@@ -16,7 +16,7 @@ NEWSPIDER_MODULE = 'locations.spiders'
 
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
-#USER_AGENT = 'locations (+http://www.yourdomain.com)'
+USER_AGENT = 'locations (+https://github.com/iandees/all-the-places)'
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = True
@@ -84,7 +84,7 @@ ITEM_PIPELINES = {
 
 # Enable and configure HTTP caching (disabled by default)
 # See http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html#httpcache-middleware-settings
-#HTTPCACHE_ENABLED = True
+HTTPCACHE_ENABLED = True
 #HTTPCACHE_EXPIRATION_SECS = 0
 #HTTPCACHE_DIR = 'httpcache'
 #HTTPCACHE_IGNORE_HTTP_CODES = []
