@@ -100,7 +100,7 @@ class KrogerSpider(scrapy.Spider):
                 "ref": store_information['recordId'],
                 "name": store_information['localName'],
                 "type": self.store_types[store_information['storeType']],
-                "hours": self.store_hours(store_hours),
+                "opening_hours": self.store_hours(store_hours),
             }
 
             address = self.address(store_information['address'])
