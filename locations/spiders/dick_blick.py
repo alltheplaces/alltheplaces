@@ -6,7 +6,7 @@ from scrapy.utils.response import get_base_url
 
 from locations.items import GeojsonPointItem
 
-class ApplebeesSpider(scrapy.Spider):
+class DickBlickSpider(scrapy.Spider):
     name = "dick_blick"
     allowed_domains = ["www.dickblick.com"]
     start_urls = (
