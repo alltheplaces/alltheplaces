@@ -25,8 +25,9 @@ class GeoJsonWriterPipeline(object):
                 "type": "Point",
                 "coordinates": item['lon_lat']
             }
-        }) + ",\n"
+        }, separators=(',', ':'))
         self.file.write(line)
+        self.file.write('\n')
         return item
 
 class DuplicatesPipeline(object):
