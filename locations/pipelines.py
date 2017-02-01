@@ -5,17 +5,23 @@
 # Don't forget to add your pipeline to the ITEM_PIPELINES setting
 # See: http://doc.scrapy.org/en/latest/topics/item-pipeline.html
 import json
+from scrapy.xlib.pydispatch import dispatcher
 from scrapy.exceptions import DropItem
+from scrapy import signals
 
-
-class locationsPipeline(object):
-    def process_item(self, item, spider):
-        return item
 
 class GeoJsonWriterPipeline(object):
 
     def __init__(self):
-        self.file = open('items.jl', 'wb')
+        dispatcher.connect(self.spider_opened, signals.spider_opened)
+        dispatcher.connect(self.spider_closed, signals.spider_closed)
+        self.file = None
+
+    def spider_opened(self, spider):
+        self.file = open('{}.jl'.format(spider.name), 'wb')
+
+    def spider_closed(self, spider):
+        self.file.close()
 
     def process_item(self, item, spider):
         line = json.dumps({
