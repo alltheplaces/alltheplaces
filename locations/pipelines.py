@@ -24,14 +24,18 @@ class GeoJsonWriterPipeline(object):
         self.file.close()
 
     def process_item(self, item, spider):
-        line = json.dumps({
+        feature = {
             "type": "Feature",
             "properties": item['properties'],
-            "geometry": {
+        }
+
+        if item.get('lon_lat'):
+            feature['geometry'] = {
                 "type": "Point",
                 "coordinates": item['lon_lat']
             }
-        }, separators=(',', ':'))
+
+        line = json.dumps(feature, separators=(',', ':'))
         self.file.write(line)
         self.file.write('\n')
         return item
