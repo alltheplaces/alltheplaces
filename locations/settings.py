@@ -19,7 +19,7 @@ NEWSPIDER_MODULE = 'locations.spiders'
 USER_AGENT = 'locations (+https://github.com/iandees/all-the-places)'
 
 # Obey robots.txt rules
-ROBOTSTXT_OBEY = True
+ROBOTSTXT_OBEY = False
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 #CONCURRENT_REQUESTS = 32
