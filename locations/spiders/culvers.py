@@ -10,7 +10,7 @@ class CulversSpider(scrapy.Spider):
     name = "culvers"
     allowed_domains = ["hosted.where2getit.com"]
     start_urls = (
-        'https://hosted.where2getit.com/culvers/2015/ajax?&xml_request=%3Crequest%3E%3Cappkey%3E1099682E-D719-11E6-A0C4-347BDEB8F1E5%3C%2Fappkey%3E%3Cformdata+id%3D%22locatorsearch%22%3E%3Cdataview%3Estore_default%3C%2Fdataview%3E%3Corder%3Erank%2C_distance%3C%2Forder%3E%3Climit%3E5000%3C%2Flimit%3E%3Cstateonly%3E0%3C%2Fstateonly%3E%3Cgeolocs%3E%3Cgeoloc%3E%3Caddressline%3E%3C%2Faddressline%3E%3Clongitude%3E-98.369%3C%2Flongitude%3E%3Clatitude%3E39.417%3C%2Flatitude%3E%3Ccountry%3E%3C%2Fcountry%3E%3C%2Fgeoloc%3E%3C%2Fgeolocs%3E%3Csearchradius%3E2500%3C%2Fsearchradius%3E%3C%2Fformdata%3E%3C%2Frequest%3E',
+        'https://hosted.where2getit.com/culvers/2015/ajax?&xml_request=<request><appkey>1099682E-D719-11E6-A0C4-347BDEB8F1E5</appkey><formdata id="locatorsearch"><dataview>store_default</dataview><order>rank,_distance</order><limit>5000</limit><stateonly>0</stateonly><geolocs><geoloc><addressline></addressline><longitude>-98.369</longitude><latitude>39.417</latitude><country></country></geoloc></geolocs><searchradius>2500</searchradius></formdata></request>',
     )
 
     def store_hours(self, store_hours):
