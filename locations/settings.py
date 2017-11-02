@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import os
 
 # Scrapy settings for locations project
 #
@@ -20,6 +21,13 @@ USER_AGENT = 'locations (+https://github.com/iandees/all-the-places)'
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = False
+
+FEED_URI = os.environ.get('FEED_URI')
+FEED_FORMAT = os.environ.get('FEED_FORMAT')
+FEED_EXPORTERS = {
+    'geojson': 'locations.exporters.GeoJsonExporter',
+    'ndgeojson': 'locations.exporters.LineDelimitedGeoJsonExporter',
+}
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 #CONCURRENT_REQUESTS = 32
@@ -66,7 +74,6 @@ ROBOTSTXT_OBEY = False
 # See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
    'locations.pipelines.DuplicatesPipeline': 200,
-   'locations.pipelines.GeoJsonWriterPipeline': 300,
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
