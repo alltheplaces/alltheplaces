@@ -12,6 +12,7 @@ name = "pypi"
 [packages]
 
 scrapy = "*"
+botocore = "*"
 
 
 [requires]
