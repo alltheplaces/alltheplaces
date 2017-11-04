@@ -111,6 +111,11 @@ cat << EOF >> $TMPFILE
 </html>
 EOF
 
+if [ ! -f "$SPIDERS" ]; then
+    echo "No spiders run"
+    exit 0
+fi
+
 aws s3 cp --quiet \
     --acl=public-read \
     --content-type "text/html" \
