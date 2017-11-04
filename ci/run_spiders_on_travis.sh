@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
+if [ -f $S3_BUCKET ]; then
+    (>&2 echo "Please set S3_BUCKET environment variable")
+    exit 1
+fi
+
 TMPFILE=$(mktemp)
 RUN_TIMESTAMP=$(date -u +%s)
 S3_PREFIX="s3://${S3_BUCKET}/runs/${RUN_TIMESTAMP}"
@@ -40,10 +45,46 @@ esac
 for spider in $SPIDERS
 do
     (>&2 echo "Running spider at ${spider}")
-    spider_url_root=$(./ci/run_one_spider.sh $spider)
+    SPIDER_RUN_DIR=$(./ci/run_one_spider.sh $spider)
 
     if [ ! $? -eq 0 ]; then
         (>&2 echo "Spider ${spider} failed")
+    fi
+
+    LOGFILE="${SPIDER_RUN_DIR}/log.txt"
+    OUTFILE="${SPIDER_RUN_DIR}/output.geojson"
+    TIMESTAMP=$(date -u +%F-%H-%M-%S)
+    S3_KEY_PREFIX="results/${SPIDER_NAME}/${TIMESTAMP}"
+    S3_URL_PREFIX="s3://${S3_BUCKET}/${S3_KEY_PREFIX}"
+
+    gzip < $LOGFILE > ${LOGFILE}.gz
+
+    aws s3 cp --quiet \
+        --acl=public-read \
+        --content-type "text/plain; charset=utf-8" \
+        --content-encoding "gzip" \
+        "${LOGFILE}.gz" \
+        "${S3_URL_PREFIX}/log.txt"
+
+    if [ ! $? -eq 0 ]; then
+        (>&2 echo "Couldn't save logfile to s3")
+        exit 1
+    fi
+
+    if grep -q 'Stored geojson feed' $LOGFILE; then
+        gzip < $OUTFILE > ${OUTFILE}.gz
+
+        aws s3 cp --quiet \
+            --acl=public-read \
+            --content-type "application/json" \
+            --content-encoding "gzip" \
+            "${OUTFILE}.gz" \
+            "${S3_URL_PREFIX}/output.geojson"
+
+        if [ ! $? -eq 0 ]; then
+            (>&2 echo "Couldn't save output to s3")
+            exit 1
+        fi
     fi
 
     cat << EOF >> $TMPFILE
@@ -52,7 +93,7 @@ do
         <a href="https://github.com/${TRAVIS_REPO_SLUG}/blob/${TRAVIS_COMMIT}/${spider}"><code>${spider}</code></a>
         </td>
         <td>
-        <a href="${spider_url_root}/output.geojson">GeoJSON</a>&nbsp;|&nbsp;
+        <a href="${spider_url_root}/output.geojson">$(wc -l < $)</a>
         <a href="https://s3.amazonaws.com/${S3_BUCKET}/map.html?show=${spider_url_root}/output.geojson">Map</a>
         </td>
         <td>
