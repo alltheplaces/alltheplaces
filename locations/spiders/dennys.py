@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 import scrapy
 import json
-from scrapy.utils.url import urljoin_rfc
-from scrapy.utils.response import get_base_url
 
 from locations.items import GeojsonPointItem
+
 
 class DennysSpider(scrapy.Spider):
     name = "dennys"
@@ -99,10 +98,9 @@ class DennysSpider(scrapy.Spider):
             yield scrapy.Request(response.urljoin(path), callback=self.parse_store)
 
     def parse(self, response):
-        urls = response.xpath('//a[@class="c-directory-list-content-item-link"]/@href')
+        urls = response.xpath('//a[@class="c-directory-list-content-item-link"]/@href').extract()
         for path in urls:
-            path = path.extract()
-            if path.rsplit('/', 1)[0].isnumeric():
+            if path.rsplit('/', 1)[-1].isnumeric():
                 # If there's only one store, the URL will have a store number at the end
                 yield scrapy.Request(response.urljoin(path), callback=self.parse_store)
             else:
