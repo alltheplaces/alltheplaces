@@ -42,7 +42,7 @@ do
         </td>
         <td>
         <a href="${spider_url_root}/output.geojson">GeoJSON</a>&nbsp;|&nbsp;
-        <a href="http://placescraper-results.s3-website-us-east-1.amazonaws.com/map.html?show=${spider_url_root}/output.geojson">Map</a>
+        <a href="https://s3.amazonaws.com/${S3_BUCKET}/map.html?show=${spider_url_root}/output.geojson">Map</a>
         </td>
         <td>
         <a href="${spider_url_root}/log.txt">Log</a>
