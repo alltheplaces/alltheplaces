@@ -26,7 +26,7 @@ scrapy runspider \
     --logfile=$LOGFILE \
     $1
 
-gzip $LOGFILE
+gzip < $LOGFILE > ${LOGFILE}.gz
 
 aws s3 cp --quiet \
     --acl=public-read \
@@ -41,7 +41,7 @@ if [ ! $? -eq 0 ]; then
 fi
 
 if grep -q 'Stored geojson feed' $LOGFILE; then
-    gzip $OUTFILE
+    gzip < $OUTFILE > ${OUTFILE}.gz
 
     aws s3 cp --quiet \
         --acl=public-read \
