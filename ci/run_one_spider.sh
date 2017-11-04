@@ -20,7 +20,7 @@ S3_PREFIX="s3://${S3_BUCKET}/results/${SPIDER_NAME}/${TIMESTAMP}"
 
 scrapy runspider \
     -t geojson \
-    -o $OUTFILE \
+    -o "file://${OUTFILE}" \
     --loglevel=INFO \
     --logfile=$LOGFILE \
     $1
