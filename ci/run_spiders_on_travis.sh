@@ -58,6 +58,7 @@ do
     TIMESTAMP=$(date -u +%F-%H-%M-%S)
     S3_KEY_PREFIX="results/${SPIDER_NAME}/${TIMESTAMP}"
     S3_URL_PREFIX="s3://${S3_BUCKET}/${S3_KEY_PREFIX}"
+    HTTP_URL_PREFIX="https://s3.amazonaws.com/${S3_BUCKET}/${S3_KEY_PREFIX}"
 
     gzip < $LOGFILE > ${LOGFILE}.gz
 
@@ -95,11 +96,11 @@ do
         <a href="https://github.com/${TRAVIS_REPO_SLUG}/blob/${TRAVIS_COMMIT}/${spider}"><code>${spider}</code></a>
         </td>
         <td>
-        <a href="${spider_url_root}/output.geojson">$(wc -l < ${OUTFILE} | tr -d ' ') results</a>
-        (<a href="https://s3.amazonaws.com/${S3_BUCKET}/map.html?show=${spider_url_root}/output.geojson">Map</a>)
+        <a href="${HTTP_URL_PREFIX}/output.geojson">$(wc -l < ${OUTFILE} | tr -d ' ') results</a>
+        (<a href="https://s3.amazonaws.com/${S3_BUCKET}/map.html?show=${HTTP_URL_PREFIX}/output.geojson">Map</a>)
         </td>
         <td>
-        <a href="${spider_url_root}/log.txt">Log</a>
+        <a href="${HTTP_URL_PREFIX}/log.txt">Log</a>
         </td>
     </tr>
 EOF
