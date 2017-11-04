@@ -16,7 +16,8 @@ OUTFILE="${RUN_DIR}/output.geojson"
 SPIDER_NAME=$(basename $1)
 SPIDER_NAME=${SPIDER_NAME%.py}
 TIMESTAMP=$(date -u +%F-%H-%M-%S)
-S3_PREFIX="s3://${S3_BUCKET}/results/${SPIDER_NAME}/${TIMESTAMP}"
+S3_KEY_PREFIX="results/${SPIDER_NAME}/${TIMESTAMP}"
+S3_URL_PREFIX="s3://${S3_BUCKET}/${S3_KEY_PREFIX}"
 
 scrapy runspider \
     -t geojson \
@@ -31,8 +32,8 @@ aws s3 cp --quiet \
     --acl=public-read \
     --content-type "text/plain; charset=utf-8" \
     --content-encoding "gzip" \
-    $LOGFILE.gz \
-    $S3_PREFIX/log.txt
+    "${LOGFILE}.gz" \
+    "${S3_URL_PREFIX}/log.txt"
 
 if [ ! $? -eq 0 ]; then
     (>&2 echo "Couldn't save logfile to s3")
@@ -46,8 +47,8 @@ if grep -q 'Stored geojson feed' $LOGFILE; then
         --acl=public-read \
         --content-type "application/json" \
         --content-encoding "gzip" \
-        $OUTFILE.gz \
-        $S3_PREFIX/output.geojson
+        "${OUTFILE}.gz" \
+        "${S3_URL_PREFIX}/output.geojson"
 
     if [ ! $? -eq 0 ]; then
         (>&2 echo "Couldn't save output to s3")
@@ -55,7 +56,7 @@ if grep -q 'Stored geojson feed' $LOGFILE; then
     fi
 fi
 
-echo "https://s3.amazonaws.com/${S3_BUCKET}/${S3_PREFIX}"
+echo "https://s3.amazonaws.com/${S3_BUCKET}/${S3_KEY_PREFIX}"
 
 if grep -q spider_exceptions $LOGFILE; then
     exit 1
