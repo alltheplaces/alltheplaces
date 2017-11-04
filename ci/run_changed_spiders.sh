@@ -59,5 +59,5 @@ EOF
 aws s3 cp --quiet \
     --acl=public-read \
     --content-type "text/html" \
-    $TMPFILE \
-    $S3_PREFIX.html
+    ${TMPFILE} \
+    "${S3_PREFIX}.html"
