@@ -26,7 +26,18 @@ cat << EOF >> $TMPFILE
     </tr>
 EOF
 
-for spider in $(git diff --name-only HEAD..$TRAVIS_BRANCH | grep 'locations/spiders')
+case "$TRAVIS_EVENT_TYPE" in
+    "cron")
+        SPIDERS=$(find locations/spiders -type f -name "[a-z][a-z_]*.py")
+    "push")
+    "pull_request")
+        SPIDERS=$(git diff --name-only HEAD..$TRAVIS_BRANCH | grep 'locations/spiders')
+    *)
+        echo "Unknown event type ${TRAVIS_EVENT_TYPE}"
+        exit 1
+esac
+
+for spider in $SPIDERS
 do
     (>&2 echo "Running spider at ${spider}")
     spider_url_root=$(./ci/run_one_spider.sh $spider)
