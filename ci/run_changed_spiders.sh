@@ -13,17 +13,17 @@ cat << EOF >> $TMPFILE
 <body>
 <h1>Travis build ${TRAVIS_JOB_NUMBER}</h1>
 <table>
-<tr>
-<th>
-Spider
-</th>
-<th>
-Results
-</th>
-<th>
-Log
-</th>
-</tr>
+    <tr>
+        <th>
+        Spider
+        </th>
+        <th>
+        Results
+        </th>
+        <th>
+        Log
+        </th>
+    </tr>
 EOF
 
 for spider in $(git diff --name-only HEAD..$TRAVIS_BRANCH | grep 'locations/spiders')
@@ -36,18 +36,18 @@ do
 
     cat << EOF >> $TMPFILE
     <tr>
-    <td>
-    <a href="https://github.com/${TRAVIS_REPO_SLUG}/blob/${TRAVIS_COMMIT}/${spider}"><code>${spider}</code></a>
-    </td>
-    <td>
-    <a href="${spider_url_root}/output.geojson">GeoJSON</a>&nbsp;|&nbsp;
-    <a href="http://placescraper-results.s3-website-us-east-1.amazonaws.com/map.html?show=${spider_url_root}/output.geojson">Map</a>
-    </td>
-    <td>
-    <a href="${spider_url_root}/log.txt">Log</a>
-    </td>
+        <td>
+        <a href="https://github.com/${TRAVIS_REPO_SLUG}/blob/${TRAVIS_COMMIT}/${spider}"><code>${spider}</code></a>
+        </td>
+        <td>
+        <a href="${spider_url_root}/output.geojson">GeoJSON</a>&nbsp;|&nbsp;
+        <a href="http://placescraper-results.s3-website-us-east-1.amazonaws.com/map.html?show=${spider_url_root}/output.geojson">Map</a>
+        </td>
+        <td>
+        <a href="${spider_url_root}/log.txt">Log</a>
+        </td>
     </tr>
-    EOF
+EOF
 done
 
 cat << EOF >> $TMPFILE
