@@ -7,7 +7,7 @@ do
     if [ ! $? -eq 0 ]; then
         (>&2 echo "Spider ${spider} failed")
         exit 1
-    done
+    fi
 
     echo $output
 done
