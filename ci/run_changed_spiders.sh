@@ -4,7 +4,7 @@ TMPFILE=$(mktemp)
 RUN_TIMESTAMP=$(date -u +%s)
 S3_PREFIX="s3://${S3_BUCKET}/runs/${RUN_TIMESTAMP}"
 
-cat << _EOF_
+cat << EOF >> $TMPFILE
 <!DOCTYPE html>
 <html>
 <head>
@@ -24,7 +24,7 @@ Results
 Log
 </th>
 </tr>
-_EOF_ >> $TMPFILE
+EOF
 
 for spider in $(git diff --name-only HEAD..$TRAVIS_BRANCH | grep 'locations/spiders')
 do
@@ -34,7 +34,7 @@ do
         (>&2 echo "Spider ${spider} failed")
     fi
 
-    cat << _EOF_
+    cat << EOF >> $TMPFILE
     <tr>
     <td>
     <a href="https://github.com/${TRAVIS_REPO_SLUG}/blob/${TRAVIS_COMMIT}/${spider}"><code>${spider}</code></a>
@@ -47,14 +47,14 @@ do
     <a href="${spider_url_root}/log.txt">Log</a>
     </td>
     </tr>
-    _EOF_ >> $TMPFILE
+    EOF
 done
 
-cat << _EOF_
+cat << EOF >> $TMPFILE
 </table>
 </body>
 </html>
-_EOF_ >> $TMPFILE
+EOF
 
 aws s3 cp --quiet \
     --acl=public-read \
