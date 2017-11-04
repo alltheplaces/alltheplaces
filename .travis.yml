@@ -9,4 +9,4 @@ install:
   - pipenv install awscli
 
 script:
-  - pipenv run ./ci/run_changed_spiders.sh
+  - pipenv run ./ci/run_spiders_on_travis.sh
