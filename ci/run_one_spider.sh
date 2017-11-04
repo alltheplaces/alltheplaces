@@ -5,6 +5,11 @@ if [ ! $# == 1 ]; then
     exit
 fi
 
+if [ -f $S3_BUCKET ]; then
+    (>&2 echo "Please set S3_BUCKET environment variable")
+    exit 1
+fi
+
 RUN_DIR=`mktemp -d` || exit 1
 LOGFILE="${RUN_DIR}/log.txt"
 OUTFILE="${RUN_DIR}/output.geojson"
