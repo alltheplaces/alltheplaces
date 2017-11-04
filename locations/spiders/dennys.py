@@ -94,21 +94,20 @@ class DennysSpider(scrapy.Spider):
         )
 
     def parse_state(self, response):
-        base_url = get_base_url(response)
         urls = response.xpath('//div/ul[@class="storelist"]/li/a/@href').extract()
         for path in urls:
-            yield scrapy.Request(urljoin_rfc(base_url, path), callback=self.parse_store)
+            yield scrapy.Request(response.urljoin(path), callback=self.parse_store)
 
     def parse(self, response):
-        base_url = get_base_url(response)
-        urls = response.xpath('//a[@class="c-directory-list-content-item-link"]/@href').extract()
+        urls = response.xpath('//a[@class="c-directory-list-content-item-link"]/@href')
         for path in urls:
+            path = path.extract()
             if path.rsplit('/', 1)[0].isnumeric():
                 # If there's only one store, the URL will have a store number at the end
-                yield scrapy.Request(urljoin_rfc(base_url, path), callback=self.parse_store)
+                yield scrapy.Request(response.urljoin(path), callback=self.parse_store)
             else:
-                yield scrapy.Request(urljoin_rfc(base_url, path))
+                yield scrapy.Request(response.urljoin(path))
 
         urls = response.xpath('//a[@class="c-location-grid-item-link"]/@href').extract()
         for path in urls:
-            yield scrapy.Request(urljoin_rfc(base_url, path), callback=self.parse_store)
+            yield scrapy.Request(response.urljoin(path), callback=self.parse_store)
