@@ -35,8 +35,7 @@ case "$TRAVIS_EVENT_TYPE" in
     "cron")
         SPIDERS=$(find locations/spiders -type f -name "[a-z][a-z_]*.py")
         ;;
-    "push")
-    "pull_request")
+    "push" | "pull_request")
         SPIDERS=$(git diff --name-only HEAD..$TRAVIS_BRANCH | grep 'locations/spiders')
         ;;
     *)
