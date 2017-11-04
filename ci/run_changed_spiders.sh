@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
-for i in $(git diff --name-only HEAD..$TRAVIS_BRANCH | grep 'locations/spiders')
+echo $(pwd)
+for spider in $(git diff --name-only HEAD..$TRAVIS_BRANCH | grep 'locations/spiders')
 do
-    echo "Would process spider ${i}"
+    output=$(./run_one_spider.sh $spider)
+    echo $output
 done
