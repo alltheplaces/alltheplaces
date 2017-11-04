@@ -1,0 +1,12 @@
+language: python
+cache: pip
+python:
+  - 3.6
+
+install:
+  - pip install pipenv
+  - pipenv install
+  - pipenv install awscli
+
+script:
+  - pipenv run ./ci/run_changed_spiders.sh

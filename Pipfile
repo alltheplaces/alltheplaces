@@ -1,0 +1,20 @@
+[[source]]
+
+url = "https://pypi.python.org/simple"
+verify_ssl = true
+name = "pypi"
+
+
+[dev-packages]
+
+
+
+[packages]
+
+scrapy = "*"
+botocore = "*"
+
+
+[requires]
+
+python_version = "3.6"
