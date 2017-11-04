@@ -2,13 +2,10 @@ language: python
 python:
   - 3.6
 
-before_install:
-  - pip install --user awscli
-  - export PATH=$PATH:$HOME/.local/bin
-
 install:
   - pip install pipenv
   - pipenv install
+  - pipenv install awscli
 
 script:
-  - ./ci/run_changed_spiders.sh
+  - pipenv run ./ci/run_changed_spiders.sh
