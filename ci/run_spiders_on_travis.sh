@@ -93,8 +93,8 @@ do
         <a href="https://github.com/${TRAVIS_REPO_SLUG}/blob/${TRAVIS_COMMIT}/${spider}"><code>${spider}</code></a>
         </td>
         <td>
-        <a href="${spider_url_root}/output.geojson">$(wc -l < $)</a>
-        <a href="https://s3.amazonaws.com/${S3_BUCKET}/map.html?show=${spider_url_root}/output.geojson">Map</a>
+        <a href="${spider_url_root}/output.geojson">$(wc -l < ${OUTFILE} | tr -d ' ') results</a>
+        (<a href="https://s3.amazonaws.com/${S3_BUCKET}/map.html?show=${spider_url_root}/output.geojson">Map</a>)
         </td>
         <td>
         <a href="${spider_url_root}/log.txt">Log</a>
