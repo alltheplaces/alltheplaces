@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 if [ ! $# == 1 ]; then
-    echo "Usage: $0 spider_name"
+    (>&2 echo "Usage: $0 spider_name")
     exit
 fi
 
@@ -25,7 +25,7 @@ aws s3 cp --quiet --acl=public-read \
     $S3_PREFIX/log.txt
 
 if [ ! $? -eq 0 ]; then
-    echo "Couldn't save logfile to s3"
+    (>&2 echo "Couldn't save logfile to s3")
     exit 1
 fi
 
@@ -35,7 +35,7 @@ if grep -q 'Stored geojson feed' $LOGFILE; then
         $S3_PREFIX/output.geojson
 
     if [ ! $? -eq 0 ]; then
-        echo "Couldn't save output to s3"
+        (>&2 echo "Couldn't save output to s3")
         exit 1
     fi
 fi
