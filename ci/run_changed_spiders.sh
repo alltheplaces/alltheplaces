@@ -28,6 +28,7 @@ EOF
 
 for spider in $(git diff --name-only HEAD..$TRAVIS_BRANCH | grep 'locations/spiders')
 do
+    (>&2 echo "Running spider at ${spider}")
     spider_url_root=$(./ci/run_one_spider.sh $spider)
 
     if [ ! $? -eq 0 ]; then
