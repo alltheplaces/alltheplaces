@@ -21,12 +21,17 @@ S3_PREFIX="s3://${S3_BUCKET}/results/${SPIDER_NAME}/${TIMESTAMP}"
 scrapy runspider \
     -t geojson \
     -o "file://${OUTFILE}" \
-    --loglevel=DEBUG \
+    --loglevel=INFO \
     --logfile=$LOGFILE \
     $1
 
-aws s3 cp --quiet --acl=public-read \
-    $LOGFILE \
+gzip $LOGFILE
+
+aws s3 cp --quiet \
+    --acl=public-read \
+    --content-type "text/plain; charset=utf-8" \
+    --content-encoding "gzip" \
+    $LOGFILE.gz \
     $S3_PREFIX/log.txt
 
 if [ ! $? -eq 0 ]; then
@@ -35,8 +40,13 @@ if [ ! $? -eq 0 ]; then
 fi
 
 if grep -q 'Stored geojson feed' $LOGFILE; then
-    aws s3 cp --quiet --acl=public-read \
-        $OUTFILE \
+    gzip $OUTFILE
+
+    aws s3 cp --quiet \
+        --acl=public-read \
+        --content-type "application/json" \
+        --content-encoding "gzip" \
+        $OUTFILE.gz \
         $S3_PREFIX/output.geojson
 
     if [ ! $? -eq 0 ]; then
@@ -45,7 +55,7 @@ if grep -q 'Stored geojson feed' $LOGFILE; then
     fi
 fi
 
-echo $S3_PREFIX
+echo "https://s3.amazonaws.com/${S3_BUCKET}/${S3_PREFIX}"
 
 if grep -q spider_exceptions $LOGFILE; then
     exit 1
