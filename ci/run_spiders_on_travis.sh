@@ -120,7 +120,7 @@ cat << EOF >> $TMPFILE
 </html>
 EOF
 
-if [ ! -f "$SPIDERS" ]; then
+if [ -z "$SPIDERS" ]; then
     echo "No spiders run"
     exit 0
 fi
