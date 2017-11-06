@@ -56,7 +56,7 @@ do
     LOGFILE="${SPIDER_RUN_DIR}/log.txt"
     OUTFILE="${SPIDER_RUN_DIR}/output.geojson"
     TIMESTAMP=$(date -u +%F-%H-%M-%S)
-    SPIDER_NAME=$(basename $1)
+    SPIDER_NAME=$(basename $spider)
     SPIDER_NAME=${SPIDER_NAME%.py}
     S3_KEY_PREFIX="results/${SPIDER_NAME}/${TIMESTAMP}"
     S3_URL_PREFIX="s3://${S3_BUCKET}/${S3_KEY_PREFIX}"
