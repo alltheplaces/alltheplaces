@@ -32,7 +32,7 @@ cat << EOF >> $TMPFILE
 EOF
 
 case "$TRAVIS_EVENT_TYPE" in
-    "cron")
+    "cron" | "api")
         SPIDERS=$(find locations/spiders -type f -name "[a-z][a-z_]*.py")
         ;;
     "push" | "pull_request")
