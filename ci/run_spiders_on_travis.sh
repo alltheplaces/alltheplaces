@@ -7,7 +7,7 @@ fi
 
 TMPFILE=$(mktemp)
 RUN_TIMESTAMP=$(date -u +%s)
-S3_PREFIX="s3://${S3_BUCKET}/runs/${RUN_TIMESTAMP}"
+RUN_S3_PREFIX="s3://${S3_BUCKET}/runs/${RUN_TIMESTAMP}"
 
 cat << EOF >> $TMPFILE
 <!DOCTYPE html>
@@ -56,6 +56,8 @@ do
     LOGFILE="${SPIDER_RUN_DIR}/log.txt"
     OUTFILE="${SPIDER_RUN_DIR}/output.geojson"
     TIMESTAMP=$(date -u +%F-%H-%M-%S)
+    SPIDER_NAME=$(basename $1)
+    SPIDER_NAME=${SPIDER_NAME%.py}
     S3_KEY_PREFIX="results/${SPIDER_NAME}/${TIMESTAMP}"
     S3_URL_PREFIX="s3://${S3_BUCKET}/${S3_KEY_PREFIX}"
     HTTP_URL_PREFIX="https://s3.amazonaws.com/${S3_BUCKET}/${S3_KEY_PREFIX}"
@@ -127,4 +129,4 @@ aws s3 cp --quiet \
     --acl=public-read \
     --content-type "text/html" \
     ${TMPFILE} \
-    "${S3_PREFIX}.html"
+    "${RUN_S3_PREFIX}.html"

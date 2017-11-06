@@ -8,8 +8,6 @@ fi
 RUN_DIR=`mktemp -d` || exit 1
 LOGFILE="${RUN_DIR}/log.txt"
 OUTFILE="${RUN_DIR}/output.geojson"
-SPIDER_NAME=$(basename $1)
-SPIDER_NAME=${SPIDER_NAME%.py}
 
 scrapy runspider \
     -t geojson \
