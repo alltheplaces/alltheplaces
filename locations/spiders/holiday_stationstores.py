@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
 import scrapy
-import json
 import re
-from scrapy.utils.url import urljoin_rfc
-from scrapy.utils.response import get_base_url
 
 from locations.items import GeojsonPointItem
 
@@ -15,12 +12,11 @@ class HolidayStationstoreSpider(scrapy.Spider):
     )
 
     def parse(self, response):
-        base_url = get_base_url(response)
         location_hrefs = response.xpath('//div[@id="stores"]/ul/li/a/@href')
 
         for path in location_hrefs:
             yield scrapy.Request(
-                urljoin_rfc(base_url, path.extract()),
+                response.urljoin(path.extract()),
                 callback=self.parse_location
             )
 

@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
 import json
 import scrapy
-import re
-from scrapy.utils.url import urljoin_rfc
-from scrapy.utils.response import get_base_url
 
 from locations.items import GeojsonPointItem
+
 
 class BojanglesSpider(scrapy.Spider):
     name = "bojangles"
@@ -67,10 +65,10 @@ class BojanglesSpider(scrapy.Spider):
 
     def parse_store(self, response):
         properties = {
-            'addr:full': response.xpath('//span[@itemprop="streetAddress"]/text()')[0].extract(),
+            'addr:full': response.xpath('//span[@itemprop="streetAddress"]/span/text()')[0].extract(),
             'addr:city': response.xpath('//span[@itemprop="addressLocality"]/text()')[0].extract(),
-            'addr:state': response.xpath('//span[@itemprop="addressRegion"]/text()')[0].extract(),
-            'addr:postcode': response.xpath('//span[@itemprop="postalCode"]/text()')[0].extract(),
+            'addr:state': response.xpath('//abbr[@itemprop="addressRegion"]/text()')[0].extract(),
+            'addr:postcode': response.xpath('//span[@itemprop="postalCode"]/text()')[0].extract().strip(),
             'ref': response.url,
             'website': response.url,
         }
@@ -79,7 +77,7 @@ class BojanglesSpider(scrapy.Spider):
         if phone:
             properties['phone'] = phone
 
-        hours = json.loads(response.xpath('//div[@class="c-location-hours-today js-location-hours"]/@data-days')[0].extract())
+        hours = json.loads(response.xpath('//div[@class="c-location-hours-details-wrapper js-location-hours"]/@data-days')[0].extract())
 
         opening_hours = self.store_hours(hours) if hours else None
         if opening_hours:
@@ -96,15 +94,14 @@ class BojanglesSpider(scrapy.Spider):
         )
 
     def parse(self, response):
-        base_url = get_base_url(response)
         urls = response.xpath('//a[@class="c-directory-list-content-item-link"]/@href').extract()
         for path in urls:
             if len(path.split('/')) > 2:
                 # If there's only one store, the URL will be longer than <state code>.html
-                yield scrapy.Request(urljoin_rfc(base_url, path), callback=self.parse_store)
+                yield scrapy.Request(response.urljoin(path), callback=self.parse_store)
             else:
-                yield scrapy.Request(urljoin_rfc(base_url, path))
+                yield scrapy.Request(response.urljoin(path))
 
         urls = response.xpath('//a[@class="c-location-grid-item-link"]/@href').extract()
         for path in urls:
-            yield scrapy.Request(urljoin_rfc(base_url, path), callback=self.parse_store)
+            yield scrapy.Request(response.urljoin(path), callback=self.parse_store)

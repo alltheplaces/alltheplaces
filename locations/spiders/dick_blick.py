@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 import scrapy
 import re
-from scrapy.utils.url import urljoin_rfc
-from scrapy.utils.response import get_base_url
 
 from locations.items import GeojsonPointItem
+
 
 class DickBlickSpider(scrapy.Spider):
     name = "dick_blick"
@@ -44,13 +43,11 @@ class DickBlickSpider(scrapy.Spider):
         )
 
     def parse_state(self, response):
-        base_url = get_base_url(response)
         urls = response.xpath('//div/ul[@class="storelist"]/li/a/@href').extract()
         for path in urls:
-            yield scrapy.Request(urljoin_rfc(base_url, path), callback=self.parse_store)
+            yield scrapy.Request(response.urljoin(path), callback=self.parse_store)
 
     def parse(self, response):
-        base_url = get_base_url(response)
         urls = response.xpath('//div[@class="statechooser"]/select/option/@value').extract()
         for path in urls:
-            yield scrapy.Request(urljoin_rfc(base_url, path), callback=self.parse_state)
+            yield scrapy.Request(response.urljoin(path), callback=self.parse_state)

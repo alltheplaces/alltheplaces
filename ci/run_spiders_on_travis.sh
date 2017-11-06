@@ -46,11 +46,11 @@ esac
 
 for spider in $SPIDERS
 do
-    (>&2 echo "Running spider at ${spider}")
+    (>&2 echo "${spider} running ...")
     SPIDER_RUN_DIR=$(./ci/run_one_spider.sh $spider)
 
     if [ ! $? -eq 0 ]; then
-        (>&2 echo "Spider ${spider} failed")
+        (>&2 echo "${spider} exited with non-zero status code")
     fi
 
     LOGFILE="${SPIDER_RUN_DIR}/log.txt"
@@ -70,12 +70,16 @@ do
         "${S3_URL_PREFIX}/log.txt"
 
     if [ ! $? -eq 0 ]; then
-        (>&2 echo "Couldn't save logfile to s3")
+        (>&2 echo "${spider} couldn't save logfile to s3")
         exit 1
     fi
 
+    FEATURE_COUNT=$(wc -l < ${OUTFILE} | tr -d ' ')
+
     if grep -q 'Stored geojson feed' $LOGFILE; then
         gzip < $OUTFILE > ${OUTFILE}.gz
+
+        echo "${spider} has ${FEATURE_COUNT} features"
 
         aws s3 cp --quiet \
             --acl=public-read \
@@ -85,7 +89,7 @@ do
             "${S3_URL_PREFIX}/output.geojson"
 
         if [ ! $? -eq 0 ]; then
-            (>&2 echo "Couldn't save output to s3")
+            (>&2 echo "${spider} couldn't save output to s3")
             exit 1
         fi
     fi
@@ -96,7 +100,7 @@ do
         <a href="https://github.com/${TRAVIS_REPO_SLUG}/blob/${TRAVIS_COMMIT}/${spider}"><code>${spider}</code></a>
         </td>
         <td>
-        <a href="${HTTP_URL_PREFIX}/output.geojson">$(wc -l < ${OUTFILE} | tr -d ' ') results</a>
+        <a href="${HTTP_URL_PREFIX}/output.geojson">${FEATURE_COUNT} results</a>
         (<a href="https://s3.amazonaws.com/${S3_BUCKET}/map.html?show=${HTTP_URL_PREFIX}/output.geojson">Map</a>)
         </td>
         <td>
@@ -104,6 +108,8 @@ do
         </td>
     </tr>
 EOF
+
+    (>&2 echo "${spider} done")
 done
 
 cat << EOF >> $TMPFILE

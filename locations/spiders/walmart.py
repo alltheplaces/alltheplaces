@@ -4,6 +4,7 @@ import json
 
 from locations.items import GeojsonPointItem
 
+
 class WalmartSpider(scrapy.Spider):
     name = "walmart"
     allowed_domains = ["walmart.com"]
@@ -69,7 +70,7 @@ class WalmartSpider(scrapy.Spider):
         for store in stores:
 
             properties = {
-                "ref": unicode(store['id']),
+                "ref": str(store['id']),
                 "phone": store.get('phone'),
                 "name": store['storeType']['name'],
             }
