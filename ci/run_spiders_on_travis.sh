@@ -135,7 +135,7 @@ aws s3 cp --quiet \
 
 RUN_HTTP_URL="https://s3.amazonaws.com/${S3_BUCKET}/$"
 
-if [ ! $? -eq 0 ];
+if [ ! $? -eq 0 ]; then
     echo "Couldn't send run HTML to S3"
     exit 1
 fi
