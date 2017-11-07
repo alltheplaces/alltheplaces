@@ -150,7 +150,7 @@ else
             -H "Authorization: token ${GITHUB_TOKEN}" \
             -d '{"body":"Finished a build of ```${SPIDERS}```:\n\n${RUN_URL_PREFIX}.html"}' \
             "https://api.github.com/repos/${TRAVIS_REPO_SLUG}/issues/${TRAVIS_PULL_REQUEST}/comments"
-        echo "Added a comment to pull https://github.com/${TRAVIS_REPO_SLUG/pull/${TRAVIS_PULL_REQUEST}"
+        echo "Added a comment to pull https://github.com/${TRAVIS_REPO_SLUG}/pull/${TRAVIS_PULL_REQUEST}"
     else
         echo "Not posting to GitHub because no pull TRAVIS_PULL_REQUEST set"
     fi
