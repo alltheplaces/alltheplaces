@@ -2,24 +2,29 @@
 import scrapy
 import json
 import re
-from scrapy.utils.url import urljoin_rfc
-from scrapy.utils.response import get_base_url
 
 from locations.items import GeojsonPointItem
+
 
 class ApplebeesSpider(scrapy.Spider):
     name = "applebees"
     allowed_domains = ["restaurants.applebees.com"]
     start_urls = (
-        'http://restaurants.applebees.com/sitemap.html',
+        'https://restaurants.applebees.com/sitemap.html',
     )
 
     def store_hours(self, store_hours):
         day_groups = []
         this_day_group = None
-        for line in store_hours.split('m '):
-            match = re.search(r'^(Su|Mo|Tu|We|Th|Fr|Sa) (\d{1,2}):(\d{2})(a|p)m-(\d{1,2}):(\d{2})(a|p)m?$', line)
-            (day, f_hr, f_min, f_ampm, t_hr, t_min, t_ampm) = match.groups()
+        for line in store_hours:
+            # Applebees always seems to have a single dow
+            # in each opening hours object
+            day = line['dayOfWeek'][0][:2]
+
+            match = re.search(r'^(\d{1,2}):(\d{2}) (A|P)M$', line['opens'])
+            (f_hr, f_min, f_ampm) = match.groups()
+            match = re.search(r'^(\d{1,2}):(\d{2}) (A|P)M$', line['closes'])
+            (t_hr, t_min, t_ampm) = match.groups()
 
             f_hr = int(f_hr)
             if f_ampm == 'p':
@@ -87,23 +92,25 @@ class ApplebeesSpider(scrapy.Spider):
         return addr_tags
 
     def parse(self, response):
-        base_url = get_base_url(response)
-        urls = response.xpath('//ul[@class="store-list"]/li/a/@href').extract()
+        urls = response.xpath('//div[@class="itemlist"]/a[@class="thelinks normal"]/@href')
         for path in urls:
-            yield scrapy.Request(urljoin_rfc(base_url, path))
+            yield scrapy.Request(response.urljoin(path.extract()))
 
-        if urls:
-            return
+        store_urls = response.xpath('//li/a[@linktrack="Landing page"]/@href')
+        if store_urls:
+            for store_url in store_urls:
+                yield scrapy.Request(response.urljoin(store_url.extract()), callback=self.parse_store)
 
-        json_data = response.xpath('//head/script[@type="application/ld+json"]/text()')
-        data = json.loads(json_data[0].extract())
+    def parse_store(self, response):
+        json_data = response.xpath('//head/script[@type="application/ld+json"]/text()')[1].extract()
+        json_data = json_data.replace('// if the location file does not have the hours separated into open/close for each day, remove the below section', '')
+        data = json.loads(json_data)
 
         properties = {
-            'name': response.xpath('//div[@itemprop="name"]/text()')[0].extract(),
             'phone': data['telephone'],
-            'website': data['url'],
-            'ref': data['url'],
-            'opening_hours': self.store_hours(data['openingHours'])
+            'website': response.xpath('//head/link[@rel="canonical"]/@href')[0].extract(),
+            'ref': data['@id'],
+            'opening_hours': self.store_hours(data['openingHoursSpecification'])
         }
 
         address = self.address(data['address'])
