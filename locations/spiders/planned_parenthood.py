@@ -35,6 +35,7 @@ class PlannedParenthoodSpider(scrapy.Spider):
             'addr:city': response.xpath('//*[@itemprop="addressLocality"]/text()')[0].extract(),
             'addr:state': response.xpath('//*[@itemprop="addressRegion"]/text()')[0].extract(),
             'addr:postcode': response.xpath('//*[@itemprop="postalCode"]/text()')[0].extract(),
+            'phone': response.xpath('//a[@itemprop="telephone"][@data-link]/text()')[0].extract(),
             'ref': response.url,
             'website': response.url,
         }
