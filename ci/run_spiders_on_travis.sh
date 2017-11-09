@@ -148,7 +148,7 @@ else
             -s \
             -XPOST \
             -H "Authorization: token ${GITHUB_TOKEN}" \
-            -d "{\"body\":\"Finished a build of the following spiders:\n\n\`\`\`${SPIDERS}\`\`\`\n\n${RUN_URL_PREFIX}.html\"}" \
+            -d "{\"body\":\"Finished a build of the following spiders:\n\n\`\`\`\n$(awk -v ORS='\\n' '{ print }' <<< $SPIDERS)\n\`\`\`\n\n${RUN_URL_PREFIX}.html\"}" \
             "https://api.github.com/repos/${TRAVIS_REPO_SLUG}/issues/${TRAVIS_PULL_REQUEST}/comments"
         echo "Added a comment to pull https://github.com/${TRAVIS_REPO_SLUG}/pull/${TRAVIS_PULL_REQUEST}"
     else
