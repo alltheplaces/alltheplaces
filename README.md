@@ -59,21 +59,21 @@ To get started, you'll want to install the dependencies for this project.
 
 1. Once you have your spider written, you can give it a test run to make sure it's finding the expected results.
 
-  ```
-  pipenv run scrapy crawl template
-  ```
+   ```
+   pipenv run scrapy crawl template
+   ```
 
-  The `scrapy crawl template` command runs a spider named `template`. If you changed the name of your spider, you should use the name you chose. By default, `scrapy crawl` does not save the output anywhere, but it does log the results of the spider operation fairly verbosely.
+   The `scrapy crawl template` command runs a spider named `template`. If you changed the name of your spider, you should use the name you chose. By default, `scrapy crawl` does not save the output anywhere, but it does log the results of the spider operation fairly verbosely.
 
 1. Finally, make sure your `parse()` function is `yield`ing `GeojsonPointItem`s that contain the location and property data that you extract from the page:
 
-  ```python
-  def parse(self, response):
+   ```python
+   def parse(self, response):
       yield GeojsonPointItem(
           properties=properties,
           lon_lat=lon_lat,
       )
-  ```
+   ```
 
 1. Once you have a spider that logs out useful results, you can create a new branch and push it up to your fork to create a pull request. The build system will run your spider and output information about the results.
 
