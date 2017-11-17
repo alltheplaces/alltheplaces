@@ -65,6 +65,14 @@ To get started, you'll want to install the dependencies for this project.
 
    The `scrapy crawl template` command runs a spider named `template`. If you changed the name of your spider, you should use the name you chose. By default, `scrapy crawl` does not save the output anywhere, but it does log the results of the spider operation fairly verbosely.
 
+   To generate GeoJSON locally, you can enable a couple options during the crawl process to use the GeoJSON exporter and to specify the file to write it to:
+
+   ```
+   pipenv run scrapy crawl template \
+     --output-format=geojson \
+     --output=output.geojson
+   ```
+
 1. Finally, make sure your `parse()` function is `yield`ing `GeojsonPointItem`s that contain the location and property data that you extract from the page:
 
    ```python
