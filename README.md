@@ -8,7 +8,7 @@ The project is built using [`scrapy`](https://scrapy.org/), a Python-based web s
 
 To scrape a new website for locations, you'll want to create a new spider. You can copy from existing spiders or start from a blank, but the result is always a Python class that has a `process()` function that `yield`s [`GeojsonPointItem`s](https://github.com/iandees/all-the-places/blob/master/locations/items.py). The Scrapy framework does the work of outputting the GeoJSON based on these objects that the spider generates.
 
-### Development setup
+## Development setup
 
 To get started, you'll want to install the dependencies for this project.
 
@@ -35,10 +35,10 @@ To get started, you'll want to install the dependencies for this project.
 
 1. If `pipenv run scrapy` ran without complaining, then you have a functional `scrapy` setup and are ready to write a scraper.
 
-### Create a new spider
+## Create a new spider
 
 1. Create a new file in `locations/spiders/` with this content:
-   
+
     ```python
     # -*- coding: utf-8 -*-
     import scrapy
@@ -54,7 +54,7 @@ To get started, you'll want to install the dependencies for this project.
         def parse(self, response):
             pass
     ```
-    
+
     This blank/template spider will start at the given `start_urls`, only touch the domains listed in `allowed_domains`, and all web requests will be returned to the `parse()` function with response content in the `response` argument. Once you have the response content, you can perform various operations on it. For example, the most useful is probably running [XPath](https://developer.mozilla.org/en-US/docs/Web/XPath) selections on the HTML of the page to extract data out of the page. Check out the "Scraper tips" section below for more information about how to use these tools to efficiently get data out of the page.
 
 1. Once you have your spider written, you can give it a test run to make sure it's finding the expected results.
@@ -75,10 +75,10 @@ To get started, you'll want to install the dependencies for this project.
       )
    ```
 
-1. Once you have a spider that logs out useful results, you can create a new branch and push it up to your fork to create a pull request. The build system will run your spider and output information about the results.
+1. Once you have a spider that logs out useful results, you can create a new branch and push it up to your fork to create a pull request. The build system will run your spider and output information about the results as a comment on your pull request.
 
-### Scraper tips
+## Scraper tips
 
-#### You can spider to other pages
+### You can spider to other pages
 
-#### Using the scrapy shell
+### Using the scrapy shell
