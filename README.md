@@ -109,3 +109,7 @@ yield scrapy.Request(
 Since the next URL you want to request is usually pulled from an `href` in the page and relative to the page you're on, you can use the [`response.urljoin()`](https://doc.scrapy.org/en/latest/topics/request-response.html#scrapy.http.Response.urljoin) method as a shortcut to build the URL for the next request.
 
 ### Using the scrapy shell
+
+Instead of running the `scrapy crawl` every time you want to try your spider, you can use the [Scrapy shell](https://doc.scrapy.org/en/latest/topics/shell.html) to load a page and experiment with XPath queries. Once you're happy with the query that extracts interesting data you can use it in your spider. This is a whole lot easier than running the whole crawl command every time you make a change to your spider.
+
+To enter the shell, use `scrapy shell http://example.com` (where you replace the URL with your own). It will dump you into a Python shell after having requested the page and parsing it. Once in the shell, you can do things with the `response` object as if you were in your spider. The shell also offers a shortcut function called `fetch()` that lets you pull up a different page.
