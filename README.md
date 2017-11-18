@@ -85,7 +85,7 @@ To get started, you'll want to install the dependencies for this project.
 
 1. Once you have a spider that logs out useful results, you can create a new branch and push it up to your fork to create a pull request. The build system will run your spider and output information about the results as a comment on your pull request.
 
-## Tips for writing a scraper
+## Tips for writing a spider
 
 ### Prefer a directory of all locations
 
@@ -99,7 +99,7 @@ The simplest thing a spider can do is to load the `start_urls`, process the page
 
 By default, the `parse()` method on the spider will be called with the response for the new request. In many cases it's easier to create a new function to parse the new page's content and pass that function in via the `Request` object's `callback` parameter like so:
 
-```
+```python
 yield scrapy.Request(
   response.urljoin(store_url.extract()),
   callback=self.parse_store
