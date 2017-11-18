@@ -85,8 +85,27 @@ To get started, you'll want to install the dependencies for this project.
 
 1. Once you have a spider that logs out useful results, you can create a new branch and push it up to your fork to create a pull request. The build system will run your spider and output information about the results as a comment on your pull request.
 
-## Scraper tips
+## Tips for writing a scraper
 
-### You can spider to other pages
+### Prefer a directory of all locations
+
+Most listings of locations come in two flavors: a "store finder" that lets the user search by location and a "store directory" that is a hierarchical listing of all locations. These listings are sometimes hidden in the footer or on the site map page. Keep an eye out for these, because it's a lot easier if they enumerate all the locations for you rather than having to program a spider to do it for you.
+
+If the only option is search by location, there is likely an AJAX query made to search by latitude/longitude. Keep an eye on your browser's developer tools "network" tab to see what the request is so you can replicate it in your spider.
+
+### You can send the spider to other pages
+
+The simplest thing a spider can do is to load the `start_urls`, process the page, and `yield` the data as `GeojsonPointItem` objects from the `parse()` method. Usually that's not enough to get at useful data, though. The `parse()` method can also `yield` a [Request object](https://doc.scrapy.org/en/latest/topics/request-response.html#request-objects), which scrapy will use to add another URL to the request queue.
+
+By default, the `parse()` method on the spider will be called with the response for the new request. In many cases it's easier to create a new function to parse the new page's content and pass that function in via the `Request` object's `callback` parameter like so:
+
+```
+yield scrapy.Request(
+  response.urljoin(store_url.extract()),
+  callback=self.parse_store
+)
+```
+
+Since the next URL you want to request is usually pulled from an `href` in the page and relative to the page you're on, you can use the [`response.urljoin()`](https://doc.scrapy.org/en/latest/topics/request-response.html#scrapy.http.Response.urljoin) method as a shortcut to build the URL for the next request.
 
 ### Using the scrapy shell
