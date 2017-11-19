@@ -8,7 +8,7 @@ from locations.items import GeojsonPointItem
 class SephoraSpider(scrapy.Spider):
     name = "sephora"
     allowed_domains = ["www.sephora.com"]
-    download_delay = 3
+    download_delay = 1.5
     start_urls = (
         'https://www.sephora.com/storelist',
     )
