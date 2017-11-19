@@ -18,6 +18,10 @@ class PortillosSpider(scrapy.Spider):
             callback=self.parse_locations,
             method='POST',
             body='{"locations":[],"all":"y"}',
+            headers={
+                'Content-Type': 'application/json;charset=UTF-8',
+                'Accept': 'Accept:application/json',
+            }
         )
 
     def parse_locations(self, response):
