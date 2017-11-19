@@ -21,6 +21,7 @@ class PortillosSpider(scrapy.Spider):
             headers={
                 'Content-Type': 'application/json;charset=UTF-8',
                 'Accept': 'application/json',
+                's': 'mjA1AiWID8JqImr3iMoEXFUpeuasRBIglY+FBqETplI=',
             }
         )
 
