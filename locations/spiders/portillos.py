@@ -30,7 +30,7 @@ class PortillosSpider(scrapy.Spider):
 
         for location in data['locations']:
             yield scrapy.Request(
-                'https://www.portillos.com/ajax/location/getLocationDetails/?id=' + location['Id'],
+                'https://www.portillos.com/ajax/location/getLocationDetails/?id=%s' % location['Id'],
                 callback=self.parse_store,
             )
 
