@@ -20,7 +20,7 @@ class PortillosSpider(scrapy.Spider):
             body='{"locations":[],"all":"y"}',
             headers={
                 'Content-Type': 'application/json;charset=UTF-8',
-                'Accept': 'Accept:application/json',
+                'Accept': 'application/json',
             }
         )
 
