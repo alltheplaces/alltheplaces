@@ -35,7 +35,7 @@ class PortillosSpider(scrapy.Spider):
             )
 
     def parse_store(self, response):
-        store_data = json.loads(response.body_as_unicode())
+        store_data = json.loads(response.body_as_unicode())['location']
 
         properties = {
             'phone': store_data['Phone'],
