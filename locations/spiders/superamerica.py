@@ -10,18 +10,17 @@ class SuperAmericaSpider(scrapy.Spider):
     name = "superamerica"
     allowed_domains = ["superamerica.com"]
     start_urls = (
-        'http://superamerica.com/wp-admin/admin-ajax.php?action=store_search&lat=45.0&lng=-90.0&max_results=500&search_radius=500&autoload=1',
+        'http://superamerica.com/wp-admin/admin-ajax.php?action=store_search&lat=45.0&lng=-90.0&max_results=0&search_radius=500',
     )
 
     def store_hours(self, store_hours):
-        if not store_hours:
-            return "24/7"
+        matches = re.findall(r'<tr><td>(.*?)<\/td><td><time>(.*?)<\/time><\/td><\/tr>', store_hours)
 
         day_groups = []
         this_day_group = None
-        days = ('Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su')
 
-        for day, hours in zip(days, store_hours):
+        for day, hours in matches:
+            day = day[:2]
             match = re.search(r'(\d{1,2}):(\d{2}) ([AP])M - (\d{1,2}):(\d{2}) ([AP])M', hours)
             (f_hr, f_min, f_ampm, t_hr, t_min, t_ampm) = match.groups()
 
@@ -74,43 +73,26 @@ class SuperAmericaSpider(scrapy.Spider):
         data = json.loads(response.body_as_unicode())
 
         for store in data:
-            yield scrapy.Request(
-                response.urljoin(store['permalink']),
-                callback=self.parse_store,
+            properties = {
+                'addr:full': store['address'],
+                'addr:city': store['city'],
+                'addr:state': store['state'],
+                'addr:postcode': store['zip'],
+                'name': store['store'],
+                'phone': store['phone'],
+                'ref': store['id'],
+            }
+
+            opening_hours = self.store_hours(store['hours'])
+            if opening_hours:
+                properties['opening_hours'] = opening_hours
+
+            lon_lat = [
+                float(store['lng']),
+                float(store['lat']),
+            ]
+
+            yield GeojsonPointItem(
+                properties=properties,
+                lon_lat=lon_lat,
             )
-
-    def parse_store(self, response):
-        # Extract the JSON about the store that has lat/lon
-        json_content = response.xpath('//script[@type="text/javascript"]/text()')[2].extract()
-        json_content = json_content.split('var wpslMap_0 = ')[1]
-        json_content = json_content.split(';\n/* ]]> */\n')[0]
-        data = json.loads(json_content)
-        # There should only be one store listed in this JSON
-        data = data['locations'][0]
-
-        properties = {
-            'addr:full': data['address'],
-            'addr:city': data['city'],
-            'addr:state': data['state'],
-            'addr:postcode': data['zip'],
-            'name': data['store'],
-            'ref': data['store'].split('#')[1],
-        }
-
-        phone_text = response.xpath('//div[@class="innerwrapper"]/h3').extract_first().split('\n')[-1]
-        properties['phone'] = phone_text.rstrip('</h3>').strip()
-
-        hours_list = response.xpath('//table[@class="wpsl-opening-hours"]/tr/td/time/text()').extract()
-        opening_hours = self.store_hours(hours_list)
-        if opening_hours:
-            properties['opening_hours'] = opening_hours
-
-        lon_lat = [
-            float(data['lng']),
-            float(data['lat']),
-        ]
-
-        yield GeojsonPointItem(
-            properties=properties,
-            lon_lat=lon_lat,
-        )
