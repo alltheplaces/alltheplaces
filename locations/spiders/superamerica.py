@@ -11,7 +11,6 @@ class SuperAmericaSpider(scrapy.Spider):
     allowed_domains = ["superamerica.com"]
     start_urls = (
         'http://superamerica.com/wp-admin/admin-ajax.php?action=store_search&lat=45.0&lng=-90.0&max_results=0&search_radius=500',
-        'http://superamerica.com/wp-admin/admin-ajax.php?action=store_search&lat=42.0&lng=-87.0&max_results=0&search_radius=500',
     )
 
     def store_hours(self, store_hours):
