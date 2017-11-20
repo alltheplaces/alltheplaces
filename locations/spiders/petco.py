@@ -19,12 +19,12 @@ class PetcoSpider(scrapy.Spider):
         for day_range in store_hours.splitlines():
             (days, hours) = day_range.split(' ', 1)
 
-            # Single days have a colon on the right side
-            days = days.rstrip(':')
-
             # They explicitly say 'closed' for days that are closed
             if hours == 'Closed':
                 continue
+
+            # Single days have a colon on the right side
+            days = days.rstrip(':')
 
             # Strip out the spaces in the time range
             hours = hours.replace(' ', '')
