@@ -29,6 +29,8 @@ class CVSSpider(scrapy.Spider):
             return "-".join(osm_days)
 
     def parse_times(self, times):
+        if times.strip() == 'Open 24 hours':
+            return '00:00-24:00'
         hours_to = [x.strip() for x in times.split('-')]
         cleaned_times = []
 
@@ -62,7 +64,7 @@ class CVSSpider(scrapy.Spider):
                 parsed_day = self.parse_day(day)
                 hours.append(parsed_day + ' ' + parsed_time)
 
-        return ";".join(hours) or 'No Store Hours'
+        return ";".join(hours)
 
     def parse_stores(self, response):
 
@@ -83,8 +85,10 @@ class CVSSpider(scrapy.Spider):
         properties = {
                       'addr:full': addr, 'phone': phone, 'addr:city': locality,
                       'addr:state': state, 'addr:postcode': postalCode,
-                      'ref': ref, 'website:': ref, 'opening_hours': hours,
+                      'ref': ref, 'website:': ref
                      }
+        if hours:
+            properties.update({'opening_hours': hours})
 
         yield GeojsonPointItem(
             properties=properties,
