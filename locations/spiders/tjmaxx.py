@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 import scrapy
-import json
 import re
-
 from locations.items import GeojsonPointItem
 
 
@@ -10,145 +8,124 @@ class TjmaxxSpider(scrapy.Spider):
     name = "tjmaxx"
     allowed_domains = ["tjx.com", "tjmaxx.com"]
     start_urls = (
-        'https://tjmaxx.tjx.com/store/stores/storeLocator.jsp',
+        'https://tjmaxx.tjx.com/store/stores/allStores.jsp',
     )
 
     def parse(self, response):
-        urls = response.xpath('//div[@class="itemlist"]/a[@class="thelinks normal"]/@href')
-        for path in urls:
-            yield scrapy.Request(response.urljoin(path.extract()))
-
-        store_urls = response.xpath('//li/a[@linktrack="Landing page"]/@href')
-        if store_urls:
-            for store_url in store_urls:
-                yield scrapy.Request(response.urljoin(store_url.extract()), callback=self.parse_store)
+        links = response.xpath('//li[@class="storelist-item vcard address"]/a[@href]/@href')
+        for link in links:
+            yield scrapy.Request(
+                response.urljoin(link.extract()),
+                callback=self.parse_links
+            )
 
 
+    def parse_links(self, response):
+        store_details = response.xpath('//form[@id="directions-form"]')
+        for store in store_details:
+            county = store.xpath('input[@name="storeName"]/@value').extract()
+            hours = store.xpath('input[@name="hours"]/@value').extract()
+            address = store.xpath('input[@name="address"]/@value').extract()
+            city = store.xpath('input[@name="city"]/@value').extract()
+            state = store.xpath('input[@name="state"]/@value').extract()
+            zip = store.xpath('input[@name="zip"]/@value').extract()
+            phone = store.xpath('input[@name="phone"]/@value').extract()
+            latitude = store.xpath('input[@name="lat"]/@value').extract()
+            longitude = store.xpath('input[@name="long"]/@value').extract()
+            website = response.xpath('//head/link[@rel="canonical"]/@href')[0].extract()
+            link_id = website.split("/")[-2]
+
+        properties = {
+                "addr:full": address[0],
+                "addr:city": city[0],
+                "addr:state": state[0],
+                "addr:postcode": zip[0],
+                "addr:country": "US",
+                'phone': phone[0],
+                'website': website,
+                'ref': link_id,
+                'opening_hours': self.process_hours(hours[0])
+            }
+
+        lon_lat = [
+            float(longitude[0]),
+            float(latitude[0]),
+        ]
+
+        yield GeojsonPointItem(
+            properties = properties,
+            lon_lat = lon_lat,
+        )
 
 
+    def process_hours(self, hours):
+        """ This should capture these time formats as on tjmaxx
+                # Mon-Wed: 9:30a-9:30p,
+                # Thanksgiving Day: CLOSED,  <- this gets appended without modification
+                # Fri-Sat: 7a-10p,
+                # Sun: 9a-10p
+        :param hours:
+        :return:  string - in this format Mo-Th 11:00-12:00; Fr-Sa 11:00-01:00;
+        """
+        working_hour = []
 
+        for t in hours.split(","):
+            match = re.search(r"^((\w{2})\w(?:-(\w{2})\w)?\:\s(\d+)(\:\d+)?(\w)-(\d+)(\:\d+)?(\w))$",
+                              t.strip(),
+                              re.IGNORECASE)
+            if match:
+                m = list(match.groups())
+                if len(m) == 9:
+                    # replace second entry for day of week for formats like Sun: 9a-12p
+                    if m[2] is None:
+                        m[2] = ""
+                    else:
+                        m[2] = "-" + m[2]
 
+                    # concatenate to our format
+                    if m[4] is None:
+                        if m[7] is None:
+                            # time is like Mon-Wed: 9a-9p
+                            working_hour.append(m[1] + m[2] + " " + str(int(m[3]) + self.am_pm(m[3], m[5])) + ":00-" +
+                                                str(int(m[6]) + self.am_pm(m[6], m[8])) + ":00")
+                        else:
+                            # time is like Mon-Wed: 9a-9:30p
+                            working_hour.append(m[1] + m[2] + " " + str(int(m[3]) + self.am_pm(m[3], m[5])) + ":00-" +
+                                                str(int(m[6]) + self.am_pm(m[6], m[8])) + m[7])
+                    else:
+                        if m[7] is None:
+                            # time is like Mon-Wed: 9:30a-9p
+                            working_hour.append(m[1] + m[2] + " " + str(int(m[3]) + self.am_pm(m[3], m[5])) + m[4] +
+                                                "-" + str(int(m[6]) + self.am_pm(m[6], m[8])) + ":00")
+                        else:
+                            # time is like Mon-Wed: 9:30a-9:30p
+                            working_hour.append(m[1] + m[2] + " " + str(int(m[3]) + self.am_pm(m[3], m[5])) + m[4] +
+                                                "-" + str(int(m[6]) + self.am_pm(m[6], m[8])) + m[7])
+            else:
+                working_hour.append(t)
 
+        if len(working_hour):
+            return "; ".join(working_hour)
+        else:
+            # if something fails, return original date
+            return hours
 
+    def am_pm(self, m3, x):
+        """
+            A convenience method to fix noon and midnight issues
+        :param m3: the hour has to be passed it to accurately decide 12noon and midnight
+        :param x: this is either a or p i.e am pm
+        :return: the hours that must be added
 
+        """
+        diff = 0
+        if x == 'a':
+            if int(m3) < 12:
+                return_diff = 0
+            else:
+                return_diff = -12
+        else:
+            if int(m3) < 12:
+                return_diff = 12
+        return diff
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    # def store_hours(self, store_hours):
-    #     day_groups = []
-    #     this_day_group = None
-    #     for line in store_hours:
-    #         # Applebees always seems to have a single dow
-    #         # in each opening hours object
-    #         day = line['dayOfWeek'][0][:2]
-    #
-    #         match = re.search(r'^(\d{1,2}):(\d{2}) (A|P)M$', line['opens'])
-    #         (f_hr, f_min, f_ampm) = match.groups()
-    #         match = re.search(r'^(\d{1,2}):(\d{2}) (A|P)M$', line['closes'])
-    #         (t_hr, t_min, t_ampm) = match.groups()
-    #
-    #         f_hr = int(f_hr)
-    #         if f_ampm == 'p':
-    #             f_hr += 12
-    #         elif f_ampm == 'a' and f_hr == 12:
-    #             f_hr = 0
-    #         t_hr = int(t_hr)
-    #         if t_ampm == 'p':
-    #             t_hr += 12
-    #         elif t_ampm == 'a' and t_hr == 12:
-    #             t_hr = 0
-    #
-    #         hours = '{:02d}:{}-{:02d}:{}'.format(
-    #             f_hr,
-    #             f_min,
-    #             t_hr,
-    #             t_min,
-    #         )
-    #
-    #         if not this_day_group:
-    #             this_day_group = {
-    #                 'from_day': day,
-    #                 'to_day': day,
-    #                 'hours': hours
-    #             }
-    #         elif this_day_group['hours'] != hours:
-    #             day_groups.append(this_day_group)
-    #             this_day_group = {
-    #                 'from_day': day,
-    #                 'to_day': day,
-    #                 'hours': hours
-    #             }
-    #         elif this_day_group['hours'] == hours:
-    #             this_day_group['to_day'] = day
-    #
-    #     day_groups.append(this_day_group)
-    #
-    #     opening_hours = ""
-    #     if len(day_groups) == 1 and day_groups[0]['hours'] in ('00:00-23:59', '00:00-00:00'):
-    #         opening_hours = '24/7'
-    #     else:
-    #         for day_group in day_groups:
-    #             if day_group['from_day'] == day_group['to_day']:
-    #                 opening_hours += '{from_day} {hours}; '.format(**day_group)
-    #             elif day_group['from_day'] == 'Su' and day_group['to_day'] == 'Sa':
-    #                 opening_hours += '{hours}; '.format(**day_group)
-    #             else:
-    #                 opening_hours += '{from_day}-{to_day} {hours}; '.format(**day_group)
-    #         opening_hours = opening_hours[:-2]
-    #
-    #     return opening_hours
-
-    # def address(self, address):
-    #     if not address:
-    #         return None
-    #
-    #     addr_tags = {
-    #         "addr:full": address['streetAddress'],
-    #         "addr:city": address['addressLocality'],
-    #         "addr:state": address['addressRegion'],
-    #         "addr:postcode": address['postalCode'],
-    #         "addr:country": address['addressCountry'],
-    #     }
-    #
-    #     return addr_tags
-
-
-    # def parse_store(self, response):
-    #     json_data = response.xpath('//head/script[@type="application/ld+json"]/text()')[1].extract()
-    #     json_data = json_data.replace('// if the location file does not have the hours separated into open/close for each day, remove the below section', '')
-    #     data = json.loads(json_data)
-    #
-    #     properties = {
-    #         'phone': data['telephone'],
-    #         'website': response.xpath('//head/link[@rel="canonical"]/@href')[0].extract(),
-    #         'ref': data['@id'],
-    #         'opening_hours': self.store_hours(data['openingHoursSpecification'])
-    #     }
-    #
-    #     address = self.address(data['address'])
-    #     if address:
-    #         properties.update(address)
-    #
-    #     lon_lat = [
-    #         float(data['geo']['longitude']),
-    #         float(data['geo']['latitude']),
-    #     ]
-    #
-    #     yield GeojsonPointItem(
-    #         properties=properties,
-    #         lon_lat=lon_lat,
-    #     )
