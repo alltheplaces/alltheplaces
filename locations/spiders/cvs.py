@@ -2,6 +2,8 @@ import scrapy
 import re
 from locations.items import GeojsonPointItem
 
+DAY_MAPPING = {'M':'Mo', 'T': 'Tu', 'W': 'We', 'F': 'Fr', 'Sat': 'Sa', 'Sun':'Su'}
+
 
 class CVSSpider(scrapy.Spider):
 
@@ -12,19 +14,55 @@ class CVSSpider(scrapy.Spider):
         'https://www.cvs.com/store-locator/cvs-pharmacy-locations',
     )
 
-    def parse_hours(self, response):
-        store_title = response.xpath('normalize-space(//h4[@class="nomargin store-photo-heading"]/text())').extract_first()
-        hours = {}
-        if store_title:
-            lis = response.xpath('//ul[@class="cleanList srHours srSection"]/li')
-            hours[store_title] = {}
-            for li in lis:
-                day = li.xpath('normalize-space(.//span[@class="day single-day"]/text() | .//span[@class="day"]/text())').extract_first()
-                times = li.xpath('.//span[@class="timings"]/text()').extract_first()
-                if day and times:
-                    hours[store_title].update({day: times})
+    def parse_day(self, day):
 
-        return hours
+        if re.search('Sat', day) or re.search('Sun', day):
+            return DAY_MAPPING[day.strip()]
+
+        if re.search('-', day):
+            days = day.split('-')
+            osm_days = []
+            if len(days) == 2:
+                for day in days:
+                    osm_day = DAY_MAPPING[day.strip()]
+                    osm_days.append(osm_day)
+            return "-".join(osm_days)
+
+    def parse_times(self, times):
+        hours_to = [x.strip() for x in times.split('-')]
+        cleaned_times = []
+
+        for hour in hours_to:
+            if re.search('PM$', hour):
+                hour = re.sub('PM', '', hour).strip()
+                hour_min = hour.split(":")
+                if int(hour_min[0]) < 12:
+                    hour_min[0] = str(12 + int(hour_min[0]))
+                cleaned_times.append(":".join(hour_min))
+
+            if re.search('AM$', hour):
+                hour = re.sub('AM', '', hour).strip()
+                hour_min = hour.split(":")
+                if len(hour_min[0]) <2:
+                    hour_min[0] = hour_min[0].zfill(2)
+                else:
+                    hour_min[0] = str(12 + int(hour_min[0]))
+
+                cleaned_times.append(":".join(hour_min))
+        return "-".join(cleaned_times)
+
+    def parse_hours(self, lis):
+
+        hours = []
+        for li in lis:
+            day = li.xpath('normalize-space(.//span[@class="day single-day"]/text() | .//span[@class="day"]/text())').extract_first()
+            times = li.xpath('.//span[@class="timings"]/text()').extract_first()
+            if times and day:
+                parsed_time = self.parse_times(times)
+                parsed_day = self.parse_day(day)
+                hours.append(parsed_day + ' ' + parsed_time)
+
+        return ";".join(hours) or 'No Store Hours'
 
     def parse_stores(self, response):
 
@@ -39,8 +77,8 @@ class CVSSpider(scrapy.Spider):
         latitude = float(response.xpath('normalize-space(//input[@id="toLatitude"]/@value)').extract_first())
         longitude = float(response.xpath('normalize-space(//input[@id="toLongitude"]/@value)').extract_first())
 
-        lat_long = [longitude, latitude]
-        hours = self.parse_hours(response)
+        lon_lat = [longitude, latitude]
+        hours = self.parse_hours(response.xpath('//ul[@class="cleanList srHours srSection"]/li'))
 
         properties = {
                       'addr:full': addr, 'phone': phone, 'addr:city': locality,
@@ -50,7 +88,7 @@ class CVSSpider(scrapy.Spider):
 
         yield GeojsonPointItem(
             properties=properties,
-            lon_lat=lat_long
+            lon_lat=lon_lat
         )
 
     def parse_city_stores(self, response):
