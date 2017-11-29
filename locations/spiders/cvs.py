@@ -2,10 +2,12 @@ import scrapy
 import re
 from locations.items import GeojsonPointItem
 
+
 class CVSSpider(scrapy.Spider):
 
     name = "cvs"
     allowed_domains = ["www.cvs.com"]
+    download_delay = 1.5
     start_urls = (
         'https://www.cvs.com/store-locator/cvs-pharmacy-locations',
     )
@@ -15,26 +17,14 @@ class CVSSpider(scrapy.Spider):
         hours = {}
         if store_title:
             lis = response.xpath('//ul[@class="cleanList srHours srSection"]/li')
-            hours [store_title] = {}
+            hours[store_title] = {}
             for li in lis:
                 day = li.xpath('normalize-space(.//span[@class="day single-day"]/text() | .//span[@class="day"]/text())').extract_first()
                 times = li.xpath('.//span[@class="timings"]/text()').extract_first()
                 if day and times:
-                    hours [store_title].update({day: times})
-
-        phar_title = response.xpath('normalize-space(//h4[@class="printml"]/text())').extract_first()
-        if phar_title:
-            hours [phar_title] = {}
-            phar_hours = response.xpath('//ul[@class="cleanList phHours srSection"]/li')
-            for li in phar_hours:
-                day = li.xpath('normalize-space(.//span[@class="day single-day"]/text() | .//span[@class="day"]/text())').extract_first()
-                times = li.xpath('normalize-space(.//span[@class="timings"]/text())').extract_first()
-                if day and times:
-                    hours [store_title].update({day: times})
-                hours [phar_title].update({day: times})
+                    hours[store_title].update({day: times})
 
         return hours
-
 
     def parse_stores(self, response):
 
@@ -49,10 +39,11 @@ class CVSSpider(scrapy.Spider):
         latitude = float(response.xpath('normalize-space(//input[@id="toLatitude"]/@value)').extract_first())
         longitude = float(response.xpath('normalize-space(//input[@id="toLongitude"]/@value)').extract_first())
 
-        lat_long = [latitude, longitude]
+        lat_long = [longitude, latitude]
         hours = self.parse_hours(response)
 
-        properties = {'addr:full': addr, 'phone': phone, 'addr:city': locality,
+        properties = {
+                      'addr:full': addr, 'phone': phone, 'addr:city': locality,
                       'addr:state': state, 'addr:postcode': postalCode,
                       'ref': ref, 'website:': ref, 'opening_hours': hours,
                      }
@@ -71,8 +62,7 @@ class CVSSpider(scrapy.Spider):
             if direction:
                 yield scrapy.Request(response.urljoin(direction), callback=self.parse_stores)
 
-
-    def parse_state(self, response):    
+    def parse_state(self, response):
         city_urls = response.xpath('//div[@class="states"]/ul/li/a/@href').extract()
         for path in city_urls:
             yield scrapy.Request(response.urljoin(path), callback=self.parse_city_stores)
