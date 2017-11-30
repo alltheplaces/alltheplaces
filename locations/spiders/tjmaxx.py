@@ -21,42 +21,30 @@ class TjmaxxSpider(scrapy.Spider):
 
 
     def parse_links(self, response):
-        store_details = response.xpath('//form[@id="directions-form"]')
-        for store in store_details:
-            county = store.xpath('input[@name="storeName"]/@value').extract()
-            hours = store.xpath('input[@name="hours"]/@value').extract()
-            address = store.xpath('input[@name="address"]/@value').extract()
-            city = store.xpath('input[@name="city"]/@value').extract()
-            state = store.xpath('input[@name="state"]/@value').extract()
-            zip = store.xpath('input[@name="zip"]/@value').extract()
-            phone = store.xpath('input[@name="phone"]/@value').extract()
-            latitude = store.xpath('input[@name="lat"]/@value').extract()
-            longitude = store.xpath('input[@name="long"]/@value').extract()
-            website = response.xpath('//head/link[@rel="canonical"]/@href')[0].extract()
-            link_id = website.split("/")[-2]
+        hours = response.xpath('//form[@id="directions-form"]/input[@name="hours"]/@value').extract()
+        address = response.xpath('//form[@id="directions-form"]/input[@name="address"]/@value').extract()
+        city = response.xpath('//form[@id="directions-form"]/input[@name="city"]/@value').extract()
+        state = response.xpath('//form[@id="directions-form"]/input[@name="state"]/@value').extract()
+        zip = response.xpath('//form[@id="directions-form"]/input[@name="zip"]/@value').extract()
+        phone = response.xpath('//form[@id="directions-form"]/input[@name="phone"]/@value').extract()
+        latitude = response.xpath('//form[@id="directions-form"]/input[@name="lat"]/@value').extract()
+        longitude = response.xpath('//form[@id="directions-form"]/input[@name="long"]/@value').extract()
+        website = response.xpath('//head/link[@rel="canonical"]/@href')[0].extract()
+        link_id = website.split("/")[-2]
 
-        properties = {
-                "addr:full": address[0],
-                "addr:city": city[0],
-                "addr:state": state[0],
-                "addr:postcode": zip[0],
-                "addr:country": "US",
-                'phone': phone[0],
-                'website': website,
-                'ref': link_id,
-                'opening_hours': self.process_hours(hours[0])
-            }
+        properties = {"addr:full": address[0],
+                      "addr:city": city[0],
+                      "addr:state": state[0],
+                      "addr:postcode": zip[0],
+                      "addr:country": "US",
+                      "phone": phone[0],
+                      "website": website,
+                      "ref": link_id,
+                      "opening_hours": self.process_hours(hours[0])}
 
-        lon_lat = [
-            float(longitude[0]),
-            float(latitude[0]),
-        ]
+        lon_lat = [float(longitude[0]), float(latitude[0])]
 
-        yield GeojsonPointItem(
-            properties = properties,
-            lon_lat = lon_lat,
-        )
-
+        yield GeojsonPointItem(properties=properties, lon_lat=lon_lat,)
 
     def process_hours(self, hours):
         """ This should capture these time formats as on tjmaxx
@@ -86,46 +74,50 @@ class TjmaxxSpider(scrapy.Spider):
                     if m[4] is None:
                         if m[7] is None:
                             # time is like Mon-Wed: 9a-9p
-                            working_hour.append(m[1] + m[2] + " " + str(int(m[3]) + self.am_pm(m[3], m[5])) + ":00-" +
-                                                str(int(m[6]) + self.am_pm(m[6], m[8])) + ":00")
+                            hr_1 = int(m[3]) + self.am_pm(m[3], m[5])
+                            hr_2 = int(m[6]) + self.am_pm(m[6], m[8])
+                            working_hour.append(m[1] + m[2] + " " + f'{hr_1:02}' + ":00-" + f'{hr_2:02}' + ":00")
                         else:
                             # time is like Mon-Wed: 9a-9:30p
-                            working_hour.append(m[1] + m[2] + " " + str(int(m[3]) + self.am_pm(m[3], m[5])) + ":00-" +
-                                                str(int(m[6]) + self.am_pm(m[6], m[8])) + m[7])
+                            hr_1 = int(m[3]) + self.am_pm(m[3], m[5])
+                            hr_2 = int(m[6]) + self.am_pm(m[6], m[8])
+                            working_hour.append(m[1] + m[2] + " " + f'{hr_1:02}' + ":00-" + f'{hr_2:02}' + m[7])
                     else:
                         if m[7] is None:
                             # time is like Mon-Wed: 9:30a-9p
-                            working_hour.append(m[1] + m[2] + " " + str(int(m[3]) + self.am_pm(m[3], m[5])) + m[4] +
-                                                "-" + str(int(m[6]) + self.am_pm(m[6], m[8])) + ":00")
+                            hr_1 = int(m[3]) + self.am_pm(m[3], m[5])
+                            hr_2 = int(m[6]) + self.am_pm(m[6], m[8])
+                            working_hour.append(m[1] + m[2] + " " + f'{hr_1:02}' + m[4] + "-" + f'{hr_2:02}' + ":00")
                         else:
                             # time is like Mon-Wed: 9:30a-9:30p
-                            working_hour.append(m[1] + m[2] + " " + str(int(m[3]) + self.am_pm(m[3], m[5])) + m[4] +
-                                                "-" + str(int(m[6]) + self.am_pm(m[6], m[8])) + m[7])
+                            hr_1 = int(m[3]) + self.am_pm(m[3], m[5])
+                            hr_2 = int(m[6]) + self.am_pm(m[6], m[8])
+                            working_hour.append(m[1] + m[2] + " " + f'{hr_1:02}' + m[4] + "-" + f'{hr_2:02}' + m[7])
             # else:
             #     working_hour.append(t)
 
-        if len(working_hour):
+        if working_hour:
             return "; ".join(working_hour)
         else:
             # if something fails, return original date
             return hours
 
-    def am_pm(self, m3, x):
+    def am_pm(self, hr, a_p):
         """
             A convenience method to fix noon and midnight issues
-        :param m3: the hour has to be passed it to accurately decide 12noon and midnight
-        :param x: this is either a or p i.e am pm
+        :param hr: the hour has to be passed it to accurately decide 12noon and midnight
+        :param a_p: this is either a or p i.e am pm
         :return: the hours that must be added
 
         """
         diff = 0
-        if x == 'a':
-            if int(m3) < 12:
-                return_diff = 0
+        if a_p == 'a':
+            if int(hr) < 12:
+                diff = 0
             else:
-                return_diff = -12
+                diff = -12
         else:
-            if int(m3) < 12:
-                return_diff = 12
+            if int(hr) < 12:
+                diff = 12
         return diff
 
