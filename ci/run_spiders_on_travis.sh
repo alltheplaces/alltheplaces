@@ -10,28 +10,7 @@ RUN_TIMESTAMP=$(date -u +%s)
 RUN_S3_KEY_PREFIX="runs/${RUN_TIMESTAMP}"
 RUN_S3_PREFIX="s3://${S3_BUCKET}/${RUN_S3_KEY_PREFIX}"
 RUN_URL_PREFIX="https://s3.amazonaws.com/${S3_BUCKET}/${RUN_S3_KEY_PREFIX}"
-
-cat << EOF >> $TMPFILE
-<!DOCTYPE html>
-<html>
-<head>
-</head>
-
-<body>
-<h1>Travis build ${TRAVIS_JOB_NUMBER}</h1>
-<table>
-    <tr>
-        <th>
-        Spider
-        </th>
-        <th>
-        Results
-        </th>
-        <th>
-        Log
-        </th>
-    </tr>
-EOF
+PR_COMMENT_BODY="I ran the spiders in this pull request and got these results:\\n\\n|Spider|Results|Log|\\n|---|---|---|\\n"
 
 case "$TRAVIS_EVENT_TYPE" in
     "cron" | "api")
@@ -46,17 +25,33 @@ case "$TRAVIS_EVENT_TYPE" in
         ;;
 esac
 
+FAIL_THE_BUILD=0
 for spider in $SPIDERS
 do
     (>&2 echo "${spider} running ...")
-    SPIDER_RUN_DIR=$(./ci/run_one_spider.sh $spider)
-
-    if [ ! $? -eq 0 ]; then
-        (>&2 echo "${spider} exited with non-zero status code")
-    fi
-
+    SPIDER_RUN_DIR=`mktemp -d` || exit 1
     LOGFILE="${SPIDER_RUN_DIR}/log.txt"
     OUTFILE="${SPIDER_RUN_DIR}/output.geojson"
+
+    scrapy runspider \
+        -t geojson \
+        -o "file://${OUTFILE}" \
+        --loglevel=INFO \
+        --logfile=$LOGFILE \
+        -s CLOSESPIDER_TIMEOUT=60 \
+        -s CLOSESPIDER_ERRORCOUNT=1 \
+        $spider
+
+    FAILURE_REASON="success"
+    if grep -q "Spider closed (closespider_errorcount)" $LOGFILE; then
+        (>&2 echo "${spider} exited with errors")
+        FAIL_THE_BUILD=1
+        FAILURE_REASON="exception"
+    elif grep -q "Spider closed (closespider_timeout)" $LOGFILE; then
+        (>&2 echo "${spider} exited because of timeout")
+        FAILURE_REASON="timeout"
+    fi
+
     TIMESTAMP=$(date -u +%F-%H-%M-%S)
     SPIDER_NAME=$(basename $spider)
     SPIDER_NAME=${SPIDER_NAME%.py}
@@ -75,8 +70,10 @@ do
 
     if [ ! $? -eq 0 ]; then
         (>&2 echo "${spider} couldn't save logfile to s3")
-        exit 1
+        FAIL_THE_BUILD=1
     fi
+
+    (>&2 echo "${spider} logfile is: ${S3_URL_PREFIX}/log.txt")
 
     FEATURE_COUNT=$(wc -l < ${OUTFILE} | tr -d ' ')
 
@@ -94,50 +91,20 @@ do
 
         if [ ! $? -eq 0 ]; then
             (>&2 echo "${spider} couldn't save output to s3")
-            exit 1
+            FAIL_THE_BUILD=1
         fi
+
+        (>&2 echo "${spider} output is: ${S3_URL_PREFIX}/output.geojson")
     fi
 
-    cat << EOF >> $TMPFILE
-    <tr>
-        <td>
-        <a href="https://github.com/${TRAVIS_REPO_SLUG}/blob/${TRAVIS_COMMIT}/${spider}"><code>${spider}</code></a>
-        </td>
-        <td>
-        <a href="${HTTP_URL_PREFIX}/output.geojson">${FEATURE_COUNT} results</a>
-        (<a href="https://s3.amazonaws.com/${S3_BUCKET}/map.html?show=${HTTP_URL_PREFIX}/output.geojson">Map</a>)
-        </td>
-        <td>
-        <a href="${HTTP_URL_PREFIX}/log.txt">Log</a>
-        </td>
-    </tr>
-EOF
+    PR_COMMENT_BODY="${PR_COMMENT_BODY}|[\`$spider\`](https://github.com/${TRAVIS_REPO_SLUG}/blob/${TRAVIS_COMMIT}/${spider})|[${FEATURE_COUNT} items](${HTTP_URL_PREFIX}/output.geojson) ([Map](https://s3.amazonaws.com/${S3_BUCKET}/map.html?show=${HTTP_URL_PREFIX}/output.geojson))|Resulted in a \`${FAILURE_REASON}\` ([Log](${HTTP_URL_PREFIX}/log.txt))|\\n"
 
     (>&2 echo "${spider} done")
 done
 
-cat << EOF >> $TMPFILE
-</table>
-</body>
-</html>
-EOF
-
 if [ -z "$SPIDERS" ]; then
     echo "No spiders run"
     exit 0
-fi
-
-aws s3 cp --quiet \
-    --acl=public-read \
-    --content-type "text/html" \
-    ${TMPFILE} \
-    "${RUN_S3_PREFIX}.html"
-
-RUN_HTTP_URL="https://s3.amazonaws.com/${S3_BUCKET}/$"
-
-if [ ! $? -eq 0 ]; then
-    echo "Couldn't send run HTML to S3"
-    exit 1
 fi
 
 if [ -z "$GITHUB_TOKEN" ]; then
@@ -148,10 +115,12 @@ else
             -s \
             -XPOST \
             -H "Authorization: token ${GITHUB_TOKEN}" \
-            -d "{\"body\":\"Finished a build of the following spiders:\n\n\`\`\`\n$(awk -v ORS='\\n' '{ print }' <<< $SPIDERS)\n\`\`\`\n\n${RUN_URL_PREFIX}.html\"}" \
+            -d "{\"body\":\"${PR_COMMENT_BODY}\"}" \
             "https://api.github.com/repos/${TRAVIS_REPO_SLUG}/issues/${TRAVIS_PULL_REQUEST}/comments"
         echo "Added a comment to pull https://github.com/${TRAVIS_REPO_SLUG}/pull/${TRAVIS_PULL_REQUEST}"
     else
         echo "Not posting to GitHub because no pull TRAVIS_PULL_REQUEST set"
     fi
 fi
+
+exit $FAIL_THE_BUILD

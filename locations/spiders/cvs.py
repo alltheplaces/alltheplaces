@@ -2,7 +2,14 @@ import scrapy
 import re
 from locations.items import GeojsonPointItem
 
-DAY_MAPPING = {'M':'Mo', 'T': 'Tu', 'W': 'We', 'F': 'Fr', 'Sat': 'Sa', 'Sun':'Su'}
+DAY_MAPPING = {
+    'M': 'Mo',
+    'T': 'Tu',
+    'W': 'We',
+    'F': 'Fr',
+    'Sat': 'Sa',
+    'Sun': 'Su'
+}
 
 
 class CVSSpider(scrapy.Spider):
@@ -76,19 +83,24 @@ class CVSSpider(scrapy.Spider):
         phone = re.sub('tel:', '', raw_phone)
         ref = response.xpath('//link[@rel="canonical"]/@href').extract_first()
 
+        properties = {
+            'addr:full': addr,
+            'phone': phone,
+            'addr:city': locality,
+            'addr:state': state,
+            'addr:postcode': postalCode,
+            'ref': ref,
+            'website:': ref
+        }
+
+        hours = self.parse_hours(response.xpath('//ul[@class="cleanList srHours srSection"]/li'))
+        if hours:
+            properties['opening_hours'] = hours
+
         latitude = float(response.xpath('normalize-space(//input[@id="toLatitude"]/@value)').extract_first())
         longitude = float(response.xpath('normalize-space(//input[@id="toLongitude"]/@value)').extract_first())
 
         lon_lat = [longitude, latitude]
-        hours = self.parse_hours(response.xpath('//ul[@class="cleanList srHours srSection"]/li'))
-
-        properties = {
-                      'addr:full': addr, 'phone': phone, 'addr:city': locality,
-                      'addr:state': state, 'addr:postcode': postalCode,
-                      'ref': ref, 'website:': ref
-                     }
-        if hours:
-            properties.update({'opening_hours': hours})
 
         yield GeojsonPointItem(
             properties=properties,
