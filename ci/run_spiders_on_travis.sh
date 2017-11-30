@@ -70,7 +70,6 @@ do
         FAILURE_REASON="exception"
     elif grep -q "Spider closed (closespider_timeout)" $LOGFILE; then
         (>&2 echo "${spider} exited because of timeout")
-        FAIL_THE_BUILD=1
         FAILURE_REASON="timeout"
     fi
 
