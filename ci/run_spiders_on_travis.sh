@@ -51,8 +51,8 @@ for spider in $SPIDERS
 do
     (>&2 echo "${spider} running ...")
     SPIDER_RUN_DIR=`mktemp -d` || exit 1
-    LOGFILE="${RUN_DIR}/log.txt"
-    OUTFILE="${RUN_DIR}/output.geojson"
+    LOGFILE="${SPIDER_RUN_DIR}/log.txt"
+    OUTFILE="${SPIDER_RUN_DIR}/output.geojson"
 
     scrapy runspider \
         -t geojson \
@@ -74,8 +74,6 @@ do
         FAILURE_REASON="timeout"
     fi
 
-    LOGFILE="${SPIDER_RUN_DIR}/log.txt"
-    OUTFILE="${SPIDER_RUN_DIR}/output.geojson"
     TIMESTAMP=$(date -u +%F-%H-%M-%S)
     SPIDER_NAME=$(basename $spider)
     SPIDER_NAME=${SPIDER_NAME%.py}
@@ -127,7 +125,7 @@ do
         (<a href="https://s3.amazonaws.com/${S3_BUCKET}/map.html?show=${HTTP_URL_PREFIX}/output.geojson">Map</a>)
         </td>
         <td>
-        <pre>${FAILURE_REASON}</pre>
+        ${FAILURE_REASON}
         (<a href="${HTTP_URL_PREFIX}/log.txt">Log</a>)
         </td>
     </tr>
