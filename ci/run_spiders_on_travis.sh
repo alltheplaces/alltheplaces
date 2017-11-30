@@ -46,13 +46,32 @@ case "$TRAVIS_EVENT_TYPE" in
         ;;
 esac
 
+FAIL_THE_BUILD=0
 for spider in $SPIDERS
 do
     (>&2 echo "${spider} running ...")
-    SPIDER_RUN_DIR=$(./ci/run_one_spider.sh $spider)
+    SPIDER_RUN_DIR=`mktemp -d` || exit 1
+    LOGFILE="${RUN_DIR}/log.txt"
+    OUTFILE="${RUN_DIR}/output.geojson"
 
-    if [ ! $? -eq 0 ]; then
-        (>&2 echo "${spider} exited with non-zero status code")
+    scrapy runspider \
+        -t geojson \
+        -o "file://${OUTFILE}" \
+        --loglevel=INFO \
+        --logfile=$LOGFILE \
+        -s CLOSESPIDER_TIMEOUT=60 \
+        -s CLOSESPIDER_ERRORCOUNT=1 \
+        $spider
+
+    FAILURE_REASON="success"
+    if grep -q "Spider closed (closespider_errorcount)" $LOGFILE; then
+        (>&2 echo "${spider} exited with errors")
+        FAIL_THE_BUILD=1
+        FAILURE_REASON="exception"
+    elif grep -q "Spider closed (closespider_timeout)" $LOGFILE; then
+        (>&2 echo "${spider} exited because of timeout")
+        FAIL_THE_BUILD=1
+        FAILURE_REASON="timeout"
     fi
 
     LOGFILE="${SPIDER_RUN_DIR}/log.txt"
@@ -75,7 +94,7 @@ do
 
     if [ ! $? -eq 0 ]; then
         (>&2 echo "${spider} couldn't save logfile to s3")
-        exit 1
+        FAIL_THE_BUILD=1
     fi
 
     FEATURE_COUNT=$(wc -l < ${OUTFILE} | tr -d ' ')
@@ -94,7 +113,7 @@ do
 
         if [ ! $? -eq 0 ]; then
             (>&2 echo "${spider} couldn't save output to s3")
-            exit 1
+            FAIL_THE_BUILD=1
         fi
     fi
 
@@ -104,11 +123,12 @@ do
         <a href="https://github.com/${TRAVIS_REPO_SLUG}/blob/${TRAVIS_COMMIT}/${spider}"><code>${spider}</code></a>
         </td>
         <td>
-        <a href="${HTTP_URL_PREFIX}/output.geojson">${FEATURE_COUNT} results</a>
+        <a href="${HTTP_URL_PREFIX}/output.geojson">${FEATURE_COUNT} items</a>
         (<a href="https://s3.amazonaws.com/${S3_BUCKET}/map.html?show=${HTTP_URL_PREFIX}/output.geojson">Map</a>)
         </td>
         <td>
-        <a href="${HTTP_URL_PREFIX}/log.txt">Log</a>
+        <pre>${FAILURE_REASON}</pre>
+        (<a href="${HTTP_URL_PREFIX}/log.txt">Log</a>)
         </td>
     </tr>
 EOF
@@ -133,8 +153,6 @@ aws s3 cp --quiet \
     ${TMPFILE} \
     "${RUN_S3_PREFIX}.html"
 
-RUN_HTTP_URL="https://s3.amazonaws.com/${S3_BUCKET}/$"
-
 if [ ! $? -eq 0 ]; then
     echo "Couldn't send run HTML to S3"
     exit 1
@@ -155,3 +173,5 @@ else
         echo "Not posting to GitHub because no pull TRAVIS_PULL_REQUEST set"
     fi
 fi
+
+exit $FAIL_THE_BUILD
