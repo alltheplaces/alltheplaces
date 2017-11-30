@@ -10,7 +10,7 @@ RUN_TIMESTAMP=$(date -u +%s)
 RUN_S3_KEY_PREFIX="runs/${RUN_TIMESTAMP}"
 RUN_S3_PREFIX="s3://${S3_BUCKET}/${RUN_S3_KEY_PREFIX}"
 RUN_URL_PREFIX="https://s3.amazonaws.com/${S3_BUCKET}/${RUN_S3_KEY_PREFIX}"
-PR_COMMENT_BODY="I ran the spiders in this pull request and got these results:\\n\\n|Spider|Results|Log\\n"
+PR_COMMENT_BODY="I ran the spiders in this pull request and got these results:\\n\\n|Spider|Results|Log|\\n|---|---|---|\\n"
 
 case "$TRAVIS_EVENT_TYPE" in
     "cron" | "api")
@@ -97,7 +97,7 @@ do
         (>&2 echo "${spider} output is: ${S3_URL_PREFIX}/output.geojson")
     fi
 
-    PR_COMMENT_BODY="${PR_COMMENT_BODY}\\n|[\`$spider\`](https://github.com/${TRAVIS_REPO_SLUG}/blob/${TRAVIS_COMMIT}/${spider})|[${FEATURE_COUNT} items](${HTTP_URL_PREFIX}/output.geojson) ([Map](https://s3.amazonaws.com/${S3_BUCKET}/map.html?show=${HTTP_URL_PREFIX}/output.geojson)|${FAILURE_REASON} ([Log](${HTTP_URL_PREFIX}/log.txt))|\\n"
+    PR_COMMENT_BODY="${PR_COMMENT_BODY}|[\`$spider\`](https://github.com/${TRAVIS_REPO_SLUG}/blob/${TRAVIS_COMMIT}/${spider})|[${FEATURE_COUNT} items](${HTTP_URL_PREFIX}/output.geojson) ([Map](https://s3.amazonaws.com/${S3_BUCKET}/map.html?show=${HTTP_URL_PREFIX}/output.geojson))|Resulted in a \`${FAILURE_REASON}\` ([Log](${HTTP_URL_PREFIX}/log.txt))|\\n"
 
     (>&2 echo "${spider} done")
 done
