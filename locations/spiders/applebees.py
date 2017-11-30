@@ -77,20 +77,6 @@ class ApplebeesSpider(scrapy.Spider):
 
         return opening_hours
 
-    def address(self, address):
-        if not address:
-            return None
-
-        addr_tags = {
-            "addr:full": address['streetAddress'],
-            "addr:city": address['addressLocality'],
-            "addr:state": address['addressRegion'],
-            "addr:postcode": address['postalCode'],
-            "addr:country": address['addressCountry'],
-        }
-
-        return addr_tags
-
     def parse(self, response):
         urls = response.xpath('//div[@class="itemlist"]/a[@class="thelinks normal"]/@href')
         for path in urls:
@@ -106,23 +92,16 @@ class ApplebeesSpider(scrapy.Spider):
         json_data = json_data.replace('// if the location file does not have the hours separated into open/close for each day, remove the below section', '')
         data = json.loads(json_data)
 
-        properties = {
-            'phone': data['telephone'],
-            'website': response.xpath('//head/link[@rel="canonical"]/@href')[0].extract(),
-            'ref': data['@id'],
-            'opening_hours': self.store_hours(data['openingHoursSpecification'])
-        }
-
-        address = self.address(data['address'])
-        if address:
-            properties.update(address)
-
-        lon_lat = [
-            float(data['geo']['longitude']),
-            float(data['geo']['latitude']),
-        ]
-
         yield GeojsonPointItem(
-            properties=properties,
-            lon_lat=lon_lat,
+            lat=float(data['geo']['latitude']),
+            lon=float(data['geo']['longitude']),
+            phone=data['telephone'],
+            website=response.xpath('//head/link[@rel="canonical"]/@href')[0].extract(),
+            ref=data['@id'],
+            opening_hours=self.store_hours(data['openingHoursSpecification']),
+            addr_full=data.get('address', {}).get('streetAddress'),
+            city=data.get('address', {}).get('addressLocality'),
+            state=data.get('address', {}).get('addressRegion'),
+            postcode=data.get('address', {}).get('postalCode'),
+            country=data.get('address', {}).get('addressCountry'),
         )
