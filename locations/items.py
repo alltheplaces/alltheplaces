@@ -9,5 +9,14 @@ import scrapy
 
 
 class GeojsonPointItem(scrapy.Item):
-    properties = scrapy.Field()
-    lon_lat = scrapy.Field()
+    lat = scrapy.Field()
+    lon = scrapy.Field()
+    addr_full = scrapy.Field()
+    city = scrapy.Field()
+    state = scrapy.Field()
+    postcode = scrapy.Field()
+    phone = scrapy.Field()
+    website = scrapy.Field()
+    opening_hours = scrapy.Field()
+    ref = scrapy.Field()
+    extras = scrapy.Field()
