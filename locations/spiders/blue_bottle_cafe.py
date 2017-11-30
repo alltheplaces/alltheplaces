@@ -22,8 +22,7 @@ class BlueBottleCafeSpider(scrapy.Spider):
                 properties = {
                     'name': store_data['name'],
                     'addr:full': address_string,
-                    'addr:city': address_string.split(", ")[1].replace(" ", ""),
-                    'region': store_data['region'].title(),
+                    'addr:city': address_string.split(", ")[1].replace(" ", " "),
                     'website': store_data['url'],
                     'ref': store_data['id'],
                 }
