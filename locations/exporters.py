@@ -7,6 +7,7 @@ mapping = (
     ('city', 'addr:city'),
     ('state', 'addr:state'),
     ('postcode', 'addr:postcode'),
+    ('country', 'addr:country'),
     ('phone', 'phone'),
     ('website', 'website'),
     ('opening_hours', 'opening_hours'),
