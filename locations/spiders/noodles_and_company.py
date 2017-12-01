@@ -110,9 +110,12 @@ class NoodlesAndCompanySpider(scrapy.Spider):
             'website': response.url,
         }
 
-        hours = json.loads(response.xpath('//div[@class="c-location-hours-details-wrapper js-location-hours"]/@data-days')[0].extract())
+        hours_elem = response.xpath('//div[@class="c-location-hours-details-wrapper js-location-hours"]/@data-days')
+        opening_hours = None
+        if hours_elem:
+            hours = json.loads(hours_elem.extract_first())
+            opening_hours = self.store_hours(hours)
 
-        opening_hours = self.store_hours(hours) if hours else None
         if opening_hours:
             properties['opening_hours'] = opening_hours
 
