@@ -1,5 +1,6 @@
-import scrapy
 import json
+import re
+import scrapy
 from locations.items import GeojsonPointItem
 
 STATES = ["AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DC", "DE", "FL", "GA",
@@ -8,7 +9,61 @@ STATES = ["AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DC", "DE", "FL", "GA",
           "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC",
           "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"]
 
+DAYS = {'Mon': 'Mo', 'Tue': 'Tu',
+        'Wed': 'We', 'Thu': 'Th',
+        'Fri': 'Fr', 'Sat': 'Sa',
+        'Sun': 'Su'}
+
 URL = 'https://mktsvc.tjx.com/storelocator/GetSearchResultsByState'
+
+
+def normalize_time(hours):
+
+    if not hours:
+      return ''
+
+    day_times = hours.split(',')
+    normalize_day_times = []
+
+    for day_time in day_times:
+        day, hours = [x.strip() for x in day_time.split(': ')]
+        normalize_hours = []
+
+        if re.search('-', day):
+            days = [x.strip() for x in day.split('-')]
+            norm_days = '-'.join([DAYS.get(x, '') for x in days])
+        else:
+            norm_days = DAYS.get(day, '')
+
+        if re.search('CLOSED', hours):
+            norm_hours = ' off'
+            normalize_hours.append(norm_hours)
+        else:
+            if re.search('-', hours):
+                hours = [x.strip() for x in hours.split('-')]
+
+                for hour in hours:
+
+                    if hour[-1] == 'p':
+                        if re.search(':', hour[:-1]):
+                            hora, minute = [x.strip() for x in hour[:-1].split(':')]
+                            if int(hora) < 12:
+                                norm_hours = str(int(hora) + 12) + ':' + minute
+                        else:
+                            if int(hour[:-1]) < 12:
+                                norm_hours = str(int(hour[:-1]) + 12) + ":00"
+
+                    elif hour[-1] == 'a':
+                        if re.search(':', hour[:-1]):
+                            hora, minute = [x.strip() for x in hour[:-1].split(':')]
+                            norm_hours = hora + ':' + minute
+                        else:
+                            norm_hours = hour[:-1] + ":00"
+
+                    normalize_hours.append(norm_hours)
+
+        normalize_day_times.append(' '.join([norm_days, '-'.join(normalize_hours)]))
+    return '; '.join(normalize_day_times)
 
 
 class MarshallsSpider(scrapy.Spider):
@@ -36,12 +91,19 @@ class MarshallsSpider(scrapy.Spider):
                                           headers=headers, callback=self.parse)
 
     def parse(self, response):
-        data = json.loads(response.text)
+
+        data = json.loads(response.body_as_unicode())
         stores = data.get('Stores', None)
 
         for store in stores:
             lon_lat = [store.pop('Longitude', None), store.pop('Latitude', None)]
-            store['ref'] = URL
+            store['ref'] = URL + str(store.get('StoreID', None))
+
+            opening_hours = normalize_time(store.get('Hours', ''))
+
+            if opening_hours:
+                store['opening_hours'] = opening_hours
+                store.pop('Hours', None)
 
             yield GeojsonPointItem(
                 properties=store,
