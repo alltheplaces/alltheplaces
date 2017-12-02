@@ -4,13 +4,7 @@ import scrapy
 from urllib import parse
 
 from locations.items import GeojsonPointItem
-
-
-STATES = ["AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DC", "DE", "FL", "GA",
-          "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD",
-          "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ",
-          "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC",
-          "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"]
+from locations.states_counties import state_county
 
 
 DAYS = {'Mon': 'Mo', 'Tue': 'Tu',
@@ -45,6 +39,7 @@ class PanerabreadSpider(scrapy.Spider):
 
     name = "panerabread"
     allowed_domains = ["panerabread.com"]
+    download_delay = 1.5
 
     def start_requests(self):
 
@@ -56,18 +51,21 @@ class PanerabreadSpider(scrapy.Spider):
                    'Content-Type': 'text/javascript; charset=UTF-8',
                    }
 
-        for state in STATES:
-            full_url = URL
-            new_url = [('address', state), ('limit', '10')]
-            encoded_url = parse.urlencode(new_url)
-            full_url += encoded_url
+        for state, counties in state_county.items():
+            for county in counties:
+                full_url = URL
+                new_url = [('address', county + ", " + state), ('limit', '10')]
+                encoded_url = parse.urlencode(new_url)
+                full_url += encoded_url
 
-            yield scrapy.http.Request(url=full_url, headers=headers,
-                                      callback=self.parse)
+                yield scrapy.http.Request(url=full_url, headers=headers,
+                                          callback=self.parse)
+
 
     def parse(self, response):
         data = json.loads(response.body_as_unicode())
         stores = data.get('features', [])
+
         opening_hours = ''
         props = {}
 
@@ -75,13 +73,14 @@ class PanerabreadSpider(scrapy.Spider):
             lon_lat = [float(store.pop('lng', None)),
                        float(store.pop('lat', None))]
             props['ref'] = store.pop('cafeID', '')
-            props['website'] = URL
+            props['website'] = response.url
 
             for new_key, old_key in NORMALIZE_KEYS:
                 props[new_key] = str(store.pop(old_key, ''))
 
+            opening_hours = updated_time(store.pop('cafeHours', ''))
             if opening_hours:
-                props['opening_hours'] = None or opening_hours
+                props['opening_hours'] = opening_hours
 
             yield GeojsonPointItem(
                 properties=props,
