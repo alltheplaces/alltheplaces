@@ -17,10 +17,20 @@ DAYS = {'Mon': 'Mo', 'Tue': 'Tu',
 URL = 'https://mktsvc.tjx.com/storelocator/GetSearchResultsByState'
 
 
+NORMALIZE_KEYS = (
+                    ('addr:full', ['Address', 'Address2']),
+                    ('addr:city', ['City']),
+                    ('addr:state', ['State']),
+                    ('addr:postcode', ['Zip']),
+                    ('addr:country', ['Country']),
+                    ('phone', ['Phone']),
+                 )
+
+
 def normalize_time(hours):
 
     if not hours:
-      return ''
+        return ''
 
     day_times = hours.split(',')
     normalize_day_times = []
@@ -94,18 +104,23 @@ class MarshallsSpider(scrapy.Spider):
 
         data = json.loads(response.body_as_unicode())
         stores = data.get('Stores', None)
+        props = {}
 
         for store in stores:
-            lon_lat = [store.pop('Longitude', None), store.pop('Latitude', None)]
-            store['ref'] = URL + str(store.get('StoreID', None))
+            lon_lat = [store.pop('Longitude', ''), store.pop('Latitude', None)]
+            props['ref'] = store.pop('StoreID', None)
+            props['website'] = URL
 
-            opening_hours = normalize_time(store.get('Hours', ''))
+            for new_key, old_keys in NORMALIZE_KEYS:
+                props[new_key] = ", ".join([store.pop(key, '').strip() for key in old_keys if store[key]])
+
+            opening_hours = normalize_time(store.pop('Hours', ''))
 
             if opening_hours:
-                store['opening_hours'] = opening_hours
-                store.pop('Hours', None)
+                props['opening_hours'] = opening_hours
+                props.pop('Hours', None)
 
             yield GeojsonPointItem(
-                properties=store,
+                properties=props,
                 lon_lat=lon_lat
             )
