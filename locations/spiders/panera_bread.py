@@ -30,6 +30,16 @@ NORMALIZE_KEYS = (
 URL = 'https://www.panerabread.com/pbdyn/panerabread/searchcafe?'
 
 
+def updated_time(hours):
+
+    hours = re.sub("[}{\]\[\']", "", hours)
+    hours = re.sub(':open:', ' ', hours)
+    hours = re.sub(',close:', '-', hours)
+    days_hours = hours.split(',')
+    days = [re.sub(x[:3], DAYS[x[:3]], x) for x in days_hours]
+
+    return ";".join(days)
+
 
 class PanerabreadSpider(scrapy.Spider):
 
@@ -69,6 +79,9 @@ class PanerabreadSpider(scrapy.Spider):
 
             for new_key, old_key in NORMALIZE_KEYS:
                 props[new_key] = str(store.pop(old_key, ''))
+
+            if opening_hours:
+                props['opening_hours'] = None or opening_hours
 
             yield GeojsonPointItem(
                 properties=props,
