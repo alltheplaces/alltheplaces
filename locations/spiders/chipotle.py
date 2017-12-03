@@ -267,4 +267,4 @@ class ChipotleSpider(scrapy.Spider):
         if len(day) == 1:
             return day[0][0:2]
         else:
-            day[0][0:2] + "-" + day[1][0:2]
+            return day[0][0:2] + "-" + day[1][0:2]
