@@ -4,10 +4,13 @@ from scrapy.utils.python import to_bytes
 
 mapping = (
     ('addr_full', 'addr:full'),
+    ('housenumber', 'addr:housenumber'),
+    ('street', 'addr:street'),
     ('city', 'addr:city'),
     ('state', 'addr:state'),
     ('postcode', 'addr:postcode'),
     ('country', 'addr:country'),
+    ('name', 'name'),
     ('phone', 'phone'),
     ('website', 'website'),
     ('opening_hours', 'opening_hours'),
