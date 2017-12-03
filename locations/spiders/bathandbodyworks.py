@@ -147,20 +147,20 @@ class BathAndBodyWorksSpider(scrapy.Spider):
             location = store.xpath('string(.//p[text()="Location"]/following-sibling::p)').extract_first()
             phone = store.xpath('.//p[text()="Phone Number"]/following-sibling::p/text()').extract_first()
 
-            properties['addr:country'] = country_name
+            properties['country'] = country_name
             if name: properties['name'] = name
             if citystate:
                 if ', ' in citystate:
                     city, state = citystate.split(', ')
-                    properties['addr:city'] = city
+                    properties['city'] = city
                 else:
                     state = citystate
 
                 if country_name not in state.title():
-                    properties['addr:state'] = state
+                    properties['state'] = state
 
             if location:
-                properties['addr:full'] = location
+                properties['addr_full'] = location
             if phone and ("TBD" not in phone): properties['phone'] = phone
 
             # We aren't given a ref for these, so generate one based on a few
@@ -175,10 +175,7 @@ class BathAndBodyWorksSpider(scrapy.Spider):
 
             properties['ref'] = hashlib.md5(ref_input.encode('utf-8')).hexdigest()
 
-            yield GeojsonPointItem(
-                lon_lat=[],
-                properties=properties,
-            )
+            yield GeojsonPointItem(**properties)
 
     def parse_us(self, response):
         results = json.loads(response.body_as_unicode())
@@ -189,17 +186,14 @@ class BathAndBodyWorksSpider(scrapy.Spider):
 
             properties = {
                 'phone': store_data['phone'],
-                'addr:full': store_data['address1'].title(),
-                'addr:city': store_data['city'].title(),
-                'addr:state': store_data['stateCode'],
-                'addr:postcode': store_data['postalCode'],
+                'addr_full': store_data['address1'].title(),
+                'city': store_data['city'].title(),
+                'state': store_data['stateCode'],
+                'postcode': store_data['postalCode'],
+                'lon': float(store_data['longitude']),
+                'lat': float(store_data['latitude']),
                 'ref': store_key,
             }
-
-            lon_lat = [
-                float(store_data['longitude']),
-                float(store_data['latitude']),
-            ]
 
             hours = (store_data['storeHours'] if 'storeHours' in store_data else None)
             opening_hours = None
@@ -208,7 +202,4 @@ class BathAndBodyWorksSpider(scrapy.Spider):
             if opening_hours:
                 properties['opening_hours'] = opening_hours
 
-            yield GeojsonPointItem(
-                properties=properties,
-                lon_lat=lon_lat,
-            )
+            yield GeojsonPointItem(**properties)
