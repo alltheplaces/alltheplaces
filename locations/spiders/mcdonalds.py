@@ -54,15 +54,6 @@ class McDonaldsSpider(scrapy.Spider):
 
         return opening_hours
 
-    def address(self, store_info):
-        return {
-            'addr:full': store_info['addressLine1'],
-            'addr:city': store_info['addressLine3'],
-            'addr:state': store_info['subDivision'],
-            'addr:country': store_info['addressLine4'],
-            'addr:postcode': store_info['postcode'],
-        }
-
     def parse(self, response):
         data = json.loads(response.body_as_unicode())
 
@@ -71,10 +62,15 @@ class McDonaldsSpider(scrapy.Spider):
 
             properties = {
                 "ref": store_info['id'],
+                'addr_full': store_info['addressLine1'],
+                'city': store_info['addressLine3'],
+                'state': store_info['subDivision'],
+                'country': store_info['addressLine4'],
+                'postcode': store_info['postcode'],
+                'phone': store_info.get('telephone'),
+                'lon': store['geometry']['coordinates'][0],
+                'lat': store['geometry']['coordinates'][1],
             }
-
-            if store_info.get('telephone'):
-                properties["phone"] = store_info['telephone']
 
             hours = store_info.get('restauranthours')
             try:
@@ -88,9 +84,4 @@ class McDonaldsSpider(scrapy.Spider):
             if address:
                 properties.update(address)
 
-            coordinates = store['geometry']['coordinates']
-
-            yield GeojsonPointItem(
-                properties=properties,
-                lon_lat=coordinates,
-            )
+            yield GeojsonPointItem(**properties)
