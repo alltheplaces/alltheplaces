@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import scrapy
 import json
-import re
 
 from locations.items import GeojsonPointItem
 
@@ -64,20 +63,6 @@ class PerkinsSpider(scrapy.Spider):
 
         return opening_hours
 
-    def address(self, address):
-        if not address:
-            return None
-
-        addr_tags = {
-            "addr:full": address['streetAddress'],
-            "addr:city": address['addressLocality'],
-            "addr:state": address['addressRegion'],
-            "addr:postcode": address['postalCode'],
-            "addr:country": address['addressCountry'],
-        }
-
-        return addr_tags
-
     def parse(self, response):
         response.selector.remove_namespaces()
         city_urls = response.xpath('//url/loc/text()').extract()
@@ -90,30 +75,24 @@ class PerkinsSpider(scrapy.Spider):
 
     def parse_store(self, response):
         properties = {
-            'addr:full': response.xpath('//span[@itemprop="streetAddress"]/span/text()')[0].extract(),
-            'addr:city': response.xpath('//span[@itemprop="addressLocality"]/text()')[0].extract(),
-            'addr:state': response.xpath('//abbr[@itemprop="addressRegion"]/text()')[0].extract(),
-            'addr:postcode': response.xpath('//span[@itemprop="postalCode"]/text()')[0].extract().strip(),
+            'addr:full': response.xpath('//span[@itemprop="streetAddress"]/span/text()').extract_first(),
+            'addr:city': response.xpath('//span[@itemprop="addressLocality"]/text()').extract_first(),
+            'addr:state': response.xpath('//abbr[@itemprop="addressRegion"]/text()').extract_first(),
+            'addr:postcode': response.xpath('//span[@itemprop="postalCode"]/text()').extract_first().strip(),
             'ref': response.url,
             'website': response.url,
+            'lon': float(response.xpath('//span/meta[@itemprop="longitude"]/@content').extract_first()),
+            'lat': float(response.xpath('//span/meta[@itemprop="latitude"]/@content').extract_first()),
         }
 
-        phone = response.xpath('//a[@class="c-phone-number-link c-phone-main-number-link"]/text()')[0].extract()
+        phone = response.xpath('//a[@class="c-phone-number-link c-phone-main-number-link"]/text()').extract_first()
         if phone:
             properties['phone'] = phone
 
-        hours = json.loads(response.xpath('//div[@class="c-location-hours-details-wrapper js-location-hours"]/@data-days')[0].extract())
+        hours = json.loads(response.xpath('//div[@class="c-location-hours-details-wrapper js-location-hours"]/@data-days').extract_first())
 
         opening_hours = self.store_hours(hours) if hours else None
         if opening_hours:
             properties['opening_hours'] = opening_hours
 
-        lon_lat = [
-            float(response.xpath('//span/meta[@itemprop="longitude"]/@content')[0].extract()),
-            float(response.xpath('//span/meta[@itemprop="latitude"]/@content')[0].extract()),
-        ]
-
-        yield GeojsonPointItem(
-            properties=properties,
-            lon_lat=lon_lat,
-        )
+        yield GeojsonPointItem(**properties)
