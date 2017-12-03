@@ -6,33 +6,14 @@ from urllib import parse
 from locations.items import GeojsonPointItem
 from locations.states_counties import state_county
 
-
-DAYS = {'Mon': 'Mo', 'Tue': 'Tu',
-        'Wed': 'We', 'Thu': 'Th',
-        'Fri': 'Fr', 'Sat': 'Sa',
-        'Sun': 'Su'}
-
-
 NORMALIZE_KEYS = (
-    ('addr:full', 'cafeStreetName'),
-    ('addr:city', 'cafeCity'),
-    ('addr:state', 'cafeState'),
-    ('addr:postcode', 'cafeZip'),
+    ('addr_full', 'cafeStreetName'),
+    ('city', 'cafeCity'),
+    ('state', 'cafeState'),
+    ('postcode', 'cafeZip'),
     ('phone', 'cafeContact'),
 )
-
 URL = 'https://www.panerabread.com/pbdyn/panerabread/searchcafe?'
-
-
-def updated_time(hours):
-
-    hours = re.sub("[}{\]\[\']", "", hours)
-    hours = re.sub(':open:', ' ', hours)
-    hours = re.sub(',close:', '-', hours)
-    days_hours = hours.split(',')
-    days = [re.sub(x[:3], DAYS[x[:3]], x) for x in days_hours]
-
-    return ";".join(days)
 
 
 class PanerabreadSpider(scrapy.Spider):
@@ -43,13 +24,14 @@ class PanerabreadSpider(scrapy.Spider):
 
     def start_requests(self):
 
-        headers = {'Accept-Language': '*/*',
-                   'Origin': 'https://www.panerabread.com',
-                   'Accept-Encoding': 'gzip, deflate, sdch, br',
-                   'Accept': 'application/json, text/plain, */*',
-                   'Connection': 'keep-alive',
-                   'Content-Type': 'text/javascript; charset=UTF-8',
-                   }
+        headers = {
+            'Accept-Language': '*/*',
+            'Origin': 'https://www.panerabread.com',
+            'Accept-Encoding': 'gzip, deflate, sdch, br',
+            'Accept': 'application/json, text/plain, */*',
+            'Connection': 'keep-alive',
+            'Content-Type': 'text/javascript; charset=UTF-8',
+        }
 
         for state, counties in state_county.items():
             for county in counties:
@@ -58,31 +40,73 @@ class PanerabreadSpider(scrapy.Spider):
                 encoded_url = parse.urlencode(new_url)
                 full_url += encoded_url
 
-                yield scrapy.http.Request(url=full_url, headers=headers,
-                                          callback=self.parse)
+                yield scrapy.http.Request(
+                    url=full_url,
+                    headers=headers,
+                    callback=self.parse
+                )
 
+    def store_hours(self, hours):
+        matches = re.findall(r"(\S{3}):{'open':'(\S{5})','close':'(\S{5})'}", hours)
+
+        this_day_group = {}
+        day_groups = []
+        for day, open_time, close_time in matches:
+            day_short = day[:2]
+            hours_today = '{}-{}'.format(open_time, close_time)
+
+            if not this_day_group:
+                this_day_group = {
+                    'from_day': day_short,
+                    'to_day': day_short,
+                    'hours': hours_today,
+                }
+            elif hours_today == this_day_group['hours']:
+                this_day_group['to_day'] = day_short
+            elif hours_today != this_day_group['hours']:
+                day_groups.append(this_day_group)
+                this_day_group = {
+                    'from_day': day_short,
+                    'to_day': day_short,
+                    'hours': hours_today,
+                }
+        day_groups.append(this_day_group)
+
+        if not day_groups:
+            return None
+
+        if len(day_groups) == 1:
+            opening_hours = day_groups[0]['hours']
+            if opening_hours == '07:00-07:00':
+                opening_hours = '24/7'
+        else:
+            opening_hours = ''
+            for day_group in day_groups:
+                if day_group['from_day'] == day_group['to_day']:
+                    opening_hours += '{from_day} {hours}; '.format(**day_group)
+                else:
+                    opening_hours += '{from_day}-{to_day} {hours}; '.format(**day_group)
+            opening_hours = opening_hours[:-2]
+
+        return opening_hours
 
     def parse(self, response):
         data = json.loads(response.body_as_unicode())
         stores = data.get('features', [])
 
-        opening_hours = ''
-        props = {}
-
         for store in stores:
-            lon_lat = [float(store.pop('lng', None)),
-                       float(store.pop('lat', None))]
-            props['ref'] = store.pop('cafeID', '')
-            props['website'] = response.url
+            props = {
+                'lat': float(store['lat']),
+                'lon': float(store['lng']),
+                'ref': store['cafeID'],
+                'website': response.url,
+            }
 
             for new_key, old_key in NORMALIZE_KEYS:
-                props[new_key] = str(store.pop(old_key, ''))
+                props[new_key] = str(store.get(old_key))
 
-            opening_hours = updated_time(store.pop('cafeHours', ''))
+            opening_hours = self.store_hours(store.get('cafeHours', ''))
             if opening_hours:
                 props['opening_hours'] = opening_hours
 
-            yield GeojsonPointItem(
-                properties=props,
-                lon_lat=lon_lat
-            )
+            yield GeojsonPointItem(**props)
