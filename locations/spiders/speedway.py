@@ -28,21 +28,13 @@ class SuperAmericaSpider(scrapy.Spider):
         data = json.loads(response.body_as_unicode())
 
         for store in data:
-            properties = {
-                'addr:full': store['address'],
-                'addr:city': store['city'],
-                'addr:state': store['state'],
-                'addr:postcode': store['zip'],
-                'phone': store['phoneNumber'],
-                'ref': store['costCenterId'],
-            }
-
-            lon_lat = [
-                store['longitude'],
-                store['latitude'],
-            ]
-
             yield GeojsonPointItem(
-                properties=properties,
-                lon_lat=lon_lat,
+                addr_full=store['address'],
+                city=store['city'],
+                state=store['state'],
+                postcode=store['zip'],
+                phone=store['phoneNumber'],
+                ref=store['costCenterId'],
+                lon=store['longitude'],
+                lat=store['latitude'],
             )

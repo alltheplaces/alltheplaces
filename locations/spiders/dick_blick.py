@@ -16,10 +16,10 @@ class DickBlickSpider(scrapy.Spider):
         contacts = response.xpath('//ul[@class="contact"]/li/span/text()').extract()
 
         properties = {
-            'addr:full': contacts[0],
-            'addr:city': contacts[1],
-            'addr:state': contacts[2],
-            'addr:postcode': contacts[3],
+            'addr_full': contacts[0],
+            'city': contacts[1],
+            'state': contacts[2],
+            'postcode': contacts[3],
             'phone': contacts[4],
             'ref': response.url,
             'website': response.url,
@@ -38,9 +38,7 @@ class DickBlickSpider(scrapy.Spider):
         if opening_hours:
             properties['opening_hours'] = '; '.join(opening_hours)
 
-        yield GeojsonPointItem(
-            properties=properties,
-        )
+        yield GeojsonPointItem(**properties)
 
     def parse_state(self, response):
         urls = response.xpath('//div/ul[@class="storelist"]/li/a/@href').extract()

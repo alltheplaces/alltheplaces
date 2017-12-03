@@ -68,23 +68,17 @@ class SephoraSpider(scrapy.Spider):
         properties = {
             'website': data['url'],
             'phone': data['address']['telephone'],
-            'addr:full': data['address']['streetAddress'],
-            'addr:postcode': data['address']['postalCode'],
-            'addr:state': data['address']['addressRegion'],
-            'addr:city': data['address']['addressLocality'],
+            'addr_full': data['address']['streetAddress'],
+            'postcode': data['address']['postalCode'],
+            'state': data['address']['addressRegion'],
+            'city': data['address']['addressLocality'],
             'ref': data['url'],
+            'lon': float(response.xpath('//div[@class="storehq-detail"]/@data-lng').extract_first()),
+            'lat': float(response.xpath('//div[@class="storehq-detail"]/@data-lat').extract_first()),
         }
 
         opening_hours = data.get('openingHours')
         if opening_hours:
             properties['opening_hours'] = '; '.join(opening_hours)
 
-        lon_lat = [
-            float(response.xpath('//div[@class="storehq-detail"]/@data-lng').extract_first()),
-            float(response.xpath('//div[@class="storehq-detail"]/@data-lat').extract_first()),
-        ]
-
-        yield GeojsonPointItem(
-            properties=properties,
-            lon_lat=lon_lat,
-        )
+        yield GeojsonPointItem(**properties)

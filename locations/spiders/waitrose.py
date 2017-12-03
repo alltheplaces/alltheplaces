@@ -59,15 +59,12 @@ class WaitroseSpider(scrapy.Spider):
 
             branch_map = details[0].xpath(
                 'div[@class="branch-finder-map"]/p/a')[0].root.attrib
-            lon_lat = [
-                float(branch_map['data-long']),
-                float(branch_map['data-lat']),
-            ]
+            properties.update({
+                'lon': float(branch_map['data-long']),
+                'lat': float(branch_map['data-lat']),
+            })
 
-            yield GeojsonPointItem(
-                properties=properties,
-                lon_lat=lon_lat,
-            )
+            yield GeojsonPointItem(**properties)
             return
 
         # otherwise it's the top-level store page
@@ -115,7 +112,7 @@ class WaitroseSpider(scrapy.Spider):
         # post code.
         line = lines[-1]
         if re.match('[A-Z0-9]+ [A-Z0-9]+', line):
-            properties['addr:postcode'] = line
+            properties['postcode'] = line
             lines.pop()
 
         # TODO: some Waitrose stores are not in the UK, and have the country
@@ -129,10 +126,10 @@ class WaitroseSpider(scrapy.Spider):
         line = lines[0]
         m = re.match('([0-9-]+) ([A-Za-z ]+)', line)
         if m:
-            properties['addr:housenumber'] = m.group(1)
-            properties['addr:street'] = m.group(2)
+            properties['housenumber'] = m.group(1)
+            properties['street'] = m.group(2)
 
-        properties['addr:full'] = ', '.join(lines)
+        properties['addr_full'] = ', '.join(lines)
         return properties
 
     def _opening_hours(self, opening_hours):

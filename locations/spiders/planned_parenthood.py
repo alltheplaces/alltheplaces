@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import scrapy
-import json
 import re
 
 from locations.items import GeojsonPointItem
@@ -31,23 +30,18 @@ class PlannedParenthoodSpider(scrapy.Spider):
 
     def parse_venue(self, response):
         properties = {
-            'addr:full': response.xpath('//*[@itemprop="streetAddress"]/text()')[0].extract(),
-            'addr:city': response.xpath('//*[@itemprop="addressLocality"]/text()')[0].extract(),
-            'addr:state': response.xpath('//*[@itemprop="addressRegion"]/text()')[0].extract(),
-            'addr:postcode': response.xpath('//*[@itemprop="postalCode"]/text()')[0].extract(),
-            'phone': response.xpath('//a[@itemprop="telephone"][@data-link]/text()')[0].extract(),
+            'addr_full': response.xpath('//*[@itemprop="streetAddress"]/text()').extract_first(),
+            'city': response.xpath('//*[@itemprop="addressLocality"]/text()').extract_first(),
+            'state': response.xpath('//*[@itemprop="addressRegion"]/text()').extract_first(),
+            'postcode': response.xpath('//*[@itemprop="postalCode"]/text()').extract_first(),
+            'phone': response.xpath('//a[@itemprop="telephone"][@data-link]/text()').extract_first(),
             'ref': response.url,
             'website': response.url,
         }
 
-        map_image_url = response.xpath('//img[@class="address-map"]/@src')[0].extract()
+        map_image_url = response.xpath('//img[@class="address-map"]/@src').extract_first()
         match = re.search(r"center=(.*?),(.*?)&zoom", map_image_url)
-        lon_lat = [
-            float(match.group(2)),
-            float(match.group(1)),
-        ]
+        properties['lat'] = float(match.group(1)),
+        properties['lon'] = float(match.group(2)),
 
-        yield GeojsonPointItem(
-            properties=properties,
-            lon_lat=lon_lat,
-        )
+        yield GeojsonPointItem(**properties)

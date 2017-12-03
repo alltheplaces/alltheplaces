@@ -89,22 +89,16 @@ class BrueggersSpider(scrapy.Spider):
                 'website': store_data['guid'],
                 'ref': store_data['location_id'],
                 'name': store_data['post_title'],
-                'addr:full': store_data['address'],
-                'addr:postcode': store_data['zip'],
-                'addr:state': store_data['state'],
-                'addr:city': store_data['city'],
+                'addr_full': store_data['address'],
+                'postcode': store_data['zip'],
+                'state': store_data['state'],
+                'city': store_data['city'],
+                'lon': float(store_data['lng']),
+                'lat': float(store_data['lat']),
             }
 
             opening_hours = self.store_hours(store_data)
             if opening_hours:
                 properties['opening_hours'] = opening_hours
 
-            lon_lat = [
-                float(store_data['lng']),
-                float(store_data['lat']),
-            ]
-
-            yield GeojsonPointItem(
-                properties=properties,
-                lon_lat=lon_lat,
-            )
+            yield GeojsonPointItem(**properties)

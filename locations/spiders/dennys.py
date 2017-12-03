@@ -65,32 +65,26 @@ class DennysSpider(scrapy.Spider):
 
     def parse_store(self, response):
         properties = {
-            'addr:full': response.xpath('//span[@itemprop="streetAddress"]/text()')[0].extract(),
-            'addr:city': response.xpath('//span[@itemprop="addressLocality"]/text()')[0].extract(),
-            'addr:state': response.xpath('//span[@itemprop="addressRegion"]/text()')[0].extract(),
-            'addr:postcode': response.xpath('//span[@itemprop="postalCode"]/text()')[0].extract(),
+            'addr_full': response.xpath('//span[@itemprop="streetAddress"]/text()').extract_first(),
+            'city': response.xpath('//span[@itemprop="addressLocality"]/text()').extract_first(),
+            'state': response.xpath('//span[@itemprop="addressRegion"]/text()').extract_first(),
+            'postcode': response.xpath('//span[@itemprop="postalCode"]/text()').extract_first(),
             'ref': response.url,
             'website': response.url,
+            'lon': float(response.xpath('//span/meta[@itemprop="longitude"]/@content').extract_first()),
+            'lat': float(response.xpath('//span/meta[@itemprop="latitude"]/@content').extract_first()),
         }
-        phone = response.xpath('//a[@class="c-phone-number-link c-phone-main-number-link"]/text()')[0].extract()
+        phone = response.xpath('//a[@class="c-phone-number-link c-phone-main-number-link"]/text()').extract_first()
         if phone:
             properties['phone'] = phone
 
-        hours = json.loads(response.xpath('//div[@class="c-location-hours-details-wrapper js-location-hours"]/@data-days')[0].extract())
+        hours = json.loads(response.xpath('//div[@class="c-location-hours-details-wrapper js-location-hours"]/@data-days').extract_first())
 
         opening_hours = self.store_hours(hours) if hours else None
         if opening_hours:
             properties['opening_hours'] = opening_hours
 
-        lon_lat = [
-            float(response.xpath('//span/meta[@itemprop="longitude"]/@content')[0].extract()),
-            float(response.xpath('//span/meta[@itemprop="latitude"]/@content')[0].extract()),
-        ]
-
-        yield GeojsonPointItem(
-            properties=properties,
-            lon_lat=lon_lat,
-        )
+        yield GeojsonPointItem(**properties)
 
     def parse_state(self, response):
         urls = response.xpath('//div/ul[@class="storelist"]/li/a/@href').extract()

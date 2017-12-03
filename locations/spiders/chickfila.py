@@ -92,10 +92,10 @@ class ChickFilASpider(scrapy.Spider):
         (state, postcode) = list(filter(None, statezip.split(' ')))
 
         return {
-            'addr:full': street,
-            'addr:city': city,
-            'addr:state': state,
-            'addr:postcode': postcode,
+            'addr_full': street,
+            'city': city,
+            'state': state,
+            'postcode': postcode,
         }
 
     def parse(self, response):
@@ -121,16 +121,10 @@ class ChickFilASpider(scrapy.Spider):
             "ref": ref,
             "name": response.xpath('//div[@class="location-details"]/h1/text()').extract_first(),
             "opening_hours": self.store_hours(response.xpath('//dl[@class="hours"]')[0]),
+            "lon": float(response.xpath('//span[@id="currentlocdistanceid"]/@data-long').extract_first()),
+            "lat": float(response.xpath('//span[@id="currentlocdistanceid"]/@data-lat').extract_first()),
         }
 
         properties.update(self.address(response))
 
-        lon_lat = [
-            float(response.xpath('//span[@id="currentlocdistanceid"]/@data-long').extract_first()),
-            float(response.xpath('//span[@id="currentlocdistanceid"]/@data-lat').extract_first()),
-        ]
-
-        yield GeojsonPointItem(
-            properties=properties,
-            lon_lat=lon_lat,
-        )
+        yield GeojsonPointItem(**properties)

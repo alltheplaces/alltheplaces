@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import scrapy
 import json
-import re
 
 from locations.items import GeojsonPointItem
 
@@ -58,45 +57,29 @@ class CulversSpider(scrapy.Spider):
 
         return opening_hours
 
-    def address(self, store):
-        addr_tags = {
-            "addr:full": store.xpath('address1/text()')[0].extract(),
-            "addr:city": store.xpath('city/text()')[0].extract(),
-            "addr:state": store.xpath('state/text()')[0].extract(),
-            "addr:postcode": store.xpath('postalcode/text()')[0].extract(),
-            "addr:country": store.xpath('country/text()')[0].extract(),
-        }
-
-        return addr_tags
-
     def parse(self, response):
         data = response.xpath('//poi')
 
         for store in data:
             properties = {
-                "ref": str(store.xpath('number/text()')[0].extract()),
-                "name": store.xpath('name/text()')[0].extract(),
-                "opening_hours": self.store_hours(json.loads(store.xpath('bho/text()')[0].extract())),
-                "website": store.xpath('url/text()')[0].extract(),
+                "ref": str(store.xpath('number/text()').extract_first()),
+                "name": store.xpath('name/text()').extract_first(),
+                "opening_hours": self.store_hours(json.loads(store.xpath('bho/text()').extract_first())),
+                "website": store.xpath('url/text()').extract_first(),
+                "addr_full": store.xpath('address1/text()').extract_first(),
+                "city": store.xpath('city/text()').extract_first(),
+                "state": store.xpath('state/text()').extract_first(),
+                "postcode": store.xpath('postalcode/text()').extract_first(),
+                "country": store.xpath('country/text()').extract_first(),
+                "lon": float(store.xpath('longitude/text()').extract_first()),
+                "lat": float(store.xpath('latitude/text()').extract_first()),
             }
 
             phone = store.xpath('phone/text()')
             if phone:
-                properties['phone'] = phone[0].extract()
+                properties['phone'] = phone.extract_first()
 
-            address = self.address(store)
-            if address:
-                properties.update(address)
-
-            lon_lat = [
-                float(store.xpath('longitude/text()')[0].extract()),
-                float(store.xpath('latitude/text()')[0].extract()),
-            ]
-
-            yield GeojsonPointItem(
-                properties=properties,
-                lon_lat=lon_lat,
-            )
+            yield GeojsonPointItem(**properties)
 
         else:
             self.logger.info("No results")
