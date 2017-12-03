@@ -21,7 +21,6 @@ at radius = 400 we get 2385 locations
 at radius = 350 we get 2379 locations
 to be safe, we use 500. if some locations don't get covered in future
 this is the first point to look.
-
 """
 import scrapy
 import re
@@ -115,7 +114,6 @@ class ChipotleSpider(scrapy.Spider):
             For some unknown reasons, there are times response.text
             returns the string "<h2>Incomplete response received from application</h2>"
             This throws a JSONDecodeError, at this point we stop parsing and yield nothing
-
         """
         try:
             json_data = json.loads(response.text)
@@ -237,7 +235,6 @@ class ChipotleSpider(scrapy.Spider):
         :param hr: the hour has to be passed in to accurately decide 12noon and midnight
         :param a_p: this is either a or p i.e am pm
         :return: the hours that must be added
-
         """
         diff = 0
         if a_p == 'AM':
