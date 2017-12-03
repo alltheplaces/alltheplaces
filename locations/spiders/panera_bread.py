@@ -3,11 +3,6 @@ import scrapy
 
 from locations.items import GeojsonPointItem
 
-DAYS = {'MONDAY': 'Mo', 'TUESDAY': 'Tu',
-        'WEDNESDAY': 'We', 'THURSDAY': 'Th',
-        'FRIDAY': 'Fr', 'SATURDAY': 'Sa',
-        'SUNDAY': 'Su'}
-
 
 class PaneraBread(scrapy.Spider):
 
@@ -25,7 +20,7 @@ class PaneraBread(scrapy.Spider):
         for day_hour in day_hours:
             hours = ''
             day, intervals = day_hour['day'], day_hour['intervals']
-            short_day = DAYS[day]
+            short_day = day.title()[:2]
             epochs = []
             for interval in intervals:
                 hours_today = '{}-{}'.format('0' + str(interval['start'])[:-2] +
@@ -82,13 +77,15 @@ class PaneraBread(scrapy.Spider):
         props['ref'] = loc.url
         hours = loc.xpath(
             '//div[@class="c-location-hours-details-wrapper js-location-hours"]/@data-days').extract_first()
+        props['lat'] = loc.xpath('//meta[@itemprop="latitude"]/@content').extract_first()
+        props['lon'] = loc.xpath('//meta[@itemprop="longitude"]/@content').extract_first()
         props['opening_hours'] = self.store_hours(json.loads(hours))
+
 
         return GeojsonPointItem(**props)
 
     def parse_city(self, city_page):
-        locations = city_page.xpath(
-            '//h2[@class="c-location-grid-item-title"]').extract()
+        locations = city_page.xpath('//h2[@class="c-location-grid-item-title"]').extract()
         if len(locations) > 0:
             for loc in locations:
                 yield scrapy.Request(city_page.urljoin(loc), callback=self.parse_location)
