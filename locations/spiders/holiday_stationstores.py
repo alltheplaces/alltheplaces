@@ -4,6 +4,7 @@ import re
 
 from locations.items import GeojsonPointItem
 
+
 class HolidayStationstoreSpider(scrapy.Spider):
     name = "holiday_stationstores"
     allowed_domains = ["m.holidaystationstores.com"]
@@ -91,23 +92,16 @@ class HolidayStationstoreSpider(scrapy.Spider):
 
     def parse_location(self, response):
         addr_parts = response.xpath('//div[@style="float:left;padding-right:10px;padding-left:10px;"][1]/text()').extract()
-        store_name = response.xpath('//h2[@style="padding-right:10px;padding-left:10px;margin-bottom:10px;"]/text()')[0].extract()
+        store_name = response.xpath('//h2[@style="padding-right:10px;padding-left:10px;margin-bottom:10px;"]/text()').extract_first()
 
         properties = {
             'name': store_name,
-            'addr:full': addr_parts[1].strip(),
-            'phone': response.xpath('//div[@style="margin-top:3px;margin-bottom:4px;"]/a/text()')[0].extract(),
+            'addr_full': addr_parts[1].strip(),
+            'phone': response.xpath('//div[@style="margin-top:3px;margin-bottom:4px;"]/a/text()').extract_first(),
             'ref': store_name,
+            'lon': float(response.xpath('//div[@id="SingleStoreMap"]/@data-longitude').extract_first()),
+            'lat': float(response.xpath('//div[@id="SingleStoreMap"]/@data-latitude').extract_first()),
+            'opening_hours': self.opening_hours(response),
         }
 
-        properties['opening_hours'] = self.opening_hours(response)
-
-        lon_lat = [
-            float(response.xpath('//div[@id="SingleStoreMap"]/@data-longitude')[0].extract()),
-            float(response.xpath('//div[@id="SingleStoreMap"]/@data-latitude')[0].extract()),
-        ]
-
-        yield GeojsonPointItem(
-            properties=properties,
-            lon_lat=lon_lat,
-        )
+        yield GeojsonPointItem(**properties)

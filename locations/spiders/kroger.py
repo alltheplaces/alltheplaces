@@ -4,6 +4,7 @@ import json
 
 from locations.items import GeojsonPointItem
 
+
 class KrogerSpider(scrapy.Spider):
     name = "kroger"
     allowed_domains = ["www.kroger.com"]
@@ -71,15 +72,14 @@ class KrogerSpider(scrapy.Spider):
 
         (num, rest) = address['addressLineOne'].split(' ', 1)
         addr_tags = {
-            "addr:housenumber": num.strip(),
-            "addr:street": rest.strip(),
-            "addr:city": address['city'],
-            "addr:state": address['state'],
-            "addr:postcode": address['zipCode'],
+            "housenumber": num.strip(),
+            "street": rest.strip(),
+            "city": address['city'],
+            "state": address['state'],
+            "postcode": address['zipCode'],
         }
 
         return addr_tags
-
 
     def parse(self, response):
         data = json.loads(response.body_as_unicode())
@@ -117,11 +117,7 @@ class KrogerSpider(scrapy.Spider):
             bounding_box['min_lon'] = min(bounding_box['min_lon'], lon_lat[0])
             bounding_box['max_lon'] = max(bounding_box['max_lon'], lon_lat[0])
 
-
-            yield GeojsonPointItem(
-                properties=properties,
-                lon_lat=lon_lat,
-            )
+            yield GeojsonPointItem(**properties)
 
         if data:
             box_corners = [

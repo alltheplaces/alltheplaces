@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 import scrapy
-import json
-import re
 
 from locations.items import GeojsonPointItem
+
 
 class ExxonMobilSpider(scrapy.Spider):
     name = "exxonmobil"
@@ -25,9 +24,9 @@ class ExxonMobilSpider(scrapy.Spider):
             start_elem = hour_iter.next()
             end_elem = hour_iter.next()
 
-            day = day_elem.xpath('@content')[0].extract()[:2]
-            start_time = start_elem.xpath('@content')[0].extract()[:5]
-            end_time = end_elem.xpath('@content')[0].extract()[:5]
+            day = day_elem.xpath('@content').extract_first()[:2]
+            start_time = start_elem.xpath('@content').extract_first()[:5]
+            end_time = end_elem.xpath('@content').extract_first()[:5]
 
             hours = '{}-{}'.format(start_time, end_time)
 
@@ -69,10 +68,10 @@ class ExxonMobilSpider(scrapy.Spider):
             return None
 
         addr_tags = {
-            "addr:full": address['business:contact_data:street_address'],
-            "addr:city": address['business:contact_data:locality'],
-            "addr:state": address['business:contact_data:region'],
-            "addr:postcode": address['business:contact_data:postal_code'],
+            "addr_full": address['business:contact_data:street_address'],
+            "city": address['business:contact_data:locality'],
+            "state": address['business:contact_data:region'],
+            "postcode": address['business:contact_data:postal_code'],
         }
 
         return addr_tags
@@ -91,7 +90,7 @@ class ExxonMobilSpider(scrapy.Spider):
         contact_props = response.xpath('//head/meta[starts-with(@property, "business:contact_data:")]')
         contact_info = {}
         for ele in contact_props:
-            contact_info[ele.xpath('@property')[0].extract()] = ele.xpath('@content')[0].extract()
+            contact_info[ele.xpath('@property').extract_first()] = ele.xpath('@content').extract_first()
 
         properties = {
             'phone': contact_info['business:contact_data:phone_number']
@@ -104,22 +103,17 @@ class ExxonMobilSpider(scrapy.Spider):
         opening_hour_props = response.xpath('//head/meta[starts-with(@property, "business:hours:")]')
         properties['opening_hours'] = self.store_hours(opening_hour_props)
 
-        url = response.xpath('//head/link[@rel="canonical"]/@href')[0].extract()
+        url = response.xpath('//head/link[@rel="canonical"]/@href').extract_first()
         properties['website'] = url
 
-        name = response.xpath('//span[@itemprop="legalName"]/text()')[0].extract()
+        name = response.xpath('//span[@itemprop="legalName"]/text()').extract_first()
         properties['name'] = name
 
         ref = response.url.rsplit('/', 1)[1].split('-', 1)[0]
         properties['ref'] = ref
 
         ll = response.xpath('//div[@itemtype="http://schema.org/GeoCoordinates"]')
-        lon_lat = [
-            float(ll.xpath('//meta[@itemprop="longitude"]/@content')[0].extract()),
-            float(ll.xpath('//meta[@itemprop="latitude"]/@content')[0].extract()),
-        ]
+        properties['lon'] = float(ll.xpath('//meta[@itemprop="longitude"]/@content').extract_first()),
+        properties['lat'] = float(ll.xpath('//meta[@itemprop="latitude"]/@content').extract_first()),
 
-        yield GeojsonPointItem(
-            properties=properties,
-            lon_lat=lon_lat,
-        )
+        yield GeojsonPointItem(**properties)

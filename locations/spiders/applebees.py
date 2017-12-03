@@ -100,7 +100,7 @@ class ApplebeesSpider(scrapy.Spider):
             lat=float(data['geo']['latitude']),
             lon=float(data['geo']['longitude']),
             phone=data['telephone'],
-            website=response.xpath('//head/link[@rel="canonical"]/@href')[0].extract(),
+            website=response.xpath('//head/link[@rel="canonical"]/@href').extract_first(),
             ref=data['@id'],
             opening_hours=self.store_hours(data['openingHoursSpecification']),
             addr_full=data.get('address', {}).get('streetAddress'),
