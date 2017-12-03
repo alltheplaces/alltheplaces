@@ -150,19 +150,19 @@ class ChipotleSpider(scrapy.Spider):
                     open_hours = address['open_close_info']
                     website = address['order_url']
 
-                    properties = {"addr:full": full_address,
-                                  "addr:city": city,
-                                  "addr:state": state,
-                                  "addr:postcode": zip_code,
-                                  "addr:country": country,
+                    properties = {"addr_full": full_address,
+                                  "city": city,
+                                  "state": state,
+                                  "postcode": zip_code,
+                                  "country": country,
                                   "phone": self.process_phone(phone),
                                   "fax": self.process_phone(fax),
                                   "website": website,
                                   "ref": link_id,
-                                  "opening_hours": self.process_hours(open_hours)}
-
-                    lon_lat = [float(longitude), float(latitude)]
-                    yield GeojsonPointItem(properties=properties, lon_lat=lon_lat,)
+                                  "opening_hours": self.process_hours(open_hours),
+                                  "lon": float(longitude),
+                                  "lat": float(latitude)}
+                    yield GeojsonPointItem(**properties)
 
     def process_phone(self, phone_number):
         """
