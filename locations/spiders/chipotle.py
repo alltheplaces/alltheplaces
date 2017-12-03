@@ -156,10 +156,10 @@ class ChipotleSpider(scrapy.Spider):
                                   "postcode": zip_code,
                                   "country": country,
                                   "phone": self.process_phone(phone),
-                                  "fax": self.process_phone(fax),
                                   "website": website,
                                   "ref": link_id,
                                   "opening_hours": self.process_hours(open_hours),
+                                  #"fax": self.process_phone(fax),
                                   "lon": float(longitude),
                                   "lat": float(latitude)}
                     yield GeojsonPointItem(**properties)
