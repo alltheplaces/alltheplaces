@@ -176,6 +176,7 @@ class BathAndBodyWorksSpider(scrapy.Spider):
             properties['ref'] = hashlib.md5(ref_input.encode('utf-8')).hexdigest()
 
             yield GeojsonPointItem(
+                lon_lat=[],
                 properties=properties,
             )
 
