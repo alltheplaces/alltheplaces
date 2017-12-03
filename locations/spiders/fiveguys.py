@@ -20,19 +20,13 @@ class FiveguysSpider(scrapy.Spider):
 
             properties = {
                 'phone': store_data['PhoneNumber'],
-                'addr:full': store_data['AddressLine1'],
-                'addr:city': store_data['City'],
-                'addr:state': store_data['StateOrProvince'],
-                'addr:postcode': store_data['PostalCode'],
+                'addr_full': store_data['AddressLine1'],
+                'city': store_data['City'],
+                'state': store_data['StateOrProvince'],
+                'postcode': store_data['PostalCode'],
                 'ref': store_data['ClientKey'],
+                'lon': float(store_data['Longitude']),
+                'lat': float(store_data['Latitude']),
             }
 
-            lon_lat = [
-                float(store_data['Longitude']),
-                float(store_data['Latitude']),
-            ]
-
-            yield GeojsonPointItem(
-                properties=properties,
-                lon_lat=lon_lat,
-            )
+            yield GeojsonPointItem(**properties)

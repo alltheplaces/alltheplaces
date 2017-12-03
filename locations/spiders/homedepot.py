@@ -81,22 +81,16 @@ class HomeDepotSpider(scrapy.Spider):
             'website': response.urljoin(store_data['url']),
             'ref': store_data['storeId'],
             'name': store_data['name'],
-            'addr:full': store_data['address']['street'],
-            'addr:postcode': store_data['address']['postalCode'],
-            'addr:state': store_data['address']['state'],
-            'addr:city': store_data['address']['city'],
+            'addr_full': store_data['address']['street'],
+            'postcode': store_data['address']['postalCode'],
+            'state': store_data['address']['state'],
+            'city': store_data['address']['city'],
+            'lon': float(store_data['coordinates']['lng']),
+            'lat': float(store_data['coordinates']['lat']),
         }
 
         opening_hours = self.store_hours(store_data['storeHours'])
         if opening_hours:
             properties['opening_hours'] = opening_hours
 
-        lon_lat = [
-            float(store_data['coordinates']['lng']),
-            float(store_data['coordinates']['lat']),
-        ]
-
-        yield GeojsonPointItem(
-            properties=properties,
-            lon_lat=lon_lat,
-        )
+        yield GeojsonPointItem(**properties)

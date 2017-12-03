@@ -77,17 +77,6 @@ class CookoutSpider(scrapy.Spider):
 
         return opening_hours
 
-    def address(self, store):
-        addr_tags = {
-            "addr:full": store.get('address'),
-            "addr:city": store.get('city'),
-            "addr:state": store.get('state'),
-            "addr:postcode": store.get('zip'),
-            "addr:country": store.get('country'),
-        }
-
-        return addr_tags
-
     def parse(self, response):
         data = json.loads(response.body_as_unicode())
 
@@ -97,25 +86,20 @@ class CookoutSpider(scrapy.Spider):
                 "name": store['store'],
                 "opening_hours": self.store_hours(store['hours']),
                 "website": store['url'],
+                "addr_full": store.get('address'),
+                "city": store.get('city'),
+                "state": store.get('state'),
+                "postcode": store.get('zip'),
+                "country": store.get('country'),
+                "lon": float(store['lng']),
+                "lat": float(store['lat']),
             }
 
             phone = store['phone']
             if phone:
                 properties['phone'] = phone
 
-            address = self.address(store)
-            if address:
-                properties.update(address)
-
-            lon_lat = [
-                float(store['lng']),
-                float(store['lat']),
-            ]
-
-            yield GeojsonPointItem(
-                properties=properties,
-                lon_lat=lon_lat,
-            )
+            yield GeojsonPointItem(**properties)
 
         else:
             self.logger.info("No results")

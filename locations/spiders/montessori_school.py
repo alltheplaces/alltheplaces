@@ -29,18 +29,12 @@ class MontessoriSchoolSpider(scrapy.Spider):
             properties = {
                 'ref': school_elem.xpath('@data-school-id')[0].extract(),
                 'name': school_elem.xpath('.//a[@class="schoolNameLink"]/text()').extract_first(),
-                'addr:full': addr_elem.xpath('.//span[@class="street"]/text()').extract_first().strip(),
-                'addr:city': city,
-                'addr:state': state,
-                'addr:postcode': postcode,
+                'addr_full': addr_elem.xpath('.//span[@class="street"]/text()').extract_first().strip(),
+                'city': city,
+                'state': state,
+                'postcode': postcode,
+                'lon': float(addr_elem.xpath('.//@data-longitude').extract_first()),
+                'lat': float(addr_elem.xpath('.//@data-latitude').extract_first()),
             }
 
-            lon_lat = [
-                float(addr_elem.xpath('.//@data-longitude').extract_first()),
-                float(addr_elem.xpath('.//@data-latitude').extract_first()),
-            ]
-
-            yield GeojsonPointItem(
-                properties=properties,
-                lon_lat=lon_lat,
-            )
+            yield GeojsonPointItem(**properties)

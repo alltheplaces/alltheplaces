@@ -82,26 +82,20 @@ class WellsFargoSpider(scrapy.Spider):
 
             loc = result_elem.xpath('.//@data-location').extract_first()
             (lat, lon) = map(float, loc.split(','))
-            lon_lat = [lon, lat]
 
-            properties = {
-                'addr:full': result_elem.xpath('.//div[@itemprop="addressRegion"]/text()').extract_first(),
-                'addr:city': result_elem.xpath('.//span[@itemprop="addressLocality"]/text()').extract_first(),
-                'addr:state': result_elem.xpath('.//abbr[@itemprop="addressRegion"]/text()').extract_first(),
-                'addr:postcode': result_elem.xpath('.//span[@itemprop="postalCode"]/text()').extract_first(),
-                'phone': result_elem.xpath('.//div[@itemprop="telephone"]/text()').extract_first()[7:],
-                'ref': result_elem.xpath('.//div[@itemprop="telephone"]/text()').extract_first()[7:],
-            }
-
+            opening_hours = None
             hours_elem = result_elem.xpath('.//ul[@itemprop="itemListElement"]')
-            if not hours_elem:
-                self.logger.warn("Could not parse opening hours for %s", properties['addr:full'])
-            else:
+            if hours_elem:
                 opening_hours = self.store_hours(hours_elem[0])
-                if opening_hours:
-                    properties['opening_hours'] = opening_hours
 
             yield GeojsonPointItem(
-                properties=properties,
-                lon_lat=lon_lat,
+                lat=lat,
+                lon=lon,
+                addr_full=result_elem.xpath('.//div[@itemprop="addressRegion"]/text()').extract_first(),
+                city=result_elem.xpath('.//span[@itemprop="addressLocality"]/text()').extract_first(),
+                state=result_elem.xpath('.//abbr[@itemprop="addressRegion"]/text()').extract_first(),
+                postcode=result_elem.xpath('.//span[@itemprop="postalCode"]/text()').extract_first(),
+                phone=result_elem.xpath('.//div[@itemprop="telephone"]/text()').extract_first()[7:],
+                ref=result_elem.xpath('.//div[@itemprop="telephone"]/text()').extract_first()[7:],
+                opening_hours=opening_hours,
             )

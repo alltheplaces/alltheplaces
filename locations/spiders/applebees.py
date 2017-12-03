@@ -21,6 +21,9 @@ class ApplebeesSpider(scrapy.Spider):
             # in each opening hours object
             day = line['dayOfWeek'][0][:2]
 
+            if not line['opens']:
+                continue
+
             match = re.search(r'^(\d{1,2}):(\d{2}) (A|P)M$', line['opens'])
             (f_hr, f_min, f_ampm) = match.groups()
             match = re.search(r'^(\d{1,2}):(\d{2}) (A|P)M$', line['closes'])
@@ -60,7 +63,8 @@ class ApplebeesSpider(scrapy.Spider):
             elif this_day_group['hours'] == hours:
                 this_day_group['to_day'] = day
 
-        day_groups.append(this_day_group)
+        if this_day_group:
+            day_groups.append(this_day_group)
 
         opening_hours = ""
         if len(day_groups) == 1 and day_groups[0]['hours'] in ('00:00-23:59', '00:00-00:00'):
@@ -69,27 +73,13 @@ class ApplebeesSpider(scrapy.Spider):
             for day_group in day_groups:
                 if day_group['from_day'] == day_group['to_day']:
                     opening_hours += '{from_day} {hours}; '.format(**day_group)
-                elif day_group['from_day'] == 'Su' and day_group['to_day'] == 'Sa':
+                elif day_group['from_day'] == 'Mo' and day_group['to_day'] == 'Su':
                     opening_hours += '{hours}; '.format(**day_group)
                 else:
                     opening_hours += '{from_day}-{to_day} {hours}; '.format(**day_group)
             opening_hours = opening_hours[:-2]
 
         return opening_hours
-
-    def address(self, address):
-        if not address:
-            return None
-
-        addr_tags = {
-            "addr:full": address['streetAddress'],
-            "addr:city": address['addressLocality'],
-            "addr:state": address['addressRegion'],
-            "addr:postcode": address['postalCode'],
-            "addr:country": address['addressCountry'],
-        }
-
-        return addr_tags
 
     def parse(self, response):
         urls = response.xpath('//div[@class="itemlist"]/a[@class="thelinks normal"]/@href')
@@ -106,23 +96,16 @@ class ApplebeesSpider(scrapy.Spider):
         json_data = json_data.replace('// if the location file does not have the hours separated into open/close for each day, remove the below section', '')
         data = json.loads(json_data)
 
-        properties = {
-            'phone': data['telephone'],
-            'website': response.xpath('//head/link[@rel="canonical"]/@href')[0].extract(),
-            'ref': data['@id'],
-            'opening_hours': self.store_hours(data['openingHoursSpecification'])
-        }
-
-        address = self.address(data['address'])
-        if address:
-            properties.update(address)
-
-        lon_lat = [
-            float(data['geo']['longitude']),
-            float(data['geo']['latitude']),
-        ]
-
         yield GeojsonPointItem(
-            properties=properties,
-            lon_lat=lon_lat,
+            lat=float(data['geo']['latitude']),
+            lon=float(data['geo']['longitude']),
+            phone=data['telephone'],
+            website=response.xpath('//head/link[@rel="canonical"]/@href').extract_first(),
+            ref=data['@id'],
+            opening_hours=self.store_hours(data['openingHoursSpecification']),
+            addr_full=data.get('address', {}).get('streetAddress'),
+            city=data.get('address', {}).get('addressLocality'),
+            state=data.get('address', {}).get('addressRegion'),
+            postcode=data.get('address', {}).get('postalCode'),
+            country=data.get('address', {}).get('addressCountry'),
         )

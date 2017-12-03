@@ -42,18 +42,12 @@ class PortillosSpider(scrapy.Spider):
             'website': response.urljoin(store_data['Url']),
             'ref': store_data['Id'],
             'name': store_data['Name'],
-            'addr:full': store_data['Address'],
-            'addr:postcode': store_data['Zip'],
-            'addr:state': store_data['State'],
-            'addr:city': store_data['City'],
+            'addr_full': store_data['Address'],
+            'postcode': store_data['Zip'],
+            'state': store_data['State'],
+            'city': store_data['City'],
+            'lon': float(store_data['Lng']),
+            'lat': float(store_data['Lat']),
         }
 
-        lon_lat = [
-            float(store_data['Lng']),
-            float(store_data['Lat']),
-        ]
-
-        yield GeojsonPointItem(
-            properties=properties,
-            lon_lat=lon_lat,
-        )
+        yield GeojsonPointItem(**properties)

@@ -5,6 +5,7 @@ import re
 
 from locations.items import GeojsonPointItem
 
+
 class FoodLionSpider(scrapy.Spider):
     name = "foodlion"
     allowed_domains = ["www.foodlion.com"]
@@ -68,11 +69,11 @@ class FoodLionSpider(scrapy.Spider):
 
         (num, rest) = address['address'].split(' ', 1)
         addr_tags = {
-            "addr:housenumber": num.strip(),
-            "addr:street": rest.strip(),
-            "addr:city": address['city'],
-            "addr:state": address['state'],
-            "addr:postcode": address['zip'],
+            "housenumber": num.strip(),
+            "street": rest.strip(),
+            "city": address['city'],
+            "state": address['state'],
+            "postcode": address['zip'],
         }
 
         return addr_tags
@@ -87,21 +88,15 @@ class FoodLionSpider(scrapy.Spider):
                 "name": store['title'],
                 "opening_hours": self.store_hours(store['hours']),
                 "website": "https://www.foodlion.com{}".format(store['href']),
+                "lon": float(store['lng']),
+                "lat": float(store['lat']),
             }
 
             address = self.address(store)
             if address:
                 properties.update(address)
 
-            lon_lat = [
-                float(store['lng']),
-                float(store['lat']),
-            ]
-
-            yield GeojsonPointItem(
-                properties=properties,
-                lon_lat=lon_lat,
-            )
+            yield GeojsonPointItem(**properties)
 
         else:
             self.logger.info("No results")

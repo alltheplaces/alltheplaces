@@ -82,13 +82,15 @@ class SonicDriveinSpider(scrapy.Spider):
             return
 
         properties = {
-            'addr:full': response.xpath('//span[@itemprop="streetAddress"]/span/text()').extract_first(),
-            'addr:city': response.xpath('//span[@itemprop="addressLocality"]/text()').extract_first(),
-            'addr:state': response.xpath('//abbr[@itemprop="addressRegion"]/text()').extract_first(),
-            'addr:postcode': response.xpath('//span[@itemprop="postalCode"]/text()').extract_first(),
+            'addr_full': response.xpath('//span[@itemprop="streetAddress"]/span/text()').extract_first(),
+            'city': response.xpath('//span[@itemprop="addressLocality"]/text()').extract_first(),
+            'state': response.xpath('//abbr[@itemprop="addressRegion"]/text()').extract_first(),
+            'postcode': response.xpath('//span[@itemprop="postalCode"]/text()').extract_first(),
             'phone': response.xpath('//span[@itemprop="telephone"]/text()').extract_first(),
             'website': response.xpath('//link[@rel="canonical"]/@href').extract_first(),
             'ref': response.xpath('//link[@rel="canonical"]/@href').extract_first(),
+            'lon': float(response.xpath('//meta[@itemprop="longitude"]/@content').extract_first()),
+            'lat': float(response.xpath('//meta[@itemprop="latitude"]/@content').extract_first()),
         }
 
         hours = json.loads(response.xpath('//div[@class="c-location-hours-details-wrapper js-location-hours"]/@data-days').extract_first())
@@ -97,12 +99,4 @@ class SonicDriveinSpider(scrapy.Spider):
         if opening_hours:
             properties['opening_hours'] = opening_hours
 
-        lon_lat = [
-            float(response.xpath('//meta[@itemprop="longitude"]/@content').extract_first()),
-            float(response.xpath('//meta[@itemprop="latitude"]/@content').extract_first()),
-        ]
-
-        yield GeojsonPointItem(
-            properties=properties,
-            lon_lat=lon_lat,
-        )
+        yield GeojsonPointItem(**properties)
