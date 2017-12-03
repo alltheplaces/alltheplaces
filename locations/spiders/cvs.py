@@ -2,7 +2,14 @@ import scrapy
 import re
 from locations.items import GeojsonPointItem
 
-DAY_MAPPING = {'M':'Mo', 'T': 'Tu', 'W': 'We', 'F': 'Fr', 'Sat': 'Sa', 'Sun':'Su'}
+DAY_MAPPING = {
+    'M': 'Mo',
+    'T': 'Tu',
+    'W': 'We',
+    'F': 'Fr',
+    'Sat': 'Sa',
+    'Sun': 'Su'
+}
 
 
 class CVSSpider(scrapy.Spider):
@@ -30,7 +37,7 @@ class CVSSpider(scrapy.Spider):
 
     def parse_times(self, times):
         if times.strip() == 'Open 24 hours':
-            return '00:00-24:00'
+            return '24/7'
         hours_to = [x.strip() for x in times.split('-')]
         cleaned_times = []
 
@@ -54,7 +61,6 @@ class CVSSpider(scrapy.Spider):
         return "-".join(cleaned_times)
 
     def parse_hours(self, lis):
-
         hours = []
         for li in lis:
             day = li.xpath('normalize-space(.//span[@class="day single-day"]/text() | .//span[@class="day"]/text())').extract_first()
@@ -64,36 +70,28 @@ class CVSSpider(scrapy.Spider):
                 parsed_day = self.parse_day(day)
                 hours.append(parsed_day + ' ' + parsed_time)
 
-        return ";".join(hours)
+        return "; ".join(hours)
 
     def parse_stores(self, response):
-
-        addr = response.xpath('normalize-space(//span[@itemprop="streetAddress"]/text())').extract_first()
-        locality = response.xpath('normalize-space(//span[@itemprop="addressLocality"]/text())').extract_first()
-        state = response.xpath('normalize-space(//span[@itemprop="addressRegion"]/text())').extract_first()
-        postalCode = response.xpath('normalize-space(//span[@itemprop="postalCode"]/text())').extract_first()
         raw_phone = response.xpath('normalize-space(//a[@class="tel_phone_numberDetail"]/@href)').extract_first()
-        phone = re.sub('tel:', '', raw_phone)
-        ref = response.xpath('//link[@rel="canonical"]/@href').extract_first()
-
-        latitude = float(response.xpath('normalize-space(//input[@id="toLatitude"]/@value)').extract_first())
-        longitude = float(response.xpath('normalize-space(//input[@id="toLongitude"]/@value)').extract_first())
-
-        lon_lat = [longitude, latitude]
-        hours = self.parse_hours(response.xpath('//ul[@class="cleanList srHours srSection"]/li'))
 
         properties = {
-                      'addr:full': addr, 'phone': phone, 'addr:city': locality,
-                      'addr:state': state, 'addr:postcode': postalCode,
-                      'ref': ref, 'website:': ref
-                     }
-        if hours:
-            properties.update({'opening_hours': hours})
+            'addr_full': response.xpath('normalize-space(//span[@itemprop="streetAddress"]/text())').extract_first(),
+            'phone': raw_phone.replace('tel:', ''),
+            'city': response.xpath('normalize-space(//span[@itemprop="addressLocality"]/text())').extract_first(),
+            'state': response.xpath('normalize-space(//span[@itemprop="addressRegion"]/text())').extract_first(),
+            'postcode': response.xpath('normalize-space(//span[@itemprop="postalCode"]/text())').extract_first(),
+            'ref': response.xpath('//link[@rel="canonical"]/@href').extract_first(),
+            'website:': response.xpath('//link[@rel="canonical"]/@href').extract_first(),
+            'lat': float(response.xpath('normalize-space(//input[@id="toLatitude"]/@value)').extract_first()),
+            'lon': float(response.xpath('normalize-space(//input[@id="toLongitude"]/@value)').extract_first()),
+        }
 
-        yield GeojsonPointItem(
-            properties=properties,
-            lon_lat=lon_lat
-        )
+        hours = self.parse_hours(response.xpath('//ul[@class="cleanList srHours srSection"]/li'))
+        if hours:
+            properties['opening_hours'] = hours
+
+        yield GeojsonPointItem(**properties)
 
     def parse_city_stores(self, response):
         stores = response.xpath('//div[@class="each-store"]')

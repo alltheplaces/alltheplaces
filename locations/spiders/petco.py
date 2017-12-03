@@ -66,22 +66,16 @@ class PetcoSpider(scrapy.Spider):
             'name': store_data['name'],
             'phone': store_data['address']['telephone'],
             'ref': store_data['url'],
-            'addr:full': store_data['address']['streetAddress'],
-            'addr:postcode': store_data['address']['postalCode'],
-            'addr:state': store_data['address']['addressRegion'],
-            'addr:city': store_data['address']['addressLocality'],
+            'addr_full': store_data['address']['streetAddress'],
+            'postcode': store_data['address']['postalCode'],
+            'state': store_data['address']['addressRegion'],
+            'city': store_data['address']['addressLocality'],
+            'lon': float(store_data['geo']['longitude']),
+            'lat': float(store_data['geo']['latitude']),
         }
 
         opening_hours = self.store_hours(store_data['openingHours'])
         if opening_hours:
             properties['opening_hours'] = opening_hours
 
-        lon_lat = [
-            float(store_data['geo']['longitude']),
-            float(store_data['geo']['latitude']),
-        ]
-
-        yield GeojsonPointItem(
-            properties=properties,
-            lon_lat=lon_lat,
-        )
+        yield GeojsonPointItem(**properties)

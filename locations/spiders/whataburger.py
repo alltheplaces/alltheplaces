@@ -73,31 +73,17 @@ class WhataburgerSpider(scrapy.Spider):
                 yield scrapy.Request(response.urljoin(path))
 
     def parse_store(self, response):
-        properties = {
-            'addr:full': response.xpath('//span[@itemprop="streetAddress"]/text()').extract_first(),
-            'addr:city': response.xpath('//span[@itemprop="addressLocality"]/text()').extract_first(),
-            'addr:state': response.xpath('//abbr[@itemprop="addressRegion"]/text()').extract_first(),
-            'addr:postcode': response.xpath('//span[@itemprop="postalCode"]/text()').extract_first().strip(),
-            'ref': response.url,
-            'website': response.url,
-        }
-
-        phone = response.xpath('//a[@class="c-phone-number-link c-phone-main-number-link"]/text()').extract_first()
-        if phone:
-            properties['phone'] = phone
-
         hours = json.loads(response.xpath('//div[@class="c-location-hours-details-wrapper js-location-hours"]/@data-days').extract_first())
 
-        opening_hours = self.store_hours(hours) if hours else None
-        if opening_hours:
-            properties['opening_hours'] = opening_hours
-
-        lon_lat = [
-            float(response.xpath('//span/meta[@itemprop="longitude"]/@content').extract_first()),
-            float(response.xpath('//span/meta[@itemprop="latitude"]/@content').extract_first()),
-        ]
-
         yield GeojsonPointItem(
-            properties=properties,
-            lon_lat=lon_lat,
+            lon=float(response.xpath('//span/meta[@itemprop="longitude"]/@content').extract_first()),
+            lat=float(response.xpath('//span/meta[@itemprop="latitude"]/@content').extract_first()),
+            addr_full=response.xpath('//span[@itemprop="streetAddress"]/text()').extract_first(),
+            city=response.xpath('//span[@itemprop="addressLocality"]/text()').extract_first(),
+            state=response.xpath('//abbr[@itemprop="addressRegion"]/text()').extract_first(),
+            postcode=response.xpath('//span[@itemprop="postalCode"]/text()').extract_first().strip(),
+            phone=response.xpath('//a[@class="c-phone-number-link c-phone-main-number-link"]/text()').extract_first(),
+            opening_hours=self.store_hours(hours) if hours else None,
+            ref=response.url,
+            website=response.url,
         )

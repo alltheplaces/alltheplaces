@@ -74,25 +74,19 @@ class SuperAmericaSpider(scrapy.Spider):
 
         for store in data:
             properties = {
-                'addr:full': store['address'],
-                'addr:city': store['city'],
-                'addr:state': store['state'],
-                'addr:postcode': store['zip'],
+                'addr_full': store['address'],
+                'city': store['city'],
+                'state': store['state'],
+                'postcode': store['zip'],
                 'name': store['store'],
                 'phone': store['phone'],
                 'ref': store['id'],
+                'lon': float(store['lng']),
+                'lat': float(store['lat']),
             }
 
             opening_hours = self.store_hours(store['hours'])
             if opening_hours:
                 properties['opening_hours'] = opening_hours
 
-            lon_lat = [
-                float(store['lng']),
-                float(store['lat']),
-            ]
-
-            yield GeojsonPointItem(
-                properties=properties,
-                lon_lat=lon_lat,
-            )
+            yield GeojsonPointItem(**properties)

@@ -1,10 +1,8 @@
 # -*- coding: utf-8 -*-
 import scrapy
-import json
-from scrapy.utils.url import urljoin_rfc
-from scrapy.utils.response import get_base_url
 
 from locations.items import GeojsonPointItem
+
 
 class LouisaCoffeeSpider(scrapy.Spider):
     name = "louisa_coffee"
@@ -17,17 +15,11 @@ class LouisaCoffeeSpider(scrapy.Spider):
         location_hrefs = response.xpath('//a[contains(@class, "marker")]')
         for location_href in location_hrefs:
             properties = {
-                'name': location_href.xpath('@rel-store-name')[0].extract(),
-                'addr:full': location_href.xpath('@rel-store-address')[0].extract(),
-                'ref': location_href.xpath('@rel-store-name')[0].extract(), # using the name in lieu of an ID of any kind
+                'name': location_href.xpath('@rel-store-name').extract_first(),
+                'addr_full': location_href.xpath('@rel-store-address').extract_first(),
+                'ref': location_href.xpath('@rel-store-name').extract_first(), # using the name in lieu of an ID of any kind
+                'lon': float(location_href.xpath('@rel-store-lng').extract_first()),
+                'lat': float(location_href.xpath('@rel-store-lat').extract_first()),
             }
 
-            lon_lat = [
-                float(location_href.xpath('@rel-store-lng')[0].extract()),
-                float(location_href.xpath('@rel-store-lat')[0].extract()),
-            ]
-
-            yield GeojsonPointItem(
-                properties=properties,
-                lon_lat=lon_lat,
-            )
+            yield GeojsonPointItem(**properties)

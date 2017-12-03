@@ -13,21 +13,6 @@ class WalmartSpider(scrapy.Spider):
         'http://www.walmart.com/store/ajax/detail-navigation?location=98101',
     )
 
-    def address(self, address):
-        if not address:
-            return None
-
-        (num, rest) = address['address1'].split(' ', 1)
-        addr_tags = {
-            "addr:housenumber": num.strip(),
-            "addr:street": rest.strip(),
-            "addr:city": address['city'],
-            "addr:state": address['state'],
-            "addr:postcode": address['postalCode'],
-        }
-
-        return addr_tags
-
     def store_hours(self, store_hours):
         if store_hours.get('open24Hours'):
             return u'24/7'
@@ -35,6 +20,9 @@ class WalmartSpider(scrapy.Spider):
             return None
         else:
             combined = store_hours.get('operationalHoursCombined')
+
+            if len(combined) == 1 and 'startHr' not in combined[0]['dailyHours']:
+                return None
 
             opening_hours = ""
             if len(combined) == 1 \
@@ -68,37 +56,28 @@ class WalmartSpider(scrapy.Spider):
         stores = data['payload']['stores']
 
         for store in stores:
-
-            properties = {
-                "ref": str(store['id']),
-                "phone": store.get('phone'),
-                "name": store['storeType']['name'],
-            }
-
-            opening_hours = self.store_hours(store['operationalHours'])
-            if opening_hours:
-                properties['opening_hours'] = opening_hours
-
             open_date = store.get('openDate')
             if open_date:
-                properties['start_date'] = '{}-{}-{}'.format(
+                open_date = '{}-{}-{}'.format(
                     open_date[6:10],
                     open_date[0:2],
                     open_date[3:5],
                 )
 
-            address = self.address(store['address'])
-            if address:
-                properties.update(address)
-
-            lon_lat = [
-                store['geoPoint']['longitude'],
-                store['geoPoint']['latitude'],
-            ]
-
             yield GeojsonPointItem(
-                properties=properties,
-                lon_lat=lon_lat,
+                lat=store['geoPoint']['latitude'],
+                lon=store['geoPoint']['longitude'],
+                ref=str(store['id']),
+                phone=store.get('phone'),
+                name=store['storeType']['name'],
+                opening_hours=self.store_hours(store['operationalHours']),
+                addr_full=store.get('address', {}).get('address1'),
+                city=store.get('address', {}).get('city'),
+                state=store.get('address', {}).get('state'),
+                postcode=store.get('address', {}).get('postalCode'),
+                extras={
+                    'start_date': open_date
+                }
             )
 
             yield scrapy.Request(

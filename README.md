@@ -17,13 +17,13 @@ To get started, you'll want to install the dependencies for this project.
 1. With `pipenv` installed, make sure you have the `all-the-places` repository checked out
 
    ```
-   git clone git@github.com:iandees/all-the-places.git
+   git clone git@github.com:alltheplaces/alltheplaces.git
    ```
 
 1. Then you can install the dependencies for the project
 
    ```
-   cd all-the-places
+   cd alltheplaces
    pipenv install
    ```
 
@@ -78,8 +78,11 @@ To get started, you'll want to install the dependencies for this project.
    ```python
    def parse(self, response):
       yield GeojsonPointItem(
-          properties=properties,
-          lon_lat=lon_lat,
+          lat=latitude,
+          lon=longitude,
+          addr_full="1234 Fifth Street",
+          city="San Francisco",
+          state="CA"
       )
    ```
 

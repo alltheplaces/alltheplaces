@@ -19,32 +19,25 @@ class TjmaxxSpider(scrapy.Spider):
                 callback=self.parse_links
             )
 
-
     def parse_links(self, response):
-        hours = response.xpath('//form[@id="directions-form"]/input[@name="hours"]/@value').extract()
-        address = response.xpath('//form[@id="directions-form"]/input[@name="address"]/@value').extract()
-        city = response.xpath('//form[@id="directions-form"]/input[@name="city"]/@value').extract()
-        state = response.xpath('//form[@id="directions-form"]/input[@name="state"]/@value').extract()
-        zip = response.xpath('//form[@id="directions-form"]/input[@name="zip"]/@value').extract()
-        phone = response.xpath('//form[@id="directions-form"]/input[@name="phone"]/@value').extract()
-        latitude = response.xpath('//form[@id="directions-form"]/input[@name="lat"]/@value').extract()
-        longitude = response.xpath('//form[@id="directions-form"]/input[@name="long"]/@value').extract()
-        website = response.xpath('//head/link[@rel="canonical"]/@href')[0].extract()
+        hours = response.xpath('//form[@id="directions-form"]/input[@name="hours"]/@value').extract_first()
+        website = response.xpath('//head/link[@rel="canonical"]/@href').extract_first()
         link_id = website.split("/")[-2]
 
-        properties = {"addr:full": address[0],
-                      "addr:city": city[0],
-                      "addr:state": state[0],
-                      "addr:postcode": zip[0],
-                      "addr:country": "US",
-                      "phone": phone[0],
-                      "website": website,
-                      "ref": link_id,
-                      "opening_hours": self.process_hours(hours[0])}
+        properties = {
+            "addr_full": response.xpath('//form[@id="directions-form"]/input[@name="address"]/@value').extract_first(),
+            "city": response.xpath('//form[@id="directions-form"]/input[@name="city"]/@value').extract_first(),
+            "state": response.xpath('//form[@id="directions-form"]/input[@name="state"]/@value').extract_first(),
+            "postcode": response.xpath('//form[@id="directions-form"]/input[@name="zip"]/@value').extract_first(),
+            "phone": response.xpath('//form[@id="directions-form"]/input[@name="phone"]/@value').extract_first(),
+            "website": website,
+            "ref": link_id,
+            "opening_hours": self.process_hours(hours[0]),
+            "lat": float(response.xpath('//form[@id="directions-form"]/input[@name="lat"]/@value').extract_first()),
+            "lon": float(response.xpath('//form[@id="directions-form"]/input[@name="long"]/@value').extract_first()),
+        }
 
-        lon_lat = [float(longitude[0]), float(latitude[0])]
-
-        yield GeojsonPointItem(properties=properties, lon_lat=lon_lat,)
+        yield GeojsonPointItem(**properties)
 
     def process_hours(self, hours):
         """ This should capture these time formats as on tjmaxx
@@ -120,4 +113,3 @@ class TjmaxxSpider(scrapy.Spider):
             if int(hr) < 12:
                 diff = 12
         return diff
-

@@ -63,11 +63,11 @@ class CrackerBarrelSpider(scrapy.Spider):
             return None
 
         addr_tags = {
-            "addr:full": address['streetAddress'],
-            "addr:city": address['addressLocality'],
-            "addr:state": address['addressRegion'],
-            "addr:postcode": address['postalCode'],
-            "addr:country": address['addressCountry'],
+            "addr_full": address['streetAddress'],
+            "city": address['addressLocality'],
+            "state": address['addressRegion'],
+            "postcode": address['postalCode'],
+            "country": address['addressCountry'],
         }
 
         return addr_tags
@@ -93,19 +93,13 @@ class CrackerBarrelSpider(scrapy.Spider):
             'phone': data['telephone'],
             'website': response.xpath('//head/link[@rel="canonical"]/@href').extract_first(),
             'ref': data['@id'],
-            'opening_hours': self.store_hours(data['openingHoursSpecification'])
+            'opening_hours': self.store_hours(data['openingHoursSpecification']),
+            'lon': float(data['geo']['longitude']),
+            'lat': float(data['geo']['latitude']),
         }
 
         address = self.address(data['address'])
         if address:
             properties.update(address)
 
-        lon_lat = [
-            float(data['geo']['longitude']),
-            float(data['geo']['latitude']),
-        ]
-
-        yield GeojsonPointItem(
-            properties=properties,
-            lon_lat=lon_lat,
-        )
+        yield GeojsonPointItem(**properties)
