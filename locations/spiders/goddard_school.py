@@ -61,7 +61,7 @@ class GoddardSchoolSpider(scrapy.Spider):
             'postcode': response.meta['postcode'],
             'ref': response.meta['ref'],
             'website': response.url,
-            'lon': float(response.meta['lng']),
+            'lon': float(response.meta['lon']),
             'lat': float(response.meta['lat']),
         }
 

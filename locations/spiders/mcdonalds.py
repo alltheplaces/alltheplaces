@@ -80,8 +80,4 @@ class McDonaldsSpider(scrapy.Spider):
             except:
                 self.logger.exception("Couldn't process opening hours: %s", hours)
 
-            address = self.address(store_info)
-            if address:
-                properties.update(address)
-
             yield GeojsonPointItem(**properties)

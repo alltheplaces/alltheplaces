@@ -21,6 +21,9 @@ class WalmartSpider(scrapy.Spider):
         else:
             combined = store_hours.get('operationalHoursCombined')
 
+            if len(combined) == 1 and 'startHr' not in combined[0]['dailyHours']:
+                return None
+
             opening_hours = ""
             if len(combined) == 1 \
               and combined[0]['dailyHours']['dayConstant'] == 1 \
