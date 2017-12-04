@@ -30,4 +30,3 @@ class WilcoFarmSpider(scrapy.Spider):
             }
 
             yield GeojsonPointItem(**properties)
-
