@@ -29,4 +29,3 @@ class CoastalFarmSpider(scrapy.Spider):
             }
 
             yield GeojsonPointItem(**properties)
-
