@@ -11,3 +11,10 @@ name = "pypi"
 
 [packages]
 
+scrapy = "*"
+botocore = "*"
+
+
+[requires]
+
+python_version = "3.6"
