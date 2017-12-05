@@ -6,10 +6,10 @@ import traceback
 
 from locations.items import GeojsonPointItem
 
-
+URL = "http://restaurants.quiznos.com"
 class QuiznosSpider(scrapy.Spider):
     name = "quiznos"
-    allowed_domains = ["restaurants.quiznos.com"]
+    allowed_domains = [URL]
     start_urls = (
         'http://restaurants.quiznos.com/data/stores.json?callback=storeList',
     )
@@ -77,5 +77,5 @@ class QuiznosSpider(scrapy.Spider):
                 city=store.get('city'),
                 state=store.get('statecode'),
                 postcode=store.get('zipcode'),
-                website=store.get('url'),
+                website=URL + store.get('url'),
             )
