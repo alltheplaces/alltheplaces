@@ -30,7 +30,7 @@ class KFCSpider(scrapy.Spider):
         for zipcode in zipcodes:
             form_data = {
                 'address': zipcode,
-                'distance': '100'
+                'distance': '300'
             }
 
             yield scrapy.http.FormRequest(
