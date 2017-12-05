@@ -24,6 +24,8 @@ class KFCSpider(scrapy.Spider):
             day_open = store_hours[day + 'Start']
             day_close = store_hours[day + 'End']
 
+            print(day_open)
+
             if day_open is False:
                 # On days that they're closed they set the value to 'false'
                 continue
