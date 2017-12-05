@@ -23,11 +23,10 @@ class KFCSpider(scrapy.Spider):
         for day in ('monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'):
             day_open = store_hours[day + 'Start']
             day_close = store_hours[day + 'End']
-
-            print(day_open)
-
             if day_open is False:
                 # On days that they're closed they set the value to 'false'
+                continue
+            if not day_open.strip():
                 continue
 
             day_open = self.normalize_time(day_open)
@@ -50,9 +49,12 @@ class KFCSpider(scrapy.Spider):
             return None
 
         if len(day_groups) == 1:
+            if day_groups[0] == None:
+                day_groups[0] = {"hours":'07:00-07:00'}
             opening_hours = day_groups[0]['hours']
             if opening_hours == '07:00-07:00':
                 opening_hours = '24/7'
+
         else:
             opening_hours = ''
             for day_group in day_groups:
