@@ -43,7 +43,8 @@ class KFCSpider(scrapy.Spider):
                 'postcode': store['postalCode'],
                 'lat': store['latitude'],
                 'lon': store['longitude'],
-                'phone': store['businessPhone']
+                'phone': store['businessPhone'],
+                'opening_hours': 'Mo-Su 09:30-23:00'
             }
 
             yield GeojsonPointItem(**properties)
