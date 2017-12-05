@@ -15,13 +15,8 @@ class QuiznosSpider(scrapy.Spider):
     )
 
     def parse(self, response):
-
-        try:
-            data = response.body_as_unicode()
-            stores = json.loads(re.search('storeList\((.*)\)', data).group(1))
-        except:
-            stores = None
-            self.log('Error while parsing the json data'.format(traceback.format_exc()))
+        data = response.body_as_unicode()
+        stores = json.loads(re.search('storeList\((.*)\)', data).group(1))
 
         for store in stores:
 
