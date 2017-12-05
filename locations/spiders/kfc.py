@@ -32,7 +32,6 @@ class KFCSpider(scrapy.Spider):
     def parse(self, response):
         data = json.loads(response.body_as_unicode())
         stores = data['results']
-        print(stores)
         for store in stores:
             properties = {
                 'ref': store['entityID'],
