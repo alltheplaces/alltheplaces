@@ -3,6 +3,7 @@ import re
 import scrapy
 from locations.items import GeojsonPointItem
 
+
 class KFCSpider(scrapy.Spider):
     name = "kfc"
     allowed_domains = ["www.kfc.com"]
@@ -19,15 +20,22 @@ class KFCSpider(scrapy.Spider):
             'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
             'X-Requested-With': 'XMLHttpRequest',
         }
-        form_data = {
-            'address': '90210',
-            'distance': '100'
-        }
 
-        yield scrapy.http.FormRequest(
-            url=url, method='POST', formdata=form_data,
-            headers=headers, callback=self.parse
-        )
+        zipcodes = ['90001', '10022', '33614', '90210', '10001', '10013', '10012', '10021', '10024', '10023', '10014', '22314',
+                '20001', '33132', '33143', '33125', '33142', '10025', '10005', '10002', '10003', '10004', '10011', '10010',
+                '90014', '90010', '90069', '90022', '23451', '63101', '30303', '20005', '20036', '82941', '30324', '30022',
+                '30004', '30005', '98052', '21201', '99362', '07054', '22313', '98065', '90089', '90213', '90209', '32801',
+                '32837', '77002', '10451']
+
+        for zipcode in zipcodes:
+            form_data = {
+                'address': zipcode,
+            }
+
+            yield scrapy.http.FormRequest(
+                url=url, method='POST', formdata=form_data,
+                headers=headers, callback=self.parse
+            )
 
     def parse(self, response):
         data = json.loads(response.body_as_unicode())
