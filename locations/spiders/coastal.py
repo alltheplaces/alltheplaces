@@ -14,7 +14,6 @@ class CoastalFarmSpider(scrapy.Spider):
 
     def parse(self, response):
         results = json.loads(response.body_as_unicode())
-        print(results)
         for data in results:
             properties = {
                 'city': data['city'],
