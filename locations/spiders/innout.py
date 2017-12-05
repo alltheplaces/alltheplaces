@@ -25,7 +25,7 @@ class TemplateSpider(scrapy.Spider):
         states = response.xpath('//LocationFinderStore/State/text()').extract()
         names = response.xpath('//LocationFinderStore/Name/text()').extract()
 
-        for city,state,lat,long,sNumb,sAddr,zcode,key in zip(cities, states, lats, longs, snumber,saddress,zipcodes,names):
+        for city,state,lat,lon,sNumb,sAddr,zcode,key in zip(cities, states, lats, longs, snumber,saddress,zipcodes,names):
 
 
             properties = {
@@ -36,7 +36,7 @@ class TemplateSpider(scrapy.Spider):
                 'state': state,
                 'postcode': zcode,
                 'ref': str(sNumb + key),
-                'lon': float(long),
+                'lon': float(lon),
                 'lat': float(lat),
 
 
