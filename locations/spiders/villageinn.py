@@ -30,12 +30,14 @@ class VillageInnSpider(scrapy.Spider):
 
         blocks = response.css("#location_subcontainer .block")
 
+        hours_text = response.xpath('//span[@class="block hours"]/span[@class="hoursTime" or @class="hoursDay"]/text()').extract()
+
         properties = {
             "ref": ref,
             "website": website,
             "lat": float(lat),
             "lon": float(lng),
-            "opening_hours": self.hours(blocks[1])
+            "opening_hours": self.hours(hours_text),
         }
 
         address = self.address(blocks[0])
@@ -66,17 +68,14 @@ class VillageInnSpider(scrapy.Spider):
         return ret
 
     def hours(self, data):
-        section_headings = data.css(".sectionHeading")
-        store_hours = section_headings[-1].xpath("//span/following-sibling::span[1]/text()").extract()
-
         this_day_group = dict()
         day_groups = []
         for i in range(7):
-            day = store_hours[(i+1)*3][:2]
-            match = re.search(r'(\d{1,2}):(\d{2}) (AM|PM)', store_hours[(i+1)*3 + 1])
+            day = data[i*3][:2]
+            match = re.search(r'(\d{1,2}):(\d{2}) (AM|PM)', data[i*3 + 1])
             f_hr, f_min, f_ampm = match.groups()
 
-            match = re.search(r'(\d{1,2}):(\d{2}) (AM|PM)', store_hours[(i+1)*3 + 2])
+            match = re.search(r'(\d{1,2}):(\d{2}) (AM|PM)', data[i*3 + 2])
             t_hr, t_min, t_ampm = match.groups()
 
             f_hr = int(f_hr)
