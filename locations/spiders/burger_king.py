@@ -1,7 +1,15 @@
 import scrapy
 import re
 from locations.items import GeojsonPointItem
-
+day_formats = {
+    "Mon": "Mo",
+    "Tue": "Tu",
+    "Wed": "We",
+    "Thu": "Th",
+    "Fri": "Fr",
+    "Sat": "Sa",
+    "Sun": "Su"
+}
 
 
 class BurgerKingSpider(scrapy.Spider):
@@ -12,7 +20,8 @@ class BurgerKingSpider(scrapy.Spider):
     start_urls = (
         'https://locations.bk.com/index.html',
     )
-
+    def parse_day(self, day):
+            return  day_formats[day.strip()]
     def parse_times(self, times):
         if times.strip() == 'Open 24 hours':
             return '24/7'
@@ -45,7 +54,8 @@ class BurgerKingSpider(scrapy.Spider):
             times_all = "".join(str(x) for x in times)
             if times_all and day:
                 parsed_time = self.parse_times(times_all)
-                hours.append(day + ' ' + parsed_time)
+                parsed_day = self.parse_day(day)
+                hours.append(parsed_day + ' ' + parsed_time)
 
         return "; ".join(hours)
 
