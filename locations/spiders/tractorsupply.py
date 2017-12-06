@@ -3,6 +3,7 @@ import scrapy
 from scrapy.linkextractors import LinkExtractor
 import json
 import re
+import time
 
 from locations.items import GeojsonPointItem
 
@@ -110,5 +111,6 @@ class TractorSupplySpider(scrapy.Spider):
         address = self.address(data['address'])
         if address:
             properties.update(address)
+        time.sleep(2)
 
         yield GeojsonPointItem(**properties)
