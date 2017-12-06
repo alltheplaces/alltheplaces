@@ -17,10 +17,9 @@ class TractorSupplySpider(scrapy.Spider):
         day_groups = []
         this_day_group = None
         for day in store_hours:
-            match = re.search(r'(\d{1,2}):(\d{2})', day)
-            (f_hr, f_min) = match.groups()
-            match = re.search(r'(\d{1,2}):(\d{2})', day)
-            (t_hr, t_min) = match.groups()
+            match = re.search(r'(\S*)\s+(\d{1,2}):(\d{2})\s*-\s*(\d{1,2}):(\d{2})', day)
+            (dow, f_hr, f_min, t_hr, t_min) = match.groups()
+            day_short = dow[:2]
 
             f_hr = int(f_hr)
             t_hr = int(t_hr)
@@ -34,19 +33,19 @@ class TractorSupplySpider(scrapy.Spider):
 
             if not this_day_group:
                 this_day_group = {
-                    'from_day': day,
-                    'to_day': day,
+                    'from_day': day_short,
+                    'to_day': day_short,
                     'hours': hours
                 }
             elif this_day_group['hours'] != hours:
                 day_groups.append(this_day_group)
                 this_day_group = {
-                    'from_day': day,
-                    'to_day': day,
+                    'from_day': day_short,
+                    'to_day': day_short,
                     'hours': hours
                 }
             elif this_day_group['hours'] == hours:
-                this_day_group['to_day'] = day
+                this_day_group['to_day'] = day_short
 
         day_groups.append(this_day_group)
 
@@ -83,19 +82,18 @@ class TractorSupplySpider(scrapy.Spider):
         city_urls = response.xpath('//url/loc/text()').extract()
         for path in city_urls:
             yield scrapy.Request(
-                path,
+                path.strip(),
                 callback=self.parse_store,
             )
 
     def parse_store(self, response):
-        json_data = response.xpath('//*/script[@type="application/ld+json"]/text()').extract()
-        json_data = str(json_data[0]).replace('\\n','').replace('\\t','')
+        json_data = response.xpath('//*/script[@type="application/ld+json"]/text()').extract_first()
         json_data = json_data[: -3]
         data = json.loads(json_data)
 
         properties = {
-            'phone': data['telephone'],
-            'website': response.xpath('//head/link[@rel="canonical"]/@href')[0].extract(),
+            'phone': data['telephone'].strip(),
+            'website': response.xpath('//head/link[@rel="canonical"]/@href').extract_first(),
             'ref': data['url'],
             'opening_hours': self.store_hours(data['openingHours']),
             'lon': float(data['geo']['longitude']),
