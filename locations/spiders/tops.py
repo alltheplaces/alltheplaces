@@ -13,6 +13,7 @@ day_formats = {
     "Sun": "Su"
 }
 
+
 class TopsSpider(scrapy.Spider):
     name = "tops"
     allowed_domains = ["www.topsmarkets.com"]
@@ -21,21 +22,6 @@ class TopsSpider(scrapy.Spider):
         'http://www.topsmarkets.com/StoreLocator/Store_MapLocation_S.las?State=all',
     )
     
-    available_urls = []
-
-    lat = ""
-    lon = ""
-    ref = ""
-
-    # zipcodes = ['83253', '57638', '54848', '44333', '03244', '23435', '31023', '38915', '79525', '81321', '89135', '98250', 
-    #             '69154', '62838', '89445', '93204', '59402', '57532', '69030', '65231', '70394', '78550', '32566', '33185',
-    #             '27229', '16933', '41231', '46992']
-
-    # for zipcode in zipcodes:
-    #     available_urls.append(url + zipcode)
-
-    # start_urls = tuple(available_urls)
-
 
     def parse_address(self, data):
         filtered_data = []
@@ -69,6 +55,7 @@ class TopsSpider(scrapy.Spider):
                 # Sunday- Saturday, 6AM-11PM,
                 # 6am - Midnight,
                 # 6AM to Midnight,
+                
         :param hours:
         :return:  string - in this format Mo-Th 11:00-12:00; Fr-Sa 11:00-01:00;
         """
@@ -167,7 +154,6 @@ class TopsSpider(scrapy.Spider):
 
 
     def parse_store(self, response):
-        global lon, lat, ref
         data = response.xpath('//p[@class="Address"]//text()').extract()
         address, city, state, postalCode = self.parse_address(data)
         data = response.xpath('//p[@class="PhoneNumber"]//text()').extract()
@@ -178,16 +164,15 @@ class TopsSpider(scrapy.Spider):
             'state': state,
             'postcode': postalCode,
             'phone': phone,
-            'ref': ref,
-            'lon': lon,
-            'lat': lat
+            'ref': response.meta['ref'],
+            'lon': response.meta['lon'],
+            'lat': response.meta['lat']
         }
 
         yield GeojsonPointItem(**properties)
 
 
     def parse(self, response):
-        global lat, lon, ref
         try:
             data = json.loads(response.body_as_unicode())
         except ValueError:
@@ -197,5 +182,5 @@ class TopsSpider(scrapy.Spider):
             lon = item['Longitude']
             ref = item['StoreNbr']
             
-            yield scrapy.Request(response.urljoin('http://www.topsmarkets.com/StoreLocator/Store?L=' + item['StoreNbr']), callback=self.parse_store)
+            yield scrapy.Request('http://www.topsmarkets.com/StoreLocator/Store?L=' + item['StoreNbr'], meta={'lat': lat, 'lon': lon, 'ref': ref}, callback=self.parse_store)
 
