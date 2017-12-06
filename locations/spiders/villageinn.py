@@ -4,59 +4,59 @@ import re
 
 from locations.items import GeojsonPointItem
 
+
 class VillageInnSpider(scrapy.Spider):
     name = "villageinn"
     allowed_domains = ["www.villageinn.com"]
     start_urls = (
         "http://www.villageinn.com/locations/bystate.php",
     )
-        
+
     def parse(self, response):
         selector = scrapy.Selector(response)
         links = selector.css("a.animatedlink::attr(href)")
-        
+
         for link in links:
             yield scrapy.Request(
-                response.urljoin(link.extract()),
+                response.urljoin(link.extract().strip()),
                 callback = self.parse_link
             )
-    
+
     def parse_link(self, response):
-        selector = scrapy.Selector(response)
-        
         website = response.xpath('//head/meta[@property="og:url"]/@content').extract_first()
         ref = website.split("/")[-1]
-        lat = selector.css("#h_lat::attr(value)").extract_first()
-        lng = selector.css("#h_lng::attr(value)").extract_first()
+        lat = response.css("#h_lat::attr(value)").extract_first()
+        lng = response.css("#h_lng::attr(value)").extract_first()
 
-        blocks = selector.css("#location_subcontainer .block")
-        
+        blocks = response.css("#location_subcontainer .block")
+
         properties = {
-            "ref" : ref,
+            "ref": ref,
             "website": website,
-            "lat": lat,
-            "lon": lng,
+            "lat": float(lat),
+            "lon": float(lng),
             "opening_hours": self.hours(blocks[1])
         }
-        
+
         address = self.address(blocks[0])
         if address:
             properties.update(address)
-        
+
         yield GeojsonPointItem(**properties)
-        
+
     def address(self, data):
         address = data.css(".block::text").extract()
-        street = address[2].strip("\n").strip("\t")
-        address1 = address[-3].strip("\n").strip("\t")
-        city = address1.split(",")[0]
-        address2 = address1.split(" ")
-        state = address2[1]
-        zipcode = address2[2]
-        phone = re.findall(r"(\d{3}[-\.\s]??\d{3}[-\.\s]??\d{4}|\(\d{3}\)\s*\d{3}[-\.\s]??\d{4}|\d{3}[-\.\s]??\d{4})", address[-2].strip("\n").strip("\t"))[0]
-        
+
+        address = list(filter(lambda a: not a.startswith('Fax'), address))
+
+        street = address[2].strip()
+        city_state_zip = address[-3].strip()
+        city, state_zip = city_state_zip.split(",", 1)
+        state, zipcode = state_zip.strip().split()
+        phone = address[-2].strip().replace('Phone: ', '')
+
         ret = {
-            "street": street,
+            "addr_full": street,
             "city": city,
             "state": state,
             "postcode": zipcode,
@@ -68,15 +68,63 @@ class VillageInnSpider(scrapy.Spider):
     def hours(self, data):
         section_headings = data.css(".sectionHeading")
         store_hours = section_headings[-1].xpath("//span/following-sibling::span[1]/text()").extract()
-        
-        ret = ""
+
+        this_day_group = dict()
+        day_groups = []
         for i in range(7):
-            ret += store_hours[(i+1)*3][:2] + " "
-            ret += store_hours[(i+1)*3 + 1] + " - "
-            ret += store_hours[(i+1)*3 + 2] + "; "
+            day = store_hours[(i+1)*3][:2]
+            match = re.search(r'(\d{1,2}):(\d{2}) (AM|PM)', store_hours[(i+1)*3 + 1])
+            f_hr, f_min, f_ampm = match.groups()
 
-        return ret
+            match = re.search(r'(\d{1,2}):(\d{2}) (AM|PM)', store_hours[(i+1)*3 + 2])
+            t_hr, t_min, t_ampm = match.groups()
 
+            f_hr = int(f_hr)
+            if f_ampm == 'PM':
+                f_hr += 12
+            if f_ampm == 'AM' and f_hr == 12:
+                f_hr -= 12
 
+            t_hr = int(t_hr)
+            if t_ampm == 'PM':
+                t_hr += 12
+            if t_ampm == 'AM' and t_hr == 12:
+                t_hr -= 12
 
+            hours = "%02d:%s-%02d:%s" % (
+                f_hr, f_min,
+                t_hr, t_min,
+            )
 
+            if not this_day_group:
+                this_day_group = {
+                    'from_day': day,
+                    'to_day': day,
+                    'hours': hours
+                }
+            elif this_day_group['hours'] != hours:
+                day_groups.append(this_day_group)
+                this_day_group = {
+                    'from_day': day,
+                    'to_day': day,
+                    'hours': hours
+                }
+            elif this_day_group['hours'] == hours:
+                this_day_group['to_day'] = day
+
+        day_groups.append(this_day_group)
+
+        opening_hours = ""
+        if len(day_groups) == 1 and day_groups[0]['hours'] in ('00:00-23:59', '00:00-00:00'):
+            opening_hours = '24/7'
+        else:
+            for day_group in day_groups:
+                if day_group['from_day'] == day_group['to_day']:
+                    opening_hours += '{from_day} {hours}; '.format(**day_group)
+                elif day_group['from_day'] == 'Su' and day_group['to_day'] == 'Sa':
+                    opening_hours += '{hours}; '.format(**day_group)
+                else:
+                    opening_hours += '{from_day}-{to_day} {hours}; '.format(**day_group)
+            opening_hours = opening_hours[:-2]
+
+        return opening_hours
