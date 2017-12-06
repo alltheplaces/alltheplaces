@@ -21,8 +21,8 @@ class BeerStoreSpider(scrapy.Spider):
             end_str = "<a href"
             properties = {
                 'ref': data['properties']['storeid'],
-                'lat': data['geometry']['coordinates'][0],
-                'lon': data['geometry']['coordinates'][1],
+                'lon': data['geometry']['coordinates'][0],
+                'lat': data['geometry']['coordinates'][1],
                 'name': data['properties']['name'],
                 'addr_full': description[:description.find(end_str)]
             }
