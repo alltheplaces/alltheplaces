@@ -3,7 +3,7 @@ import re
 import scrapy
 from locations.items import GeojsonPointItem
 
-class AfcUrgentCareSpider(scrapy.Spider):
+class KristoilSpider(scrapy.Spider):
     name = "kristoil"
     allowed_domains = ["www.kristoil.com"]
 
