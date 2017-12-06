@@ -9,6 +9,7 @@ from locations.items import GeojsonPointItem
 class TractorSupplySpider(scrapy.Spider):
     name = "tractorsupply"
     allowed_domains = ["tractorsupply.com"]
+    download_delay = 1.5
     start_urls = (
         'https://www.tractorsupply.com/sitemap_stores.xml',
     )
@@ -17,6 +18,7 @@ class TractorSupplySpider(scrapy.Spider):
         day_groups = []
         this_day_group = None
         for day in store_hours:
+            day = day.replace('  :-', ' 12:00 -')
             match = re.search(r'(\S*)\s+(\d{1,2}):(\d{2})\s*-\s*(\d{1,2}):(\d{2})', day)
             (dow, f_hr, f_min, t_hr, t_min) = match.groups()
             day_short = dow[:2]
