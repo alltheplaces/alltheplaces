@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 import scrapy
-from scrapy.linkextractors import LinkExtractor
 import json
 import re
-import time
 
 from locations.items import GeojsonPointItem
 
@@ -19,8 +17,6 @@ class TractorSupplySpider(scrapy.Spider):
         day_groups = []
         this_day_group = None
         for day in store_hours:
-            # Applebees always seems to have a single dow
-            # in each opening hours object
             match = re.search(r'(\d{1,2}):(\d{2})', day)
             (f_hr, f_min) = match.groups()
             match = re.search(r'(\d{1,2}):(\d{2})', day)
@@ -28,7 +24,6 @@ class TractorSupplySpider(scrapy.Spider):
 
             f_hr = int(f_hr)
             t_hr = int(t_hr)
-
 
             hours = '{:02d}:{}-{:02d}:{}'.format(
                 f_hr,
@@ -84,14 +79,13 @@ class TractorSupplySpider(scrapy.Spider):
         return addr_tags
 
     def parse(self, response):
-
-        store_urls = response.xpath('/*/*/*/text()').extract()
-        if store_urls:
-            for store_url in store_urls:
-                store_url = str(store_url)
-                store_url = store_url.split('.com/')
-                store_url = store_url[1]
-                yield scrapy.Request(response.urljoin(store_url), callback=self.parse_store)
+        response.selector.remove_namespaces()
+        city_urls = response.xpath('//url/loc/text()').extract()
+        for path in city_urls:
+            yield scrapy.Request(
+                path,
+                callback=self.parse_store,
+            )
 
     def parse_store(self, response):
         json_data = response.xpath('//*/script[@type="application/ld+json"]/text()').extract()
@@ -111,6 +105,5 @@ class TractorSupplySpider(scrapy.Spider):
         address = self.address(data['address'])
         if address:
             properties.update(address)
-        time.sleep(2)
 
         yield GeojsonPointItem(**properties)
