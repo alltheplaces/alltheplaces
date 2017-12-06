@@ -1,5 +1,4 @@
- # -*- coding: utf-8 -*-
-import json
+# -*- coding: utf-8 -*-
 import re
 import scrapy
 
@@ -15,25 +14,24 @@ class KohlsSpider(scrapy.Spider):
         'https://www.kohls.com/stores.shtml',
     )
 
-    
     def parse_stores(self, response):
-        phone = response.xpath('//div[@class="indy-big-map-phone"]/text()').extract_first()
         opening_hours = re.findall(r'"openingHours": "([.||\t|\n|A-Z|a-z|\-|0-9|:|\s]+)', response.text)
         hours = ''
         if opening_hours:
             for osm in opening_hours:
                 hours = osm.split('\n')
-                hours = ";".join([re.sub(' - ', '-', hour) for hour in hours if hour])
+                hours = "; ".join([hour.replace(':', '').replace(' - ', '-') for hour in hours if hour])
+
         properties = {
             'addr_full': response.xpath('//div[@id="mainAddrLine1"]/text()').extract_first(),
-            'phone': phone,
+            'phone': response.xpath('//div[@class="indy-big-map-phone"]/text()').extract_first(),
             'city': response.xpath('//meta[@name="city"]/@content').extract_first(),
             'state': response.xpath('//meta[@name="state"]/@content').extract_first(),
             'postcode': response.xpath('//meta[@name="zip"]/@content').extract_first(),
             'name': response.xpath('//div[@class="location-header"]/text()').extract_first(),
             'website': response.url,
-            'lat': re.findall(r'"latitude": "([-\d]+\.[\d]+)"', response.text)[0],
-            'lon': re.findall(r'"longitude": "([-\d]+\.[\d]+)"', response.text)[0],  
+            'lat': float(re.findall(r'"latitude": "([-\d]+\.[\d]+)"', response.text)[0]),
+            'lon': float(re.findall(r'"longitude": "([-\d]+\.[\d]+)"', response.text)[0]),
             'ref': response.url,
             'opening_hours': hours
         }
