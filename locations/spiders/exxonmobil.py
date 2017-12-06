@@ -1,4 +1,41 @@
 # -*- coding: utf-8 -*-
+"""
+https://www.exxon.com/api/v1/Retail/retailstation/GetStationsByBoundingBox?
+Latitude1=40.64768480800879&Latitude2=40.77780222218161&
+Longitude1=-73.93627828095703&Longitude2=-74.16939443085937
+
+
+{
+"AddressLine1":"309 11TH AVE",
+"AddressLine2":"",
+"City":"NEW YORK",
+"Country":"United States",
+"DisplayName":"30TH STREET SERVICE STATION INC",
+"LocationID":"309546",
+"LocationName":"30THSTREETSERVICESTATIONINC",
+"PostalCode":"10001-1213",
+"StateProvince":"NY",
+"Telephone":"212-594-1515",
+"WeeklyOperatingDays":"Open 24 Hours",
+"WeeklyOperatingHours":"",
+"Latitude":40.7532,
+"Longitude":-74.00415,
+
+northeast 47.6604721,-82.5495959
+southeast 25.357288, -76.221471
+southwest 21.650646, -127.901156
+northwest 52.182930, -129.483187
+
+graphically
+52.182930, -129.483187              47.6604721,-82.5495959
+
+
+
+
+21.650646, -127.901156              25.357288, -76.221471
+
+
+"""
 import scrapy
 
 from locations.items import GeojsonPointItem
@@ -6,9 +43,11 @@ from locations.items import GeojsonPointItem
 
 class ExxonMobilSpider(scrapy.Spider):
     name = "exxonmobil"
-    allowed_domains = ["www.exxonmobilstations.com"]
+    allowed_domains = ["www.exxon.com"]
     start_urls = (
-        'http://www.exxonmobilstations.com/station-locations',
+        'http://www.exxon.com/api/v1/Retail/retailstation/GetStationsByBoundingBox?'
+        'Latitude1=40.64768480800879&Latitude2=40.77780222218161&'
+        'Longitude1=-73.93627828095703&Longitude2=-74.16939443085937',
     )
 
     def store_hours(self, store_hours):
@@ -77,6 +116,7 @@ class ExxonMobilSpider(scrapy.Spider):
         return addr_tags
 
     def parse(self, response):
+        self.log(response.text)
         # This will spider through all the country and regional pages and get us to the individual store pages
         region_urls = response.xpath('//a[@class="sitemap_link sitemap_bar"]/@href').extract()
         for url in region_urls:
