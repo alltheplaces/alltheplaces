@@ -15,23 +15,19 @@ class VillageInnSpider(scrapy.Spider):
         selector = scrapy.Selector(response)
         links = selector.css("a.animatedlink::attr(href)")
         
-        ntest = 0
         for link in links:
-            if (ntest == 0):
-                yield scrapy.Request(
-                    response.urljoin(link.extract()),
-                    callback = self.parse_link
-                )
-
-            ntest += 1
+            yield scrapy.Request(
+                response.urljoin(link.extract()),
+                callback = self.parse_link
+            )
     
     def parse_link(self, response):
         selector = scrapy.Selector(response)
         
         website = response.xpath('//head/meta[@property="og:url"]/@content').extract_first()
         ref = website.split("/")[-1]
-        lat = selector.css("#h_lat::attr(value)").extract()[0]
-        lng = selector.css("#h_lng::attr(value)").extract()[0]
+        lat = selector.css("#h_lat::attr(value)").extract_first()
+        lng = selector.css("#h_lng::attr(value)").extract_first()
 
         blocks = selector.css("#location_subcontainer .block")
         
