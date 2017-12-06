@@ -15,23 +15,17 @@ class RedLobsterSpider(scrapy.Spider):
 
     def parse(self, response):
         results = json.loads(response.body_as_unicode())
-        for locations in results["locations"]:
-            properties = {
-                'phone': locations['location']['phone'],
-                'addr:full': locations['location']['address1'],
-                'addr:city': locations['location']['city'],
-                'website': locations['location']['localPageURL'],
-                'ref': locations['location']['rlid'],
-                'lon':locations['location']['longitude'],
-                'lat':locations['location']['latitude'],
-            }
+        for store_data in results["locations"]:
+            for location in store_data['location']:
+                properties = {
+                    'addr_full': location['address1'],
+                    'city': location['city'],
+                    'state': location['state'],
+                    'phone': location['phone'],
+                    'website': location['localPageURL'],
+                    'ref': location['rlid'],
+                    'lon':float(location['longitude']),
+                    'lat':float(location['latitude']),
+                }
 
-            lon_lat = [
-                locations['location']['longitude'],
-                locations['location']['latitude'],
-            ]
-
-            yield GeojsonPointItem(
-                properties=properties,
-                lon_lat=lon_lat,
-            )
+        yield GeojsonPointItem(**properties)
