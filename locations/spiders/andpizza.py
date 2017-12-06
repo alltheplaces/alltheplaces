@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 import scrapy
-import json
-import re
 
 from locations.items import GeojsonPointItem
 
+
 class TacocabanaSpider(scrapy.Spider):
-    name="andpizza"
+    name = "andpizza"
     allowed_domains = ["andpizza.com"]
     start_urls = (
         "https://andpizza.com",
@@ -31,8 +30,8 @@ class TacocabanaSpider(scrapy.Spider):
         stores = selector.css("div.location")
 
         for store in stores:
-            ref = store.css("div.location::attr(class)").extract()[0].split(" ")[1]
-            name = store.css("a.knockout *::text").extract()[0]
+            ref = store.css("div.location::attr(class)").extract_first().split(" ")[1]
+            name = store.css("a.knockout *::text").extract_first()
             address = store.css("address>a *::text").extract()
             address1 = address[0]
             address2 = address[len(address)-1].split(",")
@@ -49,8 +48,7 @@ class TacocabanaSpider(scrapy.Spider):
                 "city": address2[0],
                 "state": address2[1].split(" ")[1],
                 "postcode": address2[1].split(" ")[2],
-                "opening_hours": store_hours
+                "opening_hours": store_hours,
             }
 
             yield GeojsonPointItem(**properties)
-
