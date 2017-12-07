@@ -64,30 +64,34 @@ class SprintSpider(scrapy.Spider):
 
         return opening_hours
 
-    def parse(self, response):
+    def parse(self, response): #high-level list of states
         states = response.xpath('//li[@class="c-directory-list-content-item"]/a[@class="c-directory-list-content-item-link"]/@href')
         for path in states:
-            yield scrapy.Request(response.urljoin(path.extract()), callback=self.parse_city)
+            yield scrapy.Request(response.urljoin(path.extract()), callback=self.parse_state)
 
-
-    def parse_city(self, response):
+    def parse_state(self, response): #first-level list of cities    
         cities = response.xpath('//li[@class="c-directory-list-content-item"]/a[@class="c-directory-list-content-item-link"]/@href')
         for path in cities:
-            yield scrapy.Request(response.urljoin(path.extract()), callback=self.parse_store)
+            yield scrapy.Request(response.urljoin(path.extract()), callback=self.parse_store)               
 
-    def parse_store(self, response):
-        address=response.xpath('//div[@class="LocationInfo-contact"]/address/span[@class="c-address-street"]/span/text()')
-        hours=json.loads(response.xpath('//div[@id="c-hours-collapse"]/div[@class="c-location-hours"]/div[contains(@class,"c-location-hours-details-wrapper")]/@data-days').extract_first())
-        yield GeojsonPointItem(
-            lat=float(response.xpath('//span[@itemprop="geo"]/meta[@itemprop="latitude"]/@content').extract_first()),
-            lon=float(response.xpath('//span[@itemprop="geo"]/meta[@itemprop="longitude"]/@content').extract_first()),
-            phone=response.xpath('//div[@class="LocationInfo-contact"]/div[contains(@class, "c-phone-main")]/div[contains(@class,"c-phone-main-number-wrapper")]/div[@class="c-phone-number c-phone-main-number"]/span/text()').extract_first(),
-            website=response.xpath('//link[@rel="canonical"]/@href').extract_first(),
-            ref=response.xpath("//script[contains(., 'storeIdNumber')]/text()").re(r'storeIdNumber = \'(.*)\';')[0],
-            opening_hours=self.store_hours(hours),
-            addr_full=" ".join(list(map(lambda x:x.extract(),address))),
-            city=response.xpath('//span[@itemprop="addressLocality"]/text()').extract_first(),
-            state=response.xpath('//abbr[@itemprop="addressRegion"]/text()').extract_first(),
-            postcode=response.xpath('//div[@class="LocationInfo-contact"]/address/span[@class="c-address-postal-code "]/text()').extract_first().strip(),
-            country=response.xpath('//abbr[@itemprop="addressCountry"]/text()').extract_first(),
-        )
+    def parse_store(self, response): #lowest-level - getting data for store
+        if len(response.xpath('//head/meta[@name="geo.position"]')):
+            address=response.xpath('//div[@class="LocationInfo-contact"]/address/span[@class="c-address-street"]/span/text()')  
+            hours=json.loads(response.xpath('//div[@id="c-hours-collapse"]/div[@class="c-location-hours"]/div[contains(@class,"c-location-hours-details-wrapper")]/@data-days').extract_first())    
+            yield GeojsonPointItem(
+                lat=float(response.xpath('//span[@itemprop="geo"]/meta[@itemprop="latitude"]/@content').extract_first()),
+                lon=float(response.xpath('//span[@itemprop="geo"]/meta[@itemprop="longitude"]/@content').extract_first()),
+                phone=response.xpath('//div[@class="LocationInfo-contact"]/div[contains(@class, "c-phone-main")]/div[contains(@class,"c-phone-main-number-wrapper")]/div[@class="c-phone-number c-phone-main-number"]/span/text()').extract_first(),
+                website=response.xpath('//link[@rel="canonical"]/@href').extract_first(),
+                ref=response.xpath("//script[contains(., 'storeIdNumber')]/text()").re(r'storeIdNumber = \'(.*)\';')[0],
+                opening_hours=self.store_hours(hours),
+                addr_full=" ".join(list(map(lambda x:x.extract(),address))),
+                city=response.xpath('//span[@itemprop="addressLocality"]/text()').extract_first(),
+                state=response.xpath('//abbr[@itemprop="addressRegion"]/text()').extract_first(),
+                postcode=response.xpath('//div[@class="LocationInfo-contact"]/address/span[@class="c-address-postal-code "]/text()').extract_first().strip(),
+                country=response.xpath('//abbr[@itemprop="addressCountry"]/text()').extract_first(),
+            )
+        else:
+            stores = response.xpath('//li[@class="c-directory-list-content-item"]/a[@class="c-directory-list-content-item-link"]/@href')
+            for path in stores:
+                yield scrapy.Request(response.urljoin(path.extract()), callback=self.parse_store)
