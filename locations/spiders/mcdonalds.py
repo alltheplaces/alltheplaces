@@ -24,11 +24,6 @@ class McDonaldsSpider(scrapy.Spider):
         urls.append(url)
 
     start_urls = tuple(urls)
-    # start_urls = (
-    #     'https://www.mcdonalds.com/googleapps/GoogleRestaurantLocAction.do?method=searchLocation&latitude=44.97&longitude=-93.21&radius=100000&maxResults=300000&country=us&language=en-us',
-    #     'https://www.mcdonalds.com/googleapps/GoogleRestaurantLocAction.do?method=searchLocation&latitude=44.97&longitude=-93.21&radius=100000&maxResults=300000&country=ca&language=en-ca',
-    #     'https://www.mcdonalds.com/googleapps/GoogleRestaurantLocAction.do?method=searchLocation&latitude=44.97&longitude=-93.21&radius=100000&maxResults=300000&country=gb&language=en-gb',
-    # )
 
     def store_hours(self, store_hours):
         if not store_hours:
