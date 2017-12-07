@@ -4,7 +4,7 @@ import json
 
 from locations.items import GeojsonPointItem
 
-countries = ['us', 'ca', 'cr', 'au', 'jp', 'nl', 'pa', 'de', 'fr', 'sv', 'se', 'gt', 'uk', 'bs', 'nz',
+countries = ['us', 'ca', 'cr', 'au', 'jp', 'nl', 'pa', 'de', 'fr', 'sv', 'se', 'gt', 'uk', 'bs', 'nz', 'hk',
              'sz', 'ie', 'at', 'be', 'br', 'sg', 'es', 'dk', 'ph', 'my', 'no', 'ad', 'fi', 'th', 'lu', 'vu',
              'it', 'mx', 'cu', 'tr', 'ar', 'rs', 'hu', 'ru', 'cn', 'cl', 'id', 'pt', 'gr', 'uy', 'cz', 'pl',
              'mc', 'bn', 'ma', 'il', 'si', 'sa', 'kw', 'om', 'eg', 'bg', 'bh', 'lv', 'ae', 'ee', 'ro', 'mt',
@@ -67,6 +67,9 @@ class McDonaldsSpider(scrapy.Spider):
 
     def parse(self, response):
         data = json.loads(response.body_as_unicode())
+
+        if not data:
+            return
 
         for store in data.get('features', []):
             store_info = store['properties']
