@@ -25,6 +25,7 @@ class McDonaldsSpider(scrapy.Spider):
     
     start_urls = tuple(urls)
 
+
     def store_hours(self, store_hours):
         if not store_hours:
             return None
@@ -64,6 +65,7 @@ class McDonaldsSpider(scrapy.Spider):
             opening_hours = opening_hours[:-2]
 
         return opening_hours
+
 
     def parse(self, response):
         data = json.loads(response.body_as_unicode())
