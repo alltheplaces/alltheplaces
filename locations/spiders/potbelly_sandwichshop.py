@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 import scrapy
 import json
+import re
+import demjson
+
 from locations.items import GeojsonPointItem
 
 
@@ -9,29 +12,20 @@ class PotbellySandwichSpider(scrapy.Spider):
     name = "potbelly_sandwich"
     allowed_domains = ["www.potbelly.com"]
     start_urls = (
-        'https://api-origin.potbelly.com/proxy/v15/apps/1055/locations?lat=41.8781136&lng=-87.62979819999998&fulfillment_types=pickup&has_breakfast=false&in_delivery_area=false',
+        'https://www.potbelly.com/dist/main.js',
     )
 
-    def start_requests(self):
-
-        url = self.start_urls[0]
-
-        headers = {
-                   'Accept': 'application/json, text/plain, */*',
-                   'Accept-Language': 'en-US,en;q=0.9,ru;q=0.6',
-                   'Origin': 'https://www.potbelly.com',
-                   'Accept-Encoding': 'gzip, deflate, br',
-                   'Referer': 'https://www.potbelly.com/store-locator',
-                   'Connection': 'keep-alive',
-                   }
-
-        url = self.start_urls[0]
-
-        yield scrapy.Request(url=url, headers=headers, callback=self.parse)
-
     def parse(self, response):
-        results = json.loads(response.body_as_unicode())
-        for data in results:
+        results = removeNonAscii(response.body_as_unicode())
+        sub_str = find_between(results, 'staticLocations=', "shown:!0}}]}")
+        js_obj = sub_str + "shown:!0}}]"
+        js_obj = js_obj.replace('!0', 'true')
+        js_obj = js_obj.replace('!1', 'false')
+        py_obj = demjson.decode(js_obj)
+        dumped_str = json.dumps(py_obj)
+        locations = json.loads(dumped_str)
+        
+        for data in locations:
             properties = {
                 'ref': data['location']['id'],
                 'name': data['location']['name'],
@@ -47,3 +41,13 @@ class PotbellySandwichSpider(scrapy.Spider):
             }
 
             yield GeojsonPointItem(**properties)
+
+def removeNonAscii(s): return "".join(i for i in s if ord(i)<128)
+
+def find_between(s, first, last):
+    try:
+        start = s.index( first ) + len( first )
+        end = s.index( last, start )
+        return s[start:end]
+    except ValueError:
+        return ""

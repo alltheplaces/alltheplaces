@@ -13,7 +13,7 @@ name = "pypi"
 
 scrapy = "*"
 botocore = "*"
-
+demjson = "*"
 
 [requires]
 
