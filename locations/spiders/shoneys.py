@@ -1,5 +1,4 @@
 import json
-import hashlib
 import re
 import scrapy
 from locations.items import GeojsonPointItem
@@ -31,11 +30,6 @@ class ShoneysSpider(scrapy.Spider):
                 if key2 in store and store[key2]:
                     properties[key1] = store[key2]
 
-            #refsum = ''
-            #for key in ['addr_full', 'city', 'state']:
-            #    if key in properties:
-            #        refsum += properties[key]
-            #ref = hashlib.md5().update(refsum.encode('utf-8')).hexdigest()
             properties['ref'] = properties['addr_full']
                 
             yield GeojsonPointItem(**properties)             
