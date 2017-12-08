@@ -39,9 +39,4 @@ class HiHostelsSpider(scrapy.Spider):
             'lat': float(response.xpath('//*[@id ="lon"]/@value').extract()[0]),
         }
 
-        address = self.address(response.xpath('/html/body/div[1]/div[1]/aside/address/text()').extract())
-        if address:
-            properties.update(address)
-
-
         yield GeojsonPointItem(**properties)
