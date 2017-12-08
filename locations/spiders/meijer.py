@@ -18,11 +18,10 @@ class MeijerSpider(scrapy.Spider):
         search = ZipcodeSearchEngine()
         for state in STATES:
             location = search.by_state(state)
-            if state == 'MI':
-                yield scrapy.Request(
-                    'https://www.meijer.com/custserv/locate_store_layer.cmd?latitude={}&longitude={}&radius=50&editLinktype=&fromGeolocation=true'.format(location[0]['Latitude'], location[0]['Longitude']),
-                    callback = self.parse
-                )
+            yield scrapy.Request(
+                'https://www.meijer.com/custserv/locate_store_layer.cmd?latitude={}&longitude={}&radius=50&editLinktype=&fromGeolocation=true'.format(location[0]['Latitude'], location[0]['Longitude']),
+                callback = self.parse
+            )
     
     def parse(self, response):
         selector = scrapy.Selector(response)
