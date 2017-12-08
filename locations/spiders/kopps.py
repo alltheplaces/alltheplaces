@@ -14,7 +14,7 @@ DAY_MAPPING = {
 class KoppsSpider(scrapy.Spider):
     name = "kopps"
     allowed_domains = ["www.kopps.com"]
-    download_delay = 1.5
+    download_delay = 1.5 
     start_urls = (
         'https://www.kopps.com/',
     )
