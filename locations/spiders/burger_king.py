@@ -89,6 +89,7 @@ class BurgerKingSpider(scrapy.Spider):
         for path in city_urls:
             yield scrapy.Request(response.urljoin(path), callback=self.parse_city_stores)
 
+
     def parse(self, response):
         urls = response.xpath('//div[@class="c-directory-list-content-wrapper"]/ul/li/a/@href').extract()
         for path in urls:
