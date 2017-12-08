@@ -18,10 +18,14 @@ class WendysSpider(scrapy.Spider):
 
     name = "wendys"
     allowed_domains = ["locations.wendys.com"]
-    download_delay = 1
+    download_delay = 0
+    download_timeout = 30
     start_urls = (
         'https://locations.wendys.com',
     )
+
+    def handle_error(self, failure):
+        self.log("Request failed: %s" % failure.request)
     def parse_day(self, day):
             return DAY_MAPPING[day.strip()]
     def parse_times(self, times):
@@ -85,14 +89,14 @@ class WendysSpider(scrapy.Spider):
         stores = response.xpath('//div[@class="col-xs-12 col-lg-10 col-lg-offset-1"]/article/ul/li/a/@href').extract()
         for store in stores:
             if store:
-                yield scrapy.Request(response.urljoin(store), callback=self.parse_stores)
+                yield scrapy.Request(response.urljoin(store), callback=self.parse_stores ,errback=self.handle_error)
 
     def parse_state(self, response):
         city_urls = response.xpath('//div[@class="col-xs-12 col-lg-10 col-lg-offset-1"]/article/div[@class="col"]/ul/li/a/@href').extract()
         for path in city_urls:
-            yield scrapy.Request(response.urljoin(path), callback=self.parse_city_stores)
+            yield scrapy.Request(response.urljoin(path), callback=self.parse_city_stores ,errback=self.handle_error)
 
     def parse(self, response):
         urls = response.xpath('//div[@class="col-xs-12 col-lg-10 col-lg-offset-1"]/article/div[@class="col"]/ul/li/a/@href').extract()
         for path in urls:
-            yield scrapy.Request(response.urljoin(path), callback=self.parse_state)
+            yield scrapy.Request(response.urljoin(path), callback=self.parse_state ,errback=self.handle_error)
