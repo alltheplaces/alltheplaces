@@ -22,9 +22,16 @@ class McLocalizer(scrapy.Spider):
         for data in results:
             properties = {
                 'ref': data['id'],
-                'lon': data['longitude'],
-                'lat': data['latitude'],
-                'name': data['name'][:data['name'].find("<br")]
+                'lon': float(data['longitude']),
+                'lat': float(data['latitude']),
+                
             }
+
+            contact_info = data['name'][:data['name'].find("<br")]
+            name = contact_info[:contact_info.find("</br")]
+
+            properties["name"] = name
+            properties["addr_full"] = data['name'][data['name'].find("<small>"):-8][8:]
+            #  = address[8:]
 
             yield GeojsonPointItem(**properties)
