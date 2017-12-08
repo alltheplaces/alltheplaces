@@ -12,6 +12,20 @@ class OliveGardenSpider(scrapy.Spider):
         'http://www.olivegarden.com/en-locations-sitemap.xml',
     )
 
+    def address(self, address):
+        if not address:
+            return None
+
+        addr_tags = {
+            "addr_full": address[0].split('value="')[1].split('"')[0].split(',')[0],
+            "city": address[0].split('value="')[1].split('"')[0].split(',')[1],
+            "state": address[0].split('value="')[1].split('"')[0].split(',')[-2],
+            "postcode": address[0].split('value="')[1].split('"')[0].split(',')[-1],
+        }
+
+        return addr_tags
+
+
     def parse(self, response):
         response.selector.remove_namespaces()
         city_urls = response.xpath('//url/loc/text()').extract()
@@ -25,15 +39,14 @@ class OliveGardenSpider(scrapy.Spider):
 
         properties = {
             'name': response.xpath('/html/body/div[3]/div/div/div/div/div/div/div[1]/h1').extract()[0].split('\n')[1].split('<br>')[0],
-            'addr_full': response.xpath('//input[@id="restAddress"]').extract()[0].split('value="')[1].split('"')[0].split(',')[0],
-            'city': response.xpath('//input[@id="restAddress"]').extract()[0].split('value="')[1].split('"')[0].split(',')[1],
-            'state': response.xpath('//input[@id="restAddress"]').extract()[0].split('value="')[1].split('"')[0].split(',')[-2],
-            'postcode': response.xpath('//input[@id="restAddress"]').extract()[0].split('value="')[1].split('"')[0].split(',')[-1],
             'website': response.xpath('//head/link[@rel="canonical"]/@href').extract_first(),
             'lon': float(response.xpath('//input[@id="restLatLong"]').extract()[0].split('value="')[1].split('"')[0].split(',')[1]),
             'lat': float(response.xpath('//input[@id="restLatLong"]').extract()[0].split('value="')[1].split('"')[0].split(',')[0]),
         }
 
-        open('/tmp/tmp.txt','w').write(str(properties))
+        address = self.address(response.xpath('//input[@id="restAddress"]').extract())
+        if address:
+            properties.update(address)
+
 
         yield GeojsonPointItem(**properties)
