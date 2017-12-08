@@ -17,18 +17,18 @@ class LaBreweriesSpider(scrapy.Spider):
         this_day_group = None
         for day in store_hours:
             day = day.replace('  :-', ' 12:00 -')
-            match = re.search(r'(\S*)\s+(\d{1,2}):(\d{2})\s*-\s*(\d{1,2}):(\d{2})', day)
-            (dow, f_hr, f_min, t_hr, t_min) = match.groups()
+            day = day.split('<h5>Hours</h5>')[1].strip('<br>').strip('</aside>')
+            match = re.search(r'(closed|(\d{1,2})\S.\s*-\s*(\d{1,2})\S.)', day.lower())
+            open('/tmp/test1.txt', 'w').write(str(day))
+            (dow, f_hr, t_hr) = match.groups()
             day_short = dow[:2]
 
             f_hr = int(f_hr)
             t_hr = int(t_hr)
 
-            hours = '{:02d}:{}-{:02d}:{}'.format(
+            hours = '{:02d}-{:02d}'.format(
                 f_hr,
-                f_min,
                 t_hr,
-                t_min,
             )
 
             if not this_day_group:
@@ -80,7 +80,6 @@ class LaBreweriesSpider(scrapy.Spider):
     def parse(self, response):
         response.selector.remove_namespaces()
         city_urls = response.xpath('//url/loc/text()').extract()
-        open('/tmp/what1.txt','w').write(str(city_urls))
         for path in city_urls:
             yield scrapy.Request(
                 path.strip(),
@@ -91,16 +90,15 @@ class LaBreweriesSpider(scrapy.Spider):
 
         properties = {
             'website': response.xpath('//head/link[@rel="canonical"]/@href').extract_first(),
-            'ref': response.xpath('/html/body/div[1]/div[1]/header/h1/text()').extract(),
-            'opening_hours': response.css('#secondary').extract(),
-            # 'lon': float(data['geo']['longitude']),
-            # 'lat': float(data['geo']['latitude']),
+            'ref': str(response.xpath('/html/body/div[1]/div[1]/header/h1/text()').extract()).strip("['']"),
+            'opening_hours': re.sub('\s+', ' ', response.css('#secondary').extract()[0].split('<h5>Hours</h5>')[1].replace('<br>','').replace('</aside>','').replace('\t',' ').replace('\n','').replace('\r',' ')).strip(),
+            # 'lon': float(data['geo']['longitude']),   # not lon on page
+            # 'lat': float(data['geo']['latitude']),    # not lat on page
         }
 
         address = self.address(response.xpath('/html/body/div[1]/div[1]/aside/address/text()').extract())
         if address:
             properties.update(address)
 
-        # open('/tmp/test1.txt', 'w').write(str(properties))
 
         yield GeojsonPointItem(**properties)
