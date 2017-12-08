@@ -40,6 +40,7 @@ class OliveGardenSpider(scrapy.Spider):
         properties = {
             'name': response.xpath('/html/body/div[3]/div/div/div/div/div/div/div[1]/h1').extract()[0].split('\n')[1].split('<br>')[0],
             'website': response.xpath('//head/link[@rel="canonical"]/@href').extract_first(),
+            'ref': " ".join(response.xpath('/html/head/title/text()').extract()[0].split('|')[0].split()),
             'lon': float(response.xpath('//input[@id="restLatLong"]').extract()[0].split('value="')[1].split('"')[0].split(',')[1]),
             'lat': float(response.xpath('//input[@id="restLatLong"]').extract()[0].split('value="')[1].split('"')[0].split(',')[0]),
         }
@@ -47,6 +48,5 @@ class OliveGardenSpider(scrapy.Spider):
         address = self.address(response.xpath('//input[@id="restAddress"]').extract())
         if address:
             properties.update(address)
-
 
         yield GeojsonPointItem(**properties)
