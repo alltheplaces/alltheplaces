@@ -37,7 +37,7 @@ class TargetSpider(scrapy.Spider):
         from a browser), but it might be something that expires and renders requests
         invalid. So, if this spider stops working, that's probably why.
     '''         
-    zips = ['97062', '90021', '73301', '82633', '29401', '60007', '04019', '87101', '59601', '39056', '14201', '55111', '94203', '64030', '33601']
+    zips = ['97062', '90021', '73301', '82633', '29401', '60007', '04019', '87101', '59601', '39056', '14201', '55111', '94203', '64030', '33601', '10001', '98101', '37011', '58501', '78501', '97501']
     name = "target"
     allowed_domains = ["target.com"]
     start_urls = tuple([
