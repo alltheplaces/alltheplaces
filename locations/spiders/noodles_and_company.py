@@ -101,6 +101,8 @@ class NoodlesAndCompanySpider(scrapy.Spider):
 
     def parse_location(self, response):
         properties = {
+            'lon': float(response.xpath('//span/meta[@itemprop="longitude"]/@content').extract_first()),
+            'lat': float(response.xpath('//span/meta[@itemprop="latitude"]/@content').extract_first()),
             'addr_full': response.xpath('//span[@class="c-address-street-1"]/text()').extract_first().strip(),
             'city': response.xpath('//span[@itemprop="addressLocality"]/text()').extract_first(),
             'state': response.xpath('//abbr[@itemprop="addressRegion"]/text()').extract_first(),
@@ -120,12 +122,4 @@ class NoodlesAndCompanySpider(scrapy.Spider):
         if opening_hours:
             properties['opening_hours'] = opening_hours
 
-        lon_lat = [
-            float(response.xpath('//span/meta[@itemprop="longitude"]/@content').extract_first()),
-            float(response.xpath('//span/meta[@itemprop="latitude"]/@content').extract_first()),
-        ]
-
-        yield GeojsonPointItem(
-            properties=properties,
-            lon_lat=lon_lat,
-        )
+        yield GeojsonPointItem(**properties)
