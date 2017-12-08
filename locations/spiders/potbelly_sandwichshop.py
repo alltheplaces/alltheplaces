@@ -2,7 +2,6 @@
 import scrapy
 import json
 import re
-import demjson
 
 from locations.items import GeojsonPointItem
 
@@ -16,15 +15,17 @@ class PotbellySandwichSpider(scrapy.Spider):
     )
 
     def parse(self, response):
-        results = removeNonAscii(response.body_as_unicode())
+        results = response.body_as_unicode()
         sub_str = find_between(results, 'staticLocations=', "shown:!0}}]}")
         js_obj = sub_str + "shown:!0}}]"
         js_obj = js_obj.replace('!0', 'true')
         js_obj = js_obj.replace('!1', 'false')
-        py_obj = demjson.decode(js_obj)
-        dumped_str = json.dumps(py_obj)
-        locations = json.loads(dumped_str)
-        
+        js_obj = js_obj.replace(',hours:', ',"hours":')
+        js_obj = js_obj.replace('\\r\\n', '; ')
+        js_obj = re.sub(r'(-?[a-zA-Z]+):(\d{1,2}:)', r'\1: \2', js_obj)
+        cleaner_js = re.sub(r'([a-z_]+):([^/ ])', r'"\1":\2', js_obj)
+        locations = json.loads(cleaner_js)
+
         for data in locations:
             properties = {
                 'ref': data['location']['id'],
@@ -42,12 +43,11 @@ class PotbellySandwichSpider(scrapy.Spider):
 
             yield GeojsonPointItem(**properties)
 
-def removeNonAscii(s): return "".join(i for i in s if ord(i)<128)
 
 def find_between(s, first, last):
     try:
-        start = s.index( first ) + len( first )
-        end = s.index( last, start )
+        start = s.index(first) + len(first)
+        end = s.index(last, start)
         return s[start:end]
     except ValueError:
         return ""

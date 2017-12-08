@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "cb1e0847e92fe1a8f779bda0a07450ee93669d54c25f1609de0cbc9428eff759"
+            "sha256": "c98e8d9951d4c71fd338af27ca6a58bcc94bf30543b6f49ec083939fb58536ae"
         },
         "host-environment-markers": {
             "implementation_name": "cpython",
@@ -9,9 +9,9 @@
             "os_name": "posix",
             "platform_machine": "x86_64",
             "platform_python_implementation": "CPython",
-            "platform_release": "17.0.0",
+            "platform_release": "16.7.0",
             "platform_system": "Darwin",
-            "platform_version": "Darwin Kernel Version 17.0.0: Thu Aug 24 21:48:19 PDT 2017; root:xnu-4570.1.46~2/RELEASE_X86_64",
+            "platform_version": "Darwin Kernel Version 16.7.0: Thu Jun 15 17:36:27 PDT 2017; root:xnu-3789.70.16~2/RELEASE_X86_64",
             "python_full_version": "3.6.3",
             "python_version": "3.6",
             "sys_platform": "darwin"
@@ -52,10 +52,10 @@
         },
         "botocore": {
             "hashes": [
-                "sha256:b70d10c76b1ba920dbbf0ced67e64d156eff2d22799702d9a872609a028bc7a4",
-                "sha256:59266bd0ef146ae274cb3b4d8682314756cd07ce4ce0cf8cae76cd82790aff09"
+                "sha256:929a6973bc149fd8a9f880c3263debe2df0fd3329e8b717f09399d16e0941c98",
+                "sha256:90cda6580aaad820bc348968a9de3b3bfd9574e91b0941758d48f75e41b3bf99"
             ],
-            "version": "==1.8.9"
+            "version": "==1.8.10"
         },
         "cffi": {
             "hashes": [
@@ -136,12 +136,6 @@
             ],
             "version": "==1.0.1"
         },
-        "demjson": {
-            "hashes": [
-                "sha256:31de2038a0fdd9c4c11f8bf3b13fe77bc2a128307f965c8d5fb4dc6d6f6beb79"
-            ],
-            "version": "==2.2.4"
-        },
         "docutils": {
             "hashes": [
                 "sha256:7a4bd47eaf6596e1295ecb11361139febe29b084a87bf005bf899f9a42edc3c6",
@@ -149,6 +143,16 @@
                 "sha256:51e64ef2ebfb29cae1faa133b3710143496eca21c530f3f71424d77687764274"
             ],
             "version": "==0.14"
+        },
+        "enum34": {
+            "hashes": [
+                "sha256:6bd0f6ad48ec2aa117d3d141940d484deccda84d4fcd884f5c3d93c23ecd8c79",
+                "sha256:644837f692e5f550741432dd3f223bbb9852018674981b1664e5dc339387588a",
+                "sha256:8ad8c4783bf61ded74527bffb48ed9b54166685e4230386a9ed9b1279e2df5b1",
+                "sha256:2d81cbbe0e73112bdfe6ef8576f2238f2ba27dd0d55752a776c41d38b7da2850"
+            ],
+            "markers": "python_version < '3'",
+            "version": "==1.1.6"
         },
         "hyperlink": {
             "hashes": [
@@ -170,6 +174,14 @@
                 "sha256:7b751696aaf36eebfab537e458929e194460051ccad279c72b755a167eebd4b3"
             ],
             "version": "==17.5.0"
+        },
+        "ipaddress": {
+            "hashes": [
+                "sha256:d34cf15d95ce9a734560f7400a8bd2ac2606f378e2a1d0eadbf1c98707e7c74a",
+                "sha256:5d8534c8e185f2d8a1fda1ef73f2c8f4b23264e8e30063feeb9511d492a413e1"
+            ],
+            "markers": "python_version < '3'",
+            "version": "==1.0.18"
         },
         "jmespath": {
             "hashes": [
