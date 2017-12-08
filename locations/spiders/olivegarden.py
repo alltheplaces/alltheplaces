@@ -8,6 +8,7 @@ from locations.items import GeojsonPointItem
 class OliveGardenSpider(scrapy.Spider):
     name = "olivegarden"
     allowed_domains = ['olivegarden.com']
+    download_delay = 1.5
     start_urls = (
         'http://www.olivegarden.com/en-locations-sitemap.xml',
     )
@@ -25,12 +26,11 @@ class OliveGardenSpider(scrapy.Spider):
 
         return addr_tags
 
-
     def parse(self, response):
         response.selector.remove_namespaces()
         city_urls = response.xpath('//url/loc/text()').extract()
+        locationURL = re.compile(r'http:/(/|/www.)olivegarden.com/locations/\S+')
         for path in city_urls:
-            locationURL = re.compile(r'http:/(/|/www.)olivegarden.com/locations/\S+')
             if not re.search(locationURL, path):
                 pass
             else:
@@ -40,7 +40,6 @@ class OliveGardenSpider(scrapy.Spider):
                 )
 
     def parse_store(self, response):
-
         properties = {
             'name': response.xpath('/html/body/div[3]/div/div/div/div/div/div/div[1]/h1').extract()[0].split('\n')[1].split('<br>')[0],
             'website': response.xpath('//head/link[@rel="canonical"]/@href').extract_first(),
