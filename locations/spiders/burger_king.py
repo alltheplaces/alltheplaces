@@ -81,15 +81,16 @@ class BurgerKingSpider(scrapy.Spider):
         if(len(stores)==0):
              stores.append(response.url)
         for store in stores:
-             yield scrapy.Request(response.urljoin(store), callback=self.parse_stores)
+             yield scrapy.Request(response.urljoin(store), callback=self.parse_stores )
 
 
     def parse_state(self, response):
         city_urls = response.xpath('//div[@class="c-directory-list-content-wrapper"]/ul/li/a/@href').extract()
         for path in city_urls:
-            yield scrapy.Request(response.urljoin(path), callback=self.parse_city_stores)
+            yield scrapy.Request(response.urljoin(path), callback=self.parse_city_stores )
+
 
     def parse(self, response):
         urls = response.xpath('//div[@class="c-directory-list-content-wrapper"]/ul/li/a/@href').extract()
         for path in urls:
-            yield scrapy.Request(response.urljoin(path), callback=self.parse_state)
+            yield scrapy.Request(response.urljoin(path), callback=self.parse_state )
