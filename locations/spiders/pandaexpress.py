@@ -4,11 +4,11 @@ from scrapy.http import Request
 import json
 from locations.items import GeojsonPointItem
 
+
 class PandaSpider(scrapy.Spider):
     name = "pandaexpress"
-    allowed_domains = ["inkplant.com","pandaexpress.com"]
+    allowed_domains = ["inkplant.com", "pandaexpress.com"]
     start_urls = ['https://inkplant.com/code/state-latitudes-longitudes']
-
 
     def parse(self, response):
 
@@ -26,23 +26,19 @@ class PandaSpider(scrapy.Spider):
             # parse and return relevant location information
             yield Request(state_url, callback=self.parseState)
 
-    def parseState(self,response):
-
-        state_data = json.loads(response.body.decode('utf-8'))
-        print("No of Stores in State",len(state_data))
+    def parseState(self, response):
+        state_data = json.loads(response.body_as_unicode())
 
         for store in state_data:
-
             properties = {
-
                 'addr_full': store['Address'],
                 'city': store["City"],
                 'state': store['State'],
-                'postcode': store['Zip'],
+                'postcode': store['Zip'].strip(),
                 'ref': store['Id'],
                 'lon': float(store['Longitude']),
                 'lat': float(store['Latitude']),
                 'phone': store['Phone']
             }
-            yield GeojsonPointItem(**properties)
 
+            yield GeojsonPointItem(**properties)
