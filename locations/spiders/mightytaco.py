@@ -19,7 +19,7 @@ class MightytacoSpider(scrapy.Spider):
 
     name = "mightytaco"
     allowed_domains = ["www.mightytaco.com"]
-    download_delay = 1.5
+    download_delay = 1
     start_urls = (
         'https://www.mightytaco.com/Locations',
     )
