@@ -6,6 +6,8 @@ class BeerMappingSpider(scrapy.Spider):
     name = "beermapping"
     allowed_domains = ["beermapping.com"]
 
+    download_delay = 3
+
     start_urls = (
         'https://beermapping.com/includes/dataradius.php?lat=44.3793041&lng=-113.704071&radius=1000',
         'https://beermapping.com/includes/dataradius.php?lat=45.7857292&lng=-102.1970288&radius=1000',
