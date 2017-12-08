@@ -6,7 +6,7 @@ if __name__ == '__main__':
     settings = get_project_settings()
 
     settings.set('LOG_FILE', 'all_spiders.log')
-    settings.set('LOG_LEVEL', 'WARN')
+    settings.set('LOG_LEVEL', 'ERROR')
     settings.set('TELNETCONSOLE_ENABLED', False)
     settings.set('FEED_URI', 'output.ndgeojson')
     settings.set('FEED_FORMAT', 'ndgeojson')
