@@ -1,48 +1,39 @@
 # -*- coding: utf-8 -*-
 import json
 import scrapy
-import re
 
 from locations.items import GeojsonPointItem
 
+
 class SuperonefoodsSpider(scrapy.Spider):
-	name = "superonefoods"
-	allowed_domains = ["www.superonefoods.com"]
-	start_urls = (
-		'https://www.superonefoods.com/store-finder',
-	)
+    name = "superonefoods"
+    allowed_domains = ["www.superonefoods.com"]
+    start_urls = (
+        'https://www.superonefoods.com/store-finder',
+    )
 
-	def parse(self, response):
-		# retrieve js data variable from script tag
-		items = response.xpath('//script/text()')[3].re("var stores =(.+?);\n")
-		
-		# convert data variable from unicode to string
-		items = [str(x) for x in items]
-		
-		# convert type string representation of list to type list
-		data = [items[0]]
-		
-		# load list into json object for parsing
-		jsondata = json.loads(data[0])
+    def parse(self, response):
+        # retrieve js data variable from script tag
+        items = response.xpath('//script/text()')[3].re("var stores =(.+?);\n")
 
-		# loop through json data object and retrieve values; yield the values to GeojsonPointItem
-		for item in jsondata:
-			properties = {
-				'ref': item.get('_id'),
-				'addr:full': item.get('address'),
-				'addr:city': item.get('city'),
-				'addr:state': item.get('state'),
-				'addr:postcode': item.get('zip'),
-			}
+        # convert data variable from unicode to string
+        items = [str(x) for x in items]
 
-			yield GeojsonPointItem(
-				ref=item.get('_id'),
-				lat=float(item.get('latitude')),
-				lon=float(item.get('longitude')),
-				addr_full=item.get('address'),
-				city=item.get('city'),
-				state=item.get('state'),
-				postcode=item.get('zip'),
-				website='https://www.superonefoods.com/store-details/'+item.get('url'),
-			)
+        # convert type string representation of list to type list
+        data = [items[0]]
 
+        # load list into json object for parsing
+        jsondata = json.loads(data[0])
+
+        # loop through json data object and retrieve values; yield the values to GeojsonPointItem
+        for item in jsondata:
+            yield GeojsonPointItem(
+                ref=item.get('_id'),
+                lat=float(item.get('latitude')),
+                lon=float(item.get('longitude')),
+                addr_full=item.get('address'),
+                city=item.get('city'),
+                state=item.get('state'),
+                postcode=item.get('zip'),
+                website='https://www.superonefoods.com/store-details/'+item.get('url'),
+            )
