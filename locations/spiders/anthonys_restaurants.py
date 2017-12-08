@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 import scrapy
 from locations.items import GeojsonPointItem
-import json
-import re
 
 class AnthonysRestaurantsSpiders(scrapy.Spider):
     name = "anthonys_restaurants"
@@ -12,34 +10,30 @@ class AnthonysRestaurantsSpiders(scrapy.Spider):
     )
 
     def parse(self, response):
-        restaurantData = response.xpath("//markers").extract_first()
-        matches = re.finditer("<marker [\S\s]+?\"\/>", restaurantData)
-
-
-
-
-        for match in matches:
-            matchString = match.group(0)
-            fullAddress=re.findall("address=\"(.*?)\"", matchString)[0].replace('&lt;br /&gt;', ',')
+        for match in response.xpath("//markers/marker"):
+            fullAddress=match.xpath('.//@address').extract_first().replace('<br />', ',')
+            print(fullAddress)
             #Accounts for cases with second address line
-            if(len(fullAddress.split(",")) == 3):
-                cityString = fullAddress.split(",")[1].strip()
-                stateString = fullAddress.split(",")[2].strip().split(" ")[0].strip()
-                postString = fullAddress.split(",")[2].strip().split(" ")[1].strip()
-
             if(len(fullAddress.split(",")) == 4):
                 cityString = fullAddress.split(",")[2].strip()
                 stateString = fullAddress.split(",")[3].strip().split(" ")[0].strip()
                 postString = fullAddress.split(",")[3].strip().split(" ")[1].strip()
-            
+                addrLineOne = fullAddress.split(",")[0].strip()
+                addrLineTwo = fullAddress.split(",")[1].strip()
+                addrString = addrLineOne + ", " + addrLineTwo
+            else:
+                cityString = fullAddress.split(",")[1].strip()
+                stateString = fullAddress.split(",")[2].strip().split(" ")[0].strip()
+                postString = fullAddress.split(",")[2].strip().split(" ")[1].strip()
+                addrString = fullAddress.split(",")[0]
 
             yield GeojsonPointItem(
-              ref=re.findall("title=\"(.*?)\"", matchString)[0].strip(),
-              lat=re.findall("lat=\"(.*?)\"", matchString)[0].strip(),
-              lon=re.findall("lng=\"(.*?)\"", matchString)[0].strip(),
-              addr_full=re.findall("address=\"(.*?)\"", matchString)[0].replace('&lt;br /&gt;', ',').strip(),
+              ref=match.xpath('.//@title').extract_first().strip(),
+              lat=match.xpath('.//@lat').extract_first().strip(),
+              lon=match.xpath('.//@lng').extract_first().strip(),
+              addr_full=addrString,
               city=cityString,
               state=stateString,
               postcode=postString,
-              phone=re.findall("phone=\"(.*?)\"", matchString)[0].replace(' ','').strip(),
+              phone=match.xpath('.//@phone').extract_first().replace(" ",""),
             )
