@@ -11,7 +11,7 @@ class SweetTomatoesSpider(scrapy.Spider):
     name = "sweet_tomatoes"
     allowed_domains = ["sweettomatoes.com"]
     start_urls = (
-        'https://sweettomatoes.com/wp-admin/admin-ajax.php?action=store_search&lat=37.09024&lng=-95.71289100000001&max_results=999&search_radius=15&autoload=1',
+        'https://sweettomatoes.com/wp-admin/admin-ajax.php?action=store_search&lat=37.09024&lng=-95.71289100000001&max_results=9990&search_radius=1500&autoload=1',
     )
 
     def store_hours(self, store_hours):
