@@ -89,6 +89,7 @@ class WhidbeycoffeeSpider(scrapy.Spider):
         return "; ".join(hours)
 
     def parse(self, response):
+
       stores = response.xpath('//h5')
       for index , store in enumerate(stores):
         direction_link = store.xpath('normalize-space(./following-sibling::p/a/@href)').extract_first()
@@ -98,7 +99,7 @@ class WhidbeycoffeeSpider(scrapy.Spider):
             'city': store.xpath('./following-sibling::p/a/text()').extract()[1].split(',')[0],
             'state':  store.xpath('./following-sibling::p/a/text()').extract()[1].split(',')[1].split(' ')[1],
             'postcode':  store.xpath('./following-sibling::p/a/text()').extract()[1].split(',')[1].split(' ')[2],
-            'ref':response.url,
+            'ref':store.xpath('normalize-space(./text())').extract_first(),
             'lat':re.findall(r"\/@[^(\/)]+", direction_link)[0].split(',')[0][2:],
             'lon': re.findall(r"\/@[^(\/)]+", direction_link)[0].split(',')[1],
         }
