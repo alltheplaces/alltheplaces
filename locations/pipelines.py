@@ -19,3 +19,13 @@ class DuplicatesPipeline(object):
         else:
             self.ids_seen.add(ref)
             return item
+
+
+class ApplySpiderNamePipeline(object):
+
+    def process_item(self, item, spider):
+        existing_extras = item.get('extras', {})
+        existing_extras['@spider'] = spider.name
+        item['extras'] = existing_extras
+
+        return item
