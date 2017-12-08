@@ -16,10 +16,12 @@ class BurgerKingSpider(scrapy.Spider):
 
     name = "burgerking"
     allowed_domains = ["locations.bk.com"]
-    download_delay = 0
+    download_delay = 1.5
     start_urls = (
         'https://locations.bk.com/index.html',
     )
+    def handle_error(self, failure):
+        self.log("Request failed: %s" % failure.request)
     def parse_day(self, day):
             return  day_formats[day.strip()]
     def parse_times(self, times):
@@ -81,16 +83,16 @@ class BurgerKingSpider(scrapy.Spider):
         if(len(stores)==0):
              stores.append(response.url)
         for store in stores:
-             yield scrapy.Request(response.urljoin(store), callback=self.parse_stores)
+             yield scrapy.Request(response.urljoin(store), callback=self.parse_stores ,errback=self.handle_error)
 
 
     def parse_state(self, response):
         city_urls = response.xpath('//div[@class="c-directory-list-content-wrapper"]/ul/li/a/@href').extract()
         for path in city_urls:
-            yield scrapy.Request(response.urljoin(path), callback=self.parse_city_stores)
+            yield scrapy.Request(response.urljoin(path), callback=self.parse_city_stores ,errback=self.handle_error)
 
 
     def parse(self, response):
         urls = response.xpath('//div[@class="c-directory-list-content-wrapper"]/ul/li/a/@href').extract()
         for path in urls:
-            yield scrapy.Request(response.urljoin(path), callback=self.parse_state)
+            yield scrapy.Request(response.urljoin(path), callback=self.parse_state ,errback=self.handle_error)
