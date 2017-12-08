@@ -35,8 +35,8 @@ class HiHostelsSpider(scrapy.Spider):
             'postcode': " ".join(response.xpath('/html/body/div[1]/div[6]/div[2]/div[1]/div[2]/p[1]/text()').extract()[0].split(',')[-2].split()),
             'country': " ".join(response.xpath('/html/body/div[1]/div[6]/div[2]/div[1]/div[2]/p[1]/text()').extract()[0].split(',')[-1].split()),
             'website': response.xpath('//head/link[@rel="canonical"]/@href').extract_first(),
-            'lon': float(response.xpath('//*[@id ="lat"]/@value').extract()[0]),
-            'lat': float(response.xpath('//*[@id ="lon"]/@value').extract()[0]),
+            'lon': float(response.xpath('//*[@id ="lon"]/@value').extract()[0]),
+            'lat': float(response.xpath('//*[@id ="lat"]/@value').extract()[0]),
         }
 
         yield GeojsonPointItem(**properties)
