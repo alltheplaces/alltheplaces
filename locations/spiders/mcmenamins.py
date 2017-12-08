@@ -31,7 +31,7 @@ class McmenaminsSpider(scrapy.Spider):
             if not sl:
                 continue
             if sl[3] == 'daily' or sl[1] == 'daily':
-                result + ='Mo-Su '
+                result += 'Mo-Su '
             else:
                 result += DAYS[sl[1]] + (('-'+DAYS[sl[3]]) if sl[3] else '') + ' '
 
