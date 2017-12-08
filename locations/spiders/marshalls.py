@@ -18,13 +18,13 @@ URL = 'https://mktsvc.tjx.com/storelocator/GetSearchResultsByState'
 
 
 NORMALIZE_KEYS = (
-                    ('addr:full', ['Address', 'Address2']),
-                    ('addr:city', ['City']),
-                    ('addr:state', ['State']),
-                    ('addr:postcode', ['Zip']),
-                    ('addr:country', ['Country']),
-                    ('phone', ['Phone']),
-                 )
+    ('addr:full', ['Address', 'Address2']),
+    ('addr:city', ['City']),
+    ('addr:state', ['State']),
+    ('addr:postcode', ['Zip']),
+    ('addr:country', ['Country']),
+    ('phone', ['Phone']),
+)
 
 
 def normalize_time(hours):
@@ -107,7 +107,8 @@ class MarshallsSpider(scrapy.Spider):
         props = {}
 
         for store in stores:
-            lon_lat = [store.pop('Longitude', ''), store.pop('Latitude', None)]
+            props['lat'] = store.pop('Latitude', None)
+            props['lon'] = store.pop('Longitude', None)
             props['ref'] = store.pop('StoreID', None)
             props['website'] = URL
 
@@ -120,7 +121,4 @@ class MarshallsSpider(scrapy.Spider):
                 props['opening_hours'] = opening_hours
                 props.pop('Hours', None)
 
-            yield GeojsonPointItem(
-                properties=props,
-                lon_lat=lon_lat
-            )
+            yield GeojsonPointItem(**props)
