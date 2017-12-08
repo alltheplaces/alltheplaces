@@ -15,8 +15,8 @@ class HiHostelsSpider(scrapy.Spider):
     def parse(self, response):
         response.selector.remove_namespaces()
         city_urls = response.xpath('//url/loc/text()').extract()
+        regex = re.compile(r'http\S+hihostels.com/\S+/hostels/\S+')
         for path in city_urls:
-            regex = re.compile(r'http\S+hihostels.com/\S+/hostels/\S+')
             if not re.search(regex,path):
                 pass
             else:
