@@ -19,7 +19,6 @@ class SweetTomatoesSpider(scrapy.Spider):
             '<tr><td>(\w*)<\/td><td><time>([0-9: -]*)</time></td></tr>',
             store_hours
         )
-        print(m)
         day_groups = []
         this_day_group = dict()
         for day, hours_together in m:
