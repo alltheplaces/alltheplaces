@@ -37,18 +37,118 @@ graphically
 
 """
 import scrapy
+import json
 
 from locations.items import GeojsonPointItem
+
+
+def logme(text, f):
+    h=open(f, "a")
+    h.write(str(text)+"\n")
+    h.close()
+
+
+max_width=0.9
+max_height=0.9
+
+
+def get_horizontal(start_lat, start_lon, row_width):
+    number_of_box = int(abs(row_width) / max_width + 1)  # safe to assume the are left overs
+    for box in range(abs(number_of_box)):
+        b_lon_left = start_lon
+        b_lat_left = start_lat
+        # if i subtract 5 from -129, thats -134, we are drifting backwards
+        b_lon_right = b_lon_left + max_width
+        b_lat_right = b_lat_left - max_height
+        start_lon = b_lon_right
+        start_lat = b_lat_right + max_height
+        yield (b_lat_left, b_lon_left, b_lat_right, b_lon_right)
+
+
+def get_vertical(start_point, end_point):
+    difference = start_point - end_point
+    number_of_boxes = int(difference / max_height + 1)
+    # the first box must be included
+    start_point += max_height
+    for box in range(number_of_boxes):
+        b_lat = start_point - max_height
+        start_point = b_lat
+        yield b_lat
+
+
+boxes = []
+
+base_url = 'http://www.exxon.com/api/v1/Retail/retailstation/GetStationsByBoundingBox?'
+for row in get_vertical(52, 21):
+    for col in get_horizontal(row, -129, -129 + 76):
+        boxes.append(base_url + "Latitude1="+str(col[0])+"&Longitude1="+str(col[1])+"&Latitude2="+str(col[2])+"&Longitude2="+str(col[3]))
+
+
+
+logme(boxes, "box.txt")
+
 
 
 class ExxonMobilSpider(scrapy.Spider):
     name = "exxonmobil"
     allowed_domains = ["www.exxon.com"]
-    start_urls = (
-        'http://www.exxon.com/api/v1/Retail/retailstation/GetStationsByBoundingBox?'
-        'Latitude1=40.64768480800879&Latitude2=40.77780222218161&'
-        'Longitude1=-73.93627828095703&Longitude2=-74.16939443085937',
-    )
+    start_urls=tuple(boxes)
+    # start_urls = (
+    #     'http://www.exxon.com/api/v1/Retail/retailstation/GetStationsByBoundingBox?'
+    #     'Latitude1=40.64768480800879&Latitude2=40.77780222218161&'
+    #     'Longitude1=-73.93627828095703&Longitude2=-74.16939443085937',
+    # )
+
+
+    def parse(self, response):
+        self.log("#"*50)
+        json_data = json.loads(response.text)
+        logme(len(json_data), "resultcount.txt")
+        for counter, location in enumerate(json_data):
+            self.log(location['StateProvince'])
+            break
+        # This will spider through all the country and regional pages and get us to the individual store pages
+        # region_urls = response.xpath('//a[@class="sitemap_link sitemap_bar"]/@href').extract()
+        # for url in region_urls:
+        #     yield scrapy.Request(url)
+        #
+        # if response.xpath('//head/meta[@property="og:type"][@content="website"]'):
+        #     return
+        #
+        # # When we get to an individual store page the above for loop won't yield anything
+        # # so at this point we're processing an individual store page.
+        # contact_props = response.xpath('//head/meta[starts-with(@property, "business:contact_data:")]')
+        # contact_info = {}
+        # for ele in contact_props:
+        #     contact_info[ele.xpath('@property').extract_first()] = ele.xpath('@content').extract_first()
+        #
+        # properties = {
+        #     'phone': contact_info['business:contact_data:phone_number']
+        # }
+        #
+        # address = self.address(contact_info)
+        # if address:
+        #     properties.update(address)
+        #
+        # opening_hour_props = response.xpath('//head/meta[starts-with(@property, "business:hours:")]')
+        # properties['opening_hours'] = self.store_hours(opening_hour_props)
+        #
+        # url = response.xpath('//head/link[@rel="canonical"]/@href').extract_first()
+        # properties['website'] = url
+        #
+        # name = response.xpath('//span[@itemprop="legalName"]/text()').extract_first()
+        # properties['name'] = name
+        #
+        # ref = response.url.rsplit('/', 1)[1].split('-', 1)[0]
+        # properties['ref'] = ref
+        #
+        # ll = response.xpath('//div[@itemtype="http://schema.org/GeoCoordinates"]')
+        # properties['lon'] = float(ll.xpath('//meta[@itemprop="longitude"]/@content').extract_first()),
+        # properties['lat'] = float(ll.xpath('//meta[@itemprop="latitude"]/@content').extract_first()),
+        #
+        # yield GeojsonPointItem(**properties)
+
+
 
     def store_hours(self, store_hours):
         day_groups = []
@@ -114,46 +214,3 @@ class ExxonMobilSpider(scrapy.Spider):
         }
 
         return addr_tags
-
-    def parse(self, response):
-        self.log(response.text)
-        # This will spider through all the country and regional pages and get us to the individual store pages
-        region_urls = response.xpath('//a[@class="sitemap_link sitemap_bar"]/@href').extract()
-        for url in region_urls:
-            yield scrapy.Request(url)
-
-        if response.xpath('//head/meta[@property="og:type"][@content="website"]'):
-            return
-
-        # When we get to an individual store page the above for loop won't yield anything
-        # so at this point we're processing an individual store page.
-        contact_props = response.xpath('//head/meta[starts-with(@property, "business:contact_data:")]')
-        contact_info = {}
-        for ele in contact_props:
-            contact_info[ele.xpath('@property').extract_first()] = ele.xpath('@content').extract_first()
-
-        properties = {
-            'phone': contact_info['business:contact_data:phone_number']
-        }
-
-        address = self.address(contact_info)
-        if address:
-            properties.update(address)
-
-        opening_hour_props = response.xpath('//head/meta[starts-with(@property, "business:hours:")]')
-        properties['opening_hours'] = self.store_hours(opening_hour_props)
-
-        url = response.xpath('//head/link[@rel="canonical"]/@href').extract_first()
-        properties['website'] = url
-
-        name = response.xpath('//span[@itemprop="legalName"]/text()').extract_first()
-        properties['name'] = name
-
-        ref = response.url.rsplit('/', 1)[1].split('-', 1)[0]
-        properties['ref'] = ref
-
-        ll = response.xpath('//div[@itemtype="http://schema.org/GeoCoordinates"]')
-        properties['lon'] = float(ll.xpath('//meta[@itemprop="longitude"]/@content').extract_first()),
-        properties['lat'] = float(ll.xpath('//meta[@itemprop="latitude"]/@content').extract_first()),
-
-        yield GeojsonPointItem(**properties)
