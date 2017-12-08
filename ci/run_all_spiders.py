@@ -13,6 +13,6 @@ if __name__ == '__main__':
     settings.get('ITEM_PIPELINES')['locations.pipelines.ApplySpiderNamePipeline'] = 100
 
     process = CrawlerProcess(settings)
-    for spider_name in process.spiders.list():
+    for spider_name in process.spider_loader.list():
         process.crawl(spider_name)
     process.start()
