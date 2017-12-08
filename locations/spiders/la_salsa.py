@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 import scrapy
+
 from locations.items import GeojsonPointItem
-import json
-import re
+
 
 class LaSalsaSpider(scrapy.Spider):
     name = "la_salsa"
@@ -12,25 +12,14 @@ class LaSalsaSpider(scrapy.Spider):
     )
 
     def parse(self, response):
-        restaurantData = response.xpath("//markers").extract_first()
-        matches = re.finditer("<marker [\S\s]+?\"\/>", restaurantData)
-
-
-
-
-        for match in matches:
-            matchString = match.group(0)
-            fullAddress=re.findall("address=\"(.*?)\"", matchString)[0].replace('&lt;br /&gt;', ',')
-            #Accounts for cases with second address line
-
+        for match in response.xpath("//markers/marker"):
             yield GeojsonPointItem(
-              ref=re.findall("name=\"(.*?)\"", matchString)[0].strip(),
-              lat=re.findall("latitude=\"(.*?)\"", matchString)[0].strip(),
-              lon=re.findall("longitude=\"(.*?)\"", matchString)[0].strip(),
-              addr_full=re.findall("address=\"(.*?)\"", matchString)[0].replace('&lt;br /&gt;', ',').strip(),
-              city=re.findall("city=\"(.*?)\"", matchString)[0].strip(),
-              state=re.findall("state=\"(.*?)\"", matchString)[0].strip(),
-              postcode=re.findall("zip=\"(.*?)\"", matchString)[0].strip(),
-              phone=re.findall("phone=\"(.*?)\"", matchString)[0].replace(' ','').strip(),
+                ref=match.xpath('.//@name').extract_first(),
+                lat=float(match.xpath('.//@latitude').extract_first()),
+                lon=float(match.xpath('.//@longitude').extract_first()),
+                addr_full=match.xpath('.//@address').extract_first(),
+                city=match.xpath('.//@city').extract_first(),
+                state=match.xpath('.//@state').extract_first(),
+                postcode=match.xpath('.//@zip').extract_first(),
+                phone=match.xpath('.//@phone').extract_first(),
             )
-            
