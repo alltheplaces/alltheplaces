@@ -76,7 +76,6 @@ class WhidbeycoffeeSpider(scrapy.Spider):
             else:
                 day = re.findall(r"^[^( |:)]+" ,li)[0]
             times = li.replace(day , "")[1:]
-            print(times)
             if times and day:
                 parsed_time = self.parse_times(times)
                 parsed_day = self.parse_day(day)
