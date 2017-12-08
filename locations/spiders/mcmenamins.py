@@ -25,7 +25,7 @@ class McmenaminsSpider(scrapy.Spider):
     def store_hours(self, store_hours):
         result=''
         for line in store_hours:
-            sl=re.search(r'(\w+)\s*(-|&|–)?\s*(\w+)?,\s*(\d+):?(\d+)?\s*((a\.m\.)|(p\.m\.)|noon|midnight)\s*\'til\s*(\d+):?(\d+)?\s*((a\.m\.)|(p\.m\.)|noon|midnight)',line)
+            sl=re.search(r'(\w+)\s*(through|and|-|&|–)?\s*(\w+)?,\s*(\d+):?(\d+)?\s*((a\.m\.)|(p\.m\.)|noon|midnight)\s*\'til\s*(\d+):?(\d+)?\s*((a\.m\.)|(p\.m\.)|noon|midnight)',line)
 
             if not sl:
                 continue
