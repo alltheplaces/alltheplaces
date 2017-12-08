@@ -19,11 +19,57 @@ class KrystalSpider(scrapy.Spider):
         'http://krystal.com/wp-admin/admin-ajax.php',
     )
 
+    def parse_hours(self, hours):
+        hours = json.loads(hours)
+        for key, epoch in hours.items():
+
+            if epoch['open'] == '99':
+                epoch['open'] = '00'
+
+            if set(epoch.values()) == set(['99']):
+                hours[key] = "00:00-24:00"
+            elif len(epoch['close']) <2 and len(epoch['open']) <2:
+                hours[key]='0{}:00-0{}:00'.format(epoch['open'], epoch['close'])
+
+            elif len(epoch['close']) <2 and len(epoch['open']) >=2:
+                hours[key]='{}:00-0{}:00'.format(epoch['open'], epoch['close'])
+
+            elif len(epoch['open']) <2 and len(epoch['close']) >=2:
+                hours[key]='0{}:00-{}:00'.format(epoch['open'], epoch['close'])
+
+            elif len(epoch['open']) >=2 and len(epoch['close']) >=2:
+                hours[key]='{}:00-{}:00'.format(epoch['open'], epoch['close'])
+
+
+        reversed_hours = {}
+        for key, epoch in hours.items():
+
+            reversed_hours.setdefault(epoch, [])
+            reversed_hours[epoch].append(key[:2].title())
+
+        if len(reversed_hours) == 1 and list(reversed_hours)[0] =='00:00-24:00':
+            return '24/7'
+
+        opening_hours = []
+
+        for key, value in reversed_hours.items():
+            if len(value) == 1:
+                opening_hours.append('{} {}'.format(value[0],key))
+            else:
+                opening_hours.append('{}-{} {}'.format(value[0],value[-1],key))
+
+        return ";".join(opening_hours)
+        
+
+
+
     def parse(self, response):
         data = json.loads(response.body_as_unicode())
 
         for key, store_infor in data.items():
             if isinstance(store_infor, dict):
+                opening_hours = self.parse_hours(store_infor['storehours'])
+
                 properties = {
                     'addr_full': store_infor['address'],
                     'phone': store_infor['phone'],
@@ -31,9 +77,10 @@ class KrystalSpider(scrapy.Spider):
                     'state': store_infor['state'],
                     'postcode': store_infor['zip'],
                     'ref': store_infor['unit'],
-                    'website': response.url,
+                    'website': '{}{}{}'.format('http://',self.allowed_domains[0],store_infor['url']),
                     'lat': store_infor['lat'],
-                    'lon': store_infor['lng']
+                    'lon': store_infor['lng'],
+                    'opening_hours': opening_hours
                 }
                 yield GeojsonPointItem(**properties)
 
@@ -59,4 +106,3 @@ class KrystalSpider(scrapy.Spider):
             yield scrapy.http.FormRequest(url=self.start_urls[0], method='POST',
             							  formdata=form_data, headers=headers,
             							  callback=self.parse)
-
