@@ -41,11 +41,11 @@ class TargetSpider(scrapy.Spider):
     name = "target"
     allowed_domains = ["target.com"]
     start_urls = tuple([
-        'https://api.target.com/v2/store?nearby={zipcode}&range=625&limit=999999&locale=en-US&key=eb2551e4accc14f38cc42d32fbc2b2ea&callback=jQuery21409262105278815946_1512699093216&_=1512699093219'.format(zipcode=z) for z in zips
+        'https://api.target.com/v2/store?nearby={zipcode}&range=625&limit=999999&locale=en-US&key=eb2551e4accc14f38cc42d32fbc2b2ea'.format(zipcode=z) for z in zips
     ])
 
     def parse(self, response):
-        data = json.loads(response.body_as_unicode()[41:-1])
+        data = json.loads(response.body_as_unicode())
         stores = data['Locations']['Location'] 
         for store in stores:
             loc_info = store['Address']
@@ -76,4 +76,3 @@ class TargetSpider(scrapy.Spider):
                     properties['opening_hours'] = processed_hours
                                                              
             yield GeojsonPointItem(**properties)             
-
