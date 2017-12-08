@@ -30,6 +30,10 @@ class OliveGardenSpider(scrapy.Spider):
         response.selector.remove_namespaces()
         city_urls = response.xpath('//url/loc/text()').extract()
         for path in city_urls:
+            regex = re.compile(r'http\S+olivegarden.com/locations/\S+')
+            if not re.search(regex, path):
+                pass
+            else:
                 yield scrapy.Request(
                     path.strip(),
                     callback=self.parse_store,
