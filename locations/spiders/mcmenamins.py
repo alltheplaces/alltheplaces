@@ -29,7 +29,11 @@ class McmenaminsSpider(scrapy.Spider):
 
             if not sl:
                 continue
-            result+=DAYS[sl[1]]+(('-'+DAYS[sl[3]]) if sl[3] else '')+' '
+            if sl[3]=='daily' or sl[1]== 'daily':
+                result+='Mo-Su '
+            else:
+                result+=DAYS[sl[1]]+(('-'+DAYS[sl[3]]) if sl[3] else '')+' '
+
             i=int(sl[4])
 
             if sl[6]=='a.m.' or sl[6]=='noon':
