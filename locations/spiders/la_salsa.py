@@ -33,3 +33,4 @@ class LaSalsaSpider(scrapy.Spider):
               postcode=re.findall("zip=\"(.*?)\"", matchString)[0].strip(),
               phone=re.findall("phone=\"(.*?)\"", matchString)[0].replace(' ','').strip(),
             )
+            
