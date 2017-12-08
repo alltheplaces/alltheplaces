@@ -28,16 +28,15 @@ class HiHostelsSpider(scrapy.Spider):
     def parse_store(self, response):
 
         properties = {
+            'lon': float(response.xpath('//*[@id ="lat"]/@value').extract()[0]),
+            'lat': float(response.xpath('//*[@id ="lon"]/@value').extract()[0]),
             'name': " ".join(response.xpath('/html/body/div[1]/div[6]/div[2]/div[1]/h1/span/text()').extract()[0].split()),
-            'website': response.xpath('//head/link[@rel="canonical"]/@href').extract_first(),
             'addr_full': " ".join(response.xpath('/html/body/div[1]/div[6]/div[2]/div[1]/div[2]/p[1]/text()').extract()[0].split(',')[0].split()),
             'city': " ".join(response.xpath('/html/body/div[1]/div[6]/div[2]/div[1]/div[2]/p[1]/text()').extract()[0].split(',')[1].split()),
             'postcode': " ".join(response.xpath('/html/body/div[1]/div[6]/div[2]/div[1]/div[2]/p[1]/text()').extract()[0].split(',')[-2].split()),
             'country': " ".join(response.xpath('/html/body/div[1]/div[6]/div[2]/div[1]/div[2]/p[1]/text()').extract()[0].split(',')[-1].split()),
-            'lon': float(response.xpath('//*[@id ="lat"]/@value').extract()[0]),
-            'lat': float(response.xpath('//*[@id ="lon"]/@value').extract()[0]),
+            'website': response.xpath('//head/link[@rel="canonical"]/@href').extract_first(),
         }
-        open('/tmp/tmp.txt', 'w').write(str(properties))
 
 
         yield GeojsonPointItem(**properties)
