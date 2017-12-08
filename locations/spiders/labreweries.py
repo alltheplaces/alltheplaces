@@ -81,10 +81,13 @@ class LaBreweriesSpider(scrapy.Spider):
         response.selector.remove_namespaces()
         city_urls = response.xpath('//url/loc/text()').extract()
         for path in city_urls:
-            yield scrapy.Request(
-                path.strip(),
-                callback=self.parse_store,
-            )
+            if path in "http://labeerhop.com/breweries/1056/":
+                print('Skipping URL')
+            else:
+                yield scrapy.Request(
+                    path.strip(),
+                    callback=self.parse_store,
+                )
 
     def parse_store(self, response):
 
