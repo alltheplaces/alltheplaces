@@ -14,7 +14,6 @@ name = "pypi"
 scrapy = "*"
 botocore = "*"
 
-
 [requires]
 
 python_version = "3.6"
