@@ -1,0 +1,4 @@
+.git
+.scrapy
+__pycache__
+*.pyc
