@@ -18,7 +18,7 @@ class WendysSpider(scrapy.Spider):
 
     name = "wendys"
     allowed_domains = ["locations.wendys.com"]
-    download_delay = 1.5
+    download_delay = 0.5
     download_timeout = 30
     start_urls = (
         'https://locations.wendys.com',
