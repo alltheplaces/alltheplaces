@@ -4,6 +4,8 @@ import re
 from locations.items import GeojsonPointItem
 from scrapy.selector import Selector
 
+import random
+
 class KeyfoodSpider(scrapy.Spider):
 	name = "keyfood"
 	allowed_domains = ["keyfood.mywebgrocer.com"]
@@ -30,6 +32,8 @@ class KeyfoodSpider(scrapy.Spider):
 
 		for store in stores:
 
+
+
 			name = store.css('.StoreTitle').xpath("text()").extract()
 			address = store.css('.StoreAddress p').xpath("text()").extract()
 			address1 = address[0]
@@ -39,7 +43,7 @@ class KeyfoodSpider(scrapy.Spider):
 
 			properties = {
 				'name': ''.join(name),
-				'ref': response.url,
+				'ref': ''.join(name).replace('(', '').replace(')', '').replace(' ', '_'),
 				'street': address1,
 				'city': address2[0],
 				'state': address2[1].split(' ')[1],
@@ -47,5 +51,7 @@ class KeyfoodSpider(scrapy.Spider):
 				'opening_hours': store_hours,
 				'phone': ''.join(phone)[7:]
 			}
+
+			# print(random.randint(1,1000000))
 
 			yield GeojsonPointItem(**properties)
