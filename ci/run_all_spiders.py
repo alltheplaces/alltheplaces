@@ -25,6 +25,7 @@ if __name__ == '__main__':
             spider.crawler.stats.get_value('item_scraped_count'),
         ))
 
+    print("Starting to crawl")
     process = CrawlerProcess(settings)
     for spider_name in process.spider_loader.list():
         crawler = process.create_crawler(spider_name)
@@ -32,3 +33,4 @@ if __name__ == '__main__':
         crawler.signals.connect(spider_opened, signals.spider_opened)
         process.crawl(crawler)
     process.start()
+    print("Done crawling")
