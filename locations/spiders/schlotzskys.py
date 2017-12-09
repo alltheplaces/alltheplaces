@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import scrapy
 import json
-from geopy.geocoders import Nominatim
 
 from locations.items import GeojsonPointItem
 
@@ -15,6 +14,7 @@ class SchlotzskysSpider(scrapy.Spider):
         hours = hours.split('\t')[6]
         return hours
 
+    # Left this here for later. Maybe it would be useful eventually.
 ##    def parse_lat_lon(self, address):
 ##        geolocator = Nominatim()
 ##        location = geolocator.geocode(address)
