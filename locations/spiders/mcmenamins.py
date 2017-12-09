@@ -68,12 +68,10 @@ class McmenaminsSpider(scrapy.Spider):
 
     def parse(self, response): #high-level list of states
         shops = response.xpath('//div[@id="MainContent_eatDrinkLocations"]/div[contains(@class,"all")]')
-        i=1
         for path in shops:
-            if i<4:
-                yield scrapy.Request(response.urljoin(path.xpath('.//div/div[@class="tm-panel-titlebg"]/a/@href').extract_first()), callback=self.parse_store, meta={
-                       'ref':path.xpath('.//@id').extract_first(),
-                        })
+            yield scrapy.Request(response.urljoin(path.xpath('.//div/div[@class="tm-panel-titlebg"]/a/@href').extract_first()), callback=self.parse_store, meta={
+                'ref':path.xpath('.//@id').extract_first(),
+                })
 
     def parse_store(self, response):
         google_pos=response.xpath('//div[@class="mcm-logo-address"]')[0].xpath('.//a[contains(@href,"maps.google")]/@href')[0].extract()
