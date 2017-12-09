@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 import scrapy
-import json
 import re
-import logging
 
 from locations.items import GeojsonPointItem
+
 
 class CheckersSpider(scrapy.Spider):
     name = "checkers"
@@ -93,8 +92,14 @@ class CheckersSpider(scrapy.Spider):
 
         return opening_hours
 
-
     def parse(self, response):
+        id_to_loc = {}
+        loc_re = r'lat: ([\-0-9\.]+), lng: ([\-0-9\.]+)};\r\n.*marker(\d+) = '
+        loc_javascript = response.xpath('//script/text()')[-5].extract()
+        locations = re.findall(loc_re, loc_javascript)
+        for lat, lon, store_id in locations:
+            id_to_loc[store_id] = {'lat': float(lat), 'lon': float(lon)}
+
         for location in response.xpath('//li[@class="location-item "]'):
             addr_full = location.xpath('.//h2[@class="add-line-one"]/text()').extract_first()
             addr2 = location.xpath('.//h3[@class="add-line-two"]/text()').extract_first()
@@ -104,14 +109,15 @@ class CheckersSpider(scrapy.Spider):
                 three_pieces = self.addr2regex.search(addr2)
                 if three_pieces:
                     city, state, zipcode = three_pieces.groups()
-                    
+
             location_id = location.xpath('@id').extract_first()
             phone = location.xpath('.//i[@class="fa fa-phone"]/../strong/a/text()').extract_first()
             website = location.xpath('.//a[@class="view-location"]/@href').extract_first()
+
             unp = {
                 'ref': location_id,
                 'addr_full': addr_full,
-                'website': website, 
+                'website': website,
                 'city': city,
                 'state': state,
                 'postcode': zipcode,
@@ -127,5 +133,8 @@ class CheckersSpider(scrapy.Spider):
                 if unp[key]:
                     properties[key] = unp[key]
 
-            yield GeojsonPointItem(**properties)
+            latlon = id_to_loc.get(location_id)
+            if latlon:
+                properties.update(latlon)
 
+            yield GeojsonPointItem(**properties)
