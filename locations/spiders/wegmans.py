@@ -6,7 +6,7 @@ class WegmansSpider(scrapy.Spider):
 
     name = "wegmans"
     allowed_domains = ["www.wegmans.com"]
-    download_delay = 0
+    download_delay = 1.5
     start_urls = (
         'https://www.wegmans.com/stores.html',
     )
