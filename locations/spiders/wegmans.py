@@ -22,7 +22,7 @@ class WegmansSpider(scrapy.Spider):
             'lat':  response.xpath('normalize-space(//input[@id="storeLocation"]/@data-lat)').extract_first(),
             'lon':  response.xpath('normalize-space(//input[@id="storeLocation"]/@data-long)').extract_first(),
         }
-        properties['opening_hours'] ='24/7'
+        
         yield GeojsonPointItem(**properties)
     def parse(self, response):
         urls = response.xpath('//div[@class="cta-rte"]/p/a/@href').extract()
