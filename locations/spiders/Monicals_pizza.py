@@ -127,6 +127,8 @@ class MonicalsSpider(scrapy.Spider):
         opening_hours = ', '.join('{} : {}'.format(*t) for t in zip(day, hour))
 
         yield GeojsonPointItem(
+            lat=lat,
+            lon=lon,
             addr_full=address,
             street=street,
             city=city,
