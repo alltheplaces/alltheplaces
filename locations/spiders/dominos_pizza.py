@@ -14,7 +14,7 @@ ALLOWED_ZIPS=[range(500,9899),range(10000,21299),range(21400,26899),range(27000,
             range(88900,89199),range(89300,89599),range(89700,89899),range(90000,90899),range(91000,92899),range(93000,93799),
             range(93900,96199),range(96700,98699),range(98800,99999)]
 
-class McmenaminsSpider(scrapy.Spider):
+class DominosPizzaSpider(scrapy.Spider):
     name = "dominos_pizza"
     allowed_domains = ["dominos.com","google.com"]
     start_urls = (
