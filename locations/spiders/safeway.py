@@ -37,8 +37,8 @@ class SafewaySpider(scrapy.Spider):
             'city': response.xpath('/html/body/main/div[2]/div/section[1]/div[2]/div[1]/div[1]/address/span[2]/span[1]/text()').extract_first(),
             'state': response.xpath('/html/body/main/div[2]/div/section[1]/div[2]/div[1]/div[1]/address/abbr[1]/text()').extract_first(),
             'postcode': response.xpath('/html/body/main/div[2]/div/section[1]/div[2]/div[1]/div[1]/address/span[3]/text()').extract_first(),
-             'lon': float(response.xpath('//*[@id="js-map-config-dir-map-desktop"]').extract_first().split('"latitude":')[1].split(',')[0]),
-             'lat': float(response.xpath('//*[@id="js-map-config-dir-map-desktop"]').extract_first().split('"longitude":')[1].split(',')[0]),
+             'lat': float(response.xpath('//*[@id="js-map-config-dir-map-desktop"]').extract_first().split('"latitude":')[1].split(',')[0]),
+             'lon': float(response.xpath('//*[@id="js-map-config-dir-map-desktop"]').extract_first().split('"longitude":')[1].split(',')[0]),
         }
 
         yield GeojsonPointItem(**properties)
