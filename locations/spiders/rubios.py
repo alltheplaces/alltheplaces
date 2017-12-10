@@ -27,19 +27,6 @@ class RubiosSpider(scrapy.Spider):
 
     def parse_store(self, response):
 
-        properties = {
-            'name': response.css('.store-info').extract_first().replace('\t','').split('<span itemprop="name">')[1].split('</span>')[0],
-            'ref': response.css('.store-info').extract_first().replace('\t','').split('"addressLocality">')[1].split('</span>')[0],
-            'addr_full': response.css('.store-info').extract_first().replace('\t','').split('itemprop="streetAddress">')[1].split('</span>')[0],
-            'city': response.css('.store-info').extract_first().replace('\t','').split('"addressLocality">')[1].split('</span>')[0],
-            'state': response.css('.store-info').extract_first().replace('\t','').split('itemprop="addressRegion">')[1].split('</span>')[0],
-            'postcode': response.css('.store-info').extract_first().replace('\t','').split('itemprop="postalCode">')[1].split('</span>')[0],
-            'phone': response.css('.store-info').extract_first().replace('\t','').split('"tel:')[1].split('"')[0],
-            'website': response.request.url,
-            'opening_hours': response.css('.store-info').extract_first().replace('\t', '').split('<span class="oh-display-label" style="width: 6.6em;">')[1].split('<br></span>')[0].replace('</span><span class="oh-display-times oh-display-hours">', '').strip(),
-            'lon': float(response.xpath('//head/script[9]').extract_first().split('"lon":')[1].split('}')[0]),
-            'lat': float(response.xpath('//head/script[9]').extract_first().split('"lat":')[1].split(',')[0]),
-        }
         store_hours = response.css('.store-info').extract_first().replace('\t', '').split('<span class="oh-display-label" style="width: 6.6em;">')[1].split('<br></span>')[0].replace('</span><span class="oh-display-times oh-display-hours">', '').strip()
         if store_hours is not None or '':
             properties = {
@@ -51,7 +38,7 @@ class RubiosSpider(scrapy.Spider):
             'postcode': response.css('.store-info').extract_first().replace('\t','').split('itemprop="postalCode">')[1].split('</span>')[0],
             'phone': response.css('.store-info').extract_first().replace('\t','').split('"tel:')[1].split('"')[0],
             'website': response.request.url,
-            'store_hours': response.css('.store-info').extract_first().replace('\t', '').split('<span class="oh-display-label" style="width: 6.6em;">')[1].split('<br></span>')[0].replace('</span><span class="oh-display-times oh-display-hours">', '').strip(),
+            'opening_hours': response.css('.store-info').extract_first().replace('\t', '').split('<span class="oh-display-label" style="width: 6.6em;">')[1].split('<br></span>')[0].replace('</span><span class="oh-display-times oh-display-hours">', '').strip(),
             'lon': float(response.xpath('//head/script[9]').extract_first().split('"lon":')[1].split('}')[0]),
             'lat': float(response.xpath('//head/script[9]').extract_first().split('"lat":')[1].split(',')[0]),
         }
