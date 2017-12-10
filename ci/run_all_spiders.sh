@@ -14,6 +14,11 @@ RUN_URL_PREFIX="https://s3.amazonaws.com/${S3_BUCKET}/${RUN_S3_KEY_PREFIX}"
 
 python "ci/run_all_spiders.py"
 
+if [ ! $? -eq 0 ]; then
+    (>&2 echo "Running spiders failed for some reason")
+    exit 1
+fi
+
 (>&2 echo "Gzipping output")
 
 gzip all_spiders.log

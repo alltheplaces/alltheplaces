@@ -4,7 +4,7 @@ RUN pip install pipenv
 WORKDIR /opt/app
 
 COPY Pipfile Pipfile
-RUN pipenv install
+RUN pipenv install --dev
 
 COPY . .
 
