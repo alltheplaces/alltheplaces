@@ -27,8 +27,7 @@ class RubiosSpider(scrapy.Spider):
 
     def parse_store(self, response):
 
-        store_hours = response.css('.store-info').extract_first().replace('\t', '').split('<span class="oh-display-label" style="width: 6.6em;">')[1].split('<br></span>')[0].replace('</span><span class="oh-display-times oh-display-hours">', '').strip()
-        if store_hours is not None or '':
+        if response.css('.store-info').extract_first().replace('\t', '').split('<span class="oh-display-label" style="width: 6.6em;">')[1].split('<br></span>')[0].replace('</span><span class="oh-display-times oh-display-hours">', '').strip() is not None or '':
             properties = {
             'name': response.css('.store-info').extract_first().replace('\t','').split('<span itemprop="name">')[1].split('</span>')[0],
             'ref': response.css('.store-info').extract_first().replace('\t','').split('"addressLocality">')[1].split('</span>')[0],
