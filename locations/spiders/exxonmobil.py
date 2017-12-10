@@ -31,12 +31,13 @@ import json
 from locations.items import GeojsonPointItem
 import re
 
+
 class CreateStartURLs:
     # comment out large boxes to further improve crawl time when needed
     boxes = {
             "upper_canada": (71.57, -169.73, 58.43, -60.57, 3, 3),  # maxresult=6
-            "lower_canada": (58.89, -139.32, 45.44, -51.96,2,2),  # maxresult=98
-            "upper_usa": (48.67, -129.3, 42.92, -57.94, 0.7,0.7),  # maxresult=130
+            "lower_canada": (58.89, -139.32, 45.44, -51.96, 2, 2),  # maxresult=98
+            "upper_usa": (48.67, -129.3, 42.92, -57.94, 0.7, 0.7),  # maxresult=130
             "middle_usa": (44.4, -126.3, 34.86, -68.30, 0.6, 0.6),  # maxresult=163
             "southern_usa": (36.292, -122.975, 25.93, -73.41, 0.6, 0.6),  # maxresult=186
             "caribbean_sea": (25.77, -115.59, 14.917, -62.506, 2, 2),  # maxresult =69
@@ -44,21 +45,22 @@ class CreateStartURLs:
             "middlebelt_america": (10.28, -87.11, 0, -47.39, 2, 2),  # maxresult=0
             "middlebelt_america_2": (0, -83.42, -19.17, -33.68, 2, 2),  # maxresult=0
             "middle_south_america": (-15.98, -74.46, -29.40, -37.195, 3, 3),  # maxresult=0
-            "south_america": (-28.32, -77.10, -42.90, -50.36, 3, 3), #maxresult=0
+            "south_america": (-28.32, -77.10, -42.90, -50.36, 3, 3),  # maxresult=0
             "south_america_2": (-41.60, -77.07, -55.65, -60.03, 3, 3),  # maxresult=0
-            "europe": (59.29, -14.68, 36.49, 52.65, 1, 1),  # maxresult=197
-            "west_africa": (36.0, -19.07, 3.91, 57.74, 3, 3),  # maxresult=64
-            "south_africa": (3.56, 7.64, -33.97, 40.52, 3, 3),  # maxresult=0
-            "india_china": (45.85, 48.96, 21.17, 123.66, 3, 3),  # maxresult=47
-            "india": (24.57, 66.35, 5.32, 87.45, 3, 3),  # max-result=0
-            "vietnam": (22.32, 90.97, 8.46, 111.53,1,1),  # max-result=215
-            "indonesia": (9.154, 93.42, -11.47, 155,2,2),  # maxresult=55
-            "australia": (-10.78, 112.24, -38.92, 154.77,3,3),  # maxresult=13
-            "australia_2": (-40.27, 142.99, -44.18, 149.15,3,3),  # maxresult=0
-            "lower_newzealand": (-40.13, 166, -46.52, 176.22,3,3),  # maxresult=45
-            "upper_newzealand": (-33.24, 171.29, -41.73, 178.86,3,3),  # maxresult=149
-            "russia": (70.49, 2.52, 46.06, 146.3,5,5),    # maxresult=0
-            "iceland": (67.4, -25.43, 63.3, -13.13,2,2)  # maxresult=0
+            "europe": (59.29, -14.68, 36.49, 52.65, 1, 1),          # maxresult=197
+            "west_africa": (36.0, -19.07, 3.91, 57.74, 3, 3),       # maxresult=64
+            "south_africa": (3.56, 7.64, -33.97, 40.52, 3, 3),      # maxresult=0
+            "india_china": (45.85, 48.96, 21.17, 123.66, 3, 3),     # maxresult=47
+            "india": (24.57, 66.35, 5.32, 87.45, 3, 3),             # max-result=0
+            "vietnam": (22.32, 90.97, 8.46, 111.53, 1, 1),          # max-result=215
+            "indonesia": (9.154, 93.42, -11.47, 155, 2, 2),         # maxresult=55
+            "australia": (-10.78, 112.24, -38.92, 154.77, 3, 3),    # maxresult=13
+            "australia_2": (-40.27, 142.99, -44.18, 149.15, 3, 3),  # maxresult=0
+            "lower_newzealand": (-40.13, 166, -46.52, 176.22, 3, 3),  # maxresult=45
+            "upper_newzealand": (-33.24, 171.29, -41.73, 178.86, 3, 3),  # maxresult=149
+            "russia": (70.49, 2.52, 46.06, 146.3, 5, 5),            # maxresult=0
+            "iceland": (67.4, -25.43, 63.3, -13.13, 2, 2),          # maxresult=0
+            "magadascar": (-11.29, 42.80, -26.07, 50.89, 1, 1)      # maxresult=0
     }
     urls = []
     base_url = 'http://www.exxon.com/api/v1/Retail/retailstation/GetStationsByBoundingBox?'
@@ -81,7 +83,7 @@ class CreateStartURLs:
             lat2 = box[2]
             lon2 = box[3]
             max_w = box[4]
-            max_h =  box[5]
+            max_h = box[5]
             for row in self.get_vertical(lat1, lat2, max_h):
                 for col in self.get_horizontal(row, lon1, lon1 - lon2, max_w, max_h):
                     self.urls.append(
@@ -133,21 +135,22 @@ class CreateStartURLs:
             start_point = b_lat
             yield b_lat
 
+
 class ExxonMobilSpider(scrapy.Spider):
     name = "exxonmobil"
-    crawled_locations=set()
+    crawled_locations = set()
     allowed_domains = ["exxon.com"]
-    start_urls=CreateStartURLs().get_urls()
+    start_urls = CreateStartURLs().get_urls()
 
     def parse(self, response):
         json_data = json.loads(response.text)
         for location in json_data:
-            location_id=location['LocationID']
+            location_id = location['LocationID']
             if location_id not in self.crawled_locations:
                 self.crawled_locations.add(location_id)
                 properties = {
                     "name": location['DisplayName'],
-                    "addr_full": location['AddressLine1'] +" "+location['AddressLine2'],
+                    "addr_full": location['AddressLine1'] + " " + location['AddressLine2'],
                     "city": location['City'],
                     "state": location['StateProvince'],
                     "country": location['Country'],
@@ -158,7 +161,6 @@ class ExxonMobilSpider(scrapy.Spider):
                     "lat": float(location['Latitude']),
                     "lon": float(location['Longitude']),
                 }
-                logme(str(GeojsonPointItem(**properties))+"\n", "geo.txt")
                 yield GeojsonPointItem(**properties)
 
     def store_hours(self, hours):
@@ -181,7 +183,7 @@ class ExxonMobilSpider(scrapy.Spider):
                         m[0] + " " + str(int(m[1]) + self.am_pm(m[1], m[3])).zfill(2) + ":" + m[2] + "-" + str(
                             int(m[4]) + self.am_pm(m[4], m[6])).zfill(2) + ":" + m[5])
                 elif m[8] is not None:
-                    working_hours.append(m[0]+": 24/7")
+                    working_hours.append(m[0] + ": 24/7")
                 elif m[1] is None:
                     # closed
                     working_hours.append(m[0] + ": " + m[7])
@@ -210,8 +212,8 @@ class ExxonMobilSpider(scrapy.Spider):
                     p = final_working_hours.pop(-1)
                     final_working_hours.append(p[0:2] + "-" + hour[0:2] + prev_hours[-12:])
                     prev_hours = hour
-                elif last_entry[-8:-6]==match_order[get_prev_index] and hour[-4:]=='24/7':
-                    #lets do same for 24/7, they have this wierd Mon 24/7, Tue 24/7 etc
+                elif last_entry[-8:-6] == match_order[get_prev_index] and hour[-4:] == '24/7':
+                    # lets do same for 24/7, they have this wierd Mon 24/7, Tue 24/7 etc
                     p = final_working_hours.pop(-1)
                     final_working_hours.append(p[0:2] + "-" + hour[0:2] + prev_hours[-6:])
                     prev_hours = hour
@@ -219,14 +221,13 @@ class ExxonMobilSpider(scrapy.Spider):
                     # no match, let it be
                     final_working_hours.append(hour)
 
-
         if final_working_hours:
             return "; ".join(final_working_hours)
         elif hours == "Open 24 Hours":
-            #there is also a scenario where, 24/7 has no day of week prepended.
+            # there is also a scenario where, 24/7 has no day of week prepended.
             return "24/7"
         else:
-            #if it all fails
+            # if it all fails
             return hours
 
     def am_pm(self, hr, a_p):
