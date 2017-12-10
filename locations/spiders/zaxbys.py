@@ -68,7 +68,7 @@ class ZaxbysSpider(scrapy.Spider):
         return opening_hours
 
     def phone_normalize(self, phone):
-        r=re.search(r'\+?(\s+)*(\d{1})?(\s|\()*(\d{3})(\s+|\))*(\d{3})(\s+|-)?(\d{2})(\s+|-)?(\d{2})',phone)
+        r=re.search(r'\+?(\s+)*(\d{1})?(\s|\()*(\d{3})(\s+|\)|-)*(\d{3})(\s+|-)?(\d{2})(\s+|-)?(\d{2})',phone)
         return ('('+r.group(4)+') '+r.group(6)+'-'+r.group(8)+'-'+r.group(10)) if r else phone
 
     def parse(self, response): #high-level list of states
@@ -85,18 +85,17 @@ class ZaxbysSpider(scrapy.Spider):
             yield scrapy.Request(store['Website'], callback=self.parse_store,headers={'Referer':response.url if response.url else 'https://www.zaxbys.com/locations/sc/'})
 
     def parse_store(self, response):
-#        response.xpath('//script[@type="application/ld+json"]/text()')
         try:
             data=json.loads(re.search(r'(.*)"acceptsReservations.*',response.xpath('//script[@type="application/ld+json"]/text()').extract_first().replace('\r\n',''))[1])
         except Exception as e:
-#            if response.headers['Refere']
+
             yield scrapy.Request(response.url, callback=self.parse_store)
             return
 
         yield GeojsonPointItem(
             lat=float(data['geo']['latitude']),
             lon=float(data['geo']['longitude']),
-            phone=data['telephone'],
+            phone=self.phone_normalize(data['telephone']),
             website=data['url'],
             ref=data['url'],
             opening_hours=self.store_hours(data['openingHoursSpecification']),
