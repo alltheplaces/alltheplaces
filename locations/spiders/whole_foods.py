@@ -30,13 +30,18 @@ class WholeFoodsSpider(scrapy.Spider):
     def parse(self, response):
         if("?page=" in response.url):
             for match in response.xpath("//div[contains(@class,'views-field-title')]/parent::div/parent::div"):
+                if(match.xpath(".//div[contains(@class,'storefront-phone')]/span[contains(@class,'strong')]/following-sibling::text()").extract_first() is None):
+                    phoneString = ""
+                else:
+                    phoneString = self.parse_phone(match.xpath(".//div[contains(@class,'storefront-phone')]/span[contains(@class,'strong')]/following-sibling::text()").extract_first().strip())
+
                 yield GeojsonPointItem(
                     ref=string.capwords(match.xpath(".//h4[contains(@class,'field-content')]/a/text()").extract_first()),
                     addr_full=match.xpath(".//div[contains(@class,'thoroughfare')]/text()").extract_first(),
                     city=match.xpath(".//span[contains(@class,'locality')]/text()").extract_first(),
                     state=match.xpath(".//span[contains(@class,'state')]/text()").extract_first(),
                     postcode=match.xpath(".//span[contains(@class,'postal-code')]/text()").extract_first(),
-                    phone=self.parse_phone(match.xpath(".//div[contains(@class,'storefront-phone')]/span[contains(@class,'strong')]/following-sibling::text()").extract_first().strip()),
+                    phone=phoneString,
                     website= "https://www.wholefoodsmarket.com" + match.xpath(".//h4[contains(@class,'field-content')]/a/@href").extract_first(),
                     country=match.xpath(".//span[contains(@class,'country')]/text()").extract_first(),
                 )
@@ -47,13 +52,19 @@ class WholeFoodsSpider(scrapy.Spider):
                     yield scrapy.Request("https://www.wholefoodsmarket.com" + nextUrl,callback=self.parse)
         else:
             for match in response.xpath("//div[contains(@class,'views-field-title')]/parent::div"):
+                if(match.xpath(".//div[contains(@class,'phone-number')]/div/text()").extract_first() is None):
+                    phoneString = ""
+                else:
+                    phoneString = self.parse_phone(match.xpath(".//div[contains(@class,'phone-number')]/div/text()").extract_first().strip())
+
+
                 yield GeojsonPointItem(
                     ref=string.capwords(match.xpath(".//h4[contains(@class,'field-content')]/a/text()").extract_first()),
                     addr_full=match.xpath(".//div[contains(@class,'thoroughfare')]/text()").extract_first(),
                     city=match.xpath(".//span[contains(@class,'locality')]/text()").extract_first(),
                     state=match.xpath(".//div[contains(@class,'state')]/text()").extract_first(),
                     postcode=match.xpath(".//div[contains(@class,'postal-code')]/text()").extract_first(),
-                    phone=self.parse_phone(match.xpath(".//div[contains(@class,'phone-number')]/div/text()").extract_first().strip()),
+                    phone=phoneString,
                     website= "https://www.wholefoodsmarket.com" + match.xpath(".//h4[contains(@class,'field-content')]/a/@href").extract_first(),
                     country=match.xpath(".//span[contains(@class,'country')]/text()").extract_first(),
                 )
