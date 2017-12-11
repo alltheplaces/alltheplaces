@@ -43,8 +43,7 @@ class CVSSpider(scrapy.Spider):
             times = "".join(x for x in times)
             if times and day:
                 parsed_time = self.parse_times(times)
-                parsed_day = self.parse_day(day)
-                hours.append(parsed_day + ' ' + parsed_time)
+                hours.append(day + ' ' + parsed_time)
 
         return "; ".join(hours)
 
