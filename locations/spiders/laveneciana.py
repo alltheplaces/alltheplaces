@@ -23,13 +23,9 @@ class LavenecianaSpider(scrapy.Spider):
                 lat=''
                 lon=''
                 id=''
-            addr_full =  re.findall(r"^[^()]{6}[^(.)]+" , addr_full_tel)[0]
-            phone_number = re.findall(r"[0-9]{4}-[0-9]{4}",addr_full_tel)
-            if(len(phone_number)>0):
-                phone_number = phone_number[0]
-            else:
-                phone_number =''
-            if(addr_full!="Direccion"):
+            addr_full =  addr_full_tel.split('Tel.: ')[0]
+            phone_number = addr_full_tel.split('Tel.: ')[1]
+            if(addr_full!="Direccion... "):
              properties = {
                 'addr_full': addr_full,
                 'phone':phone_number,
