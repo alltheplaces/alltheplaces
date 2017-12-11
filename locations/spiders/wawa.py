@@ -1,5 +1,4 @@
 import json
-import re
 import requests
 import scrapy
 from urllib import parse
@@ -15,17 +14,6 @@ STATES = ["AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DC", "DE", "FL", "GA",
           "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ",
           "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC",
           "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"]
-
-HEADERS = {
-    'Host': 'www.wawa.com',
-    'Connection': 'keep-alive',
-    'Accept': 'application/json, text/javascript, */*; q=0.01',
-    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_5) AppleWebKit/537.36 (KHTML, like Gecko)' +
-    'Chrome/59.0.3071.115 Safari/537.36',
-    'Referer': 'https://www.wawa.com/about/locs/store-locator',
-    'Accept-Encoding': 'gzip, deflate, br',
-    'Accept-Language': 'en-US,en;q=0.8,ru;q=0.6'
-}
 
 
 class WawaSpider(scrapy.Spider):
@@ -62,13 +50,15 @@ class WawaSpider(scrapy.Spider):
                 'state': state,
                 'postcode': zipc,
                 'ref': loc['locationID'],
-                'website': response.url,
+                'website': "https://www.wawa.com/stores/{}/{}".format(
+                    loc['locationID'],
+                    loc['addressUrl'],
+                ),
                 'lat': lat,
                 'lon': lng,
                 'opening_hours': opening_hours
             }
-            return  GeojsonPointItem(**properties)
-
+            return GeojsonPointItem(**properties)
 
     def start_requests(self):
 
@@ -84,5 +74,10 @@ class WawaSpider(scrapy.Spider):
                 wawa_params = {'limit': 50, 'lat': lat, 'long': lng}
                 wawa_url = self.start_urls[0] + parse.urlencode(wawa_params)
 
-                yield scrapy.Request(url=wawa_url, headers=HEADERS, callback=self.parse)
-
+                yield scrapy.Request(
+                    wawa_url,
+                    headers={
+                        'Accept': 'application/json',
+                    },
+                    callback=self.parse
+                )
