@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import scrapy
-import ast
+import json
+import re
 from locations.items import GeojsonPointItem
 
 STATES = ['AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DC', 'DE', 'FL', 'GA',
@@ -8,7 +9,7 @@ STATES = ['AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DC', 'DE', 'FL', 'GA',
           'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ',
           'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC',
           'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY']
-
+          
 class MeijerSpider(scrapy.Spider):
     name = 'meijer'
     allowed_domains = ['www.meijer.com']
@@ -21,10 +22,20 @@ class MeijerSpider(scrapy.Spider):
             )
     
     def parse(self, response):
-        selector = scrapy.Selector(response)
-        stores = selector.css('div.records_inner>script::text').extract_first()
+        stores = response.css('div.records_inner>script::text').extract_first()
+        
         if stores:
-            for store in ast.literal_eval(stores.strip()[13:-1]):
+            stores = stores.strip()[13:-1]
+            stores = stores.replace('\',\'', '","')
+            stores = stores.replace('[\'', '["')
+            stores = stores.replace('\']', '"]')
+            stores = json.loads(stores)
+            loc_data = response.css('script').extract()[10]
+            lat_matches = re.findall(r'(\"LAT\"), (\")([+-]?([0-9]*[.])?[0-9]+)(\")', loc_data)
+            lon_matches = re.findall(r'(\"LNG\"), (\")([+-]?([0-9]*[.])?[0-9]+)(\")', loc_data)
+            
+            n = 0
+            for store in stores:
                 address1 = store[6].split(',')
                 city = address1[0].strip()
                 address2 = address1[1].strip().split(' ')
@@ -35,13 +46,15 @@ class MeijerSpider(scrapy.Spider):
                     'name': store[1],
                     'phone': store[7],
                     'opening_hours': self.hours(store[8]),
-                    'lat': store[37],
-                    'lon': store[36],
+                    'lat': lat_matches[n][2],
+                    'lon': lon_matches[n][2],
                     'street': store[2],
                     'city': city,
                     'state': state,
                     'postcode': postcode
                 }
+                
+                n = n + 1
                 
                 yield GeojsonPointItem(**properties)
 
