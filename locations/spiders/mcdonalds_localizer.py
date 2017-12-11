@@ -7,10 +7,11 @@ from locations.items import GeojsonPointItem
 class McLocalizer(scrapy.Spider):
 
     name = "mclocalizer"
-    allowed_domains = ["www.mcdonalds.com", "www.mcdonalds.com.pr", "www.mcdonalds.co.cr"]
+    allowed_domains = ["www.mcdonalds.com", "www.mcdonalds.com.pr", "www.mcdonalds.co.cr", "www.mcdonalds.com.ar"]
     start_urls = (
         'http://www.mcdonalds.com.pr/api/restaurantsByCountry?country=PR',
         'http://www.mcdonalds.co.cr/api/restaurantsByCountry?country=CR',
+        'http://www.mcdonalds.com.ar/api/restaurantsByCountry?country=AR'
     )
 
     def parse(self, response):
