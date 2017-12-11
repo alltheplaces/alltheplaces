@@ -1,5 +1,4 @@
 import json
-import requests
 import scrapy
 from urllib import parse
 from locations.items import GeojsonPointItem
@@ -9,11 +8,15 @@ MAPQUEST_KEY = 'ybe4KeKi8ACKY0eVqJXAw2QxTKnxnor8'
 
 MAPQ = 'http://www.mapquestapi.com/geocoding/v1/address?'
 
-STATES = ["AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DC", "DE", "FL", "GA",
-          "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD",
-          "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ",
-          "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC",
-          "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"]
+LAT_LONS = [
+    ('39.2601', '-76.3549'),
+    ('36.9874', '-77.0031'),
+    ('27.9998', '-81.6064'),
+    ('38.9300', '-77.1020'),
+    ('39.0495', '-75.4541'),
+    ('41.2033', '-77.1945'),
+    ('40.7995', '-77.8271'),
+]
 
 
 class WawaSpider(scrapy.Spider):
@@ -23,6 +26,19 @@ class WawaSpider(scrapy.Spider):
     )
     download_delay = 1.5
     allowed_domains = ('www.wawa.com', 'www.mapquestapi.com', )
+
+    def start_requests(self):
+        url = 'https://www.wawa.com/Handlers/LocationByLatLong.ashx?'
+        for lat, lon in LAT_LONS:
+            wawa_params = {'limit': 50, 'lat': lat, 'long': lon}
+
+            yield scrapy.Request(
+                url + parse.urlencode(wawa_params),
+                headers={
+                    'Accept': 'application/json',
+                },
+                callback=self.parse
+            )
 
     def get_addr(self, addr):
         return (v for k, v in addr.items() if k in ['address', 'city', 'state', 'zip'])
@@ -62,30 +78,9 @@ class WawaSpider(scrapy.Spider):
                     loc['locationID'],
                     loc['addressUrl'],
                 ),
-                'lat': lat,
-                'lon': lng,
+                'lat': float(lat),
+                'lon': float(lng),
                 'opening_hours': opening_hours
             }
-            return GeojsonPointItem(**properties)
 
-    def start_requests(self):
-
-        url = self.start_urls[0]
-        for state in STATES:
-            params = [('key', MAPQUEST_KEY), ('location', state)]
-            url = MAPQ + parse.urlencode(params)
-            data = requests.get(url).json()
-
-            if data.get('results', {}):
-                lat, lng = data['results'][0]['locations'][0]['latLng'].values()
-
-                wawa_params = {'limit': 50, 'lat': lat, 'long': lng}
-                wawa_url = self.start_urls[0] + parse.urlencode(wawa_params)
-
-                yield scrapy.Request(
-                    wawa_url,
-                    headers={
-                        'Accept': 'application/json',
-                    },
-                    callback=self.parse
-                )
+            yield GeojsonPointItem(**properties)
