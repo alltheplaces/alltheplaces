@@ -2,17 +2,6 @@ import scrapy
 import re
 from locations.items import GeojsonPointItem
 import json
-DAY_MAPPING = {
-    'Monday': 'Mo',
-    'Tuesday': 'Tu',
-    'Wednesday': 'We',
-    'Thursday': 'Th',
-    'Friday': 'Fr',
-    'Saturday': 'Sa',
-    'Sunday': 'Su'
-}
-
-
 class CVSSpider(scrapy.Spider):
 
     name = "pizzaranch"
@@ -21,9 +10,6 @@ class CVSSpider(scrapy.Spider):
     start_urls = (
         'https://pizzaranch.com/locations',
     )
-
-    def parse_day(self, day):
-            return DAY_MAPPING[day.strip()]
     def parse_times(self, times):
         if times.strip() == 'Open 24 hours':
             return '24/7'
@@ -52,7 +38,7 @@ class CVSSpider(scrapy.Spider):
     def parse_hours(self, lis):
         hours = []
         for li in lis:
-            day = li.xpath('normalize-space(.//td[@class="c-location-hours-details-row-day"]/text())').extract_first()
+            day = li.xpath('normalize-space(.//td[@class="c-location-hours-details-row-day"]/text())').extract_first()[:2]
             times = li.xpath('.//td[@class="c-location-hours-details-row-intervals"]/span/span/text()').extract()
             times = "".join(x for x in times)
             if times and day:
