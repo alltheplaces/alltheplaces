@@ -2,7 +2,6 @@
 import scrapy
 import json
 import re
-from uszipcode import ZipcodeSearchEngine
 from locations.items import GeojsonPointItem
 
 STATES = ['AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DC', 'DE', 'FL', 'GA',
@@ -11,21 +10,18 @@ STATES = ['AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DC', 'DE', 'FL', 'GA',
           'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC',
           'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY']
 
-
 class AldiSpider(scrapy.Spider):
-    name = "aldi"
-    allowed_domains = ["aldi.us"]
-        
-    def start_requests(self):
-        for state in STATES:
-            yield scrapy.Request(
-                'https://aldi.us/stores/en-us/Search?SingleSlotGeo={}&Mode=None'.format(state),
-                callback = self.parse
-            )
+    name = 'aldi_us'
+    allowed_domains = ['www.yellowmap.de']
+    start_urls = (
+        'https://www.yellowmap.de/Presentation/AldiSued/en-US/ResultList?LocX=&LocY=&Lux=-115.224609375&Luy=58.17070248348609&Rlx=-62.666015625&Rly=17.14079039331665&ZoomLevel=4',
+    )
     
     def parse(self, response):
-        selector = scrapy.Selector(response)
-        stores = selector.css('.resultItem')
+        data = json.loads(response.body_as_unicode())
+        container = data['Container']
+        stores = self.parse_data(container)
+
         for store in stores:
             json_data = json.loads(store.css('.resultItem::attr(data-json)').extract_first())
             ref = json_data['id']
@@ -60,6 +56,33 @@ class AldiSpider(scrapy.Spider):
             }
 
             yield GeojsonPointItem(**properties)
+
+        if 'zoom' in response.meta.keys():
+            zoom = response.meta["zoom"]
+        else:
+            zoom = 5
+
+        for child in self.children(container):
+            yield scrapy.Request(
+                'https://www.yellowmap.de/Presentation/AldiSued/en-US/ResultList?LocX={}&LocY={}&ZoomLevel={}'.format(child['locX'], child['locY'], zoom),
+                meta = {'zoom' : zoom + 1},
+                callback = self.parse
+            )
+
+    def children(self, data):
+        json_data = re.search(r'(Tiles:) (\[{.*}\])', data)
+        if json_data:
+            return json.loads(json_data.groups()[1])
+        else: 
+            return []
+
+    def parse_data(self, data):
+        data = scrapy.http.HtmlResponse(url = '', body = data, encoding='utf-8')
+        stores = data.css('.resultItem')
+        if stores:
+            return stores
+        else:
+            return []
 
     def hours(self, data):
         opening_hours = ''
