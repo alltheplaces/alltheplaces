@@ -14,12 +14,6 @@ class SchlotzskysSpider(scrapy.Spider):
         hours = hours.split('\t')[6]
         return hours
 
-    # Left this here for later. Maybe it would be useful eventually.
-##    def parse_lat_lon(self, address):
-##        geolocator = Nominatim()
-##        location = geolocator.geocode(address)
-##        coordinates = [location.latitude, location.longitude]
-##        return coordinates
 
     def parse_address(self, response):
         addr_1 = str(response.xpath('normalize-space(//div[@class="locations-address"])').extract_first()) 
@@ -43,9 +37,6 @@ class SchlotzskysSpider(scrapy.Spider):
         city = city_state_post[0]
         state = city_state_post[1]
         postcode = city_state_post[2]
-##        coordinates = self.parse_lat_lon(store_address)
-##        latitude = coordinates[0]
-##        longitude = coordinates[1]
         phone_num = response.xpath('//div[@class="locations-phone-fax"]').extract()
         phone_num = str(phone_num).split('>')[2].split('<')[0]
         website = str(response).split(' ')[1].split('>')[0]
