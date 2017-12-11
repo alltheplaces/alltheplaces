@@ -31,7 +31,15 @@ class WawaSpider(scrapy.Spider):
         return physical_addr['loc']
 
     def get_opening_hours(self, store):
-        return ''
+        open_time = store['storeOpen'][:5]
+        close_time = store['storeClose'][:5]
+
+        times = '{}-{}'.format(open_time, close_time)
+
+        if times == '00:00-00:00':
+            return '24/7'
+        else:
+            return times
 
     def parse(self, response):
         wawa_stores = json.loads(response.body_as_unicode())
@@ -40,7 +48,7 @@ class WawaSpider(scrapy.Spider):
 
             addr, city, state, zipc = self.get_addr(loc['addresses'][0])
             lat, lng = self.get_lat_lng(loc['addresses'][1])
-            opening_hours = self.get_opening_hours(loc) or ''
+            opening_hours = self.get_opening_hours(loc) or None
 
             properties = {
                 'addr_full': addr,
