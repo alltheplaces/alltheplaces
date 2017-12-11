@@ -1,7 +1,7 @@
 import scrapy
 import re
 from locations.items import GeojsonPointItem
-class CVSSpider(scrapy.Spider):
+class AdvanceautopartsSpider(scrapy.Spider):
 
     name = "advanceautoparts"
     allowed_domains = ["stores.advanceautoparts.com"]
