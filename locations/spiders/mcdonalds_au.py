@@ -86,8 +86,8 @@ class McDonalsAUSpider(scrapy.Spider):
             }
 
             lat_lon = data['store_geocode']
-            properties['lat'] = lat_lon.split(",")[0]
-            properties['lon'] = lat_lon.split(",")[1]
+            properties['lon'] = lat_lon.split(",")[0].strip()
+            properties['lat'] = lat_lon.split(",")[1].strip()
 
             opening_hours = self.store_hours(data)
             if opening_hours:
