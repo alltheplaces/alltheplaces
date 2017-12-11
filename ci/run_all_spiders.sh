@@ -12,7 +12,7 @@ RUN_URL_PREFIX="https://s3.amazonaws.com/${S3_BUCKET}/${RUN_S3_KEY_PREFIX}"
 
 (>&2 echo "Running all spiders")
 
-python "ci/run_all_spiders.py"
+python ci/run_all_spiders.py
 
 if [ ! $? -eq 0 ]; then
     (>&2 echo "Running spiders failed for some reason")
@@ -26,14 +26,14 @@ gzip output.ndgeojson
 
 (>&2 echo "Copying results to S3")
 
-aws s3 cp --quiet \
+aws s3 cp --no-progress \
     --acl=public-read \
     --content-type "application/json" \
     --content-encoding "gzip" \
     "output.ndgeojson.gz" \
     "${RUN_S3_PREFIX}/output.ndgeojson.gz"
 
-aws s3 cp --quiet \
+aws s3 cp --no-progress \
     --acl=public-read \
     --content-type "text/plain; charset=utf-8" \
     --content-encoding "gzip" \
