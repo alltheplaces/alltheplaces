@@ -82,7 +82,7 @@ class ZaxbysSpider(scrapy.Spider):
         else:
             stores=[]
         for store in stores:
-            yield scrapy.Request(store['Website'], callback=self.parse_store,headers={'Referer':response.url if response.url else 'https://www.zaxbys.com/locations/sc/'})
+            yield scrapy.Request(response.urljoin(store['Website']), callback=self.parse_store)
 
     def parse_store(self, response):
         try:
