@@ -27,7 +27,8 @@ class RubiosSpider(scrapy.Spider):
 
     def parse_store(self, response):
 
-        if response.css('.store-info').extract_first().replace('\t', '').split('<span class="oh-display-label" style="width: 6.6em;">')[1].split('<br></span>')[0].replace('</span><span class="oh-display-times oh-display-hours">', '').strip() is not None or '':
+        if response.xpath('//*[@id="btn-order-catering"]/text()').extract() is not '' or None:
+            print('NOT FOUND')
             properties = {
             'name': response.css('.store-info').extract_first().replace('\t','').split('<span itemprop="name">')[1].split('</span>')[0],
             'ref': response.css('.store-info').extract_first().replace('\t','').split('"addressLocality">')[1].split('</span>')[0],
@@ -42,6 +43,7 @@ class RubiosSpider(scrapy.Spider):
             'lat': float(response.xpath('//head/script[9]').extract_first().split('"lat":')[1].split(',')[0]),
         }
         else:
+            print('WAS FOUND')
             properties = {
             'name': response.css('.store-info').extract_first().replace('\t','').split('<span itemprop="name">')[1].split('</span>')[0],
             'ref': response.css('.store-info').extract_first().replace('\t','').split('"addressLocality">')[1].split('</span>')[0],
