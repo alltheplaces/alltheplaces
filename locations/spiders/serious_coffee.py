@@ -2,17 +2,6 @@ import scrapy
 import re
 from locations.items import GeojsonPointItem
 
-DAY_MAPPING = {
-    'Monday': 'Mo',
-    'Tuesday': 'Tu',
-    'Wednesday': 'We',
-    'Thursday': 'Th',
-    'Friday': 'Fr',
-    'Saturday': 'Sa',
-    'Sunday': 'Su'
-}
-
-
 class SeriousCoffeeSpider(scrapy.Spider):
 
     name = "seriouscoffee"
@@ -28,12 +17,12 @@ class SeriousCoffeeSpider(scrapy.Spider):
             osm_days = []
             if len(days) == 2:
                 for day in days:
-                    osm_day = DAY_MAPPING[day.strip()]
+                    osm_day = day.strip()[:2]
                     osm_days.append(osm_day)
             return "-".join(osm_days)
         if re.search('Every Day', day):
             return "Mo-Su"
-        return DAY_MAPPING[day.strip()]
+        return day.strip()[:2]
 
     def parse_times(self, times):
         if times.strip() == 'Closed':
