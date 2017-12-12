@@ -77,7 +77,7 @@ class McDonalsFRSpider(scrapy.Spider):
                 'city': data['location']['city'],
                 'ref': data['id'],
                 'addr_full': data['location']['streetLabel'],
-                'phone': data['datasheet']['tel'],
+                'phone': data['datasheet']['tel']['number'],
                 'state': data['location']['countryISO'],
                 'postcode': data['location']['postalCode'],
                 'name': data['name'],
