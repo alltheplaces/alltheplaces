@@ -98,7 +98,7 @@ class LagenovesaSpider(scrapy.Spider):
                 'city': '',
                 'state': '',
                 'postcode': '',
-                'ref': '',
+                'ref': title,
                 'website': response.url,
                 'lat': lat,
                 'lon': lng,
