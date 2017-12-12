@@ -110,4 +110,4 @@ class CVSSpider(scrapy.Spider):
     def parse(self, response):
         urls = response.xpath('//div[@class="states"]/ul/li/a/@href').extract()
         for path in urls:
-            yield scrapy.Request(response.urljoin(path), callback=self.parse_state)
+yield scrapy.Request(response.urljoin(path), callback=self.parse_state)
