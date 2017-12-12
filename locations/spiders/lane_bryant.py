@@ -8,7 +8,7 @@ class LaneBryantSpider(scrapy.Spider):
 
     name = "lanebryant"
     allowed_domains = ["stores.lanebryant.com"]
-    download_delay = 0
+    download_delay = 0.5
     start_urls = (
         'https://stores.lanebryant.com/',
     )
