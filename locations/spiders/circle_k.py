@@ -22,6 +22,11 @@ class CircleKSpider(scrapy.Spider):
                 'lat': float(data['latitude']) if data['latitude'] else None,
                 'lon': float(data['longitude']) if data['longitude'] else None,
                 'addr_full': data['address'],
+                'website': 'https://www.circlek.com/store-locator/us/{}/{}/{}'.format(
+                    data['city'].lower(),
+                    data['address'].lower().replace(' ', '-'),
+                    data['cost_center'],
+                ),
                 'city': data['city'],
             }
 
