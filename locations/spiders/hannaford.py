@@ -10,30 +10,23 @@ regex_pm = r"\s?([Pp][Mm])"
 class HannafordSpider(scrapy.Spider):
     name = 'hannaford'
     allowed_domains = ['www.hannaford.com']
-    start_urls = ['https://www.hannaford.com/custserv/locate_store.cmd?form_state=locateStoreForm&latitude=&longitude=&formId=locateStoreForm&radius=500000&cityStateZip=maine&submitBtn.x=37&submitBtn.y=10']
+    start_urls = [
+        'https://www.hannaford.com/custserv/locate_store.cmd?form_state=locateStoreForm&latitude=&longitude=&formId=locateStoreForm&radius=500000&cityStateZip=maine&submitBtn.x=37&submitBtn.y=10']
 
     def parse(self, response):
         base_url = "https://www.hannaford.com"
         stores = response.xpath(
-            '//*[@id="pageContentWrapperInner"]//descendant::*/a[2]/@href')\
+            '//*[@id="pageContentWrapperInner"]//descendant::*/a[2]/@href') \
             .extract()
         for store in stores:
             store = base_url + store
             yield scrapy.Request(store, callback=self.parse_store)
 
-    def combine_hours(self, hours, sp_hr=None, sp_tag=None):
+    def combine_hours(self, hours):
         days = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"]
         hours = self.convert_hours(hours)
-        if sp_hr:
-            sp_hr = self.convert_hours(sp_hr)
-            for i in range(len(sp_hr)):
-                if sp_hr[i] != 'off':
-                    sp_hr[i] = sp_hr[i] + ' open ' + '"' + sp_tag + '"'
-                    converted_hours = ''.join(' {} {} open, {}'.format(*t)
-                                              for t in zip(days, hours, sp_hr))
-        else:
-            converted_hours = ''.join('{} {} '.format(*t)
-                                      for t in zip(days, hours))
+        converted_hours = ''.join('{} {} '.format(*t)
+                                  for t in zip(days, hours))
         return converted_hours
 
     def convert_hours(self, hours):
@@ -92,26 +85,14 @@ class HannafordSpider(scrapy.Spider):
             '//h1[@style="display:block;"]/text()').extract_first().split(
             ' to ')[1]
         website = response.xpath(
-            '//div[@class="storeContact"]/descendant::*/a/@href')\
+            '//div[@class="storeContact"]/descendant::*/a/@href') \
             .extract_first()
         if not website:
-            if not IndexError:
-                website = response.url
-
+            website = response.url
         hours = response.xpath(
             '//div[@class="storeHours"]/div/p/descendant::*/text()').extract()
-        sp_tag = response.xpath(
-            '//p[@class="sectionHeader"]/text()').extract()
-        if len(sp_tag) >= 3:
-            sp_tag = response.xpath(
-                '//p[@class="sectionHeader"]/text()')[2].extract().split(
-                ' Hours')[0]
 
-        sp_hr = response.xpath(
-            '//div[@class="storeHours"]/div[2]/p/descendant::*/text()')\
-            .extract()
-
-        opening_hours = self.combine_hours(hours, sp_hr, sp_tag)
+        opening_hours = self.combine_hours(hours)
 
         yield GeojsonPointItem(
             ref=response.url,
