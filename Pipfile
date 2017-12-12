@@ -7,13 +7,11 @@ name = "pypi"
 
 [dev-packages]
 
-
+awscli = "*"
 
 [packages]
 
 scrapy = "*"
-botocore = "*"
-
 
 [requires]
 

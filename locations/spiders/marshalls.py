@@ -18,13 +18,13 @@ URL = 'https://mktsvc.tjx.com/storelocator/GetSearchResultsByState'
 
 
 NORMALIZE_KEYS = (
-                    ('addr:full', ['Address', 'Address2']),
-                    ('addr:city', ['City']),
-                    ('addr:state', ['State']),
-                    ('addr:postcode', ['Zip']),
-                    ('addr:country', ['Country']),
-                    ('phone', ['Phone']),
-                 )
+    ('addr_full', ['Address', 'Address2']),
+    ('city', ['City']),
+    ('state', ['State']),
+    ('postcode', ['Zip']),
+    ('country', ['Country']),
+    ('phone', ['Phone']),
+)
 
 
 def normalize_time(hours):
@@ -85,14 +85,14 @@ class MarshallsSpider(scrapy.Spider):
         url = URL
 
         headers = {
-                   'Accept-Language': 'en-US,en;q=0.8,ru;q=0.6',
-                   'Origin': 'https://www.marshallsonline.com',
-                   'Accept-Encoding': 'gzip, deflate, br',
-                   'Accept': 'application/json, text/plain, */*',
-                   'Referer': 'https://www.marshallsonline.com/store-finder/by-state',
-                   'Connection': 'keep-alive',
-                   'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-                   }
+            'Accept-Language': 'en-US,en;q=0.8,ru;q=0.6',
+            'Origin': 'https://www.marshallsonline.com',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Accept': 'application/json, text/plain, */*',
+            'Referer': 'https://www.marshallsonline.com/store-finder/by-state',
+            'Connection': 'keep-alive',
+            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+        }
 
         for state in STATES:
             form_data = {'chain': '10', 'lang': 'en', 'state': state}
@@ -107,7 +107,8 @@ class MarshallsSpider(scrapy.Spider):
         props = {}
 
         for store in stores:
-            lon_lat = [store.pop('Longitude', ''), store.pop('Latitude', None)]
+            props['lat'] = store.pop('Latitude', None)
+            props['lon'] = store.pop('Longitude', None)
             props['ref'] = store.pop('StoreID', None)
             props['website'] = URL
 
@@ -120,7 +121,4 @@ class MarshallsSpider(scrapy.Spider):
                 props['opening_hours'] = opening_hours
                 props.pop('Hours', None)
 
-            yield GeojsonPointItem(
-                properties=props,
-                lon_lat=lon_lat
-            )
+            yield GeojsonPointItem(**props)
