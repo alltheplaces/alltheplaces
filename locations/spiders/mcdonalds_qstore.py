@@ -1,15 +1,17 @@
 # -*- coding: utf-8 -*-
 import scrapy
+import re
 import json
 from locations.items import GeojsonPointItem
 
 
-class McDonalsAUSpider(scrapy.Spider):
+class McDonalsQStoreSpider(scrapy.Spider):
 
-    name = "mcdonalds-au"
-    allowed_domains = ["mcdonalds.com.au"]
+    name = "mcdonalds_qstore"
+    allowed_domains = ["mcdonalds.com.au", "mcdonalds.co.nz"]
     start_urls = (
         'https://mcdonalds.com.au/data/store',
+        'https://mcdonalds.co.nz/data/store'
     )
 
     def normalize_time(self, time_str):
@@ -86,6 +88,8 @@ class McDonalsAUSpider(scrapy.Spider):
             }
 
             lat_lon = data['store_geocode']
+            if not lat_lon:
+                continue
             properties['lon'] = lat_lon.split(",")[0].strip()
             properties['lat'] = lat_lon.split(",")[1].strip()
 
