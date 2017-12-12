@@ -10,7 +10,8 @@ class McDonalsFRSpider(scrapy.Spider):
     name = "mcdonalds_fr"
     allowed_domains = ["www.mcdonalds.fr"]
     start_urls = (
-        'https://prod-dot-mcdonaldsfrance-storelocator.appspot.com/api/store/nearest?center=2.695842500000026:47.0169289&limit=1000&authToken=26938DBF9169A7F39C92BDCF1BA7A&db=prod',
+        'https://prod-dot-mcdonaldsfrance-storelocator.appspot.com/api/store/nearest?center=2.331052600000021:48.8640493&limit=1000&authToken=26938DBF9169A7F39C92BDCF1BA7A&db=prod',
+        'https://prod-dot-mcdonaldsfrance-storelocator.appspot.com/api/store/nearest?center=2.886671299999989:45.554898&limit=1000&authToken=26938DBF9169A7F39C92BDCF1BA7A&db=prod',
     )
 
     def store_hours(self, data):
