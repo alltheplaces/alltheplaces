@@ -2,21 +2,11 @@ import scrapy
 import re
 from locations.items import GeojsonPointItem
 
-DAY_MAPPING = {
-    'M': 'Mo',
-    'T': 'Tu',
-    'W': 'We',
-    'F': 'Fr',
-    'Sat': 'Sa',
-    'Sun': 'Su'
-}
-
-
 class DiaryQueenSpider(scrapy.Spider):
 
     name = "diaryqueen"
     allowed_domains = ["www.dairyqueen.com"]
-    download_delay = 0
+    download_delay = 0.5
     start_urls = (
         'http://www.dairyqueen.com/us-en/Sitemap/',
     )
