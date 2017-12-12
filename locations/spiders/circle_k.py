@@ -19,8 +19,8 @@ class CircleKSpider(scrapy.Spider):
         for data in results:
             properties = {
                 'ref': data['id'],
-                'lat': data['latitude'],
-                'lon': data['longitude'],
+                'lat': float(data['latitude']),
+                'lon': float(data['longitude']),
                 'addr_full': data['address'],
                 'city': data['city'],
             }
