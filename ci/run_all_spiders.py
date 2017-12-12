@@ -33,5 +33,6 @@ if __name__ == '__main__':
         crawler.signals.connect(spider_closed, signals.spider_closed)
         crawler.signals.connect(spider_opened, signals.spider_opened)
         process.crawl(crawler)
+        break
     process.start()
     print("Done crawling")
