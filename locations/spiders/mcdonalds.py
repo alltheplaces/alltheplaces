@@ -8,11 +8,23 @@ from locations.items import GeojsonPointItem
 class McDonaldsSpider(scrapy.Spider):
     name = "mcdonalds"
     allowed_domains = ["www.mcdonalds.com"]
-    start_urls = (
-        'https://www.mcdonalds.com/googleapps/GoogleRestaurantLocAction.do?method=searchLocation&latitude=44.97&longitude=-93.21&radius=100000&maxResults=300000&country=us&language=en-us',
-        'https://www.mcdonalds.com/googleapps/GoogleRestaurantLocAction.do?method=searchLocation&latitude=44.97&longitude=-93.21&radius=100000&maxResults=300000&country=ca&language=en-ca',
-        'https://www.mcdonalds.com/googleapps/GoogleRestaurantLocAction.do?method=searchLocation&latitude=44.97&longitude=-93.21&radius=100000&maxResults=300000&country=gb&language=en-gb',
-    )
+
+    countries = ['us', 'ca', 'cr', 'au', 'jp', 'nl', 'pa', 'de', 'fr', 'sv', 'se', 'gt', 'uk', 'hk', 'bs', 'nz',
+                 'sz', 'ie', 'at', 'be', 'br', 'sg', 'es', 'dk', 'ph', 'my', 'no', 'ad', 'fi', 'th', 'lu', 'vu',
+                 'it', 'mx', 'cu', 'tr', 'ar', 'rs', 'hu', 'ru', 'cn', 'cl', 'id', 'pt', 'gr', 'uy', 'cz', 'pl',
+                 'mc', 'bn', 'ma', 'il', 'si', 'sa', 'kw', 'om', 'eg', 'bg', 'bh', 'lv', 'ae', 'ee', 'ro', 'mt',
+                 'co', 'sk', 'za', 'qa', 'hr', 'ws', 'fj', 'lt', 'in', 'pe', 'jo', 'py', 'do', 'by', 'tt', 'ua',
+                 'cy', 'ec', 'bo', 'sr', 'ni', 'kr', 'lb', 'pk', 'lk', 'sm', 'az', 'mr', 'iq', 'ba', 'vn', 'kz',
+                 'gb']
+
+    urls = []
+
+    for country in countries:
+        url = 'https://www.mcdonalds.com/googleapps/GoogleRestaurantLocAction.do?method=searchLocation&latitude=44.97&longitude=-93.21&radius=100000&maxResults=300000&country=' + country + '&language=en-' + country
+        urls.append(url)
+    
+    start_urls = tuple(urls)
+
 
     def store_hours(self, store_hours):
         if not store_hours:
@@ -54,8 +66,11 @@ class McDonaldsSpider(scrapy.Spider):
 
         return opening_hours
 
+
     def parse(self, response):
         data = json.loads(response.body_as_unicode())
+        if not data:
+            return
 
         for store in data.get('features', []):
             store_info = store['properties']
