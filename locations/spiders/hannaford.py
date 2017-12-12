@@ -9,7 +9,6 @@ regex_pm = r"\s?([Pp][Mm])"
 
 class HannafordSpider(scrapy.Spider):
     name = 'hannaford'
-    download_delay = 1
     allowed_domains = ['www.hannaford.com']
     start_urls = ['https://www.hannaford.com/custserv/locate_store.cmd?form_state=locateStoreForm&latitude=&longitude=&formId=locateStoreForm&radius=500000&cityStateZip=maine&submitBtn.x=37&submitBtn.y=10']
 
@@ -102,8 +101,12 @@ class HannafordSpider(scrapy.Spider):
         hours = response.xpath(
             '//div[@class="storeHours"]/div/p/descendant::*/text()').extract()
         sp_tag = response.xpath(
-            '//p[@class="sectionHeader"]/text()')[2].extract().split(
-            ' Hours')[0]
+            '//p[@class="sectionHeader"]/text()').extract()
+        if len(sp_tag) >= 3:
+            sp_tag = response.xpath(
+                '//p[@class="sectionHeader"]/text()')[2].extract().split(
+                ' Hours')[0]
+
         sp_hr = response.xpath(
             '//div[@class="storeHours"]/div[2]/p/descendant::*/text()')\
             .extract()
