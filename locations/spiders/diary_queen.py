@@ -6,7 +6,6 @@ class DiaryQueenSpider(scrapy.Spider):
 
     name = "diaryqueen"
     allowed_domains = ["www.dairyqueen.com"]
-    download_delay = 0.5
     start_urls = (
         'http://www.dairyqueen.com/us-en/Sitemap/',
     )
