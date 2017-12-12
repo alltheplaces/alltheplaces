@@ -5,22 +5,37 @@ import re
 regex = r"(\D+,\s\D+-\d{5}).*"  # city, state, zip
 regex_am = r"\s?([Aa][Mm])"
 regex_pm = r"\s?([Pp][Mm])"
+regex_lat = r"(lat = \d+\.\d+)"
+regex_lon = r"(lng = -\d+\.\d+)"
+regex_id = r"(t\.id = \"\d+\")"
 
 
 class HannafordSpider(scrapy.Spider):
     name = 'hannaford'
     allowed_domains = ['www.hannaford.com']
     start_urls = [
-        'https://www.hannaford.com/custserv/locate_store.cmd?form_state=locateStoreForm&latitude=&longitude=&formId=locateStoreForm&radius=500000&cityStateZip=maine&submitBtn.x=37&submitBtn.y=10']
+        'https://www.hannaford.com/custserv/locate_store.cmd?form_state=locateStoreForm&latitude=&longitude=&formId=locateStoreForm&radius=500&cityStateZip=maine&submitBtn.x=37&submitBtn.y=10']
 
     def parse(self, response):
         base_url = "https://www.hannaford.com"
+        script = response.xpath(
+            '//script[contains(., "t.lat")]/text()')[0].extract()
+
+        lat = re.findall(regex_lat, script)
+        lat = [x.strip('lat = ') for x in lat]
+        lon = re.findall(regex_lon, script)
+        lon = [x.strip('lng = ') for x in lon]
+        storeid = re.findall(regex_id, script)
+        storeid = [x.strip('t.id = "').strip('"') for x in storeid]
+        lat_lon = list(zip(storeid, lat, lon))
+
         stores = response.xpath(
             '//*[@id="pageContentWrapperInner"]//descendant::*/a[2]/@href') \
             .extract()
         for store in stores:
             store = base_url + store
-            yield scrapy.Request(store, callback=self.parse_store)
+            yield scrapy.Request(
+                store, callback=self.parse_store, meta={'lat_lon': lat_lon})
 
     def combine_hours(self, hours):
         days = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"]
@@ -61,6 +76,12 @@ class HannafordSpider(scrapy.Spider):
         return hours
 
     def parse_store(self, response):
+        storeid = response.url.split('=')[1]
+        for i in response.meta['lat_lon']:
+            if i[0] == storeid:
+                lat = i[1]
+                lon = i[2]
+
         addr = response.xpath(
             '//div[@class="storeContact"]/p[1]/text()').extract()
         addr = [x.strip().replace('\xa0', '-') for x in addr]
@@ -97,6 +118,8 @@ class HannafordSpider(scrapy.Spider):
         yield GeojsonPointItem(
             ref=response.url,
             name=name,
+            lat=lat,
+            lon=lon,
             addr_full=addr_full,
             street=street,
             city=city,
