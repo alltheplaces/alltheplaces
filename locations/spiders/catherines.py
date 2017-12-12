@@ -33,7 +33,7 @@ class CatherinesSpider(scrapy.Spider):
          }
          properties['opening_hours'] =  json_data[0]['openingHours'],
          yield GeojsonPointItem(**properties)
-       except ValueError:
+       except ValueError: 
         return
 
 
