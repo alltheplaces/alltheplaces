@@ -5,11 +5,10 @@ import re
 
 from locations.items import GeojsonPointItem
 
-URL = "lovinghut.us"
 
 class LovinghutSpider(scrapy.Spider):
     name = "lovinghut"
-    allowed_domains = [URL]
+    allowed_domains = ["lovinghut.us"]
     start_urls = (
         'http://lovinghut.us/locations',
     )
@@ -38,7 +37,7 @@ class LovinghutSpider(scrapy.Spider):
 
             address_match = re.search('(.*)\,\s(.*?)$', full_addresses[index])
             address_full, city_state = address_match.groups()
-            match = re.search('(.*?)\s(.*?)\s(.*?)$', city_state)
+            match = re.search('([\w\s]+)\s(\w+)\s(\w+)', city_state)
             city, state, postcode = match.groups()
 
             props = {
@@ -48,11 +47,7 @@ class LovinghutSpider(scrapy.Spider):
                 'state': state,
                 'postcode': postcode,
                 'phone': phones[index],
-                'lat': '',
-                'lon': '',
-                'name': '',
-                'ref':'',
-
+                'ref': city + ', ' + state,
             }
 
             index += 1
@@ -66,14 +61,11 @@ class LovinghutSpider(scrapy.Spider):
     def parse_detail_product(self, response):
         tr_days = response.xpath('//table[@class="hours"]//tr')
         product = response.meta.get('product')
-
         opening_hours = ""
         index = 0
 
         for tr_day in tr_days:
             open_hours = tr_day.xpath('td//h4/text()').extract()
-            if product['city'] == 'gardengrove':
-                pass
 
             if len(open_hours) == 0:
                 open_hours = tr_day.xpath('td//strong/text()').extract()
