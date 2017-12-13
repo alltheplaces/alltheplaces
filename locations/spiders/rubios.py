@@ -36,11 +36,10 @@ class RubiosSpider(scrapy.Spider):
         'postcode': response.xpath('//span[@itemprop="postalCode"]/text()').extract_first(),
         'phone': response.xpath('//span[@itemprop="postalCode"]/text()').extract_first(),
         'website': response.request.url,
-        # 'opening_hours': response.css('.store-info').extract_first().replace('\t', '').split('<span class="oh-display-label" style="width: 6.6em;">')[1].split('<br></span>')[0].replace('</span><span class="oh-display-times oh-display-hours">', '').strip(),
+        'opening_hours': "".join(response.xpath('//div/div/div/span/span/span/text()').extract()).strip(),
         'lon': float(response.xpath('//head/script[9]').extract_first().split('"lon":')[1].split('}')[0]),
         'lat': float(response.xpath('//head/script[9]').extract_first().split('"lat":')[1].split(',')[0]),
         }
-
 
 
 
