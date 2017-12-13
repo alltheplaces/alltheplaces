@@ -52,7 +52,7 @@ class McDonaldsATSpider(scrapy.Spider):
                 end_min = "59"
 
             end = '%02d:%02d' % (
-                int(end_hour) + 12 if int(end_hour) =< 12 else int(end_hour),
+                int(end_hour) + 12 if int(end_hour) < 12 else int(end_hour),
                 int(end_min),
             )
             
