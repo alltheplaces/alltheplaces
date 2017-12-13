@@ -4,6 +4,7 @@ from scrapy import signals
 
 
 if __name__ == '__main__':
+    print("Loading project")
     settings = get_project_settings()
 
     settings.set('LOG_FILE', 'all_spiders.log')
