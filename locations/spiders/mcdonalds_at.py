@@ -35,10 +35,7 @@ class McDonaldsATSpider(scrapy.Spider):
             hours = ''
             day_hour = item.groups()[0]
 
-            if not day_hour:
-                continue
-
-            if day_hour == "geschlossen":
+            if len(day_hour.split("-")) < 2:
                 continue
 
             start = day_hour.split("-")[0].strip()
@@ -80,6 +77,9 @@ class McDonaldsATSpider(scrapy.Spider):
 
         if not day_groups:
             return None
+
+        if bool(day_groups):
+            return None
         opening_hours = ''
         if len(day_groups) == 1 and day_groups[0]['hours'] in ('00:00-23:59', '00:00-00:00'):
             opening_hours = '24/7'
@@ -104,7 +104,11 @@ class McDonaldsATSpider(scrapy.Spider):
     def parse_store(self, response):
         address = response.xpath('//div[@class="street"]//text()').extract_first().strip()
         postalCode, city = self.parse_city(response.xpath('//div[@class="postal-code-city"]//text()').extract_first())
-        phone = response.xpath('//div[@class="field--phone"]//text()').extract_first().strip()
+        phone = response.xpath('//div[@class="field--phone"]//text()').extract_first()
+        if phone:
+            phone = phone.strip()
+        else:
+            phone = ""
 
         properties = {
             'addr_full': address,
