@@ -19,21 +19,21 @@ class DiscoArgentinaSpider(scrapy.Spider):
         )
 
     def parse(self, response):
-        result = response.body_as_unicode().replace("\\", '')
-        result = result.replace("{\"d\":\"", '')
-        result = result[:-2]
+        result = response.body_as_unicode().replace('\\', '')
+        result = result[:5] + result[6:-2] + result[-1:]
         data = json.loads(result)
-        for store in data['Locales']:
+        ref = 0
+        for store in data['d']['Locales']:
             properties = {
-                'ref': store['Local']['IdProvincia'].strip(),
+                'ref': ref,
                 'name': store['Local']['Nombre'].strip(),
                 'addr_full': store['Local']['Direccion'].strip(),
                 'city': store['Local']['Localidad'].strip(),
                 'state': store['Local']['Provincia'].strip(),
                 'postcode': store['Local']['CodigoPostal'].strip(),
-                'lat': store['Local']['Latitud'].strip(),
-                'lon': store['Local']['Longitud'].strip(),
+                'lat': float(store['Local']['Latitud'].strip()),
+                'lon': float(store['Local']['Longitud'].strip()),
                 'phone': store['Local']['Telefono'].strip(),
             }
-
+            ref += 1
             yield GeojsonPointItem(**properties)
