@@ -5,12 +5,13 @@ import re
 from locations.items import GeojsonPointItem
 
 
-class McDonalsHKSpider(scrapy.Spider):
+class McDonalsLocatorSpider(scrapy.Spider):
 
-    name = "mcdonalds_hk"
-    allowed_domains = ["www.mcdonalds.com.hk"]
+    name = "mcdonalds_locator"
+    allowed_domains = ["www.mcdonalds.com.hk", "www.mcdonalds.ie"]
     start_urls = (
         'http://www.mcdonalds.com.hk/googleapps/GoogleHongKongSearchAction.do?method=searchLocation&searchTxtLatlng=(22.25%2C%20114.16669999999999)&actionType=searchRestaurant&country=hk&language=en',
+        'http://www.mcdonalds.ie/googleapps/GoogleSearchAction.do?method=searchLocation&searchTxtLatlng=(54.0551962%2C%20-8.728650000000016)&actionType=searchRestaurant&language=en&country=ir'
     )
 
     def normalize_time(self, time_str):
@@ -85,6 +86,9 @@ class McDonalsHKSpider(scrapy.Spider):
     def parse_address(self, address):
         address = address['address']
         match = re.search(r'<p>(.*)<', address)
+
+        if not match:
+            match = re.search(r'<h3>(.*)<', address)
         data = match.groups()
         
         if data:
