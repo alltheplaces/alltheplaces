@@ -27,10 +27,9 @@ class IgaSpider(scrapy.Spider):
             yield GeojsonPointItem(
                 lat=float(position[1]),
                 lon=float(position[2]),
-                phone=self.phone_normalize(phone),
+                phone=phone,
                 website=store.xpath('.//a[contains(.,"View Our Website")]/@href').extract_first(),
                 ref=store.xpath('.//div[contains(@class,"org")]/text()').extract_first(),
-                opening_hours='',
                 addr_full=store.xpath('.//div[contains(@class,"street-address")]/text()').extract_first(),
                 city=store.xpath('.//span[contains(@class,"locality")]/text()').extract_first().rstrip(','),
                 state=store.xpath('.//span[contains(@class,"region")]/text()').extract_first().strip(),
