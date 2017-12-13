@@ -34,7 +34,7 @@ class RubiosSpider(scrapy.Spider):
         'city': response.xpath('//span[@itemprop="addressLocality"]/text()').extract_first(),
         'state': response.xpath('//span[@itemprop="addressRegion"]/text()').extract_first(),
         'postcode': response.xpath('//span[@itemprop="postalCode"]/text()').extract_first(),
-        'phone': response.xpath('//span[@itemprop="postalCode"]/text()').extract_first(),
+        'phone': response.xpath('//span[@itemprop="telephone"]/a/text()').extract_first(),
         'website': response.request.url,
         'opening_hours': "".join(response.xpath('//div/div/div/span/span/span/text()').extract()).strip(),
         'lon': float(response.xpath('//head/script[9]').extract_first().split('"lon":')[1].split('}')[0]),
