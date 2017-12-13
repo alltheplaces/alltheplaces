@@ -13,15 +13,18 @@ HEADERS = {
     'Referer': 'https://www.7-eleven.com/locator',
     'Content-Type': 'application/x-www-form-urlencoded',
     'X-SEI-TZ': '-08:00',
-    'Authorization': 'Bearer r7EzhnRW1tUCDIR8jUPmyqTpPK7m54'
+    'Authorization': 'Bearer DswuNWmXHj03tj42ee7bFPO59znpDD'
 }
 
 
 class SevenElevenSpider(scrapy.Spider):
     name = "seven_eleven"
-    allowed_domains = ["www.7-eleven.com"]
+    allowed_domains = [
+                        "www.7-eleven.com",
+                        "api.7-eleven.com"
+                        ]
     start_urls = (
-        'https://api.7-eleven.com/v4/stores/?lat=40.72786721004897&lon=-73.96717732880859&features=&radius=88.5137&limit=500&curr_lat=40.72786721004897&curr_lon=-73.96717732880859',
+        'https://api.7-eleven.com/v4/stores/?lat=40.72786721004897&lon=-73.96717732880859&features=&radius=100000&limit=500&curr_lat=40.72786721004897&curr_lon=-73.96717732880859',
     )
 
     
@@ -51,7 +54,7 @@ class SevenElevenSpider(scrapy.Spider):
             }
 
             yield GeojsonPointItem(**properties)
-
+            
         next_url = data['next']
         if next_url is not None:
             next_url = response.urljoin(next_url)
