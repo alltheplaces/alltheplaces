@@ -26,11 +26,14 @@ class PublixSpider(scrapy.Spider):
                 pass
 
     def parse_store(self, response):
-        storeHoursHTML = response.xpath('//div[@class="store-info-group"]').extract()[4].replace('\t','').split('0"><strong>')[1].replace('\r','').replace('\n','')
+        storeHoursHTML = response.xpath('//div[@class="store-info-group"]').extract()[4]
         p = re.compile(r'<.*?>')
         storeHours = p.sub('',storeHoursHTML)
-        storeHours = storeHours.replace('       ',' ')
+        storeHours = storeHours.replace('\t','').replace('\r','').replace('\n','').replace('       ',' ')
         storeHours = "".join(storeHours.strip())
+
+        if "CLOSED" in response.xpath('//span[@class="store-status"]/text()').extract():
+            storeHours = 'STORE CLOSED'
 
         properties = {
         'name': " ".join(response.xpath('//h1[@id="content_2_TitleTag"]/text()').extract_first().split()),
