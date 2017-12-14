@@ -124,7 +124,12 @@ if __name__ == '__main__':
     )
     print("Saved metadata to https://s3.amazonaws.com/{}/{}".format(s3_bucket, s3_key))
 
-    total_count = sum(s['item_scraped_count'] for s in spider_stats.values())
+    total_count = sum(
+        filter(
+            None,
+            (s['item_scraped_count'] for s in spider_stats.values())
+        )
+    )
     template_content = {
         'download_url': 'https://s3.amazonaws.com/{}/{}'.format(s3_bucket, s3_output_key),
         'download_size': round(s3_output_size_mb, 1),
