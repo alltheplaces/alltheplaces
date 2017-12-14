@@ -98,8 +98,8 @@ class SteakNShakeSpider(scrapy.Spider):
                 openingHoursString = ""
 
             try:
-                latFloat=item["address"]["loc"][0]
-                lonFloat=item["address"]["loc"][1]
+                latFloat=item["address"]["loc"][1]
+                lonFloat=item["address"]["loc"][0]
             except KeyError:
                 latFloat=None
                 lonFloat=None
