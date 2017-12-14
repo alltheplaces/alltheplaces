@@ -118,7 +118,7 @@ class SteakNShakeSpider(scrapy.Spider):
             address = address.strip()
 
             yield GeojsonPointItem(
-                ref='Steak n Shake' + ' - ' + address,
+                ref=item["id"],
                 name=item["name"],
                 opening_hours=openingHoursString.strip(),
                 addr_full=address,
