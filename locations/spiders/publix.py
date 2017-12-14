@@ -37,8 +37,7 @@ class PublixSpider(scrapy.Spider):
             storeHours = p.sub('', storeHoursHTML)
             storeHours = storeHours.replace('\t', '').replace('\r', '').replace('\n', '').replace('       ', ' ')
             storeHours = "".join(storeHours.strip())
-            storePHONENUMBER = \
-            response.css('#content_2_pnlPhone > div:nth-child(1)').extract_first().split(": ")[1].split('</div>')[0]
+            storePHONENUMBER = response.css('#content_2_pnlPhone > div:nth-child(1)').extract_first().split(": ")[1].split('</div>')[0]
 
 
         properties = {
