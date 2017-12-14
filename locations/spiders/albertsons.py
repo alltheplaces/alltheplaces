@@ -4,8 +4,8 @@ import scrapy
 from locations.items import GeojsonPointItem
 
 
-class SafewaySpider(scrapy.Spider):
-    name = "safeway"
+class AlbertsonsSpider(scrapy.Spider):
+    name = "albertsons"
     allowed_domains = ["locator.safeway.com"]
 
     def parse_day(self, day):
