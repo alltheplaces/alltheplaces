@@ -23,36 +23,34 @@ class SainsburysSpider(scrapy.Spider):
             if(self.state==False):
                 break
             else:
-             url = 'https://stores.sainsburys.co.uk/api/v1/stores/?fields=slfe-list-2.21&api_client_id=slfe&lat=54.652247&lon=-2.219954&limit=25000000&store_type=main%2Clocal&sort=by_distance&within=1500000&page='+str(page)
-             yield scrapy.Request(
-                url=url,
-                callback=self.parse
-             )
+                url = 'https://stores.sainsburys.co.uk/api/v1/stores/?fields=slfe-list-2.21&api_client_id=slfe&lat=54.652247&lon=-2.219954&limit=25000000&store_type=main%2Clocal&sort=by_distance&within=1500000&page='+str(page)
+                yield scrapy.Request(
+                    url=url,
+                    callback=self.parse
+                )
 
     def parse(self, response):
-      data = json.loads(response.body_as_unicode())
+        data = json.loads(response.body_as_unicode())
 
-      if(len(data['results'])==0):
-          self.state = False
-      else:
-        for store in data['results']:
+        if(len(data['results'])==0):
+            self.state = False
+        else:
+            for store in data['results']:
                 open_hours = store['opening_times']
                 clean_hours = ''
-                for idx ,time in enumerate(open_hours):
-                    clean_hours =clean_hours + DAYS[time['day']]+' '+time['start_time']+'-'+time['end_time']+' ; '
-
+                for idx, time in enumerate(open_hours):
+                    clean_hours = clean_hours + DAYS[time['day']]+' '+time['start_time']+'-'+time['end_time']+' ; '
 
                 properties = {
                     "ref": store['code'],
-                    "name":store['name'] ,
+                    "name": store['name'] ,
                     "opening_hours": clean_hours,
                     "website": 'https://stores.sainsburys.co.uk/%s/%s'%(store['code'] , store['other_name'].lower().replace(' ','-')),
-                    "addr_full":store['contact']['address1'],
+                    "addr_full": store['contact']['address1'],
                     "city": store['contact']['city'],
-                    "state":'',
                     "postcode": store['contact']['post_code'],
-                    "country":'United Kingdom',
-                    "lon": float( store['location']['lat']),
-                    "lat": float(store['location']['lon']),
+                    "country": 'United Kingdom',
+                    "lon": float( store['location']['lon']),
+                    "lat": float(store['location']['lat']),
                 }
                 yield GeojsonPointItem(**properties)
