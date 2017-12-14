@@ -6,7 +6,7 @@ class ArgosSpider(scrapy.Spider):
 
     name = "homebase"
     allowed_domains = ["www.homebase.co.uk"]
-    download_delay = 0
+    download_delay = 0.5
     start_urls = (
         'https://www.homebase.co.uk/stores',
     )
