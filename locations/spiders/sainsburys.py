@@ -52,7 +52,7 @@ class SainsburysSpider(scrapy.Spider):
                     "state":'',
                     "postcode": store['contact']['post_code'],
                     "country":'United Kingdom',
-                    "lon": store['location']['lat'],
-                    "lat": store['location']['lon'],
+                    "lon": float( store['location']['lat']),
+                    "lat": float(store['location']['lon']),
                 }
                 yield GeojsonPointItem(**properties)
