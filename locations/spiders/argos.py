@@ -2,17 +2,6 @@ import scrapy
 import re
 import json
 from locations.items import GeojsonPointItem
-
-DAY_MAPPING = {
-    'M': 'Mo',
-    'T': 'Tu',
-    'W': 'We',
-    'F': 'Fr',
-    'Sat': 'Sa',
-    'Sun': 'Su'
-}
-
-
 class ArgosSpider(scrapy.Spider):
 
     name = "argos"
