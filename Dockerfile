@@ -8,4 +8,4 @@ RUN pipenv install --dev
 
 COPY . .
 
-ENTRYPOINT ["pipenv", "run", "/opt/app/ci/run_all_spiders.sh"]
+ENTRYPOINT ["pipenv", "run", "python", "/opt/app/ci/run_all_spiders.py"]
