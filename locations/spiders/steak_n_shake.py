@@ -109,10 +109,19 @@ class SteakNShakeSpider(scrapy.Spider):
             except KeyError:
                 phoneString=None
 
+            try:
+                address2 = item["address"]["address2"]
+            except KeyError:
+                address2 = ""
+
+            address = item["address"]["address1"] + " " + address2
+            address = address.strip()
+
             yield GeojsonPointItem(
-                ref=item["name"],
+                ref='Steak n Shake' + ' - ' + address,
+                name=item["name"],
                 opening_hours=openingHoursString.strip(),
-                addr_full=item["address"]["address1"],
+                addr_full=address,
                 city=item["address"]["city"],
                 state=item["address"]["region"],
                 postcode=item["address"]["zip"],
