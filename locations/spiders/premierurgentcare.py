@@ -39,7 +39,9 @@ class PremierurgentcareSpider(scrapy.Spider):
                 'phone' : store['phone'],
                 'website' : store['permalink'],
                 'opening_hours' : '09:00-21:00',
-                'ref' : store['id'] + " " + store['store']
+                'ref' : store['id'] + " " + store['store'],
+                'lat': float(store['lat']),
+                'lon': float(store['lng']),
             }
 
             yield GeojsonPointItem(**properties)
