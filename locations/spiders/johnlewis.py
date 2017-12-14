@@ -16,7 +16,7 @@ class JohnLewisSpider(scrapy.Spider):
 
     name = "johnlewis"
     allowed_domains = ["www.johnlewis.com"]
-    download_delay = 0
+    download_delay = 0.5
     start_urls = (
         'https://www.johnlewis.com/our-shops',
     )
