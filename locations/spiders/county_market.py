@@ -7,7 +7,8 @@ from locations.items import GeojsonPointItem
 
 
 SIEVE = ('View on Map', 'Make My Preferred Store!')
-DAYS = r'M|Tue|Wed|Thu|Sat|Sun|Fri|'
+DAYS = r'M|Tue|Wed|Thu|Sat|Sun|Fri'
+AM_PM = r'am|pm|a.m.|p.m.|a|p'
 
 
 class MyCountyMarketSpider(scrapy.Spider):
@@ -19,12 +20,12 @@ class MyCountyMarketSpider(scrapy.Spider):
     )
 
     def parse_hours(self, hours):
-        if re.search(r'24 Hours', hours):
+        if re.search(r'24 hours', hours.lower()):
             return '24/7'
-        elif not re.search(DAYS, hours.replace(' ', '')):
-            return 'Mo-Su {}'.format(re.sub(r'am|pm', ':00', hours.replace(' ', '')))
-        else:
-            return ''
+        elif not re.search(DAYS, hours):
+            hours = hours.replace(' ', '').replace('to','-').replace('Midnight', '00:00')
+            return 'Mo-Su {}'.format(re.sub(AM_PM, ':00', hours))
+
 
     def process_store(self, store):
 
@@ -37,7 +38,6 @@ class MyCountyMarketSpider(scrapy.Spider):
             final_data = [clean for clean in normalize_data if clean not in SIEVE]
             city, state_zip = final_data[2].split(',')
             state, pcode = state_zip.strip().split()
-
             if 'Phone Number' in final_data:
                 phone = final_data[final_data.index('Phone Number')+1]
             if 'Store Hours' in final_data:
