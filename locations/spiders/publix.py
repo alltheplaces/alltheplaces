@@ -26,17 +26,19 @@ class PublixSpider(scrapy.Spider):
                 pass
 
     def parse_store(self, response):
-        storeHoursHTML = response.xpath('//div[@class="store-info-group"]').extract()[4]
-        p = re.compile(r'<.*?>')
-        storeHours = p.sub('',storeHoursHTML)
-        storeHours = storeHours.replace('\t','').replace('\r','').replace('\n','').replace('       ',' ')
-        storeHours = "".join(storeHours.strip())
-        storePHONENUMBER = response.css('#content_2_pnlPhone > div:nth-child(1)').extract_first().split(": ")[1].split('</div>')[0]
-
 
         if "CLOSED" in response.xpath('//span[@class="store-status"]/text()').extract():
             storeHours = 'STORE CLOSED'
             storePHONENUMBER = ''
+
+        else:
+            storeHoursHTML = response.xpath('//div[@class="store-info-group"]').extract()[4]
+            p = re.compile(r'<.*?>')
+            storeHours = p.sub('', storeHoursHTML)
+            storeHours = storeHours.replace('\t', '').replace('\r', '').replace('\n', '').replace('       ', ' ')
+            storeHours = "".join(storeHours.strip())
+            storePHONENUMBER = \
+            response.css('#content_2_pnlPhone > div:nth-child(1)').extract_first().split(": ")[1].split('</div>')[0]
 
 
         properties = {
@@ -52,8 +54,6 @@ class PublixSpider(scrapy.Spider):
         # 'lon': none on page,
         # 'lat': none on page,
         }
-
-        open('/tmp/tmp.txt','w').write(str(properties))
 
 
 
