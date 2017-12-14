@@ -31,9 +31,13 @@ class PublixSpider(scrapy.Spider):
         storeHours = p.sub('',storeHoursHTML)
         storeHours = storeHours.replace('\t','').replace('\r','').replace('\n','').replace('       ',' ')
         storeHours = "".join(storeHours.strip())
+        storePHONENUMBER = response.css('#content_2_pnlPhone > div:nth-child(1)').extract_first().split(": ")[1].split('</div>')[0]
+
 
         if "CLOSED" in response.xpath('//span[@class="store-status"]/text()').extract():
             storeHours = 'STORE CLOSED'
+            storePHONENUMBER = ''
+
 
         properties = {
         'name': " ".join(response.xpath('//h1[@id="content_2_TitleTag"]/text()').extract_first().split()),
@@ -42,7 +46,7 @@ class PublixSpider(scrapy.Spider):
         'city': "".join(response.xpath('//div[@class="store-info-group"]/text()').extract()[2].strip()).split(',')[0],
         'state': "".join(response.xpath('//div[@class="store-info-group"]/text()').extract()[2].strip()).split('\xa0')[0].split('\t')[-1],
         'postcode': response.xpath('//span[@itemprop="postalCode"]/text()').extract_first(),
-        'phone': response.css('#content_2_pnlPhone > div:nth-child(1)').extract_first().split(": ")[1].split('</div>')[0],
+        'phone': storePHONENUMBER,
         'website': response.request.url,
         'opening_hours': storeHours,
         # 'lon': none on page,
