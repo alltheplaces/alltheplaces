@@ -4,8 +4,8 @@ import scrapy
 from locations.items import GeojsonPointItem
 
 
-class AlbertsonsSpider(scrapy.Spider):
-    name = "albertsons"
+class SafewaySpider(scrapy.Spider):
+    name = "safeway"
     allowed_domains = ["locator.safeway.com"]
 
     def parse_day(self, day):
@@ -74,16 +74,6 @@ class AlbertsonsSpider(scrapy.Spider):
                  hours.append(parsed_day + ' ' + parsed_time)
             return "; ".join(hours)
     def start_requests(self):
-        headers = {
-            'Accept-Language': 'en-US,en;q=0.9',
-            'Origin': 'https://www.kfc.com',
-            'Accept-Encoding': 'gzip, deflate',
-            'Accept': 'text/javascript, text/html, application/xml, text/xml, */*',
-            'Referer': 'http://locator.safeway.com/sto…edirection=no&mylocation=2706',
-            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-            'X-Requested-With': 'XMLHttpRequest',
-        }
-
         zipcodes = ['83253', '57638', '54848', '44333', '03244', '23435', '31023', '38915', '79525', '81321', '89135', '98250',
                     '69154', '62838', '89445', '93204', '59402', '57532', '69030', '65231', '70394', '78550', '32566', '33185',
                     '27229', '16933', '41231', '46992']
