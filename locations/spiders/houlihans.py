@@ -27,9 +27,8 @@ class HoulihansSpider(scrapy.Spider):
 
     def parse_store(self, response):
 
-        if "error404" in response.request.url:
-            pass
-        else:
+        regex = re.compile(r'http(s://|://www.)houlihans.com/my-houlihans/\S+')
+        if re.search(regex,response.request.url):
             properties = {
             'name': response.xpath('//span[@itemprop="name"]/text()').extract_first(),
             'ref': response.xpath('//span[@itemprop="name"]/text()').extract_first(),
@@ -44,4 +43,7 @@ class HoulihansSpider(scrapy.Spider):
             'lon': float(response.xpath('//div/div[@class="location-actions"]/a[@href]').extract_first().split('q=')[1].split('%')[0].split(',')[1]),
             }
 
-        yield GeojsonPointItem(**properties)
+            yield GeojsonPointItem(**properties)
+
+        else:
+            pass
