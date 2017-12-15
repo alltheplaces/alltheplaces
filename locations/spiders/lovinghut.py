@@ -14,15 +14,15 @@ class LovinghutSpider(scrapy.Spider):
     )
 
     def normalize_time(self, time_str):
-        match = re.search(u'(.*) (am|pm|noon) \u2013 (.*) (am|pm|noon)', time_str)
+        match = re.search(u'(.*) (am|a.m|pm|noon|p.m) \u2013 (.*) (am|a.m||pm|noon|p.m)', time_str)
         h1, am_pm1, h2, am_pm2  = match.groups()
         h1 = h1.split(':')
         h2 = h2.split(':')
 
         return '%02d:%02d-%02d:%02d' % (
-            int(h1[0]) + 12 if am_pm1 == u'pm' or am_pm1 == u'noon' else int(h1[0]),
+            int(h1[0]) + 12 if am_pm1 == u'pm' or am_pm1 == u'noon' or am_pm1 == u'p.m' else int(h1[0]),
             int(h1[1]) if len(h1) > 1 else 0,
-            int(h2[0]) + 12 if am_pm2 == u'pm' or am_pm1 == u'noon' else int(h2[0]),
+            int(h2[0]) + 12 if am_pm2 == u'pm' or am_pm2 == u'noon' or am_pm2 == u'p.m' else int(h2[0]),
             int(h2[1]) if len(h2) > 1 else 0,
         )
 
@@ -93,7 +93,10 @@ class LovinghutSpider(scrapy.Spider):
                 index += 1
             elif len(open_hours) == 1:
                 hours = open_hours[0]
-                opening_hours += " " + self.normalize_time(hours)
+                try:
+                    opening_hours += " " + self.normalize_time(hours)
+                except Exception as e:
+                    print(e)
 
         product['opening_hours'] = opening_hours
 
