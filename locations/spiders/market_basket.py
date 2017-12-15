@@ -1,6 +1,5 @@
 import scrapy
 import re
-import json
 from locations.items import GeojsonPointItem
 class MarketBasketSpider(scrapy.Spider):
 
@@ -68,7 +67,6 @@ class MarketBasketSpider(scrapy.Spider):
                 city = city[0]
             else:
                 city =""
-
         properties = {
             'addr_full': addr_full,
             'phone': response.xpath('normalize-space(//span[@itemprop="telephone"]/text())').extract_first(),
@@ -83,8 +81,6 @@ class MarketBasketSpider(scrapy.Spider):
         hours = self.parse_hours(response.xpath('//div[@class="textwidget custom-html-widget"]/ul/li'))
         if hours:
             properties['opening_hours'] = hours
-
-        yield GeojsonPointItem(**properties)
 
         yield GeojsonPointItem(**properties)
 
