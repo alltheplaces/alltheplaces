@@ -27,9 +27,8 @@ class PublixSpider(scrapy.Spider):
 
     def parse_store(self, response):
 
-        if "CLOSED" in response.xpath('//span[@class="store-status"]/text()').extract():
+        if "CLOSED" is response.xpath('//span[@class="store-status"]/text()').extract_first():
             storeHours = 'STORE CLOSED'
-            storePHONENUMBER = ''
 
         else:
             storeHoursHTML = response.xpath('//div[@class="store-info-group"]').extract()[4]
@@ -37,23 +36,20 @@ class PublixSpider(scrapy.Spider):
             storeHours = p.sub('', storeHoursHTML)
             storeHours = storeHours.replace('\t', '').replace('\r', '').replace('\n', '').replace('       ', ' ')
             storeHours = "".join(storeHours.strip())
-            storePHONENUMBER = response.css('#content_2_pnlPhone > div:nth-child(1)').extract_first().split(": ")[1].split('</div>')[0]
 
 
         properties = {
         'name': " ".join(response.xpath('//h1[@id="content_2_TitleTag"]/text()').extract_first().split()),
         'ref': "".join(response.xpath('//div[@class="store-info-group"]/text()').extract_first().strip()),
-        'addr_full': "".join(response.xpath('//div[@class="store-info-group"]/text()').extract()[1].strip()),
-        'city': "".join(response.xpath('//div[@class="store-info-group"]/text()').extract()[2].strip()).split(',')[0],
+        'addr_full': " ".join(response.xpath('///div[@class="store-info-group"][2]/text()').extract_first().split()),
+        'city': " ".join(response.xpath('///div[@class="store-info-group"][2]/text()').extract()[1].split()).split(',')[0],
         'state': "".join(response.xpath('//div[@class="store-info-group"]/text()').extract()[2].strip()).split('\xa0')[0].split('\t')[-1],
-        'postcode': response.xpath('//span[@itemprop="postalCode"]/text()').extract_first(),
-        'phone': storePHONENUMBER,
+        'postcode': " ".join(response.xpath('///div[@class="store-info-group"][2]/text()').extract()[1].split()).split(',')[1].split()[1],
+        'phone': response.xpath('///div[@class="store-info-group"]/div[1]/text()').extract_first(),
         'website': response.request.url,
         'opening_hours': storeHours,
-        # 'lon': none on page,
-        # 'lat': none on page,
+        'lon': response.xpath('///div[@class="store-info-group"][4]/a/@href').extract_first().split('//')[2].split(',')[0],
+        'lat': response.xpath('///div[@class="store-info-group"][4]/a/@href').extract_first().split('//')[2].split(',')[1],
         }
-
-
 
         yield GeojsonPointItem(**properties)
