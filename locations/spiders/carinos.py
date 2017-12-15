@@ -66,6 +66,8 @@ class CarinosSpider(scrapy.Spider):
                 if h == 12:
                     new_h -= 12
                 store_hours = store_hours.replace(m.group(0), str(new_h) + ':00')
+        store_hours = store_hours.replace('\u2013', '-')
+        store_hours = store_hours.replace('<p>', '')
         
         return store_hours
 
