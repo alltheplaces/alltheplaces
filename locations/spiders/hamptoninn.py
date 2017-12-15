@@ -28,25 +28,21 @@ class HamptonInnSpider(scrapy.Spider):
 
     def parse_store(self, response):
 
-        json_data = response.xpath('//div/script[@type="application/ld+json"]/text()').extract_first().replace('\n','').replace('\r','').replace('\t','')
-        json_data = json_data.replace('\\','').replace(": '", ': "').replace("',",'",').replace("'}",'"}').replace(',}','}')
-        json_data = json_data.replace('// if the location file does not have the hours separated into open/close for each day, remove the below section', '')
-        data = json.loads(json_data)
-
         regex = re.compile(r'http(://|ps://)(www.|)hamptoninn\d.hilton.com/en/hotels/\w+/\S+/maps-directions/index.html')
         if re.search(regex,response.request.url):
             properties = {
-            'name': data['name'],
-            'ref': data['name'],
-            'addr_full': data['address']['streetAddress'],
-            'city': data['address']['addressLocality'],
-            'state': data['address']['addressRegion'],
-            'postcode': data['address']['postalCode'],
-            'phone': data['telephone'],
-            'website': response.request.url,
-            'opening_hours': data['openingHours'],
-            'lat': float(data['geo']['latitude']),
-            'lon': float(data['geo']['longitude']),
+            'name': response.xpath('//span[@class="property-name"]/text()').extract_first(),
+            'ref': response.xpath('//span[@class="property-name"]/text()').extract_first(),
+            'addr_full': response.xpath('//span[@class="property-streetAddress"]/text()').extract_first(),
+            'city': response.xpath('//span[@class="property-addressLocality"]/text()').extract_first(),
+            'state': response.xpath('//span[@class="property-addressRegion"]/text()').extract_first(),
+            'postcode': response.xpath('//span[@class="property-postalCode"]/text()').extract_first(),
+            'phone': response.xpath('//span[@class="property-telephone"]/text()').extract_first(),
+            'fax': response.xpath('//span[@class="property-fax"]/text()').extract_first(),
+            'website': response.xpath('//h1/a/@href').extract_first(),
+            'opening_hours': response.xpath('//div[@class="policy_component_left_pane"]/div[@class="title"]/text()').extract_first() + " " + " ".join(response.xpath('//div[@class="policy_component_left_pane"]/div[2]/text()').extract_first().split()) + " - " + response.xpath('//div[@class="policy_component_right_pane"]/div[@class="title"]/text()').extract_first() + " " + " ".join(response.xpath('//div[@class="policy_component_right_pane"]/div[2]/text()').extract_first().split()),
+            'lat': float(response.xpath('//meta[@name="geo.position"]/@content').extract_first().split(';')[0]),
+            'lon': float(response.xpath('//meta[@name="geo.position"]/@content').extract_first().split(';')[1]),
             }
 
             open('/tmp/json.txt', 'w').write(str(properties))
