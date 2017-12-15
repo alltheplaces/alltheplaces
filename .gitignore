@@ -92,3 +92,5 @@ ENV/
 .idea
 
 .DS_Store
+locations/spiders/ross.py
+locations/spiders/whole_foods.py
