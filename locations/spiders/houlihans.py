@@ -15,7 +15,7 @@ class HoulihansSpider(scrapy.Spider):
     def parse(self, response):
         response.selector.remove_namespaces()
         city_urls = response.xpath('//url/loc/text()').extract()
-        regex = re.compile(r'http(s://|://www.)houlihans.com/my-houlihans/\w+')
+        regex = re.compile(r'http(s://|://www.)houlihans.com/my-houlihans/\S+')
         for path in city_urls:
             if re.search(regex,path):
                 yield scrapy.Request(
