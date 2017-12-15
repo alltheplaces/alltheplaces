@@ -16,7 +16,6 @@ class StarwoodHotelsSpider(scrapy.Spider):
     }
     def parse(self, response):
         countries=response.xpath('//h5/a/@href')
-        print(self.settings.get('USER_AGENT'))
         for country in countries:
             yield scrapy.Request(response.urljoin(country.extract()), callback=self.parse_country)
 
