@@ -77,15 +77,19 @@ class LovinghutSpider(scrapy.Spider):
                 day = open_hours[0]
                 hours = open_hours[1]
 
+                if day == 'Last Order':
+                    continue
+
                 if hours.lower().find('closed') == -1:
                     open_days = day.split(u" \u2013 ")
+
                     try:
                         if len(open_days) == 2:
-                            opening_hours += ("; " if index > 0 else '') + open_days[0][:2] + '-' + open_days[1][:2] + ' ' + self.normalize_time(hours)
+                            opening_hours += ("; " if index > 0 else '') + open_days[0][:2] + '-' + open_days[1][:2] + ' ' + self._clean_text(self.normalize_time(hours))
                         elif len(open_days) == 1:
-                            opening_hours += ("; " if index > 0 else '') + open_days[0][:2] + ' ' + self.normalize_time(hours)
+                            opening_hours += ("; " if index > 0 else '') + open_days[0][:2] + ' ' + self._clean_text(self.normalize_time(hours))
                     except Exception as e:
-                        raise Exception("Error: " + e)
+                        print(e)
                 index += 1
             elif len(open_hours) == 1:
                 hours = open_hours[0]
@@ -94,3 +98,6 @@ class LovinghutSpider(scrapy.Spider):
         product['opening_hours'] = opening_hours
 
         yield GeojsonPointItem(**product)
+
+    def _clean_text(self, text):
+        return re.sub("[\r\n\t]", "", text).strip()
