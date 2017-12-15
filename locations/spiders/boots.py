@@ -31,7 +31,7 @@ class ArgosSpider(scrapy.Spider):
             'state': addr_full[2],
             'postcode':addr_full[3],
             'country': 'United Kingdom',
-            'ref': response.xpath('normalize-space(//input[@id="storeId"]/@value)').extract_first(),
+            'ref': re.findall(r"[^\/]+$" ,response.url)[0],
             'website': response.url,
             'lat': float(response.xpath('normalize-space(//input[@id="lat"]/@value)').extract_first()),
             'lon': float(response.xpath('normalize-space(//input[@id="lon"]/@value)').extract_first()),
