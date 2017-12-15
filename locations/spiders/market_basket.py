@@ -5,7 +5,7 @@ class MarketBasketSpider(scrapy.Spider):
 
     name = "market_basket"
     allowed_domains = ["www.mydemoulas.net"]
-    download_delay = 0
+    download_delay = 0.5
     start_urls = (
         'http://www.mydemoulas.net/locations/',
     )
