@@ -48,8 +48,8 @@ class PublixSpider(scrapy.Spider):
         'phone': response.xpath('///div[@class="store-info-group"]/div[1]/text()').extract_first(),
         'website': response.request.url,
         'opening_hours': storeHours,
-        'lon': response.xpath('///div[@class="store-info-group"][4]/a/@href').extract_first().split('//')[2].split(',')[0],
-        'lat': response.xpath('///div[@class="store-info-group"][4]/a/@href').extract_first().split('//')[2].split(',')[1],
+        'lat': response.xpath('///div[@class="store-info-group"][4]/a/@href').extract_first().split('//')[2].split(',')[0],
+        'lon': response.xpath('///div[@class="store-info-group"][4]/a/@href').extract_first().split('//')[2].split(',')[1],
         }
 
         yield GeojsonPointItem(**properties)
