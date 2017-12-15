@@ -27,18 +27,21 @@ class HoulihansSpider(scrapy.Spider):
 
     def parse_store(self, response):
 
-        properties = {
-        'name': response.xpath('//span[@itemprop="name"]/text()').extract_first(),
-        'ref': response.xpath('//span[@itemprop="name"]/text()').extract_first(),
-        'addr_full': response.xpath('//span[@itemprop="streetAddress"]/text()').extract_first(),
-        'city': response.xpath('//span[@itemprop="addressLocality"]/text()').extract_first(),
-        'state': response.xpath('//span[@itemprop="addressRegion"]/text()').extract_first(),
-        'postcode': response.xpath('//span[@itemprop="postalCode"]/text()').extract_first(),
-        'phone': response.xpath('//span[@itemprop="telephone"]/a/text()').extract_first(),
-        'website': response.request.url,
-        'opening_hours': " ".join(str(response.xpath('//div[@id="header"]/div/div/div/div/div[@class="location-hours"]/p/span/text()').extract()).replace('\\r','').replace(',',' -').split()).replace('[','').replace(']','').replace("'",""),
-        'lat': float(response.xpath('//div/div[@class="location-actions"]/a[@href]').extract_first().split('q=')[1].split('%')[0].split(',')[0]),
-        'lon': float(response.xpath('//div/div[@class="location-actions"]/a[@href]').extract_first().split('q=')[1].split('%')[0].split(',')[1]),
-        }
+        if "error404" in response.request.url:
+            pass
+        else:
+            properties = {
+            'name': response.xpath('//span[@itemprop="name"]/text()').extract_first(),
+            'ref': response.xpath('//span[@itemprop="name"]/text()').extract_first(),
+            'addr_full': response.xpath('//span[@itemprop="streetAddress"]/text()').extract_first(),
+            'city': response.xpath('//span[@itemprop="addressLocality"]/text()').extract_first(),
+            'state': response.xpath('//span[@itemprop="addressRegion"]/text()').extract_first(),
+            'postcode': response.xpath('//span[@itemprop="postalCode"]/text()').extract_first(),
+            'phone': response.xpath('//span[@itemprop="telephone"]/a/text()').extract_first(),
+            'website': response.request.url,
+            'opening_hours': " ".join(str(response.xpath('//div[@id="header"]/div/div/div/div/div[@class="location-hours"]/p/span/text()').extract()).replace('\\r','').replace(',',' -').split()).replace('[','').replace(']','').replace("'",""),
+            'lat': float(response.xpath('//div/div[@class="location-actions"]/a[@href]').extract_first().split('q=')[1].split('%')[0].split(',')[0]),
+            'lon': float(response.xpath('//div/div[@class="location-actions"]/a[@href]').extract_first().split('q=')[1].split('%')[0].split(',')[1]),
+            }
 
         yield GeojsonPointItem(**properties)
