@@ -18,6 +18,10 @@ HEADERS = {
 }
 
 class SparSpider(scrapy.Spider):
+    """ The UK Spar api disregards modified maxResults arguments, and only allows 5 results per request.
+        Therefore, this spider works by sending a large number of requests, each having a different
+        postcode.
+    """ 
     name = "spar"
     allowed_domains = ["spar.co.uk"]
     DOWNLOAD_DELAY = 0.5
