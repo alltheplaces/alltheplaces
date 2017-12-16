@@ -39,12 +39,12 @@ class PublixSpider(scrapy.Spider):
 
 
         properties = {
-        'name': " ".join(response.xpath('//h1[@id="content_2_TitleTag"]/text()').extract_first().split()),
-        'ref': "".join(response.xpath('//div[@class="store-info-group"]/text()').extract_first().strip()),
-        'addr_full': " ".join(response.xpath('///div[@class="store-info-group"][2]/text()').extract_first().split()),
-        'city': " ".join(response.xpath('///div[@class="store-info-group"][2]/text()').extract()[1].split()).split(',')[0],
-        'state': "".join(response.xpath('//div[@class="store-info-group"]/text()').extract()[2].strip()).split('\xa0')[0].split('\t')[-1],
-        'postcode': " ".join(response.xpath('///div[@class="store-info-group"][2]/text()').extract()[1].split()).split(',')[1].split()[1],
+        'name': response.xpath('//h1[@id="content_2_TitleTag"]/text()').extract_first(),
+        'ref': response.xpath('//div[@class="store-info-group"]/text()').extract_first(),
+        'addr_full': response.xpath('///div[@class="store-info-group"][2]/text()').extract_first(),
+        'city': response.xpath('///div[@class="store-info-group"][2]/text()').extract()[1].split(',')[0],
+        'state': response.xpath('//div[@class="store-info-group"]/text()').extract()[2].split('\xa0')[0].split('\t')[-1],
+        'postcode': response.xpath('///div[@class="store-info-group"][2]/text()').extract()[1].split(',')[1].split()[1],
         'phone': response.xpath('///div[@class="store-info-group"]/div[1]/text()').extract_first(),
         'website': response.request.url,
         'opening_hours': storeHours,
