@@ -180,7 +180,7 @@ class SherwinWilliamsSpider(scrapy.Spider):
                 "phone": self.phone_number(store['phone']),
                 "ref": store['storeNumber'],
                 "name": store['name'],
-                "extras": "Store Type: " + store_type,
+                "extras": {'Store_Type': store_type, 'Store_Number': store['storeNumber']},
                 "opening_hours": self.store_hours(response, store_id),
                 "lat": store['latitude'],
                 "lon": store['longitude'],
