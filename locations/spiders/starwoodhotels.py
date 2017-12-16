@@ -10,6 +10,9 @@ class StarwoodHotelsSpider(scrapy.Spider):
     start_urls = (
         'https://www.starwoodhotels.com/preferredguest/directory/hotels/all/list.html?language=en_US',
     )
+    custom_settings = {
+        'USER_AGENT': 'AllThePlacesBot/1.0',
+    }
 
     def parse(self, response):
         countries = response.xpath('//h5/a/@href')
@@ -56,11 +59,11 @@ class StarwoodHotelsSpider(scrapy.Spider):
 
             state = response.xpath('//li[@class="region"]/span/text()')
             if state:
-                props['state'] = state.extract_first().strip(),
+                props['state'] = state.extract_first().strip()
 
             country = response.xpath('//li[@class="country-name"]/span/text()')
             if country:
-                props['country'] = country.extract_first().strip(),
+                props['country'] = country.extract_first().strip()
 
             props['lat'] = float(response.xpath('//meta[@property="og:latitude"]/@content').extract_first())
             props['lon'] = float(response.xpath('//meta[@property="og:longitude"]/@content').extract_first())
