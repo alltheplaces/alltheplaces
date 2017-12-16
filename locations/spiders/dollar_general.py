@@ -12,28 +12,29 @@ STATES = ['AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DC', 'DE', 'FL', 'GA',
 
 WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
+
 class DollarGeneralSpider(scrapy.Spider):
     name = 'dollar_general'
     allowed_domains = ['hosted.where2getit.com']
-        
+
     def start_requests(self):
         url = 'https://hosted.where2getit.com/dollargeneral/rest/locatorsearch?lang=fr_FR'
         for state in STATES:
-            formdata = {  
-                'request':{  
-                    'appkey':'9E9DE426-8151-11E4-AEAC-765055A65BB0',
-                    'formdata':{  
-                        'geoip':'false',
-                        'dataview':'store_default',
-                        'geolocs':{  
-                            'geoloc':[  
-                                {  
-                                    'addressline':state,
-                                    'country':'US'
+            formdata = {
+                'request': {
+                    'appkey': '9E9DE426-8151-11E4-AEAC-765055A65BB0',
+                    'formdata': {
+                        'geoip': 'false',
+                        'dataview': 'store_default',
+                        'geolocs': {
+                            'geoloc': [
+                                {
+                                    'addressline': state,
+                                    'country': 'US'
                                 }
                             ]
                         },
-                        'searchradius':'100'
+                        'searchradius': '100'
                     }
                 }
             }
@@ -44,24 +45,24 @@ class DollarGeneralSpider(scrapy.Spider):
                 'Accept-Language': 'en-US,en;q=0.9',
                 'Content-Type': 'application/json',
                 'Origin': 'https://hosted.where2getit.com',
-                'Host':'hosted.where2getit.com',
+                'Host': 'hosted.where2getit.com',
                 'Referer': 'https://hosted.where2getit.com/dollargeneral/',
                 'X-Requested-With': 'XMLHttpRequest'
             }
-            
+
             yield scrapy.http.Request(
-                url, 
+                url,
                 self.parse,
-                method = 'POST',
-                body = json.dumps(formdata),
-                headers = headers,
+                method='POST',
+                body=json.dumps(formdata),
+                headers=headers,
             )
 
     def parse(self, response):
         result = json.loads(response.body_as_unicode())
 
         if 'collection' in result['response'].keys():
-            for data in result['response']['collection'] :
+            for data in result['response']['collection']:
                 ref = data['uid']
                 lat = data['latitude']
                 lon = data['longitude']
@@ -74,24 +75,28 @@ class DollarGeneralSpider(scrapy.Spider):
                 postalcode = 'postalcode' in data.keys() and re.search(r'\d+', data['postalcode']).group() or ''
 
                 properties = {
-                    "phone"         : phone,
-                    "ref"           : ref,
-                    "name"          : name,
-                    "opening_hours" : opening_hours,
-                    "lat"           : lat,
-                    "lon"           : lon,
-                    "street"        : street,
-                    "city"          : city,
-                    "state"         : state,
-                    "postcode"      : postalcode
+                    "phone": phone,
+                    "ref": ref,
+                    "name": name,
+                    "opening_hours": opening_hours,
+                    "lat": lat,
+                    "lon": lon,
+                    "street": street,
+                    "city": city,
+                    "state": state,
+                    "postcode": postalcode
                 }
-                
+
                 yield GeojsonPointItem(**properties)
 
     def hours(self, data):
-        hours = ''
-        for weekday in WEEKDAYS :
+        hours = []
+        for weekday in WEEKDAYS:
             if 'opening_time_' + weekday.lower() in data.keys():
-                hours = hours + '{} {}-{}; '.format(weekday[:2], data['opening_time_' + weekday.lower()], data['closing_time_' + weekday.lower()])
+                hours.append('{} {}-{}; '.format(
+                    weekday[:2],
+                    data['opening_time_' + weekday.lower()],
+                    data['closing_time_' + weekday.lower()]
+                ))
 
-        return hours
+        return '; '.join(hours)
