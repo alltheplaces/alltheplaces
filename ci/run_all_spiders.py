@@ -50,7 +50,7 @@ if __name__ == '__main__':
             spider.crawler.stats.get_value('finish_reason'),
             (spider.crawler.stats.get_value('finish_time') -
                 spider.crawler.stats.get_value('start_time')).total_seconds(),
-            spider.crawler.stats.get_value('item_scraped_count'),
+            spider.crawler.stats.get_value('item_scraped_count') or 0,
         ))
 
     print("Starting to crawl")
@@ -95,11 +95,11 @@ if __name__ == '__main__':
             shutil.copyfileobj(f_in, f_out)
 
     # Post it to S3
-    s3_key = '{}/{}.gz'.format(s3_key_prefix, output_log)
+    s3_log_key = '{}/{}.gz'.format(s3_key_prefix, output_log)
     client.upload_file(
         output_log + '.gz',
         s3_bucket,
-        s3_key,
+        s3_log_key,
         ExtraArgs={
             'ACL': 'public-read',
             'ContentType': 'text/plain; charset=utf-8',
@@ -107,12 +107,32 @@ if __name__ == '__main__':
         }
     )
 
-    print("Saved logfile to https://s3.amazonaws.com/{}/{}".format(s3_bucket, s3_key))
+    print("Saved logfile to https://s3.amazonaws.com/{}/{}".format(s3_bucket, s3_log_key))
+
+    metadata = {
+        'spiders': spider_stats,
+        'links': {
+            'download_url': "https://s3.amazonaws.com/{}/{}".format(s3_bucket, s3_output_key),
+            'log_url': "https://s3.amazonaws.com/{}/{}".format(s3_bucket, s3_log_key),
+        }
+    }
 
     with open('metadata.json', 'w') as f:
-        json.dump(spider_stats, f, indent=2)
+        json.dump(metadata, f, indent=2)
 
     s3_key = '{}/metadata.json'.format(s3_key_prefix)
+    client.upload_file(
+        'metadata.json',
+        s3_bucket,
+        s3_key,
+        ExtraArgs={
+            'ACL': 'public-read',
+            'ContentType': 'application/json; charset=utf-8',
+        }
+    )
+    print("Saved metadata to https://s3.amazonaws.com/{}/{}".format(s3_bucket, s3_key))
+
+    s3_key = 'runs/latest/metadata.json'
     client.upload_file(
         'metadata.json',
         s3_bucket,
@@ -141,13 +161,13 @@ if __name__ == '__main__':
         f.write(
             "<html><body>"
             "<a href=\"{download_url}\">Download</a> "
-            "({download_size} MB)<br/><small>{row_count} rows from "
+            "({download_size} MB)<br/><small>{row_count:,} rows from "
             "{spider_count} spiders, updated {updated_datetime}Z</small>"
             "</body></html>\n".format(
                 **template_content
             )
         )
-    s3_key = 'runs/current/info_embed.html'
+    s3_key = 'runs/latest/info_embed.html'
     client.upload_file(
         'info_embed.html',
         s3_bucket,

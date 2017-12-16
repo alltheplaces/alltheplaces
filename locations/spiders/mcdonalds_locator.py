@@ -8,10 +8,11 @@ from locations.items import GeojsonPointItem
 class McDonalsLocatorSpider(scrapy.Spider):
 
     name = "mcdonalds_locator"
-    allowed_domains = ["www.mcdonalds.com.hk", "www.mcdonalds.ie"]
+    allowed_domains = ["www.mcdonalds.com.hk", "www.mcdonalds.ie", "www5.mcdonalds.com"]
     start_urls = (
         'http://www.mcdonalds.com.hk/googleapps/GoogleHongKongSearchAction.do?method=searchLocation&searchTxtLatlng=(22.25%2C%20114.16669999999999)&actionType=searchRestaurant&country=hk&language=en',
-        'http://www.mcdonalds.ie/googleapps/GoogleSearchAction.do?method=searchLocation&searchTxtLatlng=(54.0551962%2C%20-8.728650000000016)&actionType=searchRestaurant&language=en&country=ir'
+        'http://www.mcdonalds.ie/googleapps/GoogleSearchAction.do?method=searchLocation&searchTxtLatlng=(54.0551962%2C%20-8.728650000000016)&actionType=searchRestaurant&language=en&country=ir',
+        'http://www5.mcdonalds.com/googleapps/GoogleSearchTaiwanAction.do?method=searchLocation&searchTxtLatlng=(24.5711502%2C%20120.81543579999993)&actionType=filterRestaurant&language=zh&country=tw'
     )
 
     def normalize_time(self, time_str):
