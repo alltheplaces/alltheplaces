@@ -15,9 +15,9 @@ class CarinosSpider(scrapy.Spider):
     )
 
     def store_hours(self, store_hours):
-        
+
         store_hours = store_hours.replace('Full menu available from', '')
-        
+
         m = re.search(r"(\r\n)\d", store_hours)
         if m:
             store_hours = store_hours.replace(m.group(1), ' ')
@@ -35,9 +35,9 @@ class CarinosSpider(scrapy.Spider):
         m = re.search(r"(<br>)", store_hours)
         if m:
             store_hours = store_hours.replace(m.group(1), ' ')
-        
+
         store_hours = store_hours.replace('Monday', 'Mo').replace('Tuesday', 'Tu').replace('Wednesday', 'We').replace('Thursday', 'Th').replace('Friday', 'Fr').replace('Saturday', 'Sa').replace('Sunday', 'Su')
-        
+
         for i in range(0, 8):
             m = re.search(r'([0-9]{1,2})(:[0-9]0PM)', store_hours)
             if m:
@@ -68,15 +68,15 @@ class CarinosSpider(scrapy.Spider):
                 store_hours = store_hours.replace(m.group(0), str(new_h) + ':00')
         store_hours = store_hours.replace('\u2013', '-')
         store_hours = store_hours.replace('<p>', '')
-        
+
         return store_hours
 
     def parse(self, response):
         results = json.loads(response.body_as_unicode())
-        ref = 0
+
         for data in results:
             properties = {
-                'ref': ref,
+                'ref': data['Location']['LocationID'],
                 'name': data['Location']['LocationName'],
                 'lat': data['Location']['Latitude'],
                 'lon': data['Location']['Longitude'],
@@ -88,6 +88,6 @@ class CarinosSpider(scrapy.Spider):
                 'phone': data['Location']['Phone1'],
                 'opening_hours': self.store_hours(data['Location']['Hours']),
                 'website': data['Location']['URL'],
-                }
-            ref += 1
+            }
+
             yield GeojsonPointItem(**properties)
