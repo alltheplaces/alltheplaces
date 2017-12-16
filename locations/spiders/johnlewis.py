@@ -2,15 +2,6 @@ import scrapy
 import re
 from locations.items import GeojsonPointItem
 
-DAY_MAPPING = {
-    'M': 'Mo',
-    'T': 'Tu',
-    'W': 'We',
-    'F': 'Fr',
-    'Sat': 'Sa',
-    'Sun': 'Su'
-}
-
 
 class JohnLewisSpider(scrapy.Spider):
 
