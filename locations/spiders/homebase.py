@@ -10,13 +10,14 @@ class ArgosSpider(scrapy.Spider):
     start_urls = (
         'https://www.homebase.co.uk/stores',
     )
+
     def parse_stores(self, response):
         data = re.findall(r"var com_bunnings_locations_mapLocations = [^;]+", response.body_as_unicode())
         json_data = json.loads(data[0].replace("var com_bunnings_locations_mapLocations = " ,''))
         properties = {
-            'addr_full':json_data[0]['Store']["Address"]["Address"] +json_data[0]['Store']["Address"]["AddressLineTwo"],
+            'addr_full': json_data[0]['Store']["Address"]["Address"] +json_data[0]['Store']["Address"]["AddressLineTwo"],
             'phone': json_data[0]['Store']["Phone"],
-            'city':json_data[0]['Store']["Address"]["Suburb"],
+            'city': json_data[0]['Store']["Address"]["Suburb"],
             'state': json_data[0]['Store']["Address"]["State"],
             'postcode': json_data[0]['Store']["Address"]["Postcode"],
             'country': json_data[0]['Store']["Address"]["Country"],
@@ -27,8 +28,9 @@ class ArgosSpider(scrapy.Spider):
         }
 
         hours = response.xpath('//time[@itemprop="openingHours"]/@datatime').extract()
-        if(hours != []):
-            properties['opening_hours'] = " ;".join(x for x in hours)
+        if hours != []:
+            properties['opening_hours'] = "; ".join(x for x in hours)
+
         yield GeojsonPointItem(**properties)
 
     def parse(self, response):
