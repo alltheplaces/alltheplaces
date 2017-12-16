@@ -1,27 +1,29 @@
 # -*- coding: utf-8 -*-
 import scrapy
 import json
-import re
 
 from locations.items import GeojsonPointItem
 
+STATES = [
+    'AL', 'AK', 'AS', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'DC', 'FM', 'FL',
+    'GA', 'GU', 'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MH',
+    'MD', 'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ', 'NM',
+    'NY', 'NC', 'ND', 'MP', 'OH', 'OK', 'OR', 'PW', 'PA', 'PR', 'RI', 'SC',
+    'SD', 'TN', 'TX', 'UT', 'VT', 'VI', 'VA', 'WA', 'WV', 'WI', 'WY'
+]
+
 
 class BostonMarketSpider(scrapy.Spider):
-    name = "boston-market"
+    name = "boston_market"
     allowed_domains = ["www.bostonmarket.com"]
     base_url = 'https://www.bostonmarket.com'
-    states = ['AL', 'AK', 'AS', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'DC', 'FM', 'FL', 'GA', 'GU', 'HI', 'ID', 'IL',
-              'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MH', 'MD', 'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH',
-              'NJ', 'NM', 'NY', 'NC', 'ND', 'MP', 'OH', 'OK', 'OR', 'PW', 'PA', 'PR', 'RI', 'SC', 'SD', 'TN', 'TX',
-              'UT', 'VT', 'VI', 'VA', 'WA', 'WV', 'WI', 'WY']
 
-    bm_urls = list()
-    for state in states:
-        bm_urls.append('https://www.bostonmarket.com/wp-admin/admin-ajax.php?action=bingmaps_locations_search_ajax'
-                       '&search={}'
-                       .format(state))
-    start_urls = tuple(bm_urls)
-    ll_requests = set()
+    def start_requests(self):
+        for state in STATES:
+            yield scrapy.Request(
+                'https://www.bostonmarket.com/wp-admin/admin-ajax.php?'
+                'action=bingmaps_locations_search_ajax&search={}'.format(state)
+            )
 
     def store_hours(self, store_details):
         day_groups = []
@@ -75,13 +77,11 @@ class BostonMarketSpider(scrapy.Spider):
         for store in data:
             store_details = store['bing']
             (num, street) = store_details['AddressLine'].split(' ', 1)
+
             properties = {
                 "phone": store_details['Phone'],
                 "ref": store_details['EntityID'],
                 "name": store['post']['post_title'],
-                "extras": {'CateringTier': store_details['CateringTier'],
-                           'OpenChristmas': store_details['OpenChristmas'],
-                           'Delivery': store_details['Delivery']},
                 "opening_hours": self.store_hours(store_details),
                 "lat": store_details['Latitude'],
                 "lon": store_details['Longitude'],
