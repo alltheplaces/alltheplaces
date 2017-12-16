@@ -86,8 +86,8 @@ class WhiteCastleSpider(scrapy.Spider):
             if store.get('url'):
                 properties['website'] = 'https://www.whitecastle.com' + store.get('url')
 
-            if store.get('latitude'): properties['lon'] = float(store.get('latitude'))
-            if store.get('longitude'): properties['lat'] = float(store.get('longitude'))
+            if store.get('latitude'): properties['lat'] = float(store.get('latitude'))
+            if store.get('longitude'): properties['lon'] = float(store.get('longitude'))
 
             if store.get('timetable'):
                 opening_hours = self.store_hours(store.get('timetable'))
