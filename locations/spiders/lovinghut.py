@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import scrapy
-import json
 import re
 
 from locations.items import GeojsonPointItem
@@ -15,7 +14,7 @@ class LovinghutSpider(scrapy.Spider):
 
     def normalize_time(self, time_str):
         match = re.search(u'(.*) (am|a.m|pm|noon|p.m) \u2013 (.*) (am|a.m||pm|noon|p.m)', time_str)
-        h1, am_pm1, h2, am_pm2  = match.groups()
+        h1, am_pm1, h2, am_pm2 = match.groups()
         h1 = h1.split(':')
         h2 = h2.split(':')
 
@@ -27,7 +26,6 @@ class LovinghutSpider(scrapy.Spider):
         )
 
     def parse(self, response):
-        data = response.body_as_unicode()
         stores = response.xpath('//td[@class="tg-citi"]')
         full_addresses = response.xpath('//td[@class="tg-addr"]/text()').extract()
         phones = response.xpath('//tr[contains(@style, "padding-bottom:10px")]/td[1]//a//text()').extract()
@@ -52,11 +50,13 @@ class LovinghutSpider(scrapy.Spider):
 
             index += 1
 
-            yield scrapy.Request(store_url,
-                                 meta = {
-                                    'product': props
-                                 },
-                                 callback=self.parse_detail_product)
+            yield scrapy.Request(
+                store_url,
+                meta={
+                    'product': props
+                },
+                callback=self.parse_detail_product
+            )
 
     def parse_detail_product(self, response):
         tr_days = response.xpath('//table[@class="hours"]//tr')
@@ -82,21 +82,14 @@ class LovinghutSpider(scrapy.Spider):
 
                 if hours.lower().find('closed') == -1:
                     open_days = day.split(u" \u2013 ")
-
-                    try:
-                        if len(open_days) == 2:
-                            opening_hours += ("; " if index > 0 else '') + open_days[0][:2] + '-' + open_days[1][:2] + ' ' + self._clean_text(self.normalize_time(hours))
-                        elif len(open_days) == 1:
-                            opening_hours += ("; " if index > 0 else '') + open_days[0][:2] + ' ' + self._clean_text(self.normalize_time(hours))
-                    except Exception as e:
-                        print(e)
+                    if len(open_days) == 2:
+                        opening_hours += ("; " if index > 0 else '') + open_days[0][:2] + '-' + open_days[1][:2] + ' ' + self._clean_text(self.normalize_time(hours))
+                    elif len(open_days) == 1:
+                        opening_hours += ("; " if index > 0 else '') + open_days[0][:2] + ' ' + self._clean_text(self.normalize_time(hours))
                 index += 1
             elif len(open_hours) == 1:
                 hours = open_hours[0]
-                try:
-                    opening_hours += " " + self.normalize_time(hours)
-                except Exception as e:
-                    print(e)
+                opening_hours += " " + self.normalize_time(hours)
 
         product['opening_hours'] = opening_hours
 
