@@ -24,7 +24,7 @@ class SparSpider(scrapy.Spider):
     """ 
     name = "spar"
     allowed_domains = ["spar.co.uk"]
-    DOWNLOAD_DELAY = 0.5
+    download_delay = 0.5
 
     def start_requests(self):
         for postcode in UK_POSTCODES:
@@ -39,7 +39,7 @@ class SparSpider(scrapy.Spider):
         stores = data['locations']
         if stores:
             for store in stores:
-                unp = {
+                properties = {
                     'ref': store.get('code'),
                     'name': store.get('name'),
                     'addr_full': store.get('address'),
@@ -48,11 +48,6 @@ class SparSpider(scrapy.Spider):
                     'phone': store.get('telephone'),
                 }
                 if store.get('url'):
-                    unp['website'] = 'https://spar.co.uk' + store.get('url')
-
-                properties = {}
-                for key in unp:
-                    if unp[key]:
-                        properties[key] = unp[key] 
+                    properties['website'] = 'https://spar.co.uk' + store.get('url')
 
                 yield GeojsonPointItem(**properties)
