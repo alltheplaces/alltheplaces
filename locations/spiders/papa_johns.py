@@ -51,7 +51,7 @@ class PapaJohnsSpider(scrapy.Spider):
                 opening_hours.append(
                     '{}-{} {}'.format(value[0], value[-1], key))
 
-        return ";".join(opening_hours)
+        return "; ".join(opening_hours)
 
     def parse_store(self, response):
         hours = response.xpath('//div[@class="hours-delivery"]/p[starts-with(@class, "schedule")]//text()').extract()
@@ -69,11 +69,14 @@ class PapaJohnsSpider(scrapy.Spider):
             'lat': float(response.xpath('//meta[@itemprop="latitude"]/@content').extract_first()),
             'lon': float(response.xpath('//meta[@itemprop="longitude"]/@content').extract_first()),
         }
+
         yield GeojsonPointItem(**props)
 
     def parse(self, response):
-
         stores = response.xpath('//h5[@class="street-address"]/a/@href').extract()
 
         for store in stores:
-            yield scrapy.Request(url=response.urljoin(store), callback=self.parse_store)
+            yield scrapy.Request(
+                response.urljoin(store),
+                callback=self.parse_store
+            )
