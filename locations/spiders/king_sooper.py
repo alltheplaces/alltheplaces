@@ -12,7 +12,7 @@ class KingSooperSpider(scrapy.Spider):
         'https://www.kingsoopers.com/stores?address=37.7578595,-79.76804&includeThirdPartyFuel=true&maxResults=50&radius=3000&showAllStores=false&useLatLong=true',
     )
 
-    download_delay = 3
+    download_delay = 0.5
 
     store_types = {
         '' : "unknown-blank",
@@ -35,12 +35,7 @@ class KingSooperSpider(scrapy.Spider):
 
         headers = {
                    'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
-                   'accept-language': 'en-US,en;q=0.9',
                    'accept-encoding': 'gzip, deflate, br',
-                   'cache-control': 'max-age=0',
-                   'upgrade-insecure-requests': '1',
-                   'cookie': 'sth_pid=9dcd67b4-01bf-423d-a5fc-8fc14d6aa139; pid=9dcd67b4-01bf-423d-a5fc-8fc14d6aa139; sid=6b021a26-e385-4a16-854d-86dc9c14ae7c; __VCAP_ID__=0ddde0be-67e6-404f-6064-ea3f; AMCVS_371C27E253DB0F910A490D4E%40AdobeOrg=1; AMCV_371C27E253DB0F910A490D4E%40AdobeOrg=-1891778711%7CMCIDTS%7C17515%7CMCMID%7C21069743295962380020454009139483608988%7CMCAAMLH-1513867542%7C7%7CMCAAMB-1513867545%7CRKhpRz8krg2tLO6pguXWp5olkAcUniQYPHaMWWgdJ3xzPWQmdj0y%7CMCOPTOUT-1513269942s%7CNONE%7CMCAID%7C2D19474F851D0937-60000103E00083E2%7CMCSYNCSOP%7C411-17522%7CvVersion%7C2.4.0; s_cc=true; dtSa=true%7CC%7C-1%7CShow%20stores%20with...%7C-%7C1513267454526%7C62737976_20%7Chttps%3A%2F%2Fwww.kingsoopers.com%2Fstores%2FstoreLocator%3Fhash%3DfindStoreLink%7CKing%20Soopers%20-%20Store%20Locator%7C1513267456147%7C; s_nr=1513267607021-Repeat; dtLatC=1; s_sq=krgrkingsoopersprod%252Ckrgrglobalprod%3D%2526c.%2526a.%2526activitymap.%2526page%253Dbn%25253Astores%25253Astorelocator%2526link%253DDepartments%2526region%253D--0%2526pageIDType%253D1%2526.activitymap%2526.a%2526.c%2526pid%253Dbn%25253Astores%25253Astorelocator%2526pidt%253D1%2526oid%253Dhttps%25253A%25252F%25252Fwww.kingsoopers.com%25252Fstores%25252FstoreLocator%25253Fhash%25253DfindStoreLink%252523%2526ot%253DA; dtPC=-; dtCookie=50678BDFC45A05C6A011A2DFEE5A5D24|QmFubmVyfDF8QWNjb3VudCtNYW5hZ2VtZW50fDE; AKA_A2=1; ak_bmsc=82ED7A3EE3023F524B9F4C2E75183A92685BA7563F750000FCB3325A0037C521~plH2XLCg/raSJx1IGMOfJgJ4NZy7WMZms+RaxvzkiYJO3n5TVJHZszOhG0meRUd7qw+51EKxo93+fEOMN+3om7Qi9H+++rIVkQ6U6uXDNFCZCo5PahrbTA4DFT8zfr6HneAYzrujkuRzwci+egjWhJ034H7GdIhnStykYx363Lcm6brlZkFBB6n7HRUBKzGz6Hn8iiD1CDIjXzX8b00tqd6vlN8EG7Ehq5TUYzEoGc8oM=',
-                   'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36',
                    }
 
         yield scrapy.Request(url=url, headers=headers, callback=self.parse)
