@@ -1,30 +1,48 @@
 # -*- coding: utf-8 -*-
 import scrapy
-import json
 import re
 
 from locations.items import GeojsonPointItem
+
+DAY_DICT = {
+    'Mon': 'Mo',
+    'Tue': 'Tu',
+    'Wed': 'We',
+    'Thu': 'Th',
+    'Fri': 'Fr',
+    'Sat': 'Sa',
+    'Sun': 'Su',
+    'Monday': 'Mo',
+    'Tuesday': 'Tu',
+    'Wednesday': 'We',
+    'Thursday': 'Th',
+    'Thurs': 'Th',
+    'Thur': 'Th',
+    'Friday': 'Fr',
+    'Saturday': 'Sa',
+    'Sunday': 'Su',
+    '24 hours/7 days a week': '24/7',
+    'Please contact store for hours': 'N/A',
+}
 
 
 class ShopnSaveSpider(scrapy.Spider):
     name = "shopnsave"
     allowed_domains = ["www.shopnsave.com"]
     start_urls = (
-        'https://www.shopnsave.com/stores/view-stores-by-state.html?state=IL&pageSource=',
-        'https://www.shopnsave.com/stores/view-stores-by-state.html?zipCode=&city=&lat=&long=&state=IL&address1=&radius=10&pageSource=&maxResults=10&page=2',
-        'https://www.shopnsave.com/stores/view-stores-by-state.html?state=MO&pageSource=',
-        'https://www.shopnsave.com/stores/view-stores-by-state.html?zipCode=&city=&lat=&long=&state=MO&address1=&radius=10&pageSource=&maxResults=10&page=2',
-        'https://www.shopnsave.com/stores/view-stores-by-state.html?zipCode=&city=&lat=&long=&state=MO&address1=&radius=10&pageSource=&maxResults=10&page=3',
+        'https://www.shopnsave.com/stores/view-stores-by-state.html?state=IL&page=1',
+        'https://www.shopnsave.com/stores/view-stores-by-state.html?state=IL&page=2',
+        'https://www.shopnsave.com/stores/view-stores-by-state.html?state=MO&page=1',
+        'https://www.shopnsave.com/stores/view-stores-by-state.html?state=MO&page=2',
+        'https://www.shopnsave.com/stores/view-stores-by-state.html?state=MO&page=3',
     )
-    ref = 0
-
 
     def parse(self, response):
-        
+
         stores = response.xpath('//table[@id="store-search-result"]/tbody/tr[@class="" or @class="store-grey"]')
         for store in stores:
             properties = {
-                "ref": str(self.ref),
+                "ref": store.xpath('td[@class="store-result-address"]/text()').extract_first(),
                 "name": store.xpath('td[@class="store-result-address"]/text()').extract_first(),
                 "opening_hours": self.store_hours(store.xpath('td[@class="store-result-address"]/text()[last()-1]').extract_first()),
                 "addr_full": store.xpath('td[@class="store-result-address"]/text()')[1].extract(),
@@ -34,7 +52,6 @@ class ShopnSaveSpider(scrapy.Spider):
                 "phone": self.phone(store.xpath('td[@class="store-result-phone"]/strong/text()')[0].extract()),
             }
 
-            self.ref += 1
             yield GeojsonPointItem(**properties)
 
     def city(self, data):
@@ -51,7 +68,7 @@ class ShopnSaveSpider(scrapy.Spider):
         str_list = data.split(',')
         zipCode = str_list[1].strip()
         return zipCode[-5:]
-    
+
     def phone(self, data):
         return data.replace('— Main', '')
 
@@ -63,10 +80,9 @@ class ShopnSaveSpider(scrapy.Spider):
             return "24/7"
         store_hours = store_hours.replace('\r\n\t\t\t\t\t\t', '')
         store_hours = store_hours.replace('Midnight', '00:00')
-        
-        day_dict = {'Mon':'Mo', 'Tue':'Tu', 'Wed':'We', 'Thu':'Th', 'Fri':'Fr', 'Sat':'Sa', 'Sun':'Su', 'Monday':'Mo', 'Tuesday':'Tu', 'Wednesday':'We', 'Thursday':'Th', 'Thurs':'Th', 'Thur':'Th', 'Friday':'Fr', 'Saturday':'Sa', 'Sunday':'Su', '24 hours/7 days a week':'24/7', 'Please contact store for hours':'N/A'}
-        pattern = re.compile(r'\b(' + '|'.join(day_dict.keys()) + r')\b')
-        store_hours = pattern.sub(lambda x: day_dict[x.group()], ''.join(store_hours))
+
+        pattern = re.compile(r'\b(' + '|'.join(DAY_DICT.keys()) + r')\b')
+        store_hours = pattern.sub(lambda x: DAY_DICT[x.group()], ''.join(store_hours))
         store_hours = store_hours.replace('am', ':00')
 
         m = re.search('([0-9]{1,2})(\spm)', store_hours)
