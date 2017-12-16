@@ -73,7 +73,7 @@ class WhiteCastleSpider(scrapy.Spider):
         data = json.loads(response.body_as_unicode())
 
         for store in data:
-            unp = {
+            properties = {
                 "ref": store.get('id'),
                 "name": store.get('name'),
                 "addr_full": store.get('address'),
@@ -82,23 +82,16 @@ class WhiteCastleSpider(scrapy.Spider):
                 "postcode": store.get('zip'),
                 "phone": store.get('telephone'),
             }
-            if store.get('url'):
-                unp['website'] = 'https://www.whitecastle.com' + store.get('url')
 
-            if store.get('latitude'): unp['lon'] = float(store.get('latitude'))
-            if store.get('longitude'): unp['lat'] = float(store.get('longitude'))
+            if store.get('url'):
+                properties['website'] = 'https://www.whitecastle.com' + store.get('url')
+
+            if store.get('latitude'): properties['lon'] = float(store.get('latitude'))
+            if store.get('longitude'): properties['lat'] = float(store.get('longitude'))
 
             if store.get('timetable'):
                 opening_hours = self.store_hours(store.get('timetable'))
-                if opening_hours: unp['opening_hours'] = opening_hours
-
-            properties = {}
-            for key in unp:
-                if unp[key]:
-                    if isinstance(unp[key], str):
-                        properties[key] = unp[key].strip()
-                    else: 
-                        properties[key] = unp[key]
+                if opening_hours: properties['opening_hours'] = opening_hours
 
             yield GeojsonPointItem(**properties)
 
