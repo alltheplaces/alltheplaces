@@ -54,7 +54,7 @@ class PapaJohnsSpider(scrapy.Spider):
         return "; ".join(opening_hours)
 
     def parse_store(self, response):
-        hours = response.xpath('//div[@class="hours-delivery"]/p[starts-with(@class, "schedule")]//text()').extract()
+        hours = response.xpath('//div[@class="hours-carryout"]/p[starts-with(@class, "schedule")]//text()').extract()
         opening_hours = self.parse_hours(hours)
 
         props = {
