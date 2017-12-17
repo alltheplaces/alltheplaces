@@ -8,19 +8,17 @@ from locations.items import GeojsonPointItem
 
 
 class BiggbySpider(scrapy.Spider):
-    name = "biggby"
-    allowed_domains = ["www.biggby.com"]
-    start_urls = (
-        'https://www.biggby.com/locations/',
-    )
+	name = "biggby"
+	allowed_domains = ["www.biggby.com"]
+	start_urls = (
+		'https://www.biggby.com/locations/',
+	)
 
-    def parse(self, response):
+	def parse(self, response):
 		# retrieve XML data from DIV tag
 		items = response.xpath("//div[@id='loc-list']/markers").extract()
-
 		# convert data variable from unicode to string
 		items = [str(x) for x in items]
-
 		# create element tree object
 		root = ET.fromstring(items[0])
 
