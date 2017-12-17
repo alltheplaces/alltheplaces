@@ -15,9 +15,9 @@ class BiggbySpider(scrapy.Spider):
     )
 
     def parse(self, response):
-        # retrieve XML data from DIV tag
+		# retrieve XML data from DIV tag
 		items = response.xpath("//div[@id='loc-list']/markers").extract()
-		
+
 		# convert data variable from unicode to string
 		items = [str(x) for x in items]
 
@@ -26,7 +26,6 @@ class BiggbySpider(scrapy.Spider):
 
 		# iterate items
 		for child in root:
-			# print child.attrib['name']
 			yield GeojsonPointItem(
 				ref=child.attrib['pid'],
 				lat=float(child.attrib['lat']),
