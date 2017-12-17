@@ -9,21 +9,30 @@ class PublixSpider(scrapy.Spider):
     name = "publix"
     allowed_domains = ['publix.com']
     start_urls = (
-        'http://www.publix.com/sitemap.xml',
+        'http://weeklyad.publix.com/Publix/Entry/Locations/',
     )
 
     def parse(self, response):
         response.selector.remove_namespaces()
-        city_urls = response.xpath('//url/loc/text()').extract()
-        regex = re.compile(r'http\S+publix.com/locations/\d+\S+')
+        city_urls = response.xpath('//a[@class="stdLink action-tracking-nav"]/@href').extract()
+#        regex = re.compile(r'Publix\/BrowseByListing\/ByAllCategories\/\?StoreID=\d+')
         for path in city_urls:
-            if re.search(regex,path):
-                yield scrapy.Request(
-                    path.strip(),
-                    callback=self.parse_store,
-                )
-            else:
-                pass
+#            if re.search(regex,path):
+            yield scrapy.Request(
+                str("http://weeklyad.publix.com") + path.strip(),
+                callback=self.parse_ad,
+            )
+
+
+    def parse_ad(self, response):
+        response.selector.remove_namespaces()
+        if response.xpath('//h3[@class="weeklyAdsLoc_text"]/span[@class="mainLocName"]').extract_first():
+            storeNumber = response.xpath('//h3[@class="weeklyAdsLoc_text"]/span[@class="mainLocName"]').extract_first().split('#')[1].split(')')[0]
+            yield scrapy.Request(
+                str("http://www.publix.com/locations/") + storeNumber.strip(),
+                callback=self.parse_store,
+            )
+
 
     def parse_store(self, response):
 
@@ -51,5 +60,7 @@ class PublixSpider(scrapy.Spider):
         'lat': response.xpath('///div[@class="store-info-group"][4]/a/@href').extract_first().split('//')[2].split(',')[0],
         'lon': response.xpath('///div[@class="store-info-group"][4]/a/@href').extract_first().split('//')[2].split(',')[1],
         }
+
+        print(str(properties))
 
         yield GeojsonPointItem(**properties)
