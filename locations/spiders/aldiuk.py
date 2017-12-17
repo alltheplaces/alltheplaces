@@ -24,7 +24,7 @@ class AldiUKSpider(scrapy.Spider):
             pass
 
     def parse_store(self, response):
-        json_data = response.xpath('//script[@type="text/javascript"]/text()').extract_first().replace('\n','').replace('\t','').split('(')[1].rstrip(')')
+        json_data = response.xpath('//script[@type="text/javascript"]/text()').extract_first().replace('\n','').replace('\t','').split('.push(')[1].rstrip(')')
         data = json.loads(json_data)
         geojson_data = response.xpath('//script[@class="js-store-finder-initial-state"][@type="application/json"]/text()').extract_first()
         geodata = json.loads(geojson_data)
