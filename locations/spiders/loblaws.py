@@ -20,8 +20,8 @@ class LoblawsSpider(scrapy.Spider):
         day_groups = []
         this_day_group = None
         days = ('Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su')
-        
-        for day in days:            
+
+        for day in days:
             hour_intervals = []
             (f_time, t_time) = store_hours.split('-')
             if len(f_time) > 0 and len(t_time)> 0:
@@ -100,6 +100,6 @@ class LoblawsSpider(scrapy.Spider):
             }
 
             if 'todaysHours' in data['details']:
-                properties['opening_hours'] = self.store_hours(data['details']['todaysHours']),
+                properties['opening_hours'] = self.store_hours(data['details']['todaysHours'])
 
             yield GeojsonPointItem(**properties)
