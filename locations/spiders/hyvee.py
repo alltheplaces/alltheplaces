@@ -1,4 +1,22 @@
 # -*- coding: utf-8 -*-
+"""
+Hy-Vee has 155 locations we need and they inplemented a server-side javascript detector logic
+that returns just the HTML head with an empty body asking that we enable javascript to browse the site.
+Unfortunately, The server returns no content for us to process except we use the PUT method.
+
+This is the reason for reimplementing the start_requests so we can pass the PUT method to our request object.
+We loop through the cities on https://www.hy-vee.com/stores/store-finder-results.aspx
+to build the a url that looks like this
+https://www.hy-vee.com/stores/store-finder-results.aspx?zip=&state=&city=CITY,STATECODE&olfloral=...
+
+This usually return 1 result and in some cases 0.
+and provides us with a link to a details page where we get more detailed store info.
+The detailed store info page has no map so we just get the latlon from the store-finder-results page
+and pass it over via the request object's meta.
+
+The opening hours are very inconsistent and contains lots of words.
+I tried to solve this by creating a dict of possible words, and mapping them appropriately.
+"""
 import scrapy
 import re
 from locations.items import GeojsonPointItem
@@ -7,94 +25,200 @@ from locations.items import GeojsonPointItem
 class HyVeeSpider(scrapy.Spider):
     name = "hyvee"
     allowed_domains = ["hy-vee.com"]
-    start_urls = (
-        'https://www.hy-vee.com/stores/',
-    )
+
+    def start_requests(self):
+        """
+        We need to make the inital request use a PUT method
+        They have a serverside javascript detector logic in place
+        on GET and POST requests
+        :return:
+        """
+        url = 'https://www.hy-vee.com/stores/store-finder-results.aspx'
+        yield scrapy.Request(url, method='PUT', callback=self.parse)
 
     def parse(self, response):
-        self.log(response.text)
-        # links = response.xpath('//li[@class="storelist-item vcard address"]/a[@href]/@href')
-        # for link in links:
-        #     yield scrapy.Request(
-        #         response.urljoin(link.extract()),
-        #         callback=self.parse_links
-        #     )
+        cities = response.xpath('//select[@name="ctl00$cph_main_content$spuStoreFinderResults'
+                                '$spuStoreFinder$ddlCity"]/option/@value').extract()
+        for city in cities:
+            params = "?zip=&state=&city=" + city + "&olfloral=False&olcatering=False&olgrocery=True" \
+                     "&olpre=False&olbakery=False&diet=False&chef=False"
+            yield scrapy.Request(
+                                 response.urljoin(params),
+                                 method='PUT',
+                                 callback=self.parse_links)
 
     def parse_links(self, response):
-        hours = response.xpath('//form[@id="directions-form"]/input[@name="hours"]/@value').extract_first()
-        website = response.xpath('//head/link[@rel="canonical"]/@href').extract_first()
-        link_id = website.split("/")[-2]
+        store_url = response.xpath('//a[@id="ctl00_cph_main_content_spuStoreFinderResults'
+                                   '_gvStores_ctl02_aStoreDetails"]/@href').extract()
+        if store_url:
+            latlon_js = [x for x in response.xpath('//script[@type="text/javascript"]/text()')
+                         .extract() if x.startswith('var map = new goo')][0]
+            latlon_find = re.search(r"google\.maps\.LatLng\((-?\d*\.\d*),\s(-?\d*\.\d*)\),\s*zoom:", latlon_js)
+            request = scrapy.Request(
+                                     response.urljoin(store_url[0]),
+                                     method='PUT',
+                                     callback=self.parse_details)
+            if latlon_find:
+                request.meta['latlon'] = latlon_find.groups()
+            yield request
 
+    def parse_details(self, response):
+        raw_address = response.xpath('//div[@class="col-sm-6 util-padding-bottom-15"]/text()').extract()
+        address = raw_address[1].strip()
+        raw_city = raw_address[2].strip()
+        match_city = re.search(r"^(.*),\s([A-Z]{2})\s([0-9]{5})$", raw_city).groups()
+        city = match_city[0]
+        state = match_city[1]
+        zipcode = match_city[2]
+        phone = response.xpath('//div[@class="row util-padding-top-15"]/div[@class="col-sm-6 util-padding-bottom-15"][2]/a[1]/text()').extract()[0]
+        website = response.url
+        extra_open_hours = self.process_dept_hours(response.xpath('//table[@class="storeHours table"]/tr').extract())
+        opening_hours = self.process_hours(response.xpath('//div[@id="page_content"]/p/text()').extract())
+        extras = {"department_hours": extra_open_hours, "special_days": opening_hours[1]}
+        link_id = website.split("s=")[-1]
+        # initialize latlon incase in a rare case we dont have it
+        lat = ''
+        lon = ''
+        if response.meta['latlon']:
+            lat = float(response.meta['latlon'][0])
+            lon = float(response.meta['latlon'][1])
         properties = {
-            "addr_full": response.xpath('//form[@id="directions-form"]/input[@name="address"]/@value').extract_first(),
-            "city": response.xpath('//form[@id="directions-form"]/input[@name="city"]/@value').extract_first(),
-            "state": response.xpath('//form[@id="directions-form"]/input[@name="state"]/@value').extract_first(),
-            "postcode": response.xpath('//form[@id="directions-form"]/input[@name="zip"]/@value').extract_first(),
-            "phone": response.xpath('//form[@id="directions-form"]/input[@name="phone"]/@value').extract_first(),
+            "addr_full": address,
+            "city": city,
+            "state": state,
+            "postcode": zipcode,
+            "phone": phone,
             "website": website,
             "ref": link_id,
-            "opening_hours": self.process_hours(hours[0]),
-            "lat": float(response.xpath('//form[@id="directions-form"]/input[@name="lat"]/@value').extract_first()),
-            "lon": float(response.xpath('//form[@id="directions-form"]/input[@name="long"]/@value').extract_first()),
+            "opening_hours": opening_hours[0],
+            "lat": lat,
+            "lon": lon,
+            "extras": extras
         }
-
+        logme(str(GeojsonPointItem(**properties))+"\n", "log.txt")
         yield GeojsonPointItem(**properties)
 
-    def process_hours(self, hours):
-        """ This should capture these time formats as on tjmaxx
-                # Mon-Wed: 9:30a-9:30p,
-                # Thanksgiving Day: CLOSED,  <- this gets appended without modification
-                # Fri-Sat: 7a-10p,
-                # Sun: 9a-10p
-        :param hours:
-        :return:  string - in this format Mo-Th 11:00-12:00; Fr-Sa 11:00-01:00;
+    def process_dept_hours(self, hours):
         """
-        working_hour = []
+        Returns the departmental open hours
+        :param hours: list of hours in html
+        :return:
+        """
+        dept=[]
+        for hour in hours:
+            hour_search = re.search(r"<strong>(\w*)</strong>:\s*</td>\s*<td>\s*([-0-9a-zA-Z\s.;]*)\s*</td>", hour)
+            if hour_search:
+                m = hour_search.groups()
+                split_hours = m[1].split(";")
+                formatted_hours = []
+                for hr in split_hours:
+                    hour_search = re.search(r"(\d{1,2})\s*(a.\s?m.?|p.\s?m.?)\s*(?:to|-)\s*(\d{1,2})\s*(a.\s?m.?|p.\s?m.?)\s*(daily)?(?:(\w{2})\w*-?(\w{2})?\w*?)?", hr)
+                    if hour_search:
+                        hrr = hour_search.groups()
+                        if hrr[4] == "daily" or (hrr[6] is None and hrr[5] is None and hrr[4] is None):
+                            format_hours = "Mo-Su "+str(int(hrr[0]) + self.am_pm(hrr[0], hrr[1])).zfill(
+                                2) + ":00" + "-" + str(int(hrr[2]) + self.am_pm(hrr[2], hrr[3])).zfill(2) + ":00"
 
-        for t in hours.split(","):
-            match = re.search(r"^((\w{2})\w(?:-(\w{2})\w)?\:\s(\d+)(\:\d+)?(\w)-(\d+)(\:\d+)?(\w))$",
-                              t.strip(),
-                              re.IGNORECASE)
-            if match:
-                m = list(match.groups())
-                if len(m) == 9:
-                    # replace second entry for day of week for formats like Sun: 9a-12p
-                    if m[2] is None:
-                        m[2] = ""
-                    else:
-                        m[2] = "-" + m[2]
+                        elif hrr[6] is None and hrr[5] is None:
+                            format_hours = str(int(hrr[0]) + self.am_pm(hrr[0], hrr[1])).zfill(
+                                2) + ":00" + "-" + str(int(hrr[2]) + self.am_pm(hrr[2], hrr[3])).zfill(2) + ":00"
 
-                    # concatenate to our format
-                    if m[4] is None:
-                        if m[7] is None:
-                            # time is like Mon-Wed: 9a-9p
-                            hr_1 = int(m[3]) + self.am_pm(m[3], m[5])
-                            hr_2 = int(m[6]) + self.am_pm(m[6], m[8])
-                            working_hour.append(m[1] + m[2] + " " + f'{hr_1:02}' + ":00-" + f'{hr_2:02}' + ":00")
+                        elif hrr[6] is None:
+                            format_hours = hrr[5] + " " + str(int(hrr[0]) + self.am_pm(hrr[0], hrr[1])).zfill(
+                                2) + ":00" + "-" + str(int(hrr[2]) + self.am_pm(hrr[2], hrr[3])).zfill(2) + ":00"
                         else:
-                            # time is like Mon-Wed: 9a-9:30p
-                            hr_1 = int(m[3]) + self.am_pm(m[3], m[5])
-                            hr_2 = int(m[6]) + self.am_pm(m[6], m[8])
-                            working_hour.append(m[1] + m[2] + " " + f'{hr_1:02}' + ":00-" + f'{hr_2:02}' + m[7])
+                            format_hours = hrr[5] + "-" + str(hrr[6]) + " " + str(
+                                int(hrr[0]) + self.am_pm(hrr[0], hrr[1])).zfill(2) + ":00" + "-" + \
+                                           str(int(hrr[2]) + self.am_pm(hrr[2], hrr[3])).zfill(2) + ":00"
+                        formatted_hours.append(format_hours)
                     else:
-                        if m[7] is None:
-                            # time is like Mon-Wed: 9:30a-9p
-                            hr_1 = int(m[3]) + self.am_pm(m[3], m[5])
-                            hr_2 = int(m[6]) + self.am_pm(m[6], m[8])
-                            working_hour.append(m[1] + m[2] + " " + f'{hr_1:02}' + m[4] + "-" + f'{hr_2:02}' + ":00")
-                        else:
-                            # time is like Mon-Wed: 9:30a-9:30p
-                            hr_1 = int(m[3]) + self.am_pm(m[3], m[5])
-                            hr_2 = int(m[6]) + self.am_pm(m[6], m[8])
-                            working_hour.append(m[1] + m[2] + " " + f'{hr_1:02}' + m[4] + "-" + f'{hr_2:02}' + m[7])
-            # else:
-            #     working_hour.append(t)
+                        # no match
+                        formatted_hours.append(hr)
+                dept.append(m[0] + ": " + "; ".join(formatted_hours))
+        return dept
 
-        if working_hour:
-            return "; ".join(working_hour)
-        else:
-            # if something fails, return original date
-            return hours
+    def process_hours(self, hours):
+        """
+        Here is the sample of the times we need to parse
+
+        ['Open 24 hours a day, 7 days a week.\r',
+        'Thanksgiving Day, Nov. 23, the store will close at 2 p.m. Reopening at 6 a.m. on Nov 24. \r',
+        'The store will close at 5 p.m. Christmas Eve and remain closed Christmas Day. We will reopen at 6 a.m. on Dec 26.']
+
+        ['24/7', {'other_hours': ['Thanksgiving Day, Nov. 23, the store will close at 2 p.m. Reopening at 6 a.m. on Nov 24. \r',
+        'The store will close at 5 p.m. Christmas Eve and remain closed Christmas Day. We will reopen at 6 a.m. on Dec 26.']}]
+
+        ['Open 24 hours a day, 7 days a week. Closing Thanksgiving at 2 p.m.
+        Reopening Fri. at 6 a.m. Closing Dec. 24 at 5 p.m. Closed Dec.25 Reopening
+        Dec 26 at 6 a.m. Closing Dec. 31 at 10 p.m. Reopening Jan. 1 at 6 a.m.']
+
+        :param hours: list of opening hours
+        :return:  list | string - in this format Mo-Th 11:00-12:00; Fr-Sa 11:00-01:00;
+                                    or a list with the first item as 24/7 and the leftover hours
+                                    which are special days like Thanksgiving, Xmas etc.
+        """
+        special_days = {"Thanksgiving:": ['Thanksgiving'],
+                        "Dec 24:": ['Christmas Eve', 'Dec. 24'],
+                        "Dec 25:": ['Christmas Day', 'Dec. 25'],
+                        "Dec 31:": ['New Years Eve', 'Dec. 31'],
+                        "Dec 26:": ['Boxing', 'Dec. 26'],
+                        "Jan. 1": ['New year day', 'Jan. 1'],
+                        "24/7": ["7 days a week, 24 hours a day",
+                                 "Open 24 hours a day, 7 days a week",
+                                 "Open 24 hours 7 days a week",
+                                 "Open 24 hours a day",
+                                 "Open 24 hours",
+                                 "Open 24/7",
+                                 "We are open 24 hours a day, 7 days a week",
+                                 "Open 24 Hours Monday-Sunday",
+                                 "24 hours"]}
+        actions = {
+                    "close": [
+                              'the store will close at',
+                              'the store will be closed at',
+                              'closing at ',
+                              'closed',
+                              'open until'],
+                    "open": ['Reopening at ',
+                             'Re-Opening',
+                             're-open',
+                             'reopen at']}
+
+        result = []
+        for day, vary_day in special_days.items():
+            for vday in vary_day:
+                matching_days = [x for x in hours if vday in x]
+                if day == '24/7':
+                    result.append(day)
+                    break
+                if matching_days:
+                    for k, v in actions.items():
+                        all_closed_actions = "|".join(v)
+                        reg_str = r"" + vday + ".*(" + all_closed_actions + ")\s?" \
+                                  r"(\d{1,2})\s(a\.m\.|p\.m\.)(?:\son\s(\w{3}\s\d{1,2}))?"
+                        match = re.search(reg_str, matching_days[0], re.IGNORECASE)
+                        if match:
+                            m = match.groups()
+                            result.append(day + " " + k + ": " + str(int(m[1]) + self.am_pm(m[1], m[2])) + ":00")
+                        else:
+                            reg_str = r"(" + all_closed_actions + ")\s?(\d{1,2})\s(a\.m\.|p\.m\.)\s?(" + vday + ")"
+                            match = re.search(reg_str, matching_days[0], re.IGNORECASE)
+                            if match:
+                                m = match.groups()
+                                result.append(day + " " + k + ": " + str(int(m[1]) + self.am_pm(m[1], m[2])) + ":00")
+                            else:
+                                reg_str = r"(" + all_closed_actions + ")\s?(\d{1,2})\s(a\.m\.|p\.m\.)\s?(" + vday + ")"
+                                match = re.search(reg_str, matching_days[0], re.IGNORECASE)
+                                if match:
+                                    m = match.groups()
+                                    result.append(day + " " + k + ": " + str(int(m[1]) + self.am_pm(m[1], m[2])) + ":00")
+                                else:
+                                    # more match can come here.
+                                    pass
+        if '24/7' in result:
+            return [result.pop(result.index('24/7')), "; ".join(result)]
+        elif result:
+            return "; ".join(result)
 
     def am_pm(self, hr, a_p):
         """
@@ -105,7 +229,9 @@ class HyVeeSpider(scrapy.Spider):
 
         """
         diff = 0
-        if a_p == 'a':
+        # get rid of the whitespaces to reduce possible variation
+        a_p_stripped = a_p.replace(" ", "")
+        if a_p_stripped == 'a.m.' or a_p_stripped == 'a.m':
             if int(hr) < 12:
                 diff = 0
             else:
@@ -114,3 +240,8 @@ class HyVeeSpider(scrapy.Spider):
             if int(hr) < 12:
                 diff = 12
         return diff
+
+def logme(strr, f):
+    h=open(f, 'a')
+    h.write(str(strr)+"\n")
+    h.close()
