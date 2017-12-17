@@ -61,6 +61,5 @@ class PublixSpider(scrapy.Spider):
         'lon': response.xpath('///div[@class="store-info-group"][4]/a/@href').extract_first().split('//')[2].split(',')[1],
         }
 
-        print(str(properties))
 
         yield GeojsonPointItem(**properties)
