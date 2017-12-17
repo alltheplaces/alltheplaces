@@ -4,13 +4,11 @@ from locations.items import GeojsonPointItem
 
 class BobsSpider(scrapy.Spider):
     name = 'coffeetime'
-    download_delay = 0
     allowed_domains = ['www.coffeetime.com']
     start_urls = ['http://www.coffeetime.com/locations.aspx?address=&Countryui=CA&pageNumber=1']
 
     def parse_store(self, response):
         container = response.xpath('//div[contains(@class, "col-md-9")]')
-        print(container)
         for i in container:
             street = i.xpath('.//div/p[1]/text()').extract_first().strip()
             cty_st_zip = i.xpath('.//div/p[2]/text()').extract_first().strip()
@@ -46,8 +44,8 @@ class BobsSpider(scrapy.Spider):
                 postcode=postcode,
                 addr_full=addr_full,
                 phone=phone,
-                lat=lat,
-                lon=lon,
+                lat=float(lat),
+                lon=float(lon),
                 country="CA"
             )
 
