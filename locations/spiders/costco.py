@@ -12,8 +12,9 @@ DAYS_NAME = {
     's': 'Th',
     'f': 'Fr',
     'f ': 'Fr',
-    'sun. ': 'Su',
+    'sun': 'Su',
     'sat': 'Sa',
+    'daily': '',
 }
 
 
@@ -23,20 +24,10 @@ class CostcoSpider(scrapy.Spider):
     start_urls = (
         'https://www.costco.com/WarehouseLocatorBrowseView',
     )
-    download_delay = 0.3
+    download_delay = 0.5
     custom_settings = {
         'USER_AGENT': 'Mozilla/5.0',
     }
-
-    def normalize_time(self, time_str):
-        match = re.search(r'(.*)(am|pm| a.m| p.m)', time_str)
-        h, am_pm = match.groups()
-        h = h.split(':')
-
-        return '%02d:%02d' % (
-            int(h[0]) + 12 if am_pm == u' p.m' or am_pm == u'pm' else int(h[0]),
-            int(h[1]) if len(h) > 1 else 0,
-        )
 
     def store_hours(self, store_hours):
         opening_hours = []
@@ -48,22 +39,33 @@ class CostcoSpider(scrapy.Spider):
             if day_info.lower().find('close') > -1:
                 continue
 
-            match = re.match('(.*)\s(.*)\s-\s(.*)$', day_info)
-            day, day_open, day_close = match.groups()
-            day = day.split('-')
+            match = re.match(r'^(\w+)-?\.?([A-Za-z]*)\.? *(\d{1,2}):(\d{2}) ?(am|pm|) *- +(\d{1,2}):(\d{2}) ?(am|pm|hrs\.)$', day_info)
+            if not match:
+                self.logger.warn("Couldn't match hours: %s", day_info)
 
-            if len(day) == 2:
-                day = DAYS_NAME[day[0].lower()] + '-' + DAYS_NAME[day[1].lower()]
+            try:
+                day_from, day_to, fr_hr, fr_min, fr_ampm, to_hr, to_min, to_ampm = match.groups()
+            except ValueError:
+                self.logger.warn("Couldn't match hours: %s", day_info)
+                raise
+
+            day_from = DAYS_NAME[day_from.lower()]
+            day_to = DAYS_NAME[day_to.lower()] if day_to else day_from
+
+            if day_from != day_to:
+                day_str = '{}-{}'.format(day_from, day_to)
             else:
-                day = day[0][:2]
+                day_str = '{}'.format(day_from)
 
-            day_hours = '{} {}:{}'.format(
-              day,
-              self.normalize_time(day_open),
-              self.normalize_time(day_close),
+            day_hours = '%s %02d:%02d-%02d:%02d' % (
+                day_str,
+                int(fr_hr) + 12 if fr_ampm == 'pm' else int(fr_hr),
+                int(fr_min),
+                int(to_hr) + 12 if to_ampm == 'pm' else int(to_hr),
+                int(to_min),
             )
 
-            opening_hours.append(day_hours)
+            opening_hours.append(day_hours.strip())
 
         return '; '.join(opening_hours)
 
