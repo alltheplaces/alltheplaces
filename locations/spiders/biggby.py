@@ -25,15 +25,14 @@ class BiggbySpider(scrapy.Spider):
 		root = ET.fromstring(items[0])
 
 		# iterate items
-		for child in root:
+		for item in root:
 			yield GeojsonPointItem(
-				ref=child.attrib['pid'],
-				lat=float(child.attrib['lat']),
-				lon=float(child.attrib['lng']),
-				addr_full=child.attrib['address-two'],
-				city=child.attrib['city'],
-				state=child.attrib['state'],
-				postcode=child.attrib['zip'],
-				name=child.attrib['name'],
-				# website='https://www.superonefoods.com/store-details/'+item.get('url'),
+				ref=item.attrib['pid'],
+				lat=float(item.attrib['lat']),
+				lon=float(item.attrib['lng']),
+				addr_full=item.attrib['address-two'],
+				city=item.attrib['city'],
+				state=item.attrib['state'],
+				postcode=item.attrib['zip'],
+				name=item.attrib['name'],
 			)
