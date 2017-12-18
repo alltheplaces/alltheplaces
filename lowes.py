@@ -2,45 +2,51 @@
 import scrapy
 from locations.items import GeojsonPointItem
 import json 
-from urllib.parse import urlencode
+
+states = ["AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DC", "DE", "FL", "GA", 
+          "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD", 
+          "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ", 
+          "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC", 
+"SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"] # U.S States
+
+provinces = ['ON', 'QC', 'NS', 'NB', 'MB', 'BC', 'PE', 'SK', 'AB', 'NL'] # Canadian Provinces
+
+headers = {"Referer": "http://lowes.know-where.com/lowes/cgi/region_list", 
+           'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64…) Gecko/20100101 Firefox/57.0'}
 
 class LowesSpider(scrapy.Spider):
     """" This spider scrapes Lowes store locations """
-    name = "lowes"
-    allowed_domains = ["https://www.lowes.com"]
-    start_urls = ('https://www.lowes.com/store/')
-
-    def zip_codes(self):
-        """ Generates all possible zip codes as strings """
-        import itertools as it
-
-        for i in it.product('0123456789', repeat=5): # Create all possible 5 digit zip codes as tuples
-            yield ''.join(i)                         # Join together into a zip code 
-            
+    name = 'lowes'
+    allowed_domains = ['https://know-where.com']
+    start_url = 'http://lowes.know-where.com/lowes/cgi/region_list'
+    
     def start_requests(self):
-        base_url = 'https://www.lowes.com/wcs/resources/store/10151/storelocation/v1_0?%s'
-        
-        headers = {'Accept-Encoding': 'gzip, deflate, br', 'Accept-Language': 'en-US,en;q=0.5',
-                   'Authorization': 'Basic QWRvYmU6ZW9pdWV3ZjA5ZmV3bw==',
-                    'Connection': 'keep-alive', 'Cookie': 'stop_mobi=yes; AKA_A2=1; _abck…-mPZl0ml9x:1bhcvvuj1; sn=3240',
-                    'DNT': '1', 'Host': 'www.lowes.com', 'Referer': 'https://www.lowes.com/store/',
-                    'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64…) Gecko/20100101 Firefox/57.0', 'X-Requested-With': 'XMLHttpRequest'}
+        for state in states:
+            url = ''.join(['http://lowes.know-where.com/lowes/cgi/region?all=true&country=US&region=',
+                     state, '&design=default&lang=en&option=&mapid=NorthAmerica'])
+            request = scrapy.Request(url, callback=self.parse, headers=headers)
+            request.meta['state'] = state
 
-        for zip_code in self.zip_codes():
-            params = urlencode({'maxResults': 30, 'query': zip_code})
-            search_url = base_url % params
-            yield scrapy.Request(search_url, headers=headers, callback=self.parse) 
+            yield request
+            
+        for province in provinces:
+            url = ''.join(['http://lowes.know-where.com/lowes/cgi/region?country=CA&region=',
+                           province, '&design=default&lang=en&option=&mapid=NorthAmerica'])
+            request = scrapy.Request(url, callback=self.parse)
+            request.meta['state'] = province 
 
+            yield request
+            
     def parse(self, response):
-        data = json.loads(response.body_as_unicode())
-        stores = data['storeLocation']
+        for store in response.xpath('//div[@class = \"address-block\"]'):
+            store_data = store.css('li::text').extract()
+            city_state_zip = store_data[2]
+            comma_index = city_state_zip.find(',') # A comma is at the end of the city name
+            city = city_state_zip[:comma_index]    # Gets the city name
 
-        for store in stores:
-            yield GeojsonPointItem(
-                lat=store['latitude'],
-                lon=store['longitude'],
-                addr_full=store["address1"],
-                city=store["city"],
-                state=store["state"]
-                )
-        
+            result = GeojsonPointItem(    
+                state = response.meta['state'],
+                addr_full = store_data[1],
+                city = city)
+
+            yield result 
