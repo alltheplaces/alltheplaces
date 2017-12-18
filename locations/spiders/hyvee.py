@@ -104,25 +104,24 @@ class HyVeeSpider(scrapy.Spider):
         :param hours: list of hours in html
         :return:
         """
-        dept=[]
+        dept = []
         for hour in hours:
+            #extract from html first
             hour_search = re.search(r"<strong>(\w*)</strong>:\s*</td>\s*<td>\s*([-0-9a-zA-Z\s.;]*)\s*</td>", hour)
             if hour_search:
                 m = hour_search.groups()
                 split_hours = m[1].split(";")
                 formatted_hours = []
                 for hr in split_hours:
-                    hour_search = re.search(r"(\d{1,2})\s*(a.\s?m.?|p.\s?m.?)\s*(?:to|-)\s*(\d{1,2})\s*(a.\s?m.?|p.\s?m.?)\s*(daily)?(?:(\w{2})\w*-?(\w{2})?\w*?)?", hr)
+                    hour_search = re.search(r"(\d{1,2}).?\s*(a.\s?m.?|p.\s?m.?)\s*(?:to|-)?\s*(\d{1,2}).?\s*(a.\s?m.?|p.\s?m.?)\s*(daily)?(?:(\w{2})\w*-?(\w{2})?\w*?)?", hr)
                     if hour_search:
                         hrr = hour_search.groups()
                         if hrr[4] == "daily" or (hrr[6] is None and hrr[5] is None and hrr[4] is None):
                             format_hours = "Mo-Su "+str(int(hrr[0]) + self.am_pm(hrr[0], hrr[1])).zfill(
                                 2) + ":00" + "-" + str(int(hrr[2]) + self.am_pm(hrr[2], hrr[3])).zfill(2) + ":00"
-
                         elif hrr[6] is None and hrr[5] is None:
                             format_hours = str(int(hrr[0]) + self.am_pm(hrr[0], hrr[1])).zfill(
                                 2) + ":00" + "-" + str(int(hrr[2]) + self.am_pm(hrr[2], hrr[3])).zfill(2) + ":00"
-
                         elif hrr[6] is None:
                             format_hours = hrr[5] + " " + str(int(hrr[0]) + self.am_pm(hrr[0], hrr[1])).zfill(
                                 2) + ":00" + "-" + str(int(hrr[2]) + self.am_pm(hrr[2], hrr[3])).zfill(2) + ":00"
@@ -130,11 +129,64 @@ class HyVeeSpider(scrapy.Spider):
                             format_hours = hrr[5] + "-" + str(hrr[6]) + " " + str(
                                 int(hrr[0]) + self.am_pm(hrr[0], hrr[1])).zfill(2) + ":00" + "-" + \
                                            str(int(hrr[2]) + self.am_pm(hrr[2], hrr[3])).zfill(2) + ":00"
+                        # lets append our catch
                         formatted_hours.append(format_hours)
                     else:
-                        # no match
-                        formatted_hours.append(hr)
+                        # no match but there are some funny strings that made it through that we need to fix
+                        # e.g 10 a.m. to 4 p .m. Sunday , 5 a.m. to midnight ,  7 a.m.
+                        # should be Su 10:00-16:00; 5:00-00:00;
+                        # with no corresponding closing hr
+                        hour_search = re.search(r"(\d{1,2})\s([amp\.\s]*)\sto\s(?:(\d{1,2})\s([amp\.\s]*)\s(\w{2}))?(\w*)", hr.strip())
+                        if hour_search:
+                            hrr = hour_search.groups()
+                            if hrr[5] == 'midnight' and hrr[2] is None and hrr[3] is None and hrr[4] is None:
+                                format_hours = str(int(hrr[0]) + self.am_pm(hrr[0], hrr[1])).zfill(2) + ":00-00:00"
+                            elif hrr[2] is not None and hrr[3] is not None and hrr[4] is not None:
+                                format_hours = hrr[4] + " " + str(int(hrr[0]) + self.am_pm(hrr[0], hrr[1])).zfill(2) + \
+                                               ":00-" + str(int(hrr[2]) + self.am_pm(hrr[2], hrr[3])) + ":00"
+                            # append whatever we catch
+                            formatted_hours.append(format_hours)
+                        else:
+                            # lets capture this https://www.hy-vee.com/stores/detail.aspx?s=21
+                            # Catering 7 a.m. on that page should be 7:00, should apply to pm too
+                            hour_search = re.search(r"(\d{1,2})\s([amp\.\s]*)", hr.strip(), re.IGNORECASE)
+                            if hour_search:
+                                hrr = hour_search.groups()
+                                format_hours = str(int(hrr[0]) + self.am_pm(hrr[0], hrr[1])).zfill(2) + ":00"
+                                formatted_hours.append(format_hours)
+                            else:
+                                formatted_hours.append(hr.strip())
                 dept.append(m[0] + ": " + "; ".join(formatted_hours))
+            else:
+                # if all fails, we capture it
+                hour_search = re.search(r"<strong>\s*(.*)\s*</strong>:\s*</td>\s*<td>\s*(.*)\s*</td>\s*", hour.strip(), re.IGNORECASE)
+                if hour_search:
+                    hrr = hour_search.groups()
+                    #lets split this by <br>
+                    split_hours = hrr[1].split("<br>")
+                    for hr_range in split_hours:                                    #Monday-Sunday 6AM-9PM
+                        hr_search = re.search(r"(?:(\w{2})?\w*-?(\w{2})?\w*:?\s?(\d{1,2})\s*([amp.\s]*)\s*(-|to)\s*(\d{1,2})\s*([amp.\s]*))|(24-hour\s*|\s*24\s*hours)", hr_range, re.IGNORECASE)
+                        if hr_search:
+                            m = hr_search.groups()
+                            if m[0] is not None and m[1] is not None:
+                                format_hours = m[0] + "-" + m[1] + " " + str(int(m[2]) + self.am_pm(m[2], m[3])).zfill(
+                                    2) + ":00-" + str(int(m[5]) + self.am_pm(m[5], m[6])).zfill(2) + ":00"
+                            elif m[0] is not None and m[1] is None:
+                                format_hours = m[0] + " " + str(int(m[2]) + self.am_pm(m[2], m[3])).zfill(2) + ":00-" + str(
+                                    int(m[5]) + self.am_pm(m[5], m[6])).zfill(2) + ":00"
+                            elif m[0] is None and m[1] is None and m[7] is None:
+                                format_hours = str(int(m[2]) + self.am_pm(m[2], m[3])).zfill(2) + ":00-" + str(
+                                    int(m[5]) + self.am_pm(m[5], m[6])).zfill(2) + ":00"
+                            elif m[7] is not None:
+                                format_hours = '24/7'
+                        else:
+                            # we append if no match
+                            format_hours = hr_range
+
+                    format_hours = hrr[0].replace("&amp;","&") + ": " + format_hours
+                    dept.append(format_hours)
+                else:
+                    dept.append(hour)
         return dept
 
     def process_hours(self, hours):
