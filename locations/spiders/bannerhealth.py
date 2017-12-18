@@ -35,7 +35,7 @@ class BannerHealthSpider(scrapy.Spider):
         'state': response.xpath('//div[@class="address"]/div[@class="hours"]/p/text()').extract()[1].strip().split()[-2],
         'postcode': response.xpath('//div[@class="address"]/div[@class="hours"]/p/text()').extract()[1].strip().split()[-1],
         'website': response.request.url,
-        'telephone': response.xpath('//a[@id="main_1_contentpanel_2_lnkPhone"]/text()').extract()[1].strip(),
+        'phone': response.xpath('//a[@id="main_1_contentpanel_2_lnkPhone"]/text()').extract()[1].strip(),
         # 'lat': float(geodata['store']['latlng']['lat']),
         # 'lon': float(geodata['store']['latlng']['lng']),
         }
