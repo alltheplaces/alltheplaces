@@ -16,7 +16,8 @@ class McDonaldsSpider(scrapy.Spider):
         'https://www.mcdonalds.com/googleapps/GoogleRestaurantLocAction.do?method=searchLocation&latitude=55.9394691&longitude=10.17994550000003&radius=100000&maxResults=300000&country=dk&language=da-dk',
         'https://www.mcdonalds.com/googleapps/GoogleRestaurantLocAction.do?method=searchLocation&latitude=60.7893233&longitude=10.689804200000026&radius=100000&maxResults=300000&country=no&language=en-no',
         'https://www.mcdonalds.com/googleapps/GoogleRestaurantLocAction.do?method=searchLocation&latitude=24.0799008&longitude=45.29000099999996&radius=100000&maxResults=300000&country=saj&language=en-sa',
-        'https://www.mcdonalds.com/googleapps/GoogleRestaurantLocAction.do?method=searchLocation&latitude=29.3365728&longitude=47.67552909999995&radius=100000&maxResults=300000&country=kw&language=en-kw'
+        'https://www.mcdonalds.com/googleapps/GoogleRestaurantLocAction.do?method=searchLocation&latitude=29.3365728&longitude=47.67552909999995&radius=100000&maxResults=300000&country=kw&language=en-kw',
+        'https://www.mcdonalds.com/googleapps/GoogleRestaurantLocAction.do?method=searchLocation&latitude=24.1671413&longitude=56.114225300000044&radius=100000&maxResults=300000&country=om&language=en-om'
     )
 
     def store_hours(self, store_hours):
