@@ -22,7 +22,7 @@ def get_hours(hours_obj):
 
 class ToysRUsSpider(scrapy.Spider):
     name = "toysrus"
-
+    download_timeout = 60
     def start_requests(self):
         urls = [
             'http://stores.toysrus.com/'
