@@ -16,19 +16,24 @@ class HRBlockSpider(scrapy.Spider):
 
     name = "h_r_block"
     allowed_domains = ["www.hrblock.com"]
-    download_delay = 0.5
+    download_delay = 0
     start_urls = (
         'https://www.hrblock.com/tax-offices/local/',
     )
 
     def parse_stores(self, response):
+        ref =  re.findall(r"[0-9]+$" , response.url)
+        if(len(ref)>0):
+            ref = ref[0]
+        else:
+            ref = response.url
         properties = {
             'addr_full' : ' '.join(response.xpath('//span[@itemprop="streetAddress"]/text()').extract()),
             'phone' : response.xpath('normalize-space(//span[@itemprop="telephone"]/text())').extract_first(),
             'city' : response.xpath('normalize-space(//span[@itemprop="addressLocality"]/text())').extract_first(),
             'state' : response.xpath('normalize-space(//span[@itemprop="addressRegion"]/text())').extract_first(),
             'postcode' : response.xpath('normalize-space(//span[@itemprop="postalCode"]/text())').extract_first(),
-            'ref' : re.findall(r"[0-9]+$" , response.url)[0],
+            'ref' : ref,
             'website' : response.xpath('//link[@rel="canonical"]/@href').extract_first(),
             'lat' : response.xpath('normalize-space(//meta[@itemprop="latitude"]/@content)').extract_first(),
             'lon' : response.xpath('normalize-space(//meta[@itemprop="longitude"]/@content)').extract_first(),
