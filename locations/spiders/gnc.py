@@ -16,7 +16,7 @@ class GNCSpider(scrapy.Spider):
 
     name = "gnc"
     allowed_domains = ["stores.gnc.com"]
-    download_delay = 0
+    download_delay = 0.5
     start_urls = (
         'http://stores.gnc.com/',
     )
