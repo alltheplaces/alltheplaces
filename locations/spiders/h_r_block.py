@@ -16,7 +16,7 @@ class HRBlockSpider(scrapy.Spider):
 
     name = "h_r_block"
     allowed_domains = ["www.hrblock.com"]
-    download_delay = 0
+    download_delay = 0.5
     start_urls = (
         'https://www.hrblock.com/tax-offices/local/',
     )
