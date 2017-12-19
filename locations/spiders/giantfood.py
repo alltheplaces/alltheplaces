@@ -11,26 +11,42 @@ STATES = ['AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DC', 'DE', 'FL', 'GA',
 
 WEEKDAYS = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su']
 
+
 class GiantFoodSpider(scrapy.Spider):
     name = "giantfood"
     allowed_domains = ["giantfood.com"]
-        
+
     def start_requests(self):
+        yield scrapy.http.Request(
+            'https://giantfood.com/auth/oauth/token',
+            callback=self.handle_oauth_token,
+            body='grant_type=client_credentials&scope=profile',
+            method='POST',
+            headers={
+                'content-type': 'application/x-www-form-urlencoded',
+                'Authorization': 'Basic NzJkNTBhZDctNjk4MC00OTQxLWFiNGQtNThkYzM0NjVmMDY5OjczMGUyNzgwMDMxNTkwNWMwYThiYzE0ODRmYTUzM2I2NWM0YWI5Mjc4NzdjZTdiZDYyMzUxODcwMWQ0MDY1ODA=',
+            }
+        )
+
+    def handle_oauth_token(self, response):
+        result = json.loads(response.body_as_unicode())
+        access_token = result.get('access_token')
+
         url = 'https://giantfood.com/auth/api/public/synergy/locator/GNTL/locate/grocery/15/details/'
         headers = {
-            'authorization': 'Bearer b3e76cc34746bca47c730542c8611f8856dfc891142f2f3ce4e6a7ea0363320f'
+            'authorization': 'Bearer ' + access_token
         }
-        for state in STATES :
+        for state in STATES:
             yield scrapy.http.Request(
                 '{}?q={}'.format(url, state),
                 self.parse,
-                method = 'GET',
-                headers = headers
+                method='GET',
+                headers=headers
             )
 
     def parse(self, response):
         result = json.loads(response.body_as_unicode())
-        for store in result['stores'] :
+        for store in result['stores']:
             ref             = store['storeId']
             name            = 'Giant'
             website         = 'https://giantfood.com/location-details/#/store/detail/' + store['storeNo']
@@ -50,6 +66,7 @@ class GiantFoodSpider(scrapy.Spider):
                 'lat'           : lat,
                 'lon'           : lon,
                 'website'       : website,
+                'phone'         : phone,
                 'opening_hours' : opening_hours,
                 'street'        : street,
                 'city'          : city,
@@ -62,21 +79,21 @@ class GiantFoodSpider(scrapy.Spider):
     def hours(self, store_hours):
         hours = ''
         for data in store_hours:
-            if data['24hr'] :
+            if data['24hr']:
                 open_time = '00:00'
                 close_time = '24:00'
-            if 'openTime' in data.keys() : 
+            if 'openTime' in data.keys():
                 open_time = data['openTime']
             elif 'pickupStartTime' in data.keys():
                 open_time = data['pickupStartTime']
-            else :
+            else:
                 open_time = '00:00'
-            
-            if 'closeTime' in data.keys() :
+
+            if 'closeTime' in data.keys():
                 close_time = data['closeTime']
-            elif 'pickupEndTime' in data.keys() : 
+            elif 'pickupEndTime' in data.keys():
                 close_time = data['pickupEndTime']
-            else :
+            else:
                 close_time = '24:00'
 
             hours = hours + '{} {}-{}; '.format(
@@ -84,5 +101,5 @@ class GiantFoodSpider(scrapy.Spider):
                 open_time,
                 close_time
             )
-        
+
         return hours
