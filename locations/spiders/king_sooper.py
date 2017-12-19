@@ -8,6 +8,9 @@ from locations.items import GeojsonPointItem
 class KingSooperSpider(scrapy.Spider):
     name = "king_sooper"
     allowed_domains = ["www.kingsoopers.com"]
+    custom_settings = {
+        'USER_AGENT': 'Mozilla/5.0',
+    }
     start_urls = (
         'https://www.kingsoopers.com/stores?address=37.7578595,-79.76804&includeThirdPartyFuel=true&maxResults=50&radius=3000&showAllStores=false&useLatLong=true',
     )
@@ -39,7 +42,7 @@ class KingSooperSpider(scrapy.Spider):
                    }
 
         yield scrapy.Request(url=url, headers=headers, callback=self.parse)
-        
+
 
     def store_hours(self, store_hours):
         if all([h == '' for h in store_hours.values()]):
