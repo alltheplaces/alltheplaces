@@ -6,7 +6,7 @@ class AllstateInsurnceAgentsSpider(scrapy.Spider):
 
     name = "allstate_insurance_agents"
     allowed_domains = ["agents.allstate.com"]
-    download_delay = 0
+    download_delay = 0.5
     start_urls = (
         'https://agents.allstate.com/',
     )
