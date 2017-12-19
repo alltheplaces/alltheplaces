@@ -4,11 +4,11 @@ import json
 import re
 from locations.items import GeojsonPointItem
 
-class AldiUSSpider(scrapy.Spider):
-    name = 'aldi_us'
+class AldiCHSpider(scrapy.Spider):
+    name = 'aldi_ch'
     allowed_domains = ['www.yellowmap.de']
     start_urls = (
-        'https://www.yellowmap.de/Presentation/AldiSued/en-US/ResultList?LocX=&LocY=&Lux=-115.224609375&Luy=58.17070248348609&Rlx=-62.666015625&Rly=17.14079039331665&ZoomLevel=4',
+        'https://www.yellowmap.de/Presentation/AldiSued/de-CH/ResultList?LocX=&LocY=&HiddenBranchCode=&BranchCode=&Lux=6.2841796875&Luy=49.24629332459796&Rlx=10.755615234375&Rly=44.59829048984011&ZoomLevel=4',
     )
     
     def parse(self, response):
@@ -25,28 +25,18 @@ class AldiUSSpider(scrapy.Spider):
             street = store.css('.resultItem-Street::text').extract_first()
             address1 = store.css('.resultItem-City::text').extract_first().split(',')
             hours_data = store.css('.openingHoursTable > tr')
+        
+            (zipcode, city) = re.search(r'(\d+)(.*)', address1[0]).groups()
             
-            pattern = r'(.*?)(\s|,\s)([0-9]{1,5})'
-            if len(address1) == 2: 
-                city = address1[0]
-                match = re.search(pattern, address1[1].strip())
-                state = match.groups()[0]
-                zipcode = match.groups()[2]
-
-            elif len(address1) == 1:
-                match = re.search(pattern, address1[0].strip())
-                city, state, zipcode = match.groups()
-
             properties = {
                 'ref': ref,
                 'name': name,
                 'opening_hours': self.hours(hours_data),
                 'lat': lat,
                 'lon': lon,
-                'street': street,
+                'street': street.strip(),
                 'city': city,
-                'state': state,
-                'postcode': zipcode
+                'postcode': zipcode.strip()
             }
 
             yield GeojsonPointItem(**properties)
@@ -58,7 +48,7 @@ class AldiUSSpider(scrapy.Spider):
 
         for child in self.children(container):
             yield scrapy.Request(
-                'https://www.yellowmap.de/Presentation/AldiSued/en-US/ResultList?LocX={}&LocY={}&ZoomLevel={}'.format(child['locX'], child['locY'], zoom),
+                'https://www.yellowmap.de/Presentation/AldiSued/de-CH/ResultList?LocX={}&LocY={}&ZoomLevel={}'.format(child['locX'], child['locY'], zoom),
                 meta = {'zoom' : zoom + 1},
                 callback = self.parse
             )
@@ -91,10 +81,10 @@ class AldiUSSpider(scrapy.Spider):
                 day = '{}-{}'.format(f_day, t_day)
             else:
                 day = day[:2]
-            if hours == 'closed' :
+            if hours == 'geschlossen' :
                 opening_hours += '{} {};'.format(
                     day,
-                    hours
+                    'closed'
                 )
             else :
                 f_hour_text = hours.split('-')[0].strip()
@@ -109,16 +99,15 @@ class AldiUSSpider(scrapy.Spider):
         return opening_hours
 
     def normalize_time(self, time_str):
-        match = re.search(r'([0-9]{1,2}):([0-9]{1,2}) (A|P)M$', time_str)
+        match = re.search(r'([0-9]{1,2}):([0-9]{1,2})', time_str)
         if not match:
-            match = re.search(r'([0-9]{1,2}) (A|P)M$', time_str)
-            h, am_pm = match.groups()
+            h = re.search(r'([0-9]{1,2})', time_str).group()
             m = "0"
         else:
-            h, m, am_pm = match.groups()
+            h, m = match.groups()
 
         return '%02d:%02d' % (
-            int(h) + 12 if am_pm == 'P' else int(h),
+            int(h),
             int(m),
         )
 

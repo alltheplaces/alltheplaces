@@ -4,11 +4,11 @@ import json
 import re
 from locations.items import GeojsonPointItem
 
-class AldiUSSpider(scrapy.Spider):
-    name = 'aldi_us'
+class AldiAUSpider(scrapy.Spider):
+    name = 'aldi_au'
     allowed_domains = ['www.yellowmap.de']
     start_urls = (
-        'https://www.yellowmap.de/Presentation/AldiSued/en-US/ResultList?LocX=&LocY=&Lux=-115.224609375&Luy=58.17070248348609&Rlx=-62.666015625&Rly=17.14079039331665&ZoomLevel=4',
+        'https://www.yellowmap.de/Presentation/AldiSued/en-AU/ResultList?LocX=&LocY=&HiddenBranchCode=&BranchCode=&Lux=120.146484375&Luy=1.4939713066293239&Rlx=152.138671875&Rly=-46.73986059969267&ZoomLevel=4',
     )
     
     def parse(self, response):
@@ -26,16 +26,20 @@ class AldiUSSpider(scrapy.Spider):
             address1 = store.css('.resultItem-City::text').extract_first().split(',')
             hours_data = store.css('.openingHoursTable > tr')
             
-            pattern = r'(.*?)(\s|,\s)([0-9]{1,5})'
+            pattern = r'(.*)(\s\w{1,3}\s)(.*)'
             if len(address1) == 2: 
-                city = address1[0]
-                match = re.search(pattern, address1[1].strip())
-                state = match.groups()[0]
+                city = address1[0].strip()
+                match = re.search(pattern, address1[1])
+                state = match.groups()[1]
                 zipcode = match.groups()[2]
-
-            elif len(address1) == 1:
-                match = re.search(pattern, address1[0].strip())
-                city, state, zipcode = match.groups()
+            elif len(address1) == 1 :
+                match = re.search(pattern, address1[0])
+                if match is not None:
+                    city, state, zipcode = match.groups()
+                else:
+                    match = re.search(r'(.*?)(\d+)', address1[0])
+                    city, zipcode = match.groups()
+                    state = ''
 
             properties = {
                 'ref': ref,
@@ -43,10 +47,10 @@ class AldiUSSpider(scrapy.Spider):
                 'opening_hours': self.hours(hours_data),
                 'lat': lat,
                 'lon': lon,
-                'street': street,
-                'city': city,
-                'state': state,
-                'postcode': zipcode
+                'street': street.strip(),
+                'city': city.strip(),
+                'state': state.strip(),
+                'postcode': zipcode.strip()
             }
 
             yield GeojsonPointItem(**properties)
@@ -54,12 +58,12 @@ class AldiUSSpider(scrapy.Spider):
         if 'zoom' in response.meta.keys():
             zoom = response.meta["zoom"]
         else:
-            zoom = 5
+            zoom = 6
 
         for child in self.children(container):
             yield scrapy.Request(
-                'https://www.yellowmap.de/Presentation/AldiSued/en-US/ResultList?LocX={}&LocY={}&ZoomLevel={}'.format(child['locX'], child['locY'], zoom),
-                meta = {'zoom' : zoom + 1},
+                'https://www.yellowmap.de/Presentation/AldiSued/en-AU/ResultList?LocX={}&LocY={}&ZoomLevel={}'.format(child['locX'], child['locY'], zoom),
+                meta = {'zoom' : zoom + 2},
                 callback = self.parse
             )
 
@@ -85,13 +89,13 @@ class AldiUSSpider(scrapy.Spider):
             day = time[0].strip()
             hours = time[1].strip()
 
-            if '-' in day:
+            if '-' in day :
                 f_day = day.split('-')[0].strip()[:2]
                 t_day = day.split('-')[1].strip()[:2]
                 day = '{}-{}'.format(f_day, t_day)
             else:
                 day = day[:2]
-            if hours == 'closed' :
+            if hours.lower() == 'closed' :
                 opening_hours += '{} {};'.format(
                     day,
                     hours
