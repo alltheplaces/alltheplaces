@@ -10,6 +10,7 @@ default_headers = {
     "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_1) AppleWebKit/537.36 (KHTML, like Gecko) "
                   "Chrome/63.0.3239.84 Safari/537.36"}
 
+
 def get_hours(hours_obj):
     out_hours = []
     for day, hours in hours_obj.items():
@@ -20,9 +21,12 @@ def get_hours(hours_obj):
             out_hours.append("{}: {}".format(day, ",".join(ranges)))
     return "; ".join(out_hours)
 
+
 class ToysRUsSpider(scrapy.Spider):
     name = "toysrus"
-    download_timeout = 60
+    download_timeout = 240
+    download_delay = 0.2
+
     def start_requests(self):
         urls = [
             'http://stores.toysrus.com/'
@@ -40,9 +44,9 @@ class ToysRUsSpider(scrapy.Spider):
         urls = response.css("a[href*='stores.toysrus.com/']")
         for url in [x.xpath("@href").extract_first(default=None) for x in urls]:
             if url and "#" not in url:
-                yield scrapy.Request(url=url, callback=self.parse_map, headers=default_headers)
+                yield scrapy.Request(url=url, callback=self.parse, headers=default_headers)
 
-    def parse_map(self, response):
+    def parse(self, response):
         marker_txt = re.findall(re.compile("markerData.*\}", re.MULTILINE), response.body_as_unicode())
         if not len(marker_txt):
             return
@@ -53,7 +57,7 @@ class ToysRUsSpider(scrapy.Spider):
             return
         for marker in markers:
             marker_response = HtmlResponse(url="", body=marker["info"].encode("utf-8"))
-            hours = re.findall(r"\{\"label.*\}",marker["info"])
+            hours = re.findall(r"\{\"label.*\}", marker["info"])
             hours = hours[0]
             parsed_hours = json.loads(hours)
 
