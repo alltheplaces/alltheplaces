@@ -10,6 +10,15 @@ default_headers = {
     "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_1) AppleWebKit/537.36 (KHTML, like Gecko) "
                   "Chrome/63.0.3239.84 Safari/537.36"}
 
+def get_hours(hours_obj):
+    out_hours = []
+    for day, hours in hours_obj.items():
+        if hours == "open24":
+            out_hours.append("{}: 24/7".format(day))
+        elif type(hours) is list:
+            ranges = ["{}-{}".format(x["open"], x["close"]) for x in hours]
+            out_hours.append("{}: {}".format(day, ",".join(ranges)))
+    return "; ".join(out_hours)
 
 class ToysRUsSpider(BaseSpider):
     name = "toysrus"
@@ -44,22 +53,21 @@ class ToysRUsSpider(BaseSpider):
             return
         for marker in markers:
             marker_response = HtmlResponse(url="", body=marker["info"].encode("utf-8"))
+            hours = re.findall(r"\{\"label.*\}",marker["info"])
+            hours = hours[0]
+            parsed_hours = json.loads(hours)
+
             addr_parts = marker_response.css(".address span:not(.phone)::text").extract()
-            # split_street = addr_parts[0].split(" ")
-            # house_number, street = split_street[0].strip(), " ".join(split_street[1:])
-            hours = {x.css(".daypart::text").extract_first(): [x.css(".time-open::text").extract_first(),
-                                                               x.css(".time-close::text").extract_first()]
-                     for x in marker_response.css(".day-hour-row")}
             url = marker_response.css("header a").xpath("@href").extract_first()
+            city, state = addr_parts[-1].split(",")
+
             yield GeojsonPointItem(lat=marker.get("lat"), lon=marker.get("lng"),
                                    name=marker_response.css("header a::text").extract_first(default=None),
                                    addr_full=", ".join(addr_parts),
-                                   # housenumber=house_number,
-                                   # street=street.strip(),
-                                   city=addr_parts[1].strip(),
-                                   state=addr_parts[1].strip(),
+                                   city=city.strip(),
+                                   state=state.strip(),
                                    country="United States",
                                    phone=marker_response.css(".phone::text").extract_first(),
                                    website=url,
-                                   opening_hours=hours,
+                                   opening_hours=get_hours(parsed_hours["days"]),
                                    ref=url.split("/")[-1].split(".")[0])
