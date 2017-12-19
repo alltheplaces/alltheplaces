@@ -1,6 +1,6 @@
 import json
 import scrapy
-from urllib import parse
+from six.moves.urllib.parse import urlencode
 import re
 from locations.items import GeojsonPointItem
 
@@ -34,7 +34,7 @@ class JambaJuiceSpider(scrapy.Spider):
                    }
 
         params = [('auth_token', 'PQUBOCBNLKOUIYUP'), ('sitemap', 'true')]
-        url = self.start_urls[0] + parse.urlencode(params)
+        url = self.start_urls[0] + urlencode(params)
 
         yield scrapy.Request(url=url, headers=headers, callback=self.parse)
 

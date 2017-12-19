@@ -1,6 +1,6 @@
 import json
 import scrapy
-from urllib import parse
+from six.moves.urllib.parse import urlencode
 from locations.items import GeojsonPointItem
 
 
@@ -33,7 +33,7 @@ class WawaSpider(scrapy.Spider):
             wawa_params = {'limit': 50, 'lat': lat, 'long': lon}
 
             yield scrapy.Request(
-                url + parse.urlencode(wawa_params),
+                url + urlencode(wawa_params),
                 headers={
                     'Accept': 'application/json',
                 },
