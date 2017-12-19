@@ -89,6 +89,7 @@ class BestBuyMexicoSpider(scrapy.Spider):
         for store in data:
             # Door# is at the end in address format in Spanish
             parts = store['addr1'].split(' ')
+            num = ''
             for part in parts:
                 try:
                     num = '%d' % int(part)
