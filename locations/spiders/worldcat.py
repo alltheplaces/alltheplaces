@@ -18,13 +18,6 @@ phone_regex = re.compile('^([0-9\ \-\(\)]{9,})$')
 citystate_regex = re.compile('^(.+), (.+)$')
 
 class WorldcatSpider(scrapy.Spider):
-    """ Currently, this spider isn't perfect:
-            - It gathers 44910/72000 libraries of worldcat due to a maximum of 
-              492 libraries per search query.
-            - A tiny percent (1-3%) of items will have a field or two with erroneous 
-              data due to the fact that the fields containing location data are 
-              grouped together as a blob of text in a single element.
-    """
     name = "worldcat"
     allowed_domains = ["worldcat.com"]
     download_delay = 0.5
