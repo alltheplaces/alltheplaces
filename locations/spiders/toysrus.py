@@ -1,9 +1,7 @@
 import scrapy
-from scrapy.spiders import BaseSpider
 from locations.items import GeojsonPointItem
 import json
 import re
-from io import StringIO
 from scrapy.http import HtmlResponse
 
 default_headers = {
