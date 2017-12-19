@@ -20,7 +20,7 @@ def get_hours(hours_obj):
             out_hours.append("{}: {}".format(day, ",".join(ranges)))
     return "; ".join(out_hours)
 
-class ToysRUsSpider(BaseSpider):
+class ToysRUsSpider(scrapy.Spider):
     name = "toysrus"
 
     def start_requests(self):
