@@ -39,7 +39,7 @@ class GNCSpider(scrapy.Spider):
         ends = response.xpath('//meta[@property="business:hours:end"]/@content').extract()
         hours = ''
         for idx , day in enumerate(days):
-            hours =  hours+DAYS[day.strip()]+' '+starts[idx]+'-'+ends[idx]+' ;'
+            hours =  hours+DAYS[day.strip()]+' '+starts[idx][:5]+'-'+ends[idx][:5]+' ;'
         if hours:
             properties['opening_hours'] = hours
         yield GeojsonPointItem(**properties)
