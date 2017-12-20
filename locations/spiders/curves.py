@@ -51,8 +51,4 @@ class CurvesSpider(scrapy.Spider):
         # 'lat': float(response.xpath('//head/script[9]').extract_first().split('"coordinates":[')[1].split(']')[0].split(',')[1]),
         }
 
-        print("TEST: "+str(properties))
-
-
-
         yield GeojsonPointItem(**properties)
