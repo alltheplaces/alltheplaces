@@ -12,9 +12,7 @@ class DairyQueenSpider(scrapy.Spider):
         'https://www.dairyqueen.com/us-en/Sitemap/?localechange=1&',
     )
 
-
     def parse_stores(self, response):
-        print(dir(response))
         google_lnk = response.xpath('//a[@title="Click here to view on Google"]//@href').extract_first()
         matches = re.finditer(r"([-0-9]+\.[0-9]+)", google_lnk)
         if matches:
@@ -33,11 +31,12 @@ class DairyQueenSpider(scrapy.Spider):
         }
         yield GeojsonPointItem(**properties)
 
-
     def parse(self, response):
 
         stores = response.xpath('(//div[@class="center-960"]/ul/li/a/@href)').extract()
 
         for store in stores:
-            yield scrapy.Request(response.urljoin(store), callback=self.parse_stores)
-
+            yield scrapy.Request(
+                response.urljoin(store),
+                callback=self.parse_stores
+            )

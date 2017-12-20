@@ -4,6 +4,7 @@ import json
 
 from locations.items import GeojsonPointItem
 
+
 class NoodlesAndCompanySpider(scrapy.Spider):
     name = "noodles_and_company"
     allowed_domains = ["locations.noodles.com"]
@@ -100,10 +101,12 @@ class NoodlesAndCompanySpider(scrapy.Spider):
 
     def parse_location(self, response):
         properties = {
-            'addr:full': response.xpath('//span[@class="c-address-street-1"]/text()').extract_first().strip(),
-            'addr:city': response.xpath('//span[@itemprop="addressLocality"]/text()').extract_first(),
-            'addr:state': response.xpath('//abbr[@itemprop="addressRegion"]/text()').extract_first(),
-            'addr:postcode': response.xpath('//span[@itemprop="postalCode"]/text()').extract_first().strip(),
+            'lon': float(response.xpath('//span/meta[@itemprop="longitude"]/@content').extract_first()),
+            'lat': float(response.xpath('//span/meta[@itemprop="latitude"]/@content').extract_first()),
+            'addr_full': response.xpath('//span[@class="c-address-street-1"]/text()').extract_first().strip(),
+            'city': response.xpath('//span[@itemprop="addressLocality"]/text()').extract_first(),
+            'state': response.xpath('//abbr[@itemprop="addressRegion"]/text()').extract_first(),
+            'postcode': response.xpath('//span[@itemprop="postalCode"]/text()').extract_first().strip(),
             'phone': response.xpath('//span[@itemprop="telephone"]/text()').extract_first(),
             'name': response.xpath('//span[@class="location-name-geo"]/text()').extract_first(),
             'ref': response.url,
@@ -119,13 +122,4 @@ class NoodlesAndCompanySpider(scrapy.Spider):
         if opening_hours:
             properties['opening_hours'] = opening_hours
 
-        lon_lat = [
-            float(response.xpath('//span/meta[@itemprop="longitude"]/@content').extract_first()),
-            float(response.xpath('//span/meta[@itemprop="latitude"]/@content').extract_first()),
-        ]
-
-        yield GeojsonPointItem(
-            properties=properties,
-            lon_lat=lon_lat,
-        )
-
+        yield GeojsonPointItem(**properties)
