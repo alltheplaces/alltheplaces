@@ -72,9 +72,7 @@ class HyVeeSpider(scrapy.Spider):
         zipcode = match_city[2]
         phone = response.xpath('//div[@class="row util-padding-top-15"]/div[@class="col-sm-6 util-padding-bottom-15"][2]/a[1]/text()').extract()[0]
         website = response.url
-        extra_open_hours = self.process_dept_hours(response.xpath('//table[@class="storeHours table"]/tr').extract())
         opening_hours = self.process_hours(response.xpath('//div[@id="page_content"]/p/text()').extract())
-        extras = {"department_hours": extra_open_hours, "special_days": opening_hours[1]}
         link_id = website.split("s=")[-1]
         # initialize latlon incase in a rare case we dont have it
         lat = ''
@@ -92,79 +90,10 @@ class HyVeeSpider(scrapy.Spider):
             "ref": link_id,
             "opening_hours": opening_hours[0],
             "lat": lat,
-            "lon": lon,
-            "extras": extras
+            "lon": lon
         }
-        logme(str(GeojsonPointItem(**properties))+"\n", "log.txt")
         yield GeojsonPointItem(**properties)
 
-    def process_dept_hours(self, hours):
-        """
-        Returns the departmental open hours
-        :param hours: list of hours in html
-        :return:
-        """
-        dept = []
-        for hour in hours:
-            #extract from html first
-            hour_search = re.search(r"<strong>\s*(.*)\s*</strong>:\s*</td>\s*<td>\s*(.*)\s*</td>\s*", hour)
-            if hour_search:
-                m = hour_search.groups()
-                split_hours = m[1].replace("&amp;", "&").split(";")
-                formatted_hours = []
-                for hrs in split_hours:
-                    # logme(str(hrs)+"\n", "regex.txt")
-                    split_hours = hrs.split("<br>")
-                    for hr in split_hours:
-                        hour_search = re.search(r"(\d{1,2}).?\s*(a.\s?m.?|p.\s?m.?)\s*(?:to|-)?\s*(\d{1,2}).?\s*(a.\s?m.?|p.\s?m.?)\s*(daily)?(?:(\w{2})\w*-?(\w{2})?\w*?)?", hr)
-                        if hour_search:
-                            hrr = hour_search.groups()
-                            if hrr[4] == "daily" or (hrr[6] is None and hrr[5] is None and hrr[4] is None):
-                                format_hours = "Mo-Su "+str(int(hrr[0]) + self.am_pm(hrr[0], hrr[1])).zfill(
-                                    2) + ":00" + "-" + str(int(hrr[2]) + self.am_pm(hrr[2], hrr[3])).zfill(2) + ":00"
-                            elif hrr[6] is None and hrr[5] is None:
-                                format_hours = str(int(hrr[0]) + self.am_pm(hrr[0], hrr[1])).zfill(
-                                    2) + ":00" + "-" + str(int(hrr[2]) + self.am_pm(hrr[2], hrr[3])).zfill(2) + ":00"
-                            elif hrr[6] is None:
-                                format_hours = hrr[5] + " " + str(int(hrr[0]) + self.am_pm(hrr[0], hrr[1])).zfill(
-                                    2) + ":00" + "-" + str(int(hrr[2]) + self.am_pm(hrr[2], hrr[3])).zfill(2) + ":00"
-                            else:
-                                format_hours = hrr[5] + "-" + str(hrr[6]) + " " + str(
-                                    int(hrr[0]) + self.am_pm(hrr[0], hrr[1])).zfill(2) + ":00" + "-" + \
-                                               str(int(hrr[2]) + self.am_pm(hrr[2], hrr[3])).zfill(2) + ":00"
-                            # lets append our catch
-                            formatted_hours.append(format_hours)
-                        else:
-                            # no match but there are some funny strings that made it through that we need to fix
-                            # e.g 10 a.m. to 4 p .m. Sunday , 5 a.m. to midnight ,  7 a.m.
-                            # should be Su 10:00-16:00; 5:00-00:00;
-                            # with no corresponding closing hr
-                            hour_search = re.search(r"(\d{1,2})\s([amp\.\s]*)\sto\s(?:(\d{1,2})\s([amp\.\s]*)\s(\w{2}))?(\w*)", hr.strip())
-                            if hour_search:
-                                hrr = hour_search.groups()
-                                if hrr[5] == 'midnight' and hrr[2] is None and hrr[3] is None and hrr[4] is None:
-                                    format_hours = str(int(hrr[0]) + self.am_pm(hrr[0], hrr[1])).zfill(2) + ":00-00:00"
-                                elif hrr[2] is not None and hrr[3] is not None and hrr[4] is not None:
-                                    format_hours = hrr[4] + " " + str(int(hrr[0]) + self.am_pm(hrr[0], hrr[1])).zfill(2) + \
-                                                   ":00-" + str(int(hrr[2]) + self.am_pm(hrr[2], hrr[3])) + ":00"
-                                else:
-                                    format_hours = hr.strip()
-                                # append whatever we catch
-                                formatted_hours.append(format_hours)
-                            else:
-                                # lets capture this https://www.hy-vee.com/stores/detail.aspx?s=21
-                                # Catering 7 a.m. on that page should be 7:00, should apply to pm too
-                                hour_search = re.search(r"(\d{1,2})\s([amp\.\s]*)", hr.strip(), re.IGNORECASE)
-                                if hour_search:
-                                    hrr = hour_search.groups()
-                                    format_hours = str(int(hrr[0]) + self.am_pm(hrr[0], hrr[1])).zfill(2) + ":00"
-                                    formatted_hours.append(format_hours)
-                                else:
-                                    formatted_hours.append(hr.strip())
-                dept.append(m[0].replace("&amp;", "&") + ": " + "; ".join(formatted_hours))
-            else:
-                dept.append(hour)
-        return dept
 
     def process_hours(self, hours):
         """
@@ -269,8 +198,3 @@ class HyVeeSpider(scrapy.Spider):
             if int(hr) < 12:
                 diff = 12
         return diff
-
-def logme(strr, f):
-    h=open(f, 'a')
-    h.write(str(strr)+"\n")
-    h.close()
