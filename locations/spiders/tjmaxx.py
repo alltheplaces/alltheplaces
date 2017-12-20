@@ -69,25 +69,23 @@ class TjmaxxSpider(scrapy.Spider):
                             # time is like Mon-Wed: 9a-9p
                             hr_1 = int(m[3]) + self.am_pm(m[3], m[5])
                             hr_2 = int(m[6]) + self.am_pm(m[6], m[8])
-                            working_hour.append(m[1] + m[2] + " " + f'{hr_1:02}' + ":00-" + f'{hr_2:02}' + ":00")
+                            working_hour.append(m[1] + m[2] + " " + '{0:02}'.format(hr_1) + ":00-" + '{0:02}'.format(hr_2) + ":00")
                         else:
                             # time is like Mon-Wed: 9a-9:30p
                             hr_1 = int(m[3]) + self.am_pm(m[3], m[5])
                             hr_2 = int(m[6]) + self.am_pm(m[6], m[8])
-                            working_hour.append(m[1] + m[2] + " " + f'{hr_1:02}' + ":00-" + f'{hr_2:02}' + m[7])
+                            working_hour.append(m[1] + m[2] + " " + '{0:02}'.format(hr_1) + ":00-" + '{0:02}'.format(hr_2) + m[7])
                     else:
                         if m[7] is None:
                             # time is like Mon-Wed: 9:30a-9p
                             hr_1 = int(m[3]) + self.am_pm(m[3], m[5])
                             hr_2 = int(m[6]) + self.am_pm(m[6], m[8])
-                            working_hour.append(m[1] + m[2] + " " + f'{hr_1:02}' + m[4] + "-" + f'{hr_2:02}' + ":00")
+                            working_hour.append(m[1] + m[2] + " " + '{0:02}'.format(hr_1) + m[4] + "-" + '{0:02}'.format(hr_2) + ":00")
                         else:
                             # time is like Mon-Wed: 9:30a-9:30p
                             hr_1 = int(m[3]) + self.am_pm(m[3], m[5])
                             hr_2 = int(m[6]) + self.am_pm(m[6], m[8])
-                            working_hour.append(m[1] + m[2] + " " + f'{hr_1:02}' + m[4] + "-" + f'{hr_2:02}' + m[7])
-            # else:
-            #     working_hour.append(t)
+                            working_hour.append(m[1] + m[2] + " " + '{0:02}'.format(hr_1) + m[4] + "-" + '{0:02}'.format(hr_2) + m[7])
 
         if working_hour:
             return "; ".join(working_hour)

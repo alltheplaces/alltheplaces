@@ -3,7 +3,16 @@ import scrapy
 
 from locations.items import GeojsonPointItem
 
-DAYS=['Mo','Tu','We','Th','Fr','Sa','Su']
+DAYS = [
+    'Mo',
+    'Tu',
+    'We',
+    'Th',
+    'Fr',
+    'Sa',
+    'Su'
+]
+
 
 class SparNoSpider(scrapy.Spider):
     name = "spar_no"
@@ -25,24 +34,23 @@ class SparNoSpider(scrapy.Spider):
 
             ref = response.xpath('//h1[@itemprop="name"]/text()').extract_first()
 
-            if ref: #some links redirects back to list page
+            if ref:  # some links redirects back to list page
                 props['ref'] = ref.strip("\n").strip()
             else:
-                return 
+                return
 
-            days=response.xpath('//div[@itemprop="openingHoursSpecification"]')
+            days = response.xpath('//div[@itemprop="openingHoursSpecification"]')
             if days:
                 for day in days:
                     day_list = day.xpath('.//link[@itemprop="dayOfWeek"]/@href').extract()
                     first = 0
                     last = 0
                 for d in day_list:
-                    st = d.replace('https://purl.org/goodrelations/v1#','')[:2]
+                    st = d.replace('https://purl.org/goodrelations/v1#', '')[:2]
                     first = DAYS.index(st) if first>DAYS.index(st) else first
                     last = DAYS.index(st) if first>DAYS.index(st) else first
                 props['opening_hours'] = DAYS[first]+'-'+DAYS[last]+' '+day.xpath('.//meta[@itemprop="opens"]/@content').extract_first()+' '+day.xpath('.//meta[@itemprop="closes"]/@content').extract_first()
 
-                
             phone = response.xpath('//a[@itemprop="telephone"]/text()').extract_first()
             if phone:
                 props['phone'] = phone
@@ -51,7 +59,7 @@ class SparNoSpider(scrapy.Spider):
             if addr_full:
                 props['addr_full'] = addr_full
 
-            postcode = response.xpath('//span[@itemprop="postalCode"]/text()').extract_first() 
+            postcode = response.xpath('//span[@itemprop="postalCode"]/text()').extract_first()
             if postcode:
                 props['postcode'] = postcode
 
@@ -66,6 +74,7 @@ class SparNoSpider(scrapy.Spider):
             if lat and lon:
                 props['lat'] = float(lat)
                 props['lon'] = float(lon)
+
             props['website'] = response.url
 
             yield GeojsonPointItem(**props)
