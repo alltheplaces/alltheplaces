@@ -40,11 +40,13 @@ class LowesSpider(scrapy.Spider):
     def parse(self, response):
         for store in response.xpath('//div[@class = \"address-block\"]'):
             store_data = store.css('li::text').extract()
+            store_number = store.css('li::text').extract_first()
             city_state_zip = store_data[2]
             comma_index = city_state_zip.find(',') # A comma is at the end of the city name
             city = city_state_zip[:comma_index]    # Gets the city name
 
-            result = GeojsonPointItem(    
+            result = GeojsonPointItem(
+                ref = store_number, 
                 state = response.meta['state'],
                 addr_full = store_data[1],
                 city = city)
