@@ -21,20 +21,19 @@ class LowesSpider(scrapy.Spider):
     start_url = 'http://lowes.know-where.com/lowes/cgi/region_list'
     
     def start_requests(self):
-        for state in states:
-            url = ''.join(['http://lowes.know-where.com/lowes/cgi/region?all=true&country=US&region=',
-                     state, '&design=default&lang=en&option=&mapid=NorthAmerica'])
-            request = scrapy.Request(url, callback=self.parse, headers=headers)
-            request.meta['state'] = state
+        us_url = 'http://lowes.know-where.com/lowes/cgi/region?all=true&country=US&region={}&design=default&lang=en&option=&mapid=NorthAmerica'
+        canada_url = 'http://lowes.know-where.com/lowes/cgi/region?country=CA&region={}&design=default&lang=en&option=&mapid=NorthAmerica'
 
+        for state in states:
+            state_url = us_url.format(state)
+            request = scrapy.Request(state_url, callback=self.parse, headers=headers)
+            request.meta['state'] = state
             yield request
             
         for province in provinces:
-            url = ''.join(['http://lowes.know-where.com/lowes/cgi/region?country=CA&region=',
-                           province, '&design=default&lang=en&option=&mapid=NorthAmerica'])
-            request = scrapy.Request(url, callback=self.parse)
+            province_url = canada_url.format(province)
+            request = scrapy.Request(province_url, callback=self.parse)
             request.meta['state'] = province 
-
             yield request
             
     def parse(self, response):
