@@ -58,17 +58,17 @@ class SuperCutsScraper(scrapy.Spider):
 
     def parse_result(self, response, trunk={}):
         result = json.loads(response.body_as_unicode())
-        yield GeojsonPointItem(lat=result["latitude"],
-                               lon=result["longitude"],
-                               name="Supercuts " + result[
-                                   "name"].title() if "name" in result.keys() else "Supercuts {}".format(
-                                   result["address"]),
-                               addr_full=result["address"],
-                               city=result["city"],
-                               state=result["state"],
-                               postcode=result["zip"],
-                               phone=result["phonenumber"],
-                               website=trunk["url"],
-                               opening_hours=get_hours(result["store_hours"]),
-                               ref=response.url.split("/")[-1]
-                               )
+        if result.get("name"):
+            name = "Supercuts " + result["name"].title()
+            yield GeojsonPointItem(lat=result["latitude"],
+                                   lon=result["longitude"],
+                                   name=name,
+                                   addr_full=result["address"],
+                                   city=result["city"],
+                                   state=result["state"],
+                                   postcode=result["zip"],
+                                   phone=result["phonenumber"],
+                                   website=trunk["url"],
+                                   opening_hours=get_hours(result["store_hours"]),
+                                   ref=response.url.split("/")[-1]
+                                   )
