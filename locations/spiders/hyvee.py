@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Hy-Vee has 155 locations we need and they inplemented a server-side javascript detector logic
+Hy-Vee has 155 locations we need to scrape, they implemented a server-side javascript detector logic
 that returns just the HTML head with an empty body asking that we enable javascript to browse the site.
 Unfortunately, The server returns no content for us to process except we use the PUT method.
 
@@ -81,19 +81,17 @@ class HyVeeSpider(scrapy.Spider):
             lat = float(response.meta['latlon'][0])
             lon = float(response.meta['latlon'][1])
         properties = {
-            "addr_full": address,
-            "city": city,
-            "state": state,
-            "postcode": zipcode,
-            "phone": phone,
-            "website": website,
-            "ref": link_id,
-            "opening_hours": opening_hours[0],
-            "lat": lat,
-            "lon": lon
-        }
+                      "addr_full": address,
+                      "city": city,
+                      "state": state,
+                      "postcode": zipcode,
+                      "phone": phone,
+                      "website": website,
+                      "ref": link_id,
+                      "opening_hours": opening_hours,
+                      "lat": lat,
+                      "lon": lon}
         yield GeojsonPointItem(**properties)
-
 
     def process_hours(self, hours):
         """
@@ -174,7 +172,7 @@ class HyVeeSpider(scrapy.Spider):
                                     # more match can come here.
                                     pass
         if '24/7' in result:
-            return [result.pop(result.index('24/7')), "; ".join(result)]
+            return result.pop(result.index('24/7'))
         elif result:
             return "; ".join(result)
 
