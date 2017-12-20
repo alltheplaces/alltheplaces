@@ -48,21 +48,22 @@ class HEBSpider(scrapy.Spider):
 
     def parse_store(self, response):
         dat = re.findall(r"search_createMapPin\(.*\);", response.body_as_unicode())
-        pin_call = dat[0]
-        store_str = pin_call[len("search_createMapPin("):-2]
-        _, url, lat, lon, _, _, name, address, city, state, zip, _, phone, _, _, _, _ = store_str.split(",")
-        if lat and lon:
-            sidebar = response.css(".hoursDetail span::text, .hoursDetail p:not(:contains('\t'))::text").extract()
-            yield GeojsonPointItem(
-                lat=lat,
-                lon=lon,
-                name=name.strip('"'),
-                addr_full=address.strip('"'),
-                city=city.strip('"'),
-                state=state.strip('"'),
-                postcode=zip.strip('"'),
-                phone=phone.replace(" - ", "-").strip('"'),
-                website=response.meta.get("url"),
-                opening_hours=get_hours(sidebar),
-                ref=response.meta.get("url")
-            )
+        if len(dat):
+            pin_call = dat[0]
+            store_str = pin_call[len("search_createMapPin("):-2]
+            _, url, lat, lon, _, _, name, address, city, state, zip, _, phone, _, _, _, _ = store_str.split(",")
+            if lat and lon:
+                sidebar = response.css(".hoursDetail span::text, .hoursDetail p:not(:contains('\t'))::text").extract()
+                yield GeojsonPointItem(
+                    lat=lat,
+                    lon=lon,
+                    name=name.strip('"'),
+                    addr_full=address.strip('"'),
+                    city=city.strip('"'),
+                    state=state.strip('"'),
+                    postcode=zip.strip('"'),
+                    phone=phone.replace(" - ", "-").strip('"'),
+                    website=response.meta.get("url"),
+                    opening_hours=get_hours(sidebar),
+                    ref=response.meta.get("url")
+                )
