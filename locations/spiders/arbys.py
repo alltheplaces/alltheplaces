@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import json
 import scrapy
-from urllib import parse
 from locations.items import GeojsonPointItem
 
 
@@ -78,8 +77,7 @@ class ArbysSpider(scrapy.Spider):
                 opening_hours.append('{}-{} {}'.format(o_hr['from_day'], o_hr['to_day'],
                                                        o_hr['hours']))
 
-        return ";".join(opening_hours)
-
+        return "; ".join(opening_hours)
 
     def get_store_info(self, store):
 
@@ -101,26 +99,32 @@ class ArbysSpider(scrapy.Spider):
         }
         return GeojsonPointItem(**props)
 
-
     def parse_store(self, store):
         listings = store.xpath('//div[@class="row row-vertical-margin-bottom"]')
         if listings:
             city_stores = store.xpath('//a[@class="c-location-grid-item-link c-location-grid-item-link-visitpage"]/@href').extract()
             for city_store in city_stores:
-                yield scrapy.Request(url=store.urljoin(city_store), callback=self.get_store_info)
+                yield scrapy.Request(
+                    store.urljoin(city_store),
+                    callback=self.get_store_info
+                )
         else:
             self.get_store_info(store)
-
 
     def parse_state(self, response):
 
         cities = response.xpath('//li[@class="c-directory-list-content-item"]/a/@href').extract()
         for city in cities:
-            yield scrapy.Request(url=response.urljoin(city), callback=self.parse_store)
-
+            yield scrapy.Request(
+                response.urljoin(city),
+                callback=self.parse_store
+            )
 
     def parse(self, response):
         states = response.xpath('//li[@class="c-directory-list-content-item"]/a/@href').extract()
 
         for state in states:
-            yield scrapy.Request(url=response.urljoin(state), callback=self.parse_state)
+            yield scrapy.Request(
+                response.urljoin(state),
+                callback=self.parse_state
+            )
