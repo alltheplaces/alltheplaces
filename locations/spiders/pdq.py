@@ -7,7 +7,6 @@ from locations.items import GeojsonPointItem
 
 class PDQSpider(scrapy.Spider):
     name = "pdq"
-    download_delay = 1.5
     allowed_domains = ['eatpdq.qatserver.com']
     start_urls = (
         'http://eatpdq.qatserver.com/sitemap/sitemap.gz',
@@ -41,7 +40,7 @@ class PDQSpider(scrapy.Spider):
         properties = {
         'name': response.xpath('//div[@class="name"]/h1/text()').extract_first(),
         'ref': response.xpath('//div[@class="name"]/h1/text()').extract_first(),
-        'addr_full': response.xpath('//div[@class="address"]/text()').extract_first().strip(),
+        'addr_full': response.xpath('//div[@class="address"]/text()').extract_first(),
         'city': response.xpath('//div[@class="address"]/text()[2]').extract_first().split(',')[0],
         'state': response.xpath('//div[@class="address"]/text()[2]').extract_first().split()[1],
         'postcode': response.xpath('//div[@class="address"]/text()[2]').extract_first().split()[-1],
