@@ -14,6 +14,7 @@ formdata = {'sFormName': 'storeFinder',
 headers = {'Referer': 'https://www.pcworld.co.uk/gbuk/s/find-a-store.html', 'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64…) Gecko/20100101 Firefox/57.0'}
 
 class CurrysPcWorldSpider(scrapy.Spider):
+    counter = 0 # Used for refs as the stores do not have store numbers
     name = "currys"
     allowed_domains = ["https://www.currys.co.uk"] # Change if using PC World 
     # start_urls = ('https://www.currys.co.uk/gbuk/s/find-a-store.html')
@@ -37,12 +38,13 @@ class CurrysPcWorldSpider(scrapy.Spider):
             address = address.split(sep='\n') # Separating the data 
             address = [i.strip() for i in address] # Lots of whitespace in the websites' text. Removing.
             street_address = address[2]
-            city, postal_area, postal_district = address[3].split() # Only relevant section 
-            postal_code = ''.join([postal_area, postal_district])   # Postal area + postal district = postal_code
-            
-            yield GeojsonPointItem(        
+            city, postal_code = address[3].split(sep=',') # Only relevant section
+
+            yield GeojsonPointItem(
+                ref = ''.join(['currys', str(self.counter)]),
                 lat = latitude,
                 lon = longitude,
                 addr_full = street_address,
                 city = city,
-                country = response.meta['country'])
+                country = response.meta['country'])  
+            self.counter += 1
