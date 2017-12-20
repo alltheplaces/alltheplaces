@@ -20,16 +20,15 @@ class PDQSpider(scrapy.Spider):
         city_urls = re.findall(regex, str(sitemap))
 
         for path in city_urls:
-            yield scrapy.Request(
-                path.strip(),
-                callback=self.parse_store,
-            )
-        else:
-            pass
+            if path.strip() == "http://eatpdq.qatserver.com/locations/find-a-location":
+                pass
+            else:
+                yield scrapy.Request(
+                    path.strip(),
+                    callback=self.parse_store,
+                )
 
     def parse_store(self, response):
-        if "http://eatpdq.qatserver.com/locations/find-a-location" == response.request.url:
-            pass
         if "Sitefinity trial version" in response.xpath('//title/text()').extract():
             yield scrapy.Request(
                 response.request.url,
