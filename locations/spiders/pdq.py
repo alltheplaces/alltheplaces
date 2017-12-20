@@ -28,6 +28,8 @@ class PDQSpider(scrapy.Spider):
             pass
 
     def parse_store(self, response):
+        if http://eatpdq.qatserver.com/locations/find-a-location == response.request.url:
+            pass
         if "Sitefinity trial version" in response.xpath('//title/text()').extract():
             yield scrapy.Request(
                 response.request.url,
