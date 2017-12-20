@@ -26,6 +26,7 @@ def get_hours(hour_list):
             ret.append("{} {}-{}".format(hours["days"][:2], open_time, close_time))
     return "; ".join(ret)
 
+
 class SuperCutsScraper(scrapy.Spider):
     name = "supercuts"
 
@@ -56,7 +57,9 @@ class SuperCutsScraper(scrapy.Spider):
         result = json.loads(response.body_as_unicode())
         yield GeojsonPointItem(lat=result["latitude"],
                                lon=result["longitude"],
-                               name="Supercuts " + result["name"].title(),
+                               name="Supercuts " + result[
+                                   "name"].title() if "name" in result.keys() else "Supercuts {}".format(
+                                   result["address"]),
                                addr_full=result["address"],
                                city=result["city"],
                                state=result["state"],
