@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import scrapy
 import json
-import re
 from locations.items import GeojsonPointItem
 
 
@@ -14,7 +13,7 @@ class McDonalsJPSpider(scrapy.Spider):
     )
 
     def parse(self, response):
-        
+
         results = json.loads(response.body_as_unicode())
         for data in results:
             properties = {
