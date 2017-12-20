@@ -6,7 +6,7 @@ class CitiTrendsSpider(scrapy.Spider):
 
     name = "cititrends"
     allowed_domains = ["locations.cititrends.com"]
-    download_delay = 0
+    download_delay = 0.5
     start_urls = (
         'https://locations.cititrends.com/',
     )
@@ -31,7 +31,7 @@ class CitiTrendsSpider(scrapy.Spider):
         yield GeojsonPointItem(**properties)
 
     def parse_city_stores(self, response):
-        stores = response.xpath('//h2[@class="c-location-grid-item-title"]/a/href')
+        stores = response.xpath('//h2[@class="c-location-grid-item-title"]/a/@href').extract()
         for store in stores:
                 yield scrapy.Request(response.urljoin(store), callback=self.parse_stores)
 
