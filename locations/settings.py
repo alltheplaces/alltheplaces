@@ -17,7 +17,7 @@ NEWSPIDER_MODULE = 'locations.spiders'
 
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
-USER_AGENT = 'locations (+https://github.com/iandees/all-the-places)'
+USER_AGENT = 'locations (+https://github.com/alltheplaces/alltheplaces)'
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = False
