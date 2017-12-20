@@ -14,17 +14,20 @@ default_headers = {
 
 
 def get_hours(hour_list):
-    ret = []
-    for hours in hour_list:
-        open_time = datetime.strptime(hours["hours"]["open"], "%I:%M %p").strftime("%H:%M")
-        close_time = datetime.strptime(hours["hours"]["close"], "%I:%M %p").strftime("%H:%M")
-        split_days = hours["days"].split(" - ")
-        if "-" in hours["days"] and len(split_days) == 2:
-            start_day, end_day = split_days
-            ret.append("{} {}-{}".format("-".join([start_day[:2], end_day[:2]]), open_time, close_time))
-        else:
-            ret.append("{} {}-{}".format(hours["days"][:2], open_time, close_time))
-    return "; ".join(ret)
+    try:
+        ret = []
+        for hours in hour_list:
+            open_time = datetime.strptime(hours["hours"]["open"], "%I:%M %p").strftime("%H:%M")
+            close_time = datetime.strptime(hours["hours"]["close"], "%I:%M %p").strftime("%H:%M")
+            split_days = hours["days"].split(" - ")
+            if "-" in hours["days"] and len(split_days) == 2:
+                start_day, end_day = split_days
+                ret.append("{} {}-{}".format("-".join([start_day[:2], end_day[:2]]), open_time, close_time))
+            else:
+                ret.append("{} {}-{}".format(hours["days"][:2], open_time, close_time))
+        return "; ".join(ret)
+    except:
+        return None
 
 
 class SuperCutsScraper(scrapy.Spider):
