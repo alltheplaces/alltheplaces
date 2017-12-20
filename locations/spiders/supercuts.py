@@ -16,7 +16,6 @@ default_headers = {
 def get_hours(hour_list):
     ret = []
     for hours in hour_list:
-        from pprint import pprint
         open_time = datetime.strptime(hours["hours"]["open"], "%I:%M %p").strftime("%H:%M")
         close_time = datetime.strptime(hours["hours"]["close"], "%I:%M %p").strftime("%H:%M")
         split_days = hours["days"].split(" - ")
