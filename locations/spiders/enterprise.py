@@ -34,10 +34,9 @@ class EnterpriseSpider(scrapy.Spider):
             properties['lon'] = lon
             properties['ref'] = response.url
             yield GeojsonPointItem(**properties)
-        else:
-            for url in response.xpath('//section[contains(@class, "region-list") or contains(@class, "location-band")]//ul/li/a/@href').extract():
-                yield scrapy.Request(
-                    response.urljoin(url),
-                    callback=self.parse,
-                )
+        for url in response.xpath('//a/@href').re('/en/car-rental/locations/.+'):
+            yield scrapy.Request(
+                response.urljoin(url),
+                callback=self.parse,
+            )
 
