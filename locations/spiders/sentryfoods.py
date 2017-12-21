@@ -15,7 +15,7 @@ class SentryFoodsSpider(scrapy.Spider):
         city_urls = response.xpath('//div[@class="searchbystate parbase section"]/div/div/*/ul/li/a/@href').extract()
         for path in city_urls:
             yield scrapy.Request(
-                "https://www.sentryfoods.com" + path.strip() + "displayCount=100",
+                "https://www.sentryfoods.com" + path.strip() + "&displayCount=100",
                 callback=self.parse_state,
             )
 
