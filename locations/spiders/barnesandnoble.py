@@ -53,19 +53,15 @@ class BarnesandnobleSpider(scrapy.Spider):
 
     def parse(self, response):
         content = response.body_as_unicode()
-
-        try:
-            stores = json.loads(re.search('var storesJson = (.*)\;', content).group(1))
-        except:
-            raise
+        stores = json.loads(re.search('var storesJson = (.*)\;', content).group(1))
 
         for store in stores:
             props = {}
             props['ref'] = store.get('storeId')
             props['city'] = store.get('city')
             props['state'] = store.get('state')
-            props['lat'] = store.get('location')[0]
-            props['lon'] = store.get('location')[1]
+            props['lat'] = store.get('location')[1]
+            props['lon'] = store.get('location')[0]
             props['addr_full'] = store.get('address1')
             props['street'] = store.get('address2')
             props['name'] = store.get('name')
