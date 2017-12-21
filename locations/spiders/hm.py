@@ -17,7 +17,7 @@ def partition(l, n):
 def process_hours(opening_hours):
     ret_hours = []
     for hours_str in opening_hours:
-        split_hours = hours_str.replace(",", "").split(" ")
+        split_hours = hours_str.replace(",", "").replace("AM AM","").replace("PM PM", "").split(" ")
         if split_hours[1] == "-":
             range_start = split_hours[0]
             range_end = split_hours[2]
