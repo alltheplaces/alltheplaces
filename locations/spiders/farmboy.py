@@ -49,16 +49,17 @@ class FarmBoySpider(scrapy.Spider):
 
         stores = response.xpath('//div[@id="portfolio"]/article')
         for store in stores:
-            properties = {
-                "ref": store.xpath('div/h3/text()').extract_first(),
-                "name": store.xpath('div/h3/text()').extract_first(),
-                "addr_full": store.xpath('div/div/p/text()').extract_first(),
-                "postcode": self.postCode(store.xpath('div/div/p/text()[last() -1 ]').extract_first()),
-                "phone": self.phone(store.xpath('div/div/div[@id="cinfo"]/p/text()').extract_first()),
-                "opening_hours": self.parse_hours(store.xpath('div/div/div[@id="sinfo"]/table[1]/tbody/tr'))
-            }
-
-            yield GeojsonPointItem(**properties)
+            if store.xpath('@class').extract_first() != 'all portfolio-item toronto':
+                properties = {
+                    "ref": store.xpath('div/h3/text()').extract_first(),
+                    "name": store.xpath('div/h3/text()').extract_first(),
+                    "addr_full": store.xpath('div/div/p/text()').extract_first(),
+                    "postcode": self.postCode(store.xpath('div/div/p/text()[last()]').extract_first()),
+                    "state": self.state(store.xpath('div/div/p/text()[last() - 1]').extract_first()),
+                    "phone": self.phone(store.xpath('div/div/div[@id="cinfo"]/p/text()').extract_first()),
+                    "opening_hours": self.parse_hours(store.xpath('div/div/div[@id="sinfo"]/table[1]/tbody/tr'))
+                }
+                yield GeojsonPointItem(**properties)
 
     def city(self, data):
         str_list = data.split(',')
@@ -66,20 +67,21 @@ class FarmBoySpider(scrapy.Spider):
         return str_list[0].strip()
 
     def state(self, data):
-        str_list = data.split(',')
-        state = str_list[1].strip()
-        state = state[:2]
-        return state
+        if data is None: return ''
+        m = re.search(r'(,)\s(.*)', data)
+        m_space = re.search(r'\s(.*)', data)
+        if m:
+            return m.group(2)
+        elif m_space: 
+            return m_space.group(1)
+        else: return data
 
     def postCode(self, data):
         if data is None: return ''
-        if ',' not in data: return data
-        str_list = data.split(',')
-        zipCode = str_list[1].strip()
-        return zipCode[-5:]
+        return data.strip().replace('\xa0', '')
 
     def phone(self, data):
         if data is None: return ''
-        if ':' not in data: return data.replace('\xa0', '')
+        if ':' not in data: return data.replace('\xa0', ' ')
         return data.split(':')[1]
 
