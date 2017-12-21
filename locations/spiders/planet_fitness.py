@@ -24,7 +24,7 @@ class PlanetFitnessSpider(scrapy.Spider):
         coordinates = re.findall(r"(?<=\.setLngLat\(\[).*(?=\]\))", response.body_as_unicode())
         lat, lon = coordinates[0].split(", ") if len(coordinates) else None, None
         iframe = response.css("iframe[src*='https://mico.myiclubonline.com']::attr('src')")
-        club_number = iframe.extract_first().split("=")[-1]
+        club_number = iframe.extract_first("=-1").split("=")[-1]
         point = {
             "lat": lat,
             "lon": lon,
@@ -37,7 +37,7 @@ class PlanetFitnessSpider(scrapy.Spider):
             "phone": response.css(".field--name-field-phone div::text").extract_first(default="").strip(),
             "website": response.url,
             "opening_hours": "24/7",
-            "ref": club_number
+            "ref": response.url
         }
 
         yield GeojsonPointItem(**point)
