@@ -20,11 +20,11 @@ class BigLotsSpider(scrapy.Spider):
             'postcode': response.xpath('normalize-space(//span[@itemprop="postalCode"]/text())').extract_first(),
             'ref': re.findall(r"[0-9]+" , response.url)[0],
             'website': response.url,
-            'lat': response.xpath('normalize-space(//meta[@name="geo.position"]/@content)').extract_first().split(';')[0].strip(),
-            'lon': response.xpath('normalize-space(//meta[@name="geo.position"]/@content)').extract_first().split(';')[1].strip()
+            'lat': float(response.xpath('normalize-space(//meta[@name="geo.position"]/@content)').extract_first().split(';')[0].strip()),
+            'lon': float(response.xpath('normalize-space(//meta[@name="geo.position"]/@content)').extract_first().split(';')[1].strip())
         }
         hours = response.xpath('//meta[@itemprop="openingHours"]/@content').extract()
-        hours = ' ;'.join(hours)
+        hours = '; '.join(hours)
         if hours:
             properties['opening_hours'] = hours
         yield GeojsonPointItem(**properties)
