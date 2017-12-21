@@ -39,8 +39,8 @@ class TijuanaFlatsSpider(scrapy.Spider):
             'state': response.xpath('//div[@class="wpsl-location-address"]/span[4]/text()').extract_first().strip(),
             'postcode': response.xpath('//div[@class="wpsl-location-address"]/span[5]/text()').extract_first().strip(),
             'opening_hours': storeHours,
-            'lat': float(response.xpath('//script[@type="text/javascript"][10]/text()').extract_first().split('"lat":"')[1].split('"')[0]),
-            'lon': float(response.xpath('//script[@type="text/javascript"][10]/text()').extract_first().split('"lng":"')[1].split('"')[0]),
+            'lat': float(response.xpath('//script/text()').extract()[-3].split('"lat":"')[1].split('"')[0]),
+            'lon': float(response.xpath('//script/text()').extract()[-3].split('"lng":"')[1].split('"')[0]),
         }
 
         yield GeojsonPointItem(**properties)
