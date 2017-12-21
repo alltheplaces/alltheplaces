@@ -22,7 +22,7 @@ class PlanetFitnessSpider(scrapy.Spider):
 
     def parse_gym(self, response):
         coordinates = re.findall(r"(?<=\.setLngLat\(\[).*(?=\]\))", response.body_as_unicode())
-        lat, lon = coordinates[0].split(", ") if len(coordinates) else None, None
+        lat, lon = coordinates[0].split(", ") if len(coordinates) else [None, None]
         iframe = response.css("iframe[src*='https://mico.myiclubonline.com']::attr('src')")
         club_number = iframe.extract_first("=-1").split("=")[-1]
         point = {
