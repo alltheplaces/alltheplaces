@@ -21,15 +21,12 @@ def process_hours(hours_str):
 class PaylessSpider(scrapy.Spider):
     name = "payless"
     allowed_domains = ["payless.com"]
-    base_url = "https://www.payless.com/on/demandware.store/Sites-payless-Site/default/Stores-Details?StoreID={}"
+    start_urls = (
+        'https://www.payless.com/on/demandware.store/Sites-payless-Site/default/Stores-GetNearestStores?postalCode'
+        '=11230&countryCode=US&distanceUnit=imperial&maxdistance=5000',
+    )
 
-    def start_requests(self):
-        urls = (
-            'https://www.payless.com/on/demandware.store/Sites-payless-Site/default/Stores-GetNearestStores?postalCode'
-            '=11230&countryCode=US&distanceUnit=imperial&maxdistance=5000',
-        )
-        for url in urls:
-            yield scrapy.Request(url=url, callback=self.parse)
+    base_url = "https://www.payless.com/on/demandware.store/Sites-payless-Site/default/Stores-Details?StoreID={}"
 
     def parse(self, response):
         stores = json.loads(response.body_as_unicode())

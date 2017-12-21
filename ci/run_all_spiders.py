@@ -26,7 +26,6 @@ if __name__ == '__main__':
     settings.set('TELNETCONSOLE_ENABLED', False)
     settings.set('FEED_URI', output_results)
     settings.set('FEED_FORMAT', 'ndgeojson')
-    settings.get('ITEM_PIPELINES')['locations.pipelines.ApplySpiderNamePipeline'] = 100
 
     utcnow = datetime.datetime.utcnow()
     tstamp = utcnow.strftime('%F-%H-%M-%S')
