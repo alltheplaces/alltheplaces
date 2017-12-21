@@ -8,6 +8,12 @@ We use newline-delimited GeoJSON so that it's easier to incrementally parse, but
 
 Each GeoJSON feature has an `id` field. The ID is a hash based on the `ref` and `@spider` fields below and should be consistent between builds. You can use this to determine if new objects show up or disappear between builds, for example.
 
+## Geometry
+
+In most cases, the feature will include a `geometry` field following [the GeoJSON spec](https://tools.ietf.org/html/rfc7946#section-3.1). There are some spiders that aren't able to recover a position from the venue's website. In those cases, the geometry is not included and only the properties are included.
+
+Although it's not supported at the time of this writing, we hope to include a geocoding step in the pipeline so that these feature will get a position added.
+
 ## Properties
 
 Each GeoJSON feature will have a `properties` object with the following keys:
