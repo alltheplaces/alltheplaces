@@ -74,6 +74,7 @@ TELNETCONSOLE_ENABLED = False
 # See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
    'locations.pipelines.DuplicatesPipeline': 200,
+   'locations.pipelines.ApplySpiderNamePipeline': 250,
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
