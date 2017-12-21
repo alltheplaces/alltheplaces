@@ -2,32 +2,51 @@ import scrapy
 from locations.items import GeojsonPointItem
 import json
 import requests
+import itertools
+
+
+def chunks(l, n):
+    for i in range(0, len(l), n):
+        yield l[i:i + n]
+
+
+def partition(l, n):
+    return list(chunks(l, n))
 
 
 def process_hours(opening_hours):
     ret_hours = []
     for hours_str in opening_hours:
-        split_hours = hours_str.split(" ")
-        if split_hours.count("-") == 2 and split_hours[1] == "-":
-            range_start, _, range_end, start, start_period, _, end, end_period = split_hours
+        split_hours = hours_str.replace(",", "").split(" ")
+        if split_hours[1] == "-":
+            range_start = split_hours[0]
+            range_end = split_hours[2]
+            times = partition([x for x in split_hours[3:] if x != "-"], 2)
+        else:
+            range_start, range_end = split_hours[0], None
+            times = partition([x for x in split_hours[1:] if x != "-"], 2)
+        periods = partition(times, 2)
+        periods = [list(itertools.chain(*r)) for r in periods]
+
+        period_list = []
+
+        for start, start_period, end, end_period in periods:
             start_hour, start_minutes = [int(x) for x in start.split(":")]
             end_hour, end_minutes = [int(x) for x in end.split(":")]
 
             if start_period == "PM":
                 start_hour += 12
             end_hour += 12
-            hours = (range_start[:2], range_end[:2], start_hour, start_minutes, end_hour, end_minutes)
-            ret_hours.append("%s-%s %02d:%02d-%02d:%02d" % hours)
-        else:
-            day, start, start_period, _, end, end_period = split_hours
-            start_hour, start_minutes = [int(x) for x in start.split(":")]
-            end_hour, end_minutes = [int(x) for x in end.split(":")]
-            if start_period == "PM":
-                start_hour += 12
-            end_hour += 12
-            hours = (day[:2], start_hour, start_minutes, end_hour, end_minutes)
-            ret_hours.append("%s %02d:%02d-%02d:%02d" % hours)
+
+            hours = (start_hour, start_minutes, end_hour, end_minutes)
+            period_list.append("%02d:%02d-%02d:%02d" % hours)
+        periods_str = ", ".join(period_list)
+        if range_start and range_end:
+            ret_hours.append("{}-{} {}".format(range_start[:2], range_end[:2], periods_str))
+        elif range_start:
+            ret_hours.append("{} {}".format(range_start[:2], periods_str))
     return "; ".join(ret_hours)
+
 
 class HMSpider(scrapy.Spider):
     name = "hm-worldwide"
