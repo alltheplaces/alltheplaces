@@ -7,7 +7,6 @@ class AnatomieSpider(scrapy.Spider):
 
     name = "anatomie"
     allowed_domains = ["stores.boldapps.net"]
-    download_delay = 0
     start_urls = (
         'https://stores.boldapps.net/front-end/get_surrounding_stores.php?shop=anatomie-store.myshopify.com&latitude=38.331258&longitude=-121.54841799999997&max_distance=100000&limit=10000&calc_distance=1',
     )
