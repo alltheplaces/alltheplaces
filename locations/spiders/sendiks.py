@@ -30,7 +30,7 @@ class SendikSpider(scrapy.Spider):
 
     def parse_store(self, response):
 
-        if "No Store" in response.xpath('//title/text()').extract_first():
+        if "No Store" or "Store Support Center" in response.xpath('//title/text()').extract_first():
             pass
         else:
             properties = {
