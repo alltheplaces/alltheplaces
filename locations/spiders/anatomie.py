@@ -24,7 +24,7 @@ class AnatomieSpider(scrapy.Spider):
                 'postcode':address.xpath('normalize-space(.//span[@class="postal_zip"]/text())'),
                 'ref': item['store_id'],
                 'website': response.url,
-                'lat': item['lng'],
-                'lon': item['lat'],
+                'lat': float(item['lat']),
+                'lon': float(item['lng']),
             }
             yield GeojsonPointItem(**properties)
