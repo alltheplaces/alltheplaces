@@ -40,9 +40,14 @@ def item_to_properties(item):
 
 
 def compute_hash(item):
-    sha1 = hashlib.sha1(item['extras']['@spider'])
-    sha1.update(item['ref'])
-    return base64.urlsafe_b64encode(sha1.digest())
+    ref = str(item.get('ref') or '').encode('utf8')
+    sha1 = hashlib.sha1(ref)
+
+    spider_name = item.get('extras', {}).get('@spider')
+    if spider_name:
+        sha1.update(spider_name.encode('utf8'))
+
+    return base64.urlsafe_b64encode(sha1.digest()).decode('utf8')
 
 
 class LineDelimitedGeoJsonExporter(JsonLinesItemExporter):
