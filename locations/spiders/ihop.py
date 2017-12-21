@@ -46,7 +46,7 @@ class IHOPSpider(scrapy.Spider):
                     hours_str = "%s %02d:%02d-%02d:%02d" % (prefix, start_hour, start_minutes, end_hour + 12, end_minutes)
                     formatted_times.append(hours_str)
                 except:
-                    self.logger.warn("could not parse hours from ", day, time)
+                    self.logger.warn("could not parse hours from {} {}".format(day, time))
             opening_hours = "; ".join(formatted_times)
 
         point = {
