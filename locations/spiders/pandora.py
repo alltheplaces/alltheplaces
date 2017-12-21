@@ -42,7 +42,7 @@ class PandoraSpider(scrapy.Spider):
 
 
     def parse_store(self, response):
-        json_data = response.xpath('//script[@type="application/ld+json"]/text()').extract_first()
+        json_data = response.xpath('//script[@type="application/ld+json"]/text()').extract_first().replace('"Chic"', 'Chic')
         data = json.loads(json_data)
         data = data[0]
 
