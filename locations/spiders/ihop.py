@@ -40,8 +40,8 @@ class IHOPSpider(scrapy.Spider):
             formatted_times = []
             for day, time in zip(days, times):
                 prefix, start_time, end_time = day[:2], *time.split(" - ")
-                start_hour, start_minutes = int(start_time[:2]), int(start_time[3:4])
-                end_hour, end_minutes = int(end_time[:2]), int(end_time[3:4])
+                start_hour, start_minutes = int(start_time[:2]), int(start_time[3:5])
+                end_hour, end_minutes = int(end_time[:2]), int(end_time[3:5])
                 hours_str = "%s %02d:%02d-%02d:%02d" % (prefix, start_hour, start_minutes, end_hour + 12, end_minutes)
                 formatted_times.append(hours_str)
             opening_hours = "; ".join(formatted_times)
