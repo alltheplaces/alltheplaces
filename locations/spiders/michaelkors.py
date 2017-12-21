@@ -49,6 +49,7 @@ class MichaelkorsSpider(scrapy.Spider):
                 yield scrapy.Request(response.urljoin(path), callback=self.parse_city_stores)
             else:
                 yield scrapy.Request(response.urljoin(path), callback=self.parse_stores)
+
     def parse_country(self, response):
         urls = response.xpath('//div[@class="c-directory-list-content-wrapper"]/ul/li/a/@href').extract()
         for path in urls:
