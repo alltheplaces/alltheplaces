@@ -92,3 +92,6 @@ ENV/
 .idea
 
 .DS_Store
+
+#using this to use gdb debugger with scrappy
+.debug.py
