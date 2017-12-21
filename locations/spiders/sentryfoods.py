@@ -21,27 +21,24 @@ class SentryFoodsSpider(scrapy.Spider):
 
     def parse_state(self, response):
         response.selector.remove_namespaces()
-        location_urls = response.xpath('//div[@class="small-12 medium-3 large-3 cell"]/a/@href').extract()
-        for path in location_urls:
-            yield scrapy.Request(
-                "https://www.sentryfoods.com" + path.strip(),
-                callback=self.parse_store,
-            )
+        store_elems = response.xpath('//div[@class="store-search-results"]/ul/li')
+        for store_elem in store_elems:
+            url = response.urljoin(store_elem.xpath('.//a[@class="store-detail"]/@href').extract_first())
+            city_state_zip = store_elem.xpath('.//p[@class="store-city-state-zip"]/text()').extract_first()
+            city, state_zip = city_state_zip.split(',', 1)
+            state, zipcode = state_zip.split(' ', 1)
 
-
-    def parse_store(self, response):
-
-        properties = {
-        'name': response.xpath('//span[@class="storeName"]/text()').extract_first(),
-        'ref': response.xpath('//span[@class="storeName"]/text()').extract_first(),
-        'addr_full': response.xpath('//span[@class="address-1"]/text()').extract_first(),
-        'city': response.xpath('//div[@class="storeDetail"]/p/text()[3]').extract_first().split()[0].rstrip(','),
-        'state': response.xpath('//span[@class="address-2"]/text()[2]').extract_first().strip().split()[-2],
-        'postcode': response.xpath('//span[@class="address-2"]/text()[2]').extract_first().strip().split()[-1],
-        'phone': response.xpath('//a[@class="phoneNumber show-for-small-only"]/text()').extract_first(),
-        'website': response.request.url,
-        'opening_hours': response.xpath('//div[@class="storeDetail"]/ul/li/text()').extract_first(),
-        }
-
-
-        yield GeojsonPointItem(**properties)
+            props = {
+                'website': url,
+                'ref': store_elem.xpath('.//@data-storeid').extract_first(),
+                'lat': store_elem.xpath('.//@data-storelat').extract_first(),
+                'lon': store_elem.xpath('.//@data-storelng').extract_first(),
+                'name': store_elem.xpath('.//h6[@class="store-display-name"]/text()').extract_first(),
+                'addr_full': store_elem.xpath('.//p[@class="store-address"]/text()').extract_first(),
+                'phone': store_elem.xpath('.//p[@class="store-main-phone"]/span/text()').extract_first().strip(),
+                'opening_hours': store_elem.xpath('.//ul[@class="store-regular-hours"]/li/text()').extract_first(),
+                'city': city,
+                'state': state,
+                'postcode': zipcode,
+            }
+            yield GeojsonPointItem(**props)
