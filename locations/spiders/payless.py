@@ -13,6 +13,26 @@ class PaylessSpider(scrapy.Spider):
 
     base_url = "https://www.payless.com/on/demandware.store/Sites-payless-Site/default/Stores-Details?StoreID={}"
 
+    def process_hours(self, hours_str):
+        hours_str = hours_str.replace("<br>", "; ").replace(" :", ": ").title()
+        days = hours_str.split("; ")
+        out = []
+        for day in days:
+            if day:
+                prefix, hours = day.split(" ", 1)
+
+                if "-" not in hours:
+                    # Skip over special days
+                    continue
+
+                start, end = hours.split("-")
+                start_hours, start_minutes = int(start[:2]), int(start[2:])
+                end_hours, end_minutes = int(end[:2]), int(end[2:])
+                end_hours += 12
+                formatted = "%s %02d:%02d-%02d:%02d" % (prefix[:2], start_hours, start_minutes, end_hours, end_minutes)
+                out.append(formatted)
+        return "; ".join(out)
+
     def parse(self, response):
         stores = json.loads(response.body_as_unicode())
         for store in stores["stores"].values():
@@ -32,8 +52,14 @@ class PaylessSpider(scrapy.Spider):
                 "country": store["countryCode"],
                 "phone": store["phone"],
                 "website": website,
-                "opening_hours": store["storeHours"].replace("<br>", "; ").replace(" :", ": ").title(),
                 "ref": store["number"],
             }
+
+            try:
+                hours = self.process_hours(store["storeHours"])
+                if hours:
+                    point["opening_hours"] = hours
+            except:
+                self.logger.exception("Couldn't parse hours '%s'", store["storeHours"])
 
             yield GeojsonPointItem(**point)
