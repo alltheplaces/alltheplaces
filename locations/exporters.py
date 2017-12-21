@@ -1,3 +1,5 @@
+import base64
+import hashlib
 from scrapy.exporters import JsonLinesItemExporter, JsonItemExporter
 from scrapy.utils.python import to_bytes
 
@@ -37,19 +39,26 @@ def item_to_properties(item):
     return props
 
 
+def compute_hash(item):
+    sha1 = hashlib.sha1(item['extras']['@spider'])
+    sha1.update(item['ref'])
+    return base64.urlsafe_b64encode(sha1.digest())
+
+
 class LineDelimitedGeoJsonExporter(JsonLinesItemExporter):
 
     def _get_serialized_fields(self, item, default_value=None, include_empty=None):
         feature = []
         feature.append(('type', 'Feature'))
+        feature.append(('id', compute_hash(item)))
         feature.append(('properties', item_to_properties(item)))
 
         if item.get('lon'):
             feature.append(('geometry', {
                 'type': 'Point',
                 'coordinates': [
-                    item['lon'],
-                    item['lat']
+                    float(item['lon']),
+                    float(item['lat'])
                 ],
             }))
 
@@ -61,14 +70,15 @@ class GeoJsonExporter(JsonItemExporter):
     def _get_serialized_fields(self, item, default_value=None, include_empty=None):
         feature = []
         feature.append(('type', 'Feature'))
+        feature.append(('id', compute_hash(item)))
         feature.append(('properties', item_to_properties(item)))
 
         if item.get('lon'):
             feature.append(('geometry', {
                 'type': 'Point',
                 'coordinates': [
-                    item['lon'],
-                    item['lat']
+                    float(item['lon']),
+                    float(item['lat'])
                 ],
             }))
 
