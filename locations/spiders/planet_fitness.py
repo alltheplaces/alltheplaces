@@ -28,13 +28,13 @@ class PlanetFitnessSpider(scrapy.Spider):
         point = {
             "lat": lat,
             "lon": lon,
-            "name": "Planet Fitness " + response.css("h1.alt::text").extract_first().strip(),
+            "name": "Planet Fitness " + response.css("h1.alt::text").extract_first(default="").strip(),
             "addr_full": response.css(".address-line1::text").extract_first(),
             "city": response.css(".locality::text").extract_first(),
             "state": response.css(".administrative-area::text").extract_first(),
             "postcode": response.css(".postal-code::text").extract_first(),
             "country": response.css(".country::text").extract_first(),
-            "phone": response.css(".field--name-field-phone div::text").extract_first().strip(),
+            "phone": response.css(".field--name-field-phone div::text").extract_first(default="").strip(),
             "website": response.url,
             "opening_hours": "24/7",
             "ref": club_number
