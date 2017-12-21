@@ -7,8 +7,9 @@ import requests
 def process_hours(opening_hours):
     ret_hours = []
     for hours_str in opening_hours:
-        if hours_str.split(" ")[1] == "-":
-            range_start, _, range_end, start, start_period, _, end, end_period = hours_str.split(" ")
+        split_hours = hours_str.split(" ")
+        if split_hours.count("-") == 2 and split_hours[1] == "-":
+            range_start, _, range_end, start, start_period, _, end, end_period = split_hours
             start_hour, start_minutes = [int(x) for x in start.split(":")]
             end_hour, end_minutes = [int(x) for x in end.split(":")]
 
@@ -18,7 +19,7 @@ def process_hours(opening_hours):
             hours = (range_start[:2], range_end[:2], start_hour, start_minutes, end_hour, end_minutes)
             ret_hours.append("%s-%s %02d:%02d-%02d:%02d" % hours)
         else:
-            day, start, start_period, _, end, end_period = hours_str.split(" ")
+            day, start, start_period, _, end, end_period = split_hours
             start_hour, start_minutes = [int(x) for x in start.split(":")]
             end_hour, end_minutes = [int(x) for x in end.split(":")]
             if start_period == "PM":
