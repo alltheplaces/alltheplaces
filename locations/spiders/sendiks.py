@@ -30,13 +30,11 @@ class SendikSpider(scrapy.Spider):
 
     def parse_store(self, response):
 
-        if "No Store" or "Store Support Center" in response.xpath('//title/text()').extract_first():
-            pass
-        else:
+        if response.xpath('//div[@class="fp-store-address"]/div/text()').extract_first():
             properties = {
             'name': response.xpath('//h2/text()').extract_first(),
             'ref': response.xpath('//h2/text()').extract_first(),
-            'addr_full': response.xpath('//div[@class="fp-store-address"]/div[2]/text()').extract_first(),
+            'addr_full': response.xpath('//div[@class="fp-store-address"]/div/text()').extract_first(),
             'city': response.xpath('//div[@class="fp-store-address"]/text()').extract_first().split(',')[0].strip(),
             'state': response.xpath('//div[@class="fp-store-address"]/text()').extract_first().split()[-2],
             'postcode': response.xpath('//div[@class="fp-store-address"]/text()').extract_first().split()[-1],
@@ -46,5 +44,4 @@ class SendikSpider(scrapy.Spider):
             'lat': float(response.xpath('//script').extract()[-6].split('latitude":')[1].split(',')[0]),
             'lon': float(response.xpath('//script').extract()[-6].split('longitude":')[1].split(',')[0]),
             }
-
-        yield GeojsonPointItem(**properties)
+            yield GeojsonPointItem(**properties)
