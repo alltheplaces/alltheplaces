@@ -2,7 +2,7 @@
 import scrapy
 from locations.items import GeojsonPointItem
 
-countries = ['england', 'uk', 'ireland', 'scotland']
+countries = ['England', 'Uk', 'Ireland', 'Scotland']
 
 formdata = {'sFormName': 'storeFinder',
                 'storeFind': 'true',
@@ -14,12 +14,8 @@ formdata = {'sFormName': 'storeFinder',
 headers = {'Referer': 'https://www.pcworld.co.uk/gbuk/s/find-a-store.html', 'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64…) Gecko/20100101 Firefox/57.0'}
 
 class CurrysPcWorldSpider(scrapy.Spider):
-    counter = 0 # Used for refs as the stores do not have store numbers
     name = "currys"
-    allowed_domains = ["https://www.currys.co.uk"] # Change if using PC World 
-    # start_urls = ('https://www.currys.co.uk/gbuk/s/find-a-store.html')
-    search_url = 'https://www.pcworld.co.uk/gbuk/s/find-a-store.html'
-    url = 'https://www.pcworld.co.uk/gbuk/s/3100/find-a-store.html' # response.xpath('//li//@data-location').extract()
+    allowed_domains = ["https://www.pcworld.co.uk"]  
 
     def start_requests(self):
         search_url = 'https://www.pcworld.co.uk/gbuk/s/find-a-store.html'
@@ -31,7 +27,7 @@ class CurrysPcWorldSpider(scrapy.Spider):
 
     def parse(self, response):
         stores = response.xpath('//ul[@class = "borderdList storesList"]//li')
-
+        
         for store in stores: 
             latitude, longitude = store.xpath('@data-location').extract_first().split()
             address = store.css('div[class="address bsp"]').extract_first()
@@ -39,12 +35,12 @@ class CurrysPcWorldSpider(scrapy.Spider):
             address = [i.strip() for i in address] # Lots of whitespace in the websites' text. Removing.
             street_address = address[2]
             city, postal_code = address[3].split(sep=',') # Only relevant section
-
+            store_url = store.css('a::attr(href)').extract_first()
+            
             yield GeojsonPointItem(
-                ref = ''.join(['currys', str(self.counter)]),
+                ref = store_url,
                 lat = latitude,
                 lon = longitude,
                 addr_full = street_address,
                 city = city,
                 country = response.meta['country'])  
-            self.counter += 1
