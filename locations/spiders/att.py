@@ -9,7 +9,7 @@ class ATTScraper(scrapy.Spider):
     start_urls = ['https://www.att.com/sitemapfiles/stores-sitemap.xml']
     api_base = "https://www.att.com/apis/maps/v2/locator/place/cpid/{}.json"
 
-    def process_hours(result):
+    def process_hours(self, result):
         ret = []
         for day in ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]:
             open, close = result[day.lower() + "_open"], result[day.lower() + "_close"]
