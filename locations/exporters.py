@@ -57,8 +57,8 @@ class LineDelimitedGeoJsonExporter(JsonLinesItemExporter):
             feature.append(('geometry', {
                 'type': 'Point',
                 'coordinates': [
-                    item['lon'],
-                    item['lat']
+                    float(item['lon']),
+                    float(item['lat'])
                 ],
             }))
 
@@ -77,8 +77,8 @@ class GeoJsonExporter(JsonItemExporter):
             feature.append(('geometry', {
                 'type': 'Point',
                 'coordinates': [
-                    item['lon'],
-                    item['lat']
+                    float(item['lon']),
+                    float(item['lat'])
                 ],
             }))
 
