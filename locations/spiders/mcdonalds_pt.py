@@ -103,8 +103,8 @@ class McDonaldsPTSpider(scrapy.Spider):
             properties = {
                 'ref': store['id'],
                 'phone': store['phone'],
-                'lon': store['coordinates']['latitude'],
-                'lat': store['coordinates']['longitude'],
+                'lat': store['coordinates']['latitude'],
+                'lon': store['coordinates']['longitude'],
                 'name': store['name'],
                 'addr_full': store['address'],
                 'city': store['city'],
