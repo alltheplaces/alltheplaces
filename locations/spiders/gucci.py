@@ -6,7 +6,7 @@ class GucciSpider(scrapy.Spider):
 
     name = "gucci"
     allowed_domains = ["www.gucci.com"]
-    download_delay = 0
+    download_delay = 0.5
     start_urls = (
         'https://www.gucci.com/us/en/store',
     )
