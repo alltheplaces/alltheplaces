@@ -6,7 +6,6 @@ class NeimanMarcusSpider(scrapy.Spider):
 
     name = "neiman_marcus"
     allowed_domains = ["www.neimanmarcus.com"]
-    download_delay = 1.5
     start_urls = (
         'http://www.neimanmarcus.com/en-au/stores/locations',
     )
