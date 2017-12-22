@@ -31,8 +31,8 @@ class ErbertandGerbertsSpider(scrapy.Spider):
         'postcode': response.xpath('//address[@class]/text()').extract()[1].split()[-1],
         'phone': response.xpath('//div[@class="store__contact text-gray std-mb"]/p/a/text()').extract_first(),
         'website': response.request.url,
-        'lat': float(response.xpath('//div/main/div/div/div/div/script/text()').extract_first().split('lat')[1].strip().split('"')[1]),
-        'lon': float(response.xpath('//div/main/div/div/div/div/script/text()').extract_first().split('lng')[1].strip().split('"')[1]),
+        'lat': response.xpath('//div/main/div/div/div/div/script/text()').extract_first().split('lat')[1].strip().split('"')[1],
+        'lon': response.xpath('//div/main/div/div/div/div/script/text()').extract_first().split('lng')[1].strip().split('"')[1],
         }
 
         yield GeojsonPointItem(**properties)
