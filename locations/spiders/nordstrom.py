@@ -5,7 +5,7 @@ class NordstromSpider(scrapy.Spider):
 
     name = "nordstrom"
     allowed_domains = ["shop.nordstrom.com"]
-    download_delay = 0
+    download_delay = 0.5
     start_urls = (
         'https://shop.nordstrom.com/c/sitemap-stores',
     )
