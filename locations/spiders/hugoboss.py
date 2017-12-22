@@ -15,7 +15,7 @@ day_formats = {
 class HugoBossSpider(scrapy.Spider):
     name = "hugoboss"
     allowed_domains = ["production-web-hugo.demandware.net"]
-    download_delay = 0
+    download_delay = 0.5
     start_urls = (
         'https://production-web-hugo.demandware.net/s/US/dw/shop/v16_9/stores?client_id=871c988f-3549-4d76-b200-8e33df5b45ba&latitude=37.09024&longitude=-95.71289100000001&count=200&maxDistance=100000000&distanceUnit=mi',
     )
