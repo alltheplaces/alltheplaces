@@ -14,8 +14,8 @@ STATES = ["al", "ak", "az", "ar", "ca", "co", "ct", "dc", "de", "fl", "ga",
 HEADERS = {'Referer': 'https://stores.joann.com'}
 
 class JoAnnFabricsSpider(scrapy.Spider):
-    name = "joann_fabrics"
-    allowed_domains = ["www.joann.com"]
+    name = 'joann_fabrics'
+    allowed_domains = ['www.joann.com','stores.joann.com']
 
     def start_requests(self):
         """ Yields a scrapy.Request object for each state in the USA """ 
@@ -49,6 +49,6 @@ class JoAnnFabricsSpider(scrapy.Spider):
                 state = store['address']['addressRegion'],
                 city = store['address']['addressLocality'],
                 ref = store['url'],
-                telephone = store['telephone'],
+                phone = store['telephone'],
                 name = store['branchOf']['name']
                 )
