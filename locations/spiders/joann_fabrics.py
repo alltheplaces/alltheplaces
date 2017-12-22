@@ -10,7 +10,7 @@ STATES = ["al", "ak", "az", "ar", "ca", "co", "ct", "dc", "de", "fl", "ga",
           "ma", "mi", "mn", "ms", "mo", "mt", "ne", "nv", "nh", "nj", 
           "nm", "ny", "nc", "nd", "oh", "ok", "or", "pa", "ri", "sc", 
           "sd", "tn", "tx", "ut", "vt", "va", "wa", "wv", "wi", "wy"] # U.S States
-STATES = ["wa"]                 # For testing - REMOVE 
+
 HEADERS = {'Referer': 'https://stores.joann.com'}
 
 class JoAnnFabricsSpider(scrapy.Spider):
@@ -37,25 +37,10 @@ class JoAnnFabricsSpider(scrapy.Spider):
             
     def parse_city(self, response): 
         """ Yields a scrapy.Request for the store information page for each store in the city """ 
-        # stores = response.xpath('//script[@type = "application/ld+json"]/text()')[1:].extract() # The first result is irrelevent
         stores = response.xpath('//a[@linktrack="Landing page"]/@href').extract()
         for store in stores:
-            # store = remove_tags(store)
-            # store = json.loads(store)
 
             yield scrapy.Request(store, callback=self.parse_store_data, headers=HEADERS)
-            # lat, lon, hours = self.lat_lon_hours(response)
-
-            # yield GeojsonPointItem(
-            #     addr_full = store['address']['streetAddress'],
-            #     country = store['address']['addressCountry'],
-            #     postcode = store['address']['postalCode'],
-            #     state = store['address']['addressRegion'],
-            #     city = store['address']['addressLocality'],
-            #     ref = store['url'],
-            #     phone = store['telephone'],
-            #     name = store['branchOf']['name']
-            #     )
 
     def parse_store_data(self, response):
         """ Yield a GeojsonPointItem of the store's data """ # Pull the data off the stores page
