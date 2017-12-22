@@ -6,7 +6,7 @@ class FinishlineSpider(scrapy.Spider):
 
     name = "finishline"
     allowed_domains = ["stores.finishline.com"]
-    download_delay = 0
+    download_delay = 0.5
     start_urls = (
         'https://stores.finishline.com/',
     )
