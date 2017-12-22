@@ -47,7 +47,7 @@ class DillardsSpider(scrapy.Spider):
         store = json.loads(response.xpath('//script[@type="application/ld+json"]/text()').extract_first()[:len(data)-4])
         properties = {
             'addr_full': store['location']['address']['streetAddress'],
-            'phone':   store['location']['address']['streetAddress'],
+            'phone':   store['telephone'],
             'name': store['name'],
             'city': store['telephone'],
             'state': store['location']['address']['addressRegion'],
