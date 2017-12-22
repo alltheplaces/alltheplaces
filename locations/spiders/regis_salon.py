@@ -8,18 +8,22 @@ regex_times = r"\d{1,2}:\d{1,2}\s?[Aa]?[Mm]?[Pp]?[Mm]?\s?-\s?\d{1,2}:\d{1,2}" \
 regex_am = r"\s?[Aa][Mm]"
 regex_pm = r"\s?[Pp][Mm]"
 
-STATES = ["AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DC", "DE", "FL", "GA",
-          "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD",
-          "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ",
-          "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC",
-          "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"]
+
+#  Covers all of the United States, Puerto Rico, Bahamas with 500 mile radius
+lats = ['32.806671', '31.054487',  '39.059811', '46.921925', '45.694454',
+        '38.039119', '44.045876', '32.593106', '33.596319', '47.398349',
+        '24.44715', '18.229351', '19.725342', '64.014496']
+
+lons = ['-86.791130', '-97.563461', '-105.311104', '-110.454353', '-93.900192',
+        '-87.618638', '-72.710686', '-82.342529', '-113.334961', '-121.289062',
+        '-78.00293', '-65.830078', '-155.610352', '-153.28125']
 
 
 class RegisSpider(scrapy.Spider):
     name = 'regis'
     download_delay = 0
     allowed_domains = ['www.regissalons.com']
-    start_urls = ['https://www.regissalons.com/wp-admin/admin-ajax.php?action=store_search&lat=36.778261&lng=-119.41793239999998&max_results=100&search_radius=500&search=Ca']
+    start_urls = ['https://www.regissalons.com']
 
     def convert_hours(self, hours):
         if not hours:
@@ -96,6 +100,7 @@ class RegisSpider(scrapy.Spider):
             )
 
     def parse(self, response):
-        base_url = 'https://www.regissalons.com/wp-admin/admin-ajax.php?action=store_search&lat=36.778261&lng=-119.41793239999998&max_results=100&search_radius=500&search='
-        for state in STATES:
-            yield scrapy.Request(base_url + state, callback=self.parse_store)
+        for x, y in zip(lats, lons):
+                base_url = 'https://www.regissalons.com/wp-admin/admin-ajax.php?action=store_search&max_results=100&search_radius=500&'
+                base_url += "lat={}&lng={}".format(x, y)
+                yield scrapy.Request(base_url, callback=self.parse_store)
