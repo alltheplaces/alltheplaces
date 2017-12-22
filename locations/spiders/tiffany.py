@@ -7,7 +7,7 @@ class TiffanySpider(scrapy.Spider):
 
     name = "tiffany"
     allowed_domains = ["www.tiffany.com"]
-    download_delay = 0
+    download_delay = 0.5
     start_urls = (
         'http://www.tiffany.com/jewelry-stores/store-list/united-states',
     )
