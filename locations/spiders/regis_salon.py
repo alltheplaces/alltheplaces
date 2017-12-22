@@ -8,15 +8,18 @@ regex_times = r"\d{1,2}:\d{1,2}\s?[Aa]?[Mm]?[Pp]?[Mm]?\s?-\s?\d{1,2}:\d{1,2}" \
 regex_am = r"\s?[Aa][Mm]"
 regex_pm = r"\s?[Pp][Mm]"
 
-
-#  Covers all of the United States, Puerto Rico, Bahamas with 500 mile radius
+#  Covers United States, Canada, UK, Puerto Rico, Bahamas with 500 mile radius
 lats = ['32.806671', '31.054487',  '39.059811', '46.921925', '45.694454',
         '38.039119', '44.045876', '32.593106', '33.596319', '47.398349',
-        '24.44715', '18.229351', '19.725342', '64.014496']
+        '24.44715', '18.229351', '19.725342', '64.014496', '51.563412',
+        '52.48278', '55.27911529201562', '55.17886766328199',
+        '63.15435519659188', '52.96187505907603']
 
 lons = ['-86.791130', '-97.563461', '-105.311104', '-110.454353', '-93.900192',
         '-87.618638', '-72.710686', '-82.342529', '-113.334961', '-121.289062',
-        '-78.00293', '-65.830078', '-155.610352', '-153.28125']
+        '-78.00293', '-65.830078', '-155.610352', '-153.28125' '-86.923828',
+        '-65.126953', '-103.974609375', '-120.76171875', '-136.142578125',
+        '-0.17578125']
 
 
 class RegisSpider(scrapy.Spider):
@@ -101,6 +104,6 @@ class RegisSpider(scrapy.Spider):
 
     def parse(self, response):
         for x, y in zip(lats, lons):
-                base_url = 'https://www.regissalons.com/wp-admin/admin-ajax.php?action=store_search&max_results=100&search_radius=500&'
-                base_url += "lat={}&lng={}".format(x, y)
-                yield scrapy.Request(base_url, callback=self.parse_store)
+            base_url = 'https://www.regissalons.com/wp-admin/admin-ajax.php?action=store_search&max_results=100&search_radius=500&'
+            base_url += "lat={}&lng={}".format(x, y)
+            yield scrapy.Request(base_url, callback=self.parse_store)
