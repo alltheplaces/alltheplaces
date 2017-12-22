@@ -1,87 +1,51 @@
 import scrapy
 from locations.items import GeojsonPointItem
+import re
 
-base_url = 'https://216.222.184.133/main/storeDetails.html?store='
-store_list = [str(i) for i in range(3012, 3345)]
-bad_urls = ['3014', '3019', '3023', '3024', '3026', '3027', '3031', '3033',
-            '3035', '3037', '3038', '3039', '3044', '3048', '3049', '3051',
-            '3061', '3062', '3063', '3066', '3067', '3069', '3075', '3076',
-            '3077', '3078', '3079', '3099', '3100', '3110', '3116', '3117',
-            '3118', '3122', '3124', '3238', '3239', '3327', '3336', '3339',
-            '3344']
+regex_id_name = r"\"\d{4}\",\s\"\w+.?&?\s?\w{0,10}\s?\w{0,10}\s?\w{0,10}\""
 
-for i in bad_urls:
-    store_list.remove(i)
+regex_street_city = r"\d+\s\w+.?-?\s?\w+.?\s?\w{0,12}.?\s?\d{0,2}\s?\w{0,12}" \
+                    r"\",\s\"\w+\s?\w{0,12}\s?\w{0,12}"
+
+regex_state_zip = r"\"\w{2}\",\s\"\d+"
+
+regex_lat_lon = r"-\d+\.\d+\",\s\"\d+.\d+"
 
 
 class MenardsSpider(scrapy.Spider):
     name = 'menards'
-    download_delay = 0
     allowed_domains = ['216.222.184.133']
-    start_urls = ['http://216.222.184.133/main/storeDetails.html?store=3011']
+    start_urls = ['https://216.222.184.133/main/storeLocator.html']
 
     def parse(self, response):
-        if response.status == 200:
-            store_id = response.url.split('=')[1]
-            store_name = response.xpath(
-                '//*[@id="mainContent"]/div[1]/div[1]/h1/text()')\
-                .extract_first()
-            street = response.xpath(
-                '//*[@id="mainContent"]/div[1]/div[1]/text()[2]')\
-                .extract_first().strip()
-            cty_st_zip = response.xpath(
-                '//*[@id="mainContent"]/div[1]/div[1]/text()[3]')\
-                .extract_first()
-            city = cty_st_zip.split(',')[0].strip()
-            state = cty_st_zip.split(', ')[1].split(' ')[0]
-            postcode = cty_st_zip.split(', ')[1].split(' ')[1]
+        script = response.xpath(
+            '//script[contains(., "new store")]')[0].extract()
+        lat_lon = re.findall(regex_lat_lon, script)
+        lons = [x.split('"')[0] for x in lat_lon]
+        lats = [x.split('"')[2] for x in lat_lon]
 
-            addr_full = "{} {}, {} {}".format(
-                street, city, state, postcode)
+        id_name = re.findall(regex_id_name, script)
+        store_ids = [x.split(',')[0].strip('"') for x in id_name]
+        names = [x.split(', "')[1].strip('"') for x in id_name]
 
+        strt_cty = re.findall(regex_street_city, script)
+        streets = [x.split('",')[0] for x in strt_cty]
+        cities = [x.split(', "')[1] for x in strt_cty]
+
+        state_zip = re.findall(regex_state_zip, script)
+        states = [x.split('",')[0].strip('"') for x in state_zip]
+        postcodes = [x.split(', "')[1] for x in state_zip]
+
+        for i in range(0, len(store_ids)):
             yield GeojsonPointItem(
-                ref=store_id,
-                name=store_name,
-                street=street,
-                city=city,
-                state=state,
-                postcode=postcode,
-                addr_full=addr_full
+                ref=store_ids[i],
+                name=names[i],
+                street=streets[i],
+                city=cities[i],
+                state=states[i],
+                postcode=postcodes[i],
+                lat=lats[i],
+                lon=lons[i],
+                addr_full="{} {}, {} {}".format(streets[i], cities[i],
+                                                states[i], postcodes[i])
             )
-
-            nearby_stores = response.xpath(
-                '//*[@id="mainContent"]/div[1]/div[5]/ol/li')
-            for i in nearby_stores:
-                nrby_id = i.xpath(
-                    './/p[5]/a/@href').extract_first().split('=')[1]
-                nrby_name = i.xpath(
-                    './/p[1]/strong/text()').extract_first()
-                nrby_street = i.xpath(
-                    './/p[2]/text()').extract_first().strip()
-                nrby_cty_st_zip = i.xpath(
-                    './/p[3]/text()').extract_first()
-                nrby_city = nrby_cty_st_zip.split(',')[0].strip()
-                nrby_state = nrby_cty_st_zip.split(', ')[1].split(' ')[0]
-                nrby_postcode = nrby_cty_st_zip.split(', ')[1].split(' ')[1]
-
-                nrby_addr_full = "{} {}, {} {}".format(
-                    nrby_street, nrby_city, nrby_state, nrby_postcode)
-
-                # Remove nearby stores from list to crawl to reduce requests
-                if nrby_id in store_list:
-                    store_list.remove(nrby_id)
-
-                yield GeojsonPointItem(
-                    ref=nrby_id,
-                    name=nrby_name,
-                    street=nrby_street,
-                    city=nrby_city,
-                    state=nrby_state,
-                    postcode=nrby_postcode,
-                    addr_full=nrby_addr_full
-                )
-
-        if store_list:
-            yield scrapy.Request(base_url + store_list[0], meta={
-                'dont_redirect': True, 'handle_httpstatus_all': True})
-            store_list.remove(store_list[0])
