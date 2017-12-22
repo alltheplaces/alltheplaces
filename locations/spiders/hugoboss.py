@@ -52,8 +52,8 @@ class HugoBossSpider(scrapy.Spider):
                 "city": store['city'],
                 "postcode": postal_code,
                 "country": store['country_code'],
-                "lon": float(store['latitude']),
-                "lat": float(store['longitude']),
+                "lat": float(store['latitude']),
+                "lon": float(store['longitude']),
                 "phone": phone,
             }
 
