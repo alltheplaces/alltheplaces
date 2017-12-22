@@ -17,7 +17,7 @@ class DillardsSpider(scrapy.Spider):
 
     name = "dillards"
     allowed_domains = ["www.dillards.com"]
-    download_delay = 0
+    download_delay = 0.5
     start_urls = (
         'https://www.dillards.com/stores',
     )
