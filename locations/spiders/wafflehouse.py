@@ -34,24 +34,27 @@ class WaffleHouseSpider(scrapy.Spider):
                 state = location['province']
                 country = location['country']
                 zip_code = location['postalCode']
-                latitude = location['geo'][0]
-                longitude = location['geo'][1]
+                latitude = location['geo'][1]
+                longitude = location['geo'][0]
                 phone = location['phone']
                 open_hours = location['hoursOfOperation']
                 website = location['website']
                 link_id = location['_id']
 
-                properties = {"addr_full": full_address,
-                              "city": city,
-                              "state": state,
-                              "postcode": zip_code,
-                              "country": country,
-                              "phone": self.process_phone(phone),
-                              "website": website,
-                              "ref": link_id,
-                              "opening_hours": self.process_hours(open_hours),
-                              "lon": float(longitude),
-                              "lat": float(latitude)}
+                properties = {
+                    "addr_full": full_address,
+                    "city": city,
+                    "state": state,
+                    "postcode": zip_code,
+                    "country": country,
+                    "phone": self.process_phone(phone),
+                    "website": website,
+                    "ref": link_id,
+                    "opening_hours": self.process_hours(open_hours),
+                    "lon": longitude,
+                    "lat": latitude,
+                }
+
                 yield GeojsonPointItem(**properties)
 
     def process_phone(self, phone_number):
