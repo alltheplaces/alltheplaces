@@ -8,12 +8,14 @@ The API works by returning locations within a bounding box and there is a perPag
 that allows us to specify how many results we need.
 When skipped, it returns all.
 
-1906 results returned 252kb worth of JSON so we are safe returning all
+Widening the box to cover the whole of the United states returned all
+1906 results worth 252kb of JSON so we are safe returning all
 """
 import scrapy
 import json
 import re
 from locations.items import GeojsonPointItem
+
 
 class WaffleHouseSpider(scrapy.Spider):
     name = "wafflehouse"
@@ -76,6 +78,8 @@ class WaffleHouseSpider(scrapy.Spider):
                    'Tue': [['00:00', '23:59']],
                    'Wed': [['00:00', '23:59']]
         to Mo-Su: 24/7 and handle possible variants
+        Wafflehouse is open 24/7 at all locations but if sometime, this changes
+        I want to assume this will capture it
         :param hours:
         :return:
         """
@@ -84,11 +88,15 @@ class WaffleHouseSpider(scrapy.Spider):
         if possible_keys == hours_keys:
             return 'Mo-Su: 24/7'
         else:
+            # if a day is skipped, lets add each day and time independently
             result = []
             for dow, tod in hours.items():
                 if tod[0][0] == '00:00' and tod[0][1] == '23:59':
+                    # time is 24/7, lets add 24/7 to each
+                    # so it looks like Mo 24/7; Tu 24/7 etc.
                     result.append(dow[0:2] + " 24/7")
                 else:
+                    # if time is not 24/7, lets add actual time
                     result.append(dow[0:2] + " " + tod[0][0] + "-" + tod[0][1])
             if result:
                 return "; ".join(result)
