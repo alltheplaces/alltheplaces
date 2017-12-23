@@ -14,10 +14,8 @@ class SupervaluSpider(scrapy.Spider):
     def parse(self, response):
         stores = json.loads(response.body_as_unicode())
         for store in stores:
-            print(store['hours'])
-            print('.........................................')
             hours = self.hours(store['hours'])
-            properties = dict(
+            yield GeojsonPointItem(
                 city=store['city'],
                 ref=store['id'],
                 lat=store['lat'],
@@ -27,28 +25,16 @@ class SupervaluSpider(scrapy.Spider):
                 postcode=store['zip'],
                 state=store['state'],
                 addr_full=store['street'],
-                opening_hours = store['hours'] 
+                opening_hours=store['hours'] 
                 )
-            yield GeojsonPointItem(**properties)
             
     def hours(self, hours_string):
-        """ """
-        """ 
-                Still need 7 days a week section
-                For stores with some days having different hours - not finished
-                Split hours_string by <br />  -> ['days: hours', ...]
-                Loop and process each 'day: hours' individually 
-                Concatenate and return 
-
-                Processing each 'day: hours':
-                    Split at ':' -> two sections ['day(s)', 'hours']
-                    First section is day - get abbrevs. Ex Mon-Fri -> Mo-Fr. This will be a function. 
-                    Second gets processed in self.to_24hr().  
-        """
-        if 'April' in hours_string:
+        """ Returns a string of the store hours in a opening_hours format. If not able to parse, just returns the hours. 
+            Args: hours_string - A string of the store hours """
+        if 'April' in hours_string: # Edge case 1 
             return hours_string.replace('<br />', '')
             
-        if 'Christmas' in hours_string:
+        if 'Christmas' in hours_string: # Edge case 2 
             return hours_string.replace('<br />', '')
         
         if 'Daily' in hours_string:
@@ -102,6 +88,7 @@ class SupervaluSpider(scrapy.Spider):
                 su = self.day_to_abbrev(su)
                 sunday_hours = self.to_24hr(sunday_hours)
                 return days + ' ' + spring_hours + '; || ' + fall_hours + '; ' + su + ' ' + sunday_hours
+
             if 'Closed Sundays' in hours_string:
                 hours_string = hours_string.replace('<br />Closed Sundays', '')
                 day1, day2 = hours_string.split('<br />', 1)
@@ -112,7 +99,6 @@ class SupervaluSpider(scrapy.Spider):
                 sat = self.day_to_abbrev(sat)
                 sat_hrs = self.to_24hr(sat_hrs)
                 return wk_days + ' ' + wk_hrs + '; ' + sat + ' ' + sat_hrs
-                
                 
             store_hours = ''
             for hours_info in hours_string.split('<br />'): # day is 'day: hr'
@@ -128,8 +114,10 @@ class SupervaluSpider(scrapy.Spider):
         elif '<br />' not in hours_string:
             if 'Closed Sunday' in hours_string:
                 return hours_string
+
             elif 'Mon' not in hours_string: # No open days given 
                 return self.to_24hr(hours_string)
+
             else:                   # Like 'Mon-Fri: 7am - 8 pm; Sat: ...Sun:... ' no <br />
                 try:                # Try to parse. If you can't just return 
                     group1, group2, group3 = hours_string.split(';')
@@ -139,6 +127,7 @@ class SupervaluSpider(scrapy.Spider):
                     day1, day2, day3 = map(self.day_to_abbrev, (day1, day2, day3))
                     hour1, hour2, hour3 = map(self.to_24hr, (hour1, hour2, hour3))
                     return day1 + ' ' + hour1 + '; ' + day2 + ' ' + hour2 + '; ' + day3 + ' ' + hour3 + '; '
+
                 except ValueError:    
                     return hours_string 
         else:
@@ -153,6 +142,7 @@ class SupervaluSpider(scrapy.Spider):
             day1 = day1[:2]
             day2 = day2[:2]
             return day1 + '-' + day2
+
         else:
             return days_string[:2]
 
@@ -160,7 +150,7 @@ class SupervaluSpider(scrapy.Spider):
         """ Converts a time string from 12hr format to 24 hr format. Example 5 am - 7 pm -> 5:00-19:00 """
         def to_24(time, pm=False):            
             """ Helper Function. Converts a single time from 12 to 24. Ex. 7:30 pm -> 19:30"""
-            if ':' in time:         # Block for times like 7:30 
+            if ':' in time:         
                 index = time.index(':')
                 hour = time[:index]   
                 if pm:
@@ -170,8 +160,7 @@ class SupervaluSpider(scrapy.Spider):
             else:
                 if pm:
                     if time != '12':
-                        time = str(int(time) + 12)# + ':00'   # PM time in 24 hour time 
-                # else:
+                        time = str(int(time) + 12)
                 time += ':00'
             return time 
 
@@ -179,7 +168,7 @@ class SupervaluSpider(scrapy.Spider):
         time1, time2 = time_string.split('-', 1)
         new_times = ''
 
-        if 'pm' in time1:           # Checking if the times are am or pm  
+        if 'pm' in time1:           
             pm1 = True
         if 'pm' in time2:
             pm2 = True
