@@ -16,8 +16,9 @@ class McLocalizer(scrapy.Spider):
         "www.mcdonalds.com.br", 
         "www.mcdonalds.com.ve",
         "www.mcdonalds.com.mx",
-        "www.mcdonalds.cl"
-        "www.mcdonalds.com.uy"
+        "www.mcdonalds.cl",
+        "www.mcdonalds.com.uy",
+        "www.mcdonalds.com.co"
     ]
 
     start_urls = (
@@ -30,6 +31,7 @@ class McLocalizer(scrapy.Spider):
         'http://www.mcdonalds.com.mx/api/restaurantsByCountry?country=MX',
         'http://www.mcdonalds.cl/api/restaurantsByCountry?country=CL',
         'http://www.mcdonalds.com.uy/api/restaurantsByCountry?country=UY',
+        'http://www.mcdonalds.com.co/api/restaurantsByCountry?country=CO'
     )
 
     def parse(self, response):
