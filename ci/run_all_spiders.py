@@ -3,18 +3,23 @@ import datetime
 import gzip
 import json
 import logging
-import multiprocessing
 import os
 import os.path
 import shutil
+import subprocess
 import tempfile
+import time
 import traceback
+import zipfile
 
+from multiprocessing.dummy import Pool
 from pythonjsonlogger import jsonlogger
 from scrapy.utils.project import get_project_settings
 from scrapy.crawler import CrawlerProcess
 from scrapy.spiderloader import SpiderLoader
 from scrapy import signals
+
+upload_to_s3 = False
 
 logger = logging.getLogger('atp')
 ch = logging.StreamHandler()
@@ -30,45 +35,36 @@ def json_serial(obj):
         return obj.isoformat()
     raise TypeError ("Type %s not serializable" % type(obj))
 
+
 def run_one_spider(spider_name):
-    try:
-        settings = get_project_settings()
+    _, output_log = tempfile.mkstemp('.log')
+    _, output_results = tempfile.mkstemp('.geojson')
 
-        _, output_log = tempfile.mkstemp('.log')
-        _, output_results = tempfile.mkstemp('.geojson')
+    logger.info("Scrapy crawl for %s", spider_name)
 
-        settings.set('LOG_FILE', output_log)
-        settings.set('LOG_LEVEL', 'INFO')
-        settings.set('TELNETCONSOLE_ENABLED', False)
-        settings.set('FEED_URI', output_results)
-        settings.set('FEED_FORMAT', 'ndgeojson')
+    start = time.time()
+    result = subprocess.run([
+        'pipenv', 'run',
+        'scrapy', 'crawl',
+        '--output', output_results,
+        '--output-format', 'ndgeojson',
+        '--logfile', output_log,
+        '--loglevel', 'INFO',
+        '--set', 'TELNETCONSOLE_ENABLED', '0',
+        '--set', 'CLOSESPIDER_TIMEOUT', '21600', # 6 hours
+        spider_name
+    ], shell=True)
+    elapsed = time.time() - start
 
-        def spider_opened(spider):
-            logger.info("Spider %s opened, saving to %s", spider.name, output_results)
+    logger.info("Scrapy crawl for %s exited code %s after %0.1f sec", spider_name, result.returncode, elapsed)
 
-        def spider_closed(spider):
-            logger.info("Spider %s closed (%s) after %0.1f sec, %d items",
-                spider.name,
-                spider.crawler.stats.get_value('finish_reason'),
-                (spider.crawler.stats.get_value('finish_time') -
-                    spider.crawler.stats.get_value('start_time')).total_seconds(),
-                spider.crawler.stats.get_value('item_scraped_count') or 0,
-            )
-
-        process = CrawlerProcess(settings)
-        crawler = process.create_crawler(spider_name)
-        crawler.signals.connect(spider_closed, signals.spider_closed)
-        crawler.signals.connect(spider_opened, signals.spider_opened)
-        process.crawl(crawler)
-        process.start()
-
-        results = crawler.stats.spider_stats.get(spider_name)
-        results['output_filename'] = output_results
-        results['log_filename'] = output_log
-        results['spider'] = spider_name
-        return results
-    except Exception as e:
-        logger.exception("Exception in scraper process")
+    return {
+        'output_filename': output_results,
+        'log_filename': output_log,
+        'exit_code': result.returncode,
+        'elapsed': elapsed,
+        'spider_name': spider_name,
+    }
 
 
 def main():
@@ -79,13 +75,13 @@ def main():
 
     utcnow = datetime.datetime.utcnow()
     tstamp = utcnow.strftime('%F-%H-%M-%S')
-    pool_size = 12
+    pool_size = 1
 
     settings = get_project_settings()
     spider_loader = SpiderLoader.from_settings(settings)
-    spider_names = spider_loader.list()
+    spider_names = spider_loader.list()[45:50]
 
-    pool = multiprocessing.Pool(pool_size, maxtasksperchild=1)
+    pool = Pool(pool_size)
     logger.info("Starting to crawl %s spiders on %s processes", len(spider_names), pool_size)
     results = pool.imap_unordered(run_one_spider, spider_names)
     pool.close()
@@ -110,38 +106,39 @@ def main():
 
     # Post it to S3
     s3_output_key = '{}/output.geojson.gz'.format(s3_key_prefix)
-    client.upload_file(
-        output_gz_filename,
-        s3_bucket,
-        s3_output_key,
-        ExtraArgs={
-            'ACL': 'public-read',
-            'ContentType': 'application/json',
-            'ContentDisposition': 'attachment; filename="output-{}.geojson.gz"'.format(tstamp),
-        }
-    )
+    if upload_to_s3:
+        client.upload_file(
+            output_gz_filename,
+            s3_bucket,
+            s3_output_key,
+            ExtraArgs={
+                'ACL': 'public-read',
+                'ContentType': 'application/json',
+                'ContentDisposition': 'attachment; filename="output-{}.geojson.gz"'.format(tstamp),
+            }
+        )
 
     logger.warn("Saved output to https://s3.amazonaws.com/%s/%s", s3_bucket, s3_output_key)
 
-    # Concatenate and gzip the log files
-    _, log_gz_filename = tempfile.mkstemp('.log.gz')
-    with gzip.open(log_gz_filename, 'wb') as f_out:
+    # Concatenate and zip the log files
+    _, log_zip_filename = tempfile.mkstemp('.log.zip')
+    with zipfile.ZipFile(log_zip_filename, 'w', compression=zipfile.ZIP_DEFLATED) as f_out:
         for r in results:
-            with open(r.pop('log_filename'), 'rb') as f_in:
-                shutil.copyfileobj(f_in, f_out)
+            log_filename = r.pop('log_filename')
+            f_out.write(log_filename, os.path.join('logs', log_filename))
 
     # Post it to S3
-    s3_log_key = '{}/all_logs.txt.gz'.format(s3_key_prefix)
-    client.upload_file(
-        log_gz_filename,
-        s3_bucket,
-        s3_log_key,
-        ExtraArgs={
-            'ACL': 'public-read',
-            'ContentType': 'text/plain; charset=utf-8',
-            'ContentEncoding': 'gzip',
-        }
-    )
+    s3_log_key = '{}/all_logs.log.zip'.format(s3_key_prefix)
+    if upload_to_s3:
+        client.upload_file(
+            log_zip_filename,
+            s3_bucket,
+            s3_log_key,
+            ExtraArgs={
+                'ACL': 'public-read',
+                'ContentType': 'application/zip',
+            }
+        )
 
     logger.warn("Saved logfile to https://s3.amazonaws.com/%s/%s", s3_bucket, s3_log_key)
 
@@ -157,27 +154,29 @@ def main():
         json.dump(metadata, f, indent=2, default=json_serial)
 
     s3_key = '{}/metadata.json'.format(s3_key_prefix)
-    client.upload_file(
-        'metadata.json',
-        s3_bucket,
-        s3_key,
-        ExtraArgs={
-            'ACL': 'public-read',
-            'ContentType': 'application/json; charset=utf-8',
-        }
-    )
+    if upload_to_s3:
+        client.upload_file(
+            'metadata.json',
+            s3_bucket,
+            s3_key,
+            ExtraArgs={
+                'ACL': 'public-read',
+                'ContentType': 'application/json; charset=utf-8',
+            }
+        )
     logger.warn("Saved metadata to https://s3.amazonaws.com/%s/%s", s3_bucket, s3_key)
 
     s3_key = 'runs/latest/metadata.json'
-    client.upload_file(
-        'metadata.json',
-        s3_bucket,
-        s3_key,
-        ExtraArgs={
-            'ACL': 'public-read',
-            'ContentType': 'application/json; charset=utf-8',
-        }
-    )
+    if upload_to_s3:
+        client.upload_file(
+            'metadata.json',
+            s3_bucket,
+            s3_key,
+            ExtraArgs={
+                'ACL': 'public-read',
+                'ContentType': 'application/json; charset=utf-8',
+            }
+        )
     logger.warn("Saved metadata to https://s3.amazonaws.com/%s/%s", s3_bucket, s3_key)
 
     total_count = sum(
@@ -204,15 +203,16 @@ def main():
             )
         )
     s3_key = 'runs/latest/info_embed.html'
-    client.upload_file(
-        'info_embed.html',
-        s3_bucket,
-        s3_key,
-        ExtraArgs={
-            'ACL': 'public-read',
-            'ContentType': 'text/html; charset=utf-8',
-        }
-    )
+    if upload_to_s3:
+        client.upload_file(
+            'info_embed.html',
+            s3_bucket,
+            s3_key,
+            ExtraArgs={
+                'ACL': 'public-read',
+                'ContentType': 'text/html; charset=utf-8',
+            }
+        )
     logger.warn("Saved embed to https://s3.amazonaws.com/%s/%s", s3_bucket, s3_key)
 
 
