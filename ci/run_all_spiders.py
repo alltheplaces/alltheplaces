@@ -40,11 +40,10 @@ def run_one_spider(spider_name):
     _, output_log = tempfile.mkstemp('.log')
     _, output_results = tempfile.mkstemp('.geojson')
 
-    logger.info("Scrapy crawl for %s", spider_name)
+    logger.warning("Scrapy crawl for %s", spider_name)
 
     start = time.time()
     result = subprocess.run([
-        'pipenv', 'run',
         'scrapy', 'crawl',
         '--output', output_results,
         '--output-format', 'ndgeojson',
@@ -53,10 +52,10 @@ def run_one_spider(spider_name):
         '--set', 'TELNETCONSOLE_ENABLED', '0',
         '--set', 'CLOSESPIDER_TIMEOUT', '21600', # 6 hours
         spider_name
-    ], shell=True)
+    ], env=os.environ.copy())
     elapsed = time.time() - start
 
-    logger.info("Scrapy crawl for %s exited code %s after %0.1f sec", spider_name, result.returncode, elapsed)
+    logger.warning("Scrapy crawl for %s exited code %s after %0.1f sec: %s", spider_name, result.returncode, elapsed, result.arg)
 
     return {
         'output_filename': output_results,
