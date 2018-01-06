@@ -16,7 +16,6 @@ class BestBuySpider(scrapy.Spider):
     bb_url = 'https://www.bestbuy.ca/en-CA/secure/store-locator-view-all-stores.aspx'
 
     start_urls = (bb_url, )
-    # print(start_urls)
     completed_requests = set()
 
     def store_hours(self, store_hours):
@@ -30,7 +29,6 @@ class BestBuySpider(scrapy.Spider):
         else:
             store_times = [' '.join(i.split(' ')[-5:]) for i in store_times]
 
-        print(store_days, store_times)
         for i, day in enumerate(store_days):
             day_hours = store_times[i]
             if 'Closed' in day_hours:

@@ -23,7 +23,6 @@ class DillardsSpider(scrapy.Spider):
     )
 
     def parse_times(self, hour):
-        print(hour)
         if hour.strip() == 'Open 24 hours':
             return '24/7'
         if re.search('PM', hour):
@@ -60,7 +59,6 @@ class DillardsSpider(scrapy.Spider):
 
         hours = ''
         for time in store['openingHoursSpecification']:
-            print(time['dayOfWeek']['name'])
             hours = hours + time['dayOfWeek']['name'][:2]+ ' '+self.parse_times(time['opens'])+'-'+self.parse_times(time['closes'])+'; '
         if hours:
             properties['opening_hours'] = hours

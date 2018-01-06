@@ -34,7 +34,7 @@ class FarmBoySpider(scrapy.Spider):
                         t_hr += 12
                     elif t_ampm == 'a' and t_hr == 12:
                         t_hr = 0
-                    
+
                     hours = '{:02d}:{}-{:02d}:{}'.format(
                         f_hr,
                         '00',
@@ -63,7 +63,6 @@ class FarmBoySpider(scrapy.Spider):
 
     def city(self, data):
         str_list = data.split(',')
-        print(str_list[0])
         return str_list[0].strip()
 
     def state(self, data):
@@ -72,7 +71,7 @@ class FarmBoySpider(scrapy.Spider):
         m_space = re.search(r'\s(.*)', data)
         if m:
             return m.group(2)
-        elif m_space: 
+        elif m_space:
             return m_space.group(1)
         else: return data
 
