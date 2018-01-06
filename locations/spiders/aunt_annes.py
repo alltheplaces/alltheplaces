@@ -17,7 +17,7 @@ US_STATES = (
 UK_Cities = (
         'London', 'Birmingham', 'Manchester', 'Glasgow', 'Leeds',
         'Liverpool', 'Bristol', 'Newcastle', 'Sunderland', 'Wolverhampton',
-        'Nottingham', 'Sheffield', 'Belfast', 'Leicester', 'Bradford', 
+        'Nottingham', 'Sheffield', 'Belfast', 'Leicester', 'Bradford',
 
 )
 
@@ -32,7 +32,7 @@ TT_Cities = (
         "Victoria", "Maraval", "Fyzabad", "Debe", "Couva", "Diego Martin", "Chaguanas",
         "Penal", "Cunupia", "Curepe", "Roxborough", "San Juan", "Arouca", "Saint Joseph",
         "California", "Marabella", "Siparia", "Gasparillo", "Morvant", "Barataria", "Saint Clair",
-        "Laventille", "Carenage", "Ward of Tacarigua", "Caroni", "Lopinot", "Tunapuna", "Santa Cruz", 
+        "Laventille", "Carenage", "Ward of Tacarigua", "Caroni", "Lopinot", "Tunapuna", "Santa Cruz",
         "Saint Augustine", "Golden Lane", "Scarborough", "Moriah", "Saint James", "Carapichaima",
         "Valsayn", "Freeport", "Claxton Bay", "Sangre Grande", "Cumuto", "Woodbrook", "Petit Valley",
         "El Dorado", "Phoenix Park",
@@ -54,10 +54,10 @@ Thailand_Cities = (
         "Rawai", "Buriram", "Dusit", "Khlong Luang", "Trat", "Ban Bueng", "Sung Noen", "Manorom",
         "Ban Bang Plong", "Tak", "Ban Tha Duea", "Amphawa", "Ban Pong Lang", "Phaya Thai", "Si Sa Ket",
         "Nakhon Ratchasima", "Bang Phlat", "Ban Bang Phli Nakhon", "Salaya", "Krathum Baen",
-        "Hua Hin", "Ban Talat Rangsit", "Ban Khlong Ngae", "Nong Prue", "Wang Thonglang", 
+        "Hua Hin", "Ban Talat Rangsit", "Ban Khlong Ngae", "Nong Prue", "Wang Thonglang",
         "Samphanthawong", "Bang Khun Thian", "Chatuchak", "Chaiyaphum",
         "Nakhon Pathom", "Nan", "Bang Kruai", "Sathon", "Suan Luang", "Ban Wang Yai"
-        "Khlong San", "Watthana", "Lat Krabang", "Muak Lek", "Kosum Phisai", "Ban Phlam", "Non Thai", 
+        "Khlong San", "Watthana", "Lat Krabang", "Muak Lek", "Kosum Phisai", "Ban Phlam", "Non Thai",
         "Photharam", "Thalang", "Bang Kapi", "Long", "Ka Bang", "Pattani", "Nakhon Si Thammarat",
         "Khlong Toei", "Cha-am", "Amphoe Aranyaprathet", "Phang Nga", "Ban Tha Ruea", "Chiang Muan",
         "Ban Ang Thong", "Ban Khlong Takhian", "Khan Na Yao", "Bang Sue", "Sam Khok", "Don Mueang",
@@ -67,7 +67,7 @@ Thailand_Cities = (
         "Ban Na", "Ban Ko Pao","Mae Sot"
 )
 Korea_Cities = (
-        "Seoul", "Incheon", "Paju", "Cheonan", "Yongin", "Kwanghui-dong", "Pon-dong", 
+        "Seoul", "Incheon", "Paju", "Cheonan", "Yongin", "Kwanghui-dong", "Pon-dong",
         "Gwangju", "Gwangmyeong", "Tang-ni", "Busan", "Seongnam-si", "Suwon-si", "Namyang",
         "Namyangju", "Jeju-si", "Ulsan", "Osan", "Hanam", "Pyong-gol", "Anyang-si",
         "Yangsan", "Daejeon", "Nonsan", "Seocho", "Wonju", "Kisa", "Daegu", "Ansan-si", "Gongju",
@@ -87,7 +87,7 @@ Singapore_Cities = (
         "Kalang", "Tampines New Town", "Ang Mo Kio New Town", "Kampong Pasir Ris", "Hougang",
         "Yew Tee", "Choa Chu Kang New Town", "Punggol", "Changi Village", "Bukit Timah Estate",
         "Serangoon", "Jurong Town", "Tanglin Halt", "Woodlands New Town", "Jurong East New Town",
-        "Bukit Panjang New Town", "Bukit Batok New Town", "Pasir Panjang", "Holland Village", 
+        "Bukit Panjang New Town", "Bukit Batok New Town", "Pasir Panjang", "Holland Village",
         "Tai Seng", "Toa Payoh New Town", "Bukit Timah", "Jurong West New Town", "Kembangan",
         "Queenstown Estate", "Boon Lay", "Simei New Town", "Pandan Valley", "Clementi New Town",
         "Tanjong Pagar"
@@ -110,22 +110,22 @@ Indonesia_Cities = (
 Malaysia_Cities = (
         "Kaula Lumpur", "Kota Bharu", "Klang", "Johor Bahru", "Subang Jaya", "Ipoh", "Kuching", "Seremban",
         "Petaling Jaya", "Shah Alam", 'Penang', 'Kelantan', "Pantai", "Petaling Jaya",  "Kajang",
-        "Setapak", "Bukit Kayu Hitam", "Bayan Lepas", "Taiping", "Kuala Terengganu", "Kuantan", 
+        "Setapak", "Bukit Kayu Hitam", "Bayan Lepas", "Taiping", "Kuala Terengganu", "Kuantan",
         "Alor Gajah",
 )
 Japan_Cities = (
         'Tokyo', "Hiroshima", "Saitama", "Nihon'odori", "Ibaraki", "Urayasu",
         "Suita", "Funabashi", "Nagareyama", "Ichikawa", "Isesaki", "Koga", "Ichihara",
-        "Koshigaya", "Shibukawa", "Aoicho", "Yamakita", "Gotemba", "Nisshin", "Nishinomiya",  
-        "Den'en-chofu", "Kawasaki", "Toyama-shi", "Moriguchi", "Chita", "Sano", "Nagoya-shi", 
+        "Koshigaya", "Shibukawa", "Aoicho", "Yamakita", "Gotemba", "Nisshin", "Nishinomiya",
+        "Den'en-chofu", "Kawasaki", "Toyama-shi", "Moriguchi", "Chita", "Sano", "Nagoya-shi",
         "Kyoto", "Hamamatsu", "Shimotoda", "Yachiyo", "Tsukuba", "Chiba", "Yokohama",
         "Yamanashi", "Ashihara", "Kawaguchi", "Kasukabe", "Shizuoka", "Kawanishi", "Itami",
-        "Kobe", "Nara", "Yao", "Osaka", "Handa", "Honjocho", "Kishiwada", "Susono", "Nagasaki", 
-        "Setagaya-ku", "Zushi", "Sugito", "Yabasehoncho", "Yamaguchi", "Kanazawa", "Maruyama", 
+        "Kobe", "Nara", "Yao", "Osaka", "Handa", "Honjocho", "Kishiwada", "Susono", "Nagasaki",
+        "Setagaya-ku", "Zushi", "Sugito", "Yabasehoncho", "Yamaguchi", "Kanazawa", "Maruyama",
         "Tahara", "Obu", "Nishio", "Okinawa", "Urasoe", "Naha", "Chichibu", "Asahi", "Kita-sannomaru",
         "Hirokawa", "Ishigaki", "Higashine", "Tsuruoka", "Asahikawa", "Minatomachi", "Sannohe",
         "Tottori-shi", "Higashiasahimachi", "Iwata", "Koriyama", "Hanno", "Takarazuka", "Kuwana-shi",
-        "Kakogawa", "Komaki", "Mitake", "Tondabayashi", "Matsumoto", "Kakamigahara", "Onomichi",    
+        "Kakogawa", "Komaki", "Mitake", "Tondabayashi", "Matsumoto", "Kakamigahara", "Onomichi",
         "Kure", "Maebaru", "Tokai",
 )
 
@@ -154,9 +154,9 @@ MAPPING = {
 }
 
 
-class ClassName(scrapy.Spider):
+class AuntieAnnesSpider(scrapy.Spider):
 
-    name = "aunt_annes"
+    name = "auntie_annes"
     allowed_domains = ["hosted.where2getit.com/auntieannes"]
     download_delay = 0.2
 
@@ -194,7 +194,6 @@ class ClassName(scrapy.Spider):
         root = ET.fromstring(response.text)
         collection = root.getchildren()[0]
         pois = collection.findall('poi')
-        if len(pois) ==0:
-            print('Zero count for ' + response.url)
+
         for poi in pois:
             yield self.process_poi(poi)

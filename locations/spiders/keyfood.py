@@ -16,7 +16,7 @@ def opening_hours(datestring):
 
         if (mil_hrs):
             for i in range(len(mil_hrs)):
-                hour = mil_hrs[i]            
+                hour = mil_hrs[i]
                 hour = re.sub(r'[AaMm]{2}', '', hour.replace('-',''))
 
                 if re.search(r'[PpMm]{2}', hour) is not None:
@@ -24,7 +24,7 @@ def opening_hours(datestring):
                     hour = hour.replace(":",".")
                     hour = '%.2f' % (float(hour)+12)
                     hour = hour.replace('.',":")
-                
+
                 if (len(hour) == 1):
                     hour = "0" + hour + ":00"
                 elif (len(hour) == 2):
@@ -44,11 +44,10 @@ def opening_hours(datestring):
                 regex = str('(?<=' + hours[1] + ')(.*?)(?=' + hours[2] + ')')
                 second = ((re.search(regex,datestring)).group(0)).lstrip()
                 regex = str('(?<=' + hours[3] + ')(.*?)(?=' + hours[4] + ')')
-                # print ("regex is " + regex)
                 third = ((re.search(regex,datestring)).group(0)).lstrip()
                 regex = str(hours[5] + '(?!.*' + hours[5] + ')(.*?)(?=' + hours[6] + ')')
                 fourth = ((re.search(regex,datestring)).group(1)).lstrip()
-                
+
             except:
                 pass
 

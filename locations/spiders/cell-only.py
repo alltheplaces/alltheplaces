@@ -74,7 +74,6 @@ class CellOnlySpider(scrapy.Spider):
                 'radius': '25000',
                 'action': 'csl_ajax_search',
             }
-            print (str(form_data))
             yield scrapy.http.FormRequest(
                 url=url, method='POST', formdata=form_data,
                 headers=headers, callback=self.parse

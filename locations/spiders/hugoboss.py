@@ -23,13 +23,11 @@ class HugoBossSpider(scrapy.Spider):
 
     def parse(self, response):
       data = json.loads(response.body_as_unicode())
-      print(self.count)
       if "data" in data:
         for store in data['data']:
             clean_hours = ''
             if "store_hours" in store:
                 open_hours = json.loads(store['store_hours'])
-                print(open_hours)
                 for key , value in open_hours.items():
                   if isinstance(value[0], str):
                     clean_hours = clean_hours + day_formats[key] + ' ' + value[0] + '-' + value[1] + '; '

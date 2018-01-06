@@ -24,7 +24,6 @@ class SchnucksSpider(scrapy.Spider):
                 period = store_hours[k][0][0]+'-'+store_hours[k][0][1]
                 if period == last_period:
                     continue
-                    print(' ')
                 if DAYS[DAYS.index(k)-1][:2] == last_day:
                     result += ' '+last_period+';'
                 else:
