@@ -10,14 +10,14 @@ RUN_S3_KEY_PREFIX="runs/${RUN_TIMESTAMP}"
 RUN_S3_PREFIX="s3://${S3_BUCKET}/${RUN_S3_KEY_PREFIX}"
 RUN_URL_PREFIX="https://s3.amazonaws.com/${S3_BUCKET}/${RUN_S3_KEY_PREFIX}"
 SPIDER_RUN_DIR=`mktemp -d` || exit 1
-PARALLELISM=12
-SPIDER_TIMEOUT=14400 # 4 hours
+PARALLELISM=${PARALLELISM:-12}
+SPIDER_TIMEOUT=${SPIDER_TIMEOUT:-14400} # default to 4 hours
 
 (>&2 echo "Tmp is ${SPIDER_RUN_DIR}")
 (>&2 echo "Write out a file with scrapy commands to parallelize")
 for spider in $(scrapy list)
 do
-    echo "scrapy crawl --output ${SPIDER_RUN_DIR}/${spider}.geojson --output-format ndgeojson --logfile ${SPIDER_RUN_DIR}/logs/${spider}.log --loglevel INFO --set TELNETCONSOLE_ENABLED=0 --set CLOSESPIDER_TIMEOUT=21600 ${spider}" >> ${SPIDER_RUN_DIR}/commands.txt
+    echo "scrapy crawl --output ${SPIDER_RUN_DIR}/${spider}.geojson --output-format ndgeojson --logfile ${SPIDER_RUN_DIR}/logs/${spider}.log --loglevel INFO --set TELNETCONSOLE_ENABLED=0 --set CLOSESPIDER_TIMEOUT=${SPIDER_TIMEOUT} ${spider}" >> ${SPIDER_RUN_DIR}/commands.txt
 done
 
 mkdir -p ${SPIDER_RUN_DIR}/logs
@@ -26,6 +26,10 @@ SPIDER_COUNT=$(wc -l < ${SPIDER_RUN_DIR}/commands.txt | tr -d ' ')
 (>&2 echo "Running ${SPIDER_COUNT} spiders ${PARALLELISM} at a time")
 xargs -t -L 1 -P ${PARALLELISM} pipenv run < ${SPIDER_RUN_DIR}/commands.txt
 
+if [ ! $? -eq 0 ]; then
+    (>&2 echo "Xargs failed with exit code ${?}")
+    exit 1
+fi
 (>&2 echo "Done running spiders")
 
 (>&2 echo "Concatenating and compressing output files")
