@@ -17,7 +17,7 @@ SPIDER_TIMEOUT=${SPIDER_TIMEOUT:-14400} # default to 4 hours
 (>&2 echo "Write out a file with scrapy commands to parallelize")
 for spider in $(scrapy list)
 do
-    echo "scrapy crawl --output ${SPIDER_RUN_DIR}/${spider}.geojson --output-format ndgeojson --logfile ${SPIDER_RUN_DIR}/logs/${spider}.log --loglevel INFO --set TELNETCONSOLE_ENABLED=0 --set CLOSESPIDER_TIMEOUT=${SPIDER_TIMEOUT} ${spider}" >> ${SPIDER_RUN_DIR}/commands.txt
+    echo "scrapy crawl --output ${SPIDER_RUN_DIR}/${spider}.geojson --output-format geojson --logfile ${SPIDER_RUN_DIR}/logs/${spider}.log --loglevel INFO --set TELNETCONSOLE_ENABLED=0 --set CLOSESPIDER_TIMEOUT=${SPIDER_TIMEOUT} ${spider}" >> ${SPIDER_RUN_DIR}/commands.txt
 done
 
 mkdir -p ${SPIDER_RUN_DIR}/logs
