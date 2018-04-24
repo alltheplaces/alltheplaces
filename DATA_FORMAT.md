@@ -1,16 +1,14 @@
 # All The Places Data Format
 
-The output of the periodic run of all spiders posted on https://www.alltheplaces.xyz/ is a single newline-delimited file where each line contains a GeoJSON feature. The file is gzipped to save space on disk.
-
-We use newline-delimited GeoJSON so that it's easier to incrementally parse, but chances are your GIS software won't know how to parse the format properly. For example, as of this writing QGIS will only render the first item in the file. To make it render in QGIS, add a comma after every line except the last, then add `{"type": "FeatureCollection", "features": [` at the beginning of the file and `]}` at the end. The resulting modified file can be opened in QGIS.
+The output of the periodic run of all spiders posted on https://www.alltheplaces.xyz/ is a single GeoJSON `FeatureCollection` where each `Feature` contains the data for a single scraped item. The file is gzipped to save space on disk.
 
 ## Identifier
 
-Each GeoJSON feature has an `id` field. The ID is a hash based on the `ref` and `@spider` fields below and should be consistent between builds. You can use this to determine if new objects show up or disappear between builds, for example.
+Each GeoJSON feature has an `id` field. The ID is a hash based on the `ref` and `@spider` fields and should be consistent between builds. You might use this to determine if new objects show up or disappear between builds.
 
 ## Geometry
 
-In most cases, the feature will include a `geometry` field following [the GeoJSON spec](https://tools.ietf.org/html/rfc7946#section-3.1). There are some spiders that aren't able to recover a position from the venue's website. In those cases, the geometry is not included and only the properties are included.
+In most cases, the feature will include a `geometry` field following [the GeoJSON spec](https://tools.ietf.org/html/rfc7946#section-3.1). There are some spiders that aren't able to recover a position from the venue's website. In those cases, the geometry is set to `null` and only the properties are included.
 
 Although it's not supported at the time of this writing, we hope to include a geocoding step in the pipeline so that these feature will get a position added.
 
