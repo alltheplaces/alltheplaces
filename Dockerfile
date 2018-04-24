@@ -4,8 +4,9 @@ RUN pip install pipenv
 WORKDIR /opt/app
 
 COPY Pipfile Pipfile
-RUN pipenv install --dev
+COPY Pipfile.lock Pipfile.lock
+RUN pipenv install --dev --deploy --system
 
 COPY . .
 
-ENTRYPOINT ["pipenv", "run", "/opt/app/ci/run_all_spiders.sh"]
+ENTRYPOINT ["/opt/app/ci/run_all_spiders.sh"]
