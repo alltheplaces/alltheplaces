@@ -9,4 +9,4 @@ RUN pipenv install --dev --deploy --system
 
 COPY . .
 
-ENTRYPOINT ["/opt/app/ci/run_all_spiders.sh"]
+CMD ["/opt/app/ci/run_all_spiders.sh"]

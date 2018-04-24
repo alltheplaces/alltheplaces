@@ -17,14 +17,14 @@ SPIDER_TIMEOUT=${SPIDER_TIMEOUT:-14400} # default to 4 hours
 (>&2 echo "Write out a file with scrapy commands to parallelize")
 for spider in $(scrapy list)
 do
-    echo "scrapy crawl --output ${SPIDER_RUN_DIR}/${spider}.geojson --output-format geojson --logfile ${SPIDER_RUN_DIR}/logs/${spider}.log --loglevel INFO --set TELNETCONSOLE_ENABLED=0 --set CLOSESPIDER_TIMEOUT=${SPIDER_TIMEOUT} ${spider}" >> ${SPIDER_RUN_DIR}/commands.txt
+    echo "--output ${SPIDER_RUN_DIR}/${spider}.geojson --output-format geojson --logfile ${SPIDER_RUN_DIR}/logs/${spider}.log --loglevel INFO --set TELNETCONSOLE_ENABLED=0 --set CLOSESPIDER_TIMEOUT=${SPIDER_TIMEOUT} ${spider}" >> ${SPIDER_RUN_DIR}/commands.txt
 done
 
 mkdir -p ${SPIDER_RUN_DIR}/logs
 SPIDER_COUNT=$(wc -l < ${SPIDER_RUN_DIR}/commands.txt | tr -d ' ')
 
 (>&2 echo "Running ${SPIDER_COUNT} spiders ${PARALLELISM} at a time")
-xargs -t -L 1 -P ${PARALLELISM} pipenv run < ${SPIDER_RUN_DIR}/commands.txt
+xargs -t -L 1 -P ${PARALLELISM} scrapy crawl < ${SPIDER_RUN_DIR}/commands.txt
 
 if [ ! $? -eq 0 ]; then
     (>&2 echo "Xargs failed with exit code ${?}")
