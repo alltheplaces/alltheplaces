@@ -13,14 +13,15 @@ SPIDER_RUN_DIR=`mktemp -d` || exit 1
 PARALLELISM=${PARALLELISM:-12}
 SPIDER_TIMEOUT=${SPIDER_TIMEOUT:-14400} # default to 4 hours
 
-(>&2 echo "Tmp is ${SPIDER_RUN_DIR}")
+(>&2 echo "Writing to ${SPIDER_RUN_DIR}")
 (>&2 echo "Write out a file with scrapy commands to parallelize")
 for spider in $(scrapy list)
 do
-    echo "--output ${SPIDER_RUN_DIR}/${spider}.geojson --output-format geojson --logfile ${SPIDER_RUN_DIR}/logs/${spider}.log --loglevel INFO --set TELNETCONSOLE_ENABLED=0 --set CLOSESPIDER_TIMEOUT=${SPIDER_TIMEOUT} ${spider}" >> ${SPIDER_RUN_DIR}/commands.txt
+    echo "--output ${SPIDER_RUN_DIR}/output/${spider}.geojson --output-format geojson --logfile ${SPIDER_RUN_DIR}/logs/${spider}.log --loglevel INFO --set TELNETCONSOLE_ENABLED=0 --set CLOSESPIDER_TIMEOUT=${SPIDER_TIMEOUT} ${spider}" >> ${SPIDER_RUN_DIR}/commands.txt
 done
 
 mkdir -p ${SPIDER_RUN_DIR}/logs
+mkdir -p ${SPIDER_RUN_DIR}/output
 SPIDER_COUNT=$(wc -l < ${SPIDER_RUN_DIR}/commands.txt | tr -d ' ')
 
 (>&2 echo "Running ${SPIDER_COUNT} spiders ${PARALLELISM} at a time")
@@ -32,12 +33,12 @@ if [ ! $? -eq 0 ]; then
 fi
 (>&2 echo "Done running spiders")
 
-(>&2 echo "Concatenating and compressing output files")
-cat ${SPIDER_RUN_DIR}/*.geojson > ${SPIDER_RUN_DIR}/output.geojson
-gzip < ${SPIDER_RUN_DIR}/output.geojson > ${SPIDER_RUN_DIR}/output.geojson.gz
-OUTPUT_LINECOUNT=$(wc -l < ${SPIDER_RUN_DIR}/output.geojson | tr -d ' ')
+OUTPUT_LINECOUNT=$(cat ${SPIDER_RUN_DIR}/output/*.geojson | wc -l | tr -d ' ')
 (>&2 echo "Generated ${OUTPUT_LINECOUNT} lines")
-OUTPUT_FILESIZE=$(du ${SPIDER_RUN_DIR}/output.geojson.gz | awk '{printf "%0.1f", $1/1024}')
+
+(>&2 echo "Concatenating and compressing output files")
+tar -czf ${SPIDER_RUN_DIR}/output.tar.gz -C ${SPIDER_RUN_DIR} ./output
+OUTPUT_FILESIZE=$(du ${SPIDER_RUN_DIR}/output.tar.gz | awk '{printf "%0.1f", $1/1024}')
 
 (>&2 echo "Compressing log files")
 tar -czf ${SPIDER_RUN_DIR}/logs.tar.gz -C ${SPIDER_RUN_DIR} ./logs
@@ -54,12 +55,12 @@ if [ ! $? -eq 0 ]; then
     exit 1
 fi
 
-(>&2 echo "Saving output to ${RUN_URL_PREFIX}/output.geojson.gz")
+(>&2 echo "Saving output to ${RUN_URL_PREFIX}/output.tar.gz")
 aws s3 cp --only-show-errors \
     --acl=public-read \
     --content-type "application/gzip" \
-    "${SPIDER_RUN_DIR}/output.geojson.gz" \
-    "${RUN_S3_PREFIX}/output.geojson.gz"
+    "${SPIDER_RUN_DIR}/output.tar.gz" \
+    "${RUN_S3_PREFIX}/output.tar.gz"
 
 if [ ! $? -eq 0 ]; then
     (>&2 echo "Couldn't save output to s3")
@@ -69,7 +70,7 @@ fi
 (>&2 echo "Saving embed to https://s3.amazonaws.com/${S3_BUCKET}/runs/latest/info_embed.html")
 cat > "${SPIDER_RUN_DIR}/info_embed.html" << EOF
 <html><body>
-<a href="${RUN_URL_PREFIX}/output.geojson.gz">Download</a>
+<a href="${RUN_URL_PREFIX}/output.tar.gz">Download</a>
 (${OUTPUT_FILESIZE} MB)<br/><small>$(printf "%'d" ${OUTPUT_LINECOUNT}) rows from
 ${SPIDER_COUNT} spiders, updated $(date)</small>
 </body></html>
