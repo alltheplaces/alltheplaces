@@ -40,7 +40,6 @@ class McDonaldsEGSpider(scrapy.Spider):
 
     def parse_data(self, response):
         response = '<div id="mapInfo" style="width: 200px;">' + response
-        print(response)
         selector = scrapy.Selector(text=response)
         name = selector.xpath('//h2[@class="store-title"]/b/text()').extract_first().strip()
         address = selector.xpath('//*[@id="mapInfo"]/div/span[1]/text()').extract_first().strip()

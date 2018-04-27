@@ -21,7 +21,6 @@ class JimmyJohnsSpider(scrapy.Spider):
 
     def start_requests(self):
         for state in STATES:
-            print(state)
             current_state = json.dumps({ 'state': state })
             request = scrapy.Request(
                 CITIES, 
