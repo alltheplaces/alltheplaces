@@ -35,8 +35,8 @@ class HRBlockSpider(scrapy.Spider):
             'postcode' : response.xpath('normalize-space(//span[@itemprop="postalCode"]/text())').extract_first(),
             'ref' : ref,
             'website' : response.xpath('//link[@rel="canonical"]/@href').extract_first(),
-            'lat' : response.xpath('normalize-space(//meta[@itemprop="latitude"]/@content)').extract_first(),
-            'lon' : response.xpath('normalize-space(//meta[@itemprop="longitude"]/@content)').extract_first(),
+            'lat' : float(response.xpath('normalize-space(//meta[@itemprop="latitude"]/@content)').extract_first()),
+            'lon' : float(response.xpath('normalize-space(//meta[@itemprop="longitude"]/@content)').extract_first()),
         }
         yield GeojsonPointItem(**properties)
 
