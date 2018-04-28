@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import scrapy
 from locations.items import GeojsonPointItem
-import json
 import re
 from urllib.parse import urlencode
 
