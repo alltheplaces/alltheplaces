@@ -9,4 +9,5 @@ install:
   - pipenv install awscli
 
 script:
+  - pipenv run scrapy check
   - pipenv run ./ci/run_spiders_on_travis.sh

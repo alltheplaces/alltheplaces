@@ -29,7 +29,7 @@ class TraderJoesSpider(scrapy.Spider):
             if phone:
                 properties['phone'] = phone.extract_first()
 
-            properties['lon'] = float(store.xpath('longitude/text()').extract_first()),
-            properties['lat'] = float(store.xpath('latitude/text()').extract_first()),
+            properties['lon'] = store.xpath('longitude/text()').extract_first()
+            properties['lat'] = store.xpath('latitude/text()').extract_first()
 
             yield GeojsonPointItem(**properties)

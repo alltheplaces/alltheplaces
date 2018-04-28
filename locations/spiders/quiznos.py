@@ -16,7 +16,7 @@ class QuiznosSpider(scrapy.Spider):
     )
 
     def store_hours(self, store_hours):
-        if store_hours == '': return ''
+        if store_hours == '' or store_hours.lower().find('close') > -1: return ''
 
         day_groups = []
         this_day_group = None
