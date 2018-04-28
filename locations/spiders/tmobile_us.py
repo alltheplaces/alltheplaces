@@ -8,11 +8,14 @@ from locations.items import GeojsonPointItem
 
 class TMobileUSSpider(scrapy.Spider):
 
-    name = "tmobileus"
+    name = "tmobile_us"
     allowed_domains = ["www.t-mobile.com"]
-    start_urls = (
-        'https://www.t-mobile.com/srvspub/storelocsearch?authorizedRetailers=true&coporateStores=true&count=1000&dist=5000&latcentre=44.9761378&lngcentre=-93.271724&prepaidStores=false&query=80+S+8th+St+Ste+205,+Minneapolis,+MN,+United+States&sortBy=Store+Type&start=0',
-    )
+
+    def start_requests(self):
+        url = 'https://www.t-mobile.com/srvspub/storelocsearch?prepaidStores=true&authorizedRetailers=true&coporateStores=true&start=%s&count=50&dist=6000&latcentre=45.0&lngcentre=-90.0&sortBy=Store+Type'
+
+        for start in range(0, 6000, 50):
+            yield scrapy.Request(url % start)
 
     def store_hours(self, store_hours):
         opening_hours = []
@@ -20,7 +23,7 @@ class TMobileUSSpider(scrapy.Spider):
             day_hours = day_hours.replace('Monday', 'Mo').replace('Tuesday', 'Tu').replace('Wednesday', 'We').replace('Thursday', 'Th').replace('Friday', 'Fr').replace('Saturday', 'Sa').replace('Sunday', 'Su')
             day_hours = day_hours.replace('Weekdays', 'Mo-Fr').replace('Weekends', 'Sa-Su').replace('Holidays', 'PH').replace('Everyday', 'Mo-Su')
             day_hours = day_hours.replace('midnight', '12 PM')
-            
+
             hours = ''
             match = re.search(r'(\d{1,2}):(\d{2}) (A|P)M to (\d{1,2}):(\d{2}) (A|P)M', day_hours)
             if match:
@@ -59,7 +62,7 @@ class TMobileUSSpider(scrapy.Spider):
                         t_hr += 12
                     elif t_ampm == 'A' and t_hr == 12:
                         t_hr = 0
-                    
+
                     hours = '{:02d}:{}-{:02d}:{}'.format(
                         f_hr,
                         f_min,
@@ -72,6 +75,7 @@ class TMobileUSSpider(scrapy.Spider):
 
     def parse(self, response):
         results = json.loads(response.body_as_unicode())
+
         base_url = 'https://www.t-mobile.com'
         for store in results['stores']:
             properties = {
@@ -86,9 +90,11 @@ class TMobileUSSpider(scrapy.Spider):
                 'country': store['country_region'],
                 'postcode': store['postal_code'],
             }
+
             if 'storeHours' in store:
                 properties['opening_hours'] = self.store_hours(store['storeHours'])
 
             if 'rspPath' in store:
                 properties['website'] = base_url + store['rspPath']
+
             yield GeojsonPointItem(**properties)
