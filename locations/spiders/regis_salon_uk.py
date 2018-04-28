@@ -9,7 +9,6 @@ regex_pm = r"\s?([Pp][Mm])"
 class RegisUKSpider(scrapy.Spider):
     name = "regis_uk"
     allowed_domains = ["www.regissalons.co.uk"]
-    download_delay = 0
     start_urls = ['https://www.regissalons.co.uk/salon-locator?show-all=yes']
 
     def convert_hours(self, hours):
