@@ -15,16 +15,25 @@ class LowesSpider(scrapy.Spider):
         day_groups = []
         this_day_group = None
 
-        hours = None
+        parsed_hours = {}
         for m in re.finditer(r"(\S*)_(\S*):'(\d{2})\.(\d{2})\S*'", hours_str):
             day, open_close, h, m = m.groups()
             day_short = day[:2]
 
+            day_hours = parsed_hours.get(day_short)
+            if not day_hours:
+                day_hours = ['', '']
+
+            hours = '%s:%s' % (h, m)
             if open_close == 'Open':
-                hours = '%s:%s' % (h, m)
-                continue
-            else:
-                hours = hours + "-%s:%s" % (h, m)
+                day_hours[0] = hours
+            elif open_close == 'Close':
+                day_hours[1] = hours
+
+            parsed_hours[day_short] = day_hours
+
+        for day_short in ('Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'):
+            hours = '-'.join(parsed_hours[day_short])
 
             if not this_day_group:
                 this_day_group = dict(from_day=day_short, to_day=day_short, hours=hours)
