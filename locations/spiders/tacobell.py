@@ -20,6 +20,10 @@ class TacobellSpider(scrapy.Spider):
         for hour in json.loads(hours):
             all_intervals = []
             short_day = hour['day'].title()[:2]
+
+            if not hour['intervals']:
+                continue
+
             for interval in hour['intervals']:
                 start = str(interval['start']).zfill(4)
                 end = str(interval['end']).zfill(4)
