@@ -5,103 +5,92 @@ import traceback
 import re
 from locations.items import GeojsonPointItem
 
-URL = 'https://prd-tac-api01.cfrprd.com/location/v1/stores?longitude=-88.6162872314453&latitude=42.4210510253906&distance=50'
-HEADERS = {
-           'Accept-Language': 'en-US,en;q=0.9',
-           'Origin': 'https://www.tacobell.com',
-           'Accept-Encoding': 'gzip, deflate, br',
-           'Accept': '*/*',
-           'Referer': 'https://www.tacobell.com/locations/',
-           'Connection': 'keep-alive',
-           'Device-Identifier': '68805ed9-8f43-41ce-5993-e6af2dfcdf31',
-           'Host':'prd-tac-api01.cfrprd.com',
-           'Authorization': 'bearer 2962bdbe503c11e58504005056b335f2',
-           'Content-Type': 'application/json',
-           }
-
-DAY_NAMES = {
-    'monday':'Mo',
-    'tuesday': 'Tu',
-    'wednesday': 'We',
-    'thursday': 'Th',
-    'friday': 'Fr',
-    'saturday': 'Sa',
-    'sunday': 'Su'
-}
-
 
 class TacobellSpider(scrapy.Spider):
     name = "tacobell"
-    allowed_domains = ["www.tacobell.com"]
+    allowed_domains = ["locations.tacobell.com"]
+    start_urls = ("https://locations.tacobell.com/",)
+    download_delay = 0.2
 
-    def start_requests(self):
-        yield scrapy.http.FormRequest(url=URL, method='GET',
-                                          headers=HEADERS, callback=self.parse)
+    def normalize_hours(self, hours):
 
-    def store_hours(self, store_hours):
-        day_groups = []
-        this_day_group = None
+        all_days = []
+        reversed_hours = {}
 
-        for day_info in DAY_NAMES:
-            day = DAY_NAMES[day_info]
-            o_match = re.match('(\d{1,2}):(\d{2})(am|pm|AM|PM)', store_hours[day_info]['openTime'])
-            c_match = re.match('(\d{1,2}):(\d{2})(am|pm|AM|PM)', store_hours[day_info]['closeTime'])
-            o_h, o_min, o_ampm = o_match.groups()
-            c_h, c_min, c_ampm = c_match.groups()
+        for hour in json.loads(hours):
+            all_intervals = []
+            short_day = hour['day'].title()[:2]
+            for interval in hour['intervals']:
+                start = str(interval['start']).zfill(4)
+                end = str(interval['end']).zfill(4)
+                from_hr = "{}:{}".format(start[:2],
+                                         start[2:]
+                                         )
+                to_hr = "{}:{}".format(end[:2],
+                                       end[2:]
+                                       )
+                epoch = '{}-{}'.format(from_hr, to_hr)
+                all_intervals.append(epoch)
+            reversed_hours.setdefault(', '.join(all_intervals), [])
+            reversed_hours[epoch].append(short_day)
 
-            hours = '%02d:%02d-%02d:%02d' % (
-                int(o_h) + 12 if o_ampm == 'pm' or o_ampm == 'PM' else int(o_h),
-                int(o_min),
-                int(c_h) + 12 if c_ampm == 'pm' or c_ampm == 'PM' else int(c_h),
-                int(c_min),
+        if len(reversed_hours) == 1 and list(reversed_hours)[0] == '00:00-24:00':
+            return '24/7'
+        opening_hours = []
+
+        for key, value in reversed_hours.items():
+            if len(value) == 1:
+                opening_hours.append('{} {}'.format(value[0], key))
+            else:
+                opening_hours.append(
+                    '{}-{} {}'.format(value[0], value[-1], key))
+        return "; ".join(opening_hours)
+
+    def parse_location(self, response):
+
+        hours = response.xpath('//div[@class="c-location-hours-details-wrapper js-location-hours"]/@data-days').extract_first()
+        opening_hours = self.normalize_hours(hours)
+
+        props = {
+            'addr_full': response.xpath('//span[@itemprop="streetAddress"]/span/text()').extract_first().strip(),
+            'lat': float(response.xpath('//meta[@itemprop="latitude"]/@content').extract_first()),
+            'lon': float(response.xpath('//meta[@itemprop="longitude"]/@content').extract_first()),
+            'city': response.xpath('//span[@itemprop="addressLocality"]/text()').extract_first(),
+            'postcode': response.xpath('//span[@itemprop="addressLocality"]/text()').extract_first(),
+            'state': response.xpath('//abbr[@itemprop="addressRegion"]/text()').extract_first(),
+            'phone': response.xpath('//span[@class="c-phone-number-span c-phone-main-number-span"]/text()').extract_first(),
+            'ref': response.xpath('//div[@class="nap-content main"]/@data-code').extract_first(),
+            'website': response.url,
+            'opening_hours': opening_hours,
+        }
+
+        return GeojsonPointItem(**props)
+
+    def parse_city_stores(self, response):
+        locations = response.xpath('//a[@class="c-location-grid-item-link"]/@href').extract()
+
+        if not locations:
+            yield self.parse_location(response)
+        else:
+            for location in locations:
+                yield scrapy.Request(
+                    url=response.urljoin(location),
+                    callback=self.parse_location
+                )
+
+    def parse_state(self, response):
+        cities = response.xpath('//li[@class="c-directory-list-content-item"]/a/@href').extract()
+        for city in cities:
+            yield scrapy.Request(
+                response.urljoin(city),
+                callback=self.parse_city_stores
             )
 
-            if not this_day_group:
-                this_day_group = {
-                    'from_day': day,
-                    'to_day': day,
-                    'hours': hours
-                }
-            elif this_day_group['hours'] != hours:
-                day_groups.append(this_day_group)
-                this_day_group = {
-                    'from_day': day,
-                    'to_day': day,
-                    'hours': hours
-                }
-            elif this_day_group['hours'] == hours:
-                this_day_group['to_day'] = day
-
-        day_groups.append(this_day_group)
-
-        opening_hours = ""
-        for day_group in day_groups:
-            if day_group['from_day'] == day_group['to_day']:
-                opening_hours += '{from_day} {hours}; '.format(**day_group)
-            elif day_group['from_day'] == 'Su' and day_group['to_day'] == 'Sa':
-                opening_hours += '{hours}; '.format(**day_group)
-            else:
-                opening_hours += '{from_day}-{to_day} {hours}; '.format(**day_group)
-        opening_hours = opening_hours[:-2]
-
-        return opening_hours
-
     def parse(self, response):
-        content = json.loads(response.body_as_unicode())
-        stores = content.get('data')
+        states = response.xpath('//li[@class="c-directory-list-content-item"]/a/@href').extract()
 
-        for store in stores:
-            props = {
-                'lat': store.get('coordinates')['latitude'],
-                'lon': store.get('coordinates')['longitude'],
-                'ref': store.get('storeId'),
-                'name': store.get('name'),
-                'phone': store.get('phoneNumber'),
-                'street': store.get('address')['line1'],
-                'city': store.get('address')['city'],
-                'state': store.get('address')['countrySubdivisionCode'],
-                'postcode': store.get('address')['postalCode'],
-                'opening_hours': self.store_hours(store.get('weeklyOperatingSchedule'))
-            }
-
-            yield GeojsonPointItem(**props)
+        for state in states:
+            yield scrapy.Request(
+                response.urljoin(state),
+                callback=self.parse_state
+            )
