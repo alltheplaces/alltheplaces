@@ -24,20 +24,20 @@ class ApplebeesSpider(scrapy.Spider):
             if not line['opens']:
                 continue
 
-            match = re.search(r'^(\d{1,2}):(\d{2}) (A|P)M$', line['opens'])
+            match = re.search(r'^(\d{1,2}):(\d{2})\D*?([APap])[Mm]$', line['opens'])
             (f_hr, f_min, f_ampm) = match.groups()
-            match = re.search(r'^(\d{1,2}):(\d{2}) (A|P)M$', line['closes'])
+            match = re.search(r'^(\d{1,2}):(\d{2})\D*?([APap])[Mm]$', line['closes'])
             (t_hr, t_min, t_ampm) = match.groups()
 
             f_hr = int(f_hr)
-            if f_ampm == 'p':
+            if f_ampm.lower() == 'p':
                 f_hr += 12
-            elif f_ampm == 'a' and f_hr == 12:
+            elif f_ampm.lower() == 'a' and f_hr == 12:
                 f_hr = 0
             t_hr = int(t_hr)
-            if t_ampm == 'p':
+            if t_ampm.lower() == 'p':
                 t_hr += 12
-            elif t_ampm == 'a' and t_hr == 12:
+            elif t_ampm.lower() == 'a' and t_hr == 12:
                 t_hr = 0
 
             hours = '{:02d}:{}-{:02d}:{}'.format(
