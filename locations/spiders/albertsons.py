@@ -16,10 +16,14 @@ DAY_MAPPING = {
 class AlbertsonsSpider(scrapy.Spider):
 
     name = "albertsons"
-    allowed_domains = ["local.albertsons.com"]
     download_delay = 0.5
+    allowed_domains = [
+        "local.albertsons.com",
+        "local.jewelosco.com",
+    ]
     start_urls = (
         'https://local.albertsons.com/index.html',
+        'https://local.jewelosco.com/index.html',
     )
 
     def parse_stores(self, response):
@@ -41,7 +45,7 @@ class AlbertsonsSpider(scrapy.Spider):
         }
         hours = response.xpath('//div[@class="LocationInfo-right"]/div[1]/div[@class="LocationInfo-hoursTable"]/div[@class="c-location-hours-details-wrapper js-location-hours"]/table/tbody/tr/@content').extract()
         if hours:
-            properties['opening_hours'] = " ;".join(hours)
+            properties['opening_hours'] = "; ".join(hours)
         yield GeojsonPointItem(**properties)
 
     def parse_city_stores(self ,response):
