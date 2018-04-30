@@ -15,6 +15,10 @@ class OfficedepotSpider(scrapy.Spider):
         for d in response.xpath('//time[@itemprop="openingHours"]/@datetime').extract():
             day, times = d.split(' ', 1)
             s, f = times.split('-')
+
+            # They seem to have a bug where they put down 24:00 when they mean noon
+            if s == '24:00': s = '12:00'
+
             o.add_range(day, s, f)
 
         yield GeojsonPointItem(
