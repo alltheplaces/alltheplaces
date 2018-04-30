@@ -21,6 +21,10 @@ class OfficedepotSpider(scrapy.Spider):
 
             o.add_range(day, s, f)
 
+        store_number_results = response.xpath('//dt[@class="lsp_number"]/text()')
+        if store_number_results:
+            ref = store_number_results[-1].extract().strip()
+
         yield GeojsonPointItem(
             lat=response.xpath('//meta[@itemprop="latitude"]/@content').extract_first(),
             lon=response.xpath('//meta[@itemprop="longitude"]/@content').extract_first(),
@@ -30,7 +34,7 @@ class OfficedepotSpider(scrapy.Spider):
             state=response.xpath('//p[@itemprop="addressRegion"]/text()').extract_first(),
             postcode=response.xpath('//p[@itemprop="postalCode"]/text()').extract_first(),
             website=response.url,
-            ref=response.xpath('//dt[@class="lsp_number"]/text()')[-1].extract().strip(),
+            ref=ref,
             opening_hours=o.as_opening_hours(),
         )
 
