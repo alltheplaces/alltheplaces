@@ -37,7 +37,6 @@ class StaplesSpider(scrapy.Spider):
         return "; ".join(opening_hours)
 
     def get_store_info(self, store):
-        print('store URL', store.url)
         hours = store.xpath('//div[@class="c-location-hours-details-wrapper js-location-hours"]/@data-days').extract_first()
         opening_hours = self.get_hours(json.loads(hours)) or ''
 
@@ -65,7 +64,6 @@ class StaplesSpider(scrapy.Spider):
                     callback=self.get_store_info
                 )
         else:
-            print('\nSINGLE store', store.url)
             yield self.get_store_info(store)
     
     def parse_state(self, response):
