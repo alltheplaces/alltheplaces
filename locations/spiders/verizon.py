@@ -24,18 +24,20 @@ class VerizonSpider(scrapy.Spider):
                 city_name = city_json[index]['city']
                 state = city_json[index]['state']
                 zip_code = city_json[index]['zip']
+                web = city_store.xpath('.//span/a/@href').extract_first()
                 props = {
                     'addr_full': '{}, {}, {} {}'.format(city_json[index]['address'], city_name, state, zip_code),
                     'city': city_name,
                     'state': state,
                     'postcode': zip_code,
                     'phone': phone,
-                    'ref': phone,
-                    'website': city.urljoin(city_store.xpath('.//span/a/@href').extract_first()),
-                    'name': city_store.xpath('.//span/a/text()').extract_first(),
-                    'lat': float(city_json[index]['lat']),
-                    'lon': float(city_json[index]['lng'])
+                    'ref': web,
+                    'website': city.urljoin(web),
+                    'name': city_store.xpath('.//span/a/text()').extract_first()
                 }
+                if city_json[index]['lat'] != 'null' and city_json[index]['lng'] != 'null':
+                    props['lat'] = float(city_json[index]['lat'])
+                    props['lon'] = float(city_json[index]['lng'])
                 yield GeojsonPointItem(**props)
     
     # Once per state, gets cities.
