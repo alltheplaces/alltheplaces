@@ -65,25 +65,22 @@ class FazolisSpider(scrapy.Spider):
         return opening_hours
 
     def store_info(self, store):
-        phone = store.xpath('.//span[@class="c-phone-number-span c-phone-main-number-span"]/text()').extract_first()
-        city = store.xpath('.//span[@class="c-address-city"]/text()').extract_first()
-        state = store.xpath('.//abbr[@class="c-address-state"]/text()').extract_first()
-        zip_code = store.xpath('.//span[@class="c-address-postal-code"]/text()').extract_first()
-        address = store.xpath('.//span[@class="c-address-street-1"]/text()').extract_first()
-        latitude = store.xpath('.//span[@class="coordinates"]/meta[@itemprop="latitude"]/@content').extract_first()
-        longitude = store.xpath('.//span[@class="coordinates"]/meta[@itemprop="longitude"]/@content').extract_first()
+        address = store.xpath('//meta[contains(@itemprop,"streetAddress")]/@content').extract_first()
+        city = store.xpath('//span[contains(@itemprop,"addressLocality")]/text()').extract_first()
+        state = store.xpath('//abbr[contains(@itemprop,"addressRegion")]/text()').extract_first()
+        zip_code = store.xpath('//span[contains(@itemprop,"postalCode")]/text()').extract_first()
         hours = json.loads(store.xpath('//div[@class="location-info-col-split right-split"]//div[@class="c-location-hours-details-wrapper js-location-hours"]/@data-days').extract_first())
         props = {
             'addr_full': '{}, {}, {} {}'.format(address, city, state, zip_code),
             'city': city,
             'state': state,
             'postcode': zip_code,
-            'phone': phone,
+            'phone': store.xpath('//span[contains(@itemprop,"telephone")]/text()').extract_first(),
             'ref': store.url,
-            'name': store.xpath('//h1[contains(@itemprop,"name")]/text()').extract_first(),
+            'name': store.xpath('string(//h1[contains(@itemprop,"name")])').extract_first(),
             'website': store.url,
-            'lat': float(latitude),
-            'lon': float(longitude)
+            'lat': float(store.xpath('//meta[contains(@itemprop,"latitude")]/@content').extract_first()),
+            'lon': float(store.xpath('//meta[contains(@itemprop,"longitude")]/@content').extract_first())
         }
         if hours:
             props['opening_hours'] = self.store_hours(hours)
