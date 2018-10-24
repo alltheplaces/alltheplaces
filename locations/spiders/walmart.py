@@ -9,79 +9,34 @@ class WalmartSpider(scrapy.Spider):
     name = "walmart"
     allowed_domains = ["walmart.com"]
     start_urls = (
-        'http://www.walmart.com/store/ajax/detail-navigation?location=24019',
-        'http://www.walmart.com/store/ajax/detail-navigation?location=98101',
+        'https://www.walmart.com/sitemap_store_main.xml',
     )
 
     def store_hours(self, store_hours):
-        if store_hours.get('open24Hours'):
+        if store_hours == 'Mo-Su':
             return u'24/7'
-        elif store_hours.get('empty'):
+        elif store_hours is None:
             return None
         else:
-            combined = store_hours.get('operationalHoursCombined')
-
-            if len(combined) == 1 and 'startHr' not in combined[0]['dailyHours']:
-                return None
-
-            opening_hours = ""
-            if len(combined) == 1 \
-              and combined[0]['dailyHours']['dayConstant'] == 1 \
-              and combined[0]['dailyHours']['endDayConstant'] == 7:
-                opening_hours = "{}-{}".format(
-                    combined[0]['dailyHours']['startHr'],
-                    combined[0]['dailyHours']['endHr'].replace('24:', '00:'),
-                )
-            else:
-                for r in combined:
-                    if not r['dailyHours'].get('startHr'):
-                        continue
-
-                    day_group = "{} {}-{}; ".format(
-                        r['dayNameShort'].replace(' ', ''),
-                        r['dailyHours']['startHr'],
-                        r['dailyHours']['endHr'].replace('24:', '00:'),
-                    )
-
-                    opening_hours += day_group
-                opening_hours = opening_hours[:-2]
-            return opening_hours
+            return store_hours
 
     def parse(self, response):
-        data = json.loads(response.body_as_unicode())
+        response.selector.remove_namespaces()
+        for u in response.xpath('//loc/text()').extract():
+            if u.endswith('/details'):
+                yield scrapy.Request(u.strip(), callback=self.parse_store)
 
-        if data['status'] == 'error':
-            raise Exception("Error: " + data['message'])
-
-        stores = data['payload']['stores']
-
-        for store in stores:
-            open_date = store.get('openDate')
-            if open_date:
-                open_date = '{}-{}-{}'.format(
-                    open_date[6:10],
-                    open_date[0:2],
-                    open_date[3:5],
-                )
-
-            yield GeojsonPointItem(
-                lat=store['geoPoint']['latitude'],
-                lon=store['geoPoint']['longitude'],
-                ref=str(store['id']),
-                phone=store.get('phone'),
-                name=store['storeType']['name'],
-                opening_hours=self.store_hours(store['operationalHours']),
-                addr_full=store.get('address', {}).get('address1'),
-                city=store.get('address', {}).get('city'),
-                state=store.get('address', {}).get('state'),
-                postcode=store.get('address', {}).get('postalCode'),
-                extras={
-                    'start_date': open_date
-                }
-            )
-
-            yield scrapy.Request(
-                'http://www.walmart.com/store/ajax/detail-navigation?location={}'.format(
-                    store['address']['postalCode']
-                ),
-            )
+    def parse_store(self, response):
+        addr = response.xpath('//div[@itemprop="address"]')[0]
+        yield GeojsonPointItem(
+            lat=response.xpath('//meta[@itemprop="latitude"]/@content').extract_first(),
+            lon=response.xpath('//meta[@itemprop="longitude"]/@content').extract_first(),
+            ref=response.url.split('/')[4],
+            phone=response.xpath('//meta[@itemprop="telephone"]/@content').extract_first(),
+            name=response.xpath('//meta[@itemprop="name"]/@content').extract_first(),
+            opening_hours=self.store_hours(response.xpath('//meta[@itemprop="openingHours"]/@content').extract_first()),
+            addr_full=addr.xpath('//span[@itemprop="streetAddress"]/text()').extract_first(),
+            city=addr.xpath('//span[@itemprop="locality"]/text()').extract_first(),
+            state=addr.xpath('//span[@itemprop="addressRegion"]/text()').extract_first(),
+            postcode=addr.xpath('//span[@itemprop="postalCode"]/text()').extract_first(),
+        )
