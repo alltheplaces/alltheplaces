@@ -23,7 +23,7 @@ def item_to_properties(item):
     props = {}
 
     # Ref is required
-    props['ref'] = unicode(item['ref'])
+    props['ref'] = str(item['ref'])
 
     # Add in the extra bits
     extras = item.get('extras')
