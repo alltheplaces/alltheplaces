@@ -5,6 +5,7 @@ if [ -f $S3_BUCKET ]; then
     exit 1
 fi
 
+RUN_START=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 RUN_TIMESTAMP=$(date -u +%F-%H-%M-%S)
 RUN_S3_KEY_PREFIX="runs/${RUN_TIMESTAMP}"
 RUN_S3_PREFIX="s3://${S3_BUCKET}/${RUN_S3_KEY_PREFIX}"
@@ -36,38 +37,64 @@ fi
 OUTPUT_LINECOUNT=$(cat ${SPIDER_RUN_DIR}/output/*.geojson | wc -l | tr -d ' ')
 (>&2 echo "Generated ${OUTPUT_LINECOUNT} lines")
 
+echo "{\"count\": ${SPIDER_COUNT}, \"results\": []}" >> ${SPIDER_RUN_DIR}/output/results.json
+for spider in $(scrapy list)
+do
+    spider_out_geojson="${SPIDER_RUN_DIR}/output/${spider}.geojson"
+    spider_out_log="${SPIDER_RUN_DIR}/logs/${spider}.log"
+    cat ${SPIDER_RUN_DIR}/output/results.json | \
+        jq --compact-output \
+            --arg spider_name ${spider} \
+            --arg spider_feature_count $(wc -l < ${spider_out_geojson}) \
+            --arg spider_error_count $(grep ' ERROR: ' ${spider_out_log} | wc -l | tr -d ' ') \
+            '.results += [{"spider": $spider_name, "errors": $spider_error_count | tonumber, "features": $spider_feature_count | tonumber}]' \
+        > ${SPIDER_RUN_DIR}/output/results.json
+done
+(>&2 echo "Wrote out summary JSON")
+
 (>&2 echo "Concatenating and compressing output files")
 tar -czf ${SPIDER_RUN_DIR}/output.tar.gz -C ${SPIDER_RUN_DIR} ./output
-OUTPUT_FILESIZE=$(du ${SPIDER_RUN_DIR}/output.tar.gz | awk '{printf "%0.1f", $1/1024}')
 
-(>&2 echo "Compressing log files")
+(>&2 echo "Concatenating and compressing log files")
 tar -czf ${SPIDER_RUN_DIR}/logs.tar.gz -C ${SPIDER_RUN_DIR} ./logs
 
-(>&2 echo "Saving log files to ${RUN_URL_PREFIX}/logs.tar.gz")
-aws s3 cp --only-show-errors \
+(>&2 echo "Saving log and output files to ${RUN_URL_PREFIX}")
+aws s3 sync \
+    --only-show-errors \
     --acl=public-read \
-    --content-type "application/gzip" \
-    "${SPIDER_RUN_DIR}/logs.tar.gz" \
-    "${RUN_S3_PREFIX}/logs.tar.gz"
+    "${SPIDER_RUN_DIR}/" \
+    "${RUN_S3_PREFIX}/"
 
 if [ ! $? -eq 0 ]; then
-    (>&2 echo "Couldn't save logfiles to s3")
+    (>&2 echo "Couldn't sync to s3")
     exit 1
 fi
 
-(>&2 echo "Saving output to ${RUN_URL_PREFIX}/output.tar.gz")
-aws s3 cp --only-show-errors \
+(>&2 echo "Updating runs.json with new runs")
+RUN_FINISH=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+aws s3 cp \
+    --only-show-errors \
+    "s3://${S3_BUCKET}/runs.json" \
+    "runs.json"
+cat runs.json | \
+    jq \
+        --compact-output \
+        --arg run_start $RUN_START \
+        --arg run_finish $RUN_FINISH \
+        --arg run_name $RUN_TIMESTAMP \
+        --arg spider_count $SPIDER_COUNT \
+        --arg feature_count $OUTPUT_LINECOUNT \
+        '.runs += [{"start": $run_start, "finish": $run_finish, "name": $run_name, "spider_count": $spider_count | tonumber, "feature_count": $feature_count | tonumber}]' \
+    > runs.json
+aws s3 cp \
+    --only-show-errors \
     --acl=public-read \
-    --content-type "application/gzip" \
-    "${SPIDER_RUN_DIR}/output.tar.gz" \
-    "${RUN_S3_PREFIX}/output.tar.gz"
-
-if [ ! $? -eq 0 ]; then
-    (>&2 echo "Couldn't save output to s3")
-    exit 1
-fi
+    "runs.json" \
+    "s3://${S3_BUCKET}/runs.json"
+(>&2 echo "Saved updated runs.json to https://s3.amazonaws.com/${S3_BUCKET}/runsjson")
 
 (>&2 echo "Saving embed to https://s3.amazonaws.com/${S3_BUCKET}/runs/latest/info_embed.html")
+OUTPUT_FILESIZE=$(du ${SPIDER_RUN_DIR}/output.tar.gz | awk '{printf "%0.1f", $1/1024}')
 cat > "${SPIDER_RUN_DIR}/info_embed.html" << EOF
 <html><body>
 <a href="${RUN_URL_PREFIX}/output.tar.gz">Download</a>
@@ -76,7 +103,8 @@ ${SPIDER_COUNT} spiders, updated $(date)</small>
 </body></html>
 EOF
 
-aws s3 cp --only-show-errors \
+aws s3 cp \
+    --only-show-errors \
     --acl=public-read \
     --content-type "text/html; charset=utf-8" \
     "${SPIDER_RUN_DIR}/info_embed.html" \
