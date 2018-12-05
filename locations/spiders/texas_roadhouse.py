@@ -1,12 +1,10 @@
 import datetime
-import xml.etree.ElementTree as ET
 
 import scrapy
 
 from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
 
-MAX_RETRIES = 3
 DAY_MAPPING = {
     'MonHours': 'Mo',
     'TueHours': 'Tu',
@@ -27,20 +25,16 @@ class TexasRoadhouseSpider(scrapy.Spider):
     )
 
     @staticmethod
-    def format_address(data):
-        addr = " ".join(filter(None, [data["Address1"], data["Address2"]]))
-        city = data["City"]
-        state = data["State"].strip()
-        zip = data["Zip"]
-        country = data["Country"]
+    def format_address(address1, address2, city, state, zipcode, country):
+        addr = " ".join(filter(None, [address1, address2]))
 
-        if not state and not zip:  # international address - does not have state/zip but may have city
+        if not state and not zipcode:  # international address - does not have state/zip but may have city
             if city:
-                return "{}, {}, {}".format(addr, city, data["Country"])
+                return "{}, {}, {}".format(addr, city, country)
             else:
-                return "{}, {}".format(addr, data["Country"])
+                return "{}, {}".format(addr, country)
         else:
-            return "{}, {}, {} {}, {}".format(addr, city, state, zip, country)
+            return "{}, {}, {} {}, {}".format(addr, city, state, zipcode, country)
 
     @staticmethod
     def convert_to_24hr(date):
@@ -76,43 +70,37 @@ class TexasRoadhouseSpider(scrapy.Spider):
         return hours.as_opening_hours()
 
     def parse_store(self, response):
-        retries = 0
         ref = response.meta['id']
         name = response.meta['name']
 
-        try:
-            root = ET.fromstring(response.text)
-        except ET.ParseError:
-            if retries <= MAX_RETRIES:
-                retries += 1
-                print('Retrying parse store!  store_id: {}'.format(ref))
-                yield scrapy.Request(response.url, callback=self.parse_store, dont_filter=True, meta=response.meta)
-            else:
-                return
+        address1 = (response.xpath('//Table/Address1/text()').extract_first() or '').strip() or None
+        address2 = (response.xpath('//Table/Address2/text()').extract_first() or '').strip() or None
+        city = (response.xpath('//Table/City/text()').extract_first() or '').strip()
+        state = (response.xpath('//Table/State/text()').extract_first() or '').strip()
+        zipcode = (response.xpath('//Table/Zip/text()').extract_first() or '').strip()
+        country = (response.xpath('//Table/Country/text()').extract_first() or '').strip()
 
-        table = root.getchildren()[0]
-        data = {i.tag: i.text for i in table}
-
-        if 'Address1' not in data:
+        if not address1:
             return
 
         properties = {
             'ref': ref,
             'name': name,
-            'addr_full': self.format_address(data),
-            'city': (data['City'] or '').strip() or None,
-            'state': (data['State'] or '').strip() or None,
-            'postcode': (data['Zip'] or '').strip() or None,
-            'country': data["Country"].strip(),
-            'lat': float(data['GPSLat']),
-            'lon': float(data['GPSLon']),
-            'phone': data['Phone'],
+            'addr_full': self.format_address(address1, address2, city, state, zipcode, country),
+            'city': city or None,
+            'state': state or None,
+            'postcode': zipcode or None,
+            'country': country or None,
+            'lat': float(response.xpath('//Table/GPSLat/text()').extract_first()),
+            'lon': float(response.xpath('//Table/GPSLon/text()').extract_first()),
+            'phone': response.xpath('//Table/Phone/text()').extract_first(),
             'extras': {
-                'display_name': data['StoreDisplayName']
+                'display_name': response.xpath('//Table/StoreDisplayName/text()').extract_first()
             }
         }
 
-        hours = self.parse_hours(data)
+        hour_data = {day: response.xpath('//Table/{}/text()'.format(day)).extract_first() for day in DAY_MAPPING.keys()}
+        hours = self.parse_hours(hour_data)
         if hours and hours != 'Mo-Su ':
             properties['opening_hours'] = hours
 
@@ -123,28 +111,21 @@ class TexasRoadhouseSpider(scrapy.Spider):
                              meta={'properties': properties})
 
     def parse_website_url(self, response):
-        retries = 0
         properties = response.meta['properties']
 
-        root = ET.fromstring(response.text)
-        website_url = root.text
-
-        if not website_url and retries <= MAX_RETRIES:  # retry if empty
-            retries += 1
-            print('Retrying parse website url! store_id: {}'.format(properties["ref"]))
-            yield scrapy.Request(response.url, callback=self.parse_website_url, dont_filter=True, meta=response.meta)
+        website_url = response.xpath('./text()').extract_first()
 
         if website_url:
-            properties["website"] = 'https://www.texasroadhouse.com' + website_url.replace('\n', '')
+            properties["website"] = 'https://www.texasroadhouse.com' + website_url
 
         yield GeojsonPointItem(**properties)
 
     def parse(self, response):
-        root = ET.fromstring(response.text)
+        store_elems = response.xpath('//Table')
 
-        for table in root.iter('Table'):
-            store_id = table.find('StoreID').text
-            name = table.find('Name').text
+        for store_elem in store_elems:
+            store_id = store_elem.xpath('.//StoreID/text()').extract_first()
+            name = store_elem.xpath('.//Name/text()').extract_first()
             url = "https://www.texasroadhouse.com/sitefinity/services/LeapFrog/TRH_Proxy.asmx/GetXmlStoreById?storeId=%s" % (store_id)
             yield scrapy.Request(
                 url,
