@@ -55,7 +55,9 @@ class OpeningHours(object):
             opening_hours = '24/7'
         else:
             for day_group in day_groups:
-                if day_group['from_day'] == day_group['to_day']:
+                if not day_group['hours']:
+                    continue
+                elif day_group['from_day'] == day_group['to_day']:
                     opening_hours += '{from_day} {hours}; '.format(**day_group)
                 elif day_group['from_day'] == 'Su' and day_group['to_day'] == 'Sa':
                     opening_hours += '{hours}; '.format(**day_group)
