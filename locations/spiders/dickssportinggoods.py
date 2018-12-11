@@ -39,10 +39,7 @@ class DicksSportingGoodsSpider(scrapy.Spider):
         return opening_hours.as_opening_hours()
 
     def parse_store(self, response):
-        # store_number = response.url.split('/')[-1]
         ref = re.search(r"/(\d+)/$", response.url).group(1)
-
-        # shopping_center = response.xpath('//collection[@name="poi"]/poi[1]/address2/text()').extract_first()
         name = response.xpath('//meta[@property="og:title"]/@content').extract_first()
         shopping_center = string.capwords("".join(
             response.xpath('//div[contains(@class, "shopping_center")]/text()').extract()).strip())
