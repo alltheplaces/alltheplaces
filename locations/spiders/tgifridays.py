@@ -20,7 +20,7 @@ DAY_MAPPING = {
 
 class TGIFridaySpider(scrapy.Spider):
     download_delay = 0.2
-    name = "tgifriday"
+    name = "tgifridays"
     allowed_domains = ["tgifridays.com"]
     start_urls = (
         'https://locations.tgifridays.com/index.html',
@@ -31,16 +31,22 @@ class TGIFridaySpider(scrapy.Spider):
 
         for elem in elements:
             day = elem.xpath('.//td[@class="c-location-hours-details-row-day"]/text()').extract_first()
-            intervals = elem.xpath('.//td[@class="c-location-hours-details-row-intervals"]/text()').extract_first()
-            if intervals == "Closed":
+            intervals = elem.xpath('.//td[@class="c-location-hours-details-row-intervals"]')
+
+            if intervals.xpath('./text()').extract_first() == "Closed":
                 continue
-            start_time = elem.xpath(
-                './/span[@class="c-location-hours-details-row-intervals-instance-open"]/text()').extract_first()
-            end_time = elem.xpath(
-                './/span[@class="c-location-hours-details-row-intervals-instance-close"]/text()').extract_first()
-            opening_hours.add_range(day=DAY_MAPPING[day],
-                                    open_time=datetime.datetime.strptime(start_time, '%H:%M %p').strftime('%H:%M'),
-                                    close_time=datetime.datetime.strptime(end_time, '%H:%M %p').strftime('%H:%M'))
+            if intervals.xpath('./span/text()').extract_first() == "Open 24 hours":
+                opening_hours.add_range(day=DAY_MAPPING[day],
+                                        open_time='0:00',
+                                        close_time='23:59')
+            else:
+                start_time = elem.xpath(
+                    './/span[@class="c-location-hours-details-row-intervals-instance-open"]/text()').extract_first()
+                end_time = elem.xpath(
+                    './/span[@class="c-location-hours-details-row-intervals-instance-close"]/text()').extract_first()
+                opening_hours.add_range(day=DAY_MAPPING[day],
+                                        open_time=datetime.datetime.strptime(start_time, '%H:%M %p').strftime('%H:%M'),
+                                        close_time=datetime.datetime.strptime(end_time, '%H:%M %p').strftime('%H:%M'))
         return opening_hours.as_opening_hours()
 
     def parse_store(self, response):
