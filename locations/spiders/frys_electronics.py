@@ -11,7 +11,6 @@ class FrysElectronisSpider(scrapy.Spider):
     )
 
     def parse_store(self, response):
-        print('\n', response.url)
         address_lines = response.xpath('//div[@id="rightside"]/div[@id="text3"]/div[@id="address"]//b/text()').extract()
         address = ', '.join([ a.strip() for a in address_lines ])
         phone = [ t for t in response.xpath('//div[@id="rightside"]/div[@id="text3"]/div[@id="address"]//text()').extract() if 'Phone' in t ]
@@ -28,7 +27,6 @@ class FrysElectronisSpider(scrapy.Spider):
         
         # Try to parse the degree, minutes, seconds coordinate pair
         if coordinates and len(coordinates) == 1:
-            print('coordinates', coordinates)
             # Add a comma to separate lat and lon
             if '" -' in coordinates[0]:
                 coordinates[0] = coordinates[0].replace('" -', '", -')

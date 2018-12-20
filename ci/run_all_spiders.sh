@@ -91,7 +91,7 @@ aws s3 cp \
     --acl=public-read \
     "runs.json" \
     "s3://${S3_BUCKET}/runs.json"
-(>&2 echo "Saved updated runs.json to https://s3.amazonaws.com/${S3_BUCKET}/runsjson")
+(>&2 echo "Saved updated runs.json to https://s3.amazonaws.com/${S3_BUCKET}/runs.json")
 
 (>&2 echo "Saving embed to https://s3.amazonaws.com/${S3_BUCKET}/runs/latest/info_embed.html")
 OUTPUT_FILESIZE=$(du ${SPIDER_RUN_DIR}/output.tar.gz | awk '{printf "%0.1f", $1/1024}')

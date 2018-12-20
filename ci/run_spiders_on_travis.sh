@@ -68,12 +68,12 @@ do
         "${LOGFILE}.gz" \
         "${S3_URL_PREFIX}/log.txt"
 
-    if [ ! $? -eq 0 ]; then
+    if [ $? -eq 0 ]; then
+        (>&2 echo "${spider} logfile is: ${S3_URL_PREFIX}/log.txt")
+    else
         (>&2 echo "${spider} couldn't save logfile to s3")
-        FAIL_THE_BUILD=1
     fi
 
-    (>&2 echo "${spider} logfile is: ${S3_URL_PREFIX}/log.txt")
 
     FEATURE_COUNT=$(wc -l < ${OUTFILE} | tr -d ' ')
 
@@ -89,12 +89,12 @@ do
             "${OUTFILE}.gz" \
             "${S3_URL_PREFIX}/output.geojson"
 
-        if [ ! $? -eq 0 ]; then
+        if [ $? -eq 0 ]; then
+            (>&2 echo "${spider} output is: ${S3_URL_PREFIX}/output.geojson")
+        else
             (>&2 echo "${spider} couldn't save output to s3")
-            FAIL_THE_BUILD=1
         fi
 
-        (>&2 echo "${spider} output is: ${S3_URL_PREFIX}/output.geojson")
     fi
 
     PR_COMMENT_BODY="${PR_COMMENT_BODY}|[\`$spider\`](https://github.com/${TRAVIS_REPO_SLUG}/blob/${TRAVIS_COMMIT}/${spider})|[${FEATURE_COUNT} items](${HTTP_URL_PREFIX}/output.geojson) ([Map](https://s3.amazonaws.com/${S3_BUCKET}/map.html?show=${HTTP_URL_PREFIX}/output.geojson))|Resulted in a \`${FAILURE_REASON}\` ([Log](${HTTP_URL_PREFIX}/log.txt))|\\n"
