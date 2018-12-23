@@ -8,14 +8,14 @@ class OpeningHours(object):
     def __init__(self):
         self.day_hours = defaultdict(list)
 
-    def add_range(self, day, open_time, close_time):
+    def add_range(self, day, open_time, close_time, time_format='%H:%M'):
         if day not in DAYS:
             raise ValueError("day must be one of " + ', '.join(DAYS))
 
         if not isinstance(open_time, time.struct_time):
-            open_time = time.strptime(open_time, '%H:%M')
+            open_time = time.strptime(open_time, time_format)
         if not isinstance(close_time, time.struct_time):
-            close_time = time.strptime(close_time, '%H:%M')
+            close_time = time.strptime(close_time, time_format)
 
         self.day_hours[day].append((open_time, close_time))
 

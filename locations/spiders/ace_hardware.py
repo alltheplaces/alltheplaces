@@ -2,65 +2,65 @@ import scrapy
 import re
 import json
 from locations.items import GeojsonPointItem
+from locations.hours import OpeningHours
 
-DAY_MAPPING = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+DAY_MAPPING = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
 
 
 class AceHardwareSpider(scrapy.Spider):
     name = "ace_hardware"
     allowed_domains = ["www.acehardware.com"]
-    download_delay = 0.5
+    download_delay = 0.1
     start_urls = (
-        'http://www.acehardware.com/acestoresitemap.xml',
+        'https://www.acehardware.com/store-directory',
     )
 
     def parse_hours(self, lis):
-        days = []
+        o = OpeningHours()
+
         for day in DAY_MAPPING:
-            if 'openingTime'+day in lis and 'closingTime'+day in lis:
-                open_time = str(lis['openingTime'+day]).zfill(4)
-                close_time = str(lis['closingTime'+day]).zfill(4)
-                days.append("%s %s:%s-%s:%s" % (
-                    day[:2],
-                    open_time[0:2],
-                    open_time[2:],
-                    close_time[0:2],
-                    close_time[2:],
-                ))
-        return '; '.join(days)
+            d = day.title()[:2]
 
-    def parse_stores(self, response):
-        ref = response.meta['id']
-        json_data = json.loads(response.body_as_unicode())
+            label = lis[day]['label']
+            if label == '0000 - 0000':
+                continue
 
-        if 'address1' not in json_data:
+            start, end = label.split(' - ')
+            start = '%s:%s' % (start[:2], start[2:])
+            end = '%s:%s' % (end[:2], end[2:])
+
+            o.add_range(d, start, end)
+        return o.as_opening_hours()
+
+    def parse_store(self, response):
+        store_data = response.xpath('//script[@id="data-mz-preload-store"]/text()').extract_first()
+
+        if not store_data:
             return
 
+        store_data = json.loads(store_data)
+
         properties = {
-            'addr_full': json_data['address1'],
-            'phone': json_data['phoneNumber'],
-            'city': json_data['city'],
-            'state': json_data['stateCode'],
-            'postcode': json_data['postalCode'],
-            'ref': ref,
-            'website': "http://www.acehardware.com/mystore/index.jsp?store=" + ref,
-            'lat': float(json_data['latitude']),
-            'lon': float(json_data['longitude']),
+            'name': store_data['StoreName'],
+            'phone': store_data['Phone'],
+            'city': store_data['StoreCityNm'],
+            'state': store_data['StoreStateCd'],
+            'postcode': store_data['StoreZipCd'],
+            'ref': store_data['StoreNumber'],
+            'website': response.url,
+            'lat': float(store_data['Latitude']),
+            'lon': float(store_data['Longitude']),
         }
 
-        hours = self.parse_hours(json_data['hours'])
+        hours = self.parse_hours(store_data['RegularHours'])
         if hours:
             properties['opening_hours'] = hours
 
         yield GeojsonPointItem(**properties)
 
     def parse(self, response):
-        data = response.body_as_unicode()
-        store_ids = re.findall(r"[0-9]{5}", data)
-        for store_id in store_ids:
-            url = "http://www.acehardware.com/storeLocServ?heavy=true&token=ACE&operation=storeData&storeID=%s" % (store_id)
+        for store_url in response.css('div.store-directory-list-item').xpath('div/a/@href').extract():
             yield scrapy.Request(
-                url,
-                callback=self.parse_stores,
-                meta={'id': store_id}
+                response.urljoin(store_url),
+                callback=self.parse_store,
             )

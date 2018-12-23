@@ -2,60 +2,43 @@ import json
 import re
 import scrapy
 from locations.items import GeojsonPointItem
+from locations.hours import OpeningHours
 
 class AfcUrgentCareSpider(scrapy.Spider):
     name = "afcurgentcare"
     allowed_domains = ["afcurgentcare.com"]
-
-    def start_requests(self):
-        url = 'https://www.afcurgentcare.com/wp-admin/admin-ajax.php'
-        headers = {
-            'Accept-Language': 'en-US,en;q=0.9',
-            'Origin': 'https://www.afcurgentcare.com',
-            'Accept-Encoding': 'gzip, deflate, br',
-            'Accept': '*/*',
-            'Referer': 'https://www.afcurgentcare.com/national-map-american-family-care-locations/',
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'X-Requested-With': 'XMLHttpRequest',
-        }
-        form_data = {
-            'formdata': 'nameSearch=&addressInput=&addressInputCity=&addressInputState=&addressInputCountry=&tag_to_search_for=&radiusSelect=25000&ignore_radius=0',
-            'options[initial_results_returned]': '99999',
-            'lat': '45',
-            'lng': '-122',
-            'radius': '25000',
-            'action': 'csl_ajax_onload',
-        }
-
-        yield scrapy.http.FormRequest(
-            url=url, method='POST', formdata=form_data,
-            headers=headers, callback=self.parse
-        )
+    download_delay = 0.2
+    start_urls = (
+        'https://www.afcurgentcare.com/locations/',
+    )
 
     def parse(self, response):
-        phoneregex = re.compile('^<a.+>([0-9\-]+)<\/a>$')
-        data = json.loads(response.body_as_unicode())
-        stores = data['response']
-        for store in stores:
-            properties = {
-                'ref': store['id'],
-                'name': store['name'],
-                'addr_full': store['address'],
-                'city': store['city'],
-                'state': store['state'],
-                'postcode': store['zip'],
-                'lat': store['lat'],
-                'lon': store['lng'],
-            }
-            if store['url']:
-                properties['website'] = store['url']
-            elif store['sl_pages_url']:
-                properties['website'] = store['sl_pages_url']
+        for url in response.xpath('//li[@class="location"]/@data-href').extract():
+            yield scrapy.Request(
+                response.urljoin(url),
+                callback=self.parse_store,
+            )
 
-            if store['phone']:
-                phone = phoneregex.match(store['phone'])
-                if phone: 
-                    phone = phone.groups()[0]
-                    properties['phone'] = phone
+    def parse_store(self, response):
+        properties = {
+            'ref': response.url,
+            'lat': response.xpath('//div[@class="map-container"]/div/@data-latitude').extract_first(),
+            'lon': response.xpath('//div[@class="map-container"]/div/@data-longitude').extract_first(),
+            'phone': response.xpath('//a[@class="phone-link"]/span/text()').extract_first(),
+            'addr_full': response.xpath('//span[@itemprop="streetAddress"]/text()').extract_first().strip(),
+            'name': response.xpath('//meta[@itemprop="name legalName"]/@content').extract_first(),
+            'city': response.xpath('//span[@itemprop="addressLocality"]/text()').extract_first()[:-1],
+            'state': response.xpath('//span[@itemprop="addressRegion"]/text()').extract_first().strip(),
+            'postcode': response.xpath('//span[@itemprop="postalCode"]/text()').extract_first().strip(),
+        }
 
-            yield GeojsonPointItem(**properties)
+        o = OpeningHours()
+        for h in response.css('#LocalMapAreaOpenHourBanner li.h-day'):
+            day = h.xpath('em/span/text()').extract_first().strip()[:2]
+            day_range = h.xpath('em/text()').extract_first().strip(':').strip()
+            open_time, close_time = day_range.split(' - ')
+
+            o.add_range(day, open_time, close_time, '%I:%M %p')
+        properties['opening_hours'] = o.as_opening_hours()
+
+        yield GeojsonPointItem(**properties)
