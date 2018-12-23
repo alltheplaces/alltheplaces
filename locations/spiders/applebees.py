@@ -99,7 +99,7 @@ class ApplebeesSpider(scrapy.Spider):
     def parse_store(self, response):
         data = json.loads(response.xpath('//script[@type="application/ld+json"]/text()').extract_first())
 
-        if not data:
+        if not data or isinstance(data, dict):
             return
 
         data = data[0]
