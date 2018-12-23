@@ -33,7 +33,12 @@ class AceHardwareSpider(scrapy.Spider):
         return o.as_opening_hours()
 
     def parse_store(self, response):
-        store_data = json.loads(response.xpath('//script[@id="data-mz-preload-store"]/text()').extract_first())
+        store_data = response.xpath('//script[@id="data-mz-preload-store"]/text()').extract_first()
+
+        if not store_data:
+            return
+
+        store_data = json.loads(store_data)
 
         properties = {
             'name': store_data['StoreName'],

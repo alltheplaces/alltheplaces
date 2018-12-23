@@ -98,6 +98,10 @@ class ApplebeesSpider(scrapy.Spider):
 
     def parse_store(self, response):
         data = json.loads(response.xpath('//script[@type="application/ld+json"]/text()').extract_first())
+
+        if not data:
+            return
+
         data = data[0]
 
         o = OpeningHours()

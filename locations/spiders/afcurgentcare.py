@@ -35,7 +35,7 @@ class AfcUrgentCareSpider(scrapy.Spider):
         o = OpeningHours()
         for h in response.css('#LocalMapAreaOpenHourBanner li.h-day'):
             day = h.xpath('em/span/text()').extract_first().strip()[:2]
-            day_range = h.xpath('em/text()').extract_first().strip()
+            day_range = h.xpath('em/text()').extract_first().strip(':').strip()
             open_time, close_time = day_range.split(' - ')
 
             o.add_range(day, open_time, close_time, '%I:%M %p')
