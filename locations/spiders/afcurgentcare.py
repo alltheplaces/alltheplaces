@@ -22,8 +22,8 @@ class AfcUrgentCareSpider(scrapy.Spider):
     def parse_store(self, response):
         properties = {
             'ref': response.url,
-            'lat': response.xpath('//div[@class="location-info"]/@data-latitude').extract_first(),
-            'lon': response.xpath('//div[@class="location-info"]/@data-longitude').extract_first(),
+            'lat': response.xpath('//div[@class="map-container"]/div/@data-latitude').extract_first(),
+            'lon': response.xpath('//div[@class="map-container"]/div/@data-longitude').extract_first(),
             'phone': response.xpath('//a[@class="phone-link"]/span/text()').extract_first(),
             'addr_full': response.xpath('//span[@itemprop="streetAddress"]/text()').extract_first().strip(),
             'name': response.xpath('//meta[@itemprop="name legalName"]/@content').extract_first(),
