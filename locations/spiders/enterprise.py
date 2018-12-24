@@ -6,37 +6,35 @@ from locations.items import GeojsonPointItem
 
 class EnterpriseSpider(scrapy.Spider):
     name = "enterprise"
-    allowed_domains = ["enterprise.com"]
+    allowed_domains = ["www.enterprise.com"]
     start_urls = (
         'https://www.enterprise.com/en/car-rental/locations.html',
     )
 
     def parse(self, response):
-        data = response.xpath('//script[@type="application/ld+json"]/text()').extract_first()
-        if data:
-            data = json.loads(data)
-            address = data.get('address', {})
-            properties = {
-                'name': data.get('name'),
-                'phone': data.get('telephone'),
-                'website': response.url,
-                'addr_full': address.get('streetAddress'),
-                'city': address.get('addressLocality'),
-                'state': address.get('addressRegion'),
-                'postcode': address.get('postalCode'),
-                'country': address.get('addressCountry'),
-            }
-            lat = data.get('geo', {}).get('latitude')
-            lon = data.get('geo', {}).get('longitude')
-            if lat: lat = float(lat)
-            if lon: lon = float(lon)
-            properties['lat'] = lat
-            properties['lon'] = lon
-            properties['ref'] = response.url
-            yield GeojsonPointItem(**properties)
-        for url in response.xpath('//a/@href').re('/en/car-rental/locations/.+'):
-            yield scrapy.Request(
-                response.urljoin(url),
-                callback=self.parse,
-            )
+        for u in response.xpath('//div[@class="cf"]/ul/li/a/@href').extract():
+            if u.startswith('/en/car-rental/locations'):
+                country = u.rsplit('/', 1)[1].rsplit('.', 1)[0]
+                yield scrapy.Request(
+                    'https://www.enterprise.com/en/car-rental/locations/%s/_jcr_content.mapdata.js' % country,
+                    callback=self.parse_country,
+                )
 
+    def parse_country(self, response):
+        data = json.loads(response.body_as_unicode())
+        if data:
+            for d in data:
+                properties = {
+                    'name': d.get('shortTitle'),
+                    'phone': d.get('formattedPhone'),
+                    'website': d.get('url'),
+                    'addr_full': ' '.join(d.get('addressLines')),
+                    'city': d.get('city'),
+                    'state': d.get('state'),
+                    'postcode': d.get('postalCode'),
+                    'country': d.get('countryCode'),
+                    'lat': d.get('latitude'),
+                    'lon': d.get('longitude'),
+                    'ref': d.get('stationId'),
+                }
+                yield GeojsonPointItem(**properties)
