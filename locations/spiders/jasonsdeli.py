@@ -22,8 +22,8 @@ class JasonsDeliSpider(scrapy.Spider):
             day, open_time, close_time = re.search(
                 r'([a-z]{3}):.([0-9:\sAPM]+)\s-\s([0-9:\sAPM]+)', item, flags=re.IGNORECASE).groups()
             opening_hours.add_range(day=day[0:2],
-                                    open_time=datetime.datetime.strptime(open_time, '%H:%M %p').strftime('%H:%M'),
-                                    close_time=datetime.datetime.strptime(close_time, '%H:%M %p').strftime('%H:%M'))
+                                    open_time=datetime.datetime.strptime(open_time, '%I:%M %p').strftime('%H:%M'),
+                                    close_time=datetime.datetime.strptime(close_time, '%I:%M %p').strftime('%H:%M'))
         return opening_hours.as_opening_hours()
 
     def parse_store(self, response):
@@ -40,7 +40,6 @@ class JasonsDeliSpider(scrapy.Spider):
         }
 
         hours = self.parse_hours(response.xpath('//div[@class="loc-hours"]/p/text()').extract())
-        print(hours)
 
         try:
             bus_name = response.xpath('//div[@class="loc-title"]/text()').extract()[0].split(': ')[1]
