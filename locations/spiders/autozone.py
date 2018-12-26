@@ -4,7 +4,6 @@ import re
 import scrapy
 from locations.items import GeojsonPointItem
 
-HOURS_XPATH = '//span[@class="c-location-hours-today js-location-hours"]/@data-days'
 
 class AutoZoneSpider(scrapy.Spider):
 
@@ -49,56 +48,53 @@ class AutoZoneSpider(scrapy.Spider):
                     '{}-{} {}'.format(value[0], value[-1], key))
         return "; ".join(opening_hours)
 
-    def parse_location(self, location):
+    def parse_location(self, response):
+        opening_hours = response.xpath('//span[@class="c-location-hours-today js-location-hours"]/@data-days').extract_first()
+        opening_hours = self.normalize_hours(opening_hours)
 
-        opening_hours = self.normalize_hours(location.xpath(HOURS_XPATH).extract_first())
         props = {
-            'addr_full': location.xpath(
+            'addr_full': response.xpath(
                 '//meta[@itemprop="streetAddress"]/@content').extract_first(),
-            'lat': float(location.xpath(
+            'lat': float(response.xpath(
                 '//meta[@itemprop="latitude"]/@content').extract_first()),
-            'lon': float(location.xpath(
+            'lon': float(response.xpath(
                 '//meta[@itemprop="longitude"]/@content').extract_first()),
-            'city': location.xpath(
+            'city': response.xpath(
                 '//span[@class="c-address-city"]/text()').extract_first(),
-            'postcode': location.xpath(
+            'postcode': response.xpath(
                 '//span[@class="c-address-postal-code"]/text()').extract_first(),
-            'state': location.xpath(
+            'state': response.xpath(
                 '//abbr[@class="c-address-state"]/text()').extract_first(),
-            'phone': location.xpath(
+            'phone': response.xpath(
                 '//span[@class="c-phone-number-span c-phone-main-number-span"]/text()').extract_first(),
-            'ref': location.url,
-            'website': location.url,
+            'ref': response.url,
+            'website': response.url,
             'opening_hours': opening_hours
         }
         return GeojsonPointItem(**props)
 
-    def parse_city_stores(self, city):
-
-        locations = city.xpath(
-            '//a[@class="c-location-grid-item-link"]/@href').extract()
+    def parse_city_stores(self, response):
+        locations = response.xpath('//a[@class="c-location-grid-item-link"]/@href').extract()
 
         if not locations:
-            yield self.parse_location(city)
+            yield self.parse_location(response)
         else:
             for location in locations:
-                yield scrapy.Request(url=city.urljoin(location),
-                                     callback=self.parse_location
-                                     )
-    def parse_state(self, state):
+                yield scrapy.Request(
+                    url=response.urljoin(location),
+                    callback=self.parse_location
+                )
 
-        cities = state.xpath(
-            '//a[@class="c-directory-list-content-item-link"]/@href').extract()
-        for city in cities:
-            yield scrapy.Request(url=state.urljoin(city),
-                                 callback=self.parse_city_stores
-                                 )
+    def parse_state(self, response):
+        for city in response.xpath('//a[@class="c-directory-list-content-item-link"]/@href').extract():
+            yield scrapy.Request(
+                url=response.urljoin(city),
+                callback=self.parse_city_stores
+            )
 
     def parse(self, response):
-
-        states = response.xpath(
-            '//a[@class="c-directory-list-content-item-link"]/@href').extract()
-        for state in states:
-            yield scrapy.Request(url=response.urljoin(state),
-                                 callback=self.parse_state
-                                 )
+        for state in response.xpath('//a[@class="c-directory-list-content-item-link"]/@href').extract():
+            yield scrapy.Request(
+                url=response.urljoin(state),
+                callback=self.parse_state
+            )
