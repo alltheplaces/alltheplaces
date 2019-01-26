@@ -64,7 +64,7 @@ class WhataburgerSpider(scrapy.Spider):
         return opening_hours
 
     def parse(self, response):
-        urls = response.xpath('//a[@class="c-directory-list-content-item-link"]/@href').extract()
+        urls = response.xpath('//a[@class="Directory-listLink"]/@href').extract()
         for path in urls:
             if len(path.split('/')) > 2:
                 # If there's only one store, the URL will be longer than <state code>.html
@@ -78,8 +78,8 @@ class WhataburgerSpider(scrapy.Spider):
         yield GeojsonPointItem(
             lon=float(response.xpath('//span/meta[@itemprop="longitude"]/@content').extract_first()),
             lat=float(response.xpath('//span/meta[@itemprop="latitude"]/@content').extract_first()),
-            addr_full=response.xpath('//span[@itemprop="streetAddress"]/text()').extract_first(),
-            city=response.xpath('//span[@itemprop="addressLocality"]/text()').extract_first(),
+            addr_full=response.xpath('//meta[@itemprop="streetAddress"]/@content').extract_first(),
+            city=response.xpath('//meta[@itemprop="addressLocality"]/@content').extract_first(),
             state=response.xpath('//abbr[@itemprop="addressRegion"]/text()').extract_first(),
             postcode=response.xpath('//span[@itemprop="postalCode"]/text()').extract_first().strip(),
             phone=response.xpath('//a[@class="c-phone-number-link c-phone-main-number-link"]/text()').extract_first(),
