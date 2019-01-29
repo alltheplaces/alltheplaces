@@ -1,4 +1,3 @@
-import datetime
 import scrapy
 import re
 
@@ -21,9 +20,9 @@ class McCoysSpider(scrapy.Spider):
             day = hours[i]
             open_time, close_time = hours[i+1].split('-')
             opening_hours.add_range(day=day[:2],
-                                    open_time=datetime.datetime.strptime(open_time.strip(), '%I:%M %p').strftime('%H:%M'),
-                                    close_time=datetime.datetime.strptime(close_time.strip(), '%I:%M %p').strftime('%H:%M'))
-
+                                    open_time=open_time.strip(),
+                                    close_time=close_time.strip(),
+                                    time_format='%I:%M %p')
         return opening_hours.as_opening_hours()
 
     def parse_store(self, response):
