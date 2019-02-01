@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import scrapy
+import datetime
 import re
 
 from locations.items import GeojsonPointItem
@@ -16,12 +17,12 @@ DAY_MAPPING = {
     'Sunday': 'Su'
 }
 
-class BrueggersSpider(scrapy.Spider):
+class NoahsNYBagelsSpider(scrapy.Spider):
     """Copy of Einstein Bros. Bagels - all brands of the same parent company Coffee & Bagels"""
-    name = "brueggers"
-    allowed_domains = ["brueggers.com"]
+    name = "noahsnybagels"
+    allowed_domains = ["noahs.com"]
     start_urls = (
-        'https://locations.brueggers.com/us',
+        'https://locations.noahs.com/us',
     )
 
     def parse_hours(self, elements):
