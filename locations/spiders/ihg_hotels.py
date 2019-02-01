@@ -13,6 +13,7 @@ class IHGHotels(scrapy.Spider):
 
     start_urls = (
         'https://www.ihg.com/holidayinn/destinations/us/en/explore',
+        'https://www.ihg.com/armyhotels/hotels/us/en/installations',
     )
 
     def parse_hotel(self, response):
@@ -32,7 +33,7 @@ class IHGHotels(scrapy.Spider):
             'name': response.xpath('//meta[@property="og:title"]/@content').extract_first(),
             'addr_full': street_address.replace(u'\u00a0', ' ').strip(', ') if street_address else None,
             'city': city.replace(u'\u00a0', ' ').strip(', ') if city else None,
-            'state': state.replace(u'\u00a0', ' ') if state else None,
+            'state': state.replace(u'\u00a0', ' ').strip(', ') if state else None,
             'postcode': response.xpath('//span[@itemprop="postalCode"]/text()').extract_first(),
             'country': response.xpath('//span[@itemprop="addressCountry"]/text()').extract_first(),
             'phone': (response.xpath('//span[@itemprop="telephone"]/text()').extract_first() or '').strip('| '),
@@ -177,6 +178,23 @@ class IHGHotels(scrapy.Spider):
 
         yield GeojsonPointItem(**properties)
 
+    def parse_army_hotel(self, response):
+        properties = {
+            'ref': "_".join(re.search(r'en/(.*)/(.*)/hoteldetail', response.url).groups()),
+            'name': response.xpath('//meta[@property="og:title"]/@content').extract_first(),
+            'addr_full': response.xpath('//meta[@property="business:contact_data:street_address"]/@content').extract_first(),
+            'city': response.xpath('//meta[@property="business:contact_data:locality"]/@content').extract_first(),
+            'state': response.xpath('//meta[@property="business:contact_data:region"]/@content').extract_first(),
+            'postcode': response.xpath('//meta[@property="business:contact_data:postal_code"]/@content').extract_first(),
+            'country': response.xpath('//meta[@property="business:contact_data:country_name"]/@content').extract_first(),
+            'phone': (response.xpath('//span[@title="Hotel Front Desk:"]/span/text()').extract_first() or "").strip(),
+            'lat': float(response.xpath('//meta[@property="place:location:latitude"]/@content').extract_first()),
+            'lon': float(response.xpath('//meta[@property="place:location:longitude"]/@content').extract_first()),
+            'website': response.url,
+        }
+
+        yield GeojsonPointItem(**properties)
+
     def parse(self, response):
 
         hotel_parsers = {
@@ -194,10 +212,15 @@ class IHGHotels(scrapy.Spider):
             'holidayinnclubvacations': self.parse_hotel,
             'evenhotels': self.parse_hotel,
             'avidhotels': self.parse_hotel,
-            'hualuxe': self.parse_hotel
+            'hualuxe': self.parse_hotel,
+            'armyhotels': self.parse_army_hotel
         }
 
         hotel_urls = response.xpath('//div[@class="hotelList"]//div[contains(@class, "hotelItem")]//a[contains(@class, "hotel-name")]/@href').extract()
+
+        if 'armyhotels' in response.url:
+            hotel_urls = response.xpath('//div[@id="hotelListWrap"]//a/@href').extract()
+
         if hotel_urls:
             for url in hotel_urls:
                 hotel_type = re.search(r'ihg.com/(.*?)/', response.urljoin(url), re.IGNORECASE).group(1)
