@@ -16,12 +16,12 @@ DAY_MAPPING = {
     'Sunday': 'Su'
 }
 
-class BrueggersSpider(scrapy.Spider):
+class ManhattanBagelSpider(scrapy.Spider):
     """Copy of Einstein Bros. Bagels - all brands of the same parent company Coffee & Bagels"""
-    name = "brueggers"
-    allowed_domains = ["brueggers.com"]
+    name = "manhattanbagels"
+    allowed_domains = ["manhattanbagel.com"]
     start_urls = (
-        'https://locations.brueggers.com/us',
+        'https://locations.manhattanbagel.com/us',
     )
 
     def parse_hours(self, elements):
