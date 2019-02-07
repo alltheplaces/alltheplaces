@@ -3,9 +3,6 @@ import scrapy
 from locations.items import GeojsonPointItem
 import re
 
-class CasinoGeojsonPointItem(GeojsonPointItem):
-    addr_2_housenumber = scrapy.Field()
-
 class TemplateSpider(scrapy.Spider):
     name = "casino"
     allowed_domains = ["magasins.supercasino.fr"]
@@ -33,7 +30,7 @@ class TemplateSpider(scrapy.Spider):
         postalCode=response.xpath('.//div[@class="StoreInformations"]//span[@itemprop="postalCode"]/text()').get()
         streetAddress=response.xpath('.//div[@class="StoreInformations"]//span[@itemprop="streetAddress"]/text()').get().replace('\n','').replace('\r','').strip()
 
-        streetExtracts=re.search('^(?:(\d+ ?[a-zA-Z]{0,3})?(?: ?[-/]? ?(\d+ ?[a-zA-Z]{0,3})?)? +)?(.+)$',streetAddress)
+        streetExtracts=re.search('^(?:(\d+ ?(?:[a-z]|bis|ter)?)(?: ?[-/]? ?(\d+ ?(?:[a-z]|bis|ter)?))? +)?(.+)$',streetAddress,re.IGNORECASE)
         roadNum=streetExtracts.group(1)
         secondRoadNum=streetExtracts.group(2)
         street=streetExtracts.group(3)
@@ -45,11 +42,13 @@ class TemplateSpider(scrapy.Spider):
             "city": city,
             "postcode": postalCode,
             "housenumber": roadNum,
-            "addr_2_housenumber": secondRoadNum,
             "street": street,
             "addr_full": streetAddress+', '+city+', '+postalCode,
             "website": response.url,
-            "opening_hours": openingHours
+            "opening_hours": openingHours,
+            "extras": {
+                "addr_2_housenumber": secondRoadNum
+            }
         }
 
-        yield CasinoGeojsonPointItem(**properties)
+        yield GeojsonPointItem(**properties)
