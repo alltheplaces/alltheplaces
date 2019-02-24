@@ -29,7 +29,7 @@ class PotbellySandwichSpider(scrapy.Spider):
                 'state': data['location']['region'],
                 'postcode': data['location']['postal_code'],
                 'phone': data['location']['phone'],
-                'website': data['location']['facebook_url'],
+                'website': 'https://www.potbelly.com/stores/' + data['location']['id'],
                 'opening_hours': data['location']['hours']
             }
 
