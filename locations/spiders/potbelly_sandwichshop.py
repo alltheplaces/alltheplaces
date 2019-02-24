@@ -4,6 +4,7 @@ import json
 import re
 
 from locations.items import GeojsonPointItem
+from locations.hours import OpeningHours
 
 
 class PotbellySandwichSpider(scrapy.Spider):
@@ -29,8 +30,17 @@ class PotbellySandwichSpider(scrapy.Spider):
                 'state': data['location']['region'],
                 'postcode': data['location']['postal_code'],
                 'phone': data['location']['phone'],
-                'website': 'https://www.potbelly.com/stores/' + data['location']['id'],
-                'opening_hours': data['location']['hours']
+                'website': 'https://www.potbelly.com/stores/%s' % data['location']['id'],
             }
+
+            hours = json.loads(data['location']['meta']['open_hours'])
+            if hours:
+                oh = OpeningHours()
+                for d, v in hours.items():
+                    for r in v:
+                        open_time = r['opens_at']
+                        close_time = r['closes_at']
+                        oh.add_range(d[:2], open_time, close_time, '%H:%M:%S')
+                properties['opening_hours'] = oh.as_opening_hours()
 
             yield GeojsonPointItem(**properties)
