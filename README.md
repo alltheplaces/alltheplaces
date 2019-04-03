@@ -94,7 +94,7 @@ To get started, you'll want to install the dependencies for this project.
 
 ### Prefer a directory of all locations
 
-Most listings of locations come in two flavors: a "store finder" that lets the user search by location and a "store directory" that is a hierarchical listing of all locations. These listings are sometimes hidden in the footer or on the site map page. Keep an eye out for these, because it's a lot easier if they enumerate all the locations for you rather than having to program a spider to do it for you.
+Most listings of locations come in two flavors: a "store finder" that lets the user search by location and a "store directory" that is a hierarchical listing of all locations. These listings are sometimes hidden in the footer or on the site map page. Keep an eye out for these, because it's a lot easier if they enumerate all the locations for you rather than having to program a spider to do it for you.  Checking the domain's `robots.txt` file can also be useful for finding sitemaps (http://\<domain>/robots.txt).  
 
 If the only option is search by location, there is likely an AJAX query made to search by latitude/longitude. Keep an eye on your browser's developer tools "network" tab to see what the request is so you can replicate it in your spider.
 
