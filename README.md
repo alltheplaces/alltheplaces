@@ -98,6 +98,8 @@ Most listings of locations come in two flavors: a "store finder" that lets the u
 
 If the only option is search by location, there is likely an AJAX query made to search by latitude/longitude. Keep an eye on your browser's developer tools "network" tab to see what the request is so you can replicate it in your spider.
 
+For store locators that do allow search by latitude/longitude, a US grid of searchable latlon points representing the centroid of a 100, 50, 25, or 10mile search radius is available [here](https://github.com/alltheplaces/alltheplaces/tree/master/locations/searchable_points). Each point has a state attribute as well that can be used for filtering when it’s known that a store only exists in certain states.
+
 ### You can send the spider to other pages
 
 The simplest thing a spider can do is to load the `start_urls`, process the page, and `yield` the data as `GeojsonPointItem` objects from the `parse()` method. Usually that's not enough to get at useful data, though. The `parse()` method can also `yield` a [Request object](https://doc.scrapy.org/en/latest/topics/request-response.html#request-objects), which scrapy will use to add another URL to the request queue.
