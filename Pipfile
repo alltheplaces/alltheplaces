@@ -1,23 +1,17 @@
 [[source]]
-
 url = "https://pypi.python.org/simple"
 verify_ssl = true
 name = "pypi"
 
-
 [dev-packages]
-
 awscli = "*"
 "boto3" = "*"
-
+pylint = "*"
 
 [packages]
-
 scrapy = "*"
 pygithub = "*"
 python-json-logger = "*"
 
-
 [requires]
-
 python_version = "3.6"
