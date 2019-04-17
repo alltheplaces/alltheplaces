@@ -98,7 +98,12 @@ Most listings of locations come in two flavors: a "store finder" that lets the u
 
 If the only option is search by location, there is likely an AJAX query made to search by latitude/longitude. Keep an eye on your browser's developer tools "network" tab to see what the request is so you can replicate it in your spider.
 
-For store locators that do allow search by latitude/longitude, a US grid of searchable latlon points representing the centroid of a 100, 50, 25, or 10mile search radius is available [here](https://github.com/alltheplaces/alltheplaces/tree/master/locations/searchable_points). Each point has a state attribute as well that can be used for filtering when it’s known that a store only exists in certain states.
+### Searchable Points
+
+For store locators that do allow search by latitude/longitude, a US grid of searchable latlon points representing the centroid of a 100, 50, 25, or 10mile search radius is available [here](https://github.com/alltheplaces/alltheplaces/tree/master/locations/searchable_points). See the [Dollar General scraper](https://github.com/alltheplaces/alltheplaces/pull/1076) for an example of how you might utilize them for national searches.
+
+For stores that do not have a national footprint, there are separate searchable point files that include a state attribute e.g. <i>'us_centroids_100mile_radius_state.csv'</i>. The state attribute also allows for the points to be filtered down to specific states when a national search is unnecessary. A search radius may overlap multiple states especially when it’s centered near a state boundary. This creates a one to many relationship between the search radius point and the states covered in that search zone. The result in these state point files is that there will be records that share the same latlon associated to differing states. That way a radius that covers parts of both Tennessee and Kentucky can be used for a request for either state when filtering. In this example, if both Tennessee and Kentucky are desired a duplicate request will be performed as there are two records - one for TN and one for KY that share the same latlon unless filtered out beforehand.
+
 
 ### You can send the spider to other pages
 
