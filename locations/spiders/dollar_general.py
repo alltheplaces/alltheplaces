@@ -15,7 +15,7 @@ class DollarGeneralSpider(scrapy.Spider):
     def start_requests(self):
         url = 'https://hosted.where2getit.com/dollargeneral/rest/locatorsearch?lang=fr_FR'
 
-        with open('./locations/searchable_points/us_centroids_50mile_radius.csv') as points:
+        with open('./locations/searchable_points/us_centroids_100mile_radius.csv') as points:
             next(points) # Ignore the header
             for point in points:
                 row = point.split(',')
@@ -38,7 +38,7 @@ class DollarGeneralSpider(scrapy.Spider):
                                     }
                                 ]
                             },
-                            "searchradius":"50",
+                            "searchradius":"100",
                             "where": {
                                 "nci": {
                                     "eq":""
