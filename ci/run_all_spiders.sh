@@ -70,29 +70,6 @@ if [ ! $? -eq 0 ]; then
     exit 1
 fi
 
-(>&2 echo "Updating runs.json with new runs")
-RUN_FINISH=$(date -u +%Y-%m-%dT%H:%M:%SZ)
-aws s3 cp \
-    --only-show-errors \
-    "s3://${S3_BUCKET}/runs.json" \
-    "runs.json"
-cat runs.json | \
-    jq \
-        --compact-output \
-        --arg run_start $RUN_START \
-        --arg run_finish $RUN_FINISH \
-        --arg run_name $RUN_TIMESTAMP \
-        --arg spider_count $SPIDER_COUNT \
-        --arg feature_count $OUTPUT_LINECOUNT \
-        '.runs += [{"start": $run_start, "finish": $run_finish, "name": $run_name, "spider_count": $spider_count | tonumber, "feature_count": $feature_count | tonumber}]' \
-    > runs.json
-aws s3 cp \
-    --only-show-errors \
-    --acl=public-read \
-    "runs.json" \
-    "s3://${S3_BUCKET}/runs.json"
-(>&2 echo "Saved updated runs.json to https://s3.amazonaws.com/${S3_BUCKET}/runs.json")
-
 (>&2 echo "Saving embed to https://s3.amazonaws.com/${S3_BUCKET}/runs/latest/info_embed.html")
 OUTPUT_FILESIZE=$(du ${SPIDER_RUN_DIR}/output.tar.gz | awk '{printf "%0.1f", $1/1024}')
 cat > "${SPIDER_RUN_DIR}/info_embed.html" << EOF
