@@ -71,7 +71,7 @@ class FazolisSpider(scrapy.Spider):
         zip_code = store.xpath('//span[contains(@itemprop,"postalCode")]/text()').extract_first()
         hours = json.loads(store.xpath('//div[@class="location-info-col-split right-split"]//div[@class="c-location-hours-details-wrapper js-location-hours"]/@data-days').extract_first())
         props = {
-            'addr_full': '{}, {}, {} {}'.format(address, city, state, zip_code),
+            'addr_full': address,
             'city': city,
             'state': state,
             'postcode': zip_code,
