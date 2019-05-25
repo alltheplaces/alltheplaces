@@ -23,13 +23,16 @@ DAYS_NAME = {
 class CostcoSpider(scrapy.Spider):
     name = "costco"
     allowed_domains = ['www.costco.com']
-
-    download_delay = 0.5
+    start_urls = (
+        'https://www.costco.com/warehouse-locations',
+    )
     custom_settings = {
         'USER_AGENT': 'Mozilla/5.0',
     }
 
-    def start_requests(self):
+    download_delay = 0.5
+
+    def parse(self, response):
         url = 'https://www.costco.com/AjaxWarehouseBrowseLookupView?'
 
         params = {
@@ -54,9 +57,9 @@ class CostcoSpider(scrapy.Spider):
         with open('./locations/searchable_points/us_centroids_100mile_radius.csv') as points:
             next(points)
             for point in points:
-                _, lat, lon = point.split(',')
+                _, lat, lon = point.strip().split(',')
                 params.update({"latitude": lat, "longitude": lon})
-                yield scrapy.Request(url=url + urlencode(params))
+                yield scrapy.Request(url=url + urlencode(params), callback=self.parse_ajax)
 
 
     def store_hours(self, store_hours):
@@ -99,10 +102,10 @@ class CostcoSpider(scrapy.Spider):
 
         return '; '.join(opening_hours)
 
-    def _clean_text(sel, text):
+    def _clean_text(self, text):
         return re.sub("[\r\n\t]", "", text).strip()
 
-    def parse(self, response):
+    def parse_ajax(self, response):
         body = json.loads(response.body_as_unicode())
 
 
