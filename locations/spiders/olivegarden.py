@@ -45,6 +45,7 @@ class OliveGardenSpider(scrapy.Spider):
             return
 
         data = json.loads(response.xpath('//script[@type="application/ld+json"]/text()').extract_first())
+        fallback = False
 
         try:
             properties = {
@@ -62,10 +63,15 @@ class OliveGardenSpider(scrapy.Spider):
             }
 
         except KeyError:  # a few location pages don't have the complete ld+json data
+            properties = {}
+            fallback = True
+
+        if not properties.get("city", False) or fallback:
             properties = {
                 'name': response.xpath('normalize-space(//input[@id="isLocationDetails"]/../h1/text())').extract_first(),
                 'website': response.url,
                 'ref': response.url.split('/')[-1],
+                'country': 'US',
                 'lon': float(response.xpath('//input[@id="restLatLong"]').extract_first().split('value="')[1].split('"')[0].split(',')[1]),
                 'lat': float(response.xpath('//input[@id="restLatLong"]').extract_first().split('value="')[1].split('"')[0].split(',')[0]),
             }
