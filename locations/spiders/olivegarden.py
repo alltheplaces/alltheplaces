@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import json
 import scrapy
 import re
 
@@ -8,7 +9,7 @@ from locations.items import GeojsonPointItem
 class OliveGardenSpider(scrapy.Spider):
     name = "olivegarden"
     allowed_domains = ['olivegarden.com']
-    download_delay = 1.5
+    download_delay = 0.5
     start_urls = (
         'http://www.olivegarden.com/en-locations-sitemap.xml',
     )
@@ -29,7 +30,7 @@ class OliveGardenSpider(scrapy.Spider):
     def parse(self, response):
         response.selector.remove_namespaces()
         city_urls = response.xpath('//url/loc/text()').extract()
-        locationURL = re.compile(r'http:/(/|/www.)olivegarden.com/locations/\S+')
+        locationURL = re.compile(r'http[s]:/(/|/www.)olivegarden.com/locations/\S+')
         for path in city_urls:
             if not re.search(locationURL, path):
                 pass
@@ -40,16 +41,43 @@ class OliveGardenSpider(scrapy.Spider):
                 )
 
     def parse_store(self, response):
-        properties = {
-            'name': response.xpath('/html/body/div[3]/div/div/div/div/div/div/div[1]/h1').extract()[0].split('\n')[1].split('<br>')[0],
-            'website': response.xpath('//head/link[@rel="canonical"]/@href').extract_first(),
-            'ref': " ".join(response.xpath('/html/head/title/text()').extract()[0].split('|')[0].split()),
-            'lon': float(response.xpath('//input[@id="restLatLong"]').extract()[0].split('value="')[1].split('"')[0].split(',')[1]),
-            'lat': float(response.xpath('//input[@id="restLatLong"]').extract()[0].split('value="')[1].split('"')[0].split(',')[0]),
-        }
+        if response.url == 'https://www.olivegarden.com/home':
+            return
 
-        address = self.address(response.xpath('//input[@id="restAddress"]').extract())
-        if address:
-            properties.update(address)
+        data = json.loads(response.xpath('//script[@type="application/ld+json"]/text()').extract_first())
+        fallback = False
+
+        try:
+            properties = {
+                'ref': response.url.split('/')[-1],
+                'name': data["name"],
+                'addr_full': data["address"].get("streetAddress", "").strip(),
+                'city': data["address"]["addressLocality"],
+                'state': data["address"]["addressRegion"],
+                'postcode': data["address"]["postalCode"],
+                'country': data["address"]["addressCountry"],
+                'phone': data.get("telephone", None),
+                'lat': float(data["geo"]["latitude"]),
+                'lon': float(data["geo"]["longitude"]),
+                'website': response.url,
+            }
+
+        except KeyError:  # a few location pages don't have the complete ld+json data
+            properties = {}
+            fallback = True
+
+        if not properties.get("city", False) or fallback:
+            properties = {
+                'name': response.xpath('normalize-space(//input[@id="isLocationDetails"]/../h1/text())').extract_first(),
+                'website': response.url,
+                'ref': response.url.split('/')[-1],
+                'country': 'US',
+                'lon': float(response.xpath('//input[@id="restLatLong"]').extract_first().split('value="')[1].split('"')[0].split(',')[1]),
+                'lat': float(response.xpath('//input[@id="restLatLong"]').extract_first().split('value="')[1].split('"')[0].split(',')[0]),
+            }
+
+            address = self.address(response.xpath('//input[@id="restAddress"]').extract())
+            if address:
+                properties.update(address)
 
         yield GeojsonPointItem(**properties)
