@@ -1,6 +1,7 @@
 import scrapy
 import re
 from locations.items import GeojsonPointItem
+
 day_formats = {
     "Mon": "Mo",
     "Tue": "Tu",
@@ -13,16 +14,19 @@ day_formats = {
 
 
 class BurgerKingSpider(scrapy.Spider):
-
     name = "burgerking"
     allowed_domains = ["locations.bk.com"]
-    download_delay = 0
+    download_delay = 0.2
     start_urls = (
         'https://locations.bk.com/index.html',
     )
+
     def parse_day(self, day):
-            return  day_formats[day.strip()]
+
+        return day_formats[day.strip()]
+
     def parse_times(self, times):
+
         if times.strip() == 'Open 24 hours':
             return '24/7'
         hours_to = [x.strip() for x in times.split('-')]
@@ -38,7 +42,7 @@ class BurgerKingSpider(scrapy.Spider):
             if re.search('AM$', hour):
                 hour = re.sub('AM', '', hour).strip()
                 hour_min = hour.split(":")
-                if len(hour_min[0]) <2:
+                if len(hour_min[0]) < 2:
                     hour_min[0] = hour_min[0].zfill(2)
                 else:
                     hour_min[0] = str(12 + int(hour_min[0]))
@@ -59,7 +63,7 @@ class BurgerKingSpider(scrapy.Spider):
 
         return "; ".join(hours)
 
-    def parse_stores(self, response):
+    def parse_store(self, response):
         properties = {
             'addr_full': response.xpath('normalize-space(//div[@class="c-AddressRow"]/span[@class="c-address-street-1"]/text())').extract_first(),
             'phone': response.xpath('normalize-space(//span[@id="telephone"]/text())').extract_first(),
@@ -67,29 +71,31 @@ class BurgerKingSpider(scrapy.Spider):
             'state': response.xpath('normalize-space(//abbr[@itemprop="addressRegion"]/text())').extract_first(),
             'postcode': response.xpath('normalize-space(//span[@itemprop="postalCode"]/text())').extract_first(),
             'lat': float(response.xpath('normalize-space(//meta[@itemprop="latitude"]/@content)').extract_first()),
-            'lon':float(response.xpath('normalize-space(//meta[@itemprop="longitude"]/@content)').extract_first()),
-            'ref':response.url
+            'lon': float(response.xpath('normalize-space(//meta[@itemprop="longitude"]/@content)').extract_first()),
+            'ref': response.url
         }
 
-        opening_hours = self.parse_hours(response.xpath('//div[@class="Nap-column Nap-column--3"]//div/div/table/tbody/tr[@class="c-location-hours-details-row js-day-of-week-row highlight-text"]'))
+        opening_hours = self.parse_hours(response.xpath(
+            '//div[@class="Nap-column Nap-column--3"]//div/div/table/tbody/tr[@class="c-location-hours-details-row js-day-of-week-row highlight-text"]'))
         if opening_hours:
             properties['opening_hours'] = opening_hours
         yield GeojsonPointItem(**properties)
 
     def parse_city_stores(self, response):
-        stores = response.xpath('//h2[@class="Teaser-title Heading Heading--sub Teaser-title--full"]/a[@class="Teaser-titleLink"]/@href').extract()
-        if(len(stores)==0):
-             stores.append(response.url)
+        stores = response.xpath("//a[@class='Teaser-nearbyLink Link']/@href").extract()
         for store in stores:
-             yield scrapy.Request(response.urljoin(store), callback=self.parse_stores)
+            yield scrapy.Request(response.urljoin(store), callback=self.parse_store)
 
-
-    def parse_state(self, response):
+    def parse_city(self, response):
         city_urls = response.xpath('//div[@class="c-directory-list-content-wrapper"]/ul/li/a/@href').extract()
-        for path in city_urls:
-            yield scrapy.Request(response.urljoin(path), callback=self.parse_city_stores)
+
+        for city_url in city_urls:
+            if city_url.count('/') >= 2:
+                yield scrapy.Request(response.urljoin(city_url), callback=self.parse_store)
+            else:
+                yield scrapy.Request(response.urljoin(city_url), callback=self.parse_city_stores)
 
     def parse(self, response):
-        urls = response.xpath('//div[@class="c-directory-list-content-wrapper"]/ul/li/a/@href').extract()
-        for path in urls:
-            yield scrapy.Request(response.urljoin(path), callback=self.parse_state)
+        state_urls = response.xpath('//div[@class="c-directory-list-content-wrapper"]/ul/li/a/@href').extract()
+        for state_url in state_urls:
+            yield scrapy.Request(response.urljoin(state_url), callback=self.parse_city)
