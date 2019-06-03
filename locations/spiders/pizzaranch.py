@@ -51,6 +51,7 @@ class CVSSpider(scrapy.Spider):
         map_data = response.xpath('normalize-space(//script[@id="js-map-config-dir-map-nap-map"]/text())').extract_first()
         map_json = json.loads(map_data)
         properties = {
+            'name': response.xpath('//span[@class="location-name-geo"]/text()').extract_first(),
             'addr_full': response.xpath('normalize-space(//span[@itemprop="streetAddress"]/span/text())').extract_first(),
             'phone': response.xpath('normalize-space(//div[@class="c-phone-number c-phone-main-number"]/span[@class="c-phone-number-span c-phone-main-number-span"]/text())').extract_first(),
             'city': response.xpath('normalize-space(//span[@itemprop="addressLocality"]/text())').extract_first(),
@@ -68,10 +69,16 @@ class CVSSpider(scrapy.Spider):
 
         yield GeojsonPointItem(**properties)
 
+
     def parse_state_stores(self, response):
         stores = response.xpath('//h3[@class="title"]/a/@href').extract()
         for store in stores:
                 yield scrapy.Request(response.urljoin(store), callback=self.parse_stores)
+
+        next_page_url = response.xpath('//div[@class="pagination"]//li[@class="next"]/a/@href').extract_first()
+
+        if next_page_url:
+            yield scrapy.Request(next_page_url, callback=self.parse_state_stores)
 
     def parse(self, response):
         urls = response.xpath('//ol[@class="state-list"]/li/a/@href').extract()
