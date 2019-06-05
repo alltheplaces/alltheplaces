@@ -1,80 +1,63 @@
 # -*- coding: utf-8 -*-
 import scrapy
-from locations.items import GeojsonPointItem
 import re
-from urllib.parse import urlencode
+import json
+from locations.items import GeojsonPointItem
+from locations.hours import OpeningHours
+
+
+day_mapping = {'Monday': 'Mo', 'Tuesday': 'Tu', 'Wednesday': 'We', 'Thursday': 'Th', 'Friday': 'Fr', 'Saturday': 'Sa',
+               'Sunday': 'Su'}
+
 
 class LowesSpider(scrapy.Spider):
-    """" This spider scrapes Lowes store locations """
+    """"This spider scrapes Lowes retail store locations"""
     name = "lowes"
-    allowed_domains = ["www.lowes.com"]
-    start_urls = ('https://www.lowes.com/Lowes-Stores',)
-    download_delay = 1.5
+    allowed_domains = ["lowes.com"]
+    start_urls = ('http://www.lowes.com/Lowes-Stores',)
+    download_delay = 0.5
 
-    def extract_hours(self, hours_str):
-        day_groups = []
-        this_day_group = None
+    custom_settings = {
+        'USER_AGENT': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.86 Safari/537.36',
+    }
 
-        parsed_hours = {}
-        for m in re.finditer(r"(\S*)_(\S*):'(\d{2})\.(\d{2})\S*'", hours_str):
-            day, open_close, h, m = m.groups()
-            day_short = day[:2]
+    def parse_hours(self, store_hours):
+        opening_hours = OpeningHours()
 
-            day_hours = parsed_hours.get(day_short)
-            if not day_hours:
-                day_hours = ['', '']
+        for weekday in store_hours:
+            day = weekday.get('day').get('day')
+            open_time = weekday.get('day').get('open')
+            hour, minute, sec = open_time.split('.')
+            open_time_formatted = hour + ':' + minute
 
-            hours = '%s:%s' % (h, m)
-            if open_close == 'Open':
-                day_hours[0] = hours
-            elif open_close == 'Close':
-                day_hours[1] = hours
+            close = weekday.get('day').get('close')
+            hour, minute, sec = close.split('.')
+            close_time_formatted = hour + ':' + minute
 
-            parsed_hours[day_short] = day_hours
+            if close_time_formatted in {'00:00', '24:00'}:
+                close_time_formatted = "23:59"
 
-        for day_short in ('Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'):
-            hours = '-'.join(parsed_hours[day_short])
+            opening_hours.add_range(day=day_mapping[day],
+                                    open_time=open_time_formatted,
+                                    close_time=close_time_formatted)
 
-            if not this_day_group:
-                this_day_group = dict(from_day=day_short, to_day=day_short, hours=hours)
-            elif this_day_group['hours'] == hours:
-                this_day_group['to_day'] = day_short
-            elif this_day_group['hours'] != hours:
-                day_groups.append(this_day_group)
-                this_day_group = dict(from_day=day_short, to_day=day_short, hours=hours)
-            hours = ''
-        day_groups.append(this_day_group)
-
-        if not day_groups:
-            return None
-
-        if len(day_groups) == 1:
-            opening_hours = day_groups[0]['hours']
-            if opening_hours == '07:00-07:00':
-                opening_hours = '24/7'
-        else:
-            opening_hours = ''
-            for day_group in day_groups:
-                if day_group['from_day'] == day_group['to_day']:
-                    opening_hours += '{from_day} {hours}; '.format(**day_group)
-                else:
-                    opening_hours += '{from_day}-{to_day} {hours}; '.format(**day_group)
-            opening_hours = opening_hours[:-2]
-
-        return opening_hours
+        return opening_hours.as_opening_hours()
 
     def parse_store(self, response):
-        js_content = response.xpath('normalize-space(//div[@class="store"]/script/text())').extract_first()
-        match = re.search(r"country: '(\S*)', lat: (-?\d+\.\d+), lng: (-?\d+\.\d+), key: '(.*?)', storeHours: { (.*?) } };", js_content)
-        if not match:
-            return
+        ref = re.search(r'.+/(.+)', response.url).group(1)
 
-        country, lat, lng, ref, hours_str = match.groups()
+        script_content = response.xpath('//*[@id="wrapper"]/script[1]').extract_first()
+        script_data = re.search(r'currentStore: (.*)userLocation:', script_content,
+                                flags=re.IGNORECASE | re.DOTALL).group(1).strip()
+        script_data = script_data.strip(",")
+        script_data = script_data.replace("\'", "")
+
+        json_data = json.loads(script_data)
+        store_hours = json_data.get('storeHours')
 
         properties = {
-            'lat': float(lat),
-            'lon': float(lng),
-            'country': country,
+            'lat': float(json_data.get('lat')),
+            'lon': float(json_data.get('long')),
             'ref': ref,
             'addr_full': response.xpath('normalize-space(//span[@itemprop="streetAddress"]/text())').extract_first(),
             'city': response.xpath('normalize-space(//span[@itemprop="addressLocality"]/text())').extract_first(),
@@ -82,7 +65,7 @@ class LowesSpider(scrapy.Spider):
             'postcode': response.xpath('normalize-space(//span[@itemprop="postalCode"]/text())').extract_first(),
             'phone': response.xpath('normalize-space(//span[@itemprop="telephone"]/text())').extract_first(),
             'website': response.request.url,
-            'opening_hours': self.extract_hours(hours_str),
+            'opening_hours': self.parse_hours(store_hours),
         }
 
         yield GeojsonPointItem(**properties)
