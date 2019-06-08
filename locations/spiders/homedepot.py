@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import scrapy
 import json
-
+import re
 from locations.items import GeojsonPointItem
 
 
@@ -11,6 +11,7 @@ class HomeDepotSpider(scrapy.Spider):
     start_urls = (
         'https://www.homedepot.com/l/storeDirectory',
     )
+    download_delay = 0.2
 
     def store_hours(self, store_hours):
         day_groups = []
@@ -55,41 +56,41 @@ class HomeDepotSpider(scrapy.Spider):
         return opening_hours
 
     def parse(self, response):
-        for path in response.xpath('//a[@class="stateList__link"]/@href'):
-            yield scrapy.Request(
-                response.urljoin(path.extract()),
-                callback=self.parse_state,
-            )
+        urls = response.xpath('//a[@class="stateList__link"]/@href').extract()
+        for url in urls:
+            yield scrapy.Request(response.urljoin(url), callback=self.parse_state)
 
     def parse_state(self, response):
-        for path in response.xpath('//a[@class="storeList__link"]/@href'):
-            if not path.extract()[-1].isdigit():
-                continue
-
-            yield scrapy.Request(
-                response.urljoin(path.extract()),
-                callback=self.parse_store,
-            )
+        state_urls = response.xpath('//section[1]/div[2]/ul/li[@class="storeList__item"]/a/@href').extract()
+        for state_url in state_urls:
+            yield scrapy.Request(response.urljoin(state_url), callback=self.parse_store)
 
     def parse_store(self, response):
-        # There's extra JSON loading stuff before and after the JSON blob to skip around
-        data = json.loads(response.xpath('//script/text()').extract_first()[81:-686])
-        store_data = data['stores'][0]
+        ref = re.search(r'.+/(.+)', response.url).group(1)
+
+        script_content = response.xpath('/html/head/script[5]/text()').extract_first()
+        coord_data = re.search(r'"coordinates":(.*?}),', script_content,
+                               flags=re.IGNORECASE | re.DOTALL).group(1)
+        coords = json.loads(coord_data)
+        store_hours_data = re.search(r'"storeHours":(.*?),"distance"', script_content,
+                                     flags=re.IGNORECASE | re.DOTALL).group(1)
+        store_hours = json.loads(store_hours_data)
 
         properties = {
-            'phone': store_data['phone'],
-            'website': response.urljoin(store_data['url']),
-            'ref': store_data['storeId'],
-            'name': store_data['name'],
-            'addr_full': store_data['address']['street'],
-            'postcode': store_data['address']['postalCode'],
-            'state': store_data['address']['state'],
-            'city': store_data['address']['city'],
-            'lon': float(store_data['coordinates']['lng']),
-            'lat': float(store_data['coordinates']['lat']),
+            'phone': response.xpath('//span[@itemprop="telephone"]/text()').extract_first(),
+            'website': response.request.url,
+            'ref': ref,
+            'name': response.xpath(
+                '//h1[@class="storeDetailHeader__storeName change-store-inline"]/text()').extract_first(),
+            'addr_full': response.xpath('//span[@class="location__storeAddressLine--street"]/text()').extract_first(),
+            'postcode': response.xpath('//span[@itemprop="postalCode"]/text()').extract_first(),
+            'state': response.xpath('// span[ @ itemprop = "addressRegion"]/text()').extract_first(),
+            'city': response.xpath('// span[ @ itemprop = "addressLocality"]/text()').extract_first(),
+            'lon': float(coords.get('lng')),
+            'lat': float(coords.get('lat')),
         }
 
-        opening_hours = self.store_hours(store_data['storeHours'])
+        opening_hours = self.store_hours(store_hours)
         if opening_hours:
             properties['opening_hours'] = opening_hours
 
