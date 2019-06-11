@@ -79,16 +79,17 @@ class HarristeeterSpider(scrapy.Spider):
 
         for shop in shops:
             props = {
-                'opening_hours': shop['StoreHours'].replace('Open 24 hrs', 'Mo-Su 0:00-24:00'),
-                'phone': shop['Telephone'],
-                'country': shop['Country'],
-                'ref': shop['Title'],
+                'ref': shop['StoreNumber'],
                 'addr_full': shop['Street'],
-                'postcode': shop.get('ZipCode'),
                 'city': shop.get('City'),
                 'state': shop.get('State'),
+                'postcode': shop.get('PostalCode'),
+                'country': shop['Country'],
+                'name': shop['StoreName'],
+                'phone': shop['Telephone'],
                 'lat': float(shop['Latitude']),
                 'lon': float(shop['Longitude']),
+                'opening_hours': shop['StoreHours'].replace('Open 24 Hours', 'Mo-Su 0:00-24:00')
             }
 
             yield GeojsonPointItem(**props)
