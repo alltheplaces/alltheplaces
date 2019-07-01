@@ -49,16 +49,16 @@ class DennysSpider(scrapy.Spider):
 
     def parse_store(self, response):
         properties = {
-            'addr_full': response.xpath('//span[@itemprop="streetAddress"]/text()').extract_first(),
-            'city': response.xpath('//span[@itemprop="addressLocality"]/text()').extract_first(),
-            'state': response.xpath('//span[@itemprop="addressRegion"]/text()').extract_first(),
+            'addr_full': response.xpath('//meta[@itemprop="streetAddress"]/@content').extract_first(),
+            'city': response.xpath('//meta[@itemprop="addressLocality"]/@content').extract_first(),
+            'state': response.xpath('//abbr[@itemprop="addressRegion"]/text()').extract_first(),
             'postcode': response.xpath('//span[@itemprop="postalCode"]/text()').extract_first(),
             'ref': response.url,
             'website': response.url,
-            'lon': float(response.xpath('//span/meta[@itemprop="longitude"]/@content').extract_first()),
-            'lat': float(response.xpath('//span/meta[@itemprop="latitude"]/@content').extract_first()),
+            'lon': float(response.xpath('//meta[@itemprop="longitude"]/@content').extract_first()),
+            'lat': float(response.xpath('//meta[@itemprop="latitude"]/@content').extract_first()),
         }
-        phone = response.xpath('//a[@class="c-phone-number-link c-phone-main-number-link"]/text()').extract_first()
+        phone = response.xpath('//div[@itemprop="telephone"]/text()').extract_first()
         if phone:
             properties['phone'] = phone
 
