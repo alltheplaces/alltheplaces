@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import scrapy
 from locations.items import GeojsonPointItem
+from urllib.parse import urlencode
 import json
 
 
@@ -8,20 +9,31 @@ class DunkinSpider(scrapy.Spider):
     name = "dunkindonuts"
     allowed_domains = ["dunkindonuts.com", "mapquestapi.com"]
 
-    # Choosing key hub at geographic extremes of the US in order to get full coverage in the location search
-    search_hubs = ['washington+dc', 'los+angeles', 'miami', 'boston', 'chicago']
+    def start_requests(self):
+        base_url = "https://www.mapquestapi.com/search/v2/radius?"
 
-    start_urls = [
-        'https://www.mapquestapi.com/search/v2/radius?'
-        'key=Gmjtd|lu6t2luan5%2C72%3Do5-larsq&origin=' + i + '&units=m&'
-        'maxMatches=4000&radius=3000&hostedData=mqap.33454_DunkinDonuts&'
-        'ambiguities=ignore' for i in search_hubs
-    ]
+        params = {
+            "key": "Gmjtd|lu6t2luan5%2C72%3Do5-larsq",
+            "origin": "",
+            "units": "m",
+            "maxMatches": "4000",
+            "radius": "100",
+            "hostedData": "mqap.33454_DunkinDonuts",
+            "ambiguities": "ignore"
+        }
+
+        with open('./locations/searchable_points/us_centroids_100mile_radius.csv') as points:
+            next(points)
+            for point in points:
+                _, lat, lon = point.strip().split(',')
+                params.update({"origin": lat + "," + lon})
+                yield scrapy.Request(url=base_url + urlencode(params))
+
 
     def parse(self, response):
         jdata = json.loads(response.body_as_unicode())
 
-        for i in jdata['searchResults']:
+        for i in jdata.get('searchResults',[]):
 
             properties = {
                 'ref': i['key'],
