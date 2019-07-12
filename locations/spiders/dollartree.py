@@ -8,9 +8,9 @@ from locations.items import GeojsonPointItem
 
 class DollarTreeSpider(scrapy.Spider):
     name = "dollartree"
-    allowed_domains = ["locations.dollartree.com"]
+    allowed_domains = ["dollartree.com/locations/"]
     start_urls = (
-        'https://locations.dollartree.com',
+        'https://www.dollartree.com/locations',
     )
 
     def store_hours(self, store_hours):
