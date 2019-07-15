@@ -12,9 +12,13 @@ class MedExpressSpider(scrapy.Spider):
 
     def parse(self, response):
         data = json.loads(response.body_as_unicode())
-        stores = data['locations']                            
-        hourdict = {}
-        for store in stores:                                 
+        stores = data['locations']
+
+        for store in stores:
+
+            if re.search('closed', store['locationName'], re.IGNORECASE):
+                continue
+
             properties = {                                   
                 'ref': store['uid'],                          
                 'name': store['locationName'],                       
