@@ -1,6 +1,7 @@
 import scrapy
 import re
 from locations.items import GeojsonPointItem
+from locations.hours import OpeningHours
 
 class FinishlineSpider(scrapy.Spider):
 
@@ -11,12 +12,26 @@ class FinishlineSpider(scrapy.Spider):
         'https://stores.finishline.com/',
     )
 
+    def parse_hours(self, hours):
+        opening_hours = OpeningHours()
+
+        for hour in hours:
+            try:
+                day, open_time, close_time = re.search(r'([A-Za-z]{2})\s([\d:]+)-([\d:]+)', hour).groups()
+            except:
+                continue
+            opening_hours.add_range(day=day, open_time=open_time, close_time=close_time, time_format='%H:%M')
+
+        return opening_hours.as_opening_hours()
+
     def parse_stores(self, response):
-        ref = re.findall(r"[^(\/)]+$", response.url)
-        if (len(ref) > 0):
-            ref = ref[0].split('.')[0]
+        ref = re.findall(r".com/(.+?)/(.+?)/(.+?).html", response.url)[0]
+        ref = "_".join(ref)
+
+        address_parts = response.xpath('//span[@itemprop="streetAddress"]/span/text()').extract()
         properties = {
-            'addr_full': " ".join(response.xpath('//span[@itemprop="streetAddress"]/span/text()').extract()),
+            'addr_full': " ".join([a.strip() for a in address_parts]),
+            "name": response.xpath('//span[@class="location-name-geo"]/text()').extract_first(),
             'phone': response.xpath(
                 'normalize-space(//span[@itemprop="telephone"]/text())').extract_first(),
             'city': response.xpath('normalize-space(//span[@itemprop="addressLocality"]/text())').extract_first(),
@@ -26,17 +41,51 @@ class FinishlineSpider(scrapy.Spider):
             'website': response.url,
             'lat': float(response.xpath('normalize-space(//meta[@itemprop="latitude"]/@content)').extract_first()),
             'lon': float(response.xpath('normalize-space(//meta[@itemprop="longitude"]/@content)').extract_first()),
+            'extras': {
+                'brand': response.xpath('//span[@class="location-name-brand"]/text()').extract_first().strip()
+            }
         }
-        hours = response.xpath('//tr[@itemprop="openingHours"]/@content').extract()
-        if hours != []:
-            hours = "; ".join(hours)
+
+        hours = self.parse_hours(response.xpath('//tr[@itemprop="openingHours"]/@content').extract())
+
+        if hours:
             properties['opening_hours'] = hours
         yield GeojsonPointItem(**properties)
 
     def parse_city_stores(self, response):
-        stores = response.xpath('//a[contains(text(),"Shoe Store Details")]/@href').extract()
+
+        stores = response.xpath('//div[@class="c-location-grid-item"]')
         for store in stores:
-            yield scrapy.Request(response.urljoin(store), callback=self.parse_stores)
+            url = store.xpath('.//div[@class="c-location-grid-links"]/div/a[contains(text(), "Store Details")]/@href').extract_first()
+            if url:
+                yield scrapy.Request(response.urljoin(url), callback=self.parse_stores)
+            else:
+                ref = re.findall(r".com/(.+?)/(.+?).html", response.url)[0]
+                ref = "_".join(ref)
+                name = store.xpath('.//span[@class="location-name-geo"]/text()').extract_first()
+                address_parts = store.xpath('.//span[@class="c-address-street"]/span/text()').extract()
+                brand = store.xpath('.//span[@class="location-name-brand"]/text()').extract_first().replace("  ", " ").strip()
+                properties = {
+                    'addr_full': " ".join([a.strip() for a in address_parts]),
+                    'name': name,
+                    'phone': store.xpath(
+                        'normalize-space(.//span[contains(@class, "c-phone-main-number-span")]/text())').extract_first(),
+                    'city': store.xpath(
+                        'normalize-space(.//span[@class="c-address-city"]/span/text())').extract_first(),
+                    'state': store.xpath(
+                        'normalize-space(.//abbr[@class="c-address-state"]/text())').extract_first(),
+                    'postcode': store.xpath(
+                        'normalize-space(.//span[@class="c-address-postal-code"]/text())').extract_first().strip(),
+                    'ref': "_".join([ref, brand, name]).replace(' ', '-').lower(),
+                    'website': response.url,
+                    'extras': {
+                        'brand': brand
+                    }
+                }
+                hours = self.parse_hours(store.xpath('//tr[@itemprop="openingHours"]/@content').extract())
+                if hours:
+                    properties['opening_hours'] = hours
+                yield GeojsonPointItem(**properties)
 
     def parse_state(self, response):
         urls = response.xpath('//div[@class="c-directory-list-content-wrapper"]/ul/li/a/@href').extract()
@@ -46,6 +95,7 @@ class FinishlineSpider(scrapy.Spider):
                 yield scrapy.Request(response.urljoin(path), callback=self.parse_city_stores)
             else:
                 yield scrapy.Request(response.urljoin(path), callback=self.parse_stores)
+
     def parse(self, response):
         urls = response.xpath('//div[@class="c-directory-list-content-wrapper"]/ul/li/a/@href').extract()
         for path in urls:
