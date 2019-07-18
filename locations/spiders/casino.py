@@ -43,7 +43,7 @@ class TemplateSpider(scrapy.Spider):
             "postcode": postalCode,
             "housenumber": roadNum,
             "street": street,
-            "addr_full": streetAddress+', '+city+', '+postalCode,
+            "addr_full": streetAddress,
             "website": response.url,
             "opening_hours": openingHours,
             "extras": {
