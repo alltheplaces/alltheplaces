@@ -2,6 +2,8 @@
 import scrapy
 from locations.items import GeojsonPointItem
 import json
+import html
+
 
 class AnytimeFitnessSpider(scrapy.Spider):
     name = 'anytime_fitness'
@@ -18,14 +20,13 @@ class AnytimeFitnessSpider(scrapy.Spider):
             yield GeojsonPointItem(
                 lat = gym['latitude'],
                 lon = gym['longitude'],
-                addr_full = '{}, {}'.format(gym['content']['address'], gym['content']['address2']),
+                addr_full = ", ".join(filter(None, [gym['content']['address'], gym['content']['address2']])),
                 city = gym['content']['city'],
                 phone = gym['content']['phone'],
                 state = gym['content']['state_abbr'],
                 postcode = gym['content']['zip'],
                 ref = gym['content']['url'],
-                country = gym['content']['country']
+                country = gym['content']['country'],
+                name = html.unescape(gym['content']['title']),
+                extras = {"number": gym['content']['number']}
                 )
-                
-                
-    
