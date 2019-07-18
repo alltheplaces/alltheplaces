@@ -62,14 +62,15 @@ class DunhamsSportsSpiders(scrapy.Spider):
             for match in response.xpath("//markers/marker"):
                 fullAddress=match.xpath('.//@address').extract_first().replace('<br>', ', ')
                 addrString = fullAddress.split(",")[0].strip()
-                refString = ""
+                refString = addrString.replace(" ","_")
 
                 stateString = fullAddress.split(" ")[len(fullAddress.split(" "))-2].strip()
                 postString =  fullAddress.split(" ")[len(fullAddress.split(" "))-1].strip()
 
                 if(len(addrString.split(' - ')) > 1):
-                    refString = addrString.split(' - ')[0].strip()
+                    name = addrString.split(' - ')[0].strip()
                     addrString = addrString.split(' - ')[1].strip()
+
 
 
                 hoursMonString = self.store_hours(match.xpath('.//@hours_mon').extract_first().strip())
@@ -88,5 +89,6 @@ class DunhamsSportsSpiders(scrapy.Spider):
                     phone=match.xpath('.//@phone').extract_first().replace(" ",""),
                     website=match.xpath('.//@permalink').extract_first().strip(),
                     opening_hours=allHours,
+                    name=name,
                 )
 
