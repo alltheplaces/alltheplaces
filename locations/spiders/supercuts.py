@@ -1,5 +1,4 @@
 import scrapy
-from scrapy.spiders import BaseSpider
 from locations.items import GeojsonPointItem
 import json
 import re
