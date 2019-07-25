@@ -27,22 +27,20 @@ class TemplateSpider(scrapy.Spider):
 
         data = json.loads(response.body_as_unicode())
 
-        i = 0
         for row in data:
 
             properties = {
-                "ref": data[i]['community_id'],
-                "name": data[i]['name'],
-                "lat": data[i]['latitude'],
-                "lon": data[i]['longitude'],
-                "addr_full": data[i]['address1'],
-                "city": data[i]['city'],
-                "state": data[i]['state'],
-                "country": data[i]['country_code'],
-                "postcode": data[i]['zip_postal_code'],
-                "website": data[i]['website'],
-                "phone": data[i]['contact_center_phone'],
+                "ref": row['community_id'],
+                "name": row['name'],
+                "lat": row['latitude'],
+                "lon": row['longitude'],
+                "addr_full": row['address1'],
+                "city": row['city'],
+                "state": row['state'],
+                "country": row['country_code'],
+                "postcode": row['zip_postal_code'],
+                "website": row['website'],
+                "phone": row['contact_center_phone'],
             }
 
             yield GeojsonPointItem(**properties)
-            i += 1
