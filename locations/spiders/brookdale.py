@@ -28,7 +28,7 @@ class TemplateSpider(scrapy.Spider):
         data = json.loads(response.body_as_unicode())
 
         i = 0
-        while i < len(data):
+        for row in data:
 
             properties = {
                 "ref": data[i]['community_id'],
