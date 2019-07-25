@@ -30,7 +30,6 @@ class TemplateSpider(scrapy.Spider):
         i = 0
         while i < len(data):
 
-            print(data[i]['name'])
             properties = {
                 "ref": data[i]['community_id'],
                 "name": data[i]['name'],
