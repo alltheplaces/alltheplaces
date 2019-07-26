@@ -3,7 +3,17 @@ import scrapy
 import re
 
 from locations.items import GeojsonPointItem
+from locations.hours import OpeningHours
 
+DAY_MAPPING = [
+    "Mon",
+    "Tue",
+    "Wed",
+    "Thu",
+    "Fri",
+    "Sat",
+    "Sun"
+]
 
 class AppleSpider(scrapy.Spider):
     name = "apple"
@@ -12,68 +22,70 @@ class AppleSpider(scrapy.Spider):
         'https://www.apple.com/retail/storelist/',
     )
 
-    def store_hours(self, store_hours):
-        result = ''
-        for line in range(0, int(len(store_hours)/2)):
-            days = re.search(r'^(\D{3})\s*((through|and|-|&|-)\s*(\D{3}))?$', store_hours[line*2])
+    def store_hours(self, hours):
+        opening_hours = OpeningHours()
+        for i in range(0, len(hours), 2):
+            try:
+                day_ranges = hours[i]
+                times = hours[i+1].replace("Noon", "12:00 p.m.").replace('.', '')
+                if times == 'Closed':
+                    continue
 
-            if (not days) or (store_hours[line*2+1] == 'Closed'):
+                open_time, close_time = re.search(r'([\d:]+\s[apm]+)\s-\s([\d:]+\s[apm]+)', times).groups()
+
+                for day_range in day_ranges.split(','):
+                    if '-' in day_range:
+                        start_day, end_day = day_range.split(' - ')
+
+                    else:
+                        start_day, end_day = day_range, day_range
+
+                    start_day = start_day.strip(' :')
+                    end_day = end_day.strip(' :')
+
+                    for day in DAY_MAPPING[DAY_MAPPING.index(start_day):DAY_MAPPING.index(end_day)]:
+                        opening_hours.add_range(day=day[:2], open_time=open_time, close_time=close_time, time_format='%I:%M %p')
+            except:
                 continue
 
-            result += days[1][:2]
-            try:
-                result += "-"+days[4][:2]+" "
-            except Exception as e:
-                result += " "
-
-            hours_str = store_hours[line*2+1].replace("Noon","12:00 a.m.")
-            hours = re.search(r'(\d+):(\d+)\s*((a\.m\.)|(p\.m\.))\s*-\s*(\d+):?(\d+)?\s*((a\.m\.)|(p\.m\.))',hours_str)
-
-            result += str(int(hours[1])+(12 if hours[3] in ['p.m.', 'm.p.'] else 0))+':'+hours[2]+'-'
-            result += str(int(hours[6])+(12 if hours[8] in ['p.m.', 'm.p.'] else 0))+':'+hours[7]+';'
-        return result.rstrip(';')
+        return opening_hours.as_opening_hours()
 
     def parse(self, response):
-        shops = response.xpath('//div[@id="usstores"]//li/a/@href')
-        for shop in shops:
-            yield scrapy.Request(response.urljoin(shop.extract()), callback=self.parse_shops)
+        countries = response.xpath('//div[contains(@id, "stores")]')
+        for country in countries:
+            country_code = country.xpath('./@id').extract_first()[:2].upper()
+
+            shops = country.xpath('.//li/a/@href').extract()
+            for shop in shops:
+                yield scrapy.Request(response.urljoin(shop),
+                                     callback=self.parse_shops,
+                                     meta={"properties": {"country": country_code}})
 
     def parse_shops(self, response):
-            props = {
-                'website': response.url,
-                'ref': response.xpath('//meta[@property="og:title"]/@content').extract_first(),
-                'country': 'USA',
-                'opening_hours': self.store_hours(response.xpath('//div[contains(@class,"store-hours-row")]/div/text()').extract()),
-            }
 
-            phone_elem = response.xpath('//div[contains(@class,"store-details")]//span[contains(@class,"store-phone")]/text()')
-            if phone_elem:
-                props['phone'] = phone_elem.extract_first()
+        properties = response.meta["properties"]
 
-            addr_full_elem = response.xpath('//div[contains(@class,"store-details")]//span[contains(@class,"store-street")]/text()')
-            if addr_full_elem:
-                props['addr_full'] = addr_full_elem.extract_first()
+        store_details = response.xpath('//div[contains(@class,"store-details")]')
 
-            postcode_elem = response.xpath('//div[contains(@class,"store-details")]//span[contains(@class,"store-postal-code")]/text()')
-            if postcode_elem:
-                props['postcode'] = postcode_elem.extract_first()
+        properties.update({
+            'website': response.url,
+            'ref': "_".join(re.search(r'.*/(.*?)/(.*?)/', response.url).groups()),
+            'name': response.xpath('//meta[@property="og:title"]/@content').extract_first(),
+            'phone': store_details.xpath('.//span[contains(@class,"store-phone")]/text()').extract_first(),
+            'addr_full': store_details.xpath('.//span[contains(@class,"store-street")]/text()').extract_first(),
+            'city': store_details.xpath('.//span[contains(@class,"store-locality")]/text()').extract_first(),
+            'state': store_details.xpath('.//span[contains(@class,"store-region")]/text()').extract_first(),
+            'postcode': store_details.xpath('.//span[contains(@class,"store-postal-code")]/text()').extract_first(),
+        })
 
-            city_elem = response.xpath('//div[contains(@class,"store-locality")]//span[contains(@class,"store-postal-code")]/text()')
-            if city_elem:
-                props['city'] = city_elem.extract_first()
+        hours = self.store_hours(response.xpath('//div[contains(@class,"store-hours-row")]/div/text()').extract())
+        if hours:
+            properties['opening_hours'] = hours
 
-            state_elem = response.xpath('//div[contains(@class,"store-locality")]//span[contains(@class,"store-region")]/text()')
-            if state_elem:
-                props['state'] = state_elem.extract_first()
+        latlon_elem = response.xpath('//div[contains(@class,"copy-software")]/a/@href')
+        if latlon_elem:
+            lat, lon = re.search(r'&lat=(.+)&long=(.+)', latlon_elem.extract_first()).groups()
+            properties['lat'] = float(lat)
+            properties['lon'] = float(lon)
 
-            country_elem = response.xpath('//li[@class="country-name"]/span/text()')
-            if country_elem:
-                props['country'] = country_elem.extract_first().strip(),
-
-            latlon_elem = response.xpath('//div[contains(@class,"copy-software")]/a/@href')
-            if latlon_elem:
-                pos = re.search(r'&lat=(.+)&long=(.+)', latlon_elem.extract_first())
-                props['lat'] = pos[1]
-                props['lon'] = pos[2]
-
-            yield GeojsonPointItem(**props)
+        yield GeojsonPointItem(**properties)
