@@ -1,28 +1,26 @@
 import scrapy
 from locations.items import GeojsonPointItem
-import re
 
 
 class PlanetFitnessSpider(scrapy.Spider):
     name = "planet-fitness"
     allowed_domains = ["planetfitness.com"]
     start_urls = (
-        "https://www.planetfitness.com/sitemap.xml",
+        "https://www.planetfitness.com/sitemap",
     )
 
     def parse(self, response):
-        response.selector.remove_namespaces()
-        city_urls = response.xpath('//url/loc/text()').extract()
+        city_urls = response.xpath('//td[@class="club-title"]/a/@href').extract()
         for path in city_urls:
-            if "https://www.planetfitness.com/gyms/" in path:
+            if "/gyms/" in path:
                 yield scrapy.Request(
-                    path,
+                    response.urljoin(path),
                     callback=self.parse_gym
                 )
 
     def parse_gym(self, response):
-        coordinates = re.findall(r"(?<=\.setLngLat\(\[).*(?=\]\))", response.body_as_unicode())
-        lat, lon = coordinates[0].split(", ") if len(coordinates) else [None, None]
+        coordinates = response.xpath('//meta[@name="geo.position"]/@content').extract_first()
+        lat, lon = coordinates.split(", ") if len(coordinates) else [None, None]
 
         point = {
             "lat": lat,
