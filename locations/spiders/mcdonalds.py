@@ -81,7 +81,8 @@ class McDonaldsSpider(scrapy.Spider):
                     'phone': store_info.get('telephone'),
                     'lon': store['geometry']['coordinates'][0],
                     'lat': store['geometry']['coordinates'][1],
-                    'extras': {
+                    'extras':
+                    {
                         'number': store_info["identifierValue"]
                     }
                 }
