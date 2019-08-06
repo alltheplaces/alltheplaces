@@ -83,7 +83,7 @@ class McDonaldsSpider(scrapy.Spider):
                     'lat': store['geometry']['coordinates'][1],
                     'extras':
                     {
-                        'number': store_info["identifierValue"]
+                        'number': store_info["identifierValue"]  ## 4 digit identifier that is a store number for US McDonalds
                     }
                 }
 
