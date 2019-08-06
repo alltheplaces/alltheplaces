@@ -69,17 +69,35 @@ class McDonaldsSpider(scrapy.Spider):
         for store in data.get('features', []):
             store_info = store['properties']
 
-            properties = {
-                "ref": store_info['id'],
-                'addr_full': store_info['addressLine1'],
-                'city': store_info['addressLine3'],
-                'state': store_info['subDivision'],
-                'country': store_info['addressLine4'],
-                'postcode': store_info['postcode'],
-                'phone': store_info.get('telephone'),
-                'lon': store['geometry']['coordinates'][0],
-                'lat': store['geometry']['coordinates'][1],
-            }
+            if store_info['addressLine4'] == 'USA':
+
+                properties = {
+                    "ref": store_info['id'],
+                    'addr_full': store_info['addressLine1'],
+                    'city': store_info['addressLine3'],
+                    'state': store_info['subDivision'],
+                    'country': store_info['addressLine4'],
+                    'postcode': store_info['postcode'],
+                    'phone': store_info.get('telephone'),
+                    'lon': store['geometry']['coordinates'][0],
+                    'lat': store['geometry']['coordinates'][1],
+                    'extras': {
+                        'number': store_info["identifierValue"]
+                    }
+                }
+
+            else:
+                properties = {
+                    "ref": store_info['id'],
+                    'addr_full': store_info['addressLine1'],
+                    'city': store_info['addressLine3'],
+                    'state': store_info['subDivision'],
+                    'country': store_info['addressLine4'],
+                    'postcode': store_info['postcode'],
+                    'phone': store_info.get('telephone'),
+                    'lon': store['geometry']['coordinates'][0],
+                    'lat': store['geometry']['coordinates'][1],
+                }
 
             hours = store_info.get('restauranthours')
             try:
