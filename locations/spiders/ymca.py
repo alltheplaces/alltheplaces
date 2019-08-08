@@ -17,6 +17,28 @@ SINGLE_POINT_STATES = [
 HUNDRED_MILES_STATES = {"MT", "WY", "SD", "ND", "NE", "NV", "AZ", "NM", "UT", "ID"}
 TWENTYFIVE_MILES_STATES = {"MD", "OH", "FL", "IL", "IA", "WI", "MN", "RI", "MA", "NH",
                            "SC", "NC", "NJ", "WA", "CA", "PA", "NY"}
+ADDITONAL_CITIES = [
+    "Los Angeles, CA",
+    "New York, NY",
+    "Boston, MA",
+    "Philadelphia, PA",
+    "Dallas, TX",
+    "Houston, TX",
+    "Seattle, WA",
+    "San Francisco, CA",
+    "Denver, CO",
+    "Minneapolis, MN",
+    "Omaha, NE",
+    "St. Louis, MO",
+    "Chicago, IL",
+    "Montgomery, AL",
+    "Orlando, FL",
+    "St. Petersburg, FL",
+    "Atlanta, GA",
+    "Poughkeepsie, NY",
+    "Hartford, CT",
+    "Concord, NH"
+]
 
 
 class YmcaSpider(scrapy.Spider):
@@ -55,6 +77,10 @@ class YmcaSpider(scrapy.Spider):
                 if state not in HUNDRED_MILES_STATES.union(TWENTYFIVE_MILES_STATES).union({"AK", "HI"}):
                     params = {"address": "{},{}".format(lat, lon)}
                     yield scrapy.Request(url=url + urlencode(params))
+
+        for city in ADDITONAL_CITIES:
+            params = {"address": city}
+            yield scrapy.Request(url=url + urlencode(params))
 
     def parse_hours(self, hours):
         opening_hours = OpeningHours()
