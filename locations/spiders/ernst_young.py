@@ -8,8 +8,8 @@ from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
 
 
-class EySpider(scrapy.Spider):
-    name = "ey"
+class ErnstYoungSpider(scrapy.Spider):
+    name = "ernst_young"
     allowed_domains = []
     start_urls = [
         'https://www.ey.com/eydff/services/officeLocations.json',
