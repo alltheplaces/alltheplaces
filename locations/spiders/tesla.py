@@ -36,9 +36,19 @@ class TeslaSpider(scrapy.Spider):
 
             # city, state, and zip do not have separate classes - contained together in locality class as text
             name = response.xpath('normalize-space(//header/h1/text())').extract_first()
+            common_name = response.xpath('normalize-space(//span[@class="common-name"]//text())').extract_first()
             street_address = response.xpath('normalize-space(//span[@class="street-address"]//text())').extract_first()
             city_state_zip = response.xpath('normalize-space(//span[@class="locality"]//text())').extract_first()
-            addr_full = street_address + ', ' + city_state_zip
+
+            if common_name and street_address and city_state_zip:
+                addr_full = common_name + ' ' + street_address + ', ' + city_state_zip
+            elif street_address and not city_state_zip:
+                addr_full = street_address
+            elif city_state_zip and not street_address:
+                addr_full = city_state_zip
+            elif street_address and city_state_zip:
+                addr_full = street_address + ', ' + city_state_zip
+
             country_url = response.xpath('//header[@class="findus-list-header"]/a/@href').extract_first()
             country = urllib.parse.unquote_plus(re.search(r'.+/(.+?)/?(?:\.html|$)', country_url).group(1))
             phone = response.xpath('normalize-space(//span[@class="tel"]/span[2]/text())').extract_first()
