@@ -2,10 +2,12 @@
 import scrapy
 import json
 import datetime
+import re
 from locations.items import GeojsonPointItem
+from locations.hours import OpeningHours
 
 
-class TemplateSpider(scrapy.Spider):
+class VeteransAffairsSpider(scrapy.Spider):
     name = "department_veterans_affairs"
     allowed_domains = ["api.va.gov"]
 
@@ -15,87 +17,38 @@ class TemplateSpider(scrapy.Spider):
             URL = 'https://api.va.gov/v0/facilities/va?address=United%%20States&bbox[]=-180&bbox[]=90&bbox[]=180&bbox[]=-90&type=all&page=%s' % i
             yield scrapy.Request(URL, callback=self.parse_info)
 
-
     def store_hours(self, store_hours):
-        if not store_hours:
-            return None
-        if all([h == '' for h in store_hours.values()]):
-            return None
+        o = OpeningHours()
 
-        day_groups = []
-        this_day_group = None
         for day in ('monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'):
             hours = store_hours.get(day)
+            d = day[:2]
+            d = d.title()
+
+            print('hours:' + hours)
             if not hours:
                 continue
 
-            hours = hours.replace(' - ', '-')
-            hours = hours.replace(' ', '')
+            try:
+                m = re.match(
+                    r'((1[0-2]|0?[1-9]):([0-5][0-9]) ?([AaPp][Mm]))-((1[0-2]|0?[1-9]):([0-5][0-9]) ?([AaPp][Mm]))',
+                    hours)
 
-            if hours != "Closed":
-                temp = hours.split('-')
+                open = datetime.datetime.strptime(m.group(1), '%I:%M%p').strftime('%H:%M')
+                close = datetime.datetime.strptime(m.group(5), '%I:%M%p').strftime('%H:%M')
 
-                try:
-                    try:
-                        from_time = datetime.datetime.strptime(temp[0], '%I%M%p').strftime('%H:%M') + "-"
-                        to_time = datetime.datetime.strptime(temp[1], '%I%M%p').strftime('%H:%M')
-                    except:
-                        from_time = datetime.datetime.strptime(temp[0], '%I:%M%p').strftime('%H:%M') + "-"
-                        to_time = datetime.datetime.strptime(temp[1], '%I:%M%p').strftime('%H:%M')
-                    hours = from_time + to_time
-                except:
-                    return None
+                o.add_range(d, open_time=open, close_time=close, time_format='%H:%M')
+            except AttributeError:
+                continue
 
-            day_short = day[:2]
-            day_short = day_short.title()
-
-            if not this_day_group:
-                this_day_group = dict(from_day=day_short, to_day=day_short, hours=hours)
-            elif this_day_group['hours'] == hours:
-                this_day_group['to_day'] = day_short
-            elif this_day_group['hours'] != hours:
-                day_groups.append(this_day_group)
-                this_day_group = dict(from_day=day_short, to_day=day_short, hours=hours)
-
-        day_groups.append(this_day_group)
-
-
-        if len(day_groups) == 1:
-            if day_groups['hours'] == 'Closed':
-                pass
-            else:
-                opening_hours = day_groups[0]['hours']
-                if opening_hours == '04:00-04:00':
-                    opening_hours = '24/7'
-        else:
-            opening_hours = ''
-            for day_group in day_groups:
-                if day_group['from_day'] == day_group['to_day']:
-                    if day_group['hours'] == 'Closed':
-                        pass
-                    else:
-                        opening_hours += '{from_day} {hours}; '.format(**day_group)
-                else:
-                    if day_group['hours'] == 'Closed':
-                        pass
-                    else:
-                        opening_hours += '{from_day}-{to_day} {hours}; '.format(**day_group)
-            opening_hours = opening_hours[:-2]
-
-        return opening_hours
-
-
+        return o.as_opening_hours()
 
     def parse_info(self, response):
-
-
         data = json.loads(response.body_as_unicode())
 
         data = data['data']
 
-
         for row in data:
-
             place_info = row['attributes']
 
             properties = {
@@ -125,9 +78,3 @@ class TemplateSpider(scrapy.Spider):
                 self.logger.exception("Couldn't process opening hours: %s", hours)
 
             yield GeojsonPointItem(**properties)
-
-
-
-
-
-
