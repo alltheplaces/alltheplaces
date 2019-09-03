@@ -25,7 +25,6 @@ class VeteransAffairsSpider(scrapy.Spider):
             d = day[:2]
             d = d.title()
 
-            print('hours:' + hours)
             if not hours:
                 continue
 
