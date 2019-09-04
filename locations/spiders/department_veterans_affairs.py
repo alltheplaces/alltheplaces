@@ -32,9 +32,11 @@ class VeteransAffairsSpider(scrapy.Spider):
                 m = re.match(
                     r'((1[0-2]|0?[1-9]):([0-5][0-9]) ?([AaPp][Mm]))-((1[0-2]|0?[1-9]):([0-5][0-9]) ?([AaPp][Mm]))',
                     hours)
-
-                open = datetime.datetime.strptime(m.group(1), '%I:%M%p').strftime('%H:%M')
-                close = datetime.datetime.strptime(m.group(5), '%I:%M%p').strftime('%H:%M')
+                try:
+                    open = datetime.datetime.strptime(m.group(1), '%I:%M%p').strftime('%H:%M')
+                    close = datetime.datetime.strptime(m.group(5), '%I:%M%p').strftime('%H:%M')
+                except:
+                    continue
 
                 o.add_range(d, open_time=open, close_time=close, time_format='%H:%M')
             except AttributeError:
@@ -50,12 +52,17 @@ class VeteransAffairsSpider(scrapy.Spider):
         for row in data:
             place_info = row['attributes']
 
+            try:
+                addr = place_info['address']['physical']['address_1']
+            except:
+                addr = place_info['address']['mailing']['address_1']
+
             properties = {
                 "ref": row['id'],
                 "name": place_info['name'],
                 "lat": place_info['lat'],
                 "lon": place_info['long'],
-                "addr_full": place_info['address']['physical']['address_1'],
+                "addr_full": addr,
                 "city": place_info['address']['physical']['city'],
                 "state": place_info['address']['physical']['state'],
                 "country": 'US',
