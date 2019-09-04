@@ -69,11 +69,8 @@ class VeteransAffairsSpider(scrapy.Spider):
             }
 
             hours = place_info.get('hours')
-            try:
-                hours = self.store_hours(hours)
-                if hours:
-                    properties['opening_hours'] = hours
-            except:
-                self.logger.exception("Couldn't process opening hours: %s", hours)
+            opening_hours = self.store_hours(hours)
+            if opening_hours:
+                properties['opening_hours'] = opening_hours
 
             yield GeojsonPointItem(**properties)
