@@ -26,11 +26,12 @@ class VitaminShoppe(scrapy.Spider):
         hours = [re.sub(r'[:]$', '', day_hour) for day_hour in hours]
 
         props = {
-            'addr_full': response.xpath('//meta[@name="address"]/@content').extract_first(),
+            'addr_full': app_json[0]['address']['streetAddress'],
             'phone': response.xpath(PHONE).extract_first(),
-            'city': response.xpath('//meta[@name="city"]/@content').extract_first(),
-            'state': response.xpath('//meta[@name="state"]/@content').extract_first(),
-            'postcode': response.xpath('//meta[@name="zip"]/@content').extract_first(),
+            'city': app_json[0]['address']['addressLocality'],
+            'state': app_json[0]['address']['addressRegion'],
+            'postcode': app_json[0]['address']['postalCode'],
+            'phone': app_json[0]['address']['telephone'],
             'lat': float(app_json[0]['geo']['latitude']),
             'lon': float(app_json[0]['geo']['longitude']),
             'opening_hours': "; ".join(['{} {}'.format(x[0], x[1]) for x in zip(*[iter(hours)]*2)]),
