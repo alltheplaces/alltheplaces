@@ -1,95 +1,88 @@
+import json
 import scrapy
 import re
 from locations.items import GeojsonPointItem
+from locations.hours import OpeningHours
 
-DAY_MAPPING = {
-    'M': 'Mo',
-    'T': 'Tu',
-    'W': 'We',
-    'F': 'Fr',
-    'Sat': 'Sa',
-    'Sun': 'Su'
-}
+DAYS = [
+    'Mo',
+    'Tu',
+    'We',
+    'Th',
+    'Fr',
+    'Sa',
+    'Su'
+]
 
 
 class CVSSpider(scrapy.Spider):
 
     name = "cvs"
     allowed_domains = ["www.cvs.com"]
-    download_delay = 1.5
+    download_delay = 0.5
     start_urls = (
         'https://www.cvs.com/store-locator/cvs-pharmacy-locations',
     )
 
-    def parse_day(self, day):
+    def parse_hours(self, hours):
+        opening_hours = OpeningHours()
 
-        if re.search('Sat', day) or re.search('Sun', day):
-            return DAY_MAPPING[day.strip()]
+        for group in hours:
+            if 'closed' in group:
+                continue
+            if 'open 24 hours' in group:
+                days = re.search(r'([a-zA-Z\-]+)\s+open 24 hours', group).groups()[0]
+                open_time, close_time = '00:00:00', '23:59:00'
+            else:
+                try:
+                    days, open_time, close_time = re.search(r'([a-zA-Z\-]+)\s+([\d:\sapm]+)-([\d:\sapm]+)', group).groups()
+                except AttributeError:
+                    continue  # no hours listed, just day
+            try:
+                start_day, end_day = days.split('-')
+            except ValueError:
+                start_day, end_day = days, days
+            for day in DAYS[DAYS.index(start_day):DAYS.index(end_day) + 1]:
+                if 'm' in open_time:
+                    open_time = open_time.strip(' apm') + ":00"
+                if 'm' in close_time:
+                    close_time = close_time.strip(' apm') + ":00"
+                opening_hours.add_range(day=day,
+                                        open_time=open_time.strip(),
+                                        close_time=close_time.strip(),
+                                        time_format='%H:%M:%S')
 
-        if re.search('-', day):
-            days = day.split('-')
-            osm_days = []
-            if len(days) == 2:
-                for day in days:
-                    osm_day = DAY_MAPPING[day.strip()]
-                    osm_days.append(osm_day)
-            return "-".join(osm_days)
-
-    def parse_times(self, times):
-        if times.strip() == 'Open 24 hours':
-            return '24/7'
-        hours_to = [x.strip() for x in times.split('-')]
-        cleaned_times = []
-
-        for hour in hours_to:
-            if re.search('PM$', hour):
-                hour = re.sub('PM', '', hour).strip()
-                hour_min = hour.split(":")
-                if int(hour_min[0]) < 12:
-                    hour_min[0] = str(12 + int(hour_min[0]))
-                cleaned_times.append(":".join(hour_min))
-
-            if re.search('AM$', hour):
-                hour = re.sub('AM', '', hour).strip()
-                hour_min = hour.split(":")
-                if len(hour_min[0]) <2:
-                    hour_min[0] = hour_min[0].zfill(2)
-                else:
-                    hour_min[0] = str(12 + int(hour_min[0]))
-
-                cleaned_times.append(":".join(hour_min))
-        return "-".join(cleaned_times)
-
-    def parse_hours(self, lis):
-        hours = []
-        for li in lis:
-            day = li.xpath('normalize-space(.//span[@class="day single-day"]/text() | .//span[@class="day"]/text())').extract_first()
-            times = li.xpath('.//span[@class="timings"]/text()').extract_first()
-            if times and day:
-                parsed_time = self.parse_times(times)
-                parsed_day = self.parse_day(day)
-                hours.append(parsed_day + ' ' + parsed_time)
-
-        return "; ".join(hours)
+        return opening_hours.as_opening_hours()
 
     def parse_stores(self, response):
-        raw_phone = response.xpath('normalize-space(//a[@class="tel_phone_numberDetail"]/@href)').extract_first()
+        try:
+            data = json.loads(response.xpath('//script[@type="application/ld+json" and contains(text(), "streetAddress")]/text()').extract_first())[0]
+        except json.decoder.JSONDecodeError:
+            # one malformed json body on this store:
+            # https://www.cvs.com/store-locator/cvs-pharmacy-address/84+South+Avenue+tops+Plaza+-Hilton-NY-14468/storeid=5076
+            data = response.xpath('//script[@type="application/ld+json" and contains(text(), "streetAddress")]/text()').extract_first()
+            data = re.sub(r'"tops Plaza\s*"', '', data)
+            data = json.loads(data)[0]
+        except TypeError:
+            return  # empty store page
 
         properties = {
-            'addr_full': response.xpath('normalize-space(//span[@itemprop="streetAddress"]/text())').extract_first(),
-            'phone': raw_phone.replace('tel:', ''),
-            'city': response.xpath('normalize-space(//span[@itemprop="addressLocality"]/text())').extract_first(),
-            'state': response.xpath('normalize-space(//span[@itemprop="addressRegion"]/text())').extract_first(),
-            'postcode': response.xpath('normalize-space(//span[@itemprop="postalCode"]/text())').extract_first(),
-            'ref': response.xpath('//link[@rel="canonical"]/@href').extract_first(),
-            'website': response.xpath('//link[@rel="canonical"]/@href').extract_first(),
-            'lat': float(response.xpath('normalize-space(//input[@id="toLatitude"]/@value)').extract_first()),
-            'lon': float(response.xpath('normalize-space(//input[@id="toLongitude"]/@value)').extract_first()),
+            'name': data["name"],
+            'ref': re.search(r'.+/?storeid=(.+)', response.url).group(1),
+            'addr_full': data["address"]["streetAddress"].strip(', '),
+            'city': data["address"]["addressLocality"],
+            'state': data["address"]["addressRegion"],
+            'postcode': data["address"]["postalCode"],
+            'country': data["address"]["addressCountry"],
+            'phone': data["address"].get("telephone"),
+            'website': data.get("url") or response.url,
+            'lat': float(data["geo"]["latitude"]),
+            'lon': float(data["geo"]["longitude"]),
         }
 
-        hours = self.parse_hours(response.xpath('//ul[@class="cleanList srHours srSection"]/li'))
+        hours = self.parse_hours(data["openingHours"])
         if hours:
-            properties['opening_hours'] = hours
+            properties["opening_hours"] = hours
 
         yield GeojsonPointItem(**properties)
 
