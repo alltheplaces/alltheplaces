@@ -1,5 +1,6 @@
 import scrapy
 import json
+import re
 from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
 
@@ -41,6 +42,11 @@ class UpsStoreSpider(scrapy.Spider):
         return o.as_opening_hours()
 
     def parse_store(self, response):
+        ref = response.xpath('//input[@id="store_id"]/@value').extract_first()
+        if not ref:
+            ref = re.search(r'store(\d+)@theupsstore.com',
+                            response.xpath('//a[@itemprop="email"]/text()').extract_first()).groups()
+
         properties = {
             'name': response.xpath('//span[@class="LocationName-geo"]/text()').extract_first(),
             'phone': response.xpath('//span[@itemprop="telephone"]/text()').extract_first(),
@@ -49,7 +55,7 @@ class UpsStoreSpider(scrapy.Spider):
             'state': response.xpath('//abbr[@itemprop="addressRegion"]/text()').extract_first(),
             'country': response.xpath('//abbr[@itemprop="addressCountry"]/text()').extract_first(),
             'postcode': response.xpath('//span[@itemprop="postalCode"]/text()').extract_first(),
-            'ref': response.xpath('//input[@id="store_id"]/@value').extract_first(),
+            'ref': ref,
             'website': response.url,
             'lat': float(response.xpath('//meta[@itemprop="latitude"]/@content').extract_first()),
             'lon': float(response.xpath('//meta[@itemprop="longitude"]/@content').extract_first()),

@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 import scrapy
 import json
+import re
 
+from collections import defaultdict
 from locations.items import GeojsonPointItem
 
 
@@ -11,14 +13,39 @@ class WalmartSpider(scrapy.Spider):
     start_urls = (
         'https://www.walmart.com/sitemap_store_main.xml',
     )
+    retries = defaultdict(int)
 
     def store_hours(self, store_hours):
-        if store_hours == 'Mo-Su':
+        if store_hours.get('operationalHours').get('open24Hours') is True:
             return u'24/7'
-        elif store_hours is None:
+        elif not store_hours.get('operationalHoursCombined'):
             return None
         else:
-            return store_hours
+            op_hours = store_hours.get('operationalHoursCombined')
+            open_hours = []
+            for op_hour in op_hours:
+                if op_hour.get('dailyHours').get('closed') is True:
+                    continue
+
+                if op_hour.get('dailyHours').get('openFullDay') is True:
+                    start_hr = '00:00'
+                    end_hr = '24:00'
+                else:
+                    start_hr = op_hour.get('dailyHours').get('startHr')
+                    end_hr = op_hour.get('dailyHours').get('endHr')
+
+                start_day = op_hour.get('startDayName')
+                end_day = op_hour.get('endDayName')
+
+                if end_day is None:
+                    end_day = ''
+
+                hours = start_day+'-'+end_day+' '+start_hr+'-'+end_hr
+                open_hours.append(hours)
+
+            hours_combined = '; '.join(open_hours)
+
+            return hours_combined
 
     def parse(self, response):
         response.selector.remove_namespaces()
@@ -27,16 +54,30 @@ class WalmartSpider(scrapy.Spider):
                 yield scrapy.Request(u.strip(), callback=self.parse_store)
 
     def parse_store(self, response):
-        addr = response.xpath('//div[@itemprop="address"]')[0]
+        script = response.xpath("//script[contains(.,'WML_REDUX_INITIAL_STATE')]").extract_first()
+        # In rare cases will hit page before script tag loads with content
+        if script is None:
+            if self.retries.get(response.url, 0) <= 2:
+                self.retries[response.url] += 1
+                yield scrapy.Request(response.url, callback=self.parse_store)  # Try again
+            else:
+                raise Exception('Retried too many times')
+
+        script_content = re.search(r'window.__WML_REDUX_INITIAL_STATE__ = (.*);</script>', script,
+                                   flags=re.IGNORECASE | re.DOTALL).group(1)
+
+        store_data = json.loads(script_content).get('store')
+
         yield GeojsonPointItem(
-            lat=response.xpath('//meta[@itemprop="latitude"]/@content').extract_first(),
-            lon=response.xpath('//meta[@itemprop="longitude"]/@content').extract_first(),
-            ref=response.url.split('/')[4],
-            phone=response.xpath('//meta[@itemprop="telephone"]/@content').extract_first(),
-            name=response.xpath('//meta[@itemprop="name"]/@content').extract_first(),
-            opening_hours=self.store_hours(response.xpath('//meta[@itemprop="openingHours"]/@content').extract_first()),
-            addr_full=addr.xpath('//span[@itemprop="streetAddress"]/text()').extract_first(),
-            city=addr.xpath('//span[@itemprop="locality"]/text()').extract_first(),
-            state=addr.xpath('//span[@itemprop="addressRegion"]/text()').extract_first(),
-            postcode=addr.xpath('//span[@itemprop="postalCode"]/text()').extract_first(),
+            lat=store_data.get('geoPoint').get('latitude'),
+            lon=store_data.get('geoPoint').get('longitude'),
+            ref=store_data.get('id'),
+            phone=store_data.get('phone'),
+            name=store_data.get('displayName'),
+            opening_hours=self.store_hours(store_data),
+            addr_full=store_data.get('address').get('streetAddress'),
+            city=store_data.get('address').get('city'),
+            state=store_data.get('address').get('state'),
+            postcode=store_data.get('address').get('postalCode'),
+            website=store_data.get('detailsPageURL'),
         )
