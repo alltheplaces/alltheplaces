@@ -6,7 +6,7 @@ from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
 
 
-class Providence_health_servicesSpider(scrapy.Spider):
+class ProvidenceHealthServicesSpider(scrapy.Spider):
     name = "providence_health_services"
     allowed_domains = ["providence.org"]
 
