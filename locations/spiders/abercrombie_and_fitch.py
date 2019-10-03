@@ -32,6 +32,9 @@ class AbercrombieAndFitchSpider(scrapy.Spider):
         data = json.loads(response.body_as_unicode())
 
         for row in data["physicalStores"]:
+            for brand in row["physicalStoreAttribute"]:
+                if brand["name"] == 'Brand':
+                    brandValue = brand["value"]
             properties = {
                 'ref': row["storeNumber"],
                 'name': row["name"],
@@ -42,7 +45,11 @@ class AbercrombieAndFitchSpider(scrapy.Spider):
                 'lon': row["longitude"],
                 'phone': row["telephone"],
                 'addr_full': row["addressLine"][0],
-                'postcode': row["postalCode"]
+                'postcode': row["postalCode"],
+                'extras':
+                    {
+                        'brand': brandValue
+                    }
             }
 
             yield GeojsonPointItem(**properties)
