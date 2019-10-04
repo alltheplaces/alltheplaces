@@ -18,7 +18,7 @@ jobs:
     - name: Setup Python
       uses: actions/setup-python@master
       with:
-        version: 3.7
+        python-version: 3.7
     - name: Run Scrapy check
       run: |
         pip install pipenv
@@ -28,7 +28,7 @@ jobs:
       run: |
         PR_COMMENT_BODY="I ran the spiders in this pull request and got these results:\\n\\n|Spider|Results|Log|\\n|---|---|---|\\n"
 
-        SPIDERS=$(git diff --name-only ${GITHUB_SHA}..master | grep 'locations/spiders')
+        SPIDERS=$(git diff --name-only ${GITHUB_SHA}..origin/master | grep 'locations/spiders')
 
         RUN_DIR="output"
         EXIT_CODE=0
