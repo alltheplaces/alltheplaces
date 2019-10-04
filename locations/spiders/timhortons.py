@@ -1,5 +1,6 @@
-import scrapy
+import json
 import re
+import scrapy
 from locations.items import GeojsonPointItem
 
 class TimHortonsSpider(scrapy.Spider):
@@ -61,18 +62,18 @@ class TimHortonsSpider(scrapy.Spider):
         return opening_hours
 
     def parse(self, response):
-        for state_url in response.xpath('//a[@class="c-directory-list-content-item-link"]/@href').re(r'(^[^\/]+$)'):
+        for local_url in response.xpath('//a[@class="c-directory-list-content-item-link"]/@href').extract():
             yield scrapy.Request(
-                response.urljoin(state_url),
+                response.urljoin(local_url),
                 callback=self.parse,
             )
 
-        for location_url in response.xpath('//a[@class="Teaser-titleLink"]/@href').re(r'(^[^\/]+\/[^\/]+\/.+$)'):
+        for location_url in response.xpath('//ul[@class="c-LocationGridList"]/li/article/div/h2/a/@href').extract():
             yield scrapy.Request(
                 response.urljoin(location_url),
                 callback=self.parse_location,
             )
-            
+
         if response.xpath('//span/meta[@itemprop="longitude"]/@content').extract_first():
             yield scrapy.Request(
                 response.url,
