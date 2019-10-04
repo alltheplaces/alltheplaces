@@ -21,9 +21,9 @@ jobs:
         python-version: 3.7
     - name: Run Scrapy check
       run: |
-        pip install pipenv
-        pipenv install --deploy
-        pipenv run scrapy check
+        pip --quiet install pipenv
+        pipenv --bare install --system --deploy
+        scrapy check
     - name: Run spiders that changed
       run: |
         PR_COMMENT_BODY="I ran the spiders in this pull request and got these results:\\n\\n|Spider|Results|Log|\\n|---|---|---|\\n"
