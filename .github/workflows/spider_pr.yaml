@@ -30,6 +30,11 @@ jobs:
 
         SPIDERS=$(git diff --name-only ${GITHUB_SHA}..origin/master | grep 'locations/spiders')
 
+        if [ -z "$SPIDERS" ]; then
+            echo "No spiders to run."
+            exit 0
+        fi
+
         RUN_DIR="output"
         EXIT_CODE=0
         for spider in $SPIDERS
@@ -72,11 +77,6 @@ jobs:
 
             (>&2 echo "${spider} done")
         done
-
-        if [ -z "$SPIDERS" ]; then
-            echo "No spiders run"
-            exit 0
-        fi
 
         echo "GitHub Event Number: ${{ github.event.number }}"
         if [ -z "$GITHUB_TOKEN" ]; then
