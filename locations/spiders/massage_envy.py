@@ -2,6 +2,7 @@ import json
 import re
 import scrapy
 from locations.items import GeojsonPointItem
+from locations.hours import OpeningHours
 
 class MassageEnvySpider(scrapy.Spider):
 
