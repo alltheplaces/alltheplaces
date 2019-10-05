@@ -70,9 +70,7 @@ jobs:
                 FAILURE_REASON="timeout"
             fi
 
-            LOGFILE_UPLOAD_RESPONSE=$(curl -s -F "file=@${LOGFILE}" https://file.io/\?expires\=14d)
-            echo $LOGFILE_UPLOAD_RESPONSE
-            LOGFILE_URL=$(echo ${$LOGFILE_UPLOAD_RESPONSE} | jq -r '.link')
+            LOGFILE_URL=$(curl -F filedata=@${LOGFILE} https://transfer.sh/)
 
             if [ -f "$OUTFILE" ]; then
                 FEATURE_COUNT=$(wc -l < ${OUTFILE} | tr -d ' ')
@@ -81,9 +79,9 @@ jobs:
                     echo "${spider} has ${FEATURE_COUNT} features"
                 fi
 
-                OUTFILE_URL=$(curl -s -F "file=@${OUTFILE}" https://file.io/\?expires\=14d | jq -r '.link')
+                OUTFILE_URL=$(curl -F filedata=@${OUTFILE} https://transfer.sh/)
 
-                PR_COMMENT_BODY="${PR_COMMENT_BODY}|[\`$spider\`](https://github.com/${GITHUB_REPOSITORY}/blob/${GITHUB_SHA}/${spider})|[${FEATURE_COUNT} items](${OUTFILE_URL}) ([Map](https://s3.amazonaws.com/placescraper-results/map.html?show=${OUTFILE_URL}))|Resulted in a \`${FAILURE_REASON}\` ([Log](${LOGFILE_URL}))|\\n"
+                PR_COMMENT_BODY="${PR_COMMENT_BODY}|[\`$spider\`](https://github.com/${GITHUB_REPOSITORY}/blob/${GITHUB_SHA}/${spider})|[${FEATURE_COUNT} items](${OUTFILE_URL}) ([Map](https://s3.amazonaws.com/placescraper-results/map.html?show=https://cors-anywhere.herokuapp.com/${OUTFILE_URL}))|Resulted in a \`${FAILURE_REASON}\` ([Log](${LOGFILE_URL}))|\\n"
             else
                 echo "${spider} has no output"
                 PR_COMMENT_BODY="${PR_COMMENT_BODY}|[\`$spider\`](https://github.com/${GITHUB_REPOSITORY}/blob/${GITHUB_SHA}/${spider})| (No Output) |Resulted in a \`${FAILURE_REASON}\` ([Log](${LOGFILE_URL}))|\\n"
