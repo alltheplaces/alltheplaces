@@ -14,6 +14,8 @@ SPIDER_RUN_DIR="${GITHUB_WORKSPACE}/output"
 PARALLELISM=${PARALLELISM:-12}
 SPIDER_TIMEOUT=${SPIDER_TIMEOUT:-14400} # default to 4 hours
 
+mkdir -p "${SPIDER_RUN_DIR}"
+
 (>&2 echo "Writing to ${SPIDER_RUN_DIR}")
 (>&2 echo "Write out a file with scrapy commands to parallelize")
 for spider in $(scrapy list)
