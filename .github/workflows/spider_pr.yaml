@@ -38,7 +38,7 @@ jobs:
             exit 0
         fi
 
-        RUN_DIR="output"
+        RUN_DIR="${GITHUB_WORKSPACE}/output"
         EXIT_CODE=0
         for spider in $SPIDERS
         do
@@ -46,7 +46,7 @@ jobs:
             SPIDER_NAME=$(basename $spider)
             SPIDER_NAME=${SPIDER_NAME%.py}
             SPIDER_RUN_DIR="${RUN_DIR}/${SPIDER_NAME}"
-            mkdir -p $SPIDER_RUN_DIR
+            mkdir -p "${SPIDER_RUN_DIR}"
 
             LOGFILE="${SPIDER_RUN_DIR}/log.txt"
             OUTFILE="${SPIDER_RUN_DIR}/output.geojson"
@@ -55,7 +55,7 @@ jobs:
                 -t geojson \
                 -o "file://${OUTFILE}" \
                 --loglevel=INFO \
-                --logfile=$LOGFILE \
+                --logfile="${LOGFILE}" \
                 -s CLOSESPIDER_TIMEOUT=60 \
                 -s CLOSESPIDER_ERRORCOUNT=1 \
                 $spider
@@ -70,7 +70,9 @@ jobs:
                 FAILURE_REASON="timeout"
             fi
 
-            LOGFILE_URL=$(curl -s -F "file=@${LOGFILE}" https://file.io/ | jq -r '.link')
+            LOGFILE_UPLOAD_RESPONSE=$(curl -s -F "file=@${LOGFILE}" https://file.io/\?expires\=14d)
+            echo $LOGFILE_UPLOAD_RESPONSE
+            LOGFILE_URL=$(echo ${$LOGFILE_UPLOAD_RESPONSE} | jq -r '.link')
 
             if [ -f "$OUTFILE" ]; then
                 FEATURE_COUNT=$(wc -l < ${OUTFILE} | tr -d ' ')
@@ -79,12 +81,12 @@ jobs:
                     echo "${spider} has ${FEATURE_COUNT} features"
                 fi
 
-                OUTFILE_URL=$(curl -s -F "file=@${OUTFILE}" https://file.io/ | jq -r '.link')
+                OUTFILE_URL=$(curl -s -F "file=@${OUTFILE}" https://file.io/\?expires\=14d | jq -r '.link')
 
-                PR_COMMENT_BODY="${PR_COMMENT_BODY}|[\`$spider\`](https://github.com/${{ github.repository }}/blob/${{ github.base_ref }}/${spider})|[${FEATURE_COUNT} items](${OUTFILE_URL}) ([Map](https://s3.amazonaws.com/placescraper-results/map.html?show=${OUTFILE_URL}))|Resulted in a \`${FAILURE_REASON}\` ([Log](${LOGFILE_URL}))|\\n"
+                PR_COMMENT_BODY="${PR_COMMENT_BODY}|[\`$spider\`](https://github.com/${GITHUB_REPOSITORY}/blob/${GITHUB_SHA}/${spider})|[${FEATURE_COUNT} items](${OUTFILE_URL}) ([Map](https://s3.amazonaws.com/placescraper-results/map.html?show=${OUTFILE_URL}))|Resulted in a \`${FAILURE_REASON}\` ([Log](${LOGFILE_URL}))|\\n"
             else
                 echo "${spider} has no output"
-                PR_COMMENT_BODY="${PR_COMMENT_BODY}|[\`$spider\`](https://github.com/${{ github.repository }}/blob/${{ github.base_ref }}/${spider})| (No Output) |Resulted in a \`${FAILURE_REASON}\` ([Log](${LOGFILE_URL}))|\\n"
+                PR_COMMENT_BODY="${PR_COMMENT_BODY}|[\`$spider\`](https://github.com/${GITHUB_REPOSITORY}/blob/${GITHUB_SHA}/${spider})| (No Output) |Resulted in a \`${FAILURE_REASON}\` ([Log](${LOGFILE_URL}))|\\n"
             fi
 
             (>&2 echo "${spider} done")
@@ -99,8 +101,8 @@ jobs:
                     -XPOST \
                     -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
                     -d "{\"body\":\"${PR_COMMENT_BODY}\"}" \
-                    "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.number }}/comments"
-                echo "Added a comment to pull https://github.com/${{ github.repository }}/pull/${{ github.event.number }}"
+                    "https://api.github.com/repos/${GITHUB_REPOSITORY}/issues/${{ github.event.number }}/comments"
+                echo "Added a comment to pull https://github.com/${GITHUB_REPOSITORY}/pull/${{ github.event.number }}"
             else
                 echo "Not posting to GitHub because no pull event number set"
             fi
