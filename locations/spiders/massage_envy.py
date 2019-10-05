@@ -36,13 +36,13 @@ class MassageEnvySpider(scrapy.Spider):
             opening_hours = self.normalize_hours(opening_hours)
 
         props = {
-            'addr_full': response.xpath('//span[@itemprop="streetAddress"]/span/text()').extract_first().strip(),
+            'addr_full': ' '.join(i.strip() for i in response.xpath('//div[@class="info-right hidden-xs"]/div/address[@itemprop="address"]/span[@itemprop="streetAddress"]/span/text()').extract()),
             'lat': float(response.xpath('//meta[@itemprop="latitude"]/@content').extract_first().strip()),
             'lon': float(response.xpath('//meta[@itemprop="longitude"]/@content').extract_first().strip()),
-            'city': response.xpath('//span[@itemprop="addressLocality"]/span/text()').extract_first().strip(),
-            'postcode': response.xpath('//span[@itemprop="postalCode"]/span/text()').extract_first().strip(),
-            'state': response.xpath('//span[@itemprop="addressRegion"]/span/text()').extract_first().strip(),
-            'phone': response.xpath('//span[@itemprop="telephone"]/span/text()').extract_first().strip(),
+            'city': response.xpath('//div[@class="info-right hidden-xs"]/div/address[@itemprop="address"]/span/span[@itemprop="addressLocality"]/text()').extract_first().strip(),
+            'postcode': response.xpath('//div[@class="info-right hidden-xs"]/div/address[@itemprop="address"]/span[@itemprop="postalCode"]/text()').extract_first().strip(),
+            'state': response.xpath('//div[@class="info-right hidden-xs"]/div/address[@itemprop="address"]/abbr[@itemprop="addressRegion"]/text()').extract_first().strip(),
+            'phone': response.xpath('//span[@itemprop="telephone"]/text()').extract_first().strip(),
             'ref': response.url,
             'website': response.url,
             'opening_hours': opening_hours
