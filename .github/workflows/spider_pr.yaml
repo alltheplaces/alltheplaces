@@ -19,10 +19,13 @@ jobs:
       uses: actions/setup-python@master
       with:
         python-version: 3.7
-    - name: Run Scrapy check
+    - name: Install dependencies
       run: |
         pip --quiet install pipenv
         pipenv --bare install --system --deploy
+        apt-get install jq
+    - name: Run Scrapy check
+      run: |
         scrapy check
     - name: Run spiders that changed
       run: |
@@ -67,26 +70,34 @@ jobs:
                 FAILURE_REASON="timeout"
             fi
 
-            FEATURE_COUNT=$(wc -l < ${OUTFILE} | tr -d ' ')
+            LOGFILE_URL=$(curl -s -F "file=@${LOGFILE}" https://file.io/ | jq -r '.link')
 
-            if grep -q 'Stored geojson feed' $LOGFILE; then
-                echo "${spider} has ${FEATURE_COUNT} features"
+            if [ -f "$OUTFILE" ]; then
+                FEATURE_COUNT=$(wc -l < ${OUTFILE} | tr -d ' ')
+
+                if grep -q 'Stored geojson feed' $LOGFILE; then
+                    echo "${spider} has ${FEATURE_COUNT} features"
+                fi
+
+                OUTFILE_URL=$(curl -s -F "file=@${OUTFILE}" https://file.io/ | jq -r '.link')
+
+                PR_COMMENT_BODY="${PR_COMMENT_BODY}|[\`$spider\`](https://github.com/${{ github.repository }}/blob/${{ github.base_ref }}/${spider})|[${FEATURE_COUNT} items](${OUTFILE_URL}) ([Map](https://s3.amazonaws.com/placescraper-results/map.html?show=${OUTFILE_URL}))|Resulted in a \`${FAILURE_REASON}\` ([Log](${LOGFILE_URL}))|\\n"
+            else
+                echo "${spider} has no output"
+                PR_COMMENT_BODY="${PR_COMMENT_BODY}|[\`$spider\`](https://github.com/${{ github.repository }}/blob/${{ github.base_ref }}/${spider})| (No Output) |Resulted in a \`${FAILURE_REASON}\` ([Log](${LOGFILE_URL}))|\\n"
             fi
-
-            PR_COMMENT_BODY="${PR_COMMENT_BODY}|[\`$spider\`](https://github.com/${{ github.repository }}/blob/${{ github.base_ref }}/${spider})|[${FEATURE_COUNT} items](${HTTP_URL_PREFIX}/output.geojson) ([Map](https://s3.amazonaws.com/placescraper-results/map.html?show=${HTTP_URL_PREFIX}/output.geojson))|Resulted in a \`${FAILURE_REASON}\` ([Log](${HTTP_URL_PREFIX}/log.txt))|\\n"
 
             (>&2 echo "${spider} done")
         done
 
-        echo "GitHub Event Number: ${{ github.event.number }}"
-        if [ -z "$GITHUB_TOKEN" ]; then
+        if [ -z "${{ secrets.GITHUB_TOKEN }}" ]; then
             echo "No GITHUB_TOKEN set"
         else
             if [ "${{ github.event.number }}" != "false" ]; then
                 curl \
                     -s \
                     -XPOST \
-                    -H "Authorization: token ${GITHUB_TOKEN}" \
+                    -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
                     -d "{\"body\":\"${PR_COMMENT_BODY}\"}" \
                     "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.number }}/comments"
                 echo "Added a comment to pull https://github.com/${{ github.repository }}/pull/${{ github.event.number }}"
@@ -96,8 +107,3 @@ jobs:
         fi
 
         exit $EXIT_CODE
-    - name: Archive
-      uses: actions/upload-artifact@v1
-      with:
-        name: spider-output
-        path: output/
