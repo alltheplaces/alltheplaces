@@ -23,7 +23,7 @@ jobs:
       run: |
         pip --quiet install pipenv
         pipenv --bare install --system --deploy
-        apt-get install jq
+        sudo apt-get install jq
     - name: Run Scrapy check
       run: |
         scrapy check
