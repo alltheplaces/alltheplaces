@@ -1,8 +1,9 @@
 name: Run All Spiders Periodically
 
 on:
-  cron:
-    - '0 12 * * fri'
+  schedule:
+    - cron: '*/15 * * * *'
+    # - cron: '0 12 * * fri'
 
 jobs:
   run-spiders:
