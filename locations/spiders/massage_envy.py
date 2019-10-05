@@ -37,8 +37,8 @@ class MassageEnvySpider(scrapy.Spider):
 
         props = {
             'addr_full': response.xpath('//span[@itemprop="streetAddress"]/span/text()').extract_first().strip(),
-            'lat': float(response.xpath('//span[@itemprop="latitude"]/span/text()').extract_first().strip()),
-            'lon': float(response.xpath('//span[@itemprop="longitude"]/span/text()').extract_first().strip()),
+            'lat': float(response.xpath('//meta[@itemprop="latitude"]/@content').extract_first().strip()),
+            'lon': float(response.xpath('//meta[@itemprop="longitude"]/@content').extract_first().strip()),
             'city': response.xpath('//span[@itemprop="addressLocality"]/span/text()').extract_first().strip(),
             'postcode': response.xpath('//span[@itemprop="postalCode"]/span/text()').extract_first().strip(),
             'state': response.xpath('//span[@itemprop="addressRegion"]/span/text()').extract_first().strip(),
