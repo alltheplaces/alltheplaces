@@ -52,8 +52,6 @@ class SignetJewelersSpider(scrapy.Spider):
     def parse_cities(self, response):
         cities = response.xpath('//*[@class="viewstoreslist"]/a/@href').extract()
         for i in cities:
-            ## There is bad href in Jared - University Town Center
-            # if "null" not in i:
             yield scrapy.Request(response.urljoin(i), callback=self.parse)
 
     def parse(self, response):
