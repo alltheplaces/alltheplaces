@@ -1,64 +1,63 @@
 import scrapy
-import re
 from locations.items import GeojsonPointItem
 
-DAYS={
-    'monday':'Mo',
-    'tuesday':'Tu',
-    'wednesday':'We',
-    'friday':'Fr',
-    'thursday':'Th',
-    'saturday':'Sa',
-    'sunday':'Su',
-}
+import json
+import re
+import time
+import random
+
+STATE_CENTROID_ZIPS = ['26601', '34604', '61749', '56425', '20716', '02818', '83227', '03226', '27330', '05669',
+                       '06023', '19946', '87036', '93645', '08515', '54443', '97754', '68856', '16835', '98847',
+                       '71369', '31044', '36750', '84642', '43317', '76873', '80827', '29061', '73114', '37132',
+                       '82638', '96706', '58463', '40033', '96910', '04426', '13310', '89310', '99756', '49621',
+                       '72113', '39094', '65064', '59464', '67427', '46278', '00720', '57501', '01757', '23921',
+                       '50201', '85544'
+                       ]
+
+BASE_URL = 'https://www.gnc.com/on/demandware.store/Sites-GNC-Site/default/Stores-FindStores'
+
 
 class GNCSpider(scrapy.Spider):
-
     name = "gnc"
-    allowed_domains = ["stores.gnc.com"]
-    download_delay = 0.5
+    allowed_domains = ["www.gnc.com"]
+    download_delay = 30
     start_urls = (
-        'http://stores.gnc.com/',
+        'https://www.gnc.com/stores',
     )
+    custom_settings = {
+        'USER_AGENT': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.86 Safari/537.36',
+        'CONCURRENT_REQUESTS': '1'
+    }
 
-    def parse_stores(self, response):
-        properties = {
-            'addr_full': response.xpath('normalize-space(//meta[@property="business:contact_data:street_address"]/@content)').extract_first(),
-            'phone' : response.xpath('normalize-space(//meta[@property="business:contact_data:phone_number"]/@content)').extract_first(),
-            'city' : response.xpath('normalize-space(//meta[@property="business:contact_data:locality"]/@content)').extract_first(),
-            'state': response.xpath('normalize-space(//meta[@property="business:contact_data:region"]/@content)').extract_first(),
-            'postcode': response.xpath('normalize-space(//meta[@property="business:contact_data:postal_code"]/@content)').extract_first(),
-            'ref' : re.findall(r"[^(\/)]+$", response.url)[0] ,
-            'website' : response.url,
-            'lat' : response.xpath('normalize-space(//meta[@property="place:location:latitude"]/@content)').extract_first(),
-            'lon' : response.xpath('normalize-space(//meta[@property="place:location:longitude"]/@content)').extract_first(),
-        }
-
-        days= response.xpath('//meta[@property="business:hours:day"]/@content').extract()
-        starts = response.xpath('//meta[@property="business:hours:start"]/@content').extract()
-        ends = response.xpath('//meta[@property="business:hours:end"]/@content').extract()
-        hours = ''
-        for idx , day in enumerate(days):
-            hours =  hours+DAYS[day.strip()]+' '+starts[idx][:5]+'-'+ends[idx][:5]+' ;'
-        if hours:
-            properties['opening_hours'] = hours
-        yield GeojsonPointItem(**properties)
-
-    def parse_city_stores(self, response):
-        stores = response.xpath('//div[@id="pl-result-list"]/div/h2/a/@href').extract()
-        if(len(stores)==0):
-            return
-        else:
-            for store in stores:
-                yield scrapy.Request(response.urljoin(store), callback=self.parse_stores)
-        page = response.meta['page']+1
-        yield  scrapy.Request(response.urljoin(response.meta['url']+'?page='+str(page)), callback=self.parse_city_stores ,meta={'page':page,'url':response.meta['url']})
-
-    def parse_state(self, response):
-        city_urls = response.xpath('//div[@id="pl-state-list-container"]/article/div/ul/li/a/@href').extract()
-        for path in city_urls:
-            yield scrapy.Request(response.urljoin(path), callback=self.parse_city_stores ,meta={'page':1 ,'url':response.urljoin(path)})
     def parse(self, response):
-        urls = response.xpath('//div[@id="pl-state-list"]/article/div/ul/li/a/@href').extract()
-        for path in urls:
-            yield scrapy.Request(response.urljoin(path), callback=self.parse_state)
+        url = BASE_URL
+        headers = {'Content-Type': 'application/x-www-form-urlencoded'}
+
+        for zipcode in STATE_CENTROID_ZIPS:
+            form_data = {'dwfrm_storelocator_countryCode': 'US', 'dwfrm_storelocator_distanceUnit': 'mi',
+                         'dwfrm_storelocator_maxdistance': '500', 'dwfrm_storelocator_findbyzip': 'Search',
+                         'dwfrm_storelocator_postalCode': zipcode}
+
+            time.sleep(random.randint(1, 10))
+            yield scrapy.http.FormRequest(url=url, method='POST', formdata=form_data, headers=headers,
+                                          callback=self.parse_store_list)
+
+    def parse_store_list(self, response):
+        content = response.xpath('//script[contains(text(), "map.data.addGeoJson")]/text()').extract_first()
+        data = json.loads(re.search(r'JSON.parse\( eqfeed_callback\((.*?)\) \) \);', content).group(1))
+        stores = data["features"]
+
+        for store in stores:
+            properties = {
+                'ref': store["properties"]["storenumber"],
+                'name': store["properties"]["title"],
+                'addr_full': store["properties"]["address1"],
+                'city': store["properties"]["city"],
+                'state': store["properties"]["state"],
+                'postcode': store["properties"]["postalCode"],
+                'lat': store["geometry"]["coordinates"][1],
+                'lon': store["geometry"]["coordinates"][0],
+                'website': ''.join(['www.gnc.com', re.search(r'href="(.*?)"', store["properties"]["url"]).group(1)]),
+            }
+
+            yield GeojsonPointItem(**properties)
