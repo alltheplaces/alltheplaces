@@ -3,6 +3,8 @@ import scrapy
 from locations.items import GeojsonPointItem
 from urllib.parse import urlencode
 import json
+from locations.hours import OpeningHours
+from scrapy.selector import Selector
 
 
 class SallySpider(scrapy.Spider):
@@ -32,13 +34,16 @@ class SallySpider(scrapy.Spider):
         opening_hours = OpeningHours()
 
         for d, h in zip(days, hours):
-            day = d.strip(': ')
-            open_time, close_time = h.split(' - ')
-            open_time = open_time.lstrip('0')
-            opening_hours.add_range(day=day[:2],
-                                    open_time=open_time,
-                                    close_time=close_time,
-                                    time_format="%I:%M %p")
+            try:
+                day = d.strip(': ')
+                open_time, close_time = h.split(' - ')
+                open_time = open_time.lstrip('0')
+                opening_hours.add_range(day=day[:2],
+                                        open_time=open_time,
+                                        close_time=close_time,
+                                        time_format="%I:%M %p")
+            except:
+                continue
 
         return opening_hours.as_opening_hours()
 
@@ -58,5 +63,9 @@ class SallySpider(scrapy.Spider):
                 'phone': row["phone"],
                 'state': row["stateCode"],
             }
+
+            hours = self.parse_hours(row["storeHours"])
+            if hours:
+                properties['opening_hours'] = hours
 
             yield GeojsonPointItem(**properties)
