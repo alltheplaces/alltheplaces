@@ -52,28 +52,22 @@ class BestBuySpider(scrapy.Spider):
         }
         return GeojsonPointItem(**props)
 
-    def parse_city_stores(self, response):
-        locations = response.xpath('//a[@class="Link Teaser-titleLink"]/@href').extract()
 
+    def parse(self, response):
+        locations = response.xpath('//a[@class="c-directory-list-content-item-link"]/@href').extract()
         if not locations:
-            yield self.parse_location(response)
+            stores = response.xpath('//a[@class="Link Teaser-titleLink"]/@href').extract()
+            if not stores:
+                yield self.parse_location(response)
+            for store in stores:
+                yield scrapy.Request(
+                    url=response.urljoin(store),
+                    callback=self.parse_location
+                )
         else:
             for location in locations:
                 yield scrapy.Request(
                     url=response.urljoin(location),
-                    callback=self.parse_location
+                    callback=self.parse
                 )
 
-    def parse_state(self, response):
-        for city in response.xpath('//a[@class="c-directory-list-content-item-link"]/@href').extract():
-            yield scrapy.Request(
-                url=response.urljoin(city),
-                callback=self.parse_city_stores
-            )
-
-    def parse(self, response):
-        for state in response.xpath('//a[@class="c-directory-list-content-item-link"]/@href').extract():
-            yield scrapy.Request(
-                url=response.urljoin(state),
-                callback=self.parse_state
-            )
