@@ -59,7 +59,7 @@ class StaplesSpider(scrapy.Spider):
             'addr_full': " ".join([address1, address2]).strip(),
             'phone': response.xpath('//span[@itemprop="telephone"]/text()').extract_first(),
             'city': response.xpath('//span[@class="c-address-city"]/text()').extract_first(),
-            'state': response.xpath('//span[@itemprop="addressRegion"]/text()').extract_first(),
+            'state': response.xpath('//abbr[@itemprop="addressRegion"]/text()').extract_first(),
             'postcode': response.xpath('//span[@itemprop="postalCode"]/text()').extract_first(),
             'country': response.xpath('//abbr[@itemprop="addressCountry"]/text()').extract_first(),
             'ref': ref,
