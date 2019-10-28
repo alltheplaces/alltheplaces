@@ -1,50 +1,81 @@
 import scrapy
-from locations.items import GeojsonPointItem
 import json
+import re
+from locations.items import GeojsonPointItem
+from locations.hours import OpeningHours
+
+
+DAY_MAPPING = {
+    "MONDAY": "Mo",
+    "TUESDAY": "Tu",
+    "WEDNESDAY": "We",
+    "THURSDAY": "Th",
+    "FRIDAY": "Fr",
+    "SATURDAY": "Sa",
+    "SUNDAY": "Su"
+}
 
 
 class ATTScraper(scrapy.Spider):
     name = "att"
+    allowed_domains = ['www.att.com']
+    start_urls = (
+        'https://www.att.com/stores/us',
+    )
+    download_delay = 0.2
 
-    start_urls = ['https://www.att.com/sitemapfiles/stores-sitemap.xml']
-    api_base = "https://www.att.com/apis/maps/v2/locator/place/cpid/{}.json"
+    def parse_hours(self, store_hours):
+        opening_hours = OpeningHours()
+        store_data = json.loads(store_hours)
 
-    def process_hours(self, result):
-        ret = []
-        for day in ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]:
-            open, close = result[day.lower() + "_open"], result[day.lower() + "_close"]
-            if "-1" not in (open, close):
-                ret.append("{} {}-{}".format(day[:2], open, close))
+        for store_day in store_data:
+            if len(store_day["intervals"]) < 1:
+                continue
+            day = DAY_MAPPING[store_day["day"]]
+            open_time = str(store_day["intervals"][0]["start"])
+            if open_time == '0':
+                open_time = '0000'
+            close_time = str(store_day["intervals"][0]["end"])
+            if close_time == '0':
+                close_time = '2359'
+            opening_hours.add_range(day=day,
+                                    open_time=open_time,
+                                    close_time=close_time,
+                                    time_format='%H%M'
+                                    )
 
-        return "; ".join(ret)
+        return opening_hours.as_opening_hours()
 
     def parse(self, response):
-        response.selector.remove_namespaces()
-        locations = response.xpath('//url/loc/text()')
-        for loc in locations:
-            url = loc.extract()
-            store_id = url.rsplit('/', 1)[-1]
-            yield scrapy.Request(
-                self.api_base.format(store_id),
-                callback=self.parse_location,
-                meta={"url": loc.extract()}
-            )
+        urls = response.xpath('//a[@class="Directory-listLink"]/@href').extract()
+        is_store_list = response.xpath('//a[@class="Teaser-titleLink"]/@href').extract()
 
-    def parse_location(self, response):
-        results = json.loads(response.body_as_unicode())["results"]
-        if results:
-            store_data = results[0]
-            yield GeojsonPointItem(
-                lat=store_data["lat"],
-                lon=store_data["lon"],
-                name=store_data["name"],
-                addr_full=(store_data["address1"] + " "
-                          + (store_data.get("address2") or "")).strip(),
-                city=store_data["city"],
-                state=store_data["region"],
-                postcode=store_data["postal"],
-                phone=store_data["phone"].strip(),
-                website=response.meta["url"],
-                opening_hours=self.process_hours(store_data),
-                ref=store_data["id"]
-            )
+        if not urls and is_store_list:
+            urls = response.xpath('//a[@class="Teaser-titleLink"]/@href').extract()
+        for url in urls:
+            if url.count('/') >= 2:
+                yield scrapy.Request(response.urljoin(url), callback=self.parse_store)
+            else:
+                yield scrapy.Request(response.urljoin(url))
+
+    def parse_store(self, response):
+        ref = re.search(r'.+/(.+?)/?(?:\.html|$)', response.url).group(1)
+
+        properties = {
+            'ref': ref,
+            'name': response.xpath('normalize-space(//span[@class="LocationName-brand"]/text())').extract_first(),
+            'addr_full': response.xpath('normalize-space(//meta[@itemprop="streetAddress"]/@content)').extract_first(),
+            'city': response.xpath('normalize-space(//meta[@itemprop="addressLocality"]/@content)').extract_first(),
+            'state': response.xpath('normalize-space(//abbr[@itemprop="addressRegion"]/text())').extract_first(),
+            'postcode': response.xpath('normalize-space(//span[@itemprop="c-address-postal-code"]/text())').extract_first(),
+            'country': response.xpath('normalize-space(//abbr[@itemprop="addressCountry"]/text())').extract_first(),
+            'phone': response.xpath('normalize-space(//span[@itemprop="telephone"]//text())').extract_first(),
+            'website': response.url,
+            'lat': response.xpath('normalize-space(//meta[@itemprop="latitude"]/@content)').extract_first(),
+            'lon': response.xpath('normalize-space(//meta[@itemprop="longitude"]/@content)').extract_first(),
+        }
+
+        hours = response.xpath('//span[@class="c-location-hours-today js-location-hours"]/@data-days').extract_first()
+        properties['opening_hours'] = self.parse_hours(hours)
+
+        yield GeojsonPointItem(**properties)
