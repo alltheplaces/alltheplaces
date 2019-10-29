@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-if [ -f $S3_BUCKET ]; then
+if [ -f "${S3_BUCKET}" ]; then
     (>&2 echo "Please set S3_BUCKET environment variable")
     exit 1
 fi
@@ -9,10 +9,12 @@ RUN_START=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 RUN_TIMESTAMP=$(date -u +%F-%H-%M-%S)
 RUN_S3_KEY_PREFIX="runs/${RUN_TIMESTAMP}"
 RUN_S3_PREFIX="s3://${S3_BUCKET}/${RUN_S3_KEY_PREFIX}"
-RUN_URL_PREFIX="https://s3.amazonaws.com/${S3_BUCKET}/${RUN_S3_KEY_PREFIX}"
-SPIDER_RUN_DIR=`mktemp -d` || exit 1
+RUN_URL_PREFIX="https://data.alltheplaces.xyz/${RUN_S3_KEY_PREFIX}"
+SPIDER_RUN_DIR="${GITHUB_WORKSPACE}/output"
 PARALLELISM=${PARALLELISM:-12}
 SPIDER_TIMEOUT=${SPIDER_TIMEOUT:-14400} # default to 4 hours
+
+mkdir -p "${SPIDER_RUN_DIR}"
 
 (>&2 echo "Writing to ${SPIDER_RUN_DIR}")
 (>&2 echo "Write out a file with scrapy commands to parallelize")
@@ -58,10 +60,9 @@ tar -czf ${SPIDER_RUN_DIR}/output.tar.gz -C ${SPIDER_RUN_DIR} ./output
 (>&2 echo "Concatenating and compressing log files")
 tar -czf ${SPIDER_RUN_DIR}/logs.tar.gz -C ${SPIDER_RUN_DIR} ./logs
 
-(>&2 echo "Saving log and output files to ${RUN_URL_PREFIX}")
+(>&2 echo "Saving log and output files to ${RUN_S3_PREFIX}")
 aws s3 sync \
     --only-show-errors \
-    --acl=public-read \
     "${SPIDER_RUN_DIR}/" \
     "${RUN_S3_PREFIX}/"
 
@@ -82,7 +83,6 @@ EOF
 
 aws s3 cp \
     --only-show-errors \
-    --acl=public-read \
     --content-type "text/html; charset=utf-8" \
     "${SPIDER_RUN_DIR}/info_embed.html" \
     "s3://${S3_BUCKET}/runs/latest/info_embed.html"

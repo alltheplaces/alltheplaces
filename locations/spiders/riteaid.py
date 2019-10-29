@@ -2,11 +2,9 @@
 import scrapy
 import json
 import re
-
 from locations.items import GeojsonPointItem
 
-
-class RiteaidPizzaSpider(scrapy.Spider):
+class RiteAidSpider(scrapy.Spider):
     name = "riteaid"
     allowed_domains = ["riteaid.com"]
     start_urls = (
@@ -64,39 +62,63 @@ class RiteaidPizzaSpider(scrapy.Spider):
 
         return opening_hours
 
-    def phone_normalize(self, phone):
-        r = re.search(r'\+?(\s+)*(\d{1})?(\s|\()*(\d{3})(\s+|\))*(\d{3})(\s+|-)?(\d{2})(\s+|-)?(\d{2})',phone)
-        return ('('+r.group(4)+') '+r.group(6)+'-'+r.group(8)+'-'+r.group(10)) if r else phone
+    def parse(self, response):
+        urls = response.xpath('//a[@class="c-directory-list-content-item-link"]/@href').extract()
 
-    def parse(self, response):  # high-level list of states
-        url_elems = response.xpath('//a[@class="c-directory-list-content-item-link"]/@href')
-        for url_elem in url_elems:
-            url = url_elem.extract()
-            if url.count('/') == 4:
-                yield scrapy.Request(
-                    response.urljoin(url),
-                    callback=self.parse_shop
-                )
+        for url in urls:
+            if len(url.split('/')) == 3:
+                yield scrapy.Request(response.urljoin(url), callback=self.parse_city)
+            elif len(url.split('/')) == 4:
+                yield scrapy.Request(response.urljoin(url), callback=self.parse_location)
             else:
-                yield scrapy.Request(response.urljoin(url))
+                yield scrapy.Request(response.urljoin(url), callback=self.parse_state)
 
-    def parse_shop(self, response):
+    def parse_state(self, response):
+        state_urls = response.xpath('//a[@class="c-directory-list-content-item-link"]/@href').extract()
+
+        for url in state_urls:
+            if len(url.split('/')) == 5:
+                yield scrapy.Request(response.urljoin(url), callback=self.parse_location)
+            else:
+                yield scrapy.Request(response.urljoin(url), callback=self.parse_city)
+
+    def parse_city(self, response):
+        city_urls = response.xpath('//a[@itemprop="url"]/@href').extract()
+
+        for url in city_urls:
+            yield scrapy.Request(response.urljoin(url), callback=self.parse_location)
+
+    def parse_location(self, response):
+        ref = response.xpath('normalize-space(//h1[contains(@itemprop,"name")]/text())').extract_first()
+        brand_elem = response.xpath('//div[@class="alert alert-danger"]/text()').extract_first()
+
+        if brand_elem: #Changed ownership as part of the sale of select Rite Aid stores to Walgreens
+            brand = 'Walgreens'
+        else:
+            brand = re.search(r'([^#//s*]+)', ref).group(1)
+
         hours_elem = response.xpath('//div[@class="Hours-store"]//div[contains(@class,"c-location-hours-details-wrapper")]/@data-days')
         if hours_elem:  # not shop, only clinic
             hours = json.loads(hours_elem.extract_first())
         else:
             hours = json.loads(response.xpath('//div[contains(@class,"c-location-hours-details-wrapper")]/@data-days').extract_first())
 
-        yield GeojsonPointItem(
-            lat=float(response.xpath('//meta[contains(@itemprop,"latitude")]/@content').extract_first()),
-            lon=float(response.xpath('//meta[contains(@itemprop,"longitude")]/@content').extract_first()),
-            phone=self.phone_normalize(response.xpath('//span[contains(@itemprop,"telephone")]/text()').extract_first()),
-            website=response.xpath('//link[contains(@itemprop,"url")]/@href').extract_first(),
-            ref=response.xpath('//h1[contains(@itemprop,"name")]/text()').extract_first(),
-            opening_hours=self.store_hours(hours),
-            addr_full=' '.join(response.xpath('//span[contains(@itemprop,"streetAddress")]/span/text()').extract()).strip(),
-            city=response.xpath('//span[contains(@itemprop,"addressLocality")]/text()').extract_first(),
-            state=response.xpath('//span[contains(@itemprop,"addressRegion")]/text()').extract_first(),
-            postcode=response.xpath('//span[contains(@itemprop,"postalCode")]/text()').extract_first(),
-            country=response.xpath('//span[contains(@itemprop,"addressCountry")]/text()').extract_first(),
-        )
+        properties = {
+            'ref': ref,
+            'addr_full': response.xpath('normalize-space(//span[contains(@itemprop,"streetAddress")]/span/text())').extract_first(),
+            'state': response.xpath('normalize-space(//abbr[contains(@itemprop,"addressRegion")]/text())').extract_first(),
+            'city': response.xpath('normalize-space(//span[contains(@itemprop,"addressLocality")]/text())').extract_first(),
+            'postcode': response.xpath('normalize-space(//span[contains(@itemprop,"postalCode")]/text())').extract_first(),
+            'country': response.xpath('normalize-space(//abbr[contains(@itemprop,"addressCountry")]/text())').extract_first(),
+            'phone': response.xpath('//span[contains(@itemprop,"telephone")]/text()').extract_first(),
+            'lat': float(response.xpath('//meta[contains(@itemprop,"latitude")]/@content').extract_first()),
+            'lon' : float(response.xpath('//meta[contains(@itemprop,"longitude")]/@content').extract_first()),
+            'website': response.url,
+            'opening_hours': self.store_hours(hours),
+            'extras': {
+                'brand': brand.strip()
+            }
+
+        }
+
+        yield GeojsonPointItem(**properties)

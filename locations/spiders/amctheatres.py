@@ -13,8 +13,8 @@ class AmcTheatresSpider(scrapy.Spider):
 
     def parse(self, response):
         response.selector.remove_namespaces()
-        theater_elems = response.xpath('//url')
-        for theater_elem in theater_elems:
+
+        for theater_elem in response.xpath('//url'):
             properties = {
                 'website': theater_elem.xpath('.//loc/text()').extract_first(),
                 'name': theater_elem.xpath('.//Attribute[@name="title"]/text()').extract_first(),

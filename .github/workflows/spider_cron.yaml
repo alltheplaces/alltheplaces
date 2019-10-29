@@ -1,0 +1,29 @@
+name: Run All Spiders Periodically
+
+on:
+  schedule:
+    # - cron: '*/15 * * * *'
+    - cron: '0 12 * * fri'
+
+jobs:
+  run-spiders:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v1
+    - name: Setup Python
+      uses: actions/setup-python@master
+      with:
+        python-version: 3.7
+    - name: Install dependencies
+      run: |
+        pip --quiet install pipenv
+        pipenv --bare install --system --deploy
+        sudo apt-get install --quiet --yes awscli
+    - name: Run all spiders
+      run: ./ci/run_all_spiders.sh
+      env:
+        S3_BUCKET: "${{ secrets.S3_BUCKET }}"
+        AWS_ACCESS_KEY_ID: "${{ secrets.AWS_ACCESS_KEY_ID }}"
+        AWS_SECRET_ACCESS_KEY: "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
+        PARALLELISM: 4
