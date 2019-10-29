@@ -74,11 +74,13 @@ jobs:
 
             LOGFILE_URL=$(curl -s -F filedata=@${LOGFILE} https://transfer.sh/)
 
+            echo "${spider} log: ${LOGFILE_URL}"
+
             if [ -f "$OUTFILE" ]; then
                 FEATURE_COUNT=$(wc -l < ${OUTFILE} | tr -d ' ')
 
                 if grep -q 'Stored geojson feed' $LOGFILE; then
-                    echo "${spider} has ${FEATURE_COUNT} features"
+                    echo "${spider} has ${FEATURE_COUNT} features: https://s3.amazonaws.com/placescraper-results/map.html?show=https://cors-anywhere.herokuapp.com/${OUTFILE_URL}"
                 fi
 
                 OUTFILE_URL=$(curl -s -F filedata=@${OUTFILE} https://transfer.sh/)
