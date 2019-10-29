@@ -5,13 +5,17 @@ class AdvanceautopartsSpider(scrapy.Spider):
 
     name = "advanceautoparts"
     allowed_domains = ["stores.advanceautoparts.com"]
-    download_delay = 0.5
+    download_delay = 0.1
     start_urls = (
         'https://stores.advanceautoparts.com/index.html#DirectoryList',
     )
 
     def parse_stores(self, response):
         ref = re.findall(r"[^(\/)]+$", response.url)
+
+        brand = response.xpath('//span[@class="LocationName-brand"]/span/text()').extract_first()
+        store_num = brand.replace("#","").strip()
+
         if (len(ref) > 0):
             ref = ref[0].split('.')[0]
         properties = {
@@ -25,6 +29,8 @@ class AdvanceautopartsSpider(scrapy.Spider):
             'website': response.url,
             'lat': response.xpath('normalize-space(//meta[@itemprop="latitude"]/@content)').extract_first(),
             'lon': response.xpath('normalize-space(//meta[@itemprop="longitude"]/@content)').extract_first(),
+            'name': response.xpath('//div[@class="LocationName-geo"]/text()').extract_first(),
+            'extras': {'number':store_num}
         }
         hours = response.xpath('//div[@class="Nap-hours Text Text--xsmall Text--gray"]/div[@class="c-location-hours"]/div[@class="c-location-hours-details-wrapper js-location-hours"]/table/tbody/tr/@content').extract()
         if hours !=[]:
