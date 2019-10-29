@@ -15,6 +15,8 @@ DAY_MAPPING = {'Monday': 'Mo',
                'Saturday': 'Sa',
                'Sunday': 'Su'}
 
+BASE_URL = 'https://onmyj41p3c.execute-api.us-west-2.amazonaws.com/prod/getStoresByCoordinates?'
+
 
 class TMobileUSSpider(scrapy.Spider):
     name = "tmobile_us"
@@ -41,19 +43,7 @@ class TMobileUSSpider(scrapy.Spider):
         return opening_hours.as_opening_hours()
 
     def start_requests(self):
-        base_url = 'https://onmyj41p3c.execute-api.us-west-2.amazonaws.com/prod/getStoresByCoordinates?'
-
-        # params = {
-        #     'latitude': '{}'.format('21.2621394012'),
-        #     'longitude': '{}'.format('-158.1838736264'),
-        #     # 'latitude': '{}'.format(lat),
-        #     # 'longitude': '{}'.format(lon),
-        #     'count': '1000',
-        #     'radius': '25',
-        #     'ignoreLoadingBar': 'false'
-        # }
-        #
-        # yield scrapy.http.Request(base_url + urlencode(params), callback=self.parse)
+        url = BASE_URL
 
         with open('./locations/searchable_points/us_centroids_25mile_radius.csv') as points:
 
@@ -69,7 +59,7 @@ class TMobileUSSpider(scrapy.Spider):
                     'ignoreLoadingBar': 'false'
                 }
 
-                yield scrapy.http.Request(base_url + urlencode(params), callback=self.parse)
+                yield scrapy.http.Request(url + urlencode(params), callback=self.parse)
 
     def parse(self, response):
         data = json.loads(response.body_as_unicode())
