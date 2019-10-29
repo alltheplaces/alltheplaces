@@ -27,7 +27,7 @@ class SherwinWilliamsSpider(scrapy.Spider):
     def start_requests(self):
         params = {
             'sideBarType': 'LSTORES',
-            'radius': '100',
+            'radius': '50',
             'abbrv': 'us',
             'uom': 'SMI',
             'langId': '-1',
@@ -35,8 +35,18 @@ class SherwinWilliamsSpider(scrapy.Spider):
         }
         base_url = 'https://www.sherwin-williams.com/AjaxStoreLocatorSideBarView?'
 
+        addtional_lat_lons = [
+            (32.790133, -97.304605),
+            (32.789066, -96.893189),
+            (49.245301, -123.130791),
+            (38.919445, -77.055250),
+            (39.297416, -76.652098),
+            (33.675832, -84.390719),
+            (33.840679, -84.391333)
+        ]
+
         # paint stores - search by 100 mile radius in US/CA
-        with open('./locations/searchable_points/us_centroids_100mile_radius.csv') as points:
+        with open('./locations/searchable_points/us_centroids_50mile_radius.csv') as points:
             next(points)
             for point in points:
                 _, lat, lon = point.strip().split(',')
@@ -49,7 +59,7 @@ class SherwinWilliamsSpider(scrapy.Spider):
                                      callback=self.parse,
                                      meta={"store_type": "Sherwin-Williams Paint Store"})
 
-        with open('./locations/searchable_points/ca_centroids_100mile_radius.csv') as points:
+        with open('./locations/searchable_points/ca_centroids_50mile_radius.csv') as points:
             next(points)
             for point in points:
                 _, lat, lon = point.strip().split(',')
@@ -61,6 +71,16 @@ class SherwinWilliamsSpider(scrapy.Spider):
                 yield scrapy.Request(url=base_url + urlencode(params),
                                      callback=self.parse,
                                      meta={"store_type": "Sherwin-Williams Paint Store"})
+
+        for lat, lon in addtional_lat_lons:
+            params.update({
+                "latitude": lat,
+                "longitude": lon,
+                "storeType": 'PaintStore'
+            })
+            yield scrapy.Request(url=base_url + urlencode(params),
+                                 callback=self.parse,
+                                 meta={"store_type": "Sherwin-Williams Paint Store"})
 
         # the other store types are much more sparse so we can search with a larger
         # radius before hitting the limit of stores returned
