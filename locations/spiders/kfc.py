@@ -2,117 +2,79 @@ import json
 import re
 import scrapy
 from locations.items import GeojsonPointItem
+from locations.hours import OpeningHours
+
+
+DAY_MAPPING = {
+    "MONDAY": "Mo",
+    "TUESDAY": "Tu",
+    "WEDNESDAY": "We",
+    "THURSDAY": "Th",
+    "FRIDAY": "Fr",
+    "SATURDAY": "Sa",
+    "SUNDAY": "Su"
+}
 
 
 class KFCSpider(scrapy.Spider):
     name = "kfc"
-    allowed_domains = ["www.kfc.com"]
+    allowed_domains = ["kfc.com"]
+    start_urls = (
+        'https://locations.kfc.com/',
+    )
+    download_delay = 0.2
 
-    def normalize_time(self, time_str):
-        match = re.search(r'(\d{1,2}):(\d{2})([AP])M', time_str)
-        h, m, am_pm = match.groups()
+    def parse_hours(self, store_hours):
+        opening_hours = OpeningHours()
+        store_data = json.loads(store_hours)
 
-        return '%02d:%02d' % (
-            int(h) + 12 if am_pm == 'P' else int(h),
-            int(m),
-        )
-
-    def store_hours(self, store_hours):
-        day_groups = []
-        this_day_group = None
-        for day in ('monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'):
-            day_open = store_hours[day + 'Start']
-            day_close = store_hours[day + 'End']
-            if day_open is False:
-                # On days that they're closed they set the value to 'false'
+        for store_day in store_data:
+            if len(store_day["intervals"]) < 1:
                 continue
-            if not day_open.strip():
-                continue
+            day = DAY_MAPPING[store_day["day"]]
+            open_time = str(store_day["intervals"][0]["start"])
+            if open_time == '0':
+                open_time = '0000'
+            close_time = str(store_day["intervals"][0]["end"])
+            if close_time == '0':
+                close_time = '2359'
+            opening_hours.add_range(day=day,
+                                    open_time=open_time,
+                                    close_time=close_time,
+                                    time_format='%H%M'
+                                    )
 
-            day_open = self.normalize_time(day_open)
-            day_close = self.normalize_time(day_close)
-
-            hours = day_open + "-" + day_close
-
-            day_short = day.title()[:2]
-
-            if not this_day_group:
-                this_day_group = dict(from_day=day_short, to_day=day_short, hours=hours)
-            elif this_day_group['hours'] == hours:
-                this_day_group['to_day'] = day_short
-            elif this_day_group['hours'] != hours:
-                day_groups.append(this_day_group)
-                this_day_group = dict(from_day=day_short, to_day=day_short, hours=hours)
-        day_groups.append(this_day_group)
-
-        if not day_groups:
-            return None
-
-        if len(day_groups) == 1:
-            if day_groups[0] == None:
-                day_groups[0] = {"hours":'07:00-07:00'}
-            opening_hours = day_groups[0]['hours']
-            if opening_hours == '07:00-07:00':
-                opening_hours = '24/7'
-
-        else:
-            opening_hours = ''
-            for day_group in day_groups:
-                if day_group['from_day'] == day_group['to_day']:
-                    opening_hours += '{from_day} {hours}; '.format(**day_group)
-                else:
-                    opening_hours += '{from_day}-{to_day} {hours}; '.format(**day_group)
-            opening_hours = opening_hours[:-2]
-
-        return opening_hours
-
-    def start_requests(self):
-        url = 'https://services.kfc.com/services/query/locations'
-
-        headers = {
-            'Accept-Language': 'en-US,en;q=0.9',
-            'Origin': 'https://www.kfc.com',
-            'Accept-Encoding': 'gzip, deflate, br',
-            'Accept': 'application/json, text/javascript, */*; q=0.01',
-            'Referer': 'https://www.kfc.com/store-locator?query=90210',
-            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-            'X-Requested-With': 'XMLHttpRequest',
-        }
-
-        zipcodes = ['83253', '57638', '54848', '44333', '03244', '23435', '31023', '38915', '79525', '81321', '89135', '98250', 
-                    '69154', '62838', '89445', '93204', '59402', '57532', '69030', '65231', '70394', '78550', '32566', '33185',
-                    '27229', '16933', '41231', '46992']
-
-        for zipcode in zipcodes:
-            form_data = {
-                'address': zipcode,
-                'distance': '1000'
-            }
-
-            yield scrapy.http.FormRequest(
-                url=url, method='POST', formdata=form_data,
-                headers=headers, callback=self.parse
-            )
+        return opening_hours.as_opening_hours()
 
     def parse(self, response):
-        data = json.loads(response.body_as_unicode())
-        stores = data['results']
-        for store in stores:
-            properties = {
-                'ref': store['entityID'],
-                'name': store['storeNumber'],
-                'addr_full': store['addressLine'],
-                'city': store['city'],
-                'state': store['state'],
-                'postcode': store['postalCode'],
-                'lat': store['latitude'],
-                'lon': store['longitude'],
-                'phone': store['businessPhone'],
-            }
+        urls = response.xpath('//a[@class="Directory-listLink"]/@href').extract()
+        is_store_list = response.xpath('//a[@class="Teaser-titleLink"]/@href').extract()
 
-            opening_hours = self.store_hours(store)
-            if opening_hours:
-                properties['opening_hours'] = opening_hours
+        if not urls and is_store_list:
+            urls = response.xpath('//a[@class="Teaser-titleLink"]/@href').extract()
+        for url in urls:
+            if url.count('/') >= 2:
+                yield scrapy.Request(response.urljoin(url), callback=self.parse_store)  # TODO: Fix this
+            else:
+                yield scrapy.Request(response.urljoin(url))
 
-            yield GeojsonPointItem(**properties)
+    def parse_store(self, response):
+        ref = re.search(r'.+/(.+?)/?(?:\.html|$)', response.url).group(1)
 
+        properties = {
+            'ref': ref,
+            'name': response.xpath('normalize-space(//span[@class="LocationName-brand"]/text())').extract_first(),
+            'addr_full': response.xpath('normalize-space(//meta[@itemprop="streetAddress"]/@content)').extract_first(),
+            'city': response.xpath('normalize-space(//meta[@itemprop="addressLocality"]/@content)').extract_first(),
+            'state': response.xpath('normalize-space(//abbr[@itemprop="addressRegion"]/text())').extract_first(),
+            'postcode': response.xpath('normalize-space(//span[@itemprop="postalCode"]//text())').extract_first(),
+            'phone': response.xpath('normalize-space(//div[@itemprop="telephone"]//text())').extract_first(),
+            'website': response.url,
+            'lat': response.xpath('normalize-space(//meta[@itemprop="latitude"]/@content)').extract_first(),
+            'lon': response.xpath('normalize-space(//meta[@itemprop="longitude"]/@content)').extract_first(),
+        }
+
+        hours = response.xpath('//span[@class="c-hours-today js-hours-today"]/@data-days').extract_first()
+        properties['opening_hours'] = self.parse_hours(hours)
+
+        yield GeojsonPointItem(**properties)
