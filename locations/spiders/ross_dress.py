@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 import scrapy
-import json
-from scrapy.shell import inspect_response
 from locations.hours import OpeningHours
 from locations.items import GeojsonPointItem
 
