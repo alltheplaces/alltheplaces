@@ -27,7 +27,6 @@ class SpiritHalloween(scrapy.Spider):
 
         props = {
             'addr_full': app_json[0]['address']['streetAddress'],
-            'phone': response.xpath(PHONE).extract_first(),
             'city': app_json[0]['address']['addressLocality'],
             'state': app_json[0]['address']['addressRegion'],
             'postcode': app_json[0]['address']['postalCode'],
@@ -36,6 +35,7 @@ class SpiritHalloween(scrapy.Spider):
             'lon': float(app_json[0]['geo']['longitude']),
             'opening_hours': "; ".join(['{} {}'.format(x[0], x[1]) for x in zip(*[iter(hours)]*2)]),
             'ref': response.url,
+            'name': app_json[0]['mainEntityOfPage']['breadcrumb']['itemListElement'][0]['item']['name'],
             'website': response.url
         }
 
