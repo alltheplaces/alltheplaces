@@ -1,6 +1,8 @@
-import scrapy
 import json
 import re
+
+import scrapy
+
 from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
 
@@ -67,7 +69,7 @@ class ATTScraper(scrapy.Spider):
             'addr_full': response.xpath('normalize-space(//meta[@itemprop="streetAddress"]/@content)').extract_first(),
             'city': response.xpath('normalize-space(//meta[@itemprop="addressLocality"]/@content)').extract_first(),
             'state': response.xpath('normalize-space(//abbr[@itemprop="addressRegion"]/text())').extract_first(),
-            'postcode': response.xpath('normalize-space(//span[@itemprop="c-address-postal-code"]/text())').extract_first(),
+            'postcode': response.xpath('normalize-space(//span[@itemprop="postalCode"]/text())').extract_first(),
             'country': response.xpath('normalize-space(//abbr[@itemprop="addressCountry"]/text())').extract_first(),
             'phone': response.xpath('normalize-space(//span[@itemprop="telephone"]//text())').extract_first(),
             'website': response.url,
