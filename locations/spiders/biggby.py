@@ -3,6 +3,7 @@ import json
 import scrapy
 from xml.etree import ElementTree as ET
 from scrapy import Selector
+import time
 
 from locations.items import GeojsonPointItem
 
@@ -25,12 +26,12 @@ class BiggbySpider(scrapy.Spider):
 		# iterate items
 		for item in root:
 			yield GeojsonPointItem(
-				ref=item.attrib['pid'],
+				ref=item.attrib['name'],
 				lat=float(item.attrib['lat']),
 				lon=float(item.attrib['lng']),
-				addr_full=item.attrib['address-two'],
+				addr_full=item.attrib['address-one'],
 				city=item.attrib['city'],
 				state=item.attrib['state'],
 				postcode=item.attrib['zip'],
-				name=item.attrib['name'],
+				name='Biggby Coffee {storenum}'.format(storenum=item.attrib['name']),
 			)
