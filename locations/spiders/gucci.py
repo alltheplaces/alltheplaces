@@ -1,69 +1,84 @@
+# -*- coding: utf-8 -*-
 import scrapy
 import re
+import json
+
 from locations.items import GeojsonPointItem
+from locations.hours import OpeningHours
+
+DAYS_NAME = {
+    'Monday': 'Mo',
+    'Tuesday': 'Tu',
+    'Wednesday': 'We',
+    'Thursday': 'Th',
+    'Friday': 'Fr',
+    'Saturday': 'Sa',
+    'Sunday': 'Su'
+}
+
 
 class GucciSpider(scrapy.Spider):
-
     name = "gucci"
     allowed_domains = ["www.gucci.com"]
-    download_delay = 0.5
     start_urls = (
-        'https://www.gucci.com/us/en/store',
+        'https://www.gucci.com/us/en/store/all',
     )
 
-    def parse_times(self, times):
-        hours_to = [x.strip() for x in times.split('-')]
-        cleaned_times = []
+    def parse_hours(self, days, hours):
+        opening_hours = OpeningHours()
+        for d, h in zip(days, hours):
+            day = DAYS_NAME[d]
+            open_time, close_time = re.search(r'([\d:]+)\s-\s([\d:]+)', h).groups()
+            opening_hours.add_range(day=day, open_time=open_time, close_time=close_time, time_format='%H:%M')
 
-        for hour in hours_to:
-            if re.search('pm$', hour):
-                hour = re.sub('pm', '', hour).strip()
-                hour_min = hour.split(":")
-                if int(hour_min[0]) < 12:
-                    hour_min[0] = str(12 + int(hour_min[0]))
-                cleaned_times.append(":".join(hour_min))
-
-            if re.search('am$', hour):
-                hour = re.sub('am', '', hour).strip()
-                hour_min = hour.split(":")
-                if len(hour_min[0]) <2:
-                    hour_min[0] = hour_min[0].zfill(2)
-                else:
-                    hour_min[0] = str(int(hour_min[0]))
-
-                cleaned_times.append(":".join(hour_min))
-        return "-".join(cleaned_times)
-
-    def parse_hours(self, lis):
-        hours = []
-        for li in lis:
-            day = li.xpath('normalize-space(./td[@class="store-detail-store-hours-day"]/text())').extract_first()
-            times = li.xpath('normalize-space(./td[@class="store-detail-store-hours-hour"]/span/text())').extract_first()
-            if times and day:
-                parsed_time = self.parse_times(times)
-                hours.append(day.strip()[:2] + ' ' + parsed_time)
-
-        return "; ".join(hours)
-
-    def parse_stores(self, response):
-        location =  re.findall(r"=[0-9.-]+" ,response.url)
-        properties = {
-            'addr_full': response.xpath('normalize-space(//div[@itemprop="streetAddress"]/text())').extract_first(),
-            'phone': response.xpath('normalize-space(//a[@itemprop="telephone"]/text())').extract_first().replace('T:',''),
-            'city': '',
-            'state':  response.xpath('normalize-space(//span[@itemprop="addressLocality"]/text())').extract_first().replace(',',''),
-            'postcode': response.xpath('normalize-space(//span[@itemprop="postalCode"]/text())').extract_first(),
-            'ref': response.xpath('normalize-space(//div[@itemprop="streetAddress"]/text())').extract_first().replace(' ' ,'-'),
-            'website': response.url,
-            'lat': float(location[0][1:]),
-            'lon': float(location[1][1:]),
-        }
-        hours = self.parse_hours(response.xpath('//tr[@class="store-detail-store-hours-table-row"]'))
-        if hours:
-            properties['opening_hours'] = hours
-        yield GeojsonPointItem(**properties)
+        return opening_hours.as_opening_hours()
 
     def parse(self, response):
-        urls = response.xpath('//h3[@class="name"]/a/@href').extract()
-        for path in urls:
-            yield scrapy.Request(response.urljoin(path), callback=self.parse_stores)
+        data = json.loads(response.body_as_unicode())
+        stores = data["features"]
+
+        for store in stores:
+            ## City tag contains city, state, postal, country
+            addr = store["properties"]["address"]["city"].split(",")
+            city = addr[0].strip()
+            if len(addr) == 3:
+                state = ""
+                postal = addr[1].strip()
+            elif len(addr) == 4:
+                state = addr[1].replace("Canada", "").strip()
+                postal = addr[2].strip()
+            else:
+                state = ""
+                postal = ""
+
+            properties = {
+                'ref': store["properties"]["url"],
+                'name': store["properties"]["name"],
+                'addr_full': store["properties"]["address"]["location"],
+                'city': city,
+                'state': state,
+                'postcode': postal,
+                'country': store["properties"]["address"]["country"],
+                'lat': store["properties"]["latitude"],
+                'lon': store["properties"]["longitude"],
+                'phone': store["properties"]["address"]["phone"],
+                'website': response.urljoin(store["properties"]["url"]),
+                'extras': {
+                    'number': store["properties"]["storeCode"]
+                }
+            }
+
+            try:
+                selector = scrapy.Selector(text=store['properties']["openingHours"]["h24"], type="html")
+                days = selector.xpath('//*[@class="day"]/text()').extract()
+                hours = selector.xpath('//*[@class="all"]/text()').extract()
+
+                hours = self.parse_hours(days, hours)
+
+                if hours:
+                    properties['opening_hours'] = hours
+
+            except:
+                pass
+
+            yield GeojsonPointItem(**properties)
