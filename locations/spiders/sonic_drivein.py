@@ -8,9 +8,9 @@ from locations.items import GeojsonPointItem
 class SonicDriveinSpider(scrapy.Spider):
     name = "sonic_drivein"
     allowed_domains = ["locations.sonicdrivein.com"]
-    start_urls = (
+    start_urls = [
         'https://locations.sonicdrivein.com/index.html',
-    )
+    ]
 
     def store_hours(self, store_hours):
         day_groups = []
@@ -64,7 +64,9 @@ class SonicDriveinSpider(scrapy.Spider):
         return opening_hours
 
     def parse(self, response):
-        for item_elem in response.xpath('//li[@class="c-directory-list-content-item"]'):
+        stores = response.xpath('//li[@class="c-directory-list-content-item"]')
+
+        for item_elem in stores:
             count = int(item_elem.xpath('.//span[@class="c-directory-list-content-item-count"]/text()').extract_first())
 
             if count == 1:
@@ -75,6 +77,14 @@ class SonicDriveinSpider(scrapy.Spider):
             else:
                 yield scrapy.Request(
                     response.urljoin(item_elem.xpath('.//a/@href').extract_first()),
+                )
+
+        if not stores:
+            stores = response.xpath('//h3[@class="c-location-grid-item-title"]/a/@href').extract()
+            for store in stores:
+                yield scrapy.Request(
+                    response.urljoin(store),
+                    callback=self.parse_store,
                 )
 
     def parse_store(self, response):
