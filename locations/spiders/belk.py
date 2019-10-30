@@ -58,6 +58,8 @@ class BelkSpider(scrapy.Spider):
         lat = data_obj.get('geo').get('latitude')
         lon = data_obj.get('geo').get('longitude')
         phone = data_obj.get('telephone')
+        name = data_obj.get('name')
+        country = data_obj.get('address').get('addressCountry')
 
         properties = {
             'ref': ref,
@@ -68,6 +70,8 @@ class BelkSpider(scrapy.Spider):
             'lat': lat,
             'lon': lon,
             'phone': phone,
+            'name': name,
+            'country': country,
             'website': response.request.url,
         }
 
