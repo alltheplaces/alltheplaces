@@ -8,13 +8,13 @@ import random
 from locations.items import GeojsonPointItem
 
 day_formats = {
-    "MON": "Mo", 
-    "TUES": "Tu",
-    "WED": "We",
-    "THURS": "Th",
-    "FRI": "Fr",
-    "SAT": "Sa",
-    "SUN": "Su"
+    "Mon": "Mo",
+    "Tue": "Tu",
+    "Wed": "We",
+    "Thu": "Th",
+    "Fri": "Fr",
+    "Sat": "Sa",
+    "Sun": "Su"
 }
 
 # This spider scrapes both the US locations, as well as the global locations for bathandbodyworks.
@@ -185,11 +185,13 @@ class BathAndBodyWorksSpider(scrapy.Spider):
             store_data = stores[store_key]
 
             properties = {
+                'name': store_data["name"],
                 'phone': store_data['phone'],
                 'addr_full': store_data['address1'].title(),
                 'city': store_data['city'].title(),
                 'state': store_data['stateCode'],
                 'postcode': store_data['postalCode'],
+                'country': store_data['countryCode'],
                 'lon': float(store_data['longitude']),
                 'lat': float(store_data['latitude']),
                 'ref': store_key,
@@ -198,7 +200,10 @@ class BathAndBodyWorksSpider(scrapy.Spider):
             hours = (store_data['storeHours'] if 'storeHours' in store_data else None)
             opening_hours = None
             if hours and ("Please call" not in hours):
-                opening_hours = self.store_hours(hours)
+                try:
+                    opening_hours = self.store_hours(hours)
+                except:
+                    pass
             if opening_hours:
                 properties['opening_hours'] = opening_hours
 
