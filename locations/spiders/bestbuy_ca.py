@@ -50,6 +50,7 @@ class BestBuySpider(scrapy.Spider):
             'phone': response.xpath('//span[@class="c-phone-number-span c-phone-main-number-span"]/text()').extract_first(),
             'ref': response.url,
             'website': response.url,
+            'name': response.xpath('//span[@class="LocationName-brand"]/text()').extract_first(),
             'opening_hours': opening_hours
         }
         return GeojsonPointItem(**props)
