@@ -106,7 +106,6 @@ class FamilyDollarSpider(scrapy.Spider):
             'phone': data['telephone'],
             'website': data['url'],
             'ref': data['@id'],
-            'opening_hours': self.store_hours(data['openingHoursSpecification']),
             'lon': float(data['geo']['longitude']),
             'lat': float(data['geo']['latitude']),
         }
@@ -114,5 +113,12 @@ class FamilyDollarSpider(scrapy.Spider):
         address = self.address(data['address'])
         if address:
             properties.update(address)
+
+        try:
+            hours = self.store_hours(data['openingHoursSpecification'])
+            if hours:
+                properties["opening_hours"] = hours
+        except:
+            pass
 
         yield GeojsonPointItem(**properties)
