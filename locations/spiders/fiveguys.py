@@ -24,9 +24,12 @@ class FiveguysSpider(scrapy.Spider):
                 'city': store_data['City'],
                 'state': store_data['StateOrProvince'],
                 'postcode': store_data['PostalCode'],
+                'country': store_data['Country'],
                 'ref': store_data['ClientKey'],
+                'name': store_data['LocationName'],
                 'lon': float(store_data['Longitude']),
                 'lat': float(store_data['Latitude']),
+
             }
 
             yield GeojsonPointItem(**properties)
