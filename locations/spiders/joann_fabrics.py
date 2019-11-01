@@ -52,6 +52,7 @@ class JoAnnFabricsSpider(scrapy.Spider):
             lon=store['geo']['longitude'],
             addr_full=store['address']['streetAddress'],
             city=store['address']['addressLocality'],
+            state=store['address']['addressRegion'],
             postcode=store['address']['postalCode'],
             name=store['branchOf']['name'],
             phone=store['telephone'],
