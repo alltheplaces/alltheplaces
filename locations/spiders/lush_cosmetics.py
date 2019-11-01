@@ -6,9 +6,10 @@ import json
 class LushSpider(scrapy.Spider):
     name = 'lush'
     download_delay = 0
-    allowed_domains = ['www.lushusa.com']
+    allowed_domains = ['www.lushusa.com', 'lush.ca']
     start_urls = [
-        'https://www.lushusa.com/on/demandware.store/Sites-Lush-Site/default/Stores-FindStores?showMap=false&radius=50000&postalCode=78704'
+        'https://www.lushusa.com/on/demandware.store/Sites-Lush-Site/default/Stores-FindStores?showMap=false&radius=50000&postalCode=78704',
+        'https://www.lush.ca/on/demandware.store/Sites-LushCA-Site/en_CA/Stores-FindStores?showMap=false&radius=50000&postalCode=V5K%200A1'
     ]
 
     def parse(self, response):
@@ -22,7 +23,7 @@ class LushSpider(scrapy.Spider):
                 postcode=i['postalCode'],
                 city=i['city'],
                 state=i['stateCode'],
-                country=i['countryCode'],
+                country=i['countryCode'] or 'US',
                 lat=i['latitude'],
                 lon=i['longitude'],
             )
