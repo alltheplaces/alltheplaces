@@ -7,7 +7,6 @@ from locations.items import GeojsonPointItem
 
 
 SCRIPT_JSON = 'normalize-space(//script[@type="application/ld+json"]/text())'
-PHONE = 'normalize-space(//span[@class="telephone-text bold"]//text())'
 
 
 class VitaminShoppe(scrapy.Spider):
@@ -26,8 +25,8 @@ class VitaminShoppe(scrapy.Spider):
         hours = [re.sub(r'[:]$', '', day_hour) for day_hour in hours]
 
         props = {
+            'name': response.xpath('(//span[@class="location-name"])[1]/text()').extract()[-1],
             'addr_full': app_json[0]['address']['streetAddress'],
-            'phone': response.xpath(PHONE).extract_first(),
             'city': app_json[0]['address']['addressLocality'],
             'state': app_json[0]['address']['addressRegion'],
             'postcode': app_json[0]['address']['postalCode'],
