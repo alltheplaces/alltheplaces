@@ -60,7 +60,7 @@ class TacobellSpider(scrapy.Spider):
             'lat': float(response.xpath('//meta[@itemprop="latitude"]/@content').extract_first()),
             'lon': float(response.xpath('//meta[@itemprop="longitude"]/@content').extract_first()),
             'city': response.xpath('//span[@itemprop="addressLocality"]/text()').extract_first(),
-            'postcode': response.xpath('//span[@itemprop="addressLocality"]/text()').extract_first(),
+            'postcode': response.xpath('//span[@itemprop="postalCode"]/text()').extract_first(),
             'state': response.xpath('//abbr[@itemprop="addressRegion"]/text()').extract_first(),
             'phone': response.xpath('//span[@class="c-phone-number-span c-phone-main-number-span"]/text()').extract_first(),
             'ref': response.xpath('//div[@class="nap-content main"]/@data-code').extract_first(),
