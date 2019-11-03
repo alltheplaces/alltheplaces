@@ -62,5 +62,6 @@ class MarksAndSpencerSpider(scrapy.Spider):
             day = days[i][0].upper() + days[i][1]
             start = starts[i].replace(".", ":")
             end = ends[i].replace(".", ":")
-            o.add_range(day, start, end)
+            if day and start and end:
+                o.add_range(day, start, end)
         return o.as_opening_hours()
