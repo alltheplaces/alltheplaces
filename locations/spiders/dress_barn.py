@@ -4,10 +4,7 @@ import re
 import scrapy
 
 from locations.items import GeojsonPointItem
-
-
-SCRIPT_JSON = 'normalize-space(//script[@type="application/ld+json"]/text())'
-PHONE = 'normalize-space(//span[@class="telephone-text bold"]//text())'
+from locations.hours import OpeningHours
 
 
 class DressBarn(scrapy.Spider):
@@ -19,53 +16,58 @@ class DressBarn(scrapy.Spider):
         'https://locations.dressbarn.com',
     )
 
+    def parse_hours(self, hours):
+        opening_hours = OpeningHours()
+        for hour in hours:
+            day, hrs = hour.split(' ')
+            if hrs == 'Closed':
+                continue
+            open_time, close_time = hrs.split('-')
+            opening_hours.add_range(day=day, open_time=open_time, close_time=close_time, time_format='%H:%M')
+
+        return opening_hours.as_opening_hours()
+
     def parse_stores(self, response):
 
-        app_json = json.loads(response.xpath(SCRIPT_JSON).extract_first())
-        hours = app_json[0]['openingHours'].replace(' - ', '-').split()
-        hours = [re.sub(r'[:]$', '', day_hour) for day_hour in hours]
-
         props = {
-            'addr_full': response.xpath('//meta[@name="address"]/@content').extract_first(),
-            'phone': response.xpath(PHONE).extract_first(),
-            'city': response.xpath('//meta[@name="city"]/@content').extract_first(),
-            'state': response.xpath('//meta[@name="state"]/@content').extract_first(),
-            'postcode': response.xpath('//meta[@name="zip"]/@content').extract_first(),
-            'lat': float(app_json[0]['geo']['latitude']),
-            'lon': float(app_json[0]['geo']['longitude']),
-            'opening_hours': "; ".join(['{} {}'.format(x[0], x[1]) for x in zip(*[iter(hours)]*2)]),
+            'name': response.xpath('//span[@id="location-name"]/text()').extract_first(),
+            'addr_full': response.xpath('//meta[@itemprop="streetAddress"]/@content').extract_first(),
+            'phone': response.xpath('//div[@itemprop="telephone"]/text()').extract_first(),
+            'city': response.xpath('//meta[@itemprop="addressLocality"]/@content').extract_first(),
+            'state': response.xpath('//*[@itemprop="addressRegion"]/text()').extract_first(),
+            'postcode': response.xpath('//*[@itemprop="postalCode"]/text()').extract_first(),
+            'lat': float(response.xpath('//meta[@itemprop="latitude"]/@content').extract_first()),
+            'lon': float(response.xpath('//meta[@itemprop="longitude"]/@content').extract_first()),
             'ref': response.url,
             'website': response.url
         }
+
+        opening_hours = self.parse_hours(response.xpath('//tr[@itemprop="openingHours"]/@content').extract())
+        if opening_hours:
+            props["opening_hours"] = opening_hours
 
         return GeojsonPointItem(**props)
 
     def parse_city_stores(self, response):
 
-        stores = response.xpath(
-            '//div/a[@class="store-info flex flex-hor"]/@href').extract()
+        stores = response.xpath('//a[@class="Teaser-titleLink"]/@href').extract()
         for store in stores:
             yield scrapy.Request(
                 response.urljoin(store),
                 callback=self.parse_stores
             )
 
-    def parse_state(self, response):
-
-        city_urls = response.xpath(
-            '//div[@class="map-list-item is-single"]/a/@href').extract()
-        for path in city_urls:
-            yield scrapy.Request(
-                response.urljoin(path),
-                callback=self.parse_city_stores
-            )
-
     def parse(self, response):
+        urls = response.xpath('//li[@class="Directory-listItem"]/a/@href').extract()
 
-        urls = response.xpath(
-            '//div[@class="map-list-item is-single"]/a/@href').extract()
-        for path in urls:
+        for url in urls:
+            if url.count('/') == 2:
+                callback = self.parse_stores
+            elif url.count('/') == 1:
+                callback = self.parse_city_stores
+            else:
+                callback = self.parse
             yield scrapy.Request(
-                response.urljoin(path),
-                callback=self.parse_state
+                response.urljoin(url),
+                callback=callback,
             )
