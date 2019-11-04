@@ -1,53 +1,65 @@
 import scrapy
 import re
-from locations.items import GeojsonPointItem
 import json
+
+from locations.items import GeojsonPointItem
+from locations.hours import OpeningHours
 
 
 class LaneBryantSpider(scrapy.Spider):
-
     name = "lanebryant"
     allowed_domains = ["stores.lanebryant.com"]
-    download_delay = 0.5
-    start_urls = (
-        'https://stores.lanebryant.com/',
-    )
 
-    def parse_stores(self, response):
-       data =  response.xpath('normalize-space(//script[@type="application/ld+json"]/text())').extract_first()
-       ref = re.findall(r"[^(\/)]+$", response.url)
-       if (len(ref) > 0):
-            ref = ref[0].split('.')[0]
-       try:
-         json_data = json.loads(data)
-         properties = {
-            'addr_full': json_data[0]['address']['streetAddress'] ,
-            'phone':json_data[0]['address']['telephone'] ,
-            'city': json_data[0]['address']['addressLocality'] ,
-            'state': json_data[0]['address']['addressRegion'] ,
-            'postcode':json_data[0]['address']['postalCode'] ,
-            'ref': ref ,
-            'website': response.url,
-            'lat': json_data[0]['geo']['latitude'] ,
-            'lon':json_data[0]['geo']['longitude'] ,
-         }
-         properties['opening_hours'] =  json_data[0]['openingHours'],
-         yield GeojsonPointItem(**properties)
-       except ValueError:
-        return
+    def start_requests(self):
 
+        states = ["al", "ak", "az", "ar", "ca", "co", "ct", "dc", "de", "fl", "ga",
+                  "hi", "id", "il", "in", "ia", "ks", "ky", "la", "me", "md",
+                  "ma", "mi", "mn", "ms", "mo", "mt", "ne", "nv", "nh", "nj",
+                  "nm", "ny", "nc", "nd", "oh", "ok", "or", "pa", "ri", "sc",
+                  "sd", "tn", "tx", "ut", "vt", "va", "wa", "wv", "wi", "wy"]
 
-    def parse_city_stores(self, response):
-        stores = response.xpath('//div[@id="rls_maplist"]/div/ul/div/div/li/div/a/@href').extract()
-        for store in stores:
-                yield scrapy.Request(response.urljoin(store), callback=self.parse_stores)
+        base_url = "https://stores.lanebryant.com/{state}"
 
-    def parse_state(self, response):
-        city_urls = response.xpath('//div[@id="rls_maplist"]/div/ul/div/li/a/@href').extract()
-        for path in city_urls:
-            yield scrapy.Request(response.urljoin(path), callback=self.parse_city_stores)
+        for state in states:
+            url = base_url.format(state=state)
+            yield scrapy.Request(url=url, callback=self.parse)
+
+    def parse_hours(self, hours):
+        opening_hours = OpeningHours()
+        for group in hours:
+            if "Closed" in group:
+                pass
+            else:
+                days, open_time, close_time = re.search(r'([a-zA-Z,]+)\s([\d:]+)-([\d:]+)', group).groups()
+                days = days.split(',')
+                for day in days:
+                    opening_hours.add_range(day=day, open_time=open_time, close_time=close_time, time_format='%H:%M')
+
+        return opening_hours.as_opening_hours()
 
     def parse(self, response):
-        urls = response.xpath('//div[@id="rls_maplist"]/div/ul/div/li/a/@href').extract()
-        for path in urls:
-            yield scrapy.Request(response.urljoin(path), callback=self.parse_state)
+        urls = response.xpath(
+            '//*[@class="Directory-listItem"]/a/@href | //*[@class="Directory-listTeaser"]/article/h2/a/@href').extract()
+
+        if len(urls) == 0:
+            properties = {
+                'name': response.xpath('//*[@class="Core-geomodifier"]/text()').extract_first(),
+                'addr_full': response.xpath('//*[@class="c-address-street-1"]/text()').extract_first(),
+                'city': response.xpath('//*[@class="c-address-city"]/text()').extract_first(),
+                'state': response.xpath('//*[@class="c-address-state"]/text()').extract_first(),
+                'postcode': response.xpath('//*[@class="c-address-postal-code"]/text()').extract_first(),
+                'phone': response.xpath('//*[@id="phone-main"]/text()').extract_first(),
+                'ref': "_".join(re.search(r".+/(.+?)/(.+?)/(.+?)/?(?:\.html|$)", response.url).groups()),
+                'website': response.url,
+                'lat': response.xpath('//*[@itemprop="latitude"]/@content').extract_first(),
+                'lon': response.xpath('//*[@itemprop="longitude"]/@content').extract_first(),
+            }
+
+            hours = self.parse_hours(response.xpath('//*[@itemprop="openingHours"]/@content').extract())
+            if hours:
+                properties["opening_hours"] = hours
+
+            yield GeojsonPointItem(**properties)
+        else:
+            for path in urls:
+                yield scrapy.Request(url=response.urljoin(path), callback=self.parse)
