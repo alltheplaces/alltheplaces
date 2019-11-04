@@ -24,6 +24,10 @@ class VueSpider(scrapy.Spider):
         ).extract_first()
 
         address_parts = response.xpath('//img[@alt="location-pin"]/../text()').extract()
+        if not address_parts:
+            address_parts = response.xpath(
+                f'//div[@class="collapse__heading" and @data-page-url="{parse.urlparse(response.url).path}"]/following-sibling::div//div[@class="container container--scroll"]/div/p/text()'
+            ).extract()
         address_parts = [a.strip() for a in address_parts if a.strip()]
 
         maps_link = response.xpath('//a[text()="Get directions"]/@href').extract_first()
