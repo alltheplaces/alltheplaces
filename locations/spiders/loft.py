@@ -1,40 +1,60 @@
 import scrapy
 import re
 from locations.items import GeojsonPointItem
-
-
+from locations.hours import OpeningHours
 
 
 class LoftSpider(scrapy.Spider):
-
     name = "loft"
     allowed_domains = ["stores.loft.com"]
     download_delay = 0
     start_urls = (
         'https://stores.loft.com/',
+        'https://stores.loft.com/outlet/index.html'
     )
 
+    country_url_pattern = re.compile(r'^(..\/|..\/outlet\/)[a-z]{2}.html$')
+    state_url_pattern = re.compile(r'^(..\/|..\/outlet\/|)[a-z]{2}\/[^(\/)]+.html$')
+    city_url_pattern = re.compile(r'^(..\/|)([a-z]{2}|outlet)\/[a-z]{2}\/[^(\/)]+.html$')
+    store_url_pattern = re.compile(r'^(..\/|..\/outlet\/)?[a-z]{2}\/[^(\/)]+\/[^(\/)]+\/[^(\/)]+.html$')
+
+    def parse_hours(self, hours):
+        opening_hours = OpeningHours()
+        for hour in hours:
+            day, hrs = hour.split(' ')
+            if hrs == 'Closed':
+                continue
+            open_time, close_time = hrs.split('-')
+            opening_hours.add_range(day=day, open_time=open_time, close_time=close_time, time_format='%H:%M')
+
+        return opening_hours.as_opening_hours()
+
     def parse_stores(self, response):
-        ref = re.findall(r"[^(\/)]+$", response.url)
-        if (len(ref) > 0):
-            ref = ref[0].split('.')[0]
+        brand = response.xpath('normalize-space(//h1[@itemprop="name"]/text())').extract_first()
+        if 'closed' in brand.lower():
+            return
         properties = {
+            'name': response.xpath('//h1[@itemprop="name"]/div/text()').extract_first(),
             'addr_full': response.xpath('normalize-space(//span[@itemprop="streetAddress"]/text())').extract_first(),
             'phone': response.xpath(
                 'normalize-space(//span[@itemprop="telephone"]/text())').extract_first(),
-            'city': response.xpath('normalize-space(//span[@itemprop="addressLocality"]/text())').extract_first(),
+            'city': response.xpath('normalize-space(//span[@itemprop="addressLocality"]/text())').extract_first().strip(','),
             'state': response.xpath('normalize-space(//span[@itemprop="addressRegion"]/text())').extract_first(),
             'postcode': response.xpath('normalize-space(//span[@itemprop="postalCode"]/text())').extract_first(),
-            'ref': ref,
+            'country': response.xpath('normalize-space(//abbr[@itemprop="addressCountry"]/text())').extract_first(),
+            'ref': "_".join(re.search(r".+/(.+?)/(.+?)/(.+?)/?(?:\.html|$)", response.url).groups()),
             'website': response.url,
             'lat': response.xpath('normalize-space(//meta[@itemprop="latitude"]/@content)').extract_first(),
             'lon': response.xpath('normalize-space(//meta[@itemprop="longitude"]/@content)').extract_first(),
+            'extras': {
+                'brand': brand
+            }
         }
-        hours = response.xpath(
-            '//div[@class="row"]/div[@class="nap-row-left-col-row-right-hours-of-operation"]/div[@class="c-location-hours-details-wrapper js-location-hours"]/table/tbody/tr/@content').extract()
-        if hours != []:
-            hours = " ; ".join(hours)
-            properties['opening_hours'] = hours
+
+        opening_hours = self.parse_hours(response.xpath('//tr[@itemprop="openingHours"]/@content').extract())
+        if opening_hours:
+            properties["opening_hours"] = opening_hours
+
         yield GeojsonPointItem(**properties)
 
     def parse_city_stores(self, response):
@@ -45,8 +65,7 @@ class LoftSpider(scrapy.Spider):
     def parse_state(self, response):
         urls = response.xpath('//div[@class="c-directory-list-content-wrapper"]/ul/li/a/@href').extract()
         for path in urls:
-            pattern2 = re.compile("^(..\/|)[a-z]{2}\/[^(\/)]+\/[^(\/)]+\/[^(\/)]+.html$")
-            if (pattern2.match(path.strip())):
+            if (self.store_url_pattern.match(path.strip())):
                 yield scrapy.Request(response.urljoin(path), callback=self.parse_stores)
             else:
                 yield scrapy.Request(response.urljoin(path), callback=self.parse_city_stores)
@@ -55,27 +74,21 @@ class LoftSpider(scrapy.Spider):
         urls = response.xpath('//div[@class="c-directory-list-content-wrapper"]/ul/li/a/@href').extract()
 
         for path in urls:
-            pattern1 = re.compile("^(..\/|)[a-z]{2}\/[^(\/)]+.html$")
-            pattern2 = re.compile("^(..\/|)[a-z]{2}\/[^(\/)]+\/[^(\/)]+\/[^(\/)]+.html$")
-            if (pattern1.match(path.strip())):
-                yield scrapy.Request(response.urljoin(path), callback=self.parse_state)
-            elif (pattern2.match(path.strip())):
+            if (self.store_url_pattern.match(path.strip())):
                 yield scrapy.Request(response.urljoin(path), callback=self.parse_stores)
-            else:
+            elif (self.city_url_pattern.match(path.strip())):
                 yield scrapy.Request(response.urljoin(path), callback=self.parse_city_stores)
+            else:
+                yield scrapy.Request(response.urljoin(path), callback=self.parse_state)
 
     def parse(self, response):
         urls = response.xpath('//div[@class="c-directory-list-content-wrapper"]/ul/li/a/@href').extract()
         for path in urls:
-            pattern = re.compile("^(..\/|)[a-z]{2}.html$")
-            pattern1 = re.compile("^(..\/|)[a-z]{2}\/[^(\/)]+.html$")
-            pattern2 = re.compile("^(..\/|)[a-z]{2}\/[^(\/)]+\/[^(\/)]+\/[^(\/)]+.html$")
-
-            if (pattern.match(path.strip())):
-                yield scrapy.Request(response.urljoin(path), callback=self.parse_country)
-            elif (pattern1.match(path.strip())):
-                yield scrapy.Request(response.urljoin(path), callback=self.parse_state)
-            elif (pattern2.match(path.strip())):
+            if (self.store_url_pattern.match(path.strip())):
                 yield scrapy.Request(response.urljoin(path), callback=self.parse_stores)
-            else:
+            elif (self.city_url_pattern.match(path.strip())):
                 yield scrapy.Request(response.urljoin(path), callback=self.parse_city_stores)
+            elif (self.state_url_pattern.match(path.strip())):
+                yield scrapy.Request(response.urljoin(path), callback=self.parse_state)
+            else:
+                yield scrapy.Request(response.urljoin(path), callback=self.parse_country)
