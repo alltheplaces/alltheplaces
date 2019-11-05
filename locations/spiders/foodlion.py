@@ -5,20 +5,66 @@ import re
 
 from locations.items import GeojsonPointItem
 
-
 class FoodLionSpider(scrapy.Spider):
+    download_delay = 3
     name = "foodlion"
     allowed_domains = ["www.foodlion.com"]
     start_urls = (
-        'https://www.foodlion.com/stores/_jcr_content/mainParsys/storelocator.stores.json?lat=37.8&lng=-79.5&distance=5000&pharmacyFilter=false',
+        'https://www.foodlion.com/stores/',
     )
 
-    def store_hours(self, store_hours):
-        day_groups = []
-        for line in store_hours:
-            this_day_group = dict()
-            (front, rest) = line.split(': ')
+    custom_settings = {
+        'USER_AGENT': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.86 Safari/537.36',
+    }
 
+    def start_requests(self):
+        states = ['GA', 'SC', 'NC', 'MD', 'TN', 'VA']
+        template = 'https://www.foodlion.com/bin/foodlion/search/storelocator.json?zip={state}&distance=1000&onlyPharmacyEnabledStores=false'
+
+        headers = {
+            'Accept': 'application/json',
+        }
+
+        for state in states:
+            yield scrapy.http.FormRequest(
+                url=template.format(state=state),
+                method='GET',
+                headers=headers,
+                callback=self.parse
+            )
+
+    def parse(self, response):
+        jsonresponse = json.loads(response.body_as_unicode())
+        stores = json.loads(jsonresponse["result"])
+        for store in stores:
+            properties = {
+                'name': store['title'],
+                'ref': store['storeId'],
+                'addr_full': store["address"].strip(),
+                'city': store["city"],
+                'state': store["state"],
+                'postcode': store["zip"],
+                'country': "US",
+                'phone': store["phoneNumber"],
+                'lat': float(store["lat"]),
+                'lon': float(store["lon"]),
+                'website': 'https://www.foodlion.com' + store["href"]
+            }
+
+            hours = store["hours"]
+
+            if hours:
+                properties['opening_hours'] = self.process_hours(hours)
+
+            yield GeojsonPointItem(**properties)
+
+    def process_hours(self, hours):
+        day_groups = []
+        for line in hours:
+            this_day_group = dict()
+            if ': ' not in line:
+                continue
+            (front, rest) = line.split(': ')
             days = front.split('-')
             if days:
                 this_day_group['from_day'] = days[0][:2]
@@ -62,41 +108,3 @@ class FoodLionSpider(scrapy.Spider):
             opening_hours = opening_hours[:-2]
 
         return opening_hours
-
-    def address(self, address):
-        if not address:
-            return None
-
-        (num, rest) = address['address'].split(' ', 1)
-        addr_tags = {
-            "housenumber": num.strip(),
-            "street": rest.strip(),
-            "city": address['city'],
-            "state": address['state'],
-            "postcode": address['zip'],
-        }
-
-        return addr_tags
-
-    def parse(self, response):
-        data = json.loads(response.body_as_unicode())
-
-        for store in data:
-            properties = {
-                "phone": store['phoneNumber'],
-                "ref": str(store['storeId']),
-                "name": store['title'],
-                "opening_hours": self.store_hours(store['hours']),
-                "website": "https://www.foodlion.com{}".format(store['href']),
-                "lon": float(store['lng']),
-                "lat": float(store['lat']),
-            }
-
-            address = self.address(store)
-            if address:
-                properties.update(address)
-
-            yield GeojsonPointItem(**properties)
-
-        else:
-            self.logger.info("No results")
