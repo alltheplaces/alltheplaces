@@ -43,6 +43,7 @@ class AceHardwareSpider(scrapy.Spider):
         properties = {
             'name': store_data['StoreName'],
             'phone': store_data['Phone'],
+            'addr_full': store_data['StoreAddressLn1'],
             'city': store_data['StoreCityNm'],
             'state': store_data['StoreStateCd'],
             'postcode': store_data['StoreZipCd'],
