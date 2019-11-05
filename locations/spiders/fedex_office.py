@@ -1,91 +1,86 @@
 # -*- coding: utf-8 -*-
 import scrapy
 import json
+import re
 from locations.items import GeojsonPointItem
-from urllib.parse import urlencode
-
-STATES = ['AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DC', 'DE', 'FL', 'GA',
-          'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD',
-          'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ',
-          'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC',
-          'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY']
-
-BASE_URL = 'https://local.fedex.com/'
+from locations.hours import OpeningHours
 
 
 class FedExOfficeSpider(scrapy.Spider):
-    name = "fedex_office"
+    name = "fedex_office_alt"
     allowed_domains = ['fedex.com']
     download_delay = 0.2
     start_urls = [
-        'https://local.fedex.com/',
+        'https://local.fedex.com/sitemap/fedex-office-sitemap.xml',
+        'https://local.fedex.com/sitemap/fedex-ship-center-sitemap.xml',
+        'https://local.fedex.com/sitemap/fedex-freight-sitemap.xml',
+        'https://local.fedex.com/sitemap/canada-fedex-ship-center-sitemap.xml',
+        'https://local.fedex.com/sitemap/puerto-rico-fedex-ship-center-sitemap.xml',
+        'https://local.fedex.com/sitemap/us-virgin-islands-fedex-ship-center-sitemap.xml',
     ]
 
-    def parse(self, response):
-        for state in STATES:
-            url = BASE_URL + state.lower() + '/a/'
-            yield scrapy.Request(url, callback=self.parse_locations_by_letter)
-
-    def parse_locations_by_letter(self, response):
-        # Does not include urls to the "a" page, will need a separate request for each "state/a" page
-        letter_urls = response.xpath('//div[@class="loc-state-letters fx-cf"]/ul/li//@href').extract()
-
-        for letter_url in letter_urls:
-            yield scrapy.Request(response.urljoin(letter_url), callback=self.parse_cities)
-
-        yield scrapy.Request(response.url, callback=self.parse_cities)  # parse "a" cities too
-
-    def parse_cities(self, response):
-        city_urls = response.xpath('//ul[@class="loc-state-cities loc-simple-column"]/li//@href').extract()
-
-        for city_url in city_urls:
-            # Filter response to store locations, exclude drop boxes
-            params = {
-                'ajax': 'true',
-                'group_filters[]': 'office_group',
-                'filters[]': 'office',  # FedEx Office Print & Ship Center
-                'filters[]': 'officesc',  # FedEx Office Ship Center
-                'filters[]': 'officescu',  # FedEx Office Hotel/Convention Center
-                'filters[]': 'officeun',  # FedEx Office University Center
-                'filters[]': 'walmart',  # FedEx Office Inside Walmart
-                'filters[]': 'freight',  # FedEx Freight
-                'filters[]': 'fedex',  # FedEx Ship Center
-                'show': '50'  # Max number of results allowed
-            }
-
-            yield scrapy.http.Request('?'.join([response.urljoin(city_url), urlencode(params)]),
-                                      callback=self.parse_stores)
-
-    def parse_stores(self, response):
-        # Handle bad links e.g. RI - Pereira is not a valid store page, redirects to state page
-        try:
-            # If a valid store page
-            data = json.loads(response.body_as_unicode())
-        except json.decoder.JSONDecodeError:
-            # If not a valid page
+    def parse_hours(self, store_hours):
+        opening_hours = OpeningHours()
+        if store_hours is None or len(store_hours) == 0:
             return
 
-        stores = data["results"]  # only includes store hours for the day request was made
-        for store in stores:
+        for store_day in store_hours:
+            if store_day == 'Closed':
+                continue
+            else:
+                day_open, close_time = store_day.split('-')
+                day = day_open.split(' ')[0]
+                open_time = day_open.split(' ')[1]
+                opening_hours.add_range(day=day,
+                                        open_time=open_time.strip(),
+                                        close_time=close_time.strip(),
+                                        time_format='%H:%M'
+                                        )
+
+        return opening_hours.as_opening_hours()
+
+    def parse(self, response):
+        response.selector.remove_namespaces()
+        urls = response.xpath('//url/loc/text()').extract()
+
+        for url in urls:
+            yield scrapy.Request(url, callback=self.parse_store)
+
+    def parse_store(self, response):
+        # Check if store is closed
+        title = response.xpath('//div[@class="fx-copy"]/h1/text()').extract_first()
+        store_is_closed = 'This Location is No Longer Available'
+        if title == store_is_closed:
+            pass
+        else:
+            ref = re.search(r'.+/(.+?)/?(?:\.html|$)', response.url).group(1)
+            script_content = response.xpath('//script[@type="text/javascript" and contains(text(), "current_location_point")]/text()').extract_first()
+            store_data = json.loads(re.search(r'current_location_point = (.*);', script_content).group(1))
+
             properties = {
-                'name': store["disp_nm"],
-                'ref': store["locid"],
-                'addr_full': store["address"],
-                'city': store["city"],
-                'state': store["state"],
-                'postcode': store["postalcode"],
-                'country': store["country_cd"],
-                'phone': store.get("stor_phone"),
-                'website': store.get("location_url") or response.url,
-                'lat': store.get("latitude"),
-                'lon': store.get("longitude"),
+                'ref': ref,
+                'name': response.xpath('normalize-space(//*[@itemprop="name"]//text())').extract_first(),
+                'addr_full': response.xpath('normalize-space(//span[@itemprop="streetAddress"]//text())').extract_first(),
+                'city': response.xpath('normalize-space(//span[@itemprop="addressLocality"]//text())').extract_first(),
+                'state': response.xpath('normalize-space(//span[@itemprop="addressRegion"]//text())').extract_first(),
+                'postcode': response.xpath('normalize-space(//span[@itemprop="postalCode"]//text())').extract_first(),
+                'country': response.xpath('normalize-space(//span[@itemprop="addressCountry"]//text())').extract_first(),
+                'phone': response.xpath('normalize-space(//meta[@itemprop="telephone"]/@content)').extract_first(),
+                'website': response.url,
+                'lat': response.xpath('normalize-space(//meta[@itemprop="latitude"]/@content)').extract_first(),
+                'lon': response.xpath('normalize-space(//meta[@itemprop="longitude"]/@content)').extract_first(),
                 'extras': {
-                    'branch_id': store.get("fxo_branch_id"),
-                    'location_code': store.get("local_fdx_type"),
-                    'location_type': store.get("location_type"),
-                    'venue': store.get("bldg"),
-                    'venue_note': store.get("loc_onprop")
+                    'branch_id': store_data.get("fxo_branch_id"),
+                    'location_id': store_data.get("locid"),
+                    'location_code': store_data.get("local_fdx_type"),
+                    'location_type': store_data.get("location_type"),
+                    'venue': store_data.get("bldg"),
+                    'venue_note': store_data.get("loc_onprop")
                 }
             }
+
+            hours = response.xpath('//meta[@itemprop="openingHours"]/@content').extract()
+            if hours:
+                properties['opening_hours'] = self.parse_hours(hours)
 
             yield GeojsonPointItem(**properties)
