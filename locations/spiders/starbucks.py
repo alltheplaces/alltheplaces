@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import csv
 import scrapy
 import json
 from locations.items import GeojsonPointItem
@@ -13,31 +14,24 @@ class StarbucksSpider(scrapy.Spider):
     allowed_domains = ['www.starbucks.com']
 
     def start_requests(self):
-        with open('./locations/searchable_points/us_centroids_50mile_radius.csv') as points:
-            next(points)
-            for point in points:
-                row = point.strip().split(',')
-                request = scrapy.Request(
-                    url=STORELOCATOR.format(row[1], row[2]),
-                    headers=HEADERS,
-                    callback=self.parse
-                )
-                # Distance is in degrees...
-                request.meta['distance'] = 1
-                yield request
+        searchable_point_files = [
+            './locations/searchable_points/us_centroids_50mile_radius.csv',
+            './locations/searchable_points/ca_centroids_50mile_radius.csv'
+        ]
 
-        with open('./locations/searchable_points/ca_centroids_50mile_radius.csv') as points:
-            next(points)
-            for point in points:
-                row = point.strip().split(',')
-                request = scrapy.Request(
-                    url=STORELOCATOR.format(row[1], row[2]),
-                    headers=HEADERS,
-                    callback=self.parse
-                )
-                # Distance is in degrees...
-                request.meta['distance'] = 1
-                yield request
+        for point_file in searchable_point_files:
+            with open(point_file) as points:
+                reader = csv.DictReader(points)
+                for point in reader:
+                    request = scrapy.Request(
+                        url=STORELOCATOR.format(point["latitude"], point["longitude"]),
+                        headers=HEADERS,
+                        callback=self.parse
+                    )
+                    # Distance is in degrees...
+                    request.meta['distance'] = 1
+                    yield request
+
 
     def parse(self, response):
         responseJson = json.loads(response.body)
