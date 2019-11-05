@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import csv
 import scrapy
 import json
 from locations.items import GeojsonPointItem
@@ -13,18 +14,24 @@ class StarbucksSpider(scrapy.Spider):
     allowed_domains = ['www.starbucks.com']
 
     def start_requests(self):
-        with open('./locations/searchable_points/us_centroids_50mile_radius.csv') as points:
-            next(points)
-            for point in points:
-                row = point.split(',')
-                request = scrapy.Request(
-                    url=STORELOCATOR.format(row[1], row[2]),
-                    headers=HEADERS,
-                    callback=self.parse
-                )
-                # Distance is in degrees...
-                request.meta['distance'] = 1
-                yield request
+        searchable_point_files = [
+            './locations/searchable_points/us_centroids_50mile_radius.csv',
+            './locations/searchable_points/ca_centroids_50mile_radius.csv'
+        ]
+
+        for point_file in searchable_point_files:
+            with open(point_file) as points:
+                reader = csv.DictReader(points)
+                for point in reader:
+                    request = scrapy.Request(
+                        url=STORELOCATOR.format(point["latitude"], point["longitude"]),
+                        headers=HEADERS,
+                        callback=self.parse
+                    )
+                    # Distance is in degrees...
+                    request.meta['distance'] = 1
+                    yield request
+
 
     def parse(self, response):
         responseJson = json.loads(response.body)
@@ -34,11 +41,20 @@ class StarbucksSpider(scrapy.Spider):
             storeLat = store['coordinates']['latitude']
             storeLon = store['coordinates']['longitude']
             properties = {
-                'addr_full': ', '.join(store['addressLines']),
+                'name': store["name"],
+                'addr_full': store['address']['streetAddressLine1'],
+                'city': store['address']['city'],
+                'state': store['address']['countrySubdivisionCode'],
+                'country': store['address']['countryCode'],
+                'postcode': store['address']['postalCode'],
                 'phone': store['phoneNumber'],
                 'ref': store['id'],
                 'lon': storeLon,
-                'lat': storeLat
+                'lat': storeLat,
+                'extras': {
+                    'number': store['storeNumber'],
+                    'brand': store['brandName']
+                }
             }
             yield GeojsonPointItem(**properties)
 
