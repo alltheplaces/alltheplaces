@@ -16,7 +16,20 @@ class StarbucksSpider(scrapy.Spider):
         with open('./locations/searchable_points/us_centroids_50mile_radius.csv') as points:
             next(points)
             for point in points:
-                row = point.split(',')
+                row = point.strip().split(',')
+                request = scrapy.Request(
+                    url=STORELOCATOR.format(row[1], row[2]),
+                    headers=HEADERS,
+                    callback=self.parse
+                )
+                # Distance is in degrees...
+                request.meta['distance'] = 1
+                yield request
+
+        with open('./locations/searchable_points/ca_centroids_50mile_radius.csv') as points:
+            next(points)
+            for point in points:
+                row = point.strip().split(',')
                 request = scrapy.Request(
                     url=STORELOCATOR.format(row[1], row[2]),
                     headers=HEADERS,
@@ -34,11 +47,20 @@ class StarbucksSpider(scrapy.Spider):
             storeLat = store['coordinates']['latitude']
             storeLon = store['coordinates']['longitude']
             properties = {
-                'addr_full': ', '.join(store['addressLines']),
+                'name': store["name"],
+                'addr_full': store['address']['streetAddressLine1'],
+                'city': store['address']['city'],
+                'state': store['address']['countrySubdivisionCode'],
+                'country': store['address']['countryCode'],
+                'postcode': store['address']['postalCode'],
                 'phone': store['phoneNumber'],
                 'ref': store['id'],
                 'lon': storeLon,
-                'lat': storeLat
+                'lat': storeLat,
+                'extras': {
+                    'number': store['storeNumber'],
+                    'brand': store['brandName']
+                }
             }
             yield GeojsonPointItem(**properties)
 
