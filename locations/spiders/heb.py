@@ -1,63 +1,39 @@
+# -*- coding: utf-8 -*-
 import scrapy
-from locations.items import GeojsonPointItem
 import re
-from xml.dom import minidom
+
+from locations.items import GeojsonPointItem
 
 
 class HEBSpider(scrapy.Spider):
     name = "heb"
-
-    start_urls = ["https://www.heb.com/sitemap/storeSitemap.xml"]
+    allowed_domains = ["www.heb.com"]
+    download_delay = 0.2
+    start_urls = (
+        'https://www.heb.com/sitemap/storeSitemap.xml',
+    )
 
     def parse(self, response):
-        document = minidom.parseString(response.body_as_unicode())
-        for url in (node.firstChild.nodeValue for node in document.getElementsByTagName("loc")):
+        xml = scrapy.selector.Selector(response)
+        xml.remove_namespaces()
+
+        urls = xml.xpath('//loc/text()').extract()
+        for url in urls:
             yield scrapy.Request(url=url, callback=self.parse_store, meta={"url": url})
 
-    def get_hours(self, sidebar):
-        hours = []
-        ret = []
-        is_hours = False
-        for hour in sidebar:
-            if hour.strip().startswith("Store Hours"):
-                is_hours = True
-                continue
-            if is_hours:
-                if "AM" in hour or "PM" in hour:
-                    hours.append(hour)
-                else:
-                    break
-        for hour in hours:
-            hour = hour.strip()
-            range, start, _, _, _, end, _ = hour.split(" ")
-            split_end = end.split(":")
-            new_end = "%02d:%s" % (int(split_end[0]) + 12, split_end[1])
-            if "-" in range:
-                new_range = "{}-{}".format(*[x[:2] for x in range.split("-")])
-            else:
-                new_range = range[:2]
-            ret.append("{} {}-{}".format(new_range, start, new_end))
-        return "; ".join(ret)
-
     def parse_store(self, response):
-        dat = re.findall(r"search_createMapPin\(.*\);", response.body_as_unicode())
-        if dat:
-            pin_call = dat[0]
-            store_str = pin_call[len("search_createMapPin("):-2]
-            if len(store_str.split(",")) == 17:
-                _, url, lat, lon, _, _, name, address, city, state, zip, _, phone, _, _, _, _ = store_str.split(",")
-                if lat and lon:
-                    sidebar = response.css(".hoursDetail span::text, .hoursDetail p:not(:contains('\t'))::text").extract()
-                    yield GeojsonPointItem(
-                        lat=float(lat),
-                        lon=float(lon),
-                        name=name.strip('"'),
-                        addr_full=address.strip('"'),
-                        city=city.strip('"'),
-                        state=state.strip('"'),
-                        postcode=zip.strip('"'),
-                        phone=phone.replace(" - ", "-").strip('"'),
-                        website=response.meta.get("url"),
-                        opening_hours=self.get_hours(sidebar),
-                        ref=response.meta.get("url")
-                    )
+        ref = "_".join(re.search(r".+/(.+?)/(.+?)/(.+?)/?(?:\.html|$)", response.url).groups())
+
+        properties = {
+            'name': response.xpath('//h1[@class="store-details__store-name"]/text()').extract_first(),
+            'ref': ref,
+            'addr_full': response.xpath('//p[@itemprop="streetAddress"]/text()').extract_first(),
+            'city': response.xpath('//div[@class="store-details__location"]/p[2]/span[1]/text()').extract_first(),
+            'state': response.xpath('//div[@class="store-details__location"]/p[2]/span[2]/text()').extract_first(),
+            'postcode': response.xpath('//div[@class="store-details__location"]/p[2]/span[3]/text()').extract_first(),
+            'phone': response.xpath('//a[@class="store-details__link store-details__link--phone"]/@content/text()').extract_first(),
+            'lat': (response.xpath('//div[@id="map-wrap"]/@data-map-lat').extract_first()),
+            'lon': (response.xpath('//div[@id="map-wrap"]/@data-map-lon').extract_first()),
+            'website': response.url
+        }
+        yield GeojsonPointItem(**properties)
