@@ -79,12 +79,14 @@ class SafewaySpider(scrapy.Spider):
                 )
 
     def parse_store(self, response):
+        ref = re.search(r'.+/(.+?)/?(?:\.html|$)', response.url).group(1)
+
         properties = {
             'name': response.xpath('//span[@class="LocationName-geo"]/text()').extract_first(),
             'website': response.url,
-            'ref': response.url,
-            'addr_full': response.xpath('//span[@itemprop="streetAddress"]/span/text()').extract_first(),
-            'city': response.xpath('//span[@itemprop="addressLocality"]/text()').extract_first(),
+            'ref': ref,
+            'addr_full': response.xpath('//meta[@itemprop="streetAddress"]/@content').extract_first(),
+            'city': response.xpath('//meta[@itemprop="addressLocality"]/@content').extract_first(),
             'state': response.xpath('//abbr[@itemprop="addressRegion"]/text()').extract_first(),
             'postcode': response.xpath('//span[@itemprop="postalCode"]/text()').extract_first().strip(),
             'lat': float(response.xpath('//meta[@itemprop="latitude"]/@content').extract_first()),
