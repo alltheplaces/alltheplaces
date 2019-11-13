@@ -15,6 +15,7 @@ DAYS = {
     'Sunday': 'Su'
 }
 
+
 class NextcareSpider(scrapy.Spider):
     name = "nextcare"
     allowed_domains = ["nextcare.com"]
@@ -73,7 +74,7 @@ class NextcareSpider(scrapy.Spider):
             )
 
     def parse_location(self, response):
-        unp = {} # Unprocessed properties
+        unp = {}  # Unprocessed properties
         properties = {}
         unp['phone'] = response.xpath('//span[@itemprop="telephone"]/a/text()').extract_first()
         unp['name'] = response.xpath('//span[@itemprop="name"]/h2[@class="loc_d_title"]/text()').extract_first()
@@ -85,7 +86,16 @@ class NextcareSpider(scrapy.Spider):
         unp['city'] = addressdiv.xpath('.//span[@itemprop="addressLocality"]/text()').extract_first()
         unp['state'] = addressdiv.xpath('.//span[@itemprop="addressRegion"]/text()').extract_first()
         unp['postcode'] = addressdiv.xpath('.//span[@itemprop="postalCode"]/text()').extract_first()
-        
+
+        uber_url = response.xpath('//div[@class="heading-desktop"]/h5/a/@href').extract_first()
+        latitude = uber_url.split('[latitude]=')[1]
+        latitude = latitude.split('&dropoff')[0]
+        longitude = uber_url.split('[longitude]=')[1]
+
+        if latitude is not None and longitude is not None:
+            unp['lat'] = latitude
+            unp['lon'] = longitude
+
         hours = response.xpath('//ul[@class="loc_d_times row"]/li/text()').extract()
         opening_hours = None
         if hours:
