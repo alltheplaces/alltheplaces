@@ -36,7 +36,7 @@ class HarborFreightSpider(scrapy.Spider):
             properties = {
                 'ref': store.xpath('@location_id').extract_first(),
                 'name': store.xpath('@title').extract_first(),
-                'addr_full': store.xpath('address').extract_first(),
+                'addr_full': store.xpath('@address').extract_first(),
                 'city': store.xpath('@city').extract_first(),
                 'state': store.xpath('@state').extract_first(),
                 'postcode': store.xpath('@zip').extract_first(),
