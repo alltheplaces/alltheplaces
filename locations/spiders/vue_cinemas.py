@@ -5,8 +5,8 @@ import scrapy
 from locations.items import GeojsonPointItem
 
 
-class VueSpider(scrapy.Spider):
-    name = "vue"
+class VueCinemasSpider(scrapy.Spider):
+    name = "vue_cinemas"
     start_urls = ("https://www.myvue.com/data/locations/",)
 
     def parse(self, response):
