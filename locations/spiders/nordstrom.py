@@ -1,34 +1,44 @@
 import scrapy
+import json
 import re
 from locations.items import GeojsonPointItem
-class NordstromSpider(scrapy.Spider):
 
+
+class NordstromSpider(scrapy.Spider):
     name = "nordstrom"
     allowed_domains = ["shop.nordstrom.com"]
-    download_delay = 0.5
     start_urls = (
         'https://shop.nordstrom.com/c/sitemap-stores',
     )
+    custom_settings = {
+        'USER_AGENT': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.86 Safari/537.36',
+    }
 
-    def parse_stores(self, response):
-        lat = re.findall(r'\"Latitude\":\"[0-9-.]+' ,response.body_as_unicode())[0]
-        lng = re.findall(r'\"Longitude\":\"[0-9-.]+' ,response.body_as_unicode())[0]
-        lat = re.findall(r"[0-9.-]+$",lat)[0]
-        lng = re.findall(r"[0-9.-]+$",lng)[0]
-        properties = {
-            'addr_full': response.xpath('normalize-space(//span[@itemprop="streetAddress"]/text())').extract_first().replace(',' ,''),
-            'phone': response.xpath('normalize-space(//span[@itemprop="telephone"]/text())').extract_first(),
-            'city': response.xpath('normalize-space(//span[@itemprop="addressLocality"]/text())').extract_first().replace(',' ,''),
-            'state': response.xpath('normalize-space(//span[@itemprop="addressRegion"]/text())').extract_first(),
-            'postcode': response.xpath('normalize-space(//span[@itemprop="postalCode"]/text())').extract_first(),
-            'ref': response.xpath('normalize-space(//div[@class="store-number"]/text())').extract_first(),
-            'website': response.url,
-            'lat': float(lat),
-            'lon': float(lng),
-        }
-        yield GeojsonPointItem(**properties)
+    def parse_store(self, response):
+        # Handle broken links e.g. Nordstrom Rack Long Beach Exchange
+        if response.url == 'https://shop.nordstrom.com/stores':
+            return
+        else:
+            script_content = response.xpath('//script[contains(text(), "window.__INITIAL_CONFIG__")]/text()').extract_first()
+            data = json.loads(re.search(r'window.__INITIAL_CONFIG__ =(.*}})', script_content).group(1))
+            store_data = data['viewData']['stores']['stores'][0]
+
+            properties = {
+                'name': store_data["name"],
+                'ref': store_data["number"],
+                'addr_full': store_data["address"],
+                'city': store_data["city"],
+                'state': store_data["state"],
+                'postcode': store_data["zipCode"],
+                'phone': store_data.get("phone"),
+                'website': store_data.get("url") or response.url,
+                'lat': store_data.get("latitude"),
+                'lon': store_data.get("longitude"),
+            }
+
+            yield GeojsonPointItem(**properties)
 
     def parse(self, response):
-        urls = response.xpath('//a[contains(@href ,"shop.nordstrom.com/st/")]/@href').extract()
-        for path in urls:
-            yield scrapy.Request(response.urljoin(path), callback=self.parse_stores)
+        urls = response.xpath('//a[contains(@href ,"store-details")]/@href').extract()
+        for url in urls:
+            yield scrapy.Request(response.urljoin(url), callback=self.parse_store)
