@@ -16,6 +16,8 @@ and pass it over via the request object's meta.
 
 The opening hours are very inconsistent and contains lots of words.
 I tried to solve this by creating a dict of possible words, and mapping them appropriately.
+
+Update Nov-2019: PUT requests stopped working, GET requests now work
 """
 import scrapy
 import re
@@ -26,46 +28,39 @@ class HyVeeSpider(scrapy.Spider):
     name = "hyvee"
     allowed_domains = ["hy-vee.com"]
 
-    def start_requests(self):
-        """
-        We need to make the inital request use a PUT method
-        They have a serverside javascript detector logic in place
-        on GET and POST requests
-        :return:
-        """
-        url = 'https://www.hy-vee.com/stores/store-finder-results.aspx'
-        yield scrapy.Request(url, method='PUT', callback=self.parse)
+    start_urls = (
+        "https://www.hy-vee.com/stores/store-finder-results.aspx",
+    )
 
     def parse(self, response):
         cities = response.xpath('//select[@name="ctl00$cph_main_content$spuStoreFinderResults'
                                 '$spuStoreFinder$ddlCity"]/option/@value').extract()
         for city in cities:
-            params = "?zip=&state=&city=" + city + "&olfloral=False&olcatering=False&olgrocery=True" \
-                     "&olpre=False&olbakery=False&diet=False&chef=False"
+            params = "?zip=&state=&city=" + city #+ "&olfloral=False&olcatering=False&olgrocery=True" \
+                     #"&olpre=False&olbakery=False&diet=False&chef=False"
             yield scrapy.Request(
                                  response.urljoin(params),
-                                 method='PUT',
+                                 method='GET',
                                  callback=self.parse_links)
 
     def parse_links(self, response):
-        store_url = response.xpath('//a[@id="ctl00_cph_main_content_spuStoreFinderResults'
-                                   '_gvStores_ctl02_aStoreDetails"]/@href').extract()
-        if store_url:
-            latlon_js = [x for x in response.xpath('//script[@type="text/javascript"]/text()')
-                         .extract() if x.startswith('var map = new goo')][0]
-            latlon_find = re.search(r"google\.maps\.LatLng\((-?\d*\.\d*),\s(-?\d*\.\d*)\),\s*zoom:", latlon_js)
-            request = scrapy.Request(
-                                     response.urljoin(store_url[0]),
-                                     method='PUT',
-                                     callback=self.parse_details)
-            if latlon_find:
-                request.meta['latlon'] = latlon_find.groups()
-            yield request
+
+        latlon_js = [x for x in response.xpath('//script[@type="text/javascript"]/text()')
+            .extract() if x.startswith('var map = new goo')][0]
+
+        store_urls = response.xpath('//*[@storecode]/../a[contains(text(), "store details")]/@href').extract()
+        latlons = re.findall(r'position: new google.maps.LatLng\(([\d.-]+),\s?([\d.-]+)\)', latlon_js)
+
+        for url, latlon in zip(store_urls, latlons):
+            yield scrapy.Request(response.urljoin(url),
+                                 callback=self.parse_details,
+                                 meta={'latlon': latlon})
 
     def parse_details(self, response):
         raw_address = response.xpath('//div[@class="col-sm-6 util-padding-bottom-15"]/text()').extract()
-        address = raw_address[1].strip()
-        raw_city = raw_address[2].strip()
+        raw_address = list(filter(None, [l.strip() for l in raw_address]))
+        raw_city = raw_address.pop(-1)
+        address = " ".join(raw_address)
         match_city = re.search(r"^(.*),\s([A-Z]{2})\s([0-9]{5})$", raw_city).groups()
         city = match_city[0]
         state = match_city[1]
@@ -74,6 +69,8 @@ class HyVeeSpider(scrapy.Spider):
         website = response.url
         opening_hours = self.process_hours(response.xpath('//div[@id="page_content"]/p/text()').extract())
         link_id = website.split("s=")[-1]
+        names = response.xpath('//div[@id="page_content"]/h1/descendant-or-self::*/text()').extract()
+        name = " ".join(filter(None, [n.strip() for n in names]))
         # initialize latlon incase in a rare case we dont have it
         lat = ''
         lon = ''
@@ -81,6 +78,7 @@ class HyVeeSpider(scrapy.Spider):
             lat = float(response.meta['latlon'][0])
             lon = float(response.meta['latlon'][1])
         properties = {
+                      "name": name,
                       "addr_full": address,
                       "city": city,
                       "state": state,
