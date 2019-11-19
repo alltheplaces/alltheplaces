@@ -36,8 +36,7 @@ class HyVeeSpider(scrapy.Spider):
         cities = response.xpath('//select[@name="ctl00$cph_main_content$spuStoreFinderResults'
                                 '$spuStoreFinder$ddlCity"]/option/@value').extract()
         for city in cities:
-            params = "?zip=&state=&city=" + city #+ "&olfloral=False&olcatering=False&olgrocery=True" \
-                     #"&olpre=False&olbakery=False&diet=False&chef=False"
+            params = "?zip=&state=&city=" + city
             yield scrapy.Request(
                                  response.urljoin(params),
                                  method='GET',
