@@ -10,7 +10,7 @@ class AldiAUSpider(scrapy.Spider):
     start_urls = (
         'https://www.yellowmap.de/Presentation/AldiSued/en-AU/ResultList?LocX=&LocY=&HiddenBranchCode=&BranchCode=&Lux=120.146484375&Luy=1.4939713066293239&Rlx=152.138671875&Rly=-46.73986059969267&ZoomLevel=4',
     )
-    
+
     def parse(self, response):
         data = json.loads(response.body_as_unicode())
         container = data['Container']
@@ -25,9 +25,9 @@ class AldiAUSpider(scrapy.Spider):
             street = store.css('.resultItem-Street::text').extract_first()
             address1 = store.css('.resultItem-City::text').extract_first().split(',')
             hours_data = store.css('.openingHoursTable > tr')
-            
+
             pattern = r'(.*)(\s\w{1,3}\s)(.*)'
-            if len(address1) == 2: 
+            if len(address1) == 2:
                 city = address1[0].strip()
                 match = re.search(pattern, address1[1])
                 state = match.groups()[1]
@@ -68,10 +68,10 @@ class AldiAUSpider(scrapy.Spider):
             )
 
     def children(self, data):
-        json_data = re.search(r'(Tiles:) (\[{.*}\])', data)
+        json_data = re.search(r'Tiles:\s+(\[{.*}\])', data)
         if json_data:
-            return json.loads(json_data.groups()[1])
-        else: 
+            return json.loads(json_data.groups()[0])
+        else:
             return []
 
     def parse_data(self, data):
@@ -125,12 +125,3 @@ class AldiAUSpider(scrapy.Spider):
             int(h) + 12 if am_pm == 'P' else int(h),
             int(m),
         )
-
-
-
-            
-
-
-
-
-    

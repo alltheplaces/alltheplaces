@@ -51,5 +51,3 @@ class AldiESSpider(scrapy.Spider):
                     data[3] + ':' + data[4]
                 )
         return opening_hours
-
-        

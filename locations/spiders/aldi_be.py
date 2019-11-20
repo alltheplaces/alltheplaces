@@ -32,7 +32,7 @@ class AldiBESpider(scrapy.Spider):
             street = data[2]
             zipcode, city = re.search(r'(\d+) (.*)', data[3]).groups()
             hours_data = store.css('.openhrs')[0]
-            
+
             properties = {
                 'ref': ref,
                 'name': name.strip(),
@@ -62,12 +62,10 @@ class AldiBESpider(scrapy.Spider):
                 day = '{}-{}'.format(f_day, t_day)
             else:
                 day = WEEKDAYS[item_data[0][:2]]
-            
+
             opening_hours = opening_hours + '{} {}; '.format(
                 day,
                 item_data[1]
             )
-        
-        return opening_hours
 
-    
+        return opening_hours
