@@ -10,7 +10,7 @@ class AldiCHSpider(scrapy.Spider):
     start_urls = (
         'https://www.yellowmap.de/Presentation/AldiSued/de-CH/ResultList?LocX=&LocY=&HiddenBranchCode=&BranchCode=&Lux=6.2841796875&Luy=49.24629332459796&Rlx=10.755615234375&Rly=44.59829048984011&ZoomLevel=4',
     )
-    
+
     def parse(self, response):
         data = json.loads(response.body_as_unicode())
         container = data['Container']
@@ -25,9 +25,9 @@ class AldiCHSpider(scrapy.Spider):
             street = store.css('.resultItem-Street::text').extract_first()
             address1 = store.css('.resultItem-City::text').extract_first().split(',')
             hours_data = store.css('.openingHoursTable > tr')
-        
+
             (zipcode, city) = re.search(r'(\d+)(.*)', address1[0]).groups()
-            
+
             properties = {
                 'ref': ref,
                 'name': name,
@@ -54,10 +54,10 @@ class AldiCHSpider(scrapy.Spider):
             )
 
     def children(self, data):
-        json_data = re.search(r'(Tiles:) (\[{.*}\])', data)
+        json_data = re.search(r'Tiles:\s+(\[{.*}\])', data)
         if json_data:
-            return json.loads(json_data.groups()[1])
-        else: 
+            return json.loads(json_data.groups()[0])
+        else:
             return []
 
     def parse_data(self, data):
@@ -110,12 +110,3 @@ class AldiCHSpider(scrapy.Spider):
             int(h),
             int(m),
         )
-
-
-
-            
-
-
-
-
-    

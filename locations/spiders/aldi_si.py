@@ -20,7 +20,7 @@ class AldiSISpider(scrapy.Spider):
     start_urls = (
         'https://www.yellowmap.de/Presentation/AldiSued/sl-SI/ResultList?LocX=&LocY=&HiddenBranchCode=&BranchCode=&Lux=13.3154296875&Luy=47.56170075451973&Rlx=16.600341796875&Rly=45.213003555993964&ZoomLevel=4',
     )
-    
+
     def parse(self, response):
         data = json.loads(response.body_as_unicode())
         container = data['Container']
@@ -35,9 +35,9 @@ class AldiSISpider(scrapy.Spider):
             street = store.css('.resultItem-Street::text').extract_first()
             address1 = store.css('.resultItem-City::text').extract_first().split(',')[0]
             hours_data = store.css('.openingHoursTable > tr')
-            
+
             (zipcode, city) = re.search(r'(\d+)(.*)', address1).groups()
-        
+
             properties = {
                 'ref': ref,
                 'name': name,
@@ -64,10 +64,10 @@ class AldiSISpider(scrapy.Spider):
             )
 
     def children(self, data):
-        json_data = re.search(r'(Tiles:) (\[{.*}\])', data)
+        json_data = re.search(r'Tiles:\s+(\[{.*}\])', data)
         if json_data:
-            return json.loads(json_data.groups()[1])
-        else: 
+            return json.loads(json_data.groups()[0])
+        else:
             return []
 
     def parse_data(self, data):
@@ -96,7 +96,7 @@ class AldiSISpider(scrapy.Spider):
                     day,
                     'closed'
                 )
-            else :               
+            else :
                 f_hour_text = hours.split('-')[0].strip()
                 t_hour_text = hours.split('-')[1].strip()
                 f_hour = self.normalize_time(f_hour_text)

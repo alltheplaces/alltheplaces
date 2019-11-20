@@ -10,7 +10,7 @@ class AldiUSSpider(scrapy.Spider):
     start_urls = (
         'https://www.yellowmap.de/Presentation/AldiSued/en-US/ResultList?LocX=&LocY=&Lux=-115.224609375&Luy=58.17070248348609&Rlx=-62.666015625&Rly=17.14079039331665&ZoomLevel=4',
     )
-    
+
     def parse(self, response):
         data = json.loads(response.body_as_unicode())
         container = data['Container']
@@ -25,9 +25,9 @@ class AldiUSSpider(scrapy.Spider):
             street = store.css('.resultItem-Street::text').extract_first()
             address1 = store.css('.resultItem-City::text').extract_first().split(',')
             hours_data = store.css('.openingHoursTable > tr')
-            
+
             pattern = r'(.*?)(\s|,\s)([0-9]{1,5})'
-            if len(address1) == 2: 
+            if len(address1) == 2:
                 city = address1[0]
                 match = re.search(pattern, address1[1].strip())
                 state = match.groups()[0]
@@ -64,14 +64,14 @@ class AldiUSSpider(scrapy.Spider):
             )
 
     def children(self, data):
-        json_data = re.search(r'(Tiles:) (\[{.*}\])', data)
+        json_data = re.search(r'Tiles:\s+(\[{.*}\])', data)
         if json_data:
-            return json.loads(json_data.groups()[1])
-        else: 
+            return json.loads(json_data.groups()[0])
+        else:
             return []
 
     def parse_data(self, data):
-        data = scrapy.http.HtmlResponse(url = '', body = data, encoding='utf-8')
+        data = scrapy.http.HtmlResponse(url='', body=data, encoding='utf-8')
         stores = data.css('.resultItem')
         if stores:
             return stores
@@ -121,12 +121,3 @@ class AldiUSSpider(scrapy.Spider):
             int(h) + 12 if am_pm == 'P' else int(h),
             int(m),
         )
-
-
-
-            
-
-
-
-
-    
