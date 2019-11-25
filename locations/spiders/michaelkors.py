@@ -16,11 +16,12 @@ class MichaelkorsSpider(scrapy.Spider):
         if (len(ref) > 0):
             ref = ref[0].split('.')[0]
         properties = {
-            'addr_full': " ".join(response.xpath('//span[@itemprop="streetAddress"]/span/text()').extract()),
+            'addr_full': response.xpath('//meta[@itemprop="streetAddress"]/@content').extract_first(),
             'phone': response.xpath(
                 'normalize-space(//span[@itemprop="telephone"]/text())').extract_first(),
-            'city': response.xpath('normalize-space(//span[@itemprop="addressLocality"]/text())').extract_first(),
+            'city': response.xpath('//meta[@itemprop="addressLocality"]/@content').extract_first(),
             'state': response.xpath('normalize-space(//abbr[@itemprop="addressRegion"]/text())').extract_first(),
+            'country': response.xpath('//abbr[@itemprop="addressCountry"]/text()').extract_first(),
             'postcode': response.xpath('normalize-space(//span[@itemprop="postalCode"]/text())').extract_first(),
             'ref': ref,
             'website': response.url,
