@@ -11,10 +11,6 @@ class FiveBelowSpider(scrapy.Spider):
         "https://locations.fivebelow.com/sitemap.xml",
     )
 
-    def start_requests(self):
-        url = self.start_urls[0]
-        yield scrapy.Request(url=url, callback=self.parse)
-
     def parse(self, response):
         response.selector.remove_namespaces()
         store_urls = response.xpath('//url/loc/text()').extract()
@@ -48,7 +44,7 @@ class FiveBelowSpider(scrapy.Spider):
             "city": postaladdress.xpath('//*[@itemprop="addressLocality"]/@content').get(),
             "state": postaladdress.xpath('//*[@itemprop="addressRegion"]/text()').get(),
             "postcode": postaladdress.xpath('//*[@itemprop="postalCode"]/text()').get(),
-            "country":  postaladdress.xpath('//*[@itemprop="addressCountry"]/text()').get(),
+            "country": postaladdress.xpath('//*[@itemprop="addressCountry"]/text()').get(),
             "lon": float(geocoordinates.xpath('//*/meta[@itemprop="longitude"]/@content').get()),
             "lat": float(geocoordinates.xpath('//*/meta[@itemprop="latitude"]/@content').get()),
             "phone": postaladdress.xpath('//*[@itemprop="telephone"]/text()').get(),
