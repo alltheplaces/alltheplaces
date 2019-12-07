@@ -17,35 +17,6 @@ DAY_MAPPING = {
 }
 
 
-def remove_seconds(time_str):
-    # Time specifications may appear as HH:MM:SS.  If so, remove the ":SS".
-    if time_str.count(":") == 2:
-        time_str = time_str.rsplit(":", 1)[0]
-
-    return time_str
-
-
-def adjust_closing_time(time_str):
-    if time_str == "00:00":
-        time_str = "23:59"
-
-    return time_str
-
-
-def parse_hours(hours_json):
-    opening_hours = OpeningHours()
-
-    for spec in hours_json:
-        for day in spec['dayOfWeek']:
-            opening_hours.add_range(
-                day=DAY_MAPPING[day],
-                open_time=remove_seconds(spec['opens']),
-                close_time=adjust_closing_time(remove_seconds(spec['closes']))
-            )
-
-    return opening_hours.as_opening_hours()
-
-
 class GoldenCorralSpider(scrapy.Spider):
     name = "golden_corral"
     allowed_domains = ["goldencorral.com"]
@@ -110,3 +81,34 @@ class GoldenCorralSpider(scrapy.Spider):
                 return data
 
         return
+
+
+def adjust_closing_time(time_str):
+    if time_str == "00:00":
+        time_str = "23:59"
+
+    return time_str
+
+
+def parse_hours(hours_json):
+    opening_hours = OpeningHours()
+
+    for spec in hours_json:
+        for day in spec['dayOfWeek']:
+            opening_hours.add_range(
+                day=DAY_MAPPING[day],
+                open_time=remove_seconds(spec['opens']),
+                close_time=adjust_closing_time(remove_seconds(spec['closes']))
+            )
+
+    return opening_hours.as_opening_hours()
+
+
+def remove_seconds(time_str):
+    # Time specifications may appear as HH:MM:SS.  If so, remove the ":SS".
+    if time_str.count(":") == 2:
+        time_str = time_str.rsplit(":", 1)[0]
+
+    return time_str
+    
+
