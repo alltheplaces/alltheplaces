@@ -1,5 +1,4 @@
 import json
-import re
 import scrapy
 
 from locations.hours import OpeningHours
@@ -45,8 +44,8 @@ class GoldenCorralSpider(scrapy.Spider):
             # In case we reached a URL that does not provide details of an individual store
             return
 
-        data_address = data['address']
-        data_geo = data['geo']
+        data_address = data.get('address')
+        data_geo = data.get('geo')
 
         if not data_address or not data_geo:
             return
@@ -72,8 +71,8 @@ class GoldenCorralSpider(scrapy.Spider):
 
     def get_json_data(self, response):
         # The pages for each location include JSON data in several <script /> blocks.
-        # The metadata for the location is in the block that follows the SelfStorage
-        # schema (see http://schema.org/SelfStorage).
+        # The metadata for the location is in the block that follows the Restaurant
+        # schema (see http://schema.org/Restaurant).
         all_ldjson = response.xpath('//*/script[@type="application/ld+json"]/text()')
         for ldjson in all_ldjson:
             data = json.loads(ldjson.get())
