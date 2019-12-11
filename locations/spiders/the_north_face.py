@@ -11,7 +11,7 @@ from locations.hours import OpeningHours
 
 class TheNorthFaceSpider(scrapy.Spider):
     name = "the_north_face"
-    allowed_domains = ["thenorthface.com"]
+    allowed_domains = ["hosted.where2getit.com"]
 
     def start_requests(self):
         url = 'https://hosted.where2getit.com/northface/2015/rest/locatorsearch?like=0.8704346432892842&lang=en_EN'
