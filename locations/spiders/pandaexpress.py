@@ -29,7 +29,7 @@ class PandaSpider(scrapy.Spider):
     def parseState(self, response):
         state_data = json.loads(response.body_as_unicode())
 
-        for store in state_data:
+        for store in state_data["List"]:
             properties = {
                 'addr_full': store['Address'],
                 'city': store["City"],
