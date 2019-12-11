@@ -82,7 +82,10 @@ class ArbysSpider(scrapy.Spider):
     def get_store_info(self, store):
 
         hours = store.xpath('.//span[@class="c-location-hours-today js-location-hours"]/@data-days').extract_first()
-        opening_hours = self.get_hours(json.loads(hours)) or ''
+        if hours:
+            opening_hours = self.get_hours(json.loads(hours))
+        else:
+            opening_hours = None
 
         props = {
             'addr_full': store.xpath('normalize-space(.//span[@class="c-address-street-1"]/text())').extract_first(),
@@ -94,8 +97,8 @@ class ArbysSpider(scrapy.Spider):
             'ref': store.xpath('.//div[@class="logistics-detail-store-id hidden-xs hidden-sm"]/text()').extract_first(),
             'website': store.url,
             'opening_hours': opening_hours,
-            'lat': float(store.xpath('.//meta[@itemprop="latitude"]/@content').extract_first()) or '',
-            'lon': float(store.xpath('.//meta[@itemprop="longitude"]/@content').extract_first()) or '',
+            'lat': float(store.xpath('.//meta[@itemprop="latitude"]/@content').extract_first()),
+            'lon': float(store.xpath('.//meta[@itemprop="longitude"]/@content').extract_first()),
         }
         return GeojsonPointItem(**props)
 
