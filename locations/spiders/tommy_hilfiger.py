@@ -40,7 +40,7 @@ class TommyHilfigerSpider(scrapy.Spider):
         )
 
     def parse(self, response):
-        stores = json.loads(response.body)
+        stores = json.loads(response.body_as_unicode())
 
         for store in stores["response"]["collection"]:
             properties = {
