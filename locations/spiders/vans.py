@@ -42,7 +42,10 @@ class VansSpider(scrapy.Spider):
                 'country': Selector(text=poi).xpath('//country/text()').get(),
                 'lat': Selector(text=poi).xpath('//latitude/text()').get(),
                 'lon': Selector(text=poi).xpath('//longitude/text()').get(),
-                'phone': Selector(text=poi).xpath('//phone/text()').get()
+                'phone': Selector(text=poi).xpath('//phone/text()').get(),
+                'extras': {
+                    'brand': "Vans"
+                }
             }
 
             yield GeojsonPointItem(**properties)
