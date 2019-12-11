@@ -1,130 +1,80 @@
 # -*- coding: utf-8 -*-
 import scrapy
+import json
 import re
-
+from locations.hours import OpeningHours
 from locations.items import GeojsonPointItem
+
+STATES = ["AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DC", "DE", "FL", "GA",
+          "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD",
+          "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ",
+          "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC",
+          "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"]
+
+DAYS_NAME = {
+    'MONDAY': 'Mo',
+    'TUESDAY': 'Tu',
+    'WEDNESDAY': 'We',
+    'THURSDAY': 'Th',
+    'FRIDAY': 'Fr',
+    'SATURDAY': 'Sa',
+    'SUNDAY': 'Su'
+}
+
+HEADERS = {'Accept': 'application/json'}
 
 
 class ChickFilASpider(scrapy.Spider):
     name = "chickfila"
-    allowed_domains = ["www.chick-fil-a.com"]
-    start_urls = (
-        'https://www.chick-fil-a.com/Locations/Browse',
-    )
+    allowed_domains = ["chick-fil-a.com", "yext-cdn.com"]
 
-    def store_hours(self, hours_elem):
-        dow_elems = hours_elem.xpath('dt/text()')
-        time_elems = hours_elem.xpath('dd/text()')
+    def start_requests(self):
+        for state in STATES:
+            yield scrapy.Request(
+                'https://locator.chick-fil-a.com.yext-cdn.com/search?per=50&per=10&offset=0&q='+state, headers=HEADERS
+                )
 
-        day_groups = []
-        this_day_group = None
-        for dow_elem, time_elem in zip(dow_elems, time_elems):
-            dow = dow_elem.extract()
-            timerange = time_elem.extract()
+    def parse_hours(self, hours):
+        opening_hours = OpeningHours()
 
-            if timerange == 'Closed':
-                continue
+        for hour in hours:
 
-            dow_split = dow.split(' - ')
-            if len(dow_split) == 2:
-                fm_dow = dow_split[0][:2]
-                to_dow = dow_split[1][:2]
+            if hour["isClosed"]:
+                pass
             else:
-                fm_dow = dow_split[0][:2]
-                to_dow = dow_split[0][:2]
+                day = DAYS_NAME[hour["day"]]
+                open_time = str(hour["intervals"][0]["start"])
+                close_time = str(hour["intervals"][0]["end"])
+                opening_hours.add_range(day=day, open_time=open_time, close_time=close_time, time_format="%H%M")
 
-            match = re.search(r'^(\d{1,2}):(\d{2}) ([APM]{2})-(\d{1,2}):(\d{2}) ([APM]{2})$', timerange)
-            (f_hr, f_min, f_ampm, t_hr, t_min, t_ampm) = match.groups()
-
-            f_hr = int(f_hr)
-            if f_ampm == 'PM':
-                f_hr += 12
-            elif f_ampm == 'AM' and f_hr == 12:
-                f_hr = 0
-            t_hr = int(t_hr)
-            if t_ampm == 'PM':
-                t_hr += 12
-            elif t_ampm == 'AM' and t_hr == 12:
-                t_hr = 0
-
-            hours = '{:02d}:{}-{:02d}:{}'.format(
-                f_hr,
-                f_min,
-                t_hr,
-                t_min,
-            )
-
-            if not this_day_group:
-                this_day_group = dict(from_day=fm_dow, to_day=to_dow, hours=hours)
-            elif this_day_group['hours'] == hours:
-                this_day_group['to_day'] = to_dow
-            elif this_day_group['hours'] != hours:
-                day_groups.append(this_day_group)
-                this_day_group = dict(from_day=fm_dow, to_day=to_dow, hours=hours)
-        day_groups.append(this_day_group)
-
-        if len(day_groups) == 1:
-            opening_hours = day_groups[0]['hours']
-            if opening_hours == '07:00-07:00':
-                return '24/7'
-
-        opening_hours = ''
-        for day_group in day_groups:
-            if day_group['from_day'] == day_group['to_day']:
-                opening_hours += '{from_day} {hours}; '.format(**day_group)
-            else:
-                opening_hours += '{from_day}-{to_day} {hours}; '.format(**day_group)
-        opening_hours = opening_hours[:-2]
-
-        return opening_hours
-
-    def address(self, response):
-        addr_text = response.xpath('//div[@class="location-details"]/p[@class="address"]/text()').extract_first()
-        addr_text = addr_text.strip().replace('\n', ' ')
-
-        addr_split = addr_text.split(' , ')
-        addr_split = [a.strip() for a in addr_split]
-        if len(addr_split) == 4:
-            (street, street2, city, statezip) = addr_split
-        else:
-            (street, city, statezip) = addr_split
-
-        (state, postcode) = list(filter(None, statezip.split(' ')))
-
-        return {
-            'addr_full': street,
-            'city': city,
-            'state': state,
-            'postcode': postcode,
-        }
+        return opening_hours.as_opening_hours()
 
     def parse(self, response):
-        for state_elem in response.xpath('//article/ul/li/a/@href'):
-            yield scrapy.Request(
-                response.urljoin(state_elem.extract()),
-                callback=self.parse_state,
-            )
+        stores = json.loads(response.body_as_unicode())
 
-    def parse_state(self, response):
-        for city_elem in response.xpath('//div[@class="location"]/h2/a/@href'):
-            yield scrapy.Request(
-                response.urljoin(city_elem.extract()),
-                callback=self.parse_location,
-            )
+        stores = stores["response"]["entities"]
 
-    def parse_location(self, response):
-        ref = response.xpath('//a[@class="btn set-as-location"]/@data-loc-id').extract_first() \
-              or response.request.url
+        if stores:
 
-        properties = {
-            "phone": response.xpath('//div[@class="module"]/p/a/text()').extract_first(),
-            "ref": ref,
-            "name": response.xpath('//div[@class="location-details"]/h1/text()').extract_first(),
-            "opening_hours": self.store_hours(response.xpath('//dl[@class="hours"]')[0]),
-            "lon": float(response.xpath('//span[@id="currentlocdistanceid"]/@data-long').extract_first()),
-            "lat": float(response.xpath('//span[@id="currentlocdistanceid"]/@data-lat').extract_first()),
-        }
+            for store in stores:
 
-        properties.update(self.address(response))
+                properties = {
+                    'name': store["profile"]["c_locationName"],
+                    'addr_full': " ".join([store["profile"]["address"]["line1"], store.get("line2", ""), store.get("line3", "")]).strip(),
+                    'city': store["profile"]["address"]["city"],
+                    'state': store["profile"]["address"]["region"],
+                    'postcode': store["profile"]["address"]["postalCode"],
+                    'phone': store["profile"].get("c_preferredPhone"),
+                    'website': store["profile"]["websiteUrl"],
+                    'ref': store["distance"]["id"],
+                    'lat': store["profile"]["displayCoordinate"]["lat"],
+                    'lon': store["profile"]["displayCoordinate"]["long"],
+                }
+                opening_hours = self.parse_hours(store["profile"]["hours"]["normalHours"])
+                properties['opening_hours'] = opening_hours
 
-        yield GeojsonPointItem(**properties)
+                yield GeojsonPointItem(**properties)
+
+            offset = int(re.search(r'offset=(\d+)', response.url).groups()[0])
+            url = response.urljoin(response.url.replace("offset={}".format(offset), "offset={}".format(offset + 50)))
+            yield scrapy.Request(url, headers=HEADERS)
