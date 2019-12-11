@@ -25,7 +25,6 @@ class OmniHotels(scrapy.Spider):
         try:
             latlon = re.search('(@.*,)', response.xpath('//div[@class="plp-hotel-content-container"]/p/a/@href').extract_first()).group(1)
             the_state = response.xpath('//div[@class="plp-hotel-content-container"]/p/a//text()[3]').extract_first().rstrip()
-            print(the_state)
             if the_state in ca_states:
                 the_country = 'CA'
             elif the_state in mx_states:
