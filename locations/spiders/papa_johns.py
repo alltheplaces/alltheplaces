@@ -47,6 +47,13 @@ class PapaJohnsSpider(scrapy.Spider):
         else:
             city = response.xpath('//address[@class="c-address"]/div[2]/span/text()').extract_first()
 
+        if response.xpath('//address[@class="c-address"]/div[2]/abbr/text()').extract_first() is not None:
+            the_state = response.xpath('//address[@class="c-address"]/div[2]/abbr/text()').extract_first()
+            the_postal = response.xpath('//address[@class="c-address"]/div[2]/span[2]/text()').extract_first()
+        else:
+            the_state = response.xpath('//address[@class="c-address"]/div[3]/abbr/text()').extract_first()
+            the_postal = response.xpath('//address[@class="c-address"]/div[3]/span[2]/text()').extract_first()
+
         if '/united-states/' in response.url:
             country = 'US'
         elif '/canada/' in response.url:
@@ -60,8 +67,8 @@ class PapaJohnsSpider(scrapy.Spider):
             'addr_full': response.xpath('//address[@class="c-address"]/div[1]/span/text()').extract_first(),
             'phone': response.xpath('//div[@class="c-phone-number c-phone-main-number"]/a/text()').extract_first(),
             'city': city,
-            'postcode': response.xpath('//address[@class="c-address"]/div[2]/span[2]/text()').extract_first(),
-            'state': response.xpath('//address[@class="c-address"]/div[2]/abbr/text()').extract_first(),
+            'postcode': the_postal,
+            'state': the_state,
             'opening_hours': opening_hours,
             'country': country,
             'lat': float(response.xpath('//span[@class="coordinates"]/meta[1]/@content').extract_first()),
