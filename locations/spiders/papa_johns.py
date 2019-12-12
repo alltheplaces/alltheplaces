@@ -47,6 +47,11 @@ class PapaJohnsSpider(scrapy.Spider):
         else:
             city = response.xpath('//address[@class="c-address"]/div[2]/span/text()').extract_first()
 
+        if 'united-states' in response.url:
+            country = 'US'
+        else:
+            country = 'CA'
+
         props = {
             'ref': response.xpath('//main/@itemid').extract_first().split('#')[1],
             'website': response.url,
@@ -56,6 +61,7 @@ class PapaJohnsSpider(scrapy.Spider):
             'postcode': response.xpath('//address[@class="c-address"]/div[2]/span[2]/text()').extract_first(),
             'state': response.xpath('//address[@class="c-address"]/div[2]/abbr/text()').extract_first(),
             'opening_hours': opening_hours,
+            'country': country,
             'lat': float(response.xpath('//span[@class="coordinates"]/meta[1]/@content').extract_first()),
             'lon': float(response.xpath('//span[@class="coordinates"]/meta[2]/@content').extract_first()),
         }
