@@ -47,10 +47,12 @@ class PapaJohnsSpider(scrapy.Spider):
         else:
             city = response.xpath('//address[@class="c-address"]/div[2]/span/text()').extract_first()
 
-        if 'united-states' in response.url:
+        if '/united-states/' in response.url:
             country = 'US'
-        else:
+        elif '/canada/' in response.url:
             country = 'CA'
+        else:
+            country = ''
 
         props = {
             'ref': response.xpath('//main/@itemid').extract_first().split('#')[1],
