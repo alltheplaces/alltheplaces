@@ -19,7 +19,7 @@ class VansSpider(scrapy.Spider):
     def parse(self, response):
         xxs = Selector(response)
 
-        pois = xxs.select('//poi').extract()
+        pois = xxs.xpath('//poi').extract()
 
         for poi in pois:
             state = Selector(text=poi).xpath('//state/text()').get()
