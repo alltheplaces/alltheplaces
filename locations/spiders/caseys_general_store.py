@@ -11,7 +11,7 @@ from datetime import datetime
 Seven_Days = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su']
 
 
-class Caseys_general_storeSpider(scrapy.Spider):
+class CaseysGeneralStoreSpider(scrapy.Spider):
     name = "caseys_general_store"
     allowed_domains = ["caseys.com"]
 
