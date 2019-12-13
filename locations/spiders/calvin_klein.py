@@ -66,13 +66,22 @@ class CalvinKleinSpider(scrapy.Spider):
         data = json.loads(response.body_as_unicode())
 
         for store in data["PhysicalStore"]:
+            try:
+                state = store["stateOrProvinceName"]
+            except:
+                state = "Europe"
+            try:
+                postal = store["postalCode"].strip()
+            except:
+                postal = ""
+
             properties = {
                 'ref': store["storeName"],
                 'name': 'Calvin Klein',
                 'addr_full': store["addressLine"][0],
                 'city': store["city"],
-                'state': store["stateOrProvinceName"],
-                'postcode': store["postalCode"].strip(),
+                'state': state,
+                'postcode': postal,
                 'country': store["country"],
                 'lat': store["latitude"],
                 'lon': store["longitude"]
