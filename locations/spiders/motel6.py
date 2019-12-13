@@ -15,6 +15,10 @@ class Motel6Spider(scrapy.Spider):
         storeids = idata.keys()
         URL = 'https://www.motel6.com/var/g6/hotel-information/en/{}.json'
         for storeid in storeids:
+            try:
+                int(storeid)
+            except ValueError:
+                continue
             yield scrapy.Request(URL.format(storeid), callback=self.parse_hotel)
 
     def parse_hotel(self, response):
