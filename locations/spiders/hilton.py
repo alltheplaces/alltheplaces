@@ -177,19 +177,22 @@ class HiltonSpider(scrapy.Spider):
             }
 
         else:
-            lat, lon = response.xpath('//meta[@name="geo.position"]/@content').extract_first().split(';')
+            try:
+                lat, lon = response.xpath('//meta[@name="geo.position"]/@content').extract_first().split(';')
+            except:
+                lat, lon = None, None
 
             properties = {
                 "name": response.xpath('//meta[@name="og:title"]/@content').extract_first(),
                 "ref": re.search(r'.*/(.*)/(?:index.html)?', response.url).group(1),
                 "phone": response.xpath('//span[@class="property-telephone"]/text()').extract_first(),
-                "addr_full": response.xpath('//span[@class="property-streetAddress"]/text()').extract_first().strip(),
+                "addr_full": (response.xpath('//span[@class="property-streetAddress"]/text()').extract_first() or "").strip(),
                 "city": response.xpath('//span[@class="property-addressLocality"]/text()').extract_first(),
                 "state": response.xpath('//span[@class="property-addressRegion"]/text()').extract_first(),
                 "country": response.xpath('//span[@class="property-addressCountry"]/text()').extract_first(),
                 "postcode": response.xpath('//span[@class="property-postalCode"]/text()').extract_first(),
-                "lat": float(lat),
-                "lon": float(lon),
+                "lat": float(lat) if lat else None,
+                "lon": float(lon) if lon else None,
                 "website": response.url
             }
 
