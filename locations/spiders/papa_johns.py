@@ -1,82 +1,128 @@
 # -*- coding: utf-8 -*-
 import scrapy
-import re
+import json
 
 from locations.items import GeojsonPointItem
+from locations.hours import OpeningHours
+
+day_map = {'MONDAY': 'Mo', 'TUESDAY': 'Tu', 'WEDNESDAY': 'We', 'THURSDAY': 'Th',
+           'FRIDAY': 'Fr', 'SATURDAY': 'Sa', 'SUNDAY': 'Su'}
 
 
 class PapaJohnsSpider(scrapy.Spider):
 
     name = "papa_johns"
-    allowed_domains = ["www.papajohns.com", ]
+    allowed_domains = ["papajohns.com", ]
 
     start_urls = (
-        'https://www.papajohns.com/locations/',
+        'https://locations.papajohns.com/',
     )
     download_delay = 0.2
 
     def parse_hours(self, hours):
-
-        reversed_hours = {}
-
         if not hours:
             return ''
-
-        for day_hour in zip(*[iter(hours)]*2):
-            short_day, hours = day_hour[0].title()[:2], day_hour[1]
-            from_hr, to_hr = [hr.strip() for hr in hours.split('—')]
-
-            short_frm_hr = from_hr.replace('AM', '').strip()
-            if re.search('PM', to_hr):
-                hour, minute = to_hr.replace('PM', '').strip().split(':')
-                short_to_hr = '{}:{}'.format(str(int(hour)+12), minute)
-            else:
-                times = re.findall(r"([\d]+:[\d]+)",to_hr)
-                if times:
-                    short_to_hr = times[0]
-            final_day_hour = '{}-{}'.format(short_frm_hr, short_to_hr)
-
-            reversed_hours.setdefault(final_day_hour, [])
-            reversed_hours[final_day_hour].append(short_day)
-
-        if len(reversed_hours) == 1 and list(reversed_hours)[0] == '00:00-24:00':
-            return '24/7'
-
-        opening_hours = []
-
-        for key, value in reversed_hours.items():
-            if len(value) == 1:
-                opening_hours.append('{} {}'.format(value[0], key))
-            else:
-                opening_hours.append(
-                    '{}-{} {}'.format(value[0], value[-1], key))
-
-        return "; ".join(opening_hours)
+        try:
+            opening_hours = OpeningHours()
+            the_hours = json.loads(hours[0])
+            for day in the_hours:
+                the_day = day_map[day['day']]
+                the_start = str(day['intervals'][0]['start'])
+                the_end = str(day['intervals'][0]['end'])
+                if the_start == '0':
+                    the_start = '000'
+                if the_end == '0':
+                    the_end = '000'
+                opening_hours.add_range(day=the_day, open_time=the_start, close_time=the_end, time_format='%H%M')
+            return opening_hours.as_opening_hours()
+        except IndexError:
+            return ''
 
     def parse_store(self, response):
-        hours = response.xpath('//div[@class="hours-carryout"]/p[starts-with(@class, "schedule")]//text()').extract()
+        hours = response.xpath('//div[@class="c-location-hours-details-wrapper js-location-hours"]/@data-days').extract()
         opening_hours = self.parse_hours(hours)
 
+        if response.xpath('//address[@class="c-address"]/div[3]/span/text()').extract_first() is not None:
+            city = response.xpath('//address[@class="c-address"]/div[3]/span/text()').extract_first()
+        else:
+            city = response.xpath('//address[@class="c-address"]/div[2]/span/text()').extract_first()
+
+        if response.xpath('//address[@class="c-address"]/div[2]/abbr/text()').extract_first() is not None:
+            the_state = response.xpath('//address[@class="c-address"]/div[2]/abbr/text()').extract_first()
+            the_postal = response.xpath('//address[@class="c-address"]/div[2]/span[2]/text()').extract_first()
+        else:
+            the_state = response.xpath('//address[@class="c-address"]/div[3]/abbr/text()').extract_first()
+            the_postal = response.xpath('//address[@class="c-address"]/div[3]/span[2]/text()').extract_first()
+
+        if '/united-states/' in response.url:
+            country = 'US'
+        elif '/canada/' in response.url:
+            country = 'CA'
+        else:
+            country = ''
+
         props = {
-            'ref': response.xpath('//p[@class="store-number"]/strong/text()').extract_first(),
+            'ref': response.xpath('//main/@itemid').extract_first().split('#')[1],
             'website': response.url,
-            'addr_full': response.xpath('//div[@class="streetAddress"]/text()').extract_first(),
-            'phone': response.xpath('//span[@itemprop="telephone"]/a/text()').extract_first(),
-            'city': response.xpath('//span[@itemprop="addressLocality"]/text()').extract_first(),
-            'postcode': response.xpath('//span[@itemprop="postalCode"]/text()').extract_first(),
-            'state': response.xpath('//span[@itemprop="addressRegion"]/text()').extract_first(),
+            'addr_full': response.xpath('//address[@class="c-address"]/div[1]/span/text()').extract_first(),
+            'phone': response.xpath('//div[@class="c-phone-number c-phone-main-number"]/a/text()').extract_first(),
+            'city': city,
+            'postcode': the_postal,
+            'state': the_state,
             'opening_hours': opening_hours,
-            'lat': float(response.xpath('//meta[@itemprop="latitude"]/@content').extract_first()),
-            'lon': float(response.xpath('//meta[@itemprop="longitude"]/@content').extract_first()),
+            'country': country,
+            'lat': float(response.xpath('//span[@class="coordinates"]/meta[1]/@content').extract_first()),
+            'lon': float(response.xpath('//span[@class="coordinates"]/meta[2]/@content').extract_first()),
         }
 
         yield GeojsonPointItem(**props)
 
-    def parse(self, response):
-        stores = response.xpath('//h5[@class="street-address"]/a/@href').extract()
+    def parse_within_city(self, response):
+        stores = response.xpath('//h2[@class="Teaser-title"]/a/@href').extract()
 
         for store in stores:
             yield scrapy.Request(
                 response.urljoin(store),
                 callback=self.parse_store
+            )
+
+    def parse_city(self, response):
+        cities = response.xpath('//li[@class="Directory-listItem"]/a/@href').extract()
+
+        for city in cities:
+            determine_multi_state = city.split('/')
+            if len(determine_multi_state) == 4:
+                yield scrapy.Request(
+                    response.urljoin(city),
+                    callback=self.parse_within_city
+                )
+            else:
+                yield scrapy.Request(
+                    response.urljoin(city),
+                    callback=self.parse_store
+                )
+
+    def parse_state(self, response):
+        states = response.xpath('//li[@class="Directory-listItem"]/a/@href').extract()
+
+        for state in states:
+            determine_multi_state = state.split('/')
+            if len(determine_multi_state) <= 5:
+                yield scrapy.Request(
+                    response.urljoin(state),
+                    callback=self.parse_city
+                )
+            else:
+                yield scrapy.Request(
+                    response.urljoin(state),
+                    callback=self.parse_store
+                )
+
+    def parse(self, response):
+        countries = response.xpath('//li[@class="Directory-listItem"]/a/@href').extract()
+
+        for country in countries:
+            yield scrapy.Request(
+                response.urljoin(country),
+                callback=self.parse_state
             )
