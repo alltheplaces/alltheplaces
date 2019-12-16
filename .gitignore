@@ -92,3 +92,8 @@ ENV/
 .idea
 
 .DS_Store
+
+*json
+*geojson
+*zip
+commands.txt
