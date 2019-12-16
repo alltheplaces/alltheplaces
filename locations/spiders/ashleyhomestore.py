@@ -103,8 +103,9 @@ class AshleyHomeStoreSpider(scrapy.Spider):
                     continue
                 open_time, close_time = open_close.split('-')
                 opening_hours.add_range(day=day[:2],
-                                        open_time=datetime.datetime.strptime(open_time, '%I:%M%p').strftime('%H:%M'),
-                                        close_time=datetime.datetime.strptime(close_time, '%I:%M%p').strftime('%H:%M'))
+                                        open_time=open_time,
+                                        close_time=close_time,
+                                        time_format='%I:%M%p')
             except:
                 continue
         opening_hours = opening_hours.as_opening_hours()
