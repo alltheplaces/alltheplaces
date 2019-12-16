@@ -1,7 +1,13 @@
 #!/usr/bin/env bash
 
-if [ -f "${S3_BUCKET}" ]; then
+if [ -z "${S3_BUCKET}" ]; then
     (>&2 echo "Please set S3_BUCKET environment variable")
+    exit 1
+fi
+
+
+if [ -z "${GITHUB_WORKSPACE}" ]; then
+    (>&2 echo "Please set GITHUB_WORKSPACE environment variable")
     exit 1
 fi
 
@@ -20,10 +26,11 @@ mkdir -p "${SPIDER_RUN_DIR}"
 (>&2 echo "Write out a file with scrapy commands to parallelize")
 for spider in $(scrapy list)
 do
-    echo "--output ${SPIDER_RUN_DIR}/output/${spider}.geojson --output-format geojson --logfile ${SPIDER_RUN_DIR}/logs/${spider}.log --loglevel ERROR --set TELNETCONSOLE_ENABLED=0 --set CLOSESPIDER_TIMEOUT=${SPIDER_TIMEOUT} ${spider}" >> ${SPIDER_RUN_DIR}/commands.txt
+    echo "--output ${SPIDER_RUN_DIR}/output/${spider}.geojson --output-format geojson --logfile ${SPIDER_RUN_DIR}/logs/${spider}.log --loglevel ERROR --set TELNETCONSOLE_ENABLED=0 --set CLOSESPIDER_TIMEOUT=${SPIDER_TIMEOUT} --set LOGSTATS_FILE=${SPIDER_RUN_DIR}/stats/${spider}.json ${spider}" >> ${SPIDER_RUN_DIR}/commands.txt
 done
 
 mkdir -p ${SPIDER_RUN_DIR}/logs
+mkdir -p ${SPIDER_RUN_DIR}/stats
 mkdir -p ${SPIDER_RUN_DIR}/output
 SPIDER_COUNT=$(wc -l < ${SPIDER_RUN_DIR}/commands.txt | tr -d ' ')
 

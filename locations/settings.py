@@ -64,11 +64,16 @@ TELNETCONSOLE_ENABLED = False
 #    'locations.middlewares.MyCustomDownloaderMiddleware': 543,
 #}
 
+
 # Enable or disable extensions
 # See http://scrapy.readthedocs.org/en/latest/topics/extensions.html
 #EXTENSIONS = {
 #    'scrapy.extensions.telnet.TelnetConsole': None,
 #}
+
+EXTENSIONS = {
+    'locations.extensions.LogStatsExtension': 101,
+}
 
 # Configure item pipelines
 # See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html
@@ -76,6 +81,8 @@ ITEM_PIPELINES = {
    'locations.pipelines.DuplicatesPipeline': 200,
    'locations.pipelines.ApplySpiderNamePipeline': 250,
 }
+
+
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See http://doc.scrapy.org/en/latest/topics/autothrottle.html
