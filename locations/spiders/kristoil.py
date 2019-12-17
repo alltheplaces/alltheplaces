@@ -5,7 +5,7 @@ from locations.items import GeojsonPointItem
 
 class KristoilSpider(scrapy.Spider):
     name = "kristoil"
-    chain_name = "Kristoil"
+    brand = "Kristoil"
     allowed_domains = ["www.kristoil.com"]
 
     def start_requests(self):

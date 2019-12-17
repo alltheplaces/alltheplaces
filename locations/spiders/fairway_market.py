@@ -7,7 +7,7 @@ from locations.items import GeojsonPointItem
 
 class FairwayMarketSpider(scrapy.Spider):
     name = "fairway_market"
-    chain_name = "Fairway Market"
+    brand = "Fairway Market"
     allowed_domains = ["http://www.fairwaymarkets.com/"]
     start_urls = (
         'http://www.fairwaymarkets.com/index.php/store-locations/victoria',

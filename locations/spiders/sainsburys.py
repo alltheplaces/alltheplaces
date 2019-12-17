@@ -6,7 +6,7 @@ DAYS = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su']
 
 class SainsburysSpider(scrapy.Spider):
     name = "sainsburys"
-    chain_name = "Sainsbury's"
+    brand = "Sainsbury's"
     allowed_domains = ["stores.sainsburys.co.uk"]
     state = True
     def start_requests(self):

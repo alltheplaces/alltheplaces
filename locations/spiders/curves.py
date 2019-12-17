@@ -7,7 +7,7 @@ from locations.items import GeojsonPointItem
 
 class CurvesSpider(scrapy.Spider):
     name = "curves"
-    chain_name = "Curves"
+    brand = "Curves"
     allowed_domains = ['curves.com']
     start_urls = (
         'https://www.curves.com/sitemap.xml',

@@ -7,7 +7,7 @@ from locations.items import GeojsonPointItem
 
 class FiveguysSpider(scrapy.Spider):
     name = "fiveguys"
-    chain_name = "Five Guys"
+    brand = "Five Guys"
     allowed_domains = ["www.fiveguys.com"]
     start_urls = (
         'http://www.fiveguys.com/5gapi/stores/ByDistance?lat=45.0&lng=-90.0&distance=25000&secondaryDistance=250&lang=en',

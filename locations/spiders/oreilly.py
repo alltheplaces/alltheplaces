@@ -7,7 +7,7 @@ from locations.items import GeojsonPointItem
 class OreillyAuto(scrapy.Spider):
 
     name = 'oreilly'
-    chain_name = "O'Reilly Auto Parts"
+    brand = "O'Reilly Auto Parts"
     download_delay = 0.2
     allowed_domains = ('locations.oreillyauto.com', 'www.oreillyauto.com', )
     start_urls = (

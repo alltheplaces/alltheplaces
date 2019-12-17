@@ -13,7 +13,7 @@ DAY_MAPPING = {
 }
 class KoppsSpider(scrapy.Spider):
     name = "kopps"
-    chain_name = "Kopps"
+    brand = "Kopps"
     allowed_domains = ["www.kopps.com"]
     download_delay = 1.5
     start_urls = (

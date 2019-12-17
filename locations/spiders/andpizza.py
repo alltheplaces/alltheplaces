@@ -7,7 +7,7 @@ from locations.items import GeojsonPointItem
 
 class TacocabanaSpider(scrapy.Spider):
     name = 'andpizza'
-    chain_name = "&pizza"
+    brand = "&pizza"
     allowed_domains = ['andpizza.com']
     start_urls = (
         'https://andpizza.com',

@@ -23,7 +23,7 @@ STATES = {
 class OutbackSteakhouseSpider(scrapy.Spider):
     download_delay = 0.2
     name = "outbacksteakhouse"
-    chain_name = "Outback Steakhouse"
+    brand = "Outback Steakhouse"
     allowed_domains = ["outback.com"]
     start_urls = (
         'https://www.outback.com/partial/subpage_locations_directory',

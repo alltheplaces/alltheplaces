@@ -8,7 +8,7 @@ from locations.items import GeojsonPointItem
 
 class CookoutSpider(scrapy.Spider):
     name = "cookout"
-    chain_name = "Cookout"
+    brand = "Cookout"
     allowed_domains = ["www.cookout.com"]
     start_urls = (
         'http://www.cookout.com/wp-admin/admin-ajax.php?action=store_search&lat=36.072635&lng=-79.79197499999998&max_results=500&radius=500',

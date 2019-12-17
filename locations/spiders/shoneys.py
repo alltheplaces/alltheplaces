@@ -15,7 +15,7 @@ keymap = {
 
 class ShoneysSpider(scrapy.Spider):
     name = "shoneys"
-    chain_name = "Shoney's"
+    brand = "Shoney's"
     allowed_domains = ["static.batchgeo.com"]
     start_urls = (
         'https://static.batchgeo.com/map/json/b317db15b42986919f24bff19465e039/1482130242',

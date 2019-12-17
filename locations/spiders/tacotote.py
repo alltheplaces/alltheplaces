@@ -35,7 +35,7 @@ DAYS = {
 
 class MisterCarWashSpider(scrapy.Spider):
     name = "tacotote"
-    chain_name = "El Taco Tote"
+    brand = "El Taco Tote"
     allowed_domains = ["tacotote.com/"]
     start_urls = (
         'http://tacotote.com/site/index.php/en-us/?option=com_storelocator&view=map&format=raw&searchall=1',

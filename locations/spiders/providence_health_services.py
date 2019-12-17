@@ -8,7 +8,7 @@ from locations.hours import OpeningHours
 
 class ProvidenceHealthServicesSpider(scrapy.Spider):
     name = "providence_health_services"
-    chain_name = "Providence Health Services"
+    brand = "Providence Health Services"
     allowed_domains = ["providence.org"]
 
     def start_requests(self):

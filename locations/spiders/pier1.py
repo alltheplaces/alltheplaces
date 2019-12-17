@@ -8,7 +8,7 @@ from locations.hours import OpeningHours
 
 class Pier1Spider(scrapy.Spider):
     name = "pier1"
-    chain_name = "Pier 1"
+    brand = "Pier 1"
     allowed_domains = ['www.pier1.com']
     start_urls = [
         'https://www.pier1.com/on/demandware.store/Sites-pier1_us-Site/default/LocalStore?',

@@ -79,7 +79,7 @@ def normalize_time(hours):
 class MarshallsSpider(scrapy.Spider):
 
     name = "marshalls"
-    chain_name = "Marshalls"
+    brand = "Marshalls"
     allowed_domains = ["mktsvc.tjx.com", 'www.marshallsonline.com']
 
     def start_requests(self):

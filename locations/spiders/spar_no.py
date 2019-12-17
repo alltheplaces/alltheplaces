@@ -16,7 +16,7 @@ DAYS = [
 
 class SparNoSpider(scrapy.Spider):
     name = "spar_no"
-    chain_name = "Spar"
+    brand = "Spar"
     allowed_domains = ["spar.no"]
     start_urls = (
         'https://spar.no/Finn-butikk/',

@@ -6,7 +6,7 @@ from locations.items import GeojsonPointItem
 
 class MarksAndSpencerSpider(scrapy.Spider):
     name = "waterstones"
-    chain_name = "Waterstones"
+    brand = "Waterstones"
     allowed_domains = ["www.waterstones.com"]
     start_urls = ("https://www.waterstones.com/bookshops/viewall",)
 

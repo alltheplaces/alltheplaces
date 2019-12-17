@@ -43,7 +43,7 @@ LAT_LONS = [
 
 class WawaSpider(scrapy.Spider):
     name = 'wawa'
-    chain_name = "Wawa"
+    brand = "Wawa"
     start_urls = (
         'https://www.wawa.com/Handlers/LocationByLatLong.ashx?',
     )

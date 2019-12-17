@@ -21,7 +21,7 @@ DAY_MAPPING = {
 
 class DicksSportingGoodsSpider(scrapy.Spider):
     name = "dickssportinggoods"
-    chain_name = "Dick's Sporting Goods"
+    brand = "Dick's Sporting Goods"
     allowed_domains = ["dickssportinggoods.com"]
     start_urls = (
         'https://stores.dickssportinggoods.com/',

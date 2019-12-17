@@ -7,7 +7,7 @@ from locations.items import GeojsonPointItem
 
 class KrogerSpider(scrapy.Spider):
     name = "kroger"
-    chain_name = "Kroger"
+    brand = "Kroger"
     allowed_domains = ["www.kroger.com"]
     start_urls = (
         'https://www.kroger.com/stores?address=37.7578595,-79.76804&includeThirdPartyFuel=true&maxResults=50&radius=3000&showAllStores=false&useLatLong=true',

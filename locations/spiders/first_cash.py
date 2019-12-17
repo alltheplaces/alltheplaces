@@ -10,7 +10,7 @@ from locations.hours import OpeningHours
 
 class FirstCashSpider(scrapy.Spider):
     name = "first_cash"
-    chain_name = "First Cash"
+    brand = "First Cash"
     allowed_domains = ['find.cashamerica.us']
 
     def start_requests(self):

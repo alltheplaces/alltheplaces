@@ -6,7 +6,7 @@ from locations.items import GeojsonPointItem
 
 class McDonaldsRSSpider(scrapy.Spider):
     name = "mcdonalds_rs"
-    chain_name = "McDonald's"
+    brand = "McDonald's"
     allowed_domains = ["www.mcdonalds.rs"]
 
     start_urls = (

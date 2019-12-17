@@ -8,7 +8,7 @@ from locations.hours import OpeningHours
 
 class LaneBryantSpider(scrapy.Spider):
     name = "lanebryant"
-    chain_name = "Lane Bryant"
+    brand = "Lane Bryant"
     allowed_domains = ["stores.lanebryant.com"]
 
     def start_requests(self):

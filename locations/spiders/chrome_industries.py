@@ -5,7 +5,7 @@ import lxml
 from locations.items import GeojsonPointItem
 class ChromeIndustriesSpider(scrapy.Spider):
     name = "chrome_industries"
-    chain_name = "Chrome Industries"
+    brand = "Chrome Industries"
     allowed_domains = ["www.chromeindustries.com"]
     start_urls = (
         'https://www.chromeindustries.com/on/demandware.store/Sites-chrome_na-Site/en_US/Stores-Search?latitude=32.7269669&longitude=-117.16470939999999&maxDistance=50000000',

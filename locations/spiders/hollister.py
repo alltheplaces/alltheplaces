@@ -10,7 +10,7 @@ from locations.hours import OpeningHours
 
 class HollisterSpider(scrapy.Spider):
     name = "hollister"
-    chain_name = "Hollister"
+    brand = "Hollister"
     allowed_domains = ['hollisterco.com']
 
     # Website is blocking scrapers so I had to change the User Agent to get around this

@@ -30,11 +30,12 @@ class ApplySpiderNamePipeline(object):
 
         return item
 
-class ApplyChainNamePipeline(object):
+class ApplyBrandPipeline(object):
 
     def process_item(self, item, spider):
         existing_extras = item.get('extras', {})
-        existing_extras['chain_name'] = spider.chain_name
+        if hasattr(spider, 'brand') and 'brand' not in existing_extras:
+            existing_extras['brand'] = spider.brand
         item['extras'] = existing_extras
 
         return item

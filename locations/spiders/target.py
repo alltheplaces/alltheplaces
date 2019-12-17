@@ -40,7 +40,7 @@ class TargetSpider(scrapy.Spider):
         invalid. So, if this spider stops working, that's probably why.
     '''
     name = "target"
-    chain_name = "Target"
+    brand = "Target"
     allowed_domains = ["target.com"]
 
     def start_requests(self):

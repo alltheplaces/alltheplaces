@@ -5,7 +5,7 @@ from locations.items import GeojsonPointItem
 
 class HangerclinicSpider(scrapy.Spider):
     name = "hangerclinic"
-    chain_name = "Hanger Clinic"
+    brand = "Hanger Clinic"
     allowed_domains = ["hangerclinic.com"]
     start_urls = (
         'http://www.hangerclinic.com/locations/Pages/by-state.aspx',

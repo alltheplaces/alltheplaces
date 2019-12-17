@@ -11,7 +11,7 @@ from locations.hours import OpeningHours
 class WalgreensSpider(scrapy.Spider):
 
     name = "walgreens"
-    chain_name = "Walgreens"
+    brand = "Walgreens"
     allowed_domains = ["www.walgreens.com"]
     download_delay = 0.1
     start_urls = (

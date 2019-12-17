@@ -5,7 +5,7 @@ from locations.items import GeojsonPointItem
 
 class SoulCycleSpider(scrapy.Spider):
     name = "soulcycle"
-    chain_name = "Soulcycle"
+    brand = "Soulcycle"
     allowed_domains = ['soul-cycle.com']
     start_urls = (
         'https://www.soul-cycle.com/studios/all/',

@@ -11,7 +11,7 @@ from locations.hours import OpeningHours
 
 class BbvaCompassSpider(scrapy.Spider):
     name = "bbvacompass"
-    chain_name = "BBVA Compass"
+    brand = "BBVA Compass"
     allowed_domains = ['bbvausa.com']
     start_urls = [
         'https://www.bbvausa.com/USA',

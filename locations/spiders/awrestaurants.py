@@ -17,7 +17,7 @@ HEADERS = {
 
 class AwrestaurantsSpider(scrapy.Spider):
     name = "awrestaurants"
-    chain_name = "A&W Restaurants"
+    brand = "A&W Restaurants"
     allowed_domains = ["www.awrestaurants.com"]
     start_urls = (
         'https://www.awrestaurants.com/locations?zipcode=67301',

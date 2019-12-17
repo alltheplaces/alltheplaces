@@ -12,7 +12,7 @@ class PigglyWigglySpider(scrapy.Spider):
         api request.
     '''
     name = "pigglywiggly"
-    chain_name = "Piggly Wiggly"
+    brand = "Piggly Wiggly"
     allowed_domains = ["pigglywiggly.com"]
 
     def start_requests(self):

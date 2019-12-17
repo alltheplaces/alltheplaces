@@ -8,7 +8,7 @@ from locations.items import GeojsonPointItem
 
 class OliveGardenSpider(scrapy.Spider):
     name = "olivegarden"
-    chain_name = "Olive Garden"
+    brand = "Olive Garden"
     allowed_domains = ['olivegarden.com']
     download_delay = 0.5
     start_urls = (

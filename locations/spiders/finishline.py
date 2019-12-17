@@ -6,7 +6,7 @@ from locations.hours import OpeningHours
 class FinishlineSpider(scrapy.Spider):
 
     name = "finishline"
-    chain_name = "Finish Line"
+    brand = "Finish Line"
     allowed_domains = ["stores.finishline.com"]
     download_delay = 0.5
     start_urls = (

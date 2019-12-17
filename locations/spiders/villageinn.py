@@ -7,7 +7,7 @@ from locations.items import GeojsonPointItem
 
 class VillageInnSpider(scrapy.Spider):
     name = "villageinn"
-    chain_name = "Village Inn"
+    brand = "Village Inn"
     allowed_domains = ["www.villageinn.com"]
     start_urls = (
         "http://www.villageinn.com/locations/bystate.php",

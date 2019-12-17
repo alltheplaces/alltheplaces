@@ -8,7 +8,7 @@ from locations.hours import OpeningHours
 
 class CompleteCashSpider(scrapy.Spider):
     name = "completecash"
-    chain_name = "Complete Cash"
+    brand = "Complete Cash"
     allowed_domains = ["locations.completecash.net"]
     cc_url = 'https://locations.completecash.net/api/5c1bc42410e9b07c77f0fab5/locations-details'
     base_url = 'https://locations.completecash.net/'

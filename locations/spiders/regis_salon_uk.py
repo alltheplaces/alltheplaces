@@ -8,7 +8,7 @@ regex_pm = r"\s?([Pp][Mm])"
 
 class RegisUKSpider(scrapy.Spider):
     name = "regis_uk"
-    chain_name = "Regis Salon"
+    brand = "Regis Salon"
     allowed_domains = ["www.regissalons.co.uk"]
     start_urls = ['https://www.regissalons.co.uk/salon-locator?show-all=yes']
 

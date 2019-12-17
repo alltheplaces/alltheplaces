@@ -6,7 +6,7 @@ import json
 
 class MerrillLynchSpider(scrapy.Spider):
     name = 'merrilllynch'
-    chain_name = "Merrill Lynch"
+    brand = "Merrill Lynch"
     allowed_domains = ['ml.com']
     start_urls = ('https://fa.ml.com/',)
 

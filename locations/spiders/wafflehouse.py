@@ -19,7 +19,7 @@ from locations.items import GeojsonPointItem
 
 class WaffleHouseSpider(scrapy.Spider):
     name = "wafflehouse"
-    chain_name = "Waffle House"
+    brand = "Waffle House"
     allowed_domains = ["sweetiq.com"]
     start_urls = ('https://api.sweetiq.com/store-locator/public/locations/587d236eeb89fb17504336db'
                   '?categories=&geo%5B0%5D=-74.0468&geo%5B1%5D=40.8859&tag=&page=1&'

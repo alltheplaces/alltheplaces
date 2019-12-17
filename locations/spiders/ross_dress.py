@@ -15,7 +15,7 @@ DAY_MAPPING = [
 
 class RossDressSpider(scrapy.Spider):
     name = "ross_dress"
-    chain_name = "Ross Dress for Less"
+    brand = "Ross Dress for Less"
     allowed_domains = ["hosted.where2getit.com"]
     start_urls = (
         'https://hosted.where2getit.com/rossdressforless/2014/ajax?&xml_request=<request><appkey>1F663E4E-1B64-11E5-B356-3DAF58203F82</appkey><formdata id="locatorsearch"><dataview>store_default</dataview><limit>99999</limit><geolocs><geoloc><longitude>-98.5795</longitude><latitude>39.8283</latitude></geoloc></geolocs><searchradius>4000|2500</searchradius><where><clientkey><eq></eq></clientkey><opendate><eq></eq></opendate><shopping_spree><eq></eq></shopping_spree></where></formdata></request>',

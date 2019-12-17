@@ -20,7 +20,7 @@ BASE_URL = 'https://onmyj41p3c.execute-api.us-west-2.amazonaws.com/prod/getStore
 
 class TMobileUSSpider(scrapy.Spider):
     name = "tmobile_us"
-    chain_name = "T-Mobile"
+    brand = "T-Mobile"
     allowed_domains = ["www.t-mobile.com"]
     download_delay = 0.2
 

@@ -21,7 +21,7 @@ DAY_MAPPING = {
 
 class SubwaySpider(scrapy.Spider):
     name = "subway"
-    chain_name = "Subway"
+    brand = "Subway"
     allowed_domains = ["www.subway.com"]
     download_delay = 2  # limit the delay to 2 seconds to avoid 402 errors
 

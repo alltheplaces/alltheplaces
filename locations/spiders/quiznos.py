@@ -10,7 +10,7 @@ URL = "http://restaurants.quiznos.com"
 
 class QuiznosSpider(scrapy.Spider):
     name = "quiznos"
-    chain_name = "Quizno's"
+    brand = "Quizno's"
     allowed_domains = [URL]
     start_urls = (
         'http://restaurants.quiznos.com/data/stores.json?callback=storeList',

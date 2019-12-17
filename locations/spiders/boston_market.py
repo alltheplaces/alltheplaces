@@ -15,7 +15,7 @@ STATES = [
 
 class BostonMarketSpider(scrapy.Spider):
     name = "boston_market"
-    chain_name = "Boston Market"
+    brand = "Boston Market"
     allowed_domains = ["www.bostonmarket.com"]
     base_url = 'https://www.bostonmarket.com'
 

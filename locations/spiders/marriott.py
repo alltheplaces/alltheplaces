@@ -10,7 +10,7 @@ from locations.items import GeojsonPointItem
 class MarriottHotels(scrapy.Spider):
 
     name = "marriott"
-    chain_name = "Marriott"
+    brand = "Marriott"
     allowed_domains = ["marriott.com", "ritzcarlton.com"]
     download_delay = 0.2
 

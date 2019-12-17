@@ -16,7 +16,7 @@ DAY_MAPPING = {
 class DillardsSpider(scrapy.Spider):
 
     name = "dillards"
-    chain_name = "Dillard's"
+    brand = "Dillard's"
     allowed_domains = ["www.dillards.com"]
     download_delay = 0.5
     start_urls = (

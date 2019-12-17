@@ -5,7 +5,7 @@ from locations.items import GeojsonPointItem
 
 class SentryFoodsSpider(scrapy.Spider):
     name = "sentryfoods"
-    chain_name = "Sentry Foods"
+    brand = "Sentry Foods"
     allowed_domains = ['sentryfoods.com']
     start_urls = (
         'https://www.sentryfoods.com/stores/search-stores.html',

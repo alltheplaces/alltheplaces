@@ -4,7 +4,7 @@ from locations.items import GeojsonPointItem
 
 class SunglassHutSpider(scrapy.Spider):
     name = "sunglass_hut"
-    chain_name = "Sunglass Hut"
+    brand = "Sunglass Hut"
     allowed_domains = ["stores.sunglasshut.com"]
     start_urls = (
         'https://stores.sunglasshut.com/',

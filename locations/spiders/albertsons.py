@@ -16,7 +16,7 @@ DAY_MAPPING = {
 class AlbertsonsSpider(scrapy.Spider):
 
     name = "albertsons"
-    chain_name = "Albertsons"
+    brand = "Albertsons"
     download_delay = 0.5
     allowed_domains = [
         "local.albertsons.com",

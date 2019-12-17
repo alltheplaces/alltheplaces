@@ -16,7 +16,7 @@ mx_states = ["Aguascalientes", "Baja California Norte", "Baja California Sur", "
 class OmniHotels(scrapy.Spider):
     download_delay = 0.2
     name = "omni_hotels"
-    chain_name = "Omni Hotels"
+    brand = "Omni Hotels"
     allowed_domains = ["omnihotels.com"]
     start_urls = (
         'https://www.omnihotels.com/site-map',

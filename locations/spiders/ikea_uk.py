@@ -9,7 +9,7 @@ DAYS=['Mo','Tu','We','Th','Fr','Sa','Su']
 
 class IkeaUKSpider(scrapy.Spider):
     name = "ikea_uk"
-    chain_name = "Ikea"
+    brand = "Ikea"
     allowed_domains = ["ikea.com"]
     start_urls = (
         'http://www.ikea.com/gb/en/store/',

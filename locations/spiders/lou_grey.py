@@ -8,7 +8,7 @@ from locations.items import GeojsonPointItem
 class LouGreySpider(scrapy.Spider):
 
     name = "lou_grey"
-    chain_name = "Lou Grey"
+    brand = "Lou Grey"
     allowed_domains = ["stores.louandgrey.com"]
     download_delay = 0.5
     start_urls = (

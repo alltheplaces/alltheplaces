@@ -5,7 +5,7 @@ from locations.items import GeojsonPointItem
 
 class FrysElectronisSpider(scrapy.Spider):
     name = 'frys-electronics'
-    chain_name = "Fry's Electronics"
+    brand = "Fry's Electronics"
     allowed_domains = ['www.frys.com']
     start_urls = (
         'https://www.frys.com/ac/storeinfo/storelocator',

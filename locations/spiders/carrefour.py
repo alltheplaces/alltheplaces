@@ -1246,7 +1246,7 @@ DAYS=['Mo','Tu','We','Th','Fr','Sa','Su']
 
 class CarrefourSpider(scrapy.Spider):
     name = "carrefour"
-    chain_name = "Carrefour"
+    brand = "Carrefour"
     allowed_domains = ["carrefour.com.ar"]
     start_urls = (
         'https://www.carrefour.com.ar/storelocator/index/',

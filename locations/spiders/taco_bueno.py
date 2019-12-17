@@ -16,7 +16,7 @@ STATES = ["AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DC", "DE", "FL", "GA",
 
 class TacobuenoSpider(scrapy.Spider):
     name = 'bueno'
-    chain_name = "Taco Bueno"
+    brand = "Taco Bueno"
     allowed_domains = ['buenoonthego.com']
     download_delay = 0.1
     start_urls = ["https://buenoonthego.com/mp/ndXTAL/searchByStateCode_JSON?"]

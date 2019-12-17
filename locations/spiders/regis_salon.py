@@ -24,7 +24,7 @@ lons = ['-86.791130', '-97.563461', '-105.311104', '-110.454353', '-93.900192',
 
 class RegisSpider(scrapy.Spider):
     name = 'regis'
-    chain_name = "Regis Salon"
+    brand = "Regis Salon"
     download_delay = 0
     allowed_domains = ['www.regissalons.com']
     start_urls = ['https://www.regissalons.com']

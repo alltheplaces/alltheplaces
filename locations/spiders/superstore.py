@@ -9,7 +9,7 @@ from locations.items import GeojsonPointItem
 class SuperStoreSpider(scrapy.Spider):
 
     name = "super_store"
-    chain_name = "Real Canadian Superstore"
+    brand = "Real Canadian Superstore"
     allowed_domains = ["www.realcanadiansuperstore.ca/"]
     start_urls = (
         'https://www.realcanadiansuperstore.ca/store-locator/locations/all?showNonShoppable=true&_=1513507990972',

@@ -8,7 +8,7 @@ from locations.items import GeojsonPointItem
 class FoodLionSpider(scrapy.Spider):
     download_delay = 3
     name = "foodlion"
-    chain_name = "Food Lion"
+    brand = "Food Lion"
     allowed_domains = ["www.foodlion.com"]
     start_urls = (
         'https://www.foodlion.com/stores/',

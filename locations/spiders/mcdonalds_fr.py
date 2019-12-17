@@ -8,7 +8,7 @@ from locations.items import GeojsonPointItem
 class McDonalsFRSpider(scrapy.Spider):
 
     name = "mcdonalds_fr"
-    chain_name = "McDonald's"
+    brand = "McDonald's"
     allowed_domains = ["www.mcdonalds.fr"]
     start_urls = (
         'https://prod-dot-mcdonaldsfrance-storelocator.appspot.com/api/store/nearest?center=2.331052600000021:48.8640493&limit=1000&authToken=26938DBF9169A7F39C92BDCF1BA7A&db=prod',

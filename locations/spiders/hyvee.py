@@ -26,7 +26,7 @@ from locations.items import GeojsonPointItem
 
 class HyVeeSpider(scrapy.Spider):
     name = "hyvee"
-    chain_name = "Hyvee"
+    brand = "Hyvee"
     allowed_domains = ["hy-vee.com"]
 
     start_urls = (

@@ -8,7 +8,7 @@ from locations.items import GeojsonPointItem
 
 class PartyCitySpider(scrapy.Spider):
     name = "party_city"
-    chain_name = "Party City"
+    brand = "Party City"
     allowed_domains = ['stores.partycity.com']
     start_urls = (
         'https://stores.partycity.com/sitemap.xml',

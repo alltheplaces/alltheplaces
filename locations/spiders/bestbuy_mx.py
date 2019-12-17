@@ -11,7 +11,7 @@ from locations.items import GeojsonPointItem
 
 class BestBuyMexicoSpider(scrapy.Spider):
     name = "bestbuy-mx"
-    chain_name = "Best Buy"
+    brand = "Best Buy"
     allowed_domains = ["www.bestbuy.com.mx",]
     bb_url = 'http://www.bestbuy.com.mx/storelocator/api/{}'
 

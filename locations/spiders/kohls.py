@@ -8,7 +8,7 @@ from locations.items import GeojsonPointItem
 class KohlsSpider(scrapy.Spider):
 
     name = "kohls"
-    chain_name = "Kohl's"
+    brand = "Kohl's"
     download_delay = 1.5
     allowed_domains = ["www.kohls.com"]
     start_urls = (

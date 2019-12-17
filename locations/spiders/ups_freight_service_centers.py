@@ -8,7 +8,7 @@ from locations.items import GeojsonPointItem
 class UPSFreightServiceCenter(scrapy.Spider):
     download_delay = 0.2
     name = "ups_freight_service_centers"
-    chain_name = "UPS Freight Service Centers"
+    brand = "UPS Freight Service Centers"
     allowed_domains = ["upsfreight.com"]
     start_urls = (
         'https://www.upsfreight.com/ProductsandServices/ServiceCenterDir/default.aspx',

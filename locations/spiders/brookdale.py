@@ -15,7 +15,7 @@ US_STATES = (
 
 class TemplateSpider(scrapy.Spider):
     name = "brookdale"
-    chain_name = "Brookdale"
+    brand = "Brookdale"
     allowed_domains = ["www.brookdale.com"]
 
     def start_requests(self):

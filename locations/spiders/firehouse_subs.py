@@ -18,7 +18,7 @@ DAY_MAPPING = {
 
 class FirehouseSubsSpider(scrapy.Spider):
     name = "firehouse_subs"
-    chain_name = "Firehouse Subs"
+    brand = "Firehouse Subs"
     allowed_domains = ["firehousesubs.com"]
 
     def start_requests(self):

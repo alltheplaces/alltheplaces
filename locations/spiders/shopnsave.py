@@ -28,7 +28,7 @@ DAY_DICT = {
 
 class ShopnSaveSpider(scrapy.Spider):
     name = "shopnsave"
-    chain_name = "SHOP ‘n SAVE"
+    brand = "SHOP ‘n SAVE"
     allowed_domains = ["www.shopnsave.com"]
     start_urls = (
         'https://www.shopnsave.com/stores/view-stores-by-state.html?state=IL&page=1',

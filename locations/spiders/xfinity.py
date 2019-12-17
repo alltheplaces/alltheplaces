@@ -16,7 +16,7 @@ STATES = [
 
 class XfinitySpider(scrapy.Spider):
     name = "xfinity"
-    chain_name = "Xfinity"
+    brand = "Xfinity"
     allowed_domains = ["www.xfinity.com"]
     base_url = 'https://www.xfinity.com/support/service-center-locations/'
 

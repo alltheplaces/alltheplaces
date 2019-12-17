@@ -5,7 +5,7 @@ import re
 
 class TemplateSpider(scrapy.Spider):
     name = "casino"
-    chain_name = "Casino"
+    brand = "Casino"
     allowed_domains = ["magasins.supercasino.fr"]
     start_urls = (
         'https://magasins.supercasino.fr/fr',

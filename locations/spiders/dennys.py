@@ -17,7 +17,7 @@ DAY_MAPPING = {
 
 class DennysSpider(scrapy.Spider):
     name = "dennys"
-    chain_name = "Denny's"
+    brand = "Denny's"
     allowed_domains = ["locations.dennys.com"]
     start_urls = (
         'https://locations.dennys.com/',

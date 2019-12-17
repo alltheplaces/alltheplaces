@@ -13,7 +13,7 @@ brand_name_override = {
 
 class ChoiceHotelsSpider(scrapy.Spider):
     name = "choicehotels"
-    chain_name = "Choice Hotels"
+    brand = "Choice Hotels"
     allowed_domains = ["choicehotels.com"]
     download_delay = 0.2
 

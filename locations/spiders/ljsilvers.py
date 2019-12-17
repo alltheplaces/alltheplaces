@@ -8,7 +8,7 @@ from locations.items import GeojsonPointItem
 
 class LjsilversSpider(scrapy.Spider):
     name = "ljsilvers"
-    chain_name = "Long John Silver's"
+    brand = "Long John Silver's"
     allowed_domains = ["ljsilvers.com"]
     start_urls = (
         'http://www.ljsilvers.com/locator?postalcode=76010',

@@ -6,7 +6,7 @@ from locations.items import GeojsonPointItem
 
 class TwentyFourHourFitnessSpider(scrapy.Spider):
     name = "24_hour_fitness"
-    chain_name = '24 Hour Fitness'
+    brand = '24 Hour Fitness'
     allowed_domains = ["www.24hourfitness.com"]
     start_urls = (
         'https://www.24hourfitness.com',

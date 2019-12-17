@@ -5,7 +5,7 @@ from locations.items import GeojsonPointItem
 
 class StaterBrosSpider(scrapy.Spider):
     name = 'stater-bros'
-    chain_name = "Stater Bros"
+    brand = "Stater Bros"
     allowed_domains = ['www.staterbros.com']
 
     def start_requests(self):

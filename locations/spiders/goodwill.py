@@ -14,7 +14,7 @@ CATEGORY_MAPPING = {
 
 class GoodwillSpider(scrapy.Spider):
     name = "goodwill"
-    chain_name = "Goodwill"
+    brand = "Goodwill"
     allowed_domains = ['www.goodwill.org']
     download_delay = 0.2
 

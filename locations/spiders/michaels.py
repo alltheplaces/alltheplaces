@@ -8,7 +8,7 @@ from locations.hours import OpeningHours
 class MichaelsSpider(scrapy.Spider):
     download_delay = 0.2
     name = "michaels"
-    chain_name = "Michaels"
+    brand = "Michaels"
     allowed_domains = ["michaels.com"]
     start_urls = (
         'http://locations.michaels.com/',

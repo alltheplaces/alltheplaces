@@ -11,7 +11,7 @@ DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
 class UltaBeautySpider(scrapy.Spider):
     name = "ulta-beauty"
-    chain_name = "Ulta Beauty"
+    brand = "Ulta Beauty"
     allowed_domains = ["ulta.com", "sweetiq.com"]
     start_urls = (
         'https://api.sweetiq.com/store-locator/public/locations/582b2f2f588e96c131eefa9f?page=1&perPage=0&searchFields%5B0%5D=name&countLocations=true&clientIds%5B0%5D=57b75cf805fbd94379859661',

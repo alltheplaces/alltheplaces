@@ -7,7 +7,7 @@ from locations.items import GeojsonPointItem
 
 class GamestopSpider(scrapy.Spider):
 	name = "gamestop"
-	chain_name = "GameStop"
+	brand = "GameStop"
 	allowed_domains = ["www.gamestop.com"]
 	start_urls = (
 		'https://spatial.virtualearth.net/REST/v1/data/8f92e4701aa94bbba485642dc6d15873/_AllStores/StoreSchema?s=1&$format=json&callback=getStoreInfoSuccess&spatialFilter=&$filter=DisplayType%20Eq%20%271%27%20and%20StoreName%20Ne%20%27GameStop.com%27%20and%20StoreName%20Ne%20%27Internet%20/%20Stores%27%20and%20StoreName%20Ne%20%27GameStop%20Military%27&key=AleEo0hykwhhc2_vhIDzSZvfqbcmdTVzwZp3TrNliPr6CPJtxveXCdwIr7zAHu2O&$top=250&callback=jQuery111105958918103101543_1513486119155&_=1513486119161',

@@ -5,7 +5,7 @@ from locations.items import GeojsonPointItem
 class MichaelkorsSpider(scrapy.Spider):
 
     name = "michaelkors"
-    chain_name = "Michael Kors"
+    brand = "Michael Kors"
     allowed_domains = ["locations.michaelkors.com"]
     download_delay = 0.5
     start_urls = (

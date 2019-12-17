@@ -4,7 +4,7 @@ from locations.items import GeojsonPointItem
 
 class DiscoArgentinaSpider(scrapy.Spider):
     name = "disco_argentina"
-    chain_name = "Disco Argentina"
+    brand = "Disco Argentina"
     allowed_domains = ["www.disco.com.ar"]
 
     def start_requests(self):

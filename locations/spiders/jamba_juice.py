@@ -14,7 +14,7 @@ DAYS = {
 class JambaJuiceSpider(scrapy.Spider):
 
     name = "jambajuice"
-    chain_name = "Jamba Juice"
+    brand = "Jamba Juice"
     allowed_domains = ["https://momentfeed-prod.apigee.net/"]
     download_delay = 1.5
     start_urls = (
