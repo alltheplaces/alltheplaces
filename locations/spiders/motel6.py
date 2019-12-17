@@ -45,9 +45,7 @@ class Motel6Spider(scrapy.Spider):
                     'phone': mdata["phone"],
                     'state': mdata["state"],
                     'website': mdata["microsite_url"],
-                    'extras': {
-                        'brand': brand_lookup[mdata["brand_id"]]
-                    }
+                    'brand': brand_lookup[mdata["brand_id"]],
         }
 
         yield GeojsonPointItem(**properties)
