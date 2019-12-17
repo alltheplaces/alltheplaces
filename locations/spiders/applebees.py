@@ -9,6 +9,7 @@ from locations.hours import OpeningHours
 
 class ApplebeesSpider(scrapy.Spider):
     name = "applebees"
+    item_attributes = { 'brand': "Applebees" }
     allowed_domains = ["www.applebees.com"]
     start_urls = (
         'https://www.applebees.com/sitemap.xml',

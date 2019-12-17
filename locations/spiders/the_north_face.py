@@ -11,6 +11,7 @@ from locations.hours import OpeningHours
 
 class TheNorthFaceSpider(scrapy.Spider):
     name = "the_north_face"
+    item_attributes = { 'brand': "The North Face" }
     allowed_domains = ["hosted.where2getit.com"]
 
     def start_requests(self):
@@ -70,9 +71,6 @@ class TheNorthFaceSpider(scrapy.Spider):
                 'lon': store["longitude"],
                 'phone': store["phone"],
                 'website': store["url"],
-                'extras': {
-                    'brand': "The North Face"
-                }
             }
 
             yield GeojsonPointItem(**properties)

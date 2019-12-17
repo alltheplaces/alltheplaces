@@ -5,6 +5,7 @@ import json
 
 class LushSpider(scrapy.Spider):
     name = 'lush'
+    item_attributes = { 'brand': "Lush Cosmetics" }
     download_delay = 0
     allowed_domains = ['www.lushusa.com', 'lush.ca']
     start_urls = [

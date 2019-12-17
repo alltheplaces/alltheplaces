@@ -6,6 +6,7 @@ from locations.items import GeojsonPointItem
 
 class AmcTheatresSpider(scrapy.Spider):
     name = "amctheatres"
+    item_attributes = { 'brand': "AMC Theaters" }
     allowed_domains = ['amctheatres.com']
     start_urls = (
         'https://www.amctheatres.com/sitemaps/sitemap-theatres.xml',

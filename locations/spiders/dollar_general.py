@@ -10,6 +10,7 @@ WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
 class DollarGeneralSpider(scrapy.Spider):
     name = 'dollar_general'
+    item_attributes = { 'brand': "Dollar General" }
     allowed_domains = ['hosted.where2getit.com']
 
     def start_requests(self):

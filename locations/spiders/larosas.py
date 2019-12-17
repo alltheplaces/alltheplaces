@@ -9,6 +9,7 @@ hour_label = ["Mo-Th", "Fr", "Sa", "Su"]
 
 class LarosasSpider(scrapy.Spider):
     name = "larosas"
+    item_attributes = { 'brand': "Larosa's" }
     allowed_domains = ["www.larosas.com"]
     start_urls = (
         'https://www.larosas.com/pizzeria.aspx',

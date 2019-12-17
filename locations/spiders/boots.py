@@ -5,6 +5,7 @@ from locations.items import GeojsonPointItem
 class ArgosSpider(scrapy.Spider):
 
     name = "boots"
+    item_attributes = { 'brand': "Boots" }
     allowed_domains = ["www.boots.com"]
     download_delay = 0.5
     start_urls = (

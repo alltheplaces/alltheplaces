@@ -19,6 +19,7 @@ DAYS_NAME = {
 
 class GucciSpider(scrapy.Spider):
     name = "gucci"
+    item_attributes = { 'brand': "Gucci" }
     allowed_domains = ["www.gucci.com"]
     start_urls = (
         'https://www.gucci.com/us/en/store/all',

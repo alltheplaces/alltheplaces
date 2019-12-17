@@ -9,6 +9,7 @@ from locations.items import GeojsonPointItem
 class LoblawsSpider(scrapy.Spider):
 
     name = "loblaws"
+    item_attributes = { 'brand': "Loblaws" }
     allowed_domains = ["www.loblaws.ca"]
     start_urls = (
         'https://www.loblaws.ca/store-locator/locations/all?showNonShoppable=true&_=1513445413276',

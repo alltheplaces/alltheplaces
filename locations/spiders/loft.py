@@ -46,9 +46,7 @@ class LoftSpider(scrapy.Spider):
             'website': response.url,
             'lat': response.xpath('normalize-space(//meta[@itemprop="latitude"]/@content)').extract_first(),
             'lon': response.xpath('normalize-space(//meta[@itemprop="longitude"]/@content)').extract_first(),
-            'extras': {
-                'brand': brand
-            }
+            'brand': brand
         }
 
         opening_hours = self.parse_hours(response.xpath('//tr[@itemprop="openingHours"]/@content').extract())

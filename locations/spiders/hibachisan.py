@@ -10,6 +10,7 @@ from locations.hours import OpeningHours
 
 class HibachisanSpider(scrapy.Spider):
     name = "hibachisan"
+    item_attributes = { 'brand': "Hibachisan" }
     allowed_domains = ['hibachisan.com']
     start_urls = [
         'http://www.hibachisan.com/locations/Default.aspx',

@@ -9,6 +9,7 @@ from locations.items import GeojsonPointItem
 
 class BiggbySpider(scrapy.Spider):
 	name = "biggby"
+	item_attributes = { 'brand': "Biggby" }
 	allowed_domains = ["www.biggby.com"]
 	start_urls = (
 		'https://www.biggby.com/locations/',

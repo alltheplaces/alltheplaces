@@ -48,6 +48,7 @@ def build_links(tld, region_code, states):
 
 class ChipotleSpider(scrapy.Spider):
     name = "chipotle"
+    item_attributes = { 'brand': "Chipotle" }
     crawled_sites = set()
 
     states_com = [

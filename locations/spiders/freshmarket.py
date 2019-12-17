@@ -6,6 +6,7 @@ from locations.items import GeojsonPointItem
 
 class FreshMarketSpider(scrapy.Spider):
     name = "freshmarket"
+    item_attributes = { 'brand': "Fresh Market" }
     allowed_domains = ['thefreshmarket.com']
     start_urls = (
         'https://www.thefreshmarket.com/your-market/store-locator/',

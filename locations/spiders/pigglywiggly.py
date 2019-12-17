@@ -20,6 +20,7 @@ class PigglyWigglySpider(scrapy.Spider):
         api request.
     '''
     name = "pigglywiggly"
+    item_attributes = { 'brand': "Piggly Wiggly" }
     allowed_domains = ["pigglywiggly.com", "www.shopthepig.com"]
 
     def start_requests(self):

@@ -5,6 +5,7 @@ from locations.items import GeojsonPointItem
 class AllstateInsurnceAgentsSpider(scrapy.Spider):
 
     name = "allstate_insurance_agents"
+    item_attributes = { 'brand': "Allstate Insurance Agents" }
     allowed_domains = ["agents.allstate.com"]
     download_delay = 0.5
     start_urls = (

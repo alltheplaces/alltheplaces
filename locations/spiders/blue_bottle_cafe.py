@@ -7,6 +7,7 @@ from locations.items import GeojsonPointItem
 class BlueBottleCafeSpider(scrapy.Spider):
 
     name = "bluebottlecafe"
+    item_attributes = { 'brand': "Blue Bottle Cafe" }
     allowed_domains = ["www.bluebottlecoffee.com"]
     start_urls = (
         'https://bluebottlecoffee.com/api/cafe_search/fetch.json?coordinates=false&query=true&search_value=all',

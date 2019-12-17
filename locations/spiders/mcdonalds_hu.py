@@ -8,6 +8,7 @@ from locations.items import GeojsonPointItem
 class McDonaldsHUSpider(scrapy.Spider):
 
     name = "mcdonalds_hu"
+    item_attributes = { 'brand': "McDonald's" }
     allowed_domains = ["www.mcdonalds.hu"]
     start_urls = (
         'https://www.mcdonalds.hu/ettermeink',

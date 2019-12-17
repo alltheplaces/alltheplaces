@@ -7,6 +7,7 @@ from locations.items import GeojsonPointItem
 
 class ShopkoSpider(scrapy.Spider):
     name = "shopko"
+    item_attributes = { 'brand': "Shopko" }
     allowed_domains = ['shopko.com']
     start_urls = (
         'http://www.shopko.com/sitemaps_list.jsp?seq_no=1&typeName=store',

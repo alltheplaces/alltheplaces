@@ -15,6 +15,7 @@ DAY_MAPPING = {
 class HRBlockSpider(scrapy.Spider):
 
     name = "h_r_block"
+    item_attributes = { 'brand': "H & R Block" }
     allowed_domains = ["www.hrblock.com"]
     download_delay = 0.5
     start_urls = (

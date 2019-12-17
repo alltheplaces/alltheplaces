@@ -6,6 +6,7 @@ from scrapy.http import HtmlResponse
 
 class JusticeSpider(scrapy.Spider):
     name = "justice"
+    item_attributes = { 'brand': "Justice" }
     allowed_domains = ["shopjustice.com"]
     start_urls = (
         "https://maps.shopjustice.com/api/getAsyncLocations?template=search&level=search&radius=50000&search=55401",

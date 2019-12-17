@@ -17,6 +17,7 @@ DAYS={
 
 class VCASpider(scrapy.Spider):
     name = "vca"
+    item_attributes = { 'brand': "VCA" }
     allowed_domains = ["vcahospitals.com"]
     start_urls = (
         'https://vcahospitals.com/find-a-hospital/location-directory',

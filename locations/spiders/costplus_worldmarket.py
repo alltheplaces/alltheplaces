@@ -9,6 +9,7 @@ from locations.items import GeojsonPointItem
 
 class CostPlusWorldMarketSpider(scrapy.Spider):
     name = "costplus_worldmarket"
+    item_attributes = { 'brand': "Cost Plus World Market" }
     allowed_domains = ["stores.worldmarket.com"]
     start_urls = (
         'https://stores.worldmarket.com/',

@@ -8,6 +8,7 @@ from locations.items import GeojsonPointItem
 
 class PandoraSpider(scrapy.Spider):
     name = "pandora"
+    item_attributes = { 'brand': "Pandora" }
     allowed_domains = ['pandora.net']
     start_urls = (
         'https://stores.pandora.net/en-us/',

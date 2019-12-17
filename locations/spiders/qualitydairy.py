@@ -9,6 +9,7 @@ URL = "qualitydairy.com"
 
 class QuiznosSpider(scrapy.Spider):
     name = "qualitydiary"
+    item_attributes = { 'brand': "Quality Dairy" }
     allowed_domains = [URL]
     start_urls = (
         'http://qualitydairy.com/v15/stores/',

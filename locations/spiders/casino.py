@@ -5,6 +5,7 @@ import re
 
 class TemplateSpider(scrapy.Spider):
     name = "casino"
+    item_attributes = { 'brand': "Casino" }
     allowed_domains = ["magasins.supercasino.fr"]
     start_urls = (
         'https://magasins.supercasino.fr/fr',

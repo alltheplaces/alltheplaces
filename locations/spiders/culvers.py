@@ -7,6 +7,7 @@ from locations.items import GeojsonPointItem
 
 class CulversSpider(scrapy.Spider):
     name = "culvers"
+    item_attributes = { 'brand': "Culver's" }
     allowed_domains = ["hosted.where2getit.com"]
     start_urls = (
         'https://hosted.where2getit.com/culvers/2015/ajax?&xml_request=<request><appkey>1099682E-D719-11E6-A0C4-347BDEB8F1E5</appkey><formdata id="locatorsearch"><dataview>store_default</dataview><order>rank,_distance</order><limit>5000</limit><stateonly>0</stateonly><geolocs><geoloc><addressline></addressline><longitude>-98.369</longitude><latitude>39.417</latitude><country></country></geoloc></geolocs><searchradius>2500</searchradius></formdata></request>',

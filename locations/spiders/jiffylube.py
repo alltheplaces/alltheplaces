@@ -14,6 +14,7 @@ STATES = [
 
 class JiffyLubeSpider(scrapy.Spider):
     name = "jiffylube"
+    item_attributes = { 'brand': "Jiffy Lube" }
     allowed_domains = ["www.jiffylube.com"]
 
     def start_requests(self):

@@ -7,6 +7,7 @@ from locations.items import GeojsonPointItem
 
 class PublicStorageSpider(scrapy.Spider):
     name = "public_storage"
+    item_attributes = { 'brand': "Public Storage" }
     allowed_domains = ["www.publicstorage.com"]
     start_urls = (
         'https://www.publicstorage.com/handlers/searchcoordinates.ashx?north=90.0&east=180.0&south=-90.0&west=-180.0',

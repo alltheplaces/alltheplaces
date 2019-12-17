@@ -9,6 +9,7 @@ DAYS=['Mo','Tu','We','Th','Fr','Sa','Su']
 
 class IkeaUSSpider(scrapy.Spider):
     name = "ikea_us"
+    item_attributes = { 'brand': "Ikea" }
     allowed_domains = ["ikea.com"]
     start_urls = (
         'https://ww8.ikea.com/ext/iplugins/en_US/production/editions/sizmecplus/prio.min.js',

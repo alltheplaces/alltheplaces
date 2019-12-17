@@ -9,6 +9,7 @@ from locations.items import GeojsonPointItem
 
 class jefferson_univ_hosp(scrapy.Spider):
     name = "jefferson_univ_hosp"
+    item_attributes = { 'brand': "Jefferson University Hospital" }
     allowed_domains = ['https://hospitals.jefferson.edu']
     start_urls = [
         'https://hospitals.jefferson.edu/find-a-location.html',

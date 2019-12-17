@@ -10,6 +10,7 @@ from locations.hours import OpeningHours
 
 class KiplingSpider(scrapy.Spider):
     name = "kipling"
+    item_attributes = { 'brand': "Kipling" }
     allowed_domains = ['kipling-usa.com']
     start_urls = (
         "https://www.kipling-usa.com/on/demandware.store/Sites-kip-Site/default/Stores-GetNearestStores?countryCode=US&onlyCountry=true",
@@ -31,9 +32,6 @@ class KiplingSpider(scrapy.Spider):
                     'lat': data[store]["latitude"],
                     'lon': data[store]["longitude"],
                     'phone': data[store]["phone"],
-                    'extras': {
-                        'brand': "Kipling"
-                    }
                 }
 
                 yield GeojsonPointItem(**properties)

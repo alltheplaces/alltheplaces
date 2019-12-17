@@ -20,6 +20,7 @@ DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 class AvisSpider(scrapy.Spider):
 
     name = "avis"
+    item_attributes = { 'brand': "Avis" }
     download_delay = 0.5
     allowed_domains = [
         "avis.com",

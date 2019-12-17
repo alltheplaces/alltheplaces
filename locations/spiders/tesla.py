@@ -7,6 +7,7 @@ from locations.items import GeojsonPointItem
 
 class TeslaSpider(scrapy.Spider):
     name = "tesla"
+    item_attributes = { 'brand': "Tesla" }
     allowed_domains = ['www.tesla.com']
     start_urls = [
         'https://www.tesla.com/findus/list',

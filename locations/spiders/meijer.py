@@ -12,6 +12,7 @@ STATES = ['AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DC', 'DE', 'FL', 'GA',
           
 class MeijerSpider(scrapy.Spider):
     name = 'meijer'
+    item_attributes = { 'brand': "Meijer" }
     allowed_domains = ['www.meijer.com']
 
     def start_requests(self):

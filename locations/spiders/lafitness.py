@@ -19,6 +19,7 @@ DAY_MAPPING = {
 
 class LAFitnessSpider(scrapy.Spider):
     name = "lafitness"
+    item_attributes = { 'brand': "LA Fitness" }
     allowed_domains = ["lafitness.com"]
     download_delay = 0.1
 

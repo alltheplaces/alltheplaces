@@ -121,9 +121,9 @@ class SherwinWilliamsSpider(scrapy.Spider):
                     "lat": float(store['latitude']),
                     "lon": float(store['longitude']),
                     "website": 'https://www.sherwin-williams.com' + store['url'],
+                    'brand': store_type,
                     "extras": {
                         'number': store['storeNumber'],
-                        'brand': store_type
                     }
                 }
 

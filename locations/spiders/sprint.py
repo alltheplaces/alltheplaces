@@ -8,6 +8,7 @@ from locations.hours import OpeningHours
 
 class SprintSpider(scrapy.Spider):
     name = "sprint"
+    item_attributes = { 'brand': "Sprint" }
     allowed_domains = ["sprint.com"]
     start_urls = (
         'https://www.sprint.com/locations/',

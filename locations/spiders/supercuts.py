@@ -31,6 +31,7 @@ def get_hours(hour_list):
 
 class SuperCutsScraper(scrapy.Spider):
     name = "supercuts"
+    item_attributes = { 'brand': "Supercuts" }
 
     start_urls = [
         'https://www.supercuts.com/salon-directory.html'

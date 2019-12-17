@@ -7,6 +7,7 @@ import json
 class EdekaSpider(scrapy.Spider):
     """ Scrapes Edeka, the German market chain, locations. """
     name = "edeka"
+    item_attributes = { 'brand': "Edeka" }
     allowed_domains = ["www.edeka.de"]
 
     def start_requests(self):

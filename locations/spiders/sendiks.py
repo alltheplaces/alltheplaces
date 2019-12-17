@@ -8,6 +8,7 @@ from locations.items import GeojsonPointItem
 
 class SendikSpider(scrapy.Spider):
     name = "sendiks"
+    item_attributes = { 'brand': "Sendik's Food Market" }
     allowed_domains = ['www.sendiks.com']
     start_urls = (
         'https://www.sendiks.com/sitemap-pt-stores-2015-07.xml',

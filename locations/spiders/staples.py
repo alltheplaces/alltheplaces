@@ -20,6 +20,7 @@ DAY_MAPPING = {
 class StaplesSpider(scrapy.Spider):
 
     name = "staples"
+    item_attributes = { 'brand': "Staples" }
     allowed_domains = ["stores.staples.com"]
     start_urls = (
         'https://stores.staples.com/',

@@ -26,6 +26,7 @@ HEADERS = {'Accept': 'application/json'}
 
 class ChickFilASpider(scrapy.Spider):
     name = "chickfila"
+    item_attributes = { 'brand': "Chick-Fil-A" }
     allowed_domains = ["chick-fil-a.com", "yext-cdn.com"]
 
     def start_requests(self):

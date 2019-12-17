@@ -7,6 +7,7 @@ from locations.items import GeojsonPointItem
 
 class WalmartSpider(scrapy.Spider):
     name = "bigboy"
+    item_attributes = { 'brand': "Big Boy" }
     allowed_domains = ["www.bigboy.com"]
     start_urls = (
         'http://www.bigboy.com/locations',

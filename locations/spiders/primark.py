@@ -8,6 +8,7 @@ import json
 
 class PrimarkSpider(scrapy.Spider):
     name = "primark"
+    item_attributes = { 'brand': "Primark" }
     allowed_domains = ["primark.com"]
     start_urls = (
         'https://www.primark.com/en/our-stores',

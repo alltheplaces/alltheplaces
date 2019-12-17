@@ -5,6 +5,7 @@ import json
 class CVSSpider(scrapy.Spider):
 
     name = "pizzaranch"
+    item_attributes = { 'brand': "Pizza Ranch" }
     allowed_domains = ["pizzaranch.com"]
     download_delay = 0.5
     start_urls = (

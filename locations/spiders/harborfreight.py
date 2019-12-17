@@ -14,6 +14,7 @@ BASE_URL = 'https://shop.harborfreight.com/storelocator/location/state?'
 
 class HarborFreightSpider(scrapy.Spider):
     name = "harborfreight"
+    item_attributes = { 'brand': "Harbor Freight" }
     allowed_domains = ["harborfreight.com"]
     start_urls = (
         'https://www.harborfreight.com/storelocator/location/map',

@@ -18,6 +18,7 @@ HEADERS = {
 class BeaconAndBridgeSpider(scrapy.Spider):
 
     name = "beacon_and_bridge"
+    item_attributes = { 'brand': "Beacon Bridge Market" }
     allowed_domains = ["www.beaconandbridge.com/"]
 
     def start_requests(self):

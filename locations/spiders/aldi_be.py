@@ -15,6 +15,7 @@ WEEKDAYS = {
 
 class AldiBESpider(scrapy.Spider):
     name = "aldi_be"
+    item_attributes = { 'brand': "Aldi" }
     allowed_domains = ['nl.aldi.be']
     start_urls = (
         'https://nl.aldi.be/filialen/index/page-1',

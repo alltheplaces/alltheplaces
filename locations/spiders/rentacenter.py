@@ -20,6 +20,7 @@ DAY_MAPPING = {
 
 class RentACenterSpider(scrapy.Spider):
     name = "rentacenter"
+    item_attributes = { 'brand': "Rent-A-Center" }
     allowed_domains = ["rentacenter.com"]
 
     start_urls = [

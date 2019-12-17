@@ -51,9 +51,9 @@ class StarbucksSpider(scrapy.Spider):
                 'ref': store['id'],
                 'lon': storeLon,
                 'lat': storeLat,
+                'brand': store['brandName'],
                 'extras': {
                     'number': store['storeNumber'],
-                    'brand': store['brandName']
                 }
             }
             yield GeojsonPointItem(**properties)

@@ -10,6 +10,7 @@ regex_name = r"^(\s?[a-zA-z]+/?\s?[a-zA-z]{0,10}\s?Bob's)"
 
 class BobsSpider(scrapy.Spider):
     name = 'bobs'
+    item_attributes = { 'brand': "Bob's Burgers" }
     allowed_domains = ['www.bobsburgersandbrew.com']
     start_urls = ['https://www.bobsburgersandbrew.com/content/locations/locations']
 

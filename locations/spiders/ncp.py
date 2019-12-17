@@ -6,6 +6,7 @@ from locations.items import GeojsonPointItem
 
 class NcpSpider(scrapy.Spider):
     name = "ncp"
+    item_attributes = { 'brand': "NCP" }
     allowed_domains = ["www.ncp.co.uk"]
     start_urls = ("https://www.ncp.co.uk/parking-solutions/cities/",)
 

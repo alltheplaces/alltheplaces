@@ -15,6 +15,7 @@ _DAYNAMES = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su']
 class WaitroseSpider(scrapy.Spider):
 
     name = "waitrose"
+    item_attributes = { 'brand': "Waitrose" }
     allowed_domains = ["www.waitrose.com"]
     bf_home = 'http://www.waitrose.com/content/waitrose/en/bf_home'
     start_urls = (

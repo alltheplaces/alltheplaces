@@ -9,6 +9,7 @@ from locations.hours import OpeningHours
 
 class SevenElevenSpider(scrapy.Spider):
     name = "seven_eleven"
+    brand = '7-Eleven'
     allowed_domains = [
                         "www.7-eleven.com",
                         "api.7-eleven.com"

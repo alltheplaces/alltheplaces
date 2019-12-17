@@ -7,6 +7,7 @@ from locations.items import GeojsonPointItem
 
 class PublixSpider(scrapy.Spider):
     name = "publix"
+    item_attributes = { 'brand': "Publix" }
     allowed_domains = ['publix.com']
     start_urls = (
         'http://weeklyad.publix.com/Publix/Entry/Locations/',

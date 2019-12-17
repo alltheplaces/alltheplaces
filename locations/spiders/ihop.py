@@ -6,6 +6,7 @@ import re
 
 class IHOPSpider(scrapy.Spider):
     name = "ihop"
+    item_attributes = { 'brand': "IHOP" }
     allowed_domains = ["restaurants.ihop.com"]
     start_urls = (
         'https://restaurants.ihop.com/',

@@ -81,6 +81,7 @@ def opening_hours(datestring):
 
 class KeyfoodSpider(scrapy.Spider):
     name = "keyfood"
+    item_attributes = { 'brand': "Key Food" }
     allowed_domains = ["keyfood.mywebgrocer.com"]
     start_urls = (
         'http://keyfood.mywebgrocer.com/StoreLocator.aspx',

@@ -7,6 +7,7 @@ from locations.items import GeojsonPointItem
 
 class HEBSpider(scrapy.Spider):
     name = "heb"
+    item_attributes = { 'brand': "H-E-B" }
     allowed_domains = ["www.heb.com"]
     download_delay = 0.2
     start_urls = (

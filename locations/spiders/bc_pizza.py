@@ -11,6 +11,7 @@ regex_hours = r"\d{1,2}:\d{1,2}\s?[Aa]?[Pp]?[Mm]\s?-\s?\d{1,2}:\d{1,2}\s?" \
 
 class BcpizzaSpider(scrapy.Spider):
     name = "bcpizza"
+    item_attributes = { 'brand': "BC Pizza" }
     allowed_domains = ["bc.pizza"]
     start_urls = [
         'https://bc.pizza/wp-admin/admin-ajax.php?action=store_search&lat=42.331427&lng=-83.0457538&max_results=100&search_radius=1000&_=1515354445197']

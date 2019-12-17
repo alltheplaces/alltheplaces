@@ -77,10 +77,7 @@ class SignetJewelersSpider(scrapy.Spider):
             'lon': data["longitude"],
             'phone': data["phone"],
             'website': response.url,
-            'extras':
-                {
-                    'brand': re.search(r'www.(\w+)', response.url)[1]
-                }
+            'brand': re.search(r'www.(\w+)', response.url)[1],
         }
 
         yield GeojsonPointItem(**properties)
@@ -100,10 +97,7 @@ class SignetJewelersSpider(scrapy.Spider):
                 'country': 'GB',
                 'lat': store["latitude"],
                 'lon': store["longitude"],
-                'extras':
-                    {
-                        'brand': re.search(r'www.(\w+)', response.url)[1]
-                    }
+                'brand': re.search(r'www.(\w+)', response.url)[1],
             }
 
             yield GeojsonPointItem(**properties)

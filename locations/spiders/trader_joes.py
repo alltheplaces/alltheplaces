@@ -6,6 +6,7 @@ from locations.items import GeojsonPointItem
 
 class TraderJoesSpider(scrapy.Spider):
     name = "trader_joes"
+    item_attributes = { 'brand': "Trader Joe's" }
     allowed_domains = ["hosted.where2getit.com"]
     start_urls = (
         'https://hosted.where2getit.com/traderjoes/ajax?&xml_request=<request><appkey>8559C922-54E3-11E7-8321-40B4F48ECC77</appkey><formdata id="locatorsearch"><dataview>store_default</dataview><limit>3000</limit><geolocs><geoloc><addressline>53209</addressline><longitude></longitude><latitude></latitude><country></country></geoloc></geolocs><searchradius>3000</searchradius><where></where></formdata></request>',

@@ -8,6 +8,7 @@ DAYS=['Mo','Tu','We','Th','Fr','Sa','Su']
 from locations.items import GeojsonPointItem
 class DaveAndBustersSpider(scrapy.Spider):
     name = "dave_and_busters"
+    item_attributes = { 'brand': "Dave and Busters" }
     allowed_domains = ["daveandbusters.com"]
     start_urls = (
         'https://www.daveandbusters.com/locations',

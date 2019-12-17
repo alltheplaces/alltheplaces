@@ -19,6 +19,7 @@ BASE_URL = 'https://www.gnc.com/on/demandware.store/Sites-GNC-Site/default/Store
 
 class GNCSpider(scrapy.Spider):
     name = "gnc"
+    item_attributes = { 'brand': "GNC" }
     allowed_domains = ["www.gnc.com"]
     download_delay = 30
     start_urls = (

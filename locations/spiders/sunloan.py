@@ -17,6 +17,7 @@ DAYS={
 
 class SunLoanSpider(scrapy.Spider):
     name = "sunloan"
+    item_attributes = { 'brand': "Sun Loan" }
     allowed_domains = ["sunloan.com"]
     start_urls = (
         'https://www.sunloan.com/locations/',

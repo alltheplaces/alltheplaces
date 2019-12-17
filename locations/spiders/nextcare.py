@@ -18,6 +18,7 @@ DAYS = {
 
 class NextcareSpider(scrapy.Spider):
     name = "nextcare"
+    item_attributes = { 'brand': "NextCare Urgent Care" }
     allowed_domains = ["nextcare.com"]
     start_urls = (
         'https://nextcare.com/locations/',

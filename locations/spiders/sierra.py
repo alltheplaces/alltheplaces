@@ -10,6 +10,7 @@ from locations.hours import OpeningHours
 
 class SierraSpider(scrapy.Spider):
     name = "sierra"
+    item_attributes = { 'brand': "Sierra" }
     allowed_domains = ["sierra.com"]
 
     headers = {

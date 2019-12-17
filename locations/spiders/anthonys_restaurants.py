@@ -5,6 +5,7 @@ from locations.items import GeojsonPointItem
 
 class AnthonysRestaurantsSpiders(scrapy.Spider):
     name = "anthonys_restaurants"
+    item_attributes = { 'brand': "Anthony's" }
     allowed_domains = ["www.anthonys.com"]
     start_urls = (
         'https://www.anthonys.com/restaurants/search/47.6062095/-122.3320708/2000',

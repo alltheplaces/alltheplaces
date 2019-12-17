@@ -13,6 +13,7 @@ US_STATES = ["AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DC", "DE", "FL", "GA",
 
 class USArmyNationalGuardSpider(scrapy.Spider):
     name = "us_army_national_guard"
+    item_attributes = { 'brand': "US Army National Guard" }
     allowed_domains = ["www.nationalguard.com"]
 
     def start_requests(self):

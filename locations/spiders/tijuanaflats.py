@@ -7,6 +7,7 @@ from locations.items import GeojsonPointItem
 
 class TijuanaFlatsSpider(scrapy.Spider):
     name = "tijuanaflats"
+    item_attributes = { 'brand': "Tijuana Flats" }
     allowed_domains = ['tijuanaflats.com']
     start_urls = (
         'https://tijuanaflats.com/wpsl_stores-sitemap.xml',

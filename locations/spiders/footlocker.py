@@ -12,6 +12,7 @@ STORES_REGEX = r'https://stores.footlocker.com/.+/.+/.+/.+.html'
 
 class FootLockerSpider(scrapy.Spider):
     name = 'footlocker'
+    item_attributes = { 'brand': "Foot Locker" }
     allowed_domains = ['stores.footlocker.com']
     start_urls = (
         'https://stores.footlocker.com/sitemap.xml',

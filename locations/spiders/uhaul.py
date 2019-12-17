@@ -12,6 +12,7 @@ STATES = ['AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DC', 'DE', 'FL', 'GA',
 
 class UhaulSpider(scrapy.Spider):
     name = "uhaul"
+    item_attributes = { 'brand': "U-Haul" }
     allowed_domains = ["www.uhaul.com"]
 
     def start_requests(self):

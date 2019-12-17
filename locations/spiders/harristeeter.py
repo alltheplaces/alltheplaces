@@ -10,6 +10,7 @@ DAYS = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su']
 
 class HarristeeterSpider(scrapy.Spider):
     name = "harristeeter"
+    item_attributes = { 'brand': "Harris Teeter" }
     allowed_domains = ["harristeeter.com"]
     start_urls = (
         'https://www.harristeeter.com/store/#/app/store-locator',

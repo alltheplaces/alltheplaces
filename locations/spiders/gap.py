@@ -10,6 +10,7 @@ from locations.items import GeojsonPointItem
 
 class GapSpider(scrapy.Spider):
     name = "gap"
+    item_attributes = { 'brand': "Gap" }
     allowed_domains = ["www.gap.com"]
     gap_url = 'http://www.gap.com/products/store-locations.jsp'
     store_url = 'http://www.gap.com/resources/storeLocations/v1/us/store/?storeid={}'

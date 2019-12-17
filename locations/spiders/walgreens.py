@@ -54,9 +54,8 @@ class WalgreensSpider(scrapy.Spider):
             'opening_hours': self.parse_hours(json_data["openingHoursSpecification"]),
             'lat': float(json_data["geo"]["latitude"]),
             'lon': float(json_data["geo"]["longitude"]),
-            'extras': {
-                'brand': json_data.get("name") or ('Duane Reade' if 'duane' in response.url else 'Walgreens')
-            }
+            'brand': json_data.get("name") or ('Duane Reade' if 'duane' in response.url else 'Walgreens')
+            
         }
         return GeojsonPointItem(**props)
 

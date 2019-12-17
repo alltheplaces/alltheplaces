@@ -6,6 +6,7 @@ from locations.items import GeojsonPointItem
 
 class SheetzSpider(scrapy.Spider):
     name = "sheetz"
+    item_attributes = { 'brand': "Sheetz" }
     allowed_domains = ["orderz.sheetz.com"]
     start_urls = (
         "https://orderz.sheetz.com/sas/location?address=90210&fuelPrice=true&page=0&radius=1500&size=10000",

@@ -17,6 +17,7 @@ HEADERS = {
            }
 class GattispizzaSpider(scrapy.Spider):
     name = "gattispizza"
+    item_attributes = { 'brand': "Gatti's Pizza" }
     allowed_domains = ["gattispizza.com"]
 
     def start_requests(self):
