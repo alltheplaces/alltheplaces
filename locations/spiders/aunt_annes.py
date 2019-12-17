@@ -18,7 +18,7 @@ DAY_MAPPING = {'Monday': 'Mo',
 
 class AuntieAnnesSpider(scrapy.Spider):
     name = "auntie_annes"
-    brand = "Auntie Anne's"
+    item_attributes = { 'brand': "Auntie Anne's" }
     allowed_domains = ["www.auntieannes.com"]
     download_delay = 0.2
 

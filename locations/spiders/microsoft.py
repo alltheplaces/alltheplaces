@@ -5,7 +5,7 @@ from locations.items import GeojsonPointItem
 class MicrosoftSpider(scrapy.Spider):
 
     name = "microsoft"
-    brand = "Microsoft"
+    item_attributes = { 'brand': "Microsoft" }
     allowed_domains = ["www.microsoft.com"]
     download_delay = 0.5
     start_urls = (

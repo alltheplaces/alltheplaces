@@ -11,7 +11,7 @@ from locations.hours import OpeningHours
 class AshleyHomeStoreSpider(scrapy.Spider):
 
     name = "ashleyhomestore"
-    brand = "Ashley Home Store"
+    item_attributes = { 'brand': "Ashley Home Store" }
     allowed_domains = [
         "ashleyfurniture.com",
         "ashleyhomestore.ca",

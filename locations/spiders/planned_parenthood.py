@@ -7,7 +7,7 @@ from locations.items import GeojsonPointItem
 
 class PlannedParenthoodSpider(scrapy.Spider):
     name = "planned_parenthood"
-    brand = "Planned Parenthood"
+    item_attributes = { 'brand': "Planned Parenthood" }
     allowed_domains = ["www.plannedparenthood.org"]
     start_urls = (
         'https://www.plannedparenthood.org/health-center',

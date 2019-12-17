@@ -6,7 +6,7 @@ from locations.items import GeojsonPointItem
 
 class NordstromSpider(scrapy.Spider):
     name = "nordstrom"
-    brand = "Nordstrom"
+    item_attributes = { 'brand': "Nordstrom" }
     allowed_domains = ["shop.nordstrom.com"]
     start_urls = (
         'https://shop.nordstrom.com/c/sitemap-stores',

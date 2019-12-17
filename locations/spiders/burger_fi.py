@@ -11,7 +11,7 @@ HEADERS = {
 
 class BurgerFiSpider(scrapy.Spider):
     name = "burger_fi"
-    brand = "Burger Fi"
+    item_attributes = { 'brand': "Burger Fi" }
     allowed_domains = [ "order.burgerfi.com" ]
     start_urls = (
         "https://order.burgerfi.com/api/restaurants",

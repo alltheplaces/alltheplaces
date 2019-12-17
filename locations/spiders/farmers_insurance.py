@@ -8,7 +8,7 @@ from locations.items import GeojsonPointItem
 class FarmersInsuranceSpider(scrapy.Spider):
     download_delay = 0.2
     name = "farmers-insurance"
-    brand = "Farmers Insurance"
+    item_attributes = { 'brand': "Farmers Insurance" }
     allowed_domains = ["agents.farmers.com"]
     start_urls = (
         'https://agents.farmers.com/',

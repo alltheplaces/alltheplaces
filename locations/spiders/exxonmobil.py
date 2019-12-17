@@ -138,7 +138,7 @@ class CreateStartURLs:
 
 class ExxonMobilSpider(scrapy.Spider):
     name = "exxonmobil"
-    brand = "ExxonMobil"
+    item_attributes = { 'brand': "ExxonMobil" }
     crawled_locations = set()
     allowed_domains = ["exxon.com"]
     start_urls = CreateStartURLs().get_urls()

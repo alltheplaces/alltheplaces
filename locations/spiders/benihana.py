@@ -8,7 +8,7 @@ from locations.hours import OpeningHours
 class BenihanaSpider(scrapy.Spider):
     download_delay = 0.2
     name = "benihana"
-    brand = "Benihana"
+    item_attributes = { 'brand': "Benihana" }
     allowed_domains = ["benihana.com"]
 
     def start_requests(self):

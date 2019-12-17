@@ -11,7 +11,6 @@ STORELOCATOR = 'https://www.starbucks.com/bff/locations?lat={}&lng={}'
 
 class StarbucksSpider(scrapy.Spider):
     name = 'starbucks'
-    brand = "Starbucks"
     allowed_domains = ['www.starbucks.com']
 
     def start_requests(self):
@@ -52,9 +51,9 @@ class StarbucksSpider(scrapy.Spider):
                 'ref': store['id'],
                 'lon': storeLon,
                 'lat': storeLat,
+                'brand': store['brandName'],
                 'extras': {
                     'number': store['storeNumber'],
-                    'brand': store['brandName']
                 }
             }
             yield GeojsonPointItem(**properties)

@@ -9,7 +9,7 @@ from locations.items import GeojsonPointItem
 class AlbertAndWalterSpider(scrapy.Spider):
 
     name = "albert_walter"
-    brand = "Albert and Walter"
+    item_attributes = { 'brand': "Albert and Walter" }
     allowed_domains = ["www.aw.ca"]
     start_urls = (
         'https://web.aw.ca/api/locations/',

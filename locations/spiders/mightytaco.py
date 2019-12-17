@@ -18,7 +18,7 @@ day_formats = {
 class MightytacoSpider(scrapy.Spider):
 
     name = "mightytaco"
-    brand = "Mighty Taco"
+    item_attributes = { 'brand': "Mighty Taco" }
     allowed_domains = ["www.mightytaco.com"]
     download_delay = 1.5
     start_urls = (

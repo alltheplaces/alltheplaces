@@ -10,7 +10,7 @@ from locations.hours import OpeningHours
 class PotbellySandwichSpider(scrapy.Spider):
 
     name = "potbelly_sandwich"
-    brand = "Potbelly Sandwich Shop"
+    item_attributes = { 'brand': "Potbelly Sandwich Shop" }
     allowed_domains = ["www.potbelly.com"]
     start_urls = (
         'https://api-potbelly-production.fuzzstaging.com/proxy/all-locations',

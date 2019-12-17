@@ -10,7 +10,6 @@ from locations.hours import OpeningHours
 
 class LuxotticaSpider(scrapy.Spider):
     name = "luxottica"
-    brand = "Luxottica Group"
     allowed_domains = ['locations.searsoptical.com', 'local.targetoptical.com']
     start_urls = [
         'https://locations.searsoptical.com/',
@@ -49,10 +48,8 @@ class LuxotticaSpider(scrapy.Spider):
                 'website': response.url,
                 'lat': response.xpath('//*[@itemprop="latitude"]/@content').extract_first(),
                 'lon': response.xpath('//*[@itemprop="longitude"]/@content').extract_first(),
-                'extras': {
-                    'brand': response.xpath(
-                        '//*[@class="c-location-title"]/text() | //*[@itemprop="name"]/span/text()').extract_first()
-                }
+                'brand': response.xpath(
+                    '//*[@class="c-location-title"]/text() | //*[@itemprop="name"]/span/text()').extract_first(),
             }
 
             hours = self.parse_hours(response.xpath('//*[@itemprop="openingHours"]/@content').extract())

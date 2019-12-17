@@ -10,7 +10,6 @@ from locations.items import GeojsonPointItem
 class MarriottHotels(scrapy.Spider):
 
     name = "marriott"
-    brand = "Marriott"
     allowed_domains = ["marriott.com", "ritzcarlton.com"]
     download_delay = 0.2
 
@@ -38,7 +37,7 @@ class MarriottHotels(scrapy.Spider):
 
         brand = response.xpath('//ul[contains(@class,"tile-breadcrumbs")]/li[2]/a/span/text()').extract_first()
         if brand == "Design HotelsTM":
-            brand = "Design Hotels"
+            item_attributes = { 'brand': "Design Hotels" }
 
         properties = {
             'ref': re.search(r'.*/(.*)/$', response.url).groups()[0],
@@ -52,9 +51,7 @@ class MarriottHotels(scrapy.Spider):
             'lat': float(response.xpath('//span[@itemprop="latitude"]/text()').extract_first()),
             'lon': float(response.xpath('//span[@itemprop="longitude"]/text()').extract_first()),
             'website': response.url,
-            'extras': {
-                'brand': brand
-            }
+            'brand': brand
         }
 
         yield GeojsonPointItem(**properties)

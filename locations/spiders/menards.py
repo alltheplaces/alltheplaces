@@ -14,7 +14,7 @@ regex_lat_lon = r"-\d+\.\d+\",\s\"\d+.\d+"
 
 class MenardsSpider(scrapy.Spider):
     name = 'menards'
-    brand = "Menards"
+    item_attributes = { 'brand': "Menards" }
     allowed_domains = ['216.222.184.133']
     start_urls = ['https://216.222.184.133/main/storeLocator.html']
 

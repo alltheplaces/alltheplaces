@@ -3,7 +3,7 @@ import re
 from locations.items import GeojsonPointItem
 class LavenecianaSpider(scrapy.Spider):
     name = "laveneciana"
-    brand = "La Veneciana"
+    item_attributes = { 'brand': "La Veneciana" }
     allowed_domains = ["www.laveneciana.com.ar"]
     download_delay = 0.5
     start_urls = (

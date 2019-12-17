@@ -80,7 +80,7 @@ EXTENSIONS = {
 ITEM_PIPELINES = {
    'locations.pipelines.DuplicatesPipeline': 200,
    'locations.pipelines.ApplySpiderNamePipeline': 250,
-   'locations.pipelines.ApplyBrandPipeline': 300
+   'locations.pipelines.ApplySpiderLevelAttributesPipeline': 300
 }
 
 

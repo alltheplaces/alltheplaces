@@ -28,7 +28,7 @@ DAY_MAPPING = {
 
 class JcrewSpider(scrapy.Spider):
     name = "jcrew"
-    brand = "J. Crew"
+    item_attributes = { 'brand': "J. Crew" }
     allowed_domains = ['stores.jcrew.com', 'stores.factory.jcrew.com', 'stores.madewell.com']
     start_urls = [
         'https://stores.jcrew.com/en/api/v2/stores.json',
@@ -63,11 +63,11 @@ class JcrewSpider(scrapy.Spider):
         data = json.loads(response.body_as_unicode())
 
         if re.search(r'stores.(.\w+)', response.url).groups()[0] == 'factory':
-            brand = "J.Crew Factory"
+            item_attributes = { 'brand': "J.Crew Factory" }
         elif re.search(r'stores.(.\w+)', response.url).groups()[0] == 'jcrew':
-            brand = "J.Crew"
+            item_attributes = { 'brand': "J.Crew" }
         else:
-            brand = "Madewell"
+            item_attributes = { 'brand': "Madewell" }
 
         for place in data["stores"]:
             properties = {

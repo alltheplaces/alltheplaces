@@ -10,7 +10,7 @@ from locations.items import GeojsonPointItem
 
 class AthletaSpider(scrapy.Spider):
     name = "athleta"
-    brand = "Athleta"
+    item_attributes = { 'brand': "Athleta" }
     allowed_domains = ["stores.athleta.net"]
     athleta_url = 'http://stores.athleta.net'
     start_urls = (athleta_url, )

@@ -19,7 +19,7 @@ DAY_MAPPING = {
 class ManhattanBagelSpider(scrapy.Spider):
     """Copy of Einstein Bros. Bagels - all brands of the same parent company Coffee & Bagels"""
     name = "manhattanbagels"
-    brand = "Manhattan Bagels"
+    item_attributes = { 'brand': "Manhattan Bagels" }
     allowed_domains = ["manhattanbagel.com"]
     start_urls = (
         'https://locations.manhattanbagel.com/us',

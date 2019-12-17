@@ -9,7 +9,7 @@ Days = ['Mo', 'Tu', 'We', 'Th', 'Fr']
 
 class LidsSpider(scrapy.Spider):
     name = "lids"
-    brand = "Lids"
+    item_attributes = { 'brand': "Lids" }
     allowed_domains = ["lids.com"]
 
     def start_requests(self):

@@ -15,7 +15,7 @@ day_formats = {
 
 class BurgerKingSpider(scrapy.Spider):
     name = "burgerking"
-    brand = "Burger King"
+    item_attributes = { 'brand': "Burger King" }
     allowed_domains = ["locations.bk.com"]
     download_delay = 0.2
     start_urls = (

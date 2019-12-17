@@ -7,7 +7,7 @@ from locations.items import GeojsonPointItem
 
 class BrightHorizonsSpider(scrapy.Spider):
     name = "brighthorizons"
-    brand = "Bright Horizons"
+    item_attributes = { 'brand': "Bright Horizons" }
     allowed_domains = ['brighthorizons.com']
     start_urls = (
         'https://www.brighthorizons.com/sitemap.xml',

@@ -7,7 +7,7 @@ base_url = 'https://www.elclubdelamilanesa.com/'
 
 class MilanesaSpider(scrapy.Spider):
     name = 'milanesa'
-    brand = "Club Milanesa"
+    item_attributes = { 'brand': "Club Milanesa" }
     allowed_domains =['www.elclubdelamilanesa.com']
     start_urls = ['https://www.elclubdelamilanesa.com/caba.html']
 

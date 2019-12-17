@@ -7,7 +7,7 @@ import html
 
 class AnytimeFitnessSpider(scrapy.Spider):
     name = 'anytime_fitness'
-    brand = "Anytime Fitness"
+    item_attributes = { 'brand': "Anytime Fitness" }
     allowed_domains = ['www.anytimefitness.com']
 
     def start_requests(self):

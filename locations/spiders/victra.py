@@ -9,7 +9,7 @@ from locations.hours import OpeningHours
 
 class VictraSpider(scrapy.Spider):
     name = "victra"
-    brand = "Victra"
+    item_attributes = { 'brand': "Victra" }
     allowed_domains = []
     start_urls = [
         'https://victra.com/Handlers/LocationData.ashx',

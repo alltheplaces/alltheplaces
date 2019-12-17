@@ -18,7 +18,7 @@ DAY_MAPPING = {
 
 class ATTScraper(scrapy.Spider):
     name = "att"
-    brand = "AT&T"
+    item_attributes = { 'brand': "AT&T" }
     allowed_domains = ['www.att.com']
     start_urls = (
         'https://www.att.com/stores/us',

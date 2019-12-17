@@ -7,7 +7,7 @@ from locations.items import GeojsonPointItem
 class VeaSpider(scrapy.Spider):
 
     name = "vea"
-    brand = "Vea Cencosud"
+    item_attributes = { 'brand': "Vea Cencosud" }
     allowed_domains = ["www.supermercadosvea.com"]
     start_urls = (
         'http://www.supermercadosvea.com.ar/sucursales-obtener.html',

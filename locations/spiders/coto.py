@@ -6,7 +6,7 @@ from locations.items import GeojsonPointItem
 
 class CotoSpider(scrapy.Spider):
     name = "coto"
-    brand = "Coto"
+    item_attributes = { 'brand': "Coto" }
     allowed_domains = ["www.coto.com"]
     start_urls = ['http://www.coto.com.ar/mapassucursales/Sucursales/ListadoSucursalesPorDistancia.json.aspx?latitud=-34.6037389&longitud=-58.38157039999999&filtroComunidad=0&_=1512931386401']
 

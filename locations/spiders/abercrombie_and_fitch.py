@@ -10,7 +10,7 @@ from locations.hours import OpeningHours
 
 class AbercrombieAndFitchSpider(scrapy.Spider):
     name = "abercrombie_and_fitch"
-    brand = "Abercrombie and Fitch"
+    item_attributes = { 'brand': "Abercrombie and Fitch" }
     allowed_domains = ["abercrombie.com"]
     # Website is blocking scrapers so I had to change the User Agent to get around this
     custom_settings = {

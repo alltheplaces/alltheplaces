@@ -8,7 +8,7 @@ from locations.items import GeojsonPointItem
 
 class SuperAmericaSpider(scrapy.Spider):
     name = "superamerica"
-    brand = "SuperAmerica"
+    item_attributes = { 'brand': "SuperAmerica" }
     allowed_domains = ["superamerica.com"]
     start_urls = (
         'http://superamerica.com/wp-admin/admin-ajax.php?action=store_search&lat=45.0&lng=-90.0&max_results=0&search_radius=500',

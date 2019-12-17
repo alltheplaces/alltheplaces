@@ -43,7 +43,7 @@ ADDITONAL_CITIES = [
 
 class YmcaSpider(scrapy.Spider):
     name = "ymca"
-    brand = "YMCA"
+    item_attributes = { 'brand': "YMCA" }
     allowed_domains = ["ymca.net"]
     download_delay = 0.5
 

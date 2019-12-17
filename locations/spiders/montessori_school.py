@@ -7,7 +7,7 @@ from locations.items import GeojsonPointItem
 
 class MontessoriSchoolSpider(scrapy.Spider):
     name = "montessori_school"
-    brand = "Montessori School"
+    item_attributes = { 'brand': "Montessori School" }
     allowed_domains = ["www.montessori.com"]
     start_urls = (
         'https://www.montessori.com/montessori-schools/find-a-school/',

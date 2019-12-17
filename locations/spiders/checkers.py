@@ -7,7 +7,7 @@ from locations.items import GeojsonPointItem
 
 class CheckersSpider(scrapy.Spider):
     name = "checkers"
-    brand = "Checkers Drive-In"
+    item_attributes = { 'brand': "Checkers Drive-In" }
     allowed_domains = ["checkers.com"]
     start_urls = (
         'https://www.checkers.com/locations/?zip_code=97035&radius=25000',

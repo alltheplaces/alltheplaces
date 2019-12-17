@@ -5,7 +5,7 @@ import json
 
 class PaylessSpider(scrapy.Spider):
     name = "payless"
-    brand = "Payless"
+    item_attributes = { 'brand': "Payless" }
     allowed_domains = ["payless.com"]
     start_urls = (
         'https://www.payless.com/on/demandware.store/Sites-payless-Site/default/Stores-GetNearestStores?postalCode'

@@ -7,7 +7,7 @@ from locations.items import GeojsonPointItem
 
 class KingSooperSpider(scrapy.Spider):
     name = "king_sooper"
-    brand = "King Sooper"
+    item_attributes = { 'brand': "King Sooper" }
     allowed_domains = ["www.kingsoopers.com"]
     custom_settings = {
         'USER_AGENT': 'Mozilla/5.0',

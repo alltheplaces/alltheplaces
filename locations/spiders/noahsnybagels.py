@@ -20,7 +20,7 @@ DAY_MAPPING = {
 class NoahsNYBagelsSpider(scrapy.Spider):
     """Copy of Einstein Bros. Bagels - all brands of the same parent company Coffee & Bagels"""
     name = "noahsnybagels"
-    brand = "Noah's New York Bagels"
+    item_attributes = { 'brand': "Noah's New York Bagels" }
     allowed_domains = ["noahs.com"]
     start_urls = (
         'https://locations.noahs.com/us',

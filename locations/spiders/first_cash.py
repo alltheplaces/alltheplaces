@@ -10,7 +10,7 @@ from locations.hours import OpeningHours
 
 class FirstCashSpider(scrapy.Spider):
     name = "first_cash"
-    brand = "First Cash"
+    item_attributes = { 'brand': "First Cash" }
     allowed_domains = ['find.cashamerica.us']
 
     def start_requests(self):
@@ -38,9 +38,7 @@ class FirstCashSpider(scrapy.Spider):
                 'lat': place["latitude"],
                 'lon': place["longitude"],
                 'phone': place["phone"],
-                'extras': {
-                    'brand': place["brand"]
-                }
+                'brand': place["brand"]
             }
 
             yield GeojsonPointItem(**properties)

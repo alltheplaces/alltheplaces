@@ -13,7 +13,7 @@ STATES = ["AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DC", "DE", "FL", "GA",
 class KrystalSpider(scrapy.Spider):
 
     name = "krystal"
-    brand = "Krystal"
+    item_attributes = { 'brand': "Krystal" }
     allowed_domains = ["krystal.com"]
     download_delay = 1.5
     start_urls = (

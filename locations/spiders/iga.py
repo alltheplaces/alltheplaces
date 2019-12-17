@@ -8,7 +8,7 @@ DAYS = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su']
 
 class IgaSpider(scrapy.Spider):
     name = "iga"
-    brand = "IGA"
+    item_attributes = { 'brand': "IGA" }
     allowed_domains = ["iga.com"]
     start_urls = (
         'https://www.iga.com/consumer/locator.aspx',

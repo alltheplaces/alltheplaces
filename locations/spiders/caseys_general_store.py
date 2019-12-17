@@ -13,7 +13,7 @@ Seven_Days = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su']
 
 class CaseysGeneralStoreSpider(scrapy.Spider):
     name = "caseys_general_store"
-    brand = "Casey's General Store"
+    item_attributes = { 'brand': "Casey's General Store" }
     allowed_domains = ["caseys.com"]
 
     def start_requests(self):

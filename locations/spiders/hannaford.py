@@ -12,7 +12,7 @@ regex_id = r"(t\.id = \"\d+\")"
 
 class HannafordSpider(scrapy.Spider):
     name = 'hannaford'
-    brand = "Hannaford"
+    item_attributes = { 'brand': "Hannaford" }
     allowed_domains = ['www.hannaford.com']
     start_urls = [
         'https://www.hannaford.com/custserv/locate_store.cmd?form_state=locateStoreForm&latitude=&longitude=&formId=locateStoreForm&radius=500&cityStateZip=maine&submitBtn.x=37&submitBtn.y=10']

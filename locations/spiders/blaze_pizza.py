@@ -8,7 +8,7 @@ regex = r"\[{.*}\]"
 
 class BlazePizzaSpider(scrapy.Spider):
     name = "blazepizza"
-    brand = "Blaze Pizza"
+    item_attributes = { 'brand': "Blaze Pizza" }
     allowed_domains = ["www.blazepizza.com"]
     start_urls = ['http://www.blazepizza.com/locations/']
 

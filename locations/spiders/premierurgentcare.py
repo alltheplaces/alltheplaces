@@ -9,7 +9,7 @@ class DifferentHours(Exception):
 
 class PremierurgentcareSpider(scrapy.Spider):
     name = "premierurgentcare"
-    brand = "Premier Urgent Care"
+    item_attributes = { 'brand': "Premier Urgent Care" }
     allowed_domains = ["premierimc.com"]
     start_urls = (
         'http://www.premierimc.com/wp-admin/admin-ajax.php?action=store_search&lat=40.030628&lng=-75.36398400000002&max_results=50&search_radius=10&autoload=1',

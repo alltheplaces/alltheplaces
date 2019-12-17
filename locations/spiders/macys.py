@@ -19,7 +19,7 @@ DAY_MAPPING = {
 
 class MacysSpider(scrapy.Spider):
     name = 'macys'
-    brand = "Macy's"
+    item_attributes = { 'brand': "Macy's" }
     allowed_domains = ['macys.com']
     download_delay = 0.2
     start_urls = (

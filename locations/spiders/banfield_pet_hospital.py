@@ -8,7 +8,7 @@ from locations.hours import OpeningHours
 
 class BanfieldPetHospitalScraper(scrapy.Spider):
     name = "banfield_pet_hospital"
-    brand = "Banfield Pet Hospital"
+    item_attributes = { 'brand': "Banfield Pet Hospital" }
     allowed_domains = ["www.banfield.com"]
     download_delay = 0.5
     start_urls = (

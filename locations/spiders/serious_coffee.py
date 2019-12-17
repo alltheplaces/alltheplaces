@@ -5,7 +5,7 @@ from locations.items import GeojsonPointItem
 class SeriousCoffeeSpider(scrapy.Spider):
 
     name = "seriouscoffee"
-    brand = "Serious Coffee"
+    item_attributes = { 'brand': "Serious Coffee" }
     allowed_domains = ["www.seriouscoffee.com"]
     download_delay = 0.5
     start_urls = (

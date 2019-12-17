@@ -7,7 +7,7 @@ from locations.items import GeojsonPointItem
 class McLocalizer(scrapy.Spider):
 
     name = "mclocalizer"
-    brand = "McDonald's"
+    item_attributes = { 'brand': "McDonald's" }
     allowed_domains = [
         "www.mcdonalds.com", 
         "www.mcdonalds.com.pr", 

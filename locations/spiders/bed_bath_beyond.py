@@ -7,7 +7,7 @@ from locations.items import GeojsonPointItem
 
 class BedBathBeyondSpider(scrapy.Spider):
     name = "bed_bath_beyond"
-    brand = "Bed Bath & Beyond"
+    item_attributes = { 'brand': "Bed Bath & Beyond" }
     allowed_domains = ["stores.bedbathandbeyond.com"]
     start_urls = (
         'https://stores.bedbathandbeyond.com/',

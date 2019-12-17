@@ -6,7 +6,6 @@ from locations.items import GeojsonPointItem
 
 class RiteAidSpider(scrapy.Spider):
     name = "riteaid"
-    brand = "Rite Aid"
     allowed_domains = ["riteaid.com"]
     start_urls = (
         'https://locations.riteaid.com/',
@@ -116,10 +115,7 @@ class RiteAidSpider(scrapy.Spider):
             'lon' : float(response.xpath('//meta[contains(@itemprop,"longitude")]/@content').extract_first()),
             'website': response.url,
             'opening_hours': self.store_hours(hours),
-            'extras': {
-                'brand': brand.strip()
-            }
-
+            'brand': brand.strip(),
         }
 
         yield GeojsonPointItem(**properties)

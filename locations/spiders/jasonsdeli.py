@@ -10,7 +10,7 @@ from locations.hours import OpeningHours
 class JasonsDeliSpider(scrapy.Spider):
     download_delay = 0.2
     name = "jasonsdeli"
-    brand = "Jason's Deli"
+    item_attributes = { 'brand': "Jason's Deli" }
     allowed_domains = ["jasonsdeli.com"]
     start_urls = (
         'https://www.jasonsdeli.com/restaurants',

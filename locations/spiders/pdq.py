@@ -8,7 +8,7 @@ from locations.items import GeojsonPointItem
 
 class PDQSpider(scrapy.Spider):
     name = "pdq"
-    brand = "PDQ"
+    item_attributes = { 'brand': "PDQ" }
     allowed_domains = ['eatpdq.qatserver.com']
     start_urls = (
         'http://eatpdq.qatserver.com/sitemap/sitemap.gz',

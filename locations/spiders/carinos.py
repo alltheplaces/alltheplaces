@@ -9,7 +9,7 @@ from locations.items import GeojsonPointItem
 class CarinosSpider(scrapy.Spider):
 
     name = "carinos"
-    brand = "Carino's Italian"
+    item_attributes = { 'brand': "Carino's Italian" }
     allowed_domains = ["www.carinos.com"]
     start_urls = (
         'http://www.carinos.com/Location/Maps?locationType=2',

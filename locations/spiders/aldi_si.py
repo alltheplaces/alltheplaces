@@ -16,7 +16,7 @@ WEEKDAYS = {
 
 class AldiSISpider(scrapy.Spider):
     name = 'aldi_si'
-    brand = "Aldi"
+    item_attributes = { 'brand': "Aldi" }
     allowed_domains = ['www.yellowmap.de']
     start_urls = (
         'https://www.yellowmap.de/Presentation/AldiSued/sl-SI/ResultList?LocX=&LocY=&HiddenBranchCode=&BranchCode=&Lux=13.3154296875&Luy=47.56170075451973&Rlx=16.600341796875&Rly=45.213003555993964&ZoomLevel=4',

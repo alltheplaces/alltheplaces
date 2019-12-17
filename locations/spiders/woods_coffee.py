@@ -10,7 +10,7 @@ daysKey = {
 
 class WoodsCoffeeSpider(scrapy.Spider):
         name = "woods_coffee"
-        brand = "Woods Coffee"
+        item_attributes = { 'brand': "Woods Coffee" }
         allowed_domains = ["www.woodscoffee.com"]
         start_urls = (
                 'https://woodscoffee.com/locations/',

@@ -5,7 +5,7 @@ import json
 
 class WholeFoodsSpider(scrapy.Spider):
     name = "whole_foods"
-    brand = "Whole Foods"
+    item_attributes = { 'brand': "Whole Foods" }
     allowed_domains = ["www.wholefoodsmarket.com"]
     start_urls = (
         'https://www.wholefoodsmarket.com/ajax/stores',

@@ -21,7 +21,7 @@ DAY_MAPPING = {
 class TGIFridaySpider(scrapy.Spider):
     download_delay = 0.2
     name = "tgifridays"
-    brand = "TGI Friday's"
+    item_attributes = { 'brand': "TGI Friday's" }
     allowed_domains = ["tgifridays.com"]
     start_urls = (
         'https://locations.tgifridays.com/index.html',

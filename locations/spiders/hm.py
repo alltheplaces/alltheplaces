@@ -48,7 +48,7 @@ def process_hours(opening_hours):
 
 class HMSpider(scrapy.Spider):
     name = "hm-worldwide"
-    brand = "H&M"
+    item_attributes = { 'brand': "H&M" }
     all_stores_uri = 'https://hm.storelocator.hm.com/rest/storelocator/stores/1.0/locale/en_US/country/{}/'
     start_urls = ["http://www.hm.com/entrance.ahtml"]
 

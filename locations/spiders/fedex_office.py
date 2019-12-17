@@ -8,7 +8,7 @@ from locations.hours import OpeningHours
 
 class FedExOfficeSpider(scrapy.Spider):
     name = "fedex_office_alt"
-    brand = "FedEx Office"
+    item_attributes = { 'brand': "FedEx Office" }
     allowed_domains = ['fedex.com']
     download_delay = 0.2
     start_urls = [

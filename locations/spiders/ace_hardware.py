@@ -9,7 +9,7 @@ DAY_MAPPING = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday
 
 class AceHardwareSpider(scrapy.Spider):
     name = "ace_hardware"
-    brand = "Ace Hardware"
+    item_attributes = { 'brand': "Ace Hardware" }
     allowed_domains = ["www.acehardware.com"]
     download_delay = 0.1
     start_urls = (

@@ -8,7 +8,7 @@ from locations.items import GeojsonPointItem
 
 class TacobellSpider(scrapy.Spider):
     name = "tacobell"
-    brand = "Taco Bell"
+    item_attributes = { 'brand': "Taco Bell" }
     allowed_domains = ["locations.tacobell.com"]
     start_urls = ("https://locations.tacobell.com/",)
     download_delay = 0.2

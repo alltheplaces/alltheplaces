@@ -6,7 +6,7 @@ from locations.items import GeojsonPointItem
 
 class ExtraSpaceStorageSpider(scrapy.Spider):
     name = "extra_space_storage"
-    brand = "Extra Space Storage"
+    item_attributes = { 'brand': "Extra Space Storage" }
     allowed_domains = [ "www.extraspace.com" ]
     start_urls = (
         "https://www.extraspace.com/sitemap_sites.aspx",

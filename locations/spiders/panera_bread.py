@@ -7,7 +7,7 @@ from locations.items import GeojsonPointItem
 class PaneraBread(scrapy.Spider):
 
     name = 'panera'
-    brand = "Panera Bread"
+    item_attributes = { 'brand': "Panera Bread" }
     download_delay = 1.5
     allowed_domains = ["panerabread.com"]
     start_urls = (

@@ -13,7 +13,7 @@ DAY_MAPPING = {
 class LagenovesaSpider(scrapy.Spider):
 
     name = "lagenovesa"
-    brand = "La Genovesa"
+    item_attributes = { 'brand': "La Genovesa" }
     allowed_domains = ["lagenovesasuper.com.ar"]
     download_delay = 1.5
     start_urls = (

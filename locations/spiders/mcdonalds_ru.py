@@ -5,7 +5,7 @@ from locations.items import GeojsonPointItem
 
 class McDonaldsRUSpider(scrapy.Spider):
     name = "mcdonalds_ru"
-    brand = "McDonald's"
+    item_attributes = { 'brand': "McDonald's" }
     allowed_domains = ["mcdonalds.ru"]
 
     def start_requests(self):

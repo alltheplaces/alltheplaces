@@ -5,7 +5,7 @@ from locations.items import GeojsonPointItem
 
 class TheBarreCodeSpider(scrapy.Spider):
     name = "thebarrecode"
-    brand = "The Barre Code"
+    item_attributes = { 'brand': "The Barre Code" }
     allowed_domains = ["thebarrecode.com"]
     start_urls = (
         'http://www.thebarrecode.com/',

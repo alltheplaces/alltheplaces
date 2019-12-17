@@ -11,7 +11,7 @@ from scrapy.selector import Selector
 
 class CalvinKleinSpider(scrapy.Spider):
     name = "calvin_klein"
-    brand = "Calvin Klein"
+    item_attributes = { 'brand': "Calvin Klein" }
     allowed_domains = ['gotwww.com', 'calvinklein.com']
 
     def start_requests(self):

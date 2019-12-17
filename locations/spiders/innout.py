@@ -5,7 +5,7 @@ from locations.items import GeojsonPointItem
 
 class TemplateSpider(scrapy.Spider):
     name = "innout"
-    brand = "In-N-Out Burger"
+    item_attributes = { 'brand': "In-N-Out Burger" }
 
     allowed_domains = ["www.in-n-out.com"]
     start_urls = ['http://locations.in-n-out.com/api/finder/search/?showunopened=false&latitude='

@@ -4,7 +4,7 @@ from locations.items import GeojsonPointItem
 class MarketBasketSpider(scrapy.Spider):
 
     name = "market_basket"
-    brand = "Market Basket"
+    item_attributes = { 'brand': "Market Basket" }
     allowed_domains = ["www.mydemoulas.net"]
     download_delay = 0.5
     start_urls = (

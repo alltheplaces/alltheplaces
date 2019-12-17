@@ -17,7 +17,7 @@ DAY_MAPPING = {
 class WendysSpider(scrapy.Spider):
 
     name = "wendys"
-    brand = "Wendy's"
+    item_attributes = { 'brand': "Wendy's" }
     allowed_domains = ["locations.wendys.com"]
     download_delay = 0.5
     download_timeout = 30

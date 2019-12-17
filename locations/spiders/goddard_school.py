@@ -7,7 +7,7 @@ from locations.items import GeojsonPointItem
 
 class GoddardSchoolSpider(scrapy.Spider):
     name = "goddard_school"
-    brand = "Goddard School"
+    item_attributes = { 'brand': "Goddard School" }
     allowed_domains = ["www.goddardschool.com"]
     start_urls = (
         'https://www.goddardschool.com/LocationsXML.aspx',

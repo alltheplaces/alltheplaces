@@ -6,7 +6,7 @@ from locations.hours import OpeningHours
 
 class AfcUrgentCareSpider(scrapy.Spider):
     name = "afcurgentcare"
-    brand = "AFC Urgent Care"
+    item_attributes = { 'brand': "AFC Urgent Care" }
     allowed_domains = ["afcurgentcare.com"]
     download_delay = 0.2
     start_urls = (

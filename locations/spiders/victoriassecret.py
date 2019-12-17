@@ -16,7 +16,7 @@ DAY_MAPPING = {
 
 class VictoriassecretSpider(scrapy.Spider):
     name = "victoriassecret"
-    brand = "Victoria's Secret"
+    item_attributes = { 'brand': "Victoria's Secret" }
     allowed_domains = ["victoriassecret.com"]
     start_urls = [
         'https://www.victoriassecret.com/store-locator#storeList/US',

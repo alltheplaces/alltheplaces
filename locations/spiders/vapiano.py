@@ -8,7 +8,7 @@ regex = r"\[{.*}\]"
 
 class VapianoSpider(scrapy.Spider):
     name = "vapiano_us"
-    brand = "Vapiano"
+    item_attributes = { 'brand': "Vapiano" }
     allowed_domains = ["us.vapiano.com"]
     download_delay = 0
     start_urls = ['https://us.vapiano.com/en/restaurants/']

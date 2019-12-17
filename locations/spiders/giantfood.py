@@ -14,7 +14,7 @@ WEEKDAYS = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su']
 
 class GiantFoodSpider(scrapy.Spider):
     name = "giantfood"
-    brand = "Giant Food"
+    item_attributes = { 'brand': "Giant Food" }
     allowed_domains = ["giantfood.com"]
 
     def start_requests(self):

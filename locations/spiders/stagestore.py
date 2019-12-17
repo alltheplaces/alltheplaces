@@ -17,7 +17,7 @@ DAY_MAPPING = {
 class WhiteHouseBlackMarketSpider(scrapy.Spider):
     download_delay = 0.2
     name = "stagestore"
-    brand = "Stage"
+    item_attributes = { 'brand': "Stage" }
     allowed_domains = ["stage.com"]
     start_urls = (
         'https://stores.stage.com/',

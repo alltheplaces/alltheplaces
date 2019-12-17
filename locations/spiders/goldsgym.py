@@ -10,7 +10,7 @@ from locations.hours import OpeningHours
 
 class GoldsGymSpider(scrapy.Spider):
     name = "goldsgym"
-    brand = "Gold's Gym"
+    item_attributes = { 'brand': "Gold's Gym" }
     allowed_domains = ["goldsgym.com"]
 
     start_urls = [

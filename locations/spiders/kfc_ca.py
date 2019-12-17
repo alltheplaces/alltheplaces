@@ -20,7 +20,7 @@ DAY_MAPPING = {
 
 class KFCCanadaSpider(scrapy.Spider):
     name = "kfc_ca"
-    brand = "KFC"
+    item_attributes = { 'brand': "KFC" }
     allowed_domains = ['kfc.ca']
     start_urls = [
         'https://www.kfc.ca/find-a-kfc',

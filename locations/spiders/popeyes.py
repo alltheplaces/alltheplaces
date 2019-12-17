@@ -14,7 +14,7 @@ def replacement(x):
 class PopeyesSpider(scrapy.Spider):
 
     name = "popeyes"
-    brand = "Popeyes Louisiana Kitchen"
+    item_attributes = { 'brand': "Popeyes Louisiana Kitchen" }
     allowed_domains = ["www.popeyes.com", "locations.popeyes.com"]
     download_delay = 0.2
     start_urls = (

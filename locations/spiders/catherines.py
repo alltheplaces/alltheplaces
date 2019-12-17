@@ -7,7 +7,7 @@ import json
 class CatherinesSpider(scrapy.Spider):
 
     name = "catherines"
-    brand = "Catherine's"
+    item_attributes = { 'brand': "Catherine's" }
     allowed_domains = ["stores.catherines.com"]
     download_delay = 0.5
     start_urls = (

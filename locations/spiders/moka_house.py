@@ -5,7 +5,7 @@ from locations.items import GeojsonPointItem
 
 class MokaHouseSpider(scrapy.Spider):
     name = 'moka_house'
-    brand = "Moka House"
+    item_attributes = { 'brand': "Moka House" }
     allowed_domains = ['mokahouse.com']
     start_urls = (
         'http://mokahouse.com/locations/',

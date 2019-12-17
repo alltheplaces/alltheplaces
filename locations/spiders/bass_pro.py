@@ -36,8 +36,8 @@ class BassProSpider(scrapy.Spider):
                 lat=float(lat.strip()),
                 lon=float(lon.strip()),
                 website=response.urljoin(store["pageurl"]),
+                brand=brands[store['brand']],
                 extras={
-                    "brand": brands[store['brand']],
                     "number": store['key']
                 }
             )

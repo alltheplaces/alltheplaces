@@ -30,12 +30,15 @@ class ApplySpiderNamePipeline(object):
 
         return item
 
-class ApplyBrandPipeline(object):
-
+class ApplySpiderLevelAttributesPipeline(object):
     def process_item(self, item, spider):
-        existing_extras = item.get('extras', {})
-        if hasattr(spider, 'brand') and 'brand' not in existing_extras:
-            existing_extras['brand'] = spider.brand
-        item['extras'] = existing_extras
+        if not hasattr(spider, 'item_attributes'):
+            return item
+
+        item_attributes = spider.item_attributes
+        
+        for (key, value) in item_attributes.items():
+            if key not in item:
+                item[key] = value
 
         return item

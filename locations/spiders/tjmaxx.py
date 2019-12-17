@@ -6,7 +6,7 @@ from locations.items import GeojsonPointItem
 
 class TjmaxxSpider(scrapy.Spider):
     name = "tjmaxx"
-    brand = "T.J. Maxx"
+    item_attributes = { 'brand': "T.J. Maxx" }
     allowed_domains = ["tjx.com", "tjmaxx.com"]
     start_urls = (
         'https://tjmaxx.tjx.com/store/stores/allStores.jsp',

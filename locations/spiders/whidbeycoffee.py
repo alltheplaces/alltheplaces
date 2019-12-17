@@ -16,7 +16,7 @@ DAY_MAPPING = {
 class WhidbeycoffeeSpider(scrapy.Spider):
 
     name = "whidbeycoffee"
-    brand = "Whidbey Coffee"
+    item_attributes = { 'brand': "Whidbey Coffee" }
     allowed_domains = ["www.whidbeycoffee.com"]
     download_delay = 1
     start_urls = (

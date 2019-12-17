@@ -13,7 +13,7 @@ day_mapping = {'Monday': 'Mo', 'Tuesday': 'Tu', 'Wednesday': 'We', 'Thursday': '
 class LowesSpider(scrapy.Spider):
     """"This spider scrapes Lowes retail store locations"""
     name = "lowes"
-    brand = "Lowe's"
+    item_attributes = { 'brand': "Lowe's" }
     allowed_domains = ["lowes.com"]
     start_urls = ('http://www.lowes.com/Lowes-Stores',)
     download_delay = 0.5

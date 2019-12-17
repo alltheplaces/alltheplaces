@@ -10,7 +10,7 @@ daysKey = {
 
 class SteakNShakeSpider(scrapy.Spider):
     name = "steak_n_shake"
-    brand = "Steak N Shake"
+    item_attributes = { 'brand': "Steak N Shake" }
     allowed_domains = ["www.steaknshake.com"]
     start_urls = (
         'https://www.steaknshake.com/zsapi/locations/',

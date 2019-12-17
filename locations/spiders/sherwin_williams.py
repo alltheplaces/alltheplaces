@@ -9,7 +9,6 @@ from locations.items import GeojsonPointItem
 
 class SherwinWilliamsSpider(scrapy.Spider):
     name = "sherwin_williams"
-    brand = "Sherwin Williams"
     allowed_domains = ["www.sherwin-williams.com"]
 
     #  Covers United States, Canada, UK, Puerto Rico, Bahamas with 500 mile radius - (from regis spider)
@@ -122,9 +121,9 @@ class SherwinWilliamsSpider(scrapy.Spider):
                     "lat": float(store['latitude']),
                     "lon": float(store['longitude']),
                     "website": 'https://www.sherwin-williams.com' + store['url'],
+                    'brand': store_type,
                     "extras": {
                         'number': store['storeNumber'],
-                        'brand': store_type
                     }
                 }
 

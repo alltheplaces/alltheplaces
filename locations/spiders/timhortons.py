@@ -5,7 +5,7 @@ from locations.items import GeojsonPointItem
 
 class TimHortonsSpider(scrapy.Spider):
     name = "timhortons"
-    brand = "Tim Horton's"
+    item_attributes = { 'brand': "Tim Horton's" }
     allowed_domains = ["locations.timhortons.com"]
     start_urls = (
         'https://locations.timhortons.com/',

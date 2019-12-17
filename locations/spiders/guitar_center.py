@@ -11,7 +11,7 @@ day_mapping = {'MONDAY': 'Mo','TUESDAY': 'Tu','WEDNESDAY': 'We','THURSDAY': 'Th'
 
 class GuitarCenterSpider(scrapy.Spider):
     name = "guitar_center"
-    brand = "Guitar Center"
+    item_attributes = { 'brand': "Guitar Center" }
     allowed_domains = ["stores.guitarcenter.com"]
     start_urls = (
         'https://stores.guitarcenter.com/',

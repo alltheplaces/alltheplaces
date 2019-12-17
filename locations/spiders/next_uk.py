@@ -10,7 +10,7 @@ DAYS = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su']
 
 class NextSpider(scrapy.Spider):
     name = "next_uk"
-    brand = "Next"
+    item_attributes = { 'brand': "Next" }
     allowed_domains = ["next.co.uk"]
     start_urls = (
         'http://stores.next.co.uk/',

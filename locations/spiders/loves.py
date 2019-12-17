@@ -9,7 +9,7 @@ HEADERS = {'Content-Type': 'application/json'}
 
 class LovesSpider(scrapy.Spider):
     name = "loves"
-    brand = "Love's Travel Stops & Country Stores"
+    item_attributes = { 'brand': "Love's Travel Stops & Country Stores" }
     allowed_domains = ["www.loves.com"]
     download_delay = 0.2
 

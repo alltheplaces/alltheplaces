@@ -20,7 +20,6 @@ DAY_MAPPING = {
 
 class MauricesSpider(scrapy.Spider):
     name = "maurices"
-    brand = "Maurices"
     allowed_domains = ["www.maurices.com", "locations.maurices.com"]
     download_delay = 0.2
     start_urls = (
@@ -55,9 +54,7 @@ class MauricesSpider(scrapy.Spider):
             'lon': float(response.xpath('//meta[@itemprop="longitude"]/@content').extract_first()),
             'ref': response.url,
             'website': response.url,
-            'extras': {
-                'brand': response.xpath('//span[@class="LocationName-brand"]/text()').extract_first()
-            }
+            'brand': response.xpath('//span[@class="LocationName-brand"]/text()').extract_first()
         }
 
         opening_hours = self.parse_hours(response.xpath('//*[contains(@class, "js-hours-today")]/@data-days').extract_first())

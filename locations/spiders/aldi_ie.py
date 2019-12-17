@@ -7,7 +7,7 @@ from locations.items import GeojsonPointItem
 
 class AldiIESpider(scrapy.Spider):
     name = "aldi_ie"
-    brand = "Aldi"
+    item_attributes = { 'brand': "Aldi" }
     allowed_domains = ['www.aldi.ie']
     start_urls = (
         'https://www.aldi.ie/sitemap/store',

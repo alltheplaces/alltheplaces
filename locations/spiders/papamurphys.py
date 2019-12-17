@@ -22,7 +22,7 @@ DAY_MAPPING = {
 class PapaMurphysSpider(scrapy.Spider):
 
     name = "papamurphys"
-    brand = "Papa Murphy's"
+    item_attributes = { 'brand': "Papa Murphy's" }
     allowed_domains = ["papamurphys.com"]
     download_delay = 0.5
     start_urls = (

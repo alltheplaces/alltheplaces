@@ -15,7 +15,7 @@ HEADERS = {'Referer': 'https://stores.joann.com'}
 
 class JoAnnFabricsSpider(scrapy.Spider):
     name = 'joann_fabrics'
-    brand = "Jo-Ann Fabrics"
+    item_attributes = { 'brand': "Jo-Ann Fabrics" }
     allowed_domains = ['www.joann.com','stores.joann.com']
 
     def start_requests(self):

@@ -9,7 +9,7 @@ from scrapy.selector import Selector
 
 class SallySpider(scrapy.Spider):
     name = "sallybeauty"
-    brand = "Sally Beauty"
+    item_attributes = { 'brand': "Sally Beauty" }
     allowed_domains = ["sallybeauty.com"]
 
     def start_requests(self):

@@ -10,7 +10,7 @@ from locations.hours import OpeningHours
 
 class BootbarnSpider(scrapy.Spider):
     name = "bootbarn"
-    brand = "Boot Barn"
+    item_attributes = { 'brand': "Boot Barn" }
     allowed_domains = ['bootbarn.com']
     start_urls = [
         'https://www.bootbarn.com/stores-all',

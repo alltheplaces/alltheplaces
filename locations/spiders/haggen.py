@@ -4,7 +4,7 @@ from locations.items import GeojsonPointItem
 
 class Haggen(scrapy.Spider):
     name = "haggen"
-    brand = "Haggen"
+    item_attributes = { 'brand': "Haggen" }
     allowed_domains = ["haggen.com"]
     download_delay = 0.2
     start_urls = (

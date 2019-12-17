@@ -23,7 +23,7 @@ class SparSpider(scrapy.Spider):
         postcode.
     """ 
     name = "spar"
-    brand = "Spar"
+    item_attributes = { 'brand': "Spar" }
     allowed_domains = ["spar.co.uk"]
     download_delay = 0.5
 

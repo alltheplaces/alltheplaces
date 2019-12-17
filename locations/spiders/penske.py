@@ -20,7 +20,7 @@ DAY_MAPPING = {
 class PenskeSpider(scrapy.Spider):
     download_delay = 0.5
     name = "penske"
-    brand = "Penske"
+    item_attributes = { 'brand': "Penske" }
     allowed_domains = ["pensketruckrental.com"]
     start_urls = (
         'https://www.pensketruckrental.com/locations',

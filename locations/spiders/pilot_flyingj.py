@@ -6,7 +6,7 @@ from locations.items import GeojsonPointItem
 
 class PilotFlyingJSpider(scrapy.Spider):
     name = "pilot_flyingj"
-    brand = "Pilot Flying J"
+    item_attributes = { 'brand': "Pilot Flying J" }
     download_delay = 0.3
     allowed_domains = [
         "pilotflyingj.com",

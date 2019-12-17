@@ -22,7 +22,6 @@ DAYS = [
 
 class Tjx_CaSpider(scrapy.Spider):
     name = "tjx_ca"
-    brand = "TJX"
     allowed_domains = ["tjx.com"]
 
     chains = {
@@ -97,9 +96,7 @@ class Tjx_CaSpider(scrapy.Spider):
                 'phone': store["Phone"],
                 'lat': float(store["Latitude"]),
                 'lon': float(store["Longitude"]),
-                'extras': {
-                    'brand': self.chains[store["Chain"]]
-                }
+                'brand': self.chains[store["Chain"]],
             }
 
             hours = self.parse_hours(store["Hours"])

@@ -10,7 +10,7 @@ from locations.hours import OpeningHours
 
 class PearleVisionSpider(scrapy.Spider):
     name = "pearle_vision"
-    brand = "Pearle Vision"
+    item_attributes = { 'brand': "Pearle Vision" }
     allowed_domains = ['pearlevision.com']
     download_delay = 1
 

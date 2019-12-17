@@ -5,7 +5,7 @@ from locations.items import GeojsonPointItem
 
 class MedExpressSpider(scrapy.Spider):
     name = "medexpress"
-    brand = "Med Express"
+    item_attributes = { 'brand': "Med Express" }
     allowed_domains = ["medexpress.com"]
     start_urls = (
         "https://www.medexpress.com/bin/optum3/medexserviceCallToYEXT2",

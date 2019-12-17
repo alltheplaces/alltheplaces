@@ -17,7 +17,7 @@ DAY_MAPPING = [
 
 class AppleSpider(scrapy.Spider):
     name = "apple"
-    brand = "Apple"
+    item_attributes = { 'brand': "Apple" }
     allowed_domains = ["apple.com"]
     start_urls = (
         'https://www.apple.com/retail/storelist/',

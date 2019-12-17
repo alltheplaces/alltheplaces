@@ -8,7 +8,7 @@ from locations.hours import OpeningHours
 class MassageEnvySpider(scrapy.Spider):
 
     name = "massage_envy"
-    brand = "Massage Envy"
+    item_attributes = { 'brand': "Massage Envy" }
     allowed_domains = ["locations.massageenvy.com"]
     start_urls = (
         'https://locations.massageenvy.com/index.html',

@@ -18,7 +18,7 @@ DAY_MAPPING = {
 
 class TexasRoadhouseSpider(scrapy.Spider):
     name = "texas_roadhouse"
-    brand = "Texas Roadhouse"
+    item_attributes = { 'brand': "Texas Roadhouse" }
     allowed_domains = ["www.texasroadhouse.com"]
     download_delay = 0.5
     start_urls = (

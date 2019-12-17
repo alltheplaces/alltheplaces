@@ -19,7 +19,7 @@ NUMBER_DAY = {
 class CaptainDSpider(scrapy.Spider):
 
     name = "captaind"
-    brand = "Captain D's"
+    item_attributes = { 'brand': "Captain D's" }
     allowed_domains = ["momentfeed-prod.apigee.net", ]
 
     start_urls = (

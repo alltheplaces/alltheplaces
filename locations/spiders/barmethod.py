@@ -5,7 +5,7 @@ from locations.items import GeojsonPointItem
 
 class BarMethodSpider(scrapy.Spider):
     name = "barmethod"
-    brand = "The Bar Method"
+    item_attributes = { 'brand': "The Bar Method" }
     allowed_domains = ['barmethod.com']
     start_urls = (
         'https://barmethod.com/locations/',

@@ -23,4 +23,5 @@ class GeojsonPointItem(scrapy.Item):
     website = scrapy.Field()
     opening_hours = scrapy.Field()
     ref = scrapy.Field()
+    brand = scrapy.Field()
     extras = scrapy.Field()

@@ -10,7 +10,6 @@ from locations.hours import OpeningHours
 
 class SignetJewelersSpider(scrapy.Spider):
     name = "signet_jewelers"
-    brand = "Signet Jewelers"
     allowed_domains = ['www.jared.com', 'www.kay.com', 'www.zales.com', 'www.pagoda.com', 'www.peoplesjewellers.com',
                        'www.ernestjones.co.uk', 'www.hsamuel.co.uk']
     download_delay = 0.5  # limit the delay to avoid 403 errors
@@ -78,10 +77,7 @@ class SignetJewelersSpider(scrapy.Spider):
             'lon': data["longitude"],
             'phone': data["phone"],
             'website': response.url,
-            'extras':
-                {
-                    'brand': re.search(r'www.(\w+)', response.url)[1]
-                }
+            'brand': re.search(r'www.(\w+)', response.url)[1],
         }
 
         yield GeojsonPointItem(**properties)
@@ -101,10 +97,7 @@ class SignetJewelersSpider(scrapy.Spider):
                 'country': 'GB',
                 'lat': store["latitude"],
                 'lon': store["longitude"],
-                'extras':
-                    {
-                        'brand': re.search(r'www.(\w+)', response.url)[1]
-                    }
+                'brand': re.search(r'www.(\w+)', response.url)[1],
             }
 
             yield GeojsonPointItem(**properties)
