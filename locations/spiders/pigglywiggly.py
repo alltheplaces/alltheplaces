@@ -2,9 +2,17 @@
 import scrapy
 import json
 import re
-import logging
-
 from locations.items import GeojsonPointItem
+from locations.hours import OpeningHours
+
+DAY_MAPPING = {1: 'Mo',
+               2: 'Tu',
+               3: 'We',
+               4: 'Th',
+               5: 'Fr',
+               6: 'Sa',
+               0: 'Su'}
+
 
 class PigglyWigglySpider(scrapy.Spider):
     ''' This spider scrapes from two different places, an api which has their stores in Wisconsin
@@ -13,40 +21,60 @@ class PigglyWigglySpider(scrapy.Spider):
     '''
     name = "pigglywiggly"
     item_attributes = { 'brand': "Piggly Wiggly" }
-    allowed_domains = ["pigglywiggly.com"]
+    allowed_domains = ["pigglywiggly.com", "www.shopthepig.com"]
 
     def start_requests(self):
-        url = 'https://www.shopthepig.com/api/m_store_location'
-        headers = {
-            'x-newrelic-id': 'XQYBWFVVGwAEVFNRBQcP',
-            'accept-encoding': 'gzip, deflate, br',
-            'x-csrf-token': 'eF2m10r8n51nsRgBSv1xSvhAGtCo8E84BExlmn54Vvc',
-            'accept-language': 'en-US,en;q=0.9',
-            'user-agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36',
-            'accept': 'application/json, text/plain, */*',
-            'referer': 'https://www.shopthepig.com/stores',
-        }
-        cookies = {
-            '__cfduid': 'db0a53231376d78a40dd7fd728fa896f51512948321',
-            'SESSb159e7a0d4a6fad9ba3abc7fadef99ec': 'h3o7xcjnfcERSRrqJVh0soQdUI5IFIBDIQlytOZkhIU',
-            'XSRF-TOKEN': 'eF2m10r8n51nsRgBSv1xSvhAGtCo8E84BExlmn54Vvc',
-            'has_js': 1,
-        }
-
-        yield scrapy.http.FormRequest(
-            url=url, headers=headers, callback=self.parse_wi, cookies=cookies
-        )
+        url = 'https://www.shopthepig.com/api/m_user/sessioninit'
+        formdata = {'method': 'POST'}
+        yield scrapy.FormRequest(url, formdata=formdata, callback=self.parse_wi_token)
 
         yield scrapy.Request(
             'https://www.pigglywiggly.com/store-locations',
             callback=self.parse_nonwi,
         )
 
+    def parse_wi_hours(self, store_hours):
+        opening_hours = OpeningHours()
+
+        for store_day in store_hours:
+            day = DAY_MAPPING[store_day.get("day")]
+            open_time = store_day.get("open")
+            close_time = store_day.get("close")
+            if open_time is None and close_time is None:
+                continue
+            opening_hours.add_range(day=day,
+                                    open_time=open_time,
+                                    close_time=close_time,
+                                    time_format='%H:%M%p'
+                                    )
+
+        return opening_hours.as_opening_hours()
+
+    def parse_wi_token(self, response):
+        # Get authentication token for api
+        csrf = response.text.strip('[""]')
+
+        locations_url = 'https://www.shopthepig.com/api/m_store_location?store_type_ids=1,2,3'
+
+        headers = {
+            'authority': 'www.shopthepig.com',
+            'accept-language': 'en-US,en;q=0.9',
+            'cookie': '__cfduid=d9a8c379f9e4520ce97e2a938504cfd191576252256; has_js=1; SESSb159e7a0d4a6fad9ba3abc7fadef99ec=QdLSe8PB_GYs3I01Do1aBTGK8a04ugH7HGnCO1qTZTY; XSRF-TOKEN={}'.format(
+                csrf),
+            'referer': 'https://www.shopthepig.com/',
+            'sec-fetch-mode': 'cors',
+            'sec-fetch-site': 'same-origin',
+            'x-csrf-token': '{}'.format(csrf),
+            'user-agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36',
+        }
+
+        yield scrapy.http.Request(url=locations_url, headers=headers, callback=self.parse_wi)
+
     def parse_wi(self, response):
         data = json.loads(response.body_as_unicode())
         stores = data['stores']
         for store in stores:
-            unp = {
+            properties = {
                 'ref': store['storeID'],
                 'name': store['storeName'],
                 'addr_full': store['normalized_address'],
@@ -55,11 +83,12 @@ class PigglyWigglySpider(scrapy.Spider):
                 'postcode': store['normalized_zip'],
                 'lat': store['latitude'],
                 'lon': store['longitude'],
-                'phone': store['phone']
+                'phone': store['phone'],
+                'website': store['webURL']
             }
-            properties = {}
-            for key in unp:
-                if unp[key]: properties[key] = unp[key]
+            hours = store.get('store_hours')
+            if hours:
+                properties["opening_hours"] = self.parse_wi_hours(hours)
 
             yield GeojsonPointItem(**properties)
 
@@ -72,6 +101,14 @@ class PigglyWigglySpider(scrapy.Spider):
 
     def parse_state(self, response):
         for location in response.xpath('//li[contains(@class, "views-row")]'):
+            # Extract coordinates
+            map_link = location.xpath('.//a[contains(@href,"maps.google")]/@href').extract_first()
+            if re.search(r'.+=([0-9.-]+)\+([0-9.-]+)', map_link):
+                lat = re.search(r'.+=([0-9.-]+)\+([0-9.-]+)', map_link).group(1)
+                lon = re.search(r'.+=([0-9.-]+)\+([0-9.-]+)', map_link).group(2)
+            else:
+                lat = None
+                lon = None
             unp = {
                 'addr_full': location.xpath('.//div[@class="street-address"]/text()').extract_first(),
                 'city': location.xpath('.//span[@class="locality"]/text()').extract_first(),
@@ -79,6 +116,8 @@ class PigglyWigglySpider(scrapy.Spider):
                 'postcode': location.xpath('.//span[@class="postal-code"]/text()').extract_first(),
                 'phone': location.xpath('.//label[@class="views-label-field-phone-value"]/following-sibling::span[1]/text()').extract_first(),
                 'website': location.xpath('.//label[@class="views-label-field-website-value"]/following-sibling::span[1]/a/@href').extract_first(),
+                'lat': lat,
+                'lon': lon,
             }
             if unp['website']:
                 if 'google' in unp['website']:
