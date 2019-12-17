@@ -3,6 +3,13 @@ import scrapy
 import json
 from locations.items import GeojsonPointItem
 
+brand_lookup = {
+    "MS": "Motel 6",
+    "SS": "Studio 6",
+    "HS": "Hotel 6"
+}
+
+
 class Motel6Spider(scrapy.Spider):
     name = "motel6"
     allowed_domains = ["motel6.com"]
@@ -19,7 +26,10 @@ class Motel6Spider(scrapy.Spider):
                 int(storeid)
             except ValueError:
                 continue
-            yield scrapy.Request(URL.format(storeid), callback=self.parse_hotel)
+            try:
+                yield scrapy.Request(URL.format(storeid), callback=self.parse_hotel)
+            except ValueError:
+                continue
 
     def parse_hotel(self, response):
         mdata = json.loads(response.body_as_unicode())
@@ -35,6 +45,9 @@ class Motel6Spider(scrapy.Spider):
                     'phone': mdata["phone"],
                     'state': mdata["state"],
                     'website': mdata["microsite_url"],
-                }
+                    'extras': {
+                        'brand': brand_lookup[mdata["brand_id"]]
+                    }
+        }
 
         yield GeojsonPointItem(**properties)
