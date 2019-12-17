@@ -6,6 +6,7 @@ from locations.items import GeojsonPointItem
 
 class LaSalsaSpider(scrapy.Spider):
     name = "la_salsa"
+    chain_name = "La Salsa"
     allowed_domains = ["www.lasalsa.com"]
     start_urls = (
         'http://lasalsa.com/wp-content/themes/lasalsa-main/locations-search.php?lat=0&lng=0&radius=99999999',

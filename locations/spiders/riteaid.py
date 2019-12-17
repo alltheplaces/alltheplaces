@@ -6,6 +6,7 @@ from locations.items import GeojsonPointItem
 
 class RiteAidSpider(scrapy.Spider):
     name = "riteaid"
+    chain_name = "Rite Aid"
     allowed_domains = ["riteaid.com"]
     start_urls = (
         'https://locations.riteaid.com/',

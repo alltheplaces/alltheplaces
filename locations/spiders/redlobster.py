@@ -17,6 +17,7 @@ DAYS = [
 
 class RedLobsterSpider(scrapy.Spider):
     name = "redlobster"
+    chain_name = "Red Lobster"
     allowed_domains = ["redlobster.com"]
     start_urls = (
         'https://www.redlobster.com/api/location/GetLocations?latitude=38.9072&longitude=-77.0369&radius=150000',

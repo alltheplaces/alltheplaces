@@ -6,6 +6,7 @@ from locations.items import GeojsonPointItem
 
 class BankOfAmericaSpider(scrapy.Spider):
     name = "bankofamerica"
+    chain_name = "Bank of America"
     allowed_domains = ["bankofamerica.com"]
     start_urls = (
         'https://locators.bankofamerica.com/',

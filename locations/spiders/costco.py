@@ -22,6 +22,7 @@ DAYS_NAME = {
 
 class CostcoSpider(scrapy.Spider):
     name = "costco"
+    chain_name = "Costco"
     allowed_domains = ['www.costco.com']
     start_urls = (
         'https://www.costco.com/warehouse-locations',

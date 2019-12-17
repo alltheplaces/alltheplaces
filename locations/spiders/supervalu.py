@@ -5,6 +5,7 @@ import json
 
 class SupervaluSpider(scrapy.Spider):
     name = "supervalu"
+    chain_name = "SuperValu"
     allowed_domains = ["www.supervalustores.com"]
     
     def start_requests(self):

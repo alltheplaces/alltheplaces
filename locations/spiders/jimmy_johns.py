@@ -16,6 +16,7 @@ STORES = JJBASE.format('GetStoreAddressesByCityAndState')
 
 class JimmyJohnsSpider(scrapy.Spider):
     name = "jimmy-johns"
+    chain_name = "Jimmy John's"
     allowed_domains = ["www.jimmyjohns.com"]
     download_delay = 0.2
 

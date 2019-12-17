@@ -5,6 +5,7 @@ from locations.items import GeojsonPointItem
 class ExpressSpider(scrapy.Spider):
 
     name = "teavana"
+    chain_name = "Teavana"
     allowed_domains = ["locations.teavana.com"]
     download_delay = 0.5
     start_urls = (

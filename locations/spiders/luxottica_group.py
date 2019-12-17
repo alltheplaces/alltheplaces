@@ -10,6 +10,7 @@ from locations.hours import OpeningHours
 
 class LuxotticaSpider(scrapy.Spider):
     name = "luxottica"
+    chain_name = "Luxottica Group"
     allowed_domains = ['locations.searsoptical.com', 'local.targetoptical.com']
     start_urls = [
         'https://locations.searsoptical.com/',

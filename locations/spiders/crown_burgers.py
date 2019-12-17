@@ -11,6 +11,7 @@ STATES = {
 
 class CrownburgerSpider(scrapy.Spider):
     name = "crown_burgers"
+    chain_name = "Crown Burgers"
     allowed_domains = ["crown-burgers.com","maps.google.com"]
     start_urls = (
         'http://www.crown-burgers.com/locations.php',

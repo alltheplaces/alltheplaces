@@ -4,6 +4,7 @@ from locations.items import GeojsonPointItem
 
 class KwikTripSpider(scrapy.Spider):
     name = "kwiktrip"
+    chain_name = "Kwik Trip"
     allowed_domains = ["www.kwiktrip.com"]
     download_delay = 0
     user_agent = "Mozilla/5.0 (Windows NT 6.1; Win64; x64) " \

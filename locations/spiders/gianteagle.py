@@ -20,6 +20,7 @@ DAY_MAPPING = {
 
 class GiantEagleSpider(scrapy.Spider):
     name = "gianteagle"
+    chain_name = "Giant Eagle"
     allowed_domains = ("www.gianteagle.com")
     download_delay = 0.2
     start_urls = (

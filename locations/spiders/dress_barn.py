@@ -10,6 +10,7 @@ from locations.hours import OpeningHours
 class DressBarn(scrapy.Spider):
 
     name = 'dressbarn'
+    chain_name = "Dress Barn"
     download_delay = 0.2
     allowed_domains = ('locations.dressbarn.com', )
     start_urls = (

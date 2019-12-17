@@ -23,6 +23,7 @@ class SparSpider(scrapy.Spider):
         postcode.
     """ 
     name = "spar"
+    chain_name = "Spar"
     allowed_domains = ["spar.co.uk"]
     download_delay = 0.5
 

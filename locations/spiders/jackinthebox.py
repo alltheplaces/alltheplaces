@@ -5,6 +5,7 @@ from locations.items import GeojsonPointItem
 
 class JackInTheBoxSpider(scrapy.Spider):
     name = "jackinthebox"
+    chain_name = "Jack In The Box"
     allowed_domains = ["jackinthebox.com"]
     start_urls = (
         "https://www.jackinthebox.com/api/locations",

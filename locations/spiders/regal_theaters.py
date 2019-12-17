@@ -6,6 +6,7 @@ from locations.items import GeojsonPointItem
 
 class RegalTheatersSpider(scrapy.Spider):
     name = 'regal_theaters'
+    chain_name = "Regal Theaters"
     allowed_domains = ['www.regmovies.com']
     start_urls = ['https://www.regmovies.com/theatres/regal-hollywood-huntsville/0427']
 

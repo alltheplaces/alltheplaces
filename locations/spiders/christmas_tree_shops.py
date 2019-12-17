@@ -32,6 +32,7 @@ def convert_24hour(time):
 
 class ChristmasTreeShopsSpider(scrapy.Spider):
     name = "christmas_tree_shops"
+    chain_name = "Christmas Tree Shops"
     allowed_domains = ['www.christmastreeshops.com']
     start_urls = [
         'https://www.christmastreeshops.com/store-locator',

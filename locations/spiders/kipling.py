@@ -10,6 +10,7 @@ from locations.hours import OpeningHours
 
 class KiplingSpider(scrapy.Spider):
     name = "kipling"
+    chain_name = "Kipling"
     allowed_domains = ['kipling-usa.com']
     start_urls = (
         "https://www.kipling-usa.com/on/demandware.store/Sites-kip-Site/default/Stores-GetNearestStores?countryCode=US&onlyCountry=true",

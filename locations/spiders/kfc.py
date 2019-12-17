@@ -18,6 +18,7 @@ DAY_MAPPING = {
 
 class KFCSpider(scrapy.Spider):
     name = "kfc"
+    chain_name = "KFC"
     allowed_domains = ["kfc.com"]
     start_urls = (
         'https://locations.kfc.com/',

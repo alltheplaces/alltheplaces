@@ -8,6 +8,7 @@ from locations.items import GeojsonPointItem
 class WesternFamilySpider(scrapy.Spider):
 
     name = "western_family"
+    chain_name = "Western Family"
     allowed_domains = ["www.westernfamily.com"]
     start_urls = (
         'http://www.westernfamily.com/wp-admin/admin-ajax.php?action=store_search&lat=45.5230622&lng=-122.67648159999999&max_results=2500&search_radius=50000&autoload=1',

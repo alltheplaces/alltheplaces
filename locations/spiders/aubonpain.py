@@ -7,6 +7,7 @@ from locations.hours import OpeningHours
 
 class AuBonPainSpider(scrapy.Spider):
     name = "aubonpain"
+    chain_name = "Au Bon Pain"
     download_delay = 0.5
     allowed_domains = [
         "www.aubonpain.com",

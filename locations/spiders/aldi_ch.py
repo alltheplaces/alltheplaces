@@ -6,6 +6,7 @@ from locations.items import GeojsonPointItem
 
 class AldiCHSpider(scrapy.Spider):
     name = 'aldi_ch'
+    chain_name = "Aldi"
     allowed_domains = ['www.yellowmap.de']
     start_urls = (
         'https://www.yellowmap.de/Presentation/AldiSued/de-CH/ResultList?LocX=&LocY=&HiddenBranchCode=&BranchCode=&Lux=6.2841796875&Luy=49.24629332459796&Rlx=10.755615234375&Rly=44.59829048984011&ZoomLevel=4',

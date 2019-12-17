@@ -6,6 +6,7 @@ from locations.items import GeojsonPointItem
 class JohnLewisSpider(scrapy.Spider):
 
     name = "johnlewis"
+    chain_name = "John Lewis"
     allowed_domains = ["www.johnlewis.com"]
     download_delay = 0.5
     start_urls = (

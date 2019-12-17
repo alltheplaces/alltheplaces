@@ -7,6 +7,7 @@ from locations.items import GeojsonPointItem
 
 class SuperAmericaSpider(scrapy.Spider):
     name = "speedway"
+    chain_name = "Speedway"
     allowed_domains = ["www.speedway.com"]
     start_urls = (
         'https://www.speedway.com/GasPriceSearch',

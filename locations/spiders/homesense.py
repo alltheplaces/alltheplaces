@@ -10,6 +10,7 @@ from locations.hours import OpeningHours
 
 class HomeSenseSpider(scrapy.Spider):
     name = "homesense"
+    chain_name = "Homesense"
     allowed_domains = ["homesense.com"]
     start_urls = [
         'https://us.homesense.com/locator',

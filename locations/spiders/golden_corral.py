@@ -18,6 +18,7 @@ DAY_MAPPING = {
 
 class GoldenCorralSpider(scrapy.Spider):
     name = "golden_corral"
+    chain_name = "Golden Corral"
     allowed_domains = ["goldencorral.com"]
     download_delay = 0.5
     start_urls = (

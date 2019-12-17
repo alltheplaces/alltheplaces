@@ -6,6 +6,7 @@ from locations.items import GeojsonPointItem
 
 class CoopFoodSpider(scrapy.Spider):
     name = "coopfood"
+    chain_name = "Co-op Food"
     allowed_domains = ["api.coop.co.uk"]
     download_delay = 0.5
     page_number = 1

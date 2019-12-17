@@ -16,6 +16,7 @@ day_formats = {
 
 class TopsSpider(scrapy.Spider):
     name = "tops"
+    chain_name = "Tops"
     allowed_domains = ["www.topsmarkets.com"]
 
     start_urls = (

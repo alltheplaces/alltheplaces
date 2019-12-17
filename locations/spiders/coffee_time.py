@@ -4,6 +4,7 @@ from locations.items import GeojsonPointItem
 
 class BobsSpider(scrapy.Spider):
     name = 'coffeetime'
+    chain_name = "Coffee Time"
     allowed_domains = ['www.coffeetime.com']
     start_urls = ['http://www.coffeetime.com/locations.aspx?address=&Countryui=CA&pageNumber=1']
 

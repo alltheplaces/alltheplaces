@@ -5,6 +5,7 @@ from locations.items import GeojsonPointItem
 
 class WilcoFarmSpider(scrapy.Spider):
     name = "wilcofarm"
+    chain_name = "Wilco Farm"
     allowed_domains = ["www.farmstore.com"]
 
     start_urls = (

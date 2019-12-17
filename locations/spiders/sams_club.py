@@ -13,6 +13,7 @@ DAYS = [
 
 class SamsClubSpider(scrapy.Spider):
     name = "sams_club"
+    chain_name = "Sam's Club"
     allowed_domains = ['www.samsclub.com']
     start_urls = [
         'https://www.samsclub.com/api/node/clubfinder/list?distance=10000&nbrOfStores=600&singleLineAddr=78749',

@@ -19,6 +19,7 @@ DAY_MAPPING = {
 
 class SephoraSpider(scrapy.Spider):
     name = "sephora"
+    chain_name = "Sephora"
     allowed_domains = ["www.sephora.com"]
     download_delay = 0.2
     start_urls = (

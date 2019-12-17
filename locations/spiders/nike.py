@@ -5,6 +5,7 @@ from locations.items import GeojsonPointItem
 class NikeSpider(scrapy.Spider):
 
     name = "nike"
+    chain_name = "Nike"
     allowed_domains = ["www.nike.com"]
     download_delay = 1.5
     start_urls = (

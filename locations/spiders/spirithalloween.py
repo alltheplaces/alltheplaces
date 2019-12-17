@@ -13,6 +13,7 @@ PHONE = 'normalize-space(//span[@class="telephone-text bold"]//text())'
 class SpiritHalloween(scrapy.Spider):
 
     name = 'spirit-halloween'
+    chain_name = "Spirit Halloween"
     download_delay = 0.2
     allowed_domains = ('stores.spirithalloween.com', )
     start_urls = (

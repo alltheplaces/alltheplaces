@@ -21,6 +21,7 @@ DAY_MAPPING = [
 
 class BJsWholesaleSpider(scrapy.Spider):
     name = "bjswholesale"
+    chain_name = "BJ's Wholesale"
     allowed_domains = ["bjs.com"]
     start_urls = [
         'https://api.bjs.com/digital/live/apis/v1.0/clublocatorpage/statetowns/10201',

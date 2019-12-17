@@ -13,6 +13,7 @@ STATES = ["AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DC", "DE", "FL", "GA",
 class StopAndShopSpider(scrapy.Spider):
     """ Spider to scrape Stop and Shop locations """
     name = "stop_and_shop"
+    chain_name = "Stop and Shop"
     allowed_domains = ["stopandshop.com"]
 
     def start_requests(self):

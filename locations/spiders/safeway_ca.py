@@ -8,6 +8,7 @@ from locations.items import GeojsonPointItem
 
 class SafewayCaSpider(scrapy.Spider):
     name = "safeway_ca"
+    chain_name = "Safeway"
     allowed_domains = ["www.safeway.ca"]
     start_urls = (
         'https://www.safeway.ca/api/en/Store/get?Latitude=42.0354084&Longitude=-88.2825668&Skip=0&Max=60000',

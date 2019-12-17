@@ -8,6 +8,7 @@ from locations.items import GeojsonPointItem
 class AutoZoneSpider(scrapy.Spider):
 
     name = "auto_zone"
+    chain_name = "AutoZone"
     allowed_domains = ["www.autozone.com"]
     download_delay = 0.2
     start_urls = (

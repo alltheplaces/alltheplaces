@@ -6,6 +6,7 @@ from locations.items import GeojsonPointItem
 
 class SaveOnFoodsSpider(scrapy.Spider):
     name = "saveonfoods"
+    chain_name = "Save on Foods"
     allowed_domains = ["shop.saveonfoods.com"]
 
     def start_requests(self):

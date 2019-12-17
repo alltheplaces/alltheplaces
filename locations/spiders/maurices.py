@@ -20,6 +20,7 @@ DAY_MAPPING = {
 
 class MauricesSpider(scrapy.Spider):
     name = "maurices"
+    chain_name = "Maurices"
     allowed_domains = ["www.maurices.com", "locations.maurices.com"]
     download_delay = 0.2
     start_urls = (

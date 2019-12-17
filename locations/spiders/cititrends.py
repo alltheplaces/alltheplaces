@@ -5,6 +5,7 @@ from locations.items import GeojsonPointItem
 class CitiTrendsSpider(scrapy.Spider):
 
     name = "cititrends"
+    chain_name = "Citi Trends"
     allowed_domains = ["locations.cititrends.com"]
     download_delay = 0.5
     start_urls = (

@@ -10,6 +10,7 @@ from locations.hours import OpeningHours
 
 class SignetJewelersSpider(scrapy.Spider):
     name = "signet_jewelers"
+    chain_name = "Signet Jewelers"
     allowed_domains = ['www.jared.com', 'www.kay.com', 'www.zales.com', 'www.pagoda.com', 'www.peoplesjewellers.com',
                        'www.ernestjones.co.uk', 'www.hsamuel.co.uk']
     download_delay = 0.5  # limit the delay to avoid 403 errors

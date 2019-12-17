@@ -22,6 +22,7 @@ DAYS = [
 
 class Tjx_CaSpider(scrapy.Spider):
     name = "tjx_ca"
+    chain_name = "TJX"
     allowed_domains = ["tjx.com"]
 
     chains = {

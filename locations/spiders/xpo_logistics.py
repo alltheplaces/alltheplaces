@@ -6,6 +6,7 @@ from locations.items import GeojsonPointItem
 
 class XPOLogisticsSpider(scrapy.Spider):
     name = "xpo_logistics"
+    chain_name = "XPO Logistics"
     allowed_domains = ["www.xpo.com"]
     start_urls = (
         'https://www.xpo.com/global-locations/',

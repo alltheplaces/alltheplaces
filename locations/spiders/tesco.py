@@ -13,6 +13,7 @@ DAYS = {
 }
 class TescoSpider(scrapy.Spider):
     name = "tesco"
+    chain_name = "Tesco"
     allowed_domains = ["tescolocation.api.tesco.com"]
     def store_hours(self, store_hours):
         clean_time=''

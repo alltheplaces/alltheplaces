@@ -7,6 +7,7 @@ from locations.items import GeojsonPointItem
 
 class SonicDriveinSpider(scrapy.Spider):
     name = "sonic_drivein"
+    chain_name = "Sonic Drive-In"
     allowed_domains = ["locations.sonicdrivein.com"]
     start_urls = [
         'https://locations.sonicdrivein.com/index.html',

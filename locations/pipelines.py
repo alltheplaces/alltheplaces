@@ -29,3 +29,12 @@ class ApplySpiderNamePipeline(object):
         item['extras'] = existing_extras
 
         return item
+
+class ApplyChainNamePipeline(object):
+
+    def process_item(self, item, spider):
+        existing_extras = item.get('extras', {})
+        existing_extras['chain_name'] = spider.chain_name
+        item['extras'] = existing_extras
+
+        return item

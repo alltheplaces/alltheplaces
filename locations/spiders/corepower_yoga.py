@@ -6,6 +6,7 @@ from locations.items import GeojsonPointItem
 
 class CorePowerYogaSpider(scrapy.Spider):
     name = 'corepower_yoga'
+    chain_name = "Corepower Yoga"
     allowed_domains = ['www.corepoweryoga.com']
     start_urls = (
         'https://www.corepoweryoga.com/data/all-locations',

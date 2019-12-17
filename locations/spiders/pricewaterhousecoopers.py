@@ -10,6 +10,7 @@ from locations.hours import OpeningHours
 
 class PricewaterhouseCoopersSpider(scrapy.Spider):
     name = "pricewaterhousecoopers"
+    chain_name = "PricewaterhouseCoopers"
     allowed_domains = []
     start_urls = [
         'https://www.pwc.com/content/pwc/script/gx/en/office-locator/data/offices/offices-data_en-us.json',

@@ -19,6 +19,7 @@ def load_json(data):
 
 class HiltonSpider(scrapy.Spider):
     name = "hilton"
+    chain_name = "Hilton"
     allowed_domains = ["hilton.com", "hiltongrandvacations.com"]
 
     def start_requests(self):

@@ -22,6 +22,7 @@ DAYS = [
 
 class HomeGoodsSpider(scrapy.Spider):
     name = "homegoods"
+    chain_name = "HomeGoods"
     allowed_domains = ["tjx.com"]
 
     chains = {

@@ -6,6 +6,7 @@ from locations.items import GeojsonPointItem
 
 class ShakeShackSpider(scrapy.Spider):
     name = "shake_shack"
+    chain_name = "Shake Shack"
     allowed_domains = ["www.shakeshack.com"]
     start_urls = (
         'https://www.shakeshack.com/locations/',

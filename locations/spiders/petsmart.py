@@ -31,6 +31,7 @@ def convert_24hour(time):
 class PetSmartSpider(scrapy.Spider):
     download_delay = 0.2
     name = "petsmart"
+    chain_name = "Petsmart"
     allowed_domains = ["petsmart.com"]
     start_urls = (
         'https://www.petsmart.com/store-locator/all/',

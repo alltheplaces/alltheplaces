@@ -9,6 +9,7 @@ from locations.items import GeojsonPointItem
 class RedRobbinSpider(scrapy.Spider):
 
     name = "red_robbin"
+    chain_name = "Red Robbin"
     allowed_domains = ["www.redrobin.com"]
     start_urls = (
         'https://www.redrobin.com/static/data.locationddp.json?lat=29.8067386&lng=-91.51919780000003&units=miles&maxresults=1200&maxdistance=5000',

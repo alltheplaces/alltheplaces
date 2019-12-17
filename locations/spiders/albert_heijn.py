@@ -5,6 +5,7 @@ import json
 
 class AlbertHeijnSpider(scrapy.Spider):
     name = 'albert_heijn'
+    chain_name = "Albert Heijn"
     allowed_domains = ['www.ah.nl']
 
     def start_requests(self):

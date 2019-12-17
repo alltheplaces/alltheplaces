@@ -8,6 +8,7 @@ from locations.hours import OpeningHours
 class FifthThirdBankSpider(scrapy.Spider):
 
     name = "fifththirdbank"
+    chain_name = "Fifth Third Bank"
     download_delay = 0.5
     allowed_domains = [
         "53.com",

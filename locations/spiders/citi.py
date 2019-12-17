@@ -10,6 +10,7 @@ from locations.hours import OpeningHours
 
 class CitiSpider(scrapy.Spider):
     name = "citi"
+    chain_name = "Citi"
     allowed_domains = ['citi.com']
     download_delay = 1.5
 

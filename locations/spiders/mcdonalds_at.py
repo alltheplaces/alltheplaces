@@ -16,6 +16,7 @@ day_formats = {
 
 class McDonaldsATSpider(scrapy.Spider):
     name = "mcdonalds_at"
+    chain_name = "McDonald's"
     allowed_domains = ["www.mcdonalds.at"]
 
     start_urls = (

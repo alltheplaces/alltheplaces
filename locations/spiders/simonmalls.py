@@ -8,6 +8,7 @@ from locations.items import GeojsonPointItem
 class SimonMallsSpider(scrapy.Spider):
     download_delay = 0.2
     name = "simonmalls"
+    chain_name = "Simon Malls"
     allowed_domains = ["simon.com"]
     start_urls = (
         'https://api.simon.com/v1.2/centers/all/index',

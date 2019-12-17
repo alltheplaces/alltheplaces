@@ -6,6 +6,7 @@ from locations.items import GeojsonPointItem
 
 class TheLearningExperienceSpider(scrapy.Spider):
     name = "learning_experience"
+    chain_name = "Learning Experience"
     allowed_domains = ["thelearningexperience.com"]
     start_urls = (
         'https://thelearningexperience.com/our-centers/directory',

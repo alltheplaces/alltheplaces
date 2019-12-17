@@ -10,6 +10,7 @@ from locations.hours import OpeningHours
 class Rue21Spider(scrapy.Spider):
     download_delay = 0.2
     name = "rue21"
+    chain_name = "rue21"
     allowed_domains = ["rue21.com"]
     start_urls = (
         'https://stores.rue21.com/index.html',

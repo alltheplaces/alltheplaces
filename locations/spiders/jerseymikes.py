@@ -7,6 +7,7 @@ from locations.items import GeojsonPointItem
 
 class JerseyMikesSpider(scrapy.Spider):
     name = "jerseymikes"
+    chain_name = "Jersey Mike's Subs"
     allowed_domains = ['jerseymikes.com']
     start_urls = (
         'https://www.jerseymikes.com/locations/all',

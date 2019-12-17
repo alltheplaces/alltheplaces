@@ -5,6 +5,7 @@ from locations.items import GeojsonPointItem
 class OldChicagoSpider(scrapy.Spider):
     
     name = 'oldchicago'
+    chain_name = "Old Chicago"
     allowed_domains = ['oc-api-prod.azurewebsites.com']
     
     query_id = 'q0'

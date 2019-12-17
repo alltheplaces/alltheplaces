@@ -7,6 +7,7 @@ from locations.items import GeojsonPointItem
 
 class ShopkoSpider(scrapy.Spider):
     name = "surlatable"
+    chain_name = "Sur La Table"
     allowed_domains = ['surlatable.com']
     start_urls = (
         'https://www.surlatable.com/storeHome.xml',

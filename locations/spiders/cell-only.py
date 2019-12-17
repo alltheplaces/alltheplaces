@@ -32,6 +32,7 @@ def normalize_dayrange(dayrange):
 
 class CellOnlySpider(scrapy.Spider):
     name = "cellonly"
+    chain_name = "CellOnly"
     allowed_domains = ["cell-only.com"]
 
     def process_hours(self, hours):

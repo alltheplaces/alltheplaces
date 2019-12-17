@@ -9,6 +9,7 @@ from locations.hours import OpeningHours
 
 class VeteransAffairsSpider(scrapy.Spider):
     name = "department_veterans_affairs"
+    chain_name = "Department Veterans Affairs"
     allowed_domains = ["api.va.gov"]
 
     def start_requests(self):

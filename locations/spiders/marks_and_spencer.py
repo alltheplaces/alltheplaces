@@ -7,6 +7,7 @@ from locations.items import GeojsonPointItem
 
 class MarksAndSpencerSpider(scrapy.Spider):
     name = "marks_and_spencer"
+    chain_name = "Marks and Spencer"
     start_urls = (
         "https://www.marksandspencer.com/webapp/wcs/stores/servlet/MSResStoreFinderConfigCmd?storeId=10151&langId=-24",
     )

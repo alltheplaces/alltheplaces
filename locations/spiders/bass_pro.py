@@ -8,6 +8,7 @@ from locations.items import GeojsonPointItem
 
 class BassProSpider(scrapy.Spider):
     name = "basspro"
+    chain_name = "Bass Pro"
     download_delay = 0
     allowed_domains = ["basspro.com", "cabelas.com", "cabelas.ca"]
     start_urls = ('https://www.cabelas.com/stores',)

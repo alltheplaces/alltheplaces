@@ -13,6 +13,7 @@ AM_PM = r'am|pm|a.m.|p.m.|a|p'
 
 class MyCountyMarketSpider(scrapy.Spider):
     name = "county_market"
+    chain_name = "County Market"
     allowed_domains = ["www.mycountymarket.com", ]
 
     start_urls = (

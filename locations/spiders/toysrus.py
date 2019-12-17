@@ -23,6 +23,7 @@ def get_hours(hours_obj):
 
 class ToysRUsSpider(scrapy.Spider):
     name = "toysrus"
+    chain_name = "Toys R Us"
 
     def start_requests(self):
         urls = [

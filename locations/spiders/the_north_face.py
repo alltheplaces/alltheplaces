@@ -11,6 +11,7 @@ from locations.hours import OpeningHours
 
 class TheNorthFaceSpider(scrapy.Spider):
     name = "the_north_face"
+    chain_name = "The North Face"
     allowed_domains = ["hosted.where2getit.com"]
 
     def start_requests(self):

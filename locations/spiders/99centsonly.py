@@ -20,6 +20,7 @@ DAY_MAPPING = [
 
 class NinetyNineCentsOnlySpider(scrapy.Spider):
     name = "99centsonly"
+    chain_name = '99 Cents Only'
     allowed_domains = ["99only.com"]
 
     start_urls = [

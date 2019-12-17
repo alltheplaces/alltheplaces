@@ -20,6 +20,7 @@ headers = {
 
 class CurrysPcWorldSpider(scrapy.Spider):
     name = "currys"
+    chain_name = "Currys PC World"
     allowed_domains = ["https://www.pcworld.co.uk"]
 
     def start_requests(self):

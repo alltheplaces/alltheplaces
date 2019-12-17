@@ -10,6 +10,7 @@ from locations.hours import OpeningHours
 
 class PriceRiteSpider(scrapy.Spider):
     name = "pricerite"
+    chain_name = "PriceRite"
     allowed_domains = ["priceritesupermarkets.com"]
 
     start_urls = (

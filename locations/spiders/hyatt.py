@@ -8,6 +8,7 @@ from locations.items import GeojsonPointItem
 class HyattSpider(scrapy.Spider):
 
     name = "hyatt"
+    chain_name = "Hyatt"
     allowed_domains = ["hyatt.com"]
     download_delay = 1.5  # delay required to avoid getting temporarily blocked from hyatt.com (403s)
 

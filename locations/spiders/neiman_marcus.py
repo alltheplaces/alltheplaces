@@ -5,6 +5,7 @@ from locations.items import GeojsonPointItem
 class NeimanMarcusSpider(scrapy.Spider):
 
     name = "neiman_marcus"
+    chain_name = "Neiman Marcus"
     allowed_domains = ["www.neimanmarcus.com"]
     start_urls = (
         'http://www.neimanmarcus.com/en-au/stores/locations',

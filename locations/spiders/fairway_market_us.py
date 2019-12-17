@@ -21,6 +21,7 @@ DAYS_NAME = {
 
 class FairwayMarketUSSpider(scrapy.Spider):
     name = "fairway_market_us"
+    chain_name = "Fairway Market"
     allowed_domains = ['fairwaymarket.com']
     start_urls = [
         'https://www.fairwaymarket.com/api/models/stores?posts_per_page=40',

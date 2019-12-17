@@ -14,6 +14,7 @@ states = ['AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DC', 'DE', 'FL', 'GA',
 
 class BelkSpider(scrapy.Spider):
     name = "belk"
+    chain_name = "Belk"
     allowed_domains = ["www.belk.com"]
     start_urls = (
         'https://www.belk.com/stores-near-you/',

@@ -17,6 +17,7 @@ DAY_MAPPING = {
 class WhiteHouseBlackMarketSpider(scrapy.Spider):
     download_delay = 0.2
     name = "whitehouseblackmarket"
+    chain_name = "White House Black Market"
     allowed_domains = ["whitehouseblackmarket.com"]
     start_urls = (
         'https://stores.whitehouseblackmarket.com/',

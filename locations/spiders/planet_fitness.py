@@ -4,6 +4,7 @@ from locations.items import GeojsonPointItem
 
 class PlanetFitnessSpider(scrapy.Spider):
     name = "planet-fitness"
+    chain_name = "Planet Fitness"
     allowed_domains = ["planetfitness.com"]
     start_urls = (
         "https://www.planetfitness.com/sitemap",

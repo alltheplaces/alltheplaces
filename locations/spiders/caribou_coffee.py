@@ -19,6 +19,7 @@ NUMBER_DAY = {
 class CaribouCoffeeSpider(scrapy.Spider):
 
     name = "caribou_coffee"
+    chain_name = "Caribou Coffee"
     allowed_domains = ["momentfeed-prod.apigee.net", ]
 
     start_urls = (

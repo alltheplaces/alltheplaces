@@ -10,6 +10,7 @@ from locations.hours import OpeningHours
 
 class FreshGrocerSpider(scrapy.Spider):
     name = "thefreshgrocer"
+    chain_name = "The Fresh Grocer"
     allowed_domains = ["thefreshgrocer.com"]
 
     def start_requests(self):

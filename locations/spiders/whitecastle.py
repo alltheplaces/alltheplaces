@@ -7,6 +7,7 @@ from locations.items import GeojsonPointItem
 
 class WhiteCastleSpider(scrapy.Spider):
     name = "whitecastle"
+    chain_name = "White Castle"
     allowed_domains = ["www.whitecastle.com"]
     timeregex = re.compile('^([0-9:]+)(AM|PM)$')
     start_urls = (

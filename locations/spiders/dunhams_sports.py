@@ -4,6 +4,7 @@ from locations.items import GeojsonPointItem
 
 class DunhamsSportsSpiders(scrapy.Spider):
         name = "dunhams_sports"
+        chain_name = "Dunham's Sports"
         allowed_domains = ["http://www.dunhamssports.com"]
         start_urls = (
                 'http://www.dunhamssports.com/wp-admin/admin-ajax.php?action=simloc_get_locations&lat=32.7258378&lng=-116.95580669999998&radius=200000',

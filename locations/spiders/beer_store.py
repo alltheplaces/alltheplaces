@@ -8,6 +8,7 @@ from locations.items import GeojsonPointItem
 class BeerStoreSpider(scrapy.Spider):
 
     name = "beer_store"
+    chain_name = "The Beer Store"
     allowed_domains = ["www.thebeerstore.ca/"]
     start_urls = (
         'http://www.thebeerstore.ca/storelocations.json',

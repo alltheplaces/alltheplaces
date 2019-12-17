@@ -18,6 +18,7 @@ DAY_MAPPING = {
 
 class QdobaSpider(scrapy.Spider):
     name = "qdoba"
+    chain_name = "Qdoba"
     allowed_domains = ["qdoba.com"]
     start_urls = (
         'https://locations.qdoba.com/us.html',

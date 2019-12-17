@@ -10,6 +10,7 @@ from locations.hours import OpeningHours
 
 class LensCraftersSpider(scrapy.Spider):
     name = "lenscrafters"
+    chain_name = "Lenscrafters"
     allowed_domains = ['local.lenscrafters.com']
     start_urls = [
         'https://local.lenscrafters.com/'
