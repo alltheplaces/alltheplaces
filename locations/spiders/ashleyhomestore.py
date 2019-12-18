@@ -3,10 +3,18 @@ import json
 import scrapy
 import re
 
-
 from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
 
+DAY_MAPPING = {
+    'Monday': 'Mo',
+    'Tuesday': 'Tu',
+    'Wednesday': 'We',
+    'Thursday': 'Th',
+    'Friday': 'Fr',
+    'Saturday': 'Sa',
+    'Sunday': 'Su'
+}
 
 class AshleyHomeStoreSpider(scrapy.Spider):
 
@@ -25,63 +33,48 @@ class AshleyHomeStoreSpider(scrapy.Spider):
             scrapy.Request('https://ashleyhomestore.ca/apps/store-locator', callback=self.parse_ca_stores),
         ]
 
-    def parse_phone_number(self, phone):
-        phone = phone.replace('+1', '')
-        return '{0}-{1}-{2}'.format(phone[0:3], phone[3:6], phone[6:])
-
-    def parse_hours(self, days):
+    def parse_hours(self, hours):
         opening_hours = OpeningHours()
 
-        for item in days:
-            if item.xpath('./span[contains(@class, "hours")]/text()').extract_first() == "Closed":
+        for hour in hours:
+            if hour["opens"] == "Closed":
                 continue
-            day = item.xpath('./span[contains(@class, "text")]/text()').extract_first()[:2]
-            hours = item.xpath('./span[contains(@class, "hours")]/span/text()').extract_first()
-            if hours == "Closed":
+            elif hour["closes"] == "Closed":
                 continue
-            open_time, close_time = hours.split('-')
-            opening_hours.add_range(day=day,
-                                    open_time=datetime.datetime.strptime(open_time, '%I:%M%p').strftime('%H:%M'),
-                                    close_time=datetime.datetime.strptime(close_time, '%I:%M%p').strftime('%H:%M'))
+            else:
+                opening_hours.add_range(day=DAY_MAPPING[hour["dayOfWeek"].replace('http://schema.org/', '')],
+                                        open_time=hour["opens"],
+                                        close_time=hour["closes"],
+                                        time_format='%I:%M%p')
 
         return opening_hours.as_opening_hours()
 
     def parse_store(self, response):
-        # Panama City, FL store redirects to the main location search page; presumably the location no longer exists
-        if response.url == 'https://stores.ashleyfurniture.com/':
-            return
-
-        data = "".join(response.xpath(
-            '//body[contains(@class, "location-details")]//div[@class="container"]/text()').extract()).strip()
-        if not data:
-            # sometimes the data we need is in a script element
-            data = "".join(
-                response.xpath('//body[contains(@class, "location-details")]//div[@class="container"]//script/text()').extract()).strip()
-
-        country = re.search(r'"addressCountry":\s+"(.+)"', data).group(1)
-        locality = re.search(r'"addressLocality":\s+"(.+)"', data).group(1)
-        region = re.search(r'"addressRegion":\s+"(.+)"', data).group(1)
-        postal_code = re.search(r'"postalCode":\s+"(.+)"', data).group(1)
-        street_address = re.search(r'"streetAddress":\s+"(.+)"', data).group(1)
+        try:
+            data = json.loads(response.xpath('//script[@type="application/ld+json" and contains(text(), "streetAddress")]/text()').extract_first())
+        except:
+            jsondata = response.xpath('//script[@type="application/ld+json" and contains(text(), "streetAddress")]/text()').extract_first()
+            jsondata = jsondata[:-8]
+            jsondata = jsondata.replace("\r\n","")
+            data = json.loads(jsondata)
 
         properties = {
-            'addr_full': street_address,
-            'name': response.xpath('//p[@class="store-name"]/text()').extract_first(),
-            'phone': self.parse_phone_number(response.xpath('//a[@class="phone"]/text()').extract_first().strip()),
-            'city': locality,
-            'country': country,
-            'state': region,
-            'postcode': postal_code,
-            'ref': "_".join(response.url.split('/')[-3:]),
-            'website': response.url,
-            'lat': float(response.xpath('//div[@id="location-details"]/@data-lat').extract_first()),
-            'lon': float(response.xpath('//div[@id="location-details"]/@data-lng').extract_first()),
+            'name': data["name"],
+            'ref': data["url"],
+            'addr_full': data["address"]["streetAddress"],
+            'city': data["address"]["addressLocality"],
+            'state': data["address"]["addressRegion"],
+            'postcode': data["address"]["postalCode"],
+            'country': data["address"]["addressCountry"],
+            'phone': data.get("telephone"),
+            'website': data.get("url") or response.url,
+            'lat': float(data["geo"]["latitude"]),
+            'lon': float(data["geo"]["longitude"]),
         }
 
-        opening_hours = self.parse_hours(response.xpath('//div[@id="storeHours"]/div[contains(@class, "day")]'))
-
-        if opening_hours:
-            properties['opening_hours'] = opening_hours
+        hours = self.parse_hours(data.get("openingHoursSpecification", []))
+        if hours:
+            properties["opening_hours"] = hours
 
         yield GeojsonPointItem(**properties)
 
@@ -104,14 +97,18 @@ class AshleyHomeStoreSpider(scrapy.Spider):
 
         opening_hours = OpeningHours()
         for hour in hours:
-            hour = hour.strip()
-            day, open_close = re.search(pattern, hour).groups()
-            if open_close == "Closed":
+            try:
+                hour = hour.strip()
+                day, open_close = re.search(pattern, hour).groups()
+                if open_close == "Closed":
+                    continue
+                open_time, close_time = open_close.split('-')
+                opening_hours.add_range(day=day[:2],
+                                        open_time=open_time,
+                                        close_time=close_time,
+                                        time_format='%I:%M%p')
+            except:
                 continue
-            open_time, close_time = open_close.split('-')
-            opening_hours.add_range(day=day[:2],
-                                    open_time=datetime.datetime.strptime(open_time, '%I:%M%p').strftime('%H:%M'),
-                                    close_time=datetime.datetime.strptime(close_time, '%I:%M%p').strftime('%H:%M'))
         opening_hours = opening_hours.as_opening_hours()
 
         if opening_hours:
