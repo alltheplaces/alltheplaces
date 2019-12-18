@@ -72,9 +72,7 @@ class JCPenneySpider(scrapy.Spider):
             'city': store.xpath('//span[@class="c-address-city"]/text()').extract_first(),
             'state': store.xpath('//abbr[@itemprop="addressRegion"]/text()').extract_first(),
             'postcode': store.xpath('//span[@itemprop="postalCode"]/text()').extract_first(),
-            'extras': {
-                'brand': brand
-            }
+            'brand': brand
         }
 
         hours = store.xpath('//div[contains(@class, "js-location-hours")]/@data-days').extract_first()

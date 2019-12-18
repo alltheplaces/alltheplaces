@@ -50,11 +50,9 @@ class ExpressSpider(scrapy.Spider):
             'website': response.url,
             'lat': float(response.xpath('normalize-space(//meta[@itemprop="latitude"]/@content)').extract_first()),
             'lon': float(response.xpath('normalize-space(//meta[@itemprop="longitude"]/@content)').extract_first()),
-            'extras': {
-                'brand': response.xpath('//h1[@itemprop="name"]/text()')\
+            'brand': response.xpath('//h1[@itemprop="name"]/text()')\
                     .extract_first()\
                     .replace(" - Temporarily Closed", "")
-            }
         }
 
         hours = response.xpath('//tr[@itemprop="openingHours"]/@content').extract()

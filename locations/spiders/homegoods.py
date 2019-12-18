@@ -98,9 +98,7 @@ class HomeGoodsSpider(scrapy.Spider):
                 'phone': store["Phone"],
                 'lat': float(store["Latitude"]),
                 'lon': float(store["Longitude"]),
-                'extras': {
-                    'brand': self.chains[store["Chain"]]
-                }
+                'brand': self.chains[store["Chain"]]
             }
 
             hours = self.parse_hours(store["Hours"])

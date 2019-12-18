@@ -42,9 +42,7 @@ class FinishlineSpider(scrapy.Spider):
             'website': response.url,
             'lat': float(response.xpath('normalize-space(//meta[@itemprop="latitude"]/@content)').extract_first()),
             'lon': float(response.xpath('normalize-space(//meta[@itemprop="longitude"]/@content)').extract_first()),
-            'extras': {
-                'brand': response.xpath('//span[@class="location-name-brand"]/text()').extract_first().strip()
-            }
+            'brand': response.xpath('//span[@class="location-name-brand"]/text()').extract_first().strip()
         }
 
         hours = self.parse_hours(response.xpath('//tr[@itemprop="openingHours"]/@content').extract())
@@ -79,9 +77,7 @@ class FinishlineSpider(scrapy.Spider):
                         'normalize-space(.//span[@class="c-address-postal-code"]/text())').extract_first().strip(),
                     'ref': "_".join([ref, brand, name]).replace(' ', '-').lower(),
                     'website': response.url,
-                    'extras': {
-                        'brand': brand
-                    }
+                    'brand': brand
                 }
                 hours = self.parse_hours(store.xpath('//tr[@itemprop="openingHours"]/@content').extract())
                 if hours:

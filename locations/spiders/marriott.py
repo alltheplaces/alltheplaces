@@ -82,9 +82,7 @@ class MarriottHotels(scrapy.Spider):
                 'lat': float(item["venue"]["location"]["lat"]),
                 'lon': float(item["venue"]["location"]["lng"]),
                 'website': item["tip"]["link"]["url"],
-                'extras': {
-                    'brand': brands.get(item["venue"]["type"], 'Ritz-Carlton')
-                }
+                'brand': brands.get(item["venue"]["type"], 'Ritz-Carlton')
             }
 
             yield GeojsonPointItem(**properties)

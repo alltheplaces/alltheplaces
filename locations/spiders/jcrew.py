@@ -62,12 +62,13 @@ class JcrewSpider(scrapy.Spider):
     def parse(self, response):
         data = json.loads(response.body_as_unicode())
 
+        brand = None 
         if re.search(r'stores.(.\w+)', response.url).groups()[0] == 'factory':
-            item_attributes = { 'brand': "J.Crew Factory" }
+            brand = "J.Crew Factory"
         elif re.search(r'stores.(.\w+)', response.url).groups()[0] == 'jcrew':
-            item_attributes = { 'brand': "J.Crew" }
+            brand = "J.Crew" 
         else:
-            item_attributes = { 'brand': "Madewell" }
+            brand = "Madewell"
 
         for place in data["stores"]:
             properties = {
@@ -82,9 +83,7 @@ class JcrewSpider(scrapy.Spider):
                 'lon': place["longitude"],
                 'phone': place["phone_number"],
                 'website': response.urljoin(place["url"]),
-                'extras': {
-                    'brand': brand
-                }
+                'brand': brand
             }
 
             hours = place["regular_hour_ranges"]

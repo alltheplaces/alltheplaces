@@ -10,8 +10,6 @@ class DeloitteSpider(scrapy.Spider):
     allowed_domains = ["deloitte.com"]
     download_delay = 0.2
 
-    brand = 'Deloitte'
-
     def start_requests(self):
         start_urls = (
             ('https://www2.deloitte.com/us/en/footerlinks/office-locator.html', self.parse),
@@ -66,9 +64,6 @@ class DeloitteSpider(scrapy.Spider):
                 'website': response.url,
                 'lat': None,
                 'lon': None,
-                'extras': {
-                    'brand': self.brand
-                }
             }
 
             details_url = office.xpath('.//h3/a/@href').extract_first()
