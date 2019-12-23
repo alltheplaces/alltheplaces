@@ -47,10 +47,7 @@ class AbercrombieAndFitchSpider(scrapy.Spider):
                 'phone': row["telephone"],
                 'addr_full': row["addressLine"][0],
                 'postcode': row["postalCode"],
-                'extras':
-                    {
-                        'brand': brandValue
-                    }
+                'brand': brandValue
             }
 
             yield GeojsonPointItem(**properties)

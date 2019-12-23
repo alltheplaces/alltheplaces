@@ -75,9 +75,7 @@ class CreditUnionSpider(scrapy.Spider):
             'website': bank.xpath('./div[1]/a/@href').extract_first(),
             'lat':  float(lat),
             'lon':  float(lon),
-            'extras': {
-                'brand': name
-            }
+            'brand': name
         }
         hours = self.parse_hours(bank.xpath('.//div[contains(@class, "location-results__hours")]/p/text()').extract())
         if hours:

@@ -72,9 +72,7 @@ class AlbertsonsSpider(scrapy.Spider):
             'website': response.url,
             'lat':  float(map_json['locs'][0]['latitude']),
             'lon':  float(map_json['locs'][0]['longitude']),
-            'extras' : {
-                'brand' : response.xpath('normalize-space(//span[@class="LocationName-brand"]/text())').extract_first()
-            }
+            'brand' : response.xpath('normalize-space(//span[@class="LocationName-brand"]/text())').extract_first()
         }
         hours = response.xpath('//div[@class="LocationInfo-right"]/div[1]/div[@class="LocationInfo-hoursTable"]/div[@class="c-location-hours-details-wrapper js-location-hours"]/table/tbody/tr/@content').extract()
         if hours:

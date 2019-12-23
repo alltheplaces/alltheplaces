@@ -53,9 +53,7 @@ class ChoiceHotelsSpider(scrapy.Spider):
             'lat': float(data["hotel"]["general"]["lat"]),
             'lon': float(data["hotel"]["general"]["lon"]),
             'website': response.url,
-            'extras': {
-                'brand': brand_name_override.get(brand, brand)
-            }
+            'brand': brand_name_override.get(brand, brand)
         }
 
         yield GeojsonPointItem(**properties)

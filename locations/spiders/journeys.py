@@ -53,8 +53,8 @@ class JourneysSpider(scrapy.Spider):
             'country': response.xpath('normalize-space(//*[@itemprop="addressCountry"]//text())').extract_first(),
             'phone': response.xpath('normalize-space(//span[@itemprop="telephone"]//text())').extract_first(),
             'website': response.url,
+            'brand': brand,
             'extras': {
-                'brand': brand,
                 'number': number
             }
         }

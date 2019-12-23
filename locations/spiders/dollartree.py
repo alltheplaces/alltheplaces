@@ -65,9 +65,7 @@ class DollarTreeSpider(scrapy.Spider):
             'opening_hours': self.parse_hours(data['openingHoursSpecification']),
             'lon': float(data['geo']['longitude']),
             'lat': float(data['geo']['latitude']),
-            'extras': {
-                'brand': data['branchOf']['name']
-            }
+            'brand': data['branchOf']['name']
         }
 
         address = self.address(data['address'])

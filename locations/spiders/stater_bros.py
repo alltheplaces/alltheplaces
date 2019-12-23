@@ -25,6 +25,6 @@ class StaterBrosSpider(scrapy.Spider):
             'lon': store.xpath('@data-longitude').extract_first(),
             'lat': store.xpath('@data-latitude').extract_first(),
             'opening_hours': ' '.join(stores[0].xpath('div[@class="right"]/div[@class="hours"]/p/text()').extract()[:2]),
-            'extras': { 'name': store.xpath('div[@class="left"]/div[@class="name"]/text()').extract_first() }
+            'name': store.xpath('div[@class="left"]/div[@class="name"]/text()').extract_first()
           }
           yield GeojsonPointItem(**properties)
