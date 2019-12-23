@@ -3,6 +3,7 @@ import scrapy
 from locations.items import GeojsonPointItem
 from urllib.parse import urlencode
 import json
+import csv
 from locations.hours import OpeningHours
 from scrapy.selector import Selector
 
@@ -15,17 +16,23 @@ class SallySpider(scrapy.Spider):
     def start_requests(self):
         base_url = "https://www.sallybeauty.com/on/demandware.store/Sites-SA-Site/default/Stores-FindStores?"
 
+        point_files = [
+            './locations/searchable_points/us_centroids_100mile_radius.csv',
+            './locations/searchable_points/ca_centroids_100mile_radius.csv'
+        ]
+
         params = {
             "showmap": "true",
             "radius": "100",
         }
 
-        with open('./locations/searchable_points/us_centroids_100mile_radius.csv') as points:
-            next(points)
-            for point in points:
-                _, lat, lon = point.strip().split(',')
-                params.update({"lat": lat, "long": lon})
-                yield scrapy.Request(url=base_url + urlencode(params))
+        for point_file in point_files:
+            with open(point_file) as points:
+                next(points)
+                for point in points:
+                    _, lat, lon = point.strip().split(',')
+                    params.update({"lat": lat, "long": lon})
+                    yield scrapy.Request(url=base_url + urlencode(params))
 
     def parse_hours(self, hours):
         hrs = Selector(text=hours)
