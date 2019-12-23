@@ -14,32 +14,32 @@ DAY_MAPPING = {
     'SAT': 'Sa',
 }
 
+HEADERS = {
+    'Accept': '*/*',
+    'Accept-Encoding': 'gzip, deflate, br',
+    'Accept-Language': 'en-US',
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36'
+}
+
 class LittleCaesarsSpider(scrapy.Spider):
     name = "little_caesars"
     allowed_domains = ["littlecaesars.com"]
-    download_delay = 0.5
+    download_delay = 0.1
 
     def start_requests(self):
         with open('./locations/searchable_points/us_zcta.csv') as points:
             next(points) # Ignore the header
             for point in points:
                 row = point.split(',')
-                zcta = row[0]
+                zip = row[0].strip().strip('"')
 
-                url = f"https://api.cloud.littlecaesars.com/bff/api/stores?zip={zcta}"
-
-                headers = {
-                    'Accept': '*/*',
-                    'Accept-Encoding': 'gzip, deflate, br',
-                    'Accept-Language': 'en-US',
-                    'Referer': f"https://order.littlecaesars.com/en-us/stores/search/{zcta}"
-                }
+                url = f"https://api.cloud.littlecaesars.com/bff/api/stores?zip={zip}"
 
                 yield scrapy.http.Request(
                     url,
                     self.parse,
                     method='GET',
-                    headers=headers
+                    headers=HEADERS
                 )
 
     def parse(self, response):
@@ -61,7 +61,8 @@ class LittleCaesarsSpider(scrapy.Spider):
             yield scrapy.http.Request(
                 url=f"https://api.cloud.littlecaesars.com/bff/api/stores/{store_id}",
                 method='GET',
-                callback=self.parse_store
+                callback=self.parse_store,
+                headers=HEADERS
             )
 
     def parse_store(self, response):
