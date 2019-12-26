@@ -32,9 +32,10 @@ class PetSmartSpider(scrapy.Spider):
     download_delay = 0.2
     name = "petsmart"
     item_attributes = { 'brand': "Petsmart" }
-    allowed_domains = ["petsmart.com"]
+    allowed_domains = ["petsmart.com", "petsmart.ca"]
     start_urls = (
         'https://www.petsmart.com/store-locator/all/',
+        'https://www.petsmart.ca/store-locator/all/'
     )
 
     def parse(self, response):
@@ -50,6 +51,10 @@ class PetSmartSpider(scrapy.Spider):
 
     def parse_store(self, response):
         ref = re.search(r'.+/?\?(.+)', response.url).group(1)
+        if 'petsmart.ca' in response.url:
+            country = 'CA'
+        elif 'petsmart.com' in response.url:
+            country = 'US'
 
         properties = {
             'name': response.xpath('//span[@itemprop="name"]/text()').extract_first().strip(),
@@ -60,6 +65,7 @@ class PetSmartSpider(scrapy.Spider):
             'lat': float(response.xpath('//input[@name="storeLatitudeVal"]/@value').extract_first()),
             'lon': float(response.xpath('//input[@name="storeLongitudeVal"]/@value').extract_first()),
             'phone': response.xpath('//a[@class="store-contact-info"]/text()').extract_first(),
+            'country': country,
             'ref': ref,
             'website': response.url
         }
