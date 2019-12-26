@@ -56,6 +56,7 @@ class CanadianTireSpider(scrapy.Spider):
         data = json.loads(response.xpath('//div[@data-component="StoreLocatorPage"]/@data-config').extract_first())
 
         properties = {
+            'brand': 'Canadian Tire',
             'name': data["storeName"],
             'ref': data["storeNumber"],
             'addr_full': data["storeAddress1"],
