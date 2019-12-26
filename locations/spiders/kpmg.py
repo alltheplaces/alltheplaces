@@ -11,7 +11,7 @@ from locations.items import GeojsonPointItem
 class KpmgSpider(scrapy.Spider):
     name = "kpmg"
     request_delay = 4
-    # allowed_domains = ['home.kmpg']  # scrapy doesn't like this
+    allowed_domains = ['home.kpmg']
     start_urls = [
         'https://home.kpmg/bin/kpmg/officesjson?url=xx/en/home/about/offices.html',
     ]
