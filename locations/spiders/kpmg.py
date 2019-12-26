@@ -47,6 +47,7 @@ class KpmgSpider(scrapy.Spider):
                 postcode = postcode.strip('- ')
 
         properties.update({
+            'brand': 'KPMG',
             'ref': re.search(r'.+/(.+?)/?(?:\.html|$)', response.url).group(1),
             'name': response.xpath('//meta[@name="KPMG_Title"]/@content').extract_first(),
             'city': response.xpath('//meta[@name="KPMG_Location_Mailing_Address_City"]/@content').extract_first(),
