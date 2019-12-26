@@ -12,7 +12,7 @@ class RoyalLePageSpider(scrapy.Spider):
     name = "royallepage"
     allowed_domains = ['royallepage.ca']
     start_urls = [
-        'https://www.royallepage.ca/en/search/offices/?csrfmiddlewaretoken=c6kc9LYa5T3dHB6gOMrmQEA9LSTiV7VsnV6rQdBr6NNmvbFTFGomA1dHgwgZ0Zz0&lat=&lng=&address=&designations=&address_type=&city_name=&prov_code=&sortby=&transactionType=OFFICE&name=&location=&language=&specialization=All',
+        'https://www.royallepage.ca/en/search/offices/?lat=&lng=&address=&designations=&address_type=&city_name=&prov_code=&sortby=&transactionType=OFFICE&name=&location=&language=&specialization=All',
     ]
 
     def parse_location(self, response):
