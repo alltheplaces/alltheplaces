@@ -11,6 +11,7 @@ ALL_DAYS = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su']
 class DickeysBarbecuePitSpider(scrapy.Spider):
     name = "dickeys_barbecue_pit"
     allowed_domains = ["dickeys.com"]
+    download_delay = 0.5
     start_urls = (
         "https://www.dickeys.com/location/search-by-state",
     )
