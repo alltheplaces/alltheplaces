@@ -18,8 +18,8 @@ DAY_MAPPING = {
 
 class BostonPizzaSpider(scrapy.Spider):
     name = "bostonpizza"
-    item_attributes = { 'brand': "Boston Pizza" }
-    allowed_domains = ["www.montessori.com"]
+    item_attributes = {'brand': "Boston Pizza"}
+    allowed_domains = ["www.bostonpizza.com"]
     start_urls = (
         'https://bostonpizza.com/en/locations.html',
     )
