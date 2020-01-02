@@ -42,7 +42,7 @@ class FraserHealthSpider(scrapy.Spider):
         yield GeojsonPointItem(**properties)
 
     def parse(self, response):
-        places = json.loads(response.body)
+        places = json.loads(response.body_as_unicode())
 
         for place in places["Results"]:
             yield scrapy.Request(url=place["Url"], callback=self.parse_place, meta={'ref': place['Id']})
