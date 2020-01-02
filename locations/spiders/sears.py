@@ -119,7 +119,7 @@ class SearsSpider(scrapy.Spider):
             'phone': store_data.get('custrecord_loc_det_phone'),
             'website': store_data.get('custrecord_loc_det_store_url'),
             'lat': store_data.get('custrecord_sho_latitude'),
-            'lon': store_data.get('custrecord_sho_longitude'),
+            'lon': store_data.get('custrecord_sho_lbi_longitude'),
         }
 
         yield GeojsonPointItem(**properties)
