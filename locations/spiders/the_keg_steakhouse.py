@@ -21,6 +21,7 @@ DAYS_NAME = {
 
 class TheKegSteakhouseSpider(scrapy.Spider):
     name = "the_keg_steakhouse"
+    item_attributes = {'brand': "The Keg Steakhouse"}
     allowed_domains = ['kegsteakhouse.com']
     start_urls = [
         'https://kegsteakhouse.com/en/location/list',
