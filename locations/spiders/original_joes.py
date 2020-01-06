@@ -11,7 +11,7 @@ from locations.hours import OpeningHours
 class OriginalJoesSpider(scrapy.Spider):
     name = "original_joes"
     item_attributes = {'brand': "Original Joes"}
-    allowed_domains = ['originaljoes.ca/']
+    allowed_domains = ['originaljoes.ca']
     start_urls = [
         'https://www.originaljoes.ca/',
     ]
