@@ -21,13 +21,13 @@ class PrimePubsSpider(scrapy.Spider):
         for place in places["feed"]["entry"]:
             brand = place["gsx$storename"]["$t"]
             if "FIONN MACCOOL'S" in brand:
-                brand = "FIONN MACCOOL'S"
+                brand = "Fionn MaCcool's"
             elif "D'ARCY MCGEE'S" in brand:
-                brand = "D'ARCY MCGEE'S"
+                brand = "D'Arcy McGee's"
             elif "PADDY FLAHERTY'S" in brand:
-                brand = "PADDY FLAHERTY'S"
+                brand = "Paddy Flaherty's"
             elif "TIR NAN ÓG KINGSTON" in brand:
-                brand = "TIR NAN ÓG KINGSTON"
+                brand = "Tir Nan Óg"
 
             properties = {
                 'ref': place["gsx$storenumber"]["$t"],
