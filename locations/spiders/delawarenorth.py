@@ -23,7 +23,8 @@ class DelawareNorthSpider(scrapy.Spider):
     def parse_location(self, response):
         try:
             address_element = response.xpath('//div[@class="generic-content"]/h2/text()').extract()
-            address = address_element[0].split(',')
+            addresses = list(filter(None, [a.strip() for a in address_element]))
+            address = addresses[0]
 
             properties = {
                 'ref': re.search(r'.+/(.+?)/?(?:\.html|$)', response.url).group(1),
