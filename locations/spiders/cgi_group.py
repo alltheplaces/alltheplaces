@@ -36,8 +36,8 @@ class CGISpider(scrapy.Spider):
                                                    office['properties']['description'])),
                 'postcode': self.checklist(re.findall('(?<=postal-code">).*?(?=<)',
                                                       office['properties']['description'])),
-                'lat': float(office['geometry']['coordinates'][0]),
-                'lon': float(office['geometry']['coordinates'][1]),
+                'lat': float(office['geometry']['coordinates'][1]),
+                'lon': float(office['geometry']['coordinates'][0]),
                 'country': re.findall('(?<=country">).*?(?=<)', office['properties']['description'])[0],
                 'ref': re.findall('(?<=<span>).*?(?=<)', office['properties']['description'])[0],
                 'website': response.url
