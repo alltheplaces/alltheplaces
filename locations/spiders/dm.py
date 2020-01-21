@@ -15,6 +15,12 @@ DAY_MAPPING = {
     7: 'Su'
 }
 
+COUNTRY_MAPPING = {
+    'DE': 'Germany',
+    'AT': 'Austria',
+    'CZ': 'Czech Republic'
+}
+
 class DmSpider(scrapy.Spider):
     name = "dm"
     allowed_domains = ["services.dm.de"]
@@ -45,23 +51,24 @@ class DmSpider(scrapy.Spider):
     def parse_details(self, response):
         stores = json.loads(response.body_as_unicode())
         for store in stores['stores']:
-            properties = {
-                'country': store['localeCountry'],
-                'ref': store['storeNumber'],
-                'phone': store['phone'],
-                'name': store['address']['name'],
-                'street': store['address']['street'],
-                'postcode': store['address']['zip'],
-                'city': store['address']['city'],
-                'lat': store['location']['lat'],
-                'lon': store['location']['lon'],
-            }
-            hours = self.parse_hours(store['openingDays'])
+            if store['localeCountry'] in COUNTRY_MAPPING:
+                properties = {
+                    'country': COUNTRY_MAPPING[store['localeCountry']],
+                    'ref': store['storeNumber'],
+                    'phone': store['phone'],
+                    'name': store['address']['name'],
+                    'street': store['address']['street'],
+                    'postcode': store['address']['zip'],
+                    'city': store['address']['city'],
+                    'lat': store['location']['lat'],
+                    'lon': store['location']['lon'],
+                }
+                hours = self.parse_hours(store['openingDays'])
 
-            if hours:
-                properties["opening_hours"] = hours
+                if hours:
+                    properties["opening_hours"] = hours
 
-            yield GeojsonPointItem(**properties)
+                yield GeojsonPointItem(**properties)
 
     def parse(self, response):
         locations = json.loads(response.body_as_unicode())
