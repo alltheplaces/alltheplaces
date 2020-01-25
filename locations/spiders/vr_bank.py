@@ -39,7 +39,7 @@ class VRBankSpider(scrapy.Spider):
             except Exception:
                 pass
 
-            if time:
+            if time and day in DAY_MAPPING.keys():
                 time = time.replace("24:00", "00:00")
                 tms = []
                 if 'und' in time:
@@ -98,12 +98,16 @@ class VRBankSpider(scrapy.Spider):
             pass
 
         try:
-            latitude = re.search(r'"lat":([-+]?[0-9]*\.?[0-9]*)', response.text)
+            m = re.search(r'lat&quot;:([-+]?[0-9]*\.?[0-9]*)', response.text)
+            if m:
+                latitude = m.group(1)
         except Exception:
             pass
 
         try:
-            longitude = re.search(r'"lng":([-+]?[0-9]*\.?[0-9]*)', response.text)
+            m = re.search(r'lng&quot;:([-+]?[0-9]*\.?[0-9]*)', response.text)
+            if m:
+                longitude = m.group(1)
         except Exception:
             pass
 
