@@ -9,12 +9,16 @@ from locations.hours import OpeningHours
 class SparkasseSpider(scrapy.Spider):
     name = "sparkasse"
     allowed_domains = ["www.sparkasse.de"]
-    start_urls = []
-    for c in "abcdefghijklmnopqrstuvwxyz":
-        url = "https://www.sparkasse.de/filialen/{}.html".format(c)
-        start_urls.append(url)
-
     download_delay = 2
+
+    def start_requests(self):
+        for c in "abcdefghijklmnopqrstuvwxyz":
+            url = "https://www.sparkasse.de/filialen/{}.html".format(c)
+
+            yield scrapy.http.FormRequest(
+                url=url,
+                callback=self.parse
+            )
 
     def parse_hours(self, store_hours):
         opening_hours = OpeningHours()
