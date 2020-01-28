@@ -1,5 +1,4 @@
 import scrapy
-import json
 import re
 
 from locations.items import GeojsonPointItem
@@ -21,8 +20,6 @@ class VRBankSpider(scrapy.Spider):
     name = "vr_bank"
     allowed_domains = ["www.vr.de"]
     start_urls = ['https://www.vr.de/service/filialen-a-z/a.html']
-
-    download_delay = 1
 
     def process_hours(self, store_hours):
         opening_hours = OpeningHours()
@@ -66,6 +63,13 @@ class VRBankSpider(scrapy.Spider):
         return opening_hours.as_opening_hours()
 
     def parse_details(self, response):
+        if response.status == 403:
+            yield scrapy.Request(
+                url=response.meta.get('url'),
+                callback=self.parse_details,
+                meta={'url': response.meta.get('url')}
+            )
+
         name = street = zip = city = phone = website = latitude = longitude = ""
 
         try:
@@ -120,6 +124,7 @@ class VRBankSpider(scrapy.Spider):
             'ref': response.meta.get('url'),
             'name': name,
             'city': city,
+            'street': street,
             'postcode': zip,
             'phone': phone,
             'website': website,
@@ -142,9 +147,42 @@ class VRBankSpider(scrapy.Spider):
             )
 
     def parse(self, response):
-        index = response.xpath('//div[has-class("module module-linklist ym-clearfix")]/ul/li/a/@href').getall()
+        index = [
+            "https://www.vr.de/service/filialen-a-z/a.html",
+            "https://www.vr.de/service/filialen-a-z/ba-bm.html",
+            "https://www.vr.de/service/filialen-a-z/bn-Bz.html",
+            "https://www.vr.de/service/filialen-a-z/c.html",
+            "https://www.vr.de/service/filialen-a-z/d.html",
+            "https://www.vr.de/service/filialen-a-z/e.html",
+            "https://www.vr.de/service/filialen-a-z/f.html",
+            "https://www.vr.de/service/filialen-a-z/g.html",
+            "https://www.vr.de/service/filialen-a-z/ha-hm.html",
+            "https://www.vr.de/service/filialen-a-z/hn-hz.html",
+            "https://www.vr.de/service/filialen-a-z/i.html",
+            "https://www.vr.de/service/filialen-a-z/j.html",
+            "https://www.vr.de/service/filialen-a-z/k.html",
+            "https://www.vr.de/service/filialen-a-z/l.html",
+            "https://www.vr.de/service/filialen-a-z/m.html",
+            "https://www.vr.de/service/filialen-a-z/n.html",
+            "https://www.vr.de/service/filialen-a-z/o.html",
+            "https://www.vr.de/service/filialen-a-z/p.html",
+            "https://www.vr.de/service/filialen-a-z/q.html",
+            "https://www.vr.de/service/filialen-a-z/r.html",
+            "https://www.vr.de/service/filialen-a-z/sa-sm.html",
+            "https://www.vr.de/service/filialen-a-z/sn-sz.html",
+            "https://www.vr.de/service/filialen-a-z/t.html",
+            "https://www.vr.de/service/filialen-a-z/u.html",
+            "https://www.vr.de/service/filialen-a-z/v.html",
+            "https://www.vr.de/service/filialen-a-z/wa-wm.html",
+            "https://www.vr.de/service/filialen-a-z/wn-wz.html",
+            "https://www.vr.de/service/filialen-a-z/x.html",
+            "https://www.vr.de/service/filialen-a-z/y.html",
+            "https://www.vr.de/service/filialen-a-z/z.html"
+        ]
+
         for page in index:
             yield scrapy.Request(
                 url=page,
                 callback=self.get_index
             )
+
