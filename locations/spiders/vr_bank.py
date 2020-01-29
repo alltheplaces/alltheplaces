@@ -88,7 +88,7 @@ class VRBankSpider(scrapy.Spider):
             city = response.xpath('//span[@itemprop="addressLocality"]/text()').get()
             phone = response.xpath('//li[@itemprop="telephone"]/a/span/text()').get()
             website = response.xpath('//li[@itemprop="url"]/a/span/text()').get()
-        except:
+        except Exception:
             print("Error: contact details not found for url: {}".format(response.meta.get('url')))
 
         try:
