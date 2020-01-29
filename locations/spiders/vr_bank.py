@@ -21,7 +21,7 @@ class VRBankSpider(scrapy.Spider):
     allowed_domains = ["www.vr.de"]
     start_urls = ['https://www.vr.de/service/filialen-a-z/a.html']
 
-    def start_requests(self, response):
+    def start_requests(self):
         index = response.xpath('//div[has-class("module module-linklist ym-clearfix")]/ul/li/a/@href').getall()
 
         for page in index:
