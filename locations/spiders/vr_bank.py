@@ -83,51 +83,32 @@ class VRBankSpider(scrapy.Spider):
 
         try:
             name = response.xpath('//h1[@itemprop="name"]/text()').get()
-        except Exception:
-            pass
-
-        try:
             street = response.xpath('//span[@itemprop="streetAddress"]/text()').get()
-        except Exception:
-            pass
-        try:
             zip = response.xpath('//span[@itemprop="postalCode"]/text()').get()
-        except Exception:
-            pass
-
-        try:
             city = response.xpath('//span[@itemprop="addressLocality"]/text()').get()
-        except Exception:
-            pass
-
-        try:
             phone = response.xpath('//li[@itemprop="telephone"]/a/span/text()').get()
-        except Exception:
-            pass
-
-        try:
             website = response.xpath('//li[@itemprop="url"]/a/span/text()').get()
-        except Exception:
-            pass
+        except:
+            print("Error: contact details not found for url: {}".format(response.meta.get('url')))
 
         try:
             m = re.search(r'lat&quot;:([-+]?[0-9]*\.?[0-9]*)', response.text)
             if m:
                 latitude = m.group(1)
         except Exception:
-            pass
+            print("Error: latitude not found for url: {}".format(response.meta.get('url')))
 
         try:
             m = re.search(r'lng&quot;:([-+]?[0-9]*\.?[0-9]*)', response.text)
             if m:
                 longitude = m.group(1)
         except Exception:
-            pass
+            print("Error: longitude not found for url: {}".format(response.meta.get('url')))
 
         try:
             hours = response.xpath('//p[@itemprop="openingHoursSpecification"]/text()').getall()
         except Exception:
-            pass
+            print("Error: working hours information not found for url: {}".format(response.meta.get('url')))
 
         properties = {
             'ref': response.meta.get('url'),
