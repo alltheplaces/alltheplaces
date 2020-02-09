@@ -38,6 +38,10 @@ class IcelandSpider(scrapy.Spider):
                     store['address']['addressRegion'],
                     store['address']['addressLocality']
                 ).replace(', null', '')
+
+                phone = response.css('div.phone').xpath('./text()').get()
+                if phone:
+                    phone.strip()
                 
                 properties = {
                     'name': store_name,
@@ -47,7 +51,7 @@ class IcelandSpider(scrapy.Spider):
                     'city': store['address']['addressRegion'].title() or '', # Usually city, but not always
                     'addr_full': store_addr,
                     'country': store_country,
-                    'phone': response.css('div.phone').xpath('./text()').get().strip(),
+                    'phone': phone,
                 }
 
                 try:
