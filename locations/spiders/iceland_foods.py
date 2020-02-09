@@ -7,8 +7,8 @@ from urllib.parse import unquote
 from locations.items import GeojsonPointItem
 
 
-class IcelandSpider(scrapy.Spider):
-    name = "iceland"
+class IcelandFoodsSpider(scrapy.Spider):
+    name = "iceland_foods"
     item_attributes = { 'brand': "Iceland Foods" }
     allowed_domains = ['www.iceland.co.uk']
     start_urls = (
