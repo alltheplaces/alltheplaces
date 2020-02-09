@@ -43,14 +43,18 @@ class IcelandSpider(scrapy.Spider):
                     'name': store_name,
                     'ref': response.url.split('StoreID=')[1].split('&')[0],
                     'website': response.url,
-                    'lat': float( store['geo']['latitude'] ),
-                    'lon': float( store['geo']['longitude'] ),
                     'postcode': store['address']['postalCode'],
                     'city': store['address']['addressRegion'].title() or '', # Usually city, but not always
                     'addr_full': store_addr,
                     'country': store_country,
                     'phone': response.css('div.phone').xpath('./text()').get().strip(),
                 }
+
+                try:
+                    properties['lat'] = float( store['geo']['latitude'] )
+                    properties['lon'] = float( store['geo']['longitude'] )
+                except ValueError:
+                    return
 
                 yield GeojsonPointItem(**properties)
 
