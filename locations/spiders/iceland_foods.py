@@ -28,7 +28,7 @@ class IcelandFoodsSpider(scrapy.Spider):
                 store = json.loads( s )
 
                 # Extract store name from URL
-                store_name = unquote(response.url.split('StoreName=')[1])#.replace('%20', ' ')
+                store_name = unquote(response.url.split('StoreName=')[1])
 
                 # Because country is not always set in address field, guess country from name
                 store_country = 'Ireland' if 'IRELAND ' in store_name else 'UK'
