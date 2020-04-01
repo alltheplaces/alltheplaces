@@ -22,17 +22,25 @@ class RoadysSpider(scrapy.Spider):
         title = single_rloc.xpath('.//div[@class="rloc_title"]/text()').extract_first()
 
         # location address
-        addr_full, city_state_postcode = single_rloc.xpath('.//div[@class="rloc_address"]//text()').extract()
-        addr_full = addr_full.strip()
-        city, state_postcode = city_state_postcode.rsplit(",", 1)
-        city = city.strip()
-        state_postcode = state_postcode.strip()
-        if " " in state_postcode:
-          state, postcode = state_postcode.split(" ")
-          state = state.strip()
-          postcode = postcode.strip()
+        rloc_address = single_rloc.xpath('.//div[@class="rloc_address"]//text()').extract()
+        if len(rloc_address) == 2:
+          addr_full, city_state_postcode = rloc_address
+          addr_full = addr_full.strip()
+          city, state_postcode = city_state_postcode.rsplit(",", 1)
+          city = city.strip()
+          state_postcode = state_postcode.strip()
+          if " " in state_postcode:
+            state, postcode = state_postcode.split(" ")
+            state = state.strip()
+            postcode = postcode.strip()
+          else:
+            state = state_postcode
+            postcode = None
         else:
-          state = state_postcode
+          # assume rloc_address is empty and don't put any address data
+          addr_full = None
+          city = None
+          state = None
           postcode = None
 
         # lat/lng coordinates
