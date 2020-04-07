@@ -16,7 +16,8 @@ mapping = (
     ('phone', 'phone'),
     ('website', 'website'),
     ('opening_hours', 'opening_hours'),
-    ('brand', 'brand')
+    ('brand', 'brand'),
+    ('brand_wikidata', 'brand:wikidata'),
 )
 
 
