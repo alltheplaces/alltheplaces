@@ -8,7 +8,7 @@ from locations.items import GeojsonPointItem
 
 class SafewaySpider(scrapy.Spider):
     name = "safeway"
-    item_attributes = { 'brand': "Safeway" }
+    item_attributes = { 'brand': "Safeway", 'brand_wikidata': "Q1508234" }
     allowed_domains = ['safeway.com']
     start_urls = (
         'https://local.safeway.com/sitemap.xml',
@@ -80,12 +80,10 @@ class SafewaySpider(scrapy.Spider):
                 )
 
     def parse_store(self, response):
-        ref = re.search(r'.+/(.+?)/?(?:\.html|$)', response.url).group(1)
-
         properties = {
-            'name': response.xpath('//span[@class="LocationName-geo"]/text()').extract_first(),
+            'name': response.xpath('//meta[@itemprop="name"]/@content').extract_first(),
             'website': response.url,
-            'ref': ref,
+            'ref': response.url,
             'addr_full': response.xpath('//meta[@itemprop="streetAddress"]/@content').extract_first(),
             'city': response.xpath('//meta[@itemprop="addressLocality"]/@content').extract_first(),
             'state': response.xpath('//abbr[@itemprop="addressRegion"]/text()').extract_first(),
@@ -94,7 +92,7 @@ class SafewaySpider(scrapy.Spider):
             'lon': float(response.xpath('//meta[@itemprop="longitude"]/@content').extract_first()),
         }
 
-        hours = json.loads(response.xpath('//div[@class="c-location-hours-details-wrapper js-location-hours"]/@data-days').extract_first())
+        hours = json.loads(response.xpath('//div[@class="c-hours-details-wrapper js-hours-table"]/@data-days').extract_first())
         opening_hours = self.store_hours(hours) if hours else None
         if opening_hours:
             properties['opening_hours'] = opening_hours
