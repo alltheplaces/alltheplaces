@@ -8,7 +8,7 @@ from locations.items import GeojsonPointItem
 class ArbysSpider(scrapy.Spider):
 
     name = "arby"
-    item_attributes = { 'brand': "Arby's" }  # 'brand:wikidata': "Q630866"
+    item_attributes = { 'brand': "Arby's", 'brand_wikidata': "Q630866" }
     allowed_domains = ["locations.arbys.com"]
     download_delay = 0.2
     start_urls = (
@@ -23,7 +23,7 @@ class ArbysSpider(scrapy.Spider):
             properties = {
                 # store name is after the pipe, e.g. Fast Food Drive-Thru
                 # Restaurants | Arby's 8437
-                'ref': data["name"].rsplit("|", 1)[-1],
+                'ref': data["name"].rsplit("|", 1)[-1].strip(),
                 'name': data["name"],
                 'addr_full': data["address"]["streetAddress"].strip(),
                 'city': data["address"]["addressLocality"].strip(),
