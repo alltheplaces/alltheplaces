@@ -32,7 +32,7 @@ class SubwaySpider(scrapy.Spider):
 
             next(points)  # Ignore the header
             for point in points:
-                _, lat, lon, state = point.strip().split(',')
+                _, lat, lon = point.strip().split(',')
                 options = {
                     "InputText": "",
                     "Geocode": {
