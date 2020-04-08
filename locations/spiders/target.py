@@ -11,6 +11,8 @@ class TargetSpider(scrapy.Spider):
     item_attributes = { 'brand': "Target", 'brand_wikidata': "Q1046951" }
     allowed_domains = ["target.com"]
     start_urls = (
+        # stores seem to have their own site index taken from
+        # https://www.target.com/sitemap_index.xml.gz
         'https://www.target.com/sl/sitemap_001.xml.gz',
     )
 
