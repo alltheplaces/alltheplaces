@@ -6,10 +6,10 @@ import re
 from locations.items import GeojsonPointItem
 
 
-class RedRobbinSpider(scrapy.Spider):
+class RedRobinSpider(scrapy.Spider):
 
-    name = "red_robbin"
-    item_attributes = { 'brand': "Red Robbin" }
+    name = "red_robin"
+    item_attributes = { 'brand': "Red Robin", 'brand_wikidata': "Q7304886" }
     allowed_domains = ["www.redrobin.com"]
     start_urls = (
         'https://www.redrobin.com/static/data.locationddp.json?lat=29.8067386&lng=-91.51919780000003&units=miles&maxresults=1200&maxdistance=5000',
@@ -22,14 +22,14 @@ class RedRobbinSpider(scrapy.Spider):
             day_hours = day_hours.replace('Mon', 'Mo').replace('Tue', 'Tu').replace('Thu', 'Th').replace('Fri', 'Fr').replace('Sat', 'Sa').replace('Sun', 'Su')
             day_hours = day_hours.replace('a-', ':00-')
             day_hours = day_hours.replace('Midnight', '12:00')
-    
+
             m = re.search('([0-9]{1,2})(p)', day_hours)
             if m:
                 h = m.group(1)
                 new_h = int(h) + 12
                 day_hours = day_hours.replace(h + 'p', str(new_h) + ':00')
-            opening_hours += '{}; '.format(day_hours)            
-        
+            opening_hours += '{}; '.format(day_hours)
+
         opening_hours = opening_hours[:-1]
 
         return opening_hours

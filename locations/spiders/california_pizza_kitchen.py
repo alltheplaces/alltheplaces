@@ -19,7 +19,7 @@ DAY_MAPPING = {'1': 'Mo', '2': 'Tu', '3': 'We', '4': 'Th',
 class cpkSpider(scrapy.Spider):
     download_delay = 0.2
     name = "cpk"
-    item_attributes = { 'brand': "California Pizza Kitchen" }
+    item_attributes = { 'brand': "California Pizza Kitchen", 'brand_wikidata': "Q15109854" }
     allowed_domains = ["momentfeed-prod.apigee.net"]
 
     def start_requests(self):

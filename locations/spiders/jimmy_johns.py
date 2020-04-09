@@ -4,10 +4,10 @@ import json
 
 from locations.items import GeojsonPointItem
 
-STATES = ["AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DC", "DE", "FL", "GA", 
-          "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD", 
-          "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ", 
-          "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC", 
+STATES = ["AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DC", "DE", "FL", "GA",
+          "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD",
+          "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ",
+          "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC",
           "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"]
 HEADERS = { 'Content-Type': 'application/json' }
 JJBASE = 'https://www.jimmyjohns.com/webservices/Location/LocationServiceHandler.asmx/{}'
@@ -16,7 +16,7 @@ STORES = JJBASE.format('GetStoreAddressesByCityAndState')
 
 class JimmyJohnsSpider(scrapy.Spider):
     name = "jimmy-johns"
-    item_attributes = { 'brand': "Jimmy John's" }
+    item_attributes = { 'brand': "Jimmy John's", 'brand_wikidata': "Q1689380" }
     allowed_domains = ["www.jimmyjohns.com"]
     download_delay = 0.2
 
@@ -24,7 +24,7 @@ class JimmyJohnsSpider(scrapy.Spider):
         for state in STATES:
             current_state = json.dumps({ 'state': state })
             request = scrapy.Request(
-                CITIES, 
+                CITIES,
                 method='POST',
                 body=current_state,
                 headers=HEADERS,
@@ -32,7 +32,7 @@ class JimmyJohnsSpider(scrapy.Spider):
             )
             request.meta['state'] = state
             yield request
-    
+
     def parse_cities(self, response):
         cities = json.loads(response.body)
         for city in cities['d']:

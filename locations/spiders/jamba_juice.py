@@ -14,7 +14,7 @@ DAYS = {
 class JambaJuiceSpider(scrapy.Spider):
 
     name = "jambajuice"
-    item_attributes = { 'brand': "Jamba Juice" }
+    item_attributes = { 'brand': "Jamba Juice", 'brand_wikidata': "Q3088784" }
     allowed_domains = ["https://momentfeed-prod.apigee.net/"]
     download_delay = 1.5
     start_urls = (
