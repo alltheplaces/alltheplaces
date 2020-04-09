@@ -7,7 +7,7 @@ from xlrd import open_workbook
 
 class TAPetroSpider(scrapy.Spider):
     name = 'tapetro'
-    item_attributes = { 'brand': "TravelCenters of America" }
+    item_attributes = { 'brand': "TravelCenters of America", 'brand_wikidata': "Q7835892" }
     allowed_domains = ['www.ta-petro.com']
     start_urls = (
         'http://www.ta-petro.com/assets/ce/Documents/Master-Location-List.xls',
