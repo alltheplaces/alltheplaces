@@ -9,7 +9,7 @@ from locations.hours import OpeningHours
 
 class SevenElevenSpider(scrapy.Spider):
     name = "seven_eleven"
-    brand = '7-Eleven'
+    item_attributes = { 'brand': "7-Eleven", 'brand_wikidata': "Q259340" }
     allowed_domains = [
                         "www.7-eleven.com",
                         "api.7-eleven.com"
@@ -46,9 +46,9 @@ class SevenElevenSpider(scrapy.Spider):
             'lat': response.xpath('normalize-space(//meta[@itemprop="latitude"]/@content)').extract_first(),
             'lon': response.xpath('normalize-space(//meta[@itemprop="longitude"]/@content)').extract_first(),
         }
-        
+
         properties['opening_hours'] = self.parse_hours(response.xpath('//div[@id="se-local-store-hours"]'))
-        
+
         yield GeojsonPointItem(**properties)
 
     def parse(self, response):

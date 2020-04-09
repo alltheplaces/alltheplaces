@@ -9,7 +9,7 @@ from locations.items import GeojsonPointItem
 class CircleKSpider(scrapy.Spider):
 
     name = "circle_k"
-    item_attributes = { 'brand': "Circle K" }
+    item_attributes = { 'brand': "Circle K", 'brand_wikidata': "Q3268010" }
     allowed_domains = ["www.circlek.com"]
 
     start_urls = (

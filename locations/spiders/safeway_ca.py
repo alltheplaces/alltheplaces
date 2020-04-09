@@ -8,7 +8,7 @@ from locations.items import GeojsonPointItem
 
 class SafewayCaSpider(scrapy.Spider):
     name = "safeway_ca"
-    item_attributes = { 'brand': "Safeway" }
+    item_attributes = { 'brand': "Safeway", 'brand_wikidata': "Q17111901" }
     allowed_domains = ["www.safeway.ca"]
     start_urls = (
         'https://www.safeway.ca/api/en/Store/get?Latitude=42.0354084&Longitude=-88.2825668&Skip=0&Max=60000',
@@ -33,7 +33,7 @@ class SafewayCaSpider(scrapy.Spider):
                     t_hr += 12
                 elif t_ampm == 'A' and t_hr == 12:
                     t_hr = 0
-                
+
                 hours = '{:02d}:{}-{:02d}:{}'.format(
                     f_hr,
                     f_min,

@@ -18,7 +18,7 @@ DAY_MAPPING = {
 
 class FirehouseSubsSpider(scrapy.Spider):
     name = "firehouse_subs"
-    item_attributes = { 'brand': "Firehouse Subs" }
+    item_attributes = { 'brand': "Firehouse Subs", 'brand_wikidata': "Q5451873" }
     allowed_domains = ["firehousesubs.com"]
 
     def start_requests(self):

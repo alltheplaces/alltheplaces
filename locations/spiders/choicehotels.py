@@ -13,7 +13,7 @@ brand_name_override = {
 
 class ChoiceHotelsSpider(scrapy.Spider):
     name = "choicehotels"
-    item_attributes = { 'brand': "Choice Hotels" }
+    item_attributes = { 'brand': "Choice Hotels", 'brand_wikidata': "Q1075788" }
     allowed_domains = ["choicehotels.com"]
     download_delay = 0.2
 

@@ -20,7 +20,7 @@ DAY_MAPPING = {
 
 class DominosPizzaSpider(scrapy.Spider):
     name = "dominos_pizza"
-    item_attributes = { 'brand': "Domino's Pizza" }
+    item_attributes = { 'brand': "Domino's Pizza", 'brand_wikidata': "Q839466" }
     allowed_domains = ["dominos.com"]
     start_urls = (
         'https://pizza.dominos.com/sitemap.xml',

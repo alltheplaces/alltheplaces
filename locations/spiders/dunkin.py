@@ -7,7 +7,7 @@ import json
 
 class DunkinSpider(scrapy.Spider):
     name = "dunkindonuts"
-    item_attributes = { 'brand': "Dunkin'" }
+    item_attributes = { 'brand': "Dunkin'", 'brand_wikidata': "Q847743" }
     allowed_domains = ["dunkindonuts.com", "mapquestapi.com"]
 
     def start_requests(self):
