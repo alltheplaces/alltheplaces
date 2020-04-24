@@ -10,7 +10,7 @@ from locations.hours import OpeningHours
 
 class KauflandSpider(scrapy.Spider):
     name = "kaufland"
-    item_attributes = {'brand': 'Kaufland'}
+    item_attributes = {'brand': 'Kaufland', 'brand_wikidata': 'Q685967'}
     allowed_domains = ["kaufland.de"]
     start_urls = [
         'https://www.kaufland.de/.storefinder.json',
