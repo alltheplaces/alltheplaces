@@ -20,23 +20,24 @@ class EdekaSpider(scrapy.Spider):
                 'referer': 'https://edeka.de/marktsuche.jsp',
                 'content-type': 'application/x-www-form-urlencoded'},
             body='indent=off&hl=false&rows=10000&q=(indexName:b2cMarktDBIndex++AND+kanalKuerzel_tlcm:edeka+AND+((freigabeVonDatum_longField_l:[0+TO+1513897199999]+AND+freigabeBisDatum_longField_l:[1513810800000+TO+*])+AND+NOT+(datumAppHiddenVon_longField_l:[0+TO+1513897199999]+AND+datumAppHiddenBis_longField_l:[1513810800000+TO+*]))+AND+geoLat_doubleField_d:[47.0+TO+55.0]+AND+geoLng_doubleField_d:[5.62+TO+15])&fl=handzettelSonderlUrl_tlcm,handzettelSonderName_tlcm,handzettelUrl_tlc,marktID_tlc,plz_tlc,ort_tlc,strasse_tlc,name_tlc,geoLat_doubleField_d,geoLng_doubleField_d,telefon_tlc,fax_tlc,services_tlc,oeffnungszeiten_tlc,knzUseUrlHomepage_tlc,urlHomepage_tlc,urlExtern_tlc,marktTypName_tlc,mapsBildURL_tlc,vertriebsschieneName_tlc,vertriebsschienenTypeKuerzel_tlc,vertriebsschieneKey_tlc,freigabeVonDatum_longField_l,freigabeBisDatum_longField_l,datumAppHiddenVon_longField_l,datumAppHiddenBis_longField_l,oeffnungszeitenZusatz_tlc,knzTz_tlc,kaufmannIName_tlc,kaufmannIStrasse_tlc,kaufmannIPlz_tlc,kaufmannIOrt_tlc,sonderoeffnungszeitJahr_tlcm,sonderoeffnungszeitMonat_tlcm,sonderoeffnungszeitTag_tlcm,sonderoeffnungszeitUhrzeitBis_tlcm,sonderoeffnungszeitUhrzeitVon_tlcm,regionName_tlc',
+            # body='indent=off&hl=false&rows=1000&q=((indexName%3Ab2cMarktDBIndex++AND+kanalKuerzel_tlcm%3Aedeka+AND+((freigabeVonDatum_longField_l%3A%5B0+TO+1588370399999%5D+AND+freigabeBisDatum_longField_l%3A%5B1588284000000+TO+*%5D)+AND+NOT+(datumAppHiddenVon_longField_l%3A%5B0+TO+1588370399999%5D+AND+datumAppHiddenBis_longField_l%3A%5B1588284000000+TO+*%5D))+AND+geoLat_doubleField_d%3A%5B48.01462417684553+TO+48.081997823154495%5D+AND+geoLng_doubleField_d%3A%5B7.7655461221047775+TO+7.866328877895223%5D)+OR+(indexName%3Ab2cMarktDBIndex++AND+kanalKuerzel_tlcm%3Aedeka+AND+((freigabeVonDatum_longField_l%3A%5B0+TO+1588370399999%5D+AND+freigabeBisDatum_longField_l%3A%5B1588284000000+TO+*%5D)+AND+NOT+(datumAppHiddenVon_longField_l%3A%5B0+TO+1588370399999%5D+AND+datumAppHiddenBis_longField_l%3A%5B1588284000000+TO+*%5D))+AND+geoLat_doubleField_d%3A%5B47.77881641476416+TO+48.31780558523587%5D+AND+geoLng_doubleField_d%3A%5B7.412804665841071+TO+8.21907033415893%5D))&fl=handzettelSonderlUrl_tlcm%2ChandzettelSonderName_tlcm%2ChandzettelUrl_tlc%2CmarktID_tlc%2Cplz_tlc%2Cort_tlc%2Cstrasse_tlc%2Cname_tlc%2CgeoLat_doubleField_d%2CgeoLng_doubleField_d%2Ctelefon_tlc%2Cfax_tlc%2Cservices_tlc%2Coeffnungszeiten_tlc%2CurlHomepage_tlc%2CurlExtern_tlc%2CmarktTypName_tlc%2CmapsBildURL_tlc%2CvertriebsschieneName_tlc%2CvertriebsschienenTypeKuerzel_tlc%2CvertriebsschieneKey_tlc%2CfreigabeVonDatum_longField_l%2CfreigabeBisDatum_longField_l%2CdatumAppHiddenVon_longField_l%2CdatumAppHiddenBis_longField_l%2CoeffnungszeitenZusatz_tlc%2CknzTz_tlc%2CkaufmannIName_tlc%2CkaufmannIStrasse_tlc%2CkaufmannIPlz_tlc%2CkaufmannIOrt_tlc%2CsonderoeffnungszeitJahr_tlcm%2CsonderoeffnungszeitMonat_tlcm%2CsonderoeffnungszeitTag_tlcm%2CsonderoeffnungszeitUhrzeitBis_tlcm%2CsonderoeffnungszeitUhrzeitVon_tlcm%2CregionName_tlc'
         ) # The request body contains the coordinates past the edges of Germany. Gets all the stores in Germany
 
     def parse(self, response):
         store_data = json.loads(response.body_as_unicode())['response']['docs']
 
         for store in store_data:
-            properties = dict(
-                ref=store['marktID_tlc'],
-                name=store['kaufmannIName_tlc'],
-                addr_full=store['kaufmannIStrasse_tlc'],
-                lat=store['geoLat_doubleField_d'],
-                lon=store['geoLng_doubleField_d'],
-                country='Germany',
-                city=store['kaufmannIOrt_tlc'],
-                postcode=store['plz_tlc'],
-                state=store['regionName_tlc'],
-                phone=store.get('telefon_tlc'),
-            )
+            properties = {
+                'ref': store["marktID_tlc"],
+                'name': store["name_tlc"],
+                'addr_full': store["strasse_tlc"],
+                'city': store["ort_tlc"],
+                'state': store["regionName_tlc"],
+                'postcode': store["plz_tlc"],
+                'country': "DE",
+                'lat': store["geoLat_doubleField_d"],
+                'lon': store["geoLng_doubleField_d"],
+                'phone': store["telefon_tlc"]
+            }
 
             yield GeojsonPointItem(**properties)
