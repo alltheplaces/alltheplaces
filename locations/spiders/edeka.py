@@ -26,17 +26,17 @@ class EdekaSpider(scrapy.Spider):
         store_data = json.loads(response.body_as_unicode())['response']['docs']
 
         for store in store_data:
-            properties = dict(
-                ref=store['marktID_tlc'],
-                name=store['kaufmannIName_tlc'],
-                addr_full=store['kaufmannIStrasse_tlc'],
-                lat=store['geoLat_doubleField_d'],
-                lon=store['geoLng_doubleField_d'],
-                country='Germany',
-                city=store['kaufmannIOrt_tlc'],
-                postcode=store['plz_tlc'],
-                state=store['regionName_tlc'],
-                phone=store.get('telefon_tlc'),
-            )
+            properties = {
+                'ref': store["marktID_tlc"],
+                'name': store["name_tlc"],
+                'addr_full': store["strasse_tlc"],
+                'city': store["ort_tlc"],
+                'state': store["regionName_tlc"],
+                'postcode': store["plz_tlc"],
+                'country': "DE",
+                'lat': store["geoLat_doubleField_d"],
+                'lon': store["geoLng_doubleField_d"],
+                'phone': store["telefon_tlc"]
+            }
 
             yield GeojsonPointItem(**properties)
