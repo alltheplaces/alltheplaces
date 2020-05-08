@@ -13,27 +13,21 @@ class PricewaterhouseCoopersSpider(scrapy.Spider):
     item_attributes = { 'brand': "PricewaterhouseCoopers" }
     allowed_domains = []
     start_urls = [
-        'https://www.pwc.com/content/pwc/script/gx/en/office-locator/data/offices/offices-data_en-us.json',
+        'https://www.pwc.com/content/pwc/script/gx/en/office-locator/data/offices/offices-data_en-global.json'
     ]
 
     def parse(self, response):
         data = json.loads(response.body_as_unicode())
 
         for office in data["offices"]:
-            addr_full, city_state, postcode = re.match(r"(.*),\s(.+) (\d{5})",  office["address"].replace('+', ' ')).groups()
-
-            state = office["parentRegion"]["id"].replace('-', ' ').title()
-            city = city_state.replace(state, "", 1)
+            country = office["id"].split('-')[0].upper()
 
             properties = {
-                'name':office["name"],
+                'name': office["name"],
                 'ref': office["id"],
-                'addr_full': addr_full.strip(),
-                'city': city.strip(),
-                'state': state.strip(),
-                'postcode': postcode.strip(),
-                'country': "US",
-                'phone': office["departments"][0]["telephone"],
+                'addr_full': office["address"].replace('+', ' ').strip(),
+                'country': country,
+                'phone': office["departments"][0].get("telephone"),
                 'lat': float(office["coords"]["latitude"]),
                 'lon': float(office["coords"]["longitude"]),
                 'website': "https://www.pwc.com/us/en/about-us/pwc-office-locations.html#/office/{}".format(office["id"])
