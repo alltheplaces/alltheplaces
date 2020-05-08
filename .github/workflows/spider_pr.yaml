@@ -114,5 +114,5 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: spider_output
-        path: "${GITHUB_WORKSPACE}/output"
+        path: ${{ github.workspace }}/output
       
