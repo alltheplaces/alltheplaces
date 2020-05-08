@@ -72,13 +72,13 @@ jobs:
                 FAILURE_REASON="timeout"
             fi
 
-            LOGFILE_URL=$(curl -v -F filedata=@${LOGFILE} https://transfer.sh/)
+            LOGFILE_URL="placeholder"
 
             echo "${spider} log: ${LOGFILE_URL}"
 
             if [ -f "$OUTFILE" ]; then
                 FEATURE_COUNT=$(wc -l < ${OUTFILE} | tr -d ' ')
-                OUTFILE_URL=$(curl -v -F filedata=@${OUTFILE} https://transfer.sh/)
+                OUTFILE_URL="placeholder"
 
                 if grep -q 'Stored geojson feed' $LOGFILE; then
                     echo "${spider} has ${FEATURE_COUNT} features: https://s3.amazonaws.com/placescraper-results/map.html?show=https://cors-anywhere.herokuapp.com/${OUTFILE_URL}"
@@ -110,3 +110,9 @@ jobs:
         fi
 
         exit $EXIT_CODE
+    - name: Upload results
+      uses: actions/upload-artifact@v2
+      with:
+        name: spider_output
+        path: "${GITHUB_WORKSPACE}/output"
+      
