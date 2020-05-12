@@ -138,7 +138,7 @@ class CreateStartURLs:
 
 class ExxonMobilSpider(scrapy.Spider):
     name = "exxonmobil"
-    item_attributes = { 'brand': "ExxonMobil", 'brand_wikidata': "Q156238" }
+    item_attributes = {'brand': "ExxonMobil", 'brand_wikidata': "Q156238"}
     crawled_locations = set()
     allowed_domains = ["exxon.com"]
     start_urls = CreateStartURLs().get_urls()
@@ -161,8 +161,28 @@ class ExxonMobilSpider(scrapy.Spider):
                     "opening_hours": self.store_hours(location['WeeklyOperatingDays']),
                     "lat": float(location['Latitude']),
                     "lon": float(location['Longitude']),
+                    **self.brand(location)
                 }
                 yield GeojsonPointItem(**properties)
+
+    def brand(self, location):
+        if 'mobil' in location['BrandingImage']:
+            return {
+                'brand': 'Mobil',
+                'brand_wikidata': 'Q3088656'
+            }
+        elif 'esso' in location['BrandingImage']:
+            return {
+                'brand': 'Esso',
+                'brand_wikidata': 'Q867662'
+            }
+        elif 'exxon' in location['BrandingImage']:
+            return {
+                'brand': 'Exxon',
+                'brand_wikidata': 'Q4781944'
+            }
+        else:
+            return {}
 
     def store_hours(self, hours):
         """
