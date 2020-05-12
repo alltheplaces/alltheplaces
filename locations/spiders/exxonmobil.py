@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Exxonmobil has 1,679 locations worldwide except a few nations(those may even change with time)
-This crawler crawls http://www.exxon.com/api/v1/Retail/retailstation/GetStationsByBoundingBox
+This crawler crawls https://www.exxon.com/en/api/locator/Locations
 with 4 parameters representing a bounding box of latitudes and longitudes.
 
 We created an extra class CreateStartURLs to keep things neat,
@@ -63,7 +63,7 @@ class CreateStartURLs:
             "magadascar": (-11.29, 42.80, -26.07, 50.89, 1, 1)      # maxresult=0
     }
     urls = []
-    base_url = 'http://www.exxon.com/api/v1/Retail/retailstation/GetStationsByBoundingBox?'
+    base_url = 'https://www.exxon.com/en/api/locator/Locations?DataSource=RetailGasStations'
 
     def __init__(self):
         self.build_start_urls()
@@ -87,8 +87,8 @@ class CreateStartURLs:
             for row in self.get_vertical(lat1, lat2, max_h):
                 for col in self.get_horizontal(row, lon1, lon1 - lon2, max_w, max_h):
                     self.urls.append(
-                                    self.base_url + "Latitude1=" + str(col[0]) + "&Longitude1=" + str(col[1]) +
-                                    "&Latitude2=" + str(col[2]) + "&Longitude2=" + str(col[3]))
+                        self.base_url + "&Latitude1=" + str(min(col[0], col[2])) + "&Longitude1=" + str(min(col[1], col[3])) +
+                        "&Latitude2=" + str(max(col[0], col[2])) + "&Longitude2=" + str(max(col[1], col[3])))
 
     def get_urls(self):
         """
