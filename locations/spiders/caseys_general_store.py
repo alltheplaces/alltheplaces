@@ -27,6 +27,11 @@ class CaseysGeneralStoreSpider(scrapy.Spider):
             next(points)
             for point in points:
                 _, lat, lon = point.strip().split(',')
+
+                # Max bounds based on the overview map at https://www.caseys.com/store-finder/locations
+                if 32 > float(lat) or float(lat) > 50 or -104.5 > float(lon) or float(lon) > -80:
+                    continue
+
                 url = base_url.format(lat=lat, lng=lon)
                 yield scrapy.Request(url=url, headers=headers, callback=self.parse)
 
