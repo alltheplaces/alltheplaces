@@ -55,7 +55,7 @@ class WalmartSpider(scrapy.Spider):
                 yield scrapy.Request(u.strip(), callback=self.parse_store)
 
     def parse_store(self, response):
-        script = response.xpath("//script[contains(.,'WML_REDUX_INITIAL_STATE')]").extract_first()
+        script = response.xpath("//script[contains(.,'__WML_REDUX_INITIAL_STATE__ = ')]").extract_first()
         # In rare cases will hit page before script tag loads with content
         if script is None:
             if self.retries.get(response.url, 0) <= 2:
