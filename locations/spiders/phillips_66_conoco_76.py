@@ -56,14 +56,14 @@ class Phillips66Spider(scrapy.Spider):
                 ref=station['EntityID'],
                 brand=BRANDS[station['Brand']],
                 brand_wikidata=WIKIBRANDS[station['Brand']],
+                opening_hours='24/7' if station['TFH'] else '',
                 extras={
-                    'amenity': 'fuel',
-                    'e85': station['e85'],
-                    'e66': station['E66'],
-                    'diesel': station['Diesel'],
+                    'amenity:fuel': True,
+                    'fuel:e85': station['e85'],
+                    'fuel:diesel': station['Diesel'],
+                    'fuel:biodiesel': station['rd'],
                     'car_wash': station['CarWash'],
-                    'convenience_store': station['CStore'],
-                    'snacks': station['Snacks'],
+                    'shop': 'convenience' if station['CStore'] else 'kiosk' if station['Snacks'] else None,
                     'atm': station['ATM']
                 }
             )
