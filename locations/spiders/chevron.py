@@ -61,11 +61,11 @@ class ChevronSpider(scrapy.Spider):
                 brand=station['brand'],
                 brand_wikidata=WIKIBRANDS[station['brand']],
                 extras={
-                    'amenity': 'fuel',
-                    'diesel': station['diesel'] == '1',
-                    'truck_stop': station['truckstop'] == '1',
-                    'convenience_store': station['cstore'] == '1',
+                    'amenity:fuel': True,
+                    'amenity:toilets': station['restroom'] == '1',
                     'car_wash': station['carwash'] == '1',
-                    'restroom': station['restroom'] == '1',
+                    'fuel:diesel': station['diesel'] == '1',
+                    'hgv': station['truckstop'] == '1',
+                    'shop': 'convenience' if station['cstore'] == '1' else None
                 }
             )
