@@ -5,11 +5,21 @@ import re
 
 from locations.items import GeojsonPointItem
 
+WIKIBRANDS = {
+    'Circle K': 'Q3268010',
+    'Corner Store': 'Q16959310',
+    'Couche-Tard': 'Q2836957',
+    'Flash Foods': 'Q16959310',
+    'Kangaroo Express': 'Q61747408',
+    "Mac's": 'Q4043527',
+    'On The Run': 'Q16931259'
+}
+
 
 class CircleKSpider(scrapy.Spider):
 
     name = "circle_k"
-    item_attributes = { 'brand': "Circle K", 'brand_wikidata': "Q3268010" }
+    item_attributes = {'brand': "Circle K", 'brand_wikidata': "Q3268010"}
     allowed_domains = ["www.circlek.com"]
 
     start_urls = (
@@ -20,38 +30,59 @@ class CircleKSpider(scrapy.Spider):
         results = json.loads(response.body_as_unicode())
 
         for storeid, store in results['stores'].items():
-            yield scrapy.Request(url=response.urljoin(store['url']), callback=self.parse_state,
-                                 meta={'ref': store['cost_center'], 'addr_full': store['address'],
-                                       'city': store['city'], 'country': store['country'], 'lat': store['latitude'],
-                                       'lon': store['longitude']})
+            services = store['services']
+
+            properties = {
+                'ref': store['cost_center'],
+                'name': store['display_brand'],
+                'addr_full': store['address'],
+                'city': store['city'],
+                'country': store['country'],
+                'lat': store['latitude'],
+                'lon': store['longitude'],
+                'website': store['url'],
+                'brand': store['display_brand'],
+                'brand_wikidata': WIKIBRANDS.get(store['display_brand'], WIKIBRANDS['Circle K']),
+                'extras': {
+                    'amenity:fuel': any('gas' == s['name'] for s in services) or None,
+                    'fuel:diesel': any('diesel' == s['name'] for s in services) or None,
+                    'car_wash': any('car_wash' == s['name'] for s in services) or None,
+                    'shop': 'convenience'
+                }
+            }
+
+            yield scrapy.Request(url=response.urljoin(store['url']),
+                                 callback=self.parse_state,
+                                 meta={'properties': properties})
 
     def parse_state(self, response):
-        ## Not all countries/store pages follow the same format
-        if response.meta['country'] == 'US':
-            state = response.xpath('//*[@class="heading-small"]/span[2]/text()').extract_first()
-            postal = response.xpath('//*[@class="heading-small"]/span[3]/text()').extract_first()
-        elif response.meta['country'] in ['CA', 'Canada']:
-            if len(response.xpath('//*[@class="heading-small"]/span[2]/text()').extract_first()) < 4:
-                state = response.xpath('//*[@class="heading-small"]/span[2]/text()').extract_first()
-                postal = response.xpath('//*[@class="heading-small"]/span[3]/text()').extract_first()
+        properties = response.meta['properties']
+        # Not all countries/store pages follow the same format
+        if properties['country'] == 'US':
+            state = response.xpath(
+                '//*[@class="heading-small"]/span[2]/text()').extract_first()
+            postal = response.xpath(
+                '//*[@class="heading-small"]/span[3]/text()').extract_first()
+        elif properties['country'] in ['CA', 'Canada']:
+            extracted = response.xpath(
+                '//*[@class="heading-small"]/span[2]/text()').extract_first()
+            if extracted and len(extracted) < 4:
+                state = response.xpath(
+                    '//*[@class="heading-small"]/span[2]/text()').extract_first()
+                postal = response.xpath(
+                    '//*[@class="heading-small"]/span[3]/text()').extract_first()
             else:
                 state = ""
-                postal = response.xpath('//*[@class="heading-small"]/span[2]/text()').extract_first()
+                postal = response.xpath(
+                    '//*[@class="heading-small"]/span[2]/text()').extract_first()
         else:
             state = ""
-            postal = response.xpath('//*[@class="heading-small"]/span[2]/text()').extract_first()
+            postal = response.xpath(
+                '//*[@class="heading-small"]/span[2]/text()').extract_first()
 
-        properties = {
-            'ref': response.meta['ref'],
-            'name': 'Circle K',
-            'addr_full': response.meta['addr_full'],
-            'city': response.meta['city'],
+        properties.update({
             'state': state,
             'postcode': postal,
-            'country': response.meta['country'],
-            'lat': response.meta['lat'],
-            'lon': response.meta['lon'],
-            'website': response.url
-        }
+        })
 
         yield GeojsonPointItem(**properties)
