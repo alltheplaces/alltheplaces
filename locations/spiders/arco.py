@@ -36,7 +36,8 @@ class ArcoSpider(scrapy.Spider):
                     phone=station['Phone'],
                     ref=station['StoreNumber'],
                     extras={
-                        'accepts_credit_cards': station['CreditCards'] == '1',
-                        'convenience_store': station['ampm'] == '1'
+                        'amenity:fuel': True,
+                        'payment:credit_cards': station['CreditCards'] == '1',
+                        'shop': 'convenience' if station['ampm'] == '1' else None
                     }
                 )

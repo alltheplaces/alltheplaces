@@ -145,10 +145,13 @@ class ExxonMobilSpider(scrapy.Spider):
 
     def parse(self, response):
         json_data = json.loads(response.text)
+
         for location in json_data:
             location_id = location['LocationID']
             if location_id not in self.crawled_locations:
                 self.crawled_locations.add(location_id)
+                features = location['FeaturedItems'] + \
+                    location['StoreAmenities']
                 properties = {
                     "name": location['DisplayName'],
                     "addr_full": location['AddressLine1'] + " " + location['AddressLine2'],
@@ -161,7 +164,20 @@ class ExxonMobilSpider(scrapy.Spider):
                     "opening_hours": self.store_hours(location['WeeklyOperatingDays']),
                     "lat": float(location['Latitude']),
                     "lon": float(location['Longitude']),
-                    **self.brand(location)
+                    "extras": {
+                        "amenity:fuel": True,
+                        "amenity:toilets": any('Restroom' in f['Name'] for f in features),
+                        "atm": any('ATM' in f['Name'] for f in features),
+                        "car_wash": any('Carwash' in f['Name'] for f in features),
+                        "fuel:diesel": any('Diesel' in f['Name'] for f in features) or None,
+                        "fuel:octane_87": any('Regular' == f['Name'] for f in features) or None,
+                        "fuel:octane_89": any('Extra' == f['Name'] for f in features) or None,
+                        "fuel:octane_91": any('Supreme' == f['Name'] for f in features) or None,
+                        "fuel:octane_93": any('Supreme+' == f['Name'] for f in features) or None,
+                        "fuel:propane": any('Propane' == f['Name'] for f in features) or None,
+                        "shop": "convenience" if any('Convenience Store' in f['Name'] for f in features) else None
+                    },
+                    **self.brand(location),
                 }
                 yield GeojsonPointItem(**properties)
 
