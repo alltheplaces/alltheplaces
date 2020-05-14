@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import scrapy
+import json
 import re
 
 from locations.items import GeojsonPointItem
@@ -7,23 +8,62 @@ from locations.items import GeojsonPointItem
 
 class HolidayStationstoreSpider(scrapy.Spider):
     name = "holiday_stationstores"
-    item_attributes = { 'brand': "Holiday Stationstores" }
-    allowed_domains = ["m.holidaystationstores.com"]
-    start_urls = (
-        'http://m.holidaystationstores.com/locations/stores/',
-    )
+    item_attributes = {'brand': 'Holiday Stationstores',
+                       'brand_wikidata': 'Q5880490'}
+    allowed_domains = ["www.holidaystationstores.com"]
+    download_delay = 0.2
+
+    def start_requests(self):
+        yield scrapy.Request('https://www.holidaystationstores.com/Locations/GetAllStores',
+                             method='POST',
+                             callback=self.parse_all_stores)
+
+    def parse_all_stores(self, response):
+        all_stores = json.loads(response.body_as_unicode())
+
+        for store_id, store in all_stores.items():
+            # GET requests get blocked by their CDN, but POST works fine
+            yield scrapy.Request(f"https://www.holidaystationstores.com/Locations/Detail?storeNumber={store_id}",
+                                 method='POST',
+                                 meta={'store': store})
 
     def parse(self, response):
-        location_hrefs = response.xpath('//div[@id="stores"]/ul/li/a/@href')
+        store = response.meta['store']
 
-        for path in location_hrefs:
-            yield scrapy.Request(
-                response.urljoin(path.extract()),
-                callback=self.parse_location
-            )
+        address = response.css(
+            '.row.HolidayBackgroundColorBlue div::text').extract_first().strip()
+        phone = response.css(
+            '.body-content .col-lg-4 .HolidayFontColorRed::text').extract_first().strip()
+        services = '|'.join(response.css(
+            '.body-content .col-lg-4 ul li::text').extract()).lower()
+        open_24_hours = '24 hours' in response.css(
+            '.body-content .col-lg-4').get().lower()
+
+        properties = {
+            'name': f"Holiday #{store['Name']}",
+            'lon': store['Lng'],
+            'lat': store['Lat'],
+            'addr_full': address,
+            'phone': phone,
+            'ref': store['ID'],
+            'opening_hours': '24/7' if open_24_hours else self.opening_hours(response),
+            'extras': {
+                'amenity:fuel': True,
+                'fuel:diesel': 'diesel' in services or None,
+                'atm': 'atm' in services or None,
+                'fuel:e85': 'e85' in services or None,
+                'hgv': 'truck' in services or None,
+                'fuel:propane': 'propane' in services or None,
+                'car_wash': 'car wash' in services or None,
+                'fuel:cng': 'cng' in services or None
+            }
+        }
+
+        yield GeojsonPointItem(**properties)
 
     def opening_hours(self, response):
-        hour_part_elems = response.xpath('//table[@style="margin-left:0px;font-size:90%;padding:0px;"]/tr/td/text()').extract()
+        hour_part_elems = response.css(
+            '.body-content .col-lg-4 .row div::text').extract()
         day_groups = []
         this_day_group = None
 
@@ -33,7 +73,8 @@ class HolidayStationstoreSpider(scrapy.Spider):
 
             for day, hours in slice(hour_part_elems, 2):
                 day = day[:2]
-                match = re.search(r'^(\d{1,2}):(\d{2})\w*(a|p)m - (\d{1,2}):(\d{2})\w*(a|p)m?$', hours)
+                match = re.search(
+                    r'^(\d{1,2}):(\d{2})\s*(a|p)m - (\d{1,2}):(\d{2})\s*(a|p)m?$', hours.lower())
                 (f_hr, f_min, f_ampm, t_hr, t_min, t_ampm) = match.groups()
 
                 f_hr = int(f_hr)
@@ -72,9 +113,11 @@ class HolidayStationstoreSpider(scrapy.Spider):
 
             day_groups.append(this_day_group)
 
-        hour_part_elems = response.xpath('//span[@style="font-size:90%"]/text()').extract()
+        hour_part_elems = response.xpath(
+            '//span[@style="font-size:90%"]/text()').extract()
         if hour_part_elems:
-            day_groups.append({'from_day': 'Mo', 'to_day': 'Su', 'hours': '00:00-23:59'})
+            day_groups.append(
+                {'from_day': 'Mo', 'to_day': 'Su', 'hours': '00:00-23:59'})
 
         opening_hours = ""
         if len(day_groups) == 1 and day_groups[0]['hours'] in ('00:00-23:59', '00:00-00:00'):
@@ -86,23 +129,8 @@ class HolidayStationstoreSpider(scrapy.Spider):
                 elif day_group['from_day'] == 'Su' and day_group['to_day'] == 'Sa':
                     opening_hours += '{hours}; '.format(**day_group)
                 else:
-                    opening_hours += '{from_day}-{to_day} {hours}; '.format(**day_group)
+                    opening_hours += '{from_day}-{to_day} {hours}; '.format(
+                        **day_group)
             opening_hours = opening_hours[:-2]
 
         return opening_hours
-
-    def parse_location(self, response):
-        addr_parts = response.xpath('//div[@style="float:left;padding-right:10px;padding-left:10px;"][1]/text()').extract()
-        store_name = response.xpath('//h2[@style="padding-right:10px;padding-left:10px;margin-bottom:10px;"]/text()').extract_first()
-
-        properties = {
-            'name': store_name,
-            'addr_full': addr_parts[1].strip(),
-            'phone': response.xpath('//div[@style="margin-top:3px;margin-bottom:4px;"]/a/text()').extract_first(),
-            'ref': store_name,
-            'lon': float(response.xpath('//div[@id="SingleStoreMap"]/@data-longitude').extract_first()),
-            'lat': float(response.xpath('//div[@id="SingleStoreMap"]/@data-latitude').extract_first()),
-            'opening_hours': self.opening_hours(response),
-        }
-
-        yield GeojsonPointItem(**properties)
