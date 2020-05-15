@@ -66,6 +66,7 @@ class WhataburgerSpider(scrapy.Spider):
 
     def parse(self, response):
         urls = response.xpath('//a[@class="Directory-listLink"]/@href').extract()
+        urls.extend(response.xpath('//a[@class="Teaser-titleLink"]/@href').extract())
         for path in urls:
             if len(path.split('/')) > 2:
                 # If there's only one store, the URL will be longer than <state code>.html
