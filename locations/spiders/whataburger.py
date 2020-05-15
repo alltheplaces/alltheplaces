@@ -10,7 +10,7 @@ class WhataburgerSpider(scrapy.Spider):
     item_attributes = { 'brand': "Whataburger", 'brand_wikidata': "Q376627" }
     allowed_domains = ["locations.whataburger.com"]
     start_urls = (
-        'https://locations.whataburger.com/',
+        'https://locations.whataburger.com/directory.html',
     )
 
     def store_hours(self, store_hours):
