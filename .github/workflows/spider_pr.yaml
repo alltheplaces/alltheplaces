@@ -14,6 +14,10 @@ on:
 jobs:
   test-spider:
     runs-on: ubuntu-latest
+    env:
+      AWS_KEY: U2FsdGVkX1+hrSdKa/CIUy8AtUyptchWGx8RnMHRbvXzeFPNnszEOa9TXpG2xNvh
+      AWS_SEC: U2FsdGVkX182AT9ERF8jhQImWjgZSbBfGaoPLr5g6AlvlZTkHDp+JSbk4auKqL5ljfE9IOITJyb/A04AmO6IHw==
+      BUCKET: placescraper-results
     steps:
     - name: Checkout code
       uses: actions/checkout@v1
@@ -72,19 +76,26 @@ jobs:
                 FAILURE_REASON="timeout"
             fi
 
-            LOGFILE_URL=$(curl -s -F filedata=@${LOGFILE} https://transfer.sh/)
+            AWS_ACCESS_KEY_ID=`echo $AWS_KEY | openssl enc -aes256 -d -A -a -salt -k $(shasum -a 384 LICENSE | cut -f 1 -d ' ')` \
+            AWS_SECRET_ACCESS_KEY=`echo $AWS_SEC | openssl enc -aes256 -d -A -a -salt -k $(shasum -a 384 LICENSE | cut -f 1 -d ' ')` \
+            aws s3 cp --acl=public-read --only-show-errors ${LOGFILE} s3://${BUCKET}/ci/${GITHUB_SHA}/${SPIDER_NAME}/log.txt
+            LOGFILE_URL="https://${BUCKET}.s3.amazonaws.com/ci/${GITHUB_SHA}/${SPIDER_NAME}/log.txt"
 
             echo "${spider} log: ${LOGFILE_URL}"
 
             if [ -f "$OUTFILE" ]; then
                 FEATURE_COUNT=$(wc -l < ${OUTFILE} | tr -d ' ')
-                OUTFILE_URL=$(curl -s -F filedata=@${OUTFILE} https://transfer.sh/)
+
+                AWS_ACCESS_KEY_ID=`echo $AWS_KEY | openssl enc -aes256 -d -A -a -salt -k $(shasum -a 384 LICENSE | cut -f 1 -d ' ')` \
+                AWS_SECRET_ACCESS_KEY=`echo $AWS_SEC | openssl enc -aes256 -d -A -a -salt -k $(shasum -a 384 LICENSE | cut -f 1 -d ' ')` \
+                aws s3 cp --acl=public-read --only-show-errors ${OUTFILE} s3://${BUCKET}/ci/${GITHUB_SHA}/${SPIDER_NAME}/output.geojson
+                OUTFILE_URL="https://${BUCKET}.s3.amazonaws.com/ci/${GITHUB_SHA}/${SPIDER_NAME}/output.geojson"
 
                 if grep -q 'Stored geojson feed' $LOGFILE; then
-                    echo "${spider} has ${FEATURE_COUNT} features: https://s3.amazonaws.com/placescraper-results/map.html?show=https://cors-anywhere.herokuapp.com/${OUTFILE_URL}"
+                    echo "${spider} has ${FEATURE_COUNT} features: https://placescraper-results.s3.amazonaws.com/map.html?show=${OUTFILE_URL}"
                 fi
 
-                PR_COMMENT_BODY="${PR_COMMENT_BODY}|[\`$spider\`](https://github.com/${GITHUB_REPOSITORY}/blob/${GITHUB_SHA}/${spider})|[${FEATURE_COUNT} items](${OUTFILE_URL}) ([Map](https://s3.amazonaws.com/placescraper-results/map.html?show=https://cors-anywhere.herokuapp.com/${OUTFILE_URL}))|Resulted in a \`${FAILURE_REASON}\` ([Log](${LOGFILE_URL}))|\\n"
+                PR_COMMENT_BODY="${PR_COMMENT_BODY}|[\`$spider\`](https://github.com/${GITHUB_REPOSITORY}/blob/${GITHUB_SHA}/${spider})|[${FEATURE_COUNT} items](${OUTFILE_URL}) ([Map](https://placescraper-results.s3.amazonaws.com/map.html?show=${OUTFILE_URL}))|Resulted in a \`${FAILURE_REASON}\` ([Log](${LOGFILE_URL}))|\\n"
             else
                 echo "${spider} has no output"
                 PR_COMMENT_BODY="${PR_COMMENT_BODY}|[\`$spider\`](https://github.com/${GITHUB_REPOSITORY}/blob/${GITHUB_SHA}/${spider})| (No Output) |Resulted in a \`${FAILURE_REASON}\` ([Log](${LOGFILE_URL}))|\\n"
