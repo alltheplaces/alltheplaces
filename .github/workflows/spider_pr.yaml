@@ -44,8 +44,8 @@ jobs:
             exit 0
         fi
 
-        export AWS_ACCESS_KEY_ID=$(echo "${AWS_KEY}" | base64 --decode)
-        export AWS_SECRET_ACCESS_KEY=$(echo "${AWS_SEC}" | base64 --decode)
+        export AWS_ACCESS_KEY_ID=`echo "${AWS_KEY}" | base64 --decode`
+        export AWS_SECRET_ACCESS_KEY=`echo "${AWS_SEC}" | base64 --decode`
 
         RUN_DIR="${GITHUB_WORKSPACE}/output"
         EXIT_CODE=0
@@ -79,16 +79,16 @@ jobs:
                 FAILURE_REASON="timeout"
             fi
 
-            aws s3 cp --acl=public-read --only-show-errors ${LOGFILE} s3://${BUCKET}/ci/${GITHUB_SHA}/${SPIDER_NAME}/log.txt
-            LOGFILE_URL="https://${BUCKET}.s3.amazonaws.com/ci/${GITHUB_SHA}/${SPIDER_NAME}/log.txt"
+            aws s3 cp --acl=public-read --only-show-errors ${LOGFILE} s3://${BUCKET}/ci/${GITHUB_RUN_ID}/${SPIDER_NAME}/log.txt
+            LOGFILE_URL="https://${BUCKET}.s3.amazonaws.com/ci/${GITHUB_RUN_ID}/${SPIDER_NAME}/log.txt"
 
             echo "${spider} log: ${LOGFILE_URL}"
 
             if [ -f "$OUTFILE" ]; then
                 FEATURE_COUNT=$(wc -l < ${OUTFILE} | tr -d ' ')
 
-                aws s3 cp --acl=public-read --only-show-errors ${OUTFILE} s3://${BUCKET}/ci/${GITHUB_SHA}/${SPIDER_NAME}/output.geojson
-                OUTFILE_URL="https://${BUCKET}.s3.amazonaws.com/ci/${GITHUB_SHA}/${SPIDER_NAME}/output.geojson"
+                aws s3 cp --acl=public-read --only-show-errors ${OUTFILE} s3://${BUCKET}/ci/${GITHUB_RUN_ID}/${SPIDER_NAME}/output.geojson
+                OUTFILE_URL="https://${BUCKET}.s3.amazonaws.com/ci/${GITHUB_RUN_ID}/${SPIDER_NAME}/output.geojson"
 
                 if grep -q 'Stored geojson feed' $LOGFILE; then
                     echo "${spider} has ${FEATURE_COUNT} features: https://placescraper-results.s3.amazonaws.com/map.html?show=${OUTFILE_URL}"
