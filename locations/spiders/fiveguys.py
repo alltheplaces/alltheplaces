@@ -16,9 +16,7 @@ class FiveguysSpider(scrapy.Spider):
     def parse(self, response):
         results = json.loads(response.body_as_unicode())
 
-        for data in results:
-            store_data = data['Store']
-
+        for store_data in results:
             properties = {
                 'phone': store_data['PhoneNumber'],
                 'addr_full': store_data['AddressLine1'],
