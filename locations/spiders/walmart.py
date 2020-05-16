@@ -9,7 +9,7 @@ from locations.items import GeojsonPointItem
 
 class WalmartSpider(scrapy.Spider):
     name = "walmart"
-    item_attributes = { 'brand': "Walmart", 'brand_wikidata': "Q483551" }
+    item_attributes = {'brand': "Walmart", 'brand_wikidata': "Q483551"}
     allowed_domains = ["walmart.com"]
     start_urls = (
         'https://www.walmart.com/sitemap_store_main.xml',
@@ -55,12 +55,14 @@ class WalmartSpider(scrapy.Spider):
                 yield scrapy.Request(u.strip(), callback=self.parse_store)
 
     def parse_store(self, response):
-        script = response.xpath("//script[contains(.,'__WML_REDUX_INITIAL_STATE__ = ')]").extract_first()
+        script = response.xpath(
+            "//script[contains(.,'__WML_REDUX_INITIAL_STATE__ = ')]").extract_first()
         # In rare cases will hit page before script tag loads with content
         if script is None:
             if self.retries.get(response.url, 0) <= 2:
                 self.retries[response.url] += 1
-                yield scrapy.Request(response.url, callback=self.parse_store)  # Try again
+                # Try again
+                yield scrapy.Request(response.url, callback=self.parse_store)
             else:
                 raise Exception('Retried too many times')
 
@@ -68,6 +70,8 @@ class WalmartSpider(scrapy.Spider):
                                    flags=re.IGNORECASE | re.DOTALL).group(1)
 
         store_data = json.loads(script_content).get('store')
+        services = store_data['primaryServices'] + \
+            store_data['secondaryServices']
 
         yield GeojsonPointItem(
             lat=store_data.get('geoPoint').get('latitude'),
@@ -81,4 +85,7 @@ class WalmartSpider(scrapy.Spider):
             state=store_data.get('address').get('state'),
             postcode=store_data.get('address').get('postalCode'),
             website=store_data.get('detailsPageURL'),
-        )
+            extras={
+                'amenity:fuel': any(s['name'] == 'GAS_STATION' and s['active'] for s in services),
+                'shop': 'department_store' if store_data['storeType']['id'] == 2 else 'supermarket'
+            })
