@@ -42,6 +42,7 @@ class TexasRoadhouseSpider(scrapy.Spider):
                 'lat': store['gps_lat'],
                 'lon': store['gps_lon'],
                 'ref': store['url'],
+                'name': store['name'],
                 'addr_full': store['address1'],
                 'city': store['city'],
                 'state': store['state'],
