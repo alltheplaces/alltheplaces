@@ -15,8 +15,8 @@ jobs:
   test-spider:
     runs-on: ubuntu-latest
     env:
-      AWS_KEY: QUtJQVZFWlJZM1ozUjVFQ05YTTYK
-      AWS_SEC: Nkl5citXTXE4dEsyS01DWHAxR1N1cFZSZWZqemZ4TFV2dDlNVDMxSQo==
+      AWS_KEY: QUtJQVZFWlJZM1ozUjVFQ05YTTY=
+      AWS_SEC: Nkl5citXTXE4dEsyS01DWHAxR1N1cFZSZWZqemZ4TFV2dDlNVDMxSQ==
       BUCKET: placescraper-results
     steps:
     - name: Checkout code
