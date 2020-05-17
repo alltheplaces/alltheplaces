@@ -4,6 +4,7 @@ import json
 import re
 
 from locations.items import GeojsonPointItem
+from locations.hours import OpeningHours
 
 # When the 7-eleven site loads, it makes a reqest to fetch an anon
 # OAuth bearer token from the API using this client ID / secret.
@@ -63,10 +64,38 @@ class SevenElevenSpider(scrapy.Spider):
         for store in data['results']:
             features = store['features']
 
+            if store['open_time'] == '24h' or (store['hours'] and store['hours']['message'] and '24/7' in store['hours']['message']):
+                store_hours = '24/7'
+            elif store['hours'] and store['hours']['operating']:
+                no_minutes = re.compile(r"^\d+(a|p)m$")
+                opening_hours = OpeningHours()
+
+                for hours in store['hours']['operating']:
+                    times = hours['detail'].split(' - ')
+                    if len(times) < 2:
+                        continue
+
+                    (open_time, close_time) = times
+
+                    if no_minutes.match(open_time):
+                        open_time = f"{open_time[:-2]}:00{open_time[-2:]}"
+
+                    if no_minutes.match(close_time):
+                        close_time = f"{close_time[:-2]}:00{close_time[-2:]}"
+
+                    opening_hours.add_range(day=hours['key'][0:2],
+                                            open_time=open_time,
+                                            close_time=close_time,
+                                            time_format='%I:%M%p')
+
+                store_hours = opening_hours.as_opening_hours()
+            else:
+                store_hours = None
+
             properties = {
                 'ref': store['id'],
                 'name': store['name'],
-                'opening_hours': '24/7' if store['open_time'] == '24h' else None,
+                'opening_hours': store_hours,
                 'addr_full': store['address'],
                 'city': store['city'],
                 'state': store['state'],
