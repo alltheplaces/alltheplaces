@@ -8,7 +8,7 @@ from locations.items import GeojsonPointItem
 
 class SafewaySpider(scrapy.Spider):
     name = "safeway"
-    item_attributes = { 'brand': "Safeway", 'brand_wikidata': "Q1508234" }
+    item_attributes = {'brand': "Safeway", 'brand_wikidata': "Q1508234"}
     allowed_domains = ['safeway.com']
     start_urls = (
         'https://local.safeway.com/sitemap.xml',
@@ -60,7 +60,8 @@ class SafewaySpider(scrapy.Spider):
                 elif day_group['from_day'] == 'Su' and day_group['to_day'] == 'Sa':
                     opening_hours += '{hours}; '.format(**day_group)
                 else:
-                    opening_hours += '{from_day}-{to_day} {hours}; '.format(**day_group)
+                    opening_hours += '{from_day}-{to_day} {hours}; '.format(
+                        **day_group)
             opening_hours = opening_hours[:-2]
 
         return opening_hours
@@ -69,7 +70,8 @@ class SafewaySpider(scrapy.Spider):
         response.selector.remove_namespaces()
         city_urls = response.xpath('//*/*[@href]').extract()
         for path in city_urls:
-            locationURL = re.compile(r'https://local.safeway.com/(safeway/|\S+)/\S+/\S+/\S+.html')
+            locationURL = re.compile(
+                r'https://local.safeway.com/(safeway/|\S+)/\S+/\S+/\S+.html')
             if not re.search(locationURL, path):
                 pass
             else:
@@ -90,11 +92,35 @@ class SafewaySpider(scrapy.Spider):
             'postcode': response.xpath('//span[@itemprop="postalCode"]/text()').extract_first().strip(),
             'lat': float(response.xpath('//meta[@itemprop="latitude"]/@content').extract_first()),
             'lon': float(response.xpath('//meta[@itemprop="longitude"]/@content').extract_first()),
+            'extras': {
+                'shop': 'supermarket',
+            }
         }
 
-        hours = json.loads(response.xpath('//div[@class="c-hours-details-wrapper js-hours-table"]/@data-days').extract_first())
+        hours = json.loads(response.xpath(
+            '//div[@class="c-hours-details-wrapper js-hours-table"]/@data-days').extract_first())
         opening_hours = self.store_hours(hours) if hours else None
         if opening_hours:
             properties['opening_hours'] = opening_hours
+
+        nav_links = response.xpath("//ul[@class='Navbar']/li/a/@href").getall()
+        fuel_link = next((l for l in nav_links if 'fuel' in l), None)
+
+        if fuel_link:
+            yield scrapy.Request(fuel_link,
+                                 callback=self.add_fuel,
+                                 meta={'properties': properties})
+        else:
+            yield GeojsonPointItem(**properties)
+
+    def add_fuel(self, response):
+        properties = response.meta['properties']
+        services = response.xpath(
+            "//ul[@class='Core-servicesList']//span[@itemprop='name']/text()").getall()
+
+        properties['extras'].update({
+            'amentiy:fuel': True,
+            'fuel:diesel': 'Diesel' in services
+        })
 
         yield GeojsonPointItem(**properties)
