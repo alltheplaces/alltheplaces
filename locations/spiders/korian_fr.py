@@ -8,12 +8,40 @@ from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
 
 
-class Korian_frSpider(scrapy.Spider):
+class KorianFrSpider(scrapy.Spider):
     name = "korian_fr"
-    allowed_domains = []
-    start_urls = [
-        '',
-    ]
+    item_attributes = {'brand': "Korian"}
+    allowed_domains = ['api-www.korian.fr']
+
+    def start_requests(self):
+        types = ['maison-retraite', 'clinique-ssr', 'residence-seniors', 'hospitalisation-a-domicile']
+
+        regions = ['bretagne', 'occitanie', 'ile-de-france', 'normandie', 'auvergne-rhone-alpes',
+                   'nouvelle-aquitaine', 'hauts-de-france', 'provence-alpes-cote-dazur', 'centre-val-de-loire',
+                   'pays-de-la-loire', 'bourgogne-franche-comte', 'grand-est']
+
+        for type in types:
+            for region in regions:
+                url = 'https://api-www.korian.fr/api-front/FR/{type}/{region}'.format(type=type, region=region)
+                yield scrapy.Request(url=url, callback=self.parse)
 
     def parse(self, response):
-        pass
+        result = json.loads(response.body_as_unicode())
+
+        stores = result["data"]["content"][0]["results"]
+
+        for store in stores:
+            properties = {
+                'ref': store["id"],
+                'name': store["name"],
+                'addr_full': store["address"],
+                'city': store["city"],
+                'state': store["region"],
+                'postcode': store["zipcode"],
+                'country': "FR",
+                'lat': store["latitude"],
+                'lon': store["longitude"],
+                'website': 'https://www.korian.fr/' + store["redirecturl"]
+            }
+
+            yield GeojsonPointItem(**properties)
