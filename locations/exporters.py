@@ -60,12 +60,14 @@ class LineDelimitedGeoJsonExporter(JsonLinesItemExporter):
         feature.append(('id', compute_hash(item)))
         feature.append(('properties', item_to_properties(item)))
 
-        if item.get('lon'):
+        lat = item.get('lat')
+        lon = item.get('lon')
+        if lat and lon:
             feature.append(('geometry', {
                 'type': 'Point',
                 'coordinates': [
-                    float(item['lon']),
-                    float(item['lat'])
+                    float(lon),
+                    float(lat)
                 ],
             }))
 
