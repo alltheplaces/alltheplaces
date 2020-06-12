@@ -6,6 +6,7 @@ import scrapy
 
 from locations.items import GeojsonPointItem
 
+COUNTRY = {'1':'DE', '5':'AT', '6': 'CZ', '8': 'PL', '9': 'NL'}
 
 class KikSpider(scrapy.Spider):
     name = 'kik'
@@ -26,12 +27,13 @@ class KikSpider(scrapy.Spider):
     def parse(self, response):
         data = json.loads(response.body_as_unicode())
         for store in data["stores"]:
+            country = store["country"]
             properties = {
                 'ref': store["filiale"],
                 'addr_full': store["address"],
                 'city': store["city"],
                 'postcode': store["zip"],
-                'country': "DE",
+                'country': COUNTRY[country],
                 'lat': float(store["latitude"]),
                 'lon': float(store["longitude"]),
             }
