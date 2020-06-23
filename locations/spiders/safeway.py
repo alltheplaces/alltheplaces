@@ -119,7 +119,7 @@ class SafewaySpider(scrapy.Spider):
             "//ul[@class='Core-servicesList']//span[@itemprop='name']/text()").getall()
 
         properties['extras'].update({
-            'amentiy:fuel': True,
+            'amenity:fuel': True,
             'fuel:diesel': 'Diesel' in services
         })
 
