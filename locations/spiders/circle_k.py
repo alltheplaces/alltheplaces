@@ -38,9 +38,9 @@ class CircleKSpider(scrapy.Spider):
                 'addr_full': store['address'],
                 'city': store['city'],
                 'country': store['country'],
-                'lat': re.sub(r"\D", "", store['latitude']),
-                'lon': re.sub(r"\D", "", store['longitude']),
-                'website': store['url'],
+                'lat': re.sub(r"[^\d\-\.]", "", store['latitude']),
+                'lon': re.sub(r"[^\d\-\.]", "", store['longitude']),
+                'website': f"https://www.circlek.com{store['url']}" if store['url'] else None,
                 'brand': store['display_brand'],
                 'brand_wikidata': WIKIBRANDS.get(store['display_brand'], WIKIBRANDS['Circle K']),
                 'extras': {
