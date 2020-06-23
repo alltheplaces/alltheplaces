@@ -60,7 +60,7 @@ class RoadysSpider(scrapy.Spider):
             'lon': longitude,
             'lat': latitude,
             'extras': {
-                'amentiy:fuel': True,
+                'amenity:fuel': True,
                 'fuel:diesel': True,
                 'fuel:HGV_diesel': True,
                 'hgv': True
