@@ -40,7 +40,7 @@ class CircleKSpider(scrapy.Spider):
                 'country': store['country'],
                 'lat': re.sub(r"[^\d\-\.]", "", store['latitude']),
                 'lon': re.sub(r"[^\d\-\.]", "", store['longitude']),
-                'website': store['url'],
+                'website': f"https://www.circlek.com{store['url']}" if store['url'] else None,
                 'brand': store['display_brand'],
                 'brand_wikidata': WIKIBRANDS.get(store['display_brand'], WIKIBRANDS['Circle K']),
                 'extras': {
