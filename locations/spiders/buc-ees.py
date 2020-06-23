@@ -44,7 +44,7 @@ class BuceesSpider(scrapy.Spider):
                 city=store['city'],
                 state=store['state'],
                 postcode=store['zip'],
-                country=store['country'],
+                country='US' if store['country'] == 'United States' else store['country'],
                 phone=store['phone'],
                 opening_hours=opening_hours.as_opening_hours(),
                 extras={
