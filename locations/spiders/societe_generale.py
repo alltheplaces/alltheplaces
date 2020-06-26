@@ -31,20 +31,17 @@ class SocieteGeneraleSpider(scrapy.Spider):
     def parse_location(self, response):
         data = json.loads(response.body_as_unicode())
         stores = data["markers"]["places"]
-        try:
-            store_data = stores[0]
+        for store in stores:
             properties = {
-                'name': store_data["name"],
-                'ref': store_data["id"],
-                'addr_full': store_data["address"],
-                'city': store_data["city"],
-                'country': store_data["country"],
-                'phone': store_data["phone"],
-                'lat': float(store_data["latitude"]),
-                'lon': float(store_data["longitude"]),
-                'website': store_data["url"]
+                'ref': "{}_{}".format(store["name"].lower().replace(' ', '_'), store["id"]),
+                'name': store["name"],
+                'addr_full': store["address"],
+                'city': store["city"],
+                'country': store["country"],
+                'phone': store["phone"],
+                'lat': float(store["latitude"]),
+                'lon': float(store["longitude"]),
+                'website': store.get("url")
             }
 
             yield GeojsonPointItem(**properties)
-        except:
-            pass
