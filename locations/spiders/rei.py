@@ -48,7 +48,8 @@ class ReiSpider(scrapy.Spider):
             country=store_dict["address"]["addressCountry"],
             opening_hours=self.fix_opening_hours(store_dict["openingHours"]),
             phone=store_dict["telephone"],
-            ref=store_dict["hasMap"] 
+            website=store_dict["url"],
+            ref=store_dict["url"],
         )
 
     def parse(self, response):
