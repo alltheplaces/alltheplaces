@@ -29,7 +29,6 @@ class ReiSpider(scrapy.Spider):
         if end_day:
             result += "-"+DAY_MAPPING[end_day]
         result += " "+time_range
-        print(result)
         return result
 
     def fix_opening_hours(self, opening_hours):
