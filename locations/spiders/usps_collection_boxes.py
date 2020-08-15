@@ -5,7 +5,7 @@ import re
 import scrapy
 
 from locations.items import GeojsonPointItem
-from locations.hours import OpeningHours
+from locations.geo import vincenty_distance, MILES_TO_KILOMETERS
 
 DAYS_NAME = {
     'MO': 'Mo',
@@ -16,6 +16,12 @@ DAYS_NAME = {
     'SA': 'Sa',
     'SU': 'Su'
 }
+USPS_URL = 'https://tools.usps.com/UspsToolsRestServices/rest/POLocator/findLocations'
+USPS_HEADERS = {
+    'origin': 'https://tools.usps.com',
+    'referer': 'https://tools.usps.com/find-location.htm?',
+    'content-type': 'application/json;charset=UTF-8'
+}
 
 
 class UspsCollectionBoxesSpider(scrapy.Spider):
@@ -25,32 +31,34 @@ class UspsCollectionBoxesSpider(scrapy.Spider):
     download_delay = 0.1
 
     def start_requests(self):
-        url = 'https://tools.usps.com/UspsToolsRestServices/rest/POLocator/findLocations'
 
-        headers = {
-            'origin': 'https://tools.usps.com',
-            'referer': 'https://tools.usps.com/find-location.htm?',
-            'content-type': 'application/json;charset=UTF-8'
-        }
-
-        with open('./locations/searchable_points/us_centroids_25mile_radius.csv') as points:
+        with open('./locations/searchable_points/us_centroids_100mile_radius.csv') as points:
             next(points)
             for point in points:
-                _, lat, lon = point.strip().split(',')
+                _, lat, lon = tuple(map(float, point.strip().split(',')))
 
                 current_state = json.dumps({
-                    'requestGPSLat': lat,
-                    'requestGPSLng': lon,
-                    'maxDistance': '25',
+                    'lbro': '',
+                    'requestRefineHours': '',
+                    'requestRefineTypes': '',
+                    'requestServices': '',
                     'requestType': 'collectionbox',
+                    'requestGPSLat': '%0.6f' % lat,
+                    'requestGPSLng': '%0.6f' % lon,
+                    'maxDistance': '100',
                 })
 
                 yield scrapy.Request(
-                    url,
+                    USPS_URL,
                     method='POST',
                     body=current_state,
-                    headers=headers,
+                    headers=USPS_HEADERS,
                     callback=self.parse,
+                    meta={
+                        'lat': lat,
+                        'lon': lon,
+                        'radius_miles': 100,
+                    },
                 )
 
     def parse_hours(self, hours):
@@ -90,33 +98,78 @@ class UspsCollectionBoxesSpider(scrapy.Spider):
     def parse(self, response):
         stores = json.loads(response.body)
 
-        try:
-            stores = stores["locations"]
+        stores = stores.get("locations") or []
 
-            for store in stores:
-                properties = {
-                    'ref': store["locationID"],
-                    'name': store["locationName"],
-                    'addr_full': store["address1"],
-                    'city': store["city"],
-                    'state': store["state"],
-                    'postcode': store["zip5"],
-                    'country': 'US',
-                    'lat': store["latitude"],
-                    'lon': store["longitude"],
-                    'name': store["locationName"],
-                    'extras': {
-                        'note': store["specialMessage"],
-                    }
-                }
+        print(','.join(map(str, [
+            "quuery",
+            response.meta.get('lat'),
+            response.meta.get('lon'),
+            response.meta.get('radius_miles'),
+            len(stores),
+        ])))
 
-                try:
-                    h = self.parse_hours(store["locationServiceHours"][0]["dailyHoursList"])
-                    if h:
-                        properties['extras']['collection_hours'] = h
-                except:
-                    pass
+        if len(stores) == 199 and response.meta.get('radius_miles') > 2:
+            # Hit max, so recurse with smaller radius
+            steps = 6
+            new_radius_miles = int(response.meta.get('radius_miles') / 2.0)
 
-                yield GeojsonPointItem(**properties)
-        except:
-            pass
+            for step in range(steps):
+                angle = (360.0/steps) * step
+
+                new_lat, new_lon = vincenty_distance(
+                    response.meta.get('lat'),
+                    response.meta.get('lon'),
+                    new_radius_miles * MILES_TO_KILOMETERS,
+                    angle
+                )
+
+                current_state = json.dumps({
+                    'lbro': '',
+                    'requestRefineHours': '',
+                    'requestRefineTypes': '',
+                    'requestServices': '',
+                    'requestType': 'collectionbox',
+                    'requestGPSLat': '%0.6f' % new_lat,
+                    'requestGPSLng': '%0.6f' % new_lon,
+                    'maxDistance': str(new_radius_miles),
+                })
+
+                yield scrapy.Request(
+                    url=USPS_URL,
+                    method='POST',
+                    body=current_state,
+                    headers=USPS_HEADERS,
+                    callback=self.parse,
+                    meta={
+                        'lat': new_lat,
+                        'lon': new_lon,
+                        'radius_miles': new_radius_miles,
+                    },
+                )
+
+            return
+
+        for store in stores:
+            properties = {
+                'ref': store["locationID"],
+                'name': store["locationName"],
+                'addr_full': store["address1"],
+                'city': store["city"],
+                'state': store["state"],
+                'postcode': store["zip5"],
+                'country': 'US',
+                'lat': store["latitude"],
+                'lon': store["longitude"],
+                'name': store["locationName"],
+                'extras': {}
+            }
+
+            message = store.get("specialMessage")
+            if message:
+                properties['extras']['note'] = message
+
+            h = self.parse_hours(store["locationServiceHours"][0]["dailyHoursList"])
+            if h:
+                properties['extras']['collection_times'] = h
+
+            yield GeojsonPointItem(**properties)
