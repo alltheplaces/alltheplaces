@@ -27,25 +27,3 @@ def vincenty_distance(lat, lon, distance_km, bearing_deg):
     )
 
     return (math.degrees(lat2), math.degrees(lon2))
-
-if __name__ == "__main__":
-    lat = 44.9243067876
-    lon = -93.2593836077
-
-    fc = {"type": "FeatureCollection", "features": [
-        {"type":"Feature","geometry":{"type":"Point","coordinates":[lon,lat]},"properties":{"depth":0}}
-    ]}
-
-    steps = 6
-    for step in range(steps):
-        angle = (360.0/steps) * step
-        lat1, lon1 = vincenty_distance(lat, lon, 8.05, angle)
-        fc['features'].append({"type":"Feature","geometry":{"type":"Point","coordinates":[lon1,lat1]},"properties":{"depth":1}})
-
-        for step1 in range(steps):
-            angle1 = (360.0/steps) * step1
-            lat2, lon2 = vincenty_distance(lat1, lon1, 4.025, angle1)
-            fc['features'].append({"type":"Feature","geometry":{"type":"Point","coordinates":[lon2,lat2]},"properties":{"depth":2}})
-
-    import json
-    print(json.dumps(fc))
