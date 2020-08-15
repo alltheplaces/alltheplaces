@@ -100,14 +100,6 @@ class UspsCollectionBoxesSpider(scrapy.Spider):
 
         stores = stores.get("locations") or []
 
-        print(','.join(map(str, [
-            "quuery",
-            response.meta.get('lat'),
-            response.meta.get('lon'),
-            response.meta.get('radius_miles'),
-            len(stores),
-        ])))
-
         if len(stores) == 199 and response.meta.get('radius_miles') > 2:
             # Hit max, so recurse with smaller radius
             steps = 6
