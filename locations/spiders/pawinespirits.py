@@ -52,6 +52,8 @@ class PAWineSpirits(scrapy.Spider):
             hours = ", ".join(" ".join(x) for x in hour_pairs)
 
             [lat, lon] = row.xpath("*/form/input").re('name=".*itude" value="(.*)"')
+            if float(lat) == 0 and float(lon) == 0:
+                lat, lon = None, None
 
             properties = {
                 "lat": lat,
