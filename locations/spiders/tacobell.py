@@ -93,6 +93,13 @@ class TacobellSpider(scrapy.Spider):
 
     def parse(self, response):
         states = response.xpath('//li[@class="Directory-listItem"]/a/@href').extract()
+        # The web site currently special-cases DC by linking directly to the
+        # page for the one store therein, bypassing the state index page.
+        # (This spider will call parse_state on the store page and fail.)
+        # Un-special case this by inserting a link to the state index page
+        # which does in fact exist. Hopefully this is bulletproof if the
+        # web site changes.
+        states.append('dc.html')
 
         for state in states:
             yield scrapy.Request(
