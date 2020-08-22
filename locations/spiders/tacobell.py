@@ -52,9 +52,11 @@ class TacobellSpider(scrapy.Spider):
         return "; ".join(opening_hours)
 
     def parse_location(self, response):
+        if not response.xpath('//div[@itemprop="department"]'):
+            return
 
         hours = response.xpath('//div[@class="c-hours-details-wrapper js-hours-table"]/@data-days').extract_first()
-        opening_hours = self.normalize_hours(hours)
+        opening_hours = hours and self.normalize_hours(hours)
 
         props = {
             'addr_full': response.xpath('//meta[@itemprop="streetAddress"]/@content').extract_first().strip(),
@@ -72,16 +74,14 @@ class TacobellSpider(scrapy.Spider):
         return GeojsonPointItem(**props)
 
     def parse_city_stores(self, response):
+        yield self.parse_location(response)
         locations = response.xpath('//a[@class="Teaser-titleLink"]/@href').extract()
 
-        if not locations:
-            yield self.parse_location(response)
-        else:
-            for location in locations:
-                yield scrapy.Request(
-                    url=response.urljoin(location),
-                    callback=self.parse_location
-                )
+        for location in locations:
+            yield scrapy.Request(
+                url=response.urljoin(location),
+                callback=self.parse_location
+            )
 
     def parse_state(self, response):
         cities = response.xpath('//li[@class="Directory-listItem"]/a/@href').extract()
