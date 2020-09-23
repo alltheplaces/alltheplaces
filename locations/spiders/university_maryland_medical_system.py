@@ -13,7 +13,8 @@ class UniversityMarylandMedicalSystemSpider(scrapy.Spider):
     allowed_domains = ["www.umms.org"]
     start_urls = [
         'https://www.umms.org/locations'
-]
+    ]
+
     def parse(self, response):
         template = 'https://www.umms.org/locations?page=1&perpage=50&q=&serv={path}&sort=Ascending&view=list&st=Locations'
         paths = response.xpath('//select[@class="select-search__select"]//option/@value').extract()
@@ -28,20 +29,22 @@ class UniversityMarylandMedicalSystemSpider(scrapy.Spider):
             yield scrapy.Request(response.urljoin(url), callback=self.parse_location)
 
     def parse_location(self, response):
-        data = json.loads(response.xpath('//script[@type="application/ld+json" and contains(text(), "streetAddress")]/text()').extract_first())
-        coordinates = json.loads(response.xpath('//div[@class="locations js-locations"]/@data-map-json').extract_first())
-        ref = re.search(r'.+/(.+)', response.url).group(1)
+        data = json.loads(response.xpath('//div[contains(@class, "locations")]/@data-map-json').extract_first())
+        addr_last_line = data["items"][0]["address2"]
+        city, state, zipcode = re.search(r'^(.*),\s+([a-z]{2}|Maryland)\s+([0-9]+)$', addr_last_line, re.IGNORECASE).groups()
+
+        ref = "_".join(re.search(r'.+/(.+)/.+/(.+)', response.url).groups())
 
         properties = {
-            'name': data["sourceOrganization"]["name"],
+            'name': data["items"][0]["title"],
             'ref': ref,
-            'addr_full': data["sourceOrganization"]["location"]["streetAddress"],
-            'city': data["sourceOrganization"]["location"]["addressLocality"],
-            'state': data["sourceOrganization"]["location"]["addressRegion"],
-            'postcode': data["sourceOrganization"]["location"]["postalCode"],
-            'phone': coordinates["items"][0]["phone"],
+            'addr_full': data["items"][0]["address1"],
+            'city': city,
+            'state': state,
+            'postcode': zipcode,
+            'phone': data["items"][0]["phone"],
             'website': response.url,
-            'lat': float(coordinates["items"][0]["coordinates"][0]["lat"]),
-            'lon': float(coordinates["items"][0]["coordinates"][0]["lng"])
+            'lat': float(data["items"][0]["coordinates"][0]["lat"]),
+            'lon': float(data["items"][0]["coordinates"][0]["lng"])
         }
         yield GeojsonPointItem(**properties)
