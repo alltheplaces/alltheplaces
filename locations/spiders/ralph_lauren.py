@@ -25,7 +25,7 @@ class LanghamHotel(scrapy.Spider):
                 data = json.loads(data)
 
                 # preparation to extract data in the next step, return empty if there is no geo/address in the json
-                # otherwise it throws error while setting properties (since no geo/address in json)
+                # otherwise throws error while setting properties
                 geo_data = data.get("geo", {})
                 address_data = data.get("address", {})
 
@@ -49,22 +49,12 @@ class LanghamHotel(scrapy.Spider):
         else:
             # some of the websites don't provide location information with application/ld+json
             # or return invalid JSON
-            # the footers provide some location information,
-            # but there is no common pattern for these remaining 8 hotels to extract the locations nicely
-            # https://www.langhamhotels.com/en/langham-place/changsha/
-            # https://www.langhamhotels.com/en/the-langham/boston/
-            # https://www.langhamhotels.com/en/langham-place/xiamen/
-            # https://www.langhamhotels.com/en/langham-place/ningbo/
-            # https://www.langhamhotels.com/en/langham-place/haining/
-            # https://www.langhamhotels.com/en/langham-place/guangzhou/
-            # https://www.langhamhotels.com/en/the-langham/haikou/
-            # https://www.langhamresidences.com/en/the-langham/nymphenburg/ (no location information)
+            # the only other option is to crawl the footers in that case, which seems messy to me
             pass
 
     def isValidJson(self,jsondata):
         try:
             json.loads(jsondata)
         except Exception as e:
-            self.logger.warn("----------------- Error -----------------: {}".format(e))
             return False
         return True
