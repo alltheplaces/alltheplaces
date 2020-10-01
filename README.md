@@ -29,7 +29,7 @@ To get started, you'll want to install the dependencies for this project.
    pipenv install
    ```
 
-1. After dependencies are installed, make sure you can run the `scrapy` command without error
+1. After dependencies are installed, make sure that you can run the `scrapy` command without error
 
    ```
    pipenv run scrapy
@@ -107,7 +107,7 @@ For stores that do not have a national footprint ([e.g. #1034](https://github.co
 **Note**: A search radius may overlap multiple states especially when it’s centered near a state boundary. This creates a one to many relationship between the search radius point and the states covered in that search zone. This means that for the state files, there will be records that share the same latlon associated to differing states. The same is true for the European and Canadian territory files. 
 
 
-### You can send the spider to other pages
+### You can send the spider to the other pages
 
 The simplest thing a spider can do is to load the `start_urls`, process the page, and `yield` the data as `GeojsonPointItem` objects from the `parse()` method. Usually that's not enough to get at useful data, though. The `parse()` method can also `yield` a [Request object](https://doc.scrapy.org/en/latest/topics/request-response.html#request-objects), which scrapy will use to add another URL to the request queue.
 
