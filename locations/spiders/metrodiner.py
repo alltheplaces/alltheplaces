@@ -43,22 +43,23 @@ class MetroDinerSpider(scrapy.Spider):
     def parse_location(self, response):
         data = response.xpath('//div[@class="site-header__top-wrapper container"]/div/script/text()').re_first(r'locations:\s*(\[.*\])')
         data = json.loads(data)
-        data = data[0]
 
-        properties = {
-            'addr_full': data["address"],
-            'phone': data["phone"],
-            'country': 'US',
-            'ref': response.url,
-            'website': response.url,
-            'lat': float(data["latitude"]),
-            'lon': float(data["longitude"]),
-            'name': data["name"]
-        }
+        for location in data:
+            if location["link"] == response.url:
+                properties = {
+                    'addr_full': location["address"],
+                    'phone': location["phone"],
+                    'country': 'US',
+                    'ref': response.url,
+                    'website': response.url,
+                    'lat': float(location["latitude"]),
+                    'lon': float(location["longitude"]),
+                    'name': location["name"]
+                }
 
-        hours = self.parse_hours(data["hours"])
-        if hours:
-            properties["opening_hours"] = hours
+                hours = self.parse_hours(location["hours"])
+                if hours:
+                    properties["opening_hours"] = hours
 
         yield GeojsonPointItem(**properties)
 
