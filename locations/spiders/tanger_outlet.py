@@ -11,31 +11,19 @@ class TangerOutletSpider(scrapy.Spider):
     )
 
     def parse(self, response):
-        storeurls = response.xpath('.//a[@title="Visit"]/@href').extract()
-        storeurls = [response.urljoin(i) for i in storeurls if 'location' in i]
-        for storeurl in storeurls:
-            yield scrapy.Request(storeurl, callback=self.parse_store)
-
-    def parse_store(self, response):
-        tempurl = '/' + response.url.split('/')[-2] + '/'
-        for i in response.xpath('.//ul[@id="usCenters"]/li[@class="allCenters"]/a/@href').extract():
-            if i == tempurl:
-                latitude = float(response.xpath('.//ul[@id="usCenters"]/li[@class="allCenters"]/@data-latitude').extract_first())
-                longitude = float(response.xpath('.//ul[@id="usCenters"]/li[@class="allCenters"]/@data-longitude').extract_first())
-        try:
+        storeselector = response.xpath('.//div[@id="centerIndexList"]/div[@class="row"]/div')
+        for i in range(len(storeselector)):
             properties = {
-                'ref': response.url,
+                'ref': 'https://www.tangeroutlet.com/' + storeselector[i].xpath('.//@data-webmoniker').extract_first() + '/location',
                 'brand': 'Tanger Outlet',
-                'addr_full': response.xpath('.//div[@class="centerLocation"]//span/text()').extract()[0],
-                'city': response.xpath('.//div[@class="centerLocation"]//span/text()').extract()[1].split(',')[0],
-                'state': response.xpath('.//div[@class="centerLocation"]//span/text()').extract()[1].split(',')[1].split()[0],
-                'postcode': response.xpath('.//div[@class="centerLocation"]//span/text()').extract()[1].split(',')[1].split()[1],
-                'phone': response.xpath('.//div[@class="centerLocation"]//span/text()').extract()[2],
-                'lat': latitude,
-                'lon': longitude,
-                'website': response.url,
+                'addr_full': storeselector[i].xpath('.//span[@class="address"]/text()').extract_first().strip(),
+                'city': storeselector[i].xpath('.//@data-city').extract_first(),
+                'state': storeselector[i].xpath('.//span[@class="address-info"]/text()').extract_first().split()[-2],
+                'postcode':storeselector[i].xpath('.//span[@class="address-info"]/text()').extract_first().split()[-1],
+                'phone': storeselector[i].xpath('.//span[@class="phone"]/text()').extract_first(),
+                'opening_hours': storeselector[i].xpath('.//span[@class="todays-hours"]/span[@class="break"]/text()').extract_first(),
+                'website': 'https://www.tangeroutlet.com/' + storeselector[i].xpath('.//@data-webmoniker').extract_first() + '/location',
+                'lat': storeselector[i].xpath('.//@data-latitude').extract_first(),
+                'lon': storeselector[i].xpath('.//@data-longitude').extract_first(),
             }
             yield GeojsonPointItem(**properties)
-        except:
-            pass
-        
