@@ -36,16 +36,15 @@ class IronMountainSpider(scrapy.Spider):
         data = data.replace("RLS.defaultData = ","")
         data = data.replace(";","")
         address = json.loads("{"+str.join(",",json.loads(data)["markerData"][0]["info"].replace("</div>","").split(",")[1:]))
-        # yield GeojsonPointItem(
-        #     addr_full=address["address_1"],
-        #     city=address["city"],
-        #     state=response.xpath('//*[@id="main-container"]/div[2]/div[1]/ol/li[2]/a/text()').extract()[0].strip(" "),
-        #     postcode=address["post_code"],
-        #     lat=float(address["lat"]),
-        #     lon=float(address["lng"]),
-        #     phone=address["local_phone"],
-        #     website=address["url"].replace("\\",""),
-        #     country=response.meta.get("country"),
-        #     ref=address["url"].replace("\\","")
-        # )
-        yield {"data":data}
+        yield GeojsonPointItem(
+            addr_full=address["address_1"],
+            city=address["city"],
+            state=response.xpath('//*[@id="main-container"]/div[2]/div[1]/ol/li[2]/a/text()').extract()[0].strip(" "),
+            postcode=address["post_code"],
+            lat=float(address["lat"]),
+            lon=float(address["lng"]),
+            phone=address["local_phone"],
+            website=address["url"].replace("\\",""),
+            country=response.meta.get("country"),
+            ref=address["url"].replace("\\","")
+        )
