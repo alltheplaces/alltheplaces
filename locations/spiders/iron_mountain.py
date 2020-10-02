@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import scrapy
+import json
 import re
 
 from locations.items import GeojsonPointItem
@@ -31,21 +32,19 @@ class IronMountainSpider(scrapy.Spider):
     
     def parse_location(self,response):
         data = re.sub("'","",response.xpath('//*[@id="gmap"]/script/text()').extract()[0])
-        data = data.replace("false","False")
-        data = data.replace("true","True")
-        data = data.replace("null","None")
+        data = data.replace(",}","}")
         data = data.replace("RLS.defaultData = ","")
         data = data.replace(";","")
-        address = eval("{"+str.join(",",eval(data)["markerData"][0]["info"].replace("<\\/div>","").split(",")[1:]))
-        yield GeojsonPointItem(**{
-            "addr_full":address["address_1"],
-            "city":address["city"],
-            "state":response.xpath('//*[@id="main-container"]/div[2]/div[1]/ol/li[2]/a/text()').extract()[0].strip(" "),
-            "postcode":address["post_code"],
-            "lat":float(address["lat"]),
-            "lon":float(address["lng"]),
-            "phone":address["local_phone"],
-            "website":address["url"].replace("\\",""),
-            "country":response.meta.get("country"),
-            "ref":address["url"].replace("\\","")
-        })
+        address = json.loads("{"+str.join(",",json.loads(data)["markerData"][0]["info"].replace("</div>","").split(",")[1:]))
+        yield GeojsonPointItem(
+            addr_full=address["address_1"],
+            city=address["city"],
+            state=response.xpath('//*[@id="main-container"]/div[2]/div[1]/ol/li[2]/a/text()').extract()[0].strip(" "),
+            postcode=address["post_code"],
+            lat=float(address["lat"]),
+            lon=float(address["lng"]),
+            phone=address["local_phone"],
+            website=address["url"].replace("\\",""),
+            country=response.meta.get("country"),
+            ref=address["url"].replace("\\","")
+        )
