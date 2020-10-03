@@ -81,3 +81,4 @@ class RalphLauren(scrapy.Spider):
             self.logger.warn("----------------- Error -----------------: {}".format(e))
             return False
         return True
+    
