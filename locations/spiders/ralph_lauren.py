@@ -2,8 +2,6 @@
 import scrapy
 import json
 import base64
-import re
-from codecs import encode, decode
 from locations.items import GeojsonPointItem
 
 class RalphLauren(scrapy.Spider):
