@@ -47,38 +47,26 @@ class RalphLauren(scrapy.Spider):
         for i in hours:
             opening_hours.append(i.strip())
 
-        if data and self.isValidJson(data):
-            try:
-                data = json.loads(data)[0]
-                name = data.get("name", None)
-                name = base64.b64decode(name).decode('utf-8')
-                address = data.get("address1", None)
-                address = base64.b64decode(address).decode('utf-8')
+        if data:
+            data = json.loads(data)[0]
+            name = data.get("name", None)
+            name = base64.b64decode(name).decode('utf-8')
+            address = data.get("address1", None)
+            address = base64.b64decode(address).decode('utf-8')
 
-                properties = {
-                    'ref': data.get("id", None),
-                    'name': name,
-                    'lat': data.get("latitude", None),
-                    'lon': data.get("longitude", None),
-                    'phone': data.get("phone", None),
-                    'addr_full': address,
-                    'state': data.get("stateCode", None),
-                    'city': data.get("city", None),
-                    'country': data.get("countryCode", None),
-                    'postcode': data.get("postalCode", None),
-                    'opening_hours': opening_hours,
-                }
+            properties = {
+                'ref': data.get("id", None),
+                'name': name,
+                'lat': data.get("latitude", None),
+                'lon': data.get("longitude", None),
+                'phone': data.get("phone", None),
+                'addr_full': address,
+                'state': data.get("stateCode", None),
+                'city': data.get("city", None),
+                'country': data.get("countryCode", None),
+                'postcode': data.get("postalCode", None),
+                'opening_hours': opening_hours,
+            }
 
-                yield GeojsonPointItem(**properties)
+            yield GeojsonPointItem(**properties)
 
-            except Exception as e:
-                self.logger.warn("----------------- Error -----------------: {}".format(e))
-
-    def isValidJson(self,jsondata):
-        try:
-            json.loads(jsondata)
-        except Exception as e:
-            self.logger.warn("----------------- Error -----------------: {}".format(e))
-            return False
-        return True
-    
