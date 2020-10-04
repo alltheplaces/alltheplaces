@@ -2,9 +2,6 @@ name: Run Changed Spiders in Pull Requests
 
 # Only run on pushes
 on:
-  pull_request:
-    paths:
-    - 'locations/spiders/*.py'
   push:
     branches-ignore:
     - 'master'
