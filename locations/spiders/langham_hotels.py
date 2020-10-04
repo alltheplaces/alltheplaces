@@ -20,7 +20,7 @@ class LanghamHotel(scrapy.Spider):
     def parse_locations(self,response):
         data = response.xpath('//script[@type="application/ld+json"]/text()').extract_first()
 
-        if data and self.isValidJson(data):
+        if data:
             try:
                 data = json.loads(data)
 
@@ -45,6 +45,7 @@ class LanghamHotel(scrapy.Spider):
 
             except Exception as e:
                 self.logger.warn("----------------- Error -----------------: {}".format(e))
+                pass
 
         else:
             # some of the websites don't provide location information with application/ld+json
@@ -60,11 +61,3 @@ class LanghamHotel(scrapy.Spider):
             # https://www.langhamhotels.com/en/the-langham/haikou/
             # https://www.langhamresidences.com/en/the-langham/nymphenburg/ (no location information)
             pass
-
-    def isValidJson(self,jsondata):
-        try:
-            json.loads(jsondata)
-        except Exception as e:
-            self.logger.warn("----------------- Error -----------------: {}".format(e))
-            return False
-        return True
