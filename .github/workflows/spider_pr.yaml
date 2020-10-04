@@ -55,6 +55,7 @@ jobs:
         do
             if [[ $file_changed != locations/spiders/* ]]; then
                 echo "${file_changed} is not a spider. Skipping."
+                continue
             fi
 
             spider="${file_changed}"
