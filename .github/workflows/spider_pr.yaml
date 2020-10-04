@@ -20,25 +20,37 @@ jobs:
       BUCKET: placescraper-results
     steps:
     - name: Checkout code
-      uses: actions/checkout@v1
+      uses: actions/checkout@v2
     - name: Setup Python
       uses: actions/setup-python@master
       with:
         python-version: 3.7
-    - name: Install dependencies
+    - name: Install pipenv
       run: |
         pip --quiet install pipenv
+    - uses: actions/cache@v2
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/Pipfile.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+    - name: Install dependencies
+      run: |
         pipenv --bare install --system --deploy
-        sudo apt-get install jq
+        sudo apt-get install jqx
     - name: Run Scrapy check
       run: |
         scrapy check
+    - id: file_changes
+      uses: trilom/file-changes-action@v1.2.4
+      with:
+        output: ''
     - name: Run spiders that changed
       shell: bash
       run: |
         PR_COMMENT_BODY="I ran the spiders in this pull request and got these results:\\n\\n|Spider|Results|Log|\\n|---|---|---|\\n"
 
-        SPIDERS=$(git diff --name-only ${GITHUB_SHA}..origin/master | grep 'locations/spiders')
+        SPIDERS=$(echo "${{ steps.file_changes.outputs.files_modified }}" | grep 'locations/spiders')
 
         if [ -z "$SPIDERS" ]; then
             echo "No spiders to run."
