@@ -5,11 +5,6 @@ on:
   pull_request:
     paths:
     - 'locations/spiders/*.py'
-  push:
-    branches-ignore:
-    - 'master'
-    paths:
-    - 'locations/spiders/*.py'
 
 jobs:
   test-spider:
@@ -20,38 +15,50 @@ jobs:
       BUCKET: placescraper-results
     steps:
     - name: Checkout code
-      uses: actions/checkout@v1
+      uses: actions/checkout@v2
     - name: Setup Python
       uses: actions/setup-python@master
       with:
         python-version: 3.7
-    - name: Install dependencies
+    - name: Install pipenv
       run: |
         pip --quiet install pipenv
+    - uses: actions/cache@v2
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/Pipfile.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+    - name: Install dependencies
+      run: |
         pipenv --bare install --system --deploy
         sudo apt-get install jq
     - name: Run Scrapy check
       run: |
         scrapy check
+    - id: file_changes
+      uses: trilom/file-changes-action@v1.2.4
+      with:
+        output: ''
     - name: Run spiders that changed
       shell: bash
       run: |
+        set -x
         PR_COMMENT_BODY="I ran the spiders in this pull request and got these results:\\n\\n|Spider|Results|Log|\\n|---|---|---|\\n"
-
-        SPIDERS=$(git diff --name-only ${GITHUB_SHA}..origin/master | grep 'locations/spiders')
-
-        if [ -z "$SPIDERS" ]; then
-            echo "No spiders to run."
-            exit 0
-        fi
 
         export AWS_ACCESS_KEY_ID=$(echo -n "${AWS_KEY}" | base64 --decode)
         export AWS_SECRET_ACCESS_KEY=$(echo -n "${AWS_SEC}" | base64 --decode)
 
         RUN_DIR="${GITHUB_WORKSPACE}/output"
         EXIT_CODE=0
-        for spider in $SPIDERS
+        for file_changed in ${{ steps.file_changes.outputs.files_modified }}
         do
+            if [[ $file_changed != locations/spiders/* ]]; then
+                echo "${file_changed} is not a spider. Skipping."
+                continue
+            fi
+
+            spider="${file_changed}"
             (>&2 echo "${spider} running ...")
             SPIDER_NAME=$(basename $spider)
             SPIDER_NAME=${SPIDER_NAME%.py}
@@ -103,6 +110,11 @@ jobs:
 
             (>&2 echo "${spider} done")
         done
+        
+        if [[ ! "$(ls ${RUN_DIR})" ]]; then
+            echo "Nothing ran. Exiting."
+            echo $EXIT_CODE
+        fi
 
         if [ -z "${{ secrets.GITHUB_TOKEN }}" ]; then
             echo "No GITHUB_TOKEN set"
