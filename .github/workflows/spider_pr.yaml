@@ -34,7 +34,7 @@ jobs:
     - name: Install dependencies
       run: |
         pipenv --bare install --system --deploy
-        sudo apt-get install jqx
+        sudo apt-get install jq
     - name: Run Scrapy check
       run: |
         scrapy check
