@@ -36,32 +36,28 @@ class Deichmann(scrapy.Spider):
         # get json which provides all data
         data = response.xpath('//script[@type="application/ld+json"]/text()').extract_first()
 
-        if data and self.isValidJson(data):
-            data = json.loads(data)
-
-            geo_data = data.get("geo", {})
-            address_data = data.get("address", {})
-            contact_data = data.get("ContactPoint", {})
-
-            properties = {
-                'ref': data.get("@id", None),
-                'name': data.get("name", None),
-                'lat': geo_data.get("latitude", None),
-                'lon': geo_data.get("longitude", None),
-                'phone': contact_data[0].get("telephone", None),
-                'addr_full': address_data.get("streetAddress", None),
-                'country': address_data.get("addressCountry", None),
-                'postcode': address_data.get("postalCode", None),
-                'city': address_data.get("addressLocality", None),
-                'opening_hours': data.get("openingHours", None),
-            }
-
-            yield GeojsonPointItem(**properties)
-
-    def isValidJson(self, jsondata):
         try:
-            json.loads(jsondata)
+            if data:
+                data = json.loads(data)
+
+                geo_data = data.get("geo", {})
+                address_data = data.get("address", {})
+                contact_data = data.get("ContactPoint", {})
+
+                properties = {
+                    'ref': data.get("@id", None),
+                    'name': data.get("name", None),
+                    'lat': geo_data.get("latitude", None),
+                    'lon': geo_data.get("longitude", None),
+                    'phone': contact_data[0].get("telephone", None),
+                    'addr_full': address_data.get("streetAddress", None),
+                    'country': address_data.get("addressCountry", None),
+                    'postcode': address_data.get("postalCode", None),
+                    'city': address_data.get("addressLocality", None),
+                    'opening_hours': data.get("openingHours", None),
+                }
+
+                yield GeojsonPointItem(**properties)
         except Exception as e:
             self.logger.warn("----------------- Error -----------------: {}".format(e))
-            return False
-        return True
+            pass
