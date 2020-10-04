@@ -36,7 +36,7 @@ class Deichmann(scrapy.Spider):
         # get json which provides all data
         data = response.xpath('//script[@type="application/ld+json"]/text()').extract_first()
 
-        if data:
+        if data and self.isValidJson(data):
             data = json.loads(data)
 
             geo_data = data.get("geo", {})
@@ -57,3 +57,11 @@ class Deichmann(scrapy.Spider):
             }
 
             yield GeojsonPointItem(**properties)
+
+    def isValidJson(self, jsondata):
+        try:
+            json.loads(jsondata)
+        except Exception as e:
+            self.logger.warn("----------------- Error -----------------: {}".format(e))
+            return False
+        return True
