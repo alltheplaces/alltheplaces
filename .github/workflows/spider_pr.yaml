@@ -43,6 +43,7 @@ jobs:
     - name: Run spiders that changed
       shell: bash
       run: |
+        set -x
         PR_COMMENT_BODY="I ran the spiders in this pull request and got these results:\\n\\n|Spider|Results|Log|\\n|---|---|---|\\n"
 
         SPIDERS=$(echo "${{ steps.file_changes.outputs.files_modified }}" | grep 'locations/spiders')
