@@ -12,47 +12,46 @@ class RalphLauren(scrapy.Spider):
     )
 
     def parse(self, response):
-        #gather URLs for all countries
+        # gather URLs of all countries
         countries = response.xpath('//a[@class="store-directory-countrylink"]/@href').extract()
 
         for country in countries:
-            yield scrapy.Request(response.urljoin(country),callback=self.parse_city)
+            # build URL for per country overview of all stores, countrycode is after the equals sign, e.g. /Stores-ShowStates?countryCode=US
+            url = "/findstores?dwfrm_storelocator_country="+(country.split("=",1)[1])+"&dwfrm_storelocator_findbycountry=Search&findByValue=CountrySearch"
+            yield scrapy.Request(response.urljoin(url),callback=self.parse_city)
 
     def parse_city(self, response):
-        #all URLs for cities in the countries
-        cities = response.xpath('//a[@class="store-directory-citylink"]/@href').extract()
+        # get all stores per country
+        stores = response.xpath('//span[@class="store-listing-name"]/a/@href').extract()
 
-        for city in cities:
-            yield scrapy.Request(response.urljoin(city), callback=self.parse_stores)
-
-    def parse_stores(self, response):
-        # if a city has more than 1 store
-        if len(response.xpath('//span[@class="store-listing-name"]/a/@href').extract()) > 0:
-            stores = response.xpath('//span[@class="store-listing-name"]/a/@href').extract()
-
-            for store in stores:
-                yield scrapy.Request(response.urljoin(store), callback=self.parse_locations)
-        else:
-            stores = response.xpath('//a[@class="store-directory-citylink"]/@href').extract()
-
-            for store in stores:
-                yield scrapy.Request(response.urljoin(store), callback=self.parse_locations)
+        for store in stores:
+            yield scrapy.Request(response.urljoin(store), callback=self.parse_locations)
 
     def parse_locations(self, response):
+        # get json which provides most of the data
         data = response.xpath('//div[@class="storeJSON hide"]/@data-storejson').extract_first()
 
+        # opening hourse are not in json, thus need to be scraped seperately
         hours = response.xpath('//tr[@class="store-hourrow"]//td//text()').getall()
         opening_hours = []
 
         for i in hours:
             opening_hours.append(i.strip())
 
+        # some stores have a second address line which is not in the json
+        store_address = response.xpath('//p[@class="store-address"]/text()').extract()
+
+        if len(store_address) == 6:
+            address = store_address[0].strip()
+        else:
+            address = '\n'.join([store_address[0].strip(),store_address[1].strip()])
+
         if data:
             data = json.loads(data)[0]
+
+            # decode base64 string
             name = data.get("name", None)
             name = base64.b64decode(name).decode('utf-8')
-            address = data.get("address1", None)
-            address = base64.b64decode(address).decode('utf-8')
 
             properties = {
                 'ref': data.get("id", None),
