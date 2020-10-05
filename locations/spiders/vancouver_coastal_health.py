@@ -33,9 +33,14 @@ class VancouverCoastalHealthSpider(scrapy.Spider):
         coords = response.xpath('//Geocode/text()').extract_first()
         if coords:
             lat, lon = coords.split(',')
+            if float(lat) < 45.0:
+                lat, lon = None, None
         else:
             lat = None
             lon = None
+        city = response.xpath('//City_x0020_Field/text()').extract_first()
+        if city == "[blank]":
+            city = None
         phone_str = response.xpath('//Phone_x0020_1/text()').extract_first()
         if phone_str:
             phone = ''.join(re.findall(r'([0-9]+)', phone_str))
@@ -47,7 +52,7 @@ class VancouverCoastalHealthSpider(scrapy.Spider):
             'ref': ref,
             'name': response.xpath('//Specific_x0020_Title/text()').extract_first(),
             'addr_full': response.xpath('//Address_x0020_1/text()').extract_first(),
-            'city': response.xpath('//City_x0020_Field/text()').extract_first(),
+            'city': city,
             'state': response.xpath('//Province/text()').extract_first(),
             'postcode': response.xpath('//Postal_x0020_Code/text()').extract_first(),
             'country': 'CA',
