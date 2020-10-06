@@ -1,43 +1,46 @@
 # -*- coding: utf-8 -*-
 import json
 import csv
+import re
 
 import scrapy
 
 from locations.items import GeojsonPointItem
 
+regex = r"(?<=Imagery\/Map\/Road\/)(-?\d+\.\d+),(-?\d+\.\d+)"
+
 class CinemarkSpider(scrapy.Spider):
     name = "cinemark"
     item_attributes = {'brand': "Cinemark"}
     allowed_domains = ["cinemark.com"]
-    download_delay = 2
-
-
-    def start_requests(self):
-        url = "https://www.cinemark.com/theatres/{zipcode}"
-
-        with open('./locations/searchable_points/us_zcta.csv') as zipcodes:
-            # reader = csv.reader(zipcodes)
-            next(zipcodes)
-            for zipcode in zipcodes:
-                yield scrapy.Request(
-                    url = url.format(zipcode = zipcode.replace('"', '')),
-                    callback=self.parse
-                )
-                break
+    start_urls = ["https://www.cinemark.com/full-theatre-list"]
 
     def parse(self, response):
-        data = response.xpath('//script[@type="application/ld+json"]//text()').extract_first()
-        data = json.loads(data.split(';')[0]) # remove trailing ';'
-        for store in data:
-            properties = {
-                'ref': store["@id"],
-                'name': store["name"],
-                'addr_full': store["address"][0]["streetAddress"],
-                'city': store["address"][0]["addressLocality"],
-                'postcode': store["address"][0]["postalCode"],
-                'country': "US",
-                'phone': store.get("telephone"),
-            }
+        for theatre in response.css('div.theatres-by-state li a::attr(href)').getall():
+            yield scrapy.Request(response.urljoin(theatre), callback=self.parseTheatre)
 
-            yield GeojsonPointItem(**properties)
+    def parseTheatre(self, response):
+        lat = lon = None
+        geo = response.xpath('//*[@id="theatreInfo"]/div[1]/div[2]/a/img/@data-src').extract_first()
+        m = re.search(regex, geo)
+        if m:
+            lat, lon = m.group(1), m.group(2)
+
+        data = response.xpath('//body/script[@type="application/ld+json"]//text()').extract_first()
+        data = json.loads(data)
+
+        properties = {
+            'lat': lat,
+            'lon': lon,
+            'ref': data["@id"],
+            'name': data["name"],
+            'addr_full': data["address"][0]["streetAddress"],
+            'city': data["address"][0]["addressLocality"],
+            'state': data["address"][0]["addressRegion"],
+            'country': data["address"][0]["addressCountry"],
+            'postcode': data["address"][0]["postalCode"],
+            'phone': data.get("telephone"),
+            'website': data.get("url"),
+        }
+
+        yield GeojsonPointItem(**properties)
