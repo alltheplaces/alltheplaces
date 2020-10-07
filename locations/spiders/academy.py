@@ -11,7 +11,7 @@ from locations.hours import OpeningHours
 
 class AcademySpider(scrapy.Spider):
     name = "academy"
-    item_attributes = {'brand': 'Academy', 'brand_wikidata': 'Q4671380'}
+    item_attributes = {'brand': 'Academy Sports + Outdoors', 'brand_wikidata': 'Q4671380'}
     allowed_domains = []
     start_urls = [
         'https://www.academy.com/sitemap_store_1.xml.gz',
