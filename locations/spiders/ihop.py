@@ -1,54 +1,59 @@
 import scrapy
 from locations.items import GeojsonPointItem
+from locations.hours import OpeningHours
 import json
 import re
 
 
 class IHOPSpider(scrapy.Spider):
     name = "ihop"
-    item_attributes = { 'brand': "IHOP" }
+    item_attributes = {'brand': "IHOP", 'brand_wikidata': "Q1185675"}
     allowed_domains = ["restaurants.ihop.com"]
     start_urls = (
-        'https://restaurants.ihop.com/',
+        'https://restaurants.ihop.com/en-us',
     )
-    location_selector = ".location-careers a::attr('href')"
+
+    def parse_opening_hours(self, hours):
+        opening_hours = OpeningHours()
+
+        for item in hours:
+            day = item.xpath('.//span[@class="daypart"]/@data-daypart').extract_first()
+            open_time = item.xpath('.//span[@class="time-open"]/text()').extract_first()
+            close_time = item.xpath('.//span[@class="time-close"]/text()').extract_first()
+
+            if not open_time:
+                if item.xpath('.//span[@class="time"]/span/text()').extract_first() == 'Open 24 Hours':
+                    open_time = '12:00am'
+                    close_time = '11:59pm'
+                else:
+                    continue
+
+            opening_hours.add_range(day=day[:2],
+                                    open_time=open_time.upper(),
+                                    close_time=close_time.upper(),
+                                    time_format='%I:%M%p')
+
+        return opening_hours.as_opening_hours()
 
     def parse(self, response):
-        state_urls = response.css(self.location_selector).extract()
+        state_urls = response.xpath('//div[@class="browse-container"]//li//a/@href').extract()
         for state_url in state_urls:
             yield scrapy.Request(url=state_url, callback=self.parse_state)
 
     def parse_state(self, response):
-        city_urls = response.css(self.location_selector).extract()
+        city_urls = response.xpath('//ul[@class="map-list"]/li//a/@href').extract()
         for city_url in city_urls:
             yield scrapy.Request(url=city_url, callback=self.parse_city)
 
     def parse_city(self, response):
-        location_urls = response.css(self.location_selector).extract()
+        location_urls = response.xpath('//div[@class="map-list-item-header"]/a/@href').extract()
         for location_url in location_urls:
-            yield scrapy.Request(url=location_url, callback=self.parse_location)
+            if location_url != '#':
+                yield scrapy.Request(url=location_url, callback=self.parse_location)
 
     def parse_location(self, response):
-        info_jsons = response.css("script[type='application/ld+json']::text").extract()
-        info = [x for x in info_jsons if "geo" in x]
-        basic_info = json.loads(info[-1])
-        if len(response.css(".icon-24")):
-            opening_hours = "24/7"
-        else:
-            hour_nodes = response.css(".hours.openLogo").extract_first()
-            days = response.css(".hours.openLogo div::text").extract()
-            times = [x[7:-5].replace("\xa0", "") for x in re.findall(r"</div.*<br>", hour_nodes)]
-            formatted_times = []
-            for day, time in zip(days, times):
-                try:
-                    prefix, start_time, end_time = day[:2], *time.split(" - ")
-                    start_hour, start_minutes = int(start_time[:2]), int(start_time[3:5])
-                    end_hour, end_minutes = int(end_time[:2]), int(end_time[3:5])
-                    hours_str = "%s %02d:%02d-%02d:%02d" % (prefix, start_hour, start_minutes, end_hour + 12, end_minutes)
-                    formatted_times.append(hours_str)
-                except:
-                    self.logger.warn("could not parse hours from {} {}".format(day, time))
-            opening_hours = "; ".join(formatted_times)
+        info_json = response.xpath("//script[@type='application/ld+json' and contains(text(), 'geo')]/text()").extract_first()
+        basic_info = json.loads(info_json)[0]
 
         point = {
             "lat": basic_info["geo"]["latitude"],
@@ -58,10 +63,13 @@ class IHOPSpider(scrapy.Spider):
             "city": basic_info["address"]["addressLocality"],
             "state": basic_info["address"]["addressRegion"],
             "postcode": basic_info["address"]["postalCode"],
-            "country": basic_info["address"]["addressCountry"],
-            "phone": basic_info["telephone"],
+            "phone": basic_info["address"]["telephone"],
             "website": basic_info["url"],
-            "opening_hours": opening_hours,
-            "ref": basic_info["@id"],
+            "ref": "_".join(re.search(r".+/(.+?)/(.+?)/(.+?)/?(?:\.html|$)", response.url).groups())
         }
+
+        hours = self.parse_opening_hours(response.xpath('//div[contains(@class, "hide-mobile")]//div[@class="day-hour-row"]'))
+        if hours:
+            point['opening_hours'] = hours
+
         return GeojsonPointItem(**point)
