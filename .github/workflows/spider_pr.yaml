@@ -36,22 +36,20 @@ jobs:
     - name: Run Scrapy check
       run: |
         scrapy check
-    - id: file_changes
-      uses: trilom/file-changes-action@v1.2.4
-      with:
-        output: ''
     - name: Run spiders that changed
       shell: bash
       run: |
-        set -x
         PR_COMMENT_BODY="I ran the spiders in this pull request and got these results:\\n\\n|Spider|Results|Log|\\n|---|---|---|\\n"
 
         export AWS_ACCESS_KEY_ID=$(echo -n "${AWS_KEY}" | base64 --decode)
         export AWS_SECRET_ACCESS_KEY=$(echo -n "${AWS_SEC}" | base64 --decode)
 
+        set -x
+        SPIDERS=$(curl -sL https://api.github.com/repos/alltheplaces/alltheplaces/pulls/${{ github.event.number }}/files | jq -r '.[].filename')
+
         RUN_DIR="${GITHUB_WORKSPACE}/output"
         EXIT_CODE=0
-        for file_changed in ${{ steps.file_changes.outputs.files_modified }}
+        for file_changed in $SPIDERS
         do
             if [[ $file_changed != locations/spiders/* ]]; then
                 echo "${file_changed} is not a spider. Skipping."
@@ -110,7 +108,7 @@ jobs:
 
             (>&2 echo "${spider} done")
         done
-        
+
         if [[ ! "$(ls ${RUN_DIR})" ]]; then
             echo "Nothing ran. Exiting."
             echo $EXIT_CODE
