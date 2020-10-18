@@ -6,7 +6,7 @@ from locations.hours import OpeningHours
 
 DAYS = ['Su', 'Mo', 'Tu', "We", 'Th', 'Fr', 'Sa']
 
-class TemplateSpider(scrapy.Spider):
+class JbHifiSpider(scrapy.Spider):
     name = "jbhifi"
     allowed_domains = ["algolia.net"]
     
