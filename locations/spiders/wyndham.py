@@ -112,7 +112,7 @@ def create_url(brand, city, state, unique_url, tier_id):
     if not brand_name:
         brand_name = BRAND_MAP.get(tier_id.lower())
     url = brand_name + "/"
-    url += city.replace(" ", "-").lower()
+    url += city.replace(" ", "-").replace(".","").lower()
     state_name = (
         f"-{state.replace(' ','-').lower()}"
         if state.lower() != "other than us/canada"
