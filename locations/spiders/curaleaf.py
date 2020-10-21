@@ -12,6 +12,10 @@ class CuraleafSpider(scrapy.Spider):
         'https://curaleaf.com/locations/',
     )
 
+    def phone_normalize(self, phone):
+        r = re.search(r'\+?(\s+)*(\d{1})?(\s|\()*(\d{3})(\s+|\)|-)*(\d{3})(\s+|-)?(\d{2})(\s+|-)?(\d{2})', phone)
+        return ('('+r.group(4)+') '+r.group(6)+'-'+r.group(8)+'-'+r.group(10)) if r else phone
+
     def parse(self, response):
         urls = response.xpath('//div[@class="button2"]/a/@href').extract()
         for url in urls:
@@ -37,8 +41,9 @@ class CuraleafSpider(scrapy.Spider):
             country = 'US'
             address = "{} {} {} {}".format(street, city, state, postcode)
             properties = {
-                'name': '',
-                'ref': address,
+                'name': 'Curaleaf',
+                'ref': response.url,
+                'website': response.url,
                 'lat': float(latitude),
                 'lon': float(longitude),
                 'street': street,
