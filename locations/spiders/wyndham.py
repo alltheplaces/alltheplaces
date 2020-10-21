@@ -169,7 +169,7 @@ class WyndhamSpider(scrapy.Spider):
         )
         if not raw_json:
             return None
-        data = json.loads(raw_json.group(1))
+        data = json.loads(raw_json.group(1).replace("\t"," "))
         properties = {
             "ref": response.meta["id"],
             "lat": data["geo"]["latitude"],
