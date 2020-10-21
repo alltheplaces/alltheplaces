@@ -38,5 +38,5 @@ class PetSuitesSpider(scrapy.Spider):
                 phone=entity['mainPhone'],
                 website=entity['websiteUrl']['url'],
                 opening_hours=self.process_hours(entity['hours']),
-                ref=entity['googlePlaceId'],
+                ref=entity['c_googleMyBusinessCID'],
             )
