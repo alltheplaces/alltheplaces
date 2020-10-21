@@ -166,8 +166,10 @@ class WyndhamSpider(scrapy.Spider):
             '<script type="application\/ld\+json"\>(.+?)\<',
             response.text,
             flags=re.DOTALL,
-        ).group(1)
-        data = json.loads(raw_json)
+        )
+        if not raw_json:
+            return None
+        data = json.loads(raw_json.group(1))
         properties = {
             "ref": response.meta["id"],
             "lat": data["geo"]["latitude"],
