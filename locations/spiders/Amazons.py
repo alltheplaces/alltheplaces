@@ -112,12 +112,10 @@ class AmazonsSpider(CrawlSpider):
                     item["street"] = some[1] + " "+some[2]
                 if len(div) == 2:
                     try:
-                        print()
                         item["city"]= div[0].split(' ')[-1]
                         item["state"] = div[1].split(' ')[1]
                         item["postcode"] = div[1].split(' ')[2]
                     except Exception as ex:
-                        # print(div[0].split(' '))
                         item["city"] = div[0].split(' ')[-2]+" "+div[0].split(' ')[-1]
                         item["postcode"] = div[1]
                         item["state"] = div[0].split(' ')[-1]
@@ -137,7 +135,7 @@ class AmazonsSpider(CrawlSpider):
                 try:
                     del item["Timings"]
                 except Exception:
-                    print("No")
+                    pass
                 break
         if item and len(item) > 2:
             yield GeojsonPointItem(item)
