@@ -132,10 +132,7 @@ class AmazonsSpider(CrawlSpider):
                     item['phone'] = None
                 if openhours:
                     item["opening_hours"] = openhours
-                try:
-                    del item["Timings"]
-                except Exception:
-                    pass
+                item.pop("Timings",None)
                 break
         if item and len(item) > 2:
             yield GeojsonPointItem(item)
