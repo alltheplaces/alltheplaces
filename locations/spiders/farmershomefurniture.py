@@ -15,9 +15,6 @@ DAYS = {
     "6": "Su"
 }
 
-default_headers = {
-    "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_1) AppleWebKit/537.36 (KHTML, like Gecko) "
-                  "Chrome/63.0.3239.84 Safari/537.36"}
 
 class FarmersHomeFurnitureSpider(scrapy.Spider):
     name = 'farmershomefurniture'
@@ -25,6 +22,10 @@ class FarmersHomeFurnitureSpider(scrapy.Spider):
     allowed_domains = ['www.farmershomefurniture.com']
     start_urls = ['https://www.farmershomefurniture.com/store-list.inc']
     download_delay = 1
+    headers = {
+        "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_1) AppleWebKit/537.36 (KHTML, like Gecko) "
+                  "Chrome/63.0.3239.84 Safari/537.36"
+    }
 
     def parse(self, response):
         for store in response.xpath('//tr'):
