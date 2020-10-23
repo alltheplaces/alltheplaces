@@ -5,7 +5,7 @@ from locations.items import GeojsonPointItem
 from scrapy.selector import Selector
 
 class CareOneSpider(scrapy.Spider):
-    name = "care-one"
+    name = "care_one"
     allowed_domains = ["care-one.com"]
     start_urls = (
         'https://www.care-one.com/locations/',
