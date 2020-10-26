@@ -127,4 +127,4 @@ class AmazonsSpider(CrawlSpider):
                 item.pop("Timings",None)
                 break
         if item and len(item) > 2:
-            yield GeojsonPointItem(item)
+            yield GeojsonPointItem(**item)
