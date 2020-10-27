@@ -31,8 +31,12 @@ class FarmersHomeFurnitureSpider(scrapy.Spider):
         for store in response.xpath('//tr'):
             store_data = store.xpath('./td/text()').getall()
             if store_data:
-                properties={ ['city', 'state', 'address', 'phone'][i]: store_data[i]
-                                                        for i in range(len(store_data)) }
+                properties= {
+                    'city': store_data[0],
+                    'state': store_data[1],
+                    'address': store_data[2],
+                    'phone': store_data[3]
+                }
 
                 store_link = store.xpath('./@onclick').re_first('/stores/[0-9a-z-]+.inc')
                 store_url = 'https://www.farmershomefurniture.com/{}'.format(store_link)
@@ -45,11 +49,11 @@ class FarmersHomeFurnitureSpider(scrapy.Spider):
         store_hours = response.xpath('//div[@class="workspacearea"]/div/div/p/text()').extract()[2:]
 
         for hours in store_hours:
-            day = hours.strip().split(':')[0]
+            day, time = hours.strip().split(':')
             if day != 'Sun':
-                time_range= hours.strip().split(':')[1].split('-')
+                time_range= time.split('-')
                 if time_range[0] != 'Closed':
-                    opening_hours.add_range(day=DAYS[str(store_hours.index(hours))],
+                    opening_hours.add_range(day=day[:2],
                                         open_time=time_range[0].strip()+":00",
                                         close_time=time_range[1].strip()+":00"
                                         )
