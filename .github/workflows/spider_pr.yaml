@@ -44,7 +44,6 @@ jobs:
         export AWS_ACCESS_KEY_ID=$(echo -n "${AWS_KEY}" | base64 --decode)
         export AWS_SECRET_ACCESS_KEY=$(echo -n "${AWS_SEC}" | base64 --decode)
 
-        set -x
         SPIDERS=$(curl -sL https://api.github.com/repos/alltheplaces/alltheplaces/pulls/${{ github.event.number }}/files | jq -r '.[].filename')
 
         RUN_DIR="${GITHUB_WORKSPACE}/output"
@@ -92,6 +91,14 @@ jobs:
 
             if [ -f "$OUTFILE" ]; then
                 FEATURE_COUNT=$(wc -l < ${OUTFILE} | tr -d ' ')
+                
+                if [ $FEATURE_COUNT == "0" ]; then
+                    echo "${spider} has no output"
+                    FAILURE_REASON="no output"
+                    PR_COMMENT_BODY="${PR_COMMENT_BODY}|[\`$spider\`](https://github.com/${GITHUB_REPOSITORY}/blob/${GITHUB_SHA}/${spider})| (No Output) |Resulted in a \`${FAILURE_REASON}\` ([Log](${LOGFILE_URL}))|\\n"
+                    EXIT_CODE=1
+                    continue
+                fi
 
                 aws s3 cp --acl=public-read --only-show-errors ${OUTFILE} s3://${BUCKET}/ci/${GITHUB_RUN_ID}/${SPIDER_NAME}/output.geojson
                 OUTFILE_URL="https://${BUCKET}.s3.amazonaws.com/ci/${GITHUB_RUN_ID}/${SPIDER_NAME}/output.geojson"
@@ -103,7 +110,9 @@ jobs:
                 PR_COMMENT_BODY="${PR_COMMENT_BODY}|[\`$spider\`](https://github.com/${GITHUB_REPOSITORY}/blob/${GITHUB_SHA}/${spider})|[${FEATURE_COUNT} items](${OUTFILE_URL}) ([Map](https://placescraper-results.s3.amazonaws.com/map.html?show=${OUTFILE_URL}))|Resulted in a \`${FAILURE_REASON}\` ([Log](${LOGFILE_URL}))|\\n"
             else
                 echo "${spider} has no output"
+                FAILURE_REASON="no output"
                 PR_COMMENT_BODY="${PR_COMMENT_BODY}|[\`$spider\`](https://github.com/${GITHUB_REPOSITORY}/blob/${GITHUB_SHA}/${spider})| (No Output) |Resulted in a \`${FAILURE_REASON}\` ([Log](${LOGFILE_URL}))|\\n"
+                EXIT_CODE=1
             fi
 
             (>&2 echo "${spider} done")
