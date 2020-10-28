@@ -14,5 +14,3 @@ pygithub = "*"
 python-json-logger = "*"
 xlrd = "*"
 
-[requires]
-python_version = "3.7"
