@@ -13,9 +13,9 @@ class TacoJohns(scrapy.Spider):
         "https://locations.tacojohns.com/",
     )
 
-    state_pattern = re.compile("^[a-z]{2}.html$")
-    city_pattern = re.compile("^[a-z]{2}\/[^()]+.html$")
-    location_pattern = re.compile("^[a-z]{2}\/[^()]+\/[^()]+.html$")
+    state_pattern = re.compile("^[a-z]{2}(\.html)$")
+    city_pattern = re.compile("^[a-z]{2}\/.+(\.html)$")
+    location_pattern = re.compile("^[a-z]{2}\/.+\/.+(\.html)$")
 
     def parse(self, response):
         urls = response.xpath('//li[@class="c-directory-list-content-item"]//@href').extract()
