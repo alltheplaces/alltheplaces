@@ -12,7 +12,7 @@ class TargetAUSpider(scrapy.Spider):
     headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:81.0) Gecko/20100101 Firefox/81.0",
                 "Referer": "https://www.target.com.au/store-finder"}
 
-    custom_settings = {'DOWNLOAD_DELAY' : 1,}
+    custom_settings = {'DOWNLOAD_DELAY' : 0.5,}
 
     def start_requests(self):
         url = "https://www.target.com.au/store-finder/state/{}"
@@ -39,7 +39,7 @@ class TargetAUSpider(scrapy.Spider):
         hours = hours_node.xpath(".//dd/text()").getall()
         for idx, day in enumerate(days):
             store_hours = hours[idx]
-            if store_hours == "CLOSED":
+            if "–" not in store_hours or ":" not in store_hours:
                 continue
             parts = store_hours.strip().split(" – ")
             open_time = self._parse_hour_str(parts[0])
@@ -51,8 +51,11 @@ class TargetAUSpider(scrapy.Spider):
 
 
     def parse_store(self, response):
-        store_name = response.xpath("//h4/text()").get().replace("Target - ","")
-        address = response.xpath("//span[@itemprop='streetAddress']/text()").get()
+        store_name = response.xpath("//h4/text()").get().replace("Target – ","")
+        address_header = response.xpath("//span[@itemprop='streetAddress']/strong/text()").get()
+        address = " ".join(response.xpath("//span[@itemprop='streetAddress']/text()").getall()).strip()
+        if address_header:
+            address = address_header + " " + address
         locality = response.xpath("//span[@itemprop='addressLocality']/text()").get()
         region = response.xpath("//span[@itemprop='addressRegion']/text()").get()
         post_code = response.xpath("//span[@itemprop='postalCode']/text()").get()
