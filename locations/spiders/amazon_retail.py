@@ -81,14 +81,14 @@ class amazon_retailSpider(CrawlSpider):
                     except Exception:
                         continue
                     if not (j in [':',': '] and j in ':\n') and len(j) < 20:
-                        ok = j.strip(':').strip('\n')
-                        if ok == 'To come':
+                        timings = j.strip(':').strip('\n')
+                        if timings == 'To come':
                             continue
-                        if len(ok) > 12:
-                            if ok[0] == '(':
-                                item["phone"] = ok
-                            elif ok not in '\n' and ok not in ' ':
-                                item["Timings"] = ok
+                        if len(timings) > 12:
+                            if timings[0] == '(':
+                                item["phone"] = timings
+                            elif timings not in '\n' and timings not in ' ':
+                                item["Timings"] = timings
                 if '\n' in add:
                     add = add.replace("\n"," ")
                 div = add.split(',')
