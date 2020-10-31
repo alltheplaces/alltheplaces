@@ -13,7 +13,7 @@ days_want = ["Mo","Tu","We","Th","Fr","Sa","Su"]
 days_dict = {i:n for n,i in enumerate(days_want)}
 days_rev_dict = {n:i for n,i in enumerate(days_want)}
 class AmazonsSpider(CrawlSpider):
-    name = 'Amazons'
+    name = 'amazon_retail'
     allowed_domains = ['amazon.com']
     # start_urls = ['']
     user_agent = (
