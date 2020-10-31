@@ -5,8 +5,6 @@ import  requests
 from locations.items import  GeojsonPointItem
 import re
 
-User_Agent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.157 Safari/537.36"
-
 
 days = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"]
 days_short =["Mon","Tue","Wed","Thur","Fri","Sat","Sun"]
@@ -16,9 +14,8 @@ days_rev_dict = {n:i for n,i in enumerate(days_want)}
 class amazon_retailSpider(CrawlSpider):
     name = 'amazon_retail'
     allowed_domains = ['amazon.com']
-    user_agent = (
-        User_Agent
-    )
+    user_agent = '''Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 
+    (KHTML, like Gecko) Chrome/44.0.2403.157 Safari/537.36'''
 
     def start_requests(self):
         yield  scrapy.Request(
