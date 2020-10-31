@@ -3,6 +3,7 @@ from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 import  requests
 from locations.items import  GeojsonPointItem
+import re
 
 User_Agent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.157 Safari/537.36"
 
@@ -12,16 +13,15 @@ days_short =["Mon","Tue","Wed","Thur","Fri","Sat","Sun"]
 days_want = ["Mo","Tu","We","Th","Fr","Sa","Su"]
 days_dict = {i:n for n,i in enumerate(days_want)}
 days_rev_dict = {n:i for n,i in enumerate(days_want)}
-class AmazonsSpider(CrawlSpider):
+class amazon_retailSpider(CrawlSpider):
     name = 'amazon_retail'
     allowed_domains = ['amazon.com']
-    # start_urls = ['']
     user_agent = (
         User_Agent
     )
 
     def start_requests(self):
-        yield scrapy.Request(
+        yield  scrapy.Request(
             url="https://www.amazon.com/find-your-store/b/?node=17608448011",
             headers={"User-Agent":self.user_agent}
         )
@@ -37,15 +37,19 @@ class AmazonsSpider(CrawlSpider):
         return request
 
     def parse_item(self, response):
+        f = response.url
         item = {}
+        try:
+            item["ref"] = f[re.search(r"ref=",f).start()+4:re.search(r"\?",f).start()]
+        except:
+            item["ref"] = None
         openhours = []
         linker = []
         locations = None
-        phela = None
         name = response.xpath("//h2/text()").get()
         lot_of = response.xpath("//div[@class='bxc-grid__text a-text-left   bxc-grid__text--light']//p")
-        if naam:
-            item["name"] = naam
+        if name:
+            item["name"] = name
         if lot_of:
             for i in lot_of:
                 add = i.xpath("//p/a/text()").get()
