@@ -26,12 +26,8 @@ class amazon_retailSpider(CrawlSpider):
     rules = (
         Rule(LinkExtractor(restrict_xpaths="//p/a"),
              callback='parse_item',
-             follow=True,
-             process_request="set_user_agent"),
+             follow=True),
     )
-    def set_user_agent(self, request):
-        request.headers["User-Agent"] = self.user_agent
-        return request
 
     def parse_item(self, response):
         f = response.url
