@@ -42,7 +42,7 @@ class AmazonsSpider(CrawlSpider):
         linker = []
         locations = None
         phela = None
-        naam = response.xpath("//h2/text()").get()
+        name = response.xpath("//h2/text()").get()
         lot_of = response.xpath("//div[@class='bxc-grid__text a-text-left   bxc-grid__text--light']//p")
         if naam:
             item["name"] = naam
