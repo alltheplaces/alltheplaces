@@ -42,7 +42,7 @@ class BigWSpider(scrapy.Spider):
         cleaned = [a.strip() for a in address]
         street = cleaned[0]
         suburb, state, postcode = tuple(cleaned[1].split('\xa0'))
-        phonenumber = cleaned[2].replace("Ph: ","").strip()
+        phonenumber = cleaned[3].replace("Ph:","").strip()
         return dict(street=street,
                         city=suburb.strip(),
                         state=state.strip(),
@@ -57,13 +57,15 @@ class BigWSpider(scrapy.Spider):
         addresses = self.parse_address(response.xpath("//address/text()").getall())
         lat = response.xpath("//div[@id='map_canvas']/@data-latitude").get()
         lon = response.xpath("//div[@id='map_canvas']/@data-longitude").get()
+        geo = dict(lat=lat, lon=lon)
+        if float(lat) == 0.0 or float(lon) == 0.0:
+            geo = {}
         properties = dict(name=store_name,
-                        lat=lat,
-                        lon=lon,
                         opening_hours=hours,
                         website=response.url,
                         ref=response.url.split("/")[-2],
-                        **addresses)
+                        **addresses,
+                        **geo)
         yield GeojsonPointItem(**properties)
 
 
