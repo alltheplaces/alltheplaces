@@ -1,7 +1,6 @@
 import scrapy
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
-import  requests
 from locations.items import  GeojsonPointItem
 import re
 
@@ -14,8 +13,7 @@ days_rev_dict = {n:i for n,i in enumerate(days_want)}
 class amazon_retailSpider(CrawlSpider):
     name = 'amazon_retail'
     allowed_domains = ['amazon.com']
-    user_agent = '''Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 
-    (KHTML, like Gecko) Chrome/44.0.2403.157 Safari/537.36'''
+    user_agent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.157 Safari/537.36"
 
     def start_requests(self):
         yield  scrapy.Request(
