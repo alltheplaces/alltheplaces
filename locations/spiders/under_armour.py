@@ -10,6 +10,7 @@ from locations.hours import OpeningHours
 
 class UnderArmourSpider(scrapy.Spider):
     name = "under_armour"
+    item_attributes = {'brand': "Under Armour"}
     allowed_domains = ["where2getit.com"]
 
     def start_requests(self):
