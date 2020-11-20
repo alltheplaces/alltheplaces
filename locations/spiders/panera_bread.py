@@ -86,7 +86,7 @@ class PaneraBread(scrapy.Spider):
         return GeojsonPointItem(**props)
 
     def parse_city(self, city_page):
-        locations = city_page.xpath('//h2[@class="c-location-grid-item-title"]').extract()
+        locations = city_page.xpath('//h2[@class="c-location-grid-item-title"]//a[@data-ya-track="businessname"]/@href').extract()
         if len(locations) > 0:
             for loc in locations:
                 yield scrapy.Request(city_page.urljoin(loc), callback=self.parse_location)
