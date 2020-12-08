@@ -35,7 +35,7 @@ class InsomniaCookiesSpider(scrapy.Spider):
         'CONCURRENT_REQUESTS': '1'
     }
 
-    def start_requests(self):
+    def parse(self, response):
         url = URL
 
         headers = {
@@ -46,13 +46,14 @@ class InsomniaCookiesSpider(scrapy.Spider):
             'Referer': 'https://insomniacookies.com/locations',
             'Connection': 'keep-alive',
             'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+            '_token': 'E6o8X3DWy5H5PM3QZnjjPJ0Dn6TiVUNKbVV3gsUb'
         }
 
         for state in STATES:
             form_data = {'state': state}
 
             yield scrapy.http.FormRequest(url=url, method='POST', formdata=form_data, headers=headers,
-                                          callback=self.parse)
+                                          callback=self.parse_stores)
 
     def parse_hours(self, store_data):
         opening_hours = OpeningHours()
@@ -72,7 +73,7 @@ class InsomniaCookiesSpider(scrapy.Spider):
 
         return opening_hours.as_opening_hours()
 
-    def parse(self, response):
+    def parse_stores(self, response):
 
         data = json.loads(response.body_as_unicode())
         stores = data["stores"]
