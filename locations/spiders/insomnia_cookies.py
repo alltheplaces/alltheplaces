@@ -29,7 +29,11 @@ class InsomniaCookiesSpider(scrapy.Spider):
     name = "insomnia_cookies"
     allowed_domains = ['insomniacookies.com']
     start_urls = ['https://insomniacookies.com/locations']
-    download_delay = 0.3
+    download_delay = 5.0
+    custom_settings = {
+        'USER_AGENT': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.86 Safari/537.36',
+        'CONCURRENT_REQUESTS': '1'
+    }
 
     def start_requests(self):
         url = URL
