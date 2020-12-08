@@ -13,10 +13,9 @@ class PFChangsSpider(scrapy.Spider):
 	def parse(self, response):
 		stateurls = response.xpath('.//li[@class="Directory-listItem"]/a/@href').extract()
 		stateurls = [response.urljoin(i) for i in stateurls]
-		statenames = response.xpath('.//li[@class="Directory-listItem"]/a/span/text()').extract()
 		statecount = response.xpath('.//li[@class="Directory-listItem"]/a/@data-count').extract()
 		statecount = [int(i.strip('(').strip(')')) for i in statecount]
-		print(statecount)
+
 		for i in range(len(stateurls)):
 			if statecount[i] > 1:
 				yield scrapy.Request(stateurls[i], callback=self.parse_state)
@@ -26,7 +25,6 @@ class PFChangsSpider(scrapy.Spider):
 	def parse_state(self, response):
 		cityurls = response.xpath('.//li[@class="Directory-listItem"]/a/@href').extract()
 		cityurls = [response.urljoin(i) for i in cityurls]
-		citynames = response.xpath('.//li[@class="Directory-listItem"]/a/span/text()').extract()
 		citycount = response.xpath('.//li[@class="Directory-listItem"]/a/@data-count').extract()
 		citycount = [int(i.strip('(').strip(')')) for i in citycount]
 		for i in range(len(cityurls)):
