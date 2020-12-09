@@ -31,7 +31,7 @@ class SomaSpider(scrapy.Spider):
                 'state': data["attributes"]["state"],
                 'postcode': data["attributes"]["postalCode"],
                 'country': data["attributes"]["countryCode"],
-                'website': 'https://stores.chicos.com/s/' + data["attributes"]["slug"],
+                'website': 'https://stores.soma.com/s/' + data["attributes"]["slug"],
                 'lat': float(data["attributes"]["latitude"]),
                 'lon': float(data["attributes"]["longitude"])
             }
