@@ -15,22 +15,25 @@ class SbarroSpider(scrapy.Spider):
     start_urls = ['https://sbarro.com/locations/?user_search=78749&radius=50000&count=5000']
 
     def parse_store(self, response):
-        data = json.loads(response.xpath(
-            '//script[@type="application/ld+json" and contains(text(), "PostalAddress")]/text()').extract_first(),
-                          strict=False)
-        properties = {
-            'ref': response.meta["ref"],
-            'name': response.xpath('//*[@class="location-name "]/text()').extract_first(),
-            'addr_full': data["address"]["streetAddress"],
-            'city': data["address"]["addressLocality"],
-            'state': data["address"]["addressRegion"],
-            'postcode': data["address"]["postalCode"],
-            'lat': response.meta["lat"],
-            'lon': response.meta["lon"],
-            'website': response.url
-        }
+        try:
+            data = json.loads(response.xpath(
+                '//script[@type="application/ld+json" and contains(text(), "PostalAddress")]/text()').extract_first(),
+                              strict=False)
+            properties = {
+                'ref': response.meta["ref"],
+                'name': response.xpath('//*[@class="location-name "]/text()').extract_first(),
+                'addr_full': data["address"]["streetAddress"],
+                'city': data["address"]["addressLocality"],
+                'state': data["address"]["addressRegion"],
+                'postcode': data["address"]["postalCode"],
+                'lat': response.meta["lat"],
+                'lon': response.meta["lon"],
+                'website': response.url
+            }
 
-        yield GeojsonPointItem(**properties)
+            yield GeojsonPointItem(**properties)
+        except:
+            pass
 
     def parse(self, response):
         store_urls = response.xpath('//*[@class="location-name "]/a/@href').extract()
