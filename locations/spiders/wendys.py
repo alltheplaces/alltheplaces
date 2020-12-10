@@ -22,7 +22,7 @@ class WendysSpider(scrapy.Spider):
     download_delay = 0.5
     download_timeout = 30
     start_urls = (
-        'https://locations.wendys.com',
+        'https://locations.wendys.com/sitemap.xml',
     )
 
     def handle_error(self, failure):
@@ -32,7 +32,7 @@ class WendysSpider(scrapy.Spider):
         name = response.xpath('//h1[@class="HeroBanner-title Heading--lead"]/text()').extract_first()
 
         properties = {
-            'ref': name,
+            'ref': response.url,
             'name': name,
             'addr_full': response.xpath('//meta[@itemprop="streetAddress"]/@content').extract_first(),
             'city': response.xpath('//meta[@itemprop="addressLocality"]/@content').extract_first(),
@@ -48,22 +48,9 @@ class WendysSpider(scrapy.Spider):
 
         yield GeojsonPointItem(**properties)
 
-    def parse_cities(self, response):
-        urls = response.xpath('//a[@class="Teaser-titleLink Link--big"]/@href').extract()
-        for url in urls:
-            yield scrapy.Request(response.urljoin(url), callback=self.parse_stores, errback=self.handle_error)
-
-    def parse_states(self, response):
-        urls = response.xpath('//a[@class="Directory-listLink"]/@href').extract()
-        for url in urls:
-            yield scrapy.Request(response.urljoin(url), callback=self.parse_cities, errback=self.handle_error)
-
-    def parse_countries(self, response):
-        urls = response.xpath('//a[@class="Directory-listLink"]/@href').extract()
-        for url in urls:
-            yield scrapy.Request(response.urljoin(url), callback=self.parse_states, errback=self.handle_error)
-
     def parse(self, response):
-        urls = response.xpath('//a[@class="Directory-listLink"]/@href').extract()
-        for url in urls:
-            yield scrapy.Request(response.urljoin(url), callback=self.parse_countries, errback=self.handle_error)
+        response.selector.remove_namespaces()
+        for url in response.xpath('//url/loc/text()').extract():
+            if url.count('/') >= 6:
+                yield scrapy.Request(url, callback=self.parse_stores)
+
