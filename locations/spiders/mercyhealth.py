@@ -4,7 +4,7 @@ import scrapy
 from locations.items import GeojsonPointItem
 
 
-class VictoriassecretSpider(scrapy.Spider):
+class MercyHealthSpider(scrapy.Spider):
     name = "mercyhealth"
     item_attributes = {'brand': "Mercy Health"}
     allowed_domains = ["www.mercy.com"]
@@ -43,7 +43,7 @@ class VictoriassecretSpider(scrapy.Spider):
                 'phone': store_data["Location"]["Phone"],
                 'lat': float(store_data["Location"]["Latitude"]),
                 'lon': float(store_data["Location"]["Longitude"]),
-                'website':store_data["Location"]["Link"]
+                'website': store_data["Location"]["Link"]
 
             }
 
