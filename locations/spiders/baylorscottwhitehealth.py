@@ -3,7 +3,7 @@ import scrapy
 from locations.items import GeojsonPointItem
 
 
-class baylorscottwhitespider(scrapy.Spider):
+class BaylorScottWhiteSpider(scrapy.Spider):
     name = "baylorscottwhite"
     item_attributes = {'brand': "Baylor Scott & White Health"}
     allowed_domains = ["https://www.bswhealth.com/",
@@ -15,7 +15,7 @@ class baylorscottwhitespider(scrapy.Spider):
     def start_requests(self):
         url = 'https://phyndapi.bswapi.com/V2/Places/GetLocations?&location=30.259317199999998,-97.7393817&distance=100000&LineOfBusiness=BSWH&pageNumber=1&sortSeed=1049&perPage=1000&SortBy=Distance&DocSortBy=NextAvailableAppointment&overrideRules=false'
 
-        HEADERS = {'Referer': 'https://www.bswhealth.com/',
+        headers = {'Referer': 'https://www.bswhealth.com/',
                    'Cookie': 'ARRAffinity=abb1bf08643cf24445e2af4eb0b40e562ee3a33b388db503d33b42e5adafc29f;Path=/;HttpOnly;Secure;Domain=phyndapi.bswapi.com',
                    'Authorization': 'phyndapi.bswapi.com',
                    'x-bsw-clientid': 'BSWHealth.com'}
@@ -24,7 +24,7 @@ class baylorscottwhitespider(scrapy.Spider):
             url,
             self.parse,
             method='GET',
-            headers=HEADERS
+            headers=headers,
         )
 
     def parse(self, response):
@@ -48,6 +48,3 @@ class baylorscottwhitespider(scrapy.Spider):
             }
 
             yield GeojsonPointItem(**properties)
-
-
-
