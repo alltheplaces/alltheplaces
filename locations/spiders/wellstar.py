@@ -115,5 +115,4 @@ class WellStarSpider(scrapy.Spider):
             hours = self.parse_hours(row['WorkingHours'])
             properties['opening_hours'] = hours
 
-
             yield GeojsonPointItem(**properties)
