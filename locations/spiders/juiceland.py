@@ -47,7 +47,7 @@ class JuicelandSpider(scrapy.Spider):
             'lon': long
         }
 
-        hours = self.parse_hours(response.xpath('//*[@itemprop="openingHours"]/@datetime').extract())
+        hours = self.parse_hours(response.xpath('//*[@itemprop="openingHours"]/@content').extract())
 
         if hours:
             properties['opening_hours'] = hours
