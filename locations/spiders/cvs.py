@@ -18,7 +18,7 @@ DAYS = [
 class CVSSpider(scrapy.Spider):
 
     name = "cvs"
-    item_attributes = { 'brand': "CVS" }
+    item_attributes = { 'brand': "CVS", 'brand_wikidata': "Q2078880" }
     allowed_domains = ["www.cvs.com"]
     download_delay = 0.5
     start_urls = (

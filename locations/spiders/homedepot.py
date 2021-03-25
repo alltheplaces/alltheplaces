@@ -7,7 +7,7 @@ from locations.items import GeojsonPointItem
 
 class HomeDepotSpider(scrapy.Spider):
     name = "homedepot"
-    item_attributes = { 'brand': "The Home Depot" }
+    item_attributes = { 'brand': "The Home Depot", 'brand_wikidata': "Q864407" }
     allowed_domains = ["www.homedepot.com"]
     start_urls = (
         'https://www.homedepot.com/l/storeDirectory',

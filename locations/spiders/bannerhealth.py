@@ -7,49 +7,53 @@ from locations.items import GeojsonPointItem
 
 class BannerHealthSpider(scrapy.Spider):
     name = "bannerhealth"
-    item_attributes = { 'brand': "Banner Health" }
+    item_attributes = {'brand': "Banner Health"}
     allowed_domains = ['bannerhealth.com']
     start_urls = (
-        'https://www.bannerhealth.com/bh_sitemap.xml',
+        'https://www.bannerhealth.com/locations?PageNo=ALL',
     )
 
     def parse(self, response):
-        response.selector.remove_namespaces()
-        city_urls = response.xpath('//url/loc/text()').extract()
-        regex = re.compile(r'http(s|)://(www.|)bannerhealth.com/locations/\w+/\S+')
-        for path in city_urls:
-            if re.search(regex, path):
-                yield scrapy.Request(
-                    path.strip(),
-                    callback=self.parse_store,
-                )
+        urls = response.xpath('//div[@class="location-link"][2]/a/@href').extract()
+
+        for url in urls:
+            yield scrapy.Request(response.urljoin(url), callback=self.parse_location)
+
+    def parse_location(self, response):
+        try:
+            locs = response.xpath('//div[@class="text-card-location-image-content"]/p[1]/text()[2]').extract_first()
+            city, state_postalcode = locs.split(',')
+            state_postalcode = state_postalcode.strip()
+            jsondata = json.loads(response.xpath('//div[@data-js="map_canvas-v2"]/@data-map-config').extract_first())
+            data = jsondata["markerList"]
+            name = re.search(r'.+/(.+)', response.xpath('//meta[@property="og:url"]/@content').extract_first()).group(1)
+            ref = re.search(r'.+/(.+)', response.url).group(1)
+
+            if " " in state_postalcode:
+                state, postcode = state_postalcode.split(" ")
+                state = state.strip()
+                postcode = postcode.strip()
             else:
-                pass
+                state = state_postalcode
+                postcode = None
 
-    def parse_store(self, response):
+            for locations in data:
+                location = json.dumps(locations)
+                location_data = json.loads(location)
 
-        if response.xpath('//a[@id="main_1_contentpanel_2_lnkPhone"]/@href').extract_first():
-            phoneNumber = response.xpath('//a[@id="main_1_contentpanel_2_lnkPhone"]/@href').extract_first().replace('%20',' ').replace('tel:','')
-        else:
-            phoneNumber = response.xpath('//a[@id="main_1_contentpanel_2_lnkPhone"]/@href').extract_first()
-
-        regex = re.compile(r'http(s|)://(www.|)bannerhealth.com/locations/\w+/\S+')
-
-        if re.match(regex,response.request.url):
             properties = {
-            'name': response.xpath('//h1/text()').extract_first().strip(),
-            'ref': response.xpath('//h1/text()').extract_first().strip(),
-            'addr_full': response.xpath('//div[@class="address"]/div[@class="hours"]/p/text()').extract_first().strip(),
-            'city': response.xpath('//div[@class="address"]/div[@class="hours"]/p/text()').extract()[1].strip().split(',')[0],
-            'state': response.xpath('//div[@class="address"]/div[@class="hours"]/p/text()').extract()[1].strip().split()[-2],
-            'postcode': response.xpath('//div[@class="address"]/div[@class="hours"]/p/text()').extract()[1].strip().split()[-1],
-            'website': response.request.url,
-            'phone': phoneNumber,
-            # 'lat': float(geodata['store']['latlng']['lat']),
-            # 'lon': float(geodata['store']['latlng']['lng']),
+                'ref': ref,
+                'name': name,
+                'addr_full': response.xpath('//div[@class="text-card-location-image-content"]/p[1]/text()').extract_first(),
+                'city': city,
+                'state': state,
+                'postcode': postcode,
+                'phone': response.xpath('//li[@class="text-card-location-image-content-action-list-item"][1]/a/text()').extract_first().strip(),
+                'lat': float(location_data["Latitude"]),
+                'lon': float(location_data["Longitude"]),
+                'website': response.url
             }
-        else:
+
+            yield GeojsonPointItem(**properties)
+        except:
             pass
-
-
-        yield GeojsonPointItem(**properties)

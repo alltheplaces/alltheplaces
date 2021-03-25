@@ -17,7 +17,7 @@ DAYS={
 
 class ZaxbysSpider(scrapy.Spider):
     name = "zaxbys"
-    item_attributes = { 'brand': "Zaxby's" }
+    item_attributes = { 'brand': "Zaxby's", 'brand_wikidata': "Q8067525" }
     allowed_domains = ["zaxbys.com"]
     start_urls = (
         'https://www.zaxbys.com/locations',

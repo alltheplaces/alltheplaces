@@ -8,7 +8,7 @@ from locations.items import GeojsonPointItem
 
 class TacobellSpider(scrapy.Spider):
     name = "tacobell"
-    item_attributes = { 'brand': "Taco Bell" }
+    item_attributes = { 'brand': "Taco Bell", 'brand_wikidata': "Q752941" }
     allowed_domains = ["locations.tacobell.com"]
     start_urls = ("https://locations.tacobell.com/",)
     download_delay = 0.2
@@ -52,19 +52,21 @@ class TacobellSpider(scrapy.Spider):
         return "; ".join(opening_hours)
 
     def parse_location(self, response):
+        if not response.xpath('//div[@itemprop="department"]'):
+            return
 
-        hours = response.xpath('//div[@class="c-location-hours-details-wrapper js-location-hours"]/@data-days').extract_first()
-        opening_hours = self.normalize_hours(hours)
+        hours = response.xpath('//div[@class="c-hours-details-wrapper js-hours-table"]/@data-days').extract_first()
+        opening_hours = hours and self.normalize_hours(hours)
 
         props = {
-            'addr_full': response.xpath('//span[@itemprop="streetAddress"]/span/text()').extract_first().strip(),
+            'addr_full': response.xpath('//meta[@itemprop="streetAddress"]/@content').extract_first().strip(),
             'lat': float(response.xpath('//meta[@itemprop="latitude"]/@content').extract_first()),
             'lon': float(response.xpath('//meta[@itemprop="longitude"]/@content').extract_first()),
-            'city': response.xpath('//span[@itemprop="addressLocality"]/text()').extract_first(),
+            'city': response.xpath('//meta[@itemprop="addressLocality"]/@content').extract_first(),
             'postcode': response.xpath('//span[@itemprop="postalCode"]/text()').extract_first(),
             'state': response.xpath('//abbr[@itemprop="addressRegion"]/text()').extract_first(),
-            'phone': response.xpath('//span[@class="c-phone-number-span c-phone-main-number-span"]/text()').extract_first(),
-            'ref': response.xpath('//div[@class="nap-content main"]/@data-code').extract_first(),
+            'phone': response.xpath('//div[@itemprop="telephone"]/text()').extract_first(),
+            'ref': response.xpath('//div[@itemprop="department"]/@data-code').extract_first(),
             'website': response.url,
             'opening_hours': opening_hours,
         }
@@ -72,19 +74,17 @@ class TacobellSpider(scrapy.Spider):
         return GeojsonPointItem(**props)
 
     def parse_city_stores(self, response):
-        locations = response.xpath('//a[@class="c-location-grid-item-link"]/@href').extract()
+        yield self.parse_location(response)
+        locations = response.xpath('//a[@class="Teaser-titleLink"]/@href').extract()
 
-        if not locations:
-            yield self.parse_location(response)
-        else:
-            for location in locations:
-                yield scrapy.Request(
-                    url=response.urljoin(location),
-                    callback=self.parse_location
-                )
+        for location in locations:
+            yield scrapy.Request(
+                url=response.urljoin(location),
+                callback=self.parse_location
+            )
 
     def parse_state(self, response):
-        cities = response.xpath('//li[@class="c-directory-list-content-item"]/a/@href').extract()
+        cities = response.xpath('//li[@class="Directory-listItem"]/a/@href').extract()
         for city in cities:
             yield scrapy.Request(
                 response.urljoin(city),
@@ -92,7 +92,14 @@ class TacobellSpider(scrapy.Spider):
             )
 
     def parse(self, response):
-        states = response.xpath('//li[@class="c-directory-list-content-item"]/a/@href').extract()
+        states = response.xpath('//li[@class="Directory-listItem"]/a/@href').extract()
+        # The web site currently special-cases DC by linking directly to the
+        # page for the one store therein, bypassing the state index page.
+        # (This spider will call parse_state on the store page and fail.)
+        # Un-special case this by inserting a link to the state index page
+        # which does in fact exist. Hopefully this is bulletproof if the
+        # web site changes.
+        states.append('dc.html')
 
         for state in states:
             yield scrapy.Request(
