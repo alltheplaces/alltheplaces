@@ -3,117 +3,72 @@ import scrapy
 from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
 
-from urllib.parse import urlencode
+from urllib.parse import urlencode, urlparse
 import json
 from scrapy.selector import Selector
 
 
 DAY_MAPPING = {
-    "Monday": "Mo",
-    "Tuesday": "Tu",
-    "Wednesday": "We",
-    "Thursday": "Th",
-    "Friday": "Fr",
-    "Saturday": "Sa",
-    "Sunday": "Su"
+    "MONDAY": "Mo",
+    "TUESDAY": "Tu",
+    "WEDNESDAY": "We",
+    "THURSDAY": "Th",
+    "FRIDAY": "Fr",
+    "SATURDAY": "Sa",
+    "SUNDAY": "Su",
 }
 
 
 class SubwaySpider(scrapy.Spider):
     name = "subway"
-    item_attributes = { 'brand': "Subway", 'brand_wikidata': "Q244457" }
-    allowed_domains = ["www.subway.com"]
-    download_delay = 2  # limit the delay to 2 seconds to avoid 402 errors
+    item_attributes = {"brand": "Subway", "brand_wikidata": "Q244457"}
+    allowed_domains = ["restaurants.subway.com"]
+    # download_delay = 2  # limit the delay to 2 seconds to avoid 402 errors
+    start_urls = ["https://restaurants.subway.com/"]
 
-    def start_requests(self):
-        url = 'https://locator-svc.subway.com/v3/GetLocations.ashx?'
-
-        with open('./locations/searchable_points/us_centroids_10mile_radius.csv') as points:
-
-            next(points)  # Ignore the header
-            for point in points:
-                _, lat, lon = point.strip().split(',')
-                options = {
-                    "InputText": "",
-                    "Geocode": {
-                        "Latitude": lat,
-
-                        "Longitude": lon
-                    },
-                    "DetectedLocation": {
-                        "Latitude": '0',
-                        "Longitude": '0',
-                        "Accuracy": '0'
-                    },
-                    "Paging": {
-                        "StartIndex": "1",
-                        "PageSize": "50"   #max amount
-                    },
-                    "ConsumerParameters": {
-                        "metric": False,
-                        "culture": "en-US",
-                        "country": "US",
-                        "size": "M",
-                        "template": "",
-                        "rtl": False,
-                        "clientId": "17",
-                        "key": "SUBWAY_PROD"
-                    },
-                    "Filters": [],
-                    "LocationType": 1,
-                    "behavior": "",
-                    "FavoriteStores": None,
-                    "RecentStores": None
-                }
-
-                params = {
-                    "q": json.dumps(options)
-                }
-
-                yield scrapy.http.Request(url + urlencode(params), self.parse)
+    link_extractor = scrapy.linkextractors.LinkExtractor(
+        restrict_css=".Directory-listLinks, .Directory-listTeasers"
+    )
 
     def parse(self, response):
-        result = json.loads(response.text[1:-1])
-        resultJSON = result['ResultData']
-        resultHTML = result['ResultHtml'][2:]
+        for link in self.link_extractor.extract_links(response):
+            yield scrapy.Request(link.url)
 
-        for i, data in enumerate(resultJSON):
-            loc = data['LocationId']
-            store_num = loc['StoreNumber']
-            address = data['Address']
-            html_data = resultHTML[i]  # Access html snippet data, get same index as json data
+        js = response.xpath('//script[@class="js-hours-config"]/text()').get()
+        if js:
+            yield from self.parse_restaurant(json.loads(js))
 
-            properties = {
-                "ref": str(store_num) + '-' + str(loc['SatelliteNumber']),  #Unique ID
-                "lat": float(data['Geo']['Latitude']),
-                "lon": float(data['Geo']['Longitude']),
-                "addr_full": address['Address1'],
-                "city": address['City'],
-                "state": address['StateProvCode'],
-                "country": address['CountryCode'],
-                "postcode": address['PostalCode'],
-                "website": data['OrderingUrl'],
-                "phone": Selector(text=html_data).xpath('//div[contains(@class,"locatorPhone")]/text()').extract_first(),
-                "opening_hours": self.parse_hours(html_data),
-                "extras": {
-                    "number": store_num
-                }
-            }
+    def parse_restaurant(self, js):
+        # Note: Of the five different coordinate fields, this is the one that always exists
+        lat_long = js["profile"]["yextDisplayCoordinate"]
+        website = urlparse(js["profile"]["websiteUrl"])._replace(query="").geturl()
+        properties = {
+            "lat": lat_long["lat"],
+            "lon": lat_long["long"],
+            "ref": js["profile"]["meta"]["id"],
+            "addr_full": js["profile"]["address"]["line1"],
+            "extras": {
+                "addr_suite": js["profile"]["address"]["line2"],
+                # Note: line3 is always null
+                "loc_name": js["profile"]["address"]["extraDescription"],
+            },
+            "city": js["profile"]["address"]["city"],
+            "state": js["profile"]["address"]["region"],
+            "postcode": js["profile"]["address"]["postalCode"],
+            "country": js["profile"]["address"]["countryCode"],
+            "phone": js["profile"].get("mainPhone", {}).get("number"),
+            "opening_hours": self.parse_hours(js["profile"]["hours"]["normalHours"]),
+            "website": website,
+        }
+        yield GeojsonPointItem(**properties)
 
-            yield GeojsonPointItem(**properties)
-
-    def parse_hours(self, data):
-
-        sclass = Selector(text=data)
-        days = sclass.xpath('//div[contains(@class,"hoursTable")]//div[contains(@class, "scheduleDay")]//div[contains(@class, "dayName")]/text()').extract()
-        start_times = sclass.xpath('//div[contains(@class,"hoursTable")]//div[contains(@class, "scheduleDay")]//div[contains(@class, "openTime")]/text()').extract()
-        end_times = sclass.xpath('//div[contains(@class,"hoursTable")]//div[contains(@class, "scheduleDay")]//div[contains(@class, "closeTime")]/text()').extract()
-
+    def parse_hours(self, hours_json):
         opening_hours = OpeningHours()
-        if '-' in start_times or '-' in end_times:
-            return None
-        else:
-            for day, open_time, close_time in zip(days, start_times, end_times):
-                opening_hours.add_range(day=DAY_MAPPING[day], open_time=open_time, close_time=close_time,
-                                        time_format="%I:%M %p")
-            return opening_hours.as_opening_hours()
+        for date in hours_json:
+            day = DAY_MAPPING[date['day']]
+            for interval in date['intervals']:
+                start_hr, start_min = divmod(interval['start'], 100)
+                end_hr, end_min = divmod(interval['end'], 100)
+                opening_hours.add_range(day, f'{start_hr}:{start_min}', f'{end_hr}:{end_min}')
+        return opening_hours.as_opening_hours()
+
