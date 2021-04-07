@@ -48,7 +48,7 @@ class SubwaySpider(scrapy.Spider):
             "ref": js["profile"]["meta"]["id"],
             "addr_full": js["profile"]["address"]["line1"],
             "extras": {
-                "addr_suite": js["profile"]["address"]["line2"],
+                "addr:suite": js["profile"]["address"]["line2"],
                 # Note: line3 is always null
                 "loc_name": js["profile"]["address"]["extraDescription"],
             },
