@@ -3,7 +3,7 @@ import scrapy
 from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
 
-from urllib.parse import urlencode, urlparse
+from urllib.parse import urlparse
 import json
 
 
