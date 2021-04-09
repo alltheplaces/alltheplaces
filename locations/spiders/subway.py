@@ -20,7 +20,7 @@ DAY_MAPPING = {
 
 class SubwaySpider(scrapy.Spider):
     name = "subway"
-    item_attributes = {"brand": "Subway", "brand_wikidata": "Q244457"}
+    item_attributes = {"name": "Subway", "brand": "Subway", "brand_wikidata": "Q244457"}
     allowed_domains = ["restaurants.subway.com"]
     start_urls = ["https://restaurants.subway.com/"]
 
