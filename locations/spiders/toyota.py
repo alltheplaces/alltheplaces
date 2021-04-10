@@ -1,9 +1,10 @@
-# -*-
+# -*- coding: utf-8 -*-
 import json
 import scrapy
 from scrapy.linkextractors import LinkExtractor
 
 from locations.items import GeojsonPointItem
+from locations.hours import OpeningHours
 
 
 class ToyotaSpider(scrapy.Spider):
@@ -50,6 +51,7 @@ class ToyotaSpider(scrapy.Spider):
 
         phone = contact["telephoneCommunication"][0]["completeNumber"]["value"]
         website = contact["uricommunication"][0]["uriid"]["value"]
+        opening_hours = self.parse_hours(info["hoursOfOperation"][0]["daysOfWeek"])
 
         return GeojsonPointItem(
             ref=ref,
@@ -63,5 +65,18 @@ class ToyotaSpider(scrapy.Spider):
             postcode=postcode,
             phone=phone,
             website=website,
+            opening_hours=opening_hours,
         )
 
+    def parse_hours(self, days_of_week_obj):
+        opening_hours = OpeningHours()
+        for x in days_of_week_obj:
+            if "availabilityStartTimeMeasure" not in x:
+                continue
+            day = x["dayOfWeekCode"][:2]
+            open_hr, open_min = divmod(x["availabilityStartTimeMeasure"]["value"], 60)
+            close_hr, close_min = divmod(x["availabilityEndTimeMeasure"]["value"], 60)
+            opening_hours.add_range(
+                day, f"{open_hr}:{open_min:02}", f"{close_hr}:{close_min:02}"
+            )
+        return opening_hours.as_opening_hours()
