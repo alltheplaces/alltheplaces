@@ -51,7 +51,11 @@ class ToyotaSpider(scrapy.Spider):
 
         phone = contact["telephoneCommunication"][0]["completeNumber"]["value"]
         website = contact["uricommunication"][0]["uriid"]["value"]
-        opening_hours = self.parse_hours(info["hoursOfOperation"][0]["daysOfWeek"])
+        opening_hours = (
+            self.parse_hours(info["hoursOfOperation"][0]["daysOfWeek"])
+            if "hoursOfOperation" in info
+            else None
+        )
 
         return GeojsonPointItem(
             ref=ref,
