@@ -64,7 +64,7 @@ class QuiznosSpider(scrapy.Spider):
 
     def parse(self, response):
         data = response.body_as_unicode()
-        stores = json.loads(re.search('storeList\((.*)\)', data).group(1))
+        stores = json.loads(re.search(r'storeList\((.*)\)', data).group(1))
 
         for store in stores:
 

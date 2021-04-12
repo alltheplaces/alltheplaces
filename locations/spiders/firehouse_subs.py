@@ -111,7 +111,7 @@ class FirehouseSubsSpider(scrapy.Spider):
             # Note:
             # - Whitespace is inconsistent
             # - Some stores may have extra information after; e.g., "10:30am - 9:00pm (drive-thru opens 9:30)"
-            regex = re.compile("^\s*(\d{1,2}:\d{2}\s*[a|p]m)\s*-\s*(\d{1,2}:\d{2}\s*[a|p]m)")
+            regex = re.compile(r"^\s*(\d{1,2}:\d{2}\s*[a|p]m)\s*-\s*(\d{1,2}:\d{2}\s*[a|p]m)")
             match = re.search(regex, times)
             if not match or len(match.groups()) != 2:
                 continue

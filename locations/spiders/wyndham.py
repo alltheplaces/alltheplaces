@@ -163,7 +163,7 @@ class WyndhamSpider(scrapy.Spider):
 
     def parse_property(self, response):
         raw_json = re.search(
-            '<script type="application\/ld\+json"\>(.+?)\<',
+            r'<script type="application\/ld\+json"\>(.+?)\<',
             response.text,
             flags=re.DOTALL,
         )

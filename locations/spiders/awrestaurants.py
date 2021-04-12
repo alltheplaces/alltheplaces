@@ -85,7 +85,7 @@ class AwrestaurantsSpider(scrapy.Spider):
             city_state = store.xpath('form/button/div/span[contains(@class, "location-city")]/text()')[0].extract()
             phone = store.xpath('form/button/div/span[contains(@class, "location-phone")]/text()')[0].extract()
             zipcode_param = store.xpath('form/input[@id="zipcode"]/@value')[0].extract()
-            match = re.search('([\w\s]+),\s(\w+)\s(\w+)', city_state)
+            match = re.search(r'([\w\s]+),\s(\w+)\s(\w+)', city_state)
             city, state, postcode = match.groups()
             url = DETAIL_URL.format(zipcode=zipcode_param)
 

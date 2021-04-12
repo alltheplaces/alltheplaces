@@ -16,7 +16,7 @@ class CookoutSpider(scrapy.Spider):
 
     def store_hours(self, store_hours):
         m = re.findall(
-            '<tr><td>(\w*)<\/td><td><time>([0-9: APM-]*)</time></td></tr>',
+            r'<tr><td>(\w*)<\/td><td><time>([0-9: APM-]*)</time></td></tr>',
             store_hours
         )
 

@@ -39,7 +39,7 @@ class CellOnlySpider(scrapy.Spider):
         if not hours: return None
         output = ""
         hours = hours[7:].strip()
-        parts = re.findall("[A-Z\-]+\: (?:[0-9]+\-[0-9]+|Closed)", hours)
+        parts = re.findall(r"[A-Z\-]+\: (?:[0-9]+\-[0-9]+|Closed)", hours)
         for part in parts:
             dayrange, hours = part.split(': ')
             if "Closed" in hours: continue

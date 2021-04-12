@@ -11,13 +11,13 @@ class JusticeSpider(scrapy.Spider):
     start_urls = (
         "https://maps.shopjustice.com/api/getAsyncLocations?template=search&level=search&radius=50000&search=55401",
     )
-    addr2regex = re.compile('^([A-Za-z\ \.]+)\, ([A-Z]+) ([0-9]+)$')
+    addr2regex = re.compile(r'^([A-Za-z\ \.]+)\, ([A-Z]+) ([0-9]+)$')
     def parse(self, response):
         data = json.loads(response.body_as_unicode())
-        stores = data['markers']                            
-        for store in stores:                                 
+        stores = data['markers']
+        for store in stores:
             html = HtmlResponse(
-                url="", 
+                url="",
                 body=store['info'].encode('UTF-8')
             )
 
@@ -41,10 +41,10 @@ class JusticeSpider(scrapy.Spider):
                     unp['city'] = city
                     unp['state'] = state
                     unp['postcode'] = zipcode
-           
-            properties = {}                                                
+
+            properties = {}
             for key in unp:
                 if unp[key]:
                     properties[key] = unp[key]
 
-            yield GeojsonPointItem(**properties)             
+            yield GeojsonPointItem(**properties)
