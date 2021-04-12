@@ -3,9 +3,8 @@ import scrapy
 from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
 
-from urllib.parse import urlencode, urlparse
+from urllib.parse import urlparse
 import json
-from scrapy.selector import Selector
 
 
 DAY_MAPPING = {
@@ -21,9 +20,8 @@ DAY_MAPPING = {
 
 class SubwaySpider(scrapy.Spider):
     name = "subway"
-    item_attributes = {"brand": "Subway", "brand_wikidata": "Q244457"}
+    item_attributes = {"name": "Subway", "brand": "Subway", "brand_wikidata": "Q244457"}
     allowed_domains = ["restaurants.subway.com"]
-    # download_delay = 2  # limit the delay to 2 seconds to avoid 402 errors
     start_urls = ["https://restaurants.subway.com/"]
 
     link_extractor = scrapy.linkextractors.LinkExtractor(
@@ -48,7 +46,7 @@ class SubwaySpider(scrapy.Spider):
             "ref": js["profile"]["meta"]["id"],
             "addr_full": js["profile"]["address"]["line1"],
             "extras": {
-                "addr:suite": js["profile"]["address"]["line2"],
+                "addr:unit": js["profile"]["address"]["line2"],
                 # Note: line3 is always null
                 "loc_name": js["profile"]["address"]["extraDescription"],
             },
@@ -65,10 +63,11 @@ class SubwaySpider(scrapy.Spider):
     def parse_hours(self, hours_json):
         opening_hours = OpeningHours()
         for date in hours_json:
-            day = DAY_MAPPING[date['day']]
-            for interval in date['intervals']:
-                start_hr, start_min = divmod(interval['start'], 100)
-                end_hr, end_min = divmod(interval['end'], 100)
-                opening_hours.add_range(day, f'{start_hr}:{start_min}', f'{end_hr}:{end_min}')
+            day = DAY_MAPPING[date["day"]]
+            for interval in date["intervals"]:
+                start_hr, start_min = divmod(interval["start"], 100)
+                end_hr, end_min = divmod(interval["end"], 100)
+                opening_hours.add_range(
+                    day, f"{start_hr}:{start_min}", f"{end_hr}:{end_min}"
+                )
         return opening_hours.as_opening_hours()
-
