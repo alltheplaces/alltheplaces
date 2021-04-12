@@ -7,8 +7,8 @@ from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
 
 
-class ToyotaSpider(scrapy.Spider):
-    name = "toyota"
+class ToyotaUSSpider(scrapy.Spider):
+    name = "toyota_us"
     item_attributes = {
         "brand": "Toyota",
         "brand_wikidata": "Q53268",
