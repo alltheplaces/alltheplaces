@@ -15,7 +15,7 @@ class ELeclercSpider(scrapy.spiders.SitemapSpider):
         'https://www.e-leclerc.com/sitemap_www_index.xml',
     ]
     sitemap_rules = [
-        ('https:\/\/www\.e-leclerc\.com\/[^\/]+?$', 'parse_location')
+        (r'https:\/\/www\.e-leclerc\.com\/[^\/]+?$', 'parse_location')
     ]
     sitemap_follow = ['/sitemap_section_']
 

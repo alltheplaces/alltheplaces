@@ -31,20 +31,20 @@ class JacksonHewittSpider(scrapy.Spider):
 
         for place in places:
             properties = {
-                'ref': re.search('<OfficeNumber>(.*)<\/OfficeNumber>', place).groups()[0],
-                'addr_full': re.search('<Address1>(.*)<\/Address1>', place).groups()[0],
-                'city': re.search('<City>(.*)<\/City>', place).groups()[0],
-                'state': re.search('<State>(.*)<\/State>', place).groups()[0],
-                'postcode': re.search('<ZipCode>(.*)<\/ZipCode>', place).groups()[0],
+                'ref': re.search(r'<OfficeNumber>(.*)<\/OfficeNumber>', place).groups()[0],
+                'addr_full': re.search(r'<Address1>(.*)<\/Address1>', place).groups()[0],
+                'city': re.search(r'<City>(.*)<\/City>', place).groups()[0],
+                'state': re.search(r'<State>(.*)<\/State>', place).groups()[0],
+                'postcode': re.search(r'<ZipCode>(.*)<\/ZipCode>', place).groups()[0],
                 'country': "US",
-                'lat': re.search('<Latitude>(.*)<\/Latitude>', place).groups()[0],
-                'lon': re.search('<Longitude>(.*)<\/Longitude>', place).groups()[0],
-                'phone': re.search('<Phone>(.*)<\/Phone>', place).groups()[0],
+                'lat': re.search(r'<Latitude>(.*)<\/Latitude>', place).groups()[0],
+                'lon': re.search(r'<Longitude>(.*)<\/Longitude>', place).groups()[0],
+                'phone': re.search(r'<Phone>(.*)<\/Phone>', place).groups()[0],
                 'extras':
                     {
-                        'location_type': re.search('<Seasonal>(.*)<\/Seasonal>', place).groups()[0],
+                        'location_type': re.search(r'<Seasonal>(.*)<\/Seasonal>', place).groups()[0],
                         # Is this a permanent or seasonal location
-                        'type_name': re.search('<TypeName>(.*)<\/TypeName>', place).groups()[0]
+                        'type_name': re.search(r'<TypeName>(.*)<\/TypeName>', place).groups()[0]
                         # Is this a storefront or walmart location
                     }
             }

@@ -45,10 +45,10 @@ class ToysRUsSpider(scrapy.Spider):
                 yield scrapy.Request(url=url, callback=self.parse, headers=default_headers)
 
     def parse(self, response):
-        marker_txt = re.findall(re.compile("markerData.*\}", re.MULTILINE), response.body_as_unicode())
+        marker_txt = re.findall(re.compile(r"markerData.*\}", re.MULTILINE), response.body_as_unicode())
         if not len(marker_txt):
             return
-        markers_json = "{\"" + marker_txt[0]
+        markers_json = r"{\"" + marker_txt[0]
         markers = list(json.loads(markers_json).values())[0]
 
         if not len(markers):

@@ -116,7 +116,7 @@ class LeesFamousRecipeSpider(scrapy.Spider):
             else:
                 countryString = "US"
                 mapUrl = response.xpath("//div[contains(@class,'map-link')]/div/a/@href").extract_first()
-                stateString = re.findall('(?<=\+)(.*?)(?=\+)', mapUrl)[len(re.findall('(?<=\+)(.*?)(?=\+)', mapUrl)) - 2].strip().replace('%2C','')
+                stateString = re.findall(r'(?<=\+)(.*?)(?=\+)', mapUrl)[len(re.findall(r'(?<=\+)(.*?)(?=\+)', mapUrl)) - 2].strip().replace('%2C','')
 
             yield GeojsonPointItem(
                 ref=nameString,

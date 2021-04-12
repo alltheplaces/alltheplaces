@@ -17,9 +17,9 @@ class TemplateSpider(scrapy.Spider):
         for shop in shopList:
             shopPage=shop.xpath('.//span[@class="MoreInfos"]/../@href').get()
             yield scrapy.Request(shopPage,callback=self.parse_shop)
-    
+
     def parse_shop(self,response):
-        ref=re.search('\/([^\/]+)$',response.url).group(1)
+        ref=re.search(r'\/([^\/]+)$',response.url).group(1)
 
         name=response.xpath('.//span[@class="Brand"]/text()').get()
 
@@ -31,7 +31,7 @@ class TemplateSpider(scrapy.Spider):
         postalCode=response.xpath('.//div[@class="StoreInformations"]//span[@itemprop="postalCode"]/text()').get()
         streetAddress=response.xpath('.//div[@class="StoreInformations"]//span[@itemprop="streetAddress"]/text()').get().replace('\n','').replace('\r','').strip()
 
-        streetExtracts=re.search('^(?:(\d+ ?(?:[a-z]|bis|ter)?)(?: ?[-/]? ?(\d+ ?(?:[a-z]|bis|ter)?))? +)?(.+)$',streetAddress,re.IGNORECASE)
+        streetExtracts=re.search(r'^(?:(\d+ ?(?:[a-z]|bis|ter)?)(?: ?[-/]? ?(\d+ ?(?:[a-z]|bis|ter)?))? +)?(.+)$',streetAddress,re.IGNORECASE)
         roadNum=streetExtracts.group(1)
         secondRoadNum=streetExtracts.group(2)
         street=streetExtracts.group(3)

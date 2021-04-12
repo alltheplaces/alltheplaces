@@ -62,7 +62,7 @@ class CandaPostSpider(scrapy.Spider):
             city_state = addr_parts.pop()
             name = addr_parts.pop(0)
             addr = ' '.join(addr_parts)
-            match = re.search('([\w\s]+)\s([A-Z]{2})\s+(\w{3}\s\w{3})', city_state)
+            match = re.search(r'([\w\s]+)\s([A-Z]{2})\s+(\w{3}\s\w{3})', city_state)
             try:
                 city, state, postcode = match.groups()
             except AttributeError:

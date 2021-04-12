@@ -26,8 +26,8 @@ class PKEquipmentSpider(scrapy.Spider):
         ref = re.search(r'.+/(.+?)/?(?:\.html|$)', response.url).group(1)
         data = json.loads(response.xpath('//script[@type="application/ld+json" and contains(text(), "streetAddress")]/text()').extract_first())
         mapdata = response.xpath('//div[@class="clearfix map_equipment"]/script[2]').extract_first()
-        lat = re.search('(?:lat":)(-?\d+\.\d+),.*(?:long":)(-?\d*.\d*)', mapdata).group(1)
-        lon = re.search('(?:lat":)(-?\d+\.\d+),.*(?:long":)(-?\d*.\d*)', mapdata).group(2)
+        lat = re.search(r'(?:lat":)(-?\d+\.\d+),.*(?:long":)(-?\d*.\d*)', mapdata).group(1)
+        lon = re.search(r'(?:lat":)(-?\d+\.\d+),.*(?:long":)(-?\d*.\d*)', mapdata).group(2)
         properties = {
 
             'ref': ref,

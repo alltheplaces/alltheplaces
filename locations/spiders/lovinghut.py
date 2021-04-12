@@ -34,9 +34,9 @@ class LovinghutSpider(scrapy.Spider):
         for store in stores:
             store_url = store.xpath('a/@href')[0].extract()
 
-            address_match = re.search('(.*)\,\s(.*?)$', full_addresses[index])
+            address_match = re.search(r'(.*)\,\s(.*?)$', full_addresses[index])
             address_full, city_state = address_match.groups()
-            match = re.search('([\w\s]+)\s(\w+)\s(\w+)', city_state)
+            match = re.search(r'([\w\s]+)\s(\w+)\s(\w+)', city_state)
             city, state, postcode = match.groups()
 
             props = {

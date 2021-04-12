@@ -79,14 +79,14 @@ class NoodlesAndCompanySpider(scrapy.Spider):
 
     def parse_state(self, response):
         # For counties that have multiple locations, go to a county page listing, and go to each individual location from there.
-        for county_url in response.xpath('//a[@class="c-directory-list-content-item-link"]/@href').re('(^[^\/]+\/[^\/]+$)'):
+        for county_url in response.xpath('//a[@class="c-directory-list-content-item-link"]/@href').re(r'(^[^\/]+\/[^\/]+$)'):
             yield scrapy.Request(
                 response.urljoin(county_url),
                 callback=self.parse_county,
             )
 
         # For counties that have only one location, go directly to that location page.
-        for location_url in response.xpath('//a[@class="c-directory-list-content-item-link"]/@href').re('(^[^\/]+\/[^\/]+\/.+$)'):
+        for location_url in response.xpath('//a[@class="c-directory-list-content-item-link"]/@href').re(r'(^[^\/]+\/[^\/]+\/.+$)'):
             yield scrapy.Request(
                 response.urljoin(location_url),
                 callback=self.parse_location,

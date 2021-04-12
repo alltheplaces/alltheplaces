@@ -37,7 +37,7 @@ class PublixSpider(scrapy.Spider):
 
     def parse_store(self, response):
 
-        if "CLOSED" is response.xpath('//span[@class="store-status"]/text()').extract_first():
+        if "CLOSED" == response.xpath('//span[@class="store-status"]/text()').extract_first():
             storeHours = 'STORE CLOSED'
 
         else:

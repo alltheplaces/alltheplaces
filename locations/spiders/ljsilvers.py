@@ -16,11 +16,11 @@ class LjsilversSpider(scrapy.Spider):
 
     def parse(self, response):
         data = response.body_as_unicode()
-        base_data = re.search('dataout\s--Array\s\((.*)\)\s\s--><style type="text/css">', data, re.DOTALL).group(1)
-        detail_matches = re.findall('\((.*?)\)', base_data, re.DOTALL)
+        base_data = re.search(r'dataout\s--Array\s\((.*)\)\s\s--><style type="text/css">', data, re.DOTALL).group(1)
+        detail_matches = re.findall(r'\((.*?)\)', base_data, re.DOTALL)
 
         for detail_match in detail_matches:
-            key_values = re.findall('(.*?)\s=>\s(.*)', detail_match)
+            key_values = re.findall(r'(.*?)\s=>\s(.*)', detail_match)
             props = {}
 
             for key_value in key_values:

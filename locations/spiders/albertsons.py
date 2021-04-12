@@ -87,7 +87,7 @@ class AlbertsonsSpider(scrapy.Spider):
     def parse_state(self, response):
         urls = response.xpath('//div[@class="c-directory-list-content-wrapper"]/ul/li/a/@href').extract()
         for path in urls:
-            pattern = re.compile("^[a-z]{2}\/[^()]+\/[^()]+.html$")
+            pattern = re.compile(r"^[a-z]{2}\/[^()]+\/[^()]+.html$")
             if (pattern.match(path.strip())):
                 yield scrapy.Request(response.urljoin(path), callback=self.parse_stores)
             else:
@@ -97,7 +97,7 @@ class AlbertsonsSpider(scrapy.Spider):
         urls = response.xpath('//div[@class="c-directory-list-content-wrapper"]/ul/li/a/@href').extract()
         for path in urls:
             pattern = re.compile("^[a-z]{2}.html$")
-            pattern1 = re.compile("^[a-z]{2}\/[^()]+\/[^()]+.html$")
+            pattern1 = re.compile(r"^[a-z]{2}\/[^()]+\/[^()]+.html$")
             if(pattern.match(path.strip())):
                yield scrapy.Request(response.urljoin(path), callback=self.parse_state)
             elif(pattern1.match(path.strip())):

@@ -27,7 +27,7 @@ class KristoilSpider(scrapy.Spider):
         )
 
     def parse(self, response):
-        phoneregex = re.compile('^<a.+>([0-9\-]+)<\/a>$')
+        phoneregex = re.compile(r'^<a.+>([0-9\-]+)<\/a>$')
         stores = json.loads(response.body_as_unicode())
         for key , value in stores.items():
             all_address = value['address'].split(',')

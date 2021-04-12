@@ -33,7 +33,7 @@ class AllstateInsurnceAgentsSpider(scrapy.Spider):
             'city': response.xpath('normalize-space(//meta[@itemprop="addressLocality"]/@content)').extract_first(),
             'state': response.xpath('normalize-space(//abbr[@itemprop="addressRegion"]/text())').extract_first(),
             'postcode': response.xpath('normalize-space(//span[@itemprop="postalCode"]/text())').extract_first(),
-            'ref': re.findall('[^\/]+$', response.url)[0].split('.')[0],
+            'ref': re.findall(r'[^\/]+$', response.url)[0].split('.')[0],
             'website': response.xpath('//link[@rel="canonical"]/@href').extract_first(),
             'lat': float(response.xpath('normalize-space(//meta[@name="geo.position"]/@content)').extract_first().split(';')[0]),
             'lon': float(response.xpath('normalize-space(//meta[@name="geo.position"]/@content)').extract_first().split(';')[1])
