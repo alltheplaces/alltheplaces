@@ -53,7 +53,7 @@ class ingles(scrapy.Spider):
 
     def parse(self, response):
         for store in response.xpath('//markers/marker'):
-            ids = store.xpath('./@id').get(),
+            ids = str(store.xpath('./@id').get()),
             name = store.xpath('./@name').get()
             addr = store.xpath('./@address').get()
             city = store.xpath('./@city').get()
@@ -67,7 +67,7 @@ class ingles(scrapy.Spider):
                     response.urljoin(store_url),
                     callback=self.parse_store,
                     meta={
-                        'ref': ids,
+                        'ref': id,
                         'name': name,
                         'addr_full': addr,
                         'city': city,
