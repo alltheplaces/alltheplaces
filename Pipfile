@@ -13,4 +13,4 @@ scrapy = "*"
 pygithub = "*"
 python-json-logger = "*"
 xlrd = "*"
-
+boto3 = "*"
