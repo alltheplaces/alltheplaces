@@ -18,8 +18,7 @@ class ingles(scrapy.Spider):
 
     def start_requests(self):
         for state in STORE_STATES:
-            url = ''.join([URL, state])
-            yield scrapy.Request(url, callback=self.parse)
+            yield scrapy.Request(URL + state, callback=self.parse)
 
     def parse_hours(self, hours):
         opening_hours = OpeningHours()
