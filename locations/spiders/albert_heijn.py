@@ -30,4 +30,4 @@ class AlbertHeijnSpider(scrapy.Spider):
                 ref=store['no'],
                 country="Netherlands",
                 website="https://www.ah.nl/winkel/albert-heijn/%s/%s/%s" % (store['city'], store['street'], store['no'])
-                )
+            )
