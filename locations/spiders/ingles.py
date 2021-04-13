@@ -61,9 +61,8 @@ class ingles(scrapy.Spider):
             longs = store.xpath('./@lng').get()
 
             for id in ids:
-                store_url = 'https://www.ingles-markets.com/storelocate/storeinfo.php?storenum=' + id
                 yield scrapy.Request(
-                    response.urljoin(store_url),
+                    'https://www.ingles-markets.com/storelocate/storeinfo.php?storenum=' + id,
                     callback=self.parse_store,
                     meta={
                         'ref': id,
