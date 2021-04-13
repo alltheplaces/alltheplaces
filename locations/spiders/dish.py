@@ -37,7 +37,7 @@ class DishSpider(scrapy.Spider):
 
             properties = {
                 'ref': store["address"],
-                'addr_full': ["address"],
+                'addr_full': store["address"],
                 'lat': store["lat"],
                 'lon': store["lng"],
                 'name': store["storename"],
