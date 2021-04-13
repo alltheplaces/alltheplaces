@@ -52,7 +52,7 @@ class ingles(scrapy.Spider):
 
     def parse(self, response):
         for store in response.xpath('//markers/marker'):
-            ids = str(store.xpath('./@id').get()),
+            ids =store.xpath('./@id').extract_first(),
             name = store.xpath('./@name').get()
             addr = store.xpath('./@address').get()
             city = store.xpath('./@city').get()
