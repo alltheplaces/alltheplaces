@@ -13,6 +13,8 @@ class CoenMarketsSpider(scrapy.Spider):
 
     def parse(self, response):
         for location in response.json()["locations"]:
+            if not location:
+                continue
             url_title = location["url_title"]
             # Note: embedded in an iframe; not useful as item's website
             store_url = f"https://coen1923.com/locations/location/{url_title}"
