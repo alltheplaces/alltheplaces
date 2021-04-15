@@ -37,7 +37,7 @@ class TargetSpider(scrapy.Spider):
                 continue  # closed or no time range given
 
     def parse_store(self, response):
-        data = response.xpath('//script[@type="application/ld+json"]/text()').extract_first()
+        data = response.xpath('//script[@type="application/ld+json"]/text()').re_first('.*')
         if data:
             data = json.loads(data)
         else:
