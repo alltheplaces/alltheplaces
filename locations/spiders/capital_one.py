@@ -73,7 +73,7 @@ class CapitalOneSpider(scrapy.Spider):
                     'lat': location["latitude"],
                     'lon': location["longitude"],
                     'phone': location["phoneNumber"],
-                    'website': '/'.join(['https://locations.capitalone.com/bank/', location["address"]["stateCode"],
+                    'website': '/'.join(['https://locations.capitalone.com/bank', location["address"]["stateCode"],
                                          location["slug"]]),
                     'extras': {'location_type': location["locType"]}
                 }
