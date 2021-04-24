@@ -64,7 +64,6 @@ class DmSpider(scrapy.Spider):
                     'lon': store['location']['lon'],
                 }
                 hours = self.parse_hours(store['openingHours'])
-                
                 if hours:
                     properties["opening_hours"] = hours
 
