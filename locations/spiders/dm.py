@@ -37,6 +37,7 @@ class DmSpider(scrapy.Spider):
             day = DAY_MAPPING[store_day.get("weekDay")]
             open_time = store_day['timeRanges'][0]['opening']
             close_time = store_day['timeRanges'][0]['closing']
+
             if open_time is None and close_time is None:
                 continue
             opening_hours.add_range(day=day,
@@ -63,7 +64,7 @@ class DmSpider(scrapy.Spider):
                     'lon': store['location']['lon'],
                 }
                 hours = self.parse_hours(store['openingHours'])
-
+                
                 if hours:
                     properties["opening_hours"] = hours
 

@@ -17,7 +17,7 @@ class SweetTomatoesSpider(scrapy.Spider):
 
     def store_hours(self, store_hours):
         m = re.findall(
-            '<tr><td>(\w*)<\/td><td><time>([0-9: -]*)</time></td></tr>',
+            r'<tr><td>(\w*)<\/td><td><time>([0-9: -]*)</time></td></tr>',
             store_hours
         )
         day_groups = []

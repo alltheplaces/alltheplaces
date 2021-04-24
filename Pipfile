@@ -5,13 +5,12 @@ name = "pypi"
 
 [dev-packages]
 awscli = "*"
-"boto3" = "*"
+boto3 = "*"
 pylint = "*"
 
 [packages]
 scrapy = "*"
 pygithub = "*"
 python-json-logger = "*"
-
-[requires]
-python_version = "3.7"
+xlrd = "*"
+boto3 = "*"

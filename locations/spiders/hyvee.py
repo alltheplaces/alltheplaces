@@ -148,20 +148,20 @@ class HyVeeSpider(scrapy.Spider):
                 if matching_days:
                     for k, v in actions.items():
                         all_closed_actions = "|".join(v)
-                        reg_str = r"" + vday + ".*(" + all_closed_actions + ")\s?" \
+                        reg_str = r"" + vday + ".*(" + all_closed_actions + r")\s?" \
                                   r"(\d{1,2})\s(a\.m\.|p\.m\.)(?:\son\s(\w{3}\s\d{1,2}))?"
                         match = re.search(reg_str, matching_days[0], re.IGNORECASE)
                         if match:
                             m = match.groups()
                             result.append(day + " " + k + ": " + str(int(m[1]) + self.am_pm(m[1], m[2])) + ":00")
                         else:
-                            reg_str = r"(" + all_closed_actions + ")\s?(\d{1,2})\s(a\.m\.|p\.m\.)\s?(" + vday + ")"
+                            reg_str = r"(" + all_closed_actions + r")\s?(\d{1,2})\s(a\.m\.|p\.m\.)\s?(" + vday + ")"
                             match = re.search(reg_str, matching_days[0], re.IGNORECASE)
                             if match:
                                 m = match.groups()
                                 result.append(day + " " + k + ": " + str(int(m[1]) + self.am_pm(m[1], m[2])) + ":00")
                             else:
-                                reg_str = r"(" + all_closed_actions + ")\s?(\d{1,2})\s(a\.m\.|p\.m\.)\s?(" + vday + ")"
+                                reg_str = r"(" + all_closed_actions + r")\s?(\d{1,2})\s(a\.m\.|p\.m\.)\s?(" + vday + ")"
                                 match = re.search(reg_str, matching_days[0], re.IGNORECASE)
                                 if match:
                                     m = match.groups()

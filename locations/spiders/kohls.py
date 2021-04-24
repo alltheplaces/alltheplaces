@@ -8,7 +8,7 @@ from locations.items import GeojsonPointItem
 class KohlsSpider(scrapy.Spider):
 
     name = "kohls"
-    item_attributes = { 'brand': "Kohl's" }
+    item_attributes = { 'brand': "Kohl's", 'brand_wikidata': "Q967265" }
     download_delay = 1.5
     allowed_domains = ["www.kohls.com"]
     start_urls = (

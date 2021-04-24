@@ -137,7 +137,7 @@ class AshleyHomeStoreSpider(scrapy.Spider):
             coords[id] = {"lat": float(lat), "lon": float(lon)}
 
         for store in store_list:
-            id = store.xpath('./@onmouseover').re_first('\((.*)\)')
+            id = store.xpath('./@onmouseover').re_first(r'\((.*)\)')
             name = store.xpath('.//span[@class="name"]/text()').extract_first().strip()
             name = re.sub(r'\(\d+\)', '', name).strip()
 

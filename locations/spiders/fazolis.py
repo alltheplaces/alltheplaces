@@ -8,7 +8,7 @@ from locations.items import GeojsonPointItem
 class FazolisSpider(scrapy.Spider):
 
     name = "fazolis"
-    item_attributes = { 'brand': "Fazoli's" }
+    item_attributes = { 'brand': "Fazoli's", 'brand_wikidata': "Q1399195" }
     allowed_domains = ["locations.fazolis.com"]
     start_urls = (
         'https://locations.fazolis.com/',
@@ -104,7 +104,7 @@ class FazolisSpider(scrapy.Spider):
         # Single store in a city means store info is in this page
         else:
             yield self.store_info(city)
-    
+
     # Once per state, gets cities.
     def parse_state(self, state):
         cities = state.xpath('//ul[@class="c-directory-list-content"]/li/a/@href').extract()
@@ -126,12 +126,12 @@ class FazolisSpider(scrapy.Spider):
         # Single store in a state means store info is in this page:
         else:
             yield self.store_info(state)
-    
+
     # Initial request, gets states.
     def parse(self, response):
         states = response.xpath('//ul[@class="c-directory-list-content"]/li/a/@href').extract()
         for state in states:
             yield scrapy.Request(
-                response.urljoin(state), 
+                response.urljoin(state),
                 callback=self.parse_state
             )

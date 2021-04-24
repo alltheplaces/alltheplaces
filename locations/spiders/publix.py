@@ -7,7 +7,7 @@ from locations.items import GeojsonPointItem
 
 class PublixSpider(scrapy.Spider):
     name = "publix"
-    item_attributes = { 'brand': "Publix" }
+    item_attributes = { 'brand': "Publix", 'brand_wikidata': "Q672170" }
     allowed_domains = ['publix.com']
     start_urls = (
         'http://weeklyad.publix.com/Publix/Entry/Locations/',
@@ -37,7 +37,7 @@ class PublixSpider(scrapy.Spider):
 
     def parse_store(self, response):
 
-        if "CLOSED" is response.xpath('//span[@class="store-status"]/text()').extract_first():
+        if "CLOSED" == response.xpath('//span[@class="store-status"]/text()').extract_first():
             storeHours = 'STORE CLOSED'
 
         else:

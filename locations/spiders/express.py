@@ -70,8 +70,8 @@ class ExpressSpider(scrapy.Spider):
     def parse(self, response):
         urls = response.xpath('//li[@class="Directory-listItem"]/a/@href').extract()
         for path in urls:
-            pattern = re.compile("^[a-z]{2}\/[^()\/]+$")
-            pattern1 = re.compile("^[a-z]{2}\/[^()]+\/[^()]+\/[^()]+$")
+            pattern = re.compile(r"^[a-z]{2}\/[^()\/]+$")
+            pattern1 = re.compile(r"^[a-z]{2}\/[^()]+\/[^()]+\/[^()]+$")
             if (pattern.match(path.strip('./'))):
                 yield scrapy.Request(response.urljoin(path))
             elif (pattern1.match(path.strip('./'))):

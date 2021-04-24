@@ -12,7 +12,7 @@ day_map = {'MONDAY': 'Mo', 'TUESDAY': 'Tu', 'WEDNESDAY': 'We', 'THURSDAY': 'Th',
 class PapaJohnsSpider(scrapy.Spider):
 
     name = "papa_johns"
-    item_attributes = { 'brand': "Papa John's Pizza" }
+    item_attributes = { 'brand': "Papa John's Pizza", 'brand_wikidata': "Q2759586" }
     allowed_domains = ["papajohns.com", ]
 
     start_urls = (

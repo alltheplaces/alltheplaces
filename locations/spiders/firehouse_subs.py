@@ -18,7 +18,7 @@ DAY_MAPPING = {
 
 class FirehouseSubsSpider(scrapy.Spider):
     name = "firehouse_subs"
-    item_attributes = { 'brand': "Firehouse Subs" }
+    item_attributes = { 'brand': "Firehouse Subs", 'brand_wikidata': "Q5451873" }
     allowed_domains = ["firehousesubs.com"]
 
     def start_requests(self):
@@ -111,7 +111,7 @@ class FirehouseSubsSpider(scrapy.Spider):
             # Note:
             # - Whitespace is inconsistent
             # - Some stores may have extra information after; e.g., "10:30am - 9:00pm (drive-thru opens 9:30)"
-            regex = re.compile("^\s*(\d{1,2}:\d{2}\s*[a|p]m)\s*-\s*(\d{1,2}:\d{2}\s*[a|p]m)")
+            regex = re.compile(r"^\s*(\d{1,2}:\d{2}\s*[a|p]m)\s*-\s*(\d{1,2}:\d{2}\s*[a|p]m)")
             match = re.search(regex, times)
             if not match or len(match.groups()) != 2:
                 continue

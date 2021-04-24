@@ -58,7 +58,7 @@ def opening_hours(datestring):
                     mil_hrs.append("")
 
             def fmt(period, first=0):
-                if period is not "":
+                if period != "":
                     if not first:
                         period = ", " + period
                 period = period.replace(" - ", "-").replace(" -", "-").replace(".", "").replace(':', ' ').replace("  ", " ")

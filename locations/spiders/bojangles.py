@@ -65,12 +65,14 @@ class BojanglesSpider(scrapy.Spider):
         return opening_hours
 
     def parse_store(self, response):
+        store_number = response.xpath('//div[@class="Nap-corporateCode"]/text()').re_first(r'Restaurant #(\d+)')
+
         properties = {
             'addr_full': response.xpath('//span[@itemprop="streetAddress"]/span/text()').extract_first(),
             'city': response.xpath('//span[@itemprop="addressLocality"]/text()').extract_first(),
             'state': response.xpath('//abbr[@itemprop="addressRegion"]/text()').extract_first(),
             'postcode': response.xpath('//span[@itemprop="postalCode"]/text()').extract_first().strip(),
-            'ref': response.url,
+            'ref': store_number,
             'website': response.url,
             'lon': float(response.xpath('//span/meta[@itemprop="longitude"]/@content').extract_first()),
             'lat': float(response.xpath('//span/meta[@itemprop="latitude"]/@content').extract_first()),
@@ -88,15 +90,19 @@ class BojanglesSpider(scrapy.Spider):
 
         yield GeojsonPointItem(**properties)
 
+    def parse_city_stores(self, response):
+        urls = response.xpath('//a[@class="TeaserHeader-titleName"]/@href').extract()
+        for path in urls:
+            yield scrapy.Request(response.urljoin(path), callback=self.parse_store)
+
     def parse(self, response):
         urls = response.xpath('//a[@class="c-directory-list-content-item-link"]/@href').extract()
         for path in urls:
             if len(path.split('/')) > 2:
                 # If there's only one store, the URL will be longer than <state code>.html
                 yield scrapy.Request(response.urljoin(path), callback=self.parse_store)
+            elif len(path.split('/')) == 2:
+                # multiple stores in city
+                yield scrapy.Request(response.urljoin(path), callback=self.parse_city_stores)
             else:
                 yield scrapy.Request(response.urljoin(path))
-
-        urls = response.xpath('//a[@class="c-location-grid-item-link"]/@href').extract()
-        for path in urls:
-            yield scrapy.Request(response.urljoin(path), callback=self.parse_store)

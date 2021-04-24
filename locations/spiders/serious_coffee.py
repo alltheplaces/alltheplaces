@@ -97,7 +97,7 @@ class SeriousCoffeeSpider(scrapy.Spider):
             'city': city,
             'state':state,
             'postcode': postcode,
-            'ref': re.findall('com\/[^(\/)]+' ,response.url)[0][4:],
+            'ref': re.findall(r'com\/[^(\/)]+' ,response.url)[0][4:],
             'website':response.url,
             'lat': latitude,
             'lon': longitude,
