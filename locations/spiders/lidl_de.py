@@ -48,6 +48,7 @@ class LidlDESpider(scrapy.Spider):
         return opening_hours.as_opening_hours()
 
     def parse_details(self, response):
+        properties = {}
         if response.status == 200:
             json_data = re.search(r'salePoints = eval\((.*?)\);', response.text)
             if json_data:
@@ -83,4 +84,5 @@ class LidlDESpider(scrapy.Spider):
             for city in cities:
                 logging.info(f"Processing for url {city}")
                 city = f"https://www.lidl.de{city}"
+
                 yield scrapy.Request(url=city, callback=self.parse_details)
