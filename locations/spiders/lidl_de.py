@@ -23,6 +23,7 @@ class LidlDESpider(scrapy.Spider):
     name = "lidl_de"
     item_attributes = {'brand': 'Lidl', 'brand_wikidata': "Q151954"}
     allowed_domains = ['lidl.de']
+    download_delay = 2
     start_urls = [
         'https://www.lidl.de/de/filialsuche/s940'
     ]
@@ -46,7 +47,7 @@ class LidlDESpider(scrapy.Spider):
         return opening_hours.as_opening_hours()
 
     def parse_details(self, response):
-        json_data = re.search(r'salePoints = eval\((.*?)\)', response.text)
+        json_data = re.search(r'salePoints = eval\((.*?)\);', response.text)
         if json_data:
             json_data = json.loads(json_data.groups(1)[0])
             for store in json_data:
