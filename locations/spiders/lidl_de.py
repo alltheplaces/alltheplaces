@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import json
 import re
+import logging
 
 import scrapy
 
@@ -8,37 +9,75 @@ from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
 
 
+DAY_MAPPING = {
+   'Mo': 'Mo',
+   'Di': 'Tu',
+   'Mi': 'We',
+   'Do': 'Th',
+   'Fr': 'Fr',
+   'Sa': 'Sa',
+   'So': 'Su'
+}
+
 class LidlDESpider(scrapy.Spider):
     name = "lidl_de"
     item_attributes = {'brand': 'Lidl', 'brand_wikidata': "Q151954"}
-    allowed_domains = ['virtualearth.net']
+    allowed_domains = ['lidl.de']
     start_urls = [
-        'https://spatial.virtualearth.net/REST/v1/data/ab055fcbaac04ec4bc563e65ffa07097/Filialdaten-SEC/Filialdaten-SEC?$filter=Adresstyp%20Eq%201&$top=250&$format=json&$skip=0&key=AvmZsSXvHn2vR2mEhiF9bQ5yJHzwt2Fa1XNUUJr-lOKims2EKIBYnDvunZ6crsyE&Jsonp=displayResultStores'
+        'https://www.lidl.de/de/filialsuche/s940'
     ]
-    download_delay = 1
+
+    def parse_hours(self, store_hours):
+        opening_hours = OpeningHours()
+        if store_hours is None:
+            return
+
+        for store_day in store_hours:
+            day, hours = store_day.split(' ')
+            match = re.match(r'(\d\d:\d\d)-(\d\d:\d\d)', hours)
+            if match:
+                opening_hours.add_range(
+                    day=DAY_MAPPING[day],
+                    open_time=match.group(1),
+                    close_time=match.group(2),
+                    time_format='%H:%M'
+                )
+
+        return opening_hours.as_opening_hours()
+
+    def parse_details(self, response):
+        json_data = re.search(r'salePoints = eval\((.*?)\)', response.text)
+        if json_data:
+            json_data = json.loads(json_data.groups(1)[0])
+            for store in json_data:
+                if store['country'] == 'DE':
+                    properties = {
+                        'country': store['country'],
+                        'ref': store['HOUSENUMBER'],
+                        'name': store['name'],
+                        'street': store['STREET'],
+                        'postcode': store['ZIPCODE'],
+                        'city': store['CITY'],
+                        'lat': store['Y'],
+                        'lon': store['X'],
+                    }
+                    hours = self.parse_hours(
+                        store['parsedopeningTimes']['regular']
+                    )
+                    if hours:
+                        properties["opening_hours"] = hours
+
+                    yield GeojsonPointItem(**properties)
 
     def parse(self, response):
-        data = json.loads(re.search(r'displayResultStores\((.*)\)', response.body_as_unicode()).groups()[0])
+        # Read all provinces
+        province = response.xpath('//dl[@class="store-listing"]')
 
-        stores = data['d']['results']
+        # Read cities in each province
+        for p in province:
+            cities = p.xpath('//dd/a/@href').getall()
 
-        for store in stores:
-            properties = {
-                'name': store["ShownStoreName"],
-                'ref': store["EntityID"],
-                'addr_full': store["AddressLine"],
-                'city': store["Locality"],
-                'postcode': store["PostalCode"],
-                'country': store["CountryRegion"],
-                'lat': float(store["Latitude"]),
-                'lon': float(store["Longitude"]),
-            }
-
-            yield GeojsonPointItem(**properties)
-
-        if stores:
-            i = int(re.search(r'\$skip=(\d+)&', response.url).groups()[0])
-            url_parts = response.url.split('$skip={}'.format(i))
-            i += 250
-            url = "$skip={}".format(i).join(url_parts)
-            yield scrapy.Request(url=url)
+            for city in cities:
+                logging.info(f"Processing for url {city}")
+                city = f"https://www.lidl.de{city}"
+                yield scrapy.Request(url=city, callback=self.parse_details)
