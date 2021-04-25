@@ -19,11 +19,12 @@ DAY_MAPPING = {
    'So': 'Su'
 }
 
+
 class LidlDESpider(scrapy.Spider):
     name = "lidl_de"
     item_attributes = {'brand': 'Lidl', 'brand_wikidata': "Q151954"}
     allowed_domains = ['lidl.de']
-    download_delay = 2
+    handle_httpstatus_list = [404]
     start_urls = [
         'https://www.lidl.de/de/filialsuche/s940'
     ]
@@ -47,28 +48,29 @@ class LidlDESpider(scrapy.Spider):
         return opening_hours.as_opening_hours()
 
     def parse_details(self, response):
-        json_data = re.search(r'salePoints = eval\((.*?)\);', response.text)
-        if json_data:
-            json_data = json.loads(json_data.groups(1)[0])
-            for store in json_data:
-                if store['country'] == 'DE':
-                    properties = {
-                        'country': store['country'],
-                        'ref': store['HOUSENUMBER'],
-                        'name': store['name'],
-                        'street': store['STREET'],
-                        'postcode': store['ZIPCODE'],
-                        'city': store['CITY'],
-                        'lat': store['Y'],
-                        'lon': store['X'],
-                    }
-                    hours = self.parse_hours(
-                        store['parsedopeningTimes']['regular']
-                    )
-                    if hours:
-                        properties["opening_hours"] = hours
+        if response.status == 200:
+            json_data = re.search(r'salePoints = eval\((.*?)\);', response.text)
+            if json_data:
+                json_data = json.loads(json_data.groups(1)[0])
+                for store in json_data:
+                    if store['country'] == 'DE':
+                        properties = {
+                            'country': store['country'],
+                            'ref': store['HOUSENUMBER'],
+                            'name': store['name'],
+                            'street': store['STREET'],
+                            'postcode': store['ZIPCODE'],
+                            'city': store['CITY'],
+                            'lat': store['Y'],
+                            'lon': store['X'],
+                        }
+                        hours = self.parse_hours(
+                            store['parsedopeningTimes']['regular']
+                        )
+                        if hours:
+                            properties["opening_hours"] = hours
 
-                    yield GeojsonPointItem(**properties)
+                        yield GeojsonPointItem(**properties)
 
     def parse(self, response):
         # Read all provinces
