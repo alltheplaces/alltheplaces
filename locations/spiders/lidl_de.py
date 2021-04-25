@@ -46,6 +46,7 @@ class LidlDESpider(scrapy.Spider):
         return opening_hours.as_opening_hours()
 
     def parse_details(self, response):
+        properties = {}
         json_data = re.search(r'salePoints = eval\((.*?)\)', response.text)
         if json_data:
             json_data = json.loads(json_data.groups(1)[0])
@@ -67,7 +68,7 @@ class LidlDESpider(scrapy.Spider):
                     if hours:
                         properties["opening_hours"] = hours
 
-                    yield GeojsonPointItem(**properties)
+        yield GeojsonPointItem(**properties)
 
     def parse(self, response):
         # Read all provinces
