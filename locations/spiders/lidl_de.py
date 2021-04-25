@@ -57,7 +57,7 @@ class LidlDESpider(scrapy.Spider):
                     if store['country'] == 'DE':
                         properties = {
                             'country': store['country'],
-                            'ref': store['HOUSENUMBER'],
+                            'ref': store['ID'],
                             'name': store['name'],
                             'street': store['STREET'],
                             'postcode': store['ZIPCODE'],
