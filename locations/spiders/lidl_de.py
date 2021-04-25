@@ -62,8 +62,8 @@ class LidlDESpider(scrapy.Spider):
                             'street': store['STREET'],
                             'postcode': store['ZIPCODE'],
                             'city': store['CITY'],
-                            'lat': store['Y'],
-                            'lon': store['X'],
+                            'lat': store['X'],
+                            'lon': store['Y'],
                         }
                         hours = self.parse_hours(
                             store['parsedopeningTimes']['regular']
