@@ -24,49 +24,42 @@ class MuellerSpider(scrapy.Spider):
 
     def parse_hours(self, store_hours):
         opening_hours = OpeningHours()
-        if store_hours is None:
-            return
+        weekdays = [d.strip() for d in store_hours.split(',')]
+        for record in weekdays:
+            day, hours = record.split(' ')
+            from_hours, to_hours = hours.split('-')
 
-        for store_day in store_hours:
-            day = DAY_MAPPING[store_day.get("dayOfWeek")]
-            open_time = store_day.get("fromTime")
-            close_time = store_day.get("toTime")
-            if open_time is None and close_time is None:
-                continue
-            opening_hours.add_range(day=day,
-                                    open_time=open_time,
-                                    close_time=close_time,
+            opening_hours.add_range(day=DAY_MAPPING[day],
+                                    open_time=from_hours,
+                                    close_time=to_hours,
                                     time_format='%H:%M'
                                     )
 
         return opening_hours.as_opening_hours()
 
-    def parse_details(self, response):
-        stores = json.loads(response.body_as_unicode())
-        properties = {
-            'lat': stores['latitude'],
-            'lon': stores['longitude'],
-            'name': stores['companyName'],
-            'street': stores['street'],
-            'city': stores['city'],
-            'postcode': stores['zip'],
-            'country': stores['country'],
-            'phone': stores['ccstoreDtoDetails']['phone'],
-            'ref': stores['storeNumber'],
-        }
-        hours = self.parse_hours(stores['ccstoreDtoDetails']['openingHourWeek'])
-
-        if hours:
-            properties["opening_hours"] = hours
-
-        yield GeojsonPointItem(**properties)
-
     def parse(self, response):
-        store_numbers = re.findall(r'{storeNumber: \'(\d+)\'', response.text)
-        if store_numbers:
-            for n in store_numbers:
-                yield scrapy.Request(
-                    url="https://www.mueller.de/api/ccstore/byStoreNumber/{}/".format(n),
-                    callback=self.parse_details
-                )
+        data = response.xpath(
+            '//script[@type="application/ld+json"]/text()'
+        ).get()
+        if data:
+            properties = {}
+            data = json.loads(data)
+            for stores in data:
+                properties = {
+                    'lat': stores['geo']['latitude'],
+                    'lon': stores['geo']['longitude'],
+                    'name': stores['legalName'],
+                    'street': stores['address']['streetAddress'],
+                    'city': stores['address']['addressLocality'].replace(
+                        ', German', ''
+                    ),
+                    'postcode': stores['address']['postalCode'],
+                    'country': 'DE',
+                    'ref': stores['globalLocationNumber'],
+                }
+                if stores['openingHours']:
+                    hours = self.parse_hours(stores['openingHours'])
+                    if hours:
+                        properties["opening_hours"] = hours
 
+                yield GeojsonPointItem(**properties)
