@@ -13,6 +13,7 @@ DAY_MAPPING = {'MONDAY': 'Mo',
                'SATURDAY': 'Sa',
                'SUNDAY': 'Su'}
 
+
 class MuellerSpider(scrapy.Spider):
     name = "mueller"
     allowed_domains = ["www.mueller.de"]
