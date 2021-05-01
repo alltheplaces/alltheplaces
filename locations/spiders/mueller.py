@@ -18,48 +18,48 @@ class MuellerSpider(scrapy.Spider):
     name = "mueller"
     allowed_domains = ["www.mueller.de"]
     start_urls = (
-        'https://www.mueller.de/meine-filiale/',
+        'https://www.mueller.de/api/ccstore/allPickupStores/',
     )
     download_delay = 0.2
 
     def parse_hours(self, store_hours):
         opening_hours = OpeningHours()
-        weekdays = [d.strip() for d in store_hours.split(',')]
-        for record in weekdays:
-            day, hours = record.split(' ')
-            from_hours, to_hours = hours.split('-')
-
-            opening_hours.add_range(day=DAY_MAPPING[day],
-                                    open_time=from_hours,
-                                    close_time=to_hours,
-                                    time_format='%H:%M'
-                                    )
+        for record in store_hours:
+            if record['open']:
+                opening_hours.add_range(day=DAY_MAPPING[record['dayOfWeek']],
+                                        open_time=record['fromTime'],
+                                        close_time=record['toTime'],
+                                        time_format='%H:%M'
+                                        )
 
         return opening_hours.as_opening_hours()
 
-    def parse(self, response):
-        data = response.xpath(
-            '//script[@type="application/ld+json"]/text()'
-        ).get()
-        if data:
-            properties = {}
-            data = json.loads(data)
-            for stores in data:
-                properties = {
-                    'lat': stores['geo']['latitude'],
-                    'lon': stores['geo']['longitude'],
-                    'name': stores['legalName'],
-                    'street': stores['address']['streetAddress'],
-                    'city': stores['address']['addressLocality'].replace(
-                        ', German', ''
-                    ),
-                    'postcode': stores['address']['postalCode'],
-                    'country': 'DE',
-                    'ref': stores['globalLocationNumber'],
-                }
-                if stores['openingHours']:
-                    hours = self.parse_hours(stores['openingHours'])
-                    if hours:
-                        properties["opening_hours"] = hours
+    def parse_stores(self, response):
+        store = json.loads(response.text)
 
-                yield GeojsonPointItem(**properties)
+        properties = {
+            'lat': store['latitude'],
+            'lon': store['longitude'],
+            'name': store['storeName'],
+            'street': store['street'],
+            'city': store['city'],
+            'postcode': store['zip'],
+            'country': store['country'],
+            'ref': store['storeNumber'],
+        }
+
+        if store['cCStoreDtoDetails']['openingHourWeek']:
+            hours = self.parse_hours(store['cCStoreDtoDetails']['openingHourWeek'])
+            if hours:
+                properties["opening_hours"] = hours
+
+        yield GeojsonPointItem(**properties)
+
+    def parse(self, response):
+        data = json.loads(response.text)
+        stores_number = [stores['storeNumber'] for stores in data]
+
+        for n in stores_number:
+            yield scrapy.Request(
+                f"https://www.mueller.de/api/ccstore/byStoreNumber/{n}/",
+                callback=self.parse_stores)
