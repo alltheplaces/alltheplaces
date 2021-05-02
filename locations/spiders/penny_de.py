@@ -1,12 +1,20 @@
 # -*- coding: utf-8 -*-
-import csv
 import json
-import re
-
 import scrapy
 
 from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
+
+
+DAY_MAPPING = {
+    'Monday': 'Mo',
+    'Tuesday': 'Tu',
+    'Wednesday': 'We',
+    'Thursday': 'Th',
+    'Friday': 'Fr',
+    'Saturday': 'Sa',
+    'Sunday': 'Su'
+}
 
 
 class PennyDESpider(scrapy.Spider):
@@ -14,32 +22,35 @@ class PennyDESpider(scrapy.Spider):
     item_attributes = {'brand': 'Penny', 'brand_wikidata': 'Q284688'}
     allowed_domains = ["penny.de"]
     download_delay = 0.5
+    start_urls = ("https://www.penny.de/.rest/market",)
 
-    def start_requests(self):
-        url = "https://www.penny.de/marktsuche/?type=666&tx_pennyregionalization_googlemarket[location]={lat},{lng}"
-
-        with open('./locations/searchable_points/eu_centroids_20km_radius_country.csv') as points:
-            reader = csv.DictReader(points)
-            for point in reader:
-                if point["country"] == "DE":
-                    yield scrapy.Request(
-                        url=url.format(lat=point["latitude"], lng=point["longitude"]),
-                        callback=self.parse
-                    )
+    def parse_hours(self, store_info):
+        opening_hours = OpeningHours()
+        for day in DAY_MAPPING:
+            opening_hours.add_range(
+                day=DAY_MAPPING[day],
+                open_time=store_info[f'opensAt{day}'],
+                close_time=store_info[f'closesAt{day}'],
+                time_format='%H:%M'
+            )
 
     def parse(self, response):
         data = json.loads(response.body_as_unicode())
 
-        for store in data["markets"]:
+        for store in data["results"]:
             properties = {
-                'name': store["name"],
+                'name': store["marketName"],
                 'ref': store["marketId"],
-                'addr_full': store["address"],
+                'addr_full': store["street"],
                 'city': store["city"],
-                'postcode': store["zip"],
+                'postcode': store["zipCode"],
                 'country': "DE",
-                'lat': float(store["lat"]),
-                'lon': float(store["lng"]),
+                'lat': float(store["latitude"]),
+                'lon': float(store["longitude"]),
             }
+            hours = self.parse_hours(store)
+
+            if hours:
+                properties["opening_hours"] = hours
 
             yield GeojsonPointItem(**properties)
