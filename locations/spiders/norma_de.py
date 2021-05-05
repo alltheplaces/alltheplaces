@@ -19,8 +19,7 @@ class NormaDeSpider(scrapy.Spider):
     allowed_domains = ["www.norma-online.de"]
 
     start_urls = []
-    with open(
-            './locations/searchable_points/worldcities.csv') as csv_file:
+    with open('./locations/searchable_points/germany_centroids_80km_radius_country.csv') as csv_file:
         csv_reader = csv.reader(csv_file, delimiter=',')
         for row in csv_reader:
             if row[4] == 'Germany':
