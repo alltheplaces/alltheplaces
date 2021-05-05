@@ -1,142 +1,175 @@
 # -*- coding: utf-8 -*-
-import scrapy
 import json
+import scrapy
 
+from locations.hours import OpeningHours
 from locations.items import GeojsonPointItem
+from scrapy.selector import Selector
+
+
+DEFAULT_HEADERS = {
+    "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_1) AppleWebKit/537.36 (KHTML, like Gecko) "
+                  "Chrome/63.0.3239.84 Safari/537.36",
+    'connection': 'keep-alive'}
+
+BRANDS = [
+    {
+        'brand': "Baker's",
+        'brand_wikidata': "Q4849080",
+        'domain': "www.bakersplus.com"
+    },
+    {
+        'brand': "City Market",
+        'brand_wikidata': "Q5123299",
+        'domain': "www.citymarket.com"
+    },
+    {
+        'brand': "Dillons",
+        'brand_wikidata': "Q5276954",
+        'domain': "www.dillons.com"
+    },
+    {
+        'brand': "Food 4 Less",
+        'brand_wikidata': "Q5465282",
+        'domain': "www.food4less.com"
+    },
+    {
+        'brand': "Foods Co",
+        # This is an alt name used by Food 4 Less in N. California; same wikidata
+        'brand_wikidata': "Q5465282",
+        'domain': "www.foodsco.net"
+    },
+    {
+        'brand': "Fred Meyer",
+        'brand_wikidata': "Q5495932",
+        'domain': "www.fredmeyer.com"
+    },
+    {
+        'brand': "Fry's Food Stores",
+        'brand_wikidata': "Q5506547",
+        'domain': "www.frysfood.com"
+    },
+    {
+        'brand': "Gerbes",
+        # This is a subbrand of Dillons; same wikidata
+        'brand_wikidata': "Q5276954",
+        'domain': "www.gerbes.com"
+    },
+    {
+        'brand': "JayC",
+        'brand_wikidata': "Q6166302",
+        'domain': "www.jaycfoods.com"
+    },
+    {
+        'brand': "King Soopers",
+        'brand_wikidata': "Q6412065",
+        'domain': "www.kingsoopers.com"
+    },
+    {
+        'brand': "Kroger",
+        'brand_wikidata': "Q153417",
+        'domain': "www.kroger.com"
+    },
+    {
+        'brand': "Mariano's Fresh Market",
+        'brand_wikidata': "Q55622168",
+        'domain': "www.marianos.com"
+    },
+    {
+        'brand': "Metro Market",
+        # This is a subbrand of Roundy's; same wikidata
+        'brand_wikidata': "Q7371288",
+        'domain': "www.metromarket.net"
+    },
+    {
+        'brand': "Pay Less",
+        'brand_wikidata': "Q7156587",
+        'domain': "www.pay-less.com"
+    },
+    {
+        'brand': "Owen's",
+        'brand_wikidata': "Q7114367",
+        'domain': "www.owensmarket.com"
+    },
+    {
+        'brand': "Pick 'n Save",
+        # This is a subbrand of Roundy's; same wikidata
+        'brand_wikidata': "Q7371288",
+        'domain': "www.picknsave.com"
+    },
+    {
+        'brand': "QFC",
+        'brand_wikidata': "Q7265425",
+        'domain': "www.qfc.com"
+    },
+    {
+        'brand': "Ralphs",
+        'brand_wikidata': "Q3929820",
+        'domain': "www.ralphs.com"
+    },
+    {
+        'brand': "Smith's",
+        'brand_wikidata': "Q7544856",
+        'domain': "www.smithsfoodanddrug.com"
+    }
+]
 
 
 class KrogerSpider(scrapy.Spider):
     name = "kroger"
-    item_attributes = { 'brand': "Kroger" }
-    allowed_domains = ["www.kroger.com"]
-    start_urls = (
-        'https://www.kroger.com/stores?address=37.7578595,-79.76804&includeThirdPartyFuel=true&maxResults=50&radius=3000&showAllStores=false&useLatLong=true',
-    )
+    item_attributes = {'brand': "Kroger", 'brand_wikidata': "Q153417"}
+    download_delay = 0.2
+    allowed_domains = [b['domain'] for b in BRANDS]
 
-    store_types = {
-        '' : "unknown-blank",
-        'C': "grocery",
-        'F': "unknown-f",
-        'G': "gas station",
-        'I': "unknown-i",
-        'J': "unknown-j",
-        'M': "grocery",
-        'Q': "unknown-q",
-        'S': "grocery",
-        'X': "unknown-x",
-    }
-
-    ll_requests = set()
-
-    def store_hours(self, store_hours):
-        if all([h == '' for h in store_hours.values()]):
-            return None
-        else:
-            day_groups = []
-            this_day_group = None
-            for day in ('monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'):
-                day_open = store_hours[day + 'Open']
-                day_close = store_hours[day + 'Close']
-                hours = day_open + "-" + day_close
-                day_short = day.title()[:2]
-
-                if not this_day_group:
-                    this_day_group = dict(from_day=day_short, to_day=day_short, hours=hours)
-                elif this_day_group['hours'] == hours:
-                    this_day_group['to_day'] = day_short
-                elif this_day_group['hours'] != hours:
-                    day_groups.append(this_day_group)
-                    this_day_group = dict(from_day=day_short, to_day=day_short, hours=hours)
-            day_groups.append(this_day_group)
-
-            if len(day_groups) == 1:
-                opening_hours = day_groups[0]['hours']
-                if opening_hours == '07:00-07:00':
-                    opening_hours = '24/7'
-            else:
-                opening_hours = ''
-                for day_group in day_groups:
-                    if day_group['from_day'] == day_group['to_day']:
-                        opening_hours += '{from_day} {hours}; '.format(**day_group)
-                    else:
-                        opening_hours += '{from_day}-{to_day} {hours}; '.format(**day_group)
-                opening_hours = opening_hours[:-2]
-
-            return opening_hours
-
-    def phone_number(self, phone):
-        return '{}-{}-{}'.format(phone[0:3], phone[3:6], phone[6:10])
-
-    def address(self, address):
-        if not address:
-            return None
-
-        (num, rest) = address['addressLineOne'].split(' ', 1)
-        addr_tags = {
-            "housenumber": num.strip(),
-            "street": rest.strip(),
-            "city": address['city'],
-            "state": address['state'],
-            "postcode": address['zipCode'],
-        }
-
-        return addr_tags
+    def start_requests(self):
+        for brand in BRANDS:
+            yield scrapy.Request(url=f"https://{brand['domain']}/storelocator-sitemap.xml",
+                                 headers=DEFAULT_HEADERS,
+                                 meta={'brand': brand})
 
     def parse(self, response):
-        data = json.loads(response.body_as_unicode())
+        xml = Selector(response)
+        xml.remove_namespaces()
 
-        bounding_box = {
-            'min_lat': 100,
-            'max_lat': -100,
-            'min_lon': 300,
-            'max_lon': -300,
+        urls = xml.xpath('//loc/text()').extract()
+        for url in urls:
+            yield scrapy.Request(url,
+                                 callback=self.parse_store,
+                                 headers=DEFAULT_HEADERS,
+                                 meta=response.meta)
+
+    def parse_store(self, response):
+        data = response.xpath(
+            '//script[@type="application/ld+json"]/text()').extract_first()
+        if data:
+            data = json.loads(data)
+            services = response.css(
+                '.StoreServices-departmentsItem::text').getall()
+            services = [s.lower() for s in services]
+        else:
+            return
+
+        properties = {
+            'ref': '/'.join(response.url.split('/')[-2:]),
+            'name': f"{data['name']} {response.meta['brand']['brand']}",
+            'addr_full': data["address"]["streetAddress"].strip(),
+            'city': data["address"]["addressLocality"].strip(),
+            'state': data["address"]["addressRegion"],
+            'postcode': data["address"]["postalCode"],
+            'country': data["address"].get("addressCountry"),
+            'phone': data.get("telephone"),
+            'lat': float(data["geo"]["latitude"]),
+            'lon': float(data["geo"]["longitude"]),
+            'opening_hours': '; '.join(data['openingHours']),
+            'website': data.get("url") or response.url,
+            'brand': response.meta['brand']['brand'],
+            'brand_wikidata': response.meta['brand']['brand_wikidata'],
+            'extras': {
+                'shop': 'supermarket',
+                'amenity:fuel': 'gas station' in services,
+                'amenity:pharmacy': 'pharmacy' in services,
+                'atm': 'atm' in services
+            }
         }
 
-        for store in data:
-            store_information = store['storeInformation']
-            store_hours = store['storeHours']
-
-            properties = {
-                "phone": self.phone_number(store_information['phoneNumber']),
-                "ref": store_information['recordId'],
-                "name": store_information['localName'],
-                "type": self.store_types[store_information['storeType']],
-                "opening_hours": self.store_hours(store_hours),
-            }
-
-            address = self.address(store_information['address'])
-            if address:
-                properties.update(address)
-
-            lon_lat = [
-                float(store_information['latLong']['longitude']),
-                float(store_information['latLong']['latitude']),
-            ]
-
-            bounding_box['min_lat'] = min(bounding_box['min_lat'], lon_lat[1])
-            bounding_box['max_lat'] = max(bounding_box['max_lat'], lon_lat[1])
-            bounding_box['min_lon'] = min(bounding_box['min_lon'], lon_lat[0])
-            bounding_box['max_lon'] = max(bounding_box['max_lon'], lon_lat[0])
-
-            yield GeojsonPointItem(**properties)
-
-        if data:
-            box_corners = [
-                '{},{}'.format(bounding_box['min_lat'], bounding_box['min_lon']),
-                '{},{}'.format(bounding_box['max_lat'], bounding_box['min_lon']),
-                '{},{}'.format(bounding_box['min_lat'], bounding_box['max_lon']),
-                '{},{}'.format(bounding_box['max_lat'], bounding_box['max_lon']),
-            ]
-
-            for corner in box_corners:
-                if corner in self.ll_requests:
-                    self.logger.info("Skipping request for %s because we already did it", corner)
-                else:
-                    self.ll_requests.add(corner)
-                    yield scrapy.Request(
-                        'https://www.kroger.com/stores?address={}&includeThirdPartyFuel=true&maxResults=50&radius=3000&showAllStores=false&useLatLong=true'.format(
-                            corner
-                        ),
-                    )
-        else:
-            self.logger.info("No results")
+        yield GeojsonPointItem(**properties)

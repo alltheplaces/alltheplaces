@@ -46,15 +46,15 @@ class ProvidenceHealthServicesSpider(scrapy.Spider):
         for place in data:
             for x in place["Locations"]:
                 try:
-                    street = re.search('\s*(.*)(?=<)', x["Address"]).groups()[0]
+                    street = re.search(r'\s*(.*)(?=<)', x["Address"]).groups()[0]
                     properties = {
                         'name': x["Name"],
                         'ref': x["Name"] + x["Maps"],
                         'addr_full': street.replace("<br/>", ", "),
-                        'city': re.search('(?<=>)\s*([\sA-Za-z]*)(?=,\s*[A-Z]{2}\s*[0-9]{5})', x["Address"]).groups()[
+                        'city': re.search(r'(?<=>)\s*([\sA-Za-z]*)(?=,\s*[A-Z]{2}\s*[0-9]{5})', x["Address"]).groups()[
                             0],
-                        'state': re.search('>\D*,\s*(.[A-Z]{2})\s*[0-9]{5}', x["Address"]).groups()[0],
-                        'postcode': re.search('>\D*,.[A-Z]{2} \s*(\d{5})', x["Address"])[1],
+                        'state': re.search(r'>\D*,\s*(.[A-Z]{2})\s*[0-9]{5}', x["Address"]).groups()[0],
+                        'postcode': re.search(r'>\D*,.[A-Z]{2} \s*(\d{5})', x["Address"])[1],
                         'country': "US",
                         'phone': x["PhoneNumber"],
                         'website': x["Maps"],

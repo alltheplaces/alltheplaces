@@ -10,6 +10,7 @@ ALL_DAYS = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su']
 
 class DickeysBarbecuePitSpider(scrapy.Spider):
     name = "dickeys_barbecue_pit"
+    item_attributes = { 'brand': "Dickey's Barbecue Pit", 'brand_wikidata': "Q19880747" }
     allowed_domains = ["dickeys.com"]
     download_delay = 0.5
     start_urls = (

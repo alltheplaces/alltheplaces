@@ -17,8 +17,8 @@ DAYS = {
 class MorrisonsSpider(scrapy.Spider):
 
     name = "morrisons"
-    item_attributes = { 'brand': "Morrisons" }
-    allowed_domains = ["my.morrisons.com" ,"api.morrisons.com"]
+    item_attributes = {'brand': "Morrisons"}
+    allowed_domains = ["my.morrisons.com", "api.morrisons.com"]
     download_delay = 0.5
     start_urls = (
         'https://my.morrisons.com/storefinder/list/a',
@@ -38,9 +38,10 @@ class MorrisonsSpider(scrapy.Spider):
 
     def parse_stores(self, response):
         data = json.loads(response.body_as_unicode())
+        address = data['address']['addressLine1']+" "+data['address']['addressLine2'].replace("None", "")
         properties = {
-            'addr_full': data['address']['addressLine1']+" "+data['address']['addressLine2'],
-            'phone':data['telephone'] ,
+            'addr_full': address.strip(),
+            'phone':data['telephone'],
             'city': data['address']['city'],
             'state': '',
             'postcode': data['address']['postcode'],
@@ -62,7 +63,7 @@ class MorrisonsSpider(scrapy.Spider):
         alpha_urls = response.xpath('//div[@class="col-md-4 col-sm-6"]/a/@href').extract()
         for path in alpha_urls:
             id = re.findall(r"[0-9]+$" , path)[0]
-            url = 'https://api.morrisons.com/location/v2//stores/%s?apikey=nIqSiqIFeSeaQEomK5F0PHKfyNKKVVvD&include=departments,services,linkedStores'%(id)
+            url = 'https://api.morrisons.com/location/v2//stores/%s?apikey=kxBdM2chFwZjNvG2PwnSn3sj6C53dLEY&include=departments,services,linkedStores'%(id)
             yield scrapy.Request(response.urljoin(url), callback=self.parse_stores)
 
     def parse(self, response):

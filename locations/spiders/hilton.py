@@ -128,7 +128,7 @@ class HiltonSpider(scrapy.Spider):
     def parse_grand_vacation_hotel(self, response):
         """Parse Grand Vacation hotel resort page"""
         properties = response.meta["properties"]
-        lat, lon = response.xpath('//script/text()').re_first('.*google.maps.LatLng\(\s*(.*)\s+\);').split(',')
+        lat, lon = response.xpath('//script/text()').re_first(r'.*google.maps.LatLng\(\s*(.*)\s+\);').split(',')
         properties.update({
             "name": response.xpath('//div[contains(@class, "resort-title")]//h1/text()').extract_first(),
             "ref":  "_".join(re.search(r'.*/(.*)/(.*)/', response.url).groups()),

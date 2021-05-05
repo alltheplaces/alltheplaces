@@ -10,7 +10,7 @@ base_url = 'http://www.fuddruckers.com'
 
 class FuddruckersSpider(scrapy.Spider):
     name = "fuddruckers"
-    item_attributes = { 'brand': "Fuddruckers" }
+    item_attributes = { 'brand': "Fuddruckers", 'brand_wikidata': "Q5507056" }
     allowed_domains = ["www.fuddruckers.com"]
     start_urls = [
         'http://www.fuddruckers.com/services/location/get_stores_by_position.php?lt=37.09024&lg=-95.712891&m=100&k=United+States',

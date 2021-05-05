@@ -36,8 +36,8 @@ class PearleVisionSpider(scrapy.Spider):
 
         for data in coords:
             if "LatLng" in data:
-                lat = re.search('LatLng\(parseFloat\("(\d*.\d*)"', data).groups()[0]
-                lng = re.search(',parseFloat\("(-\d*.\d*)"', data).groups()[0]
+                lat = re.search(r'LatLng\(parseFloat\("(\d*.\d*)"', data).groups()[0]
+                lng = re.search(r',parseFloat\("(-\d*.\d*)"', data).groups()[0]
 
         properties = {
             'ref': "_".join(re.search(r".+/(.+?)/(.+?)/(.+?)/?(?:\.html|$)", response.url).groups()),

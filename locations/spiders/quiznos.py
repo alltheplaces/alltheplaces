@@ -10,7 +10,7 @@ URL = "http://restaurants.quiznos.com"
 
 class QuiznosSpider(scrapy.Spider):
     name = "quiznos"
-    item_attributes = { 'brand': "Quizno's" }
+    item_attributes = { 'brand': "Quizno's", 'brand_wikidata': "Q1936229" }
     allowed_domains = [URL]
     start_urls = (
         'http://restaurants.quiznos.com/data/stores.json?callback=storeList',
@@ -64,7 +64,7 @@ class QuiznosSpider(scrapy.Spider):
 
     def parse(self, response):
         data = response.body_as_unicode()
-        stores = json.loads(re.search('storeList\((.*)\)', data).group(1))
+        stores = json.loads(re.search(r'storeList\((.*)\)', data).group(1))
 
         for store in stores:
 

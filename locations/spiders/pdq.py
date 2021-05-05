@@ -2,7 +2,7 @@
 import scrapy
 import re
 import time
-from scrapy.utils.gz import gunzip, is_gzipped
+from scrapy.utils.gz import gunzip
 
 from locations.items import GeojsonPointItem
 

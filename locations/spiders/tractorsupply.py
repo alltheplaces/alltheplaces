@@ -1,110 +1,79 @@
 # -*- coding: utf-8 -*-
 import scrapy
 import json
-import re
 
 from locations.items import GeojsonPointItem
+from locations.hours import OpeningHours
 
+DAYS_NAME = {
+    'Monday': 'Mo',
+    'Tuesday': 'Tu',
+    'Wednesday': 'We',
+    'Thursday': 'Th',
+    'Friday': 'Fr',
+    'Saturday': 'Sa',
+    'Sunday': 'Su'
+}
 
 class TractorSupplySpider(scrapy.Spider):
     name = "tractorsupply"
     item_attributes = { 'brand': "Tractor Supply" }
     allowed_domains = ["tractorsupply.com"]
     download_delay = 1.5
-    start_urls = (
-        'https://www.tractorsupply.com/sitemap_stores.xml',
-    )
+    custom_settings = {
+        'USER_AGENT': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.128 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+    }
 
-    def store_hours(self, store_hours):
-        day_groups = []
-        this_day_group = None
-        for day in store_hours:
-            day = day.replace('  :-', ' 12:00 -')
-            match = re.search(r'(\S*)\s+(\d{1,2}):(\d{2})\s*-\s*(\d{1,2}):(\d{2})', day)
-            (dow, f_hr, f_min, t_hr, t_min) = match.groups()
-            day_short = dow[:2]
+    def start_requests(self):
+        base_url = 'https://www.tractorsupply.com/wcs/resources/store/10151/zipcode/fetchstoredetails?responseFormat=json&latitude={lat}&longitude={lng}'
 
-            f_hr = int(f_hr)
-            t_hr = int(t_hr)
+        with open('./locations/searchable_points/us_centroids_25mile_radius.csv') as points:
+            for point in points:
+                _, lat, lon = point.strip().split(',')
+                url = base_url.format(lat=lat, lng=lon)
+                yield scrapy.Request(url=url, callback=self.parse)
 
-            hours = '{:02d}:{}-{:02d}:{}'.format(
-                f_hr,
-                f_min,
-                t_hr,
-                t_min,
-            )
+    def parse_hours(self, hours):
+        day_hour = hours.split('|')
 
-            if not this_day_group:
-                this_day_group = {
-                    'from_day': day_short,
-                    'to_day': day_short,
-                    'hours': hours
-                }
-            elif this_day_group['hours'] != hours:
-                day_groups.append(this_day_group)
-                this_day_group = {
-                    'from_day': day_short,
-                    'to_day': day_short,
-                    'hours': hours
-                }
-            elif this_day_group['hours'] == hours:
-                this_day_group['to_day'] = day_short
+        opening_hours = OpeningHours()
 
-        day_groups.append(this_day_group)
+        for dh in day_hour:
+            try:
+                day = DAYS_NAME[dh.split('=')[0]]
+                hr = dh.split('=')[1]
+                open_time, close_time = hr.split('-')
+                opening_hours.add_range(day=day,
+                                        open_time=open_time,
+                                        close_time=close_time,
+                                        time_format="%I:%M %p"
+                                        )
+            except:
+                continue
 
-        opening_hours = ""
-        if len(day_groups) == 1 and day_groups[0]['hours'] in ('00:00-23:59', '00:00-00:00'):
-            opening_hours = '24/7'
-        else:
-            for day_group in day_groups:
-                if day_group['from_day'] == day_group['to_day']:
-                    opening_hours += '{from_day} {hours}; '.format(**day_group)
-                elif day_group['from_day'] == 'Su' and day_group['to_day'] == 'Sa':
-                    opening_hours += '{hours}; '.format(**day_group)
-                else:
-                    opening_hours += '{from_day}-{to_day} {hours}; '.format(**day_group)
-            opening_hours = opening_hours[:-2]
-
-        return opening_hours
-
-    def address(self, address):
-        if not address:
-            return None
-
-        addr_tags = {
-            "addr_full": address['streetAddress'],
-            "city": address['addressLocality'],
-            "state": address['addressRegion'],
-            "postcode": address['postalCode'],
-        }
-
-        return addr_tags
+        return opening_hours.as_opening_hours()
 
     def parse(self, response):
-        response.selector.remove_namespaces()
-        city_urls = response.xpath('//url/loc/text()').extract()
-        for path in city_urls:
-            yield scrapy.Request(
-                path.strip(),
-                callback=self.parse_store,
-            )
+        data = json.loads(response.body_as_unicode())
+        store_data = (data["storesList"])
 
-    def parse_store(self, response):
-        json_data = response.xpath('//*/script[@type="application/ld+json"]/text()').extract_first()
-        json_data = json_data[: -3]
-        data = json.loads(json_data)
+        for store in store_data:
 
-        properties = {
-            'phone': data['telephone'].strip(),
-            'website': response.xpath('//head/link[@rel="canonical"]/@href').extract_first(),
-            'ref': data['url'],
-            'opening_hours': self.store_hours(data['openingHours']),
-            'lon': float(data['geo']['longitude']),
-            'lat': float(data['geo']['latitude']),
-        }
+            properties = {
+                'ref': store["stlocId"],
+                'name': store["storeName"],
+                'addr_full': store["addressLine"],
+                'city': store["city"],
+                'state': store["state"],
+                'postcode': store["zipCode"],
+                'phone': store["phoneNumber"],
+                'lat': store["latitude"],
+                'lon': store["longitude"],
+            }
 
-        address = self.address(data['address'])
-        if address:
-            properties.update(address)
+            hours = self.parse_hours(store["storeHours"])
+            if hours:
+                properties['opening_hours'] = hours
 
-        yield GeojsonPointItem(**properties)
+            yield GeojsonPointItem(**properties)

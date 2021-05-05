@@ -5,45 +5,57 @@ on:
   pull_request:
     paths:
     - 'locations/spiders/*.py'
-  push:
-    branches-ignore:
-    - 'master'
-    paths:
-    - 'locations/spiders/*.py'
 
 jobs:
   test-spider:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
+    env:
+      AWS_KEY: QUtJQVZFWlJZM1ozUjVFQ05YTTY=
+      AWS_SEC: Nkl5citXTXE4dEsyS01DWHAxR1N1cFZSZWZqemZ4TFV2dDlNVDMxSQ==
+      BUCKET: placescraper-results
     steps:
     - name: Checkout code
-      uses: actions/checkout@v1
+      uses: actions/checkout@v2
     - name: Setup Python
       uses: actions/setup-python@master
       with:
         python-version: 3.7
-    - name: Install dependencies
+    - name: Install pipenv
       run: |
         pip --quiet install pipenv
+    - uses: actions/cache@v2
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/Pipfile.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+    - name: Install dependencies
+      run: |
         pipenv --bare install --system --deploy
         sudo apt-get install jq
     - name: Run Scrapy check
       run: |
         scrapy check
     - name: Run spiders that changed
+      shell: bash
       run: |
         PR_COMMENT_BODY="I ran the spiders in this pull request and got these results:\\n\\n|Spider|Results|Log|\\n|---|---|---|\\n"
 
-        SPIDERS=$(git diff --name-only ${GITHUB_SHA}..origin/master | grep 'locations/spiders')
+        export AWS_ACCESS_KEY_ID=$(echo -n "${AWS_KEY}" | base64 --decode)
+        export AWS_SECRET_ACCESS_KEY=$(echo -n "${AWS_SEC}" | base64 --decode)
 
-        if [ -z "$SPIDERS" ]; then
-            echo "No spiders to run."
-            exit 0
-        fi
+        SPIDERS=$(curl -sL https://api.github.com/repos/alltheplaces/alltheplaces/pulls/${{ github.event.number }}/files | jq -r '.[].filename')
 
         RUN_DIR="${GITHUB_WORKSPACE}/output"
         EXIT_CODE=0
-        for spider in $SPIDERS
+        for file_changed in $SPIDERS
         do
+            if [[ $file_changed != locations/spiders/* ]]; then
+                echo "${file_changed} is not a spider. Skipping."
+                continue
+            fi
+
+            spider="${file_changed}"
             (>&2 echo "${spider} running ...")
             SPIDER_NAME=$(basename $spider)
             SPIDER_NAME=${SPIDER_NAME%.py}
@@ -72,26 +84,44 @@ jobs:
                 FAILURE_REASON="timeout"
             fi
 
-            LOGFILE_URL=$(curl -s -F filedata=@${LOGFILE} https://transfer.sh/)
+            aws s3 cp --acl=public-read --only-show-errors ${LOGFILE} s3://${BUCKET}/ci/${GITHUB_RUN_ID}/${SPIDER_NAME}/log.txt
+            LOGFILE_URL="https://${BUCKET}.s3.amazonaws.com/ci/${GITHUB_RUN_ID}/${SPIDER_NAME}/log.txt"
 
             echo "${spider} log: ${LOGFILE_URL}"
 
             if [ -f "$OUTFILE" ]; then
                 FEATURE_COUNT=$(wc -l < ${OUTFILE} | tr -d ' ')
-                OUTFILE_URL=$(curl -s -F filedata=@${OUTFILE} https://transfer.sh/)
-
-                if grep -q 'Stored geojson feed' $LOGFILE; then
-                    echo "${spider} has ${FEATURE_COUNT} features: https://s3.amazonaws.com/placescraper-results/map.html?show=https://cors-anywhere.herokuapp.com/${OUTFILE_URL}"
+                
+                if [ $FEATURE_COUNT == "0" ]; then
+                    echo "${spider} has no output"
+                    FAILURE_REASON="no output"
+                    PR_COMMENT_BODY="${PR_COMMENT_BODY}|[\`$spider\`](https://github.com/${GITHUB_REPOSITORY}/blob/${GITHUB_SHA}/${spider})| (No Output) |Resulted in a \`${FAILURE_REASON}\` ([Log](${LOGFILE_URL}))|\\n"
+                    EXIT_CODE=1
+                    continue
                 fi
 
-                PR_COMMENT_BODY="${PR_COMMENT_BODY}|[\`$spider\`](https://github.com/${GITHUB_REPOSITORY}/blob/${GITHUB_SHA}/${spider})|[${FEATURE_COUNT} items](${OUTFILE_URL}) ([Map](https://s3.amazonaws.com/placescraper-results/map.html?show=https://cors-anywhere.herokuapp.com/${OUTFILE_URL}))|Resulted in a \`${FAILURE_REASON}\` ([Log](${LOGFILE_URL}))|\\n"
+                aws s3 cp --acl=public-read --only-show-errors ${OUTFILE} s3://${BUCKET}/ci/${GITHUB_RUN_ID}/${SPIDER_NAME}/output.geojson
+                OUTFILE_URL="https://${BUCKET}.s3.amazonaws.com/ci/${GITHUB_RUN_ID}/${SPIDER_NAME}/output.geojson"
+
+                if grep -q 'Stored geojson feed' $LOGFILE; then
+                    echo "${spider} has ${FEATURE_COUNT} features: https://placescraper-results.s3.amazonaws.com/map.html?show=${OUTFILE_URL}"
+                fi
+
+                PR_COMMENT_BODY="${PR_COMMENT_BODY}|[\`$spider\`](https://github.com/${GITHUB_REPOSITORY}/blob/${GITHUB_SHA}/${spider})|[${FEATURE_COUNT} items](${OUTFILE_URL}) ([Map](https://placescraper-results.s3.amazonaws.com/map.html?show=${OUTFILE_URL}))|Resulted in a \`${FAILURE_REASON}\` ([Log](${LOGFILE_URL}))|\\n"
             else
                 echo "${spider} has no output"
+                FAILURE_REASON="no output"
                 PR_COMMENT_BODY="${PR_COMMENT_BODY}|[\`$spider\`](https://github.com/${GITHUB_REPOSITORY}/blob/${GITHUB_SHA}/${spider})| (No Output) |Resulted in a \`${FAILURE_REASON}\` ([Log](${LOGFILE_URL}))|\\n"
+                EXIT_CODE=1
             fi
 
             (>&2 echo "${spider} done")
         done
+
+        if [[ ! "$(ls ${RUN_DIR})" ]]; then
+            echo "Nothing ran. Exiting."
+            echo $EXIT_CODE
+        fi
 
         if [ -z "${{ secrets.GITHUB_TOKEN }}" ]; then
             echo "No GITHUB_TOKEN set"

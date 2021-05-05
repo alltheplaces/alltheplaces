@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Exxonmobil has 1,679 locations worldwide except a few nations(those may even change with time)
-This crawler crawls http://www.exxon.com/api/v1/Retail/retailstation/GetStationsByBoundingBox
+This crawler crawls https://www.exxon.com/en/api/locator/Locations
 with 4 parameters representing a bounding box of latitudes and longitudes.
 
 We created an extra class CreateStartURLs to keep things neat,
@@ -63,7 +63,7 @@ class CreateStartURLs:
             "magadascar": (-11.29, 42.80, -26.07, 50.89, 1, 1)      # maxresult=0
     }
     urls = []
-    base_url = 'http://www.exxon.com/api/v1/Retail/retailstation/GetStationsByBoundingBox?'
+    base_url = 'https://www.exxon.com/en/api/locator/Locations?DataSource=RetailGasStations'
 
     def __init__(self):
         self.build_start_urls()
@@ -87,8 +87,8 @@ class CreateStartURLs:
             for row in self.get_vertical(lat1, lat2, max_h):
                 for col in self.get_horizontal(row, lon1, lon1 - lon2, max_w, max_h):
                     self.urls.append(
-                                    self.base_url + "Latitude1=" + str(col[0]) + "&Longitude1=" + str(col[1]) +
-                                    "&Latitude2=" + str(col[2]) + "&Longitude2=" + str(col[3]))
+                        self.base_url + "&Latitude1=" + str(min(col[0], col[2])) + "&Longitude1=" + str(min(col[1], col[3])) +
+                        "&Latitude2=" + str(max(col[0], col[2])) + "&Longitude2=" + str(max(col[1], col[3])))
 
     def get_urls(self):
         """
@@ -138,17 +138,20 @@ class CreateStartURLs:
 
 class ExxonMobilSpider(scrapy.Spider):
     name = "exxonmobil"
-    item_attributes = { 'brand': "ExxonMobil" }
+    item_attributes = {'brand': "ExxonMobil", 'brand_wikidata': "Q156238"}
     crawled_locations = set()
     allowed_domains = ["exxon.com"]
     start_urls = CreateStartURLs().get_urls()
 
     def parse(self, response):
         json_data = json.loads(response.text)
+
         for location in json_data:
             location_id = location['LocationID']
             if location_id not in self.crawled_locations:
                 self.crawled_locations.add(location_id)
+                features = location['FeaturedItems'] + \
+                    location['StoreAmenities']
                 properties = {
                     "name": location['DisplayName'],
                     "addr_full": location['AddressLine1'] + " " + location['AddressLine2'],
@@ -161,8 +164,41 @@ class ExxonMobilSpider(scrapy.Spider):
                     "opening_hours": self.store_hours(location['WeeklyOperatingDays']),
                     "lat": float(location['Latitude']),
                     "lon": float(location['Longitude']),
+                    "extras": {
+                        "amenity:fuel": True,
+                        "amenity:toilets": any('Restroom' in f['Name'] for f in features),
+                        "atm": any('ATM' in f['Name'] for f in features),
+                        "car_wash": any('Carwash' in f['Name'] for f in features),
+                        "fuel:diesel": any('Diesel' in f['Name'] for f in features) or None,
+                        "fuel:octane_87": any('Regular' == f['Name'] for f in features) or None,
+                        "fuel:octane_89": any('Extra' == f['Name'] for f in features) or None,
+                        "fuel:octane_91": any('Supreme' == f['Name'] for f in features) or None,
+                        "fuel:octane_93": any('Supreme+' == f['Name'] for f in features) or None,
+                        "fuel:propane": any('Propane' == f['Name'] for f in features) or None,
+                        "shop": "convenience" if any('Convenience Store' in f['Name'] for f in features) else None
+                    },
+                    **self.brand(location),
                 }
                 yield GeojsonPointItem(**properties)
+
+    def brand(self, location):
+        if 'mobil' in location['BrandingImage']:
+            return {
+                'brand': 'Mobil',
+                'brand_wikidata': 'Q3088656'
+            }
+        elif 'esso' in location['BrandingImage']:
+            return {
+                'brand': 'Esso',
+                'brand_wikidata': 'Q867662'
+            }
+        elif 'exxon' in location['BrandingImage']:
+            return {
+                'brand': 'Exxon',
+                'brand_wikidata': 'Q4781944'
+            }
+        else:
+            return {}
 
     def store_hours(self, hours):
         """

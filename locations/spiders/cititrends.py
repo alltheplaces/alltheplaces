@@ -39,7 +39,7 @@ class CitiTrendsSpider(scrapy.Spider):
     def parse_state(self, response):
         city_urls = response.xpath('//div[@class="c-directory-list-content-wrapper"]/ul/li/a/@href').extract()
         for path in city_urls:
-            pattern1 = re.compile("^[a-z]{2}\/[^()]+\/[^()]+.html$")
+            pattern1 = re.compile(r"^[a-z]{2}\/[^()]+\/[^()]+.html$")
             if(pattern1.match(path.strip())):
                 yield scrapy.Request(response.urljoin(path), callback=self.parse_stores)
             else:
@@ -49,7 +49,7 @@ class CitiTrendsSpider(scrapy.Spider):
         urls = response.xpath('//div[@class="c-directory-list-content-wrapper"]/ul/li/a/@href').extract()
         for path in urls:
             pattern = re.compile("^[a-z]{2}.html$")
-            pattern1 = re.compile("^[a-z]{2}\/[^()]+\/[^()]+.html$")
+            pattern1 = re.compile(r"^[a-z]{2}\/[^()]+\/[^()]+.html$")
             if(pattern.match(path.strip())):
                yield scrapy.Request(response.urljoin(path), callback=self.parse_state)
             elif(pattern1.match(path.strip())):

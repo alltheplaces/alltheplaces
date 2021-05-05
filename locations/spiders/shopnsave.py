@@ -86,7 +86,7 @@ class ShopnSaveSpider(scrapy.Spider):
         store_hours = pattern.sub(lambda x: DAY_DICT[x.group()], ''.join(store_hours))
         store_hours = store_hours.replace('am', ':00')
 
-        m = re.search('([0-9]{1,2})(\spm)', store_hours)
+        m = re.search(r'([0-9]{1,2})(\spm)', store_hours)
         if m:
             h = m.group(1)
             new_h = int(h) + 12
