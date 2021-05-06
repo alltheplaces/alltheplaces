@@ -50,7 +50,7 @@ class PennyDESpider(scrapy.Spider):
                 'lat': float(store["latitude"]),
                 'lon': float(store["longitude"]),
                 'extras': {
-                    'house_number': store['streetNumber']
+                    'addr:housenumber': store['streetNumber']
                 },
             }
             hours = self.parse_hours(store)
