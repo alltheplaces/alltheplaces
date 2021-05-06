@@ -34,6 +34,8 @@ class PennyDESpider(scrapy.Spider):
                 time_format='%H:%M'
             )
 
+        return opening_hours.as_opening_hours()
+
     def parse(self, response):
         data = json.loads(response.body_as_unicode())
 
@@ -47,6 +49,9 @@ class PennyDESpider(scrapy.Spider):
                 'country': "DE",
                 'lat': float(store["latitude"]),
                 'lon': float(store["longitude"]),
+                'extras': {
+                    'addr:housenumber': store['streetNumber']
+                },
             }
             hours = self.parse_hours(store)
 
