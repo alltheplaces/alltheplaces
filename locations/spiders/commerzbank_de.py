@@ -59,7 +59,12 @@ class CommerzbankDESpider(scrapy.Spider):
                     'phone': branch.get("telefon", ''),
                     'extras': {
                         'fax': branch.get('telefax', ''),
-                        'email': branch.get('email', '')
+                        'email': branch.get('email', ''),
+                        'barriere_type': branch.get('barriereTyp', ''),
+                        'cash_register': branch.get('kasse', ''),
+                        'vault': branch.get('vault', ''),
+                        'cashback': branch.get('cashback', ''),
+                        'cashgroup': branch.get('cashgroup', ''),
                     }
                 }
                 hours = self.parse_hours(branch)
