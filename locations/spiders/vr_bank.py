@@ -20,6 +20,11 @@ class VRBankSpider(scrapy.Spider):
     name = "vr_bank"
     allowed_domains = ["www.vr.de"]
     start_urls = ['https://www.vr.de/service/filialen-a-z/a.html']
+    custom_settings = {
+        'USER_AGENT': "Mozilla/5.0 (iPhone; CPU iPhone OS 5_1 like Mac OS X) "
+                      "AppleWebKit/534.46 (KHTML, like Gecko) Version/5.1 "
+                      "Mobile/9B179 Safari/7534.48.3",
+    }
 
     def process_hours(self, store_hours):
         opening_hours = OpeningHours()
@@ -34,7 +39,7 @@ class VRBankSpider(scrapy.Spider):
             try:
                 day, time = hour.split("#")
             except ValueError:
-                print("Error: date time is not splitable")
+                continue
 
             if time and day in DAY_MAPPING.keys():
                 time = time.replace("24:00", "00:00")
@@ -58,7 +63,7 @@ class VRBankSpider(scrapy.Spider):
                         else:
                             continue
                     except ValueError:
-                        print("Error: time attribute is not in correct format")
+                        continue
 
         return opening_hours.as_opening_hours()
 
@@ -105,7 +110,7 @@ class VRBankSpider(scrapy.Spider):
         for page in index:
             yield scrapy.Request(
                 url=page,
-                callback=self.parse_links
+                callback=self.parse_links,
             )
 
     def parse_links(self, response):
@@ -113,5 +118,5 @@ class VRBankSpider(scrapy.Spider):
         for item in list:
             yield scrapy.Request(
                 url=item,
-                callback=self.parse_details
+                callback=self.parse_details,
             )
