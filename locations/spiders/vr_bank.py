@@ -39,7 +39,7 @@ class VRBankSpider(scrapy.Spider):
             try:
                 day, time = hour.split("#")
             except ValueError:
-                print("Error: date time is not splitable")
+                continue
 
             if time and day in DAY_MAPPING.keys():
                 time = time.replace("24:00", "00:00")
@@ -63,7 +63,7 @@ class VRBankSpider(scrapy.Spider):
                         else:
                             continue
                     except ValueError:
-                        print("Error: time attribute is not in correct format")
+                        continue
 
         return opening_hours.as_opening_hours()
 
