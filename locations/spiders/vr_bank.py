@@ -20,6 +20,16 @@ class VRBankSpider(scrapy.Spider):
     name = "vr_bank"
     allowed_domains = ["www.vr.de"]
     start_urls = ['https://www.vr.de/service/filialen-a-z/a.html']
+    headers = {
+        "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 5_1 like Mac OS X) "
+                      "AppleWebKit/534.46 (KHTML, like Gecko) Version/5.1 "
+                      "Mobile/9B179 Safari/7534.48.3"}
+
+    def start_requests(self):
+        for url in self.start_urls:
+            yield scrapy.Request(
+                url, callback=self.parse, headers=self.headers
+            )
 
     def process_hours(self, store_hours):
         opening_hours = OpeningHours()
@@ -105,7 +115,8 @@ class VRBankSpider(scrapy.Spider):
         for page in index:
             yield scrapy.Request(
                 url=page,
-                callback=self.parse_links
+                callback=self.parse_links,
+                headers = self.headers
             )
 
     def parse_links(self, response):
@@ -113,5 +124,6 @@ class VRBankSpider(scrapy.Spider):
         for item in list:
             yield scrapy.Request(
                 url=item,
-                callback=self.parse_details
+                callback=self.parse_details,
+                headers=self.headers
             )
