@@ -38,7 +38,7 @@ class NationalSpider(scrapy.Spider):
             properties = {
                 'name': loc["name"],
                 'brand': loc["brand"],
-                'phone': loc["phones"][0],
+                'phone': loc["phones"][0]["phone_number"],
                 'addr_full': loc["address"]["street_addresses"],
                 'city': loc["address"]["city"],
                 'state': loc["address"]["country_subdivision_code"],
