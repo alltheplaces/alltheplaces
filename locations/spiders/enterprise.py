@@ -29,7 +29,7 @@ class EnterpriseSpider(scrapy.Spider):
                     'name': d.get('name'),
                     'phone': d.get('formatted_phone'),
                     'website': d.get('url'),
-                    'addr_full': d.get('address_lines'),
+                    'addr_full': ' '.join(d.get('address_lines') or []),
                     'city': d.get('city'),
                     'state': d.get('state'),
                     'postcode': d.get('postal_code'),
