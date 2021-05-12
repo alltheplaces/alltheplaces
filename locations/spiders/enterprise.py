@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 import scrapy
 import json
-import logging
+
 from locations.items import GeojsonPointItem
 
 class EnterpriseSpider(scrapy.Spider):
     name = "enterprise"
-    item_attributes = { 'brand': "Enterprise Rent-A-Car", 'brand_wikidata': "Q17085454" }
+    item_attributes = {'brand': "Enterprise Rent-A-Car", 'brand_wikidata': "Q17085454"}
     allowed_domains = ["www.enterprise.com"]
     start_urls = (
         'https://www.enterprise.com/en/car-rental/locations.html',
@@ -26,16 +26,16 @@ class EnterpriseSpider(scrapy.Spider):
         if data:
             for d in data:
                 properties = {
-                    'name': d.get('shortTitle'),
-                    'phone': d.get('formattedPhone'),
+                    'name': d.get('name'),
+                    'phone': d.get('formatted_phone'),
                     'website': d.get('url'),
-                    'addr_full': ' '.join(d.get('addressLines')),
+                    'addr_full': ' '.join(d.get('address_lines') or []),
                     'city': d.get('city'),
                     'state': d.get('state'),
-                    'postcode': d.get('postalCode'),
-                    'country': d.get('countryCode'),
+                    'postcode': d.get('postal_code'),
+                    'country': d.get('country_code'),
                     'lat': d.get('latitude'),
                     'lon': d.get('longitude'),
-                    'ref': d.get('stationId'),
+                    'ref': d.get('station_id'),
                 }
                 yield GeojsonPointItem(**properties)
