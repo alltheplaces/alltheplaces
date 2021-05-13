@@ -19,15 +19,20 @@ class DeutschepostDeSpider(scrapy.Spider):
     name = "deutschepost_de"
     allowed_domains = ["www.deutschepost.de"]
 
+    input_files = [
+    #    'eu_centroids_20km_radius_country.csv',
+    #    'germany_centroids_80km_radius_country.csv',
+        'germany_grid_15km.csv',
+    ]
     start_urls = []
-    with open('./locations/searchable_points/germany_centroids_80km_radius_country.csv') as csv_file:
-        csv_reader = csv.reader(csv_file, delimiter=',')
-        for row in csv_reader:
-            if row[4] == 'Germany':
+    for file in input_files:
+        with open(f'./locations/searchable_points/{file}') as csv_file:
+            csv_reader = csv.reader(csv_file, delimiter=',')
+            for row in csv_reader:
                 start_urls.append(
                     f"https://www.deutschepost.de/int-postfinder"
                     f"/postfinder_webservice/rest/v1/nearbySearch?address="
-                    f"{row[2]},{row[3]}"
+                    f"{row[0]},{row[1]}"
                 )
 
     def parse_hours(self, hours):
