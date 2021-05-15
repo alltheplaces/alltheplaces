@@ -13,7 +13,7 @@ class KauflandSpider(scrapy.Spider):
     item_attributes = {'brand': 'Kaufland', 'brand_wikidata': 'Q685967'}
     allowed_domains = ["kaufland.de"]
     start_urls = [
-        'https://www.kaufland.de/.storefinder.json',
+        'https://filiale.kaufland.de/.klstorefinder.json',
     ]
 
     def parse_hours(self, hours):
