@@ -62,13 +62,10 @@ class AlnaturaSpider(scrapy.Spider):
             'phone': store['Tel'],
             'country': store['Country'],
             'ref': response.meta.get('id'),
-            'extras': {
-                'time': store['OpeningTime']
-            }
         }
 
         if store['OpeningTime']:
-            hours = self.parse_hours(store['OpeningTime'])
+            hours = self.parse_hours(store.get('OpeningTime'))
             if hours:
                 properties["opening_hours"] = hours
 
@@ -83,8 +80,8 @@ class AlnaturaSpider(scrapy.Spider):
                 f"?storeid={stores['Id']}",
                 callback=self.parse_stores,
                 meta={
-                    'lat': stores['Lat'],
-                    'lng': stores['Lng'],
+                    'lat': stores['Lat'].replace(',', '.'),
+                    'lng': stores['Lng'].replace(',', '.'),
                     'id': stores['Id'],
                 }
             )
