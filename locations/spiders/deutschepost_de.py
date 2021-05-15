@@ -1,7 +1,6 @@
 import scrapy
 import json
 import csv
-import re
 
 from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
@@ -19,21 +18,20 @@ class DeutschepostDeSpider(scrapy.Spider):
     name = "deutschepost_de"
     allowed_domains = ["www.deutschepost.de"]
 
-    input_files = [
-    #    'eu_centroids_20km_radius_country.csv',
-    #    'germany_centroids_80km_radius_country.csv',
-        'germany_grid_15km.csv',
-    ]
-    start_urls = []
-    for file in input_files:
-        with open(f'./locations/searchable_points/{file}') as csv_file:
-            csv_reader = csv.reader(csv_file, delimiter=',')
-            for row in csv_reader:
-                start_urls.append(
-                    f"https://www.deutschepost.de/int-postfinder"
-                    f"/postfinder_webservice/rest/v1/nearbySearch?address="
-                    f"{row[0]},{row[1]}"
-                )
+    def start_requests(self):
+        input_files = [
+            'germany_grid_15km.csv'
+        ]
+        for file in input_files:
+            with open(f'./locations/searchable_points/{file}') as csv_file:
+                csv_reader = csv.reader(csv_file, delimiter=',')
+                for row in csv_reader:
+                    yield scrapy.Request(
+                        f"https://www.deutschepost.de/int-postfinder"
+                        f"/postfinder_webservice/rest/v1/nearbySearch?address="
+                        f"{row[0]},{row[1]}",
+                        callback=self.parse
+                    )
 
     def parse_hours(self, hours):
         opening_hours = OpeningHours()
