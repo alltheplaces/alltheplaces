@@ -62,9 +62,7 @@ class DennsDeSpider(scrapy.Spider):
         for link in response.xpath('//li[@class="list-inline-item"]//a'):
             next = link.xpath('./text()').get().strip()
             if next == '>':
-                print("Next page found")
                 next_link = link.xpath('./@href').get()
-                print(f"######{next_link}")
                 yield scrapy.Request(
                     f"https://www.tegut.com{next_link}",
                     callback=self.parse
