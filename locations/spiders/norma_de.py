@@ -50,7 +50,6 @@ class NormaDeSpider(scrapy.Spider):
         return opening_hours.as_opening_hours()
 
     def parse_hours(self, store):
-        #print(store.extract())
         opening_hours = OpeningHours()
         try:
             weekday = store.xpath(

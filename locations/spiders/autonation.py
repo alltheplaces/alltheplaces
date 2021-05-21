@@ -17,7 +17,7 @@ DAY_MAPPING = {0: 'Mo',
 
 
 class AutoNationSpider(scrapy.Spider):
-    name = "AutoNation"
+    name = "auto_nation"
     allowed_domains = ['autonation.com']
     start_urls = [
         'https://www.autonation.com/StoreDetails/Get/?lat=30.218908309936523&long=-97.8546142578125&radius=5000\

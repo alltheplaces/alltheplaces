@@ -25,7 +25,6 @@ class HarveysSpider(scrapy.Spider):
         yield scrapy.Request(url=url, callback=self.parse_places)
 
     def parse_places(self, response):
-        print(response.url)
         places = json.loads(response.body_as_unicode())
 
         for place in places["response"]["responseContent"]["storeModel"]:
