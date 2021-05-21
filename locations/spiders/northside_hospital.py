@@ -4,7 +4,7 @@ import scrapy
 from locations.items import GeojsonPointItem
 
 class NorthsideHospitalSpider(scrapy.Spider):
-    name = "NorthsideHospital"
+    name = "northside_hospital"
     item_attributes = { 'brand': "Northside Hospital" }
     allowed_domains = ["www.northside.com"]
     start_urls = (
@@ -30,7 +30,6 @@ class NorthsideHospitalSpider(scrapy.Spider):
         for stores in jsonresponse['data']:
             store = json.dumps(stores)
             store_data = json.loads(store)
-            print(store_data)
 
             properties = {
                 'name': store_data["name"],
