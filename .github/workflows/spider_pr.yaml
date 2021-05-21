@@ -66,12 +66,12 @@ jobs:
             OUTFILE="${SPIDER_RUN_DIR}/output.geojson"
 
             scrapy runspider \
-                -t geojson \
-                -o "file://${OUTFILE}" \
+                -o "file://${OUTFILE}:geojson" \
                 --loglevel=INFO \
                 --logfile="${LOGFILE}" \
                 -s CLOSESPIDER_TIMEOUT=60 \
                 -s CLOSESPIDER_ERRORCOUNT=1 \
+                -s LOGSTATS_FILE=${SPIDER_RUN_DIR}/stats.json \
                 $spider
 
             FAILURE_REASON="success"
@@ -90,8 +90,8 @@ jobs:
             echo "${spider} log: ${LOGFILE_URL}"
 
             if [ -f "$OUTFILE" ]; then
-                FEATURE_COUNT=$(wc -l < ${OUTFILE} | tr -d ' ')
-                
+                FEATURE_COUNT=$(jq --raw-output '.item_scraped_count' ${SPIDER_RUN_DIR}/stats.json)
+
                 if [ $FEATURE_COUNT == "0" ]; then
                     echo "${spider} has no output"
                     FAILURE_REASON="no output"
