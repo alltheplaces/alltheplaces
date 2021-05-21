@@ -92,6 +92,10 @@ jobs:
             if [ -f "$OUTFILE" ]; then
                 FEATURE_COUNT=$(jq --raw-output '.item_scraped_count' ${SPIDER_RUN_DIR}/stats.json)
 
+                if [ $FEATURE_COUNT == "null" ]; then
+                    FEATURE_COUNT="0"
+                fi
+
                 if [ $FEATURE_COUNT == "0" ]; then
                     echo "${spider} has no output"
                     FAILURE_REASON="no output"
