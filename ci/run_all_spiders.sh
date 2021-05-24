@@ -86,11 +86,16 @@ do
     # look for an existing issue for this spider
     lookup_response=$(curl -s -u ${GITHUB_AUTH} -s https://api.github.com/search/issues\?q=is:issue+label:bug+repo:alltheplaces/alltheplaces+\"Spider+${spider}+is+broken\" | jq '{count: .total_count, url: .items[0].url, state: .items[0].state}')
 
+    issues_found=$(echo $lookup_response | jq --raw-output '.count')
+    if [ "${issues_found}" == "null" ]; then
+        issues_found=0
+    fi
+
     if [ "${feature_count}" -eq "0" ] || [ "${error_count}" -gt "0" ]; then
         # if there are errors or zero features, post an issue about it
         issue_body="During the global build at ${RUN_TIMESTAMP}, spider **$spider** failed with **${feature_count} features** and **${error_count} errors**.\n\nHere's [the log](${RUN_URL_PREFIX}/logs/${spider}.log) and [the output](${RUN_URL_PREFIX}/output/${spider}.geojson) ([on a map](https://data.alltheplaces.xyz/map.html?show=${RUN_URL_PREFIX}/output/${spider}.geojson))"
 
-        if [ "$(echo $lookup_response | jq --raw-output '.count')" -eq 0 ]; then
+        if [ "${issues_found}" -eq "0" ]; then
             # no existing issue found, so create a new one
 
             curl -s -u $GITHUB_AUTH -XPOST -d "{\"title\": \"Spider ${spider} is broken\", \"labels\": [\"bug\"], \"body\": \"${issue_body}\"}" https://api.github.com/repos/alltheplaces/alltheplaces/issues | jq --raw-output --compact-output .
@@ -104,7 +109,7 @@ do
             # existing issue found, so add a comment to it
             issue_url=$(echo $lookup_response | jq --raw-output '.url')
 
-            if [ "$(echo $lookup_response | jq --raw-output '.state')" -eq "closed" ]; then
+            if [ "$(echo $lookup_response | jq --raw-output '.state')" == "closed" ]; then
                 # ... but first reopen the issue if it's closed
                 curl -s -u $GITHUB_AUTH -XPATCH -d '{"state": "open"}' $issue_url | jq --raw-output --compact-output .
 
@@ -126,14 +131,14 @@ do
     else
         issue_body="During the global build at ${RUN_TIMESTAMP}, spider **$spider** succeeded with **${feature_count} features** and **${error_count} errors**.\n\nHere's [the log](${RUN_URL_PREFIX}/logs/${spider}.log) and [the output](${RUN_URL_PREFIX}/output/${spider}.geojson) ([on a map](https://data.alltheplaces.xyz/map.html?show=${RUN_URL_PREFIX}/output/${spider}.geojson))"
 
-        if [ "$(echo $lookup_response | jq --raw-output '.count')" -eq 0 ]; then
+        if [ "${issues_found}" -eq "0" ]; then
             # no existing issue found, and output was as expected, so continue
             continue
         else
             # existing issue found. post a comment about success.
             issue_url=$(echo $lookup_response | jq --raw-output '.url')
 
-            if [ "$(echo $lookup_response | jq --raw-output '.state')" -eq "open" ]; then
+            if [ "$(echo $lookup_response | jq --raw-output '.state')" == "open" ]; then
                 # ... but first close the issue if it's open
                 curl -s -u $GITHUB_AUTH -XPATCH -d '{"state": "closed"}' $issue_url | jq --raw-output --compact-output .
 
