@@ -20,7 +20,7 @@ jobs:
 
       - name: Run all spiders
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.SCRAPERBOT_GITHUB_TOKEN }}
           GITHUB_WORKSPACE: "/tmp"
           S3_BUCKET: "placescraper-results"
         run: ./ci/run_all_spiders.sh
