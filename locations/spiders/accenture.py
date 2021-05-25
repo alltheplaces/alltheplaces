@@ -4,34 +4,41 @@ import json
 import scrapy
 
 from locations.items import GeojsonPointItem
-from locations.hours import OpeningHours
 
+countries = ['Argentina', 'Australia','Austria', 'Belgium', 'Brazil', 'Canada', 'Chile', 'China', 'Colombia', 'Costa Rica',
+             'Czech Republic', 'Denmark', 'Finland', 'France', 'Germany', 'Greece', 'Hungary', 'India', 'Indonesia',
+             'Ireland', 'Israel', 'Italy', 'Japan', 'Latvia', 'Luxembourg', 'Malaysia', 'Mauritius', 'Mexico', 'Morocco',
+             'Netherlands', 'New Zealand', 'Norway', 'Peru', 'Philippines', 'Poland', 'Portugal', 'Romania', 'Russia',
+             'Saudi Arabia', 'Singapore', 'Slovak Republic', 'South Africa', 'Spain', 'Sweden', 'Switzerland', 'Thailand',
+             'Turkey', 'United Arab Emirates', 'United Kingdom', 'United States']
 
 class AccentureSpider(scrapy.Spider):
     name = "accenture"
     item_attributes = {'brand': "Accenture"}
     allowed_domains = ["accenture.com"]
     start_urls = [
-        'https://www.accenture.com/us-en/about/locations/office-details?loc=United%20States',
+        'https://www.accenture.com/us-en/about/location-index',
     ]
 
     def start_requests(self):
-        template = 'https://www.accenture.com/api/sitecore/LocationsHeroModule/GetLocation?query=United%20States&from=0&size=150&language=en'
+        template = 'https://www.accenture.com/api/sitecore/LocationsHeroModule/GetLocation?query={country}&from=0&size=150&language=en'
 
         headers = {
             'Accept': 'application/json',
         }
 
-        yield scrapy.http.FormRequest(
-            url=template,
-            method='GET',
-            headers=headers,
-            callback=self.parse
-        )
+        for country in countries:
+            yield scrapy.http.FormRequest(
+                url=template.format(country=country),
+                method='GET',
+                headers=headers,
+                callback=self.parse
+            )
 
     def parse(self, response):
         jsonresponse = json.loads(response.body_as_unicode())
         data = jsonresponse["documents"]
+
         for stores in data:
             store = json.dumps(stores)
             store_data = json.loads(store)
