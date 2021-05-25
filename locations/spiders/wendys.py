@@ -31,7 +31,12 @@ class WendysSpider(scrapy.Spider):
             if times == "Closed":
                 continue
 
-            open_time, close_time = times.split('-', 1)
+            if times == 'All Day':
+                open_time = '00:00'
+                close_time = '23:59'
+            else:
+                open_time, close_time = times.split('-', 1)
+
             o.add_range(day, open_time=open_time, close_time=close_time)
 
         return o.as_opening_hours()
