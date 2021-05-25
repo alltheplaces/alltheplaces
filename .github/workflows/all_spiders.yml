@@ -10,6 +10,27 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+
+      - name: Setup Python
+        uses: actions/setup-python@master
+        with:
+          python-version: 3.9
+
+      - name: Install pipenv
+        run: |
+          pip --quiet install pipenv
+
+      - uses: actions/cache@v2
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/Pipfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        run: |
+          pipenv --bare install --system --deploy
+          sudo apt-get install -y jq
       
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
