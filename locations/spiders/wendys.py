@@ -27,6 +27,10 @@ class WendysSpider(scrapy.Spider):
         o = OpeningHours()
         for s in hours_elements:
             day, times = s.split(' ', 1)
+
+            if times == "Closed":
+                continue
+
             open_time, close_time = times.split('-', 1)
             o.add_range(day, open_time=open_time, close_time=close_time)
 
