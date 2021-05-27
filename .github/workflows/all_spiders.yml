@@ -44,4 +44,5 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.SCRAPERBOT_GITHUB_TOKEN }}
           GITHUB_WORKSPACE: "/tmp"
           S3_BUCKET: "placescraper-results"
+          PARALLELISM: "2"
         run: ./ci/run_all_spiders.sh
