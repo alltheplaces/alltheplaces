@@ -57,7 +57,7 @@ echo "{\"count\": ${SPIDER_COUNT}, \"results\": []}" >> ${SPIDER_RUN_DIR}/output
 for spider in $(scrapy list)
 do
     spider_out_geojson="${SPIDER_RUN_DIR}/output/${spider}.geojson"
-    spider_out_log="${SPIDER_RUN_DIR}/logs/${spider}.log"
+    spider_out_log="${SPIDER_RUN_DIR}/logs/${spider}.txt"
     statistics_json="${SPIDER_RUN_DIR}/stats/${spider}.json"
 
     feature_count=$(jq --raw-output '.item_scraped_count' ${statistics_json})
@@ -93,7 +93,7 @@ do
 
     if [ "${feature_count}" -eq "0" ] || [ "${error_count}" -gt "0" ]; then
         # if there are errors or zero features, post an issue about it
-        issue_body="During the global build at ${RUN_TIMESTAMP}, spider **$spider** failed with **${feature_count} features** and **${error_count} errors**.\n\nHere's [the log](${RUN_URL_PREFIX}/logs/${spider}.log) and [the output](${RUN_URL_PREFIX}/output/${spider}.geojson) ([on a map](https://data.alltheplaces.xyz/map.html?show=${RUN_URL_PREFIX}/output/${spider}.geojson))"
+        issue_body="During the global build at ${RUN_TIMESTAMP}, spider **$spider** failed with **${feature_count} features** and **${error_count} errors**.\n\nHere's [the log](${RUN_URL_PREFIX}/logs/${spider}.txt) and [the output](${RUN_URL_PREFIX}/output/${spider}.geojson) ([on a map](https://data.alltheplaces.xyz/map.html?show=${RUN_URL_PREFIX}/output/${spider}.geojson))"
 
         if [ "${issues_found}" -eq "0" ]; then
             # no existing issue found, so create a new one
@@ -129,7 +129,7 @@ do
             fi
         fi
     else
-        issue_body="During the global build at ${RUN_TIMESTAMP}, spider **$spider** succeeded with **${feature_count} features** and **${error_count} errors**.\n\nHere's [the log](${RUN_URL_PREFIX}/logs/${spider}.log) and [the output](${RUN_URL_PREFIX}/output/${spider}.geojson) ([on a map](https://data.alltheplaces.xyz/map.html?show=${RUN_URL_PREFIX}/output/${spider}.geojson))"
+        issue_body="During the global build at ${RUN_TIMESTAMP}, spider **$spider** succeeded with **${feature_count} features** and **${error_count} errors**.\n\nHere's [the log](${RUN_URL_PREFIX}/logs/${spider}.txt) and [the output](${RUN_URL_PREFIX}/output/${spider}.geojson) ([on a map](https://data.alltheplaces.xyz/map.html?show=${RUN_URL_PREFIX}/output/${spider}.geojson))"
 
         if [ "${issues_found}" -eq "0" ]; then
             # no existing issue found, and output was as expected, so continue
