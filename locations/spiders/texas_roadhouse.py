@@ -18,8 +18,8 @@ class TexasRoadhouseSpider(scrapy.Spider):
         for weekday in store_hours:
             # convert day from full Monday to Mo, etc
             day = weekday.get('day')[:2]
-            open_time = weekday.get('hours').get('open')
-            close_time = weekday.get('hours').get('close')
+            open_time = weekday.get('hours').get('openTime')
+            close_time = weekday.get('hours').get('closeTime')
             opening_hours.add_range(day=day,
                                     open_time=open_time,
                                     close_time=close_time,
@@ -31,7 +31,7 @@ class TexasRoadhouseSpider(scrapy.Spider):
         response.selector.remove_namespaces()
         city_urls = response.xpath('//url/loc/text()').extract()
         for path in city_urls:
-            if path.startswith('https://www.texasroadhouse.com/locations'):
+            if path.startswith('https://www.texasroadhouse.com/locations/'):
                 yield scrapy.Request(
                     path.strip(),
                     callback=self.parse_store,
