@@ -8,6 +8,7 @@ class TjmaxxSpider(scrapy.Spider):
     name = "tjmaxx"
     item_attributes = { 'brand': "T.J. Maxx", 'brand_wikidata': "Q10860683" }
     allowed_domains = ["tjx.com", "tjmaxx.com"]
+    user_agent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.157 Safari/537.36"
     start_urls = (
         'https://tjmaxx.tjx.com/store/stores/allStores.jsp',
     )
