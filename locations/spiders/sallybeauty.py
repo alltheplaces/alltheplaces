@@ -58,7 +58,7 @@ class SallySpider(scrapy.Spider):
     def parse(self, response):
         jdata = json.loads(response.body_as_unicode())
 
-        for row in jdata.get('stores',[]):
+        for row in jdata.get('stores', []):
 
             properties = {
                 'ref': row["ID"],
@@ -72,8 +72,11 @@ class SallySpider(scrapy.Spider):
                 'state': row["stateCode"],
             }
 
-            hours = self.parse_hours(row["storeHours"])
-            if hours:
-                properties['opening_hours'] = hours
+            store_hours = row.get("storeHours")
+            if store_hours:
+                hours = self.parse_hours(store_hours)
+
+                if hours:
+                    properties['opening_hours'] = hours
 
             yield GeojsonPointItem(**properties)
