@@ -72,8 +72,11 @@ class SallySpider(scrapy.Spider):
                 'state': row["stateCode"],
             }
 
-            hours = self.parse_hours(row.get("storeHours"))
-            if hours:
-                properties['opening_hours'] = hours
+            store_hours = row.get("storeHours")
+            if store_hours:
+                hours = self.parse_hours(store_hours)
+
+                if hours:
+                    properties['opening_hours'] = hours
 
             yield GeojsonPointItem(**properties)
