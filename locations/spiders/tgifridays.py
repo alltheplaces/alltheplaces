@@ -51,12 +51,12 @@ class TGIFridaySpider(scrapy.Spider):
         data = json.loads(response.xpath('//script[@type="application/ld+json"]/text()').extract_first()[:-3])
 
         properties = {
-            'addr_full': data['streetAddress'],
+            'addr_full': data['address']['streetAddress'],
             'phone': data['telephone'],
-            'city': data['addressLocality'],
-            'state': data['addressRegion'],
-            'postcode': data['postalCode'],
-            'country': data['addressCountry'],
+            'city': data['address']['addressLocality'],
+            'state': data['address']['addressRegion'],
+            'postcode': data['address']['postalCode'],
+            'country': data['address']['addressCountry'],
             'ref': data['@id'],
             'website': data['url'],
             'lat': data['geo']['latitude'],
