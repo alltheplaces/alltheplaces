@@ -57,6 +57,9 @@ class ReiSpider(scrapy.Spider):
     def parse(self, response):
         urls = set(response.xpath('//a[contains(@href,"stores") and contains(@href,".html")]/@href').extract())
         for path in urls:
+            if path == "/stores/bikeshop.html":
+                continue
+
             yield scrapy.Request(
                 response.urljoin(path),
                 callback=self.parse_store,
