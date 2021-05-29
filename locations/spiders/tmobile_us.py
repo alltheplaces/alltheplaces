@@ -75,8 +75,8 @@ class TMobileUSSpider(scrapy.Spider):
                 'postcode': store["location"]["address"]["postalCode"],
                 'phone': store.get("telephone"),
                 'website': store.get("url") or response.url,
-                'lat': float(store["location"]["latitude"]),
-                'lon': float(store["location"]["longitude"]),
+                'lat': store["location"]["latitude"],
+                'lon': store["location"]["longitude"],
             }
 
             hours = self.parse_hours(store.get("hours", []))
