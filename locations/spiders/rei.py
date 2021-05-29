@@ -33,28 +33,34 @@ class ReiSpider(scrapy.Spider):
 
     def fix_opening_hours(self, opening_hours):
         return ";".join(map(self.format_days, opening_hours))
-        
 
     def parse_store(self, response):
         json_string = response.xpath('//script[@id="store-schema"]/text()').extract_first()
         store_dict = json.loads(json_string)
-        yield GeojsonPointItem(
-            lat=store_dict["geo"]["latitude"],
-            lon=store_dict["geo"]["longitude"],
-            addr_full=store_dict["address"]["streetAddress"],
-            city=store_dict["address"]["addressLocality"],
-            state=store_dict["address"]["addressRegion"],
-            postcode=store_dict["address"]["postalCode"],
-            country=store_dict["address"]["addressCountry"],
-            opening_hours=self.fix_opening_hours(store_dict["openingHours"]),
-            phone=store_dict["telephone"],
-            website=store_dict["url"],
-            ref=store_dict["url"],
-        )
+
+        properties = {
+            "lat": store_dict["geo"]["latitude"],
+            "lon": store_dict["geo"]["longitude"],
+            "addr_full": store_dict["address"]["streetAddress"],
+            "city": store_dict["address"]["addressLocality"],
+            "state": store_dict["address"]["addressRegion"],
+            "postcode": store_dict["address"]["postalCode"],
+            "country": store_dict["address"]["addressCountry"],
+            "opening_hours": self.fix_opening_hours(store_dict["openingHours"]),
+            "phone": store_dict["telephone"],
+            "website": store_dict["url"],
+            "ref": store_dict["url"],
+        }
+
+        yield GeojsonPointItem(**properties)
 
     def parse(self, response):
-        urls = response.xpath('//a[@class="store-name-link"]/@href').extract()
+        urls = set(response.xpath('//a[contains(@href,"stores") and contains(@href,".html")]/@href').extract())
         for path in urls:
-            yield scrapy.Request(response.urljoin(path), callback=self.parse_store)
+            if path == "/stores/bikeshop.html":
+                continue
 
-        
+            yield scrapy.Request(
+                response.urljoin(path),
+                callback=self.parse_store,
+            )
