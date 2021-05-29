@@ -25,7 +25,7 @@ class TGIFridaySpider(scrapy.Spider):
     item_attributes = { 'brand': "TGI Friday's" }
     allowed_domains = ["tgifridays.com"]
     start_urls = (
-        'https://locations.tgifridays.com/index.html',
+        'https://locations.tgifridays.com/sitemap.xml',
     )
 
     def parse_hours(self, hours):
@@ -48,7 +48,7 @@ class TGIFridaySpider(scrapy.Spider):
 
     def parse_store(self, response):
         # The JSON blob has an extra "}\r\n" at the end
-        data = json.loads(response.xpath('//script[@type="application/ld+json"]/text()')[:-3])
+        data = json.loads(response.xpath('//script[@type="application/ld+json"]/text()').extract_first()[:-3])
 
         properties = {
             'addr_full': data['streetAddress'],
