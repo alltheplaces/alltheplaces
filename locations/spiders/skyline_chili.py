@@ -46,11 +46,11 @@ class SkylineChiliSpider(scrapy.Spider):
     def parse_hours(self, hours):
         opening_hours = OpeningHours()
         for spec in hours:
-            if not {"dayOfWeek", "closes", "opens"} - spec.keys():
+            if {"dayOfWeek", "closes", "opens"} <= spec.keys():
                 opening_hours.add_range(
                     spec["dayOfWeek"][:2], spec["opens"], spec["closes"]
                 )
-            elif not {"opens", "closes"} - spec.keys():
+            elif {"opens", "closes"} <= spec.keys():
                 for day in DAYS:
                     opening_hours.add_range(day, spec["opens"], spec["closes"])
             else:
