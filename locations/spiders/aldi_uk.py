@@ -1,71 +1,46 @@
 # -*- coding: utf-8 -*-
-import scrapy
 import json
-import re
+import csv
+
+import scrapy
 
 from locations.items import GeojsonPointItem
 
 
 class AldiUkSpider(scrapy.Spider):
     name = "aldiuk"
-    item_attributes = { 'brand': "Aldi" }
-    allowed_domains = ['www.aldi.co.uk']
-    start_urls = (
-        'https://www.aldi.co.uk/sitemap.xml',
-    )
-
-    # Extracts store's data from an individual store page
-    def parse_store_page(self, response):
-        response.selector.remove_namespaces()
-
-        # Get a JS object with all store information
-        store = json.loads( response.css('.js-store-finder-initial-state').xpath('./text()').get() )['store']
-
-        # Transform an array of objects for opening times into a string
-        hours = [ '{} {}'.format(d['day'], d['hours'].replace('&nbsp;&ndash;&nbsp;', '-')) for d in store['openingTimes'] ]
-        hours_str = '; '.join(hours)
-
-        # Address = Street (sometimes with Number) extracted from title, together with Address array from data object
-        street_full = store['name'].split('ALDI - ')[1].strip()
-        addr_full = '{}, {}'.format(street_full, ', '.join(store['address']))
-
-        # From ALDI's name, extract housenumber & street name
-        addr_regex = r"^(Unit\s.|\d*\-?\d*),?\s?(.*)$"
-        housenumber = re.search(addr_regex, street_full).group(1)
-        street =  re.search(addr_regex, street_full).group(2)
-
-        properties = {
-            'name': store['name'],
-            'ref': store['code'],
-            'website': 'https://www.aldi.co.uk/store/{}'.format(store['code']),
-            'lat': float( store['latlng']['lat'] ),
-            'lon': float( store['latlng']['lng'] ),
-            'postcode': store['address'][-1],
-            'city': store['address'][-2],
-            'addr_full': addr_full,
-            'opening_hours': hours_str,
-            'street': street,
-            'housenumber': housenumber,
-            'country': 'UK',
-        }
-
-        yield GeojsonPointItem(**properties)
+    item_attributes = {'brand': "Aldi"}
+    allowed_domains = ['aldi.co.uk']
 
 
-    # Extracts URLs for all individual stores from the XML document
-    def parse_stores(self, response):
-        response.selector.remove_namespaces()
+    def start_requests(self):
+        url = "https://www.aldi.co.uk/api/store-finder/search?latitude={lat}&longitude={lng}"
+        headers = {'user-agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36'}
+        with open('./locations/searchable_points/eu_centroids_120km_radius_country.csv') as points:
+            reader = csv.DictReader(points)
+            for point in reader:
+                if point["country"] == "UK":
+                    yield scrapy.Request(
+                        url=url.format(lat=point["latitude"], lng=point["longitude"]),
+                        headers=headers,
+                        callback=self.parse)
 
-        for url in response.xpath('//url'):
-            yield scrapy.Request( url.xpath('.//loc/text()').get(), callback=self.parse_store_page )
-
-
-    # Start by parsing the Sitemap: find a page with URLs of all Aldi UK stores
     def parse(self, response):
-        response.selector.remove_namespaces()
+        data = json.loads(response.body_as_unicode())
+        try:
+            stores = data['results']
+            for store in stores:
+                properties = {
+                    'ref': store['code'],
+                    'name': store['name'],
+                    'addr_full': store['name'].strip('ALDI - '),
+                    'city': store['address'][0],
+                    'postcode': store['address'][1],
+                    'lat': store['latlng']['lat'],
+                    'lon': store['latlng']['lng'],
+                    'website': response.url
+                }
 
-        for sitemap_item in response.xpath('//sitemap'):
-            sitemap_item_url = sitemap_item.xpath('.//loc/text()').get()
-
-            if '/store-' in sitemap_item_url:
-                yield scrapy.Request( sitemap_item_url , callback=self.parse_stores)
+                yield GeojsonPointItem(**properties)
+        except:
+            pass
