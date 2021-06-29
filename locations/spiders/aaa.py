@@ -55,7 +55,6 @@ class AAASpider(scrapy.Spider):
                     'lat': location["position"]["latitude"],
                     'lon': location["position"]["longitude"],
                     'phone': location["phones"].get("phone", {}).get("content"),
-                    'website': response.url
                 }
 
                 yield GeojsonPointItem(**properties)
@@ -72,7 +71,6 @@ class AAASpider(scrapy.Spider):
                 'lat': location["position"]["latitude"],
                 'lon': location["position"]["longitude"],
                 'phone': location["phones"].get("phone", {}).get("content"),
-                'website': response.url
             }
 
             yield GeojsonPointItem(**properties)
