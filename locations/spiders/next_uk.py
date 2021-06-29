@@ -2,9 +2,9 @@
 import scrapy
 import json
 import re
-from functools import reduce
 
 from locations.items import GeojsonPointItem
+from locations.hours import OpeningHours
 
 DAYS = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su']
 
@@ -18,35 +18,18 @@ class NextSpider(scrapy.Spider):
     )
 
     def store_hours(self, store_hours):
-        lastday = DAYS[0]
-        lasttime = store_hours[DAYS[0]]
-        opening_hours = lastday
+        o = OpeningHours()
 
-        if not len(reduce(lambda x, y: x+y, store_hours)):
-            return ''
-
-        for day in range(1, 7):  # loop by days
-            if day == len(store_hours):
-                break
-
-            str_curr = store_hours[DAYS[day]]
-
-            if str_curr != lasttime:
-                if lastday == DAYS[day-1]:
-                    opening_hours += ' '+lasttime+';'+DAYS[day]
-                else:
-                    opening_hours += '-'+DAYS[day-1]+' '+lasttime+';'+DAYS[day]
-                lasttime = str_curr
-                lastday = DAYS[day]
-        if lasttime != '':
-            if lastday == DAYS[day]:
-                opening_hours += ' '+str_curr
+        for day in DAYS:
+            open_time, close_time = store_hours[day].split("-")
+            open_time = open_time.rstrip()
+            close_time = close_time.rstrip()
+            if (len(open_time) < 3 or len(open_time) > 4) and (len(close_time) < 3 or len(close_time) > 4):
+                pass
             else:
-                opening_hours += '-'+DAYS[6]+' '+str_curr
-        else:
-            opening_hours = opening_hours.rstrip(DAYS[6])
+                o.add_range(day=day, open_time=open_time, close_time=close_time, time_format='%H%M')
 
-        return opening_hours.rstrip(';').strip()
+        return o.as_opening_hours()
 
     def parse(self, response):
         countries = response.xpath('//select[@id="country-store"]/option/@value')
