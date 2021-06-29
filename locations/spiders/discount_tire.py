@@ -15,7 +15,7 @@ class DiscountTireSpider(scrapy.Spider):
     item_attributes = {'brand': 'Discount Tire', 'brand_wikidata': 'Q5281735'}
     allowed_domains = ['discounttire.com']
     start_urls = [
-        'https://cdn.discounttire.com/sys-master/images/h7c/h65/9717607170078/20210423-Discount-Tire-Sitemap-Categories-Content-April2021.xml',
+        'https://www.discounttire.com/sitemap.xml',
     ]
     download_delay = 3.0
     custom_settings = {
@@ -23,6 +23,12 @@ class DiscountTireSpider(scrapy.Spider):
     }
 
     def parse(self, response):
+        response.selector.remove_namespaces()
+        url = response.xpath('//loc[contains(text(), "Sitemap-Categories")]/text()').extract_first()
+
+        yield scrapy.Request(url=url, callback=self.parse_site)
+
+    def parse_site(self, response):
         response.selector.remove_namespaces()
         urls = response.xpath('//loc[contains(text(), "/store/")]/text()').extract()
 
