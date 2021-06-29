@@ -2,6 +2,7 @@
 import scrapy
 import json
 import re
+from functools import reduce
 
 from locations.items import GeojsonPointItem
 
@@ -52,7 +53,7 @@ class NextSpider(scrapy.Spider):
         for country in countries:
             req = {"country": country.extract()}
             yield scrapy.FormRequest(
-                "http://stores.next.co.uk/index/stores",
+                "https://stores.next.co.uk/index/stores",
                 formdata=req,
                 method="POST",
                 callback=self.parse_city
@@ -62,7 +63,7 @@ class NextSpider(scrapy.Spider):
         cities = response.xpath('//option/@value')
         for city in cities:
             yield scrapy.Request(
-                'http://stores.next.co.uk/stores/single/'+city.extract(),
+                'http://stores.next.co.uk/stores/single/' + city.extract(),
                 callback=self.parse_shop
             )
 
@@ -70,7 +71,7 @@ class NextSpider(scrapy.Spider):
         text = response.xpath('//script[contains(.,"window.lctr.single_search")]/text()').extract_first()
         parts = text.split("window.lctr.results.push(")
 
-        for place in range(1, len(parts)):
+        for place in range(1, 2):
             shop = json.loads(parts[place].strip().rstrip(';').rstrip(')'))
             try:
                 hours = self.store_hours({
@@ -85,24 +86,40 @@ class NextSpider(scrapy.Spider):
             except Exception:
                 hours = ''
 
-            props = {
+            properties = {
+                'ref': shop['location_id'],
+                'name': shop['branch_name'],
+                'addr_full': shop['AddressLine'] + ',' + shop['street'],
+                'city': shop['city'],
+                'country': shop['country'],
                 'lat': float(shop['Latitude']),
                 'lon': float(shop['Longitude']),
                 'phone': shop['telephone'],
-                'website': response.url,
-                'ref': shop['location_id'],
-                'addr_full': shop['street'],
-                'city': shop['city'],
-                'country': shop['country'],
+                'website': response.url
             }
 
             if hours:
-                props['opening_hours'] = hours
+                properties['opening_hours'] = hours
             if shop['PostalCode']:
-                props['postcode'] = shop['PostalCode']
+                properties['postcode'] = shop['PostalCode']
             if shop['county']:
-                props['state'] = shop['county']
-            if shop['county']:
-                props['state'] = shop['county']
+                properties['state'] = shop['county']
 
-            yield GeojsonPointItem(**props)
+            if shop['AddressLine'] and shop['centre'] and shop['street']:
+                properties['addr_full'] = shop['AddressLine'] + ', ' + shop['centre'] + ', ' + shop['street']
+            elif shop['street'] and shop['centre']:
+                properties['addr_full'] = shop['centre'] + ',' + shop['street']
+            elif shop['AddressLine'] and shop['centre']:
+                properties['addr_full'] = shop['AddressLine'] + ', ' + shop['centre']
+            elif shop['street']:
+                properties['addr_full'] = shop['street']
+            elif shop['centre']:
+                properties['addr_full'] = shop['centre']
+            elif shop['AddressLine']:
+                properties['addr_full'] = shop['AddressLine']
+            elif shop['town']:
+                properties['addr_full'] = shop['town']
+            else:
+                properties['addr_full'] = ""
+
+            yield GeojsonPointItem(**properties)
