@@ -33,13 +33,15 @@ class NHSScotlandSpider(scrapy.Spider):
             coords = re.search(r'.+/(.+?)/?(?:\.html|$)', geo).group(1)
             lat = coords.split(',')[0]
             lon = coords.split(',')[1]
+            addressfull = response.xpath('//address[@class="beta dark-grey-3 push-half--bottom"]/text()').extract()
+            add1 = [x.rstrip() for x in addressfull]
+            add2 = [x.lstrip() for x in add1]
+            address = ' '.join(str(e) for e in add2)
 
             properties = {
                 'ref': response.xpath('//h1[@class="giga bold primary-color"]/text()').extract_first().strip() + ' ' + response.xpath('//address[@class="beta dark-grey-3 push-half--bottom"]/text()').extract()[2].strip(),
                 'name': response.xpath('//h1[@class="giga bold primary-color"]/text()').extract_first().strip(),
-                'addr_full': response.xpath('//address[@class="beta dark-grey-3 push-half--bottom"]/text()').extract()[0].strip(),
-                'city': response.xpath('//address[@class="beta dark-grey-3 push-half--bottom"]/text()').extract()[1].strip(),
-                'postcode': response.xpath('//address[@class="beta dark-grey-3 push-half--bottom"]/text()').extract()[2].strip(),
+                'addr_full': address.strip(),
                 'country': re.search(r'.+/?google.co.(.+?)/', geo).group(1),
                 'lat': float(lat),
                 'lon': float(lon),
