@@ -35,10 +35,10 @@ class PremierInnSpider(scrapy.Spider):
         try:
             properties = {
                 'ref': ref.strip('/'),
-                'name': response.xpath('//h1[@itemprop="name"]/text()').extract_first(),
+                'name': response.xpath('//h1[@itemprop="name"]/text()').extract_first().strip(),
                 'addr_full': response.xpath('//span[@itemprop="streetAddress"]/text()').extract_first(),
                 'city': response.xpath('//span[@itemprop="addressLocality"][1]/text()').extract_first(),
-                'state': response.xpath('//span[@itemprop="addressLocality"][2]').extract_first(),
+                'state': response.xpath('//span[@itemprop="addressLocality"][2]/text()').extract_first(),
                 'postcode': response.xpath('//span[@itemprop="postalCode"]/text()').extract_first(),
                 'phone': response.xpath('//span[@data-ng-bind-html="$ctrl.hotelPhoneNumber"]/text()').extract_first(),
                 'country': response.xpath('//ol[@class="nav breadcrumb--path"]/li[3]/a/text()').extract_first(),
