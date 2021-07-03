@@ -26,6 +26,7 @@ class ColdstoneCreamerySpider(scrapy.Spider):
                 'city': store_obj['City'],
                 'state': store_obj['State'],
                 'postcode': store_obj['Zip'],
+                'country': store_obj['CountryCode'],
                 'phone': store_obj['Phone'],
                 'ref': store_obj['StoreId'],
                 'website': response.urljoin('/stores/%s' % store_obj['StoreId']),
