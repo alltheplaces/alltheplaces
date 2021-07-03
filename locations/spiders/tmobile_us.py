@@ -15,7 +15,7 @@ DAY_MAPPING = {'Monday': 'Mo',
                'Saturday': 'Sa',
                'Sunday': 'Su'}
 
-BASE_URL = 'https://onmyj41p3c.execute-api.us-west-2.amazonaws.com/prod/getStoresByCoordinates?'
+BASE_URL = 'https://onmyj41p3c.execute-api.us-west-2.amazonaws.com/prod/v2.1/getStoresByCoordinates?'
 
 
 class TMobileUSSpider(scrapy.Spider):
