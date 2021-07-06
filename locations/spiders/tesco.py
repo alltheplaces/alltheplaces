@@ -74,7 +74,7 @@ class TescoSpider(scrapy.Spider):
         urls = response.xpath('//url/loc/text()').extract()
 
         # Exclude location subpages for at-store services
-        service_paths = ['petrol-filling-station', 'cafe', 'travel-money', 'f-f-clothing']
+        service_paths = ['petrol-filling-station', 'cafe', 'travel-money', 'f-f-clothing', 'pharmacy']
 
         for url in urls:
             if not any(service_path in url for service_path in service_paths):
@@ -112,7 +112,7 @@ class TescoSpider(scrapy.Spider):
                     'postcode': response.xpath('//div[@class="Core-infoWrapper"]//span[@class="Address-field Address-postalCode"]/text()').extract_first(),
                     'country': 'GB',
                     'lat': response.xpath('//div[@class="Core-infoWrapper"]//span[@class="Address-coordinates"]/meta[@itemprop="latitude"]/@content').extract_first(),
-                    'lon': response.xpath('//div[@class="Core-infoWrapper"]//span[@class="Address-coordinates"]/meta[@itemprop="latitude"]/@content').extract_first(),
+                    'lon': response.xpath('//div[@class="Core-infoWrapper"]//span[@class="Address-coordinates"]/meta[@itemprop="longitude"]/@content').extract_first(),
                     'phone': response.xpath('//div[@class="Core-infoWrapper"]//span[@itemprop="telephone"]/text()').extract_first(),
                     'website': response.url
                 }
