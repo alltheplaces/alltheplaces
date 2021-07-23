@@ -26,8 +26,8 @@ HEADERS = {
     'user-agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36',
 }
 
-class AldiUkSpider(scrapy.Spider):
-    name = "aldiuk"
+class AldiUKSpider(scrapy.Spider):
+    name = "aldi_uk"
     item_attributes = {'brand': "Aldi"}
     allowed_domains = ['aldi.co.uk']
     download_delay = 0.5
