@@ -17,44 +17,34 @@ class SunocoSpider(scrapy.Spider):
         for location in json.loads(response.body_as_unicode()):
             opening_hours = OpeningHours()
 
-            for key in [
-                'Hrs of Operation Mon-Sat Open',
-                'Hrs of Operation Mon-Sat Close',
-                'Hrs of Operation Sun Open',
-                'Hrs of Operation Sun Close'
-            ]:
-                if location[key] >= 2400:
-                    location[key] -= 2400
-
-            for day in ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']:
-                opening_hours.add_range(day=day,
-                                        open_time=f"{location['Hrs of Operation Mon-Sat Open']:04d}",
-                                        close_time=f"{location['Hrs of Operation Mon-Sat Close']:04d}",
-                                        time_format='%H%M')
-
-            opening_hours.add_range(day='Su',
-                                    open_time=f"{location['Hrs of Operation Sun Open']:04d}",
-                                    close_time=f"{location['Hrs of Operation Sun Close']:04d}",
-                                    time_format='%H%M')
+            for key, val in location.items():
+                if not key.endswith('_Hours'):
+                    continue
+                day = key[:2].capitalize()
+                if val == '24 hours':
+                    open_time = close_time = '12 AM'
+                else:
+                    open_time, close_time = val.split(' to ')
+                opening_hours.add_range(day, open_time, close_time, '%I %p')
 
             yield GeojsonPointItem(
-                ref=location['Facility ID'],
+                ref=location['Store_ID'],
                 lon=location['Longitude'],
                 lat=location['Latitude'],
                 # name as shown on the Sunoco site
-                name=f"Sunoco #{location['Facility ID']}",
-                addr_full=location['Address'],
+                name=f"Sunoco #{location['Store_ID']}",
+                addr_full=location['Street_Address'],
                 city=location['City'],
                 state=location['State'],
-                postcode=location['Zip'],
+                postcode=location['Postalcode'],
                 country='US',
                 phone=location['Phone'],
                 opening_hours=opening_hours.as_opening_hours(),
                 extras={
                     'amenity:fuel': True,
-                    'atm': int(location['ATM'] or 0) == 1,
-                    'car_wash': int(location['Car Wash'] or 0) == 1,
-                    'fuel:diesel': int(location['Diesel'] or 0) == 1,
-                    'fuel:kerosene': int(location['Kerosene'] or 0) == 1
+                    'atm': location['ATM'] == 'Y',
+                    'car_wash': location['CarWash'],
+                    'fuel:diesel': location['HasDiesel'] == 'Y',
+                    'fuel:kerosene': location['HasKero'] == 'Y'
                 }
             )
