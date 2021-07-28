@@ -1,122 +1,81 @@
 # -*- coding: utf-8 -*-
 import scrapy
-#import json
 import re
 
 from locations.items import GeojsonPointItem
+from locations.hours import OpeningHours
 
-DAYS=['Mo','Tu','We','Th','Fr','Sa','Su']
+DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+DAY_MAPPING = {
+    'Monday': 'Mo',
+    'Tuesday': 'Tu',
+    'Wednesday': 'We',
+    'Thursday': 'Th',
+    'Friday': 'Fr',
+    'Saturday': 'Sa',
+    'Sunday': 'Su'
+}
+
 
 class IkeaUKSpider(scrapy.Spider):
     name = "ikea_uk"
-    item_attributes = { 'brand': "Ikea" }
+    item_attributes = {'brand': "Ikea"}
     allowed_domains = ["ikea.com"]
     start_urls = (
         'http://www.ikea.com/gb/en/store/',
     )
 
-
     def store_hours(self, store_hours):
-        hours={}
-        for i in store_hours:
-            hours[i[:2]] = i[2:].replace(" ","")
+        opening_hours = OpeningHours()
+        store_hours = store_hours.xpath('.//h3[contains(strong, "Store")]/following-sibling::p[1]')
+        weekdays = store_hours.xpath('.//strong/text()').extract()
+        weekday_hours = store_hours.xpath('.//strong/following-sibling::text()').extract()
+        if '\u200b' in weekdays:
+            weekdays.remove('\u200b')
+        weekday_data = list(zip(weekdays, weekday_hours))
+        for weekday in weekday_data:
+            day_range, day_hours = weekday
+            day_hours = day_hours.replace('–', '-')
+            day_range = day_range.replace('–', '-')
+            day_range = day_range.strip().strip('\u200b').strip(':').strip(' -').split(' - ')
+            open_time, close_time = day_hours.split(' - ')
+            open_time = open_time.strip().strip('\u200b')
+            close_time = close_time.strip().strip('\u200b')
 
-        lastday=DAYS[0]
-        lasttime=hours[DAYS[0]]
-        opening_hours=lastday
-
-        for day in range(1,7): #loop by days
-            if day==len(hours):
-                break
-            str_curr=hours[DAYS[day]]
-
-            if str_curr != lasttime:
-                if lastday==DAYS[day-1]:
-                    opening_hours+=' '+lasttime+';'+DAYS[day]
-                else:
-                    opening_hours+='-'+DAYS[day-1]+' '+lasttime+';'+DAYS[day]
-                lasttime=str_curr
-                lastday=DAYS[day]
-        if lasttime != '':
-            if lastday==DAYS[day]:
-                opening_hours+=' '+str_curr
+            if len(day_range) > 1:
+                start = DAYS.index(day_range[0])
+                end = DAYS.index(day_range[1])
+                for day in DAYS[start:end]:
+                    opening_hours.add_range(day=DAY_MAPPING[day], open_time=open_time,
+                                            close_time=close_time,
+                                            time_format='%H:%M')
             else:
-                opening_hours+='-'+DAYS[6]+' '+str_curr
-        else:
-            opening_hours=opening_hours.rstrip(DAYS[6])
+                opening_hours.add_range(day=DAY_MAPPING[day_range[0]], open_time=open_time,
+                                        close_time=close_time,
+                                        time_format='%H:%M')
 
-        return opening_hours.rstrip(';').strip()
+        return opening_hours.as_opening_hours()
 
     def parse(self, response): 
-        shops = response.xpath('//div[contains(@class,"ContentBlock__block")]//a/@href')
-        for shop in shops:
-            yield scrapy.Request(response.urljoin(shop.extract()),callback=self.parse_shops)
+        shops_urls = response.xpath('//article//a[contains(@href, "stores")]/@href').extract()
+        for shop_url in shops_urls:
+            yield scrapy.Request(url=shop_url, callback=self.parse_shops)
 
-    def parse_shops(self, response): 
+    def parse_shops(self, response):
+        ref = re.search(r'.+/(.+?)/?(?:\.html|$)', response.url).group(1)
+        address_full = response.xpath('//h3[contains(strong, "Address")]/following-sibling::p/text()').extract_first()
+        name = response.xpath('//h1[@class="c1m1sl8e pub__h1 s1gshh7t"]/text()').extract_first()
 
-        store_data = response.xpath('//div[@id="IKEA-PageModule-Store-Store-storecontent"]')
-        props = {}
-        if store_data:
-            props['ref'] = store_data.xpath('.//meta[@itemprop="name"]/@content').extract_first()
-            phone = store_data.xpath('.//meta[@itemprop="telephone"]/@content').extract_first().strip()
+        properties = {
+            'ref': ref,
+            'name': name,
+            'addr_full': address_full,
+            'country': 'GB',
+            'website': response.url
+        }
+        hours = response.xpath('.//h2[contains(strong, "Opening hours")]/following::div[1]')
 
-            if phone:
-                props['phone'] = phone
-            props['addr_full'] = store_data.xpath('.//meta[@itemprop="streetAddress"]/@content').extract_first()
+        if hours:
+            properties['opening_hours'] = self.store_hours(hours)
 
-            if store_data.xpath('.//meta[@itemprop="postalCode"]/@content'):
-                props['postcode'] = store_data.xpath('.//meta[@itemprop="postalCode"]/@content').extract_first().strip()
-
-            props['city'] = store_data.xpath('.//meta[@itemprop="addressLocality"]/@content').extract_first()
-            props['lat'] = float(store_data.xpath('.//meta[@itemprop="latitude"]/@content').extract_first())
-            props['lon'] = float(store_data.xpath('.//meta[@itemprop="longitude"]/@content').extract_first())
-
-            props['country'] = store_data.xpath('.//meta[@itemprop="addressCountry"]/@content').extract_first()
-
-            props['opening_hours'] = self.store_hours(store_data.xpath('.//meta[@itemprop="openingHours"]/@content').extract())
-        else:
-            props['ref'] = response.xpath('//h1/text()').extract_first()
-            hours_parts = response.xpath('//div[contains(.//span/text(),"onday")]/p[1]/span/text()').extract()
-            if not hours_parts:
-                if response.xpath('//div[contains(./p/text(),"onday")]/p[1]'):
-                    hours_parts = response.xpath('//div[contains(./p/text(),"onday")]/p[1]').extract_first().replace("<p>","").replace("</p>","").replace("<br>","").replace("*","").split('\n\t')
-
-
-            stri=''
-            for hours in hours_parts:
-                if hours=='' or not hours.find(':0'):
-                    continue
-                days = hours.replace(' - ','-').replace('*','').split(" ")
-                if len(days)!=2:
-                    continue
-                parts = days[0].split("-")
-                for day in parts:
-                    stri += day[:2]+"-"
-                stri = stri.rstrip("-")+" "+days[1]+";"
-            props['opening_hours'] = stri.rstrip(";")
-            address = response.xpath('//div[@class="main-body"]/p[contains(.,"ADDRESS:")]').extract_first()
-            address = address[address.find("</strong>")+9:]
-            address = address[:address.find("<")].strip()
-            if address.count(',')==1:
-                address_parts = re.search(r"(.*),\s*(.*)\s(.{4})\s(.{3})",address)
-            else:
-                address_parts = re.search(r"(.*),\s*(.*),\s*(.{4})\s(.{3})",address)
-            try:
-                props['addr_full'] = address_parts[1]
-            except Exception as e:
-                props['addr_full'] = address
-
-            try:
-                props['city'] = address_parts[2]
-            except Exception as e:
-                props['city'] = ''
-            
-            try:
-                props['postcode'] = address_parts[3]+' '+address_parts[4]
-            except Exception as e:
-                props['postcode'] = ''
-
-            props['country'] = 'UK'
-        props['website'] = response.url
-        yield GeojsonPointItem(**props)
-            
+        yield GeojsonPointItem(**properties)
