@@ -23,7 +23,7 @@ class AcademySpider(scrapy.Spider):
         body.remove_namespaces()
         urls = body.xpath('//url/loc/text()').extract()
         for path in urls:
-            store_url = re.compile(r'http://www.academy.com/shop/storelocator/.+?/.+?/store-\d+')
+            store_url = re.compile(r'https://www.academy.com/shop/storelocator/.+?/.+?/store-\d+')
             if re.search(store_url, path):
                 yield scrapy.Request(
                     path.strip(),
