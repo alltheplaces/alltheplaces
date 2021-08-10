@@ -22,7 +22,7 @@ class SheetzSpider(scrapy.Spider):
                 'state': store['state'],
                 'postcode': store['zip'],
                 'ref': store['storeNumber'],
-                'phone': store['phone'],
+                'phone': store.get('phone'),
                 'website': 'https://orderz.sheetz.com/#/main/location/store/'+store['storeNumber'],
                 'lat': float(store['latitude']),
                 'lon': float(store['longitude']),
