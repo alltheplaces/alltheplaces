@@ -30,7 +30,7 @@ class AldiUKSpider(scrapy.Spider):
     name = "aldi_uk"
     item_attributes = {'brand': "Aldi"}
     allowed_domains = ['aldi.co.uk']
-    download_delay = 0.5
+    download_delay = 1.5
     custom_settings = {
         'USER_AGENT': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.86 Safari/537.36',
     }
