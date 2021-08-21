@@ -19,7 +19,7 @@ class HolidayStationstoreSpider(scrapy.Spider):
                              callback=self.parse_all_stores)
 
     def parse_all_stores(self, response):
-        all_stores = json.loads(response.body_as_unicode())
+        all_stores = json.loads(response.text)
 
         for store_id, store in all_stores.items():
             # GET requests get blocked by their Incapsula bot protection, but POST works fine
@@ -110,13 +110,12 @@ class HolidayStationstoreSpider(scrapy.Spider):
                 elif this_day_group['hours'] == hours:
                     this_day_group['to_day'] = day
 
-            day_groups.append(this_day_group)
+            if this_day_group:
+                day_groups.append(this_day_group)
 
-        hour_part_elems = response.xpath(
-            '//span[@style="font-size:90%"]/text()').extract()
+        hour_part_elems = response.xpath('//span[@style="font-size:90%"]/text()').extract()
         if hour_part_elems:
-            day_groups.append(
-                {'from_day': 'Mo', 'to_day': 'Su', 'hours': '00:00-23:59'})
+            day_groups.append({'from_day': 'Mo', 'to_day': 'Su', 'hours': '00:00-23:59'})
 
         opening_hours = ""
         if len(day_groups) == 1 and day_groups[0]['hours'] in ('00:00-23:59', '00:00-00:00'):
