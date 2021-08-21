@@ -28,7 +28,7 @@ class CostcoSpider(scrapy.Spider):
         'https://www.costco.com/warehouse-locations',
     )
     custom_settings = {
-        'USER_AGENT': 'Mozilla/5.0',
+        'USER_AGENT': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36',
     }
 
     download_delay = 0.5
