@@ -20,7 +20,7 @@ BASE_URL = 'https://onmyj41p3c.execute-api.us-west-2.amazonaws.com/prod/v2.1/get
 
 class TMobileUSSpider(scrapy.Spider):
     name = "tmobile_us"
-    item_attributes = { 'brand': "T-Mobile" }
+    item_attributes = {'brand': "T-Mobile"}
     allowed_domains = ["www.t-mobile.com"]
     download_delay = 0.2
 
@@ -67,7 +67,7 @@ class TMobileUSSpider(scrapy.Spider):
 
         for store in data:
             properties = {
-                'name': store["name"],
+                'name': store.get("name"),
                 'ref': store["id"],
                 'addr_full': store["location"]["address"]["streetAddress"],
                 'city': store["location"]["address"]["addressLocality"],
@@ -75,8 +75,8 @@ class TMobileUSSpider(scrapy.Spider):
                 'postcode': store["location"]["address"]["postalCode"],
                 'phone': store.get("telephone"),
                 'website': store.get("url") or response.url,
-                'lat': float(store["location"]["latitude"]),
-                'lon': float(store["location"]["longitude"]),
+                'lat': store["location"]["latitude"],
+                'lon': store["location"]["longitude"],
             }
 
             hours = self.parse_hours(store.get("hours", []))
