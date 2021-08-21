@@ -23,17 +23,7 @@ class AceHardwareSpider(scrapy.Spider):
         for day in DAY_MAPPING:
             d = day.title()[:2]
 
-            label = lis[day]['label']
-            if label == '0000 - 0000':
-                continue
-
-            start, end = label.split('-')
-            start = start.strip()
-            end = end.strip()
-            start = '%s:%s' % (start[:2], start[2:])
-            end = '%s:%s' % (end[:2], end[2:])
-
-            o.add_range(d, start, end)
+            o.add_range(d, lis[day]['openTime'], lis[day]['closeTime'])
         return o.as_opening_hours()
 
     def parse_store(self, response):
