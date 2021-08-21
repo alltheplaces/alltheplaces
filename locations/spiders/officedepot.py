@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import json
 import scrapy
 
 from locations.items import GeojsonPointItem
@@ -7,8 +8,41 @@ from locations.hours import OpeningHours
 
 class OfficedepotSpider(scrapy.Spider):
     name = 'officedepot'
-    allowed_domains = ['www.officedepot.com']
-    start_urls = ['https://www.officedepot.com/storelocator/states/']
+    allowed_domains = ["where2getit.com"]
+
+    def start_requests(self):
+        url = 'https://locations.where2getit.com/officedepot/rest/getlist?like=0.9145201524205426&lang=en_US'
+
+        headers = {
+            'Accept-Language': 'en-US,en;q=0.9',
+            'Origin': 'https://hosted.where2getit.com',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Accept': 'application/json, text/javascript, */*; q=0.01',
+            'Referer': 'https://hosted.where2getit.com/officedepot/2015/index1.html',
+            'Connection': 'keep-alive',
+            'Content-Type': 'application/json',
+        }
+
+        form_data = {
+            "request": {
+                "appkey": "592778B0-A13B-11EB-B3DB-84030D516365",
+                "formdata": {
+                    "order": "city",
+                    "objectname": "Locator::Store",
+                    "softmatch": "1",
+                    "where": {
+                    }
+                }
+            }
+        }
+
+        yield scrapy.http.FormRequest(
+            url=url,
+            method='POST',
+            body=json.dumps(form_data),
+            headers=headers,
+            callback=self.parse,
+        )
 
     def parse_store(self, response):
         o = OpeningHours()
@@ -40,14 +74,20 @@ class OfficedepotSpider(scrapy.Spider):
         )
 
     def parse(self, response):
-        for state in response.xpath('//div[@style="float: left; width: 200px;"]/a/@href').extract():
-            yield scrapy.Request(
-                response.urljoin(state),
-                callback=self.parse,
-            )
+        data = json.loads(response.body_as_unicode())
 
-        for store in response.xpath('//div[@style="float: left; width: 300px; padding-top: 10px;"]/a/@href').extract():
-            yield scrapy.Request(
-                response.urljoin(store),
-                callback=self.parse_store,
-            )
+        for store in data["response"]["collection"]:
+            properties = {
+                'ref': store["clientkey"],
+                'name': store.get("name"),
+                'addr_full': store["address1"],
+                'city': store["city"],
+                'state': store["state"],
+                'postcode': store["postalcode"],
+                'country': store["country"],
+                'lat': store["latitude"],
+                'lon': store["longitude"],
+                'phone': store["phone"],
+            }
+
+            yield GeojsonPointItem(**properties)
