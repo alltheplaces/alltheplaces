@@ -23,6 +23,9 @@ class AceHardwareSpider(scrapy.Spider):
         for day in DAY_MAPPING:
             d = day.title()[:2]
 
+            if lis[day]['label'] == '0000 - 0000':
+                continue
+
             o.add_range(d, lis[day]['openTime'], lis[day]['closeTime'])
         return o.as_opening_hours()
 
