@@ -11,7 +11,7 @@ class AceHardwareSpider(scrapy.Spider):
     name = "ace_hardware"
     item_attributes = {'brand': "Ace Hardware", 'brand_wikidata': 'Q4672981'}
     allowed_domains = ["www.acehardware.com"]
-    download_delay = 0.1
+    download_delay = 0.7
     start_urls = (
         'https://www.acehardware.com/store-directory',
     )
