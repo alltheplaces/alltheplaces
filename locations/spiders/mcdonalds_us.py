@@ -14,10 +14,10 @@ class McDonaldsUSSpider(scrapy.Spider):
         # Experimentally found that 250 was max results
         base_url = 'https://www.mcdonalds.com/googleappsv2/geolocation?latitude={lat}&longitude={lng}&radius=100&maxResults=250&country=us&language=en-us'
 
-        with open('./locations/searchable_points/us_centroids_100mile_radius_state.csv') as points:
+        with open('./locations/searchable_points/us_centroids_100mile_radius.csv') as points:
             next(points)
             for point in points:
-                _, lat, lon, _ = point.strip().split(',')
+                _, lat, lon = point.strip().split(',')
                 url = base_url.format(lat=lat, lng=lon)
                 yield scrapy.Request(url=url, callback=self.parse)
 
