@@ -19,10 +19,10 @@ class HolidayStationstoreSpider(scrapy.Spider):
                              callback=self.parse_all_stores)
 
     def parse_all_stores(self, response):
-        all_stores = json.loads(response.body_as_unicode())
+        all_stores = json.loads(response.text)
 
         for store_id, store in all_stores.items():
-            # GET requests get blocked by their CDN, but POST works fine
+            # GET requests get blocked by their Incapsula bot protection, but POST works fine
             yield scrapy.Request(f"https://www.holidaystationstores.com/Locations/Detail?storeNumber={store_id}",
                                  method='POST',
                                  meta={'store': store})
@@ -30,12 +30,9 @@ class HolidayStationstoreSpider(scrapy.Spider):
     def parse(self, response):
         store = response.meta['store']
 
-        address = response.css(
-            '.row.HolidayBackgroundColorBlue div::text').extract_first().strip()
-        phone = response.css(
-            '.body-content .col-lg-4 .HolidayFontColorRed::text').extract_first().strip()
-        services = '|'.join(response.css(
-            '.body-content .col-lg-4 ul li::text').extract()).lower()
+        address = response.xpath('//div[@class="col-lg-4 col-sm-12"]/text()')[1].extract().strip()
+        phone = response.xpath('//div[@class="HolidayFontColorRed"]/text()').extract_first().strip()
+        services = '|'.join(response.xpath('//ul[@style="list-style-type: none; padding-left: 1.0em; font-size: 12px;"]/li/text()').extract()).lower()
         open_24_hours = '24 hours' in response.css(
             '.body-content .col-lg-4').get().lower()
 
@@ -62,16 +59,18 @@ class HolidayStationstoreSpider(scrapy.Spider):
         yield GeojsonPointItem(**properties)
 
     def opening_hours(self, response):
-        hour_part_elems = response.css(
-            '.body-content .col-lg-4 .row div::text').extract()
+        hour_part_elems = response.xpath('//div[@class="row"][@style="font-size: 12px;"]')
         day_groups = []
         this_day_group = None
 
         if hour_part_elems:
-            def slice(source, step):
-                return [source[i:i+step] for i in range(0, len(source), step)]
+            for hour_part_elem in hour_part_elems:
+                day = hour_part_elem.xpath('.//div[@class="col-3"]/text()').extract_first()
+                hours = hour_part_elem.xpath('.//div[@class="col-9"]/text()').extract_first()
 
-            for day, hours in slice(hour_part_elems, 2):
+                if not hours:
+                    continue
+
                 day = day[:2]
                 match = re.search(
                     r'^(\d{1,2}):(\d{2})\s*(a|p)m - (\d{1,2}):(\d{2})\s*(a|p)m?$', hours.lower())
@@ -111,13 +110,12 @@ class HolidayStationstoreSpider(scrapy.Spider):
                 elif this_day_group['hours'] == hours:
                     this_day_group['to_day'] = day
 
-            day_groups.append(this_day_group)
+            if this_day_group:
+                day_groups.append(this_day_group)
 
-        hour_part_elems = response.xpath(
-            '//span[@style="font-size:90%"]/text()').extract()
+        hour_part_elems = response.xpath('//span[@style="font-size:90%"]/text()').extract()
         if hour_part_elems:
-            day_groups.append(
-                {'from_day': 'Mo', 'to_day': 'Su', 'hours': '00:00-23:59'})
+            day_groups.append({'from_day': 'Mo', 'to_day': 'Su', 'hours': '00:00-23:59'})
 
         opening_hours = ""
         if len(day_groups) == 1 and day_groups[0]['hours'] in ('00:00-23:59', '00:00-00:00'):
