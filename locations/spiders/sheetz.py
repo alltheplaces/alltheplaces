@@ -24,8 +24,8 @@ class SheetzSpider(scrapy.Spider):
                 'ref': store['storeNumber'],
                 'phone': store.get('phone'),
                 'website': 'https://orderz.sheetz.com/#/main/location/store/'+store['storeNumber'],
-                'lat': float(store['latitude']),
-                'lon': float(store['longitude']),
+                'lat': store['latitude'],
+                'lon': store['longitude'],
                 'opening_hours': '24/7' if store['open24x7'] else None,
                 'extras': {
                     'amenity:chargingstation': store['evCharger'],
