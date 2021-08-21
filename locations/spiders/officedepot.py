@@ -79,7 +79,7 @@ class OfficedepotSpider(scrapy.Spider):
         for store in data["response"]["collection"]:
             properties = {
                 'ref': store["clientkey"],
-                'name': store["subname"],
+                'name': store.get("name"),
                 'addr_full': store["address1"],
                 'city': store["city"],
                 'state': store["state"],
