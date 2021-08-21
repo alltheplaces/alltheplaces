@@ -22,7 +22,7 @@ class HolidayStationstoreSpider(scrapy.Spider):
         all_stores = json.loads(response.body_as_unicode())
 
         for store_id, store in all_stores.items():
-            # GET requests get blocked by their CDN, but POST works fine
+            # GET requests get blocked by their Incapsula bot protection, but POST works fine
             yield scrapy.Request(f"https://www.holidaystationstores.com/Locations/Detail?storeNumber={store_id}",
                                  method='POST',
                                  meta={'store': store})
@@ -30,12 +30,9 @@ class HolidayStationstoreSpider(scrapy.Spider):
     def parse(self, response):
         store = response.meta['store']
 
-        address = response.css(
-            '.row.HolidayBackgroundColorBlue div::text').extract_first().strip()
-        phone = response.css(
-            '.body-content .col-lg-4 .HolidayFontColorRed::text').extract_first().strip()
-        services = '|'.join(response.css(
-            '.body-content .col-lg-4 ul li::text').extract()).lower()
+        address = response.xpath('//div[@class="col-lg-4 col-sm-12"]/text()')[1].extract().strip()
+        phone = response.xpath('//div[@class="HolidayFontColorRed"]/text()').extract_first().strip()
+        services = '|'.join(response.xpath('//ul[@style="list-style-type: none; padding-left: 1.0em; font-size: 12px;"]/li/text()').extract()).lower()
         open_24_hours = '24 hours' in response.css(
             '.body-content .col-lg-4').get().lower()
 
