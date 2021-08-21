@@ -27,7 +27,9 @@ class AceHardwareSpider(scrapy.Spider):
             if label == '0000 - 0000':
                 continue
 
-            start, end = label.split(' - ')
+            start, end = label.split('-')
+            start = start.strip()
+            end = end.strip()
             start = '%s:%s' % (start[:2], start[2:])
             end = '%s:%s' % (end[:2], end[2:])
 
