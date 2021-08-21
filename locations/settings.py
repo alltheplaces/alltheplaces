@@ -16,8 +16,6 @@ SPIDER_MODULES = ['locations.spiders']
 NEWSPIDER_MODULE = 'locations.spiders'
 
 
-# Crawl responsibly by identifying yourself (and your website) on the user-agent
-USER_AGENT = 'Mozilla/5.0 (Linux; rv:1.0) https://github.com/alltheplaces/alltheplaces'
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = False
@@ -60,10 +58,19 @@ TELNETCONSOLE_ENABLED = False
 
 # Enable or disable downloader middlewares
 # See http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html
-#DOWNLOADER_MIDDLEWARES = {
-#    'locations.middlewares.MyCustomDownloaderMiddleware': 543,
-#}
+DOWNLOADER_MIDDLEWARES = {
+    'scrapy.downloadermiddlewares.useragent.UserAgentMiddleware': None,
+    'scrapy.downloadermiddlewares.retry.RetryMiddleware': None,
+    'scrapy_fake_useragent.middleware.RandomUserAgentMiddleware': 400,
+    'scrapy_fake_useragent.middleware.RetryUserAgentMiddleware': 401,
+}
 
+FAKEUSERAGENT_PROVIDERS = [
+    'scrapy_fake_useragent.providers.FakeUserAgentProvider',
+    'scrapy_fake_useragent.providers.FakerProvider',
+    'scrapy_fake_useragent.providers.FixedUserAgentProvider',
+]
+USER_AGENT = 'Mozilla/5.0 (Linux; rv:1.0) https://github.com/alltheplaces/alltheplaces'
 
 # Enable or disable extensions
 # See http://scrapy.readthedocs.org/en/latest/topics/extensions.html
