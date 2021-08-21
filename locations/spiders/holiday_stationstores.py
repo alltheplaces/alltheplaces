@@ -59,16 +59,18 @@ class HolidayStationstoreSpider(scrapy.Spider):
         yield GeojsonPointItem(**properties)
 
     def opening_hours(self, response):
-        hour_part_elems = response.css(
-            '.body-content .col-lg-4 .row div::text').extract()
+        hour_part_elems = response.xpath('//div[@class="row"][@style="font-size: 12px;"]')
         day_groups = []
         this_day_group = None
 
         if hour_part_elems:
-            def slice(source, step):
-                return [source[i:i+step] for i in range(0, len(source), step)]
+            for hour_part_elem in hour_part_elems:
+                day = hour_part_elem.xpath('.//div[@class="col-3"]/text()').extract_first()
+                hours = hour_part_elem.xpath('.//div[@class="col-9"]/text()').extract_first()
 
-            for day, hours in slice(hour_part_elems, 2):
+                if not hours:
+                    continue
+
                 day = day[:2]
                 match = re.search(
                     r'^(\d{1,2}):(\d{2})\s*(a|p)m - (\d{1,2}):(\d{2})\s*(a|p)m?$', hours.lower())
