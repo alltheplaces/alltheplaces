@@ -9,7 +9,7 @@ DAY_MAPPING = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday
 
 class AceHardwareSpider(scrapy.Spider):
     name = "ace_hardware"
-    item_attributes = { 'brand': "Ace Hardware" }
+    item_attributes = {'brand': "Ace Hardware", 'brand_wikidata': 'Q4672981'}
     allowed_domains = ["www.acehardware.com"]
     download_delay = 0.1
     start_urls = (
@@ -50,8 +50,8 @@ class AceHardwareSpider(scrapy.Spider):
             'postcode': store_data['StoreZipCd'],
             'ref': store_data['StoreNumber'],
             'website': response.url,
-            'lat': float(store_data['Latitude']),
-            'lon': float(store_data['Longitude']),
+            'lat': store_data['Latitude'],
+            'lon': store_data['Longitude'],
         }
 
         hours = self.parse_hours(store_data['RegularHours'])
