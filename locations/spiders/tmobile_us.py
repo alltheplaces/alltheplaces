@@ -15,12 +15,12 @@ DAY_MAPPING = {'Monday': 'Mo',
                'Saturday': 'Sa',
                'Sunday': 'Su'}
 
-BASE_URL = 'https://onmyj41p3c.execute-api.us-west-2.amazonaws.com/prod/getStoresByCoordinates?'
+BASE_URL = 'https://onmyj41p3c.execute-api.us-west-2.amazonaws.com/prod/v2.1/getStoresByCoordinates?'
 
 
 class TMobileUSSpider(scrapy.Spider):
     name = "tmobile_us"
-    item_attributes = { 'brand': "T-Mobile" }
+    item_attributes = {'brand': "T-Mobile"}
     allowed_domains = ["www.t-mobile.com"]
     download_delay = 0.2
 
