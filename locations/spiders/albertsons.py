@@ -66,8 +66,8 @@ class AlbertsonsSpider(scrapy.Spider):
             "name": js["name"],
             "ref": js["meta"]["id"],
             "website": response.url,
-            "lat": js["geocodedCoordinate"]["lat"],
-            "lon": js["geocodedCoordinate"]["long"],
+            "lat": js["yextDisplayCoordinate"]["lat"],
+            "lon": js["yextDisplayCoordinate"]["long"],
             "brand": js["c_groceryBrand"],
             "opening_hours": hours.as_opening_hours(),
         }
