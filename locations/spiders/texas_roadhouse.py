@@ -6,7 +6,10 @@ from locations.hours import OpeningHours
 
 class TexasRoadhouseSpider(scrapy.Spider):
     name = "texas_roadhouse"
-    item_attributes = { 'brand': "Texas Roadhouse", 'brand_wikidata': "Q7707945" }
+    item_attributes = {
+        'brand': "Texas Roadhouse",
+        'brand_wikidata': "Q7707945",
+    }
     allowed_domains = ["www.texasroadhouse.com"]
     start_urls = (
         'https://www.texasroadhouse.com/sitemap.xml',
