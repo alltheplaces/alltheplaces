@@ -9,12 +9,13 @@ DAY_MAPPING = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday
 
 class AceHardwareSpider(scrapy.Spider):
     name = "ace_hardware"
-    item_attributes = { 'brand': "Ace Hardware" }
+    item_attributes = {'brand': "Ace Hardware", 'brand_wikidata': 'Q4672981'}
     allowed_domains = ["www.acehardware.com"]
-    download_delay = 0.1
+    download_delay = 0.7
     start_urls = (
         'https://www.acehardware.com/store-directory',
     )
+    user_agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36'
 
     def parse_hours(self, lis):
         o = OpeningHours()
@@ -22,15 +23,10 @@ class AceHardwareSpider(scrapy.Spider):
         for day in DAY_MAPPING:
             d = day.title()[:2]
 
-            label = lis[day]['label']
-            if label == '0000 - 0000':
+            if lis[day]['label'] == '0000 - 0000':
                 continue
 
-            start, end = label.split(' - ')
-            start = '%s:%s' % (start[:2], start[2:])
-            end = '%s:%s' % (end[:2], end[2:])
-
-            o.add_range(d, start, end)
+            o.add_range(d, lis[day]['openTime'], lis[day]['closeTime'])
         return o.as_opening_hours()
 
     def parse_store(self, response):
@@ -50,8 +46,8 @@ class AceHardwareSpider(scrapy.Spider):
             'postcode': store_data['StoreZipCd'],
             'ref': store_data['StoreNumber'],
             'website': response.url,
-            'lat': float(store_data['Latitude']),
-            'lon': float(store_data['Longitude']),
+            'lat': store_data['Latitude'],
+            'lon': store_data['Longitude'],
         }
 
         hours = self.parse_hours(store_data['RegularHours'])
