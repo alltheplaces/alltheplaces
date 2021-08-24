@@ -35,7 +35,7 @@ class TargetSpider(scrapy.Spider):
                                         time_format="%H:%M:%S")
             except:
                 continue  # closed or no time range given
-        return opening_hours
+        return opening_hours.as_opening_hours()
 
     def parse_store(self, response):
         data = response.xpath('//script[@type="application/ld+json"]/text()').re_first('.*')
