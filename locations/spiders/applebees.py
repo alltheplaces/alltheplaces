@@ -9,9 +9,21 @@ from locations.hours import OpeningHours
 
 class ApplebeesSpider(scrapy.Spider):
     name = "applebees"
-    item_attributes = {"brand": "Applebees"}
-    allowed_domains = ["www.applebees.com"]
-    start_urls = ("https://www.applebees.com/sitemap.xml",)
+    item_attributes = {"brand": "Applebees", "brand_wikidata": "Q621532"}
+    allowed_domains = ["restaurants.applebees.com"]
+    start_urls = ("https://restaurants.applebees.com/en-us/",)
+
+    def parse(self, response):
+        for url in response.xpath('//*[@id="bowse-content"]//@href').extract():
+            yield scrapy.Request(url, callback=self.parse_state)
+
+    def parse_state(self, response):
+        for url in response.xpath('//*[@class="map-list"]//@href').extract():
+            yield scrapy.Request(url, callback=self.parse_city)
+
+    def parse_city(self, response):
+        for url in response.xpath('//*[@class="map-list-item-header"]/a[@class="ga-link"]/@href').extract():
+            yield scrapy.Request(url, callback=self.parse_store)
 
     def store_hours(self, store_hours):
         o = OpeningHours()
@@ -56,10 +68,7 @@ class ApplebeesSpider(scrapy.Spider):
             day_groups.append(this_day_group)
 
         opening_hours = ""
-        if len(day_groups) == 1 and day_groups[0]["hours"] in (
-            "00:00-23:59",
-            "00:00-00:00",
-        ):
+        if len(day_groups) == 1 and day_groups[0]["hours"] in ("00:00-23:59", "00:00-00:00"):
             opening_hours = "24/7"
         else:
             for day_group in day_groups:
@@ -73,23 +82,8 @@ class ApplebeesSpider(scrapy.Spider):
 
         return opening_hours
 
-    def parse(self, response):
-        response.selector.remove_namespaces()
-        for u in response.xpath("//url/loc/text()").extract():
-            if (
-                not u.startswith("https://www.applebees.com/en/restaurants-")
-                or not u[-1].isdigit()
-            ):
-                continue
-
-            yield scrapy.Request(u, callback=self.parse_store)
-
     def parse_store(self, response):
-        data = json.loads(
-            response.xpath(
-                '//script[@type="application/ld+json"]/text()'
-            ).extract_first()
-        )
+        data = json.loads(response.xpath('//script[@type="application/ld+json"]/text()').extract_first())
 
         if not data or isinstance(data, dict):
             return
@@ -106,9 +100,7 @@ class ApplebeesSpider(scrapy.Spider):
         yield GeojsonPointItem(
             lat=float(data["geo"]["latitude"]),
             lon=float(data["geo"]["longitude"]),
-            website=response.xpath(
-                '//head/link[@rel="canonical"]/@href'
-            ).extract_first(),
+            website=response.xpath('//head/link[@rel="canonical"]/@href').extract_first(),
             ref=response.xpath('//head/link[@rel="canonical"]/@href').extract_first(),
             opening_hours=o.as_opening_hours(),
             addr_full=data.get("address", {}).get("streetAddress"),
