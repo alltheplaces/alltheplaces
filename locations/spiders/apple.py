@@ -12,7 +12,7 @@ class AppleSpider(scrapy.Spider):
     name = "apple"
     item_attributes = {"brand": "Apple"}
     allowed_domains = ["apple.com"]
-    start_urls = ("https://www.apple.com/retail/storelist/",)
+    start_urls = ("https://www.apple.com/retail/sitemap/sitemap.xml",)
 
     def store_hours(self, hours):
         opening_hours = OpeningHours()
@@ -52,21 +52,14 @@ class AppleSpider(scrapy.Spider):
         return opening_hours.as_opening_hours()
 
     def parse(self, response):
-        countries = response.xpath('//div[contains(@id, "stores")]')
-        for country in countries:
-            country_code = country.xpath("./@id").extract_first()[:2].upper()
-
-            shops = country.xpath(".//li/a/@href").extract()
-            for shop in shops:
-                yield scrapy.Request(
-                    response.urljoin(shop),
-                    callback=self.parse_shops,
-                    meta={"properties": {"country": country_code}},
-                )
+        response.selector.remove_namespaces()
+        for url in response.xpath("//loc/text()").extract():
+            url = url.strip()
+            yield scrapy.Request(url, callback=self.parse_shops)
 
     def parse_shops(self, response):
 
-        properties = response.meta["properties"]
+        properties = {}
 
         store_details = response.xpath('//div[contains(@class,"store-details")]')
 
