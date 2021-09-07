@@ -95,7 +95,8 @@ class ApplebeesSpider(scrapy.Spider):
             d = h.xpath("@data-daypart").extract_first()[:2]
             open_time = h.xpath('//span[@class="time-open"]/text()').extract_first()
             close_time = h.xpath('//span[@class="time-close"]/text()').extract_first()
-            o.add_range(d, open_time, close_time, "%I:%M%p")
+            if open_time and close_time:
+                o.add_range(d, open_time, close_time, "%I:%M%p")
 
         yield GeojsonPointItem(
             lat=float(data["geo"]["latitude"]),
