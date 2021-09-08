@@ -18,7 +18,16 @@ class ArbysSpider(scrapy.Spider):
     def get_store_info(self, response):
         data = response.xpath('//script[@type="application/ld+json"]/text()').extract_first()
         if data:
-            data = json.loads(data)[0]
+            try:
+                data = json.loads(data)[0]
+            except json.JSONDecodeError:
+                # Unescaped " on two pages
+                lines = data.split('\n')
+                i = 2 + next(i for (i, line) in enumerate(lines) if "mainContentOfPage" in line)
+                lines[i] = '"text": ""}'
+                data = '\n'.join(lines)
+                data = json.loads(data)[0]
+
 
             properties = {
                 'ref': response.css('div.store-id::text').get().split(': ')[-1],
