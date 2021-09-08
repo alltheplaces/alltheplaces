@@ -12,7 +12,7 @@ class ArbysSpider(scrapy.Spider):
     allowed_domains = ["locations.arbys.com"]
     download_delay = 0.2
     start_urls = (
-        'https://locations.arbys.com/browse/',
+        'https://locations.arbys.com/',
     )
 
     def get_store_info(self, response):
@@ -21,15 +21,13 @@ class ArbysSpider(scrapy.Spider):
             data = json.loads(data)[0]
 
             properties = {
-                # store name is after the pipe, e.g. Fast Food Drive-Thru
-                # Restaurants | Arby's 8437
-                'ref': data["name"].rsplit("|", 1)[-1].strip(),
+                'ref': response.css('div.store-id::text').get().split(': ')[-1],
                 'name': data["name"],
                 'addr_full': data["address"]["streetAddress"].strip(),
                 'city': data["address"]["addressLocality"].strip(),
                 'state': data["address"]["addressRegion"],
                 'postcode': data["address"]["postalCode"],
-                'phone': data.get("telephone", None),
+                'phone': data["address"]["telephone"],
                 'lat': float(data["geo"]["latitude"]),
                 'lon': float(data["geo"]["longitude"]),
                 'website': response.url,
