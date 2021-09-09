@@ -27,9 +27,14 @@ class PlannedParenthoodSpider(scrapy.Spider):
             yield scrapy.Request(
                 response.urljoin(path),
                 callback=self.parse_venue,
+                meta={'dont_redirect':True}
             )
 
     def parse_venue(self, response):
+        if response is None:
+            # Ignoring redirects
+            return
+
         properties = {
             'addr_full': response.xpath('//*[@itemprop="streetAddress"]/text()').extract_first(),
             'city': response.xpath('//*[@itemprop="addressLocality"]/text()').extract_first(),
@@ -42,7 +47,7 @@ class PlannedParenthoodSpider(scrapy.Spider):
 
         map_image_url = response.xpath('//img[@class="address-map"]/@src').extract_first()
         match = re.search(r"center=(.*?),(.*?)&zoom", map_image_url)
-        properties['lat'] = float(match.group(1)),
-        properties['lon'] = float(match.group(2)),
+        properties['lat'] = float(match.group(1))
+        properties['lon'] = float(match.group(2))
 
         yield GeojsonPointItem(**properties)
