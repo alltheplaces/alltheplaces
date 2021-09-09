@@ -42,7 +42,7 @@ class PlannedParenthoodSpider(scrapy.Spider):
 
         map_image_url = response.xpath('//img[@class="address-map"]/@src').extract_first()
         match = re.search(r"center=(.*?),(.*?)&zoom", map_image_url)
-        properties['lat'] = float(match.group(1)),
-        properties['lon'] = float(match.group(2)),
+        properties['lat'] = float(match.group(1))
+        properties['lon'] = float(match.group(2))
 
         yield GeojsonPointItem(**properties)
