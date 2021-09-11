@@ -26,9 +26,11 @@ class PrimarkSpider(scrapy.Spider):
                 yield scrapy.Request(response.urljoin(href))
 
     def parse_store(self, response):
-        js = json.loads(
-            response.xpath('//script[@class="js-map-config"]/text()').get()
-        )["entities"][0]["profile"]
+        json_text = response.xpath('//script[@class="js-map-config"]/text()').get()
+        if json_text is None:
+            # These stores are "opening soon"
+            return
+        js = json.loads(json_text)["entities"][0]["profile"]
 
         opening_hours = OpeningHours()
         for row in js["hours"]["normalHours"]:
