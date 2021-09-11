@@ -1,96 +1,57 @@
 # -*- coding: utf-8 -*-
-import scrapy
-import re
-from locations.items import GeojsonPointItem
 import json
-# import unicodedata
+import urllib.parse
+
+import scrapy
+
+from locations.hours import OpeningHours
+from locations.items import GeojsonPointItem
 
 
 class PrimarkSpider(scrapy.Spider):
     name = "primark"
-    item_attributes = { 'brand': "Primark" }
+    item_attributes = {"brand": "Primark", "brand_wikidata": "Q137023"}
     allowed_domains = ["primark.com"]
-    start_urls = (
-        'https://www.primark.com/en/our-stores',
-    )
-
-    def parse_osm(self,opening_table):
-
-        for div in opening_table:
-            opening_days = div.xpath('//span[@class="opening-day"]/text()').extract()
-            opening_hours = div.xpath('//span[@class="opening-hours text-turquoise"]/text()').extract()
-        
-        dayhour_list = list(zip(opening_days[:7], opening_hours[:7]))
-        dayhour_list.append(dayhour_list.pop(0)) # moving sunday to end of list
-
-        hoursdict = {}
-        for dayhour in dayhour_list:
-            if dayhour[1] not in hoursdict:
-                hoursdict[dayhour[1]] = []
-
-        for dayhour in dayhour_list:
-            hoursdict[dayhour[1]].append(dayhour[0])
-
-        osm = ""
-        for x in hoursdict:
-            if (hoursdict[x][0] == hoursdict[x][-1]):
-                osm += hoursdict[x][0] + " " + x + ", "
-            else:
-                osm += hoursdict[x][0] + "-" + hoursdict[x][-1] + " " + x + ", "
-        osm = osm[:-2]
-
-        day_dict = {'Monday':'Mo', 'Tuesday':'Tu', 'Wednesday':'We', 'Thursday':'Th', 'Friday':'Fr', 'Saturday':'Sa', 'Sunday':'Su'}
-        pattern = re.compile(r'\b(' + '|'.join(day_dict.keys()) + r')\b')
-        osm = pattern.sub(lambda x: day_dict[x.group()], osm.replace(" - ", "-"))
-
-        return osm
+    start_urls = ("https://stores.primark.com/",)
 
     def parse(self, response):
-        raw_JSON = re.search(r'showMarks\(\$\.parseJSON\(\'(.*)\'\)\);', response.text)
-        dataJSON = json.loads(raw_JSON.group(1))
+        for href in response.xpath(
+            '(//a[@data-ya-track="directorylink"]|//a[@data-ya-track="businessname"])/@href'
+        ).extract():
+            url = response.urljoin(href)
+            path = urllib.parse.urlparse(url).path
+            if path.count("/") == 3:
+                yield scrapy.Request(response.urljoin(href), callback=self.parse_store)
+            else:
+                yield scrapy.Request(response.urljoin(href))
 
-        for i in range(int(len(dataJSON))):
-            link = "https://www.primark.com/en/store/" + dataJSON[i]['Name'].lower().strip().replace(' – ', '-').replace(' - ', '-').replace(' ', '-').replace('\'','').replace('(','').replace(')','').replace(',', '')
-            request = scrapy.Request(link, dont_filter=True, callback=self.parse_store, errback=self.handle_fail)
-            yield request
+    def parse_store(self, response):
+        json_text = response.xpath('//script[@class="js-map-config"]/text()').get()
+        if json_text is None:
+            # These stores are "opening soon"
+            return
+        js = json.loads(json_text)["entities"][0]["profile"]
 
-    def handle_fail(self,failure):
-        pass
-
-    def parse_store(self,response):
-
-        address = (' '.join(response.css('h2.store-address').xpath('text()').extract())).lstrip().rstrip()
-        name = ''.join(response.css('div.store-info-text h1.title-level-1').xpath('text()').extract())
-        opening_hours = self.parse_osm(response.css('div.opening-times-table div.opening-day-hours'))
-        lat, lon = response.xpath('//div[@class="store-location-map"]/a/@href').extract()[0].split('?q=')[1].split(',')
-        website = response.url
-
-        postcode = ''
-        postmatch = re.search(r'[\d]{5}', address)
-        if postmatch:
-            postcode = postmatch.group(0)
-
-        phone = ''
-        phonematch = response.css('div.phone-number a.title-level-3').xpath('text()')
-        if phonematch:
-            phone = phonematch.extract()[0].replace("Tel: ","")
-
+        opening_hours = OpeningHours()
+        for row in js["hours"]["normalHours"]:
+            day = row["day"][:2].capitalize()
+            for interval in row["intervals"]:
+                start_time = "{:02}:{:02}".format(*divmod(interval["start"], 100))
+                end_time = "{:02}:{:02}".format(*divmod(interval["end"], 100))
+                opening_hours.add_range(day, start_time, end_time)
 
         properties = {
-            'name': name,
-            'addr_full' : address,
-            'ref': name,
-            'website' : website,
-            # 'street': street,
-            # 'city': city,
-            # 'state' : statezip[:2],
-            'postcode' : postcode,
-            'opening_hours': opening_hours,
-            'phone': phone,
-            'lat': lat,
-            'lon': lon,
+            "name": js["name"],
+            "addr_full": js["address"]["line1"],
+            "ref": js["meta"]["id"],
+            "website": response.url,
+            "city": js["address"]["city"],
+            "state": js["address"]["region"],
+            "postcode": js["address"]["postalCode"],
+            "country": js["address"]["countryCode"],
+            "opening_hours": opening_hours.as_opening_hours(),
+            "phone": js["mainPhone"]["number"],
+            "lat": response.xpath('//meta[@itemprop="latitude"]/@content').get(),
+            "lon": response.xpath('//meta[@itemprop="longitude"]/@content').get(),
         }
-
-        yield (GeojsonPointItem(**properties))
-
-        
+        yield GeojsonPointItem(**properties)
