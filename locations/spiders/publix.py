@@ -27,7 +27,7 @@ class PublixSpider(scrapy.Spider):
                     continue
                 latitude = row["latitude"]
                 longitude = row["longitude"]
-                url = f"https://services.publix.com/api/v1/storelocation?{latitude=!s}&{longitude=!s}"
+                url = f"https://services.publix.com/api/v1/storelocation?latitude={latitude}&longitude={longitude}"
                 yield scrapy.Request(url, headers={"Accept": "application/json"})
 
     def parse(self, response):
