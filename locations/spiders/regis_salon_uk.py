@@ -11,6 +11,7 @@ class RegisUKSpider(scrapy.Spider):
     item_attributes = { 'brand': "Regis Salon" }
     allowed_domains = ["www.regissalons.co.uk"]
     start_urls = ['https://www.regissalons.co.uk/salon-locator?show-all=yes']
+    download_delay = 4.0
 
     def convert_hours(self, hours):
         hours = [x.strip() for x in hours]
@@ -21,20 +22,20 @@ class RegisUKSpider(scrapy.Spider):
                 from_hr, to_hr = [hr.strip() for hr in hours[i].split('–')]
                 if re.search(regex_am, from_hr):
                     from_hr = re.sub(regex_am, '', from_hr)
-                    hour_min = from_hr.split(':')
+                    hour_min = re.split('[:.]', from_hr)
                     if len(hour_min[0]) < 2:
                         hour_min[0].zfill(2)
                     converted_times += (":".join(hour_min)) + ' - '
                 else:
                     from_hr = re.sub(regex_pm, '', from_hr)
-                    hour_min = from_hr.split(':')
+                    hour_min = re.split('[:.]', from_hr)
                     if int(hour_min[0]) < 12:
                         hour_min[0] = str(12 + int(hour_min[0]))
                     converted_times += (":".join(hour_min)) + ' - '
 
                 if re.search(regex_am, to_hr):
                     to_hr = re.sub(regex_am, '', to_hr)
-                    hour_min = to_hr.split(':')
+                    hour_min = re.split('[:.]', to_hr)
                     if len(hour_min[0]) < 2:
                         hour_min[0].zfill(2)
                     if int(hour_min[0]) == 12:
@@ -42,7 +43,7 @@ class RegisUKSpider(scrapy.Spider):
                     converted_times += (":".join(hour_min))
                 else:
                     to_hr = re.sub(regex_pm, '', to_hr)
-                    hour_min = to_hr.split(':')
+                    hour_min = re.split('[:.]', to_hr)
                     if int(hour_min[0]) < 12:
                         hour_min[0] = str(12 + int(hour_min[0]))
                     converted_times += (":".join(hour_min))
@@ -77,4 +78,6 @@ class RegisUKSpider(scrapy.Spider):
     def parse(self, response):
         stores = response.xpath('//ul[@class="list"]//a/@href').extract()
         for store in stores:
+            if '/salon-region/' in store:
+                continue
             yield scrapy.Request(store, callback=self.parse_store)
