@@ -46,6 +46,9 @@ class RentACenterSpider(scrapy.Spider):
         if not ref:
             return  # not a store page
 
+        if data["geo"]["latitude"] is data["geo"]["longitude"] is False:
+            return
+
         properties = {
             'addr_full': data["address"]["streetAddress"],
             'phone': data["telephone"],
