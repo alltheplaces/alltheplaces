@@ -87,5 +87,7 @@ class RentACenterSpider(scrapy.Spider):
         urls = [url.strip() for url in urls]
 
         for url in urls:
+            if '/home/' in url:
+                continue
             yield scrapy.Request(url, callback=self.parse_state_sitemap)
 
