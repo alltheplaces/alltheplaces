@@ -27,7 +27,7 @@ class RegisSpider(scrapy.Spider):
         phone = (
             response.xpath('//@href[contains(., "tel:")]')
             .extract_first()
-            .replace("tel:", ""),
+            .replace("tel:", "")
         )
         properties = {
             "lat": data["lat"],
