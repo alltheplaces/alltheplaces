@@ -38,7 +38,8 @@ class SafewayCaSpider(scrapy.Spider):
         yield GeojsonPointItem(**properties)
 
     def parse_hours(self, response):
-        vals = [s for s in response.css(".hours tbody").xpath(".//text()").extract() if s.strip()]
+        tbl = response.css('.holiday_hours_tbl')[-1].xpath('./tbody//text()')
+        vals = [s for s in tbl.extract() if s.strip()]
         opening_hours = OpeningHours()
         for day, span in zip(*[iter(vals)] * 2):
             day = day[:2]
