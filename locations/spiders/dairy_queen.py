@@ -20,7 +20,7 @@ class DairyQueenSpider(scrapy.Spider):
                 'accept': 'application/json',
                 'referer': 'https://www.dairyqueen.com/',
             },
-            body='{"size":5000,"query":{"bool":{"must":[{"term":{"contenttype":"locationDetail"}}]}}}',
+            body='{"size":10000,"query":{"bool":{"must":[{"term":{"contenttype":"locationDetail"}}]}}}',
         )
 
     def parse(self, response):
