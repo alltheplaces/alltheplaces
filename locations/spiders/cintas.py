@@ -30,58 +30,43 @@ class CintasSpider(scrapy.Spider):
         try:
             data = json.loads(response.xpath('//script[@type="application/ld+json" and contains(text(), "addressLocality")]/text()').extract_first())
             store = data['address']['streetAddress'] + ',%20' + data['address']['addressLocality'] + ',%20' + data['address']['addressRegion']
-            storeurl= 'https://www.cintas.com/sitefinity/public/services/locationfinder.svc/search/{}/50'.format(store)
-            if data['address']['addressLocality'] + ', ' + data['address']['addressRegion'] == 'Missoula, MT':
-                pass
-            else:
-                yield scrapy.Request(response.urljoin(storeurl), callback=self.parse_loc)
+
+            storeurl= 'https://www.cintas.com/sitefinity/public/services/locationfinder.svc/search/{}/25'.format(store)
+            yield scrapy.Request(response.urljoin(storeurl), callback=self.parse_loc)
         except:
             pass
 
-    def parse_loc(selfself, response):
-        global ref, full_address, locality, state, pc, phone, lat, lon
-        geocoderdata = response.xpath('//body//text()').extract()
-        geocodertext = geocoderdata[0]
-        geocodertext = geocodertext.replace('[', '')
-        geocode_re = re.search('distance(.*)', geocodertext).group()
-        for item in geocode_re.split('location":{'):
-            geocode_replace = item.replace('}', '')
-            geocode_replace = geocode_replace.replace('{', '')
-            geocode_replace = geocode_replace.replace(']', '')
-            geocode_replace = geocode_replace.replace("'", '')
-            for j in geocode_replace.split(','):
-                try:
-                    i = j.split(':')
-                    if i[0].startswith('"Lati'):
-                        lat = float(i[1].replace('"', ''))
-                    elif i[0].startswith('"Longit'):
-                        lon = float(i[1].replace('"', ''))
-                    elif i[0].startswith('"Id'):
-                        ref = i[1].replace('"', '')
-                    elif i[0].startswith('"Address_1'):
-                        full_address = i[1].replace('"', '')
-                    elif i[0].startswith('"City'):
-                        locality = i[1].replace('"', '')
-                    elif i[0].startswith('"District'):
-                        state = i[1].replace('"', '')
-                    elif i[0].startswith('"Postal'):
-                        pc = i[1].replace('"', '')
-                    elif i[0].startswith('"Phone'):
-                        phone = i[1].replace('"', '')
+    def parse_loc(self, response):
+        try:
+            geocoderdata = response.xpath('//body//text()').extract()
+            geocodertext = geocoderdata[0]
+            geocodertext = geocodertext.replace('[', '')
+            geocode_re = re.search('distance(.*)', geocodertext).group()
+            for item in geocode_re.split('"location":'):
+                geocode_replace = re.sub('"distance":.*?:{','', item)
+                geocode_replace = geocode_replace.replace('}', '')
+                geocode_replace = geocode_replace.replace('{', '')
+                geocode_replace = geocode_replace.replace(']', '')
+                geocode_replace = geocode_replace.replace("'", '')
+                geocode_replace = geocode_replace.replace('"', '')
+                if item.startswith('dist'):
+                    pass
+                else:
+                    geoc_list = geocode_replace.split(',')
 
                     properties = {
-                        'ref':   ref,
+                        'ref': geoc_list[5].replace('Id:', ''),
                         'name': 'Cintas',
-                        'addr_full': full_address,
-                        'city': locality,
-                        'state': state,
-                        'postcode': pc,
+                        'addr_full': geoc_list[0].replace('Address_1:', ''),
+                        'city': geoc_list[2].replace('City:', ''),
+                        'state': geoc_list[4].replace('District:', ''),
+                        'postcode': geoc_list[10].replace('Postal:', ''),
                         'country': "US",
-                        'phone': phone,
-                        'lat': lat,
-                        'lon': lon,
+                        'phone': geoc_list[12].replace('Phone:', ''),
+                        'lat': float(geoc_list[6].replace('Latitude:', '')),
+                        'lon': float(geoc_list[7].replace('Longitude:', '')),
                     }
 
                     yield GeojsonPointItem(**properties)
-                except:
-                    pass
+        except:
+            pass
