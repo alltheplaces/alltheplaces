@@ -30,6 +30,7 @@ class CintasSpider(scrapy.Spider):
         try:
             data = json.loads(response.xpath('//script[@type="application/ld+json" and contains(text(), "addressLocality")]/text()').extract_first())
             store = data['address']['streetAddress'] + ',%20' + data['address']['addressLocality'] + ',%20' + data['address']['addressRegion']
+
             storeurl= 'https://www.cintas.com/sitefinity/public/services/locationfinder.svc/search/{}/25'.format(store)
             yield scrapy.Request(response.urljoin(storeurl), callback=self.parse_loc)
         except:
@@ -52,7 +53,6 @@ class CintasSpider(scrapy.Spider):
                     pass
                 else:
                     geoc_list = geocode_replace.split(',')
-
 
                     properties = {
                         'ref': geoc_list[5].replace('Id:', ''),
