@@ -32,9 +32,9 @@ class TGIFridaySpider(scrapy.Spider):
         opening_hours = OpeningHours()
 
         for hour in hours:
-            if hour["opens"] == "Closed":
+            if hour["opens"] in ("Closed", ""):
                 continue
-            elif hour["closes"] == "Closed":
+            elif hour["closes"] in ("Closed", ""):
                 continue
             else:
                 opening_hours.add_range(
