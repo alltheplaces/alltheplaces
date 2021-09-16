@@ -1,37 +1,55 @@
 # -*- coding: utf-8 -*-
 import scrapy
-import json
-import re
 
 from locations.items import GeojsonPointItem
 
+
 class TacocabanaSpider(scrapy.Spider):
     name = "tacocabana"
-    item_attributes = { 'brand': "Taco Cabana" }
-    allowed_domains = ["www.tacocabana.com"]
-    start_urls = (
-        "http://www.tacocabana.com/wp-admin/admin-ajax.php?action=get_ajax_processor&processor=get-locations&queryType=&postID=816",
-    )
-        
-    def parse(self, response):
-        data = json.loads(re.sub(r"\s<.*?>.*<.*?>\s", "", response.body_as_unicode()))
+    item_attributes = {"brand": "Taco Cabana"}
+    allowed_domains = ["api.koala.fuzzhq.com"]
 
-        for store in data:
+    def start_requests(self):
+        yield scrapy.http.JsonRequest(
+            "https://api.koala.fuzzhq.com/oauth/access_token",
+            data={
+                "client_id": "3nA4STkGif0fZGApqxMlVewy3h8HN6Fsy7jVOACP",
+                "client_secret": "8oBU5gWiNg04zYzz61hN3ETrTIzvmbGyeLCX0F1s",
+                "grant_type": "ordering_app_credentials",
+                "scope": "group:ordering_app",
+            },
+            callback=self.fetch_locations,
+        )
+
+    def fetch_locations(self, response):
+        self.access_token = response.json()["access_token"]
+        yield self.request(
+            "https://api.koala.fuzzhq.com/v1/ordering/store-locations/?include[]=operating_hours&include[]=attributes&per_page=50"
+        )
+
+    def request(self, url):
+        return scrapy.Request(
+            url, headers={"Authorization": f"Bearer {self.access_token}"}
+        )
+
+    def parse(self, response):
+        data = response.json()
+
+        for store in data["data"]:
             properties = {
-                "phone"         : store["phone_number"],
-                "ref"           : str(store["locator_store_number"]),
-                "name"          : store["post_title"],
-                "opening_hours" : store["hours"],
-                "website"       : store["permalink"],
-                "lat"           : store["x_coordinate"],
-                "lon"           : store["y_coordinate"],
-                "street"        : store["street_address_1"] + store["street_address_2"],
-                "city"          : store["city"],
-                "state"         : store["state"],
-                "postcode"      : store["zip_code"]
+                "website": f'https://olo.tacocabana.com/menu/{store["slug"]}?showInfoModal=true',
+                "ref": store["brand_id"],
+                "lat": store["latitude"],
+                "lon": store["longitude"],
+                "addr_full": store["street_address"],
+                "city": store["city"],
+                "state": store["cached_data"]["state"],
+                "country": store["country"],
+                "postcode": store["zip_code"],
+                "phone": store["phone_number"],
             }
-            
             yield GeojsonPointItem(**properties)
-        
-        else:
-            self.logger.info("No results")
+
+        next_url = data["meta"]["pagination"]["links"]["next"]
+        if next_url:
+            yield self.request(next_url)
