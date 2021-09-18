@@ -1,47 +1,45 @@
 # -*- coding: utf-8 -*-
+import json
+
 import scrapy
-import re
 
 from locations.items import GeojsonPointItem
 
 
 class TijuanaFlatsSpider(scrapy.Spider):
     name = "tijuanaflats"
-    item_attributes = { 'brand': "Tijuana Flats" }
-    allowed_domains = ['tijuanaflats.com']
-    start_urls = (
-        'https://tijuanaflats.com/wpsl_stores-sitemap.xml',
-    )
+    item_attributes = {"brand": "Tijuana Flats", "brand_wikidata": "Q7801833"}
+    allowed_domains = ["tijuanaflats.com"]
+    start_urls = ("https://www.tijuanaflats.com/locations",)
 
     def parse(self, response):
-        response.selector.remove_namespaces()
-        city_urls = response.xpath('//url/loc/text()').extract()
-        for path in city_urls:
-            yield scrapy.Request(
-                path.strip(),
-                callback=self.parse_store,
+        data = json.loads(
+            response.xpath(
+                '//tjs-view-locations/attribute::*[name()=":locations"]'
+            ).extract_first()
+        )
+        for row in data:
+            for ent in row["yoast_json_ld"][0]["@graph"]:
+                if ent["@type"] == "WebPage" and row["slug"] in ent["url"]:
+                    name = ent["name"]
+
+            # extract text from html snippet
+            hours_of_operation = scrapy.Selector(text=row["acf"]["hours_of_operation"])
+            opening_hours = "; ".join(
+                a.strip() for a in hours_of_operation.xpath("//text()").extract()
             )
 
-    def parse_store(self, response):
-
-        if response.xpath('//table[@class="wpsl-opening-hours"]/tr').extract():
-            storeHours = str(response.xpath('//table[@class="wpsl-opening-hours"]/tr').extract())
-            storeHours = storeHours.replace('[','').replace(']','').replace("'",'').replace(',',' - ')
-        else:
-            storeHours = response.xpath('//table[@class="wpsl-opening-hours"]/tr').extract()
-
-
-        properties = {
-            'name': response.xpath('//h1[@class="entry-title"]/text()').extract_first(),
-            'website': response.request.url,
-            'ref': response.xpath('//h1[@class="entry-title"]/text()').extract_first(),
-            'addr_full': response.xpath('//div[@class="wpsl-location-address"]/span[1]/text()').extract_first() + " " + response.xpath('//div[@class="wpsl-location-address"]/span[2]/text()').extract_first(),
-            'city': response.xpath('//div[@class="wpsl-location-address"]/span[3]/text()').extract_first().rstrip(', '),
-            'state': response.xpath('//div[@class="wpsl-location-address"]/span[4]/text()').extract_first().strip(),
-            'postcode': response.xpath('//div[@class="wpsl-location-address"]/span[5]/text()').extract_first().strip(),
-            'opening_hours': storeHours,
-            'lat': float(response.xpath('//script/text()').extract()[-3].split('"lat":"')[1].split('"')[0]),
-            'lon': float(response.xpath('//script/text()').extract()[-3].split('"lng":"')[1].split('"')[0]),
-        }
-
-        yield GeojsonPointItem(**properties)
+            properties = {
+                "ref": row["slug"],
+                "name": name,
+                "lat": row["acf"]["physical_location"]["lat"],
+                "lon": row["acf"]["physical_location"]["lng"],
+                "addr_full": row["acf"]["address_1"],
+                "city": row["acf"]["city"],
+                "state": row["acf"]["state"],
+                "postcode": row["acf"]["zip"],
+                "phone": row["acf"]["contact_phone"],
+                "website": f'https://www.tijuanaflats.com/locations/{row["slug"]}',
+                "opening_hours": opening_hours,
+            }
+            yield GeojsonPointItem(**properties)
