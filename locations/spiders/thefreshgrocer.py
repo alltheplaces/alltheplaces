@@ -5,62 +5,34 @@ import re
 import scrapy
 
 from locations.items import GeojsonPointItem
-from locations.hours import OpeningHours
 
 
 class FreshGrocerSpider(scrapy.Spider):
     name = "thefreshgrocer"
-    item_attributes = { 'brand': "The Fresh Grocer" }
+    item_attributes = {"brand": "The Fresh Grocer", "brand_wikidata": "Q18389721"}
     allowed_domains = ["thefreshgrocer.com"]
 
-    def start_requests(self):
-        url = "https://www.thefreshgrocer.com/StoreLocatorSearch"
-
-        for region in ["DE", "PA"]:
-            payload = {
-                "Region": region,
-                "City": "",
-                "SearchTerm": "",
-                "FilterOptions%5B0%5D.IsActive": "false",
-                "FilterOptions%5B0%5D.Name": "Online%20Grocery%20Delivery",
-                "FilterOptions%5B0%5D.Value": "MwgService%3AShop2GroDelivery",
-                "FilterOptions%5B1%5D.IsActive": "false",
-                "FilterOptions%5B1%5D.Name": "Online%20Grocery%20Pickup",
-                "FilterOptions%5B1%5D.Value": "MwgService%3AShop2GroPickup",
-                "FilterOptions%5B2%5D.IsActive": "false",
-                "FilterOptions%5B2%5D.Name": "Platters%2C%20Cakes%20%26%20Catering",
-                "FilterOptions%5B2%5D.Value": "MwgService%3AOrderReady",
-                "FilterOptions%5B3%5D.IsActive": "false",
-                "FilterOptions%5B3%5D.Name": "Pharmacy",
-                "FilterOptions%5B3%5D.Value": "MwgService%3AUmaPharmacy",
-                "FilterOptions%5B4%5D.IsActive": "false",
-                "FilterOptions%5B4%5D.Name": "Retail%20Dietitian",
-                "FilterOptions%5B4%5D.Value": "ShoppingService%3ARetail%20Dietitian",
-                "Radius": "150",
-                "Take": "999"
-            }
-
-            yield scrapy.FormRequest(url=url, formdata=payload)
+    start_urls = ("https://www.thefreshgrocer.com/",)
 
     def parse(self, response):
-        stores = json.loads(re.search(r'stores: (\[.*\])', response.body_as_unicode()).groups()[0])
-        for store in stores:
-            store_id = store["PseudoStoreId"]
-            addr_1 = response.xpath('//li[@id="{}"]//div[@class="store__address"]/div[1]/text()'.format(store_id)).extract_first()
-            city_state_post = response.xpath('//li[@id="{}"]//div[@class="store__address"]/div[2]/text()'.format(store_id)).extract_first()
-            city, state, post = re.search(r'(.*?), (.*?) (\d+)', city_state_post).groups()
+        script = response.xpath('//script[contains(text(), "__PRELOADED_STATE__")]/text()').extract_first()
+        script = script[script.index("{") :]
+        stores = json.loads(script)["stores"]["availablePlanningStores"]["items"]
 
+        for store in stores:
+            ref = store["retailerStoreId"]
             properties = {
-                "ref": store_id,
-                "name": store["StoreName"],
-                "lat": store["Coordinates"]["Latitude"],
-                "lon": store["Coordinates"]["Longitude"],
-                "addr_full": addr_1.strip(),
-                "city": city,
-                "state": state,
-                "postcode": post,
-                "website": "https://shoprite.com/store/" + store_id
+                "ref": ref,
+                "website": f"https://www.thefreshgrocer.com/sm/planning/rsid/{ref}",
+                "name": store["name"],
+                "lat": store["location"]["latitude"],
+                "lon": store["location"]["longitude"],
+                "addr_full": store["addressLine1"],
+                "city": store["city"],
+                "state": store["countyProvinceState"],
+                "postcode": store["postCode"],
+                "phone": store["phone"],
+                "opening_hours": store["openingHours"],
             }
 
             yield GeojsonPointItem(**properties)
-
