@@ -6,11 +6,11 @@ from locations.items import GeojsonPointItem
 class TiffanySpider(scrapy.Spider):
 
     name = "tiffany"
-    item_attributes = { 'brand': "Tiffany" }
+    item_attributes = { 'brand': "Tiffany", 'brand_wikidata': "Q1066858" }
     allowed_domains = ["www.tiffany.com"]
     download_delay = 0.5
     start_urls = (
-        'http://www.tiffany.com/jewelry-stores/store-list/united-states',
+        'https://www.tiffany.com/jewelry-stores/store-list/',
     )
 
     def parse_day(self, day):
@@ -61,27 +61,31 @@ class TiffanySpider(scrapy.Spider):
 
         return "; ".join(hours)
 
-    def parse_stores(self, response):
-        data = json.loads(response.xpath('//script[@type="application/ld+json"]/text()').extract_first())
-        properties = {
-            'addr_full': data['address']['streetAddress'],
-            'phone': data['telephone'],
-            'name': data['name'],
-            'city': data['address']['addressLocality'],
-            'state': data['address']['addressRegion'],
-            'postcode': data['address']['postalCode'],
-            'ref': data['name'].replace(' ','_'),
-            'website': response.url,
-            'lat': float(data['geo']['latitude']),
-            'lon': float(data['geo']['longitude']),
-        }
-
-        hours = self.parse_hours(response.xpath('//div[@id="divExtendedInfo"]/text()').extract())
-        if hours:
-            properties['opening_hours'] = hours
-        yield GeojsonPointItem(**properties)
-
     def parse(self, response):
-        urls = response.xpath('//a[contains(text(),"View on Map")]/@href').extract()
-        for path in urls:
-            yield scrapy.Request(response.urljoin(path), callback=self.parse_stores)
+        for href in response.xpath('//@href[contains(., "/jewelry-stores/")]').extract():
+            yield scrapy.Request(response.urljoin(href))
+
+        for ldjson in response.xpath('//script[@type="application/ld+json"]/text()').extract():
+            data = json.loads(ldjson)
+            if data["@type"] != "Store":
+                continue
+
+            properties = {
+                'name': data['name'],
+                'phone': data['telephone'],
+                'addr_full': data['address']['streetAddress'],
+                'city': data['address']['addressLocality'],
+                'state': data['address']['addressRegion'],
+                'postcode': data['address']['postalCode'],
+                'country': data['address']['addressCountry'],
+                'ref': data['name'].replace(' ','_'),
+                'website': response.url,
+                'lat': response.xpath('//tiffany-maps/@markeratlat').extract_first(),
+                'lon': response.xpath('//tiffany-maps/@markeratlng').extract_first(),
+            }
+
+            hours = self.parse_hours(response.xpath('//div[@id="divExtendedInfo"]/text()').extract())
+            if hours:
+                properties['opening_hours'] = hours
+            yield GeojsonPointItem(**properties)
+
