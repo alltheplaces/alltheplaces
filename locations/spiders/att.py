@@ -76,7 +76,7 @@ class ATTScraper(scrapy.Spider):
             'lon': response.xpath('normalize-space(//meta[@itemprop="longitude"]/@content)').extract_first(),
         }
 
-        hours = response.xpath('//span[@class="c-location-hours-today js-location-hours"]/@data-days').extract_first()
+        hours = response.xpath('//span[@class="c-hours-today js-hours-today"]/@data-days').extract_first()
         properties['opening_hours'] = self.parse_hours(hours)
 
         yield GeojsonPointItem(**properties)
