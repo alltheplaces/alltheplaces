@@ -11,8 +11,11 @@ from locations.items import GeojsonPointItem
 class AlbertHeijnSpider(scrapy.Spider):
     name = "albert_heijn"
     item_attributes = {"brand": "Albert Heijn", "brand_wikidata": "Q1653985"}
-    allowed_domains = ["www.ah.nl"]
-    start_urls = ("https://www.ah.nl/sitemaps/entities/stores/stores.xml",)
+    allowed_domains = ["www.ah.nl", "www.ah.be"]
+    start_urls = (
+        "https://www.ah.nl/sitemaps/entities/stores/stores.xml",
+        "https://www.ah.be/sitemaps/entities/stores/stores.xml",
+    )
 
     def parse(self, response):
         response.selector.remove_namespaces()
