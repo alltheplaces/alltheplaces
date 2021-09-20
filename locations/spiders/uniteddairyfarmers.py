@@ -9,7 +9,7 @@ from locations.hours import OpeningHours
 
 class UnitedDairyFarmersSpider(scrapy.Spider):
     download_delay = 0.2
-    name = "UnitedDairyFarmers"
+    name = "united_dairy_farmers"
     item_attributes = {'brand': "United Dairy Farmers", 'brand_wikidata': "Q7887677"}
     allowed_domains = ["udfinc.com"]
     start_urls = (
