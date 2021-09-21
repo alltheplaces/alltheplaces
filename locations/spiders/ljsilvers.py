@@ -27,6 +27,6 @@ class LjsilversSpider(scrapy.Spider):
                 "state": addr.css(".storestate ::text").extract_first(),
                 "postcode": addr.css(".storepostalcode ::text").extract_first(),
                 "country": row["c"],
-                "phone": row["p"],
+                "phone": row.get("p"),
             }
             yield GeojsonPointItem(**properties)
