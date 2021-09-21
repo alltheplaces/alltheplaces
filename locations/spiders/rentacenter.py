@@ -48,15 +48,15 @@ class RentACenterSpider(scrapy.Spider):
 
         properties = {
             'addr_full': data["address"]["streetAddress"],
-            'phone': data["telephone"],
+            'phone': data.get("telephone"),
             'city': data["address"]["addressLocality"],
             'state': data["address"]["addressRegion"],
             'postcode': data["address"]["postalCode"],
             'country': 'US',
             'ref': ref,
             'website': response.url,
-            'lat': float(data["geo"]["latitude"]),
-            'lon': float(data["geo"]["longitude"]),
+            'lat': data["geo"]["latitude"],
+            'lon': data["geo"]["longitude"],
             'name': data["name"]
         }
 
@@ -87,5 +87,7 @@ class RentACenterSpider(scrapy.Spider):
         urls = [url.strip() for url in urls]
 
         for url in urls:
+            if '/home/' in url:
+                continue
             yield scrapy.Request(url, callback=self.parse_state_sitemap)
 
