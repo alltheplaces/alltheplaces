@@ -16,6 +16,8 @@ class SCSpider(scrapy.Spider):
 
     def parse(self, response):
         replace_list = (']', '[', '}', '"', '\\t')
+        cat = ('State Park', 'Library', 'Department of Health and Human Resources',
+               'Court House', 'Department of Mental Health', 'Department of Motor Vehicles', 'SC Works')
 
         zipre = response.xpath('//body//text()').extract()
         ziptext = zipre[0]
@@ -29,21 +31,23 @@ class SCSpider(scrapy.Spider):
                 if i.startswith('Id'):
                     i = i.replace(', ', " ")
                     j = i.split(',')
-                    for js in j:
-                        properties = {
-                            'ref': j[0].split(':')[1],
-                            'name': j[1].split(':')[1],
-                            'addr_full': j[6].split(':')[1] + ' ' + j[5].split(':')[1],
-                            'city': '',
-                            'state': '',
-                            'postcode': '',
-                            'country': 'US',
-                            'phone': j[7].split(':')[1],
-                            'lat': float(j[2].split(':')[1]),
-                            'lon': -abs((float(j[3].split(':')[1]))),
-                        }
+                    print(cat[int((j[4].split(':')[1]))-1])
 
-                        yield GeojsonPointItem(**properties)
+                    properties = {
+                        'ref': j[0].split(':')[1],
+                        'name': j[1].split(':')[1],
+                        'extras': cat[int((j[4].split(':')[1])) - 1],
+                        'addr_full': j[6].split(':')[1] + ' ' + j[5].split(':')[1],
+                        'city': '',
+                        'state': '',
+                        'postcode': '',
+                        'country': 'US',
+                        'phone': j[7].split(':')[1],
+                        'lat': float(j[2].split(':')[1]),
+                        'lon': -abs((float(j[3].split(':')[1]))),
+                    }
+
+                    yield GeojsonPointItem(**properties)
 
             except:
                 pass
