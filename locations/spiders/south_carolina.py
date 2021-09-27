@@ -18,31 +18,26 @@ class SCSpider(scrapy.Spider):
     def parse(self, response):
         cat = ('State Park', 'Library', 'Department of Health and Human Resources',
                'Court House', 'Department of Mental Health', 'Department of Motor Vehicles', 'SC Works')
-
         data = json.loads(json.dumps(response.json()))
-        # ziptext = zipre[0]
-        # ziptext = ziptext.replace(',SC', ', SC')
-        # for item in replace_list:
-        #     ziptext = ziptext.replace(item, '')
-        #
-        # ziptext2 = ziptext.split('{')
-        print(data[0])
 
         for i in data:
-            print (i['Address'])
 
-            properties = {
-                'ref': i['Id'],
-                'name': i['Description'],
-                'extras': (cat[int(i['CategoryId']) - 1]),
-                'addr_full': i['Address'],
-                'city': '',
-                'state': '',
-                'postcode': i['Zipcode'],
-                'country': 'US',
-                'phone': i['Telephone'],
-                'lat': float(i['Latitude']),
-                'lon': -abs(float(i['Longitude'])),
-            }
+            try:
+                properties = {
+                    'ref': i['Id'],
+                    'name': i['Description'],
+                    'extras': {
+                        'category': (cat[int(i['CategoryId']) - 1]),
+                    },
+                    'addr_full': i['Address'],
+                    'postcode': i['Zipcode'],
+                    'country': 'US',
+                    'phone': i['Telephone'],
+                    'lat': float(i['Latitude']),
+                    'lon': -abs(float(i['Longitude'])),
+                }
 
-            yield GeojsonPointItem(**properties)
+                yield GeojsonPointItem(**properties)
+
+            except:
+                pass
