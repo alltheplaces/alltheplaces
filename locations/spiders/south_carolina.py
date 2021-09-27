@@ -9,7 +9,6 @@ from locations.items import GeojsonPointItem
 class SCSpider(scrapy.Spider):
     download_delay = 0.2
     name = "south_carolina"
-    item_attributes = {'brand': "State of South Carolina", 'brand_wikidata': "Q53709977"}
     allowed_domains = ["sc.gov"]
     start_urls = (
         'https://applications.sc.gov/PortalMapApi/api/Map/GetMapItemsByCategoryId/1,2,3,4,5,6,7',
