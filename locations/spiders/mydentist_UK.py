@@ -50,7 +50,6 @@ class MyDentistSpider(scrapy.Spider):
                     'name': 'MyDentist',
                     'addr_full': address,
                     'city': city,
-                    'state': 'null',
                     'postcode': zip,
                     'country': 'UK',
                     'phone': phone,
