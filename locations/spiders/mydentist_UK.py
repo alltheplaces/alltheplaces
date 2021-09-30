@@ -8,7 +8,7 @@ from locations.items import GeojsonPointItem
 class MyDentistSpider(scrapy.Spider):
     #download_delay = 0.2
     name = "my_dentist"
-    item_attributes = {'brand': "MyDentist", 'brand_wikidata': "Q65118035"}
+    item_attributes = {'brand': "MY DENTIST", 'brand_wikidata': "Q65118035"}
     allowed_domains = ["mydentist.co.uk"]
 
     start_urls = ([
