@@ -21,7 +21,7 @@ class CBRE(scrapy.Spider):
 
     def parse_location(self, response):
         store_js = response.xpath('//div[@class="OfficeMapsWrapper google-map"]//script//text()').extract()
-        try:
+        if store_js:
             store = (store_js[0])
             storere = re.findall('\(("[^)]+")', store)
             for item in storere:
@@ -41,5 +41,5 @@ class CBRE(scrapy.Spider):
                 }
 
                 yield GeojsonPointItem(**properties)
-        except:
-            pass
+            else:
+                pass
