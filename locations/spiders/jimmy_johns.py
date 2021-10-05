@@ -1,61 +1,53 @@
 # -*- coding: utf-8 -*-
+from os import stat
 import scrapy
-import json
-
+from urllib import parse
 from locations.items import GeojsonPointItem
 
-STATES = ["AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DC", "DE", "FL", "GA",
-          "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD",
-          "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ",
-          "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC",
-          "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"]
-HEADERS = { 'Content-Type': 'application/json' }
-JJBASE = 'https://www.jimmyjohns.com/webservices/Location/LocationServiceHandler.asmx/{}'
-CITIES = JJBASE.format('GetCitiesByStateNameAbbreviation')
-STORES = JJBASE.format('GetStoreAddressesByCityAndState')
-
-class JimmyJohnsSpider(scrapy.Spider):
-    name = "jimmy-johns"
-    item_attributes = { 'brand': "Jimmy John's", 'brand_wikidata': "Q1689380" }
-    allowed_domains = ["www.jimmyjohns.com"]
-    download_delay = 0.2
-
-    def start_requests(self):
-        for state in STATES:
-            current_state = json.dumps({ 'state': state })
-            request = scrapy.Request(
-                CITIES,
-                method='POST',
-                body=current_state,
-                headers=HEADERS,
-                callback=self.parse_cities
-            )
-            request.meta['state'] = state
-            yield request
-
-    def parse_cities(self, response):
-        cities = json.loads(response.body)
-        for city in cities['d']:
-            current_city = json.dumps({ 'state': response.meta['state'], 'city': city })
-            request = scrapy.Request(
-                STORES,
-                method='POST',
-                body=current_city,
-                headers=HEADERS,
-                callback=self.parse
-            )
-            yield request
+class TemplateSpider(scrapy.Spider):
+    name = "jimmy_johns"
+    allowed_domains = ["locations.jimmyjohns.com"]
+    start_urls = (
+        'https://locations.jimmyjohns.com/sitemap.xml',
+        #'https://locations.jimmyjohns.com/ks/emporia/sandwiches-1298.html',
+    )
 
     def parse(self, response):
-        stores = json.loads(response.body)
-        for store in stores['d']:
-            full = '{}, {}, {} {}'.format(store['address'], store['city'], store['state'], store['postalcode'])
-            yield GeojsonPointItem(
-                name=store['storename'],
-                addr_full=full,
-                opening_hours=store['hours'],
-                phone=store['telephone'],
-                ref=store['storeid'],
-                lon=float(store['lng']),
-                lat=float(store['lat']),
-            )
+        
+        stores = response.xpath('//url/loc[contains(text(),"sandwiches")]/text()').extract()
+        for store in stores:
+            print(store)
+            yield scrapy.Request(response.urljoin(store), callback=self.parse_store)
+
+    def parse_store(self, response):
+        address1 = response.xpath('normalize-space(//p[@class="address"]/span[1]/text())').extract()
+        address2 = response.xpath('normalize-space(//p[@class="address"]/span[2]/text())').extract()
+        address2 = address2[0].split(",")
+        city = address2[0]
+        address2 = address2[1].strip()
+        address2 = address2.split(" ")
+        state = address2[0]
+        postcode = address2[1]
+        phone = response.xpath('//div[@class="map-list-item-inner relative"]/div/a[@class="phone ga-link"]/text()').extract()
+        gmapsurl = response.xpath('//div[@class="map-list-item-inner relative"]/a[@class="directions ga-link"]/@href').extract()
+
+        _, query_string = parse.splitquery(gmapsurl[0])
+        query = parse.parse_qs(query_string)
+        latlng = query["daddr"]
+        lat, lon = latlng[0].split(",")
+
+        properties = {
+            'ref': response.url,
+            #'name': name,
+            'addr_full': address1[0],
+            'city': city,
+            'state': state,
+            'postcode': postcode,
+            #'country': country,
+            'phone': phone[0],
+            'website': response.url,
+            'lat': lat,
+            'lon': lon,
+        }
+
+        yield GeojsonPointItem(**properties)
