@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 import scrapy
+
 from locations.items import GeojsonPointItem
+
 
 class ScrewfixSpider(scrapy.Spider):
     name = "screwfix"
@@ -23,7 +25,7 @@ class ScrewfixSpider(scrapy.Spider):
             'ref': ref,
             'name': response.xpath(".//span[@class='tcName']/text()").extract_first(),
             'addr_full': addr,
-            'opening_hours': str('; ' .join([i.strip() for i in response.xpath(".//dl/dd/text()").extract()])),
+            'country': 'UK',
             'lat': float(response.xpath(".//input[@id='lat']/@value").extract_first()),
             'lon': float(response.xpath(".//input[@id='lng']/@value").extract_first()),
             'website': ref
