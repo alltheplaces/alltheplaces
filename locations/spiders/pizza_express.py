@@ -28,7 +28,6 @@ class PizzaExpressSpider(scrapy.Spider):
                     yield scrapy.Request(response.urljoin(searchurl), callback=self.parse_search)
 
     def parse_search(self, response):
-        print(response.url)
         data = json.loads(json.dumps(response.json()))
 
         for i in data:
