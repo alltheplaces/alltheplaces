@@ -40,7 +40,7 @@ class VitalantSpider(scrapy.Spider):
                 "ref": ref,
                 "lat": lat,
                 "lon": lon,
-                "website": website,
+                "website": response.urljoin(website),
                 "name": name,
                 "addr_full": ", ".join(addrs),
                 "city": city,
