@@ -28,7 +28,6 @@ class AveraSpider(scrapy.Spider):
                 yield scrapy.Request(response.urljoin(loc_url), callback=self.parse_data)
 
     def parse_data(self, response):
-        print (response.url)
         try:
             data = json.loads(response.xpath('//script[@type="application/ld+json" and contains(text(), "latitude")]/text()').extract_first())
         except:
