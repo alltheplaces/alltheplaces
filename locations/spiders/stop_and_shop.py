@@ -16,7 +16,7 @@ class StopAndShopSpider(scrapy.Spider):
     )
 
     def parse(self, response):
-        data = json.loads(json.dumps(response.json()))git
+        data = json.loads(json.dumps(response.json()))
         for i in data.items():
             idata = i
             for j in idata:
