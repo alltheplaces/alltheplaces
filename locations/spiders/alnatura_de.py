@@ -28,8 +28,8 @@ class AlnaturaSpider(scrapy.Spider):
         if match:
             from_day = match.group(1).strip()
             to_day = match.group(2).strip()
-            from_time = match.group(3).strip()
-            to_time = match.group(4).strip()
+            from_time = match.group(3).strip().replace(':','.')
+            to_time = match.group(4).strip().replace(':','.')
 
             fhours = int(float(from_time))
             fminutes = (float(from_time) * 60) % 60
@@ -38,13 +38,13 @@ class AlnaturaSpider(scrapy.Spider):
             tminutes = (float(to_time) * 60) % 60
             fmt_to_time = "%d:%02d" % (thours, tminutes)
 
-        for day in range(DAY_MAPPING[from_day], DAY_MAPPING[to_day] + 1):
-            opening_hours.add_range(
-                day=DAY_MAPPING[day],
-                open_time=fmt_from_time,
-                close_time=fmt_to_time,
-                time_format='%H:%M'
-            )
+            for day in range(DAY_MAPPING[from_day], DAY_MAPPING[to_day] + 1):
+                opening_hours.add_range(
+                    day=DAY_MAPPING[day],
+                    open_time=fmt_from_time,
+                    close_time=fmt_to_time,
+                    time_format='%H:%M'
+                )
 
         return opening_hours.as_opening_hours()
 
