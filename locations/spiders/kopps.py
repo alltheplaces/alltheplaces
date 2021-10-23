@@ -26,8 +26,9 @@ class KoppsSpider(scrapy.Spider):
             osm_days = []
             if len(days) == 2:
                 for day in days:
-                    osm_day = DAY_MAPPING[day.strip()]
-                    osm_days.append(osm_day)
+                    if day.strip() in DAY_MAPPING:
+                        osm_day = DAY_MAPPING[day.strip()]
+                        osm_days.append(osm_day)
             return "-".join(osm_days)
 
     def parse_times(self, times):
@@ -69,7 +70,8 @@ class KoppsSpider(scrapy.Spider):
             if times and day:
                 parsed_time = self.parse_times(times)
                 parsed_day = self.parse_day(day)
-                hours.append(parsed_day + ' ' + parsed_time)
+                if parsed_day and parsed_time:
+                    hours.append(parsed_day + ' ' + parsed_time)
 
         return "; ".join(hours)
 
