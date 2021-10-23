@@ -83,11 +83,12 @@ class WholeFoodsSpider(scrapy.Spider):
             store_text[store_text.find('{'):store_text.rfind('}')+1]
         )['initialProps']['siteData']['storeAPIData']
 
+        # Coordinates are listed as [lon, lat]
         yield GeojsonPointItem(
             ref=store_json['folder'],
             name=store_json['name'],
-            lat=float(store_json['geo_location']['coordinates'][0]),
-            lon=float(store_json['geo_location']['coordinates'][1]),
+            lat=float(store_json['geo_location']['coordinates'][1]),
+            lon=float(store_json['geo_location']['coordinates'][0]),
             addr_full=store_json['address'],
             city=store_json['city'],
             state=store_json['state'],
