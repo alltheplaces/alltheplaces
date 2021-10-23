@@ -28,7 +28,7 @@ class HyattSpider(scrapy.Spider):
             yield scrapy.Request(url=self.base_url.format(region=region))
 
     def parse_hotel(self, response):
-        data = json.loads(response.xpath('//script[contains(text(), "streetAddress")]/text()').extract_first())[0]
+        data = json.loads(response.xpath('//script[contains(text(), "streetAddress")]/text()').extract_first())
 
         properties = {
             'ref': "_".join(response.url.split('/')[-3:]),
