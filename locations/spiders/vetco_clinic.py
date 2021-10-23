@@ -38,7 +38,7 @@ class VetcoSpider(scrapy.Spider):
             if clinics:
                 for stores in clinics:
                     body = stores['label']
-                    address = Selector(text=body).xpath('//div[@class="locationinfo_area"]/address/text()').extract()
+                    address = Selector(text=body).xpath('//address/text()').extract()
                     if len(address) == 3:
                         addr_full, city_state_postal, phone = [item.split(",") for item in address]
                         city, state_postal = [item.split(",") for item in city_state_postal]
