@@ -81,11 +81,10 @@ class WellStarSpider(scrapy.Spider):
             for dt in hours:
                 try:
                     day = DAYS_NAME[dt.split(':')[0]]
-                    time = "".join(dt.split(':')[1:4])
-                    open_time, close_time = time.split('-')
+                    open_time, close_time = hours.get(dt).split('-')
                     opening_hours.add_range(day=day,
-                                            open_time=open_time.strip(),
-                                            close_time=close_time.strip(),
+                                            open_time=open_time.replace(':', '').strip(),
+                                            close_time=close_time.replace(':', '').strip(),
                                             time_format="%H%M"
                                             )
                 except:
@@ -93,26 +92,38 @@ class WellStarSpider(scrapy.Spider):
 
         return opening_hours.as_opening_hours()
 
+    def get_address_attributes(self, address):
+        address_parts = address.split(",")
+        address_attributes = {}
+        if len(address_parts) > 1:
+            address_attributes['city'] = address_parts[1].strip()
+        if len(address_parts) > 2:
+            address_attributes['state'] = address_parts[2].strip()
+        if len(address_parts) > 3:
+            address_attributes['postcode'] = address_parts[3].strip()
+
+        return address_attributes
+
     def parse(self, response):
         hdata = json.loads(response.text)
 
-        hdata = hdata["SearchResults"]
+        hdata = hdata["matchingItems"]
 
         for row in hdata:
-
+            address_attributes = self.get_address_attributes(row.get("Address"))
             properties = {
-                'ref': row['LocationID'],
-                'name': row['Name'],
-                'addr_full': " ".join([row["Address"].split(",")[0], row.get('Address2',"") or ""]).strip(),
-                'city': row["Address"].split(",")[1].strip(),
-                'state': row["Address"].split(",")[2].strip(),
-                'postcode': row["Address"].split(",")[3].strip(),
-                'lat': row['Latitude'],
-                'lon': row['Longitude'],
-                'phone': row['LocationContactPhone']
+                'ref': row.get('LocationID'),
+                'name': row.get('Name'),
+                'addr_full': " ".join([row.get("Address").split(",")[0], row.get('Address2',"") or ""]).strip(),
+                'city': address_attributes.get('city'),
+                'state': address_attributes.get('state'),
+                'postcode': address_attributes.get('postcode'),
+                'lat': row.get('Latitude'),
+                'lon': row.get('Longitude'),
+                'phone': row.get('LocationContactPhone')
             }
 
-            hours = self.parse_hours(row['WorkingHours'])
+            hours = self.parse_hours(row.get('Hours'))
             properties['opening_hours'] = hours
 
             yield GeojsonPointItem(**properties)
