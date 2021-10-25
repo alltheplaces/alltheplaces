@@ -62,10 +62,15 @@ class VerizonSpider(scrapy.Spider):
         urls = response.xpath('//url/loc/text()').extract()
 
         for url in urls:
-            yield scrapy.Request(url, callback=self.parse_store)
+            if url.split('/')[-2].split('-')[-1].isdigit():
+                # Store pages have a number at the end of their URL
+                yield scrapy.Request(url, callback=self.parse_store)
 
     def parse_store(self, response):
         script = response.xpath('//script[contains(text(), "storeJSON")]/text()').extract_first()
+        if not script:
+            return
+
         store_data = json.loads(re.search(r'var storeJSON = (.*);', script).group(1))
 
         properties = {
