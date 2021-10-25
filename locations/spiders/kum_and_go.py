@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import csv
 import scrapy
 import json
 
@@ -12,56 +13,27 @@ class KumAndGoSpider(scrapy.Spider):
     allowed_domains = ["kumandgo.com"]
 
     def start_requests(self):
-        yield scrapy.FormRequest(
-            'https://www.kumandgo.com/wordpress/wp-admin/admin-ajax.php',
-            method='POST',
-            formdata={
-                'coords[latitude]': '39.74581290359507',
-                'coords[longitude]': '-104.96756559990148',
-                'radius': '3000',
-                'action': 'stores_coords'
-            })
+        with open('./locations/searchable_points/us_centroids_100mile_radius_state.csv') as points:
+            reader = csv.DictReader(points)
+            for point in reader:
+                if point['state'] in ('IA', 'AR', 'CO', 'MN', 'MO', 'MT', 'NE', 'ND', 'OK', 'SD', 'WY'):
+                    yield scrapy.Request(
+                        f'https://www.kumandgo.com/wordpress/wp-admin/admin-ajax.php?action=store_search&lat={point["latitude"]}&lng={point["longitude"]}&max_results=100&search_radius=100',
+                    )
 
     def parse(self, response):
-        result = json.loads(response.body_as_unicode())
-        for store in result['data']['stores']:
-            opening_hours = OpeningHours()
-
-            for hours_key in [
-                'monday_hours',
-                'tuesday_hours',
-                'wednesday_hours',
-                'thursday_hours',
-                'friday_hours',
-                'saturday_hours',
-                'sunday_hours'
-            ]:
-                (open_time, close_time) = store[hours_key].split(' - ')
-
-                opening_hours.add_range(day=hours_key[:2].capitalize(),
-                                        open_time=open_time,
-                                        close_time=close_time,
-                                        time_format='%I:%M %p')
+        result = json.loads(response.text)
+        for store in result:
 
             yield GeojsonPointItem(
-                ref=store['store_id'],
-                lon=store['longitude'],
-                lat=store['latitude'],
-                name=store['name'],
-                addr_full=store['address1'],
+                ref=store['id'],
+                lon=store['lng'],
+                lat=store['lat'],
+                addr_full=store['address'],
                 city=store['city'],
                 state=store['state'],
-                postcode=store['postalcode'],
+                postcode=store['zip'],
                 country=store['country'],
                 phone=store['phone'],
-                website=store['url'],
-                opening_hours=opening_hours.as_opening_hours(),
-                extras={
-                    'amenity:fuel': True,
-                    'atm': int(store['atm'] or 0) == 1,
-                    'car_wash': int(store['car_wash'] or 0) == 1,
-                    'fuel:diesel': int(store['diesel'] or 0) == 1,
-                    'fuel:e85': int(store['e85'] or 0) == 1,
-                    'hgv': int(store['semi_truck_fuel_island'] or 0) == 1,
-                }
+                website=store['permalink'],
             )
