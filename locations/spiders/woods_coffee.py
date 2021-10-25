@@ -1,16 +1,17 @@
 # -*- coding: utf-8 -*-
 import scrapy
+
 from locations.items import GeojsonPointItem
-import re
 
 daysKey = {
                 'MONDAY': 'Mo', 'TUESDAY': 'Tu', 'WEDNESDAY': 'We', 'THURSDAY': 'Th',
                 'FRIDAY': 'Fr', 'SATURDAY': 'Sa', 'SUNDAY': 'Su'
 }
 
+
 class WoodsCoffeeSpider(scrapy.Spider):
         name = "woods_coffee"
-        item_attributes = { 'brand': "Woods Coffee" }
+        item_attributes = {'brand': "Woods Coffee", "brand_wikidata": "Q8033255"}
         allowed_domains = ["www.woodscoffee.com"]
         start_urls = (
                 'https://woodscoffee.com/locations/',
@@ -82,8 +83,8 @@ class WoodsCoffeeSpider(scrapy.Spider):
                 return dayOutput +' '+ openHours.replace(' ','') + "-" + closeHours + ';'
 
         def parse(self, response):
-            for match in response.xpath("//h2[contains(@class,'font-weight-700 text-uppercase')]/parent::div/parent::div"):
-                cityState = match.xpath(".//div[contains(@class,'heading-text el-text')]/div/p/text()").extract_first();
+            for match in response.xpath("//h2[contains(@class,'font-weight-700 text-uppercase')]/parent::div/parent::div/parent::div"):
+                cityState = match.xpath(".//div[contains(@class,'heading-text el-text')]/div/p/text()").extract_first()
                 cityString = cityState.split(",")[0].strip()
                 stateString = cityState.split(",")[1].strip()
 
@@ -103,13 +104,17 @@ class WoodsCoffeeSpider(scrapy.Spider):
                     hoursString = hoursString +' '+self.store_hours(hoursMatch.extract().replace('\n',''))
                 hoursString = hoursString.strip(';').strip()
 
+                name = match.xpath(".//h2[contains(@class,'font-weight-700 text-uppercase')]/span/text()").extract_first()
+
                 yield GeojsonPointItem(
-                    ref=match.xpath(".//h2[contains(@class,'font-weight-700 text-uppercase')]/span/text()").extract_first(),
+                    ref=name,
+                    name=name,
                     addr_full=addressString,
                     city=cityString,
                     state=stateString,
                     postcode=postcodeString,
+                    country="USA",
                     phone=phoneString,
                     opening_hours=hoursString,
-                    website=match.xpath(".//a/@href").extract_first(),
+                    website=response.urljoin(match.xpath(".//a/@href").extract_first()),
                 )
