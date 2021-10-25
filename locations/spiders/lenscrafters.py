@@ -10,7 +10,7 @@ from locations.hours import OpeningHours
 
 class LensCraftersSpider(scrapy.Spider):
     name = "lenscrafters"
-    item_attributes = { 'brand': "Lenscrafters" }
+    item_attributes = {'brand': "Lenscrafters"}
     allowed_domains = ['local.lenscrafters.com']
     start_urls = [
         'https://local.lenscrafters.com/'
@@ -30,21 +30,21 @@ class LensCraftersSpider(scrapy.Spider):
         return opening_hours.as_opening_hours()
 
     def parse(self, response):
-        urls = response.xpath(
-            '//a[@class="c-directory-list-content-item-link" or @class="c-location-grid-item-link"]/@href').extract()
-        # If cannot find 'c-directory-list-content-item-link' or 'c-location-grid-item-link' then this is a store page
+        urls = response.xpath('//a[@class="Directory-listLink Link--directory"]/@href').extract()
+
+        # If cannot find 'Directory-listLink Link--directory' then this is a store page
         if len(urls) == 0:
             properties = {
-                'name': response.xpath('//*[@class="location-name h1-normal"]/text()').extract_first(),
-                'addr_full': response.xpath('//*[@class="c-address-street-1"]/text()').extract_first(),
-                'city': response.xpath('//*[@class="c-address-city"]/text()').extract_first(),
-                'state': response.xpath('//*[@class="c-address-state"]/text()').extract_first(),
-                'postcode': response.xpath('//*[@class="c-address-postal-code"]/text()').extract_first(),
-                'phone': response.xpath('//*[@id="phone-main"]/text()').extract_first(),
-                'ref': "_".join(re.search(r".+/(.+?)/(.+?)/(.+?)/?(?:\.html|$)", response.url).groups()),
-                'website': response.url,
-                'lat': response.xpath('//*[@itemprop="latitude"]/@content').extract_first(),
-                'lon': response.xpath('//*[@itemprop="longitude"]/@content').extract_first(),
+                'name': response.xpath('//h1[@id="location-name"]/text()').extract_first(),
+                'addr_full': response.xpath('//span[@class="c-address-street-1"]/text()').extract_first(),
+                'city': response.xpath('//span[@class="c-address-city"]/text()').extract_first(),
+                'state': response.xpath('//abbr[@class="c-address-state"]/text()').extract_first(),
+                'postcode': response.xpath('//span[@class="c-address-postal-code"]/text()').extract_first(),
+                'phone': response.xpath('//div[@id="phone-main"]/text()').extract_first(),
+                'ref': response.xpath('//link[@rel="canonical"]/@href').extract_first(),
+                'website': response.xpath('//link[@rel="canonical"]/@href').extract_first(),
+                'lat': response.xpath('//meta[@itemprop="latitude"]/@content').extract_first(),
+                'lon': response.xpath('//meta[@itemprop="longitude"]/@content').extract_first(),
             }
 
             hours = self.parse_hours(response.xpath('//*[@itemprop="openingHours"]/@content').extract())
