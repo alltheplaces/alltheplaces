@@ -31,6 +31,8 @@ class HolidayStationstoreSpider(scrapy.Spider):
         store = response.meta['store']
 
         address = response.xpath('//div[@class="col-lg-4 col-sm-12"]/text()')[1].extract().strip()
+        city_state = response.xpath('//div[@class="col-lg-4 col-sm-12"]/text()')[2].extract().strip()
+        city, state = city_state.split(", ")
         phone = response.xpath('//div[@class="HolidayFontColorRed"]/text()').extract_first().strip()
         services = '|'.join(response.xpath('//ul[@style="list-style-type: none; padding-left: 1.0em; font-size: 12px;"]/li/text()').extract()).lower()
         open_24_hours = '24 hours' in response.css(
@@ -43,6 +45,9 @@ class HolidayStationstoreSpider(scrapy.Spider):
             'addr_full': address,
             'phone': phone,
             'ref': store['ID'],
+            'city': city.strip(),
+            'state': state.strip(),
+            'website': response.url,
             'opening_hours': '24/7' if open_24_hours else self.opening_hours(response),
             'extras': {
                 'amenity:fuel': True,
@@ -68,7 +73,7 @@ class HolidayStationstoreSpider(scrapy.Spider):
                 day = hour_part_elem.xpath('.//div[@class="col-3"]/text()').extract_first()
                 hours = hour_part_elem.xpath('.//div[@class="col-9"]/text()').extract_first()
 
-                if not hours:
+                if not hours or hours.lower() == 'closed':
                     continue
 
                 day = day[:2]
