@@ -44,11 +44,11 @@ ADDITONAL_CITIES = [
 class YmcaSpider(scrapy.Spider):
     name = "ymca"
     item_attributes = { 'brand': "YMCA" }
-    allowed_domains = ["ymca.net"]
+    allowed_domains = ["ymca.org"]
     download_delay = 0.5
 
     def start_requests(self):
-        url = 'https://www.ymca.net/find-your-y/?'
+        url = 'https://www.ymca.org/find-your-y/?'
 
         for point in SINGLE_POINT_STATES:
             _, lat, lon, state = point.strip().split(',')
