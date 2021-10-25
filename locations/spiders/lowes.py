@@ -66,14 +66,14 @@ class LowesSpider(scrapy.Spider):
 
         state_texts = response.xpath('//span[@itemprop="addressRegion"]/text()').extract()
         properties = {
-            'lat': float(json_data['storeDetails']['lat']),
-            'lon': float(json_data['storeDetails']['long']),
-            'ref': ref,
-            'addr_full': response.xpath('normalize-space(//span[@itemprop="streetAddress"]/text())').extract_first(),
-            'city': response.xpath('normalize-space(//span[@itemprop="addressLocality"]/text())').extract_first(),
-            'state': " ".join(text.strip() for text in state_texts if text.strip()),
-            'postcode': response.xpath('normalize-space(//span[@itemprop="postalCode"]/text())').extract_first(),
-            'phone': response.xpath('normalize-space(//meta[@itemprop="telephone"]/@content)').extract_first(),
+            'lat': json_data['storeDetails']['lat'],
+            'lon': json_data['storeDetails']['long'],
+            'ref': json_data['storeDetails']['id'],
+            'addr_full': json_data['storeDetails']['address'],
+            'city': json_data['storeDetails']['city'],
+            'state': json_data['storeDetails']['state'],
+            'postcode': json_data['storeDetails']['zip'],
+            'phone': json_data['storeDetails']['phone'],
             'website': response.request.url,
             'opening_hours': self.parse_hours(store_hours),
             'extras': {
