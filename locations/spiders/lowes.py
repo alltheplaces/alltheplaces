@@ -6,16 +6,23 @@ from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
 
 
-day_mapping = {'Monday': 'Mo', 'Tuesday': 'Tu', 'Wednesday': 'We', 'Thursday': 'Th', 'Friday': 'Fr', 'Saturday': 'Sa',
-               'Sunday': 'Su'}
+day_mapping = {
+    'Monday': 'Mo',
+    'Tuesday': 'Tu',
+    'Wednesday': 'We',
+    'Thursday': 'Th',
+    'Friday': 'Fr',
+    'Saturday': 'Sa',
+    'Sunday': 'Su',
+}
 
 
 class LowesSpider(scrapy.Spider):
     """"This spider scrapes Lowes retail store locations"""
     name = "lowes"
-    item_attributes = { 'brand': "Lowe's", 'brand_wikidata': "Q1373493" }
+    item_attributes = {'brand': "Lowe's", 'brand_wikidata': "Q1373493"}
     allowed_domains = ["lowes.com"]
-    start_urls = ('https://www.lowes.com/Lowes-Stores',)
+    start_urls = ('https://www.lowes.com/sitemap/store0.xml',)
     download_delay = 0.5
 
     custom_settings = {
@@ -76,12 +83,9 @@ class LowesSpider(scrapy.Spider):
 
         yield GeojsonPointItem(**properties)
 
-    def parse_state(self, response):
-        city_urls = response.xpath('//div[@class="v-spacing-small"]/a/@href').extract()
-        for path in city_urls:
-            yield scrapy.Request(response.urljoin(path), callback=self.parse_store)
-
     def parse(self, response):
-        urls = response.xpath('//div[@id="mainContent"]//li[@role="listitem"]/a/@href').extract()
-        for path in urls:
-            yield scrapy.Request(response.urljoin(path), callback=self.parse_state)
+        response.selector.remove_namespaces()
+        urls = response.xpath('//url/loc/text()').extract()
+
+        for url in urls:
+            yield scrapy.Request(url, callback=self.parse_store)
