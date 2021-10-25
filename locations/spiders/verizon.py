@@ -62,6 +62,10 @@ class VerizonSpider(scrapy.Spider):
         urls = response.xpath('//url/loc/text()').extract()
 
         for url in urls:
+            if url.count('/') != 7:
+                # Store pages have 7 slashes in the URL.
+                continue
+
             yield scrapy.Request(url, callback=self.parse_store)
 
     def parse_store(self, response):
