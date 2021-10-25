@@ -34,4 +34,3 @@ class BeefOBradysSpider(scrapy.Spider):
             }
 
             yield GeojsonPointItem(**properties)
-           
