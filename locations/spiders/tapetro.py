@@ -57,7 +57,7 @@ class TAPetroSpider(scrapy.Spider):
                     'fuel:diesel:class2': store['WINTERIZED DIESEL NOV-MAR(any temp)'] == 'Y' or store['WINTERIZED DIESEL NOV-MAR (when temps are 10 degrees or below)'] == 'Y' or store['WINTERIZED DIESEL NOV-MAR (when temps are 30 degrees or below)'] == 'y',
                     'fuel:diesel': True,
                     'fuel:HGV_diesel': True,
-                    'fuel:lng': int(store['LNG(Liquified Natural Gas)/Lanes'] or 0) > 0,
+                    'fuel:lng': store['LNG(Liquified Natural Gas)'] == 'Y',
                     'fuel:propane': store['PROPANE'] == 'Y',
                     'hgv': True
                 }
