@@ -9,7 +9,7 @@ class wsp(scrapy.Spider):
     item_attributes = {'brand': "wsp"}
     allowed_domains = ["www.wsp.com"]
     start_urls = (
-        'https://www.wsp.com',
+        'https://www.wsp.com/',
     )
 
     def parse(self, response):
