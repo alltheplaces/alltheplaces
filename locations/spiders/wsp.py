@@ -9,7 +9,7 @@ class wsp(scrapy.Spider):
     item_attributes = {'brand': "wsp"}
     allowed_domains = ["www.wsp.com"]
     start_urls = (
-        'https://www.wsp.com',
+        'https://www.wsp.com/',
     )
 
     def parse(self, response):
@@ -24,10 +24,10 @@ class wsp(scrapy.Spider):
             self.parse_store,
             method='POST',
             formdata=formdata,
-            )
+        )
 
     def parse_store(self, response):
-        office_data = json.loads(response.body_as_unicode())
+        office_data = json.loads(response.text)
 
         for office in office_data:
             try:
@@ -37,7 +37,7 @@ class wsp(scrapy.Spider):
                     'lat': office["Location"].split(",")[0],
                     'lon': office["Location"].split(",")[1],
                     'name': office["Name"],
-                    'website': office["MapPointURL"]
+                    'website': response.urljoin(office["MapPointURL"]),
                 }
             except IndexError:
                 continue
