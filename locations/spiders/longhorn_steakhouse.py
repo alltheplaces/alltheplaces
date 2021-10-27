@@ -18,7 +18,7 @@ class LongHornSteakhouseSpider(scrapy.Spider):
     custom_settings = {
         'USER_AGENT': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.86 Safari/537.36',
     }
-    download_delay = 5
+    download_delay = 1
 
     def parse_hours(self, hours):
         opening_hours = OpeningHours()
