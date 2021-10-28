@@ -35,6 +35,7 @@ class ScootersCoffeeSpider(scrapy.Spider):
             if open_close == 'C':
                 continue
             else:
+                open_close = open_close.replace(' ', '')
                 open_time, close_time = open_close.split('-')
                 opening_hours.add_range(day=DAY_MAPPING[day], open_time=open_time, close_time=close_time, time_format='%I:%M%p')
 
