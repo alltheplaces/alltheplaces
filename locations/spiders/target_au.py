@@ -26,6 +26,8 @@ class TargetAUSpider(scrapy.Spider):
             yield scrapy.Request(response.urljoin(link), callback=self.parse_store, headers=self.headers)
 
     def _parse_hour_str(self, hour_string):
+        if hour_string == "Midnight":
+            return self._parse_hour_str("12:00 AM")
         time_, am_pm = tuple(hour_string.split(" "))
         hour, min = tuple(time_.split(":"))
         hour = int(hour)
