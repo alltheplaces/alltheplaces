@@ -25,12 +25,17 @@ class BarMethodSpider(scrapy.Spider):
         properties = {
         'name': response.xpath('//h2[@class="mtn"]/text()').extract_first(),
         'ref': response.xpath('//h2[@class="mtn"]/text()').extract_first(),
-        'addr_full': response.xpath('//address/text()').extract_first().strip(),
-        'city': response.xpath('//address/text()').extract()[1].strip().split(',')[0],
-        'state': response.xpath('//address/text()').extract()[1].strip().split()[-2],
-        'postcode': response.xpath('//address/text()').extract()[1].strip().split()[-1],
         'phone': response.xpath('//span[@id="phone-number"]/text()').extract_first(),
         'website': response.request.url,
         }
+
+        if response.xpath('//address/text()').extract_first() is not None:
+            properties['addr_full'] = response.xpath('//address/text()').extract_first().strip()
+
+        if len(response.xpath('//address/text()').extract()) > 0:
+            properties['city'] = response.xpath('//address/text()').extract()[1].strip().split(',')[0]
+            properties['state'] = response.xpath('//address/text()').extract()[1].strip().split()[-2]
+            properties['postcode'] = response.xpath('//address/text()').extract()[1].strip().split()[-1]
+
 
         yield GeojsonPointItem(**properties)
