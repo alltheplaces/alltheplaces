@@ -15,7 +15,7 @@ class SuperonefoodsSpider(scrapy.Spider):
 
     def parse(self, response):
         # retrieve js data variable from script tag
-        items = response.xpath('//script/text()')[3].re("var stores =(.+?);\n")
+        items = response.xpath('//script/text()')[4].re("var stores =(.+?);\n")
 
         # convert data variable from unicode to string
         items = [str(x) for x in items]
