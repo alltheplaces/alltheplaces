@@ -23,6 +23,8 @@ class CoxHealthSpider(scrapy.Spider):
     def parse_loc(self, response):
         name = response.xpath('//h2[@class="section-title"]/text()').extract()
         address = response.xpath('//div[@class="default-x-spacing reg-background module-card-new"]//p/text()').extract()
+        x = response.xpath('//div[@class="map"]').extract()
+        xy = x[0].split('"')
         address = ' '.join(address)
         address = address.replace('\r', '').replace('\n', '')
         address = " ".join(address.split())
@@ -59,6 +61,8 @@ class CoxHealthSpider(scrapy.Spider):
             'postcode': zip,
             'country': 'US',
             'phone': phone[0],
+            'lat': float(xy[5].strip(',')),
+            'lon': float(xy[3].strip(',')),
         }
 
         yield GeojsonPointItem(**properties)
