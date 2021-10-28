@@ -28,7 +28,8 @@ class JbHifiSpider(scrapy.Spider):
     def process_trading_hours(self, store_hours):
         opening_hours = OpeningHours()
         for day in store_hours:
-            opening_hours.add_range(DAYS[day['DayOfWeek']], day['OpeningTime'], day['ClosingTime'])
+            if 'NULL' not in day['OpeningTime'] and 'NULL' not in  day['ClosingTime']:
+                opening_hours.add_range(DAYS[day['DayOfWeek']], day['OpeningTime'], day['ClosingTime'])
         
         return opening_hours.as_opening_hours()
 
