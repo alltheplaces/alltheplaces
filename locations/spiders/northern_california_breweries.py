@@ -18,10 +18,19 @@ class NorthernCaliforniaBreweriesSpider(scrapy.Spider):
       breweryList = json.loads(jsonData)
 
       for item in breweryList:
+        latitude = None
+        longitude = None
+
+        if item.get('Latitude') is not None:
+          latitude = float(item.get('Latitude'))
+
+        if item.get('Longitude') is not None:
+          longitude = float(item.get('Longitude'))
+        
         yield GeojsonPointItem(
           ref=item.get('Brewery'),
-          lat=float(item.get('Latitude')),
-          lon=float(item.get('Longitude')),
+          lat=latitude,
+          lon=longitude,
           addr_full=item.get('Address'),
           city=item.get('City'),
           state="CA",
