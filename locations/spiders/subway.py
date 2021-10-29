@@ -40,7 +40,7 @@ class SubwaySpider(scrapy.Spider):
         # Note: Of the five different coordinate fields, this is the one that always exists
         lat_long = js["profile"]["yextDisplayCoordinate"]
         website = ""
-        if websiteUrl in js["profile"]:
+        if 'websiteUrl' in js["profile"]:
             website = urlparse(js["profile"]["websiteUrl"])._replace(query="").geturl()
         properties = {
             "lat": lat_long["lat"],
