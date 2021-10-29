@@ -88,6 +88,10 @@ class KonaGrillSpider(scrapy.Spider):
         oh = OpeningHours()
 
         for t in hours:
+            # Some day entries contain invalid week data, e.g. "Brunch"
+            # "Brunch" is a special dining hour that is contained in regular hours, ignore it
+            if "Brunch" in t.get("days"):
+                continue
             days = self.parse_days(t.get("days"))
             open_time, close_time = t.get("hours").split("-")
             ot = open_time.strip()
