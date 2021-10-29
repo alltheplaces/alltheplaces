@@ -45,8 +45,11 @@ class amazon_retailSpider(CrawlSpider):
             for i in lot_of:
                 add = i.xpath("//p/a/text()").get()
                 linked = i.xpath("//p/a/@href").get()
-                done = linked.split('@')
-                if len(done) == 2:
+                done = None
+                if linked is not None:
+                    done = linked.split('@')
+                locations = None
+                if done and len(done) == 2:
                     locations = done[1].split(',')[:2]
                 for j in i.xpath("//p/text()").getall():
                     try:
@@ -87,17 +90,23 @@ class amazon_retailSpider(CrawlSpider):
                                 item["phone"] = timings
                             elif timings not in '\n' and timings not in ' ':
                                 item["Timings"] = timings
-                if '\n' in add:
+                if add and '\n' in add:
                     add = add.replace("\n"," ")
-                div = add.split(',')
-                some = add.split(' ')
+
+                div = None
+                some = None
+
+                if add:
+                    div = add.split(',')
+                    some = add.split(' ')
+
                 for i in range(len(some)):
                     if ',' in some[i] and len(some[i-1])<4 and i >1:
                         item["extras"] = some[i-1] + " "+some[i]
-                if some[0][0].isdigit():
+                if some and len(some) > 2 and some[0][0].isdigit():
                     item["housenumber"] = some[0]
                     item["street"] = some[1] + " "+some[2]
-                if len(div) == 2:
+                if div and len(div) == 2:
                     try:
                         item["city"]= div[0].split(' ')[-1]
                         item["state"] = div[1].split(' ')[1]
