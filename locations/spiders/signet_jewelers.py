@@ -56,29 +56,38 @@ class SignetJewelersSpider(scrapy.Spider):
 
     def parse(self, response):
         script = " ".join(response.xpath('//*[@id="js-store-details"]/div/script/text()').extract())
-        data = re.search(r'storeInformation\s=\s((?s).*)', script).groups()[0]
-        data = data.replace(";", '')
-        data = eval(data)
+        data = None
 
-        if data["region"] in SignetJewelersSpider.ca_prov:
-            country = 'CA'
-        else:
-            country = 'US'
+        if re.search(r'storeInformation\s=\s((?s).*)', script) is not None:
+            data = re.search(r'storeInformation\s=\s((?s).*)', script).groups()
 
-        properties = {
-            'ref': data["name"],
-            'name': data["displayName"],
-            'addr_full': data["line1"],
-            'city': data["town"],
-            'state': data["region"],
-            'postcode': data["postalCode"],
-            'country': country,
-            'lat': data["latitude"],
-            'lon': data["longitude"],
-            'phone': data["phone"],
-            'website': response.url,
-            'brand': re.search(r'www.(\w+)', response.url)[1],
-        }
+        properties = {}
+
+        if data is not None:
+            if len(data) > 0:
+                data = data[0]
+            data = data.replace(";", '')
+            data = eval(data)
+
+            if data["region"] in SignetJewelersSpider.ca_prov:
+                country = 'CA'
+            else:
+                country = 'US'
+
+            properties = {
+                'ref': data["name"],
+                'name': data["displayName"],
+                'addr_full': data["line1"],
+                'city': data["town"],
+                'state': data["region"],
+                'postcode': data["postalCode"],
+                'country': country,
+                'lat': data["latitude"],
+                'lon': data["longitude"],
+                'phone': data["phone"],
+                'website': response.url,
+                'brand': re.search(r'www.(\w+)', response.url)[1],
+            }
 
         yield GeojsonPointItem(**properties)
 
