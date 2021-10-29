@@ -16,35 +16,39 @@ class LuLuLemonSpider(scrapy.Spider):
     start_urls = ("https://shop.lululemon.com/stores/all-lululemon-stores",)
 
     def parse(self, response):
-        urls = response.xpath('//a[@class="store-link basic"]/@href').extract()
+        urls = response.xpath('//a[@class="store-list_storeLink__3krLG"]/@href').extract()
         for path in urls:
             yield scrapy.Request(response.urljoin(path), callback=self.parse_store)
 
     def parse_store(self, response):
         address = {}
         geo = {}
+        hours = {}
+        status = "CLOSED"
         data = json.loads(
-            response.xpath('//script[@type="application/ld+json"]/text()').extract_first()
+            response.xpath('//script[@type="application/json"]/text()').extract_first()
         )
 
-        ref = response.xpath('//h1[@class="lll-stack-lvl4"]/text()').extract_first()
+        ref = data["props"]["pageProps"]["storeData"]["name"]
+        address["full"] = data["props"]["pageProps"]["storeData"].get("fullAddress")
+        address["zip"] = address["full"].split(",")[-1].strip()
+        address["state"] = data["props"]["pageProps"]["storeData"].get("state")
+        address["city"] = data["props"]["pageProps"]["storeData"].get("city")
+        address["country"] = data["props"]["pageProps"]["storeData"].get("country")
+        address["phone"] = data["props"]["pageProps"]["storeData"].get("phone")
+        geo["lat"] = data["props"]["pageProps"]["storeData"].get("latitude")
+        geo["lon"] = data["props"]["pageProps"]["storeData"].get("longitude")
+        hours = data["props"]["pageProps"]["storeData"].get("hours")
+        if data["props"]["pageProps"]["storeData"].get("status") == "active_soon":
+            status = "Opening soon"
 
-        if data.get("address"):
-            address["full"] = data["address"].get("streetAddress")
-            address["zip"] = data["address"].get("postalCode")
-            address["state"] = data["address"].get("addressRegion")
-            address["city"] = data["address"].get("addressLocality")
-            address["country"] = data["address"].get("addressCountry")
-        if data.get("geo"):
-            geo["lat"] = data["geo"].get("latitude")
-            geo["lon"] = data["geo"].get("longitude")
-        oh = self.parse_hours(data.get("openingHours"))
+        oh = self.parse_hours(hours)
         if not oh:
-            ref = "CLOSED - {}".format(ref)
-
+            ref = "{} - {}".format(status, ref)
+        
         properties = {
             "addr_full": address.get("full"),
-            "phone": data.get("telephone"),
+            "phone": address.get("phone"),
             "city": address.get("city"),
             "state": address.get("state"),
             "postcode": address.get("zip"),
@@ -60,11 +64,11 @@ class LuLuLemonSpider(scrapy.Spider):
         oh = OpeningHours()
 
         for h in hours:
-            t = h.replace(" - ", "-")
-            d, h = t.split()
-            ot, ct = h.split("-")
+            d = h.get("name")
+            ot = h.get("openHour")
+            ct = h.get("closeHour")
             # Some stores are permanently closed, thus no time is defined
-            if ot == "null" or ct == "null":
+            if not ot or not ct:
                 continue
             days = self.parse_days(d)
             for day in days:
