@@ -39,7 +39,9 @@ class SubwaySpider(scrapy.Spider):
     def parse_restaurant(self, js):
         # Note: Of the five different coordinate fields, this is the one that always exists
         lat_long = js["profile"]["yextDisplayCoordinate"]
-        website = urlparse(js["profile"]["websiteUrl"])._replace(query="").geturl()
+        website = ""
+        if 'websiteUrl' in js["profile"]:
+            website = urlparse(js["profile"]["websiteUrl"])._replace(query="").geturl()
         properties = {
             "lat": lat_long["lat"],
             "lon": lat_long["long"],
