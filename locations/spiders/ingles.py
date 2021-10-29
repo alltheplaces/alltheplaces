@@ -37,14 +37,14 @@ class ingles(scrapy.Spider):
             'addr_full': response.meta["addr_full"],
             'city': response.meta["city"],
             'state': response.meta["state"],
-            'postcode': re.search(r'(\d{5})',response.xpath("/html/body/fieldset/div[2]/span[2]/strong/text()").get()).group(),
+            'postcode': re.search(r'(\d{5})',response.xpath("/html/body/div[2]/span[2]/strong/text()").get()).group(),
             'phone': response.xpath("/html/body/fieldset/div[2]/a/text()").get(),
             'lat': response.meta["lat"],
             'lon': response.meta["lon"],
             'website': response.url,
         }
 
-        hours = self.parse_hours(" ".join(response.xpath("/html/body/fieldset/div[2]/text()")[2].getall()).strip())
+        hours = self.parse_hours(" ".join(response.xpath("/html/body/fieldset/div[2]/text()")[1].getall()).strip())
         if hours:
             properties["opening_hours"] = hours
 
