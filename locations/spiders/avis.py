@@ -66,6 +66,15 @@ class AvisSpider(scrapy.Spider):
 
         ref = response.url.split('/')[-1]
 
+        latitude = None
+        longitude = None
+
+        if response.xpath('//meta[@itemprop="latitude"]/@content').extract_first() is not None:
+            latitude = float(response.xpath('//meta[@itemprop="latitude"]/@content').extract_first())
+
+        if response.xpath('//meta[@itemprop="longitude"]/@content').extract_first() is not None:
+            longitude = float(response.xpath('//meta[@itemprop="longitude"]/@content').extract_first())
+
         properties = {
             'name': clean(response.xpath('//h2/span[@itemprop="name"]/text()').extract_first()),
             'addr_full': clean(response.xpath('normalize-space(//span[@itemprop="streetAddress"]/text())').extract_first()),
@@ -76,8 +85,8 @@ class AvisSpider(scrapy.Spider):
             'country': clean(response.xpath('normalize-space(//span[@itemprop="addressCountry"]/text())').extract_first()),
             'ref': ref,
             'website': response.url,
-            'lat':  float(response.xpath('//meta[@itemprop="latitude"]/@content').extract_first()),
-            'lon':  float(response.xpath('//meta[@itemprop="longitude"]/@content').extract_first()),
+            'lat':  latitude,
+            'lon':  longitude,
         }
         hours = response.xpath('//meta[@itemprop="openingHours"]/@content').extract_first()
         if hours:
