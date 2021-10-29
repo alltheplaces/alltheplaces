@@ -88,15 +88,38 @@ class SearsSpider(scrapy.Spider):
         # Ensure ref is consistent across sears sites - 7 digit unique store identifier (zero padded)
         ref = str(store_data['unit']).zfill(7)
 
+        name = None
+        addr_full = None
+        city = None
+        state = None
+        postcode = None
+        phone = None
+        website = None
+
+        if 'storeName' in store_data:
+            name = store_data['storeName']
+        if 'streetAddr' in store_data:
+            addr_full = store_data['streetAddr']
+        if 'city' in store_data:
+            city = store_data['city']
+        if 'state' in store_data:
+            state = store_data['state']
+        if 'zip' in store_data:
+            postcode = store_data['zip']
+        if 'phone' in store_data:
+            phone = store_data.get('phone')
+        if 'url' in store_data:
+            website = 'https://www.searsoutlet.com' + store_data.get('url', '')
+
         properties = {
             'ref': ref,
-            'name': store_data['storeName'],
-            'addr_full': store_data['streetAddr'],
-            'city': store_data['city'],
-            'state': store_data['state'],
-            'postcode': store_data['zip'],
-            'phone': store_data.get('phone'),
-            'website': 'https://www.searsoutlet.com' + store_data.get('url', ''),
+            'name': name,
+            'addr_full': addr_full,
+            'city': city,
+            'state': state,
+            'postcode': postcode,
+            'phone': phone,
+            'website': website,
             # Lat and lon are unavailable in outlet store responses
         }
 
