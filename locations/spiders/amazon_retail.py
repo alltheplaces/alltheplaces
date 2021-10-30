@@ -100,12 +100,13 @@ class amazon_retailSpider(CrawlSpider):
                     div = add.split(',')
                     some = add.split(' ')
 
-                for i in range(len(some)):
-                    if ',' in some[i] and len(some[i-1])<4 and i >1:
-                        item["extras"] = some[i-1] + " "+some[i]
-                if some and len(some) > 2 and some[0][0].isdigit():
-                    item["housenumber"] = some[0]
-                    item["street"] = some[1] + " "+some[2]
+                if some:
+                    for i in range(len(some)):
+                        if ',' in some[i] and len(some[i-1])<4 and i >1:
+                            item["extras"] = some[i-1] + " "+some[i]
+                    if len(some) > 2 and some[0][0].isdigit():
+                        item["housenumber"] = some[0]
+                        item["street"] = some[1] + " "+some[2]
                 if div and len(div) == 2:
                     try:
                         item["city"]= div[0].split(' ')[-1]
