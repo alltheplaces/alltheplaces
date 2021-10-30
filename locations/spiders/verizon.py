@@ -82,7 +82,7 @@ class VerizonSpider(scrapy.Spider):
                 'postcode': store_data["address"]["postalCode"],
                 'country': store_data["address"]["addressCountry"],
                 'phone': store_data.get("telephone"),
-                'website': store_data.get("url") or response.url,
+                'website': response.urljoin(store_data.get("url")) if store_data.get("url") else response.url,
                 'lat': store_data["geo"].get("latitude"),
                 'lon': store_data["geo"].get("longitude"),
                 'extras': {
