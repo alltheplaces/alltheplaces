@@ -20,40 +20,18 @@ class VerizonSpider(scrapy.Spider):
 
     def parse_hours(self, store_hours):
         opening_hours = OpeningHours()
-        for store_day in store_hours['dayOfWeek']:
-            if store_day.lower() == 'closed':
-                continue
-            else:
-                day, open_close = store_day.split('-')
-                day = day.strip()[:2]
-                open_time = ' '.join(open_close.strip().split(' ', 2)[0:2])
-                if open_time.split(' ')[0].lower() == 'closed':
-                    continue
-                elif open_time.split(' ')[0].lower() == 'null':
-                    continue
-                else:
-                    if open_close.strip().count(' ') == 1:
-                        open_time, close_time = open_time.split(' ')
-                        opening_hours.add_range(day=day,
-                                                open_time=open_time,
-                                                close_time=close_time,
-                                                time_format='%I:%M%p'
-                                                )
-                    elif open_close.strip().count(' ') == 2:
-                        open_time = open_close.strip().split(' ')[0]
-                        close_time = ''.join(open_close.strip().split(' ')[1:3])
-                        opening_hours.add_range(day=day,
-                                                open_time=open_time,
-                                                close_time=close_time,
-                                                time_format='%I:%M%p'
-                                                )
-                    else:
-                        close_time = open_close.strip().split(' ', 2)[2]
-                        opening_hours.add_range(day=day,
-                                                open_time=open_time,
-                                                close_time=close_time,
-                                                time_format='%I:%M %p'
-                                                )
+
+        for store_day in ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']:
+            open_time = store_hours.get(f'{store_day}Open')
+            close_time = store_hours.get(f'{store_day}Close')
+
+            if open_time and close_time and open_time.lower() != 'closed' and close_time.lower() != 'closed':
+                opening_hours.add_range(
+                    day=store_day[0:2],
+                    open_time=open_time,
+                    close_time=close_time,
+                    time_format='%I:%M %p'
+                )
 
         return opening_hours.as_opening_hours()
 
@@ -86,14 +64,15 @@ class VerizonSpider(scrapy.Spider):
                 'lat': store_data["geo"].get("latitude"),
                 'lon': store_data["geo"].get("longitude"),
                 'extras': {
-                    'business_name': store_data.get('posStoreDetail').get('businessName'),
+                    # Sometimes 'postStoreDetail' exists with "None" value, usual get w/ default syntax isn't reliable
+                    'business_name': (store_data.get('posStoreDetail') or {}).get('businessName'),
                     'retail_id': store_data.get('retailId'),
-                    'store_type': store_data.get('posStoreDetail').get('storeType'),
+                    'store_type': (store_data.get('posStoreDetail') or {}).get('storeType'),
                     'store_type_note': store_data.get('typeOfStore')
                 }
             }
 
-        hours = self.parse_hours(store_data.get("openingHoursSpecification"))
+        hours = self.parse_hours(store_data.get("StoreHours"))
         if hours:
             properties["opening_hours"] = hours
 
