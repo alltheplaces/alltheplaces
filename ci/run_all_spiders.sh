@@ -42,7 +42,7 @@ mkdir -p ${SPIDER_RUN_DIR}/output
 SPIDER_COUNT=$(wc -l < ${SPIDER_RUN_DIR}/commands.txt | tr -d ' ')
 
 (>&2 echo "Running ${SPIDER_COUNT} spiders ${PARALLELISM} at a time")
-xargs -t -L 1 -P ${PARALLELISM} timeout --kill-after=15s 4h scrapy crawl < ${SPIDER_RUN_DIR}/commands.txt
+xargs -t -L 1 -P ${PARALLELISM} timeout -k 15s 4h scrapy crawl < ${SPIDER_RUN_DIR}/commands.txt
 
 if [ ! $? -eq 0 ]; then
     (>&2 echo "Xargs failed with exit code ${?}")
