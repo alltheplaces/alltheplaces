@@ -45,7 +45,7 @@ class LuLuLemonSpider(scrapy.Spider):
         oh = self.parse_hours(hours)
         if not oh:
             ref = "{} - {}".format(status, ref)
-        
+
         properties = {
             "addr_full": address.get("full"),
             "phone": address.get("phone"),
