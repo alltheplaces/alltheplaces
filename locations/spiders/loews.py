@@ -38,7 +38,7 @@ class LoewsHotelsSpider(scrapy.Spider):
             properties = {
                 'ref': data['name'],
                 'name': data['name'],
-                'addr_full': response.xpath('//span[@class="street-address"]/text()')[0].extract().strip('[', ']'),
+                'addr_full': response.xpath('//span[@class="street-address"]/text()')[0].extract().strip(']['),
                 'city': data['address']['addressLocality'],
                 'state': data['address']['addressRegion'],
                 'postcode': data['address']['postalCode'],
@@ -53,7 +53,7 @@ class LoewsHotelsSpider(scrapy.Spider):
             properties = {
                 'ref': data['name'],
                 'name': data['name'],
-                'addr_full': response.xpath('//span[@class="street-address"]/text()').extract()[0].strip('[', ']'),
+                'addr_full': response.xpath('//span[@class="street-address"]/text()').extract()[0].strip(']['),
                 'city': data['address']['addressLocality'],
                 'state': data['address']['addressRegion'],
                 'postcode': data['address']['postalCode'],
