@@ -32,8 +32,6 @@ class TorchysTacosSpider(scrapy.Spider):
             ).extract()
         ]
 
-        lat = store_info.xpath('.//div[@id="ttMap"]/@data-lat').extract()
-        lon = store_info.xpath('.//div[@id="ttMap"]/@data-lon').extract()
         full_address = [e.strip() for e in store_address[0].split("  ") if e.strip()]
         phone = store_address[1].strip() if len(store_address) > 1 else None
         oh = self.parse_hours(store_hours)
@@ -46,8 +44,8 @@ class TorchysTacosSpider(scrapy.Spider):
             "postcode": full_address[-1],
             "ref": ref,
             "website": response.url,
-            "lat": lat,
-            "lon": lon,
+            "lat": store_info.xpath('.//div[@id="ttMap"]/@data-lat').extract_first(),
+            "lon": store_info.xpath('.//div[@id="ttMap"]/@data-lon').extract_first(),
             "opening_hours": oh,
         }
         yield GeojsonPointItem(**properties)
