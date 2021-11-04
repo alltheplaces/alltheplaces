@@ -92,7 +92,7 @@ class MarshallsSpider(scrapy.Spider):
                 'city': store["City"],
                 'state': store["State"],
                 'postcode': store["Zip"],
-                'country': store["Country"],
+                'countrygit st': store["Country"],
                 'phone': store["Phone"],
                 'lat': float(store["Latitude"]),
                 'lon': float(store["Longitude"]),
