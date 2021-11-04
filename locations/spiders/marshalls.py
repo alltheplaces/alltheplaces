@@ -24,7 +24,11 @@ class MarshallsSpider(scrapy.Spider):
     allowed_domains = ["tjx.com"]
 
     chains = {
+        "08": "TJ Maxx",
         "10": "Marshalls",
+        "28": "Homegoods",
+        "29": "Homesense",
+        "50": "Sierra"
     }
 
     def start_requests(self):
@@ -92,7 +96,7 @@ class MarshallsSpider(scrapy.Spider):
                 'city': store["City"],
                 'state': store["State"],
                 'postcode': store["Zip"],
-                'countrygit st': store["Country"],
+                'country': store["Country"],
                 'phone': store["Phone"],
                 'lat': float(store["Latitude"]),
                 'lon': float(store["Longitude"]),
