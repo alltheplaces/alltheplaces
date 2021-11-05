@@ -3,6 +3,7 @@ import csv
 import json
 import scrapy
 from locations.items import GeojsonPointItem
+from urllib.parse import urlencode
 
 CATEGORY_MAPPING = {
     '1': 'Donation Site',
@@ -20,26 +21,20 @@ class GoodwillSpider(scrapy.Spider):
     download_delay = 0.2
 
     def start_requests(self):
-        url = 'https://www.goodwill.org/GetLocAPI.php'
+        url = 'https://www.goodwill.org/GetLocAPI.php?'
 
         with open('./locations/searchable_points/us_centroids_25mile_radius.csv') as points:
             reader = csv.DictReader(points)
             for point in reader:
                 # Unable to find a way to specify a search radius
                 # Appears to use a set search radius somewhere > 25mi, using 25mi to be safe
-                form_data = {
+                params = {
                     'lat': point['latitude'],
                     'lng': point['longitude'],
                     'cats': '3,1,2,4,5'  # Includes donation sites
                 }
 
-                yield scrapy.http.FormRequest(
-                    url=url,
-                    method='POST',
-                    formdata=form_data,
-                    headers={'Content-Type': 'application/x-www-form-urlencoded'},
-                    callback=self.parse,
-                )
+                yield scrapy.Request(url=url + urlencode(params))
 
     def parse(self, response):
         data = json.loads(response.text)
