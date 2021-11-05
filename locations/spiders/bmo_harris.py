@@ -7,7 +7,7 @@ from locations.hours import OpeningHours
 
 
 class BMOHarrisSpider(scrapy.Spider):
-    name = "bmo-harris"
+    name = "bmo_harris"
     item_attributes = {'brand': "BMO Harris Bank", 'brand_wikidata': "Q4835981"}
     allowed_domains = ["branches.bmoharris.com"]
     download_delay = 0.5
