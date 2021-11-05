@@ -10,7 +10,7 @@ jobs:
   test-spider:
     runs-on: ubuntu-18.04
     env:
-      AWS_KEY: QUtJQTRLMllUQzIzTFNFQkVDTk0=
+      AWS_KEY: QUtJQTRLMllUQzIzRzVZRkxENkg=
       AWS_SEC: b1RmNXNxc0VSNlNKdFNhbUdlcjJwZHR6YXQwNXpRRDRPZUtoVkpPSA==
       BUCKET: alltheplaces.openaddresses.io
     steps:
