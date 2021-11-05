@@ -21,7 +21,7 @@ class GoodwillSpider(scrapy.Spider):
     download_delay = 0.2
 
     def start_requests(self):
-        url = 'https://www.goodwill.org/GetLocAPI.php?'
+        base_url = 'https://www.goodwill.org/GetLocAPI.php?'
 
         with open('./locations/searchable_points/us_centroids_25mile_radius.csv') as points:
             reader = csv.DictReader(points)
@@ -34,7 +34,7 @@ class GoodwillSpider(scrapy.Spider):
                     'cats': '3,1,2,4,5'  # Includes donation sites
                 }
 
-                yield scrapy.Request(url=url + urlencode(params))
+                yield scrapy.Request(url=(base_url + urlencode(params)))
 
     def parse(self, response):
         data = json.loads(response.text)
