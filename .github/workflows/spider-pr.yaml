@@ -2,15 +2,15 @@ name: Run Changed Spiders in Pull Requests
 
 # Only run on pushes
 on:
-  pull_request:
+  pull_request_target:
     paths:
     - 'locations/spiders/*.py'
 
 jobs:
   test-spider:
-    runs-on: ubuntu-21.04
+    runs-on: ubuntu-18.04
     env:
-      AWS_KEY: QUtJQTRLMllUQzIzTFNFQkVDTk0=
+      AWS_KEY: QUtJQTRLMllUQzIzRzVZRkxENkg=
       AWS_SEC: b1RmNXNxc0VSNlNKdFNhbUdlcjJwZHR6YXQwNXpRRDRPZUtoVkpPSA==
       BUCKET: alltheplaces.openaddresses.io
     steps:
@@ -85,8 +85,13 @@ jobs:
             fi
 
             aws s3 cp --only-show-errors ${LOGFILE} s3://${BUCKET}/ci/${GITHUB_RUN_ID}/${SPIDER_NAME}/log.txt
-            LOGFILE_URL="https://data.alltheplaces.xyz/ci/${GITHUB_RUN_ID}/${SPIDER_NAME}/log.txt"
+            retval=$?
+            if [ ! $retval -eq 0 ]; then
+                (>&2 echo "log copy to s3 failed with exit code ${retval}")
+                exit 1
+            fi
 
+            LOGFILE_URL="https://data.alltheplaces.xyz/ci/${GITHUB_RUN_ID}/${SPIDER_NAME}/log.txt"
             echo "${spider} log: ${LOGFILE_URL}"
 
             if [ -f "$OUTFILE" ]; then
@@ -105,6 +110,12 @@ jobs:
                 fi
 
                 aws s3 cp --only-show-errors ${OUTFILE} s3://${BUCKET}/ci/${GITHUB_RUN_ID}/${SPIDER_NAME}/output.geojson
+                retval=$?
+                if [ ! $retval -eq 0 ]; then
+                    (>&2 echo "output copy to s3 failed with exit code ${retval}")
+                    exit 1
+                fi
+
                 OUTFILE_URL="https://data.alltheplaces.xyz/ci/${GITHUB_RUN_ID}/${SPIDER_NAME}/output.geojson"
 
                 if grep -q 'Stored geojson feed' $LOGFILE; then
