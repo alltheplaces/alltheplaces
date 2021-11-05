@@ -33,7 +33,7 @@ class GoodwillSpider(scrapy.Spider):
                 }
 
                 url = 'https://www.goodwill.org/GetLocAPI.php?' + urlencode(params)
-                print(url)
+                self.logger.error(url)
                 yield scrapy.Request(url=url)
 
     def parse(self, response):
