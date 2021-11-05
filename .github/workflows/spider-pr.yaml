@@ -84,7 +84,7 @@ jobs:
                 FAILURE_REASON="timeout"
             fi
 
-            aws s3 cp --only-show-errors ${LOGFILE} s3://${BUCKET}/ci/${GITHUB_RUN_ID}/${SPIDER_NAME}/log.txt
+            aws s3 cp ${LOGFILE} s3://${BUCKET}/ci/${GITHUB_RUN_ID}/${SPIDER_NAME}/log.txt
             retval=$?
             if [ ! $retval -eq 0 ]; then
                 (>&2 echo "log copy to s3 failed with exit code ${retval}")
