@@ -8,7 +8,7 @@ on:
 
 jobs:
   test-spider:
-    runs-on: ubuntu-21.04
+    runs-on: ubuntu-20.04
     env:
       AWS_KEY: QUtJQTRLMllUQzIzTFNFQkVDTk0=
       AWS_SEC: b1RmNXNxc0VSNlNKdFNhbUdlcjJwZHR6YXQwNXpRRDRPZUtoVkpPSA==
