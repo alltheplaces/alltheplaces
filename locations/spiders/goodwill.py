@@ -33,34 +33,24 @@ class GoodwillSpider(scrapy.Spider):
                 }
 
                 url = 'https://www.goodwill.org/GetLocAPI.php?' + urlencode(params)
-                self.logger.error(url)
                 yield scrapy.Request(url=url)
 
     def parse(self, response):
         data = json.loads(response.text)
 
         for store in data:
-            service_codes = store.get("services")
-
-            store_categories = []
-            for code in service_codes:
-                store_categories.append(CATEGORY_MAPPING[code])
-
             properties = {
-                'name': store["name"],
-                'ref': store["id"],
-                'addr_full': store["address1"],
-                'city': store["city"],
-                'state': store["state"],
-                'postcode': store["postal_code"],
-                'country': store["country"],
-                'phone': store.get("phone"),
-                'website': store.get("website") or response.url,
-                'lat': store.get("lat"),
-                'lon': store.get("lng"),
+                'name': store["LocationName"],
+                'ref': store["LocationId"],
+                'addr_full': store["LocationStreetAddress1"],
+                'city': store["LocationCity1"],
+                'state': store["LocationState1"],
+                'postcode': store["LocationPostal1"],
+                'phone': store.get("LocationPhoneOffice"),
+                'lat': store.get("LocationLatitude1"),
+                'lon': store.get("LocationLongitude1"),
                 'extras': {
-                    'service_codes': service_codes,
-                    'store_categories': store_categories
+                    'store_categories': store.get("calcd_ServicesOffered"),
                 }
             }
 
