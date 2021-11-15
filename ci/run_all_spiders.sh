@@ -51,7 +51,7 @@ if [ ! $retval -eq 0 ]; then
 fi
 (>&2 echo "Done running spiders")
 
-OUTPUT_LINECOUNT=$(wc -l < "${SPIDER_RUN_DIR}/output/*.geojson" | tr -d ' ')
+OUTPUT_LINECOUNT=$(cat "${SPIDER_RUN_DIR}"/output/*.geojson | wc -l | tr -d ' ')
 (>&2 echo "Generated ${OUTPUT_LINECOUNT} lines")
 
 echo "{\"count\": ${SPIDER_COUNT}, \"results\": []}" >> "${SPIDER_RUN_DIR}/stats/_results.json"
@@ -62,14 +62,14 @@ do
     statistics_json="${SPIDER_RUN_DIR}/stats/${spider}.json"
 
     feature_count=$(jq --raw-output '.item_scraped_count' "${statistics_json}")
-
-    if [ "${feature_count}" == "null" ]; then
+    retval=$?
+    if [ ! $retval -eq 0 ] || [ "${feature_count}" == "null" ]; then
         feature_count="0"
     fi
 
     error_count=$(jq --raw-output '."log_count/ERROR"' "${statistics_json}")
-
-    if [ "${error_count}" == "null" ]; then
+    retval=$?
+    if [ ! $retval -eq 0 ] || [ "${error_count}" == "null" ]; then
         error_count="0"
     fi
 

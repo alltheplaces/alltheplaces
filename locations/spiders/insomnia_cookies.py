@@ -37,7 +37,6 @@ class InsomniaCookiesSpider(scrapy.Spider):
 
     def parse(self, response):
         data = json.loads(response.text)
-        print(data)
 
         for store in data.get('data', {}).get('storeSearch', {}).get('stores', []):
             properties = {
