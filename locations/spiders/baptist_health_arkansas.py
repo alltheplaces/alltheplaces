@@ -6,8 +6,6 @@ from locations.hours import OpeningHours
 from locations.items import GeojsonPointItem
 
 
-
-
 class BaptistHealthSpider(scrapy.Spider):
     name = "bha"
     allowed_domains = ['algolia.net', 'baptist-health.com']
@@ -27,12 +25,6 @@ class BaptistHealthSpider(scrapy.Spider):
             'content-type': 'application/x-www-form-urlencoded',
             'Origin': 'https://www.baptist-health.com',
             'Referer': 'https://www.baptist-health.com/',
-            'sec-ch-ua': '" Not A;Brand";v="99", "Chromium";v="96", "Google Chrome";v="96"',
-            'sec-ch-ua-mobile': '?0',
-            'sec-ch-ua-platform': '"macOS"',
-            'Sec-Fetch-Dest': 'empty',
-            'Sec-Fetch-Mode': 'cors',
-            'Sec-Fetch-Site': 'cross-site',
             'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.55 Safari/537.36',
         }
 
@@ -40,41 +32,22 @@ class BaptistHealthSpider(scrapy.Spider):
                                       callback=self.parse_stores)
 
     def parse_stores(self, response):
-        data = json.dumps(json.loads(response.text), sort_keys=True)
-        data2 = data.split('"post_title": "')
-        for i in data2[1:]:
-            for j in i.split(', '):
-                if j.split(': "')[0].strip('"') == 'address_1':
-                    add1 = j.split(': "')[1].strip('"')
-                elif j.split(': "')[0].strip('"') == 'address_2':
-                    add2 = j.split(': "')[1].strip('"')
-                elif j.split(': "')[0].strip('"') == 'city':
-                    city = j.split(': "')[1].strip('"')
-                elif j.split(': "')[0].strip('"') == 'state':
-                    state = j.split(': "')[1].strip('"')
-                elif j.split(': "')[0].strip('"}') == 'zip_code':
-                    pc = j.split(': "')[1].strip('"')
-                elif j.split(': "')[0].strip('"') == 'phone_number':
-                    phone = j.split(': "')[1].strip('"')
-                elif j.split(': ')[0].strip('"') == '{"_geoloc':
-                    lat = float(j.split(': ')[2].strip('}'))
-                elif j.split(': ')[0].strip('"') == 'lng':
-                    lng = float(j.split(': ')[1].strip('}'))
-                elif j.split(': "')[0].strip('"') == 'permalink':
-                    ref = j.split(': "')[1].strip('"')
-                else:
-                    pass
+        data = json.loads(json.dumps(response.json()))
 
-            properties = {
-                'name': "Baptist Health Arkansas",
-                'ref': ref,
-                'addr_full': add1 + ', ' + add2,
-                'city': city,
-                'state': state,
-                'postcode': pc,
-                'country': "US",
-                'phone': phone,
-                'lat': lat,
-                'lon': lng,
-            }
-            yield GeojsonPointItem(**properties)
+        for i in data["results"]:
+            first_value = list(i.values())[0]
+            datai = json.loads(json.dumps(first_value))
+            for j in datai:
+                properties = {
+                    'name': "Baptist Health Arkansas",
+                    'ref': j['address_1'] + j['city'] + j['state'],
+                    'addr_full': j['address_1'],
+                    'city': j['city'],
+                    'state': j['state'],
+                    'postcode': j['zip_code'],
+                    'country': "US",
+                    'phone': j['phone_number'],
+                    'lat': float(j['_geoloc']['lat']),
+                    'lon': float(j['_geoloc']['lng']),
+                }
+                yield GeojsonPointItem(**properties)
