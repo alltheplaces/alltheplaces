@@ -1,102 +1,56 @@
-import scrapy
-import re
-from locations.items import GeojsonPointItem
+# -*- coding: utf-8 -*-
+import csv
 
-day_formats = {
-    "Mon": "Mo",
-    "Tue": "Tu",
-    "Wed": "We",
-    "Thu": "Th",
-    "Fri": "Fr",
-    "Sat": "Sa",
-    "Sun": "Su"
-}
+import scrapy
+
+from locations.items import GeojsonPointItem
 
 
 class BurgerKingSpider(scrapy.Spider):
     name = "burgerking"
-    item_attributes = { 'brand': "Burger King", 'brand_wikidata': "Q177054" }
-    allowed_domains = ["locations.bk.com"]
+    item_attributes = {"brand": "Burger King", "brand_wikidata": "Q177054"}
+    allowed_domains = ["bk.com", "use1-prod-bk.rbictg.com"]
     download_delay = 0.2
-    start_urls = (
-        'https://locations.bk.com/index.html',
-    )
 
-    def parse_day(self, day):
+    query = "query GetRestaurants($input: RestaurantsInput) {\n  restaurants(input: $input) {\n    pageInfo {\n      hasNextPage\n      endCursor\n      __typename\n    }\n    totalCount\n    nodes {\n      ...RestaurantNodeFragment\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment RestaurantNodeFragment on RestaurantNode {\n  _id\n  storeId\n  isAvailable\n  posVendor\n  chaseMerchantId\n  curbsideHours {\n    ...OperatingHoursFragment\n    __typename\n  }\n  deliveryHours {\n    ...OperatingHoursFragment\n    __typename\n  }\n  diningRoomHours {\n    ...OperatingHoursFragment\n    __typename\n  }\n  distanceInMiles\n  drinkStationType\n  driveThruHours {\n    ...OperatingHoursFragment\n    __typename\n  }\n  driveThruLaneType\n  email\n  environment\n  franchiseGroupId\n  franchiseGroupName\n  frontCounterClosed\n  hasBreakfast\n  hasBurgersForBreakfast\n  hasCatering\n  hasCurbside\n  hasDelivery\n  hasDineIn\n  hasDriveThru\n  hasMobileOrdering\n  hasLateNightMenu\n  hasParking\n  hasPlayground\n  hasTakeOut\n  hasWifi\n  hasLoyalty\n  id\n  isDarkKitchen\n  isFavorite\n  isHalal\n  isRecent\n  latitude\n  longitude\n  mobileOrderingStatus\n  name\n  number\n  parkingType\n  phoneNumber\n  physicalAddress {\n    address1\n    address2\n    city\n    country\n    postalCode\n    stateProvince\n    stateProvinceShort\n    __typename\n  }\n  playgroundType\n  pos {\n    vendor\n    __typename\n  }\n  posRestaurantId\n  restaurantImage {\n    asset {\n      _id\n      metadata {\n        lqip\n        palette {\n          dominant {\n            background\n            foreground\n            __typename\n          }\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    crop {\n      top\n      bottom\n      left\n      right\n      __typename\n    }\n    hotspot {\n      height\n      width\n      x\n      y\n      __typename\n    }\n    __typename\n  }\n  restaurantPosData {\n    _id\n    __typename\n  }\n  status\n  vatNumber\n  __typename\n}\n\nfragment OperatingHoursFragment on OperatingHours {\n  friClose\n  friOpen\n  monClose\n  monOpen\n  satClose\n  satOpen\n  sunClose\n  sunOpen\n  thrClose\n  thrOpen\n  tueClose\n  tueOpen\n  wedClose\n  wedOpen\n  __typename\n}\n"
 
-        return day_formats[day.strip()]
+    def make_request(self, lat, lon):
+        body = [
+            {
+                "operationName": "GetRestaurants",
+                "variables": {
+                    "input": {
+                        "filter": "NEARBY",
+                        "coordinates": {"userLat": lat, "userLng": lon, "searchRadius": 128000},
+                        "first": 20000,
+                        "status": "OPEN",
+                    }
+                },
+                "query": self.query,
+            }
+        ]
+        return scrapy.http.JsonRequest("https://use1-prod-bk.rbictg.com/graphql", data=body)
 
-    def parse_times(self, times):
-
-        if times.strip() == 'Open 24 hours':
-            return '24/7'
-        hours_to = [x.strip() for x in times.split('-')]
-        cleaned_times = []
-        for hour in hours_to:
-            if re.search('PM$', hour):
-                hour = re.sub('PM', '', hour).strip()
-                hour_min = hour.split(":")
-                if int(hour_min[0]) < 12:
-                    hour_min[0] = str(12 + int(hour_min[0]))
-                cleaned_times.append(":".join(hour_min))
-
-            if re.search('AM$', hour):
-                hour = re.sub('AM', '', hour).strip()
-                hour_min = hour.split(":")
-                if len(hour_min[0]) < 2:
-                    hour_min[0] = hour_min[0].zfill(2)
-                else:
-                    hour_min[0] = str(12 + int(hour_min[0]))
-
-                cleaned_times.append(":".join(hour_min))
-        return "-".join(cleaned_times)
-
-    def parse_hours(self, lis):
-        hours = []
-        for li in lis:
-            day = li.xpath('normalize-space(.//td[@class="c-location-hours-details-row-day"]/text())').extract_first()
-            times = li.xpath('.//td[@class="c-location-hours-details-row-intervals"]/span/span/text()').extract()
-            times_all = "".join(str(x) for x in times)
-            if times_all and day:
-                parsed_time = self.parse_times(times_all)
-                parsed_day = self.parse_day(day)
-                hours.append(parsed_day + ' ' + parsed_time)
-
-        return "; ".join(hours)
-
-    def parse_store(self, response):
-        properties = {
-            'addr_full': response.xpath('normalize-space(//div[@class="c-AddressRow"]/span[@class="c-address-street-1"]/text())').extract_first(),
-            'phone': response.xpath('normalize-space(//span[@id="telephone"]/text())').extract_first(),
-            'city': response.xpath('normalize-space(//span[@itemprop="addressLocality"]/text())').extract_first(),
-            'state': response.xpath('normalize-space(//abbr[@itemprop="addressRegion"]/text())').extract_first(),
-            'postcode': response.xpath('normalize-space(//span[@itemprop="postalCode"]/text())').extract_first(),
-            'lat': float(response.xpath('normalize-space(//meta[@itemprop="latitude"]/@content)').extract_first()),
-            'lon': float(response.xpath('normalize-space(//meta[@itemprop="longitude"]/@content)').extract_first()),
-            'ref': response.url
-        }
-
-        opening_hours = self.parse_hours(response.xpath(
-            '//div[@class="Nap-column Nap-column--3"]//div/div/table/tbody/tr[@class="c-location-hours-details-row js-day-of-week-row highlight-text"]'))
-        if opening_hours:
-            properties['opening_hours'] = opening_hours
-        yield GeojsonPointItem(**properties)
-
-    def parse_city_stores(self, response):
-        stores = response.xpath("//a[@class='Teaser-nearbyLink Link']/@href").extract()
-        for store in stores:
-            yield scrapy.Request(response.urljoin(store), callback=self.parse_store)
-
-    def parse_city(self, response):
-        city_urls = response.xpath('//div[@class="c-directory-list-content-wrapper"]/ul/li/a/@href').extract()
-
-        for city_url in city_urls:
-            if city_url.count('/') >= 2:
-                yield scrapy.Request(response.urljoin(city_url), callback=self.parse_store)
-            else:
-                yield scrapy.Request(response.urljoin(city_url), callback=self.parse_city_stores)
+    def start_requests(self):
+        with open("./locations/searchable_points/us_centroids_100mile_radius.csv") as points:
+            reader = csv.DictReader(points)
+            for point in reader:
+                yield self.make_request(float(point["latitude"]), float(point["longitude"]))
 
     def parse(self, response):
-        state_urls = response.xpath('//div[@class="c-directory-list-content-wrapper"]/ul/li/a/@href').extract()
-        for state_url in state_urls:
-            yield scrapy.Request(response.urljoin(state_url), callback=self.parse_city)
+        data = response.json()
+        for row in data[0]["data"]["restaurants"]["nodes"]:
+            properties = {
+                "ref": row["number"],
+                "lat": row["latitude"],
+                "lon": row["longitude"],
+                "name": row["name"],
+                "phone": row["phoneNumber"],
+                "addr_full": row["physicalAddress"]["address1"],
+                "city": row["physicalAddress"]["city"],
+                "state": row["physicalAddress"]["stateProvince"],
+                "postcode": row["physicalAddress"]["postalCode"],
+                "country": row["physicalAddress"]["country"],
+                "website": f'https://www.bk.com/store-locator/store/{row["_id"]}',
+            }
+            yield GeojsonPointItem(**properties)
