@@ -13,9 +13,10 @@ class FreshMarketSpider(scrapy.Spider):
     )
 
     def parse(self, response):
-        json_data = response.xpath('//script[@data-reactid="39"]/text()').extract_first().rstrip(';').split('=')[-1]
-        data = json.loads(json_data)
-        allStores =  data['stores']['allStores']
+        json_data = response.xpath('//script[@data-reactid="39"]/text()').extract_first()
+        start = json_data.index('"stores":') + 9
+        data = json.decoder.JSONDecoder().raw_decode(json_data, start)[0]
+        allStores =  data['allStores']
         for store in allStores:
 
             properties = {
