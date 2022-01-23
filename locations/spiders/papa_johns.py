@@ -5,14 +5,20 @@ import json
 from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
 
-day_map = {'MONDAY': 'Mo', 'TUESDAY': 'Tu', 'WEDNESDAY': 'We', 'THURSDAY': 'Th',
-           'FRIDAY': 'Fr', 'SATURDAY': 'Sa', 'SUNDAY': 'Su'}
+day_map = {
+    'MONDAY': 'Mo',
+    'TUESDAY': 'Tu',
+    'WEDNESDAY': 'We',
+    'THURSDAY': 'Th',
+    'FRIDAY': 'Fr',
+    'SATURDAY': 'Sa',
+    'SUNDAY': 'Su',
+}
 
 
 class PapaJohnsSpider(scrapy.Spider):
-
     name = "papa_johns"
-    item_attributes = { 'brand': "Papa John's Pizza" }
+    item_attributes = {'brand': "Papa John's Pizza", 'brand_wikidata': "Q2759586"}
     allowed_domains = ["papajohns.com", ]
 
     start_urls = (
@@ -59,6 +65,8 @@ class PapaJohnsSpider(scrapy.Spider):
             country = 'US'
         elif '/canada/' in response.url:
             country = 'CA'
+        elif response.url == 'https://locations.papajohns.com/index.html':
+            return
         else:
             country = ''
 
@@ -72,8 +80,8 @@ class PapaJohnsSpider(scrapy.Spider):
             'state': the_state,
             'opening_hours': opening_hours,
             'country': country,
-            'lat': float(response.xpath('//span[@class="coordinates"]/meta[1]/@content').extract_first()),
-            'lon': float(response.xpath('//span[@class="coordinates"]/meta[2]/@content').extract_first()),
+            'lat': response.xpath('//span[@class="coordinates"]/meta[1]/@content').extract_first(),
+            'lon': response.xpath('//span[@class="coordinates"]/meta[2]/@content').extract_first(),
         }
 
         yield GeojsonPointItem(**props)

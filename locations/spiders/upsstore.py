@@ -43,6 +43,9 @@ class UpsStoreSpider(scrapy.Spider):
         return o.as_opening_hours()
 
     def parse_store(self, response):
+        if "Permanently Closed" in response.text:
+            return
+
         ref = response.xpath('//input[@id="store_id"]/@value').extract_first()
         if not ref:
             ref = re.search(r'store(\d+)@theupsstore.com',

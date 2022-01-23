@@ -7,7 +7,7 @@ from locations.items import GeojsonPointItem
 
 class PandaSpider(scrapy.Spider):
     name = "pandaexpress"
-    item_attributes = { 'brand': "Panda Express" }
+    item_attributes = { 'brand': "Panda Express", 'brand_wikidata': "Q1358690" }
     allowed_domains = ["inkplant.com", "pandaexpress.com"]
     start_urls = ['https://inkplant.com/code/state-latitudes-longitudes']
 

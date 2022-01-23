@@ -19,7 +19,7 @@ class TeslaSpider(scrapy.Spider):
 
     def parse(self, response):
         # Only scrape stores and service centers
-        country_urls = response.xpath('//a[contains(@href,"stores") or contains(@href,"services")]/@href').extract()
+        country_urls = response.xpath('//a[contains(@href,"stores") or contains(@href,"services") or contains(@href,"superchargers")]/@href').extract()
         for country_url in country_urls:
             yield scrapy.Request(response.urljoin(country_url), callback=self.parse_store_list)
 
@@ -41,6 +41,7 @@ class TeslaSpider(scrapy.Spider):
             street_address = response.xpath('normalize-space(//span[@class="street-address"]//text())').extract_first()
             city_state_zip = response.xpath('normalize-space(//span[@class="locality"]//text())').extract_first()
 
+            addr_full = ""
             if common_name and street_address and city_state_zip:
                 addr_full = common_name + ' ' + street_address + ', ' + city_state_zip
             elif street_address and not city_state_zip:

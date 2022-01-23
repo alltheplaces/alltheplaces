@@ -18,7 +18,7 @@ DAYS = [
 class CVSSpider(scrapy.Spider):
 
     name = "cvs"
-    item_attributes = { 'brand': "CVS" }
+    item_attributes = { 'brand': "CVS", 'brand_wikidata': "Q2078880" }
     allowed_domains = ["www.cvs.com"]
     download_delay = 0.5
     start_urls = (
@@ -77,8 +77,8 @@ class CVSSpider(scrapy.Spider):
             'country': data["address"]["addressCountry"],
             'phone': data["address"].get("telephone"),
             'website': data.get("url") or response.url,
-            'lat': float(data["geo"]["latitude"]),
-            'lon': float(data["geo"]["longitude"]),
+            'lat': data["geo"]["latitude"] or None,
+            'lon': data["geo"]["longitude"] or None,
         }
 
         hours = self.parse_hours(data["openingHours"])

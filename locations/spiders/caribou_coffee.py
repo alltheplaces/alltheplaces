@@ -1,85 +1,44 @@
 # -*- coding: utf-8 -*-
+import urllib.parse
+
 import scrapy
-import json
-import re
 
 from locations.items import GeojsonPointItem
-
-NUMBER_DAY = {
-    '1': 'Mo',
-    '2': 'Tu',
-    '3': 'We',
-    '4': 'Th',
-    '5': 'Fr',
-    '6': 'Sa',
-    '7': 'Su'
-}
-
 
 class CaribouCoffeeSpider(scrapy.Spider):
 
     name = "caribou_coffee"
-    item_attributes = { 'brand': "Caribou Coffee" }
-    allowed_domains = ["momentfeed-prod.apigee.net", ]
+    item_attributes = {"brand": "Caribou Coffee", "brand_wikidata": "Q5039494"}
+    allowed_domains = ["locations.cariboucoffee.com"]
 
-    start_urls = (
-        'https://momentfeed-prod.apigee.net/api/llp.json?auth_token=CVTQBSJXYGFVUDEY&sitemap=true',
-    )
-    download_delay = 0.2
-
-    def normalize_hours(self, hours):
-
-        reversed_hours = {}
-        if not hours:
-            return ''
-        else:
-            days = [day for day in hours.split(';') if day]
-            for day in days:
-                day, from_hr, to_hr = day.split(',')
-
-                short_day = NUMBER_DAY[day]
-                from_hour = '{}:{}'.format(from_hr[:2], from_hr[2:])
-                to_hour = '{}:{}'.format(to_hr[:2], to_hr[2:])
-                epoch = '{}-{}'.format(from_hour, to_hour)
-
-                reversed_hours.setdefault(epoch, [])
-                reversed_hours[epoch].append(short_day)
-
-            if len(reversed_hours) == 1 and list(reversed_hours)[0] == '00:00-24:00':
-                return '24/7'
-
-            opening_hours = []
-
-            for key, value in reversed_hours.items():
-                if len(value) == 1:
-                    opening_hours.append('{} {}'.format(value[0], key))
-                else:
-                    opening_hours.append(
-                        '{}-{} {}'.format(value[0], value[-1], key))
-
-            return ";".join(opening_hours)
+    start_urls = ("https://locations.cariboucoffee.com/sitemap.xml",)
 
     def parse(self, response):
+        response.selector.remove_namespaces()
+        for url in response.xpath("//loc/text()").extract():
+            path = urllib.parse.urlparse(url).path
+            if path.count("/") != 4:
+                continue
+            yield scrapy.Request(url, callback=self.parse_store)
 
-        stores = json.loads(response.body_as_unicode())
+    def parse_store(self, response):
+        main = response.xpath('//h1[@itemprop="name"]/..')
 
-        for store in stores:
-            opening_hours = ''
-            if store.get('store_info', '').get('store_hours', ''):
-                opening_hours = self.normalize_hours(
-                    store['store_info']['store_hours'])
+        ref = urllib.parse.parse_qs(urllib.parse.urlparse(response.css('script[src*="storeCode"]').attrib["src"]).query)["storeCode"][0]
 
-            props = {
-                'ref': store['store_info']['corporate_id'],
-                'addr_full': store['store_info']['address'],
-                'postcode': store['store_info']['postcode'],
-                'state': store['store_info']['region'],
-                'website': store['store_info']['website'],
-                'city': store['store_info']['locality'],
-                'phone': store['store_info']['phone'],
-                'lat': store['store_info']['latitude'],
-                'lon': store['store_info']['longitude'],
-                'opening_hours': opening_hours
-            }
+        properties = {
+            "name": main.xpath('.//*[@itemprop="name"]/text()').get(),
+            "lat": main.xpath('.//*[@itemprop="latitude"]/@content').get(),
+            "lon": main.xpath('.//*[@itemprop="longitude"]/@content').get(),
+            "ref": ref,
+            "website": response.url,
+            "addr_full": main.xpath('.//*[@itemprop="streetAddress"]/@content').get(),
+            "city": main.xpath('.//*[@itemprop="addressLocality"]/@content').get(),
+            "state": main.xpath('.//*[@itemprop="addressRegion"]/text()').get(),
+            "postcode": main.xpath('.//*[@itemprop="postalCode"]/text()').get(),
+            "country": main.xpath('.//*[@itemprop="addressCountry"]/text()').get(),
+            "phone": main.xpath('.//*[@itemprop="telephone"]/text()').get(),
+            "opening_hours": "; ".join(main.xpath('.//*[@itemprop="openingHours"]/@content').extract()),
+        }
+        yield GeojsonPointItem(**properties)
 
-            yield GeojsonPointItem(**props)

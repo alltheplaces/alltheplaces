@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import scrapy
-import json
 import re
 
 from locations.items import GeojsonPointItem
@@ -8,58 +7,42 @@ from locations.items import GeojsonPointItem
 
 class GreatclipsSpider(scrapy.Spider):
     name = "greatclips"
-    item_attributes = { 'brand': "Great Clips" }
+    item_attributes = {'brand': "Great Clips"}
     allowed_domains = ["greatclips.com", "stylewaretouch.net"]
     start_urls = (
         'https://www.stylewaretouch.net/checkin/wa/jsonMarkers?client=locator&lat=-34&lng=85&tzoffset=200&callback=onSuccess&failureCallback=onFailure&stores=',
     )
 
-    def store_hours(self, store_hours):
-        if not store_hours or len(store_hours) < 5:
-            return
-
-        stri = ''
-        match = re.search(r'(\d{1,2})(:(\d{1,2}))?\s*(am|AM|mp|PM|pm)?\s*-\s*(\d{1,2})(:(\d{1,2}))?\s*(am|pm|mp|PM|AM)',store_hours)
-
-        if not match:
-            return store_hours
-
-        stri += str(int(match[1])+(12 if match[4] in ['pm','mp','PM'] else 0)) +match[2]+'-'
-        stri += str(int(match[5])+(12 if match[8] in ['pm','mp','PM'] else 0)) +match[6]+';'
-
-        return stri.rstrip(';')
 
     def parse(self, response):
-        # all shops grouped in ther database by codes experimentally was
-        # uncovered all groups lies in 1..10000 range (checked till 100000)
+        # creating storeid's
         for i in range(1, 10000):
             yield scrapy.Request(
                 self.start_urls[0]+str(i),
-                callback=self.parse_shop,
+                callback=self.parse_url,
             )
 
-    def parse_shop(self, response):
-        if response.text.find('onFailure') != -1:
+    def parse_url(self, response):
+        # passing storeid's to find a valid response
+        if response.text.find("onFailure('An unknown error occurred')") != -1:
             return
+        else:
+            store = re.search(r'.+/?stores=(.+)', response.url).group(1)
+            store_url = 'https://www.greatclips.com/salons/'+store
 
-        shops = json.loads(response.text.lstrip('onSuccess(').rstrip(')'))
-        if not shops:
-            return
+            yield scrapy.Request(store_url, callback=self.parse_location)
 
-        for shop in shops:
-            props = {}
+    def parse_location(self, response):
+        ref = re.search(r'.+/(.+)', response.url).group(1)
 
-            props['ref'] = shop['name']
-            props['phone'] = shop['phone']
-            props['addr_full'] = shop['Thoroughfare']
-            props['postcode'] = shop['ZIP']
-            props['state'] = shop['State']
-            props['city'] = shop['City']
-            props['lat'] = float(shop['latitude'])
-            props['lon'] = float(shop['longitude'])
-            props['website'] = 'https://www.greatclips.com/salons/'+shop['number']
-            props['country'] = shop['CountryCode']
-
-            props['opening_hours'] = 'Mo-Fr '+self.store_hours(shop['hours_mon'])+';Sa '+self.store_hours(shop['hours_sat'])+';Su '+self.store_hours(shop['hours_sun'])
-
-            yield GeojsonPointItem(**props)
+        properties = {
+            'ref': ref.strip('/'),
+            'name': response.xpath('normalize-space(//span[@itemprop="name"]/text())').extract_first(),
+            'addr_full': response.xpath('normalize-space(//div[@itemprop="streetAddress"]/div/text())').extract_first(),
+            'city': response.xpath('normalize-space(//span[@itemprop="addressLocality"]/text())').extract_first(),
+            'state': response.xpath('normalize-space(//span[@itemprop="addressRegion"]/text())').extract_first(),
+            'postcode': response.xpath('normalize-space(//span[@itemprop="postalCode"]/text())').extract_first(),
+            'phone': response.xpath('normalize-space(//span[@itemprop="telephone"]/@content)').extract_first(),
+            'website': response.url
+        }
+        yield GeojsonPointItem(**properties)

@@ -92,7 +92,7 @@ class LaBreweriesSpider(scrapy.Spider):
         properties = {
             'website': response.xpath('//head/link[@rel="canonical"]/@href').extract_first(),
             'ref': str(response.xpath('/html/body/div[1]/div[1]/header/h1/text()').extract()).strip("['']"),
-            'opening_hours': re.sub('\s+', ' ', response.css('#secondary').extract()[0].split('<h5>Hours</h5>')[1].replace('<br>','').replace('</aside>','').replace('\t',' ').replace('\n','').replace('\r',' ')).strip(),
+            'opening_hours': re.sub(r'\s+', ' ', response.xpath('//*[@id="content"]/div/div[2]/div[3]').extract()[0].split('<h5 class="mb-2">Hours</h5>')[1].replace('<br>','').replace('</div>','').replace('\t',' ').replace('\n','').replace('\r',' ')).strip(),
             # 'lon': float(data['geo']['longitude']),   # not lon on page
             # 'lat': float(data['geo']['latitude']),    # not lat on page
         }

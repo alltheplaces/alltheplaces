@@ -9,8 +9,9 @@ regex_time = r"(1[0-2]|0[1-9]|[1-9]):[0-5]\d\s?[AaPp][Mm]"
 regex_am = r"\s?([Aa][Mm])"
 regex_pm = r"\s?([Pp][Mm])"
 
+
 class MonicalsSpider(scrapy.Spider):
-    name = 'monicals'
+    name = 'monicals_pizza'
     item_attributes = { 'brand': "Monical's Pizza" }
     allowed_domains =['www.monicals.com']
     start_urls = ['http://www.monicals.com/locations/']
@@ -140,4 +141,3 @@ class MonicalsSpider(scrapy.Spider):
             opening_hours=opening_hours,
             ref=response.url,
         )
-

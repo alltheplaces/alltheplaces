@@ -19,7 +19,7 @@ class New_york_friesSpider(scrapy.Spider):
     def parse(self, response):
         data = response.xpath('//script[contains(.,"canadaEntries")]/text()').extract_first()
 
-        places_ca = re.search("canadaEntries\s=\s(.*)", data).groups()[0]
+        places_ca = re.search(r"canadaEntries\s=\s(.*)", data).groups()[0]
 
         places_ca = json.loads(places_ca)
 
@@ -38,7 +38,7 @@ class New_york_friesSpider(scrapy.Spider):
 
             yield GeojsonPointItem(**properties)
 
-        places_intl = re.search("intlEntries\s=\s(.*)", data).groups()[0]
+        places_intl = re.search(r"intlEntries\s=\s(.*)", data).groups()[0]
 
         places_intl = json.loads(places_intl)
 

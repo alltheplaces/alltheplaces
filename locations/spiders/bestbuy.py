@@ -39,7 +39,13 @@ class BestBuySpider(scrapy.Spider):
             opening_hours = json.loads(opening_hours)
             opening_hours = self.normalize_hours(opening_hours)
 
+        name = response.xpath('//span[@id="location-name"]/text()').extract_first()
+        if not name.strip():
+            name = "".join(response.xpath('//span[@id="location-name"]//text()').extract())
+
         props = {
+            'name': name,
+            'brand': 'Pacific Sales Kitchen & Home' if 'Pacific Sales' in name else self.item_attributes["brand"],
             'addr_full': response.xpath('//meta[@itemprop="streetAddress"]/@content').extract_first(),
             'lat': float(response.xpath('//meta[@itemprop="latitude"]/@content').extract_first()),
             'lon': float(response.xpath('//meta[@itemprop="longitude"]/@content').extract_first()),
@@ -57,10 +63,12 @@ class BestBuySpider(scrapy.Spider):
     def parse(self, response):
         locations = response.xpath('//a[@class="c-directory-list-content-item-link"]/@href').extract()
         if not locations:
-            stores = response.xpath('//a[@class="Link Teaser-titleLink"]/@href').extract()
+            stores = response.xpath('//div[@class="c-LocationGrid"]//a[@class="Link Teaser-titleLink"]/@href').extract()
             if not stores:
                 yield self.parse_location(response)
             for store in stores:
+                if store.endswith('/magnolia.html'):  # store within a store
+                    continue
                 yield scrapy.Request(
                     url=response.urljoin(store),
                     callback=self.parse_location

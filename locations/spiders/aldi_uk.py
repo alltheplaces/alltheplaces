@@ -1,71 +1,87 @@
 # -*- coding: utf-8 -*-
-import scrapy
 import json
+import csv
+import scrapy
 import re
 
 from locations.items import GeojsonPointItem
 
+COOKIES = {
+    "bm_sz": "04B124C1C96D68082A9F61BAAAF0B6D5~YAAQdjsvF22E8Xl6AQAACr1VfAxPEt+enarZyrOZrBaNvyuX71lK5QPuDR/FgDEWBZVMRhjiIf000W7Z1PiAjxobrz2Y5LcYMH3CvUNvpdS3MjVLUMGwMEBCf9L5nD5Gs9ho2YL8T7Tz7lYvpolvaOlJnKrHyhCFxxk/uyBZ2G/0QrGKLwSaCQShDsz7ink=",
+    "_abck": "440E40C406E69413DCCC08ABAA3E9022~-1~YAAQdjsvF26E8Xl6AQAACr1VfAYznoJdJhX7TNIZW1Rfh6qRhzquXg+L1TWoaL7nZUjXlNls2iPIKFQrCdrWqY/CNXW+mHyXibInMflIXJi5VVB/Swq53kABYJDuXYSlCunYvJAzMSr1q12NOYswz134Y8HRNzVWhkb2jMS5whmHxS/v0vniIvS1TQtKjEQlMGzQYmN41CmLX0JobipQhDtUB4VyNwztb2DCAZiqDX8BLwWg7h/DtPd4158qU69hNhayFTgWmD76/MiR8/T536tMmcoRyWLl4fEtP/XUmKOcksuZO7dbfNxXBffTxIXPYwf1eO77LNuZTCQq5kfsGZLJX8ODju2KSjnIF1vdnyHAe98FDIm+hw==~-1~-1~-1"
+}
 
-class AldiUkSpider(scrapy.Spider):
-    name = "aldiuk"
-    item_attributes = { 'brand': "Aldi" }
-    allowed_domains = ['www.aldi.co.uk']
-    start_urls = (
-        'https://www.aldi.co.uk/sitemap.xml',
-    )
+HEADERS = {
+    'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+    'accept-encoding': 'gzip, deflate, br',
+    'cache-control': 'max-age=0',
+    'referer': 'https://www.aldi.co.uk/store-finder',
+    'sec-ch-ua': '" Not;A Brand";v="99", "Google Chrome";v="91", "Chromium";v="91"',
+    'sec-ch-ua-mobile': '?0',
+    'sec-fetch-dest': 'document',
+    'sec-fetch-mode': 'navigate',
+    'sec-fetch-site': 'same-origin',
+    'sec-fetch-user': '?1',
+    'upgrade-insecure-requests': '1',
+    'user-agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36',
+}
 
-    # Extracts store's data from an individual store page
-    def parse_store_page(self, response):
+class AldiUKSpider(scrapy.Spider):
+    name = "aldi_uk"
+    item_attributes = {'brand': "Aldi"}
+    allowed_domains = ['aldi.co.uk']
+    download_delay = 1.5
+    custom_settings = {
+        'USER_AGENT': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.86 Safari/537.36',
+    }
+
+    def start_requests(self):
+        url = 'https://www.aldi.co.uk/sitemap/store-en_gb-gbp'
+        
+        yield scrapy.http.FormRequest(
+            url=url,
+            method='GET',
+            dont_filter=True,
+            cookies=COOKIES,
+            headers=HEADERS,
+            callback=self.parse
+        )
+        
+    def parse(self, response):
         response.selector.remove_namespaces()
+        store_urls = response.xpath('//url/loc/text()').extract()
+        
+        for store_url in store_urls:
 
-        # Get a JS object with all store information
-        store = json.loads( response.css('.js-store-finder-initial-state').xpath('./text()').get() )['store']
-
-        # Transform an array of objects for opening times into a string
-        hours = [ '{} {}'.format(d['day'], d['hours'].replace('&nbsp;&ndash;&nbsp;', '-')) for d in store['openingTimes'] ]
-        hours_str = '; '.join(hours)
-
-        # Address = Street (sometimes with Number) extracted from title, together with Address array from data object
-        street_full = store['name'].split('ALDI - ')[1].strip()
-        addr_full = '{}, {}'.format(street_full, ', '.join(store['address']))
-
-        # From ALDI's name, extract housenumber & street name
-        addr_regex = r"^(Unit\s.|\d*\-?\d*),?\s?(.*)$"
-        housenumber = re.search(addr_regex, street_full).group(1)
-        street =  re.search(addr_regex, street_full).group(2)
+            yield scrapy.http.FormRequest(
+                url=store_url,
+                method='GET',
+                dont_filter=True,
+                cookies=COOKIES,
+                headers=HEADERS,
+                callback=self.parse_store
+            )
+        
+    def parse_store(self, response):
+        
+        store_js = response.xpath('//script[@type="text/javascript"]/text()').extract_first()
+        json_data = re.search('gtmData =(.+?);', store_js).group(1)
+        data = json.loads(json_data)
+        
+        geojson_data = response.xpath('//script[@class="js-store-finder-initial-state"][@type="application/json"]/text()').extract_first()
+        geodata = json.loads(geojson_data)
 
         properties = {
-            'name': store['name'],
-            'ref': store['code'],
-            'website': 'https://www.aldi.co.uk/store/{}'.format(store['code']),
-            'lat': float( store['latlng']['lat'] ),
-            'lon': float( store['latlng']['lng'] ),
-            'postcode': store['address'][-1],
-            'city': store['address'][-2],
-            'addr_full': addr_full,
-            'opening_hours': hours_str,
-            'street': street,
-            'housenumber': housenumber,
-            'country': 'UK',
+            'name': data['seoData']['name'],
+            'ref': data['seoData']['name'],
+            'addr_full': data['seoData']['address']['streetAddress'],
+            'city': data['seoData']['address']['addressLocality'],
+            'postcode': data['seoData']['address']['postalCode'],
+            'country': data['seoData']['address']['addressCountry'],
+            'website': response.request.url,
+            'opening_hours': str(data['seoData']['openingHours']).replace('[','').replace(']','').replace("'",''),
+            'lat': geodata['store']['latlng']['lat'],
+            'lon': geodata['store']['latlng']['lng'],
         }
 
         yield GeojsonPointItem(**properties)
-
-
-    # Extracts URLs for all individual stores from the XML document
-    def parse_stores(self, response):
-        response.selector.remove_namespaces()
-
-        for url in response.xpath('//url'):
-            yield scrapy.Request( url.xpath('.//loc/text()').get(), callback=self.parse_store_page )
-
-
-    # Start by parsing the Sitemap: find a page with URLs of all Aldi UK stores
-    def parse(self, response):
-        response.selector.remove_namespaces()
-
-        for sitemap_item in response.xpath('//sitemap'):
-            sitemap_item_url = sitemap_item.xpath('.//loc/text()').get()
-
-            if '/store-' in sitemap_item_url:
-                yield scrapy.Request( sitemap_item_url , callback=self.parse_stores)

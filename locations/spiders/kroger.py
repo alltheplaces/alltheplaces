@@ -6,69 +6,73 @@ from locations.hours import OpeningHours
 from locations.items import GeojsonPointItem
 from scrapy.selector import Selector
 
-
-default_headers = {
-    "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_1) AppleWebKit/537.36 (KHTML, like Gecko) "
-                  "Chrome/63.0.3239.84 Safari/537.36"}
+WIKIBRANDS = {
+    "Baker's": 'Q4849080',
+    'City Market': 'Q5123299',
+    'Dillons': 'Q5276954',
+    'Food 4 Less': 'Q5465282',
+    'Foods Co': 'Q5465282',
+    'Fred Meyer': 'Q5495932',
+    "Fry's Food Stores": 'Q5506547',
+    'Gerbes': 'Q5276954',
+    'JayC': 'Q6166302',
+    'King Soopers': 'Q6412065',
+    'Kroger': 'Q153417',
+    "Mariano's Fresh Market": 'Q55622168',
+    'Metro Market': 'Q7371288',
+    'Pay Less': 'Q7156587',
+    "Owen's": 'Q7114367',
+    "Pick 'n Save": 'Q7371288',
+    'QFC': 'Q7265425',
+    'Ralphs': 'Q3929820',
+    "Smith's": 'Q7544856'
+}
 
 
 class KrogerSpider(scrapy.Spider):
     name = "kroger"
-    item_attributes = { 'brand': "Kroger", 'brand_wikidata': "Q153417" }
-    allowed_domains = ["www.kroger.com"]
-    download_delay = 0.2
+    allowed_domains = ['www.kroger.com']
+    custom_settings = {
+        'USER_AGENT': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.212 Safari/537.36'
+    }
 
     def start_requests(self):
-        urls = [
-	    'https://www.kroger.com/storelocator-sitemap.xml',
-        ]
-        for url in urls:
-            yield scrapy.Request(url=url, callback=self.parse, headers=default_headers)
+        base_url = 'https://www.kroger.com/atlas/v1/stores/v1/search?filter.latLng={lat},{lng}&filter.radiusInMiles=30'
 
+        with open('./locations/searchable_points/us_centroids_25mile_radius.csv') as points:
+            next(points)  # Ignore the header
+            for point in points:
+                _, lat, lon = point.strip().split(',')
+
+                url = base_url.format(lat=lat, lng=lon)
+
+                yield scrapy.http.Request(url=url, method='GET', callback=self.parse)
 
     def parse(self, response):
-        xml = Selector(response)
-        xml.remove_namespaces()
+        data = json.loads(response.body_as_unicode())
 
-        urls = xml.xpath('//loc/text()').extract()
-        for url in urls:
-            yield scrapy.Request(url, callback=self.parse_store, headers=default_headers)
-
-    def parse_hours(self, hours):
-        opening_hours = OpeningHours()
-
-        for hour in hours:
+        for store in data["data"]["storeSearch"]["results"]:
             try:
-                opening_hours.add_range(day=hour["dayOfWeek"].replace("http://schema.org/", "")[:2],
-                                        open_time=hour["opens"],
-                                        close_time=hour["closes"],
-                                        time_format="%H:%M:%S")
+                brand = store['facilityName']
             except:
-                continue  # closed or no time range given
+                brand = store["brand"]
+            try:
+                wiki = WIKIBRANDS.get(brand)
+            except:
+                wiki = ""
 
-    def parse_store(self, response):
-        data = response.xpath('//script[@type="application/ld+json"]/text()').extract_first()
-        if data:
-            data = json.loads(data)
-        else:
-            return
+            properties = {
+                'ref': store["locationId"],
+                'name': store["vanityName"],
+                'addr_full': store["address"]["address"]["addressLines"][0],
+                'city': store["address"]["address"]["cityTown"],
+                'state': store["address"]["address"]["stateProvince"],
+                'postcode': store["address"]["address"]["postalCode"],
+                'country': store["address"]["address"]["countryCode"],
+                'lat': store["location"]["lat"],
+                'lon': store["location"]["lng"],
+                'brand': brand,
+                'brand_wikidata': wiki
+            }
 
-        properties = {
-            'ref': response.url,
-            'name': "%s Kroger" % data["name"],
-            'addr_full': data["address"]["streetAddress"].strip(),
-            'city': data["address"]["addressLocality"].strip(),
-            'state': data["address"]["addressRegion"],
-            'postcode': data["address"]["postalCode"],
-            'country': data["address"].get("addressCountry"),
-            'phone': data.get("telephone"),
-            'lat': float(data["geo"]["latitude"]),
-            'lon': float(data["geo"]["longitude"]),
-            'website': data.get("url") or response.url,
-        }
-
-        hours = self.parse_hours(data['openingHoursSpecification'])
-        if hours:
-            properties["opening_hours"] = hours
-
-        yield GeojsonPointItem(**properties)
+            yield GeojsonPointItem(**properties)

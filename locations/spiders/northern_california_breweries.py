@@ -13,15 +13,24 @@ class NorthernCaliforniaBreweriesSpider(scrapy.Spider):
 
     def parse(self, response):
       beerData = response.xpath("//*[text()[contains(.,'beerData')]]").extract_first()
-      matches = re.search("var beerData = (\[(.*)\])", beerData)
+      matches = re.search(r"var beerData = (\[(.*)\])", beerData)
       jsonData = matches.group(0).replace("var beerData = ","")
       breweryList = json.loads(jsonData)
 
       for item in breweryList:
+        latitude = None
+        longitude = None
+
+        if item.get('Latitude') is not None:
+          latitude = float(item.get('Latitude'))
+
+        if item.get('Longitude') is not None:
+          longitude = float(item.get('Longitude'))
+        
         yield GeojsonPointItem(
           ref=item.get('Brewery'),
-          lat=float(item.get('Latitude')),
-          lon=float(item.get('Longitude')),
+          lat=latitude,
+          lon=longitude,
           addr_full=item.get('Address'),
           city=item.get('City'),
           state="CA",

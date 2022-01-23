@@ -29,30 +29,27 @@ class JiffyLubeSpider(scrapy.Spider):
     name = "jiffylube"
     item_attributes = {'brand': "Jiffy Lube"}
     allowed_domains = ["www.jiffylube.com"]
+    start_urls = (
+        'https://www.jiffylube.com/api/locations',
+    )
 
-    def start_requests(self):
-        template = 'https://www.jiffylube.com/api/locations?state={state}'
 
-        headers = {
-            'Accept': 'application/json',
-        }
-
-        for state in STATES:
-            yield scrapy.http.FormRequest(
-                url=template.format(state=state),
-                method='GET',
-                headers=headers,
-                callback=self.parse
-            )
     def parse(self, response):
-        jsonresponse = json.loads(response.body_as_unicode())
+        stores = json.loads(response.text)
+        
 
-        for stores in jsonresponse:
-            store = json.dumps(stores)
-            store_data = json.loads(store)
+        for store in stores:
+            store_url =  "https://www.jiffylube.com/api" + store["_links"]["_self"]
+            yield scrapy.Request(
+                store_url,
+                callback=self.parse_store
+            )
+
+
+    def parse_store(self, response):
+            store_data = json.loads(response.text)
 
             properties = {
-                'name': store_data["nickname"],
                 'ref': store_data["id"],
                 'addr_full': store_data["address"],
                 'city': store_data["city"],
@@ -64,22 +61,5 @@ class JiffyLubeSpider(scrapy.Spider):
                 'lon': float(store_data["coordinates"]["longitude"]),
                 'website': "https://www.jiffylube.com{}".format(store_data["_links"]["_self"])
             }
-
-            hours = store_data["hours_schema"]
-
-            if hours:
-                properties['opening_hours'] = self.process_hours(hours)
-
+            
             yield GeojsonPointItem(**properties)
-
-    def process_hours(self, hours):
-        opening_hours = OpeningHours()
-
-        for hour in hours:
-            day = hour["name"]
-            open_time = hour["time_open"]
-            close_time = hour["time_close"]
-
-            opening_hours.add_range(day=DAY_MAPPING[day], open_time=open_time, close_time=close_time,
-                                    time_format='%H:%M')
-        return opening_hours.as_opening_hours()

@@ -1,0 +1,2 @@
+stacks:
+  default: "scrapy:2.5"

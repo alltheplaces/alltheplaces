@@ -7,10 +7,10 @@ from locations.items import GeojsonPointItem
 
 class WhataburgerSpider(scrapy.Spider):
     name = "whataburger"
-    item_attributes = { 'brand': "Whataburger" }
+    item_attributes = { 'brand': "Whataburger", 'brand_wikidata': "Q376627" }
     allowed_domains = ["locations.whataburger.com"]
     start_urls = (
-        'https://locations.whataburger.com/',
+        'https://locations.whataburger.com/directory.html',
     )
 
     def store_hours(self, store_hours):
@@ -66,6 +66,7 @@ class WhataburgerSpider(scrapy.Spider):
 
     def parse(self, response):
         urls = response.xpath('//a[@class="Directory-listLink"]/@href').extract()
+        urls.extend(response.xpath('//a[@class="Teaser-titleLink"]/@href').extract())
         for path in urls:
             if len(path.split('/')) > 2:
                 # If there's only one store, the URL will be longer than <state code>.html
@@ -74,17 +75,18 @@ class WhataburgerSpider(scrapy.Spider):
                 yield scrapy.Request(response.urljoin(path))
 
     def parse_store(self, response):
-        hours = json.loads(response.xpath('//div[@class="c-location-hours-details-wrapper js-location-hours"]/@data-days').extract_first())
+        hours_data = response.xpath('//div[@class="c-hours-details-wrapper js-hours-table"]/@data-days').extract_first()
 
         yield GeojsonPointItem(
             lon=float(response.xpath('//span/meta[@itemprop="longitude"]/@content').extract_first()),
             lat=float(response.xpath('//span/meta[@itemprop="latitude"]/@content').extract_first()),
+            name=response.xpath('//span[@class="Banner-titleGeo"]/text()').extract_first(),
             addr_full=response.xpath('//meta[@itemprop="streetAddress"]/@content').extract_first(),
             city=response.xpath('//meta[@itemprop="addressLocality"]/@content').extract_first(),
             state=response.xpath('//abbr[@itemprop="addressRegion"]/text()').extract_first(),
             postcode=response.xpath('//span[@itemprop="postalCode"]/text()').extract_first().strip(),
             phone=response.xpath('//a[@class="c-phone-number-link c-phone-main-number-link"]/text()').extract_first(),
-            opening_hours=self.store_hours(hours) if hours else None,
+            opening_hours=self.store_hours(json.loads(hours_data)) if hours_data else None,
             ref=response.url,
             website=response.url,
         )

@@ -7,13 +7,14 @@ from locations.hours import OpeningHours
 
 
 class BMOHarrisSpider(scrapy.Spider):
-    name = "bmo-harris"
-    item_attributes = { 'brand': "BMO Harris Bank" }
+    name = "bmo_harris"
+    item_attributes = {'brand': "BMO Harris Bank", 'brand_wikidata': "Q4835981"}
     allowed_domains = ["branches.bmoharris.com"]
     download_delay = 0.5
     start_urls = (
         'https://branches.bmoharris.com/',
     )
+    user_agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36'
 
     def parse_store(self, response):
         properties = {
@@ -33,9 +34,9 @@ class BMOHarrisSpider(scrapy.Spider):
 
     def parse(self, response):
         # Step into hierarchy of place
-        for url in response.xpath("//div[@class='itemlist']/p/a/@href").extract():
+        for url in response.xpath("//ul[@class='itemlist']/li/a/@href").extract():
             yield scrapy.Request(response.urljoin(url))
 
         # Look for links to stores
-        for url in response.xpath("//div[@class='itemlist']/li/span[@itemprop='streetAddress']/a/@href").extract():
+        for url in response.xpath("//ul[@class='itemlist']/li/div/span[@itemprop='streetAddress']/a/@href").extract():
             yield scrapy.Request(response.urljoin(url), callback=self.parse_store)

@@ -18,7 +18,7 @@ DAY_MAPPING = {
 
 class ATTScraper(scrapy.Spider):
     name = "att"
-    item_attributes = { 'brand': "AT&T" }
+    item_attributes = { 'brand': "AT&T", 'brand_wikidata': "Q35476" }
     allowed_domains = ['www.att.com']
     start_urls = (
         'https://www.att.com/stores/us',
@@ -76,7 +76,7 @@ class ATTScraper(scrapy.Spider):
             'lon': response.xpath('normalize-space(//meta[@itemprop="longitude"]/@content)').extract_first(),
         }
 
-        hours = response.xpath('//span[@class="c-location-hours-today js-location-hours"]/@data-days').extract_first()
+        hours = response.xpath('//span[@class="c-hours-today js-hours-today"]/@data-days').extract_first()
         properties['opening_hours'] = self.parse_hours(hours)
 
         yield GeojsonPointItem(**properties)

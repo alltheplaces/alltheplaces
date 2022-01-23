@@ -1,61 +1,48 @@
 # -*- coding: utf-8 -*-
-import scrapy
 import json
 import re
 
+import scrapy
+
+from locations.hours import OpeningHours
 from locations.items import GeojsonPointItem
 
 
 class SafewayCaSpider(scrapy.Spider):
     name = "safeway_ca"
-    item_attributes = { 'brand': "Safeway" }
+    item_attributes = {"brand": "Safeway", "brand_wikidata": "Q17111901"}
     allowed_domains = ["www.safeway.ca"]
-    start_urls = (
-        'https://www.safeway.ca/api/en/Store/get?Latitude=42.0354084&Longitude=-88.2825668&Skip=0&Max=60000',
-    )
-
-    def store_hours(self, store_hours):
-        store_hours = store_hours.replace('Monday', 'Mo').replace('Tuesday', 'Tu').replace('Wednesday', 'We').replace('Thursday', 'Th').replace('Friday', 'Fr').replace('Saturday', 'Sa').replace('Sunday', 'Su')
-        if 'Open 24 hours' in store_hours:
-            return store_hours.replace('Open 24 hours', '00:00-24:00')
-        else:
-            hours = ''
-            match = re.search(r'(\d{1,2sains}):(\d{2})(A|P)M - (\d{1,2}):(\d{2})(A|P)M', store_hours)
-            if match:
-                (f_hr, f_min, f_ampm, t_hr, t_min, t_ampm) = match.groups()
-                f_hr = int(f_hr)
-                if f_ampm == 'P':
-                    f_hr += 12
-                elif f_ampm == 'A' and f_hr == 12:
-                    f_hr = 0
-                t_hr = int(t_hr)
-                if t_ampm == 'P':
-                    t_hr += 12
-                elif t_ampm == 'A' and t_hr == 12:
-                    t_hr = 0
-                
-                hours = '{:02d}:{}-{:02d}:{}'.format(
-                    f_hr,
-                    f_min,
-                    t_hr,
-                    t_min,
-                )
-            return store_hours[:2] + ' ' + hours
+    start_urls = ("https://www.safeway.ca/store-sitemap.xml",)
 
     def parse(self, response):
-        results = json.loads(response.body_as_unicode())
-        for store in results['Data']:
-            properties = {
-                'ref': store['Number'],
-                'name': store['Name'],
-                'lat': store['Coordinates']['Latitude'],
-                'lon': store['Coordinates']['Longitude'],
-                'addr_full': store['AddressMain']['Line'],
-                'city': store['AddressMain']['City'],
-                'state': store['AddressMain']['Province'],
-                'postcode': store['AddressMain']['PostalCode'],
-                'phone': store['PhoneNumberHome']['Number'],
-                'opening_hours': self.store_hours(store['OpeningHours'])
-                }
+        response.selector.remove_namespaces()
+        for url in response.xpath("//loc/text()").extract():
+            if "/stores/" in url:
+                yield scrapy.Request(url, callback=self.parse_store)
 
-            yield GeojsonPointItem(**properties)
+    def parse_store(self, response):
+        properties = {
+            "ref": response.xpath("//@data-store-id").extract_first(),
+            "name": response.xpath('//meta[@property="og:title"]/@content').extract_first(),
+            "website": response.url,
+            "lat": response.xpath("//@data-lat").extract_first(),
+            "lon": response.xpath("//@data-lng").extract_first(),
+            "addr_full": response.css(".location_address_address_1::text").extract_first(),
+            "city": response.css(".city::text").extract_first(),
+            "state": response.css(".province::text").extract_first(),
+            "postcode": response.css(".postal_code::text").extract_first(),
+            "phone": response.xpath('//a[contains(@href,"tel:")]/text()').extract_first(),
+            "opening_hours": self.parse_hours(response),
+        }
+
+        yield GeojsonPointItem(**properties)
+
+    def parse_hours(self, response):
+        tbl = response.css('.holiday_hours_tbl')[-1].xpath('./tbody//text()')
+        vals = [s for s in tbl.extract() if s.strip()]
+        opening_hours = OpeningHours()
+        for day, span in zip(*[iter(vals)] * 2):
+            day = day[:2]
+            open_time, close_time = span.split(" to ")
+            opening_hours.add_range(day, open_time, close_time, "%I:%M %p")
+        return opening_hours.as_opening_hours()

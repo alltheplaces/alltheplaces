@@ -64,7 +64,6 @@ TELNETCONSOLE_ENABLED = False
 #    'locations.middlewares.MyCustomDownloaderMiddleware': 543,
 #}
 
-
 # Enable or disable extensions
 # See http://scrapy.readthedocs.org/en/latest/topics/extensions.html
 #EXTENSIONS = {

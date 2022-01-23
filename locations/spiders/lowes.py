@@ -6,16 +6,23 @@ from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
 
 
-day_mapping = {'Monday': 'Mo', 'Tuesday': 'Tu', 'Wednesday': 'We', 'Thursday': 'Th', 'Friday': 'Fr', 'Saturday': 'Sa',
-               'Sunday': 'Su'}
+day_mapping = {
+    'Monday': 'Mo',
+    'Tuesday': 'Tu',
+    'Wednesday': 'We',
+    'Thursday': 'Th',
+    'Friday': 'Fr',
+    'Saturday': 'Sa',
+    'Sunday': 'Su',
+}
 
 
 class LowesSpider(scrapy.Spider):
     """"This spider scrapes Lowes retail store locations"""
     name = "lowes"
-    item_attributes = { 'brand': "Lowe's" }
+    item_attributes = {'brand': "Lowe's", 'brand_wikidata': "Q1373493"}
     allowed_domains = ["lowes.com"]
-    start_urls = ('http://www.lowes.com/Lowes-Stores',)
+    start_urls = ('https://www.lowes.com/sitemap/store0.xml',)
     download_delay = 0.5
 
     custom_settings = {
@@ -47,36 +54,38 @@ class LowesSpider(scrapy.Spider):
     def parse_store(self, response):
         ref = re.search(r'.+/(.+)', response.url).group(1)
 
-        script_content = response.xpath('//*[@id="wrapper"]/script[1]').extract_first()
-        script_data = re.search(r'currentStore: (.*)userLocation:', script_content,
-                                flags=re.IGNORECASE | re.DOTALL).group(1).strip()
-        script_data = script_data.strip(",")
-        script_data = script_data.replace("\'", "")
+        script_content = response.xpath('//script[contains(text(),"storeHours")]/text()').extract_first()
+        if not script_content:
+            return
 
+        # effectively strip off leading "window.__PRELOADED_STATE__ = " where
+        # the rest is a json blob
+        script_data = script_content.split(" = ", 1)[-1]
         json_data = json.loads(script_data)
         store_hours = json_data.get('storeHours')
 
+        state_texts = response.xpath('//span[@itemprop="addressRegion"]/text()').extract()
         properties = {
-            'lat': float(json_data.get('lat')),
-            'lon': float(json_data.get('long')),
-            'ref': ref,
-            'addr_full': response.xpath('normalize-space(//span[@itemprop="streetAddress"]/text())').extract_first(),
-            'city': response.xpath('normalize-space(//span[@itemprop="addressLocality"]/text())').extract_first(),
-            'state': response.xpath('normalize-space(//span[@itemprop="addressRegion"]/text())').extract_first(),
-            'postcode': response.xpath('normalize-space(//span[@itemprop="postalCode"]/text())').extract_first(),
-            'phone': response.xpath('normalize-space(//span[@itemprop="telephone"]/text())').extract_first(),
+            'lat': json_data['storeDetails']['lat'],
+            'lon': json_data['storeDetails']['long'],
+            'ref': json_data['storeDetails']['id'],
+            'addr_full': json_data['storeDetails']['address'],
+            'city': json_data['storeDetails']['city'],
+            'state': json_data['storeDetails']['state'],
+            'postcode': json_data['storeDetails']['zip'],
+            'phone': json_data['storeDetails']['phone'],
             'website': response.request.url,
             'opening_hours': self.parse_hours(store_hours),
+            'extras': {
+                'amenity:toilets': True,
+            },
         }
 
         yield GeojsonPointItem(**properties)
 
-    def parse_state(self, response):
-        city_urls = response.xpath('//div[@class="v-spacing-small"]/a/@href').extract()
-        for path in city_urls:
-            yield scrapy.Request(response.urljoin(path), callback=self.parse_store)
-
     def parse(self, response):
-        urls = response.xpath('//li[@role="listitem"]/a/@href').extract()
-        for path in urls:
-            yield scrapy.Request(response.urljoin(path), callback=self.parse_state)
+        response.selector.remove_namespaces()
+        urls = response.xpath('//url/loc/text()').extract()
+
+        for url in urls:
+            yield scrapy.Request(url, callback=self.parse_store)

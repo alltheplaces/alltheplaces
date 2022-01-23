@@ -1,16 +1,8 @@
+from datetime import datetime
 import scrapy
 import re
 from locations.items import GeojsonPointItem
-
-DAY_MAPPING = {
-    "Mon": "Mo",
-    "Tue": "Tu",
-    "Wed": "We",
-    "Thu": "Th",
-    "Fri": "Fr",
-    "Sat": "Sa",
-    "Sun": "Su"
-}
+from locations.hours import OpeningHours
 
 
 class WhidbeycoffeeSpider(scrapy.Spider):
@@ -20,94 +12,78 @@ class WhidbeycoffeeSpider(scrapy.Spider):
     allowed_domains = ["www.whidbeycoffee.com"]
     download_delay = 1
     start_urls = (
-        'http://www.whidbeycoffee.com/pages/locations',
+        'https://www.whidbeycoffee.com/sitemap_pages_1.xml',
     )
 
-    def parse_day(self, day):
-        if re.search('-', day):
-            days = day.split('-')
-            osm_days = []
-            if len(days) == 2:
-                for day in days:
-                    try:
-                        osm_day = DAY_MAPPING[day.strip()]
-                        osm_days.append(osm_day)
-                    except:
-                        return None
-            return ["-".join(osm_days)]
-        if re.search('Sat', day) or re.search('Sun', day):
-            if re.search('Sat', day) and re.search('Sun', day):
-                return ['Sa', 'Su']
-            else:
-                return [DAY_MAPPING[day.strip()]]
-
-    def parse_times(self, times):
-        if times.strip() == 'Closed':
-            return 'off'
-        hours_to = [x.strip() for x in times.split('-')]
-        cleaned_times = []
-
-        for hour in hours_to:
-            if re.search('pm$', hour):
-                hour = re.sub('pm', '', hour).strip()
-                hour_min = hour.split(":")
-                if int(hour_min[0]) < 12:
-                    hour_min[0] = str(12 + int(hour_min[0]))
-                cleaned_times.append(":".join(hour_min))
-
-            if re.search('am$', hour):
-                hour = re.sub('am', '', hour).strip()
-                hour_min = hour.split(":")
-                if len(hour_min[0]) <2:
-                    hour_min[0] = hour_min[0].zfill(2)
-                else:
-                    hour_min[0] = str(12 + int(hour_min[0]))
-
-                cleaned_times.append(":".join(hour_min))
-        return "-".join(cleaned_times)
-
-    def parse_hours(self, lis):
-        hours = []
-        for li in lis:
-            li = li.lstrip()
-            if re.search('&', li):
-                day = li.split(':')[0]
-            else:
-                day = re.findall(r"^[^( |:)]+" ,li)[0]
-            times = li.replace(day , "")[1:]
-
-            if times and day:
-                parsed_time = self.parse_times(times)
-                parsed_day = self.parse_day(day)
-                if parsed_day is not None:
-                    if (len(parsed_day) == 2):
-                        hours.append(parsed_day[0] + ' ' + parsed_time)
-                        hours.append(parsed_day[1] + ' ' + parsed_time)
-                    else:
-                        hours.append(parsed_day[0] + ' ' + parsed_time)
-
-        return "; ".join(hours)
-
     def parse(self, response):
-        stores = response.xpath('//h5')
-        for index , store in enumerate(stores):
-            direction_link = store.xpath('normalize-space(./following-sibling::p/a/@href)').extract_first()
-            properties = {
-                'addr_full': store.xpath('./following-sibling::p/a/text()').extract()[0],
-                'phone': store.xpath('./following-sibling::p/following-sibling::p/text()').extract()[0],
-                'city': store.xpath('./following-sibling::p/a/text()').extract()[1].split(',')[0],
-                'state':  store.xpath('./following-sibling::p/a/text()').extract()[1].split(',')[1].split(' ')[1],
-                'postcode':  store.xpath('./following-sibling::p/a/text()').extract()[1].split(',')[1].split(' ')[2],
-                'ref':store.xpath('normalize-space(./text())').extract_first(),
-                'lat':re.findall(r"\/@[^(\/)]+", direction_link)[0].split(',')[0][2:],
-                'lon': re.findall(r"\/@[^(\/)]+", direction_link)[0].split(',')[1],
-            }
-            if(index==0):
-                hours = self.parse_hours(store.xpath('./following-sibling::p[3]/text()').extract())
+        response.selector.remove_namespaces()
+        urls = response.xpath('//url/loc/text()').extract()
+        for url in urls:
+            yield scrapy.Request(
+                url.strip(),
+                callback=self.parse_store
+            )
+
+    def parse_store(self, response):
+        map_link = response.xpath('//div[@itemprop="address"]/p/a/@href').extract_first()
+        if not map_link:
+            self.logger.info(f"Skipping URL {response.url}")
+            return
+
+        lat, lon = re.search(r".*@(-?[\d.]+),(-?[\d.]+).*", map_link).groups()
+
+        yield GeojsonPointItem(
+            ref=response.url.split('/')[-1],
+            name=response.xpath('//h1/text()').extract_first().strip(),
+            lat=float(lat),
+            lon=float(lon),
+            addr_full=response.xpath('//span[@itemprop="streetAddress"]/text()').extract_first().strip(),
+            city=response.xpath('//span[@itemprop="addressLocality"]/text()').extract_first().strip(),
+            state=response.xpath('//span[@itemprop="addressRegion"]/text()').extract_first().strip(),
+            postcode=response.xpath('//span[@itemprop="postalCode"]/text()').extract_first().strip(),
+            phone=response.xpath('//span[@itemprop="telephone"]/text()').extract_first().strip(),
+            website=response.url,
+            opening_hours=self.parse_hours(response.xpath('//p[strong[contains(text(), "Hours")]]//text()').extract())
+        )
+
+    def parse_hours(self, hours):
+
+        opening_hours = OpeningHours()
+
+        DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+
+        for hour in hours:
+            if '-' not in hour:
+                continue
+            if 'Drive Thru' in hour or 'Cafe' in hour:
+                continue
+
+            day_range = hour.split(' ')[0]
+            time_range = ''.join(hour.split(' ')[1:])
+            open_time, close_time = time_range.strip().split('-')
+
+            if ":" not in open_time:
+                open_time = datetime.strptime(open_time, '%I%p').strftime('%I:%M%p')
+            if ":" not in close_time:
+                close_time = datetime.strptime(close_time, '%I%p').strftime('%I:%M%p')
+
+            # Day range, e.g. Mon - Fri
+            if '-' in day_range:
+                start_day, end_day = re.sub(r'[\s:]', '', day_range).split('-')
+                for day in DAYS[DAYS.index(start_day[0:3]):DAYS.index(end_day[0:3])+1]:
+                    opening_hours.add_range(
+                        day=day[0:2],
+                        open_time=open_time,
+                        close_time=close_time,
+                        time_format='%I:%M%p'
+                    )
+            # Single day, e.g. Sat
             else:
-                hours = self.parse_hours(store.xpath('./following-sibling::p[2]/text()').extract()[2:])
+                opening_hours.add_range(
+                    day=day_range[0:2],
+                    open_time=open_time,
+                    close_time=close_time,
+                    time_format='%I:%M%p'
+                )
 
-                if hours:
-                    properties['opening_hours'] = hours
-
-                yield GeojsonPointItem(**properties)
+        return opening_hours.as_opening_hours()

@@ -16,17 +16,16 @@ DAY_MAPPING = {
 }
 
 COUNTRY_MAPPING = {
-    'DE': 'Germany',
-    'AT': 'Austria',
-    'CZ': 'Czech Republic'
+    'DE': 'Germany'
 }
 
 class DmSpider(scrapy.Spider):
     name = "dm"
-    allowed_domains = ["services.dm.de"]
-    start_urls = (
-        'https://services.dm.de/storedata/stores/bbox/85.999%2C-179.999%2C-89.999%2C179.999/cluster/zip',
-    )
+    allowed_domains = ["store-data-service.services.dmtech.com"]
+    start_urls = [
+        'https://store-data-service.services.dmtech.com/stores/bbox/'
+        '85.999%2C-179.999%2C-89.999%2C179.999'
+    ]
     download_delay = 0.2
 
     def parse_hours(self, store_hours):
@@ -36,8 +35,9 @@ class DmSpider(scrapy.Spider):
 
         for store_day in store_hours:
             day = DAY_MAPPING[store_day.get("weekDay")]
-            open_time = store_day['timeSlices'][0]['opening']
-            close_time = store_day['timeSlices'][0]['closing']
+            open_time = store_day['timeRanges'][0]['opening']
+            close_time = store_day['timeRanges'][0]['closing']
+
             if open_time is None and close_time is None:
                 continue
             opening_hours.add_range(day=day,
@@ -48,7 +48,7 @@ class DmSpider(scrapy.Spider):
 
         return opening_hours.as_opening_hours()
 
-    def parse_details(self, response):
+    def parse(self, response):
         stores = json.loads(response.body_as_unicode())
         for store in stores['stores']:
             if store['localeCountry'] in COUNTRY_MAPPING:
@@ -63,26 +63,8 @@ class DmSpider(scrapy.Spider):
                     'lat': store['location']['lat'],
                     'lon': store['location']['lon'],
                 }
-                hours = self.parse_hours(store['openingDays'])
-
+                hours = self.parse_hours(store['openingHours'])
                 if hours:
                     properties["opening_hours"] = hours
 
                 yield GeojsonPointItem(**properties)
-
-    def parse(self, response):
-        locations = json.loads(response.body_as_unicode())
-        for l in locations:
-            lat = locations[l]['centerPoint']['lat']
-            lon = locations[l]['centerPoint']['lon']
-            lat_1 = lat + 2.56
-            lat_2 = lat - 2.56
-            lon_1 = lon + 8
-            lon_2 = lon - 8
-
-            url = "https://services.dm.de/storedata/stores/bbox/{}%2C{}%2C{}%2C{}".format(lat_1, lat_2, lon_2, lon_1)
-
-            yield scrapy.Request(
-                url=url,
-                callback=self.parse_details
-            )

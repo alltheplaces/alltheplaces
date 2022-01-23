@@ -8,7 +8,7 @@ class RiteAidSpider(scrapy.Spider):
     name = "riteaid"
     allowed_domains = ["riteaid.com"]
     start_urls = (
-        'https://locations.riteaid.com/',
+        'https://www.riteaid.com/locations/',
     )
 
     def store_hours(self, store_hours):
@@ -77,6 +77,9 @@ class RiteAidSpider(scrapy.Spider):
         state_urls = response.xpath('//a[@class="c-directory-list-content-item-link"]/@href').extract()
 
         for url in state_urls:
+            if url == 'https://www.riteaid.com/locations/pa/philadelphia.html':
+                # As of 2021-08-21, This URL 500's reliably, so skipping it.
+                continue
             if len(url.split('/')) == 5:
                 yield scrapy.Request(response.urljoin(url), callback=self.parse_location)
             else:

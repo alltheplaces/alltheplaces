@@ -5,18 +5,28 @@ import re
 
 from locations.items import GeojsonPointItem
 
+STATES = ['NC', 'AL', 'GA', 'KY', 'MD', 'MS', 'SC', 'TN', 'VA', 'WV']
+
 
 class CookoutSpider(scrapy.Spider):
     name = "cookout"
-    item_attributes = { 'brand': "Cookout" }
-    allowed_domains = ["www.cookout.com"]
-    start_urls = (
-        'http://www.cookout.com/wp-admin/admin-ajax.php?action=store_search&lat=36.072635&lng=-79.79197499999998&max_results=500&radius=500',
-    )
+    item_attributes = {'brand': "Cookout", 'brand_wikidata': "Q5166992"}
+    allowed_domains = ["cookout.com"]
+
+    def start_requests(self):
+        base_url = 'https://cookout.com/wp-admin/admin-ajax.php?action=store_search&lat={lat}&lng={lng}&max_results=300&search_radius=500'
+
+        with open('./locations/searchable_points/us_centroids_100mile_radius_state.csv') as points:
+            next(points)
+            for point in points:
+                _, lat, lon, state = point.strip().split(',')
+                if state in STATES:
+                    url = base_url.format(lat=lat, lng=lon)
+                    yield scrapy.Request(url=url, callback=self.parse)
 
     def store_hours(self, store_hours):
         m = re.findall(
-            '<tr><td>(\w*)<\/td><td><time>([0-9: APM-]*)</time></td></tr>',
+            r'<tr><td>(\w*)<\/td><td><time>([0-9: APM-]*)</time></td></tr>',
             store_hours
         )
 
@@ -85,7 +95,6 @@ class CookoutSpider(scrapy.Spider):
             properties = {
                 "ref": store['id'],
                 "name": store['store'],
-                "opening_hours": self.store_hours(store['hours']),
                 "website": store['url'],
                 "addr_full": store.get('address'),
                 "city": store.get('city'),
@@ -99,6 +108,10 @@ class CookoutSpider(scrapy.Spider):
             phone = store['phone']
             if phone:
                 properties['phone'] = phone
+
+            hours = store.get('hours', '')
+            if hours:
+                properties['opening_hours'] = self.store_hours(hours)
 
             yield GeojsonPointItem(**properties)
 

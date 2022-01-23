@@ -83,7 +83,7 @@ class LeesFamousRecipeSpider(scrapy.Spider):
                 closeH = str(int(closeH) + 12)
                 closeHours = closeH + ":" + closeM
             return dayOutput +' '+ openHours.replace(' ','') + "-" + closeHours + ';'
-        except KeyError:
+        except (KeyError, IndexError):
             return ""
 
     def parse(self, response):
@@ -99,9 +99,8 @@ class LeesFamousRecipeSpider(scrapy.Spider):
             nameString = nameString + " " + shortString
             nameString = nameString.strip()
 
-            scriptBody = response.xpath("//script[@type='text/javascript' and contains(.,'latitude')]/text()").extract_first()
-            latString = re.findall("latitude\":\"(.*?)\"", scriptBody)[0]
-            lonString = re.findall("longitude\":\"(.*?)\"", scriptBody)[0]
+            googleMapSrc = response.xpath("//*[@id='block-system-main']/div/div/iframe").extract_first()
+            [latString, lonString] = re.findall("center=(.*?)\"", googleMapSrc)[0].split(',')
 
             openingHoursString = ""
             firstHourBlock = response.xpath("//div[contains(@class,'field-name-field-hours-summer')]/div/div/p/br/parent::p/text()")
@@ -116,7 +115,7 @@ class LeesFamousRecipeSpider(scrapy.Spider):
             else:
                 countryString = "US"
                 mapUrl = response.xpath("//div[contains(@class,'map-link')]/div/a/@href").extract_first()
-                stateString = re.findall('(?<=\+)(.*?)(?=\+)', mapUrl)[len(re.findall('(?<=\+)(.*?)(?=\+)', mapUrl)) - 2].strip().replace('%2C','')
+                stateString = response.xpath("//div[contains(@class,'adr')]/div[2]/span[2]/text()").extract_first()
 
             yield GeojsonPointItem(
                 ref=nameString,
@@ -125,7 +124,7 @@ class LeesFamousRecipeSpider(scrapy.Spider):
                 opening_hours=openingHoursString,
                 state=stateString,
                 postcode=response.xpath("//div[@class='city-state-zip']/span[@class='postal-code']/text()").extract_first().strip(),
-                phone=self.parse_phone(response.xpath("//div[contains(@class,'field-name-field-phone')]/div/div/text()").extract_first().strip()),
+                phone=self.parse_phone(response.xpath("//div[contains(@class,'adr')]/div[3]/text()").extract_first().strip()),
                 country = countryString,
                 lat=float(latString),
                 lon=float(lonString),

@@ -11,13 +11,13 @@ class JackInTheBoxSpider(scrapy.Spider):
         "https://www.jackinthebox.com/api/locations",
     )
     dayMap = {
-        'monday': 'Mo',
-        'tuesday': 'Tu',
-        'wednesday': 'We',
-        'thursday': 'Th',
-        'friday': 'Fr',
-        'saturday': 'Sa',
-        'sunday': 'Su'
+        'Monday': 'Mo',
+        'Tuesday': 'Tu',
+        'Wednesday': 'We',
+        'Thursday': 'Th',
+        'Friday': 'Fr',
+        'Saturday': 'Sa',
+        'Sunday': 'Su'
     }
     def opening_hours(self, days_hours):
         day_groups = []
@@ -25,6 +25,9 @@ class JackInTheBoxSpider(scrapy.Spider):
         for day_hours in days_hours:
             day = day_hours[0]
             hours = day_hours[1]
+            if not hours:
+                continue
+
             match = re.search(r'^(\d{1,2}):(\d{2})\w*(a|p)m-(\d{1,2}):(\d{2})\w*(a|p)m?$', hours)
             (f_hr, f_min, f_ampm, t_hr, t_min, t_ampm) = match.groups()
 
@@ -62,7 +65,8 @@ class JackInTheBoxSpider(scrapy.Spider):
             elif this_day_group['hours'] == hours:
                 this_day_group['to_day'] = day
 
-        day_groups.append(this_day_group)
+        if this_day_group:
+            day_groups.append(this_day_group)
 
         opening_hours = ""
         if len(day_groups) == 1 and day_groups[0]['hours'] in ('00:00-23:59', '00:00-00:00'):
@@ -80,31 +84,32 @@ class JackInTheBoxSpider(scrapy.Spider):
         return opening_hours
 
     def parse(self, response):
-        stores = json.loads(response.body_as_unicode())
-        for store in stores:                                 
+        stores = json.loads(response.body_as_unicode())['Locations']
+        for store in stores:
+            address = store['Address']
             properties = {                                   
-                'ref': store['id'],                          
-                'addr_full': store['address'],
-                'city': store['city'],                       
-                'state': store['state'],                     
-                'postcode': store['postal'],                    
-                'lat': store['lat'],                         
-                'lon': store['lng'],                         
-                'phone': store['phone'],
+                'ref': store['LocationId'],
+                'addr_full': ", ".join([address['StreetLine1'], address['StreetLine2']]),
+                'city': address['City'],
+                'state': address['State'],
+                'postcode': address['Zipcode'],
+                'lat': store['Coordinates']['Lat'],
+                'lon': store['Coordinates']['Lon'],
+                'phone': store['OperationsData']['BusinessPhoneNumber'],
             }                                                
             
-            if store['twentyfourhours']:
+            hours = store['OperatingHours']
+            if all (hours['DineInAllDay'][day] == True for day in hours['DineInAllDay']):
                 properties['opening_hours'] = '24/7'
-            elif 'hours' in store:
-                hours = store['hours']
-                if not all(hours[d] == '' for d in hours):
-                    days_hours = []
-                    for day in ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']:
-                        days_hours.append([
-                            self.dayMap[day],
-                            hours[day].lower().replace(' ', '')
-                        ])
-                    properties['opening_hours'] = self.opening_hours(days_hours)
+
+            else:
+                days_hours = []
+                for day in ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']:
+                    days_hours.append([
+                        self.dayMap[day],
+                        hours['DineIn'][day].lower().replace(' ', '')
+                    ])
+                properties['opening_hours'] = self.opening_hours(days_hours)
                                                                  
             yield GeojsonPointItem(**properties)             
 

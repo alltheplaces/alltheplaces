@@ -1,43 +1,47 @@
-import scrapy
+# -*- coding: utf-8 -*-
 import re
+
+import scrapy
+
 from locations.items import GeojsonPointItem
 
 
 class DairyQueenSpider(scrapy.Spider):
-
     name = "dairyqueen"
-    item_attributes = { 'brand': "Dairy Queen" }
+    item_attributes = { 'brand': "Dairy Queen", 'brand_wikidata': "Q1141226" }
     allowed_domains = ["www.dairyqueen.com"]
-    download_delay = 1.5
-    start_urls = (
-        'https://www.dairyqueen.com/us-en/Sitemap/?localechange=1&',
-    )
 
-    def parse_stores(self, response):
-        google_lnk = response.xpath('//a[@title="Click here to view on Google"]//@href').extract_first()
-        matches = re.finditer(r"([-0-9]+\.[0-9]+)", google_lnk)
-        if matches:
-            lat, lng = [float(next(matches).group(0)) for _ in range(2)]
-
-        properties = {
-            'addr_full': response.xpath('//hgroup[@class="store-address"]/h2/text()').extract_first(),
-            'phone': response.xpath('//a[@class="telephone-cta"]/text()').extract_first() ,
-            'city': response.xpath('//span[@itemprop="addressLocality"]/text()').extract_first(),
-            'state': response.xpath('//span[@itemprop="addressRegion"]/text()').extract_first(),
-            'postcode': response.xpath('//span[@itemprop="postalCode"]/text()').extract_first(),
-            'ref': response.url,
-            'website': response.url,
-            'lat': lat,
-            'lon': lng
-        }
-        yield GeojsonPointItem(**properties)
+    def start_requests(self):
+        yield scrapy.Request(
+            'https://prod-dairyqueen.dotcmscloud.com/api/es/search',
+            method='POST',
+            headers={
+                'content-type': 'application/json',
+                'accept': 'application/json',
+                'referer': 'https://www.dairyqueen.com/',
+            },
+            body='{"size":10000,"query":{"bool":{"must":[{"term":{"contenttype":"locationDetail"}}]}}}',
+        )
 
     def parse(self, response):
+        data = response.json()
 
-        stores = response.xpath('(//div[@class="center-960"]/ul/li/a/@href)').extract()
+        for store in data['contentlets']:
 
-        for store in stores:
-            yield scrapy.Request(
-                response.urljoin(store),
-                callback=self.parse_stores
-            )
+            lat, lon = store.get('latlong', ',').split(',', 2)
+
+            properties = {
+                'name': f'{store["address1"]} ({store["conceptType"]})',
+                'addr_full': store.get('address3'),
+                'phone': store.get('phone'),
+                'city': store.get('city'),
+                'state': store.get('stateProvince'),
+                'postcode': store.get('postalCode'),
+                'ref': store.get('storeId'),
+                'website': 'https://www.dairyqueen.com' + store.get('urlTitle'),
+                'country': store.get('country'),
+                'lat': lat,
+                'lon': lon,
+            }
+
+            yield GeojsonPointItem(**properties)

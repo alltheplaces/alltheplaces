@@ -12,7 +12,7 @@ class CheckersSpider(scrapy.Spider):
     start_urls = (
         'https://www.checkers.com/locations/?zip_code=97035&radius=25000',
     )
-    addr2regex = re.compile('^([A-Za-z\ \.]+)\, ([A-Z]+) ([0-9]+)$')
+    addr2regex = re.compile(r'^([A-Za-z\ \.]+)\, ([A-Z]+) ([0-9]+)$')
     dayMap = {
         'Mon': 'Mo',
         'Tue': 'Tu',

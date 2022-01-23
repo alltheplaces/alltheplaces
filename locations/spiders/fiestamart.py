@@ -33,7 +33,6 @@ class FiestaMartSpider(scrapy.Spider):
         for stores in jsonresponse['locations']:
             store = json.dumps(stores)
             store_data = json.loads(store)
-            print(store_data)
 
             properties = {
                 'name': store_data["name"],

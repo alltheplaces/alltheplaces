@@ -22,13 +22,13 @@ DAYS_NAME = {
 
 class CostcoSpider(scrapy.Spider):
     name = "costco"
-    item_attributes = { 'brand': "Costco" }
+    item_attributes = {'brand': 'Costco', 'brand_wikidata': 'Q715583'}
     allowed_domains = ['www.costco.com']
     start_urls = (
         'https://www.costco.com/warehouse-locations',
     )
     custom_settings = {
-        'USER_AGENT': 'Mozilla/5.0',
+        'USER_AGENT': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36',
     }
 
     download_delay = 0.5
@@ -39,7 +39,7 @@ class CostcoSpider(scrapy.Spider):
         params = {
             "langId": "-1",
             # "storeId": "10301",
-            "numOfWarehouses": "50", # max allowed
+            "numOfWarehouses": "50",  # max allowed
             "hasGas": "false",
             "hasTires": "false",
             "hasFood": "false",
@@ -62,7 +62,6 @@ class CostcoSpider(scrapy.Spider):
                 params.update({"latitude": lat, "longitude": lon})
                 yield scrapy.Request(url=url + urlencode(params), callback=self.parse_ajax)
 
-
     def store_hours(self, store_hours):
         opening_hours = []
 
@@ -73,7 +72,8 @@ class CostcoSpider(scrapy.Spider):
             if day_info.lower().find('close') > -1:
                 continue
 
-            match = re.match(r'^(\w+)-?[\.:]?([A-Za-z]*)\.? *(\d{1,2}):(\d{2}) ?(am|pm|) *- +(\d{1,2}):(\d{2}) ?(am|pm|hrs\.)$', day_info)
+            match = re.match(
+                r'^(\w+)-?[\.:]?([A-Za-z]*)\.? *(\d{1,2}):(\d{2}) ?(am|pm|) *- +(\d{1,2}):(\d{2}) ?(am|pm|hrs\.)$', day_info)
             if not match:
                 self.logger.warn("Couldn't match hours: %s", day_info)
 
@@ -109,18 +109,27 @@ class CostcoSpider(scrapy.Spider):
     def parse_ajax(self, response):
         body = json.loads(response.body_as_unicode())
 
-
         for store in body[1:]:
             if store["distance"] < 110:
                 # only process stores that are within 110 miles of query point
                 # (to reduce processing a ton of duplicates)
                 ref = store['identifier']
+                department = store['specialtyDepartments']
+
+                fuels = {}
+                if 'gasPrices' in store:
+                    fuels = {
+                        'fuel:diesel': 'diesel' in store['gasPrices'],
+                        'fuel:octane_87': 'regular' in store['gasPrices'],
+                        'fuel:octane_91': 'premium' in store['gasPrices']
+                    }
+
                 properties = {
                     'lat': store.get('latitude'),
                     'lon': store.get('longitude'),
                     'ref': ref,
                     'phone': self._clean_text(store.get('phone')),
-                    'name': store['locationName'],
+                    'name': f"Costco {store['locationName']}",
                     'addr_full': store['address1'],
                     'city': store['city'],
                     'state': store['state'],
@@ -128,7 +137,13 @@ class CostcoSpider(scrapy.Spider):
                     'country': store.get('country'),
                     'website': 'https://www.costco.com/warehouse-locations/store-{}.html'.format(ref),
                     'extras': {
-                        'number': store["displayName"]
+                        'shop': 'supermarket',
+                        'number': store["displayName"],
+                        'amenity:fuel': store['hasGasDepartment'],
+                        'amenity:pharmacy': store['hasPharmacyDepartment'],
+                        'atm': any('ATM' == d['name'] for d in department) or None,
+                        'fuel:propane': any('Propane' == d['name'] for d in department) or None,
+                        **fuels
                     }
                 }
 

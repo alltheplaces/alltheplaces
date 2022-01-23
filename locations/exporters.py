@@ -1,5 +1,6 @@
 import base64
 import hashlib
+import logging
 from scrapy.exporters import JsonLinesItemExporter, JsonItemExporter
 from scrapy.utils.python import to_bytes
 
@@ -60,14 +61,20 @@ class LineDelimitedGeoJsonExporter(JsonLinesItemExporter):
         feature.append(('id', compute_hash(item)))
         feature.append(('properties', item_to_properties(item)))
 
-        if item.get('lon'):
-            feature.append(('geometry', {
-                'type': 'Point',
-                'coordinates': [
-                    float(item['lon']),
-                    float(item['lat'])
-                ],
-            }))
+        lat = item.get('lat')
+        lon = item.get('lon')
+        if lat and lon:
+            try:
+                feature.append(('geometry', {
+                    'type': 'Point',
+                    'coordinates': [
+                        float(item['lon']),
+                        float(item['lat'])
+                    ],
+                }))
+            except ValueError:
+                logging.warning("Couldn't convert lat (%s) and lon (%s) to string", lat, lon)
+                pass
 
         return feature
 
@@ -80,14 +87,20 @@ class GeoJsonExporter(JsonItemExporter):
         feature.append(('id', compute_hash(item)))
         feature.append(('properties', item_to_properties(item)))
 
-        if item.get('lon'):
-            feature.append(('geometry', {
-                'type': 'Point',
-                'coordinates': [
-                    float(item['lon']),
-                    float(item['lat'])
-                ],
-            }))
+        lat = item.get('lat')
+        lon = item.get('lon')
+        if lat and lon:
+            try:
+                feature.append(('geometry', {
+                    'type': 'Point',
+                    'coordinates': [
+                        float(item['lon']),
+                        float(item['lat'])
+                    ],
+                }))
+            except ValueError:
+                logging.warning("Couldn't convert lat (%s) and lon (%s) to string", lat, lon)
+                pass
 
         return feature
 

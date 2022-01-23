@@ -1,13 +1,15 @@
 # -*- coding: utf-8 -*-
+import json
+
 import scrapy
-import re
 
 from locations.items import GeojsonPointItem
+from locations.hours import OpeningHours
 
 
 class HEBSpider(scrapy.Spider):
     name = "heb"
-    item_attributes = { 'brand': "H-E-B" }
+    item_attributes = { 'brand': "H-E-B", 'brand_wikidata': "Q830621" }
     allowed_domains = ["www.heb.com"]
     download_delay = 0.2
     start_urls = (
@@ -23,18 +25,35 @@ class HEBSpider(scrapy.Spider):
             yield scrapy.Request(url=url, callback=self.parse_store, meta={"url": url})
 
     def parse_store(self, response):
-        ref = "_".join(re.search(r".+/(.+?)/(.+?)/(.+?)/?(?:\.html|$)", response.url).groups())
+        if response.request.meta.get('redirect_urls'):
+            return
 
-        properties = {
-            'name': response.xpath('//h1[@class="store-details__store-name"]/text()').extract_first(),
-            'ref': ref,
-            'addr_full': response.xpath('//p[@itemprop="streetAddress"]/text()').extract_first(),
-            'city': response.xpath('//div[@class="store-details__location"]/p[2]/span[1]/text()').extract_first(),
-            'state': response.xpath('//div[@class="store-details__location"]/p[2]/span[2]/text()').extract_first(),
-            'postcode': response.xpath('//div[@class="store-details__location"]/p[2]/span[3]/text()').extract_first(),
-            'phone': response.xpath('//a[@class="store-details__link store-details__link--phone"]/@content/text()').extract_first(),
-            'lat': (response.xpath('//div[@id="map-wrap"]/@data-map-lat').extract_first()),
-            'lon': (response.xpath('//div[@id="map-wrap"]/@data-map-lon').extract_first()),
-            'website': response.url
-        }
-        yield GeojsonPointItem(**properties)
+        store_json = json.loads(
+            response.xpath('//script[@type="application/ld+json"]/text()').extract_first()
+        )
+        yield GeojsonPointItem(
+            ref=response.url.split('/')[-1],
+            name=store_json['name'],
+            lat=float(store_json['geo']['latitude']),
+            lon=float(store_json['geo']['longitude']),
+            addr_full=store_json['address']['streetAddress'],
+            city=store_json['address']['addressLocality'],
+            state=store_json['address']['addressRegion'],
+            postcode=store_json['address']['postalCode'],
+            country=store_json['address']['addressCountry'],
+            phone=store_json['telephone'],
+            website=response.url,
+            opening_hours=self.parse_hours(store_json['openingHoursSpecification'])
+        )
+
+    def parse_hours(self, hours):
+        opening_hours = OpeningHours()
+
+        for hour in hours:
+            opening_hours.add_range(
+                day=hour["dayOfWeek"][0:2].capitalize(),
+                open_time=hour["opens"],
+                close_time=hour["closes"]
+            )
+
+        return opening_hours.as_opening_hours()

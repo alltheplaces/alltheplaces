@@ -2,22 +2,24 @@
 import scrapy
 import json
 import re
-import traceback
 
 from locations.items import GeojsonPointItem
 
-URL = "http://restaurants.quiznos.com"
 
 class QuiznosSpider(scrapy.Spider):
     name = "quiznos"
-    item_attributes = { 'brand': "Quizno's" }
-    allowed_domains = [URL]
+    item_attributes = { 'brand': "Quizno's", 'brand_wikidata': "Q1936229" }
+    allowed_domains = ["https://restaurants.quiznos.com"]
     start_urls = (
-        'http://restaurants.quiznos.com/data/stores.json?callback=storeList',
+        'https://restaurants.quiznos.com/data/stores.json',
     )
 
     def store_hours(self, store_hours):
-        if store_hours == '' or store_hours.lower().find('close') > -1: return ''
+        if store_hours == '' or store_hours == ' - ' or store_hours.lower().find('close') > -1:
+            return ''
+
+        if store_hours == 'Open 24 Hours - Open 24 Hours':
+            return '24/7'
 
         day_groups = []
         this_day_group = None
@@ -64,20 +66,21 @@ class QuiznosSpider(scrapy.Spider):
 
     def parse(self, response):
         data = response.body_as_unicode()
-        stores = json.loads(re.search('storeList\((.*)\)', data).group(1))
+        stores = json.loads(re.search(r'storeList\((.*)\)', data).group(1))
 
         for store in stores:
+            properties = {
+                "lat": store.get('latitude'),
+                "lon": store.get('longitude'),
+                "ref": str(store.get('storeid')),
+                "phone": store.get('phone'),
+                "name": store.get('restaurantname'),
+                "opening_hours": self.store_hours(store.get('businesshours')),
+                "addr_full": store.get('address1'),
+                "city": store.get('city'),
+                "state": store.get('statecode'),
+                "postcode": store.get('zipcode'),
+                "website": response.urljoin(store.get('url')),
+            }
 
-            yield GeojsonPointItem(
-                lat=store.get('latitude'),
-                lon=store.get('longitude'),
-                ref=str(store.get('storeid')),
-                phone=store.get('phone'),
-                name=store.get('restaurantname'),
-                opening_hours=self.store_hours(store.get('businesshours')),
-                addr_full=store.get('address1'),
-                city=store.get('city'),
-                state=store.get('statecode'),
-                postcode=store.get('zipcode'),
-                website=URL + store.get('url'),
-            )
+            yield GeojsonPointItem(**properties)

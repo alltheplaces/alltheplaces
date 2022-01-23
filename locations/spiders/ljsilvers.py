@@ -1,47 +1,32 @@
 # -*- coding: utf-8 -*-
 import scrapy
-import json
-import re
 
 from locations.items import GeojsonPointItem
 
 
 class LjsilversSpider(scrapy.Spider):
     name = "ljsilvers"
-    item_attributes = { 'brand': "Long John Silver's" }
+    item_attributes = {"brand": "Long John Silver's", "brand_wikidata": "Q1535221"}
     allowed_domains = ["ljsilvers.com"]
     start_urls = (
-        'http://www.ljsilvers.com/locator?postalcode=76010',
+        "https://viewer.blipstar.com/searchdbnew?uid=2483677&lat=45&lng=-103&value=10000",
     )
 
     def parse(self, response):
-        data = response.body_as_unicode()
-        base_data = re.search('dataout\s--Array\s\((.*)\)\s\s--><style type="text/css">', data, re.DOTALL).group(1)
-        detail_matches = re.findall('\((.*?)\)', base_data, re.DOTALL)
-
-        for detail_match in detail_matches:
-            key_values = re.findall('(.*?)\s=>\s(.*)', detail_match)
-            props = {}
-
-            for key_value in key_values:
-                key = key_value[0].strip()
-                value = key_value[1].strip()
-
-                if key == '[storeID]':
-                    props['ref'] = value
-                if key == '[address]':
-                    props['addr_full'] = value
-                if key == '[city]':
-                    props['city'] = value
-                if key == '[state]':
-                    props['state'] = value
-                if key == '[zip]':
-                    props['postcode'] = value
-                if key == '[phone_number]':
-                    props['phone'] = value
-                if key == '[latitude]':
-                    props['lat'] = value
-                if key == '[longitude]':
-                    props['lon'] = value
-
-            yield GeojsonPointItem(**props)
+        for row in response.json():
+            if row.keys() == {"fulltotal", "total", "units"}:
+                continue
+            addr = scrapy.Selector(text=row["a"])
+            properties = {
+                "name": row["n"],
+                "ref": row["bpid"],
+                "lat": row["lat"],
+                "lon": row["lng"],
+                "addr_full": addr.xpath("//p/text()").extract_first(),
+                "city": addr.css(".storecity ::text").extract_first(),
+                "state": addr.css(".storestate ::text").extract_first(),
+                "postcode": addr.css(".storepostalcode ::text").extract_first(),
+                "country": row["c"],
+                "phone": row.get("p"),
+            }
+            yield GeojsonPointItem(**properties)

@@ -3,6 +3,7 @@ import scrapy
 import json
 
 from locations.items import GeojsonPointItem
+from locations.hours import OpeningHours
 
 
 class PublicStorageSpider(scrapy.Spider):
@@ -10,23 +11,45 @@ class PublicStorageSpider(scrapy.Spider):
     item_attributes = { 'brand': "Public Storage" }
     allowed_domains = ["www.publicstorage.com"]
     start_urls = (
-        'https://www.publicstorage.com/handlers/searchcoordinates.ashx?north=90.0&east=180.0&south=-90.0&west=-180.0',
+        'https://www.publicstorage.com/sitemap_plp.xml',
     )
 
     def parse(self, response):
-        data = json.loads(response.body_as_unicode())
+        response.selector.remove_namespaces()
+        city_urls = response.xpath('//url/loc/text()').extract()
+        for path in city_urls:
+            yield scrapy.Request(
+                path.strip(),
+                callback=self.parse_store,
+            )
 
-        for store in data['response']['properties']['property']:
-            lat, lon = map(float, store['lat_long'].split(', '))
-            properties = {
-                "ref": store.get('property_id'),
-                "opening_hours": '; '.join(response.xpath('//time[@itemprop="openingHours"]/@datetime').extract()),
-                "addr_full": store.get('address'),
-                "city": store.get('city'),
-                "state": store.get('state'),
-                "postcode": store.get('zip'),
-                "lat": lat,
-                "lon": lon,
-            }
+    def parse_hours(self, hours):
+        opening_hours = OpeningHours()
 
-            yield GeojsonPointItem(**properties)
+        for hour in hours:
+            for day in hour['dayOfWeek']:
+                opening_hours.add_range(
+                    day=day[:2],
+                    open_time=hour["opens"],
+                    close_time=hour["closes"],
+                )
+
+        return opening_hours.as_opening_hours()
+
+    def parse_store(self, response):
+        data = json.loads(response.xpath('//script[@type="application/ld+json"]/text()').extract_first())
+        data = data['@graph'][0]
+
+        properties = {
+            "ref": data['@id'],
+            "opening_hours": self.parse_hours(data['openingHoursSpecification']),
+            "addr_full": data['address']['streetAddress'],
+            "city": data['address']['addressLocality'],
+            "state": data['address']['addressRegion'],
+            "postcode": data['address']['postalCode'],
+            "phone": data['telephone'],
+            "lat": data['geo']['latitude'],
+            "lon": data['geo']['longitude'],
+        }
+
+        yield GeojsonPointItem(**properties)
