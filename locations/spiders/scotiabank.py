@@ -65,6 +65,7 @@ class ScotiabankSpider(scrapy.Spider):
                 if refs.issubset(self.refs):
                     return
                 max_distance = branches[-1]["@attributes"]["distance"]
+                # Make more requests around this location. These are angles:
                 for b in [45.0, 135.0, 225.0, 315.0]:
                     new_x, new_y = calculate_offset_point(x=float(response.meta["request_x"]),
                                                           y=float(response.meta["request_y"]),
