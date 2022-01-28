@@ -39,6 +39,7 @@ class PPGPaintsSpider(scrapy.Spider):
             "addr_full": response.xpath('//*[@itemprop="streetAddress"]/text()').get(),
             "city": response.xpath('//*[@itemprop="addressLocality"]/text()').get(),
             "state": response.xpath('//*[@itemprop="addressRegion"]/text()').get(),
+            "postcode": response.xpath('//*[@itemprop="postalCode"]/text()').get(),
             "phone": response.xpath('//*[@itemprop="telephone"]/text()').get(),
         }
         return GeojsonPointItem(**properties)
