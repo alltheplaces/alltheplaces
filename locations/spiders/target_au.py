@@ -12,7 +12,9 @@ class TargetAUSpider(scrapy.Spider):
     allowed_domains = ["target.com.au"]
     start_urls = ["https://www.target.com.au/store-finder"]
     headers = {
-        "User-Agent": "Mozilla/5.0 (X11; CrOS aarch64 14324.72.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4692.91 Safari/537.36"
+        "Accept": "*/*",
+        "Accept-Language": "en-US,en;q=0.9",
+        "User-Agent": "Mozilla/5.0 (X11; CrOS aarch64 14324.72.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4692.91 Safari/537.36",
     }
     custom_settings = {
         "DEFAULT_REQUEST_HEADERS": headers,
