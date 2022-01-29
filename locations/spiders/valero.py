@@ -1,49 +1,39 @@
 # -*- coding: utf-8 -*-
 import scrapy
 import json
+
 from locations.items import GeojsonPointItem
 
 
 class ValeroSpider(scrapy.Spider):
     name = "valero"
-    item_attributes = {'brand': "Valero", 'brand_wikidata': 'Q1283291'}
-    allowed_domains = ["valeromaps.valero.com"]
-
-    def start_requests(self):
-        yield scrapy.FormRequest(
-            'https://valeromaps.valero.com/Home/Search?SPHostUrl=https:%2F%2Fwww.valero.com%2Fen-us',
-            method='POST',
-            headers={
-                'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8'
-            },
-            formdata={
-                'NEBound_Lat': '90',
-                'NEBound_Long': '180',
-                'SWBound_Lat': '-90',
-                'SWBound_Long': '-180',
-                'center_Lat': '0',
-                'center_Long': '0'
-            }
-        )
+    item_attributes = {"brand": "Valero", "brand_wikidata": "Q1283291"}
+    allowed_domains = ["valero.com"]
+    start_urls = ["https://locations.valero.com/sitemap.xml"]
 
     def parse(self, response):
-        result = json.loads(response.body_as_unicode())
-        for store in result['StoreList']:
-            details = ', '.join([d['DetailName'] for d in store['Details']])
-            yield GeojsonPointItem(
-                lon=store['Longitude'],
-                lat=store['Latitude'],
-                ref=store['UniqueID'],
-                name=store['StationName'],
-                addr_full=store['Address'],
-                phone=store['Phone'],
-                opening_hours='24/7' if '24 Hours' in details else None,
-                extras={
-                    'amenity:fuel': True,
-                    'amenity:toilets': 'Restroom' in details or None,
-                    'atm': 'ATM' in details,
-                    'car_wash': 'Car Wash' in details,
-                    'fuel:diesel': 'Diesel' in details or None,
-                    'fuel:e85': 'E-85' in details or None,
-                }
-            )
+        response.selector.remove_namespaces()
+        for url in response.xpath("//loc/text()").extract():
+            yield scrapy.Request(url, callback=self.parse_store)
+
+    def parse_store(self, response):
+        amenities = [s.strip() for s in response.xpath('//div[@class="amenityIconLabel"]/text()').extract()]
+        properties = {
+            "lat": response.xpath('//meta[@property="place:location:latitude"]/@content').get(),
+            "lon": response.xpath('//meta[@property="place:location:longitude"]/@content').get(),
+            "ref": response.url.rsplit("/", 1)[-1],
+            "website": response.url,
+            "name": response.xpath('normalize-space(//*[@id="pageTitleStoreName"])').get(),
+            "addr_full": response.xpath('normalize-space(//div[@class="locationDetailsContactRow"][1]//br/..)').get(),
+            "phone": response.xpath('//a[contains(@href,"tel:")]/text()').get(),
+            "opening_hours": "24/7" if "24 Hour" in amenities else None,
+            "extras": {
+                "atm": "ATM" in amenities,
+                "amenity:fuel": True,
+                "amenity:toilets": "Public Restroom" in amenities or None,
+                "car_wash": "Car Wash" in amenities,
+                "fuel:diesel": "Diesel" in amenities or None,
+                "fuel:e85": "E-85" in amenities or None,
+            },
+        }
+        yield GeojsonPointItem(**properties)
