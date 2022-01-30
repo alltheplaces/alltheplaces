@@ -14,11 +14,12 @@ DAY_MAPPING = {
     'Sun': 'Su'
 }
 
+
 class ReiSpider(scrapy.Spider):
     name = "rei"
     allowed_domains = ["www.rei.com"]
     start_urls = (
-        'https://www.rei.com/map/store',
+        'https://www.rei.com/stores/map',
     )
 
     # Fix formatting for ["Mon - Fri 10:00-1800","Sat 12:00-18:00"]
@@ -38,18 +39,22 @@ class ReiSpider(scrapy.Spider):
         json_string = response.xpath('//script[@id="store-schema"]/text()').extract_first()
         store_dict = json.loads(json_string)
 
+        # The above dict has more clearly laid-out info, but doesn't include storeId or country, which is found here:
+        store_id_js_text = str(response.xpath('//script[@id="modelData"]/text()').extract_first())
+        store_data_model = json.loads(store_id_js_text)["pageData"]["storeDataModel"]
+
         properties = {
-            "lat": store_dict["geo"]["latitude"],
-            "lon": store_dict["geo"]["longitude"],
-            "addr_full": store_dict["address"]["streetAddress"],
-            "city": store_dict["address"]["addressLocality"],
-            "state": store_dict["address"]["addressRegion"],
-            "postcode": store_dict["address"]["postalCode"],
-            "country": store_dict["address"]["addressCountry"],
+            "lat": store_dict["geo"].get("latitude"),
+            "lon": store_dict["geo"].get("longitude"),
+            "addr_full": store_dict["address"].get("streetAddress"),
+            "city": store_dict["address"].get("addressLocality"),
+            "state": store_dict["address"].get("addressRegion"),
+            "postcode": store_dict["address"].get("postalCode"),
+            "country": store_data_model.get("countryCode"),
             "opening_hours": self.fix_opening_hours(store_dict["openingHours"]),
-            "phone": store_dict["telephone"],
-            "website": store_dict["url"],
-            "ref": store_dict["url"],
+            "phone": store_dict.get("telephone"),
+            "website": store_dict.get("url"),
+            "ref": store_data_model.get("storeNumber"),
         }
 
         yield GeojsonPointItem(**properties)
