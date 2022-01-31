@@ -20,8 +20,12 @@ class PublicStorageSpider(scrapy.Spider):
         for path in city_urls:
             yield scrapy.Request(
                 path.strip(),
-                callback=self.parse_store,
+                callback=self.load_store,
             )
+
+    def load_store(self, response):
+        ldjson = response.xpath('//link[@type="application/ld+json"]/@href').get()
+        yield scrapy.Request(response.urljoin(ldjson), callback=self.parse_store)
 
     def parse_hours(self, hours):
         opening_hours = OpeningHours()
@@ -37,11 +41,11 @@ class PublicStorageSpider(scrapy.Spider):
         return opening_hours.as_opening_hours()
 
     def parse_store(self, response):
-        data = json.loads(response.xpath('//script[@type="application/ld+json"]/text()').extract_first())
-        data = data['@graph'][0]
+        data = response.json()['@graph'][0]
 
         properties = {
             "ref": data['@id'],
+            "website": data['url'],
             "opening_hours": self.parse_hours(data['openingHoursSpecification']),
             "addr_full": data['address']['streetAddress'],
             "city": data['address']['addressLocality'],
