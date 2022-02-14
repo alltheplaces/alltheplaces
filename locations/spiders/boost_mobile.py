@@ -8,7 +8,7 @@ from locations.items import GeojsonPointItem
 
 class BoostMobileSpider(scrapy.Spider):
     #download_delay = 0.2
-    name = 'boost_mob'
+    name = 'boost_mobile'
     item_attributes = {'brand': "Boost Mobile", 'brand_wikidata': 'Q4943790'}
     allowed_domains = ["boostmobile.com",
                        "boostmobile.nearestoutlet.com"]
