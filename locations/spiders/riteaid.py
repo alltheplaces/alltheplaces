@@ -8,8 +8,16 @@ class RiteAidSpider(scrapy.Spider):
     name = "riteaid"
     allowed_domains = ["riteaid.com"]
     start_urls = (
-        'https://www.riteaid.com/locations/',
+        'https://locations2.riteaid.com.yext-cdn.com/sitemap.xml',
     )
+    download_delay = 0.1
+
+    def parse(self, response):
+        response.selector.remove_namespaces()
+        for url in response.xpath('//loc/text()').extract():
+            if url.count('/') != 6:
+                continue
+            yield scrapy.Request(url, callback=self.parse_location)
 
     def store_hours(self, store_hours):
         day_groups = []
@@ -61,35 +69,6 @@ class RiteAidSpider(scrapy.Spider):
             opening_hours = opening_hours[:-2]
 
         return opening_hours
-
-    def parse(self, response):
-        urls = response.xpath('//a[@class="c-directory-list-content-item-link"]/@href').extract()
-
-        for url in urls:
-            if len(url.split('/')) == 3:
-                yield scrapy.Request(response.urljoin(url), callback=self.parse_city)
-            elif len(url.split('/')) == 4:
-                yield scrapy.Request(response.urljoin(url), callback=self.parse_location)
-            else:
-                yield scrapy.Request(response.urljoin(url), callback=self.parse_state)
-
-    def parse_state(self, response):
-        state_urls = response.xpath('//a[@class="c-directory-list-content-item-link"]/@href').extract()
-
-        for url in state_urls:
-            if url == 'https://www.riteaid.com/locations/pa/philadelphia.html':
-                # As of 2021-08-21, This URL 500's reliably, so skipping it.
-                continue
-            if len(url.split('/')) == 5:
-                yield scrapy.Request(response.urljoin(url), callback=self.parse_location)
-            else:
-                yield scrapy.Request(response.urljoin(url), callback=self.parse_city)
-
-    def parse_city(self, response):
-        city_urls = response.xpath('//a[@itemprop="url"]/@href').extract()
-
-        for url in city_urls:
-            yield scrapy.Request(response.urljoin(url), callback=self.parse_location)
 
     def parse_location(self, response):
         ref = response.xpath('normalize-space(//h1[contains(@itemprop,"name")]/text())').extract_first()
