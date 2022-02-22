@@ -7,15 +7,6 @@ import scrapy
 from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
 
-DAYS = {
-    "1": "Mo",
-    "2": "Tu",
-    "3": "We",
-    "4": "Th",
-    "5": "Fr",
-    "6": "Sa",
-    "7": "Su"
-}
 
 
 class AuchanSpider(scrapy.Spider):
@@ -28,18 +19,6 @@ class AuchanSpider(scrapy.Spider):
 
     def parse(self, response):
         yield scrapy.Request('https://api.woosmap.com/stores/?key=auchan-woos&page=1', callback=self.parse_api)
-
-    def parse_hours(self, hours):
-        opening_hours = OpeningHours()
-        for day, times in hours.items():
-            if day == "default":
-                continue
-            opening_hours.add_range(day=DAYS[day],
-                                    open_time=times[0]["start"],
-                                    close_time=times[-1]["end"]
-                                    )
-
-        return opening_hours.as_opening_hours()
 
     def parse_api(self, response):
         data = json.loads(response.body_as_unicode())
@@ -59,10 +38,6 @@ class AuchanSpider(scrapy.Spider):
                 'lat': float(store["geometry"]["coordinates"][1]),
                 'lon': float(store["geometry"]["coordinates"][0]),
             }
-
-            hours = self.parse_hours(store["properties"]["opening_hours"]["usual"])
-            if hours:
-                properties["opening_hours"] = hours
 
             yield GeojsonPointItem(**properties)
 
