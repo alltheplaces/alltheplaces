@@ -13,7 +13,7 @@ countries = ('Algeria,DZ', 'Argentina,AR', 'Australia,AU', 'Austria,AT', 'Azerba
              'Taiwan,TW', 'Thailand,TH', 'Tunisia,TN', 'Turkey,TR', 'Ukraine,UA', 'United Arab Emirates,AE', 'United Kingdom,UK', 'United States,US', 'Uzbekistan,UZ', 'Venezuela,VE',
              'Vietnam,VN')
 class AlstomSpider(scrapy.Spider):
-    #download_delay = 0.2
+    #download_delay = 0.3
     name = "alstom"
     item_attributes = {'brand': "Alstom"}
     allowed_domains = ["alstom.com"]
