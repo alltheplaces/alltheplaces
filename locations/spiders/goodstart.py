@@ -6,16 +6,18 @@ import json
 
 from locations.items import GeojsonPointItem
 
+
 class GoodstartsSpider(scrapy.Spider):
-    #download_delay = 0.3
     name = "goodstart"
     item_attributes = {'brand': "GoodStart Early Learning"}
     allowed_domains = ["goodstart.org.au"]
-    start_urls = ([
+    start_urls = [
         'https://www.goodstart.org.au/extApi/CentreAPI/',
-    ])
+    ]
+
     def parse(self, response):
-        data = json.loads(json.dumps(response.json()))
+        data = response.json()
+
         for i in data['centres']:
             properties = {
                 'ref': i['NodeAliasPath'],

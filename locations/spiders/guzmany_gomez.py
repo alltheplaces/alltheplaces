@@ -6,17 +6,17 @@ import json
 
 from locations.items import GeojsonPointItem
 
+
 class GuzmanyGomezSpider(scrapy.Spider):
-    #download_delay = 0.3
-    name = "gyg"
+    name = "guzmany_gomez"
     item_attributes = {'brand': "Guzman Y Gomez"}
     allowed_domains = ["guzmanygomez.com.au"]
-    start_urls = ([
+    start_urls = [
         'https://www.guzmanygomez.com.au/wp-json/wpapi/v2/getall',
-    ])
+    ]
 
     def parse(self, response):
-        data = json.loads(json.dumps(response.json()))
+        data = response.json()
 
         for i in data:
             properties = {
@@ -31,4 +31,5 @@ class GuzmanyGomezSpider(scrapy.Spider):
                 'lat': i['Latitude'],
                 'lon': i['Longitude'],
             }
+
             yield GeojsonPointItem(**properties)
