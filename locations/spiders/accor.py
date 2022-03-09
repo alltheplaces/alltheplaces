@@ -7,8 +7,7 @@ import json
 from locations.items import GeojsonPointItem
 
 
-class AlstomSpider(scrapy.Spider):
-    #download_delay = 0.3
+class AccorSpider(scrapy.Spider):
     name = "accor"
     allowed_domains = ["accor.com"]
     start_urls = (
@@ -16,13 +15,11 @@ class AlstomSpider(scrapy.Spider):
     )
 
     def parse(self, response):
-        data = json.loads(json.dumps(response.json()))
+        data = response.json()
 
         for i in data['poi']:
-
             post = str(i['zipCode'])
             postal = post.zfill(5)
-
 
             properties = {
                 'ref': i['_id'],
