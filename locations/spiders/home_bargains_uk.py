@@ -10,9 +10,9 @@ from locations.hours import OpeningHours
 
 class HomeBargainsUkSpider(scrapy.Spider):
     name = "home_bargains_uk"
-    allowed_domains = ['homebargains.co.uk']
+    allowed_domains = ["homebargains.co.uk"]
     start_urls = [
-        'https://storelocator.homebargains.co.uk/all-stores',
+        "https://storelocator.homebargains.co.uk/all-stores",
     ]
 
     def parse(self, response):
@@ -36,11 +36,12 @@ class HomeBargainsUkSpider(scrapy.Spider):
             if open_time == "closed":
                 pass
             else:
-                opening_hours.add_range(day=day,
-                                        open_time=open_time,
-                                        close_time=close_time,
-                                        time_format='%H:%M'
-                                        )
+                opening_hours.add_range(
+                    day=day,
+                    open_time=open_time,
+                    close_time=close_time,
+                    time_format="%H:%M",
+                )
 
         return opening_hours.as_opening_hours()
 
@@ -50,18 +51,22 @@ class HomeBargainsUkSpider(scrapy.Spider):
         addr = ",".join(addr).strip()
 
         properties = {
-            'ref': re.search(r'store\/(.*)\/', response.url).group(1),
-            'name': response.xpath('//h1/text()').extract_first().strip(),
-            'addr_full': addr,
-            'country': "United Kingdom",
-            'lat': response.xpath('//*[@itemprop="latitude"]/text()').extract_first(),
-            'lon': response.xpath('//*[@itemprop="longitude"]/text()').extract_first(),
-            'phone': response.xpath('//*[@class="telephone print-only"]/text()').extract_first(),
-            'website': response.url
+            "ref": re.search(r"store\/(.*)\/", response.url).group(1),
+            "name": response.xpath("//h1/text()").extract_first().strip(),
+            "addr_full": addr,
+            "country": "United Kingdom",
+            "lat": response.xpath('//*[@itemprop="latitude"]/text()').extract_first(),
+            "lon": response.xpath('//*[@itemprop="longitude"]/text()').extract_first(),
+            "phone": response.xpath(
+                '//*[@class="telephone print-only"]/text()'
+            ).extract_first(),
+            "website": response.url,
         }
 
-        hours = self.parse_hours(response.xpath('//*[@itemprop="openingHours"]/@datetime').extract())
+        hours = self.parse_hours(
+            response.xpath('//*[@itemprop="openingHours"]/@datetime').extract()
+        )
         if hours:
-            properties['opening_hours'] = hours
+            properties["opening_hours"] = hours
 
         yield GeojsonPointItem(**properties)

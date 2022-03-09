@@ -10,11 +10,9 @@ from locations.items import GeojsonPointItem
 
 class SimplySelfStorageSpider(scrapy.Spider):
     name = "simply_self_storage"
-    item_attributes = { 'brand': "Simply Self Storage" }
+    item_attributes = {"brand": "Simply Self Storage"}
     allowed_domains = ["simplyss.com"]
-    start_urls = (
-        "https://www.simplyss.com/site_map/",
-    )
+    start_urls = ("https://www.simplyss.com/site_map/",)
 
     def parse(self, response):
         store_urls = response.css(

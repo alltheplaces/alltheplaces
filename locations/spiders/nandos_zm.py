@@ -9,38 +9,44 @@ from locations.items import GeojsonPointItem
 
 class NandosZMSpider(scrapy.Spider):
     name = "nandos_zm"
-    item_attributes = {'brand': "Nando's", 'brand_wikidata': "Q3472954"}
-    allowed_domains = ['www.nandos.co.zm']
+    item_attributes = {"brand": "Nando's", "brand_wikidata": "Q3472954"}
+    allowed_domains = ["www.nandos.co.zm"]
     start_urls = [
-        'https://www.nandos.co.zm/eat/restaurants-all',
+        "https://www.nandos.co.zm/eat/restaurants-all",
     ]
     download_delay = 0.3
 
     def parse(self, response):
-        urls = response.xpath('//ul[@class="row row-fixed-cols list-unstyled restaurant-list"]/li/a/@href').extract()
+        urls = response.xpath(
+            '//ul[@class="row row-fixed-cols list-unstyled restaurant-list"]/li/a/@href'
+        ).extract()
 
         for url in urls:
-            yield scrapy.Request(url=response.urljoin(url.strip()), callback=self.parse_store)
+            yield scrapy.Request(
+                url=response.urljoin(url.strip()), callback=self.parse_store
+            )
 
     def parse_store(self, response):
-        data = response.xpath('//script[@type="application/ld+json" and contains(text(), "address")]/text()').extract_first()
+        data = response.xpath(
+            '//script[@type="application/ld+json" and contains(text(), "address")]/text()'
+        ).extract_first()
 
         if data:
             store_data = json.loads(data)
-            ref = re.search(r'.+/(.+?)/?(?:\.html|$)', response.url).group(1)
+            ref = re.search(r".+/(.+?)/?(?:\.html|$)", response.url).group(1)
 
             properties = {
-                'name': store_data["name"],
-                'ref': ref,
-                'addr_full': store_data["address"]["streetAddress"],
-                'city': store_data["address"]["addressLocality"],
-                'state': store_data["address"]["addressRegion"],
-                'postcode': store_data["address"]["postalCode"],
-                'phone': store_data["contactPoint"][0].get("telephone"),
-                'website': response.url,
-                'country': 'ZM',
-                'lat': store_data["geo"]["latitude"],
-                'lon': store_data["geo"]["longitude"]
+                "name": store_data["name"],
+                "ref": ref,
+                "addr_full": store_data["address"]["streetAddress"],
+                "city": store_data["address"]["addressLocality"],
+                "state": store_data["address"]["addressRegion"],
+                "postcode": store_data["address"]["postalCode"],
+                "phone": store_data["contactPoint"][0].get("telephone"),
+                "website": response.url,
+                "country": "ZM",
+                "lat": store_data["geo"]["latitude"],
+                "lon": store_data["geo"]["longitude"],
             }
 
             yield GeojsonPointItem(**properties)

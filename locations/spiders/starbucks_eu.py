@@ -13,12 +13,16 @@ class StarbucksEUSpider(scrapy.Spider):
     allowed_domains = ["https://www.starbucks.co.uk/"]
 
     def start_requests(self):
-        base_url = "https://www.starbucks.co.uk/api/v1/store-finder?latLng={lat}%2C{lon}"
+        base_url = (
+            "https://www.starbucks.co.uk/api/v1/store-finder?latLng={lat}%2C{lon}"
+        )
 
-        with open('./locations/searchable_points/eu_centroids_20km_radius_country.csv') as points:
+        with open(
+            "./locations/searchable_points/eu_centroids_20km_radius_country.csv"
+        ) as points:
             next(points)  # Ignore the header
             for point in points:
-                _, lat, lon, country = point.strip().split(',')
+                _, lat, lon, country = point.strip().split(",")
                 url = base_url.format(lat=lat, lon=lon)
 
                 yield scrapy.http.Request(url=url, callback=self.parse)
@@ -28,14 +32,15 @@ class StarbucksEUSpider(scrapy.Spider):
 
         for place in data["stores"]:
             try:
-                addr, postal_city = place["address"].strip().split('\n')
+                addr, postal_city = place["address"].strip().split("\n")
             except:
-                addr, addr_2, postal_city = place["address"].strip().split('\n')
+                addr, addr_2, postal_city = place["address"].strip().split("\n")
 
             try:
                 city_hold = re.search(
-                    r'\s([A-Z]{1,2}[a-z]*)$|\s([A-Z]{1}[a-z]*)(\s|,\s)([A-Z]{1,2}[a-z]*)$|\s([A-Z]{1}[a-z]*)\s([0-9]*)$',
-                    postal_city).groups()
+                    r"\s([A-Z]{1,2}[a-z]*)$|\s([A-Z]{1}[a-z]*)(\s|,\s)([A-Z]{1,2}[a-z]*)$|\s([A-Z]{1}[a-z]*)\s([0-9]*)$",
+                    postal_city,
+                ).groups()
                 res = [i for i in city_hold if i]
 
                 if ", " in res:
@@ -49,14 +54,14 @@ class StarbucksEUSpider(scrapy.Spider):
                 postal = postal_city
 
             properties = {
-                'ref': place["id"],
-                'name': place["name"],
-                'addr_full': addr,
-                'city': city,
-                'postcode': postal,
-                'lat': place["coordinates"]["lat"],
-                'lon': place["coordinates"]["lng"],
-                'phone': place["phoneNumber"]
+                "ref": place["id"],
+                "name": place["name"],
+                "addr_full": addr,
+                "city": city,
+                "postcode": postal,
+                "lat": place["coordinates"]["lat"],
+                "lon": place["coordinates"]["lng"],
+                "phone": place["phoneNumber"],
             }
 
             yield GeojsonPointItem(**properties)

@@ -8,19 +8,19 @@ from locations.hours import OpeningHours
 
 
 DAY_MAPPING = {
-    'Monday': 'Mo',
-    'Tuesday': 'Tu',
-    'Wednesday': 'We',
-    'Thursday': 'Th',
-    'Friday': 'Fr',
-    'Saturday': 'Sa',
-    'Sunday': 'Su'
+    "Monday": "Mo",
+    "Tuesday": "Tu",
+    "Wednesday": "We",
+    "Thursday": "Th",
+    "Friday": "Fr",
+    "Saturday": "Sa",
+    "Sunday": "Su",
 }
 
 
 class RentACenterSpider(scrapy.Spider):
     name = "rentacenter"
-    item_attributes = { 'brand': "Rent-A-Center" }
+    item_attributes = {"brand": "Rent-A-Center"}
     allowed_domains = ["rentacenter.com"]
 
     start_urls = [
@@ -31,15 +31,19 @@ class RentACenterSpider(scrapy.Spider):
         opening_hours = OpeningHours()
 
         for hour in hours:
-            opening_hours.add_range(day=DAY_MAPPING[hour["dayOfWeek"].replace('http://schema.org/', '')],
-                                    open_time=hour["opens"],
-                                    close_time=hour["closes"],
-                                    time_format='%H:%M:%S')
+            opening_hours.add_range(
+                day=DAY_MAPPING[hour["dayOfWeek"].replace("http://schema.org/", "")],
+                open_time=hour["opens"],
+                close_time=hour["closes"],
+                time_format="%H:%M:%S",
+            )
 
         return opening_hours.as_opening_hours()
 
     def parse_location(self, response):
-        data = response.xpath('//script[@type="application/ld+json"]/text()').extract_first()
+        data = response.xpath(
+            '//script[@type="application/ld+json"]/text()'
+        ).extract_first()
         data = json.loads(data)
 
         ref = data.get("branchCode")
@@ -47,17 +51,17 @@ class RentACenterSpider(scrapy.Spider):
             return  # not a store page
 
         properties = {
-            'addr_full': data["address"]["streetAddress"],
-            'phone': data.get("telephone"),
-            'city': data["address"]["addressLocality"],
-            'state': data["address"]["addressRegion"],
-            'postcode': data["address"]["postalCode"],
-            'country': 'US',
-            'ref': ref,
-            'website': response.url,
-            'lat': data["geo"]["latitude"],
-            'lon': data["geo"]["longitude"],
-            'name': data["name"]
+            "addr_full": data["address"]["streetAddress"],
+            "phone": data.get("telephone"),
+            "city": data["address"]["addressLocality"],
+            "state": data["address"]["addressRegion"],
+            "postcode": data["address"]["postalCode"],
+            "country": "US",
+            "ref": ref,
+            "website": response.url,
+            "lat": data["geo"]["latitude"],
+            "lon": data["geo"]["longitude"],
+            "name": data["name"],
         }
 
         hours = self.parse_hours(data.get("openingHoursSpecification", []))
@@ -70,12 +74,17 @@ class RentACenterSpider(scrapy.Spider):
         xml = Selector(response)
         xml.remove_namespaces()
 
-        urls = xml.xpath('//loc/text()').extract()
+        urls = xml.xpath("//loc/text()").extract()
         urls = [url.strip() for url in urls]
 
         # individual store pages are listed at top, then a state page, then bunch of other non-store pages
         # find the index position of the state page and then only parse urls before that
-        i = urls.index(re.search(r'^(https://locations.rentacenter.com/.+?)/.*$', urls[0]).groups()[0] + '/')
+        i = urls.index(
+            re.search(
+                r"^(https://locations.rentacenter.com/.+?)/.*$", urls[0]
+            ).groups()[0]
+            + "/"
+        )
         for url in urls[:i]:
             yield scrapy.Request(url, callback=self.parse_location)
 
@@ -83,11 +92,10 @@ class RentACenterSpider(scrapy.Spider):
         xml = Selector(response)
         xml.remove_namespaces()
 
-        urls = xml.xpath('//loc/text()').extract()
+        urls = xml.xpath("//loc/text()").extract()
         urls = [url.strip() for url in urls]
 
         for url in urls:
-            if '/home/' in url:
+            if "/home/" in url:
                 continue
             yield scrapy.Request(url, callback=self.parse_state_sitemap)
-

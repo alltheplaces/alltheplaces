@@ -6,13 +6,14 @@ import json
 
 from locations.items import GeojsonPointItem
 
+
 class StopAndShopSpider(scrapy.Spider):
-    #download_delay = 0.2
+    # download_delay = 0.2
     name = "stop_and_shop"
-    item_attributes = {'brand': "Stop and Shop"}
+    item_attributes = {"brand": "Stop and Shop"}
     allowed_domains = ["stopandshop.com"]
     start_urls = (
-        'https://stopandshop.com/apis/store-locator/locator/v1/stores/STSH?storeType=GROCERY&q=11797&maxDistance=1000000&details=true',
+        "https://stopandshop.com/apis/store-locator/locator/v1/stores/STSH?storeType=GROCERY&q=11797&maxDistance=1000000&details=true",
     )
 
     def parse(self, response):
@@ -27,15 +28,15 @@ class StopAndShopSpider(scrapy.Spider):
                     for item in jdata:
 
                         properties = {
-                            'ref': item['storeNo'],
-                            'name': item['name'],
-                            'addr_full': item['address1'] + item['address2'],
-                            'city': item['city'],
-                            'state': item['state'],
-                            'postcode': item['zip'],
-                            'country': 'US',
-                            'lat': float(item['latitude']),
-                            'lon': float(item['longitude']),
+                            "ref": item["storeNo"],
+                            "name": item["name"],
+                            "addr_full": item["address1"] + item["address2"],
+                            "city": item["city"],
+                            "state": item["state"],
+                            "postcode": item["zip"],
+                            "country": "US",
+                            "lat": float(item["latitude"]),
+                            "lon": float(item["longitude"]),
                         }
 
                         yield GeojsonPointItem(**properties)

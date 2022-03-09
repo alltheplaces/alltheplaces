@@ -11,27 +11,29 @@ from locations.hours import OpeningHours
 
 class RogersCommunicationsSpider(scrapy.Spider):
     name = "rogers_communications"
-    item_attributes = {'brand': "Rogers Communications"}
-    allowed_domains = ['1-dot-rogers-store-finder.appspot.com', 'rogers.com']
+    item_attributes = {"brand": "Rogers Communications"}
+    allowed_domains = ["1-dot-rogers-store-finder.appspot.com", "rogers.com"]
 
     def start_requests(self):
-        url = 'https://1-dot-rogers-store-finder.appspot.com/searchRogersStoresService'
+        url = "https://1-dot-rogers-store-finder.appspot.com/searchRogersStoresService"
 
         headers = {
-            'origin': 'https://www.rogers.com',
-            'Referer': 'https://www.rogers.com/business/contact-us/store-locator',
-            'content-type': 'application/x-www-form-urlencoded; charset=UTF-8'
+            "origin": "https://www.rogers.com",
+            "Referer": "https://www.rogers.com/business/contact-us/store-locator",
+            "content-type": "application/x-www-form-urlencoded; charset=UTF-8",
         }
 
         form_data = {
             "select": "Record_ID,SCID,Location_Name,Address_Or_Intersection,Address2,City,State_Or_Province,ZIP_Or_Postal_Code,Business_Phone,Intersection,Priority1,Priority2,Priority3,Priority10,Rogers_Video_Store,Rogers_Plus_Store,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday,Closed_smb,Latitude,Longitude,CONCAT(Longitude, ',' ,Latitude) as geometry,( 6371 * acos( cos( radians(49.2827291) ) * cos( radians(Latitude) ) * cos( radians( Longitude ) - radians( -123.12073750000002) )+sin( radians(49.2827291) ) * sin( radians( Latitude )))) AS distance",
             "where": "(Closed_smb=''AND Small_biz_centre='Y')OR(Closed_smb=''AND Priority1='Y')OR(Closed_smb=''AND Priority2='Y')",
             "order": "distance ASC",
-            "limit": "600", "channelID": "ROGERS"}
+            "limit": "600",
+            "channelID": "ROGERS",
+        }
 
         yield scrapy.FormRequest(
             url=url,
-            method='POST',
+            method="POST",
             formdata=form_data,
             headers=headers,
             callback=self.parse,
@@ -51,11 +53,19 @@ class RogersCommunicationsSpider(scrapy.Spider):
 
                 open_time = time[0].replace(" ", "")
                 close_time = time[1].replace(" ", "")
-                open_time = datetime.datetime.strptime(open_time, '%I:%M%p').strftime('%H:%M')
-                close_time = datetime.datetime.strptime(close_time, '%I:%M%p').strftime('%H:%M')
+                open_time = datetime.datetime.strptime(open_time, "%I:%M%p").strftime(
+                    "%H:%M"
+                )
+                close_time = datetime.datetime.strptime(close_time, "%I:%M%p").strftime(
+                    "%H:%M"
+                )
 
-                opening_hours.add_range(day=day, open_time=open_time,
-                                        close_time=close_time, time_format='%H:%M')
+                opening_hours.add_range(
+                    day=day,
+                    open_time=open_time,
+                    close_time=close_time,
+                    time_format="%H:%M",
+                )
 
         return opening_hours.as_opening_hours()
 
@@ -72,28 +82,33 @@ class RogersCommunicationsSpider(scrapy.Spider):
                 addr = addr[:-1]
 
             properties = {
-                'ref': store["properties"]["Record_ID"],
-                'name': name,
-                'addr_full': addr,
-                'city': store["properties"]["City"],
-                'state': store["properties"]["StateOrProvince"],
-                'postcode': store["properties"]["ZIPOrPostalCode"],
-                'country': "CA",
-                'lat': store["properties"]["Latitude"],
-                'lon': store["properties"]["Longitude"],
-                'phone': store["properties"]["Business_Phone"]
+                "ref": store["properties"]["Record_ID"],
+                "name": name,
+                "addr_full": addr,
+                "city": store["properties"]["City"],
+                "state": store["properties"]["StateOrProvince"],
+                "postcode": store["properties"]["ZIPOrPostalCode"],
+                "country": "CA",
+                "lat": store["properties"]["Latitude"],
+                "lon": store["properties"]["Longitude"],
+                "phone": store["properties"]["Business_Phone"],
             }
 
-            hours = {'Mo': store["properties"]["Monday"], 'Tu': store["properties"]["Tuesday"],
-                     'We': store["properties"]["Wednesday"],
-                     'Th': store["properties"]["Thursday"], 'Fr': store["properties"]["Friday"],
-                     'Sa': store["properties"]["Saturday"], 'Su': store["properties"]["Sunday"]}
+            hours = {
+                "Mo": store["properties"]["Monday"],
+                "Tu": store["properties"]["Tuesday"],
+                "We": store["properties"]["Wednesday"],
+                "Th": store["properties"]["Thursday"],
+                "Fr": store["properties"]["Friday"],
+                "Sa": store["properties"]["Saturday"],
+                "Su": store["properties"]["Sunday"],
+            }
 
             try:
                 h = self.parse_hours(hours)
 
                 if h:
-                    properties['opening_hours'] = h
+                    properties["opening_hours"] = h
             except:
                 pass
 

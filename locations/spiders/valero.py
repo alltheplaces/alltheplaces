@@ -17,14 +17,25 @@ class ValeroSpider(scrapy.Spider):
             yield scrapy.Request(url, callback=self.parse_store)
 
     def parse_store(self, response):
-        amenities = [s.strip() for s in response.xpath('//div[@class="amenityIconLabel"]/text()').extract()]
+        amenities = [
+            s.strip()
+            for s in response.xpath('//div[@class="amenityIconLabel"]/text()').extract()
+        ]
         properties = {
-            "lat": response.xpath('//meta[@property="place:location:latitude"]/@content').get(),
-            "lon": response.xpath('//meta[@property="place:location:longitude"]/@content').get(),
+            "lat": response.xpath(
+                '//meta[@property="place:location:latitude"]/@content'
+            ).get(),
+            "lon": response.xpath(
+                '//meta[@property="place:location:longitude"]/@content'
+            ).get(),
             "ref": response.url.rsplit("/", 1)[-1],
             "website": response.url,
-            "name": response.xpath('normalize-space(//*[@id="pageTitleStoreName"])').get(),
-            "addr_full": response.xpath('normalize-space(//div[@class="locationDetailsContactRow"][1]//br/..)').get(),
+            "name": response.xpath(
+                'normalize-space(//*[@id="pageTitleStoreName"])'
+            ).get(),
+            "addr_full": response.xpath(
+                'normalize-space(//div[@class="locationDetailsContactRow"][1]//br/..)'
+            ).get(),
             "phone": response.xpath('//a[contains(@href,"tel:")]/text()').get(),
             "opening_hours": "24/7" if "24 Hour" in amenities else None,
             "extras": {

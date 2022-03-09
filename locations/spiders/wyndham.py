@@ -100,7 +100,7 @@ def create_url(brand, city, state, unique_url, tier_id):
     if not brand_name:
         brand_name = BRAND_MAP.get(tier_id.lower())
     url = brand_name + "/"
-    url += city.replace(" ", "-").replace(".","").lower()
+    url += city.replace(" ", "-").replace(".", "").lower()
     state_name = (
         f"-{state.replace(' ','-').lower()}"
         if state.lower() != "other than us/canada"
@@ -117,20 +117,20 @@ class WyndhamSpider(scrapy.Spider):
     download_speed = 0.7
     allowed_domains = ["www.wyndhamhotels.com"]
     start_urls = (
-        'https://www.wyndhamhotels.com/BWSServices/services/search/properties?recordsPerPage=50&pageNumber=1&brandId=ALL&countryCode=US%2CCA%2CMX',
+        "https://www.wyndhamhotels.com/BWSServices/services/search/properties?recordsPerPage=50&pageNumber=1&brandId=ALL&countryCode=US%2CCA%2CMX",
     )
 
     def parse(self, response):
         data = json.loads(response.text)
 
-        page_count = data.get('pageCount')
+        page_count = data.get("pageCount")
         parsed_url = urlparse(response.request.url)
         parsed_args = parse_qs(parsed_url.query)
-        page_number = int(parsed_args['pageNumber'][0])
+        page_number = int(parsed_args["pageNumber"][0])
         if page_number <= page_count:
             next_page_number = page_number + 1
             yield scrapy.Request(
-                f'https://www.wyndhamhotels.com/BWSServices/services/search/properties?recordsPerPage=50&pageNumber={next_page_number}&brandId=ALL&countryCode=US%2CCA%2CMX',
+                f"https://www.wyndhamhotels.com/BWSServices/services/search/properties?recordsPerPage=50&pageNumber={next_page_number}&brandId=ALL&countryCode=US%2CCA%2CMX",
             )
 
         for country in data["countries"]:
@@ -166,7 +166,7 @@ class WyndhamSpider(scrapy.Spider):
         )
         if not raw_json:
             return None
-        data = json.loads(raw_json.group(1).replace("\t"," "))
+        data = json.loads(raw_json.group(1).replace("\t", " "))
         properties = {
             "ref": response.meta["id"],
             "lat": data["geo"]["latitude"],

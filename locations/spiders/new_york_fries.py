@@ -10,14 +10,16 @@ from locations.hours import OpeningHours
 
 class New_york_friesSpider(scrapy.Spider):
     name = "new_york_fries"
-    item_attributes = {'brand': "New York Fries"}
-    allowed_domains = ['newyorkfries.com']
+    item_attributes = {"brand": "New York Fries"}
+    allowed_domains = ["newyorkfries.com"]
     start_urls = [
-        'https://www.newyorkfries.com/locations/all',
+        "https://www.newyorkfries.com/locations/all",
     ]
 
     def parse(self, response):
-        data = response.xpath('//script[contains(.,"canadaEntries")]/text()').extract_first()
+        data = response.xpath(
+            '//script[contains(.,"canadaEntries")]/text()'
+        ).extract_first()
 
         places_ca = re.search(r"canadaEntries\s=\s(.*)", data).groups()[0]
 
@@ -25,15 +27,15 @@ class New_york_friesSpider(scrapy.Spider):
 
         for place in places_ca:
             properties = {
-                'ref': place["id"],
-                'name': place["title"],
-                'addr_full': place["address"],
-                'city': place["city"],
-                'state': place["province"],
-                'country': place["country"],
-                'lat': place["latitude"],
-                'lon': place["longitude"],
-                'website': place["url"]
+                "ref": place["id"],
+                "name": place["title"],
+                "addr_full": place["address"],
+                "city": place["city"],
+                "state": place["province"],
+                "country": place["country"],
+                "lat": place["latitude"],
+                "lon": place["longitude"],
+                "website": place["url"],
             }
 
             yield GeojsonPointItem(**properties)
@@ -44,15 +46,15 @@ class New_york_friesSpider(scrapy.Spider):
 
         for place in places_intl:
             properties = {
-                'ref': place["id"],
-                'name': place["title"],
-                'addr_full': place["address"],
-                'city': place["city"],
-                'state': place["province"],
-                'country': place["country"],
-                'lat': place["latitude"],
-                'lon': place["longitude"],
-                'website': place["url"]
+                "ref": place["id"],
+                "name": place["title"],
+                "addr_full": place["address"],
+                "city": place["city"],
+                "state": place["province"],
+                "country": place["country"],
+                "lat": place["latitude"],
+                "lon": place["longitude"],
+                "website": place["url"],
             }
 
             yield GeojsonPointItem(**properties)

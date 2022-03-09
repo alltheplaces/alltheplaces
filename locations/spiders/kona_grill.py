@@ -6,11 +6,56 @@ from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
 
 STATES = [
-    "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DC", "DE", "FL",
-    "GA", "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME",
-    "MD", "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH",
-    "NJ", "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI",
-    "SC", "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI",
+    "AL",
+    "AK",
+    "AZ",
+    "AR",
+    "CA",
+    "CO",
+    "CT",
+    "DC",
+    "DE",
+    "FL",
+    "GA",
+    "HI",
+    "ID",
+    "IL",
+    "IN",
+    "IA",
+    "KS",
+    "KY",
+    "LA",
+    "ME",
+    "MD",
+    "MA",
+    "MI",
+    "MN",
+    "MS",
+    "MO",
+    "MT",
+    "NE",
+    "NV",
+    "NH",
+    "NJ",
+    "NM",
+    "NY",
+    "NC",
+    "ND",
+    "OH",
+    "OK",
+    "OR",
+    "PA",
+    "RI",
+    "SC",
+    "SD",
+    "TN",
+    "TX",
+    "UT",
+    "VT",
+    "VA",
+    "WA",
+    "WV",
+    "WI",
     "WY",
 ]
 
@@ -66,11 +111,15 @@ class KonaGrillSpider(scrapy.Spider):
         store = response_data.get("data")
         dh = store.get("dininghours")
         # Data is inconsistent some keys were found with a trailing space
-        opening_hours = self.parse_hours(dh.get("dining hours") or dh.get("dining hours "))
+        opening_hours = self.parse_hours(
+            dh.get("dining hours") or dh.get("dining hours ")
+        )
         properties = {
             "addr_full": store.get("address"),
             "city": store.get("city"),
-            "extras": {"email": store.get("email"),},
+            "extras": {
+                "email": store.get("email"),
+            },
             "lat": store.get("latitude"),
             "lon": store.get("longitude"),
             "name": store.get("title"),
