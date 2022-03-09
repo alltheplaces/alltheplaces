@@ -7,7 +7,6 @@ import json
 from locations.items import GeojsonPointItem
 
 class ColesSpider(scrapy.Spider):
-    #download_delay = 0.3
     name = "coles_au"
     item_attributes = {'brand': "Coles"}
     allowed_domains = ["apigw.coles.com.au"]
@@ -29,7 +28,6 @@ class ColesSpider(scrapy.Spider):
         data = json.loads(json.dumps(response.json()))
 
         for i in data['stores']:
-
             properties = {
                 'ref': i['storeId'],
                 'name': i['brandName'],
@@ -44,4 +42,3 @@ class ColesSpider(scrapy.Spider):
             }
 
             yield GeojsonPointItem(**properties)
-
