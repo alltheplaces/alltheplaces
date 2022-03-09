@@ -29,7 +29,7 @@ class AnthonysRestaurantsSpiders(scrapy.Spider):
         # These are weird enough that there's no hope of parsing them, but
         # clean the text up
         hours = response.xpath('//strong[text()="Hours:"]/../text()').extract()
-        hours = ';'.join(s.strip().replace('\xa0', ' ') for s in hours)
+        hours = ";".join(s.strip().replace("\xa0", " ") for s in hours)
 
         properties = {
             "ref": re.search(r"postid-(\d+)", response.css("body").attrib["class"])[1],

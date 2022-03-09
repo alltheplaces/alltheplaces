@@ -15,10 +15,12 @@ class HopdoddyBurgerBarSpider(scrapy.Spider):
     def start_requests(self):
         base_url = "https://na6c0i4fb0.execute-api.us-west-2.amazonaws.com/restaurants/near?lat={lat}3&long={lon}"
 
-        with open('./locations/searchable_points/us_centroids_25mile_radius.csv') as points:
+        with open(
+            "./locations/searchable_points/us_centroids_25mile_radius.csv"
+        ) as points:
             next(points)  # Ignore the header
             for point in points:
-                _, lat, lon = point.strip().split(',')
+                _, lat, lon = point.strip().split(",")
 
                 url = base_url.format(lat=lat, lon=lon)
 
@@ -29,16 +31,16 @@ class HopdoddyBurgerBarSpider(scrapy.Spider):
 
         for place in data["restaurants"]:
             properties = {
-                'ref': place["id"],
-                'name': place["name"],
-                'addr_full': place["streetaddress"],
-                'city': place["city"],
-                'state': place["state"],
-                'postcode': place["zip"],
-                'country': place["country"],
-                'lat': place["latitude"],
-                'lon': place["longitude"],
-                'phone': place["telephone"]
+                "ref": place["id"],
+                "name": place["name"],
+                "addr_full": place["streetaddress"],
+                "city": place["city"],
+                "state": place["state"],
+                "postcode": place["zip"],
+                "country": place["country"],
+                "lat": place["latitude"],
+                "lon": place["longitude"],
+                "phone": place["telephone"],
             }
 
             yield GeojsonPointItem(**properties)

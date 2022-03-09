@@ -16,7 +16,9 @@ class LuLuLemonSpider(scrapy.Spider):
     start_urls = ("https://shop.lululemon.com/stores/all-lululemon-stores",)
 
     def parse(self, response):
-        urls = response.xpath('//a[@class="store-list_storeLink__3krLG"]/@href').extract()
+        urls = response.xpath(
+            '//a[@class="store-list_storeLink__3krLG"]/@href'
+        ).extract()
         for path in urls:
             yield scrapy.Request(response.urljoin(path), callback=self.parse_store)
 

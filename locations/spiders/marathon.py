@@ -6,18 +6,18 @@ from locations.items import GeojsonPointItem
 
 class MarathonScraper(scrapy.Spider):
     name = "marathon"
-    item_attributes = {'brand': "Marathon Petroleum",
-                       'brand_wikidata': 'Q458363'}
+    item_attributes = {"brand": "Marathon Petroleum", "brand_wikidata": "Q458363"}
 
-    start_urls = ['https://marathon.shotgunflat.com/data.txt']
+    start_urls = ["https://marathon.shotgunflat.com/data.txt"]
 
     def parse(self, response):
-        for row in response.body_as_unicode().split('|`,'):
-            if row == '':
+        for row in response.body_as_unicode().split("|`,"):
+            if row == "":
                 continue
 
-            (name, address, lat, lon, slug, city,
-             state, zip_code, phone) = row.split('|')
+            (name, address, lat, lon, slug, city, state, zip_code, phone) = row.split(
+                "|"
+            )
 
             if len(zip_code) == 9:
                 zip_code = f"{zip_code[0:5]}-{zip_code[5:]}"
@@ -31,9 +31,9 @@ class MarathonScraper(scrapy.Spider):
                 city=city,
                 state=state,
                 postcode=zip_code,
-                country='US',
+                country="US",
                 phone=phone,
                 extras={
-                    'amenity:fuel': True,
-                }
+                    "amenity:fuel": True,
+                },
             )

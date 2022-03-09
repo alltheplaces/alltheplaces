@@ -23,7 +23,9 @@ class FnbUSSpider(scrapy.Spider):
                 yield scrapy.Request(url, callback=self.parse_store, meta=meta)
 
     def parse_store(self, response):
-        script = response.xpath('//script/text()[contains(.,"var location_data")]').get()
+        script = response.xpath(
+            '//script/text()[contains(.,"var location_data")]'
+        ).get()
         start = script.index("var location_data =") + len("var location_data =")
         data = json.decoder.JSONDecoder().raw_decode(script, start)[0][0]
 

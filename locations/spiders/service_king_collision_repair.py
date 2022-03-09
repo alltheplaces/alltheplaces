@@ -12,7 +12,7 @@ class ServiceKingCollisionRepairSpider(scrapy.Spider):
     name = "service_king_collision_repair"
     allowed_domains = ["serviceking.com"]
     start_urls = [
-        'https://www.serviceking.com/sitemap.xml',
+        "https://www.serviceking.com/sitemap.xml",
     ]
 
     def parse(self, response):
@@ -25,18 +25,24 @@ class ServiceKingCollisionRepairSpider(scrapy.Spider):
         info = response.xpath("//*[@class='address']/p/text()").extract_first()
         city, state, postal = info.split(",")
         properties = {
-            'ref': re.search(r'.+/(.+?)/?(?:\.html|$)', response.url).group(1),
-            'name': response.xpath("//*[@class='location-dtls__title']/span/text()").extract_first(),
-            'addr_full': response.xpath("//*[@class='address']/text()").extract_first().strip(),
-            'city': city.strip(),
-            'state': state.strip(),
-            'postcode': postal.strip(),
-            'country': "US",
-            'lat': response.xpath("//@data-latitude").extract_first(),
-            'lon': response.xpath("//@data-longitude").extract_first(),
-            'phone': response.xpath("//*[@class='location-dtls__phone']/text()").extract_first().replace("T: ",
-                                                                                                         "").strip(),
-            'website': response.url
+            "ref": re.search(r".+/(.+?)/?(?:\.html|$)", response.url).group(1),
+            "name": response.xpath(
+                "//*[@class='location-dtls__title']/span/text()"
+            ).extract_first(),
+            "addr_full": response.xpath("//*[@class='address']/text()")
+            .extract_first()
+            .strip(),
+            "city": city.strip(),
+            "state": state.strip(),
+            "postcode": postal.strip(),
+            "country": "US",
+            "lat": response.xpath("//@data-latitude").extract_first(),
+            "lon": response.xpath("//@data-longitude").extract_first(),
+            "phone": response.xpath("//*[@class='location-dtls__phone']/text()")
+            .extract_first()
+            .replace("T: ", "")
+            .strip(),
+            "website": response.url,
         }
 
         yield GeojsonPointItem(**properties)

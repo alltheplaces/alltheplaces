@@ -15,9 +15,11 @@ class IntermarcheSpider(scrapy.Spider):
     def start_requests(self):
         url = "https://www.intermarche.com/api/service/pdvs/v4/pdvs/zone?r=10000&lat=43.646715&lon=1.433066&min=10000"
 
-        headers = {'x-red-version': '3', 'x-red-device': 'red_fo_desktop'}
+        headers = {"x-red-version": "3", "x-red-device": "red_fo_desktop"}
 
-        yield scrapy.http.FormRequest(url=url, method='GET', headers=headers, callback=self.parse)
+        yield scrapy.http.FormRequest(
+            url=url, method="GET", headers=headers, callback=self.parse
+        )
 
     def parse(self, response):
         data = json.loads(response.body_as_unicode())
@@ -29,15 +31,15 @@ class IntermarcheSpider(scrapy.Spider):
                 phone = ""
 
             properties = {
-                'ref': place["storeCode"],
-                'name': place["modelLabel"],
-                'addr_full': place["addresses"][0]["address"],
-                'city': place["addresses"][0]["townLabel"],
-                'postcode': place["addresses"][0]["postCode"],
-                'country': "FR",
-                'lat': place["addresses"][0]["latitude"],
-                'lon': place["addresses"][0]["longitude"],
-                'phone': phone
+                "ref": place["storeCode"],
+                "name": place["modelLabel"],
+                "addr_full": place["addresses"][0]["address"],
+                "city": place["addresses"][0]["townLabel"],
+                "postcode": place["addresses"][0]["postCode"],
+                "country": "FR",
+                "lat": place["addresses"][0]["latitude"],
+                "lon": place["addresses"][0]["longitude"],
+                "phone": phone,
             }
 
             yield GeojsonPointItem(**properties)

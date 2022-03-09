@@ -3,13 +3,16 @@ import scrapy
 from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
 
+
 class BigWSpider(scrapy.Spider):
     name = "big_w"
     allowed_domains = ["bigw.com.au"]
-    start_urls = ('https://www.bigw.com.au/sitemap/store-en-aud.xml',)
+    start_urls = ("https://www.bigw.com.au/sitemap/store-en-aud.xml",)
     days = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
 
-    custom_settings = {'DOWNLOAD_DELAY' : 0.5,}
+    custom_settings = {
+        "DOWNLOAD_DELAY": 0.5,
+    }
 
     def _parse_hour_str(self, hour_string):
         time_, am_pm = tuple(hour_string.split(" "))
@@ -41,8 +44,8 @@ class BigWSpider(scrapy.Spider):
     def parse_address(self, address):
         cleaned = [a.strip() for a in address]
         street = cleaned[0]
-        suburb, state, postcode = tuple(cleaned[1].split('\xa0'))
-        phonenumber = cleaned[3].replace("Ph:","").strip()
+        suburb, state, postcode = tuple(cleaned[1].split("\xa0"))
+        phonenumber = cleaned[3].replace("Ph:", "").strip()
         return dict(
             street=street,
             city=suburb.strip(),
@@ -52,10 +55,17 @@ class BigWSpider(scrapy.Spider):
             country="AU",
         )
 
-
     def parse_store(self, response):
-        store_name = response.xpath("//h1[@class='blue']/strong/text()").get().replace("BIG W ","")
-        hours = self.parse_hours(response.xpath("//div[@id='collapseOne']/div/div/div[contains(@class, 'text-right') and contains(@class, 'col-xs-8')]/text()").getall())
+        store_name = (
+            response.xpath("//h1[@class='blue']/strong/text()")
+            .get()
+            .replace("BIG W ", "")
+        )
+        hours = self.parse_hours(
+            response.xpath(
+                "//div[@id='collapseOne']/div/div/div[contains(@class, 'text-right') and contains(@class, 'col-xs-8')]/text()"
+            ).getall()
+        )
         addresses = self.parse_address(response.xpath("//address/text()").getall())
         lat = response.xpath("//div[@id='map_canvas']/@data-latitude").get()
         lon = response.xpath("//div[@id='map_canvas']/@data-longitude").get()

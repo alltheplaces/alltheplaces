@@ -21,7 +21,11 @@ class BurgerKingSpider(scrapy.Spider):
                 "variables": {
                     "input": {
                         "filter": "NEARBY",
-                        "coordinates": {"userLat": lat, "userLng": lon, "searchRadius": 128000},
+                        "coordinates": {
+                            "userLat": lat,
+                            "userLng": lon,
+                            "searchRadius": 128000,
+                        },
                         "first": 20000,
                         "status": "OPEN",
                     }
@@ -29,13 +33,19 @@ class BurgerKingSpider(scrapy.Spider):
                 "query": self.query,
             }
         ]
-        return scrapy.http.JsonRequest("https://use1-prod-bk.rbictg.com/graphql", data=body)
+        return scrapy.http.JsonRequest(
+            "https://use1-prod-bk.rbictg.com/graphql", data=body
+        )
 
     def start_requests(self):
-        with open("./locations/searchable_points/us_centroids_100mile_radius.csv") as points:
+        with open(
+            "./locations/searchable_points/us_centroids_100mile_radius.csv"
+        ) as points:
             reader = csv.DictReader(points)
             for point in reader:
-                yield self.make_request(float(point["latitude"]), float(point["longitude"]))
+                yield self.make_request(
+                    float(point["latitude"]), float(point["longitude"])
+                )
 
     def parse(self, response):
         data = response.json()

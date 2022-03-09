@@ -17,7 +17,9 @@ class PPGPaintsSpider(scrapy.Spider):
     ]
 
     def parse(self, response):
-        for href in response.xpath('//*[@class="store-locations-item"]//@href').extract():
+        for href in response.xpath(
+            '//*[@class="store-locations-item"]//@href'
+        ).extract():
             url = response.urljoin(href)
             yield scrapy.Request(url)
         for href in response.xpath('//*[@id="store-table"]//@href').extract():

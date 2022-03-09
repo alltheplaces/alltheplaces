@@ -8,28 +8,23 @@ from locations.items import GeojsonPointItem
 
 class PetParadiseSpider(scrapy.Spider):
     name = "petparadise"
-    item_attributes = {'brand': "Pet Paradise"}
+    item_attributes = {"brand": "Pet Paradise"}
     allowed_domains = ["petparadise.com.com"]
-    start_urls = (
-        'https://www.petparadise.com/locations.htm',
-    )
+    start_urls = ("https://www.petparadise.com/locations.htm",)
 
     def start_requests(self):
-        url = 'https://www.petparadise.com/files/4859/widget856515.js'
+        url = "https://www.petparadise.com/files/4859/widget856515.js"
 
         headers = {
-            'Accept': 'application/javascript',
+            "Accept": "application/javascript",
         }
 
         yield scrapy.http.FormRequest(
-            url=url,
-            method='GET',
-            headers=headers,
-            callback=self.parse
+            url=url, method="GET", headers=headers, callback=self.parse
         )
 
     def parse(self, response):
-        text1 = (response.text)
+        text1 = response.text
         text2 = text1.lstrip("widget856515DataCallback (")
         text = text2.rstrip(");")
         data = json.loads(text)
@@ -39,16 +34,16 @@ class PetParadiseSpider(scrapy.Spider):
             store_data = json.loads(store)
 
             properties = {
-                'ref': store_data["interestpointpropertyname"],
-                'name': store_data["interestpointpropertyname"],
-                'addr_full': store_data["interestpointpropertyaddress"],
-                'city': store_data["interestpointCity"],
-                'state': store_data["interestpointState"],
-                'postcode': store_data["interestpointPostalCode"],
-                'phone': store_data["interestpointPhoneNumber"],
-                'lat': float(store_data["interestpointinterestlatitude"]),
-                'lon': float(store_data["interestpointinterestlongitude"]),
-                'website': store_data["interestpointMoreInfoLink"]
+                "ref": store_data["interestpointpropertyname"],
+                "name": store_data["interestpointpropertyname"],
+                "addr_full": store_data["interestpointpropertyaddress"],
+                "city": store_data["interestpointCity"],
+                "state": store_data["interestpointState"],
+                "postcode": store_data["interestpointPostalCode"],
+                "phone": store_data["interestpointPhoneNumber"],
+                "lat": float(store_data["interestpointinterestlatitude"]),
+                "lon": float(store_data["interestpointinterestlongitude"]),
+                "website": store_data["interestpointMoreInfoLink"],
             }
 
             yield GeojsonPointItem(**properties)
