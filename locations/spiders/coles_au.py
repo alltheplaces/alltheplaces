@@ -11,9 +11,10 @@ class ColesSpider(scrapy.Spider):
     name = "coles_au"
     item_attributes = {'brand': "Coles"}
     allowed_domains = ["apigw.coles.com.au"]
-    start_urls = ([
+    start_urls = [
         'https://apigw.coles.com.au/digital/colesweb/v1/stores/search?latitude=-28.014547&longitude=135.171168&brandIds=2,1&numberOfStores=10',
-    ])
+    ]
+
     def parse(self, response):
         with open('./locations/searchable_points/au_centroids_20km_radius.csv') as points:
             next(points)
@@ -43,3 +44,4 @@ class ColesSpider(scrapy.Spider):
             }
 
             yield GeojsonPointItem(**properties)
+
