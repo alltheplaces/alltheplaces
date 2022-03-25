@@ -9,17 +9,17 @@ from locations.items import GeojsonPointItem
 
 class PriceRiteSpider(scrapy.Spider):
     name = "pricerite"
-    item_attributes = { 'brand': "PriceRite" }
+    item_attributes = {"brand": "PriceRite"}
     allowed_domains = ["priceritemarketplace.com"]
 
-    start_urls = (
-        "https://www.priceritemarketplace.com/",
-    )
+    start_urls = ("https://www.priceritemarketplace.com/",)
 
     def parse(self, response):
-        script = response.xpath('//script[contains(text(), "__PRELOADED_STATE__")]/text()').extract_first()
-        script = script[script.index('{'):]
-        stores = json.loads(script)['stores']['availablePlanningStores']['items']
+        script = response.xpath(
+            '//script[contains(text(), "__PRELOADED_STATE__")]/text()'
+        ).extract_first()
+        script = script[script.index("{") :]
+        stores = json.loads(script)["stores"]["availablePlanningStores"]["items"]
 
         for store in stores:
             ref = store["retailerStoreId"]
@@ -38,4 +38,3 @@ class PriceRiteSpider(scrapy.Spider):
             }
 
             yield GeojsonPointItem(**properties)
-

@@ -10,7 +10,10 @@ from locations.hours import OpeningHours
 
 class PiadaSpider(scrapy.Spider):
     name = "piada"
-    item_attributes = {"brand": "Piada Italian Street Food", "brand_wikidata": "Q7190020"}
+    item_attributes = {
+        "brand": "Piada Italian Street Food",
+        "brand_wikidata": "Q7190020",
+    }
     start_urls = ["https://mypiada.com/locations"]
 
     def parse(self, response):
@@ -24,7 +27,9 @@ class PiadaSpider(scrapy.Spider):
 
             lat, lon = data["geo"].split(",")
 
-            addr_full, city_state_zip = scrapy.Selector(text=data["address"]).xpath("//text()").extract()
+            addr_full, city_state_zip = (
+                scrapy.Selector(text=data["address"]).xpath("//text()").extract()
+            )
             city_state = city_state_zip.replace(data["zip"], "").strip()
             city, state = city_state.split(", ")
             phone = scrapy.Selector(text=data["phone"]).xpath("//text()").extract()[1:]

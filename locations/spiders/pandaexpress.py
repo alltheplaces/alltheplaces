@@ -7,9 +7,9 @@ from locations.items import GeojsonPointItem
 
 class PandaSpider(scrapy.Spider):
     name = "pandaexpress"
-    item_attributes = { 'brand': "Panda Express", 'brand_wikidata': "Q1358690" }
+    item_attributes = {"brand": "Panda Express", "brand_wikidata": "Q1358690"}
     allowed_domains = ["inkplant.com", "pandaexpress.com"]
-    start_urls = ['https://inkplant.com/code/state-latitudes-longitudes']
+    start_urls = ["https://inkplant.com/code/state-latitudes-longitudes"]
 
     def parse(self, response):
 
@@ -21,8 +21,11 @@ class PandaSpider(scrapy.Spider):
         # Iterate through each state to locate Panda Express Locations
         for state in sname:
 
-            state_url = "https://www.pandaexpress.com/userlocation/searchbyquery?query="+state+\
-                        "&limit=1000&hours=true&_=1512680879964"
+            state_url = (
+                "https://www.pandaexpress.com/userlocation/searchbyquery?query="
+                + state
+                + "&limit=1000&hours=true&_=1512680879964"
+            )
 
             # parse and return relevant location information
             yield Request(state_url, callback=self.parseState)
@@ -32,14 +35,14 @@ class PandaSpider(scrapy.Spider):
 
         for store in state_data["List"]:
             properties = {
-                'addr_full': store['Address'],
-                'city': store["City"],
-                'state': store['State'],
-                'postcode': store['Zip'].strip(),
-                'ref': store['Id'],
-                'lon': float(store['Longitude']),
-                'lat': float(store['Latitude']),
-                'phone': store['Phone']
+                "addr_full": store["Address"],
+                "city": store["City"],
+                "state": store["State"],
+                "postcode": store["Zip"].strip(),
+                "ref": store["Id"],
+                "lon": float(store["Longitude"]),
+                "lat": float(store["Latitude"]),
+                "phone": store["Phone"],
             }
 
             yield GeojsonPointItem(**properties)

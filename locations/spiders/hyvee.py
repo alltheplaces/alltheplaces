@@ -26,38 +26,50 @@ from locations.items import GeojsonPointItem
 
 class HyVeeSpider(scrapy.Spider):
     name = "hyvee"
-    item_attributes = { 'brand': "Hyvee" }
+    item_attributes = {"brand": "Hyvee"}
     allowed_domains = ["hy-vee.com"]
 
-    start_urls = (
-        "https://www.hy-vee.com/stores/store-finder-results.aspx",
-    )
+    start_urls = ("https://www.hy-vee.com/stores/store-finder-results.aspx",)
 
     def parse(self, response):
-        cities = response.xpath('//select[@name="ctl00$cph_main_content$spuStoreFinderResults'
-                                '$spuStoreFinder$ddlCity"]/option/@value').extract()
+        cities = response.xpath(
+            '//select[@name="ctl00$cph_main_content$spuStoreFinderResults'
+            '$spuStoreFinder$ddlCity"]/option/@value'
+        ).extract()
         for city in cities:
             params = "?zip=&state=&city=" + city
             yield scrapy.Request(
-                                 response.urljoin(params),
-                                 method='GET',
-                                 callback=self.parse_links)
+                response.urljoin(params), method="GET", callback=self.parse_links
+            )
 
     def parse_links(self, response):
 
-        latlon_js = [x for x in response.xpath('//script[@type="text/javascript"]/text()')
-            .extract() if x.startswith('var map = new goo')][0]
+        latlon_js = [
+            x
+            for x in response.xpath(
+                '//script[@type="text/javascript"]/text()'
+            ).extract()
+            if x.startswith("var map = new goo")
+        ][0]
 
-        store_urls = response.xpath('//*[@storecode]/../a[contains(text(), "store details")]/@href').extract()
-        latlons = re.findall(r'position: new google.maps.LatLng\(([\d.-]+),\s?([\d.-]+)\)', latlon_js)
+        store_urls = response.xpath(
+            '//*[@storecode]/../a[contains(text(), "store details")]/@href'
+        ).extract()
+        latlons = re.findall(
+            r"position: new google.maps.LatLng\(([\d.-]+),\s?([\d.-]+)\)", latlon_js
+        )
 
         for url, latlon in zip(store_urls, latlons):
-            yield scrapy.Request(response.urljoin(url),
-                                 callback=self.parse_details,
-                                 meta={'latlon': latlon})
+            yield scrapy.Request(
+                response.urljoin(url),
+                callback=self.parse_details,
+                meta={"latlon": latlon},
+            )
 
     def parse_details(self, response):
-        raw_address = response.xpath('//div[@class="col-sm-6 util-padding-bottom-15"]/text()').extract()
+        raw_address = response.xpath(
+            '//div[@class="col-sm-6 util-padding-bottom-15"]/text()'
+        ).extract()
         raw_address = list(filter(None, [l.strip() for l in raw_address]))
         raw_city = raw_address.pop(-1)
         address = " ".join(raw_address)
@@ -65,30 +77,37 @@ class HyVeeSpider(scrapy.Spider):
         city = match_city[0]
         state = match_city[1]
         zipcode = match_city[2]
-        phone = response.xpath('//div[@class="row util-padding-top-15"]/div[@class="col-sm-6 util-padding-bottom-15"][2]/a[1]/text()').extract()[0]
+        phone = response.xpath(
+            '//div[@class="row util-padding-top-15"]/div[@class="col-sm-6 util-padding-bottom-15"][2]/a[1]/text()'
+        ).extract()[0]
         website = response.url
-        opening_hours = self.process_hours(response.xpath('//div[@id="page_content"]/p/text()').extract())
+        opening_hours = self.process_hours(
+            response.xpath('//div[@id="page_content"]/p/text()').extract()
+        )
         link_id = website.split("s=")[-1]
-        names = response.xpath('//div[@id="page_content"]/h1/descendant-or-self::*/text()').extract()
+        names = response.xpath(
+            '//div[@id="page_content"]/h1/descendant-or-self::*/text()'
+        ).extract()
         name = " ".join(filter(None, [n.strip() for n in names]))
         # initialize latlon incase in a rare case we dont have it
-        lat = ''
-        lon = ''
-        if response.meta['latlon']:
-            lat = float(response.meta['latlon'][0])
-            lon = float(response.meta['latlon'][1])
+        lat = ""
+        lon = ""
+        if response.meta["latlon"]:
+            lat = float(response.meta["latlon"][0])
+            lon = float(response.meta["latlon"][1])
         properties = {
-                      "name": name,
-                      "addr_full": address,
-                      "city": city,
-                      "state": state,
-                      "postcode": zipcode,
-                      "phone": phone,
-                      "website": website,
-                      "ref": link_id,
-                      "opening_hours": opening_hours,
-                      "lat": lat,
-                      "lon": lon}
+            "name": name,
+            "addr_full": address,
+            "city": city,
+            "state": state,
+            "postcode": zipcode,
+            "phone": phone,
+            "website": website,
+            "ref": link_id,
+            "opening_hours": opening_hours,
+            "lat": lat,
+            "lon": lon,
+        }
         yield GeojsonPointItem(**properties)
 
     def process_hours(self, hours):
@@ -111,66 +130,106 @@ class HyVeeSpider(scrapy.Spider):
                                     or a list with the first item as 24/7 and the leftover hours
                                     which are special days like Thanksgiving, Xmas etc.
         """
-        special_days = {"Thanksgiving:": ['Thanksgiving'],
-                        "Dec 24:": ['Christmas Eve', 'Dec. 24'],
-                        "Dec 25:": ['Christmas Day', 'Dec. 25'],
-                        "Dec 31:": ['New Years Eve', 'Dec. 31'],
-                        "Dec 26:": ['Boxing', 'Dec. 26'],
-                        "Jan. 1": ['New year day', 'Jan. 1'],
-                        "24/7": ["7 days a week, 24 hours a day",
-                                 "Open 24 hours a day, 7 days a week",
-                                 "Open 24 hours 7 days a week",
-                                 "Open 24 hours a day",
-                                 "Open 24 hours",
-                                 "Open 24/7",
-                                 "We are open 24 hours a day, 7 days a week",
-                                 "Open 24 Hours Monday-Sunday",
-                                 "24 hours"]}
+        special_days = {
+            "Thanksgiving:": ["Thanksgiving"],
+            "Dec 24:": ["Christmas Eve", "Dec. 24"],
+            "Dec 25:": ["Christmas Day", "Dec. 25"],
+            "Dec 31:": ["New Years Eve", "Dec. 31"],
+            "Dec 26:": ["Boxing", "Dec. 26"],
+            "Jan. 1": ["New year day", "Jan. 1"],
+            "24/7": [
+                "7 days a week, 24 hours a day",
+                "Open 24 hours a day, 7 days a week",
+                "Open 24 hours 7 days a week",
+                "Open 24 hours a day",
+                "Open 24 hours",
+                "Open 24/7",
+                "We are open 24 hours a day, 7 days a week",
+                "Open 24 Hours Monday-Sunday",
+                "24 hours",
+            ],
+        }
         actions = {
-                    "close": [
-                              'the store will close at',
-                              'the store will be closed at',
-                              'closing at ',
-                              'closed',
-                              'open until'],
-                    "open": ['Reopening at ',
-                             'Re-Opening',
-                             're-open',
-                             'reopen at']}
+            "close": [
+                "the store will close at",
+                "the store will be closed at",
+                "closing at ",
+                "closed",
+                "open until",
+            ],
+            "open": ["Reopening at ", "Re-Opening", "re-open", "reopen at"],
+        }
 
         result = []
         for day, vary_day in special_days.items():
             for vday in vary_day:
                 matching_days = [x for x in hours if vday in x]
-                if day == '24/7':
+                if day == "24/7":
                     result.append(day)
                     break
                 if matching_days:
                     for k, v in actions.items():
                         all_closed_actions = "|".join(v)
-                        reg_str = r"" + vday + ".*(" + all_closed_actions + r")\s?" \
-                                  r"(\d{1,2})\s(a\.m\.|p\.m\.)(?:\son\s(\w{3}\s\d{1,2}))?"
+                        reg_str = (
+                            r"" + vday + ".*(" + all_closed_actions + r")\s?"
+                            r"(\d{1,2})\s(a\.m\.|p\.m\.)(?:\son\s(\w{3}\s\d{1,2}))?"
+                        )
                         match = re.search(reg_str, matching_days[0], re.IGNORECASE)
                         if match:
                             m = match.groups()
-                            result.append(day + " " + k + ": " + str(int(m[1]) + self.am_pm(m[1], m[2])) + ":00")
+                            result.append(
+                                day
+                                + " "
+                                + k
+                                + ": "
+                                + str(int(m[1]) + self.am_pm(m[1], m[2]))
+                                + ":00"
+                            )
                         else:
-                            reg_str = r"(" + all_closed_actions + r")\s?(\d{1,2})\s(a\.m\.|p\.m\.)\s?(" + vday + ")"
+                            reg_str = (
+                                r"("
+                                + all_closed_actions
+                                + r")\s?(\d{1,2})\s(a\.m\.|p\.m\.)\s?("
+                                + vday
+                                + ")"
+                            )
                             match = re.search(reg_str, matching_days[0], re.IGNORECASE)
                             if match:
                                 m = match.groups()
-                                result.append(day + " " + k + ": " + str(int(m[1]) + self.am_pm(m[1], m[2])) + ":00")
+                                result.append(
+                                    day
+                                    + " "
+                                    + k
+                                    + ": "
+                                    + str(int(m[1]) + self.am_pm(m[1], m[2]))
+                                    + ":00"
+                                )
                             else:
-                                reg_str = r"(" + all_closed_actions + r")\s?(\d{1,2})\s(a\.m\.|p\.m\.)\s?(" + vday + ")"
-                                match = re.search(reg_str, matching_days[0], re.IGNORECASE)
+                                reg_str = (
+                                    r"("
+                                    + all_closed_actions
+                                    + r")\s?(\d{1,2})\s(a\.m\.|p\.m\.)\s?("
+                                    + vday
+                                    + ")"
+                                )
+                                match = re.search(
+                                    reg_str, matching_days[0], re.IGNORECASE
+                                )
                                 if match:
                                     m = match.groups()
-                                    result.append(day + " " + k + ": " + str(int(m[1]) + self.am_pm(m[1], m[2])) + ":00")
+                                    result.append(
+                                        day
+                                        + " "
+                                        + k
+                                        + ": "
+                                        + str(int(m[1]) + self.am_pm(m[1], m[2]))
+                                        + ":00"
+                                    )
                                 else:
                                     # more match can come here.
                                     pass
-        if '24/7' in result:
-            return result.pop(result.index('24/7'))
+        if "24/7" in result:
+            return result.pop(result.index("24/7"))
         elif result:
             return "; ".join(result)
 
@@ -185,7 +244,7 @@ class HyVeeSpider(scrapy.Spider):
         diff = 0
         # get rid of the whitespaces to reduce possible variation
         a_p_stripped = a_p.replace(" ", "")
-        if a_p_stripped == 'a.m.' or a_p_stripped == 'a.m':
+        if a_p_stripped == "a.m." or a_p_stripped == "a.m":
             if int(hr) < 12:
                 diff = 0
             else:

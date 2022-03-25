@@ -33,7 +33,9 @@ class ATIPhysicalTherapySpider(scrapy.Spider):
         oh = OpeningHours()
         ref = re.findall(r"[^(\/)]+$", response.url)[0]
         data = json.loads(
-            response.xpath('//script[@type="application/ld+json"]/text()').extract_first()
+            response.xpath(
+                '//script[@type="application/ld+json"]/text()'
+            ).extract_first()
         )
 
         address = {}
@@ -61,7 +63,9 @@ class ATIPhysicalTherapySpider(scrapy.Spider):
             "website": response.url,
             "lat": geo.get("lat"),
             "lon": geo.get("lon"),
-            "extras": {"email": data.get("email"),},
+            "extras": {
+                "email": data.get("email"),
+            },
             "opening_hours": oh.as_opening_hours(),
         }
         yield GeojsonPointItem(**properties)

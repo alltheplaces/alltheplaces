@@ -4,43 +4,56 @@ import scrapy
 from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
 
-day_mapping = {'MON': 'Mo','TUE': 'Tu','WED': 'We','THU': 'Th',
-            'FRI': 'Fr','SAT': 'Sa','SUN': 'Su'}
+day_mapping = {
+    "MON": "Mo",
+    "TUE": "Tu",
+    "WED": "We",
+    "THU": "Th",
+    "FRI": "Fr",
+    "SAT": "Sa",
+    "SUN": "Su",
+}
+
 
 def convert_24hour(time):
     """
     Takes 12 hour time as a string and converts it to 24 hour time.
     """
 
-    if len(time[:-2].split(':')) < 2:
+    if len(time[:-2].split(":")) < 2:
         hour = time[:-2]
-        minute = '00'
+        minute = "00"
     else:
-        hour, minute = time[:-2].split(':')
+        hour, minute = time[:-2].split(":")
 
-    if time[-2:] == 'AM':
-        time_formatted = hour + ':' + minute
-    elif time[-2:] == 'PM':
-        time_formatted = str(int(hour)+ 12) + ':' + minute
+    if time[-2:] == "AM":
+        time_formatted = hour + ":" + minute
+    elif time[-2:] == "PM":
+        time_formatted = str(int(hour) + 12) + ":" + minute
 
-    if time_formatted in ['24:00','0:00','00:00']:
-        time_formatted = '23:59'
+    if time_formatted in ["24:00", "0:00", "00:00"]:
+        time_formatted = "23:59"
 
     return time_formatted
+
 
 class PetSmartSpider(scrapy.Spider):
     download_delay = 0.2
     name = "petsmart"
-    item_attributes = { 'brand': "Petsmart" }
+    item_attributes = {"brand": "Petsmart"}
     allowed_domains = ["petsmart.com", "petsmart.ca"]
     start_urls = (
-        'https://www.petsmart.com/store-locator/all/',
-        'https://www.petsmart.ca/store-locator/all/'
+        "https://www.petsmart.com/store-locator/all/",
+        "https://www.petsmart.ca/store-locator/all/",
     )
 
     def parse(self, response):
-        state_urls = response.xpath('//li[@class="col-sm-12 col-md-4"]/a/@href').extract()
-        is_store_details_urls = response.xpath('//a[@class="store-details-link"]/@href').extract()
+        state_urls = response.xpath(
+            '//li[@class="col-sm-12 col-md-4"]/a/@href'
+        ).extract()
+        is_store_details_urls = response.xpath(
+            '//a[@class="store-details-link"]/@href'
+        ).extract()
 
         if not state_urls and is_store_details_urls:
             for url in is_store_details_urls:
@@ -50,30 +63,50 @@ class PetSmartSpider(scrapy.Spider):
                 yield scrapy.Request(response.urljoin(url))
 
     def parse_store(self, response):
-        ref = re.search(r'.+/?\?(.+)', response.url).group(1)
-        if 'petsmart.ca' in response.url:
-            country = 'CA'
-        elif 'petsmart.com' in response.url:
-            country = 'US'
+        ref = re.search(r".+/?\?(.+)", response.url).group(1)
+        if "petsmart.ca" in response.url:
+            country = "CA"
+        elif "petsmart.com" in response.url:
+            country = "US"
 
         properties = {
-            'name': response.xpath('//span[@itemprop="name"]/text()').extract_first().strip(),
-            'addr_full': response.xpath('//div[@itemprop="streetAddress"]/text()').extract_first(),
-            'city': response.xpath('//span[@itemprop="addressLocality"][1]/text()').extract_first().title(),
-            'state': response.xpath('//span[@itemprop="addressLocality"][2]/text()').extract_first(),
-            'postcode': response.xpath('//span[@itemprop="postalCode"]/text()').extract_first(),
-            'lat': float(response.xpath('//input[@name="storeLatitudeVal"]/@value').extract_first()),
-            'lon': float(response.xpath('//input[@name="storeLongitudeVal"]/@value').extract_first()),
-            'phone': response.xpath('//a[@class="store-contact-info"]/text()').extract_first(),
-            'country': country,
-            'ref': ref,
-            'website': response.url
+            "name": response.xpath('//span[@itemprop="name"]/text()')
+            .extract_first()
+            .strip(),
+            "addr_full": response.xpath(
+                '//div[@itemprop="streetAddress"]/text()'
+            ).extract_first(),
+            "city": response.xpath('//span[@itemprop="addressLocality"][1]/text()')
+            .extract_first()
+            .title(),
+            "state": response.xpath(
+                '//span[@itemprop="addressLocality"][2]/text()'
+            ).extract_first(),
+            "postcode": response.xpath(
+                '//span[@itemprop="postalCode"]/text()'
+            ).extract_first(),
+            "lat": float(
+                response.xpath(
+                    '//input[@name="storeLatitudeVal"]/@value'
+                ).extract_first()
+            ),
+            "lon": float(
+                response.xpath(
+                    '//input[@name="storeLongitudeVal"]/@value'
+                ).extract_first()
+            ),
+            "phone": response.xpath(
+                '//a[@class="store-contact-info"]/text()'
+            ).extract_first(),
+            "country": country,
+            "ref": ref,
+            "website": response.url,
         }
 
         hours = self.parse_hours(response.xpath('//div[@class="store-detail-address"]'))
 
         if hours:
-            properties['opening_hours'] = hours
+            properties["opening_hours"] = hours
 
         yield GeojsonPointItem(**properties)
 
@@ -82,17 +115,25 @@ class PetSmartSpider(scrapy.Spider):
 
         days = elements.xpath('//span[@itemprop="dayOfWeek"]/text()').extract()
         today = (set(day_mapping) - set(days)).pop()
-        days.remove('TODAY')
-        days.insert(0,today)
-        open_hours = elements.xpath('//div[@class="store-hours"]/time[@itemprop="opens"]/@content').extract()
-        close_hours = elements.xpath('//div[@class="store-hours"]/time[@itemprop="closes"]/@content').extract()
+        days.remove("TODAY")
+        days.insert(0, today)
+        open_hours = elements.xpath(
+            '//div[@class="store-hours"]/time[@itemprop="opens"]/@content'
+        ).extract()
+        close_hours = elements.xpath(
+            '//div[@class="store-hours"]/time[@itemprop="closes"]/@content'
+        ).extract()
 
-        store_hours = dict((z[0],list(z[1:])) for z in zip(days, open_hours, close_hours))
+        store_hours = dict(
+            (z[0], list(z[1:])) for z in zip(days, open_hours, close_hours)
+        )
 
         for day, hours in store_hours.items():
-            if 'CLOSED' in hours:
+            if "CLOSED" in hours:
                 continue
-            opening_hours.add_range(day=day_mapping[day],
-                                    open_time=convert_24hour(hours[0]),
-                                    close_time=convert_24hour(hours[1]))
+            opening_hours.add_range(
+                day=day_mapping[day],
+                open_time=convert_24hour(hours[0]),
+                close_time=convert_24hour(hours[1]),
+            )
         return opening_hours.as_opening_hours()

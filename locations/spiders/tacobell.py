@@ -8,7 +8,7 @@ from locations.items import GeojsonPointItem
 
 class TacobellSpider(scrapy.Spider):
     name = "tacobell"
-    item_attributes = { 'brand': "Taco Bell", 'brand_wikidata': "Q752941" }
+    item_attributes = {"brand": "Taco Bell", "brand_wikidata": "Q752941"}
     allowed_domains = ["locations.tacobell.com"]
     start_urls = ("https://locations.tacobell.com/",)
     download_delay = 0.2
@@ -20,55 +20,68 @@ class TacobellSpider(scrapy.Spider):
 
         for hour in json.loads(hours):
             all_intervals = []
-            short_day = hour['day'].title()[:2]
+            short_day = hour["day"].title()[:2]
 
-            if not hour['intervals']:
+            if not hour["intervals"]:
                 continue
 
-            for interval in hour['intervals']:
-                start = str(interval['start']).zfill(4)
-                end = str(interval['end']).zfill(4)
-                from_hr = "{}:{}".format(start[:2],
-                                         start[2:]
-                                         )
-                to_hr = "{}:{}".format(end[:2],
-                                       end[2:]
-                                       )
-                epoch = '{}-{}'.format(from_hr, to_hr)
+            for interval in hour["intervals"]:
+                start = str(interval["start"]).zfill(4)
+                end = str(interval["end"]).zfill(4)
+                from_hr = "{}:{}".format(start[:2], start[2:])
+                to_hr = "{}:{}".format(end[:2], end[2:])
+                epoch = "{}-{}".format(from_hr, to_hr)
                 all_intervals.append(epoch)
-            reversed_hours.setdefault(', '.join(all_intervals), [])
+            reversed_hours.setdefault(", ".join(all_intervals), [])
             reversed_hours[epoch].append(short_day)
 
-        if len(reversed_hours) == 1 and list(reversed_hours)[0] == '00:00-24:00':
-            return '24/7'
+        if len(reversed_hours) == 1 and list(reversed_hours)[0] == "00:00-24:00":
+            return "24/7"
         opening_hours = []
 
         for key, value in reversed_hours.items():
             if len(value) == 1:
-                opening_hours.append('{} {}'.format(value[0], key))
+                opening_hours.append("{} {}".format(value[0], key))
             else:
-                opening_hours.append(
-                    '{}-{} {}'.format(value[0], value[-1], key))
+                opening_hours.append("{}-{} {}".format(value[0], value[-1], key))
         return "; ".join(opening_hours)
 
     def parse_location(self, response):
         if not response.xpath('//div[@itemprop="department"]'):
             return
 
-        hours = response.xpath('//div[@class="c-hours-details-wrapper js-hours-table"]/@data-days').extract_first()
+        hours = response.xpath(
+            '//div[@class="c-hours-details-wrapper js-hours-table"]/@data-days'
+        ).extract_first()
         opening_hours = hours and self.normalize_hours(hours)
 
         props = {
-            'addr_full': response.xpath('//meta[@itemprop="streetAddress"]/@content').extract_first().strip(),
-            'lat': float(response.xpath('//meta[@itemprop="latitude"]/@content').extract_first()),
-            'lon': float(response.xpath('//meta[@itemprop="longitude"]/@content').extract_first()),
-            'city': response.xpath('//meta[@itemprop="addressLocality"]/@content').extract_first(),
-            'postcode': response.xpath('//span[@itemprop="postalCode"]/text()').extract_first(),
-            'state': response.xpath('//abbr[@itemprop="addressRegion"]/text()').extract_first(),
-            'phone': response.xpath('//div[@itemprop="telephone"]/text()').extract_first(),
-            'ref': response.xpath('//div[@itemprop="department"]/@data-code').extract_first(),
-            'website': response.url,
-            'opening_hours': opening_hours,
+            "addr_full": response.xpath('//meta[@itemprop="streetAddress"]/@content')
+            .extract_first()
+            .strip(),
+            "lat": float(
+                response.xpath('//meta[@itemprop="latitude"]/@content').extract_first()
+            ),
+            "lon": float(
+                response.xpath('//meta[@itemprop="longitude"]/@content').extract_first()
+            ),
+            "city": response.xpath(
+                '//meta[@itemprop="addressLocality"]/@content'
+            ).extract_first(),
+            "postcode": response.xpath(
+                '//span[@itemprop="postalCode"]/text()'
+            ).extract_first(),
+            "state": response.xpath(
+                '//abbr[@itemprop="addressRegion"]/text()'
+            ).extract_first(),
+            "phone": response.xpath(
+                '//div[@itemprop="telephone"]/text()'
+            ).extract_first(),
+            "ref": response.xpath(
+                '//div[@itemprop="department"]/@data-code'
+            ).extract_first(),
+            "website": response.url,
+            "opening_hours": opening_hours,
         }
 
         return GeojsonPointItem(**props)
@@ -79,16 +92,14 @@ class TacobellSpider(scrapy.Spider):
 
         for location in locations:
             yield scrapy.Request(
-                url=response.urljoin(location),
-                callback=self.parse_location
+                url=response.urljoin(location), callback=self.parse_location
             )
 
     def parse_state(self, response):
         cities = response.xpath('//li[@class="Directory-listItem"]/a/@href').extract()
         for city in cities:
             yield scrapy.Request(
-                response.urljoin(city),
-                callback=self.parse_city_stores
+                response.urljoin(city), callback=self.parse_city_stores
             )
 
     def parse(self, response):
@@ -99,10 +110,7 @@ class TacobellSpider(scrapy.Spider):
         # Un-special case this by inserting a link to the state index page
         # which does in fact exist. Hopefully this is bulletproof if the
         # web site changes.
-        states.append('dc.html')
+        states.append("dc.html")
 
         for state in states:
-            yield scrapy.Request(
-                response.urljoin(state),
-                callback=self.parse_state
-            )
+            yield scrapy.Request(response.urljoin(state), callback=self.parse_state)

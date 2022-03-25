@@ -100,7 +100,7 @@ If the only option is search by location, there is likely an AJAX query made to 
 
 ### Searchable Points
 
-For store locators that do allow searches by latitude/longitude, a grid of searchable latlon points is available for the US, CA, and Europe [here](https://github.com/alltheplaces/alltheplaces/tree/master/locations/searchable_points). Each point represents the centroid of a search where the radius distance is indicated in the file name. See the [Dollar General scraper](https://github.com/alltheplaces/alltheplaces/pull/1076) for an example of how you might utilize them for national searches.
+For store locators that do allow searches by latitude/longitude, a grid of searchable latlon points is available for the US, CA, AU, and Europe [here](https://github.com/alltheplaces/alltheplaces/tree/master/locations/searchable_points). Each point represents the centroid of a search where the radius distance is indicated in the file name. See the [Dollar General scraper](https://github.com/alltheplaces/alltheplaces/pull/1076) for an example of how you might utilize them for national searches.
 
 For stores that do not have a national footprint ([e.g. #1034](https://github.com/alltheplaces/alltheplaces/issues/1034)), there are separate point files that include a state/territory attribute e.g. <i>'us_centroids_100mile_radius_state.csv'</i>. This allows for points to be filtered down to specific states/territories when a national search is unnecessary.
 

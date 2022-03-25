@@ -5,24 +5,19 @@ from locations.items import GeojsonPointItem
 
 class ElPolloLocoSpider(scrapy.Spider):
     name = "elpolloloco"
-    item_attributes = { 'brand': "El Pollo Loco" }
+    item_attributes = {"brand": "El Pollo Loco"}
     allowed_domains = ["www.elpolloloco.com"]
-    start_urls = (
-        'https://www.elpolloloco.com/locations/locations_json',
-    )
+    start_urls = ("https://www.elpolloloco.com/locations/locations_json",)
 
     def start_requests(self):
-        template = 'https://www.elpolloloco.com/locations/locations_json'
+        template = "https://www.elpolloloco.com/locations/locations_json"
 
         headers = {
-            'Accept': 'application/json',
+            "Accept": "application/json",
         }
 
         yield scrapy.http.FormRequest(
-            url=template,
-            method='GET',
-            headers=headers,
-            callback=self.parse
+            url=template, method="GET", headers=headers, callback=self.parse
         )
 
     def parse(self, response):
@@ -30,16 +25,16 @@ class ElPolloLocoSpider(scrapy.Spider):
         for store in store_data:
             try:
                 properties = {
-                        'ref': store[0],
-                        'name' : store[12],
-                        'addr_full': store[1],
-                        'city': store[3],
-                        'state': store[4],
-                        'postcode': store[5],
-                        'phone': store[6],
-                        'lat': float(store[8]),
-                        'lon': float(store[9]),
-                        'website': response.url
+                    "ref": store[0],
+                    "name": store[12],
+                    "addr_full": store[1],
+                    "city": store[3],
+                    "state": store[4],
+                    "postcode": store[5],
+                    "phone": store[6],
+                    "lat": float(store[8]),
+                    "lon": float(store[9]),
+                    "website": response.url,
                 }
                 yield GeojsonPointItem(**properties)
 

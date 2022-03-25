@@ -4,21 +4,20 @@ import scrapy
 from scrapy.selector import Selector
 from locations.items import GeojsonPointItem
 
+
 class McDonaldsRSSpider(scrapy.Spider):
     name = "mcdonalds_rs"
-    item_attributes = { 'brand': "McDonald's" }
+    item_attributes = {"brand": "McDonald's"}
     allowed_domains = ["www.mcdonalds.rs"]
 
-    start_urls = (
-        'http://www.mcdonalds.rs/restoran-lokator/',
-    )
+    start_urls = ("http://www.mcdonalds.rs/restoran-lokator/",)
 
     def normalize_item(self, data):
-        match = re.sub('<[^<]+?>', '', data)
-        return ' '.join(match.split())
+        match = re.sub("<[^<]+?>", "", data)
+        return " ".join(match.split())
 
     def parse_postalCity(self, data):
-        match = re.search(r'(.*\d)(.*\w)', data[1])
+        match = re.search(r"(.*\d)(.*\w)", data[1])
         if not match:
             return "", ""
         postalCode, city = match.groups()
@@ -33,7 +32,9 @@ class McDonaldsRSSpider(scrapy.Spider):
 
     def parse(self, response):
         try:
-            match = re.search(r'var locations = (.*)</script>', response.body_as_unicode())
+            match = re.search(
+                r"var locations = (.*)</script>", response.body_as_unicode()
+            )
             data = json.loads(match.groups()[0])
         except ValueError:
             return
@@ -41,15 +42,14 @@ class McDonaldsRSSpider(scrapy.Spider):
         for item in data:
             address, postalCode, city = self.parse_address(item[3])
             properties = {
-                'name': item[1],
-                'website': item[2],
-                'ref': item[0],
-                'lon': item[4],
-                'lat': item[5],
-                'city': city,
-                'addr_full': address,
-                'postcode': postalCode
+                "name": item[1],
+                "website": item[2],
+                "ref": item[0],
+                "lon": item[4],
+                "lat": item[5],
+                "city": city,
+                "addr_full": address,
+                "postcode": postalCode,
             }
 
             yield GeojsonPointItem(**properties)
-            
