@@ -10,14 +10,16 @@ from locations.hours import OpeningHours
 
 class HomeSenseSpider(scrapy.Spider):
     name = "homesense"
-    item_attributes = { 'brand': "Homesense" }
+    item_attributes = {"brand": "Homesense"}
     allowed_domains = ["homesense.com"]
     start_urls = [
-        'https://us.homesense.com/locator',
+        "https://us.homesense.com/locator",
     ]
 
     def parse_store(self, response):
-        raw_address = response.xpath('//div[contains(@class, "store-details-txt")]/p/span/text()').extract()
+        raw_address = response.xpath(
+            '//div[contains(@class, "store-details-txt")]/p/span/text()'
+        ).extract()
         raw_address = list(filter(None, [a.strip() for a in raw_address]))
 
         raw_city = raw_address.pop(-1)
@@ -32,15 +34,15 @@ class HomeSenseSpider(scrapy.Spider):
         zipcode = match_city[2]
 
         properties = {
-            'ref': re.search(r'.+/(.+?)/?(?:\.html|$)', response.url).group(1),
-            'name': name,
-            'addr_full': address,
-            'city': city,
-            'state': state,
-            'postcode': zipcode,
-            'country': 'US',
-            'phone': response.xpath('//a[@class="phone"]/text()').extract_first(),
-            'website': response.url
+            "ref": re.search(r".+/(.+?)/?(?:\.html|$)", response.url).group(1),
+            "name": name,
+            "addr_full": address,
+            "city": city,
+            "state": state,
+            "postcode": zipcode,
+            "country": "US",
+            "phone": response.xpath('//a[@class="phone"]/text()').extract_first(),
+            "website": response.url,
         }
 
         yield GeojsonPointItem(**properties)

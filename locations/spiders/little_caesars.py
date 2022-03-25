@@ -5,21 +5,22 @@ from locations.hours import OpeningHours
 from locations.items import GeojsonPointItem
 
 DAY_MAPPING = {
-    'SUN': 'Su',
-    'MON': 'Mo',
-    'TUE': 'Tu',
-    'WED': 'We',
-    'THU': 'Th',
-    'FRI': 'Fr',
-    'SAT': 'Sa',
+    "SUN": "Su",
+    "MON": "Mo",
+    "TUE": "Tu",
+    "WED": "We",
+    "THU": "Th",
+    "FRI": "Fr",
+    "SAT": "Sa",
 }
 
 HEADERS = {
-    'Accept': '*/*',
-    'Accept-Encoding': 'gzip, deflate, br',
-    'Accept-Language': 'en-US',
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36'
+    "Accept": "*/*",
+    "Accept-Encoding": "gzip, deflate, br",
+    "Accept-Language": "en-US",
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36",
 }
+
 
 class LittleCaesarsSpider(scrapy.Spider):
     name = "little_caesars"
@@ -27,19 +28,16 @@ class LittleCaesarsSpider(scrapy.Spider):
     download_delay = 0.1
 
     def start_requests(self):
-        with open('./locations/searchable_points/us_zcta.csv') as points:
-            next(points) # Ignore the header
+        with open("./locations/searchable_points/us_zcta.csv") as points:
+            next(points)  # Ignore the header
             for point in points:
-                row = point.split(',')
+                row = point.split(",")
                 zip = row[0].strip().strip('"')
 
                 url = f"https://api.cloud.littlecaesars.com/bff/api/stores?zip={zip}"
 
                 yield scrapy.http.Request(
-                    url,
-                    self.parse,
-                    method='GET',
-                    headers=HEADERS
+                    url, self.parse, method="GET", headers=HEADERS
                 )
 
     def parse(self, response):
@@ -48,10 +46,10 @@ class LittleCaesarsSpider(scrapy.Spider):
             return
 
         result = json.loads(body)
-        stores = result.get('stores')
+        stores = result.get("stores")
 
         for store in stores:
-            store_id = store.get('storeId')
+            store_id = store.get("storeId")
             if not store_id:
                 continue
 
@@ -60,9 +58,9 @@ class LittleCaesarsSpider(scrapy.Spider):
             # through another API.
             yield scrapy.http.Request(
                 url=f"https://api.cloud.littlecaesars.com/bff/api/stores/{store_id}",
-                method='GET',
+                method="GET",
                 callback=self.parse_store,
-                headers=HEADERS
+                headers=HEADERS,
             )
 
     def parse_store(self, response):
@@ -71,17 +69,17 @@ class LittleCaesarsSpider(scrapy.Spider):
             return
 
         result = json.loads(body)
-        store = result.get('store')
+        store = result.get("store")
         if not store:
             return
 
-        address = store.get('address')
+        address = store.get("address")
         if not address:
             return
 
         addr_full = None
-        street = store.get('street')
-        street2 = store.get('street2')
+        street = store.get("street")
+        street2 = store.get("street2")
         if street:
             addr_full = street
         if street2:
@@ -91,18 +89,18 @@ class LittleCaesarsSpider(scrapy.Spider):
             # 'siteId' appears to be the publicly facing store number.  I would prefer to use it, but
             # it comes back as null for some stores.  'id' also appears in the data, reliably.
             # So use it instead.
-            'ref': store.get('locationNumber'),
-            'addr_full': addr_full,
-            'city': address.get('city'),
-            'state': address.get('state'),
-            'postcode': address.get('zip'),
-            'phone': store.get('phone'),
-            'website': response.url,
-            'lon': store.get('longitude'),
-            'lat': store.get('latitude')
+            "ref": store.get("locationNumber"),
+            "addr_full": addr_full,
+            "city": address.get("city"),
+            "state": address.get("state"),
+            "postcode": address.get("zip"),
+            "phone": store.get("phone"),
+            "website": response.url,
+            "lon": store.get("longitude"),
+            "lat": store.get("latitude"),
         }
 
-        opening_hours = self.add_hours(result.get('orderingHours'))
+        opening_hours = self.add_hours(result.get("orderingHours"))
         if opening_hours:
             properties["opening_hours"] = opening_hours
 
@@ -114,9 +112,9 @@ class LittleCaesarsSpider(scrapy.Spider):
         for o in ordering_hours:
             try:
                 opening_hours.add_range(
-                    DAY_MAPPING[o['dayName']],
+                    DAY_MAPPING[o["dayName"]],
                     f"{o['hourOpen']}:{o['minuteOpen']}",
-                    f"{o['hourClose']}:{o['minuteClose']}"
+                    f"{o['hourClose']}:{o['minuteClose']}",
                 )
             except (KeyError, ValueError):
                 # In rare cases, we've seen the day name is missing from the data.
@@ -126,4 +124,3 @@ class LittleCaesarsSpider(scrapy.Spider):
                 return
 
         return opening_hours.as_opening_hours()
-

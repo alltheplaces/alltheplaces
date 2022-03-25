@@ -3,6 +3,7 @@ import json
 import re
 import scrapy
 from locations.items import GeojsonPointItem
+from urllib.parse import urlparse, parse_qs
 
 BRAND_MAP = {
     "hj": "hojo",
@@ -91,19 +92,6 @@ COUNTRIES = {
     "Chile": "CL",
     "Colombia": "CO",
 }
-HEADERS = {
-    "Host": "www.wyndhamhotels.com",
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:81.0) Gecko/20100101 Firefox/81.0",
-    "Accept": "*/*",
-    "Accept-Language": "en-US,en;q=0.5",
-    "Accept-Encoding": "gzip, deflate, br",
-    "X-Requested-With": "XMLHttpRequest",
-    "DNT": "1",
-    "Connection": "keep-alive",
-    "Referer": "https://www.wyndhamhotels.com/locations",
-    "TE": "Trailers",
-}
-
 
 
 def create_url(brand, city, state, unique_url, tier_id):
@@ -112,7 +100,7 @@ def create_url(brand, city, state, unique_url, tier_id):
     if not brand_name:
         brand_name = BRAND_MAP.get(tier_id.lower())
     url = brand_name + "/"
-    url += city.replace(" ", "-").replace(".","").lower()
+    url += city.replace(" ", "-").replace(".", "").lower()
     state_name = (
         f"-{state.replace(' ','-').lower()}"
         if state.lower() != "other than us/canada"
@@ -126,15 +114,25 @@ def create_url(brand, city, state, unique_url, tier_id):
 
 class WyndhamSpider(scrapy.Spider):
     name = "wyndham"
+    download_speed = 0.7
     allowed_domains = ["www.wyndhamhotels.com"]
-    headers = HEADERS
-
-    def start_requests(self):
-        start_url = "https://www.wyndhamhotels.com/BWSServices/services/search/properties?recordsPerPage=&pageNumber=1&brandId=ALL&countryCode=&noPropertyData=false"
-        yield scrapy.Request(start_url, callback=self.parse, headers=self.headers)
+    start_urls = (
+        "https://www.wyndhamhotels.com/BWSServices/services/search/properties?recordsPerPage=50&pageNumber=1&brandId=ALL&countryCode=US%2CCA%2CMX",
+    )
 
     def parse(self, response):
         data = json.loads(response.text)
+
+        page_count = data.get("pageCount")
+        parsed_url = urlparse(response.request.url)
+        parsed_args = parse_qs(parsed_url.query)
+        page_number = int(parsed_args["pageNumber"][0])
+        if page_number <= page_count:
+            next_page_number = page_number + 1
+            yield scrapy.Request(
+                f"https://www.wyndhamhotels.com/BWSServices/services/search/properties?recordsPerPage=50&pageNumber={next_page_number}&brandId=ALL&countryCode=US%2CCA%2CMX",
+            )
+
         for country in data["countries"]:
             country_code = country["countryCode"]
             for state in country["states"]:
@@ -158,7 +156,6 @@ class WyndhamSpider(scrapy.Spider):
                                 "country_code": country_code,
                                 "brand_name": brand_name,
                             },
-                            headers=HEADERS,
                         )
 
     def parse_property(self, response):
@@ -169,7 +166,7 @@ class WyndhamSpider(scrapy.Spider):
         )
         if not raw_json:
             return None
-        data = json.loads(raw_json.group(1).replace("\t"," "))
+        data = json.loads(raw_json.group(1).replace("\t", " "))
         properties = {
             "ref": response.meta["id"],
             "lat": data["geo"]["latitude"],

@@ -22,7 +22,9 @@ class ApplebeesSpider(scrapy.Spider):
             yield scrapy.Request(url, callback=self.parse_city)
 
     def parse_city(self, response):
-        for url in response.xpath('//*[@class="map-list-item-header"]/a[@class="ga-link"]/@href').extract():
+        for url in response.xpath(
+            '//*[@class="map-list-item-header"]/a[@class="ga-link"]/@href'
+        ).extract():
             yield scrapy.Request(url, callback=self.parse_store)
 
     def store_hours(self, store_hours):
@@ -68,7 +70,10 @@ class ApplebeesSpider(scrapy.Spider):
             day_groups.append(this_day_group)
 
         opening_hours = ""
-        if len(day_groups) == 1 and day_groups[0]["hours"] in ("00:00-23:59", "00:00-00:00"):
+        if len(day_groups) == 1 and day_groups[0]["hours"] in (
+            "00:00-23:59",
+            "00:00-00:00",
+        ):
             opening_hours = "24/7"
         else:
             for day_group in day_groups:
@@ -83,7 +88,11 @@ class ApplebeesSpider(scrapy.Spider):
         return opening_hours
 
     def parse_store(self, response):
-        data = json.loads(response.xpath('//script[@type="application/ld+json"]/text()').extract_first())
+        data = json.loads(
+            response.xpath(
+                '//script[@type="application/ld+json"]/text()'
+            ).extract_first()
+        )
 
         if not data or isinstance(data, dict):
             return
@@ -101,7 +110,9 @@ class ApplebeesSpider(scrapy.Spider):
         yield GeojsonPointItem(
             lat=float(data["geo"]["latitude"]),
             lon=float(data["geo"]["longitude"]),
-            website=response.xpath('//head/link[@rel="canonical"]/@href').extract_first(),
+            website=response.xpath(
+                '//head/link[@rel="canonical"]/@href'
+            ).extract_first(),
             ref=response.xpath('//head/link[@rel="canonical"]/@href').extract_first(),
             opening_hours=o.as_opening_hours(),
             addr_full=data.get("address", {}).get("streetAddress"),

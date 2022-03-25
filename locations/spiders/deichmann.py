@@ -4,16 +4,17 @@ import json
 import base64
 from locations.items import GeojsonPointItem
 
+
 class Deichmann(scrapy.Spider):
     name = "deichmann"
-    allowed_domains = ["stores.deichmann.com","stores.dosenbach.ch"]
-    start_urls = (
-        'https://stores.deichmann.com/index.html',
-    )
+    allowed_domains = ["stores.deichmann.com", "stores.dosenbach.ch"]
+    start_urls = ("https://stores.deichmann.com/index.html",)
 
     def parse(self, response):
         # base url of all countries
-        countries = response.xpath('//ul[@class="countrydropdown"]/li/a/@href').extract()
+        countries = response.xpath(
+            '//ul[@class="countrydropdown"]/li/a/@href'
+        ).extract()
 
         for country in countries:
             yield scrapy.Request(country, callback=self.parse_country)
@@ -34,7 +35,9 @@ class Deichmann(scrapy.Spider):
 
     def parse_locations(self, response):
         # get json which provides all data
-        data = response.xpath('//script[@type="application/ld+json"]/text()').extract_first()
+        data = response.xpath(
+            '//script[@type="application/ld+json"]/text()'
+        ).extract_first()
 
         try:
             if data:
@@ -45,16 +48,16 @@ class Deichmann(scrapy.Spider):
                 contact_data = data.get("ContactPoint", {})
 
                 properties = {
-                    'ref': data.get("@id", None),
-                    'name': data.get("name", None),
-                    'lat': geo_data.get("latitude", None),
-                    'lon': geo_data.get("longitude", None),
-                    'phone': contact_data[0].get("telephone", None),
-                    'addr_full': address_data.get("streetAddress", None),
-                    'country': address_data.get("addressCountry", None),
-                    'postcode': address_data.get("postalCode", None),
-                    'city': address_data.get("addressLocality", None),
-                    'opening_hours': data.get("openingHours", None),
+                    "ref": data.get("@id", None),
+                    "name": data.get("name", None),
+                    "lat": geo_data.get("latitude", None),
+                    "lon": geo_data.get("longitude", None),
+                    "phone": contact_data[0].get("telephone", None),
+                    "addr_full": address_data.get("streetAddress", None),
+                    "country": address_data.get("addressCountry", None),
+                    "postcode": address_data.get("postalCode", None),
+                    "city": address_data.get("addressLocality", None),
+                    "opening_hours": data.get("openingHours", None),
                 }
 
                 yield GeojsonPointItem(**properties)

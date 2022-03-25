@@ -15,26 +15,23 @@ class CampBowWowSpider(scrapy.Spider):
     def start_requests(self):
         url = "https://www.campbowwow.com/locations/?CallAjax=GetLocations"
 
-        yield scrapy.http.Request(url,
-                                  method='POST',
-                                  callback=self.parse
-                                  )
+        yield scrapy.http.Request(url, method="POST", callback=self.parse)
 
     def parse(self, response):
         data = json.loads(response.body_as_unicode())
 
         for place in data:
             properties = {
-                'ref': place["FranchiseLocationID"],
-                'name': place["FranchiseLocationName"],
-                'addr_full': place["Address1"],
-                'city': place["City"],
-                'state': place["State"],
-                'postcode': place["ZipCode"],
-                'country': place["Country"],
-                'lat': place["Latitude"],
-                'lon': place["Longitude"],
-                'phone': place["Phone"]
+                "ref": place["FranchiseLocationID"],
+                "name": place["FranchiseLocationName"],
+                "addr_full": place["Address1"],
+                "city": place["City"],
+                "state": place["State"],
+                "postcode": place["ZipCode"],
+                "country": place["Country"],
+                "lat": place["Latitude"],
+                "lon": place["Longitude"],
+                "phone": place["Phone"],
             }
 
             yield GeojsonPointItem(**properties)

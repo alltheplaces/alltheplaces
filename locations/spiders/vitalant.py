@@ -33,9 +33,9 @@ class VitalantSpider(scrapy.Spider):
                 for s in selector.xpath("//b/text()[normalize-space()]").extract()
             )
             city, state, postcode = re.search("(.*), (.*) (.*)", addr2).groups()
-            website = selector.xpath("//@href").extract_first().strip(r'\"')
+            website = selector.xpath("//@href").extract_first().strip(r"\"")
             lat, lon = location.split(", ")[1:3]
-            ref = re.search(r'BasicGoogleMaps\[(\d+)\]', location)[1]
+            ref = re.search(r"BasicGoogleMaps\[(\d+)\]", location)[1]
             properties = {
                 "ref": ref,
                 "lat": lat,

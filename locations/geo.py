@@ -17,13 +17,17 @@ def vincenty_distance(lat, lon, distance_km, bearing_deg):
     bearing_rad = math.radians(bearing_deg)
 
     lat2 = math.asin(
-            math.sin(lat_rad)*math.cos(distance_km/EARTH_RADIUS) +
-            math.cos(lat_rad)*math.sin(distance_km/EARTH_RADIUS)*math.cos(bearing_rad)
+        math.sin(lat_rad) * math.cos(distance_km / EARTH_RADIUS)
+        + math.cos(lat_rad)
+        * math.sin(distance_km / EARTH_RADIUS)
+        * math.cos(bearing_rad)
     )
 
     lon2 = lon_rad + math.atan2(
-        math.sin(bearing_rad)*math.sin(distance_km/EARTH_RADIUS)*math.cos(lat_rad),
-        math.cos(distance_km/EARTH_RADIUS)-math.sin(lat_rad)*math.sin(lat2)
+        math.sin(bearing_rad)
+        * math.sin(distance_km / EARTH_RADIUS)
+        * math.cos(lat_rad),
+        math.cos(distance_km / EARTH_RADIUS) - math.sin(lat_rad) * math.sin(lat2),
     )
 
     return (math.degrees(lat2), math.degrees(lon2))

@@ -9,29 +9,27 @@ import re
 from itertools import groupby
 
 
-_DAYNAMES = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su']
+_DAYNAMES = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
 
 
 class WaitroseSpider(scrapy.Spider):
 
     name = "waitrose"
-    item_attributes = { 'brand': "Waitrose" }
+    item_attributes = {"brand": "Waitrose"}
     allowed_domains = ["www.waitrose.com"]
-    bf_home = 'http://www.waitrose.com/content/waitrose/en/bf_home'
-    start_urls = (
-        bf_home + '/bf.html',
-    )
+    bf_home = "http://www.waitrose.com/content/waitrose/en/bf_home"
+    start_urls = (bf_home + "/bf.html",)
 
     def parse(self, response):
 
         # if this is a store details page then it will have the following
         # div section.
         details = response.xpath(
-            '//div[@role="article"]/div'
-            '/div[@class="parbase details section"]')
+            '//div[@role="article"]/div' '/div[@class="parbase details section"]'
+        )
 
         if details:
-            name = response.xpath('//head/title')[0].root.text
+            name = response.xpath("//head/title")[0].root.text
             # sometimes, but not always, the name of the shop also has some
             # variant of " - Branch Finder..." appended. the fact that it's
             # not consistent between pages seems to indicate that it has been
@@ -39,31 +37,36 @@ class WaitroseSpider(scrapy.Spider):
             name = name.split("- ")[0].strip()
 
             properties = {
-                'name': name,
-                'website': response.url,
-                'ref': response.meta['waitrose_store_id'],
+                "name": name,
+                "website": response.url,
+                "ref": response.meta["waitrose_store_id"],
             }
 
-            branch_details = details[0].xpath(
-                'div[@class="col branch-details"]/p')[0].root.text_content()
+            branch_details = (
+                details[0]
+                .xpath('div[@class="col branch-details"]/p')[0]
+                .root.text_content()
+            )
             if branch_details:
                 branch_details = self._branch_details(branch_details)
             if branch_details:
                 properties.update(branch_details)
 
-            opening_hours = details[0].xpath(
-                'div[@class="opening-times"]')[0]
+            opening_hours = details[0].xpath('div[@class="opening-times"]')[0]
             if opening_hours:
                 opening_hours = self._opening_hours(opening_hours)
             if opening_hours:
                 properties.update(opening_hours)
 
-            branch_map = details[0].xpath(
-                'div[@class="branch-finder-map"]/p/a')[0].root.attrib
-            properties.update({
-                'lon': float(branch_map['data-long']),
-                'lat': float(branch_map['data-lat']),
-            })
+            branch_map = (
+                details[0].xpath('div[@class="branch-finder-map"]/p/a')[0].root.attrib
+            )
+            properties.update(
+                {
+                    "lon": float(branch_map["data-long"]),
+                    "lat": float(branch_map["data-lat"]),
+                }
+            )
 
             yield GeojsonPointItem(**properties)
             return
@@ -86,7 +89,7 @@ class WaitroseSpider(scrapy.Spider):
                 pass
 
         for store_id in store_ids:
-            url = '%s/bf/%d.html' % (WaitroseSpider.bf_home, store_id)
+            url = "%s/bf/%d.html" % (WaitroseSpider.bf_home, store_id)
             yield scrapy.Request(url, meta=dict(waitrose_store_id=store_id))
 
         return
@@ -105,15 +108,15 @@ class WaitroseSpider(scrapy.Spider):
 
         # last line is usually, but not always, a phone number.
         line = lines[-1]
-        if re.match('0[0-9 ]+', line):
-            properties['phone'] = line
+        if re.match("0[0-9 ]+", line):
+            properties["phone"] = line
             lines.pop()
 
         # the next-to-last (or last when there's no phone) is usually a
         # post code.
         line = lines[-1]
-        if re.match('[A-Z0-9]+ [A-Z0-9]+', line):
-            properties['postcode'] = line
+        if re.match("[A-Z0-9]+ [A-Z0-9]+", line):
+            properties["postcode"] = line
             lines.pop()
 
         # TODO: some Waitrose stores are not in the UK, and have the country
@@ -125,21 +128,21 @@ class WaitroseSpider(scrapy.Spider):
         # if the first line is a number and name, then it's probably a house
         # number and street name.
         line = lines[0]
-        m = re.match('([0-9-]+) ([A-Za-z ]+)', line)
+        m = re.match("([0-9-]+) ([A-Za-z ]+)", line)
         if m:
-            properties['housenumber'] = m.group(1)
-            properties['street'] = m.group(2)
+            properties["housenumber"] = m.group(1)
+            properties["street"] = m.group(2)
 
-        properties['addr_full'] = ', '.join(lines)
+        properties["addr_full"] = ", ".join(lines)
         return properties
 
     def _opening_hours(self, opening_hours):
-        hours = ['off'] * 7
-        for row in opening_hours.xpath('//tr'):
-            day, times = row.xpath('td/text()').extract()
+        hours = ["off"] * 7
+        for row in opening_hours.xpath("//tr"):
+            day, times = row.xpath("td/text()").extract()
             times = times.replace(" ", "")
-            if times == 'CLOSED':
-                times = 'off'
+            if times == "CLOSED":
+                times = "off"
             assert day[0:2] in _DAYNAMES
             day_idx = _DAYNAMES.index(day[0:2])
             hours[day_idx] = times
@@ -148,13 +151,12 @@ class WaitroseSpider(scrapy.Spider):
         for times, indices in groupby(range(len(hours)), lambda i: hours[i]):
             indices = list(indices)
             if len(indices) == 1:
-                formatted.append('%s %s' % (_DAYNAMES[indices[0]], times))
+                formatted.append("%s %s" % (_DAYNAMES[indices[0]], times))
             else:
-                dayrange = _DAYNAMES[indices[0]] + '-' + \
-                           _DAYNAMES[indices[-1]]
-                formatted.append('%s %s' % (dayrange, times))
+                dayrange = _DAYNAMES[indices[0]] + "-" + _DAYNAMES[indices[-1]]
+                formatted.append("%s %s" % (dayrange, times))
 
         properties = {
-            'opening_hours': '; '.join(formatted),
+            "opening_hours": "; ".join(formatted),
         }
         return properties

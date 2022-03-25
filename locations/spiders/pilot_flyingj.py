@@ -1,56 +1,59 @@
-import csv
+# -*- coding: utf-8 -*-
+import json
 
 import scrapy
+
 from locations.items import GeojsonPointItem
 
 
 class PilotFlyingJSpider(scrapy.Spider):
     name = "pilot_flyingj"
-    item_attributes = {'brand': "Pilot Flying J", 'brand_wikidata': "Q1434601"}
-    download_delay = 0.3
-    allowed_domains = [
-        "pilotflyingj.com",
-    ]
+    item_attributes = {"brand": "Pilot Flying J", "brand_wikidata": "Q1434601"}
+    allowed_domains = ["pilotflyingj.com"]
 
-    start_urls = [
-        'https://pilotflyingj.com/umbraco/surface/storelocations/download?Format=csv&PageSize=1000&PageNumber=1'
-    ]
+    start_urls = ["https://locations.pilotflyingj.com/"]
 
     def parse(self, response):
-        for store in csv.DictReader(response.body_as_unicode().splitlines()):
-            yield GeojsonPointItem(
-                lat=store['Latitude'],
-                lon=store['Longitude'],
-                name=store['Name'],
-                addr_full=store['Address'],
-                city=store['City'],
-                state=store['State/Province'],
-                postcode=store['Zip'],
-                country=store['Country'],
-                phone=store['Phone'],
-                ref=store['Store#'],
-                extras={
-                    'amenity:fuel': True,
-                    'fax': store['Fax'],
-                    'fuel:diesel': True,
-                    'fuel:HGV_diesel': True,
-                    'hgv': True,
-                },
-                **self.brand_info(store['Name'])
-            )
+        for href in response.xpath(
+            '//a[@data-ya-track="todirectory" or @data-ya-track="visitpage"]/@href'
+        ).extract():
+            yield scrapy.Request(response.urljoin(href))
+
+        for item in response.xpath('//*[@itemtype="http://schema.org/LocalBusiness"]'):
+            yield from self.parse_store(response, item)
+
+    def parse_store(self, response, item):
+        jsdata = json.loads(
+            item.xpath('.//script[@class="js-map-config"]/text()').get()
+        )
+        store = jsdata["entities"][0]["profile"]
+        properties = {
+            "ref": store["meta"]["id"],
+            "lat": item.xpath('//*[@itemprop="latitude"]/@content').get(),
+            "lon": item.xpath('//*[@itemprop="longitude"]/@content').get(),
+            "name": store["name"],
+            "website": response.url,
+            "addr_full": store["address"]["line1"],
+            "city": store["address"]["city"],
+            "state": store["address"]["region"],
+            "postcode": store["address"]["postalCode"],
+            "country": store["address"]["countryCode"],
+            "phone": store.get("mainPhone", {}).get("number"),
+            "extras": {
+                "fax": store.get("fax", {}).get("number"),
+                "amenity:fuel": True,
+                "fuel:diesel": True,
+                "fuel:HGV_diesel": True,
+                "hgv": True,
+            },
+        }
+        properties.update(self.brand_info(store["name"]))
+        yield GeojsonPointItem(**properties)
 
     def brand_info(self, name):
-        if 'Pilot' in name:
-            return {
-                'brand': 'Pilot',
-                'brand_wikidata': 'Q7194412'
-            }
-        elif 'Flying J' in name:
-            return {
-                'brand': 'Flying J',
-                'brand_wikidata': 'Q16974822'
-            }
+        if "Pilot" in name:
+            return {"brand": "Pilot", "brand_wikidata": "Q7194412"}
+        elif "Flying J" in name:
+            return {"brand": "Flying J", "brand_wikidata": "Q16974822"}
         else:
-            return {
-                'brand': name
-            }
+            return {"brand": name}

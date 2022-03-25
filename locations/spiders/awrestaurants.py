@@ -27,7 +27,10 @@ class AwrestaurantsSpider(scrapy.Spider):
         data = json.loads(script[script.index("{") : 1 + script.rindex("}")])
         store = data["store"]
 
-        hours_text = [s.strip() for s in response.css(".store-header__details-hours ::text").extract()]
+        hours_text = [
+            s.strip()
+            for s in response.css(".store-header__details-hours ::text").extract()
+        ]
         hours = "; ".join(s for s in hours_text if s)
 
         properties = {

@@ -8,23 +8,19 @@ from locations.hours import OpeningHours
 
 class SprintSpider(scrapy.Spider):
     name = "sprint"
-    item_attributes = { 'brand': "Sprint" }
+    item_attributes = {"brand": "Sprint"}
     allowed_domains = ["sprint.com"]
-    start_urls = (
-        'https://www.sprint.com/locations/',
-    )
+    start_urls = ("https://www.sprint.com/locations/",)
 
     def parse_hours(self, store_hours):
         opening_hours = OpeningHours()
 
         for store_day in store_hours:
-            day, open_close = store_day.split(' ')
-            open_time, close_time = open_close.split('-')
-            opening_hours.add_range(day=day,
-                                    open_time=open_time,
-                                    close_time=close_time,
-                                    time_format='%H:%M'
-                                    )
+            day, open_close = store_day.split(" ")
+            open_time, close_time = open_close.split("-")
+            opening_hours.add_range(
+                day=day, open_time=open_time, close_time=close_time, time_format="%H:%M"
+            )
 
         return opening_hours.as_opening_hours()
 
@@ -39,21 +35,24 @@ class SprintSpider(scrapy.Spider):
             yield scrapy.Request(response.urljoin(city_url), callback=self.parse_store)
 
     def parse_store(self, response):
-        data = json.loads(response.xpath(
-            '//script[@type="application/ld+json" and contains(text(), "streetAddress")]/text()').extract_first())
+        data = json.loads(
+            response.xpath(
+                '//script[@type="application/ld+json" and contains(text(), "streetAddress")]/text()'
+            ).extract_first()
+        )
 
         properties = {
-            'name': data["name"],
-            'ref': data["branchCode"],
-            'addr_full': data["address"]["streetAddress"],
-            'city': data["address"]["addressLocality"],
-            'state': data["address"]["addressRegion"],
-            'postcode': data["address"]["postalCode"],
-            'country': data["address"]["addressCountry"],
-            'phone': data.get("telephone"),
-            'website': data.get("url") or response.url,
-            'lat': float(data["geo"]["latitude"]),
-            'lon': float(data["geo"]["longitude"]),
+            "name": data["name"],
+            "ref": data["branchCode"],
+            "addr_full": data["address"]["streetAddress"],
+            "city": data["address"]["addressLocality"],
+            "state": data["address"]["addressRegion"],
+            "postcode": data["address"]["postalCode"],
+            "country": data["address"]["addressCountry"],
+            "phone": data.get("telephone"),
+            "website": data.get("url") or response.url,
+            "lat": float(data["geo"]["latitude"]),
+            "lon": float(data["geo"]["longitude"]),
         }
 
         hours = self.parse_hours(data.get("openingHoursSpecification", []))

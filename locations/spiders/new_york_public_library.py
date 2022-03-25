@@ -13,38 +13,39 @@ DAY_MAPPING = {
     "Thu": "Th",
     "Fri": "Fr",
     "Sat": "Sa",
-    "Sun": "Su"
+    "Sun": "Su",
 }
 
 
 class NewYorkPublicLibrarySpider(scrapy.Spider):
     name = "new_york_public_library"
-    item_attributes = {'brand': 'The New York Public Library'}
-    allowed_domains = ['www.nypl.org']
+    item_attributes = {"brand": "The New York Public Library"}
+    allowed_domains = ["www.nypl.org"]
     start_urls = [
-        'www.nypl.org',
+        "www.nypl.org",
     ]
 
     def start_requests(self):
-        url = 'https://refinery.nypl.org/api/nypl/locations/v1.0/locations'
+        url = "https://refinery.nypl.org/api/nypl/locations/v1.0/locations"
 
-        yield scrapy.http.Request(url, self.parse, method='GET')
+        yield scrapy.http.Request(url, self.parse, method="GET")
 
     def parse_hours(self, location_hours):
         opening_hours = OpeningHours()
         regular_hours = location_hours["regular"]
 
         for week_day in regular_hours:
-            day = DAY_MAPPING[week_day["day"].strip('.')]
+            day = DAY_MAPPING[week_day["day"].strip(".")]
             open_time = week_day["open"]
             close_time = week_day["close"]
 
             if open_time and close_time:
-                opening_hours.add_range(day=day,
-                                        open_time=open_time,
-                                        close_time=close_time,
-                                        time_format='%H:%M'
-                                        )
+                opening_hours.add_range(
+                    day=day,
+                    open_time=open_time,
+                    close_time=close_time,
+                    time_format="%H:%M",
+                )
             else:
                 continue
 
@@ -64,17 +65,18 @@ class NewYorkPublicLibrarySpider(scrapy.Spider):
                 lon = None
 
             properties = {
-                'name': location["name"],
-                'ref': location["id"],
-                'addr_full': location["street_address"],
-                'city': location["locality"],
-                'state': location["region"],
-                'postcode': location["postal_code"],
-                'country': 'US',
-                'phone': location.get("contacts", {}).get("phone"),
-                'website': location.get("_links", {}).get("self", {}).get("about") or response.url,
-                'lat': lat,
-                'lon': lon,
+                "name": location["name"],
+                "ref": location["id"],
+                "addr_full": location["street_address"],
+                "city": location["locality"],
+                "state": location["region"],
+                "postcode": location["postal_code"],
+                "country": "US",
+                "phone": location.get("contacts", {}).get("phone"),
+                "website": location.get("_links", {}).get("self", {}).get("about")
+                or response.url,
+                "lat": lat,
+                "lon": lon,
             }
 
             hours = location.get("hours")

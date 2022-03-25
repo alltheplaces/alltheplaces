@@ -5,6 +5,7 @@ import scrapy
 
 from locations.items import GeojsonPointItem
 
+
 class CaribouCoffeeSpider(scrapy.Spider):
 
     name = "caribou_coffee"
@@ -24,7 +25,11 @@ class CaribouCoffeeSpider(scrapy.Spider):
     def parse_store(self, response):
         main = response.xpath('//h1[@itemprop="name"]/..')
 
-        ref = urllib.parse.parse_qs(urllib.parse.urlparse(response.css('script[src*="storeCode"]').attrib["src"]).query)["storeCode"][0]
+        ref = urllib.parse.parse_qs(
+            urllib.parse.urlparse(
+                response.css('script[src*="storeCode"]').attrib["src"]
+            ).query
+        )["storeCode"][0]
 
         properties = {
             "name": main.xpath('.//*[@itemprop="name"]/text()').get(),
@@ -38,7 +43,8 @@ class CaribouCoffeeSpider(scrapy.Spider):
             "postcode": main.xpath('.//*[@itemprop="postalCode"]/text()').get(),
             "country": main.xpath('.//*[@itemprop="addressCountry"]/text()').get(),
             "phone": main.xpath('.//*[@itemprop="telephone"]/text()').get(),
-            "opening_hours": "; ".join(main.xpath('.//*[@itemprop="openingHours"]/@content').extract()),
+            "opening_hours": "; ".join(
+                main.xpath('.//*[@itemprop="openingHours"]/@content').extract()
+            ),
         }
         yield GeojsonPointItem(**properties)
-

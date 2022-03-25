@@ -6,45 +6,40 @@ from locations.items import GeojsonPointItem
 
 class MercyHealthSpider(scrapy.Spider):
     name = "mercyhealth"
-    item_attributes = {'brand': "Mercy Health"}
+    item_attributes = {"brand": "Mercy Health"}
     allowed_domains = ["www.mercy.com"]
     start_urls = [
-        'https://www.mercy.com/locations',
+        "https://www.mercy.com/locations",
     ]
 
     def start_requests(self):
-        template = 'https://www.mercy.com/api/v1/locations'
+        template = "https://www.mercy.com/api/v1/locations"
 
         headers = {
-            'Accept': 'application/json',
+            "Accept": "application/json",
         }
 
         yield scrapy.http.FormRequest(
-            url=template,
-            method='GET',
-            headers=headers,
-            callback=self.parse
+            url=template, method="GET", headers=headers, callback=self.parse
         )
-
 
     def parse(self, response):
         jsonresponse = json.loads(response.body_as_unicode())
-        for stores in jsonresponse['Results']:
+        for stores in jsonresponse["Results"]:
             store = json.dumps(stores)
             store_data = json.loads(store)
 
             properties = {
-                'name': store_data["Location"]["Name"],
-                'ref': store_data["Location"]["KyruusId"],
-                'addr_full': store_data["Location"]["Address"]["Street1"],
-                'city': store_data["Location"]["Address"]["City"],
-                'state': store_data["Location"]["Address"]["State"],
-                'postcode': store_data["Location"]["Address"]["PostalCode"],
-                'phone': store_data["Location"]["Phone"],
-                'lat': float(store_data["Location"]["Latitude"]),
-                'lon': float(store_data["Location"]["Longitude"]),
-                'website': store_data["Location"]["Link"]
-
+                "name": store_data["Location"]["Name"],
+                "ref": store_data["Location"]["KyruusId"],
+                "addr_full": store_data["Location"]["Address"]["Street1"],
+                "city": store_data["Location"]["Address"]["City"],
+                "state": store_data["Location"]["Address"]["State"],
+                "postcode": store_data["Location"]["Address"]["PostalCode"],
+                "phone": store_data["Location"]["Phone"],
+                "lat": float(store_data["Location"]["Latitude"]),
+                "lon": float(store_data["Location"]["Longitude"]),
+                "website": store_data["Location"]["Link"],
             }
 
             yield GeojsonPointItem(**properties)

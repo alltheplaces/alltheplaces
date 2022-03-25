@@ -7,24 +7,23 @@ from locations.items import GeojsonPointItem
 
 class BankofHawaiiSpider(scrapy.Spider):
     name = "bankofhawaii"
-    item_attributes = {'brand': "Bank of Hawaii"}
+    item_attributes = {"brand": "Bank of Hawaii"}
     allowed_domains = ["boh.com"]
     start_urls = [
-        'https://www.boh.com/locations',
+        "https://www.boh.com/locations",
     ]
 
     def start_requests(self):
-        template = 'https://www.boh.com/get-locations?lat=21.33&lng=-157.845934&radius=25'
+        template = (
+            "https://www.boh.com/get-locations?lat=21.33&lng=-157.845934&radius=25"
+        )
 
         headers = {
-            'Accept': 'application/json',
+            "Accept": "application/json",
         }
 
         yield scrapy.http.FormRequest(
-            url=template,
-            method='GET',
-            headers=headers,
-            callback=self.parse
+            url=template, method="GET", headers=headers, callback=self.parse
         )
 
     def parse(self, response):
@@ -43,19 +42,16 @@ class BankofHawaiiSpider(scrapy.Spider):
                 location_type = "Null"
 
             properties = {
-                'ref': store_data["id"],
-                'name': store_data["displayName"],
-                'addr_full': store_data["address"]["address1"],
-                'city': store_data["address"]["city"],
-                'state': store_data["address"]["state"],
-                'postcode': store_data["address"]["zip"],
-                'country': "US",
-                'lat': float(store_data["geocode"]["latitude"]),
-                'lon': float(store_data["geocode"]["longitude"]),
-                'extras': {
-                    'location_type': location_type
-                }
-
+                "ref": store_data["id"],
+                "name": store_data["displayName"],
+                "addr_full": store_data["address"]["address1"],
+                "city": store_data["address"]["city"],
+                "state": store_data["address"]["state"],
+                "postcode": store_data["address"]["zip"],
+                "country": "US",
+                "lat": float(store_data["geocode"]["latitude"]),
+                "lon": float(store_data["geocode"]["longitude"]),
+                "extras": {"location_type": location_type},
             }
 
             yield GeojsonPointItem(**properties)

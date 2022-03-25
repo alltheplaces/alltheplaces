@@ -10,9 +10,9 @@ from locations.hours import OpeningHours
 
 class CornerBakeryCafeSpider(scrapy.Spider):
     name = "corner_bakery_cafe"
-    allowed_domains = ['cornerbakerycafe.com']
+    allowed_domains = ["cornerbakerycafe.com"]
     start_urls = [
-        'https://cornerbakerycafe.com/locations/all',
+        "https://cornerbakerycafe.com/locations/all",
     ]
 
     def parse(self, response):
@@ -32,40 +32,47 @@ class CornerBakeryCafeSpider(scrapy.Spider):
             if len(days) > 2:
                 day = days.split(",")
                 for d in day:
-                    opening_hours.add_range(day=d,
-                                            open_time=open_hour,
-                                            close_time=close_hour,
-                                            time_format='%H:%M')
+                    opening_hours.add_range(
+                        day=d,
+                        open_time=open_hour,
+                        close_time=close_hour,
+                        time_format="%H:%M",
+                    )
             else:
-                opening_hours.add_range(day=days,
-                                        open_time=open_hour,
-                                        close_time=close_hour,
-                                        time_format='%H:%M')
+                opening_hours.add_range(
+                    day=days,
+                    open_time=open_hour,
+                    close_time=close_hour,
+                    time_format="%H:%M",
+                )
 
         return opening_hours.as_opening_hours()
 
     def parse_store(self, response):
         data = json.loads(
-            response.xpath('//script[@type="application/ld+json"]/text()').extract_first().replace('\r\n', ''))
+            response.xpath('//script[@type="application/ld+json"]/text()')
+            .extract_first()
+            .replace("\r\n", "")
+        )
 
         properties = {
-            'ref': re.search(r'.+/(.+?)/?(?:\.html|$)', response.url).group(1),
-            'name': data["name"],
-            'addr_full': data["address"]["streetAddress"],
-            'city': data["address"]["addressLocality"],
-            'state': data["address"]["addressRegion"],
-            'postcode': data["address"]["postalCode"],
-            'country': data["address"]["addressCountry"],
-            'lat': data["geo"]["latitude"],
-            'lon': data["geo"]["longitude"],
-            'phone': data["telephone"],
-            'website': data["url"]
+            "ref": re.search(r".+/(.+?)/?(?:\.html|$)", response.url).group(1),
+            "name": data["name"],
+            "addr_full": data["address"]["streetAddress"],
+            "city": data["address"]["addressLocality"],
+            "state": data["address"]["addressRegion"],
+            "postcode": data["address"]["postalCode"],
+            "country": data["address"]["addressCountry"],
+            "lat": data["geo"]["latitude"],
+            "lon": data["geo"]["longitude"],
+            "phone": data["telephone"],
+            "website": data["url"],
         }
 
         try:
             hours = self.parse_hours(data["openingHours"])
             if hours:
-                properties['opening_hours'] = hours
+                properties["opening_hours"] = hours
         except:
             pass
 

@@ -15,10 +15,7 @@ class SparkasseSpider(scrapy.Spider):
         for c in "abcdefghijklmnopqrstuvwxyz":
             url = "https://www.sparkasse.de/filialen/{}.html".format(c)
 
-            yield scrapy.http.FormRequest(
-                url=url,
-                callback=self.parse
-            )
+            yield scrapy.http.FormRequest(url=url, callback=self.parse)
 
     def parse_hours(self, store_hours):
         opening_hours = OpeningHours()
@@ -33,43 +30,43 @@ class SparkasseSpider(scrapy.Spider):
                 print("Error in store_day: {}".format(store_day))
 
             if time:
-                (open_time, close_time) = time.split('-')
-                open_time = open_time.replace('24:00', '00:00')
-                close_time = close_time.replace('24:00', '00:00')
+                (open_time, close_time) = time.split("-")
+                open_time = open_time.replace("24:00", "00:00")
+                close_time = close_time.replace("24:00", "00:00")
 
             if open_time is None and close_time is None:
                 continue
-            opening_hours.add_range(day=day,
-                                    open_time=open_time,
-                                    close_time=close_time,
-                                    time_format='%H:%M'
-                                    )
+            opening_hours.add_range(
+                day=day, open_time=open_time, close_time=close_time, time_format="%H:%M"
+            )
 
         return opening_hours.as_opening_hours()
 
     def parse_details(self, response):
-        json_data = response.xpath('//script[@type="application/ld+json"]/text()').getall()
+        json_data = response.xpath(
+            '//script[@type="application/ld+json"]/text()'
+        ).getall()
         if json_data:
             json_data = json_data[0]
         store = json.loads(json_data)
         store = store[0]
         properties = {
-            'lat': store['geo'].get('latitude'),
-            'lon': store['geo'].get('longitude '),
-            'name': store.get('name'),
-            'street': store['address'].get('streetAddress'),
-            'city': store['address'].get('addressLocality'),
-            'postcode': store['address'].get('postalCode'),
-            'phone': store.get('telephone'),
-            'ref': response.meta.get('url'),
-            'extras': {
-                'image': store.get('image'),
-                'fax': store.get('faxNumber'),
-                'email': store.get('email'),
-                'url': response.meta.get('url')
-            }
+            "lat": store["geo"].get("latitude"),
+            "lon": store["geo"].get("longitude "),
+            "name": store.get("name"),
+            "street": store["address"].get("streetAddress"),
+            "city": store["address"].get("addressLocality"),
+            "postcode": store["address"].get("postalCode"),
+            "phone": store.get("telephone"),
+            "ref": response.meta.get("url"),
+            "extras": {
+                "image": store.get("image"),
+                "fax": store.get("faxNumber"),
+                "email": store.get("email"),
+                "url": response.meta.get("url"),
+            },
         }
-        hours = self.parse_hours(store.get('openingHours'))
+        hours = self.parse_hours(store.get("openingHours"))
 
         if hours:
             properties["opening_hours"] = hours
@@ -77,12 +74,12 @@ class SparkasseSpider(scrapy.Spider):
         yield GeojsonPointItem(**properties)
 
     def parse(self, response):
-        links = re.findall(r'<a class="object-link grey-link" href="(.+?)">', response.text)
+        links = re.findall(
+            r'<a class="object-link grey-link" href="(.+?)">', response.text
+        )
         if links:
             for l in links:
                 url = "https://www.sparkasse.de/filialen/{}".format(l)
                 yield scrapy.Request(
-                    url=url,
-                    callback=self.parse_details,
-                    meta={'url': url}
+                    url=url, callback=self.parse_details, meta={"url": url}
                 )
