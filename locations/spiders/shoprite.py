@@ -43,9 +43,7 @@ class ShopriteSpider(scrapy.Spider):
             yield scrapy.FormRequest(url=url, formdata=payload)
 
     def parse(self, response):
-        stores = json.loads(
-            re.search(r"stores: (\[{.*}\])", response.text).groups()[0]
-        )
+        stores = json.loads(re.search(r"stores: (\[{.*}\])", response.text).groups()[0])
         for store in stores:
             store_id = store["PseudoStoreId"]
             addr_1 = response.xpath(

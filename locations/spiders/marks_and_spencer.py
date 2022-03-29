@@ -13,9 +13,7 @@ class MarksAndSpencerSpider(scrapy.Spider):
     )
 
     def parse(self, response):
-        config = json.loads(
-            response.text.replace("STORE_FINDER_CONFIG=", "")
-        )
+        config = json.loads(response.text.replace("STORE_FINDER_CONFIG=", ""))
         stores_api_url = (
             f"{config['storeFinderAPIBaseURL']}?apikey={config['apiConsumerKey']}"
         )

@@ -109,9 +109,7 @@ class McDonaldsMTSpider(scrapy.Spider):
         return phone.strip()
 
     def parse(self, response):
-        match = re.search(
-            r"placeMarkers\(\) {([\s|\S]{0,})}", response.text
-        )
+        match = re.search(r"placeMarkers\(\) {([\s|\S]{0,})}", response.text)
         if not match:
             return
         stores = match.groups()[0]

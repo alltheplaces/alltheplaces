@@ -72,9 +72,7 @@ class McDonalsFRSpider(scrapy.Spider):
         return opening_hours
 
     def parse(self, response):
-        match = re.search(
-            r"(HTTPResponseLoaded\()({.*})(\))", response.text
-        )
+        match = re.search(r"(HTTPResponseLoaded\()({.*})(\))", response.text)
         if not match:
             return
 

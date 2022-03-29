@@ -14,9 +14,7 @@ class AldiESSpider(scrapy.Spider):
     start_urls = ("https://www.aldi.es/encuentra-tu-tienda/",)
 
     def parse(self, response):
-        data = re.search(
-            r"(var dataMap = \{)((.|\s)*?)(}\;)", response.text
-        ).groups()
+        data = re.search(r"(var dataMap = \{)((.|\s)*?)(}\;)", response.text).groups()
         data = re.search(r"(.*)(\[(.|\s)*\])", data[1]).groups()
         last_occurrence = data[1].rfind(",")
         data = '{}"{}":{}{}'.format(

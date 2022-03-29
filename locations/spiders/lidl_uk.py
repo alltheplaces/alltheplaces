@@ -19,9 +19,7 @@ class LidlUKSpider(scrapy.Spider):
 
     def parse(self, response):
         data = json.loads(
-            re.search(
-                r"displayResultStores\((.*)\)", response.text
-            ).groups()[0]
+            re.search(r"displayResultStores\((.*)\)", response.text).groups()[0]
         )
 
         stores = data["d"]["results"]

@@ -125,9 +125,7 @@ class McDonaldsATSpider(scrapy.Spider):
             "lat": response.meta["lat"],
         }
 
-        data = re.finditer(
-            r"<span class=\"label\">.*</span>(.*)</li>", response.text
-        )
+        data = re.finditer(r"<span class=\"label\">.*</span>(.*)</li>", response.text)
         opening_hours = self.store_hours(data)
         if opening_hours:
             properties["opening_hours"] = opening_hours
