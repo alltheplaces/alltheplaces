@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import json
 import re
 
 import scrapy
@@ -28,7 +27,7 @@ class VetcoSpider(scrapy.Spider):
                 yield scrapy.http.Request(url, self.parse, method="GET")
 
     def parse(self, response):
-        jsonresponse = json.loads(response.body_as_unicode())
+        jsonresponse = response.json()
         if jsonresponse is not None:
             clinics = jsonresponse.get("clinics")
             if clinics:

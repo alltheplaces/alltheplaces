@@ -1,4 +1,3 @@
-import json
 import scrapy
 from six.moves.urllib.parse import urlencode
 from locations.items import GeojsonPointItem
@@ -79,7 +78,7 @@ class WawaSpider(scrapy.Spider):
             return times
 
     def parse(self, response):
-        wawa_stores = json.loads(response.body_as_unicode())
+        wawa_stores = response.json()
 
         for loc in wawa_stores["locations"]:
 

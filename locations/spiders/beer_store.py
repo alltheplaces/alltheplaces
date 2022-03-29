@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import scrapy
-import json
 
 from locations.items import GeojsonPointItem
 
@@ -13,7 +12,7 @@ class BeerStoreSpider(scrapy.Spider):
     start_urls = ("http://www.thebeerstore.ca/storelocations.json",)
 
     def parse(self, response):
-        results = json.loads(response.body_as_unicode())
+        results = response.json()
         features = results["features"]
         for data in features:
             description = data["properties"]["description"]

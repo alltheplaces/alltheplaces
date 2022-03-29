@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import json
 import re
 
 import scrapy
@@ -31,7 +30,7 @@ class ErnstYoungSpider(scrapy.Spider):
         return properties
 
     def parse(self, response):
-        data = json.loads(response.body_as_unicode())
+        data = response.json()
 
         for country in data["countries"]:
 

@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import json
 import re
 
 import scrapy
@@ -48,7 +47,7 @@ class GiantEagleSpider(scrapy.Spider):
         page_regex = re.compile(r"skip=(\d+)")
         page = int(page_regex.search(response.url).group(1))
 
-        stores = json.loads(response.body_as_unicode())["Locations"] or []
+        stores = response.json()["Locations"] or []
 
         for store in stores:
             telephone = [

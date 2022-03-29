@@ -30,7 +30,7 @@ class NationalTireBatterySpider(scrapy.Spider):
         return opening_hours.as_opening_hours()
 
     def parse_store(self, response):
-        data = json.loads(response.body_as_unicode())
+        data = response.json()
 
         store = data["output"]["store"]
         properties = {
@@ -52,7 +52,7 @@ class NationalTireBatterySpider(scrapy.Spider):
         yield GeojsonPointItem(**properties)
 
     def parse(self, response):
-        data = json.loads(response.body_as_unicode())
+        data = response.json()
         for store in data["output"]["storeDetailList"]:
             store_number = re.search(r"(\d+)\s-\s.+", store).groups()[0]
             yield scrapy.Request(

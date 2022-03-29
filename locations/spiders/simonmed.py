@@ -1,4 +1,3 @@
-import json
 import scrapy
 import re
 from locations.items import GeojsonPointItem
@@ -28,7 +27,7 @@ class SimonMedSpider(scrapy.Spider):
             return ":".join(hour_min)
 
     def parse(self, response):
-        data = json.loads(response.body_as_unicode())
+        data = response.json()
         for store in data:
             opening_hours = []
 

@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import scrapy
-import json
 import re
 from locations.items import GeojsonPointItem
 
@@ -72,14 +71,14 @@ class FuddruckersSpider(scrapy.Spider):
         )
 
     def parse(self, response):
-        results = json.loads(response.body_as_unicode())
+        results = response.json()
         for i in results["places"]["positions"]["data"]:
             yield scrapy.Request(
                 base_url + i["link"].strip("\\"), callback=self.get_hours
             )
 
     def parse_stores(self, response):
-        results = json.loads(response.body_as_unicode())
+        results = response.json()
         hours = response.meta["hours"]
         for i in results["places"]["positions"]["data"]:
             yield GeojsonPointItem(

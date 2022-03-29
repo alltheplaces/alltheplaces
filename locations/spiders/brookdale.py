@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import scrapy
-import json
 from locations.items import GeojsonPointItem
 
 URL = "https://www.brookdale.com/bin/brookdale/community-search?care_type_category=resident&loc=&finrpt=&state="
@@ -66,7 +65,7 @@ class TemplateSpider(scrapy.Spider):
 
     def parse_info(self, response):
 
-        data = json.loads(response.body_as_unicode())
+        data = response.json()
 
         for row in data:
 

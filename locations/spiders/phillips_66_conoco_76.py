@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import scrapy
-import json
 import urllib
 
 from locations.items import GeojsonPointItem
@@ -23,7 +22,7 @@ class Phillips66Spider(scrapy.Spider):
         yield scrapy.Request(self.base_url, callback=self.get_pages)
 
     def get_pages(self, response):
-        result = json.loads(response.body_as_unicode())
+        result = response.json()
         total_count = int(result["d"]["__count"])
         offset = 0
 
@@ -32,7 +31,7 @@ class Phillips66Spider(scrapy.Spider):
             offset += 250
 
     def parse(self, response):
-        result = json.loads(response.body_as_unicode())
+        result = response.json()
 
         for station in result["d"]["results"]:
             yield GeojsonPointItem(

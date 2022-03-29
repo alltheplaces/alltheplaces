@@ -1,4 +1,3 @@
-import json
 import re
 import scrapy
 from locations.items import GeojsonPointItem
@@ -90,7 +89,7 @@ class McDonaldsDESpider(scrapy.Spider):
         return opening_hours
 
     def parse(self, response):
-        stores = json.loads(response.body_as_unicode())
+        stores = response.json()
         stores = stores["restaurantList"]
         for item in stores:
             store = item["restaurant"]

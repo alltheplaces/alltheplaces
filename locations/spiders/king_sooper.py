@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import scrapy
-import json
 
 from locations.items import GeojsonPointItem
 
@@ -113,7 +112,7 @@ class KingSooperSpider(scrapy.Spider):
         return addr_tags
 
     def parse(self, response):
-        data = json.loads(response.body_as_unicode())
+        data = response.json()
 
         bounding_box = {
             "min_lat": 100,

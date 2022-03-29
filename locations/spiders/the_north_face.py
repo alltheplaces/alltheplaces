@@ -76,7 +76,7 @@ class TheNorthFaceSpider(scrapy.Spider):
         )
 
     def parse(self, response):
-        stores = json.loads(response.body_as_unicode())
+        stores = response.json()
 
         for store in stores["response"]["collection"]:
             state = store["state"]

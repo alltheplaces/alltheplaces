@@ -16,7 +16,7 @@ class KpmgFrSpider(scrapy.Spider):
     ]
 
     def parse(self, response):
-        data = json.loads(response.body_as_unicode())
+        data = response.json()
 
         for place in data["Europe"]["France"]:
             yield scrapy.Request(

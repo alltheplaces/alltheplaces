@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import json
 import re
 
 import scrapy
@@ -49,7 +48,7 @@ class SamsClubSpider(scrapy.Spider):
         return opening_hours.as_opening_hours()
 
     def parse(self, response):
-        data = json.loads(response.body_as_unicode())
+        data = response.json()
 
         for store in data:
             properties = {

@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import json
 import scrapy
 
 from locations.items import GeojsonPointItem
@@ -83,7 +82,7 @@ class DishSpider(scrapy.Spider):
             )
 
     def parse_store(self, response):
-        store_data = json.loads(response.body_as_unicode())
+        store_data = response.json()
 
         for store in store_data:
 

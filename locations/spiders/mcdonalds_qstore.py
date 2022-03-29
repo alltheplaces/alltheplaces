@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import scrapy
 import re
-import json
 from locations.items import GeojsonPointItem
 
 
@@ -79,7 +78,7 @@ class McDonalsQStoreSpider(scrapy.Spider):
         return opening_hours
 
     def parse(self, response):
-        results = json.loads(response.body_as_unicode())
+        results = response.json()
         for data in results:
             properties = {
                 "city": data["store_suburb"],

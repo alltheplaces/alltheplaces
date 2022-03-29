@@ -1,4 +1,3 @@
-import json
 import re
 import scrapy
 from locations.items import GeojsonPointItem
@@ -11,7 +10,7 @@ class SheetzSpider(scrapy.Spider):
     start_urls = ("https://orderz.sheetz.com/sas/store",)
 
     def parse(self, response):
-        stores = json.loads(response.body_as_unicode())
+        stores = response.json()
 
         for store in stores:
             properties = {

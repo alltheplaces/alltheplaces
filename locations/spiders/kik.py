@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import json
 import csv
 
 import scrapy
@@ -28,7 +27,7 @@ class KikSpider(scrapy.Spider):
                     )
 
     def parse(self, response):
-        data = json.loads(response.body_as_unicode())
+        data = response.json()
         for store in data["stores"]:
             country = store["country"]
             properties = {

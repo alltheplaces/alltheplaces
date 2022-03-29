@@ -107,7 +107,7 @@ class KrystalSpider(scrapy.Spider):
         return ";".join(opening_hours)
 
     def parse(self, response):
-        data = json.loads(response.body_as_unicode())
+        data = response.json()
 
         for key, store_infor in data.items():
             if isinstance(store_infor, dict):

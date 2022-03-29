@@ -22,7 +22,7 @@ class MarksAndSpencerSpider(scrapy.Spider):
         yield response.follow(stores_api_url, self.parse_stores)
 
     def parse_stores(self, response):
-        stores = json.loads(response.body_as_unicode())
+        stores = response.json()
         for store in stores["results"]:
             properties = {
                 "ref": store["id"],

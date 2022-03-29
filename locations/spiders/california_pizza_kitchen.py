@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import re
-import json
 import scrapy
 from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
@@ -93,7 +92,7 @@ class cpkSpider(scrapy.Spider):
             yield scrapy.http.Request(base_url + urlencode(params), callback=self.parse)
 
     def parse(self, response):
-        store_data = json.loads(response.body_as_unicode())
+        store_data = response.json()
 
         # States without a store return a dict with a message, otherwise a list of stores as json arrays
         if isinstance(store_data, list):

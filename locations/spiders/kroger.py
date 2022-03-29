@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import json
 import scrapy
 
 from locations.hours import OpeningHours
@@ -51,7 +50,7 @@ class KrogerSpider(scrapy.Spider):
                 yield scrapy.http.Request(url=url, method="GET", callback=self.parse)
 
     def parse(self, response):
-        data = json.loads(response.body_as_unicode())
+        data = response.json()
 
         for store in data["data"]["storeSearch"]["results"]:
             try:

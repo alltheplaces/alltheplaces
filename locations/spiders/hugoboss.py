@@ -25,7 +25,7 @@ class HugoBossSpider(scrapy.Spider):
     count = 0
 
     def parse(self, response):
-        data = json.loads(response.body_as_unicode())
+        data = response.json()
         if "data" in data:
             for store in data["data"]:
                 clean_hours = ""

@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import scrapy
-import json
 import re
 from locations.items import GeojsonPointItem
 
@@ -64,7 +63,7 @@ class BcpizzaSpider(scrapy.Spider):
         return hours
 
     def parse(self, response):
-        results = json.loads(response.body_as_unicode())
+        results = response.json()
         for i in results:
             ref = i["id"]
             street = i["address"]

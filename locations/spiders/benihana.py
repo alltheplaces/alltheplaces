@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import scrapy
 import re
-import json
 from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
 
@@ -20,7 +19,7 @@ class BenihanaSpider(scrapy.Spider):
         yield scrapy.Request("https://www.benihana.com/locations/")
 
     def set_locations(self, response):
-        self.locations = json.loads(response.body_as_unicode())
+        self.locations = response.json()
 
     def parse(self, response):
         urls = response.xpath('//div[@class="location-link"]/a/@href').extract()

@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import json
 import re
 
 import scrapy
@@ -16,7 +15,7 @@ class UclaHealthSpider(scrapy.Spider):
     ]
 
     def parse(self, response):
-        result = json.loads(response.body_as_unicode())
+        result = response.json()
 
         for place in result:
             properties = {

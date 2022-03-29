@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import scrapy
-import json
 import urllib
 
 from locations.items import GeojsonPointItem
@@ -36,7 +35,7 @@ class ChevronSpider(scrapy.Spider):
                 )
 
     def parse(self, response):
-        result = json.loads(response.body_as_unicode())
+        result = response.json()
 
         if int(result["count"]) == 50:
             self.logger.warning(

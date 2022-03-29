@@ -1,4 +1,3 @@
-import json
 import scrapy
 from six.moves.urllib.parse import urlencode
 import re
@@ -85,7 +84,7 @@ class JambaJuiceSpider(scrapy.Spider):
 
     def parse(self, response):
 
-        stores = json.loads(response.body_as_unicode())
+        stores = response.json()
         for store in stores:
             props = {}
             store_info = store.get("store_info", "")

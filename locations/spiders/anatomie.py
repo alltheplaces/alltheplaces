@@ -1,6 +1,5 @@
 import scrapy
 import re
-import json
 import lxml
 from locations.items import GeojsonPointItem
 
@@ -15,7 +14,7 @@ class AnatomieSpider(scrapy.Spider):
     )
 
     def parse(self, response):
-        json_data = json.loads(response.body_as_unicode())
+        json_data = response.json()
         for item in json_data["stores"]:
             address = lxml.html.fromstring(item["summary"])
             properties = {

@@ -1,5 +1,4 @@
 import scrapy
-import json
 from locations.items import GeojsonPointItem
 
 
@@ -42,7 +41,7 @@ class BeerMappingSpider(scrapy.Spider):
 
     def parse(self, response):
         try:
-            results = json.loads(response.body_as_unicode())
+            results = response.json()
         except ValueError:
             return
         results = results["locations"]

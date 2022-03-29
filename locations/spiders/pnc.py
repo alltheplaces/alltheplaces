@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import json
 import scrapy
 
 from locations.items import GeojsonPointItem
@@ -26,7 +25,7 @@ class PncSpider(scrapy.Spider):
                 yield scrapy.Request(url=url, callback=self.parse)
 
     def parse(self, response):
-        data = json.loads(response.body_as_unicode())
+        data = response.json()
         branch_data = data["locations"]
 
         for branch in branch_data:

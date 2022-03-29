@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import scrapy
-import json
 import re
 from locations.items import GeojsonPointItem
 
@@ -100,7 +99,7 @@ class McDonaldsPTSpider(scrapy.Spider):
         return " ".join(match.split())
 
     def parse_store(self, response):
-        stores = json.loads(response.body_as_unicode())
+        stores = response.json()
         for store in stores:
             properties = {
                 "ref": store["id"],

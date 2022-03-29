@@ -39,7 +39,7 @@ class WhiteHouseBlackMarketSpider(scrapy.Spider):
             )
 
     def parse(self, response):
-        jsonresponse = json.loads(response.body_as_unicode())
+        jsonresponse = response.json()
         data = jsonresponse["hits"]
         for stores in data:
             store = json.dumps(stores)

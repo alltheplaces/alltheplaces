@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import io
-import json
 import re
 import zipfile
 

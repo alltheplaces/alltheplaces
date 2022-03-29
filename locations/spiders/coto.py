@@ -13,7 +13,7 @@ class CotoSpider(scrapy.Spider):
     ]
 
     def parse(self, response):
-        results = json.loads(response.body_as_unicode())
+        results = response.json()
         for data in results["results"]:
             ref = data["id_suc"]
             name = "Coto " + data["desc_suc"]

@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import json
 
 import scrapy
 
@@ -15,7 +14,7 @@ class United_surgical_partners_internationalSpider(scrapy.Spider):
     ]
 
     def parse(self, response):
-        data = json.loads(response.body_as_unicode())["rows"]
+        data = response.json()["rows"]
 
         for i, item in enumerate(data):
             if len(item) == 12:

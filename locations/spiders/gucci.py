@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import scrapy
 import re
-import json
 
 from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
@@ -35,7 +34,7 @@ class GucciSpider(scrapy.Spider):
         return opening_hours.as_opening_hours()
 
     def parse(self, response):
-        data = json.loads(response.body_as_unicode())
+        data = response.json()
         stores = data["features"]
 
         for store in stores:

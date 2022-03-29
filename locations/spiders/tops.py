@@ -1,4 +1,3 @@
-import json
 import re
 import scrapy
 from locations.items import GeojsonPointItem
@@ -157,7 +156,7 @@ class TopsSpider(scrapy.Spider):
 
     def parse(self, response):
         try:
-            data = json.loads(response.body_as_unicode())
+            data = response.json()
         except ValueError:
             return
         for item in data:

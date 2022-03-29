@@ -63,7 +63,7 @@ class CitiSpider(scrapy.Spider):
             )
 
     def parse(self, response):
-        data = json.loads(response.body_as_unicode())
+        data = response.json()
 
         for feature in data["features"]:
             postcode = feature["properties"]["postalCode"]

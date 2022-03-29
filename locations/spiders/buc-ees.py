@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import scrapy
-import json
 
 from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
@@ -16,7 +15,7 @@ class BuceesSpider(scrapy.Spider):
     ]
 
     def parse(self, response):
-        for store in json.loads(response.body_as_unicode()):
+        for store in response.json():
             opening_hours = OpeningHours()
 
             hours_table = scrapy.Selector(text=store["hours"])

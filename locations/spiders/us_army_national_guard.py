@@ -1,5 +1,4 @@
 import scrapy
-import json
 from locations.items import GeojsonPointItem
 
 URL = "https://www.nationalguard.com/api/state/"
@@ -73,7 +72,7 @@ class USArmyNationalGuardSpider(scrapy.Spider):
             yield scrapy.Request(url, callback=self.parse_info)
 
     def parse_info(self, response):
-        data = json.loads(response.body_as_unicode())
+        data = response.json()
         for row in data["locations"]:
             properties = {
                 "name": row["name"],

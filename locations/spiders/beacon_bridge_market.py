@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import scrapy
-import json
 import traceback
 
 from locations.items import GeojsonPointItem
@@ -41,7 +40,7 @@ class BeaconAndBridgeSpider(scrapy.Spider):
         )
 
     def parse(self, response):
-        results = json.loads(response.body_as_unicode())
+        results = response.json()
         for data in results["response"]:
             properties = {
                 "ref": data["id"],

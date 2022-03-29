@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import json
 import scrapy
 
 from locations.items import GeojsonPointItem
@@ -37,7 +36,7 @@ class PennyDESpider(scrapy.Spider):
         return opening_hours.as_opening_hours()
 
     def parse(self, response):
-        data = json.loads(response.body_as_unicode())
+        data = response.json()
 
         for store in data["results"]:
             properties = {

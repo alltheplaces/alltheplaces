@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import scrapy
-import json
 
 from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
@@ -45,7 +44,7 @@ class CaptainDSpider(scrapy.Spider):
 
     def parse(self, response):
 
-        stores = json.loads(response.body_as_unicode())
+        stores = response.json()
 
         for store in stores:
             opening_hours = ""

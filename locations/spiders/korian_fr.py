@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import json
 import re
 
 import scrapy
@@ -44,7 +43,7 @@ class KorianFrSpider(scrapy.Spider):
                 yield scrapy.Request(url=url, callback=self.parse)
 
     def parse(self, response):
-        result = json.loads(response.body_as_unicode())
+        result = response.json()
 
         stores = result["data"]["content"][0]["results"]
 

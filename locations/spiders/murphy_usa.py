@@ -75,7 +75,7 @@ class MurphyUSASpider(scrapy.Spider):
             )
 
     def fetch_diesel_stores(self, response):
-        stores = json.loads(response.body_as_unicode()).get("d")
+        stores = response.json().get("d")
 
         if len(stores) > 0:
             query = json.loads(response.request.body)
@@ -90,7 +90,7 @@ class MurphyUSASpider(scrapy.Spider):
 
     def parse(self, response):
         stores = response.meta["stores"]
-        diesel_stores = json.loads(response.body_as_unicode()).get("d")
+        diesel_stores = response.json().get("d")
 
         for store in stores:
             properties = {
@@ -125,7 +125,7 @@ class MurphyUSASpider(scrapy.Spider):
         properties = response.meta["item_properties"]
         opening_hours = OpeningHours()
 
-        details_html = json.loads(response.body_as_unicode()).get("d")
+        details_html = response.json().get("d")
         details = scrapy.Selector(text=details_html)
 
         days = details.css(".hours th::text").getall()

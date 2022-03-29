@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import json
 
 import scrapy
 
@@ -29,7 +28,7 @@ class SocieteGeneraleSpider(scrapy.Spider):
                 yield scrapy.Request(url, callback=self.parse_location)
 
     def parse_location(self, response):
-        data = json.loads(response.body_as_unicode())
+        data = response.json()
         stores = data["markers"]["places"]
         for store in stores:
             properties = {

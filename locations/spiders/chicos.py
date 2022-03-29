@@ -20,7 +20,7 @@ class ChicosSpider(scrapy.Spider):
             yield scrapy.Request(url=url, callback=self.parse)
 
     def parse(self, response):
-        jsonresponse = json.loads(response.body_as_unicode())
+        jsonresponse = response.json()
         locations = jsonresponse["hits"]
         for location in locations:
             location_data = json.dumps(location)

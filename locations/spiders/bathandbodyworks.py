@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import scrapy
 import hashlib
-import json
 import re
 import random
 
@@ -176,7 +175,7 @@ class BathAndBodyWorksSpider(scrapy.Spider):
             yield GeojsonPointItem(**properties)
 
     def parse_us(self, response):
-        results = json.loads(response.body_as_unicode())
+        results = response.json()
         stores = results["stores"]
 
         for store_key in stores:

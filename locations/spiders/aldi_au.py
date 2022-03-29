@@ -14,7 +14,7 @@ class AldiAUSpider(scrapy.Spider):
     )
 
     def parse(self, response):
-        data = json.loads(response.body_as_unicode())
+        data = response.json()
         container = data["Container"]
         stores = self.parse_data(container)
 

@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import scrapy
-import json
 
 from locations.items import GeojsonPointItem
 
@@ -14,7 +13,7 @@ class FiveguysSpider(scrapy.Spider):
     )
 
     def parse(self, response):
-        results = json.loads(response.body_as_unicode())
+        results = response.json()
 
         for store_data in results:
             properties = {

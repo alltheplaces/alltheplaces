@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import json
 
 import scrapy
 
@@ -26,7 +25,7 @@ class VoyageCareSpider(scrapy.Spider):
         )
 
     def parse(self, response):
-        jsondata = json.loads(response.body_as_unicode())
+        jsondata = response.json()
         data = jsondata["body"]
         for store in data:
             properties = {

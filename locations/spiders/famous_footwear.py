@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import json
 
 import scrapy
 
@@ -32,7 +31,7 @@ class FamousFootwearSpider(scrapy.Spider):
                 yield scrapy.http.Request(url + urlencode(params), callback=self.parse)
 
     def parse(self, response):
-        data = json.loads(response.body_as_unicode())
+        data = response.json()
         stores = data["stores"]
 
         for store in stores:

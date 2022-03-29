@@ -34,7 +34,7 @@ class FoodLionSpider(scrapy.Spider):
             )
 
     def parse(self, response):
-        jsonresponse = json.loads(response.body_as_unicode())
+        jsonresponse = response.json()
         stores = json.loads(jsonresponse["result"])
         for store in stores:
             properties = {

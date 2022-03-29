@@ -1,4 +1,3 @@
-import json
 import re
 import scrapy
 from locations.items import GeojsonPointItem
@@ -34,7 +33,7 @@ class SainsburysSpider(scrapy.Spider):
                 yield scrapy.Request(url=url, callback=self.parse)
 
     def parse(self, response):
-        data = json.loads(response.body_as_unicode())
+        data = response.json()
 
         if len(data["results"]) == 0:
             self.state = False

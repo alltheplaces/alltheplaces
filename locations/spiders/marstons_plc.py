@@ -33,7 +33,7 @@ class MarstonsPlcSpider(scrapy.Spider):
         )
 
     def parse_store_ids(self, response):
-        store_ids = json.loads(response.body_as_unicode())
+        store_ids = response.json()
         ids = []
 
         for id in store_ids["markers"]:
@@ -63,7 +63,7 @@ class MarstonsPlcSpider(scrapy.Spider):
         yield scrapy.Request(url, callback=self.parse)
 
     def parse(self, response):
-        data = json.loads(response.body_as_unicode())
+        data = response.json()
         places = data["outlets"]
 
         for place in places:

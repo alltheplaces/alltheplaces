@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import scrapy
-import json
 import re
 
 from locations.items import GeojsonPointItem
@@ -82,7 +81,7 @@ class CookoutSpider(scrapy.Spider):
         return opening_hours
 
     def parse(self, response):
-        data = json.loads(response.body_as_unicode())
+        data = response.json()
 
         for store in data:
             properties = {

@@ -62,7 +62,7 @@ class BJsWholesaleSpider(scrapy.Spider):
         return opening_hours.as_opening_hours()
 
     def parse_store(self, response):
-        data = json.loads(response.body_as_unicode())["Stores"]["PhysicalStore"][0]
+        data = response.json()["Stores"]["PhysicalStore"][0]
 
         properties = {
             "name": data["Description"][0]["displayStoreName"],
@@ -89,7 +89,7 @@ class BJsWholesaleSpider(scrapy.Spider):
         yield GeojsonPointItem(**properties)
 
     def parse(self, response):
-        data = json.loads(response.body_as_unicode())
+        data = response.json()
 
         for state in data["clubLocatorStateTownList"]:
             for town in state["Towns"]:

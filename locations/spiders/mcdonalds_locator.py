@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import scrapy
-import json
 import re
 from locations.items import GeojsonPointItem
 
@@ -102,7 +101,7 @@ class McDonalsLocatorSpider(scrapy.Spider):
         return None
 
     def parse(self, response):
-        results = json.loads(response.body_as_unicode())
+        results = response.json()
         results = results["results"]
         for data in results:
             properties = {

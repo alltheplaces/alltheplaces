@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import json
 
 import scrapy
 
@@ -26,7 +25,7 @@ class FiestaMartSpider(scrapy.Spider):
         )
 
     def parse(self, response):
-        jsonresponse = json.loads(response.body_as_unicode())
+        jsonresponse = response.json()
         for store in jsonresponse:
             properties = {
                 "name": store["StoreName"],

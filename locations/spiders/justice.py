@@ -1,4 +1,3 @@
-import json
 import re
 import scrapy
 from locations.items import GeojsonPointItem
@@ -15,7 +14,7 @@ class JusticeSpider(scrapy.Spider):
     addr2regex = re.compile(r"^([A-Za-z\ \.]+)\, ([A-Z]+) ([0-9]+)$")
 
     def parse(self, response):
-        data = json.loads(response.body_as_unicode())
+        data = response.json()
         stores = data["markers"]
         for store in stores:
             html = HtmlResponse(url="", body=store["info"].encode("UTF-8"))

@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import json
 import re
 
 import scrapy
@@ -49,7 +48,7 @@ class KBPFoodsSpider(scrapy.Spider):
         )
 
     def parse(self, response):
-        brand_data = json.loads(response.body_as_unicode())
+        brand_data = response.json()
 
         url = "https://kbp-foods.com/wp-json/facetwp/v1/refresh"
 
@@ -97,7 +96,7 @@ class KBPFoodsSpider(scrapy.Spider):
                 )
 
     def parse_location(self, response):
-        result = json.loads(response.body_as_unicode())
+        result = response.json()
         meta_brand = response.meta["locations"]
 
         locations = result["settings"].get("map", {}).get("locations", [])

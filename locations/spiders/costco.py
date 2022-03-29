@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import scrapy
-import json
 import re
 from urllib.parse import urlencode
 
@@ -120,7 +119,7 @@ class CostcoSpider(scrapy.Spider):
         return re.sub("[\r\n\t]", "", text).strip()
 
     def parse_ajax(self, response):
-        body = json.loads(response.body_as_unicode())
+        body = response.json()
 
         for store in body[1:]:
             if store["distance"] < 110:

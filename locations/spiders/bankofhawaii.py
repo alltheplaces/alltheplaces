@@ -27,7 +27,7 @@ class BankofHawaiiSpider(scrapy.Spider):
         )
 
     def parse(self, response):
-        jsonresponse = json.loads(response.body_as_unicode())
+        jsonresponse = response.json()
         for stores in jsonresponse["locations"]:
             store = json.dumps(stores)
             store_data = json.loads(store)

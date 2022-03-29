@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import json
 import re
 
 import scrapy
@@ -16,7 +15,7 @@ class CroixRougeFrancaiseSpider(scrapy.Spider):
     ]
 
     def parse(self, response):
-        data = json.loads(response.body_as_unicode())
+        data = response.json()
 
         for feature in data["features"]:
             city_postal = feature["properties"]["address2"]

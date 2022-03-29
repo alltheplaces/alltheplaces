@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import json
 import re
 
 import scrapy
@@ -18,7 +17,7 @@ class CampBowWowSpider(scrapy.Spider):
         yield scrapy.http.Request(url, method="POST", callback=self.parse)
 
     def parse(self, response):
-        data = json.loads(response.body_as_unicode())
+        data = response.json()
 
         for place in data:
             properties = {

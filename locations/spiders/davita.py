@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import json
 import re
 
 import scrapy
@@ -75,7 +74,7 @@ class DavitaSpider(scrapy.Spider):
             yield scrapy.Request(url, callback=self.parse_locations)
 
     def parse_locations(self, response):
-        data = json.loads(response.body_as_unicode())
+        data = response.json()
         for location in data.get("locations", []) or []:
             properties = {
                 "name": location["facilityname"],

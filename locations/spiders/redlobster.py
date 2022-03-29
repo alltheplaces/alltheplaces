@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import scrapy
-import json
 
 from locations.items import GeojsonPointItem
 
@@ -73,7 +72,7 @@ class RedLobsterSpider(scrapy.Spider):
         return opening_hours
 
     def parse(self, response):
-        results = json.loads(response.body_as_unicode())
+        results = response.json()
         for result in results["locations"]:
             location = result["location"]
             properties = {

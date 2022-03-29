@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import json
 import re
 
 import scrapy
@@ -51,7 +50,7 @@ class RicohEuropeSpider(scrapy.Spider):
             yield scrapy.Request(url=url, callback=self.parse)
 
     def parse(self, response):
-        stores = json.loads(response.body_as_unicode())
+        stores = response.json()
 
         for store in stores["Dealers"]:
             self.REF += 1

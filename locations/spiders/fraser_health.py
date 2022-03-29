@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import json
 import re
 
 import scrapy
@@ -56,7 +55,7 @@ class FraserHealthSpider(scrapy.Spider):
         yield GeojsonPointItem(**properties)
 
     def parse(self, response):
-        places = json.loads(response.body_as_unicode())
+        places = response.json()
 
         for place in places["Results"]:
             yield scrapy.Request(

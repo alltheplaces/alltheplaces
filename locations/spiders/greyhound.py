@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import json
 import re
 from urllib.parse import urlencode
 
@@ -25,7 +24,7 @@ class GreyhoundSpider(scrapy.Spider):
     def parse(self, response):
         search_url = "https://locations.greyhound.com/bus-stations/search?"
 
-        locations = json.loads(response.body_as_unicode())
+        locations = response.json()
         for location in locations.values():
             city, state = location.split(", ")
             params = {

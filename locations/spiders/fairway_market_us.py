@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import json
 import re
 
 import scrapy
@@ -51,7 +50,7 @@ class FairwayMarketUSSpider(scrapy.Spider):
         return opening_hours.as_opening_hours()
 
     def parse(self, response):
-        stores = json.loads(response.body_as_unicode())
+        stores = response.json()
 
         for store in stores["data"]:
             addr = re.search(r"^(.*?),", store["location"]["address"]).groups()[0]

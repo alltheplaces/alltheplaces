@@ -23,7 +23,7 @@ class kruidvatSpider(scrapy.Spider):
         )
 
     def parse(self, response):
-        data = json.loads(response.body_as_unicode())
+        data = response.json()
         for store_data in data["stores"]:
             stores = json.dumps(store_data)
             store = json.loads(stores)

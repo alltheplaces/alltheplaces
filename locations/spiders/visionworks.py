@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import json
 
 import scrapy
 
@@ -22,7 +21,7 @@ class VisionWorksSpider(scrapy.Spider):
     }
 
     def parse_store(self, response):
-        data = json.loads(response.body_as_unicode())
+        data = response.json()
         store_data = data[0]["store_info"]
 
         properties = {

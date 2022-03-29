@@ -1,6 +1,5 @@
 import scrapy
 from locations.items import GeojsonPointItem
-import json
 import re
 from io import StringIO
 from scrapy.http import HtmlResponse
@@ -79,7 +78,7 @@ class SuperCutsScraper(scrapy.Spider):
                 )
 
     def parse_result(self, response, trunk={}):
-        result = json.loads(response.body_as_unicode())
+        result = response.json()
         if result.get("name"):
             name = "Supercuts " + result["name"].title()
             yield GeojsonPointItem(
