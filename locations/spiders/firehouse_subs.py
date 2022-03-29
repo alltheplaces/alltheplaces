@@ -47,7 +47,7 @@ class FirehouseSubsSpider(scrapy.Spider):
                 )
 
     def parse(self, response):
-        body = response.body_as_unicode()
+        body = response.text
         if body is None:
             return
 

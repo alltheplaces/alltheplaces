@@ -44,7 +44,7 @@ class ShopriteSpider(scrapy.Spider):
 
     def parse(self, response):
         stores = json.loads(
-            re.search(r"stores: (\[{.*}\])", response.body_as_unicode()).groups()[0]
+            re.search(r"stores: (\[{.*}\])", response.text).groups()[0]
         )
         for store in stores:
             store_id = store["PseudoStoreId"]

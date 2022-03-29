@@ -24,7 +24,7 @@ class CandaPostSpider(scrapy.Spider):
     )
 
     def parse(self, response):
-        pdata = json.dumps(response.body_as_unicode())
+        pdata = json.dumps(response.text)
         postids = re.findall('(00.+?)\\\\"]', pdata)
 
         url = "https://www.canadapost.ca/cpotools/apps/fpo/personal/findPostOfficeDetail?outletId={}"

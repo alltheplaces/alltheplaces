@@ -78,7 +78,7 @@ class QuiznosSpider(scrapy.Spider):
         return opening_hours
 
     def parse(self, response):
-        data = response.body_as_unicode()
+        data = response.text
         stores = json.loads(re.search("qd_locations = (.*);", data).group(1))
 
         for store in stores:

@@ -41,7 +41,7 @@ class McDonaldsGTSpider(scrapy.Spider):
         return match.groups()[1]
 
     def parse(self, response):
-        stores = response.body_as_unicode().split("|")
+        stores = response.text.split("|")
         index = 0
         for item in stores:
             lat, lon = self.parse_latlon(item)

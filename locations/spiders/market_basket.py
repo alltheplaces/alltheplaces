@@ -49,7 +49,7 @@ class MarketBasketSpider(scrapy.Spider):
 
     def parse_stores(self, response):
         map_data = re.findall(
-            r"pois\":\[{\"point\":{\"lat\":[^}]+", response.body_as_unicode()
+            r"pois\":\[{\"point\":{\"lat\":[^}]+", response.text
         )
         if len(map_data) == 0:
             return

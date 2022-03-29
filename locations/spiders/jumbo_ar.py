@@ -24,7 +24,7 @@ class JumboArgentinaSpider(scrapy.Spider):
         )
 
     def parse(self, response):
-        result = response.body_as_unicode().replace("\\", "")
+        result = response.text.replace("\\", "")
         result = result[:5] + result[6:-2] + result[-1:]
         data = json.loads(result)
         ref = 0

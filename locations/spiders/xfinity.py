@@ -136,7 +136,7 @@ class XfinitySpider(scrapy.Spider):
         return opening_hours
 
     def parse(self, response):
-        data = response.body_as_unicode()
+        data = response.text
         stores = json.loads(data)["locations"]
 
         for store in stores:

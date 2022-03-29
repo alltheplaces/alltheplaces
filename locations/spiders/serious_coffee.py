@@ -93,7 +93,7 @@ class SeriousCoffeeSpider(scrapy.Spider):
                 + " "
                 + address_list[1].split(",")[1].lstrip().split(" ")[3].strip()
             )
-        page_content = response.body_as_unicode()
+        page_content = response.text
         latitude = re.findall("var latitude = [^(;)]+", page_content)
         if len(latitude) > 0:
             latitude = float(latitude[0][15:])

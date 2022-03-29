@@ -110,7 +110,7 @@ class McDonaldsMTSpider(scrapy.Spider):
 
     def parse(self, response):
         match = re.search(
-            r"placeMarkers\(\) {([\s|\S]{0,})}", response.body_as_unicode()
+            r"placeMarkers\(\) {([\s|\S]{0,})}", response.text
         )
         if not match:
             return

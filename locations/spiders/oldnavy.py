@@ -94,7 +94,7 @@ class OldNavySpider(scrapy.Spider):
             )
 
     def parse_store(self, response):
-        json_str = response.body_as_unicode()
+        json_str = response.text
         store = json.loads(json_str)["storeLocations"]["storeLocationList"]
         store_addr = store["storeAddress"]
         addr1 = store_addr["addressLine1"]

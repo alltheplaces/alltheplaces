@@ -92,7 +92,7 @@ class GapSpider(scrapy.Spider):
             )
 
     def parse_store(self, response):
-        json_str = response.body_as_unicode()
+        json_str = response.text
         store = json.loads(json_str)["storeLocations"]["storeLocationList"]
         self.logger.info("store %s" % str(store))
         store_addr = store["storeAddress"]

@@ -23,7 +23,7 @@ class ShoneysSpider(scrapy.Spider):
     )
 
     def parse(self, response):
-        body = response.body_as_unicode()[6:-1]
+        body = response.text[6:-1]
         data = json.loads(body)
         stores = data["mapRS"]
         properties = {}

@@ -13,7 +13,7 @@ class ArgosSpider(scrapy.Spider):
     start_urls = ("http://www.argos.co.uk/stores/",)
 
     def parse_stores(self, response):
-        data = re.findall(r"window.INITIAL_STATE =[^<]+", response.body_as_unicode())
+        data = re.findall(r"window.INITIAL_STATE =[^<]+", response.text)
         json_data = json.loads(data[0].replace("window.INITIAL_STATE =", ""))
         properties = {
             "addr_full": json_data["store"]["store"]["address"],

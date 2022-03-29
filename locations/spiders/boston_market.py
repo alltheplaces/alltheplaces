@@ -121,7 +121,7 @@ class BostonMarketSpider(scrapy.Spider):
         return opening_hours
 
     def parse(self, response):
-        json_str = response.body_as_unicode()
+        json_str = response.text
         data = json.loads(json_str)["locations"]
 
         for store in data:

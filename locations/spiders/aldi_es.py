@@ -15,7 +15,7 @@ class AldiESSpider(scrapy.Spider):
 
     def parse(self, response):
         data = re.search(
-            r"(var dataMap = \{)((.|\s)*?)(}\;)", response.body_as_unicode()
+            r"(var dataMap = \{)((.|\s)*?)(}\;)", response.text
         ).groups()
         data = re.search(r"(.*)(\[(.|\s)*\])", data[1]).groups()
         last_occurrence = data[1].rfind(",")

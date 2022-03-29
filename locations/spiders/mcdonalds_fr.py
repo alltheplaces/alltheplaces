@@ -73,7 +73,7 @@ class McDonalsFRSpider(scrapy.Spider):
 
     def parse(self, response):
         match = re.search(
-            r"(HTTPResponseLoaded\()({.*})(\))", response.body_as_unicode()
+            r"(HTTPResponseLoaded\()({.*})(\))", response.text
         )
         if not match:
             return

@@ -10,7 +10,7 @@ class MarathonScraper(scrapy.Spider):
     start_urls = ["https://marathon.shotgunflat.com/data.txt"]
 
     def parse(self, response):
-        for row in response.body_as_unicode().split("|`,"):
+        for row in response.text.split("|`,"):
             if row == "":
                 continue
 

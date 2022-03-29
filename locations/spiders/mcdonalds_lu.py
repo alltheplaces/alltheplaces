@@ -91,7 +91,7 @@ class McDonaldsLUSpider(scrapy.Spider):
         return " ".join(match.split())
 
     def parse_store(self, response):
-        data = response.body_as_unicode()
+        data = response.text
 
         name = self.parse_name(data)
         address = self.parse_address(data)
@@ -112,7 +112,7 @@ class McDonaldsLUSpider(scrapy.Spider):
         yield GeojsonPointItem(**properties)
 
     def parse(self, response):
-        matches = re.finditer(r"<a id=\"snav_(1.*)\">", response.body_as_unicode())
+        matches = re.finditer(r"<a id=\"snav_(1.*)\">", response.text)
         for matchNum, match in enumerate(matches):
             ref = match.groups()[0]
             yield scrapy.Request(

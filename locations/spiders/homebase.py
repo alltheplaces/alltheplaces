@@ -15,7 +15,7 @@ class ArgosSpider(scrapy.Spider):
     def parse_stores(self, response):
         data = re.findall(
             r"var com_bunnings_locations_mapLocations = [^;]+",
-            response.body_as_unicode(),
+            response.text,
         )
         json_data = json.loads(
             data[0].replace("var com_bunnings_locations_mapLocations = ", "")

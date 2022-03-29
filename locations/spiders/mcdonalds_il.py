@@ -98,7 +98,7 @@ class McDonalsILSpider(scrapy.Spider):
         return address.strip()
 
     def parse_store(self, response):
-        data = response.body_as_unicode()
+        data = response.text
         name = self.parse_name(response)
         address = self.parse_address(response)
         phone = self.parse_phone(response)

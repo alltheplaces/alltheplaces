@@ -49,7 +49,7 @@ class CharleysPhillySteaksSpider(scrapy.Spider):
         return opening_hours.as_opening_hours()
 
     def parse(self, response):
-        for row in csv.DictReader(response.body_as_unicode().splitlines()):
+        for row in csv.DictReader(response.text.splitlines()):
             properties = {
                 "ref": row["store_id"],
                 "name": row["store_name"],

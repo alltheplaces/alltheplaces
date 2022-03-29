@@ -126,7 +126,7 @@ class McDonaldsATSpider(scrapy.Spider):
         }
 
         data = re.finditer(
-            r"<span class=\"label\">.*</span>(.*)</li>", response.body_as_unicode()
+            r"<span class=\"label\">.*</span>(.*)</li>", response.text
         )
         opening_hours = self.store_hours(data)
         if opening_hours:
@@ -136,7 +136,7 @@ class McDonaldsATSpider(scrapy.Spider):
 
     def parse(self, response):
         try:
-            match = re.search(r"\"markers\":(\[.*\])", response.body_as_unicode())
+            match = re.search(r"\"markers\":(\[.*\])", response.text)
             data = json.loads(match.groups()[0])
         except ValueError:
             return

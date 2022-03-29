@@ -59,7 +59,7 @@ class McDonaldsEGSpider(scrapy.Spider):
         return name, address, phone
 
     def parse(self, response):
-        match = re.search(r"var locS = (\[.*\])\;", response.body_as_unicode())
+        match = re.search(r"var locS = (\[.*\])\;", response.text)
         results = json.loads(match.groups()[0])
         index = 0
         for data in results:

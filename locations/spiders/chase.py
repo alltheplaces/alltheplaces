@@ -27,7 +27,7 @@ class ChaseSpider(scrapy.Spider):
     def parse(self, response):
 
         regex = re.compile(r"https://locator.chase.com/\w+/\S+(?=</loc>)")
-        urls = re.findall(regex, response.body_as_unicode())
+        urls = re.findall(regex, response.text)
 
         for path in urls:
             path = html.unescape(path)

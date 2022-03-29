@@ -14,7 +14,7 @@ class ChromeIndustriesSpider(scrapy.Spider):
     )
 
     def parse(self, response):
-        json_data = json.loads(response.body_as_unicode().replace("null", '""'))
+        json_data = json.loads(response.text.replace("null", '""'))
         for item in json_data["locations"]:
             properties = {
                 "addr_full": item["address"] + " " + item["address2"],

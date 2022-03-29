@@ -71,7 +71,7 @@ class WellsFargoSpider(scrapy.Spider):
             )
 
     def parse_state(self, response):
-        data = json.loads(response.body_as_unicode().strip().split("\n")[2])
+        data = json.loads(response.text.strip().split("\n")[2])
         for city in data["allCities"]:
             yield scrapy.Request(
                 "https://www.wellsfargo.com/locator/search/?searchTxt={},+{}&mlflg=N&il=EN&bo=1".format(

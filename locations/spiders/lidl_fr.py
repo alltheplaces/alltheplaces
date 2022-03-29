@@ -20,7 +20,7 @@ class LidlFRSpider(scrapy.Spider):
     def parse(self, response):
         data = json.loads(
             re.search(
-                r"displayResultStores\((.*)\)", response.body_as_unicode()
+                r"displayResultStores\((.*)\)", response.text
             ).groups()[0]
         )
 

@@ -17,12 +17,12 @@ class ArcoSpider(scrapy.Spider):
 
     def parse(self, response):
         if response.url == self.start_urls[0]:
-            match = re.search("var csv_url = '(.*)'", response.body_as_unicode())
+            match = re.search("var csv_url = '(.*)'", response.text)
             assert match.group(1)
 
             yield scrapy.Request(f"https://www.arco.com{match.group(1)}")
         else:
-            for station in csv.DictReader(response.body_as_unicode().splitlines()):
+            for station in csv.DictReader(response.text.splitlines()):
                 yield GeojsonPointItem(
                     lat=station["Lat"],
                     lon=station["Lng"],
