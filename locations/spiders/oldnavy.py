@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import scrapy
-import json
 import re
 from datetime import date
 
@@ -94,8 +93,7 @@ class OldNavySpider(scrapy.Spider):
             )
 
     def parse_store(self, response):
-        json_str = response.text
-        store = json.loads(json_str)["storeLocations"]["storeLocationList"]
+        store = response.json()["storeLocations"]["storeLocationList"]
         store_addr = store["storeAddress"]
         addr1 = store_addr["addressLine1"]
         (num, street) = (addr1, addr1)

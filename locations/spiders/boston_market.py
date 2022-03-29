@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import scrapy
-import json
 
 from locations.items import GeojsonPointItem
 
@@ -121,8 +120,7 @@ class BostonMarketSpider(scrapy.Spider):
         return opening_hours
 
     def parse(self, response):
-        json_str = response.text
-        data = json.loads(json_str)["locations"]
+        data = response.json()["locations"]
 
         for store in data:
             store_details = store["bing"]

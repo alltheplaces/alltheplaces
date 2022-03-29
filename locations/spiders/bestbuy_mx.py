@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import scrapy
-import json
 import re
 from datetime import date
 from urllib.parse import urlparse, parse_qsl
@@ -77,8 +76,7 @@ class BestBuyMexicoSpider(scrapy.Spider):
         return opening_hours
 
     def parse(self, response):
-        json_str = response.text
-        data = json.loads(json_str)["data"]["stores"]
+        data = response.json()["data"]["stores"]
 
         bounding_box = {
             "min_lat": 100,
