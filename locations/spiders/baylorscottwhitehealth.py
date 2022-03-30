@@ -1,4 +1,3 @@
-import json
 import scrapy
 from locations.items import GeojsonPointItem
 
@@ -27,7 +26,7 @@ class BaylorScottWhiteSpider(scrapy.Spider):
         )
 
     def parse(self, response):
-        ldata = json.loads(response.body_as_unicode())
+        ldata = response.json()
 
         ldata = ldata["locationResults"]
 

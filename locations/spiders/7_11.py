@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import scrapy
-import json
 import re
 
 from locations.items import GeojsonPointItem
@@ -50,7 +49,7 @@ class SevenElevenSpider(scrapy.Spider):
         )
 
     def fetch_stores(self, response):
-        auth = json.loads(response.body_as_unicode())
+        auth = response.json()
         HEADERS.update({"Authorization": "Bearer cvrL4po6pXlnjzd7lrQRQ3iAbzDf9L"})
 
         yield scrapy.Request(
@@ -59,7 +58,7 @@ class SevenElevenSpider(scrapy.Spider):
         )
 
     def parse(self, response):
-        data = json.loads(response.body_as_unicode())
+        data = response.json()
 
         for store in data["results"]:
             features = store["features"]

@@ -12,7 +12,7 @@ class MerrillLynchSpider(scrapy.Spider):
 
     def parse_branch(self, response):
 
-        data = json.loads(response.body_as_unicode())
+        data = response.json()
 
         for location in data["Results"]:
             properties = {

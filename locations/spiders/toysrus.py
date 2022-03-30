@@ -51,7 +51,7 @@ class ToysRUsSpider(scrapy.Spider):
 
     def parse(self, response):
         marker_txt = re.findall(
-            re.compile(r"markerData.*\}", re.MULTILINE), response.body_as_unicode()
+            re.compile(r"markerData.*\}", re.MULTILINE), response.text
         )
         if not len(marker_txt):
             return

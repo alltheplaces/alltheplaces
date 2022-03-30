@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import scrapy
 from locations.items import GeojsonPointItem
-import json
 
 
 class EdekaSpider(scrapy.Spider):
@@ -25,7 +24,7 @@ class EdekaSpider(scrapy.Spider):
         )  # The request body contains the coordinates past the edges of Germany. Gets all the stores in Germany
 
     def parse(self, response):
-        store_data = json.loads(response.body_as_unicode())["response"]["docs"]
+        store_data = response.json()["response"]["docs"]
 
         for store in store_data:
             properties = {

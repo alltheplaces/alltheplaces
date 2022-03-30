@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import json
 import re
 
 import scrapy
@@ -17,7 +16,7 @@ class LidlUSSpider(scrapy.Spider):
     ]
 
     def parse(self, response):
-        data = json.loads(response.body_as_unicode())
+        data = response.json()
 
         for store in data["results"]:
             properties = {

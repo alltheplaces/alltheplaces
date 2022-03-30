@@ -13,7 +13,7 @@ class WilcoFarmSpider(scrapy.Spider):
 
     def parse(self, response):
         pattern = r"(var markers=\[)(.*?)(\]\;)"
-        data = re.search(pattern, response.body_as_unicode(), re.MULTILINE).group(2)
+        data = re.search(pattern, response.text, re.MULTILINE).group(2)
         data = json.loads("[" + data + "]")
         for item in data:
             properties = {

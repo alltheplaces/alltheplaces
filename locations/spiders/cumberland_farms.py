@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import scrapy
-import json
 
 from locations.items import GeojsonPointItem
 
@@ -13,7 +12,7 @@ class CumberlandFarmsSpider(scrapy.Spider):
     start_urls = ["https://www.cumberlandfarms.com/storedata/getstoredatabylocation"]
 
     def parse(self, response):
-        for store in json.loads(response.body_as_unicode()):
+        for store in response.json():
             if "StoreId" not in store:
                 continue
 

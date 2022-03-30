@@ -48,9 +48,7 @@ class MarketBasketSpider(scrapy.Spider):
         return "; ".join(hours)
 
     def parse_stores(self, response):
-        map_data = re.findall(
-            r"pois\":\[{\"point\":{\"lat\":[^}]+", response.body_as_unicode()
-        )
+        map_data = re.findall(r"pois\":\[{\"point\":{\"lat\":[^}]+", response.text)
         if len(map_data) == 0:
             return
         location = re.findall(r"[-.0-9]+", map_data[0])

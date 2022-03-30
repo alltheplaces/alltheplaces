@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import scrapy
-import json
 from locations.items import GeojsonPointItem
 
 
@@ -13,7 +12,7 @@ class VeaSpider(scrapy.Spider):
 
     def parse(self, response):
 
-        store_list = json.loads(response.body_as_unicode())
+        store_list = response.json()
         for store in store_list:
             properties = {
                 "name": store["descripcion"],

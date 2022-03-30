@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import scrapy
-import json
 
 from locations.items import GeojsonPointItem
 
@@ -24,7 +23,7 @@ class AramarkSpider(scrapy.Spider):
 
     def parse(self, response):
         base_url = "https://www.aramarkuniform.com"
-        jsonresponse = json.loads(response.body_as_unicode())
+        jsonresponse = response.json()
         stores = jsonresponse["results"]
         for store in stores:
             try:

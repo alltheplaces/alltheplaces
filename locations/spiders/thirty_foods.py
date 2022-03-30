@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import scrapy
-import json
 import re
 
 from locations.items import GeojsonPointItem
@@ -53,7 +52,7 @@ class ThirtyFoodsSpider(scrapy.Spider):
             return store_hours[:2] + " " + hours
 
     def parse(self, response):
-        results = json.loads(response.body_as_unicode())
+        results = response.json()
         for store in results["Data"]:
             properties = {
                 "ref": store["Number"],

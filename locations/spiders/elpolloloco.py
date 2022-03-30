@@ -1,5 +1,4 @@
 import scrapy
-import json
 from locations.items import GeojsonPointItem
 
 
@@ -21,7 +20,7 @@ class ElPolloLocoSpider(scrapy.Spider):
         )
 
     def parse(self, response):
-        store_data = json.loads(response.body_as_unicode())
+        store_data = response.json()
         for store in store_data:
             try:
                 properties = {

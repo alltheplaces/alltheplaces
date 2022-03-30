@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import scrapy
 import re
-import json
 from locations.items import GeojsonPointItem
 
 
@@ -18,7 +17,7 @@ class PremierurgentcareSpider(scrapy.Spider):
     )
 
     def parse(self, response):
-        jsonresponse = json.loads(response.body_as_unicode())
+        jsonresponse = response.json()
 
         for store in jsonresponse:
             addr_full = (

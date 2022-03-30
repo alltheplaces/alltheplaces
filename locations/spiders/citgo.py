@@ -34,7 +34,7 @@ class CitgoSpider(scrapy.Spider):
             )
         else:
             # The first character of the response is `s`; after that it's JSON
-            result = json.loads(response.body_as_unicode()[1:])
+            result = json.loads(response.text[1:])
 
             for location in result["Locations"]:
                 opening_hours = OpeningHours()

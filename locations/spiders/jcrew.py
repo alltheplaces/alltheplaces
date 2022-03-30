@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import json
 import re
 import datetime
 
@@ -64,7 +63,7 @@ class JcrewSpider(scrapy.Spider):
         return "; ".join(o_hours)
 
     def parse(self, response):
-        data = json.loads(response.body_as_unicode())
+        data = response.json()
 
         brand = None
         if re.search(r"stores.(.\w+)", response.url).groups()[0] == "factory":

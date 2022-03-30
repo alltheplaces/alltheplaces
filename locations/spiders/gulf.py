@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import scrapy
-import json
 
 from locations.items import GeojsonPointItem
 
@@ -16,7 +15,7 @@ class GulfSpider(scrapy.Spider):
 
     def parse(self, response):
         page = response.meta.get("page", 0)
-        json_result = json.loads(response.body_as_unicode())
+        json_result = response.json()
         html_result = json_result[-1]["data"]
         results = scrapy.Selector(text=html_result)
 

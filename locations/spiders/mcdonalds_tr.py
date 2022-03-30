@@ -57,7 +57,7 @@ class McDonaldsTRSpider(scrapy.Spider):
         return "Mo-Su " + start + ":" + end
 
     def parse(self, response):
-        results = json.loads(response.body_as_unicode())
+        results = response.json()
         results = results["d"]
         for data in results:
             properties = {

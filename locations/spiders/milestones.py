@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import json
 import re
 
 import scrapy
@@ -17,7 +16,7 @@ class MilestonesSpider(scrapy.Spider):
     ]
 
     def parse(self, response):
-        places = json.loads(response.body_as_unicode())
+        places = response.json()
 
         for place in places["feed"]["entry"]:
             properties = {

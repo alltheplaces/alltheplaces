@@ -33,7 +33,7 @@ class OldChicagoSpider(scrapy.Spider):
             )
 
     def parse(self, response):
-        response_json = json.loads(response.body_as_unicode())
+        response_json = response.json()
         stores = response_json[0]["payload"]["data"]["viewer"][self.query_name]["edges"]
         for loc in stores:
             node = loc["node"]

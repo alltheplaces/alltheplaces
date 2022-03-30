@@ -1,4 +1,3 @@
-import json
 import re
 import scrapy
 from locations.items import GeojsonPointItem
@@ -14,7 +13,7 @@ class ConcentraSpider(scrapy.Spider):
     )
 
     def parse(self, response):
-        data = json.loads(response.body_as_unicode())
+        data = response.json()
         stores = data["Results"]
         for store in stores:
             url = "https://www.concentra.com{}".format(store["Url"])

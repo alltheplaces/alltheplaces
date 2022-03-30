@@ -16,7 +16,7 @@ class SimonMallsSpider(scrapy.Spider):
         base_url = "https://www.simon.com/mall/"
 
         # build store urls
-        jsonresponse = json.loads(response.body_as_unicode())
+        jsonresponse = response.json()
         for stores in jsonresponse:
             store = json.dumps(stores)
             store_data = json.loads(store)

@@ -36,7 +36,7 @@ class McLocalizer(scrapy.Spider):
     )
 
     def parse(self, response):
-        data = response.body_as_unicode()
+        data = response.text
         data.replace('" ', '"')
         data.replace(' "', '"')
         results = json.loads(data)

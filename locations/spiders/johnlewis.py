@@ -12,7 +12,7 @@ class JohnLewisSpider(scrapy.Spider):
     start_urls = ("https://www.johnlewis.com/our-shops",)
 
     def parse_stores(self, response):
-        location = re.findall(r"[;?]ll=[^(&)]+", response.body_as_unicode())
+        location = re.findall(r"[;?]ll=[^(&)]+", response.text)
         addr_full = response.xpath(
             '//div[@class="cq-shop-info"]/p[1]/text()|//div[@id="cq-shop-info"]/p[1]/text()|//div[@id="cq-full-width"]/div[@class="cq-content"]/div/p[@class="shop-address"]/text()'
         ).extract()

@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import scrapy
-import json
 
 from locations.items import GeojsonPointItem
 
@@ -15,7 +14,7 @@ class ShellSpider(scrapy.Spider):
     ]
 
     def parse(self, response):
-        result = json.loads(response.body_as_unicode())
+        result = response.json()
 
         if isinstance(result, list):
             for item in result:

@@ -120,7 +120,7 @@ class LAFitnessSpider(scrapy.Spider):
         yield GeojsonPointItem(**properties)
 
     def parse(self, response):
-        locations = json.loads(response.body_as_unicode())["d"]
+        locations = response.json()["d"]
 
         for location in locations:
 

@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import scrapy
 import re
-import json
 from locations.items import GeojsonPointItem
 
 
@@ -110,9 +109,7 @@ class McDonaldsMTSpider(scrapy.Spider):
         return phone.strip()
 
     def parse(self, response):
-        match = re.search(
-            r"placeMarkers\(\) {([\s|\S]{0,})}", response.body_as_unicode()
-        )
+        match = re.search(r"placeMarkers\(\) {([\s|\S]{0,})}", response.text)
         if not match:
             return
         stores = match.groups()[0]

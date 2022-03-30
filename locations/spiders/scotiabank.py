@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import csv
-import json
 import math
 import re
 
@@ -66,7 +65,7 @@ class ScotiabankSpider(scrapy.Spider):
         return opening_hours.as_opening_hours()
 
     def parse(self, response):
-        data = json.loads(response.body_as_unicode())
+        data = response.json()
         branches = (data["branchInfo"] or {}).get("marker", [])
         if branches:
             if data["branchCount"] == 20:

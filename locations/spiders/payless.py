@@ -1,6 +1,5 @@
 import scrapy
 from locations.items import GeojsonPointItem
-import json
 
 
 class PaylessSpider(scrapy.Spider):
@@ -41,7 +40,7 @@ class PaylessSpider(scrapy.Spider):
         return "; ".join(out)
 
     def parse(self, response):
-        stores = json.loads(response.body_as_unicode())
+        stores = response.json()
         for store in stores["stores"].values():
             street = "{} {}".format(store["address1"], store["address2"]).strip()
             has_house_number = store["address1"].split(" ")[0].isnumeric()

@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import scrapy
-import json
 from locations.hours import OpeningHours
 from locations.items import GeojsonPointItem
 
@@ -61,7 +60,7 @@ class ArdeneSpider(scrapy.Spider):
         return opening_hours.as_opening_hours()
 
     def parse_store(self, response):
-        store_data = json.loads(response.body_as_unicode())
+        store_data = response.json()
 
         for store in store_data:
 

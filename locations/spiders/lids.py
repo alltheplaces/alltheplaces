@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import scrapy
 from locations.items import GeojsonPointItem
-import json
 from locations.hours import OpeningHours
 import datetime
 
@@ -63,7 +62,7 @@ class LidsSpider(scrapy.Spider):
         return opening_hours.as_opening_hours()
 
     def parse(self, response):
-        ldata = json.loads(response.body_as_unicode())
+        ldata = response.json()
 
         for row in ldata:
 

@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import json
 import re
 
 import scrapy
@@ -101,7 +100,7 @@ class CalvinKleinSpider(scrapy.Spider):
         )
 
     def parse_au(self, response):
-        data = json.loads(response.body_as_unicode())
+        data = response.json()
 
         for store in data:
             properties = {
@@ -120,7 +119,7 @@ class CalvinKleinSpider(scrapy.Spider):
             yield GeojsonPointItem(**properties)
 
     def parse_europe(self, response):
-        data = json.loads(response.body_as_unicode())
+        data = response.json()
 
         for store in data["PhysicalStore"]:
             try:

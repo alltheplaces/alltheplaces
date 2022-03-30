@@ -41,7 +41,7 @@ class LittleCaesarsSpider(scrapy.Spider):
                 )
 
     def parse(self, response):
-        body = response.body_as_unicode()
+        body = response.text
         if not body:
             return
 
@@ -64,7 +64,7 @@ class LittleCaesarsSpider(scrapy.Spider):
             )
 
     def parse_store(self, response):
-        body = response.body_as_unicode()
+        body = response.text
         if not body:
             return
 

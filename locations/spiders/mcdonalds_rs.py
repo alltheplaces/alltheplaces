@@ -32,9 +32,7 @@ class McDonaldsRSSpider(scrapy.Spider):
 
     def parse(self, response):
         try:
-            match = re.search(
-                r"var locations = (.*)</script>", response.body_as_unicode()
-            )
+            match = re.search(r"var locations = (.*)</script>", response.text)
             data = json.loads(match.groups()[0])
         except ValueError:
             return

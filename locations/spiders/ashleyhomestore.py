@@ -110,7 +110,7 @@ class AshleyHomeStoreSpider(scrapy.Spider):
     def parse_ca_store(self, response):
         properties = response.meta["properties"]
 
-        data = json.loads(response.body_as_unicode())["data"]
+        data = response.json()["data"]
         hours = (
             scrapy.Selector(text=data).xpath('//span[@class="hours"]/text()').extract()
         )

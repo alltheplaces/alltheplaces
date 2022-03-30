@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import scrapy
-import json
 
 from locations.items import GeojsonPointItem
 
@@ -25,7 +24,7 @@ class PortillosSpider(scrapy.Spider):
         )
 
     def parse_locations(self, response):
-        data = json.loads(response.body_as_unicode())
+        data = response.json()
 
         for location in data["locations"]:
             yield scrapy.Request(
@@ -35,7 +34,7 @@ class PortillosSpider(scrapy.Spider):
             )
 
     def parse_store(self, response):
-        store_data = json.loads(response.body_as_unicode())["location"]
+        store_data = response.json()["location"]
 
         properties = {
             "phone": store_data["Phone"],

@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import json
 from urllib.parse import urlencode
 
 import scrapy
@@ -65,7 +64,7 @@ class TMobileUSSpider(scrapy.Spider):
                 yield scrapy.http.Request(url + urlencode(params), callback=self.parse)
 
     def parse(self, response):
-        data = json.loads(response.body_as_unicode())
+        data = response.json()
 
         for store in data:
             properties = {

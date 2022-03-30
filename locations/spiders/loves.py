@@ -36,7 +36,7 @@ class LovesSpider(scrapy.Spider):
         )
 
     def parse(self, response):
-        stores = json.loads(response.body_as_unicode())
+        stores = response.json()
         for store in stores[0]["Points"]:
             yield GeojsonPointItem(
                 name=store["Name"],

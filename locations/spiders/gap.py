@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import scrapy
-import json
 import re
 from datetime import date
 
@@ -92,8 +91,7 @@ class GapSpider(scrapy.Spider):
             )
 
     def parse_store(self, response):
-        json_str = response.body_as_unicode()
-        store = json.loads(json_str)["storeLocations"]["storeLocationList"]
+        store = response.json()["storeLocations"]["storeLocationList"]
         self.logger.info("store %s" % str(store))
         store_addr = store["storeAddress"]
         self.logger.info("store_addr %s" % store_addr)

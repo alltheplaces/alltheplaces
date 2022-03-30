@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import scrapy
-import json
 import re
 from locations.hours import OpeningHours
 from locations.items import GeojsonPointItem
@@ -106,7 +105,7 @@ class ChickFilASpider(scrapy.Spider):
         return opening_hours.as_opening_hours()
 
     def parse(self, response):
-        stores = json.loads(response.body_as_unicode())
+        stores = response.json()
 
         stores = stores["response"]["entities"]
 

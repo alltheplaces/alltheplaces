@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import json
 import scrapy
 from xml.etree import ElementTree as ET
 from scrapy import Selector

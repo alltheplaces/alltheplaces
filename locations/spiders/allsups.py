@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import json
 import re
 
 import scrapy
@@ -16,7 +15,7 @@ class AllsupsSpider(scrapy.Spider):
     ]
 
     def parse(self, response):
-        stores = json.loads(response.body_as_unicode())
+        stores = response.json()
 
         for store in stores:
             properties = {

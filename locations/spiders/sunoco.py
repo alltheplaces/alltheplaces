@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import scrapy
-import json
 
 from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
@@ -14,7 +13,7 @@ class SunocoSpider(scrapy.Spider):
     start_urls = ["https://www.sunoco.com/js/locations.json"]
 
     def parse(self, response):
-        for location in json.loads(response.body_as_unicode()):
+        for location in response.json():
             opening_hours = OpeningHours()
 
             for key, val in location.items():

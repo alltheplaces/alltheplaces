@@ -1,6 +1,5 @@
 import scrapy
 import re
-import json
 from locations.items import GeojsonPointItem
 
 DAYS = {
@@ -44,7 +43,7 @@ class MorrisonsSpider(scrapy.Spider):
         return clean_time
 
     def parse_stores(self, response):
-        data = json.loads(response.body_as_unicode())
+        data = response.json()
         address = (
             data["address"]["addressLine1"]
             + " "

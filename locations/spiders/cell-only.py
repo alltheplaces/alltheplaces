@@ -1,4 +1,3 @@
-import json
 import re
 import scrapy
 from locations.items import GeojsonPointItem
@@ -88,7 +87,7 @@ class CellOnlySpider(scrapy.Spider):
             )
 
     def parse(self, response):
-        data = json.loads(response.body_as_unicode())
+        data = response.json()
         stores = data["response"]
         for store in stores:
             properties = {

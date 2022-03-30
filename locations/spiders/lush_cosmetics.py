@@ -1,6 +1,5 @@
 import scrapy
 from locations.items import GeojsonPointItem
-import json
 
 
 class LushSpider(scrapy.Spider):
@@ -14,7 +13,7 @@ class LushSpider(scrapy.Spider):
     ]
 
     def parse(self, response):
-        results = json.loads(response.body_as_unicode())
+        results = response.json()
         for i in results["stores"]:
             yield GeojsonPointItem(
                 ref=i["ID"],

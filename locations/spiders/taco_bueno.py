@@ -2,7 +2,6 @@
 import scrapy
 from locations.items import GeojsonPointItem
 import re
-import json
 
 regex_am = r"\s?([Aa][Mm])"
 regex_pm = r"\s?([Pp][Mm])"
@@ -113,7 +112,7 @@ class TacobuenoSpider(scrapy.Spider):
         return converted_times
 
     def parse(self, response):
-        results = json.loads(response.body_as_unicode())
+        results = response.json()
         if results:
             for i in results:
                 ref = i["storeid"]

@@ -1,4 +1,3 @@
-import json
 import re
 import scrapy
 from locations.items import GeojsonPointItem
@@ -47,7 +46,7 @@ class McDonaldsMYSpider(scrapy.Spider):
         return address, city, state, postalCode
 
     def parse(self, response):
-        stores = json.loads(response.body_as_unicode())
+        stores = response.json()
         stores = stores["stores"]
         index = 0
         for item in stores:

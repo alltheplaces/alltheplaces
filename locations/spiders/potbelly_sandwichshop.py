@@ -17,7 +17,7 @@ class PotbellySandwichSpider(scrapy.Spider):
     )
 
     def parse(self, response):
-        results = response.body_as_unicode()
+        results = response.text
         locations = json.loads(results)
 
         for data in locations:

@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import scrapy
 import re
-import json
 from locations.items import GeojsonPointItem
 
 
@@ -84,7 +83,7 @@ class McDonaldsFISpider(scrapy.Spider):
         return opening_hours
 
     def parse(self, response):
-        results = json.loads(response.body_as_unicode())
+        results = response.json()
         results = results["features"]
         for data in results:
             properties = {

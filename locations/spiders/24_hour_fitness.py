@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import scrapy
-import json
 from locations.items import GeojsonPointItem
 
 
@@ -32,7 +31,7 @@ class TwentyFourHourFitnessSpider(scrapy.Spider):
         )
 
     def parse(self, response):
-        result = json.loads(response.body_as_unicode())
+        result = response.json()
 
         if "clubs" in result.keys():
             for club in result.get("clubs"):

@@ -2,7 +2,6 @@
 import scrapy
 from locations.items import GeojsonPointItem
 from urllib.parse import urlencode
-import json
 import csv
 from locations.hours import OpeningHours
 from scrapy.selector import Selector
@@ -58,7 +57,7 @@ class SallySpider(scrapy.Spider):
         return opening_hours.as_opening_hours()
 
     def parse(self, response):
-        jdata = json.loads(response.body_as_unicode())
+        jdata = response.json()
 
         for row in jdata.get("stores", []):
 

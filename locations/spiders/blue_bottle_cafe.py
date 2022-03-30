@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import scrapy
-import json
 from locations.items import GeojsonPointItem
 
 
@@ -14,7 +13,7 @@ class BlueBottleCafeSpider(scrapy.Spider):
     )
 
     def parse(self, response):
-        results = json.loads(response.body_as_unicode())
+        results = response.json()
         for region_name in results["cafes"]:
             for store_data in results["cafes"][region_name]:
 

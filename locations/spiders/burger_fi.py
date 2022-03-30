@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import scrapy
-import json
 import re
 
 from locations.items import GeojsonPointItem
@@ -21,7 +20,7 @@ class BurgerFiSpider(scrapy.Spider):
         yield scrapy.Request(url=url, headers=HEADERS, callback=self.parse)
 
     def parse(self, response):
-        data = json.loads(response.body_as_unicode())
+        data = response.json()
 
         for store in data["restaurants"]:
             addr_full = "{}, {}, {} {}".format(

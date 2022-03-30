@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import scrapy
-import json
 from locations.items import GeojsonPointItem
 
 
@@ -40,7 +39,7 @@ class CenexSpider(scrapy.Spider):
         )
 
     def parse(self, response):
-        result = json.loads(response.body_as_unicode())
+        result = response.json()
 
         for store in result["SearchResponse"]["Locations"]:
             amenities = "|".join([a["Name"] for a in store["Amenities"]])

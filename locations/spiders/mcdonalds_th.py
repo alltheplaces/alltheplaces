@@ -1,4 +1,3 @@
-import json
 import re
 import scrapy
 from locations.items import GeojsonPointItem
@@ -35,7 +34,7 @@ class McDonaldsTHSpider(scrapy.Spider):
         return "Mo-Su:" + "{}-{}".format(start, end)
 
     def parse(self, response):
-        stores = json.loads(response.body_as_unicode())
+        stores = response.json()
         for data in stores:
             properties = {
                 "ref": data["id"],

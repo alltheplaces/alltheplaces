@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import scrapy
-import json
 
 from locations.items import GeojsonPointItem
 
@@ -22,7 +21,7 @@ class EnterpriseSpider(scrapy.Spider):
                 )
 
     def parse_country(self, response):
-        data = json.loads(response.body_as_unicode())
+        data = response.json()
         if data:
             for d in data:
                 properties = {

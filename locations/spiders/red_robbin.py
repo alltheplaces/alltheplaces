@@ -63,7 +63,7 @@ class RedRobinSpider(scrapy.Spider):
         return opening_hours.as_opening_hours()
 
     def parse(self, response):
-        results = json.loads(response.body_as_unicode())
+        results = response.json()
         for place in results["data"]["restaurants"]["byGeolocation"]:
             properties = {
                 "ref": place["restaurant"]["id"],

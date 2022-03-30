@@ -201,7 +201,7 @@ class HiltonSpider(scrapy.Spider):
     def parse_tapestry_hotel(self, response):
         """Parse Tapestry hotel page"""
         properties = response.meta["properties"]
-        data = json.loads(response.body_as_unicode())
+        data = response.json()
 
         if not data["data"].get("hotel"):
             return

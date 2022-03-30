@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import csv
 import datetime
-import json
 
 import scrapy
 
@@ -87,7 +86,7 @@ class Tjx_CaSpider(scrapy.Spider):
         return opening_hours.as_opening_hours()
 
     def parse(self, response):
-        data = json.loads(response.body_as_unicode())
+        data = response.json()
 
         for store in data["Stores"]:
             properties = {

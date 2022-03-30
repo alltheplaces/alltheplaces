@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import scrapy
 from locations.items import GeojsonPointItem
-import json
 
 
 class SupervaluSpider(scrapy.Spider):
@@ -14,7 +13,7 @@ class SupervaluSpider(scrapy.Spider):
         yield scrapy.Request(url, callback=self.parse)
 
     def parse(self, response):
-        stores = json.loads(response.body_as_unicode())
+        stores = response.json()
         for store in stores:
             hours = self.hours(store["hours"])
             yield GeojsonPointItem(

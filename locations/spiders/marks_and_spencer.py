@@ -13,16 +13,14 @@ class MarksAndSpencerSpider(scrapy.Spider):
     )
 
     def parse(self, response):
-        config = json.loads(
-            response.body_as_unicode().replace("STORE_FINDER_CONFIG=", "")
-        )
+        config = json.loads(response.text.replace("STORE_FINDER_CONFIG=", ""))
         stores_api_url = (
             f"{config['storeFinderAPIBaseURL']}?apikey={config['apiConsumerKey']}"
         )
         yield response.follow(stores_api_url, self.parse_stores)
 
     def parse_stores(self, response):
-        stores = json.loads(response.body_as_unicode())
+        stores = response.json()
         for store in stores["results"]:
             properties = {
                 "ref": store["id"],

@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import json
 import re
 
 import scrapy
@@ -18,14 +17,14 @@ class HarveysSpider(scrapy.Spider):
 
     def parse(self, response):
         base_url = "https://aws-api.harveys.ca/CaraAPI/servlet/VESBCmdServlet?application=VECOMV1&service=OrganizationService&command=getStoreList&reqJSON=%7B%22request%22%3A%7B%22requestHeader%22%3A%7B%22caller%22%3A%22Mobile%22%2C%22sessionId%22%3A%22{session_id}%22%7D%2C%22requestContent%22%3A%7B%22@class%22%3A%22storeListRqstModel%22%2C%22eCommOnly%22%3A%22N%22%2C%22fromLatitude%22%3A90.0000%2C%22toLatitude%22%3A0.00000%2C%22fromLongitude%22%3A-180.0000%2C%22toLongitude%22%3A-1.56301%7D%7D%7D"
-        info = json.loads(response.body_as_unicode())
+        info = response.json()
         session_id = info["response"]["responseContent"]["veSessionID"]
 
         url = base_url.format(session_id=session_id)
         yield scrapy.Request(url=url, callback=self.parse_places)
 
     def parse_places(self, response):
-        places = json.loads(response.body_as_unicode())
+        places = response.json()
 
         for place in places["response"]["responseContent"]["storeModel"]:
             properties = {

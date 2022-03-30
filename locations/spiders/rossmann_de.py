@@ -1,5 +1,4 @@
 import scrapy
-import json
 
 from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
@@ -44,7 +43,7 @@ class RossmannDeSpider(scrapy.Spider):
         return opening_hours.as_opening_hours()
 
     def parse(self, response):
-        stores = json.loads(response.body_as_unicode())
+        stores = response.json()
         for store in stores:
             properties = {
                 "lat": stores[store]["lat"],

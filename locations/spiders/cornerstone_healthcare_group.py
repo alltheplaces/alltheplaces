@@ -1,5 +1,3 @@
-import json
-
 import scrapy
 
 from locations.items import GeojsonPointItem
@@ -14,7 +12,7 @@ class Cornerstone_healthcare_groupSpider(scrapy.Spider):
     ]
 
     def parse(self, response):
-        data = json.loads(response.body_as_unicode())
+        data = response.json()
 
         for i, item in enumerate(data):
             properties = {

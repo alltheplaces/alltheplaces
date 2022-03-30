@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import scrapy
-import json
 from locations.items import GeojsonPointItem
 
 brand_lookup = {"MS": "Motel 6", "SS": "Studio 6", "HS": "Hotel 6"}
@@ -12,7 +11,7 @@ class Motel6Spider(scrapy.Spider):
     start_urls = ("https://www.motel6.com/content/g6-cache/property-summary.1.json",)
 
     def parse(self, response):
-        idata = json.loads(response.body_as_unicode())
+        idata = response.json()
         url = "https://www.motel6.com/bin/g6/propertydata.{}.json"
 
         for storeid in idata.keys():
@@ -27,7 +26,7 @@ class Motel6Spider(scrapy.Spider):
                 continue
 
     def parse_hotel(self, response):
-        mdata = json.loads(response.body_as_unicode())
+        mdata = response.json()
 
         properties = {
             "ref": mdata["property_id"],

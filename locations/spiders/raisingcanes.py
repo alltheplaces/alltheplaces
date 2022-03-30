@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import scrapy
-import json
 
 
 from locations.items import GeojsonPointItem
@@ -25,7 +24,7 @@ class RasingCanes(scrapy.Spider):
                 yield scrapy.Request(url=url, callback=self.parse)
 
     def parse(self, response):
-        data = json.loads(response.body_as_unicode())
+        data = response.json()
         store_data = data["response"]
 
         for store in store_data:

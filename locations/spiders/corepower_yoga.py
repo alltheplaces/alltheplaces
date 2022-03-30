@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import scrapy
-import json
 from locations.items import GeojsonPointItem
 
 
@@ -11,7 +10,7 @@ class CorePowerYogaSpider(scrapy.Spider):
     start_urls = ("https://www.corepoweryoga.com/data/all-locations",)
 
     def parse(self, response):
-        results = json.loads(response.body_as_unicode())
+        results = response.json()
         for index, data in results.items():
             if index != "pager" and data["field_comp_studio"] != "Not Yet Open":
                 properties = {

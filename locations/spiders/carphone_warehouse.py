@@ -1,4 +1,3 @@
-import json
 import re
 import scrapy
 from locations.items import GeojsonPointItem
@@ -31,7 +30,7 @@ class CarphoneWarehouseSpider(scrapy.Spider):
         yield scrapy.Request(url=url, callback=self.parse)
 
     def parse(self, response):
-        data = json.loads(response.body_as_unicode())
+        data = response.json()
         for key, value in data.items():
             if "AddressLine" in value:
                 addr_full = value["AddressLine"].split(",")

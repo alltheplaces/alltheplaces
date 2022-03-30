@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import scrapy
-import json
 import re
 from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
@@ -72,7 +71,7 @@ class PigglyWigglySpider(scrapy.Spider):
         )
 
     def parse_wi(self, response):
-        data = json.loads(response.body_as_unicode())
+        data = response.json()
         stores = data["stores"]
         for store in stores:
             properties = {

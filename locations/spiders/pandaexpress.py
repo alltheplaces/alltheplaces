@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import scrapy
 from scrapy.http import Request
-import json
 from locations.items import GeojsonPointItem
 
 
@@ -31,7 +30,7 @@ class PandaSpider(scrapy.Spider):
             yield Request(state_url, callback=self.parseState)
 
     def parseState(self, response):
-        state_data = json.loads(response.body_as_unicode())
+        state_data = response.json()
 
         for store in state_data["List"]:
             properties = {

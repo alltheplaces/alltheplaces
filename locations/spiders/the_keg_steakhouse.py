@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import json
 import re
 import datetime
 
@@ -47,7 +46,7 @@ class TheKegSteakhouseSpider(scrapy.Spider):
         return opening_hours.as_opening_hours()
 
     def parse(self, response):
-        places = json.loads(response.body_as_unicode())
+        places = response.json()
 
         for place in places:
             properties = {

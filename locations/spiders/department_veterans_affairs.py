@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import scrapy
-import json
 import datetime
 import re
 from locations.items import GeojsonPointItem
@@ -62,7 +61,7 @@ class VeteransAffairsSpider(scrapy.Spider):
         return o.as_opening_hours()
 
     def parse_info(self, response):
-        data = json.loads(response.body_as_unicode())
+        data = response.json()
 
         data = data["data"]
 

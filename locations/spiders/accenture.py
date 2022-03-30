@@ -83,7 +83,7 @@ class AccentureSpider(scrapy.Spider):
             )
 
     def parse(self, response):
-        jsonresponse = json.loads(response.body_as_unicode())
+        jsonresponse = response.json()
         data = jsonresponse["documents"]
 
         for stores in data:

@@ -1,4 +1,3 @@
-import json
 import re
 import scrapy
 from locations.items import GeojsonPointItem
@@ -113,7 +112,7 @@ class SaveOnFoodsSpider(scrapy.Spider):
         return "; ".join(opening_hours)
 
     def parse(self, response):
-        data = json.loads(response.body_as_unicode())
+        data = response.json()
         for item in data["Stores"]:
             store = item["Sections"][0]
             store_properties = {

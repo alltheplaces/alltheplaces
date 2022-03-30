@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import json
 import scrapy
 
 from locations.items import GeojsonPointItem
@@ -30,7 +29,7 @@ class GamestopSpider(scrapy.Spider):
         # data = [items]
 
         # load list into json object for parsing
-        jsondata = json.loads(response.body_as_unicode())
+        jsondata = response.json()
 
         # iterate items
         for item in jsondata["d"]["results"]:

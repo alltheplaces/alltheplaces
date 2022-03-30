@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import json
 import scrapy
 
 from locations.items import GeojsonPointItem
@@ -31,7 +30,7 @@ class NationalSpider(scrapy.Spider):
         )
 
     def parse(self, response):
-        loc_data = json.loads(response.body_as_unicode())
+        loc_data = response.json()
 
         for loc in loc_data:
 

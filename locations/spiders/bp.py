@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import scrapy
-import json
 
 from locations.items import GeojsonPointItem
 
@@ -19,7 +18,7 @@ class BPSpider(scrapy.Spider):
     ]
 
     def parse(self, response):
-        for result in json.loads(response.body_as_unicode()):
+        for result in response.json():
             # This within_bounds endpoint always returns an array with one of
             # two kinds of response.
             #

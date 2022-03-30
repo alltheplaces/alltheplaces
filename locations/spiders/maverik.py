@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import scrapy
-import json
 from locations.items import GeojsonPointItem
 
 
@@ -18,12 +17,12 @@ class MaverikSpider(scrapy.Spider):
         yield scrapy.Request(
             "https://gateway.maverik.com/ac-loc/location/fuel/all",
             headers={"APP-ID": "PAYX"},
-            meta=json.loads(response.body_as_unicode()),
+            meta=response.json(),
         )
 
     def parse(self, response):
         locations = response.meta["locations"]
-        fuels = json.loads(response.body_as_unicode())
+        fuels = response.json()
 
         for location in locations:
             address = location["address"]

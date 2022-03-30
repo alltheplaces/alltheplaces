@@ -1,4 +1,3 @@
-import json
 import re
 import scrapy
 from locations.items import GeojsonPointItem
@@ -32,7 +31,7 @@ class KristoilSpider(scrapy.Spider):
 
     def parse(self, response):
         phoneregex = re.compile(r"^<a.+>([0-9\-]+)<\/a>$")
-        stores = json.loads(response.body_as_unicode())
+        stores = response.json()
         for key, value in stores.items():
             all_address = value["address"].split(",")
             len_address = len(all_address)

@@ -1,4 +1,3 @@
-import json
 import re
 import scrapy
 from locations.items import GeojsonPointItem
@@ -81,7 +80,7 @@ class JackInTheBoxSpider(scrapy.Spider):
         return opening_hours
 
     def parse(self, response):
-        stores = json.loads(response.body_as_unicode())["Locations"]
+        stores = response.json()["Locations"]
         for store in stores:
             address = store["Address"]
             properties = {

@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import json
 import csv
 
 import scrapy
@@ -27,7 +26,7 @@ class McDonaldsNLSpider(scrapy.Spider):
                     )
 
     def parse(self, response):
-        data = json.loads(response.body_as_unicode())
+        data = response.json()
         for store in data["features"]:
             properties = {
                 "ref": store["properties"]["id"],

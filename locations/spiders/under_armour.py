@@ -72,7 +72,7 @@ class UnderArmourSpider(scrapy.Spider):
         )
 
     def parse(self, response):
-        data = json.loads(response.body_as_unicode())
+        data = response.json()
 
         for store in data["response"]["collection"]:
             properties = {
