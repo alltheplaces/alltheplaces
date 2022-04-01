@@ -16,7 +16,9 @@ class AdvanceautopartsSpider(scrapy.Spider):
 
     def parse(self, response):
         response.selector.remove_namespaces()
-        urls = response.xpath("//loc/text()").getall()
+        for sitemap in response.xpath("//sitemap/loc/text()").extract():
+            yield scrapy.Request(sitemap)
+        urls = response.xpath("//url/loc/text()").extract()
         storeRe = re.compile(r"^https://stores.advanceautoparts.com/[^/]+/[^/]+/[^/]+$")
         for url in urls:
             if storeRe.fullmatch(url):
