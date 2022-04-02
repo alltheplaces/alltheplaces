@@ -21,7 +21,7 @@ class AdvanceautopartsSpider(scrapy.Spider):
         urls = response.xpath("//url/loc/text()").extract()
         storeRe = re.compile(r"^https://stores.advanceautoparts.com/[^/]+/[^/]+/[^/]+$")
         for url in urls:
-            if not url.starswith(
+            if not url.startswith(
                 "https://stores.advanceautoparts.com/es"
             ) and storeRe.fullmatch(url):
                 yield scrapy.Request(url, callback=self.parse_store)
