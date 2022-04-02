@@ -17,8 +17,7 @@ class SmilebrandsSpider(scrapy.Spider):
     ]
 
     def parse(self, response):
-        data = json.loads(json.dumps(response.json()))
-        for place in data:
+        for place in response.json():
             properties = {
                 'name': place['store'],
                 'ref': place['address'],
@@ -31,4 +30,5 @@ class SmilebrandsSpider(scrapy.Spider):
                 'lon': place['lng'],
                 'website': place['url'],
             }
+
             yield GeojsonPointItem(**properties)
