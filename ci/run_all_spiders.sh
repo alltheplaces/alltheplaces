@@ -127,14 +127,14 @@ if [ ! $retval -eq 0 ]; then
     exit 1
 fi
 
-jq --compact-output \
+jq -n --compact-output \
     --arg run_id "${RUN_TIMESTAMP}" \
     --arg run_output_url "${RUN_URL_PREFIX}/output.tar.gz" \
     --arg run_stats_url "${RUN_URL_PREFIX}/stats/_results.json" \
     --arg run_start_time "${RUN_START}" \
     --arg run_output_size "${OUTPUT_FILESIZE}" \
     --arg run_spider_count "${SPIDER_COUNT}" \
-    '{"run_id": $run_id, "output_url": $run_output_url, "stats_url": $run_stats_url, "start_time": $run_start_time, "size_bytes": $run_output_size | tonumber, "spiders": run_spider_count | tonumber}' \
+    '{"run_id": $run_id, "output_url": $run_output_url, "stats_url": $run_stats_url, "start_time": $run_start_time, "size_bytes": $run_output_size | tonumber, "spiders": $run_spider_count | tonumber}' \
     > latest.json
 
 aws s3 cp \
