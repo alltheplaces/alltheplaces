@@ -73,14 +73,19 @@ do
         error_count="0"
     fi
 
-    echo "Spider ${spider} has ${feature_count} features, ${error_count} errors"
+    elapsed_time=$(jq --raw-output '.elapsed_time_seconds' "${statistics_json}")
+    retval=$?
+    if [ ! $retval -eq 0 ] || [ "${error_count}" == "null" ]; then
+        elapsed_time="0"
+    fi
 
     # use JQ to create an overall results JSON
     jq --compact-output \
         --arg spider_name "${spider}" \
         --arg spider_feature_count ${feature_count} \
         --arg spider_error_count ${error_count} \
-        '.results += [{"spider": $spider_name, "errors": $spider_error_count | tonumber, "features": $spider_feature_count | tonumber}]' \
+        --arg spider_elapsed_time ${elapsed_time} \
+        '.results += [{"spider": $spider_name, "errors": $spider_error_count | tonumber, "features": $spider_feature_count | tonumber, "elapsed_time": $spider_elapsed_time | tonumber}]' \
         "${SPIDER_RUN_DIR}/stats/_results.json" > "${SPIDER_RUN_DIR}/stats/_results.json.tmp"
     mv "${SPIDER_RUN_DIR}/stats/_results.json.tmp" "${SPIDER_RUN_DIR}/stats/_results.json"
 done
@@ -134,7 +139,8 @@ jq -n --compact-output \
     --arg run_start_time "${RUN_START}" \
     --arg run_output_size "${OUTPUT_FILESIZE}" \
     --arg run_spider_count "${SPIDER_COUNT}" \
-    '{"run_id": $run_id, "output_url": $run_output_url, "stats_url": $run_stats_url, "start_time": $run_start_time, "size_bytes": $run_output_size | tonumber, "spiders": $run_spider_count | tonumber}' \
+    --arg run_line_count "${OUTPUT_LINECOUNT}" \
+    '{"run_id": $run_id, "output_url": $run_output_url, "stats_url": $run_stats_url, "start_time": $run_start_time, "size_bytes": $run_output_size | tonumber, "spiders": $run_spider_count | tonumber, "total_lines": $run_line_count | tonumber }' \
     > latest.json
 
 aws s3 cp \
