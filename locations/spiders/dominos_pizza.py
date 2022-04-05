@@ -46,8 +46,8 @@ class DominosPizzaSpider(scrapy.Spider):
 
         for url in urls:
             # store urls follow this pattern:
-            # url must be 3 segments (state/city/address) and the last one cannot be a postalcode only
-            if re.match(r"^https://pizza.dominos.com/.*?/.*?/(?!(\d{5}/)).*?/$", url):
+            # url must be 3 segments (state/city/address) and the last one cannot be a postalcode only or the words "chicken", "pasta", or "sandwiches".
+            if re.match(r"^https://pizza.dominos.com/.*?/.*?/.*-.*?/$", url):
                 yield scrapy.Request(url, callback=self.parse_place)
 
     def parse(self, response):
