@@ -75,7 +75,7 @@ do
 
     elapsed_time=$(jq --raw-output '.elapsed_time_seconds' "${statistics_json}")
     retval=$?
-    if [ ! $retval -eq 0 ] || [ "${error_count}" == "null" ]; then
+    if [ ! $retval -eq 0 ] || [ "${elapsed_time}" == "null" ]; then
         elapsed_time="0"
     fi
 
@@ -110,7 +110,7 @@ if [ ! $retval -eq 0 ]; then
 fi
 
 (>&2 echo "Saving embed to https://data.alltheplaces.xyz/runs/latest/info_embed.html")
-OUTPUT_FILESIZE=$(du "${SPIDER_RUN_DIR}/output.tar.gz")
+OUTPUT_FILESIZE=$(du "${SPIDER_RUN_DIR}/output.tar.gz"  | awk '{ print $1 }')
 OUTPUT_FILESIZE_PRETTY=$(echo "$OUTPUT_FILESIZE" | awk '{printf "%0.1f", $1/1024}')
 cat > "${SPIDER_RUN_DIR}/info_embed.html" << EOF
 <html><body>
