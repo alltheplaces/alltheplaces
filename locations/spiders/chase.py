@@ -47,7 +47,7 @@ class ChaseSpider(scrapy.Spider):
         if response.xpath('//div[@class="Core-branch"]/*[1]').extract_first():
             atm_only = False
 
-        name = response.xpath('//h1[@itemprop="name"]/text()').extract_first()
+        name = response.xpath('//h1[@itemprop="name"]//text()').extract_first()
         if atm_only and " atm" not in name.lower():
             name += " ATM"
 
