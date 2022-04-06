@@ -17,40 +17,60 @@ class LowesFoodSpider(scrapy.Spider):
         urls = response.xpath("//url/loc/text()").extract()
         for url in urls:
             if re.match(r".*store-locator/store-\d+$", url):
-                yield scrapy.Request(url=url, callback=self.parse_store, meta={"url": url})
+                yield scrapy.Request(
+                    url=url, callback=self.parse_store, meta={"url": url}
+                )
 
     def parse_store(self, response):
 
-        city_state_zip = response.xpath("//div[@class='store-details__store-info']/ul/li[4]/text()").extract_first().strip()
+        city_state_zip = (
+            response.xpath("//div[@class='store-details__store-info']/ul/li[4]/text()")
+            .extract_first()
+            .strip()
+        )
 
         yield GeojsonPointItem(
             ref=response.url.split("/")[-1],
-            name=response.xpath("//div[@class='store-details__heading']/h1/text()").extract_first().strip(),
-            addr_full=response.xpath("//div[@class='store-details__store-info']/ul/li[2]/text()").extract_first().strip(),
-            city=city_state_zip.split(',')[0],
-            state=city_state_zip.split(' ')[1],
-            postcode=city_state_zip.split(' ')[2],
+            name=response.xpath("//div[@class='store-details__heading']/h1/text()")
+            .extract_first()
+            .strip(),
+            addr_full=response.xpath(
+                "//div[@class='store-details__store-info']/ul/li[2]/text()"
+            )
+            .extract_first()
+            .strip(),
+            city=city_state_zip.split(",")[0],
+            state=city_state_zip.split(" ")[1],
+            postcode=city_state_zip.split(" ")[2],
             country="United States",
-            phone=response.xpath("//div[@class='store-details__store-info__phone']/a/text()").extract_first().strip(),
+            phone=response.xpath(
+                "//div[@class='store-details__store-info__phone']/a/text()"
+            )
+            .extract_first()
+            .strip(),
             website=response.url,
-            opening_hours=self.parse_hours(response.xpath("//div[@class='store-details__heading']/h2/text()").extract_first().strip()),
+            opening_hours=self.parse_hours(
+                response.xpath("//div[@class='store-details__heading']/h2/text()")
+                .extract_first()
+                .strip()
+            ),
         )
 
     def parse_hours(self, hours):
         opening_hours = OpeningHours()
 
         if "Daily" in hours:
-            open_time = hours.split(' - ')[0].split(' ')[-1]
-            close_time = hours.split(' - ')[1]
+            open_time = hours.split(" - ")[0].split(" ")[-1]
+            close_time = hours.split(" - ")[1]
             # There is sometimes a space between the time and 'PM'
-            close_time = ''.join(close_time.split(' '))
+            close_time = "".join(close_time.split(" "))
 
             for DAY in DAYS:
                 opening_hours.add_range(
                     day=DAY,
                     open_time=open_time,
                     close_time=close_time,
-                    time_format="%I:%M%p"
+                    time_format="%I:%M%p",
                 )
         else:
             return None
