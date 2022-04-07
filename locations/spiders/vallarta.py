@@ -36,7 +36,7 @@ class VallartaSpider(scrapy.Spider):
             state=address[2].split(' ')[-2].strip(),
             postcode=address[2].split(' ')[-1].strip(),
             country="United States",
-            phone=response.xpath("//a[@class='tel']/text()").extract_first(),
+            phone=response.xpath("//a[@class='tel']/text()").extract_first().strip(),
             website=response.url,
             opening_hours=self.parse_hours(
                 response.xpath("//div[contains(@class, 'days')]/text()").extract_first().strip(),
