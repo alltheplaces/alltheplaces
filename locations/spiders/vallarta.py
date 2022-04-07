@@ -4,7 +4,7 @@ from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours, DAYS
 
 
-class LowesFoodSpider(scrapy.Spider):
+class VallartaSpider(scrapy.Spider):
     name = "vallarta"
     item_attributes = {"brand": "Vallarta Supermarkets", "brand_wikidata": "Q7911833"}
     allowed_domains = ["vallartasupermarkets.com"]
