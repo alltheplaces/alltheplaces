@@ -20,11 +20,13 @@ class ChuysSpider(scrapy.Spider):
 
         for location_id in location_ids:
             try:
-                re_pattern_store_info = rf"infoWindowContent{location_id}\s\+=.+;"
+                re_pattern_store_info = (
+                    rf"infoWindowContent{location_id}\s\+=(?!.*Coming Soon).+;"
+                )
                 store_info = re.findall(re_pattern_store_info, data)
 
                 name = re.search(r"<strong>(.*?)</strong>", store_info[0]).group(1)
-                addr_full = re.search(r"<br.*>(.*?)'", store_info[1]).group(1)
+                addr_full = re.search(r"<br.*>(.*?)'", store_info[1]).group(1).strip()
                 locality = re.search(r"<br.*>(.*?)'", store_info[2]).group(1)
                 phone = re.search(r"<br.*>(.*?)'", store_info[3]).group(1)
                 website = urljoin(
@@ -48,6 +50,7 @@ class ChuysSpider(scrapy.Spider):
                     "lon": lon,
                 }
             except Exception as e:
-                continue
+                print(f"Unable to fetch data for location id {location_id}: {e}")
+                raise
 
             yield GeojsonPointItem(**properties)
