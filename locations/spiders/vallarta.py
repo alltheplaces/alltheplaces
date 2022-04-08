@@ -17,30 +17,34 @@ class VallartaSpider(scrapy.Spider):
         for url in urls:
             if url == "https://vallartasupermarkets.com/store-locations/":
                 continue
-            yield scrapy.Request(
-                url=url, callback=self.parse_store, meta={"url": url}
-            )
+            yield scrapy.Request(url=url, callback=self.parse_store, meta={"url": url})
 
     def parse_store(self, response):
 
-        address = (
-            response.xpath("//div[@class='blade store-location']/div/div/div[2]/p[1]/text()").extract()
-        )
+        address = response.xpath(
+            "//div[@class='blade store-location']/div/div/div[2]/p[1]/text()"
+        ).extract()
 
         # No lat/lon in source code; Google map link contains address
         yield GeojsonPointItem(
             ref=response.url.split("/")[-2],
-            name=response.xpath("//div[@class='page-breadcrumb']/span/text()").extract_first(),
+            name=response.xpath(
+                "//div[@class='page-breadcrumb']/span/text()"
+            ).extract_first(),
             addr_full=address[1].strip(),
-            city=address[2].split(',')[0].strip(),
-            state=address[2].split(' ')[-2].strip(),
-            postcode=address[2].split(' ')[-1].strip(),
+            city=address[2].split(",")[0].strip(),
+            state=address[2].split(" ")[-2].strip(),
+            postcode=address[2].split(" ")[-1].strip(),
             country="United States",
             phone=response.xpath("//a[@class='tel']/text()").extract_first().strip(),
             website=response.url,
             opening_hours=self.parse_hours(
-                response.xpath("//div[contains(@class, 'days')]/text()").extract_first().strip(),
-                response.xpath("//div[contains(@class, 'hours')]//p/text()").extract_first().strip()
+                response.xpath("//div[contains(@class, 'days')]/text()")
+                .extract_first()
+                .strip(),
+                response.xpath("//div[contains(@class, 'hours')]//p/text()")
+                .extract_first()
+                .strip(),
             ),
         )
 

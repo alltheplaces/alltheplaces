@@ -11,7 +11,7 @@ class ChurchsChickenSpider(scrapy.Spider):
 
     def parse_store(self, response):
         if response.url == "https://locations.churchs.com/index.html":
-            return # not found, redirects
+            return  # not found, redirects
 
         ref = re.search(r".*\/([0-9]+[a-z\-]+)", response.url).group(1)
         name = response.xpath(
