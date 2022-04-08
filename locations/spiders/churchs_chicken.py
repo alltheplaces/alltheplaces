@@ -10,6 +10,9 @@ class ChurchsChickenSpider(scrapy.Spider):
     start_urls = ("https://locations.churchs.com/sitemap.xml",)
 
     def parse_store(self, response):
+        if response.url == "https://locations.churchs.com/index.html":
+            return # not found, redirects
+
         ref = re.search(r".*\/([0-9]+[a-z\-]+)", response.url).group(1)
         name = response.xpath(
             "//span[@class='LocationName-geo']/text()"
