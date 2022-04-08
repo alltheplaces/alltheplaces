@@ -8,7 +8,10 @@ import json
 
 class MainEventSpider(scrapy.Spider):
     name = "main_event"
-    item_attributes = {"brand": "Main Event Entertainment", "brand_wikidata": "Q56062981"}
+    item_attributes = {
+        "brand": "Main Event Entertainment",
+        "brand_wikidata": "Q56062981",
+    }
     allowed_domains = ["mainevent.com"]
     download_delay = 0.2
     start_urls = ("https://www.mainevent.com/sitemap.xml",)
@@ -35,13 +38,15 @@ class MainEventSpider(scrapy.Spider):
         store_json = json.loads(store_data)
 
         # \\"latitude\\":33.318367794546674,\\"longitude\\":-111.74067152513123,
-        map_data = response.xpath("//script[contains(text(), 'googleInfo')]/text()").extract_first()
+        map_data = response.xpath(
+            "//script[contains(text(), 'googleInfo')]/text()"
+        ).extract_first()
 
         yield GeojsonPointItem(
             ref=response.url.split("/")[-2],
             name=store_json["name"],
-            lat = re.search('.*latitude\\\\":(-?\d+\.\d+),.*', map_data).group(1),
-            lon = re.search('.*longitude\\\\":(-?\d+\.\d+),.*', map_data).group(1),
+            lat=re.search('.*latitude\\\\":(-?\d+\.\d+),.*', map_data).group(1),
+            lon=re.search('.*longitude\\\\":(-?\d+\.\d+),.*', map_data).group(1),
             addr_full=store_json["address"]["streetAddress"],
             city=store_json["address"]["addressLocality"],
             state=store_json["address"]["addressRegion"],
