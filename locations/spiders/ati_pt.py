@@ -8,7 +8,7 @@ from locations.hours import OpeningHours
 
 
 class ATIPhysicalTherapySpider(scrapy.Spider):
-    download_delay = 10
+    download_delay = 1.2
     name = "ati_physical_therapy"
     item_attributes = {"brand": "ATI Physical Therapy", "brand_wikidata": "Q50039703"}
     allowed_domains = ["locations.atipt.com"]
