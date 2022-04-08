@@ -25,7 +25,6 @@ class SmashburgerSpider(scrapy.Spider):
                 url = 'https://api.smashburger.com/mobilem8-web-service/rest/storeinfo/distance?_=1649446017671&attributes=&disposition=PICKUP&latitude={la}&longitude={lo}&maxResults=50&radius=100&radiusUnit=mi&statuses=ACTIVE,TEMP-INACTIVE&tenant=sb-us'.format(la=lati, lo=long)
                 yield scrapy.Request(response.urljoin(url), callback=self.parse_search)
 
-
     def parse_search(self, response):
         print(response.url)
         data = json.loads(json.dumps(response.json()))
