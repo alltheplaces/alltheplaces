@@ -48,14 +48,14 @@ class ChaseSpider(scrapy.Spider):
             atm_only = False
 
         name = response.xpath('//h1[@itemprop="name"]//text()').extract_first()
-        if atm_only and " atm" not in name.lower():
+        if atm_only and name and " atm" not in name.lower():
             name += " ATM"
 
         properties = {
-            "name": name,
-            "ref": re.search(
-                r"https://locator.chase.com/.+?/.+?/(.+)$", response.url
-            ).groups()[0],
+            "name": name.strip(),
+            "ref": re.search(r"https://locator.chase.com/(.+)$", response.url).groups()[
+                0
+            ],
             "addr_full": response.xpath(
                 '//meta[@itemprop="streetAddress"]/@content'
             ).extract_first(),
