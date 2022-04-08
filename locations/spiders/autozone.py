@@ -10,6 +10,7 @@ class AutoZoneSpider(scrapy.Spider):
     name = "auto_zone"
     item_attributes = {"brand": "AutoZone", "brand_wikidata": "Q4826087"}
     allowed_domains = ["www.autozone.com"]
+    user_agent = "Mozilla/5.0 (iPhone; CPU iPhone OS 9_1 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13B143 Safari/601.1 (compatible; AllThePlaces; +https://github.com/alltheplaces/alltheplaces)"
     download_delay = 1.0
     start_urls = ("https://www.autozone.com/locations/",)
 
