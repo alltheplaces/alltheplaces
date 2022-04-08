@@ -1,59 +1,32 @@
 # -*- coding: utf-8 -*-
-import scrapy
 import datetime
 import re
-from locations.items import GeojsonPointItem
-from locations.hours import OpeningHours
 
-DAY_MAPPING = {
-    "Monday": "Mo",
-    "Tuesday": "Tu",
-    "Wednesday": "We",
-    "Thursday": "Th",
-    "Friday": "Fr",
-    "Saturday": "Sa",
-    "Sunday": "Su",
-}
+import scrapy
+
+from locations.hours import OpeningHours
+from locations.items import GeojsonPointItem
 
 
 class DennysSpider(scrapy.Spider):
     name = "dennys"
-    item_attributes = {"brand": "Denny's"}
+    item_attributes = {"brand": "Denny's", "brand_wikidata": "Q1189695"}
     allowed_domains = ["locations.dennys.com"]
     start_urls = ("https://locations.dennys.com/",)
 
-    def parse_hours(self, elements):
+    def parse_hours(self, hours_container):
         opening_hours = OpeningHours()
 
-        for elem in elements:
-            day = elem.xpath(
-                './/td[@class="c-hours-details-row-day"]/text()'
-            ).extract_first()
-            intervals = elem.xpath('.//td[@class="c-hours-details-row-intervals"]')
-
-            if intervals.xpath("./text()").extract_first() == "Closed":
+        for row in hours_container.xpath(
+            './/*[@itemprop="openingHours"]/@content'
+        ).extract():
+            day, interval = row.split(" ", 1)
+            if interval == "Closed":
                 continue
-            if intervals.xpath("./span/text()").extract_first() == "Open 24 hours":
-                opening_hours.add_range(
-                    day=DAY_MAPPING[day], open_time="0:00", close_time="23:59"
-                )
-            else:
-                start_time = elem.xpath(
-                    './/span[@class="c-hours-details-row-intervals-instance-open"]/text()'
-                ).extract_first()
-                end_time = elem.xpath(
-                    './/span[@class="c-hours-details-row-intervals-instance-close"]/text()'
-                ).extract_first()
-                opening_hours.add_range(
-                    day=DAY_MAPPING[day],
-                    open_time=datetime.datetime.strptime(
-                        start_time, "%H:%M %p"
-                    ).strftime("%H:%M"),
-                    close_time=datetime.datetime.strptime(
-                        end_time, "%H:%M %p"
-                    ).strftime("%H:%M"),
-                )
-
+            if interval == "All Day":
+                interval = "00:00-00:00"
+            open_time, close_time = interval.split("-")
+            opening_hours.add_range(day, open_time, close_time)
         return opening_hours.as_opening_hours()
 
     def parse_store(self, response):
@@ -70,7 +43,7 @@ class DennysSpider(scrapy.Spider):
             "postcode": response.xpath(
                 '//span[@itemprop="postalCode"]/text()'
             ).extract_first(),
-            "ref": response.url,
+            "ref": response.url.split("/")[-1],
             "website": response.url,
             "lon": float(
                 response.xpath('//meta[@itemprop="longitude"]/@content').extract_first()
@@ -83,12 +56,8 @@ class DennysSpider(scrapy.Spider):
         if phone:
             properties["phone"] = phone
 
-        hours = self.parse_hours(
-            response.xpath('//table[@class="c-hours-details"]//tbody/tr')
-        )
-
-        if hours:
-            properties["opening_hours"] = hours
+        if hours_container := response.xpath('//table[@class="c-hours-details"]'):
+            properties["opening_hours"] = self.parse_hours(hours_container[0])
 
         yield GeojsonPointItem(**properties)
 
