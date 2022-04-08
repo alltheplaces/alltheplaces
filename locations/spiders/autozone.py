@@ -10,7 +10,7 @@ class AutoZoneSpider(scrapy.Spider):
     name = "auto_zone"
     item_attributes = {"brand": "AutoZone", "brand_wikidata": "Q4826087"}
     allowed_domains = ["www.autozone.com"]
-    download_delay = 0.2
+    download_delay = 1.0
     start_urls = ("https://www.autozone.com/locations/",)
 
     def normalize_hours(self, hours):
