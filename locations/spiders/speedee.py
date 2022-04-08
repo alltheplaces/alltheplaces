@@ -71,30 +71,30 @@ us_state_to_abbrev = {
 
 class SpeeDeeSpider(scrapy.Spider):
     name = "speedee_oil"
-    item_attributes = {'brand': 'SpeeDee Oil Change and Auto Service'}
-    allowed_domains = ['speedeeoil.com']
+    item_attributes = {"brand": "SpeeDee Oil Change and Auto Service"}
+    allowed_domains = ["speedeeoil.com"]
     start_urls = [
-        'https://www.speedeeoil.com/wp-admin/admin-ajax.php?action=asl_load_stores&nonce=207e81f157&load_all=1&layout=1',
+        "https://www.speedeeoil.com/wp-admin/admin-ajax.php?action=asl_load_stores&nonce=207e81f157&load_all=1&layout=1",
     ]
 
     def parse(self, response):
         for store in response.json():
-            if len(store['state']) == 2:
-                state = store['state']
+            if len(store["state"]) == 2:
+                state = store["state"]
             else:
-                state = us_state_to_abbrev[store['state']]
+                state = us_state_to_abbrev[store["state"]]
 
             properties = {
-            'ref': store['title'].split()[-1],
-            'name': store['title'],
-            'addr_full': store['street'],
-            'city': store['city'],
-            'state': state,
-            'postcode': store['postal_code'],
-            'country': 'US',
-            'lat': store['lat'],
-            'lon': store['lng'],
-            'phone': store['phone'],
-            'website': store['website']
+                "ref": store["title"].split()[-1],
+                "name": store["title"],
+                "addr_full": store["street"],
+                "city": store["city"],
+                "state": state,
+                "postcode": store["postal_code"],
+                "country": "US",
+                "lat": store["lat"],
+                "lon": store["lng"],
+                "phone": store["phone"],
+                "website": store["website"],
             }
             yield GeojsonPointItem(**properties)
