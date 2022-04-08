@@ -155,7 +155,7 @@ aws s3 cp \
     "s3://${S3_BUCKET}/runs/history.json" \
     history.json
 
-if [ ! -f history.json ]; then
+if [ ! -s history.json ]; then
     echo '[]' > history.json
 fi
 
