@@ -53,9 +53,9 @@ class ChaseSpider(scrapy.Spider):
 
         properties = {
             "name": name.strip(),
-            "ref": re.search(
-                r"https://locator.chase.com/(.+)$", response.url
-            ).groups()[0],
+            "ref": re.search(r"https://locator.chase.com/(.+)$", response.url).groups()[
+                0
+            ],
             "addr_full": response.xpath(
                 '//meta[@itemprop="streetAddress"]/@content'
             ).extract_first(),
