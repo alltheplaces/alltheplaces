@@ -7,7 +7,7 @@ import json
 from locations.items import GeojsonPointItem
 
 class SmashburgerSpider(scrapy.Spider):
-    download_delay = .2
+    download_delay = 0.2
     name = "smashburger"
     item_attributes = {'brand': "Smashburger"}
     allowed_domains = ["smashburger.com"]
@@ -16,8 +16,8 @@ class SmashburgerSpider(scrapy.Spider):
         with open('./locations/searchable_points/us_centroids_100mile_radius.csv') as points:
             reader = csv.DictReader(points)
             for point in points:
-                url = f'https://api.smashburger.com/mobilem8-web-service/rest/storeinfo/distance?_=1649446017671&attributes=&disposition=PICKUP&latitude={point["latitude"]}&longitude={point["longitude"]}&maxResults=100&radius=100&radiusUnit=mi&statuses=ACTIVE,TEMP-INACTIVE&tenant=sb-us'.format(la=lati, lo=long)
-                yield scrapy.Request(url.format(url), callback=self.parse_search)
+                url = f'https://api.smashburger.com/mobilem8-web-service/rest/storeinfo/distance?_=1649446017671&attributes=&disposition=PICKUP&latitude={point["latitude"]}&longitude={point["longitude"]}&maxResults=100&radius=100&radiusUnit=mi&statuses=ACTIVE,TEMP-INACTIVE&tenant=sb-us'
+                yield scrapy.Request(url, callback=self.parse_search)
 
     def parse_search(self, response):
         data = response.json()
