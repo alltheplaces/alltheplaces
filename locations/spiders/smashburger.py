@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import re
-
+import csv
 import scrapy
 import json
 
@@ -13,15 +13,11 @@ class SmashburgerSpider(scrapy.Spider):
     allowed_domains = ["smashburger.com"]
 
     def start_requests(self):
-        with open('./locations/searchable_points/us_centroids_50mile_radius.csv') as points:
-            next(points)
+        with open('./locations/searchable_points/us_centroids_100mile_radius.csv') as points:
+            reader = csv.DictReader(points)
             for point in points:
-                row = point.replace('\n', '').split(',')
-                lati = row[1]
-                long = row[2]
-                url = 'https://api.smashburger.com/mobilem8-web-service/rest/storeinfo/distance?_=1649446017671&attributes=&disposition=PICKUP&latitude={la}&longitude={lo}&maxResults=100&radius=100&radiusUnit=mi&statuses=ACTIVE,TEMP-INACTIVE&tenant=sb-us'.format(la=lati, lo=long)
+                url = f'https://api.smashburger.com/mobilem8-web-service/rest/storeinfo/distance?_=1649446017671&attributes=&disposition=PICKUP&latitude={point["latitude"]}&longitude={point["longitude"]}&maxResults=100&radius=100&radiusUnit=mi&statuses=ACTIVE,TEMP-INACTIVE&tenant=sb-us'.format(la=lati, lo=long)
                 yield scrapy.Request(url.format(url), callback=self.parse_search)
-
 
     def parse_search(self, response):
         data = response.json()
