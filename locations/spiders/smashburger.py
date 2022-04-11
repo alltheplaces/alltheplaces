@@ -11,11 +11,8 @@ class SmashburgerSpider(scrapy.Spider):
     name = "smashburger"
     item_attributes = {'brand': "Smashburger"}
     allowed_domains = ["smashburger.com"]
-    start_urls = (
-        'https://api.smashburger.com/mobilem8-web-service/rest/storeinfo/distance?_=1649446017671&attributes=&disposition=PICKUP&latitude=39.7392358&longitude=-104.990251&maxResults=50&radius=100&radiusUnit=mi&statuses=ACTIVE,TEMP-INACTIVE&tenant=sb-us',
-    )
 
-    def parse(self, response):
+    def start_requests(self):
         with open('./locations/searchable_points/us_centroids_50mile_radius.csv') as points:
             next(points)
             for point in points:
@@ -23,11 +20,11 @@ class SmashburgerSpider(scrapy.Spider):
                 lati = row[1]
                 long = row[2]
                 url = 'https://api.smashburger.com/mobilem8-web-service/rest/storeinfo/distance?_=1649446017671&attributes=&disposition=PICKUP&latitude={la}&longitude={lo}&maxResults=100&radius=100&radiusUnit=mi&statuses=ACTIVE,TEMP-INACTIVE&tenant=sb-us'.format(la=lati, lo=long)
-                yield scrapy.Request(response.urljoin(url), callback=self.parse_search)
+                yield scrapy.Request(url.format(url), callback=self.parse_search)
 
 
     def parse_search(self, response):
-        data = json.loads(json.dumps(response.json()))
+        data = response.json()
         for i in data['getStoresResult']['stores']:
             properties = {
                 'ref': i['storeName'],
