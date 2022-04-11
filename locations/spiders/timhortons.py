@@ -1,14 +1,28 @@
+# -*- coding: utf-8 -*-
 import json
-import re
+
 import scrapy
+
 from locations.items import GeojsonPointItem
 
 
 class TimHortonsSpider(scrapy.Spider):
     name = "timhortons"
-    item_attributes = {"brand": "Tim Horton's"}
-    allowed_domains = ["locations.timhortons.com"]
-    start_urls = ("https://locations.timhortons.com/",)
+    item_attributes = {"brand": "Tim Horton's", "brand_wikidata": "Q175106"}
+    allowed_domains = ["locations.timhortons.com", "locations.timhortons.ca"]
+    start_urls = (
+        "https://locations.timhortons.com/sitemap.xml",
+        "https://locations.timhortons.ca/sitemap.xml",
+    )
+
+    def parse(self, response):
+        response.selector.remove_namespaces()
+        for url in response.xpath("//url/loc/text()").extract():
+            if ".ca/fr/" in url:
+                continue
+            if url.count("/") != 5:
+                continue
+            yield scrapy.Request(url, callback=self.parse_location)
 
     def store_hours(self, store_hours):
         day_groups = []
@@ -22,10 +36,7 @@ class TimHortonsSpider(scrapy.Spider):
                 t_time = str(interval["end"]).zfill(4)
                 hour_intervals.append(
                     "{}:{}-{}:{}".format(
-                        f_time[0:2],
-                        f_time[2:4],
-                        t_time[0:2],
-                        t_time[2:4],
+                        f_time[0:2], f_time[2:4], t_time[0:2], t_time[2:4]
                     )
                 )
             hours = ",".join(hour_intervals)
@@ -58,61 +69,19 @@ class TimHortonsSpider(scrapy.Spider):
 
         return opening_hours
 
-    def parse(self, response):
-        for local_url in response.xpath(
-            '//a[@class="c-directory-list-content-item-link"]/@href'
-        ).extract():
-            yield scrapy.Request(
-                response.urljoin(local_url),
-                callback=self.parse,
-            )
-
-        for location_url in response.xpath(
-            '//ul[@class="c-LocationGridList"]/li/article/div/h2/a/@href'
-        ).extract():
-            yield scrapy.Request(
-                response.urljoin(location_url),
-                callback=self.parse_location,
-            )
-
-        if response.xpath(
-            '//span/meta[@itemprop="longitude"]/@content'
-        ).extract_first():
-            yield scrapy.Request(
-                response.url,
-                callback=self.parse_location,
-            )
-
     def parse_location(self, response):
+        address = response.xpath('//*[@itemprop="address"]')[0]
         properties = {
-            "lon": float(
-                response.xpath(
-                    '//span/meta[@itemprop="longitude"]/@content'
-                ).extract_first()
-            ),
-            "lat": float(
-                response.xpath(
-                    '//span/meta[@itemprop="latitude"]/@content'
-                ).extract_first()
-            ),
-            "addr_full": response.xpath('//span[@class="c-address-street-1"]/text()')
-            .extract_first()
-            .strip(),
-            "city": response.xpath(
-                '//span[@itemprop="addressLocality"]/text()'
-            ).extract_first(),
-            "state": response.xpath(
-                '//abbr[@itemprop="addressRegion"]/text()'
-            ).extract_first(),
-            "postcode": response.xpath('//span[@itemprop="postalCode"]/text()')
-            .extract_first()
-            .strip(),
-            "phone": response.xpath(
-                '//span[@itemprop="telephone"]/text()'
-            ).extract_first(),
-            "name": response.xpath(
-                '//span[@class="location-name-geo"]/text()'
-            ).extract_first(),
+            "lon": response.xpath('//*[@itemprop="longitude"]/@content').get(),
+            "lat": response.xpath('//*[@itemprop="latitude"]/@content').get(),
+            "addr_full": address.xpath(
+                './/*[@itemprop="streetAddress"]/@content'
+            ).get(),
+            "city": address.css(".Address-city::text").get(),
+            "state": address.xpath('.//*[@itemprop="addressRegion"]/text()').get(),
+            "postcode": address.xpath('.//*[@itemprop="postalCode"]/text()').get(),
+            "phone": response.xpath('//*[@itemprop="telephone"]/text()').get(),
+            "name": response.xpath('//*[@class="LocationName-geo"]/text()').get(),
             "ref": response.url,
             "website": response.url,
         }
