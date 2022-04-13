@@ -19,6 +19,11 @@ class PlanetFitnessSpider(scrapy.Spider):
     start_urls = ("https://www.planetfitness.com/sitemap",)
     download_delay = 4
 
+    def parse_hours(self, response):
+        hours = response.css("p.club-hours::text").get()
+        if hours is not None:
+            return hours.replace("\n", "; ")
+
     def parse(self, response):
         city_urls = response.xpath('//td[@class="club-title"]/a/@href').extract()
         for path in city_urls:
@@ -30,7 +35,7 @@ class PlanetFitnessSpider(scrapy.Spider):
             response.xpath('//script[@type="application/ld+json"]/text()').get()
         )["@graph"][0]
 
-        hours = response.css("p.club-hours::text").get().replace("\n", "; ")
+        hours = self.parse_hours(response)
 
         properties = {
             "lat": data["geo"]["latitude"],
