@@ -1,47 +1,43 @@
 # -*- coding: utf-8 -*-
 import scrapy
-from scrapy.http import Request
+
 from locations.items import GeojsonPointItem
 
 
 class PandaSpider(scrapy.Spider):
     name = "pandaexpress"
     item_attributes = {"brand": "Panda Express", "brand_wikidata": "Q1358690"}
-    allowed_domains = ["inkplant.com", "pandaexpress.com"]
-    start_urls = ["https://inkplant.com/code/state-latitudes-longitudes"]
+    allowed_domains = ["pandaexpress.com"]
+    start_urls = ["https://www.pandaexpress.com/locations"]
 
     def parse(self, response):
+        for href in response.xpath(
+            '//a[@data-ga-action="locationClick" or @data-ag-action="storeDetailsClick"]/@href'
+        ).extract():
+            yield scrapy.Request(response.urljoin(href))
 
-        # Get all state names to search for Panda Express
-        sname = response.xpath("//tr//td[1]/text()").extract()[1:]
-        # Add Puerto Rico
-        sname.append("Puerto Rico")
+        if response.xpath("//@data-productlink"):
+            slug = response.xpath("//@data-productlink").get().split("/")[2]
+            if slug:
+                url = f"https://nomnom-prod-api.pandaexpress.com/restaurants/byslug/{slug}"
+                yield scrapy.Request(
+                    url, meta={"url": response.url}, callback=self.parse_store
+                )
 
-        # Iterate through each state to locate Panda Express Locations
-        for state in sname:
-
-            state_url = (
-                "https://www.pandaexpress.com/userlocation/searchbyquery?query="
-                + state
-                + "&limit=1000&hours=true&_=1512680879964"
-            )
-
-            # parse and return relevant location information
-            yield Request(state_url, callback=self.parseState)
-
-    def parseState(self, response):
-        state_data = response.json()
-
-        for store in state_data["List"]:
-            properties = {
-                "addr_full": store["Address"],
-                "city": store["City"],
-                "state": store["State"],
-                "postcode": store["Zip"].strip(),
-                "ref": store["Id"],
-                "lon": float(store["Longitude"]),
-                "lat": float(store["Latitude"]),
-                "phone": store["Phone"],
-            }
-
-            yield GeojsonPointItem(**properties)
+    def parse_store(self, response):
+        data = response.json()
+        url = response.meta["url"]
+        properties = {
+            "ref": data["id"],
+            "lat": data["latitude"],
+            "lon": data["longitude"],
+            "name": data["name"],
+            "website": url,
+            "addr_full": data["streetaddress"],
+            "city": data["city"],
+            "state": data["state"],
+            "postcode": data["zip"],
+            "country": data["country"],
+            "phone": data["telephone"],
+        }
+        yield GeojsonPointItem(**properties)
