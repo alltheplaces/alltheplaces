@@ -1,37 +1,33 @@
+# -*- coding: utf-8 -*-
 import json
 import re
-import scrapy
-from locations.items import GeojsonPointItem
 
-keymap = {
-    "addr_full": "a",
-    "city": "c",
-    "state": "s",
-    "postcode": "z",
-    "name": "t",
-    "lat": "lt",
-    "lon": "ln",
-}
+import scrapy
+
+from locations.hours import OpeningHours
+from locations.items import GeojsonPointItem
 
 
 class ShoneysSpider(scrapy.Spider):
     name = "shoneys"
-    item_attributes = {"brand": "Shoney's"}
-    allowed_domains = ["static.batchgeo.com"]
-    start_urls = (
-        "https://static.batchgeo.com/map/json/b317db15b42986919f24bff19465e039/1482130242",
-    )
+    item_attributes = {"brand": "Shoney's", "brand_wikidata": "Q7500392"}
+    allowed_domains = ["shoneys.com"]
+    start_urls = ("https://www.shoneys.com/wp-json/wp/v2/locations",)
 
     def parse(self, response):
-        body = response.text[6:-1]
-        data = json.loads(body)
-        stores = data["mapRS"]
-        properties = {}
-        for store in stores:
-            for key1, key2 in keymap.items():
-                if key2 in store and store[key2]:
-                    properties[key1] = store[key2]
-
-            properties["ref"] = properties["addr_full"]
-
+        for row in response.json():
+            hours = OpeningHours()
+            for day, interval in row["acf"]["working_hours"].items():
+                if interval in ("", "CLOSED"):
+                    continue
+                open_time, close_time = re.split(" ?- ?", interval)
+                hours.add_range(day[:2].capitalize(), open_time, close_time, "%I:%M%p")
+            properties = {
+                "ref": row["id"],
+                "website": row["link"],
+                "name": row["title"]["rendered"],
+                "addr_full": row["acf"]["address"]["address"],
+                "phone": row["acf"]["phone"],
+                "opening_hours": hours.as_opening_hours(),
+            }
             yield GeojsonPointItem(**properties)
