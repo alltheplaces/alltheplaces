@@ -24,6 +24,8 @@ class ShoneysSpider(scrapy.Spider):
                 hours.add_range(day[:2].capitalize(), open_time, close_time, "%I:%M%p")
             properties = {
                 "ref": row["id"],
+                "lat": row["acf"]["address"]["lat"],
+                "lon": row["acf"]["address"]["lng"],
                 "website": row["link"],
                 "name": row["title"]["rendered"],
                 "addr_full": row["acf"]["address"]["address"],
