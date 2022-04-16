@@ -199,7 +199,7 @@ class BurgerKingUKSpider(scrapy.Spider):
                 "lon": row["longitude"],
                 "ref": row["storeId"],
                 "name": row["name"],
-                "phone": "+44 " + row["phoneNumber"][1:],
+                "phone": row["phoneNumber"],
                 "street": row["physicalAddress"]["address1"],
                 "city": row["physicalAddress"]["city"],
                 "state": row["physicalAddress"]["stateProvince"],
