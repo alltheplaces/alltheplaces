@@ -140,6 +140,15 @@ class BurgerKingUKSpider(scrapy.Spider):
                 "state": row["physicalAddress"]["stateProvince"],
                 "postcode": row["physicalAddress"]["postalCode"],
                 "country": "GB",
+                "addr_full": ", ".join(
+                    (
+                        row["physicalAddress"]["address1"],
+                        row["physicalAddress"]["address2"],
+                        row["physicalAddress"]["city"],
+                        row["physicalAddress"]["postalCode"],
+                        "United Kingdom",
+                    )
+                ),
                 "extras": {
                     "operator": row["franchiseGroupName"],
                     "internet_access": "wlan" if row["hasWifi"] == True else "no",
