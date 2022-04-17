@@ -20,10 +20,9 @@ class BurgerKingUKSpider(scrapy.Spider):
                         "coordinates": {
                             "userLat": lat,
                             "userLng": lon,
-                            "searchRadius": 128000,
+                            "searchRadius": 1000000,
                         },
                         "first": 20000,
-                        "status": "OPEN",
                     }
                 },
                 "query": (
@@ -115,15 +114,7 @@ class BurgerKingUKSpider(scrapy.Spider):
         )
 
     def start_requests(self):
-        with open(
-            "./locations/searchable_points/eu_centroids_120km_radius_country.csv"
-        ) as points:
-            reader = csv.DictReader(points)
-            for point in reader:
-                if point["country"] == "UK":
-                    yield self.make_request(
-                        float(point["latitude"]), float(point["longitude"])
-                    )
+        yield self.make_request(52.905499, -1.536478)
 
     def parse(self, response):
         data = response.json()
@@ -140,6 +131,15 @@ class BurgerKingUKSpider(scrapy.Spider):
                 "state": row["physicalAddress"]["stateProvince"],
                 "postcode": row["physicalAddress"]["postalCode"],
                 "country": "GB",
+                "addr_full": ", ".join(
+                    (
+                        row["physicalAddress"]["address1"],
+                        row["physicalAddress"]["address2"],
+                        row["physicalAddress"]["city"],
+                        row["physicalAddress"]["postalCode"],
+                        "United Kingdom",
+                    )
+                ),
                 "extras": {
                     "operator": row["franchiseGroupName"],
                     "internet_access": "wlan" if row["hasWifi"] == True else "no",
