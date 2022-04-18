@@ -1,6 +1,11 @@
+# -*- coding: utf-8 -*-
 import datetime
+import json
 import re
+import urllib.parse
+
 import scrapy
+
 from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
 
@@ -63,47 +68,41 @@ class PetSmartSpider(scrapy.Spider):
                 yield scrapy.Request(response.urljoin(url))
 
     def parse_store(self, response):
-        ref = re.search(r"-store(\d+)", response.url).group(1)
         if "petsmart.ca" in response.url:
             country = "CA"
         elif "petsmart.com" in response.url:
             country = "US"
 
+        script = response.xpath(
+            "//script/text()[contains(.,'\"ispuStore\"')]"
+        ).extract_first()
+        data = json.decoder.JSONDecoder().raw_decode(
+            script, script.index("{", script.index("ispuStore"))
+        )[0]
+
+        map_url = response.xpath('//img/@src[contains(.,"staticmap")]').extract_first()
+        lat_lon = urllib.parse.parse_qs(urllib.parse.urlparse(map_url).query)["center"][
+            0
+        ]
+        lat, lon = map(float, lat_lon.split(","))
+
         properties = {
-            "name": response.xpath('//span[@itemprop="name"]/text()')
-            .extract_first()
-            .strip(),
-            "addr_full": response.xpath(
-                '//div[@itemprop="streetAddress"]/text()'
-            ).extract_first(),
-            "city": response.xpath('//span[@itemprop="addressLocality"][1]/text()')
-            .extract_first()
-            .title(),
-            "state": response.xpath(
-                '//span[@itemprop="addressLocality"][2]/text()'
-            ).extract_first(),
-            "postcode": response.xpath(
-                '//span[@itemprop="postalCode"]/text()'
-            ).extract_first(),
-            "lat": float(
-                response.xpath(
-                    '//input[@name="storeLatitudeVal"]/@value'
-                ).extract_first()
-            ),
-            "lon": float(
-                response.xpath(
-                    '//input[@name="storeLongitudeVal"]/@value'
-                ).extract_first()
-            ),
-            "phone": response.xpath(
-                '//a[@class="store-contact-info"]/text()'
-            ).extract_first(),
+            "name": response.xpath("//@data-storename").extract_first(),
+            "addr_full": data["address"],
+            "city": data["city"],
+            "state": data["stateCode"],
+            "postcode": data["postalCode"],
+            "lat": lat,
+            "lon": lon,
+            "phone": data["phoneFormatted"],
             "country": country,
-            "ref": ref,
+            "ref": response.xpath("//@data-storenumber").extract_first(),
             "website": response.url,
         }
 
-        hours = self.parse_hours(response.xpath('//div[@class="store-detail-address"]'))
+        hours = self.parse_hours(
+            response.xpath('//*[@itemprop="OpeningHoursSpecification"]')
+        )
 
         if hours:
             properties["opening_hours"] = hours
@@ -113,16 +112,12 @@ class PetSmartSpider(scrapy.Spider):
     def parse_hours(self, elements):
         opening_hours = OpeningHours()
 
-        days = elements.xpath('//span[@itemprop="dayOfWeek"]/text()').extract()
+        days = elements.xpath('.//span[@itemprop="dayOfWeek"]/text()').extract()
         today = (set(day_mapping) - set(days)).pop()
         days.remove("TODAY")
         days.insert(0, today)
-        open_hours = elements.xpath(
-            '//div[@class="store-hours"]/time[@itemprop="opens"]/@content'
-        ).extract()
-        close_hours = elements.xpath(
-            '//div[@class="store-hours"]/time[@itemprop="closes"]/@content'
-        ).extract()
+        open_hours = elements.xpath('.//time[@itemprop="opens"]/@content').extract()
+        close_hours = elements.xpath('.//time[@itemprop="closes"]/@content').extract()
 
         store_hours = dict(
             (z[0], list(z[1:])) for z in zip(days, open_hours, close_hours)
