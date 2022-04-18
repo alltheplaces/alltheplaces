@@ -63,7 +63,7 @@ class PetSmartSpider(scrapy.Spider):
                 yield scrapy.Request(response.urljoin(url))
 
     def parse_store(self, response):
-        ref = re.search(r".+/?\?(.+)", response.url).group(1)
+        ref = re.search(r"-store(\d+)", response.url).group(1)
         if "petsmart.ca" in response.url:
             country = "CA"
         elif "petsmart.com" in response.url:
