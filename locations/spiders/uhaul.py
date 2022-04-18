@@ -1,23 +1,23 @@
 # -*- coding: utf-8 -*-
 import json
-import scrapy
 import re
+
+import scrapy
+
 from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
 
 
 class UhaulSpider(scrapy.Spider):
     name = "uhaul"
-    item_attributes = {"brand": "U-Haul"}
+    item_attributes = {"brand": "U-Haul", "brand_wikidata": "Q7862902"}
     allowed_domains = ["www.uhaul.com"]
 
     start_urls = ("https://www.uhaul.com/Locations/US_and_Canada/",)
 
     def parse(self, response):
         for cell in response.xpath('//ul/li[@class="cell"]/a/@href'):
-            yield scrapy.Request(
-                url=response.urljoin(cell.extract()),
-            )
+            yield scrapy.Request(url=response.urljoin(cell.extract()))
 
         for store_nav in response.xpath('//ul/li/ul[@class="sub-nav"]'):
             # Each store nav can have multiple services, each with a link under the sub-nav ul.
@@ -25,8 +25,7 @@ class UhaulSpider(scrapy.Spider):
             store_url = store_nav.xpath(".//a/@href").extract_first()
 
             yield scrapy.Request(
-                url=response.urljoin(store_url),
-                callback=self.parse_store,
+                url=response.urljoin(store_url), callback=self.parse_store
             )
 
     def parse_store(self, response):
@@ -76,9 +75,7 @@ class UhaulSpider(scrapy.Spider):
         yield scrapy.Request(
             url="https://www.uhaul.com/Locations/Directions-to-%s/" % ref,
             callback=self.parse_directions,
-            meta={
-                "properties": properties,
-            },
+            meta={"properties": properties},
         )
 
     def hours(self, store_hours):
@@ -115,13 +112,10 @@ class UhaulSpider(scrapy.Spider):
         else:
             h, m = match.groups()
 
-        return "%02d:%02d" % (
-            int(h) + 12 if not open else int(h),
-            int(m),
-        )
+        return "%02d:%02d" % (int(h) + 12 if not open else int(h), int(m))
 
     def parse_directions(self, response):
-        script_str = response.xpath("//script")[-1].extract()
+        script_str = response.xpath('//script/text()[contains(.,"mapPins")]').get()
         matches = re.search(r'"lat":([\-\d\.]*),"long":([\-\d\.]*),', script_str)
         lat, lon = matches.groups() if matches else (None, None)
 
