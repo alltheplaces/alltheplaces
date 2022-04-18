@@ -29,7 +29,7 @@ HEADERS = {
 
 class AldiUKSpider(scrapy.Spider):
     name = "aldi_uk"
-    item_attributes = {"brand": "Aldi"}
+    item_attributes = {"brand": "Aldi", "brand_wikidata": "Q41171672"}
     allowed_domains = ["aldi.co.uk"]
     download_delay = 1.5
     custom_settings = {
@@ -78,16 +78,21 @@ class AldiUKSpider(scrapy.Spider):
 
         properties = {
             "name": data["seoData"]["name"],
-            "ref": data["seoData"]["name"],
-            "addr_full": data["seoData"]["address"]["streetAddress"],
+            "ref": response.request.url.replace("https://www.aldi.co.uk/store/", ""),
+            "street": data["seoData"]["address"]["streetAddress"],
             "city": data["seoData"]["address"]["addressLocality"],
             "postcode": data["seoData"]["address"]["postalCode"],
             "country": data["seoData"]["address"]["addressCountry"],
+            "addr_full": data["seoData"]["address"]["streetAddress"]
+            + data["seoData"]["address"]["addressLocality"]
+            + data["seoData"]["address"]["postalCode"]
+            + data["seoData"]["address"]["addressCountry"],
             "website": response.request.url,
             "opening_hours": str(data["seoData"]["openingHours"])
             .replace("[", "")
             .replace("]", "")
-            .replace("'", ""),
+            .replace("'", "")
+            .replace(", ", "; "),
             "lat": geodata["store"]["latlng"]["lat"],
             "lon": geodata["store"]["latlng"]["lng"],
         }
