@@ -72,17 +72,14 @@ class PetSmartSpider(scrapy.Spider):
         elif "petsmart.com" in response.url:
             country = "US"
 
+        ref = re.search(r"-store(\d+)", response.url).group(1)
+
         addr_lines = [
             s.strip()
             for s in response.xpath(
                 '//p[@class="store-page-details-address"]//text()'
             ).extract()
         ]
-
-        addr_full, city_state_postcode = [s for s in addr_lines if s]
-        # n.b. spaces in canadian postcodes
-        city, state_postcode = city_state_postcode.split(", ", 1)
-        state, postcode = state_postcode.split(" ", 1)
 
         map_url = response.xpath('//img/@src[contains(.,"staticmap")]').extract_first()
         [lat_lon] = urllib.parse.parse_qs(urllib.parse.urlparse(map_url).query)[
@@ -91,20 +88,17 @@ class PetSmartSpider(scrapy.Spider):
         lat, lon = map(float, lat_lon.split(","))
 
         properties = {
-            "name": urllib.parse.unquote(
-                response.xpath("//@data-storename").extract_first()
-            ),
-            "addr_full": addr_full,
-            "city": city,
-            "state": state,
-            "postcode": postcode,
+            "name": response.xpath("//h1/text()").extract_first(),
+            "addr_full": response.xpath(
+                'normalize-space(//p[@class="store-page-details-address"])'
+            ).extract_first(),
             "lat": lat,
             "lon": lon,
             "phone": response.xpath(
                 'normalize-space(//p[@class="store-page-details-phone"])'
             ).extract_first(),
             "country": country,
-            "ref": response.xpath("//@data-storenumber").extract_first(),
+            "ref": ref,
             "website": response.url,
         }
 
