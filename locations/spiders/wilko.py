@@ -9,7 +9,10 @@ class WilkoSpider(SitemapSpider):
     allowed_domains = ["stores.wilko.com"]
     sitemap_urls = ["https://stores.wilko.com/sitemap.xml"]
     sitemap_rules = [
-        ("https:\/\/stores\.wilko\.com\/gb\/([\w-]+)\/([\w-]+)\/?([\w-]+)?", "parse_store"),
+        (
+            "https:\/\/stores\.wilko\.com\/gb\/([\w-]+)\/([\w-]+)\/?([\w-]+)?",
+            "parse_store",
+        ),
     ]
 
     def parse_store(self, response):
