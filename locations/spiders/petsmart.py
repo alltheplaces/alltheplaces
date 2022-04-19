@@ -25,6 +25,8 @@ def convert_24hour(time):
     Takes 12 hour time as a string and converts it to 24 hour time.
     """
 
+    time = time.replace(".", ":")
+
     if len(time[:-2].split(":")) < 2:
         hour = time[:-2]
         minute = "00"
@@ -52,19 +54,14 @@ class PetSmartSpider(scrapy.Spider):
     )
 
     def parse(self, response):
-        state_urls = response.xpath(
-            '//li[@class="col-sm-12 col-md-4"]/a/@href'
-        ).extract()
-        is_store_details_urls = response.xpath(
-            '//a[@class="store-details-link"]/@href'
-        ).extract()
+        for state_url in response.xpath(
+            '//*[@class="all-states-list container"]//@href'
+        ).extract():
+            yield scrapy.Request(response.urljoin(state_url), callback=self.parse_state)
 
-        if not state_urls and is_store_details_urls:
-            for url in is_store_details_urls:
-                yield scrapy.Request(response.urljoin(url), callback=self.parse_store)
-        else:
-            for url in state_urls:
-                yield scrapy.Request(response.urljoin(url))
+    def parse_state(self, response):
+        for href in response.xpath('//a[@class="store-details-link"]/@href').extract():
+            yield scrapy.Request(response.urljoin(href), callback=self.parse_store)
 
     def parse_store(self, response):
         if "petsmart.ca" in response.url:
@@ -85,7 +82,7 @@ class PetSmartSpider(scrapy.Spider):
         [lat_lon] = urllib.parse.parse_qs(urllib.parse.urlparse(map_url).query)[
             "center"
         ]
-        lat, lon = map(float, lat_lon.split(","))
+        lat, lon = lat_lon.split(",")
 
         properties = {
             "name": response.xpath("//h1/text()").extract_first(),
@@ -102,12 +99,9 @@ class PetSmartSpider(scrapy.Spider):
             "website": response.url,
         }
 
-        hours = self.parse_hours(
-            response.xpath('//*[@itemprop="OpeningHoursSpecification"]')
-        )
-
-        if hours:
-            properties["opening_hours"] = hours
+        hours_elements = response.xpath('//*[@itemprop="OpeningHoursSpecification"]')
+        if hours_elements:
+            properties["opening_hours"] = self.parse_hours(hours_elements)
 
         yield GeojsonPointItem(**properties)
 
@@ -115,6 +109,7 @@ class PetSmartSpider(scrapy.Spider):
         opening_hours = OpeningHours()
 
         days = elements.xpath('.//span[@itemprop="dayOfWeek"]/text()').extract()
+
         today = (set(day_mapping) - set(days)).pop()
         days.remove("TODAY")
         days.insert(0, today)
