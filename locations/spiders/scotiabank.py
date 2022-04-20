@@ -40,6 +40,8 @@ class ScotiabankSpider(scrapy.Spider):
     base_url = "https://mapsms.scotiabank.com/branches?1=1&latitude={lat}&longitude={lon}&recordlimit=20&locationtypes=1&options=&languagespoken=any&language=en&address=&province=&city="
     refs = set()
 
+    custom_settings = {"DEFAULT_REQUEST_HEADERS": {"Accept": "application/json"}}
+
     def start_requests(self):
         with open(
             "./locations/searchable_points/ca_centroids_100mile_radius.csv"
@@ -88,8 +90,8 @@ class ScotiabankSpider(scrapy.Spider):
 
             for branch in branches:
                 address = branch["address"]
-                address1, city_state_postal = re.split(r"<br\s?/>", address)
-                city, state, postal = city_state_postal.split(", ")
+                address1, city, state_postal, country = address.rsplit(", ", 3)
+                state, postal = state_postal.rsplit(" ", 1)
                 ref = branch["@attributes"]["id"]
                 self.refs.add(ref)
 
@@ -100,7 +102,7 @@ class ScotiabankSpider(scrapy.Spider):
                     "city": city.strip(),
                     "state": state,
                     "postcode": postal,
-                    "country": "CA",
+                    "country": country,
                     "phone": branch["phoneNo"],
                     "lat": float(branch["@attributes"]["lat"]),
                     "lon": float(branch["@attributes"]["lng"]),
