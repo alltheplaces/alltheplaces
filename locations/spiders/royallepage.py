@@ -11,19 +11,13 @@ class RoyalLePageSpider(scrapy.Spider):
     name = "royallepage"
     allowed_domains = ["royallepage.ca"]
     start_urls = [
-        "https://www.royallepage.ca/en/search/offices/?lat=&lng=&address=&designations=&address_type=&city_name=&prov_code=&sortby=&transactionType=OFFICE&name=&location=&language=&specialization=All",
+        "https://www.royallepage.ca/en/search/offices/?lat=&lng=&address=&designations=&address_type=&city_name=&prov_code=&sortby=&transactionType=OFFICE&name=&location=&language=&specialization=All"
     ]
 
     def parse_location(self, response):
-        map_url = response.xpath(
-            '//div[contains(@class, "map-container")]/a/@href'
-        ).extract_first()
-
-        lat_lon = re.search(r"maps\?q=([\d\.\-]+),([\d\.\-]+)", map_url)
-        if lat_lon:
-            lat, lon = lat_lon.groups()
-        else:
-            lat, lon = None, None
+        map_script = response.xpath('//script/text()[contains(., "staticMap")]').get()
+        lat = re.search("latitude: (.*?),?$", map_script, flags=re.M).group(1)
+        lon = re.search("longitude: (.*?),?$", map_script, flags=re.M).group(1)
 
         properties = {
             "brand": "Royal LePage",
