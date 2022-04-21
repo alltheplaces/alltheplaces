@@ -101,9 +101,10 @@ class CAndASpider(scrapy.Spider):
                 .split("/")
             )
             if len(link) > 6:
-                coords = link[6][1:].split(",")
+                if link[6][0:1] == "@":
+                    coords = link[6][1:].split(",")
 
-                properties["lat"] = coords[0]
-                properties["lon"] = coords[1]
+                    properties["lat"] = coords[0]
+                    properties["lon"] = coords[1]
 
             yield GeojsonPointItem(**properties)
