@@ -60,7 +60,7 @@ class IkeaSpider(scrapy.Spider):
     ]
 
     def parse(self, response):
-        data = json.loads(response.text)
+        data = response.json()
         for store in data:
             if "storePageUrl" not in store:
                 continue
