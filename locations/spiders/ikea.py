@@ -79,7 +79,6 @@ class IkeaSpider(scrapy.Spider):
                 "street": store["address"].get("street"),
                 "city": store["address"].get("city"),
                 "postcode": store["address"].get("zipCode"),
-                "state": store["address"].get("stateProvinceCode"),
                 "country": response.request.url[21:23].upper(),
                 "website": store["storePageUrl"],
                 "ref": store["id"],
@@ -88,5 +87,8 @@ class IkeaSpider(scrapy.Spider):
                     "store_type": store["buClassification"]["code"],
                 },
             }
+
+            if properties["country"] == "US":
+                properties["state"] = store["address"].get("stateProvinceCode")[2:]
 
             yield GeojsonPointItem(**properties)
