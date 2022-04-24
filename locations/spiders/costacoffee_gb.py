@@ -6,8 +6,8 @@ from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
 
 
-class CostaCoffeeSpider(scrapy.Spider):
-    name = "costacoffee"
+class CostaCoffeeGBSpider(scrapy.Spider):
+    name = "costacoffee_gb"
     item_attributes = {"brand": "Costa Coffee", "brand_wikidata": "Q608845"}
     allowed_domains = ["www.costa.co.uk"]
     download_delay = 1
