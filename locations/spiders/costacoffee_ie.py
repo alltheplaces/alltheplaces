@@ -1,44 +1,48 @@
 # -*- coding: utf-8 -*-
-import json
-
 import scrapy
 
 from locations.items import GeojsonPointItem
+from locations.hours import OpeningHours
 
 
-class CostaCoffeeSpider(scrapy.Spider):
-    name = "costacoffeeie"
+class CostaCoffeeIESpider(scrapy.Spider):
+    name = "costacoffee_ie"
     item_attributes = {"brand": "Costa Coffee"}
     allowed_domains = ["costaireland.ie"]
-    start_urls = [
-        "https://www.costaireland.ie/locations/store-locator/map?latitude=53.34463099999999&longitude=-6.259525999999994",
-    ]
-
-    def start_requests(self):
-        template = "https://www.costaireland.ie/api/cf/?locale=en-IE&include=2&content_type=storeV2&limit=500&fields.location[near]=53.344630999999964,-6.259525999999994"
-
-        headers = {
-            "Accept": "application/json",
-        }
-
-        yield scrapy.http.FormRequest(
-            url=template, method="GET", headers=headers, callback=self.parse
-        )
+    # May need to do pagination at some point
+    start_urls = ["https://www.costaireland.ie/api/cf/?content_type=storeV2&limit=500"]
 
     def parse(self, response):
         jsonresponse = response.json()
-        for stores in jsonresponse["items"]:
-            store = json.dumps(stores)
-            store_data = json.loads(store)
+        for store_data in jsonresponse["items"]:
             data = store_data["fields"]
 
             properties = {
-                "ref": data["storeAddress"],
+                "ref": store_data["sys"]["id"],
                 "name": data["storeName"],
                 "addr_full": data["storeAddress"],
                 "country": "IE",
                 "lat": float(data["location"]["lat"]),
                 "lon": float(data["location"]["lon"]),
+                "extras": {},
             }
+
+            label = data["cmsLabel"]
+            if label.startswith("STORE"):
+                properties["extras"]["store_type"] = "store"
+            elif label.startswith("EXPRESS"):
+                properties["extras"]["store_type"] = "express"
+            else:
+                properties["extras"]["operator"] = data["cmsLabel"]
+
+            opening_hours = OpeningHours()
+            for day in ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]:
+                if "open" + day in data:
+                    opening_hours.add_range(
+                        day[0:2],
+                        data["open" + day],
+                        data["close" + day],
+                    )
+            properties["opening_hours"] = opening_hours.as_opening_hours()
 
             yield GeojsonPointItem(**properties)
