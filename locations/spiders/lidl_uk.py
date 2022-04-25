@@ -22,13 +22,18 @@ class LidlUKSpider(scrapy.Spider):
             properties = {
                 "name": store["ShownStoreName"],
                 "ref": store["EntityID"],
-                "addr_full": store["AddressLine"],
+                "street": store["AddressLine"],
                 "city": store["PostalCode"],
                 "postcode": store["Locality"],
                 "country": store["CountryRegion"],
                 "lat": float(store["Latitude"]),
                 "lon": float(store["Longitude"]),
+                "extras": {},
             }
+
+            if store["INFOICON17"] == "customerToilet":
+                properties["extras"]["toilets"] = "yes"
+                properties["extras"]["toilets:access"] = "customers"
 
             yield GeojsonPointItem(**properties)
 
