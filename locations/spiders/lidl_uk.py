@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
-import json
 import re
-
 import scrapy
 
 from locations.items import GeojsonPointItem
@@ -13,15 +11,12 @@ class LidlUKSpider(scrapy.Spider):
     item_attributes = {"brand": "Lidl", "brand_wikidata": "Q151954"}
     allowed_domains = ["virtualearth.net"]
     start_urls = [
-        "https://spatial.virtualearth.net/REST/v1/data/588775718a4b4312842f6dffb4428cff/Filialdaten-UK/Filialdaten-UK?$filter=Adresstyp%20Eq%201&$top=250&$format=json&$skip=0&key=Argt0lKZTug_IDWKC5e8MWmasZYNJPRs0btLw62Vnwd7VLxhOxFLW2GfwAhMK5Xg&Jsonp=displayResultStores",
+        "https://spatial.virtualearth.net/REST/v1/data/588775718a4b4312842f6dffb4428cff/Filialdaten-UK/Filialdaten-UK?$filter=Adresstyp%20Eq%201&$top=250&$format=json&$skip=0&key=Argt0lKZTug_IDWKC5e8MWmasZYNJPRs0btLw62Vnwd7VLxhOxFLW2GfwAhMK5Xg",
     ]
     download_delay = 1
 
     def parse(self, response):
-        data = json.loads(
-            re.search(r"displayResultStores\((.*)\)", response.text).groups()[0]
-        )
-
+        data = response.json()
         stores = data["d"]["results"]
 
         for store in stores:
