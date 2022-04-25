@@ -5,8 +5,8 @@ import scrapy
 from locations.items import GeojsonPointItem
 
 
-class LidlUKSpider(scrapy.Spider):
-    name = "lidl_uk"
+class LidlGBSpider(scrapy.Spider):
+    name = "lidl_gb"
     item_attributes = {"brand": "Lidl", "brand_wikidata": "Q151954"}
     allowed_domains = ["virtualearth.net"]
     start_urls = [
