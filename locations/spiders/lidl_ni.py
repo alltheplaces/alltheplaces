@@ -1,16 +1,15 @@
-# -*- coding: utf-8 -*-
 import re
 import scrapy
 
 from locations.items import GeojsonPointItem
 
 
-class LidlUKSpider(scrapy.Spider):
-    name = "lidl_uk"
+class LidlNISpider(scrapy.Spider):
+    name = "lidl_ni"
     item_attributes = {"brand": "Lidl", "brand_wikidata": "Q151954"}
     allowed_domains = ["virtualearth.net"]
     start_urls = [
-        "https://spatial.virtualearth.net/REST/v1/data/588775718a4b4312842f6dffb4428cff/Filialdaten-UK/Filialdaten-UK?$filter=Adresstyp%20Eq%201&$top=250&$format=json&$skip=0&key=Argt0lKZTug_IDWKC5e8MWmasZYNJPRs0btLw62Vnwd7VLxhOxFLW2GfwAhMK5Xg",
+        "https://spatial.virtualearth.net/REST/v1/data/91bdba818b3c4f5e8b109f223ac4a9f0/Filialdaten-NIE/Filialdaten-NIE?&$filter=Adresstyp%20eq%201&$top=250&$format=json&$skip=0&key=Asz4OJrOqSHy-1xEWYGLbFhH4TnVP0LL1xgj0YBkewA5ZrtHRB2nlpfqzm1lqKPK"
     ]
     download_delay = 1
 
@@ -23,8 +22,8 @@ class LidlUKSpider(scrapy.Spider):
                 "name": store["ShownStoreName"],
                 "ref": store["EntityID"],
                 "street": store["AddressLine"],
-                "city": store["PostalCode"],
-                "postcode": store["Locality"],
+                "city": store["Locality"],
+                "postcode": store["PostalCode"],
                 "country": store["CountryRegion"],
                 "lat": float(store["Latitude"]),
                 "lon": float(store["Longitude"]),
