@@ -78,7 +78,7 @@ class CAndASpider(scrapy.Spider):
                 ).get(),
                 "phone": contact[2].replace("Tel: ", ""),
                 "opening_hours": "; ".join(hours),
-                "street": address[0],
+                "street_address": address[0],
                 "city": address[1],
                 "addr_full": ", ".join(address),
                 "extras": {

@@ -14,7 +14,7 @@ class CostaCoffeePLSpider(scrapy.Spider):
         for store in data:
             properties = {
                 "name": store["name"],
-                "street": store["address"],
+                "street_address": store["address"],
                 "city": store["city"],
                 "postcode": store["postCode"],
                 "country": "PL",
@@ -25,7 +25,7 @@ class CostaCoffeePLSpider(scrapy.Spider):
                             store["address"],
                             store["city"],
                             store["postCode"],
-                            "PL",
+                            "Poland",
                         ),
                     ),
                 ),

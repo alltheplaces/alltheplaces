@@ -68,7 +68,7 @@ class StarbucksEUSpider(scrapy.Spider):
             properties = {
                 "ref": place["id"],
                 "name": place["name"],
-                "street": street,
+                "street_address": street,
                 "city": city,
                 "postcode": postal,
                 "addr_full": place["address"].strip().replace("\n", ", "),

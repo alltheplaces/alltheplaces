@@ -39,7 +39,7 @@ class WilkoSpider(SitemapSpider):
                     '//*[@itemscope][@itemprop="geo"][@itemtype="http://schema.org/GeoCoordinates"]/meta[@itemprop="longitude"]/@content'
                 ).get()
             ),
-            "street": ", ".join(
+            "street_address": ", ".join(
                 root.xpath(
                     '//*[@itemscope][@itemprop="address"][@itemtype="http://schema.org/PostalAddress"]//*[@itemprop="streetAddress"]/descendant-or-self::*/text()'
                 ).getall()
@@ -53,15 +53,20 @@ class WilkoSpider(SitemapSpider):
             "country": "GB",
         }
 
-        properties["street"] = properties["street"].strip().replace(" ,", ",")
+        properties["street_address"] = (
+            properties["street_address"].strip().replace(" ,", ",")
+        )
         properties["phone"] = "+44 " + properties["phone"][1:]
         properties["postcode"] = properties["postcode"].strip()
         properties["addr_full"] = ", ".join(
-            (
-                properties["street"],
-                properties["city"],
-                properties["postcode"],
-                properties["country"],
+            filter(
+                None,
+                (
+                    properties["street_address"],
+                    properties["city"],
+                    properties["postcode"],
+                    "United Kingdom",
+                ),
             )
         )
 
