@@ -53,7 +53,9 @@ class WilkoSpider(SitemapSpider):
             "country": "GB",
         }
 
-        properties["street"] = properties["street"].strip().replace(" ,", ",")
+        properties["street_address"] = (
+            properties["street_address"].strip().replace(" ,", ",")
+        )
         properties["phone"] = "+44 " + properties["phone"][1:]
         properties["postcode"] = properties["postcode"].strip()
         properties["addr_full"] = ", ".join(
