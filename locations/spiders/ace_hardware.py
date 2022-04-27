@@ -29,7 +29,7 @@ class AceHardwareSpider(scrapy.Spider):
         for day in DAY_MAPPING:
             d = day.title()[:2]
 
-            if lis[day]["label"] == "0000 - 0000":
+            if lis[day]["label"] in ["0000 - 0000", "1201 - 1201"]:
                 continue
 
             o.add_range(d, lis[day]["openTime"], lis[day]["closeTime"])
@@ -68,7 +68,4 @@ class AceHardwareSpider(scrapy.Spider):
         for store_url in (
             response.css("div.store-directory-list-item").xpath("div/a/@href").extract()
         ):
-            yield scrapy.Request(
-                response.urljoin(store_url),
-                callback=self.parse_store,
-            )
+            yield scrapy.Request(response.urljoin(store_url), callback=self.parse_store)
