@@ -22,10 +22,22 @@ class LidlFRSpider(scrapy.Spider):
             properties = {
                 "name": store["ShownStoreName"],
                 "ref": store["EntityID"],
-                "street": store["AddressLine"],
+                "street_address": store["AddressLine"],
                 "city": store["Locality"],
                 "postcode": store["PostalCode"],
                 "country": store["CountryRegion"],
+                "addr_full": ", ".join(
+                    filter(
+                        None,
+                        (
+                            store["AddressLine"],
+                            store["Locality"],
+                            store["CityDistrict"],
+                            store["PostalCode"],
+                            "France",
+                        ),
+                    )
+                ),
                 "lat": float(store["Latitude"]),
                 "lon": float(store["Longitude"]),
             }

@@ -21,10 +21,23 @@ class LidlIESpider(scrapy.Spider):
             properties = {
                 "name": store["ShownStoreName"],
                 "ref": store["EntityID"],
-                "street": store["AddressLine"],
-                "city": store["Locality"],
+                "street_address": store["AddressLine"],
+                "city": store["CityDistrict"],
+                "state": store["Locality"],
                 "postcode": store["PostalCode"],
                 "country": store["CountryRegion"],
+                "addr_full": ", ".join(
+                    filter(
+                        None,
+                        (
+                            store["AddressLine"],
+                            store["CityDistrict"],
+                            store["Locality"],
+                            store["PostalCode"],
+                            "Ireland",
+                        ),
+                    )
+                ),
                 "lat": float(store["Latitude"]),
                 "lon": float(store["Longitude"]),
                 "extras": {},

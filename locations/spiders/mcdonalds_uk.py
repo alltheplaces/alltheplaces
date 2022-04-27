@@ -43,17 +43,20 @@ class McDonaldsUKSpider(scrapy.Spider):
                     + ".html",
                     "ref": store["properties"]["id"],
                     "name": store["properties"]["name"],
-                    "street": store["properties"]["addressLine1"],
+                    "street_address": store["properties"]["addressLine1"],
                     "city": store["properties"]["addressLine3"],
                     "postcode": store["properties"]["postcode"],
                     "country": "GB",
                     "addr_full": ", ".join(
-                        (
-                            store["properties"]["addressLine1"],
-                            store["properties"]["addressLine3"],
-                            store["properties"]["postcode"],
-                            "United Kingdom",
-                        )
+                        filter(
+                            None,
+                            (
+                                store["properties"]["addressLine1"],
+                                store["properties"]["addressLine3"],
+                                store["properties"]["postcode"],
+                                "United Kingdom",
+                            ),
+                        ),
                     ),
                     "phone": "+44 " + store["properties"]["telephone"][1:],
                     "lat": float(store["geometry"]["coordinates"][1]),

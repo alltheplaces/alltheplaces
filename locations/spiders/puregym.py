@@ -27,27 +27,29 @@ class PureGymSpider(SitemapSpider):
         )
 
         properties = {
+            "ref": response.xpath('//meta[@itemprop="gymId"]/@content').get(),
             "website": response.request.url,
             "name": ld["name"],
             "phone": ld["telephone"],
-            "street": ld["location"]["address"]["streetAddress"],
+            "street_address": ld["location"]["address"]["streetAddress"],
             "city": ld["location"]["address"]["addressLocality"],
             "postcode": ld["location"]["address"]["postalCode"],
             "country": "GB",
+            "addr_full": ", ".join(
+                filter(
+                    None,
+                    (
+                        ld["location"]["address"]["streetAddress"],
+                        ld["location"]["address"]["addressLocality"],
+                        ld["location"]["address"]["postalCode"],
+                        "United Kingdom",
+                    ),
+                )
+            ),
             "extras": {
                 "email": ld["email"],
             },
         }
-
-        properties["addr_full"] = ", ".join(
-            (
-                properties["street"],
-                properties["city"],
-                properties["postcode"],
-                properties["country"],
-            )
-        )
-        properties["ref"] = response.xpath('//meta[@itemprop="gymId"]/@content').get()
 
         maplink = urlparse(
             response.xpath(

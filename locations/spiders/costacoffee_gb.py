@@ -41,7 +41,7 @@ class CostaCoffeeGBSpider(scrapy.Spider):
                         store_data["storeAddress"]["addressLine3"],
                         store_data["storeAddress"]["city"],
                         store_data["storeAddress"]["postCode"],
-                        store_data["storeAddress"]["country"],
+                        "United Kingdom",
                     ),
                 ),
             )
@@ -59,6 +59,7 @@ class CostaCoffeeGBSpider(scrapy.Spider):
                 "ref": store_data["storeNo8Digit"],
                 "name": store_data["storeNameExternal"],
                 "addr_full": addr_full.strip(),
+                "street_address": store_data["storeAddress"]["addressLine1"],
                 "city": store_data["storeAddress"]["city"],
                 "postcode": store_data["storeAddress"]["postCode"],
                 "country": store_data["storeAddress"]["country"],

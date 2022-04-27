@@ -76,7 +76,7 @@ class IkeaSpider(scrapy.Spider):
                 "lat": store["lat"],
                 "lon": store["lng"],
                 "name": store["displayName"],
-                "street": store["address"].get("street"),
+                "street_address": store["address"].get("street"),
                 "city": store["address"].get("city"),
                 "postcode": store["address"].get("zipCode"),
                 "country": response.request.url[21:23].upper(),
