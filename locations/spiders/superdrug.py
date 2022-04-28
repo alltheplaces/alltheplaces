@@ -4,6 +4,7 @@ import json
 import scrapy
 
 from locations.items import GeojsonPointItem
+from locations.hours import OpeningHours
 
 
 class SuperdrugSpider(scrapy.Spider):
@@ -13,6 +14,10 @@ class SuperdrugSpider(scrapy.Spider):
     download_delay = 0.5
 
     start_urls = ["https://www.superdrug.com/stores/a-to-z"]
+
+    custom_settings = {
+        "USER_AGENT": "Mozilla/5.0 (X11; Linux x86_64; rv:99.0) Gecko/20100101 Firefox/99.0"
+    }
 
     def parse(self, response):
         urls = response.xpath('//a[@class="row store-link"]/@href').extract()
@@ -28,9 +33,11 @@ class SuperdrugSpider(scrapy.Spider):
         )
 
         properties = {
-            "name": data["name"],
-            "ref": data["name"],
-            "addr_full": data["address"]["streetAddress"],
+            "name": data["name"].replace("Superdrug", "").strip(),
+            "ref": data["@id"],
+            "street_address": data["address"]["streetAddress"]
+            .replace("Superdrug", "")
+            .strip(),
             "city": data["address"]["addressLocality"],
             "state": data["address"]["addressRegion"],
             "postcode": data["address"]["postalCode"],
@@ -48,4 +55,15 @@ class SuperdrugSpider(scrapy.Spider):
                 ).extract_first()
             ),
         }
+
+        oh = OpeningHours()
+
+        for rule in data["OpeningHoursSpecification"]:
+            oh.add_range(
+                day=rule["dayOfWeek"][0:2],
+                open_time=rule["opens"],
+                close_time=rule["closes"],
+                time_format="%I:%M %p",
+            )
+
         yield GeojsonPointItem(**properties)
