@@ -23,7 +23,7 @@ class DavidsBridalSpider(scrapy.Spider):
         opening_hours = OpeningHours()
         for day in DAY_MAPPING:
             open_close = hours[DAY_MAPPING[day]]
-            if open_close.lower() in ["closed", ""]:
+            if open_close.lower() in ["closed", "", "-"]:
                 continue
             else:
                 open_time, close_time = re.split(r" [-\u2013] ", open_close)
