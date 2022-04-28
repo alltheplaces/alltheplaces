@@ -3,7 +3,7 @@ import re
 import json
 
 import scrapy
-import scrapy.downloadermiddlewares.retry.get_retry_request
+from scrapy.downloadermiddlewares.retry import get_retry_request
 
 from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
