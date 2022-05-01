@@ -9,6 +9,7 @@ mapping = (
     ("addr_full", "addr:full"),
     ("housenumber", "addr:housenumber"),
     ("street", "addr:street"),
+    ("street_address", "addr:street_address"),
     ("city", "addr:city"),
     ("state", "addr:state"),
     ("postcode", "addr:postcode"),

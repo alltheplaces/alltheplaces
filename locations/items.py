@@ -15,6 +15,7 @@ class GeojsonPointItem(scrapy.Item):
     addr_full = scrapy.Field()
     housenumber = scrapy.Field()
     street = scrapy.Field()
+    street_address = scrapy.Field()
     city = scrapy.Field()
     state = scrapy.Field()
     postcode = scrapy.Field()

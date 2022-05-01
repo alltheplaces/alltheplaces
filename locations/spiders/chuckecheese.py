@@ -8,65 +8,28 @@ from locations.hours import OpeningHours
 
 class ChuckECheeseSpider(scrapy.Spider):
     name = "chuckecheese"
-    item_attributes = {"brand": "Chuck E Cheese"}
+    item_attributes = {"brand": "Chuck E Cheese", "brand_wikidata": "Q2438391"}
     allowed_domains = ["chuckecheese.com"]
+    start_urls = ["https://locations.chuckecheese.com"]
 
-    def start_requests(self):
-        countries = ["us", "ca", "pr", "gu"]
-        base_url = "https://locations.chuckecheese.com/"
+    def parse(self, response):
+        for href in response.xpath(
+            '//*[@class="Teaser-link" or @class="Directory-listLink"]/@href'
+        ).extract():
+            yield scrapy.Request(response.urljoin(href))
 
-        for country in countries:
-            url = base_url + country
-
-            yield scrapy.Request(url=url, callback=self.parse_state)
-
-    def parse_state(self, response):
-        states = response.xpath('//*[@class="Directory-listLink"]/@href').extract()
-
-        base_url = "https://locations.chuckecheese.com/"
-
-        for state in states:
-            url = base_url + state
-            if len(state) > 5:
-                yield scrapy.Request(url=url, callback=self.parse_store)
-            else:
-                yield scrapy.Request(url=url, callback=self.parse_region)
-
-    def parse_region(self, response):
-        city_count = response.xpath(
-            '//*[@class="Directory-listLink"]/@data-count'
-        ).extract()
-        cities = response.xpath('//*[@class="Directory-listLink"]/@href').extract()
-
-        base_url = "https://locations.chuckecheese.com"
-
-        for count, city in zip(city_count, cities):
-            city = city[2:]
-            url = base_url + city
-            if count == "(1)":
-                yield scrapy.Request(url=url, callback=self.parse_store)
-            else:
-                yield scrapy.Request(url=url, callback=self.parse_city)
-
-    def parse_city(self, response):
-        stores = response.xpath('//*[@class="Teaser-link"]/@href').extract()
-
-        base_url = "https://locations.chuckecheese.com"
-
-        for store in stores:
-            store = store[5:]
-            url = base_url + store
-
-            yield scrapy.Request(url=url, callback=self.parse_store)
+        if response.xpath('//*[@itemtype="http://schema.org/LocalBusiness"]'):
+            yield from self.parse_store(response)
 
     def parse_hours(self, hours):
         opening_hours = OpeningHours()
         hours = list(dict.fromkeys(hours))
 
         for hour in hours:
-            hour = hour.split(" ")
-            day = hour[0]
-            open_time, close_time = hour[1].split("-")
+            day, interval = hour.split(" ")
+            if interval == "Closed":
+                continue
+            open_time, close_time = interval.split("-")
 
             opening_hours.add_range(
                 day=day, open_time=open_time, close_time=close_time, time_format="%H:%M"
@@ -104,14 +67,11 @@ class ChuckECheeseSpider(scrapy.Spider):
             "website": response.url,
         }
 
-        try:
-            hours = self.parse_hours(
-                response.xpath('//*[@itemprop="openingHours"]/@content').extract()
-            )
+        hours = self.parse_hours(
+            response.xpath('//*[@itemprop="openingHours"]/@content').extract()
+        )
 
-            if hours:
-                properties["opening_hours"] = hours
-        except:
-            pass
+        if hours:
+            properties["opening_hours"] = hours
 
         yield GeojsonPointItem(**properties)

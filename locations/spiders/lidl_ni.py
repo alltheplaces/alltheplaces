@@ -1,16 +1,15 @@
-# -*- coding: utf-8 -*-
 import re
 import scrapy
 
 from locations.items import GeojsonPointItem
 
 
-class LidlFRSpider(scrapy.Spider):
-    name = "lidl_fr"
+class LidlNISpider(scrapy.Spider):
+    name = "lidl_ni"
     item_attributes = {"brand": "Lidl", "brand_wikidata": "Q151954"}
     allowed_domains = ["virtualearth.net"]
     start_urls = [
-        "https://spatial.virtualearth.net/REST/v1/data/717c7792c09a4aa4a53bb789c6bb94ee/Filialdaten-FR/Filialdaten-FR?$filter=Adresstyp%20Eq%201&$top=250&$format=json&$skip=0&key=AgC167Ojch2BCIEvqkvyrhl-yLiZLv6nCK_p0K1wyilYx4lcOnTjm6ud60JnqQAa"
+        "https://spatial.virtualearth.net/REST/v1/data/91bdba818b3c4f5e8b109f223ac4a9f0/Filialdaten-NIE/Filialdaten-NIE?&$filter=Adresstyp%20eq%201&$top=250&$format=json&$skip=0&key=Asz4OJrOqSHy-1xEWYGLbFhH4TnVP0LL1xgj0YBkewA5ZrtHRB2nlpfqzm1lqKPK"
     ]
     download_delay = 1
 
@@ -32,15 +31,19 @@ class LidlFRSpider(scrapy.Spider):
                         (
                             store["AddressLine"],
                             store["Locality"],
-                            store["CityDistrict"],
                             store["PostalCode"],
-                            "France",
+                            "United Kingdom",
                         ),
                     )
                 ),
                 "lat": float(store["Latitude"]),
                 "lon": float(store["Longitude"]),
+                "extras": {},
             }
+
+            if store["INFOICON17"] == "customerToilet":
+                properties["extras"]["toilets"] = "yes"
+                properties["extras"]["toilets:access"] = "customers"
 
             yield GeojsonPointItem(**properties)
 

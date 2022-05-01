@@ -34,17 +34,20 @@ class AldiUKSpider(SitemapSpider):
         properties = {
             "name": data["seoData"]["name"],
             "ref": geodata["store"]["code"],
-            "street": data["seoData"]["address"]["streetAddress"],
+            "street_address": data["seoData"]["address"]["streetAddress"],
             "city": data["seoData"]["address"]["addressLocality"],
             "postcode": data["seoData"]["address"]["postalCode"],
             "country": data["seoData"]["address"]["addressCountry"],
             "addr_full": ", ".join(
-                [
-                    data["seoData"]["address"]["streetAddress"],
-                    data["seoData"]["address"]["addressLocality"],
-                    data["seoData"]["address"]["postalCode"],
-                    data["seoData"]["address"]["addressCountry"],
-                ]
+                filter(
+                    None,
+                    (
+                        data["seoData"]["address"]["streetAddress"],
+                        data["seoData"]["address"]["addressLocality"],
+                        data["seoData"]["address"]["postalCode"],
+                        data["seoData"]["address"]["addressCountry"],
+                    ),
+                )
             ),
             "website": response.request.url,
             "opening_hours": str(data["seoData"]["openingHours"])

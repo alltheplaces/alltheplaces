@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-import csv
-
 import scrapy
 
 from locations.items import GeojsonPointItem
@@ -126,18 +124,21 @@ class BurgerKingUKSpider(scrapy.Spider):
                 "ref": row["storeId"],
                 "name": row["name"],
                 "phone": row["phoneNumber"],
-                "street": row["physicalAddress"]["address1"],
+                "street_address": row["physicalAddress"]["address1"],
                 "city": row["physicalAddress"]["city"],
                 "state": row["physicalAddress"]["stateProvince"],
                 "postcode": row["physicalAddress"]["postalCode"],
                 "country": "GB",
                 "addr_full": ", ".join(
-                    (
-                        row["physicalAddress"]["address1"],
-                        row["physicalAddress"]["address2"],
-                        row["physicalAddress"]["city"],
-                        row["physicalAddress"]["postalCode"],
-                        "United Kingdom",
+                    filter(
+                        None,
+                        (
+                            row["physicalAddress"]["address1"],
+                            row["physicalAddress"]["address2"],
+                            row["physicalAddress"]["city"],
+                            row["physicalAddress"]["postalCode"],
+                            "United Kingdom",
+                        ),
                     )
                 ),
                 "extras": {

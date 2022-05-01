@@ -46,5 +46,11 @@ class NandosUKSpider(scrapy.Spider):
                 "lat": store_data["geo"].get("latitude"),
                 "lon": store_data["geo"].get("longitude"),
             }
+            nino = response.xpath(
+                "//div[contains(concat(' ',normalize-space(@class),' '),' pane--restaurant-details-nino ')]"
+            ).get()
+            if nino:
+                properties["brand"] = "Nino Nando's"
+                properties["brand_wikidata"] = "Q111753283"
 
             yield GeojsonPointItem(**properties)
