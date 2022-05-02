@@ -31,7 +31,7 @@ class GrimaldisPizzeriaSpider(scrapy.Spider):
             properties = {
                 "ref": website.split("/")[-2],
                 "name": loc.css(".loc_title::text").get(),
-                "addr_full": address.street_address,
+                "street_address": address.street_address,
                 "city": address.city,
                 "state": address.state,
                 "postcode": address.zip,
