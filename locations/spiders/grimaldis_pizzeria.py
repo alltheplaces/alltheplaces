@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import re
 import scrapy
 from collections import namedtuple
 from locations.items import GeojsonPointItem
@@ -10,13 +11,25 @@ class GrimaldisPizzeriaSpider(scrapy.Spider):
     start_urls = ("https://www.grimaldispizzeria.com/locations/",)
 
     def parse(self, response):
-        locations = response.css("div.location_block")
+        # Get coordinates embedded in script tag
+        script = response.css("script:contains('stateLatLngs')::text").get()
+        coordinates = {}
+        for latlng in re.findall(r"latlng:.(.*?https.*?),", script):
+            lat = re.search(r"lat: (.+?),", latlng).group(1)
+            long = re.search(r"lng: (.+?)},", latlng).group(1)
+            website = re.search(r"'(https.*)'", latlng).group(1)
+            coordinates[website] = [lat, long]
 
+        # Get location data from each location block
+        locations = response.css("div.location_block")
         for loc in locations:
             address = self._format_address(loc.css(".store_address::text").getall())
+            website = loc.css(
+                ".cta_row .cta_button:last-child .g_cta::attr(href)"
+            ).get()
 
             properties = {
-                "ref": loc.css("h3.loc_title::text").get(),
+                "ref": website.split("/")[-2],
                 "name": loc.css(".loc_title::text").get(),
                 "addr_full": address.street_address,
                 "city": address.city,
@@ -26,6 +39,9 @@ class GrimaldisPizzeriaSpider(scrapy.Spider):
                 "opening_hours": self._format_store_hours(
                     loc.css(".store_hours::text").getall()
                 ),
+                "website": website,
+                "lat": coordinates[website][0],
+                "lon": coordinates[website][1],
             }
 
             yield GeojsonPointItem(**properties)
