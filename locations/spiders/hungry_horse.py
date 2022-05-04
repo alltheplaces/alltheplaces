@@ -21,6 +21,8 @@ class HungryHorseSpider(SitemapSpider):
         ld = json.loads(
             response.xpath('//script[@type="application/ld+json"]/text()').get()
         )
+        if not ld.get("branchCode"):
+            return
         properties = {
             "ref": ld["branchCode"],
             "website": response.request.url,
