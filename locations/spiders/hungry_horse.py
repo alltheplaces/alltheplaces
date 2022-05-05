@@ -17,6 +17,14 @@ class HungryHorseSpider(SitemapSpider):
     ]
     download_delay = 0.5
 
+    def sitemap_filter(self, entries):
+        for entry in entries:
+            if (
+                entry["loc"]
+                != "https://www.hungryhorse.co.uk/pubs/west-lothian/lime-kiln/"
+            ):
+                yield entry
+
     def parse(self, response):
         ld = json.loads(
             response.xpath('//script[@type="application/ld+json"]/text()').get()
