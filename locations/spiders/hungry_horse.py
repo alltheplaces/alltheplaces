@@ -11,7 +11,7 @@ class HungryHorseSpider(SitemapSpider):
     sitemap_urls = ["https://www.hungryhorse.co.uk/xml-sitemap"]
     sitemap_rules = [
         (
-            "https:\/\/www\.hungryhorse\.co\.uk\/pubs\/([\w-]+)\/([\w-]+)\/$",
+            r"https://www.hungryhorse.co.uk/pubs/(west-[\w-]+)/([\w-]+)/$",
             "parse",
         ),
     ]
