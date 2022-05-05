@@ -19,6 +19,7 @@ DAY_MAPPING = {
 class SpecsaversSpider(scrapy.Spider):
     download_delay = 5
     name = "specsavers"
+    item_attributes = {"brand": "Specsavers", "brand_wikidata": "Q2000610"}
     allowed_domains = ["specsavers.co.uk"]
     start_urls = [
         "https://www.specsavers.co.uk/stores/full-store-list",
