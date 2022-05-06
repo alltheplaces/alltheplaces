@@ -7,7 +7,7 @@ from locations.hours import OpeningHours
 
 
 class SpecsaversSpider(scrapy.spiders.SitemapSpider):
-    download_delay = 5
+    download_delay = 1
     name = "specsavers"
     item_attributes = {"brand": "Specsavers", "brand_wikidata": "Q2000610"}
     allowed_domains = ["specsavers.co.uk"]
