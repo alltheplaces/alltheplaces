@@ -1,82 +1,57 @@
-import scrapy
+# -*- coding: utf-8 -*-
+from scrapy.spiders import SitemapSpider
+from scrapy.downloadermiddlewares.retry import get_retry_request
+
 import re
 import json
+
+from locations.hours import OpeningHours
 from locations.items import GeojsonPointItem
 
-DAY_MAPPING = {"M": "Mo", "T": "Tu", "W": "We", "F": "Fr", "Sat": "Sa", "Sun": "Su"}
 
-
-class DillardsSpider(scrapy.Spider):
-
+class DillardsSpider(SitemapSpider):
     name = "dillards"
-    item_attributes = {"brand": "Dillard's"}
+    item_attributes = {"brand": "Dillard's", "brand_wikidata": "Q844805"}
     allowed_domains = ["www.dillards.com"]
+    sitemap_urls = ("https://www.dillards.com/sitemap/sitemap_storeLocator_1.xml",)
     download_delay = 0.5
-    start_urls = ("https://www.dillards.com/stores",)
 
-    def parse_times(self, hour):
-        if hour.strip() == "Open 24 hours":
-            return "24/7"
-        if re.search("PM", hour):
-            hour = re.sub("PM", "", hour).strip()
-            hour_min = hour.split(":")
-            if int(hour_min[0]) < 12:
-                hour_min[0] = str(12 + int(hour_min[0]))
-            return ":".join(hour_min)
-        if re.search("AM", hour):
-            hour = re.sub("AM", "", hour).strip()
-            hour_min = hour.split(":")
-            if len(hour_min[0]) < 2:
-                hour_min[0] = hour_min[0].zfill(2)
-            else:
-                hour_min[0] = str(int(hour_min[0]))
-
-            return ":".join(hour_min)
-
-    def parse_stores(self, response):
-        data = response.xpath(
-            '//script[@type="application/ld+json"]/text()'
-        ).extract_first()
-        store = json.loads(
-            response.xpath(
-                '//script[@type="application/ld+json"]/text()'
-            ).extract_first()[: len(data) - 4]
-        )
-        properties = {
-            "addr_full": store["location"]["address"]["streetAddress"],
-            "phone": store["telephone"],
-            "name": store["name"],
-            "city": store["telephone"],
-            "state": store["location"]["address"]["addressRegion"],
-            "postcode": store["location"]["address"]["postalCode"],
-            "ref": re.findall(r"[0-9]+$", response.url)[0],
-            "website": response.url,
-            "lat": re.findall(
-                r"[0-9.,-]+$",
-                response.xpath('//a[@class="direction-link"]/@href').extract_first(),
-            )[0].split(",")[0],
-            "lon": re.findall(
-                r"[0-9.,-]+$",
-                response.xpath('//a[@class="direction-link"]/@href').extract_first(),
-            )[0].split(",")[1],
-        }
-
-        hours = ""
-        for time in store["openingHoursSpecification"]:
-            hours = (
-                hours
-                + time["dayOfWeek"]["name"][:2]
-                + " "
-                + self.parse_times(time["opens"])
-                + "-"
-                + self.parse_times(time["closes"])
-                + "; "
-            )
-        if hours:
-            properties["opening_hours"] = hours
-        yield GeojsonPointItem(**properties)
+    sitemap_rules = [(r"https://www.dillards.com/stores/.*/.*", "parse")]
 
     def parse(self, response):
-        urls = response.xpath('//span[@class="mallname"]/a/@href').extract()
-        for path in urls:
-            yield scrapy.Request(response.urljoin(path), callback=self.parse_stores)
+        if 'Access Denied' in response.text:
+             return get_retry_request(response.request, spider=self, reason="throttle")
+
+        ldjson = response.xpath(
+            '//script[@type="application/ld+json"]/text()[contains(.,"DepartmentStore")]'
+        ).get()
+        data = json.loads(ldjson)
+
+        script = response.xpath(
+            '//script/text()[contains(.,"__INITIAL_STATE__")]'
+        ).get()
+        script_data = json.decoder.JSONDecoder().raw_decode(script, script.index("{"))[
+            0
+        ]
+        lat = script_data["contentData"]["store"]["latitude"]
+        lon = script_data["contentData"]["store"]["longitude"]
+
+        hours = OpeningHours()
+        for row in data["openingHoursSpecification"]:
+            day = row["dayOfWeek"]["name"][:2]
+            hours.add_range(day, row["opens"], row["closes"], "%I:%M %p")
+
+        properties = {
+            "ref": response.css(".storeNumber::text").get(),
+            "lat": lat,
+            "lon": lon,
+            "website": response.url,
+            "name": data["name"],
+            "phone": data["telephone"],
+            "street_address": data["address"]["streetAddress"],
+            "city": data["address"]["addressLocality"],
+            "state": data["address"]["addressRegion"],
+            "postcode": data["address"]["postalCode"],
+            "opening_hours": hours.as_opening_hours(),
+        }
+        return GeojsonPointItem(**properties)
