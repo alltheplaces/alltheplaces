@@ -19,6 +19,14 @@ class SpecsaversSpider(scrapy.spiders.SitemapSpider):
         ),
     ]
 
+    custom_settings = {"REDIRECT_ENABLED": False}
+    # Stores that include hearing tests are given an extra page e.g.
+    # https://www.specsavers.co.uk/stores/barnsley-hearing
+    # We can't just ignore any that end with "-hearing" as some are valid e.g
+    # https://www.specsavers.co.uk/stores/eastdereham-hearing
+    # However the fake ones currently redirect to "?hearing=true"
+    # So we can disable redirecting
+
     def sitemap_filter(self, entries):
         for entry in entries:
             if entry["loc"] != "https://www.specsavers.co.uk/stores/highlands":
