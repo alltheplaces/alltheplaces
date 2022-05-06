@@ -19,8 +19,8 @@ class DillardsSpider(SitemapSpider):
     sitemap_rules = [(r"https://www.dillards.com/stores/.*/.*", "parse")]
 
     def parse(self, response):
-        if 'Access Denied' in response.text:
-             return get_retry_request(response.request, spider=self, reason="throttle")
+        if "Access Denied" in response.text:
+            return get_retry_request(response.request, spider=self, reason="throttle")
 
         ldjson = response.xpath(
             '//script[@type="application/ld+json"]/text()[contains(.,"DepartmentStore")]'
