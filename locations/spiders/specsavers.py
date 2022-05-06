@@ -19,6 +19,11 @@ class SpecsaversSpider(scrapy.spiders.SitemapSpider):
         ),
     ]
 
+    def sitemap_filter(self, entries):
+        for entry in entries:
+            if entry["loc"] != "https://www.specsavers.co.uk/stores/highlands":
+                yield entry
+
     def parse_store(self, response):
         jsonld = response.xpath('//script[@type="application/ld+json"]/text()').get()
         ld = json.loads(jsonld)
