@@ -44,10 +44,11 @@ class WaffleHouseSpider(scrapy.Spider):
             "website": response.url,
             "name": data["name"],
             "phone": data["telephone"],
-            "addr_full": data["address"]["streetAddress"],
+            "street_address": data["address"]["streetAddress"],
             "city": data["address"]["addressLocality"],
             "state": data["address"]["addressRegion"],
             "postcode": data["address"]["postalCode"],
             "opening_hours": hours.as_opening_hours(),
         }
+
         yield GeojsonPointItem(**properties)
