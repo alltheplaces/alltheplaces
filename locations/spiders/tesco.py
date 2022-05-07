@@ -14,26 +14,6 @@ DAY_MAPPING = {
     "SUNDAY": "Su",
 }
 
-COOKIES = {
-    "bm_sz": "04B124C1C96D68082A9F61BAAAF0B6D5~YAAQdjsvF22E8Xl6AQAACr1VfAxPEt+enarZyrOZrBaNvyuX71lK5QPuDR/FgDEWBZVMRhjiIf000W7Z1PiAjxobrz2Y5LcYMH3CvUNvpdS3MjVLUMGwMEBCf9L5nD5Gs9ho2YL8T7Tz7lYvpolvaOlJnKrHyhCFxxk/uyBZ2G/0QrGKLwSaCQShDsz7ink=",
-    "_abck": "440E40C406E69413DCCC08ABAA3E9022~-1~YAAQdjsvF26E8Xl6AQAACr1VfAYznoJdJhX7TNIZW1Rfh6qRhzquXg+L1TWoaL7nZUjXlNls2iPIKFQrCdrWqY/CNXW+mHyXibInMflIXJi5VVB/Swq53kABYJDuXYSlCunYvJAzMSr1q12NOYswz134Y8HRNzVWhkb2jMS5whmHxS/v0vniIvS1TQtKjEQlMGzQYmN41CmLX0JobipQhDtUB4VyNwztb2DCAZiqDX8BLwWg7h/DtPd4158qU69hNhayFTgWmD76/MiR8/T536tMmcoRyWLl4fEtP/XUmKOcksuZO7dbfNxXBffTxIXPYwf1eO77LNuZTCQq5kfsGZLJX8ODju2KSjnIF1vdnyHAe98FDIm+hw==~-1~-1~-1",
-}
-
-HEADERS = {
-    "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
-    "accept-encoding": "gzip, deflate, br",
-    "cache-control": "max-age=0",
-    "referer": "https://www.tesco.com/store-locator/?q=london&qp=london&l=en",
-    "sec-ch-ua": '" Not;A Brand";v="99", "Google Chrome";v="91", "Chromium";v="91"',
-    "sec-ch-ua-mobile": "?0",
-    "sec-fetch-dest": "document",
-    "sec-fetch-mode": "navigate",
-    "sec-fetch-site": "same-origin",
-    "sec-fetch-user": "?1",
-    "upgrade-insecure-requests": "1",
-    "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.106 Safari/537.36",
-}
-
 
 class TescoSpider(SitemapSpider):
     name = "tesco"
@@ -41,7 +21,7 @@ class TescoSpider(SitemapSpider):
     allowed_domains = ["www.tesco.com"]
     download_delay = 0.3
     custom_settings = {
-        "USER_AGENT": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.86 Safari/537.36",
+        "USER_AGENT": "Mozilla/5.0 (X11; Linux x86_64; rv:99.0) Gecko/20100101 Firefox/99.0",
     }
     sitemap_urls = [
         "https://www.tesco.com/store-locator/sitemap.xml",
