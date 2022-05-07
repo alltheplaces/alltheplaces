@@ -1,5 +1,6 @@
 import json
 import scrapy
+
 from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
 
@@ -36,7 +37,7 @@ HEADERS = {
 
 class TescoSpider(scrapy.Spider):
     name = "tesco"
-    item_attributes = {"brand": "Tesco"}
+    item_attributes = {"brand": "Tesco", "brand_wikidata": "Q487494"}
     allowed_domains = ["www.tesco.com"]
     download_delay = 0.3
     custom_settings = {
@@ -149,5 +150,15 @@ class TescoSpider(scrapy.Spider):
                 ).extract_first()
                 if hours:
                     properties["opening_hours"] = self.store_hours(hours)
+
+                if properties["name"].endswith(" Express"):
+                    properties["brand"] = "Tesco Express"
+                    properties["brand_wikidata"] = "Q98456772"
+                elif properties["name"].endswith(" Superstore"):
+                    properties["brand"] = "Tesco Superstore"
+                    properties["brand_wikidata"] = "Q487494"
+                elif properties["name"].endswith(" Extra"):
+                    properties["brand"] = "Tesco Extra"
+                    properties["brand_wikidata"] = "Q25172225"
 
                 yield GeojsonPointItem(**properties)
