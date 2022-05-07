@@ -27,7 +27,10 @@ class TescoSpider(SitemapSpider):
         "https://www.tesco.com/store-locator/sitemap.xml",
     ]
     sitemap_rules = [
-        ("https:\/\/www\.tesco\.com\/store-locator\/([\w\-\.]+)\/([\d]+\/)?([\w\-\.\(\)]+)$", "parse_store")
+        (
+            "https:\/\/www\.tesco\.com\/store-locator\/([\w\-\.]+)\/([\d]+\/)?([\w\-\.\(\)]+)$",
+            "parse_store",
+        )
     ]
 
     def store_hours(self, store_hours):
@@ -47,67 +50,62 @@ class TescoSpider(SitemapSpider):
         return opening_hours.as_opening_hours()
 
     def parse_store(self, response):
-        city_page = response.xpath(
-            '//span[@class="Hero-title Hero-title--top"]/text()'
+        store_details = response.xpath(
+            '//script[@type="application/json" and contains(text(),"storeID")]/text()'
         ).extract_first()
-
-        if not city_page:  # and is a store page
-            store_details = response.xpath(
-                '//script[@type="application/json" and contains(text(),"storeID")]/text()'
+        if store_details:
+            store_data = json.loads(store_details)
+            ref = store_data["storeID"]
+            name = store_data["pageName"]
+            addr_1 = response.xpath(
+                '//div[@class="Core-infoWrapper"]//span[@class="Address-field Address-line1"]/text()'
             ).extract_first()
-            if store_details:
-                store_data = json.loads(store_details)
-                ref = store_data["storeID"]
-                name = store_data["pageName"]
-                addr_1 = response.xpath(
-                    '//div[@class="Core-infoWrapper"]//span[@class="Address-field Address-line1"]/text()'
-                ).extract_first()
-                addr_2 = response.xpath(
-                    '//div[@class="Core-infoWrapper"]//span[@class="Address-field Address-line2"]/text()'
-                ).extract_first()
-                if addr_2:
-                    addr_full = ", ".join([addr_1.strip(), addr_2.strip()])
-                else:
-                    addr_full = addr_1
+            addr_2 = response.xpath(
+                '//div[@class="Core-infoWrapper"]//span[@class="Address-field Address-line2"]/text()'
+            ).extract_first()
+            if addr_2:
+                addr_full = ", ".join([addr_1.strip(), addr_2.strip()])
+            else:
+                addr_full = addr_1
 
-                properties = {
-                    "ref": ref,
-                    "name": name,
-                    "addr_full": addr_full,
-                    "city": response.xpath(
-                        '//div[@class="Core-infoWrapper"]//span[@class="Address-field Address-city"]/text()'
-                    ).extract_first(),
-                    "postcode": response.xpath(
-                        '//div[@class="Core-infoWrapper"]//span[@class="Address-field Address-postalCode"]/text()'
-                    ).extract_first(),
-                    "country": "GB",
-                    "lat": response.xpath(
-                        '//div[@class="Core-infoWrapper"]//span[@class="Address-coordinates"]/meta[@itemprop="latitude"]/@content'
-                    ).extract_first(),
-                    "lon": response.xpath(
-                        '//div[@class="Core-infoWrapper"]//span[@class="Address-coordinates"]/meta[@itemprop="longitude"]/@content'
-                    ).extract_first(),
-                    "phone": "+44 "
-                    + response.xpath(
-                        '//span[@itemprop="telephone"]/text()'
-                    ).extract_first()[1:],
-                    "website": response.url,
-                }
+            properties = {
+                "ref": ref,
+                "name": name,
+                "addr_full": addr_full,
+                "city": response.xpath(
+                    '//div[@class="Core-infoWrapper"]//span[@class="Address-field Address-city"]/text()'
+                ).extract_first(),
+                "postcode": response.xpath(
+                    '//div[@class="Core-infoWrapper"]//span[@class="Address-field Address-postalCode"]/text()'
+                ).extract_first(),
+                "country": "GB",
+                "lat": response.xpath(
+                    '//div[@class="Core-infoWrapper"]//span[@class="Address-coordinates"]/meta[@itemprop="latitude"]/@content'
+                ).extract_first(),
+                "lon": response.xpath(
+                    '//div[@class="Core-infoWrapper"]//span[@class="Address-coordinates"]/meta[@itemprop="longitude"]/@content'
+                ).extract_first(),
+                "phone": "+44 "
+                + response.xpath(
+                    '//span[@itemprop="telephone"]/text()'
+                ).extract_first()[1:],
+                "website": response.url,
+            }
 
-                hours = response.xpath(
-                    '//div[@class="Core-infoWrapper"]//@data-days'
-                ).extract_first()
-                if hours:
-                    properties["opening_hours"] = self.store_hours(hours)
+            hours = response.xpath(
+                '//div[@class="Core-infoWrapper"]//@data-days'
+            ).extract_first()
+            if hours:
+                properties["opening_hours"] = self.store_hours(hours)
 
-                if properties["name"].endswith(" Express"):
-                    properties["brand"] = "Tesco Express"
-                    properties["brand_wikidata"] = "Q98456772"
-                elif properties["name"].endswith(" Superstore"):
-                    properties["brand"] = "Tesco Superstore"
-                    properties["brand_wikidata"] = "Q487494"
-                elif properties["name"].endswith(" Extra"):
-                    properties["brand"] = "Tesco Extra"
-                    properties["brand_wikidata"] = "Q25172225"
+            if properties["name"].endswith(" Express"):
+                properties["brand"] = "Tesco Express"
+                properties["brand_wikidata"] = "Q98456772"
+            elif properties["name"].endswith(" Superstore"):
+                properties["brand"] = "Tesco Superstore"
+                properties["brand_wikidata"] = "Q487494"
+            elif properties["name"].endswith(" Extra"):
+                properties["brand"] = "Tesco Extra"
+                properties["brand_wikidata"] = "Q25172225"
 
-                yield GeojsonPointItem(**properties)
+            yield GeojsonPointItem(**properties)
