@@ -137,9 +137,10 @@ class TescoSpider(scrapy.Spider):
                     "lon": response.xpath(
                         '//div[@class="Core-infoWrapper"]//span[@class="Address-coordinates"]/meta[@itemprop="longitude"]/@content'
                     ).extract_first(),
-                    "phone": response.xpath(
-                        '//div[@class="Core-infoWrapper"]//span[@itemprop="telephone"]/text()'
-                    ).extract_first(),
+                    "phone": "+44 "
+                    + response.xpath(
+                        '//span[@itemprop="telephone"]/text()'
+                    ).extract_first()[1:],
                     "website": response.url,
                 }
 
