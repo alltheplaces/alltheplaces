@@ -1,8 +1,8 @@
 import json
-import scrapy
 
 from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
+from scrapy.spiders import SitemapSpider
 
 DAY_MAPPING = {
     "MONDAY": "Mo",
@@ -35,7 +35,7 @@ HEADERS = {
 }
 
 
-class TescoSpider(scrapy.Spider):
+class TescoSpider(SitemapSpider):
     name = "tesco"
     item_attributes = {"brand": "Tesco", "brand_wikidata": "Q487494"}
     allowed_domains = ["www.tesco.com"]
@@ -43,6 +43,12 @@ class TescoSpider(scrapy.Spider):
     custom_settings = {
         "USER_AGENT": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.86 Safari/537.36",
     }
+    sitemap_urls = [
+        "https://www.tesco.com/store-locator/sitemap.xml",
+    ]
+    sitemap_rules = [
+        ("https:\/\/www\.tesco\.com\/store-locator\/([\w\-\.]+)\/([\d]+\/)?([\w\-\.\(\)]+)$", "parse_store")
+    ]
 
     def store_hours(self, store_hours):
         opening_hours = OpeningHours()
@@ -59,43 +65,6 @@ class TescoSpider(scrapy.Spider):
                 )
 
         return opening_hours.as_opening_hours()
-
-    def start_requests(self):
-        url = "https://www.tesco.com/store-locator/sitemap.xml"
-
-        yield scrapy.http.FormRequest(
-            url=url,
-            method="GET",
-            dont_filter=True,
-            cookies=COOKIES,
-            headers=HEADERS,
-            callback=self.parse,
-        )
-
-    def parse(self, response):
-        response.selector.remove_namespaces()
-        urls = response.xpath("//url/loc/text()").extract()
-
-        # Exclude location subpages for at-store services
-        service_paths = [
-            "petrol-filling-station",
-            "cafe",
-            "travel-money",
-            "f-f-clothing",
-            "pharmacy",
-        ]
-
-        for url in urls:
-            if not any(service_path in url for service_path in service_paths):
-
-                yield scrapy.http.FormRequest(
-                    url=url,
-                    method="GET",
-                    dont_filter=True,
-                    cookies=COOKIES,
-                    headers=HEADERS,
-                    callback=self.parse_store,
-                )
 
     def parse_store(self, response):
         city_page = response.xpath(
