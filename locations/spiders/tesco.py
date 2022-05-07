@@ -51,12 +51,11 @@ class TescoSpider(SitemapSpider):
 
     def parse_store(self, response):
         store_details = response.xpath(
-            '//script[@type="application/json" and contains(text(),"storeID")]/text()'
+            '//script[@type="application/json"][@id="storeData"]/text()'
         ).extract_first()
         if store_details:
             store_data = json.loads(store_details)
-            ref = store_data["storeID"]
-            name = store_data["pageName"]
+            ref = store_data["store"]
             addr_1 = response.xpath(
                 '//div[@class="Core-infoWrapper"]//span[@class="Address-field Address-line1"]/text()'
             ).extract_first()
@@ -70,8 +69,10 @@ class TescoSpider(SitemapSpider):
 
             properties = {
                 "ref": ref,
-                "name": name,
-                "addr_full": addr_full,
+                "name": response.xpath(
+                    '//h1[@itemprop="name"]/descendant-or-self::*/text()'
+                ).get(),
+                "street_address": addr_full,
                 "city": response.xpath(
                     '//div[@class="Core-infoWrapper"]//span[@class="Address-field Address-city"]/text()'
                 ).extract_first(),
@@ -98,13 +99,13 @@ class TescoSpider(SitemapSpider):
             if hours:
                 properties["opening_hours"] = self.store_hours(hours)
 
-            if properties["name"].endswith(" Express"):
+            if store_data["storeformat"] == "Express":
                 properties["brand"] = "Tesco Express"
                 properties["brand_wikidata"] = "Q98456772"
-            elif properties["name"].endswith(" Superstore"):
+            elif store_data["storeformat"] == "Superstore":
                 properties["brand"] = "Tesco Superstore"
                 properties["brand_wikidata"] = "Q487494"
-            elif properties["name"].endswith(" Extra"):
+            elif store_data["storeformat"] == "Extra":
                 properties["brand"] = "Tesco Extra"
                 properties["brand_wikidata"] = "Q25172225"
 
