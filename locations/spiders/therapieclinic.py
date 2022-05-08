@@ -36,7 +36,9 @@ class TherapieClinicSpider(scrapy.Spider):
                 ).get(),
                 "phone": store.xpath(
                     './div[@class="cl_rest_box"]/div[@class="clbox_phone"]/text()'
-                ).get(),
+                )
+                .get()
+                .replace("Phone: ", ""),
             }
             link = store.xpath(
                 './div[@class="cl_rest_box"]/div[@class="clbox_direction"]/a/@href'
