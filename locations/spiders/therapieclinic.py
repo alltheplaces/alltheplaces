@@ -16,9 +16,11 @@ class TherapieClinicSpider(scrapy.Spider):
                 "ref": store.xpath(
                     './div[@class="cl_rest_box"]/div[@class="clbox_website"]/a/@href'
                 ).get(),
-                "website": store.xpath(
-                    './div[@class="cl_rest_box"]/div[@class="clbox_website"]/a/@href'
-                ).get(),
+                "website": response.urljoin(
+                    store.xpath(
+                        './div[@class="cl_rest_box"]/div[@class="clbox_website"]/a/@href'
+                    ).get()
+                ),
                 "name": store.xpath(
                     './div[@class="box_small_box"]/div[@class="clbox_name"]/text()'
                 ).get(),
