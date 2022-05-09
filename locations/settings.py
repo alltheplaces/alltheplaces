@@ -24,7 +24,7 @@ USER_AGENT = f"Mozilla/5.0 (X11; Linux x86_64) Scrapy/{scrapy.__version__} {BOT_
 ROBOTSTXT_USER_AGENT = BOT_NAME
 
 # Obey robots.txt rules
-ROBOTSTXT_OBEY = False
+ROBOTSTXT_OBEY = True
 
 FEED_URI = os.environ.get("FEED_URI")
 FEED_FORMAT = os.environ.get("FEED_FORMAT")
