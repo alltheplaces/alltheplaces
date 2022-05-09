@@ -9,6 +9,7 @@ class BuceesSpider(scrapy.Spider):
     name = "buc-ees"
     item_attributes = {"brand": "Buc-ee's", "brand_wikidata": "Q4982335"}
     allowed_domains = ["buc-ees.com"]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     start_urls = [
         "https://buc-ees.com/wp-admin/admin-ajax.php?action=store_search&lat=30.26715&lng=-97.74306&autoload=1"

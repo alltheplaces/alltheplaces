@@ -23,6 +23,7 @@ class VivaChickenSpider(scrapy.Spider):
     name = "viva_chicken"
     item_attributes = {"brand": "Viva Chicken"}
     allowed_domains = ["www.vivachicken.com"]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def start_requests(self):
         params = {

@@ -17,6 +17,7 @@ class BcpizzaSpider(scrapy.Spider):
     start_urls = [
         "https://bc.pizza/wp-admin/admin-ajax.php?action=store_search&lat=42.331427&lng=-83.0457538&max_results=100&search_radius=1000&_=1515354445197"
     ]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def convert_hours(self, hours):
         hours = [x.strip() for x in hours]

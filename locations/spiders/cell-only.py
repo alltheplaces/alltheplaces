@@ -35,6 +35,7 @@ class CellOnlySpider(scrapy.Spider):
     name = "cellonly"
     item_attributes = {"brand": "CellOnly"}
     allowed_domains = ["cell-only.com"]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def process_hours(self, hours):
         if not hours:

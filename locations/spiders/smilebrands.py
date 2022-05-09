@@ -12,6 +12,7 @@ class SmilebrandsSpider(scrapy.Spider):
     name = "smilebrands"
     item_attributes = {"brand": "Smile Brands Inc."}
     allowed_domains = ["smilebrands.com"]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
     start_urls = [
         "https://smilebrands.com/wp-admin/admin-ajax.php?action=store_search&lat=39.11553&lng=-94.62679&max_results=100000&search_radius=100&autoload=1",
     ]

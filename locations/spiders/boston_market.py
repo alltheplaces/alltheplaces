@@ -71,6 +71,7 @@ class BostonMarketSpider(scrapy.Spider):
     item_attributes = {"brand": "Boston Market"}
     allowed_domains = ["www.bostonmarket.com"]
     base_url = "https://www.bostonmarket.com"
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def start_requests(self):
         for state in STATES:

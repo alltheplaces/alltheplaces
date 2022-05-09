@@ -12,6 +12,7 @@ class BayshoreHealthcareSpider(scrapy.Spider):
     name = "bayshore_healthcare"
     item_attributes = {"brand": "Bayshore Healthcare"}
     allowed_domains = ["bayshore.ca"]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def start_requests(self):
         url = "https://www.bayshore.ca/wp-admin/admin-ajax.php?action=location_finder&language=en"

@@ -8,6 +8,7 @@ class HeronFoodsSpider(scrapy.Spider):
     name = "heron_foods"
     item_attributes = {"brand": "Heron Foods", "brand_wikidata": "Q5743472"}
     allowed_domains = ["heronfoods.com"]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def start_requests(self):
         yield scrapy.FormRequest(

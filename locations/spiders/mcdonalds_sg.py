@@ -7,6 +7,7 @@ class McDonaldsSGSpider(scrapy.Spider):
     name = "mcdonalds_sg"
     item_attributes = {"brand": "McDonald's"}
     allowed_domains = ["www.mcdonalds.com.sg"]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     start_urls = (
         "https://www.mcdonalds.com.sg/wp/wp-admin/admin-ajax.php?action=store_locator_locations",

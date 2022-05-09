@@ -7,6 +7,7 @@ class McDonaldsGTSpider(scrapy.Spider):
     name = "mcdonalds_gt"
     item_attributes = {"brand": "McDonald's"}
     allowed_domains = ["mcdonalds.com.gt"]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def start_requests(self):
         url = "https://mcdonalds.com.gt/wp-admin/admin-ajax.php"

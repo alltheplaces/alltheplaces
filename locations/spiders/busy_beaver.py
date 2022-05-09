@@ -12,6 +12,7 @@ class BusyBeaverSpider(scrapy.Spider):
     name = "busy_beaver"
     item_attributes = {"brand": "Busy Beaver", "brand_wikidata": "Q108394482"}
     allowed_domains = ["busybeaver.com"]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
     start_urls = (
         "https://busybeaver.com/wp-admin/admin-ajax.php?action=store_search&lat=40&lng=-79&max_results=5000&search_radius=5000&autoload=1",
     )
