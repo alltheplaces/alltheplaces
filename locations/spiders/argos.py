@@ -1,21 +1,29 @@
-import scrapy
 import re
 import json
+
 from locations.items import GeojsonPointItem
+from scrapy.spiders import SitemapSpider
 
 
-class ArgosSpider(scrapy.Spider):
-
+class ArgosSpider(SitemapSpider):
     name = "argos"
     item_attributes = {"brand": "Argos"}
     allowed_domains = ["www.argos.co.uk"]
     download_delay = 0.5
-    start_urls = ("http://www.argos.co.uk/stores/",)
+    sitemap_urls = [
+        "https://www.argos.co.uk/stores_sitemap.xml",
+    ]
+    sitemap_rules = [
+        (
+            r"https://www.argos.co.uk/stores/([\d]+)-([\w-]+)",
+            "parse",
+        ),
+    ]
     custom_settings = {
         "USER_AGENT": "Mozilla/5.0 (X11; Linux x86_64; rv:99.0) Gecko/20100101 Firefox/99.0"
     }
 
-    def parse_stores(self, response):
+    def parse(self, response):
         data = re.findall(r"window.INITIAL_STATE =[^<]+", response.text)
         json_data = json.loads(data[0].replace("window.INITIAL_STATE =", ""))
         properties = {
@@ -37,8 +45,3 @@ class ArgosSpider(scrapy.Spider):
             properties["opening_hours"] = open_hours
 
         yield GeojsonPointItem(**properties)
-
-    def parse(self, response):
-        urls = response.xpath('//div/div[@class="azsl-panel"]/ul/li/a/@href').extract()
-        for path in urls:
-            yield scrapy.Request(response.urljoin(path), callback=self.parse_stores)
