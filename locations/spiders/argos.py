@@ -2,6 +2,7 @@ import re
 import json
 
 from locations.items import GeojsonPointItem
+from locations.hours import OpeningHours
 from scrapy.spiders import SitemapSpider
 
 
@@ -38,10 +39,17 @@ class ArgosSpider(SitemapSpider):
             "lon": float(json_data["store"]["store"]["lng"]),
         }
 
-        open_hours = ""
+        oh = OpeningHours()
         for item in json_data["store"]["store"]["storeTimes"]:
-            open_hours = open_hours + item["date"][:2] + " " + item["time"] + " ;"
-        if open_hours:
-            properties["opening_hours"] = open_hours
+            open_time, close_time = item["time"].split(" - ")
+            if (
+                open_time
+                and not open_time.isspace()
+                and close_time
+                and not close_time.isspace()
+            ):
+                oh.add_range(item["date"][:2], open_time, close_time)
+
+        properties["opening_hours"] = oh.as_opening_hours()
 
         yield GeojsonPointItem(**properties)
