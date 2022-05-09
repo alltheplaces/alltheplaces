@@ -7,7 +7,7 @@ from scrapy.spiders import SitemapSpider
 
 class ArgosSpider(SitemapSpider):
     name = "argos"
-    item_attributes = {"brand": "Argos"}
+    item_attributes = {"brand": "Argos", "brand_wikidata": "Q4789707"}
     allowed_domains = ["www.argos.co.uk"]
     download_delay = 0.5
     sitemap_urls = [
