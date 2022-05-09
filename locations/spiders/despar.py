@@ -41,3 +41,4 @@ class DesparSpider(scrapy.Spider):
             }
 
             yield GeojsonPointItem(**properties)
+            
