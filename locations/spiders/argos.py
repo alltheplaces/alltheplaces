@@ -28,15 +28,18 @@ class ArgosSpider(SitemapSpider):
         data = re.findall(r"window.INITIAL_STATE =[^<]+", response.text)
         json_data = json.loads(data[0].replace("window.INITIAL_STATE =", ""))
         properties = {
-            "addr_full": json_data["store"]["store"]["address"],
+            "street_address": json_data["store"]["store"]["address"],
             "phone": json_data["store"]["store"]["tel"],
             "city": json_data["store"]["store"]["town"],
-            "state": "",
+            "name": json_data["store"]["store"]["name"],
             "postcode": json_data["store"]["store"]["postcode"],
             "ref": json_data["store"]["store"]["id"],
             "website": response.url,
             "lat": float(json_data["store"]["store"]["lat"]),
             "lon": float(json_data["store"]["store"]["lng"]),
+            "extras": {
+                "store_type": json_data["store"]["store"]["type"],
+            },
         }
 
         oh = OpeningHours()
