@@ -11,6 +11,9 @@ class ArgosSpider(scrapy.Spider):
     allowed_domains = ["www.argos.co.uk"]
     download_delay = 0.5
     start_urls = ("http://www.argos.co.uk/stores/",)
+    custom_settings = {
+        "USER_AGENT": "Mozilla/5.0 (X11; Linux x86_64; rv:99.0) Gecko/20100101 Firefox/99.0"
+    }
 
     def parse_stores(self, response):
         data = re.findall(r"window.INITIAL_STATE =[^<]+", response.text)
