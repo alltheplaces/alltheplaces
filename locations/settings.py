@@ -9,6 +9,8 @@ import os
 #     http://doc.scrapy.org/en/latest/topics/settings.html
 #     http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html
 #     http://scrapy.readthedocs.org/en/latest/topics/spider-middleware.html
+import locations
+import scrapy
 
 BOT_NAME = "locations"
 
@@ -17,7 +19,9 @@ NEWSPIDER_MODULE = "locations.spiders"
 
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
-USER_AGENT = "Mozilla/5.0 (Linux; rv:1.0) https://github.com/alltheplaces/alltheplaces"
+USER_AGENT = f"Mozilla/5.0 (X11; Linux x86_64) Scrapy/{scrapy.__version__} {BOT_NAME}/{locations.__version__} (+https://github.com/alltheplaces/alltheplaces)"
+
+ROBOTSTXT_USER_AGENT = BOT_NAME
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = False
