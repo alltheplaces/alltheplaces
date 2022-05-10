@@ -11,9 +11,9 @@ class DesparSpider(scrapy.Spider):
     item_attributes = {'brand': "Despar"}
     allowed_domains = ["despar.com"]
 
-    start_urls = ([
+    start_urls = [
         'https://www.despar.com'
-    ])
+    ]
 
     def parse(self, response):
         with open('./locations/searchable_points/eu_centroids_20km_radius_country.csv') as points:
