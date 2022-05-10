@@ -33,11 +33,11 @@ class DesparSpider(scrapy.Spider):
             properties = {
                 'ref': i['codice'],
                 'name': i['nome'],
-                'addr_full': i['indirizzo'],
+                'street_address': i['indirizzo'],
                 'city': i['citta'],
                 'country': 'IT',
-                'lat': float(i['lat']),
-                'lon': float(i['lng']),
+                'lat': i['lat'],
+                'lon': i['lng'],
             }
 
             yield GeojsonPointItem(**properties)
