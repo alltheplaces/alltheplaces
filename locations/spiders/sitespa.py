@@ -6,7 +6,7 @@ import scrapy
 from locations.items import GeojsonPointItem
 
 class SiteSPASpider(scrapy.Spider):
-    #download_delay = 0.2
+    download_delay = 0.2
     name = "sitespa"
     item_attributes = {'brand': "SITE SpA"}
     allowed_domains = ["sitespa.com"]
