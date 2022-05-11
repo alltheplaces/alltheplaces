@@ -1,106 +1,28 @@
 # -*- coding: utf-8 -*-
-import json
-import re
-
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.brands import Brand
+from locations.seo import extract_ldjson
 from locations.hours import OpeningHours
 
 
-class ClairesSpider(scrapy.Spider):
+class ClairesSpider(scrapy.spiders.SitemapSpider):
+
     name = "claires"
-    item_attributes = {"brand": "Claire's", "brand_wikidata": "Q2974996"}
+    brand = Brand.from_wikidata("Claire's", 'Q2974996')
     allowed_domains = ["claires.com"]
+    sitemap_urls = ['https://stores.claires.com/sitemap.xml']
+    sitemap_rules = [('.html', 'parse_store')]
 
-    def start_requests(self):
-        base_url = "https://stores.claires.com/us/"
-
-        states = [
-            "al",
-            "ak",
-            "az",
-            "ar",
-            "ca",
-            "co",
-            "ct",
-            "dc",
-            "de",
-            "fl",
-            "ga",
-            "hi",
-            "id",
-            "il",
-            "in",
-            "ia",
-            "ks",
-            "ky",
-            "la",
-            "me",
-            "md",
-            "ma",
-            "mi",
-            "mn",
-            "ms",
-            "mo",
-            "mt",
-            "ne",
-            "nv",
-            "nh",
-            "nj",
-            "nm",
-            "ny",
-            "nc",
-            "nd",
-            "oh",
-            "ok",
-            "or",
-            "pa",
-            "ri",
-            "sc",
-            "sd",
-            "tn",
-            "tx",
-            "ut",
-            "vt",
-            "va",
-            "wa",
-            "wv",
-            "wi",
-            "wy",
-            "ab",
-            "bc",
-            "mb",
-            "nb",
-            "nl",
-            "ns",
-            "on",
-            "pe",
-            "pr",
-            "qc",
-            "sk",
-            "vi",
-        ]
-
-        for state in states:
-            url = base_url + state
-            yield scrapy.Request(url=url, callback=self.parse_cities)
-
-    def parse_cities(self, response):
-        city_urls = response.xpath(
-            '//*[@class="map-list-item is-single"]/a/@href'
-        ).extract()
-
-        for city_url in city_urls:
-            yield scrapy.Request(url=city_url, callback=self.parse_stores)
-
-    def parse_stores(self, response):
-        store_urls = response.xpath(
-            '//*[@class="map-list-item-header"]/a/@href'
-        ).extract()
-
-        for store_url in store_urls:
-            yield scrapy.Request(url=store_url, callback=self.parse)
+    def parse_store(self, response):
+        for item in extract_ldjson(self.brand, response, 'JewelryStore'):
+            if item.has_geo():
+                hours = self.parse_hours(item['source_data']['ld_json']["openingHours"])
+                if hours:
+                    item["opening_hours"] = hours
+                yield item
+            else:
+                self.logger.warn("no location for: %s", response.url)
 
     def parse_hours(self, hours):
         opening_hours = OpeningHours()
@@ -119,32 +41,3 @@ class ClairesSpider(scrapy.Spider):
                     opening_hours.add_range(day=day, open_time=start, close_time=end)
 
         return opening_hours.as_opening_hours()
-
-    def parse(self, response):
-        data = json.loads(
-            response.xpath(
-                '//script[@type="application/ld+json" and contains(text(), "PostalAddress")]/text()'
-            ).extract_first()
-        )
-
-        data = data[0]
-
-        properties = {
-            "ref": re.search(r".+/(.+?)/?(?:\.html|$)", response.url).group(1),
-            "name": data["name"],
-            "addr_full": data["address"]["streetAddress"].rstrip(),
-            "city": data["address"]["addressLocality"],
-            "state": data["address"]["addressRegion"],
-            "postcode": data["address"]["postalCode"],
-            "lat": data["geo"]["latitude"],
-            "lon": data["geo"]["longitude"],
-            "phone": data["address"]["telephone"],
-            "website": response.url,
-        }
-
-        hours = self.parse_hours(data["openingHours"])
-
-        if hours:
-            properties["opening_hours"] = hours
-
-        yield GeojsonPointItem(**properties)

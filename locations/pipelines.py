@@ -41,3 +41,10 @@ class ApplySpiderLevelAttributesPipeline(object):
                 item[key] = value
 
         return item
+
+
+class ClearItemSourceDataPipeline(object):
+    def process_item(self, item, spider):
+        # For now we will not store/export any response data.
+        item['source_data'] = None
+        return item
