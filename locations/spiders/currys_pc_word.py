@@ -19,9 +19,9 @@ headers = {
 }
 
 
-class CurrysPcWorldSpider(scrapy.Spider):
+class CurrysSpider(scrapy.Spider):
     name = "currys"
-    item_attributes = {"brand": "Currys PC World"}
+    item_attributes = {"brand": "currys", "brand_wikidata": "Q3246464"}
     allowed_domains = ["https://www.pcworld.co.uk"]
 
     def start_requests(self):
