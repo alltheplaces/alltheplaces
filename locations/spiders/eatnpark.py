@@ -29,7 +29,7 @@ class EatnParkSpider(SitemapSpider):
         properties = {
             "ref": re.search(r"-(\d+)\.html", response.url).group(1),
             "website": response.url,
-            "name": data["name"],
+            "name": response.css("span.location-name::text").get(),
             "lat": data["geo"]["latitude"],
             "lon": data["geo"]["longitude"],
             "street_address": data["address"]["streetAddress"],
