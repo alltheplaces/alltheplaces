@@ -7,7 +7,7 @@ import json
 from locations.items import GeojsonPointItem
 
 class CoopNorgeSpider(scrapy.Spider):
-    download_delay = .2
+    #download_delay = .2
     name = "coop"
     item_attributes = {'brand': "Coop Norge"}
     allowed_domains = ["coop.no"]
