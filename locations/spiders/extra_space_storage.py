@@ -1,46 +1,53 @@
-import scrapy
+# -*- coding: utf-8 -*-
 import json
 import re
 
+from scrapy.downloadermiddlewares.retry import get_retry_request
+from scrapy.spiders import SitemapSpider
+
+from locations.hours import OpeningHours
 from locations.items import GeojsonPointItem
 
 
-class ExtraSpaceStorageSpider(scrapy.Spider):
+class ExtraSpaceStorageSpider(SitemapSpider):
     name = "extra_space_storage"
-    item_attributes = {"brand": "Extra Space Storage"}
+    item_attributes = {"brand": "Extra Space Storage", "brand_wikidata": "Q5422162"}
     allowed_domains = ["www.extraspace.com"]
-    start_urls = ("https://www.extraspace.com/sitemap_sites.aspx",)
+
+    # Seems to be sufficient to allow the site to include correct ldjson
+    download_delay = 1.6
+
+    sitemap_urls = ["https://www.extraspace.com/facility-intent-sitemap.xml"]
+    sitemap_rules = [(r"/facilities/", "parse")]
+
+    def sitemap_filter(self, entries):
+        for entry in entries:
+            # Sitemap contains subpages but not the main location
+            entry["loc"] = re.sub("/id/.*", "/", entry["loc"])
+            yield entry
 
     def parse(self, response):
-        response.selector.remove_namespaces()
-        store_urls = response.xpath("//url/loc/text()").extract()
-        regex = re.compile(r"https://www.extraspace.com/\S+")
-        for path in store_urls:
-            if re.search(regex, path):
-                yield scrapy.Request(
-                    path.strip(),
-                    callback=self.parse_store,
-                )
-            else:
-                pass
-
-    def parse_store(self, response):
-        data = self.get_json_data(response)
-        if not data:
-            # The sitemap may include some URLs that do not provide details of individual stores
+        try:
+            data = self.get_json_data(response)
+        except TypeError:
+            yield get_retry_request(
+                response.request, spider=self, reason="missing ldjson"
+            )
             return
 
         data_address = data["address"]
         data_geo = data["geo"]
 
-        if not data_address or not data_geo:
-            return
+        opening_hours = OpeningHours()
+        for row in data["openingHours"]:
+            day, interval = row.split(" ", 1)
+            open_time, close_time = interval.split("-", 1)
+            opening_hours.add_range(day, open_time, close_time)
 
         properties = {
-            # The Site Number does not appear in JSON but it is displayed on the page.
-            "ref": response.xpath('//*/span[@id="site-number"]/text()').get(),
+            "ref": response.url.split("/")[-2],
             "name": data["name"],
-            "addr_full": data_address["streetAddress"],
+            "street_address": data_address["streetAddress"],
             "city": data_address["addressLocality"],
             "state": data_address["addressRegion"],
             "postcode": data_address["postalCode"],
@@ -48,25 +55,15 @@ class ExtraSpaceStorageSpider(scrapy.Spider):
             "lat": float(data_geo["latitude"]),
             "phone": data["telephone"],
             "website": data["url"],
+            "opening_hours": opening_hours.as_opening_hours(),
         }
-
-        opening_hours_list = data["openingHours"]
-        if isinstance(opening_hours_list, list) and len(opening_hours_list) > 0:
-            # Opening hours are already in OpenStreetMap format but each ruleset appears as a separate array
-            # element in JSON.
-            opening_hours = "; ".join(opening_hours_list)
-            properties["opening_hours"] = opening_hours
 
         yield GeojsonPointItem(**properties)
 
     def get_json_data(self, response):
-        # The pages for each location include JSON data in several <script /> blocks.
-        # The metadata for the location is in the block that follows the SelfStorage
-        # schema (see http://schema.org/SelfStorage).
-        all_ldjson = response.xpath('//*/script[@type="application/ld+json"]/text()')
-        for ldjson in all_ldjson:
-            data = json.loads(ldjson.get())
-            if data["@type"] == "SelfStorage":
-                return data
-
-        return
+        # Note: Page omits the good ldjson when given a browser user-agent
+        # But also sporadically for no reason
+        ldjson = response.xpath('//script[@id="JsonLdSelfStorageScript"]/text()')
+        data = json.loads(ldjson.get())
+        assert data["@type"] == "SelfStorage"
+        return data
