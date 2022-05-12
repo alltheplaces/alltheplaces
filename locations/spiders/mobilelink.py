@@ -11,6 +11,7 @@ class MobilelinkSpider(scrapy.Spider):
     name = "mobilelink"
     item_attributes = {"brand": "Mobilelink"}
     allowed_domains = ["mobilelinkusa.com"]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
     start_urls = [
         "https://mobilelinkusa.com/wp-admin/admin-ajax.php?action=store_search&lat=29.760427&lng=-95.36980299999999&max_results=1000&search_radius=10000&autoload=1",
     ]

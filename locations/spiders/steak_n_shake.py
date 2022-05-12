@@ -10,6 +10,7 @@ class SteakNShakeSpider(scrapy.Spider):
     name = "steak_n_shake"
     item_attributes = {"brand": "Steak N Shake", "brand_wikidata": "Q7605233"}
     allowed_domains = ["www.steaknshake.com"]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
     start_urls = ("https://www.steaknshake.com/locations/",)
 
     def start_requests(self):

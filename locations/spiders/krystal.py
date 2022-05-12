@@ -59,12 +59,12 @@ STATES = [
 
 
 class KrystalSpider(scrapy.Spider):
-
     name = "krystal"
     item_attributes = {"brand": "Krystal"}
     allowed_domains = ["krystal.com"]
     download_delay = 1.5
     start_urls = ("http://krystal.com/wp-admin/admin-ajax.php",)
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def parse_hours(self, hours):
         hours = json.loads(hours)

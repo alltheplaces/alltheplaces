@@ -11,6 +11,7 @@ class CookoutSpider(scrapy.Spider):
     name = "cookout"
     item_attributes = {"brand": "Cookout", "brand_wikidata": "Q5166992"}
     allowed_domains = ["cookout.com"]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def start_requests(self):
         base_url = "https://cookout.com/wp-admin/admin-ajax.php?action=store_search&lat={lat}&lng={lng}&max_results=300&search_radius=500"

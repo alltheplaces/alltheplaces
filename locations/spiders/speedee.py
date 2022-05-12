@@ -73,6 +73,7 @@ class SpeeDeeSpider(scrapy.Spider):
     name = "speedee_oil"
     item_attributes = {"brand": "SpeeDee Oil Change and Auto Service"}
     allowed_domains = ["speedeeoil.com"]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
     start_urls = [
         "https://www.speedeeoil.com/wp-admin/admin-ajax.php?action=asl_load_stores&nonce=207e81f157&load_all=1&layout=1",
     ]

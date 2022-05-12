@@ -17,10 +17,10 @@ HEADERS = {
 
 
 class BeaconAndBridgeSpider(scrapy.Spider):
-
     name = "beacon_and_bridge"
     item_attributes = {"brand": "Beacon Bridge Market"}
-    allowed_domains = ["www.beaconandbridge.com/"]
+    allowed_domains = ["www.beaconandbridge.com"]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def start_requests(self):
         form_data = {

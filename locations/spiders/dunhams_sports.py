@@ -7,6 +7,7 @@ class DunhamsSportsSpiders(scrapy.Spider):
     name = "dunhams_sports"
     item_attributes = {"brand": "Dunham's Sports"}
     allowed_domains = ["http://www.dunhamssports.com"]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
     start_urls = (
         "http://www.dunhamssports.com/wp-admin/admin-ajax.php?action=simloc_get_locations&lat=32.7258378&lng=-116.95580669999998&radius=200000",
     )

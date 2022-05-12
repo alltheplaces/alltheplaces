@@ -11,6 +11,7 @@ class KumAndGoSpider(scrapy.Spider):
     name = "kum_and_go"
     item_attributes = {"brand": "Kum & Go", "brand_wikidata": "Q6443340"}
     allowed_domains = ["kumandgo.com"]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def start_requests(self):
         with open(

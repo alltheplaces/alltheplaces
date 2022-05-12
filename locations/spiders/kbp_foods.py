@@ -18,6 +18,7 @@ class KBPFoodsSpider(scrapy.Spider):
     allowed_domains = ["kbp-foods.com"]
     item_attributes = {"brand": "KBP Foods"}
     download_delay = 0.3
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def start_requests(self):
         # Fetch brand data first

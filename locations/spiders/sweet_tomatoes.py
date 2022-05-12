@@ -6,10 +6,10 @@ from locations.items import GeojsonPointItem
 
 
 class SweetTomatoesSpider(scrapy.Spider):
-
     name = "sweet_tomatoes"
     item_attributes = {"brand": "Sweet Tomatoes"}
     allowed_domains = ["sweettomatoes.com"]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
     start_urls = (
         "https://sweettomatoes.com/wp-admin/admin-ajax.php?action=store_search&lat=37.09024&lng=-95.71289100000001&max_results=9990&search_radius=1500&autoload=1",
     )

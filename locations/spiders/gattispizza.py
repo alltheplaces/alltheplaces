@@ -21,6 +21,7 @@ class GattispizzaSpider(scrapy.Spider):
     name = "gattispizza"
     item_attributes = {"brand": "Gatti's Pizza", "brand_wikidata": "Q5527509"}
     allowed_domains = ["gattispizza.com"]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def start_requests(self):
         form_data = {"action": "udfd_update_locations", "data": "3211"}
