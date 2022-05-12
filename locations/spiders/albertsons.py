@@ -10,7 +10,7 @@ from locations.hours import OpeningHours
 class AlbertsonsSpider(scrapy.Spider):
 
     name = "albertsons"
-    item_attributes = {"brand": "Albertsons", "brand_wikidata": "Q4712282"}
+    item_attributes = {"brand": "Albertsons", "brand_wikidata": "Q2831861"}
     download_delay = 0.5
 
     allowed_domains = [
