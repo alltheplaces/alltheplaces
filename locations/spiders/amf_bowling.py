@@ -7,6 +7,7 @@ from locations.items import GeojsonPointItem
 
 class AMFBowlingSpider(scrapy.Spider):
     name = "amf_bowling"
+    item_attributes = {"brand": "AMF Bowling Center", "brand_wikidata": "Q4652616"}
     start_urls = ("https://www.amf.com/bowlero-location/finder?_format=json",)
 
     def parse(self, response):

@@ -26,6 +26,7 @@ DAY_MAPPING = {
 
 class AlnaturaSpider(scrapy.Spider):
     name = "alnatura_de"
+    item_attributes = {"brand": "Alnatura", "brand_wikidata": "Q876811"}
     allowed_domains = ["www.alnatura.de"]
     start_urls = (
         "https://www.alnatura.de/api/sitecore/stores/FindStoresforMap?"
@@ -33,6 +34,7 @@ class AlnaturaSpider(scrapy.Spider):
         "&lng=7.811966062500009&radius=1483"
         "&Tradepartner=Alnatura%20Super%20Natur%20Markt",
     )
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def parse_hours(self, store_hours):
         opening_hours = OpeningHours()

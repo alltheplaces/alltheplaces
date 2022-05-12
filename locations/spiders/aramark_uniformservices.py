@@ -6,7 +6,7 @@ from locations.items import GeojsonPointItem
 
 class AramarkSpider(scrapy.Spider):
     name = "aramark"
-    item_attributes = {"brand": "Aramark"}
+    item_attributes = {"brand": "Aramark", "brand_wikidata": "Q625708"}
     allowed_domains = ["www.aramark.com", "www.aramarkuniform.com"]
     start_urls = ("https://www.aramarkuniform.com/our-locations#",)
 

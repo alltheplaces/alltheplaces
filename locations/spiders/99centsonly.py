@@ -20,7 +20,7 @@ DAY_MAPPING = [
 
 class NinetyNineCentsOnlySpider(scrapy.Spider):
     name = "99centsonly"
-    brand = "99 Cents Only"
+    item_attributes = {"brand": "99 Cents Only Stores", "brand_wikidata": "Q4646294"}
     allowed_domains = ["99only.com"]
 
     start_urls = [

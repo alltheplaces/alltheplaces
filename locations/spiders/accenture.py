@@ -61,11 +61,12 @@ countries = [
 
 class AccentureSpider(scrapy.Spider):
     name = "accenture"
-    item_attributes = {"brand": "Accenture"}
+    item_attributes = {"brand": "Accenture", "brand_wikidata": "Q29123313"}
     allowed_domains = ["accenture.com"]
     start_urls = [
         "https://www.accenture.com/us-en/about/location-index",
     ]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def start_requests(self):
         template = "https://www.accenture.com/api/sitecore/LocationsHeroModule/GetLocation?query={country}&from=0&size=150&language=en"

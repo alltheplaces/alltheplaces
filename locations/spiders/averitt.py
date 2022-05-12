@@ -9,7 +9,7 @@ from locations.hours import OpeningHours
 
 class AverittSpider(scrapy.Spider):
     name = "averitt"
-    item_attributes = {"brand": "Averitt Express"}
+    item_attributes = {"brand": "Averitt Express", "brand_wikidata": "Q4828320"}
     allowed_domains = ["averittexpress.com"]
     start_urls = [
         "https://www.averittexpress.com/resources/facility-locator",

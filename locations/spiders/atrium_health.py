@@ -9,6 +9,7 @@ from locations.hours import OpeningHours
 
 class AtriumHealthSpider(scrapy.Spider):
     name = "atrium_health"
+    item_attributes = {"brand": "Atrium Health", "brand_wikidata": "Q5044932"}
     allowed_domains = ["atriumhealth.org"]
 
     def start_requests(self):

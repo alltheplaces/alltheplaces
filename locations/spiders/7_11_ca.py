@@ -19,7 +19,7 @@ DAY_MAPPING = {
 
 class SevenElevenSpider(scrapy.Spider):
     name = "seven_eleven_ca"
-    brand = "7-Eleven"
+    item_attributes = {"brand": "7-Eleven", "brand_wikidata": "Q259340"}
     allowed_domains = ["yext.com"]
 
     start_urls = (

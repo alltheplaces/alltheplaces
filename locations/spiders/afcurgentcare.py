@@ -9,7 +9,7 @@ from locations.hours import OpeningHours, DAYS
 
 class AfcUrgentCareSpider(scrapy.Spider):
     name = "afcurgentcare"
-    item_attributes = {"brand": "AFC Urgent Care"}
+    item_attributes = {"brand": "AFC Urgent Care", "brand_wikidata": "Q110552174"}
     allowed_domains = ["afcurgentcare.com"]
     start_urls = (
         "https://www.afcurgentcare.com/modules/multilocation/?near_lat=39&near_lon=-98",

@@ -16,7 +16,7 @@ DAYS_NAME = {
 
 class ArdeneSpider(scrapy.Spider):
     name = "ardene"
-    item_attributes = {"brand": "Ardene"}
+    item_attributes = {"brand": "Ardene", "brand_wikidata": "Q2860764"}
     allowed_domains = ["www.ardene.com"]
     start_urls = ("https://www.ardene.com/us/en/stores/",)
 

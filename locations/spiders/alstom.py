@@ -73,7 +73,7 @@ countries = (
 class AlstomSpider(scrapy.Spider):
     # download_delay = 0.3
     name = "alstom"
-    item_attributes = {"brand": "Alstom"}
+    item_attributes = {"brand": "Alstom", "brand_wikidata": "Q309084"}
     allowed_domains = ["alstom.com"]
     start_urls = ("https://www.alstom.com/alstom-page/maps/json/1826",)
 
