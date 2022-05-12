@@ -154,6 +154,9 @@ class ExxonMobilSpider(scrapy.Spider):
     crawled_locations = set()
     allowed_domains = ["exxon.com"]
     start_urls = CreateStartURLs().get_urls()
+    custom_settings = {
+        "USER_AGENT": "Mozilla/5.0 (X11; Linux x86_64; rv:99.0) Gecko/20100101 Firefox/99.0"
+    }
 
     def parse(self, response):
         json_data = json.loads(response.text)
