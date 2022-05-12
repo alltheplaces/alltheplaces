@@ -8,7 +8,7 @@ HEADERS = {"Content-Type": "application/json"}
 
 BRANDS = {"U76": "76", "P66": "Phillips 66", "CON": "Conoco"}
 
-WIKIBRANDS = {"U76": "Q1658320", "P66": "Q1656230", "CON": "Q1126518"}
+WIKIBRANDS = {"U76": "Q1658320", "P66": "Q1656230", "CON": "Q214763"}
 
 
 class Phillips66Spider(scrapy.Spider):
