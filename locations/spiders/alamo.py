@@ -6,6 +6,7 @@ from locations.items import GeojsonPointItem
 
 class AlamoSpider(scrapy.Spider):
     name = "alamo"
+    item_attributes = {"brand": "Alamo", "brand_wikidata": "Q1429287"}
     allowed_domains = ["alamo.com"]
 
     def start_requests(self):

@@ -12,8 +12,13 @@ from locations.hours import OpeningHours
 
 class AmericanEagleOutfittersSpider(scrapy.Spider):
     name = "american_eagle_outfitters"
+    item_attributes = {
+        "brand": "American Eagle Outfitters",
+        "brand_wikidata": "Q2842931",
+    }
     allowed_domains = ["ae.com"]
     start_urls = ["http://stores.aeostores.com/sitemap.xml"]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def parse(self, response):
         xml = Selector(response)

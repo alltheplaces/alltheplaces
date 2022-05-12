@@ -11,7 +11,10 @@ URL = "https://tdr.aaa.com/tdrl/search.jsp?"
 
 class AAASpider(scrapy.Spider):
     name = "aaa"
-    item_attributes = {"brand": "AAA"}
+    item_attributes = {
+        "brand": "American Automobile Association",
+        "brand_wikidata": "Q463436",
+    }
     allowed_domains = ["tdr.aaa.com"]
     download_delay = 1.0
 

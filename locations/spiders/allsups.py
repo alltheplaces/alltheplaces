@@ -9,6 +9,7 @@ from locations.hours import OpeningHours
 
 class AllsupsSpider(scrapy.Spider):
     name = "allsups"
+    item_attributes = {"brand": "Allsup's", "brand_wikidata": "Q4733292"}
     allowed_domains = ["allsups.com"]
     start_urls = [
         "https://allsups.com/wp-json/acf/v3/business_locations?_embed&per_page=1000",

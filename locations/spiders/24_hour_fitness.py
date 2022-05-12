@@ -5,7 +5,7 @@ from locations.items import GeojsonPointItem
 
 class TwentyFourHourFitnessSpider(scrapy.Spider):
     name = "24_hour_fitness"
-    brand = "24 Hour Fitness"
+    item_attributes = {"brand": "24 Hour Fitness", "brand_wikidata": "Q4631849"}
     allowed_domains = ["www.24hourfitness.com"]
     start_urls = ("https://www.24hourfitness.com",)
     download_delay = 0.1

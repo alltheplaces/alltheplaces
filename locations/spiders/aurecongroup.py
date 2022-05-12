@@ -5,6 +5,7 @@ from locations.items import GeojsonPointItem
 
 class AureconGroupSpider(scrapy.Spider):
     name = "aurecongroup"
+    item_attributes = {"brand": "Aurecon", "brand_wikidata": "Q2871849"}
     allowed_domains = ["www.aurecon.com"]
     download_delay = 0.1
     start_urls = ("https://www.aurecongroup.com/locations",)
