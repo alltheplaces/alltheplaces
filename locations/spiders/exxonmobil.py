@@ -210,7 +210,7 @@ class ExxonMobilSpider(scrapy.Spider):
         elif "esso" in location["BrandingImage"]:
             return {"brand": "Esso", "brand_wikidata": "Q867662"}
         elif "exxon" in location["BrandingImage"]:
-            return {"brand": "Exxon", "brand_wikidata": "Q4781944"}
+            return {"brand": "Exxon", "brand_wikidata": "Q109675651"}
         else:
             return {}
 
