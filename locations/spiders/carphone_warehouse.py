@@ -1,6 +1,8 @@
 import re
 import scrapy
+
 from locations.items import GeojsonPointItem
+from locations.hours import OpeningHours
 
 DAYS = {
     "monday": "Mo",
@@ -15,19 +17,20 @@ DAYS = {
 
 class CarphoneWarehouseSpider(scrapy.Spider):
     name = "carphonewarehouse"
-    item_attributes = {"brand": "Carphone Warehouse"}
+    item_attributes = {"brand": "Carphone Warehouse", "brand_wikidata": "Q118046"}
     allowed_domains = ["www.carphonewarehouse.com"]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
+    start_urls = [
+        "https://www.carphonewarehouse.com/services/storedata?filter=&count=1000000&lat=54.2526491&lng=-2.0411242"
+    ]
 
     def store_hours(self, store_hours):
-        clean_time = ""
+        oh = OpeningHours()
         for key1, value1 in DAYS.items():
             if key1 in store_hours:
-                clean_time = clean_time + value1 + " " + store_hours[key1] + " ;"
-        return clean_time
-
-    def start_requests(self):
-        url = "https://www.carphonewarehouse.com/services/storedata?filter=&count=1000000&lat=54.2526491&lng=-2.0411242"
-        yield scrapy.Request(url=url, callback=self.parse)
+                open_time, close_time = store_hours[key1].split(" - ")
+                oh.add_range(value1, open_time, close_time)
+        return oh.as_opening_hours()
 
     def parse(self, response):
         data = response.json()
@@ -46,13 +49,15 @@ class CarphoneWarehouseSpider(scrapy.Spider):
             properties = {
                 "ref": key,
                 "name": value["branch_name"],
-                "addr_full": address,
+                "street_address": address,
                 "city": city,
-                "country": "United Kingdom",
                 "postcode": postcode,
                 "lat": value["Latitude"],
                 "lon": value["Longitude"],
-                "phone": value["telephone"],
+                "phone": value.get("telephone"),
+                "website": "https://www.carphonewarehouse.com/store-locator/"
+                + value["pageName"]
+                + ".html",
             }
 
             opening_hours = self.store_hours(value)

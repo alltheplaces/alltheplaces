@@ -12,7 +12,7 @@ from locations.hours import OpeningHours
 
 class BestBuySpider(scrapy.Spider):
     name = "bestbuy-ca"
-    item_attributes = {"brand": "Best Buy"}
+    item_attributes = {"brand": "Best Buy", "brand_wikidata": "Q533415"}
     allowed_domains = ["stores.bestbuy.ca"]
     bb_url = "https://stores.bestbuy.ca/en-ca/index.html"
 

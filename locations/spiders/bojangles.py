@@ -7,7 +7,7 @@ from locations.items import GeojsonPointItem
 
 class BojanglesSpider(scrapy.Spider):
     name = "bojangles"
-    item_attributes = {"brand": "Bojangles' Famous Chicken 'n Biscuits"}
+    item_attributes = {"brand": "Bojangles'", "brand_wikidata": "Q891163"}
     allowed_domains = ["locations.bojangles.com"]
     start_urls = ("http://locations.bojangles.com/",)
 
@@ -97,15 +97,14 @@ class BojanglesSpider(scrapy.Spider):
         if phone:
             properties["phone"] = phone
 
-        hours = json.loads(
-            response.xpath(
-                '//div[@class="c-location-hours-details-wrapper js-location-hours"]/@data-days'
-            ).extract_first()
-        )
-
-        opening_hours = self.store_hours(hours) if hours else None
-        if opening_hours:
-            properties["opening_hours"] = opening_hours
+        hours_raw = response.xpath(
+            '//div[@class="c-location-hours-details-wrapper js-location-hours"]/@data-days'
+        ).extract_first()
+        if hours_raw:
+            hours = json.loads(hours_raw)
+            opening_hours = self.store_hours(hours)
+            if opening_hours:
+                properties["opening_hours"] = opening_hours
 
         yield GeojsonPointItem(**properties)
 

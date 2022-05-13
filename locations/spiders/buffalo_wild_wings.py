@@ -9,7 +9,7 @@ from locations.hours import OpeningHours
 
 class BuffaloWildWingsSpider(scrapy.Spider):
     name = "buffalo_wild_wings"
-    item_attributes = {"brand": "Buffalo Wild Wings"}
+    item_attributes = {"brand": "Buffalo Wild Wings", "brand_wikidata": "Q509255"}
     allowed_domains = ["buffalowildwings.com"]
 
     def start_requests(self):

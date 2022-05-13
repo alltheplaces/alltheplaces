@@ -8,8 +8,9 @@ from locations.items import GeojsonPointItem
 
 class ChicosSpider(scrapy.Spider):
     name = "chicos"
-    item_attributes = {"brand": "Chico's"}
+    item_attributes = {"brand": "Chico's", "brand_wikidata": "Q5096393"}
     allowed_domains = ["stores.chicos.com"]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def start_requests(self):
         pages = [*range(0, 30, 1)]

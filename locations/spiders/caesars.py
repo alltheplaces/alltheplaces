@@ -7,7 +7,7 @@ from locations.items import GeojsonPointItem
 
 class CaesarsSpider(scrapy.Spider):
     name = "caesars"
-    item_attributes = {"brand": "Caesars Entertainment"}
+    item_attributes = {"brand": "Caesars Entertainment", "brand_wikidata": "Q18636524"}
     allowed_domains = ["caesars.com"]
     start_urls = [
         "https://www.caesars.com/destinations",

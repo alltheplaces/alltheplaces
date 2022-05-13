@@ -9,6 +9,7 @@ from locations.hours import OpeningHours
 
 class BeefOBradysSpider(scrapy.Spider):
     name = "beef_o_bradys"
+    item_attributes = {"brand": "Beef 'o' Brady's"}
     allowed_domains = ["locationstogo.com"]
 
     start_urls = [
@@ -22,7 +23,7 @@ class BeefOBradysSpider(scrapy.Spider):
             properties = {
                 "ref": place["storeID"],
                 "name": place["title"],
-                "addr_full": place["address"],
+                "street_address": place["address"],
                 "city": place["city"],
                 "state": place["state"],
                 "postcode": place["zip"],
@@ -30,6 +31,10 @@ class BeefOBradysSpider(scrapy.Spider):
                 "lon": place["lng"],
                 "phone": place["phone"],
                 "website": "https://www.beefobradys.com/" + place["url"],
+                "extras": {
+                    "contact:fax": place["fax"],
+                    "contact:facebook": place["facebook"],
+                },
             }
 
             yield GeojsonPointItem(**properties)

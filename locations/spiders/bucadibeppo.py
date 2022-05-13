@@ -9,7 +9,7 @@ from locations.items import GeojsonPointItem
 
 class BucadiBeppoSpider(scrapy.Spider):
     name = "bucadibeppo"
-    item_attributes = {"brand": "Buca di Beppo"}
+    item_attributes = {"brand": "Buca di Beppo", "brand_wikidata": "Q4982340"}
     allowed_domains = ["bucadibeppo.com"]
     start_urls = ["https://locations.bucadibeppo.com/us"]
 

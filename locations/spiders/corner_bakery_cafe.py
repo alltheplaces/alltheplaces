@@ -10,6 +10,7 @@ from locations.hours import OpeningHours
 
 class CornerBakeryCafeSpider(scrapy.Spider):
     name = "corner_bakery_cafe"
+    item_attributes = {"brand": "Corner Bakery Cafe", "brand_wikidata": "Q5171598"}
     allowed_domains = ["cornerbakerycafe.com"]
     start_urls = [
         "https://cornerbakerycafe.com/locations/all",

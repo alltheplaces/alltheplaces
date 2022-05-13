@@ -7,11 +7,12 @@ from locations.items import GeojsonPointItem
 
 class CulversSpider(scrapy.Spider):
     name = "culvers"
-    item_attributes = {"brand": "Culver's"}
+    item_attributes = {"brand": "Culver's", "brand_wikidata": "Q1143589"}
     allowed_domains = ["hosted.where2getit.com"]
     start_urls = (
         'https://hosted.where2getit.com/culvers/2015/ajax?&xml_request=<request><appkey>1099682E-D719-11E6-A0C4-347BDEB8F1E5</appkey><formdata id="locatorsearch"><dataview>store_default</dataview><order>rank,_distance</order><limit>5000</limit><stateonly>0</stateonly><geolocs><geoloc><addressline></addressline><longitude>-98.369</longitude><latitude>39.417</latitude><country></country></geoloc></geolocs><searchradius>2500</searchradius></formdata></request>',
     )
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def store_hours(self, store_hours):
         day_groups = []
