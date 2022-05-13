@@ -19,7 +19,7 @@ DAY_MAPPING = {
 
 class BloomingdalesSpider(scrapy.Spider):
     name = "bloomingdales"
-    item_attributes = {"brand": "Bloomingdale's"}
+    item_attributes = {"brand": "Bloomingdale's", "brand_wikidata": "Q283383"}
     allowed_domains = ["bloomingdales.com"]
     download_delay = 0.2
     start_urls = ("https://locations.bloomingdales.com/",)

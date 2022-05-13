@@ -19,7 +19,7 @@ DAY_MAPPING = {
 
 class ChilisSpider(scrapy.Spider):
     name = "chilis"
-    item_attributes = {"brand": "Chili's"}
+    item_attributes = {"brand": "Chili's", "brand_wikidata": "Q1072948"}
     allowed_domains = ["chilis.com"]
     download_delay = 0.5
     start_urls = ("https://www.chilis.com/locations/us/all",)

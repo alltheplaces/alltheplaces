@@ -4,8 +4,11 @@ from locations.items import GeojsonPointItem
 
 class BaylorScottWhiteSpider(scrapy.Spider):
     name = "baylorscottwhite"
-    item_attributes = {"brand": "Baylor Scott & White Health"}
-    allowed_domains = ["https://www.bswhealth.com/", "https://phyndapi.bswapi.com"]
+    item_attributes = {
+        "brand": "Baylor Scott & White Health",
+        "brand_wikidata": "Q41568258",
+    }
+    allowed_domains = ["www.bswhealth.com", "phyndapi.bswapi.com"]
     start_urls = ("https://www.bswhealth.com/",)
 
     def start_requests(self):

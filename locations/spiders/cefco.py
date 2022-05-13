@@ -7,7 +7,7 @@ from locations.items import GeojsonPointItem
 
 class CefcoSpider(scrapy.Spider):
     name = "cefco"
-    item_attributes = {"brand": "CEFCO"}
+    item_attributes = {"brand": "CEFCO", "brand_wikidata": "Q110209230"}
     allowed_domains = ["cefco.com"]
 
     start_urls = ["https://cefcostores.com/store-locator/"]

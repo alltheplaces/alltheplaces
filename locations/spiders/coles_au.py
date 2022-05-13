@@ -9,7 +9,7 @@ from locations.items import GeojsonPointItem
 
 class ColesSpider(scrapy.Spider):
     name = "coles_au"
-    item_attributes = {"brand": "Coles"}
+    item_attributes = {"brand": "Coles", "brand_wikidata": "Q1108172"}
     allowed_domains = ["apigw.coles.com.au"]
     start_urls = [
         "https://apigw.coles.com.au/digital/colesweb/v1/stores/search?latitude=-28.014547&longitude=135.171168&brandIds=2,1&numberOfStores=10",

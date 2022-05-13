@@ -62,7 +62,7 @@ STATES = [
 
 class CaliberHomeLoansSpider(scrapy.Spider):
     name = "caliber_home_loans"
-    item_attributes = {"brand": "Caliber Home Loans"}
+    item_attributes = {"brand": "Caliber Home Loans", "brand_wikidata": "Q25055134"}
     allowed_domains = ["www.caliberhomeloans.com"]
     download_delay = 0.3
 

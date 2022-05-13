@@ -15,7 +15,7 @@ DAYS = {
 
 class CarphoneWarehouseSpider(scrapy.Spider):
     name = "carphonewarehouse"
-    item_attributes = {"brand": "Carphone Warehouse"}
+    item_attributes = {"brand": "Carphone Warehouse", "brand_wikidata": "Q118046"}
     allowed_domains = ["www.carphonewarehouse.com"]
 
     def store_hours(self, store_hours):

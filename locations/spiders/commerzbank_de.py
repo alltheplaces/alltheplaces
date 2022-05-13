@@ -20,6 +20,7 @@ DAY_MAPPING = {
 
 class CommerzbankDESpider(scrapy.Spider):
     name = "commerzbank_de"
+    item_attributes = {"brand": "Commerzbank", "brand_wikidata": "Q157617"}
     allowed_domains = ["commerzbank.de"]
     start_urls = ("https://filialsuche.commerzbank.de/de/branch-name",)
 

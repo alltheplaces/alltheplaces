@@ -9,7 +9,7 @@ from locations.items import GeojsonPointItem
 class CleanHarborsSpider(scrapy.Spider):
     # download_delay = 0.2
     name = "clean_harbors"
-    item_attributes = {"brand": "Clean Harbors"}
+    item_attributes = {"brand": "Clean Harbors", "brand_wikidata": "Q5130494"}
     allowed_domains = ["cleanharbors.com"]
     start_urls = ("https://www.cleanharbors.com/locations/united-states",)
 

@@ -8,7 +8,7 @@ from locations.items import GeojsonPointItem
 
 class BarnesNobleCollegeSpider(scrapy.Spider):
     name = "barnesnoblecollege"
-    item_attributes = {"brand": "Barnes & Noble College"}
+    item_attributes = {"brand": "Barnes & Noble College", "brand_wikidata": "Q4861508"}
     allowed_domains = ["bncollege.com"]
     start_urls = ("https://www.bncollege.com/campus-stores/",)
 

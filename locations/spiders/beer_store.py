@@ -7,7 +7,7 @@ from locations.items import GeojsonPointItem
 class BeerStoreSpider(scrapy.Spider):
 
     name = "beer_store"
-    item_attributes = {"brand": "The Beer Store"}
+    item_attributes = {"brand": "The Beer Store", "brand_wikidata": "Q16243674"}
     allowed_domains = ["www.thebeerstore.ca/"]
     start_urls = ("http://www.thebeerstore.ca/storelocations.json",)
 
@@ -22,7 +22,7 @@ class BeerStoreSpider(scrapy.Spider):
                 "lon": data["geometry"]["coordinates"][0],
                 "lat": data["geometry"]["coordinates"][1],
                 "name": data["properties"]["name"],
-                "addr_full": description[: description.find(end_str)],
+                "street_address": description[: description.find(end_str)],
             }
 
             yield GeojsonPointItem(**properties)

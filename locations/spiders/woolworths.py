@@ -6,7 +6,7 @@ from locations.items import GeojsonPointItem
 
 class WoolworthsSpider(scrapy.Spider):
     name = "woolworths"
-    item_attributes = {"brand": "Woolworths Supermarket"}
+    item_attributes = {"brand": "Woolworths", "brand_wikidata": "Q3249145"}
     allowed_domains = ["woolworths.com.au"]
     start_urls = [
         "https://www.woolworths.com.au/apis/ui/StoreLocator/Stores?Max=4500&Division=SUPERMARKETS,PETROL,CALTEXWOW,AMPOLMETRO,AMPOL&Facility=&latitude=-16.0880000&longitude=142.2948779",
@@ -18,6 +18,7 @@ class WoolworthsSpider(scrapy.Spider):
         "https://www.woolworths.com.au/apis/ui/StoreLocator/Stores?Max=4500&Division=SUPERMARKETS,PETROL,CALTEXWOW,AMPOLMETRO,AMPOL&Facility=&latitude=-32.1755753&longitude=138.7792529",
         "https://www.woolworths.com.au/apis/ui/StoreLocator/Stores?Max=4500&Division=SUPERMARKETS,PETROL,CALTEXWOW,AMPOLMETRO,AMPOL&Facility=&latitude=-42.2284848&longitude=146.3817920",
     ]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def parse(self, response):
         data = response.json()
