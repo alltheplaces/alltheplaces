@@ -17,6 +17,7 @@ class CarphoneWarehouseSpider(scrapy.Spider):
     name = "carphonewarehouse"
     item_attributes = {"brand": "Carphone Warehouse", "brand_wikidata": "Q118046"}
     allowed_domains = ["www.carphonewarehouse.com"]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def store_hours(self, store_hours):
         clean_time = ""
@@ -52,7 +53,10 @@ class CarphoneWarehouseSpider(scrapy.Spider):
                 "postcode": postcode,
                 "lat": value["Latitude"],
                 "lon": value["Longitude"],
-                "phone": value["telephone"],
+                "phone": value.get("telephone"),
+                "website": "https://www.carphonewarehouse.com/store-locator/"
+                + value["pageName"]
+                + ".html",
             }
 
             opening_hours = self.store_hours(value)
