@@ -7,8 +7,9 @@ class EdekaSpider(scrapy.Spider):
     """Scrapes Edeka, the German market chain, locations."""
 
     name = "edeka"
-    item_attributes = {"brand": "Edeka"}
+    item_attributes = {"brand": "Edeka", "brand_wikidata": "Q701755"}
     allowed_domains = ["www.edeka.de"]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def start_requests(self):
         """Initial Request. The initial request searches for all Edeka locations within the rectangle 47.0 South, 55.5 North, 5.62 East, 15 west"""

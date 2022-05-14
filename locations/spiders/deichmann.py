@@ -7,6 +7,7 @@ from locations.items import GeojsonPointItem
 
 class Deichmann(scrapy.Spider):
     name = "deichmann"
+    item_attributes = {"brand": "Deichmann", "brand_wikidata": "Q664543"}
     allowed_domains = ["stores.deichmann.com", "stores.dosenbach.ch"]
     start_urls = ("https://stores.deichmann.com/index.html",)
 

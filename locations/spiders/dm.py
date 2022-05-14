@@ -11,6 +11,7 @@ COUNTRY_MAPPING = {"DE": "Germany"}
 
 class DmSpider(scrapy.Spider):
     name = "dm"
+    item_attributes = {"brand": "dm", "brand_wikidata": "Q266572"}
     allowed_domains = ["store-data-service.services.dmtech.com"]
     start_urls = [
         "https://store-data-service.services.dmtech.com/stores/bbox/"

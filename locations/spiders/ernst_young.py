@@ -9,7 +9,7 @@ from locations.hours import OpeningHours
 
 class ErnstYoungSpider(scrapy.Spider):
     name = "ernst_young"
-    item_attributes = {"brand": "Ernst & Young"}
+    item_attributes = {"brand": "EY", "brand_wikidata": "Q489097"}
     allowed_domains = []
     start_urls = [
         "https://www.ey.com/eydff/services/officeLocations.json",
