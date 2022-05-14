@@ -20,7 +20,7 @@ DAY_MAPPING = {
 class EinsteinBrosSpider(scrapy.Spider):
     download_delay = 0.5
     name = "einsteinbros"
-    item_attributes = {"brand": "Einstein Bros. Bagels"}
+    item_attributes = {"brand": "Einstein Bros. Bagels", "brand_wikidata": "Q5349788"}
     allowed_domains = ["einsteinbros.com"]
     start_urls = ("https://locations.einsteinbros.com/us",)
 

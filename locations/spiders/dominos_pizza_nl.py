@@ -7,7 +7,7 @@ from locations.items import GeojsonPointItem
 
 class DomionsPizzaWorldwideSpider(scrapy.Spider):
     name = "dominos_pizza_nl"
-    item_attributes = {"brand": "Dominos Pizza Netherlands"}
+    item_attributes = {"brand": "Domino's", "brand_wikidata": "Q839466"}
     allowed_domains = ["dominos.nl"]
 
     start_urls = ("https://www.dominos.nl/winkels",)
@@ -30,13 +30,11 @@ class DomionsPizzaWorldwideSpider(scrapy.Spider):
         ref = re.search(r".+/(.+?)/?(?:\.html|$)", response.url).group(1)
         country = re.search(r"\.([a-z]{2})\/", response.url).group(1)
         address_data = response.xpath('//a[@id="open-map-address"]/text()').extract()
-        locality_data = address_data[1].strip()
+        locality_data = re.search(r"(.*) ([A-Z]{2}) (.*)", address_data[1].strip())
         properties = {
             "ref": ref.strip("/"),
             "name": response.xpath('//h1[@class="storetitle"]/text()').extract_first(),
             "addr_full": address_data[0].strip().strip(","),
-            "city": re.search(r"(.*) ([A-Z]{2}) (.*)", locality_data).group(1),
-            "postcode": re.search(r"(.*) ([A-Z]{2}) (.*)", locality_data).group(3),
             "country": country,
             "lat": float(
                 response.xpath(
@@ -54,4 +52,7 @@ class DomionsPizzaWorldwideSpider(scrapy.Spider):
             ),
             "website": response.url,
         }
+        if locality_data:
+            properties["city"] = locality_data.group(1)
+            properties["postcode"] = locality_data.group(3)
         yield GeojsonPointItem(**properties)

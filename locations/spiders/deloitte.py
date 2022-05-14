@@ -6,7 +6,7 @@ from locations.items import GeojsonPointItem
 
 class DeloitteSpider(scrapy.Spider):
     name = "deloitte"
-    item_attributes = {"brand": "Deloitte"}
+    item_attributes = {"brand": "Deloitte", "brand_wikidata": "Q491748"}
     allowed_domains = ["deloitte.com"]
     download_delay = 0.2
 

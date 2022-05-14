@@ -7,6 +7,7 @@ from locations.items import GeojsonPointItem
 
 class EquinoxSpider(scrapy.Spider):
     name = "equinox"
+    item_attributes = {"brand": "Equinox Fitness", "brand_wikidata": "Q5384535"}
     allowed_domains = ["cdn.contentful.com"]
     start_url = "https://cdn.contentful.com/spaces/drib7o8rcbyf/environments/master/entries?content_type=club&include=3"
 

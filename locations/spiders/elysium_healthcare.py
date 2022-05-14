@@ -9,7 +9,7 @@ from locations.items import GeojsonPointItem
 
 class ElysiumHealthcareSpider(scrapy.Spider):
     name = "elysium_healthcare"
-    item_attributes = {"brand": "Elysium Healthcare"}
+    item_attributes = {"brand": "Elysium Healthcare", "brand_wikidata": "Q39086513"}
     allowed_domains = ["www.elysiumhealthcare.co.uk"]
     start_urls = [
         "https://www.elysiumhealthcare.co.uk/locations/",

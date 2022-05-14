@@ -61,7 +61,7 @@ POSTALS = [
 
 class DishSpider(scrapy.Spider):
     name = "dish"
-    item_attributes = {"brand": "DISH"}
+    item_attributes = {"brand": "Dish", "brand_wikidata": "Q1199757"}
     allowed_domains = ["www.dish.com"]
     start_urls = [
         "https://www.dish.com/find-retailer",

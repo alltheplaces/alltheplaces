@@ -9,7 +9,7 @@ from locations.hours import OpeningHours
 
 class DollarTreeSpider(scrapy.Spider):
     name = "dollartree"
-    item_attributes = {"brand": "Dollar Tree"}
+    item_attributes = {"brand": "Dollar Tree", "brand_wikidata": "Q5289230"}
     allowed_domains = ["dollartree.com"]
     start_urls = ("https://www.dollartree.com/locations",)
 

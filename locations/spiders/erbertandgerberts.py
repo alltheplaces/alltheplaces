@@ -5,9 +5,12 @@ from locations.items import GeojsonPointItem
 
 class ErbertandGerbertsSpider(scrapy.Spider):
     name = "erbertandgerberts"
-    item_attributes = {"brand": "Erbert & Gerbert's"}
+    item_attributes = {"brand": "Erbert & Gerbert's", "brand_wikidata": "Q5385097"}
     allowed_domains = ["erbertandgerberts.com"]
     start_urls = ("https://www.erbertandgerberts.com/store-sitemap.xml",)
+    custom_settings = {
+        "USER_AGENT": "Mozilla/5.0 (X11; Linux x86_64; rv:99.0) Gecko/20100101 Firefox/99.0"
+    }
 
     def parse(self, response):
         response.selector.remove_namespaces()

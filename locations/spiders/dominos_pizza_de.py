@@ -7,7 +7,7 @@ from locations.items import GeojsonPointItem
 
 class DomionsPizzaWorldwideSpider(scrapy.Spider):
     name = "dominos_pizza_de"
-    item_attributes = {"brand": "Dominos Pizza Germany"}
+    item_attributes = {"brand": "Domino's", "brand_wikidata": "Q839466"}
     allowed_domains = ["dominos.de"]
 
     start_urls = ("https://www.dominos.de/store",)
