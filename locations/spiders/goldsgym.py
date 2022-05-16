@@ -73,4 +73,6 @@ class GoldsGymSpider(scrapy.Spider):
         urls = xml.xpath("//loc/text()").extract()
         for url in urls:
             path = "/".join(urlparse(url).path.split("/")[:-1])
-            yield scrapy.Request(response.urljoin(path), callback=self.parse_hotel)
+            yield scrapy.Request(
+                response.urljoin(path) + "/", callback=self.parse_hotel
+            )
