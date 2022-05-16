@@ -19,6 +19,7 @@ DAY_MAPPING = {
 
 class HibbettSportsSpider(scrapy.Spider):
     name = "hibbett_sports"
+    item_attributes = {"brand": "Hibbett Sports", "brand_wikidata": "Hibbett Sports"}
     allowed_domains = ["hibbett.com"]
     start_urls = [
         "https://www.hibbett.com/on/demandware.store/Sites-Hibbett-US-Site/default/Stores-GetNearestStores?latitude=30.2175453&longitude=-97.8558357&countryCode=US&distanceUnit=mi&maxdistance=5000",

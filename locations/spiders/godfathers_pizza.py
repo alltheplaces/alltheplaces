@@ -9,7 +9,7 @@ from locations.hours import OpeningHours
 
 class GodfathersPizzaSpider(scrapy.Spider):
     name = "godfathers_pizza"
-    item_attributes = {"brand": "Godfather's Pizza"}
+    item_attributes = {"brand": "Godfather's Pizza", "brand_wikidata": "Q5576353"}
     allowed_domains = ["tillster.com"]
     start_urls = [
         "https://api-prod-gfp-us-a.tillster.com/mobilem8-web-service/rest/storeinfo/distance?_=1601656666666&\

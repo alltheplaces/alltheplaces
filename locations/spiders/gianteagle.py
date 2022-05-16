@@ -11,7 +11,7 @@ DAY_MAPPING = {1: "Su", 2: "Mo", 3: "Tu", 4: "We", 5: "Th", 6: "Fr", 7: "Sa"}
 
 class GiantEagleSpider(scrapy.Spider):
     name = "gianteagle"
-    item_attributes = {"brand": "Giant Eagle"}
+    item_attributes = {"brand": "Giant Eagle", "brand_wikidata": "Q1522721"}
     allowed_domains = "www.gianteagle.com"
     download_delay = 0.2
     start_urls = (

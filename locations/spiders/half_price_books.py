@@ -30,7 +30,7 @@ def convert_24hour(time):
 
 class HalfPriceBooksSpider(scrapy.Spider):
     name = "half_price_books"
-    item_attributes = {"brand": "Half Price Books"}
+    item_attributes = {"brand": "Half Price Books", "brand_wikidata": "Q5641744"}
     allowed_domains = ["hpb.com"]
     start_urls = ("https://www.hpb.com/all-stores-list",)
 

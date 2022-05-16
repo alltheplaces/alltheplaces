@@ -8,7 +8,7 @@ from locations.items import GeojsonPointItem
 
 class GapSpider(scrapy.Spider):
     name = "gap"
-    item_attributes = {"brand": "Gap"}
+    item_attributes = {"brand": "Gap", "brand_wikidata": "Q420822"}
     allowed_domains = ["www.gap.com"]
     start_urls = ["https://www.gap.com/stores"]
 

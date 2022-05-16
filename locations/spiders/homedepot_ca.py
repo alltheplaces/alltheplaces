@@ -9,7 +9,7 @@ from locations.hours import OpeningHours
 
 class HomeDepotCanadaSpider(scrapy.Spider):
     name = "homedepot_ca"
-    item_attributes = {"brand": "The Home Depot"}
+    item_attributes = {"brand": "The Home Depot", "brand_wikidata": "Q864407"}
     allowed_domains = ["homedepot.ca"]
     start_urls = [
         "https://stores.homedepot.ca/sitemap.xml",

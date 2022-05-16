@@ -9,10 +9,12 @@ from locations.hours import OpeningHours
 
 class HomeBargainsUkSpider(scrapy.Spider):
     name = "home_bargains_uk"
+    item_attributes = {"brand": "Home Bargains", "brand_wikidata": "Q5888229"}
     allowed_domains = ["homebargains.co.uk"]
     start_urls = [
         "https://storelocator.homebargains.co.uk/all-stores",
     ]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def parse(self, response):
         remove_dupes_hrefs = []
