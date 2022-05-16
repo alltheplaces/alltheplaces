@@ -51,10 +51,7 @@ class HalfPriceBooksSpider(scrapy.Spider):
             "name": response.xpath(
                 '//h1[@class="store-details-name"]/text()'
             ).extract_first(),
-            "addr_full": address.split(",")[0],
-            "city": address.split(",")[1].strip(),
-            "state": (address.split(",")[2]).strip().split(" ")[0],
-            "postcode": (address.split(",")[2]).strip().split(" ")[1],
+            "addr_full": address,
             "lat": float(
                 response.xpath(
                     '//div[@class="stock_location"]/@data-lat'
@@ -73,6 +70,21 @@ class HalfPriceBooksSpider(scrapy.Spider):
         hours = self.parse_hours(
             response.xpath('//ul[@class="store-details-hours mts"]/li/text()').extract()
         )
+
+        split_addr = address.split(",")
+        if len(split_addr) == 3:
+            properties["street_address"] = split_addr[0]
+            properties["city"] = split_addr[1].strip()
+            properties["state"] = split_addr[2].strip().split(" ")[0]
+            properties["postcode"] = split_addr[2].strip().split(" ")[1]
+        elif len(split_addr) == 4:
+            properties["street_address"] = split_addr[0] + "," + split_addr[1]
+            properties["city"] = split_addr[2].strip()
+            properties["state"] = split_addr[3].strip().split(" ")[0]
+            properties["postcode"] = split_addr[3].strip().split(" ")[1]
+        elif len(split_addr) == 2:
+            properties["city"] = split_addr[0].strip()
+            properties["state"] = split_addr[1].strip()
 
         if hours:
             properties["opening_hours"] = hours
