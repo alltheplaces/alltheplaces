@@ -8,7 +8,10 @@ from locations.items import GeojsonPointItem
 
 class GoodstartsSpider(scrapy.Spider):
     name = "goodstart"
-    item_attributes = {"brand": "GoodStart Early Learning", "brand_wikidata": "Q24185325"}
+    item_attributes = {
+        "brand": "GoodStart Early Learning",
+        "brand_wikidata": "Q24185325",
+    }
     allowed_domains = ["goodstart.org.au"]
     start_urls = [
         "https://www.goodstart.org.au/extApi/CentreAPI/",
