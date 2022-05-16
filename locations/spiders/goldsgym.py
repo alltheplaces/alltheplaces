@@ -46,6 +46,16 @@ class GoldsGymSpider(scrapy.Spider):
         else:
             return  # closed gym
 
+        if data.get("@graph"):
+            found = False
+            for obj in data["@graph"]:
+                if obj["@type"] == "ExerciseGym":
+                    data = obj
+                    found = True
+                    break
+            if not found:
+                return
+
         properties = {
             "ref": "_".join([x for x in response.url.split("/")[-2:] if x]),
             "name": data["name"],
