@@ -7,13 +7,13 @@ from locations.items import GeojsonPointItem
 
 class FreshMarketSpider(scrapy.Spider):
     name = "freshmarket"
-    item_attributes = {"brand": "Fresh Market"}
+    item_attributes = {"brand": "Fresh Market", "brand_wikidata": "Q7735265"}
     allowed_domains = ["thefreshmarket.com"]
     start_urls = ("https://www.thefreshmarket.com/your-market/store-locator/",)
 
     def parse(self, response):
         json_data = response.xpath(
-            '//script[@data-reactid="39"]/text()'
+            '//script[@data-reactid="41"]/text()'
         ).extract_first()
         start = json_data.index('"stores":') + 9
         data = json.decoder.JSONDecoder().raw_decode(json_data, start)[0]

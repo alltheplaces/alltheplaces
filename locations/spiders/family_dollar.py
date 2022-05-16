@@ -8,7 +8,7 @@ from locations.items import GeojsonPointItem
 
 class FamilyDollarSpider(scrapy.Spider):
     name = "family_dollar"
-    item_attributes = {"brand": "Family Dollar"}
+    item_attributes = {"brand": "Family Dollar", "brand_wikidata": "Q5433101"}
     allowed_domains = ["familydollar.com"]
     start_urls = ("https://locations.familydollar.com",)
 

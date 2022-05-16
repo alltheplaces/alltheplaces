@@ -8,7 +8,7 @@ from locations.items import GeojsonPointItem
 
 class FreshThymeSpider(scrapy.Spider):
     name = "freshthyme"
-    item_attributes = {"brand": "Fresh Thyme"}
+    item_attributes = {"brand": "Fresh Thyme", "brand_wikidata": "Q64132791"}
     allowed_domains = ["www.freshthyme.com"]
     start_urls = ["https://discover.freshthyme.com/api/v2/stores"]
 

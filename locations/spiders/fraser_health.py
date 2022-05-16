@@ -9,7 +9,7 @@ from locations.hours import OpeningHours
 
 class FraserHealthSpider(scrapy.Spider):
     name = "fraser_health"
-    item_attributes = {"brand": "Fraser Health"}
+    item_attributes = {"brand": "Fraser Health", "brand_wikidata": "Q5493608"}
     allowed_domains = ["fraserhealth.ca"]
     start_urls = [
         "https://www.fraserhealth.ca//sxa/search/results/?s={EEFB374B-EF65-4B44-B06E-AF16ECE464AA}&sig=location&o=Title,Ascending&p=500&v={36068498-7115-494B-8659-DFFB2B83EBF5}&site=null",

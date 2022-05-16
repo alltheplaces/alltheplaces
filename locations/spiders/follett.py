@@ -8,6 +8,7 @@ BASE_URL = "https://www.follett.com"
 
 class FollettSpider(scrapy.Spider):
     name = "follett"
+    item_attributes = {"brand": "Follett Corporation", "brand_wikidata": "Q5464641"}
     allowed_domains = ["www.follett.com"]
     start_urls = [
         "https://www.follett.com/college-bookstores/",

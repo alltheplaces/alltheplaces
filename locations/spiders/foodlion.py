@@ -9,7 +9,7 @@ from locations.items import GeojsonPointItem
 class FoodLionSpider(scrapy.Spider):
     download_delay = 3
     name = "foodlion"
-    item_attributes = {"brand": "Food Lion"}
+    item_attributes = {"brand": "Food Lion", "brand_wikidata": "Q1435950"}
     allowed_domains = ["www.foodlion.com"]
     start_urls = ("https://www.foodlion.com/stores/",)
 

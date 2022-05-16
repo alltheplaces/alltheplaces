@@ -18,9 +18,9 @@ DAY_MAPPING = {
 }
 
 
-class FreseniusFidneyCare(scrapy.Spider):
+class FreseniusKidneyCare(scrapy.Spider):
     name = "freseniuskidneycare"
-    item_attributes = {"brand": "Fresenius Kidney Care"}
+    item_attributes = {"brand": "Fresenius Kidney Care", "brand_wikidata": "Q650259"}
     allowed_domains = ["www.freseniuskidneycare.com"]
     download_delay = 0.2
     start_urls = (
