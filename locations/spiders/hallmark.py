@@ -9,7 +9,7 @@ from scrapy.selector import Selector
 
 class HallmarkSpider(scrapy.Spider):
     name = "hallmark"
-    item_attributes = {"brand": "Hallmark"}
+    item_attributes = {"brand": "Hallmark", "brand_wikidata": "Q1521910"}
     allowed_domains = ["www.hallmark.com"]
     start_urls = [
         "https://maps.hallmark.com/api/getAsyncLocations?template=search&level=search&search=66952&radius=10000&limit=3000"

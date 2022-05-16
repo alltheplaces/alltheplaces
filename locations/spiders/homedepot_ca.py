@@ -1,27 +1,24 @@
 # -*- coding: utf-8 -*-
 import json
 import re
-import scrapy
 
 from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
+from scrapy.spiders import SitemapSpider
 
 
-class HomeDepotCanadaSpider(scrapy.Spider):
+class HomeDepotCanadaSpider(SitemapSpider):
     name = "homedepot_ca"
-    item_attributes = {"brand": "The Home Depot"}
+    item_attributes = {"brand": "The Home Depot", "brand_wikidata": "Q864407"}
     allowed_domains = ["homedepot.ca"]
-    start_urls = [
-        "https://stores.homedepot.ca/sitemap.xml",
-    ]
     download_delay = 0.2
-
-    def parse(self, response):
-        response.selector.remove_namespaces()
-        urls = response.xpath("//url/loc/text()").extract()
-        for url in urls:
-            if re.match(r"(.*.html)", url):
-                yield scrapy.Request(url, callback=self.parse_store)
+    sitemap_urls = ["https://stores.homedepot.ca/sitemap.xml"]
+    sitemap_rules = [
+        (
+            "https:\/\/stores\.homedepot\.ca\/([\w]{2})\/([-\w]+)\/([-\w]+)([\d]+)\.html$",
+            "parse_store",
+        ),
+    ]
 
     def parse_store(self, response):
         script = json.loads(
@@ -35,7 +32,7 @@ class HomeDepotCanadaSpider(scrapy.Spider):
         properties = {
             "name": data["name"],
             "ref": ref,
-            "addr_full": data["address"]["streetAddress"].strip(),
+            "street_address": data["address"]["streetAddress"].strip(),
             "city": data["address"]["addressLocality"],
             "state": data["address"]["addressRegion"],
             "postcode": data["address"]["postalCode"],

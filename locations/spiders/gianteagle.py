@@ -11,7 +11,7 @@ DAY_MAPPING = {1: "Su", 2: "Mo", 3: "Tu", 4: "We", 5: "Th", 6: "Fr", 7: "Sa"}
 
 class GiantEagleSpider(scrapy.Spider):
     name = "gianteagle"
-    item_attributes = {"brand": "Giant Eagle"}
+    item_attributes = {"brand": "Giant Eagle", "brand_wikidata": "Q1522721"}
     allowed_domains = "www.gianteagle.com"
     download_delay = 0.2
     start_urls = (
@@ -50,11 +50,11 @@ class GiantEagleSpider(scrapy.Spider):
         stores = response.json()["Locations"] or []
 
         for store in stores:
-            telephone = [
-                t["DisplayNumber"]
-                for t in store["TelephoneNumbers"]
-                if t["location"]["Item2"] == "Main"
-            ]
+            telephone = None
+            if store.get("TelephoneNumbers"):
+                for t in store["TelephoneNumbers"]:
+                    if t["location"]["Item2"] == "Main":
+                        telephone = t["DisplayNumber"]
 
             properties = dict(
                 ref=store["Number"]["Value"],
@@ -66,7 +66,7 @@ class GiantEagleSpider(scrapy.Spider):
                 city=store["Address"]["City"],
                 state=store["Address"]["State"]["Abbreviation"],
                 postcode=store["Address"]["Zip"],
-                phone=telephone[0] if telephone else None,
+                phone=telephone,
                 opening_hours=self.parse_hours(store["HoursOfOperation"]),
                 extras={
                     "number": store["Number"]["Value"],

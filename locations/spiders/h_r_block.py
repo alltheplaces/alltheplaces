@@ -5,7 +5,7 @@ from locations.items import GeojsonPointItem
 
 class HRBlockSpider(scrapy.Spider):
     name = "h_r_block"
-    item_attributes = {"brand": "H&R Block"}
+    item_attributes = {"brand": "H&R Block", "brand_wikidata": "Q5627799"}
     allowed_domains = ["www.hrblock.com"]
     download_delay = 0.8
     start_urls = (

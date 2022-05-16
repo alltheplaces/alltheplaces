@@ -7,7 +7,7 @@ from locations.items import GeojsonPointItem
 
 class GreatclipsSpider(scrapy.Spider):
     name = "greatclips"
-    item_attributes = {"brand": "Great Clips"}
+    item_attributes = {"brand": "Great Clips", "brand_wikidata": "Q5598967"}
     allowed_domains = ["greatclips.com", "stylewaretouch.net"]
     start_urls = (
         "https://www.stylewaretouch.net/checkin/wa/jsonMarkers?client=locator&lat=-34&lng=85&tzoffset=200&callback=onSuccess&failureCallback=onFailure&stores=",
