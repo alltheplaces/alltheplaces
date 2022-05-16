@@ -41,11 +41,12 @@ class HalfPriceBooksSpider(scrapy.Spider):
 
     def parse_store(self, response):
         ref = re.search(r".+/(.+)", response.url).group(1)
-        address = (
-            response.xpath('//div[@class="font-large font-pn-reg"]/div[1]/text()')
-            .extract_first()
-            .strip()
-        )
+        address = response.xpath(
+            '//div[@class="font-large font-pn-reg"]/div[1]/text()'
+        ).extract_first()
+        if address is None:
+            return
+        address = address.strip()
 
         properties = {
             "name": response.xpath(
