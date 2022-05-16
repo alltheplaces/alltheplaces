@@ -50,11 +50,11 @@ class GiantEagleSpider(scrapy.Spider):
         stores = response.json()["Locations"] or []
 
         for store in stores:
-            telephone = [
-                t["DisplayNumber"]
-                for t in store["TelephoneNumbers"]
-                if t["location"]["Item2"] == "Main"
-            ]
+            telephone = None
+            if store.get("TelephoneNumbers"):
+                for t in store["TelephoneNumbers"]:
+                    if t["location"]["Item2"] == "Main":
+                        telephone = t["DisplayNumber"]
 
             properties = dict(
                 ref=store["Number"]["Value"],
@@ -66,7 +66,7 @@ class GiantEagleSpider(scrapy.Spider):
                 city=store["Address"]["City"],
                 state=store["Address"]["State"]["Abbreviation"],
                 postcode=store["Address"]["Zip"],
-                phone=telephone[0] if telephone else None,
+                phone=telephone,
                 opening_hours=self.parse_hours(store["HoursOfOperation"]),
                 extras={
                     "number": store["Number"]["Value"],
