@@ -21,7 +21,7 @@ DAYS = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
 
 class ingles(scrapy.Spider):
     name = "ingles"
-    item_attributes = {"brand": "Ingles"}
+    item_attributes = {"brand": "Ingles", "brand_wikidata": "Q6032595"}
     allowed_domains = ["www.ingles-markets.com"]
 
     def start_requests(self):

@@ -8,7 +8,7 @@ from locations.items import GeojsonPointItem
 
 class KaiserPermanenteSpider(scrapy.Spider):
     name = "kaiser_permanente"
-    item_attributes = {"brand": "Kaiser Permanente"}
+    item_attributes = {"brand": "Kaiser Permanente", "brand_wikidata": "Q1721601"}
     allowed_domains = [
         "healthy.kaiserpermanente.org",
         "locations.kaiserpermanentejobs.org",

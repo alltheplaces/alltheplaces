@@ -18,7 +18,7 @@ DAY_MAPPING = {
 
 class JCPenneySpider(scrapy.Spider):
     name = "jcpenney"
-    item_attributes = {"brand": "J. C. Penney"}
+    item_attributes = {"brand": "JCPenney", "brand_wikidata": "Q920037"}
     allowed_domains = ["jcpenney.com"]
     download_delay = 0.2
     start_urls = ("https://stores.jcpenney.com/",)

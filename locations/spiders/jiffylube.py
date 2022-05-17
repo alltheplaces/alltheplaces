@@ -82,7 +82,7 @@ DAY_MAPPING = {
 
 class JiffyLubeSpider(scrapy.Spider):
     name = "jiffylube"
-    item_attributes = {"brand": "Jiffy Lube"}
+    item_attributes = {"brand": "Jiffy Lube", "brand_wikidata": "Q6192247"}
     allowed_domains = ["www.jiffylube.com"]
     start_urls = ("https://www.jiffylube.com/api/locations",)
 

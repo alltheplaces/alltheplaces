@@ -16,7 +16,10 @@ daysKey = {
 
 class LeesFamousRecipeSpider(scrapy.Spider):
     name = "lees_famous_recipe"
-    item_attributes = {"brand": "Lee's Famous Recipe Chicken"}
+    item_attributes = {
+        "brand": "Lee's Famous Recipe Chicken",
+        "brand_wikidata": "Q6512810",
+    }
     allowed_domains = ["www.leesfamousrecipe.com"]
     start_urls = ("https://www.leesfamousrecipe.com/locations/all",)
 

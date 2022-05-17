@@ -9,7 +9,7 @@ from locations.hours import OpeningHours
 
 class KorianFrSpider(scrapy.Spider):
     name = "korian_fr"
-    item_attributes = {"brand": "Korian"}
+    item_attributes = {"brand": "Korian", "brand_wikidata": "Q3198944"}
     allowed_domains = ["api-www.korian.fr"]
 
     def start_requests(self):

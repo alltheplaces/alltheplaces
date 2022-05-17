@@ -6,6 +6,7 @@ from locations.hours import OpeningHours
 
 class LoftSpider(scrapy.Spider):
     name = "loft"
+    item_attributes = {"brand": "Loft", "brand_wikidata": "Q62075137"}
     allowed_domains = ["stores.loft.com"]
     download_delay = 0
     start_urls = (
