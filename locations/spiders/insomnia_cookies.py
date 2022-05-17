@@ -9,6 +9,7 @@ from locations.items import GeojsonPointItem
 
 class InsomniaCookiesSpider(scrapy.Spider):
     name = "insomnia_cookies"
+    item_attributes = {"brand": "Insomnia Cookies", "brand_wikidata": "Q16997024"}
     allowed_domains = ["insomniacookies.com"]
 
     def start_requests(self):

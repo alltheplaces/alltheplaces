@@ -7,7 +7,7 @@ from locations.hours import OpeningHours
 
 class LaneBryantSpider(scrapy.Spider):
     name = "lanebryant"
-    item_attributes = {"brand": "Lane Bryant"}
+    item_attributes = {"brand": "Lane Bryant", "brand_wikidata": "Q6485350"}
     allowed_domains = ["stores.lanebryant.com"]
 
     def start_requests(self):

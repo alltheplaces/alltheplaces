@@ -10,6 +10,7 @@ from locations.hours import OpeningHours
 
 class KpmgFrSpider(scrapy.Spider):
     name = "kpmg_fr"
+    item_attributes = {"brand": "KPMG", "brand_wikidata": "Q493751"}
     allowed_domains = ["home.kpmg"]
     start_urls = [
         "https://home.kpmg/content/kpmgpublic/fr/fr/home/about/offices.regionMap.json",

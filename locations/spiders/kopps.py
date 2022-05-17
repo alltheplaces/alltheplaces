@@ -15,7 +15,7 @@ DAY_MAPPING = {
 
 class KoppsSpider(scrapy.Spider):
     name = "kopps"
-    item_attributes = {"brand": "Kopps"}
+    item_attributes = {"brand": "Kopp's Frozen Custard", "brand_wikidata": "Q6431150"}
     allowed_domains = ["www.kopps.com"]
     download_delay = 1.5
     start_urls = ("https://www.kopps.com/",)

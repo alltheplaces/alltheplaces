@@ -9,6 +9,7 @@ DAYS = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"]
 
 class IowaUniversitySpider(scrapy.Spider):
     name = "iowa_university"
+    item_attributes = {"brand": "University of Iowa Hospitals and Clinics", "brand_wikidata": "Q7895561"}
     allowed_domains = ["algolia.net", "algolianet.com"]
     body = '{"requests":[{"indexName":"uihc_locations","params":"query=&highlightPreTag=__ais-highlight__&highlightPostTag=__%2Fais-highlight__&page=%PAGE%&maxValuesPerFacet=100&facets=%5B%22services%22%2C%22field_patient_population%22%5D&tagFilters="}]}'
     headers = {

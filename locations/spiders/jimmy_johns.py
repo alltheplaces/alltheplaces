@@ -8,6 +8,7 @@ from locations.items import GeojsonPointItem
 
 class TemplateSpider(scrapy.Spider):
     name = "jimmy_johns"
+    item_attributes = {"brand": "Jimmy John's", "brand_wikidata": "Q1689380"}
     allowed_domains = ["locations.jimmyjohns.com"]
     start_urls = ("https://locations.jimmyjohns.com/sitemap.xml",)
 
