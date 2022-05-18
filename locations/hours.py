@@ -33,7 +33,7 @@ class OpeningHours(object):
                 "%s-%s"
                 % (
                     time.strftime("%H:%M", h[0]),
-                    time.strftime("%H:%M", h[1]),
+                    time.strftime("%H:%M", h[1]).replace("23:59", "24:00"),
                 )
                 for h in self.day_hours[day]
             )
@@ -50,7 +50,7 @@ class OpeningHours(object):
 
         opening_hours = ""
         if len(day_groups) == 1 and day_groups[0]["hours"] in (
-            "00:00-23:59",
+            "00:00-24:00",
             "00:00-00:00",
         ):
             opening_hours = "24/7"

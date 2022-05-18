@@ -7,7 +7,7 @@ from locations.items import GeojsonPointItem
 
 class MarksAndSpencerSpider(scrapy.Spider):
     name = "marks_and_spencer"
-    item_attributes = {"brand": "Marks and Spencer"}
+    item_attributes = {"brand": "Marks and Spencer", "brand_wikidata": "Q714491"}
     start_urls = (
         "https://www.marksandspencer.com/webapp/wcs/stores/servlet/MSResStoreFinderConfigCmd?storeId=10151&langId=-24",
     )
@@ -40,6 +40,8 @@ class MarksAndSpencerSpider(scrapy.Spider):
         o = OpeningHours()
         for day in store["coreOpeningHours"]:
             o.add_range(
-                day["day"][:2], day["open"], day["close"].replace("24:00", "23:59")
+                day["day"][:2],
+                day["open"].replace("24:00", "00:00"),
+                day["close"].replace("24:00", "23:59"),
             )
         return o.as_opening_hours()
