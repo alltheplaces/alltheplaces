@@ -1,6 +1,8 @@
 import scrapy
 import re
+
 from locations.items import GeojsonPointItem
+from locations.hours import OpeningHours
 
 DAYS = {
     "mon": "Mo",
@@ -14,46 +16,35 @@ DAYS = {
 
 
 class MorrisonsSpider(scrapy.Spider):
-
     name = "morrisons"
-    item_attributes = {"brand": "Morrisons", "brand+wikidata": "Q922344"}
-    allowed_domains = ["my.morrisons.com", "api.morrisons.com"]
-    download_delay = 0.5
-    start_urls = ("https://my.morrisons.com/storefinder/list/a",)
+    item_attributes = {"brand": "Morrisons", "brand_wikidata": "Q922344"}
+    allowed_domains = ["api.morrisons.com"]
+    start_urls = [
+        "https://api.morrisons.com/location/v2//stores?apikey=kxBdM2chFwZjNvG2PwnSn3sj6C53dLEY&limit=20000"
+    ]
 
     def store_hours(self, store_hours):
-        clean_time = ""
+        oh = OpeningHours()
         for key, value in store_hours.items():
-            if "open" in value and "close" in value:
-                if re.search("[0-9]{2}:[0-9]{2}:[0-9]{2}", value["open"]) and re.search(
-                    "[0-9]{2}:[0-9]{2}:[0-9]{2}", value["close"]
-                ):
-                    clean_time = (
-                        clean_time
-                        + DAYS[key]
-                        + " "
-                        + value["open"][0:5]
-                        + "-"
-                        + value["close"][0:5]
-                        + ";"
-                    )
-                else:
-                    clean_time = clean_time + DAYS[key] + " " + "Closed" + ";"
+            oh.add_range(key.title()[:2], value["open"], value["close"], "%H:%M:%S")
 
-        return clean_time
+        return oh.as_opening_hours()
 
-    def parse_stores(self, response):
-        data = response.json()
-        address = (
-            data["address"]["addressLine1"]
-            + " "
-            + data["address"]["addressLine2"].replace("None", "")
+    def parse_store(self, data):
+        address = ", ".join(
+            filter(
+                None,
+                (
+                    data["address"]["addressLine1"].strip(),
+                    data["address"]["addressLine2"].replace("None", "").strip(),
+                ),
+            )
         )
         properties = {
-            "addr_full": address.strip(),
+            "street_address": address,
             "phone": data["telephone"],
-            "city": data["address"]["city"],
-            "state": "",
+            "city": data["address"]["city"].replace("None", "").strip(),
+            "state": data["address"]["county"],
             "postcode": data["address"]["postcode"],
             "ref": data["name"],
             "name": data["storeName"],
@@ -61,27 +52,34 @@ class MorrisonsSpider(scrapy.Spider):
             "website": "https://my.morrisons.com/storefinder/" + str(data["name"]),
             "lat": data["location"]["latitude"],
             "lon": data["location"]["longitude"],
+            "extras": {},
         }
+
+        if data["storeFormat"] == "food-box":
+            properties["extras"]["industrial"] = "warehouse"
+        elif data["storeFormat"] == "pfs":
+            properties["extras"]["amenity"] = "fuel"
+        elif data["storeFormat"] == "supermarket":
+            properties["extras"]["shop"] = "supermarket"
+        elif data["storeFormat"] == "restricted":
+            return
+
+        if data["region"] == "Morrisons Daily":
+            properties["brand"] = "Morrisons Daily"
+            properties["brand_wikidata"] = "Q99752411"
+            properties["extras"]["shop"] = "convenience"
+        elif data["region"] == "Morrisons Select":
+            properties["brand"] = "Morrisons Select"
+            properties["brand_wikidata"] = "Q105221633"
+            properties["extras"]["shop"] = "convenience"
 
         hours = self.store_hours(data["openingTimes"])
         if hours:
             properties["opening_hours"] = hours
 
-        yield GeojsonPointItem(**properties)
-
-    def parse_alpha(self, response):
-        alpha_urls = response.xpath(
-            '//div[@class="col-md-4 col-sm-6"]/a/@href'
-        ).extract()
-        for path in alpha_urls:
-            id = re.findall(r"[0-9]+$", path)[0]
-            url = (
-                "https://api.morrisons.com/location/v2//stores/%s?apikey=kxBdM2chFwZjNvG2PwnSn3sj6C53dLEY&include=departments,services,linkedStores"
-                % (id)
-            )
-            yield scrapy.Request(response.urljoin(url), callback=self.parse_stores)
+        return GeojsonPointItem(**properties)
 
     def parse(self, response):
-        urls = response.xpath('//div[@class="azWrapper"]/ul/li/a/@href').extract()
-        for path in urls:
-            yield scrapy.Request(response.urljoin(path), callback=self.parse_alpha)
+        # may need to do pagination at some point, but right now the API accepts any limit
+        for store in response.json()["stores"]:
+            yield self.parse_store(store)
