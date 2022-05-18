@@ -25,7 +25,7 @@ class MarksAndSpencerSpider(scrapy.Spider):
             properties = {
                 "ref": store["id"],
                 "name": store["name"],
-                "addr_full": f"{store['address']['addressLine1']}, {store['address']['addressLine2']}",
+                "street_address": store["address"]["addressLine2"],
                 "city": store["address"]["city"],
                 "country": store["address"]["country"],
                 "postcode": store["address"]["postalCode"],
@@ -33,7 +33,25 @@ class MarksAndSpencerSpider(scrapy.Spider):
                 "lon": store["coordinates"]["longitude"],
                 "phone": store.get("phone", ""),
                 "opening_hours": self.get_opening_hours(store),
+                "website": "https://www.marksandspencer.com/stores/"
+                + store["name"].lower().replace(" ", "-")
+                + "-"
+                + str(store["id"]),
+                "extras": {},
             }
+
+            if store["storeType"] == "mands":
+                properties["extras"]["operator"] = "Marks and Spencer"
+                properties["extras"]["operator:wikidata"] = "Q714491"
+
+            name = store["name"].lower()
+            if name.endswith("foodhall"):
+                properties["brand"] = "M&S Foodhall"
+            elif name.endswith("simply food"):
+                properties["brand"] = "M&S Simply Food"
+            elif name.endswith("outlet"):
+                properties["brand"] = "M&S Outlet"
+
             yield GeojsonPointItem(**properties)
 
     def get_opening_hours(self, store):
