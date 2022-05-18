@@ -2,7 +2,7 @@
 
 [**Website**](https://www.alltheplaces.xyz/)
 
-A project to extract GeoJSON from the web focusing on websites that have 'store locator' pages like restaurants, gas stations, retailers, etc. Each chain has its own bit of software to extract useful information from their site (a "spider"). Each spider can be individually configured to throttle request rate to act as a good citizen on the Internet. The default `User-Agent` for the spiders can be found [here](https://github.com/alltheplaces/alltheplaces/blob/master/locations/settings.py#L20), so websites wishing to prevent our spiders from accessing the data on their website can block that User Agent.
+A project to extract GeoJSON from the web focusing on websites that have 'store locator' pages like restaurants, gas stations, retailers, etc. Each chain has its own bit of software to extract useful information from their site (a "spider"). Each spider can be individually configured to throttle request rate to act as a good citizen on the Internet. The default `User-Agent` for the spiders can be found [here](https://github.com/alltheplaces/alltheplaces/blob/master/locations/settings.py#L22), so websites wishing to prevent our spiders from accessing the data on their website can block that User Agent, but please feel free to contact us with any requests or recommendations.
 
 The project is built using [`scrapy`](https://scrapy.org/), a Python-based web scraping framework. Each target website gets its own [spider](https://doc.scrapy.org/en/latest/topics/spiders.html), which does the work of extracting interesting details about locations and outputting results in a useful format.
 
