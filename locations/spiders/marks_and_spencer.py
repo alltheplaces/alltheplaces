@@ -33,6 +33,10 @@ class MarksAndSpencerSpider(scrapy.Spider):
                 "lon": store["coordinates"]["longitude"],
                 "phone": store.get("phone", ""),
                 "opening_hours": self.get_opening_hours(store),
+                "website": "https://www.marksandspencer.com/stores/"
+                + store["name"].lower().replace(" ", "-")
+                + "-"
+                + str(store["id"]),
             }
             yield GeojsonPointItem(**properties)
 
