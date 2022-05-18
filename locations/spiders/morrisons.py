@@ -44,6 +44,7 @@ class MorrisonsSpider(scrapy.Spider):
             "street_address": address,
             "phone": data["telephone"],
             "city": data["address"]["city"].replace("None", "").strip(),
+            "state": data["address"]["county"],
             "postcode": data["address"]["postcode"],
             "ref": data["name"],
             "name": data["storeName"],
@@ -51,7 +52,24 @@ class MorrisonsSpider(scrapy.Spider):
             "website": "https://my.morrisons.com/storefinder/" + str(data["name"]),
             "lat": data["location"]["latitude"],
             "lon": data["location"]["longitude"],
+            "extras": {},
         }
+
+        if data["region"] == "Morrisons Daily":
+            properties["brand"] = "Morrisons Daily"
+            properties["brand_wikidata"] = "Q99752411"
+        elif data["region"] == "Morrisons Select":
+            properties["brand"] = "Morrisons Select"
+            properties["brand_wikidata"] = "Q105221633"
+
+        if data["storeFormat"] == "food-box":
+            properties["extras"]["industrial"] = "warehouse"
+        elif data["storeFormat"] == "pfs":
+            properties["extras"]["amenity"] = "fuel"
+        elif data["storeFormat"] == "supermarket":
+            properties["extras"]["shop"] = "supermarket"
+        elif data["storeFormat"] == "restricted":
+            return
 
         hours = self.store_hours(data["openingTimes"])
         if hours:
