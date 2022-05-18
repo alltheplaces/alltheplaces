@@ -25,7 +25,7 @@ class MarksAndSpencerSpider(scrapy.Spider):
             properties = {
                 "ref": store["id"],
                 "name": store["name"],
-                "addr_full": f"{store['address']['addressLine1']}, {store['address']['addressLine2']}",
+                "street_address": store["address"]["addressLine2"],
                 "city": store["address"]["city"],
                 "country": store["address"]["country"],
                 "postcode": store["address"]["postalCode"],
