@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 import json
+import math
 
 import scrapy
+from scrapy.downloadermiddlewares.retry import get_retry_request
 
 from locations.items import GeojsonPointItem
 
@@ -13,16 +15,32 @@ class WorldcatSpider(scrapy.Spider):
 
     def get_page(self, offset):
         return scrapy.Request(
+            # This URL returns JSON array
             f"https://worldcat.org/webservices/registry/find?oclcAccountName=+&institutionAlias=&instType=&country=&city=&subdivision=&postalCode=&regID=&oclcSymbol=&ISIL=&marcOrgCode=&blCode=&searchTermSet=1&getData=getData&offset={offset}",
             meta={"offset": offset},
         )
 
     def start_requests(self):
-        yield self.get_page(1)
+        yield scrapy.Request(
+            # This URL returns HTML search page
+            "https://www.worldcat.org/webservices/registry/find?oclcAccountName=+&institutionAlias=&instType=&country=&city=&subdivision=&postalCode=&regID=&oclcSymbol=&ISIL=&marcOrgCode=&blCode=&offset=0&searchTermSet=1",
+            callback=self.parse_search_page,
+        )
+
+    def parse_search_page(self, response):
+        total_records = int(
+            response.xpath("//script/text()").re_first(r"var totalRecords = '(\d+)'")
+        )
+        total_pages = math.ceil(total_records / 10)
+        for i in range(1, total_pages + 1):
+            yield self.get_page(i)
 
     def parse(self, response):
         data = response.json()
         if data == []:
+            # Seems to sometimes return empty array as a transient error,
+            # let's call their bluff to see if that's actually the end.
+            yield get_retry_request(response.request, spider=self, reason="empty array")
             return
         for row in data:
             inst_id = row["inst_id"]
@@ -30,8 +48,6 @@ class WorldcatSpider(scrapy.Spider):
                 f"https://worldcat.org/webservices/registry/Institutions/{inst_id}",
                 callback=self.parse_library,
             )
-
-        yield self.get_page(1 + response.meta["offset"])
 
     def parse_library(self, response):
         script = response.xpath('//script/text()[contains(., "var JSON_Obj")]').get()
