@@ -1,6 +1,8 @@
 import scrapy
 import re
+
 from locations.items import GeojsonPointItem
+from locations.hours import OpeningHours
 
 DAYS = {
     "mon": "Mo",
@@ -22,25 +24,11 @@ class MorrisonsSpider(scrapy.Spider):
     ]
 
     def store_hours(self, store_hours):
-        clean_time = ""
+        oh = OpeningHours()
         for key, value in store_hours.items():
-            if "open" in value and "close" in value:
-                if re.search("[0-9]{2}:[0-9]{2}:[0-9]{2}", value["open"]) and re.search(
-                    "[0-9]{2}:[0-9]{2}:[0-9]{2}", value["close"]
-                ):
-                    clean_time = (
-                        clean_time
-                        + DAYS[key]
-                        + " "
-                        + value["open"][0:5]
-                        + "-"
-                        + value["close"][0:5]
-                        + ";"
-                    )
-                else:
-                    clean_time = clean_time + DAYS[key] + " " + "Closed" + ";"
+            oh.add_range(key.title()[:2], value["open"], value["close"], "%H:%M:%S")
 
-        return clean_time
+        return oh.as_opening_hours()
 
     def parse_store(self, data):
         address = ", ".join(
