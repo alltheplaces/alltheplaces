@@ -43,16 +43,19 @@ class MorrisonsSpider(scrapy.Spider):
         return clean_time
 
     def parse_store(self, data):
-        address = (
-            data["address"]["addressLine1"]
-            + " "
-            + data["address"]["addressLine2"].replace("None", "")
+        address = ", ".join(
+            filter(
+                None,
+                (
+                    data["address"]["addressLine1"].strip(),
+                    data["address"]["addressLine2"].replace("None", "").strip(),
+                ),
+            )
         )
         properties = {
-            "addr_full": address.strip(),
+            "street_address": address,
             "phone": data["telephone"],
-            "city": data["address"]["city"],
-            "state": "",
+            "city": data["address"]["city"].replace("None", "").strip(),
             "postcode": data["address"]["postcode"],
             "ref": data["name"],
             "name": data["storeName"],
