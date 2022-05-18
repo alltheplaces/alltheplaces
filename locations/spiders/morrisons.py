@@ -55,13 +55,6 @@ class MorrisonsSpider(scrapy.Spider):
             "extras": {},
         }
 
-        if data["region"] == "Morrisons Daily":
-            properties["brand"] = "Morrisons Daily"
-            properties["brand_wikidata"] = "Q99752411"
-        elif data["region"] == "Morrisons Select":
-            properties["brand"] = "Morrisons Select"
-            properties["brand_wikidata"] = "Q105221633"
-
         if data["storeFormat"] == "food-box":
             properties["extras"]["industrial"] = "warehouse"
         elif data["storeFormat"] == "pfs":
@@ -70,6 +63,15 @@ class MorrisonsSpider(scrapy.Spider):
             properties["extras"]["shop"] = "supermarket"
         elif data["storeFormat"] == "restricted":
             return
+
+        if data["region"] == "Morrisons Daily":
+            properties["brand"] = "Morrisons Daily"
+            properties["brand_wikidata"] = "Q99752411"
+            properties["extras"]["shop"] = "convenience"
+        elif data["region"] == "Morrisons Select":
+            properties["brand"] = "Morrisons Select"
+            properties["brand_wikidata"] = "Q105221633"
+            properties["extras"]["shop"] = "convenience"
 
         hours = self.store_hours(data["openingTimes"])
         if hours:
