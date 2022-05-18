@@ -2,6 +2,7 @@
 import json
 
 import scrapy
+from scrapy.downloadermiddlewares.retry import get_retry_request
 
 from locations.items import GeojsonPointItem
 
@@ -23,6 +24,9 @@ class WorldcatSpider(scrapy.Spider):
     def parse(self, response):
         data = response.json()
         if data == []:
+            # Seems to sometimes return empty array as a transient error,
+            # let's call their bluff to see if that's actually the end.
+            yield get_retry_request(response.request, spider=self, reason="empty array")
             return
         for row in data:
             inst_id = row["inst_id"]
