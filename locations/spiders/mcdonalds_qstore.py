@@ -7,7 +7,7 @@ from locations.items import GeojsonPointItem
 class McDonalsQStoreSpider(scrapy.Spider):
 
     name = "mcdonalds_qstore"
-    item_attributes = {"brand": "McDonald's"}
+    item_attributes = {"brand": "McDonald's", "brand_wikidata": "Q38076"}
     allowed_domains = ["mcdonalds.com.au", "mcdonalds.co.nz"]
     start_urls = (
         "https://mcdonalds.com.au/data/store",

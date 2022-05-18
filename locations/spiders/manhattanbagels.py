@@ -21,7 +21,7 @@ class ManhattanBagelSpider(scrapy.Spider):
     """Copy of Einstein Bros. Bagels - all brands of the same parent company Coffee & Bagels"""
 
     name = "manhattanbagels"
-    item_attributes = {"brand": "Manhattan Bagels"}
+    item_attributes = {"brand": "Manhattan Bagel", "brand_wikidata": "Q64517333"}
     allowed_domains = ["manhattanbagel.com"]
     start_urls = ("https://locations.manhattanbagel.com/us",)
 

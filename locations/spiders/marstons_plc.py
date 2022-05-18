@@ -10,7 +10,7 @@ from locations.hours import OpeningHours
 
 class MarstonsPlcSpider(scrapy.Spider):
     name = "marstons_plc"
-    item_attributes = {"brand": "Marstons Plc"}
+    item_attributes = {"brand": "Marston's", "brand_wikidata": "Q6773982"}
     allowed_domains = ["marstons.co.uk"]
 
     def start_requests(self):

@@ -18,7 +18,10 @@ DAY_MAPPING = {
 
 class NewYorkPublicLibrarySpider(scrapy.Spider):
     name = "new_york_public_library"
-    item_attributes = {"brand": "The New York Public Library"}
+    item_attributes = {
+        "brand": "The New York Public Library",
+        "brand_wikidata": "Q219555",
+    }
     allowed_domains = ["www.nypl.org"]
     start_urls = [
         "www.nypl.org",

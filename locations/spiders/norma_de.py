@@ -19,6 +19,7 @@ DAY_MAPPING = {
 
 class NormaDeSpider(scrapy.Spider):
     name = "norma_de"
+    item_attributes = {"brand": "Norma", "brand_wikidata": "Q450180"}
     allowed_domains = ["www.norma-online.de"]
 
     start_urls = []

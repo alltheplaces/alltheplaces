@@ -12,7 +12,7 @@ regex_pm = r"\s?([Pp][Mm])"
 
 class MonicalsSpider(scrapy.Spider):
     name = "monicals_pizza"
-    item_attributes = {"brand": "Monical's Pizza"}
+    item_attributes = {"brand": "Monical's Pizza", "brand_wikidata": "Q6900121"}
     allowed_domains = ["www.monicals.com"]
     start_urls = ["http://www.monicals.com/locations/"]
 
