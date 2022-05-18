@@ -14,12 +14,12 @@ DAYS = {
 
 
 class MorrisonsSpider(scrapy.Spider):
-
     name = "morrisons"
-    item_attributes = {"brand": "Morrisons", "brand+wikidata": "Q922344"}
-    allowed_domains = ["my.morrisons.com", "api.morrisons.com"]
-    download_delay = 0.5
-    start_urls = ("https://my.morrisons.com/storefinder/list/a",)
+    item_attributes = {"brand": "Morrisons", "brand_wikidata": "Q922344"}
+    allowed_domains = ["api.morrisons.com"]
+    start_urls = [
+        "https://api.morrisons.com/location/v2//stores?apikey=kxBdM2chFwZjNvG2PwnSn3sj6C53dLEY&limit=20000"
+    ]
 
     def store_hours(self, store_hours):
         clean_time = ""
@@ -42,8 +42,7 @@ class MorrisonsSpider(scrapy.Spider):
 
         return clean_time
 
-    def parse_stores(self, response):
-        data = response.json()
+    def parse_store(self, data):
         address = (
             data["address"]["addressLine1"]
             + " "
@@ -67,21 +66,9 @@ class MorrisonsSpider(scrapy.Spider):
         if hours:
             properties["opening_hours"] = hours
 
-        yield GeojsonPointItem(**properties)
-
-    def parse_alpha(self, response):
-        alpha_urls = response.xpath(
-            '//div[@class="col-md-4 col-sm-6"]/a/@href'
-        ).extract()
-        for path in alpha_urls:
-            id = re.findall(r"[0-9]+$", path)[0]
-            url = (
-                "https://api.morrisons.com/location/v2//stores/%s?apikey=kxBdM2chFwZjNvG2PwnSn3sj6C53dLEY&include=departments,services,linkedStores"
-                % (id)
-            )
-            yield scrapy.Request(response.urljoin(url), callback=self.parse_stores)
+        return GeojsonPointItem(**properties)
 
     def parse(self, response):
-        urls = response.xpath('//div[@class="azWrapper"]/ul/li/a/@href').extract()
-        for path in urls:
-            yield scrapy.Request(response.urljoin(path), callback=self.parse_alpha)
+        # may need to do pagination at some point, but right now the API accepts any limit
+        for store in response.json()["stores"]:
+            yield self.parse_store(store)
