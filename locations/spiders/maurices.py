@@ -20,6 +20,7 @@ DAY_MAPPING = {
 
 class MauricesSpider(scrapy.Spider):
     name = "maurices"
+    item_attributes = {"brand": "Maurices", "brand_wikidata": "Q6793571"}
     allowed_domains = ["www.maurices.com", "locations.maurices.com"]
     download_delay = 0.2
     start_urls = ("https://locations.maurices.com/directory",)

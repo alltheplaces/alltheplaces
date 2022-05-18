@@ -16,7 +16,7 @@ DAYS = {
 class MorrisonsSpider(scrapy.Spider):
 
     name = "morrisons"
-    item_attributes = {"brand": "Morrisons"}
+    item_attributes = {"brand": "Morrisons", "brand+wikidata": "Q922344"}
     allowed_domains = ["my.morrisons.com", "api.morrisons.com"]
     download_delay = 0.5
     start_urls = ("https://my.morrisons.com/storefinder/list/a",)

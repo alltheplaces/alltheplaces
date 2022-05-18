@@ -6,7 +6,7 @@ from locations.items import GeojsonPointItem
 
 class MercyHealthSpider(scrapy.Spider):
     name = "mercyhealth"
-    item_attributes = {"brand": "Mercy Health"}
+    item_attributes = {"brand": "Mercy Health", "brand_wikidata": "Q5053169"}
     allowed_domains = ["www.mercy.com"]
     start_urls = [
         "https://www.mercy.com/locations",

@@ -20,6 +20,7 @@ DAY_MAPPING = {
 
 class MetroDinerSpider(scrapy.Spider):
     name = "metrodiner"
+    item_attributes = {"brand": "Metro Diner", "brand_wikidata": "Q104870732"}
     allowed_domains = ["metrodiner.com"]
     start_urls = [
         "https://metrodiner.com/locations-sitemap.xml",
