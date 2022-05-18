@@ -37,7 +37,21 @@ class MarksAndSpencerSpider(scrapy.Spider):
                 + store["name"].lower().replace(" ", "-")
                 + "-"
                 + str(store["id"]),
+                "extras": {},
             }
+
+            if store["storeType"] == "mands":
+                properties["extras"]["operator"] = "Marks and Spencer"
+                properties["extras"]["operator:wikidata"] = "Q714491"
+
+            name = store["name"].lower()
+            if name.endswith("foodhall"):
+                properties["brand"] = "M&S Foodhall"
+            elif name.endswith("simply food"):
+                properties["brand"] = "M&S Simply Food"
+            elif name.endswith("outlet"):
+                properties["brand"] = "M&S Outlet"
+
             yield GeojsonPointItem(**properties)
 
     def get_opening_hours(self, store):
