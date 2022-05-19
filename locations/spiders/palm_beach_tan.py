@@ -8,7 +8,7 @@ from locations.items import GeojsonPointItem
 
 class PalmBeachTanSpider(scrapy.Spider):
     name = "palm_beach_tan"
-    item_attributes = {"brand": "Palm Beach Tan"}
+    item_attributes = {"brand": "Palm Beach Tan", "brand_wikidata": "Q64027086"}
     allowed_domains = ["palmbeachtan.com"]
     start_urls = [
         "https://palmbeachtan.com/locations/states/",

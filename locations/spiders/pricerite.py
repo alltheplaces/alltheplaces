@@ -9,7 +9,7 @@ from locations.items import GeojsonPointItem
 
 class PriceRiteSpider(scrapy.Spider):
     name = "pricerite"
-    item_attributes = {"brand": "PriceRite"}
+    item_attributes = {"brand": "PriceRite", "brand_wikidata": "Q7242560"}
     allowed_domains = ["priceritemarketplace.com"]
 
     start_urls = ("https://www.priceritemarketplace.com/",)

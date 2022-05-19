@@ -6,7 +6,7 @@ from locations.items import GeojsonPointItem
 
 class PncSpider(scrapy.Spider):
     name = "pnc"
-    item_attributes = {"brand": "PNC"}
+    item_attributes = {"brand": "PNC", "brand_wikidata": "Q38928"}
     allowed_domains = ["www.pnc.com"]
     start_urls = [
         "https://apps.pnc.com/locator/search",

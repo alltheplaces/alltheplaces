@@ -8,6 +8,7 @@ from locations.items import GeojsonPointItem
 
 class OrangetheoryFitnessSpider(scrapy.Spider):
     name = "orangetheory_fitness"
+    item_attributes = {"brand": "Orangetheory Fitness", "brand_wikidata": "Q25005163"}
     allowed_domains = ["orangetheory.co"]
     start_urls = [
         "https://api.orangetheory.co/partners/studios/v2?country=United+States",
