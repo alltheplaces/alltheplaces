@@ -10,7 +10,10 @@ from locations.hours import OpeningHours
 
 class ProvidenceHealthServicesSpider(scrapy.Spider):
     name = "providence_health_services"
-    item_attributes = {"brand": "Providence Health Services", "brand_wikidata": "Q7252430"}
+    item_attributes = {
+        "brand": "Providence Health Services",
+        "brand_wikidata": "Q7252430",
+    }
     allowed_domains = ["providence.org"]
     download_delay = 0.2
     start_urls = ["https://www.providence.org/sitemap.xml"]
