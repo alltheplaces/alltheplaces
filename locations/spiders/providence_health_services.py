@@ -27,6 +27,12 @@ class ProvidenceHealthServicesSpider(SitemapSpider):
             entry["loc"] = entry["loc"].replace(
                 "https://www.providence.org/en/", "https://www.providence.org/"
             )
+            # skip bad page
+            if (
+                entry["loc"]
+                == "https://www.providence.org/locations/saint-johns-santa-monica-pediatrics-1811-wilshire"
+            ):
+                continue
 
             yield entry
 
