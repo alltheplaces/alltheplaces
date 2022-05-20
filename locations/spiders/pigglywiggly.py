@@ -14,7 +14,7 @@ class PigglyWigglySpider(scrapy.Spider):
     """
 
     name = "pigglywiggly"
-    item_attributes = {"brand": "Piggly Wiggly"}
+    item_attributes = {"brand": "Piggly Wiggly", "brand_wikidata": "Q3388303"}
     allowed_domains = ["pigglywiggly.com", "www.shopthepig.com"]
 
     def start_requests(self):

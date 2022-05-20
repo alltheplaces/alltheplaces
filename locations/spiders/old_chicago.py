@@ -6,7 +6,7 @@ from locations.items import GeojsonPointItem
 class OldChicagoSpider(scrapy.Spider):
 
     name = "oldchicago"
-    item_attributes = {"brand": "Old Chicago"}
+    item_attributes = {"brand": "Old Chicago", "brand_wikidata": "Q64411347"}
     allowed_domains = ["oc-api-prod.azurewebsites.com"]
 
     query_id = "q0"
