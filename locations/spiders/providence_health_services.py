@@ -40,6 +40,10 @@ class ProvidenceHealthServicesSpider(SitemapSpider):
         ldjson = json.loads(
             response.css('script[type="application/ld+json"]::text').get()
         )
+
+        if ldjson["@type"] == "SpecialAnnouncement":
+            ldjson = ldjson["announcementLocation"]
+
         lat = ldjson["geo"]["latitude"]
         lon = ldjson["geo"]["longitude"]
         if (lat, lon) == (0, 0):
@@ -48,7 +52,7 @@ class ProvidenceHealthServicesSpider(SitemapSpider):
             "lat": lat,
             "lon": lon,
             "ref": response.url,
-            "phone": ldjson["telephone"],
+            "phone": ldjson.get("telephone"),
             "name": ldjson["name"],
             "website": response.url,
         }
@@ -56,7 +60,7 @@ class ProvidenceHealthServicesSpider(SitemapSpider):
             address = ldjson["address"]
             properties.update(
                 {
-                    "addr_full": address["streetAddress"],
+                    "street_address": address["streetAddress"],
                     "city": address["addressLocality"],
                     "state": address["addressRegion"],
                     "postcode": address["postalCode"],
