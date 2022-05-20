@@ -21,6 +21,15 @@ class ProvidenceHealthServicesSpider(SitemapSpider):
         )
     ]
 
+    def sitemap_filter(self, entries):
+        for entry in entries:
+            # sitemap now includes language codes, but are always redirected to the base url
+            entry["loc"] = entry["loc"].replace(
+                "https://www.providence.org/en/", "https://www.providence.org/"
+            )
+
+            yield entry
+
     def parse_location(self, response):
         ldjson = json.loads(
             response.css('script[type="application/ld+json"]::text').get()
