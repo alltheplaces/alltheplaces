@@ -1,3 +1,6 @@
+from urllib.parse import parse_qsl
+
+
 def url_to_coords(url: str) -> (float, float):
     if url.startswith("https://www.google.com/maps/embed?pb="):
         # https://andrewwhitby.com/2014/09/09/google-maps-new-embed-format/
@@ -15,5 +18,9 @@ def url_to_coords(url: str) -> (float, float):
                         lat = float(params[k][2:])
 
                 return lat, lon
+    elif url.startswith("https://maps.googleapis.com/maps/api/staticmap"):
+        query = dict(parse_qsl(url))
+        lat, lon = query["center"].split(",")
+        return float(lat), float(lon)
 
     return None
