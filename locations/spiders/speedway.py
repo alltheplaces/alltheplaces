@@ -10,6 +10,7 @@ from locations.items import GeojsonPointItem
 
 class SpeedwaySpider(scrapy.Spider):
     name = "speedway"
+    item_attributes = {"brand": "Speedway", "brand_wikidata": "Q7575683"}
     item_attributes = {"brand": "Speedway"}
     allowed_domains = ["mobileapps.speedway.com"]
 

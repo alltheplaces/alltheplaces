@@ -22,6 +22,13 @@ class TjmaxxSpider(scrapy.Spider):
         "29": "Sierra",
         "50": "Home Sense",
     }
+    wikidata = {
+        "08": "Q10860683",
+        "10": "Q15903261",
+        "28": "Q5887941",
+        "29": "Q7511598",
+        "50": "Q16844433",
+    }
 
     def start_requests(self):
         url = "https://marketingsl.tjx.com/storelocator/GetSearchResults"
@@ -112,6 +119,7 @@ class TjmaxxSpider(scrapy.Spider):
                 "lat": float(store["Latitude"]),
                 "lon": float(store["Longitude"]),
                 "brand": self.chains[store["Chain"]],
+                "brand_wikidata": self.wikidata[store["Chain"]],
             }
 
             hours = self.parse_hours(store["Hours"])

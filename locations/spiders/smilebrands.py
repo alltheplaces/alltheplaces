@@ -10,7 +10,7 @@ from locations.hours import OpeningHours
 
 class SmilebrandsSpider(scrapy.Spider):
     name = "smilebrands"
-    item_attributes = {"brand": "Smile Brands Inc."}
+    item_attributes = {"brand": "Smile Brands Inc.", "brand_wikidata": "Q108286823"}
     allowed_domains = ["smilebrands.com"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
     start_urls = [

@@ -19,6 +19,7 @@ DAY_MAPPING = {
 
 class DennsDeSpider(scrapy.Spider):
     name = "tegut_de"
+    item_attributes = {"brand": "tegut…", "brand_wikidata": "Q1547993"}
     allowed_domains = ["www.tegut.com"]
     start_urls = [
         "https://www.tegut.com/maerkte/marktsuche.html?mktegut%5Baddress%5D=Stuttgart&mktegut%5Bradius%5D=2000&mktegut%5Bsubmit%5D=Markt+suchen"

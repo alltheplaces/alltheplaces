@@ -9,6 +9,7 @@ from locations.hours import OpeningHours
 
 class RoyalLePageSpider(scrapy.Spider):
     name = "royallepage"
+    item_attributes = {"brand": "Royal LePage", "brand_wikidata": "Q7374385"}
     allowed_domains = ["royallepage.ca"]
     start_urls = [
         "https://www.royallepage.ca/en/search/offices/?lat=&lng=&address=&designations=&address_type=&city_name=&prov_code=&sortby=&transactionType=OFFICE&name=&location=&language=&specialization=All"

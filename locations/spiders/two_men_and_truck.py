@@ -9,7 +9,7 @@ from locations.hours import OpeningHours
 
 class TwoMenAndATruckSpider(scrapy.Spider):
     name = "two_men_and_truck"
-    item_attributes = {"brand": "Two Men and a Truck"}
+    item_attributes = {"brand": "Two Men and a Truck", "brand_wikidata": "Q7859087"}
     allowed_domains = ["twomenandatruck.com", "twomenandatruck.ca"]
 
     def start_requests(self):

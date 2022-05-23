@@ -10,7 +10,7 @@ from locations.items import GeojsonPointItem
 class SmashburgerSpider(scrapy.Spider):
     download_delay = 0.2
     name = "smashburger"
-    item_attributes = {"brand": "Smashburger"}
+    item_attributes = {"brand": "Smashburger", "brand_wikidata": "Q17061332"}
     allowed_domains = ["smashburger.com"]
 
     def start_requests(self):
