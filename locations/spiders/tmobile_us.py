@@ -21,7 +21,7 @@ BASE_URL = "https://onmyj41p3c.execute-api.us-west-2.amazonaws.com/prod/v2.1/get
 
 class TMobileUSSpider(scrapy.Spider):
     name = "tmobile_us"
-    item_attributes = {"brand": "T-Mobile"}
+    item_attributes = {"brand": "T-Mobile", "brand_wikidata": "Q3511885"}
     allowed_domains = ["www.t-mobile.com"]
     download_delay = 0.2
 

@@ -3141,9 +3141,10 @@ class SparSpider(scrapy.Spider):
     """
 
     name = "spar"
-    item_attributes = {"brand": "Spar"}
+    item_attributes = {"brand": "Spar", "brand_wikidata": "Q610492"}
     allowed_domains = ["spar.co.uk"]
     download_delay = 0.5
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def start_requests(self):
         for postcode in UK_POSTCODES:

@@ -6,7 +6,7 @@ from locations.items import GeojsonPointItem
 
 class ThorntonsSpider(scrapy.Spider):
     name = "thorntons"
-    item_attributes = {"brand": "Thorntons"}
+    item_attributes = {"brand": "Thorntons", "brand_wikidata": "Q683102"}
     allowed_domains = ["www.thorntonsinc.com"]
     start_urls = [
         "https://www.thorntonsinc.com/about-us/location-finder",

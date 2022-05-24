@@ -18,7 +18,7 @@ DAY_MAPPING = {
 
 class QdobaSpider(scrapy.Spider):
     name = "qdoba"
-    item_attributes = {"brand": "Qdoba"}
+    item_attributes = {"brand": "Qdoba", "brand_wikidata": "Q1363885"}
     allowed_domains = ["qdoba.com"]
     start_urls = (
         "https://locations.qdoba.com/us.html",

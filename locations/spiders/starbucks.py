@@ -10,6 +10,7 @@ STORELOCATOR = "https://www.starbucks.com/bff/locations?lat={}&lng={}"
 
 class StarbucksSpider(scrapy.Spider):
     name = "starbucks"
+    item_attributes = {"brand": "Starbucks", "brand_wikidata": "Q37158"}
     allowed_domains = ["www.starbucks.com"]
 
     def start_requests(self):

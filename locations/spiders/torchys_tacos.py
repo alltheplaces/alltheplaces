@@ -9,7 +9,7 @@ WEEKDAYS = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
 
 class TorchysTacosSpider(scrapy.Spider):
     name = "torchys_tacos"
-    item_attributes = {"brand": "Torchy's Tacos"}
+    item_attributes = {"brand": "Torchy's Tacos", "brand_wikidata": "Q106769573"}
     allowed_domains = ["torchystacos.com"]
     start_urls = ("https://torchystacos.com/locations/",)
     download_delay = 0.7

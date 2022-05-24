@@ -6,6 +6,7 @@ from locations.items import GeojsonPointItem
 
 class TomThumbSpider(scrapy.Spider):
     name = "tom_thumb"
+    item_attributes = {"brand": "Tom Thumb", "brand_wikidata": "Q7817826"}
     allowed_domains = ["local.tomthumb.com"]
     start_urls = ("https://local.tomthumb.com/sitemap.xml",)
 

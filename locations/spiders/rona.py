@@ -9,7 +9,7 @@ from locations.hours import OpeningHours
 
 class RonaSpider(scrapy.Spider):
     name = "rona"
-    item_attributes = {"brand": "RONA"}
+    item_attributes = {"brand": "RONA", "brand_wikidata": "Q3415283"}
     allowed_domains = ["www.rona.ca"]
     start_urls = [
         "https://www.rona.ca/sitemap-stores-en.xml",

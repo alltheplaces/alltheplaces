@@ -7,7 +7,7 @@ DAYS = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
 
 class SainsburysSpider(scrapy.Spider):
     name = "sainsburys"
-    item_attributes = {"brand": "Sainsbury's"}
+    item_attributes = {"brand": "Sainsbury's", "brand_wikidata": "Q152096"}
     allowed_domains = ["stores.sainsburys.co.uk"]
     state = True
 

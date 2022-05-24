@@ -22,7 +22,7 @@ DAY_MAPPING = {
 class TGIFridaySpider(scrapy.Spider):
     download_delay = 0.2
     name = "tgifridays"
-    item_attributes = {"brand": "TGI Friday's"}
+    item_attributes = {"brand": "TGI Friday's", "brand_wikidata": "Q1524184"}
     allowed_domains = ["tgifridays.com"]
     start_urls = ("https://locations.tgifridays.com/sitemap.xml",)
 

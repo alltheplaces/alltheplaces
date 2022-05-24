@@ -5,6 +5,7 @@ from locations.items import GeojsonPointItem
 
 class ScrewfixSpider(scrapy.Spider):
     name = "screwfix"
+    item_attributes = {"brand": "Screwfix", "brand_wikidata": "Q7439115"}
     allowed_domains = ["www.screwfix.com"]
     download_delay = 0.1
     start_urls = (

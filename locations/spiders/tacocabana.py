@@ -6,7 +6,7 @@ from locations.items import GeojsonPointItem
 
 class TacocabanaSpider(scrapy.Spider):
     name = "tacocabana"
-    item_attributes = {"brand": "Taco Cabana"}
+    item_attributes = {"brand": "Taco Cabana", "brand_wikidata": "Q12070488"}
     allowed_domains = ["api.koala.fuzzhq.com"]
 
     def start_requests(self):

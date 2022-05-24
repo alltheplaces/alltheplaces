@@ -5,7 +5,7 @@ from locations.items import GeojsonPointItem
 
 class SoulCycleSpider(scrapy.Spider):
     name = "soulcycle"
-    item_attributes = {"brand": "Soulcycle"}
+    item_attributes = {"brand": "Soulcycle", "brand_wikidata": "Q17084730"}
     allowed_domains = ["soul-cycle.com"]
     start_urls = ("https://www.soul-cycle.com/studios/all/",)
 
@@ -24,10 +24,10 @@ class SoulCycleSpider(scrapy.Spider):
 
         properties = {
             "name": response.xpath(
-                '//span[@class="studio-name"]/@data-studio-name'
+                '//*[@class="studio-name"]/@data-studio-name'
             ).extract_first(),
             "ref": response.xpath(
-                '//span[@class="studio-name"]/@data-studio-name'
+                '//*[@class="studio-name"]/@data-studio-name'
             ).extract_first(),
             "addr_full": response.xpath(
                 '//span[@itemprop="streetAddress"]/text()'

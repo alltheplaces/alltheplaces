@@ -10,7 +10,7 @@ from locations.hours import OpeningHours
 
 class RogersCommunicationsSpider(scrapy.Spider):
     name = "rogers_communications"
-    item_attributes = {"brand": "Rogers Communications"}
+    item_attributes = {"brand": "Rogers Communications", "brand_wikidata": "Q165684"}
     allowed_domains = ["1-dot-rogers-store-finder.appspot.com", "rogers.com"]
 
     def start_requests(self):
