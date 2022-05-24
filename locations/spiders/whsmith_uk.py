@@ -20,6 +20,7 @@ DAY_MAPPING = {
 
 class WHSmithUKSpider(scrapy.Spider):
     name = "whsmith_uk"
+    item_attributes = {"brand": "WHSmith", "brand_wikidata": "Q1548712"}
     allowed_domains = ["whsmith.co.uk"]
 
     def start_requests(self):

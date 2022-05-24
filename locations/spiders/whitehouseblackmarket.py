@@ -18,9 +18,13 @@ DAY_MAPPING = {
 class WhiteHouseBlackMarketSpider(scrapy.Spider):
     download_delay = 0.2
     name = "whitehouseblackmarket"
-    item_attributes = {"brand": "White House Black Market"}
+    item_attributes = {
+        "brand": "White House Black Market",
+        "brand_wikidata": "Q7994858",
+    }
     allowed_domains = ["whitehouseblackmarket.com"]
     start_urls = ("https://stores.whitehouseblackmarket.com/",)
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def start_requests(self):
         page_numbers = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]

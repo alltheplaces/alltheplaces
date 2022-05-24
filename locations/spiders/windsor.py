@@ -8,7 +8,7 @@ from locations.items import GeojsonPointItem
 
 class FiestaMartSpider(scrapy.Spider):
     name = "windsor"
-    item_attributes = {"brand": "Windsor"}
+    item_attributes = {"brand": "Windsor", "brand_wikidata": "Q72981668"}
     allowed_domains = ["windsorstore.com"]
     start_urls = [
         "https://www.windsorstore.com/pages/locations",

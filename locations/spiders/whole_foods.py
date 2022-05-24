@@ -11,7 +11,7 @@ import json
 
 class WholeFoodsSpider(scrapy.Spider):
     name = "whole_foods"
-    item_attributes = {"brand": "Whole Foods"}
+    item_attributes = {"brand": "Whole Foods", "brand_wikidata": "Q1809448"}
     allowed_domains = ["wholefoodsmarket.com", "wholefoodsmarket.co.uk"]
     start_urls = (
         "https://www.wholefoodsmarket.com/sitemap/sitemap-stores.xml",

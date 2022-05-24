@@ -10,6 +10,10 @@ from locations.hours import OpeningHours
 
 class ValvolineInstantOilChangeSpider(scrapy.Spider):
     name = "valvoline_instant_oil_change"
+    item_attributes = {
+        "brand": "Valvoline Instant Oil Change",
+        "brand_wikidata": "Q7912852",
+    }
     allowed_domains = ["vioc.com"]
     start_urls = [
         "https://store.vioc.com/",
@@ -17,7 +21,7 @@ class ValvolineInstantOilChangeSpider(scrapy.Spider):
 
     def parse(self, response):
         state_urls = response.xpath(
-            '//*[@class="map-list-item is-single"]/a/@href'
+            '//*[@class="map-list-item is-single"]/strong/a/@href'
         ).extract()
         for path in state_urls:
             yield scrapy.Request(
@@ -27,7 +31,7 @@ class ValvolineInstantOilChangeSpider(scrapy.Spider):
 
     def parse_cities(self, response):
         city_urls = response.xpath(
-            '//*[@class="map-list-item is-single"]/a/@href'
+            '//*[@class="map-list-item is-single"]/strong/a/@href'
         ).extract()
         for path in city_urls:
             yield scrapy.Request(

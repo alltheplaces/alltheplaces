@@ -12,7 +12,7 @@ BASE_URL = (
 
 class VancouverCoastalHealthSpider(scrapy.Spider):
     name = "vancouver_coastal_health"
-    item_attributes = {"brand": "Vancouver Coastal Health"}
+    item_attributes = {"brand": "Vancouver Coastal Health", "brand_wikidata": "Q7914144"}
     allowed_domains = ["www.vch.ca"]
     start_urls = [
         "http://www.vch.ca/StaticDirectoryPages/sitemap1.xml",

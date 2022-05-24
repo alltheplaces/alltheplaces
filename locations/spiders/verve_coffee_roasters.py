@@ -8,7 +8,7 @@ from locations.hours import OpeningHours
 class VerveCoffeeRoastersSpider(scrapy.Spider):
     name = "verve_coffee_roasters"
     item_attributes = {"brand": "Verve Coffee Roasters"}
-    allowed_domains = ["www.vervecoffee.com/"]
+    allowed_domains = ["www.vervecoffee.com"]
     start_urls = [
         "https://www.vervecoffee.com/pages/locations-all",
     ]
