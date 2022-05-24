@@ -9,7 +9,7 @@ from locations.hours import OpeningHours
 
 class VerizonSpider(scrapy.Spider):
     name = "verizon"
-    item_attributes = {"brand": "Verizon"}
+    item_attributes = {"brand": "Verizon", "brand_wikidata": "Q919641"}
     allowed_domains = ["www.verizonwireless.com"]
     start_urls = ("https://www.verizonwireless.com/sitemap_storelocator.xml",)
     custom_settings = {

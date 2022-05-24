@@ -12,7 +12,7 @@ SCRIPT_JSON = 'normalize-space(//script[@type="application/ld+json"]/text())'
 class VitaminShoppe(scrapy.Spider):
 
     name = "vitamin-shoppe"
-    item_attributes = {"brand": "The Vitamin Shoppe"}
+    item_attributes = {"brand": "The Vitamin Shoppe", "brand_wikidata": "Q7772938"}
     download_delay = 0.2
     allowed_domains = ("locations.vitaminshoppe.com",)
     start_urls = ("https://locations.vitaminshoppe.com",)

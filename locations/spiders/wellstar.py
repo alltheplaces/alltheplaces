@@ -17,8 +17,8 @@ DAYS_NAME = {
 
 class WellStarSpider(scrapy.Spider):
     name = "wellstar"
-    item_attributes = {"brand": "WellStar Health System"}
-    allowed_domains = ["www.wellstar.org/"]
+    item_attributes = {"brand": "WellStar Health System", "brand_wikidata": "Q7981073"}
+    allowed_domains = ["www.wellstar.org"]
     start_urls = ("https://www.wellstar.org/locations",)
 
     def start_requests(self):

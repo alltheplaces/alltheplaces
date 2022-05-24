@@ -19,6 +19,7 @@ DAY_MAPPING = {
 
 class VitaliaSpider(scrapy.Spider):
     name = "vitalia"
+    item_attributes = {"brand": "Vitalia Reformhaus", "brand_wikidata": "Q2528558"}
     allowed_domains = ["www.vitalia-reformhaus.de"]
     start_urls = ["https://www.vitalia-reformhaus.de/marktfinder"]
 
@@ -62,9 +63,10 @@ class VitaliaSpider(scrapy.Spider):
                     },
                 }
 
-                opening_hours = json.loads(store["schedule_string"])
-                hours = self.parse_hours(opening_hours)
-                if hours:
-                    properties["opening_hours"] = hours
+                if store["schedule_string"]:
+                    opening_hours = json.loads(store["schedule_string"])
+                    hours = self.parse_hours(opening_hours)
+                    if hours:
+                        properties["opening_hours"] = hours
 
                 yield GeojsonPointItem(**properties)

@@ -6,7 +6,7 @@ from locations.items import GeojsonPointItem
 
 class wsp(scrapy.Spider):
     name = "wsp"
-    item_attributes = {"brand": "wsp"}
+    item_attributes = {"brand": "wsp", "brand_wikidata": "Q30284893"}
     allowed_domains = ["www.wsp.com"]
     start_urls = ("https://www.wsp.com/",)
 

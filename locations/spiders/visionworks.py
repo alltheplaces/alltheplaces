@@ -11,7 +11,7 @@ URL = "https://api.momentfeed.com/v1/analytics/api/llp.json?"
 class VisionWorksSpider(scrapy.Spider):
     name = "visionworks"
     allowed_domains = ["visionworks.com", "api.momentfeed.com"]
-    item_attributes = {"brand": "Visionworks"}
+    item_attributes = {"brand": "Visionworks", "brand_wikidata": "Q5422607"}
     start_urls = [
         "https://locations.visionworks.com/sitemap.xml",
     ]

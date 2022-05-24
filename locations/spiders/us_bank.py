@@ -12,7 +12,7 @@ class UsBankSpider(scrapy.Spider):
     name = "us_bank"
     download_delay = 0.5
     concurrent_requests = 3
-    item_attributes = {"brand": "US Bank"}
+    item_attributes = {"brand": "US Bank", "brand_wikidata": "Q739084"}
     allowed_domains = ["usbank.com"]
     start_urls = [
         "https://locations.usbank.com/index.html",

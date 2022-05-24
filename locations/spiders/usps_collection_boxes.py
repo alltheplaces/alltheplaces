@@ -26,7 +26,7 @@ USPS_HEADERS = {
 
 class UspsCollectionBoxesSpider(scrapy.Spider):
     name = "usps_collection_boxes"
-    item_attributes = {"brand": "USPS"}
+    item_attributes = {"brand": "USPS", "brand_wikidata": "Q668687"}
     allowed_domains = ["usps.com"]
     download_delay = 0.1
 

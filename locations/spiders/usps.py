@@ -20,7 +20,7 @@ DAYS_NAME = {
 
 class UspsSpider(scrapy.Spider):
     name = "usps"
-    item_attributes = {"brand": "USPS"}
+    item_attributes = {"brand": "USPS", "brand_wikidata": "Q668687"}
     allowed_domains = ["usps.com"]
 
     def start_requests(self):
