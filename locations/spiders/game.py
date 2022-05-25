@@ -20,11 +20,10 @@ class GameSpider(SitemapSpider):
 
     def sitemap_filter(self, entries):
         for entry in entries:
-            if (
-                entry["loc"] != "https://storefinder.game.co.uk/game/stores/search"
-                and entry["loc"]
-                != "https://storefinder.game.co.uk/game/stores/2216/Londonderry/Derry"
-            ):
+            if not entry["loc"] in [
+                "https://storefinder.game.co.uk/game/stores/search",
+                "https://storefinder.game.co.uk/game/stores/2216/Londonderry/Derry",
+            ]:
                 yield entry
 
     def parse(self, response):
@@ -83,7 +82,9 @@ class GameSpider(SitemapSpider):
         located_in = re.match("(?i)c\/o ([\w ]+), (.+)", store["street_address"])
         if located_in:
             store["located_in"] = located_in.group(1)
-            store["located_in_wikidata"] = self.located_in_brands.get(located_in.group(1))
+            store["located_in_wikidata"] = self.located_in_brands.get(
+                located_in.group(1)
+            )
             store["street_address"] = located_in.group(2)
 
         yield store
