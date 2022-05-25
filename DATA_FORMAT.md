@@ -37,7 +37,10 @@ Each GeoJSON feature will have a `properties` object with the following keys:
 | `phone`               | No  | The telephone number for the venue. Note that this is usually pulled from a website assuming local visitors, so it probably doesn't include the country code.
 | `website`             | No  | The website for the venue. We try to make this a URL specific to the venue and not a generic URL for the brand that is operating the venue.
 | `contact:twitter`     | No  | The twitter account for the venue. We try to make this specific to the venue and not generic for the brand that is operating the venue.
+| **Other**             |     | _Other information about the venue_
 | `opening_hours`       | No  | The opening hours for the venue. When we can, the format for this field follows [OpenStreetMap's `opening_hours` format](https://wiki.openstreetmap.org/wiki/Key:opening_hours#Examples).
+| `located_in`          | No  | The brand or chain name of the feature that this feature is located in.
+| `located_in:wikidata` | No  | The [Wikidata](https://www.wikidata.org/wiki/Wikidata:Main_Page) [item ID](https://www.wikidata.org/wiki/Help:Items) for the brand or chain of the feature that this feature is located in. This is a machine-readible identifier counterpart for the human-readible `located_in` above.
 
 
 

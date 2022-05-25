@@ -21,6 +21,8 @@ mapping = (
     ("opening_hours", "opening_hours"),
     ("brand", "brand"),
     ("brand_wikidata", "brand:wikidata"),
+    ("located_in", "located_in"),
+    ("located_in_wikidata", "located_in:wikidata"),
 )
 
 

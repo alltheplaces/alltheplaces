@@ -82,8 +82,8 @@ class GameSpider(SitemapSpider):
         )
         located_in = re.match("(?i)c\/o ([\w ]+), (.+)", store["street_address"])
         if located_in:
-            store["extras"]["located_in"] = located_in.group(1)
-            store["extras"]["located_in:wikidata"] = self.located_in_brands.get(located_in.group(1))
+            store["located_in"] = located_in.group(1)
+            store["located_in_wikidata"] = self.located_in_brands.get(located_in.group(1))
             store["street_address"] = located_in.group(2)
 
         yield store
