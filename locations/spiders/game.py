@@ -61,11 +61,10 @@ class GameSpider(SitemapSpider):
             .replace("`", "")
         )
         store["ref"] = response.url.split("/")[5]
-        store["extras"] = {}
 
         img = response.xpath('//meta[@name="twitter:image"]/@content').get()
         if img != "https://cdn.game.net/image/upload/":
-            store["extras"]["image"] = img
+            store["image"] = img
 
         # Normalise a couple of exceptions
         store["street_address"] = (
