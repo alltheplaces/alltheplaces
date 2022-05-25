@@ -49,6 +49,11 @@ class GameSpider(SitemapSpider):
         store["state"] = ld["address"]["addressRegion"]
         store["postcode"] = ld["address"]["postalCode"]
         store["website"] = response.url
+
+        twitter = response.xpath('//meta[@name="twitter:site"]/@content').get().strip()
+        if twitter != "@GAMEdigital":
+            store["twitter"] = twitter
+
         store["opening_hours"] = (
             ld["openingHours"][0]
             .replace("Mo-Fri ", "Mo-Fr ")
@@ -58,10 +63,6 @@ class GameSpider(SitemapSpider):
         )
         store["ref"] = response.url.split("/")[5]
         store["extras"] = {}
-
-        twitter = response.xpath('//meta[@name="twitter:site"]/@content').get().strip()
-        if twitter != "@GAMEdigital":
-            store["extras"]["contact:twitter"] = twitter
 
         img = response.xpath('//meta[@name="twitter:image"]/@content').get()
         if img != "https://cdn.game.net/image/upload/":

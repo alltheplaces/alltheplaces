@@ -17,6 +17,7 @@ mapping = (
     ("name", "name"),
     ("phone", "phone"),
     ("website", "website"),
+    ("twitter", "contact:twitter"),
     ("opening_hours", "opening_hours"),
     ("brand", "brand"),
     ("brand_wikidata", "brand:wikidata"),
