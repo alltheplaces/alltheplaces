@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
-import scrapy
 import json
 import re
+
 from locations.items import GeojsonPointItem
+from scrapy.spiders import SitemapSpider
 
 DAY_MAPPING = {
     "Mon": "Mo",
@@ -15,10 +16,19 @@ DAY_MAPPING = {
 }
 
 
-class ReiSpider(scrapy.Spider):
+class ReiSpider(SitemapSpider):
     name = "rei"
     allowed_domains = ["www.rei.com"]
-    start_urls = ("https://www.rei.com/stores/map",)
+    sitemap_urls = ["https://www.rei.com/sitemap-stores.xml"]
+    sitemap_rules = [("https:\/\/www\.rei\.com\/stores\/[-\w]+$", "parse_store")]
+    custom_settings = {
+        "USER_AGENT": "Mozilla/5.0 (X11; Linux x86_64; rv:99.0) Gecko/20100101 Firefox/99.0"
+    }
+
+    def sitemap_filter(self, entries):
+        for entry in entries:
+            if entry["loc"] != "https://www.rei.com/stores/bike-shop":
+                yield entry
 
     # Fix formatting for ["Mon - Fri 10:00-1800","Sat 12:00-18:00"]
     def format_days(self, range):
@@ -37,7 +47,7 @@ class ReiSpider(scrapy.Spider):
 
     def parse_store(self, response):
         json_string = response.xpath(
-            '//script[@id="store-schema"]/text()'
+            '//script[@id="store-schema"][@type="application/ld+json"]/text()'
         ).extract_first()
         store_dict = json.loads(json_string)
 
@@ -62,18 +72,3 @@ class ReiSpider(scrapy.Spider):
         }
 
         yield GeojsonPointItem(**properties)
-
-    def parse(self, response):
-        urls = set(
-            response.xpath(
-                '//a[contains(@href,"stores") and contains(@href,".html")]/@href'
-            ).extract()
-        )
-        for path in urls:
-            if path == "/stores/bikeshop.html":
-                continue
-
-            yield scrapy.Request(
-                response.urljoin(path),
-                callback=self.parse_store,
-            )
