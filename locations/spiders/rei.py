@@ -18,6 +18,7 @@ DAY_MAPPING = {
 
 class ReiSpider(SitemapSpider):
     name = "rei"
+    item_attributes = {"brand": "REI", "brand_wikidata": "Q3414933"}
     allowed_domains = ["www.rei.com"]
     sitemap_urls = ["https://www.rei.com/sitemap-stores.xml"]
     sitemap_rules = [("https:\/\/www\.rei\.com\/stores\/[-\w]+$", "parse_store")]
