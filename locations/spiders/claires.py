@@ -7,17 +7,16 @@ from locations.hours import OpeningHours
 
 
 class ClairesSpider(scrapy.spiders.SitemapSpider):
-
     name = "claires"
-    brand = Brand.from_wikidata("Claire's", 'Q2974996')
+    brand = Brand.from_wikidata("Claire's", "Q2974996")
     allowed_domains = ["claires.com"]
-    sitemap_urls = ['https://stores.claires.com/sitemap.xml']
-    sitemap_rules = [('.html', 'parse_store')]
+    sitemap_urls = ["https://stores.claires.com/sitemap.xml"]
+    sitemap_rules = [(".html", "parse_store")]
 
     def parse_store(self, response):
-        for item in extract_ldjson(self.brand, response, 'JewelryStore'):
+        for item in extract_ldjson(self.brand, response, "JewelryStore"):
             if item.has_geo():
-                hours = self.parse_hours(item['source_data']['ld_json']["openingHours"])
+                hours = self.parse_hours(item["source_data"]["ld_json"]["openingHours"])
                 if hours:
                     item["opening_hours"] = hours
                 yield item

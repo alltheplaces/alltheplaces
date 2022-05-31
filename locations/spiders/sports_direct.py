@@ -7,14 +7,13 @@ from locations.seo import extract_details
 
 
 class SportsDirectSpider(scrapy.spiders.SitemapSpider):
-
     name = "sports_direct"
-    brand = Brand.from_wikidata('Sports Direct', 'Q7579661')
+    brand = Brand.from_wikidata("Sports Direct", "Q7579661")
     download_delay = 1.0
-    allowed_domains = ['www.sportsdirect.com']
-    sitemap_urls = ['https://www.sportsdirect.com/sitemap-store-pages.xml']
+    allowed_domains = ["www.sportsdirect.com"]
+    sitemap_urls = ["https://www.sportsdirect.com/sitemap-store-pages.xml"]
     custom_settings = {
-        'USER_AGENT': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.107 Safari/537.36'
+        "USER_AGENT": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.107 Safari/537.36"
     }
 
     def parse(self, response):
@@ -24,5 +23,5 @@ class SportsDirectSpider(scrapy.spiders.SitemapSpider):
             store = json.loads(matches.group(1))
             item = self.brand.item(response)
             extract_details(item, store)
-            item['street_address'] = store['address']
+            item["street_address"] = store["address"]
             yield item

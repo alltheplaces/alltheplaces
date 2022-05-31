@@ -2,29 +2,92 @@ import json
 from typing import Iterator
 from locations.items import GeojsonPointItem
 
+name_keys = ["name", "title"]
 
-name_keys = ['name', 'title']
+street_address_keys = ["streetAddress", "street_address", "street-address"]
 
-street_address_keys = ['streetAddress', 'street_address', 'street-address']
+city_keys = [
+    "addressLocality",
+    "city",
+    "addressCity",
+    "town",
+    "Town",
+    "CITY",
+    "City",
+    "locality",
+]
 
-city_keys = ['addressLocality', 'city', 'addressCity', 'town', 'Town', 'CITY', 'City', 'locality']
+region_keys = ["addressRegion", "region", "state"]
 
-region_keys = ['addressRegion', 'region', 'state']
+country_keys = [
+    "addressCountry",
+    "country",
+    "Country",
+    "countryCode",
+    "CountryCode",
+    "country_code",
+]
 
-country_keys = ['addressCountry', 'country', 'Country', 'countryCode', 'CountryCode', 'country_code']
+postcode_keys = [
+    "postalCode",
+    "postCode",
+    "postalcode",
+    "zip",
+    "Postcode",
+    "postcode",
+    "post_code",
+    "addressPostCode",
+    "PostCode",
+    "postal",
+    "postal_code",
+    "POSTCODE",
+    "PostalCode",
+    "Zip",
+    "ZIP",
+    "ZipCode",
+    "zipCode",
+    "zipcode",
+]
 
-postcode_keys = ['postalCode', 'postCode', 'postalcode', 'zip', 'Postcode', 'postcode', "post_code",
-                 'addressPostCode', 'PostCode', 'postal', 'postal_code', 'POSTCODE', 'PostalCode',
-                 'Zip', 'ZIP', 'ZipCode', 'zipCode', 'zipcode']
+email_keys = ["Email", "email", "ContactEmail", "EMAIL"]
 
-email_keys = ['Email', 'email', 'ContactEmail', 'EMAIL']
+phone_keys = [
+    "phoneNumber",
+    "phone",
+    "telephone",
+    "Telephone",
+    "tel",
+    "telephoneNumber",
+    "Telephone1",
+    "contactNumber",
+    "PhoneNumber",
+    "PHONE",
+    "Phone",
+    "phone_number",
+    "phoneNo",
+]
 
-phone_keys = ['phoneNumber', 'phone', 'telephone', 'Telephone', 'tel', 'telephoneNumber', 'Telephone1',
-              'contactNumber', 'PhoneNumber', 'PHONE', 'Phone', 'phone_number', 'phoneNo']
+lat_keys = [
+    "latitude",
+    "lat",
+    "Lat",
+    "LAT",
+    "Latitude",
+    "displayLat",
+    "yextDisplayLat",
+]
 
-lat_keys = ['latitude', 'lat', 'Lat', 'LAT', 'Latitude', 'displayLat', 'yextDisplayLat']
-
-lon_keys = ['longitude', 'lon', 'long', 'Lng', 'LON', 'lng', 'Longitude', 'displayLng', 'yextDisplayLng']
+lon_keys = [
+    "longitude",
+    "lon",
+    "long",
+    "Lng",
+    "LON",
+    "lng",
+    "Longitude",
+    "displayLng",
+    "yextDisplayLng",
+]
 
 
 def get_key(src, keys):
@@ -50,14 +113,14 @@ def extract_details(item, src) -> GeojsonPointItem:
     able to pick up the fall out.
     """
     if src:
-        extract_field(item, 'name', src, name_keys)
-        extract_field(item, 'street_address', src, street_address_keys)
-        extract_field(item, 'city', src, city_keys)
-        extract_field(item, 'state', src, region_keys)
-        extract_field(item, 'country', src, country_keys)
-        extract_field(item, 'postcode', src, postcode_keys)
-        extract_field(item, 'email', src, email_keys)
-        extract_field(item, 'phone', src, phone_keys)
+        extract_field(item, "name", src, name_keys)
+        extract_field(item, "street_address", src, street_address_keys)
+        extract_field(item, "city", src, city_keys)
+        extract_field(item, "state", src, region_keys)
+        extract_field(item, "country", src, country_keys)
+        extract_field(item, "postcode", src, postcode_keys)
+        extract_field(item, "email", src, email_keys)
+        extract_field(item, "phone", src, phone_keys)
         extract_geo(item, src)
     return item
 
@@ -70,13 +133,13 @@ def extract_geo(item, src) -> GeojsonPointItem:
 
 def extract_html_meta_details(item, response) -> GeojsonPointItem:
     """
-    Pulls out meta properties of the form "og:????", takes "????" as the key for a dict to feed
-    to our generic extract code.
+    Pull certain meta properties from the page and form a dict from them to give
+    to the generic extract code.
     """
-    keys = response.xpath('/html/head/meta/@property').getall()
+    keys = response.xpath("/html/head/meta/@property").getall()
     src = {}
     for key in keys:
-        if key.startswith("og:"):
+        if key.startswith("og:") or key.startswith("place:location:"):
             content = response.xpath('//meta[@property="{}"]/@content'.format(key)).get()
             if content:
                 src[key.split(":")[-1]] = content
@@ -129,18 +192,17 @@ def get_all_keys(src, lookup_key=None):
 
 
 def parse_ldjson(brand, entry_or_entries, required_type, response=None) -> GeojsonPointItem:
-
     # Sometimes (hello Marriott in the first case) the entry array is one level down.
     if isinstance(entry_or_entries, dict):
-        if entry_or_entries.get('@graph'):
-            entry_or_entries = entry_or_entries.get('@graph')
+        if entry_or_entries.get("@graph"):
+            entry_or_entries = entry_or_entries.get("@graph")
         elif entry_or_entries.get("mainEntity"):
             # This was added for Radisson in the first instance
             entry_or_entries = entry_or_entries.get("mainEntity")
 
     for entry in ensure_list(entry_or_entries):
         # Look for an entry with the required type
-        if required_type not in ensure_list(entry.get('@type')):
+        if required_type not in ensure_list(entry.get("@type")):
             continue
 
         if brand:
@@ -153,25 +215,25 @@ def parse_ldjson(brand, entry_or_entries, required_type, response=None) -> Geojs
 
         image_url = entry.get("image")
         if isinstance(image_url, dict):
-            image_url = image_url.get('url')
+            image_url = image_url.get("url")
         if image_url and isinstance(image_url, str) and image_url.startswith("http"):
-            item['image'] = image_url
+            item["image"] = image_url
 
-        # First we knock out any 'parentOrganization' field which may have an embedded
+        # First we knock out any "parentOrganization" field which may have an embedded
         # address which we do not want the lookup code beyond this to pick up on.
         # Vets4Pets UK was the first instance that made this necessary.
-        if entry.get('parentOrganization'):
-            entry['parentOrganization'] = None
+        if entry.get("parentOrganization"):
+            entry["parentOrganization"] = None
 
-        address = get_first_key(entry, 'address')
+        address = get_first_key(entry, "address")
         if isinstance(address, list):
             # First saw VisionExpress have an array entry for the address, Vets4Pets also
             address = address[0]
         extract_details(item, address)
 
-        item.set_source_data(response)['ld_json'] = entry
+        item.set_source_data(response)["ld_json"] = entry
 
-        yield extract_geo(item, entry.get('geo'))
+        yield extract_geo(item, entry.get("geo"))
 
 
 def join_address_fields(src, *fields):
