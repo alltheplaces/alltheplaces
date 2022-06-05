@@ -45,7 +45,7 @@ class WesternUnionSpider(SitemapSpider):
         # just one ordinal or the other. Generally that causes obviously bogus
         # coordinates, namely |lat| > 90, |lon| > 180, which is a good thing
         # here so they can be discarded.
-        lat, lon = map(float, store["location"].split(','))
+        lat, lon = map(float, store["location"].split(","))
 
         properties = {
             "lat": lat,
