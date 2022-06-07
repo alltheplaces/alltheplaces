@@ -35,6 +35,8 @@ class SheetzSpider(scrapy.Spider):
             features = store["features"]
             properties = {
                 "ref": store["storeNumber"],
+                "lat": store["latitude"],
+                "lon": store["longitude"],
                 "website": f'https://orders.sheetz.com/findASheetz/store/{store["storeNumber"]}',
                 "street_address": store["address"],
                 "city": store["city"],
