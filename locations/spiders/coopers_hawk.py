@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from re import A
 import scrapy
 from locations.items import GeojsonPointItem
 import json
