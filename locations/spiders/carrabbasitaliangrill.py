@@ -7,68 +7,62 @@ from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
 
 
-DAY_MAPPING = {
-    'Monday': 'Mo',
-    'Tuesday': 'Tu',
-    'Wednesday': 'We',
-    'Thursday': 'Th',
-    'Friday': 'Fr',
-    'Saturday': 'Sa',
-    'Sunday': 'Su'
-}
-
 class CarrabbasItalianGrillSpider(scrapy.Spider):
     download_delay = 0.2
     name = "carrabbasitaliangrill"
     allowed_domains = ["carrabbas.com"]
     start_urls = (
-        'https://www.carrabbas.com/locations/all',
+        'https://locations.carrabbas.com/index.html',
     )
 
     def parse(self, response):
-        urls = response.xpath('//section[@class="location-directory"]//a/@href').extract()
+        stateurls = response.xpath('//div[@class="Directory-content"]//a/@href').extract()
+        for url in stateurls:
+            state = url.split('/')[0]
+            yield scrapy.Request(response.urljoin(state), callback=self.parse_state)
 
-        for url in urls:
-            yield scrapy.Request(response.urljoin(url), callback=self.parse_location)
+    def parse_state(self, response):
+        cityurls = response.xpath('//li[@class="Directory-listItem"]//a/@href').extract()
+        for url in cityurls:
+            city = url.split('/')[0]+"/"+url.split('/')[1]
+            yield scrapy.Request(response.urljoin(city), callback=self.parse_store)
 
-    def parse_location(self, response):
-        data = response.xpath('//script[contains(text(), "initLocationDetail")][1]/text()').extract_first()
+    def parse_store(self, response):
+        print(response.url)
+        storeurls = response.xpath('//ul[@class="Directory-listTeasers Directory-row"]//a/@href').extract()
+        storeurlsing = response.xpath('//li[@class="Directory-listTeaser Directory-listTeaser--single"]//a/@href').extract()
+        if len(storeurls) > 1:
+            for stores in storeurls:
+                print(stores)
+                if stores.startswith('..'):
+                    store = stores.split('..')[1]
+                    print(store)
+                    yield scrapy.Request(response.urljoin(store), callback=self.parse_loc)
+        if len(storeurlsing) > 1git status:
+            for stores in storeurlsing:
+                print(stores)
+                if stores.startswith('..'):
+                    store = stores.split('..')[1]
+                    print(store)
+                    yield scrapy.Request(response.urljoin(store), callback=self.parse_loc)
 
-        try:
-            properties = {
-                'ref': re.search(r'"UnitId":"(.*?)"', data).group(1),
-                'name': re.search(r'"City":"(.*?)"', data).group(1),
-                'addr_full': re.search(r'"Address":"(.*?)"', data).group(1),
-                'city': re.search(r'"City":"(.*?)"', data).group(1),
-                'state': re.search(r'"State":"(.*?)"', data).group(1),
-                'postcode': re.search(r'"Zip":"(.*?)"', data).group(1),
-                'phone': re.search(r'"Phone":"(.*?)"', data).group(1),
-                'lat': re.search(r'"Latitude":"(.*?)"', data).group(1),
-                'lon': re.search(r'"Longitude":"(.*?)"', data).group(1),
-                'website': response.url
-            }
+    def parse_loc(self, response):
+        print(response.url)
+        lat = response.xpath('//meta[@itemprop="latitude"]').extract_first()
+        lon = response.xpath('//meta[@itemprop="longitude"]').extract_first()
+        properties = {
+            'ref':  response.url,
+            'name': "Carrabba's Italian Grill",
+            'addr_full': response.xpath('//span[@class="c-address-street-1"]/text()').extract_first(),
+            'city': response.xpath('//span[@class="c-address-city"]/text()').extract_first(),
+            'state': response.xpath('//abbr[@class="c-address-state"]/text()').extract_first(),
+            'postcode': response.xpath('//span[@class="c-address-postal-code"]/text()').extract_first(),
+            'country': response.xpath('//abbr[@class="c-address-country-name c-address-country-us"]/text()').extract_first(),
+            'lat': lat.split('content="')[1].replace('">',''),
+            'lon': lon.split('content="')[1].replace('">','')
+        }
 
-            hours = self.parse_hours(re.search(r'"Hours":(.*?})', data).group(1))
+        yield GeojsonPointItem(**properties)
 
-            if hours:
-                properties['opening_hours'] = hours
-            yield GeojsonPointItem(**properties)
-        except:
-            pass
 
-    def parse_hours(self, response):
-        opening_hours = OpeningHours()
-        weekdays = response
-        hrs = json.loads(weekdays)
-        WEEKDAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 
-        for DAY in WEEKDAYS:
-            open = hrs.get(DAY+'Open')
-            close = hrs.get(DAY+'Close')
-
-            opening_hours.add_range(day=DAY_MAPPING[DAY],
-                                    open_time=open,
-                                    close_time=close,
-                                    time_format='%H:%M %p')
-
-        return opening_hours.as_opening_hours()
