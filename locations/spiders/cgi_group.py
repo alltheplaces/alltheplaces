@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
-import re
 import scrapy
-import json
 
 from locations.items import GeojsonPointItem
 
@@ -10,72 +8,74 @@ class CGISpider(scrapy.Spider):
     name = "cgi_group"
     item_attributes = {"brand": "CGI Group", "brand_wikidata": "Q1798370"}
     allowed_domains = ["cgi.com"]
-    download_delay = 0.5
     start_urls = (
         "https://www.cgi.com/en/offices?field_address_country_code=All&field_address_administrative_area=All&field_address_locality=All",
     )
 
-    def checklist(self, mylist):
-        try:
-            string = mylist[0]
-            return string
-        except IndexError:
-            return None
-
-    def parse_country(self, response):
-        data = json.loads(
-            response.xpath('//script[@type="application/json"]/text()').extract_first()
+    def parse(self, response):
+        offices = response.xpath(
+            '//span[@class="region-wrapper"]/div[@class="vcard-wrapper"]'
         )
-
-        offices = data["geofield_google_map"]["geofield-map-view-newoffices-block-1"][
-            "data"
-        ]["features"]
 
         for office in offices:
 
             properties = {
-                "name": re.findall(
-                    "(?<=<span>).*?(?=<)", office["properties"]["description"]
-                )[0],
-                "addr_full": re.findall(
-                    '(?<=-line1">).*?(?=<)', office["properties"]["description"]
-                )[0],
-                "city": re.findall(
-                    '(?<=locality">).*?(?=<)', office["properties"]["description"]
-                )[0],
-                "state": self.checklist(
-                    re.findall(
-                        '(?<=administrative-area">).*?(?=<)',
-                        office["properties"]["description"],
+                "name": " ".join(
+                    filter(
+                        None,
+                        [
+                            office.xpath(
+                                './div[@class="vcard"]/h4[@class="locality"]/text()'
+                            ).get(),
+                            office.xpath(
+                                './div[@class="vcard"]/div[@class="adr"]/h4/text()'
+                            ).get(),
+                        ],
                     )
-                ),
-                "postcode": self.checklist(
-                    re.findall(
-                        '(?<=postal-code">).*?(?=<)',
-                        office["properties"]["description"],
-                    )
-                ),
-                "lat": float(office["geometry"]["coordinates"][1]),
-                "lon": float(office["geometry"]["coordinates"][0]),
-                "country": re.findall(
-                    '(?<=country">).*?(?=<)', office["properties"]["description"]
-                )[0],
-                "ref": re.findall(
-                    "(?<=<span>).*?(?=<)", office["properties"]["description"]
-                )[0],
-                "website": response.url,
+                ).strip(),
+                "street_address": office.xpath(
+                    './div[@class="vcard"]/div[@class="adr"]/span[@class="street-block"]/text()'
+                )
+                .get()
+                .strip(),
+                "city": office.xpath(
+                    './div[@class="vcard"]/div[@class="adr"]/span[@class="locality"]/text()'
+                )
+                .get()
+                .strip(),
+                "postcode": office.xpath(
+                    './div[@class="vcard"]/div[@class="adr"]/span[@class="postal-code"]/text()'
+                ).get(),
+                "phone": office.xpath(
+                    './div[@class="vcard"]/div[@class="adr"]/span[@class="telephone"]/a/text()'
+                ).get(),
+                "extras": {
+                    "contact:fax": office.xpath(
+                        './div[@class="vcard"]/div[@class="adr"]/span[@class="fax"]/a/text()'
+                    ).get()
+                },
             }
 
-            yield GeojsonPointItem(**properties)
-
-    def parse(self, response):
-        countries = response.xpath(
-            '//select[@data-drupal-selector="edit-field-address-country-code"]/option'
-        ).extract()
-        for country in countries:
-            country = re.findall(r'"([^"]*)"', country)
-            if country[0] != "All":
-                url = "https://www.cgi.com/en/offices?field_address_country_code={country}&field_address_administrative_area=All&field_address_locality=All".format(
-                    country=country[0]
+            if properties.get("phone"):
+                properties["phone"] = (
+                    properties["phone"]
+                    .strip()
+                    .replace("-", "")
+                    .replace("(", "")
+                    .replace(")", "")
                 )
-                yield scrapy.Request(url, callback=self.parse_country)
+            if properties["extras"].get("contact:fax"):
+                properties["extras"]["contact:fax"] = (
+                    properties["extras"]["contact:fax"]
+                    .strip()
+                    .replace("-", "")
+                    .replace("(", "")
+                    .replace(")", "")
+                )
+
+            if "(Mailing address)" in properties["name"]:
+                continue
+
+            properties["ref"] = hash(str(properties))
+
+            yield GeojsonPointItem(**properties)
