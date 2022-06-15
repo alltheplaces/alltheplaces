@@ -18,13 +18,11 @@ class DomionsPizzaGermanySpider(SitemapSpider):
         ref = match.group(3)
         country = match.group(1)
         address_data = response.xpath('//a[@id="open-map-address"]/text()').extract()
-        locality_data = address_data[1].strip()
+        locality_data = re.match(r"(\d+)? ?([-\ \w'À-Ÿ()]+)$", address_data[1].strip())
         properties = {
             "ref": ref,
             "name": response.xpath('//h1[@class="storetitle"]/text()').extract_first(),
             "street_address": address_data[0].strip().strip(","),
-            "city": re.search(r"(.*) (.*[A-Za-z])", locality_data).group(2),
-            "postcode": re.search(r"(.*) (.*[A-Za-z])", locality_data).group(1),
             "country": country,
             "lat": response.xpath('//input[@id="store-lat"]/@value')
             .get()
@@ -34,4 +32,8 @@ class DomionsPizzaGermanySpider(SitemapSpider):
             .replace(",", "."),
             "website": response.url,
         }
+        if locality_data:
+            properties["city"] = locality_data.group(2)
+            properties["postcode"] = locality_data.group(1)
+
         yield GeojsonPointItem(**properties)
