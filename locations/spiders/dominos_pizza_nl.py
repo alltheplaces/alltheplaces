@@ -10,7 +10,7 @@ class DomionsPizzaNetherlandsSpider(SitemapSpider):
     item_attributes = {"brand": "Domino's", "brand_wikidata": "Q839466"}
     allowed_domains = ["dominos.nl"]
     sitemap_urls = ["https://www.dominos.nl/sitemap.aspx"]
-    url_regex = f"https:\/\/www\.dominos\.nl\/winkel\/([\w]+)-([\w]+)-([\d]+)$"
+    url_regex = r"https:\/\/www\.dominos\.nl\/winkel\/([\w]+)-([\w]+)-([\d]+)$"
     sitemap_rules = [(url_regex, "parse_store")]
 
     start_urls = ("https://www.dominos.nl/winkels",)

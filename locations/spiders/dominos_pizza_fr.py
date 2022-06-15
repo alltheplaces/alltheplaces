@@ -12,7 +12,7 @@ class DomionsPizzaFranceSpider(SitemapSpider):
     sitemap_urls = ["https://www.dominos.fr/sitemap.aspx"]
     sitemap_rules = [
         (
-            f"https:\/\/www\.dominos\.fr\/magasin\/([-\w.]+)_(unknown|[\d]+)$",
+            r"https:\/\/www\.dominos\.fr\/magasin\/([-\w.]+)_(unknown|[\d]+)$",
             "parse_store",
         )
     ]
@@ -20,7 +20,7 @@ class DomionsPizzaFranceSpider(SitemapSpider):
     def parse_store(self, response):
         address_data = response.xpath('//a[@id="open-map-address"]/text()').extract()
         locality_data = re.match(
-            f"([\d]+)? ?([-\ \w'À-Ÿ()]+)$", address_data[1].strip()
+            r"([\d]+)? ?([-\ \w'À-Ÿ()]+)$", address_data[1].strip()
         )
         properties = {
             "ref": response.url,

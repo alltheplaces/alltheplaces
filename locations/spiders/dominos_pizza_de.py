@@ -10,7 +10,7 @@ class DomionsPizzaGermanySpider(SitemapSpider):
     item_attributes = {"brand": "Domino's", "brand_wikidata": "Q839466"}
     allowed_domains = ["dominos.de"]
     sitemap_urls = ["https://www.dominos.de/sitemap.aspx"]
-    url_regex = f"https:\/\/www\.dominos\.de\/filiale\/([\w]+)-([\w]+)-([\d]+)$"
+    url_regex = r"https:\/\/www\.dominos\.de\/filiale\/([\w]+)-([\w]+)-([\d]+)$"
     sitemap_rules = [(url_regex, "parse_store")]
 
     def parse_store(self, response):
