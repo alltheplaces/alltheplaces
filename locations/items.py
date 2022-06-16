@@ -13,6 +13,7 @@ class SourceData(scrapy.Item):
     Source data associated with the creation of this POI. Pipeline code may well find it useful.
     For example, social media links may optionally be extracted from individual POI websites.
     """
+
     response = scrapy.Field()
     # The entry used to generate the POI.
     ld_json = scrapy.Field()

@@ -140,7 +140,9 @@ def extract_html_meta_details(item, response) -> GeojsonPointItem:
     src = {}
     for key in keys:
         if key.startswith("og:") or key.startswith("place:location:"):
-            content = response.xpath('//meta[@property="{}"]/@content'.format(key)).get()
+            content = response.xpath(
+                '//meta[@property="{}"]/@content'.format(key)
+            ).get()
             if content:
                 src[key.split(":")[-1]] = content
     extract_details(item, src)
@@ -192,7 +194,7 @@ def get_all_keys(src, lookup_key=None):
 
 
 def parse_ldjson(
-        brand, entry_or_entries, required_type, response=None
+    brand, entry_or_entries, required_type, response=None
 ) -> GeojsonPointItem:
     # Sometimes (hello Marriott in the first case) the entry array is one level down.
     if isinstance(entry_or_entries, dict):
