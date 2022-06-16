@@ -22,7 +22,12 @@ class AnthonysSpider(scrapy.Spider):
                     "lat": store["acf"]["coords"]["latitude"],
                     "lon": store["acf"]["coords"]["longitude"],
                     "name": html.unescape(store["title"]["rendered"]),
-                    "addr_full": html.unescape(store["acf"]["page"]["info"]["address"]),
+                    "addr_full": html.unescape(
+                        store["acf"]["page"]["info"]["address"]
+                        .replace("\n", "")
+                        .replace("<p>", "")
+                        .replace("</p>", ", ")
+                    ).strip(", "),
                     "phone": store["acf"]["page"]["info"]["tel"],
                     "website": "https://acfp.com/locations/" + store["slug"],
                     "ref": store["id"],
