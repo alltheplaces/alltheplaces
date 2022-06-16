@@ -15,13 +15,10 @@ class ClairesSpider(scrapy.spiders.SitemapSpider):
 
     def parse_store(self, response):
         for item in extract_ldjson(self.brand, response, "JewelryStore"):
-            if item.has_geo():
-                hours = self.parse_hours(item["source_data"]["ld_json"]["openingHours"])
-                if hours:
-                    item["opening_hours"] = hours
-                yield item
-            else:
-                self.logger.warn("no location for: %s", response.url)
+            hours = self.parse_hours(item["source_data"]["ld_json"]["openingHours"])
+            if hours:
+                item["opening_hours"] = hours
+            yield item
 
     def parse_hours(self, hours):
         opening_hours = OpeningHours()

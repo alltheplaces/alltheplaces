@@ -41,7 +41,7 @@ class GeojsonPointItem(scrapy.Item):
     ref = scrapy.Field()
     brand = scrapy.Field()
     brand_wikidata = scrapy.Field()
-    image = scrapy.Field()
+    located_in = scrapy.Field()
     located_in_wikidata = scrapy.Field()
     extras = scrapy.Field()
     source_data = scrapy.Field()
