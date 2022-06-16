@@ -33,11 +33,15 @@ class GeojsonPointItem(scrapy.Item):
     phone = scrapy.Field()
     email = scrapy.Field()
     website = scrapy.Field()
+    twitter = scrapy.Field()
+    facebook = scrapy.Field()
     opening_hours = scrapy.Field()
+    image = scrapy.Field()
     ref = scrapy.Field()
     brand = scrapy.Field()
     brand_wikidata = scrapy.Field()
     image = scrapy.Field()
+    located_in_wikidata = scrapy.Field()
     extras = scrapy.Field()
     source_data = scrapy.Field()
 
@@ -46,10 +50,10 @@ class GeojsonPointItem(scrapy.Item):
         Is the POI considered to have a position set.
         :return: true iff both latitude and longitude have float values one of which is non zero
         """
-        lat_val = self.get('lat')
-        lon_val = self.get('lon')
+        lat_val = self.get("lat")
+        lon_val = self.get("lon")
         if isinstance(lat_val, float) and isinstance(lon_val, float):
-            return bool(self.get('lat') or self.get('lon'))
+            return bool(self.get("lat") or self.get("lon"))
         return False
 
     def set_geo(self, lat, lon) -> bool:
@@ -62,23 +66,23 @@ class GeojsonPointItem(scrapy.Item):
         try:
             lat_val = float(lat)
             lon_val = float(lon)
-            self['lat'] = lat_val
-            self['lon'] = lon_val
+            self["lat"] = lat_val
+            self["lon"] = lon_val
             return self.has_geo()
         except (TypeError, ValueError):
             return False
 
     def set_located_in(self, brand, logger):
-        logger.info("set %s instance to be located in %s", self.get('brand'), brand)
-        # TODO: add a relationship field to GeojsonPointItem and set accordingly
+        logger.info("set %s instance to be located in %s", self.get("brand"), brand)
+        self["located_in_wikidata"] = brand.brand_wikidata
 
     def set_source_data(self, response=None) -> SourceData:
         """
         Return the source data structure for the item, allocated if necessary. Optionally
         set the response object component of the source data.
         """
-        if not self.get('source_data'):
-            self['source_data'] = SourceData()
+        if not self.get("source_data"):
+            self["source_data"] = SourceData()
         if response:
-            self['source_data']['response'] = response
-        return self['source_data']
+            self["source_data"]["response"] = response
+        return self["source_data"]

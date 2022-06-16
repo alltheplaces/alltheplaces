@@ -39,7 +39,7 @@ class FnbUSSpider(scrapy.Spider):
             "state": data["state"],
             "postcode": data["postalcode"],
             "country": data["country"],
-            "phone": "phone",
+            "phone": data["phone"],
             "website": response.url,
             "opening_hours": data["branchhours"],
         }

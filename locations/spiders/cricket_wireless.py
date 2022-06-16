@@ -44,7 +44,7 @@ class CricketWirelessSpider(scrapy.Spider):
                 "ref": store["corporate_id"],
                 "website": store["website"],
                 "name": store["name"],
-                "addr_full": store["website"],
+                "street_address": store["address"],
                 "city": store["locality"],
                 "state": store["region"],
                 "postcode": store["postcode"],

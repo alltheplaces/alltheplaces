@@ -17,9 +17,14 @@ mapping = (
     ("name", "name"),
     ("phone", "phone"),
     ("website", "website"),
+    ("twitter", "contact:twitter"),
+    ("facebook", "contact:facebook"),
     ("opening_hours", "opening_hours"),
+    ("image", "image"),
     ("brand", "brand"),
     ("brand_wikidata", "brand:wikidata"),
+    ("located_in", "located_in"),
+    ("located_in_wikidata", "located_in:wikidata"),
 )
 
 

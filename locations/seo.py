@@ -191,7 +191,9 @@ def get_all_keys(src, lookup_key=None):
         yield src
 
 
-def parse_ldjson(brand, entry_or_entries, required_type, response=None) -> GeojsonPointItem:
+def parse_ldjson(
+        brand, entry_or_entries, required_type, response=None
+) -> GeojsonPointItem:
     # Sometimes (hello Marriott in the first case) the entry array is one level down.
     if isinstance(entry_or_entries, dict):
         if entry_or_entries.get("@graph"):
@@ -257,7 +259,12 @@ def join_address_array(address_array, join_str=","):
     all_parts = list(map(lambda s: s.strip(), all_parts))
     for i in range(0, len(all_parts)):
         for j in range(i + 1, len(all_parts)):
-            if all_parts[i] and all_parts[j] and all_parts[i].lower() == all_parts[j].lower():
+            # Remove duplicate consecutive entries
+            if (
+                all_parts[i]
+                and all_parts[j]
+                and all_parts[i].lower() == all_parts[j].lower()
+            ):
                 all_parts[i] = None
     all_parts = list(filter(lambda s: s, all_parts))
     join_str = join_str + " "
