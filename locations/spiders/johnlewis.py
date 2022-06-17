@@ -44,9 +44,14 @@ class JohnLewisSpider(SitemapSpider):
             )
 
         item["addr_full"] = addr_full
-        item["phone"] = "+44 " + response.xpath(
-            '//span[@class="shop-details-telephone-number"]/text()'
-        ).get()[1:]
+
+        item["name"] = response.xpath('//span[@class="shop-name"]/text()').get()
+        item["phone"] = (
+            "+44 "
+            + response.xpath(
+                '//span[@class="shop-details-telephone-number"]/text()'
+            ).get()[1:]
+        )
 
         opening_rules = response.xpath(
             '//dl[@class="opening-weeks-list"]/descendant::*/text()'
