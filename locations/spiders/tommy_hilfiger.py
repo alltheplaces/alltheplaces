@@ -1,81 +1,47 @@
 # -*- coding: utf-8 -*-
 import json
-import re
-
 import scrapy
 
 from locations.items import GeojsonPointItem
-from locations.hours import OpeningHours
 
 
 class TommyHilfigerSpider(scrapy.Spider):
     name = "tommy_hilfiger"
-    item_attributes = {"brand": "Tommy Hilfiger"}
+    item_attributes = {"brand": "Tommy Hilfiger", "brand_wikidata": "Q634881"}
     allowed_domains = ["tommy.com"]
-
-    def start_requests(self):
-        url = "https://hosted.where2getit.com/tommyhilfiger/rest/locatorsearch?like=0.11100338339866411"
-
-        headers = {
-            "origin": "https://hosted.where2getit.com",
-            "Referer": "https://hosted.where2getit.com/tommyhilfiger/store-locator.html",
-            "content-type": "application/json",
-        }
-
-        current_state = json.dumps(
-            {
-                "request": {
-                    "appkey": "0B93630E-2675-11E9-A702-7BCC0C70A832",
-                    "formdata": {
-                        "geoip": "false",
-                        "dataview": "store_default",
-                        "limit": 3000,
-                        "geolocs": {
-                            "geoloc": [
-                                {
-                                    "addressline": "TX",
-                                    "country": "US",
-                                    "latitude": 31.9685988,
-                                    "longitude": -99.90181310000003,
-                                    "state": "TX",
-                                    "province": "",
-                                    "city": "",
-                                    "address1": "",
-                                    "postalcode": "",
-                                }
-                            ]
-                        },
-                        "searchradius": "5000",
-                        "where": {"or": {"icon": {"like": ""}}},
-                        "false": "0",
-                    },
-                }
-            }
-        )
-
-        yield scrapy.Request(
-            url,
-            method="POST",
-            body=current_state,
-            headers=headers,
-            callback=self.parse,
-        )
+    start_urls = [
+        "https://uk.tommy.com/wcs/resources/store/30027/geonode?q=byGeoNodeTypeAndName&type=CNTY&name=&siteLevelSearch=true"
+    ]
 
     def parse(self, response):
-        stores = response.json()
+        regions = response.json()["GeoNode"]
+        for region in regions:
+            yield scrapy.Request(
+                "https://uk.tommy.com/wcs/resources/store/30027/storelocator/byGeoNode/"
+                + region["uniqueID"],
+                callback=self.parse_stores,
+            )
 
-        for store in stores["response"]["collection"]:
+    def parse_stores(self, response):
+        stores = response.json()
+        if not stores.get("PhysicalStore"):
+            return
+
+        stores = stores["PhysicalStore"]
+
+        for store in stores:
             properties = {
-                "ref": store["uid"],
-                "name": store["name"],
-                "addr_full": store["address1"],
+                "ref": store["storeName"],
+                "name": store["Description"][0]["displayStoreName"],
+                "street_address": store["addressLine"][0],
                 "city": store["city"],
-                "state": store["state"],
-                "postcode": store["postalcode"],
                 "country": store["country"],
                 "lat": store["latitude"],
                 "lon": store["longitude"],
-                "phone": store["phone"],
             }
+            if store.get("postalCode"):
+                properties["postcode"] = store["postalCode"].strip()
+            if store.get("telephone1"):
+                properties["phone"] = store["telephone1"].strip()
 
             yield GeojsonPointItem(**properties)
