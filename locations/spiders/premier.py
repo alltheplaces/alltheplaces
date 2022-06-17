@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import scrapy
 from locations.brands import Brand
-from locations.seo import extract_html_meta_details
+from locations.seo import extract_html_meta
 
 
 class PremierSpider(scrapy.spiders.SitemapSpider):
@@ -12,6 +12,4 @@ class PremierSpider(scrapy.spiders.SitemapSpider):
     sitemap_rules = [("/our-stores/", "parse_store")]
 
     def parse_store(self, response):
-        item = self.brand.item(response)
-        if extract_html_meta_details(item, response).has_geo():
-            yield item
+        return extract_html_meta(self.brand, response)

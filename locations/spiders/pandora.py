@@ -10,10 +10,7 @@ class PandoraSpider(scrapy.spiders.SitemapSpider):
     download_delay = 0.2
     allowed_domains = ["pandora.net"]
     sitemap_urls = ["https://stores.pandora.net/sitemap.xml"]
+    sitemap_rules = [("\.html", "parse_store")]
 
-    def parse(self, response):
-        for item in extract_ldjson(self.brand, response, "JewelryStore"):
-            if item.has_geo():
-                yield item
-            else:
-                self.logger.warn(">>>> no position for %s", response.url)
+    def parse_store(self, response):
+        return extract_ldjson(self.brand, response, "JewelryStore")

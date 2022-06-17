@@ -1,6 +1,8 @@
 import json
 from typing import Iterator
 from locations.items import GeojsonPointItem
+from locations.brands import Brand
+
 
 name_keys = ["name", "title"]
 
@@ -131,11 +133,15 @@ def extract_geo(item, src) -> GeojsonPointItem:
     return item
 
 
-def extract_html_meta_details(item, response) -> GeojsonPointItem:
+def extract_html_meta(brand_or_item, response) -> GeojsonPointItem:
     """
     Pull certain meta properties from the page and form a dict from them to give
     to the generic extract code.
     """
+    if isinstance(brand_or_item, Brand):
+        item = brand_or_item.item(response)
+    else:
+        item = brand_or_item
     keys = response.xpath("/html/head/meta/@property").getall()
     src = {}
     for key in keys:
