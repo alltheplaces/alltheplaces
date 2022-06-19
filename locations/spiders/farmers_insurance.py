@@ -1,33 +1,23 @@
 # -*- coding: utf-8 -*-
 import re
 import json
-import scrapy
+
 from locations.items import GeojsonPointItem
+from scrapy.spiders import SitemapSpider
 
 
-class FarmersInsuranceSpider(scrapy.Spider):
+class FarmersInsuranceSpider(SitemapSpider):
     download_delay = 0.2
     name = "farmers-insurance"
     item_attributes = {"brand": "Farmers Insurance", "brand_wikidata": "Q1396863"}
     allowed_domains = ["agents.farmers.com"]
-    start_urls = ("https://agents.farmers.com/",)
-
-    def parse(self, response):
-        urls = response.xpath('//a[@class="Directory-listLink"]/@href').extract()
-        for url in urls:
-            yield scrapy.Request(response.urljoin(url), callback=self.parse_state)
-
-    def parse_state(self, response):
-        state_urls = response.xpath('//a[@class="Directory-listLink"]/@href').extract()
-
-        for url in state_urls:
-            yield scrapy.Request(response.urljoin(url), callback=self.parse_city)
-
-    def parse_city(self, response):
-        city_urls = response.xpath('//a[@class="location-title-link"]/@href').extract()
-
-        for url in city_urls:
-            yield scrapy.Request(response.urljoin(url), callback=self.parse_location)
+    sitemap_urls = ["https://agents.farmers.com/sitemap.xml"]
+    sitemap_rules = [
+        (
+            r"https:\/\/agents\.farmers\.com\/(\w{2})\/([-\w]+)\/([-\w]+)$",
+            "parse_location",
+        )
+    ]
 
     def parse_location(self, response):
         ref = re.search(r".+/(.+)", response.url).group(1)
