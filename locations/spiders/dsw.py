@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
-import re
 import json
-import scrapy
 
 from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
+from scrapy.spiders import SitemapSpider
 
 
-class DesignerShoeWarehouseSpider(scrapy.Spider):
+class DesignerShoeWarehouseSpider(SitemapSpider):
     download_delay = 1
     name = "dsw"
     item_attributes = {"brand": "Designer Shoe Warehouse", "brand_wikidata": "Q5206207"}
@@ -15,43 +14,17 @@ class DesignerShoeWarehouseSpider(scrapy.Spider):
         "stores.dsw.com",
         "stores.dsw.ca",
     ]
-    start_urls = ("https://stores.dsw.com",)
-
-    def parse(self, response):
-        urls = response.xpath(
-            '//div[@class="CountryList-regionList"]/div/ul/li/a/@href'
-        ).extract()
-        for path in urls:
-            yield scrapy.Request(response.urljoin(path), callback=self.parse_state)
-
-    def parse_state(self, response):
-        store = re.compile(r"^(dsw|\d+)-(\w+-?)+(\.html)?$")
-        urls = (
-            response.xpath('//ul[@class="StateList-listLinks"]/li/a/@href').extract()
-            or response.xpath('//ul[@class="Directory-listLinks"]/li/a/@href').extract()
-        )
-        for path in urls:
-            if store.match(path.split("/")[-1]):
-                yield scrapy.Request(response.urljoin(path), callback=self.parse_store)
-            else:
-                yield scrapy.Request(response.urljoin(path), callback=self.parse_city)
-
-    def parse_city(self, response):
-        store = re.compile(r"^(dsw|\d+)-(\w+-?)+(\.html)?$")
-        urls = (
-            response.xpath('//div[@class="CityList-content"]/ul/li/a/@href').extract()
-            or response.xpath('//ul[@class="Directory-listLinks"]/li/a/@href').extract()
-        )
-        for path in urls:
-            if store.match(path.split("/")[-1]):
-                yield scrapy.Request(response.urljoin(path), callback=self.parse_store)
-            else:
-                yield scrapy.Request(response.urljoin(path), callback=self.parse_stores)
-
-    def parse_stores(self, response):
-        urls = response.xpath('//div[@id="Directory-content"]/ul/li/a/@href').extract()
-        for path in urls:
-            yield scrapy.Request(response.urljoin(path), callback=self.parse_store)
+    sitemap_urls = [
+        "https://stores.dsw.com/sitemap.xml",
+        "https://stores.dsw.ca/sitemap.xml",
+    ]
+    sitemap_rules = [
+        (
+            r"https:\/\/stores\.dsw\.com\/usa\/(\w{2})\/([-\w]+)\/([-\w']+)\.html$",
+            "parse_store",
+        ),
+        (r"https:\/\/stores\.dsw\.ca\/(\w{2})\/([-\w]+)\/([-\w]+)$", "parse_store"),
+    ]
 
     def parse_store(self, response):
         oh = OpeningHours()
