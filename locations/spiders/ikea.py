@@ -66,7 +66,7 @@ class IkeaSpider(scrapy.Spider):
             for day in store["hours"]["normal"] if "hours" in store else []:
                 if day["open"] != "":
                     opening_hours.add_range(
-                        day["day"][0:1].upper() + day["day"][1:2].lower(),
+                        day["day"].title()[0:1].upper() + day["day"].title()[1:2].lower(),
                         day["open"],
                         day["close"],
                     )
