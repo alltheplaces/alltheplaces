@@ -62,8 +62,6 @@ class IkeaSpider(scrapy.Spider):
     def parse(self, response):
         data = response.json()
         for store in data:
-            if "storePageUrl" not in store:
-                continue
             opening_hours = OpeningHours()
             for day in store["hours"]["normal"]:
                 if day["open"] != "":
@@ -72,6 +70,8 @@ class IkeaSpider(scrapy.Spider):
                         day["open"],
                         day["close"],
                     )
+            split_url = response.url.split("/")
+            country_path = f"{split_url[3]}/{split_url[4]}"
             properties = {
                 "lat": store["lat"],
                 "lon": store["lng"],
@@ -80,7 +80,9 @@ class IkeaSpider(scrapy.Spider):
                 "city": store["address"].get("city"),
                 "postcode": store["address"].get("zipCode"),
                 "country": response.request.url[21:23].upper(),
-                "website": store["storePageUrl"],
+                "website": store["storePageUrl"]
+                if "storePageUrl" in store
+                else f"https://www.ikea.com/{country_path}/stores/",
                 "ref": store["id"],
                 "opening_hours": opening_hours.as_opening_hours(),
                 "extras": {
