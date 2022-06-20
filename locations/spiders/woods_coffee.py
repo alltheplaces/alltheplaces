@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import scrapy
+import time
 
 from locations.items import GeojsonPointItem
 
@@ -16,75 +17,41 @@ class WoodsCoffeeSpider(scrapy.Spider):
 
     def store_hours(self, hours):
         hours = hours.replace("–", "-")
-        hours = hours.replace("\xa0", " ")
-        days = hours.split(": ")[0].strip()
+        days, times = hours.split(": ")
+        open_time, close_time = times.split("-")
 
         if "-" in days:
-            startDay = days.split("-")[0][0:2].title()
-            endDay = days.split("-")[1][0:2].title()
-            dayOutput = startDay + "-" + endDay
+            start_day, end_day = days.split("-")
+            days = start_day[0:2].title() + "-" + end_day[0:2].title()
         else:
             if "DAILY" in days:
-                startDay = "Mo"
-                endDay = "Su"
-                dayOutput = startDay + "-" + endDay
+                days = "Mo-Su"
             else:
-                dayOutput = days[0:2].title()
+                days = days[0:2].title()
 
-        bothHours = hours.split(": ")[1].replace(" ", "")
-        openHours = bothHours.split("-")[0]
-        closeHours = bothHours.split("-")[1]
+        if ":" in open_time:
+            open_time = time.strptime(open_time, "%I:%M %p")
+        else:
+            open_time = time.strptime(open_time, "%I %p")
 
-        if "AM" in openHours:
-            openHours = openHours.replace("AM", "")
-            if ":" in openHours:
-                openH = openHours.split(":")[0]
-                openM = openHours.split(":")[1]
-            else:
-                openH = openHours
-                openM = "00"
-            openHours = openH + ":" + openM
+        if ":" in close_time:
+            close_time = time.strptime(close_time, "%I:%M %p")
+        else:
+            close_time = time.strptime(close_time, "%I %p")
 
-        if "PM" in openHours:
-            openHours = openHours.replace("PM", "")
-            if ":" in openHours:
-                openH = openHours.split(":")[0]
-                openM = openHours.split(":")[1]
-            else:
-                openH = openHours
-                openM = "00"
-            openH = str(int(openH) + 12)
-            openHours = openH + ":" + openM
-
-        if "AM" in closeHours:
-            closeHours = closeHours.replace("AM", "")
-            if ":" in closeHours:
-                closeH = closeHours.split(":")[0]
-                closeM = closeHours.split(":")[1]
-            else:
-                closeH = closeHours
-                closeM = "00"
-            closeHours = closeH + ":" + closeM
-
-        if "PM" in closeHours:
-            closeHours = closeHours.replace("PM", "")
-            if ":" in closeHours:
-                closeH = closeHours.split(":")[0]
-                closeM = closeHours.split(":")[1]
-            else:
-                closeH = closeHours
-                closeM = "00"
-            closeH = str(int(closeH) + 12)
-            closeHours = closeH + ":" + closeM
-
-            return dayOutput + " " + openHours.replace(" ", "") + "-" + closeHours + ";"
+        return "{days} {open}-{close}".format(
+            days=days,
+            open=time.strftime("%H:%M", open_time),
+            close=time.strftime("%H:%M", close_time),
+        )
 
     def parse(self, response):
         for store in response.json():
-            hoursString = ""
+            opening_hours = ""
             for hoursMatch in store["description"].split("\n"):
-                hoursString = hoursString + " " + self.store_hours(hoursMatch)
-            hoursString = hoursString.strip(";").strip()
+                if opening_hours != "":
+                    opening_hours += "; "
+                opening_hours += self.store_hours(hoursMatch)
 
             yield GeojsonPointItem(
                 lat=store["latitude"],
@@ -110,6 +77,6 @@ class WoodsCoffeeSpider(scrapy.Spider):
                 state=store["state"],
                 postcode=store["postal_code"],
                 phone=store["phone"],
-                opening_hours=hoursString,
+                opening_hours=opening_hours,
                 ref=store["id"],
             )
