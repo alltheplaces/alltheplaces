@@ -63,7 +63,7 @@ class IkeaSpider(scrapy.Spider):
         data = response.json()
         for store in data:
             opening_hours = OpeningHours()
-            for day in store["hours"]["normal"]:
+            for day in store["hours"]["normal"] if "hours" in store else []:
                 if day["open"] != "":
                     opening_hours.add_range(
                         day["day"][0:1].upper() + day["day"][1:2].lower(),
