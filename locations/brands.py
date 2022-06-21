@@ -30,7 +30,6 @@ class Brand:
         Create a boiler plate POI item based on the brand. A HTTP response structure or URL
         for the POI may optionally be provided.
         """
-        # TODO: this would a point to lazily integrate with NSI / wikidata etc to pick up extra brand information
         item = GeojsonPointItem()
         item["brand"] = self.brand
         item["brand_wikidata"] = self.brand_wikidata
