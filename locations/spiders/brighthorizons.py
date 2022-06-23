@@ -1,37 +1,37 @@
 # -*- coding: utf-8 -*-
-import scrapy
+import json
+import logging
 import re
+import time
 
 from locations.items import GeojsonPointItem
+from scrapy.spiders import SitemapSpider
 
 
-class BrightHorizonsSpider(scrapy.Spider):
+class BrightHorizonsSpider(SitemapSpider):
     name = "brighthorizons"
-    item_attributes = {"brand": "Bright Horizons"}
+    item_attributes = {
+        "brand": "Bright Horizons",
+        "brand_wikidata": "Q4967421",
+        "country": "US",
+    }
     allowed_domains = ["brighthorizons.com"]
-    start_urls = ("https://www.brighthorizons.com/sitemap.xml",)
-
-    def parse(self, response):
-        response.selector.remove_namespaces()
-        city_urls = response.xpath("//url/loc/text()").extract()
-        regex = re.compile(
-            r"http(s|)://(www.|)brighthorizons.com/child-care-locator/results\?state=\w+&city=\w+"
+    sitemap_urls = ["https://child-care-preschool.brighthorizons.com/sitemap.xml"]
+    sitemap_rules = [
+        (
+            r"https:\/\/child-care-preschool\.brighthorizons\.com\/(\w{2})\/(\w+)\/([-\w]+)$",
+            "parse_store",
         )
-        for path in city_urls:
-            if re.search(regex, path):
-                yield scrapy.Request(
-                    path.strip(),
-                    callback=self.parse_location,
-                )
+    ]
 
-    def parse_location(self, response):
-        response.selector.remove_namespaces()
-        location_urls = response.xpath('//a[@class="cta2 visit"]/@href').extract()
-        for path in location_urls:
-            yield scrapy.Request(
-                path.strip(),
-                callback=self.parse_store,
-            )
+    def sitemap_filter(self, entries):
+        for entry in entries:
+            match = re.match(self.sitemap_rules[0][0], entry["loc"])
+            if match:
+                if match.group(1) == "ZZ":
+                    # ZZ is there testing data
+                    continue
+                yield entry
 
     def parse_store(self, response):
 
