@@ -34,61 +34,49 @@ class BrightHorizonsSpider(SitemapSpider):
                 yield entry
 
     def parse_store(self, response):
+        linked_data = response.xpath(
+            '//script[@type="application/ld+json"]/text()'
+        ).getall()
+        for ld in linked_data:
+            item = json.loads(ld)
 
-        if response.xpath('//a[@itemprop="telephone"]/text()').extract_first():
-            telephoneNumber = (
-                response.xpath('//a[@itemprop="telephone"]/text()')
-                .extract_first()
-                .strip()
-            )
-        else:
-            telephoneNumber = response.xpath(
-                '//a[@itemprop="telephone"]/text()'
-            ).extract_first()
+            if item["@type"] != "ChildCare":
+                continue
 
-        if response.xpath(
-            '//div/section/ul/li/meta[@itemprop="openingHours"]/@content'
-        ).extract_first():
-            storeHours = (
-                response.xpath(
-                    '//div/section/ul/li/meta[@itemprop="openingHours"]/@content'
-                )
-                .extract_first()
-                .strip()
-            )
-        else:
-            storeHours = response.xpath(
-                '//div/section/ul/li/meta[@itemprop="openingHours"]/@content'
-            ).extract_first()
+            if not item.get("name"):
+                continue
 
-        properties = {
-            "name": response.xpath("//h1/text()").extract_first(),
-            "ref": response.xpath("//h1/text()").extract_first(),
-            "addr_full": response.xpath(
-                '//span[@itemprop="streetAddress"]/text()'
-            ).extract_first(),
-            "city": response.xpath(
-                '//span[@itemprop="addressLocality"]/text()'
-            ).extract_first(),
-            "state": response.xpath(
-                '//span[@itemprop="addressRegion"]/text()'
-            ).extract_first(),
-            "postcode": response.xpath(
-                '//span[@itemprop="postalCode"]/text()'
-            ).extract_first(),
-            "phone": telephoneNumber,
-            "website": response.request.url,
-            "opening_hours": storeHours,
-            "lat": float(
-                response.xpath(
-                    '//div/meta[@itemprop="latitude"]/@content'
-                ).extract_first()
-            ),
-            "lon": float(
-                response.xpath(
-                    '//div/meta[@itemprop="longitude"]/@content'
-                ).extract_first()
-            ),
-        }
+            properties = {
+                "lat": item["geo"].get("latitude"),
+                "lon": item["geo"].get("longitude"),
+                "name": item["name"],
+                "street_address": item["address"]["streetAddress"],
+                "city": item["address"]["addressLocality"],
+                "state": item["address"]["addressRegion"],
+                "postcode": item["address"]["postalCode"],
+                "phone": item.get("telephone"),
+                "website": response.request.url,
+                "ref": item["@id"],
+            }
 
-        yield GeojsonPointItem(**properties)
+            oh = item["openingHours"]
+            if oh != "Not Available":
+                days, times = oh.split(": ")
+
+                if days != "M-F":
+                    logging.error("Unexpected days: " + days)
+                else:
+                    start_time, end_time = (
+                        times.replace("a.m.", "AM").replace("p.m.", "PM").split(" to ")
+                    )
+
+                    start_time = time.strftime(
+                        "%H:%M", time.strptime(start_time, "%I:%M %p")
+                    )
+                    end_time = time.strftime(
+                        "%H:%M", time.strptime(end_time, "%I:%M %p")
+                    )
+
+                    properties["opening_hours"] = f"Mo-Fr {start_time}-{end_time}"
+
+            yield GeojsonPointItem(**properties)
