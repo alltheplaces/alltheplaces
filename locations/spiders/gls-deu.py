@@ -7,10 +7,8 @@ HEADERS = {"X-Requested-With": "XMLHttpRequest"}
 STORELOCATOR = "https://api.gls-pakete.de/parcelshops?version=4&coordinates={},{}&distance=40"
 
 class GenspiderSpider(scrapy.Spider):
-    name = 'glsdeuSpider'
+    name = 'glsdeu_spider'
     allowed_domains = ['https://www.gls-pakete.de/']
-    deList = []
-    usedLongLat = []
 
     def start_requests(self):
         searchable_point_files = [
@@ -25,18 +23,18 @@ class GenspiderSpider(scrapy.Spider):
                         longitude = format(float(result["longitude"]), '.5f')
                         latitude = format(float(result["latitude"]), '.5f')
                         request = scrapy.Request(
-                            url=STORELOCATOR.format(str(latitude), str(longitude)),
+                            url=STORELOCATOR.format(latitude, longitude),
                             headers=HEADERS,
                             callback=self.parse,
                         )
                         yield request
 
     def parse(self, response):
-        firstResults = json.loads(response.body)
+        firstResults = response.json()
         results = firstResults['shops']
-        item = GeojsonPointItem()
 
         for result in results:
+            item = GeojsonPointItem()
             address = result['address']
             phone = result['phone']
             coordinates = address['coordinates']
@@ -44,8 +42,8 @@ class GenspiderSpider(scrapy.Spider):
             latitude = coordinates['latitude']
             name = address['name']
             openingHours = result['openingHours']
-            state = 1
 
+            item['ref'] = result['id']
             item['name'] = name
             item["lat"] = latitude
             item["lon"] = longitude
@@ -56,15 +54,4 @@ class GenspiderSpider(scrapy.Spider):
             item["phone"] = phone['number']
             item["opening_hours"] = openingHours
 
-            if(GenspiderSpider.usedLongLat):
-                for used in GenspiderSpider.usedLongLat:
-                    if (used["longitude"] == longitude and used["latitude"] == latitude):
-                        state = 0
-
-            if(state == 1):
-                data = {
-                    "longitude": longitude,
-                    "latitude": latitude
-                }
-                GenspiderSpider.usedLongLat.append(data)
-                yield item
+            yield item
