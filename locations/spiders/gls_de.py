@@ -3,7 +3,7 @@ import csv
 from locations.items import GeojsonPointItem
 
 HEADERS = {"X-Requested-With": "XMLHttpRequest"}
-STORELOCATOR = "https://api.gls-pakete.de/parcelshops?version=4&coordinates={},{}&distance=40"
+STORELOCATOR = "https://api.gls-pakete.de/parcelshops?version=4&coordinates={:0.5},{:0.5}&distance=40"
 
 class GeneralLogisticsSystemsSpider(scrapy.Spider):
     name = 'gls_de'
@@ -19,8 +19,8 @@ class GeneralLogisticsSystemsSpider(scrapy.Spider):
                 results = csv.DictReader(openFile)
                 for result in results:
                     if(result["country"] == "DE"):
-                        longitude = format(float(result["longitude"]), '.5f')
-                        latitude = format(float(result["latitude"]), '.5f')
+                        longitude = float(result["longitude"])
+                        latitude = float(result["latitude"])
                         request = scrapy.Request(
                             url=STORELOCATOR.format(latitude, longitude),
                             headers=HEADERS,
