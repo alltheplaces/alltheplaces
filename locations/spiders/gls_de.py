@@ -1,13 +1,12 @@
 import scrapy
-import json
 import csv
 from locations.items import GeojsonPointItem
 
 HEADERS = {"X-Requested-With": "XMLHttpRequest"}
 STORELOCATOR = "https://api.gls-pakete.de/parcelshops?version=4&coordinates={},{}&distance=40"
 
-class GenspiderSpider(scrapy.Spider):
-    name = 'glsdeu_spider'
+class GeneralLogisticsSystemsSpider(scrapy.Spider):
+    name = 'gls_de'
     allowed_domains = ['https://www.gls-pakete.de/']
 
     def start_requests(self):
@@ -30,8 +29,8 @@ class GenspiderSpider(scrapy.Spider):
                         yield request
 
     def parse(self, response):
-        firstResults = response.json()
-        results = firstResults['shops']
+        first_results = response.json()
+        results = first_results['shops']
 
         for result in results:
             item = GeojsonPointItem()
@@ -41,7 +40,7 @@ class GenspiderSpider(scrapy.Spider):
             longitude = coordinates['longitude']
             latitude = coordinates['latitude']
             name = address['name']
-            openingHours = result['openingHours']
+            opening_hours = result['openingHours']
 
             item['ref'] = result['id']
             item['name'] = name
@@ -52,6 +51,5 @@ class GenspiderSpider(scrapy.Spider):
             item["city"] = address['city']
             item["postcode"] = address['postalCode']
             item["phone"] = phone['number']
-            item["opening_hours"] = openingHours
-
+            item["opening_hours"] = opening_hours
             yield item
