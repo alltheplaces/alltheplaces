@@ -22,12 +22,12 @@ city_keys = [
 region_keys = ["addressRegion", "region", "state"]
 
 country_keys = [
-    "addressCountry",
-    "country",
-    "Country",
     "countryCode",
     "CountryCode",
     "country_code",
+    "addressCountry",
+    "country",
+    "Country",
 ]
 
 postcode_keys = [
