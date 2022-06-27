@@ -6,6 +6,7 @@
 # See: http://doc.scrapy.org/en/latest/topics/item-pipeline.html
 from scrapy.exceptions import DropItem
 
+
 class DuplicatesPipeline(object):
     def __init__(self):
         self.ids_seen = set()
