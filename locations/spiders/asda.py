@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import scrapy
-import json
 import re
 
 from locations.items import GeojsonPointItem
@@ -13,7 +12,7 @@ class AsdaSpider(scrapy.Spider):
     item_attributes = {"brand": "Asda", "brand_wikidata": "Q297410"}
     allowed_domains = ["asda.com", "virtualearth.net", "bing.com"]
     start_urls = (
-        "https://spatial.virtualearth.net/REST/v1/data/2c85646809c94468af8723dd2b52fcb1/AsdaStoreLocator/asda_store?$callback=resultCallback&jsonp=resultCallback&key=AtAs6PiQ3e0HE187rJgUEqvoKcKfTklRKTvCN1X1mpumYE-Z4VQFvx62X7ff13t6&spatialFilter=nearby(53.4795913696289,-2.24873995780945,400)&$select=imp_id,url_key,Latitude,Longitude,name,__Distance,store_photo_url,street,town,post_code,store_manager,telephone,asda_store_type,asda_store_type_display,opening_times_withheld_until_timestamp,has_holiday_opening_times,asda_service_bounty_packs,asda_service_24_hour,asda_service_community_champion,asda_service_pharmacy,asda_service_petrol_station,asda_service_opticians,asda_service_george,asda_service_click_collect,asda_service_grocery_click_collect,asda_service_baby_changing,asda_service_travel_money,asda_service_travel_money_click_collect,asda_service_instant_photo_print_centre,asda_service_photo_department_or_instant_print,asda_service_electric_car_charging,asda_service_scan_go,asda_store_type_living&$top=800&$format=json&$skip=",
+        "https://spatial.virtualearth.net/REST/v1/data/2c85646809c94468af8723dd2b52fcb1/AsdaStoreLocator/asda_store?key=AtAs6PiQ3e0HE187rJgUEqvoKcKfTklRKTvCN1X1mpumYE-Z4VQFvx62X7ff13t6&spatialFilter=nearby(53.4795913696289,-2.24873995780945,400)&$select=imp_id,url_key,Latitude,Longitude,name,__Distance,store_photo_url,street,town,post_code,store_manager,telephone,asda_store_type,asda_store_type_display,opening_times_withheld_until_timestamp,has_holiday_opening_times,asda_service_bounty_packs,asda_service_24_hour,asda_service_community_champion,asda_service_pharmacy,asda_service_petrol_station,asda_service_opticians,asda_service_george,asda_service_click_collect,asda_service_grocery_click_collect,asda_service_baby_changing,asda_service_travel_money,asda_service_travel_money_click_collect,asda_service_instant_photo_print_centre,asda_service_photo_department_or_instant_print,asda_service_electric_car_charging,asda_service_scan_go,asda_store_type_living&$top=800&$format=json&$skip=",
     )
 
     def time_str(self, time):
@@ -64,9 +63,7 @@ class AsdaSpider(scrapy.Spider):
         except Exception:
             start = 250
 
-        shops = json.loads(response.text.rstrip(")").lstrip("resultCallback("))["d"][
-            "results"
-        ]
+        shops = response.json()["d"]["results"]
         for place in shops:
             yield scrapy.Request(
                 "https://storelocator.asda.com/store/" + place["url_key"],
