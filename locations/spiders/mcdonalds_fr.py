@@ -29,8 +29,10 @@ class McDonalsFRSpider(scrapy.Spider):
 
     def start_requests(self):
         yield scrapy.Request(
-            url="https://api.woosmap.com/project/config?key=woos-77bec2e5-8f40-35ba-b483-67df0d5401be", method="GET",
-            callback=self.parse_store_grid, headers=self.headers
+            url="https://api.woosmap.com/project/config?key=woos-77bec2e5-8f40-35ba-b483-67df0d5401be",
+            method="GET",
+            callback=self.parse_store_grid,
+            headers=self.headers,
         )
 
     def parse_store_grid(self, response):
@@ -43,7 +45,7 @@ class McDonalsFRSpider(scrapy.Spider):
                     url=f"https://api.woosmap.com/tiles/10-{str(lat)}-{str(long)}.grid.json?key=woos-77bec2e5-8f40-35ba-b483-67df0d5401be&_={config_id}",
                     method="GET",
                     callback=self.get_store_ids,
-                    headers=self.headers
+                    headers=self.headers,
                 )
 
     def get_store_ids(self, response):
@@ -52,7 +54,10 @@ class McDonalsFRSpider(scrapy.Spider):
             store_id = json_obj["data"].get(store)["store_id"]
             yield scrapy.Request(
                 url=f"https://ws.mcdonalds.fr/api/restaurant/{store_id}/?responseGroups=RG.RESTAURANT.FACILITIES",
-                method="GET", callback=self.parse_all_stores, headers=self.headers)
+                method="GET",
+                callback=self.parse_all_stores,
+                headers=self.headers,
+            )
 
     def parse_all_stores(self, response):
         store_json = response.json()
