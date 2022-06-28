@@ -1,101 +1,84 @@
 # -*- coding: utf-8 -*-
 import scrapy
-import json
-import re
+
+from locations.hours import OpeningHours
 from locations.items import GeojsonPointItem
 
 
 class McDonalsFRSpider(scrapy.Spider):
-
     name = "mcdonalds_fr"
     item_attributes = {"brand": "McDonald's"}
-    allowed_domains = ["www.mcdonalds.fr"]
-    start_urls = (
-        "https://prod-dot-mcdonaldsfrance-storelocator.appspot.com/api/store/nearest?center=2.331052600000021:48.8640493&limit=1000&authToken=26938DBF9169A7F39C92BDCF1BA7A&db=prod",
-        "https://prod-dot-mcdonaldsfrance-storelocator.appspot.com/api/store/nearest?center=2.6830176999999367:45.2304368&limit=1000&authToken=26938DBF9169A7F39C92BDCF1BA7A&db=prod",
-    )
+    allowed_domains = ["www.mcdonalds.fr", "api.woosmap.com", "ws.mcdonalds.fr"]
 
-    def store_hours(self, data):
-        day_groups = []
-        this_day_group = {}
-        weekdays = ["Su", "Mo", "Th", "We", "Tu", "Fr", "Sa"]
-        for day_hour in data:
-            if day_hour["idx"] > 7:
-                continue
+    start_urls = [
+        "https://api.woosmap.com/project/config?key=woos-77bec2e5-8f40-35ba-b483-67df0d5401be"
+    ]
+    headers = {
+        "origin": "https://www.mcdonalds.fr",
+    }
 
-            hours = ""
-            start, end = (
-                day_hour["value"].split("-")[0].strip(),
-                day_hour["value"].split("-")[1].strip(),
-            )
+    day_range = {
+        1: "Mo",
+        2: "Tu",
+        3: "We",
+        4: "Th",
+        5: "Fr",
+        6: "Sa",
+        7: "Su",
+    }
 
-            short_day = weekdays[day_hour["idx"] - 1]
-            hours = "{}:{}-{}:{}".format(start[:2], start[3:], end[:2], end[3:])
-            if not this_day_group:
-                this_day_group = {
-                    "from_day": short_day,
-                    "to_day": short_day,
-                    "hours": hours,
-                }
+    def start_requests(self):
+        yield scrapy.Request(
+            url="https://api.woosmap.com/project/config?key=woos-77bec2e5-8f40-35ba-b483-67df0d5401be", method="GET",
+            callback=self.parse_store_grid, headers=self.headers
+        )
 
-            elif hours == this_day_group["hours"]:
-                this_day_group["to_day"] = short_day
+    def parse_store_grid(self, response):
+        config_id = str(response.json().get("updated")).split(".", maxsplit=1)[0]
 
-            elif hours != this_day_group["hours"]:
-                day_groups.append(this_day_group)
-                this_day_group = {
-                    "from_day": short_day,
-                    "to_day": short_day,
-                    "hours": hours,
-                }
+        # Scan the entire France map with zoom level 10. https://www.mcdonalds.fr/restaurants
+        for lat in range(495, 540):
+            for long in range(340, 379):
+                yield scrapy.Request(
+                    url=f"https://api.woosmap.com/tiles/10-{str(lat)}-{str(long)}.grid.json?key=woos-77bec2e5-8f40-35ba-b483-67df0d5401be&_={config_id}",
+                    method="GET",
+                    callback=self.get_store_ids,
+                    headers=self.headers
+                )
 
-        day_groups.append(this_day_group)
+    def get_store_ids(self, response):
+        json_obj = response.json()
+        for store in json_obj["data"]:
+            store_id = json_obj["data"].get(store)["store_id"]
+            yield scrapy.Request(
+                url=f"https://ws.mcdonalds.fr/api/restaurant/{store_id}/?responseGroups=RG.RESTAURANT.FACILITIES",
+                method="GET", callback=self.parse_all_stores, headers=self.headers)
 
-        if not day_groups:
-            return None
-        opening_hours = ""
-        if len(day_groups) == 1 and not day_groups[0]:
-            return None
-        if len(day_groups) == 1 and day_groups[0]["hours"] in (
-            "00:00-23:59",
-            "00:00-00:00",
-        ):
-            opening_hours = "24/7"
-        else:
-            for day_group in day_groups:
-                if day_group["from_day"] == day_group["to_day"]:
-                    opening_hours += "{from_day} {hours}; ".format(**day_group)
-                else:
-                    opening_hours += "{from_day}-{to_day} {hours}; ".format(**day_group)
-            opening_hours = opening_hours[:-2]
+    def parse_all_stores(self, response):
+        store_json = response.json()
+        address_info = store_json["restaurantAddress"][0]
+        coords = store_json["coordinates"]
+        store_oh = store_json.get("openingHours")
+        opening_hours = OpeningHours()
+        for day in store_oh if len(store_json.get("openingHours")) > 0 else []:
+            if day["beginHour"] != "":
+                opening_hours.add_range(
+                    self.day_range.get(day.get("day")),
+                    day["beginHour"],
+                    day["endHour"],
+                )
+        properties = {
+            "name": f"McDonalds {store_json['name']}",
+            "ref": address_info.get("id"),
+            "addr_full": address_info.get("address1"),
+            "city": address_info.get("city"),
+            "postcode": address_info.get("zipCode"),
+            "country": address_info.get("country"),
+            "phone": store_json.get("phone"),
+            "state": store_json.get("region"),
+            "opening_hours": opening_hours.as_opening_hours(),
+            "lat": coords.get("latitude"),
+            "lon": coords.get("longitude"),
+        }
 
-        return opening_hours
-
-    def parse(self, response):
-        match = re.search(r"(HTTPResponseLoaded\()({.*})(\))", response.text)
-        if not match:
-            return
-
-        results = json.loads(match.groups()[1])
-        results = results["poiList"]
-        for item in results:
-            data = item["poi"]
-            properties = {
-                "city": data["location"]["city"],
-                "ref": data["id"],
-                "addr_full": data["location"]["streetLabel"],
-                "phone": data["datasheet"]["tel"]["number"],
-                "state": data["location"]["countryISO"],
-                "postcode": data["location"]["postalCode"],
-                "name": data["name"],
-                "lat": data["location"]["coords"]["lat"],
-                "lon": data["location"]["coords"]["lon"],
-                "website": "https://www.restaurants.mcdonalds.fr"
-                + data["datasheet"]["web"],
-            }
-
-            opening_hours = self.store_hours(data["datasheet"]["descList"])
-            if opening_hours:
-                properties["opening_hours"] = opening_hours
-
-            yield GeojsonPointItem(**properties)
+        yield GeojsonPointItem(**properties)
