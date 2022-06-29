@@ -8,24 +8,34 @@ class AsdaSpider(scrapy.Spider):
     name = "asda"
     item_attributes = {"brand": "Asda", "brand_wikidata": "Q297410", "country": "GB"}
     allowed_domains = ["virtualearth.net"]
-    start_urls = (
+    base_url = (
         "https://spatial.virtualearth.net/REST/v1/data/2c85646809c94468af8723dd2b52fcb1/AsdaStoreLocator/asda_store"
         "?key=AtAs6PiQ3e0HE187rJgUEqvoKcKfTklRKTvCN1X1mpumYE-Z4VQFvx62X7ff13t6"
-        "&$filter=country%20eq%20%27United%20Kingdom%27"
+        "&$filter=country Eq 'United Kingdom'"
         "&$select=Latitude,Longitude,name,street,town,county,region,post_code,country,telephone,url_key,"
         "store_photo_url,imp_id,asda_store_type"
-        "&$top=250"
-        "&$format=json"
-        "&$skip=",
     )
 
-    def parse(self, response):
-        if response.meta.get("start"):
-            start = response.meta["start"]
-        else:
-            start = 250
+    def start_requests(self):
+        yield scrapy.Request(
+            self.base_url + "&$inlinecount=allpages" + "&$format=json",
+            callback=self.get_pages,
+        )
 
+    def get_pages(self, response):
+        total_count = int(response.json()["d"]["__count"])
+        offset = 0
+        page_size = 250
+
+        while offset < total_count:
+            yield scrapy.Request(
+                self.base_url + f"&$top={page_size}&$skip={offset}&$format=json"
+            )
+            offset += page_size
+
+    def parse(self, response):
         shops = response.json()["d"]["results"]
+
         for place in shops:
             yield GeojsonPointItem(
                 lat=place["Latitude"],
@@ -57,11 +67,4 @@ class AsdaSpider(scrapy.Spider):
                 ],  # TODO: find the root url for the images
                 ref=place["imp_id"],
                 brand="Asda " + place["asda_store_type"],
-            )
-
-        if len(shops) == 250:
-            yield scrapy.Request(
-                self.start_urls[0] + str(start),
-                callback=self.parse,
-                meta={"start": start + 250},
             )
