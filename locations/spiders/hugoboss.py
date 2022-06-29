@@ -24,7 +24,6 @@ class HugoBossSpider(scrapy.Spider):
     start_urls = (
         "https://production-na01-hugoboss.demandware.net/s/US/dw/shop/v20_10/stores?client_id=871c988f-3549-4d76-b200-8e33df5b45ba&latitude=36.439068689946765&longitude=-95.71289100000001&count=200&maxDistance=100000000&distanceUnit=mi&start=0",
     )
-    count = 0
 
     def parse(self, response):
         data = response.json()
