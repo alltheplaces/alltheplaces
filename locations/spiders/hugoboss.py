@@ -18,7 +18,6 @@ class HugoBossSpider(scrapy.Spider):
     name = "hugoboss"
     item_attributes = {"brand": "Hugo Boss"}
     allowed_domains = [
-        "production-web-hugo.demandware.net",
         "production-na01-hugoboss.demandware.net",
     ]
     download_delay = 0.5
