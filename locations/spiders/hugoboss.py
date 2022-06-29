@@ -38,14 +38,7 @@ class HugoBossSpider(scrapy.Spider):
                             oh.add_range(day_formats[key], value[0], value[1])
                         else:
                             oh.add_range(day_formats[key], value[0][0], value[0][1])
-                if "postal_code" in store:
-                    postal_code = store["postal_code"]
-                else:
-                    postal_code = ""
-                if "phone" in store:
-                    phone = store["phone"]
-                else:
-                    phone = ""
+
                 properties = {
                     "ref": store["id"],
                     "name": store["name"],
@@ -53,11 +46,11 @@ class HugoBossSpider(scrapy.Spider):
                     "website": "https://www.hugoboss.com/us/stores",
                     "addr_full": store.get("address1"),
                     "city": store.get("city"),
-                    "postcode": postal_code,
+                    "postcode": store.get("postal_code"),
                     "country": store.get("country_code"),
                     "lat": float(store.get("latitude")),
                     "lon": float(store.get("longitude")),
-                    "phone": phone,
+                    "phone": store.get("phone"),
                 }
 
                 yield GeojsonPointItem(**properties)
