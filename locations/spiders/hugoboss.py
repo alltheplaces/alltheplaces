@@ -17,10 +17,13 @@ day_formats = {
 class HugoBossSpider(scrapy.Spider):
     name = "hugoboss"
     item_attributes = {"brand": "Hugo Boss"}
-    allowed_domains = ["production-web-hugo.demandware.net"]
+    allowed_domains = [
+        "production-web-hugo.demandware.net",
+        "production-na01-hugoboss.demandware.net",
+    ]
     download_delay = 0.5
     start_urls = (
-        "https://production-web-hugo.demandware.net/s/US/dw/shop/v16_9/stores?client_id=871c988f-3549-4d76-b200-8e33df5b45ba&latitude=37.09024&longitude=-95.71289100000001&count=200&maxDistance=100000000&distanceUnit=mi",
+        "https://production-na01-hugoboss.demandware.net/s/US/dw/shop/v20_10/stores?client_id=871c988f-3549-4d76-b200-8e33df5b45ba&latitude=36.439068689946765&longitude=-95.71289100000001&count=200&maxDistance=100000000&distanceUnit=mi&start=0",
     )
     count = 0
 
@@ -65,18 +68,18 @@ class HugoBossSpider(scrapy.Spider):
                     "name": store["name"],
                     "opening_hours": clean_hours,
                     "website": "https://www.hugoboss.com/us/stores",
-                    "addr_full": store["address1"],
-                    "city": store["city"],
+                    "addr_full": store.get("address1"),
+                    "city": store.get("city"),
                     "postcode": postal_code,
-                    "country": store["country_code"],
-                    "lat": float(store["latitude"]),
-                    "lon": float(store["longitude"]),
+                    "country": store.get("country_code"),
+                    "lat": float(store.get("latitude")),
+                    "lon": float(store.get("longitude")),
                     "phone": phone,
                 }
 
                 yield GeojsonPointItem(**properties)
-            self.count = self.count + len(data["data"])
-            yield scrapy.Request(
-                response.urljoin(self.start_urls[0] + "&start=" + str(self.count)),
-                callback=self.parse,
-            )
+            if "next" in data:
+                yield scrapy.Request(
+                    url=data["next"],
+                    callback=self.parse,
+                )
