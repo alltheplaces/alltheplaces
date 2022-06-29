@@ -1,153 +1,82 @@
 # -*- coding: utf-8 -*-
 import scrapy
+import time
 
 from locations.items import GeojsonPointItem
-
-daysKey = {
-    "MONDAY": "Mo",
-    "TUESDAY": "Tu",
-    "WEDNESDAY": "We",
-    "THURSDAY": "Th",
-    "FRIDAY": "Fr",
-    "SATURDAY": "Sa",
-    "SUNDAY": "Su",
-}
 
 
 class WoodsCoffeeSpider(scrapy.Spider):
     name = "woods_coffee"
-    item_attributes = {"brand": "Woods Coffee", "brand_wikidata": "Q8033255"}
-    allowed_domains = ["www.woodscoffee.com"]
-    start_urls = ("https://woodscoffee.com/locations/",)
+    item_attributes = {
+        "brand": "Woods Coffee",
+        "brand_wikidata": "Q8033255",
+        "country": "US",
+    }
+    allowed_domains = ["stockist.co"]
+    start_urls = ["https://stockist.co/api/v1/u11293/locations/all"]
 
     def store_hours(self, hours):
         hours = hours.replace("–", "-")
-        hours = hours.replace("\xa0", " ")
-        days = hours.split(": ")[0].strip()
+        days, times = hours.split(": ")
+        open_time, close_time = times.split("-")
 
         if "-" in days:
-            startDay = daysKey[days.split("-")[0]]
-            endDay = daysKey[days.split("-")[1]]
-            dayOutput = startDay + "-" + endDay
+            start_day, end_day = days.split("-")
+            days = start_day[0:2].title() + "-" + end_day[0:2].title()
         else:
             if "DAILY" in days:
-                startDay = "Mo"
-                endDay = "Su"
-                dayOutput = startDay + "-" + endDay
+                days = "Mo-Su"
             else:
-                dayOutput = daysKey[days]
+                days = days[0:2].title()
 
-        bothHours = hours.split(": ")[1].replace(" ", "")
-        openHours = bothHours.split("-")[0]
-        closeHours = bothHours.split("-")[1]
+        if ":" in open_time:
+            open_time = time.strptime(open_time, "%I:%M %p")
+        else:
+            open_time = time.strptime(open_time, "%I %p")
 
-        if "AM" in openHours:
-            openHours = openHours.replace("AM", "")
-            if ":" in openHours:
-                openH = openHours.split(":")[0]
-                openM = openHours.split(":")[1]
-            else:
-                openH = openHours
-                openM = "00"
-            openHours = openH + ":" + openM
+        if ":" in close_time:
+            close_time = time.strptime(close_time, "%I:%M %p")
+        else:
+            close_time = time.strptime(close_time, "%I %p")
 
-        if "PM" in openHours:
-            openHours = openHours.replace("PM", "")
-            if ":" in openHours:
-                openH = openHours.split(":")[0]
-                openM = openHours.split(":")[1]
-            else:
-                openH = openHours
-                openM = "00"
-            openH = str(int(openH) + 12)
-            openHours = openH + ":" + openM
-
-        if "AM" in closeHours:
-            closeHours = closeHours.replace("AM", "")
-            if ":" in closeHours:
-                closeH = closeHours.split(":")[0]
-                closeM = closeHours.split(":")[1]
-            else:
-                closeH = closeHours
-                closeM = "00"
-            closeHours = closeH + ":" + closeM
-
-        if "PM" in closeHours:
-            closeHours = closeHours.replace("PM", "")
-            if ":" in closeHours:
-                closeH = closeHours.split(":")[0]
-                closeM = closeHours.split(":")[1]
-            else:
-                closeH = closeHours
-                closeM = "00"
-            closeH = str(int(closeH) + 12)
-            closeHours = closeH + ":" + closeM
-
-            return dayOutput + " " + openHours.replace(" ", "") + "-" + closeHours + ";"
+        return "{days} {open}-{close}".format(
+            days=days,
+            open=time.strftime("%H:%M", open_time),
+            close=time.strftime("%H:%M", close_time),
+        )
 
     def parse(self, response):
-        for match in response.xpath(
-            "//h2[contains(@class,'font-weight-700 text-uppercase')]/parent::div/parent::div/parent::div"
-        ):
-            cityState = match.xpath(
-                ".//div[contains(@class,'heading-text el-text')]/div/p/text()"
-            ).extract_first()
-            cityString = cityState.split(",")[0].strip()
-            stateString = cityState.split(",")[1].strip()
-
-            addressString = (
-                match.xpath(
-                    ".//div[contains(@class,'uncode_text_column')]/p[contains(@style,'text-align: center;')][not(.//strong)]/text()"
-                )
-                .extract_first()
-                .strip()
-            )
-            postcodeString = addressString.split(stateString)[1].strip()
-            addressString = (
-                addressString.split(stateString)[0]
-                .replace(",", "")
-                .strip()
-                .strip(cityString)
-                .strip()
-            )
-
-            if (
-                match.xpath(
-                    ".//div[contains(@class,'uncode_text_column')]/p[contains(@style,'text-align: center;')][not (.//strong)]/br/following-sibling::text()"
-                ).extract_first()
-                is None
-            ):
-                phoneString = ""
-            else:
-                phoneString = match.xpath(
-                    ".//div[contains(@class,'uncode_text_column')]/p[contains(@style,'text-align: center;')][not (.//strong)]/br/following-sibling::text()"
-                ).extract_first()
-            phoneString = phoneString.replace(" ", "").strip()
-
-            hoursString = ""
-            for hoursMatch in match.xpath(
-                ".//p[contains(@style,'text-align: center;')]/strong//following-sibling::text()"
-            ):
-                hoursString = (
-                    hoursString
-                    + " "
-                    + self.store_hours(hoursMatch.extract().replace("\n", ""))
-                )
-            hoursString = hoursString.strip(";").strip()
-
-            name = match.xpath(
-                ".//h2[contains(@class,'font-weight-700 text-uppercase')]/span/text()"
-            ).extract_first()
+        for store in response.json():
+            opening_hours = ""
+            for hoursMatch in store["description"].split("\n"):
+                if opening_hours != "":
+                    opening_hours += "; "
+                opening_hours += self.store_hours(hoursMatch)
 
             yield GeojsonPointItem(
-                ref=name,
-                name=name,
-                addr_full=addressString,
-                city=cityString,
-                state=stateString,
-                postcode=postcodeString,
-                country="USA",
-                phone=phoneString,
-                opening_hours=hoursString,
-                website=response.urljoin(match.xpath(".//a/@href").extract_first()),
+                lat=store["latitude"],
+                lon=store["longitude"],
+                name=store["name"],
+                addr_full=", ".join(
+                    filter(
+                        None,
+                        [
+                            store["address_line_1"],
+                            store["address_line_2"],
+                            store["city"],
+                            store["state"],
+                            store["postal_code"],
+                            "United States",
+                        ],
+                    )
+                ),
+                city=store["city"],
+                street_address=", ".join(
+                    filter(None, [store["address_line_1"], store["address_line_2"]])
+                ),
+                state=store["state"],
+                postcode=store["postal_code"],
+                phone=store["phone"],
+                opening_hours=opening_hours,
+                ref=store["id"],
             )

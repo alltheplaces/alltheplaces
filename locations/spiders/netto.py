@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-import re
-
 import scrapy
 
 from locations.items import GeojsonPointItem
@@ -21,13 +19,24 @@ class NettoSpider(scrapy.Spider):
     name = "netto"
     item_attributes = {"brand": "Netto Marken-Discount", "brand_wikidata": "Q879858"}
     allowed_domains = ["netto-online.de"]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def start_requests(self):
         url = "https://www.netto-online.de/INTERSHOP/web/WFS/Plus-NettoDE-Site/de_DE/-/EUR/ViewNettoStoreFinder-GetStoreItems"
         yield scrapy.http.FormRequest(
             url=url,
             method="POST",
-            formdata={"n": "56.0", "e": "15.0", "w": "5.0", "s": "47.0"},
+            formdata={
+                "n": "56.0",
+                "e": "15.0",
+                "w": "5.0",
+                "s": "47.0",
+                "netto": "false",
+                "city": "false",
+                "service": "false",
+                "beverage": "false",
+                "nonfood": "false",
+            },
             callback=self.parse,
         )
 
@@ -71,19 +80,24 @@ class NettoSpider(scrapy.Spider):
         return opening_hours.as_opening_hours()
 
     def parse(self, response):
-        stores = response.json()
+        stores = response.json()["store_items"]
 
         for store in stores:
             properties = {
                 "ref": store["store_id"],
                 "name": store["store_name"],
-                "addr_full": store["street"],
+                "street_address": store["street"],
                 "city": store["city"],
                 "state": store["state"],
                 "postcode": store["post_code"],
                 "country": "DE",
                 "lat": store["coord_latitude"],
                 "lon": store["coord_longitude"],
+                "website": "https://www.netto-online.de/filialen/{city}/{street}/{id}".format(
+                    city=self.urlify(store["city"].lower()),
+                    street=self.urlify(store["street"]),
+                    id=store["store_id"],
+                ),
             }
 
             properties["opening_hours"] = self.parse_opening_hours(
@@ -91,3 +105,13 @@ class NettoSpider(scrapy.Spider):
             )
 
             yield GeojsonPointItem(**properties)
+
+    def urlify(self, param):
+        # They also do ß -> ss, but it's not vital
+        return (
+            param.lower()
+            .replace(" ", "-")
+            .replace(".", "")
+            .replace(",", "")
+            .replace("'", "")
+        )
