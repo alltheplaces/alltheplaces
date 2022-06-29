@@ -8,13 +8,14 @@ class McDonaldsUSSpider(scrapy.Spider):
     name = "mcdonalds_us"
     item_attributes = {"brand": "McDonald's", "brand_wikidata": "Q38076"}
     allowed_domains = ["www.mcdonalds.com"]
+    download_delay = 0.2
 
     def start_requests(self):
         # Experimentally found that 250 was max results
-        base_url = "https://www.mcdonalds.com/googleappsv2/geolocation?latitude={lat}&longitude={lng}&radius=100&maxResults=250&country=us&language=en-us"
+        base_url = "https://www.mcdonalds.com/googleappsv2/geolocation?latitude={lat}&longitude={lng}&radius=50&maxResults=250&country=us&language=en-us"
 
         with open(
-            "./locations/searchable_points/us_centroids_100mile_radius.csv"
+            "./locations/searchable_points/us_centroids_50mile_radius.csv"
         ) as points:
             next(points)
             for point in points:
