@@ -99,8 +99,8 @@ class McDonaldsCASpider(scrapy.Spider):
                     "country": store_info["addressLine4"],
                     "postcode": store_info["postcode"],
                     "phone": store_info.get("telephone"),
-                    "lon": store["geometry"]["coordinates"][1],
-                    "lat": store["geometry"]["coordinates"][0],
+                    "lon": store["geometry"]["coordinates"][0],
+                    "lat": store["geometry"]["coordinates"][1],
                 }
 
             hours = store_info.get("restauranthours")
