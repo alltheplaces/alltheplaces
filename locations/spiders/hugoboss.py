@@ -1,6 +1,7 @@
 import json
 import scrapy
 
+from locations.hours import OpeningHours
 from locations.items import GeojsonPointItem
 
 day_formats = {
@@ -29,30 +30,14 @@ class HugoBossSpider(scrapy.Spider):
         data = response.json()
         if "data" in data:
             for store in data["data"]:
-                clean_hours = ""
+                oh = OpeningHours()
                 if "store_hours" in store:
                     open_hours = json.loads(store["store_hours"])
                     for key, value in open_hours.items():
                         if isinstance(value[0], str):
-                            clean_hours = (
-                                clean_hours
-                                + day_formats[key]
-                                + " "
-                                + value[0]
-                                + "-"
-                                + value[1]
-                                + "; "
-                            )
+                            oh.add_range(day_formats[key], value[0], value[1])
                         else:
-                            clean_hours = (
-                                clean_hours
-                                + day_formats[key]
-                                + " "
-                                + value[0][0]
-                                + "-"
-                                + value[0][1]
-                                + "; "
-                            )
+                            oh.add_range(day_formats[key], value[0][0], value[0][1])
                 if "postal_code" in store:
                     postal_code = store["postal_code"]
                 else:
@@ -64,7 +49,7 @@ class HugoBossSpider(scrapy.Spider):
                 properties = {
                     "ref": store["id"],
                     "name": store["name"],
-                    "opening_hours": clean_hours,
+                    "opening_hours": oh.as_opening_hours(),
                     "website": "https://www.hugoboss.com/us/stores",
                     "addr_full": store.get("address1"),
                     "city": store.get("city"),
