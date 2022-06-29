@@ -12,15 +12,11 @@ class BaylorScottWhiteSpider(scrapy.Spider):
     }
     allowed_domains = ["phyndapi.bswapi.com"]
     download_delay = 1
-    base_url = (
-        "https://phyndapi.bswapi.com/V4/Places/GetLocations"
-        "?location=30.259317199999998,-97.7393817"
-        "&distance=100000"
-    )
+    base_url = "https://phyndapi.bswapi.com/V4/Places/GetLocations"
 
     def start_requests(self):
         yield scrapy.Request(
-            self.base_url + "&perPage=1",
+            self.base_url + "?perPage=1",
             callback=self.get_pages,
         )
 
@@ -31,7 +27,7 @@ class BaylorScottWhiteSpider(scrapy.Spider):
 
         while page_number * page_size < total_count:
             yield scrapy.Request(
-                self.base_url + f"&perPage={page_size}&pageNumber={page_number+1}"
+                self.base_url + f"?perPage={page_size}&pageNumber={page_number+1}"
             )
             page_number += 1
 
