@@ -33,9 +33,9 @@ class SocieteGeneraleSpider(SitemapSpider):
         for k, v in oh.items():
             # Don't add the last comma of the last item
             if k == list(oh.keys())[-1]:
-                string_oh += f"{k}: {v}"
+                string_oh += f"{k} {v}"
             else:
-                string_oh += f"{k}: {v}; "
+                string_oh += f"{k} {v}; "
 
         properties = {
             "lat": store["geo"]["latitude"],
