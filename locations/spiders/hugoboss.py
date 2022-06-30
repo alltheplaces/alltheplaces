@@ -19,7 +19,6 @@ class HugoBossSpider(scrapy.Spider):
     name = "hugoboss"
     item_attributes = {
         "brand": "Hugo Boss",
-        "website": "https://www.hugoboss.com/us/stores",
         "brand_wikidata": "Q491627",
     }
     allowed_domains = [
@@ -48,6 +47,7 @@ class HugoBossSpider(scrapy.Spider):
                     "opening_hours": oh.as_opening_hours(),
                     "street_address": store.get("address1"),
                     "city": store.get("city"),
+                    "website": f"https://www.hugoboss.com/us/storedetail?storeid={store.get('id')}",
                     "postcode": store.get("postal_code"),
                     "country": store.get("country_code"),
                     "lat": float(store.get("latitude")),
