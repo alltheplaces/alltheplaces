@@ -33,13 +33,18 @@ class SocieteGeneraleSpider(scrapy.Spider):
             op = d.get("opens")
             cl = d.get("closes")
             if day not in oh:
-                oh[day] = f"{op} - {cl}"
+                oh[day] = f"{op},{cl}"
             else:
-                oh[day] += f" | {op} - {cl}"
+                oh[day] += f",{op}-{cl}"
 
         string_oh = ""
         for k, v in oh.items():
-            string_oh += f"{k}: {v}, "
+            # Don't add the last comma of the last item
+            if k == list(oh.keys())[-1]:
+                string_oh += f"{k}: {v}"
+            else:
+                string_oh += f"{k}: {v}; "
+
         properties = {
             "lat": store["geo"]["latitude"],
             "lon": store["geo"]["longitude"],
