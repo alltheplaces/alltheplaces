@@ -44,6 +44,7 @@ jobs:
 
         export AWS_ACCESS_KEY_ID=$(echo -n "${AWS_KEY}" | base64 --decode)
         export AWS_SECRET_ACCESS_KEY=$(echo -n "${AWS_SEC}" | base64 --decode)
+        export AWS_REGION="us-east-1"
 
         SPIDERS=$(curl -sL https://api.github.com/repos/alltheplaces/alltheplaces/pulls/${{ github.event.number }}/files | jq -r '.[] | select(.status != "removed") | .filename')
 
