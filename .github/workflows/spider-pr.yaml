@@ -39,7 +39,6 @@ jobs:
     - name: Run spiders that changed
       shell: bash
       run: |
-        set -x
         PR_COMMENT_BODY="I ran the spiders in this pull request and got these results:\\n\\n|Spider|Results|Log|\\n|---|---|---|\\n"
 
         export AWS_ACCESS_KEY_ID=$(echo -n "${AWS_KEY}" | base64 --decode)
@@ -86,8 +85,7 @@ jobs:
                 FAILURE_REASON="timeout"
             fi
 
-            du ${LOGFILE}
-            aws --debug s3 cp ${LOGFILE} s3://${BUCKET}/ci/${GITHUB_RUN_ID}/${SPIDER_NAME}/log.txt
+            aws --only-show-errors s3 cp ${LOGFILE} s3://${BUCKET}/ci/${GITHUB_RUN_ID}/${SPIDER_NAME}/log.txt
             retval=$?
             if [ ! $retval -eq 0 ]; then
                 (>&2 echo "log copy to s3 failed with exit code ${retval}")
