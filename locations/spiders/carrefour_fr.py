@@ -74,13 +74,14 @@ class CarrefourFrSpider(scrapy.Spider):
         store_oh = store_json.get("opening_hours")
         usual_oh = store_oh.get("usual")
         for day_count in usual_oh if usual_oh else []:
-            dates = usual_oh.get(day_count)[0]
-            if dates["start"] != "":
-                opening_hours.add_range(
-                    self.day_range.get(int(day_count)),
-                    dates["start"],
-                    dates["end"],
-                )
+            if len(usual_oh.get(day_count)) >= 1:
+                dates = usual_oh.get(day_count)[0]
+                if dates["start"] != "":
+                    opening_hours.add_range(
+                        self.day_range.get(int(day_count)),
+                        dates["start"],
+                        dates["end"],
+                    )
         properties = {
             "name": f"Carrefour {store_json.get('user_properties').get('store_name')}",
             "ref": store_id,
