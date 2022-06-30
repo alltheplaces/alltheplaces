@@ -50,6 +50,7 @@ class HugoBossSpider(scrapy.Spider):
                     "website": f"https://www.hugoboss.com/us/storedetail?storeid={store.get('id')}",
                     "postcode": store.get("postal_code"),
                     "country": store.get("country_code"),
+                    "email": store.get("c_contactEmail"),
                     "lat": float(store.get("latitude")),
                     "lon": float(store.get("longitude")),
                     "phone": store.get("phone"),
