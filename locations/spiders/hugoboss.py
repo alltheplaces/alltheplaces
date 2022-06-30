@@ -41,7 +41,6 @@ class HugoBossSpider(scrapy.Spider):
                             oh.add_range(day_formats[key], value[0], value[1])
                         else:
                             oh.add_range(day_formats[key], value[0][0], value[0][1])
-                categories = store.get("c_categories")
                 properties = {
                     "ref": store["id"],
                     "name": store["name"],
@@ -57,9 +56,22 @@ class HugoBossSpider(scrapy.Spider):
                     "extras": {
                         "store_type": store["c_type"],
                         "email": store.get("c_contactEmail"),
-                        "clothes": ",".join(categories if categories else []),
                     },
                 }
+                if store.get("c_categories"):
+                    clothes = []
+                    for cat in store["c_categories"]:
+                        if cat == "womenswear":
+                            clothes.append("women")
+                            properties["extras"]["clothes:women"] = "yes"
+                        elif cat == "menswear":
+                            clothes.append("men")
+                            properties["extras"]["clothes:men"] = "yes"
+                        elif cat == "kidswear":
+                            clothes.append("children")
+                            properties["extras"]["clothes:children"] = "yes"
+
+                    properties["extras"]["clothes"] = ";".join(clothes)
 
                 yield GeojsonPointItem(**properties)
             if "next" in data:
