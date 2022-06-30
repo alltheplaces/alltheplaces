@@ -1,7 +1,6 @@
 import json
 import scrapy
 
-from locations.hours import OpeningHours
 from locations.items import GeojsonPointItem
 
 day_formats = {
@@ -17,7 +16,11 @@ day_formats = {
 
 class HugoBossSpider(scrapy.Spider):
     name = "hugoboss"
-    item_attributes = {"brand": "Hugo Boss"}
+    item_attributes = {
+        "brand": "Hugo Boss",
+        "website": "https://www.hugoboss.com/us/stores",
+        "brand_wikidata": "Q491627",
+    }
     allowed_domains = [
         "production-na01-hugoboss.demandware.net",
     ]
@@ -30,27 +33,49 @@ class HugoBossSpider(scrapy.Spider):
         data = response.json()
         if "data" in data:
             for store in data["data"]:
-                oh = OpeningHours()
+                clean_hours = ""
                 if "store_hours" in store:
                     open_hours = json.loads(store["store_hours"])
                     for key, value in open_hours.items():
                         if isinstance(value[0], str):
-                            oh.add_range(day_formats[key], value[0], value[1])
+                            clean_hours = (
+                                clean_hours
+                                + day_formats[key]
+                                + " "
+                                + value[0]
+                                + "-"
+                                + value[1]
+                                + "; "
+                            )
                         else:
-                            oh.add_range(day_formats[key], value[0][0], value[0][1])
-
+                            clean_hours = (
+                                clean_hours
+                                + day_formats[key]
+                                + " "
+                                + value[0][0]
+                                + "-"
+                                + value[0][1]
+                                + "; "
+                            )
+                if "postal_code" in store:
+                    postal_code = store["postal_code"]
+                else:
+                    postal_code = ""
+                if "phone" in store:
+                    phone = store["phone"]
+                else:
+                    phone = ""
                 properties = {
                     "ref": store["id"],
                     "name": store["name"],
-                    "opening_hours": oh.as_opening_hours(),
-                    "website": "https://www.hugoboss.com/us/stores",
-                    "addr_full": store.get("address1"),
+                    "opening_hours": clean_hours,
+                    "street_address": store.get("address1"),
                     "city": store.get("city"),
-                    "postcode": store.get("postal_code"),
+                    "postcode": postal_code,
                     "country": store.get("country_code"),
                     "lat": float(store.get("latitude")),
                     "lon": float(store.get("longitude")),
-                    "phone": store.get("phone"),
+                    "phone": phone,
                 }
 
                 yield GeojsonPointItem(**properties)
