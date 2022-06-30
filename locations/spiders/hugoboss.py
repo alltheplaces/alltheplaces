@@ -1,6 +1,7 @@
 import json
 import scrapy
 
+from locations.hours import OpeningHours
 from locations.items import GeojsonPointItem
 
 day_formats = {
@@ -33,49 +34,25 @@ class HugoBossSpider(scrapy.Spider):
         data = response.json()
         if "data" in data:
             for store in data["data"]:
-                clean_hours = ""
+                oh = OpeningHours()
                 if "store_hours" in store:
                     open_hours = json.loads(store["store_hours"])
                     for key, value in open_hours.items():
                         if isinstance(value[0], str):
-                            clean_hours = (
-                                clean_hours
-                                + day_formats[key]
-                                + " "
-                                + value[0]
-                                + "-"
-                                + value[1]
-                                + "; "
-                            )
+                            oh.add_range(day_formats[key], value[0], value[1])
                         else:
-                            clean_hours = (
-                                clean_hours
-                                + day_formats[key]
-                                + " "
-                                + value[0][0]
-                                + "-"
-                                + value[0][1]
-                                + "; "
-                            )
-                if "postal_code" in store:
-                    postal_code = store["postal_code"]
-                else:
-                    postal_code = ""
-                if "phone" in store:
-                    phone = store["phone"]
-                else:
-                    phone = ""
+                            oh.add_range(day_formats[key], value[0][0], value[0][1])
                 properties = {
                     "ref": store["id"],
                     "name": store["name"],
-                    "opening_hours": clean_hours,
+                    "opening_hours": oh.as_opening_hours(),
                     "street_address": store.get("address1"),
                     "city": store.get("city"),
-                    "postcode": postal_code,
+                    "postcode": store.get("postal_code"),
                     "country": store.get("country_code"),
                     "lat": float(store.get("latitude")),
                     "lon": float(store.get("longitude")),
-                    "phone": phone,
+                    "phone": store.get("phone"),
                 }
 
                 yield GeojsonPointItem(**properties)
