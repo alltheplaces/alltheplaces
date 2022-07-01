@@ -1,6 +1,7 @@
 import json
 import scrapy
 
+from locations.hours import OpeningHours
 from locations.items import GeojsonPointItem
 
 day_formats = {
@@ -16,67 +17,65 @@ day_formats = {
 
 class HugoBossSpider(scrapy.Spider):
     name = "hugoboss"
-    item_attributes = {"brand": "Hugo Boss"}
-    allowed_domains = ["production-web-hugo.demandware.net"]
+    item_attributes = {
+        "brand": "Hugo Boss",
+        "brand_wikidata": "Q491627",
+    }
+    allowed_domains = [
+        "production-na01-hugoboss.demandware.net",
+    ]
     download_delay = 0.5
     start_urls = (
-        "https://production-web-hugo.demandware.net/s/US/dw/shop/v16_9/stores?client_id=871c988f-3549-4d76-b200-8e33df5b45ba&latitude=37.09024&longitude=-95.71289100000001&count=200&maxDistance=100000000&distanceUnit=mi",
+        "https://production-na01-hugoboss.demandware.net/s/US/dw/shop/v20_10/stores?client_id=871c988f-3549-4d76-b200-8e33df5b45ba&latitude=36.439068689946765&longitude=-95.71289100000001&count=200&maxDistance=100000000&distanceUnit=mi&start=0",
     )
-    count = 0
 
     def parse(self, response):
         data = response.json()
         if "data" in data:
             for store in data["data"]:
-                clean_hours = ""
+                oh = OpeningHours()
                 if "store_hours" in store:
                     open_hours = json.loads(store["store_hours"])
                     for key, value in open_hours.items():
                         if isinstance(value[0], str):
-                            clean_hours = (
-                                clean_hours
-                                + day_formats[key]
-                                + " "
-                                + value[0]
-                                + "-"
-                                + value[1]
-                                + "; "
-                            )
+                            oh.add_range(day_formats[key], value[0], value[1])
                         else:
-                            clean_hours = (
-                                clean_hours
-                                + day_formats[key]
-                                + " "
-                                + value[0][0]
-                                + "-"
-                                + value[0][1]
-                                + "; "
-                            )
-                if "postal_code" in store:
-                    postal_code = store["postal_code"]
-                else:
-                    postal_code = ""
-                if "phone" in store:
-                    phone = store["phone"]
-                else:
-                    phone = ""
+                            oh.add_range(day_formats[key], value[0][0], value[0][1])
                 properties = {
                     "ref": store["id"],
                     "name": store["name"],
-                    "opening_hours": clean_hours,
-                    "website": "https://www.hugoboss.com/us/stores",
-                    "addr_full": store["address1"],
-                    "city": store["city"],
-                    "postcode": postal_code,
-                    "country": store["country_code"],
-                    "lat": float(store["latitude"]),
-                    "lon": float(store["longitude"]),
-                    "phone": phone,
+                    "opening_hours": oh.as_opening_hours(),
+                    "street_address": store.get("address1"),
+                    "city": store.get("city"),
+                    "website": f"https://www.hugoboss.com/us/storedetail?storeid={store.get('id')}",
+                    "postcode": store.get("postal_code"),
+                    "country": store.get("country_code"),
+                    "lat": float(store.get("latitude")),
+                    "lon": float(store.get("longitude")),
+                    "phone": store.get("phone"),
+                    "extras": {
+                        "store_type": store["c_type"],
+                        "email": store.get("c_contactEmail"),
+                    },
                 }
+                if store.get("c_categories"):
+                    clothes = []
+                    for cat in store["c_categories"]:
+                        if cat == "womenswear":
+                            clothes.append("women")
+                            properties["extras"]["clothes:women"] = "yes"
+                        elif cat == "menswear":
+                            clothes.append("men")
+                            properties["extras"]["clothes:men"] = "yes"
+                        elif cat == "kidswear":
+                            clothes.append("children")
+                            properties["extras"]["clothes:children"] = "yes"
+
+                    properties["extras"]["clothes"] = ";".join(clothes)
 
                 yield GeojsonPointItem(**properties)
-            self.count = self.count + len(data["data"])
-            yield scrapy.Request(
-                response.urljoin(self.start_urls[0] + "&start=" + str(self.count)),
-                callback=self.parse,
-            )
+            if "next" in data:
+                yield scrapy.Request(
+                    url=data["next"],
+                    callback=self.parse,
+                )
