@@ -13,6 +13,8 @@ class OpeningHours(object):
         if day not in DAYS:
             raise ValueError("day must be one of " + ", ".join(DAYS))
 
+        if open_time is None or close_time is None:
+            return
         if open_time.lower() == "closed":
             return
         if close_time.lower() == "closed":
