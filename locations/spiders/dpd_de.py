@@ -8,7 +8,6 @@ class DynamicParcelDistributionSpider(scrapy.Spider):
     start_urls = ['https://my.dpd.de/shopfinder.aspx']
 
     def parse(self, response):
-
         searchable_point_files = [
             "./locations/searchable_points/eu_centroids_20km_radius_country.csv",
         ]
@@ -42,13 +41,16 @@ class DynamicParcelDistributionSpider(scrapy.Spider):
                             "__EVENTTARGET": "ctl00$ContentPlaceHolder1$modShopFinder$btnShopSearch",
                         }
 
-                        yield FormRequest.from_response(response,
-                                                        formdata=formdata,
-                                                        headers=headers,
-                                                        callback=self.tab2,
-                                                        meta=result)
+                        rq = FormRequest.from_response(response,
+                                                       formdata=formdata,
+                                                       headers=headers,
+                                                       callback=self.shopsResults,
+                                                       meta=result)
+                        yield rq
 
-    def tab2(self, response):
+
+    def shopsResults(self, response):
+        result = response.meta
         body = response.css('body')
         shopList = body.css('div.ShopList')
         shop = shopList.css('a')
@@ -56,7 +58,7 @@ class DynamicParcelDistributionSpider(scrapy.Spider):
         for nr in range(lengthOfShops):
             item = GeojsonPointItem()
             street = shop.css('span#ContentPlaceHolder1_modShopFinder_repShopList_labShopName_' + str(nr) + '::text').extract()[0]
-            name = shop.css('span#ContentPlaceHolder1_modShopFinder_repShopList_labShopName_' + str(nr) + '::text').extract()[0]
+            name = shop.css('span#ContentPlaceHolder1_modShopFinder_repShopList_labShopStreet_' + str(nr) + '::text').extract()[0]
             postalAndCity = shop.css('span#ContentPlaceHolder1_modShopFinder_repShopList_labShopCity_' + str(nr) + '::text').extract()[0].split()
             lat = shop.css('input#ContentPlaceHolder1_modShopFinder_repShopList_latitude_' + str(nr) + '::attr(value)').extract()[0]
             lng = shop.css('input#ContentPlaceHolder1_modShopFinder_repShopList_longitude_' + str(nr) + '::attr(value)').extract()[0]
@@ -93,6 +95,7 @@ class DynamicParcelDistributionSpider(scrapy.Spider):
                 "ctl00$ContentPlaceHolder1$modShopFinder$hidShopFindMoreShopsBTN": "weitere+Paketshops",
                 "ctl00$ContentPlaceHolder1$modShopFinder$hidDistanceUnit": "Entfernung+!VALUE!+km",
                 "__EVENTTARGET": "ctl00$ContentPlaceHolder1$modShopFinder$repShopList$ctl0" + str(nr) + "$btnSelectShop",
+                "ctl00$ContentPlaceHolder1$modShopFinder$txtShopSearch": result['latitude'] + "," + result['longitude']
 
             }
 
@@ -101,7 +104,9 @@ class DynamicParcelDistributionSpider(scrapy.Spider):
                                            headers=headers,
                                            callback=self.openingHoursParse,
                                            meta=item)
+
             yield rq
+
 
     def openingHoursParse(self, response):
         body = response.css('body')
