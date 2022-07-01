@@ -1,4 +1,3 @@
-import re
 import scrapy
 
 from locations.items import GeojsonPointItem
@@ -8,14 +7,33 @@ class LidlNISpider(scrapy.Spider):
     name = "lidl_ni"
     item_attributes = {"brand": "Lidl", "brand_wikidata": "Q151954"}
     allowed_domains = ["virtualearth.net"]
-    start_urls = [
-        "https://spatial.virtualearth.net/REST/v1/data/91bdba818b3c4f5e8b109f223ac4a9f0/Filialdaten-NIE/Filialdaten-NIE?&$filter=Adresstyp%20eq%201&$top=250&$format=json&$skip=0&key=Asz4OJrOqSHy-1xEWYGLbFhH4TnVP0LL1xgj0YBkewA5ZrtHRB2nlpfqzm1lqKPK"
-    ]
-    download_delay = 1
+    base_url = (
+        "https://spatial.virtualearth.net/REST/v1/data/91bdba818b3c4f5e8b109f223ac4a9f0/Filialdaten-NIE/Filialdaten-NIE"
+        "?key=Asz4OJrOqSHy-1xEWYGLbFhH4TnVP0LL1xgj0YBkewA5ZrtHRB2nlpfqzm1lqKPK"
+        "&$filter=Adresstyp Eq 1"
+        "&$select=EntityID,ShownStoreName,AddressLine,Locality,PostalCode,CountryRegion,CityDistrict,Latitude,"
+        "Longitude,INFOICON17"
+    )
+
+    def start_requests(self):
+        yield scrapy.Request(
+            self.base_url + "&$inlinecount=allpages" + "&$format=json",
+            callback=self.get_pages,
+        )
+
+    def get_pages(self, response):
+        total_count = int(response.json()["d"]["__count"])
+        offset = 0
+        page_size = 250
+
+        while offset < total_count:
+            yield scrapy.Request(
+                self.base_url + f"&$top={page_size}&$skip={offset}&$format=json"
+            )
+            offset += page_size
 
     def parse(self, response):
-        data = response.json()
-        stores = data["d"]["results"]
+        stores = response.json()["d"]["results"]
 
         for store in stores:
             properties = {
@@ -30,6 +48,7 @@ class LidlNISpider(scrapy.Spider):
                         None,
                         (
                             store["AddressLine"],
+                            store["CityDistrict"],
                             store["Locality"],
                             store["PostalCode"],
                             "United Kingdom",
@@ -46,10 +65,3 @@ class LidlNISpider(scrapy.Spider):
                 properties["extras"]["toilets:access"] = "customers"
 
             yield GeojsonPointItem(**properties)
-
-        if stores:
-            i = int(re.search(r"\$skip=(\d+)&", response.url).groups()[0])
-            url_parts = response.url.split("$skip={}".format(i))
-            i += 250
-            url = "$skip={}".format(i).join(url_parts)
-            yield scrapy.Request(url=url)
