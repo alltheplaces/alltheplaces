@@ -2,6 +2,7 @@ import scrapy
 from scrapy import FormRequest
 from locations.items import GeojsonPointItem
 import csv
+import unicodedata
 
 class DynamicParcelDistributionSpider(scrapy.Spider):
     name = 'dpd_de'
@@ -57,8 +58,12 @@ class DynamicParcelDistributionSpider(scrapy.Spider):
         lengthOfShops = len(shop) - 1
         for nr in range(lengthOfShops):
             item = GeojsonPointItem()
-            street = shop.css('span#ContentPlaceHolder1_modShopFinder_repShopList_labShopName_' + str(nr) + '::text').extract()[0]
-            name = shop.css('span#ContentPlaceHolder1_modShopFinder_repShopList_labShopStreet_' + str(nr) + '::text').extract()[0]
+            name = shop.css('span#ContentPlaceHolder1_modShopFinder_repShopList_labShopName_' + str(nr) + '::text').extract()[0]
+            streetElement = shop.css('span#ContentPlaceHolder1_modShopFinder_repShopList_labShopStreet_' + str(nr) + '::text').extract()[0]
+            streets = streetElement.split('\xa0')
+            street = streets[0]
+            housenumber = streets[1]
+
             postalAndCity = shop.css('span#ContentPlaceHolder1_modShopFinder_repShopList_labShopCity_' + str(nr) + '::text').extract()[0].split()
             lat = shop.css('input#ContentPlaceHolder1_modShopFinder_repShopList_latitude_' + str(nr) + '::attr(value)').extract()[0]
             lng = shop.css('input#ContentPlaceHolder1_modShopFinder_repShopList_longitude_' + str(nr) + '::attr(value)').extract()[0]
@@ -71,6 +76,7 @@ class DynamicParcelDistributionSpider(scrapy.Spider):
             item['city'] = city
             item['postcode'] = plz
             item['ref'] = lat + lng
+            item['housenumber'] = housenumber
 
             headers = {
                 "Content-Type": "application/x-www-form-urlencoded"
