@@ -100,5 +100,8 @@ class CarrefourFrSpider(scrapy.Spider):
                 else "",
             },
         }
+        if "CARREFOUR EXPRESS" in properties["extras"]["store_type"]:
+            properties["brand"] = "CARREFOUR EXPRESS"
+            properties["brand_wikidata"] = "Q2940190"
 
         yield GeojsonPointItem(**properties)
