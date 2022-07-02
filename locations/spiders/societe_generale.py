@@ -2,6 +2,8 @@
 import json
 
 from scrapy.spiders import SitemapSpider
+
+from locations.hours import OpeningHours
 from locations.items import GeojsonPointItem
 
 
@@ -19,23 +21,13 @@ class SocieteGeneraleSpider(SitemapSpider):
             response.xpath('//script[@type="application/ld+json"]/text()').get()
         )
         address = store.get("address")
-        oh = {}
+        oh = OpeningHours()
         for d in store["openingHoursSpecification"]:
             day = d.get("dayOfWeek")[18:20]
             op = d.get("opens")
             cl = d.get("closes")
-            if day not in oh:
-                oh[day] = f"{op},{cl}"
-            else:
-                oh[day] += f",{op}-{cl}"
 
-        string_oh = ""
-        for k, v in oh.items():
-            # Don't add the last comma of the last item
-            if k == list(oh.keys())[-1]:
-                string_oh += f"{k} {v}"
-            else:
-                string_oh += f"{k} {v}; "
+            oh.add_range(day, op, cl)
 
         properties = {
             "lat": store["geo"]["latitude"],
@@ -46,8 +38,9 @@ class SocieteGeneraleSpider(SitemapSpider):
             "postcode": address.get("postalCode"),
             "country": address.get("addressCountry"),
             "website": response.url,
-            "ref": store["name"],
-            "opening_hours": string_oh,
+            "ref": store["@id"],
+            "opening_hours": oh.as_opening_hours(),
+            "phone": store.get("telephone").replace(".", " "),
         }
 
         yield GeojsonPointItem(**properties)

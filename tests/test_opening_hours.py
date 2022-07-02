@@ -68,3 +68,10 @@ def test_twentyfour_seven():
 def test_no_opening_hours():
     o = OpeningHours()
     assert o.as_opening_hours() == ""
+
+
+def test_multiple_times():
+    o = OpeningHours()
+    o.add_range("Mo", "08:00", "12:00")
+    o.add_range("Mo", "13:00", "17:30")
+    assert o.as_opening_hours() == "Mo 08:00-12:00,13:00-17:30"
