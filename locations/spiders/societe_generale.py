@@ -1,48 +1,46 @@
 # -*- coding: utf-8 -*-
+import json
 
-import scrapy
+from scrapy.spiders import SitemapSpider
 
+from locations.hours import OpeningHours
 from locations.items import GeojsonPointItem
 
 
-class SocieteGeneraleSpider(scrapy.Spider):
+class SocieteGeneraleSpider(SitemapSpider):
     name = "societe_generale"
     item_attributes = {"brand": "Societe Generale", "brand_wikidata": "Q270363"}
-    allowed_domains = ["societegenerale.com"]
-    start_urls = [
-        "https://www.societegenerale.com/en/about-us/our-businesses/our-locations",
+    allowed_domains = ["societegenerale.com", "agences.societegenerale.fr"]
+    sitemap_urls = [
+        "https://agences.societegenerale.fr/banque-assurance/sitemap_agence_pois.xml",
     ]
 
     def parse(self, response):
-        template = "https://www.societegenerale.com/implentation/map-filter?lang=en-soge&country={country}&job=allmet&entity=allent"
+        # Get all script tags with type application/ld+json
+        store = json.loads(
+            response.xpath('//script[@type="application/ld+json"]/text()').get()
+        )
+        address = store.get("address")
+        oh = OpeningHours()
+        for d in store["openingHoursSpecification"]:
+            day = d.get("dayOfWeek")[18:20]
+            op = d.get("opens")
+            cl = d.get("closes")
 
-        countries = response.xpath(
-            '//select[@id="country"]/optgroup/option/text()'
-        ).extract()
+            oh.add_range(day, op, cl)
 
-        for country in countries:
-            if country == "All countries":
-                pass
-            else:
-                url = template.format(country=country)
-                yield scrapy.Request(url, callback=self.parse_location)
+        properties = {
+            "lat": store["geo"]["latitude"],
+            "lon": store["geo"]["longitude"],
+            "name": store["name"],
+            "street_address": address.get("streetAddress"),
+            "city": store["address"].get("city"),
+            "postcode": address.get("postalCode"),
+            "country": address.get("addressCountry"),
+            "website": response.url,
+            "ref": store["@id"],
+            "opening_hours": oh.as_opening_hours(),
+            "phone": store.get("telephone").replace(".", " "),
+        }
 
-    def parse_location(self, response):
-        data = response.json()
-        stores = data["markers"]["places"]
-        for store in stores:
-            properties = {
-                "ref": "{}_{}".format(
-                    store["name"].lower().replace(" ", "_"), store["id"]
-                ),
-                "name": store["name"],
-                "addr_full": store["address"],
-                "city": store["city"],
-                "country": store["country"],
-                "phone": store["phone"],
-                "lat": float(store["latitude"]),
-                "lon": float(store["longitude"]),
-                "website": store.get("url"),
-            }
-
-            yield GeojsonPointItem(**properties)
+        yield GeojsonPointItem(**properties)

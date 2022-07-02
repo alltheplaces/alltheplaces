@@ -33,7 +33,7 @@ class OpeningHours(object):
         this_day_group = None
 
         for day in DAYS:
-            hours = " ".join(
+            hours = ",".join(
                 "%s-%s"
                 % (
                     time.strftime("%H:%M", h[0]),
