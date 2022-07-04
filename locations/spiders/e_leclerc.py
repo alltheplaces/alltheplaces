@@ -44,6 +44,7 @@ class ELeclercSpider(scrapy.Spider):
             address = store_properties.get("address")
             user_properties = store_properties.get("user_properties")
             coords = store.get("geometry").get("coordinates")
+            email = contact.get("email")
             opening_hours = OpeningHours()
             usual_oh = store_properties.get("opening_hours").get("usual")
             for day_count in usual_oh if usual_oh else []:
@@ -72,7 +73,7 @@ class ELeclercSpider(scrapy.Spider):
                     "store_type": user_properties.get("commercialActivity").get("label")
                     if user_properties.get("commercialActivity")
                     else "",
-                    "email": contact.get("email"),
+                    "email": email if email is not None else "",
                 },
             }
 
