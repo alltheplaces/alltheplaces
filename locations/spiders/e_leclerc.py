@@ -72,6 +72,7 @@ class ELeclercSpider(scrapy.Spider):
                     "store_type": user_properties.get("commercialActivity").get("label")
                     if user_properties.get("commercialActivity")
                     else "",
+                    "email": contact.get("email"),
                 },
             }
 
