@@ -23,8 +23,7 @@ class SCSpider(scrapy.Spider):
             properties = {
                 "ref": i.get("name"),
                 "name": i.get("name"),
-                "addr_full": i.get("address") + i.get("address2"),
-                "street_address": i.get("address"),
+                "street_address": i.get("address") + i.get("address2"),
                 "city": i.get("city"),
                 "state": i.get("state"),
                 "postcode": i.get("postal"),
