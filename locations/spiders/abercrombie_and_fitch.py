@@ -12,8 +12,11 @@ class AbercrombieAndFitchSpider(scrapy.Spider):
     item_attributes = {"brand": "Abercrombie and Fitch"}
     allowed_domains = ["abercrombie.com"]
     # Website is blocking scrapers so I had to change the User Agent to get around this
+    headers = {
+        "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36",
+    }
     custom_settings = {
-        "USER_AGENT": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36"
+        "ROBOTSTXT_OBEY": False,
     }
 
     def start_requests(self):
@@ -39,11 +42,13 @@ class AbercrombieAndFitchSpider(scrapy.Spider):
             "GB",
         ]
 
-        template = "https://www.abercrombie.com/api/ecomm/a-ca/storelocator/search?country={country}"
-
         for country in countries:
-            url = template.format(country=country)
-            yield scrapy.Request(url, callback=self.parse)
+            yield scrapy.Request(
+                url=f"https://www.abercrombie.com/api/ecomm/a-ca/storelocator/search?country={country}",
+                method="GET",
+                callback=self.parse,
+                headers=self.headers,
+            )
 
     def parse(self, response):
         data = response.json()
@@ -61,7 +66,7 @@ class AbercrombieAndFitchSpider(scrapy.Spider):
                 "lat": row["latitude"],
                 "lon": row["longitude"],
                 "phone": row["telephone"],
-                "addr_full": row["addressLine"][0],
+                "street_address": row["addressLine"][0],
                 "postcode": row["postalCode"],
                 "brand": brandValue,
             }
