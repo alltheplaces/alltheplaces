@@ -42,8 +42,6 @@ class AbercrombieAndFitchSpider(scrapy.Spider):
             "GB",
         ]
 
-        # template = "https://www.abercrombie.com/api/ecomm/a-ca/storelocator/search?country={country}"
-
         for country in countries:
             yield scrapy.Request(
                 url=f"https://www.abercrombie.com/api/ecomm/a-ca/storelocator/search?country={country}",
