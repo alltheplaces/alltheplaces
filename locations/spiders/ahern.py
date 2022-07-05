@@ -12,24 +12,25 @@ class SCSpider(scrapy.Spider):
     name = "ahern"
     item_attributes = {"brand": "Ahern Rentals"}
     allowed_domains = ["ahern.com"]
-    start_urls = ("https://www.ahern.com/assets/js/storeLocator/data/locations.json",)
+    start_urls = (
+        "https://www.ahern.com/themes/theaherns/js/plugins/storeLocator/data/locations.json?formattedAddress=&boundsNorthEast=&boundsSouthWest=",
+    )
 
     def parse(self, response):
-        data = json.loads(json.dumps(response.json()))
+        data = response.json()
 
         for i in data:
-
             properties = {
-                "ref": i["id"],
-                "name": i["name"],
-                "addr_full": i["address"] + i["address2"],
-                "city": i["city"],
-                "state": i["state"],
-                "postcode": i["postal"],
+                "ref": i.get("name"),
+                "name": i.get("name"),
+                "street_address": i.get("address") + i.get("address2"),
+                "city": i.get("city"),
+                "state": i.get("state"),
+                "postcode": i.get("postal"),
                 "country": "US",
-                "phone": i["phone"],
-                "lat": float(i["lat"]),
-                "lon": float(i["lng"]),
+                "phone": i.get("phone"),
+                "lat": i.get("lat"),
+                "lon": i.get("lng"),
             }
 
             yield GeojsonPointItem(**properties)
