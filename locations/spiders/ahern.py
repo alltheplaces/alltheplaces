@@ -17,21 +17,21 @@ class SCSpider(scrapy.Spider):
     )
 
     def parse(self, response):
-        data = json.loads(json.dumps(response.json()))
+        data = response.json()
 
         for i in data:
-
             properties = {
                 "ref": i.get("name"),
                 "name": i.get("name"),
                 "addr_full": i.get("address") + i.get("address2"),
+                "street_address": i.get("address"),
                 "city": i.get("city"),
                 "state": i.get("state"),
                 "postcode": i.get("postal"),
                 "country": "US",
                 "phone": i.get("phone"),
-                "lat": float(i.get("lat")),
-                "lon": float(i.get("lng")),
+                "lat": i.get("lat"),
+                "lon": i.get("lng"),
             }
 
             yield GeojsonPointItem(**properties)
