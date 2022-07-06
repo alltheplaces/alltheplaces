@@ -26,14 +26,13 @@ class LowesSpider(scrapy.Spider):
     download_delay = 0.1
     custom_settings = {
         "ROBOTSTXT_OBEY": False,
-        "user-agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36 RuxitSynthetic/1.0 v2946028852165593646 t2919217341348717815",
+        "USER_AGENT": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36 RuxitSynthetic/1.0 v2946028852165593646 t2919217341348717815",
     }
 
     def start_requests(self):
         yield scrapy.Request(
             url="https://www.lowes.com/sitemap/store0.xml",
             callback=self.parse,
-            headers=self.custom_settings,
         )
 
     def parse_hours(self, store_hours):
@@ -102,5 +101,5 @@ class LowesSpider(scrapy.Spider):
 
         for url in urls:
             yield scrapy.Request(
-                url, callback=self.parse_store, headers=self.custom_settings
+                url, callback=self.parse_store
             )
