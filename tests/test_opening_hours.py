@@ -116,6 +116,47 @@ def test_ld_parse():
     assert o.as_opening_hours() == "Mo-Fr 09:00-11:00; Sa 12:00-14:00"
 
 
+def test_ld_parse_openingHours():
+    o = OpeningHours()
+    o.from_linked_data(
+        json.loads(
+            """
+            {
+                "@context": "https://schema.org",
+                "@type": "Pharmacy",
+                "name": "Philippa's Pharmacy",
+                "description": "A superb collection of fine pharmaceuticals for your beauty and healthcare convenience, a department of Delia's Drugstore.",
+                "openingHours": "Mo,Tu,We,Th 09:00-12:00",
+                "telephone": "+18005551234"
+            }
+            """
+        )
+    )
+    assert o.as_opening_hours() == "Mo-Th 09:00-12:00"
+
+
+def test_ld_parse_openingHours_array():
+    o = OpeningHours()
+    o.from_linked_data(
+        json.loads(
+            """
+            {
+                "@context": "https://schema.org",
+                "@type": ["TouristAttraction", "AmusementPark"],
+                "name": "Disneyland Paris",
+                "description": "It's an amusement park in Marne-la-Vallée, near Paris, in France and is the most visited theme park in all of France and Europe.",
+                "openingHours":["Mo-Fr 10:00-19:00", "Sa 10:00-22:00", "Su 10:00-21:00"],
+                "isAccessibleForFree": false,
+                "currenciesAccepted": "EUR",
+                "paymentAccepted":"Cash, Credit Card",
+                "url":"http://www.disneylandparis.it/"
+            }
+            """
+        )
+    )
+    assert o.as_opening_hours() == "Mo-Fr 10:00-19:00; Sa 10:00-22:00; Su 10:00-21:00"
+
+
 def test_ld_parse_time_format():
     o = OpeningHours()
     o.from_linked_data(

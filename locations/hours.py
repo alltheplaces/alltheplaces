@@ -104,3 +104,22 @@ class OpeningHours(object):
                         close_time=rule["closes"],
                         time_format=time_format,
                     )
+        elif linked_data.get("openingHours"):
+            rules = []
+            if not isinstance(linked_data["openingHours"], list):
+                rules.append(linked_data["openingHours"])
+            else:
+                rules = linked_data["openingHours"]
+
+            for rule in rules:
+                days, times = rule.split(" ")
+
+                start_time, end_time = times.split("-")
+
+                if "-" in days:
+                    start_day, end_day = days.split("-")
+                    for i in range(DAYS.index(start_day), DAYS.index(end_day) + 1):
+                        self.add_range(DAYS[i], start_time, end_time, time_format)
+                else:
+                    for day in days.split(","):
+                        self.add_range(day.strip(), start_time, end_time, time_format)
