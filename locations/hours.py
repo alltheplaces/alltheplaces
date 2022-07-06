@@ -96,7 +96,6 @@ class OpeningHours(object):
                         .replace("schema.org/", "")[0:2]
                         .title()
                     )
-                    print(day)
 
                     self.add_range(
                         day=day,
