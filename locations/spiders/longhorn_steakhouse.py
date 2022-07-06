@@ -16,9 +16,10 @@ class LongHornSteakhouseSpider(scrapy.Spider):
         "https://www.longhornsteakhouse.com/locations-sitemap.xml",
     ]
     custom_settings = {
-        "USER_AGENT": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.86 Safari/537.36",
+        "ROBOTSTXT_OBEY": False,
+        "user-agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36 RuxitSynthetic/1.0 v2946028852165593646 t2919217341348717815",
     }
-    download_delay = 1
+    download_delay = 0.3
 
     def parse_hours(self, hours):
         opening_hours = OpeningHours()
