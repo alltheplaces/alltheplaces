@@ -7,20 +7,9 @@ from locations.hours import OpeningHours
 from locations.items import GeojsonPointItem
 
 
-day_references = {
-    "monday": "Mo",
-    "tuesday": "Tu",
-    "wednesday": "We",
-    "thursday": "Th",
-    "friday": "Fr",
-    "saturday": "Sa",
-    "sunday": "Su",
-}
-
-
 class NikeSpider(scrapy.Spider):
     name = "nike"
-    item_attributes = {"brand": "Nike"}
+    item_attributes = {"brand": "Nike", "brand_wikidata": "Q483915"}
     allowed_domains = ["storeviews-cdn.risedomain-prod.nikecloud.com"]
     download_delay = 0.3
 
@@ -80,9 +69,7 @@ class NikeSpider(scrapy.Spider):
                             split_closing_time[0] + ":" + split_closing_time[1]
                         )
 
-                    opening_hours.add_range(
-                        day_references.get(day), opening, closing_time
-                    )
+                    opening_hours.add_range(day[0:2].title(), opening, closing_time)
 
             properties = {
                 "name": store.get("name"),

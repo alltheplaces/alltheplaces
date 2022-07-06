@@ -9,7 +9,7 @@ from locations.hours import OpeningHours
 
 class AbercrombieAndFitchSpider(scrapy.Spider):
     name = "abercrombie_and_fitch"
-    item_attributes = {"brand": "Abercrombie and Fitch"}
+    item_attributes = {"brand": "Abercrombie & Fitch", "brand_wikidata": "Q319344"}
     allowed_domains = ["abercrombie.com"]
     # Website is blocking scrapers so I had to change the User Agent to get around this
     headers = {
@@ -54,9 +54,6 @@ class AbercrombieAndFitchSpider(scrapy.Spider):
         data = response.json()
 
         for row in data["physicalStores"]:
-            for brand in row["physicalStoreAttribute"]:
-                if brand["name"] == "Brand":
-                    brandValue = brand["value"]
             properties = {
                 "ref": row["storeNumber"],
                 "name": row["name"],
@@ -68,7 +65,15 @@ class AbercrombieAndFitchSpider(scrapy.Spider):
                 "phone": row["telephone"],
                 "street_address": row["addressLine"][0],
                 "postcode": row["postalCode"],
-                "brand": brandValue,
             }
+
+            for brand in row["physicalStoreAttribute"]:
+                if brand["name"] == "Brand":
+                    if brand["value"] == "ACF":
+                        properties["brand"] = "Abercrombie & Fitch"
+                        properties["brand_wikidata"] = "Q319344"
+                    elif brand["value"] == "KID":
+                        properties["brand"] = "Abercrombie Kids"
+                        properties["brand_wikidata"] = "Q429856"
 
             yield GeojsonPointItem(**properties)
