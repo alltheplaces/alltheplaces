@@ -6,39 +6,43 @@ from locations.items import GeojsonPointItem
 class NikeSpider(scrapy.Spider):
     name = "nike"
     item_attributes = {"brand": "Nike"}
-    allowed_domains = ["nike.bricksoftware.com"]
+    allowed_domains = ["storeviews-cdn.risedomain-prod.nikecloud.com"]
     download_delay = 0.3
 
     def start_requests(self):
-        url = "https://nike.brickworksoftware.com/api/v3/stores.json"
+        url = "https://storeviews-cdn.risedomain-prod.nikecloud.com/store-locations-static.json"
 
         yield scrapy.Request(url=url, callback=self.parse)
 
     def parse(self, response):
-        data = response.json()
-        stores = data["stores"]
+        store = response.json()
+        all_stores = store["stores"]
 
-        for store in stores:
-            addr_1 = store["address_1"]
-            addr_2 = store["address_2"]
-            addr_3 = store["address_3"]
+        for store in all_stores:
+            store = all_stores.get(store)
+            addresses = store.get("address")
+            coords = store.get("coordinates")
+
+            addr_1 = addresses.get("address_1")
+            addr_2 = addresses.get("address_2")
+            addr_3 = addresses.get("address_3")
 
             properties = {
-                "name": store["name"],
-                "ref": store["id"],
+                "name": store.get("name"),
+                "ref": store.get("id"),
                 "addr_full": re.sub(
                     " +", " ", " ".join(filter(None, [addr_1, addr_2, addr_3])).strip()
                 ),
-                "city": store["city"],
-                "state": store["state"],
-                "postcode": store["postal_code"],
-                "country": store["country_code"],
-                "phone": store.get("phone_number"),
+                "city": addresses.get("city"),
+                "state": addresses.get("state"),
+                "postcode": store.get("postalCode"),
+                "country": addresses.get("country"),
+                "phone": store.get("phone"),
                 "website": response.url,
-                "lat": float(store["latitude"]),
-                "lon": float(store["longitude"]),
+                "lat": coords.get("latitude"),
+                "lon": coords.get("longitude"),
                 "extras": {
-                    "store_type": store["type"],
+                    "store_type": store.get("facilityType"),
                 },
             }
 
