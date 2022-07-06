@@ -1,3 +1,4 @@
+import logging
 from collections import defaultdict
 import time
 
@@ -71,3 +72,53 @@ class OpeningHours(object):
             opening_hours = opening_hours[:-2]
 
         return opening_hours
+
+    def from_linked_data(self, linked_data, time_format="%H:%M"):
+        if linked_data.get("openingHoursSpecification"):
+            for rule in linked_data["openingHoursSpecification"]:
+                if (
+                    not rule.get("dayOfWeek")
+                    or not rule.get("opens")
+                    or not rule.get("closes")
+                ):
+                    logging.warning("Skipping openingHoursSpecification rule")
+                    continue
+
+                days = []
+                if not isinstance(rule["dayOfWeek"], list):
+                    days.append(rule["dayOfWeek"])
+                else:
+                    days = rule["dayOfWeek"]
+                for day in days:
+                    day = (
+                        day.replace("https://", "")
+                        .replace("http://", "")
+                        .replace("schema.org/", "")[0:2]
+                        .title()
+                    )
+
+                    self.add_range(
+                        day=day,
+                        open_time=rule["opens"],
+                        close_time=rule["closes"],
+                        time_format=time_format,
+                    )
+        elif linked_data.get("openingHours"):
+            rules = []
+            if not isinstance(linked_data["openingHours"], list):
+                rules.append(linked_data["openingHours"])
+            else:
+                rules = linked_data["openingHours"]
+
+            for rule in rules:
+                days, times = rule.split(" ")
+
+                start_time, end_time = times.split("-")
+
+                if "-" in days:
+                    start_day, end_day = days.split("-")
+                    for i in range(DAYS.index(start_day), DAYS.index(end_day) + 1):
+                        self.add_range(DAYS[i], start_time, end_time, time_format)
+                else:
+                    for day in days.split(","):
+                        self.add_range(day.strip(), start_time, end_time, time_format)
