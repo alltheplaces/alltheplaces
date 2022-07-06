@@ -1,6 +1,22 @@
+import datetime
+import decimal
+
 import scrapy
 import re
+
+from locations.hours import OpeningHours
 from locations.items import GeojsonPointItem
+
+
+day_references = {
+    "monday": "Mo",
+    "tuesday": "Tu",
+    "wednesday": "We",
+    "thursday": "Th",
+    "friday": "Fr",
+    "saturday": "Sa",
+    "sunday": "Su",
+}
 
 
 class NikeSpider(scrapy.Spider):
@@ -26,6 +42,48 @@ class NikeSpider(scrapy.Spider):
             addr_1 = addresses.get("address_1")
             addr_2 = addresses.get("address_2")
             addr_3 = addresses.get("address_3")
+            days = (
+                store.get("operationalDetails")
+                .get("hoursOfOperation")
+                .get("regularHours")
+            )
+            opening_hours = OpeningHours()
+            for day in days:
+                if len(days.get(day)) > 0:
+
+                    oh = days.get(day)[0]
+                    opening = oh.get("startTime")
+                    closing = oh.get("duration")
+
+                    closing_h = (
+                        closing.split("H")[0].replace("PT", "")
+                        if "H" in closing
+                        else "0"
+                    )
+                    closing_m = (
+                        closing[len(closing) - 3 :].replace("M", "")
+                        if "M" in closing
+                        else "0"
+                    )
+
+                    start = opening.split(":")
+                    closing_time = str(
+                        datetime.timedelta(hours=int(start[0]), minutes=int(start[1]))
+                        + datetime.timedelta(
+                            hours=int(closing_h), minutes=int(closing_m)
+                        )
+                    )
+                    if "day" in closing_time:
+                        closing_time = "00:00"
+                    else:
+                        split_closing_time = closing_time.split(":")
+                        closing_time = "".join(
+                            split_closing_time[0] + ":" + split_closing_time[1]
+                        )
+
+                    opening_hours.add_range(
+                        day_references.get(day), opening, closing_time
+                    )
 
             properties = {
                 "name": store.get("name"),
@@ -39,6 +97,7 @@ class NikeSpider(scrapy.Spider):
                 "country": addresses.get("country"),
                 "phone": store.get("phone"),
                 "website": response.url,
+                "opening_hours": opening_hours.as_opening_hours(),
                 "lat": coords.get("latitude"),
                 "lon": coords.get("longitude"),
                 "extras": {
