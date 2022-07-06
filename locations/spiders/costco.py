@@ -30,7 +30,7 @@ class CostcoSpider(scrapy.Spider):
         "USER_AGENT": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36",
     }
 
-    download_delay = 0.5
+    download_delay = 0.6
 
     def parse(self, response):
         url = "https://www.costco.com/AjaxWarehouseBrowseLookupView?"
@@ -121,7 +121,11 @@ class CostcoSpider(scrapy.Spider):
         return re.sub("[\r\n\t]", "", text).strip()
 
     def parse_ajax(self, response):
-        body = json.loads(response.text)
+        # If that's the case we are getting rate limited. (Even if no features are returned, it's supposed to return "[True]")
+        if len(response.text) == 0:
+            return
+
+        body = response.json()
 
         for store in body[1:]:
             if store["distance"] < 110:
