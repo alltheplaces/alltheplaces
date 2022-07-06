@@ -1,5 +1,4 @@
 import datetime
-import decimal
 
 import scrapy
 import re
