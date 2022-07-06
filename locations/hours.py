@@ -1,3 +1,4 @@
+import logging
 from collections import defaultdict
 import time
 
@@ -71,3 +72,35 @@ class OpeningHours(object):
             opening_hours = opening_hours[:-2]
 
         return opening_hours
+
+    def from_linked_data(self, linked_data, time_format="%H:%M"):
+        if linked_data.get("openingHoursSpecification"):
+            for rule in linked_data["openingHoursSpecification"]:
+                if (
+                    not rule.get("dayOfWeek")
+                    or not rule.get("opens")
+                    or not rule.get("closes")
+                ):
+                    logging.warning("Skipping openingHoursSpecification rule")
+                    continue
+
+                days = []
+                if not isinstance(rule["dayOfWeek"], list):
+                    days.append(rule["dayOfWeek"])
+                else:
+                    days = rule["dayOfWeek"]
+                for day in days:
+                    day = (
+                        day.replace("https://", "")
+                        .replace("http://", "")
+                        .replace("schema.org/", "")[0:2]
+                        .title()
+                    )
+                    print(day)
+
+                    self.add_range(
+                        day=day,
+                        open_time=rule["opens"],
+                        close_time=rule["closes"],
+                        time_format=time_format,
+                    )

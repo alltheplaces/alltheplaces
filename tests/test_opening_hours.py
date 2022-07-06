@@ -1,3 +1,5 @@
+import json
+
 from locations.hours import OpeningHours
 
 
@@ -75,3 +77,66 @@ def test_multiple_times():
     o.add_range("Mo", "08:00", "12:00")
     o.add_range("Mo", "13:00", "17:30")
     assert o.as_opening_hours() == "Mo 08:00-12:00,13:00-17:30"
+
+
+def test_ld_parse():
+    o = OpeningHours()
+    o.from_linked_data(
+        json.loads(
+            """
+            {
+                "@context": "https://schema.org",
+                "@type": "Store",
+                "name": "Middle of Nowhere Foods",
+                "openingHoursSpecification":
+                [
+                    {
+                        "@type": "OpeningHoursSpecification",
+                        "dayOfWeek": [
+                            "http://schema.org/Monday",
+                            "https://schema.org/Tuesday",
+                            "Wednesday",
+                            "http://schema.org/Thursday",
+                            "http://schema.org/Friday"
+                        ],
+                        "opens": "09:00",
+                        "closes": "11:00"
+                    },
+                    {
+                        "@type": "OpeningHoursSpecification",
+                        "dayOfWeek": "http://schema.org/Saturday",
+                        "opens": "12:00",
+                        "closes": "14:00"
+                    }
+                ]
+            }
+            """
+        )
+    )
+    assert o.as_opening_hours() == "Mo-Fr 09:00-11:00; Sa 12:00-14:00"
+
+
+def test_ld_parse_time_format():
+    o = OpeningHours()
+    o.from_linked_data(
+        json.loads(
+            """
+            {
+                "@context": "https://schema.org",
+                "@type": "Store",
+                "name": "Middle of Nowhere Foods",
+                "openingHoursSpecification":
+                [
+                    {
+                        "@type": "OpeningHoursSpecification",
+                        "dayOfWeek": "http://schema.org/Saturday",
+                        "opens": "12:00:00",
+                        "closes": "14:00:00"
+                    }
+                ]
+            }
+            """
+        ),
+        "%H:%M:%S",
+    )
+    assert o.as_opening_hours() == "Sa 12:00-14:00"
