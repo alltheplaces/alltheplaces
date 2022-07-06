@@ -100,6 +100,4 @@ class LowesSpider(scrapy.Spider):
         urls = response.xpath("//url/loc/text()").extract()
 
         for url in urls:
-            yield scrapy.Request(
-                url, callback=self.parse_store
-            )
+            yield scrapy.Request(url, callback=self.parse_store)
