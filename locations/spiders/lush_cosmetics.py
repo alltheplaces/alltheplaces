@@ -4,7 +4,7 @@ from locations.items import GeojsonPointItem
 
 class LushSpider(scrapy.Spider):
     name = "lush"
-    item_attributes = {"brand": "Lush Cosmetics"}
+    item_attributes = {"brand": "Lush", "brand_wikidata": "Q1585448"}
     download_delay = 0
     allowed_domains = ["www.lushusa.com", "lush.ca"]
     start_urls = [
