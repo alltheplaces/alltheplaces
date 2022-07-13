@@ -1,31 +1,22 @@
 # -*- coding: utf-8 -*-
 import json
-import urllib.parse
 
-import scrapy
+from scrapy.spiders import SitemapSpider
 
 from locations.hours import OpeningHours
 from locations.items import GeojsonPointItem
 
 
-class PrimarkSpider(scrapy.Spider):
+class PrimarkSpider(SitemapSpider):
     name = "primark"
     item_attributes = {"brand": "Primark", "brand_wikidata": "Q137023"}
     allowed_domains = ["primark.com"]
-    start_urls = ("https://stores.primark.com/",)
+    sitemap_urls = ["https://stores.primark.com/sitemap.xml"]
+    sitemap_rules = [
+        (r"https:\/\/stores\.primark\.com\/[-\w]+\/[-\w]+\/[-\w%']+", "parse")
+    ]
 
     def parse(self, response):
-        for href in response.xpath(
-            '(//a[@data-ya-track="directorylink"]|//a[@data-ya-track="businessname"])/@href'
-        ).extract():
-            url = response.urljoin(href)
-            path = urllib.parse.urlparse(url).path
-            if path.count("/") == 3:
-                yield scrapy.Request(response.urljoin(href), callback=self.parse_store)
-            else:
-                yield scrapy.Request(response.urljoin(href))
-
-    def parse_store(self, response):
         json_text = response.xpath('//script[@class="js-map-config"]/text()').get()
         if json_text is None:
             # These stores are "opening soon"
@@ -42,7 +33,16 @@ class PrimarkSpider(scrapy.Spider):
 
         properties = {
             "name": js["name"],
-            "addr_full": js["address"]["line1"],
+            "street_address": ", ".join(
+                filter(
+                    None,
+                    [
+                        js["address"]["line1"],
+                        js["address"]["line2"],
+                        js["address"]["line3"],
+                    ],
+                )
+            ),
             "ref": js["meta"]["id"],
             "website": response.url,
             "city": js["address"]["city"],
@@ -53,5 +53,28 @@ class PrimarkSpider(scrapy.Spider):
             "phone": js["mainPhone"]["number"],
             "lat": response.xpath('//meta[@itemprop="latitude"]/@content').get(),
             "lon": response.xpath('//meta[@itemprop="longitude"]/@content').get(),
+            "facebook": js.get("facebookPageUrl"),
+            "extras": {},
         }
+
+        if js.get("paymentOptions"):
+            for payment in js["paymentOptions"]:
+                if payment == "Google Pay":
+                    properties["extras"]["payment:google_pay"] = "yes"
+                elif payment == "Apple Pay":
+                    properties["extras"]["payment:apple_pay"] = "yes"
+                elif payment == "Cash":
+                    properties["extras"]["payment:cash"] = "yes"
+                elif payment == "MasterCard":
+                    properties["extras"]["payment:mastercard"] = "yes"
+                elif payment == "Visa":
+                    properties["extras"]["payment:visa"] = "yes"
+                elif payment == "American Express":
+                    properties["extras"]["payment:american_express"] = "yes"
+                elif payment == "Maestro":
+                    properties["extras"]["payment:maestro"] = "yes"
+
+        if js["name"] == "Penneys":
+            properties["brand"] = "Penneys"
+
         yield GeojsonPointItem(**properties)
