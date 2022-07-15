@@ -38,39 +38,39 @@ class GeojsonPointItem(scrapy.Item):
     def from_linked_data(self, ld):
         if ld.get("geo"):
             if ld["geo"].get("@type") == "GeoCoordinates":
-                self.lat = ld["geo"].get("latitude")
-                self.lon = ld["geo"].get("longitude")
+                self["lat"] = ld["geo"].get("latitude")
+                self["lon"] = ld["geo"].get("longitude")
 
-        self.name = ld.get("name")
+        self["name"] = ld.get("name")
 
         if ld.get("address"):
             if ld["address"].get("@type") == "PostalAddress":
-                self.street_address = ld["address"].get("streetAddress")
-                self.city = ld["address"].get("addressLocality")
-                self.state = ld["address"].get("addressRegion")
-                self.postcode = ld["address"].get("postalCode")
-                self.country = ld["address"].get("addressCountry")
+                self["street_address"] = ld["address"].get("streetAddress")
+                self["city"] = ld["address"].get("addressLocality")
+                self["state"] = ld["address"].get("addressRegion")
+                self["postcode"] = ld["address"].get("postalCode")
+                self["country"] = ld["address"].get("addressCountry")
             else:
-                self.addr_full = ld["address"]
+                self["addr_full"] = ld["address"]
 
-        self.phone = ld.get("telephone")
-        self.website = ld.get("url")
+        self["phone"] = ld.get("telephone")
+        self["website"] = ld.get("url")
 
         oh = OpeningHours()
         oh.from_linked_data(ld)
-        self.opening_hours = oh.as_opening_hours()
+        self["opening_hours"] = oh.as_opening_hours()
 
         if ld.get("image"):
             if ld["image"].get("@type") == "ImageObject":
-                self.image = ld["image"].get("contentUrl")
+                self["image"] = ld["image"].get("contentUrl")
             else:
-                self.image = ld["image"]
+                self["image"] = ld["image"]
 
-        self.ref = ld.get("branchCode")
+        self["ref"] = ld.get("branchCode")
 
         if ld.get("brand"):
             if (
                 ld["brand"].get("@type") == "Brand"
                 or ld["brand"].get("@type") == "Organization"
             ):
-                self.brand = ld["brand"].get("name")
+                self["brand"] = ld["brand"].get("name")
