@@ -44,8 +44,8 @@ def test_ld():
     assert i["street_address"] == "1901 Lemur Ave"
     assert i["name"] == "GreatFood"
     assert (
-            i["opening_hours"]
-            == "Mo-Th 11:00-14:30,17:00-21:30; Fr-Sa 11:00-14:30,17:00-22:00"
+        i["opening_hours"]
+        == "Mo-Th 11:00-14:30,17:00-21:30; Fr-Sa 11:00-14:30,17:00-22:00"
     )
     assert i["phone"] == "(408) 714-1489"
     assert i["website"] == "http://www.greatfood.com"
