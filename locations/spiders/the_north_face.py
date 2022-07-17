@@ -1,17 +1,13 @@
 # -*- coding: utf-8 -*-
-
 import json
-import re
-
 import scrapy
 
 from locations.items import GeojsonPointItem
-from locations.hours import OpeningHours
 
 
 class TheNorthFaceSpider(scrapy.Spider):
     name = "the_north_face"
-    item_attributes = {"brand": "The North Face"}
+    item_attributes = {"brand": "The North Face", "brand_wikidata": "Q152784"}
     allowed_domains = ["hosted.where2getit.com"]
 
     def start_requests(self):

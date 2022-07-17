@@ -1,6 +1,7 @@
 import scrapy
-from locations.items import GeojsonPointItem
 import itertools
+
+from locations.items import GeojsonPointItem
 
 
 def chunks(l, n):
@@ -55,7 +56,7 @@ def process_hours(opening_hours):
 
 class HMSpider(scrapy.Spider):
     name = "hm-worldwide"
-    item_attributes = {"brand": "H&M"}
+    item_attributes = {"brand": "H&M", "brand_wikidata": "Q188326"}
     all_stores_uri = "https://hm.storelocator.hm.com/rest/storelocator/stores/1.0/locale/en_US/country/{}/"
     start_urls = ["http://www.hm.com/entrance.ahtml"]
 

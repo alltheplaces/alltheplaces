@@ -10,7 +10,7 @@ from locations.hours import OpeningHours
 
 class NationalTireBatterySpider(scrapy.Spider):
     name = "national_tire_battery"
-    item_attributes = {"brand": "National Tire & Battery"}
+    item_attributes = {"brand": "National Tire & Battery", "brand_wikidata": "Q6978944"}
     allowed_domains = ["ntb.com"]
     start_urls = [
         "https://www.ntb.com/rest/model/com/tbc/store/StoreLocatorService/getAllActiveStores"

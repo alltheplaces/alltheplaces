@@ -1,4 +1,5 @@
 import scrapy
+
 from six.moves.urllib.parse import urlencode
 from locations.items import GeojsonPointItem
 
@@ -42,7 +43,7 @@ LAT_LONS = [
 
 class WawaSpider(scrapy.Spider):
     name = "wawa"
-    item_attributes = {"brand": "Wawa"}
+    item_attributes = {"brand": "Wawa", "brand_wikidata": "Q5936320"}
     start_urls = ("https://www.wawa.com/Handlers/LocationByLatLong.ashx?",)
     download_delay = 1.5
     allowed_domains = "www.wawa.com"

@@ -1,15 +1,13 @@
 # -*- coding: utf-8 -*-
 import scrapy
 import json
-import re
-from urllib.parse import unquote
 
 from locations.items import GeojsonPointItem
 
 
 class TheRangeSpider(scrapy.Spider):
     name = "therange"
-    item_attributes = {"brand": "The Range"}
+    item_attributes = {"brand": "The Range", "brand_wikidata": "Q7759409"}
     allowed_domains = ["www.therange.co.uk"]
     start_urls = ("https://www.therange.co.uk/stores/",)
 

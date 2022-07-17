@@ -7,7 +7,7 @@ from locations.items import GeojsonPointItem
 
 class ThirtyFoodsSpider(scrapy.Spider):
     name = "thirty_foods"
-    item_attributes = {"brand": "Thirty Foods"}
+    item_attributes = {"brand": "Thirty Foods", "brand_wikidata": "Q7798140"}
     allowed_domains = ["www.thriftyfoods.com"]
     start_urls = (
         "https://www.thriftyfoods.com/api/en/Store/get?Latitude=48.45423&Longitude=-123.359205&Skip=0&Max=60000",

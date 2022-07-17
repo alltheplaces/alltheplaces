@@ -10,7 +10,7 @@ from scrapy import Selector
 
 class BootsTHSpider(scrapy.Spider):
     name = "boots_th"
-    item_attributes = {"brand": "Boots"}
+    item_attributes = {"brand": "Boots", "brand_wikidata": "Q6123139"}
     allowed_domains = ["www.intl.boots.com"]
     download_delay = 0.5
     start_urls = [

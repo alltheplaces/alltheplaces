@@ -4,7 +4,7 @@ import scrapy
 from locations.items import GeojsonPointItem
 
 
-class BurgerKingUKSpider(scrapy.Spider):
+class BurgerKingGBSpider(scrapy.Spider):
     name = "burgerkinguk"
     item_attributes = {"brand": "Burger King", "brand_wikidata": "Q177054"}
 
