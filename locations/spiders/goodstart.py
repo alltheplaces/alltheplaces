@@ -6,7 +6,7 @@ import scrapy
 from locations.items import GeojsonPointItem
 
 
-class GoodstartsSpider(scrapy.Spider):
+class GoodstartSpider(scrapy.Spider):
     name = "goodstart"
     item_attributes = {
         "brand": "GoodStart Early Learning",

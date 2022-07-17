@@ -2,12 +2,10 @@
 import scrapy
 import re
 
-
 from locations.items import GeojsonPointItem
 
 
-class Spencers(scrapy.Spider):
-
+class SpencersSpider(scrapy.Spider):
     name = "spencers"
     item_attributes = {"brand": "Spencer's"}
     download_delay = 0.2

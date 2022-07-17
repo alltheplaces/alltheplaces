@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import scrapy
 import json
-import re
 
 from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
@@ -9,7 +8,7 @@ from locations.hours import OpeningHours
 DAYS = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
 
 
-class NextSpider(scrapy.Spider):
+class NextGBSpider(scrapy.Spider):
     name = "next_uk"
     item_attributes = {"brand": "Next", "brand_wikidata": "Q246655"}
     allowed_domains = ["next.co.uk"]

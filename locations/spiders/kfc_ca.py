@@ -10,9 +10,9 @@ from locations.hours import OpeningHours
 DAY_MAPPING = {0: "Su", 1: "Mo", 2: "Tu", 3: "We", 4: "Th", 5: "Fr", 6: "Sa"}
 
 
-class KFCCanadaSpider(scrapy.Spider):
+class KFCCASpider(scrapy.Spider):
     name = "kfc_ca"
-    item_attributes = {"brand": "KFC"}
+    item_attributes = {"brand": "KFC", "brand_wikidata": "Q524757"}
     allowed_domains = ["kfc.ca"]
     start_urls = [
         "https://www.kfc.ca/find-a-kfc",

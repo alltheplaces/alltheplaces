@@ -2,6 +2,7 @@
 import scrapy
 import unicodedata
 import re
+
 from locations.items import GeojsonPointItem
 
 regex = r"(^\D)"
@@ -10,7 +11,7 @@ regex_am = r"\s?([Aa][Mm])"
 regex_pm = r"\s?([Pp][Mm])"
 
 
-class MonicalsSpider(scrapy.Spider):
+class MonicalsPizzaSpider(scrapy.Spider):
     name = "monicals_pizza"
     item_attributes = {"brand": "Monical's Pizza", "brand_wikidata": "Q6900121"}
     allowed_domains = ["www.monicals.com"]

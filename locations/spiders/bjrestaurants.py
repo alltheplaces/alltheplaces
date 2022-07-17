@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 import scrapy
 import json
-import re
+
 from locations.items import GeojsonPointItem
 
 
-class BjRestaurantSpider(scrapy.Spider):
+class BjRestaurantsSpider(scrapy.Spider):
     name = "bj-restaurant"
     item_attributes = {
         "brand": "BJ's Restaurant & Brewery",

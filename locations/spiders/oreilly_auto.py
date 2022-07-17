@@ -4,8 +4,7 @@ import scrapy
 from locations.items import GeojsonPointItem
 
 
-class OreillyAuto(scrapy.Spider):
-
+class OreillyAutoSpider(scrapy.Spider):
     name = "oreilly"
     item_attributes = {"brand": "O'Reilly Auto Parts", "brand_wikidata": "Q7071951"}
     download_delay = 0.2

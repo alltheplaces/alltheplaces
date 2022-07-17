@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 import re
-
 import scrapy
 
 from locations.items import GeojsonPointItem
 
 
-class CBRE(scrapy.Spider):
+class CBRESpider(scrapy.Spider):
     name = "cbre"
     item_attributes = {"brand": "CBRE", "brand_wikidata": "Q1023013"}
     allowed_domains = ["cbre.us"]

@@ -5,7 +5,7 @@ import json
 from locations.items import GeojsonPointItem
 
 
-class kruidvatSpider(scrapy.Spider):
+class KruidvatSpider(scrapy.Spider):
     name = "kruidvat"
     item_attributes = {"brand": "Kruidvat"}
     allowed_domains = ["kruidvat.nl"]

@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
-from os import stat
 import scrapy
-from urllib import parse
 import json
+
 from locations.items import GeojsonPointItem
 
 
-class TemplateSpider(scrapy.Spider):
+class JimmyJohnsSpider(scrapy.Spider):
     name = "jimmy_johns"
     item_attributes = {"brand": "Jimmy John's", "brand_wikidata": "Q1689380"}
     allowed_domains = ["locations.jimmyjohns.com"]

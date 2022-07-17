@@ -5,7 +5,7 @@ import re
 from locations.items import GeojsonPointItem
 
 
-class ShopkoSpider(scrapy.Spider):
+class SurLaTableSpider(scrapy.Spider):
     name = "surlatable"
     item_attributes = {"brand": "Sur La Table"}
     allowed_domains = ["surlatable.com"]

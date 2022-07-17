@@ -1,17 +1,11 @@
 # -*- coding: utf-8 -*-
 import json
-import re
 import scrapy
-
 
 from locations.items import GeojsonPointItem
 
 
-SCRIPT_JSON = 'normalize-space(//script[contains(text(), "markerData")]/text())'
-
-
-class HalloweenCity(scrapy.Spider):
-
+class HalloweenCitySpider(scrapy.Spider):
     name = "halloween-city"
     item_attributes = {"brand": "Halloween City"}
     download_delay = 0.2
@@ -21,7 +15,9 @@ class HalloweenCity(scrapy.Spider):
     def parse_stores(self, response):
 
         app_json = json.loads(
-            response.xpath(SCRIPT_JSON).re_first(r"RLS.defaultData = (\{.*?\});")
+            response.xpath(
+                'normalize-space(//script[contains(text(), "markerData")]/text())'
+            ).re_first(r"RLS.defaultData = (\{.*?\});")
         )
         store = json.loads(
             scrapy.Selector(text=app_json["markerData"][0]["info"])

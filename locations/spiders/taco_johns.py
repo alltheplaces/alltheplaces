@@ -1,11 +1,10 @@
 import re
-
 import scrapy
 
 from locations.items import GeojsonPointItem
 
 
-class TacoJohns(scrapy.Spider):
+class TacoJohnsSpider(scrapy.Spider):
     name = "taco_johns"
     allowed_domains = ["tacojohns.com"]
     download_delay = 0.2

@@ -1,15 +1,13 @@
 # -*- coding: utf-8 -*-
-import re
 import scrapy
 
 from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
 
 
-class DressBarn(scrapy.Spider):
-
+class DressBarnSpider(scrapy.Spider):
     name = "dressbarn"
-    item_attributes = {"brand": "Dress Barn"}
+    item_attributes = {"brand": "DressBarn", "brand_wikidata": "Q65090033"}
     download_delay = 0.2
     allowed_domains = ("locations.dressbarn.com",)
     start_urls = ("https://locations.dressbarn.com",)

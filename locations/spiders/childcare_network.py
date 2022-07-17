@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 import scrapy
-import re
 
 from locations.items import GeojsonPointItem
 
 
-class ChildcareNetwork(scrapy.Spider):
+class ChildcareNetworkSpider(scrapy.Spider):
     name = "childcare_network"
     home_site = "https://schools.childcarenetwork.com/"
     start_urls = ("https://schools.childcarenetwork.com/index.html",)

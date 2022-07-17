@@ -6,7 +6,7 @@ import scrapy
 from locations.items import GeojsonPointItem
 
 
-class Crunch_fitnessSpider(scrapy.Spider):
+class CrunchFitnessSpider(scrapy.Spider):
     name = "crunch_fitness"
     item_attributes = {"brand": "Crunch Fitness", "brand_wikidata": "Q5190093"}
     allowed_domains = ["crunch.com"]

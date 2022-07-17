@@ -1,12 +1,13 @@
 import scrapy
+import csv
+
 from scrapy import FormRequest
 from locations.items import GeojsonPointItem
-import csv
-import unicodedata
 
 
-class DynamicParcelDistributionSpider(scrapy.Spider):
+class DPDDESpider(scrapy.Spider):
     name = "dpd_de"
+    item_attributes = {"brand": "DPD", "brand:wikidata": "Q541030"}
     start_urls = ["https://my.dpd.de/shopfinder.aspx"]
 
     def parse(self, response):

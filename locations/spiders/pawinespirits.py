@@ -1,11 +1,9 @@
-import re
-import urllib
-
 import scrapy
+
 from locations.items import GeojsonPointItem
 
 
-class PAWineSpirits(scrapy.Spider):
+class PAWineSpiritsSpider(scrapy.Spider):
     name = "pawinespirits"
     item_attributes = {
         "name": "Fine Wine & Good Spirits",

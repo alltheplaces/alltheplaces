@@ -7,7 +7,7 @@ import scrapy
 from locations.items import GeojsonPointItem
 
 
-class RegisSpider(scrapy.Spider):
+class RegisSalonSpider(scrapy.Spider):
     name = "regis"
     item_attributes = {"brand": "Regis Salon", "brand_wikidata": "Q7309325"}
     download_delay = 0.1

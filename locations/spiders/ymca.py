@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import re
-from datetime import datetime
 
 import scrapy
 
@@ -8,7 +7,7 @@ from locations.hours import OpeningHours
 from locations.items import GeojsonPointItem
 
 
-class YmcaSpider(scrapy.Spider):
+class YMCASpider(scrapy.Spider):
     name = "ymca"
     item_attributes = {"brand": "YMCA", "brand_wikidata": "Q157169"}
     allowed_domains = ["ymca.org"]

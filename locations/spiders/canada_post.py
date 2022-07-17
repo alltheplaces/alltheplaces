@@ -15,7 +15,7 @@ DAY_MAPPING = {
 }
 
 
-class CandaPostSpider(scrapy.Spider):
+class CanadaPostSpider(scrapy.Spider):
     name = "canadapost"
     item_attributes = {"brand": "Canada Post"}
     allowed_domains = ["canadapost.ca"]

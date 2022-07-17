@@ -1,14 +1,12 @@
 # -*- coding: utf-8 -*-
 import scrapy
 import json
-import re
 
 from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
 
 
-class PotbellySandwichSpider(scrapy.Spider):
-
+class PotbellySandwichShopSpider(scrapy.Spider):
     name = "potbelly_sandwich"
     item_attributes = {"brand": "Potbelly Sandwich Shop"}
     allowed_domains = ["www.potbelly.com"]

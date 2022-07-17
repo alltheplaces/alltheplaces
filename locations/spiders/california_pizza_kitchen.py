@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import re
 import scrapy
+
 from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
 from urllib.parse import urlencode
@@ -70,7 +71,7 @@ DAY_MAPPING = {
 }
 
 
-class cpkSpider(scrapy.Spider):
+class CaliforniaPizzaKitchenSpider(scrapy.Spider):
     download_delay = 0.2
     name = "cpk"
     item_attributes = {
