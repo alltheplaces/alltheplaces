@@ -2,10 +2,11 @@
 import scrapy
 import json
 import base64
+
 from locations.items import GeojsonPointItem
 
 
-class RalphLauren(scrapy.Spider):
+class RalphLaurenSpider(scrapy.Spider):
     name = "ralph_lauren"
     allowed_domains = ["www.ralphlauren.com"]
     start_urls = ("https://www.ralphlauren.com/Stores-ShowCountries",)

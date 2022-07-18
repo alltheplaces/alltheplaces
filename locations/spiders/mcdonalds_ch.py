@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*-
 import scrapy
-import re
 import datetime
+
 from locations.items import GeojsonPointItem
 
 
-class McDonalsCHSpider(scrapy.Spider):
-
+class McDonaldsCHSpider(scrapy.Spider):
     name = "mcdonalds_ch"
-    item_attributes = {"brand": "McDonald's"}
+    item_attributes = {"brand": "McDonald's", "brand_wikidata": "Q38076"}
     allowed_domains = ["www.mcdonalds.ch"]
     start_urls = (
         "https://www.mcdonalds.ch/api/v1/restaurants/?lon=7.458354699999973&lat=46.786249&range=1000",

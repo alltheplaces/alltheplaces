@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
-from urllib import parse
 import scrapy
+
 from locations.items import GeojsonPointItem
+from urllib import parse
 
 
 class VueCinemasSpider(scrapy.Spider):
     name = "vue_cinemas"
-    item_attributes = {"brand": "Vue Cinemas"}
+    item_attributes = {"brand": "Vue Cinemas", "brand_wikidata": "Q2535134"}
     start_urls = ("https://www.myvue.com/data/locations/",)
 
     def parse(self, response):

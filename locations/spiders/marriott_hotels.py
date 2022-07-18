@@ -1,14 +1,12 @@
 import json
 import re
 import scrapy
+
 from scrapy.selector import Selector
-
-
 from locations.items import GeojsonPointItem
 
 
-class MarriottHotels(scrapy.Spider):
-
+class MarriottHotelsSpider(scrapy.Spider):
     name = "marriott"
     allowed_domains = ["marriott.com", "ritzcarlton.com"]
     download_delay = 0.2

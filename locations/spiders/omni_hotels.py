@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import re
-
 import scrapy
+
 from locations.items import GeojsonPointItem
 
 ca_states = [
@@ -56,7 +56,7 @@ mx_states = [
 ]
 
 
-class OmniHotels(scrapy.Spider):
+class OmniHotelsSpider(scrapy.Spider):
     download_delay = 0.2
     name = "omni_hotels"
     item_attributes = {"brand": "Omni Hotels", "brand_wikidata": "Q7090329"}

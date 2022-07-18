@@ -15,9 +15,9 @@ DAY_MAPPING = {
 }
 
 
-class CandaPostSpider(scrapy.Spider):
+class CanadaPostSpider(scrapy.Spider):
     name = "canadapost"
-    item_attributes = {"brand": "Canada Post"}
+    item_attributes = {"brand": "Canada Post", "brand_wikidata": "Q1032001"}
     allowed_domains = ["canadapost.ca"]
     start_urls = (
         "https://maps.googleapis.com/maps/api/js/KmlOverlayService.GetOverlays?1shttp%3A%2F%2Fwww.canadapost.ca%2Fcpo%2Fmc%2Fapp%2Fpersonal%2Ffpo%2Fgeodata%2Fcpc-outlets-en.kmz%3F14&callback=_xdc_._vjm4rb&client=gme-innovapost1&token=61596",

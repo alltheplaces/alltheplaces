@@ -5,11 +5,13 @@ import re
 from locations.items import GeojsonPointItem
 
 
-class SuperStoreSpider(scrapy.Spider):
-
+class RealCanadianSuperstoreSpider(scrapy.Spider):
     name = "super_store"
-    item_attributes = {"brand": "Real Canadian Superstore"}
-    allowed_domains = ["www.realcanadiansuperstore.ca/"]
+    item_attributes = {
+        "brand": "Real Canadian Superstore",
+        "brand_wikidata": "Q7300856",
+    }
+    allowed_domains = ["www.realcanadiansuperstore.ca"]
     start_urls = (
         "https://www.realcanadiansuperstore.ca/store-locator/locations/all?showNonShoppable=true&_=1513507990972",
     )

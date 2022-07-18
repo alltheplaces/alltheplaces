@@ -1,16 +1,13 @@
 # -*- coding: utf-8 -*-
 import json
-import re
-
 import scrapy
 
 from locations.items import GeojsonPointItem
-from locations.hours import OpeningHours
 
 
 class UnderArmourSpider(scrapy.Spider):
     name = "under_armour"
-    item_attributes = {"brand": "Under Armour"}
+    item_attributes = {"brand": "Under Armour", "brand_wikidata": "Q2031485"}
     allowed_domains = ["where2getit.com"]
 
     def start_requests(self):

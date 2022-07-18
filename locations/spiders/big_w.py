@@ -6,6 +6,7 @@ from locations.hours import OpeningHours
 
 class BigWSpider(scrapy.Spider):
     name = "big_w"
+    item_attributes = {"brand": "Big W", "brand_wikidata": "Q4906646"}
     allowed_domains = ["bigw.com.au"]
     start_urls = ("https://www.bigw.com.au/sitemap/store-en-aud.xml",)
     days = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]

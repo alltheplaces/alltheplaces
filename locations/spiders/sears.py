@@ -12,7 +12,7 @@ from urllib.parse import urlencode
 
 class SearsSpider(scrapy.Spider):
     name = "sears"
-    item_attributes = {"brand": "Sears"}
+    item_attributes = {"brand": "Sears", "brand_wikidata": "Q6499202"}
     allowed_domains = [
         "www.sears.com",
         "www.searsoutlet.com",

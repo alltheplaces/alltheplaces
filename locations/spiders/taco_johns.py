@@ -1,12 +1,12 @@
 import re
-
 import scrapy
 
 from locations.items import GeojsonPointItem
 
 
-class TacoJohns(scrapy.Spider):
+class TacoJohnsSpider(scrapy.Spider):
     name = "taco_johns"
+    item_attributes = {"brand": "Taco John's", "brand_wikidata": "Q7673962"}
     allowed_domains = ["tacojohns.com"]
     download_delay = 0.2
     start_urls = ("https://locations.tacojohns.com/",)

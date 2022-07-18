@@ -5,7 +5,7 @@ from locations.items import GeojsonPointItem
 from scrapy.spiders import SitemapSpider
 
 
-class DomionsPizzaNetherlandsSpider(SitemapSpider):
+class DominosPizzaNLSpider(SitemapSpider):
     name = "dominos_pizza_nl"
     item_attributes = {"brand": "Domino's", "brand_wikidata": "Q839466"}
     allowed_domains = ["dominos.nl"]

@@ -7,9 +7,9 @@ import scrapy
 from locations.items import GeojsonPointItem
 
 
-class GreyhoundCanadaSpider(scrapy.Spider):
+class GreyhoundCASpider(scrapy.Spider):
     name = "greyhound_ca"
-    item_attributes = {"brand": "Greyhound"}
+    item_attributes = {"brand": "Greyhound", "brand_wikidata": "Q5353655"}
     allowed_domains = ["bustracker.greyhound.ca"]
     start_urls = [
         "https://bustracker.greyhound.ca/stop-finder/",

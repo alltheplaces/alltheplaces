@@ -6,7 +6,7 @@ import urllib.parse
 from locations.items import GeojsonPointItem
 
 
-class BassProSpider(scrapy.Spider):
+class BassProShopsSpider(scrapy.Spider):
     name = "bassproshops"
     item_attributes = {"brand": "Bass Pro Shops", "brand_wikidata": "Q4867953"}
     allowed_domains = ["stores.basspro.com"]

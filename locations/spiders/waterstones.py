@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 import scrapy
+
 from locations.hours import OpeningHours
 from locations.items import GeojsonPointItem
 
 
-class MarksAndSpencerSpider(scrapy.Spider):
+class WaterstonesSpider(scrapy.Spider):
     name = "waterstones"
-    item_attributes = {"brand": "Waterstones"}
+    item_attributes = {"brand": "Waterstones", "brand_wikidata": "Q151779"}
     allowed_domains = ["www.waterstones.com"]
     start_urls = ("https://www.waterstones.com/bookshops/viewall",)
 

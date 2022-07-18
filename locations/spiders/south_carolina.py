@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
-import re
-
 import scrapy
 import json
 
 from locations.items import GeojsonPointItem
 
 
-class SCSpider(scrapy.Spider):
+class SouthCarolinaSpider(scrapy.Spider):
     download_delay = 0.2
     name = "south_carolina"
     allowed_domains = ["sc.gov"]

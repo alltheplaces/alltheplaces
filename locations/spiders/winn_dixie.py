@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
-
 import scrapy
 
 from locations.items import GeojsonPointItem
 
 
-class FiestaMartSpider(scrapy.Spider):
+class WinnDixieSpider(scrapy.Spider):
     name = "winndixie"
     item_attributes = {"brand": "Winn Dixie", "brand_wikidata": "Q1264366"}
     allowed_domains = ["winndixie.com"]

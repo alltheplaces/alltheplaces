@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 import scrapy
+
 from locations.items import GeojsonPointItem
 
 
 class CoastalFarmSpider(scrapy.Spider):
-
     name = "coastalfarm"
     item_attributes = {"brand": "Coastal"}
     allowed_domains = ["www.coastalfarm.com"]

@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 import re
-
 import scrapy
+
 from locations.items import GeojsonPointItem
 
 
-class UPSFreightServiceCenter(scrapy.Spider):
+class UPSFreightServiceCentersSpider(scrapy.Spider):
     download_delay = 0.2
     name = "ups_freight_service_centers"
     item_attributes = {"brand": "UPS Freight Service Centers"}

@@ -1,10 +1,8 @@
 import scrapy
-from locations.items import GeojsonPointItem
-import re
-from io import StringIO
-from scrapy.http import HtmlResponse
-from functools import partial
+
 from datetime import datetime
+from functools import partial
+from locations.items import GeojsonPointItem
 
 default_headers = {
     "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_1) AppleWebKit/537.36 (KHTML, like Gecko) "
@@ -37,7 +35,7 @@ def get_hours(hour_list):
         return None
 
 
-class SuperCutsScraper(scrapy.Spider):
+class SuperCutsSpider(scrapy.Spider):
     name = "supercuts"
     item_attributes = {"brand": "Supercuts", "brand_wikidata": "Q7643239"}
 

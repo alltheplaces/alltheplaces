@@ -1,13 +1,15 @@
 # -*- coding: utf-8 -*-
-
 import scrapy
 
 from locations.items import GeojsonPointItem
 
 
-class United_surgical_partners_internationalSpider(scrapy.Spider):
+class UnitedSurgicalPartnersInternationalSpider(scrapy.Spider):
     name = "united_surgical_partners_international"
-    item_attributes = {"brand": "United Surgical Partners International"}
+    item_attributes = {
+        "brand": "United Surgical Partners International",
+        "brand_wikidata": "Q7893575",
+    }
     allowed_domains = ["uspi.com"]
     start_urls = [
         "https://webwidgets.q4api.com/v1/fusion?sql=SELECT%20*%20FROM%201MgAq-T0B9gtHKnM0RbfBi8xeJRwmCQftIEvcNdY0Olw&key=AIzaSyBjtj8mMa96IpYNmDjwH-EbmMT3RpeU6ao",

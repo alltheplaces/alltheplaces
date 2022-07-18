@@ -7,7 +7,7 @@ from locations.hours import OpeningHours
 class ExpressSpider(scrapy.Spider):
 
     name = "express"
-    item_attributes = {"brand": "Express"}
+    item_attributes = {"brand": "Express", "brand_wikidata": "Q1384784"}
     allowed_domains = ["stores.express.com", "stores.expressfactoryoutlet.com"]
     download_delay = 0.1
     start_urls = (

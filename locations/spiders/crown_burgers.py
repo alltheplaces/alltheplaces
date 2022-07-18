@@ -10,7 +10,7 @@ STATES = {
 }
 
 
-class CrownburgerSpider(scrapy.Spider):
+class CrownBurgersSpider(scrapy.Spider):
     name = "crown_burgers"
     item_attributes = {"brand": "Crown Burgers"}
     allowed_domains = ["crown-burgers.com", "maps.google.com"]

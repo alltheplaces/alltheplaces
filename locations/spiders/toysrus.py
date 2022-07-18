@@ -1,8 +1,8 @@
 import scrapy
-from locations.items import GeojsonPointItem
 import json
 import re
-from io import StringIO
+
+from locations.items import GeojsonPointItem
 from scrapy.http import HtmlResponse
 
 default_headers = {
@@ -24,7 +24,7 @@ def get_hours(hours_obj):
 
 class ToysRUsSpider(scrapy.Spider):
     name = "toysrus"
-    item_attributes = {"brand": "Toys R Us"}
+    item_attributes = {"brand": "Toys R Us", "brand_wikidata": "Q696334"}
 
     def start_requests(self):
         urls = ["http://stores.toysrus.com/"]

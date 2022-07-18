@@ -4,7 +4,7 @@ from locations.hours import OpeningHours
 from locations.items import GeojsonPointItem
 
 
-class BaylorScottWhiteSpider(scrapy.Spider):
+class BaylorScottWhiteHealthSpider(scrapy.Spider):
     name = "baylorscottwhite"
     item_attributes = {
         "brand": "Baylor Scott & White Health",

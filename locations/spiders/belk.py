@@ -62,7 +62,7 @@ states = [
 
 class BelkSpider(scrapy.Spider):
     name = "belk"
-    item_attributes = {"brand": "Belk"}
+    item_attributes = {"brand": "Belk", "brand:wikidata": "Q127428"}
     allowed_domains = ["www.belk.com"]
     start_urls = ("https://www.belk.com/stores-near-you/",)
     download_delay = 0.2

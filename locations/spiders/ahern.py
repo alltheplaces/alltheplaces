@@ -7,7 +7,7 @@ import json
 from locations.items import GeojsonPointItem
 
 
-class SCSpider(scrapy.Spider):
+class AhernSpider(scrapy.Spider):
     # download_delay = 0.2
     name = "ahern"
     item_attributes = {"brand": "Ahern Rentals"}

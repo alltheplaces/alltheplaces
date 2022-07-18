@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
 import json
-import re
-
 import scrapy
 
 from locations.items import GeojsonPointItem
 
 
-class FreshGrocerSpider(scrapy.Spider):
+class TheFreshGrocerSpider(scrapy.Spider):
     name = "thefreshgrocer"
     item_attributes = {"brand": "The Fresh Grocer", "brand_wikidata": "Q18389721"}
     allowed_domains = ["thefreshgrocer.com"]

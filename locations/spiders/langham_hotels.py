@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 import scrapy
 import json
+
 from locations.items import GeojsonPointItem
 
 
-class LanghamHotel(scrapy.Spider):
+class LanghamHotelsSpider(scrapy.Spider):
     name = "langham"
     allowed_domains = [
         "www.langhamhotels.com",

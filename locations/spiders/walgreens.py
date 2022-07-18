@@ -2,15 +2,15 @@
 import json
 import re
 import scrapy
-from scrapy.selector import Selector
 
+from scrapy.selector import Selector
 from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
 
 
 class WalgreensSpider(scrapy.Spider):
-
     name = "walgreens"
+    item_attributes = {"brand": "Walgreens", "brand_wikidata": "Q1591889"}
     allowed_domains = ["www.walgreens.com"]
     download_delay = 0.1
     start_urls = ("https://www.walgreens.com/Store-Details.xml",)

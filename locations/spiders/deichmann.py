@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 import scrapy
 import json
-import base64
+
 from locations.items import GeojsonPointItem
 
 
-class Deichmann(scrapy.Spider):
+class DeichmannSpider(scrapy.Spider):
     name = "deichmann"
     item_attributes = {"brand": "Deichmann", "brand_wikidata": "Q664543"}
     allowed_domains = ["stores.deichmann.com", "stores.dosenbach.ch"]

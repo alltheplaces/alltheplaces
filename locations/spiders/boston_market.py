@@ -68,7 +68,7 @@ STATES = [
 
 class BostonMarketSpider(scrapy.Spider):
     name = "boston_market"
-    item_attributes = {"brand": "Boston Market"}
+    item_attributes = {"brand": "Boston Market", "brand_wikidata": "Q603617"}
     allowed_domains = ["www.bostonmarket.com"]
     base_url = "https://www.bostonmarket.com"
     custom_settings = {"ROBOTSTXT_OBEY": False}

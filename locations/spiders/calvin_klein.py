@@ -10,7 +10,7 @@ from scrapy.selector import Selector
 
 class CalvinKleinSpider(scrapy.Spider):
     name = "calvin_klein"
-    item_attributes = {"brand": "Calvin Klein"}
+    item_attributes = {"brand": "Calvin Klein", "brand_wikidata": "Q1068628"}
     allowed_domains = ["gotwww.com", "calvinklein.com"]
 
     def start_requests(self):

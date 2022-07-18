@@ -5,8 +5,7 @@ import scrapy
 from locations.items import GeojsonPointItem
 
 
-class IHGHotels(scrapy.Spider):
-
+class IHGHotelsSpider(scrapy.Spider):
     name = "ihg_hotels"
     item_attributes = {"brand": "IHG Hotels", "brand_wikidata": "Q1424962"}
     # allowed_domains = ["ihg.com"]  # the Kimpton hotels each have their own domains

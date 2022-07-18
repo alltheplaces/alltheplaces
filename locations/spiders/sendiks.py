@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 import scrapy
-import re
 
 from locations.items import GeojsonPointItem
 
 
-class SendikSpider(scrapy.Spider):
+class SendiksSpider(scrapy.Spider):
     name = "sendiks"
     item_attributes = {"brand": "Sendik's Food Market"}
     allowed_domains = ["www.sendiks.com"]

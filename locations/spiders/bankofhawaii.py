@@ -5,9 +5,9 @@ import scrapy
 from locations.items import GeojsonPointItem
 
 
-class BankofHawaiiSpider(scrapy.Spider):
+class BankOfHawaiiSpider(scrapy.Spider):
     name = "bankofhawaii"
-    item_attributes = {"brand": "Bank of Hawaii"}
+    item_attributes = {"brand": "Bank of Hawaii", "brand_wikidata": "Q4856124"}
     allowed_domains = ["boh.com"]
     start_urls = [
         "https://www.boh.com/locations",

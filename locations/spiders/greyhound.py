@@ -1,15 +1,14 @@
 # -*- coding: utf-8 -*-
 import re
-from urllib.parse import urlencode
-
 import scrapy
 
 from locations.items import GeojsonPointItem
+from urllib.parse import urlencode
 
 
 class GreyhoundSpider(scrapy.Spider):
     name = "greyhound"
-    item_attributes = {"brand": "Greyhound"}
+    item_attributes = {"brand": "Greyhound", "brand_wikidata": "Q755309"}
     allowed_domains = ["locations.greyhound.com"]
     start_urls = [
         "https://locations.greyhound.com/",

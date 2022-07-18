@@ -4,7 +4,7 @@ import scrapy
 from locations.items import GeojsonPointItem
 
 
-class WalmartSpider(scrapy.Spider):
+class BigBoySpider(scrapy.Spider):
     name = "bigboy"
     item_attributes = {"brand": "Big Boy"}
     allowed_domains = ["www.bigboy.com"]

@@ -24,6 +24,7 @@ HEADERS = {
 
 class LittleCaesarsSpider(scrapy.Spider):
     name = "little_caesars"
+    item_attributes = {"brand": "Little Caesars", "brand_wikidata": "Q1393809"}
     allowed_domains = ["littlecaesars.com"]
     download_delay = 0.1
 

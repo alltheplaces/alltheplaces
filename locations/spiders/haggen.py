@@ -1,9 +1,10 @@
 import scrapy
 import re
+
 from locations.items import GeojsonPointItem
 
 
-class Haggen(scrapy.Spider):
+class HaggenSpider(scrapy.Spider):
     name = "haggen"
     item_attributes = {"brand": "Haggen"}
     allowed_domains = ["haggen.com"]

@@ -6,7 +6,7 @@ import scrapy
 from locations.items import GeojsonPointItem
 
 
-class BedBathBeyondSpider(scrapy.Spider):
+class CamilleLaVieSpider(scrapy.Spider):
     name = "camillelavie"
     item_attributes = {"brand": "Camille La Vie"}
     allowed_domains = ["camillelavie.com"]

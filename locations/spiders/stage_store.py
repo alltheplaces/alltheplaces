@@ -15,7 +15,7 @@ DAY_MAPPING = {
 }
 
 
-class WhiteHouseBlackMarketSpider(scrapy.Spider):
+class StageStoreSpider(scrapy.Spider):
     download_delay = 0.2
     name = "stagestore"
     item_attributes = {"brand": "Stage"}
