@@ -44,14 +44,14 @@ class GeojsonPointItem(scrapy.Item):
         self["name"] = ld.get("name")
 
         if ld.get("address"):
-            if ld["address"].get("@type") == "PostalAddress":
+            if isinstance(ld["address"], str):
+                self["addr_full"] = ld["address"]
+            elif ld["address"].get("@type") == "PostalAddress":
                 self["street_address"] = ld["address"].get("streetAddress")
                 self["city"] = ld["address"].get("addressLocality")
                 self["state"] = ld["address"].get("addressRegion")
                 self["postcode"] = ld["address"].get("postalCode")
                 self["country"] = ld["address"].get("addressCountry")
-            else:
-                self["addr_full"] = ld["address"]
 
         self["phone"] = ld.get("telephone")
         self["website"] = ld.get("url")
@@ -61,15 +61,17 @@ class GeojsonPointItem(scrapy.Item):
         self["opening_hours"] = oh.as_opening_hours()
 
         if ld.get("image"):
-            if ld["image"].get("@type") == "ImageObject":
-                self["image"] = ld["image"].get("contentUrl")
-            else:
+            if isinstance(ld["image"], str):
                 self["image"] = ld["image"]
+            elif ld["image"].get("@type") == "ImageObject":
+                self["image"] = ld["image"].get("contentUrl")
 
         self["ref"] = ld.get("branchCode")
 
         if ld.get("brand"):
-            if (
+            if isinstance(ld["brand"], str):
+                self["brand"] = ld["brand"]
+            elif (
                 ld["brand"].get("@type") == "Brand"
                 or ld["brand"].get("@type") == "Organization"
             ):
