@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
 import re
-
 import scrapy
 
 from locations.items import GeojsonPointItem
-from locations.hours import OpeningHours
 
 
-class Royal_farmsSpider(scrapy.Spider):
+class RoyalFarmsSpider(scrapy.Spider):
     name = "royal_farms"
     item_attributes = {"brand": "Royal Farms", "brand_wikidata": "Q7374169"}
     allowed_domains = ["royalfarms.com"]

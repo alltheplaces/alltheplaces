@@ -1,16 +1,12 @@
 # -*- coding: utf-8 -*-
 import scrapy
 import json
-import re
-from datetime import date
-from urllib.parse import urlparse, parse_qsl
-
 
 from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
 
 
-class BestBuySpider(scrapy.Spider):
+class BestBuyCASpider(scrapy.Spider):
     name = "bestbuy-ca"
     item_attributes = {"brand": "Best Buy", "brand_wikidata": "Q533415"}
     allowed_domains = ["stores.bestbuy.ca"]

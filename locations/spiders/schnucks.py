@@ -9,7 +9,7 @@ DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 
 class SchnucksSpider(scrapy.Spider):
     name = "schnucks"
-    item_attributes = {"brand": "Schnuck's"}
+    item_attributes = {"brand": "Schnuck's", "brand_wikidata": "Q7431920"}
     allowed_domains = ["schnucks.com", "sweetiq.com"]
     start_urls = (
         "https://api.sweetiq.com/store-locator/public/locations/598224b880237d5614a5b7b5?categories=&geo%5B0%5D=-122.2044&geo%5B1%5D=47.7477&tag%5B0%5D=SLS&perPage=3000&page=1&search=&searchFields%5B0%5D=name&box%5B0%5D=-165.71130012499998&box%5B1%5D=-79.42057661509223&box%5B2%5D=1.2808873750000203&box%5B3%5D=73.04134924587599&clientIds%5B0%5D=5931ad931ded45973af8c5c8",

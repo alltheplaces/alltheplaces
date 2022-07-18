@@ -17,7 +17,7 @@ DAY_MAPPING = {
 }
 
 
-class DennsDeSpider(scrapy.Spider):
+class TegutDeSpider(scrapy.Spider):
     name = "tegut_de"
     item_attributes = {"brand": "tegut…", "brand_wikidata": "Q1547993"}
     allowed_domains = ["www.tegut.com"]

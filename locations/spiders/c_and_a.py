@@ -87,7 +87,7 @@ class CAndASpider(scrapy.Spider):
                 },
             }
 
-            properties["extras"]["image"] = (
+            properties["image"] = (
                 "https://www.c-and-a.com/shop-img/ca-store/"
                 + properties["ref"]
                 + ".JPG"

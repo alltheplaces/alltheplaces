@@ -53,7 +53,7 @@ US_STATES = (
 )
 
 
-class TemplateSpider(scrapy.Spider):
+class BrookdaleSpider(scrapy.Spider):
     name = "brookdale"
     item_attributes = {"brand": "Brookdale"}
     allowed_domains = ["www.brookdale.com"]

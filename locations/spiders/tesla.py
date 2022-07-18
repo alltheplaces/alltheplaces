@@ -2,12 +2,13 @@
 import re
 import scrapy
 import urllib.parse
+
 from locations.items import GeojsonPointItem
 
 
 class TeslaSpider(scrapy.Spider):
     name = "tesla"
-    item_attributes = {"brand": "Tesla"}
+    item_attributes = {"brand": "Tesla", "brand_wikidata": "Q478214"}
     allowed_domains = ["www.tesla.com"]
     start_urls = [
         "https://www.tesla.com/findus/list",

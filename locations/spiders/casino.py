@@ -4,9 +4,9 @@ from locations.items import GeojsonPointItem
 import re
 
 
-class TemplateSpider(scrapy.Spider):
+class CasinoSpider(scrapy.Spider):
     name = "casino"
-    item_attributes = {"brand": "Casino"}
+    item_attributes = {"brand": "Casino Supermarchés", "brand_wikidata": "Q89029184"}
     allowed_domains = ["magasins.supercasino.fr"]
     start_urls = ("https://magasins.supercasino.fr/fr",)
 

@@ -9,6 +9,7 @@ from locations.items import GeojsonPointItem
 
 class KpmgSpider(scrapy.Spider):
     name = "kpmg"
+    item_attributes = {"brand": "KPMG", "brand_wikidata": "Q493751"}
     request_delay = 4
     allowed_domains = ["home.kpmg"]
     start_urls = [

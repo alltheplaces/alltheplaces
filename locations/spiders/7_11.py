@@ -37,6 +37,7 @@ HEADERS = {
 
 class SevenElevenSpider(scrapy.Spider):
     name = "seven_eleven"
+    item_attributes = {"brand": "7-Eleven", "brand_wikidata": "Q259340"}
     allowed_domains = ["7-eleven.com"]
 
     def start_requests(self):

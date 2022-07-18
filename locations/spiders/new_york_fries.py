@@ -5,10 +5,9 @@ import re
 import scrapy
 
 from locations.items import GeojsonPointItem
-from locations.hours import OpeningHours
 
 
-class New_york_friesSpider(scrapy.Spider):
+class NewYorkFriesSpider(scrapy.Spider):
     name = "new_york_fries"
     item_attributes = {"brand": "New York Fries"}
     allowed_domains = ["newyorkfries.com"]

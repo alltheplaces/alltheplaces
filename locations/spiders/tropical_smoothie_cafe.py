@@ -8,7 +8,7 @@ from locations.hours import OpeningHours
 from locations.items import GeojsonPointItem
 
 
-class TropicalSmoothieCafe(scrapy.Spider):
+class TropicalSmoothieCafeSpider(scrapy.Spider):
     name = "tropical_smoothie_cafe"
     item_attributes = {"brand": "Tropical Smoothie Cafe", "brand_wikidata": "Q7845817"}
     allowed_domains = ["locations.tropicalsmoothiecafe.com"]

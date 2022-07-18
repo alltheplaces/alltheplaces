@@ -5,7 +5,7 @@ import re
 from locations.items import GeojsonPointItem
 
 
-class TacocabanaSpider(scrapy.Spider):
+class AndPizzaSpider(scrapy.Spider):
     name = "andpizza"
     item_attributes = {"brand": "&pizza"}
     allowed_domains = ["andpizza.com"]

@@ -1,24 +1,32 @@
 # -*- coding: utf-8 -*-
-import scrapy
 import json
 
 from locations.hours import OpeningHours
 from locations.items import GeojsonPointItem
+from scrapy.spiders import SitemapSpider
 
 DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 
 
-class CrackerBarrelSpider(scrapy.Spider):
+class CrackerBarrelSpider(SitemapSpider):
     name = "crackerbarrel"
     item_attributes = {"brand": "Cracker Barrel", "brand_wikidata": "Q4492609"}
     allowed_domains = ["crackerbarrel.com"]
-    start_urls = ("https://www.crackerbarrel.com/sitemap.xml",)
+    sitemap_urls = ["https://www.crackerbarrel.com/sitemap.xml"]
+    sitemap_rules = [
+        (
+            "https:\/\/crackerbarrel\.com\/Locations\/States\/(\w{2})\/([-\w]+)\/(\d+)$",
+            "parse_store",
+        )
+    ]
 
-    def parse(self, response):
-        response.selector.remove_namespaces()
-        for url in response.xpath("//loc/text()").extract():
-            if "/Locations/States/" in url and url.count("/") == 7:
-                yield scrapy.Request(url, callback=self.parse_store)
+    def sitemap_filter(self, entries):
+        for entry in entries:
+            entry["loc"] = entry["loc"].replace(
+                "https://crackerbarrel.com/sitecore/shell/crackerbarrel/brandsite/home/",
+                "https://www.crackerbarrel.com/",
+            )
+            yield entry
 
     def parse_store(self, response):
         ldjson = response.xpath('//script[@type="application/json"]/text()').get()
@@ -36,7 +44,7 @@ class CrackerBarrelSpider(scrapy.Spider):
             "lon": data["Longitude"]["value"],
             "website": response.url,
             "name": data["Alternate Name"]["value"],
-            "addr_full": data["Address 1"]["value"],
+            "street_address": data["Address 1"]["value"],
             "city": data["City"]["value"],
             "state": data["State"]["value"],
             "postcode": data["Zip"]["value"],

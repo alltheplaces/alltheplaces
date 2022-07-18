@@ -2,7 +2,7 @@ import scrapy
 from locations.items import GeojsonPointItem
 
 
-class BobsSpider(scrapy.Spider):
+class CoffeeTimeSpider(scrapy.Spider):
     name = "coffeetime"
     item_attributes = {"brand": "Coffee Time"}
     allowed_domains = ["www.coffeetime.com"]

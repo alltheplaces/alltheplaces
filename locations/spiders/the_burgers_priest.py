@@ -10,7 +10,7 @@ from locations.hours import OpeningHours
 
 class TheBurgersPriestSpider(scrapy.Spider):
     name = "the_burgers_priest"
-    item_attributes = {"brand": "The Burger's Priest"}
+    item_attributes = {"brand": "The Burger's Priest", "brand_wikidata": "Q100255453"}
     allowed_domains = ["theburgerspriest.com"]
     start_urls = [
         "https://theburgerspriest.com/find-a-location/",

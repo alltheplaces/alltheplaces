@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 import scrapy
-from locations.items import GeojsonPointItem
 import re
+
+from locations.items import GeojsonPointItem
 
 regex_am = r"\s?([Aa][Mm])"
 regex_pm = r"\s?([Pp][Mm])"
@@ -63,7 +64,7 @@ STATES = [
 
 class TacobuenoSpider(scrapy.Spider):
     name = "bueno"
-    item_attributes = {"brand": "Taco Bueno"}
+    item_attributes = {"brand": "Taco Bueno", "brand_wikidata": "Q7673958"}
     allowed_domains = ["buenoonthego.com"]
     download_delay = 0.1
     start_urls = ["https://buenoonthego.com/mp/ndXTAL/searchByStateCode_JSON?"]

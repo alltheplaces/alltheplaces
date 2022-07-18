@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 import scrapy
-from locations.items import GeojsonPointItem
-from urllib.parse import urlencode
-import csv
+
 from locations.hours import OpeningHours
+from locations.items import GeojsonPointItem
 from scrapy.selector import Selector
+from urllib.parse import urlencode
 
 
-class SallySpider(scrapy.Spider):
+class SallyBeautySpider(scrapy.Spider):
     name = "sallybeauty"
     item_attributes = {"brand": "Sally Beauty"}
     allowed_domains = ["sallybeauty.com"]

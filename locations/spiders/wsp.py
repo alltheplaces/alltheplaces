@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 import scrapy
 import json
+
 from locations.items import GeojsonPointItem
 
 
-class wsp(scrapy.Spider):
+class WSPSpider(scrapy.Spider):
     name = "wsp"
     item_attributes = {"brand": "wsp", "brand_wikidata": "Q30284893"}
     allowed_domains = ["www.wsp.com"]

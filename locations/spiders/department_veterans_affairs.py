@@ -6,7 +6,7 @@ from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
 
 
-class VeteransAffairsSpider(scrapy.Spider):
+class DepartmentVeteransAffairsSpider(scrapy.Spider):
     name = "department_veterans_affairs"
     item_attributes = {"brand": "Department Veterans Affairs"}
     allowed_domains = ["api.va.gov"]

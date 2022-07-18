@@ -2,12 +2,15 @@ import json
 
 import scrapy
 
-from locations.hours import OpeningHours
 from locations.items import GeojsonPointItem
 
 
-class BaptistHealthSpider(scrapy.Spider):
+class BaptistHealthArkansasSpider(scrapy.Spider):
     name = "bha"
+    item_attributes = {
+        "brand": "Baptist Health Foundation",
+        "brand_wikidata": "Q50379824",
+    }
     allowed_domains = ["algolia.net", "baptist-health.com"]
     start_urls = ["https://www.baptist-health.com/healthcare-arkansas-locations/"]
     # download_delay =

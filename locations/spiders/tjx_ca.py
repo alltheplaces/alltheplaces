@@ -11,7 +11,7 @@ from locations.hours import OpeningHours
 DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 
 
-class Tjx_CaSpider(scrapy.Spider):
+class TjxCASpider(scrapy.Spider):
     name = "tjx_ca"
     allowed_domains = ["tjx.com"]
 

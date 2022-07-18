@@ -31,9 +31,9 @@ class BeefOBradysSpider(scrapy.Spider):
                 "lon": place["lng"],
                 "phone": place["phone"],
                 "website": "https://www.beefobradys.com/" + place["url"],
+                "facebook": place["facebook"],
                 "extras": {
                     "contact:fax": place["fax"],
-                    "contact:facebook": place["facebook"],
                 },
             }
 

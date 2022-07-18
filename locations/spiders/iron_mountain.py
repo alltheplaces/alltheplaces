@@ -8,6 +8,10 @@ from locations.items import GeojsonPointItem
 
 class IronMountainSpider(scrapy.Spider):
     name = "iron_mountain"
+    item_attributes = {
+        "brand": "Iron Mountain Incorporated",
+        "brand_wikidata": "Q1673079",
+    }
     start_urls = ("https://locations.ironmountain.com/",)
 
     def parse(self, response):

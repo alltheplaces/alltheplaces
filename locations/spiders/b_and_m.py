@@ -2,7 +2,7 @@ from scrapy.spiders import SitemapSpider
 from locations.items import GeojsonPointItem
 
 
-class BMSpider(SitemapSpider):
+class BAndMSpider(SitemapSpider):
     name = "b_and_m"
     item_attributes = {"brand": "B&M", "brand_wikidata": "Q4836931"}
     allowed_domains = ["www.bmstores.co.uk"]

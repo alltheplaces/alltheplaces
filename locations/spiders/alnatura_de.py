@@ -24,7 +24,7 @@ DAY_MAPPING = {
 }
 
 
-class AlnaturaSpider(scrapy.Spider):
+class AlnaturaDESpider(scrapy.Spider):
     name = "alnatura_de"
     item_attributes = {"brand": "Alnatura", "brand_wikidata": "Q876811"}
     allowed_domains = ["www.alnatura.de"]

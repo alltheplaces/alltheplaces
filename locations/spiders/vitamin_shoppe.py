@@ -6,10 +6,7 @@ import scrapy
 from locations.items import GeojsonPointItem
 
 
-SCRIPT_JSON = 'normalize-space(//script[@type="application/ld+json"]/text())'
-
-
-class VitaminShoppe(scrapy.Spider):
+class VitaminShoppeSpider(scrapy.Spider):
 
     name = "vitamin-shoppe"
     item_attributes = {"brand": "The Vitamin Shoppe", "brand_wikidata": "Q7772938"}
@@ -19,7 +16,11 @@ class VitaminShoppe(scrapy.Spider):
 
     def parse_stores(self, response):
 
-        app_json = json.loads(response.xpath(SCRIPT_JSON).extract_first())
+        app_json = json.loads(
+            response.xpath(
+                'normalize-space(//script[@type="application/ld+json"]/text())'
+            ).extract_first()
+        )
         hours = app_json[0]["openingHours"].replace(" - ", "-").split()
         hours = [re.sub(r"[:]$", "", day_hour) for day_hour in hours]
 

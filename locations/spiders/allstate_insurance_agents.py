@@ -4,8 +4,7 @@ from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
 
 
-class AllstateInsurnceAgentsSpider(scrapy.Spider):
-
+class AllstateInsuranceAgentsSpider(scrapy.Spider):
     name = "allstate_insurance_agents"
     item_attributes = {"brand": "Allstate", "brand_wikidata": "Q2645636"}
     allowed_domains = ["agents.allstate.com"]

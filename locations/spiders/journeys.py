@@ -9,7 +9,7 @@ from locations.hours import OpeningHours
 
 class JourneysSpider(scrapy.Spider):
     name = "journeys"
-    item_attributes = {"brand": "Journeys"}
+    item_attributes = {"brand": "Journeys", "brand_wikidata": "Q61994838"}
     allowed_domains = ["journeys.com"]
     start_urls = [
         "https://www.journeys.com/stores",

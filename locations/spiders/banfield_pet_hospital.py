@@ -7,7 +7,7 @@ from locations.hours import OpeningHours
 from locations.items import GeojsonPointItem
 
 
-class BanfieldPetHospitalScraper(scrapy.Spider):
+class BanfieldPetHospitalSpider(scrapy.Spider):
     name = "banfield_pet_hospital"
     item_attributes = {"brand": "Banfield Pet Hospital", "brand_wikidata": "Q2882416"}
     allowed_domains = ["www.banfield.com"]

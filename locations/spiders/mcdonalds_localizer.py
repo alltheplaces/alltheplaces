@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 import scrapy
 import json
+
 from locations.items import GeojsonPointItem
 
 
-class McLocalizer(scrapy.Spider):
-
+class McDonaldsLocalizerSpider(scrapy.Spider):
     name = "mclocalizer"
     item_attributes = {"brand": "McDonald's", "brand_wikidata": "Q38076"}
     allowed_domains = [
