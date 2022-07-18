@@ -8,7 +8,8 @@ class InNOutSpider(scrapy.Spider):
     item_attributes = {"brand": "In-N-Out Burger", "brand_wikidata": "Q1205312"}
     allowed_domains = ["www.in-n-out.com"]
     start_urls = [
-        "https://locations.in-n-out.com/api/finder/search/?showunopened=false&latitude="
+        # Keeping http because their SSL implementation is old and scrapy won't connect to it
+        "http://locations.in-n-out.com/api/finder/search/?showunopened=false&latitude="
         "37.751&longitude=-97.822&maxdistance=3050&maxresults=2500"
     ]
     custom_settings = {
