@@ -11,6 +11,10 @@ class InNOutSpider(scrapy.Spider):
         "https://locations.in-n-out.com/api/finder/search/?showunopened=false&latitude="
         "37.751&longitude=-97.822&maxdistance=3050&maxresults=2500"
     ]
+    custom_settings = {
+        # Attempting to read robots.txt gives an error
+        "ROBOTSTXT_OBEY": False,
+    }
 
     def parse(self, response):
         # testing
