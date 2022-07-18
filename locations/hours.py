@@ -29,7 +29,7 @@ class OpeningHours(object):
             return
         if close_time.lower() == "closed":
             return
-        if close_time == "24:00":
+        if close_time == "24:00" or close_time == "00:00":
             close_time = "23:59"
         if not isinstance(open_time, time.struct_time):
             open_time = time.strptime(open_time, time_format)

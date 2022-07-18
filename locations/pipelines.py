@@ -4,6 +4,8 @@
 #
 # Don't forget to add your pipeline to the ITEM_PIPELINES setting
 # See: http://doc.scrapy.org/en/latest/topics/item-pipeline.html
+import re
+
 from scrapy.exceptions import DropItem
 
 
@@ -39,5 +41,16 @@ class ApplySpiderLevelAttributesPipeline(object):
         for (key, value) in item_attributes.items():
             if key not in item:
                 item[key] = value
+
+        return item
+
+
+class ExtractGBPostcodePipeline(object):
+    def process_item(self, item, spider):
+        if item.get("country") == "GB":
+            if item.get("addr_full") and not item.get("postcode"):
+                postcode = re.search(r"(\w{1,2}\d{1,2}\w? \d\w{2})", item["addr_full"])
+                if postcode:
+                    item["postcode"] = postcode.group(1)
 
         return item

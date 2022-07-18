@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import os
 
 # Scrapy settings for locations project
 #
@@ -9,6 +8,8 @@ import os
 #     http://doc.scrapy.org/en/latest/topics/settings.html
 #     http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html
 #     http://scrapy.readthedocs.org/en/latest/topics/spider-middleware.html
+
+import os
 import locations
 import scrapy
 
@@ -84,6 +85,7 @@ ITEM_PIPELINES = {
     "locations.pipelines.DuplicatesPipeline": 200,
     "locations.pipelines.ApplySpiderNamePipeline": 250,
     "locations.pipelines.ApplySpiderLevelAttributesPipeline": 300,
+    "locations.pipelines.ExtractGBPostcodePipeline": 400,
 }
 
 

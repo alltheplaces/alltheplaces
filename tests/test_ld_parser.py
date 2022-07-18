@@ -32,7 +32,11 @@ def test_ld():
                 "priceRange": "$$",
                 "servesCuisine": ["Middle Eastern", "Mediterranean"],
                 "telephone": "(408) 714-1489",
-                "url": "http://www.greatfood.com"
+                "url": "http://www.greatfood.com",
+                "brand": {
+                    "@type": "Brand",
+                    "name": "GreatFood"
+                }
             }
             """
         )
@@ -50,6 +54,7 @@ def test_ld():
     assert i["phone"] == "(408) 714-1489"
     assert i["website"] == "http://www.greatfood.com"
     assert i["ref"] is None
+    assert i["brand"] == "GreatFood"
 
 
 def test_ld_lat_lon():
@@ -73,3 +78,24 @@ def test_ld_lat_lon():
 
     assert i["lat"] == "40.75"
     assert i["lon"] == "-73.98"
+
+
+def test_flat_properties():
+    i = GeojsonPointItem()
+    i.from_linked_data(
+        json.loads(
+            """
+            {
+                "@context": "https://schema.org",
+                "@type": "Place",
+                "address": "a, b, c",
+                "image": "https://example.org/image",
+                "brand": "Example"
+            }
+            """
+        )
+    )
+
+    assert i["addr_full"] == "a, b, c"
+    assert i["image"] == "https://example.org/image"
+    assert i["brand"] == "Example"
