@@ -8,11 +8,17 @@ from locations.items import GeojsonPointItem
 
 class BQSpider(scrapy.Spider):
     name = "bq"
-    item_attributes = {"brand": "B&Q"}
+    item_attributes = {"brand": "B&Q", "brand_wikidata": "Q707602"}
     allowed_domains = ["www.diy.com"]
     # To get a new atmosphere_app_id key, check Network calls within https://www.diy.com/find-a-store/ (call to api.kingfisher.com)
+    custom_settings = {
+        "DEFAULT_REQUEST_HEADERS": {
+            "Authorization": "Atmosphere atmosphere_app_id=kingfisher-7c4QgmLEROp4PUh0oUebbI94"
+        }
+    }
+
     start_urls = (
-        "https://api.kingfisher.com/v1/mobile/stores/BQUK?nearLatLong=51.515617%2C-0.091998&page[size]=500&atmosphere_app_id=kingfisher-7c4QgmLEROp4PUh0oUebbI94",
+        "https://api.kingfisher.com/v1/mobile/stores/BQUK?nearLatLong=51.515617%2C-0.091998&page[size]=500",
     )
 
     def parse(self, response):

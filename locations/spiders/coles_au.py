@@ -7,7 +7,7 @@ import json
 from locations.items import GeojsonPointItem
 
 
-class ColesSpider(scrapy.Spider):
+class ColesAUSpider(scrapy.Spider):
     name = "coles_au"
     item_attributes = {"brand": "Coles", "brand_wikidata": "Q1108172"}
     allowed_domains = ["apigw.coles.com.au"]

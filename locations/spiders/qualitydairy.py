@@ -5,13 +5,11 @@ import re
 
 from locations.items import GeojsonPointItem
 
-URL = "qualitydairy.com"
 
-
-class QuiznosSpider(scrapy.Spider):
+class QualityDairySpider(scrapy.Spider):
     name = "qualitydiary"
     item_attributes = {"brand": "Quality Dairy", "brand_wikidata": "Q23461886"}
-    allowed_domains = [URL]
+    allowed_domains = ["qualitydairy.com"]
     start_urls = ("http://qualitydairy.com/v15/stores/",)
 
     def normalize_time(self, time_str):

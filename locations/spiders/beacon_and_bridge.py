@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import scrapy
-import traceback
 
 from locations.items import GeojsonPointItem
 

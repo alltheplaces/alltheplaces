@@ -10,7 +10,7 @@ regex_phone = r"^\s?\d{3}\.\d{3}\.\d{4}"
 regex_name = r"^(\s?[a-zA-z]+/?\s?[a-zA-z]{0,10}\s?Bob's)"
 
 
-class BobsSpider(scrapy.Spider):
+class BobsBurgersSpider(scrapy.Spider):
     name = "bobs"
     item_attributes = {"brand": "Bob's Burgers"}
     allowed_domains = ["www.bobsburgersandbrew.com"]

@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 import json
-import scrapy
 
+from scrapy.spiders import SitemapSpider
 from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
 
 
-class SpecsaversSpider(scrapy.spiders.SitemapSpider):
+class SpecsaversSpider(SitemapSpider):
     download_delay = 1
     name = "specsavers"
     item_attributes = {"brand": "Specsavers", "brand_wikidata": "Q2000610"}

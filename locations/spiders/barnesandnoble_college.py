@@ -6,7 +6,7 @@ import scrapy
 from locations.items import GeojsonPointItem
 
 
-class BarnesNobleCollegeSpider(scrapy.Spider):
+class BarnesAndNobleCollegeSpider(scrapy.Spider):
     name = "barnesnoblecollege"
     item_attributes = {"brand": "Barnes & Noble College", "brand_wikidata": "Q4861508"}
     allowed_domains = ["bncollege.com"]

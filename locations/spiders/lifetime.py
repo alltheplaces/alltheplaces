@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 import scrapy
 import json
+
 from locations.items import GeojsonPointItem
 
 
-class LifetimeFitnessSpider(scrapy.Spider):
+class LifetimeSpider(scrapy.Spider):
     name = "lifetimefitness"
     item_attributes = {"brand": "Lifetime", "brand_wikidata": "Q6545004"}
     allowed_domains = ["lifetime.life"]

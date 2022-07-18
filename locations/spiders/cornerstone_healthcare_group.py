@@ -3,7 +3,7 @@ import scrapy
 from locations.items import GeojsonPointItem
 
 
-class Cornerstone_healthcare_groupSpider(scrapy.Spider):
+class CornerstoneHealthcareGroupSpider(scrapy.Spider):
     name = "cornerstone_healthcare_group"
     item_attributes = {"brand": "Cornerstone Healthcare Group"}
     allowed_domains = ["chghospitals.com"]

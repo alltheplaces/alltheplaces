@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*-
 import re
-
 import scrapy
 
 from locations.items import GeojsonPointItem
 
 
-class CompletudeFrancaiseSpider(scrapy.Spider):
+class CompletudeSpider(scrapy.Spider):
     name = "completude"
-    item_attributes = {"brand": "Completude"}
+    item_attributes = {"brand": "Complétude", "brand_wikidata": "Q2990589"}
     allowed_domains = ["completude.com"]
     start_urls = ["https://www.completude.com/mon-agence/"]
 

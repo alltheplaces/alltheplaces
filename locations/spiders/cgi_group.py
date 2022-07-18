@@ -4,7 +4,7 @@ import scrapy
 from locations.items import GeojsonPointItem
 
 
-class CGISpider(scrapy.Spider):
+class CGIGroupSpider(scrapy.Spider):
     name = "cgi_group"
     item_attributes = {"brand": "CGI Group", "brand_wikidata": "Q1798370"}
     allowed_domains = ["cgi.com"]

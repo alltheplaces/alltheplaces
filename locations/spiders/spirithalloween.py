@@ -6,12 +6,7 @@ import scrapy
 from locations.items import GeojsonPointItem
 
 
-SCRIPT_JSON = 'normalize-space(//script[@type="application/ld+json"]/text())'
-PHONE = 'normalize-space(//span[@class="telephone-text bold"]//text())'
-
-
-class SpiritHalloween(scrapy.Spider):
-
+class SpiritHalloweenSpider(scrapy.Spider):
     name = "spirit-halloween"
     item_attributes = {"brand": "Spirit Halloween"}
     download_delay = 0.2
@@ -20,7 +15,11 @@ class SpiritHalloween(scrapy.Spider):
 
     def parse_stores(self, response):
 
-        app_json = json.loads(response.xpath(SCRIPT_JSON).extract_first())
+        app_json = json.loads(
+            response.xpath(
+                'normalize-space(//script[@type="application/ld+json"]/text())'
+            ).extract_first()
+        )
         hours = app_json[0]["openingHours"].replace(" - ", "-").split()
         hours = [re.sub(r"[:]$", "", day_hour) for day_hour in hours]
 

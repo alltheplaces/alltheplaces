@@ -17,6 +17,7 @@ DAY_MAPPING = {
 
 class RossmannDeSpider(scrapy.Spider):
     name = "rossmann_de"
+    item_attributes = {"brand": "Rossmann", "brand_wikidata": "Q316004"}
     allowed_domains = ["www.rossmann.de"]
     start_urls = ("https://www.rossmann.de/de/filialen/assets/data/locations.json",)
     download_delay = 0.2

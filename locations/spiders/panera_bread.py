@@ -4,7 +4,7 @@ import scrapy
 from locations.items import GeojsonPointItem
 
 
-class PaneraBread(scrapy.Spider):
+class PaneraBreadSpider(scrapy.Spider):
 
     name = "panera"
     item_attributes = {"brand": "Panera Bread", "brand_wikidata": "Q7130852"}

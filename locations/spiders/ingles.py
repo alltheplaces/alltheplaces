@@ -5,8 +5,6 @@ import re
 from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
 
-URL = "https://www.ingles-markets.com/storelocate/storelocator.php?address="
-
 STORE_STATES = [
     "Alabama",
     "Georgia",
@@ -19,14 +17,18 @@ STORE_STATES = [
 DAYS = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
 
 
-class ingles(scrapy.Spider):
+class InglesSpider(scrapy.Spider):
     name = "ingles"
     item_attributes = {"brand": "Ingles", "brand_wikidata": "Q6032595"}
     allowed_domains = ["www.ingles-markets.com"]
 
     def start_requests(self):
         for state in STORE_STATES:
-            yield scrapy.Request(URL + state, callback=self.parse)
+            yield scrapy.Request(
+                "https://www.ingles-markets.com/storelocate/storelocator.php?address="
+                + state,
+                callback=self.parse,
+            )
 
     def parse_hours(self, hours):
         opening_hours = OpeningHours()

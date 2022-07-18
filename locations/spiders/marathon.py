@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 import scrapy
+
 from locations.items import GeojsonPointItem
 
 
-class MarathonScraper(scrapy.Spider):
+class MarathonSpider(scrapy.Spider):
     name = "marathon"
     item_attributes = {"brand": "Marathon Petroleum", "brand_wikidata": "Q458363"}
 

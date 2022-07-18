@@ -10,7 +10,7 @@ DAYS = r"M|Tue|Wed|Thu|Sat|Sun|Fri"
 AM_PM = r"am|pm|a.m.|p.m.|a|p"
 
 
-class MyCountyMarketSpider(scrapy.Spider):
+class CountyMarketSpider(scrapy.Spider):
     name = "county_market"
     item_attributes = {"brand": "County Market"}
     allowed_domains = [

@@ -7,7 +7,7 @@ from locations.hours import OpeningHours
 
 class CostaCoffeeIESpider(scrapy.Spider):
     name = "costacoffee_ie"
-    item_attributes = {"brand": "Costa Coffee"}
+    item_attributes = {"brand": "Costa Coffee", "brand_wikidata": "Q608845"}
     allowed_domains = ["costaireland.ie"]
     # May need to do pagination at some point
     start_urls = ["https://www.costaireland.ie/api/cf/?content_type=storeV2&limit=500"]

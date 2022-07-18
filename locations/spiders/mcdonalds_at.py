@@ -1,6 +1,7 @@
 import json
 import re
 import scrapy
+
 from locations.items import GeojsonPointItem
 
 day_formats = {
@@ -16,7 +17,7 @@ day_formats = {
 
 class McDonaldsATSpider(scrapy.Spider):
     name = "mcdonalds_at"
-    item_attributes = {"brand": "McDonald's"}
+    item_attributes = {"brand": "McDonald's", "brand_wikidata": "Q38076"}
     allowed_domains = ["www.mcdonalds.at"]
 
     start_urls = ("http://www.mcdonalds.at/restaurant-finder",)

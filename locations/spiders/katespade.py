@@ -1,5 +1,6 @@
 import scrapy
 import re
+
 from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
 
@@ -17,7 +18,7 @@ DAYS_NAME = {
 HEADERS = {"Accept": "application/json"}
 
 
-class KateSpade(scrapy.Spider):
+class KateSpadeSpider(scrapy.Spider):
     name = "katespade"
     allowed_domains = ["katespade.com", "katespade.brickworksoftware.com"]
 

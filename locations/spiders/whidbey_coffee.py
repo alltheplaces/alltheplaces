@@ -1,11 +1,12 @@
-from datetime import datetime
 import scrapy
 import re
+
+from datetime import datetime
 from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
 
 
-class WhidbeycoffeeSpider(scrapy.Spider):
+class WhidbeyCoffeeSpider(scrapy.Spider):
 
     name = "whidbeycoffee"
     item_attributes = {"brand": "Whidbey Coffee"}

@@ -6,7 +6,7 @@ import scrapy
 from locations.items import GeojsonPointItem
 
 
-class jefferson_univ_hosp(scrapy.Spider):
+class JeffersonUniversityHospitalSpider(scrapy.Spider):
     name = "jefferson_univ_hosp"
     item_attributes = {
         "brand": "Jefferson University Hospital",

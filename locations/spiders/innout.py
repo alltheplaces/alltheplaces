@@ -3,7 +3,7 @@ import scrapy
 from locations.items import GeojsonPointItem
 
 
-class TemplateSpider(scrapy.Spider):
+class InNOutSpider(scrapy.Spider):
     name = "innout"
     item_attributes = {"brand": "In-N-Out Burger", "brand_wikidata": "Q1205312"}
 

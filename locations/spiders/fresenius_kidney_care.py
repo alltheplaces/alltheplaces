@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import json
 import re
-
 import scrapy
 
 from locations.items import GeojsonPointItem
@@ -18,7 +17,7 @@ DAY_MAPPING = {
 }
 
 
-class FreseniusKidneyCare(scrapy.Spider):
+class FreseniusKidneyCareSpider(scrapy.Spider):
     name = "freseniuskidneycare"
     item_attributes = {"brand": "Fresenius Kidney Care", "brand_wikidata": "Q650259"}
     allowed_domains = ["www.freseniuskidneycare.com"]

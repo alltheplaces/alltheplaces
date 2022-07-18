@@ -23,12 +23,17 @@ class LowesSpider(scrapy.Spider):
     name = "lowes"
     item_attributes = {"brand": "Lowe's", "brand_wikidata": "Q1373493"}
     allowed_domains = ["lowes.com"]
-    start_urls = ("https://www.lowes.com/sitemap/store0.xml",)
-    download_delay = 0.5
-
+    download_delay = 0.1
     custom_settings = {
-        "USER_AGENT": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.86 Safari/537.36",
+        "ROBOTSTXT_OBEY": False,
+        "USER_AGENT": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36 RuxitSynthetic/1.0 v2946028852165593646 t2919217341348717815",
     }
+
+    def start_requests(self):
+        yield scrapy.Request(
+            url="https://www.lowes.com/sitemap/store0.xml",
+            callback=self.parse,
+        )
 
     def parse_hours(self, store_hours):
         opening_hours = OpeningHours()

@@ -1,13 +1,13 @@
 import scrapy
 import re
 import json
+
 from locations.items import GeojsonPointItem
 
 
-class ArgosSpider(scrapy.Spider):
-
+class HomebaseSpider(scrapy.Spider):
     name = "homebase"
-    item_attributes = {"brand": "Homebase"}
+    item_attributes = {"brand": "Homebase", "brand_wikidata": "Q9293447"}
     allowed_domains = ["www.homebase.co.uk"]
     download_delay = 0.5
     start_urls = ("https://www.homebase.co.uk/stores",)

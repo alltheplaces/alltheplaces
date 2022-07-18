@@ -7,7 +7,7 @@ from locations.hours import OpeningHours
 from scrapy.spiders import SitemapSpider
 
 
-class HomeDepotCanadaSpider(SitemapSpider):
+class HomeDepotCASpider(SitemapSpider):
     name = "homedepot_ca"
     item_attributes = {"brand": "The Home Depot", "brand_wikidata": "Q864407"}
     allowed_domains = ["homedepot.ca"]

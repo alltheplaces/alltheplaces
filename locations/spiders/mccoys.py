@@ -7,7 +7,10 @@ from locations.hours import OpeningHours
 
 class McCoysSpider(scrapy.Spider):
     name = "mccoys"
-    item_attributes = {"brand": "McCoy's Building Supply"}
+    item_attributes = {
+        "brand": "McCoy's Building Supply",
+        "brand_wikidata": "Q27877295",
+    }
     allowed_domains = ["www.mccoys.com"]
     download_delay = 0.5
     start_urls = ("https://www.mccoys.com/stores",)

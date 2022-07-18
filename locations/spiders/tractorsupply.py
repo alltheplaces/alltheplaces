@@ -17,7 +17,7 @@ DAYS_NAME = {
 
 class TractorSupplySpider(scrapy.Spider):
     name = "tractorsupply"
-    item_attributes = {"brand": "Tractor Supply"}
+    item_attributes = {"brand": "Tractor Supply", "brand_wikidata": "Q15109925"}
     allowed_domains = ["tractorsupply.com"]
     download_delay = 1.5
     custom_settings = {

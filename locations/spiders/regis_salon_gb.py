@@ -1,12 +1,13 @@
 import scrapy
-from locations.items import GeojsonPointItem
 import re
+
+from locations.items import GeojsonPointItem
 
 regex_am = r"\s?([Aa][Mm])"
 regex_pm = r"\s?([Pp][Mm])"
 
 
-class RegisUKSpider(scrapy.Spider):
+class RegisSalonGBSpider(scrapy.Spider):
     name = "regis_uk"
     item_attributes = {"brand": "Regis Salon", "brand_wikidata": "Q110166032"}
     allowed_domains = ["www.regissalons.co.uk"]

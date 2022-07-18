@@ -1,11 +1,11 @@
-import scrapy
-import re
-from locations.items import GeojsonPointItem
 import json
+import re
+import scrapy
+
+from locations.items import GeojsonPointItem
 
 
-class CVSSpider(scrapy.Spider):
-
+class PizzaRanchSpider(scrapy.Spider):
     name = "pizzaranch"
     item_attributes = {"brand": "Pizza Ranch"}
     allowed_domains = ["pizzaranch.com"]

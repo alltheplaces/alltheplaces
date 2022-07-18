@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import scrapy
+
 from locations.items import GeojsonPointItem
 
 brand_lookup = {"MS": "Motel 6", "SS": "Studio 6", "HS": "Hotel 6"}
@@ -7,6 +8,7 @@ brand_lookup = {"MS": "Motel 6", "SS": "Studio 6", "HS": "Hotel 6"}
 
 class Motel6Spider(scrapy.Spider):
     name = "motel6"
+    item_attributes = {"brand": "Motel 6", "brand_wikidata": "Q2188884"}
     allowed_domains = ["motel6.com"]
     start_urls = ("https://www.motel6.com/content/g6-cache/property-summary.1.json",)
 

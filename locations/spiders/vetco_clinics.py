@@ -1,15 +1,14 @@
 # -*- coding: utf-8 -*-
 import re
-
 import scrapy
 
 from locations.items import GeojsonPointItem
 from scrapy.selector import Selector
 
 
-class VetcoSpider(scrapy.Spider):
+class VetcoClinicsSpider(scrapy.Spider):
     name = "vetco"
-    item_attributes = {"brand": "vetcoclinics"}
+    item_attributes = {"brand": "Vetco Clinics"}
     allowed_domains = ["vetcoclinics.com"]
     start_urls = (
         "https://www.vetcoclinics.com/services-and-clinics/vaccination-clinics-by-state/",

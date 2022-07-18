@@ -2,10 +2,9 @@ import scrapy
 
 from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
-from scrapy.spiders import Spider
 
 
-class CeXSpider(Spider):
+class CeXSpider(scrapy.Spider):
     name = "cex"
     item_attributes = {"brand": "CeX", "brand_wikidata": "Q5055676", "country": "GB"}
     allowed_domains = ["wss2.cex.uk.webuy.io"]

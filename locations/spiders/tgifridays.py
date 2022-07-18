@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
-import datetime
-import re
 import json
-
 import scrapy
+
 from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
 
@@ -19,7 +17,7 @@ DAY_MAPPING = {
 }
 
 
-class TGIFridaySpider(scrapy.Spider):
+class TGIFridaysSpider(scrapy.Spider):
     download_delay = 0.2
     name = "tgifridays"
     item_attributes = {"brand": "TGI Friday's", "brand_wikidata": "Q1524184"}

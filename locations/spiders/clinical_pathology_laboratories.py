@@ -7,7 +7,7 @@ from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
 
 
-class Clinical_pathology_laboratoriesSpider(scrapy.Spider):
+class ClinicalPathologyLaboratoriesSpider(scrapy.Spider):
     name = "clinical_pathology_laboratories"
     item_attributes = {
         "brand": "Clinical Pathology Laboratories",
