@@ -1,62 +1,76 @@
 # -*- coding: utf-8 -*-
 import re
 
-import scrapy
-
+from locations.hours import OpeningHours
 from locations.items import GeojsonPointItem
+from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule
 
 
-class MyDentistGBSpider(scrapy.Spider):
-    # download_delay = 0.2
+class MyDentistGBSpider(CrawlSpider):
     name = "mydentist_uk"
-    item_attributes = {"brand": "MY DENTIST", "brand_wikidata": "Q65118035"}
+    item_attributes = {
+        "brand": "My Dentist",
+        "brand_wikidata": "Q65118035",
+        "country": "GB",
+    }
     allowed_domains = ["mydentist.co.uk"]
+    start_urls = ["https://www.mydentist.co.uk/dentists/practices/"]
+    rules = [
+        Rule(
+            link_extractor=LinkExtractor(
+                allow=r"https:\/\/www\.mydentist\.co\.uk\/dentists\/practices\/([\w]+)(\/[-\w]+)?(\/[-\w]+)?$",
+            ),
+        ),
+        Rule(
+            link_extractor=LinkExtractor(
+                allow=r"https:\/\/www\.mydentist\.co\.uk\/dentists\/practices\/([\w]+)\/([-\w]+)\/([-\w]+)\/([-\w]+)$",
+            ),
+            callback="parse_item",
+        ),
+    ]
 
-    start_urls = ["https://www.mydentist.co.uk/"]
+    def parse_item(self, response):
+        if response.url.startswith("https://www.mydentist.co.uk/error-pages"):
+            return
 
-    def parse(self, response):
-        with open(
-            "./locations/searchable_points/eu_centroids_120km_radius_country.csv"
-        ) as points:
-            next(points)
-            for point in points:
-                row = point.replace("\n", "").split(",")
-                lati = row[1]
-                long = row[2]
-                country = row[3]
-                if country == "UK":
-                    searchurl = "https://www.mydentist.co.uk/Workflow/DentistSearch/_SearchResult?searchData=&clientLat={la}&clientLng={lo}&searchoption=private%2Cnhs%2Cortho%2C&numberOfResults=1000&widgetName=DentistSearch&quickContronFormOptions=&isquickContactForm=False&_=1632838745154".format(
-                        la=lati, lo=long
-                    )
-                    yield scrapy.Request(
-                        response.urljoin(searchurl), callback=self.parse_search
-                    )
+        root = response.xpath(
+            '//body[@itemscope][@itemtype="http://schema.org/LocalBusiness"]'
+        )
 
-    def parse_search(self, response):
-        stores = response.xpath('//div[@class="practice-details"]').extract()
-        for i in stores:
-            store = re.sub(" +", " ", i)
-            store = re.sub("\\r\\n", "", store)
-            address = (
-                re.search("/strong><br> (.+?) <br>", store).group(1).split(", ")[0]
-            )
-            city = re.search("/strong><br> (.+?) <br>", store).group(1).split(", ")[1]
-            zip = re.search("/strong><br> (.+?) <br>", store).group(1).split(", ")[2]
-            phone = re.search('tel">(.+?)</a>', store).group(1)
-            lat = float(re.search('latitude="(.+?)" data-lon', store).group(1))
-            lon = float(re.search('longitude="(.+?)"> <strong', store).group(1))
-            ref = re.search('data-title="(.+?)" data-lati', store).group(1)
+        item = GeojsonPointItem()
 
-            properties = {
-                "ref": ref,
-                "name": "MyDentist",
-                "addr_full": address,
-                "city": city,
-                "postcode": zip,
-                "country": "UK",
-                "phone": phone,
-                "lat": lat,
-                "lon": lon,
-            }
+        item["lat"] = re.search(r"\"_readModeLat\":(-?[\d.]+),", response.text).group(1)
+        item["lon"] = re.search(r"\"_readModeLon\":(-?[\d.]+),", response.text).group(1)
 
-            yield GeojsonPointItem(**properties)
+        item["name"] = root.xpath('.//span[@itemprop="name"]/text()').get()
+
+        address = root.xpath('.//div[@itemprop="address"][@itemscope]')
+        item["street_address"] = address.xpath(
+            './/span[@itemprop="streetAddress"]/text()'
+        ).get()
+        item["city"] = root.xpath('.//span[@itemprop="addressLocality"]/text()').get()
+        item["state"] = root.xpath('.//span[@itemprop="addressLocality"]/text()').get()
+        item["postcode"] = root.xpath('.//span[@itemprop="postalCode"]/text()').get()
+
+        item["phone"] = root.xpath('.//span[@itemprop="telephone"]/a/@href').get()
+        if item.get("phone"):
+            item["phone"] = item["phone"].replace("tel:", "")
+
+        # item["email"] = root.xpath('.//span[@itemprop="email"]/a/@href').get()
+        # if item.get("email"):
+        #    item["email"] = item["email"].replace("mailto:", "")
+
+        item["website"] = response.url
+
+        oh = OpeningHours()
+        for rule in root.xpath('.//time[@itemprop="openingHours"]/@datetime').getall():
+            day, times = rule.split(" ")
+            open_time, close_time = times.split("-")
+            oh.add_range(day[:2], open_time, close_time)
+
+        item["opening_hours"] = oh.as_opening_hours()
+
+        item["ref"] = response.url
+
+        yield item
