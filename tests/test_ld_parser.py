@@ -1,11 +1,10 @@
 import json
 
-from locations.items import GeojsonPointItem
+from locations.linked_data_parser import LinkedDataParser
 
 
 def test_ld():
-    i = GeojsonPointItem()
-    i.from_linked_data(
+    i = LinkedDataParser.parse_ld(
         json.loads(
             """
             {
@@ -58,8 +57,7 @@ def test_ld():
 
 
 def test_ld_lat_lon():
-    i = GeojsonPointItem()
-    i.from_linked_data(
+    i = LinkedDataParser.parse_ld(
         json.loads(
             """
             {
@@ -81,8 +79,7 @@ def test_ld_lat_lon():
 
 
 def test_flat_properties():
-    i = GeojsonPointItem()
-    i.from_linked_data(
+    i = LinkedDataParser.parse_ld(
         json.loads(
             """
             {
