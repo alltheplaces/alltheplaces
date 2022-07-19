@@ -120,14 +120,17 @@ class OpeningHours(object):
                 rules = linked_data["openingHours"]
 
             for rule in rules:
-                days, times = rule.split(" ")
+                days, time_ranges = rule.split(" ", 1)
 
-                start_time, end_time = times.split("-")
+                for time_range in time_ranges.split(","):
+                    start_time, end_time = time_range.split("-")
 
-                if "-" in days:
-                    start_day, end_day = days.split("-")
-                    for i in range(DAYS.index(start_day), DAYS.index(end_day) + 1):
-                        self.add_range(DAYS[i], start_time, end_time, time_format)
-                else:
-                    for day in days.split(","):
-                        self.add_range(day.strip(), start_time, end_time, time_format)
+                    if "-" in days:
+                        start_day, end_day = days.split("-")
+                        for i in range(DAYS.index(start_day), DAYS.index(end_day) + 1):
+                            self.add_range(DAYS[i], start_time, end_time, time_format)
+                    else:
+                        for day in days.split(","):
+                            self.add_range(
+                                day.strip(), start_time, end_time, time_format
+                            )

@@ -157,6 +157,21 @@ def test_ld_parse_openingHours_array():
     assert o.as_opening_hours() == "Mo-Fr 10:00-19:00; Sa 10:00-22:00; Su 10:00-21:00"
 
 
+def test_ld_parse_openingHours_array_with_commas():
+    o = OpeningHours()
+    o.from_linked_data(
+        json.loads(
+            """
+            {
+                "@context": "https://schema.org",
+                "openingHours": ["Mo-Su 00:00-01:00, 04:00-00:00"],
+            }
+            """
+        )
+    )
+    assert o.as_opening_hours() == "Mo-Su 00:00-01:00, 04:00-00:00"
+
+
 def test_ld_parse_time_format():
     o = OpeningHours()
     o.from_linked_data(
