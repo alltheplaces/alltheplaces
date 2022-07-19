@@ -34,16 +34,21 @@ class LinkedDataParser(object):
         item["name"] = ld.get("name")
 
         if ld.get("address"):
-            if isinstance(ld["address"], str):
-                item["addr_full"] = ld["address"]
-            elif ld["address"].get("@type") == "PostalAddress":
-                item["street_address"] = ld["address"].get("streetAddress")
-                item["city"] = ld["address"].get("addressLocality") or \
-                               ld["address"].get("addresslocality")
-                item["state"] = ld["address"].get("addressRegion") or \
-                                ld["address"].get("addressregion")
-                item["postcode"] = ld["address"].get("postalCode")
-                item["country"] = ld["address"].get("addressCountry")
+            addr = ld["address"]
+            if isinstance(addr, str):
+                item["addr_full"] = addr
+            elif addr.get("@type") == "PostalAddress":
+                item["street_address"] = addr.get("streetAddress") or addr.get(
+                    "streetaddress"
+                )
+                item["city"] = addr.get("addressLocality") or addr.get(
+                    "addresslocality"
+                )
+                item["state"] = addr.get("addressRegion") or addr.get("addressregion")
+                item["postcode"] = addr.get("postalCode") or addr.get("postalcode")
+                item["country"] = addr.get("addressCountry") or addr.get(
+                    "addresscountry"
+                )
 
         item["phone"] = ld.get("telephone")
         item["website"] = ld.get("url")
