@@ -20,7 +20,6 @@ class GoOutdoorsSpider(CrawlSpider):
             callback="parse",
         )
     ]
-    download_delay = 10
 
     def parse(self, response):
         store = LinkedDataParser.find_linked_data(response, "LocalBusiness")
