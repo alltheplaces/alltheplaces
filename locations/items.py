@@ -68,6 +68,9 @@ class GeojsonPointItem(scrapy.Item):
 
         self["ref"] = ld.get("branchCode")
 
+        if self["ref"] is None:
+            self["ref"] = ld.get("@id")
+
         if ld.get("brand"):
             if isinstance(ld["brand"], str):
                 self["brand"] = ld["brand"]
