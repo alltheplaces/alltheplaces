@@ -22,5 +22,8 @@ def url_to_coords(url: str) -> (float, float):
         query = dict(parse_qsl(url))
         lat, lon = query["center"].split(",")
         return float(lat), float(lon)
+    elif url.startswith("https://www.google.com/maps/@"):
+        lat, lon, _ = url.replace("https://www.google.com/maps/@", "").split(",")
+        return float(lat), float(lon)
 
     return None
