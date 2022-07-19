@@ -56,6 +56,48 @@ def test_ld():
     assert i["brand"] == "GreatFood"
 
 
+def test_ld_lowercase_attributes():
+    i = LinkedDataParser.parse_ld(
+        json.loads(
+            """
+            {
+                "@context": "http://schema.org",
+                "@type": "ConvenienceStore",
+                "name": "KEARNEY #7",
+                "address": {
+                    "@type": "PostalAddress",
+                    "addressCountry": "US",
+                    "addressregion": "NE",
+                    "postalCode": "68847",
+                    "streetAddress": "1107 2ND AVE"
+                },
+                "openingHours": [
+                    "Mo-Su 05:00-23:00"
+                ],
+                "telephone": "(308) 234-3062",
+                "geo": {
+                    "@type":"http://schema.org/GeoCoordinates",
+                    "longitude": "-99.08411",
+                    "latitude": "40.6862"
+                }
+            }
+            """
+        )
+    )
+
+    assert i["state"] == "NE"
+    assert i["postcode"] == "68847"
+    assert i["street_address"] == "1107 2ND AVE"
+    assert i["name"] == "KEARNEY #7"
+    assert i["opening_hours"] == "Mo-Su 05:00-23:00"
+    assert i["phone"] == "(308) 234-3062"
+    assert i["website"] is None
+    assert i["ref"] is None
+    assert i["brand"] is None
+    assert i["lat"] == "40.6862"
+    assert i["lon"] == "-99.08411"
+
+
 def test_ld_lat_lon():
     i = LinkedDataParser.parse_ld(
         json.loads(
