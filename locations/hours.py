@@ -125,6 +125,9 @@ class OpeningHours(object):
                 for time_range in time_ranges.split(","):
                     start_time, end_time = time_range.split("-")
 
+                    start_time = start_time.strip()
+                    end_time = end_time.strip()
+
                     if "-" in days:
                         start_day, end_day = days.split("-")
                         for i in range(DAYS.index(start_day), DAYS.index(end_day) + 1):
