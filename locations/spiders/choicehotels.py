@@ -8,11 +8,13 @@ class ChoiceHotelsSpider(SitemapSpider):
     name = "choicehotels"
     item_attributes = {"brand": "Choice Hotels", "brand_wikidata": "Q1075788"}
     allowed_domains = ["choicehotels.com"]
-    download_delay = 0.2
-    user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36"
     sitemap_urls = [
         "https://www.choicehotels.com/propertysitemap.xml",
     ]
+    custom_settings = {
+        "DOWNLOAD_DELAY": 0.2,
+        "USER_AGENT": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36",
+    }
 
     brand_mapping = {
         "AC": ("Ascend Hotel Collection", "Q113152464"),
@@ -48,7 +50,7 @@ class ChoiceHotelsSpider(SitemapSpider):
         properties = {
             "ref": data["property"]["id"],
             "name": data["property"]["name"],
-            "addr_full": data["property"]["address"]["line1"],
+            "street_address": data["property"]["address"]["line1"],
             "city": data["property"]["address"]["city"],
             "state": data["property"]["address"].get("subdivision"),
             "postcode": data["property"]["address"].get("postalCode"),
