@@ -38,8 +38,10 @@ class LinkedDataParser(object):
                 item["addr_full"] = ld["address"]
             elif ld["address"].get("@type") == "PostalAddress":
                 item["street_address"] = ld["address"].get("streetAddress")
-                item["city"] = ld["address"].get("addressLocality") or ld["address"].get("addresslocality")
-                item["state"] = ld["address"].get("addressRegion") or ld["address"].get("addressregion")
+                item["city"] = ld["address"].get("addressLocality") or \
+                               ld["address"].get("addresslocality")
+                item["state"] = ld["address"].get("addressRegion") or \
+                                ld["address"].get("addressregion")
                 item["postcode"] = ld["address"].get("postalCode")
                 item["country"] = ld["address"].get("addressCountry")
 
