@@ -27,7 +27,11 @@ class LinkedDataParser(object):
         item = GeojsonPointItem()
 
         if ld.get("geo"):
-            if ld["geo"].get("@type") == "GeoCoordinates":
+            if ld["geo"].get("@type") in (
+                "GeoCoordinates",
+                "http://schema.org/GeoCoordinates",
+                "https://schema.org/GeoCoordinates",
+            ):
                 item["lat"] = ld["geo"].get("latitude")
                 item["lon"] = ld["geo"].get("longitude")
 

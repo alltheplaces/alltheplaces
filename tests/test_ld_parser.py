@@ -94,6 +94,8 @@ def test_ld_lowercase_attributes():
     assert i["website"] is None
     assert i["ref"] is None
     assert i["brand"] is None
+    assert i["lat"] == "40.6862"
+    assert i["lon"] == "-99.08411"
 
 
 def test_ld_lat_lon():
