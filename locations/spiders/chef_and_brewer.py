@@ -1,7 +1,6 @@
 from scrapy.spiders import SitemapSpider
 
-from locations.items import GeojsonPointItem
-from locations.utils import find_linked_data
+from locations.linked_data_parser import LinkedDataParser
 
 
 class ChefAndBrewerSpider(SitemapSpider):
@@ -17,12 +16,4 @@ class ChefAndBrewerSpider(SitemapSpider):
     ]
 
     def parse(self, response):
-        pub = find_linked_data(response, "BarOrPub")
-
-        if pub:
-            item = GeojsonPointItem()
-            item.from_linked_data(pub)
-
-            item["website"] = response.url
-
-            yield item
+        yield LinkedDataParser.parse(response, "BarOrPub")

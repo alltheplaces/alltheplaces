@@ -2,8 +2,7 @@ from scrapy.spiders import CrawlSpider, Rule
 from scrapy.linkextractors import LinkExtractor
 
 from locations.google_url import url_to_coords
-from locations.items import GeojsonPointItem
-from locations.utils import find_linked_data
+from locations.linked_data_parser import LinkedDataParser
 
 
 class GoOutdoorsSpider(CrawlSpider):
@@ -24,12 +23,11 @@ class GoOutdoorsSpider(CrawlSpider):
     download_delay = 10
 
     def parse(self, response):
-        store = find_linked_data(response, "LocalBusiness")
+        store = LinkedDataParser.find_linked_data(response, "LocalBusiness")
         # There is a better SportingGoodsStore ld object, but it requires JS to load
 
         if store:
-            item = GeojsonPointItem()
-            item.from_linked_data(store)
+            item = LinkedDataParser.parse_ld(store)
 
             item["name"] = "Go Outdoors"  # Yes, they have a typeo in their own name
 
