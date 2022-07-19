@@ -1,79 +1,77 @@
 import json
 import re
-import scrapy
-
 from locations.items import GeojsonPointItem
+from scrapy.spiders import SitemapSpider
 
 
-brand_name_override = {
-    "Comfort Suites Suites": "Comfort Suites",
-    "Econo Lodge Lodge": "Econo Lodge",
-}
-
-
-class ChoiceHotelsSpider(scrapy.Spider):
+class ChoiceHotelsSpider(SitemapSpider):
     name = "choicehotels"
     item_attributes = {"brand": "Choice Hotels", "brand_wikidata": "Q1075788"}
     allowed_domains = ["choicehotels.com"]
-    download_delay = 0.2
-
-    base_url = "https://www.choicehotels.com/cms/pages/choice-hotels"
-
-    start_urls = [
-        "https://www.choicehotels.com/cms/pages/comfort-inn/sitemap?d=DESKTOP&applocale=en-us",
-        "https://www.choicehotels.com/cms/pages/comfort-suites/sitemap?d=DESKTOP&applocale=en-u",
-        "https://www.choicehotels.com/cms/pages/quality-inn/sitemap?d=DESKTOP&applocale=en-u",
-        "https://www.choicehotels.com/cms/pages/sleep-inn/sitemap?d=DESKTOP&applocale=en-u",
-        "https://www.choicehotels.com/cms/pages/clarion/sitemap?d=DESKTOP&applocale=en-u",
-        "https://www.choicehotels.com/cms/pages/cambria/sitemap?d=DESKTOP&applocale=en-u",
-        "https://www.choicehotels.com/cms/pages/mainstay/sitemap?d=DESKTOP&applocale=en-u",
-        "https://www.choicehotels.com/cms/pages/suburban/sitemap?d=DESKTOP&applocale=en-u",
-        "https://www.choicehotels.com/cms/pages/econo-lodge/sitemap?d=DESKTOP&applocale=en-u",
-        "https://www.choicehotels.com/cms/pages/rodeway-inn/sitemap?d=DESKTOP&applocale=en-u",
+    sitemap_urls = [
+        "https://www.choicehotels.com/propertysitemap.xml",
     ]
+    custom_settings = {
+        "DOWNLOAD_DELAY": 0.2,
+        "USER_AGENT": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36",
+    }
 
-    def parse_hotel(self, response):
-        script = "".join(response.xpath("//script/text()").extract())
-        data = json.loads(re.search(r"window.hotelInfoData = (.*)?;", script).group(1))
-
-        if data["hotel"]["status"] == "TERMINATED":
-            return
-
-        brand = (
-            data["hotel"]["general"]["brandName"]
-            + " "
-            + data["hotel"]["general"]["productName"]
-        )
-
-        properties = {
-            "ref": data["hotel"]["id"],
-            "name": data["hotel"]["name"],
-            "addr_full": data["hotel"]["address"]["line1"],
-            "city": data["hotel"]["address"]["city"],
-            "state": data["hotel"]["address"].get("subdivision"),
-            "postcode": data["hotel"]["address"].get("postalCode"),
-            "country": data["hotel"]["address"]["country"],
-            "phone": data["hotel"]["general"]["phone"],
-            "lat": float(data["hotel"]["general"]["lat"]),
-            "lon": float(data["hotel"]["general"]["lon"]),
-            "website": response.url,
-            "brand": brand_name_override.get(brand, brand),
-        }
-
-        yield GeojsonPointItem(**properties)
-
-    def parse_hotel_list(self, response):
-        urls = response.xpath("//p/a/@href").extract()
-        if not urls:
-            urls = response.xpath("//div/a/@href").extract()
-
-        for url in urls:
-            yield scrapy.Request(response.urljoin(url), callback=self.parse_hotel)
+    brand_mapping = {
+        "AC": ("Ascend Hotel Collection", "Q113152464"),
+        "BR": ("Cambria Hotels", "Q113152476"),
+        "CI": ("Comfort Inn", "Q113152349"),
+        "CL": ("Clarion Hotels", "Q113152454"),
+        "CS": ("Comfort Suites", "Q55525150"),
+        "EL": ("Econo Lodge", "Q5333330"),
+        "MS": ("MainStay Suites", "Q113152432"),
+        "QI": ("Quality Inn", "Q113152195"),
+        "RW": ("Rodeway Inn", "Q7356709"),
+        "SB": ("Suburban Extended Stay Hotel", "Q113152401"),
+        "SL": ("Sleep Inn", "Q69588194"),
+        "WS": ("WoodSpring Suites", "Q30672853"),
+    }
 
     def parse(self, response):
-        urls = response.xpath(
-            '//h3[contains(text(), "Locations")]/following-sibling::div//h6/a/@href'
-        ).extract()
+        script = "".join(response.xpath("//script/text()").extract())
+        data = json.loads(
+            re.search(r"window.PRELOADED_STATE = (.*)?;", script).group(1)
+        )["page"]
 
-        for url in urls:
-            yield scrapy.Request(self.base_url + url, callback=self.parse_hotel_list)
+        # Remove unused extra bits to get to the random key with the useful stuff in it
+        data.pop("referrerState", None)
+        data.pop("screenParams", None)
+        data.pop("hasUserScrolled", None)
+        data.pop("ready", None)
+        data = list(data.values())[0]
+
+        if "property" not in data:
+            return
+
+        properties = {
+            "ref": data["property"]["id"],
+            "name": data["property"]["name"],
+            "street_address": data["property"]["address"]["line1"],
+            "city": data["property"]["address"]["city"],
+            "state": data["property"]["address"].get("subdivision"),
+            "postcode": data["property"]["address"].get("postalCode"),
+            "country": data["property"]["address"]["country"],
+            "phone": data["property"]["phone"],
+            "lat": data["property"]["lat"],
+            "lon": data["property"]["lon"],
+            "brand": data["property"]["brandName"],
+            "website": response.url,
+        }
+
+        brand_info = self.brand_mapping.get(data["property"]["brandCode"])
+        if brand_info:
+            brand_name, brand_wikidata = brand_info
+            properties["brand"] = brand_name
+            properties["brand_wikidata"] = brand_wikidata
+        else:
+            self.logger.warning(
+                "Missing brand mapping for %s, %s",
+                data["property"]["brandCode"],
+                data["property"]["brandName"],
+            )
+
+        yield GeojsonPointItem(**properties)
