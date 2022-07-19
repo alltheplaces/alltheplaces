@@ -14,6 +14,21 @@ class ChoiceHotelsSpider(SitemapSpider):
         "https://www.choicehotels.com/propertysitemap.xml",
     ]
 
+    brand_mapping = {
+        "AC": ("Ascend Hotel Collection", "Q113152464"),
+        "BR": ("Cambria Hotels", "Q113152476"),
+        "CI": ("Comfort Inn", "Q113152349"),
+        "CL": ("Clarion Hotels", "Q113152454"),
+        "CS": ("Comfort Suites", "Q55525150"),
+        "EL": ("Econo Lodge", "Q5333330"),
+        "MS": ("MainStay Suites", "Q113152432"),
+        "QI": ("Quality Inn", "Q113152195"),
+        "RW": ("Rodeway Inn", "Q7356709"),
+        "SB": ("Suburban Extended Stay Hotel", "Q113152401"),
+        "SL": ("Sleep Inn", "Q69588194"),
+        "WS": ("WoodSpring Suites", "Q30672853"),
+    }
+
     def parse(self, response):
         script = "".join(response.xpath("//script/text()").extract())
         data = json.loads(
@@ -41,10 +56,20 @@ class ChoiceHotelsSpider(SitemapSpider):
             "phone": data["property"]["phone"],
             "lat": data["property"]["lat"],
             "lon": data["property"]["lon"],
+            "brand": data["property"]["brandName"],
             "website": response.url,
-            "brand": " ".join(
-                [data["property"]["brandName"], data["property"]["productName"]]
-            ),
         }
+
+        brand_info = self.brand_mapping.get(data["property"]["brandCode"])
+        if brand_info:
+            brand_name, brand_wikidata = brand_info
+            properties["brand"] = brand_name
+            properties["brand_wikidata"] = brand_wikidata
+        else:
+            self.logger.warning(
+                "Missing brand mapping for %s, %s",
+                data["property"]["brandCode"],
+                data["property"]["brandName"],
+            )
 
         yield GeojsonPointItem(**properties)
