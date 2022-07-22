@@ -9,10 +9,15 @@ class HollandAndBarrettSpider(SitemapSpider):
         "brand": "Holland & Barrett",
         "brand_wikidata": "Q5880870",
     }
-    sitemap_urls = ["https://www.hollandandbarrett.com/sitemap-stores.xml"]
+    sitemap_urls = [
+        "https://www.hollandandbarrett.com/sitemap-stores.xml",
+        "https://www.hollandandbarrett.nl/sitemap-stores.xml",
+        "https://www.hollandandbarrett.be/sitemap-stores.xml"
+        "https://www.hollandandbarrett.ie/sitemap-stores.xml",
+    ]
     sitemap_rules = [
         (
-            r"https:\/\/www\.hollandandbarrett\.com\/stores\/([-\w]+)\/$",
+            r"https:\/\/www\.hollandandbarrett\.(com|nl|be|ie)\/(stores|winkels)\/([-\w]+)\/$",
             "parse",
         )
     ]
