@@ -64,6 +64,8 @@ class LinkedDataParser(object):
         if ld.get("image"):
             if isinstance(ld["image"], str):
                 item["image"] = ld["image"]
+            elif isinstance(ld["image"], list):
+                item["image"] = ld["image"][0]
             elif ld["image"].get("@type") == "ImageObject":
                 item["image"] = ld["image"].get("contentUrl")
 
@@ -91,6 +93,10 @@ class LinkedDataParser(object):
             item = LinkedDataParser.parse_ld(ld_item)
 
             if item["website"] is None:
+                item["website"] = response.url
+            elif item["website"] == "":
+                item["website"] = response.url
+            elif item["website"][0] == "/":
                 item["website"] = response.url
 
             return item

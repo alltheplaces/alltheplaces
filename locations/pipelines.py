@@ -39,7 +39,7 @@ class ApplySpiderLevelAttributesPipeline(object):
         item_attributes = spider.item_attributes
 
         for (key, value) in item_attributes.items():
-            if key not in item:
+            if item.get(key) is None:
                 item[key] = value
 
         return item
