@@ -16,7 +16,6 @@ class HollandAndBarrettSpider(SitemapSpider):
             "parse",
         )
     ]
-    custom_settings = {"REDIRECT_ENABLED": False}
 
     def parse(self, response):
         yield LinkedDataParser.parse(response, "LocalBusiness")

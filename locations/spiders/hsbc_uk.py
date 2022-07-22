@@ -4,7 +4,7 @@ from scrapy.spiders import CrawlSpider, Rule
 from locations.linked_data_parser import LinkedDataParser
 
 
-class HSBCUK(CrawlSpider):
+class HSBC_UK(CrawlSpider):
     name = "hsbc_uk"
     item_attributes = {
         "brand": "HSBC UK",
