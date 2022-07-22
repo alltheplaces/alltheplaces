@@ -94,5 +94,7 @@ class LinkedDataParser(object):
 
             if item["website"] is None:
                 item["website"] = response.url
+            elif item["website"][0] == "/":
+                item["website"] = response.url
 
             return item
