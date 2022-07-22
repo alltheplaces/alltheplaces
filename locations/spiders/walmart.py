@@ -1,18 +1,24 @@
 # -*- coding: utf-8 -*-
-import scrapy
 import json
 import re
-
-from collections import defaultdict
 from locations.items import GeojsonPointItem
+from scrapy.spiders import SitemapSpider
 
 
-class WalmartSpider(scrapy.Spider):
+class WalmartSpider(SitemapSpider):
     name = "walmart"
     item_attributes = {"brand": "Walmart", "brand_wikidata": "Q483551"}
     allowed_domains = ["walmart.com"]
-    start_urls = ("https://www.walmart.com/sitemap_store_main.xml",)
-    retries = defaultdict(int)
+    sitemap_urls = ["https://www.walmart.com/sitemap_store_main.xml"]
+    sitemap_rules = [
+        (
+            r"https://www.walmart.com/store/\d*/.*/details",
+            "parse_store",
+        ),
+    ]
+    custom_settings = {
+        "DOWNLOAD_DELAY": 2.5,
+    }
 
     def store_hours(self, store_hours):
         if store_hours.get("operationalHours").get("open24Hours") is True:
@@ -46,24 +52,10 @@ class WalmartSpider(scrapy.Spider):
 
             return hours_combined
 
-    def parse(self, response):
-        response.selector.remove_namespaces()
-        for u in response.xpath("//loc/text()").extract():
-            if u.endswith("/details"):
-                yield scrapy.Request(u.strip(), callback=self.parse_store)
-
     def parse_store(self, response):
         script = response.xpath(
             "//script[contains(.,'__WML_REDUX_INITIAL_STATE__ = ')]"
         ).extract_first()
-        # In rare cases will hit page before script tag loads with content
-        if script is None:
-            if self.retries.get(response.url, 0) <= 2:
-                self.retries[response.url] += 1
-                # Try again
-                yield scrapy.Request(response.url, callback=self.parse_store)
-            else:
-                raise Exception("Retried too many times")
 
         script_content = re.search(
             r"window.__WML_REDUX_INITIAL_STATE__ = (.*);</script>",
