@@ -57,9 +57,12 @@ class LinkedDataParser(object):
         item["phone"] = ld.get("telephone")
         item["website"] = ld.get("url")
 
-        oh = OpeningHours()
-        oh.from_linked_data(ld)
-        item["opening_hours"] = oh.as_opening_hours()
+        try:
+            oh = OpeningHours()
+            oh.from_linked_data(ld)
+            item["opening_hours"] = oh.as_opening_hours()
+        except:
+            pass
 
         if ld.get("image"):
             if isinstance(ld["image"], str):

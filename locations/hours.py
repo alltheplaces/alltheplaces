@@ -122,6 +122,9 @@ class OpeningHours(object):
             for rule in rules:
                 days, time_ranges = rule.split(" ", 1)
 
+                if time_ranges.lower() == "closed":
+                    continue
+
                 for time_range in time_ranges.split(","):
                     start_time, end_time = time_range.split("-")
 
