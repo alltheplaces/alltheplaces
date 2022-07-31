@@ -20,9 +20,16 @@ class TractorSupplySpider(scrapy.Spider):
     item_attributes = {"brand": "Tractor Supply", "brand_wikidata": "Q15109925"}
     allowed_domains = ["tractorsupply.com"]
     download_delay = 1.5
+    headers = {
+        "Accept": "*/*",
+        "Accept-Language": "en-US,en;q=0.9",
+        "User-Agent": "Mozilla/5.0 (X11; CrOS aarch64 14324.72.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4692.91 Safari/537.36",
+    }
     custom_settings = {
-        "USER_AGENT": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.128 Safari/537.36",
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+        "DEFAULT_REQUEST_HEADERS": headers,
+        "DOWNLOAD_HANDLERS": {
+            "https": "scrapy.core.downloader.handlers.http2.H2DownloadHandler"
+        },
     }
 
     def start_requests(self):
@@ -31,6 +38,7 @@ class TractorSupplySpider(scrapy.Spider):
         with open(
             "./locations/searchable_points/us_centroids_25mile_radius.csv"
         ) as points:
+            next(points)  # ignore CSV header
             for point in points:
                 _, lat, lon = point.strip().split(",")
                 url = base_url.format(lat=lat, lng=lon)
