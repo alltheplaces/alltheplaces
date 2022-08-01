@@ -3,7 +3,7 @@ from scrapy.spiders import SitemapSpider
 from locations.linked_data_parser import LinkedDataParser
 
 
-class OakFurnitureland(SitemapSpider):
+class OakFurniturelandSpider(SitemapSpider):
     name = "oak_furnitureland"
     item_attributes = {
         "brand": "Oak Furnitureland",
