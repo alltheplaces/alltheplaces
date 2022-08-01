@@ -28,7 +28,7 @@ class OpticalExpressSpider(SitemapSpider):
             return
 
         # They don't encode "description", breaking the json
-        ld_item = json.loads(ld.replace("\n", ""))
+        ld_item = json.loads(ld, strict=False)
 
         ld_item["name"] = (
             ld_item["name"]

@@ -18,11 +18,11 @@ class GreeneKingInnsSpider(SitemapSpider):
     ]
 
     def parse(self, response):
-        ld = response.xpath('//script[@type="application/ld+json"]//text()').get()
-        if not ld:
+        item = LinkedDataParser.parse(response, "Hotel")
+
+        if item is None:
             return
-        ld_obj = json.loads(ld.replace("\n", ""))
-        item = LinkedDataParser.parse_ld(ld_obj)
-        item["website"] = response.url
+
         item["ref"] = response.url
-        yield item
+
+        return item
