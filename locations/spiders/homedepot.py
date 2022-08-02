@@ -9,6 +9,7 @@ class HomeDepotSpider(SitemapSpider):
     allowed_domains = ["www.homedepot.com"]
     download_delay = 0.2
     sitemap_urls = ("https://www.homedepot.com/robots.txt",)
+    sitemap_follow = (r".*store.xml$",)
     sitemap_rules = [
         (r"^https:\/\/www.homedepot.com\/l\/.*\/\d*$", "parse_store"),
     ]
