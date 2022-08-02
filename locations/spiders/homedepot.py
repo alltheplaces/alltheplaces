@@ -10,7 +10,7 @@ class HomeDepotSpider(SitemapSpider):
     download_delay = 0.2
     sitemap_urls = ("https://www.homedepot.com/robots.txt",)
     sitemap_rules = [
-        (r"^https:\/\/www.homedepot.com\/l\/.*$", "parse_store"),
+        (r"^https:\/\/www.homedepot.com\/l\/.*\/\d*$", "parse_store"),
     ]
 
     def parse_store(self, response):
