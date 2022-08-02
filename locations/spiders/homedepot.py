@@ -14,4 +14,6 @@ class HomeDepotSpider(SitemapSpider):
     ]
 
     def parse_store(self, response):
-        yield LinkedDataParser.parse(response, "LocalBusiness")
+        item = LinkedDataParser.parse(response, "LocalBusiness")
+        item["ref"] = item["website"].split("/")[-1]
+        yield item
