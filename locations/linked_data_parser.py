@@ -9,7 +9,7 @@ class LinkedDataParser(object):
     def find_linked_data(response, wanted_type) -> {}:
         lds = response.xpath('//script[@type="application/ld+json"]//text()').getall()
         for ld in lds:
-            ld_obj = json.loads(ld)
+            ld_obj = json.loads(ld, strict=False)
 
             if not ld_obj.get("@type"):
                 continue
@@ -57,9 +57,12 @@ class LinkedDataParser(object):
         item["phone"] = ld.get("telephone")
         item["website"] = ld.get("url")
 
-        oh = OpeningHours()
-        oh.from_linked_data(ld)
-        item["opening_hours"] = oh.as_opening_hours()
+        try:
+            oh = OpeningHours()
+            oh.from_linked_data(ld)
+            item["opening_hours"] = oh.as_opening_hours()
+        except:
+            pass
 
         if ld.get("image"):
             if isinstance(ld["image"], str):
