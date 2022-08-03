@@ -164,12 +164,12 @@ def test_ld_parse_openingHours_array_with_commas():
             """
             {
                 "@context": "https://schema.org",
-                "openingHours": ["Mo-Su 00:00-01:00, 04:00-00:00"],
+                "openingHours": ["Mo-Su 00:00-01:00, 04:00-00:00"]
             }
             """
         )
     )
-    assert o.as_opening_hours() == "Mo-Su 00:00-01:00, 04:00-00:00"
+    assert o.as_opening_hours() == "Mo-Su 00:00-01:00,04:00-24:00"
 
 
 def test_ld_parse_time_format():
