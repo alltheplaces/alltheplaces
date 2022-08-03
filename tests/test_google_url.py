@@ -24,3 +24,12 @@ def test_maps_url():
         52.578594,
         -2.112396,
     )
+
+
+def test_directions():
+    assert url_to_coords(
+        "https://www.google.com/maps/dir//51.4063062, -0.02920658/"
+    ) == (
+        51.4063062,
+        -0.02920658,
+    )
