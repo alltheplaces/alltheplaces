@@ -2,6 +2,8 @@
 import urllib.parse
 from scrapy.spiders import SitemapSpider
 from locations.linked_data_parser import LinkedDataParser
+from locations.hours import OpeningHours
+import json
 
 
 class HomeDepotSpider(SitemapSpider):
@@ -15,7 +17,12 @@ class HomeDepotSpider(SitemapSpider):
     ]
 
     def parse_store(self, response):
-        item = LinkedDataParser.parse(response, "LocalBusiness")
+        json_ld = json.loads(
+            response.xpath(
+                '//script[@id="thd-helmet__script--storeDetailStructuredLocalBusinessData"]/text()'
+            ).extract_first()
+        )
+        item = LinkedDataParser.parse_ld(json_ld)
         item["ref"] = item["website"].split("/")[-1]
         mapurl = urllib.parse.urlsplit(
             response.css('img[alt="map preview"]').attrib["src"]
@@ -24,4 +31,7 @@ class HomeDepotSpider(SitemapSpider):
         lat, lon = lat_lon.split(",")
         item["lat"] = lat
         item["lon"] = lon
+        oh = OpeningHours()
+        oh.from_linked_data({"openingHours": json_ld["openingHours"]}, "%I:%M %p")
+        item["opening_hours"] = oh.as_opening_hours()
         yield item

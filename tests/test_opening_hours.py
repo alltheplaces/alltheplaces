@@ -171,6 +171,33 @@ def test_ld_parse_openingHours_array_with_commas():
     )
     assert o.as_opening_hours() == "Mo-Su 00:00-01:00,04:00-24:00"
 
+def test_ld_parse_openingHours_extended_day_format():
+    o = OpeningHours()
+    o.from_linked_data(
+        json.loads(
+            """
+            {
+                "@context": "https://schema.org",
+                "@type": "LocalBusiness",
+                "address": {
+                    "@type": "PostalAddress",
+                    "addressLocality": "Ballwin",
+                    "addressRegion": "MO",
+                    "postalCode": "63011",
+                    "streetAddress": "13929 Manchester Rd"
+                },
+                "name": "Manchester Road",
+                "openingHours": [
+                    "Mon-Sat 6:00 am - 10:00 pm",
+                    "Sun 7:00 am - 8:00 pm"
+                ],
+                "telephone": "(636)207-8875",
+                "url": "https://www.homedepot.com/l/Manchester-Road/MO/Ballwin/63011/3004"
+            }
+            """
+        ),"%I:%M %p"
+    )
+    assert o.as_opening_hours() == "Mo-Sa 06:00-22:00; Su 07:00-20:00"
 
 def test_ld_parse_time_format():
     o = OpeningHours()

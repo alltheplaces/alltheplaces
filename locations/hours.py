@@ -83,6 +83,15 @@ class OpeningHours(object):
         return opening_hours
 
     def from_linked_data(self, linked_data, time_format="%H:%M"):
+        DAY_MAPPING = {
+            "Mon": "Mo",
+            "Tue": "Tu",
+            "Wed": "We",
+            "Thur": "Th",
+            "Fri": "Fr",
+            "Sat": "Sa",
+            "Sun": "Su"
+        }
         if linked_data.get("openingHoursSpecification"):
             for rule in linked_data["openingHoursSpecification"]:
                 if (
@@ -133,10 +142,16 @@ class OpeningHours(object):
 
                     if "-" in days:
                         start_day, end_day = days.split("-")
+                        if start_day in DAY_MAPPING:
+                            start_day = DAY_MAPPING[start_day]
+                        if end_day in DAY_MAPPING:
+                            end_day = DAY_MAPPING[end_day]
                         for i in range(DAYS.index(start_day), DAYS.index(end_day) + 1):
                             self.add_range(DAYS[i], start_time, end_time, time_format)
                     else:
                         for day in days.split(","):
+                            if day in DAY_MAPPING:
+                                day = DAY_MAPPING[day]
                             self.add_range(
                                 day.strip(), start_time, end_time, time_format
                             )
