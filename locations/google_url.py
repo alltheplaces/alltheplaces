@@ -25,5 +25,8 @@ def url_to_coords(url: str) -> (float, float):
     elif url.startswith("https://www.google.com/maps/@"):
         lat, lon, _ = url.replace("https://www.google.com/maps/@", "").split(",")
         return float(lat), float(lon)
+    elif url.startswith("https://www.google.com/maps/dir/"):
+        lat, lon = url.split("/")[6].split(",")
+        return float(lat.strip()), float(lon.strip())
 
     return None
