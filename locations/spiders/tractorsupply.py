@@ -1,40 +1,32 @@
 # -*- coding: utf-8 -*-
-import scrapy
-
-from locations.items import GeojsonPointItem
+from scrapy.spiders import SitemapSpider
 from locations.hours import OpeningHours
-
-DAYS_NAME = {
-    "Monday": "Mo",
-    "Tuesday": "Tu",
-    "Wednesday": "We",
-    "Thursday": "Th",
-    "Friday": "Fr",
-    "Saturday": "Sa",
-    "Sunday": "Su",
-}
+from locations.items import GeojsonPointItem
 
 
-class TractorSupplySpider(scrapy.Spider):
+class TractorSupplySpider(SitemapSpider):
     name = "tractorsupply"
     item_attributes = {"brand": "Tractor Supply", "brand_wikidata": "Q15109925"}
     allowed_domains = ["tractorsupply.com"]
+    sitemap_urls = ["https://www.tractorsupply.com/sitemap_stores.xml"]
+    sitemap_rules = [
+        (
+            "https:\/\/www\.tractorsupply\.com\/tsc\/([\w\-_]+)$",
+            "parse",
+        ),
+    ]
     download_delay = 1.5
-    custom_settings = {
-        "USER_AGENT": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.128 Safari/537.36",
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+    headers = {
+        "Accept": "*/*",
+        "Accept-Language": "en-US,en;q=0.9",
+        "User-Agent": "Mozilla/5.0 (X11; CrOS aarch64 14324.72.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4692.91 Safari/537.36",
     }
-
-    def start_requests(self):
-        base_url = "https://www.tractorsupply.com/wcs/resources/store/10151/zipcode/fetchstoredetails?responseFormat=json&latitude={lat}&longitude={lng}"
-
-        with open(
-            "./locations/searchable_points/us_centroids_25mile_radius.csv"
-        ) as points:
-            for point in points:
-                _, lat, lon = point.strip().split(",")
-                url = base_url.format(lat=lat, lng=lon)
-                yield scrapy.Request(url=url, callback=self.parse)
+    custom_settings = {
+        "DEFAULT_REQUEST_HEADERS": headers,
+        "DOWNLOAD_HANDLERS": {
+            "https": "scrapy.core.downloader.handlers.http2.H2DownloadHandler"
+        },
+    }
 
     def parse_hours(self, hours):
         day_hour = hours.split("|")
@@ -43,7 +35,7 @@ class TractorSupplySpider(scrapy.Spider):
 
         for dh in day_hour:
             try:
-                day = DAYS_NAME[dh.split("=")[0]]
+                day = dh.split("=")[0][:2]
                 hr = dh.split("=")[1]
                 open_time, close_time = hr.split("-")
                 opening_hours.add_range(
@@ -58,25 +50,44 @@ class TractorSupplySpider(scrapy.Spider):
         return opening_hours.as_opening_hours()
 
     def parse(self, response):
-        data = response.json()
-        store_data = data["storesList"]
+        store = response.xpath('//*[@itemtype="http://schema.org/Store"]')
 
-        for store in store_data:
+        address = store.xpath("//*/address")
+        geocoordinates = address.xpath(
+            '//*[@itemtype="http://schema.org/GeoCoordinates"]'
+        )
+        postaladdress = address.xpath(
+            '//*[@itemtype="http://schema.org/PostalAddress"]'
+        )
 
-            properties = {
-                "ref": store["stlocId"],
-                "name": store["storeName"],
-                "addr_full": store["addressLine"],
-                "city": store["city"],
-                "state": store["state"],
-                "postcode": store["zipCode"],
-                "phone": store["phoneNumber"],
-                "lat": store["latitude"],
-                "lon": store["longitude"],
-            }
+        properties = {
+            "ref": response.xpath('//*[@id="physicalStoreId"]/@value').get(),
+            "name": store.xpath('.//*[@itemprop="name"]/text()').get().strip(),
+            "addr_full": postaladdress.xpath(
+                '//*[@itemprop="streetAddress"]/text()'
+            ).get(),
+            "city": postaladdress.xpath(
+                '//*[@itemprop="addressLocality"]/text()'
+            ).get(),
+            "state": postaladdress.xpath('//*[@itemprop="addressRegion"]/text()').get(),
+            "postcode": postaladdress.xpath('//*[@itemprop="postalCode"]/text()').get(),
+            "country": postaladdress.xpath(
+                '//*[@itemprop="addressCountry"]/text()'
+            ).get(),
+            "lon": float(
+                geocoordinates.xpath('//*/meta[@itemprop="longitude"]/@content').get()
+            ),
+            "lat": float(
+                geocoordinates.xpath('//*/meta[@itemprop="latitude"]/@content').get()
+            ),
+            "phone": response.xpath('//*[@itemprop="Telephone"]/text()').get().strip(),
+            "website": response.url,
+        }
 
-            hours = self.parse_hours(store["storeHours"])
-            if hours:
-                properties["opening_hours"] = hours
+        opening_hours = self.parse_hours(
+            response.xpath('//*[@id="storeHour0"]/@value').get()
+        )
+        if opening_hours:
+            properties["opening_hours"] = opening_hours
 
-            yield GeojsonPointItem(**properties)
+        yield GeojsonPointItem(**properties)
