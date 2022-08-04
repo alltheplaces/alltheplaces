@@ -6,11 +6,20 @@ from locations.items import GeojsonPointItem
 
 class LinkedDataParser(object):
     @staticmethod
-    def find_linked_data(response, wanted_type) -> {}:
+    def iter_linked_data(response):
         lds = response.xpath('//script[@type="application/ld+json"]//text()').getall()
         for ld in lds:
             ld_obj = json.loads(ld, strict=False)
+            if isinstance(ld_obj, dict):
+                yield ld_obj
+            elif isinstance(ld_obj, list):
+                yield from ld_obj
+            else:
+                raise TypeError(ld_obj)
 
+    @staticmethod
+    def find_linked_data(response, wanted_type) -> {}:
+        for ld_obj in LinkedDataParser.iter_linked_data(response):
             if not ld_obj.get("@type"):
                 continue
 
