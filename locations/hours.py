@@ -90,7 +90,7 @@ class OpeningHours(object):
             "Thur": "Th",
             "Fri": "Fr",
             "Sat": "Sa",
-            "Sun": "Su"
+            "Sun": "Su",
         }
         if linked_data.get("openingHoursSpecification"):
             for rule in linked_data["openingHoursSpecification"]:

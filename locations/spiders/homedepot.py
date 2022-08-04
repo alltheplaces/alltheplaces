@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 import urllib.parse
+import json
 from scrapy.spiders import SitemapSpider
 from locations.linked_data_parser import LinkedDataParser
 from locations.hours import OpeningHours
-import json
 
 
 class HomeDepotSpider(SitemapSpider):

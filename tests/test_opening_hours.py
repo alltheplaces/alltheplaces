@@ -171,6 +171,7 @@ def test_ld_parse_openingHours_array_with_commas():
     )
     assert o.as_opening_hours() == "Mo-Su 00:00-01:00,04:00-24:00"
 
+
 def test_ld_parse_openingHours_extended_day_format():
     o = OpeningHours()
     o.from_linked_data(
@@ -195,9 +196,11 @@ def test_ld_parse_openingHours_extended_day_format():
                 "url": "https://www.homedepot.com/l/Manchester-Road/MO/Ballwin/63011/3004"
             }
             """
-        ),"%I:%M %p"
+        ),
+        "%I:%M %p",
     )
     assert o.as_opening_hours() == "Mo-Sa 06:00-22:00; Su 07:00-20:00"
+
 
 def test_ld_parse_time_format():
     o = OpeningHours()
