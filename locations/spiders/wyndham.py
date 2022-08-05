@@ -50,6 +50,9 @@ class WyndhamSpider(SitemapSpider):
     def parse_property(self, response):
         item = LinkedDataParser.parse(response, "Hotel")
 
+        if item is None:
+            return
+
         ref = re.search(r'var overview_propertyId = "([\d]+)";', response.text)
 
         if ref:

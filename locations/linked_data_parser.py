@@ -9,7 +9,11 @@ class LinkedDataParser(object):
     def iter_linked_data(response):
         lds = response.xpath('//script[@type="application/ld+json"]//text()').getall()
         for ld in lds:
-            ld_obj = json.loads(ld, strict=False)
+            try:
+                ld_obj = json.loads(ld, strict=False)
+            except:
+                continue
+
             if isinstance(ld_obj, dict):
                 yield ld_obj
             elif isinstance(ld_obj, list):
