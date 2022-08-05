@@ -45,6 +45,7 @@ class WyndhamSpider(SitemapSpider):
             "parse_property",
         )
     ]
+    custom_settings = {"REDIRECT_ENABLED": False}
 
     def parse_property(self, response):
         item = LinkedDataParser.parse(response, "Hotel")
