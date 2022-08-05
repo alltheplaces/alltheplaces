@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
-import json
 import re
 
-from locations.items import GeojsonPointItem
+from locations.linked_data_parser import LinkedDataParser
 from scrapy.spiders import SitemapSpider
 
 
@@ -23,28 +22,12 @@ class WyndhamSpider(SitemapSpider):
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def parse_property(self, response):
-        raw_json = re.search(
-            r'<script type="application\/ld\+json"\>(.+?)\<',
-            response.text,
-            flags=re.DOTALL,
-        )
-        if not raw_json:
-            return None
-        data = json.loads(raw_json.group(1).replace("\t", " "))
-        properties = {
-            "ref": response.url.replace("https://www.wyndhamhotels.com/", "").replace(
-                "/overview", ""
-            ),
-            "lat": data["geo"]["latitude"],
-            "lon": data["geo"]["longitude"],
-            "name": data["name"],
-            "street_address": data["address"]["streetAddress"],
-            "city": data["address"]["addressLocality"],
-            "state": data["address"].get("addressRegion"),
-            "postcode": data["address"].get("postalCode"),
-            "country": data["address"].get("addressCountry"),
-            "phone": data["telephone"],
-            "website": response.url,
-            "brand": re.match(self.sitemap_rules[0][0], response.url).group(1),
-        }
-        yield GeojsonPointItem(**properties)
+        item = LinkedDataParser.parse(response, "Hotel")
+
+        item["ref"] = response.url.replace(
+            "https://www.wyndhamhotels.com/", ""
+        ).replace("/overview", "")
+
+        item["brand"] = re.match(self.sitemap_rules[0][0], response.url).group(1)
+
+        return item
