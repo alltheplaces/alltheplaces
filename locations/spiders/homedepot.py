@@ -17,11 +17,7 @@ class HomeDepotSpider(SitemapSpider):
     ]
 
     def parse_store(self, response):
-        json_ld = json.loads(
-            response.xpath(
-                '//script[@id="thd-helmet__script--storeDetailStructuredLocalBusinessData"]/text()'
-            ).extract_first()
-        )
+        json_ld = LinkedDataParser.find_linked_data(response, "LocalBusiness")
         item = LinkedDataParser.parse_ld(json_ld)
         item["ref"] = item["website"].split("/")[-1]
         mapurl = urllib.parse.urlsplit(
