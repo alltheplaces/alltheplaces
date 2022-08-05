@@ -33,3 +33,12 @@ def test_directions():
         51.4063062,
         -0.02920658,
     )
+
+
+def test_bing_virtualearth_url():
+    assert url_to_coords(
+        "https://dev.virtualearth.net/REST/v1/Imagery/Map/Road/38.59966,-90.487672/13?mapSize=60,60&amp;key=AoKTFnu3hdkRgVWl45fcxdz0WSDP6hroMDcPKXE4ZkQql3hPt3PtkCDwtNRCYgYA"
+    ) == (
+        38.59966,
+        -90.487672,
+    )

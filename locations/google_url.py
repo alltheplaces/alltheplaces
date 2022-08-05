@@ -1,4 +1,4 @@
-from urllib.parse import parse_qsl
+from urllib.parse import parse_qsl, urlsplit
 
 
 def url_to_coords(url: str) -> (float, float):
@@ -28,5 +28,10 @@ def url_to_coords(url: str) -> (float, float):
     elif url.startswith("https://www.google.com/maps/dir/"):
         lat, lon = url.split("/")[6].split(",")
         return float(lat.strip()), float(lon.strip())
+    elif url.startswith("https://dev.virtualearth.net/REST/v1/Imagery/"):
+        mapurl = urlsplit(url)
+        lat_lon = next(p for p in mapurl.path.split("/") if "," in p)
+        lat, lon = lat_lon.split(",")
+        return float(lat), float(lon)
 
     return None
