@@ -50,7 +50,6 @@ class LidlDESpider(scrapy.Spider):
     def parse(self, response):
         # Read all provinces
         provinces = response.css('.ret-o-store-detail-content')
-        print(sys.path)
 
         # Read cities in each province
         for province in provinces:
