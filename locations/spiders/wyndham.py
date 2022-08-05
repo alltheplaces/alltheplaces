@@ -45,14 +45,18 @@ class WyndhamSpider(SitemapSpider):
             "parse_property",
         )
     ]
-    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def parse_property(self, response):
         item = LinkedDataParser.parse(response, "Hotel")
 
-        item["ref"] = response.url.replace(
-            "https://www.wyndhamhotels.com/", ""
-        ).replace("/overview", "")
+        ref = re.search(r'var overview_propertyId = "([\d]+)";', response.text)
+
+        if ref:
+            item["ref"] = ref.group(1)
+        else:
+            item["ref"] = response.url.replace(
+                "https://www.wyndhamhotels.com/", ""
+            ).replace("/overview", "")
 
         brand_id = re.match(self.sitemap_rules[0][0], response.url).group(1)
         brand = BRANDS[brand_id]
