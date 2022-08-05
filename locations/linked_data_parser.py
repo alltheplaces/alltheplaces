@@ -11,7 +11,7 @@ class LinkedDataParser(object):
         for ld in lds:
             try:
                 ld_obj = json.loads(ld, strict=False)
-            except:
+            except json.decoder.JSONDecodeError:
                 continue
 
             if isinstance(ld_obj, dict):
