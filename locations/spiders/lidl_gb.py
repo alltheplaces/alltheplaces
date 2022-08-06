@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import re
+
 import scrapy
 
 from locations.items import GeojsonPointItem
@@ -37,13 +39,26 @@ class LidlGBSpider(scrapy.Spider):
         stores = response.json()["d"]["results"]
 
         for store in stores:
+
+            match = re.match(
+                r"(\w{1,2}\d{1,2}\w?) (\d|O)(\w{2})", store["Locality"].upper()
+            )
+            if match:
+                if match.group(2) == "O":
+                    postcode = match.group(1) + " 0" + match.group(3)
+                else:
+                    postcode = match.group(1) + " " + match.group(2) + match.group(3)
+                city = store["PostalCode"]
+            else:
+                postcode = store["PostalCode"]
+                city = store["Locality"]
+
             properties = {
                 "name": store["ShownStoreName"],
                 "ref": store["EntityID"],
                 "street_address": store["AddressLine"],
-                # Locality and PostalCode are swapped in source data
-                "city": store["PostalCode"],
-                "postcode": store["Locality"],
+                "city": city,
+                "postcode": postcode,
                 "country": store["CountryRegion"],
                 "addr_full": ", ".join(
                     filter(
@@ -51,8 +66,8 @@ class LidlGBSpider(scrapy.Spider):
                         (
                             store["AddressLine"],
                             store["CityDistrict"],
-                            store["PostalCode"],
-                            store["Locality"],
+                            city,
+                            postcode,
                             "United Kingdom",
                         ),
                     )

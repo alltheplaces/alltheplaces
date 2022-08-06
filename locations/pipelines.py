@@ -49,8 +49,16 @@ class ExtractGBPostcodePipeline(object):
     def process_item(self, item, spider):
         if item.get("country") == "GB":
             if item.get("addr_full") and not item.get("postcode"):
-                postcode = re.search(r"(\w{1,2}\d{1,2}\w? \d\w{2})", item["addr_full"])
+                postcode = re.search(
+                    r"(\w{1,2}\d{1,2}\w? \d\w{2})", item["addr_full"].upper()
+                )
                 if postcode:
                     item["postcode"] = postcode.group(1)
+                else:
+                    postcode = re.search(
+                        r"(\w{1,2}\d{1,2}\w?) O(\w{2})", item["addr_full"].upper()
+                    )
+                    if postcode:
+                        item["postcode"] = postcode.group(1) + " 0" + postcode.group(2)
 
         return item
