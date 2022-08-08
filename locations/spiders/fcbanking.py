@@ -2,50 +2,32 @@
 import json
 import re
 
-import scrapy
+from scrapy.spiders import SitemapSpider
 
+from locations.linked_data_parser import LinkedDataParser
 from locations.items import GeojsonPointItem
 
 
-class FcBankingSpider(scrapy.Spider):
+class FcBankingSpider(SitemapSpider):
     name = "fcbanking"
     item_attributes = {"brand": "First Commonwealth Bank", "brand_wikidata": "Q5452773"}
     allowed_domains = ["www.fcbanking.com"]
-    start_urls = [
-        "https://www.fcbanking.com/sitemap/branch-locations_0.xml",
-        "https://www.fcbanking.com/sitemap/branch-locations_1.xml",
-    ]
+    sitemap_urls = ["https://www.fcbanking.com/robots.txt"]
+    sitemap_follow = ["branch-locations"]
+    sitemap_rules = [(r"branch-locations/.", "parse")]
 
     def parse(self, response):
-        response.selector.remove_namespaces()
-        urls = response.xpath("//loc/text()").extract()
-
-        for url in urls:
-            if url == "https://www.fcbanking.com/branch-locations/":
-                continue
-            yield scrapy.Request(url, callback=self.parse_branch)
-
-    def parse_branch(self, response):
         map_script = response.xpath('//script/text()[contains(., "setLat")]').get()
-        ldjson = response.xpath('//script[@type="application/ld+json"]/text()').get()
-        data = json.loads(re.sub(r"^//.*$", "", ldjson, flags=re.M))
-
+        map_script = map_script.replace("\r", "\n")
         lat = re.search(r'setLat\("(.*)"\)', map_script)[1]
         lon = re.search(r'setLon\("(.*)"\)', map_script)[1]
-        address = data["address"]
 
-        properties = {
-            "lat": lat,
-            "lon": lon,
-            "ref": response.url,
-            "name": data["name"],
-            "addr_full": address["streetAddress"],
-            "city": address["addressLocality"],
-            "state": address["addressRegion"],
-            "postcode": address["postalCode"],
-            "phone": data["telephone"],
-            "website": response.url,
-            "opening_hours": ",".join(data["openingHours"]),
-        }
-
-        return GeojsonPointItem(**properties)
+        ldjson = response.xpath('//script[@type="application/ld+json"]/text()').get()
+        ldjson = ldjson.replace("\r", "\n")
+        data = json.loads(re.sub(r"^//.*$", "", ldjson, flags=re.M))
+        item = LinkedDataParser.parse_ld(data)
+        item["lat"] = lat
+        item["lon"] = lon
+        item["ref"] = item["website"] = response.url
+        item["opening_hours"] = "; ".join(data["openingHours"])
+        yield item
