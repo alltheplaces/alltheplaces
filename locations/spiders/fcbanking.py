@@ -34,7 +34,7 @@ class FcBankingSpider(SitemapSpider):
         path = urllib.parse.urlsplit(response.url).path
         item["ref"] = path.removeprefix("/branch-locations")
         hours_fixed = [
-            row.replace("a.m.", "am").replace("p.m.", "pm")
+            re.sub(r"([ap])\.m\.?", r"\1m", row).replace("\u2013", "-")
             for row in data["openingHours"]
         ]
         oh = OpeningHours()
