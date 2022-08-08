@@ -11,6 +11,7 @@ class WalmartSpider(CrawlSpider):
     name = "walmart"
     item_attributes = {"brand": "Walmart", "brand_wikidata": "Q483551", "country": "US"}
     allowed_domains = ["walmart.com"]
+    download_delay = 3
     start_urls = ["https://www.walmart.com/store/directory"]
     rules = [
         Rule(
@@ -26,9 +27,6 @@ class WalmartSpider(CrawlSpider):
             callback="parse_store",
         ),
     ]
-    custom_settings = {
-        "DOWNLOAD_DELAY": 2.5,
-    }
 
     def store_hours(self, store_hours):
         if store_hours.get("operationalHours").get("open24Hours") is True:
