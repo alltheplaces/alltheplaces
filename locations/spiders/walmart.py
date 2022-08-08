@@ -1,19 +1,29 @@
 # -*- coding: utf-8 -*-
 import json
 import re
+
 from locations.items import GeojsonPointItem
-from scrapy.spiders import SitemapSpider
+from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule
 
 
-class WalmartSpider(SitemapSpider):
+class WalmartSpider(CrawlSpider):
     name = "walmart"
-    item_attributes = {"brand": "Walmart", "brand_wikidata": "Q483551"}
+    item_attributes = {"brand": "Walmart", "brand_wikidata": "Q483551", "country": "US"}
     allowed_domains = ["walmart.com"]
-    sitemap_urls = ["https://www.walmart.com/sitemap_store_main.xml"]
-    sitemap_rules = [
-        (
-            r"https://www.walmart.com/store/\d*/.*/details",
-            "parse_store",
+    start_urls = ["https://www.walmart.com/store/directory"]
+    rules = [
+        Rule(
+            LinkExtractor(
+                allow=[
+                    r"https:\/\/www\.walmart\.com\/store\/directory\/\w{2}$",
+                    r"https:\/\/www\.walmart\.com\/store\/directory\/\w{2}\/[-.\w]+$",
+                ]
+            )
+        ),
+        Rule(
+            LinkExtractor(allow=r"https:\/\/www\.walmart\.com\/store\/\d+$"),
+            callback="parse_store",
         ),
     ]
     custom_settings = {
@@ -39,8 +49,8 @@ class WalmartSpider(SitemapSpider):
                     start_hr = op_hour.get("dailyHours").get("startHr")
                     end_hr = op_hour.get("dailyHours").get("endHr")
 
-                start_day = op_hour.get("startDayName")
-                end_day = op_hour.get("endDayName")
+                start_day = op_hour.get("startDayName")[:2]
+                end_day = op_hour.get("endDayName")[:2]
 
                 if end_day is None:
                     end_day = ""
@@ -73,11 +83,11 @@ class WalmartSpider(SitemapSpider):
             phone=store_data.get("phone"),
             name=store_data.get("displayName"),
             opening_hours=self.store_hours(store_data),
-            addr_full=store_data.get("address").get("streetAddress"),
+            street_address=store_data.get("address").get("streetAddress"),
             city=store_data.get("address").get("city"),
             state=store_data.get("address").get("state"),
             postcode=store_data.get("address").get("postalCode"),
-            website=store_data.get("detailsPageURL"),
+            website=response.url,
             extras={
                 "amenity:fuel": any(
                     s["name"] == "GAS_STATION" and s["active"] for s in services
