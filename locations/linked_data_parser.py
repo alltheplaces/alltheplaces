@@ -114,5 +114,7 @@ class LinkedDataParser(object):
                 item["website"] = response.url
             elif item["website"][0] == "/":
                 item["website"] = response.url
+            elif item["website"].startswith("www"):
+                item["website"] = "https://" + item["website"]
 
             return item
