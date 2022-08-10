@@ -8,13 +8,13 @@ class CostcutterGBSpider(scrapy.spiders.SitemapSpider):
     item_attributes = {
         "brand": "Costcutter",
         "brand_wikidata": "Q5175072",
+        "country": "GB",
     }
     allowed_domains = ["costcutter.co.uk"]
     sitemap_urls = ["https://store-locator.costcutter.co.uk/sitemap.xml"]
     sitemap_rules = [("/costcutter-*", "parse_store")]
 
     def parse_store(self, response):
-        ld = LinkedDataParser.find_linked_data(response, "ConvenienceStore")
-        if ld:
-            ld["brand"] = None
-            return LinkedDataParser.parse_ld(ld)
+        item = LinkedDataParser.parse(response, "ConvenienceStore")
+        if item and "closed" not in item["name"].lower():
+            return item
