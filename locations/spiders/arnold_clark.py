@@ -16,7 +16,6 @@ class ArnoldClarkSpider(SitemapSpider):
             "parse_item",
         )
     ]
-    custom_settings = {"REDIRECT_ENABLED": "False"}
 
     def parse_item(self, response):
         return LinkedDataParser.parse(response, "AutoDealer")
