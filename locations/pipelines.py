@@ -62,3 +62,12 @@ class ExtractGBPostcodePipeline(object):
                         item["postcode"] = postcode.group(1) + " 0" + postcode.group(2)
 
         return item
+
+
+class AssertURLSchemePipeline(object):
+    def process_item(self, item, spider):
+        if item.get("image"):
+            if item["image"].startswith("//"):
+                item["image"] = "https:" + item["image"]
+
+        return item
