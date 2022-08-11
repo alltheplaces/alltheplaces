@@ -24,6 +24,12 @@ def test_maps_url():
         52.578594,
         -2.112396,
     )
+    assert url_to_coords(
+        "http://maps.google.com/maps?saddr=current+location&ll=57.213,-2.187"
+    ) == (
+        57.213,
+        -2.187,
+    )
 
 
 def test_directions():

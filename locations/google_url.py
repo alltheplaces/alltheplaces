@@ -29,4 +29,11 @@ def url_to_coords(url: str) -> (float, float):
         lat, lon = url.split("/")[6].split(",")
         return float(lat.strip()), float(lon.strip())
 
+    if "/maps.google.com/" in url:
+        query = dict(parse_qsl(url))
+        ll = query.get("ll")
+        if ll:
+            lat, lon = ll.split(",")
+            return float(lat), float(lon)
+
     return None
