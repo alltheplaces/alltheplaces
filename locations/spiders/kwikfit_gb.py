@@ -5,7 +5,7 @@ from locations.google_url import url_to_coords
 
 
 def extract_google_position(item, response):
-    for link in response.xpath('//a/@href').extract():
+    for link in response.xpath("//a/@href").extract():
         if "maps.google.com" in link:
             item["lat"], item["lon"] = url_to_coords(link)
             return
