@@ -14,5 +14,6 @@ class CubeSmartSpider(SitemapSpider):
 
     def parse(self, response):
         item = LinkedDataParser.parse(response, "SelfStorage")
+        item["lon"] = "-" + item["lon"]
         item["ref"] = response.url
         yield item
