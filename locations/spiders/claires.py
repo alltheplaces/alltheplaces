@@ -11,10 +11,10 @@ class ClairesSpider(SitemapSpider):
     sitemap_urls = ["https://stores.claires.com/sitemap.xml"]
     sitemap_rules = [
         (
-            r"https:\/\/stores\.claires\.com\/.+\/(\d+)\.html$",
+            r"https:\/\/stores\.claires\.com\/.+\/([-\w]+\/\d+)\.html$",
             "parse_store",
         )
     ]
 
     def parse_store(self, response):
-        yield PandoraSpider.parse_item(response)
+        yield PandoraSpider.parse_item(response, self.sitemap_rules[0][0])
