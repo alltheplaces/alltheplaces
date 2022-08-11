@@ -15,7 +15,10 @@ class LinkedDataParser(object):
                 continue
 
             if isinstance(ld_obj, dict):
-                yield ld_obj
+                if "@graph" in ld_obj:
+                    yield from ld_obj["@graph"]
+                else:
+                    yield ld_obj
             elif isinstance(ld_obj, list):
                 yield from ld_obj
             else:
