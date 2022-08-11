@@ -1,350 +1,96 @@
-import json
-import re
+# -*- coding: utf-8 -*-
 import scrapy
-
-from locations.items import GeojsonPointItem
-
-
-def load_json(data):
-    try:
-        return json.loads(data)
-    except json.JSONDecodeError:
-        # fix malformed json
-        data = re.sub(r"(:\s*)\'", r'\1"', data)  # use double quotes instead of single
-        data = re.sub(r"\'([,\s\}])", r'"\1', data)
-        data = re.sub(r",(\s*\})", r"\1", data)  # remove trailing commas
-        data = re.sub(r'(description": ")[\s\S]*?(",[\n\r])', r"\1\2", data)
-        return json.loads(data)
+from locations.linked_data_parser import LinkedDataParser
 
 
-class HiltonSpider(scrapy.Spider):
+def from_wikidata(name, code):
+    return {"brand": name, "brand_wikidata": code}
+
+
+class HiltonSpider(scrapy.spiders.SitemapSpider):
     name = "hilton"
-    allowed_domains = ["hilton.com", "hiltongrandvacations.com"]
+    sitemap_urls = [
+        "https://www.hilton.com/temporary/legacy-sitemap1.xml",
+        "https://www.hilton.com/temporary/legacy-sitemap2.xml",
+    ]
+    download_delay = 0.2
+    HILTON_TRU = from_wikidata("Tru by Hilton", "Q24907770")
+    HILTON_WALDORF = from_wikidata("Waldorf Astoria", "Q3239392")
+    HILTON_GARDEN = from_wikidata("Hilton Garden Inn", "Q1162859")
+    HILTON_EMBASSY = from_wikidata("Embassy Suites", "Q5369524")
+    HILTON_HOMEWOOD = from_wikidata("Homewood Suites by Hilton", "Q5890701")
+    HILTON_HOME2 = from_wikidata("Home2 Suites by Hilton", "Q5887912")
+    HILTON_DOUBLETREE = from_wikidata("DoubleTree by Hilton", "Q2504643")
+    HILTON_CANOPY = from_wikidata("Canopy by Hilton", "Q30632909")
+    HILTON_CONRAD = from_wikidata("Conrad Hotels & Resorts", "Q855525")
+    HILTON_HAMPTON = from_wikidata("Hampton by Hilton", "Q5646230")
+    HILTON_HOTELS = from_wikidata("Hilton Hotels & Resorts", "Q598884")
+    # Looks like internally Hilton assign each hotel a 7-alpha code, the last
+    # two letters of which indicate the brand.
+    my_brands = {
+        "ci": HILTON_CONRAD,
+        "di": HILTON_DOUBLETREE,
+        "dt": HILTON_DOUBLETREE,
+        "es": HILTON_EMBASSY,
+        "hf": HILTON_HOTELS,
+        "hh": HILTON_HOTELS,
+        "hi": HILTON_HOTELS,
+        "hn": HILTON_HOTELS,
+        "hs": HILTON_HOTELS,
+        "ht": HILTON_HOME2,
+        "hw": HILTON_HOMEWOOD,
+        "hx": HILTON_HAMPTON,
+        "gi": HILTON_GARDEN,
+        "py": HILTON_CANOPY,
+        "ru": HILTON_TRU,
+        "tw": HILTON_HOTELS,
+        "wa": HILTON_WALDORF,
+    }
 
-    def start_requests(self):
-        sites = [
-            (
-                "Hilton Hotels & Resorts",
-                "https://www3.hilton.com/en/hotel-locations/index.html",
-                self.parse,
-            ),
-            (
-                "Waldorf Astoria Hotels & Resorts",
-                "https://waldorfastoria3.hilton.com/en/hotels/index.html",
-                self.parse_hotel_list,
-            ),
-            (
-                "LXR Hotels & Resorts",
-                "https://lxrhotels3.hilton.com/lxr/locations/",
-                self.parse_lxr,
-            ),
-            (
-                "Conrad Hotels & Resorts",
-                "https://conradhotels3.hilton.com/en/hotels/index.html",
-                self.parse_hotel_list,
-            ),
-            (
-                "Canopy by Hilton",
-                "https://canopy3.hilton.com/en/hotel-locations/index.html",
-                self.parse,
-            ),
-            (
-                "Curio Collection by Hilton",
-                "https://curiocollection3.hilton.com/en/hotel-locations/index.html",
-                self.parse,
-            ),
-            (
-                "Doubletree by Hilton",
-                "https://doubletree3.hilton.com/en/hotel-locations/index.html",
-                self.parse,
-            ),
-            (
-                "Tapestry Collection by Hilton",
-                "https://tapestrycollection3.hilton.com/tc/locations/",
-                self.parse_tapestry,
-            ),
-            (
-                "Embassy Suites",
-                "https://embassysuites3.hilton.com/en/hotel-locations/index.html",
-                self.parse,
-            ),
-            (
-                "Hilton Garden Inn",
-                "https://hiltongardeninn3.hilton.com/en/hotel-locations/index.html",
-                self.parse,
-            ),
-            (
-                "Hampton Inn",
-                "https://hamptoninn3.hilton.com/en/hotel-locations/index.html",
-                self.parse,
-            ),
-            (
-                "Tru by Hilton",
-                "https://tru3.hilton.com/en/hotel-locations/index.html",
-                self.parse,
-            ),
-            (
-                "Homewood Suites by Hilton",
-                "https://homewoodsuites3.hilton.com/en/hotel-locations/index.html",
-                self.parse,
-            ),
-            (
-                "Home2 Suites by Hilton",
-                "https://home2suites3.hilton.com/en/hotel-locations/index.html",
-                self.parse,
-            ),
-            (
-                "Hilton Grand Vacations",
-                "https://www.hiltongrandvacations.com/destinations/",
-                self.parse_grand_vacation,
-            ),
-            # # ('Motto', '', None)  # no locations yet but "coming soon"
-        ]
-        for site in sites:
-            yield scrapy.Request(
-                url=site[1],
-                callback=site[2],
-                meta={"properties": {"extras": {"brand": site[0]}}},
-            )
-
-    def parse_hotel_list(self, response):
-        """Different style hotel list"""
-        hotel_urls = response.xpath('//ul[@class="locations"]/li/a/@href').extract()
-
-        for url in hotel_urls:
-            yield scrapy.Request(
-                response.urljoin(url), callback=self.parse_hotel, meta=response.meta
-            )
-
-    def parse_lxr(self, response):
-        """Parse LXR hotel list"""
-        hotel_urls = response.xpath(
-            '//section[contains(@class, "location-hotels-wrap")]/section//a/@href'
-        ).extract()
-
-        for url in hotel_urls:
-            yield scrapy.Request(
-                response.urljoin(url), callback=self.parse_lxr_hotel, meta=response.meta
-            )
-
-    def parse_lxr_hotel(self, response):
-        """Parse LXR hotel page (address parts are not labeled correctly)"""
-        try:
-            address = ", ".join(
-                [
-                    response.xpath(
-                        '//span[@itemprop="streetAddress"]/text()'
-                    ).extract_first(),
-                    response.xpath(
-                        '//span[@itemprop="addressRegion"]/text()'
-                    ).extract_first(),
-                ]
-            )
-        except:
-            address = response.xpath(
-                '//span[@itemprop="streetAddress"]/text()'
-            ).extract_first()
-
-        properties = {
-            "name": response.xpath('//span[@itemprop="name"]/text()').extract_first(),
-            "ref": response.xpath('//link[@rel="canonical"]/@href').re_first(
-                ".*/(.*?)/"
-            ),
-            "phone": response.xpath(
-                '//span[@itemprop="telephone"]//span/text()'
-            ).extract_first(),
-            "addr_full": address,
-            "city": response.xpath(
-                '//span[@itemprop="addressCountry"]/text()'
-            ).extract_first(),
-            "country": (
-                response.xpath('//span[@itemprop="postalCode"]/text()').extract_first()
-                or ""
-            ).strip(),
-            "website": response.xpath('//link[@rel="canonical"]/@href').extract_first(),
-            "lat": float(
-                response.xpath('//div[@class="marker"]/@data-lat').extract_first()
-            ),
-            "lon": float(
-                response.xpath('//div[@class="marker"]/@data-lng').extract_first()
-            ),
-        }
-        properties.update(response.meta["properties"])
-        yield GeojsonPointItem(**properties)
-
-    def parse_tapestry(self, response):
-        """Parse Tapestry Collection hotel list"""
-        script = "".join(response.xpath("//script/text()").extract())
-        hotels = re.split(r'hotels\.[\d]+\.address":', script)
-
-        for hotel in hotels[1:]:
-            code = re.search(r'ctyhocn":"(.*?)"', hotel).groups()[0]
-            lat = re.search(r'latitude":([\d\-\.]+)', hotel).groups()[0]
-            lon = re.search(r'longitude":([\d\-\.]+)', hotel).groups()[0]
-            properties = {"ref": code, "lat": float(lat), "lon": float(lon)}
-            properties.update(response.meta["properties"])
-            payload = {
-                "operationName": "hotel",
-                "variables": {"ctyhocn": code, "language": "en"},
-                "query": "query hotel($ctyhocn: String!, $language: String!) {\n  hotel(ctyhocn: $ctyhocn, language: $language) {\n    address {\n      addressFmt\n    }\n    brandCode\n    galleryImages(numPerCategory: 2, first: 12) {\n      alt\n      hiResSrc(height: 430, width: 950)\n      src\n    }\n    homepageUrl\n    name\n    open\n    openDate\n    phoneNumber\n    resEnabled\n    amenities(filter: {groups_includes: [hotel]}) {\n      id\n      name\n    }\n  }\n}\n",
-            }
-
-            yield scrapy.Request(
-                url="https://www.hilton.com/graphql/customer?appName=dx-brands-ui&operationName=hotel&pod=brands",
-                method="POST",
-                body=json.dumps(payload),
-                headers={"Content-Type": "application/json"},
-                meta={"properties": properties},
-                callback=self.parse_tapestry_hotel,
-            )
-
-    def parse_tapestry_hotel(self, response):
-        """Parse Tapestry hotel page"""
-        properties = response.meta["properties"]
-        data = response.json()
-
-        if not data["data"].get("hotel"):
-            return
-
-        url = data["data"]["hotel"]["homepageUrl"]
-        if url.startswith("/"):
-            url = "https:" + url
-
-        properties.update(
-            {
-                "addr_full": data["data"]["hotel"]["address"]["addressFmt"],
-                "name": data["data"]["hotel"]["name"],
-                "phone": data["data"]["hotel"]["phoneNumber"],
-                "website": url,
-            }
-        )
-        yield GeojsonPointItem(**properties)
-
-    def parse_grand_vacation_hotel(self, response):
-        """Parse Grand Vacation hotel resort page"""
-        properties = response.meta["properties"]
-        lat, lon = (
-            response.xpath("//script/text()")
-            .re_first(r".*google.maps.LatLng\(\s*(.*)\s+\);")
-            .split(",")
-        )
-        properties.update(
-            {
-                "name": response.xpath(
-                    '//div[contains(@class, "resort-title")]//h1/text()'
-                ).extract_first(),
-                "ref": "_".join(re.search(r".*/(.*)/(.*)/", response.url).groups()),
-                "lat": float(lat),
-                "lon": float(lon),
-                "website": response.url,
-            }
-        )
-        yield GeojsonPointItem(**properties)
-
-    def parse_grand_vacation(self, response):
-        """Parse Hilton Grand Vacations resort list"""
-        resorts = response.xpath('//div[contains(@class, "resortpanel")]')
-
-        for resort in resorts:
-            url = resort.xpath(".//a/@href").extract_first()
-            location = (
-                resort.xpath('.//p[@class="location"]/text()')
-                .extract_first()
-                .split(",")
-            )
-            properties = dict()
-            properties["country"] = location.pop().strip()
-            properties["state"] = location.pop().strip()
-            properties["city"] = ", ".join(location)
-            properties.update(response.meta["properties"])
-
-            yield scrapy.Request(
-                response.urljoin(url),
-                callback=self.parse_grand_vacation_hotel,
-                meta={"properties": properties},
-            )
-
-    def parse_hotel(self, response):
-        """Parse generic hotel page"""
-        data = response.xpath(
-            '//script[@type="application/ld+json" and contains(text(), "streetAddress")]/text()'
-        ).extract_first()
-
-        if data:
-            data = load_json(data)
-
-            properties = {
-                "name": data["name"],
-                "ref": re.search(r".*/(.*)/(?:index.html)?", response.url).group(1),
-                "addr_full": data["address"]["streetAddress"],
-                "city": data["address"]["addressLocality"],
-                "state": data["address"]["addressRegion"],
-                "postcode": data["address"]["postalCode"],
-                "country": data["address"]["addressCountry"],
-                "phone": data.get("telephone"),
-                "website": data.get("url") or response.url,
-                "lat": float(data["geo"]["latitude"]),
-                "lon": float(data["geo"]["longitude"]),
-            }
-
-        else:
-            try:
-                lat, lon = (
-                    response.xpath('//meta[@name="geo.position"]/@content')
-                    .extract_first()
-                    .split(";")
+    def sitemap_filter(self, entries):
+        # The sitemap URLs and the gymnastics on display here shows that the Hilton site
+        # is in somewhat of a state of flux.
+        for entry in entries:
+            url = entry["loc"]
+            if "curiocollection3" in url or "GV/" in url:
+                continue
+            if url.endswith("/about/index.html") or url.endswith("rooms/index.html"):
+                hotel = url.split("/")[-3]
+                splits = hotel.split("-")
+                code = splits.pop().lower()
+                splits.insert(0, code)
+                if code == "dt":
+                    # Some Doubletree links have XXXXX-DT rather than XXXXXDT codes.
+                    code = splits.pop().lower()
+                    splits.insert(0, code)
+                entry["loc"] = "https://www.hilton.com/en/hotels/{}/".format(
+                    "-".join(splits)
                 )
-            except:
-                lat, lon = None, None
+                yield entry
 
-            properties = {
-                "name": response.xpath(
-                    '//meta[@name="og:title"]/@content'
-                ).extract_first(),
-                "ref": re.search(r".*/(.*)/(?:index.html)?", response.url).group(1),
-                "phone": response.xpath(
-                    '//span[@class="property-telephone"]/text()'
-                ).extract_first(),
-                "addr_full": (
-                    response.xpath(
-                        '//span[@class="property-streetAddress"]/text()'
-                    ).extract_first()
-                    or ""
-                ).strip(),
-                "city": response.xpath(
-                    '//span[@class="property-addressLocality"]/text()'
-                ).extract_first(),
-                "state": response.xpath(
-                    '//span[@class="property-addressRegion"]/text()'
-                ).extract_first(),
-                "country": response.xpath(
-                    '//span[@class="property-addressCountry"]/text()'
-                ).extract_first(),
-                "postcode": response.xpath(
-                    '//span[@class="property-postalCode"]/text()'
-                ).extract_first(),
-                "lat": float(lat) if lat else None,
-                "lon": float(lon) if lon else None,
-                "website": response.url,
-            }
-
-        properties.update(response.meta["properties"])
-        yield GeojsonPointItem(**properties)
+    def lookup_brand(self, response):
+        if "-dt-doubletree-" in response.url:
+            # Catch the XXXXX-DT rather than XXXXXDT case
+            return self.HILTON_DOUBLETREE
+        splits = response.url.split("/")[-2]
+        code = splits.split("-")[0][-2:]
+        return self.my_brands.get(code)
 
     def parse(self, response):
-        """Parse generic hotel listings"""
-        hotel_urls = response.xpath(
-            '//ul[@class="directory_hotels_list"]/li/a/@href'
-        ).extract()
-        if hotel_urls:
-            for url in hotel_urls:
-                yield scrapy.Request(
-                    response.urljoin(url), callback=self.parse_hotel, meta=response.meta
-                )
-
+        brand = self.lookup_brand(response)
+        if brand:
+            item = LinkedDataParser.parse(response, "Hotel")
+            if item:
+                item["ref"] = response.url
+                item["brand"] = brand["brand"]
+                item["brand_wikidata"] = brand["brand_wikidata"]
+                # The street address is set by Hilton to be the full address of the property.
+                # This can be fixed up rather well given that Hilton set the city field correctly.
+                street_address = item["street_address"]
+                splits = street_address.split(", {},".format(item["city"]))
+                if len(splits) == 2:
+                    item["addr_full"] = street_address
+                    item["street_address"] = splits[0]
+                return item
         else:
-            urls = response.xpath(
-                '//ul[@class="directory_locations_list"]/li/a/@href'
-            ).extract()
-            for url in urls:
-                yield scrapy.Request(response.urljoin(url), meta=response.meta)
+            self.logger.warn("unable to lookup brand: %s", response.url)
