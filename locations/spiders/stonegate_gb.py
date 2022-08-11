@@ -9,8 +9,8 @@ class StonegateGBSpider(scrapy.spiders.SitemapSpider):
         "brand": "Stonegate",
         "brand_wikidata": "Q7619176",
     }
-    sitemap_urls = ['https://great-british-pubs.co.uk/sitemap_index.xml']
-    sitemap_rules = [('/locations/', 'parse')]
+    sitemap_urls = ["https://great-british-pubs.co.uk/sitemap_index.xml"]
+    sitemap_rules = [("/locations/", "parse")]
     download_delay = 0.2
 
     def parse(self, response):
