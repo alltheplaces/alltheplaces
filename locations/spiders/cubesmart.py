@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+from pathlib import Path
+import urllib.parse
+
 from scrapy.spiders import SitemapSpider
 from locations.linked_data_parser import LinkedDataParser
 
@@ -15,5 +18,5 @@ class CubeSmartSpider(SitemapSpider):
     def parse(self, response):
         item = LinkedDataParser.parse(response, "SelfStorage")
         item["lon"] = "-" + item["lon"]
-        item["ref"] = response.url
+        item["ref"] = Path(urllib.parse.urlsplit(response.url).path).stem
         yield item
