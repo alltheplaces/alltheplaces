@@ -9,7 +9,6 @@ class AmerigasSpider(SitemapSpider):
     item_attributes = {
         "brand": "AmeriGas",
         "brand_wikidata": "Q23130318",
-        "extras": {"shop": "gas"},
     }
 
     # Note, /api/search is forbidden by robots.txt, this spider produces their
@@ -22,4 +21,7 @@ class AmerigasSpider(SitemapSpider):
 
     def parse(self, response):
         item = LinkedDataParser.parse(response, "LocalBusiness")
+        if "extras" not in item:
+            item["extras"] = {}
+        item["extras"].update({"shop": "gas"})
         yield item
