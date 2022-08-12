@@ -24,5 +24,5 @@ class JDSportsGBSpider(CrawlSpider):
         else:
             item = LinkedDataParser.parse(response, "Store")
             if item:
-                item["ref"] = response.url.strip('/').split('/')[-1]
+                item["ref"] = response.url.strip("/").split("/")[-1]
                 yield item
