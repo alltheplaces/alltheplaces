@@ -42,6 +42,8 @@ class PandoraSpider(scrapy.spiders.SitemapSpider):
 
         item = LinkedDataParser.parse_ld(ld_item)
         if item:
+            if item["state"] == "JE":
+                item["state"] = "JE-JerseyIsSpecial"
             # In many countries "state" is set to "country-region", unpick and discard region
             splits = item["state"].split("-")
             if len(splits) == 2 and len(splits[0]) == 2:

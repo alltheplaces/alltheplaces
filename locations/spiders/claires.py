@@ -15,6 +15,7 @@ class ClairesSpider(SitemapSpider):
             "parse_store",
         )
     ]
+    download_delay = 0.2
 
     def parse_store(self, response):
         yield PandoraSpider.parse_item(response, self.sitemap_rules[0][0])
