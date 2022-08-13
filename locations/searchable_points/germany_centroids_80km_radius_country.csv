@@ -1,4 +1,4 @@
-"city","city_ascii","lat","lng","country","iso2","iso3","admin_name","capital","population","id"
+"city","city_ascii","latitude","longitude","country","iso2","iso3","admin_name","capital","population","id"
 "Tokyo","Tokyo","35.6897","139.6922","Japan","JP","JPN","Tōkyō","primary","37977000","1392685764"
 "Jakarta","Jakarta","-6.2146","106.8451","Indonesia","ID","IDN","Jakarta","primary","34540000","1360771077"
 "Delhi","Delhi","28.6600","77.2300","India","IN","IND","Delhi","admin","29617000","1356872604"
