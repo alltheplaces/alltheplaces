@@ -1,36 +1,26 @@
 # -*- coding: utf-8 -*-
+import re
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.linked_data_parser import LinkedDataParser
 
 
 class TraderJoesSpider(scrapy.Spider):
     name = "trader_joes"
     item_attributes = {"brand": "Trader Joe's", "brand_wikidata": "Q688825"}
-    allowed_domains = ["hosted.where2getit.com"]
-    start_urls = (
-        'https://hosted.where2getit.com/traderjoes/ajax?&xml_request=<request><appkey>8559C922-54E3-11E7-8321-40B4F48ECC77</appkey><formdata id="locatorsearch"><dataview>store_default</dataview><limit>3000</limit><geolocs><geoloc><addressline>53209</addressline><longitude></longitude><latitude></latitude><country></country></geoloc></geolocs><searchradius>3000</searchradius><where></where></formdata></request>',
-    )
+    allowed_domains = ["traderjoes.com"]
+    start_urls = [
+        "https://locations.traderjoes.com/",
+    ]
 
     def parse(self, response):
-        data = response.xpath("//poi")
-
-        for store in data:
-            properties = {
-                "ref": str(store.xpath("clientkey/text()").extract_first()),
-                "name": store.xpath("name/text()").extract_first(),
-                "addr_full": store.xpath("address1/text()").extract_first(),
-                "city": store.xpath("city/text()").extract_first(),
-                "state": store.xpath("state/text()").extract_first(),
-                "postcode": store.xpath("postalcode/text()").extract_first(),
-                "country": store.xpath("country/text()").extract_first(),
-            }
-
-            phone = store.xpath("phone/text()")
-            if phone:
-                properties["phone"] = phone.extract_first()
-
-            properties["lon"] = store.xpath("longitude/text()").extract_first()
-            properties["lat"] = store.xpath("latitude/text()").extract_first()
-
-            yield GeojsonPointItem(**properties)
+        yield from response.follow_all(css="a.listitem")
+        for script in response.xpath('//script[@type="application/ld+json"]'):
+            text = script.root.text
+            # json with two kinds of comments
+            text = re.sub(r" +//.*", "", text)
+            text = re.sub(r"/\*.*?\*/", "", text, flags=re.S)
+            script.root.text = text
+        item = LinkedDataParser.parse(response, "GroceryStore")
+        if item is not None and item["ref"]:
+            yield item
