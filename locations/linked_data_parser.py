@@ -93,15 +93,6 @@ class LinkedDataParser(object):
         if item["ref"] is None:
             item["ref"] = ld.get("@id")
 
-        if ld.get("brand"):
-            if isinstance(ld["brand"], str):
-                item["brand"] = ld["brand"]
-            elif (
-                ld["brand"].get("@type") == "Brand"
-                or ld["brand"].get("@type") == "Organization"
-            ):
-                item["brand"] = ld["brand"].get("name")
-
         return item
 
     @staticmethod

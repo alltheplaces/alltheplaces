@@ -31,11 +31,7 @@ def test_ld():
                 "priceRange": "$$",
                 "servesCuisine": ["Middle Eastern", "Mediterranean"],
                 "telephone": "(408) 714-1489",
-                "url": "http://www.greatfood.com",
-                "brand": {
-                    "@type": "Brand",
-                    "name": "GreatFood"
-                }
+                "url": "http://www.greatfood.com"
             }
             """
         )
@@ -53,7 +49,6 @@ def test_ld():
     assert i["phone"] == "(408) 714-1489"
     assert i["website"] == "http://www.greatfood.com"
     assert i["ref"] is None
-    assert i["brand"] == "GreatFood"
 
 
 def test_ld_lowercase_attributes():
@@ -93,7 +88,6 @@ def test_ld_lowercase_attributes():
     assert i["phone"] == "(308) 234-3062"
     assert i["website"] is None
     assert i["ref"] is None
-    assert i.get("brand") is None
     assert i["lat"] == "40.6862"
     assert i["lon"] == "-99.08411"
 
@@ -128,8 +122,7 @@ def test_flat_properties():
                 "@context": "https://schema.org",
                 "@type": "Place",
                 "address": "a, b, c",
-                "image": "https://example.org/image",
-                "brand": "Example"
+                "image": "https://example.org/image"
             }
             """
         )
@@ -137,4 +130,3 @@ def test_flat_properties():
 
     assert i["addr_full"] == "a, b, c"
     assert i["image"] == "https://example.org/image"
-    assert i["brand"] == "Example"
