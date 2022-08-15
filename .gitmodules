@@ -1,0 +1,3 @@
+[submodule "nsi"]
+	path = nsi
+	url = git@github.com:osmlab/name-suggestion-index.git
