@@ -8,7 +8,7 @@ on:
 
 jobs:
   test-spider:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     env:
       AWS_KEY: QUtJQTRLMllUQzIzRzVZRkxENkg=
       AWS_SEC: b1RmNXNxc0VSNlNKdFNhbUdlcjJwZHR6YXQwNXpRRDRPZUtoVkpPSA==
