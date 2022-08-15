@@ -55,9 +55,14 @@ class LinkedDataParser(object):
 
         if ld.get("address"):
             addr = ld["address"]
+            if isinstance(addr, list):
+                addr = addr[0]
             if isinstance(addr, str):
                 item["addr_full"] = addr
-            elif addr.get("@type") == "PostalAddress":
+            else:
+                # We do not check for "@type" being "PostalAddress", some sites fail
+                # to specify this and since it is unlikely to be anything else we do not
+                # perform the check.
                 item["street_address"] = addr.get("streetAddress") or addr.get(
                     "streetaddress"
                 )

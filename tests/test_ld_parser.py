@@ -56,6 +56,26 @@ def test_ld():
     assert i["brand"] == "GreatFood"
 
 
+def test_ld_address_array():
+    i = LinkedDataParser.parse_ld(
+        json.loads(
+            """
+            {
+                "address": [
+                {
+                    "streetAddress": "first-in-array"
+                },
+                {
+                    "streetAddress": "second-in-array"
+                }
+                ]
+            }
+            """
+        )
+    )
+    assert i["street_address"] == "first-in-array"
+
+
 def test_ld_lowercase_attributes():
     i = LinkedDataParser.parse_ld(
         json.loads(

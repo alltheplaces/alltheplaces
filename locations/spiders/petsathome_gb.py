@@ -21,8 +21,7 @@ def get_locations(areas_csv_file, area_field_filter=None):
         area_field_filter = [area_field_filter]
     with open("./locations/searchable_points/{}".format(areas_csv_file)) as points:
         for row in csv.DictReader(points):
-            lat = get_key(row, ["latitude", "lat"])
-            lon = get_key(row, ["longitude", "lng"])
+            lat, lon = row["latitude"], row["longitude"]
             if not lat or not lon:
                 raise Exception("missing lat/lon in file")
             area = get_key(row, ["country", "territory", "state"])
@@ -68,8 +67,4 @@ class PetsAtHomeGBSpider(scrapy.Spider):
                 yield scrapy.Request("https://community.petsathome.com" + node["slug"])
 
     def parse(self, response):
-        ld = LinkedDataParser.find_linked_data(response, "PetStore")
-        if ld:
-            # Our LD parser is reasonably strict, help petaathome meet its requirements.
-            ld["address"]["@type"] = "PostalAddress"
-            return LinkedDataParser.parse_ld(ld)
+        return LinkedDataParser.parse(response, "PetStore")

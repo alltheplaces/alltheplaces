@@ -34,12 +34,9 @@ class Vets4PetsGBSpider(CrawlSpider):
     def parse_func(self, response):
         ld = LinkedDataParser.find_linked_data(response, "VeterinaryCare")
         if ld:
-            # Should we support lists of addresses in the common parser code and take the first?
-            ld["address"] = ld["address"][0]
             item = LinkedDataParser.parse_ld(ld)
             item["ref"] = response.url
             extract_google_position(item, response)
             if "petsathome" in item["street_address"].lower().replace(" ", ""):
-                self.logger.info("%s located in Pets at Home store", item["name"])
                 set_located_in(item, PetsAtHomeGBSpider.item_attributes)
             return item
