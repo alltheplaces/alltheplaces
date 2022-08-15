@@ -32,9 +32,8 @@ class Vets4PetsGBSpider(CrawlSpider):
     download_delay = 0.2
 
     def parse_func(self, response):
-        ld = LinkedDataParser.find_linked_data(response, "VeterinaryCare")
-        if ld:
-            item = LinkedDataParser.parse_ld(ld)
+        item = LinkedDataParser.parse(response, "VeterinaryCare")
+        if item:
             item["ref"] = response.url
             extract_google_position(item, response)
             if "petsathome" in item["street_address"].lower().replace(" ", ""):

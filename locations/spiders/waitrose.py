@@ -1,11 +1,7 @@
 # -*- coding: utf-8 -*-
 import scrapy
-from scrapy.utils.url import urljoin_rfc
-from scrapy.utils.response import get_base_url
-
-from locations.items import GeojsonPointItem
-
 import re
+from locations.items import GeojsonPointItem
 from itertools import groupby
 
 
