@@ -1,7 +1,12 @@
-from urllib.parse import parse_qsl
+from urllib.parse import urlparse, parse_qs
 
 
 def url_to_coords(url: str) -> (float, float):
+    def get_query_param(link, query_param):
+        parsed_link = urlparse(link)
+        queries = parse_qs(parsed_link.query)
+        return queries.get(query_param)
+
     if url.startswith("https://www.google.com/maps/embed?pb="):
         # https://andrewwhitby.com/2014/09/09/google-maps-new-embed-format/
         params = url[38:].split("!")
@@ -19,9 +24,10 @@ def url_to_coords(url: str) -> (float, float):
 
                 return lat, lon
     elif url.startswith("https://maps.googleapis.com/maps/api/staticmap"):
-        query = dict(parse_qsl(url))
-        lat, lon = query["center"].split(",")
-        return float(lat), float(lon)
+        ll = get_query_param(url, "center")
+        if ll:
+            lat, lon = ll[0].split(",")
+            return float(lat), float(lon)
     elif url.startswith("https://www.google.com/maps/@"):
         lat, lon, _ = url.replace("https://www.google.com/maps/@", "").split(",")
         return float(lat), float(lon)
@@ -30,10 +36,9 @@ def url_to_coords(url: str) -> (float, float):
         return float(lat.strip()), float(lon.strip())
 
     if "/maps.google.com/" in url:
-        query = dict(parse_qsl(url))
-        ll = query.get("ll")
+        ll = get_query_param(url, "ll")
         if ll:
-            lat, lon = ll.split(",")
+            lat, lon = ll[0].split(",")
             return float(lat), float(lon)
 
-    return None
+    return None, None
