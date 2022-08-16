@@ -39,13 +39,18 @@ class DictParser(object):
             item["street_address"] = ", ".join(item["street_address"])
 
         item["city"] = DictParser.get_first_key(address, ["city", "town"])
-        item["state"] = DictParser.get_first_key(address, ["state"])
+        item["state"] = DictParser.get_first_key(address, ["state", "region"])
         item["postcode"] = DictParser.get_first_key(
             address, ["postCode", "post_code", "postalCode"]
         )
         item["country"] = DictParser.get_first_key(address, ["country", "countryCode"])
 
-        item["phone"] = DictParser.get_first_key(obj, ["phone", "telephone", "tel"])
+        contact = DictParser.get_first_key(obj, ["contact"])
+
+        if not contact or not isinstance(contact, dict):
+            contact = obj
+
+        item["phone"] = DictParser.get_first_key(contact, ["phone", "telephone", "tel"])
 
         item["ref"] = DictParser.get_first_key(obj, ["ref", "id", "store_id", "shopNumber", "slug"])
 

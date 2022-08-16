@@ -122,3 +122,4 @@ def test_dict_parse():
     assert i["postcode"] == "10007"
     assert i["lat"] == 40.713166
     assert i["lon"] == -74.009354
+    assert i["phone"] == "212 227 3108"
