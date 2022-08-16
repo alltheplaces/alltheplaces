@@ -70,10 +70,10 @@ class BootsSpider(scrapy.Spider):
         if hours:
             properties["opening_hours"] = hours
 
-        if properties["name"].startswith("Opticians - "):
+        if properties["name"].startswith("Opticians"):
             properties["brand"] = "Boots Opticians"
             properties["brand_wikidata"] = "Q4944037"
-            properties["name"] = properties["name"][12:]
+            properties["name"] = properties["name"].replace("Opticians", "").strip("- ")
 
         yield GeojsonPointItem(**properties)
 
