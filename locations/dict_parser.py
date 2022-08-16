@@ -13,7 +13,9 @@ class DictParser(object):
             location = obj
 
         item["lat"] = DictParser.get_first_key(location, ["latitude", "lat"])
-        item["lon"] = DictParser.get_first_key(location, ["longitude", "lon", "long", "lng"])
+        item["lon"] = DictParser.get_first_key(
+            location, ["longitude", "lon", "long", "lng"]
+        )
 
         item["name"] = DictParser.get_first_key(
             obj, ["name", "storeName", "displayName"]
@@ -52,7 +54,9 @@ class DictParser(object):
 
         item["phone"] = DictParser.get_first_key(contact, ["phone", "telephone", "tel"])
 
-        item["ref"] = DictParser.get_first_key(obj, ["ref", "id", "store_id", "shopNumber", "slug"])
+        item["ref"] = DictParser.get_first_key(
+            obj, ["ref", "id", "store_id", "shopNumber", "slug"]
+        )
 
         return item
 
