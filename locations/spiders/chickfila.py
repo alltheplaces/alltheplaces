@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 from scrapy.spiders import SitemapSpider
 
-from locations.linked_data_parser import LinkedDataParser
 from locations.google_url import url_to_coords
+from locations.linked_data_parser import LinkedDataParser
 
 
 class ChickFilASpider(SitemapSpider):
@@ -25,6 +25,8 @@ class ChickFilASpider(SitemapSpider):
         item["phone"] = response.xpath(
             "//a[@id='LocationDetail-PhoneNumber']/a/text()"
         ).extract_first()
-        item["lat"], item["lon"] = url_to_coords(response.xpath("//div[@id='map-modal']/div/div/a/@href").extract_first())
+        item["lat"], item["lon"] = url_to_coords(
+            response.xpath("//div[@id='map-modal']/div/div/a/@href").extract_first()
+        )
 
         yield item
