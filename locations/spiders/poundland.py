@@ -6,9 +6,7 @@ from locations.hours import OpeningHours
 
 class PoundlandSpider(scrapy.Spider):
     name = "poundland"
-    poundland = {"brand": "Poundland", "brand_wikidata": "Q1434528"}
-    pep = {"brand": "Pep&Co", "brand_wikidata": "Q24908166"}
-    item_attributes = poundland
+    item_attributes = {"brand": "Poundland", "brand_wikidata": "Q1434528"}
     start_urls = [
         "https://www.poundland.co.uk/rest/poundland/V1/locator/?searchCriteria[scope]=store-locator&searchCriteria[current_page]=1&searchCriteria[page_size]=10000"
     ]
@@ -45,8 +43,8 @@ class PoundlandSpider(scrapy.Spider):
             item["extras"]["icestore"] = "yes" if store.get("icestore") == "1" else "no"
 
             if store["is_pep_co_only"] == "1":
-                item["brand"] = self.pep["brand"]
-                item["brand_wikidata"] = self.pep["brand_wikidata"]
+                item["brand"] = "Pep&Co"
+                item["brand_wikidata"] = "Q24908166"
             else:
                 if store.get("pepshopinshop") == "1":
                     # Pep and Poundland at this location
@@ -54,11 +52,11 @@ class PoundlandSpider(scrapy.Spider):
 
                     pep["ref"] = pep["ref"] + "_pep"
 
-                    pep["brand"] = self.pep["brand"]
-                    pep["brand_wikidata"] = self.pep["brand_wikidata"]
+                    pep["brand"] = "Pep&Co"
+                    pep["brand_wikidata"] = "Q24908166"
 
-                    pep["located_in"] = self.poundland["brand"]
-                    pep["located_in_wikidata"] = self.poundland["brand_wikidata"]
+                    pep["located_in"] = self.item_attributes["brand"]
+                    pep["located_in_wikidata"] = self.item_attributes["brand_wikidata"]
 
                     yield pep
 
