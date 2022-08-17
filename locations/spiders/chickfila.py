@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from scrapy.spiders import SitemapSpider
+
 from locations.linked_data_parser import LinkedDataParser
 
 
@@ -19,7 +20,9 @@ class ChickFilASpider(SitemapSpider):
         item = LinkedDataParser.parse(response, "Restaurant")
 
         item["ref"] = "-".join(response.url.rsplit("/", 2)[-2:])
-        item["phone"] = response.xpath("//a[@id='LocationDetail-PhoneNumber']/a/text()").extract_first()
+        item["phone"] = response.xpath(
+            "//a[@id='LocationDetail-PhoneNumber']/a/text()"
+        ).extract_first()
         # Note that their opening hours specification doesn't include closing times, so no opening hours for now
 
         yield item
