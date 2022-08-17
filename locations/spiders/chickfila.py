@@ -25,8 +25,11 @@ class ChickFilASpider(SitemapSpider):
         item["phone"] = response.xpath(
             "//a[@id='LocationDetail-PhoneNumber']/a/text()"
         ).extract_first()
-        item["lat"], item["lon"] = url_to_coords(
-            response.xpath("//div[@id='map-modal']/div/div/a/@href").extract_first()
-        )
+
+        google_link = response.xpath(
+            "//div[@id='map-modal']/div/div/a/@href"
+        ).extract_first()
+        if google_link:
+            item["lat"], item["lon"] = url_to_coords(google_link)
 
         yield item
