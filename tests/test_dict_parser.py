@@ -51,7 +51,6 @@ def test_dict_parse():
 
     assert i["ref"] == "2107"
     assert i["name"] == "Kidderminster, Swan Centre"
-    assert i["street_address"] == "3-6 Coventry Street, Swan Centre"
     assert i["city"] == "Kidderminster"
     assert i["country"] == "UK"
     assert i["postcode"] == "DY10 2DG"

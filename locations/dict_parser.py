@@ -34,11 +34,8 @@ class DictParser(object):
         )
         item["street"] = DictParser.get_first_key(address, ["street", "streetName"])
         item["street_address"] = DictParser.get_first_key(
-            address, ["streetAddress", "street_address", "line1", "line"]
+            address, ["streetAddress", "street_address", "line1"]
         )
-
-        if isinstance(item["street_address"], list):
-            item["street_address"] = ", ".join(item["street_address"])
 
         item["city"] = DictParser.get_first_key(address, ["city", "town"])
         item["state"] = DictParser.get_first_key(address, ["state", "region"])

@@ -19,6 +19,10 @@ class PoundlandSpider(scrapy.Spider):
         for store in response.json()["locations"]:
             item = DictParser.parse(store)
 
+            item["street_address"] = ", ".join(
+                filter(None, store["address"].get("line"))
+            )
+
             # "store_id" seems to be a better ref than "id"
             item["ref"] = store.get("store_id")
             item["website"] = (
