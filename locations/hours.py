@@ -90,7 +90,6 @@ class OpeningHours(object):
                     or not rule.get("opens")
                     or not rule.get("closes")
                 ):
-                    logging.warning("Skipping openingHoursSpecification rule")
                     continue
 
                 days = []
