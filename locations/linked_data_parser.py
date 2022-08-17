@@ -74,6 +74,7 @@ class LinkedDataParser(object):
                 item["country"] = addr.get("addressCountry") or addr.get(
                     "addresscountry"
                 )
+                item["phone"] = addr.get("telephone")
 
         item["phone"] = ld.get("telephone")
         item["website"] = ld.get("url")
