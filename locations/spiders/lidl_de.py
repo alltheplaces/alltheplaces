@@ -1,10 +1,7 @@
 # -*- coding: utf-8 -*-
-import logging
-
 import scrapy
 
 from locations.items import GeojsonPointItem
-from scrapy.crawler import CrawlerProcess
 from locations.hours import OpeningHours
 
 DAY_MAPPING = {
@@ -89,8 +86,3 @@ class LidlDESpider(scrapy.Spider):
             city = f"https://www.lidl.de{city.get()}"
 
             yield scrapy.Request(url=city, callback=self.parse_details)
-
-
-process = CrawlerProcess()
-process.crawl(LidlDESpider)
-process.start()
