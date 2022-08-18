@@ -43,15 +43,7 @@ class LidlDESpider(scrapy.Spider):
             street = shopAddress[0]
             postalCode = shopAddress[1].split()[0]
             city = shopAddress[1].split()[1]
-
             openingHours = shop.css('.ret-o-store-detail__opening-hours::text').extract()
-            # shopOpeningHours = {}
-            # for openingHour in openingHours:
-            #     if(openingHour.split()):
-            #         day = openingHour.split()[0]
-            #         hours = openingHour.split()[1]
-            #         shopOpeningHours[day] = hours
-
             services = response.css('.ret-o-store-detail__store-icon-wrapper')[0]
             link = services.css('a::attr("href")').get()
             coordinates = link.split('pos.')[1].split('_L')[0]
@@ -64,7 +56,6 @@ class LidlDESpider(scrapy.Spider):
                 "street": street,
                 "postcode": postalCode,
                 "city": city,
-                # "opening_hours": shopOpeningHours,
                 "lat": latitude,
                 "lon": longitude
             }
