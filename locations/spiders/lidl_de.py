@@ -4,12 +4,39 @@ import logging
 import scrapy
 
 from locations.items import GeojsonPointItem
+from scrapy.crawler import CrawlerProcess
+from locations.hours import OpeningHours
+
+DAY_MAPPING = {
+    "Mo": "Mo",
+    "Di": "Tu",
+    "Mi": "We",
+    "Do": "Th",
+    "Fr": "Fr",
+    "Sa": "Sa",
+    "So": "Su",
+}
 class LidlDESpider(scrapy.Spider):
     name = "lidl_de"
-    item_attributes = {"brand": "Lidl", "brand_wikidata": "Q151954"}
+    item_attributes = {"brand": "Lidl", "brand_wikidata": "Q151954", "country": "DE"}
     allowed_domains = ["lidl.de"]
     handle_httpstatus_list = [404]
     start_urls = ["https://www.lidl.de/f/"]
+
+    def parse_hours(self, hours):
+        opening_hours = OpeningHours()
+
+        for item in hours:
+            if (item.split()):
+                day = DAY_MAPPING[item.split()[0]]
+                hour = item.split()[1]
+                opening_hours.add_range(
+                    day=day,
+                    open_time=hour.split('-')[0],
+                    close_time=hour.split('-')[1]
+                )
+
+        return opening_hours.as_opening_hours()
     def parse_details(self, response):
 
         lidlShops = response.css('.ret-o-store-detail')
@@ -21,12 +48,12 @@ class LidlDESpider(scrapy.Spider):
             city = shopAddress[1].split()[1]
 
             openingHours = shop.css('.ret-o-store-detail__opening-hours::text').extract()
-            shopOpeningHours = {}
-            for openingHour in openingHours:
-                if(openingHour.split()):
-                    day = openingHour.split()[0]
-                    hours = openingHour.split()[1]
-                    shopOpeningHours[day] = hours
+            # shopOpeningHours = {}
+            # for openingHour in openingHours:
+            #     if(openingHour.split()):
+            #         day = openingHour.split()[0]
+            #         hours = openingHour.split()[1]
+            #         shopOpeningHours[day] = hours
 
             services = response.css('.ret-o-store-detail__store-icon-wrapper')[0]
             link = services.css('a::attr("href")').get()
@@ -36,28 +63,34 @@ class LidlDESpider(scrapy.Spider):
 
             properties = {
                 "ref": latitude+longitude,
-                "country": "Germany",
-                "name": "Lidl",
+                "country": "DE",
                 "street": street,
                 "postcode": postalCode,
                 "city": city,
-                "opening_hours": shopOpeningHours,
+                # "opening_hours": shopOpeningHours,
                 "lat": latitude,
                 "lon": longitude
             }
+
+            hours = self.parse_hours(openingHours)
+            print(hours)
+
+            if hours:
+                properties["opening_hours"] = hours
+
+
             yield GeojsonPointItem(**properties)
 
     def parse(self, response):
-        # Read all provinces
-        provinces = response.css('.ret-o-store-detail-content')
 
-        # Read cities in each province
-        for province in provinces:
-            cities = province.css('.ret-o-store-detail-city').css('a::attr(href)')
+        cities = response.css('.ret-o-store-detail-city').css('a::attr(href)')
+
+        for city in cities:
+            city = f"https://www.lidl.de{city.get()}"
+
+            yield scrapy.Request(url=city, callback=self.parse_details)
 
 
-            for city in cities:
-                logging.info(f"Processing for url {city.get()}")
-                city = f"https://www.lidl.de{city.get()}"
-
-                yield scrapy.Request(url=city, callback=self.parse_details)
+process = CrawlerProcess()
+process.crawl(LidlDESpider)
+process.start()
