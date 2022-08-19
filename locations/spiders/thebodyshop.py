@@ -45,7 +45,7 @@ class TheBodyShopSpider(scrapy.spiders.SitemapSpider):
                 )
 
     def parse_json(self, response, html_response):
-        store = json.loads(response.text)
+        store = response.json()
         store["location"] = store["geoPoint"]
         item = DictParser.parse(store)
         item["ref"] = store["name"]
