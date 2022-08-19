@@ -49,7 +49,9 @@ class DictParser(object):
         if not contact or not isinstance(contact, dict):
             contact = obj
 
-        item["phone"] = DictParser.get_first_key(contact, ["phone", "telephone", "tel", "phoneNumber"])
+        item["phone"] = DictParser.get_first_key(
+            contact, ["phone", "telephone", "tel", "phoneNumber"]
+        )
 
         item["ref"] = DictParser.get_first_key(
             obj, ["ref", "id", "store_id", "shopNumber", "slug"]
