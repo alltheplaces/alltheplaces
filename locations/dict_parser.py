@@ -8,8 +8,8 @@ class DictParser(object):
 
         location = DictParser.get_first_key(obj, ["location", "geolocation"])
 
-        # Check for a location object, if not use the parent
-        if location and not isinstance(location, dict):
+        # If not a good location object then use the parent
+        if not location or not isinstance(location, dict):
             location = obj
 
         item["lat"] = DictParser.get_first_key(location, ["latitude", "lat"])
@@ -42,14 +42,14 @@ class DictParser(object):
         item["postcode"] = DictParser.get_first_key(
             address, ["postCode", "post_code", "postalCode"]
         )
-        item["country"] = DictParser.get_first_key(address, ["country", "countryCode"])
+        item["country"] = DictParser.get_first_key(address, ["countryCode", "country"])
 
         contact = DictParser.get_first_key(obj, ["contact"])
 
         if not contact or not isinstance(contact, dict):
             contact = obj
 
-        item["phone"] = DictParser.get_first_key(contact, ["phone", "telephone", "tel"])
+        item["phone"] = DictParser.get_first_key(contact, ["phone", "telephone", "tel", "phoneNumber"])
 
         item["ref"] = DictParser.get_first_key(
             obj, ["ref", "id", "store_id", "shopNumber", "slug"]
