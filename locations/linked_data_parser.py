@@ -76,7 +76,8 @@ class LinkedDataParser(object):
                 )
                 item["phone"] = addr.get("telephone")
 
-        item["phone"] = ld.get("telephone").strip()
+        if tele := ld.get("telephone"):
+            item["phone"] = tele.strip()
         item["website"] = ld.get("url")
 
         try:
