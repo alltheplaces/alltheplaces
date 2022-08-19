@@ -51,6 +51,5 @@ class TheBodyShopSpider(scrapy.spiders.SitemapSpider):
         item["ref"] = store["name"]
         item["name"] = store["displayName"]
         item["website"] = html_response.url
-        item["street_address"] = store["address"].get("line1")
         item["country"] = store["address"]["country"]["isocode"]
         return item
