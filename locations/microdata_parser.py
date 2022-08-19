@@ -78,7 +78,7 @@ def property_value(element: lxml.html.HtmlElement):
         # datetime content attribute, if it has one, otherwise the child text
         # content of the time element.
         if "datetime" in element.attrib:
-            value = element.attrib["datetime", ""]
+            value = element.attrib["datetime"]
         else:
             value = element.text_content()
         return value
