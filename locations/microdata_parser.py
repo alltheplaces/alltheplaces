@@ -237,7 +237,9 @@ def remove_duplicates(lst):
 def convert_item(item):
     ld = {}
     for itemtype in item.get("type", []):
-        schema_type = itemtype.removeprefix("http://schema.org/").removeprefix("https://schema.org/")
+        schema_type = itemtype.removeprefix("http://schema.org/").removeprefix(
+            "https://schema.org/"
+        )
         if schema_type != itemtype:
             # Did we identify the URI prefix?
             ld["@type"] = schema_type
@@ -296,7 +298,7 @@ class MicrodataParser:
         return result
 
     @staticmethod
-    def convert_to_json_ld(response: Union['parsel.Selector', 'scrapy.http.Response']):
+    def convert_to_json_ld(response: Union["parsel.Selector", "scrapy.http.Response"]):
         selector = getattr(response, "selector", response)
         obj = MicrodataParser.extract_microdata(selector)
         ld = MicrodataParser.convert_to_graph(obj)
