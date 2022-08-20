@@ -24,14 +24,17 @@ class LidlDESpider(scrapy.Spider):
         opening_hours = OpeningHours()
 
         for item in hours:
-            if (item.split()):
-                day = DAY_MAPPING[item.split()[0]]
-                hour = item.split()[1]
-                opening_hours.add_range(
-                    day=day,
-                    open_time=hour.split('-')[0],
-                    close_time=hour.split('-')[1]
-                )
+            if item.split():
+                try:
+                    day = DAY_MAPPING[item.split()[0]]
+                    hour = item.split()[1]
+                    opening_hours.add_range(
+                        day=day,
+                        open_time=hour.split('-')[0],
+                        close_time=hour.split('-')[1]
+                    )
+                except KeyError:
+                    pass
 
         return opening_hours.as_opening_hours()
     def parse_details(self, response):
