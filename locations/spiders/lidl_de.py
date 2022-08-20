@@ -55,7 +55,7 @@ class LidlDESpider(scrapy.Spider):
 
             properties = {
                 "ref": latitude+longitude,
-                "street": street,
+                "street_address": street,
                 "postcode": postalCode,
                 "city": city,
                 "lat": latitude,
