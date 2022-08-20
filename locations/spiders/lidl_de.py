@@ -13,6 +13,8 @@ DAY_MAPPING = {
     "Sa": "Sa",
     "So": "Su",
 }
+
+
 class LidlDESpider(scrapy.Spider):
     name = "lidl_de"
     item_attributes = {"brand": "Lidl", "brand_wikidata": "Q151954", "country": "DE"}
@@ -30,36 +32,39 @@ class LidlDESpider(scrapy.Spider):
                     hour = item.split()[1]
                     opening_hours.add_range(
                         day=day,
-                        open_time=hour.split('-')[0],
-                        close_time=hour.split('-')[1]
+                        open_time=hour.split("-")[0],
+                        close_time=hour.split("-")[1],
                     )
                 except KeyError:
                     pass
 
         return opening_hours.as_opening_hours()
+
     def parse_details(self, response):
 
-        lidlShops = response.css('.ret-o-store-detail')
+        lidlShops = response.css(".ret-o-store-detail")
 
         for shop in lidlShops:
-            shopAddress = shop.css('.ret-o-store-detail__address::text').extract()
+            shopAddress = shop.css(".ret-o-store-detail__address::text").extract()
             street = shopAddress[0]
             postalCode = shopAddress[1].split()[0]
             city = shopAddress[1].split()[1]
-            openingHours = shop.css('.ret-o-store-detail__opening-hours::text').extract()
-            services = response.css('.ret-o-store-detail__store-icon-wrapper')[0]
+            openingHours = shop.css(
+                ".ret-o-store-detail__opening-hours::text"
+            ).extract()
+            services = response.css(".ret-o-store-detail__store-icon-wrapper")[0]
             link = services.css('a::attr("href")').get()
-            coordinates = link.split('pos.')[1].split('_L')[0]
-            latitude = coordinates.split('_')[0]
-            longitude = coordinates.split('_')[1]
+            coordinates = link.split("pos.")[1].split("_L")[0]
+            latitude = coordinates.split("_")[0]
+            longitude = coordinates.split("_")[1]
 
             properties = {
-                "ref": latitude+longitude,
+                "ref": latitude + longitude,
                 "street_address": street,
                 "postcode": postalCode,
                 "city": city,
                 "lat": latitude,
-                "lon": longitude
+                "lon": longitude,
             }
 
             hours = self.parse_hours(openingHours)
@@ -67,12 +72,11 @@ class LidlDESpider(scrapy.Spider):
             if hours:
                 properties["opening_hours"] = hours
 
-
             yield GeojsonPointItem(**properties)
 
     def parse(self, response):
 
-        cities = response.css('.ret-o-store-detail-city').css('a::attr(href)')
+        cities = response.css(".ret-o-store-detail-city").css("a::attr(href)")
 
         for city in cities:
             city = f"https://www.lidl.de{city.get()}"
