@@ -63,7 +63,6 @@ class LidlDESpider(scrapy.Spider):
             }
 
             hours = self.parse_hours(openingHours)
-            print(hours)
 
             if hours:
                 properties["opening_hours"] = hours
