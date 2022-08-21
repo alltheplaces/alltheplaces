@@ -4,8 +4,8 @@ import scrapy
 from locations.items import GeojsonPointItem
 
 
-class Forever21Spider(scrapy.Spider):
-    name = "forever21"
+class Forever21UsSpider(scrapy.Spider):
+    name = "forever21_us"
     item_attributes = {
         "brand": "Forever 21",
         "brand_wikidata": "Q1060537",
