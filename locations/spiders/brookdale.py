@@ -2,6 +2,8 @@
 import json
 from pathlib import Path
 import urllib.parse
+import re
+
 import scrapy
 
 from locations.linked_data_parser import LinkedDataParser
@@ -25,6 +27,8 @@ class BrookdaleSpider(scrapy.spiders.SitemapSpider):
 
         script = response.xpath('//script[@type="application/ld+json"]/text()').get()
         script = script.replace('"amenityFeature": \n}', '"amenityFeature": [] \n}')
+        script = script.replace("\r\n", "")
+        script = re.sub(r'"description":.*', "", script)
         item = LinkedDataParser.parse_ld(json.loads(script))
         path = urllib.parse.urlsplit(response.url).path
         item["ref"] = Path(path).stem.removeprefix("brookdale-")
