@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import json
 from pathlib import Path
 import urllib.parse
 import scrapy
@@ -21,7 +22,10 @@ class BrookdaleSpider(scrapy.spiders.SitemapSpider):
         if response.request.meta.get("redirect_reasons") == [301]:
             # Returning 301 when should be 404
             return
-        item = LinkedDataParser.parse(response, "Residence")
+
+        script = response.xpath('//script[@type="application/ld+json"]/text()').get()
+        script = script.replace('"amenityFeature": \n}', '"amenityFeature": [] \n}')
+        item = LinkedDataParser.parse_ld(json.loads(script))
         path = urllib.parse.urlsplit(response.url).path
         item["ref"] = Path(path).stem.removeprefix("brookdale-")
         yield item
