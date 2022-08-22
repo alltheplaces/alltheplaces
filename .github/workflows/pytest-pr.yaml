@@ -1,0 +1,25 @@
+name: Run pytest when core files have changed
+
+on:
+  pull_request:
+    paths:
+    - 'locations/*.py'
+
+jobs:
+  pytest:
+    runs-on: ubuntu-18.04
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+    - name: Setup Python
+      uses: actions/setup-python@master
+    - name: Install pipenv
+      run: |
+        pip --quiet install pipenv
+    - name: Install dependencies
+      run: |
+        pipenv --bare install --system --deploy
+    - name: Run pytest
+      run: |
+        pytest
+
