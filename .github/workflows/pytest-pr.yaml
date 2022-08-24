@@ -3,6 +3,7 @@ name: Run pytest when core files have changed
 on:
   pull_request:
     paths:
+    - '.github/workflows/*.yaml'
     - 'locations/*.py'
 
 jobs:
