@@ -8,7 +8,12 @@ class SouthernCoopSpider(SitemapSpider):
     name = "southern_coop"
     item_attributes = {"brand": "Southern Co-op", "brand_wikidata": "Q7569773"}
     sitemap_urls = ["https://stores.thesouthernco-operative.co.uk/sitemap.xml"]
-    sitemap_rules = [("", "parse_item")]
+    sitemap_rules = [
+        (
+            "https:\/\/stores\.thesouthernco-operative\.co\.uk\/[-\w]+\/[-\w]+\/[-\w]+\.html$",
+            "parse_item",
+        )
+    ]
 
     def parse_item(self, response):
         MicrodataParser.convert_to_json_ld(response)
