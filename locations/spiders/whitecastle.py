@@ -57,16 +57,11 @@ class WhiteCastleSpider(scrapy.Spider):
                 "lon": store.get("lng"),
             }
 
-            try:
-                if store.get("open24x7"):
-                    properties["opening_hours"] = "24/7"
-                elif store.get("days"):
-                    opening_hours = self.store_hours(store.get("days"))
-                    if opening_hours:
-                        properties["opening_hours"] = opening_hours
-            except:
-                # TODO: opening hours exception was prematurely stopping the spider
-                # TODO: a good samaritan could fix?
-                pass
+            if store.get("open24x7"):
+                properties["opening_hours"] = "24/7"
+            elif store.get("days"):
+                opening_hours = self.store_hours(store.get("days"))
+                if opening_hours:
+                    properties["opening_hours"] = opening_hours
 
             yield GeojsonPointItem(**properties)
