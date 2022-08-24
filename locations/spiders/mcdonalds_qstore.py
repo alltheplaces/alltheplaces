@@ -2,16 +2,17 @@
 import scrapy
 import re
 
-from locations.items import GeojsonPointItem
+from locations.dict_parser import DictParser
 
 
 class McDonaldsQStoreSpider(scrapy.Spider):
     name = "mcdonalds_qstore"
     item_attributes = {"brand": "McDonald's", "brand_wikidata": "Q38076"}
-    allowed_domains = ["mcdonalds.com.au", "mcdonalds.co.nz"]
+    allowed_domains = ["mcdonalds.com.au", "mcdonalds.co.nz", "mcdonalds.eg"]
     start_urls = (
         "https://mcdonalds.com.au/data/store",
         "https://mcdonalds.co.nz/data/store",
+        "https://mcdonalds.eg/Stotes",
     )
 
     def normalize_time(self, time_str):
@@ -33,7 +34,6 @@ class McDonaldsQStoreSpider(scrapy.Spider):
         this_day_group = {}
         day_hours = data["store_trading_hour"]
         for day_hour in day_hours:
-            hours = ""
             day, start, end = day_hour[0], day_hour[1], day_hour[2]
             if day == "Day":
                 continue
@@ -78,26 +78,32 @@ class McDonaldsQStoreSpider(scrapy.Spider):
         return opening_hours
 
     def parse(self, response):
-        results = response.json()
-        for data in results:
+        def country_from_url(response):
+            return response.url.split("/")[2].split(".")[-1].upper()
+
+        for data in response.json():
             properties = {
                 "city": data["store_suburb"],
                 "ref": data["store_code"],
-                "addr_full": data["store_address"],
-                "phone": data["store_phone"],
+                "street_address": data["store_address"],
+                "phone": data.get("store_phone"),
                 "state": data["store_state"],
-                "postcode": data["store_postcode"],
+                "postcode": data.get("store_postcode"),
                 "name": data["title"],
+                "geolocation": data.get("lat_long"),
             }
+            item = DictParser.parse(properties)
+            item["country"] = country_from_url(response)
 
-            lat_lon = data["store_geocode"]
-            if not lat_lon:
-                continue
-            properties["lon"] = lat_lon.split(",")[0].strip()
-            properties["lat"] = lat_lon.split(",")[1].strip()
+            # The alternative way of providing the location.
+            coords = data.get("store_geocode")
+            if coords and "," in coords:
+                item["lat"] = coords.split(",")[1]
+                item["lon"] = coords.split(",")[0]
 
-            opening_hours = self.store_hours(data)
-            if opening_hours:
-                properties["opening_hours"] = opening_hours
+            if not item["country"] == "EG":
+                opening_hours = self.store_hours(data)
+                if opening_hours:
+                    item["opening_hours"] = opening_hours
 
-            yield GeojsonPointItem(**properties)
+            yield item
