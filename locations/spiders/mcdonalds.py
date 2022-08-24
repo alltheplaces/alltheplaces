@@ -1,27 +1,117 @@
 # -*- coding: utf-8 -*-
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.geo import city_locations
+from locations.dict_parser import DictParser
 
 
 class McDonaldsSpider(scrapy.Spider):
     name = "mcdonalds"
     item_attributes = {"brand": "McDonald's", "brand_wikidata": "Q38076"}
     allowed_domains = ["www.mcdonalds.com"]
-    start_urls = (
-        "https://www.mcdonalds.com/googleapps/GoogleRestaurantLocAction.do?method=searchLocation&latitude=44.97&longitude=-93.21&radius=100000&maxResults=300000&country=us&language=en-us",
-        "https://www.mcdonalds.com/googleapps/GoogleRestaurantLocAction.do?method=searchLocation&latitude=44.97&longitude=-93.21&radius=100000&maxResults=300000&country=ca&language=en-ca",
-        "https://www.mcdonalds.com/googleapps/GoogleRestaurantLocAction.do?method=searchLocation&latitude=44.97&longitude=-93.21&radius=100000&maxResults=300000&country=gb&language=en-gb",
-        "https://www.mcdonalds.com/googleapps/GoogleRestaurantLocAction.do?method=searchLocation&latitude=44.97&longitude=-93.21&radius=100000&maxResults=300000&country=se&language=sv-se",
-        "https://www.mcdonalds.com/googleapps/GoogleRestaurantLocAction.do?method=searchLocation&latitude=55.9394691&longitude=10.17994550000003&radius=100000&maxResults=300000&country=dk&language=da-dk",
-        "https://www.mcdonalds.com/googleapps/GoogleRestaurantLocAction.do?method=searchLocation&latitude=60.7893233&longitude=10.689804200000026&radius=100000&maxResults=300000&country=no&language=en-no",
-        "https://www.mcdonalds.com/googleapps/GoogleRestaurantLocAction.do?method=searchLocation&latitude=24.0799008&longitude=45.29000099999996&radius=100000&maxResults=300000&country=saj&language=en-sa",
-        "https://www.mcdonalds.com/googleapps/GoogleRestaurantLocAction.do?method=searchLocation&latitude=29.3365728&longitude=47.67552909999995&radius=100000&maxResults=300000&country=kw&language=en-kw",
-        "https://www.mcdonalds.com/googleapps/GoogleRestaurantLocAction.do?method=searchLocation&latitude=24.1671413&longitude=56.114225300000044&radius=100000&maxResults=300000&country=om&language=en-om",
-        "https://www.mcdonalds.com/googleapps/GoogleRestaurantLocAction.do?method=searchLocation&latitude=23.659703&longitude=53.7042189&radius=100000&maxResults=300000&country=ae&language=en-ae",
-        "https://www.mcdonalds.com/googleapps/GoogleRestaurantLocAction.do?method=searchLocation&latitude=26.1621079&longitude=50.4501947&radius=100000&maxResults=300000&country=bh&language=en-bh",
-        "https://www.mcdonalds.com/googleapps/GoogleRestaurantLocAction.do?method=searchLocation&latitude=25.2854473&longitude=51.53103979999992&radius=100000&maxResults=300000&country=qa&language=en-q",
-    )
+    download_delay = 0.5
+
+    def start_requests(self):
+        template = "https://www.mcdonalds.com/googleappsv2/geolocation?latitude={}&longitude={}&radius=50&maxResults=250&country={}&language={}&showClosed="
+        for locale in [
+            "en-ca",
+            "en-gb",
+            "fi-fi",
+            "en-ie",
+            "en-us",
+            "de-de",
+            "nb-no",
+            "en-ae",
+            "dk-dk",
+            "nl-nl",
+            "en-om",
+            "en-qa",
+            "en-kw",
+            "en-bh",
+            "fr-ch",
+            "sv-se",
+            "en-sa",
+            "uk-ua",
+        ]:
+            country = locale.split("-")[1]
+            for city in city_locations(country.upper(), 20000):
+                if country == "sa":
+                    url = template.format(
+                        city["latitude"], city["longitude"], "sar", "en"
+                    )
+                else:
+                    url = template.format(
+                        city["latitude"], city["longitude"], country, locale
+                    )
+                yield scrapy.Request(
+                    url,
+                    self.parse_major_api,
+                    cb_kwargs=dict(country=country, locale=locale),
+                )
+
+    def parse_major_api(self, response, country, locale):
+        if len(response.body) == 0:
+            return
+        stores = response.json()["features"]
+        for store in stores:
+            properties = store["properties"]
+            store_identifier = properties["identifierValue"]
+            store_url = None
+            if locale in [
+                "en-ca",
+                "en-gb",
+                "fi-fi",
+                "en-ie",
+                "en-us",
+                "fr-ch",
+                "sv-se",
+                "zh-tw",
+            ]:
+                # Individual store site pages in these locale's have a common pattern.
+                store_url = "https://www.mcdonalds.com/{}/{}/location/{}.html".format(
+                    country, locale, store_identifier
+                )
+            elif locale in ["de-de"]:
+                store_url = properties.get("restaurantUrl")
+                if not store_url.startswith("https://www.mcdonalds.com/"):
+                    # Most of the sites have good individual site pages, some do not.
+                    store_url = None
+            elif locale in [
+                "nb-no",
+                "en-ae",
+                "en-om",
+                "en-qa",
+                "en-kw",
+                "en-bh",
+                "en-sa",
+            ]:
+                # These locale's do not support individual site pages.
+                pass
+            elif locale in ["da-dk", "nl-nl"]:
+                store_url = properties.get("restaurantUrl")
+            if not store_url:
+                store_url = "https://www.mcdonalds.com/"
+
+            item = DictParser.parse(properties)
+            item["ref"] = store_identifier
+            item["website"] = store_url
+            item["street_address"] = properties.get("addressLine1")
+            item["city"] = properties.get("addressLine3")
+            item['state'] = properties.get("subDivision")
+            item["country"] = country.upper()
+            coords = store["geometry"]["coordinates"]
+            item["lat"] = coords[1]
+            item["lon"] = coords[0]
+
+            hours = properties.get("restauranthours")
+            try:
+                hours = self.store_hours(hours)
+                if hours:
+                    item["opening_hours"] = hours
+            except:
+                self.logger.exception("Couldn't process opening hours: %s", hours)
+
+            yield item
 
     def store_hours(self, store_hours):
         if not store_hours:
@@ -32,13 +122,13 @@ class McDonaldsSpider(scrapy.Spider):
         day_groups = []
         this_day_group = None
         for day in (
-            "Monday",
-            "Tuesday",
-            "Wednesday",
-            "Thursday",
-            "Friday",
-            "Saturday",
-            "Sunday",
+                "Monday",
+                "Tuesday",
+                "Wednesday",
+                "Thursday",
+                "Friday",
+                "Saturday",
+                "Sunday",
         ):
             hours = store_hours.get("hours" + day)
             if not hours:
@@ -70,51 +160,3 @@ class McDonaldsSpider(scrapy.Spider):
             opening_hours = opening_hours[:-2]
 
         return opening_hours
-
-    def parse(self, response):
-        data = response.json()
-
-        for store in data.get("features", []):
-            store_info = store["properties"]
-
-            if store_info["addressLine4"] == "USA":
-
-                properties = {
-                    "ref": store_info["id"],
-                    "addr_full": store_info["addressLine1"],
-                    "city": store_info["addressLine3"],
-                    "state": store_info["subDivision"],
-                    "country": store_info["addressLine4"],
-                    "postcode": store_info["postcode"],
-                    "phone": store_info.get("telephone"),
-                    "lon": store["geometry"]["coordinates"][0],
-                    "lat": store["geometry"]["coordinates"][1],
-                    "extras": {
-                        "number": store_info[
-                            "identifierValue"
-                        ]  ## 4 digit identifier that is a store number for US McDonalds
-                    },
-                }
-
-            else:
-                properties = {
-                    "ref": store_info["id"],
-                    "addr_full": store_info["addressLine1"],
-                    "city": store_info["addressLine3"],
-                    "state": store_info["subDivision"],
-                    "country": store_info["addressLine4"],
-                    "postcode": store_info["postcode"],
-                    "phone": store_info.get("telephone"),
-                    "lon": store["geometry"]["coordinates"][0],
-                    "lat": store["geometry"]["coordinates"][1],
-                }
-
-            hours = store_info.get("restauranthours")
-            try:
-                hours = self.store_hours(hours)
-                if hours:
-                    properties["opening_hours"] = hours
-            except:
-                self.logger.exception("Couldn't process opening hours: %s", hours)
-
-            yield GeojsonPointItem(**properties)
