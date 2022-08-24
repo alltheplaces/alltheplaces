@@ -12,7 +12,12 @@ class EastOfEnglandCoopSpider(SitemapSpider):
         "country": "GB",
     }
     sitemap_urls = ["https://www.eastofengland.coop/googlesitemap.xml"]
-    sitemap_rules = [(r"https:\/\/www\.eastofengland\.coop\/(supermarket|foodstores|funerals)\/", "parse_item")]
+    sitemap_rules = [
+        (
+            r"https:\/\/www\.eastofengland\.coop\/(supermarket|foodstores|funerals)\/",
+            "parse_item",
+        )
+    ]
 
     def sitemap_filter(self, entries):
         for entry in entries:
