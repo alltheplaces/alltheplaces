@@ -3,6 +3,7 @@ name: Run pytest when core files have changed
 on:
   pull_request:
     paths:
+    - '.github/workflows/*.yaml'
     - 'locations/*.py'
 
 jobs:
@@ -18,8 +19,8 @@ jobs:
         pip --quiet install pipenv
     - name: Install dependencies
       run: |
-        pipenv --bare install --system --deploy
+        pipenv --bare install --system --dev
     - name: Run pytest
       run: |
-        pytest
+        pipenv run pytest
 
