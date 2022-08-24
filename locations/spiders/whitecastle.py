@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 import scrapy
-import csv
-import json
 import re
 
+from locations.geo import point_locations
 from locations.hours import OpeningHours
 from locations.items import GeojsonPointItem
 
@@ -15,14 +14,9 @@ class WhiteCastleSpider(scrapy.Spider):
     timeregex = re.compile("^([0-9:]+)(AM|PM)$")
 
     def start_requests(self):
-        with open(
-            "./locations/searchable_points/us_centroids_100mile_radius.csv"
-        ) as points:
-            for row in csv.DictReader(points):
-                latitude = row["latitude"]
-                longitude = row["longitude"]
-                url = f"https://www.whitecastle.com/wcapi/location-search?lat={latitude}&lng={longitude}&dist=100"
-                yield scrapy.Request(url, headers={"Accept": "application/json"})
+        for lat, lon in point_locations("us_centroids_100mile_radius.csv"):
+            url = f"https://www.whitecastle.com/wcapi/location-search?lat={lat}&lng={lon}&dist=100"
+            yield scrapy.Request(url, headers={"Accept": "application/json"})
 
     def store_hours(self, days):
         o = OpeningHours()
@@ -49,13 +43,11 @@ class WhiteCastleSpider(scrapy.Spider):
         return o.as_opening_hours()
 
     def parse(self, response):
-        data = json.loads(response.text)
-
-        for store in data:
+        for store in response.json():
             properties = {
                 "ref": store.get("storeNumber"),
                 "name": store.get("name"),
-                "addr_full": store.get("address"),
+                "street_address": store.get("address"),
                 "city": store.get("city"),
                 "state": store.get("state"),
                 "postcode": store.get("zip"),
