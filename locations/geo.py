@@ -68,5 +68,8 @@ def point_locations(areas_csv_file, area_field_filter=None):
 
 def city_locations(country_code, min_population=0):
     for city in geonamescache.GeonamesCache().get_cities().values():
-        if city['countrycode'].lower() == country_code.lower() and city['population'] >= min_population:
+        if (
+            city["countrycode"].lower() == country_code.lower()
+            and city["population"] >= min_population
+        ):
             yield city
