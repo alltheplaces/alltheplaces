@@ -97,7 +97,7 @@ class McDonaldsSpider(scrapy.Spider):
             item["website"] = store_url
             item["street_address"] = properties.get("addressLine1")
             item["city"] = properties.get("addressLine3")
-            item['state'] = properties.get("subDivision")
+            item["state"] = properties.get("subDivision")
             item["country"] = country.upper()
             coords = store["geometry"]["coordinates"]
             item["lat"] = coords[1]
@@ -122,13 +122,13 @@ class McDonaldsSpider(scrapy.Spider):
         day_groups = []
         this_day_group = None
         for day in (
-                "Monday",
-                "Tuesday",
-                "Wednesday",
-                "Thursday",
-                "Friday",
-                "Saturday",
-                "Sunday",
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday",
+            "Sunday",
         ):
             hours = store_hours.get("hours" + day)
             if not hours:
