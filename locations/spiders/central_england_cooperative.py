@@ -9,6 +9,7 @@ class CentralEnglandCooperativeSpider(SitemapSpider):
     item_attributes = {
         "brand": "Central England Co-operative",
         "brand_wikidata": "Q16986583",
+        "country": "GB",
     }
     sitemap_urls = ["https://stores.centralengland.coop/sitemap.xml"]
     sitemap_rules = [
