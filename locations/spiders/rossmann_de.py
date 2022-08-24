@@ -55,7 +55,7 @@ class RossmannDeSpider(scrapy.Spider):
                 "postcode": stores[store]["postalCode"],
                 "ref": store,
                 "extras": {
-                    "maps_url": stores[store]["mapsUrl"],
+                    "maps_url": stores[store]["mapsUri"],
                     "url": stores[store]["url"],
                     "region": stores[store]["region"],
                     "store_code": stores[store]["storeCode"],
