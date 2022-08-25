@@ -6,10 +6,10 @@ class DictParser(object):
     def parse(obj) -> GeojsonPointItem:
         item = GeojsonPointItem()
 
-        location = DictParser.get_first_key(obj, ["location", "geolocation"])
+        location = DictParser.get_first_key(obj, ["location", "geolocation", "geo"])
 
-        # Check for a location object, if not use the parent
-        if location and not isinstance(location, dict):
+        # If not a good location object then use the parent
+        if not location or not isinstance(location, dict):
             location = obj
 
         item["lat"] = DictParser.get_first_key(location, ["latitude", "lat"])
@@ -18,7 +18,7 @@ class DictParser(object):
         )
 
         item["name"] = DictParser.get_first_key(
-            obj, ["name", "storeName", "displayName"]
+            obj, ["name", "storeName", "displayName", "title"]
         )
 
         address = DictParser.get_first_key(obj, ["address", "addr"])
@@ -34,13 +34,13 @@ class DictParser(object):
         )
         item["street"] = DictParser.get_first_key(address, ["street", "streetName"])
         item["street_address"] = DictParser.get_first_key(
-            address, ["streetAddress", "street_address", "line1"]
+            address, ["streetAddress", "street_address", "addressLine1", "line1"]
         )
 
         item["city"] = DictParser.get_first_key(address, ["city", "town"])
         item["state"] = DictParser.get_first_key(address, ["state", "region"])
         item["postcode"] = DictParser.get_first_key(
-            address, ["postCode", "post_code", "postalCode"]
+            address, ["postCode", "post_code", "postalCode", "zip"]
         )
         item["country"] = DictParser.get_first_key(address, ["country", "countryCode"])
 
@@ -66,3 +66,15 @@ class DictParser(object):
                 return obj[key.lower()]
             elif obj.get(key.upper()):
                 return obj[key.upper()]
+
+    # Looks for a nested key and return the value.
+    @staticmethod
+    def get_nested_key(obj, key):
+        if isinstance(obj, dict):
+            for k, v in obj.items():
+                if k == key:
+                    return v
+                val = DictParser.get_nested_key(v, key)
+                if val:
+                    return val
+        return None
