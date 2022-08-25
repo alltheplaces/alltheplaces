@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import scrapy
-import json
 from locations.dict_parser import DictParser
 
 
@@ -11,7 +10,7 @@ class TheBodyShopSpider(scrapy.spiders.SitemapSpider):
         "brand_wikidata": "Q837851",
     }
     allowed_domains = ["thebodyshop.com"]
-    download_delay = 2.0
+    download_delay = 1.0
     sitemap_urls = ["https://www.thebodyshop.com/sitemap.xml"]
     sitemap_rules = [("/store-details/", "parse_store")]
 
