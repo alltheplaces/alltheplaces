@@ -1,6 +1,13 @@
 from urllib.parse import urlparse, parse_qs
 
 
+def extract_google_position(item, response):
+    for link in response.xpath("//img/@src").extract():
+        if link.startswith("https://maps.googleapis.com/maps/api/staticmap"):
+            item["lat"], item["lon"] = url_to_coords(link)
+            return
+
+
 def url_to_coords(url: str) -> (float, float):
     def get_query_param(link, query_param):
         parsed_link = urlparse(link)
