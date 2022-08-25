@@ -40,7 +40,7 @@ class DictParser(object):
         item["city"] = DictParser.get_first_key(address, ["city", "town"])
         item["state"] = DictParser.get_first_key(address, ["state", "region"])
         item["postcode"] = DictParser.get_first_key(
-            address, ["postCode", "post_code", "postalCode"]
+            address, ["postCode", "post_code", "postalCode", "zip"]
         )
         item["country"] = DictParser.get_first_key(address, ["country", "countryCode"])
 
@@ -66,3 +66,15 @@ class DictParser(object):
                 return obj[key.lower()]
             elif obj.get(key.upper()):
                 return obj[key.upper()]
+
+    # Looks for a nested key and return the value.
+    @staticmethod
+    def get_nested_key(obj, key):
+        if isinstance(obj, dict):
+            for k, v in obj.items():
+                if k == key:
+                    return v
+                val = DictParser.get_nested_key(v, key)
+                if val:
+                    return val
+        return None
