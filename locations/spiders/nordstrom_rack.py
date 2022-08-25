@@ -8,7 +8,12 @@ class NordstromRackSpider(SitemapSpider):
     name = "nordstrom_rack"
     item_attributes = {"brand": "Nordstrom Rack", "brand_wikidata": "Q21463374"}
     sitemap_urls = ["https://stores.nordstromrack.com/sitemap.xml"]
-    sitemap_rules = [(r"https:\/\/stores\.nordstromrack\.com\/\w{2}\/\w{2}\/[-\w]+\/[-\w]+$", "parse")]
+    sitemap_rules = [
+        (
+            r"https:\/\/stores\.nordstromrack\.com\/\w{2}\/\w{2}\/[-\w]+\/[-\w]+$",
+            "parse",
+        )
+    ]
 
     def parse(self, response):
         MicrodataParser.convert_to_json_ld(response)
