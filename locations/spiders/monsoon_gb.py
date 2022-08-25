@@ -7,11 +7,6 @@ def from_wikidata(name, code):
     return {"brand": name, "brand_wikidata": code}
 
 
-def set_brand(item, brand):
-    item["brand"] = brand.get("brand")
-    item["brand_wikidata"] = brand.get("brand_wikidata")
-
-
 class MonsoonGBSpider(scrapy.spiders.SitemapSpider):
     name = "monsoon_gb"
     sitemap_urls = ["https://stores.monsoon.co.uk/sitemap.xml"]
@@ -24,12 +19,12 @@ class MonsoonGBSpider(scrapy.spiders.SitemapSpider):
         item = LinkedDataParser.parse(response, "ClothingStore")
         if item:
             item["website"] = response.url
-            set_brand(item, self.MONSOON)
+            item.update(self.MONSOON)
             yield item
             if "Accessorize" in item["name"]:
                 # There is a co-located Accessorize store, this is how they work!
                 item = LinkedDataParser.parse(response, "ClothingStore")
                 item["website"] = response.url
-                set_brand(item, self.ACCESSORIZE)
+                item.update(self.ACCESSORIZE)
                 item["ref"] += "-accessorize"
                 yield item
