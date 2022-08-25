@@ -1,54 +1,25 @@
-import scrapy
+# -*- coding: utf-8 -*-
 import re
+
+import scrapy
+
 from locations.items import GeojsonPointItem
+from locations.linked_data_parser import LinkedDataParser
+from locations.microdata_parser import MicrodataParser
 
 
-class SunglassHutSpider(scrapy.Spider):
+class SunglassHutSpider(scrapy.spiders.SitemapSpider):
     name = "sunglass_hut"
     item_attributes = {"brand": "Sunglass Hut", "brand_wikidata": "Q136311"}
     allowed_domains = ["stores.sunglasshut.com"]
-    start_urls = ("https://stores.sunglasshut.com/",)
-
-    def parse_opening_hours(self, opening_hours):
-        return ";".join(opening_hours)
+    sitemap_urls = [
+        "https://stores.sunglasshut.com/robots.txt",
+    ]
 
     def parse(self, response):
-        urls = response.xpath(
-            '//a[@class="c-directory-list-content-item-link" or @class="c-location-grid-item-link"]/@href'
-        ).extract()
-        # If cannot find 'c-directory-list-content-item-link' or 'c-location-grid-item-link' then this is a store page
-        if len(urls) == 0:
-            properties = {
-                "addr_full": response.xpath(
-                    'normalize-space(//div[@class="c-location-info"]//span[@itemprop="streetAddress"]/text())'
-                ).extract_first(),
-                "city": response.xpath(
-                    'normalize-space(//div[@class="c-location-info"]//span[@itemprop="addressLocality"]/text())'
-                )
-                .extract_first()
-                .strip(","),
-                "state": response.xpath(
-                    'normalize-space(//div[@class="c-location-info"]//span[@itemprop="addressRegion"]/text())'
-                ).extract_first(),
-                "postcode": response.xpath(
-                    'normalize-space(//div[@class="c-location-info"]//span[@itemprop="postalCode"]/text())'
-                ).extract_first(),
-                "phone": response.xpath(
-                    'normalize-space(//div[@class="c-location-info"]//span[@itemprop="telephone"]/text())'
-                ).extract_first(),
-                "ref": response.url,
-                "website": response.url,
-                "lat": response.xpath(
-                    'normalize-space(//div[@class="c-location-info"]//meta[@itemprop="latitude"]/@content)'
-                ).extract_first(),
-                "lon": response.xpath(
-                    'normalize-space(//div[@class="c-location-info"]//meta[@itemprop="longitude"]/@content)'
-                ).extract_first(),
-                "opening_hours": self.parse_opening_hours(
-                    response.xpath('//meta[@itemprop="openingHours"]/@content').getall()
-                ),
-            }
-            yield GeojsonPointItem(**properties)
-        else:
-            for path in urls:
-                yield scrapy.Request(response.urljoin(path), callback=self.parse)
+        MicrodataParser.convert_to_json_ld(response.selector)
+        ld = LinkedDataParser.find_linked_data(response, "LocalBusiness")
+        if ld is not None:
+            ld["geo"] = ld["geo"][0]
+            item = LinkedDataParser.parse_ld(ld)
+            yield item

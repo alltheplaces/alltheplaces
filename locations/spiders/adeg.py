@@ -6,49 +6,62 @@ import scrapy
 from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
 
+wochentag = {
+    "Mo": "Mo",
+    "Di": "Tu",
+    "Mi": "We",
+    "Do": "Th",
+    "Fr": "Fr",
+    "Sa": "Sa",
+    "So": "Su",
+}
+
 
 class AdegSpider(scrapy.Spider):
     name = "adeg"
     item_attributes = {"brand": "ADEG Österreich", "brand_wikidata": "Q290211"}
     allowed_domains = ["adeg.at"]
-    start_urls = [
-        "https://www.adeg.at/stores/data/",
-    ]
 
-    def parse_hours(self, hours):
-        opening_hours = OpeningHours()
+    def start_requests(self):
+        yield self.get_page(1)
 
-        for item in hours:
-            opening_hours.add_range(
-                day=item["dayOfWeek"][:2],
-                open_time=item["opens"],
-                close_time=item["closes"],
-            )
-
-        return opening_hours.as_opening_hours()
+    def get_page(self, n):
+        return scrapy.Request(
+            f"https://www.adeg.at/services/maerkte-oeffnungszeiten?tx_solr[page]={n}&type=7382&distance=1000",
+            meta={"page": n},
+        )
 
     def parse(self, response):
-        stores = response.json()
+        stores = response.json()["merchantData"]
+        if stores == []:
+            return
+        yield self.get_page(1 + response.meta["page"])
 
         for store in stores:
+            lat, lon = store["coordinates"].split(",")
+
+            oh = OpeningHours()
+            for row in scrapy.Selector(text=store["openingHours"]).xpath(".//dt"):
+                day = wochentag[row.xpath("normalize-space()").get().removesuffix(":")]
+                for interval in row.xpath(
+                    "./following-sibling::dd[position()=1]/span/text()"
+                ).extract():
+                    open_time, close_time = interval.strip(",").split(" \u2013 ")
+                    if (open_time, close_time) == ("", ""):
+                        continue
+                    oh.add_range(day, open_time, close_time)
+
             properties = {
-                "name": store["displayName"],
-                "ref": store["storeId"],
-                "addr_full": store["street"],
-                "city": store["city"],
-                "state": store["province"]["provinceName"],
+                "ref": store["uid"],
+                "lat": lat,
+                "lon": lon,
+                "name": store["title"],
+                "street_address": store["street"],
+                "city": store["municipality"],
                 "postcode": store["zip"],
                 "country": "AT",
-                "phone": (store["telephoneAreaCode"] or "")
-                + " "
-                + (store["telephoneNumber"] or ""),
-                "website": store.get("url") or None,
-                "lat": float(store["yCoordinates"]),
-                "lon": float(store["xCoordinates"]),
+                "phone": store["telephoneUrl"].removeprefix("tel:"),
+                "website": response.urljoin(store["url"]),
+                "opening_hours": oh.as_opening_hours(),
             }
-
-            hours = self.parse_hours(store["openingTimesStructured"])
-            if hours:
-                properties["opening_hours"] = hours
-
             yield GeojsonPointItem(**properties)
