@@ -1,4 +1,5 @@
 import csv
+import geonamescache
 import math
 
 # Radius of the Earth in kilometers
@@ -63,3 +64,12 @@ def point_locations(areas_csv_file, area_field_filter=None):
                     if area not in area_field_filter:
                         continue
                 yield lat, lon
+
+
+def city_locations(country_code, min_population=0):
+    for city in geonamescache.GeonamesCache().get_cities().values():
+        if (
+            city["countrycode"].lower() == country_code.lower()
+            and city["population"] >= min_population
+        ):
+            yield city

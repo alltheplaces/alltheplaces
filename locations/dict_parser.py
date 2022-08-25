@@ -8,8 +8,8 @@ class DictParser(object):
 
         location = DictParser.get_first_key(obj, ["location", "geolocation"])
 
-        # Check for a location object, if not use the parent
-        if location and not isinstance(location, dict):
+        # If not a good location object then use the parent
+        if not location or not isinstance(location, dict):
             location = obj
 
         item["lat"] = DictParser.get_first_key(location, ["latitude", "lat"])
