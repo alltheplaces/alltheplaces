@@ -6,7 +6,7 @@ class DictParser(object):
     def parse(obj) -> GeojsonPointItem:
         item = GeojsonPointItem()
 
-        location = DictParser.get_first_key(obj, ["location", "geolocation"])
+        location = DictParser.get_first_key(obj, ["location", "geolocation", "geo"])
 
         # If not a good location object then use the parent
         if not location or not isinstance(location, dict):
@@ -18,7 +18,7 @@ class DictParser(object):
         )
 
         item["name"] = DictParser.get_first_key(
-            obj, ["name", "storeName", "displayName"]
+            obj, ["name", "storeName", "displayName", "title"]
         )
 
         address = DictParser.get_first_key(obj, ["address", "addr"])
