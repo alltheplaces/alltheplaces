@@ -40,7 +40,8 @@ class DictParser(object):
         item["city"] = DictParser.get_first_key(address, ["city", "town"])
         item["state"] = DictParser.get_first_key(address, ["state", "region"])
         item["postcode"] = DictParser.get_first_key(
-            address, ["postCode", "post_code", "postalCode", "zipCode", "zip"]
+            address,
+            ["postCode", "post_code", "postalCode", "postal_code", "zipCode", "zip"],
         )
         item["country"] = DictParser.get_first_key(address, ["country", "countryCode"])
 
