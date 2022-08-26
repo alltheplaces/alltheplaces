@@ -34,7 +34,14 @@ class DictParser(object):
         )
         item["street"] = DictParser.get_first_key(address, ["street", "streetName"])
         item["street_address"] = DictParser.get_first_key(
-            address, ["streetAddress", "street_address", "addressLine1", "line1"]
+            address,
+            [
+                "streetAddress",
+                "street_address",
+                "addressLine1",
+                "line1",
+                "addressLineOne",
+            ],
         )
 
         item["city"] = DictParser.get_first_key(address, ["city", "town"])
