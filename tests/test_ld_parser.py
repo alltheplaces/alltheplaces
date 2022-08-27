@@ -51,6 +51,34 @@ def test_ld():
     assert i["ref"] is None
 
 
+def test_strip_whitespace():
+    i = LinkedDataParser.parse_ld(
+        json.loads(
+            """
+            {
+                "@context": "https://schema.org",
+                "@type": "Restaurant",
+                "address": {
+                    "@type": "PostalAddress",
+                    "addressLocality": "Sunnyvale ",
+                    "addressRegion": " CA",
+                    "postalcode": " 94086 ",
+                    "streetAddress": "   1901 Lemur Ave                 "
+                },
+                "telephone": "\
+                    (408) 714-1489    "
+            }
+            """
+        )
+    )
+
+    assert i["city"] == "Sunnyvale"
+    assert i["state"] == "CA"
+    assert i["postcode"] == "94086"
+    assert i["street_address"] == "1901 Lemur Ave"
+    assert i["phone"] == "(408) 714-1489"
+
+
 def test_ld_address_array():
     i = LinkedDataParser.parse_ld(
         json.loads(
@@ -150,3 +178,10 @@ def test_flat_properties():
 
     assert i["addr_full"] == "a, b, c"
     assert i["image"] == "https://example.org/image"
+
+
+def test_get_case_insensitive():
+    i = {"aaa": "aaa", "BBB": "BBB", "aAa": "aAa"}
+
+    assert LinkedDataParser.get_case_insensitive(i, "aAa") == "aAa"
+    assert LinkedDataParser.get_case_insensitive(i, "bbb") == "BBB"
