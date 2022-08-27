@@ -54,10 +54,9 @@ class LinkedDataParser(object):
                 item["lat"] = geo.get("latitude")
                 item["lon"] = geo.get("longitude")
 
-        item["name"] = ld.get("name")
+        item["name"] = LinkedDataParser.get_clean(ld, "name")
 
-        if ld.get("address"):
-            addr = ld["address"]
+        if addr := LinkedDataParser.get_clean(ld, "address"):
             if isinstance(addr, list):
                 addr = addr[0]
             if isinstance(addr, str):
@@ -66,21 +65,26 @@ class LinkedDataParser(object):
                 # We do not check for "@type" being "PostalAddress", some sites fail
                 # to specify this and since it is unlikely to be anything else we do not
                 # perform the check.
-                item["street_address"] = addr.get("streetAddress") or addr.get(
-                    "streetaddress"
+                item["street_address"] = LinkedDataParser.get_case_insensitive(
+                    addr, "streetAddress"
                 )
-                item["city"] = addr.get("addressLocality") or addr.get(
-                    "addresslocality"
+                item["city"] = LinkedDataParser.get_case_insensitive(
+                    addr, "addressLocality"
                 )
-                item["state"] = addr.get("addressRegion") or addr.get("addressregion")
-                item["postcode"] = addr.get("postalCode") or addr.get("postalcode")
-                item["country"] = addr.get("addressCountry") or addr.get(
-                    "addresscountry"
+                item["state"] = LinkedDataParser.get_case_insensitive(
+                    addr, "addressRegion"
                 )
-                item["phone"] = addr.get("telephone")
+                item["postcode"] = LinkedDataParser.get_case_insensitive(
+                    addr, "postalCode"
+                )
+                item["country"] = LinkedDataParser.get_case_insensitive(
+                    addr, "addressCountry"
+                )
+                item["phone"] = LinkedDataParser.get_clean(addr, "telephone")
 
-        if tele := ld.get("telephone"):
-            item["phone"] = tele.strip()
+        if item.get("phone") is None:
+            item["phone"] = LinkedDataParser.get_clean(ld, "telephone")
+
         item["website"] = ld.get("url")
 
         try:
@@ -122,3 +126,20 @@ class LinkedDataParser(object):
                 item["website"] = "https://" + item["website"]
 
             return item
+
+    @staticmethod
+    def get_clean(obj, key):
+        if value := obj.get(key):
+            if isinstance(value, str):
+                return value.strip()
+            return value
+
+    @staticmethod
+    def get_case_insensitive(obj, key):
+        # Prioritise the case correct key
+        if value := LinkedDataParser.get_clean(obj, key):
+            return value
+
+        for real_key in obj:
+            if real_key.lower() == key.lower():
+                return LinkedDataParser.get_clean(obj, real_key)
