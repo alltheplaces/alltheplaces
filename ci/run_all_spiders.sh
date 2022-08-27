@@ -79,13 +79,16 @@ do
         elapsed_time="0"
     fi
 
+    spider_filename=$(scrapy spider_filename "${spider}")
+
     # use JQ to create an overall results JSON
     jq --compact-output \
         --arg spider_name "${spider}" \
         --arg spider_feature_count ${feature_count} \
         --arg spider_error_count ${error_count} \
         --arg spider_elapsed_time ${elapsed_time} \
-        '.results += [{"spider": $spider_name, "errors": $spider_error_count | tonumber, "features": $spider_feature_count | tonumber, "elapsed_time": $spider_elapsed_time | tonumber}]' \
+        --arg spider_filename ${spider_filename} \
+        '.results += [{"spider": $spider_name, "filename": $spider_filename, "errors": $spider_error_count | tonumber, "features": $spider_feature_count | tonumber, "elapsed_time": $spider_elapsed_time | tonumber}]' \
         "${SPIDER_RUN_DIR}/stats/_results.json" > "${SPIDER_RUN_DIR}/stats/_results.json.tmp"
     mv "${SPIDER_RUN_DIR}/stats/_results.json.tmp" "${SPIDER_RUN_DIR}/stats/_results.json"
 done
