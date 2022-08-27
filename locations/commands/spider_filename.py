@@ -8,7 +8,7 @@ from scrapy.exceptions import UsageError
 class FilenameCommand(ScrapyCommand):
 
     requires_project = True
-    default_settings = {'LOG_ENABLED': False}
+    default_settings = {"LOG_ENABLED": False}
 
     def syntax(self):
         return "<spider>"
@@ -33,7 +33,7 @@ class FilenameCommand(ScrapyCommand):
             return self._err(f"Spider not found: {args[0]}")
 
         sfile = sys.modules[spidercls.__module__].__file__
-        sfile = sfile.replace('.pyc', '.py')
+        sfile = sfile.replace(".pyc", ".py")
         sfile = os.path.relpath(sfile)
 
-        sys.stdout.write(f'{sfile}\n')
+        sys.stdout.write(f"{sfile}\n")
