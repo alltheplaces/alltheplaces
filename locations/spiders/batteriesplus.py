@@ -22,7 +22,7 @@ class BatteriesPlusSpider(scrapy.spiders.SitemapSpider):
     ]
 
     def parse(self, response):
-        if 301 in response.request.meta.get("redirect_reasons"):
+        if 301 in response.request.meta.get("redirect_reasons", []):
             return
         ld = LinkedDataParser.find_linked_data(response, "ElectronicsStore")
         ld["openingHours"] = re.findall(rf"({daysRe}[^A-Z]*) ", ld["openingHours"])
