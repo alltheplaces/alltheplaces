@@ -20,7 +20,7 @@ class DollarGeneralSpider(SitemapSpider):
         properties = {
             "street_address": response.xpath('//div[@data-address]/@data-address').extract_first(),
             "city": response.xpath('//div[@data-city]/@data-city').extract_first(),
-            "state": response.xpth('//div[@data-state]/@data-state').extract_first(),
+            "state": response.xpath('//div[@data-state]/@data-state').extract_first(),
             "postcode": response.xpath('//div[@data-zip]/@data-zip').extract_first(),
             "lat": response.xpath('//div[@data-latitude]/@data-latitude').extract_first(),
             "lon": response.xpath('//div[@data-longitude]/@data-longitude').extract_first(),
