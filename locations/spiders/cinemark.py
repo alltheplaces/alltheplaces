@@ -20,7 +20,7 @@ class CinemarkSpider(SitemapSpider):
     def parse(self, response):
         item = LinkedDataParser.parse(response, "MovieTheater")
 
-        item["ref"] = "/".join(response.url.rsplit("-")[-2:])
+        item["ref"] = "/".join(response.url.rsplit("/")[-2:])
         item["lat"], item["lon"] = parse_qs(
             urlparse(
                 response.css(".theatreInfoCollapseMap")
