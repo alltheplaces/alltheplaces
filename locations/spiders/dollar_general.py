@@ -18,21 +18,35 @@ class DollarGeneralSpider(SitemapSpider):
 
     def parse(self, response):
         properties = {
-            "street_address": response.xpath('//div[@data-address]/@data-address').extract_first(),
-            "city": response.xpath('//div[@data-city]/@data-city').extract_first(),
-            "state": response.xpath('//div[@data-state]/@data-state').extract_first(),
-            "postcode": response.xpath('//div[@data-zip]/@data-zip').extract_first(),
-            "lat": response.xpath('//div[@data-latitude]/@data-latitude').extract_first(),
-            "lon": response.xpath('//div[@data-longitude]/@data-longitude').extract_first(),
-            "phone": response.xpath('//div[@data-phone]/@data-phone').extract_first(),
+            "street_address": response.xpath(
+                "//div[@data-address]/@data-address"
+            ).extract_first(),
+            "city": response.xpath("//div[@data-city]/@data-city").extract_first(),
+            "state": response.xpath("//div[@data-state]/@data-state").extract_first(),
+            "postcode": response.xpath("//div[@data-zip]/@data-zip").extract_first(),
+            "lat": response.xpath(
+                "//div[@data-latitude]/@data-latitude"
+            ).extract_first(),
+            "lon": response.xpath(
+                "//div[@data-longitude]/@data-longitude"
+            ).extract_first(),
+            "phone": response.xpath("//div[@data-phone]/@data-phone").extract_first(),
         }
 
         o = OpeningHours()
-        for d in ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']:
-            hours = response.xpath(f'//div[@data-{d}]/@data-{d}').extract_first()
+        for d in [
+            "monday",
+            "tuesday",
+            "wednesday",
+            "thursday",
+            "friday",
+            "saturday",
+            "sunday",
+        ]:
+            hours = response.xpath(f"//div[@data-{d}]/@data-{d}").extract_first()
             from_time, to_time = hours.split(":")
             o.add_range(d.title()[:2], from_time, to_time, "%H%M")
 
-        properties['opening_hours'] = o.as_opening_hours()
+        properties["opening_hours"] = o.as_opening_hours()
 
         yield GeojsonPointItem(**properties)
