@@ -10,13 +10,14 @@ class VivacomSpider(Spider):
 
     def parse(self, response):
         for store in response.json():
+
+            if "partners" in store["store_img"]:
+                continue
+
             item = GeojsonPointItem()
 
             item["ref"] = store["store_id"]
             item["lat"], item["lon"] = store["latlng"].split(",")
-            item["image"] = (
-                "https://www.vivacom.bg/web/images/stores/" + store["store_img"]
-            )
             item["name"] = store["store_name"]
             item["phone"] = store["store_phone"]
 
