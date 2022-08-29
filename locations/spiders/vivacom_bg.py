@@ -3,9 +3,13 @@ from scrapy import Spider
 from locations.items import GeojsonPointItem
 
 
-class VivacomSpider(Spider):
-    name = "vivacom"
-    item_attributes = {"brand": "Vivacom", "brand_wikidata": "Q7937522"}
+class VivacomBGSpider(Spider):
+    name = "vivacom_bg"
+    item_attributes = {
+        "brand": "Vivacom",
+        "brand_wikidata": "Q7937522",
+        "country": "BG",
+    }
     start_urls = ["https://www.vivacom.bg/bg/stores/xhr?method=getJSON"]
 
     def parse(self, response):
