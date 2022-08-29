@@ -37,7 +37,4 @@ class VivacomBGSpider(Spider):
                 .replace("нд.", "Su")
             )
 
-            item["extras"] = {}
-            item["extras"]["type"] = store["store_type"]
-
             yield item
