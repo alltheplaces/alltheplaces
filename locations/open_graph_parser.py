@@ -3,7 +3,6 @@ from locations.dict_parser import DictParser
 
 
 class OpenGraphParser(object):
-
     @staticmethod
     def parse(response) -> GeojsonPointItem:
         keys = response.xpath("/html/head/meta/@property").getall()
