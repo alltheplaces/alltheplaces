@@ -234,11 +234,17 @@ def remove_duplicates(lst):
     return result
 
 
+def remove_prefix(input_string, prefix):
+    if prefix and input_string.startswith(prefix):
+        return input_string[len(prefix) :]
+    return input_string
+
+
 def convert_item(item):
     ld = {}
     for itemtype in item.get("type", []):
-        schema_type = itemtype.removeprefix("http://schema.org/").removeprefix(
-            "https://schema.org/"
+        schema_type = remove_prefix(
+            remove_prefix(itemtype, "https://schema.org/"), "http://schema.org/"
         )
         if schema_type != itemtype:
             # Did we identify the URI prefix?
