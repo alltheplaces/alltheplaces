@@ -14,7 +14,9 @@ class VetcoClinicsSpider(scrapy.Spider):
 
     def start_requests(self):
         for record in postal_regions("US"):
-            url_template = "https://www.vetcoclinics.com/_assets/dynamic/ajax/locator.php?zip={}"
+            url_template = (
+                "https://www.vetcoclinics.com/_assets/dynamic/ajax/locator.php?zip={}"
+            )
             yield scrapy.http.Request(url_template.format(record["postal_region"]))
 
     def parse(self, response):

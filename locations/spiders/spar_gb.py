@@ -14,7 +14,9 @@ class SparGBSpider(scrapy.Spider):
     download_delay = 0.5
 
     def start_requests(self):
-        url_template = "https://www.spar.co.uk/umbraco/api/storelocationapi/stores?location={}"
+        url_template = (
+            "https://www.spar.co.uk/umbraco/api/storelocationapi/stores?location={}"
+        )
         for record in postal_regions("GB"):
             yield scrapy.Request(url_template.format(record["postal_region"]))
 

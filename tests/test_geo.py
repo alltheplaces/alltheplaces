@@ -22,6 +22,6 @@ def test_city_locations():
 
 def test_postal_regions():
     uk_codes = len(list(postal_regions("GB")))
-    assert(2000 < uk_codes < 3000)
+    assert 2000 < uk_codes < 3000
     us_codes = len(list(postal_regions("US")))
-    assert(33000 < us_codes < 34000)
+    assert 33000 < us_codes < 34000
