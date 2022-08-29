@@ -2,24 +2,118 @@ from locations.items import GeojsonPointItem
 
 
 class DictParser(object):
+
+    ref_keys = ["ref", "id", "Id", "store_id", "shopNumber", "slug"]
+
+    name_keys = ["name", "Name", "storeName", "displayName", "DisplayName", "title"]
+
+    house_number_keys = ["houseNumber", "houseNo", "streetNumber"]
+
+    street_address_keys = [
+        "streetAddress",
+        "street_address",
+        "street-address",
+        "addressLine1",
+        "line1",
+        "addressLineOne",
+    ]
+
+    city_keys = [
+        "addressLocality",
+        "city",
+        "addressCity",
+        "town",
+        "Town",
+        "CITY",
+        "City",
+        "locality",
+    ]
+
+    region_keys = ["addressRegion", "region", "state", "StateProvince"]
+
+    country_keys = [
+        "countryCode",
+        "CountryCode",
+        "country_code",
+        "addressCountry",
+        "country",
+        "Country",
+    ]
+
+    postcode_keys = [
+        "postalCode",
+        "postCode",
+        "postalcode",
+        "zip",
+        "Postcode",
+        "postcode",
+        "post_code",
+        "addressPostCode",
+        "PostCode",
+        "postal",
+        "postal_code",
+        "POSTCODE",
+        "PostalCode",
+        "Zip",
+        "ZIP",
+        "ZipCode",
+        "zipCode",
+        "zipcode",
+    ]
+
+    email_keys = ["Email", "email", "ContactEmail", "EMAIL"]
+
+    phone_keys = [
+        "phoneNumber",
+        "phone",
+        "telephone",
+        "Telephone",
+        "tel",
+        "telephoneNumber",
+        "Telephone1",
+        "contactNumber",
+        "PhoneNumber",
+        "PHONE",
+        "Phone",
+        "phone_number",
+        "phoneNo",
+    ]
+
+    lat_keys = [
+        "latitude",
+        "lat",
+        "Lat",
+        "LAT",
+        "Latitude",
+        "displayLat",
+        "yextDisplayLat",
+    ]
+
+    lon_keys = [
+        "longitude",
+        "lon",
+        "long",
+        "Lng",
+        "LON",
+        "lng",
+        "Longitude",
+        "displayLng",
+        "yextDisplayLng",
+    ]
+
     @staticmethod
     def parse(obj) -> GeojsonPointItem:
         item = GeojsonPointItem()
 
-        location = DictParser.get_first_key(obj, ["location", "geolocation", "geo"])
+        item["ref"] = DictParser.get_first_key(obj, DictParser.ref_keys)
+        item["name"] = DictParser.get_first_key(obj, DictParser.name_keys)
 
+        location = DictParser.get_first_key(obj, ["location", "geolocation", "geo"])
         # If not a good location object then use the parent
         if not location or not isinstance(location, dict):
             location = obj
-
-        item["lat"] = DictParser.get_first_key(location, ["latitude", "lat"])
-        item["lon"] = DictParser.get_first_key(
-            location, ["longitude", "lon", "long", "lng"]
-        )
-
-        item["name"] = DictParser.get_first_key(
-            obj, ["name", "storeName", "displayName", "title"]
-        )
+        item["lat"] = DictParser.get_first_key(location, DictParser.lat_keys)
+        item["lon"] = DictParser.get_first_key(location, DictParser.lon_keys)
 
         address = DictParser.get_first_key(obj, ["address", "addr"])
 
@@ -30,38 +124,23 @@ class DictParser(object):
             address = obj
 
         item["housenumber"] = DictParser.get_first_key(
-            address, ["houseNumber", "houseNo", "streetNumber"]
+            address, DictParser.house_number_keys
         )
         item["street"] = DictParser.get_first_key(address, ["street", "streetName"])
         item["street_address"] = DictParser.get_first_key(
-            address,
-            [
-                "streetAddress",
-                "street_address",
-                "addressLine1",
-                "line1",
-                "addressLineOne",
-            ],
+            address, DictParser.street_address_keys
         )
-
-        item["city"] = DictParser.get_first_key(address, ["city", "town"])
-        item["state"] = DictParser.get_first_key(address, ["state", "region"])
-        item["postcode"] = DictParser.get_first_key(
-            address,
-            ["postCode", "post_code", "postalCode", "postal_code", "zipCode", "zip"],
-        )
-        item["country"] = DictParser.get_first_key(address, ["country", "countryCode"])
+        item["city"] = DictParser.get_first_key(address, DictParser.city_keys)
+        item["state"] = DictParser.get_first_key(address, DictParser.region_keys)
+        item["postcode"] = DictParser.get_first_key(address, DictParser.postcode_keys)
+        item["country"] = DictParser.get_first_key(address, DictParser.country_keys)
 
         contact = DictParser.get_first_key(obj, ["contact"])
-
         if not contact or not isinstance(contact, dict):
             contact = obj
-
-        item["phone"] = DictParser.get_first_key(contact, ["phone", "telephone", "tel"])
-
-        item["ref"] = DictParser.get_first_key(
-            obj, ["ref", "id", "store_id", "shopNumber", "slug"]
-        )
+        # TODO: support e-mail in item structure
+        # item["email"] = DictParser.get_first_key(contact, DictParser.email_keys)
+        item["phone"] = DictParser.get_first_key(contact, DictParser.phone_keys)
 
         return item
 

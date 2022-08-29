@@ -1,21 +1,26 @@
 # -*- coding: utf-8 -*-
 import scrapy
-from locations.linked_data_parser import LinkedDataParser
+from locations.dict_parser import DictParser
+from locations.geo import postal_regions
 
 
-class SparGBSpider(scrapy.spiders.SitemapSpider):
+class SparGBSpider(scrapy.Spider):
     name = "spar_gb"
     item_attributes = {
         "brand": "SPAR",
         "brand_wikidata": "Q610492",
         "country": "GB",
     }
-    download_delay = 0.2
-    sitemap_urls = [
-        "https://www.spar-ni.co.uk/sitemap",
-        "https://www.spar.co.uk/sitemap",
-    ]
-    sitemap_rules = [("/store-locator*", "parse_store")]
+    download_delay = 0.5
 
-    def parse_store(self, response):
-        return LinkedDataParser.parse(response, "Store")
+    def start_requests(self):
+        url_template = "https://www.spar.co.uk/umbraco/api/storelocationapi/stores?location={}"
+        for record in postal_regions("GB"):
+            yield scrapy.Request(url_template.format(record["postal_region"]))
+
+    def parse(self, response):
+        for store in response.json()["storeList"]:
+            item = DictParser.parse(store)
+            item["website"] = "https://www.spar.co.uk" + store["StoreUrl"]
+            item["street_address"] = store.get("Address1")
+            yield item

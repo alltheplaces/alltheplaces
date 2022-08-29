@@ -1,5 +1,7 @@
 import csv
 import geonamescache
+import gzip
+import json
 import math
 
 # Radius of the Earth in kilometers
@@ -67,9 +69,57 @@ def point_locations(areas_csv_file, area_field_filter=None):
 
 
 def city_locations(country_code, min_population=0):
+    """
+    Sometimes useful to iterate cities in a country. This method is backed by the GeoNames database.
+
+    :param country_code: ISO 2-alpha country code to query
+    :param min_population: minimum population to be included in result list, default zero
+    :return: iterator of city names with locations
+    """
     for city in geonamescache.GeonamesCache().get_cities().values():
         if (
             city["countrycode"].lower() == country_code.lower()
             and city["population"] >= min_population
         ):
             yield city
+
+
+def postal_regions(country_code):
+    """
+    Sometimes useful to iterate postal regions in a country as they are usually
+     allocated by population density. The granularity varies by country. In the US
+     the five digit ZIP code of which there are ~33K is used. For the UK this method
+     supplies the outward postal code of which there are ~3K. The minimum data in
+     each response dict will include the "postal_region". Other fields such as
+     "latitude", "longitude", "state", "city" may be populated on a per country basis
+     where the backing dataset supports it.
+
+    :param country_code: ISO 2-alpha country code to query
+    :return: post code regions with possible extras
+    """
+    if country_code == "GB":
+        with gzip.open(
+            "./locations/searchable_points/postcodes/outward_gb.json.gz"
+        ) as points:
+            for outward_code in json.load(points):
+                yield {
+                    "postal_region": outward_code["postcode"],
+                    "city": outward_code["town"],
+                    "state": outward_code["country_string"],
+                    "latitude": outward_code["latitude"],
+                    "longitude": outward_code["longitude"],
+                }
+    elif country_code == "US":
+        with gzip.open(
+            "./locations/searchable_points/postcodes/uszips.csv.gz", mode="rt"
+        ) as points:
+            for row in csv.DictReader(points):
+                yield {
+                    "postal_region": row["zip"],
+                    "city": row["city"],
+                    "state": row["state_id"],
+                    "latitude": row["lat"],
+                    "longitude": row["lng"],
+                }
+    else:
+        raise Exception("country code not supported: " + country_code)
