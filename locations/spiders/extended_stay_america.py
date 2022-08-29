@@ -19,15 +19,19 @@ class ExtendedStayAmericaSpider(scrapy.Spider):
     start_urls = [
         "https://www.extendedstayamerica.com/hotels/",
     ]
-    user_agent="Mozilla/5.0 (iPad; CPU OS 12_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+    user_agent = "Mozilla/5.0 (iPad; CPU OS 12_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
 
     def parse(self, response):
-        urls = response.xpath('//ul[@class="esa-locations-markets-list"]/li/a/@href').extract()
+        urls = response.xpath(
+            '//ul[@class="esa-locations-markets-list"]/li/a/@href'
+        ).extract()
         for url in urls:
             yield scrapy.Request(response.urljoin(url), callback=self.parse_hotel_list)
 
     def parse_hotel_list(self, response):
-        script = response.xpath("//script[contains(text(), 'hotelsData')]/text()").extract_first()
+        script = response.xpath(
+            "//script[contains(text(), 'hotelsData')]/text()"
+        ).extract_first()
         hotels = json.loads(script[58:-3])
 
         for hotel in hotels:
@@ -39,7 +43,7 @@ class ExtendedStayAmericaSpider(scrapy.Spider):
                 "state": hotel["address"]["region"],
                 "postcode": hotel["address"]["postalCode"],
                 "website": response.urljoin(hotel["urlMap"]),
-                "photo": response.urljoin(hotel["featuredImages"][0]["url"]),
+                "image": response.urljoin(hotel["featuredImages"][0]["url"]),
                 "phone": hotel["phone"],
                 "lat": hotel["latitude"],
                 "lon": hotel["longitude"],
