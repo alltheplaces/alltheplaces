@@ -123,23 +123,19 @@ class DictParser(object):
 
     @staticmethod
     def get_variations(key):
-        results = [key]
+        results = set(key)
 
         lower = key.lower()
-        if not lower in results:
-            results.append(lower)
+        results.add(lower)
 
         upper = key.upper()
-        if not upper in results:
-            results.append(upper)
+        results.add(upper)
 
         flatcase = key.lower().replace("-", "")
-        if not flatcase in results:
-            results.append(flatcase)
+        results.add(flatcase)
 
         FLATCASEUPPER = flatcase.upper()
-        if not FLATCASEUPPER in results:
-            results.append(FLATCASEUPPER)
+        results.add(FLATCASEUPPER)
 
         camelCase = key[0].lower()
         i = 1
@@ -151,21 +147,17 @@ class DictParser(object):
                 camelCase += key[i]
             i += 1
 
-        if not camelCase in results:
-            results.append(camelCase)
+        results.add(camelCase)
 
         PascalCase = camelCase[0].upper() + camelCase[1:]
 
-        if not PascalCase in results:
-            results.append(PascalCase)
+        results.add(PascalCase)
 
         snake_case = key.lower().replace("-", "_")
-        if not snake_case in results:
-            results.append(snake_case)
+        results.add(snake_case)
 
         SCREAMING_SNAKE_CASE = key.upper().replace("-", "_")
-        if not SCREAMING_SNAKE_CASE in results:
-            results.append(SCREAMING_SNAKE_CASE)
+        results.add(SCREAMING_SNAKE_CASE)
 
         camel_Snake_Case = key[0].lower()
         i = 1
@@ -178,13 +170,11 @@ class DictParser(object):
                 camel_Snake_Case += key[i]
             i += 1
 
-        if not camel_Snake_Case in results:
-            results.append(camel_Snake_Case)
+        results.add(camel_Snake_Case)
 
         Pascal_Snake_Case = camel_Snake_Case[0].upper() + camel_Snake_Case[1:]
 
-        if not Pascal_Snake_Case in results:
-            results.append(Pascal_Snake_Case)
+        results.add(Pascal_Snake_Case)
 
         return results
 
