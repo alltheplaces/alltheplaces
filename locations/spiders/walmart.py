@@ -12,7 +12,7 @@ class WalmartSpider(CrawlSpider):
     name = "walmart"
     item_attributes = {"brand": "Walmart", "brand_wikidata": "Q483551", "country": "US"}
     allowed_domains = ["walmart.com"]
-    download_delay = 3
+    download_delay = 5
     start_urls = ["https://www.walmart.com/store/directory"]
     rules = [
         Rule(
@@ -56,6 +56,9 @@ class WalmartSpider(CrawlSpider):
         store = data["props"]["pageProps"]["initialData"]["initialDataNodeDetail"][
             "data"
         ]["nodeDetail"]
+
+        if store is None:
+            return
 
         item = DictParser.parse(store)
 
