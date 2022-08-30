@@ -110,6 +110,16 @@ def postal_regions(country_code):
                     "longitude": outward_code["longitude"],
                 }
     elif country_code == "US":
+        # US zip code database from https://simplemaps.com/data/us-zips
+        # From their licence.txt:
+        #
+        # Free US Zip Code Database: The Provider offers a free version of the US Zip Code Database.
+        # This Database is offered free of charge conditional on a link back to https://simplemaps.com/data/us-zips.
+        # This backlink must come from a public webpage where the Customer is using the data. If the Customer uses
+        # the data internally, the backlink must be placed on the organization's website on a page that can be
+        # easily found though links on the root domain. The link must be clearly visible to the human eye.
+        # The backlink must be placed before the Customer uses the Database in production.
+        #
         with gzip.open(
             "./locations/searchable_points/postcodes/uszips.csv.gz", mode="rt"
         ) as points:
