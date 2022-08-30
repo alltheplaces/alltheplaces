@@ -11,7 +11,7 @@ class FuzzysTacosSpider(SitemapSpider):
     sitemap_urls = ["https://restaurants.fuzzystacoshop.com/sitemap.xml"]
     sitemap_rules = [
         (
-            r"https:\/\/restaurants.fuzzystacoshop.com\/",
+            r"https:\/\/restaurants.fuzzystacoshop.com\/fuzzys-taco-shop-.*",
             "parse_store",
         ),
     ]
