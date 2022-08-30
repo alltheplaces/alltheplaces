@@ -38,6 +38,7 @@ class DictParser(object):
         "addressCountry",
         "country",
         "Country",
+        "country_name",
     ]
 
     postcode_keys = [

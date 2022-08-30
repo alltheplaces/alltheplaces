@@ -16,4 +16,4 @@ class PremierGBSpider(scrapy.spiders.SitemapSpider):
     download_delay = 1.0
 
     def parse_store(self, response):
-        return OpenGraphParser.parse(response)
+        yield OpenGraphParser.parse(response)
