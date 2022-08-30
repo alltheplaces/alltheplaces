@@ -3,103 +3,72 @@ from locations.items import GeojsonPointItem
 
 class DictParser(object):
 
-    ref_keys = ["ref", "id", "Id", "store_id", "shopNumber", "slug"]
+    ref_keys = ["ref", "id", "store-id", "shop-number", "slug"]
 
-    name_keys = ["name", "Name", "storeName", "displayName", "DisplayName", "title"]
+    name_keys = ["name", "store-name", "display-name", "title"]
 
-    house_number_keys = ["houseNumber", "houseNo", "streetNumber"]
+    house_number_keys = ["house-number", "house-no", "street-number"]
 
     street_address_keys = [
-        "streetAddress",
-        "street_address",
         "street-address",
-        "addressLine1",
+        "address-line1",
         "line1",
-        "addressLineOne",
+        "address-line-one",
     ]
 
     city_keys = [
-        "addressLocality",
+        "address-locality",
         "city",
-        "addressCity",
+        "address-city",
         "town",
-        "Town",
-        "CITY",
-        "City",
         "locality",
     ]
 
-    region_keys = ["addressRegion", "region", "state", "StateProvince"]
+    region_keys = ["address-region", "region", "state", "state-province"]
 
     country_keys = [
-        "countryCode",
-        "CountryCode",
-        "country_code",
-        "addressCountry",
+        "country-code",
+        "address-country",
         "country",
-        "Country",
-        "country_name",
+        "country-name",
     ]
 
     postcode_keys = [
-        "postalCode",
-        "postCode",
-        "postalcode",
+        "postal-code",
+        "post-code",
         "zip",
-        "Postcode",
-        "postcode",
-        "post_code",
-        "addressPostCode",
-        "PostCode",
+        "address-post-code",
         "postal",
-        "postal_code",
-        "POSTCODE",
-        "PostalCode",
-        "Zip",
-        "ZIP",
-        "ZipCode",
-        "zipCode",
-        "zipcode",
+        "zip-code",
     ]
 
-    email_keys = ["Email", "email", "ContactEmail", "EMAIL"]
+    email_keys = ["email", "contact-email"]
 
     phone_keys = [
-        "phoneNumber",
+        "phone-number",
         "phone",
         "telephone",
-        "Telephone",
         "tel",
-        "telephoneNumber",
-        "Telephone1",
-        "contactNumber",
-        "PhoneNumber",
-        "PHONE",
-        "Phone",
-        "phone_number",
-        "phoneNo",
+        "telephone-number",
+        "telephone1",
+        "contact-number",
+        "phone-no",
     ]
 
     lat_keys = [
         "latitude",
         "lat",
-        "Lat",
-        "LAT",
-        "Latitude",
-        "displayLat",
-        "yextDisplayLat",
+        "display-lat",
+        "yext-display-lat",
     ]
 
     lon_keys = [
         "longitude",
         "lon",
         "long",
-        "Lng",
-        "LON",
         "lng",
-        "Longitude",
-        "displayLng",
-        "yextDisplayLng",
+        "display-lng",
+        "yext-display-lng",
     ]
 
     @staticmethod
@@ -109,7 +78,9 @@ class DictParser(object):
         item["ref"] = DictParser.get_first_key(obj, DictParser.ref_keys)
         item["name"] = DictParser.get_first_key(obj, DictParser.name_keys)
 
-        location = DictParser.get_first_key(obj, ["location", "geolocation", "geo"])
+        location = DictParser.get_first_key(
+            obj, ["location", "geo-location", "geo", "geo-point"]
+        )
         # If not a good location object then use the parent
         if not location or not isinstance(location, dict):
             location = obj
@@ -148,12 +119,67 @@ class DictParser(object):
     @staticmethod
     def get_first_key(obj, keys):
         for key in keys:
-            if obj.get(key):
-                return obj[key]
-            elif obj.get(key.lower()):
-                return obj[key.lower()]
-            elif obj.get(key.upper()):
-                return obj[key.upper()]
+            variations = DictParser.get_variations(key)
+            for variation in variations:
+                if obj.get(variation):
+                    return obj[variation]
+
+    @staticmethod
+    def get_variations(key):
+        results = set(key)
+
+        lower = key.lower()
+        results.add(lower)
+
+        upper = key.upper()
+        results.add(upper)
+
+        flatcase = key.lower().replace("-", "")
+        results.add(flatcase)
+
+        FLATCASEUPPER = flatcase.upper()
+        results.add(FLATCASEUPPER)
+
+        camelCase = key[0].lower()
+        i = 1
+        while i < len(key):
+            if key[i] == "-":
+                i += 1
+                camelCase += key[i].upper()
+            else:
+                camelCase += key[i]
+            i += 1
+
+        results.add(camelCase)
+
+        PascalCase = camelCase[0].upper() + camelCase[1:]
+
+        results.add(PascalCase)
+
+        snake_case = key.lower().replace("-", "_")
+        results.add(snake_case)
+
+        SCREAMING_SNAKE_CASE = key.upper().replace("-", "_")
+        results.add(SCREAMING_SNAKE_CASE)
+
+        camel_Snake_Case = key[0].lower()
+        i = 1
+        while i < len(key):
+            if key[i] == "-":
+                i += 1
+                camel_Snake_Case += "_"
+                camel_Snake_Case += key[i].upper()
+            else:
+                camel_Snake_Case += key[i]
+            i += 1
+
+        results.add(camel_Snake_Case)
+
+        Pascal_Snake_Case = camel_Snake_Case[0].upper() + camel_Snake_Case[1:]
+
+        results.add(Pascal_Snake_Case)
+
+        return results
 
     # Looks for a nested key and return the value.
     @staticmethod
@@ -162,7 +188,6 @@ class DictParser(object):
             for k, v in obj.items():
                 if k == key:
                     return v
-                val = DictParser.get_nested_key(v, key)
-                if val:
+                if val := DictParser.get_nested_key(v, key):
                     return val
         return None
