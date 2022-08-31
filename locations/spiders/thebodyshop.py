@@ -12,7 +12,6 @@ class TheBodyShopSpider(scrapy.spiders.SitemapSpider):
     allowed_domains = ["thebodyshop.com"]
     download_delay = 1.0
     sitemap_urls = ["https://www.thebodyshop.com/sitemap.xml"]
-    sitemap_rules = [("/store-details/", "parse_store")]
 
     parse_pages = {
         "/en-gb/": "uk",
@@ -30,25 +29,28 @@ class TheBodyShopSpider(scrapy.spiders.SitemapSpider):
         "/de-at/": "at",
     }
 
-    def parse_store(self, response):
-        store_id = response.url.split("/")[-1]
-        for key in self.parse_pages:
-            if key in response.url:
-                yield scrapy.Request(
-                    "https://api.thebodyshop.com/rest/v2/thebodyshop-{}/stores/{}".format(
-                        self.parse_pages[key], store_id
-                    ),
-                    headers={"Accept": "application/json"},
-                    callback=self.parse_json,
-                    cb_kwargs=dict(html_response=response),
-                )
+    def _parse_sitemap(self, response):
+        for x in super()._parse_sitemap(response):
+            if ".xml" in x.url:
+                yield x
+            elif "/store-details" in x.url:
+                store_id = x.url.split("/")[-1]
+                for key in self.parse_pages:
+                    if key in x.url:
+                        yield scrapy.Request(
+                            "https://api.thebodyshop.com/rest/v2/thebodyshop-{}/stores/{}".format(
+                                self.parse_pages[key], store_id
+                            ),
+                            headers={"Accept": "application/json"},
+                            cb_kwargs=dict(html_url=x.url),
+                        )
+                        break
 
-    def parse_json(self, response, html_response):
+    def parse(self, response, html_url):
         store = response.json()
-        store["location"] = store["geoPoint"]
         item = DictParser.parse(store)
-        item["ref"] = store["name"]
+        item["ref"] = store["address"]["id"]
         item["name"] = store["displayName"]
-        item["website"] = html_response.url
+        item["website"] = html_url
         item["country"] = store["address"]["country"]["isocode"]
         return item
