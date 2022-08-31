@@ -10,40 +10,43 @@ from locations.hours import OpeningHours
 
 class ExtendedStayAmericaSpider(scrapy.Spider):
     name = "extended_stay_america"
-    item_attributes = {"brand": "Extended Stay America"}
+    item_attributes = {
+        "brand": "Extended Stay America",
+        "brand_wikidata": "Q5421850",
+        "country": "US",
+    }
     allowed_domains = ["extendedstayamerica.com"]
     start_urls = [
-        "https://www.extendedstayamerica.com/hotels",
+        "https://www.extendedstayamerica.com/hotels/",
     ]
+    user_agent = "Mozilla/5.0 (iPad; CPU OS 12_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
 
     def parse(self, response):
-        urls = response.xpath("//tr/td/a/@href").extract()
-        for url in urls:
-            yield scrapy.Request(response.urljoin(url), callback=self.parse_state)
-
-    def parse_state(self, response):
-        urls = response.xpath('//div[@class="links"]//td/a/@href').extract()
+        urls = response.xpath(
+            '//ul[@class="esa-locations-markets-list"]/li/a/@href'
+        ).extract()
         for url in urls:
             yield scrapy.Request(response.urljoin(url), callback=self.parse_hotel_list)
 
     def parse_hotel_list(self, response):
         script = response.xpath(
-            '//script[contains(text(), "pinList")]/text()'
+            "//script[contains(text(), 'hotelsData')]/text()"
         ).extract_first()
-        hotels = json.loads(re.search(r"var pinList =\s(\{.*\});", script).groups()[0])
+        hotels = json.loads(script[58:-3])
 
-        for hotel in hotels["PushPins"]:
+        for hotel in hotels:
             properties = {
-                "name": hotel["HotelName"],
-                "ref": hotel["HotelId"],
-                "addr_full": hotel["Address"],
-                "city": hotel["HotelCity"],
-                "state": hotel["HotelState"],
-                "postcode": hotel["HotelZip"],
-                "country": "US",
-                "website": hotel["MinisiteUrl"],
-                "lat": float(hotel["Latitude"]),
-                "lon": float(hotel["Longitude"]),
+                "name": hotel["title"],
+                "ref": hotel["siteId"],
+                "street_address": hotel["address"]["street"],
+                "city": hotel["address"]["city"],
+                "state": hotel["address"]["region"],
+                "postcode": hotel["address"]["postalCode"],
+                "website": response.urljoin(hotel["urlMap"]),
+                "image": response.urljoin(hotel["featuredImages"][0]["url"]),
+                "phone": hotel["phone"],
+                "lat": hotel["latitude"],
+                "lon": hotel["longitude"],
             }
 
             yield GeojsonPointItem(**properties)

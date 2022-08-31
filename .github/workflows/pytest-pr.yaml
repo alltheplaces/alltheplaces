@@ -1,0 +1,26 @@
+name: Run pytest when core files have changed
+
+on:
+  pull_request:
+    paths:
+    - '.github/workflows/*.yaml'
+    - 'locations/*.py'
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+    - name: Setup Python
+      uses: actions/setup-python@master
+    - name: Install pipenv
+      run: |
+        pip --quiet install pipenv
+    - name: Install dependencies
+      run: |
+        pipenv --bare install --system --dev
+    - name: Run pytest
+      run: |
+        pipenv run pytest
+
