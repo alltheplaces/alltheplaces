@@ -1,58 +1,54 @@
 # -*- coding: utf-8 -*-
-import gzip
-import json
-import re
-
-import scrapy
-
-from locations.hours import OpeningHours
+from scrapy.spiders import SitemapSpider
 from locations.items import GeojsonPointItem
+from locations.hours import OpeningHours
 
 
-class DollarGeneralSpider(scrapy.Spider):
+class DollarGeneralSpider(SitemapSpider):
     name = "dollar_general"
     item_attributes = {"brand": "Dollar General", "brand_wikidata": "Q145168"}
     allowed_domains = ["dollargeneral.com"]
-    start_urls = ["https://stores.dollargeneral.com/sitemap.xml.gz"]
+    sitemap_urls = ["https://www.dollargeneral.com/sitemap-main.xml"]
+    sitemap_rules = [
+        (
+            r"https:\/\/www\.dollargeneral\.com\/store-directory\/.*\/\d+\.html$",
+            "parse",
+        ),
+    ]
 
     def parse(self, response):
-        xml = scrapy.Selector(type="xml", text=gzip.decompress(response.body))
-        xml.remove_namespaces()
-        for url in xml.xpath("//loc/text()").extract():
-            if url.count("/") == 6:
-                yield scrapy.Request(url, callback=self.parse_store)
-
-    def parse_store(self, response):
-        ldjson = response.xpath(
-            '//script[@type="application/ld+json"]/text()[contains(.,"GroceryStore")]'
-        ).get()
-        # hacky removal of javascript comments from json
-        ldjson = re.sub(r" //.*", "", ldjson)
-        data = json.loads(ldjson)
-
-        hours = OpeningHours()
-        for row in data["openingHoursSpecification"]:
-            opens = row["opens"]
-            closes = row["closes"]
-            if opens == "":
-                continue
-            if closes == "24:00":
-                closes = "00:00"
-            for day in row["dayOfWeek"]:
-                hours.add_range(day[:2], opens, closes)
-
         properties = {
-            "lat": data["geo"]["latitude"],
-            "lon": data["geo"]["longitude"],
-            "ref": data["@id"],
-            "name": data["name"],
-            "website": data["url"],
-            "phone": data["telephone"],
-            "addr_full": data["address"]["streetAddress"],
-            "city": data["address"]["addressLocality"],
-            "state": data["address"]["addressRegion"],
-            "postcode": data["address"]["postalCode"],
-            "country": data["address"]["addressCountry"],
-            "opening_hours": hours.as_opening_hours(),
+            "street_address": response.xpath(
+                "//div[@data-address]/@data-address"
+            ).extract_first(),
+            "city": response.xpath("//div[@data-city]/@data-city").extract_first(),
+            "state": response.xpath("//div[@data-state]/@data-state").extract_first(),
+            "postcode": response.xpath("//div[@data-zip]/@data-zip").extract_first(),
+            "lat": response.xpath(
+                "//div[@data-latitude]/@data-latitude"
+            ).extract_first(),
+            "lon": response.xpath(
+                "//div[@data-longitude]/@data-longitude"
+            ).extract_first(),
+            "phone": response.xpath("//div[@data-phone]/@data-phone").extract_first(),
+            "website": response.url,
+            "ref": response.url.rsplit("/", 1)[-1].rsplit(".")[0],
         }
+
+        o = OpeningHours()
+        for d in [
+            "monday",
+            "tuesday",
+            "wednesday",
+            "thursday",
+            "friday",
+            "saturday",
+            "sunday",
+        ]:
+            hours = response.xpath(f"//div[@data-{d}]/@data-{d}").extract_first()
+            from_time, to_time = hours.split(":")
+            o.add_range(d.title()[:2], from_time, to_time, "%H%M")
+
+        properties["opening_hours"] = o.as_opening_hours()
+
         yield GeojsonPointItem(**properties)
