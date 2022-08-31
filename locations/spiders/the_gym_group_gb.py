@@ -6,8 +6,8 @@ from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
 
-class TheGymGroupSpider(SitemapSpider):
-    name = "the_gym_group"
+class TheGymGroupGBSpider(SitemapSpider):
+    name = "the_gym_group_gb"
     item_attributes = {
         "brand": "The Gym Group",
         "brand_wikidata": "Q48815022",
