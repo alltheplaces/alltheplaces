@@ -9,11 +9,6 @@ def from_wikidata(name, code):
     return {"brand": name, "brand_wikidata": code}
 
 
-def set_brand(item, brand):
-    item["brand"] = brand.get("brand")
-    item["brand_wikidata"] = brand.get("brand_wikidata")
-
-
 class BestWesternSpider(scrapy.spiders.SitemapSpider):
     name = "bestwestern"
     brands = [
@@ -31,35 +26,28 @@ class BestWesternSpider(scrapy.spiders.SitemapSpider):
     download_delay = 0.5
 
     def parse_hotel(self, response):
-        data_hotel_details = response.xpath(
+        hotel_details = response.xpath(
             '//div[@id="hotel-details-info"]/@data-hoteldetails'
         ).get()
-        if data_hotel_details:
-            json_data = json.loads(html.unescape(data_hotel_details))
-            summary = json_data["summary"]
-            my_name = summary["name"].lower()
-            my_brand = None
+        if hotel_details:
+            hotel = json.loads(html.unescape(hotel_details))
+            summary = hotel["summary"]
             for brand in self.brands:
-                if my_name.startswith(brand["brand"].lower()):
-                    my_brand = brand
-                    break
-            if not my_brand:
-                # For the most part these are hotels not owned by BW, but part of a "collection"
-                return
-            item = DictParser.parse(summary)
-            set_brand(item, my_brand)
-            hotel_code = summary["resort"]
-            item["website"] = response.url
-            item["ref"] = hotel_code
-            try:
-                # It's a big hotel chain, worth a bit of work to get the imagery.
-                image_path = json_data["imageCatalog"]["Media"][0]["ImagePath"]
-                item[
-                    "image"
-                ] = "https://images.bestwestern.com/bwi/brochures/{}/photos/1024/{}".format(
-                    hotel_code, image_path
-                )
-            except IndexError:
-                pass
-            item["street_address"] = summary["address1"]
-            return item
+                if summary["name"].lower().startswith(brand["brand"].lower()):
+                    item = DictParser.parse(summary)
+                    item.update(brand)
+                    item["street_address"] = summary["address1"]
+                    item["website"] = response.url
+                    item["ref"] = summary["resort"]
+                    try:
+                        # It's a big hotel chain, worth a bit of work to get the imagery.
+                        image_path = hotel["imageCatalog"]["Media"][0]["ImagePath"]
+                        item[
+                            "image"
+                        ] = "https://images.bestwestern.com/bwi/brochures/{}/photos/1024/{}".format(
+                            summary["resort"], image_path
+                        )
+                    except IndexError:
+                        pass
+                    yield item
+                    return
