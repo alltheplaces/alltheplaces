@@ -1,51 +1,32 @@
 # -*- coding: utf-8 -*-
-import json
-import csv
-import re
-
-import scrapy
-
-from locations.items import GeojsonPointItem
-
-regex = r"(?<=Imagery\/Map\/Road\/)(-?\d+\.\d+),(-?\d+\.\d+)"
+from scrapy.spiders import SitemapSpider
+from locations.linked_data_parser import LinkedDataParser
+from urllib.parse import parse_qs, urlparse
 
 
-class CinemarkSpider(scrapy.Spider):
+class CinemarkSpider(SitemapSpider):
     name = "cinemark"
-    item_attributes = {"brand": "Cinemark"}
+    item_attributes = {"brand": "Cinemark", "brand_wikidata": "Q707530"}
     allowed_domains = ["cinemark.com"]
-    start_urls = ["https://www.cinemark.com/full-theatre-list"]
+    download_delay = 10
+    sitemap_urls = ["https://www.cinemark.com/sitemap.xml"]
+    sitemap_rules = [
+        (
+            r"https:\/\/www\.cinemark\.com\/theatres\/",
+            "parse",
+        ),
+    ]
 
     def parse(self, response):
-        for theatre in response.css("div.theatres-by-state li a::attr(href)").getall():
-            yield scrapy.Request(response.urljoin(theatre), callback=self.parseTheatre)
+        item = LinkedDataParser.parse(response, "MovieTheater")
 
-    def parseTheatre(self, response):
-        lat = lon = None
-        geo = response.xpath(
-            '//*[@id="theatreInfo"]/div[1]/div[2]/a/img/@data-src'
-        ).extract_first()
-        m = re.search(regex, geo)
-        if m:
-            lat, lon = m.group(1), m.group(2)
+        item["ref"] = "/".join(response.url.rsplit("/")[-2:])
+        item["lat"], item["lon"] = parse_qs(
+            urlparse(
+                response.css(".theatreInfoCollapseMap")
+                .xpath("//a/img/@data-src")
+                .extract_first()
+            ).query
+        )["pp"][0].split(",")
 
-        data = response.xpath(
-            '//body/script[@type="application/ld+json"]//text()'
-        ).extract_first()
-        data = json.loads(data)
-
-        properties = {
-            "lat": lat,
-            "lon": lon,
-            "ref": data["@id"],
-            "name": data["name"],
-            "addr_full": data["address"][0]["streetAddress"],
-            "city": data["address"][0]["addressLocality"],
-            "state": data["address"][0]["addressRegion"],
-            "country": data["address"][0]["addressCountry"],
-            "postcode": data["address"][0]["postalCode"],
-            "phone": data.get("telephone"),
-            "website": data.get("url"),
-        }
-
-        yield GeojsonPointItem(**properties)
+        yield item

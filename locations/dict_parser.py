@@ -2,24 +2,90 @@ from locations.items import GeojsonPointItem
 
 
 class DictParser(object):
+
+    ref_keys = ["ref", "id", "store-id", "shop-number", "slug"]
+
+    name_keys = ["name", "store-name", "display-name", "title"]
+
+    house_number_keys = ["house-number", "house-no", "street-number"]
+
+    street_address_keys = [
+        "street-address",
+        "address-line1",
+        "line1",
+        "address-line-one",
+    ]
+
+    city_keys = [
+        "address-locality",
+        "city",
+        "address-city",
+        "town",
+        "locality",
+    ]
+
+    region_keys = ["address-region", "region", "state", "state-province"]
+
+    country_keys = [
+        "country-code",
+        "address-country",
+        "country",
+        "country-name",
+    ]
+
+    postcode_keys = [
+        "postal-code",
+        "post-code",
+        "zip",
+        "address-post-code",
+        "postal",
+        "zip-code",
+    ]
+
+    email_keys = ["email", "contact-email"]
+
+    phone_keys = [
+        "phone-number",
+        "phone",
+        "telephone",
+        "tel",
+        "telephone-number",
+        "telephone1",
+        "contact-number",
+        "phone-no",
+    ]
+
+    lat_keys = [
+        "latitude",
+        "lat",
+        "display-lat",
+        "yext-display-lat",
+    ]
+
+    lon_keys = [
+        "longitude",
+        "lon",
+        "long",
+        "lng",
+        "display-lng",
+        "yext-display-lng",
+    ]
+
     @staticmethod
     def parse(obj) -> GeojsonPointItem:
         item = GeojsonPointItem()
 
-        location = DictParser.get_first_key(obj, ["location", "geolocation", "geo"])
+        item["ref"] = DictParser.get_first_key(obj, DictParser.ref_keys)
+        item["name"] = DictParser.get_first_key(obj, DictParser.name_keys)
 
+        location = DictParser.get_first_key(
+            obj, ["location", "geo-location", "geo", "geo-point"]
+        )
         # If not a good location object then use the parent
         if not location or not isinstance(location, dict):
             location = obj
-
-        item["lat"] = DictParser.get_first_key(location, ["latitude", "lat"])
-        item["lon"] = DictParser.get_first_key(
-            location, ["longitude", "lon", "long", "lng"]
-        )
-
-        item["name"] = DictParser.get_first_key(
-            obj, ["name", "storeName", "displayName", "title"]
-        )
+        item["lat"] = DictParser.get_first_key(location, DictParser.lat_keys)
+        item["lon"] = DictParser.get_first_key(location, DictParser.lon_keys)
 
         address = DictParser.get_first_key(obj, ["address", "addr"])
 
@@ -30,50 +96,90 @@ class DictParser(object):
             address = obj
 
         item["housenumber"] = DictParser.get_first_key(
-            address, ["houseNumber", "houseNo", "streetNumber"]
+            address, DictParser.house_number_keys
         )
         item["street"] = DictParser.get_first_key(address, ["street", "streetName"])
         item["street_address"] = DictParser.get_first_key(
-            address,
-            [
-                "streetAddress",
-                "street_address",
-                "addressLine1",
-                "line1",
-                "addressLineOne",
-            ],
+            address, DictParser.street_address_keys
         )
-
-        item["city"] = DictParser.get_first_key(address, ["city", "town"])
-        item["state"] = DictParser.get_first_key(address, ["state", "region"])
-        item["postcode"] = DictParser.get_first_key(
-            address,
-            ["postCode", "post_code", "postalCode", "postal_code", "zipCode", "zip"],
-        )
-        item["country"] = DictParser.get_first_key(address, ["country", "countryCode"])
+        item["city"] = DictParser.get_first_key(address, DictParser.city_keys)
+        item["state"] = DictParser.get_first_key(address, DictParser.region_keys)
+        item["postcode"] = DictParser.get_first_key(address, DictParser.postcode_keys)
+        item["country"] = DictParser.get_first_key(address, DictParser.country_keys)
 
         contact = DictParser.get_first_key(obj, ["contact"])
-
         if not contact or not isinstance(contact, dict):
             contact = obj
-
-        item["phone"] = DictParser.get_first_key(contact, ["phone", "telephone", "tel"])
-
-        item["ref"] = DictParser.get_first_key(
-            obj, ["ref", "id", "store_id", "shopNumber", "slug"]
-        )
+        # TODO: support e-mail in item structure
+        # item["email"] = DictParser.get_first_key(contact, DictParser.email_keys)
+        item["phone"] = DictParser.get_first_key(contact, DictParser.phone_keys)
 
         return item
 
     @staticmethod
     def get_first_key(obj, keys):
         for key in keys:
-            if obj.get(key):
-                return obj[key]
-            elif obj.get(key.lower()):
-                return obj[key.lower()]
-            elif obj.get(key.upper()):
-                return obj[key.upper()]
+            variations = DictParser.get_variations(key)
+            for variation in variations:
+                if obj.get(variation):
+                    return obj[variation]
+
+    @staticmethod
+    def get_variations(key):
+        results = set(key)
+
+        lower = key.lower()
+        results.add(lower)
+
+        upper = key.upper()
+        results.add(upper)
+
+        flatcase = key.lower().replace("-", "")
+        results.add(flatcase)
+
+        FLATCASEUPPER = flatcase.upper()
+        results.add(FLATCASEUPPER)
+
+        camelCase = key[0].lower()
+        i = 1
+        while i < len(key):
+            if key[i] == "-":
+                i += 1
+                camelCase += key[i].upper()
+            else:
+                camelCase += key[i]
+            i += 1
+
+        results.add(camelCase)
+
+        PascalCase = camelCase[0].upper() + camelCase[1:]
+
+        results.add(PascalCase)
+
+        snake_case = key.lower().replace("-", "_")
+        results.add(snake_case)
+
+        SCREAMING_SNAKE_CASE = key.upper().replace("-", "_")
+        results.add(SCREAMING_SNAKE_CASE)
+
+        camel_Snake_Case = key[0].lower()
+        i = 1
+        while i < len(key):
+            if key[i] == "-":
+                i += 1
+                camel_Snake_Case += "_"
+                camel_Snake_Case += key[i].upper()
+            else:
+                camel_Snake_Case += key[i]
+            i += 1
+
+        results.add(camel_Snake_Case)
+
+        Pascal_Snake_Case = camel_Snake_Case[0].upper() + camel_Snake_Case[1:]
+
+        results.add(Pascal_Snake_Case)
+
+        return results
 
     # Looks for a nested key and return the value.
     @staticmethod
@@ -82,7 +188,6 @@ class DictParser(object):
             for k, v in obj.items():
                 if k == key:
                     return v
-                val = DictParser.get_nested_key(v, key)
-                if val:
+                if val := DictParser.get_nested_key(v, key):
                     return val
         return None
