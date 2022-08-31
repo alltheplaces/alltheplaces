@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import scrapy
 from locations.linked_data_parser import LinkedDataParser
+from locations.open_graph_parser import OpenGraphParser
 
 
 def from_wikidata(name, code):
@@ -47,13 +48,10 @@ class IHGHotelsSpider(scrapy.spiders.SitemapSpider):
         if isinstance(brand, str):
             return
         if hotel_type in ["hotelindigo"]:
-            # TODO: parse microdata
-            return
+            item = OpenGraphParser.parse(response)
         else:
             item = LinkedDataParser.parse(response, "Hotel")
-            if item:
-                item["ref"] = response.url
-                item.update(brand)
-            else:
-                self.logger.warn("no linked data for: %s", response.url)
-            return item
+        if item:
+            item["ref"] = response.url
+            item.update(brand)
+            yield item
