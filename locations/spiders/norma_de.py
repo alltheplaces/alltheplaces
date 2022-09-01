@@ -1,7 +1,7 @@
 import scrapy
-import csv
 import re
 
+from locations.geo import point_locations
 from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
 
@@ -21,20 +21,12 @@ class NormaDeSpider(scrapy.Spider):
     name = "norma_de"
     item_attributes = {"brand": "Norma", "brand_wikidata": "Q450180"}
     allowed_domains = ["www.norma-online.de"]
-
-    start_urls = []
-    with open(
-        "./locations/searchable_points/germany_centroids_80km_radius_country.csv"
-    ) as csv_file:
-        csv_reader = csv.reader(csv_file, delimiter=",")
-        for row in csv_reader:
-            if row[4] == "Germany":
-                start_urls.append(
-                    f"https://www.norma-online.de/de/filialfinder"
-                    f"/suchergebnis?lng={row[3]}&lat={row[2]}&r=80000"
-                )
-
     download_delay = 0.2
+
+    def start_requests(self):
+        url = "https://www.norma-online.de/de/filialfinder/suchergebnis?lng={}&lat={}&r=80000"
+        for lat, lon in point_locations("eu_centroids_20km_radius_country.csv", "DE"):
+            yield scrapy.Request(url.format(lon, lat))
 
     def parse_hours(self, store_hours):
         opening_hours = OpeningHours()

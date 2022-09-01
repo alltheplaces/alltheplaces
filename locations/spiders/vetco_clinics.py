@@ -2,6 +2,7 @@
 import re
 import scrapy
 
+from locations.geo import postal_regions
 from locations.items import GeojsonPointItem
 from scrapy.selector import Selector
 
@@ -10,20 +11,13 @@ class VetcoClinicsSpider(scrapy.Spider):
     name = "vetco"
     item_attributes = {"brand": "Vetco Clinics"}
     allowed_domains = ["vetcoclinics.com"]
-    start_urls = (
-        "https://www.vetcoclinics.com/services-and-clinics/vaccination-clinics-by-state/",
-    )
 
     def start_requests(self):
-        with open("./locations/searchable_points/us_zcta.csv") as points:
-            next(points)  # Ignore the header
-            for point in points:
-                row = point.split(",")
-                zip = row[0].strip().strip('"')
-
-                url = f"https://www.vetcoclinics.com/_assets/dynamic/ajax/locator.php?zip={zip}"
-
-                yield scrapy.http.Request(url, self.parse, method="GET")
+        for record in postal_regions("US"):
+            url_template = (
+                "https://www.vetcoclinics.com/_assets/dynamic/ajax/locator.php?zip={}"
+            )
+            yield scrapy.http.Request(url_template.format(record["postal_region"]))
 
     def parse(self, response):
         jsonresponse = response.json()
