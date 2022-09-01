@@ -7,6 +7,7 @@ from locations.items import GeojsonPointItem
 
 class RiteAidSpider(scrapy.Spider):
     name = "riteaid"
+    item_attributes = {"brand": "Rite Aid", "brand_wikidata": "Q3433273"}
     allowed_domains = ["riteaid.com"]
     start_urls = ("https://locations2.riteaid.com.yext-cdn.com/sitemap.xml",)
     download_delay = 0.1
