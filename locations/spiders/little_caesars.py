@@ -2,6 +2,7 @@ import json
 import scrapy
 
 from locations.hours import OpeningHours
+from locations.geo import postal_regions
 from locations.items import GeojsonPointItem
 
 DAY_MAPPING = {
@@ -29,17 +30,12 @@ class LittleCaesarsSpider(scrapy.Spider):
     download_delay = 0.1
 
     def start_requests(self):
-        with open("./locations/searchable_points/us_zcta.csv") as points:
-            next(points)  # Ignore the header
-            for point in points:
-                row = point.split(",")
-                zip = row[0].strip().strip('"')
-
-                url = f"https://api.cloud.littlecaesars.com/bff/api/stores?zip={zip}"
-
-                yield scrapy.http.Request(
-                    url, self.parse, method="GET", headers=HEADERS
-                )
+        for record in postal_regions("US"):
+            url = (
+                "https://api.cloud.littlecaesars.com/bff/api/stores?zip="
+                + record["postal_region"]
+            )
+            yield scrapy.http.Request(url, self.parse, method="GET", headers=HEADERS)
 
     def parse(self, response):
         body = response.text

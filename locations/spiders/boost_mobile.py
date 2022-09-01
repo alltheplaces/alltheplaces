@@ -1,61 +1,34 @@
 # -*- coding: utf-8 -*-
-import re
-
 import scrapy
 import json
 
-from locations.items import GeojsonPointItem
+from locations.geo import postal_regions
+from locations.dict_parser import DictParser
 
 
 class BoostMobileSpider(scrapy.Spider):
-    # download_delay = 0.2
     name = "boost_mobile"
-    item_attributes = {"brand": "Boost Mobile", "brand_wikidata": "Q4943790"}
-    allowed_domains = ["boostmobile.com", "boostmobile.nearestoutlet.com"]
-    start_urls = ("https://www.boostmobile.com/locations.html",)
+    item_attributes = {
+        "brand": "Boost Mobile",
+        "brand_wikidata": "Q4943790",
+        "country": "US",
+    }
+    download_delay = 0.2
+
+    def start_requests(self):
+        for record in postal_regions("US"):
+            template_url = "https://boostmobile.nearestoutlet.com/cgi-bin/jsonsearch-cs.pl?showCaseInd=false&brandId=bst&results=50&zipcode={}"
+            yield scrapy.Request(template_url.format(record["postal_region"]))
 
     def parse(self, response):
-        with open("./locations/searchable_points/us_zcta.csv") as zips:
-            next(zips)
-            for zip in zips:
-                row = zip.replace("\n", "").replace('"', "")
-                searchurl = "https://boostmobile.nearestoutlet.com/cgi-bin/jsonsearch-cs.pl?showCaseInd=false&brandId=bst&results=50&zipcode={pc}".format(
-                    pc=row
-                )
-
-                yield scrapy.Request(
-                    response.urljoin(searchurl), callback=self.parse_search
-                )
-
-    def parse_search(self, response):
         data = json.loads(json.dumps(response.json()))
-
-        for i in data["nearestOutletResponse"]["nearestlocationinfolist"][
-            "nearestLocationInfo"
-        ]:
-
-            if i["storeName"].startswith("Boost Mobile"):
-                try:
-                    lat = float(i["storeAddress"]["lat"])
-                except:
-                    lat = ""
-                try:
-                    lon = float(i["storeAddress"]["long"])
-                except:
-                    lon = ""
-
-                properties = {
-                    "ref": i["id"],
-                    "name": i["storeName"],
-                    "addr_full": i["storeAddress"]["primaryAddressLine"],
-                    "city": i["storeAddress"]["city"],
-                    "postcode": i["storeAddress"]["zipCode"],
-                    "state": i["storeAddress"]["state"],
-                    "country": "US",
-                    "phone": i["storePhone"],
-                    "lat": lat,
-                    "lon": lon,
-                }
-                yield GeojsonPointItem(**properties)
-            else:
-                pass
+        stores = DictParser.get_nested_key(data, "nearestLocationInfo")
+        if not stores:
+            return
+        for store in stores:
+            if store["storeName"].startswith("Boost Mobile"):
+                item = DictParser.parse(store["storeAddress"])
+                item["ref"] = store["id"]
+                item["name"] = store["storeName"]
+                item["street_address"] = store["storeAddress"]["primaryAddressLine"]
+                yield item
