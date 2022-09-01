@@ -24,7 +24,7 @@ class DictParser(object):
         "locality",
     ]
 
-    region_keys = ["address-region", "region", "state", "state-province"]
+    region_keys = ["address-region", "region", "state", "state-province", "province"]
 
     country_keys = [
         "country-code",
