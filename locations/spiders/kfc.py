@@ -1,97 +1,33 @@
-import json
-import re
 import scrapy
-from locations.items import GeojsonPointItem
-from locations.hours import OpeningHours
+
+from locations.microdata_parser import MicrodataParser
+from locations.linked_data_parser import LinkedDataParser
 
 
-DAY_MAPPING = {
-    "MONDAY": "Mo",
-    "TUESDAY": "Tu",
-    "WEDNESDAY": "We",
-    "THURSDAY": "Th",
-    "FRIDAY": "Fr",
-    "SATURDAY": "Sa",
-    "SUNDAY": "Su",
-}
-
-
-class KFCSpider(scrapy.Spider):
+class KFCSpider(scrapy.spiders.SitemapSpider):
     name = "kfc"
     item_attributes = {"brand": "KFC", "brand_wikidata": "Q524757"}
-    allowed_domains = ["kfc.com"]
-    start_urls = ("https://locations.kfc.com/",)
-    download_delay = 0.2
+    sitemap_urls = [
+        "https://www.kfc.co.uk/sitemap.xml",
+        "https://locations.kfc.com/sitemap.xml",
+    ]
+    download_delay = 0.5
 
-    def parse_hours(self, store_hours):
-        opening_hours = OpeningHours()
-        store_data = json.loads(store_hours)
+    def _parse_sitemap(self, response):
+        def follow_link(url):
+            if "kfc.co.uk" in url:
+                return "/kfc-near-me/" in url
+            for s in ["/delivery", "/chickensandwich"]:
+                if url.endswith(s):
+                    return False
+            return True
 
-        for store_day in store_data:
-            if len(store_day["intervals"]) < 1:
-                continue
-            day = DAY_MAPPING[store_day["day"]]
-            open_time = str(store_day["intervals"][0]["start"])
-            if open_time == "0":
-                open_time = "0000"
-            close_time = str(store_day["intervals"][0]["end"])
-            if close_time == "0":
-                close_time = "2359"
-            opening_hours.add_range(
-                day=day, open_time=open_time, close_time=close_time, time_format="%H%M"
-            )
-
-        return opening_hours.as_opening_hours()
+        for x in super()._parse_sitemap(response):
+            if follow_link(x.url):
+                yield x
 
     def parse(self, response):
-        urls = response.xpath('//a[@class="Directory-listLink"]/@href').extract()
-        is_store_list = response.xpath('//a[@class="Teaser-titleLink"]/@href').extract()
-
-        if not urls and is_store_list:
-            urls = response.xpath('//a[@class="Teaser-titleLink"]/@href').extract()
-        for url in urls:
-            if url.count("/") >= 2:
-                yield scrapy.Request(
-                    response.urljoin(url), callback=self.parse_store
-                )  # TODO: Fix this
-            else:
-                yield scrapy.Request(response.urljoin(url))
-
-    def parse_store(self, response):
-        ref = re.search(r".+/(.+?)/?(?:\.html|$)", response.url).group(1)
-
-        properties = {
-            "ref": ref,
-            "name": response.xpath(
-                'normalize-space(//span[@class="LocationName-brand"]/text())'
-            ).extract_first(),
-            "addr_full": response.xpath(
-                'normalize-space(//meta[@itemprop="streetAddress"]/@content)'
-            ).extract_first(),
-            "city": response.xpath(
-                'normalize-space(//meta[@itemprop="addressLocality"]/@content)'
-            ).extract_first(),
-            "state": response.xpath(
-                'normalize-space(//abbr[@itemprop="addressRegion"]/text())'
-            ).extract_first(),
-            "postcode": response.xpath(
-                'normalize-space(//span[@itemprop="postalCode"]//text())'
-            ).extract_first(),
-            "phone": response.xpath(
-                'normalize-space(//div[@itemprop="telephone"]//text())'
-            ).extract_first(),
-            "website": response.url,
-            "lat": response.xpath(
-                'normalize-space(//meta[@itemprop="latitude"]/@content)'
-            ).extract_first(),
-            "lon": response.xpath(
-                'normalize-space(//meta[@itemprop="longitude"]/@content)'
-            ).extract_first(),
-        }
-
-        hours = response.xpath(
-            '//span[@class="c-hours-today js-hours-today"]/@data-days'
-        ).extract_first()
-        properties["opening_hours"] = self.parse_hours(hours)
-
-        yield GeojsonPointItem(**properties)
+        MicrodataParser.convert_to_json_ld(response)
+        for store_type in ["FoodEstablishment", "Restaurant"]:
+            if item := LinkedDataParser.parse(response, store_type):
+                yield item
