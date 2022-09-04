@@ -12,15 +12,11 @@ class HollandAndBarrettSpider(SitemapSpider):
     sitemap_urls = [
         "https://www.hollandandbarrett.com/sitemap-stores.xml",
         "https://www.hollandandbarrett.nl/sitemap-stores.xml",
-        "https://www.hollandandbarrett.be/sitemap-stores.xml"
+        "https://www.hollandandbarrett.be/sitemap-stores.xml",
         "https://www.hollandandbarrett.ie/sitemap-stores.xml",
     ]
-    sitemap_rules = [
-        (
-            r"https:\/\/www\.hollandandbarrett\.(com|nl|be|ie)\/(stores|winkels)\/([-\w]+)\/$",
-            "parse",
-        )
-    ]
+    sitemap_rules = [("/stores/", "parse"), ("/winkels/", "parse")]
+    download_delay = 1.0
 
     def parse(self, response):
         yield LinkedDataParser.parse(response, "LocalBusiness")
