@@ -62,6 +62,6 @@ class EdibleArrangementsSpider(scrapy.Spider):
                 oh.append(f"{days} {from_t}-{to_t}")
 
             if oh:
-                properties["opening_hours"] = ", ".join(oh)
+                properties["opening_hours"] = "; ".join(oh)
 
             yield GeojsonPointItem(**properties)
