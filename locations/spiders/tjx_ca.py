@@ -4,6 +4,7 @@ import datetime
 
 import scrapy
 
+from locations.geo import point_locations
 from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
 
@@ -18,27 +19,20 @@ class TjxCASpider(scrapy.Spider):
     chains = {"90": "HomeSense", "91": "Winners", "93": "Marshalls"}
 
     def start_requests(self):
-        url = "https://mktsvc.tjx.com/storelocator/GetSearchResults"
-        payload = {"chain": "90, 91, 93", "lang": "en", "maxstores": "100"}
+        url = "https://marketingsl.tjx.com/storelocator/GetSearchResults"
+        payload = {"chain": "90,91,93", "lang": "en", "maxstores": "100"}
 
-        with open(
-            "./locations/searchable_points/ca_centroids_100mile_radius.csv"
-        ) as points:
-            reader = csv.DictReader(points)
-            for point in reader:
-                payload.update(
-                    {"geolat": point["latitude"], "geolong": point["longitude"]}
-                )
-
-                yield scrapy.http.FormRequest(
-                    url=url,
-                    method="POST",
-                    formdata=payload,
-                    headers={
-                        "Content-Type": "application/x-www-form-urlencoded",
-                        "Accept": "application/json",
-                    },
-                )
+        for lat, lon in point_locations("ca_centroids_100mile_radius.csv"):
+            payload.update({"geolat": lat, "geolong": lon})
+            yield scrapy.http.FormRequest(
+                url=url,
+                method="POST",
+                formdata=payload,
+                headers={
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    "Accept": "application/json",
+                },
+            )
 
     def parse_hours(self, hours):
         """Mon-Thu: 9am - 9pm, Black Friday: 8am - 10pm, Sat: 9am - 9pm, Sun: 10am - 8pm"""
