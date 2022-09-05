@@ -19,4 +19,3 @@ class MarathonSpider(scrapy.spiders.CSVFeedSpider):
             row["street_address"] = row.pop("Address")
             row["id"] = row.pop("StoreNumber")
             yield DictParser.parse(row)
-
