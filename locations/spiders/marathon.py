@@ -16,8 +16,7 @@ class MarathonSpider(scrapy.spiders.CSVFeedSpider):
 
     def parse_row(self, response, row):
         if row["Status"] == "Open":
-            row["street_address"] = row["Address"]
-            del row["Address"]
+            row["street_address"] = row.pop("Address")
             item = DictParser.parse(row)
             item["ref"] = row["StoreNumber"]
             yield item
