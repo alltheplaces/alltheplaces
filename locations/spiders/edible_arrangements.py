@@ -27,8 +27,8 @@ class EdibleArrangementsSpider(scrapy.Spider):
         )
 
     def parse(self, response):
-        d = json.loads(response.json()['d'])
-        for s in d['_Data']:
+        d = json.loads(response.json()["d"])
+        for s in d["_Data"]:
             properties = {
                 "lat": s["Latitude"],
                 "lon": s["Longitude"],
@@ -44,13 +44,16 @@ class EdibleArrangementsSpider(scrapy.Spider):
                 if h["Timing"] == "Closed":
                     continue
 
-                days = h["Days"].replace("Monday", "Mo")\
-                                .replace("Tuesday", "Tu")\
-                                .replace("Wednesday", "We")\
-                                .replace("Thursday", "Th")\
-                                .replace("Friday", "Fr")\
-                                .replace("Saturday", "Sa")\
-                                .replace("Sunday", "Su")
+                days = (
+                    h["Days"]
+                    .replace("Monday", "Mo")
+                    .replace("Tuesday", "Tu")
+                    .replace("Wednesday", "We")
+                    .replace("Thursday", "Th")
+                    .replace("Friday", "Fr")
+                    .replace("Saturday", "Sa")
+                    .replace("Sunday", "Su")
+                )
 
                 from_time, to_time = h["Timing"].split("-")
                 from_t = datetime.strptime(from_time, "%I:%M %p").strftime("%H:%M")
@@ -59,6 +62,6 @@ class EdibleArrangementsSpider(scrapy.Spider):
                 oh.append(f"{days} {from_t}-{to_t}")
 
             if oh:
-                properties['opening_hours'] = ", ".join(oh)
+                properties["opening_hours"] = ", ".join(oh)
 
             yield GeojsonPointItem(**properties)
