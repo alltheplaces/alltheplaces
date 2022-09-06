@@ -15,6 +15,15 @@ DAYS_FULL = [
 ]
 
 
+def day_range(start_day, end_day):
+    start_ix = DAYS.index(start_day)
+    end_ix = DAYS.index(end_day)
+    if start_ix <= end_ix:
+        return DAYS[start_ix : end_ix + 1]
+    else:
+        return DAYS[start_ix:] + DAYS[: end_ix + 1]
+
+
 class OpeningHours(object):
     def __init__(self):
         self.day_hours = defaultdict(list)
@@ -132,8 +141,8 @@ class OpeningHours(object):
 
                     if "-" in days:
                         start_day, end_day = days.split("-")
-                        for i in range(DAYS.index(start_day), DAYS.index(end_day) + 1):
-                            self.add_range(DAYS[i], start_time, end_time, time_format)
+                        for day in day_range(start_day, end_day):
+                            self.add_range(day, start_time, end_time, time_format)
                     else:
                         for day in days.split(","):
                             self.add_range(
