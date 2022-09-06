@@ -13,6 +13,7 @@ class MarathonSpider(scrapy.spiders.CSVFeedSpider):
     start_urls = [
         "https://www.marathonbrand.com/content/includes/mpc-brand-stations/SiteList.csv"
     ]
+    user_agent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36"
 
     def parse_row(self, response, row):
         if row["Status"] == "Open":
