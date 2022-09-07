@@ -29,7 +29,7 @@ class ShopriteSpider(scrapy.Spider):
                 "name": store["name"],
                 "lat": store["location"]["latitude"],
                 "lon": store["location"]["longitude"],
-                "addr_full": store["addressLine1"],
+                "street_address": store["addressLine1"],
                 "city": store["city"],
                 "state": store["countyProvinceState"],
                 "postcode": store["postCode"],
