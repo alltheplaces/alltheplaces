@@ -41,5 +41,7 @@ class SweetTomatoesSpider(scrapy.Spider):
                 for day in day_range(start_day[:2], end_day[:2]):
                     oh.add_range(day, open_time, close_time, "%I:%M %p")
         item["opening_hours"] = oh.as_opening_hours()
-        item["brand"] = response.xpath('//meta[@property="og:site_name"]/@content').get()
+        item["brand"] = response.xpath(
+            '//meta[@property="og:site_name"]/@content'
+        ).get()
         yield item
