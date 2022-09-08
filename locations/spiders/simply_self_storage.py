@@ -31,5 +31,8 @@ class SimplySelfStorageSpider(scrapy.spiders.SitemapSpider):
         oh.from_linked_data(ld, "%I:%M %p")
         item["opening_hours"] = oh.as_opening_hours()
 
-        item["phone"] = ld["telephone"]
+        if isinstance(ld["telephone"], list):
+            item["phone"] = ";".join(ld["telephone"])
+        else:
+            item["phone"] = ld["telephone"]
         yield item
