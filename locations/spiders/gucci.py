@@ -56,4 +56,7 @@ class GucciSpider(scrapy.spiders.SitemapSpider):
             yield scrapy.Request(sitemap_url, self._parse_sitemap)
 
     def parse(self, response):
-        yield LinkedDataParser.parse(response, "Store")
+        if item := LinkedDataParser.parse(response, "Store"):
+            item["lat"] = response.xpath("//@data-latitude").get()
+            item["lon"] = response.xpath("//@data-longitude").get()
+            yield item
