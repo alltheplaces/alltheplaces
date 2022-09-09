@@ -8,6 +8,9 @@ def test_embed():
     assert url_to_coords(
         "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2500.3404587315936!2d0.2883177157631218!3d51.1943779795849!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47df48b0a94080d3%3A0xa460c3bddd378d92!2sTonbridge+Depot+-+Parcelforce+Worldwide!5e0!3m2!1sen!2sus!4v1496934862229"
     ) == (51.1943779795849, 0.2883177157631218)
+    assert url_to_coords(
+        "https://www.google.com/maps/embed?pb=!4v1609582314852!6m8!1m7!1sCAoSLEFGMVFpcFB3TzhsbGwtQ1RuMWhpS3I0cjZXYmZqaUloT3FRQ1VUNnhCRWo3!2m2!1d53.22113234117468!2d-0.5585914791344676!3f33.35570201128006!4f-4.604534739231056!5f0.7820865974627469"
+    ) == (53.22113234117468, -0.5585914791344676)
 
 
 def test_staticmap():
