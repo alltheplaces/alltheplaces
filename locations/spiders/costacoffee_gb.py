@@ -1,111 +1,146 @@
 # -*- coding: utf-8 -*-
-import csv
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.geo import postal_regions
 
 
 class CostaCoffeeGBSpider(scrapy.Spider):
     name = "costacoffee_gb"
     item_attributes = {"brand": "Costa Coffee", "brand_wikidata": "Q608845"}
-    allowed_domains = ["www.costa.co.uk"]
-    download_delay = 1
+    download_delay = 1.0
+    # Do our own de-duping as so common!
+    my_ids = []
 
     def start_requests(self):
-        template = "https://www.costa.co.uk/api/locations/stores?latitude={lat}&longitude={lon}&maxrec=600"
-        # TODO: Can't figure out how to return more than 5 miles
-
-        with open(
-            "./locations/searchable_points/eu_centroids_20km_radius_country.csv"
-        ) as points:
-            reader = csv.DictReader(points)
-            for point in reader:
-                if point["country"] == "UK":
-                    yield scrapy.http.Request(
-                        url=template.format(
-                            lat=point["latitude"], lon=point["longitude"]
-                        ),
-                        callback=self.parse,
-                    )
+        # Costa API only returns very local results and hence requires a rather heavy approach.
+        template = "https://www.costa.co.uk/api/locations/stores?latitude={}&longitude={}&maxrec=500"
+        for point in postal_regions("GB"):
+            url = template.format(point["latitude"], point["longitude"])
+            yield scrapy.http.Request(url)
 
     def parse(self, response):
-        jsonresponse = response.json()
-        for store_data in jsonresponse["stores"]:
-            addr_full = ", ".join(
-                filter(
-                    None,
-                    (
-                        store_data["storeAddress"]["addressLine1"],
-                        store_data["storeAddress"]["addressLine2"],
-                        store_data["storeAddress"]["addressLine3"],
-                        store_data["storeAddress"]["city"],
-                        store_data["storeAddress"]["postCode"],
-                        "United Kingdom",
-                    ),
-                ),
-            )
+        def is_express(s):
+            return s.get("storeType") == "COSTA EXPRESS"
 
-            opening_hours = OpeningHours()
+        for store in response.json()["stores"]:
+            if not store.get("storeStatus") == "TRADING":
+                continue
+            store.update(store["storeAddress"])
+            item = DictParser.parse(store)
+
+            item["ref"] = store["storeNo8Digit"]
+            if item["ref"] in self.my_ids:
+                continue
+            self.my_ids.append(item["ref"])
+
+            item["name"] = store["storeNameExternal"]
+            if is_express(store):
+                item["name"] = "Costa Coffee (Express)"
+
+            oh = OpeningHours()
             for day in ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]:
-                if store_data["storeOperatingHours"]["open" + day] != "":
-                    opening_hours.add_range(
+                if store["storeOperatingHours"]["open" + day] != "":
+                    oh.add_range(
                         day[0:2],
-                        store_data["storeOperatingHours"]["open" + day],
-                        store_data["storeOperatingHours"]["close" + day],
+                        store["storeOperatingHours"]["open" + day],
+                        store["storeOperatingHours"]["close" + day],
                     )
+            item["opening_hours"] = oh.as_opening_hours()
 
-            properties = {
-                "ref": store_data["storeNo8Digit"],
-                "name": store_data["storeNameExternal"],
-                "addr_full": addr_full.strip(),
-                "street_address": store_data["storeAddress"]["addressLine1"],
-                "city": store_data["storeAddress"]["city"],
-                "postcode": store_data["storeAddress"]["postCode"],
-                "country": store_data["storeAddress"]["country"],
-                "lat": float(store_data["latitude"]),
-                "lon": float(store_data["longitude"]),
-                "phone": store_data["telephone"],
-                "opening_hours": opening_hours.as_opening_hours(),
-                "extras": {
-                    "email": store_data["email"],
-                    "store_type": store_data["storeType"],
-                    "storeBusinessModel": store_data["storeBusinessModel"],
-                },
-            }
+            extras = item["extras"] = {}
+            for sf in store["storeFacilities"]:
 
-            for storeFacility in store_data["storeFacilities"]:
-                if storeFacility["name"] == "Wifi":
-                    if storeFacility["active"]:
-                        properties["extras"]["internet_access"] = "wlan"
-                    else:
-                        properties["extras"]["internet_access"] = "no"
-                elif storeFacility["name"] == "Disabled WC":
-                    if storeFacility["active"]:
-                        properties["extras"]["toilets"] = "yes"
-                        properties["extras"]["toilets:wheelchair"] = "yes"
-                    else:
-                        properties["extras"]["toilets:wheelchair"] = "no"
-                elif storeFacility["name"] == "Baby Changing":
-                    if storeFacility["active"]:
-                        properties["extras"]["changing_table"] = "yes"
-                    else:
-                        properties["extras"]["changing_table"] = "no"
-                elif storeFacility["name"] == "Disabled Access":
-                    if storeFacility["active"]:
-                        properties["extras"]["wheelchair"] = "yes"
-                    else:
-                        properties["extras"]["wheelchair"] = "no"
-                elif storeFacility["name"] == "Drive Thru":
-                    if storeFacility["active"]:
-                        properties["extras"]["drive_through"] = "yes"
-                    else:
-                        properties["extras"]["drive_through"] = "no"
-                elif storeFacility["name"] == "Delivery":
-                    if storeFacility["active"]:
-                        properties["extras"]["delivery"] = "yes"
-                    else:
-                        properties["extras"]["delivery"] = "no"
+                def yes_or_no(condition):
+                    return "yes" if condition else "no"
 
-            if store_data["storeStatus"] == "TRADING":
-                yield GeojsonPointItem(**properties)
+                if sf["name"] == "Wifi":
+                    if sf["active"]:
+                        extras["internet_access"] = "wlan"
+                    else:
+                        extras["internet_access"] = "no"
+                elif sf["name"] == "Disabled WC":
+                    if sf["active"]:
+                        extras["toilets"] = "yes"
+                        extras["toilets:wheelchair"] = "yes"
+                    else:
+                        extras["toilets:wheelchair"] = "no"
+                elif sf["name"] == "Baby Changing":
+                    extras["changing_table"] = yes_or_no(sf["active"])
+                elif sf["name"] == "Disabled Access":
+                    extras["wheelchair"] = yes_or_no(sf["active"])
+                elif sf["name"] == "Drive Thru":
+                    extras["drive_through"] = yes_or_no(sf["active"])
+                elif sf["name"] == "Delivery":
+                    extras["delivery"] = yes_or_no(sf["active"])
+
+            yield item
+
+    # TODO: checked in this unused code as a reminder that a structural solution is needed on the branding
+    @staticmethod
+    def check_for_location(store):
+        ns = store["storeNameExternal"]
+        nsl = ns.lower()
+
+        if "morrisons" in nsl and "PFS" in ns:
+            return "Brand.MORRISONS / FUEL"
+
+        if "sainsbury" in nsl and "PFS" in ns:
+            return "Brand.SAINSBURYS / FUEL"
+
+        if "sainsbury" in nsl and "local" in nsl:
+            return "Brand.SAINSBURYS_LOCAL / FUEL"
+
+        if "tesco" in nsl and "PFS" in ns:
+            return "Brand.TESCO / FUEL"
+
+        if "tesco" in nsl:
+            return "Brand.TESCO"
+
+        if "scotmid" in nsl:
+            return "Brand.SCOTMID"
+
+        # There are quite a few ways of spelling Co-Op!
+        for s in ["co op", "coop", "co-op", "central england co"]:
+            if s in nsl:
+                return "Brand.COOP_UK"
+
+        if "next " in nsl:
+            return "Brand.NEXT"
+
+        if "one stop" in nsl:
+            return "Brand.ONE_STOP"
+
+        if "spar " in nsl:
+            return "Brand.SPAR"
+
+        if "nisa @ " in nsl or "nisa local" in nsl or "@ nisa " in nsl:
+            return "Brand.NISA_LOCAL"
+
+        if "@ budgens" in nsl:
+            return "Brand.BUDGENS"
+
+        if "@ londis" in nsl:
+            return "Brand.LONDIS"
+
+        if "shell uk" in nsl:
+            return "Brand.SHELL"
+
+    # TODO: leaving this old code lying around as a reminder that a more structural solution is needed.
+    @staticmethod
+    def dead_code(item, store):
+        addr_full = ", ".join(
+            filter(
+                None,
+                (
+                    store["addressLine1"],
+                    store["addressLine2"],
+                    store["addressLine3"],
+                    store["city"],
+                    store["postCode"],
+                    "United Kingdom",
+                ),
+            ),
+        )
+        item["addr_full"] = addr_full.strip()
