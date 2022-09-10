@@ -30,7 +30,7 @@ class OpeningHours(object):
 
     def add_range(self, day, open_time, close_time, time_format="%H:%M"):
         if day not in DAYS:
-            raise ValueError("day must be one of " + ", ".join(DAYS))
+            raise ValueError(f"day must be one of {DAYS}, not {day!r}")
 
         if open_time is None or close_time is None:
             return
