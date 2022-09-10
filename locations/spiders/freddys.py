@@ -15,10 +15,12 @@ class FreddysSpider(scrapy.Spider):
 
     def start_requests(self):
         today = datetime.date.today().strftime("%Y%m%d")
-        nextweek = (datetime.date.today() + datetime.timedelta(days=7)).strftime("%Y%m%d")
+        nextweek = (datetime.date.today() + datetime.timedelta(days=7)).strftime(
+            "%Y%m%d"
+        )
         url = "https://nomnom-prod-api.freddys.com/restaurants/near?lat={lat}&long={lng}&radius=100&limit=200&nomnom=calendars&nomnom_calendars_from={today}&nomnom_calendars_to={nextweek}&nomnom_exclude_extref=999"
         with open(
-                "./locations/searchable_points/us_centroids_10mile_radius.csv"
+            "./locations/searchable_points/us_centroids_10mile_radius.csv"
         ) as points:
             reader = csv.DictReader(points)
             for point in reader:
