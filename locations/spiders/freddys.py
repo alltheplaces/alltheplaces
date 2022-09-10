@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-import ast
-import json
-
+import csv
+import datetime
 import scrapy
 
+from locations.hours import OpeningHours
 from locations.items import GeojsonPointItem
 
 
@@ -11,41 +11,60 @@ class FreddysSpider(scrapy.Spider):
     name = "freddys"
     item_attributes = {"brand": "Freddy's", "brand_wikidata": "Q5496837"}
     allowed_domains = ["freddysusa.com"]
-    start_urls = [
-        "https://freddysusa.com/locations/?type=findmyfreddys&address=73034&distance=5000"
-    ]
+    download_delay = 0.75
 
-    def parse(self, response):
-        script = response.xpath('//script/text()[contains(., "var locations")]').get()
-        it = iter(script.splitlines())
-        for line in it:
-            if "var locations" in line:
-                data = next(it)
-                break
-        data = ast.literal_eval("[" + data.rstrip(";\n"))
-        for [link, lat, lon] in data:
-            body = scrapy.Selector(text=link)
-            url = body.xpath("//@href").get()
-            meta = {"lat": lat, "lon": lon}
-            yield scrapy.Request(url, meta=meta, callback=self.parse_store)
+    def start_requests(self):
+        today = datetime.date.today().strftime("%Y%m%d")
+        nextweek = (datetime.date.today() + datetime.timedelta(days=7)).strftime(
+            "%Y%m%d"
+        )
+        url = "https://nomnom-prod-api.freddys.com/restaurants/near?lat={lat}&long={lng}&radius=100&limit=200&nomnom=calendars&nomnom_calendars_from={today}&nomnom_calendars_to={nextweek}&nomnom_exclude_extref=999"
+        with open(
+            "./locations/searchable_points/us_centroids_10mile_radius.csv"
+        ) as points:
+            reader = csv.DictReader(points)
+            for point in reader:
+                yield scrapy.Request(
+                    url.format(
+                        lat=point["latitude"],
+                        lng=point["longitude"],
+                        today=today,
+                        nextweek=nextweek,
+                    ),
+                    callback=self.parse_stores,
+                )
 
-    def parse_store(self, response):
-        for ldjson in response.xpath(
-            '//script[@type="application/ld+json"]/text()'
-        ).extract():
-            if "LocalBusiness" in ldjson:
-                break
-        ldjson = json.loads(ldjson)
-        storeName = response.xpath('//p[@class="storeName"]/text()').get()
-        properties = {
-            "ref": response.url.split("/")[-2],
-            "lat": response.meta["lat"],
-            "lon": response.meta["lon"],
-            "website": response.url,
-            "name": storeName,
-            "phone": ldjson["telephone"],
-            "addr_full": ldjson["address"]["streetAddress"],
-            "city": ldjson["address"]["addressLocality"],
-            "postcode": ldjson["address"]["postalCode"],
-        }
-        yield GeojsonPointItem(**properties)
+    def parse_stores(self, response):
+        data = response.json()
+
+        for store in data["restaurants"]:
+            if store["telephone"] == "(505) 555-5555":
+                # It seems like they have fake data in some places
+                continue
+
+            oh = OpeningHours()
+            if calendar := store.get("calendars").get("calendar"):
+                calendar_ranges = calendar[0].get("ranges")
+                for oh_range in calendar_ranges:
+                    oh.add_range(
+                        oh_range.get("weekday")[:2],
+                        oh_range.get("start").split(" ")[-1],
+                        oh_range.get("end").split(" ")[-1],
+                        time_format="%H:%M",
+                    )
+
+            properties = {
+                "ref": store["id"],
+                "lat": store["latitude"],
+                "lon": store["longitude"],
+                "name": store["name"],
+                "street_address": store["streetaddress"],
+                "opening_hours": oh.as_opening_hours(),
+                "city": store["city"],
+                "state": store["state"],
+                "postcode": store["zip"],
+                "country": store["country"],
+                "phone": store["telephone"],
+            }
+
+            yield GeojsonPointItem(**properties)
