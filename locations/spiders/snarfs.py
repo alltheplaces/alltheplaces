@@ -18,4 +18,5 @@ class SnarfsSpider(scrapy.Spider):
         item = LinkedDataParser.parse(response, "Restaurant")
         if item is None:
             return
+        item["ref"] = item["name"]
         yield item
