@@ -67,7 +67,7 @@ class PotbellySandwichShopSpider(Spider):
                 "delivery": "yes" if store["candeliver"] else "no",
                 "takeaway": "yes" if store["canpickup"] else "no",
                 "drive_through": "yes" if store["supportsdrivethru"] else "no",
-            }
+            },
         }
 
         yield GeojsonPointItem(**properties)
