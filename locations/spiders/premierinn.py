@@ -23,6 +23,10 @@ class PremierInnSpider(scrapy.spiders.SitemapSpider):
     ]
 
     def parse_location(self, response):
+        if '/hotels-near' in response.url:
+            # Page with multiple hotels
+            return
+
         properties = {
             "ref": re.search(r"([^/]+/[^/]+/[^/]+/[^/]+).html$", response.url).group(1),
             "name": response.xpath('//meta[@itemprop="name"]/@content')
