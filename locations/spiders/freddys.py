@@ -34,9 +34,21 @@ class FreddysSpider(scrapy.Spider):
         store = response.json()
 
         oh = OpeningHours()
-        if calendar := store.get("calendars").get("calendar"):
-            calendar_ranges = calendar[0].get("ranges")
+        if calendars := store.get("calendars").get("calendar"):
+            # Look for the first calendar showing "business hours"
+            business_hours_calendar = next(
+                filter(lambda c: c["type"] == "business", calendars)
+            )
+
+            calendar_ranges = business_hours_calendar.get("ranges")
+            first_day_seen = None
             for oh_range in calendar_ranges:
+                # The calendar may include multiple weeks of hours, so break out of the loop if we see the same day again
+                if first_day_seen and first_day_seen == oh_range.get("weekday"):
+                    break
+                elif not first_day_seen:
+                    first_day_seen = oh_range.get("weekday")
+
                 oh.add_range(
                     oh_range.get("weekday")[:2],
                     oh_range.get("start").split(" ")[-1],
