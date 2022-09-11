@@ -30,8 +30,20 @@ class PretAMangerSpider(scrapy.Spider):
             for i in range(0, 7):
                 rule = store["tradingHours"][i]
                 if rule:
-                    if not rule == ["00:00", "00:00"] and len(rule) == 2:
-                        oh.add_range(DAYS[i], rule[0], rule[1])
+                    if rule in (["00:00", "00:00"], ["0:00AM", "0:00AM"], ["", ""]):
+                        continue
+
+                    if len(rule) != 2:
+                        continue
+
+                    if rule[0] == "0:00AM":
+                        rule[0] = "12:00AM"
+                    if rule[1] == "0:00AM":
+                        rule[1] = "12:00AM"
+                    if rule[0] == "0:01AM":
+                        rule[0] = "12:01AM"
+
+                    oh.add_range(DAYS[i], rule[0], rule[1], "%I:%M%p")
 
             item["opening_hours"] = oh.as_opening_hours()
 
