@@ -23,7 +23,7 @@ class PremierInnSpider(scrapy.spiders.SitemapSpider):
     ]
 
     def parse_location(self, response):
-        if '/hotels-near' in response.url:
+        if "/hotels-near" in response.url:
             # Page with multiple hotels
             return
 
