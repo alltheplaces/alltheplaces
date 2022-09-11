@@ -23,8 +23,8 @@ class PremierInnSpider(scrapy.spiders.SitemapSpider):
     ]
 
     def parse_location(self, response):
-        if "/hotels-near" in response.url:
-            # Page with multiple hotels
+        if response.xpath('//section[@class="seo-hotel-listings"]'):
+            # Page with multiple hotels that has the same URL format as single-hotel pages
             return
 
         properties = {
