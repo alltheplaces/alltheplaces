@@ -52,12 +52,20 @@ class PremierInnSpider(scrapy.spiders.SitemapSpider):
             "country": response.xpath(
                 '//ol[@class="nav breadcrumb--path"]/li[3]/a/text()'
             ).extract_first(),
-            "lat": float(
-                response.xpath('//meta[@itemprop="latitude"]/@content').extract_first()
+            "lat": response.xpath(
+                '//meta[@itemprop="latitude"]/@content'
+            ).extract_first(),
+            "lon": response.xpath(
+                '//meta[@itemprop="longitude"]/@content'
+            ).extract_first(),
+            "image": response.urljoin(
+                response.xpath(
+                    '//a[@id="gallery-item-single"]/img/@src'
+                ).extract_first()
             ),
-            "lon": float(
-                response.xpath('//meta[@itemprop="longitude"]/@content').extract_first()
-            ),
+            "phone": response.xpath(
+                "//*[@hotel-phone-number]/@hotel-phone-number"
+            ).extract_first(),
             "website": response.url,
         }
 
