@@ -22,16 +22,30 @@ class PapaMurphysSpider(SitemapSpider):
 
     def parse_store(self, response):
         properties = {
-            "street_address": response.xpath('//*[@itemprop="streetAddress"]/@content').extract_first(),
-            "phone": response.xpath('//*[@itemprop="telephone"]/text()').extract_first(),
-            "city": response.xpath('//*[@itemprop="addressLocality"]/@content').extract_first(),
-            "state": response.xpath('//*[@itemprop="addressRegion"]/text()').extract_first(),
-            "postcode": response.xpath('//*[@itemprop="postalCode"]/text()').extract_first(),
-            "country": response.xpath('//*[@itemprop="address"]/@data-country').extract_first(),
+            "street_address": response.xpath(
+                '//*[@itemprop="streetAddress"]/@content'
+            ).extract_first(),
+            "phone": response.xpath(
+                '//*[@itemprop="telephone"]/text()'
+            ).extract_first(),
+            "city": response.xpath(
+                '//*[@itemprop="addressLocality"]/@content'
+            ).extract_first(),
+            "state": response.xpath(
+                '//*[@itemprop="addressRegion"]/text()'
+            ).extract_first(),
+            "postcode": response.xpath(
+                '//*[@itemprop="postalCode"]/text()'
+            ).extract_first(),
+            "country": response.xpath(
+                '//*[@itemprop="address"]/@data-country'
+            ).extract_first(),
             "ref": response.url,
             "website": response.url,
             "lat": response.xpath('//*[@itemprop="latitude"]/@content').extract_first(),
-            "lon": response.xpath('//*[@itemprop="longitude"]/@content').extract_first(),
+            "lon": response.xpath(
+                '//*[@itemprop="longitude"]/@content'
+            ).extract_first(),
         }
 
         hours = json.loads(
