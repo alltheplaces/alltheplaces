@@ -20,5 +20,5 @@ class BurgervilleSpider(SitemapSpider):
 
         if item is None:
             return
-        item['country'] = 'US'
+        item["country"] = "US"
         yield item
