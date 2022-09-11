@@ -77,20 +77,22 @@ class AssertURLSchemePipeline(object):
 class CheckItemPropertiesPipeline(object):
     # From https://github.com/django/django/blob/master/django/core/validators.py
     url_regex = re.compile(
-        r'^(?:http)s?://'  # http:// or https://
-        r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}\.?)|'  # domain...
-        r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}|'  # ...or ipv4
-        r'\[?[A-F0-9]*:[A-F0-9:]+\]?)'  # ...or ipv6
-        r'(?::\d+)?'  # optional port
-        r'(?:/?|[/?]\S+)$', re.IGNORECASE)
+        r"^(?:http)s?://"  # http:// or https://
+        r"(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}\.?)|"  # domain...
+        r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}|"  # ...or ipv4
+        r"\[?[A-F0-9]*:[A-F0-9:]+\]?)"  # ...or ipv6
+        r"(?::\d+)?"  # optional port
+        r"(?:/?|[/?]\S+)$",
+        re.IGNORECASE,
+    )
     phone_regex = re.compile(
-        r'^[+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$',
+        r"^[+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$",
     )
     wikidata_regex = re.compile(
-        r'^Q[0-9]+$',
+        r"^Q[0-9]+$",
     )
     opening_hours_regex = re.compile(
-        r'^(?:(?:Mo|Tu|We|Th|Fr|Sa|Su)(?:-(?:Mo|Tu|We|Th|Fr|Sa|Su))? [0-9]{2}:[0-9]{2}-[0-9]{2}:[0-9]{2}(?:; )?)+$'
+        r"^(?:(?:Mo|Tu|We|Th|Fr|Sa|Su)(?:-(?:Mo|Tu|We|Th|Fr|Sa|Su))? [0-9]{2}:[0-9]{2}-[0-9]{2}:[0-9]{2}(?:; )?)+$"
     )
     min_lat = -90.0
     max_lat = 90.0
@@ -122,7 +124,7 @@ class CheckItemPropertiesPipeline(object):
         else:
             spider.crawler.stats.inc_value("atp/field/image/missing")
 
-        lat, lon = item['lat'], item['lon']
+        lat, lon = item["lat"], item["lon"]
         if not (self.min_lat < float(lat) < self.max_lat):
             spider.crawler.stats.inc_value("atp/field/lat/invalid")
         if not (self.min_lon < float(lon) < self.max_lon):
