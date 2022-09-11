@@ -8,7 +8,9 @@ class LundsAndByerlysSpider(scrapy.Spider):
     name = "lundsandbyerlys"
     item_attributes = {"brand": "Lunds & Byerlys", "brand_wikidata": "Q19903424"}
     allowed_domains = ["lundsandbyerlys.com"]
-    start_urls = ["https://lundsandbyerlys.com/wp-admin/admin-ajax.php?action=store_search&lat=44.983654&lng=-93.269357&max_results=NaN&radius=10&store_options=&autoload=1"]
+    start_urls = [
+        "https://lundsandbyerlys.com/wp-admin/admin-ajax.php?action=store_search&lat=44.983654&lng=-93.269357&max_results=NaN&radius=10&store_options=&autoload=1",
+    ]
 
     def parse_hours(self, hours):
         if not hours:
