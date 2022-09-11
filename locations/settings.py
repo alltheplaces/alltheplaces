@@ -23,7 +23,7 @@ COMMANDS_MODULE = "locations.commands"
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 USER_AGENT = f"Mozilla/5.0 (X11; Linux x86_64) {BOT_NAME}/{locations.__version__} (+https://github.com/alltheplaces/alltheplaces; framework {scrapy.__version__})"
 
-ROBOTSTXT_USER_AGENT = USER_AGENT
+ROBOTSTXT_USER_AGENT = BOT_NAME
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = True
