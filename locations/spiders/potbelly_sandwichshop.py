@@ -10,7 +10,7 @@ from locations.hours import OpeningHours
 
 class PotbellySandwichShopSpider(Spider):
     name = "potbelly_sandwich"
-    item_attributes = {"brand": "Potbelly Sandwich Shop"}
+    item_attributes = {"brand": "Potbelly Sandwich Shop", "brand_wikidata": "Q7234777"}
     allowed_domains = ["www.potbelly.com", "api.prod.potbelly.com"]
     download_delay = 1.0
     start_urls = [
@@ -63,6 +63,11 @@ class PotbellySandwichShopSpider(Spider):
             "postcode": store["zip"],
             "country": store["country"],
             "phone": store["telephone"],
+            "extras": {
+                "delivery": "yes" if store["candeliver"] else "no",
+                "takeaway": "yes" if store["canpickup"] else "no",
+                "drive_through": "yes" if store["supportsdrivethru"] else "no",
+            }
         }
 
         yield GeojsonPointItem(**properties)
