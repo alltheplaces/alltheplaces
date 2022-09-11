@@ -28,4 +28,5 @@ class IkesSpider(SitemapSpider):
         if item is None:
             return
         item["ref"] = response.url.split("/")[-2]
+        item["country"] = item["country"]["name"]
         yield item
