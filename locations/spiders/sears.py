@@ -15,16 +15,13 @@ class SearsSpider(scrapy.Spider):
     item_attributes = {"brand": "Sears", "brand_wikidata": "Q6499202"}
     allowed_domains = [
         "www.sears.com",
-        "www.searshometownstores.com",
     ]
     download_delay = 0.3
 
     def start_requests(self):
         sears_url = "https://www.sears.com/Sitemap_Local.xml.gz"
-        sears_hts_url = "http://www.searshometownstores.com/sitemap-store-urls.xml"
 
         yield scrapy.Request(sears_url, callback=self.parse_sears)
-        yield scrapy.Request(sears_hts_url, callback=self.parse_sears_hts)
 
     def parse_sears(self, response):
         decompressed_xml = zlib.decompress(response.body, 16 + zlib.MAX_WBITS)
@@ -32,23 +29,6 @@ class SearsSpider(scrapy.Spider):
         for url in sel.xpath("//loc/text()").extract():
             if url.count("/") == 6:
                 yield scrapy.Request(url.strip(), callback=self.parse_sears_store)
-
-    def parse_sears_hts(self, response):
-        response.selector.remove_namespaces()
-        base_url = (
-            "http://www.searshometownstores.com/hometown/services/Store.Service.ss?"
-        )
-        for url in response.xpath("//loc/text()").extract():
-            store_name = re.search(r".+/(.+?)/?(?:\.html|$)", url).group(1)
-            params = {
-                "format": "HTS",
-                "name": store_name,
-                "storehome": "T",
-                "storekioskhome": "F",
-            }
-            yield scrapy.http.Request(
-                base_url + urlencode(params), callback=self.parse_sears_hts_store
-            )
 
     def parse_sears_store(self, response):
         # Handle redirects to closed store page, majority are regular store detail pages
@@ -89,25 +69,3 @@ class SearsSpider(scrapy.Spider):
             }
 
             yield GeojsonPointItem(**properties)
-
-    def parse_sears_hts_store(self, response):
-        json_data = json.loads(response.text)
-        store_data = json_data["store"]
-        # Ensure ref is consistent across sears sites - 7 digit unique store identifier (zero padded)
-        ref = store_data["name"].zfill(7)
-
-        properties = {
-            "ref": ref,
-            "name": store_data["custrecord_website_display_name"],
-            "addr_full": store_data["custrecord_loc_det_add_1"],
-            "city": store_data["custrecord_loc_det_city"],
-            "state": store_data["custrecord_loc_det_state_or_province"],
-            "postcode": store_data["custrecord_loc_det_zip_or_postal_code"],
-            "country": store_data["custrecord_loc_det_country"],
-            "phone": store_data.get("custrecord_loc_det_phone"),
-            "website": store_data.get("custrecord_loc_det_store_url"),
-            "lat": store_data.get("custrecord_sho_latitude"),
-            "lon": store_data.get("custrecord_sho_lbi_longitude"),
-        }
-
-        yield GeojsonPointItem(**properties)

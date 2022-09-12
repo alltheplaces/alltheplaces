@@ -38,6 +38,7 @@ class DictParser(object):
         "postal-code",
         "post-code",
         "zip",
+        "zipcode",
         "address-post-code",
         "postal",
         "zip-code",
@@ -88,7 +89,7 @@ class DictParser(object):
         item["lat"] = DictParser.get_first_key(location, DictParser.lat_keys)
         item["lon"] = DictParser.get_first_key(location, DictParser.lon_keys)
 
-        address = DictParser.get_first_key(obj, ["address", "addr"])
+        address = DictParser.get_first_key(obj, ["address", "addr", "storeaddress"])
 
         if address and isinstance(address, str):
             item["addr_full"] = address
