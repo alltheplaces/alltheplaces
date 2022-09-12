@@ -13,6 +13,16 @@ DAYS_FULL = [
     "Saturday",
     "Sunday",
 ]
+
+DAYS_DE = {
+    "Mo": "Mo",
+    "Di": "Tu",
+    "Mi": "We",
+    "Do": "Th",
+    "Fr": "Fr",
+    "Sa": "Sa",
+    "So": "Su",
+}
 DAYS_BG = {
     "Пон": "Mo",
     "Пт": "Fr",
@@ -51,7 +61,10 @@ def sanitise_day(day: str, days: {} = None) -> str:
     if day[:2] in DAYS:
         return day[:2]
 
-    if day in DAYS_BG:
+    if DAYS_DE.get(day[:2]):
+        return DAYS_DE[day[:2]]
+
+    if DAYS_BG.get(day):
         return DAYS_BG[day]
 
     return None
