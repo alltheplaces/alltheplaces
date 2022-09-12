@@ -1,5 +1,5 @@
-import logging
 from collections import defaultdict
+
 import time
 
 
@@ -13,6 +13,14 @@ DAYS_FULL = [
     "Saturday",
     "Sunday",
 ]
+DAYS_BG = {
+    "Пон": "Mo",
+    "Пт": "Fr",
+    "Пет": "Fr",
+    "Съб": "Sa",
+    "нед": "Su",
+    "Нд": "Su",
+}
 
 
 def day_range(start_day, end_day):
@@ -24,11 +32,37 @@ def day_range(start_day, end_day):
         return DAYS[start_ix:] + DAYS[: end_ix + 1]
 
 
+def sanitise_day(day: str) -> str:
+    if day is None:
+        return None
+
+    day = day.strip("-.\t ").lower()
+
+    day = (
+        day.replace("https://", "")
+        .replace("http://", "")
+        .replace("schema.org/", "")
+        .title()
+    )
+
+    if day in DAYS_BG:
+        return DAYS_BG[day]
+
+    day = day[:2]
+
+    if day in DAYS:
+        return day
+
+    return None
+
+
 class OpeningHours(object):
     def __init__(self):
         self.day_hours = defaultdict(list)
 
     def add_range(self, day, open_time, close_time, time_format="%H:%M"):
+        day = sanitise_day(day)
+
         if day not in DAYS:
             raise ValueError(f"day must be one of {DAYS}, not {day!r}")
 
@@ -101,19 +135,11 @@ class OpeningHours(object):
                 ):
                     continue
 
-                days = []
-                if not isinstance(rule["dayOfWeek"], list):
-                    days.append(rule["dayOfWeek"])
-                else:
-                    days = rule["dayOfWeek"]
-                for day in days:
-                    day = (
-                        day.replace("https://", "")
-                        .replace("http://", "")
-                        .replace("schema.org/", "")[0:2]
-                        .title()
-                    )
+                days = rule["dayOfWeek"]
+                if not isinstance(days, list):
+                    days = [days]
 
+                for day in days:
                     self.add_range(
                         day=day,
                         open_time=rule["opens"],
@@ -121,11 +147,9 @@ class OpeningHours(object):
                         time_format=time_format,
                     )
         elif linked_data.get("openingHours"):
-            rules = []
-            if not isinstance(linked_data["openingHours"], list):
-                rules.append(linked_data["openingHours"])
-            else:
-                rules = linked_data["openingHours"]
+            rules = linked_data["openingHours"]
+            if not isinstance(rules, list):
+                rules = [rules]
 
             for rule in rules:
                 days, time_ranges = rule.split(" ", 1)
@@ -141,10 +165,12 @@ class OpeningHours(object):
 
                     if "-" in days:
                         start_day, end_day = days.split("-")
+
+                        start_day = sanitise_day(start_day)
+                        end_day = sanitise_day(end_day)
+
                         for day in day_range(start_day, end_day):
                             self.add_range(day, start_time, end_time, time_format)
                     else:
                         for day in days.split(","):
-                            self.add_range(
-                                day.strip(), start_time, end_time, time_format
-                            )
+                            self.add_range(day, start_time, end_time, time_format)

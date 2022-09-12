@@ -1,6 +1,6 @@
 import json
 
-from locations.hours import OpeningHours, day_range, DAYS
+from locations.hours import OpeningHours, day_range, DAYS, sanitise_day
 
 
 def test_day_range():
@@ -84,6 +84,19 @@ def test_multiple_times():
     o.add_range("Mo", "08:00", "12:00")
     o.add_range("Mo", "13:00", "17:30")
     assert o.as_opening_hours() == "Mo 08:00-12:00,13:00-17:30"
+
+
+def test_sanitise_days():
+    assert sanitise_day("Mo") == "Mo"
+    assert sanitise_day("Mon") == "Mo"
+    assert sanitise_day("MONDAY") == "Mo"
+    assert sanitise_day("schema.org/monday") == "Mo"
+    assert sanitise_day("https://schema.org/monday") == "Mo"
+    assert sanitise_day("http://schema.org/monday") == "Mo"
+    assert sanitise_day("   Monday ") == "Mo"
+    assert sanitise_day("not_a_day") is None
+    assert sanitise_day("пон") == "Mo"
+    assert sanitise_day("Съб. ") == "Sa"
 
 
 def test_ld_parse():
