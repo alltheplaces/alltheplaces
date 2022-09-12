@@ -42,8 +42,12 @@ class LinkedDataParser(object):
     def parse_ld(ld) -> GeojsonPointItem:
         item = GeojsonPointItem()
 
-        if geo := ld.get("geo"):
-            if isinstance(ld["geo"], list):
+        if (
+            (geo := ld.get("geo"))
+            or "location" in ld
+            and (geo := ld["location"].get("geo"))
+        ):
+            if isinstance(ld.get("geo"), list):
                 geo = geo[0]
 
             if geo.get("@type", "GeoCoordinates") in (
@@ -121,7 +125,6 @@ class LinkedDataParser(object):
     @staticmethod
     def parse(response, wanted_type) -> GeojsonPointItem:
         ld_item = LinkedDataParser.find_linked_data(response, wanted_type)
-
         if ld_item:
             item = LinkedDataParser.parse_ld(ld_item)
 
