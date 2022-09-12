@@ -15,18 +15,15 @@ class SearsSpider(scrapy.Spider):
     item_attributes = {"brand": "Sears", "brand_wikidata": "Q6499202"}
     allowed_domains = [
         "www.sears.com",
-        "www.searsoutlet.com",
         "www.searshometownstores.com",
     ]
     download_delay = 0.3
 
     def start_requests(self):
         sears_url = "https://www.sears.com/Sitemap_Local.xml.gz"
-        sears_outlet_url = "https://www.searsoutlet.com/sitemap.xml"
         sears_hts_url = "http://www.searshometownstores.com/sitemap-store-urls.xml"
 
         yield scrapy.Request(sears_url, callback=self.parse_sears)
-        yield scrapy.Request(sears_outlet_url, callback=self.parse_sears_outlet)
         yield scrapy.Request(sears_hts_url, callback=self.parse_sears_hts)
 
     def parse_sears(self, response):
@@ -35,15 +32,6 @@ class SearsSpider(scrapy.Spider):
         for url in sel.xpath("//loc/text()").extract():
             if url.count("/") == 6:
                 yield scrapy.Request(url.strip(), callback=self.parse_sears_store)
-
-    def parse_sears_outlet(self, response):
-        response.selector.remove_namespaces()
-        base_url = "https://www.searsoutlet.com/br/api/store/"
-        for url in response.xpath("//loc/text()").extract():
-            if "br/store/" in url:
-                store_name = re.search(r".+/(.+?)/?(?:\.html|$)", url.strip()).group(1)
-                api_url = base_url + store_name
-                yield scrapy.Request(api_url, callback=self.parse_sears_outlet_store)
 
     def parse_sears_hts(self, response):
         response.selector.remove_namespaces()
@@ -101,26 +89,6 @@ class SearsSpider(scrapy.Spider):
             }
 
             yield GeojsonPointItem(**properties)
-
-    def parse_sears_outlet_store(self, response):
-        json_data = json.loads(response.text)
-        store_data = json_data["storePageData"]["storeInfo"]
-        # Ensure ref is consistent across sears sites - 7 digit unique store identifier (zero padded)
-        ref = str(store_data["unit"]).zfill(7)
-
-        properties = {
-            "ref": ref,
-            "name": store_data["storeName"],
-            "addr_full": store_data["streetAddr"],
-            "city": store_data["city"],
-            "state": store_data["state"],
-            "postcode": store_data["zip"],
-            "phone": store_data.get("phone"),
-            "website": "https://www.searsoutlet.com" + store_data.get("url", ""),
-            # Lat and lon are unavailable in outlet store responses
-        }
-
-        yield GeojsonPointItem(**properties)
 
     def parse_sears_hts_store(self, response):
         json_data = json.loads(response.text)
