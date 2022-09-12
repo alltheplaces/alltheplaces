@@ -45,10 +45,7 @@ class DominosPizzaJPSpider(scrapy.Spider):
             "lon": response.xpath(
                 'normalize-space(//input[@id="store-lon"]/@value)'
             ).extract_first(),
-            "phone": re.search(
-                r"\s([\d-]*)$",
-                response.xpath('//div[@id="store-tel"]/a/text()').extract_first(),
-            ).group(1),
+            "phone": response.xpath('//div[@id="store-tel"]/a/text()').extract_first(),
             "website": response.url,
         }
 
