@@ -1,6 +1,13 @@
 import json
 
-from locations.hours import OpeningHours, day_range, DAYS, sanitise_day
+from locations.hours import (
+    OpeningHours,
+    day_range,
+    DAYS,
+    sanitise_day,
+    DAYS_BG,
+    DAYS_DE,
+)
 
 
 def test_day_range():
@@ -95,19 +102,8 @@ def test_sanitise_days():
     assert sanitise_day("http://schema.org/monday") == "Mo"
     assert sanitise_day("   Monday ") == "Mo"
     assert sanitise_day("not_a_day") is None
-    assert sanitise_day("пон") == "Mo"
-    assert sanitise_day("Съб. ") == "Sa"
-
-    DAYS_DE = {
-        "Mo": "Mo",
-        "Di": "Tu",
-        "Mi": "We",
-        "Do": "Th",
-        "Fr": "Fr",
-        "Sa": "Sa",
-        "So": "Su",
-    }
-
+    assert sanitise_day("пон", DAYS_BG) == "Mo"
+    assert sanitise_day("Съб. ", DAYS_BG) == "Sa"
     assert sanitise_day("Съб. ", DAYS_DE) is None
     assert sanitise_day("Mo", DAYS_DE) == "Mo"
     assert sanitise_day("Do", DAYS_DE) == "Th"

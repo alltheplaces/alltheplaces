@@ -14,6 +14,29 @@ DAYS_FULL = [
     "Sunday",
 ]
 
+DAYS_EN = {
+    "Monday": "Mo",
+    "Mon": "Mo",
+    "Mo": "Mo",
+    "Tuesday": "Tu",
+    "Tue": "Tu",
+    "Tu": "Tu",
+    "Wednesday": "We",
+    "Wed": "We",
+    "We": "We",
+    "Thursday": "Th",
+    "Thu": "Th",
+    "Th": "Th",
+    "Friday": "Fr",
+    "Fri": "Fr",
+    "Fr": "Fr",
+    "Saturday": "Sa",
+    "Sat": "Sa",
+    "Sa": "Sa",
+    "Sunday": "Su",
+    "Sun": "Su",
+    "Su": "Su",
+}
 DAYS_DE = {
     "Mo": "Mo",
     "Di": "Tu",
@@ -42,7 +65,7 @@ def day_range(start_day, end_day):
         return DAYS[start_ix:] + DAYS[: end_ix + 1]
 
 
-def sanitise_day(day: str, days: {} = None) -> str:
+def sanitise_day(day: str, days: {} = DAYS_EN) -> str:
     if day is None:
         return None
 
@@ -55,19 +78,7 @@ def sanitise_day(day: str, days: {} = None) -> str:
         .title()
     )
 
-    if days:
-        return days.get(day)
-
-    if day[:2] in DAYS:
-        return day[:2]
-
-    if DAYS_DE.get(day[:2]):
-        return DAYS_DE[day[:2]]
-
-    if DAYS_BG.get(day):
-        return DAYS_BG[day]
-
-    return None
+    return days.get(day)
 
 
 class OpeningHours(object):
