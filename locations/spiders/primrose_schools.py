@@ -30,12 +30,17 @@ class PrimroseSchoolsSpider(scrapy.Spider):
 
     def parse_search(self, response):
         content = response.xpath('//script[@type="application/json"]/text()').get()
+        if content is None:
+            return
+
         schools = json.loads(content)
         for i in schools:
             if i["address_1"]:
                 properties = {
                     "name": i["name"],
-                    "addr_full": i["address_1"] + " " + i["address_2"],
+                    "street_address": ", ".join(
+                        filter(None, [i["address_1"], i["address_2"]])
+                    ),
                     "city": i["city"],
                     "state": i["state"],
                     "postcode": i["zip_code"],
