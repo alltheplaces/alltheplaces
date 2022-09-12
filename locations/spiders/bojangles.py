@@ -11,14 +11,13 @@ class BojanglesSpider(scrapy.spiders.SitemapSpider):
     allowed_domains = ["locations.bojangles.com"]
     sitemap_urls = ["https://locations.bojangles.com/sitemap.xml"]
     sitemap_rules = [
-        (
-            r"^https://locations.bojangles.com/[^/]+/[^/]+/[^/]+.html$",
-            "parse_store"
-        ),
+        (r"^https://locations.bojangles.com/[^/]+/[^/]+/[^/]+.html$", "parse_store"),
     ]
 
     def parse_store(self, response):
         MicrodataParser.convert_to_json_ld(response)
         item = LinkedDataParser.parse(response, "FastFoodRestaurant")
-        item['ref'] = response.url.replace("https://locations.bojangles.com/", "").replace(".html", "")
+        item["ref"] = response.url.replace(
+            "https://locations.bojangles.com/", ""
+        ).replace(".html", "")
         yield item
