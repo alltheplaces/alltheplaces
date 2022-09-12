@@ -45,13 +45,11 @@ def sanitise_day(day: str) -> str:
         .title()
     )
 
+    if day[:2] in DAYS:
+        return day[:2]
+
     if day in DAYS_BG:
         return DAYS_BG[day]
-
-    day = day[:2]
-
-    if day in DAYS:
-        return day
 
     return None
 
