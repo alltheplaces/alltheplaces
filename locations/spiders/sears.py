@@ -1,71 +1,63 @@
 # -*- coding: utf-8 -*-
-import json
-import re
-import zlib
-
 import scrapy
 
-from scrapy import Selector
+from locations.hours import OpeningHours
 from locations.items import GeojsonPointItem
-from urllib.parse import urlencode
 
 
-class SearsSpider(scrapy.Spider):
+class SearsSpider(scrapy.spiders.SitemapSpider):
     name = "sears"
     item_attributes = {"brand": "Sears", "brand_wikidata": "Q6499202"}
-    allowed_domains = [
-        "www.sears.com",
+    allowed_domains = ["www.sears.com"]
+    sitemap_urls = ["https://www.sears.com/Sitemap_Local.xml.gz"]
+    sitemap_rules = [
+        (r"\d+\.html$", "parse"),
     ]
     download_delay = 0.3
 
-    def start_requests(self):
-        sears_url = "https://www.sears.com/Sitemap_Local.xml.gz"
-
-        yield scrapy.Request(sears_url, callback=self.parse_sears)
-
-    def parse_sears(self, response):
-        decompressed_xml = zlib.decompress(response.body, 16 + zlib.MAX_WBITS)
-        sel = Selector(text=decompressed_xml)
-        for url in sel.xpath("//loc/text()").extract():
-            if url.count("/") == 6:
-                yield scrapy.Request(url.strip(), callback=self.parse_sears_store)
-
-    def parse_sears_store(self, response):
+    def parse(self, response):
         # Handle redirects to closed store page, majority are regular store detail pages
-        if response.request.meta.get("redirect_urls"):
-            if "store-closed" in response.url:
-                pass
-        else:
-            store_script_data = response.xpath(
-                '//script[contains(text(),"var storeTitle")]/text()'
-            ).extract_first()
-            lat = re.search(r"lat = ([0-9.]*),", store_script_data).group(1)
-            lon = re.search(r"lon = ([0-9.-]*),", store_script_data).group(1)
-            ref = re.search(r'unitNumber = "([0-9]*)",', store_script_data).group(1)
+        if (
+            response.request.meta.get("redirect_urls")
+            and "store-closed" in response.url
+        ):
+            return
+        oh = OpeningHours()
+        for hours_li in response.css(".shc-store-hours")[0].css("li"):
+            day, interval = hours_li.css("span::text").extract()
+            open_time, close_time = interval.split(" - ")
+            oh.add_range(day, open_time, close_time, "%I:%M %p")
 
-            properties = {
-                "ref": ref,
-                "name": response.xpath(
-                    'normalize-space(//*[@itemprop="name"]//text())'
-                ).extract_first(),
-                "addr_full": response.xpath(
-                    'normalize-space(//span[@itemprop="streetAddress"]//text())'
-                ).extract_first(),
-                "city": response.xpath(
-                    'normalize-space(//span[@itemprop="addressLocality"]//text())'
-                ).extract_first(),
-                "state": response.xpath(
-                    'normalize-space(//span[@itemprop="addressRegion"]//text())'
-                ).extract_first(),
-                "postcode": response.xpath(
-                    'normalize-space(//span[@itemprop="postalCode"]//text())'
-                ).extract_first(),
-                "phone": response.xpath(
-                    'normalize-space(//span[@itemprop="telephone"]//text())'
-                ).extract_first(),
-                "website": response.url,
-                "lat": lat,
-                "lon": lon,
-            }
-
-            yield GeojsonPointItem(**properties)
+        addr_txt = (
+            response.css(".shc-store-location__details--address")[0]
+            .css("::text")
+            .extract()
+        )
+        street_address, city_postcode = list(
+            filter(None, (s.strip() for s in addr_txt))
+        )
+        city, postcode = city_postcode.split(",  ")
+        properties = {
+            "ref": response.xpath("//@data-unit-number").get(),
+            "name": response.xpath("//@data-store-title").get(),
+            "lat": response.xpath("//@data-latitude").get(),
+            "lon": response.xpath("//@data-longitude").get(),
+            "street_address": street_address,
+            "city": city,
+            "postcode": postcode,
+            "state": response.url.split("/")[-3],
+            "website": response.url,
+            "phone": response.css(".shc-store-location__details--tel::text").get(),
+            "opening_hours": oh.as_opening_hours(),
+        }
+        if "Hometown" in properties["name"]:
+            # See sears_hometown; ref should be shared
+            # Address and coordinates are slightly off
+            properties.update(
+                {"brand": "Sears Hometown", "brand_wikidata": "Q69926963"}
+            )
+        elif "Mattress" in properties["name"]:
+            # Likely stale; these are now american_freight
+            # Refs are distinct
+            properties.update({"brand": "Sears Outlet", "brand_wikidata": "Q20080412"})
+        yield GeojsonPointItem(**properties)
