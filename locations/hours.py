@@ -32,7 +32,7 @@ def day_range(start_day, end_day):
         return DAYS[start_ix:] + DAYS[: end_ix + 1]
 
 
-def sanitise_day(day: str) -> str:
+def sanitise_day(day: str, days: {} = None) -> str:
     if day is None:
         return None
 
@@ -44,6 +44,9 @@ def sanitise_day(day: str) -> str:
         .replace("schema.org/", "")
         .title()
     )
+
+    if days:
+        return days.get(day)
 
     if day[:2] in DAYS:
         return day[:2]

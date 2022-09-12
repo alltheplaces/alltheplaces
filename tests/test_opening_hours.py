@@ -98,6 +98,20 @@ def test_sanitise_days():
     assert sanitise_day("пон") == "Mo"
     assert sanitise_day("Съб. ") == "Sa"
 
+    DAYS_DE = {
+        "Mo": "Mo",
+        "Di": "Tu",
+        "Mi": "We",
+        "Do": "Th",
+        "Fr": "Fr",
+        "Sa": "Sa",
+        "So": "Su",
+    }
+
+    assert sanitise_day("Съб. ", DAYS_DE) is None
+    assert sanitise_day("Mo", DAYS_DE) == "Mo"
+    assert sanitise_day("Do", DAYS_DE) == "Th"
+
 
 def test_ld_parse():
     o = OpeningHours()
