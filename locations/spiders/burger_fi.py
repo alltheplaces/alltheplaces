@@ -15,6 +15,9 @@ class BurgerFiSpider(scrapy.Spider):
     def parse(self, response):
         response.selector.remove_namespaces()
         for r in response.xpath("//restaurant"):
+            if r.xpath("@slug").get() == "burgerfi-test-vendor":
+                continue
+
             properties = {
                 "ref": r.xpath("@id").extract_first(),
                 "name": r.xpath("@name").extract_first(),
