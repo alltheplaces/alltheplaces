@@ -16,3 +16,7 @@ python-json-logger = "*"
 xlrd = "*"
 boto3 = "*"
 geonamescache = "*"
+h3 = "==4.0.0b1"
+
+[pipenv]
+allow_prereleases = true

@@ -2,6 +2,7 @@
 import csv
 import scrapy
 
+from locations.geo import h3_locations
 from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
 
@@ -13,21 +14,9 @@ class CostaCoffeeGBSpider(scrapy.Spider):
     download_delay = 1
 
     def start_requests(self):
-        template = "https://www.costa.co.uk/api/locations/stores?latitude={lat}&longitude={lon}&maxrec=600"
-        # TODO: Can't figure out how to return more than 5 miles
-
-        with open(
-            "./locations/searchable_points/eu_centroids_20km_radius_country.csv"
-        ) as points:
-            reader = csv.DictReader(points)
-            for point in reader:
-                if point["country"] == "UK":
-                    yield scrapy.http.Request(
-                        url=template.format(
-                            lat=point["latitude"], lon=point["longitude"]
-                        ),
-                        callback=self.parse,
-                    )
+        for (lat, lon) in h3_locations("uk_h3_res6.txt", 6):
+            url = f"https://www.costa.co.uk/api/locations/stores?latitude={lat}&longitude={lon}&maxrec=600"
+            yield scrapy.Request(url)
 
     def parse(self, response):
         jsonresponse = response.json()

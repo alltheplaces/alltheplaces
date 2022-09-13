@@ -1,8 +1,10 @@
 import csv
-import geonamescache
 import gzip
 import json
 import math
+
+import geonamescache
+import h3
 
 # Radius of the Earth in kilometers
 EARTH_RADIUS = 6378.1
@@ -66,6 +68,15 @@ def point_locations(areas_csv_file, area_field_filter=None):
                     if area not in area_field_filter:
                         continue
                 yield lat, lon
+
+
+def h3_locations(h3_txt_file, res):
+    # Format: one H3 id per line
+    cells = open(f"./locations/searchable_points/{h3_txt_file}").read().splitlines()
+    cells = h3.uncompact_cells(cells, res)
+    for cell in cells:
+        lat, lon = h3.cell_to_latlng(cell)
+        yield lat, lon
 
 
 def city_locations(country_code, min_population=0):
