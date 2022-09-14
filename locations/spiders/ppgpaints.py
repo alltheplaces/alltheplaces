@@ -38,10 +38,13 @@ class PPGPaintsSpider(scrapy.Spider):
             "lon": lon,
             "website": response.url,
             "name": response.xpath('//*[@itemprop="name"]/text()').get(),
-            "addr_full": response.xpath('//*[@itemprop="streetAddress"]/text()').get(),
+            "street_address": response.xpath(
+                '//*[@itemprop="streetAddress"]/text()'
+            ).get(),
             "city": response.xpath('//*[@itemprop="addressLocality"]/text()').get(),
             "state": response.xpath('//*[@itemprop="addressRegion"]/text()').get(),
             "postcode": response.xpath('//*[@itemprop="postalCode"]/text()').get(),
             "phone": response.xpath('//*[@itemprop="telephone"]/text()').get(),
+            "country": response.url.split("/")[4].upper(),
         }
         return GeojsonPointItem(**properties)

@@ -10,7 +10,11 @@ from locations.items import GeojsonPointItem
 class AdvanceautopartsSpider(scrapy.Spider):
 
     name = "advanceautoparts"
-    item_attributes = {"brand": "Advance Auto Parts", "brand_wikidata": "Q4686051"}
+    item_attributes = {
+        "brand": "Advance Auto Parts",
+        "brand_wikidata": "Q4686051",
+        "country": "US",
+    }
     allowed_domains = ["stores.advanceautoparts.com"]
     start_urls = ("https://stores.advanceautoparts.com/sitemap.xml",)
 

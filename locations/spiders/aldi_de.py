@@ -10,7 +10,11 @@ from locations.hours import OpeningHours
 
 class AldiDESpider(scrapy.Spider):
     name = "aldi_de"
-    item_attributes = {"brand": "Aldi", "brand_wikidata": "Q41171373"}
+    item_attributes = {
+        "brand": "Aldi",
+        "brand_wikidata": "Q41171373",
+        "country": "DE",
+    }
     allowed_domains = ["www.yellowmap.de"]
     start_urls = (
         "https://www.yellowmap.de/Presentation/AldiSued/de-DE/ResultList?LocX=&LocY=&HiddenBranchCode=&BranchCode=&Lux=-14.150390625&Luy=73.9710776393399&Rlx=38.408203125&Rly=49.95121990866204&ZoomLevel=4&Mode=None&Filters.OPEN=false&Filters.ASxFITF=false&Filters.ASxFIPA=false&Filters.ASxFIBA=false&Filters.ASxFIEL=false&Filters.ASxNEDE=false&Filters.ASxKAFE=false&Filters.ASxKUWI=false&Filters.ASxBACK=false&Filters.ASxFIGS=false&_=1586528054615",

@@ -6,7 +6,11 @@ from locations.hours import OpeningHours
 
 class DollarGeneralSpider(SitemapSpider):
     name = "dollar_general"
-    item_attributes = {"brand": "Dollar General", "brand_wikidata": "Q145168"}
+    item_attributes = {
+        "brand": "Dollar General",
+        "brand_wikidata": "Q145168",
+        "country": "US",
+    }
     allowed_domains = ["dollargeneral.com"]
     sitemap_urls = ["https://www.dollargeneral.com/sitemap-main.xml"]
     sitemap_rules = [

@@ -1,4 +1,3 @@
-import re
 import scrapy
 
 from locations.items import GeojsonPointItem
@@ -6,7 +5,11 @@ from locations.items import GeojsonPointItem
 
 class StateFarmSpider(scrapy.Spider):
     name = "statefarm"
-    item_attributes = {"brand": "State Farm", "brand_wikidata": "Q2007336"}
+    item_attributes = {
+        "brand": "State Farm",
+        "brand_wikidata": "Q2007336",
+        "country": "US",
+    }
     allowed_domains = ["statefarm.com"]
     download_delay = 0.1
 

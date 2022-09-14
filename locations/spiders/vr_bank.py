@@ -25,6 +25,7 @@ class VRBankSpider(scrapy.Spider):
         "AppleWebKit/534.46 (KHTML, like Gecko) Version/5.1 "
         "Mobile/9B179 Safari/7534.48.3",
     }
+    item_attributes = {"country": "DE"}
 
     def process_hours(self, store_hours):
         opening_hours = OpeningHours()
