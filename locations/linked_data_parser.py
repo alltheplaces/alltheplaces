@@ -47,7 +47,7 @@ class LinkedDataParser(object):
             or "location" in ld
             and (geo := ld["location"].get("geo"))
         ):
-            if isinstance(ld.get("geo"), list):
+            if isinstance(geo, list):
                 geo = geo[0]
 
             if geo.get("@type", "GeoCoordinates") in (

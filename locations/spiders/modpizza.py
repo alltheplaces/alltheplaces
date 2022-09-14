@@ -8,7 +8,12 @@ from locations.microdata_parser import MicrodataParser
 
 class MODPizzaSpider(scrapy.spiders.SitemapSpider):
     name = "modpizza"
-    item_attributes = {"brand": "MOD Pizza", "brand_wikidata": "Q19903469"}
+    item_attributes = {
+        "brand": "MOD Pizza",
+        "brand_wikidata": "Q19903469",
+        "country": "US",
+    }
+
     allowed_domains = ["locations.modpizza.com"]
     sitemap_urls = [
         "https://locations.modpizza.com/sitemap.xml",
@@ -28,6 +33,5 @@ class MODPizzaSpider(scrapy.spiders.SitemapSpider):
         item["city"] = response.css(".Address-city::text").get()
         item["state"] = response.css(".Address-field.Address-region::text").get()
         item["postcode"] = response.css(".Address-field.Address-postalCode::text").get()
-        item["country"] = "US"
 
         yield item
