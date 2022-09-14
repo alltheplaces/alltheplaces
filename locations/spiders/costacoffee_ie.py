@@ -2,7 +2,7 @@
 import scrapy
 
 from locations.items import GeojsonPointItem
-from locations.hours import OpeningHours
+from locations.hours import OpeningHours, DAYS_FULL
 
 
 class CostaCoffeeIESpider(scrapy.Spider):
@@ -10,11 +10,12 @@ class CostaCoffeeIESpider(scrapy.Spider):
     item_attributes = {"brand": "Costa Coffee", "brand_wikidata": "Q608845"}
     allowed_domains = ["costaireland.ie"]
     # May need to do pagination at some point
-    start_urls = ["https://www.costaireland.ie/api/cf/?content_type=storeV2&limit=500"]
+    start_urls = [
+        "https://www.costaireland.ie/api/cf/?content_type=storeLocatorStore&limit=1000"
+    ]
 
     def parse(self, response):
-        jsonresponse = response.json()
-        for store_data in jsonresponse["items"]:
+        for store_data in response.json()["items"]:
             data = store_data["fields"]
 
             properties = {
@@ -29,19 +30,22 @@ class CostaCoffeeIESpider(scrapy.Spider):
 
             label = data["cmsLabel"]
             if label.startswith("STORE"):
-                properties["extras"]["store_type"] = "store"
+                properties["extras"]["amenity"] = "cafe"
+                properties["extras"]["cuisine"] = "coffee_shop"
             elif label.startswith("EXPRESS"):
-                properties["extras"]["store_type"] = "express"
+                properties["brand"] = "Costa Express"
+                properties["extras"]["amenity"] = "vending_machine"
+                properties["extras"]["vending"] = "coffee"
             else:
-                properties["extras"]["operator"] = data["cmsLabel"]
+                properties["extras"]["operator"] = label
 
             opening_hours = OpeningHours()
-            for day in ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]:
-                if "open" + day in data:
+            for day in DAYS_FULL:
+                if day.lower() + "Opening" in data:
                     opening_hours.add_range(
                         day[0:2],
-                        data["open" + day],
-                        data["close" + day],
+                        data[day.lower() + "Opening"],
+                        data[day.lower() + "Closing"],
                     )
             properties["opening_hours"] = opening_hours.as_opening_hours()
 
