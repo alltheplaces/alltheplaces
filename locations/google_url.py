@@ -6,7 +6,7 @@ def extract_google_position(item, response):
         if link.startswith("https://maps.googleapis.com/maps/api/staticmap"):
             item["lat"], item["lon"] = url_to_coords(link)
             return
-    for link in response.xpath('//iframe/@src').getall():
+    for link in response.xpath("//iframe/@src").getall():
         if link.startswith("https://www.google.com/maps/embed?pb="):
             item["lat"], item["lon"] = url_to_coords(link)
             return
