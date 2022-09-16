@@ -125,14 +125,15 @@ class CheckItemPropertiesPipeline(object):
             spider.crawler.stats.inc_value("atp/field/image/missing")
 
         lat, lon = item["lat"], item["lon"]
-        if not (self.min_lat < float(lat) < self.max_lat):
-            spider.crawler.stats.inc_value("atp/field/lat/invalid")
-        if not (self.min_lon < float(lon) < self.max_lon):
-            spider.crawler.stats.inc_value("atp/field/lon/invalid")
-        if math.fabs(float(lat)) < 0.01:
-            spider.crawler.stats.inc_value("atp/field/lat/invalid")
-        if math.fabs(float(lon)) < 0.01:
-            spider.crawler.stats.inc_value("atp/field/lon/invalid")
+        if lat and lon:
+            if not (self.min_lat < float(lat) < self.max_lat):
+                spider.crawler.stats.inc_value("atp/field/lat/invalid")
+            if not (self.min_lon < float(lon) < self.max_lon):
+                spider.crawler.stats.inc_value("atp/field/lon/invalid")
+            if math.fabs(float(lat)) < 0.01:
+                spider.crawler.stats.inc_value("atp/field/lat/invalid")
+            if math.fabs(float(lon)) < 0.01:
+                spider.crawler.stats.inc_value("atp/field/lon/invalid")
 
         if phone := item.get("phone"):
             if not isinstance(phone, str):
@@ -175,7 +176,10 @@ class CheckItemPropertiesPipeline(object):
         if opening_hours := item.get("opening_hours"):
             if not isinstance(opening_hours, str):
                 spider.crawler.stats.inc_value("atp/field/opening_hours/wrong_type")
-            elif not self.opening_hours_regex.match(opening_hours):
+            elif (
+                not self.opening_hours_regex.match(opening_hours)
+                and opening_hours != "24/7"
+            ):
                 spider.crawler.stats.inc_value("atp/field/opening_hours/invalid")
         else:
             spider.crawler.stats.inc_value("atp/field/opening_hours/missing")
