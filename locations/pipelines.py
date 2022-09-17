@@ -124,7 +124,7 @@ class CheckItemPropertiesPipeline(object):
         else:
             spider.crawler.stats.inc_value("atp/field/image/missing")
 
-        lat, lon = item["lat"], item["lon"]
+        lat, lon = item.get("lat"), item.get("lon")
         if lat and lon:
             if not (self.min_lat < float(lat) < self.max_lat):
                 spider.crawler.stats.inc_value("atp/field/lat/invalid")
