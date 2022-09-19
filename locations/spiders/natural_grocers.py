@@ -62,7 +62,3 @@ class NaturalGrocersSpider(SitemapSpider):
                 o.add_range(day, *hours.split("-"), "%I:%M %p")
 
         return o.as_opening_hours()
-
-
-if __name__ == "__main__":
-    from locations.open_graph_parser import OpenGraphParser
