@@ -43,11 +43,14 @@ class CostaCoffeeGBSpider(scrapy.Spider):
                     store_data["storeOperatingHours"]["open" + day] != ""
                     and store_data["storeOperatingHours"]["close" + day] != ""
                 ):
-                    opening_hours.add_range(
-                        day[0:2],
-                        store_data["storeOperatingHours"]["open" + day],
-                        store_data["storeOperatingHours"]["close" + day],
-                    )
+                    try:
+                        opening_hours.add_range(
+                            day[0:2],
+                            store_data["storeOperatingHours"]["open" + day],
+                            store_data["storeOperatingHours"]["close" + day],
+                        )
+                    except:
+                        pass
 
             item["opening_hours"] = opening_hours.as_opening_hours()
             item["extras"] = {"email": store_data["email"]}
