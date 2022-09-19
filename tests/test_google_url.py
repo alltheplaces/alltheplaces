@@ -45,3 +45,13 @@ def test_directions():
         51.4063062,
         -0.02920658,
     )
+
+
+def test_place():
+    assert url_to_coords(
+        "https://www.google.co.uk/maps/place/24%20Howard%20St,%20Glasgow%20G1%204BA/@55.8568582,-4.257138,18z/_data=!3m1!4b1!4m5!3m4!1s0x4888469ecb49dc1f_0x243ec55597095f68!8m2!3d55.8568582!4d-4.2560748"
+    ) == (55.8568582, -4.257138)
+
+    assert url_to_coords(
+        "https://www.google.com/maps/place/Portsmouth%20PO1%203EE/@50.799315,-1.1083991,17z/_data=!3m1!4b1!4m5!3m4!1s0x48745d7f5c40b405_0xa073c4da0d1c686a!8m2!3d50.7993679!4d-1.1059256"
+    ) == (50.799315, -1.1083991)

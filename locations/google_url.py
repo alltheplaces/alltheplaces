@@ -6,6 +6,10 @@ def extract_google_position(item, response):
         if link.startswith("https://maps.googleapis.com/maps/api/staticmap"):
             item["lat"], item["lon"] = url_to_coords(link)
             return
+    for link in response.xpath("//iframe/@src").getall():
+        if link.startswith("https://www.google.com/maps/embed?pb="):
+            item["lat"], item["lon"] = url_to_coords(link)
+            return
 
 
 def url_to_coords(url: str) -> (float, float):
@@ -13,6 +17,8 @@ def url_to_coords(url: str) -> (float, float):
         parsed_link = urlparse(link)
         queries = parse_qs(parsed_link.query)
         return queries.get(query_param)
+
+    url = url.replace("google.co.uk", "google.com")
 
     if url.startswith("https://www.google.com/maps/embed?pb="):
         # https://andrewwhitby.com/2014/09/09/google-maps-new-embed-format/
@@ -41,6 +47,9 @@ def url_to_coords(url: str) -> (float, float):
         return float(lat), float(lon)
     elif url.startswith("https://www.google.com/maps/dir/"):
         lat, lon = url.split("/")[6].split(",")
+        return float(lat.strip()), float(lon.strip())
+    elif url.startswith("https://www.google.com/maps/place/"):
+        lat, lon, _ = url.split("/")[6].replace("@", "").split(",")
         return float(lat.strip()), float(lon.strip())
 
     if "/maps.google.com/" in url:
