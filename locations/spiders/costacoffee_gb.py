@@ -29,22 +29,28 @@ class CostaCoffeeGBSpider(scrapy.Spider):
             item["street_address"] = ", ".join(
                 filter(
                     None,
-                    (
+                    [
                         store_data["storeAddress"]["addressLine1"],
                         store_data["storeAddress"]["addressLine2"],
                         store_data["storeAddress"]["addressLine3"],
-                    ),
+                    ],
                 ),
             )
 
             opening_hours = OpeningHours()
             for day in ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]:
-                if store_data["storeOperatingHours"]["open" + day] != "":
-                    opening_hours.add_range(
-                        day[0:2],
-                        store_data["storeOperatingHours"]["open" + day],
-                        store_data["storeOperatingHours"]["close" + day],
-                    )
+                if (
+                    store_data["storeOperatingHours"]["open" + day] != ""
+                    and store_data["storeOperatingHours"]["close" + day] != ""
+                ):
+                    try:
+                        opening_hours.add_range(
+                            day[0:2],
+                            store_data["storeOperatingHours"]["open" + day],
+                            store_data["storeOperatingHours"]["close" + day],
+                        )
+                    except:
+                        pass
 
             item["opening_hours"] = opening_hours.as_opening_hours()
             item["extras"] = {"email": store_data["email"]}
