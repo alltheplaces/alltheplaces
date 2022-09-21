@@ -8,6 +8,7 @@ class StructuredDataSpider(Spider):
 
     wanted_types = []
     search_for_email = True
+    search_for_phone = True
 
     def parse_sd(self, response):
         MicrodataParser.convert_to_json_ld(response)
@@ -20,6 +21,9 @@ class StructuredDataSpider(Spider):
                 if self.search_for_email:
                     self.email_search(item, response)
 
+                if self.search_for_phone:
+                    self.phone_search(item, response)
+
                 self.inspect_item(item, response)
 
                 yield item
@@ -28,11 +32,19 @@ class StructuredDataSpider(Spider):
         yield item
 
     def email_search(self, item, response):
-        for link in response.xpath("//a[contains(@href, 'mailto')]").getall():
+        for link in response.xpath("//a[contains(@href, 'mailto')]/@href").getall():
             link = link.strip()
             if link.startswith("mailto:"):
                 if not item.get("extras"):
                     item["extras"] = {}
 
                 item["extras"]["email"] = link.replace("mailto:", "")
+                return
+
+    def phone_search(self, item, response):
+        for link in response.xpath("//a[contains(@href, 'tel')]/@href").getall():
+            link = link.strip()
+            if link.startswith("tel:"):
+
+                item["phone"] = link.replace("tel:", "")
                 return
