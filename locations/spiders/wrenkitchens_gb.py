@@ -1,30 +1,26 @@
 # -*- coding: utf-8 -*-
 from scrapy.spiders import CrawlSpider, Rule
 from scrapy.linkextractors import LinkExtractor
-from locations.linked_data_parser import LinkedDataParser
-from locations.microdata_parser import MicrodataParser
-from locations.google_url import url_to_coords
+
+from locations import google_url
+from locations.structured_data_spider import StructuredDataSpider
 
 
-def extract_google_position(item, response):
-    for link in response.xpath("//iframe/@src").extract():
-        if "google.com" in link:
-            item["lat"], item["lon"] = url_to_coords(link)
-            return
-
-
-class WrenKitchensGBSpider(CrawlSpider):
+class WrenKitchensGB(CrawlSpider, StructuredDataSpider):
     name = "wrenkitchens_gb"
-    item_attributes = {"brand": "Wren Kitchens", "brand_wikidata": "Q8037744"}
+    item_attributes = {
+        "brand": "Wren Kitchens",
+        "brand_wikidata": "Q8037744",
+        "country": "GB",
+    }
     allowed_domains = ["wrenkitchens.com"]
     start_urls = ["https://www.wrenkitchens.com/showrooms/"]
-    rules = [Rule(LinkExtractor(allow="/showrooms/"), callback="parse", follow=False)]
+    rules = [
+        Rule(LinkExtractor(allow="/showrooms/"), callback="parse_sd", follow=False)
+    ]
     download_delay = 0.5
+    wanted_types = ["HomeAndConstructionBusiness"]
 
-    def parse(self, response):
-        MicrodataParser.convert_to_json_ld(response)
-        if item := LinkedDataParser.parse(response, "HomeAndConstructionBusiness"):
-            item["ref"] = response.url
-            item["country"] = "GB"
-            extract_google_position(item, response)
-            yield item
+    def inspect_item(self, item, response):
+        google_url.extract_google_position(item, response)
+        yield item
