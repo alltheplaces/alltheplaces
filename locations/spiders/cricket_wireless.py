@@ -19,7 +19,11 @@ DAY_MAPPING = {
 
 class CricketWirelessSpider(scrapy.Spider):
     name = "cricket_wireless"
-    item_attributes = {"brand": "Cricket Wireless", "brand_wikidata": "Q5184987"}
+    item_attributes = {
+        "brand": "Cricket Wireless",
+        "brand_wikidata": "Q5184987",
+        "country": "US",
+    }
     allowed_domains = ["api.momentfeed.com"]
 
     def get_page(self, n):

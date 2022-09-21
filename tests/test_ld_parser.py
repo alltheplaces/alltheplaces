@@ -162,6 +162,36 @@ def test_ld_lat_lon():
     assert i["lon"] == "-73.98"
 
 
+def test_default_types():
+    i = LinkedDataParser.parse_ld(
+        json.loads(
+            """
+            {
+                "@context": "https://schema.org",
+                "@type": "Place",
+                "geo": {"latitude": "40.75", "longitude": "-73.98"},
+                "address": {
+                    "addressCountry": {
+                        "name": "US"
+                    },
+                    "addressregion": "NE",
+                    "postalCode": "68847",
+                    "streetAddress": "1107 2ND AVE"
+                },
+                "name": "Empire State Building"
+            }
+            """
+        )
+    )
+
+    assert i["lat"] == "40.75"
+    assert i["lon"] == "-73.98"
+    assert i["country"] == "US"
+    assert i["state"] == "NE"
+    assert i["postcode"] == "68847"
+    assert i["street_address"] == "1107 2ND AVE"
+
+
 def test_flat_properties():
     i = LinkedDataParser.parse_ld(
         json.loads(

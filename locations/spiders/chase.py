@@ -8,7 +8,11 @@ from locations.items import GeojsonPointItem
 
 class ChaseSpider(scrapy.Spider):
     name = "chase"
-    item_attributes = {"brand": "Chase", "brand_wikidata": "Q524629"}
+    item_attributes = {
+        "brand": "Chase",
+        "brand_wikidata": "Q524629",
+        "country": "US",
+    }
     allowed_domains = ["chase.com"]
     start_urls = ("https://locator.chase.com/sitemap.xml",)
 

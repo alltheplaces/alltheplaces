@@ -8,7 +8,11 @@ from locations.items import GeojsonPointItem
 
 class BlueRhinoSpider(scrapy.Spider):
     name = "bluerhino"
-    item_attributes = {"brand": "Blue Rhino", "brand_wikidata": "Q65681213"}
+    item_attributes = {
+        "brand": "Blue Rhino",
+        "brand_wikidata": "Q65681213",
+        "country": "US",
+    }
     allowed_domains = ["bluerhino.com"]
 
     custom_settings = {"DEFAULT_REQUEST_HEADERS": {"Accept": "application/json"}}
