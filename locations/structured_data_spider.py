@@ -21,7 +21,7 @@ class StructuredDataSpider(Spider):
                 if self.search_for_email:
                     self.email_search(item, response)
 
-                if self.search_for_phone:
+                if self.search_for_phone and item["phone"] is None:
                     self.phone_search(item, response)
 
                 for i in self.inspect_item(item, response):
