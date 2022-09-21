@@ -24,9 +24,8 @@ class StructuredDataSpider(Spider):
                 if self.search_for_phone:
                     self.phone_search(item, response)
 
-                self.inspect_item(item, response)
-
-                yield item
+                for i in self.inspect_item(item, response):
+                    yield i
 
     def inspect_item(self, item, response):
         yield item
