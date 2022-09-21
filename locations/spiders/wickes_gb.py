@@ -12,7 +12,7 @@ class WickesGB(SitemapSpider, StructuredDataSpider):
         "country": "GB",
     }
     sitemap_urls = ["https://www.wickes.co.uk/sitemap.xml"]
-    sitemap_rules = [("/store/", "parse_sd")]
+    sitemap_rules = [(r"https:\/\/www\.wickes\.co\.uk\/store\/(\d+)$", "parse_sd")]
     wanted_types = ["Place"]
 
     def inspect_item(self, item, response):

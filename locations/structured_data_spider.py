@@ -1,3 +1,5 @@
+import re
+
 from scrapy import Spider
 
 from locations.linked_data_parser import LinkedDataParser
@@ -16,7 +18,22 @@ class StructuredDataSpider(Spider):
             if item := LinkedDataParser.parse(response, wanted_type):
 
                 if item["ref"] is None:
-                    item["ref"] = response.url
+                    if hasattr(self, "rules"):
+                        # Attempt to pull a match from CrawlSpider.rules
+                        for rule in getattr(self, "rules"):
+                            for allow in rule.link_extractor.allow_res:
+                                if match := re.match(allow, response.url):
+                                    if len(match.groups()) > 0:
+                                        item["ref"] = match.group(1)
+                    elif hasattr(self, "sitemap_rules"):
+                        # Attempt to pull a match from SitemapSpider.sitemap_rules
+                        for rule in getattr(self, "sitemap_rules"):
+                            if match := re.match(rule[0], response.url):
+                                if len(match.groups()) > 0:
+                                    item["ref"] = match.group(1)
+
+                    if item["ref"] is None:
+                        item["ref"] = response.url
 
                 if self.search_for_email:
                     self.email_search(item, response)

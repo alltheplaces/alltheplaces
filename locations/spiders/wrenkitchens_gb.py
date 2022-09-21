@@ -16,7 +16,13 @@ class WrenKitchensGB(CrawlSpider, StructuredDataSpider):
     allowed_domains = ["wrenkitchens.com"]
     start_urls = ["https://www.wrenkitchens.com/showrooms/"]
     rules = [
-        Rule(LinkExtractor(allow="/showrooms/"), callback="parse_sd", follow=False)
+        Rule(
+            LinkExtractor(
+                allow=r"https:\/\/www\.wrenkitchens\.com\/showrooms\/([_\w]+)$"
+            ),
+            callback="parse_sd",
+            follow=False,
+        )
     ]
     download_delay = 0.5
     wanted_types = ["HomeAndConstructionBusiness"]
