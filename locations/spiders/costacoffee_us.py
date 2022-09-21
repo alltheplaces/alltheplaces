@@ -1,40 +1,39 @@
 # -*- coding: utf-8 -*-
-import json
 import re
-
 import scrapy
 
 from locations.items import GeojsonPointItem
+from scrapy import Selector
 
 
 class CostaCoffeeUSSpider(scrapy.Spider):
     name = "costacoffee_us"
     item_attributes = {"brand": "Costa Coffee", "brand_wikidata": "Q608845"}
     allowed_domains = ["us.costacoffee.com"]
-    start_urls = [
-        "https://us.costacoffee.com/locations/",
-    ]
+    start_urls = ["https://us.costacoffee.com/amlocator/index/ajax"]
 
     def parse(self, response):
-        script = response.xpath(
-            '//script[@type="text/x-magento-init"]/text()[contains(.,"js/map")]'
-        ).get()
-        data = json.loads(script)
-        for (ref, store) in data["*"]["js/map"]["locations"].items():
-            properties = {
-                "ref": ref,
-                "name": store["name"],
-                "lat": store["lat"],
-                "lon": store["long"],
-                "street_address": store["address"],
-            }
-            if m := re.fullmatch("(.*), ?(.*) (.*)", store["address2"]):
-                city, state, postcode = m.groups()
-                properties.update(
-                    {
-                        "city": city,
-                        "state": state,
-                        "postcode": postcode,
-                    }
-                )
-            yield GeojsonPointItem(**properties)
+        for store in response.json()["items"]:
+            item = GeojsonPointItem()
+            item["ref"] = store["id"]
+            item["lat"] = store["lat"]
+            item["lon"] = store["lng"]
+
+            html = Selector(text=store["popup_html"])
+
+            item["name"] = html.xpath('//*[@class="amlocator-title"]/text()').get()
+
+            for line in html.xpath(
+                '//div[@class="amlocator-info-popup"]/text()'
+            ).getall():
+                line = line.strip()
+                if m := re.match(r"City: (.*)", line):
+                    item["city"] = m.group(1)
+                elif m := re.match(r"Zip: (.*)", line):
+                    item["postcode"] = m.group(1)
+                elif m := re.match(r"Address: (.*)", line):
+                    item["street_address"] = m.group(1)
+                elif m := re.match(r"State: (.*)", line):
+                    item["state"] = m.group(1)
+
+            yield item
