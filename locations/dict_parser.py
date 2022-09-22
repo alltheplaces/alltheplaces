@@ -128,7 +128,8 @@ class DictParser(object):
 
     @staticmethod
     def get_variations(key):
-        results = set(key)
+        results = set()
+        results.add(key)
 
         lower = key.lower()
         results.add(lower)
