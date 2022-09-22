@@ -1,28 +1,32 @@
 # -*- coding: utf-8 -*-
+from locations.google_url import extract_google_position
+from locations.spiders.vapestore_gb import clean_address
+from locations.structured_data_spider import StructuredDataSpider
+
 from scrapy.spiders import CrawlSpider, Rule
 from scrapy.linkextractors import LinkExtractor
-from locations.linked_data_parser import LinkedDataParser
-from locations.microdata_parser import MicrodataParser
-from locations.google_url import extract_google_position
 
 
-class WebuyanycarGBSpider(CrawlSpider):
+class WeBuyAnyCarGB(CrawlSpider, StructuredDataSpider):
     name = "webuyanycar_gb"
-    item_attributes = {"brand": "WeBuyAnyCar", "brand_wikidata": "Q7977432"}
+    item_attributes = {
+        "brand": "WeBuyAnyCar",
+        "brand_wikidata": "Q7977432",
+        "country": "GB",
+    }
     allowed_domains = ["www.webuyanycar.com"]
     start_urls = ["https://www.webuyanycar.com/branch-locator/"]
     rules = [
         Rule(
-            LinkExtractor(allow=".*/branch-locator/.*"), callback="parse", follow=False
+            LinkExtractor(allow=".*/branch-locator/.*"),
+            callback="parse_sd",
+            follow=False,
         )
     ]
     download_delay = 0.5
+    wanted_types = ["LocalBusiness"]
 
-    def parse(self, response):
-        MicrodataParser.convert_to_json_ld(response)
-        if item := LinkedDataParser.parse(response, "LocalBusiness"):
-            # TODO: street_address needs a structural clean-up approach
-            item["ref"] = response.url
-            item["country"] = "GB"
-            extract_google_position(item, response)
-            yield item
+    def inspect_item(self, item, response):
+        extract_google_position(item, response)
+        item["street_address"] = clean_address(item["street_address"])
+        yield item
