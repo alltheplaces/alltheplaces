@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
-import scrapy
-from locations.linked_data_parser import LinkedDataParser
+from locations.structured_data_spider import StructuredDataSpider
+
+from scrapy.spiders import SitemapSpider
 
 
-class WickesGBSpider(scrapy.spiders.SitemapSpider):
+class WickesGB(SitemapSpider, StructuredDataSpider):
     name = "wickes_gb"
     item_attributes = {
         "brand": "Wickes",
@@ -11,11 +12,11 @@ class WickesGBSpider(scrapy.spiders.SitemapSpider):
         "country": "GB",
     }
     sitemap_urls = ["https://www.wickes.co.uk/sitemap.xml"]
-    sitemap_rules = [("/store/", "parse_store")]
+    sitemap_rules = [(r"https:\/\/www\.wickes\.co\.uk\/store\/(\d+)$", "parse_sd")]
+    wanted_types = ["Place"]
 
-    def parse_store(self, response):
-        item = LinkedDataParser.parse(response, "Place")
-        if item:
-            item["lat"] = response.xpath("//@data-latitude").get()
-            item["lon"] = response.xpath("//@data-longitude").get()
-            return item
+    def inspect_item(self, item, response):
+        item["lat"] = response.xpath("//@data-latitude").get()
+        item["lon"] = response.xpath("//@data-longitude").get()
+
+        yield item
