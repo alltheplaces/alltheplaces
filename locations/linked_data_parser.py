@@ -102,6 +102,8 @@ class LinkedDataParser(object):
         if isinstance(item["phone"], str):
             item["phone"] = item["phone"].replace("tel:", "")
 
+        item["email"] = LinkedDataParser.get_clean(ld, "email")
+
         item["website"] = ld.get("url")
 
         try:

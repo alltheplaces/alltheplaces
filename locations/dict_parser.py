@@ -112,8 +112,8 @@ class DictParser(object):
         contact = DictParser.get_first_key(obj, ["contact"])
         if not contact or not isinstance(contact, dict):
             contact = obj
-        # TODO: support e-mail in item structure
-        # item["email"] = DictParser.get_first_key(contact, DictParser.email_keys)
+
+        item["email"] = DictParser.get_first_key(contact, DictParser.email_keys)
         item["phone"] = DictParser.get_first_key(contact, DictParser.phone_keys)
 
         return item

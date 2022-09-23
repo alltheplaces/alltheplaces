@@ -35,7 +35,7 @@ class StructuredDataSpider(Spider):
                     if item["ref"] is None:
                         item["ref"] = response.url
 
-                if self.search_for_email:
+                if self.search_for_email and item["email"] is None:
                     self.email_search(item, response)
 
                 if self.search_for_phone and item["phone"] is None:
@@ -52,10 +52,7 @@ class StructuredDataSpider(Spider):
         for link in response.xpath("//a[contains(@href, 'mailto')]/@href").getall():
             link = link.strip()
             if link.startswith("mailto:"):
-                if not item.get("extras"):
-                    item["extras"] = {}
-
-                item["extras"]["email"] = link.replace("mailto:", "")
+                item["email"] = link.replace("mailto:", "")
                 return
 
     def phone_search(self, item, response):
