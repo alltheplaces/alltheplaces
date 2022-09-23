@@ -41,8 +41,9 @@ class StructuredDataSpider(Spider):
                 if self.search_for_phone and item["phone"] is None:
                     self.phone_search(item, response)
 
-                for i in self.inspect_item(item, response):
-                    yield i
+                if items := self.inspect_item(item, response):
+                    for i in items:
+                        yield i
 
     def inspect_item(self, item, response):
         yield item
