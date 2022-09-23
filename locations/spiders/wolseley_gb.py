@@ -8,7 +8,9 @@ class WolseleyGB(SitemapSpider, StructuredDataSpider):
     name = "wolseley_gb"
     item_attributes = {"brand": "Wolseley", "brand_wikidata": "Q8030423"}
     sitemap_urls = ["https://www.wolseley.co.uk/sitemap.xml"]
-    sitemap_rules = [(f"https:\/\/www\.wolseley\.co\.uk\/branch\/[-\w]+\/$", "parse_sd")]
+    sitemap_rules = [
+        (f"https:\/\/www\.wolseley\.co\.uk\/branch\/[-\w]+\/$", "parse_sd")
+    ]
     wanted_types = ["LocalBusiness"]
     download_delay = 5
 
