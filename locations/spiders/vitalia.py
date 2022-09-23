@@ -56,9 +56,9 @@ class VitaliaSpider(scrapy.Spider):
                     "lat": store["lat"],
                     "lon": store["lng"],
                     "phone": store["phone"],
+                    "email": store["email"],
+                    "website": store["website"],
                     "extras": {
-                        "email": store["email"],
-                        "website": store["website"],
                         "category": store["category"],
                     },
                 }

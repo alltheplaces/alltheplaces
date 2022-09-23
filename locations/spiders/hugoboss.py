@@ -53,10 +53,8 @@ class HugoBossSpider(scrapy.Spider):
                     "lat": float(store.get("latitude")),
                     "lon": float(store.get("longitude")),
                     "phone": store.get("phone"),
-                    "extras": {
-                        "store_type": store["c_type"],
-                        "email": store.get("c_contactEmail"),
-                    },
+                    "email": store.get("c_contactEmail"),
+                    "extras": {"store_type": store["c_type"]},
                 }
                 if store.get("c_categories"):
                     clothes = []

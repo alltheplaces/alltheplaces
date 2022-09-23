@@ -31,6 +31,7 @@ def test_ld():
                 "priceRange": "$$",
                 "servesCuisine": ["Middle Eastern", "Mediterranean"],
                 "telephone": "(408) 714-1489",
+                "email": "example@example.org",
                 "url": "http://www.greatfood.com"
             }
             """
@@ -47,6 +48,7 @@ def test_ld():
         == "Mo-Th 11:00-14:30,17:00-21:30; Fr-Sa 11:00-14:30,17:00-22:00"
     )
     assert i["phone"] == "(408) 714-1489"
+    assert i["email"] == "example@example.org"
     assert i["website"] == "http://www.greatfood.com"
     assert i["ref"] is None
 

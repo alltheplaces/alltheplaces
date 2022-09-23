@@ -22,7 +22,7 @@ def test_dict_parse():
             "store_manager": "Steven Creighton",
             "fax": "",
             "tel": "01562 746695",
-            "email": "",
+            "email": "example@example.org",
             "store_features": '{"atm":"false","pepshopinshop":"true","icestore":"true","parking":"true","clickandcollect":"false","storetype":{"highstreet":"true","shoppingprecinct":"false","shoppingcentre":"false","retailpark":"false"}}',
             "close_date": None,
             "atm": "0",
@@ -57,6 +57,7 @@ def test_dict_parse():
     assert i["lat"] == "52.38839100"
     assert i["lon"] == "-2.24784700"
     assert i["phone"] == "01562 746695"
+    assert i["email"] == "example@example.org"
 
     i = DictParser.parse(
         {

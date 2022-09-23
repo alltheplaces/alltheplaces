@@ -21,6 +21,7 @@ class GeojsonPointItem(scrapy.Item):
     postcode = scrapy.Field()
     country = scrapy.Field()
     phone = scrapy.Field()
+    email = scrapy.Field()
     website = scrapy.Field()
     twitter = scrapy.Field()
     facebook = scrapy.Field()

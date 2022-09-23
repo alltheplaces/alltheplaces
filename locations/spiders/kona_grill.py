@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import json
 import scrapy
 
 from locations.items import GeojsonPointItem
@@ -83,7 +82,7 @@ class KonaGrillSpider(scrapy.Spider):
             )
 
     def parse(self, response):
-        store_data = json.loads(response.text)
+        store_data = response.json()
         url_location_details = "https://www.konagrill.com/ajax/getlocationdetails"
         headers = {"content-type": "application/x-www-form-urlencoded"}
         store_ids = []
@@ -104,7 +103,7 @@ class KonaGrillSpider(scrapy.Spider):
             )
 
     def parse_store(self, response):
-        response_data = json.loads(response.text)
+        response_data = response.json()
         if not response_data.get("data"):
             return
 
@@ -117,9 +116,7 @@ class KonaGrillSpider(scrapy.Spider):
         properties = {
             "addr_full": store.get("address"),
             "city": store.get("city"),
-            "extras": {
-                "email": store.get("email"),
-            },
+            "email": store.get("email"),
             "lat": store.get("latitude"),
             "lon": store.get("longitude"),
             "name": store.get("title"),
@@ -142,7 +139,7 @@ class KonaGrillSpider(scrapy.Spider):
             if "Brunch" in t.get("days"):
                 continue
             days = self.parse_days(t.get("days"))
-            open_time, close_time = t.get("hours").split("-")
+            open_time, close_time = t.get("hours").replace("*", "").split("-")
             ot = open_time.strip()
             ct = close_time.strip()
             for day in days:
