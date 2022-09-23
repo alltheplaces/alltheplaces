@@ -146,11 +146,11 @@ class CheckItemPropertiesPipeline(object):
 
         if email := item.get("email"):
             if not isinstance(email, str):
-                spider.crawler.stats.inc_value("atp/field/phone/wrong_type")
+                spider.crawler.stats.inc_value("atp/field/email/wrong_type")
             elif not self.email_regex.match(email):
                 spider.crawler.stats.inc_value("atp/field/email/invalid")
         else:
-            spider.crawler.stats.inc_value("atp/field/phone/missing")
+            spider.crawler.stats.inc_value("atp/field/email/missing")
 
         if postcode := item.get("postcode"):
             if not isinstance(postcode, str):
