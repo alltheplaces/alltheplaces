@@ -13,11 +13,10 @@ class CondadoTacosSpider(SitemapSpider, StructuredDataSpider):
     allowed_domains = ["locations.condadotacos.com"]
     sitemap_urls = ["https://locations.condadotacos.com/sitemap.xml"]
     sitemap_rules = [
-        (r"/condado-tacos-", "parse"),
+        (r"/condado-tacos-", "parse_sd"),
     ]
 
-    def parse(self, response):
-        [item] = self.parse_sd(response)
+    def inspect_item(self, item, response):
         description = response.css("meta[name=description]").attrib["content"]
         [name] = re.search(r"(Condado [^,]+),", description).groups()
         item["name"] = name

@@ -41,11 +41,10 @@ class StructuredDataSpider(Spider):
                 if self.search_for_phone and item["phone"] is None:
                     self.phone_search(item, response)
 
-                if items := self.inspect_item(item, response):
-                    for i in items:
-                        yield i
+                yield from self.inspect_item(item, response)
 
     def inspect_item(self, item, response):
+        """Override with any additional processing on the item."""
         yield item
 
     def email_search(self, item, response):
