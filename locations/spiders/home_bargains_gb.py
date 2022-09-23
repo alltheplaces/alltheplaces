@@ -10,7 +10,7 @@ class HomeBargainsGB(CrawlSpider, StructuredDataSpider):
     item_attributes = {"brand": "Home Bargains", "brand_wikidata": "Q5888229"}
     allowed_domains = ["homebargains.co.uk"]
     start_urls = ["https://storelocator.homebargains.co.uk/all-stores"]
-    rules = [Rule(LinkExtractor(allow='/store/'), callback='parse_sd', follow=False)]
+    rules = [Rule(LinkExtractor(allow="/store/"), callback="parse_sd", follow=False)]
     wanted_types = ["LocalBusiness"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
     download_delay = 0.5
@@ -23,7 +23,9 @@ class HomeBargainsGB(CrawlSpider, StructuredDataSpider):
             response.xpath('//*[@itemprop="openingHours"]/@datetime').extract()
         )
         item["lat"] = response.xpath('//*[@itemprop="latitude"]/text()').extract_first()
-        item["lon"] = response.xpath('//*[@itemprop="longitude"]/text()').extract_first()
+        item["lon"] = response.xpath(
+            '//*[@itemprop="longitude"]/text()'
+        ).extract_first()
         item["country"] = "GB"
         yield item
 
