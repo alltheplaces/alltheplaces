@@ -57,9 +57,9 @@ class MyDentistGBSpider(CrawlSpider):
         if item.get("phone"):
             item["phone"] = item["phone"].replace("tel:", "")
 
-        # item["email"] = root.xpath('.//span[@itemprop="email"]/a/@href').get()
-        # if item.get("email"):
-        #    item["email"] = item["email"].replace("mailto:", "")
+        item["email"] = root.xpath('.//span[@itemprop="email"]/a/@href').get()
+        if item.get("email"):
+            item["email"] = item["email"].replace("mailto:", "")
 
         item["website"] = response.url
 

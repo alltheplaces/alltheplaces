@@ -117,9 +117,7 @@ class KonaGrillSpider(scrapy.Spider):
         properties = {
             "addr_full": store.get("address"),
             "city": store.get("city"),
-            "extras": {
-                "email": store.get("email"),
-            },
+            "email": store.get("email"),
             "lat": store.get("latitude"),
             "lon": store.get("longitude"),
             "name": store.get("title"),

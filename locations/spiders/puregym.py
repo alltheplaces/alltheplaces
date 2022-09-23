@@ -46,9 +46,7 @@ class PureGymSpider(SitemapSpider):
                     ),
                 )
             ),
-            "extras": {
-                "email": ld["email"],
-            },
+            "email": ld["email"],
         }
 
         properties["lat"], properties["lon"] = url_to_coords(
