@@ -18,7 +18,7 @@ class Decathlon(CrawlSpider):
         "https://www.decathlon.pt/store-locator",
         # TODO: more domains no doubt
     ]
-    rules = [Rule(LinkExtractor(allow="/store-view/"), follow=False)]
+    rules = [Rule(LinkExtractor(allow="/store-view/"), callback="parse", follow=False)]
     custom_settings = {"ROBOTSTXT_OBEY": False}
     download_delay = 0.5
 
