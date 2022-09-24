@@ -9,6 +9,9 @@ class JennyCraigSpider(SitemapSpider, StructuredDataSpider):
     allowed_domains = ["locations.jennycraig.com"]
     sitemap_urls = ("https://locations.jennycraig.com/robots.txt",)
     sitemap_rules = [
-        (r"^https://locations.jennycraig.com/[^/]+/[^/]+/weight-loss-center-[^/]+.html$", "parse_sd"),
+        (
+            r"^https://locations.jennycraig.com/[^/]+/[^/]+/weight-loss-center-[^/]+.html$",
+            "parse_sd",
+        ),
     ]
     wanted_types = ["HealthAndBeautyBusiness"]
