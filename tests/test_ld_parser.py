@@ -10,6 +10,7 @@ def test_ld():
             {
                 "@context": "https://schema.org",
                 "@type": "Restaurant",
+                "@id": "",
                 "address": {
                     "@type": "PostalAddress",
                     "addressLocality": "Sunnyvale",

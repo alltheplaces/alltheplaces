@@ -124,9 +124,11 @@ class LinkedDataParser(object):
                     item["image"] = image.get("contentUrl")
 
         item["ref"] = ld.get("branchCode")
-
-        if item["ref"] is None:
+        if item["ref"] is None or item["ref"] == "":
             item["ref"] = ld.get("@id")
+
+        if item["ref"] == "":
+            item["ref"] = None
 
         return item
 
