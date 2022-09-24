@@ -24,12 +24,16 @@ class BremerBankSpider(SitemapSpider):
             "phone": response.xpath('//a[@class="phoneLink"]/text()').extract_first(),
         }
 
-        properties["city"], properties["state"], properties["postcode"] = (
+        city, state, postcode = (
             response.xpath('//div[@class="col-sm-12 col-lg-4"]/div/p/text()')[2]
             .extract()
             .strip()
-            .split()
+            .split("\n")
         )
+
+        properties['city'] = city.strip(",")
+        properties['state'] = state.strip()
+        properties['postcode'] = postcode.strip()
 
         extract_google_position(properties, response)
 
