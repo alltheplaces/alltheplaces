@@ -21,7 +21,7 @@ class SendiksSpider(scrapy.spiders.SitemapSpider):
     ]
 
     def parse_store(self, response):
-        data = json.loads(response.xpath('//script/text()')[5].extract().strip()[20:-1])
+        data = json.loads(response.xpath("//script/text()")[5].extract().strip()[20:-1])
 
         properties = {
             "name": data["name"],
