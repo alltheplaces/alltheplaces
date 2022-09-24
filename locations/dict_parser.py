@@ -200,4 +200,8 @@ class DictParser(object):
                     return v
                 if val := DictParser.get_nested_key(v, key):
                     return val
+        elif isinstance(obj, list):
+            for x in obj:
+                if val := DictParser.get_nested_key(x, key):
+                    return val
         return None
