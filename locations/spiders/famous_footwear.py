@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import re
+
 from scrapy.spiders import SitemapSpider
 from locations.structured_data_spider import StructuredDataSpider
 
@@ -15,10 +17,6 @@ class FamousFootwearSpider(SitemapSpider, StructuredDataSpider):
     wanted_types = ["Store"]
 
     def inspect_item(self, item, response):
-        item["lat"] = response.xpath(
-            '//div[@class="CoveoStaticPositionProvider" and @data-latitude]/@data-latitude'
-        ).extract_first()
-        item["lon"] = response.xpath(
-            '//div[@class="CoveoStaticPositionProvider" and @data-longitude]/@data-longitude'
-        ).extract_first()
+        matches = re.search(r'location: \["(.*)", "(.*)"\],', response.text)
+        item["lat"], item["lon"] = matches.group(1), matches.group(2)
         yield item
