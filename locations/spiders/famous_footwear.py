@@ -15,6 +15,10 @@ class FamousFootwearSpider(SitemapSpider, StructuredDataSpider):
     wanted_types = ["Store"]
 
     def inspect_item(self, item, response):
-        item["lat"] = response.xpath('//div[@class="CoveoStaticPositionProvider" and @data-latitude]/@data-latitude').extract_first()
-        item["lon"] = response.xpath('//div[@class="CoveoStaticPositionProvider" and @data-longitude]/@data-longitude').extract_first()
+        item["lat"] = response.xpath(
+            '//div[@class="CoveoStaticPositionProvider" and @data-latitude]/@data-latitude'
+        ).extract_first()
+        item["lon"] = response.xpath(
+            '//div[@class="CoveoStaticPositionProvider" and @data-longitude]/@data-longitude'
+        ).extract_first()
         yield item
