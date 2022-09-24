@@ -16,5 +16,5 @@ class UltaBeautySpider(SitemapSpider, StructuredDataSpider):
         # The structured data has bad addressRegion in the JSON but it's OK in the HTML
         item["state"] = response.xpath(
             '//span[@itemprop="addressRegion"]/text()'
-        ).extract_first()
+        ).extract()[-1]
         yield item
