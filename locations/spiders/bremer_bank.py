@@ -31,9 +31,9 @@ class BremerBankSpider(SitemapSpider):
             .split("\n")
         )
 
-        properties['city'] = city.strip(",")
-        properties['state'] = state.strip()
-        properties['postcode'] = postcode.strip()
+        properties["city"] = city.strip(",")
+        properties["state"] = state.strip()
+        properties["postcode"] = postcode.strip()
 
         extract_google_position(properties, response)
 
