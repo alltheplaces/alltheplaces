@@ -6,6 +6,23 @@ from locations.linked_data_parser import LinkedDataParser
 from locations.microdata_parser import MicrodataParser
 
 
+def extract_email(item, response):
+    for link in response.xpath("//a[contains(@href, 'mailto')]/@href").getall():
+        link = link.strip()
+        if link.startswith("mailto:"):
+            item["email"] = link.replace("mailto:", "")
+            return
+
+
+def extract_phone(item, response):
+    for link in response.xpath("//a[contains(@href, 'tel')]/@href").getall():
+        link = link.strip()
+        if link.startswith("tel:"):
+
+            item["phone"] = link.replace("tel:", "")
+            return
+
+
 class StructuredDataSpider(Spider):
 
     wanted_types = []
@@ -36,28 +53,13 @@ class StructuredDataSpider(Spider):
                         item["ref"] = response.url
 
                 if self.search_for_email and item["email"] is None:
-                    self.email_search(item, response)
+                    extract_email(item, response)
 
                 if self.search_for_phone and item["phone"] is None:
-                    self.phone_search(item, response)
+                    extract_phone(item, response)
 
                 yield from self.inspect_item(item, response)
 
     def inspect_item(self, item, response):
         """Override with any additional processing on the item."""
         yield item
-
-    def email_search(self, item, response):
-        for link in response.xpath("//a[contains(@href, 'mailto')]/@href").getall():
-            link = link.strip()
-            if link.startswith("mailto:"):
-                item["email"] = link.replace("mailto:", "")
-                return
-
-    def phone_search(self, item, response):
-        for link in response.xpath("//a[contains(@href, 'tel')]/@href").getall():
-            link = link.strip()
-            if link.startswith("tel:"):
-
-                item["phone"] = link.replace("tel:", "")
-                return

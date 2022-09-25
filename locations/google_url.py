@@ -1,3 +1,4 @@
+import re
 from urllib.parse import urlparse, parse_qs
 
 
@@ -10,6 +11,10 @@ def extract_google_position(item, response):
         if link.startswith("https://www.google.com/maps/embed?pb="):
             item["lat"], item["lon"] = url_to_coords(link)
             return
+    for link in response.xpath("//a[contains(@href, 'google')]/@href").getall():
+        if link.startswith("https://www.google.com/maps/dir"):
+            item["lat"], item["lon"] = url_to_coords(link)
+            return
 
 
 def url_to_coords(url: str) -> (float, float):
@@ -19,6 +24,9 @@ def url_to_coords(url: str) -> (float, float):
         return queries.get(query_param)
 
     url = url.replace("google.co.uk", "google.com")
+
+    if match := re.search(r"@(-?\d+.\d+),\s?(-?\d+.\d+),\d+z", url):
+        return float(match.group(1)), float(match.group(2))
 
     if url.startswith("https://www.google.com/maps/embed?pb="):
         # https://andrewwhitby.com/2014/09/09/google-maps-new-embed-format/
@@ -42,14 +50,8 @@ def url_to_coords(url: str) -> (float, float):
         if ll:
             lat, lon = ll[0].split(",")
             return float(lat), float(lon)
-    elif url.startswith("https://www.google.com/maps/@"):
-        lat, lon, _ = url.replace("https://www.google.com/maps/@", "").split(",")
-        return float(lat), float(lon)
     elif url.startswith("https://www.google.com/maps/dir/"):
         lat, lon = url.split("/")[6].split(",")
-        return float(lat.strip()), float(lon.strip())
-    elif url.startswith("https://www.google.com/maps/place/"):
-        lat, lon, _ = url.split("/")[6].replace("@", "").split(",")
         return float(lat.strip()), float(lon.strip())
 
     if "/maps.google.com/" in url:

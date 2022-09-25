@@ -1,86 +1,59 @@
-import scrapy
 import re
 
+from locations.google_url import extract_google_position
+from locations.hours import OpeningHours
 from locations.items import GeojsonPointItem
+from locations.structured_data_spider import extract_phone
 
-regex_am = r"\s?([Aa][Mm])"
-regex_pm = r"\s?([Pp][Mm])"
+from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule
 
 
-class RegisSalonGBSpider(scrapy.Spider):
-    name = "regis_uk"
-    item_attributes = {"brand": "Regis Salon", "brand_wikidata": "Q110166032"}
+class RegisSalonGB(CrawlSpider):
+    name = "regis_gb"
+    item_attributes = {
+        "brand": "Regis Salon",
+        "brand_wikidata": "Q110166032",
+        "country": "GB",
+    }
     allowed_domains = ["www.regissalons.co.uk"]
-    start_urls = ["https://www.regissalons.co.uk/salon-locator?show-all=yes"]
+    start_urls = ["https://www.regissalons.co.uk/salon-locator"]
     download_delay = 4.0
-
-    def convert_hours(self, hours):
-        hours = [x.strip() for x in hours]
-        hours = [x for x in hours if x]
-        for i in range(len(hours)):
-            converted_times = ""
-            if hours[i] != "Closed":
-                from_hr, to_hr = [hr.strip() for hr in hours[i].split("–")]
-                if re.search(regex_am, from_hr):
-                    from_hr = re.sub(regex_am, "", from_hr)
-                    hour_min = re.split("[:.]", from_hr)
-                    if len(hour_min[0]) < 2:
-                        hour_min[0].zfill(2)
-                    converted_times += (":".join(hour_min)) + " - "
-                else:
-                    from_hr = re.sub(regex_pm, "", from_hr)
-                    hour_min = re.split("[:.]", from_hr)
-                    if int(hour_min[0]) < 12:
-                        hour_min[0] = str(12 + int(hour_min[0]))
-                    converted_times += (":".join(hour_min)) + " - "
-
-                if re.search(regex_am, to_hr):
-                    to_hr = re.sub(regex_am, "", to_hr)
-                    hour_min = re.split("[:.]", to_hr)
-                    if len(hour_min[0]) < 2:
-                        hour_min[0].zfill(2)
-                    if int(hour_min[0]) == 12:
-                        hour_min[0] = "00"
-                    converted_times += ":".join(hour_min)
-                else:
-                    to_hr = re.sub(regex_pm, "", to_hr)
-                    hour_min = re.split("[:.]", to_hr)
-                    if int(hour_min[0]) < 12:
-                        hour_min[0] = str(12 + int(hour_min[0]))
-                    converted_times += ":".join(hour_min)
-            else:
-                converted_times += "off"
-            hours[i] = converted_times
-        days = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
-        hours = "".join("{} {} ".format(*t) for t in zip(days, hours))
-        return hours
-
-    def parse_store(self, response):
-        phone = (
-            response.xpath('//a[@class="phone-tracked-link"]/text()')
-            .extract_first()
-            .strip()
+    rules = [
+        Rule(
+            LinkExtractor(
+                allow=r"https://www.regissalons.co.uk/salon-locator/[-\w]+/$"
+            ),
+            callback="parse",
         )
-        lat = response.xpath('//div[@id="map-aside"]/@data-lat').extract_first()
-        lon = response.xpath('//div[@id="map-aside"]/@data-lng').extract_first()
-        hours = response.xpath(
-            '//div[@class="container"]//p[contains(., "am")'
-            ' or contains(., "Closed")]/text()'
-        ).extract()
-        hours = self.convert_hours(hours)
-
-        yield GeojsonPointItem(
-            ref=response.url,
-            phone=phone,
-            lat=lat,
-            lon=lon,
-            opening_hours=hours,
-            website=response.url,
-        )
+    ]
 
     def parse(self, response):
-        stores = response.xpath('//ul[@class="list"]//a/@href').extract()
-        for store in stores:
-            if "/salon-region/" in store:
+        item = GeojsonPointItem()
+
+        item["ref"] = item["website"] = response.url
+
+        item["name"] = response.xpath('//h1[@class="page-title"]/span/text()').get()
+
+        item["addr_full"] = response.xpath(
+            '//div[@class="amlocator-salon-left-address"]/p/text()'
+        ).get()
+
+        extract_google_position(item, response)
+        extract_phone(item, response)
+
+        oh = OpeningHours()
+        for rule in response.xpath('//div[@class="amlocator-row"]'):
+            day = rule.xpath('./span[@class="amlocator-cell -day"]/text()').get()
+            time = rule.xpath('./span[@class="amlocator-cell -time"]/text()').get()
+
+            if "closed" in time.lower():
                 continue
-            yield scrapy.Request(store, callback=self.parse_store)
+
+            start_time, end_time = time.split(" - ")
+
+            oh.add_range(day, start_time, end_time)
+
+        item["opening_hours"] = oh.as_opening_hours()
+
+        yield item
