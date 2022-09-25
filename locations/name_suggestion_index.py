@@ -1,4 +1,4 @@
-import json
+import requests
 
 
 class NSI(object):
@@ -14,8 +14,9 @@ class NSI(object):
 
     def _ensure_loaded(self):
         if self.nsi_wikidata is None:
-            with open("./nsi/dist/wikidata.json") as json_file:
-                self.nsi_wikidata = json.load(json_file)["wikidata"]
+            self.nsi_wikidata = requests.get(
+                "https://raw.githubusercontent.com/osmlab/name-suggestion-index/main/dist/wikidata.min.json"
+            ).json()["wikidata"]
             if not self.nsi_wikidata:
                 self.nsi_wikidata = {}
 
