@@ -14,9 +14,11 @@ class NSI(object):
 
     def _ensure_loaded(self):
         if self.nsi_wikidata is None:
-            self.nsi_wikidata = requests.get(
+            resp = requests.get(
                 "https://raw.githubusercontent.com/osmlab/name-suggestion-index/main/dist/wikidata.min.json"
-            ).json()["wikidata"]
+            )
+            self.nsi_wikidata = resp.json()["wikidata"]
+
             if not self.nsi_wikidata:
                 self.nsi_wikidata = {}
 

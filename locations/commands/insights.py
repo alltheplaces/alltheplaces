@@ -3,6 +3,7 @@ import geonamescache
 import os
 import requests
 from collections import Counter
+from locations.name_suggestion_index import NSI
 from scrapy.commands import ScrapyCommand
 from scrapy.exceptions import UsageError
 
@@ -119,36 +120,13 @@ class InsightsCommand(ScrapyCommand):
             brand_wikidata = feature["properties"].get("brand:wikidata")
             if not brand_wikidata:
                 spider_empty_counter[spider_name] += 1
-            elif not nsi.lookup_wikidata(brand_wikidata):
+            elif not nsi.lookup_wikidata_code(brand_wikidata):
                 spider_nsi_missing_counter[spider_name + "/" + brand_wikidata] += 1
             else:
                 # TODO: query wikidata to see if Q-code remotely sensible?
                 pass
         self.show_counter("SPIDERS WITH NO BRAND DATA:", spider_empty_counter)
         self.show_counter("NSI MISSING WIKIDATA CODE:", spider_nsi_missing_counter)
-
-
-class NSI(object):
-    """
-    Interact with Name Suggestion Index (NSI). The NSI data is pulled from Github,
-    which is used by the OSM editor to do rather useful brand suggestions when editing POIs.
-    """
-
-    def __init__(self):
-        self.nsi_wikidata = None
-
-    def _ensure_loaded(self):
-        if self.nsi_wikidata is None:
-            resp = requests.get(
-                "https://raw.githubusercontent.com/osmlab/name-suggestion-index/main/dist/wikidata.min.json"
-            )
-            self.nsi_wikidata = resp.json()["wikidata"]
-            if not self.nsi_wikidata:
-                self.nsi_wikidata = {}
-
-    def lookup_wikidata(self, brand_wikidata):
-        self._ensure_loaded()
-        return self.nsi_wikidata.get(brand_wikidata)
 
 
 class CountryUtils(object):
