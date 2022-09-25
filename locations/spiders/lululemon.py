@@ -1,26 +1,19 @@
-# -*- coding: utf-8 -*-
 import json
-import scrapy
-
+from scrapy.spiders import SitemapSpider
 from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
 
 WEEKDAYS = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
 
 
-class LuLuLemonSpider(scrapy.Spider):
-    download_delay = 0.1
+class LuLuLemonSpider(SitemapSpider):
     name = "lululemon"
     item_attributes = {"brand": "LuLuLemon", "brand_wikidata": "Q6702957"}
-    allowed_domains = ["shop.lululemon.com"]
-    start_urls = ("https://shop.lululemon.com/stores/all-lululemon-stores",)
-
-    def parse(self, response):
-        urls = response.xpath(
-            '//a[@class="store-list_storeLink__3krLG"]/@href'
-        ).extract()
-        for path in urls:
-            yield scrapy.Request(response.urljoin(path), callback=self.parse_store)
+    sitemap_urls = ("https://shop.lululemon.com/sitemap.xml",)
+    download_delay = 1.0
+    sitemap_rules = [
+        (r"^https://shop.lululemon.com/stores/[^/]+/[^/]+/[^/]+$", "parse_store"),
+    ]
 
     def parse_store(self, response):
         address = {}
