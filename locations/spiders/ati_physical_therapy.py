@@ -63,9 +63,7 @@ class ATIPhysicalTherapySpider(scrapy.Spider):
             "website": response.url,
             "lat": geo.get("lat"),
             "lon": geo.get("lon"),
-            "extras": {
-                "email": data.get("email"),
-            },
+            "email": data.get("email"),
             "opening_hours": oh.as_opening_hours(),
         }
         yield GeojsonPointItem(**properties)

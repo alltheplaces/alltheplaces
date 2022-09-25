@@ -1,54 +1,19 @@
 # -*- coding: utf-8 -*-
-import json
-
-import scrapy
-
-from locations.items import GeojsonPointItem
+from scrapy.spiders import SitemapSpider
+from locations.linked_data_parser import LinkedDataParser
 
 
-class PlanetFitnessSpider(scrapy.Spider):
+class PlanetFitnessSpider(SitemapSpider):
     name = "planet-fitness"
     item_attributes = {"brand": "Planet Fitness", "brand_wikidata": "Q7201095"}
-    allowed_domains = [
-        "planetfitness.ca",
-        "planetfitness.com",
-        "planetfitness.com.au",
-        "planetfitness.mx",
-        "planetfitness.pa",
-    ]
-    start_urls = ("https://www.planetfitness.com/sitemap",)
     download_delay = 4
-
-    def parse_hours(self, response):
-        hours = response.css("p.club-hours::text").get()
-        if hours is not None:
-            return hours.replace("\n", "; ")
+    sitemap_urls = [
+        "https://www.planetfitness.com/sitemap.xml",
+    ]
+    sitemap_rules = [
+        (r"https://www.planetfitness.com/gyms/", "parse"),
+    ]
 
     def parse(self, response):
-        city_urls = response.xpath('//td[@class="club-title"]/a/@href').extract()
-        for path in city_urls:
-            if "/gyms/" in path:
-                yield scrapy.Request(response.urljoin(path), callback=self.parse_gym)
-
-    def parse_gym(self, response):
-        data = json.loads(
-            response.xpath('//script[@type="application/ld+json"]/text()').get()
-        )["@graph"][0]
-
-        hours = self.parse_hours(response)
-
-        properties = {
-            "lat": data["geo"]["latitude"],
-            "lon": data["geo"]["longitude"],
-            "name": data["name"],
-            "ref": response.url,
-            "website": response.url,
-            "phone": data["telephone"],
-            "addr_full": data["address"]["streetAddress"],
-            "city": data["address"]["addressLocality"],
-            "state": data["address"]["addressRegion"],
-            "postcode": data["address"]["postalCode"],
-            "country": data["address"]["addressCountry"],
-            "opening_hours": hours,
-        }
-        yield GeojsonPointItem(**properties)
+        item = LinkedDataParser.parse(response, "ExerciseGym")
+        yield item

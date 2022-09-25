@@ -141,6 +141,7 @@ class BurgerKingGBSpider(scrapy.Spider):
                         ),
                     )
                 ),
+                "email": row["email"],
                 "extras": {
                     "operator": row["franchiseGroupName"],
                     "internet_access": "wlan" if row["hasWifi"] == True else "no",
@@ -148,7 +149,6 @@ class BurgerKingGBSpider(scrapy.Spider):
                     "delivery": "yes" if row["hasDelivery"] == True else "no",
                     "drive_through": "yes" if row["hasDriveThru"] == True else "no",
                     "takeaway": "yes" if row["hasTakeOut"] == True else "no",
-                    "email": row["email"],
                 },
             }
             yield GeojsonPointItem(**properties)

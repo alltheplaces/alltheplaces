@@ -69,11 +69,11 @@ class ELeclercSpider(scrapy.Spider):
                 "opening_hours": opening_hours.as_opening_hours(),
                 "lat": coords[1],
                 "lon": coords[0],
+                "email": email,
                 "extras": {
                     "store_type": user_properties.get("commercialActivity").get("label")
                     if user_properties.get("commercialActivity")
-                    else "",
-                    "email": email if email is not None else "",
+                    else ""
                 },
             }
 

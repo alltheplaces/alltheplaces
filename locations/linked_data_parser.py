@@ -42,11 +42,15 @@ class LinkedDataParser(object):
     def parse_ld(ld) -> GeojsonPointItem:
         item = GeojsonPointItem()
 
-        if geo := ld.get("geo"):
-            if isinstance(ld["geo"], list):
+        if (
+            (geo := ld.get("geo"))
+            or "location" in ld
+            and (geo := ld["location"].get("geo"))
+        ):
+            if isinstance(geo, list):
                 geo = geo[0]
 
-            if geo.get("@type") in (
+            if geo.get("@type", "GeoCoordinates") in (
                 "GeoCoordinates",
                 "http://schema.org/GeoCoordinates",
                 "https://schema.org/GeoCoordinates",
@@ -59,31 +63,46 @@ class LinkedDataParser(object):
         if addr := LinkedDataParser.get_clean(ld, "address"):
             if isinstance(addr, list):
                 addr = addr[0]
+
             if isinstance(addr, str):
                 item["addr_full"] = addr
-            else:
-                # We do not check for "@type" being "PostalAddress", some sites fail
-                # to specify this and since it is unlikely to be anything else we do not
-                # perform the check.
-                item["street_address"] = LinkedDataParser.get_case_insensitive(
-                    addr, "streetAddress"
-                )
-                item["city"] = LinkedDataParser.get_case_insensitive(
-                    addr, "addressLocality"
-                )
-                item["state"] = LinkedDataParser.get_case_insensitive(
-                    addr, "addressRegion"
-                )
-                item["postcode"] = LinkedDataParser.get_case_insensitive(
-                    addr, "postalCode"
-                )
-                item["country"] = LinkedDataParser.get_case_insensitive(
-                    addr, "addressCountry"
-                )
-                item["phone"] = LinkedDataParser.get_clean(addr, "telephone")
+            elif isinstance(addr, dict):
+                if addr.get("@type", "PostalAddress") == "PostalAddress":
+                    item["street_address"] = LinkedDataParser.get_case_insensitive(
+                        addr, "streetAddress"
+                    )
+                    item["city"] = LinkedDataParser.get_case_insensitive(
+                        addr, "addressLocality"
+                    )
+                    item["state"] = LinkedDataParser.get_case_insensitive(
+                        addr, "addressRegion"
+                    )
+                    item["postcode"] = LinkedDataParser.get_case_insensitive(
+                        addr, "postalCode"
+                    )
+                    country = LinkedDataParser.get_case_insensitive(
+                        addr, "addressCountry"
+                    )
+
+                    if isinstance(country, str):
+                        item["country"] = country
+                    elif isinstance(country, dict):
+                        if country.get("@type", "Country") == "Country":
+                            item["country"] = country.get("name")
+
+                    # Common mistake to put "telephone" in "address"
+                    item["phone"] = LinkedDataParser.get_clean(addr, "telephone")
 
         if item.get("phone") is None:
             item["phone"] = LinkedDataParser.get_clean(ld, "telephone")
+
+        if isinstance(item["phone"], list):
+            item["phone"] = item["phone"][0]
+
+        if isinstance(item["phone"], str):
+            item["phone"] = item["phone"].replace("tel:", "")
+
+        item["email"] = LinkedDataParser.get_clean(ld, "email")
 
         item["website"] = ld.get("url")
 
@@ -94,25 +113,28 @@ class LinkedDataParser(object):
         except:
             pass
 
-        if ld.get("image"):
-            if isinstance(ld["image"], str):
-                item["image"] = ld["image"]
-            elif isinstance(ld["image"], list):
-                item["image"] = ld["image"][0]
-            elif ld["image"].get("@type") == "ImageObject":
-                item["image"] = ld["image"].get("contentUrl")
+        if image := ld.get("image"):
+            if isinstance(image, list):
+                image = image[0]
+
+            if isinstance(image, str):
+                item["image"] = image
+            elif isinstance(image, dict):
+                if image.get("@type", "ImageObject") == "ImageObject":
+                    item["image"] = image.get("contentUrl")
 
         item["ref"] = ld.get("branchCode")
-
-        if item["ref"] is None:
+        if item["ref"] is None or item["ref"] == "":
             item["ref"] = ld.get("@id")
+
+        if item["ref"] == "":
+            item["ref"] = None
 
         return item
 
     @staticmethod
     def parse(response, wanted_type) -> GeojsonPointItem:
         ld_item = LinkedDataParser.find_linked_data(response, wanted_type)
-
         if ld_item:
             item = LinkedDataParser.parse_ld(ld_item)
 

@@ -1,42 +1,36 @@
 # -*- coding: utf-8 -*-
 import scrapy
-import re
 
 from locations.items import GeojsonPointItem
-
-HEADERS = {
-    "Accept": "application/json",
-}
 
 
 class BurgerFiSpider(scrapy.Spider):
     name = "burger_fi"
-    item_attributes = {"brand": "Burger Fi"}
-    allowed_domains = ["order.burgerfi.com"]
-    start_urls = ("https://order.burgerfi.com/api/restaurants",)
-
-    def start_requests(self):
-        url = self.start_urls[0]
-        yield scrapy.Request(url=url, headers=HEADERS, callback=self.parse)
+    item_attributes = {"brand": "Burger Fi", "brand_wikidata": "Q39045496"}
+    allowed_domains = ["api.dineengine.io"]
+    start_urls = (
+        "https://api.dineengine.io/burgerfi/custom/dineengine/vendor/olo/restaurants?includePrivate=false",
+    )
 
     def parse(self, response):
-        data = response.json()
+        response.selector.remove_namespaces()
+        for r in response.xpath("//restaurant"):
+            if r.xpath("@slug").get() == "burgerfi-test-vendor":
+                continue
 
-        for store in data["restaurants"]:
-            addr_full = "{}, {}, {} {}".format(
-                store["streetaddress"], store["city"], store["state"], store["zip"]
-            )
             properties = {
-                "ref": store["id"],
-                "name": store["name"],
-                "addr_full": addr_full,
-                "city": store["city"],
-                "state": store["state"],
-                "postcode": store["zip"],
-                "country": store["country"],
-                "lon": float(store["longitude"]),
-                "lat": float(store["latitude"]),
-                "phone": store["telephone"],
+                "ref": r.xpath("@id").extract_first(),
+                "name": r.xpath("@name").extract_first(),
+                "street_address": r.xpath("@streetaddress").extract_first(),
+                "phone": r.xpath("@telephone").extract_first(),
+                "city": r.xpath("@city").extract_first(),
+                "state": r.xpath("@state").extract_first(),
+                "postcode": r.xpath("@zip").extract_first(),
+                "country": r.xpath("@country").extract_first(),
+                "lat": r.xpath("@latitude").extract_first(),
+                "lon": r.xpath("@longitude").extract_first(),
+                "website": "https://order.burgerfi.com/locations/"
+                + r.xpath("@slug").extract_first(),
             }
 
             yield GeojsonPointItem(**properties)

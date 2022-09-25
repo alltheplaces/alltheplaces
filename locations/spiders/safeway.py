@@ -8,7 +8,11 @@ from locations.items import GeojsonPointItem
 
 class SafewaySpider(scrapy.Spider):
     name = "safeway"
-    item_attributes = {"brand": "Safeway", "brand_wikidata": "Q1508234"}
+    item_attributes = {
+        "brand": "Safeway",
+        "brand_wikidata": "Q1508234",
+        "country": "US",
+    }
     allowed_domains = ["safeway.com"]
     start_urls = ("https://local.safeway.com/sitemap.xml",)
 

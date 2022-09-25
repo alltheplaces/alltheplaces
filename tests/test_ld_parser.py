@@ -10,6 +10,7 @@ def test_ld():
             {
                 "@context": "https://schema.org",
                 "@type": "Restaurant",
+                "@id": "",
                 "address": {
                     "@type": "PostalAddress",
                     "addressLocality": "Sunnyvale",
@@ -31,6 +32,7 @@ def test_ld():
                 "priceRange": "$$",
                 "servesCuisine": ["Middle Eastern", "Mediterranean"],
                 "telephone": "(408) 714-1489",
+                "email": "example@example.org",
                 "url": "http://www.greatfood.com"
             }
             """
@@ -47,6 +49,7 @@ def test_ld():
         == "Mo-Th 11:00-14:30,17:00-21:30; Fr-Sa 11:00-14:30,17:00-22:00"
     )
     assert i["phone"] == "(408) 714-1489"
+    assert i["email"] == "example@example.org"
     assert i["website"] == "http://www.greatfood.com"
     assert i["ref"] is None
 
@@ -160,6 +163,36 @@ def test_ld_lat_lon():
 
     assert i["lat"] == "40.75"
     assert i["lon"] == "-73.98"
+
+
+def test_default_types():
+    i = LinkedDataParser.parse_ld(
+        json.loads(
+            """
+            {
+                "@context": "https://schema.org",
+                "@type": "Place",
+                "geo": {"latitude": "40.75", "longitude": "-73.98"},
+                "address": {
+                    "addressCountry": {
+                        "name": "US"
+                    },
+                    "addressregion": "NE",
+                    "postalCode": "68847",
+                    "streetAddress": "1107 2ND AVE"
+                },
+                "name": "Empire State Building"
+            }
+            """
+        )
+    )
+
+    assert i["lat"] == "40.75"
+    assert i["lon"] == "-73.98"
+    assert i["country"] == "US"
+    assert i["state"] == "NE"
+    assert i["postcode"] == "68847"
+    assert i["street_address"] == "1107 2ND AVE"
 
 
 def test_flat_properties():

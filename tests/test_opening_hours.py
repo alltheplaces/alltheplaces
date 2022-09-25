@@ -1,6 +1,20 @@
 import json
 
-from locations.hours import OpeningHours
+from locations.hours import (
+    OpeningHours,
+    day_range,
+    DAYS,
+    sanitise_day,
+    DAYS_BG,
+    DAYS_DE,
+)
+
+
+def test_day_range():
+    for day in DAYS:
+        assert day_range(day, day) == [day]
+    for day, next_day in zip(DAYS, DAYS[1:] + DAYS[:1]):
+        assert sorted(day_range(next_day, day), key=DAYS.index) == DAYS
 
 
 def test_two_ranges():
@@ -79,6 +93,22 @@ def test_multiple_times():
     assert o.as_opening_hours() == "Mo 08:00-12:00,13:00-17:30"
 
 
+def test_sanitise_days():
+    assert sanitise_day("Mo") == "Mo"
+    assert sanitise_day("Mon") == "Mo"
+    assert sanitise_day("MONDAY") == "Mo"
+    assert sanitise_day("schema.org/monday") == "Mo"
+    assert sanitise_day("https://schema.org/monday") == "Mo"
+    assert sanitise_day("http://schema.org/monday") == "Mo"
+    assert sanitise_day("   Monday ") == "Mo"
+    assert sanitise_day("not_a_day") is None
+    assert sanitise_day("пон", DAYS_BG) == "Mo"
+    assert sanitise_day("Съб. ", DAYS_BG) == "Sa"
+    assert sanitise_day("Съб. ", DAYS_DE) is None
+    assert sanitise_day("Mo", DAYS_DE) == "Mo"
+    assert sanitise_day("Do", DAYS_DE) == "Th"
+
+
 def test_ld_parse():
     o = OpeningHours()
     o.from_linked_data(
@@ -155,6 +185,21 @@ def test_ld_parse_openingHours_array():
         )
     )
     assert o.as_opening_hours() == "Mo-Fr 10:00-19:00; Sa 10:00-22:00; Su 10:00-21:00"
+
+
+def test_ld_parse_openingHours_day_range():
+    o = OpeningHours()
+    o.from_linked_data(
+        json.loads(
+            """
+            {
+                "@context": "https://schema.org",
+                "openingHours": ["Th-Tu 09:00-17:00"]
+            }
+            """
+        )
+    )
+    assert o.as_opening_hours() == "Mo-Tu 09:00-17:00; Th-Su 09:00-17:00"
 
 
 def test_ld_parse_openingHours_array_with_commas():

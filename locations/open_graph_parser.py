@@ -8,7 +8,11 @@ class OpenGraphParser(object):
         keys = response.xpath("/html/head/meta/@property").getall()
         src = {}
         for key in keys:
-            if key.startswith("og:") or key.startswith("place:location:"):
+            if (
+                key.startswith("og:")
+                or key.startswith("place:location:")
+                or key.startswith("business:contact_data:")
+            ):
                 content = response.xpath(
                     '//meta[@property="{}"]/@content'.format(key)
                 ).get()

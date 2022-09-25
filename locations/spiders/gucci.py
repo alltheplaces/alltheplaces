@@ -1,84 +1,62 @@
 # -*- coding: utf-8 -*-
 import scrapy
-import re
-
-from locations.items import GeojsonPointItem
-from locations.hours import OpeningHours
-
-DAYS_NAME = {
-    "Monday": "Mo",
-    "Tuesday": "Tu",
-    "Wednesday": "We",
-    "Thursday": "Th",
-    "Friday": "Fr",
-    "Saturday": "Sa",
-    "Sunday": "Su",
-}
+from locations.linked_data_parser import LinkedDataParser
 
 
-class GucciSpider(scrapy.Spider):
+class GucciSpider(scrapy.spiders.SitemapSpider):
     name = "gucci"
-    item_attributes = {"brand": "Gucci"}
+    item_attributes = {"brand": "Gucci", "brand_wikidata": "Q178516"}
     allowed_domains = ["www.gucci.com"]
-    start_urls = ("https://www.gucci.com/us/en/store/all",)
+    download_delay = 2.0
+    custom_settings = {
+        "USER_AGENT": "Mozilla/5.0 (X11; Linux x86_64; rv:99.0) Gecko/20100101 Firefox/99.0",
+    }
+    sites = [
+        # See https://www.gucci.com/sitemap.xml!
+        "https://www.gucci.com/ae/en_gb/",
+        "https://www.gucci.com/at/de/",
+        "https://www.gucci.com/au/en_au/",
+        "https://www.gucci.com/be/en_gb/",
+        "https://www.gucci.com/bg/en_gb/",
+        "https://www.gucci.com/ca/en/",
+        "https://www.gucci.com/ch/fr/",
+        "https://www.gucci.com/cz/en_gb/",
+        "https://www.gucci.com/de/de/",
+        "https://www.gucci.com/dk/en_gb/",
+        "https://www.gucci.com/es/es/",
+        "https://www.gucci.com/fi/en_gb/",
+        "https://www.gucci.com/fr/fr/",
+        "https://www.gucci.com/hk/en_gb/",
+        "https://www.gucci.com/hu/en_gb/",
+        "https://www.gucci.com/ie/en_gb/",
+        "https://www.gucci.com/it/it/",
+        "https://www.gucci.com/jp/ja/",
+        "https://www.gucci.com/kr/ko/",
+        "https://www.gucci.com/kw/en_gb/",
+        "https://www.gucci.com/nl/en_gb/",
+        "https://www.gucci.com/no/en_gb/",
+        "https://www.gucci.com/nz/en_au/",
+        "https://www.gucci.com/pl/en_gb/",
+        "https://www.gucci.com/pt/en_gb/",
+        "https://www.gucci.com/qa/en_gb/",
+        "https://www.gucci.com/ro/en_gb/",
+        "https://www.gucci.com/sa/en_gb/",
+        "https://www.gucci.com/se/en_gb/",
+        "https://www.gucci.com/sg/en_gb/",
+        "https://www.gucci.com/si/en_gb/",
+        "https://www.gucci.com/tr/en_gb/",
+        "https://www.gucci.com/uk/en_gb/",
+        "https://www.gucci.com/us/en/",
+    ]
 
-    def parse_hours(self, days, hours):
-        opening_hours = OpeningHours()
-        for d, h in zip(days, hours):
-            day = DAYS_NAME[d]
-            open_time, close_time = re.search(r"([\d:]+)\s-\s([\d:]+)", h).groups()
-            opening_hours.add_range(
-                day=day, open_time=open_time, close_time=close_time, time_format="%H:%M"
-            )
-
-        return opening_hours.as_opening_hours()
+    def start_requests(self):
+        for url in self.sites:
+            locale = url.split("/")[-2]
+            sitemap_url = url + "sitemap/STORE-{}.xml".format(locale)
+            yield scrapy.Request(sitemap_url, self._parse_sitemap)
 
     def parse(self, response):
-        data = response.json()
-        stores = data["features"]
-
-        for store in stores:
-            ## City tag contains city, state, postal, country
-            addr = store["properties"]["address"]["city"].split(",")
-            city = addr[0].strip()
-            if len(addr) == 3:
-                state = ""
-                postal = addr[1].strip()
-            elif len(addr) == 4:
-                state = addr[1].replace("Canada", "").strip()
-                postal = addr[2].strip()
-            else:
-                state = ""
-                postal = ""
-
-            properties = {
-                "ref": store["properties"]["url"],
-                "name": store["properties"]["name"],
-                "addr_full": store["properties"]["address"]["location"],
-                "city": city,
-                "state": state,
-                "postcode": postal,
-                "country": store["properties"]["address"]["country"],
-                "lat": store["properties"]["latitude"],
-                "lon": store["properties"]["longitude"],
-                "phone": store["properties"]["address"]["phone"],
-                "website": response.urljoin(store["properties"]["url"]),
-                "extras": {"number": store["properties"]["storeCode"]},
-            }
-
-            try:
-                selector = scrapy.Selector(
-                    text=store["properties"]["openingHours"]["h24"], type="html"
-                )
-                days = selector.xpath('//*[@class="day"]/text()').extract()
-                hours = selector.xpath('//*[@class="all"]/text()').extract()
-
-                hours = self.parse_hours(days, hours)
-
-                if hours:
-                    properties["opening_hours"] = hours
-
-            except:
-                pass
-
-            yield GeojsonPointItem(**properties)
+        if item := LinkedDataParser.parse(response, "Store"):
+            item["lat"] = response.xpath("//@data-latitude").get()
+            item["lon"] = response.xpath("//@data-longitude").get()
+            yield item

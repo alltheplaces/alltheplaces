@@ -74,11 +74,12 @@ class TimHortonsSpider(scrapy.Spider):
         properties = {
             "lon": response.xpath('//*[@itemprop="longitude"]/@content').get(),
             "lat": response.xpath('//*[@itemprop="latitude"]/@content').get(),
-            "addr_full": address.xpath(
+            "street_address": address.xpath(
                 './/*[@itemprop="streetAddress"]/@content'
             ).get(),
             "city": address.css(".Address-city::text").get(),
             "state": address.xpath('.//*[@itemprop="addressRegion"]/text()').get(),
+            "country": "US" if "locations.timhortons.com" in response.url else "CA",
             "postcode": address.xpath('.//*[@itemprop="postalCode"]/text()').get(),
             "phone": response.xpath('//*[@itemprop="telephone"]/text()').get(),
             "name": response.xpath('//*[@class="LocationName-geo"]/text()').get(),
