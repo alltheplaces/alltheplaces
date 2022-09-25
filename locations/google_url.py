@@ -11,6 +11,10 @@ def extract_google_position(item, response):
         if link.startswith("https://www.google.com/maps/embed?pb="):
             item["lat"], item["lon"] = url_to_coords(link)
             return
+    for link in response.xpath("//a[contains(@href, 'google')]/@href").getall():
+        if link.startswith("https://www.google.com/maps/dir"):
+            item["lat"], item["lon"] = url_to_coords(link)
+            return
 
 
 def url_to_coords(url: str) -> (float, float):
