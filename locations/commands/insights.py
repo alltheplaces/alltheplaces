@@ -1,6 +1,7 @@
 import json
 import geonamescache
 import os
+import requests
 from collections import Counter
 from scrapy.commands import ScrapyCommand
 from scrapy.exceptions import UsageError
@@ -139,8 +140,8 @@ class NSI(object):
 
     def _ensure_loaded(self):
         if self.nsi_wikidata is None:
-            with open("./nsi/dist/wikidata.json") as json_file:
-                self.nsi_wikidata = json.load(json_file)["wikidata"]
+            resp = requests.get("https://raw.githubusercontent.com/osmlab/name-suggestion-index/main/dist/wikidata.min.json")
+            self.nsi_wikidata = resp.json()["wikidata"]
             if not self.nsi_wikidata:
                 self.nsi_wikidata = {}
 
