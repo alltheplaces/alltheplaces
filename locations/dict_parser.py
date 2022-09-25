@@ -25,7 +25,14 @@ class DictParser(object):
         "locality",
     ]
 
-    region_keys = ["address-region", "region", "state", "state-province", "province"]
+    region_keys = [
+        "address-region",
+        "region",
+        "state",
+        "state-province",
+        "province",
+        "state-code",
+    ]
 
     country_keys = [
         "country-code",
@@ -112,8 +119,8 @@ class DictParser(object):
         contact = DictParser.get_first_key(obj, ["contact"])
         if not contact or not isinstance(contact, dict):
             contact = obj
-        # TODO: support e-mail in item structure
-        # item["email"] = DictParser.get_first_key(contact, DictParser.email_keys)
+
+        item["email"] = DictParser.get_first_key(contact, DictParser.email_keys)
         item["phone"] = DictParser.get_first_key(contact, DictParser.phone_keys)
 
         return item
@@ -128,7 +135,8 @@ class DictParser(object):
 
     @staticmethod
     def get_variations(key):
-        results = set(key)
+        results = set()
+        results.add(key)
 
         lower = key.lower()
         results.add(lower)
@@ -191,5 +199,9 @@ class DictParser(object):
                 if k == key:
                     return v
                 if val := DictParser.get_nested_key(v, key):
+                    return val
+        elif isinstance(obj, list):
+            for x in obj:
+                if val := DictParser.get_nested_key(x, key):
                     return val
         return None

@@ -59,12 +59,10 @@ class SparkasseSpider(scrapy.Spider):
             "postcode": store["address"].get("postalCode"),
             "phone": store.get("telephone"),
             "ref": response.meta.get("url"),
-            "extras": {
-                "image": store.get("image"),
-                "fax": store.get("faxNumber"),
-                "email": store.get("email"),
-                "url": response.meta.get("url"),
-            },
+            "email": store.get("email"),
+            "website": response.meta.get("url"),
+            "image": store.get("image"),
+            "extras": {"fax": store.get("faxNumber")},
         }
         hours = self.parse_hours(store.get("openingHours"))
 

@@ -1,97 +1,54 @@
 # -*- coding: utf-8 -*-
-import json
-import re
-
 import scrapy
 
-from locations.items import GeojsonPointItem
-from locations.hours import OpeningHours
-
-DAY_MAPPING = {
-    "Monday": "Mo",
-    "Tuesday": "Tu",
-    "Wednesday": "We",
-    "Thursday": "Th",
-    "Friday": "Fr",
-    "Saturday": "Sa",
-    "Sunday": "Su",
-}
+from locations.dict_parser import DictParser
+from locations.hours import OpeningHours, DAYS_FULL
 
 
-class WHSmithGBSpider(scrapy.Spider):
+class WHSmithGB(scrapy.Spider):
     name = "whsmith_uk"
     item_attributes = {"brand": "WHSmith", "brand_wikidata": "Q1548712"}
     allowed_domains = ["whsmith.co.uk"]
-
-    def start_requests(self):
-        base_url = "https://www.whsmith.co.uk/stores/details?StoreID="
-
-        ## Coulnd't find store ids anywhere so just loop through 4 digits
-        for id in range(1000, 9999):
-            if id == 4069:  ##internal server error
-                pass
-            else:
-                url = base_url + str(id)
-                yield scrapy.Request(url=url, callback=self.parse, meta={"id": id})
-
-    def parse_hours(self, hours):
-        opening_hours = OpeningHours()
-
-        for group in hours:
-            if type(group["dayOfWeek"]) == list:
-                for d in group["dayOfWeek"]:
-                    day = DAY_MAPPING[d]
-                    open_time = group["opens"]
-                    close_time = group["closes"]
-
-                    opening_hours.add_range(
-                        day=day,
-                        open_time=open_time,
-                        close_time=close_time,
-                        time_format="%H:%M",
-                    )
-            else:
-                day = DAY_MAPPING[group["dayOfWeek"]]
-                open_time = group["opens"]
-                close_time = group["closes"]
-
-                opening_hours.add_range(
-                    day=day,
-                    open_time=open_time,
-                    close_time=close_time,
-                    time_format="%H:%M",
-                )
-
-        return opening_hours.as_opening_hours()
+    start_urls = [
+        "https://www.whsmith.co.uk/mobify/proxy/api/s/whsmith/dw/shop/v21_3/stores?latitude=57.28687230000001&longitude=-2.3815684&distance_unit=mi&max_distance=20000&count=200"
+    ]
+    custom_settings = {
+        "DEFAULT_REQUEST_HEADERS": {
+            "x-dw-client-id": "e67cbaf5-f422-4895-967a-abf461ba92e2"
+        }
+    }
+    download_delay = 1  # Requested by robots.txt
 
     def parse(self, response):
-        if response.xpath(
-            'normalize-space(//script[@type="application/ld+json" and contains(text(), "streetAddress")]/text())'
-        ).extract_first():
-            data = json.loads(
-                response.xpath(
-                    'normalize-space(//script[@type="application/ld+json" and contains(text(), "streetAddress")]/text())'
-                ).extract_first()
+        if next_url := response.json().get("next"):
+            yield scrapy.Request(url=next_url)
+
+        for store in response.json()["data"]:
+            item = DictParser.parse(store)
+
+            item["street_address"] = ", ".join(
+                filter(None, [store.get("address1"), store.get("address2")])
             )
 
-            properties = {
-                "ref": response.meta.get("id"),
-                "name": data["@graph"][0]["name"],
-                "addr_full": data["@graph"][1]["address"]["streetAddress"],
-                "city": data["@graph"][1]["address"]["addressLocality"],
-                "postcode": data["@graph"][1]["address"]["postalCode"],
-                "country": data["@graph"][1]["address"]["addressCountry"],
-                "lat": data["@graph"][1]["geo"]["latitude"],
-                "lon": data["@graph"][1]["geo"]["longitude"],
-                "phone": data["@graph"][1]["telephone"],
-                "website": response.url,
-            }
+            oh = OpeningHours()
+            for day in DAYS_FULL:
+                if not store.get("c_openingTimes" + day):
+                    continue
 
-            hours = self.parse_hours(data["@graph"][1]["openingHoursSpecification"])
-            if hours:
-                properties["opening_hours"] = hours
+                if store["c_openingTimes" + day].lower() == "closed":
+                    continue
 
-            yield GeojsonPointItem(**properties)
+                start_time, end_time = store["c_openingTimes" + day].split("-")
+                if start_time == "24hr":
+                    start_time = "00:00"
+                if end_time == "24hr":
+                    end_time = "24:00"
+                oh.add_range(day, start_time, end_time)
 
-        else:
-            pass
+            item["opening_hours"] = oh.as_opening_hours()
+
+            item["website"] = (
+                "https://www.whsmith.co.uk/stores/details/?StoreID=" + item["ref"]
+            )
+
+            yield item

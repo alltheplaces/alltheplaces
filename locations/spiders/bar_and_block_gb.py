@@ -26,15 +26,11 @@ class BarAndBlockGB(CrawlSpider):
         item["phone"] = response.xpath(
             '//a[@class="details--table-cell__phone icon__phone"]/text()'
         ).get()
-        item["extras"] = {
-            "email": (
-                response.xpath(
-                    '//a[@class="details--table-cell__email icon__email"]/@href'
-                )
-                .get()
-                .replace("mailto:", "")
-            )
-        }
+        item["email"] = (
+            response.xpath('//a[@class="details--table-cell__email icon__email"]/@href')
+            .get()
+            .replace("mailto:", "")
+        )
 
         item["lat"], item["lon"] = url_to_coords(
             response.xpath(

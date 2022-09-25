@@ -88,6 +88,7 @@ class CheckItemPropertiesPipeline(object):
     phone_regex = re.compile(
         r"^[+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$",
     )
+    email_regex = re.compile(r"(^[-\w_.+]+@[-\w]+\.[-\w.]+$)")
     wikidata_regex = re.compile(
         r"^Q[0-9]+$",
     )
@@ -142,6 +143,14 @@ class CheckItemPropertiesPipeline(object):
                 spider.crawler.stats.inc_value("atp/field/phone/invalid")
         else:
             spider.crawler.stats.inc_value("atp/field/phone/missing")
+
+        if email := item.get("email"):
+            if not isinstance(email, str):
+                spider.crawler.stats.inc_value("atp/field/email/wrong_type")
+            elif not self.email_regex.match(email):
+                spider.crawler.stats.inc_value("atp/field/email/invalid")
+        else:
+            spider.crawler.stats.inc_value("atp/field/email/missing")
 
         if postcode := item.get("postcode"):
             if not isinstance(postcode, str):

@@ -9,9 +9,7 @@ from locations.items import GeojsonPointItem
 def extract_email_link(item, response):
     for link in response.xpath("//a/@href").getall():
         if link.startswith("mailto:"):
-            if not item.get("extras"):
-                item["extras"] = {}
-            item["extras"]["email"] = link.replace("mailto:", "").strip()
+            item["email"] = link.replace("mailto:", "").strip()
             return
 
 

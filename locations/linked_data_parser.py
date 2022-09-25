@@ -96,6 +96,14 @@ class LinkedDataParser(object):
         if item.get("phone") is None:
             item["phone"] = LinkedDataParser.get_clean(ld, "telephone")
 
+        if isinstance(item["phone"], list):
+            item["phone"] = item["phone"][0]
+
+        if isinstance(item["phone"], str):
+            item["phone"] = item["phone"].replace("tel:", "")
+
+        item["email"] = LinkedDataParser.get_clean(ld, "email")
+
         item["website"] = ld.get("url")
 
         try:
@@ -116,9 +124,11 @@ class LinkedDataParser(object):
                     item["image"] = image.get("contentUrl")
 
         item["ref"] = ld.get("branchCode")
-
-        if item["ref"] is None:
+        if item["ref"] is None or item["ref"] == "":
             item["ref"] = ld.get("@id")
+
+        if item["ref"] == "":
+            item["ref"] = None
 
         return item
 
