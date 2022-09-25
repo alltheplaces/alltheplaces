@@ -130,8 +130,7 @@ class InsightsCommand(ScrapyCommand):
 
 class NSI(object):
     """
-    Interact with Name Suggestion Index (NSI). The NSI distribution is a GIT sub-module of this
-    project. As part of their GIT repo the NSI people publish a JSON version of their database
+    Interact with Name Suggestion Index (NSI). The NSI data is pulled from Github,
     which is used by the OSM editor to do rather useful brand suggestions when editing POIs.
     """
 
