@@ -10,7 +10,7 @@ class GreeneKingPubsSpider(SitemapSpider):
         "brand_wikidata": "Q5564162",
         "country": "GB",
     }
-    sitemap_urls = ["https://www.greeneking-pubs.co.uk/xml-sitemap"]
+    sitemap_urls = ["https://www.greeneking-pubs.co.uk/xml-sitemap/"]
     sitemap_rules = [
         (
             r"https:\/\/www\.greeneking-pubs\.co\.uk\/pubs\/([-\w]+)\/([-\w]+)\/$",
