@@ -50,10 +50,10 @@ class LinkedDataParser(object):
             if isinstance(geo, list):
                 geo = geo[0]
 
-            if geo.get("@type", "GeoCoordinates") in (
-                "GeoCoordinates",
-                "http://schema.org/GeoCoordinates",
-                "https://schema.org/GeoCoordinates",
+            if geo.get("@type", "GeoCoordinates").lower() in (
+                "geocoordinates",
+                "http://schema.org/geocoordinates",
+                "https://schema.org/geocoordinates",
             ):
                 item["lat"] = geo.get("latitude")
                 item["lon"] = geo.get("longitude")
@@ -67,7 +67,7 @@ class LinkedDataParser(object):
             if isinstance(addr, str):
                 item["addr_full"] = addr
             elif isinstance(addr, dict):
-                if addr.get("@type", "PostalAddress") == "PostalAddress":
+                if addr.get("@type", "PostalAddress").lower() == "postaladdress":
                     item["street_address"] = LinkedDataParser.get_case_insensitive(
                         addr, "streetAddress"
                     )
