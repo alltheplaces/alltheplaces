@@ -23,11 +23,26 @@ def extract_phone(item, response):
             return
 
 
+def extract_twitter(item, response):
+    if twitter := response.xpath('//meta[@name="twitter:site"]/@content').get():
+        item["twitter"] = twitter.strip()
+
+
+def extract_image(item, response):
+    if image := response.xpath('//meta[@name="twitter:image"]/@content').get():
+        item["image"] = image.strip()
+        return
+    if image := response.xpath('//meta[@name="og:image"]/@content').get():
+        item["image"] = image.strip()
+
+
 class StructuredDataSpider(Spider):
 
     wanted_types = []
     search_for_email = True
     search_for_phone = True
+    search_for_twitter = True
+    search_for_image = True
 
     def parse_sd(self, response):
         MicrodataParser.convert_to_json_ld(response)
@@ -57,6 +72,12 @@ class StructuredDataSpider(Spider):
 
                 if self.search_for_phone and item["phone"] is None:
                     extract_phone(item, response)
+
+                if self.search_for_twitter and item.get("twitter") is None:
+                    extract_twitter(item, response)
+
+                if self.search_for_image and item.get("image") is None:
+                    extract_image(item, response)
 
                 yield from self.inspect_item(item, response)
 
