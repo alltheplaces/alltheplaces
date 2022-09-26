@@ -50,11 +50,7 @@ class LinkedDataParser(object):
             if isinstance(geo, list):
                 geo = geo[0]
 
-            if geo.get("@type", "GeoCoordinates").lower() in (
-                "geocoordinates",
-                "http://schema.org/geocoordinates",
-                "https://schema.org/geocoordinates",
-            ):
+            if LinkedDataParser.check_type(geo.get("@type"), "GeoCoordinates"):
                 item["lat"] = geo.get("latitude")
                 item["lon"] = geo.get("longitude")
 
@@ -67,7 +63,7 @@ class LinkedDataParser(object):
             if isinstance(addr, str):
                 item["addr_full"] = addr
             elif isinstance(addr, dict):
-                if addr.get("@type", "PostalAddress").lower() == "postaladdress":
+                if LinkedDataParser.check_type(addr.get("@type"), "PostalAddress"):
                     item["street_address"] = LinkedDataParser.get_case_insensitive(
                         addr, "streetAddress"
                     )
@@ -87,7 +83,7 @@ class LinkedDataParser(object):
                     if isinstance(country, str):
                         item["country"] = country
                     elif isinstance(country, dict):
-                        if country.get("@type", "Country") == "Country":
+                        if LinkedDataParser.check_type(country.get("@type"), "Country"):
                             item["country"] = country.get("name")
 
                     # Common mistake to put "telephone" in "address"
@@ -120,7 +116,7 @@ class LinkedDataParser(object):
             if isinstance(image, str):
                 item["image"] = image
             elif isinstance(image, dict):
-                if image.get("@type", "ImageObject") == "ImageObject":
+                if LinkedDataParser.check_type(image.get("@type"), "ImageObject"):
                     item["image"] = image.get("contentUrl")
 
         item["ref"] = ld.get("branchCode")
@@ -165,3 +161,16 @@ class LinkedDataParser(object):
         for real_key in obj:
             if real_key.lower() == key.lower():
                 return LinkedDataParser.get_clean(obj, real_key)
+
+    @staticmethod
+    def check_type(type: str, wanted_type: str, default: bool = True) -> bool:
+        if default and type is None:
+            return True
+
+        return (
+            type.lower()
+            .replace("http://", "")
+            .replace("https://", "")
+            .replace("schema.org/", "")
+            == wanted_type.lower()
+        )

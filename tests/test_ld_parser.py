@@ -218,3 +218,17 @@ def test_get_case_insensitive():
 
     assert LinkedDataParser.get_case_insensitive(i, "aAa") == "aAa"
     assert LinkedDataParser.get_case_insensitive(i, "bbb") == "BBB"
+
+
+def test_check_type():
+    assert LinkedDataParser.check_type(None, "Country", default=True) is True
+    assert LinkedDataParser.check_type("Country", "COUNTRY") is True
+    assert LinkedDataParser.check_type("postalAddress", "PostalAddress") is True
+    assert LinkedDataParser.check_type("geocoordinates", "GeoCoordinates") is True
+    assert (
+        LinkedDataParser.check_type(
+            "https://schema.org/GeoCoordinates", "GeoCoordinates"
+        )
+        is True
+    )
+    assert LinkedDataParser.check_type("postalAddress", "GeoCoordinates") is False
