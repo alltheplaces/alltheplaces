@@ -61,7 +61,7 @@ class MarriottHotelsSpider(scrapy.Spider):
                 yield scrapy.Request(url, callback=self.parse_brand_json)
 
     def parse_brand_json(self, response):
-        for cities in DictParser.get_all_values(response.json(), "city_properties"):
+        for cities in DictParser.iter_matching_keys(response.json(), "city_properties"):
             for hotel in cities:
                 yield self.parse_hotel(hotel)
 
