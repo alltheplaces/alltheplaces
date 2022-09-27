@@ -1,122 +1,81 @@
-import json
-import re
 import scrapy
-
-from scrapy.selector import Selector
-from locations.items import GeojsonPointItem
+from locations.dict_parser import DictParser
 
 
+# See https://www.marriott.com/marriott-brands.mi for an explanation of the world of Marriott brands.
+# Of the sites below Ritz Carlton is probably the most important.
+# TODO: ["Ritz-Carlton", "Q782200"] will needs its own site spider?
+# TODO: ["JW Marriott Hotels", "Q1067636"] will need its own site spider?
+# TODO: ["Renaissance Hotels", "Q2143252"] will need its own site spider?
+# TODO: ["Gaylord Hotels", "Q3099664"] will need its own site spider? (convention centres)
+# TODO: ["Protea Hotels", "Q17092570"] will need its own site spider?
+# TODO: ["Edition Hotels", "Q91218404"] will need its own site spider?
+# There are other ways in:
+# 'https://aloft-hotels.marriott.com/locations/'
+# 'https://four-points.marriott.com/hotel-directory/'
+# 'https://w-hotels.marriott.com/destinations/'
+# 'https://le-meridien.marriott.com/hotel-directory/'
+# 'https://sheraton.marriott.com/destinations/'
+# 'https://courtyard.marriott.com/destinations/'
+# 'https://westin.marriott.com/hotel-locations/'
+# 'https://st-regis.marriott.com/hotel-directory/'
+# 'https://fairfield.marriott.com/locations/'
 class MarriottHotelsSpider(scrapy.Spider):
     name = "marriott"
-    allowed_domains = ["marriott.com", "ritzcarlton.com"]
-    download_delay = 0.2
+    custom_settings = {"REDIRECT_ENABLED": False}
+    download_delay = 2.0
+
+    # Continue policy of ignoring collection hotels for now.
+    my_brands = {
+        "MC": ["Marriott Hotels & Resorts", "Q3918608"],
+        "AR": ["AC Hotels", "Q5653536"],
+        "AK": "ignore",  # Autograph Collection
+        "AL": ["Aloft Hotels", "Q4734166"],
+        "CY": ["Courtyard by Marriott", "Q1053170"],
+        "DE": ["Delta Hotels", "Q5254663"],
+        "DS": ["Design Hotels", "Q5264274"],
+        "EL": ["Element Hotels", "Q91948072"],
+        "FI": ["Fairfield by Marriott", "Q5430314"],
+        "FP": ["Four Points by Sheraton", "Q1439966"],
+        "LC": "ignore",  # Luxury Collection
+        "MD": ["Le Méridien", "Q261077"],
+        "OX": ["Moxy Hotels", "Q70287020"],
+        "RI": ["Residence Inn by Marriott", "Q7315394"],
+        "SI": ["Sheraton Hotels and Resorts", "Q634831"],
+        "SH": ["SpringHill Suites", "Q7580351"],
+        "TX": "ignore",  # Tribute Portfolio
+        "XR": ["St. Regis Hotels & Resorts", "Q30715430"],
+        "TS": ["Townplace Suites by Marriott", "Q7830092"],
+        "WH": ["W Hotels", "Q7958488"],
+        "WI": ["Westin Hotels & Resorts", "Q1969162"],
+    }
 
     def start_requests(self):
-        start_urls = [
-            (
-                "http://www.ritzcarlton.com/en/hotels/map/_jcr_content/par_content/locationmap.PINS.html",
-                self.parse_ritz,
-            ),
-            ("https://www.marriott.com/sitemap.us.hws.1.xml", self.parse),
-        ]
+        letters = "ABCDEFGHIJKLMNOPQRSTUVXYZ"
+        # Generate all possible Marriott brand codes.
+        for x in letters:
+            for y in letters:
+                url = "https://pacsys.marriott.com/data/marriott_properties_{}_en-US.json".format(
+                    x + y
+                )
+                yield scrapy.Request(url, callback=self.parse_brand_json)
 
-        for url, callback in start_urls:
-            yield scrapy.Request(url=url, callback=callback)
+    def parse_brand_json(self, response):
+        for cities in DictParser.get_all_values(response.json(), "city_properties"):
+            for hotel in cities:
+                yield self.parse_hotel(hotel)
 
-    def parse_hotel(self, response):
-        if "invalidProperty=true" in response.url:
-            return
-
-        street_address = response.xpath(
-            '//span[@itemprop="streetAddress"]/text()'
-        ).extract_first()
-
-        city = response.xpath(
-            '//span[@itemprop="addressLocality"]/text()'
-        ).extract_first()
-        state = response.xpath(
-            '//span[@itemprop="addressRegion"]/text()'
-        ).extract_first()
-
-        name = response.xpath(
-            '//div[contains(@class, "m-hotel-info")]//span[@itemprop="name"]/text()'
-        ).extract_first()
-        if name:
-            name = name.replace("\u2122", "")  # remove tm symbol
-
-        brand = response.xpath(
-            '//ul[contains(@class,"tile-breadcrumbs")]/li[2]/a/span/text()'
-        ).extract_first()
-        if brand == "Design HotelsTM":
-            item_attributes = {"brand": "Design Hotels"}
-
-        properties = {
-            "ref": re.search(r".*/(.*)/$", response.url).groups()[0],
-            "name": name,
-            "addr_full": street_address,
-            "city": city,
-            "state": state,
-            "postcode": response.xpath(
-                '//span[@itemprop="postalCode"]/text()'
-            ).extract_first(),
-            "country": response.xpath(
-                '//span[@itemprop="addressCountry"]/text()'
-            ).extract_first(),
-            "phone": (
-                response.xpath('//span[@itemprop="telephone"]/text()').extract_first()
-                or ""
-            ).strip("| "),
-            "lat": float(
-                response.xpath('//span[@itemprop="latitude"]/text()').extract_first()
-            ),
-            "lon": float(
-                response.xpath('//span[@itemprop="longitude"]/text()').extract_first()
-            ),
-            "website": response.url,
-            "brand": brand,
-        }
-
-        yield GeojsonPointItem(**properties)
-
-    def parse_ritz(self, response):
-        brands = {
-            "upcoming": "Ritz-Carlton",
-            "reserve": "Ritz-Carton Reserve",
-        }
-        data = re.search(
-            r"trc.pageProperties.trcMap.mapData= (.*)", response.text
-        ).groups()[0]
-        data = json.loads(data.strip(";\r\n "))
-
-        for item in data["response"]["list"]["listItems"]["items"]:
-            if item["venue"]["type"] in ("ritz", "upcoming"):
-                name = "The Ritz-Carlton " + item["venue"]["name"]
-            else:
-                name = item["venue"]["name"]
-            phone = re.split(r"<br./>", item["tip"]["text"])[-1]
-            properties = {
-                "ref": "-".join(
-                    re.search(r".*/(.*)/(.*)$", item["tip"]["link"]["url"]).groups()
-                ),
-                "name": name,
-                "addr_full": item["venue"]["location"]["address"].strip(),
-                "city": item["venue"]["location"]["city"].strip(),
-                "state": item["venue"]["location"]["state"].strip(),
-                "postcode": item["venue"]["location"]["postalCode"].strip(". "),
-                "country": item["venue"]["location"]["country"].strip(),
-                "phone": phone.strip(),
-                "lat": float(item["venue"]["location"]["lat"]),
-                "lon": float(item["venue"]["location"]["lng"]),
-                "website": item["tip"]["link"]["url"],
-                "brand": brands.get(item["venue"]["type"], "Ritz-Carlton"),
-            }
-
-            yield GeojsonPointItem(**properties)
-
-    def parse(self, response):
-        xml = Selector(response)
-        xml.remove_namespaces()
-
-        urls = xml.xpath("//loc/text()").extract()
-        for url in urls:
-            yield scrapy.Request(response.urljoin(url), callback=self.parse_hotel)
+    def parse_hotel(self, hotel):
+        brand = self.my_brands.get(hotel["brand_code"])
+        if not brand:
+            self.logger.error("unknown brand: %s", hotel["brand_code"])
+            return None
+        if brand == "ignore":
+            return None
+        hotel["street_address"] = hotel.pop("address")
+        item = DictParser.parse(hotel)
+        item["website"] = "https://www.marriott.com/" + hotel["marsha_code"]
+        item["ref"] = hotel["marsha_code"]
+        item["image"] = hotel.get("exterior_photo")
+        item["brand"], item["brand_wikidata"] = brand
+        return item

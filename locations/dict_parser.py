@@ -205,3 +205,15 @@ class DictParser(object):
                 if val := DictParser.get_nested_key(x, key):
                     return val
         return None
+
+    @staticmethod
+    def get_all_values(obj, key):
+        if isinstance(obj, dict):
+            for k, v in obj.items():
+                if k == key:
+                    yield v
+                else:
+                    yield from DictParser.get_all_values(v, key)
+        elif isinstance(obj, list):
+            for x in obj:
+                yield from DictParser.get_all_values(x, key)
