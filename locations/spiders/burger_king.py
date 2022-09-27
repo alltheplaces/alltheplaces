@@ -5,7 +5,7 @@ from locations.dict_parser import DictParser
 from locations.geo import city_locations, point_locations
 
 
-class BurgerKing(scrapy.Spider):
+class BurgerKingSpider(scrapy.Spider):
     name = "burgerking"
     item_attributes = {"brand": "Burger King", "brand_wikidata": "Q177054"}
     download_delay = 2.0
