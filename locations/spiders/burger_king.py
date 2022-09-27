@@ -1,20 +1,17 @@
 # -*- coding: utf-8 -*-
-import csv
-
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.dict_parser import DictParser
+from locations.geo import city_locations, point_locations
 
 
 class BurgerKingSpider(scrapy.Spider):
     name = "burgerking"
     item_attributes = {"brand": "Burger King", "brand_wikidata": "Q177054"}
-    allowed_domains = ["bk.com", "use1-prod-bk.rbictg.com"]
-    download_delay = 0.2
+    download_delay = 2.0
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
-    query = "query GetRestaurants($input: RestaurantsInput) {\n  restaurants(input: $input) {\n    pageInfo {\n      hasNextPage\n      endCursor\n      __typename\n    }\n    totalCount\n    nodes {\n      ...RestaurantNodeFragment\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment RestaurantNodeFragment on RestaurantNode {\n  _id\n  storeId\n  isAvailable\n  posVendor\n  chaseMerchantId\n  curbsideHours {\n    ...OperatingHoursFragment\n    __typename\n  }\n  deliveryHours {\n    ...OperatingHoursFragment\n    __typename\n  }\n  diningRoomHours {\n    ...OperatingHoursFragment\n    __typename\n  }\n  distanceInMiles\n  drinkStationType\n  driveThruHours {\n    ...OperatingHoursFragment\n    __typename\n  }\n  driveThruLaneType\n  email\n  environment\n  franchiseGroupId\n  franchiseGroupName\n  frontCounterClosed\n  hasBreakfast\n  hasBurgersForBreakfast\n  hasCatering\n  hasCurbside\n  hasDelivery\n  hasDineIn\n  hasDriveThru\n  hasMobileOrdering\n  hasLateNightMenu\n  hasParking\n  hasPlayground\n  hasTakeOut\n  hasWifi\n  hasLoyalty\n  id\n  isDarkKitchen\n  isFavorite\n  isHalal\n  isRecent\n  latitude\n  longitude\n  mobileOrderingStatus\n  name\n  number\n  parkingType\n  phoneNumber\n  physicalAddress {\n    address1\n    address2\n    city\n    country\n    postalCode\n    stateProvince\n    stateProvinceShort\n    __typename\n  }\n  playgroundType\n  pos {\n    vendor\n    __typename\n  }\n  posRestaurantId\n  restaurantImage {\n    asset {\n      _id\n      metadata {\n        lqip\n        palette {\n          dominant {\n            background\n            foreground\n            __typename\n          }\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    crop {\n      top\n      bottom\n      left\n      right\n      __typename\n    }\n    hotspot {\n      height\n      width\n      x\n      y\n      __typename\n    }\n    __typename\n  }\n  restaurantPosData {\n    _id\n    __typename\n  }\n  status\n  vatNumber\n  __typename\n}\n\nfragment OperatingHoursFragment on OperatingHours {\n  friClose\n  friOpen\n  monClose\n  monOpen\n  satClose\n  satOpen\n  sunClose\n  sunOpen\n  thrClose\n  thrOpen\n  tueClose\n  tueOpen\n  wedClose\n  wedOpen\n  __typename\n}\n"
-
-    def make_request(self, lat, lon):
+    def make_request(self, lat, lon, country_code, search_radius, result_limit):
         body = [
             {
                 "operationName": "GetRestaurants",
@@ -22,45 +19,155 @@ class BurgerKingSpider(scrapy.Spider):
                     "input": {
                         "filter": "NEARBY",
                         "coordinates": {
-                            "userLat": lat,
-                            "userLng": lon,
-                            "searchRadius": 128000,
+                            "userLat": float(lat),
+                            "userLng": float(lon),
+                            "searchRadius": search_radius,
                         },
-                        "first": 20000,
-                        "status": "OPEN",
+                        "first": result_limit,
                     }
                 },
-                "query": self.query,
+                "query": (
+                    "query GetRestaurants($input: RestaurantsInput) {\n"
+                    "  restaurants(input: $input) {\n"
+                    "    pageInfo {\n"
+                    "      hasNextPage\n"
+                    "      endCursor\n"
+                    "      __typename\n"
+                    "    }\n"
+                    "    totalCount\n"
+                    "    nodes {\n"
+                    "      ...RestaurantNodeFragment\n"
+                    "      __typename\n"
+                    "    }\n"
+                    "    __typename\n"
+                    "  }\n"
+                    "}\n"
+                    "\n"
+                    "fragment RestaurantNodeFragment on RestaurantNode {\n"
+                    "  _id\n"
+                    "  storeId\n"
+                    "  curbsideHours {\n"
+                    "    ...OperatingHoursFragment\n"
+                    "    __typename\n"
+                    "  }\n"
+                    "  deliveryHours {\n"
+                    "    ...OperatingHoursFragment\n"
+                    "    __typename\n"
+                    "  }\n"
+                    "  diningRoomHours {\n"
+                    "    ...OperatingHoursFragment\n"
+                    "    __typename\n"
+                    "  }\n"
+                    "  driveThruHours {\n"
+                    "    ...OperatingHoursFragment\n"
+                    "    __typename\n"
+                    "  }\n"
+                    "  email\n"
+                    "  franchiseGroupName\n"
+                    "  hasDelivery\n"
+                    "  hasDriveThru\n"
+                    "  hasTakeOut\n"
+                    "  hasWifi\n"
+                    "  id\n"
+                    "  isDarkKitchen\n"
+                    "  isHalal\n"
+                    "  latitude\n"
+                    "  longitude\n"
+                    "  name\n"
+                    "  phoneNumber\n"
+                    "  physicalAddress {\n"
+                    "    address1\n"
+                    "    address2\n"
+                    "    city\n"
+                    "    country\n"
+                    "    postalCode\n"
+                    "    stateProvince\n"
+                    "    stateProvinceShort\n"
+                    "    __typename\n"
+                    "  }\n"
+                    "  __typename\n"
+                    "}\n"
+                    "\n"
+                    "fragment OperatingHoursFragment on OperatingHours {\n"
+                    "  friClose\n"
+                    "  friOpen\n"
+                    "  monClose\n"
+                    "  monOpen\n"
+                    "  satClose\n"
+                    "  satOpen\n"
+                    "  sunClose\n"
+                    "  sunOpen\n"
+                    "  thrClose\n"
+                    "  thrOpen\n"
+                    "  tueClose\n"
+                    "  tueOpen\n"
+                    "  wedClose\n"
+                    "  wedOpen\n"
+                    "  __typename\n"
+                    "}\n"
+                ),
             }
         ]
         return scrapy.http.JsonRequest(
-            "https://use1-prod-bk.rbictg.com/graphql", data=body
+            "https://use1-prod-bk.rbictg.com/graphql",
+            data=body,
+            headers={"x-ui-language": "en", "x-ui-region": country_code},
+            cb_kwargs=dict(country_code=country_code),
         )
 
-    def start_requests(self):
-        with open(
-            "./locations/searchable_points/us_centroids_100mile_radius.csv"
-        ) as points:
-            reader = csv.DictReader(points)
-            for point in reader:
-                yield self.make_request(
-                    float(point["latitude"]), float(point["longitude"])
+    def make_city_request(self, city_name, country_code, search_radius, result_limit):
+        for city in city_locations(country_code):
+            if city["name"].lower() == city_name.lower():
+                return self.make_request(
+                    city["latitude"],
+                    city["longitude"],
+                    country_code,
+                    search_radius,
+                    result_limit,
                 )
+        raise Exception("Bogus City: " + city_name)
 
-    def parse(self, response):
-        data = response.json()
-        for row in data[0]["data"]["restaurants"]["nodes"]:
-            properties = {
-                "ref": row["number"],
-                "lat": row["latitude"],
-                "lon": row["longitude"],
-                "name": row["name"],
-                "phone": row["phoneNumber"],
-                "addr_full": row["physicalAddress"]["address1"],
-                "city": row["physicalAddress"]["city"],
-                "state": row["physicalAddress"]["stateProvince"],
-                "postcode": row["physicalAddress"]["postalCode"],
-                "country": row["physicalAddress"]["country"],
-                "website": f'https://www.bk.com/store-locator/store/{row["_id"]}',
+    def start_requests(self):
+
+        # TODO: DK, IE, ES, MX, PT, IT, BE at the least do not follow this API.
+
+        # TODO: https://www.burgerking.nl/kingfinder
+        # TODO: has an interface for central european and nordic countries
+
+        yield self.make_city_request("Calgary", "CA", 1000000, 20000)
+        yield self.make_city_request("Toronto", "CA", 1000000, 20000)
+        yield self.make_city_request("Frankfurt am Main", "DE", 1000000, 20000)
+        yield self.make_city_request("Leeds", "GB", 1000000, 20000)
+        yield self.make_city_request("Auckland", "NZ", 1000000, 20000)
+        # So many stores in the US that we need to be kind to the BK back end.
+        for lat, lon in point_locations("us_centroids_100mile_radius.csv"):
+            yield self.make_request(lat, lon, "US", 128000, 20000)
+
+    store_locator_templates = {
+        "CA": "https://www.burgerking.ca/store-locator/store/{}",
+        "DE": "https://www.burgerking.de/store-locator/store/{}",
+        "GB": "https://www.burgerking.co.uk/store-locator/store/{}",
+        "NZ": "https://www.burgerking.co.nz/store-locator/store/{}",
+        "US": "https://www.bk.com/store-locator/store/{}",
+    }
+
+    def parse(self, response, country_code):
+        for row in response.json()[0]["data"]["restaurants"]["nodes"]:
+            row.update(row.pop("physicalAddress"))
+            item = DictParser.parse(row)
+            item["name"] = "Burger King"
+            item["country"] = country_code
+            item["addr_full"] = None
+            item["website"] = self.store_locator_templates[country_code].format(
+                row["_id"]
+            )
+            item["extras"] = {
+                "operator": row["franchiseGroupName"],
+                "internet_access": "wlan" if row["hasWifi"] == True else "no",
+                "diet:halal": "yes" if row["isHalal"] == True else "no",
+                "delivery": "yes" if row["hasDelivery"] == True else "no",
+                "drive_through": "yes" if row["hasDriveThru"] == True else "no",
+                "takeaway": "yes" if row["hasTakeOut"] == True else "no",
             }
-            yield GeojsonPointItem(**properties)
+            # TODO: somebody could decode the opening hours from the BK JSON.
+            yield item
