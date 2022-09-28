@@ -39,7 +39,7 @@ class FirstCashSpider(scrapy.Spider):
                 "lat": place["latitude"],
                 "lon": place["longitude"],
                 "phone": place["phone"],
-                "brand": place["brand"],
+                "brand": place["brand"].split(" #")[0],
             }
 
             yield GeojsonPointItem(**properties)
