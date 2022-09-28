@@ -4,8 +4,8 @@ from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
 
-class FrankieAndBennysSpider(CrawlSpider, StructuredDataSpider):
-    name = "frankie_and_bennys"
+class FrankieAndBennysGBSpider(CrawlSpider, StructuredDataSpider):
+    name = "frankie_and_bennys_gb"
     item_attributes = {"brand": "Frankie & Benny's", "brand_wikidata": "Q5490892"}
     allowed_domains = ["www.frankieandbennys.com"]
     start_urls = ["https://www.frankieandbennys.com/restaurants/index.html"]
