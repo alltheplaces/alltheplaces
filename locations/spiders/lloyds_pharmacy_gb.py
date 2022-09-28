@@ -37,7 +37,7 @@ class LloydsPharmacyGBSpider(scrapy.Spider):
                 addr = address["street"]
 
             item["street_address"] = addr
-            item["street"] = None   
+            item["street"] = None
             item["city"] = city
 
             if "Sainsburys" in item["name"]:
