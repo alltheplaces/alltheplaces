@@ -1,5 +1,5 @@
 import re
-from urllib.parse import urlparse, parse_qs
+from urllib.parse import urlsplit, parse_qs
 
 
 def extract_google_position(item, response):
@@ -19,9 +19,9 @@ def extract_google_position(item, response):
 
 def url_to_coords(url: str) -> (float, float):
     def get_query_param(link, query_param):
-        parsed_link = urlparse(link)
+        parsed_link = urlsplit(link)
         queries = parse_qs(parsed_link.query)
-        return queries.get(query_param)
+        return queries.get(query_param, [])
 
     url = url.replace("google.co.uk", "google.com")
 
@@ -46,18 +46,22 @@ def url_to_coords(url: str) -> (float, float):
         if lat_index and lon_index:
             return float(maps_keys[lat_index]), float(maps_keys[lon_index])
     elif url.startswith("https://maps.googleapis.com/maps/api/staticmap"):
-        ll = get_query_param(url, "center")
-        if ll:
-            lat, lon = ll[0].split(",")
+        # find the first marker location, or the map center
+        for markers in get_query_param(url, "markers"):
+            for val in markers.split("|"):
+                if "," in val:
+                    lat, lon = map(float, val.split(","))
+                    return lat, lon
+        for ll in get_query_param(url, "center"):
+            lat, lon = ll.split(",")
             return float(lat), float(lon)
     elif url.startswith("https://www.google.com/maps/dir/"):
         lat, lon = url.split("/")[6].split(",")
         return float(lat.strip()), float(lon.strip())
 
     if "/maps.google.com/" in url:
-        ll = get_query_param(url, "ll")
-        if ll:
-            lat, lon = ll[0].split(",")
+        for ll in get_query_param(url, "ll"):
+            lat, lon = ll.split(",")
             return float(lat), float(lon)
 
     return None, None
