@@ -60,6 +60,7 @@ class AutoNationSpider(scrapy.Spider):
                 "phone": store["Phone"],
                 "website": "https://www.autonation.com/dealers/"
                 + store["StoreDetailsUrl"],
+                "extra": {"sells": store["Makes"]},
             }
 
             hours = self.parse_hours(store["StoreDetailedHours"])
