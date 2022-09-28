@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 import scrapy
-import json
-import re
 
-from locations.items import GeojsonPointItem
+from locations.dict_parser import DictParser
+from locations.hours import OpeningHours
 
 
 class BQSpider(scrapy.Spider):
@@ -22,45 +21,29 @@ class BQSpider(scrapy.Spider):
     )
 
     def parse(self, response):
-        response.selector.remove_namespaces()
+        for data in response.json()["data"]:
+            store = data["attributes"]["store"]
 
-        data = json.loads(response.xpath("//text()").get())["data"]
+            store["contact"] = store.pop("contactPoint")
+            store["location"] = store["geoCoordinates"].pop("coordinates")
 
-        for store in data:
-            if store["type"] == "store":
-                try:
+            item = DictParser.parse(store)
 
-                    country = store["attributes"]["store"]["geoCoordinates"]["country"]
-                    country = "Ireland" if country == "Eire" else country
+            item["ref"] = data["id"]
+            item["website"] = "https://www.diy.com/store/" + item["ref"]
 
-                    properties = {
-                        "name": store["attributes"]["store"]["name"],
-                        "ref": store["id"],
-                        "website": "https://www.diy.com{}".format(
-                            store["attributes"]["seoPath"]
-                        ),
-                        "postcode": store["attributes"]["store"]["geoCoordinates"][
-                            "postalCode"
-                        ],
-                        "city": store["attributes"]["store"]["geoCoordinates"][
-                            "address"
-                        ]["lines"][-2],
-                        "country": country,
-                        "addr_full": store["attributes"]["store"]["geoCoordinates"][
-                            "address"
-                        ]["lines"][0],
-                        "phone": store["attributes"]["store"]["contactPoint"][
-                            "telephone"
-                        ],
-                        "lat": float(
-                            store["attributes"]["store"]["geoCoordinates"]["latitude"]
-                        ),
-                        "lon": float(
-                            store["attributes"]["store"]["geoCoordinates"]["longitude"]
-                        ),
-                    }
+            item["country"] = store["geoCoordinates"]["countryCode"]
+            item["postcode"] = store["geoCoordinates"]["postalCode"]
 
-                    yield GeojsonPointItem(**properties)
+            item["addr_full"] = ", ".join(
+                filter(None, store["geoCoordinates"]["address"]["lines"])
+            )
+            item["street_address"] = ", ".join(
+                filter(None, store["geoCoordinates"]["address"]["lines"][:3])
+            )
+            oh = OpeningHours()
+            for rule in store["openingHoursSpecifications"]:
+                oh.add_range(rule["dayOfWeek"], rule["opens"][:5], rule["closes"][:5])
+            item["opening_hours"] = oh.as_opening_hours()
 
-                except:
-                    break
+            yield item
