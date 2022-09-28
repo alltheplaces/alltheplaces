@@ -39,7 +39,9 @@ class FirstCashSpider(scrapy.Spider):
                 "lat": place["latitude"],
                 "lon": place["longitude"],
                 "phone": place["phone"],
-                "brand": place["brand"],
+                "brand": "First Cash Pawn"
+                if "First Cash Pawn" in place["brand"]
+                else "First Cash",
             }
 
             yield GeojsonPointItem(**properties)
