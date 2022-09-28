@@ -1,68 +1,37 @@
 # -*- coding: utf-8 -*-
-import scrapy
-import json
-import re
-from urllib.parse import unquote
+from scrapy.spiders import SitemapSpider
 
-from locations.items import GeojsonPointItem
+from locations.structured_data_spider import StructuredDataSpider
 
 
-class IcelandFoodsSpider(scrapy.Spider):
+class IcelandFoodsSpider(SitemapSpider, StructuredDataSpider):
     name = "iceland_foods"
-    item_attributes = {"brand": "Iceland Foods"}
+    item_attributes = {"brand": "Iceland", "brand_wikidata": "Q721810"}
     allowed_domains = ["www.iceland.co.uk"]
-    start_urls = ("https://www.iceland.co.uk/sitemap-store-site-map.xml",)
+    sitemap_urls = ["https://www.iceland.co.uk/sitemap-store-site-map.xml"]
+    sitemap_rules = [
+        (
+            r"https://www\.iceland\.co\.uk/store-finder/store\?StoreID=(\d+)&StoreName=",
+            "parse_sd",
+        )
+    ]
+    wanted_types = ["LocalBusiness"]
+    search_for_phone = False
 
-    # Extracts store's data from an individual store page
-    def parse_store_page(self, response):
-        response.selector.remove_namespaces()
+    def inspect_item(self, item, response):
+        item["name"] = response.xpath("/html/head/title/text()").get()
 
-        # One of the <script> tags contains a JSON object with store information
-        scripts = response.css("script").xpath("./text()").getall()
+        if "FWH" in item["name"] or "Food Ware" in item["name"]:
+            # The Food Warehouse, obtained via its own spider
+            # The name usually ends with FWH or has Food Warehouse, sometime truncated.
+            return
 
-        for s in scripts:
-            if "LocalBusiness" in s:
-                # Get a JS object with store information
-                store = json.loads(s)
+        if "IRELAND" in item["name"]:
+            item["country"] = "IE"
+        else:
+            item["country"] = "GB"
 
-                # Extract store name from URL
-                store_name = unquote(response.url.split("StoreName=")[1])
+        if phone := response.xpath('//div[@class="phone"]/text()').get():
+            item["phone"] = phone.strip()
 
-                # Because country is not always set in address field, guess country from name
-                store_country = "Ireland" if "IRELAND " in store_name else "UK"
-
-                store_addr = "{}, {}, {}".format(
-                    store["address"]["streetAddress"],
-                    store["address"]["addressRegion"],
-                    store["address"]["addressLocality"],
-                ).replace(", null", "")
-
-                phone = response.css("div.phone").xpath("./text()").get()
-                if phone:
-                    phone.strip()
-
-                properties = {
-                    "name": store_name,
-                    "ref": response.url.split("StoreID=")[1].split("&")[0],
-                    "website": response.url,
-                    "postcode": store["address"]["postalCode"],
-                    "city": store["address"]["addressRegion"].title()
-                    or "",  # Usually city, but not always
-                    "addr_full": store_addr,
-                    "country": store_country,
-                    "phone": phone,
-                }
-
-                try:
-                    properties["lat"] = float(store["geo"]["latitude"])
-                    properties["lon"] = float(store["geo"]["longitude"])
-                except ValueError:
-                    return
-
-                yield GeojsonPointItem(**properties)
-
-    def parse(self, response):
-        response.selector.remove_namespaces()
-
-        for url in response.xpath("//url/loc/text()").getall():
-            yield scrapy.Request(url, callback=self.parse_store_page)
+        yield item

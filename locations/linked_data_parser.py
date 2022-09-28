@@ -51,8 +51,8 @@ class LinkedDataParser(object):
                 geo = geo[0]
 
             if LinkedDataParser.check_type(geo.get("@type"), "GeoCoordinates"):
-                item["lat"] = geo.get("latitude")
-                item["lon"] = geo.get("longitude")
+                item["lat"] = LinkedDataParser.get_clean(geo, "latitude")
+                item["lon"] = LinkedDataParser.get_clean(geo, "longitude")
 
         item["name"] = LinkedDataParser.get_clean(ld, "name")
 
@@ -149,6 +149,8 @@ class LinkedDataParser(object):
     def get_clean(obj, key):
         if value := obj.get(key):
             if isinstance(value, str):
+                if value == "null":
+                    return None
                 return value.strip()
             return value
 
