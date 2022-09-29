@@ -1,48 +1,78 @@
 import requests
 
 
-class NSI(object):
+class Singleton(type):
+    _instances = {}
+
+    def __call__(cls, *args, **kwargs):
+        if cls not in cls._instances:
+            cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
+        return cls._instances[cls]
+
+
+# This is a lazy initialised singleton as it pulls (over the network) quite a lot of data into memory.
+class NSI(object, metaclass=Singleton):
     """
-    Interact with Name Suggestion Index (NSI). The NSI distribution is a GIT sub-module of this
-    project. As part of their GIT repo the NSI people publish a JSON version of their database
+    Interact with Name Suggestion Index (NSI). The NSI people publish a JSON version of their database
     which is used by the OSM editor to do rather useful brand suggestions when editing POIs.
-    It is possible that we move to dynamic API (HTTP) access to the NSI in the future.
     """
 
     def __init__(self):
-        self.nsi_wikidata = None
+        self.loaded = False
+        self.wikidata_json = None
+        self.nsi_json = None
+
+    @staticmethod
+    def _request_file(file):
+        resp = requests.get(
+            "https://raw.githubusercontent.com/osmlab/name-suggestion-index/main/dist/"
+            + file
+        )
+        if not resp.status_code == 200:
+            raise Exception("NSI load failure")
+        return resp.json()
 
     def _ensure_loaded(self):
-        if self.nsi_wikidata is None:
-            resp = requests.get(
-                "https://raw.githubusercontent.com/osmlab/name-suggestion-index/main/dist/wikidata.min.json"
-            )
-            self.nsi_wikidata = resp.json()["wikidata"]
+        if not self.loaded:
+            self.wikidata_json = self._request_file("wikidata.min.json")["wikidata"]
+            self.nsi_json = self._request_file("nsi.min.json")["nsi"]
+            self.loaded = True
 
-            if not self.nsi_wikidata:
-                self.nsi_wikidata = {}
-
-    def lookup_wikidata_code(self, brand_wikidata):
+    def lookup_wikidata(self, wikidata_code):
         """
         Lookup wikidata code in the NSI.
-        :param brand_wikidata: wikidata code to lookup in the NSI
+        :param wikidata_code: wikidata code to lookup in the NSI
         :return: NSI wikidata.json entry if present
         """
         self._ensure_loaded()
-        return self.nsi_wikidata.get(brand_wikidata)
+        return self.wikidata_json.get(wikidata_code)
 
-    def lookup_label(self, s):
+    def iter_wikidata(self, fuzzy_label):
         """
         Lookup by fuzzy label match in the NSI.
-        :param s: string to fuzzy match
+        :param fuzzy_label: string to fuzzy match
         :return: iterator of matching NSI wikidata.json entries
         """
         self._ensure_loaded()
-        s = NSI.normalise(s)
-        for k, v in self.nsi_wikidata.items():
+        s = NSI.normalise(fuzzy_label)
+        for k, v in self.wikidata_json.items():
             if label := v.get("label"):
                 if s in NSI.normalise(label):
                     yield k, v
+
+    def iter_nsi(self, wikidata_code=None):
+        """
+        Iterate NSI for all items in nsi.json with a matching wikidata code
+        :param wikidata_code: wikidata code to match, if None then all entries
+        :return: iterator of matching NSI nsi.json item entries
+        """
+        self._ensure_loaded()
+        for v in self.nsi_json.values():
+            for item in v["items"]:
+                if not wikidata_code:
+                    yield item
+                elif wikidata_code == item["tags"].get("brand:wikidata"):
+                    yield item
 
     @staticmethod
     def normalise(s):

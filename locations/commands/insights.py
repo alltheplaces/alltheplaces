@@ -1,7 +1,6 @@
 import json
 import geonamescache
 import os
-import requests
 from collections import Counter
 from locations.name_suggestion_index import NSI
 from scrapy.commands import ScrapyCommand
@@ -120,7 +119,7 @@ class InsightsCommand(ScrapyCommand):
             brand_wikidata = feature["properties"].get("brand:wikidata")
             if not brand_wikidata:
                 spider_empty_counter[spider_name] += 1
-            elif not nsi.lookup_wikidata_code(brand_wikidata):
+            elif not nsi.lookup_wikidata(brand_wikidata):
                 spider_nsi_missing_counter[spider_name + "/" + brand_wikidata] += 1
             else:
                 # TODO: query wikidata to see if Q-code remotely sensible?
