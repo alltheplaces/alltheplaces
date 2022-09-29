@@ -37,6 +37,7 @@ def clean_address(addr):
 
     for line in addr:
         if line:
+            line = line.replace("(null)", "")
             line = line.strip("\n\r\t\f ,")
             if line != "":
                 return_addr.append(line)
