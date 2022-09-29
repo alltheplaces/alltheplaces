@@ -4,8 +4,8 @@ from scrapy.spiders import SitemapSpider
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class PureGymSpider(SitemapSpider, StructuredDataSpider):
-    name = "puregym"
+class PureGymGBSpider(SitemapSpider, StructuredDataSpider):
+    name = "puregym_gb"
     item_attributes = {
         "brand": "PureGym",
         "brand_wikidata": "Q18345898",
