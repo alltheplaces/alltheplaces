@@ -58,3 +58,8 @@ def test_place():
     assert url_to_coords(
         "https://www.google.com/maps/place/Portsmouth%20PO1%203EE/@50.799315,-1.1083991,17z/_data=!3m1!4b1!4m5!3m4!1s0x48745d7f5c40b405_0xa073c4da0d1c686a!8m2!3d50.7993679!4d-1.1059256"
     ) == (50.799315, -1.1083991)
+
+    assert url_to_coords("https://www.google.com/maps/place/57.137275,-2.098053") == (
+        57.137275,
+        -2.098053,
+    )
