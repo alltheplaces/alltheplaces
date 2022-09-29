@@ -45,12 +45,14 @@ class NameSuggestionIndexCommand(ScrapyCommand):
             self.lookup_code(args)
 
     def lookup_name(self, args):
-        for k, v in self.nsi.lookup_label(args[0]):
+        for k, v in self.nsi.iter_wikidata(args[0]):
             NameSuggestionIndexCommand.show(k, v)
 
     def lookup_code(self, args):
-        if v := self.nsi.lookup_wikidata_code(args[0]):
+        if v := self.nsi.lookup_wikidata(args[0]):
             NameSuggestionIndexCommand.show(args[0], v)
+            for item in self.nsi.iter_nsi(args[0]):
+                print("       -> " + str(item))
 
     @staticmethod
     def show(code, data):
