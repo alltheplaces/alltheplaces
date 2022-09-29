@@ -12,6 +12,7 @@ DAY_MAPPING = {0: "Mo", 1: "Tu", 2: "We", 3: "Th", 4: "Fr", 5: "Sa", 6: "Su"}
 class AutoNationSpider(scrapy.Spider):
     name = "auto_nation"
     allowed_domains = ["autonation.com"]
+    item_attributes = {"brand": "Auto Nation", "brand_wikidata": "Q784804"}
     start_urls = [
         "https://www.autonation.com/StoreDetails/Get/?lat=30.218908309936523&long=-97.8546142578125&radius=5000\
         &zipcode=78749&d=1602263009819",
@@ -57,9 +58,9 @@ class AutoNationSpider(scrapy.Spider):
                 "lat": store["Latitude"],
                 "lon": store["Longitude"],
                 "phone": store["Phone"],
-                "brand": store["Makes"],
                 "website": "https://www.autonation.com/dealers/"
                 + store["StoreDetailsUrl"],
+                "extras": {"sells": store["Makes"]},
             }
 
             hours = self.parse_hours(store["StoreDetailedHours"])
