@@ -25,7 +25,8 @@ class NSI(object, metaclass=Singleton):
     @staticmethod
     def _request_file(file):
         resp = requests.get(
-            "https://raw.githubusercontent.com/osmlab/name-suggestion-index/main/dist/" + file
+            "https://raw.githubusercontent.com/osmlab/name-suggestion-index/main/dist/"
+            + file
         )
         if not resp.status_code == 200:
             raise Exception("NSI load failure")
