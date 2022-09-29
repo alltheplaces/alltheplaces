@@ -1,7 +1,4 @@
 import json
-import re
-
-import scrapy
 
 from locations.hours import OpeningHours, DAYS_FULL
 from locations.items import GeojsonPointItem
@@ -13,21 +10,9 @@ class PrimarkGBSpider(SitemapSpider):
     item_attributes = {"brand": "Primark", "brand_wikidata": "Q137023"}
     allowed_domains = ["primark.com"]
     sitemap_urls = ["https://www.primark.com/en-gb/sitemap/sitemap-store-locator.xml"]
-    # sitemap_rules = [        (r"https:\/\/stores\.primark\.com\/[-\w]+\/[-\w]+\/[-\w%']+", "parse")    ]
-
-    def sitemap_filter(self, entries):
-        for entry in entries:
-            if entry["loc"] == "https://www.primark.com/en-gb/undefined/undefined":
-                pass
-            m = re.match(
-                r"https:\/\/www\.primark\.com\/en-gb\/([-\w]+)\/([-\w&;']+)",
-                entry["loc"],
-            )
-            if m:
-                entry[
-                    "loc"
-                ] = f"https://www.primark.com/en-gb/stores/{m.group(1)}/{m.group(2)}"
-                yield entry
+    sitemap_rules = [
+        (r"https:\/\/www\.primark\.com\/en-gb\/stores\/[-\w]+\/.+$", "parse")
+    ]
 
     def parse(self, response):
         data = json.loads(response.xpath('//script[@id="__NEXT_DATA__"]/text()').get())
@@ -50,9 +35,9 @@ class PrimarkGBSpider(SitemapSpider):
 
         oh = OpeningHours()
         for day in DAYS_FULL:
-            for time in store["hours"][day.lower()]["openIntervals"]:
-                oh.add_range(day[:2], time["start"], time["end"])
-
+            if times := store["hours"][day.lower()]["openIntervals"]:
+                for time in times:
+                    oh.add_range(day[:2], time["start"], time["end"])
         item["opening_hours"] = oh.as_opening_hours()
 
         item["extras"] = {}
