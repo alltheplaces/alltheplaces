@@ -12,7 +12,9 @@ def extract_google_position(item, response):
             item["lat"], item["lon"] = url_to_coords(link)
             return
     for link in response.xpath("//a[contains(@href, 'google')]/@href").getall():
-        if link.startswith("https://www.google.com/maps/dir"):
+        if link.startswith("https://www.google.com/maps/dir") or link.startswith(
+            "https://www.google.com/maps/place/"
+        ):
             item["lat"], item["lon"] = url_to_coords(link)
             return
 
@@ -57,6 +59,9 @@ def url_to_coords(url: str) -> (float, float):
             return float(lat), float(lon)
     elif url.startswith("https://www.google.com/maps/dir/"):
         lat, lon = url.split("/")[6].split(",")
+        return float(lat.strip()), float(lon.strip())
+    elif url.startswith("https://www.google.com/maps/place/"):
+        lat, lon = url.split("/")[5].split(",")
         return float(lat.strip()), float(lon.strip())
 
     if "/maps.google.com/" in url:
