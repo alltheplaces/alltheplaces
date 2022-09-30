@@ -20,6 +20,7 @@ class PennyDESpider(scrapy.Spider):
     name = "penny_de"
     item_attributes = {"brand": "Penny", "brand_wikidata": "Q284688"}
     allowed_domains = ["penny.de"]
+    download_delay = 0.5
     start_urls = ("https://www.penny.de/.rest/market",)
 
     def parse_hours(self, store_info):
