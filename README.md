@@ -80,9 +80,10 @@ To get started, you'll want to install the dependencies for this project.
       yield GeojsonPointItem(
           lat=latitude,
           lon=longitude,
-          addr_full="1234 Fifth Street",
+          street_address="1234 Fifth Street",
           city="San Francisco",
-          state="CA"
+          state="CA",
+          country="US"
       )
    ```
 
