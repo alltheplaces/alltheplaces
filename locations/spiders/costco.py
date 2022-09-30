@@ -25,44 +25,32 @@ class CostcoSpider(scrapy.Spider):
     name = "costco"
     item_attributes = {"brand": "Costco", "brand_wikidata": "Q715583"}
     allowed_domains = ["www.costco.com"]
-    start_urls = ("https://www.costco.com/warehouse-locations",)
     custom_settings = {
-        "USER_AGENT": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36",
+        "USER_AGENT": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36",
+        "ROBOTSTXT_OBEY": False,
+    }
+    headers = {
+        "Accept-Language": "en-US,en;q=0.9",
+        "X-Requested-With": "XMLHttpRequest",
+        "Accept": "*/*",
+        "Accept-Encoding": "gzip, deflate, br",
+        "Connection": "keep-alive",
     }
 
-    download_delay = 0.6
+    download_delay = 0.1
+    url = "https://www.costco.com/AjaxWarehouseBrowseLookupView?langId=-1&numOfWarehouses=100000&hasGas=false&hasTires=false&hasFood=false&hasHearing=false&hasPharmacy=false&hasOptical=false&hasBusiness=false&hasPhotoCenter=&tiresCheckout=0&isTransferWarehouse=false&populateWarehouseDetails=true&warehousePickupCheckout=false&latitude={lat}&longitude={lng}&countryCode=US&distance=100000"
 
-    def parse(self, response):
-        url = "https://www.costco.com/AjaxWarehouseBrowseLookupView?"
-
-        params = {
-            "langId": "-1",
-            # "storeId": "10301",
-            "numOfWarehouses": "50",  # max allowed
-            "hasGas": "false",
-            "hasTires": "false",
-            "hasFood": "false",
-            "hasHearing": "false",
-            "hasPharmacy": "false",
-            "hasOptical": "false",
-            "hasBusiness": "false",
-            "hasPhotoCenter": "false",
-            "tiresCheckout": "0",
-            "isTransferWarehouse": "false",
-            "populateWarehouseDetails": "true",
-            "warehousePickupCheckout": "false",
-            "countryCode": "US",
-        }
-
+    def start_requests(self):
         with open(
-            "./locations/searchable_points/us_centroids_100mile_radius.csv"
+            "./locations/searchable_points/us_centroids_50mile_radius.csv"
         ) as points:
             next(points)
             for point in points:
                 _, lat, lon = point.strip().split(",")
-                params.update({"latitude": lat, "longitude": lon})
                 yield scrapy.Request(
-                    url=url + urlencode(params), callback=self.parse_ajax
+                    url=self.url.format(lat=lat, lng=lon),
+                    callback=self.parse_ajax,
+                    headers=self.headers,
                 )
 
     def store_hours(self, store_hours):
@@ -148,7 +136,7 @@ class CostcoSpider(scrapy.Spider):
                     "ref": ref,
                     "phone": self._clean_text(store.get("phone")),
                     "name": f"Costco {store['locationName']}",
-                    "addr_full": store["address1"],
+                    "street_address": store["address1"],
                     "city": store["city"],
                     "state": store["state"],
                     "postcode": store.get("zipCode"),
