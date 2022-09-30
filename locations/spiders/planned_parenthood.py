@@ -1,36 +1,27 @@
 # -*- coding: utf-8 -*-
-import scrapy
 import re
+
+from scrapy.spiders import SitemapSpider
 
 from locations.items import GeojsonPointItem
 
 
-class PlannedParenthoodSpider(scrapy.Spider):
+class PlannedParenthoodSpider(SitemapSpider):
     name = "planned_parenthood"
-    item_attributes = {"brand": "Planned Parenthood"}
+    item_attributes = {
+        "brand": "Planned Parenthood",
+        "brand_wikidata": "Q2553262",
+        "country": "US",
+    }
     allowed_domains = ["www.plannedparenthood.org"]
-    start_urls = ("https://www.plannedparenthood.org/health-center",)
-
-    def parse(self, response):
-        state_urls = response.xpath(
-            '//ul[@class="quicklist-list"]/li/a/@href'
-        ).extract()
-        for path in state_urls:
-            yield scrapy.Request(
-                response.urljoin(path),
-                callback=self.parse_state,
-            )
-
-    def parse_state(self, response):
-        venue_urls = response.xpath(
-            '//ul[@class="quicklist-list"]/li/p/a/@href'
-        ).extract()
-        for path in venue_urls:
-            yield scrapy.Request(
-                response.urljoin(path),
-                callback=self.parse_venue,
-                meta={"dont_redirect": True},
-            )
+    sitemap_urls = ["https://www.plannedparenthood.org/sitemap.xml"]
+    sitemap_rules = [
+        (
+            r"https:\/\/www\.plannedparenthood\.org\/health-center\/[-\w]+\/[-\w]+\/(\d+)\/[-\w]+$",
+            "parse_venue",
+        )
+    ]
+    # Note source Microdata is malformed
 
     def parse_venue(self, response):
         if response is None:
@@ -38,7 +29,7 @@ class PlannedParenthoodSpider(scrapy.Spider):
             return
 
         properties = {
-            "addr_full": response.xpath(
+            "street_address": response.xpath(
                 '//*[@itemprop="streetAddress"]/text()'
             ).extract_first(),
             "city": response.xpath(
@@ -57,11 +48,11 @@ class PlannedParenthoodSpider(scrapy.Spider):
             "website": response.url,
         }
 
-        map_image_url = response.xpath(
-            '//img[@class="address-map"]/@src'
-        ).extract_first()
-        match = re.search(r"center=(.*?),(.*?)&zoom", map_image_url)
-        properties["lat"] = float(match.group(1))
-        properties["lon"] = float(match.group(2))
+        if map_image := response.xpath(
+            '//img[@class="address-map"]/@data-lazy-interchange'
+        ).get():
+            if match := re.search(r"center=(.*?),(.*?)&zoom", map_image):
+                properties["lat"] = float(match.group(1))
+                properties["lon"] = float(match.group(2))
 
         yield GeojsonPointItem(**properties)
