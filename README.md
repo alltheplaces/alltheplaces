@@ -14,7 +14,7 @@ To scrape a new website for locations, you'll want to create a new spider. You c
 
 To get started, you'll want to install the dependencies for this project.
 
-1. This project uses `pipenv` to handle dependencies and virtual environments. To get started, make sure you have [`pipenv` installed](https://github.com/kennethreitz/pipenv#installation).
+1. This project uses `pipenv` to handle dependencies and virtual environments. To get started, make sure you have [`pipenv` installed](https://github.com/pypa/pipenv#installation).
 
 1. With `pipenv` installed, make sure you have the `all-the-places` repository checked out
 
