@@ -26,10 +26,14 @@ class PennyDESpider(scrapy.Spider):
     def parse_hours(self, store_info):
         opening_hours = OpeningHours()
         for day in DAY_MAPPING:
+            opening_time = store_info[f"opensAt{day}"]
+            closing_time = store_info[f"closesAt{day}"]
+            if any([opening_time == "", closing_time == ""]):
+                continue
             opening_hours.add_range(
                 day=DAY_MAPPING[day],
-                open_time=store_info[f"opensAt{day}"],
-                close_time=store_info[f"closesAt{day}"],
+                open_time=opening_time,
+                close_time=closing_time,
                 time_format="%H:%M",
             )
 
