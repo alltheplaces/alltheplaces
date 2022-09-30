@@ -32,7 +32,6 @@ class CostcoSpider(scrapy.Spider):
     headers = {
         "Accept-Language": "en-US,en;q=0.9",
         "X-Requested-With": "XMLHttpRequest",
-        "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36",
         "Accept": "*/*",
         "Accept-Encoding": "gzip, deflate, br",
         "Connection": "keep-alive",
