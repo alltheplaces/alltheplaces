@@ -191,9 +191,14 @@ class DictParser(object):
 
         return results
 
-    # Looks for a nested key and return the value.
     @staticmethod
     def get_nested_key(obj, key):
+        """
+        Return value for first matching key in an object, traversing lists and dicts.
+        :param obj: the object to traverse
+        :param key: the key to match
+        :return: the first matching value, or None
+        """
         if isinstance(obj, dict):
             for k, v in obj.items():
                 if k == key:
@@ -205,3 +210,21 @@ class DictParser(object):
                 if val := DictParser.get_nested_key(x, key):
                     return val
         return None
+
+    @staticmethod
+    def iter_matching_keys(obj, key):
+        """
+        An iterator for values for all matching keys in an object, traversing lists and dicts.
+        :param obj: the object to traverse
+        :param key: the key to match
+        :return: value iterator for all matching keys
+        """
+        if isinstance(obj, dict):
+            for k, v in obj.items():
+                if k == key:
+                    yield v
+                else:
+                    yield from DictParser.iter_matching_keys(v, key)
+        elif isinstance(obj, list):
+            for x in obj:
+                yield from DictParser.iter_matching_keys(x, key)
