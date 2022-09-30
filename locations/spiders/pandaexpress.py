@@ -11,6 +11,7 @@ class PandaExpressSpider(scrapy.Spider):
     name = "pandaexpress"
     item_attributes = {"brand": "Panda Express", "brand_wikidata": "Q1358690"}
     allowed_domains = ["pandaexpress.com"]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def start_requests(self):
         today = datetime.date.today().strftime("%Y%m%d")
