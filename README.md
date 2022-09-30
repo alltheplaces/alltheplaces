@@ -70,9 +70,7 @@ To get started, you'll want to install the dependencies for this project.
    To generate GeoJSON locally, you can enable a couple options during the crawl process to use the GeoJSON exporter and to specify the file to write it to:
 
    ```
-   pipenv run scrapy crawl template \
-     --output-format=geojson \
-     --output=output.geojson
+   pipenv run scrapy crawl template -O output.geojson
    ```
 
 1. Finally, make sure your `parse()` function is `yield`ing `GeojsonPointItem`s that contain the location and property data that you extract from the page:
