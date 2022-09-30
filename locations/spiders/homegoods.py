@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-import csv
 import datetime
+import re
 
-import scrapy
+from scrapy.spiders import SitemapSpider
 
 from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
@@ -11,37 +11,23 @@ from locations.hours import OpeningHours
 DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 
 
-class HomeGoodsSpider(scrapy.Spider):
+class HomeGoodsSpider(SitemapSpider):
     name = "homegoods"
-    item_attributes = {"brand": "HomeGoods"}
-    allowed_domains = ["tjx.com"]
-
-    chains = {
-        "28": "HomeGoods",
+    item_attributes = {
+        "brand": "HomeGoods",
+        "brand_wikidata": "Q5887941",
+        "country": "US",
     }
-
-    def start_requests(self):
-        url = "https://mktsvc.tjx.com/storelocator/GetSearchResults"
-        payload = {"chain": "28", "lang": "en", "maxstores": "100", "country": "us"}
-
-        with open(
-            "./locations/searchable_points/us_centroids_100mile_radius.csv"
-        ) as points:
-            reader = csv.DictReader(points)
-            for point in reader:
-                payload.update(
-                    {"geolat": point["latitude"], "geolong": point["longitude"]}
-                )
-
-                yield scrapy.http.FormRequest(
-                    url=url,
-                    method="POST",
-                    formdata=payload,
-                    headers={
-                        "Content-Type": "application/x-www-form-urlencoded",
-                        "Accept": "application/json",
-                    },
-                )
+    sitemap_urls = ["https://www.homegoods.com/us/store/xml/storeLocatorSiteMap.xml"]
+    sitemap_rules = [
+        (
+            r"https:\/\/www\.homegoods\.com\/us\/store\/stores\/.+\/(\d+)\/aboutstore$",
+            "parse",
+        )
+    ]
+    user_agent = (
+        "Mozilla/5.0 (X11; Linux x86_64; rv:105.0) Gecko/20100101 Firefox/105.0"
+    )
 
     def parse_hours(self, hours):
         """Mon-Thu: 9am - 9pm, Black Friday: 8am - 10pm, Sat: 9am - 9pm, Sun: 10am - 8pm"""
@@ -91,25 +77,24 @@ class HomeGoodsSpider(scrapy.Spider):
         return opening_hours.as_opening_hours()
 
     def parse(self, response):
-        data = response.json()
+        item = GeojsonPointItem()
 
-        for store in data["Stores"]:
-            properties = {
-                "name": store["Name"],
-                "ref": store["StoreID"],
-                "addr_full": store["Address"].strip(),
-                "city": store["City"],
-                "state": store["State"],
-                "postcode": store["Zip"],
-                "country": store["Country"],
-                "phone": store["Phone"],
-                "lat": float(store["Latitude"]),
-                "lon": float(store["Longitude"]),
-                "brand": self.chains[store["Chain"]],
-            }
+        item["name"] = response.xpath('//input[@name="storeName"]/@value').get()
+        item["opening_hours"] = self.parse_hours(
+            response.xpath('//input[@name="hours"]/@value').get()
+        )
+        item["street_address"] = response.xpath('//input[@name="address"]/@value').get()
+        item["city"] = response.xpath('//input[@name="city"]/@value').get()
+        item["state"] = response.xpath('//input[@name="state"]/@value').get()
+        #  item["postcode"] = response.xpath('//input[@name="zip"]/@value').get()
+        if postcode := re.search(
+            r" \w\w (\d+): ", response.xpath("//title/text()").get()
+        ):
+            item["postcode"] = postcode.group(1)
+        item["phone"] = response.xpath('//input[@name="phone"]/@value').get()
+        item["lat"] = response.xpath('//input[@name="lat"]/@value').get()
+        item["lon"] = response.xpath('//input[@name="long"]/@value').get()
 
-            hours = self.parse_hours(store["Hours"])
-            if hours:
-                properties["opening_hours"] = hours
+        item["website"] = item["ref"] = response.url
 
-            yield GeojsonPointItem(**properties)
+        yield item
