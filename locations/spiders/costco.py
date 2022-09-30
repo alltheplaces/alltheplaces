@@ -136,7 +136,7 @@ class CostcoSpider(scrapy.Spider):
                     "ref": ref,
                     "phone": self._clean_text(store.get("phone")),
                     "name": f"Costco {store['locationName']}",
-                    "addr_full": store["address1"],
+                    "street_address": store["address1"],
                     "city": store["city"],
                     "state": store["state"],
                     "postcode": store.get("zipCode"),
