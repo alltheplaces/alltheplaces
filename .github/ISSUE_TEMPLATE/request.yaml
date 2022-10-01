@@ -1,0 +1,23 @@
+name: New Spider
+description: Request a new spider
+body:
+  - type: input
+    attributes:
+      label: Brand name
+      placeholder: McDonald's
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: Wikidata ID
+      placeholder: Q38076
+      description: >-
+        If possible get the ID from
+        [Wikidata](https://www.wikidata.org/wiki/Wikidata:Main_Page)
+  - type: textarea
+    attributes:
+      label: Store finder url(s)
+      placeholder: >-
+        https://www.mcdonalds.com/gb/en-gb/restaurant-locator.html
+        https://www.mcdonalds.com.hk/find-a-restaurant/
+

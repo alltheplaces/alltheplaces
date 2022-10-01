@@ -14,7 +14,7 @@ To scrape a new website for locations, you'll want to create a new spider. You c
 
 To get started, you'll want to install the dependencies for this project.
 
-1. This project uses `pipenv` to handle dependencies and virtual environments. To get started, make sure you have [`pipenv` installed](https://github.com/kennethreitz/pipenv#installation).
+1. This project uses `pipenv` to handle dependencies and virtual environments. To get started, make sure you have [`pipenv` installed](https://github.com/pypa/pipenv#installation).
 
 1. With `pipenv` installed, make sure you have the `all-the-places` repository checked out
 
@@ -70,9 +70,7 @@ To get started, you'll want to install the dependencies for this project.
    To generate GeoJSON locally, you can enable a couple options during the crawl process to use the GeoJSON exporter and to specify the file to write it to:
 
    ```
-   pipenv run scrapy crawl template \
-     --output-format=geojson \
-     --output=output.geojson
+   pipenv run scrapy crawl template -O output.geojson
    ```
 
 1. Finally, make sure your `parse()` function is `yield`ing `GeojsonPointItem`s that contain the location and property data that you extract from the page:
@@ -82,9 +80,10 @@ To get started, you'll want to install the dependencies for this project.
       yield GeojsonPointItem(
           lat=latitude,
           lon=longitude,
-          addr_full="1234 Fifth Street",
+          street_address="1234 Fifth Street",
           city="San Francisco",
-          state="CA"
+          state="CA",
+          country="US"
       )
    ```
 
@@ -92,11 +91,23 @@ To get started, you'll want to install the dependencies for this project.
 
 ## Tips for writing a spider
 
-### Prefer a directory of all locations
+### Preferred discovery methods
 
-Most listings of locations come in two flavors: a "store finder" that lets the user search by location and a "store directory" that is a hierarchical listing of all locations. These listings are sometimes hidden in the footer or on the site map page. Keep an eye out for these, because it's a lot easier if they enumerate all the locations for you rather than having to program a spider to do it for you.  Checking the domain's `robots.txt` file can also be useful for finding sitemaps (http://\<domain>/robots.txt).  
+There is usually a few ways to find locations:
 
-If the only option is search by location, there is likely an AJAX query made to search by latitude/longitude. Keep an eye on your browser's developer tools "network" tab to see what the request is so you can replicate it in your spider.
+1. An XML sitemap, often https://\<domain>/sitemap.xml, the domain's `robots.txt` file can also be useful for finding sitemaps (https://\<domain>/robots.txt). These can crawled with a [SitemapSpider](https://docs.scrapy.org/en/latest/topics/spiders.html#scrapy.spiders.SitemapSpider).
+
+2. A "store directory" that is a hierarchical listing of all locations. These listings are sometimes hidden in the footer or on the site map page. Keep an eye out for these, because it's a lot easier if they enumerate all the locations for you rather than having to program a spider to do it for you. These can be crawled with [CrawlSpider](https://docs.scrapy.org/en/latest/topics/spiders.html#crawlspider).
+
+3. A "store finder" that lets the user search by location. Keep an eye on your browser's developer tools "network" tab to see what the request is so you can replicate it in your spider. You may be able to change the request to get the API to return all the stores. These can be made with a normal [Spider](https://docs.scrapy.org/en/latest/topics/spiders.html#scrapy.Spider) and specific `start_urls` or `start_requests()`.
+
+4. But if the only option is search by latitude/longitude, these can be crawled with [Searchable Points](#searchable-points).
+
+### Structured Data
+
+Some websites may already be publishing there data in a [standard way](https://schema.org/). We can parse these with our [StructuredDataSpider](https://github.com/alltheplaces/alltheplaces/blob/master/locations/structured_data_spider.py), use a `SitemapSpider` or `CrawlSpider` to obtain the pages and pass them to `parse_sd` it will parse any Microdata or Linked Data with a type defined in `wanted_types`, you can then clean up the item, or add extra attributes with `inspect_item`.
+
+[validator.schema.org](https://validator.schema.org/) can be really helpful when making spiders to see what structured data is available.
 
 ### Searchable Points
 
