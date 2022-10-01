@@ -91,11 +91,17 @@ To get started, you'll want to install the dependencies for this project.
 
 ## Tips for writing a spider
 
-### Prefer a directory of all locations
+### Preferred discovery methods
 
-Most listings of locations come in two flavors: a "store finder" that lets the user search by location and a "store directory" that is a hierarchical listing of all locations. These listings are sometimes hidden in the footer or on the site map page. Keep an eye out for these, because it's a lot easier if they enumerate all the locations for you rather than having to program a spider to do it for you.  Checking the domain's `robots.txt` file can also be useful for finding sitemaps (http://\<domain>/robots.txt).  
+There is usually a few ways to find locations:
 
-If the only option is search by location, there is likely an AJAX query made to search by latitude/longitude. Keep an eye on your browser's developer tools "network" tab to see what the request is so you can replicate it in your spider.
+1. An XML sitemap, often https://\<domain>/sitemap.xml, the domain's `robots.txt` file can also be useful for finding sitemaps (https://\<domain>/robots.txt). These can crawled with a [SitemapSpider](https://docs.scrapy.org/en/latest/topics/spiders.html#scrapy.spiders.SitemapSpider).
+
+2. A "store directory" that is a hierarchical listing of all locations. These listings are sometimes hidden in the footer or on the site map page. Keep an eye out for these, because it's a lot easier if they enumerate all the locations for you rather than having to program a spider to do it for you. These can be crawled with [CrawlSpider](https://docs.scrapy.org/en/latest/topics/spiders.html#crawlspider).
+
+3. A "store finder" that lets the user search by location. Keep an eye on your browser's developer tools "network" tab to see what the request is so you can replicate it in your spider. You may be able to change the request to get the API to return all the stores. These can be made with a normal [Spider](https://docs.scrapy.org/en/latest/topics/spiders.html#scrapy.Spider) and specific `start_urls` or `start_requests()`.
+
+4. But if the only option is search by latitude/longitude, these can be crawled with [Searchable Points](#searchable-points).
 
 ### Searchable Points
 
