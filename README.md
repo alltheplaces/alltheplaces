@@ -103,6 +103,12 @@ There is usually a few ways to find locations:
 
 4. But if the only option is search by latitude/longitude, these can be crawled with [Searchable Points](#searchable-points).
 
+### Structured Data
+
+Some websites may already be publishing there data in a [standard way](https://schema.org/). We can parse these with our [StructuredDataSpider](https://github.com/alltheplaces/alltheplaces/blob/master/locations/structured_data_spider.py), use a `SitemapSpider` or `CrawlSpider` to obtain the pages and pass them to `parse_sd` it will parse any Microdata or Linked Data with a type defined in `wanted_types`, you can then clean up the item, or add extra attributes with `inspect_item`.
+
+[validator.schema.org](https://validator.schema.org/) can be really helpful when making spiders to see what structured data is available.
+
 ### Searchable Points
 
 For store locators that do allow searches by latitude/longitude, a grid of searchable latlon points is available for the US, CA, AU, and Europe [here](https://github.com/alltheplaces/alltheplaces/tree/master/locations/searchable_points). Each point represents the centroid of a search where the radius distance is indicated in the file name. See the [Dollar General scraper](https://github.com/alltheplaces/alltheplaces/pull/1076) for an example of how you might utilize them for national searches.
