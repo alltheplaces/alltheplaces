@@ -35,8 +35,9 @@ class LinkedDataParser(object):
             if not isinstance(types, list):
                 types = [types]
 
-            if wanted_type in types:
-                return ld_obj
+            for t in types:
+                if LinkedDataParser.check_type(t, wanted_type, default=False):
+                    return ld_obj
 
     @staticmethod
     def parse_ld(ld) -> GeojsonPointItem:
