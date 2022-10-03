@@ -9,6 +9,8 @@ import re
 
 from scrapy.exceptions import DropItem
 
+from locations.name_suggestion_index import NSI
+
 
 class DuplicatesPipeline(object):
     def __init__(self):
@@ -192,5 +194,43 @@ class CheckItemPropertiesPipeline(object):
                 spider.crawler.stats.inc_value("atp/field/opening_hours/invalid")
         else:
             spider.crawler.stats.inc_value("atp/field/opening_hours/missing")
+
+        return item
+
+
+class ApplyNSICategoriesPipeline(object):
+
+    nsi = NSI()
+
+    important_keys = ["amenity", "leisure", "shop", "tourism"]
+
+    def process_item(self, item, spider):
+        brand = item.get("brand", "").lower().replace(" ", "")
+        code = item.get("brand_wikidata")
+        extras = item.get("extras", {})
+
+        if not code:
+            return item
+
+        matches = list(self.nsi.iter_nsi(code))
+        match = None
+
+        if len(matches) == 0:
+            spider.crawler.stats.inc_value("atp/nsi/brand_missing")
+            return item
+        elif len(matches) == 1:
+            spider.crawler.stats.inc_value("atp/nsi/perfect_match")
+            match = matches[0]
+        else:
+            return item
+
+        extras["nsi_id"] = match["id"]
+
+        for (key, value) in match["tags"].items():
+            if key in self.important_keys:
+                if extras.get(key) is None:
+                    extras[key] = value
+
+        item["extras"] = extras
 
         return item

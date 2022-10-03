@@ -89,6 +89,7 @@ ITEM_PIPELINES = {
     "locations.pipelines.ExtractGBPostcodePipeline": 400,
     "locations.pipelines.AssertURLSchemePipeline": 500,
     "locations.pipelines.CheckItemPropertiesPipeline": 600,
+    "locations.pipelines.ApplyNSICategoriesPipeline": 700,
 }
 
 
