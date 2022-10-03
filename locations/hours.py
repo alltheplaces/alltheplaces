@@ -176,7 +176,7 @@ class OpeningHours(object):
             rules = linked_data["openingHours"]
             if not isinstance(rules, list):
                 rules = re.findall(
-                    r"((\w\w|\w\w\s?\-\s?\w\w)\s(\d\d:\d\d)\s?\-\s?(\d\d:\d\d))", rules
+                    r"((\w\w|\w\w\s?\-\s?\w\w|(\w\w,)+\w\w)\s(\d\d:\d\d)\s?\-\s?(\d\d:\d\d))", rules
                 )
                 rules = [r[0] for r in rules]
 

@@ -164,6 +164,40 @@ def test_ld_parse_openingHours():
     )
     assert o.as_opening_hours() == "Mo-Th 09:00-12:00"
 
+    o = OpeningHours()
+    o.from_linked_data(
+        json.loads(
+            """
+            {
+                "@context": "https://schema.org",
+                "@type": "Pharmacy",
+                "name": "Philippa's Pharmacy",
+                "description": "A superb collection of fine pharmaceuticals for your beauty and healthcare convenience, a department of Delia's Drugstore.",
+                "openingHours": "Mo-Th 09:00-12:00",
+                "telephone": "+18005551234"
+            }
+            """
+        )
+    )
+    assert o.as_opening_hours() == "Mo-Th 09:00-12:00"
+
+    o = OpeningHours()
+    o.from_linked_data(
+        json.loads(
+            """
+            {
+                "@context": "https://schema.org",
+                "@type": "Pharmacy",
+                "name": "Philippa's Pharmacy",
+                "description": "A superb collection of fine pharmaceuticals for your beauty and healthcare convenience, a department of Delia's Drugstore.",
+                "openingHours": "Mo-Tu 09:00-12:00 We,Th 09:00-12:00",
+                "telephone": "+18005551234"
+            }
+            """
+        )
+    )
+    assert o.as_opening_hours() == "Mo-Th 09:00-12:00"
+
 
 def test_ld_parse_openingHours_array():
     o = OpeningHours()
