@@ -15,9 +15,9 @@ class FarmerBoys(scrapy.Spider):
 
     def parse(self, response):
         locations_js = response.xpath(
-            '//script[contains(text(), "initMap")]/text()').extract_first()
-        locations = re.findall(
-            "var\s+locations\s*=\s*(\[.*\]);", locations_js)[0]
+            '//script[contains(text(), "initMap")]/text()'
+        ).extract_first()
+        locations = re.findall("var\s+locations\s*=\s*(\[.*\]);", locations_js)[0]
         locations = json.loads(locations)
         for location in locations:
             properties = {
@@ -34,8 +34,7 @@ class FarmerBoys(scrapy.Spider):
                 "lat": float(location["lat"]) if location["lat"] else None,
                 "lon": float(location["lng"]) if location["lng"] else None,
                 "opening_hours": " ".join(
-                    Selector(text=location["location_hours"]).xpath(
-                        "//text()").getall()
+                    Selector(text=location["location_hours"]).xpath("//text()").getall()
                 ),
             }
             yield GeojsonPointItem(**properties)
