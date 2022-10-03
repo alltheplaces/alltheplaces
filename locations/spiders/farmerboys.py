@@ -20,7 +20,7 @@ class FarmerBoys(scrapy.Spider):
         for location in locations:
             properties = {
                 "name": location["location_name"],
-                "ref": response.url,
+                "ref": location["location_url"],
                 "street": location["address_1"],
                 "city": location["city"],
                 "postcode": location["postal_code"],
