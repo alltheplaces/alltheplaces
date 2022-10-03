@@ -15,7 +15,7 @@ class DollarGeneralSpider(SitemapSpider):
     sitemap_urls = ["https://www.dollargeneral.com/sitemap-main.xml"]
     sitemap_rules = [
         (
-            r"https:\/\/www\.dollargeneral\.com\/store-directory\/.*\/\d+\.html$",
+            r"https:\/\/www\.dollargeneral\.com\/store-directory\/\w{2}\/.*\/\d+$",
             "parse",
         ),
     ]

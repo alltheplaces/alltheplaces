@@ -1,3 +1,4 @@
+import re
 from collections import defaultdict
 
 import time
@@ -174,7 +175,11 @@ class OpeningHours(object):
         elif linked_data.get("openingHours"):
             rules = linked_data["openingHours"]
             if not isinstance(rules, list):
-                rules = [rules]
+                rules = re.findall(
+                    r"((\w\w|\w\w\s?\-\s?\w\w|(\w\w,)+\w\w)\s(\d\d:\d\d)\s?\-\s?(\d\d:\d\d))",
+                    rules,
+                )
+                rules = [r[0] for r in rules]
 
             for rule in rules:
                 days, time_ranges = rule.split(" ", 1)
