@@ -243,9 +243,11 @@ def remove_prefix(input_string, prefix):
 def convert_item(item):
     ld = {}
     for itemtype in item.get("type", []):
-        schema_type = remove_prefix(
-            remove_prefix(itemtype, "https://schema.org/"), "http://schema.org/"
-        )
+        schema_type = itemtype
+        for schema in ["http://", "https://"]:
+            for host in ["schema.org", "www.schema.org"]:
+                prefix = f"{schema}{host}/"
+                schema_type = remove_prefix(schema_type, prefix)
         if schema_type != itemtype:
             # Did we identify the URI prefix?
             ld["@type"] = schema_type
