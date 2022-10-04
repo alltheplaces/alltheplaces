@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import scrapy
 from locations.items import GeojsonPointItem
+from locations.hours import OpeningHours
 
 
 class CafeZupasSpider(scrapy.Spider):
@@ -11,14 +12,46 @@ class CafeZupasSpider(scrapy.Spider):
         "https://cafezupas.com/server.php?url=https://api.controlcenter.zupas.com/api/markets/listing"
     ]
 
+    def parse_hours(self, location):
+        opening_hours = OpeningHours()
+        timings = [
+            ["mon_thurs_timings_open", "mon_thurs_timings_close"],
+            ["fri_sat_timings_open", "fri_sat_timings_close"],
+        ]
+        for i in timings:
+            if location[i[0]] in ["Closed", ""] or location[i[1]] in ["Closed", ""]:
+                continue
+            # Monday - Thursday
+            if i[0] == "mon_thurs_timings_open":
+                day_group_1 = ["MO", "TU", "WE", "TH"]
+                for day in day_group_1:
+                    opening_hours.add_range(
+                        day=day,
+                        open_time=location[i[0]],
+                        close_time=location[i[1]],
+                        time_format="%I:%M %p",
+                    )
+            # Friday - Saturday
+            if i[0] == "fri_sat_timings_open":
+                day_group_2 = ["FR", "SA"]
+                for day in day_group_2:
+                    opening_hours.add_range(
+                        day=day,
+                        open_time=location[i[0]],
+                        close_time=location[i[1]],
+                        time_format="%I:%M %p",
+                    )
+        return opening_hours.as_opening_hours()
+
     def parse(self, response):
         data = response.json()
         for i in data["data"]["data"]:
             for location in i["locations"]:
+
                 properties = {
-                    "ref": "https://cafezupas.com/locationcopy/info/"
+                    "ref": location["id"],
+                    "website": "https://cafezupas.com/locationcopy/info/"
                     + location["name"].lower().replace(" ", "-"),
-                    "website": "https://cafezupas.com/",
                     "name": location["name"],
                     "image": "https://cafezupas.com" + location["image"]
                     if location["image"] is not None
@@ -31,15 +64,6 @@ class CafeZupasSpider(scrapy.Spider):
                     "state": location["state"],
                     "postcode": location["zip"],
                     "facebook": location["facebook_url"],
-                    "opening_hours": "Fr-Sa "
-                    + location["fri_sat_timings_open"]
-                    + "-"
-                    + location["fri_sat_timings_close"]
-                    + "; Mo-Th "
-                    + location["mon_thurs_timings_open"]
-                    + "-"
-                    + location["mon_thurs_timings_close"]
-                    + "; Su "
-                    + location["sunday_timings"],
+                    "opening_hours": self.parse_hours(location),
                 }
                 yield GeojsonPointItem(**properties)
