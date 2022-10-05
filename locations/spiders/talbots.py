@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 import scrapy
+
 from locations.items import GeojsonPointItem
 
 
-class TemplateSpider(scrapy.Spider):
+class TalbotsSpider(scrapy.Spider):
     name = "talbots"
     allowed_domains = ["www.talbots.com"]
     start_urls = [
@@ -17,8 +18,10 @@ class TemplateSpider(scrapy.Spider):
             properties = {
                 "name": self.sanitize_name(resp.xpath('//a[contains(@class, "store-details-link")]//text()').get()),
                 "phone": resp.xpath('//a[contains(@href, "tel")]/text()').get(),
-                "addr_full": self.get_address(resp.xpath('//div[contains(@class, "store-name")]/following-sibling::text()').getall()),
-                "opening_hours": self.sanitize_time(resp.xpath('//*[contains(@class, "store-hours storeCol")]//text()').getall()),
+                "addr_full": self.get_address(
+                    resp.xpath('//div[contains(@class, "store-name")]/following-sibling::text()').getall()),
+                "opening_hours": self.sanitize_time(
+                    resp.xpath('//*[contains(@class, "store-hours storeCol")]//text()').getall()),
                 "ref": resp.xpath('//a[contains(@href, "store")]/@href').get(),
             }
             yield GeojsonPointItem(**properties)
