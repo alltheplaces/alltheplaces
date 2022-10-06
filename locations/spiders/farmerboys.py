@@ -3,8 +3,9 @@ import json
 import re
 
 import scrapy
+
+from locations.hours import OpeningHours, sanitise_day, day_range
 from locations.items import GeojsonPointItem
-from scrapy.selector import Selector
 
 
 class FarmerBoys(scrapy.Spider):
@@ -37,8 +38,29 @@ class FarmerBoys(scrapy.Spider):
                 else None,
                 "lat": float(location["lat"]) if location["lat"] else None,
                 "lon": float(location["lng"]) if location["lng"] else None,
-                "opening_hours": " ".join(
-                    Selector(text=location["location_hours"]).xpath("//text()").getall()
-                ).replace("\r\n", ""),
             }
+
+            oh = OpeningHours()
+
+            for days, open_time, close_time in re.findall(
+                r"(\w+-\w+|\w+)<span>([\d:ap]+)-([\d:ap]+)", location["location_hours"]
+            ):
+                open_time = open_time.replace("a", "AM").replace("p", "PM")
+                close_time = close_time.replace("a", "AM").replace("p", "PM")
+
+                days = days.replace("Thru", "Th")
+
+                if "-" in days:
+                    start_day, end_day = days.split("-")
+
+                    start_day = sanitise_day(start_day)
+                    end_day = sanitise_day(end_day)
+
+                    for day in day_range(start_day, end_day):
+                        oh.add_range(day, open_time, close_time, time_format="%I:%M%p")
+                else:
+                    oh.add_range(days, open_time, close_time, time_format="%I:%M%p")
+
+            properties["opening_hours"] = oh.as_opening_hours()
+
             yield GeojsonPointItem(**properties)
