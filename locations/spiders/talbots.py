@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
+from datetime import datetime
+
 import scrapy
 
+from locations.hours import OpeningHours
 from locations.items import GeojsonPointItem
 
 
@@ -8,47 +11,60 @@ class TalbotsSpider(scrapy.Spider):
     name = "talbots"
     allowed_domains = ["www.talbots.com"]
     start_urls = ["https://www.talbots.com/view-all-stores/"]
+    item_attributes = {"brand": "Talbots", "brand_wikidata": "Q7679064"}
 
     def parse(self, response):
-        all_data = response.xpath('//*[contains(@class, "store-row")]').getall()
-        for data in all_data:
-            resp = scrapy.Selector(text=data)
-            properties = {
-                "name": self.sanitize_name(
-                    resp.xpath(
-                        '//a[contains(@class, "store-details-link")]//text()'
-                    ).get()
-                ),
-                "phone": resp.xpath('//a[contains(@href, "tel")]/text()').get(),
-                "addr_full": self.get_address(
-                    resp.xpath(
-                        '//div[contains(@class, "store-name")]/following-sibling::text()'
-                    ).getall()
-                ),
-                "opening_hours": self.sanitize_time(
-                    resp.xpath(
-                        '//*[contains(@class, "store-hours storeCol")]//text()'
-                    ).getall()
-                ),
-                "ref": resp.xpath('//a[contains(@href, "store")]/@href').get(),
-            }
-            yield GeojsonPointItem(**properties)
+        urls = response.xpath('//a[contains(@href, "store")]/@href').extract()
+        for url in urls:
+            yield scrapy.Request(
+                "https://www.talbots.com" + url, self.parse_each_website
+            )
+
+    def parse_each_website(self, response):
+        properties = {
+            "ref": response.url,
+            "website": response.url,
+            "name": self.sanitize_name(
+                response.xpath('//*[@id="storedetails-wrapper"]/h1/text()').get()
+            ),
+            "phone": response.xpath('//*[@id="storePhone"]/a/text()').get(),
+            "addr_full": self.get_address(
+                response.xpath('//*[@id="storeAddress"]/div/div/div[1]/text()').getall()
+            ),
+            "opening_hours": self.sanitize_time(
+                response.xpath('//*[@id="storeHours"]/div/text()').getall()
+            ),
+        }
+        yield GeojsonPointItem(**properties)
 
     def get_address(self, response):
         address = []
         for line in response:
+            add = line.replace("\n", "")
+            if len(add) == 0:
+                continue
             if "Phone:" in line:
                 break
-            address.append(line.replace("\n", ""))
-        return " ".join(address)
+            address.append(add)
+        return ", ".join(address)
 
     def sanitize_time(self, response):
-        sanitized_data = []
-        for line in response:
-            if "\n" == line:
+        opening_hours = OpeningHours()
+        for time in response:
+            if time in ("\n", "Hours:"):
                 continue
-            sanitized_data.append(line.replace("\n", ""))
-        return " ".join(sanitized_data)
+            parts = time.split()
+            if parts[1] == "CLOSED":
+                continue
+            dayOfWeek = parts[0][:2]
+            opensAt = self.get_24_hr_time(parts[1], parts[2])
+            closesAt = self.get_24_hr_time(parts[4], parts[5])
+            opening_hours.add_range(dayOfWeek, opensAt, closesAt)
+        return opening_hours.as_opening_hours()
+
+    def get_24_hr_time(self, time, meridiem):
+        time_12_hr_format = datetime.strptime(time + " " + meridiem, "%I:%M %p")
+        return datetime.strftime(time_12_hr_format, "%H:%M")
 
     def sanitize_name(self, response):
         return response.replace("\n", "")
