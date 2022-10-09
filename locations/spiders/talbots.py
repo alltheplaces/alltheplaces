@@ -21,7 +21,7 @@ class TalbotsSpider(CrawlSpider):
 
     def parse_each_website(self, response):
         properties = {
-            "ref": response.url,
+            "ref": response.xpath('//input[@id="storeId"]/@value').get(),
             "website": response.url,
             "name": self.sanitize_name(
                 response.xpath('//*[@id="storedetails-wrapper"]/h1/text()').get()
