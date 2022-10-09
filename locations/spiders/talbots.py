@@ -1,24 +1,21 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime
 
-import scrapy
+from scrapy.spiders import CrawlSpider, Rule
+from scrapy.linkextractors import LinkExtractor
 
 from locations.hours import OpeningHours
 from locations.items import GeojsonPointItem
 
 
-class TalbotsSpider(scrapy.Spider):
+class TalbotsSpider(CrawlSpider):
     name = "talbots"
     allowed_domains = ["www.talbots.com"]
     start_urls = ["https://www.talbots.com/view-all-stores/"]
+    rules = [
+        Rule(LinkExtractor(allow=r"store\?StoreID=(\d+)$"), callback="parse_each_website")
+    ]
     item_attributes = {"brand": "Talbots", "brand_wikidata": "Q7679064"}
-
-    def parse(self, response):
-        urls = response.xpath('//a[contains(@href, "store")]/@href').extract()
-        for url in urls:
-            yield scrapy.Request(
-                "https://www.talbots.com" + url, self.parse_each_website
-            )
 
     def parse_each_website(self, response):
         properties = {
