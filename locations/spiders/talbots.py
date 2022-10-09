@@ -13,7 +13,9 @@ class TalbotsSpider(CrawlSpider):
     allowed_domains = ["www.talbots.com"]
     start_urls = ["https://www.talbots.com/view-all-stores/"]
     rules = [
-        Rule(LinkExtractor(allow=r"store\?StoreID=(\d+)$"), callback="parse_each_website")
+        Rule(
+            LinkExtractor(allow=r"store\?StoreID=(\d+)$"), callback="parse_each_website"
+        )
     ]
     item_attributes = {"brand": "Talbots", "brand_wikidata": "Q7679064"}
 
@@ -32,6 +34,9 @@ class TalbotsSpider(CrawlSpider):
                 response.xpath('//*[@id="storeHours"]/div/text()').getall()
             ),
         }
+        properties["lat"], properties["lon"] = (
+            response.xpath('//input[@id="address"]/@value').get().split(", ")
+        )
         yield GeojsonPointItem(**properties)
 
     def get_address(self, response):
