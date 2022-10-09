@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-from datetime import datetime
-
 from scrapy.spiders import CrawlSpider, Rule
 from scrapy.linkextractors import LinkExtractor
 
@@ -55,18 +53,14 @@ class TalbotsSpider(CrawlSpider):
         for time in response:
             if time in ("\n", "Hours:"):
                 continue
-            parts = time.split()
-            if parts[1] == "CLOSED":
+            day, times = time.split(maxsplit=1)
+            if "CLOSED" in times:
                 continue
-            dayOfWeek = parts[0][:2]
-            opensAt = self.get_24_hr_time(parts[1], parts[2])
-            closesAt = self.get_24_hr_time(parts[4], parts[5])
-            opening_hours.add_range(dayOfWeek, opensAt, closesAt)
+            open_time, close_time = times.strip().split(" - ")
+            opening_hours.add_range(
+                day[:2], open_time, close_time, time_format="%I:%M %p"
+            )
         return opening_hours.as_opening_hours()
-
-    def get_24_hr_time(self, time, meridiem):
-        time_12_hr_format = datetime.strptime(time + " " + meridiem, "%I:%M %p")
-        return datetime.strftime(time_12_hr_format, "%H:%M")
 
     def sanitize_name(self, response):
         return response.replace("\n", "")
