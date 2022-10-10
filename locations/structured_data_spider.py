@@ -38,7 +38,19 @@ def extract_image(item, response):
 
 class StructuredDataSpider(Spider):
 
-    wanted_types = []
+    wanted_types = [
+        "LocalBusiness",
+        "Store",
+        "Restaurant",
+        "BankOrCreditUnion",
+        "GroceryStore",
+        "FastFoodRestaurant",
+        "Hotel",
+        "Place",
+        "ClothingStore",
+        "DepartmentStore",
+        "HardwareStore",
+    ]
     search_for_email = True
     search_for_phone = True
     search_for_twitter = True
