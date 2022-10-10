@@ -2,17 +2,18 @@
 import scrapy
 from locations.items import GeojsonPointItem
 
+
 class AliceDeliceSpider(scrapy.Spider):
     name = "alicedelice"
     item_attributes = {"brand": "Alice Délice", "brand_wikidata": "Q105099543"}
     allowed_domains = ["www.alicedelice.com"]
-    start_urls = (
-        'https://www.alicedelice.com/trouver-ma-boutique',
-    )
+    start_urls = ("https://www.alicedelice.com/trouver-ma-boutique",)
 
     def parse(self, response):
         response.selector.remove_namespaces()
-        links = response.xpath("//div[@class='store-select']/select/option/a/@href").getall()
+        links = response.xpath(
+            "//div[@class='store-select']/select/option/a/@href"
+        ).getall()
         links = [response.urljoin(link) for link in links]
         for link in links:
             yield scrapy.Request(link, callback=self.parse_store)
@@ -21,31 +22,39 @@ class AliceDeliceSpider(scrapy.Spider):
         store_name = response.xpath("//store/@name").get()
 
         street_address_parts = response.xpath(
-                "//h1/following-sibling::*/span[@class='city']/preceding-sibling::*/text()"
-                ).getall()
-        street_address = ''.join(street_address_parts) if street_address_parts is not None else None
+            "//h1/following-sibling::*/span[@class='city']/preceding-sibling::*/text()"
+        ).getall()
+        street_address = (
+            "".join(street_address_parts) if street_address_parts is not None else None
+        )
 
         city_raw = response.xpath(
-                "//h1/following-sibling::*/span[@class='city']/span[3]/text()"
-                ).get()
+            "//h1/following-sibling::*/span[@class='city']/span[3]/text()"
+        ).get()
         city = city_raw.strip() if city_raw is not None else None
 
         postcode_raw = response.xpath(
             "//h1/following-sibling::*/span[@class='city']/span[2]/text()"
-            ).get()
+        ).get()
         postcode = postcode_raw.strip() if postcode_raw is not None else None
 
         phone_raw = response.xpath(
             "//h1/following-sibling::*/span[@class='city']"
             "/following-sibling::a[contains(@href,'tel')]/strong/text()"
-            ).get()
-        phone = phone_raw.strip().replace(".","").replace("-","") if phone_raw is not None else None
+        ).get()
+        phone = (
+            phone_raw.strip().replace(".", "").replace("-", "")
+            if phone_raw is not None
+            else None
+        )
 
         facebook_full_url = response.xpath(
             "//h1/following-sibling::*/span[@class='city']"
             "/following-sibling::a[contains(@href,'facebook')]/@href"
-            ).get()
-        facebook = facebook_full_url.split("/")[3] if facebook_full_url is not None else None
+        ).get()
+        facebook = (
+            facebook_full_url.split("/")[3] if facebook_full_url is not None else None
+        )
 
         lat = response.xpath("//store/@latitude").get()
         lon = response.xpath("//store/@longitude").get()
