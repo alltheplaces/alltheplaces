@@ -13,6 +13,7 @@ class WesternUnionSpider(SitemapSpider):
     # Use plural, singular responds with a redirect confusing to scrapy?
     sitemap_urls = ["https://locations.westernunion.com/robots.txt"]
     sitemap_rules = [(r"westernunion\.com/.*/.*", "parse")]
+    download_delay = 0
 
     def sitemap_filter(self, entries):
         for entry in entries:
