@@ -27,4 +27,8 @@ class OxfamGBSpider(SitemapSpider):
         extract_email(item, response)
         extract_phone(item, response)
 
+        if "oxfam-bookshop-" in response.url:
+            item["brand"] = "Oxfam Bookshop"
+            item["brand_wikidata"] = "Q7115196"
+
         yield item
