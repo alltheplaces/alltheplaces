@@ -105,7 +105,7 @@ There is usually a few ways to find locations:
 
 ### Structured Data
 
-Some websites may already be publishing there data in a [standard way](https://schema.org/). We can parse these with our [StructuredDataSpider](https://github.com/alltheplaces/alltheplaces/blob/master/locations/structured_data_spider.py), use a `SitemapSpider` or `CrawlSpider` to obtain the pages and pass them to `parse_sd` it will parse any Microdata or Linked Data with a type defined in `wanted_types`, you can then clean up the item, or add extra attributes with `inspect_item`.
+Some websites may already be publishing there data in a [standard way](https://schema.org/). We can parse these with our [StructuredDataSpider](https://github.com/alltheplaces/alltheplaces/blob/master/locations/structured_data_spider.py), use a `SitemapSpider` or `CrawlSpider` to obtain the pages and pass them to `parse_sd` it will parse any Microdata or Linked Data with a type defined in `wanted_types`, you can clean up source data with `pre_process_data` and clean up the item, or add extra attributes with `post_process_item`.
 
 [validator.schema.org](https://validator.schema.org/) can be really helpful when making spiders to see what structured data is available.
 

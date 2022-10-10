@@ -59,7 +59,10 @@ class StructuredDataSpider(Spider):
     def parse_sd(self, response):
         MicrodataParser.convert_to_json_ld(response)
         for wanted_type in self.wanted_types:
-            if item := LinkedDataParser.parse(response, wanted_type):
+            if ld_item := LinkedDataParser.find_linked_data(response, wanted_type):
+                self.pre_process_data(ld_item)
+
+                item = LinkedDataParser.parse_ld(ld_item)
 
                 if item["ref"] is None:
                     if hasattr(self, "rules"):
@@ -91,8 +94,16 @@ class StructuredDataSpider(Spider):
                 if self.search_for_image and item.get("image") is None:
                     extract_image(item, response)
 
-                yield from self.inspect_item(item, response)
+                yield from self.post_process_item(item, response, ld_item)
+
+    def pre_process_data(self, ld_data):
+        """Override with any pre-processing on the item."""
+        pass
+
+    def post_process_item(self, item, response, ld_data):
+        """Override with any post-processing on the item."""
+        yield from self.inspect_item(item, response)
 
     def inspect_item(self, item, response):
-        """Override with any additional processing on the item."""
+        """Deprecated, please use post_process_item(self, item, response, ld_data):"""
         yield item
