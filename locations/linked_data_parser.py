@@ -35,8 +35,22 @@ class LinkedDataParser(object):
             if not isinstance(types, list):
                 types = [types]
 
-            for t in types:
-                if LinkedDataParser.check_type(t, wanted_type, default=False):
+            types = [LinkedDataParser.clean_type(t) for t in types]
+
+            if isinstance(wanted_type, list):
+                wanted_types = wanted_type
+            else:
+                wanted_types = [wanted_type]
+
+            wanted_types = [LinkedDataParser.clean_type(t) for t in wanted_types]
+
+            for wanted_type in wanted_types:
+                valid_type = True
+                for t in types:
+                    if not t in wanted_types:
+                        valid_type = False
+
+                if valid_type:
                     return ld_obj
 
     @staticmethod
@@ -173,10 +187,13 @@ class LinkedDataParser(object):
         if default and type is None:
             return True
 
+        return LinkedDataParser.clean_type(type) == wanted_type.lower()
+
+    @staticmethod
+    def clean_type(type: str) -> str:
         return (
             type.lower()
             .replace("http://", "")
             .replace("https://", "")
             .replace("schema.org/", "")
-            == wanted_type.lower()
         )
