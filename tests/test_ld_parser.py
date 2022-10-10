@@ -256,5 +256,8 @@ def test_multiple_types():
             </script>""",
     )
 
-    assert LinkedDataParser.find_linked_data(response, ["Place", "Thing"])["name"] == "test 1"
+    assert (
+        LinkedDataParser.find_linked_data(response, ["Place", "Thing"])["name"]
+        == "test 1"
+    )
     assert LinkedDataParser.find_linked_data(response, "Place")["name"] == "test 2"
