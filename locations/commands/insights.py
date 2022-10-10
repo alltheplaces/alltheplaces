@@ -1,13 +1,14 @@
 import json
 import geonamescache
 import os
+import requests
 from collections import Counter
 from locations.name_suggestion_index import NSI
 from scrapy.commands import ScrapyCommand
 from scrapy.exceptions import UsageError
 
 
-def feature_iter(files_and_dirs):
+def iter_features(files_and_dirs):
     """
     Iterate through a set of GeoJSON files and directories. Each item in the iteration is a
     single feature. Zero length files are skipped. Only files ending .json or .geojson are
@@ -65,14 +66,32 @@ class InsightsCommand(ScrapyCommand):
             action="store_true",
             help="Are the wikidata codes in the GeoJSON known to NSI / sensible?",
         )
+        parser.add_argument(
+            "--atp-nsi-osm",
+            dest="atp_nsi_osm",
+            action="store_true",
+            help="Cross reference ATP, NSI/WIKIDATA and OSM with each other",
+        )
+        parser.add_argument(
+            "--outfile",
+            dest="outfile",
+            metavar="OUTFILE",
+            default="/tmp/out.json",
+            help="Write result of run to file",
+        )
 
     def run(self, args, opts):
         if len(args) < 1:
             raise UsageError()
         if opts.country_codes:
             self.check_country_codes(args)
+            return
         if opts.wikidata_codes:
             self.check_wikidata_codes(args)
+            return
+        if opts.atp_nsi_osm:
+            self.analyze_atp_nsi_osm(args, opts.outfile)
+            return
 
     def show_counter(self, msg, counter):
         if len(counter.most_common()) > 0:
@@ -87,7 +106,7 @@ class InsightsCommand(ScrapyCommand):
         spider_missing_counter = Counter()
         fixed_country_counter = Counter()
         country_counter = Counter()
-        for feature in feature_iter(args):
+        for feature in iter_features(args):
             spider_name = feature["properties"].get("@spider")
             country = feature["properties"].get("addr:country")
             if country:
@@ -114,7 +133,7 @@ class InsightsCommand(ScrapyCommand):
         nsi = NSI()
         spider_empty_counter = Counter()
         spider_nsi_missing_counter = Counter()
-        for feature in feature_iter(args):
+        for feature in iter_features(args):
             spider_name = feature["properties"].get("@spider")
             brand_wikidata = feature["properties"].get("brand:wikidata")
             if not brand_wikidata:
@@ -126,6 +145,62 @@ class InsightsCommand(ScrapyCommand):
                 pass
         self.show_counter("SPIDERS WITH NO BRAND DATA:", spider_empty_counter)
         self.show_counter("NSI MISSING WIKIDATA CODE:", spider_nsi_missing_counter)
+
+    def analyze_atp_nsi_osm(self, args, outfile):
+        def lookup_code(wikidata_code):
+            # Return record for a wikidata code, adding it to dict if not already present.
+            if record := wiki_table.get(wikidata_code):
+                return record
+            record = {
+                "code": wikidata_code,
+                "osm_count": 0,
+                "nsi_brand": None,
+                "nsi_description": None,
+                "atp_count": None,
+                "atp_brand": None,
+            }
+            wiki_table[wikidata_code] = record
+            return record
+
+        wiki_table = {}
+
+        # First data set is wikidata tag count info from OSM.
+        osm_url = "https://taginfo.openstreetmap.org/api/4/key/values?key=brand%3Awikidata&filter=all&lang=en&sortname=count&sortorder=desc&page=1&rp=000&qtype=value"
+        response = requests.get(osm_url)
+        if not response.status_code == 200:
+            raise Exception("Failed to load OSM wikidata tag statistics")
+        for r in response.json()["data"]:
+            x = lookup_code(r["value"])
+            x["osm_count"] = r["count"]
+
+        # Load the NSI dataset.
+        nsi = NSI()
+        for k, v in nsi.iter_wikidata():
+            r = lookup_code(k)
+            r["nsi_brand"] = v.get("label", "NO NSI LABEL!")
+            r["nsi_description"] = v.get("description", "NO NSI DESC!")
+
+        # TODO: Could go through ATP spiders themselves looking for Q-codes. Add an atp_count=-1
+        #       which would be written over if a matching POI had been scraped by the code below.
+        #       If not then that would be a possible problem to highlight.
+
+        # Walk through an ATP download set
+        for feature in iter_features(args):
+            brand_wikidata = feature["properties"].get("brand:wikidata")
+            brand = feature["properties"].get("brand")
+            if not brand_wikidata:
+                continue
+            r = lookup_code(brand_wikidata)
+            count = r.get("atp_count")
+            if not count:
+                count = 0
+            r["atp_count"] = count + 1
+            if brand and not r.get("atp_brand"):
+                r["atp_brand"] = brand
+
+        for_datatables = {"data": list(wiki_table.values())}
+        with open(outfile, "w") as f:
+            f.write(json.dumps(for_datatables))
 
 
 class CountryUtils(object):
