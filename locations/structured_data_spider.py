@@ -96,11 +96,11 @@ class StructuredDataSpider(Spider):
 
                 yield from self.post_process_item(item, response, ld_item)
 
-    def pre_process_data(self, ld_data):
+    def pre_process_data(self, ld_data, **kwargs):
         """Override with any pre-processing on the item."""
         pass
 
-    def post_process_item(self, item, response, ld_data):
+    def post_process_item(self, item, response, ld_data, **kwargs):
         """Override with any post-processing on the item."""
         yield from self.inspect_item(item, response)
 
