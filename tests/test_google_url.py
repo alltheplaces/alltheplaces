@@ -63,3 +63,9 @@ def test_place():
         57.137275,
         -2.098053,
     )
+
+
+def test_search():
+    assert url_to_coords(
+        "https://www.google.com/maps/search/?api=1&query=55.0046686,-1.6200268"
+    ) == (55.0046686, -1.6200268)
