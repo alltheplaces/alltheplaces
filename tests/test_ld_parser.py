@@ -1,5 +1,7 @@
 import json
 
+from scrapy.http import HtmlResponse
+
 from locations.linked_data_parser import LinkedDataParser
 
 
@@ -232,3 +234,27 @@ def test_check_type():
         is True
     )
     assert LinkedDataParser.check_type("postalAddress", "GeoCoordinates") is False
+
+
+def test_multiple_types():
+    response = HtmlResponse(
+        url="",
+        encoding="utf-8",
+        body="""<script type="application/ld+json">
+                {
+                    "@context": "https://schema.org",
+                    "@type": ["http://schema.org/Place", "Thing"],
+                    "name": "test 1"
+                }
+            </script>
+            <script type="application/ld+json">
+                {
+                    "@context": "https://schema.org",
+                    "@type": "http://schema.org/Place",
+                    "name": "test 2"
+                }
+            </script>""",
+    )
+
+    assert LinkedDataParser.find_linked_data(response, ["Place", "Thing"])["name"] == "test 1"
+    assert LinkedDataParser.find_linked_data(response, "Place")["name"] == "test 2"
