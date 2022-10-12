@@ -1,16 +1,21 @@
 import json
 
+import json5
+
 from locations.hours import OpeningHours
 from locations.items import GeojsonPointItem
 
 
 class LinkedDataParser(object):
     @staticmethod
-    def iter_linked_data(response):
+    def iter_linked_data(response, parse_json5=False):
         lds = response.xpath('//script[@type="application/ld+json"]//text()').getall()
         for ld in lds:
             try:
-                ld_obj = json.loads(ld, strict=False)
+                if parse_json5:
+                    ld_obj = json5.loads(ld)
+                else:
+                    ld_obj = json.loads(ld, strict=False)
             except json.decoder.JSONDecodeError:
                 continue
 
@@ -25,8 +30,10 @@ class LinkedDataParser(object):
                 raise TypeError(ld_obj)
 
     @staticmethod
-    def find_linked_data(response, wanted_type) -> {}:
-        for ld_obj in LinkedDataParser.iter_linked_data(response):
+    def find_linked_data(response, wanted_type, parse_json5=False) -> {}:
+        for ld_obj in LinkedDataParser.iter_linked_data(
+            response, parse_json5=parse_json5
+        ):
             if not ld_obj.get("@type"):
                 continue
 
@@ -147,8 +154,10 @@ class LinkedDataParser(object):
         return item
 
     @staticmethod
-    def parse(response, wanted_type) -> GeojsonPointItem:
-        ld_item = LinkedDataParser.find_linked_data(response, wanted_type)
+    def parse(response, wanted_type, parse_json5=False) -> GeojsonPointItem:
+        ld_item = LinkedDataParser.find_linked_data(
+            response, wanted_type, parse_json5=parse_json5
+        )
         if ld_item:
             item = LinkedDataParser.parse_ld(ld_item)
 

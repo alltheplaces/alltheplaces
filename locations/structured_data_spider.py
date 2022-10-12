@@ -55,11 +55,14 @@ class StructuredDataSpider(Spider):
     search_for_phone = True
     search_for_twitter = True
     search_for_image = True
+    parse_json_comments = False
 
     def parse_sd(self, response):
         MicrodataParser.convert_to_json_ld(response)
         for wanted_type in self.wanted_types:
-            if ld_item := LinkedDataParser.find_linked_data(response, wanted_type):
+            if ld_item := LinkedDataParser.find_linked_data(
+                response, wanted_type, parse_json5=self.parse_json_comments
+            ):
                 self.pre_process_data(ld_item)
 
                 item = LinkedDataParser.parse_ld(ld_item)
