@@ -262,7 +262,13 @@ class ApplyNSICategoriesPipeline(object):
         extras["nsi_id"] = match["id"]
 
         for (key, value) in match["tags"].items():
-            if key in self.important_keys:
+            if key == "brand:wikidata":
+                key = "brand_wikidata"
+
+            if key in item.fields:
+                if item.get(key) is None:
+                    item[key] = value
+            else:
                 if extras.get(key) is None:
                     extras[key] = value
 
