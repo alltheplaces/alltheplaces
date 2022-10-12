@@ -214,11 +214,6 @@ class ApplyNSICategoriesPipeline(object):
         brand = item.get("brand", "").lower().replace(" ", "")
         extras = item.get("extras", {}).copy()
 
-        current_keys = {}
-        for key in self.important_keys:
-            if value := extras.get(key):
-                current_keys[key] = value
-
         if not self.wikidata_cache.get(code):
             self.wikidata_cache[code] = list(self.nsi.iter_nsi(code))
 
@@ -233,6 +228,11 @@ class ApplyNSICategoriesPipeline(object):
             spider.crawler.stats.inc_value("atp/nsi/perfect_match")
             match = matches[0]
         else:
+            current_keys = {}
+            for key in self.important_keys:
+                if value := extras.get(key):
+                    current_keys[key] = value
+
             type_possible_matches = []
             for possible_match in matches:
                 match_names = [possible_match["displayName"]]
