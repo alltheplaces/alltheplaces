@@ -212,7 +212,7 @@ class ApplyNSICategoriesPipeline(object):
             return item
 
         brand = item.get("brand", "").lower().replace(" ", "")
-        extras = item.get("extras", {})
+        extras = item.get("extras", {}).copy()
 
         current_keys = {}
         for key in self.important_keys:
@@ -266,6 +266,7 @@ class ApplyNSICategoriesPipeline(object):
                 if extras.get(key) is None:
                     extras[key] = value
 
-        item["extras"] = extras
+        # TODO: evaluate stats from next weekly run
+        # item["extras"] = extras
 
         return item
