@@ -1,16 +1,21 @@
 import json
 
+import json5
+
 from locations.hours import OpeningHours
 from locations.items import GeojsonPointItem
 
 
 class LinkedDataParser(object):
     @staticmethod
-    def iter_linked_data(response):
+    def iter_linked_data(response, parse_json5=False):
         lds = response.xpath('//script[@type="application/ld+json"]//text()').getall()
         for ld in lds:
             try:
-                ld_obj = json.loads(ld, strict=False)
+                if parse_json5:
+                    ld_obj = json5.loads(ld)
+                else:
+                    ld_obj = json.loads(ld, strict=False)
             except json.decoder.JSONDecodeError:
                 continue
 
@@ -25,8 +30,10 @@ class LinkedDataParser(object):
                 raise TypeError(ld_obj)
 
     @staticmethod
-    def find_linked_data(response, wanted_type) -> {}:
-        for ld_obj in LinkedDataParser.iter_linked_data(response):
+    def find_linked_data(response, wanted_type, parse_json5=False) -> {}:
+        for ld_obj in LinkedDataParser.iter_linked_data(
+            response, parse_json5=parse_json5
+        ):
             if not ld_obj.get("@type"):
                 continue
 
@@ -35,8 +42,22 @@ class LinkedDataParser(object):
             if not isinstance(types, list):
                 types = [types]
 
-            for t in types:
-                if LinkedDataParser.check_type(t, wanted_type, default=False):
+            types = [LinkedDataParser.clean_type(t) for t in types]
+
+            if isinstance(wanted_type, list):
+                wanted_types = wanted_type
+            else:
+                wanted_types = [wanted_type]
+
+            wanted_types = [LinkedDataParser.clean_type(t) for t in wanted_types]
+
+            for wanted_type in wanted_types:
+                valid_type = True
+                for t in types:
+                    if not t in wanted_types:
+                        valid_type = False
+
+                if valid_type:
                     return ld_obj
 
     @staticmethod
@@ -133,8 +154,10 @@ class LinkedDataParser(object):
         return item
 
     @staticmethod
-    def parse(response, wanted_type) -> GeojsonPointItem:
-        ld_item = LinkedDataParser.find_linked_data(response, wanted_type)
+    def parse(response, wanted_type, parse_json5=False) -> GeojsonPointItem:
+        ld_item = LinkedDataParser.find_linked_data(
+            response, wanted_type, parse_json5=parse_json5
+        )
         if ld_item:
             item = LinkedDataParser.parse_ld(ld_item)
 
@@ -173,10 +196,13 @@ class LinkedDataParser(object):
         if default and type is None:
             return True
 
+        return LinkedDataParser.clean_type(type) == wanted_type.lower()
+
+    @staticmethod
+    def clean_type(type: str) -> str:
         return (
             type.lower()
             .replace("http://", "")
             .replace("https://", "")
             .replace("schema.org/", "")
-            == wanted_type.lower()
         )

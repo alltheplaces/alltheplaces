@@ -1,72 +1,51 @@
 # -*- coding: utf-8 -*-
 import scrapy
-from locations.linked_data_parser import LinkedDataParser
+import geonamescache
+from locations.structured_data_spider import StructuredDataSpider
 
 
-def from_wikidata(name, code):
-    return {"brand": name, "brand_wikidata": code}
-
-
-class HiltonSpider(scrapy.spiders.SitemapSpider):
+class HiltonSpider(scrapy.spiders.SitemapSpider, StructuredDataSpider):
     name = "hilton"
-    sitemap_urls = [
-        "https://www.hilton.com/temporary/legacy-sitemap1.xml",
-        "https://www.hilton.com/temporary/legacy-sitemap2.xml",
-    ]
+    sitemap_urls = ["https://www.hilton.com/sitemap.xml"]
     download_delay = 0.2
-    HILTON_TRU = from_wikidata("Tru by Hilton", "Q24907770")
-    HILTON_WALDORF = from_wikidata("Waldorf Astoria", "Q3239392")
-    HILTON_GARDEN = from_wikidata("Hilton Garden Inn", "Q1162859")
-    HILTON_EMBASSY = from_wikidata("Embassy Suites", "Q5369524")
-    HILTON_HOMEWOOD = from_wikidata("Homewood Suites by Hilton", "Q5890701")
-    HILTON_HOME2 = from_wikidata("Home2 Suites by Hilton", "Q5887912")
-    HILTON_DOUBLETREE = from_wikidata("DoubleTree by Hilton", "Q2504643")
-    HILTON_CANOPY = from_wikidata("Canopy by Hilton", "Q30632909")
-    HILTON_CONRAD = from_wikidata("Conrad Hotels & Resorts", "Q855525")
-    HILTON_HAMPTON = from_wikidata("Hampton by Hilton", "Q5646230")
-    HILTON_HOTELS = from_wikidata("Hilton Hotels & Resorts", "Q598884")
-    # Looks like internally Hilton assign each hotel a 7-alpha code, the last
-    # two letters of which indicate the brand.
+
+    HILTON_DOUBLETREE = ["DoubleTree by Hilton", "Q2504643"]
+    HILTON_HOTELS = ["Hilton Hotels & Resorts", "Q598884"]
+    # Each hotel has a 7 digit alpha code, the last two letters indicate the brand.
     my_brands = {
-        "ci": HILTON_CONRAD,
+        "ci": ["Conrad Hotels & Resorts", "Q855525"],
         "di": HILTON_DOUBLETREE,
         "dt": HILTON_DOUBLETREE,
-        "es": HILTON_EMBASSY,
+        "es": ["Embassy Suites", "Q5369524"],
         "hf": HILTON_HOTELS,
         "hh": HILTON_HOTELS,
         "hi": HILTON_HOTELS,
         "hn": HILTON_HOTELS,
         "hs": HILTON_HOTELS,
-        "ht": HILTON_HOME2,
-        "hw": HILTON_HOMEWOOD,
-        "hx": HILTON_HAMPTON,
-        "gi": HILTON_GARDEN,
-        "py": HILTON_CANOPY,
-        "ru": HILTON_TRU,
+        "ht": ["Home2 Suites by Hilton", "Q5887912"],
+        "hw": ["Homewood Suites by Hilton", "Q5890701"],
+        "hx": ["Hampton by Hilton", "Q5646230"],
+        "gi": ["Hilton Garden Inn", "Q1162859"],
+        "ol": ["LXR Hotels & Resorts", "Q64605184"],
+        "pr": "Hilton Hotels & Resorts",
+        "py": ["Canopy by Hilton", "Q30632909"],
+        "qq": "Curio Collection",
+        "ru": ["Tru by Hilton", "Q24907770"],
         "tw": HILTON_HOTELS,
-        "wa": HILTON_WALDORF,
+        "ua": ["Motto by Hilton", "Q112144350"],
+        "up": "Tapestry Collection",
+        "wa": ["Waldorf Astoria", "Q3239392"],
     }
+    gc = geonamescache.GeonamesCache()
 
-    def sitemap_filter(self, entries):
-        # The sitemap URLs and the gymnastics on display here shows that the Hilton site
-        # is in somewhat of a state of flux.
-        for entry in entries:
-            url = entry["loc"]
-            if "curiocollection3" in url or "GV/" in url:
-                continue
-            if url.endswith("/about/index.html") or url.endswith("rooms/index.html"):
-                hotel = url.split("/")[-3]
-                splits = hotel.split("-")
-                code = splits.pop().lower()
-                splits.insert(0, code)
-                if code == "dt":
-                    # Some Doubletree links have XXXXX-DT rather than XXXXXDT codes.
-                    code = splits.pop().lower()
-                    splits.insert(0, code)
-                entry["loc"] = "https://www.hilton.com/en/hotels/{}/".format(
-                    "-".join(splits)
+    def _parse_sitemap(self, response):
+        for x in super()._parse_sitemap(response):
+            if x.url.endswith(".xml"):
+                yield x
+            elif x.url.endswith("/hotel-info/"):
+                yield scrapy.Request(
+                    x.url.replace("/hotel-info/", "/"), callback=self.parse_sd
                 )
-                yield entry
 
     def lookup_brand(self, response):
         if "-dt-doubletree-" in response.url:
@@ -76,21 +55,27 @@ class HiltonSpider(scrapy.spiders.SitemapSpider):
         code = splits.split("-")[0][-2:]
         return self.my_brands.get(code)
 
-    def parse(self, response):
-        brand = self.lookup_brand(response)
-        if brand:
-            item = LinkedDataParser.parse(response, "Hotel")
-            if item:
-                item["ref"] = response.url
-                item["brand"] = brand["brand"]
-                item["brand_wikidata"] = brand["brand_wikidata"]
-                # The street address is set by Hilton to be the full address of the property.
-                # This can be fixed up rather well given that Hilton set the city field correctly.
-                street_address = item["street_address"]
-                splits = street_address.split(", {},".format(item["city"]))
-                if len(splits) == 2:
+    def post_process_item(self, item, response, ld_data, **kwargs):
+        if brand := self.lookup_brand(response):
+            if isinstance(brand, str):
+                return
+            item["ref"] = response.url
+            item["brand"], item["brand_wikidata"] = brand
+            # In many cases the street address is set by Hilton to be the full address
+            # of the property. A certain amount of fixup can be attempted.
+            street_address = item["street_address"]
+            splits = street_address.split(", {},".format(item["city"]))
+            if len(splits) == 2:
+                item["addr_full"] = street_address
+                item["street_address"] = splits[0]
+            else:
+                # If we find the country name in the street address treat it as a full address.
+                # Otherwise for those few remaining countries we will leave as a street address
+                # which at time of writing is totally correct.
+                country = self.gc.get_countries().get(item["country"])
+                if country and country["name"].lower() in street_address.lower():
                     item["addr_full"] = street_address
-                    item["street_address"] = splits[0]
-                return item
+                    item["street_address"] = None
+            yield item
         else:
-            self.logger.warn("unable to lookup brand: %s", response.url)
+            self.logger.error("unable to lookup brand: %s", response.url)

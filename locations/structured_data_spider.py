@@ -38,16 +38,34 @@ def extract_image(item, response):
 
 class StructuredDataSpider(Spider):
 
-    wanted_types = []
+    wanted_types = [
+        "LocalBusiness",
+        "Store",
+        "Restaurant",
+        "BankOrCreditUnion",
+        "GroceryStore",
+        "FastFoodRestaurant",
+        "Hotel",
+        "Place",
+        "ClothingStore",
+        "DepartmentStore",
+        "HardwareStore",
+    ]
     search_for_email = True
     search_for_phone = True
     search_for_twitter = True
     search_for_image = True
+    parse_json_comments = False
 
     def parse_sd(self, response):
         MicrodataParser.convert_to_json_ld(response)
         for wanted_type in self.wanted_types:
-            if item := LinkedDataParser.parse(response, wanted_type):
+            if ld_item := LinkedDataParser.find_linked_data(
+                response, wanted_type, parse_json5=self.parse_json_comments
+            ):
+                self.pre_process_data(ld_item)
+
+                item = LinkedDataParser.parse_ld(ld_item)
 
                 if item["ref"] is None:
                     if hasattr(self, "rules"):
@@ -79,8 +97,16 @@ class StructuredDataSpider(Spider):
                 if self.search_for_image and item.get("image") is None:
                     extract_image(item, response)
 
-                yield from self.inspect_item(item, response)
+                yield from self.post_process_item(item, response, ld_item)
+
+    def pre_process_data(self, ld_data, **kwargs):
+        """Override with any pre-processing on the item."""
+        pass
+
+    def post_process_item(self, item, response, ld_data, **kwargs):
+        """Override with any post-processing on the item."""
+        yield from self.inspect_item(item, response)
 
     def inspect_item(self, item, response):
-        """Override with any additional processing on the item."""
+        """Deprecated, please use post_process_item(self, item, response, ld_data):"""
         yield item
