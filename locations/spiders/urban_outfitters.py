@@ -11,4 +11,3 @@ class UrbanOutfitters(SitemapSpider, StructuredDataSpider):
     allowed_domains = ["www.urbanoutfitters.com"]
     sitemap_urls = ["https://www.urbanoutfitters.com/store_sitemap.xml"]
     sitemap_rules = [("", "parse_sd")]
-    sitemap_follow = ["/sitemapindex.xml", "/store_sitemap.xml", "/stores/"]
