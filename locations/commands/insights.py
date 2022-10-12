@@ -147,9 +147,15 @@ class InsightsCommand(ScrapyCommand):
         self.show_counter("NSI MISSING WIKIDATA CODE:", spider_nsi_missing_counter)
 
     def analyze_atp_nsi_osm(self, args, outfile):
+        """
+        Trawl ATM, NSI and OSM for per wikidata code information.
+        :param args: ATP output GeoJSON files / directories to load
+        :param outfile: JSON result file name to write
+        """
+
         def lookup_code(wikidata_code):
             # Return record for a wikidata code, adding it to dict if not already present.
-            if record := wiki_table.get(wikidata_code):
+            if record := wikidata_dict.get(wikidata_code):
                 return record
             record = {
                 "code": wikidata_code,
@@ -159,21 +165,21 @@ class InsightsCommand(ScrapyCommand):
                 "atp_count": None,
                 "atp_brand": None,
             }
-            wiki_table[wikidata_code] = record
+            wikidata_dict[wikidata_code] = record
             return record
 
-        wiki_table = {}
+        # A dict keyed by wikidata code.
+        wikidata_dict = {}
 
-        # First data set is wikidata tag count info from OSM.
+        # First data set to merge into the output table is wikidata tag count info from OSM.
         osm_url = "https://taginfo.openstreetmap.org/api/4/key/values?key=brand%3Awikidata&filter=all&lang=en&sortname=count&sortorder=desc&page=1&rp=000&qtype=value"
         response = requests.get(osm_url)
         if not response.status_code == 200:
             raise Exception("Failed to load OSM wikidata tag statistics")
         for r in response.json()["data"]:
-            x = lookup_code(r["value"])
-            x["osm_count"] = r["count"]
+            lookup_code(r["value"])["osm_count"] = r["count"]
 
-        # Load the NSI dataset.
+        # Now load each wikidata entry in the NSI dataset and merge into our wikidata table.
         nsi = NSI()
         for k, v in nsi.iter_wikidata():
             r = lookup_code(k)
@@ -184,7 +190,7 @@ class InsightsCommand(ScrapyCommand):
         #       which would be written over if a matching POI had been scraped by the code below.
         #       If not then that would be a possible problem to highlight.
 
-        # Walk through an ATP download set
+        # Walk through the referenced ATP downloads, if they have wikidata codes then update our output table.
         for feature in iter_features(args):
             brand_wikidata = feature["properties"].get("brand:wikidata")
             brand = feature["properties"].get("brand")
@@ -195,10 +201,11 @@ class InsightsCommand(ScrapyCommand):
             if not count:
                 count = 0
             r["atp_count"] = count + 1
-            if brand and not r.get("atp_brand"):
+            if brand:
                 r["atp_brand"] = brand
 
-        for_datatables = {"data": list(wiki_table.values())}
+        # Write a JSON format output file which is datatables friendly.
+        for_datatables = {"data": list(wikidata_dict.values())}
         with open(outfile, "w") as f:
             f.write(json.dumps(for_datatables))
 
