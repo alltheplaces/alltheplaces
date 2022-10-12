@@ -204,6 +204,8 @@ class ApplyNSICategoriesPipeline(object):
 
     important_keys = ["amenity", "leisure", "shop", "tourism"]
 
+    wikidata_cache = {}
+
     def process_item(self, item, spider):
         code = item.get("brand_wikidata")
         if not code:
@@ -217,7 +219,11 @@ class ApplyNSICategoriesPipeline(object):
             if value := extras.get(key):
                 current_keys[key] = value
 
-        matches = list(self.nsi.iter_nsi(code))
+        if not self.wikidata_cache.get(code):
+            self.wikidata_cache[code] = list(self.nsi.iter_nsi(code))
+
+        matches = self.wikidata_cache.get(code)
+
         match = None
 
         if len(matches) == 0:
