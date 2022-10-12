@@ -205,17 +205,17 @@ class ApplyNSICategoriesPipeline(object):
     important_keys = ["amenity", "leisure", "shop", "tourism"]
 
     def process_item(self, item, spider):
-        brand = item.get("brand", "").lower().replace(" ", "")
         code = item.get("brand_wikidata")
+        if not code:
+            return item
+
+        brand = item.get("brand", "").lower().replace(" ", "")
         extras = item.get("extras", {})
 
         current_keys = {}
         for key in self.important_keys:
             if value := extras.get(key):
                 current_keys[key] = value
-
-        if not code:
-            return item
 
         matches = list(self.nsi.iter_nsi(code))
         match = None
