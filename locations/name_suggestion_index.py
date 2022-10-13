@@ -47,7 +47,7 @@ class NSI(object, metaclass=Singleton):
         self._ensure_loaded()
         return self.wikidata_json.get(wikidata_code)
 
-    def iter_wikidata(self, fuzzy_label):
+    def iter_wikidata(self, fuzzy_label=None):
         """
         Lookup by fuzzy label match in the NSI.
         :param fuzzy_label: string to fuzzy match
@@ -56,6 +56,9 @@ class NSI(object, metaclass=Singleton):
         self._ensure_loaded()
         s = NSI.normalise(fuzzy_label)
         for k, v in self.wikidata_json.items():
+            if not fuzzy_label:
+                yield k, v
+                continue
             if label := v.get("label"):
                 if s in NSI.normalise(label):
                     yield k, v
@@ -81,6 +84,8 @@ class NSI(object, metaclass=Singleton):
         :param s: string to be cleaned
         :return: the cleaned string
         """
+        if not s:
+            return None
         s = s.upper()
         converted_word = ""
         for char in s:
