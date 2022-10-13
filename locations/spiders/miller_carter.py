@@ -1,10 +1,8 @@
 # -*- coding: utf-8 -*-
 import re
 import json
-
 import scrapy
 from scrapy.spiders import SitemapSpider
-
 from locations.structured_data_spider import StructuredDataSpider
 from locations.items import GeojsonPointItem
 
