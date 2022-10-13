@@ -23,7 +23,8 @@ class MillerCarterSpider(scrapy.Spider):
         data = json.loads(
             response.xpath(
                 '//script[@type="application/ld+json" and contains(text(), "GeoCoordinates")]/text()'
-            ).extract_first())
+            ).extract_first()
+        )
 
         properties = {
             "name": data["name"],
