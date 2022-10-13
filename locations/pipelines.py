@@ -233,8 +233,6 @@ class ApplyNSICategoriesPipeline(object):
         if match is None:
             return item
 
-        return item  # TODO: evaluate stats from next weekly run before modifying the output
-
         extras = item.get("extras", {})
         extras["nsi_id"] = match["id"]
 
