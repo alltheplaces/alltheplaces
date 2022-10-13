@@ -202,8 +202,6 @@ class ApplyNSICategoriesPipeline(object):
 
     nsi = NSI()
 
-    important_keys = ["amenity", "leisure", "shop", "tourism"]
-
     wikidata_cache = {}
 
     def process_item(self, item, spider):
@@ -211,60 +209,70 @@ class ApplyNSICategoriesPipeline(object):
         if not code:
             return item
 
-        brand = item.get("brand", "").lower().replace(" ", "")
-        extras = item.get("extras", {}).copy()
-
         if not self.wikidata_cache.get(code):
+            # wikidata_cache will usually only hold one thing, but can contain more with more complex spiders
+            # The key thing is that we don't have to call nsi.iter_nsi on every process_item
             self.wikidata_cache[code] = list(self.nsi.iter_nsi(code))
 
         matches = self.wikidata_cache.get(code)
 
-        match = None
-
         if len(matches) == 0:
             spider.crawler.stats.inc_value("atp/nsi/brand_missing")
             return item
-        elif len(matches) == 1:
+
+        extras = item.get("extras", {})
+
+        match = None
+
+        if len(matches) == 1:
             spider.crawler.stats.inc_value("atp/nsi/perfect_match")
             match = matches[0]
         else:
+            brand = item.get("brand", "").lower().replace(" ", "")
             current_keys = {}
-            for key in self.important_keys:
+            for key in ["amenity", "leisure", "shop", "tourism"]:
                 if value := extras.get(key):
                     current_keys[key] = value
 
-            type_possible_matches = []
+            # Loop through the NSI Qcode matches and exclude any that don't match
+            possible_type_matches = []
             for possible_match in matches:
                 match_names = [possible_match["displayName"]]
                 match_names += possible_match.get("matchNames", [])
                 match_names = [m.lower().replace(" ", "") for m in match_names]
 
+                # Exclude based on name
+                # TODO: We may need more normalisation here.
                 if not brand in match_names:
                     continue
 
-                valid_match = True
+                # If there are any category tags set in the spider, we can use them to exclude NSI matches
                 for key, value in current_keys.items():
                     if nsi_value := possible_match["tags"].get(key):
                         if value != nsi_value:
-                            valid_match = False
-                if valid_match:
-                    type_possible_matches.append(possible_match)
+                            continue
 
-            if len(type_possible_matches) == 1:
-                match = type_possible_matches[0]
+                possible_type_matches.append(possible_match)
 
-            if match is None:
+            if len(possible_type_matches) == 1:
+                match = possible_type_matches[0]
+                spider.crawler.stats.inc_value("atp/nsi/calculated_match")
+            else:
+                # TODO: Possibly need more filtering, or to much
                 spider.crawler.stats.inc_value("atp/nsi/match_failed")
                 return item
 
-            spider.crawler.stats.inc_value("atp/nsi/calculated_match")
+        return item  # TODO: evaluate stats from next weekly run before modifying the output
 
         extras["nsi_id"] = match["id"]
 
+        # Apply NSI tags to item
         for (key, value) in match["tags"].items():
             if key == "brand:wikidata":
                 key = "brand_wikidata"
 
+            # Fields defined in GeojsonPointItem are added directly otherwise add them to extras
+            # Never override anything set by the spider
             if key in item.fields:
                 if item.get(key) is None:
                     item[key] = value
@@ -272,7 +280,6 @@ class ApplyNSICategoriesPipeline(object):
                 if extras.get(key) is None:
                     extras[key] = value
 
-        # TODO: evaluate stats from next weekly run
-        # item["extras"] = extras
+        item["extras"] = extras
 
         return item
