@@ -8,7 +8,6 @@ from scrapy.spiders import SitemapSpider
 from locations.structured_data_spider import StructuredDataSpider
 from locations.items import GeojsonPointItem
 
-
 class MillerCarterSpider(StructuredDataSpider):
     # download_delay = 0.2
     name = "millercarter"
