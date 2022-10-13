@@ -20,11 +20,7 @@ class MillerCarterSpider(scrapy.Spider):
             yield scrapy.Request(response.urljoin(url), callback=self.parse_place)
 
     def parse_place(self, response):
-        data = json.loads(
-            response.xpath(
-                '//script[@type="application/ld+json" and contains(text(), "GeoCoordinates")]/text()'
-            ).extract_first()
-        )
+        data = json.loads(response.xpath('//script[@type="application/ld+json" and contains(text(), "GeoCoordinates")]/text()').extract_first())
 
         properties = {
             "name": data["name"],
