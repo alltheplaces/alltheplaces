@@ -12,7 +12,7 @@ from locations.items import GeojsonPointItem
 class MillerCarterSpider(StructuredDataSpider):
     # download_delay = 0.2
     name = "millercarter"
-    item_attributes = {"brand": "Miller and Carter"}
+    item_attributes = {"brand": "Miller and Carter", "brand_wikidata": "Q87067401"}
     allowed_domains = ["millerandcarter.co.uk"]
     start_urls = ["https://www.millerandcarter.co.uk/ourvenues#/"]
 
