@@ -207,7 +207,7 @@ class InsightsCommand(ScrapyCommand):
         # Write a JSON format output file which is datatables friendly.
         for_datatables = {"data": list(wikidata_dict.values())}
         with open(outfile, "w") as f:
-            f.write(json.dumps(for_datatables))
+            json.dump(for_datatables, f)
 
 
 class CountryUtils(object):
