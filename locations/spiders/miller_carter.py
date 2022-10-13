@@ -2,9 +2,7 @@
 import re
 import json
 import scrapy
-from scrapy.spiders import SitemapSpider
 from locations.structured_data_spider import StructuredDataSpider
-from locations.items import GeojsonPointItem
 
 class MillerCarterSpider(StructuredDataSpider):
     # download_delay = 0.2
@@ -17,4 +15,3 @@ class MillerCarterSpider(StructuredDataSpider):
         urls = response.xpath('//div[@class="accordion parbase section"]//a/@href').extract()
         for url in urls:
             yield scrapy.Request(response.urljoin(url), callback=self.parse_sd)
-            
