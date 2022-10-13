@@ -237,8 +237,12 @@ class ApplyNSICategoriesPipeline(object):
             # Loop through the NSI Qcode matches and exclude any that don't match
             possible_type_matches = []
             for possible_match in matches:
-                match_names = [possible_match["displayName"]]
+                match_names = [
+                    possible_match["displayName"],
+                    possible_match["tags"].get("brand"),
+                ]
                 match_names += possible_match.get("matchNames", [])
+                match_names = filter(None, match_names)
                 match_names = [m.lower().replace(" ", "") for m in match_names]
 
                 # Exclude based on name
