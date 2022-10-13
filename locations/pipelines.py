@@ -220,54 +220,22 @@ class ApplyNSICategoriesPipeline(object):
             spider.crawler.stats.inc_value("atp/nsi/brand_missing")
             return item
 
-        extras = item.get("extras", {})
-
         match = None
 
         if len(matches) == 1:
             spider.crawler.stats.inc_value("atp/nsi/perfect_match")
             match = matches[0]
         else:
-            brand = item.get("brand", "").lower().replace(" ", "")
-            current_keys = {}
-            for key in ["amenity", "leisure", "shop", "tourism"]:
-                if value := extras.get(key):
-                    current_keys[key] = value
+            # TODO: filter multiple matches after we see the stats
+            spider.crawler.stats.inc_value("atp/nsi/multiple_hits")
+            return item
 
-            # Loop through the NSI Qcode matches and exclude any that don't match
-            possible_type_matches = []
-            for possible_match in matches:
-                match_names = [
-                    possible_match["displayName"],
-                    possible_match["tags"].get("brand"),
-                ]
-                match_names += possible_match.get("matchNames", [])
-                match_names = filter(None, match_names)
-                match_names = [m.lower().replace(" ", "") for m in match_names]
-
-                # Exclude based on name
-                # TODO: We may need more normalisation here.
-                if not brand in match_names:
-                    continue
-
-                # If there are any category tags set in the spider, we can use them to exclude NSI matches
-                for key, value in current_keys.items():
-                    if nsi_value := possible_match["tags"].get(key):
-                        if value != nsi_value:
-                            continue
-
-                possible_type_matches.append(possible_match)
-
-            if len(possible_type_matches) == 1:
-                match = possible_type_matches[0]
-                spider.crawler.stats.inc_value("atp/nsi/calculated_match")
-            else:
-                # TODO: Possibly need more filtering, or to much
-                spider.crawler.stats.inc_value("atp/nsi/match_failed")
-                return item
+        if match is None:
+            return item
 
         return item  # TODO: evaluate stats from next weekly run before modifying the output
 
+        extras = item.get("extras", {})
         extras["nsi_id"] = match["id"]
 
         # Apply NSI tags to item
