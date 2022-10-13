@@ -21,7 +21,7 @@ DAY_MAPPING = {
 
 class SephoraSpider(scrapy.Spider):
     name = "sephora"
-    item_attributes = {"brand": "Sephora"}
+    item_attributes = {"brand": "Sephora", "brand_wikidata": "Q2408041"}
     allowed_domains = ["www.sephora.com"]
     download_delay = 0.2
     start_urls = ("https://www.sephora.com/storelist",)

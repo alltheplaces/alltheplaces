@@ -17,7 +17,7 @@ DAYS = {
 
 class McmenaminsSpider(scrapy.Spider):
     name = "mcmenamins"
-    item_attributes = {"brand": "McMenamins"}
+    item_attributes = {"brand": "McMenamins", "brand_wikidata": "Q6802345"}
     allowed_domains = ["mcmenamins.com"]
     start_urls = ("https://www.mcmenamins.com/eat-drink",)
 

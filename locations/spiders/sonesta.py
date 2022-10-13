@@ -10,7 +10,7 @@ from locations.items import GeojsonPointItem
 class SonestaSpider(scrapy.Spider):
     download_delay = 0.2
     name = "sonesta"
-    item_attributes = {"brand": "Sonesta"}
+    item_attributes = {"brand": "Sonesta", "brand_wikidata": "Q81003878"}
     allowed_domains = ["sonesta.com"]
     start_urls = ("https://www.sonesta.com",)
 

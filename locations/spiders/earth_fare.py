@@ -20,7 +20,7 @@ DAY_MAPPING = {
 
 class EarthFareSpider(scrapy.Spider):
     name = "earth_fare"
-    item_attributes = {"brand": "Earth Fare"}
+    item_attributes = {"brand": "Earth Fare", "brand_wikidata": "Q5327075"}
     allowed_domains = ["www.earthfare.com"]
     start_urls = [
         "https://www.earthfare.com/rs/StoreLocator",

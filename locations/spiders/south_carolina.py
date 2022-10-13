@@ -12,6 +12,7 @@ class SouthCarolinaSpider(scrapy.Spider):
     start_urls = (
         "https://applications.sc.gov/PortalMapApi/api/Map/GetMapItemsByCategoryId/1,2,3,4,5,6,7",
     )
+    item_attributes = {"brand_wikidata": "Q1456"}
 
     def parse(self, response):
         cat = (

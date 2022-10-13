@@ -10,6 +10,7 @@ class SparkasseSpider(scrapy.Spider):
     name = "sparkasse"
     allowed_domains = ["www.sparkasse.de"]
     download_delay = 2
+    item_attributes = {"brand": "Sparkasse", "brand_wikidata": "Q13601825"}
 
     def start_requests(self):
         for c in "abcdefghijklmnopqrstuvwxyz":

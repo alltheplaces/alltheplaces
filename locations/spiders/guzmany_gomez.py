@@ -8,7 +8,7 @@ from locations.items import GeojsonPointItem
 
 class GuzmanyGomezSpider(scrapy.Spider):
     name = "guzmany_gomez"
-    item_attributes = {"brand": "Guzman Y Gomez"}
+    item_attributes = {"brand": "Guzman Y Gomez", "brand_wikidata": "Q23019759"}
     allowed_domains = ["guzmanygomez.com.au"]
     start_urls = [
         "https://www.guzmanygomez.com.au/wp-json/wpapi/v2/getall",

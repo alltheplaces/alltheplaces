@@ -7,7 +7,7 @@ from locations.items import GeojsonPointItem
 
 class DickBlickSpider(scrapy.Spider):
     name = "dick_blick"
-    item_attributes = {"brand": "Dick Blick"}
+    item_attributes = {"brand": "Dick Blick", "brand_wikidata": "Q5272692"}
     allowed_domains = ["www.dickblick.com"]
     start_urls = ("https://www.dickblick.com/stores/",)
 

@@ -9,7 +9,7 @@ from locations.items import GeojsonPointItem
 
 class KindredHealthcareSpider(scrapy.Spider):
     name = "kindred_healthcare"
-    item_attributes = {"brand": "Kindred Healthcare"}
+    item_attributes = {"brand": "Kindred Healthcare", "brand_wikidata": "Q921363"}
     allowed_domains = ["www.kindredhealthcare.com"]
     start_urls = [
         "https://www.kindredhealthcare.com/sitemap/sitemap.xml",

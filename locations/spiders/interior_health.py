@@ -8,7 +8,7 @@ from locations.items import GeojsonPointItem
 
 class InteriorHealthSpider(scrapy.Spider):
     name = "interior_health"
-    item_attributes = {"brand": "Interior Health"}
+    item_attributes = {"brand": "Interior Health", "brand_wikidata": "Q6046681"}
     allowed_domains = ["www.interiorhealth.ca"]
     start_urls = [
         "https://www.interiorhealth.ca/Pages/default.aspx",
