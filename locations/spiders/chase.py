@@ -79,6 +79,7 @@ class ChaseSpider(scrapy.Spider):
             "lon": float(
                 response.xpath('//meta[@itemprop="longitude"]/@content').extract_first()
             ),
+            "extras": {"amenity": "atm" if atm_only else "bank"},
         }
 
         hours = response.xpath('//tr[@itemprop="openingHours"]/@content').extract()[
