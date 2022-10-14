@@ -7,17 +7,11 @@ from locations.hours import OpeningHours, DAYS
 class CooplandsDoncasterSpider(scrapy.Spider):
     name = "cooplands_doncaster"
     allowed_domains = ["cooplands.co.uk"]
-    start_urls = [
-        "https://cooplands.co.uk/shop-locations"
-        ]
+    start_urls = ["https://cooplands.co.uk/shop-locations"]
 
     hours = OpeningHours()
     for DAY in DAYS[0:6]:
-        hours.add_range(
-            day=DAY,
-            open_time="08:00",
-            close_time="17:00"
-        )
+        hours.add_range(day=DAY, open_time="08:00", close_time="17:00")
 
     item_attributes = {
         "brand": "Cooplands",
