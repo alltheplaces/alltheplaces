@@ -45,8 +45,13 @@ class NameSuggestionIndexCommand(ScrapyCommand):
             self.lookup_code(args)
 
     def lookup_name(self, args):
-        for k, v in self.nsi.iter_wikidata(args[0]):
-            NameSuggestionIndexCommand.show(k, v)
+        result = list(self.nsi.iter_wikidata(args[0]))
+        if len(result) == 1:
+            # Only one match, so go and lookup full NSI details by Q-code
+            self.lookup_code(result[0])
+        else:
+            for k, v in result:
+                NameSuggestionIndexCommand.show(k, v)
 
     def lookup_code(self, args):
         if v := self.nsi.lookup_wikidata(args[0]):
