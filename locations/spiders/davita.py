@@ -64,7 +64,7 @@ STATES = [
 
 class DavitaSpider(scrapy.Spider):
     name = "davita"
-    item_attributes = {"brand": "DaVita"}
+    item_attributes = {"brand": "DaVita", "brand_wikidata": "Q5207184"}
     allowed_domains = ["davita.com"]
     start_urls = ("https://www.davita.com/tools/find-dialysis-center",)
 

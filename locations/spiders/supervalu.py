@@ -5,7 +5,7 @@ from locations.items import GeojsonPointItem
 
 class SupervaluSpider(scrapy.Spider):
     name = "supervalu"
-    item_attributes = {"brand": "SuperValu"}
+    item_attributes = {"brand": "SuperValu", "brand_wikidata": "Q682047"}
     allowed_domains = ["www.supervalustores.com"]
 
     def start_requests(self):

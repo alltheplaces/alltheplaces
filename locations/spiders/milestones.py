@@ -9,7 +9,7 @@ from locations.hours import OpeningHours
 
 class MilestonesSpider(scrapy.Spider):
     name = "milestones"
-    item_attributes = {"brand": "Milestones"}
+    item_attributes = {"brand": "Milestones", "brand_wikidata": "Q6851623"}
     allowed_domains = ["google.com", "milestonesrestaurants.com"]
     start_urls = [
         "https://spreadsheets.google.com/feeds/list/19fw3iY-T80mIHgBGAysKyqq5lqcCWWP9WH74mzEz2to/1/public/values?alt=json",

@@ -12,6 +12,7 @@ DAY_MAPPING = {1: "Mo", 2: "Tu", 3: "We", 4: "Th", 5: "Fr", 6: "Sa", 7: "Su"}
 class DeutschepostDeSpider(scrapy.Spider):
     name = "deutschepost_de"
     allowed_domains = ["www.deutschepost.de"]
+    item_attributes = {"brand": "Deutsche Post", "brand_wikidata": "Q15805513"}
 
     def start_requests(self):
         input_files = ["germany_grid_15km.csv"]

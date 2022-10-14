@@ -12,6 +12,7 @@ class AveraSpider(scrapy.Spider):
     name = "avera"
     item_attributes = {
         "brand": "Avera",
+        "brand_wikidata": "Q4828238",
     }
     allowed_domains = ["www.avera.org"]
     start_urls = ("https://www.avera.org",)

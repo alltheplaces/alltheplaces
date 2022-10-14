@@ -8,6 +8,7 @@ class CuraleafSpider(scrapy.Spider):
     name = "curaleaf"
     allowed_domains = ["curaleaf.com"]
     start_urls = ("https://curaleaf.com/locations/",)
+    item_attributes = {"brand": "Curaleaf", "brand_wikidata": "Q85754829"}
 
     def parse(self, response):
         urls = response.xpath('//div[@class="button2"]/a/@href').extract()

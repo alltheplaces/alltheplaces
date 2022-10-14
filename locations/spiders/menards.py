@@ -5,7 +5,7 @@ from locations.items import GeojsonPointItem
 
 class MenardsSpider(scrapy.Spider):
     name = "menards"
-    item_attributes = {"brand": "Menards"}
+    item_attributes = {"brand": "Menards", "brand_wikidata": "Q1639897"}
     start_urls = ["https://www.menards.com/main/storeLocator.html"]
     user_agent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.183 Safari/537.36"
 

@@ -8,7 +8,7 @@ from locations.items import GeojsonPointItem
 
 class SomaSpider(scrapy.Spider):
     name = "soma"
-    item_attributes = {"brand": "Soma"}
+    item_attributes = {"brand": "Soma", "brand_wikidata": "Q69882213"}
     allowed_domains = ["stores.soma.com"]
 
     def start_requests(self):

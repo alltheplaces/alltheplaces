@@ -8,6 +8,7 @@ class TangerOutletSpider(scrapy.Spider):
     allowed_domains = ["www.tangeroutlet.com"]
     download_delay = 0.1
     start_urls = ("https://www.tangeroutlet.com/locations",)
+    item_attributes = {"brand": "Tanger Outlet", "brand_wikidata": "Q7682888"}
 
     def parse(self, response):
         storeselector = response.xpath(

@@ -9,6 +9,7 @@ class BunningsSpider(scrapy.Spider):
     name = "bunnings"
     allowed_domains = ["bunnings.com.au"]
     start_urls = ("https://www.bunnings.com.au/stores/",)
+    item_attributes = {"brand": "Bunnings", "brand_wikidata": "Q4997829"}
 
     def parse(self, response):
         raw_data = re.search(

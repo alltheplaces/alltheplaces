@@ -8,7 +8,7 @@ DAYS = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
 
 class SparNoSpider(scrapy.Spider):
     name = "spar_no"
-    item_attributes = {"brand": "Spar"}
+    item_attributes = {"brand": "Spar", "brand_wikidata": "Q610492"}
     allowed_domains = ["spar.no"]
     start_urls = ("https://spar.no/Finn-butikk/",)
 

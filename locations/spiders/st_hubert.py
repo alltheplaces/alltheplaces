@@ -9,7 +9,7 @@ from locations.hours import OpeningHours
 
 class StHubertSpider(scrapy.Spider):
     name = "st_hubert"
-    item_attributes = {"brand": "St Hubert"}
+    item_attributes = {"brand": "St Hubert", "brand_wikidata": "Q3495225"}
     allowed_domains = ["st-hubert.com"]
     start_urls = ["http://www.st-hubert.com/salle-manger/rotisserie/recherche.en.html"]
 

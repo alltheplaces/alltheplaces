@@ -10,6 +10,7 @@ from locations.hours import OpeningHours
 class OlliesBargainOutletSpider(scrapy.Spider):
     name = "ollies_bargain_outlet"
     allowed_domains = ["ollies.us"]
+    item_attributes = {"brand": "Ollie's Bargain Outlet", "brand_wikidata": "Q7088304"}
 
     def start_requests(self):
         url = "https://www.ollies.us/admin/locations/ajax.aspx"
