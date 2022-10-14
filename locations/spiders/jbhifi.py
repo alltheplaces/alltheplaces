@@ -9,6 +9,7 @@ DAYS = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"]
 
 class JbHifiSpider(scrapy.Spider):
     name = "jbhifi"
+    item_attributes = {"brand": "JB Hi-Fi", "brand_wikidata": "Q3310113"}
     allowed_domains = ["algolia.net"]
 
     def start_requests(self):
