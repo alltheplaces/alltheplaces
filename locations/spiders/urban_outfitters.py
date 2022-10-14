@@ -12,6 +12,9 @@ class UrbanOutfitters(SitemapSpider, StructuredDataSpider):
     allowed_domains = ["www.urbanoutfitters.com"]
     sitemap_urls = ["https://www.urbanoutfitters.com/store_sitemap.xml"]
     sitemap_rules = [("", "parse_sd")]
+    user_agent = (
+        "Mozilla/5.0 (X11; Linux x86_64; rv:105.0) Gecko/20100101 Firefox/105.0"
+    )
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["website"] = response.url
