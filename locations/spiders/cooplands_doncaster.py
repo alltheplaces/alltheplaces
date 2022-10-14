@@ -31,7 +31,7 @@ class CooplandsDoncasterSpider(scrapy.Spider):
 
         for index, store in enumerate(stores):
             data = store.xpath("ul/li/text()").extract()
-            addr_full = data[0].strip() + data[1] if len(data) == 4 else ''
+            addr_full = data[0].strip() + data[1] if len(data) == 4 else ""
 
             yield GeojsonPointItem(
                 ref=index,
