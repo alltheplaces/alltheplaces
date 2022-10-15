@@ -85,6 +85,15 @@ class StructuredDataSpider(Spider):
                     if item["ref"] is None:
                         item["ref"] = response.url
 
+                item["website"] = None
+                if isinstance(item["website"], list):
+                    item["website"] = item["website"][0]
+
+                if item["website"] is None or item["website"] == "":
+                    item["website"] = response.url
+                elif item["website"].startswith("www"):
+                    item["website"] = "https://" + item["website"]
+
                 if self.search_for_email and item["email"] is None:
                     extract_email(item, response)
 
