@@ -22,7 +22,6 @@ class BarlouieSpider(SitemapSpider):
                 sanitized_data = self.sanitize_json(ldjson)
                 data = json.loads(sanitized_data)
             item = LinkedDataParser.parse_ld(data)
-            print("Item: ", item)
             item["ref"] = item["website"] = response.url
             item["image"] = item.get("image", "").replace(
                 "https://www.barlouie.comhttps://images.prismic.io",
