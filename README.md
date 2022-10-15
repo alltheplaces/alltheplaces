@@ -49,6 +49,7 @@ To get started, you'll want to install the dependencies for this project.
     class TemplateSpider(scrapy.Spider):
         name = "template"
         allowed_domains = ["www.sample.com"]
+        item_attributes = {"brand": "SampleBrandName", "brand_wikidata": "Q1234567"}
         start_urls = (
             'https://www.sample.com/locations/',
         )
@@ -58,7 +59,12 @@ To get started, you'll want to install the dependencies for this project.
     ```
 
     This blank/template spider will start at the given `start_urls`, only touch the domains listed in `allowed_domains`, and all web requests will be returned to the `parse()` function with response content in the `response` argument. Once you have the response content, you can perform various operations on it. For example, the most useful is probably running [XPath](https://developer.mozilla.org/en-US/docs/Web/XPath) selections on the HTML of the page to extract data out of the page. Check out the "Scraper tips" section below for more information about how to use these tools to efficiently get data out of the page.
-
+    
+   **How to get brand_wikidata?**
+   1. Run `pipenv run scrapy nsi --name "Brand Name"` OR
+   2. Visit https://www.wikidata.org/ and search by brand name.
+   
+ 
 1. Once you have your spider written, you can give it a test run to make sure it's finding the expected results.
 
    ```
