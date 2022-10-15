@@ -4,9 +4,10 @@ from scrapy.spiders import CrawlSpider, Rule
 from scrapy.linkextractors import LinkExtractor
 
 from locations.linked_data_parser import LinkedDataParser
+from locations.structured_data_spider import StructuredDataSpider
 
 
-class CrateAndBarrelSpider(CrawlSpider):
+class CrateAndBarrelSpider(CrawlSpider, StructuredDataSpider):
     name = "crateandbarrel"
     allowed_domains = ["www.crateandbarrel.com"]
     item_attributes = {"brand": "crateandbarrel", "brand_wikidata": "Q5182604"}
@@ -14,16 +15,10 @@ class CrateAndBarrelSpider(CrawlSpider):
     rules = [
         Rule(
             LinkExtractor(allow=r"stores\/list-state\/retail-stores\/([a-zA-Z]{2})$"),
-            callback="parse",
+            callback="parse_sd",
         )
     ]
 
-    def parse(self, response):
-        for ldjson in response.xpath(
-            "//script[@type='application/ld+json' and contains(text(), '\"@type\":\"Store\"')]/text()"
-        ).extract():
-            data = json.loads(ldjson)
-            item = LinkedDataParser.parse_ld(data)
-            print("Item: ", item)
-            item["ref"] = item["website"] = response.url
-            yield item
+    def post_process_item(self, item, response, ld_data, **kwargs):
+        item["ref"] = item["website"] = response.url
+        yield item
