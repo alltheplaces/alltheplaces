@@ -15,8 +15,11 @@ class CrateAndBarrelSpider(CrawlSpider, StructuredDataSpider):
     rules = [
         Rule(
             LinkExtractor(allow=r"stores\/list-state\/retail-stores\/([a-zA-Z]{2})$"),
+        ),
+        Rule(
+            LinkExtractor(allow=r"stores\/.+\/.+$"),
             callback="parse_sd",
-        )
+        ),
     ]
 
     def post_process_item(self, item, response, ld_data, **kwargs):
