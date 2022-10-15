@@ -164,7 +164,7 @@ class LinkedDataParser(object):
             if isinstance(item["website"], list):
                 item["website"] = item["website"][0]
 
-            if item["website"] is None or item["website"] == "":
+            if not item["website"]:
                 item["website"] = response.url
             elif item["website"].startswith("www"):
                 item["website"] = "https://" + item["website"]
