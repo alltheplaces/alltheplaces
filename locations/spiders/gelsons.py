@@ -1,27 +1,27 @@
 import json
 import scrapy
-import re
 
-from locations.items import GeojsonPointItem
+from locations.dict_parser import DictParser
 from locations.hours import OpeningHours, DAYS
 
 
-class GelsonsSpider(scrapy.Spider):
+class GelsonsSpider(scrapy.spiders.SitemapSpider):
     name = "gelsons"
-    item_attributes = {"brand": "Gelson's Markets", "brand_wikidata": "Q16993993"}
-    allowed_domains = ["gelsons.com"]
+    item_attributes = {
+        "brand": "Gelson's Markets",
+        "brand_wikidata": "Q16993993",
+        "country": "US",
+    }
+
     download_delay = 0.2
-    start_urls = ("https://www.gelsons.com/sitemap.xml",)
+    sitemap_urls = ["https://www.gelsons.com/sitemap.xml"]
+    sitemap_rules = [("/stores/", "parse_store")]
 
-    def parse(self, response):
-        response.selector.remove_namespaces()
-        urls = response.xpath("//url/loc/text()").extract()
-        for url in urls:
-            if re.match(r".*stores/.+$", url) and "virtual" not in url:
-
-                yield scrapy.Request(
-                    url=url, callback=self.parse_store, meta={"url": url}
-                )
+    def sitemap_filter(self, entries):
+        for entry in entries:
+            if "virtual" in entry["loc"]:
+                continue
+            yield entry
 
     def parse_store(self, response):
 
@@ -31,20 +31,12 @@ class GelsonsSpider(scrapy.Spider):
         store_json = content["store"]
         hours = content["pageComponents"][0]["headline"]
 
-        yield GeojsonPointItem(
-            ref=store_json["slug"],
-            name=store_json["title"],
-            lat=store_json["lat"],
-            lon=store_json["long"],
-            addr_full=store_json["address"],
-            city=store_json["city"],
-            state="CA",
-            postcode=store_json["zipCode"],
-            country="US",
-            phone=store_json["storePhone"],
-            website=response.url,
-            opening_hours=self.parse_hours(hours),
-        )
+        item = DictParser.parse(store_json)
+        item["phone"] = store_json["storePhone"]
+        item["website"] = response.url
+        item["opening_hours"] = self.parse_hours(hours)
+
+        yield item
 
     def parse_hours(self, hour_string):
         """Hours look like one of the following:
