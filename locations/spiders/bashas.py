@@ -27,6 +27,7 @@ class BashasSpider(scrapy.spiders.SitemapSpider):
         hours = response.xpath("//table[@class='wpsl-opening-hours']//text()").extract()
 
         item = DictParser.parse(store_json)
+        item["street_address"] = item.pop("addr_full", None)
         item["country"] = "US"
         item["name"] = html.unescape(store_json["store"])
         item["website"] = response.url
