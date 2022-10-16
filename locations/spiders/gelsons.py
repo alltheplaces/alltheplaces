@@ -32,6 +32,7 @@ class GelsonsSpider(scrapy.spiders.SitemapSpider):
         hours = content["pageComponents"][0]["headline"]
 
         item = DictParser.parse(store_json)
+        item["street_address"] = item.pop("addr_full", None)
         item["phone"] = store_json["storePhone"]
         item["website"] = response.url
         item["opening_hours"] = self.parse_hours(hours)
