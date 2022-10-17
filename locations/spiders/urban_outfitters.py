@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import re
+
 from scrapy.spiders import SitemapSpider
 
 from locations.hours import OpeningHours
@@ -45,6 +47,11 @@ class UrbanOutfitters(SitemapSpider, StructuredDataSpider):
             # Some stores are permanently closed, thus no time is defined
             if not ot or not ct or ot == "Closed" or ct == "Closed":
                 continue
+
+            # Fix hour formatting
+            ot = self.fix_hour(ot)
+            ct = self.fix_hour(ct)
+
             days = self.parse_days(d)
             for day in days:
                 oh.add_range(
@@ -52,6 +59,29 @@ class UrbanOutfitters(SitemapSpider, StructuredDataSpider):
                 )
 
         return oh.as_opening_hours()
+
+    def fix_hour(self, h):
+        """Parses hours and returns the desired format of "%I:%M %p"
+        a) 10:30 PM, 9:00 AM
+        b) 10pm, 9am
+        c) 10:30pm, 9:00am
+        """
+        h_reg_a = re.compile(r"\d+:\d+ [AP]M")
+        h_reg_b = re.compile(r"(\d+)([ap]m)")
+        h_reg_c = re.compile(r"(\d+):(\d+)([ap]m)")
+
+        h_a = h_reg_a.match(h)
+        h_b = h_reg_b.match(h)
+        h_c = h_reg_c.match(h)
+
+        if h_a:
+            return h
+
+        if h_b:
+            return f"{h_b.group(1)}:00 {h_b.group(2).upper()}"
+
+        if h_c:
+            return f"{h_c.group(1)}:{h_c.group(2)} {h_c.group(3).upper()}"
 
     def parse_days(self, days):
         """Parse day ranges and returns a list of days it represent
