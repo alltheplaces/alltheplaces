@@ -12,13 +12,9 @@ class Duffys(scrapy.Spider):
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def start_requests(self):
-        url = "https://api.duffysmvp.com/api/app/nearByLocations"
-        yield scrapy.Request(
-            url,
-            method="POST",
-            headers={"Content-Type": "application/json", "Accept": "application/json"},
-            body='{"latitude":"26.6289791","longitude":"-80.0724384"}',
-            callback=self.parse,
+        yield JsonRequest(
+            url="https://api.duffysmvp.com/api/app/nearByLocations",
+            data={"latitude": "26.6289791", "longitude": "-80.0724384"},
         )
 
     def parse(self, response):
