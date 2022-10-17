@@ -8,7 +8,7 @@ from locations.items import GeojsonPointItem
 class LoblawsSpider(scrapy.Spider):
 
     name = "loblaws"
-    item_attributes = {"brand": "Loblaws"}
+    item_attributes = {"brand": "Loblaws", "brand_wikidata": "Q3257626"}
     allowed_domains = ["www.loblaws.ca"]
     start_urls = (
         "https://www.loblaws.ca/api/pickup-locations",
