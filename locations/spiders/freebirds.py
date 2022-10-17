@@ -19,7 +19,6 @@ class Freebirds(scrapy.Spider):
                 "name": data.get("name"),
                 "postcode": data.get("zip"),
                 "state": data.get("state"),
-                "website": data.get("rio_url"),
                 "phone": data.get("telephone"),
                 "country": "US",
                 "lat": data.get("latitude"),
