@@ -23,7 +23,7 @@ class LoblawsSpider(scrapy.Spider):
                     "ref": i["storeId"],
                     "name": i["name"],
                     "lat": i["geoPoint"]['latitude'],
-                    "lon": i["geoPoint"]['latitude'],
+                    "lon": i["geoPoint"]['longitude'],
                     "addr_full": i["address"]["line1"],
                     "city": i["address"]["town"],
                     "state": i["address"]["region"],
