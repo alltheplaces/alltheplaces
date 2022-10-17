@@ -28,6 +28,7 @@ DAYS_EN = {
     "Thursday": "Th",
     "Thu": "Th",
     "Thur": "Th",
+    "Thrs": "Th",
     "Thurs": "Th",
     "Th": "Th",
     "Friday": "Fr",
