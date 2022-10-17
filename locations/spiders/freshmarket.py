@@ -44,7 +44,7 @@ class FreshMarketSpider(scrapy.Spider):
 
             oh = OpeningHours()
             for start_day, end_day, start_time, end_time in re.findall(
-                r'(\w{3})-(\w{3}): (\d(?:am|pm))-(\d(?:am|pm))', store["moreStoreHours"]
+                r"(\w{3})-(\w{3}): (\d(?:am|pm))-(\d(?:am|pm))", store["moreStoreHours"]
             ):
                 start_day = sanitise_day(start_day)
                 end_day = sanitise_day(end_day)
