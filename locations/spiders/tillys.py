@@ -2,9 +2,7 @@
 import re
 
 import scrapy
-import json
 
-from bs4 import BeautifulSoup
 
 from locations.hours import OpeningHours, DAYS
 from locations.items import GeojsonPointItem
