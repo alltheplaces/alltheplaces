@@ -23,7 +23,7 @@ class Ridleys(scrapy.Spider):
                 "phone": data.get("phone"),
                 "lat": data.get("lat"),
                 "lon": data.get("lon"),
-                "country": data.get("US"),
+                "country": "US",
             }
 
             yield GeojsonPointItem(**props)
