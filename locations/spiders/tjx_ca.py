@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import csv
 import datetime
 
 import scrapy
@@ -16,22 +15,25 @@ class TjxCASpider(scrapy.Spider):
     name = "tjx_ca"
     allowed_domains = ["tjx.com"]
 
-    chains = {"90": "HomeSense", "91": "Winners", "93": "Marshalls"}
+    chains = {
+        "90": {"brand": "HomeSense", "brand_wikidata": "Q16844433"},
+        "91": {"brand": "Winners", "brand_wikidata": "Q845257"},
+        "93": {"brand": "Marshalls", "brand_wikidata": "Q15903261"},
+    }
 
     def start_requests(self):
-        url = "https://marketingsl.tjx.com/storelocator/GetSearchResults"
-        payload = {"chain": "90,91,93", "lang": "en", "maxstores": "100"}
 
         for lat, lon in point_locations("ca_centroids_100mile_radius.csv"):
-            payload.update({"geolat": lat, "geolong": lon})
             yield scrapy.http.FormRequest(
-                url=url,
-                method="POST",
-                formdata=payload,
-                headers={
-                    "Content-Type": "application/x-www-form-urlencoded",
-                    "Accept": "application/json",
+                url="https://marketingsl.tjx.com/storelocator/GetSearchResults",
+                formdata={
+                    "chain": "90,91,93",
+                    "lang": "en",
+                    "maxstores": "100",
+                    "geolat": lat,
+                    "geolong": lon,
                 },
+                headers={"Accept": "application/json"},
             )
 
     def parse_hours(self, hours):
@@ -86,7 +88,9 @@ class TjxCASpider(scrapy.Spider):
             properties = {
                 "name": store["Name"],
                 "ref": store["StoreID"],
-                "addr_full": store["Address"].strip(),
+                "street_address": ", ".join(
+                    filter(None, [store["Address"], store["Address2"]])
+                ),
                 "city": store["City"],
                 "state": store["State"],
                 "postcode": store["Zip"],
@@ -94,8 +98,8 @@ class TjxCASpider(scrapy.Spider):
                 "phone": store["Phone"],
                 "lat": float(store["Latitude"]),
                 "lon": float(store["Longitude"]),
-                "brand": self.chains[store["Chain"]],
             }
+            properties.update(self.chains[store["Chain"]])
 
             hours = self.parse_hours(store["Hours"])
             if hours:
