@@ -61,7 +61,7 @@ class LoblawsSpider(scrapy.Spider):
                     "ref": i["storeId"],
                     "name": i["name"],
                     "lat": i["geoPoint"]["latitude"],
-                    "lon": i["geoPoint"]["latitude"],
+                    "lon": i["geoPoint"]["longitude"],
                     "street_address": ", ".join(
                         filter(
                             None, [i["address"].get("line2"), i["address"].get("line1")]
