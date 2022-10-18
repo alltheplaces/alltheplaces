@@ -2,6 +2,7 @@
 import scrapy
 
 from locations.items import GeojsonPointItem
+from locations.spiders.costacoffee_gb import yes_or_no
 
 
 class ShellSpider(scrapy.Spider):
@@ -55,39 +56,41 @@ class ShellSpider(scrapy.Spider):
                 ref=result["id"],
                 # Definitions extracted from https://shellgsllocator.geoapp.me/config/published/retail/prod/en_US.json?format=json
                 extras={
-                    "amenity:chargingstation": "electric_charging_other" in fuels
-                    or "shell_recharge" in fuels,
-                    "amenity:fuel": True,
-                    "amenity:toilets": "toilet" in amenities,
-                    "atm": "atm" in amenities,
-                    "car_wash": "carwash" in amenities,
-                    "fuel:adblue": any("adblue" in a for a in amenities) or None,
-                    "fuel:biodiesel": "biodiesel" in fuels
-                    or "biofuel_gasoline" in fuels
-                    or None,
-                    "fuel:cng": "cng" in fuels or None,
-                    "fuel:diesel": any("diesel" in f for f in fuels) or None,
-                    "fuel:GTL_diesel": "gtl" in fuels or None,
-                    "fuel:HGV_diesel": "truck_diesel" in fuels
-                    or "hgv_lane" in amenities
-                    or None,
-                    "fuel:LH2": "hydrogen" in fuels or None,
-                    "fuel:lng": "lng" in fuels or None,
-                    "fuel:lpg": "autogas_lpg" in fuels or None,
-                    "fuel:octane_100": "super_premium_gasoline" in fuels or None,
+                    "amenity:chargingstation": yes_or_no(
+                        "electric_charging_other" in fuels or "shell_recharge" in fuels
+                    ),
+                    "amenity": "fuel",
+                    "toilets": yes_or_no("toilet" in amenities),
+                    "atm": yes_or_no("atm" in amenities),
+                    "car_wash": yes_or_no("carwash" in amenities),
+                    "fuel:adblue": yes_or_no(any("adblue" in a for a in amenities)),
+                    "fuel:biodiesel": yes_or_no(
+                        "biodiesel" in fuels or "biofuel_gasoline" in fuels
+                    ),
+                    "fuel:cng": yes_or_no("cng" in fuels),
+                    "fuel:diesel": yes_or_no(any("diesel" in f for f in fuels)),
+                    "fuel:GTL_diesel": yes_or_no("gtl" in fuels),
+                    "fuel:HGV_diesel": yes_or_no(
+                        "truck_diesel" in fuels or "hgv_lane" in amenities
+                    ),
+                    "fuel:LH2": yes_or_no("hydrogen" in fuels),
+                    "fuel:lng": yes_or_no("lng" in fuels),
+                    "fuel:lpg": yes_or_no("autogas_lpg" in fuels),
+                    "fuel:octane_100": yes_or_no("super_premium_gasoline" in fuels),
                     # definition of low-octane varies by country; 92 is most common
-                    "fuel:octane_92": "low_octane_gasoline" in fuels or None,
+                    "fuel:octane_92": yes_or_no("low_octane_gasoline" in fuels),
                     # definition of mid-octane varies by country; 95 is most common
-                    "fuel:octane_95": any("midgrade_gasoline" in f for f in fuels)
-                    or "unleaded_super" in fuels
-                    or None,
+                    "fuel:octane_95": yes_or_no(
+                        any("midgrade_gasoline" in f for f in fuels)
+                        or "unleaded_super" in fuels
+                    ),
                     # the US region seems to also use 'premium_gasoline' to refer to non-diesel gas products
-                    "fuel:octane_98": any("98" in f for f in fuels)
-                    or "premium_gasoline" in fuels
-                    or None,
-                    "fuel:propane": "auto_rv_propane" in fuels or None,
-                    "hgv": "hgv_lane" in amenities,
-                    "shop": "convenience" if "shop" in "amenities" else None,
-                    "wheelchair": "disabled_facilities" in amenities,
+                    "fuel:octane_98": yes_or_no(
+                        any("98" in f for f in fuels) or "premium_gasoline" in fuels
+                    ),
+                    "fuel:propane": yes_or_no("auto_rv_propane" in fuels),
+                    "hgv": yes_or_no("hgv_lane" in amenities),
+                    "shop": "convenience" if "shop" in "amenities" else "no",
+                    "wheelchair": yes_or_no("disabled_facilities" in amenities),
                 },
             )
