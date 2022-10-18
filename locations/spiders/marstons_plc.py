@@ -1,34 +1,19 @@
 # -*- coding: utf-8 -*-
-import json
-import re
-
 import scrapy
 
 from locations.items import GeojsonPointItem
-from locations.hours import OpeningHours
+from locations.spiders.costacoffee_gb import yes_or_no
 
 
 class MarstonsPlcSpider(scrapy.Spider):
     name = "marstons_plc"
     item_attributes = {"brand": "Marston's", "brand_wikidata": "Q6773982"}
-    allowed_domains = ["marstons.co.uk"]
+    allowed_domains = ["marstonspubs.co.uk"]
+    store_types = {}
 
     def start_requests(self):
-        url = "https://www.marstons.co.uk/ajax/finder/markers/"
-
-        headers = {
-            "origin": "https://www.marstons.co.uk",
-            "Referer": "https://www.marstons.co.uk/pubs/finder/",
-            "content-type": "application/json; charset=utf-8",
-        }
-
-        current_state = json.dumps({"s": 1, "pp": 48})
-
         yield scrapy.Request(
-            url,
-            method="POST",
-            body=current_state,
-            headers=headers,
+            url="https://www.marstonspubs.co.uk/ajax/finder/markers/",
             callback=self.parse_store_ids,
         )
 
@@ -37,6 +22,7 @@ class MarstonsPlcSpider(scrapy.Spider):
         ids = []
 
         for id in store_ids["markers"]:
+            self.store_types[id["i"]] = id["t"]
             ids.append(id["i"])
 
         count = 1
@@ -48,16 +34,15 @@ class MarstonsPlcSpider(scrapy.Spider):
                 params = params + "p=" + str(i)
                 params = params + "&"
             else:
-                url = "https://www.marstons.co.uk/ajax/finder/outlet/?"
+                url = "https://www.marstonspubs.co.uk/ajax/finder/outlet/?"
                 params = params[:-1]
                 url = url + params
                 count = 0
                 params = ""
                 yield scrapy.Request(url, callback=self.parse)
-
             count += 1
 
-        url = "https://www.marstons.co.uk/ajax/finder/outlet/?"
+        url = "https://www.marstonspubs.co.uk/ajax/finder/outlet/?"
         params = params[:-1]
         url = url + params
         yield scrapy.Request(url, callback=self.parse)
@@ -90,7 +75,8 @@ class MarstonsPlcSpider(scrapy.Spider):
             properties = {
                 "ref": place["phc"],
                 "name": place["name"],
-                "addr_full": str_addr,
+                "addr_full": address,
+                "street_address": str_addr,
                 "city": city[0],
                 "state": state,
                 "postcode": postal,
@@ -99,6 +85,18 @@ class MarstonsPlcSpider(scrapy.Spider):
                 "lon": place["lng"],
                 "phone": place["tel"],
                 "website": place["url"],
+                "email": place["email"],
+                "brand": place["pfLabel"],
+                "extras": {
+                    "amenity": "pub",
+                    "payment:marstons_privilege_card": yes_or_no(place["sv"]),
+                },
             }
+
+            if img := place.get("img"):
+                properties["image"] = "https://www.marstonspubs.co.uk" + img
+
+            if self.store_types[place["phc"]] == 2:
+                properties["extras"]["tourism"] = "hotel"
 
             yield GeojsonPointItem(**properties)
