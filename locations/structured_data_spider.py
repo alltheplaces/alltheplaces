@@ -25,7 +25,9 @@ def extract_phone(item, response):
 
 def extract_twitter(item, response):
     if twitter := response.xpath('//meta[@name="twitter:site"]/@content').get():
-        item["twitter"] = twitter.strip()
+        twitter = twitter.strip()
+        if not twitter == "@":
+            item["twitter"] = twitter
 
 
 def extract_image(item, response):
