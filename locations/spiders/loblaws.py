@@ -62,7 +62,11 @@ class LoblawsSpider(scrapy.Spider):
                     "name": i["name"],
                     "lat": i["geoPoint"]["latitude"],
                     "lon": i["geoPoint"]["latitude"],
-                    "addr_full": i["address"]["line1"],
+                    "street_address": ", ".join(
+                        filter(
+                            None, [i["address"].get("line2"), i["address"].get("line1")]
+                        )
+                    ),
                     "city": i["address"]["town"],
                     "state": i["address"]["region"],
                     "postcode": i["address"]["postalCode"],
