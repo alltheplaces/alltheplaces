@@ -2,11 +2,17 @@ import scrapy
 
 from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours, DAYS
+from locations.spiders.vapestore_gb import clean_address
 
 
 class CooplandsDoncasterSpider(scrapy.Spider):
     name = "cooplands_doncaster"
     allowed_domains = ["cooplands.co.uk"]
+    item_attributes = {
+        "brand": "Cooplands",
+        "brand_wikidata": "Q96622197",
+        "country": "GB",
+    }
     start_urls = ["https://cooplands.co.uk/shop-locations"]
 
     hours = OpeningHours()
@@ -25,7 +31,7 @@ class CooplandsDoncasterSpider(scrapy.Spider):
 
         for index, store in enumerate(stores):
             data = store.xpath("ul/li/text()").extract()
-            addr_full = data[0].strip() + data[1] if len(data) == 4 else ""
+            addr_full = clean_address(data[:-1])
 
             yield GeojsonPointItem(
                 ref=index,
