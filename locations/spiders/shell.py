@@ -6,7 +6,7 @@ from locations.items import GeojsonPointItem
 
 class ShellSpider(scrapy.Spider):
     name = "shell"
-    item_attributes = {"brand": "Shell", "brand_wikidata": "Q154950"}
+    item_attributes = {"brand": "Shell", "brand_wikidata": "Q110716465"}
     allowed_domains = ["shellgsllocator.geoapp.me"]
     download_delay = 0.2
     start_urls = [
