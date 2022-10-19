@@ -23,7 +23,7 @@ class AldiNordBESpider(SitemapSpider):
             "name": response.xpath(
                 '//div[@class="mod-overview-intro__content"]/h1/text()'
             ).extract_first(),
-            "addr_full": response.xpath(
+            "street_address": response.xpath(
                 'normalize-space(//span[@itemprop="streetAddress"]//text())'
             ).extract_first(),
             "city": response.xpath(
