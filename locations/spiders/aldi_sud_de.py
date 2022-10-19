@@ -5,7 +5,6 @@ from locations.dict_parser import DictParser
 from locations.hours import OpeningHours, sanitise_day, DAYS_DE
 
 
-
 class AldiSudDESpider(scrapy.Spider):
     name = "aldi_sud_de"
     item_attributes = {"brand": "ALDI Süd", "brand_wikidata": "Q41171672"}

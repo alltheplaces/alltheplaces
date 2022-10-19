@@ -66,6 +66,15 @@ DAYS_CH = {
     "Sa": "Sa",
     "So": "Su",
 }
+DAYS_HU = {
+    "Hé": "Mo",
+    "Ke": "Tu",
+    "Sze": "We",
+    "Csü": "Th",
+    "Pé": "Fr",
+    "Szo": "Sa",
+    "Vas": "Su",
+}
 DAYS_SI = {
     "po": "Mo",
     "Pon": "Mo",
