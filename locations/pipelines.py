@@ -91,6 +91,7 @@ class CheckItemPropertiesPipeline(object):
         r"^[+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$",
     )
     email_regex = re.compile(r"(^[-\w_.+]+@[-\w]+\.[-\w.]+$)")
+    twitter_regex = re.compile(r"^@?([-\w_]+)$")
     wikidata_regex = re.compile(
         r"^Q[0-9]+$",
     )
@@ -153,6 +154,16 @@ class CheckItemPropertiesPipeline(object):
                 spider.crawler.stats.inc_value("atp/field/email/invalid")
         else:
             spider.crawler.stats.inc_value("atp/field/email/missing")
+
+        if twitter := item.get("twitter"):
+            if not isinstance(twitter, str):
+                spider.crawler.stats.inc_value("atp/field/twitter/wrong_type")
+            elif not (
+                self.url_regex.match(twitter) and "twitter.com" in twitter
+            ) and not self.twitter_regex.match(twitter):
+                spider.crawler.stats.inc_value("atp/field/twitter/invalid")
+        else:
+            spider.crawler.stats.inc_value("atp/field/twitter/missing")
 
         if postcode := item.get("postcode"):
             if not isinstance(postcode, str):
