@@ -3,8 +3,8 @@ from scrapy.spiders import SitemapSpider
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class AldiGB(SitemapSpider, StructuredDataSpider):
-    name = "aldi_ie_gb"
+class AldiSudGB(SitemapSpider, StructuredDataSpider):
+    name = "aldi_sud_ie_gb"
     item_attributes = {"brand": "Aldi", "brand_wikidata": "Q41171672", "country": "GB"}
     allowed_domains = ["aldi.co.uk", "aldi.ie"]
     download_delay = 10

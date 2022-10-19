@@ -8,8 +8,8 @@ from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
 
 
-class AldiDESpider(scrapy.Spider):
-    name = "aldi_de"
+class AldiSudDESpider(scrapy.Spider):
+    name = "aldi_sud_de"
     item_attributes = {
         "brand": "Aldi",
         "brand_wikidata": "Q41171373",
