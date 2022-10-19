@@ -4,8 +4,8 @@ from scrapy.spiders import SitemapSpider
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class AldiUSSpider(SitemapSpider, StructuredDataSpider):
-    name = "aldi_us"
+class AldiSudUSSpider(SitemapSpider, StructuredDataSpider):
+    name = "aldi_sud_us"
     item_attributes = {"brand": "ALDI", "brand_wikidata": "Q41171672"}
     allowed_domains = ["stores.aldi.us"]
     sitemap_urls = ["https://stores.aldi.us/robots.txt"]
