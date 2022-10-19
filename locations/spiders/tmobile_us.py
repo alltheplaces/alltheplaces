@@ -74,7 +74,7 @@ class TMobileUSSpider(scrapy.Spider):
             properties = {
                 "name": store.get("name"),
                 "ref": store["id"],
-                "addr_full": store["location"]["address"]["streetAddress"],
+                "street_address": store["location"]["address"]["streetAddress"],
                 "city": store["location"]["address"]["addressLocality"],
                 "state": store["location"]["address"]["addressRegion"],
                 "postcode": store["location"]["address"]["postalCode"],
