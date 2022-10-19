@@ -66,6 +66,22 @@ DAYS_CH = {
     "Sa": "Sa",
     "So": "Su",
 }
+DAYS_SI = {
+    "po": "Mo",
+    "Pon": "Mo",
+    "to": "Tu",
+    "Tor": "Tu",
+    "sr": "We",
+    "Sre": "We",
+    "če": "Th",
+    "Čet": "Th",
+    "pe": "Fr",
+    "Pet": "Fr",
+    "so": "Sa",
+    "Sob": "Sa",
+    "ne": "Su",
+    "Ned": "Su",
+}
 
 
 def day_range(start_day, end_day):
