@@ -11,6 +11,7 @@ class VisionExpressGBSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://www.visionexpress.com/sitemap.xml"]
     sitemap_rules = [("/opticians/", "parse_sd")]
     download_delay = 0.2
+    search_for_twitter = False
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["street_address"] = item["street_address"].replace(" undefined", "")
