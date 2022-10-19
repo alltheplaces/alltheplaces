@@ -1,46 +1,26 @@
 # -*- coding: utf-8 -*-
-import re
-
 import scrapy
+from scrapy.spiders import SitemapSpider
 
 from locations.items import GeojsonPointItem
 
 
-class AldiNordLUSpider(scrapy.Spider):
+class AldiNordLUSpider(SitemapSpider):
     name = "aldi_nord_lu"
     item_attributes = {"brand": "ALDI", "brand_wikidata": "Q41171373"}
     allowed_domains = ["www.aldi.lu"]
-    start_urls = [
-        "https://www.aldi.lu/fr/informations/magasins-et-heures-d-ouverture.html",
+    sitemap_urls = ["https://www.aldi.lu/fr/.aldi-nord-sitemap-pages.xml"]
+    sitemap_rules = [
+        (r"\/magasins-et-heures-d-ouverture\/.+\/.+\/.+\.html$", "parse_store")
     ]
 
-    def parse(self, response):
-        urls = response.xpath(
-            '//div[@class="mod-stores__multicolumn"]/p/a/@href'
-        ).extract()
-        is_store_list = response.xpath(
-            '//div[@class="mod mod-stores"]//div[@class="mod-stores__overview-company-tools"]/a/@href'
-        ).extract()
-
-        if not urls and is_store_list:
-            for store_url in is_store_list:
-                yield scrapy.Request(
-                    response.urljoin(store_url), callback=self.parse_store
-                )
-        else:
-            for url in urls:
-                yield scrapy.Request(response.urljoin(url))
-
     def parse_store(self, response):
-        ref = re.search(r".+/(.+?)/?(?:\.html|$)", response.url).group(1)
-        country = re.search(r"aldi\.(\w{2}?)\/", response.url).group(1)
-
         properties = {
-            "ref": ref,
+            "ref": response.xpath("//@data-store-id").get(),
             "name": response.xpath(
                 '//div[@class="mod-overview-intro__content"]/h1/text()'
             ).extract_first(),
-            "addr_full": response.xpath(
+            "street_address": response.xpath(
                 'normalize-space(//span[@itemprop="streetAddress"]//text())'
             ).extract_first(),
             "city": response.xpath(
@@ -49,7 +29,6 @@ class AldiNordLUSpider(scrapy.Spider):
             "postcode": response.xpath(
                 'normalize-space(//span[@itemprop="postalCode"]//text())'
             ).extract_first(),
-            "country": country,
             "website": response.url,
         }
 
