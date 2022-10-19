@@ -57,6 +57,15 @@ DAYS_BG = {
     "нед": "Su",
     "Нд": "Su",
 }
+DAYS_CH = {
+    "Mo": "Mo",
+    "Di": "Tu",
+    "Mi": "We",
+    "Do": "Th",
+    "Fr": "Fr",
+    "Sa": "Sa",
+    "So": "Su",
+}
 
 
 def day_range(start_day, end_day):
