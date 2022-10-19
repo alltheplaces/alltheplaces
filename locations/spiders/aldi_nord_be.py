@@ -8,7 +8,7 @@ from locations.items import GeojsonPointItem
 
 class AldiNordBESpider(scrapy.Spider):
     name = "aldi_nord_be"
-    item_attributes = {"brand": "ALDI Nord", "brand_wikidata": "Q41171373"}
+    item_attributes = {"brand": "ALDI", "brand_wikidata": "Q41171373"}
     allowed_domains = ["www.aldi.be"]
     start_urls = [
         "https://www.aldi.be/nl/informatie/winkels-en-openingsuren.html",
