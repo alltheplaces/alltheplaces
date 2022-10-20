@@ -2,6 +2,7 @@
 import re
 
 import scrapy
+from scrapy.http import JsonRequest
 
 from locations.hours import DAYS_EN
 from locations.items import GeojsonPointItem
@@ -27,7 +28,6 @@ class Duffys(scrapy.Spider):
 
             oh = store.get("hoursOfOperation")
             oh = [format_hours(o) for o in oh.split(" ")]
-            # print(" ".join(m))
             oh = (
                 " ".join(oh)
                 .replace(",", ";")
@@ -36,12 +36,6 @@ class Duffys(scrapy.Spider):
                 .lstrip(" ")
             )
 
-            formated = [
-                oh_string.replace("am", "").replace("pm", "")
-                if re.search(r"\d", oh_string) and len(oh_string) >= 7
-                else oh_string.replace("am", ":00").replace("pm", ":00")
-                for oh_string in oh.split(" ")
-            ]
             for k, v in DAYS_EN.items():
                 oh = oh.replace(k, v)
 
