@@ -9,6 +9,7 @@ import re
 
 from scrapy.exceptions import DropItem
 
+from locations.commands.insights import CountryUtils
 from locations.name_suggestion_index import NSI
 
 
@@ -44,6 +45,18 @@ class ApplySpiderLevelAttributesPipeline(object):
         for (key, value) in item_attributes.items():
             if item.get(key) is None:
                 item[key] = value
+
+        return item
+
+
+class CountryCodeCleanUpPipeline(object):
+    def __init__(self):
+        self.country_utils = CountryUtils()
+
+    def process_item(self, item, spider):
+        if country := item.get("country"):
+            if clean_country := self.country_utils.to_iso_alpha2_country_code(country):
+                item["country"] = clean_country
 
         return item
 
