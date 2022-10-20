@@ -9,6 +9,7 @@ import re
 
 from scrapy.exceptions import DropItem
 
+from locations.commands.insights import CountryUtils
 from locations.name_suggestion_index import NSI
 
 
@@ -44,6 +45,18 @@ class ApplySpiderLevelAttributesPipeline(object):
         for (key, value) in item_attributes.items():
             if item.get(key) is None:
                 item[key] = value
+
+        return item
+
+
+class CountryCodeCleanUpPipeline(object):
+    def __init__(self):
+        self.country_utils = CountryUtils()
+
+    def process_item(self, item, spider):
+        if country := item.get("country"):
+            if clean_country := self.country_utils.to_iso_alpha2_country_code(country):
+                item["country"] = clean_country
 
         return item
 
@@ -210,7 +223,6 @@ class CheckItemPropertiesPipeline(object):
 
 
 class ApplyNSICategoriesPipeline(object):
-
     nsi = NSI()
 
     wikidata_cache = {}
@@ -231,19 +243,37 @@ class ApplyNSICategoriesPipeline(object):
             spider.crawler.stats.inc_value("atp/nsi/brand_missing")
             return item
 
-        match = None
-
         if len(matches) == 1:
             spider.crawler.stats.inc_value("atp/nsi/perfect_match")
-            match = matches[0]
-        else:
-            # TODO: filter multiple matches after we see the stats
-            spider.crawler.stats.inc_value("atp/nsi/multiple_hits")
-            return item
+            return self.apply_tags(matches[0], item)
 
-        if match is None:
-            return item
+        if cc := item.get("country"):
+            matches = self.filter_cc(matches, cc.lower())
 
+            if len(matches) == 1:
+                spider.crawler.stats.inc_value("atp/nsi/cc_match")
+                return self.apply_tags(matches[0], item)
+
+        spider.crawler.stats.inc_value("atp/nsi/match_failed")
+        return item
+
+    def filter_cc(self, matches, cc) -> []:
+        includes = []
+        globals_matches = []
+
+        for match in matches:
+            if cc in match["locationSet"].get("exclude", []):
+                continue
+
+            include = match["locationSet"].get("include", [])
+            if cc in include:
+                includes.append(match)
+            if "001" in include:  # 001 being global in NSI
+                globals_matches.append(match)
+
+        return includes or globals_matches
+
+    def apply_tags(self, match, item):
         extras = item.get("extras", {})
         extras["nsi_id"] = match["id"]
 
