@@ -4,7 +4,7 @@ import re
 import scrapy
 from scrapy.http import JsonRequest
 
-from locations.hours import DAYS_EN
+from locations.hours import DAYS_EN, OpeningHours, sanitise_day, day_range
 from locations.items import GeojsonPointItem
 
 
@@ -26,18 +26,31 @@ class Duffys(scrapy.Spider):
         for store in results:
             address_results = store.get("address")
 
-            oh = store.get("hoursOfOperation")
-            oh = [format_hours(o) for o in oh.split(" ")]
-            oh = (
-                " ".join(oh)
-                .replace(",", ";")
-                .replace(" - ", "-")
-                .replace("Daily", "Mo-Su")
-                .lstrip(" ")
-            )
+            oh_str = store.get("hoursOfOperation").strip().replace("Daily", "Mo-Su")
 
-            for k, v in DAYS_EN.items():
-                oh = oh.replace(k, v)
+            oh = OpeningHours()
+            for rule in oh_str.split(", "):
+                days, times = rule.split(": ")
+                start_day, end_day = days.split("-")
+                start_time, end_time = times.split(" - ")
+
+                # eg 2am -> 02am
+                if len(start_time) == 3:
+                    start_time = "0" + start_time
+                if len(end_time) == 3:
+                    end_time = "0" + end_time
+
+                # eg 12am -> 12:00am
+                if not ":" in start_time:
+                    start_time = start_time[:2] + ":00" + start_time[2:]
+                if not ":" in end_time:
+                    end_time = end_time[:2] + ":00" + end_time[2:]
+
+                start_day = sanitise_day(start_day)
+                end_day = sanitise_day(end_day)
+
+                for day in day_range(start_day, end_day):
+                    oh.add_range(day, start_time, end_time, time_format="%I:%M%p")
 
             properties = {
                 "ref": store.get("code"),
@@ -48,38 +61,9 @@ class Duffys(scrapy.Spider):
                 "phone": address_results.get("phone"),
                 "state": address_results.get("stateProvince"),
                 "postcode": address_results.get("postalCode"),
-                "opening_hours": oh,
+                "opening_hours": oh.as_opening_hours(),
                 "lat": store.get("latitude"),
                 "lon": store.get("longitude"),
             }
 
             yield GeojsonPointItem(**properties)
-
-
-def format_hours(oh_string):
-    has_comma = "," in oh_string
-    oh_string = oh_string.replace(",", "")
-    if any(x in oh_string for x in ["am", "pm"]):
-        if any(x in oh_string for x in ["pm", "12"]):
-            oh_string = oh_string.replace("pm", "").replace("am", "")
-            if ":" in oh_string:
-                oh_string_s = oh_string.split(":")
-                oh_string_h = int(oh_string_s[0]) + 12
-                oh_string = (
-                    str(oh_string_h) + ":".join(oh_string_s[1:])
-                    if oh_string_h < 24
-                    else "00:" + "".join(oh_string_s[1:])
-                )
-            else:
-                oh_string_h = int(oh_string) + 12
-                oh_string = str(oh_string_h) + ":00" if oh_string_h < 24 else "00:00"
-        else:
-            oh_string = (
-                oh_string.replace("am", "")
-                if ":" in oh_string
-                else oh_string.replace("am", ":00")
-            )
-        oh_string = oh_string + "," if has_comma else oh_string
-    else:
-        return oh_string.replace(":", "")
-    return oh_string
