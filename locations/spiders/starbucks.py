@@ -60,8 +60,7 @@ class StarbucksSpider(scrapy.Spider):
                 "lon": storeLon,
                 "lat": storeLat,
                 "brand": store["brandName"],
-                "website": "https://www.starbucks.com/store-locator/store/"
-                + store["id"],
+                "website": f'https://www.starbucks.com/store-locator/store/{store["id"]}/{store["slug"]}',
                 "extras": {
                     "number": store["storeNumber"],
                 },
