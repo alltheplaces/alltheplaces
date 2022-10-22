@@ -20,8 +20,13 @@ class KFCCASpider(SitemapSpider, StructuredDataSpider):
 
         for rule in ld_data.get("openingHours", []):
             day, times = rule.split(" ", maxsplit=1)
+            if "n/a" in times.lower():
+                continue
             start_time, end_time = times.split("-")
-            oh.add_range(day, start_time, end_time, time_format="%I:%M %p")
+            try:
+                oh.add_range(day, start_time, end_time, time_format="%I:%M %p")
+            except:
+                continue
 
         ld_data["openingHours"] = oh.as_opening_hours()
 
