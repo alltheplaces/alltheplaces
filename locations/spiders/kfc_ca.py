@@ -1,69 +1,34 @@
 # -*- coding: utf-8 -*-
-import json
-import re
+from scrapy.spiders import SitemapSpider
 
-import scrapy
-
-from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
+from locations.structured_data_spider import StructuredDataSpider
 
-DAY_MAPPING = {0: "Su", 1: "Mo", 2: "Tu", 3: "We", 4: "Th", 5: "Fr", 6: "Sa"}
 
-
-class KFCCASpider(scrapy.Spider):
+class KFCCASpider(SitemapSpider, StructuredDataSpider):
     name = "kfc_ca"
-    item_attributes = {"brand": "KFC", "brand_wikidata": "Q524757"}
+    item_attributes = {"brand": "KFC", "brand_wikidata": "Q524757", "country": "CA"}
     allowed_domains = ["kfc.ca"]
-    start_urls = [
-        "https://www.kfc.ca/find-a-kfc",
-    ]
+    sitemap_urls = ["https://www.kfc.ca/sitemap.xml"]
+    sitemap_rules = [("/store/", "parse_sd")]
+    user_agent = (
+        "Mozilla/5.0 (X11; Linux x86_64; rv:106.0) Gecko/20100101 Firefox/106.0"
+    )
 
-    def parse_hours(self, store_hours):
-        opening_hours = OpeningHours()
+    def pre_process_data(self, ld_data, **kwargs):
+        oh = OpeningHours()
 
-        for store_day in store_hours:
-            day = DAY_MAPPING[store_day.get("Day")]
-            open_time = store_day.get("OpenTime")
-            close_time = store_day.get("CloseTime")
-            if open_time == "n/a" and close_time == "n/a":
-                continue
-            if open_time == "n/a" and close_time != "n/a":
-                continue
-            if open_time != "n/a" and close_time == "n/a":
-                continue
-            opening_hours.add_range(
-                day=day,
-                open_time=open_time,
-                close_time=close_time,
-                time_format="%I:%M %p",
-            )
+        for rule in ld_data.get("openingHours", []):
+            day, times = rule.split(" ", maxsplit=1)
+            start_time, end_time = times.split("-")
+            oh.add_range(day, start_time, end_time, time_format="%I:%M %p")
 
-        return opening_hours.as_opening_hours()
+        ld_data["openingHours"] = oh.as_opening_hours()
 
-    def parse(self, response):
-        store_details = response.xpath(
-            '//script[contains(text(), "allRestDetails")]/text()'
-        ).extract_first()
-        data = json.loads(
-            re.search(r"var allRestDetails = \'(.*)\';", store_details).group(1)
+    def post_process_item(self, item, response, ld_data, **kwargs):
+        item["street_address"] = item["addr_full"]
+        item["addr_full"] += (
+            ", " + response.xpath('//span[@class="postal-code"]/text()').get()
         )
-        for store in data:
 
-            properties = {
-                "name": store["RestaurantName"],
-                "ref": store["RestaurantId"],
-                "addr_full": store["AddressLine1"],
-                "city": store["City"],
-                "state": store["Province"],
-                "postcode": store["PostalCode"],
-                "phone": store.get("PhoneNo"),
-                "website": response.url,
-                "lat": store.get("Lat"),
-                "lon": store.get("Long"),
-            }
-
-            hours = self.parse_hours(store.get("Hours", []))
-            if hours:
-                properties["opening_hours"] = hours
-
-            yield GeojsonPointItem(**properties)
+        yield item
