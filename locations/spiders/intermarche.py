@@ -10,6 +10,9 @@ from locations.hours import OpeningHours
 class IntermarcheSpider(scrapy.Spider):
     name = "intermarche"
     allowed_domains = ["intermarche.com"]
+    # TODO: Needs work in the spider I would think.
+    # TODO: item_attributes = {"brand": "Intermarché", "brand_wikidata": "Q3153200"}
+    # TODO: item_attributes = {"brand": "Intermarché Express", "brand_wikidata": "Q98278043"}
 
     def start_requests(self):
         url = "https://www.intermarche.com/api/service/pdvs/v4/pdvs/zone?r=10000&lat=43.646715&lon=1.433066&min=10000"

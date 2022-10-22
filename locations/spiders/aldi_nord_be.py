@@ -1,46 +1,29 @@
 # -*- coding: utf-8 -*-
-import re
-
-import scrapy
+from scrapy.spiders import SitemapSpider
 
 from locations.items import GeojsonPointItem
 
 
-class AldiNordBESpider(scrapy.Spider):
+class AldiNordBESpider(SitemapSpider):
     name = "aldi_nord_be"
-    item_attributes = {"brand": "ALDI Nord", "brand_wikidata": "Q41171373"}
+    item_attributes = {"brand": "ALDI", "brand_wikidata": "Q41171373", "country": "BE"}
     allowed_domains = ["www.aldi.be"]
-    start_urls = [
-        "https://www.aldi.be/nl/informatie/winkels-en-openingsuren.html",
+    sitemap_urls = ["https://www.aldi.be/nl/.aldi-nord-sitemap-pages.xml"]
+    sitemap_rules = [
+        (
+            r"https:\/\/www\.aldi\.be\/nl\/informatie\/winkels-en-openingsuren\/\w+\/[-\w]+\/[-\w]+\.html",
+            "parse_store",
+        )
     ]
 
-    def parse(self, response):
-        urls = response.xpath(
-            '//div[@class="mod-stores__multicolumn"]/p/a/@href'
-        ).extract()
-        is_store_list = response.xpath(
-            '//div[@class="mod mod-stores"]//div[@class="mod-stores__overview-company-tools"]/a/@href'
-        ).extract()
-
-        if not urls and is_store_list:
-            for store_url in is_store_list:
-                yield scrapy.Request(
-                    response.urljoin(store_url), callback=self.parse_store
-                )
-        else:
-            for url in urls:
-                yield scrapy.Request(response.urljoin(url))
-
     def parse_store(self, response):
-        ref = re.search(r".+/(.+?)/?(?:\.html|$)", response.url).group(1)
-        country = re.search(r"aldi\.(\w{2}?)\/", response.url).group(1)
 
         properties = {
-            "ref": ref,
+            "ref": response.xpath("//@data-store-id").get() or response.url,
             "name": response.xpath(
                 '//div[@class="mod-overview-intro__content"]/h1/text()'
             ).extract_first(),
-            "addr_full": response.xpath(
+            "street_address": response.xpath(
                 'normalize-space(//span[@itemprop="streetAddress"]//text())'
             ).extract_first(),
             "city": response.xpath(
@@ -49,7 +32,6 @@ class AldiNordBESpider(scrapy.Spider):
             "postcode": response.xpath(
                 'normalize-space(//span[@itemprop="postalCode"]//text())'
             ).extract_first(),
-            "country": country,
             "website": response.url,
         }
 

@@ -10,6 +10,7 @@ from locations.hours import OpeningHours
 class NespressoSpider(scrapy.Spider):
     name = "nespresso"
     allowed_domains = ["nespresso.com"]
+    item_attributes = {"brand": "Nespresso", "brand_wikidata": "Q301301"}
 
     def start_requests(self):
         countries = ["US", "CA", "FR", "NL", "GB", "DE", "CH", "IT", "ZA"]

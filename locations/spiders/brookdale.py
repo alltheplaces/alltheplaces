@@ -11,7 +11,7 @@ from locations.linked_data_parser import LinkedDataParser
 
 class BrookdaleSpider(scrapy.spiders.SitemapSpider):
     name = "brookdale"
-    item_attributes = {"brand": "Brookdale"}
+    item_attributes = {"brand": "Brookdale", "brand_wikidata": "Q4974387"}
     allowed_domains = ["www.brookdale.com"]
     sitemap_urls = [
         "https://www.brookdale.com/robots.txt",

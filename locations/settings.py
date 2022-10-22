@@ -84,11 +84,13 @@ EXTENSIONS = {
 # See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
     "locations.pipelines.DuplicatesPipeline": 200,
-    "locations.pipelines.ApplySpiderNamePipeline": 250,
     "locations.pipelines.ApplySpiderLevelAttributesPipeline": 300,
+    "locations.pipelines.ApplySpiderNamePipeline": 350,
+    "locations.pipelines.CountryCodeCleanUpPipeline": 355,
     "locations.pipelines.ExtractGBPostcodePipeline": 400,
     "locations.pipelines.AssertURLSchemePipeline": 500,
     "locations.pipelines.CheckItemPropertiesPipeline": 600,
+    "locations.pipelines.ApplyNSICategoriesPipeline": 700,
 }
 
 

@@ -161,11 +161,10 @@ class LinkedDataParser(object):
         if ld_item:
             item = LinkedDataParser.parse_ld(ld_item)
 
-            if item["website"] is None:
-                item["website"] = response.url
-            elif item["website"] == "":
-                item["website"] = response.url
-            elif item["website"][0] == "/":
+            if isinstance(item["website"], list):
+                item["website"] = item["website"][0]
+
+            if not item["website"]:
                 item["website"] = response.url
             elif item["website"].startswith("www"):
                 item["website"] = "https://" + item["website"]

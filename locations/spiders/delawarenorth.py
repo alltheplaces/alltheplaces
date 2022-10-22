@@ -8,7 +8,7 @@ from locations.items import GeojsonPointItem
 class DelawareNorthSpider(scrapy.Spider):
     download_delay = 0.2
     name = "delawarenorth"
-    item_attributes = {"brand": "Delaware North"}
+    item_attributes = {"brand": "Delaware North", "brand_wikidata": "Q5253324"}
     allowed_domains = ["delawarenorth.com"]
     start_urls = ("https://www.delawarenorth.com/our-locations",)
 

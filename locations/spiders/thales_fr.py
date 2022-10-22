@@ -11,7 +11,7 @@ from locations.hours import OpeningHours
 
 class ThalesFrSpider(scrapy.Spider):
     name = "thales_fr"
-    item_attributes = {"brand": "Thales"}
+    item_attributes = {"brand": "Thales", "brand_wikidata": "Q1161666"}
     allowed_domains = ["google.com"]
     start_urls = ["https://www.google.com/maps/d/kml?mid=zOpSQcuS01RE.kLfnXlw7pPcM"]
 

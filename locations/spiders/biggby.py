@@ -8,7 +8,7 @@ from locations.items import GeojsonPointItem
 
 class BiggbySpider(scrapy.Spider):
     name = "biggby"
-    item_attributes = {"brand": "Biggby"}
+    item_attributes = {"brand": "Biggby Coffee", "brand_wikidata": "Q4906876"}
     allowed_domains = ["www.biggby.com"]
     start_urls = ("https://www.biggby.com/locations/",)
 

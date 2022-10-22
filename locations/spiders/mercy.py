@@ -8,7 +8,7 @@ from locations.items import GeojsonPointItem
 
 class MercySpider(scrapy.Spider):
     name = "mercy"
-    item_attributes = {"brand": "Mercy"}
+    item_attributes = {"brand": "Mercy", "brand_wikidata": "Q30289045"}
     allowed_domains = ["mercy.net"]
 
     def start_requests(self):

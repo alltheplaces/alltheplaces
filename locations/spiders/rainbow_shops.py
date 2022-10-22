@@ -14,6 +14,7 @@ class RainbowShopsSpider(scrapy.Spider):
     start_urls = [
         "https://stores.rainbowshops.com/umbraco/api/location/GetAllLocations",
     ]
+    item_attributes = {"brand": "Rainbow Shops", "brand_wikidata": "Q7284708"}
 
     def parse(self, response):
         base_url = "https://stores.rainbowshops.com/umbraco/api/Location/GetDataByState?region={region}"

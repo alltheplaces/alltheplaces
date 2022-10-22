@@ -41,7 +41,16 @@ class StarbucksSpider(scrapy.Spider):
             storeLon = store["coordinates"]["longitude"]
             properties = {
                 "name": store["name"],
-                "addr_full": store["address"]["streetAddressLine1"],
+                "street_address": ", ".join(
+                    filter(
+                        None,
+                        [
+                            store["address"]["streetAddressLine1"],
+                            store["address"]["streetAddressLine2"],
+                            store["address"]["streetAddressLine3"],
+                        ],
+                    )
+                ),
                 "city": store["address"]["city"],
                 "state": store["address"]["countrySubdivisionCode"],
                 "country": store["address"]["countryCode"],
@@ -51,6 +60,7 @@ class StarbucksSpider(scrapy.Spider):
                 "lon": storeLon,
                 "lat": storeLat,
                 "brand": store["brandName"],
+                "website": f'https://www.starbucks.com/store-locator/store/{store["id"]}/{store["slug"]}',
                 "extras": {
                     "number": store["storeNumber"],
                 },

@@ -7,7 +7,7 @@ from locations.items import GeojsonPointItem
 
 class DPDDESpider(scrapy.Spider):
     name = "dpd_de"
-    item_attributes = {"brand": "DPD", "brand:wikidata": "Q541030"}
+    item_attributes = {"brand": "DPD", "brand_wikidata": "Q541030"}
     start_urls = ["https://my.dpd.de/shopfinder.aspx"]
 
     def parse(self, response):

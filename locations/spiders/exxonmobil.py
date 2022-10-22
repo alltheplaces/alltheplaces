@@ -27,9 +27,10 @@ result returned from exxonmobil no matter how big the boundingbox is.
 
 """
 import scrapy
-import json
 from locations.items import GeojsonPointItem
 import re
+
+from locations.spiders.costacoffee_gb import yes_or_no
 
 
 class CreateStartURLs:
@@ -159,7 +160,7 @@ class ExxonMobilSpider(scrapy.Spider):
     }
 
     def parse(self, response):
-        json_data = json.loads(response.text)
+        json_data = response.json()
 
         for location in json_data:
             location_id = location["LocationID"]
@@ -181,27 +182,35 @@ class ExxonMobilSpider(scrapy.Spider):
                     "lat": float(location["Latitude"]),
                     "lon": float(location["Longitude"]),
                     "extras": {
-                        "amenity:fuel": True,
-                        "amenity:toilets": any(
-                            "Restroom" in f["Name"] for f in features
+                        "amenity": "fuel",
+                        "toilets": yes_or_no(
+                            any("Restroom" in f["Name"] for f in features)
                         ),
-                        "atm": any("ATM" in f["Name"] for f in features),
-                        "car_wash": any("Carwash" in f["Name"] for f in features),
-                        "fuel:diesel": any("Diesel" in f["Name"] for f in features)
-                        or None,
-                        "fuel:octane_87": any("Regular" == f["Name"] for f in features)
-                        or None,
-                        "fuel:octane_89": any("Extra" == f["Name"] for f in features)
-                        or None,
-                        "fuel:octane_91": any("Supreme" == f["Name"] for f in features)
-                        or None,
-                        "fuel:octane_93": any("Supreme+" == f["Name"] for f in features)
-                        or None,
-                        "fuel:propane": any("Propane" == f["Name"] for f in features)
-                        or None,
+                        "atm": yes_or_no(any("ATM" in f["Name"] for f in features)),
+                        "car_wash": yes_or_no(
+                            any("Carwash" in f["Name"] for f in features)
+                        ),
+                        "fuel:diesel": yes_or_no(
+                            any("Diesel" in f["Name"] for f in features)
+                        ),
+                        "fuel:octane_87": yes_or_no(
+                            any("Regular" == f["Name"] for f in features)
+                        ),
+                        "fuel:octane_89": yes_or_no(
+                            any("Extra" == f["Name"] for f in features)
+                        ),
+                        "fuel:octane_91": yes_or_no(
+                            any("Supreme" == f["Name"] for f in features)
+                        ),
+                        "fuel:octane_93": yes_or_no(
+                            any("Supreme+" == f["Name"] for f in features)
+                        ),
+                        "fuel:propane": yes_or_no(
+                            any("Propane" == f["Name"] for f in features)
+                        ),
                         "shop": "convenience"
                         if any("Convenience Store" in f["Name"] for f in features)
-                        else None,
+                        else "no",
                     },
                     **self.brand(location),
                 }
@@ -215,7 +224,7 @@ class ExxonMobilSpider(scrapy.Spider):
         elif "exxon" in location["BrandingImage"]:
             return {"brand": "Exxon", "brand_wikidata": "Q109675651"}
         else:
-            return {}
+            return {"brand": location["BrandingImage"]}
 
     def store_hours(self, hours):
         """

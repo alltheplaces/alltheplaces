@@ -9,6 +9,7 @@ class ChuysSpider(scrapy.Spider):
     name = "chuys"
     allowed_domains = ["www.chuys.com"]
     start_urls = ("https://www.chuys.com/locations",)
+    item_attributes = {"brand": "Chuy's", "brand_wikidata": "Q5118415"}
 
     def parse(self, response):
         data = response.xpath(

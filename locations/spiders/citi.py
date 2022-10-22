@@ -8,7 +8,7 @@ from locations.items import GeojsonPointItem
 
 class CitiSpider(scrapy.Spider):
     name = "citi"
-    item_attributes = {"brand": "Citi", "brand_wikidata": "Q219508"}
+    item_attributes = {"brand": "Citibank", "brand_wikidata": "Q857063"}
     allowed_domains = ["citi.com"]
     download_delay = 1.5
 
@@ -74,5 +74,12 @@ class CitiSpider(scrapy.Spider):
                 "lon": float(feature["geometry"]["coordinates"][0]),
                 "extras": {"type": feature["properties"]["type"]},
             }
+
+            if feature["properties"]["type"] in ["atm", "moneypassatm"]:
+                properties["extras"]["amenity"] = "atm"
+            elif feature["properties"]["type"] == "branch":
+                properties["extras"]["amenity"] = "bank"
+            elif feature["properties"]["type"] == "private bank":
+                pass
 
             yield GeojsonPointItem(**properties)

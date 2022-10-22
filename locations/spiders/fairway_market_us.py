@@ -20,7 +20,7 @@ DAYS_NAME = {
 
 class FairwayMarketUSSpider(scrapy.Spider):
     name = "fairway_market_us"
-    item_attributes = {"brand": "Fairway Market"}
+    item_attributes = {"brand": "Fairway Market", "brand_wikidata": "Q5430910"}
     allowed_domains = ["fairwaymarket.com"]
     start_urls = [
         "https://www.fairwaymarket.com/api/models/stores?posts_per_page=40",

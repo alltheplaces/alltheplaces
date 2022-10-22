@@ -8,7 +8,7 @@ from locations.items import GeojsonPointItem
 
 class NHSScotlandSpider(scrapy.Spider):
     name = "nhsscotland"
-    item_attributes = {"brand": "NHS Scotland"}
+    item_attributes = {"brand": "NHS Scotland", "brand_wikidata": "Q108838033"}
     allowed_domains = ["nhsinform.scot"]
     start_urls = ("https://www.nhsinform.scot/scotlands-service-directory",)
 

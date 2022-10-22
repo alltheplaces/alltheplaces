@@ -6,7 +6,7 @@ from scrapy.http import HtmlResponse
 
 class ConcentraSpider(scrapy.Spider):
     name = "concentra"
-    item_attributes = {"brand": "Concentra"}
+    item_attributes = {"brand": "Concentra", "brand_wikidata": "Q5158304"}
     allowed_domains = ["concentra.com"]
     start_urls = (
         "https://www.concentra.com//sxa/search/results/?s={449ED3CA-26F3-4E6A-BF21-9808B60D936F}|{449ED3CA-26F3-4E6A-BF21-9808B60D936F}&sig=&v={D907A7FD-050F-4644-92DC-267C1FDE200C}&p=10000&g=45|-122&o=DistanceMi,Ascending",

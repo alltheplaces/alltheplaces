@@ -6,7 +6,7 @@ from locations.items import GeojsonPointItem
 
 class SendiksSpider(scrapy.spiders.SitemapSpider):
     name = "sendiks"
-    item_attributes = {"brand": "Sendik's Food Market"}
+    item_attributes = {"brand": "Sendik's Food Market", "brand_wikidata": "Q23461945"}
     allowed_domains = ["www.sendiks.com"]
     sitemap_urls = (
         "https://www.sendiks.com/sitemap-pt-stores-2015-07.xml",

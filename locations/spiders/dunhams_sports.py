@@ -5,7 +5,7 @@ from locations.items import GeojsonPointItem
 
 class DunhamsSportsSpider(scrapy.Spider):
     name = "dunhams_sports"
-    item_attributes = {"brand": "Dunham's Sports"}
+    item_attributes = {"brand": "Dunham's Sports", "brand_wikidata": "Q5315238"}
     allowed_domains = ["http://www.dunhamssports.com"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
     start_urls = (

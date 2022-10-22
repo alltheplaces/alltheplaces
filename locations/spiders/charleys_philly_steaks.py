@@ -24,6 +24,7 @@ class CharleysPhillySteaksSpider(scrapy.Spider):
     start_urls = [
         "https://charleys.com/storelocator/StoreList/StoreList.ashx",
     ]
+    item_attributes = {"brand": "Charley's Philly Steaks", "brand_wikidata": "Q1066777"}
 
     def parse_hours(self, hours):
         opening_hours = OpeningHours()

@@ -49,8 +49,8 @@ def url_to_coords(url: str) -> (float, float):
         # find the first marker location, or the map center
         for markers in get_query_param(url, "markers"):
             for val in markers.split("|"):
-                if "," in val:
-                    lat, lon = map(float, val.split(","))
+                if m := re.match(r"(-?\d+.\d+),(-?\d+.\d+)", val):
+                    lat, lon = float(m.group(1)), float(m.group(2))
                     return lat, lon
         for ll in get_query_param(url, "center"):
             lat, lon = ll.split(",")

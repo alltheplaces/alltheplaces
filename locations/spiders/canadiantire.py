@@ -17,6 +17,7 @@ class CanadianTireSpider(scrapy.Spider):
     start_urls = [
         "https://www.canadiantire.ca/sitemap_0_4.xml.gz",
     ]
+    item_attributes = {"brand": "Canadian Tire", "brand_wikidata": "Q1032400"}
 
     def parse_hours(self, hours):
         opening_hours = OpeningHours()
