@@ -1,17 +1,7 @@
 # -*- coding: utf-8 -*-
 import scrapy
 from locations.items import GeojsonPointItem
-from locations.hours import OpeningHours
-
-DAY_MAPPING = [
-    "Monday",
-    "Tuesday",
-    "Wednesday",
-    "Thursday",
-    "Friday",
-    "Saturday",
-    "Sunday",
-]
+from locations.hours import OpeningHours, DAYS_FULL
 
 
 class CavaSpider(scrapy.Spider):
@@ -89,10 +79,10 @@ class CavaSpider(scrapy.Spider):
             start_time = self.parse_timings(start_time.strip())
             end_time = self.parse_timings(end_time.strip())
 
-            curr_day_index = DAY_MAPPING.index(start_day)
-            while curr_day_index <= DAY_MAPPING.index(end_day):
+            curr_day_index = DAYS_FULL.index(start_day)
+            while curr_day_index <= DAYS_FULL.index(end_day):
                 curr_day_index += 1
-                oh.add_range(DAY_MAPPING[curr_day_index - 1], start_time, end_time)
+                oh.add_range(DAYS_FULL[curr_day_index - 1], start_time, end_time)
 
         return oh.as_opening_hours()
 
