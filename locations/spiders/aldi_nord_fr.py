@@ -1,16 +1,14 @@
-# -*- coding: utf-8 -*-
 from scrapy import Spider
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours, DAYS
 
 
-# Does have Linked Data, but requires JS to load it
-class AldiNordDESpider(Spider):
-    name = "aldi_nord_de"
-    item_attributes = {"brand": "ALDI Nord", "brand_wikidata": "Q41171373"}
+class AldiNordFRSpider(Spider):
+    name = "aldi_nord_fr"
+    item_attributes = {"brand": "ALDI", "brand_wikidata": "Q41171373"}
     start_urls = [
-        "https://uberall.com/api/storefinders/ALDINORDDE_UimhY3MWJaxhjK9QdZo3Qa4chq1MAu/locations/all"
+        "https://uberall.com/api/storefinders/ALDINORDFR_Mmljd17th8w26DMwOy4pScWk4lCvj5/locations/all"
     ]
 
     def parse(self, response, **kwargs):
