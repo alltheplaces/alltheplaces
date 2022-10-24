@@ -3,6 +3,7 @@ from scrapy.spiders import SitemapSpider
 
 from locations.hours import OpeningHours
 from locations.structured_data_spider import StructuredDataSpider
+from locations.user_agents import BROSWER_DEFAULT
 
 
 class KFCCASpider(SitemapSpider, StructuredDataSpider):
@@ -11,9 +12,7 @@ class KFCCASpider(SitemapSpider, StructuredDataSpider):
     allowed_domains = ["kfc.ca"]
     sitemap_urls = ["https://www.kfc.ca/sitemap.xml"]
     sitemap_rules = [("/store/", "parse_sd")]
-    user_agent = (
-        "Mozilla/5.0 (X11; Linux x86_64; rv:106.0) Gecko/20100101 Firefox/106.0"
-    )
+    user_agent = BROSWER_DEFAULT
 
     def pre_process_data(self, ld_data, **kwargs):
         oh = OpeningHours()

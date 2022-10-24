@@ -5,18 +5,15 @@ import scrapy
 
 from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
+from locations.user_agents import BROSWER_DEFAULT
 
 
 class RonaSpider(scrapy.Spider):
     name = "rona"
     item_attributes = {"brand": "RONA", "brand_wikidata": "Q3415283"}
     allowed_domains = ["www.rona.ca"]
-    start_urls = [
-        "https://www.rona.ca/sitemap-stores-en.xml",
-    ]
-    custom_settings = {
-        "USER_AGENT": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.86 Safari/537.36",
-    }
+    start_urls = ["https://www.rona.ca/sitemap-stores-en.xml"]
+    user_agent = BROSWER_DEFAULT
     download_delay = 30
 
     def parse(self, response):

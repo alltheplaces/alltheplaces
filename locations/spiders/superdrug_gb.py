@@ -4,6 +4,7 @@ from scrapy.spiders import SitemapSpider
 from locations.google_url import extract_google_position
 from locations.spiders.vapestore_gb import clean_address
 from locations.structured_data_spider import StructuredDataSpider
+from locations.user_agents import BROSWER_DEFAULT
 
 
 class SuperdrugGBSpider(SitemapSpider, StructuredDataSpider):
@@ -14,10 +15,7 @@ class SuperdrugGBSpider(SitemapSpider, StructuredDataSpider):
     sitemap_rules = [(r"https:\/\/www\.superdrug\.com\/store\/(.+)$", "parse_sd")]
     wanted_types = ["LocalBusiness"]
     download_delay = 0.5
-
-    custom_settings = {
-        "USER_AGENT": "Mozilla/5.0 (X11; Linux x86_64; rv:99.0) Gecko/20100101 Firefox/99.0"
-    }
+    user_agent = BROSWER_DEFAULT
 
     def inspect_item(self, item, response):
         item["addr_full"] = clean_address(

@@ -2,6 +2,7 @@
 import scrapy
 
 from locations.items import GeojsonPointItem
+from locations.user_agents import BROSWER_DEFAULT
 
 
 class SheetzSpider(scrapy.Spider):
@@ -9,11 +10,7 @@ class SheetzSpider(scrapy.Spider):
     item_attributes = {"brand": "Sheetz", "brand_wikidata": "Q7492551"}
     allowed_domains = ["orders.sheetz.com"]
     start_urls = ["https://orders.sheetz.com/anybff/api/stores/getOperatingStates"]
-
-    headers = {
-        "User-Agent": "Mozilla/5.0 (X11; CrOS aarch64 14324.72.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4692.91 Safari/537.36"
-    }
-    custom_settings = {"DEFAULT_REQUEST_HEADERS": headers}
+    user_agent = BROSWER_DEFAULT
 
     def make_request(self, state, page=0):
         return scrapy.http.JsonRequest(

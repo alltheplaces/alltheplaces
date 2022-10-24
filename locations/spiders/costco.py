@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
-import json
 
 import scrapy
 import re
-from urllib.parse import urlencode
 
 from locations.items import GeojsonPointItem
+from locations.user_agents import BROSWER_DEFAULT
 
 DAYS_NAME = {
     "m": "Mo",
@@ -25,10 +24,8 @@ class CostcoSpider(scrapy.Spider):
     name = "costco"
     item_attributes = {"brand": "Costco", "brand_wikidata": "Q715583"}
     allowed_domains = ["www.costco.com"]
-    custom_settings = {
-        "USER_AGENT": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36",
-        "ROBOTSTXT_OBEY": False,
-    }
+    user_agent = BROSWER_DEFAULT
+    custom_settings = {"ROBOTSTXT_OBEY": False}
     headers = {
         "Accept-Language": "en-US,en;q=0.9",
         "X-Requested-With": "XMLHttpRequest",

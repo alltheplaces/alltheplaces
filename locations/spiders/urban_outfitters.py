@@ -5,6 +5,7 @@ from scrapy.spiders import SitemapSpider
 
 from locations.hours import OpeningHours
 from locations.structured_data_spider import StructuredDataSpider
+from locations.user_agents import BROSWER_DEFAULT
 
 
 class UrbanOutfitters(SitemapSpider, StructuredDataSpider):
@@ -14,9 +15,7 @@ class UrbanOutfitters(SitemapSpider, StructuredDataSpider):
     allowed_domains = ["www.urbanoutfitters.com"]
     sitemap_urls = ["https://www.urbanoutfitters.com/store_sitemap.xml"]
     sitemap_rules = [("", "parse_sd")]
-    user_agent = (
-        "Mozilla/5.0 (X11; Linux x86_64; rv:105.0) Gecko/20100101 Firefox/105.0"
-    )
+    user_agent = BROSWER_DEFAULT
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["website"] = response.url

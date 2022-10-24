@@ -1,6 +1,7 @@
 from scrapy.spiders import SitemapSpider
 
 from locations.structured_data_spider import StructuredDataSpider
+from locations.user_agents import BROSWER_DEFAULT
 
 
 class AldiSudGB(SitemapSpider, StructuredDataSpider):
@@ -10,6 +11,4 @@ class AldiSudGB(SitemapSpider, StructuredDataSpider):
     download_delay = 10
     sitemap_urls = ["https://www.aldi.co.uk/sitemap/store-en_gb-gbp"]
     sitemap_rules = [("", "parse_sd")]
-    custom_settings = {
-        "USER_AGENT": "Mozilla/5.0 (X11; Linux x86_64; rv:99.0) Gecko/20100101 Firefox/99.0"
-    }
+    user_agent = BROSWER_DEFAULT

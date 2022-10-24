@@ -3,6 +3,7 @@ import json
 
 import scrapy
 from locations.items import GeojsonPointItem
+from locations.user_agents import BROSWER_DEFAULT
 
 
 class EquinoxSpider(scrapy.Spider):
@@ -10,10 +11,10 @@ class EquinoxSpider(scrapy.Spider):
     item_attributes = {"brand": "Equinox Fitness", "brand_wikidata": "Q5384535"}
     allowed_domains = ["cdn.contentful.com"]
     start_url = "https://cdn.contentful.com/spaces/drib7o8rcbyf/environments/master/entries?content_type=club&include=3"
+    user_agent = BROSWER_DEFAULT
 
     headers = {
         "Authorization": "Bearer jQC0m25d6MdSBGuBMFANzxpuWt5O_sdQOIYfLpqxcAI",
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:81.0) Gecko/20100101 Firefox/81.0",
         "X-Contentful-User-Agent": "sdk contentful.js/0.0.0-determined-by-semantic-release; platform browser; os Windows;",
         "Origin": "https://www.equinox.com",
     }

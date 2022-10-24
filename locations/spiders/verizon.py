@@ -5,16 +5,15 @@ import re
 
 from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
+from locations.user_agents import BROSWER_DEFAULT
 
 
 class VerizonSpider(scrapy.Spider):
     name = "verizon"
     item_attributes = {"brand": "Verizon", "brand_wikidata": "Q919641"}
     allowed_domains = ["www.verizonwireless.com"]
-    start_urls = ("https://www.verizonwireless.com/sitemap_storelocator.xml",)
-    custom_settings = {
-        "USER_AGENT": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.86 Safari/537.36",
-    }
+    start_urls = ["https://www.verizonwireless.com/sitemap_storelocator.xml"]
+    user_agent = BROSWER_DEFAULT
 
     def parse_hours(self, store_hours):
         opening_hours = OpeningHours()

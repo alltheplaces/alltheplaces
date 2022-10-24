@@ -3,6 +3,7 @@ import json
 import scrapy
 
 from locations.items import GeojsonPointItem
+from locations.user_agents import BROSWER_DEFAULT
 
 
 class BaptistHealthArkansasSpider(scrapy.Spider):
@@ -13,7 +14,7 @@ class BaptistHealthArkansasSpider(scrapy.Spider):
     }
     allowed_domains = ["algolia.net", "baptist-health.com"]
     start_urls = ["https://www.baptist-health.com/healthcare-arkansas-locations/"]
-    # download_delay =
+    user_agent = BROSWER_DEFAULT
 
     def parse(self, response):
         url = "https://6eh1ib012d-dsn.algolia.net/1/indexes/*/queries?x-algolia-agent=Algolia%20for%20JavaScript%20(3.33.0)%3B%20Browser%20(lite)%3B%20instantsearch.js%20(3.6.0)%3B%20Vue%20(2.6.10)%3B%20Vue%20InstantSearch%20(2.3.0)%3B%20JS%20Helper%20(2.28.0)&x-algolia-application-id=6EH1IB012D&x-algolia-api-key=66eafc59867885378e0a81317ea35987"
@@ -28,7 +29,6 @@ class BaptistHealthArkansasSpider(scrapy.Spider):
             "content-type": "application/x-www-form-urlencoded",
             "Origin": "https://www.baptist-health.com",
             "Referer": "https://www.baptist-health.com/",
-            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.55 Safari/537.36",
         }
 
         yield scrapy.http.FormRequest(

@@ -5,24 +5,17 @@ from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
 from scrapy.spiders import SitemapSpider
 
+from locations.user_agents import BROSWER_DEFAULT
+
 
 class ArgosSpider(SitemapSpider):
     name = "argos"
     item_attributes = {"brand": "Argos", "brand_wikidata": "Q4789707"}
     allowed_domains = ["www.argos.co.uk"]
     download_delay = 0.5
-    sitemap_urls = [
-        "https://www.argos.co.uk/stores_sitemap.xml",
-    ]
-    sitemap_rules = [
-        (
-            r"https://www.argos.co.uk/stores/([\d]+)-([\w-]+)",
-            "parse",
-        ),
-    ]
-    custom_settings = {
-        "USER_AGENT": "Mozilla/5.0 (X11; Linux x86_64; rv:99.0) Gecko/20100101 Firefox/99.0"
-    }
+    sitemap_urls = ["https://www.argos.co.uk/stores_sitemap.xml"]
+    sitemap_rules = [(r"https://www.argos.co.uk/stores/([\d]+)-([\w-]+)", "parse")]
+    user_agent = BROSWER_DEFAULT
 
     def parse(self, response):
         data = re.findall(r"window.INITIAL_STATE =[^<]+", response.text)
