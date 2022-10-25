@@ -2,6 +2,7 @@ from scrapy.spiders import SitemapSpider
 
 from locations.google_url import url_to_coords
 from locations.linked_data_parser import LinkedDataParser
+from locations.user_agents import BROSWER_DEFAULT
 
 
 class TUISpider(SitemapSpider):
@@ -12,15 +13,8 @@ class TUISpider(SitemapSpider):
         "country": "GB",
     }
     sitemap_urls = ["https://www.tui.co.uk/sitemap/sitemap.xml"]
-    sitemap_rules = [
-        (
-            r"^https:\/\/www\.tui\.co\.uk\/shop-finder\/([-\w]+)$",
-            "parse",
-        ),
-    ]
-    custom_settings = {
-        "USER_AGENT": "Mozilla/5.0 (X11; Linux x86_64; rv:103.0) Gecko/20100101 Firefox/103.0"
-    }
+    sitemap_rules = [(r"^https:\/\/www\.tui\.co\.uk\/shop-finder\/([-\w]+)$", "parse")]
+    user_agent = BROSWER_DEFAULT
 
     def sitemap_filter(self, entries):
         for entry in entries:

@@ -5,6 +5,7 @@ import scrapy
 
 from locations.hours import OpeningHours
 from locations.items import GeojsonPointItem
+from locations.user_agents import BROSWER_DEFAULT
 
 
 class HuntingtonBankSpider(scrapy.Spider):
@@ -12,11 +13,7 @@ class HuntingtonBankSpider(scrapy.Spider):
     item_attributes = {"brand": "Huntington Bank", "brand_wikidata": "Q798819"}
     allowed_domains = ["www.huntington.com"]
     start_urls = ["https://www.huntington.com/~/media/SEO_Files/sitemap.xml"]
-
-    headers = {
-        "User-Agent": "Mozilla/5.0 (X11; CrOS aarch64 14324.72.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4692.91 Safari/537.36"
-    }
-    custom_settings = {"DEFAULT_REQUEST_HEADERS": headers}
+    user_agent = BROSWER_DEFAULT
 
     def parse(self, response):
         response.selector.remove_namespaces()

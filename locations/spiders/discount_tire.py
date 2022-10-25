@@ -6,6 +6,8 @@ import scrapy
 from locations.items import GeojsonPointItem
 from scrapy.spiders import SitemapSpider
 
+from locations.user_agents import BROSWER_DEFAULT
+
 URL = "https://data.discounttire.com/webapi/discounttire.graph"
 
 
@@ -26,9 +28,7 @@ class DiscountTireSpider(SitemapSpider):
         )
     ]
     download_delay = 5.0
-    custom_settings = {
-        "USER_AGENT": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36"
-    }
+    user_agent = BROSWER_DEFAULT
 
     def parse_site(self, response):
         store_code = re.search(r".*/s/(\d*)$", response.url).group(1)

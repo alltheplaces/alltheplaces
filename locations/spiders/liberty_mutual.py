@@ -5,20 +5,17 @@ import re
 import scrapy
 
 from locations.items import GeojsonPointItem
+from locations.user_agents import BROSWER_DEFAULT
 
 
 class LibertyMutualSpider(scrapy.Spider):
     name = "liberty_mutual"
     item_attributes = {"brand": "Liberty Mutual", "brand_wikidata": "Q1516450"}
     allowed_domains = ["www.libertymutual.com"]
-    start_urls = [
-        "http://www.libertymutual.com/office-sitemap.xml",
-    ]
+    start_urls = ["http://www.libertymutual.com/office-sitemap.xml"]
     download_delay = 10
-    custom_settings = {
-        "USER_AGENT": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Safari/537.36",
-        "CONCURRENT_REQUESTS": "1",
-    }
+    custom_settings = {"CONCURRENT_REQUESTS": "1"}
+    user_agent = BROSWER_DEFAULT
 
     def parse_store(self, response):
         data = re.search(

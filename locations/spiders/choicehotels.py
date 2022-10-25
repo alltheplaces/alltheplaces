@@ -3,18 +3,16 @@ import re
 from locations.items import GeojsonPointItem
 from scrapy.spiders import SitemapSpider
 
+from locations.user_agents import BROSWER_DEFAULT
+
 
 class ChoiceHotelsSpider(SitemapSpider):
     name = "choicehotels"
     item_attributes = {"brand": "Choice Hotels", "brand_wikidata": "Q1075788"}
     allowed_domains = ["choicehotels.com"]
-    sitemap_urls = [
-        "https://www.choicehotels.com/propertysitemap.xml",
-    ]
-    custom_settings = {
-        "DOWNLOAD_DELAY": 5.0,
-        "USER_AGENT": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36",
-    }
+    sitemap_urls = ["https://www.choicehotels.com/propertysitemap.xml"]
+    user_agent = BROSWER_DEFAULT
+    download_delay = 5
 
     brand_mapping = {
         "AC": ("Ascend Hotel Collection", "Q113152464"),

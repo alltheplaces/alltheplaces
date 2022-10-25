@@ -5,6 +5,8 @@ from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
 from scrapy.spiders import SitemapSpider
 
+from locations.user_agents import BROSWER_DEFAULT
+
 
 class JohnLewisSpider(SitemapSpider):
     name = "johnlewis"
@@ -14,10 +16,8 @@ class JohnLewisSpider(SitemapSpider):
     sitemap_rules = [
         (r"https:\/\/www\.johnlewis\.com\/our\-shops\/([-\w]+)", "parse_stores")
     ]
-    custom_settings = {
-        "REDIRECT_ENABLED": False,
-        "USER_AGENT": "Mozilla/5.0 (X11; Linux x86_64; rv:99.0) Gecko/20100101 Firefox/99.0",
-    }
+    custom_settings = {"REDIRECT_ENABLED": False}
+    user_agent = BROSWER_DEFAULT
 
     def parse_stores(self, response):
         item = GeojsonPointItem()

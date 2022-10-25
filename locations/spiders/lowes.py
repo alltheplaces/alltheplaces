@@ -4,7 +4,7 @@ import re
 import json
 from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
-
+from locations.user_agents import BROSWER_DEFAULT
 
 day_mapping = {
     "Monday": "Mo",
@@ -24,10 +24,8 @@ class LowesSpider(scrapy.Spider):
     item_attributes = {"brand": "Lowe's", "brand_wikidata": "Q1373493"}
     allowed_domains = ["lowes.com"]
     download_delay = 0.1
-    custom_settings = {
-        "ROBOTSTXT_OBEY": False,
-        "USER_AGENT": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36 RuxitSynthetic/1.0 v2946028852165593646 t2919217341348717815",
-    }
+    custom_settings = {"ROBOTSTXT_OBEY": False}
+    user_agent = BROSWER_DEFAULT
 
     def start_requests(self):
         yield scrapy.Request(
