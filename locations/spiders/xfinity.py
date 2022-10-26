@@ -3,94 +3,20 @@ import scrapy
 import json
 import re
 
-from locations.items import GeojsonPointItem
+from geonamescache import GeonamesCache
 
-STATES = [
-    "AL",
-    "AK",
-    "AS",
-    "AZ",
-    "AR",
-    "CA",
-    "CO",
-    "CT",
-    "DE",
-    "DC",
-    "FM",
-    "FL",
-    "GA",
-    "GU",
-    "HI",
-    "ID",
-    "IL",
-    "IN",
-    "IA",
-    "KS",
-    "KY",
-    "LA",
-    "ME",
-    "MH",
-    "MD",
-    "MA",
-    "MI",
-    "MN",
-    "MS",
-    "MO",
-    "MT",
-    "NE",
-    "NV",
-    "NH",
-    "NJ",
-    "NM",
-    "NY",
-    "NC",
-    "ND",
-    "MP",
-    "OH",
-    "OK",
-    "OR",
-    "PW",
-    "PA",
-    "PR",
-    "RI",
-    "SC",
-    "SD",
-    "TN",
-    "TX",
-    "UT",
-    "VT",
-    "VI",
-    "VA",
-    "WA",
-    "WV",
-    "WI",
-    "WY",
-]
+from locations.items import GeojsonPointItem
 
 
 class XfinitySpider(scrapy.Spider):
     name = "xfinity"
     item_attributes = {"brand": "Xfinity", "brand_wikidata": "Q5151002"}
     allowed_domains = ["www.xfinity.com"]
-    base_url = "https://www.xfinity.com/support/service-center-locations/"
 
     def start_requests(self):
-        headers = {
-            "accept-Language": "en-US,en;q=0.9",
-            "origin": "https://www.xfinity.com",
-            "accept-Encoding": "gzip, deflate, br",
-            "accept": "*/*",
-            "referer": "https://www.xfinity.com/support/service-center-locations/",
-            "user-agent": "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36",
-        }
-        for state in STATES:
+        for state in GeonamesCache().get_us_states():
             yield scrapy.http.Request(
-                "https://api-support.xfinity.com/servicecenters?location={}".format(
-                    state
-                ),
-                self.parse,
-                method="GET",
-                headers=headers,
+                url=f"https://api-support.xfinity.com/servicecenters?location={state}"
             )
 
     def store_hours(self, store_hours):

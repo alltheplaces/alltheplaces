@@ -4,102 +4,29 @@ import scrapy
 from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
 
-STATES = [
-    "AL",
-    "AK",
-    "AZ",
-    "AR",
-    "CA",
-    "CO",
-    "CT",
-    "DC",
-    "DE",
-    "FL",
-    "GA",
-    "HI",
-    "ID",
-    "IL",
-    "IN",
-    "IA",
-    "KS",
-    "KY",
-    "LA",
-    "ME",
-    "MD",
-    "MA",
-    "MI",
-    "MN",
-    "MS",
-    "MO",
-    "MT",
-    "NE",
-    "NV",
-    "NH",
-    "NJ",
-    "NM",
-    "NY",
-    "NC",
-    "ND",
-    "OH",
-    "OK",
-    "OR",
-    "PA",
-    "RI",
-    "SC",
-    "SD",
-    "TN",
-    "TX",
-    "UT",
-    "VT",
-    "VA",
-    "WA",
-    "WV",
-    "WI",
-    "WY",
-]
-
 WEEKDAYS = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
 
 
 class KonaGrillSpider(scrapy.Spider):
     download_delay = 0.2
     name = "konagrill"
-    item_attributes = {"brand": "Kona Grill", "brand_wikidata": "Q6428706"}
+    item_attributes = {
+        "brand": "Kona Grill",
+        "brand_wikidata": "Q6428706",
+        "country": "US",
+    }
     allowed_domains = ["konagrill.com"]
-
-    def start_requests(self):
-        url_by_state = "https://www.konagrill.com/ajax/getlocationsbystate"
-        headers = {"content-type": "application/x-www-form-urlencoded"}
-
-        # Get store id per state
-        for state in STATES:
-            yield scrapy.http.Request(
-                url_by_state,
-                method="POST",
-                body="state={}".format(state),
-                callback=self.parse,
-                headers=headers,
-            )
+    start_urls = ["https://www.konagrill.com/ajax/getalllocations"]
 
     def parse(self, response):
         store_data = response.json()
-        url_location_details = "https://www.konagrill.com/ajax/getlocationdetails"
-        headers = {"content-type": "application/x-www-form-urlencoded"}
-        store_ids = []
-
-        if not store_data.get("data"):
-            return
-
-        store_ids += [s.get("id") for _, s in store_data.get("data").items()]
 
         # Get store details
-        for i in store_ids:
-            yield scrapy.http.Request(
-                url_location_details,
-                method="POST",
-                body="id={}".format(i),
+        for store in store_data.get("data", {}).values():
+            yield scrapy.http.FormRequest(
+                url="https://www.konagrill.com/ajax/getlocationdetails",
+                formdata={"id": store["id"]},
                 callback=self.parse_store,
-                headers=headers,
             )
 
     def parse_store(self, response):
@@ -114,7 +41,7 @@ class KonaGrillSpider(scrapy.Spider):
             dh.get("dining hours") or dh.get("dining hours ")
         )
         properties = {
-            "addr_full": store.get("address"),
+            "street_address": store.get("address"),
             "city": store.get("city"),
             "email": store.get("email"),
             "lat": store.get("latitude"),

@@ -1,77 +1,24 @@
 import scrapy
+
+from geonamescache import GeonamesCache
+
 from locations.items import GeojsonPointItem
-
-URL = "https://www.nationalguard.com/api/state/"
-
-US_STATES = [
-    "AL",
-    "AK",
-    "AZ",
-    "AR",
-    "CA",
-    "CO",
-    "CT",
-    "DC",
-    "DE",
-    "FL",
-    "GA",
-    "HI",
-    "ID",
-    "IL",
-    "IN",
-    "IA",
-    "KS",
-    "KY",
-    "LA",
-    "ME",
-    "MD",
-    "MA",
-    "MI",
-    "MN",
-    "MS",
-    "MO",
-    "MT",
-    "NE",
-    "NV",
-    "NH",
-    "NJ",
-    "NM",
-    "NY",
-    "NC",
-    "ND",
-    "OH",
-    "OK",
-    "OR",
-    "PA",
-    "USPR",
-    "USGU",
-    "USVI",
-    "RI",
-    "SC",
-    "SD",
-    "TN",
-    "TX",
-    "UT",
-    "VT",
-    "VA",
-    "WA",
-    "WV",
-    "WI",
-    "WY",
-]
 
 
 class USArmyNationalGuardSpider(scrapy.Spider):
     name = "us_army_national_guard"
-    item_attributes = {"brand": "US Army National Guard", "brand_wikidata": "Q928670"}
+    item_attributes = {
+        "brand": "US Army National Guard",
+        "brand_wikidata": "Q928670",
+        "country": "US",
+    }
     allowed_domains = ["www.nationalguard.com"]
 
     def start_requests(self):
-        for state in US_STATES:
-            url = "".join([URL, state])
-            yield scrapy.Request(url, callback=self.parse_info)
+        for state in GeonamesCache().get_us_states():
+            yield scrapy.Request(url="https://www.nationalguard.com/api/state/" + state)
 
-    def parse_info(self, response):
+    def parse(self, response, **kwargs):
         data = response.json()
         for row in data["locations"]:
             properties = {
