@@ -5,10 +5,7 @@ from locations.dict_parser import DictParser
 
 class TheBodyShopSpider(scrapy.spiders.SitemapSpider):
     name = "thebodyshop"
-    item_attributes = {
-        "brand": "Body Shop",
-        "brand_wikidata": "Q837851",
-    }
+    item_attributes = {"brand": "The Body Shop", "brand_wikidata": "Q837851"}
     allowed_domains = ["thebodyshop.com"]
     download_delay = 1.0
     sitemap_urls = ["https://www.thebodyshop.com/sitemap.xml"]

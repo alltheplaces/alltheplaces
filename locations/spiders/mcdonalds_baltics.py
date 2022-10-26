@@ -2,6 +2,7 @@
 import scrapy
 
 from locations.open_graph_parser import OpenGraphParser
+from locations.spiders.mcdonalds import McDonaldsSpider
 
 
 def country_from_url(response):
@@ -11,7 +12,7 @@ def country_from_url(response):
 class McDonaldsBalticsSpider(scrapy.spiders.SitemapSpider):
     name = "mcdonalds_baltics"
     custom_settings = {"ROBOTSTXT_OBEY": False}
-    item_attributes = {"brand": "McDonald's", "brand_wikidata": "Q38076"}
+    item_attributes = McDonaldsSpider.item_attributes
     sitemap_urls = [
         "https://mcdonalds.ee/location-sitemap.xml",
         "https://mcd.lt/location-sitemap.xml",

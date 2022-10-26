@@ -1,10 +1,11 @@
 import scrapy
 from locations.dict_parser import DictParser
+from locations.spiders.mcdonalds import McDonaldsSpider
 
 
 class McDonaldsITSpider(scrapy.Spider):
     name = "mcdonalds_it"
-    item_attributes = {"brand": "McDonald's", "brand_wikidata": "Q38076"}
+    item_attributes = McDonaldsSpider.item_attributes
     start_urls = ["https://www.mcdonalds.it/static/json/store_locator.json"]
 
     def parse(self, response):
