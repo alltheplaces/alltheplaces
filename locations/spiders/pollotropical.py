@@ -7,7 +7,8 @@ class QuickleesSpider(scrapy.Spider):
     name = "pollotropical"
     allowed_domains = ["https://www.pollotropical.com/"]
     item_attributes = {
-        "brand": "pollo tropical",
+        "brand": "Pollo Tropical",
+        "brand_wikidata": "Q3395356",
         "country": "USA",
     }
 
