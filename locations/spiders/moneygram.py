@@ -9,7 +9,7 @@ from locations.hours import OpeningHours
 class MoneygramSpider(scrapy.Spider):
     download_delay = 0.2
     name = "moneygram"
-    item_attributes = {"brand": "Moneygram", "brand_wikidata": "Q1944412"}
+    item_attributes = {"brand": "MoneyGram", "brand_wikidata": "Q1944412"}
     allowed_domains = ["locations.moneygram.com"]
     start_urls = ("http://locations.moneygram.com/",)
 

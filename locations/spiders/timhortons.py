@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import json
-
 import scrapy
 
 from locations.items import GeojsonPointItem
@@ -8,7 +7,7 @@ from locations.items import GeojsonPointItem
 
 class TimHortonsSpider(scrapy.Spider):
     name = "timhortons"
-    item_attributes = {"brand": "Tim Horton's", "brand_wikidata": "Q175106"}
+    item_attributes = {"brand": "Tim Hortons", "brand_wikidata": "Q175106"}
     allowed_domains = ["locations.timhortons.com", "locations.timhortons.ca"]
     start_urls = (
         "https://locations.timhortons.com/sitemap.xml",

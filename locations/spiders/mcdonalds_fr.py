@@ -3,11 +3,12 @@ import scrapy
 
 from locations.hours import OpeningHours
 from locations.items import GeojsonPointItem
+from locations.spiders.mcdonalds import McDonaldsSpider
 
 
 class McDonaldsFRSpider(scrapy.Spider):
     name = "mcdonalds_fr"
-    item_attributes = {"brand": "McDonald's", "brand_wikidata": "Q38076"}
+    item_attributes = McDonaldsSpider.item_attributes
     allowed_domains = ["www.mcdonalds.fr", "api.woosmap.com", "ws.mcdonalds.fr"]
 
     start_urls = [

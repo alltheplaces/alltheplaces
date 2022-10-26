@@ -42,6 +42,7 @@ class StructuredDataSpider(Spider):
 
     wanted_types = [
         "LocalBusiness",
+        "ConvenienceStore",
         "Store",
         "Restaurant",
         "BankOrCreditUnion",
