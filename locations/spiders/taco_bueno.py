@@ -2,77 +2,29 @@
 import scrapy
 import re
 
+from geonamescache import GeonamesCache
+
 from locations.items import GeojsonPointItem
 
 regex_am = r"\s?([Aa][Mm])"
 regex_pm = r"\s?([Pp][Mm])"
 
-STATES = [
-    "AL",
-    "AK",
-    "AZ",
-    "AR",
-    "CA",
-    "CO",
-    "CT",
-    "DC",
-    "DE",
-    "FL",
-    "GA",
-    "HI",
-    "ID",
-    "IL",
-    "IN",
-    "IA",
-    "KS",
-    "KY",
-    "LA",
-    "ME",
-    "MD",
-    "MA",
-    "MI",
-    "MN",
-    "MS",
-    "MO",
-    "MT",
-    "NE",
-    "NV",
-    "NH",
-    "NJ",
-    "NM",
-    "NY",
-    "NC",
-    "ND",
-    "OH",
-    "OK",
-    "OR",
-    "PA",
-    "RI",
-    "SC",
-    "SD",
-    "TN",
-    "TX",
-    "UT",
-    "VT",
-    "VA",
-    "WA",
-    "WV",
-    "WI",
-    "WY",
-]
-
 
 class TacobuenoSpider(scrapy.Spider):
     name = "bueno"
-    item_attributes = {"brand": "Taco Bueno", "brand_wikidata": "Q7673958"}
+    item_attributes = {
+        "brand": "Taco Bueno",
+        "brand_wikidata": "Q7673958",
+        "country": "US",
+    }
     allowed_domains = ["buenoonthego.com"]
     download_delay = 0.1
-    start_urls = ["https://buenoonthego.com/mp/ndXTAL/searchByStateCode_JSON?"]
 
     def start_requests(self):
-        for state in STATES:
-            store_url = self.start_urls[0] + "stateCode=" + "'" + state + "'"
-            yield scrapy.Request(store_url, callback=self.parse)
+        for state in GeonamesCache().get_us_states():
+            yield scrapy.Request(
+                f"https://buenoonthego.com/mp/ndXTAL/searchByStateCode_JSON?stateCode='{state}'"
+            )
 
     def convert_hours(self, hours):
         converted_times = ""
@@ -131,7 +83,7 @@ class TacobuenoSpider(scrapy.Spider):
                 yield GeojsonPointItem(
                     ref=ref,
                     name=name,
-                    street=street,
+                    street_address=street,
                     city=city,
                     state=state,
                     postcode=postcode,
