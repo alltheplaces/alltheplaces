@@ -8,7 +8,11 @@ from locations.items import GeojsonPointItem
 
 class FarmersHomeFurnitureSpider(scrapy.Spider):
     name = "farmershomefurniture"
-    item_attributes = {"brand": "Farmers Home Furniture", "country": "US"}
+    item_attributes = {
+        "brand": "Farmers Home Furniture",
+        "brand_wikidata": "Q114870935",
+        "country": "US",
+    }
     allowed_domains = ["www.farmershomefurniture.com"]
     start_urls = ["https://www.farmershomefurniture.com/store-list.inc"]
 
