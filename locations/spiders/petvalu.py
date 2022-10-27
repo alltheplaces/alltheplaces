@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import re
+
 import scrapy
 import json
 
@@ -15,8 +17,8 @@ class PetValuSpider(scrapy.Spider):
         "https://store.petvalu.ca/modules/multilocation/?near_location=toronto&threshold=40000000000000&geocoder_components=country:CA&distance_unit=km&limit=20000000000&services__in=&language_code=en-us&published=1&within_business=true",
     )
 
-      def parse(self, response):
+    def parse(self, response):
         data = response.json()
-        for i in data['objects']:
+        for i in data["objects"]:
             item = DictParser.parse(i)
             yield item
