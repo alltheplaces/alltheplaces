@@ -11,7 +11,6 @@ fi
 mkdir -p "${BUILD_ID}"
 
 SPIDERS=$(curl "https://data.alltheplaces.xyz/runs/${BUILD_ID}/stats/_results.json" | jq -r ".results[].spider")
-for SPIDER in $SPIDERS
-do
-  curl "https://data.alltheplaces.xyz/runs/${BUILD_ID}/stats/${SPIDER}.json" -o "${BUILD_ID}/${SPIDER}.json"
+for SPIDER in $SPIDERS; do
+    curl "https://data.alltheplaces.xyz/runs/${BUILD_ID}/stats/${SPIDER}.json" | jq > "${BUILD_ID}/${SPIDER}.json"
 done
