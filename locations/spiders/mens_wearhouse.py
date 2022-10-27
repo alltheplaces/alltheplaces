@@ -9,7 +9,7 @@ from locations.hours import OpeningHours
 
 class MensWearhouseSpider(scrapy.Spider):
     name = "mens_wearhouse"
-    item_attributes = {"brand": "Men's Wearhouse"}
+    item_attributes = {"brand": "Men's Wearhouse", "brand_wikidata": "Q57405513"}
     allowed_domains = ["menswearhouse.com"]
     start_urls = [
         "https://www.menswearhouse.com/store-locator/directory",

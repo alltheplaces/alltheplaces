@@ -8,7 +8,10 @@ from locations.items import GeojsonPointItem
 class FlemingsSteakhouseSpider(scrapy.Spider):
     download_delay = 0.2
     name = "flemingssteakhouse"
-    item_attributes = {"brand": "Fleming's Prime Steakhouse & Wine Bar"}
+    item_attributes = {
+        "brand": "Fleming's Prime Steakhouse & Wine Bar",
+        "brand_wikidata": "Q5458552",
+    }
     allowed_domains = ["flemingssteakhouse.com"]
     start_urls = ("https://www.flemingssteakhouse.com/locations",)
 

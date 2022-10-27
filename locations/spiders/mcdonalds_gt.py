@@ -1,11 +1,12 @@
 import re
 import scrapy
 from locations.items import GeojsonPointItem
+from locations.spiders.mcdonalds import McDonaldsSpider
 
 
 class McDonaldsGTSpider(scrapy.Spider):
     name = "mcdonalds_gt"
-    item_attributes = {"brand": "McDonald's", "brand_wikidata": "Q38076"}
+    item_attributes = McDonaldsSpider.item_attributes
     allowed_domains = ["mcdonalds.com.gt"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
 

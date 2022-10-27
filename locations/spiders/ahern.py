@@ -10,7 +10,7 @@ from locations.items import GeojsonPointItem
 class AhernSpider(scrapy.Spider):
     # download_delay = 0.2
     name = "ahern"
-    item_attributes = {"brand": "Ahern Rentals"}
+    item_attributes = {"brand": "Ahern Rentals", "brand_wikidata": "Q114487657"}
     allowed_domains = ["ahern.com"]
     start_urls = (
         "https://www.ahern.com/themes/theaherns/js/plugins/storeLocator/data/locations.json?formattedAddress=&boundsNorthEast=&boundsSouthWest=",

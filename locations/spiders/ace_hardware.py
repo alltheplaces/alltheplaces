@@ -1,8 +1,8 @@
 import scrapy
-import re
 import json
 from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
+from locations.user_agents import BROSWER_DEFAULT
 
 DAY_MAPPING = [
     "monday",
@@ -21,7 +21,7 @@ class AceHardwareSpider(scrapy.Spider):
     allowed_domains = ["www.acehardware.com"]
     download_delay = 0.7
     start_urls = ("https://www.acehardware.com/store-directory",)
-    user_agent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36"
+    user_agent = BROSWER_DEFAULT
 
     def parse_hours(self, lis):
         o = OpeningHours()

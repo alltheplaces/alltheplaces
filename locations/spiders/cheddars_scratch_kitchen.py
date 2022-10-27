@@ -10,6 +10,10 @@ from locations.hours import OpeningHours
 class CheddarsScratchKitchenSpider(scrapy.Spider):
     name = "cheddars_scratch_kitchen"
     allowed_domains = ["cheddars.com"]
+    item_attributes = {
+        "brand": "Cheddar's Scratch Kitchen",
+        "brand_wikidata": "Q5089187",
+    }
 
     def start_requests(self):
         url = "https://www.cheddars.com/web-api/restaurants"

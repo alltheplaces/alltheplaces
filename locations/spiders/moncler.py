@@ -9,7 +9,7 @@ from locations.items import GeojsonPointItem
 class MonclerSpider(scrapy.Spider):
     # download_delay = 0.2
     name = "moncler"
-    item_attributes = {"brand": "Moncler"}
+    item_attributes = {"brand": "Moncler", "brand_wikidata": "Q1548951"}
     allowed_domains = ["moncler.com"]
 
     start_urls = [

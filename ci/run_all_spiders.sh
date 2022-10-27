@@ -54,6 +54,9 @@ fi
 OUTPUT_LINECOUNT=$(cat "${SPIDER_RUN_DIR}"/output/*.geojson | wc -l | tr -d ' ')
 (>&2 echo "Generated ${OUTPUT_LINECOUNT} lines")
 
+scrapy insights --atp-nsi-osm "${SPIDER_RUN_DIR}/output" --outfile "${SPIDER_RUN_DIR}/stats/_insights.json"
+(>&2 echo "Done comparing against Name Suggestion Index and OpenStreetMap")
+
 echo "{\"count\": ${SPIDER_COUNT}, \"results\": []}" >> "${SPIDER_RUN_DIR}/stats/_results.json"
 for spider in $(scrapy list)
 do
@@ -139,11 +142,12 @@ jq -n --compact-output \
     --arg run_id "${RUN_TIMESTAMP}" \
     --arg run_output_url "${RUN_URL_PREFIX}/output.tar.gz" \
     --arg run_stats_url "${RUN_URL_PREFIX}/stats/_results.json" \
+    --arg run_insights_url "${RUN_URL_PREFIX}/stats/_insights.json" \
     --arg run_start_time "${RUN_START}" \
     --arg run_output_size "${OUTPUT_FILESIZE}" \
     --arg run_spider_count "${SPIDER_COUNT}" \
     --arg run_line_count "${OUTPUT_LINECOUNT}" \
-    '{"run_id": $run_id, "output_url": $run_output_url, "stats_url": $run_stats_url, "start_time": $run_start_time, "size_bytes": $run_output_size | tonumber, "spiders": $run_spider_count | tonumber, "total_lines": $run_line_count | tonumber }' \
+    '{"run_id": $run_id, "output_url": $run_output_url, "stats_url": $run_stats_url, "insights_url": $run_insights_url, "start_time": $run_start_time, "size_bytes": $run_output_size | tonumber, "spiders": $run_spider_count | tonumber, "total_lines": $run_line_count | tonumber }' \
     > latest.json
 
 aws s3 cp \

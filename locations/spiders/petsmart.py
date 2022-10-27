@@ -46,7 +46,7 @@ def convert_24hour(time):
 
 class PetSmartSpider(scrapy.Spider):
     name = "petsmart"
-    item_attributes = {"brand": "Petsmart", "brand_wikidata": "Q3307147"}
+    item_attributes = {"brand": "PetSmart", "brand_wikidata": "Q3307147"}
     allowed_domains = ["petsmart.com", "petsmart.ca"]
     start_urls = (
         "https://www.petsmart.com/store-locator/all/",

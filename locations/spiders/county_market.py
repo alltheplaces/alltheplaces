@@ -12,7 +12,7 @@ AM_PM = r"am|pm|a.m.|p.m.|a|p"
 
 class CountyMarketSpider(scrapy.Spider):
     name = "county_market"
-    item_attributes = {"brand": "County Market"}
+    item_attributes = {"brand": "County Market", "brand_wikidata": "Q5177716"}
     allowed_domains = [
         "www.mycountymarket.com",
     ]

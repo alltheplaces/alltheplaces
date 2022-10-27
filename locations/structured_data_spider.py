@@ -25,7 +25,9 @@ def extract_phone(item, response):
 
 def extract_twitter(item, response):
     if twitter := response.xpath('//meta[@name="twitter:site"]/@content').get():
-        item["twitter"] = twitter.strip()
+        twitter = twitter.strip()
+        if not twitter == "@":
+            item["twitter"] = twitter
 
 
 def extract_image(item, response):
@@ -40,6 +42,7 @@ class StructuredDataSpider(Spider):
 
     wanted_types = [
         "LocalBusiness",
+        "ConvenienceStore",
         "Store",
         "Restaurant",
         "BankOrCreditUnion",
@@ -84,6 +87,15 @@ class StructuredDataSpider(Spider):
 
                     if item["ref"] is None:
                         item["ref"] = response.url
+
+                item["website"] = None
+                if isinstance(item["website"], list):
+                    item["website"] = item["website"][0]
+
+                if not item["website"]:
+                    item["website"] = response.url
+                elif item["website"].startswith("www"):
+                    item["website"] = "https://" + item["website"]
 
                 if self.search_for_email and item["email"] is None:
                     extract_email(item, response)

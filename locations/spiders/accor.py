@@ -12,6 +12,7 @@ class AccorSpider(scrapy.Spider):
     start_urls = (
         "https://group.accor.com/en/hotel-development/-/Media/Corporate/Master-Page/Maps/Business-Developers-map/accorB2BMap_en.json",
     )
+    item_attributes = {"brand": "Accor", "brand_wikidata": "Q212599"}
 
     def parse(self, response):
         data = response.json()

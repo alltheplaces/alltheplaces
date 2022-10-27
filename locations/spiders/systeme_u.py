@@ -9,7 +9,7 @@ from locations.hours import OpeningHours
 
 class SystemeUSpider(scrapy.Spider):
     name = "systeme_u"
-    item_attributes = {"brand": "Systeme U"}
+    item_attributes = {"brand": "Systeme U", "brand_wikidata": "Q2529029"}
     allowed_domains = ["magasins-u.com"]
     start_urls = [
         "https://www.magasins-u.com/sitemap.xml",

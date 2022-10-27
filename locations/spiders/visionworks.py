@@ -5,6 +5,8 @@ import scrapy
 from locations.items import GeojsonPointItem
 from urllib.parse import urlencode
 
+from locations.user_agents import BROSWER_DEFAULT
+
 URL = "https://api.momentfeed.com/v1/analytics/api/llp.json?"
 
 
@@ -12,13 +14,9 @@ class VisionWorksSpider(scrapy.Spider):
     name = "visionworks"
     allowed_domains = ["visionworks.com", "api.momentfeed.com"]
     item_attributes = {"brand": "Visionworks", "brand_wikidata": "Q5422607"}
-    start_urls = [
-        "https://locations.visionworks.com/sitemap.xml",
-    ]
+    start_urls = ["https://locations.visionworks.com/sitemap.xml"]
     download_delay = 0.3
-    custom_settings = {
-        "USER_AGENT": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.86 Safari/537.36",
-    }
+    user_agent = BROSWER_DEFAULT
 
     def parse_store(self, response):
         data = response.json()

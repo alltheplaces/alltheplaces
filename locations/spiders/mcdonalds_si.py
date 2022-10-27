@@ -3,11 +3,12 @@ import scrapy
 import re
 
 from locations.items import GeojsonPointItem
+from locations.spiders.mcdonalds import McDonaldsSpider
 
 
 class McDonaldsSISpider(scrapy.Spider):
     name = "mcdonalds_si"
-    item_attributes = {"brand": "McDonald's", "brand_wikidata": "Q38076"}
+    item_attributes = McDonaldsSpider.item_attributes
     allowed_domains = ["www.mcdonalds.si"]
     start_urls = ("https://www.mcdonalds.si/restavracije/",)
 

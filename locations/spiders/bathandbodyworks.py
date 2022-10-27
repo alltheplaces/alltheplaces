@@ -19,7 +19,7 @@ day_formats = {
 # This spider scrapes both the US locations, as well as the global locations for bathandbodyworks.
 class BathAndBodyWorksSpider(scrapy.Spider):
     name = "bathandbodyworks"
-    item_attributes = {"brand": "Bath And Body Works"}
+    item_attributes = {"brand": "Bath & Body Works", "brand_wikidata": "Q810773"}
     allowed_domains = ["bathandbodyworks.com"]
     start_urls = (
         "https://www.bathandbodyworks.com/on/demandware.store/Sites-BathAndBodyWorks-Site/en_US/Stores-GetNearestStores?latitude=45&longitude=-120&countryCode=US&distanceUnit=mi&maxdistance=25000&BBW=1",

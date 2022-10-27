@@ -7,6 +7,7 @@ from locations.items import GeojsonPointItem
 
 class HardRockSpider(scrapy.Spider):
     name = "hardrock"
+    # TODO: has hotels, cafes etc in wikidata, spider will need more work for applying wikidata
     item_attributes = {"brand": "Hard Rock"}
     allowed_domains = ["www.hardrock.com"]
     start_urls = [

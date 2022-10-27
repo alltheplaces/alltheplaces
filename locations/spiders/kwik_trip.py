@@ -1,5 +1,6 @@
 import scrapy
 from locations.items import GeojsonPointItem
+from locations.user_agents import BROSWER_DEFAULT
 
 
 class KwikTripSpider(scrapy.Spider):
@@ -7,12 +8,8 @@ class KwikTripSpider(scrapy.Spider):
     item_attributes = {"brand": "Kwik Trip", "brand_wikidata": "Q6450420"}
     allowed_domains = ["www.kwiktrip.com"]
     download_delay = 0
-    user_agent = (
-        "Mozilla/5.0 (Windows NT 6.1; Win64; x64) "
-        "AppleWebKit/537.36 (KHTML, like Gecko) "
-        "Chrome/63.0.3239.84 Safari/537.36"
-    )
-    start_urls = ("https://www.kwiktrip.com/Maps-Downloads/Store-List",)
+    user_agent = BROSWER_DEFAULT
+    start_urls = ["https://www.kwiktrip.com/Maps-Downloads/Store-List"]
 
     def parse(self, response):
         rows = response.xpath("(//tr)[position()>1]")  # Skip header of table

@@ -7,7 +7,7 @@ from locations.dict_parser import DictParser
 
 class McDonaldsSpider(scrapy.Spider):
     name = "mcdonalds"
-    item_attributes = {"brand": "McDonald's", "brand_wikidata": "Q38076"}
+    item_attributes = {"brand": "McDonald’s", "brand_wikidata": "Q38076"}
     allowed_domains = ["www.mcdonalds.com"]
     download_delay = 0.5
 

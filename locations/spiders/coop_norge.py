@@ -7,7 +7,7 @@ from locations.items import GeojsonPointItem
 class CoopNorgeSpider(scrapy.Spider):
     # download_delay = .2
     name = "coop"
-    item_attributes = {"brand": "Coop Norge"}
+    item_attributes = {"brand": "Coop Norge", "brand_wikidata": "Q1618373"}
     allowed_domains = ["coop.no"]
     start_urls = (
         "https://coop.no/StoreService/StoresByBoundingBox?locationLat=59.91844170471853&locationLon=1.73930000000001&latNw=89.25020758985941&lonNw=9.771129833984386&latSe=9.586675819577664&lonSe=121.707470166015636",

@@ -9,7 +9,7 @@ from urllib.parse import urlencode
 
 class SallyBeautySpider(scrapy.Spider):
     name = "sallybeauty"
-    item_attributes = {"brand": "Sally Beauty"}
+    item_attributes = {"brand": "Sally Beauty", "brand_wikidata": "Q7405065"}
     allowed_domains = ["sallybeauty.com"]
 
     def start_requests(self):

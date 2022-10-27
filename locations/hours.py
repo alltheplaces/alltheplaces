@@ -28,6 +28,7 @@ DAYS_EN = {
     "Thursday": "Th",
     "Thu": "Th",
     "Thur": "Th",
+    "Thrs": "Th",
     "Thurs": "Th",
     "Th": "Th",
     "Friday": "Fr",
@@ -56,6 +57,40 @@ DAYS_BG = {
     "Съб": "Sa",
     "нед": "Su",
     "Нд": "Su",
+}
+DAYS_CH = {
+    "Mo": "Mo",
+    "Di": "Tu",
+    "Mi": "We",
+    "Do": "Th",
+    "Fr": "Fr",
+    "Sa": "Sa",
+    "So": "Su",
+}
+DAYS_HU = {
+    "Hé": "Mo",
+    "Ke": "Tu",
+    "Sze": "We",
+    "Csü": "Th",
+    "Pé": "Fr",
+    "Szo": "Sa",
+    "Vas": "Su",
+}
+DAYS_SI = {
+    "po": "Mo",
+    "Pon": "Mo",
+    "to": "Tu",
+    "Tor": "Tu",
+    "sr": "We",
+    "Sre": "We",
+    "če": "Th",
+    "Čet": "Th",
+    "pe": "Fr",
+    "Pet": "Fr",
+    "so": "Sa",
+    "Sob": "Sa",
+    "ne": "Su",
+    "Ned": "Su",
 }
 
 

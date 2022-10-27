@@ -3,11 +3,12 @@ import scrapy
 import re
 
 from locations.dict_parser import DictParser
+from locations.spiders.mcdonalds import McDonaldsSpider
 
 
 class McDonaldsQStoreSpider(scrapy.Spider):
     name = "mcdonalds_qstore"
-    item_attributes = {"brand": "McDonald's", "brand_wikidata": "Q38076"}
+    item_attributes = McDonaldsSpider.item_attributes
     allowed_domains = ["mcdonalds.com.au", "mcdonalds.co.nz", "mcdonalds.eg"]
     start_urls = (
         "https://mcdonalds.com.au/data/store",

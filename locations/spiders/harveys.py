@@ -9,7 +9,7 @@ from locations.hours import OpeningHours
 
 class HarveysSpider(scrapy.Spider):
     name = "harveys"
-    item_attributes = {"brand": "Harvey's"}
+    item_attributes = {"brand": "Harvey's", "brand_wikidata": "Q1466184"}
     allowed_domains = ["harveys.ca"]
     start_urls = [
         "https://aws-api.harveys.ca/CaraAPI/servlet/VESBCmdServlet?application=VECOMV1&service=AuthenticationService&command=createSession&reqJSON=%7B%22request%22%3A%7B%22requestHeader%22%3A%7B%22caller%22%3A%22Mobile%22%7D%2C%22requestContent%22%3A%7B%22@class%22%3A%22createSessionRqstModel%22%2C%22lang%22%3A%22en%22%2C%22version%22%3A%221.0.1%22%2C%22appType%22%3A%22web%22%7D%7D%7D",

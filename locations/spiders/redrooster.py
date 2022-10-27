@@ -9,7 +9,7 @@ from locations.items import GeojsonPointItem
 
 class RedRoosterSpider(scrapy.Spider):
     # download_delay = 0.2
-    name = "redrooster"
+    name = "redrooster_au"
     item_attributes = {"brand": "Red Rooster", "brand_wikidata": "Q376466"}
     allowed_domains = ["redrooster.com.au"]
     start_urls = ("https://www.redrooster.com.au/api/stores/4/",)
