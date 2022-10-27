@@ -20,5 +20,7 @@ class PetValuSpider(scrapy.Spider):
     def parse(self, response):
         data = response.json()
         for i in data["objects"]:
+            i["street_address"] = i.pop("street")
             item = DictParser.parse(i)
+            item["addr_full"] = i["formatted_address"]
             yield item
