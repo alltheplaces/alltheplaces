@@ -7,6 +7,17 @@ from geonamescache import GeonamesCache
 
 from locations.items import GeojsonPointItem
 
+US_TERRITORIES = {
+    "AS": {"code": "AS", "name": "American Samoa"},
+    "FM": {"code": "FM", "name": "Micronesia"},
+    "GU": {"code": "GU", "name": "Guam"},
+    "MH": {"code": "MH", "name": "Marshall Islands"},
+    "MP": {"code": "MP", "name": "Northern Mariana Islands"},
+    "PW": {"code": "PW", "name": "Palau"},
+    "PR": {"code": "PR", "name": "Puerto Rico"},
+    "VI": {"code": "VI", "name": "U.S. Virgin Islands"},
+}
+
 
 class XfinitySpider(scrapy.Spider):
     name = "xfinity"
@@ -14,7 +25,7 @@ class XfinitySpider(scrapy.Spider):
     allowed_domains = ["www.xfinity.com"]
 
     def start_requests(self):
-        for state in GeonamesCache().get_us_states():
+        for state in GeonamesCache().get_us_states() | US_TERRITORIES:
             yield scrapy.http.Request(
                 url=f"https://api-support.xfinity.com/servicecenters?location={state}"
             )
