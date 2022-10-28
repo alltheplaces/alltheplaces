@@ -37,4 +37,6 @@ def test_country_code_from_spider_name():
     assert "ES" == country_utils.country_code_from_spider_name("spider_es")
     assert "GB" == country_utils.country_code_from_spider_name("spider_UK")
     assert "GB" == country_utils.country_code_from_spider_name("spider_GB")
-    assert "GB" == country_utils.country_code_from_spider_name("spider_with_more_words_GB")
+    assert "GB" == country_utils.country_code_from_spider_name(
+        "spider_with_more_words_GB"
+    )
