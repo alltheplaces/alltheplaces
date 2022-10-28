@@ -17,3 +17,5 @@ xlrd = "*"
 boto3 = "*"
 geonamescache = "*"
 json5 = "*"
+brotli = "*"
+
