@@ -23,4 +23,5 @@ class PetValuSpider(scrapy.Spider):
             i["street_address"] = i.pop("street")
             item = DictParser.parse(i)
             item["addr_full"] = i["formatted_address"]
+            item["website"] = i["location_url"]
             yield item
