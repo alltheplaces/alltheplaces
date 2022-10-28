@@ -9,7 +9,7 @@ import re
 
 from scrapy.exceptions import DropItem
 
-from locations.commands.insights import CountryUtils
+from locations.country_utils import CountryUtils
 from locations.name_suggestion_index import NSI
 
 
@@ -57,6 +57,18 @@ class CountryCodeCleanUpPipeline(object):
         if country := item.get("country"):
             if clean_country := self.country_utils.to_iso_alpha2_country_code(country):
                 item["country"] = clean_country
+        else:
+
+            # No country set, see if it can be cleanly deduced from the spider name
+            if country := self.country_utils.country_code_from_spider_name(spider.name):
+                spider.crawler.stats.inc_value("atp/field/country/from_spider_name")
+                item["country"] = country
+                return item
+
+            # Still no country set, see if it can be cleanly deduced from a website URL if present
+            if country := self.country_utils.country_code_from_url(item.get("website")):
+                spider.crawler.stats.inc_value("atp/field/country/from_website_url")
+                item["country"] = country
 
         return item
 
