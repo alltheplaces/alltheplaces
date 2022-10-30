@@ -35,7 +35,7 @@ class TravelodgeGBSpider(scrapy.Spider):
 Many of the companies that we write spiders for will be significant
 enough to have been added to the
 [Name Suggestion Index (NSI)](https://nsi.guide/?t=brands)
-project (see below). We provide a custom `scrapy` command for
+project (see below). We provide a custom `scrapy nsi` command for
 doing name queries against the NSI dataset e.g.
 
 ```
@@ -55,9 +55,9 @@ $ pipenv run scrapy nsi --name travelodge
 ```
 
 Note the Python code fragments generated for you to copy and
-paste as a convenience. If the NSI query does not give you what
-you want immediately then you may need to dig deeper, perhaps
-going directly to the
+paste into your spider as a convenience. If the NSI query does
+not give you what  you want immediately then you may need to
+dig deeper, perhaps  going directly to the
 [Wikidata search page](https://www.wikidata.org/).
 
 ### Name Suggestion Index (NSI)
@@ -74,8 +74,8 @@ The success of the NSI can be gauged from the rapid increase in the number
 of OSM elements with Wikidata codes
 [over the previous few years](https://taginfo.openstreetmap.org/keys/brand%3Awikidata#chronology).
 
-Running our custom `scrapy nsi` command but this time with a direct QID parameter
-specified yields the NSI tag suggestions for the QID. This is the bottom line
+Running our custom `scrapy nsi` command, but this time with a direct QID parameter
+specified, yields the NSI tag suggestions for the QID. This is the bottom line
 of the output below:
 
 ```
@@ -101,7 +101,8 @@ of QID, country location (if appropriate) and category suggestion.
 
 In the great majority cases the automation gets the correct answer.
 In the cases where it fails for some reason then the automation can be disabled
-for the spider, and the categories applied in the spider code itself.
+for the spider, and the correct categories applied in the spider
+code itself.
 
 ### A virtuous circle?
 
