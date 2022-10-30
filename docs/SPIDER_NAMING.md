@@ -25,8 +25,8 @@ that you are spidering only has outlets in one country then it
 is helpful to suffix your name with the
 [ISO alpha-2 code](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2)
 for that country. For example,  if `great_name` only had outlets in
-South Africa, then spider file `great_name_za.py` should look
-something like:
+South Africa, then name the spider file `great_name_za.py`.
+Internally, it should look something like:
 
 ```python
 import scrapy
