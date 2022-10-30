@@ -13,7 +13,6 @@ If your Python file is `great_name.py` then your spider
 should look something like:
 
 ```python
-# -*- coding: utf-8 -*-
 import scrapy
 
 class GreatNameSpider(scrapy.Spider):
@@ -30,7 +29,6 @@ South Africa, then spider file `great_name_za.py` should look
 something like:
 
 ```python
-# -*- coding: utf-8 -*-
 import scrapy
 
 class GreatNameZASpider(scrapy.Spider):
