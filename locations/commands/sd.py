@@ -31,7 +31,9 @@ class SdCommand(BaseRunSpiderCommand):
         return "[options] <file or URL to decode>"
 
     def short_desc(self):
-        return "Decode a web page or file for structured data with ATP scrapy library code"
+        return (
+            "Decode a web page or file for structured data with ATP scrapy library code"
+        )
 
     def add_options(self, parser):
         super().add_options(parser)
