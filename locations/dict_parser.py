@@ -10,8 +10,8 @@ class DictParser(object):
     house_number_keys = ["house-number", "house-no", "street-number"]
 
     street_address_keys = [
-        "address1",
         "street-address",
+        "address1",
         "address-line1",
         "line1",
         "address-line-one",
