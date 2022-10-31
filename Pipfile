@@ -8,6 +8,9 @@ awscli = "*"
 boto3 = "*"
 pylint = "*"
 pytest = "*"
+black = "*"
+autoflake8 = "*"
+isort = "*"
 
 [packages]
 scrapy = "*"
@@ -18,4 +21,3 @@ boto3 = "*"
 geonamescache = "*"
 json5 = "*"
 brotli = "*"
-
