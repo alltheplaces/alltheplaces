@@ -24,7 +24,7 @@ engage blocking measures.
 
 Alongside the POI data we further publish reports that help us maintain the
 health of the code base. For a list of available reports then see the links on
-[alltheplace.xyz](https://www.alltheplaces.xyz/). Some examples of the
+[alltheplaces.xyz](https://www.alltheplaces.xyz/). Some examples of the
 report data includes:
 
 * how many POIs were retrieved by each spider this week and for previous weeks
