@@ -7,7 +7,7 @@ from locations.hours import OpeningHours
 from locations.items import GeojsonPointItem
 
 
-class CarharttWip(Spider):
+class CarharttWipSpider(Spider):
     name = "carhartt_wip"
     item_attributes = {
         "brand": "Carhartt WIP",
