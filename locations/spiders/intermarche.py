@@ -8,13 +8,17 @@ from locations.hours import DAYS, OpeningHours
 class IntermarcheSpider(scrapy.Spider):
     name = "intermarche"
     allowed_domains = ["intermarche.com"]
-    INTERMARCHE_SUPER = {"brand": "Intermarché Super", "brand_wikidata": "Q3153200"}
-    INTERMARCHE_CONTACT = {"brand": "Intermarché Contact", "brand_wikidata": "Q3153200"}
+    INTERMARCHE = {"brand": "Intermarché", "brand_wikidata": "Q3153200"}
+    INTERMARCHE_SUPER = {"brand": "Intermarché Super", "brand_wikidata": "Q98278038"}
+    INTERMARCHE_CONTACT = {
+        "brand": "Intermarché Contact",
+        "brand_wikidata": "Q98278049",
+    }
     INTERMARCHE_EXPRESS = {
         "brand": "Intermarché Express",
         "brand_wikidata": "Q98278043",
     }
-    INTERMARCHE_HYPER = {"brand": "Intermarché Hyper", "brand_wikidata": "Q3153200"}
+    INTERMARCHE_HYPER = {"brand": "Intermarché Hyper", "brand_wikidata": "Q98278022"}
     item_attributes = {"country": "FR"}
 
     def start_requests(self):
