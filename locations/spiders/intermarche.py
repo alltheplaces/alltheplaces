@@ -67,7 +67,6 @@ class IntermarcheSpider(scrapy.Spider):
                 "SUPER GENERALISTE",
             ]:
                 item.update(self.INTERMARCHE_SUPER)
-                item["brand"] = place["modelLabel"]
             elif place.get("modelLabel") == "CONTACT":
                 item.update(self.INTERMARCHE_CONTACT)
             elif place.get("modelLabel") == "EXPRESS":
