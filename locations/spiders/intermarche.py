@@ -3,6 +3,7 @@ from scrapy import Request
 
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
+from locations.spiders.costacoffee_gb import yes_or_no
 
 
 class IntermarcheSpider(scrapy.Spider):
@@ -55,10 +56,16 @@ class IntermarcheSpider(scrapy.Spider):
                         oh.add_range(DAYS[i], rules["startHours"], rules["endHours"])
             item["opening_hours"] = oh.as_opening_hours()
 
+            item["extras"] = {
+                "atm": yes_or_no(
+                    any(s["code"] == "dis" for s in place["ecommerce"]["services"])
+                )
+            }
+
             if place.get("modelLabel") in [
                 "SUPER ALIMENTAIRE",
                 "SUPER GENERALISTE",
-            ]:  # TODO: Difference?
+            ]:
                 item.update(self.INTERMARCHE_SUPER)
                 item["brand"] = place["modelLabel"]
             elif place.get("modelLabel") == "CONTACT":
@@ -68,9 +75,26 @@ class IntermarcheSpider(scrapy.Spider):
             elif place.get("modelLabel") == "HYPER":
                 item.update(self.INTERMARCHE_HYPER)
             elif place.get("modelLabel") == "Réservé Soignants":
-                continue  # Seems to be a variant of other items
+                continue  # Drive through stores reserved for medical workers
             elif place.get("modelLabel") == "Retrait La Poste":
-                item["brand"] = place["modelLabel"]
-                # TODO: What is this?
+                continue  # Something to do with post offices
+
+            if any(s["code"] == "ess" for s in place["ecommerce"]["services"]):
+                fuel = item.copy()
+                fuel["ref"] += "_fuel"
+                fuel.update(self.INTERMARCHE)
+
+                fuel["extras"]["amenity"] = "fuel"
+
+                yield fuel
+
+            if any(s["code"] == "lav" for s in place["ecommerce"]["services"]):
+                car_wash = item.copy()
+                car_wash["ref"] += "_carwash"
+                car_wash.update(self.INTERMARCHE)
+
+                car_wash["extras"]["amenity"] = "car_wash"
+
+                yield car_wash
 
             yield item
