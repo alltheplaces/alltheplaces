@@ -1,10 +1,10 @@
 # All The Places Data Format
 
-The output of the periodic run of all spiders posted on https://www.alltheplaces.xyz/ is a single GeoJSON `FeatureCollection` where each `Feature` contains the data for a single scraped item. The file is gzipped to save space on disk.
+The output of the periodic run of all spiders posted on https://www.alltheplaces.xyz/ is a .tar.gz collection of each spider's output. Each spider produces a single GeoJSON `FeatureCollection` where each `Feature` contains the data for a single scraped item. Along with the GeoJSON output, the collection includes logs and statistics, which can help understand what happened during the spider's run.
 
 ## Identifier
 
-Each GeoJSON feature has an `id` field. The ID is a hash based on the `ref` and `@spider` fields and should be consistent between builds. You might use this to determine if new objects show up or disappear between builds.
+Each GeoJSON feature has an `id` field. The ID is a hash based on the `ref` and `@spider` fields and should be consistent between builds. You might use this to determine if new objects show up or disappear between builds. Occasionally, the authors of spiders will change the spider name or the website we spider will change the identifiers used for the store. In these cases, the ID field in our output will change dramatically. At this time, we don't make an attempt to link the old and new IDs.
 
 ## Geometry
 
@@ -44,7 +44,5 @@ Each GeoJSON feature will have a `properties` object with the following keys:
 | `image`               | No  | A URL of an image for the venue. We try to make this specific to the venue and not generic for the brand that is operating the venue.
 | `located_in`          | No  | The name of the feature that this feature is located in.
 | `located_in:wikidata` | No  | The [Wikidata](https://www.wikidata.org/wiki/Wikidata:Main_Page) [item ID](https://www.wikidata.org/wiki/Help:Items) for the brand or chain of the feature that this feature is located in. This is a machine-readible identifier counterpart for the human-readible `located_in` above.
-
-
 
 Spiders can also include extra fields that will show up but aren't necessarily documented outside their spider source code. If enough spiders find interesting things to include in an extra property, it might be included here in the documentation in the future.
