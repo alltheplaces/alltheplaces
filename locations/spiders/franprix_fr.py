@@ -8,11 +8,10 @@ from locations.items import GeojsonPointItem
 
 
 class FranprixSpider(Spider):
-    name = "franprix"
+    name = "franprix_fr"
     item_attributes = {
         "brand": "Franprix",
         "brand_wikidata": "Q2420096",
-        "country": "FR",
     }
     start_urls = ("https://www.franprix.fr/xhr-cache/resource/stores",)
 
