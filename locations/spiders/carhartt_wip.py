@@ -1,7 +1,7 @@
 import json
 
-import scrapy
 from scrapy import Spider
+from scrapy.http import JsonRequest
 
 from locations.hours import OpeningHours
 from locations.items import GeojsonPointItem
@@ -16,7 +16,7 @@ class CarharttWipSpider(Spider):
 
     def start_requests(self):
         for offset in range(0, 150, 50):
-            yield scrapy.Request(
+            yield JsonRequest(
                 url=self.graphql_url,
                 method="POST",
                 body=json.dumps(
@@ -35,7 +35,6 @@ class CarharttWipSpider(Spider):
                 headers={
                     "Content-Type": "application/json",
                 },
-                callback=self.parse,
             )
 
     def parse(self, response):
