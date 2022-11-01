@@ -10,7 +10,7 @@ to no longer function.
 
 For all these reasons we try (at the time of writing) to perform a weekly run of
 all the spiders. The output is published on our
-website: [alltheplace.xyz](https://www.alltheplaces.xyz/).
+website: [alltheplaces.xyz](https://www.alltheplaces.xyz/).
 This data set is available as a compressed tar file. Each entry in the tar file
 is the [GeoJSON](https://geojson.org/) output from a spider. Some of the fields, which
 may be in the GeoJSON, are described in our [data format document](../DATA_FORMAT.md).
