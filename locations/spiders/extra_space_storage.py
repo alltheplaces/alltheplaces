@@ -17,7 +17,7 @@ class ExtraSpaceStorageSpider(SitemapSpider):
     # Seems to be sufficient to allow the site to include correct ldjson
     download_delay = 1.6
 
-    sitemap_urls = ["https://www.extraspace.com/facility-intent-sitemap.xml"]
+    sitemap_urls = ["https://www.extraspace.com/facility-sitemap.xml"]
     sitemap_rules = [(r"/facilities/", "parse")]
 
     def sitemap_filter(self, entries):
