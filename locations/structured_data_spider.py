@@ -53,6 +53,7 @@ class StructuredDataSpider(Spider):
         "ClothingStore",
         "DepartmentStore",
         "HardwareStore",
+        "AutomotiveBusiness",
     ]
     search_for_email = True
     search_for_phone = True
@@ -113,7 +114,6 @@ class StructuredDataSpider(Spider):
 
     def pre_process_data(self, ld_data, **kwargs):
         """Override with any pre-processing on the item."""
-        pass
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         """Override with any post-processing on the item."""
