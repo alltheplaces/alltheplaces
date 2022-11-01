@@ -18,7 +18,6 @@ def extract_phone(item, response):
     for link in response.xpath("//a[contains(@href, 'tel')]/@href").getall():
         link = link.strip()
         if link.startswith("tel:"):
-
             item["phone"] = link.replace("tel:", "")
             return
 
@@ -38,8 +37,13 @@ def extract_image(item, response):
         item["image"] = image.strip()
 
 
-class StructuredDataSpider(Spider):
+def get_url(response) -> str:
+    if canonical := response.xpath('//link[@rel="canonical"]/@href').get():
+        return canonical
+    return response.url
 
+
+class StructuredDataSpider(Spider):
     wanted_types = [
         "LocalBusiness",
         "ConvenienceStore",
@@ -71,30 +75,32 @@ class StructuredDataSpider(Spider):
 
                 item = LinkedDataParser.parse_ld(ld_item)
 
+                url = get_url(response)
+
                 if item["ref"] is None:
                     if hasattr(self, "rules"):
                         # Attempt to pull a match from CrawlSpider.rules
                         for rule in getattr(self, "rules"):
                             for allow in rule.link_extractor.allow_res:
-                                if match := re.match(allow, response.url):
+                                if match := re.match(allow, url):
                                     if len(match.groups()) > 0:
                                         item["ref"] = match.group(1)
                     elif hasattr(self, "sitemap_rules"):
                         # Attempt to pull a match from SitemapSpider.sitemap_rules
                         for rule in getattr(self, "sitemap_rules"):
-                            if match := re.match(rule[0], response.url):
+                            if match := re.match(rule[0], url):
                                 if len(match.groups()) > 0:
                                     item["ref"] = match.group(1)
 
                     if item["ref"] is None:
-                        item["ref"] = response.url
+                        item["ref"] = url
 
                 item["website"] = None
                 if isinstance(item["website"], list):
                     item["website"] = item["website"][0]
 
                 if not item["website"]:
-                    item["website"] = response.url
+                    item["website"] = url
                 elif item["website"].startswith("www"):
                     item["website"] = "https://" + item["website"]
 
