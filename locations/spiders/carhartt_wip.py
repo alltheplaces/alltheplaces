@@ -19,21 +19,16 @@ class CarharttWipSpider(Spider):
             yield JsonRequest(
                 url=self.graphql_url,
                 method="POST",
-                body=json.dumps(
-                    {
-                        "operationName": "offline",
-                        "variables": {
-                            "withStores": True,
-                            "withStockists": False,
-                            "country": "",
-                            "hasPosition": False,
-                            "offset": offset,
-                        },
-                        "query": "fragment hours on Weekday {\n  openIntervals {\n    start\n    end\n    __typename\n  }\n  isClosed\n  __typename\n}\n\nfragment store on Store {\n  name\n  address {\n    line1\n    line2\n    city\n    postalCode\n    countryCode\n    __typename\n  }\n  displayCoordinate {\n    latitude\n    longitude\n    __typename\n  }\n mainPhone\n  emails\n c_storeType\n  c_tempClosed\n  hours {\n    monday {\n      ...hours\n      __typename\n    }\n    tuesday {\n      ...hours\n      __typename\n    }\n    wednesday {\n      ...hours\n      __typename\n    }\n    thursday {\n      ...hours\n      __typename\n    }\n    friday {\n      ...hours\n      __typename\n    }\n    saturday {\n      ...hours\n      __typename\n    }\n    sunday {\n      ...hours\n      __typename\n    }\n    __typename\n  }\n  websiteUrl {\n    url\n    __typename\n  }\n  meta {\n    uid\n    id\n    __typename\n  }\n  c_newsletter_URL\n  c_storedetailseiten_URL\n  __typename\n}\n\nfragment distance on Distance {\n  id\n  distanceKilometers\n  __typename\n}\n\nquery offline($withStores: Boolean!, $withStockists: Boolean!, $position: String, $hasPosition: Boolean!, $country: String!, $offset: Int!) {\n  stores(position: $position, country: $country, offset: $offset) @include(if: $withStores) {\n    entities {\n      ...store\n      __typename\n    }\n    distances @include(if: $hasPosition) {\n      ...distance\n      __typename\n    }\n    geo @include(if: $hasPosition) {\n      coordinate {\n        latitude\n        longitude\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n  stockists(position: $position, country: $country, offset: $offset) @include(if: $withStockists) {\n    entities {\n      ...store\n      __typename\n    }\n    distances @include(if: $hasPosition) {\n      ...distance\n      __typename\n    }\n    geo @include(if: $hasPosition) {\n      coordinate {\n        latitude\n        longitude\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n",
-                    }
-                ),
-                headers={
-                    "Content-Type": "application/json",
+                data={
+                    "operationName": "offline",
+                    "variables": {
+                        "withStores": True,
+                        "withStockists": False,
+                        "country": "",
+                        "hasPosition": False,
+                        "offset": offset,
+                    },
+                    "query": "fragment hours on Weekday {\n  openIntervals {\n    start\n    end\n    __typename\n  }\n  isClosed\n  __typename\n}\n\nfragment store on Store {\n  name\n  address {\n    line1\n    line2\n    city\n    postalCode\n    countryCode\n    __typename\n  }\n  displayCoordinate {\n    latitude\n    longitude\n    __typename\n  }\n mainPhone\n  emails\n c_storeType\n  c_tempClosed\n  hours {\n    monday {\n      ...hours\n      __typename\n    }\n    tuesday {\n      ...hours\n      __typename\n    }\n    wednesday {\n      ...hours\n      __typename\n    }\n    thursday {\n      ...hours\n      __typename\n    }\n    friday {\n      ...hours\n      __typename\n    }\n    saturday {\n      ...hours\n      __typename\n    }\n    sunday {\n      ...hours\n      __typename\n    }\n    __typename\n  }\n  websiteUrl {\n    url\n    __typename\n  }\n  meta {\n    uid\n    id\n    __typename\n  }\n  c_newsletter_URL\n  c_storedetailseiten_URL\n  __typename\n}\n\nfragment distance on Distance {\n  id\n  distanceKilometers\n  __typename\n}\n\nquery offline($withStores: Boolean!, $withStockists: Boolean!, $position: String, $hasPosition: Boolean!, $country: String!, $offset: Int!) {\n  stores(position: $position, country: $country, offset: $offset) @include(if: $withStores) {\n    entities {\n      ...store\n      __typename\n    }\n    distances @include(if: $hasPosition) {\n      ...distance\n      __typename\n    }\n    geo @include(if: $hasPosition) {\n      coordinate {\n        latitude\n        longitude\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n  stockists(position: $position, country: $country, offset: $offset) @include(if: $withStockists) {\n    entities {\n      ...store\n      __typename\n    }\n    distances @include(if: $hasPosition) {\n      ...distance\n      __typename\n    }\n    geo @include(if: $hasPosition) {\n      coordinate {\n        latitude\n        longitude\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n",
                 },
             )
 
