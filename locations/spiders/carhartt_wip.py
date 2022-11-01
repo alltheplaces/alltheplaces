@@ -60,7 +60,7 @@ class CarharttWip(Spider):
             properties = {
                 "ref": store.get("meta").get("uid"),
                 "name": store.get("name"),
-                "addr_full": store.get("address").get("line1"),
+                "street_address": store.get("address").get("line1"),
                 "city": store.get("address").get("city"),
                 "postcode": store.get("address").get("postalCode"),
                 "country": store.get("address").get("countryCode"),
