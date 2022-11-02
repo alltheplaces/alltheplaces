@@ -1,7 +1,7 @@
 from scrapy.spiders import SitemapSpider
 
 from locations.structured_data_spider import StructuredDataSpider
-from locations.user_agents import BROSWER_DEFAULT
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class ExtendedStayAmericaSpider(SitemapSpider, StructuredDataSpider):
@@ -13,4 +13,4 @@ class ExtendedStayAmericaSpider(SitemapSpider, StructuredDataSpider):
     }
     sitemap_urls = ["https://api.prod.bws.esa.com/cms-proxy-api/sitemap/property"]
     sitemap_rules = [("/hotels/", "parse_sd")]
-    custom_settings = {"AUTOTHROTTLE_ENABLED": True, "USER_AGENT": BROSWER_DEFAULT}
+    custom_settings = {"AUTOTHROTTLE_ENABLED": True, "USER_AGENT": BROWSER_DEFAULT}
