@@ -44,5 +44,6 @@ Each GeoJSON feature will have a `properties` object with the following keys:
 | `image`               | No  | A URL of an image for the venue. We try to make this specific to the venue and not generic for the brand that is operating the venue.
 | `located_in`          | No  | The name of the feature that this feature is located in.
 | `located_in:wikidata` | No  | The [Wikidata](https://www.wikidata.org/wiki/Wikidata:Main_Page) [item ID](https://www.wikidata.org/wiki/Help:Items) for the brand or chain of the feature that this feature is located in. This is a machine-readible identifier counterpart for the human-readible `located_in` above.
+| `nsi_id`              | No  | The [NSI ID](https://nsi.guide/) for the feature. NSI IDs aren't stable, so you may require [old NSI data](https://github.com/osmlab/name-suggestion-index/tree/main/dist) if you are working with old ATP data.                                                                         |
 
 Spiders can also include extra fields that will show up but aren't necessarily documented outside their spider source code. If enough spiders find interesting things to include in an extra property, it might be included here in the documentation in the future.

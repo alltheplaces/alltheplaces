@@ -240,6 +240,9 @@ class ApplyNSICategoriesPipeline(object):
     wikidata_cache = {}
 
     def process_item(self, item, spider):
+        if item.get("nsi_id"):
+            return item
+
         code = item.get("brand_wikidata")
         if not code:
             return item
@@ -287,7 +290,7 @@ class ApplyNSICategoriesPipeline(object):
 
     def apply_tags(self, match, item):
         extras = item.get("extras", {})
-        extras["nsi_id"] = match["id"]
+        item["nsi_id"] = match["id"]
 
         # Apply NSI tags to item
         for (key, value) in match["tags"].items():
