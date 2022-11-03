@@ -1,9 +1,9 @@
 import base64
 import hashlib
 import logging
-from scrapy.exporters import JsonLinesItemExporter, JsonItemExporter
-from scrapy.utils.python import to_bytes
 
+from scrapy.exporters import JsonItemExporter, JsonLinesItemExporter
+from scrapy.utils.python import to_bytes
 
 mapping = (
     ("addr_full", "addr:full"),
@@ -26,6 +26,7 @@ mapping = (
     ("brand_wikidata", "brand:wikidata"),
     ("located_in", "located_in"),
     ("located_in_wikidata", "located_in:wikidata"),
+    ("nsi_id", "nsi_id"),
 )
 
 
@@ -84,7 +85,6 @@ class LineDelimitedGeoJsonExporter(JsonLinesItemExporter):
                 logging.warning(
                     "Couldn't convert lat (%s) and lon (%s) to string", lat, lon
                 )
-                pass
 
         return feature
 
@@ -113,7 +113,6 @@ class GeoJsonExporter(JsonItemExporter):
                 logging.warning(
                     "Couldn't convert lat (%s) and lon (%s) to string", lat, lon
                 )
-                pass
 
         return feature
 
