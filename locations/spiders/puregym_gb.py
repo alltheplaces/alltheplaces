@@ -15,7 +15,7 @@ class PureGymGBSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://www.puregym.com/sitemap.xml"]
     sitemap_rules = [
         (
-            "https:\/\/www\.puregym\.com\/gyms\/([\w-]+)\/$",
+            r"https:\/\/www\.puregym\.com\/gyms\/([\w-]+)\/$",
             "parse_sd",
         ),
     ]

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import gzip
 import json
 import re
@@ -58,7 +57,7 @@ class GenghisGrillSpider(scrapy.Spider):
         xml = scrapy.Selector(type="xml", text=gzip.decompress(response.body))
         xml.remove_namespaces()
         urls = xml.xpath("//loc").re(
-            "https:\/\/locations.genghisgrill.com\/[a-z]{2}\/[a-z\-]+\/genghis-grill-[0-9]+\.html"
+            r"https:\/\/locations.genghisgrill.com\/[a-z]{2}\/[a-z\-]+\/genghis-grill-[0-9]+\.html"
         )
         for url in urls:
             yield scrapy.Request(url, callback=self.parse_store)

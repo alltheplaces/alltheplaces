@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import scrapy
 import json
 from locations.dict_parser import DictParser

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Exxonmobil has 1,679 locations worldwide except a few nations(those may even change with time)
 This crawler crawls https://www.exxon.com/en/api/locator/Locations

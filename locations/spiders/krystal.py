@@ -73,7 +73,7 @@ class KrystalSpider(scrapy.Spider):
             if epoch["open"] == "99":
                 epoch["open"] = "00"
 
-            if set(epoch.values()) == set(["99"]):
+            if set(epoch.values()) == {"99"}:
                 hours[key] = "00:00-24:00"
             elif len(epoch["close"]) < 2 and len(epoch["open"]) < 2:
                 hours[key] = "0{}:00-0{}:00".format(epoch["open"], epoch["close"])

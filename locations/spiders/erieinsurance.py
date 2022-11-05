@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import json
 import re
 
@@ -41,7 +40,7 @@ class ErieInsuranceSpider(SitemapSpider):
                 day = row["DayName"][:2]
                 opening_hours.add_range(day, open_time, close_time, "%I:%M%p")
 
-        agentContact = dict((x["type"], x["value"]) for x in data["agentContact"])
+        agentContact = {x["type"]: x["value"] for x in data["agentContact"]}
         if ("Fax", "0") in agentContact.items():
             del agentContact["Fax"]
 

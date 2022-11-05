@@ -38,8 +38,8 @@ class LowesFoodsSpider(scrapy.Spider):
             name=response.xpath("//div[@class='store-details__heading']/h1/text()")
             .extract_first()
             .strip(),
-            lat=re.search(".*lat: (-?\d+\.\d+),.*", map_data).group(1),
-            lon=re.search(".*lng: (-?\d+\.\d+).*", map_data).group(1),
+            lat=re.search(r".*lat: (-?\d+\.\d+),.*", map_data).group(1),
+            lon=re.search(r".*lng: (-?\d+\.\d+).*", map_data).group(1),
             addr_full=response.xpath(
                 "//div[@class='store-details__store-info']/ul/li[2]/text()"
             )

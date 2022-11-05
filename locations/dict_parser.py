@@ -1,7 +1,7 @@
 from locations.items import GeojsonPointItem
 
 
-class DictParser(object):
+class DictParser:
 
     ref_keys = ["ref", "id", "store-id", "shop-number", "slug"]
 

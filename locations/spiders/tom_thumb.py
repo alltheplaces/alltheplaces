@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import scrapy
 import re
 from locations.items import GeojsonPointItem
@@ -57,7 +56,7 @@ class TomThumbSpider(scrapy.Spider):
     def parse(self, response):
         response.selector.remove_namespaces()
         urls = response.xpath("//loc").re(
-            "https://local.tomthumb.com\/[a-z]{2}\/[a-z\-]+\/[0-9]+[a-z\-]+\.html"
+            r"https://local.tomthumb.com\/[a-z]{2}\/[a-z\-]+\/[0-9]+[a-z\-]+\.html"
         )
         for url in urls:
             yield scrapy.Request(url, callback=self.parse_store)

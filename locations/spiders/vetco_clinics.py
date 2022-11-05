@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import re
 import scrapy
 
@@ -28,23 +27,23 @@ class VetcoClinicsSpider(scrapy.Spider):
                     body = stores["label"]
                     address = Selector(text=body).xpath("//address/text()").extract()
                     if len(address) == 3:
-                        addr_full, city_state_postal, phone = [
+                        addr_full, city_state_postal, phone = (
                             item.split(",") for item in address
-                        ]
-                        city, state_postal = [
+                        )
+                        city, state_postal = (
                             item.split(",") for item in city_state_postal
-                        ]
+                        )
                         state, postal = re.search(
                             r"([A-Z]{2}) (\d{5})", state_postal[0]
                         ).groups()
 
                     else:
-                        addr_full, city_state_postal = [
+                        addr_full, city_state_postal = (
                             item.split(",") for item in address
-                        ]
-                        city, state_postal = [
+                        )
+                        city, state_postal = (
                             item.split(",") for item in city_state_postal
-                        ]
+                        )
                         state, postal = re.search(
                             r"([A-Z]{2}) (\d{5})", state_postal[0]
                         ).groups()

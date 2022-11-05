@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import scrapy
 import json
 import re
@@ -26,7 +25,7 @@ class FamilyDollarSpider(CrawlSpider, StructuredDataSpider):
 
     rules = [
         Rule(
-            LinkExtractor(allow=["/\d+/$"], restrict_css=".itemlist"),
+            LinkExtractor(allow=[r"/\d+/$"], restrict_css=".itemlist"),
             callback="parse_sd",
         ),
         Rule(LinkExtractor(restrict_css=".itemlist")),

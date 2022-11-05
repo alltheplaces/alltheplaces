@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Define your item pipelines here
 #
 # Don't forget to add your pipeline to the ITEM_PIPELINES setting
@@ -13,7 +11,7 @@ from locations.country_utils import CountryUtils
 from locations.name_suggestion_index import NSI
 
 
-class DuplicatesPipeline(object):
+class DuplicatesPipeline:
     def __init__(self):
         self.ids_seen = set()
 
@@ -26,7 +24,7 @@ class DuplicatesPipeline(object):
             return item
 
 
-class ApplySpiderNamePipeline(object):
+class ApplySpiderNamePipeline:
     def process_item(self, item, spider):
         existing_extras = item.get("extras", {})
         existing_extras["@spider"] = spider.name
@@ -35,7 +33,7 @@ class ApplySpiderNamePipeline(object):
         return item
 
 
-class ApplySpiderLevelAttributesPipeline(object):
+class ApplySpiderLevelAttributesPipeline:
     def process_item(self, item, spider):
         if not hasattr(spider, "item_attributes"):
             return item
@@ -49,7 +47,7 @@ class ApplySpiderLevelAttributesPipeline(object):
         return item
 
 
-class CountryCodeCleanUpPipeline(object):
+class CountryCodeCleanUpPipeline:
     def __init__(self):
         self.country_utils = CountryUtils()
 
@@ -73,7 +71,7 @@ class CountryCodeCleanUpPipeline(object):
         return item
 
 
-class ExtractGBPostcodePipeline(object):
+class ExtractGBPostcodePipeline:
     def process_item(self, item, spider):
         if item.get("country") == "GB":
             if item.get("addr_full") and not item.get("postcode"):
@@ -92,7 +90,7 @@ class ExtractGBPostcodePipeline(object):
         return item
 
 
-class AssertURLSchemePipeline(object):
+class AssertURLSchemePipeline:
     def process_item(self, item, spider):
         if item.get("image"):
             if item["image"].startswith("//"):
@@ -101,7 +99,7 @@ class AssertURLSchemePipeline(object):
         return item
 
 
-class CheckItemPropertiesPipeline(object):
+class CheckItemPropertiesPipeline:
     # From https://github.com/django/django/blob/master/django/core/validators.py
     url_regex = re.compile(
         r"^(?:http)s?://"  # http:// or https://
@@ -234,7 +232,7 @@ class CheckItemPropertiesPipeline(object):
         return item
 
 
-class ApplyNSICategoriesPipeline(object):
+class ApplyNSICategoriesPipeline:
     nsi = NSI()
 
     wikidata_cache = {}

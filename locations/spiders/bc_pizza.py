@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import scrapy
 import re
 from locations.items import GeojsonPointItem
@@ -26,7 +25,7 @@ class BcpizzaSpider(scrapy.Spider):
             converted_times = ""
             if hours[i] != "Closed":
                 if hours[i] != "Open 24 Hours":
-                    from_hr, to_hr = [hr.strip() for hr in hours[i].split("-")]
+                    from_hr, to_hr = (hr.strip() for hr in hours[i].split("-"))
                     if re.search(regex_am, from_hr):
                         from_hr = re.sub(regex_am, "", from_hr)
                         hour_min = from_hr.split(":")

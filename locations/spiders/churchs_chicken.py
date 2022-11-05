@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import scrapy
 import re
 from locations.items import GeojsonPointItem
@@ -60,7 +59,7 @@ class ChurchsChickenSpider(scrapy.Spider):
     def parse(self, response):
         response.selector.remove_namespaces()
         urls = response.xpath("//loc").re(
-            "https://locations.churchs.com\/[a-z]{2}\/[a-z\-]+\/[0-9]+[a-z\-]+"
+            r"https://locations.churchs.com\/[a-z]{2}\/[a-z\-]+\/[0-9]+[a-z\-]+"
         )
         for url in urls:
             yield scrapy.Request(url, callback=self.parse_store)

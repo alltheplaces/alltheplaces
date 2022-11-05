@@ -12,7 +12,7 @@ class MicrodataError(Exception):
 
 
 def token_split(val):
-    return re.findall("\S+", val, flags=re.ASCII)
+    return re.findall(r"\S+", val, flags=re.ASCII)
 
 
 def top_level_items(selector: parsel.Selector):

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import scrapy
 from scrapy.linkextractors import LinkExtractor
 from locations.items import GeojsonPointItem

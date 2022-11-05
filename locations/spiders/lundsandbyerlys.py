@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import datetime
 import scrapy
 from locations.dict_parser import DictParser

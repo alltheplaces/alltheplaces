@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import json
 
 from locations.hours import OpeningHours
@@ -15,7 +14,7 @@ class CrackerBarrelSpider(SitemapSpider):
     sitemap_urls = ["https://www.crackerbarrel.com/sitemap.xml"]
     sitemap_rules = [
         (
-            "https:\/\/crackerbarrel\.com\/Locations\/States\/(\w{2})\/([-\w]+)\/(\d+)$",
+            r"https:\/\/crackerbarrel\.com\/Locations\/States\/(\w{2})\/([-\w]+)\/(\d+)$",
             "parse_store",
         )
     ]

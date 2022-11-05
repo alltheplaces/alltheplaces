@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import json
 import re
 
@@ -7,7 +6,7 @@ import scrapy
 from locations.hours import OpeningHours, day_range, DAYS
 from locations.items import GeojsonPointItem
 
-kDaysRe = re.compile(f"(?:({'|'.join(DAYS)})\w*)")
+kDaysRe = re.compile(fr"(?:({'|'.join(DAYS)})\w*)")
 kTimesRe = re.compile(r"(\d+)(:\d+)? *([APap][Mm])")
 
 

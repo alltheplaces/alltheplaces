@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import json
 import re
 
@@ -61,7 +60,7 @@ class EarthFareSpider(scrapy.Spider):
                 "state": store_details["State"],
                 "postcode": store_details["Zipcode"],
                 "phone": store_details.get("PhoneNumber"),
-                "website": "https://www.earthfare.com/rs/StoreLocator?id={0}".format(
+                "website": "https://www.earthfare.com/rs/StoreLocator?id={}".format(
                     store_details["CS_StoreID"]
                 ),
                 "lat": store_details.get("Latitude"),

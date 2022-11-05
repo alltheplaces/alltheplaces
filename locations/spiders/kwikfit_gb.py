@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import scrapy
 from locations.linked_data_parser import LinkedDataParser
 from locations.google_url import url_to_coords

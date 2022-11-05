@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import json
 import re
 
@@ -15,7 +14,7 @@ class HomeDepotCASpider(SitemapSpider):
     sitemap_urls = ["https://stores.homedepot.ca/sitemap.xml"]
     sitemap_rules = [
         (
-            "https:\/\/stores\.homedepot\.ca\/([\w]{2})\/([-\w]+)\/([-\w]+)([\d]+)\.html$",
+            r"https:\/\/stores\.homedepot\.ca\/([\w]{2})\/([-\w]+)\/([-\w]+)([\d]+)\.html$",
             "parse_store",
         ),
     ]

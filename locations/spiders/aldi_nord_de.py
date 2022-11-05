@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from scrapy import Spider
 
 from locations.dict_parser import DictParser

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from scrapy.spiders import SitemapSpider
 from scrapy.downloadermiddlewares.retry import get_retry_request
 

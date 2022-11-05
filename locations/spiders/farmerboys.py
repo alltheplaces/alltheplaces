@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import json
 import re
 
@@ -18,7 +17,7 @@ class FarmerBoys(scrapy.Spider):
         locations_js = response.xpath(
             '//script[contains(text(), "initMap")]/text()'
         ).extract_first()
-        locations = re.findall("var\s+locations\s*=\s*(\[.*\]);", locations_js)[0]
+        locations = re.findall(r"var\s+locations\s*=\s*(\[.*\]);", locations_js)[0]
         locations = json.loads(locations)
         for location in locations:
             properties = {

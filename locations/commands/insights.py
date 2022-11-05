@@ -32,10 +32,9 @@ def iter_features(files_and_dirs):
     if len(file_list) == 0:
         raise UsageError("no non-empty JSON files found")
     for file_path in file_list:
-        with open(file_path, "r") as f:
+        with open(file_path) as f:
             try:
-                for feature in json.load(f)["features"]:
-                    yield feature
+                yield from json.load(f)["features"]
             except Exception as e:
                 print("Failed to decode: " + file_path)
                 print(e)

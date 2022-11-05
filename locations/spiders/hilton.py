@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import scrapy
 import geonamescache
 from locations.structured_data_spider import StructuredDataSpider

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import json
 import re
 
@@ -8,7 +7,7 @@ from locations.hours import OpeningHours
 from locations.items import GeojsonPointItem
 
 
-HOURS_RE = re.compile("(?P<day>\w+) (?P<open_time>\S+) - (?P<close_time>\S+)")
+HOURS_RE = re.compile(r"(?P<day>\w+) (?P<open_time>\S+) - (?P<close_time>\S+)")
 
 
 class EatnParkSpider(SitemapSpider):

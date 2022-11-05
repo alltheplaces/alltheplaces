@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import scrapy
 from locations.spiders.timpson_gb import TimpsonGBSpider
 

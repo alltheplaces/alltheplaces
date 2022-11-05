@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import json
 
 from scrapy.spiders import SitemapSpider
@@ -16,7 +15,7 @@ class ProvidenceHealthServicesSpider(SitemapSpider):
     sitemap_urls = ["https://www.providence.org/sitemap.xml"]
     sitemap_rules = [
         (
-            "https:\/\/www\.providence\.org\/locations\/[-\w]+$",
+            r"https:\/\/www\.providence\.org\/locations\/[-\w]+$",
             "parse_location",
         )
     ]

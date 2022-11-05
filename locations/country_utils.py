@@ -2,7 +2,7 @@ import geonamescache
 from urllib.parse import urlparse
 
 
-class CountryUtils(object):
+class CountryUtils:
     def __init__(self):
         self.gc = geonamescache.GeonamesCache()
 

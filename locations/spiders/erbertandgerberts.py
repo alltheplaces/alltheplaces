@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import scrapy
 from locations.items import GeojsonPointItem
 from locations.user_agents import BROSWER_DEFAULT

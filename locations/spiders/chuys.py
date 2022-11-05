@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import scrapy
 import re
 from urllib.parse import urljoin

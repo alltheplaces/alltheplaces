@@ -45,8 +45,8 @@ class MainEventSpider(scrapy.Spider):
         yield GeojsonPointItem(
             ref=response.url.split("/")[-2],
             name=store_json["name"],
-            lat=re.search('.*latitude\\\\":(-?\d+\.\d+),.*', map_data).group(1),
-            lon=re.search('.*longitude\\\\":(-?\d+\.\d+),.*', map_data).group(1),
+            lat=re.search('.*latitude\\\\":(-?\\d+\\.\\d+),.*', map_data).group(1),
+            lon=re.search('.*longitude\\\\":(-?\\d+\\.\\d+),.*', map_data).group(1),
             addr_full=store_json["address"]["streetAddress"],
             city=store_json["address"]["addressLocality"],
             state=store_json["address"]["addressRegion"],

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import re
 import scrapy
 
@@ -24,7 +23,7 @@ class CBRESpider(scrapy.Spider):
         ).extract()
         if store_js:
             store = store_js[0]
-            storere = re.findall('\(("[^)]+")', store)
+            storere = re.findall(r'\(("[^)]+")', store)
             for item in storere:
                 item = item.replace("\\", "")
                 item = item.replace('"', "")

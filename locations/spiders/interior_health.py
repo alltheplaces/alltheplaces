@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import re
 
 import scrapy
@@ -72,10 +71,10 @@ class InteriorHealthSpider(scrapy.Spider):
             "MSOSPWebPartManager_OldDisplayModeName": "Browse",
             "MSOSPWebPartManager_StartWebPartEditingName": "false",
             "MSOSPWebPartManager_EndWebPartEditing": "false",
-            "__REQUESTDIGEST": "{0}".format(request_digest),
-            "__VIEWSTATE": "{0}".format(view_state),
+            "__REQUESTDIGEST": "{}".format(request_digest),
+            "__VIEWSTATE": "{}".format(view_state),
             "__VIEWSTATEGENERATOR": "1B0F5610",
-            "__EVENTVALIDATION": "{0}".format(event_validation),
+            "__EVENTVALIDATION": "{}".format(event_validation),
             "ctl00$PlaceHolderSearchArea$ctl00$ctl00": "Scope:Careers_WWW",
             "InputKeywords": "Search for ...",
             "ctl00$PlaceHolderSearchArea$ctl00$ctl04": "0",

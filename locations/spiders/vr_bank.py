@@ -48,9 +48,9 @@ class VRBankSpider(scrapy.Spider):
 
                 for tm in tms:
                     try:
-                        open_time, close_time = [
+                        open_time, close_time = (
                             t.strip() for t in tm.replace("Uhr", "").strip().split("-")
-                        ]
+                        )
 
                         if open_time and close_time and day:
                             opening_hours.add_range(

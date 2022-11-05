@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import scrapy
 import re
 from locations.items import GeojsonPointItem
@@ -147,10 +146,10 @@ class WaitroseSpider(scrapy.Spider):
         for times, indices in groupby(range(len(hours)), lambda i: hours[i]):
             indices = list(indices)
             if len(indices) == 1:
-                formatted.append("%s %s" % (_DAYNAMES[indices[0]], times))
+                formatted.append("{} {}".format(_DAYNAMES[indices[0]], times))
             else:
                 dayrange = _DAYNAMES[indices[0]] + "-" + _DAYNAMES[indices[-1]]
-                formatted.append("%s %s" % (dayrange, times))
+                formatted.append("{} {}".format(dayrange, times))
 
         properties = {
             "opening_hours": "; ".join(formatted),

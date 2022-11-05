@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Hy-Vee has 155 locations we need to scrape, they implemented a server-side javascript detector logic
 that returns just the HTML head with an empty body asking that we enable javascript to browse the site.

@@ -28,7 +28,7 @@ class TescoSpider(SitemapSpider):
     ]
     sitemap_rules = [
         (
-            "https:\/\/www\.tesco\.com\/store-locator\/([\w\-\.]+)\/([\d]+\/)?([\w\-\.\(\)]+)$",
+            r"https:\/\/www\.tesco\.com\/store-locator\/([\w\-\.]+)\/([\d]+\/)?([\w\-\.\(\)]+)$",
             "parse_store",
         )
     ]

@@ -1,5 +1,5 @@
 import scrapy
-from six.moves.urllib.parse import urlencode
+from urllib.parse import urlencode
 import re
 from locations.items import GeojsonPointItem
 

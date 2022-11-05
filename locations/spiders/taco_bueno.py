@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import scrapy
 import re
 
@@ -32,7 +31,7 @@ class TacobuenoSpider(scrapy.Spider):
             return ""
 
         if hours != "Closed":
-            from_hr, to_hr = [hr.strip() for hr in hours.split("-")]
+            from_hr, to_hr = (hr.strip() for hr in hours.split("-"))
             if re.search(regex_am, from_hr):
                 from_hr = re.sub(regex_am, "", from_hr)
                 hour_min = from_hr.split(":")

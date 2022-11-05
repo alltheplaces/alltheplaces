@@ -119,7 +119,7 @@ def sanitise_day(day: str, days: {} = DAYS_EN) -> str:
     return days.get(day)
 
 
-class OpeningHours(object):
+class OpeningHours:
     def __init__(self):
         self.day_hours = defaultdict(list)
 
