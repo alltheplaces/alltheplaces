@@ -1,5 +1,4 @@
 import json
-from urllib.parse import urlencode
 
 import scrapy
 

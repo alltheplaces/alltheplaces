@@ -1,7 +1,6 @@
 from scrapy.spiders import SitemapSpider
 from scrapy.downloadermiddlewares.retry import get_retry_request
 
-import re
 import json
 
 from locations.hours import OpeningHours

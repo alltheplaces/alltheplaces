@@ -1,7 +1,5 @@
 import scrapy
-import re
 import json
-from urllib.parse import urlparse
 
 from locations.linked_data_parser import LinkedDataParser
 

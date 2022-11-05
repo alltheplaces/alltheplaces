@@ -63,4 +63,3 @@ class DeichmannSpider(scrapy.Spider):
                 yield GeojsonPointItem(**properties)
         except Exception as e:
             self.logger.warn("----------------- Error -----------------: {}".format(e))
-            pass

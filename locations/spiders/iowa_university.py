@@ -1,7 +1,6 @@
 import scrapy
 import json
 from locations.items import GeojsonPointItem
-from locations.hours import OpeningHours
 
 DAYS = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"]
 

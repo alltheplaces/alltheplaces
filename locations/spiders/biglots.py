@@ -1,5 +1,4 @@
 import scrapy
-import re
 
 from locations.linked_data_parser import LinkedDataParser
 from locations.microdata_parser import MicrodataParser

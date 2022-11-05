@@ -1,6 +1,5 @@
 import scrapy
 import re
-from datetime import date
 
 
 from locations.items import GeojsonPointItem

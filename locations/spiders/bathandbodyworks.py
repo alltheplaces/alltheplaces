@@ -1,7 +1,6 @@
 import scrapy
 import hashlib
 import re
-import random
 
 from locations.items import GeojsonPointItem
 

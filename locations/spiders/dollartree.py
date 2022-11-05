@@ -1,6 +1,5 @@
 import scrapy
 import json
-import re
 
 from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours

@@ -1,7 +1,6 @@
 import scrapy
 import re
 from locations.items import GeojsonPointItem
-from scrapy.selector import Selector
 
 
 def opening_hours(datestring):

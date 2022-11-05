@@ -1,7 +1,6 @@
 import scrapy
 
 from locations.items import GeojsonPointItem
-from locations.hours import OpeningHours
 
 
 class TerribleHerbstSpider(scrapy.Spider):

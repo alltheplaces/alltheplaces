@@ -2,7 +2,6 @@ import scrapy
 
 from locations.microdata_parser import MicrodataParser
 from locations.linked_data_parser import LinkedDataParser
-from locations.items import GeojsonPointItem
 
 
 class Forever21UsSpider(scrapy.spiders.SitemapSpider):

@@ -56,7 +56,6 @@ class LanghamHotelsSpider(scrapy.Spider):
                 self.logger.warn(
                     "----------------- Error -----------------: {}".format(e)
                 )
-                pass
 
         else:
             # some of the websites don't provide location information with application/ld+json

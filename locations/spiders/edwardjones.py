@@ -1,6 +1,5 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
 from locations.linked_data_parser import LinkedDataParser
 
 

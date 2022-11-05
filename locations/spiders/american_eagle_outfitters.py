@@ -1,5 +1,4 @@
 import re
-import csv
 
 import scrapy
 

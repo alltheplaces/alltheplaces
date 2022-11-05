@@ -1,4 +1,3 @@
-import re
 
 from locations.google_url import extract_google_position
 from locations.hours import OpeningHours

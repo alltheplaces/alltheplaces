@@ -1,4 +1,3 @@
-import datetime
 import scrapy
 import re
 import string

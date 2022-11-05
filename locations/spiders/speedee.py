@@ -1,10 +1,7 @@
-import json
-import re
 
 import scrapy
 
 from locations.items import GeojsonPointItem
-from locations.hours import OpeningHours
 
 # source: https://gist.github.com/rogerallen/1583593
 us_state_to_abbrev = {

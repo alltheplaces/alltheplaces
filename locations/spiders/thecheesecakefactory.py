@@ -1,6 +1,5 @@
 from scrapy.spiders import SitemapSpider
 
-from locations.hours import OpeningHours
 from locations.structured_data_spider import StructuredDataSpider
 
 

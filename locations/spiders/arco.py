@@ -1,7 +1,6 @@
 import csv
 import re
 import scrapy
-import urllib
 
 from locations.items import GeojsonPointItem
 

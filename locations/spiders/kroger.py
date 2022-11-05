@@ -1,8 +1,6 @@
 import scrapy
 
-from locations.hours import OpeningHours
 from locations.items import GeojsonPointItem
-from scrapy.selector import Selector
 
 WIKIBRANDS = {
     "Baker's": "Q4849080",

@@ -3,7 +3,6 @@ import scrapy
 import json
 
 from locations.items import GeojsonPointItem
-from locations.hours import OpeningHours
 
 
 class KumAndGoSpider(scrapy.Spider):
