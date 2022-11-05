@@ -1,10 +1,8 @@
-# -*- coding: utf-8 -*-
+from urllib.parse import urlencode
 
 import scrapy
 
 from locations.items import GeojsonPointItem
-from urllib.parse import urlencode
-
 from locations.user_agents import BROSWER_DEFAULT
 
 URL = "https://api.momentfeed.com/v1/analytics/api/llp.json?"

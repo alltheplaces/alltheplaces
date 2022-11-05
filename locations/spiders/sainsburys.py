@@ -2,7 +2,7 @@ import scrapy
 from scrapy import Request
 
 from locations.dict_parser import DictParser
-from locations.hours import OpeningHours, DAYS
+from locations.hours import DAYS, OpeningHours
 from locations.spiders.costacoffee_gb import yes_or_no
 
 

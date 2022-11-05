@@ -1,6 +1,6 @@
-# -*- coding: utf-8 -*-
-import scrapy
 import json
+
+import scrapy
 
 from locations.items import GeojsonPointItem
 
@@ -57,7 +57,6 @@ class LanghamHotelsSpider(scrapy.Spider):
                 self.logger.warn(
                     "----------------- Error -----------------: {}".format(e)
                 )
-                pass
 
         else:
             # some of the websites don't provide location information with application/ld+json

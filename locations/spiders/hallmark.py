@@ -1,10 +1,10 @@
-# -*- coding: utf-8 -*-
 import json
 
 import scrapy
+from scrapy.selector import Selector
+
 from locations.hours import OpeningHours
 from locations.items import GeojsonPointItem
-from scrapy.selector import Selector
 
 
 class HallmarkSpider(scrapy.Spider):

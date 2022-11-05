@@ -1,13 +1,11 @@
-# -*- coding: utf-8 -*-
-import re
 import json
+import re
 
 import scrapy
 from scrapy.downloadermiddlewares.retry import get_retry_request
 
-from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
-
+from locations.items import GeojsonPointItem
 
 DAY_MAPPING = {"Mo": 0, "Tu": 0, "We": 0, "Th": 0, "Fr": 0, "Sa": 1, "Su": 2}
 

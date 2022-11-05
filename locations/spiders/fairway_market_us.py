@@ -1,11 +1,10 @@
-# -*- coding: utf-8 -*-
 import re
+from datetime import datetime
 
 import scrapy
 
-from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
-from datetime import datetime
+from locations.items import GeojsonPointItem
 
 DAYS_NAME = {
     "Monday": "Mo",

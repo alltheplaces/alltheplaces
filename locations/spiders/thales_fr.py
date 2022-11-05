@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import io
 import re
 import zipfile
@@ -6,7 +5,6 @@ import zipfile
 import scrapy
 
 from locations.items import GeojsonPointItem
-from locations.hours import OpeningHours
 
 
 class ThalesFrSpider(scrapy.Spider):

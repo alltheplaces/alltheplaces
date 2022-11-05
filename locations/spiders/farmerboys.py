@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
 import json
 import re
 
 import scrapy
 
-from locations.hours import OpeningHours, sanitise_day, day_range
+from locations.hours import OpeningHours, day_range, sanitise_day
 from locations.items import GeojsonPointItem
 
 
@@ -18,7 +17,7 @@ class FarmerBoys(scrapy.Spider):
         locations_js = response.xpath(
             '//script[contains(text(), "initMap")]/text()'
         ).extract_first()
-        locations = re.findall("var\s+locations\s*=\s*(\[.*\]);", locations_js)[0]
+        locations = re.findall(r"var\s+locations\s*=\s*(\[.*\]);", locations_js)[0]
         locations = json.loads(locations)
         for location in locations:
             properties = {

@@ -1,5 +1,6 @@
 from scrapy.commands import ScrapyCommand
 from scrapy.exceptions import UsageError
+
 from locations.name_suggestion_index import NSI
 
 
@@ -61,7 +62,7 @@ class NameSuggestionIndexCommand(ScrapyCommand):
 
     @staticmethod
     def show(code, data):
-        print('"{0}", "{1}"'.format(data["label"], code))
+        print('"{}", "{}"'.format(data["label"], code))
         print("       -> https://www.wikidata.org/wiki/{}".format(code))
         print(
             "       -> https://www.wikidata.org/wiki/Special:EntityData/{}.json".format(

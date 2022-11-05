@@ -1,9 +1,10 @@
-# -*- coding: utf-8 -*-
+import json
+
 import scrapy
 from scrapy.linkextractors import LinkExtractor
-from locations.items import GeojsonPointItem
-import json
 from w3lib.html import remove_tags
+
+from locations.items import GeojsonPointItem
 
 STATES = [
     "al",

@@ -1,8 +1,7 @@
-# -*- coding: utf-8 -*-
 import scrapy
 
-from locations.hours import OpeningHours
 from locations.dict_parser import DictParser
+from locations.hours import OpeningHours
 from locations.spiders.sainsburys import SainsburysSpider
 
 

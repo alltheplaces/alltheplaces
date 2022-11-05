@@ -1,11 +1,6 @@
-# -*- coding: utf-8 -*-
-import scrapy
-import json
-import re
-
-from scrapy.spiders import CrawlSpider, Rule
 from scrapy.linkextractors import LinkExtractor
 from scrapy.settings.default_settings import RETRY_HTTP_CODES
+from scrapy.spiders import CrawlSpider, Rule
 
 from locations.hours import OpeningHours
 from locations.structured_data_spider import StructuredDataSpider
@@ -26,7 +21,7 @@ class FamilyDollarSpider(CrawlSpider, StructuredDataSpider):
 
     rules = [
         Rule(
-            LinkExtractor(allow=["/\d+/$"], restrict_css=".itemlist"),
+            LinkExtractor(allow=[r"/\d+/$"], restrict_css=".itemlist"),
             callback="parse_sd",
         ),
         Rule(LinkExtractor(restrict_css=".itemlist")),

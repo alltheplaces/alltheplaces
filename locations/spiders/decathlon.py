@@ -1,7 +1,9 @@
-from scrapy.spiders import CrawlSpider, Rule
-from scrapy.linkextractors import LinkExtractor
-from locations.dict_parser import DictParser
 import json
+
+from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule
+
+from locations.dict_parser import DictParser
 
 
 class Decathlon(CrawlSpider):

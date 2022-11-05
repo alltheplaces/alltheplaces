@@ -1,5 +1,7 @@
-# -*- coding: utf-8 -*-
-import scrapy, json
+import json
+
+import scrapy
+
 from locations.items import GeojsonPointItem
 
 
@@ -39,9 +41,9 @@ class OldChicagoSpider(scrapy.Spider):
             node = loc["node"]
             address = node["address"]
             hours = ", ".join(
-                ["%s %s" % (h["days"], h["hours"]) for h in node["simpleHours"]]
+                ["{} {}".format(h["days"], h["hours"]) for h in node["simpleHours"]]
             )
-            addr_full = "%s %s" % (address["streetNumber"], address["route"])
+            addr_full = "{} {}".format(address["streetNumber"], address["route"])
             yield GeojsonPointItem(
                 ref=node["locationId"],
                 lat=node["latitude"],

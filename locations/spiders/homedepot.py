@@ -1,6 +1,7 @@
-# -*- coding: utf-8 -*-
 import urllib.parse
+
 from scrapy.spiders import SitemapSpider
+
 from locations.linked_data_parser import LinkedDataParser
 
 

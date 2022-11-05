@@ -1,8 +1,10 @@
 import os
 import pathlib
+
 import scrapy
 from scrapy.commands import BaseRunSpiderCommand
 from scrapy.exceptions import UsageError
+
 from locations.structured_data_spider import StructuredDataSpider
 from locations.user_agents import BROSWER_DEFAULT
 

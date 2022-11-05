@@ -1,6 +1,6 @@
-# -*- coding: utf-8 -*-
-import scrapy
 import time
+
+import scrapy
 
 from locations.items import GeojsonPointItem
 

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import re
 
 import scrapy
@@ -32,7 +31,7 @@ class TrekBikesSpider(scrapy.Spider):
         hours_table = response.xpath('//table[@qaid="store-hours"]')
         for row in hours_table.xpath(".//tr"):
             s = row.xpath(".//text()").extract()
-            day, *intervals = [x.strip() for x in s if x.strip()]
+            day, *intervals = (x.strip() for x in s if x.strip())
             for interval in intervals:
                 if interval == "Closed":
                     continue

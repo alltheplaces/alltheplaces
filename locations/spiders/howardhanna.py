@@ -1,7 +1,4 @@
-# -*- coding: utf-8 -*-
 import re
-
-import scrapy
 
 from scrapy.spiders import SitemapSpider
 

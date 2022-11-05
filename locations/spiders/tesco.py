@@ -1,8 +1,9 @@
 import json
 
-from locations.items import GeojsonPointItem
-from locations.hours import OpeningHours
 from scrapy.spiders import SitemapSpider
+
+from locations.hours import OpeningHours
+from locations.items import GeojsonPointItem
 
 DAY_MAPPING = {
     "MONDAY": "Mo",
@@ -28,7 +29,7 @@ class TescoSpider(SitemapSpider):
     ]
     sitemap_rules = [
         (
-            "https:\/\/www\.tesco\.com\/store-locator\/([\w\-\.]+)\/([\d]+\/)?([\w\-\.\(\)]+)$",
+            r"https:\/\/www\.tesco\.com\/store-locator\/([\w\-\.]+)\/([\d]+\/)?([\w\-\.\(\)]+)$",
             "parse_store",
         )
     ]

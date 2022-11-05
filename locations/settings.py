@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Scrapy settings for locations project
 #
 # For simplicity, this file contains only settings considered important or
@@ -10,8 +8,10 @@
 #     http://scrapy.readthedocs.org/en/latest/topics/spider-middleware.html
 
 import os
-import locations
+
 import scrapy
+
+import locations
 
 BOT_NAME = "locations"
 

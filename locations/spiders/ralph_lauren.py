@@ -1,7 +1,7 @@
-# -*- coding: utf-8 -*-
-import scrapy
-import json
 import base64
+import json
+
+import scrapy
 
 from locations.items import GeojsonPointItem
 

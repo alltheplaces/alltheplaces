@@ -1,9 +1,9 @@
-# -*- coding: utf-8 -*-
-import re
 import json
+import re
+
+from scrapy.spiders import SitemapSpider
 
 from locations.items import GeojsonPointItem
-from scrapy.spiders import SitemapSpider
 
 
 class FarmersInsuranceSpider(SitemapSpider):

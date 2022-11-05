@@ -1,11 +1,7 @@
-# -*- coding: utf-8 -*-
-import re
-
 import scrapy
+from scrapy.selector import Selector
 
 from locations.items import GeojsonPointItem
-from locations.hours import OpeningHours
-from scrapy.selector import Selector
 
 
 class VansSpider(scrapy.Spider):

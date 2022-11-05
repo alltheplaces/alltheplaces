@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
 from scrapy.spiders import SitemapSpider
 
 from locations.items import GeojsonPointItem
-
 
 DEPARTMENTS = [
     "/shipping-services",

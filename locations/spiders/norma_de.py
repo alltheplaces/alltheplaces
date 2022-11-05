@@ -1,10 +1,10 @@
-import scrapy
 import re
 
-from locations.geo import point_locations
-from locations.items import GeojsonPointItem
-from locations.hours import OpeningHours
+import scrapy
 
+from locations.geo import point_locations
+from locations.hours import OpeningHours
+from locations.items import GeojsonPointItem
 
 DAY_MAPPING = {
     "MONDAY": "Mo",

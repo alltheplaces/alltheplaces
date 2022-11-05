@@ -1,9 +1,9 @@
-# -*- coding: utf-8 -*-
-import scrapy
 import json
-from zipfile import ZipFile
 from io import BytesIO
 from time import sleep
+from zipfile import ZipFile
+
+import scrapy
 
 from locations.items import GeojsonPointItem
 

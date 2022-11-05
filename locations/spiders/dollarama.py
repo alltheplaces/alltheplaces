@@ -1,8 +1,9 @@
-import scrapy
-from locations.items import GeojsonPointItem
 from urllib.parse import urlencode
-from scrapy.selector import Selector
+
+import scrapy
+
 from locations.hours import OpeningHours
+from locations.items import GeojsonPointItem
 
 Days = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"]
 

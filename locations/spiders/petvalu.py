@@ -1,10 +1,5 @@
-# -*- coding: utf-8 -*-
-import re
-
 import scrapy
-import json
 
-from locations.items import GeojsonPointItem
 from locations.dict_parser import DictParser
 
 

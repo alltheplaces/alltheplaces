@@ -1,11 +1,10 @@
-# -*- coding: utf-8 -*-
 import json
 import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
+from locations.items import GeojsonPointItem
 
 DAY_MAPPING = {
     "Mon": "Mo",
@@ -61,7 +60,7 @@ class EarthFareSpider(scrapy.Spider):
                 "state": store_details["State"],
                 "postcode": store_details["Zipcode"],
                 "phone": store_details.get("PhoneNumber"),
-                "website": "https://www.earthfare.com/rs/StoreLocator?id={0}".format(
+                "website": "https://www.earthfare.com/rs/StoreLocator?id={}".format(
                     store_details["CS_StoreID"]
                 ),
                 "lat": store_details.get("Latitude"),

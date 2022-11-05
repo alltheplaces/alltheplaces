@@ -1,7 +1,7 @@
-import re
 import scrapy
-from locations.items import GeojsonPointItem
 from scrapy.http import HtmlResponse
+
+from locations.items import GeojsonPointItem
 
 
 class ConcentraSpider(scrapy.Spider):

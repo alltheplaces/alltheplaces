@@ -1,6 +1,7 @@
-import scrapy
 import re
 from urllib.parse import urlparse
+
+import scrapy
 
 from locations.hours import OpeningHours
 from locations.items import GeojsonPointItem

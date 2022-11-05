@@ -1,5 +1,5 @@
-# -*- coding: utf-8 -*-
 import scrapy
+
 from locations.items import GeojsonPointItem
 from locations.spiders.mcdonalds import McDonaldsSpider
 

@@ -1,6 +1,6 @@
-# -*- coding: utf-8 -*-
-import scrapy
 import json
+
+import scrapy
 
 from locations.items import GeojsonPointItem
 
@@ -64,4 +64,3 @@ class DeichmannSpider(scrapy.Spider):
                 yield GeojsonPointItem(**properties)
         except Exception as e:
             self.logger.warn("----------------- Error -----------------: {}".format(e))
-            pass

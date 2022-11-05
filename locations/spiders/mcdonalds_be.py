@@ -1,4 +1,5 @@
 import scrapy
+
 from locations.dict_parser import DictParser
 from locations.spiders.mcdonalds import McDonaldsSpider
 

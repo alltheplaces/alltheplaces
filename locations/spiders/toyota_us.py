@@ -1,10 +1,10 @@
-# -*- coding: utf-8 -*-
 import json
+
 import scrapy
 from scrapy.linkextractors import LinkExtractor
 
-from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
+from locations.items import GeojsonPointItem
 
 
 class ToyotaUSSpider(scrapy.Spider):

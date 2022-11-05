@@ -1,7 +1,9 @@
-import scrapy
-import re
-from locations.items import GeojsonPointItem
 import json
+import re
+
+import scrapy
+
+from locations.items import GeojsonPointItem
 
 
 class CatherinesSpider(scrapy.Spider):

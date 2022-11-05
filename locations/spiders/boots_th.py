@@ -1,11 +1,10 @@
-# -*- coding: utf-8 -*-
 import json
 import re
 
 import scrapy
+from scrapy import Selector
 
 from locations.items import GeojsonPointItem
-from scrapy import Selector
 
 
 class BootsTHSpider(scrapy.Spider):

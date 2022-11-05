@@ -1,5 +1,5 @@
-# -*- coding: utf-8 -*-
 import scrapy
+
 from locations.open_graph_parser import OpenGraphParser
 
 

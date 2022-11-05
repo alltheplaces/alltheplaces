@@ -1,9 +1,8 @@
-# -*- coding: utf-8 -*-
 import re
 
 import scrapy
 
-from locations.hours import day_range, OpeningHours, sanitise_day
+from locations.hours import OpeningHours, day_range, sanitise_day
 from locations.items import GeojsonPointItem
 
 

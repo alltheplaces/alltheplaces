@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Exxonmobil has 1,679 locations worldwide except a few nations(those may even change with time)
 This crawler crawls https://www.exxon.com/en/api/locator/Locations
@@ -26,10 +25,11 @@ max_width and max_height have been optimized to return less than 250 results, wh
 result returned from exxonmobil no matter how big the boundingbox is.
 
 """
-import scrapy
-from locations.items import GeojsonPointItem
 import re
 
+import scrapy
+
+from locations.items import GeojsonPointItem
 from locations.spiders.costacoffee_gb import yes_or_no
 from locations.user_agents import BROSWER_DEFAULT
 

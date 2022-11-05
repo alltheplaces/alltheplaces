@@ -1,5 +1,7 @@
 import re
+
 import scrapy
+
 from locations.items import GeojsonPointItem
 
 # zips = ['57104', '50001', '55090', '63017', '68001', '66101', '53001']

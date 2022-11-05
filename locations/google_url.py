@@ -1,5 +1,5 @@
 import re
-from urllib.parse import urlsplit, parse_qs
+from urllib.parse import parse_qs, urlsplit
 
 
 def extract_google_position(item, response):

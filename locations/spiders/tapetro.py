@@ -1,8 +1,7 @@
-# -*- coding: utf-8 -*-
 import scrapy
+from xlrd import open_workbook
 
 from locations.items import GeojsonPointItem
-from xlrd import open_workbook
 
 BRANDS = {"T": "TravelCenters of America", "P": "Petro", "TE": "TA Express"}
 
@@ -37,7 +36,9 @@ class TAPetroSpider(scrapy.Spider):
             if not (store.get("LATITUDE") and store.get("LONGITUDE")):
                 continue
 
-            ref = "%s-%s-%s" % (store["SITE ID#"], store["BRAND"], store["LOCATION_ID"])
+            ref = "{}-{}-{}".format(
+                store["SITE ID#"], store["BRAND"], store["LOCATION_ID"]
+            )
             yield GeojsonPointItem(
                 ref=ref,
                 lat=float(store["LATITUDE"]),

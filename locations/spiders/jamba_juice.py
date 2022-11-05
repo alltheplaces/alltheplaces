@@ -1,8 +1,9 @@
-import scrapy
-from six.moves.urllib.parse import urlencode
 import re
-from locations.items import GeojsonPointItem
+from urllib.parse import urlencode
 
+import scrapy
+
+from locations.items import GeojsonPointItem
 
 DAYS = {"1": "Mo", "2": "Tu", "3": "We", "4": "Th", "5": "Fr", "6": "Sa", "7": "Su"}
 

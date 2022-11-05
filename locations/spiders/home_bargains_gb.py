@@ -1,8 +1,8 @@
-# -*- coding: utf-8 -*-
-from scrapy.spiders import CrawlSpider, Rule
 from scrapy.linkextractors import LinkExtractor
-from locations.structured_data_spider import StructuredDataSpider
+from scrapy.spiders import CrawlSpider, Rule
+
 from locations.hours import OpeningHours
+from locations.structured_data_spider import StructuredDataSpider
 
 
 class HomeBargainsGB(CrawlSpider, StructuredDataSpider):

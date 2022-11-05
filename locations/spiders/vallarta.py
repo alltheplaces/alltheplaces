@@ -1,7 +1,7 @@
 import scrapy
 
+from locations.hours import DAYS, OpeningHours
 from locations.items import GeojsonPointItem
-from locations.hours import OpeningHours, DAYS
 
 
 class VallartaSpider(scrapy.Spider):

@@ -1,11 +1,9 @@
-# -*- coding: utf-8 -*-
 import csv
 import re
 
 import scrapy
 
 from locations.items import GeojsonPointItem
-from locations.hours import OpeningHours
 
 
 class StarbucksEUSpider(scrapy.Spider):

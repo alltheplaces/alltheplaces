@@ -1,8 +1,7 @@
-import time
 from scrapy.spiders import SitemapSpider
 
-from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours, day_range, sanitise_day
+from locations.items import GeojsonPointItem
 
 
 class NaturalGrocersSpider(SitemapSpider):

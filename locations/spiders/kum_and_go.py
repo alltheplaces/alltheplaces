@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
 import csv
-import scrapy
 import json
 
+import scrapy
+
 from locations.items import GeojsonPointItem
-from locations.hours import OpeningHours
 
 
 class KumAndGoSpider(scrapy.Spider):

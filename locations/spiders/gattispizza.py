@@ -1,8 +1,9 @@
-# -*- coding: utf-8 -*-
-import scrapy
 import json
-import traceback
 import re
+import traceback
+
+import scrapy
+
 from locations.items import GeojsonPointItem
 
 URL = "http://gattispizza.com/wp-admin/admin-ajax.php"

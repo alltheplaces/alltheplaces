@@ -1,13 +1,9 @@
-# -*- coding: utf-8 -*-
 import csv
 import json
-import re
 
 import scrapy
 
-
 from locations.items import GeojsonPointItem
-
 
 states = ["AL", "FL", "GA", "NC", "SC", "TN", "VA"]
 

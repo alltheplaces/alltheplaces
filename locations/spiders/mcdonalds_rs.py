@@ -1,7 +1,9 @@
 import json
 import re
+
 import scrapy
 from scrapy.selector import Selector
+
 from locations.items import GeojsonPointItem
 from locations.spiders.mcdonalds import McDonaldsSpider
 

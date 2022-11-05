@@ -1,11 +1,13 @@
 import json
 import os
-import requests
 from collections import Counter
-from locations.name_suggestion_index import NSI
-from locations.country_utils import CountryUtils
+
+import requests
 from scrapy.commands import ScrapyCommand
 from scrapy.exceptions import UsageError
+
+from locations.country_utils import CountryUtils
+from locations.name_suggestion_index import NSI
 
 
 def iter_features(files_and_dirs):
@@ -32,10 +34,9 @@ def iter_features(files_and_dirs):
     if len(file_list) == 0:
         raise UsageError("no non-empty JSON files found")
     for file_path in file_list:
-        with open(file_path, "r") as f:
+        with open(file_path) as f:
             try:
-                for feature in json.load(f)["features"]:
-                    yield feature
+                yield from json.load(f)["features"]
             except Exception as e:
                 print("Failed to decode: " + file_path)
                 print(e)

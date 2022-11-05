@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import json
 import re
 import urllib.parse
@@ -6,7 +5,6 @@ import urllib.parse
 from scrapy.spiders import SitemapSpider
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
 from locations.linked_data_parser import LinkedDataParser
 
 

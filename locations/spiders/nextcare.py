@@ -1,6 +1,6 @@
-# -*- coding: utf-8 -*-
-import scrapy
 import re
+
+import scrapy
 
 from locations.items import GeojsonPointItem
 
@@ -29,7 +29,7 @@ class NextcareSpider(scrapy.Spider):
         normalize_day_times = []
 
         for day_time in day_times:
-            day, hours = [x.strip() for x in day_time.split(": ")]
+            day, hours = (x.strip() for x in day_time.split(": "))
             normalize_hours = []
 
             if re.search("-", day):
@@ -47,7 +47,7 @@ class NextcareSpider(scrapy.Spider):
                     for hour in hours:
                         if hour[-2:] == "PM":
                             if re.search(":", hour[:-2]):
-                                hora, minute = [x.strip() for x in hour[:-2].split(":")]
+                                hora, minute = (x.strip() for x in hour[:-2].split(":"))
                                 if int(hora) < 12:
                                     norm_hours = str(int(hora) + 12) + ":" + minute
                             else:
@@ -56,7 +56,7 @@ class NextcareSpider(scrapy.Spider):
 
                         elif hour[-2:] == "AM":
                             if re.search(":", hour[:-2]):
-                                hora, minute = [x.strip() for x in hour[:-2].split(":")]
+                                hora, minute = (x.strip() for x in hour[:-2].split(":"))
                                 norm_hours = hora + ":" + minute
                             else:
                                 norm_hours = hour[:-2] + ":00"

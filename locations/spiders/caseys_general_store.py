@@ -1,6 +1,6 @@
-# -*- coding: utf-8 -*-
-from locations.linked_data_parser import LinkedDataParser
 from scrapy.spiders import SitemapSpider
+
+from locations.linked_data_parser import LinkedDataParser
 
 
 class CaseysGeneralStoreSpider(SitemapSpider):

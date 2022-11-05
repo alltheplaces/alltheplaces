@@ -1,12 +1,10 @@
-# -*- coding: utf-8 -*-
 import csv
 import math
-import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
+from locations.items import GeojsonPointItem
 
 
 def calculate_offset_point(x, y, d, b):

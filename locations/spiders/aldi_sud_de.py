@@ -1,8 +1,7 @@
-# -*- coding: utf-8 -*-
 import scrapy
 
 from locations.dict_parser import DictParser
-from locations.hours import OpeningHours, sanitise_day, DAYS_DE
+from locations.hours import DAYS_DE, OpeningHours, sanitise_day
 
 
 class AldiSudDESpider(scrapy.Spider):

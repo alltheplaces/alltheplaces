@@ -1,9 +1,10 @@
-# -*- coding: utf-8 -*-
 import csv
 import json
-import scrapy
-from locations.items import GeojsonPointItem
 from urllib.parse import urlencode
+
+import scrapy
+
+from locations.items import GeojsonPointItem
 
 CATEGORY_MAPPING = {
     "1": "Donation Site",

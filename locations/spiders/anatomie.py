@@ -1,6 +1,6 @@
-import scrapy
-import re
 import lxml
+import scrapy
+
 from locations.items import GeojsonPointItem
 
 

@@ -1,11 +1,10 @@
-# -*- coding: utf-8 -*-
-import scrapy
 import json
 
+import scrapy
 from scrapy.http import JsonRequest
 
-from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
+from locations.items import GeojsonPointItem
 
 DAYS = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"]
 

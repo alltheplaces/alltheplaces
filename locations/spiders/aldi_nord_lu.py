@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-import scrapy
 from scrapy.spiders import SitemapSpider
 
 from locations.items import GeojsonPointItem

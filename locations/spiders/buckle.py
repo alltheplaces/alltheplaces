@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
-import scrapy
-import re
 import json
-from urllib.parse import urlparse
+
+import scrapy
 
 from locations.linked_data_parser import LinkedDataParser
 

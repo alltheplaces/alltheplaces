@@ -1,9 +1,8 @@
-# -*- coding: utf-8 -*-
-import scrapy
 import json
 
+import scrapy
+
 from locations.items import GeojsonPointItem
-from locations.hours import OpeningHours
 
 
 class ColdstoneCreamerySpider(scrapy.Spider):

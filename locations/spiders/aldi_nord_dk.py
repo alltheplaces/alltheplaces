@@ -1,8 +1,7 @@
-# -*- coding: utf-8 -*-
 import scrapy
 
 from locations.dict_parser import DictParser
-from locations.hours import OpeningHours, DAYS
+from locations.hours import DAYS, OpeningHours
 
 
 # Does have Linked Data, but requires JS to load it

@@ -1,7 +1,7 @@
-# -*- coding: utf-8 -*-
 import scrapy
-from locations.linked_data_parser import LinkedDataParser
+
 from locations.google_url import extract_google_position
+from locations.linked_data_parser import LinkedDataParser
 
 
 class BritishHeartFoundationGBSpider(scrapy.spiders.SitemapSpider):

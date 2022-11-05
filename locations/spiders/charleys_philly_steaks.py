@@ -1,11 +1,9 @@
-# -*- coding: utf-8 -*-
-import re
-
-import scrapy
 import csv
 
-from locations.items import GeojsonPointItem
+import scrapy
+
 from locations.hours import OpeningHours
+from locations.items import GeojsonPointItem
 
 DAY_MAPPING = {
     "Mon": "Mo",

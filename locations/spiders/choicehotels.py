@@ -1,8 +1,9 @@
 import json
 import re
-from locations.items import GeojsonPointItem
+
 from scrapy.spiders import SitemapSpider
 
+from locations.items import GeojsonPointItem
 from locations.user_agents import BROSWER_DEFAULT
 
 

@@ -6,7 +6,7 @@ from locations.hours import OpeningHours
 from locations.items import GeojsonPointItem
 
 
-class LinkedDataParser(object):
+class LinkedDataParser:
     @staticmethod
     def iter_linked_data(response, parse_json5=False):
         lds = response.xpath('//script[@type="application/ld+json"]//text()').getall()

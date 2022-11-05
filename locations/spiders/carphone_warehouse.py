@@ -1,8 +1,7 @@
-import re
 import scrapy
 
-from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
+from locations.items import GeojsonPointItem
 
 DAYS = {
     "monday": "Mo",

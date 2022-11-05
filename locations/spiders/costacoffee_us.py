@@ -1,9 +1,9 @@
-# -*- coding: utf-8 -*-
 import re
+
 import scrapy
+from scrapy import Selector
 
 from locations.items import GeojsonPointItem
-from scrapy import Selector
 
 
 class CostaCoffeeUSSpider(scrapy.Spider):

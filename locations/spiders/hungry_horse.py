@@ -1,6 +1,7 @@
 import json
 
 from scrapy.spiders import SitemapSpider
+
 from locations.items import GeojsonPointItem
 
 

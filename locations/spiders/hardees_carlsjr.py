@@ -1,7 +1,5 @@
-# -*- coding: utf-8 -*-
 import urllib.parse
 
-import scrapy
 from scrapy.spiders import SitemapSpider
 
 from locations.hours import OpeningHours

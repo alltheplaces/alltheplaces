@@ -1,6 +1,6 @@
-# -*- coding: utf-8 -*-
 import json
 import re
+
 import scrapy
 
 from locations.hours import OpeningHours
@@ -88,7 +88,7 @@ class McalistersDeliSpider(scrapy.Spider):
     def parse(self, response):
         response.selector.remove_namespaces()
         urls = response.xpath("//loc").re(
-            "https://locations.mcalistersdeli.com\/[a-z]{2}\/[a-z\-]+\/[0-9]+[a-z\-]+"
+            r"https://locations.mcalistersdeli.com\/[a-z]{2}\/[a-z\-]+\/[0-9]+[a-z\-]+"
         )
         for url in urls:
             yield scrapy.Request(url, callback=self.parse_store)

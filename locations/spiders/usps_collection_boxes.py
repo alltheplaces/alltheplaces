@@ -1,11 +1,9 @@
-# -*- coding: utf-8 -*-
 import json
-import re
 
 import scrapy
 
+from locations.geo import MILES_TO_KILOMETERS, vincenty_distance
 from locations.items import GeojsonPointItem
-from locations.geo import vincenty_distance, MILES_TO_KILOMETERS
 
 DAYS_NAME = {
     "MO": "Mo",

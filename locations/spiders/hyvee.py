@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Hy-Vee has 155 locations we need to scrape, they implemented a server-side javascript detector logic
 that returns just the HTML head with an empty body asking that we enable javascript to browse the site.
@@ -19,8 +18,10 @@ I tried to solve this by creating a dict of possible words, and mapping them app
 
 Update Nov-2019: PUT requests stopped working, GET requests now work
 """
-import scrapy
 import re
+
+import scrapy
+
 from locations.items import GeojsonPointItem
 
 

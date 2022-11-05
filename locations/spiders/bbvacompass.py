@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import html
 import json
 import re
@@ -6,7 +5,6 @@ import re
 import scrapy
 
 from locations.items import GeojsonPointItem
-from locations.hours import OpeningHours
 
 
 class BbvaCompassSpider(scrapy.Spider):

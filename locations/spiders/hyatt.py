@@ -1,6 +1,6 @@
 import json
+
 import scrapy
-import logging
 
 from locations.items import GeojsonPointItem
 

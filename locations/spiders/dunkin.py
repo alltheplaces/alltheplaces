@@ -1,11 +1,9 @@
-# -*- coding: utf-8 -*-
 import json
-from urllib.parse import urlencode
 
 import scrapy
 
-from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
+from locations.items import GeojsonPointItem
 
 
 class DunkinSpider(scrapy.Spider):

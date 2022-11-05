@@ -1,9 +1,7 @@
-# -*- coding: utf-8 -*-
 import scrapy
 
 from locations.hours import OpeningHours
 from locations.items import GeojsonPointItem
-
 
 DAYS = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
 

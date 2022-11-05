@@ -1,8 +1,7 @@
-# -*- coding: utf-8 -*-
 import scrapy
 
 from locations.dict_parser import DictParser
-from locations.hours import OpeningHours, DAYS_FULL
+from locations.hours import DAYS_FULL, OpeningHours
 
 
 class WHSmithGB(scrapy.Spider):

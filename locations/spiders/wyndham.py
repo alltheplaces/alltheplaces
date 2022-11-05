@@ -1,8 +1,8 @@
-# -*- coding: utf-8 -*-
 import re
 
-from locations.linked_data_parser import LinkedDataParser
 from scrapy.spiders import SitemapSpider
+
+from locations.linked_data_parser import LinkedDataParser
 
 BRANDS = {
     "laquinta": ["La Quinta by Wyndham", "Q6464734"],

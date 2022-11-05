@@ -1,10 +1,7 @@
-# -*- coding: utf-8 -*-
-import re
-
 import scrapy
 from scrapy.http import JsonRequest
 
-from locations.hours import DAYS_EN, OpeningHours, sanitise_day, day_range
+from locations.hours import OpeningHours, day_range, sanitise_day
 from locations.items import GeojsonPointItem
 
 

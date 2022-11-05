@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
 import scrapy
-import urllib
 
 from locations.items import GeojsonPointItem
 

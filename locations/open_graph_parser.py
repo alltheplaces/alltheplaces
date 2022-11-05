@@ -1,8 +1,8 @@
-from locations.items import GeojsonPointItem
 from locations.dict_parser import DictParser
+from locations.items import GeojsonPointItem
 
 
-class OpenGraphParser(object):
+class OpenGraphParser:
     @staticmethod
     def parse(response) -> GeojsonPointItem:
         keys = response.xpath("/html/head/meta/@property").getall()

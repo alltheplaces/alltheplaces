@@ -1,6 +1,5 @@
-# -*- coding: utf-8 -*-
-from scrapy.spiders import Rule, CrawlSpider
 from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule
 
 from locations.structured_data_spider import StructuredDataSpider
 

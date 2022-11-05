@@ -1,4 +1,5 @@
 import scrapy
+
 from locations.open_graph_parser import OpenGraphParser
 from locations.spiders.mcdonalds import McDonaldsSpider
 

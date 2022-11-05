@@ -2,7 +2,7 @@ import json
 
 from scrapy.spiders import SitemapSpider
 
-from locations.hours import OpeningHours, sanitise_day, DAYS_DE
+from locations.hours import DAYS_DE, OpeningHours, sanitise_day
 from locations.structured_data_spider import StructuredDataSpider
 
 

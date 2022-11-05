@@ -2,7 +2,7 @@ import re
 
 from scrapy.spiders import SitemapSpider
 
-from locations.hours import OpeningHours, sanitise_day, day_range
+from locations.hours import OpeningHours, day_range, sanitise_day
 from locations.structured_data_spider import StructuredDataSpider
 
 

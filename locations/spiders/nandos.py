@@ -1,9 +1,9 @@
-# -*- coding: utf-8 -*-
 import json
+
 import scrapy
 
-from locations.linked_data_parser import LinkedDataParser
 from locations.dict_parser import DictParser
+from locations.linked_data_parser import LinkedDataParser
 
 
 class NandosSpider(scrapy.spiders.SitemapSpider):

@@ -1,11 +1,9 @@
 import scrapy
-
 from scrapy.http import JsonRequest
 
 from locations.dict_parser import DictParser
 from locations.geo import point_locations
 from locations.hours import OpeningHours
-
 from locations.spiders.circle_k import CircleKSpider
 from locations.spiders.cvs import CVSSpider
 from locations.spiders.riteaid import RiteAidSpider

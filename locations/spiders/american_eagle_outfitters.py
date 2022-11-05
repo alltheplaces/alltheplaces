@@ -1,13 +1,10 @@
-# -*- coding: utf-8 -*-
 import re
-import csv
 
 import scrapy
-
 from scrapy.selector import Selector
 
-from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
+from locations.items import GeojsonPointItem
 
 
 class AmericanEagleOutfittersSpider(scrapy.Spider):

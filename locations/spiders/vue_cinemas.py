@@ -1,8 +1,8 @@
-# -*- coding: utf-8 -*-
+from urllib import parse
+
 import scrapy
 
 from locations.items import GeojsonPointItem
-from urllib import parse
 
 
 class VueCinemasSpider(scrapy.Spider):

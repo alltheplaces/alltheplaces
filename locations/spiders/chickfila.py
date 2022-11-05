@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from scrapy.spiders import SitemapSpider
 
 from locations.google_url import url_to_coords
@@ -12,7 +11,7 @@ class ChickFilASpider(SitemapSpider):
     sitemap_urls = ["https://www.chick-fil-a.com/sitemap.xml"]
     sitemap_rules = [
         (
-            "https:\/\/www.chick-fil-a.com\/locations\/..\/.*$",
+            r"https:\/\/www.chick-fil-a.com\/locations\/..\/.*$",
             "parse",
         ),
     ]

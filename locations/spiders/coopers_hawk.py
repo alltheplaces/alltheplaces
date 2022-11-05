@@ -1,8 +1,9 @@
-# -*- coding: utf-8 -*-
-import scrapy
-from locations.items import GeojsonPointItem
 import json
+
+import scrapy
 from parsel import Selector
+
+from locations.items import GeojsonPointItem
 
 
 class CoopersHawkSpider(scrapy.Spider):

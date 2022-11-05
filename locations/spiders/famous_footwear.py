@@ -1,7 +1,7 @@
-# -*- coding: utf-8 -*-
 import re
 
 from scrapy.spiders import SitemapSpider
+
 from locations.structured_data_spider import StructuredDataSpider
 
 

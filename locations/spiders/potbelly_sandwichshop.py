@@ -1,11 +1,10 @@
-# -*- coding: utf-8 -*-
-import json
 import re
-import scrapy
 
+import scrapy
 from scrapy.spiders import Spider
-from locations.items import GeojsonPointItem
+
 from locations.hours import OpeningHours
+from locations.items import GeojsonPointItem
 
 
 class PotbellySandwichShopSpider(Spider):

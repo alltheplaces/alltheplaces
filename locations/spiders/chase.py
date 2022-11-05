@@ -1,7 +1,8 @@
-# -*- coding: utf-8 -*-
 import html
-import scrapy
 import re
+
+import scrapy
+
 from locations.hours import OpeningHours
 from locations.items import GeojsonPointItem
 

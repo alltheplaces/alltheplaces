@@ -1,8 +1,7 @@
-# -*- coding: utf-8 -*-
 import scrapy
 
-from locations.geo import city_locations
 from locations.dict_parser import DictParser
+from locations.geo import city_locations
 
 
 class McDonaldsSpider(scrapy.Spider):
