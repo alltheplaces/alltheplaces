@@ -1,9 +1,11 @@
+import json
 import re
+
 import scrapy
 from scrapy.selector import Selector
-import json
-from locations.items import GeojsonPointItem
+
 from locations.hours import OpeningHours
+from locations.items import GeojsonPointItem
 
 DAY_MAPPING = {
     "1": "Mo",

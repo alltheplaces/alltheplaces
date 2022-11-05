@@ -1,8 +1,9 @@
-import scrapy
 import re
 
-from locations.items import GeojsonPointItem
+import scrapy
+
 from locations.hours import OpeningHours
+from locations.items import GeojsonPointItem
 
 STORE_STATES = [
     "Alabama",

@@ -1,5 +1,5 @@
-from scrapy.spiders import CrawlSpider, Rule
 from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule
 
 from locations.google_url import url_to_coords
 from locations.items import GeojsonPointItem

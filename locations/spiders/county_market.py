@@ -1,8 +1,8 @@
-import scrapy
 import re
 
-from locations.items import GeojsonPointItem
+import scrapy
 
+from locations.items import GeojsonPointItem
 
 SIEVE = ("View on Map", "Make My Preferred Store!")
 DAYS = r"M|Tue|Wed|Thu|Sat|Sun|Fri"

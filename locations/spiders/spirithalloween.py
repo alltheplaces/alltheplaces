@@ -1,5 +1,6 @@
 import json
 import re
+
 import scrapy
 
 from locations.items import GeojsonPointItem

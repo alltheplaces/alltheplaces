@@ -1,6 +1,7 @@
 import scrapy
-from locations.microdata_parser import MicrodataParser
+
 from locations.linked_data_parser import LinkedDataParser
+from locations.microdata_parser import MicrodataParser
 
 
 class JewsonGBSpider(scrapy.spiders.SitemapSpider):

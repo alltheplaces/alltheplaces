@@ -2,8 +2,7 @@ import re
 
 import scrapy
 
-
-from locations.hours import OpeningHours, DAYS
+from locations.hours import DAYS, OpeningHours
 from locations.items import GeojsonPointItem
 
 AM_PM = r"am|pm|a.m.|p.m.|a|p"

@@ -1,8 +1,9 @@
 import re
+from urllib.parse import urlencode
+
 import scrapy
 
 from locations.items import GeojsonPointItem
-from urllib.parse import urlencode
 
 
 class GreyhoundSpider(scrapy.Spider):

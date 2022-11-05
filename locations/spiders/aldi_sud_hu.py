@@ -1,7 +1,7 @@
 from scrapy import Spider
 
 from locations.dict_parser import DictParser
-from locations.hours import OpeningHours, sanitise_day, DAYS_HU
+from locations.hours import DAYS_HU, OpeningHours, sanitise_day
 
 
 class AldiSudHUSpider(Spider):

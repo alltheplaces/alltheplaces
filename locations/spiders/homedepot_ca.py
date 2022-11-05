@@ -1,9 +1,10 @@
 import json
 import re
 
-from locations.items import GeojsonPointItem
-from locations.hours import OpeningHours
 from scrapy.spiders import SitemapSpider
+
+from locations.hours import OpeningHours
+from locations.items import GeojsonPointItem
 
 
 class HomeDepotCASpider(SitemapSpider):

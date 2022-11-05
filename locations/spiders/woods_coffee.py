@@ -1,5 +1,6 @@
-import scrapy
 import time
+
+import scrapy
 
 from locations.items import GeojsonPointItem
 

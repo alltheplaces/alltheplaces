@@ -1,5 +1,6 @@
-import scrapy
 import json
+
+import scrapy
 
 from locations.linked_data_parser import LinkedDataParser
 

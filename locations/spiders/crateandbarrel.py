@@ -1,6 +1,6 @@
 
-from scrapy.spiders import CrawlSpider, Rule
 from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule
 
 from locations.structured_data_spider import StructuredDataSpider
 

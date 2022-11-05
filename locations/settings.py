@@ -8,8 +8,10 @@
 #     http://scrapy.readthedocs.org/en/latest/topics/spider-middleware.html
 
 import os
-import locations
+
 import scrapy
+
+import locations
 
 BOT_NAME = "locations"
 

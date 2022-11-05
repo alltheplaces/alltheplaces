@@ -1,6 +1,6 @@
-from locations.spiders.pandora import PandoraSpider
-
 from scrapy.spiders import SitemapSpider
+
+from locations.spiders.pandora import PandoraSpider
 
 
 class ClairesSpider(SitemapSpider):

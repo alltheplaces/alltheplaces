@@ -1,6 +1,8 @@
-from scrapy.spiders import SitemapSpider
-from locations.linked_data_parser import LinkedDataParser
 from urllib.parse import parse_qs, urlparse
+
+from scrapy.spiders import SitemapSpider
+
+from locations.linked_data_parser import LinkedDataParser
 
 
 class CinemarkSpider(SitemapSpider):

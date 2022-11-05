@@ -1,8 +1,9 @@
+from urllib.parse import urlencode
+
 import scrapy
 
 from locations.geo import point_locations
 from locations.items import GeojsonPointItem
-from urllib.parse import urlencode
 
 
 class AAASpider(scrapy.Spider):

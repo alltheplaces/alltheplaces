@@ -1,10 +1,11 @@
-import scrapy
-import re
 import json
+import re
 from urllib.parse import urlencode
-from locations.items import GeojsonPointItem
-from locations.hours import OpeningHours
 
+import scrapy
+
+from locations.hours import OpeningHours
+from locations.items import GeojsonPointItem
 
 DAY_MAPPING = {
     "Sun": "Su",

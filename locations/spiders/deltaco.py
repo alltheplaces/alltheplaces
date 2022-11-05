@@ -1,5 +1,6 @@
-import scrapy
 from urllib.parse import urlparse
+
+import scrapy
 
 from locations.linked_data_parser import LinkedDataParser
 from locations.microdata_parser import MicrodataParser

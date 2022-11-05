@@ -1,5 +1,6 @@
-import scrapy
 import re
+
+import scrapy
 
 from locations.geo import point_locations
 from locations.hours import OpeningHours

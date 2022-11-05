@@ -1,8 +1,9 @@
-import scrapy
 import re
-from locations.items import GeojsonPointItem
 from itertools import groupby
 
+import scrapy
+
+from locations.items import GeojsonPointItem
 
 _DAYNAMES = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
 

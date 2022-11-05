@@ -1,7 +1,8 @@
-import scrapy
-
 from functools import partial
+
+import scrapy
 from scrapy.http import FormRequest
+
 from locations.items import GeojsonPointItem
 
 

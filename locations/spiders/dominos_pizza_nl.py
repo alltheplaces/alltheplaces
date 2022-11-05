@@ -1,7 +1,8 @@
 import re
 
-from locations.items import GeojsonPointItem
 from scrapy.spiders import SitemapSpider
+
+from locations.items import GeojsonPointItem
 
 
 class DominosPizzaNLSpider(SitemapSpider):

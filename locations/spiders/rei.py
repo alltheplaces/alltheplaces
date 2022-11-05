@@ -1,7 +1,8 @@
-from scrapy.spiders import SitemapSpider
-from locations.structured_data_spider import StructuredDataSpider
 import json
 
+from scrapy.spiders import SitemapSpider
+
+from locations.structured_data_spider import StructuredDataSpider
 from locations.user_agents import BROSWER_DEFAULT
 
 

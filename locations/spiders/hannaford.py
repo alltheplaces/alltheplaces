@@ -1,6 +1,8 @@
-import scrapy
-from locations.items import GeojsonPointItem
 import re
+
+import scrapy
+
+from locations.items import GeojsonPointItem
 
 regex = r"(\D+,\s\D+-\d{5}).*"  # city, state, zip
 regex_am = r"\s?([Aa][Mm])"

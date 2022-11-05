@@ -1,11 +1,11 @@
-from datetime import datetime
 import json
 import re
+from datetime import datetime
 
 import scrapy
 
-from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
+from locations.items import GeojsonPointItem
 
 DAY_MAPPING = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
 

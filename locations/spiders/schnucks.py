@@ -1,4 +1,5 @@
 import scrapy
+
 from locations.structured_data_spider import StructuredDataSpider
 
 

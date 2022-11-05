@@ -1,4 +1,5 @@
 import scrapy
+
 from locations.items import GeojsonPointItem
 
 base_url = "https://www.elclubdelamilanesa.com/"

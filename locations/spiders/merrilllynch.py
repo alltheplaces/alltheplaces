@@ -1,6 +1,8 @@
-import scrapy
-from locations.items import GeojsonPointItem
 import json
+
+import scrapy
+
+from locations.items import GeojsonPointItem
 
 
 class MerrillLynchSpider(scrapy.Spider):

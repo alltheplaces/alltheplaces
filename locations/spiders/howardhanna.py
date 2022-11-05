@@ -1,6 +1,5 @@
 import re
 
-
 from scrapy.spiders import SitemapSpider
 
 from locations.items import GeojsonPointItem

@@ -1,7 +1,8 @@
 
 from scrapy.spiders import SitemapSpider
-from locations.items import GeojsonPointItem
+
 from locations.google_url import extract_google_position
+from locations.items import GeojsonPointItem
 
 
 class BremerBankSpider(SitemapSpider):

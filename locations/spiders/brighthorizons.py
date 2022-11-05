@@ -3,8 +3,9 @@ import logging
 import re
 import time
 
-from locations.items import GeojsonPointItem
 from scrapy.spiders import SitemapSpider
+
+from locations.items import GeojsonPointItem
 
 
 class BrightHorizonsSpider(SitemapSpider):

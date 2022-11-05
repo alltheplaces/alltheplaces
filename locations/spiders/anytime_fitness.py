@@ -1,7 +1,9 @@
-import scrapy
-from locations.items import GeojsonPointItem
-import json
 import html
+import json
+
+import scrapy
+
+from locations.items import GeojsonPointItem
 
 
 class AnytimeFitnessSpider(scrapy.Spider):

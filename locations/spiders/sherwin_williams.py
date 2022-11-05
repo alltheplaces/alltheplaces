@@ -1,7 +1,8 @@
-import scrapy
 import html
 import json
 from urllib.parse import urlencode
+
+import scrapy
 
 from locations.items import GeojsonPointItem
 from locations.user_agents import BROSWER_DEFAULT

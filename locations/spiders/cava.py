@@ -1,6 +1,7 @@
 import scrapy
+
+from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import GeojsonPointItem
-from locations.hours import OpeningHours, DAYS_FULL
 
 
 class CavaSpider(scrapy.Spider):

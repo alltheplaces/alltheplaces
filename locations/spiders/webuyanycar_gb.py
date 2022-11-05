@@ -1,9 +1,9 @@
+from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule
+
 from locations.google_url import extract_google_position
 from locations.spiders.vapestore_gb import clean_address
 from locations.structured_data_spider import StructuredDataSpider
-
-from scrapy.spiders import CrawlSpider, Rule
-from scrapy.linkextractors import LinkExtractor
 
 
 class WeBuyAnyCarGB(CrawlSpider, StructuredDataSpider):

@@ -1,5 +1,5 @@
-from locations.items import GeojsonPointItem
 from locations.dict_parser import DictParser
+from locations.items import GeojsonPointItem
 
 
 class OpenGraphParser:

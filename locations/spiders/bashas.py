@@ -1,5 +1,6 @@
 import html
 import json
+
 import scrapy
 
 from locations.dict_parser import DictParser

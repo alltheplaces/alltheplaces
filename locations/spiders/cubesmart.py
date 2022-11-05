@@ -1,7 +1,8 @@
-from pathlib import Path
 import urllib.parse
+from pathlib import Path
 
 from scrapy.spiders import SitemapSpider
+
 from locations.linked_data_parser import LinkedDataParser
 
 

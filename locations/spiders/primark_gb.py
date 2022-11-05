@@ -1,8 +1,9 @@
 import json
 
-from locations.hours import OpeningHours, DAYS_FULL
-from locations.items import GeojsonPointItem
 from scrapy.spiders import SitemapSpider
+
+from locations.hours import DAYS_FULL, OpeningHours
+from locations.items import GeojsonPointItem
 
 
 class PrimarkGBSpider(SitemapSpider):

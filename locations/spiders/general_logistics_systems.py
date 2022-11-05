@@ -1,5 +1,7 @@
-import scrapy
 import csv
+
+import scrapy
+
 from locations.items import GeojsonPointItem
 
 HEADERS = {"X-Requested-With": "XMLHttpRequest"}

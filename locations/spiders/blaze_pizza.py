@@ -1,7 +1,9 @@
-import scrapy
-from locations.items import GeojsonPointItem
-import re
 import json
+import re
+
+import scrapy
+
+from locations.items import GeojsonPointItem
 
 regex = r"\[{.*}\]"
 

@@ -2,8 +2,9 @@ import datetime
 import re
 
 import scrapy
-from locations.items import GeojsonPointItem
+
 from locations.hours import OpeningHours
+from locations.items import GeojsonPointItem
 
 
 class JasonsDeliSpider(scrapy.Spider):

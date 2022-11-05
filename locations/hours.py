@@ -1,8 +1,6 @@
 import re
-from collections import defaultdict
-
 import time
-
+from collections import defaultdict
 
 DAYS = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
 DAYS_FULL = [

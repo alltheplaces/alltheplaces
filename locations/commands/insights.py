@@ -1,11 +1,13 @@
 import json
 import os
-import requests
 from collections import Counter
-from locations.name_suggestion_index import NSI
-from locations.country_utils import CountryUtils
+
+import requests
 from scrapy.commands import ScrapyCommand
 from scrapy.exceptions import UsageError
+
+from locations.country_utils import CountryUtils
+from locations.name_suggestion_index import NSI
 
 
 def iter_features(files_and_dirs):

@@ -1,9 +1,11 @@
+from urllib.parse import urlparse
+
 import scrapy
 from scrapy.commands import BaseRunSpiderCommand
 from scrapy.exceptions import UsageError
-from scrapy.utils.sitemap import Sitemap, sitemap_urls_from_robots
 from scrapy.spiders.sitemap import iterloc
-from urllib.parse import urlparse
+from scrapy.utils.sitemap import Sitemap, sitemap_urls_from_robots
+
 from locations.user_agents import BROSWER_DEFAULT
 
 

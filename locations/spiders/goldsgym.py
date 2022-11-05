@@ -1,11 +1,12 @@
 import json
 import re
 from urllib.parse import urlparse
+
 import scrapy
 from scrapy.selector import Selector
 
-from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
+from locations.items import GeojsonPointItem
 
 
 class GoldsGymSpider(scrapy.Spider):

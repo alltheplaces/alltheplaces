@@ -1,6 +1,8 @@
-import scrapy
 import re
 from urllib.parse import urljoin
+
+import scrapy
+
 from locations.items import GeojsonPointItem
 
 

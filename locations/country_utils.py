@@ -1,5 +1,6 @@
-import geonamescache
 from urllib.parse import urlparse
+
+import geonamescache
 
 
 class CountryUtils:

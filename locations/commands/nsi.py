@@ -1,5 +1,6 @@
 from scrapy.commands import ScrapyCommand
 from scrapy.exceptions import UsageError
+
 from locations.name_suggestion_index import NSI
 
 

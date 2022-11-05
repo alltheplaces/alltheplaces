@@ -1,8 +1,8 @@
 
 import scrapy
+from scrapy.selector import Selector
 
 from locations.items import GeojsonPointItem
-from scrapy.selector import Selector
 
 
 class VansSpider(scrapy.Spider):

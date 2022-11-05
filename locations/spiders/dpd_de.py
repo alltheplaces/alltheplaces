@@ -1,7 +1,8 @@
-import scrapy
 import csv
 
+import scrapy
 from scrapy import FormRequest
+
 from locations.items import GeojsonPointItem
 
 

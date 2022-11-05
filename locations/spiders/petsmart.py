@@ -3,8 +3,8 @@ import urllib.parse
 
 import scrapy
 
-from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
+from locations.items import GeojsonPointItem
 
 day_mapping = {
     "MON": "Mo",

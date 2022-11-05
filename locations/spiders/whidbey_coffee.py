@@ -1,9 +1,10 @@
-import scrapy
 import re
-
 from datetime import datetime
-from locations.items import GeojsonPointItem
+
+import scrapy
+
 from locations.hours import OpeningHours
+from locations.items import GeojsonPointItem
 
 
 class WhidbeyCoffeeSpider(scrapy.Spider):

@@ -1,8 +1,8 @@
-import scrapy
 import json
 
-from locations.items import GeojsonPointItem
+import scrapy
 
+from locations.items import GeojsonPointItem
 
 DAY_MAPPING = {
     "Montag": "Mo",

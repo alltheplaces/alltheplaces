@@ -1,6 +1,8 @@
 import json
-import scrapy
 from datetime import datetime
+
+import scrapy
+
 from locations.items import GeojsonPointItem
 
 

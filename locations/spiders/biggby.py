@@ -1,5 +1,6 @@
-import scrapy
 from xml.etree import ElementTree as ET
+
+import scrapy
 
 from locations.items import GeojsonPointItem
 

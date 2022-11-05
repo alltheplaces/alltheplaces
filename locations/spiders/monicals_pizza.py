@@ -1,6 +1,7 @@
-import scrapy
-import unicodedata
 import re
+import unicodedata
+
+import scrapy
 
 from locations.items import GeojsonPointItem
 

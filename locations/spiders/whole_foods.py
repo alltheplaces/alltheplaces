@@ -1,10 +1,11 @@
 
-import scrapy
+import json
 import re
 
-from locations.items import GeojsonPointItem
+import scrapy
+
 from locations.hours import OpeningHours
-import json
+from locations.items import GeojsonPointItem
 
 
 class WholeFoodsSpider(scrapy.Spider):

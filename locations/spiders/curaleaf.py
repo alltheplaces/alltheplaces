@@ -1,6 +1,8 @@
-import scrapy
-from locations.items import GeojsonPointItem
 import re
+
+import scrapy
+
+from locations.items import GeojsonPointItem
 
 
 class CuraleafSpider(scrapy.Spider):

@@ -1,7 +1,7 @@
 import scrapy
+from xlrd import open_workbook
 
 from locations.items import GeojsonPointItem
-from xlrd import open_workbook
 
 BRANDS = {"T": "TravelCenters of America", "P": "Petro", "TE": "TA Express"}
 

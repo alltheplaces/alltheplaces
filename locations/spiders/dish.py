@@ -2,7 +2,6 @@ import scrapy
 
 from locations.items import GeojsonPointItem
 
-
 POSTALS = [
     "26601",
     "34604",

@@ -1,7 +1,7 @@
 import scrapy
 
 from locations.dict_parser import DictParser
-from locations.hours import OpeningHours, DAYS
+from locations.hours import DAYS, OpeningHours
 
 
 class AldiNordNLSpider(scrapy.Spider):

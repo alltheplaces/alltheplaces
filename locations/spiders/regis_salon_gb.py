@@ -1,11 +1,11 @@
 
+from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule
+
 from locations.google_url import extract_google_position
 from locations.hours import OpeningHours
 from locations.items import GeojsonPointItem
 from locations.structured_data_spider import extract_phone
-
-from scrapy.linkextractors import LinkExtractor
-from scrapy.spiders import CrawlSpider, Rule
 
 
 class RegisSalonGB(CrawlSpider):

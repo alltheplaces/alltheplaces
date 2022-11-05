@@ -3,8 +3,8 @@ import re
 
 from scrapy.spiders import SitemapSpider
 
-from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
+from locations.items import GeojsonPointItem
 from locations.user_agents import BROSWER_DEFAULT
 
 DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]

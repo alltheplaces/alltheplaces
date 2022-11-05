@@ -1,9 +1,10 @@
 import re
+
 import scrapy
+from scrapy.selector import Selector
 
 from locations.geo import postal_regions
 from locations.items import GeojsonPointItem
-from scrapy.selector import Selector
 
 
 class VetcoClinicsSpider(scrapy.Spider):

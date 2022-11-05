@@ -1,8 +1,10 @@
-import scrapy
-import re
 import json
-from locations.items import GeojsonPointItem
+import re
+
+import scrapy
+
 from locations.hours import OpeningHours
+from locations.items import GeojsonPointItem
 from locations.user_agents import BROSWER_DEFAULT
 
 day_mapping = {

@@ -1,8 +1,9 @@
-from scrapy.spiders import CrawlSpider, Rule
 from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule
+
+from locations.google_url import url_to_coords
 from locations.linked_data_parser import LinkedDataParser
 from locations.spiders.petsathome_gb import PetsAtHomeGBSpider
-from locations.google_url import url_to_coords
 
 
 def extract_google_position(item, response):

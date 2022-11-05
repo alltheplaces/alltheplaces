@@ -1,8 +1,9 @@
-import scrapy
 import json
 
-from locations.items import GeojsonPointItem
+import scrapy
+
 from locations.hours import OpeningHours
+from locations.items import GeojsonPointItem
 
 STATES = [
     "AL",

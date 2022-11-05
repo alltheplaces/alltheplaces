@@ -1,8 +1,9 @@
 import json
+
 import scrapy
 
-from locations.hours import OpeningHours
 from locations.geo import postal_regions
+from locations.hours import OpeningHours
 from locations.items import GeojsonPointItem
 from locations.user_agents import BROSWER_DEFAULT
 

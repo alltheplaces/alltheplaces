@@ -1,6 +1,7 @@
 import gzip
 import json
 import re
+
 import scrapy
 
 from locations.hours import OpeningHours

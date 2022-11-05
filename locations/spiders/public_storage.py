@@ -1,4 +1,5 @@
 import re
+
 import scrapy
 
 from locations.linked_data_parser import LinkedDataParser

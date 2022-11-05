@@ -1,8 +1,10 @@
-import scrapy
 import datetime
 import re
-from locations.items import GeojsonPointItem
+
+import scrapy
+
 from locations.hours import OpeningHours
+from locations.items import GeojsonPointItem
 
 
 class DepartmentVeteransAffairsSpider(scrapy.Spider):

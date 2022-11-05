@@ -18,8 +18,10 @@ I tried to solve this by creating a dict of possible words, and mapping them app
 
 Update Nov-2019: PUT requests stopped working, GET requests now work
 """
-import scrapy
 import re
+
+import scrapy
+
 from locations.items import GeojsonPointItem
 
 

@@ -1,7 +1,7 @@
 import json
-from pathlib import Path
-import urllib.parse
 import re
+import urllib.parse
+from pathlib import Path
 
 import scrapy
 

@@ -1,6 +1,8 @@
-import scrapy
-import re
 import json
+import re
+
+import scrapy
+
 from locations.items import GeojsonPointItem
 
 DAY_MAPPING = {"Lunes": "Mo", "Sábados": "Sa", "Domingos": "Su"}

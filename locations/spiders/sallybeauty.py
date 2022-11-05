@@ -1,9 +1,10 @@
+from urllib.parse import urlencode
+
 import scrapy
+from scrapy.selector import Selector
 
 from locations.hours import OpeningHours
 from locations.items import GeojsonPointItem
-from scrapy.selector import Selector
-from urllib.parse import urlencode
 
 
 class SallyBeautySpider(scrapy.Spider):

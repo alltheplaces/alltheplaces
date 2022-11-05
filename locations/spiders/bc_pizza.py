@@ -1,5 +1,7 @@
-import scrapy
 import re
+
+import scrapy
+
 from locations.items import GeojsonPointItem
 
 regex_am = r"\s?([Aa][Mm])"

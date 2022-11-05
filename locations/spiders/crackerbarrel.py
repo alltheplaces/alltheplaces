@@ -1,8 +1,9 @@
 import json
 
+from scrapy.spiders import SitemapSpider
+
 from locations.hours import OpeningHours
 from locations.items import GeojsonPointItem
-from scrapy.spiders import SitemapSpider
 
 DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 

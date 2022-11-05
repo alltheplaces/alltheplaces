@@ -1,4 +1,5 @@
 import scrapy
+
 from locations.spiders.timpson_gb import TimpsonGBSpider
 
 

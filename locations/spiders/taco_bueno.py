@@ -1,6 +1,6 @@
-import scrapy
 import re
 
+import scrapy
 from geonamescache import GeonamesCache
 
 from locations.items import GeojsonPointItem

@@ -1,9 +1,10 @@
-import scrapy
 import json
 import re
 
-from locations.items import GeojsonPointItem
+import scrapy
+
 from locations.hours import OpeningHours
+from locations.items import GeojsonPointItem
 
 SERVICE_VALUES = {"Yes": True, "No": False, "NR": None}
 TIME_PATTERN = re.compile(r"\d{2}:\d{2}")

@@ -1,5 +1,4 @@
 import scrapy
-
 from scrapy.http import JsonRequest
 
 from locations.items import GeojsonPointItem

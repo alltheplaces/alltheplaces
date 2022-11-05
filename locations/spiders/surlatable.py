@@ -1,5 +1,5 @@
 import re
-from urllib.parse import urlsplit, parse_qs
+from urllib.parse import parse_qs, urlsplit
 
 import scrapy
 from scrapy.linkextractors import LinkExtractor

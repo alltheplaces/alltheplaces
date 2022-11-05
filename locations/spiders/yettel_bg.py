@@ -1,4 +1,4 @@
-from scrapy import Spider, Selector
+from scrapy import Selector, Spider
 
 from locations.items import GeojsonPointItem
 
