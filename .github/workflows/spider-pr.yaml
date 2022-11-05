@@ -15,7 +15,7 @@ jobs:
       BUCKET: alltheplaces.openaddresses.io
     steps:
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
     - name: Setup Python
       uses: actions/setup-python@master
       with:
