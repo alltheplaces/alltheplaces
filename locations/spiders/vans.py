@@ -1,4 +1,3 @@
-
 import scrapy
 from scrapy.selector import Selector
 

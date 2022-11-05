@@ -30,7 +30,7 @@ class XlPartsSpider(scrapy.Spider):
             item["phone"] = store.xpath("./ul/li/span/text()").extract_first()
 
             # Fetch the coordinates
-            pattern = fr"""data\['storeID'\] \= "{store_div}"\;.*?var lat\=([0-9.]*);.*?var longtd=([0-9.-]*);"""
+            pattern = rf"""data\['storeID'\] \= "{store_div}"\;.*?var lat\=([0-9.]*);.*?var longtd=([0-9.-]*);"""
             if m := re.search(pattern, script_data, flags=re.MULTILINE | re.DOTALL):
                 item["lat"], item["lon"] = m.groups()
 

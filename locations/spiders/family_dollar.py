@@ -1,4 +1,3 @@
-
 from scrapy.linkextractors import LinkExtractor
 from scrapy.settings.default_settings import RETRY_HTTP_CODES
 from scrapy.spiders import CrawlSpider, Rule

@@ -36,7 +36,9 @@ class TAPetroSpider(scrapy.Spider):
             if not (store.get("LATITUDE") and store.get("LONGITUDE")):
                 continue
 
-            ref = "{}-{}-{}".format(store["SITE ID#"], store["BRAND"], store["LOCATION_ID"])
+            ref = "{}-{}-{}".format(
+                store["SITE ID#"], store["BRAND"], store["LOCATION_ID"]
+            )
             yield GeojsonPointItem(
                 ref=ref,
                 lat=float(store["LATITUDE"]),

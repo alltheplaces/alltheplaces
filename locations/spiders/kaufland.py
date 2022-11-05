@@ -1,4 +1,3 @@
-
 import scrapy
 
 from locations.hours import OpeningHours

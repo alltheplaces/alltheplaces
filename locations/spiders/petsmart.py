@@ -113,9 +113,7 @@ class PetSmartSpider(scrapy.Spider):
         open_hours = elements.xpath('.//time[@itemprop="opens"]/@content').extract()
         close_hours = elements.xpath('.//time[@itemprop="closes"]/@content').extract()
 
-        store_hours = {
-            z[0]: list(z[1:]) for z in zip(days, open_hours, close_hours)
-        }
+        store_hours = {z[0]: list(z[1:]) for z in zip(days, open_hours, close_hours)}
 
         for day, hours in store_hours.items():
             if "CLOSED" in hours:
