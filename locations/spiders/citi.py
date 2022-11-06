@@ -1,6 +1,7 @@
 import scrapy
 from scrapy.http import JsonRequest
 
+from locations.categories import Categories, apply_category
 from locations.items import GeojsonPointItem
 
 
@@ -74,9 +75,9 @@ class CitiSpider(scrapy.Spider):
             }
 
             if feature["properties"]["type"] in ["atm", "moneypassatm"]:
-                properties["extras"]["amenity"] = "atm"
+                apply_category(Categories.ATM, properties)
             elif feature["properties"]["type"] == "branch":
-                properties["extras"]["amenity"] = "bank"
+                apply_category(Categories.BANK, properties)
             elif feature["properties"]["type"] == "private bank":
                 pass
 
