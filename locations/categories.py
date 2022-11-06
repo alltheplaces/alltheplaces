@@ -7,6 +7,7 @@ class Categories(Enum):
 
     SHOP_CONVENIENCE = {"shop": "convenience"}
     SHOP_SUPERMARKET = {"shop": "supermarket"}
+    SHOP_NEWSAGENT = {"shop": "newsagent"}
 
     CAFE = {"amenity": "cafe"}
     COFFEE_SHOP = {"amenity": "cafe", "cuisine": "coffee_shop"}
