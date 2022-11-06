@@ -1,6 +1,8 @@
 from scrapy import Spider
+from datetime import datetime
 
 from locations.dict_parser import DictParser
+from locations.hours import OpeningHours, DAYS
 
 
 class GreggsGBSpider(Spider):
@@ -14,4 +16,19 @@ class GreggsGBSpider(Spider):
             item["phone"] = store["address"]["phoneNumber"]
             item["name"] = store["shopName"]
             item["ref"] = store["shopCode"]
+            item["opening_hours"] = self.decode_hours(store)
             yield item
+
+    @staticmethod
+    def decode_hours(store):
+        oh = OpeningHours()
+        for r in store["tradingPeriods"]:
+            # Each day has a record like:
+            # {'openingTime': '2022-08-30T06:00:00Z', 'closingTime': '2022-08-30T18:00:00Z'}
+            # Do not believe their Zulu time modifier, it is local time.
+            oh.add_range(
+                DAYS[datetime.fromisoformat(r["openingTime"][0:10]).weekday()],
+                r["openingTime"][-9:-4],
+                r["closingTime"][-9:-4],
+            )
+        return oh.as_opening_hours()

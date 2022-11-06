@@ -4,8 +4,7 @@ The project is Python based (in particular Python 3).
 [`scrapy`](https://scrapy.org/), a popular Python-based
 web scraping framework, is used to write individual site
 [spiders](https://doc.scrapy.org/en/latest/topics/spiders.html).
-
-Various tutorials exist,
+There are various `scrapy` tutorials,
 [this series on YouTube](https://www.youtube.com/watch?v=s4jtkzHhLzY)
 is reasonable.
 

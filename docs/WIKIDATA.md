@@ -120,7 +120,9 @@ to the co-located scraped POI. If there is good branded data in OSM
 then it is easier to suggest change or removal based on changes in
 the branded / scraped data set.
 
-Currently, after each weekly run of the ATP spiders [we publish a cross
+Currently, after each weekly run of the full project, [we publish a cross
 correlation (by QID) of the data in ATP, NSI and OSM](https://www.alltheplaces.xyz/wikidata.html).
 This is able to pick up various anomalies between and within the various
 projects all leading to edits which can make the open data world a better place.
+
+Others do [similar and interesting things](https://osm.mathmos.net/chains/).
