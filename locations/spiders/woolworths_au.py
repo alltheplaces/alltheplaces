@@ -25,4 +25,16 @@ class WoolworthsAUSpider(scrapy.Spider):
             i["ref"] = i.pop("StoreNo")
             i["city"] = i.pop("Suburb")
 
-            yield DictParser.parse(i)
+            item = DictParser.parse(i)
+
+            item["website"] = (
+                "https://www.woolworths.com.au/shop/storelocator/"
+                + "-".join(
+                    [item["state"], item["city"], item["ref"], i["Division"]]
+                ).lower()
+            )
+
+            # TODO: types needs some work, NSI seems out of date too
+            item["extras"] = {"type": i["Division"]}
+
+            yield item
