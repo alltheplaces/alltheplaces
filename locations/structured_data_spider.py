@@ -118,6 +118,9 @@ class StructuredDataSpider(Spider):
 
                 yield from self.post_process_item(item, response, ld_item)
 
+    def parse(self, response, **kwargs):
+        yield from self.parse_sd(response)
+
     def pre_process_data(self, ld_data, **kwargs):
         """Override with any pre-processing on the item."""
 
