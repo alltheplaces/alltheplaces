@@ -188,17 +188,29 @@ class CheckItemPropertiesPipeline:
         else:
             spider.crawler.stats.inc_value("atp/field/twitter/missing")
 
-        if postcode := item.get("postcode"):
-            if not isinstance(postcode, str):
-                spider.crawler.stats.inc_value("atp/field/postcode/wrong_type")
+        if street_address := item.get("street_address"):
+            if not isinstance(street_address, str):
+                spider.crawler.stats.inc_value("atp/field/street_address/wrong_type")
         else:
-            spider.crawler.stats.inc_value("atp/field/postcode/missing")
+            spider.crawler.stats.inc_value("atp/field/street_address/missing")
 
         if city := item.get("city"):
             if not isinstance(city, str):
                 spider.crawler.stats.inc_value("atp/field/city/wrong_type")
         else:
             spider.crawler.stats.inc_value("atp/field/city/missing")
+
+        if state := item.get("state"):
+            if not isinstance(state, str):
+                spider.crawler.stats.inc_value("atp/field/state/wrong_type")
+        else:
+            spider.crawler.stats.inc_value("atp/field/state/missing")
+
+        if postcode := item.get("postcode"):
+            if not isinstance(postcode, str):
+                spider.crawler.stats.inc_value("atp/field/postcode/wrong_type")
+        else:
+            spider.crawler.stats.inc_value("atp/field/postcode/missing")
 
         if brand := item.get("brand"):
             if not isinstance(brand, str):
