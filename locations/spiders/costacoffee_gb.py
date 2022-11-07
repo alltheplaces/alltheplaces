@@ -1,5 +1,6 @@
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
@@ -82,7 +83,6 @@ class CostaCoffeeGBSpider(scrapy.Spider):
                 item["extras"]["amenity"] = "vending_machine"
                 item["extras"]["vending"] = "coffee"
             else:
-                item["extras"]["amenity"] = "cafe"
-                item["extras"]["cuisine"] = "coffee_shop"
+                apply_category(Categories.COFFEE_SHOP, item)
 
             yield item
