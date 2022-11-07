@@ -8,14 +8,7 @@ class WoolworthsSpider(scrapy.Spider):
     item_attributes = {"brand": "Woolworths", "brand_wikidata": "Q3249145"}
     allowed_domains = ["woolworths.com.au"]
     start_urls = [
-        "https://www.woolworths.com.au/apis/ui/StoreLocator/Stores?Max=4500&Division=SUPERMARKETS,PETROL,CALTEXWOW,AMPOLMETRO,AMPOL&Facility=&latitude=-16.0880000&longitude=142.2948779",
-        "https://www.woolworths.com.au/apis/ui/StoreLocator/Stores?Max=4500&Division=SUPERMARKETS,PETROL,CALTEXWOW,AMPOLMETRO,AMPOL&Facility=&latitude=-21.3302741&longitude=122.1239795",
-        "https://www.woolworths.com.au/apis/ui/StoreLocator/Stores?Max=4500&Division=SUPERMARKETS,PETROL,CALTEXWOW,AMPOLMETRO,AMPOL&Facility=&latitude=-21.0024300&longitude=145.7226123",
-        "https://www.woolworths.com.au/apis/ui/StoreLocator/Stores?Max=4500&Division=SUPERMARKETS,PETROL,CALTEXWOW,AMPOLMETRO,AMPOL&Facility=&latitude=-17.0567426&longitude=133.5497607",
-        "https://www.woolworths.com.au/apis/ui/StoreLocator/Stores?Max=4500&Division=SUPERMARKETS,PETROL,CALTEXWOW,AMPOLMETRO,AMPOL&Facility=&latitude=-32.5838123&longitude=117.9052295",
-        "https://www.woolworths.com.au/apis/ui/StoreLocator/Stores?Max=4500&Division=SUPERMARKETS,PETROL,CALTEXWOW,AMPOLMETRO,AMPOL&Facility=&latitude=-32.9533313&longitude=146.2060107",
-        "https://www.woolworths.com.au/apis/ui/StoreLocator/Stores?Max=4500&Division=SUPERMARKETS,PETROL,CALTEXWOW,AMPOLMETRO,AMPOL&Facility=&latitude=-32.1755753&longitude=138.7792529",
-        "https://www.woolworths.com.au/apis/ui/StoreLocator/Stores?Max=4500&Division=SUPERMARKETS,PETROL,CALTEXWOW,AMPOLMETRO,AMPOL&Facility=&latitude=-42.2284848&longitude=146.3817920",
+        "https://www.woolworths.com.au/apis/ui/StoreLocator/Stores?Max=10000&Division=SUPERMARKETS,PETROL,CALTEXWOW,AMPOLMETRO,AMPOL&Facility=&postcode=*"
     ]
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
