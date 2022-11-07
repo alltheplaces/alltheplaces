@@ -3,8 +3,8 @@ import scrapy
 from locations.items import GeojsonPointItem
 
 
-class WoolworthsSpider(scrapy.Spider):
-    name = "woolworths"
+class WoolworthsAUSpider(scrapy.Spider):
+    name = "woolworths_au"
     item_attributes = {"brand": "Woolworths", "brand_wikidata": "Q3249145"}
     allowed_domains = ["woolworths.com.au"]
     start_urls = [
