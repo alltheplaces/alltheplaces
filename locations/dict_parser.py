@@ -44,6 +44,7 @@ class DictParser:
     postcode_keys = [
         "postal-code",
         "post-code",
+        "postcode",
         "zip",
         "zipcode",
         "address-post-code",
