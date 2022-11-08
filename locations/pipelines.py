@@ -207,12 +207,6 @@ class CheckItemPropertiesPipeline:
         else:
             spider.crawler.stats.inc_value("atp/field/city/missing")
 
-        if state := item.get("state"):
-            if not isinstance(state, str):
-                spider.crawler.stats.inc_value("atp/field/state/wrong_type")
-        else:
-            spider.crawler.stats.inc_value("atp/field/state/missing")
-
         if postcode := item.get("postcode"):
             if not isinstance(postcode, str):
                 spider.crawler.stats.inc_value("atp/field/postcode/wrong_type")
