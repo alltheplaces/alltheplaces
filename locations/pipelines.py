@@ -41,7 +41,7 @@ class ApplySpiderLevelAttributesPipeline:
         item_attributes = spider.item_attributes
 
         for (key, value) in item_attributes.items():
-            if key is "extras":
+            if key == "extras":
                 extras = item.get("extras", {})
                 for k, v in value.items():
                     if extras.get(k) is None:
@@ -206,12 +206,6 @@ class CheckItemPropertiesPipeline:
                 spider.crawler.stats.inc_value("atp/field/city/wrong_type")
         else:
             spider.crawler.stats.inc_value("atp/field/city/missing")
-
-        if state := item.get("state"):
-            if not isinstance(state, str):
-                spider.crawler.stats.inc_value("atp/field/state/wrong_type")
-        else:
-            spider.crawler.stats.inc_value("atp/field/state/missing")
 
         if postcode := item.get("postcode"):
             if not isinstance(postcode, str):
