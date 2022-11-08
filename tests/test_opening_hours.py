@@ -1,12 +1,12 @@
 import json
 
 from locations.hours import (
-    OpeningHours,
-    day_range,
     DAYS,
-    sanitise_day,
     DAYS_BG,
     DAYS_DE,
+    OpeningHours,
+    day_range,
+    sanitise_day,
 )
 
 
@@ -197,6 +197,56 @@ def test_ld_parse_openingHours():
         )
     )
     assert o.as_opening_hours() == "Mo-Th 09:00-12:00"
+
+
+def test_ld_parse_openingHours_days_3_chars():
+    o = OpeningHours()
+    o.from_linked_data(
+        json.loads(
+            """
+            {
+                "@context": "https://schema.org",
+                "@type": "Pharmacy",
+                "name": "Philippa's Pharmacy",
+                "description": "A superb collection of fine pharmaceuticals for your beauty and healthcare convenience, a department of Delia's Drugstore.",
+                "openingHours": "Mon-Thu 09:00-12:00",
+                "telephone": "+18005551234"
+            }
+            """
+        )
+    )
+    assert o.as_opening_hours() == "Mo-Th 09:00-12:00"
+
+    o = OpeningHours()
+    o.from_linked_data(
+        json.loads(
+            """
+            {
+                "@context": "https://schema.org",
+                "@type": "Pharmacy",
+                "name": "Philippa's Pharmacy",
+                "description": "A superb collection of fine pharmaceuticals for your beauty and healthcare convenience, a department of Delia's Drugstore.",
+                "openingHours": "Mon-Tue 09:00-12:00 Wed,Thu 09:00-12:00",
+                "telephone": "+18005551234"
+            }
+            """
+        )
+    )
+    assert o.as_opening_hours() == "Mo-Th 09:00-12:00"
+
+    o = OpeningHours()
+    o.from_linked_data(
+        json.loads(
+            """
+            {
+                "@context": "https://schema.org",
+                "@type": "Pharmacy",
+                "openingHours": "Mon-Sat 10:00 - 19:00 Sun 12:00-17:00"
+            }
+            """
+        )
+    )
+    assert o.as_opening_hours() == "Mo-Sa 10:00-19:00; Su 12:00-17:00"
 
 
 def test_ld_parse_openingHours_array():
