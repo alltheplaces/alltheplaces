@@ -1,26 +1,11 @@
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
-from locations.linked_data_parser import LinkedDataParser
+from locations.structured_data_spider import StructuredDataSpider
 
 
-class HSBC_UK(CrawlSpider):
+class HSBCUKGBSpider(CrawlSpider, StructuredDataSpider):
     name = "hsbc_uk"
-    item_attributes = {
-        "brand": "HSBC UK",
-        "brand_wikidata": "Q64767453",
-    }
+    item_attributes = {"brand": "HSBC UK", "brand_wikidata": "Q64767453"}
     start_urls = ["https://www.hsbc.co.uk/branch-list/"]
-    rules = [
-        Rule(
-            link_extractor=LinkExtractor(
-                allow=r"https:\/\/www\.hsbc\.co\.uk\/branch-list\/\/([-\w]+)$",
-            ),
-            callback="parse_item",
-        ),
-    ]
-
-    def parse_item(self, response):
-        bank = LinkedDataParser.parse(response, "Place")
-        bank["ref"] = response.url
-        yield bank
+    rules = [Rule(LinkExtractor(allow=r"/branch-list/"), callback="parse_sd")]
