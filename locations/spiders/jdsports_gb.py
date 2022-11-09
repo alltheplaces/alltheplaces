@@ -11,3 +11,4 @@ class JDSportsGBSpider(CrawlSpider, StructuredDataSpider):
     rules = [
         Rule(LinkExtractor(allow="store-locator/", deny="-soon"), callback="parse_sd")
     ]
+    requires_proxy = True
