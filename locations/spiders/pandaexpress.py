@@ -4,13 +4,15 @@ import scrapy
 
 from locations.hours import OpeningHours
 from locations.items import GeojsonPointItem
+from locations.user_agents import BROSWER_DEFAULT
 
 
 class PandaExpressSpider(scrapy.Spider):
     name = "pandaexpress"
     item_attributes = {"brand": "Panda Express", "brand_wikidata": "Q1358690"}
     allowed_domains = ["pandaexpress.com"]
-    custom_settings = {"ROBOTSTXT_OBEY": False, "RETRY_TIMES": 5}
+    custom_settings = {"ROBOTSTXT_OBEY": False, "RETRY_TIMES": 10}
+    user_agent = BROSWER_DEFAULT
 
     def start_requests(self):
         today = datetime.date.today().strftime("%Y%m%d")
@@ -39,6 +41,12 @@ class PandaExpressSpider(scrapy.Spider):
                         oh_range.get("end").split(" ")[-1],
                         time_format="%H:%M",
                     )
+            slug = (
+                "/".join([store["state"], store["city"], store["streetaddress"]])
+                .lower()
+                .replace(".", "")
+                .replace(" ", "-")
+            )
             properties = {
                 "ref": store["id"],
                 "lat": store["latitude"],
@@ -51,5 +59,6 @@ class PandaExpressSpider(scrapy.Spider):
                 "postcode": store["zip"],
                 "country": store["country"],
                 "phone": store["telephone"],
+                "website": f"https://www.pandaexpress.com/locations/{slug}",
             }
             yield GeojsonPointItem(**properties)
