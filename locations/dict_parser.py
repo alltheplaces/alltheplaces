@@ -52,7 +52,7 @@ class DictParser:
         "zip-code",
     ]
 
-    email_keys = ["email", "contact-email"]
+    email_keys = ["email", "contact-email", "email-address"]
 
     phone_keys = [
         "phone-number",
@@ -81,6 +81,8 @@ class DictParser:
         "yext-display-lng",
     ]
 
+    website_keys = ["url", "website"]
+
     @staticmethod
     def parse(obj) -> GeojsonPointItem:
         item = GeojsonPointItem()
@@ -89,7 +91,7 @@ class DictParser:
         item["name"] = DictParser.get_first_key(obj, DictParser.name_keys)
 
         location = DictParser.get_first_key(
-            obj, ["location", "geo-location", "geo", "geo-point"]
+            obj, ["location", "geo-location", "geo", "geo-point", "coordinates"]
         )
         # If not a good location object then use the parent
         if not location or not isinstance(location, dict):
@@ -123,6 +125,7 @@ class DictParser:
 
         item["email"] = DictParser.get_first_key(contact, DictParser.email_keys)
         item["phone"] = DictParser.get_first_key(contact, DictParser.phone_keys)
+        item["website"] = DictParser.get_first_key(contact, DictParser.website_keys)
 
         return item
 
