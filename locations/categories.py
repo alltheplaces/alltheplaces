@@ -1,3 +1,4 @@
+import logging
 from enum import Enum
 
 
@@ -8,6 +9,12 @@ class Categories(Enum):
     SHOP_CONVENIENCE = {"shop": "convenience"}
     SHOP_SUPERMARKET = {"shop": "supermarket"}
     SHOP_NEWSAGENT = {"shop": "newsagent"}
+    SHOP_TRAVEL = {"shop": "travel_agency"}
+    SHOP_CAR = {"shop": "car"}
+
+    CAR_REPAIR = {"shop": "car_repair"}
+    FUNERAL_DIRECTORS = {"shop": "funeral_directors"}
+    DEPARTMENT_STORE = {"shop": "department_store"}
 
     CAFE = {"amenity": "cafe"}
     COFFEE_SHOP = {"amenity": "cafe", "cuisine": "coffee_shop"}
@@ -18,6 +25,14 @@ class Categories(Enum):
 
 
 def apply_category(category, item):
+    if isinstance(category, Enum):
+        tags = category.value
+    elif isinstance(category, dict):
+        tags = category
+    else:
+        logging.error("Invalid category format")
+        return
+
     if not item.get("extras"):
         item["extras"] = {}
-    item["extras"].update(category.value)
+    item["extras"].update(tags)
