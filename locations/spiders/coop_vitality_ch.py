@@ -1,6 +1,7 @@
 import re, scrapy
 from locations.items import GeojsonPointItem
 
+
 class CoopVitalityCHSpider(scrapy.Spider):
     name = "coop_vitality_ch"
     item_attributes = {"brand": "Coop Vitality", "brand_wikidata": "Q111725297"}
@@ -22,7 +23,7 @@ class CoopVitalityCHSpider(scrapy.Spider):
             branch = s.get("store_name", "").replace("Coop Vitality", "").strip()
             if branch:
                 properties["extras"] = {"branch": branch}
-            properties = {k:v for (k,v) in properties.items() if v}
+            properties = {k: v for (k, v) in properties.items() if v}
             yield GeojsonPointItem(**properties)
 
     def parse_addr(self, s):
@@ -47,7 +48,7 @@ class CoopVitalityCHSpider(scrapy.Spider):
             "located_in": located_in,
             "located_in_wikidata": located_in_wikidata,
             "postcode": s.get("zipcode"),
-            "street": street
+            "street": street,
         }
 
     def parse_image(self, s):
