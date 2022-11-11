@@ -19,6 +19,8 @@ class CountryUtils:
         "uk": "GB",
         "norge": "NO",
         "united states of america": "US",
+        "luxemburg (groothertogdom)": "LU",
+        "belgië": "BE",
     }
 
     def to_iso_alpha2_country_code(self, country_str):
