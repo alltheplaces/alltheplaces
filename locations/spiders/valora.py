@@ -1,5 +1,6 @@
 import re
 import scrapy
+from locations.categories import Categories
 from locations.items import GeojsonPointItem
 
 
@@ -25,16 +26,16 @@ class ValoraSpider(scrapy.Spider):
         "Spettacolo": ("Caffè Spettacolo", "Q111728781", {}),
         "U-Store": ("U-Store", "Q113290511", {}),
         # However, the AllThePlaces pipeline does not apply any NSI rules
-        # if multiple rules match with conflicting tags. Perhaps the NSI data
-        # is buggy when there’s such a conflict; anyhow, by making an explicit
-        # decision here, we can work around this.
-        # See https://github.com/osmlab/name-suggestion-index/issues/7400.
-        "k kiosk": ("k kiosk", "Q60381703", {"shop": "kiosk;newsagent"}),
-        "Press & Books": ("Press & Books", "Q100407277", {"shop": "books;newsagent"}),
+        # if multiple rules match with conflicting tags. We have asked the
+        # local mapping community if and how exactly the conflicting NSI rules
+        # should be cleaned up for "k kiosk" and "Press & Books". Meanwhile,
+        # we make a call for AllThePlaces.
+        "k kiosk": ("k kiosk", "Q60381703", Categories.SHOP_NEWSAGENT.value),
+        "Press & Books": ("Press & Books", "Q100407277", Categories.SHOP_BOOKS.value),
         # In real life, the stores formerly called “k presse+buch” have been
         # re-branded as “Press & Books”. But as of November 2022, the Valora
         # JSON feed still uses the old name.
-        "k presse+buch": ("Press & Books", "Q100407277", {"shop": "books;newsagent"}),
+        "k presse+buch": ("Press & Books", "Q100407277", Categories.SHOP_BOOKS.value),
     }
 
     def parse(self, response):
