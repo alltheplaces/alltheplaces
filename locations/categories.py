@@ -18,6 +18,7 @@ class Categories(Enum):
 
     CAFE = {"amenity": "cafe"}
     COFFEE_SHOP = {"amenity": "cafe", "cuisine": "coffee_shop"}
+    PUB = {"amenity": "pub"}
     PHARMACY = {"amenity": "pharmacy"}
     FUEL_STATION = {"amenity": "fuel"}
     BANK = {"amenity": "bank"}
