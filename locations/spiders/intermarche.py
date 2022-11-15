@@ -21,6 +21,7 @@ class IntermarcheSpider(scrapy.Spider):
     }
     INTERMARCHE_HYPER = {"brand": "Intermarché Hyper", "brand_wikidata": "Q98278022"}
     item_attributes = {"country": "FR"}
+    requires_proxy = True
 
     def start_requests(self):
         yield Request(
