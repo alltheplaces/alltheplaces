@@ -13,6 +13,7 @@ class LiviqueCHSpider(SitemapSpider, StructuredDataSpider):
     }
     allowed_domains = ["www.livique.ch"]
     sitemap_urls = ["https://www.livique.ch/sitemap.xml"]
+    sitemap_follow = ["/STORE-"]
     sitemap_rules = [(r"https://www\.[Ll]ivique\.ch/de/standorte/", "parse_sd")]
     wanted_types = ["LocalBusiness"]
     search_for_phone = False
