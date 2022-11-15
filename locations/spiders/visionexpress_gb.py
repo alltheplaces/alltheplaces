@@ -1,15 +1,18 @@
-from scrapy.spiders import SitemapSpider
+from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule
 
 from locations.google_url import extract_google_position
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class VisionExpressGBSpider(SitemapSpider, StructuredDataSpider):
+class VisionExpressGBSpider(CrawlSpider, StructuredDataSpider):
     name = "visionexpress_gb"
     item_attributes = {"brand": "VisionExpress", "brand_wikidata": "Q7936150"}
-    sitemap_urls = ["https://www.visionexpress.com/sitemap.xml"]
-    sitemap_rules = [("/opticians/", "parse_sd")]
-    download_delay = 0.2
+    start_urls = ["https://www.visionexpress.com/store-overview"]
+    rules = [
+        Rule(LinkExtractor(allow=r"/opticians/[-\w]+$")),
+        Rule(LinkExtractor(allow=r"/opticians/[-\w]+/[-\w]+$"), callback="parse_sd"),
+    ]
     search_for_twitter = False
 
     def post_process_item(self, item, response, ld_data, **kwargs):
