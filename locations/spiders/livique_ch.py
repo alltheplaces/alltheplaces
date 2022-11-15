@@ -28,6 +28,7 @@ class LiviqueCHSpider(SitemapSpider, StructuredDataSpider):
         item["country"] = "CH"
         item["extras"] = {"branch": branch}
         item["image"] = self.cleanup_image(item["image"])
+        item["lat"], item["lon"] = self.parse_lat_lon(response)
         item["opening_hours"] = self.parse_hours(response)
         item["phone"] = self.cleanup_phone(item["phone"])
         item["ref"] = item["ref"].split("/")[-1].replace("_pos", "")
@@ -59,3 +60,9 @@ class LiviqueCHSpider(SitemapSpider, StructuredDataSpider):
                 day, open_time, close_time = m.groups()
                 oh.add_range(DAYS_DE.get(day), open_time, close_time)
         return oh.as_opening_hours()
+
+    @staticmethod
+    def parse_lat_lon(response):
+        lat = response.xpath("//meta[@itemprop='latitude']/@content").extract()
+        lon = response.xpath("//meta[@itemprop='longitude']/@content").extract()
+        return (lat[0], lon[0]) if lat and lon else (None, None)
