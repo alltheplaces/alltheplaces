@@ -20,7 +20,6 @@ class Decathlon(CrawlSpider):
         "https://www.decathlon.it/store-locator",
         "https://www.decathlon.fr/store-locator",
         "https://www.decathlon.hu/store-locator",
-        "https://www.decathlon.nl/store-locator",
         "https://www.decathlon.pl/store-locator",
         "https://www.decathlon.pt/store-locator",
         "https://www.decathlon.ro/store-locator",
