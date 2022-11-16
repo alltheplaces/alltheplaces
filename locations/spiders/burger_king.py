@@ -128,7 +128,7 @@ class BurgerKingSpider(scrapy.Spider):
 
     def start_requests(self):
 
-        # TODO: DK, IE, ES, MX, PT, IT, BE at the least do not follow this API.
+        # TODO: DK, IE, MX, at the least do not follow this API.
 
         # TODO: https://www.burgerking.nl/kingfinder
         # TODO: has an interface for central european and nordic countries
