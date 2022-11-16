@@ -90,7 +90,15 @@ DAYS_SI = {
     "ne": "Su",
     "Ned": "Su",
 }
-
+DAYS_IT = {
+    "Lun": "Mo",
+    "Mar": "Tu",
+    "Mer": "We",
+    "Gio": "Th",
+    "Ven": "Fr",
+    "Sab": "Sa",
+    "Dom": "Su",
+}
 
 def day_range(start_day, end_day):
     start_ix = DAYS.index(start_day)
