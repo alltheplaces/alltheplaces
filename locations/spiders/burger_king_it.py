@@ -5,10 +5,10 @@ from locations.hours import OpeningHours, DAYS_IT
 
 
 class BurgerKingItSpider(scrapy.Spider):
-    name = 'burger_king_it'
+    name = "burger_king_it"
     item_attributes = {"brand": "Burger King", "brand_wikidata": "Q177054"}
     start_urls = [
-        'https://burgerking.it/api/data/it/ristoranti.json',
+        "https://burgerking.it/api/data/it/ristoranti.json",
     ]
 
     def parse(self, response):
@@ -17,9 +17,11 @@ class BurgerKingItSpider(scrapy.Spider):
 
             opening_time = store["orari"]["ristorante"]
             for d in DAYS_IT:
-                opening_hours.add_range(DAYS_IT[d],
-                                        opening_time[d.lower()]["lunch_start"],
-                                        opening_time[d.lower()]["dinner_end"])
+                opening_hours.add_range(
+                    DAYS_IT[d],
+                    opening_time[d.lower()]["lunch_start"],
+                    opening_time[d.lower()]["dinner_end"],
+                )
 
             item = DictParser.parse(store)
 

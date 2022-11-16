@@ -5,11 +5,11 @@ from locations.hours import OpeningHours, DAYS_FULL
 
 
 class BurgerKingEsPtSpider(scrapy.Spider):
-    name = 'burger_king_es_pt'
+    name = "burger_king_es_pt"
     item_attributes = {"brand": "Burger King", "brand_wikidata": "Q177054"}
     start_urls = [
-        'https://static.burgerkingencasa.es/bkhomewebsite/pt/stores_pt.json',
-        'https://static.burgerkingencasa.es/bkhomewebsite/es/stores_es.json'
+        "https://static.burgerkingencasa.es/bkhomewebsite/pt/stores_pt.json",
+        "https://static.burgerkingencasa.es/bkhomewebsite/es/stores_es.json",
     ]
 
     def parse(self, response):

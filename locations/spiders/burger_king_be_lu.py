@@ -7,17 +7,17 @@ from locations.items import GeojsonPointItem
 
 
 class BurgerKingBeLuSpider(scrapy.Spider):
-    name = 'burger_king_be_lu'
+    name = "burger_king_be_lu"
     item_attributes = {"brand": "Burger King", "brand_wikidata": "Q177054"}
     download_delay = 2.0
-    allowed_domains = ['www.burgerking.be']
+    allowed_domains = ["www.burgerking.be"]
     start_urls = [
         "https://stores.burgerking.be/nl/",
     ]
 
     def parse(self, response):
         for ldjson in response.xpath(
-                '//script[@type="application/ld+json"]/text()'
+            '//script[@type="application/ld+json"]/text()'
         ).extract():
             graph = json.loads(ldjson)["@graph"]
             for data in graph:
