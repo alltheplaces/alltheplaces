@@ -86,9 +86,13 @@ class LinkedDataParser:
                 item["addr_full"] = addr
             elif isinstance(addr, dict):
                 if LinkedDataParser.check_type(addr.get("@type"), "PostalAddress"):
-                    item["street_address"] = LinkedDataParser.get_case_insensitive(
+                    if street_address := LinkedDataParser.get_case_insensitive(
                         addr, "streetAddress"
-                    )
+                    ):
+                        if isinstance(street_address, list):
+                            street_address = ", ".join(street_address)
+
+                        item["street_address"] = street_address
                     item["city"] = LinkedDataParser.get_case_insensitive(
                         addr, "addressLocality"
                     )
@@ -177,7 +181,7 @@ class LinkedDataParser:
             if isinstance(value, str):
                 if value == "null":
                     return None
-                return value.strip()
+                return value.strip(" ,")
             return value
 
     @staticmethod

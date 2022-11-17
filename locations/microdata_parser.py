@@ -125,7 +125,7 @@ def item_props(scope: lxml.html.HtmlElement):
     # 5. While pending is not empty:
     while pending:
         # 5. 1. Remove an element from pending and let current be that element.
-        current = pending.pop()
+        current = pending.pop(0)
         # 5. 2. If current is already in memory, there is a microdata error;
         # continue.
         if current in memory:
