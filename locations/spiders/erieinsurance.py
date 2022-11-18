@@ -24,6 +24,8 @@ class ErieInsuranceSpider(SitemapSpider):
         script = response.xpath(
             '//script/text()[contains(.,"agencyInformation")]'
         ).get()
+        if not script:
+            return
         data = json.decoder.JSONDecoder().raw_decode(
             script, script.index("{", script.index("agencyInformation ="))
         )[0]
