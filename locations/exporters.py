@@ -1,6 +1,7 @@
 import base64
 import hashlib
 import logging
+import uuid
 
 from scrapy.exporters import JsonItemExporter, JsonLinesItemExporter
 from scrapy.utils.python import to_bytes
@@ -33,8 +34,9 @@ mapping = (
 def item_to_properties(item):
     props = {}
 
-    # Ref is required
-    props["ref"] = str(item["ref"])
+    # Ref is required, unless `no_refs = True` is set in spider
+    if ref := item.get("ref"):
+        props["ref"] = str(ref)
 
     # Add in the extra bits
     extras = item.get("extras")
@@ -51,7 +53,7 @@ def item_to_properties(item):
 
 
 def compute_hash(item):
-    ref = str(item.get("ref") or "").encode("utf8")
+    ref = str(item.get("ref") or uuid.uuid1()).encode("utf8")
     sha1 = hashlib.sha1(ref)
 
     spider_name = item.get("extras", {}).get("@spider")
