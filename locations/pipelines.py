@@ -63,6 +63,8 @@ class CountryCodeCleanUpPipeline:
             if clean_country := self.country_utils.to_iso_alpha2_country_code(country):
                 item["country"] = clean_country
         else:
+            if hasattr(spider, "skip_auto_cc") and getattr(spider, "skip_auto_cc"):
+                return item
 
             # No country set, see if it can be cleanly deduced from the spider name
             if country := self.country_utils.country_code_from_spider_name(spider.name):
