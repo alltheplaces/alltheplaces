@@ -5,6 +5,7 @@
 import math
 import re
 
+import reverse_geocode
 from scrapy.exceptions import DropItem
 
 from locations.country_utils import CountryUtils
@@ -74,6 +75,13 @@ class CountryCodeCleanUpPipeline:
             if country := self.country_utils.country_code_from_url(item.get("website")):
                 spider.crawler.stats.inc_value("atp/field/country/from_website_url")
                 item["country"] = country
+
+            # Still no country set, try an offline reverse geocoder.
+            lat, lon = item.get("lat"), item.get("lon")
+            if lat != None and lon != None:
+                if c := reverse_geocode.search([(lat, lon)]):
+                    spider.crawler.stats.inc_value("atp/field/country/from_reverse_geocoding")
+                    item["country"] = c[0]["country_code"]
 
         return item
 
