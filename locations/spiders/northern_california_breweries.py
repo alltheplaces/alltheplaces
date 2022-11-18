@@ -31,8 +31,9 @@ class NorthernCaliforniaBreweriesSpider(scrapy.Spider):
                 ref=item.get("Brewery"),
                 lat=latitude,
                 lon=longitude,
-                addr_full=item.get("Address"),
+                street_address=item.get("Address"),
                 city=item.get("City"),
                 state="CA",
+                country="US",
                 website=item.get("Website"),
             )
