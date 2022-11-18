@@ -42,4 +42,9 @@ class FootLockerSpider(scrapy.spiders.SitemapSpider):
         item = LinkedDataParser.parse(response, "ShoeStore")
         if item:
             item["ref"] = response.url
+
+            if "stores.footlocker.com" in response.url:
+                item["country"] = "US"
+                # Other countries are handled by the TLD in pipeline code
+
             yield item
