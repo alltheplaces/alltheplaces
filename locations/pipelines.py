@@ -80,7 +80,9 @@ class CountryCodeCleanUpPipeline:
             lat, lon = item.get("lat"), item.get("lon")
             if lat != None and lon != None:
                 if c := reverse_geocode.search([(lat, lon)]):
-                    spider.crawler.stats.inc_value("atp/field/country/from_reverse_geocoding")
+                    spider.crawler.stats.inc_value(
+                        "atp/field/country/from_reverse_geocoding"
+                    )
                     item["country"] = c[0]["country_code"]
 
         return item
