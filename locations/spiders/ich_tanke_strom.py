@@ -21,20 +21,9 @@ from parsel import Selector
 # charging station locations to the Swiss Federal Office of Energy,
 # which aggregates them it with all other data from Swiss companies,
 # and publishes the result as a single data feed.
-#
-# TODO: Unfortunately, the data feed does not indicate the country
-# of the stations. Currently, we always emit `addr:country=CH` even
-# though it’s sometimes wrong. Ideally, we’d assign the country code
-# by reverse geocoding. For example, we could take the GeoJSON files
-# that NSI maintains for geographically restricting its suggestions,
-# and pass the country polygons to `pygeos` or another geometry library.
-# Since reverse geocoding wouldn’t be specific to this particular spider,
-# it might make sense to implement it as a general post-processing
-# phase within the AllThePlaces pipeline. Once this is done, this
-# spider should be changed to emit items without country codes.
 
 
-class IchTankeStromCHSpider(scrapy.Spider):
+class IchTankeStromSpider(scrapy.Spider):
     name = "ich_tanke_strom"
     allowed_domains = ["data.geo.admin.ch"]
     item_attributes = {"extras": {"amenity": "charging_station"}}
@@ -101,11 +90,11 @@ class IchTankeStromCHSpider(scrapy.Spider):
         return ";".join(sorted([a for a in access if a]))
 
     def parse_address(self, html):
-        td = html.xpath("(//td[text()='Standort']/../td)[2]/text()").get()
-        if not td:
-            return {"country": "CH"}
-        addr_full = " ".join(td.split())
-        return {"addr_full": addr_full, "country": "CH"}
+        if td := html.xpath("(//td[text()='Standort']/../td)[2]/text()").get():
+            addr_full = " ".join(td.split())
+            return {"addr_full": addr_full}
+        else:
+            return {}
 
     def parse_operator(self, html):
         # In the data feed, none of the websites are specific to a single
