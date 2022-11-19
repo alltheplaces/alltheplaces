@@ -40,12 +40,19 @@ DAYS_EN = {
     "Su": "Su",
 }
 DAYS_DE = {
+    "Montag": "Mo",
     "Mo": "Mo",
+    "Dienstag": "Tu",
     "Di": "Tu",
+    "Mittwoch": "We",
     "Mi": "We",
+    "Donnerstag": "Th",
     "Do": "Th",
+    "Freitag": "Fr",
     "Fr": "Fr",
+    "Samstag": "Sa",
     "Sa": "Sa",
+    "Sonntag": "Su",
     "So": "Su",
 }
 DAYS_BG = {
