@@ -4,7 +4,9 @@ The output of the periodic run of all spiders posted on https://www.alltheplaces
 
 ## Identifier
 
-Each GeoJSON feature has an `id` field. The ID is a hash based on the `ref` and `@spider` fields and should be consistent between builds. You might use this to determine if new objects show up or disappear between builds. Occasionally, the authors of spiders will change the spider name or the website we spider will change the identifiers used for the store. In these cases, the ID field in our output will change dramatically. At this time, we don't make an attempt to link the old and new IDs.
+Each GeoJSON feature will have an `id` field. The ID is a hash based on the `ref` and `@spider` fields and should be consistent between builds.
+
+Data consumers might use the `id` field to determine if new objects show up or disappear between builds. Occasionally, the authors of spiders will change the spider name or the website we spider will change the identifiers used for the store. In these cases, the ID field in our output will change dramatically. At this time, we don't make an attempt to link the old and new IDs. Also, in some cases a spider author is unable to find a stable identifier for an item and each run will get a unique identifier.
 
 ## Geometry
 
