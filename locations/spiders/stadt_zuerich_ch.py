@@ -112,6 +112,8 @@ class StadtZuerichCHSpider(scrapy.Spider):
         return {}
 
     def parse_bicycle_parking(self, p):
+        # For bicycle and motorcycle parkings, the data feed puts the
+        # feature type into the name; the parkings have no real names.
         amenity = {
             "Motorrad": "motorcycle_parking",
             "Velo": "bicycle_parking",
@@ -121,6 +123,7 @@ class StadtZuerichCHSpider(scrapy.Spider):
         return {
             "amenity": amenity,
             "capacity": int(p.get("anzahl_pp", 0)) or None,
+            "name": None,
             "operator": operator,
             "operator:wikidata": operator_wikidata,
         }
@@ -130,11 +133,13 @@ class StadtZuerichCHSpider(scrapy.Spider):
         return ", ".join([n for n in names if n])
 
     def parse_note(self, p):
-        lines = (p.get("bemerkung") or "").split("<BR>")
-        lines.extend((p.get("kommentar") or "").split("<BR>"))
-        lines.extend((p.get("infrastruktur") or "").split("<BR>"))
-        lines = [l.strip() for l in lines]
-        return " / ".join([l for l in lines if l])
+        lines = []
+        for key in ("bemerkung", "kommentar"):
+            for line in (p.get(key) or "").split("<BR>"):
+                line = line.strip()
+                if line and line not in {"NULL", ";NULL"}:
+                    lines.append(line)
+        return " / ".join(lines)
 
     def parse_opening_hours(self, p):
         if "ist rund um die Uhr besetzt" in (p.get("bemerkung") or ""):
@@ -164,17 +169,50 @@ class StadtZuerichCHSpider(scrapy.Spider):
         return oh.as_opening_hours()
 
     def parse_park(self, p):
-        return {"leisure": "park"}
+        tags = {"leisure": "park"}
+        equipment = {
+            "Beachvolleyball": {"beachvolleyball": "yes"},
+            "Behinderten-WC": {"toilets:wheelchair": "yes"},
+            "Besuchenden-WC": {"toilets": "yes"},
+            "Brunnen": {"fountain": "yes"},
+            "Café": {"cafe": "yes"},
+            "Feuerstelle": {"bbq": "yes"},
+            "Garderobe": {"locker": "yes"},
+            "Grillstelle": {"bbq": "yes"},
+            "Grosse Liegewiese": {"sunbathing": "yes"},
+            "Elektrogrill": {"bbq": "electric"},
+            "Hundefreie Zone": {"dog": "no"},
+            "Kiosk": {"kiosk": "yes"},
+            "Liegewiese": {"sunbathing": "yes"},
+            "Nur Blindenhunde erlaubt": {"blind:dog": "yes", "dog": "no"},
+            "PingPong": {"table_tennis": "yes"},
+            "Restaurant": {"restaurant": "yes"},
+            "Schachspiel": {"chess": "yes"},
+            "Sitzgelegenheiten": {"bench": "yes"},
+            "Sitzmöglichkeiten": {"bench": "yes"},
+            "Sitzbänke": {"bench": "yes"},
+            "Spielplatz": {"playground": "yes"},
+            "Tischtennisplatz": {"table_tennis": "yes"},
+            "Trinkbrunnen": {"drinking_water": "yes"},
+            "Voliere": {"aviary": "yes"},
+        }
+        for e in re.split(r"[;_]|<BR>", p.get("infrastruktur") or ""):
+            tags.update(equipment.get(e, {}))
+        return tags
 
     def parse_phone(self, p):
         phone = (p.get("tel") or "").replace(" ", "")
+        # TODO: Write a pipeline step for normalizing phone numbers.
+        # This could be done by calling libphonenumber, respectively
+        # its Python port in pip module "phonenumbers". Afterwards,
+        # the following two lines can be removed.
         if phone.startswith("0"):
             phone = "+41" + phone[1:]
         return phone
 
     def parse_police(self, p):
         if p["name"] == "Polizeimuseum":
-            return {"amenity": "museum"}
+            return {"tourism": "museum", "museum": "police"}
         else:
             return {"amenity": "police"}
 
