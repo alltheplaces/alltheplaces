@@ -81,4 +81,9 @@ class DesignerShoeWarehouseSpider(SitemapSpider):
             ).extract_first(),
             "opening_hours": oh.as_opening_hours(),
         }
+        if "stores.dsw.com" in response.url:
+            properties["country"] = "US"
+        elif "stores.dsw.ca" in response.url:
+            properties["country"] = "CA"
+
         yield GeojsonPointItem(**properties)

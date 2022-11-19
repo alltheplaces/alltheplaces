@@ -11,7 +11,11 @@ am_pm = lambda s: re.sub(r" ?([ap])\.*m\.*", lambda x: x[1] + "m", s)
 
 class ErieInsuranceSpider(SitemapSpider):
     name = "erieinsurance"
-    item_attributes = {"brand": "Erie Insurance", "brand_wikidata": "Q5388314"}
+    item_attributes = {
+        "brand": "Erie Insurance",
+        "brand_wikidata": "Q5388314",
+        "country": "US",
+    }
     allowed_domains = ["www.erieinsurance.com"]
     sitemap_urls = ["https://www.erieinsurance.com/robots.txt"]
     sitemap_rules = [(r"^https://www.erieinsurance.com/agencies/.", "parse")]
@@ -20,6 +24,8 @@ class ErieInsuranceSpider(SitemapSpider):
         script = response.xpath(
             '//script/text()[contains(.,"agencyInformation")]'
         ).get()
+        if not script:
+            return
         data = json.decoder.JSONDecoder().raw_decode(
             script, script.index("{", script.index("agencyInformation ="))
         )[0]
