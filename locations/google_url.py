@@ -45,6 +45,11 @@ def url_to_coords(url: str) -> (float, float):
             lat_index = "1"
         if lat_index and lon_index:
             return float(maps_keys[lat_index]), float(maps_keys[lon_index])
+    elif url.startswith("https://www.google.com/maps/embed/v1/place"):
+        for q in get_query_param(url, "q"):
+            q = q.split(",")
+            if len(q) == 2:
+                return float(q[0]), float(q[1])
     elif url.startswith("https://maps.googleapis.com/maps/api/staticmap"):
         # find the first marker location, or the map center
         for markers in get_query_param(url, "markers"):
@@ -66,6 +71,11 @@ def url_to_coords(url: str) -> (float, float):
             "https://www.google.com/maps/search/?api=1&query=", ""
         ).split(",")
         return float(lat.strip()), float(lon.strip())
+    elif url.startswith("https://www.google.com/maps"):
+        for daddr in get_query_param(url, "daddr"):
+            daddr = daddr.split(",")
+            if len(daddr) == 2:
+                return float(daddr[0]), float(daddr[1])
 
     if "/maps.google.com/" in url:
         for ll in get_query_param(url, "ll"):

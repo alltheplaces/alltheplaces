@@ -11,6 +11,9 @@ def test_embed():
     assert url_to_coords(
         "https://www.google.com/maps/embed?pb=!4v1609582314852!6m8!1m7!1sCAoSLEFGMVFpcFB3TzhsbGwtQ1RuMWhpS3I0cjZXYmZqaUloT3FRQ1VUNnhCRWo3!2m2!1d53.22113234117468!2d-0.5585914791344676!3f33.35570201128006!4f-4.604534739231056!5f0.7820865974627469"
     ) == (53.22113234117468, -0.5585914791344676)
+    assert url_to_coords(
+        "https://www.google.com/maps/embed/v1/place?key=AIzaSyBjjIa7P4QKNHSPXay5bq64BWfQXMQAX94&q=24.614918,73.705124"
+    ) == (24.614918, 73.705124)
 
 
 def test_staticmap():
@@ -38,6 +41,10 @@ def test_maps_url():
     ) == (
         57.213,
         -2.187,
+    )
+    assert url_to_coords("https://www.google.com/maps?daddr=44.5043,8.9074") == (
+        44.5043,
+        8.9074,
     )
 
 

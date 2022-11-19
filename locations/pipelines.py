@@ -170,16 +170,28 @@ class CheckItemPropertiesPipeline:
         else:
             spider.crawler.stats.inc_value("atp/field/image/missing")
 
-        lat, lon = item.get("lat"), item.get("lon")
-        if lat and lon:
-            if not (self.min_lat < float(lat) < self.max_lat):
+        if lat := item.get("lat"):
+            try:
+                lat = float(lat)
+                if not (self.min_lat < lat < self.max_lat):
+                    spider.crawler.stats.inc_value("atp/field/lat/invalid")
+                if math.fabs(lat) < 0.01:
+                    spider.crawler.stats.inc_value("atp/field/lat/invalid")
+            except:
+                lat = None
                 spider.crawler.stats.inc_value("atp/field/lat/invalid")
-            if not (self.min_lon < float(lon) < self.max_lon):
+            item["lat"] = lat
+        if lon := item.get("lon"):
+            try:
+                lon = float(lon)
+                if not (self.min_lon < lon < self.max_lon):
+                    spider.crawler.stats.inc_value("atp/field/lon/invalid")
+                if math.fabs(lon) < 0.01:
+                    spider.crawler.stats.inc_value("atp/field/lon/invalid")
+            except:
+                lon = None
                 spider.crawler.stats.inc_value("atp/field/lon/invalid")
-            if math.fabs(float(lat)) < 0.01:
-                spider.crawler.stats.inc_value("atp/field/lat/invalid")
-            if math.fabs(float(lon)) < 0.01:
-                spider.crawler.stats.inc_value("atp/field/lon/invalid")
+            item["lon"] = lon
 
         if phone := item.get("phone"):
             if not isinstance(phone, str):
