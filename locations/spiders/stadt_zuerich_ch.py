@@ -114,19 +114,21 @@ class StadtZuerichCHSpider(scrapy.Spider):
     def parse_bicycle_parking(self, p):
         # For bicycle and motorcycle parkings, the data feed puts the
         # feature type into the name; the parkings have no real names.
-        amenity = {
-            "Motorrad": "motorcycle_parking",
-            "Velo": "bicycle_parking",
-            "Beide": "bicycle_parking;motorcycle_parking",
+        tags = {
+            "Motorrad": {"amenity": "motorcycle_parking", "bicycle": "no"},
+            "Velo": {"amenity": "bicycle_parking", "motorcycle": "no"},
+            "Beide": {"amenity": "bicycle_parking", "motorcycle": "yes"},
         }.get(p["name"])
         operator, operator_wikidata = self.operators["Tiefbauamt"]
-        return {
-            "amenity": amenity,
-            "capacity": int(p.get("anzahl_pp", 0)) or None,
-            "name": None,
-            "operator": operator,
-            "operator:wikidata": operator_wikidata,
-        }
+        tags.update(
+            {
+                "capacity": str(int(p.get("anzahl_pp", 0))) or None,
+                "name": None,
+                "operator": operator,
+                "operator:wikidata": operator_wikidata,
+            }
+        )
+        return tags
 
     def parse_name(self, p):
         names = [p.get(n) for n in ("name", "namenzus")]
