@@ -97,11 +97,11 @@ do
 done
 (>&2 echo "Wrote out summary JSON")
 
-(>&2 echo "Concatenating and compressing output files")
-tar -czf "${SPIDER_RUN_DIR}/output.tar.gz" -C "${SPIDER_RUN_DIR}" ./output
+(>&2 echo "Compressing output files")
+(cd "${SPIDER_RUN_DIR}" && zip -r output.zip output)
 
-(>&2 echo "Concatenating and compressing log files")
-tar -czf "${SPIDER_RUN_DIR}/logs.tar.gz" -C "${SPIDER_RUN_DIR}" ./logs
+(>&2 echo "Compressing log files")
+(cd "${SPIDER_RUN_DIR}" && zip -r logs.zip logs)
 
 (>&2 echo "Saving log and output files to ${RUN_S3_PREFIX}")
 aws s3 sync \
@@ -116,11 +116,11 @@ if [ ! $retval -eq 0 ]; then
 fi
 
 (>&2 echo "Saving embed to https://data.alltheplaces.xyz/runs/latest/info_embed.html")
-OUTPUT_FILESIZE=$(du "${SPIDER_RUN_DIR}/output.tar.gz"  | awk '{ print $1 }')
+OUTPUT_FILESIZE=$(du "${SPIDER_RUN_DIR}/output.zip"  | awk '{ print $1 }')
 OUTPUT_FILESIZE_PRETTY=$(echo "$OUTPUT_FILESIZE" | awk '{printf "%0.1f", $1/1024}')
 cat > "${SPIDER_RUN_DIR}/info_embed.html" << EOF
 <html><body>
-<a href="${RUN_URL_PREFIX}/output.tar.gz">Download</a>
+<a href="${RUN_URL_PREFIX}/output.zip">Download</a>
 (${OUTPUT_FILESIZE_PRETTY} MB)<br/><small>$(printf "%'d" "${OUTPUT_LINECOUNT}") rows from
 ${SPIDER_COUNT} spiders, updated $(date)</small>
 </body></html>
@@ -140,7 +140,7 @@ fi
 
 jq -n --compact-output \
     --arg run_id "${RUN_TIMESTAMP}" \
-    --arg run_output_url "${RUN_URL_PREFIX}/output.tar.gz" \
+    --arg run_output_url "${RUN_URL_PREFIX}/output.zip" \
     --arg run_stats_url "${RUN_URL_PREFIX}/stats/_results.json" \
     --arg run_insights_url "${RUN_URL_PREFIX}/stats/_insights.json" \
     --arg run_start_time "${RUN_START}" \

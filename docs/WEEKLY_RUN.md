@@ -11,7 +11,7 @@ to no longer function.
 For all these reasons we try (at the time of writing) to perform a weekly run of
 all the spiders. The output is published on our
 website: [alltheplaces.xyz](https://www.alltheplaces.xyz/).
-This data set is available as a compressed tar file. Each entry in the tar file
+This data set is available as a compressed zip file. Each entry in the zip file
 is the [GeoJSON](https://geojson.org/) output from a spider. Some of the fields, which
 may be in the GeoJSON, are described in our [data format document](../DATA_FORMAT.md).
 For those with knowledge of OpenStreetMap POI tags these will be somewhat familiar.
