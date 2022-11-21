@@ -13,7 +13,9 @@ class StadtZuerichCHSpider(scrapy.Spider):
             "Entsorgung + Recycling Zürich",
             "Q1345452",
         ),
+        "Fachschule Viventa": ("Schul- und Sportdepartement", "Q33121519"),
         "Grün Stadt Zürich": ("Grün Stadt Zürich", "Q1551785"),
+        "Schulamt": ("Schulamt der Stadt Zürich", "Q115322776"),
         "Stadtpolizei": ("Stadtpolizei Zürich", "Q2327949"),
         "Tiefbauamt": ("Tiefbauamt der Stadt Zürich", "Q115267460"),
         "Umwelt- und Gesundheitsschutz": (
@@ -31,6 +33,10 @@ class StadtZuerichCHSpider(scrapy.Spider):
     start_urls = [
         url_pattern % ("Park", "poi_park_view"),
         url_pattern % ("Sammelstelle", "poi_sammelstelle_view"),
+        url_pattern % ("Schulanlagen", "poi_kindergarten_view"),
+        url_pattern % ("Schulanlagen", "poi_kinderhort_view"),
+        url_pattern % ("Schulanlagen", "poi_sonderschule_view"),
+        url_pattern % ("Schulanlagen", "poi_volksschule_view"),
         url_pattern % ("Stadtpolizei", "poi_stadtpolizei_view"),
         url_pattern % ("Zueri_WC", "poi_zueriwc_rs_view"),
         url_pattern % ("Zweiradparkierung", "zweiradabstellplaetze_p"),
@@ -67,9 +73,13 @@ class StadtZuerichCHSpider(scrapy.Spider):
         # The type-specific parsers should come after the general ones,
         # so they can overwrite tags.
         if parser := {
+            "poi_kindergarten_view": self.parse_kindergarten,
+            "poi_kinderhort_view": self.parse_after_school,
             "poi_park_view": self.parse_park,
             "poi_sammelstelle_view": self.parse_recycling,
+            "poi_sonderschule_view": self.parse_school,
             "poi_stadtpolizei_view": self.parse_police,
+            "poi_volksschule_view": self.parse_school,
             "poi_zueriwc_rs_view": self.parse_toilets,
             "zweiradabstellplaetze_p": self.parse_bicycle_parking,
         }.get(id.split(".")[0]):
@@ -111,6 +121,26 @@ class StadtZuerichCHSpider(scrapy.Spider):
             return {"addr:full": f"{addr}, Zürich"}
         return {}
 
+    def parse_after_school(self, p):
+        name = p["name"]
+        amenity = "kindergarten" if "Kindergarten" in name else "school"
+        oh = OpeningHours()
+        for day in ["Mo", "Tu", "We", "Th", "Fr"]:
+            if "Morgen" in name:
+                oh.add_range(day, open_time="07:00", close_time="08:15")
+            if "Mittag" in name:
+                oh.add_range(day, open_time="11:55", close_time="14:00")
+            if "Nachmittag" in name:
+                oh.add_range(day, open_time="14:00", close_time="15:30")
+            if "Abend" in name:
+                oh.add_range(day, open_time="15:30", close_time="18:00")
+        return {
+            "amenity": amenity,
+            "after_school": "yes",
+            "name": name.split("(")[0].strip().removesuffix(" MoT"),
+            "opening_hours": oh.as_opening_hours(),
+        }
+
     def parse_bicycle_parking(self, p):
         # For bicycle and motorcycle parkings, the data feed puts the
         # feature type into the name; the parkings have no real names.
@@ -129,6 +159,9 @@ class StadtZuerichCHSpider(scrapy.Spider):
             }
         )
         return tags
+
+    def parse_kindergarten(self, p):
+        return {"amenity": "kindergarten", "isced:level": "0"}
 
     def parse_name(self, p):
         names = [p.get(n) for n in ("name", "namenzus")]
@@ -234,6 +267,28 @@ class StadtZuerichCHSpider(scrapy.Spider):
             "name": None,  # feed repeats address
             "recycling": ";".join(sorted(recycling)),
         }
+
+    def parse_school(self, p):
+        # https://wiki.openstreetmap.org/wiki/Key:isced:level
+        isced_level = "1"
+        if "Sek" in (p.get("einheit") or ""):
+            isced_level = "2"
+        elif p.get("da") == "Fachschule Viventa":
+            isced_level = "3"
+        name_words = [
+            word
+            for word in p["name"].split()
+            if word not in {"Sek", "Sekundar", "Sekundarstufe"}
+        ]
+        name = " ".join(name_words).removesuffix(",")
+        tags = {
+            "amenity": "school",
+            "isced:level": isced_level,
+            "name": name,
+        }
+        if p.get("kategorie") == "Sonderschule":
+            tags["school"] = "special_education_needs"
+        return tags
 
     def parse_toilets(self, p):
         # Unstructured text in comments, which we emit as "note";
