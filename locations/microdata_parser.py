@@ -7,10 +7,6 @@ import lxml
 import parsel
 
 
-class MicrodataError(Exception):
-    pass
-
-
 def token_split(val):
     return re.findall(r"\S+", val, flags=re.ASCII)
 
@@ -129,7 +125,8 @@ def item_props(scope: lxml.html.HtmlElement):
         # 5. 2. If current is already in memory, there is a microdata error;
         # continue.
         if current in memory:
-            raise MicrodataError
+            # FIXME show a warning?
+            continue
 
         # 5. 3. Add current to memory.
         memory.append(current)
