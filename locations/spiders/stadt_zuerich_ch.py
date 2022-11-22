@@ -63,9 +63,9 @@ class StadtZuerichCHSpider(scrapy.Spider):
             "opening_hours": self.parse_opening_hours(props),
             "operator": operator,
             "operator:wikidata": operator_wikidata,
+            "phone": self.parse_phone(props),
             "ref": props.get("poi_id"),
             "website": props.get("www"),
-            "phone": self.parse_phone(props),
         }
         tags.update(self.parse_access(props))
         tags.update(self.parse_address(props))
@@ -95,6 +95,7 @@ class StadtZuerichCHSpider(scrapy.Spider):
             "housenumber": tags.pop("addr:housenumber", None),
             "name": tags.pop("name", None),
             "opening_hours": tags.pop("opening_hours", None),
+            "phone": tags.pop("phone", None),
             "postcode": tags.pop("addr:postcode", None),
             "ref": tags.pop("ref"),
             "street": tags.pop("addr:street", None),
@@ -236,14 +237,14 @@ class StadtZuerichCHSpider(scrapy.Spider):
         return tags
 
     def parse_phone(self, p):
-        phone = (p.get("tel") or "").replace(" ", "")
-        # TODO: Write a pipeline step for normalizing phone numbers.
-        # This could be done by calling libphonenumber, respectively
-        # its Python port in pip module "phonenumbers". Afterwards,
-        # the following two lines can be removed.
-        if phone.startswith("0"):
-            phone = "+41" + phone[1:]
-        return phone
+        # The data feed sometimes contains alternate phone numbers
+        # in a custom abbreviated notation: "+41 44 413 76 34/35/36".
+        # This seems rather exotic, so we expand it here in the spider,
+        # not in PhoneCleanUpPipeline.
+        if phones := [s.strip() for s in (p.get("tel") or "").split("/")]:
+            main_phone = phones[0]
+            return ";".join([main_phone[0 : -len(x)] + x for x in phones])
+        return None
 
     def parse_police(self, p):
         if p["name"] == "Polizeimuseum":

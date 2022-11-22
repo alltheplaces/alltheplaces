@@ -5,6 +5,7 @@
 import math
 import re
 
+import phonenumbers
 import reverse_geocode
 from scrapy.exceptions import DropItem
 
@@ -93,6 +94,32 @@ class CountryCodeCleanUpPipeline:
         return item
 
 
+class PhoneCleanUpPipeline:
+    def process_item(self, item, spider):
+        phone, country = item.get("phone"), item.get("country")
+        if isinstance(phone, int):
+            phone = str(phone)
+        elif not phone:
+            spider.crawler.stats.inc_value("atp/field/phone/missing")
+            return item
+        elif not isinstance(phone, str):
+            spider.crawler.stats.inc_value("atp/field/phone/wrong_type")
+            return item
+        numbers = [self.normalize(p, country, spider) for p in phone.split(";")]
+        item["phone"] = ";".join(numbers)
+        return item
+
+    def normalize(self, phone, country, spider):
+        ph = phonenumbers.parse(phone, country)
+        if phonenumbers.is_valid_number(ph):
+            return phonenumbers.format_number(
+                ph, phonenumbers.PhoneNumberFormat.INTERNATIONAL
+            )
+        else:
+            spider.crawler.stats.inc_value("atp/field/phone/invalid")
+            return phone
+
+
 class ExtractGBPostcodePipeline:
     def process_item(self, item, spider):
         if item.get("country") == "GB":
@@ -131,9 +158,6 @@ class CheckItemPropertiesPipeline:
         r"(?::\d+)?"  # optional port
         r"(?:/?|[/?]\S+)$",
         re.IGNORECASE,
-    )
-    phone_regex = re.compile(
-        r"^[+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$",
     )
     email_regex = re.compile(r"(^[-\w_.+]+@[-\w]+\.[-\w.]+$)")
     twitter_regex = re.compile(r"^@?([-\w_]+)$")
@@ -195,14 +219,6 @@ class CheckItemPropertiesPipeline:
                 lon = None
                 spider.crawler.stats.inc_value("atp/field/lon/invalid")
             item["lon"] = lon
-
-        if phone := item.get("phone"):
-            if not isinstance(phone, str):
-                spider.crawler.stats.inc_value("atp/field/phone/wrong_type")
-            elif not self.phone_regex.match(phone):
-                spider.crawler.stats.inc_value("atp/field/phone/invalid")
-        else:
-            spider.crawler.stats.inc_value("atp/field/phone/missing")
 
         if email := item.get("email"):
             if not isinstance(email, str):
