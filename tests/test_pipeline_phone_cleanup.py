@@ -50,3 +50,7 @@ def test_bad_data():
     item, pipeline, spider = get_objects("Fijo: 963034448 / Móvil: 604026467", "ES")
     pipeline.process_item(item, spider)
     assert item.get("phone") == "Fijo: 963034448 / Móvil: 604026467"
+
+    item, pipeline, spider = get_objects(" ;    ", "CH")
+    pipeline.process_item(item, spider)
+    assert not item.get("phone")

@@ -107,10 +107,11 @@ class PhoneCleanUpPipeline:
             spider.crawler.stats.inc_value("atp/field/phone/wrong_type")
             return item
         numbers = [self.normalize(p, country, spider) for p in phone.split(";")]
-        item["phone"] = ";".join(numbers)
+        item["phone"] = ";".join(filter(None, numbers))
         return item
 
     def normalize(self, phone, country, spider):
+        phone = phone.strip()
         try:
             ph = phonenumbers.parse(phone, country)
             if phonenumbers.is_valid_number(ph):
