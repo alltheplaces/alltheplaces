@@ -1,6 +1,13 @@
+import unicodedata
 from urllib.parse import urlparse
 
 import geonamescache
+
+
+def strip_accents(s):
+    return "".join(
+        c for c in unicodedata.normalize("NFD", s) if unicodedata.category(c) != "Mn"
+    )
 
 
 class CountryUtils:
@@ -20,7 +27,7 @@ class CountryUtils:
         "norge": "NO",
         "united states of america": "US",
         "luxemburg (groothertogdom)": "LU",
-        "belgië": "BE",
+        "belgie": "BE",
     }
 
     def to_iso_alpha2_country_code(self, country_str):
@@ -34,7 +41,7 @@ class CountryUtils:
         if not country_str:
             return None
         # Clean up some common appendages we see on country strings.
-        country_str = country_str.strip().replace(".", "")
+        country_str = strip_accents(country_str.replace(".", "").strip())
         if len(country_str) < 2:
             return None
         if len(country_str) == 2:
