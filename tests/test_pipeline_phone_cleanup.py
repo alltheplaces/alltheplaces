@@ -1,4 +1,5 @@
 from scrapy.crawler import Crawler
+
 from locations.items import GeojsonPointItem
 from locations.pipelines import PhoneCleanUpPipeline
 from locations.spiders.greggs_gb import GreggsGBSpider
@@ -43,3 +44,9 @@ def test_handle_missing():
     item, pipeline, spider = get_objects(None, "CH")
     pipeline.process_item(item, spider)
     assert item.get("phone") == None
+
+
+def test_bad_data():
+    item, pipeline, spider = get_objects("Fijo: 963034448 / Móvil: 604026467", "ES")
+    pipeline.process_item(item, spider)
+    assert item.get("phone") == "Fijo: 963034448 / Móvil: 604026467"
