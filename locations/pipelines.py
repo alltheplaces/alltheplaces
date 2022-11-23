@@ -106,7 +106,7 @@ class PhoneCleanUpPipeline:
         elif not isinstance(phone, str):
             spider.crawler.stats.inc_value("atp/field/phone/wrong_type")
             return item
-        numbers = [self.normalize(p, country, spider) for p in phone.split(";")]
+        numbers = [self.normalize(p, country, spider) for p in re.split(r";|/", phone)]
         item["phone"] = ";".join(filter(None, numbers))
         return item
 
