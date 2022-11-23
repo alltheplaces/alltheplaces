@@ -7,6 +7,7 @@ import re
 
 import phonenumbers
 import reverse_geocode
+from phonenumbers import NumberParseException
 from scrapy.exceptions import DropItem
 
 from locations.country_utils import CountryUtils
@@ -105,19 +106,22 @@ class PhoneCleanUpPipeline:
         elif not isinstance(phone, str):
             spider.crawler.stats.inc_value("atp/field/phone/wrong_type")
             return item
-        numbers = [self.normalize(p, country, spider) for p in phone.split(";")]
-        item["phone"] = ";".join(numbers)
+        numbers = [self.normalize(p, country, spider) for p in re.split(r";|/", phone)]
+        item["phone"] = ";".join(filter(None, numbers))
         return item
 
     def normalize(self, phone, country, spider):
-        ph = phonenumbers.parse(phone, country)
-        if phonenumbers.is_valid_number(ph):
-            return phonenumbers.format_number(
-                ph, phonenumbers.PhoneNumberFormat.INTERNATIONAL
-            )
-        else:
-            spider.crawler.stats.inc_value("atp/field/phone/invalid")
-            return phone
+        phone = phone.strip()
+        try:
+            ph = phonenumbers.parse(phone, country)
+            if phonenumbers.is_valid_number(ph):
+                return phonenumbers.format_number(
+                    ph, phonenumbers.PhoneNumberFormat.INTERNATIONAL
+                )
+        except NumberParseException:
+            pass
+        spider.crawler.stats.inc_value("atp/field/phone/invalid")
+        return phone
 
 
 class ExtractGBPostcodePipeline:

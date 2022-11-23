@@ -1,4 +1,5 @@
 from scrapy.crawler import Crawler
+
 from locations.items import GeojsonPointItem
 from locations.pipelines import PhoneCleanUpPipeline
 from locations.spiders.greggs_gb import GreggsGBSpider
@@ -43,3 +44,19 @@ def test_handle_missing():
     item, pipeline, spider = get_objects(None, "CH")
     pipeline.process_item(item, spider)
     assert item.get("phone") == None
+
+
+def test_bad_data():
+    item, pipeline, spider = get_objects(" ;    ", "CH")
+    pipeline.process_item(item, spider)
+    assert not item.get("phone")
+
+
+def test_bad_seperator():
+    item, pipeline, spider = get_objects("2484468015 / 2484468015", "US")
+    pipeline.process_item(item, spider)
+    assert item.get("phone") == "+1 248-446-8015;+1 248-446-8015"
+
+    item, pipeline, spider = get_objects("Fijo: 963034448 / Móvil: 604026467", "ES")
+    pipeline.process_item(item, spider)
+    assert item.get("phone") == "+34 963 03 44 48;+34 604 02 64 67"
