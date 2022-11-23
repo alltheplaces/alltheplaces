@@ -13,6 +13,7 @@ def test_country_fix():
     assert "GB" == country_utils.to_iso_alpha2_country_code("United Kingdom. ")
     assert "GB" == country_utils.to_iso_alpha2_country_code("GBR")
     assert "GB" == country_utils.to_iso_alpha2_country_code(" UK ")
+    assert "MX" == country_utils.to_iso_alpha2_country_code("México")
 
 
 def test_country_code_from_url():
