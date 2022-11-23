@@ -3,8 +3,6 @@ from locations.storefinders.woosmap import WoosmapSpider
 
 class AccorSpider(WoosmapSpider):
     name = "accor"
-    item_attributes = {"brand": "Accor", "brand_wikidata": "Q212599"}
-
     key = "accor-prod-woos"
     custom_settings = {"DEFAULT_REQUEST_HEADERS": {"Origin": "https://accor.com/"}}
 
@@ -51,9 +49,7 @@ class AccorSpider(WoosmapSpider):
     # "ART", "TRI", "MTS", "21C", "SLS", "TOR", "FAE", "DHA", "HYD"
 
     def parse_item(self, item, feature, **kwargs):
-        match = self.brand_mapping.get(feature["properties"]["types"][0])
-        if match:
-            item["brand"] = match["brand"]
-            item["brand_wikidata"] = match["brand_wikidata"]
+        if match := self.brand_mapping.get(feature["properties"]["types"][0]):
+            item.update(match)
 
         yield item
