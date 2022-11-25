@@ -1,11 +1,12 @@
 import scrapy
 
 from locations.items import GeojsonPointItem
+from locations.spiders.lidl_gb import LidlGBSpider
 
 
 class LidlFRSpider(scrapy.Spider):
     name = "lidl_fr"
-    item_attributes = {"brand": "Lidl", "brand_wikidata": "Q151954"}
+    item_attributes = LidlGBSpider.item_attributes
     allowed_domains = ["virtualearth.net"]
     base_url = (
         "https://spatial.virtualearth.net/REST/v1/data/717c7792c09a4aa4a53bb789c6bb94ee/Filialdaten-FR/Filialdaten-FR"

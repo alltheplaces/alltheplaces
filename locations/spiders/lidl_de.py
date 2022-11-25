@@ -2,6 +2,7 @@ import scrapy
 
 from locations.hours import OpeningHours
 from locations.items import GeojsonPointItem
+from locations.spiders.lidl_gb import LidlGBSpider
 
 DAY_MAPPING = {
     "Mo": "Mo",
@@ -16,7 +17,7 @@ DAY_MAPPING = {
 
 class LidlDESpider(scrapy.Spider):
     name = "lidl_de"
-    item_attributes = {"brand": "Lidl", "brand_wikidata": "Q151954", "country": "DE"}
+    item_attributes = LidlGBSpider.item_attributes
     allowed_domains = ["lidl.de"]
     handle_httpstatus_list = [404]
     start_urls = ["https://www.lidl.de/f/"]

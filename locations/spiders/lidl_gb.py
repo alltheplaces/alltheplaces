@@ -2,13 +2,18 @@ import re
 
 import scrapy
 
+from locations.categories import Categories
 from locations.hours import OpeningHours, day_range, sanitise_day
 from locations.items import GeojsonPointItem
 
 
 class LidlGBSpider(scrapy.Spider):
     name = "lidl_gb"
-    item_attributes = {"brand": "Lidl", "brand_wikidata": "Q151954"}
+    item_attributes = {
+        "brand": "Lidl",
+        "brand_wikidata": "Q151954",
+        "extras": Categories.SHOP_SUPERMARKET.value,
+    }
     allowed_domains = ["virtualearth.net"]
     base_url = (
         "https://spatial.virtualearth.net/REST/v1/data/588775718a4b4312842f6dffb4428cff/Filialdaten-UK/Filialdaten-UK"
