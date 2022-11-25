@@ -4,11 +4,12 @@ import scrapy
 
 from locations.hours import OpeningHours, day_range, sanitise_day
 from locations.items import GeojsonPointItem
+from locations.spiders.lidl_gb import LidlGBSpider
 
 
 class LidlNISpider(scrapy.Spider):
     name = "lidl_ni"
-    item_attributes = {"brand": "Lidl", "brand_wikidata": "Q151954"}
+    item_attributes = LidlGBSpider.item_attributes
     allowed_domains = ["virtualearth.net"]
     base_url = (
         "https://spatial.virtualearth.net/REST/v1/data/91bdba818b3c4f5e8b109f223ac4a9f0/Filialdaten-NIE/Filialdaten-NIE"
