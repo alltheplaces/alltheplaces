@@ -2,6 +2,7 @@ import json
 
 import scrapy
 
+from locations.categories import Categories
 from locations.hours import OpeningHours
 from locations.items import GeojsonPointItem
 
@@ -18,7 +19,11 @@ DAYS_NAME = {
 
 class UspsSpider(scrapy.Spider):
     name = "usps"
-    item_attributes = {"brand": "USPS", "brand_wikidata": "Q668687"}
+    item_attributes = {
+        "brand": "United States Postal Service",
+        "brand_wikidata": "Q668687",
+        "extras": Categories.POST_OFFICE.value,
+    }
     allowed_domains = ["usps.com"]
 
     def start_requests(self):

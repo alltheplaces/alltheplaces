@@ -2,6 +2,7 @@ import json
 
 import scrapy
 
+from locations.categories import Categories
 from locations.geo import MILES_TO_KILOMETERS, vincenty_distance
 from locations.items import GeojsonPointItem
 
@@ -24,7 +25,11 @@ USPS_HEADERS = {
 
 class UspsCollectionBoxesSpider(scrapy.Spider):
     name = "usps_collection_boxes"
-    item_attributes = {"brand": "USPS", "brand_wikidata": "Q668687"}
+    item_attributes = {
+        "brand": "United States Postal Service",
+        "brand_wikidata": "Q668687",
+        "extras": Categories.POST_BOX.value,
+    }
     allowed_domains = ["usps.com"]
     download_delay = 0.1
 
