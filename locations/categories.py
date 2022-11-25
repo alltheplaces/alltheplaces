@@ -1,6 +1,8 @@
 import logging
 from enum import Enum
 
+from locations.items import GeojsonPointItem
+
 
 class Categories(Enum):
     BUS_STOP = {"highway": "bus_stop", "public_transport": "platform"}
@@ -24,6 +26,8 @@ class Categories(Enum):
     FUEL_STATION = {"amenity": "fuel"}
     BANK = {"amenity": "bank"}
     ATM = {"amenity": "atm"}
+    POST_OFFICE = {"amenity": "post_office"}
+    POST_BOX = {"amenity": "post_box"}
 
 
 def apply_category(category, item):
@@ -38,3 +42,31 @@ def apply_category(category, item):
     if not item.get("extras"):
         item["extras"] = {}
     item["extras"].update(tags)
+
+
+top_level_tags = [
+    "amenity",
+    "emergency",
+    "healthcare",
+    "highway",
+    "leisure",
+    "office",
+    "public_transport",
+    "shop",
+    "tourism",
+]
+
+
+def get_category_tags(source) -> {}:
+    if isinstance(source, GeojsonPointItem):
+        tags = source.get("extras", {})
+    elif isinstance(source, Enum):
+        tags = source.value
+    elif isinstance(source, dict):
+        tags = source
+
+    categories = {}
+    for top_level_tag in top_level_tags:
+        if v := tags.get(top_level_tag):
+            categories[top_level_tag] = v
+    return categories or None

@@ -10,6 +10,7 @@ import reverse_geocode
 from phonenumbers import NumberParseException
 from scrapy.exceptions import DropItem
 
+from locations.categories import get_category_tags
 from locations.country_utils import CountryUtils
 from locations.name_suggestion_index import NSI
 
@@ -327,6 +328,13 @@ class ApplyNSICategoriesPipeline:
                 spider.crawler.stats.inc_value("atp/nsi/cc_match")
                 return self.apply_tags(matches[0], item)
 
+        if categories := get_category_tags(item):
+            matches = self.filter_categories(matches, categories)
+
+            if len(matches) == 1:
+                spider.crawler.stats.inc_value("atp/nsi/category_match")
+                return self.apply_tags(matches[0], item)
+
         spider.crawler.stats.inc_value("atp/nsi/match_failed")
         return item
 
@@ -345,6 +353,15 @@ class ApplyNSICategoriesPipeline:
                 globals_matches.append(match)
 
         return includes or globals_matches
+
+    def filter_categories(self, matches, tags) -> []:
+        results = []
+
+        for match in matches:
+            if get_category_tags(match["tags"]) == tags:
+                results.append(match)
+
+        return results
 
     def apply_tags(self, match, item):
         extras = item.get("extras", {})
