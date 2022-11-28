@@ -15,7 +15,7 @@ bucket and filling in the minimum items required for the HTML pages that use the
 
 We manually copied the resulting files to S3 and purged the CDN cache.
 
-See also: 
+More discussion in https://github.com/alltheplaces/alltheplaces/issues/4258
 
 From the ci/run_all_spiders.sh script, a single history entry looks like:
 
@@ -41,17 +41,17 @@ def object_exists(s3_client, bucket, key):
         return False
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     bucket_name = "alltheplaces.openaddresses.io"
 
     history_elements = []
     latest_element = None
 
-    client = boto3.client('s3')
-    paginator = client.get_paginator('list_objects')
-    result = paginator.paginate(Bucket=bucket_name, Prefix='runs/', Delimiter='/')
-    for prefix in result.search('CommonPrefixes'):
-        run_id_prefix = prefix.get('Prefix')
+    client = boto3.client("s3")
+    paginator = client.get_paginator("list_objects")
+    result = paginator.paginate(Bucket=bucket_name, Prefix="runs/", Delimiter="/")
+    for prefix in result.search("CommonPrefixes"):
+        run_id_prefix = prefix.get("Prefix")
         run_id = run_id_prefix[5:-1]
 
         if run_id == "latest":
@@ -68,7 +68,9 @@ if __name__ == '__main__':
 
         insights_suffix = f"runs/{run_id}/stats/_insights.json"
         if object_exists(client, bucket_name, insights_suffix):
-            run_data["insights_url"] = f"https://data.alltheplaces.xyz/{insights_suffix}"
+            run_data[
+                "insights_url"
+            ] = f"https://data.alltheplaces.xyz/{insights_suffix}"
 
         start_time = datetime.datetime.strptime(run_id, "%Y-%m-%d-%H-%M-%S")
         run_data["start_time"] = start_time.strftime("%Y-%m-%dT%H:%M:%S")
@@ -80,10 +82,10 @@ if __name__ == '__main__':
     # print(json.dumps(history_elements))
     print("Writing latest.json")
     with open("latest.json", "w") as f:
-        json.dump(latest_element, f, separators=(',', ':'), indent=2)
+        json.dump(latest_element, f, separators=(",", ":"), indent=2)
 
     print("Writing history.json")
     with open("history.json", "w") as f:
-        json.dump(history_elements, f, separators=(',', ':'), indent=2)
+        json.dump(history_elements, f, separators=(",", ":"), indent=2)
 
     print("Done")
