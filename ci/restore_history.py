@@ -55,7 +55,7 @@ def get_object(s3_client, bucket, key):
     return resp["Body"]
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     bucket_name = "alltheplaces.openaddresses.io"
 
     history_elements = []
@@ -84,7 +84,9 @@ if __name__ == '__main__':
                 if stats_json := get_object(client, bucket_name, stats_suffix):
                     stats = json.load(stats_json)
                     run_data["spiders"] = stats["count"]
-                    run_data["total_lines"] = sum(s["features"] for s in stats["results"])
+                    run_data["total_lines"] = sum(
+                        s["features"] for s in stats["results"]
+                    )
             except json.decoder.JSONDecodeError:
                 print(f"Couldn't decode {stats_json}, skipping")
                 pass
@@ -105,7 +107,9 @@ if __name__ == '__main__':
             output_suffix = f"runs/{run_id}/output.zip"
             if size_bytes := object_size(client, bucket_name, output_suffix):
                 run_data["size_bytes"] = size_bytes
-                run_data["output_url"] = f"https://data.alltheplaces.xyz/{output_suffix}"
+                run_data[
+                    "output_url"
+                ] = f"https://data.alltheplaces.xyz/{output_suffix}"
 
         latest_element = run_data
         history_elements.append(run_data)
