@@ -15,7 +15,7 @@ bucket and filling in the minimum items required for the HTML pages that use the
 
 We manually copied the resulting files to S3 and purged the CDN cache.
 
-See also: 
+More discussion in https://github.com/alltheplaces/alltheplaces/issues/4258
 
 From the ci/run_all_spiders.sh script, a single history entry looks like:
 
