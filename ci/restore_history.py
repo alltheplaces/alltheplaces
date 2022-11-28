@@ -41,7 +41,21 @@ def object_exists(s3_client, bucket, key):
         return False
 
 
-if __name__ == "__main__":
+def object_size(s3_client, bucket, key):
+    try:
+        resp = s3_client.head_object(Bucket=bucket, Key=key)
+        return resp["ContentLength"]
+    except ClientError:
+        # Not found
+        return 0
+
+
+def get_object(s3_client, bucket, key):
+    resp = s3_client.get_object(Bucket=bucket, Key=key)
+    return resp["Body"]
+
+
+if __name__ == '__main__':
     bucket_name = "alltheplaces.openaddresses.io"
 
     history_elements = []
@@ -66,6 +80,15 @@ if __name__ == "__main__":
         if object_exists(client, bucket_name, stats_suffix):
             run_data["stats_url"] = f"https://data.alltheplaces.xyz/{stats_suffix}"
 
+            try:
+                if stats_json := get_object(client, bucket_name, stats_suffix):
+                    stats = json.load(stats_json)
+                    run_data["spiders"] = stats["count"]
+                    run_data["total_lines"] = sum(s["features"] for s in stats["results"])
+            except json.decoder.JSONDecodeError:
+                print(f"Couldn't decode {stats_json}, skipping")
+                pass
+
         insights_suffix = f"runs/{run_id}/stats/_insights.json"
         if object_exists(client, bucket_name, insights_suffix):
             run_data[
@@ -74,6 +97,15 @@ if __name__ == "__main__":
 
         start_time = datetime.datetime.strptime(run_id, "%Y-%m-%d-%H-%M-%S")
         run_data["start_time"] = start_time.strftime("%Y-%m-%dT%H:%M:%S")
+
+        output_suffix = f"runs/{run_id}/output.tar.gz"
+        if size_bytes := object_size(client, bucket_name, output_suffix):
+            run_data["size_bytes"] = size_bytes
+        else:
+            output_suffix = f"runs/{run_id}/output.zip"
+            if size_bytes := object_size(client, bucket_name, output_suffix):
+                run_data["size_bytes"] = size_bytes
+                run_data["output_url"] = f"https://data.alltheplaces.xyz/{output_suffix}"
 
         latest_element = run_data
         history_elements.append(run_data)
