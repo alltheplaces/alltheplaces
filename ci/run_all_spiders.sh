@@ -5,7 +5,6 @@ if [ -z "${S3_BUCKET}" ]; then
     exit 1
 fi
 
-
 if [ -z "${GITHUB_WORKSPACE}" ]; then
     (>&2 echo "Please set GITHUB_WORKSPACE environment variable")
     exit 1
