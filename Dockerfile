@@ -1,11 +1,11 @@
-FROM python:3.10
+FROM python:3
 
 RUN pip install pipenv
 WORKDIR /opt/app
 
 # Used by the run all spiders script to build output JSON
 RUN apt-get update \
-    && apt-get install -y jq \
+    && apt-get install -y jq zip \
     && rm -rf /var/lib/apt/lists/*
 
 COPY Pipfile Pipfile
