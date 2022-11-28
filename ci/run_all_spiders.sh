@@ -5,7 +5,6 @@ if [ -z "${S3_BUCKET}" ]; then
     exit 1
 fi
 
-
 if [ -z "${GITHUB_WORKSPACE}" ]; then
     (>&2 echo "Please set GITHUB_WORKSPACE environment variable")
     exit 1
@@ -100,8 +99,20 @@ done
 (>&2 echo "Compressing output files")
 (cd "${SPIDER_RUN_DIR}" && zip -r output.zip output)
 
+retval=$?
+if [ ! $retval -eq 0 ]; then
+    (>&2 echo "Couldn't zip output dir")
+    exit 1
+fi
+
 (>&2 echo "Compressing log files")
 (cd "${SPIDER_RUN_DIR}" && zip -r logs.zip logs)
+
+retval=$?
+if [ ! $retval -eq 0 ]; then
+    (>&2 echo "Couldn't zip logs dir")
+    exit 1
+fi
 
 (>&2 echo "Saving log and output files to ${RUN_S3_PREFIX}")
 aws s3 sync \
@@ -138,6 +149,8 @@ if [ ! $retval -eq 0 ]; then
     exit 1
 fi
 
+(>&2 echo "Creating latest.json")
+
 jq -n --compact-output \
     --arg run_id "${RUN_TIMESTAMP}" \
     --arg run_output_url "${RUN_URL_PREFIX}/output.zip" \
@@ -150,17 +163,37 @@ jq -n --compact-output \
     '{"run_id": $run_id, "output_url": $run_output_url, "stats_url": $run_stats_url, "insights_url": $run_insights_url, "start_time": $run_start_time, "size_bytes": $run_output_size | tonumber, "spiders": $run_spider_count | tonumber, "total_lines": $run_line_count | tonumber }' \
     > latest.json
 
+retval=$?
+if [ ! $retval -eq 0 ]; then
+    (>&2 echo "Couldn't create latest.json")
+    exit 1
+fi
+
 aws s3 cp \
     --only-show-errors \
     latest.json \
     "s3://${S3_BUCKET}/runs/latest.json"
 
-(>&2 echo "Saving latest.json to https://data.alltheplaces.xyz/runs/latest.json")
+retval=$?
+if [ ! $retval -eq 0 ]; then
+    (>&2 echo "Couldn't copy latest.json to S3")
+    exit 1
+fi
+
+(>&2 echo "Saved latest.json to https://data.alltheplaces.xyz/runs/latest.json")
+
+(>&2 echo "Creating history.json")
 
 aws s3 cp \
     --only-show-errors \
     "s3://${S3_BUCKET}/runs/history.json" \
     history.json
+
+retval=$?
+if [ ! $retval -eq 0 ]; then
+    (>&2 echo "Couldn't copy history.json from S3")
+    exit 1
+fi
 
 if [ ! -s history.json ]; then
     echo '[]' > history.json
@@ -169,6 +202,13 @@ fi
 jq --compact-output \
     --argjson latest_run_info "$(<latest.json)" \
     '. += [$latest_run_info]' history.json > history.json.tmp
+
+retval=$?
+if [ ! $retval -eq 0 ]; then
+    (>&2 echo "Couldn't append latest.json to history.json")
+    exit 1
+fi
+
 mv history.json.tmp history.json
 
 (>&2 echo "Saving history.json to https://data.alltheplaces.xyz/runs/history.json")
@@ -177,3 +217,9 @@ aws s3 cp \
     --only-show-errors \
     history.json \
     "s3://${S3_BUCKET}/runs/history.json"
+
+retval=$?
+if [ ! $retval -eq 0 ]; then
+    (>&2 echo "Couldn't copy history.json to S3")
+    exit 1
+fi
