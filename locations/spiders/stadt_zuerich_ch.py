@@ -1,6 +1,7 @@
 import json, re, scrapy
 from locations.hours import DAYS_DE, OpeningHours
 from locations.items import GeojsonPointItem
+from locations.materials import MATERIALS_DE
 
 
 # Open Data of the City of Zürich, https://data.stadt-zuerich.ch/
@@ -31,6 +32,7 @@ class StadtZuerichCHSpider(scrapy.Spider):
     )
 
     start_urls = [
+        url_pattern % ("Brunnen", "wvz_brunnen"),
         url_pattern % ("Park", "poi_park_view"),
         url_pattern % ("Sammelstelle", "poi_sammelstelle_view"),
         url_pattern % ("Schulanlagen", "poi_kindergarten_view"),
@@ -64,7 +66,7 @@ class StadtZuerichCHSpider(scrapy.Spider):
             "operator": operator,
             "operator:wikidata": operator_wikidata,
             "phone": self.parse_phone(props),
-            "ref": props.get("poi_id"),
+            "ref": props.get("poi_id") or id,
             "website": props.get("www"),
         }
         tags.update(self.parse_access(props))
@@ -81,6 +83,7 @@ class StadtZuerichCHSpider(scrapy.Spider):
             "poi_stadtpolizei_view": self.parse_police,
             "poi_volksschule_view": self.parse_school,
             "poi_zueriwc_rs_view": self.parse_toilets,
+            "wvz_brunnen": self.parse_fountain,
             "zweiradabstellplaetze_p": self.parse_bicycle_parking,
         }.get(id.split(".")[0]):
             tags.update(parser(props))
@@ -160,6 +163,33 @@ class StadtZuerichCHSpider(scrapy.Spider):
             }
         )
         return tags
+
+    def parse_fountain(self, p):
+        column_material, column_material_wikidata = MATERIALS_DE.get(
+            p.get("material_saeule"), (None, None)
+        )
+        sculpture_material, sculpture_material_wikidata = MATERIALS_DE.get(
+            p.get("material_figur"), (None, None)
+        )
+        trough_material, trough_material_wikidata = MATERIALS_DE.get(
+            p.get("material_trog"), (None, None)
+        )
+        if addr := (p.get("standort") or "").strip():
+            addr = addr + ", Zürich"
+        return {
+            "addr:full": addr,
+            "amenity": "fountain",
+            "artist_name": p.get("steinhauer"),
+            "column:material": column_material,
+            "column:material:wikidata": column_material_wikidata,
+            "drinking_water": "no" if p.get("abgestellt") == "ja" else "yes",
+            "ref": "wvz-%s" % p["brunnennummer"],
+            "sculpture:material": sculpture_material,
+            "sculpture:material:wikidata": sculpture_material_wikidata,
+            "start_date": str(p.get("baujahr", "")),
+            "trough:material": trough_material,
+            "trough:material:wikidata": trough_material_wikidata,
+        }
 
     def parse_kindergarten(self, p):
         return {"amenity": "kindergarten", "isced:level": "0"}
