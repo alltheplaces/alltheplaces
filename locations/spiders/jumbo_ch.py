@@ -27,6 +27,8 @@ class JumboCHSpider(SitemapSpider):
             for o in LinkedDataParser.iter_linked_data(response)
             if o.get("@type") == "LocalBusiness"
         ]
+        if len(ld_items) < 2:
+            return
         branch = LinkedDataParser.parse_ld(ld_items[0])["name"].strip()
         for prefix in ("JUMBO Maximo", "JUMBO"):
             branch = branch.removeprefix(prefix).strip()
