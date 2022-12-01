@@ -100,6 +100,7 @@ def test_sanitise_days():
     assert sanitise_day("schema.org/monday") == "Mo"
     assert sanitise_day("https://schema.org/monday") == "Mo"
     assert sanitise_day("http://schema.org/monday") == "Mo"
+    assert sanitise_day("http://purl.org/goodrelations/v1#Monday") == "Mo"
     assert sanitise_day("   Monday ") == "Mo"
     assert sanitise_day("not_a_day") is None
     assert sanitise_day("пон", DAYS_BG) == "Mo"
