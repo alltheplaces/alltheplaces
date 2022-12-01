@@ -29,6 +29,11 @@ def extract_twitter(item, response):
             item["twitter"] = twitter
 
 
+def extract_facebook(item, response):
+    if fb := response.xpath('//a[contains(@href, "facebook.com")]/@href').get():
+        item["facebook"] = fb.strip()
+
+
 def extract_image(item, response):
     if image := response.xpath('//meta[@name="twitter:image"]/@content').get():
         item["image"] = image.strip()
@@ -63,6 +68,7 @@ class StructuredDataSpider(Spider):
     search_for_email = True
     search_for_phone = True
     search_for_twitter = True
+    search_for_facebook = True
     search_for_image = True
     parse_json_comments = False
 
@@ -113,6 +119,9 @@ class StructuredDataSpider(Spider):
 
                 if self.search_for_twitter and item.get("twitter") is None:
                     extract_twitter(item, response)
+
+                if self.search_for_facebook and item.get("facebook") is None:
+                    extract_facebook(item, response)
 
                 if self.search_for_image and item.get("image") is None:
                     extract_image(item, response)

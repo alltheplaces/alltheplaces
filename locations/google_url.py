@@ -72,7 +72,7 @@ def url_to_coords(url: str) -> (float, float):
             "https://www.google.com/maps/search/?api=1&query=", ""
         ).split(",")
         return float(lat.strip()), float(lon.strip())
-    elif url.startswith("https://www.google.com/maps"):
+    elif "daddr" in url:
         for daddr in get_query_param(url, "daddr"):
             daddr = daddr.split(",")
             if len(daddr) == 2:
