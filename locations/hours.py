@@ -130,6 +130,9 @@ def sanitise_day(day: str, days: {} = DAYS_EN) -> str:
         .title()
     )
 
+    if "#" in day:
+        day = day.split("#", 1)[1]
+
     return days.get(day)
 
 
