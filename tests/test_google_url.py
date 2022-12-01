@@ -46,6 +46,12 @@ def test_maps_url():
         44.5043,
         8.9074,
     )
+    assert url_to_coords(
+        "https://maps.google.com?daddr=52.01390075683594,4.152029991149902"
+    ) == (
+        52.01390075683594,
+        4.152029991149902,
+    )
 
 
 def test_directions():
