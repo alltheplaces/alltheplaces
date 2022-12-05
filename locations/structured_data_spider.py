@@ -103,7 +103,6 @@ class StructuredDataSpider(Spider):
                     if item["ref"] is None:
                         item["ref"] = url
 
-                item["website"] = None
                 if isinstance(item["website"], list):
                     item["website"] = item["website"][0]
 
