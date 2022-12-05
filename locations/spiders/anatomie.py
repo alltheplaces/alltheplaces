@@ -7,8 +7,9 @@ from locations.items import GeojsonPointItem
 class AnatomieSpider(scrapy.Spider):
 
     name = "anatomie"
-    item_attributes = {"brand": "Anatomie"}
+    item_attributes = {"brand": "Anatomie", "brand_wikidata": "Q115608133"}
     allowed_domains = ["stores.boldapps.net"]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
     start_urls = (
         "https://stores.boldapps.net/front-end/get_surrounding_stores.php?shop=anatomie-store.myshopify.com&latitude=38.331258&longitude=-121.54841799999997&max_distance=100000&limit=10000&calc_distance=1",
     )
