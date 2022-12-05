@@ -12,6 +12,7 @@ class Categories(Enum):
     SHOP_CONVENIENCE = {"shop": "convenience"}
     SHOP_SUPERMARKET = {"shop": "supermarket"}
     SHOP_NEWSAGENT = {"shop": "newsagent"}
+    SHOP_OPTICIAN = {"shop": "optician"}
     SHOP_TRAVEL = {"shop": "travel_agency"}
     SHOP_CAR = {"shop": "car"}
     SHOP_WHOLESALE = {"shop": "wholesale"}
@@ -22,6 +23,14 @@ class Categories(Enum):
 
     CAFE = {"amenity": "cafe"}
     COFFEE_SHOP = {"amenity": "cafe", "cuisine": "coffee_shop"}
+    DENTIST = {"amenity": "dentist"}
+    CLINIC_URGENT = {"amenity": "clinic", "healthcare": "clinic", "urgent_care": "yes"}
+    DOCTOR_GP = {
+        "amenity": "doctors",
+        "healthcare": "doctor",
+        "healthcare:speciality": "community",
+    }
+    HOSPITAL = {"amenity": "hospital"}
     PUB = {"amenity": "pub"}
     PHARMACY = {"amenity": "pharmacy"}
     FUEL_STATION = {"amenity": "fuel"}

@@ -12,8 +12,6 @@ class SuperdrugGBSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://www.superdrug.com/sitemap.xml"]
     sitemap_follow = ["Store"]
     sitemap_rules = [(r"https:\/\/www\.superdrug\.com\/store\/(.+)$", "parse_sd")]
-    wanted_types = ["LocalBusiness"]
-    download_delay = 0.5
     user_agent = BROSWER_DEFAULT
 
     def inspect_item(self, item, response):
