@@ -6,7 +6,6 @@ from locations.user_agents import BROSWER_DEFAULT
 
 class AcademySpider(SitemapSpider, StructuredDataSpider):
     sitemap_rules = [("", "parse_sd")]
-    user_agent = BROSWER_DEFAULT
     name = "academy"
     item_attributes = {
         "brand": "Academy Sports + Outdoors",
