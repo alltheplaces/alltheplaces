@@ -98,7 +98,7 @@ if __name__ == "__main__":
             ] = f"https://data.alltheplaces.xyz/{insights_suffix}"
 
         start_time = datetime.datetime.strptime(run_id, "%Y-%m-%d-%H-%M-%S")
-        run_data["start_time"] = start_time.strftime("%Y-%m-%dT%H:%M:%S")
+        run_data["start_time"] = start_time.strftime("%Y-%m-%dT%H:%M:%S") + "Z"
 
         output_suffix = f"runs/{run_id}/output.tar.gz"
         if size_bytes := object_size(client, bucket_name, output_suffix):
