@@ -1,12 +1,17 @@
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
+from locations.categories import Categories
 from locations.structured_data_spider import StructuredDataSpider
 
 
 class NationwideGB(CrawlSpider, StructuredDataSpider):
     name = "nationwide_gb"
-    item_attributes = {"brand": "Nationwide", "brand_wikidata": "Q846735"}
+    item_attributes = {
+        "brand": "Nationwide",
+        "brand_wikidata": "Q846735",
+        "extras": Categories.BANK.value,
+    }
     start_urls = ["https://www.nationwide.co.uk/branches/index.html"]
     rules = [Rule(LinkExtractor(allow=r"/branches/"), callback="parse_sd", follow=True)]
 
