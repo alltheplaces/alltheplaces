@@ -16,7 +16,7 @@ def ignore(item):
     :param item: the POI to inspect
     :return: True if we think this POI is handled by a direct brand spider
     """
-    name = item["name"].lower().strip()
+    name = item["name"].lower().strip().replace(",", " ")
     for ignore_str in [
         "asda ",
         "boots ",
