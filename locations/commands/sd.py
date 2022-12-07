@@ -1,3 +1,4 @@
+import json
 import os
 import pathlib
 
@@ -5,19 +6,26 @@ import scrapy
 from scrapy.commands import BaseRunSpiderCommand
 from scrapy.exceptions import UsageError
 
+from locations.linked_data_parser import LinkedDataParser
+from locations.microdata_parser import MicrodataParser
 from locations.structured_data_spider import StructuredDataSpider
 from locations.user_agents import BROSWER_DEFAULT
 
 
 class MySpider(StructuredDataSpider):
     name = "my_spider"
-    my_url = None
+    start_urls = None
     item_attributes = {}
     user_agent = BROSWER_DEFAULT
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
-    def start_requests(self):
-        yield scrapy.Request(self.my_url, callback=self.parse_sd)
+    def parse(self, response):
+        items = MicrodataParser.extract_microdata(response)
+        self.logger.debug("Microdata %s", json.dumps(items, indent=2))
+        yield from self.parse_sd(response)
+
+    def pre_process_data(self, ld_data, **kwargs):
+        self.logger.debug("JSON-LD %s", json.dumps(ld_data, indent=2))
 
     def inspect_item(self, item, response):
         print(item)
@@ -65,10 +73,10 @@ class SdCommand(BaseRunSpiderCommand):
             raise UsageError("Please specify single file or URL to load")
 
         if args[0].startswith("http"):
-            MySpider.my_url = args[0]
+            MySpider.start_urls = [args[0]]
         else:
             path = os.path.abspath(args[0])
-            MySpider.my_url = pathlib.Path(path).as_uri()
+            MySpider.start_urls = [pathlib.Path(path).as_uri()]
 
         if opts.wikidata:
             MySpider.item_attributes["brand_wikidata"] = opts.wikidata
