@@ -1,12 +1,17 @@
 import re
 import scrapy
 from locations.items import GeojsonPointItem
+from scrapy.utils.request import request_fingerprint
 
 
 class AndPizzaSpider(scrapy.Spider):
     name = "andpizza"
     item_attributes = {"brand": "&pizza", "brand_wikidata": "Q21189222"}
     start_urls = ("https://api.andpizza.com/webapi/v100/partners/shops",)
+    custom_settings = {
+        "REQUEST_FINGERPRINTER_IMPLEMENTATION": "2.7",
+        "ROBOTSTXT_OBEY": False,
+    }
 
     def start_requests(self):
 
