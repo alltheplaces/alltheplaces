@@ -13,6 +13,15 @@ class GreggsGBSpider(Spider):
 
     def parse(self, response):
         for store in response.json():
+            store["address"]["street_address"] = ", ".join(
+                filter(
+                    None,
+                    [
+                        store["address"].pop("houseNumberOrName"),
+                        store["address"].pop("streetName"),
+                    ],
+                )
+            )
             item = DictParser.parse(store["address"])
             item["phone"] = store["address"]["phoneNumber"]
             item["name"] = store["shopName"]
