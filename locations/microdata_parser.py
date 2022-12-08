@@ -254,8 +254,12 @@ def convert_item(item):
     # Properties is a list; if its length is 1 then flatten, else don't.
     if itemid := item.get("id"):
         ld["@id"] = itemid
+    if len(item["properties"].items()) == 0:
+        return
     for k, v in item["properties"].items():
-        ld[k] = [convert_item(val) if isinstance(val, dict) else val for val in v]
+        ld[k] = filter(
+            None, [convert_item(val) if isinstance(val, dict) else val for val in v]
+        )
         ld[k] = remove_duplicates(ld[k])
         if len(ld[k]) == 1:
             ld[k] = ld[k][0]
