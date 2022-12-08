@@ -347,6 +347,8 @@ class ApplyNSICategoriesPipeline:
                 continue
 
             include = match["locationSet"].get("include", [])
+            # "gb-eng" -> "gb"
+            include = [i.split("-")[0] for i in include]
             if cc in include:
                 includes.append(match)
             if "001" in include:  # 001 being global in NSI
