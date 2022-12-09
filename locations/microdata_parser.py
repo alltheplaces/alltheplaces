@@ -255,6 +255,10 @@ def convert_item(item):
     if itemid := item.get("id"):
         ld["@id"] = itemid
     if len(item["properties"].items()) == 0:
+        # Guard against goofy use of microdata such as:
+        # <a itemscope itemprop=address itemtype=PostalAddress>...</a>
+        # Which produce an item with no properties and make it difficult to
+        # parse the correct item later down. See test_multiple_addresses
         return
     for k, v in item["properties"].items():
         ld[k] = filter(
