@@ -1,8 +1,6 @@
-import re
+import json
 import urllib.parse
-
 import scrapy
-
 from locations.items import GeojsonPointItem
 
 
@@ -23,10 +21,11 @@ class BassProShopsSpider(scrapy.Spider):
     def parse_store(self, response):
         main = response.xpath('//div[@id="hero"]/..')
 
-        store_id_js_text = str(
-            response.xpath("//script/text()")[3].extract()
-        )  # store id from JS var filter
-        store_id = re.search(r"(?<=storeid: )\d*", store_id_js_text).group()
+        store_id_json_text = response.xpath(
+            "//script[@class='js-map-config']/text()"
+        ).get()
+        # store id from JS var filter
+        store_id = json.loads(store_id_json_text)["locs"][0]["id"]
 
         properties = {
             "name": main.xpath('.//h1[@itemprop="name"]/span/text()').get(),
