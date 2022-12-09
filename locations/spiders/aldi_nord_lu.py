@@ -1,33 +1,19 @@
-from scrapy.spiders import SitemapSpider
-
-from locations.items import GeojsonPointItem
+from locations.storefinders.uberall import UberallSpider
 
 
-class AldiNordLUSpider(SitemapSpider):
+class AldiNordLUSpider(UberallSpider):
     name = "aldi_nord_lu"
     item_attributes = {"brand": "ALDI", "brand_wikidata": "Q41171373"}
-    allowed_domains = ["www.aldi.lu"]
-    sitemap_urls = ["https://www.aldi.lu/fr/.aldi-nord-sitemap-pages.xml"]
-    sitemap_rules = [
-        (r"\/magasins-et-heures-d-ouverture\/.+\/.+\/.+\.html$", "parse_store")
-    ]
+    key = "ALDINORDLU_klnge16WJnsW3DwfI5HVH28kqvo9sp"
 
-    def parse_store(self, response):
-        properties = {
-            "ref": response.xpath("//@data-store-id").get(),
-            "name": response.xpath(
-                '//div[@class="mod-overview-intro__content"]/h1/text()'
-            ).extract_first(),
-            "street_address": response.xpath(
-                'normalize-space(//span[@itemprop="streetAddress"]//text())'
-            ).extract_first(),
-            "city": response.xpath(
-                'normalize-space(//span[@itemprop="addressLocality"]//text())'
-            ).extract_first(),
-            "postcode": response.xpath(
-                'normalize-space(//span[@itemprop="postalCode"]//text())'
-            ).extract_first(),
-            "website": response.url,
-        }
-
-        yield GeojsonPointItem(**properties)
+    def parse_item(self, item, feature, **kwargs):
+        item["ref"] = str(feature["id"])
+        slug = (
+            "/".join([item["city"], item["street_address"], item["ref"]])
+            .lower()
+            .replace(" ", "-")
+        )
+        item["website"] = (
+            "https://www.aldi.lu/de/information/supermaerkte.html/l/" + slug
+        )
+        yield item
