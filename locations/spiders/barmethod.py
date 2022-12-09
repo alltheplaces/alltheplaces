@@ -36,7 +36,7 @@ class BarMethodSpider(scrapy.Spider):
         address = infos.split("\n")[1]
         state = re.findall("[A-Z]{2}", address)[0]
         postcode = re.findall("[0-9]{5}|[A-Z0-9]{3} [A-Z0-9]{3}", address)[0]
-        city = address.replace(state, "").replace(postcode, "")
+        city = address.replace(state, "").replace(postcode, "").strip().replace(",", "")
 
         name = response.xpath('//h1[@class="x-text-content-text-primary"]/text()').get()
         phone = response.xpath('//a[@class="studio-contact-phone"]/text()').get()
