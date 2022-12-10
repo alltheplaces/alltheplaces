@@ -1,33 +1,18 @@
 import scrapy
 from locations.items import GeojsonPointItem
+from locations.google_url import extract_google_position
 
 
-class AverittSpider(scrapy.Spider):
+class AverittSpider(scrapy.spiders.SitemapSpider):
     name = "averitt"
     item_attributes = {"brand": "Averitt Express", "brand_wikidata": "Q4828320"}
     allowed_domains = ["averitt.com"]
-    start_urls = [
-        "https://www.averitt.com/locations",
+    sitemap_urls = ["https://www.averitt.com/sitemap.xml"]
+    sitemap_rules = [
+        (r"^https://www.averitt.com/locations/[^/]+/[^/]", "parse"),
     ]
 
     def parse(self, response):
-        states = response.xpath('//select[@name="state"]/option/@value').extract()
-        for state in states:
-            if state == "State":
-                continue
-            yield scrapy.FormRequest(
-                url=response.urljoin(state.replace("..", "")),
-                callback=self.parse_state,
-            )
-
-    def parse_state(self, response):
-        centers = response.xpath(
-            '//*[@id="hs_cos_wrapper_widget_1613430615107_"]/b/a/@href'
-        ).extract()
-        for center in centers:
-            yield scrapy.Request(response.urljoin(center), callback=self.parse_center)
-
-    def parse_center(self, response):
         # 1
         address_full = response.xpath(
             "/html/body/div[2]/div/div[1]/div/div/span/div[4]/div/div/div/div[2]/div/div/p[1]/span[1]/text()"
@@ -83,14 +68,6 @@ class AverittSpider(scrapy.Spider):
                 state = city_state_postcode.split()[-2]
                 city = " ".join(city_state_postcode.split()[:-2]).replace(",", "")
 
-        ref_map_url = (
-            response.xpath(
-                '//a[contains(@href,"goo.gl") or contains(@href, "g.page")]/@href'
-            )
-            .get()
-            .replace("https://goo.gl/maps/", "")
-            .replace("https://g.page/", "")
-        )
         phone = response.xpath(
             "/html/body/div[2]/div/div[1]/div/div/span/div[2]/div/div/div/div[1]/div/div/p/a/text()"
         ).get()
@@ -105,7 +82,7 @@ class AverittSpider(scrapy.Spider):
             "/html/body/div[2]/div/div[1]/div/div/span/div[4]/div/div/div/div[2]/div/div/h3/strong/text()"
         ).get()
         properties = {
-            "ref": "_" + ref_map_url,
+            "ref": response.url,
             "name": name,
             "addr_full": address_full,
             "city": city,
@@ -113,6 +90,8 @@ class AverittSpider(scrapy.Spider):
             "postcode": postcode,
             "phone": phone,
             "email": email,
+            "website": response.url,
         }
+        extract_google_position(properties, response)
 
         yield GeojsonPointItem(**properties)
