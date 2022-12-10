@@ -1,57 +1,64 @@
 import scrapy
-
+import re
+from datetime import datetime
+from locations.hours import OpeningHours
 from locations.items import GeojsonPointItem
 
-URL = "http://www.beaconandbridge.com/wp-admin/admin-ajax.php"
-HEADERS = {
-    "Accept-Language": "en-US,en;q=0.9,ru;q=0.6",
-    "Origin": "http://www.beaconandbridge.com",
-    "Accept-Encoding": "gzip, deflate, br",
-    "Accept": "application/json, text/plain, */*",
-    "Referer": "http://www.beaconandbridge.com/locations/",
-    "Connection": "keep-alive",
-    "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-}
+DAYS = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
 
 
 class BeaconAndBridgeSpider(scrapy.Spider):
     name = "beacon_and_bridge"
     item_attributes = {"brand": "Beacon Bridge Market"}
-    allowed_domains = ["www.beaconandbridge.com"]
-    custom_settings = {"ROBOTSTXT_OBEY": False}
-
-    def start_requests(self):
-        form_data = {
-            "formdata": "addressInput=",
-            "lat": "43.0142978",
-            "lng": "-83.68935469999997",
-            "radius": "10000",
-            "action": "csl_ajax_onload",
-        }
-
-        yield scrapy.http.FormRequest(
-            url=URL,
-            method="POST",
-            formdata=form_data,
-            headers=HEADERS,
-            callback=self.parse,
-        )
+    start_urls = ["https://beaconandbridge.com/locations/"]
 
     def parse(self, response):
-        results = response.json()
-        for data in results["response"]:
+        address_full = response.xpath('//div[@id="section_2"]//span/a/text()[1]')
+        city_state = response.xpath('//div[@id="section_2"]//span/a/text()[2]')
+        postcode = response.xpath('//div[@id="section_2"]//span/a/text()[3]')
+        names = response.xpath('//div[@id="section_2"]//h3/text()')
+        phones = response.xpath('//div[@id="section_2"]//p/text()[1]')
+        hours = response.xpath('//div[@id="section_2"]//p/text()[2]')
+        for (
+            addr,
+            cs,
+            postcd,
+            name,
+            phone,
+            hour,
+        ) in zip(address_full, city_state, postcode, names, phones, hours):
+            hour = hour.get().replace("HOURS: ", "")
+            oh = OpeningHours()
+            for day in DAYS:
+                if hour == "24/7":
+                    hour = "12:00am - 12:00am"
+                h_h = re.split(" - | -", hour)
+                oh.add_range(
+                    day=day,
+                    open_time=datetime.strftime(
+                        datetime.strptime(
+                            h_h[0].replace("am", " am").replace("pm", " pm"),
+                            "%I:%M %p",
+                        ),
+                        "%H:%M",
+                    ),
+                    close_time=datetime.strftime(
+                        datetime.strptime(
+                            h_h[1].replace("am", " am").replace("pm", " pm"),
+                            "%I:%M %p",
+                        ),
+                        "%H:%M",
+                    ),
+                )
             properties = {
-                "ref": data["id"],
-                "name": data["name"],
-                "lat": data["lat"],
-                "lon": data["lng"],
-                "addr_full": data["address"],
-                "city": data["city"],
-                "state": data["state"],
-                "postcode": data["zip"],
-                "country": data["country"],
-                "phone": data["phone"],
-                "website": data["url"],
+                "ref": re.split(" - | -", name.get())[0],
+                "name": re.split(" - | -", name.get())[1],
+                "addr_full": addr.get(),
+                "city": cs.get().split(", ")[0],
+                "state": cs.get().split(", ")[1],
+                "postcode": postcd.get(),
+                "phone": phone.get().replace("PHONE: ", ""),
+                "opening_hours": oh.as_opening_hours(),
             }
 
             yield GeojsonPointItem(**properties)
