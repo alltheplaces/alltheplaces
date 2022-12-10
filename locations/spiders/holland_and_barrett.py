@@ -19,4 +19,6 @@ class HollandAndBarrettSpider(SitemapSpider):
     download_delay = 1.0
 
     def parse(self, response):
-        yield LinkedDataParser.parse(response, "LocalBusiness")
+        item = LinkedDataParser.parse(response, "LocalBusiness")
+        item["website"] = response.urljoin(item["website"])
+        yield item
