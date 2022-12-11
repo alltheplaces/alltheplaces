@@ -43,7 +43,7 @@ def test_handle_invalid():
 def test_handle_missing():
     item, pipeline, spider = get_objects(None, "CH")
     pipeline.process_item(item, spider)
-    assert item.get("phone") == None
+    assert item.get("phone") is None
 
 
 def test_bad_data():

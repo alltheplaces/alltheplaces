@@ -16,7 +16,7 @@ class BestBuySpider(scrapy.Spider):
         o = OpeningHours()
 
         for hour in hours:
-            if hour.get("holidayHoursIsRegular") == False:
+            if not hour.get("holidayHoursIsRegular"):
                 continue
 
             short_day = hour["day"].title()[:2]
