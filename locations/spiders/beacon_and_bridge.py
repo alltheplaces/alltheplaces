@@ -3,8 +3,7 @@ import re
 from datetime import datetime
 from locations.hours import OpeningHours
 from locations.items import GeojsonPointItem
-
-DAYS = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
+from locations.hours import DAYS
 
 
 class BeaconAndBridgeSpider(scrapy.Spider):
@@ -13,21 +12,15 @@ class BeaconAndBridgeSpider(scrapy.Spider):
     start_urls = ["https://beaconandbridge.com/locations/"]
 
     def parse(self, response):
-        address_full = response.xpath('//div[@id="section_2"]//span/a/text()[1]')
-        city_state = response.xpath('//div[@id="section_2"]//span/a/text()[2]')
-        postcode = response.xpath('//div[@id="section_2"]//span/a/text()[3]')
-        names = response.xpath('//div[@id="section_2"]//h3/text()')
-        phones = response.xpath('//div[@id="section_2"]//p/text()[1]')
-        hours = response.xpath('//div[@id="section_2"]//p/text()[2]')
-        for (
-            addr,
-            cs,
-            postcd,
-            name,
-            phone,
-            hour,
-        ) in zip(address_full, city_state, postcode, names, phones, hours):
-            hour = hour.get().replace("HOURS: ", "")
+        address_list = response.xpath(
+            '//div[@id="section_2"]//div[contains(@class, "yes_heads")]'
+        )
+        for i, item in enumerate(address_list):
+            hour = (
+                item.xpath(f'//div[contains(@class, "yes_heads")][{i+1}]//p/text()[2]')
+                .get()
+                .replace("HOURS: ", "")
+            )
             oh = OpeningHours()
             for day in DAYS:
                 if hour == "24/7":
@@ -51,13 +44,39 @@ class BeaconAndBridgeSpider(scrapy.Spider):
                     ),
                 )
             properties = {
-                "ref": re.split(" - | -", name.get())[0],
-                "name": re.split(" - | -", name.get())[1],
-                "addr_full": addr.get(),
-                "city": cs.get().split(", ")[0],
-                "state": cs.get().split(", ")[1],
-                "postcode": postcd.get(),
-                "phone": phone.get().replace("PHONE: ", ""),
+                "ref": re.split(
+                    " - | -",
+                    item.xpath(
+                        f'//div[contains(@class, "yes_heads")][{i+1}]//h3/text()'
+                    ).get(),
+                )[0],
+                "name": re.split(
+                    " - | -",
+                    item.xpath(
+                        f'//div[contains(@class, "yes_heads")][{i+1}]//h3/text()'
+                    ).get(),
+                )[1],
+                "addr_full": item.xpath(
+                    f'//div[contains(@class, "yes_heads")][{i+1}]//span/a/text()[1]'
+                ).get(),
+                "city": item.xpath(
+                    f'//div[contains(@class, "yes_heads")][{i+1}]//span/a/text()[2]'
+                )
+                .get()
+                .split(", ")[0],
+                "state": item.xpath(
+                    f'//div[contains(@class, "yes_heads")][{i+1}]//span/a/text()[2]'
+                )
+                .get()
+                .split(", ")[1],
+                "postcode": item.xpath(
+                    f'//div[contains(@class, "yes_heads")][{i+1}]//span/a/text()[3]'
+                ).get(),
+                "phone": item.xpath(
+                    f'//div[contains(@class, "yes_heads")][{i+1}]//p/text()[1]'
+                )
+                .get()
+                .replace("PHONE: ", ""),
                 "opening_hours": oh.as_opening_hours(),
             }
 
