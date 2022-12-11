@@ -1,4 +1,8 @@
-import json, re, scrapy
+import json
+import re
+
+import scrapy
+
 from locations.hours import DAYS_DE, OpeningHours
 from locations.items import GeojsonPointItem
 from locations.materials import MATERIALS_DE

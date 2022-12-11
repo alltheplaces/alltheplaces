@@ -1,7 +1,9 @@
 import re
+
 import scrapy
-from locations.items import GeojsonPointItem
 from scrapy.utils.request import request_fingerprint
+
+from locations.items import GeojsonPointItem
 
 
 class AndPizzaSpider(scrapy.Spider):

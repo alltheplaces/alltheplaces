@@ -1,11 +1,13 @@
 import re
 from datetime import datetime
+
+from geonamescache import GeonamesCache
+from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule
+
+from locations.google_url import extract_google_position
 from locations.hours import OpeningHours
 from locations.items import GeojsonPointItem
-from geonamescache import GeonamesCache
-from scrapy.spiders import CrawlSpider, Rule
-from scrapy.linkextractors import LinkExtractor
-from locations.google_url import extract_google_position
 
 
 class BcpizzaSpider(CrawlSpider):

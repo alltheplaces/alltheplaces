@@ -1,4 +1,5 @@
 from scrapy.crawler import Crawler
+
 from locations.items import GeojsonPointItem
 from locations.pipelines import CountryCodeCleanUpPipeline
 from locations.spiders.greggs_gb import GreggsGBSpider

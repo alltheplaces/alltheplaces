@@ -1,6 +1,7 @@
-import boto3
 import datetime
 import json
+
+import boto3
 from botocore.errorfactory import ClientError
 
 """

@@ -1,8 +1,10 @@
 import re
+
+from scrapy.spiders import SitemapSpider
+
 from locations.hours import DAYS_DE, OpeningHours
 from locations.linked_data_parser import LinkedDataParser
 from locations.microdata_parser import MicrodataParser
-from scrapy.spiders import SitemapSpider
 
 
 class JumboCHSpider(SitemapSpider):
