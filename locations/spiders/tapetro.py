@@ -13,9 +13,7 @@ class TAPetroSpider(scrapy.Spider):
         "brand_wikidata": "Q7835892",
     }
     allowed_domains = ["www.ta-petro.com"]
-    start_urls = (
-        "http://www.ta-petro.com/assets/ce/Documents/Master-Location-List.xls",
-    )
+    start_urls = ("http://www.ta-petro.com/assets/ce/Documents/Master-Location-List.xls",)
 
     def parse(self, response):
         workbook = open_workbook(file_contents=response.body)
@@ -36,9 +34,7 @@ class TAPetroSpider(scrapy.Spider):
             if not (store.get("LATITUDE") and store.get("LONGITUDE")):
                 continue
 
-            ref = "{}-{}-{}".format(
-                store["SITE ID#"], store["BRAND"], store["LOCATION_ID"]
-            )
+            ref = "{}-{}-{}".format(store["SITE ID#"], store["BRAND"], store["LOCATION_ID"])
             yield GeojsonPointItem(
                 ref=ref,
                 lat=float(store["LATITUDE"]),
@@ -52,16 +48,9 @@ class TAPetroSpider(scrapy.Spider):
                 brand=BRANDS.get(store["BRAND"], BRANDS["T"]),
                 extras={
                     "amenity:fuel": True,
-                    "fuel:diesel:class2": store["WINTERIZED DIESEL NOV-MAR(any temp)"]
-                    == "Y"
-                    or store[
-                        "WINTERIZED DIESEL NOV-MAR (when temps are 10 degrees or below)"
-                    ]
-                    == "Y"
-                    or store[
-                        "WINTERIZED DIESEL NOV-MAR (when temps are 30 degrees or below)"
-                    ]
-                    == "y",
+                    "fuel:diesel:class2": store["WINTERIZED DIESEL NOV-MAR(any temp)"] == "Y"
+                    or store["WINTERIZED DIESEL NOV-MAR (when temps are 10 degrees or below)"] == "Y"
+                    or store["WINTERIZED DIESEL NOV-MAR (when temps are 30 degrees or below)"] == "y",
                     "fuel:diesel": True,
                     "fuel:HGV_diesel": True,
                     "fuel:lng": store["LNG(Liquified Natural Gas)"] == "Y",

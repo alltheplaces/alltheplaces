@@ -28,23 +28,6 @@ class NormaDeSpider(scrapy.Spider):
         for lat, lon in point_locations("eu_centroids_20km_radius_country.csv", "DE"):
             yield scrapy.Request(url.format(lon, lat))
 
-    def parse_hours(self, store_hours):
-        opening_hours = OpeningHours()
-        if store_hours is None:
-            return
-
-        for store_day in store_hours:
-            day = DAY_MAPPING[store_day.get("dayOfWeek")]
-            open_time = store_day.get("fromTime")
-            close_time = store_day.get("toTime")
-            if open_time is None and close_time is None:
-                continue
-            opening_hours.add_range(
-                day=day, open_time=open_time, close_time=close_time, time_format="%H:%M"
-            )
-
-        return opening_hours.as_opening_hours()
-
     def parse_hours(self, store):
         opening_hours = OpeningHours()
         try:
@@ -65,9 +48,7 @@ class NormaDeSpider(scrapy.Spider):
             pass
 
         try:
-            weekday = store.xpath(
-                './/div[@class="col-xs-12 col-sm-6 col-md-3 col-lg-3"]'
-            )[1].get()
+            weekday = store.xpath('.//div[@class="col-xs-12 col-sm-6 col-md-3 col-lg-3"]')[1].get()
             match = re.search(r"Pon.*?: (\d+:\d+) - (\d+:\d+)", weekday)
             if match:
                 for day in ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]:
@@ -102,9 +83,7 @@ class NormaDeSpider(scrapy.Spider):
         for store in response.xpath('//div[@class="item"]//div[@class="row"]'):
             street = city = zip = lat = lon = ""
 
-            address = store.xpath(
-                './/div[@class="col-xs-12 col-sm-6 col-md-3 col-lg-3"]//p'
-            ).get()
+            address = store.xpath('.//div[@class="col-xs-12 col-sm-6 col-md-3 col-lg-3"]//p').get()
             match = re.search(r"<p>(.*?)<br>", address)
             if match:
                 street = match.group(1)
@@ -114,10 +93,7 @@ class NormaDeSpider(scrapy.Spider):
                 zip = match.group(1)
                 city = match.group(2)
 
-            position = store.xpath(
-                './/div[@class="col-xs-12 col-sm-6 col-md-2 col-lg-2 actions"]'
-                "//a/@href"
-            ).get()
+            position = store.xpath('.//div[@class="col-xs-12 col-sm-6 col-md-2 col-lg-2 actions"]' "//a/@href").get()
             if position:
                 match = re.search(r"lng=(.*?)&lat=(.*?)&", position)
                 if match:

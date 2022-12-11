@@ -31,10 +31,8 @@ class VitaliaSpider(scrapy.Spider):
         for store_day in store_hours:
             opening_hours.add_range(
                 day=DAY_MAPPING[store_day],
-                open_time=f"{store_hours[store_day]['from']['hours']}:"
-                f"{store_hours[store_day]['from']['minutes']}",
-                close_time=f"{store_hours[store_day]['to']['hours']}:"
-                f"{store_hours[store_day]['to']['minutes']}",
+                open_time=f"{store_hours[store_day]['from']['hours']}:" f"{store_hours[store_day]['from']['minutes']}",
+                close_time=f"{store_hours[store_day]['to']['hours']}:" f"{store_hours[store_day]['to']['minutes']}",
                 time_format="%H:%M",
             )
         return opening_hours.as_opening_hours()

@@ -18,9 +18,7 @@ class ToolstationSpider(scrapy.spiders.SitemapSpider):
 
     def parse(self, response):
         pattern = re.compile(r"var store = (.*?)\n", re.MULTILINE | re.DOTALL)
-        store = json.loads(
-            response.xpath('//script[contains(., "var store")]/text()').re(pattern)[0]
-        )[0]
+        store = json.loads(response.xpath('//script[contains(., "var store")]/text()').re(pattern)[0])[0]
         item = DictParser.parse(store)
         item["website"] = response.url
         item["addr_full"] = store["address_text"].split("<br /><br />")[0]

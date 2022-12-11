@@ -40,13 +40,7 @@ class EdekaDESpider(scrapy.Spider):
                     oh.add_range(day["weekday"], rule["from"], rule["to"])
             item["opening_hours"] = oh.as_opening_hours()
 
-            name = (
-                item["name"]
-                .lower()
-                .replace(" ", "")
-                .replace("und", "&")
-                .replace("-", "")
-            )
+            name = item["name"].lower().replace(" ", "").replace("und", "&").replace("-", "")
             if "nah&gut" in name:
                 item.update(self.NAH_UND_GUT)
             elif "aktivmarkt" in name:

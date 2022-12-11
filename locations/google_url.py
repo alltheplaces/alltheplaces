@@ -11,14 +11,12 @@ def extract_google_position(item, response):
         if link.startswith("https://www.google.com/maps/embed"):
             item["lat"], item["lon"] = url_to_coords(link)
             return
-    for link in response.xpath(
-        "//a[contains(@href, 'google')][contains(@href, 'maps')]/@href"
-    ).getall():
+    for link in response.xpath("//a[contains(@href, 'google')][contains(@href, 'maps')]/@href").getall():
         item["lat"], item["lon"] = url_to_coords(link)
         return
 
 
-def url_to_coords(url: str) -> (float, float):
+def url_to_coords(url: str) -> (float, float):  # noqa: C901
     def get_query_param(link, query_param):
         parsed_link = urlsplit(link)
         queries = parse_qs(parsed_link.query)
@@ -68,9 +66,7 @@ def url_to_coords(url: str) -> (float, float):
         lat, lon = url.split("/")[5].split(",")
         return float(lat.strip()), float(lon.strip())
     elif url.startswith("https://www.google.com/maps/search"):
-        lat, lon = url.replace(
-            "https://www.google.com/maps/search/?api=1&query=", ""
-        ).split(",")
+        lat, lon = url.replace("https://www.google.com/maps/search/?api=1&query=", "").split(",")
         return float(lat.strip()), float(lon.strip())
     elif "daddr" in url:
         for daddr in get_query_param(url, "daddr"):

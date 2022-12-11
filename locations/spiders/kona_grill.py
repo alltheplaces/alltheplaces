@@ -36,9 +36,7 @@ class KonaGrillSpider(scrapy.Spider):
         store = response_data.get("data")
         dh = store.get("dininghours")
         # Data is inconsistent some keys were found with a trailing space
-        opening_hours = self.parse_hours(
-            dh.get("dining hours") or dh.get("dining hours ")
-        )
+        opening_hours = self.parse_hours(dh.get("dining hours") or dh.get("dining hours "))
         properties = {
             "street_address": store.get("address"),
             "city": store.get("city"),
@@ -82,9 +80,6 @@ class KonaGrillSpider(scrapy.Spider):
 
         Returns a list with the weekdays
         """
-        parsed_days = []
-
-        # Range
         # Produce a list of weekdays between two days e.g. su-sa, mo-th, etc.
         if "-" in days:
             d = days.split("-")

@@ -18,7 +18,7 @@ is reasonable.
    $ git clone git@github.com:alltheplaces/alltheplaces.git
    ```
 
-1. If not done so already then 
+1. If not done so already then
    [install `pipenv`](https://github.com/pypa/pipenv#installation),
    then quickly check it runs:
 

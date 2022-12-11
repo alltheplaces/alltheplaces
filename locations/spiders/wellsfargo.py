@@ -32,9 +32,7 @@ class WellsFargoSpider(scrapy.Spider):
             if time_range == "closed":
                 continue
 
-            match = re.search(
-                r"^(\d{2}):(\d{2}) ([AP])M-(\d{2}):(\d{2}) ([AP])M$", time_range
-            )
+            match = re.search(r"^(\d{2}):(\d{2}) ([AP])M-(\d{2}):(\d{2}) ([AP])M$", time_range)
             if not match:
                 self.logger.error("Could not parse time_range for %s", time_range)
                 continue
@@ -85,9 +83,7 @@ class WellsFargoSpider(scrapy.Spider):
             )
 
     def parse_city(self, response):
-        result_elems = response.xpath(
-            '//ul[@id="searchResultsList"]/li[@class="aResult"]'
-        )
+        result_elems = response.xpath('//ul[@id="searchResultsList"]/li[@class="aResult"]')
         for result_elem in result_elems:
             features = result_elem.xpath(".//@data-features").extract_first()
             if "bankOnly" not in features:
@@ -104,23 +100,11 @@ class WellsFargoSpider(scrapy.Spider):
             yield GeojsonPointItem(
                 lat=lat,
                 lon=lon,
-                addr_full=result_elem.xpath(
-                    './/div[@itemprop="addressRegion"]/text()'
-                ).extract_first(),
-                city=result_elem.xpath(
-                    './/span[@itemprop="addressLocality"]/text()'
-                ).extract_first(),
-                state=result_elem.xpath(
-                    './/abbr[@itemprop="addressRegion"]/text()'
-                ).extract_first(),
-                postcode=result_elem.xpath(
-                    './/span[@itemprop="postalCode"]/text()'
-                ).extract_first(),
-                phone=result_elem.xpath(
-                    './/div[@itemprop="telephone"]/text()'
-                ).extract_first()[7:],
-                ref=result_elem.xpath(
-                    './/div[@itemprop="telephone"]/text()'
-                ).extract_first()[7:],
+                addr_full=result_elem.xpath('.//div[@itemprop="addressRegion"]/text()').extract_first(),
+                city=result_elem.xpath('.//span[@itemprop="addressLocality"]/text()').extract_first(),
+                state=result_elem.xpath('.//abbr[@itemprop="addressRegion"]/text()').extract_first(),
+                postcode=result_elem.xpath('.//span[@itemprop="postalCode"]/text()').extract_first(),
+                phone=result_elem.xpath('.//div[@itemprop="telephone"]/text()').extract_first()[7:],
+                ref=result_elem.xpath('.//div[@itemprop="telephone"]/text()').extract_first()[7:],
                 opening_hours=opening_hours,
             )

@@ -54,12 +54,8 @@ class PalmBeachTanSpider(scrapy.Spider):
                 '//div[@class="location-info"]//data[@itemprop="postalCode"]/text()'
             ).extract_first(),
             "country": "US",
-            "lat": response.xpath(
-                '//span[@class="directions"]/@data-lat'
-            ).extract_first(),
-            "lon": response.xpath(
-                '//span[@class="directions"]/@data-lng'
-            ).extract_first(),
+            "lat": response.xpath('//span[@class="directions"]/@data-lat').extract_first(),
+            "lon": response.xpath('//span[@class="directions"]/@data-lng').extract_first(),
             "phone": response.xpath(
                 '//div[@class="location-info"]//data[@itemprop="telephone"]/text()'
             ).extract_first(),

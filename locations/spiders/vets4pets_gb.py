@@ -25,9 +25,7 @@ class Vets4PetsGBSpider(CrawlSpider):
         "brand_wikidata": "Q16960196",
     }
     start_urls = ["https://www.vets4pets.com/practices/"]
-    rules = [
-        Rule(LinkExtractor(allow="/practices/"), callback="parse_func", follow=True)
-    ]
+    rules = [Rule(LinkExtractor(allow="/practices/"), callback="parse_func", follow=True)]
     allowed_domains = ["vets4pets.com"]
     download_delay = 0.2
 

@@ -29,12 +29,7 @@ class CarrefourARSpider(scrapy.Spider):
             oh = OpeningHours()
             for day in DAYS_FULL:
                 if rule := o.get(day.lower() + "Hours"):
-                    if (
-                        rule == "Cerrado"  # Closed
-                        or not "-" in rule
-                        or "/" in rule
-                        or "," in rule
-                    ):
+                    if rule == "Cerrado" or "-" not in rule or "/" in rule or "," in rule:  # Closed
                         continue
                     open_time, close_time = rule.split("-")
                     oh.add_range(day, open_time, close_time)

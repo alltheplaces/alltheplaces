@@ -1,7 +1,7 @@
 import scrapy
 
 from locations.dict_parser import DictParser
-from locations.hours import OpeningHours, DAYS_IT
+from locations.hours import DAYS_IT, OpeningHours
 
 
 class BurgerKingItSpider(scrapy.Spider):

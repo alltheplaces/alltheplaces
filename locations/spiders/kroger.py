@@ -35,9 +35,7 @@ class KrogerSpider(scrapy.Spider):
     def start_requests(self):
         base_url = "https://www.kroger.com/atlas/v1/stores/v1/search?filter.latLng={lat},{lng}&filter.radiusInMiles=30"
 
-        with open(
-            "./locations/searchable_points/us_centroids_25mile_radius.csv"
-        ) as points:
+        with open("./locations/searchable_points/us_centroids_25mile_radius.csv") as points:
             next(points)  # Ignore the header
             for point in points:
                 _, lat, lon = point.strip().split(",")

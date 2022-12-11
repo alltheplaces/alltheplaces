@@ -23,34 +23,20 @@ class MedstarSpider(scrapy.Spider):
     def parse_loc(self, response):
 
         try:
-            phone = (
-                response.xpath('//div[@class="field-phone-number"]/a/@href')
-                .extract()[0]
-                .replace("tel:", "")
-            )
+            phone = response.xpath('//div[@class="field-phone-number"]/a/@href').extract()[0].replace("tel:", "")
         except:
             phone = ""
 
         properties = {
             "ref": response.url.split("/")[-1],
             "name": response.xpath('//h1[@class="field-title"]/text()').extract()[0],
-            "addr_full": response.xpath(
-                '//div[@class="field-address"][1]/text()'
-            ).extract()[0]
+            "addr_full": response.xpath('//div[@class="field-address"][1]/text()').extract()[0]
             + ", "
             + response.xpath('//div[@class="field-city"]/text()').extract()[0],
             "country": "US",
             "phone": phone,
-            "lat": float(
-                response.xpath(
-                    '//div[@class="field-distance fieldlocation "]/span/@data-lat'
-                ).extract()[0]
-            ),
-            "lon": float(
-                response.xpath(
-                    '//div[@class="field-distance fieldlocation "]/span/@data-lon'
-                ).extract()[0]
-            ),
+            "lat": float(response.xpath('//div[@class="field-distance fieldlocation "]/span/@data-lat').extract()[0]),
+            "lon": float(response.xpath('//div[@class="field-distance fieldlocation "]/span/@data-lon').extract()[0]),
         }
 
         yield GeojsonPointItem(**properties)

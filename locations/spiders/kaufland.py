@@ -16,9 +16,7 @@ class KauflandSpider(scrapy.Spider):
         opening_hours = OpeningHours()
         for hour in hours:
             day, open_time, close_time = hour.split("|")
-            opening_hours.add_range(
-                day=day[:2], open_time=open_time, close_time=close_time
-            )
+            opening_hours.add_range(day=day[:2], open_time=open_time, close_time=close_time)
 
         return opening_hours.as_opening_hours()
 
@@ -34,9 +32,7 @@ class KauflandSpider(scrapy.Spider):
                 "postcode": store["pc"],
                 "country": "DE",
                 "phone": store["p"],
-                "website": "https://www.kaufland.de/service/filiale.storeName={}.html".format(
-                    store["n"]
-                ),
+                "website": "https://www.kaufland.de/service/filiale.storeName={}.html".format(store["n"]),
                 "lat": float(store["lat"]),
                 "lon": float(store["lng"]),
             }

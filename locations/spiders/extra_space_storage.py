@@ -29,9 +29,7 @@ class ExtraSpaceStorageSpider(SitemapSpider):
         try:
             data = self.get_json_data(response)
         except TypeError:
-            yield get_retry_request(
-                response.request, spider=self, reason="missing ldjson"
-            )
+            yield get_retry_request(response.request, spider=self, reason="missing ldjson")
             return
 
         data_address = data["address"]

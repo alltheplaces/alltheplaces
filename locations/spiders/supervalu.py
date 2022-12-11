@@ -15,7 +15,6 @@ class SupervaluSpider(scrapy.Spider):
     def parse(self, response):
         stores = response.json()
         for store in stores:
-            hours = self.hours(store["hours"])
             yield GeojsonPointItem(
                 city=store["city"],
                 ref=store["id"],
@@ -26,10 +25,10 @@ class SupervaluSpider(scrapy.Spider):
                 postcode=store["zip"],
                 state=store["state"],
                 addr_full=store["street"],
-                opening_hours=store["hours"],
+                opening_hours=self.hours(store["hours"]),
             )
 
-    def hours(self, hours_string):
+    def hours(self, hours_string):  # noqa: C901
         """Returns a string of the store hours in a opening_hours format. If not able to parse, just returns the hours.
         Args: hours_string - A string of the store hours"""
         if "April" in hours_string:  # Edge case 1
@@ -43,12 +42,8 @@ class SupervaluSpider(scrapy.Spider):
                 return "24/7"
 
             elif "Winter" in hours_string or "Summer" in hours_string:
-                season1, season1_hours, season2, season2_hours = hours_string.split(
-                    "<br />"
-                )
+                season1, season1_hours, season2, season2_hours = hours_string.split("<br />")
                 days = "Mo-Su"
-                season_1 = season1.strip()
-                season2 = season2.strip()
                 season1_hour_index = season1_hours.index("Daily")
                 season2_hour_index = season2_hours.index("Daily")
                 season1_hours = season1_hours[:season1_hour_index]
@@ -78,24 +73,11 @@ class SupervaluSpider(scrapy.Spider):
             reg_hours = self.to_24hr(reg_hours)
             season, season_hours = seasonal_info.split(":")
             season_hours = self.to_24hr(season_hours)
-            return (
-                days
-                + " "
-                + reg_hours
-                + "; "
-                + "|| "
-                + "seasonal="
-                + season
-                + " "
-                + season_hours
-                + ";"
-            )
+            return days + " " + reg_hours + "; " + "|| " + "seasonal=" + season + " " + season_hours + ";"
 
         elif "<br />" in hours_string:
             if "spring hours" in hours_string:
-                hours_string = hours_string.replace("(spring hours)", "").replace(
-                    "(fall hours)", ""
-                )
+                hours_string = hours_string.replace("(spring hours)", "").replace("(fall hours)", "")
                 days, spring_hours, fall_hours, sunday = hours_string.split("<br />")
                 days = self.day_to_abbrev(days)
                 spring_hours = self.to_24hr(spring_hours)
@@ -103,17 +85,7 @@ class SupervaluSpider(scrapy.Spider):
                 su, sunday_hours = sunday.split(":")
                 su = self.day_to_abbrev(su)
                 sunday_hours = self.to_24hr(sunday_hours)
-                return (
-                    days
-                    + " "
-                    + spring_hours
-                    + "; || "
-                    + fall_hours
-                    + "; "
-                    + su
-                    + " "
-                    + sunday_hours
-                )
+                return days + " " + spring_hours + "; || " + fall_hours + "; " + su + " " + sunday_hours
 
             if "Closed Sundays" in hours_string:
                 hours_string = hours_string.replace("<br />Closed Sundays", "")
@@ -152,20 +124,7 @@ class SupervaluSpider(scrapy.Spider):
                     day3, hour3 = group3.split(":")
                     day1, day2, day3 = map(self.day_to_abbrev, (day1, day2, day3))
                     hour1, hour2, hour3 = map(self.to_24hr, (hour1, hour2, hour3))
-                    return (
-                        day1
-                        + " "
-                        + hour1
-                        + "; "
-                        + day2
-                        + " "
-                        + hour2
-                        + "; "
-                        + day3
-                        + " "
-                        + hour3
-                        + "; "
-                    )
+                    return day1 + " " + hour1 + "; " + day2 + " " + hour2 + "; " + day3 + " " + hour3 + "; "
 
                 except ValueError:
                     return hours_string

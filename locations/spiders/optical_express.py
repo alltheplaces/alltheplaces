@@ -50,9 +50,7 @@ class OpticalExpressSpider(SitemapSpider):
         ld_item["openingHours"] = ld_item["openingHours"].replace("Op ,", "")
         ld_item["openingHours"] = ld_item["openingHours"].replace(", Op ", "")
 
-        ld_item["openingHours"] = ld_item["openingHours"].replace(
-            "Alternate weeks only", "closed"
-        )
+        ld_item["openingHours"] = ld_item["openingHours"].replace("Alternate weeks only", "closed")
         ld_item["openingHours"] = ld_item["openingHours"].replace(
             "Opening times may vary. For appointments please call ahead or book online.",
             "closed",

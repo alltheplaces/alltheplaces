@@ -1,7 +1,9 @@
 import re
+
 import scrapy
-from locations.items import GeojsonPointItem
 from scrapy.utils.request import request_fingerprint
+
+from locations.items import GeojsonPointItem
 
 
 class AndPizzaSpider(scrapy.Spider):
@@ -77,8 +79,6 @@ class AndPizzaSpider(scrapy.Spider):
             props["postcode"] = store["location"]["zipcode"]
             props["phone"] = store["location"]["phone"]
 
-            props["opening_hours"] = self.parse_hours(
-                store["service_schedule"]["general"]
-            )
+            props["opening_hours"] = self.parse_hours(store["service_schedule"]["general"])
 
             yield GeojsonPointItem(**props)

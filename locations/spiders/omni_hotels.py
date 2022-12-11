@@ -67,16 +67,10 @@ class OmniHotelsSpider(scrapy.Spider):
         try:
             latlon = re.search(
                 "(@.*,)",
-                response.xpath(
-                    '//div[@class="plp-hotel-content-container"]/p/a/@href'
-                ).extract_first(),
+                response.xpath('//div[@class="plp-hotel-content-container"]/p/a/@href').extract_first(),
             ).group(1)
             the_state = (
-                response.xpath(
-                    '//div[@class="plp-hotel-content-container"]/p/a//text()[3]'
-                )
-                .extract_first()
-                .rstrip()
+                response.xpath('//div[@class="plp-hotel-content-container"]/p/a//text()[3]').extract_first().rstrip()
             )
             if the_state in ca_states:
                 the_country = "CA"
@@ -86,25 +80,17 @@ class OmniHotelsSpider(scrapy.Spider):
                 the_country = "US"
 
             properties = {
-                "addr_full": response.xpath(
-                    '//div[@class="plp-hotel-content-container"]/p/a/text()'
-                )
+                "addr_full": response.xpath('//div[@class="plp-hotel-content-container"]/p/a/text()')
                 .extract_first()
                 .split("  ")[-1],
-                "city": response.xpath(
-                    '//div[@class="plp-hotel-content-container"]/p/a//text()[2]'
-                ).extract_first(),
+                "city": response.xpath('//div[@class="plp-hotel-content-container"]/p/a//text()[2]').extract_first(),
                 "state": the_state,
-                "postcode": response.xpath(
-                    '//div[@class="plp-hotel-content-container"]/p/a//text()[4]'
-                )
+                "postcode": response.xpath('//div[@class="plp-hotel-content-container"]/p/a//text()[4]')
                 .extract_first()
                 .split("  ")[-1],
                 "ref": response.url.split("/")[-1],
                 "website": response.url,
-                "phone": response.xpath(
-                    '//div[@class="plp-hotel-content-container"]/p[2]/a/@aria-label'
-                ).extract()[0],
+                "phone": response.xpath('//div[@class="plp-hotel-content-container"]/p[2]/a/@aria-label').extract()[0],
                 "name": response.xpath(
                     '//div[@class="plp-resort-title-container"]/h1/@data-ol-has-click-handler'
                 ).extract(),
@@ -118,14 +104,10 @@ class OmniHotelsSpider(scrapy.Spider):
             pass
 
     def parse(self, response):
-        urls = response.xpath(
-            '//div[@class="sitemap"]/ul/li[4]/ul/li/a/@href'
-        ).extract()
+        urls = response.xpath('//div[@class="sitemap"]/ul/li[4]/ul/li/a/@href').extract()
 
         for url in urls:
             if "Opening" in url:
                 continue
             else:
-                yield scrapy.Request(
-                    response.urljoin(url), callback=self.parse_location
-                )
+                yield scrapy.Request(response.urljoin(url), callback=self.parse_location)

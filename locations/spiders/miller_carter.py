@@ -10,8 +10,6 @@ class MillerCarterSpider(StructuredDataSpider):
     start_urls = ["https://www.millerandcarter.co.uk/ourvenues#/"]
 
     def parse(self, response):
-        urls = response.xpath(
-            '//div[@class="accordion parbase section"]//a/@href'
-        ).extract()
+        urls = response.xpath('//div[@class="accordion parbase section"]//a/@href').extract()
         for url in urls:
             yield scrapy.Request(response.urljoin(url), callback=self.parse_sd)

@@ -31,9 +31,7 @@ class LinkedDataParser:
 
     @staticmethod
     def find_linked_data(response, wanted_type, parse_json5=False) -> {}:
-        for ld_obj in LinkedDataParser.iter_linked_data(
-            response, parse_json5=parse_json5
-        ):
+        for ld_obj in LinkedDataParser.iter_linked_data(response, parse_json5=parse_json5):
             if not ld_obj.get("@type"):
                 continue
 
@@ -54,21 +52,17 @@ class LinkedDataParser:
             for wanted_type in wanted_types:
                 valid_type = True
                 for t in types:
-                    if not t in wanted_types:
+                    if t not in wanted_types:
                         valid_type = False
 
                 if valid_type:
                     return ld_obj
 
     @staticmethod
-    def parse_ld(ld) -> GeojsonPointItem:
+    def parse_ld(ld) -> GeojsonPointItem:  # noqa: C901
         item = GeojsonPointItem()
 
-        if (
-            (geo := ld.get("geo"))
-            or "location" in ld
-            and (geo := ld["location"].get("geo"))
-        ):
+        if (geo := ld.get("geo")) or "location" in ld and (geo := ld["location"].get("geo")):
             if isinstance(geo, list):
                 geo = geo[0]
 
@@ -86,25 +80,15 @@ class LinkedDataParser:
                 item["addr_full"] = addr
             elif isinstance(addr, dict):
                 if LinkedDataParser.check_type(addr.get("@type"), "PostalAddress"):
-                    if street_address := LinkedDataParser.get_case_insensitive(
-                        addr, "streetAddress"
-                    ):
+                    if street_address := LinkedDataParser.get_case_insensitive(addr, "streetAddress"):
                         if isinstance(street_address, list):
                             street_address = ", ".join(street_address)
 
                         item["street_address"] = street_address
-                    item["city"] = LinkedDataParser.get_case_insensitive(
-                        addr, "addressLocality"
-                    )
-                    item["state"] = LinkedDataParser.get_case_insensitive(
-                        addr, "addressRegion"
-                    )
-                    item["postcode"] = LinkedDataParser.get_case_insensitive(
-                        addr, "postalCode"
-                    )
-                    country = LinkedDataParser.get_case_insensitive(
-                        addr, "addressCountry"
-                    )
+                    item["city"] = LinkedDataParser.get_case_insensitive(addr, "addressLocality")
+                    item["state"] = LinkedDataParser.get_case_insensitive(addr, "addressRegion")
+                    item["postcode"] = LinkedDataParser.get_case_insensitive(addr, "postalCode")
+                    country = LinkedDataParser.get_case_insensitive(addr, "addressCountry")
 
                     if isinstance(country, str):
                         item["country"] = country
@@ -159,9 +143,7 @@ class LinkedDataParser:
 
     @staticmethod
     def parse(response, wanted_type, parse_json5=False) -> GeojsonPointItem:
-        ld_item = LinkedDataParser.find_linked_data(
-            response, wanted_type, parse_json5=parse_json5
-        )
+        ld_item = LinkedDataParser.find_linked_data(response, wanted_type, parse_json5=parse_json5)
         if ld_item:
             item = LinkedDataParser.parse_ld(ld_item)
 
@@ -203,9 +185,4 @@ class LinkedDataParser:
 
     @staticmethod
     def clean_type(type: str) -> str:
-        return (
-            type.lower()
-            .replace("http://", "")
-            .replace("https://", "")
-            .replace("schema.org/", "")
-        )
+        return type.lower().replace("http://", "").replace("https://", "").replace("schema.org/", "")

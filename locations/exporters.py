@@ -84,9 +84,7 @@ class LineDelimitedGeoJsonExporter(JsonLinesItemExporter):
                     )
                 )
             except ValueError:
-                logging.warning(
-                    "Couldn't convert lat (%s) and lon (%s) to string", lat, lon
-                )
+                logging.warning("Couldn't convert lat (%s) and lon (%s) to string", lat, lon)
 
         return feature
 
@@ -112,16 +110,12 @@ class GeoJsonExporter(JsonItemExporter):
                     )
                 )
             except ValueError:
-                logging.warning(
-                    "Couldn't convert lat (%s) and lon (%s) to string", lat, lon
-                )
+                logging.warning("Couldn't convert lat (%s) and lon (%s) to string", lat, lon)
 
         return feature
 
     def start_exporting(self):
-        self.file.write(
-            to_bytes('{"type":"FeatureCollection","features":[', self.encoding)
-        )
+        self.file.write(to_bytes('{"type":"FeatureCollection","features":[', self.encoding))
 
     def finish_exporting(self):
         self.file.write(to_bytes("]}", self.encoding))

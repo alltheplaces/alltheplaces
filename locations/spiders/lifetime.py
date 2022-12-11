@@ -24,9 +24,7 @@ class LifetimeSpider(scrapy.Spider):
 
     def parse_store(self, response):
 
-        json_data = response.xpath(
-            '//script[@type="application/ld+json"]/text()'
-        ).extract_first()
+        json_data = response.xpath('//script[@type="application/ld+json"]/text()').extract_first()
         data = json.loads(json_data)
 
         properties = {

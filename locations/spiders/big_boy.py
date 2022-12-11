@@ -14,9 +14,7 @@ class BigBoySpider(scrapy.Spider):
 
         for store in stores:
             url = store.xpath("@itemtype")[0].extract()
-            name = store.xpath(
-                'div[@class="thumbnail"]/strong[@itemprop="name"]/text()'
-            )[0].extract()
+            name = store.xpath('div[@class="thumbnail"]/strong[@itemprop="name"]/text()')[0].extract()
             street = store.xpath(
                 'div[@class="thumbnail"]/div[@itemprop="address"]/span[@itemprop="streetAddress"]/text()'
             )[0].extract()
@@ -29,15 +27,15 @@ class BigBoySpider(scrapy.Spider):
             postalcode = store.xpath(
                 'div[@class="thumbnail"]/div[@itemprop="address"]/span[@itemprop="postalCode"]/text()'
             )[0].extract()
-            phone = store.xpath(
-                'div[@class="thumbnail"]/div[@itemprop="address"]/span[@itemprop="telephone"]/text()'
-            )[0].extract()
-            lat = store.xpath(
-                'div[@class="thumbnail"]/div[@itemprop="geo"]/meta[@itemprop="latitude"]/@content'
-            )[0].extract()
-            lon = store.xpath(
-                'div[@class="thumbnail"]/div[@itemprop="geo"]/meta[@itemprop="longitude"]/@content'
-            )[0].extract()
+            phone = store.xpath('div[@class="thumbnail"]/div[@itemprop="address"]/span[@itemprop="telephone"]/text()')[
+                0
+            ].extract()
+            lat = store.xpath('div[@class="thumbnail"]/div[@itemprop="geo"]/meta[@itemprop="latitude"]/@content')[
+                0
+            ].extract()
+            lon = store.xpath('div[@class="thumbnail"]/div[@itemprop="geo"]/meta[@itemprop="longitude"]/@content')[
+                0
+            ].extract()
 
             yield GeojsonPointItem(
                 lat=lat,

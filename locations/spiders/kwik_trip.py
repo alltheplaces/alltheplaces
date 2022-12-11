@@ -19,14 +19,10 @@ class KwikTripSpider(scrapy.Spider):
             properties = {
                 "ref": row.xpath('.//td[@class="column-1"]/text()').extract_first(),
                 "name": row.xpath('.//td[@class="column-2"]/text()').extract_first(),
-                "addr_full": row.xpath(
-                    './/td[@class="column-3"]/text()'
-                ).extract_first(),
+                "addr_full": row.xpath('.//td[@class="column-3"]/text()').extract_first(),
                 "city": row.xpath('.//td[@class="column-4"]/text()').extract_first(),
                 "state": row.xpath('.//td[@class="column-5"]/text()').extract_first(),
-                "postcode": row.xpath(
-                    './/td[@class="column-6"]/text()'
-                ).extract_first(),
+                "postcode": row.xpath('.//td[@class="column-6"]/text()').extract_first(),
                 "lat": row.xpath('.//td[@class="column-8"]/text()').extract_first(),
                 "lon": row.xpath('.//td[@class="column-9"]/text()').extract_first(),
                 "phone": row.xpath('.//td[@class="column-7"]/text()').extract_first(),

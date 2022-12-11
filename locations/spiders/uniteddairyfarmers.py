@@ -18,9 +18,7 @@ class UnitedDairyFarmersSpider(scrapy.Spider):
             yield scrapy.Request(response.urljoin(url), callback=self.parse_store)
 
     def parse_store(self, response):
-        rawdata = response.xpath(
-            '//script[@type="text/javascript" and contains(text(), "locations")]/text()'
-        ).extract()
+        rawdata = response.xpath('//script[@type="text/javascript" and contains(text(), "locations")]/text()').extract()
         store_text = rawdata[0]
         json_prelim = re.search('store":(.*)', store_text).group()
         json_data = json_prelim.replace("[", "")
@@ -30,9 +28,7 @@ class UnitedDairyFarmersSpider(scrapy.Spider):
         json_data = json_data.replace(";", "")
         json_data = json_data.replace('"', "")
         data = json_data.split(",")
-        phone = response.xpath(
-            '//div[@class="wpsl-contact-details"]//*/a/@href'
-        ).extract()
+        phone = response.xpath('//div[@class="wpsl-contact-details"]//*/a/@href').extract()
         try:
             properties = {
                 "ref": data[9].split(":")[1],
@@ -47,7 +43,7 @@ class UnitedDairyFarmersSpider(scrapy.Spider):
                 "lon": float(data[8].split(":")[1]),
             }
 
-        except:
+        except Exception:
             properties = {
                 "ref": data[9].split(":")[1],
                 "name": "United Dairy Farmers",

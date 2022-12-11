@@ -34,9 +34,7 @@ class MarcsSpider(scrapy.Spider):
         lat = re.search("var lat = '(.*)';", map_script).group(1)
         lon = re.search("var lng = '(.*)';", map_script).group(1)
 
-        ldjson = response.xpath(
-            '//script[@type="application/ld+json"]/text()[contains(.,\'"Store"\')]'
-        ).get()
+        ldjson = response.xpath('//script[@type="application/ld+json"]/text()[contains(.,\'"Store"\')]').get()
         data = json.decoder.JSONDecoder().raw_decode(ldjson, ldjson.index("{"))[0]
 
         properties = {

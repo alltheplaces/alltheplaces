@@ -82,30 +82,22 @@ class SherwinWilliamsSpider(scrapy.Spider):
         ]
 
         # paint stores - search by 100 mile radius in US/CA
-        with open(
-            "./locations/searchable_points/us_centroids_50mile_radius.csv"
-        ) as points:
+        with open("./locations/searchable_points/us_centroids_50mile_radius.csv") as points:
             next(points)
             for point in points:
                 _, lat, lon = point.strip().split(",")
-                params.update(
-                    {"latitude": lat, "longitude": lon, "storeType": "PaintStore"}
-                )
+                params.update({"latitude": lat, "longitude": lon, "storeType": "PaintStore"})
                 yield scrapy.Request(
                     url=base_url + urlencode(params),
                     callback=self.parse,
                     meta={"store_type": "Sherwin-Williams Paint Store"},
                 )
 
-        with open(
-            "./locations/searchable_points/ca_centroids_50mile_radius.csv"
-        ) as points:
+        with open("./locations/searchable_points/ca_centroids_50mile_radius.csv") as points:
             next(points)
             for point in points:
                 _, lat, lon = point.strip().split(",")
-                params.update(
-                    {"latitude": lat, "longitude": lon, "storeType": "PaintStore"}
-                )
+                params.update({"latitude": lat, "longitude": lon, "storeType": "PaintStore"})
                 yield scrapy.Request(
                     url=base_url + urlencode(params),
                     callback=self.parse,
@@ -113,9 +105,7 @@ class SherwinWilliamsSpider(scrapy.Spider):
                 )
 
         for lat, lon in addtional_lat_lons:
-            params.update(
-                {"latitude": lat, "longitude": lon, "storeType": "PaintStore"}
-            )
+            params.update({"latitude": lat, "longitude": lon, "storeType": "PaintStore"})
             yield scrapy.Request(
                 url=base_url + urlencode(params),
                 callback=self.parse,
@@ -148,9 +138,7 @@ class SherwinWilliamsSpider(scrapy.Spider):
                 )
 
     def parse(self, response):
-        json_data = response.xpath(
-            '//script[@id="storeResultsJSON"]/text()'
-        ).extract_first()
+        json_data = response.xpath('//script[@id="storeResultsJSON"]/text()').extract_first()
         if json_data:
             data = json.loads(json_data)
             store_type = response.meta["store_type"]

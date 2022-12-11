@@ -12,9 +12,7 @@ class ShoeZoneGB(SitemapSpider, StructuredDataSpider):
         "country": "GB",
     }
     sitemap_urls = ["https://www.shoezone.com/sitemap_stores.xml"]
-    sitemap_rules = [
-        (r"https:\/\/www\.shoezone\.com\/Stores\/[-._\w]+-(\d+)$", "parse_sd")
-    ]
+    sitemap_rules = [(r"https:\/\/www\.shoezone\.com\/Stores\/[-._\w]+-(\d+)$", "parse_sd")]
     wanted_types = ["ShoeStore"]
 
     def inspect_item(self, item, response):

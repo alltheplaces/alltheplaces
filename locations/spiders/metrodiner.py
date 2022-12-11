@@ -45,9 +45,9 @@ class MetroDinerSpider(scrapy.Spider):
         return opening_hours.as_opening_hours()
 
     def parse_location(self, response):
-        data = response.xpath(
-            '//div[@class="site-header__top-wrapper container"]/div/script/text()'
-        ).re_first(r"locations:\s*(\[.*\])")
+        data = response.xpath('//div[@class="site-header__top-wrapper container"]/div/script/text()').re_first(
+            r"locations:\s*(\[.*\])"
+        )
         data = json.loads(data)
 
         for location in data:

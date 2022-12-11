@@ -23,9 +23,7 @@ class NespressoSpider(scrapy.Spider):
         for store in stores:
             properties = {
                 "ref": store["point_of_interest"]["point_of_interest_id"]["id"],
-                "name": store["point_of_interest"]["address"]["name"][
-                    "company_name_type"
-                ]["name"]["name"],
+                "name": store["point_of_interest"]["address"]["name"]["company_name_type"]["name"]["name"],
                 "addr_full": store["point_of_interest"]["address"]["address_line"],
                 "city": store["point_of_interest"]["address"]["city"]["name"],
                 "state": "",

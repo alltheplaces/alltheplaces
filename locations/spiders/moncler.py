@@ -7,9 +7,7 @@ class MonclerSpider(scrapy.Spider):
     name = "moncler"
     item_attributes = {"brand": "Moncler", "brand_wikidata": "Q1548951"}
     allowed_domains = ["moncler.com"]
-    start_urls = [
-        "https://www.moncler.com/on/demandware.store/Sites-MonclerEU-Site/it_IT/StoresApi-FindAll"
-    ]
+    start_urls = ["https://www.moncler.com/on/demandware.store/Sites-MonclerEU-Site/it_IT/StoresApi-FindAll"]
     requires_proxy = True
 
     def parse(self, response):

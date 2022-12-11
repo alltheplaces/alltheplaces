@@ -16,10 +16,7 @@ class SearsSpider(scrapy.spiders.SitemapSpider):
 
     def parse(self, response):
         # Handle redirects to closed store page, majority are regular store detail pages
-        if (
-            response.request.meta.get("redirect_urls")
-            and "store-closed" in response.url
-        ):
+        if response.request.meta.get("redirect_urls") and "store-closed" in response.url:
             return
         oh = OpeningHours()
         for hours_li in response.css(".shc-store-hours")[0].css("li"):
@@ -27,14 +24,8 @@ class SearsSpider(scrapy.spiders.SitemapSpider):
             open_time, close_time = interval.split(" - ")
             oh.add_range(day, open_time, close_time, "%I:%M %p")
 
-        addr_txt = (
-            response.css(".shc-store-location__details--address")[0]
-            .css("::text")
-            .extract()
-        )
-        street_address, city_postcode = list(
-            filter(None, (s.strip() for s in addr_txt))
-        )
+        addr_txt = response.css(".shc-store-location__details--address")[0].css("::text").extract()
+        street_address, city_postcode = list(filter(None, (s.strip() for s in addr_txt)))
         city, postcode = city_postcode.split(",  ")
         properties = {
             "ref": response.xpath("//@data-unit-number").get(),
@@ -52,9 +43,7 @@ class SearsSpider(scrapy.spiders.SitemapSpider):
         if "Hometown" in properties["name"]:
             # See sears_hometown; ref should be shared
             # Address and coordinates are slightly off
-            properties.update(
-                {"brand": "Sears Hometown", "brand_wikidata": "Q69926963"}
-            )
+            properties.update({"brand": "Sears Hometown", "brand_wikidata": "Q69926963"})
         elif "Mattress" in properties["name"]:
             # Likely stale; these are now american_freight
             # Refs are distinct

@@ -7,9 +7,7 @@ class BurgerFiSpider(scrapy.Spider):
     name = "burger_fi"
     item_attributes = {"brand": "Burger Fi", "brand_wikidata": "Q39045496"}
     allowed_domains = ["api.dineengine.io"]
-    start_urls = (
-        "https://api.dineengine.io/burgerfi/custom/dineengine/vendor/olo/restaurants?includePrivate=false",
-    )
+    start_urls = ("https://api.dineengine.io/burgerfi/custom/dineengine/vendor/olo/restaurants?includePrivate=false",)
 
     def parse(self, response):
         response.selector.remove_namespaces()
@@ -28,8 +26,7 @@ class BurgerFiSpider(scrapy.Spider):
                 "country": r.xpath("@country").extract_first(),
                 "lat": r.xpath("@latitude").extract_first(),
                 "lon": r.xpath("@longitude").extract_first(),
-                "website": "https://order.burgerfi.com/locations/"
-                + r.xpath("@slug").extract_first(),
+                "website": "https://order.burgerfi.com/locations/" + r.xpath("@slug").extract_first(),
             }
 
             yield GeojsonPointItem(**properties)

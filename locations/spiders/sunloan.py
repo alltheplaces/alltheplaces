@@ -32,9 +32,7 @@ class SunLoanSpider(scrapy.Spider):
 
     def parse_store(self, response):
         try:
-            data = response.xpath(
-                '//script[contains(text(),"latitude")]/text()'
-            ).extract_first()
+            data = response.xpath('//script[contains(text(),"latitude")]/text()').extract_first()
             data = json.loads(data)
         except TypeError:
             return

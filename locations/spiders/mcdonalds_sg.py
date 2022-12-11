@@ -12,9 +12,7 @@ class McDonaldsSGSpider(scrapy.Spider):
     allowed_domains = ["www.mcdonalds.com.sg"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
-    start_urls = (
-        "https://www.mcdonalds.com.sg/wp/wp-admin/admin-ajax.php?action=store_locator_locations",
-    )
+    start_urls = ("https://www.mcdonalds.com.sg/wp/wp-admin/admin-ajax.php?action=store_locator_locations",)
 
     def store_hours(self, data):
         if data == "24 hours":

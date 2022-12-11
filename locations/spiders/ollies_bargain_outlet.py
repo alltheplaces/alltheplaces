@@ -31,9 +31,7 @@ class OlliesBargainOutletSpider(scrapy.Spider):
                 "RangeInMiles": "5000",
             }
 
-            yield scrapy.http.FormRequest(
-                url, self.parse, method="POST", headers=headers, formdata=formdata
-            )
+            yield scrapy.http.FormRequest(url, self.parse, method="POST", headers=headers, formdata=formdata)
 
     def parse_hours(self, hours):
         opening_hours = OpeningHours()

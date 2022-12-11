@@ -32,58 +32,45 @@ class CreditAgricoleSpider(scrapy.Spider):
             yield scrapy.Request(response.urljoin(url), callback=self.parse_provence)
 
     def parse_provence(self, response):
-        province_urls = response.xpath(
-            '//ul[@class="alphabetList js-alphabetList"]/li/a/@href'
-        ).extract()
+        province_urls = response.xpath('//ul[@class="alphabetList js-alphabetList"]/li/a/@href').extract()
 
         for province in province_urls:
-            yield scrapy.Request(
-                response.urljoin(province), callback=self.parse_locality
-            )
+            yield scrapy.Request(response.urljoin(province), callback=self.parse_locality)
 
     def parse_locality(self, response):
-        locality_urls = response.xpath(
-            '//a[@class="storeLoc-selectAgency"]/@href'
-        ).extract()
+        locality_urls = response.xpath('//a[@class="storeLoc-selectAgency"]/@href').extract()
 
         for locality in locality_urls:
-            yield scrapy.Request(
-                response.urljoin(locality), callback=self.parse_location
-            )
+            yield scrapy.Request(response.urljoin(locality), callback=self.parse_location)
 
     def parse_location(self, response):
         ref = re.search(r".+-(.+?)/?(?:\.html|$)", response.url).group(1)
-        try:
-            data = json.loads(
-                response.xpath(
-                    '//script[@type="application/ld+json" and contains(text(), "streetAddress")]/text()'
-                ).extract_first()
-            )
-            geodata = json.loads(
-                response.xpath(
-                    '//div[@class="CardAgencyMap js-CardAgencyMap"]/@data-value'
-                ).extract_first()
-            )
-            properties = {
-                "name": data["Name"],
-                "ref": ref,
-                "addr_full": data["address"]["streetAddress"],
-                "city": data["address"]["addressLocality"],
-                "postcode": data["address"]["postalCode"],
-                "country": "FR",
-                "phone": data["telephone"],
-                "website": response.url,
-                "lat": float(geodata["latitude"]),
-                "lon": float(geodata["longitude"]),
-            }
+        data = json.loads(
+            response.xpath(
+                '//script[@type="application/ld+json" and contains(text(), "streetAddress")]/text()'
+            ).extract_first()
+        )
+        geodata = json.loads(
+            response.xpath('//div[@class="CardAgencyMap js-CardAgencyMap"]/@data-value').extract_first()
+        )
+        properties = {
+            "name": data["Name"],
+            "ref": ref,
+            "addr_full": data["address"]["streetAddress"],
+            "city": data["address"]["addressLocality"],
+            "postcode": data["address"]["postalCode"],
+            "country": "FR",
+            "phone": data["telephone"],
+            "website": response.url,
+            "lat": float(geodata["latitude"]),
+            "lon": float(geodata["longitude"]),
+        }
 
-            hours = self.parse_hours(data["openingHoursSpecification"])
-            if hours:
-                properties["opening_hours"] = hours
+        hours = self.parse_hours(data["openingHoursSpecification"])
+        if hours:
+            properties["opening_hours"] = hours
 
-            yield GeojsonPointItem(**properties)
-        except:
-            pass
+        yield GeojsonPointItem(**properties)
 
     def parse_hours(self, hours):
         opening_hours = OpeningHours()
@@ -98,7 +85,3 @@ class CreditAgricoleSpider(scrapy.Spider):
             )
 
         return opening_hours.as_opening_hours()
-
-        properties["opening_hours"] = self.parse_hours(
-            data["openingHoursSpecification"]
-        )

@@ -19,9 +19,7 @@ class HMSpider(scrapy.Spider):
     def parse_country(self, response):
         for store in response.json()["stores"]:
             store.update(store.pop("address"))
-            store["street_address"] = ", ".join(
-                filter(None, [store.get("streetName1"), store.get("streetName2")])
-            )
+            store["street_address"] = ", ".join(filter(None, [store.get("streetName1"), store.get("streetName2")]))
 
             item = DictParser.parse(store)
 

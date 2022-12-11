@@ -10,9 +10,7 @@ class GoldenCorralSpider(CrawlSpider):
     allowed_domains = ["goldencorral.com"]
     download_delay = 0.5
     start_urls = ["https://www.goldencorral.com/locations/all-locations"]
-    rules = [
-        Rule(LinkExtractor(allow="/location-detail/"), callback="parse", follow=False)
-    ]
+    rules = [Rule(LinkExtractor(allow="/location-detail/"), callback="parse", follow=False)]
 
     def parse(self, response):
         if item := LinkedDataParser.parse(response, "Restaurant"):

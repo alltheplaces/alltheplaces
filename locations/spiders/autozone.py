@@ -14,8 +14,6 @@ class AutoZoneSpider(scrapy.Spider):
     start_urls = ("https://www.autozone.com/locations/",)
 
     def normalize_hours(self, hours):
-
-        all_days = []
         reversed_hours = {}
 
         for hour in json.loads(hours):
@@ -24,9 +22,7 @@ class AutoZoneSpider(scrapy.Spider):
             for interval in hour["intervals"]:
                 start = str(interval["start"])
                 end = str(interval["end"])
-                from_hr = "{}:{}".format(
-                    start[: len(start) - 2], start[len(start) - 2 :]
-                )
+                from_hr = "{}:{}".format(start[: len(start) - 2], start[len(start) - 2 :])
                 to_hr = "{}:{}".format(end[: len(end) - 2], end[len(end) - 2 :])
                 epoch = "{}-{}".format(from_hr, to_hr)
                 all_intervals.append(epoch)
@@ -51,24 +47,12 @@ class AutoZoneSpider(scrapy.Spider):
         opening_hours = self.normalize_hours(opening_hours)
 
         props = {
-            "addr_full": response.xpath(
-                '//meta[@itemprop="streetAddress"]/@content'
-            ).extract_first(),
-            "lat": float(
-                response.xpath('//meta[@itemprop="latitude"]/@content').extract_first()
-            ),
-            "lon": float(
-                response.xpath('//meta[@itemprop="longitude"]/@content').extract_first()
-            ),
-            "city": response.xpath(
-                '//span[@class="c-address-city"]/text()'
-            ).extract_first(),
-            "postcode": response.xpath(
-                '//span[@class="c-address-postal-code"]/text()'
-            ).extract_first(),
-            "state": response.xpath(
-                '//abbr[@class="c-address-state"]/text()'
-            ).extract_first(),
+            "addr_full": response.xpath('//meta[@itemprop="streetAddress"]/@content').extract_first(),
+            "lat": float(response.xpath('//meta[@itemprop="latitude"]/@content').extract_first()),
+            "lon": float(response.xpath('//meta[@itemprop="longitude"]/@content').extract_first()),
+            "city": response.xpath('//span[@class="c-address-city"]/text()').extract_first(),
+            "postcode": response.xpath('//span[@class="c-address-postal-code"]/text()').extract_first(),
+            "state": response.xpath('//abbr[@class="c-address-state"]/text()').extract_first(),
             "phone": response.xpath(
                 '//span[@class="c-phone-number-span c-phone-main-number-span"]/text()'
             ).extract_first(),
@@ -79,28 +63,18 @@ class AutoZoneSpider(scrapy.Spider):
         return GeojsonPointItem(**props)
 
     def parse_city_stores(self, response):
-        locations = response.xpath(
-            '//a[@class="c-location-grid-item-link"]/@href'
-        ).extract()
+        locations = response.xpath('//a[@class="c-location-grid-item-link"]/@href').extract()
 
         if not locations:
             yield self.parse_location(response)
         else:
             for location in locations:
-                yield scrapy.Request(
-                    url=response.urljoin(location), callback=self.parse_location
-                )
+                yield scrapy.Request(url=response.urljoin(location), callback=self.parse_location)
 
     def parse_state(self, response):
-        for city in response.xpath(
-            '//a[@class="c-directory-list-content-item-link"]/@href'
-        ).extract():
-            yield scrapy.Request(
-                url=response.urljoin(city), callback=self.parse_city_stores
-            )
+        for city in response.xpath('//a[@class="c-directory-list-content-item-link"]/@href').extract():
+            yield scrapy.Request(url=response.urljoin(city), callback=self.parse_city_stores)
 
     def parse(self, response):
-        for state in response.xpath(
-            '//a[@class="c-directory-list-content-item-link"]/@href'
-        ).extract():
+        for state in response.xpath('//a[@class="c-directory-list-content-item-link"]/@href').extract():
             yield scrapy.Request(url=response.urljoin(state), callback=self.parse_state)

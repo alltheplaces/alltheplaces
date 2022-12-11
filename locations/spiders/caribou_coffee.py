@@ -25,9 +25,7 @@ class CaribouCoffeeSpider(scrapy.Spider):
         main = response.xpath('//h1[@itemprop="name"]/..')
 
         ref = urllib.parse.parse_qs(
-            urllib.parse.urlparse(
-                response.css('script[src*="storeCode"]').attrib["src"]
-            ).query
+            urllib.parse.urlparse(response.css('script[src*="storeCode"]').attrib["src"]).query
         )["storeCode"][0]
 
         properties = {
@@ -42,8 +40,6 @@ class CaribouCoffeeSpider(scrapy.Spider):
             "postcode": main.xpath('.//*[@itemprop="postalCode"]/text()').get(),
             "country": main.xpath('.//*[@itemprop="addressCountry"]/text()').get(),
             "phone": main.xpath('.//*[@itemprop="telephone"]/text()').get(),
-            "opening_hours": "; ".join(
-                main.xpath('.//*[@itemprop="openingHours"]/@content').extract()
-            ),
+            "opening_hours": "; ".join(main.xpath('.//*[@itemprop="openingHours"]/@content').extract()),
         }
         yield GeojsonPointItem(**properties)

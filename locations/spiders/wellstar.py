@@ -91,7 +91,7 @@ class WellStarSpider(scrapy.Spider):
                         close_time=close_time.replace(":", "").strip(),
                         time_format="%H%M",
                     )
-                except:
+                except Exception:
                     continue
 
         return opening_hours.as_opening_hours()
@@ -118,9 +118,7 @@ class WellStarSpider(scrapy.Spider):
             properties = {
                 "ref": row.get("LocationID"),
                 "name": row.get("Name"),
-                "addr_full": " ".join(
-                    [row.get("Address").split(",")[0], row.get("Address2", "") or ""]
-                ).strip(),
+                "addr_full": " ".join([row.get("Address").split(",")[0], row.get("Address2", "") or ""]).strip(),
                 "city": address_attributes.get("city"),
                 "state": address_attributes.get("state"),
                 "postcode": address_attributes.get("postcode"),

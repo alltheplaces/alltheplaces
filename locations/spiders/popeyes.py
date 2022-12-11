@@ -19,9 +19,7 @@ class PopeyesSpider(scrapy.Spider):
 
     def parse_location(self, location):
         hours = json.loads(
-            location.xpath(
-                '//script[@type="text/data"][@class="js-hours-config"]/text()'
-            ).extract_first()
+            location.xpath('//script[@type="text/data"][@class="js-hours-config"]/text()').extract_first()
         )
         opening_hours = OpeningHours()
         for row in hours["hours"]:
@@ -34,25 +32,13 @@ class PopeyesSpider(scrapy.Spider):
                 opening_hours.add_range(day, start_time, end_time)
 
         props = {
-            "addr_full": location.xpath(
-                '//meta[@itemprop="streetAddress"]/@content'
-            ).extract_first(),
-            "lon": float(
-                location.xpath('//meta[@itemprop="longitude"]/@content').extract_first()
-            ),
-            "lat": float(
-                location.xpath('//meta[@itemprop="latitude"]/@content').extract_first()
-            ),
+            "addr_full": location.xpath('//meta[@itemprop="streetAddress"]/@content').extract_first(),
+            "lon": float(location.xpath('//meta[@itemprop="longitude"]/@content').extract_first()),
+            "lat": float(location.xpath('//meta[@itemprop="latitude"]/@content').extract_first()),
             "city": location.css("span.Address-city::text").extract_first(),
-            "postcode": location.xpath(
-                '//span[@itemprop="postalCode"]/text()'
-            ).extract_first(),
-            "state": location.xpath(
-                '//abbr[@itemprop="addressRegion"]/text()'
-            ).extract_first(),
-            "phone": location.xpath(
-                '//div[@itemprop="telephone"]/text()'
-            ).extract_first(),
+            "postcode": location.xpath('//span[@itemprop="postalCode"]/text()').extract_first(),
+            "state": location.xpath('//abbr[@itemprop="addressRegion"]/text()').extract_first(),
+            "phone": location.xpath('//div[@itemprop="telephone"]/text()').extract_first(),
             "ref": location.url,
             "website": location.url,
             "opening_hours": opening_hours.as_opening_hours(),
@@ -62,9 +48,7 @@ class PopeyesSpider(scrapy.Spider):
     def parse_city_stores(self, city):
         locations = city.xpath('//a[@data-ya-track="visitpage"]/@href').extract()
         for location in locations:
-            yield scrapy.Request(
-                url=city.urljoin(location), callback=self.parse_location
-            )
+            yield scrapy.Request(url=city.urljoin(location), callback=self.parse_location)
 
     def parse_state(self, state):
         cities = state.xpath('//a[@data-ya-track="todirectory"]/@href').extract()

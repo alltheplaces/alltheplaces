@@ -27,9 +27,7 @@ class FarmBoySpider(scrapy.Spider):
                     .replace("Sunday", "Su")
                 )
                 time = time.replace("\xa0", " ")
-                match = re.search(
-                    r"(\d{1,2}) (a|p)[.]m[.] . (\d{1,2}) (a|p)[.]m[.]", time
-                )
+                match = re.search(r"(\d{1,2}) (a|p)[.]m[.] . (\d{1,2}) (a|p)[.]m[.]", time)
                 if match:
                     (f_hr, f_ampm, t_hr, t_ampm) = match.groups()
                     f_hr = int(f_hr)
@@ -62,18 +60,10 @@ class FarmBoySpider(scrapy.Spider):
                     "ref": store.xpath("div/h3/text()").extract_first(),
                     "name": store.xpath("div/h3/text()").extract_first(),
                     "addr_full": store.xpath("div/div/p/text()").extract_first(),
-                    "postcode": self.postCode(
-                        store.xpath("div/div/p/text()[last()]").extract_first()
-                    ),
-                    "state": self.state(
-                        store.xpath("div/div/p/text()[last() - 1]").extract_first()
-                    ),
-                    "phone": self.phone(
-                        store.xpath('div/div/div[@id="cinfo"]/p/text()').extract_first()
-                    ),
-                    "opening_hours": self.parse_hours(
-                        store.xpath('div/div/div[@id="sinfo"]/table[1]/tbody/tr')
-                    ),
+                    "postcode": self.postCode(store.xpath("div/div/p/text()[last()]").extract_first()),
+                    "state": self.state(store.xpath("div/div/p/text()[last() - 1]").extract_first()),
+                    "phone": self.phone(store.xpath('div/div/div[@id="cinfo"]/p/text()').extract_first()),
+                    "opening_hours": self.parse_hours(store.xpath('div/div/div[@id="sinfo"]/table[1]/tbody/tr')),
                 }
                 yield GeojsonPointItem(**properties)
 

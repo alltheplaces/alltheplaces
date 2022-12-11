@@ -14,9 +14,7 @@ class PearleVisionSpider(scrapy.Spider):
     def start_requests(self):
         base_url = "https://www.pearlevision.com/webapp/wcs/stores/servlet/AjaxStoreLocatorResultsView?storeId=12002&catalogId=15951&langId=-1&resultSize=100&latitude={lat}&longitude={lng}&location=dallas%2C+tx"
 
-        with open(
-            "./locations/searchable_points/us_centroids_100mile_radius.csv"
-        ) as points:
+        with open("./locations/searchable_points/us_centroids_100mile_radius.csv") as points:
             next(points)
             for point in points:
                 _, lat, lon = point.strip().split(",")
@@ -38,30 +36,20 @@ class PearleVisionSpider(scrapy.Spider):
                 lng = re.search(r',parseFloat\("(-\d*.\d*)"', data).groups()[0]
 
         properties = {
-            "ref": "_".join(
-                re.search(r".+/(.+?)/(.+?)/(.+?)/?(?:\.html|$)", response.url).groups()
-            ),
+            "ref": "_".join(re.search(r".+/(.+?)/(.+?)/(.+?)/?(?:\.html|$)", response.url).groups()),
             "name": response.xpath('//*[@class="storeInfo"]/h2/text()').extract_first(),
-            "addr_full": response.xpath(
-                'normalize-space(//*[@class="storeInfo"]/p/text())'
-            ).extract_first(),
+            "addr_full": response.xpath('normalize-space(//*[@class="storeInfo"]/p/text())').extract_first(),
             "city": re.search(
                 r"^(.*),",
-                response.xpath(
-                    'normalize-space(//*[@class="storeInfo"]/p/text()[2])'
-                ).extract_first(),
+                response.xpath('normalize-space(//*[@class="storeInfo"]/p/text()[2])').extract_first(),
             ).groups()[0],
             "state": re.search(
                 r",\s([A-Z]{2})\s",
-                response.xpath(
-                    'normalize-space(//*[@class="storeInfo"]/p/text()[2])'
-                ).extract_first(),
+                response.xpath('normalize-space(//*[@class="storeInfo"]/p/text()[2])').extract_first(),
             ).groups()[0],
             "postcode": re.search(
                 r"[A-Z]{2}\s(.*)$",
-                response.xpath(
-                    'normalize-space(//*[@class="storeInfo"]/p/text()[2])'
-                ).extract_first(),
+                response.xpath('normalize-space(//*[@class="storeInfo"]/p/text()[2])').extract_first(),
             ).groups()[0],
             "country": "US",
             "lat": lat,

@@ -1,9 +1,10 @@
 import itertools
 import re
-from locations.items import GeojsonPointItem
+
 from scrapy.spiders import SitemapSpider
 
 from locations.hours import DAYS_DE, OpeningHours
+from locations.items import GeojsonPointItem
 
 
 class FustCHSpider(SitemapSpider):

@@ -51,9 +51,7 @@ class PetSmartSpider(scrapy.Spider):
     )
 
     def parse(self, response):
-        for state_url in response.xpath(
-            '//*[@class="all-states-list container"]//@href'
-        ).extract():
+        for state_url in response.xpath('//*[@class="all-states-list container"]//@href').extract():
             yield scrapy.Request(response.urljoin(state_url), callback=self.parse_state)
 
     def parse_state(self, response):
@@ -61,6 +59,7 @@ class PetSmartSpider(scrapy.Spider):
             yield scrapy.Request(response.urljoin(href), callback=self.parse_store)
 
     def parse_store(self, response):
+        country = None
         if "petsmart.ca" in response.url:
             country = "CA"
         elif "petsmart.com" in response.url:
@@ -68,29 +67,16 @@ class PetSmartSpider(scrapy.Spider):
 
         ref = re.search(r"-store(\d+)", response.url).group(1)
 
-        addr_lines = [
-            s.strip()
-            for s in response.xpath(
-                '//p[@class="store-page-details-address"]//text()'
-            ).extract()
-        ]
-
         map_url = response.xpath('//img/@src[contains(.,"staticmap")]').extract_first()
-        [lat_lon] = urllib.parse.parse_qs(urllib.parse.urlparse(map_url).query)[
-            "center"
-        ]
+        [lat_lon] = urllib.parse.parse_qs(urllib.parse.urlparse(map_url).query)["center"]
         lat, lon = lat_lon.split(",")
 
         properties = {
             "name": response.xpath("//h1/text()").extract_first(),
-            "addr_full": response.xpath(
-                'normalize-space(//p[@class="store-page-details-address"])'
-            ).extract_first(),
+            "addr_full": response.xpath('normalize-space(//p[@class="store-page-details-address"])').extract_first(),
             "lat": lat,
             "lon": lon,
-            "phone": response.xpath(
-                'normalize-space(//p[@class="store-page-details-phone"])'
-            ).extract_first(),
+            "phone": response.xpath('normalize-space(//p[@class="store-page-details-phone"])').extract_first(),
             "country": country,
             "ref": ref,
             "website": response.url,

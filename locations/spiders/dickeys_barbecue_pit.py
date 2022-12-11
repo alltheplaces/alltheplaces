@@ -23,28 +23,16 @@ class DickeysBarbecuePitSpider(scrapy.Spider):
 
         regex_phone_prefix = re.compile(r"^\s*Telephone\:\s*(.+)$")
 
-        all_restaurants = response.xpath(
-            '//*[@itemtype="http://schema.org/Restaurant"]'
-        )
+        all_restaurants = response.xpath('//*[@itemtype="http://schema.org/Restaurant"]')
         for restaurant in all_restaurants:
 
             properties = {
                 "name": restaurant.xpath('.//*[@itemprop="name"]/text()').get(),
-                "addr_full": restaurant.xpath(
-                    './/*[@itemprop="streetAddress"]/text()'
-                ).get(),
-                "city": restaurant.xpath(
-                    './/*[@itemprop="addressLocality"]/text()'
-                ).get(),
-                "state": restaurant.xpath(
-                    './/*[@itemprop="addressRegion"]/text()'
-                ).get(),
-                "postcode": restaurant.xpath(
-                    './/*[@itemprop="postalCode"]/text()'
-                ).get(),
-                "phone": restaurant.xpath(
-                    './/a[starts-with(text(), "Telephone:")]/text()'
-                ).get(),
+                "addr_full": restaurant.xpath('.//*[@itemprop="streetAddress"]/text()').get(),
+                "city": restaurant.xpath('.//*[@itemprop="addressLocality"]/text()').get(),
+                "state": restaurant.xpath('.//*[@itemprop="addressRegion"]/text()').get(),
+                "postcode": restaurant.xpath('.//*[@itemprop="postalCode"]/text()').get(),
+                "phone": restaurant.xpath('.//a[starts-with(text(), "Telephone:")]/text()').get(),
                 "website": response.url,
             }
 
@@ -78,9 +66,7 @@ class DickeysBarbecuePitSpider(scrapy.Spider):
 
     def parse_hours(self, restaurant_item):
         opening_hours = OpeningHours()
-        opening_hours_str = restaurant_item.xpath(
-            './/*[@itemprop="openingHours"]/@content'
-        ).get()
+        opening_hours_str = restaurant_item.xpath('.//*[@itemprop="openingHours"]/@content').get()
 
         if opening_hours_str:
             regex = re.compile(
@@ -106,9 +92,7 @@ class DickeysBarbecuePitSpider(scrapy.Spider):
                         close_time = "23:59"
 
                     for day in self.get_days(day_range):
-                        opening_hours.add_range(
-                            day, open_time, close_time, time_format="%I:%M %p"
-                        )
+                        opening_hours.add_range(day, open_time, close_time, time_format="%I:%M %p")
 
         return opening_hours.as_opening_hours()
 

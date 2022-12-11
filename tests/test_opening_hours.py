@@ -1,13 +1,6 @@
 import json
 
-from locations.hours import (
-    DAYS,
-    DAYS_BG,
-    DAYS_DE,
-    OpeningHours,
-    day_range,
-    sanitise_day,
-)
+from locations.hours import DAYS, DAYS_BG, DAYS_DE, OpeningHours, day_range, sanitise_day
 
 
 def test_day_range():
@@ -38,10 +31,7 @@ def test_mixed_ranges():
     o.add_range("Fr", "07:00", "17:00")
     o.add_range("Su", "09:00", "17:00")
 
-    assert (
-        o.as_opening_hours()
-        == "Mo-Tu 08:00-17:00; We-Th 09:00-18:00; Fr 07:00-17:00; Su 09:00-17:00"
-    )
+    assert o.as_opening_hours() == "Mo-Tu 08:00-17:00; We-Th 09:00-18:00; Fr 07:00-17:00; Su 09:00-17:00"
 
 
 def test_closed_sunday():

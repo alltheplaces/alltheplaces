@@ -20,16 +20,10 @@ class BannerHealthSpider(scrapy.Spider):
 
     def parse_location(self, response):
         try:
-            locs = response.xpath(
-                '//div[@class="text-card-location-image-content"]/p[1]/text()[2]'
-            ).extract_first()
+            locs = response.xpath('//div[@class="text-card-location-image-content"]/p[1]/text()[2]').extract_first()
             city, state_postalcode = locs.split(",")
             state_postalcode = state_postalcode.strip()
-            jsondata = json.loads(
-                response.xpath(
-                    '//div[@data-js="map_canvas-v2"]/@data-map-config'
-                ).extract_first()
-            )
+            jsondata = json.loads(response.xpath('//div[@data-js="map_canvas-v2"]/@data-map-config').extract_first())
             data = jsondata["markerList"]
             name = re.search(
                 r".+/(.+)",
@@ -58,9 +52,7 @@ class BannerHealthSpider(scrapy.Spider):
                 "city": city,
                 "state": state,
                 "postcode": postcode,
-                "phone": response.xpath(
-                    '//li[@class="text-card-location-image-content-action-list-item"][1]/a/text()'
-                )
+                "phone": response.xpath('//li[@class="text-card-location-image-content-action-list-item"][1]/a/text()')
                 .extract_first()
                 .strip(),
                 "lat": float(location_data["Latitude"]),

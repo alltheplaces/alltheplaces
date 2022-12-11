@@ -39,9 +39,7 @@ class GenghisGrillSpider(scrapy.Spider):
     def parse_hours(self, response):
         opening_hours = OpeningHours()
 
-        hours = response.xpath(
-            "//script/text()[contains(., 'Primary Hours')]"
-        ).extract_first()
+        hours = response.xpath("//script/text()[contains(., 'Primary Hours')]").extract_first()
 
         hours_dict = json.loads(re.search(r'"days":(.*]})', hours).group(1))
         for day, times in hours_dict.items():

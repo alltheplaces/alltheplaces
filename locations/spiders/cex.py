@@ -14,9 +14,7 @@ class CeXSpider(scrapy.Spider):
     def parse(self, response):
         for store in response.json()["response"]["data"]["stores"]:
             yield scrapy.Request(
-                "https://wss2.cex.uk.webuy.io/v3/stores/"
-                + str(store["storeId"])
-                + "/detail",
+                "https://wss2.cex.uk.webuy.io/v3/stores/" + str(store["storeId"]) + "/detail",
                 callback=self.parse_store,
             )
 

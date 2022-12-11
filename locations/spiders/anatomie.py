@@ -19,18 +19,12 @@ class AnatomieSpider(scrapy.Spider):
         for item in json_data["stores"]:
             address = lxml.html.fromstring(item["summary"])
             properties = {
-                "addr_full": address.xpath(
-                    'normalize-space(.//span[@class="address"]/text())'
-                ),
+                "addr_full": address.xpath('normalize-space(.//span[@class="address"]/text())'),
                 "phone": "",
                 "name": address.xpath('normalize-space(.//span[@class="name"]/text())'),
                 "city": address.xpath('normalize-space(.//span[@class="city"]/text())'),
-                "state": address.xpath(
-                    'normalize-space(.//span[@class="prov_state"]/text())'
-                ),
-                "postcode": address.xpath(
-                    'normalize-space(.//span[@class="postal_zip"]/text())'
-                ),
+                "state": address.xpath('normalize-space(.//span[@class="prov_state"]/text())'),
+                "postcode": address.xpath('normalize-space(.//span[@class="postal_zip"]/text())'),
                 "ref": item["store_id"],
                 "website": response.url,
                 "lat": float(item["lat"]),

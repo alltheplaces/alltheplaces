@@ -83,10 +83,6 @@ class KateSpadeSpider(scrapy.Spider):
                 yield GeojsonPointItem(**properties)
 
             page = int(re.search(r"page%22:(\d+)", response.url).groups()[0])
-            url = response.urljoin(
-                response.url.replace(
-                    "page%22:{}".format(page), "page%22:{}".format(page + 1)
-                )
-            )
+            url = response.urljoin(response.url.replace("page%22:{}".format(page), "page%22:{}".format(page + 1)))
 
             yield scrapy.Request(url, headers=HEADERS)

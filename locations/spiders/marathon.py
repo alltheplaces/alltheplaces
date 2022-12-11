@@ -10,9 +10,7 @@ class MarathonSpider(scrapy.spiders.CSVFeedSpider):
         "brand_wikidata": "Q458363",
         "country": "US",
     }
-    start_urls = [
-        "https://www.marathonbrand.com/content/includes/mpc-brand-stations/SiteList.csv"
-    ]
+    start_urls = ["https://www.marathonbrand.com/content/includes/mpc-brand-stations/SiteList.csv"]
 
     def parse_row(self, response, row):
         if row["Status"] == "Open":

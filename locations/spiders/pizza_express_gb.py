@@ -7,9 +7,7 @@ from locations.spiders.vapestore_gb import clean_address
 class PizzaExpressGBSpider(scrapy.Spider):
     name = "pizza_express_gb"
     item_attributes = {"brand": "Pizza Express", "brand_wikidata": "Q662845"}
-    start_urls = [
-        "https://www.pizzaexpress.com/api/restaurants/FindRestaurantsByLatLong?limit=2000"
-    ]
+    start_urls = ["https://www.pizzaexpress.com/api/restaurants/FindRestaurantsByLatLong?limit=2000"]
 
     def parse(self, response):
         for i in response.json():

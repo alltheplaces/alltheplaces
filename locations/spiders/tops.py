@@ -20,9 +20,7 @@ class TopsSpider(scrapy.Spider):
     item_attributes = {"brand": "Tops", "brand_wikidata": "Q7825137"}
     allowed_domains = ["www.topsmarkets.com"]
 
-    start_urls = (
-        "http://www.topsmarkets.com/StoreLocator/Store_MapLocation_S.las?State=all",
-    )
+    start_urls = ("http://www.topsmarkets.com/StoreLocator/Store_MapLocation_S.las?State=all",)
 
     def parse_address(self, data):
         filtered_data = []
@@ -80,17 +78,13 @@ class TopsSpider(scrapy.Spider):
             to_ = hours_apart[1]
 
             if ":" in from_:
-                (from_h, from_m, from_ap) = re.findall(
-                    "([0-9]{1,2}):([0-9]{1,2})([APM]{2})", from_
-                )[0]
+                (from_h, from_m, from_ap) = re.findall("([0-9]{1,2}):([0-9]{1,2})([APM]{2})", from_)[0]
             else:
                 (from_h, from_ap) = re.findall("([0-9]{1,2})([APM]{2})", from_)[0]
                 from_m = "00"
 
             if ":" in to_:
-                (to_h, to_m, to_ap) = re.findall(
-                    "([0-9]{1,2}):([0-9]{1,2})([APM]{2})", to_
-                )[0]
+                (to_h, to_m, to_ap) = re.findall("([0-9]{1,2}):([0-9]{1,2})([APM]{2})", to_)[0]
             else:
                 (to_h, to_ap) = re.findall("([0-9]{1,2})([APM]{2})", to_)[0]
                 to_m = "00"

@@ -22,18 +22,12 @@ class DollarGeneralSpider(SitemapSpider):
 
     def parse(self, response):
         properties = {
-            "street_address": response.xpath(
-                "//div[@data-address]/@data-address"
-            ).extract_first(),
+            "street_address": response.xpath("//div[@data-address]/@data-address").extract_first(),
             "city": response.xpath("//div[@data-city]/@data-city").extract_first(),
             "state": response.xpath("//div[@data-state]/@data-state").extract_first(),
             "postcode": response.xpath("//div[@data-zip]/@data-zip").extract_first(),
-            "lat": response.xpath(
-                "//div[@data-latitude]/@data-latitude"
-            ).extract_first(),
-            "lon": response.xpath(
-                "//div[@data-longitude]/@data-longitude"
-            ).extract_first(),
+            "lat": response.xpath("//div[@data-latitude]/@data-latitude").extract_first(),
+            "lon": response.xpath("//div[@data-longitude]/@data-longitude").extract_first(),
             "phone": response.xpath("//div[@data-phone]/@data-phone").extract_first(),
             "website": response.url,
             "ref": response.url.rsplit("/", 1)[-1].rsplit(".")[0],

@@ -61,19 +61,15 @@ class GattispizzaSpider(scrapy.Spider):
 
     def parse_detail_product(self, response):
         product = response.meta.get("product")
-        time = response.xpath(
-            '//div[@class="medium-4 columns location-hours"]//p/text()'
-        ).extract()
+        time = response.xpath('//div[@class="medium-4 columns location-hours"]//p/text()').extract()
         opening_hours = time[0] if time else None
 
         try:
-            phone_list = json.loads(
-                re.search("var phonelist = (.*?)}}", response.body).group(1) + "}}"
-            )
+            phone_list = json.loads(re.search("var phonelist = (.*?)}}", response.body).group(1) + "}}")
             product["phone"] = phone_list.get(product.get("ref")).get("phone")
-        except:
+        except Exception:
             product["phone"] = ""
-            self.log("Error while parsing the json data".format(traceback.format_exc()))
+            self.log("Error while parsing the json data: {}".format(traceback.format_exc()))
 
         yield GeojsonPointItem(
             lat=product.get("lat"),

@@ -9,9 +9,7 @@ from locations.hours import OpeningHours
 class NikeSpider(scrapy.Spider):
     name = "nike"
     item_attributes = {"brand": "Nike", "brand_wikidata": "Q483915"}
-    start_urls = [
-        "https://storeviews-cdn.risedomain-prod.nikecloud.com/store-locations-static.json"
-    ]
+    start_urls = ["https://storeviews-cdn.risedomain-prod.nikecloud.com/store-locations-static.json"]
 
     def parse(self, response):
         all_stores = response.json()["stores"]
@@ -29,14 +27,8 @@ class NikeSpider(scrapy.Spider):
                 opening = oh.get("startTime")
                 closing = oh.get("duration")
 
-                closing_h = (
-                    closing.split("H")[0].replace("PT", "") if "H" in closing else "0"
-                )
-                closing_m = (
-                    closing[len(closing) - 3 :].replace("M", "")
-                    if "M" in closing
-                    else "0"
-                )
+                closing_h = closing.split("H")[0].replace("PT", "") if "H" in closing else "0"
+                closing_m = closing[len(closing) - 3 :].replace("M", "") if "M" in closing else "0"
 
                 start = opening.split(":")
                 closing_time = str(
@@ -47,9 +39,7 @@ class NikeSpider(scrapy.Spider):
                     closing_time = "00:00"
                 else:
                     split_closing_time = closing_time.split(":")
-                    closing_time = "".join(
-                        split_closing_time[0] + ":" + split_closing_time[1]
-                    )
+                    closing_time = "".join(split_closing_time[0] + ":" + split_closing_time[1])
 
                 opening_hours.add_range(day[0:2].title(), opening, closing_time)
 

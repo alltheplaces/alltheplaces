@@ -52,16 +52,11 @@ class KindredHealthcareSpider(scrapy.Spider):
 
     def parse(self, response):
         response.selector.remove_namespaces()
-        locations = response.xpath(
-            '//url/loc/text()[contains(., "locations")]'
-        ).extract()
+        locations = response.xpath('//url/loc/text()[contains(., "locations")]').extract()
 
         for location_url in locations:
             # For transitional care hospitals, reduce redundant requests by using just the contact-us pages
-            if (
-                "transitional-care-hospitals" in location_url
-                and "contact-us" not in location_url
-            ):
+            if "transitional-care-hospitals" in location_url and "contact-us" not in location_url:
                 continue
             # Do the same thing for the behavioral health pages
             if "behavioral-health" in location_url and "contact-us" not in location_url:

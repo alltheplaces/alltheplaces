@@ -22,13 +22,9 @@ class KpmgSpider(scrapy.Spider):
             cities = offices["cities"]
             for city in cities:
                 for office in city["offices"]:
-                    office_url = (
-                        Selector(text=office["name"]).xpath("//a/@href").extract_first()
-                    )
+                    office_url = Selector(text=office["name"]).xpath("//a/@href").extract_first()
                     properties = {
-                        "addr_full": " ".join(
-                            [office["streetAdd1"], office["streetAdd2"]]
-                        ).strip(),
+                        "addr_full": " ".join([office["streetAdd1"], office["streetAdd2"]]).strip(),
                         "phone": office["phone"],
                         "country": country,
                     }
@@ -40,16 +36,10 @@ class KpmgSpider(scrapy.Spider):
 
     def parse_office(self, response):
         properties = response.meta["properties"]
-        lon = response.xpath(
-            '//meta[@name="KPMG_Location_Longitude"]/@content'
-        ).extract_first()
-        lat = response.xpath(
-            '//meta[@name="KPMG_Location_Latitude"]/@content'
-        ).extract_first()
+        lon = response.xpath('//meta[@name="KPMG_Location_Longitude"]/@content').extract_first()
+        lat = response.xpath('//meta[@name="KPMG_Location_Latitude"]/@content').extract_first()
 
-        postcode = response.xpath(
-            '//meta[@name="KPMG_Location_Address_Postal_Code"]/@content'
-        ).extract_first()
+        postcode = response.xpath('//meta[@name="KPMG_Location_Address_Postal_Code"]/@content').extract_first()
         region = None
         if postcode:
             match = re.match(r"([A-Z]{2})(.*)", postcode)
@@ -61,12 +51,8 @@ class KpmgSpider(scrapy.Spider):
             {
                 "brand": "KPMG",
                 "ref": re.search(r".+/(.+?)/?(?:\.html|$)", response.url).group(1),
-                "name": response.xpath(
-                    '//meta[@name="KPMG_Title"]/@content'
-                ).extract_first(),
-                "city": response.xpath(
-                    '//meta[@name="KPMG_Location_Mailing_Address_City"]/@content'
-                ).extract_first(),
+                "name": response.xpath('//meta[@name="KPMG_Title"]/@content').extract_first(),
+                "city": response.xpath('//meta[@name="KPMG_Location_Mailing_Address_City"]/@content').extract_first(),
                 "website": response.url,
                 "postcode": postcode,
                 "lat": float(lat) if lat else None,
@@ -74,9 +60,7 @@ class KpmgSpider(scrapy.Spider):
             }
         )
 
-        country = response.xpath(
-            '//meta[@name="KPMG_Location_Country_ISO"]/@content'
-        ).extract_first()
+        country = response.xpath('//meta[@name="KPMG_Location_Country_ISO"]/@content').extract_first()
         if country:
             properties["country"] = country
         if region:

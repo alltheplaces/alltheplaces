@@ -17,17 +17,11 @@ class PoundlandSpider(scrapy.Spider):
         for store in response.json()["locations"]:
             item = DictParser.parse(store)
 
-            item["street_address"] = ", ".join(
-                filter(None, store["address"].get("line"))
-            )
+            item["street_address"] = ", ".join(filter(None, store["address"].get("line")))
 
             # "store_id" seems to be a better ref than "id"
             item["ref"] = store.get("store_id")
-            item["website"] = (
-                "https://www.poundland.co.uk/store-finder/store_page/view/id/"
-                + item["ref"]
-                + "/"
-            )
+            item["website"] = "https://www.poundland.co.uk/store-finder/store_page/view/id/" + item["ref"] + "/"
 
             oh = OpeningHours()
             for rule in store["opening_hours"]:

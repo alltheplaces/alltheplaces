@@ -4,9 +4,7 @@ import scrapy
 
 from locations.items import GeojsonPointItem
 
-BASE_URL = (
-    "http://www.vch.ca/_api/Web/Lists(guid'51d09f82-eddf-47c9-95e9-9f5f0ec838c5')/"
-)
+BASE_URL = "http://www.vch.ca/_api/Web/Lists(guid'51d09f82-eddf-47c9-95e9-9f5f0ec838c5')/"
 
 
 class VancouverCoastalHealthSpider(scrapy.Spider):
@@ -25,10 +23,7 @@ class VancouverCoastalHealthSpider(scrapy.Spider):
         response.selector.remove_namespaces()
 
         locations = response.xpath("//url/loc/text()").extract()
-        location_ids = [
-            re.search(r"\/([0-9]+)\.aspx", location_id).group(1)
-            for location_id in locations
-        ]
+        location_ids = [re.search(r"\/([0-9]+)\.aspx", location_id).group(1) for location_id in locations]
         urls = [BASE_URL + f"Items({location_id})" for location_id in location_ids]
 
         for url in urls:

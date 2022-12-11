@@ -12,9 +12,7 @@ class XPOLogisticsSpider(scrapy.Spider):
     start_urls = ("https://www.xpo.com/global-locations/",)
 
     def parse(self, response):
-        script = response.xpath(
-            '//script[@id="globalLocations"]/text()'
-        ).extract_first()
+        script = response.xpath('//script[@id="globalLocations"]/text()').extract_first()
         data = ast.literal_eval(script)
 
         for store in data:

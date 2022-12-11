@@ -22,39 +22,25 @@ class HaggenSpider(scrapy.Spider):
     def parse_stores(self, response):
 
         properties = {
-            "addr_full": response.xpath(
-                'normalize-space(//div[@class="contactInfo"]/p[1]/text())'
-            ).extract_first(),
-            "phone": response.xpath(
-                'normalize-space(//div[@class="contactInfo"]/text()[3])'
-            ).extract_first(),
-            "city": response.xpath(
-                'normalize-space(//div[@class="contactInfo"]/p[1]/text()[2])'
-            )
+            "addr_full": response.xpath('normalize-space(//div[@class="contactInfo"]/p[1]/text())').extract_first(),
+            "phone": response.xpath('normalize-space(//div[@class="contactInfo"]/text()[3])').extract_first(),
+            "city": response.xpath('normalize-space(//div[@class="contactInfo"]/p[1]/text()[2])')
             .extract_first()
             .split("\xa0")[0]
             .split(",")[0],
-            "state": response.xpath(
-                'normalize-space(//div[@class="contactInfo"]/p[1]/text()[2])'
-            )
+            "state": response.xpath('normalize-space(//div[@class="contactInfo"]/p[1]/text()[2])')
             .extract_first()
             .split("\xa0")[0]
             .split(",")[1],
-            "postcode": response.xpath(
-                'normalize-space(//div[@class="contactInfo"]/p[1]/text()[2])'
-            )
+            "postcode": response.xpath('normalize-space(//div[@class="contactInfo"]/p[1]/text()[2])')
             .extract_first()
             .split("\xa0")[1],
             "ref": re.search(r".+/(.+?)/?(?:\.html|$)", response.url).group(1),
             "website": response.url,
-            "name": response.xpath("normalize-space(//main/h2[1]/text())")
-            .extract_first()
-            .replace("\u2013", ""),
+            "name": response.xpath("normalize-space(//main/h2[1]/text())").extract_first().replace("\u2013", ""),
         }
 
-        hours = response.xpath(
-            'normalize-space(//div[@class="contactInfo"]/text()[5])'
-        ).extract_first()
+        hours = response.xpath('normalize-space(//div[@class="contactInfo"]/text()[5])').extract_first()
         if hours == "Open 24 Hours":
             properties["opening_hours"] = "24/7"
         yield GeojsonPointItem(**properties)

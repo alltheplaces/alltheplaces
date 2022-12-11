@@ -64,17 +64,9 @@ class NameSuggestionIndexCommand(ScrapyCommand):
     def show(code, data):
         print('"{}", "{}"'.format(data["label"], code))
         print("       -> https://www.wikidata.org/wiki/{}".format(code))
-        print(
-            "       -> https://www.wikidata.org/wiki/Special:EntityData/{}.json".format(
-                code
-            )
-        )
+        print("       -> https://www.wikidata.org/wiki/Special:EntityData/{}.json".format(code))
         if s := data.get("description"):
             print("       -> {}".format(s))
         if s := data.get("identities"):
             print("       -> {}".format(s.get("website", "N/A")))
-        print(
-            '       -> item_attributes = {{"brand": "{0}", "brand_wikidata": "{1}"}}'.format(
-                data["label"], code
-            )
-        )
+        print('       -> item_attributes = {{"brand": "{0}", "brand_wikidata": "{1}"}}'.format(data["label"], code))

@@ -38,9 +38,9 @@ class Duffys(scrapy.Spider):
                     end_time = "0" + end_time
 
                 # eg 12am -> 12:00am
-                if not ":" in start_time:
+                if ":" not in start_time:
                     start_time = start_time[:2] + ":00" + start_time[2:]
-                if not ":" in end_time:
+                if ":" not in end_time:
                     end_time = end_time[:2] + ":00" + end_time[2:]
 
                 start_day = sanitise_day(start_day)

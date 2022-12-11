@@ -14,9 +14,7 @@ class GoOutdoorsSpider(CrawlSpider):
     start_urls = ["https://www.gooutdoors.co.uk/stores"]
     rules = [
         Rule(
-            LinkExtractor(
-                allow=r"https:\/\/www\.gooutdoors\.co\.uk\/stores\/([-\w]+)$"
-            ),
+            LinkExtractor(allow=r"https:\/\/www\.gooutdoors\.co\.uk\/stores\/([-\w]+)$"),
             callback="parse",
         )
     ]

@@ -53,8 +53,6 @@ class McDonaldsLocalizerSpider(scrapy.Spider):
             name = contact_info[: contact_info.find("</br")]
 
             properties["name"] = name
-            properties["addr_full"] = data["name"][data["name"].find("<small>") : -8][
-                8:
-            ]
+            properties["addr_full"] = data["name"][data["name"].find("<small>") : -8][8:]
 
             yield GeojsonPointItem(**properties)

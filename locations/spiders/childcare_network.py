@@ -9,16 +9,12 @@ class ChildcareNetworkSpider(scrapy.Spider):
     start_urls = ("https://schools.childcarenetwork.com/index.html",)
 
     def parse(self, response):
-        urls = response.xpath(
-            '//*[@id="main"]/div/section/div[2]/ul/li/a/@href'
-        ).extract()
+        urls = response.xpath('//*[@id="main"]/div/section/div[2]/ul/li/a/@href').extract()
         for url in urls:
             yield scrapy.Request(url=self.home_site + url, callback=self.parse_list)
 
     def parse_list(self, response):
-        urls = response.xpath(
-            '//*[@id="main"]/div/section/div[2]/ul/li/a/@href'
-        ).extract()
+        urls = response.xpath('//*[@id="main"]/div/section/div[2]/ul/li/a/@href').extract()
         for url in urls:
             yield scrapy.Request(url=self.home_site + url, callback=self.parse_location)
 
@@ -26,29 +22,13 @@ class ChildcareNetworkSpider(scrapy.Spider):
         address = response.xpath('//*[@id="address"]/div[1]/span/text()').extract()
         if len(address) == 1:
             yield GeojsonPointItem(
-                name=response.xpath(
-                    '//*[@id="location-name"]/span[2]/text()'
-                ).extract()[0],
+                name=response.xpath('//*[@id="location-name"]/span[2]/text()').extract()[0],
                 addr_full=address[0],
-                city=response.xpath(
-                    '//*[@id="address"]/div[2]/span[1]/text()'
-                ).extract()[0],
-                state=response.xpath('//*[@id="address"]/div[2]/abbr/@title').extract()[
-                    0
-                ],
-                postcode=response.xpath(
-                    '//*[@id="address"]/div[2]/span[2]/text()'
-                ).extract_first(),
-                lat=float(
-                    response.xpath(
-                        '//*[@id="schema-location"]/span/meta[1]/@content'
-                    ).extract()[0]
-                ),
-                lon=float(
-                    response.xpath(
-                        '//*[@id="schema-location"]/span/meta[2]/@content'
-                    ).extract()[0]
-                ),
+                city=response.xpath('//*[@id="address"]/div[2]/span[1]/text()').extract()[0],
+                state=response.xpath('//*[@id="address"]/div[2]/abbr/@title').extract()[0],
+                postcode=response.xpath('//*[@id="address"]/div[2]/span[2]/text()').extract_first(),
+                lat=float(response.xpath('//*[@id="schema-location"]/span/meta[1]/@content').extract()[0]),
+                lon=float(response.xpath('//*[@id="schema-location"]/span/meta[2]/@content').extract()[0]),
                 phone=response.xpath('//*[@id="phone-main"]/text()').extract_first(),
                 website=response.xpath("/html/head/meta[11]/@content").extract()[0],
                 country="USA",
@@ -58,10 +38,6 @@ class ChildcareNetworkSpider(scrapy.Spider):
                 ).extract_first(),
             )
         else:
-            urls = response.xpath(
-                '//*[@id="main"]/div/section/div[2]/ul/li/article/h2/a/@href'
-            ).extract()
+            urls = response.xpath('//*[@id="main"]/div/section/div[2]/ul/li/article/h2/a/@href').extract()
             for url in urls:
-                yield scrapy.Request(
-                    url=self.home_site + url[2:], callback=self.parse_location
-                )
+                yield scrapy.Request(url=self.home_site + url[2:], callback=self.parse_location)

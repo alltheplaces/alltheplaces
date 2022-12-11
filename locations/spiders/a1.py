@@ -18,9 +18,7 @@ class A1Spider(scrapy.Spider):
     name = "a1"
     item_attributes = {"brand": "A1", "brand_wikidata": "Q1941592", "country": "BG"}
     allowed_domains = ["www.a1.bg"]
-    start_urls = [
-        "https://www.a1.bg/1/mm/shops/mc/index/ma/index/mo/1?ajaxaction=getShopsWithWorkTime"
-    ]
+    start_urls = ["https://www.a1.bg/1/mm/shops/mc/index/ma/index/mo/1?ajaxaction=getShopsWithWorkTime"]
 
     def parse(self, response):
         data = response.json()

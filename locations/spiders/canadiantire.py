@@ -23,9 +23,7 @@ class CanadianTireSpider(scrapy.Spider):
             if hour == "Closed":
                 continue
             hour = json.loads(hour)
-            opening_hours.add_range(
-                day, open_time=hour["open"], close_time=hour["close"]
-            )
+            opening_hours.add_range(day, open_time=hour["open"], close_time=hour["close"])
 
         return opening_hours.as_opening_hours()
 
@@ -41,18 +39,12 @@ class CanadianTireSpider(scrapy.Spider):
                 yield scrapy.Request(url, callback=self.parse_store)
 
     def parse_store(self, response):
-        check = response.xpath(
-            '//tr[contains(@class, "hours-table")]/@data-working-hours'
-        ).extract_first()
+        check = response.xpath('//tr[contains(@class, "hours-table")]/@data-working-hours').extract_first()
         if not check or check == "12:00 AM - 12:00 AM":
             # there's some empty/placeholder/test store pages
             return
 
-        data = json.loads(
-            response.xpath(
-                '//div[@data-component="StoreLocatorPage"]/@data-config'
-            ).extract_first()
-        )
+        data = json.loads(response.xpath('//div[@data-component="StoreLocatorPage"]/@data-config').extract_first())
 
         properties = {
             "brand": "Canadian Tire",
@@ -69,11 +61,7 @@ class CanadianTireSpider(scrapy.Spider):
             "lon": float(data["storeLongitude"]),
         }
 
-        hours = self.parse_hours(
-            response.xpath(
-                '//tr[contains(@class, "hours-table")]/@data-working-hours'
-            ).extract()
-        )
+        hours = self.parse_hours(response.xpath('//tr[contains(@class, "hours-table")]/@data-working-hours').extract())
         if hours:
             properties["opening_hours"] = hours
 

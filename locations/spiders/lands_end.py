@@ -10,9 +10,7 @@ class LandsEndSpider(scrapy.Spider):
 
     def start_requests(self):
         base_url = "https://www.landsend.com/pp/StoreLocator?lat={lat}&lng={lng}&radius=100&S=S&L=L&C=undefined&N=N"
-        with open(
-            "./locations/searchable_points/us_centroids_100mile_radius.csv"
-        ) as points:
+        with open("./locations/searchable_points/us_centroids_100mile_radius.csv") as points:
             next(points)
             for point in points:
                 _, lat, lon = point.strip().split(",")

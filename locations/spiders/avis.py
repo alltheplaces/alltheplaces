@@ -42,9 +42,7 @@ class AvisSpider(scrapy.Spider):
             if range_match:
                 start_day, end_day, start_time, end_time = range_match.groups()
             else:
-                single_match = re.search(
-                    r"([A-Za-z]{3})\s([\d:\sAMP]+)\s-\s([\d:\sAMP]+)", hour
-                )
+                single_match = re.search(r"([A-Za-z]{3})\s([\d:\sAMP]+)\s-\s([\d:\sAMP]+)", hour)
                 if not single_match:
                     continue
                 start_day, start_time, end_time = single_match.groups()
@@ -74,83 +72,45 @@ class AvisSpider(scrapy.Spider):
         latitude = None
         longitude = None
 
-        if (
-            response.xpath('//meta[@itemprop="latitude"]/@content').extract_first()
-            is not None
-        ):
-            latitude = float(
-                response.xpath('//meta[@itemprop="latitude"]/@content').extract_first()
-            )
+        if response.xpath('//meta[@itemprop="latitude"]/@content').extract_first() is not None:
+            latitude = float(response.xpath('//meta[@itemprop="latitude"]/@content').extract_first())
 
-        if (
-            response.xpath('//meta[@itemprop="longitude"]/@content').extract_first()
-            is not None
-        ):
-            longitude = float(
-                response.xpath('//meta[@itemprop="longitude"]/@content').extract_first()
-            )
+        if response.xpath('//meta[@itemprop="longitude"]/@content').extract_first() is not None:
+            longitude = float(response.xpath('//meta[@itemprop="longitude"]/@content').extract_first())
 
         properties = {
-            "name": clean(
-                response.xpath('//h2/span[@itemprop="name"]/text()').extract_first()
-            ),
+            "name": clean(response.xpath('//h2/span[@itemprop="name"]/text()').extract_first()),
             "addr_full": clean(
-                response.xpath(
-                    'normalize-space(//span[@itemprop="streetAddress"]/text())'
-                ).extract_first()
+                response.xpath('normalize-space(//span[@itemprop="streetAddress"]/text())').extract_first()
             ),
-            "phone": response.xpath(
-                'normalize-space(//span[@itemprop="telephone"]/text())'
-            ).extract_first(),
+            "phone": response.xpath('normalize-space(//span[@itemprop="telephone"]/text())').extract_first(),
             "city": clean(
-                response.xpath(
-                    'normalize-space(//span[@itemprop="addressLocality"]/text())'
-                ).extract_first()
+                response.xpath('normalize-space(//span[@itemprop="addressLocality"]/text())').extract_first()
             ),
-            "state": clean(
-                response.xpath(
-                    'normalize-space(//span[@itemprop="addressRegion"]/text())'
-                ).extract_first()
-            ),
-            "postcode": clean(
-                response.xpath(
-                    'normalize-space(//span[@itemprop="postalCode"]/text())'
-                ).extract_first()
-            ),
+            "state": clean(response.xpath('normalize-space(//span[@itemprop="addressRegion"]/text())').extract_first()),
+            "postcode": clean(response.xpath('normalize-space(//span[@itemprop="postalCode"]/text())').extract_first()),
             "country": clean(
-                response.xpath(
-                    'normalize-space(//span[@itemprop="addressCountry"]/text())'
-                ).extract_first()
+                response.xpath('normalize-space(//span[@itemprop="addressCountry"]/text())').extract_first()
             ),
             "ref": ref,
             "website": response.url,
             "lat": latitude,
             "lon": longitude,
         }
-        hours = response.xpath(
-            '//meta[@itemprop="openingHours"]/@content'
-        ).extract_first()
+        hours = response.xpath('//meta[@itemprop="openingHours"]/@content').extract_first()
         if hours:
             properties["opening_hours"] = self.parse_hours(hours)
         yield GeojsonPointItem(**properties)
 
     def parse_state(self, response):
-        urls = response.xpath(
-            '//ul[contains(@class, "location-list-ul")]//li/a/@href'
-        ).extract()
+        urls = response.xpath('//ul[contains(@class, "location-list-ul")]//li/a/@href').extract()
 
         if not urls:
-            urls = set(
-                response.xpath(
-                    '//ul[contains(@class, "LocContainer")]//a/@href'
-                ).extract()
-            )
+            urls = set(response.xpath('//ul[contains(@class, "LocContainer")]//a/@href').extract())
             urls = [u for u in urls if "javascript:void" not in u]
 
         location_list = re.compile("^/en/locations/(?:us|ca|au)/[a-z]{2}/[^/]+$")
-        us_single_location = re.compile(
-            r"/en/locations/(?:us|ca|au)/[a-z]{2}/[^/]+/[^/]+$"
-        )
+        us_single_location = re.compile(r"/en/locations/(?:us|ca|au)/[a-z]{2}/[^/]+/[^/]+$")
         single_location = re.compile(r"/en/locations/(?!us|ca|au)[a-z]{2}/[^/]+/[^/]+$")
 
         for url in urls:
@@ -163,9 +123,7 @@ class AvisSpider(scrapy.Spider):
                 continue
 
     def parse_country(self, response):
-        urls = response.xpath(
-            '//div[contains(@class,"country-wrapper")]//li/a/@href'
-        ).extract()
+        urls = response.xpath('//div[contains(@class,"country-wrapper")]//li/a/@href').extract()
 
         for url in urls:
             yield scrapy.Request(response.urljoin(url), callback=self.parse_state)

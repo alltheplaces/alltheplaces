@@ -12,16 +12,12 @@ class CBRESpider(scrapy.Spider):
     start_urls = ("https://www.cbre.us/people-and-offices",)
 
     def parse(self, response):
-        urls = response.xpath(
-            '//li[@class="list-item list-item--second-level"]//a/@href'
-        ).extract()
+        urls = response.xpath('//li[@class="list-item list-item--second-level"]//a/@href').extract()
         for url in urls:
             yield scrapy.Request(response.urljoin(url), callback=self.parse_location)
 
     def parse_location(self, response):
-        store_js = response.xpath(
-            '//div[@class="OfficeMapsWrapper google-map"]//script//text()'
-        ).extract()
+        store_js = response.xpath('//div[@class="OfficeMapsWrapper google-map"]//script//text()').extract()
         if store_js:
             store = store_js[0]
             storere = re.findall(r'\(("[^)]+")', store)
@@ -29,9 +25,7 @@ class CBRESpider(scrapy.Spider):
                 item = item.replace("\\", "")
                 item = item.replace('"', "")
                 properties = {
-                    "ref": item.split(",")[-4].split("   ")[0]
-                    + "-"
-                    + item.split(",")[0],
+                    "ref": item.split(",")[-4].split("   ")[0] + "-" + item.split(",")[0],
                     "name": item.split(",")[0],
                     "addr_full": item.split(",")[-4].split("   ")[0],
                     "state": item.split(", ")[-3].split(" ")[0],

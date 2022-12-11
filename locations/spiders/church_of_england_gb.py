@@ -15,9 +15,7 @@ class ChurchOfEnglandGBSpider(Spider):
             "denomination": "anglican",
         }
     }
-    start_urls = [
-        "https://www.achurchnearyou.com/api/internal/venues/venue/?format=json"
-    ]
+    start_urls = ["https://www.achurchnearyou.com/api/internal/venues/venue/?format=json"]
 
     def parse(self, response, **kwargs):
         for church in response.json()["results"]:

@@ -19,9 +19,7 @@ class PretAMangerSpider(scrapy.Spider):
 
             item = DictParser.parse(store)
 
-            item["street_address"] = ", ".join(
-                filter(None, [item["housenumber"], item["street"]])
-            )
+            item["street_address"] = ", ".join(filter(None, [item["housenumber"], item["street"]]))
             item["housenumber"] = item["street"] = None
 
             oh = OpeningHours()
@@ -47,16 +45,10 @@ class PretAMangerSpider(scrapy.Spider):
 
             item["extras"] = {}
 
-            item["extras"]["delivery"] = (
-                "yes" if store["features"]["delivery"] else "no"
-            )
+            item["extras"]["delivery"] = "yes" if store["features"]["delivery"] else "no"
             item["extras"]["storeType"] = store["features"].get("storeType")
-            item["extras"]["wheelchair"] = (
-                "yes" if store["features"]["wheelchairAccess"] else "no"
-            )
-            item["extras"]["internet_access"] = (
-                "wlan" if store["features"]["wifi"] else "no"
-            )
+            item["extras"]["wheelchair"] = "yes" if store["features"]["wheelchairAccess"] else "no"
+            item["extras"]["internet_access"] = "wlan" if store["features"]["wifi"] else "no"
 
             if store["features"].get("storeType") == "veggie-pret":
                 item["brand"] = self.veggie_pret["brand"]

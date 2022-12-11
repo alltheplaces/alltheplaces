@@ -14,9 +14,7 @@ class CitiSpider(scrapy.Spider):
     headers = {"client_id": "4a51fb19-a1a7-4247-bc7e-18aa56dd1c40"}
 
     def start_requests(self):
-        with open(
-            "./locations/searchable_points/us_centroids_100mile_radius_state.csv"
-        ) as points:
+        with open("./locations/searchable_points/us_centroids_100mile_radius_state.csv") as points:
             next(points)
             for point in points:
                 _, lat, lon, state = point.strip().split(",")
@@ -54,10 +52,7 @@ class CitiSpider(scrapy.Spider):
             postcode = feature["properties"]["postalCode"]
 
             # fix 4-digit postcodes :(
-            if (
-                feature["properties"]["country"] == "united states of america"
-                and postcode
-            ):
+            if feature["properties"]["country"] == "united states of america" and postcode:
                 postcode = postcode.zfill(5)
 
             properties = {

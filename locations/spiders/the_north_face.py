@@ -76,7 +76,7 @@ class TheNorthFaceSpider(scrapy.Spider):
 
         for store in stores["response"]["collection"]:
             state = store["state"]
-            if state == None:
+            if state is None:
                 state = store["province"]
 
             properties = {

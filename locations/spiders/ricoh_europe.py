@@ -36,9 +36,7 @@ class RicohEuropeSpider(scrapy.Spider):
             "Italy",
         ]
 
-        base_url = (
-            "https://www.ricoh-europe.com/api/dealerfinder/product/country/{country}/"
-        )
+        base_url = "https://www.ricoh-europe.com/api/dealerfinder/product/country/{country}/"
 
         for country in countries:
             url = base_url.format(country=country)

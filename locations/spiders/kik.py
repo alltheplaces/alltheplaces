@@ -14,9 +14,7 @@ class KikSpider(scrapy.Spider):
 
     def start_requests(self):
         url = "https://www.kik.de/storefinder/results.json?searchlocation=Germany&lat={lat}&long={lng}&country=DE"
-        with open(
-            "./locations/searchable_points/eu_centroids_20km_radius_country.csv"
-        ) as points:
+        with open("./locations/searchable_points/eu_centroids_20km_radius_country.csv") as points:
             reader = csv.DictReader(points)
             for point in reader:
                 if point["country"] == "DE":

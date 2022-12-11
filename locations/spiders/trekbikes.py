@@ -18,13 +18,9 @@ class TrekBikesSpider(scrapy.Spider):
         yield from response.follow_all(css="a.pagination__button")
 
     def parse_store(self, response):
-        script = response.xpath(
-            '//*[@type="text/javascript"]/text()[contains(.,"var store")]'
-        ).get()
+        script = response.xpath('//*[@type="text/javascript"]/text()[contains(.,"var store")]').get()
         data = {}
-        for key, val1, val2 in re.findall(
-            r"var (store\w+) = (?:'(.*)'|\"(.*)\");$", script, flags=re.M
-        ):
+        for key, val1, val2 in re.findall(r"var (store\w+) = (?:'(.*)'|\"(.*)\");$", script, flags=re.M):
             data[key] = val1 or val2
 
         opening_hours = OpeningHours()
@@ -56,9 +52,7 @@ class TrekBikesSpider(scrapy.Spider):
             "postcode": data["storeaddresspostalCode"],
             "country": data["storeaddresscountryname"],
             "opening_hours": opening_hours.as_opening_hours(),
-            "website": response.xpath('//*[contains(.,"Retailer website")]/@href').get(
-                response.url
-            ),
+            "website": response.xpath('//*[contains(.,"Retailer website")]/@href').get(response.url),
             "phone": phone,
         }
 

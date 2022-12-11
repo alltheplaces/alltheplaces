@@ -15,9 +15,7 @@ class TheBurgersPriestSpider(scrapy.Spider):
     ]
 
     def parse(self, response):
-        data = response.xpath(
-            '//script[contains(text(),"locations")]/text()'
-        ).extract_first()
+        data = response.xpath('//script[contains(text(),"locations")]/text()').extract_first()
 
         ## Fix lots of formatting issues
         json_data = re.sub(r"var images\s=\s((?s).*?)var locations = ", "", data)

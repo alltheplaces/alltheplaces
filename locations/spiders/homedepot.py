@@ -18,9 +18,7 @@ class HomeDepotSpider(SitemapSpider):
     def parse_store(self, response):
         item = LinkedDataParser.parse(response, "LocalBusiness")
         item["ref"] = item["website"].split("/")[-1]
-        mapurl = urllib.parse.urlsplit(
-            response.css('img[alt="map preview"]').attrib["src"]
-        )
+        mapurl = urllib.parse.urlsplit(response.css('img[alt="map preview"]').attrib["src"])
         lat_lon = next(p for p in mapurl.path.split("/") if "," in p)
         lat, lon = lat_lon.split(",")
         item["lat"] = lat

@@ -68,9 +68,7 @@ class CostaCoffeeGBSpider(scrapy.Spider):
                     else:
                         item["extras"]["toilets:wheelchair"] = "no"
                 elif storeFacility["name"] == "Baby Changing":
-                    item["extras"]["changing_table"] = yes_or_no(
-                        storeFacility["active"]
-                    )
+                    item["extras"]["changing_table"] = yes_or_no(storeFacility["active"])
                 elif storeFacility["name"] == "Disabled Access":
                     item["extras"]["wheelchair"] = yes_or_no(storeFacility["active"])
                 elif storeFacility["name"] == "Drive Thru":

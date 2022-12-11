@@ -13,9 +13,7 @@ class BootsSpider(scrapy.Spider):
     def parse_hours(self, lis):
         hours = []
         for li in lis:
-            day = li.xpath(
-                'normalize-space(./td[@class="store_hours_day"]/text())'
-            ).extract_first()
+            day = li.xpath('normalize-space(./td[@class="store_hours_day"]/text())').extract_first()
             times = (
                 li.xpath('normalize-space(./td[@class="store_hours_time"]/text())')
                 .extract_first()
@@ -37,15 +35,11 @@ class BootsSpider(scrapy.Spider):
             return
 
         properties = {
-            "ref": response.xpath(
-                'normalize-space(//input[@id="bootsStoreId"]/@value)'
-            ).extract_first(),
+            "ref": response.xpath('normalize-space(//input[@id="bootsStoreId"]/@value)').extract_first(),
             "name": response.xpath(
                 'normalize-space(//input[@id="inputLocation"][@name="inputLocation"]/@value)'
             ).extract_first(),
-            "postcode": response.xpath(
-                'normalize-space(//input[@id="storePostcode"]/@value)'
-            ).extract_first(),
+            "postcode": response.xpath('normalize-space(//input[@id="storePostcode"]/@value)').extract_first(),
             "addr_full": address,
             "phone": response.xpath(
                 '//section[@class="store_details_content rowContainer"]/dl[@class="store_info_list"][3]/dd[@class="store_info_list_item"]/a/text()'
@@ -54,12 +48,8 @@ class BootsSpider(scrapy.Spider):
                 'normalize-space(//input[@id="countryCode"][@name="countryCode"]/@value)'
             ).extract_first(),
             "website": response.url,
-            "lat": response.xpath(
-                'normalize-space(//input[@id="lat"]/@value)'
-            ).extract_first(),
-            "lon": response.xpath(
-                'normalize-space(//input[@id="lon"]/@value)'
-            ).extract_first(),
+            "lat": response.xpath('normalize-space(//input[@id="lat"]/@value)').extract_first(),
+            "lon": response.xpath('normalize-space(//input[@id="lon"]/@value)').extract_first(),
         }
 
         hours = self.parse_hours(
@@ -78,8 +68,6 @@ class BootsSpider(scrapy.Spider):
         yield GeojsonPointItem(**properties)
 
     def parse(self, response):
-        urls = response.xpath(
-            '//div[@class="brand_list_viewer"]/div[@class="column"]/ul/li/a/@href'
-        ).extract()
+        urls = response.xpath('//div[@class="brand_list_viewer"]/div[@class="column"]/ul/li/a/@href').extract()
         for path in urls:
             yield scrapy.Request(response.urljoin(path), callback=self.parse_stores)
