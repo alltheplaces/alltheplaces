@@ -38,9 +38,7 @@ class ATTSpider(scrapy.Spider):
             close_time = str(store_day["intervals"][0]["end"])
             if close_time == "0":
                 close_time = "2359"
-            opening_hours.add_range(
-                day=day, open_time=open_time, close_time=close_time, time_format="%H%M"
-            )
+            opening_hours.add_range(day=day, open_time=open_time, close_time=close_time, time_format="%H%M")
 
         return opening_hours.as_opening_hours()
 
@@ -61,39 +59,19 @@ class ATTSpider(scrapy.Spider):
 
         properties = {
             "ref": ref,
-            "name": response.xpath(
-                'normalize-space(//span[@class="LocationName-brand"]/text())'
-            ).extract_first(),
-            "addr_full": response.xpath(
-                'normalize-space(//meta[@itemprop="streetAddress"]/@content)'
-            ).extract_first(),
-            "city": response.xpath(
-                'normalize-space(//meta[@itemprop="addressLocality"]/@content)'
-            ).extract_first(),
-            "state": response.xpath(
-                'normalize-space(//abbr[@itemprop="addressRegion"]/text())'
-            ).extract_first(),
-            "postcode": response.xpath(
-                'normalize-space(//span[@itemprop="postalCode"]/text())'
-            ).extract_first(),
-            "country": response.xpath(
-                'normalize-space(//abbr[@itemprop="addressCountry"]/text())'
-            ).extract_first(),
-            "phone": response.xpath(
-                'normalize-space(//span[@itemprop="telephone"]//text())'
-            ).extract_first(),
+            "name": response.xpath('normalize-space(//span[@class="LocationName-brand"]/text())').extract_first(),
+            "addr_full": response.xpath('normalize-space(//meta[@itemprop="streetAddress"]/@content)').extract_first(),
+            "city": response.xpath('normalize-space(//meta[@itemprop="addressLocality"]/@content)').extract_first(),
+            "state": response.xpath('normalize-space(//abbr[@itemprop="addressRegion"]/text())').extract_first(),
+            "postcode": response.xpath('normalize-space(//span[@itemprop="postalCode"]/text())').extract_first(),
+            "country": response.xpath('normalize-space(//abbr[@itemprop="addressCountry"]/text())').extract_first(),
+            "phone": response.xpath('normalize-space(//span[@itemprop="telephone"]//text())').extract_first(),
             "website": response.url,
-            "lat": response.xpath(
-                'normalize-space(//meta[@itemprop="latitude"]/@content)'
-            ).extract_first(),
-            "lon": response.xpath(
-                'normalize-space(//meta[@itemprop="longitude"]/@content)'
-            ).extract_first(),
+            "lat": response.xpath('normalize-space(//meta[@itemprop="latitude"]/@content)').extract_first(),
+            "lon": response.xpath('normalize-space(//meta[@itemprop="longitude"]/@content)').extract_first(),
         }
 
-        hours = response.xpath(
-            '//span[@class="c-hours-today js-hours-today"]/@data-days'
-        ).extract_first()
+        hours = response.xpath('//span[@class="c-hours-today js-hours-today"]/@data-days').extract_first()
         properties["opening_hours"] = self.parse_hours(hours)
 
         yield GeojsonPointItem(**properties)

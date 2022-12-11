@@ -31,11 +31,7 @@ class BjRestaurantsSpider(scrapy.Spider):
         # 2. A data-location attribute
         # Some data exists in both locations
 
-        schema_string = (
-            response.xpath('//*/script[@type="application/ld+json"]/text()')
-            .extract_first()
-            .strip(";\n")
-        )
+        schema_string = response.xpath('//*/script[@type="application/ld+json"]/text()').extract_first().strip(";\n")
         schema_dict = json.loads(schema_string)
         data_location_string = response.xpath("//@data-location").extract_first()
         data_location_dict = json.loads(data_location_string)

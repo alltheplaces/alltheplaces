@@ -111,12 +111,7 @@ class AlstomSpider(scrapy.Spider):
                     t = j["title"]
                     t_en = t.encode("ascii", "ignore")
                     t_de = t_en.decode()
-                    title = (
-                        t_de.replace("\r\n", "")
-                        .replace("<p>", "")
-                        .replace("<br />", " ")
-                        .replace("</p>", "")
-                    )
+                    title = t_de.replace("\r\n", "").replace("<p>", "").replace("<br />", " ").replace("</p>", "")
                 except:
                     addr = j["address"]
 

@@ -22,11 +22,7 @@ class AnytimeFitnessSpider(scrapy.Spider):
             yield GeojsonPointItem(
                 lat=gym["latitude"],
                 lon=gym["longitude"],
-                addr_full=", ".join(
-                    filter(
-                        None, [gym["content"]["address"], gym["content"]["address2"]]
-                    )
-                ),
+                addr_full=", ".join(filter(None, [gym["content"]["address"], gym["content"]["address2"]])),
                 city=gym["content"]["city"],
                 phone=gym["content"]["phone"],
                 state=gym["content"]["state_abbr"],

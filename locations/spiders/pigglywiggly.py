@@ -50,9 +50,7 @@ class PigglyWigglySpider(scrapy.Spider):
         # Get authentication token for api
         csrf = response.text.strip('[""]')
 
-        locations_url = (
-            "https://www.shopthepig.com/api/m_store_location?store_type_ids=1,2,3"
-        )
+        locations_url = "https://www.shopthepig.com/api/m_store_location?store_type_ids=1,2,3"
 
         headers = {
             "authority": "www.shopthepig.com",
@@ -67,9 +65,7 @@ class PigglyWigglySpider(scrapy.Spider):
             "user-agent": "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36",
         }
 
-        yield scrapy.http.Request(
-            url=locations_url, headers=headers, callback=self.parse_wi
-        )
+        yield scrapy.http.Request(url=locations_url, headers=headers, callback=self.parse_wi)
 
     def parse_wi(self, response):
         data = response.json()
@@ -105,9 +101,7 @@ class PigglyWigglySpider(scrapy.Spider):
     def parse_state(self, response):
         for location in response.xpath('//li[contains(@class, "views-row")]'):
             # Extract coordinates
-            map_link = location.xpath(
-                './/a[contains(@href,"maps.google")]/@href'
-            ).extract_first()
+            map_link = location.xpath('.//a[contains(@href,"maps.google")]/@href').extract_first()
             if re.search(r".+=([0-9.-]+)\+([0-9.-]+)", map_link):
                 lat = re.search(r".+=([0-9.-]+)\+([0-9.-]+)", map_link).group(1)
                 lon = re.search(r".+=([0-9.-]+)\+([0-9.-]+)", map_link).group(2)
@@ -115,18 +109,10 @@ class PigglyWigglySpider(scrapy.Spider):
                 lat = None
                 lon = None
             unp = {
-                "addr_full": location.xpath(
-                    './/div[@class="street-address"]/text()'
-                ).extract_first(),
-                "city": location.xpath(
-                    './/span[@class="locality"]/text()'
-                ).extract_first(),
-                "state": location.xpath(
-                    './/span[@class="region"]/text()'
-                ).extract_first(),
-                "postcode": location.xpath(
-                    './/span[@class="postal-code"]/text()'
-                ).extract_first(),
+                "addr_full": location.xpath('.//div[@class="street-address"]/text()').extract_first(),
+                "city": location.xpath('.//span[@class="locality"]/text()').extract_first(),
+                "state": location.xpath('.//span[@class="region"]/text()').extract_first(),
+                "postcode": location.xpath('.//span[@class="postal-code"]/text()').extract_first(),
                 "phone": location.xpath(
                     './/label[@class="views-label-field-phone-value"]/following-sibling::span[1]/text()'
                 ).extract_first(),

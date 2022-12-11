@@ -20,9 +20,7 @@ class WilliamHillGBSpider(CrawlSpider):
     download_delay = 0.5
 
     def parse_func(self, response):
-        pattern = re.compile(
-            r"window.lctr.results.push\((.*?)\);", re.MULTILINE | re.DOTALL
-        )
+        pattern = re.compile(r"window.lctr.results.push\((.*?)\);", re.MULTILINE | re.DOTALL)
         s = response.xpath('//script[contains(., "lctr")]/text()').re(pattern)
         if s:
             store = json.loads(s[0])

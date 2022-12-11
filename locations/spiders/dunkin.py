@@ -26,12 +26,8 @@ class DunkinSpider(scrapy.Spider):
             yield from self.parse_store(response)
 
     def parse_store(self, response):
-        coords = json.loads(
-            response.xpath('//script[@class="js-map-data"]/text()').get()
-        )
-        hours = json.loads(
-            response.xpath('//script[@class="js-hours-config"]/text()').get()
-        )
+        coords = json.loads(response.xpath('//script[@class="js-map-data"]/text()').get())
+        hours = json.loads(response.xpath('//script[@class="js-hours-config"]/text()').get())
         opening_hours = OpeningHours()
         for row in hours["hours"]:
             day = row["day"][:2].capitalize()
@@ -48,9 +44,7 @@ class DunkinSpider(scrapy.Spider):
             "lat": coords["latitude"],
             "lon": coords["longitude"],
             "website": response.url,
-            "addr_full": address.xpath(
-                './/*[@itemprop="streetAddress"]/@content'
-            ).get(),
+            "addr_full": address.xpath('.//*[@itemprop="streetAddress"]/@content').get(),
             "city": address.xpath('.//*[@itemprop="addressLocality"]/@content').get(),
             "state": address.xpath('.//*[@itemprop="addressRegion"]/text()').get(),
             "postcode": address.xpath('.//*[@itemprop="postalCode"]/text()').get(),

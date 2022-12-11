@@ -19,9 +19,7 @@ class ShopriteSpider(scrapy.Spider):
     ]
 
     def parse(self, response):
-        script = response.xpath(
-            '//script[contains(text(), "__PRELOADED_STATE__")]/text()'
-        ).extract_first()
+        script = response.xpath('//script[contains(text(), "__PRELOADED_STATE__")]/text()').extract_first()
         script = script[script.index("{") :]
         stores = json.loads(script)["stores"]["availablePlanningStores"]["items"]
 

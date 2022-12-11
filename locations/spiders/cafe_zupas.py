@@ -8,9 +8,7 @@ class CafeZupasSpider(scrapy.Spider):
     name = "cafe_zupas"
     item_attributes = {"brand": "Cafe Zupas"}
     allowed_domains = ["cafezupas.com"]
-    start_urls = [
-        "https://cafezupas.com/server.php?url=https://api.controlcenter.zupas.com/api/markets/listing"
-    ]
+    start_urls = ["https://cafezupas.com/server.php?url=https://api.controlcenter.zupas.com/api/markets/listing"]
 
     def parse_hours(self, location):
         opening_hours = OpeningHours()
@@ -50,12 +48,9 @@ class CafeZupasSpider(scrapy.Spider):
 
                 properties = {
                     "ref": location["id"],
-                    "website": "https://cafezupas.com/locationcopy/info/"
-                    + location["name"].lower().replace(" ", "-"),
+                    "website": "https://cafezupas.com/locationcopy/info/" + location["name"].lower().replace(" ", "-"),
                     "name": location["name"],
-                    "image": "https://cafezupas.com" + location["image"]
-                    if location["image"] is not None
-                    else None,
+                    "image": "https://cafezupas.com" + location["image"] if location["image"] is not None else None,
                     "phone": location["phone"],
                     "lat": location["lat"],
                     "lon": location["long"],

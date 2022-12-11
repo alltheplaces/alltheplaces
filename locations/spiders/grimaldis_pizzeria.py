@@ -26,9 +26,7 @@ class GrimaldisPizzeriaSpider(scrapy.Spider):
         locations = response.css("div.location_block")
         for loc in locations:
             address = self._format_address(loc.css(".store_address::text").getall())
-            website = loc.css(
-                ".cta_row .cta_button:last-child .g_cta::attr(href)"
-            ).get()
+            website = loc.css(".cta_row .cta_button:last-child .g_cta::attr(href)").get()
 
             properties = {
                 "ref": website.split("/")[-2],
@@ -38,9 +36,7 @@ class GrimaldisPizzeriaSpider(scrapy.Spider):
                 "state": address.state,
                 "postcode": address.zip,
                 "phone": self._format_phone(loc.css(".phone_number::text")),
-                "opening_hours": self._format_store_hours(
-                    loc.css(".store_hours::text").getall()
-                ),
+                "opening_hours": self._format_store_hours(loc.css(".store_hours::text").getall()),
                 "website": website,
                 "lat": coordinates[website][0],
                 "lon": coordinates[website][1],

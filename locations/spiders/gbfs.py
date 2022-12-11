@@ -18,9 +18,7 @@ class GBFSSpider(CSVFeedSpider):
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def parse_row(self, response, row):
-        yield JsonRequest(
-            url=row["Auto-Discovery URL"], cb_kwargs=row, callback=self.parse_gbfs
-        )
+        yield JsonRequest(url=row["Auto-Discovery URL"], cb_kwargs=row, callback=self.parse_gbfs)
 
     def parse_gbfs(self, response, **kwargs):
         try:
@@ -30,9 +28,7 @@ class GBFSSpider(CSVFeedSpider):
 
         for feed in DictParser.get_nested_key(data, "feeds") or []:
             if feed["name"] == "station_information":
-                yield JsonRequest(
-                    url=feed["url"], cb_kwargs=kwargs, callback=self.parse_stations
-                )
+                yield JsonRequest(url=feed["url"], cb_kwargs=kwargs, callback=self.parse_stations)
 
     def parse_stations(self, response, **kwargs):
         try:

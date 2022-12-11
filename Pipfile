@@ -11,6 +11,7 @@ pytest = "*"
 black = "*"
 autoflake8 = "*"
 isort = "*"
+pre-commit = "*"
 
 [packages]
 scrapy = "*"

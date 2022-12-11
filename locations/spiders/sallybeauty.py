@@ -64,9 +64,7 @@ class SallyBeautySpider(scrapy.Spider):
             properties = {
                 "ref": row["ID"],
                 "name": row["name"],
-                "addr_full": " ".join(
-                    [row["address1"], row.get("address2", "") or ""]
-                ).strip(),
+                "addr_full": " ".join([row["address1"], row.get("address2", "") or ""]).strip(),
                 "city": row["city"],
                 "postcode": row["postalCode"],
                 "lat": row["latitude"],

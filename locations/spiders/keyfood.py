@@ -5,7 +5,7 @@ import scrapy
 from locations.items import GeojsonPointItem
 
 
-def opening_hours(datestring):
+def opening_hours(datestring):  # noqa: C901
     hour_match = re.findall(r"(\d{1,2}:\d{1,2}.(am|pm|-)|\d{1,2}(am|pm))", datestring)
     hours = [str(i[0]) for i in hour_match]
 
@@ -62,13 +62,7 @@ def opening_hours(datestring):
             if period != "":
                 if not first:
                     period = ", " + period
-            period = (
-                period.replace(" - ", "-")
-                .replace(" -", "-")
-                .replace(".", "")
-                .replace(":", " ")
-                .replace("  ", " ")
-            )
+            period = period.replace(" - ", "-").replace(" -", "-").replace(".", "").replace(":", " ").replace("  ", " ")
             return period
 
         def hours(a, b):
@@ -110,9 +104,7 @@ def opening_hours(datestring):
             "Please contact store for hours": "N/A",
         }
         pattern = re.compile(r"\b(" + "|".join(day_dict.keys()) + r")\b")
-        opening_hours = pattern.sub(
-            lambda x: day_dict[x.group()], "".join(opening_hours)
-        )
+        opening_hours = pattern.sub(lambda x: day_dict[x.group()], "".join(opening_hours))
 
         return opening_hours.title()
 
@@ -160,10 +152,7 @@ class KeyfoodSpider(scrapy.Spider):
 
             properties = {
                 "name": "".join(name),
-                "ref": "".join(name)
-                .replace("(", "")
-                .replace(")", "")
-                .replace(" ", "_"),
+                "ref": "".join(name).replace("(", "").replace(")", "").replace(" ", "_"),
                 "street": address1,
                 "city": address2[0],
                 "state": address2[1].split(" ")[1],

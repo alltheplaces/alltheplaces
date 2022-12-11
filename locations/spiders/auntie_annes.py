@@ -33,36 +33,16 @@ class AuntieAnnesSpider(scrapy.Spider):
             opening_hours.add_range(day, open_time, close_time)
 
         properties = {
-            "ref": urllib.parse.urlparse(
-                response.xpath("//main").attrib["itemid"]
-            ).fragment,
-            "name": response.xpath('//meta[@property="og:title"]/@content')
-            .extract_first()
-            .split(" | ")[0],
+            "ref": urllib.parse.urlparse(response.xpath("//main").attrib["itemid"]).fragment,
+            "name": response.xpath('//meta[@property="og:title"]/@content').extract_first().split(" | ")[0],
             "website": response.url,
-            "lat": response.xpath(
-                '//meta[@itemprop="latitude"]/@content'
-            ).extract_first(),
-            "lon": response.xpath(
-                '//meta[@itemprop="longitude"]/@content'
-            ).extract_first(),
-            "addr_full": response.xpath(
-                '//meta[@itemprop="streetAddress"]/@content'
-            ).extract_first(),
-            "city": response.xpath(
-                '//meta[@itemprop="addressLocality"]/@content'
-            ).extract_first(),
-            "state": response.xpath(
-                '//*[@itemprop="addressRegion"]/text()'
-            ).extract_first(),
-            "postcode": response.xpath(
-                '//*[@itemprop="postalCode"]/text()'
-            ).extract_first(),
-            "country": response.xpath(
-                '//*[@itemprop="addressCountry"]/text()'
-            ).extract_first(),
-            "phone": response.xpath(
-                '//*[@itemprop="telephone"]/text()'
-            ).extract_first(),
+            "lat": response.xpath('//meta[@itemprop="latitude"]/@content').extract_first(),
+            "lon": response.xpath('//meta[@itemprop="longitude"]/@content').extract_first(),
+            "addr_full": response.xpath('//meta[@itemprop="streetAddress"]/@content').extract_first(),
+            "city": response.xpath('//meta[@itemprop="addressLocality"]/@content').extract_first(),
+            "state": response.xpath('//*[@itemprop="addressRegion"]/text()').extract_first(),
+            "postcode": response.xpath('//*[@itemprop="postalCode"]/text()').extract_first(),
+            "country": response.xpath('//*[@itemprop="addressCountry"]/text()').extract_first(),
+            "phone": response.xpath('//*[@itemprop="telephone"]/text()').extract_first(),
         }
         yield GeojsonPointItem(**properties)

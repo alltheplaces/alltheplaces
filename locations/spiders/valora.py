@@ -1,5 +1,7 @@
 import re
+
 import scrapy
+
 from locations.categories import Categories
 from locations.items import GeojsonPointItem
 
@@ -9,8 +11,7 @@ class ValoraSpider(scrapy.Spider):
     allowed_domains = ["api.valora-stores.com"]
     key = "avecHnbG6Tr"
     start_urls = [
-        "https://api.valora-stores.com/_index.php?apiv=2.0.9&a=data&"
-        + f"ns=storefinder&l=de&key={key}",
+        "https://api.valora-stores.com/_index.php?apiv=2.0.9&a=data&" + f"ns=storefinder&l=de&key={key}",
     ]
 
     brands = {

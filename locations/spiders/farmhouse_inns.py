@@ -11,9 +11,7 @@ class FarmhouseInnsSpider(SitemapSpider):
         "country": "GB",
     }
     sitemap_urls = ["https://www.farmhouseinns.co.uk/xml-sitemap"]
-    sitemap_rules = [
-        (r"https:\/\/www\.farmhouseinns\.co\.uk\/pubs\/([-\w]+)\/([-\w]+)\/$", "parse")
-    ]
+    sitemap_rules = [(r"https:\/\/www\.farmhouseinns\.co\.uk\/pubs\/([-\w]+)\/([-\w]+)\/$", "parse")]
 
     def parse(self, response):
         yield LinkedDataParser.parse(response, "BarOrPub")

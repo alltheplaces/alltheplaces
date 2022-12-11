@@ -14,9 +14,7 @@ class McDonaldsSISpider(scrapy.Spider):
 
     def parse_hour(self, time_str):
         sh = sm = eh = em = ""
-        match = re.search(
-            r"([0-9]{1,2}):([0-9]{1,2}) - ([0-9]{1,2}):([0-9]{1,2})", time_str
-        )
+        match = re.search(r"([0-9]{1,2}):([0-9]{1,2}) - ([0-9]{1,2}):([0-9]{1,2})", time_str)
         if match:
             sh, sm, eh, em = match.groups()
 

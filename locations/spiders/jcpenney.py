@@ -66,31 +66,17 @@ class JCPenneySpider(scrapy.Spider):
         properties = {
             "ref": re.search(r".*/(.*).html", response.url).groups()[0],
             "name": name,
-            "lat": float(
-                store.xpath('//meta[@itemprop="latitude"]/@content').extract_first()
-            ),
-            "lon": float(
-                store.xpath('//meta[@itemprop="longitude"]/@content').extract_first()
-            ),
+            "lat": float(store.xpath('//meta[@itemprop="latitude"]/@content').extract_first()),
+            "lon": float(store.xpath('//meta[@itemprop="longitude"]/@content').extract_first()),
             "phone": store.xpath('//span[@id="telephone"]/text()').extract_first(),
-            "addr_full": store.xpath(
-                '//span[@class="c-address-street-1"]/text()'
-            ).extract_first(),
-            "city": store.xpath(
-                '//span[@class="c-address-city"]/text()'
-            ).extract_first(),
-            "state": store.xpath(
-                '//abbr[@itemprop="addressRegion"]/text()'
-            ).extract_first(),
-            "postcode": store.xpath(
-                '//span[@itemprop="postalCode"]/text()'
-            ).extract_first(),
+            "addr_full": store.xpath('//span[@class="c-address-street-1"]/text()').extract_first(),
+            "city": store.xpath('//span[@class="c-address-city"]/text()').extract_first(),
+            "state": store.xpath('//abbr[@itemprop="addressRegion"]/text()').extract_first(),
+            "postcode": store.xpath('//span[@itemprop="postalCode"]/text()').extract_first(),
             "brand": brand,
         }
 
-        hours = store.xpath(
-            '//div[contains(@class, "js-location-hours")]/@data-days'
-        ).extract_first()
+        hours = store.xpath('//div[contains(@class, "js-location-hours")]/@data-days').extract_first()
         if hours:
             properties["opening_hours"] = self.parse_hours(hours)
 

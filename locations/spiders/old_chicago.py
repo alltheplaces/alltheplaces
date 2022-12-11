@@ -40,9 +40,7 @@ class OldChicagoSpider(scrapy.Spider):
         for loc in stores:
             node = loc["node"]
             address = node["address"]
-            hours = ", ".join(
-                ["{} {}".format(h["days"], h["hours"]) for h in node["simpleHours"]]
-            )
+            hours = ", ".join(["{} {}".format(h["days"], h["hours"]) for h in node["simpleHours"]])
             addr_full = "{} {}".format(address["streetNumber"], address["route"])
             yield GeojsonPointItem(
                 ref=node["locationId"],

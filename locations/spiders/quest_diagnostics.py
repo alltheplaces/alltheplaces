@@ -18,9 +18,7 @@ class QuestDiagnosticsSpider(scrapy.Spider):
             yield scrapy.Request(url, callback=self.parse_location)
 
     def parse_location(self, response):
-        for ldjson in response.xpath(
-            '//script[@type="application/ld+json"]/text()'
-        ).extract():
+        for ldjson in response.xpath('//script[@type="application/ld+json"]/text()').extract():
             # Unescaped newlines
             ldjson = re.sub(r'"description": "[^"]*",', "", ldjson, flags=re.M)
             data = json.loads(ldjson)

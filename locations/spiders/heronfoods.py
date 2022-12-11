@@ -31,9 +31,7 @@ class HeronFoodsSpider(scrapy.Spider):
             oh.add_range("Mo", store["op"]["0"], store["op"]["1"])
             oh.add_range("Tu", store["op"]["2"], store["op"]["3"])
             oh.add_range("We", store["op"]["4"], store["op"]["5"])
-            oh.add_range(
-                "Th", store["op"]["6"], store["op"]["7"].replace("17:20:00", "17:20")
-            )
+            oh.add_range("Th", store["op"]["6"], store["op"]["7"].replace("17:20:00", "17:20"))
             oh.add_range("Fr", store["op"]["8"], store["op"]["9"])
             oh.add_range("Sa", store["op"]["10"], store["op"]["11"])
             oh.add_range("Su", store["op"]["12"], store["op"]["13"])

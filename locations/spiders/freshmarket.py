@@ -35,8 +35,7 @@ class FreshMarketSpider(scrapy.Spider):
                 "state": store["state"],
                 "postcode": store["postalCode"],
                 "phone": store["phoneNumber"],
-                "website": "https://www.thefreshmarket.com/my-market/store/"
-                + store["slug"],
+                "website": "https://www.thefreshmarket.com/my-market/store/" + store["slug"],
                 "lat": float(store["storeLocation"]["lat"]),
                 "lon": float(store["storeLocation"]["lon"]),
             }

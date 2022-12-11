@@ -18,7 +18,7 @@ class BestBuyCASpider(scrapy.Spider):
         o = OpeningHours()
 
         for hour in hours:
-            if hour.get("holidayHoursIsRegular") == False:
+            if hour.get("holidayHoursIsRegular") is False:
                 continue
 
             short_day = hour["day"].title()[:2]
@@ -32,40 +32,24 @@ class BestBuyCASpider(scrapy.Spider):
         return o.as_opening_hours()
 
     def parse_location(self, response):
-        opening_hours = (
-            response.css(".js-location-hours").xpath("@data-days").extract_first()
-        )
+        opening_hours = response.css(".js-location-hours").xpath("@data-days").extract_first()
         if opening_hours:
             opening_hours = json.loads(opening_hours)
             opening_hours = self.normalize_hours(opening_hours)
 
         props = {
-            "addr_full": response.xpath(
-                '//meta[@itemprop="streetAddress"]/@content'
-            ).extract_first(),
-            "lat": float(
-                response.xpath('//meta[@itemprop="latitude"]/@content').extract_first()
-            ),
-            "lon": float(
-                response.xpath('//meta[@itemprop="longitude"]/@content').extract_first()
-            ),
-            "city": response.xpath(
-                '//span[@class="c-address-city"]/text()'
-            ).extract_first(),
-            "postcode": response.xpath(
-                '//span[@class="c-address-postal-code"]/text()'
-            ).extract_first(),
-            "state": response.xpath(
-                '//abbr[@class="c-address-state"]/text()'
-            ).extract_first(),
+            "addr_full": response.xpath('//meta[@itemprop="streetAddress"]/@content').extract_first(),
+            "lat": float(response.xpath('//meta[@itemprop="latitude"]/@content').extract_first()),
+            "lon": float(response.xpath('//meta[@itemprop="longitude"]/@content').extract_first()),
+            "city": response.xpath('//span[@class="c-address-city"]/text()').extract_first(),
+            "postcode": response.xpath('//span[@class="c-address-postal-code"]/text()').extract_first(),
+            "state": response.xpath('//abbr[@class="c-address-state"]/text()').extract_first(),
             "phone": response.xpath(
                 '//span[@class="c-phone-number-span c-phone-main-number-span"]/text()'
             ).extract_first(),
             "ref": response.url,
             "website": response.url,
-            "name": response.xpath(
-                '//span[@class="LocationName-brand"]/text()'
-            ).extract_first(),
+            "name": response.xpath('//span[@class="LocationName-brand"]/text()').extract_first(),
             "opening_hours": opening_hours,
         }
         return GeojsonPointItem(**props)
@@ -77,11 +61,7 @@ class BestBuyCASpider(scrapy.Spider):
             if not stores:
                 yield self.parse_location(response)
             for store in stores:
-                yield scrapy.Request(
-                    url=response.urljoin(store), callback=self.parse_location
-                )
+                yield scrapy.Request(url=response.urljoin(store), callback=self.parse_location)
         else:
             for location in locations:
-                yield scrapy.Request(
-                    url=response.urljoin(location), callback=self.parse
-                )
+                yield scrapy.Request(url=response.urljoin(location), callback=self.parse)

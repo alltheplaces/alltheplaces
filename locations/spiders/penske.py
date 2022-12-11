@@ -73,29 +73,15 @@ class PenskeSpider(scrapy.Spider):
         ref = re.search(r".+/(.+)$", response.url).group(1)
 
         properties = {
-            "addr_full": response.xpath(
-                '//div[@id="location-left"]/p/text()'
-            ).extract_first(),
-            "phone": response.xpath(
-                '//span[@itemprop="telephone"]/text()'
-            ).extract_first(),
-            "city": response.xpath(
-                '//span[@itemprop="addressLocality"]/text()'
-            ).extract_first(),
-            "state": response.xpath(
-                '//span[@itemprop="addressRegion"]/text()'
-            ).extract_first(),
-            "postcode": response.xpath(
-                '//span[@itemprop="postalCode"]/text()'
-            ).extract_first(),
+            "addr_full": response.xpath('//div[@id="location-left"]/p/text()').extract_first(),
+            "phone": response.xpath('//span[@itemprop="telephone"]/text()').extract_first(),
+            "city": response.xpath('//span[@itemprop="addressLocality"]/text()').extract_first(),
+            "state": response.xpath('//span[@itemprop="addressRegion"]/text()').extract_first(),
+            "postcode": response.xpath('//span[@itemprop="postalCode"]/text()').extract_first(),
             "ref": ref,
             "website": response.url,
-            "lat": float(
-                response.xpath('//dt[@itemprop="latitude"]/text()').extract_first()
-            ),
-            "lon": float(
-                response.xpath('//dt[@itemprop="longitude"]/text()').extract_first()
-            ),
+            "lat": float(response.xpath('//dt[@itemprop="latitude"]/text()').extract_first()),
+            "lon": float(response.xpath('//dt[@itemprop="longitude"]/text()').extract_first()),
             "name": response.xpath('//h1[@itemprop="name"]/text()').extract_first(),
         }
 
@@ -107,27 +93,17 @@ class PenskeSpider(scrapy.Spider):
         yield GeojsonPointItem(**properties)
 
     def parse(self, response):
-        urls = response.xpath(
-            '//section[@class="locations-by-state"]/ul/li/a/@href'
-        ).extract()
+        urls = response.xpath('//section[@class="locations-by-state"]/ul/li/a/@href').extract()
         if urls:
-            urls.extend(
-                response.xpath(
-                    '//section[@class="locations-by-province"]/ul/li/a/@href'
-                ).extract()
-            )
+            urls.extend(response.xpath('//section[@class="locations-by-province"]/ul/li/a/@href').extract())
 
         is_store = False
 
         if not urls:
-            urls = response.xpath(
-                '//section[@class="locations-by-city"]/ul/li/a/@href'
-            ).extract()
+            urls = response.xpath('//section[@class="locations-by-city"]/ul/li/a/@href').extract()
 
         if not urls:
-            urls = response.xpath(
-                '//a[contains(@class,"location-link")]/@href'
-            ).extract()
+            urls = response.xpath('//a[contains(@class,"location-link")]/@href').extract()
             is_store = True
 
         for url in urls:

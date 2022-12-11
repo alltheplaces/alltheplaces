@@ -59,13 +59,9 @@ class NhsScotlandGBSpider(scrapy.Spider):
     def parse(self, response, service):
         for link in response.xpath('//h2[@class="nhsuk-heading-m"]/a/@href').extract():
             url = "https://www.nhsinform.scot" + link
-            yield scrapy.Request(
-                url, callback=self.parse_service, cb_kwargs=dict(service=service)
-            )
+            yield scrapy.Request(url, callback=self.parse_service, cb_kwargs=dict(service=service))
         for link in response.xpath('//a[@class="pagination__link "]/@href').extract():
-            yield scrapy.Request(
-                response.urljoin(link), cb_kwargs=dict(service=service)
-            )
+            yield scrapy.Request(response.urljoin(link), cb_kwargs=dict(service=service))
 
     def parse_service(self, response, service):
         item = GeojsonPointItem()
@@ -73,9 +69,7 @@ class NhsScotlandGBSpider(scrapy.Spider):
         apply_category(self.services.get(service), item)
         item["name"] = response.xpath('//input[@id="ServiceName"]/@value').get().strip()
         item["website"] = item["ref"] = response.url
-        item["postcode"] = (
-            response.xpath('//input[@id="ServicePostcode"]/@value').get().strip()
-        )
+        item["postcode"] = response.xpath('//input[@id="ServicePostcode"]/@value').get().strip()
         # TODO opening_hours = response.xpath('//div[@class="panel-times"]//dd').getall()
         item["addr_full"] = clean_address(response.xpath("//address/text()").getall())
         if external_url := response.xpath('//a[@class="external"]/@href').get():

@@ -46,9 +46,7 @@ class SimonMallsSpider(scrapy.Spider):
         if extracted_script is None:
             pass
         else:
-            store_data = json.loads(
-                re.search(r"var mallObj =(.*)", extracted_script).group(1)
-            )
+            store_data = json.loads(re.search(r"var mallObj =(.*)", extracted_script).group(1))
 
             properties = {
                 "name": store_data["DisplayName"].replace("\u00ae", " ").strip(" "),

@@ -25,8 +25,7 @@ class InglesSpider(scrapy.Spider):
     def start_requests(self):
         for state in STORE_STATES:
             yield scrapy.Request(
-                "https://www.ingles-markets.com/storelocate/storelocator.php?address="
-                + state,
+                "https://www.ingles-markets.com/storelocate/storelocator.php?address=" + state,
                 callback=self.parse,
             )
 
@@ -62,11 +61,7 @@ class InglesSpider(scrapy.Spider):
             "website": response.url,
         }
 
-        hours = self.parse_hours(
-            " ".join(
-                response.xpath("/html/body/fieldset/div[2]/text()")[1].getall()
-            ).strip()
-        )
+        hours = self.parse_hours(" ".join(response.xpath("/html/body/fieldset/div[2]/text()")[1].getall()).strip())
         if hours:
             properties["opening_hours"] = hours
 
@@ -84,8 +79,7 @@ class InglesSpider(scrapy.Spider):
 
             for id in ids:
                 yield scrapy.Request(
-                    "https://www.ingles-markets.com/storelocate/storeinfo.php?storenum="
-                    + id,
+                    "https://www.ingles-markets.com/storelocate/storeinfo.php?storenum=" + id,
                     callback=self.parse_store,
                     meta={
                         "ref": id,

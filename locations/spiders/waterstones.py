@@ -11,9 +11,7 @@ class WaterstonesSpider(scrapy.Spider):
     start_urls = ("https://www.waterstones.com/bookshops/viewall",)
 
     def parse(self, response):
-        stores = response.xpath(
-            '//div[contains(@class, "shops-directory-list")]//a/@href'
-        ).extract()
+        stores = response.xpath('//div[contains(@class, "shops-directory-list")]//a/@href').extract()
         stores = set(stores)
         for store in stores:
             yield response.follow(store, self.parse_store)
@@ -26,38 +24,24 @@ class WaterstonesSpider(scrapy.Spider):
         properties = {
             "ref": response.url.split("/")[4],
             "name": self.get_meta_property(response, "og:title"),
-            "addr_full": self.get_meta_property(
-                response, "business:contact_data:street_address"
-            ),
+            "addr_full": self.get_meta_property(response, "business:contact_data:street_address"),
             "city": self.get_meta_property(response, "business:contact_data:locality"),
-            "postcode": self.get_meta_property(
-                response, "business:contact_data:postal_code"
-            ),
+            "postcode": self.get_meta_property(response, "business:contact_data:postal_code"),
             "lat": self.get_meta_property(response, "place:location:latitude"),
             "lon": self.get_meta_property(response, "place:location:longitude"),
-            "phone": self.get_meta_property(
-                response, "business:contact_data:phone_number"
-            ),
+            "phone": self.get_meta_property(response, "business:contact_data:phone_number"),
             "opening_hours": self.get_opening_hours(response),
             "website": response.url,
         }
         yield GeojsonPointItem(**properties)
 
     def get_meta_property(self, response, property):
-        return response.xpath(
-            f'//meta[@property="{property}"]/@content'
-        ).extract_first()
+        return response.xpath(f'//meta[@property="{property}"]/@content').extract_first()
 
     def get_opening_hours(self, response):
-        days = response.xpath(
-            '//meta[@property="business:hours:day"]/@content'
-        ).extract()
-        starts = response.xpath(
-            '//meta[@property="business:hours:start"]/@content'
-        ).extract()
-        ends = response.xpath(
-            '//meta[@property="business:hours:end"]/@content'
-        ).extract()
+        days = response.xpath('//meta[@property="business:hours:day"]/@content').extract()
+        starts = response.xpath('//meta[@property="business:hours:start"]/@content').extract()
+        ends = response.xpath('//meta[@property="business:hours:end"]/@content').extract()
         o = OpeningHours()
         for i in range(len(days)):
             day = days[i][0].upper() + days[i][1]

@@ -33,9 +33,7 @@ class BarnesAndNobleSpider(scrapy.Spider):
 
         params = {"storeFilter": "all", "v": "1", "view": "map"}
 
-        with open(
-            "./locations/searchable_points/us_centroids_50mile_radius.csv"
-        ) as points:
+        with open("./locations/searchable_points/us_centroids_50mile_radius.csv") as points:
             next(points)
             for point in points:
                 _, lat, lon = point.strip().split(",")
@@ -48,16 +46,12 @@ class BarnesAndNobleSpider(scrapy.Spider):
         ranges = hours.split(",")
         for range in ranges:
             pattern = r"(.{3})[-&](.{3})\s([\d:]+)-([\d:]+)"
-            start_day, end_day, start_time, end_time = re.search(
-                pattern, range.strip()
-            ).groups()
+            start_day, end_day, start_time, end_time = re.search(pattern, range.strip()).groups()
             if ":" not in start_time:
                 start_time += ":00 AM"
             if ":" not in end_time:
                 end_time += ":00 PM"
-            for day in DAY_ORDER[
-                DAY_ORDER.index(start_day) : DAY_ORDER.index(end_day) + 1
-            ]:
+            for day in DAY_ORDER[DAY_ORDER.index(start_day) : DAY_ORDER.index(end_day) + 1]:
                 o.add_range(
                     day=DAY_MAPPING[day],
                     open_time=start_time,
@@ -67,14 +61,9 @@ class BarnesAndNobleSpider(scrapy.Spider):
         return o.as_opening_hours()
 
     def parse(self, response):
-        data = response.xpath('//div[@id="mapDiv"]/script/text()').re(
-            r"storesJson\s=\s(.*?);"
-        )
+        data = response.xpath('//div[@id="mapDiv"]/script/text()').re(r"storesJson\s=\s(.*?);")
         if not data:
-            if (
-                "No results found"
-                in response.xpath('//div[@class="content"]/h3/text()').extract_first()
-            ):
+            if "No results found" in response.xpath('//div[@class="content"]/h3/text()').extract_first():
                 return
 
         stores = json.loads(data[0])
@@ -82,9 +71,7 @@ class BarnesAndNobleSpider(scrapy.Spider):
         for store in stores:
             address = store.get("address2", None)
             if not address:
-                address = store.get(
-                    "address1"
-                )  # address1 is usually the venue/mall name
+                address = store.get("address1")  # address1 is usually the venue/mall name
 
             properties = {
                 "name": store["name"],
@@ -94,9 +81,7 @@ class BarnesAndNobleSpider(scrapy.Spider):
                 "postcode": store["zip"],
                 "phone": store["phone"],
                 "ref": store["storeId"],
-                "website": "https://stores.barnesandnoble.com/store/{}".format(
-                    store["storeId"]
-                ),
+                "website": "https://stores.barnesandnoble.com/store/{}".format(store["storeId"]),
                 "lat": float(store["location"][1]),
                 "lon": float(store["location"][0]),
             }

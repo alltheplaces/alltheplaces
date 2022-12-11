@@ -9,9 +9,7 @@ class SbarroSpider(scrapy.Spider):
     name = "sbarro"
     item_attributes = {"brand": "Sbarro", "brand_wikidata": "Q2589409"}
     allowed_domains = ["sbarro.com"]
-    start_urls = [
-        "https://sbarro.com/locations/?user_search=78749&radius=50000&count=5000"
-    ]
+    start_urls = ["https://sbarro.com/locations/?user_search=78749&radius=50000&count=5000"]
 
     def parse_store(self, response):
         try:
@@ -23,9 +21,7 @@ class SbarroSpider(scrapy.Spider):
             )
             properties = {
                 "ref": response.meta["ref"],
-                "name": response.xpath(
-                    '//*[@class="location-name "]/text()'
-                ).extract_first(),
+                "name": response.xpath('//*[@class="location-name "]/text()').extract_first(),
                 "addr_full": data["address"]["streetAddress"],
                 "city": data["address"]["addressLocality"],
                 "state": data["address"]["addressRegion"],
@@ -43,9 +39,7 @@ class SbarroSpider(scrapy.Spider):
         store_urls = response.xpath('//*[@class="location-name "]/a/@href').extract()
         ids = response.xpath('//*[@class="locations-result"]/@id').extract()
         lats = response.xpath('//*[@class="locations-result"]/@data-latitude').extract()
-        longs = response.xpath(
-            '//*[@class="locations-result"]/@data-longitude'
-        ).extract()
+        longs = response.xpath('//*[@class="locations-result"]/@data-longitude').extract()
 
         for store_url, id, lat, long in zip(store_urls, ids, lats, longs):
             store_url = "https://sbarro.com" + store_url + "/"

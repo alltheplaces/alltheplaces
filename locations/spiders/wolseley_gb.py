@@ -17,9 +17,7 @@ class WolseleyGBSpider(SitemapSpider):
             if entry["loc"].endswith(".xml"):
                 yield entry
             if m := re.search(r"\.uk/branch/(.+)/$", entry["loc"]):
-                entry[
-                    "loc"
-                ] = f"https://www.wolseley.co.uk/wcs/resources/store/10203/xstorelocator/{m.group(1)}"
+                entry["loc"] = f"https://www.wolseley.co.uk/wcs/resources/store/10203/xstorelocator/{m.group(1)}"
                 yield entry
 
     def parse(self, response, **kwargs):

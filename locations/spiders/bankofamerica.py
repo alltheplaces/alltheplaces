@@ -15,32 +15,22 @@ class BankOfAmericaSpider(scrapy.Spider):
     def parse(self, response):
         states = response.xpath('//ul//a[contains(@name, "State_")]/@href')
         for state in states:
-            yield scrapy.Request(
-                response.urljoin(state.extract()), callback=self.parse_state
-            )
+            yield scrapy.Request(response.urljoin(state.extract()), callback=self.parse_state)
 
     def parse_state(self, response):
         cities = response.xpath('//ul//a[contains(@name, "City_")]/@href')
         for city in cities:
-            yield scrapy.Request(
-                response.urljoin(city.extract()), callback=self.parse_city
-            )
+            yield scrapy.Request(response.urljoin(city.extract()), callback=self.parse_city)
 
     def parse_city(self, response):
-        centers = response.xpath(
-            '//div[@class="map-list-item"]//a[contains(@name, "View_")]/@href'
-        )
+        centers = response.xpath('//div[@class="map-list-item"]//a[contains(@name, "View_")]/@href')
 
         for center in centers:
-            yield scrapy.Request(
-                response.urljoin(center.extract()), callback=self.parse_center
-            )
+            yield scrapy.Request(response.urljoin(center.extract()), callback=self.parse_center)
 
     def parse_center(self, response):
         ref = response.url.rsplit("-", 1)[-1].split(".")[0]
-        for ldjson in response.xpath(
-            '//script[@type="application/ld+json"]//text()'
-        ).extract():
+        for ldjson in response.xpath('//script[@type="application/ld+json"]//text()').extract():
             if "SpecialAnnouncement" in ldjson:
                 # Contains broken json and is irrelevant
                 continue

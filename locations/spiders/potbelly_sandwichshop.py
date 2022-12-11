@@ -30,9 +30,7 @@ class PotbellySandwichShopSpider(Spider):
         oh = OpeningHours()
         if calendars := store.get("calendars"):
             # Look for the first calendar showing "business hours"
-            business_hours_calendar = next(
-                filter(lambda c: c["type"] == "business", calendars)
-            )
+            business_hours_calendar = next(filter(lambda c: c["type"] == "business", calendars))
 
             calendar_ranges = business_hours_calendar.get("ranges")
             first_day_seen = None

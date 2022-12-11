@@ -52,9 +52,7 @@ class DavidsBridalSpider(scrapy.Spider):
             yield get_retry_request(response.request, spider=self, reason="empty")
             return
 
-        ldjson = response.xpath(
-            '//script[@type="application/ld+json"]/text()'
-        ).extract_first()
+        ldjson = response.xpath('//script[@type="application/ld+json"]/text()').extract_first()
         # Corrupted json in holiday hours
         ldjson = re.sub(r'</?br/?>.*"$', '"', ldjson, flags=re.M)
         store_data = json.loads(ldjson)

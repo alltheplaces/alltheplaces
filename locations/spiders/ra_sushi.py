@@ -51,9 +51,7 @@ class RaSushiSpider(scrapy.spiders.SitemapSpider):
         else:
             city_state = address[-1]
             addr_dict = {
-                "street_address": ",".join(address[0:2])
-                if len(address) == 3
-                else address[0].strip(),
+                "street_address": ",".join(address[0:2]) if len(address) == 3 else address[0].strip(),
                 "city": city_state.split(",")[0].strip(),
                 "state": city_state.split(",")[1].strip().split(" ")[0].strip(),
                 "postcode": city_state.split(",")[-1].strip().split(" ")[1].strip(),

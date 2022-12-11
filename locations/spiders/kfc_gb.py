@@ -38,28 +38,15 @@ class KFCGB(Spider):
                         if day["close"] == 0:
                             day["close"] = "2359"
 
-                        oh.add_range(
-                            d, str(day["open"]), str(day["close"]), time_format="%H%M"
-                        )
+                        oh.add_range(d, str(day["open"]), str(day["close"]), time_format="%H%M")
 
                     item["opening_hours"] = oh.as_opening_hours()
                     break
 
             item["extras"] = {
-                "wheelchair": yes_or_no(
-                    any(
-                        f["name"] == "Disability Access" for f in location["facilities"]
-                    )
-                ),
-                "drive_through": yes_or_no(
-                    any(f["name"] == "Drive Thru" for f in location["facilities"])
-                ),
-                "changing_table": yes_or_no(
-                    any(
-                        f["name"] == "Baby Changing Room"
-                        for f in location["facilities"]
-                    )
-                ),
+                "wheelchair": yes_or_no(any(f["name"] == "Disability Access" for f in location["facilities"])),
+                "drive_through": yes_or_no(any(f["name"] == "Drive Thru" for f in location["facilities"])),
+                "changing_table": yes_or_no(any(f["name"] == "Baby Changing Room" for f in location["facilities"])),
             }
 
             if any(f["name"] == "Free Wifi" for f in location["facilities"]):

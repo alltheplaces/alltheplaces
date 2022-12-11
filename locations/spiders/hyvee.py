@@ -34,31 +34,22 @@ class HyVeeSpider(scrapy.Spider):
 
     def parse(self, response):
         cities = response.xpath(
-            '//select[@name="ctl00$cph_main_content$spuStoreFinderResults'
-            '$spuStoreFinder$ddlCity"]/option/@value'
+            '//select[@name="ctl00$cph_main_content$spuStoreFinderResults' '$spuStoreFinder$ddlCity"]/option/@value'
         ).extract()
         for city in cities:
             params = "?zip=&state=&city=" + city
-            yield scrapy.Request(
-                response.urljoin(params), method="GET", callback=self.parse_links
-            )
+            yield scrapy.Request(response.urljoin(params), method="GET", callback=self.parse_links)
 
     def parse_links(self, response):
 
         latlon_js = [
             x
-            for x in response.xpath(
-                '//script[@type="text/javascript"]/text()'
-            ).extract()
+            for x in response.xpath('//script[@type="text/javascript"]/text()').extract()
             if x.startswith("var map = new goo")
         ][0]
 
-        store_urls = response.xpath(
-            '//*[@storecode]/../a[contains(text(), "store details")]/@href'
-        ).extract()
-        latlons = re.findall(
-            r"position: new google.maps.LatLng\(([\d.-]+),\s?([\d.-]+)\)", latlon_js
-        )
+        store_urls = response.xpath('//*[@storecode]/../a[contains(text(), "store details")]/@href').extract()
+        latlons = re.findall(r"position: new google.maps.LatLng\(([\d.-]+),\s?([\d.-]+)\)", latlon_js)
 
         for url, latlon in zip(store_urls, latlons):
             yield scrapy.Request(
@@ -68,10 +59,8 @@ class HyVeeSpider(scrapy.Spider):
             )
 
     def parse_details(self, response):
-        raw_address = response.xpath(
-            '//div[@class="col-sm-6 util-padding-bottom-15"]/text()'
-        ).extract()
-        raw_address = list(filter(None, [l.strip() for l in raw_address]))
+        raw_address = response.xpath('//div[@class="col-sm-6 util-padding-bottom-15"]/text()').extract()
+        raw_address = list(filter(None, [line.strip() for line in raw_address]))
         raw_city = raw_address.pop(-1)
         address = " ".join(raw_address)
         match_city = re.search(r"^(.*),\s([A-Z]{2})\s([0-9]{5})$", raw_city).groups()
@@ -82,13 +71,9 @@ class HyVeeSpider(scrapy.Spider):
             '//div[@class="row util-padding-top-15"]/div[@class="col-sm-6 util-padding-bottom-15"][2]/a[1]/text()'
         ).extract()[0]
         website = response.url
-        opening_hours = self.process_hours(
-            response.xpath('//div[@id="page_content"]/p/text()').extract()
-        )
+        opening_hours = self.process_hours(response.xpath('//div[@id="page_content"]/p/text()').extract())
         link_id = website.split("s=")[-1]
-        names = response.xpath(
-            '//div[@id="page_content"]/h1/descendant-or-self::*/text()'
-        ).extract()
+        names = response.xpath('//div[@id="page_content"]/h1/descendant-or-self::*/text()').extract()
         name = " ".join(filter(None, [n.strip() for n in names]))
         # initialize latlon incase in a rare case we dont have it
         lat = ""
@@ -178,53 +163,20 @@ class HyVeeSpider(scrapy.Spider):
                         match = re.search(reg_str, matching_days[0], re.IGNORECASE)
                         if match:
                             m = match.groups()
-                            result.append(
-                                day
-                                + " "
-                                + k
-                                + ": "
-                                + str(int(m[1]) + self.am_pm(m[1], m[2]))
-                                + ":00"
-                            )
+                            result.append(day + " " + k + ": " + str(int(m[1]) + self.am_pm(m[1], m[2])) + ":00")
                         else:
-                            reg_str = (
-                                r"("
-                                + all_closed_actions
-                                + r")\s?(\d{1,2})\s(a\.m\.|p\.m\.)\s?("
-                                + vday
-                                + ")"
-                            )
+                            reg_str = r"(" + all_closed_actions + r")\s?(\d{1,2})\s(a\.m\.|p\.m\.)\s?(" + vday + ")"
                             match = re.search(reg_str, matching_days[0], re.IGNORECASE)
                             if match:
                                 m = match.groups()
-                                result.append(
-                                    day
-                                    + " "
-                                    + k
-                                    + ": "
-                                    + str(int(m[1]) + self.am_pm(m[1], m[2]))
-                                    + ":00"
-                                )
+                                result.append(day + " " + k + ": " + str(int(m[1]) + self.am_pm(m[1], m[2])) + ":00")
                             else:
-                                reg_str = (
-                                    r"("
-                                    + all_closed_actions
-                                    + r")\s?(\d{1,2})\s(a\.m\.|p\.m\.)\s?("
-                                    + vday
-                                    + ")"
-                                )
-                                match = re.search(
-                                    reg_str, matching_days[0], re.IGNORECASE
-                                )
+                                reg_str = r"(" + all_closed_actions + r")\s?(\d{1,2})\s(a\.m\.|p\.m\.)\s?(" + vday + ")"
+                                match = re.search(reg_str, matching_days[0], re.IGNORECASE)
                                 if match:
                                     m = match.groups()
                                     result.append(
-                                        day
-                                        + " "
-                                        + k
-                                        + ": "
-                                        + str(int(m[1]) + self.am_pm(m[1], m[2]))
-                                        + ":00"
+                                        day + " " + k + ": " + str(int(m[1]) + self.am_pm(m[1], m[2])) + ":00"
                                     )
                                 else:
                                     # more match can come here.

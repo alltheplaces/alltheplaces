@@ -20,9 +20,7 @@ class BuceesSpider(scrapy.Spider):
 
             hours_table = scrapy.Selector(text=store["hours"])
             days = hours_table.css("td:first-child::text").getall()
-            hours = hours_table.css(
-                "td:last-child::text, td:last-child time::text"
-            ).getall()
+            hours = hours_table.css("td:last-child::text, td:last-child time::text").getall()
 
             for day, day_hours in zip(days, hours):
                 if "Closed" in day_hours:
@@ -45,9 +43,7 @@ class BuceesSpider(scrapy.Spider):
                 city=store["city"],
                 state=store["state"],
                 postcode=store["zip"],
-                country="US"
-                if store["country"] == "United States"
-                else store["country"],
+                country="US" if store["country"] == "United States" else store["country"],
                 phone=store["phone"],
                 opening_hours=opening_hours.as_opening_hours(),
                 extras={

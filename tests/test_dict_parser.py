@@ -139,6 +139,4 @@ def test_get_variations():
     for variation in expected_variations:
         assert variation in variations
 
-    assert any(
-        "Postcode" in DictParser.get_variations(key) for key in DictParser.postcode_keys
-    )
+    assert any("Postcode" in DictParser.get_variations(key) for key in DictParser.postcode_keys)

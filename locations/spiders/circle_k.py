@@ -39,13 +39,9 @@ class CircleKSpider(scrapy.Spider):
                 "country": store["country"],
                 "lat": re.sub(r"[^\d\-\.]", "", store["latitude"]),
                 "lon": re.sub(r"[^\d\-\.]", "", store["longitude"]),
-                "website": f"https://www.circlek.com{store['url']}"
-                if store["url"]
-                else None,
+                "website": f"https://www.circlek.com{store['url']}" if store["url"] else None,
                 "brand": store["display_brand"],
-                "brand_wikidata": WIKIBRANDS.get(
-                    store["display_brand"], WIKIBRANDS["Circle K"]
-                ),
+                "brand_wikidata": WIKIBRANDS.get(store["display_brand"], WIKIBRANDS["Circle K"]),
                 "extras": {
                     "amenity:fuel": any("gas" == s["name"] for s in services) or None,
                     "fuel:diesel": any("diesel" == s["name"] for s in services) or None,
@@ -64,33 +60,19 @@ class CircleKSpider(scrapy.Spider):
         properties = response.meta["properties"]
         # Not all countries/store pages follow the same format
         if properties["country"] == "US":
-            state = response.xpath(
-                '//*[@class="heading-small"]/span[2]/text()'
-            ).extract_first()
-            postal = response.xpath(
-                '//*[@class="heading-small"]/span[3]/text()'
-            ).extract_first()
+            state = response.xpath('//*[@class="heading-small"]/span[2]/text()').extract_first()
+            postal = response.xpath('//*[@class="heading-small"]/span[3]/text()').extract_first()
         elif properties["country"] in ["CA", "Canada"]:
-            extracted = response.xpath(
-                '//*[@class="heading-small"]/span[2]/text()'
-            ).extract_first()
+            extracted = response.xpath('//*[@class="heading-small"]/span[2]/text()').extract_first()
             if extracted and len(extracted) < 4:
-                state = response.xpath(
-                    '//*[@class="heading-small"]/span[2]/text()'
-                ).extract_first()
-                postal = response.xpath(
-                    '//*[@class="heading-small"]/span[3]/text()'
-                ).extract_first()
+                state = response.xpath('//*[@class="heading-small"]/span[2]/text()').extract_first()
+                postal = response.xpath('//*[@class="heading-small"]/span[3]/text()').extract_first()
             else:
                 state = ""
-                postal = response.xpath(
-                    '//*[@class="heading-small"]/span[2]/text()'
-                ).extract_first()
+                postal = response.xpath('//*[@class="heading-small"]/span[2]/text()').extract_first()
         else:
             state = ""
-            postal = response.xpath(
-                '//*[@class="heading-small"]/span[2]/text()'
-            ).extract_first()
+            postal = response.xpath('//*[@class="heading-small"]/span[2]/text()').extract_first()
 
         properties.update(
             {

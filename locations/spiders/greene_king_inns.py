@@ -11,9 +11,7 @@ class GreeneKingInnsSpider(SitemapSpider):
         "country": "GB",
     }
     sitemap_urls = ["https://www.greenekinginns.co.uk/sitemap.xml"]
-    sitemap_rules = [
-        (r"https:\/\/www\.greenekinginns\.co\.uk\/hotels\/([-\w]+)\/$", "parse")
-    ]
+    sitemap_rules = [(r"https:\/\/www\.greenekinginns\.co\.uk\/hotels\/([-\w]+)\/$", "parse")]
 
     def parse(self, response):
         item = LinkedDataParser.parse(response, "Hotel")

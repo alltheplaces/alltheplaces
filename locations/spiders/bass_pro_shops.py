@@ -1,6 +1,8 @@
 import json
 import urllib.parse
+
 import scrapy
+
 from locations.items import GeojsonPointItem
 
 
@@ -21,9 +23,7 @@ class BassProShopsSpider(scrapy.Spider):
     def parse_store(self, response):
         main = response.xpath('//div[@id="hero"]/..')
 
-        store_id_json_text = response.xpath(
-            "//script[@class='js-map-config']/text()"
-        ).get()
+        store_id_json_text = response.xpath("//script[@class='js-map-config']/text()").get()
         # store id from JS var filter
         store_id = json.loads(store_id_json_text)["locs"][0]["id"]
 
@@ -33,17 +33,13 @@ class BassProShopsSpider(scrapy.Spider):
             "lon": main.xpath('.//*[@itemprop="longitude"]/@content').get(),
             "ref": store_id,
             "website": response.url,
-            "addr_full": main.xpath('.//*[@itemprop="streetAddress"]/span/text()')
-            .get()
-            .strip(),
+            "addr_full": main.xpath('.//*[@itemprop="streetAddress"]/span/text()').get().strip(),
             "city": main.xpath('.//*[@itemprop="addressLocality"]/text()').get(),
             "state": main.xpath('.//*[@itemprop="addressRegion"]/text()').get(),
             "postcode": main.xpath('.//*[@itemprop="postalCode"]/text()').get().strip(),
             "country": main.xpath('.//*[@itemprop="addressCountry"]/text()').get(),
             "phone": main.xpath('.//*[@itemprop="telephone"]/text()').get(),
-            "opening_hours": "; ".join(
-                main.xpath('.//*[@itemprop="openingHours"]/@content').extract()
-            ),
+            "opening_hours": "; ".join(main.xpath('.//*[@itemprop="openingHours"]/@content').extract()),
         }
 
         yield GeojsonPointItem(**properties)

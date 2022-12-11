@@ -12,11 +12,9 @@ class LloydsBankGB(SitemapSpider, StructuredDataSpider):
         "extras": Categories.BANK.value,
     }
     sitemap_urls = ["https://branches.lloydsbank.com/sitemap.xml"]
-    sitemap_rules = [
-        (r"https:\/\/branches\.lloydsbank\.com\/[-\w]+\/[-\/'\w]+$", "parse_sd")
-    ]
+    sitemap_rules = [(r"https:\/\/branches\.lloydsbank\.com\/[-\w]+\/[-\/'\w]+$", "parse_sd")]
 
     def sitemap_filter(self, entries):
         for entry in entries:
-            if not "event" in entry["loc"]:
+            if "event" not in entry["loc"]:
                 yield entry

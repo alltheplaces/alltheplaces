@@ -38,9 +38,7 @@ class IHGHotelsSpider(scrapy.spiders.SitemapSpider):
         hotel_type = response.url.split("/")[3]
         brand = self.my_brands.get(hotel_type)
         if not brand:
-            self.logger.error(
-                "no brand/dispatch for: %s / %s", hotel_type, response.url
-            )
+            self.logger.error("no brand/dispatch for: %s / %s", hotel_type, response.url)
             return
 
         if hotel_type in ["hotelindigo"]:

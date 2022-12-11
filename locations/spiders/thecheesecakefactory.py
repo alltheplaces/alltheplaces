@@ -12,6 +12,4 @@ class TheCheesecakeFactorySpider(SitemapSpider, StructuredDataSpider):
         "locations.thecheesecakefactory.com",
     ]
     sitemap_urls = ["https://locations.thecheesecakefactory.com/robots.txt"]
-    sitemap_rules = [
-        (r"https:\/\/locations\.thecheesecakefactory\.com\/.+\.html", "parse_sd")
-    ]
+    sitemap_rules = [(r"https:\/\/locations\.thecheesecakefactory\.com\/.+\.html", "parse_sd")]

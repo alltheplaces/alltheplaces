@@ -55,9 +55,9 @@ class DutchBrosSpider(scrapy.Spider):
 
             try:
                 shour, ehour = hours.split("-", 1)
-                if not ":" in shour:
+                if ":" not in shour:
                     shour = shour[:2] + ":00" + shour[2:]
-                if not ":" in ehour:
+                if ":" not in ehour:
                     ehour = ehour[:2] + ":00" + ehour[2:]
             except ValueError:
                 if hours == "Closed":

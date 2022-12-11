@@ -37,9 +37,7 @@ class DPDDESpider(scrapy.Spider):
                             "ctl00$hidScaleFactorCar": "100",
                             "ctl00$hidScaleFactorNeighbour": "100",
                             "ctl00$ContentPlaceHolder1$modShopFinder$hidPermissionError": "Bitte+aktivieren+Sie+die+Standortermittlung+in+den+Systemeinstellungen.",
-                            "ctl00$ContentPlaceHolder1$modShopFinder$txtShopSearch": result[
-                                "latitude"
-                            ]
+                            "ctl00$ContentPlaceHolder1$modShopFinder$txtShopSearch": result["latitude"]
                             + ","
                             + result["longitude"],
                             "ctl00$ContentPlaceHolder1$modShopFinder$hidShopFindMoreShopsBTN": "weitere+Paketshops",
@@ -65,37 +63,25 @@ class DPDDESpider(scrapy.Spider):
         for nr in range(lengthOfShops):
             item = GeojsonPointItem()
             name = shop.css(
-                "span#ContentPlaceHolder1_modShopFinder_repShopList_labShopName_"
-                + str(nr)
-                + "::text"
+                "span#ContentPlaceHolder1_modShopFinder_repShopList_labShopName_" + str(nr) + "::text"
             ).extract()[0]
             streetElement = shop.css(
-                "span#ContentPlaceHolder1_modShopFinder_repShopList_labShopStreet_"
-                + str(nr)
-                + "::text"
+                "span#ContentPlaceHolder1_modShopFinder_repShopList_labShopStreet_" + str(nr) + "::text"
             ).extract()[0]
             streets = streetElement.split("\xa0")
             street = streets[0]
             housenumber = streets[1]
 
             postalAndCity = (
-                shop.css(
-                    "span#ContentPlaceHolder1_modShopFinder_repShopList_labShopCity_"
-                    + str(nr)
-                    + "::text"
-                )
+                shop.css("span#ContentPlaceHolder1_modShopFinder_repShopList_labShopCity_" + str(nr) + "::text")
                 .extract()[0]
                 .split()
             )
             lat = shop.css(
-                "input#ContentPlaceHolder1_modShopFinder_repShopList_latitude_"
-                + str(nr)
-                + "::attr(value)"
+                "input#ContentPlaceHolder1_modShopFinder_repShopList_latitude_" + str(nr) + "::attr(value)"
             ).extract()[0]
             lng = shop.css(
-                "input#ContentPlaceHolder1_modShopFinder_repShopList_longitude_"
-                + str(nr)
-                + "::attr(value)"
+                "input#ContentPlaceHolder1_modShopFinder_repShopList_longitude_" + str(nr) + "::attr(value)"
             ).extract()[0]
             plz = postalAndCity[0]
             city = postalAndCity[1]
@@ -133,11 +119,7 @@ class DPDDESpider(scrapy.Spider):
                 "__EVENTTARGET": "ctl00$ContentPlaceHolder1$modShopFinder$repShopList$ctl0"
                 + str(nr)
                 + "$btnSelectShop",
-                "ctl00$ContentPlaceHolder1$modShopFinder$txtShopSearch": result[
-                    "latitude"
-                ]
-                + ","
-                + result["longitude"],
+                "ctl00$ContentPlaceHolder1$modShopFinder$txtShopSearch": result["latitude"] + "," + result["longitude"],
             }
 
             rq = FormRequest.from_response(
@@ -159,15 +141,11 @@ class DPDDESpider(scrapy.Spider):
         if len(shops) > 0:
             for nr in range(7):
                 day = shops.css(
-                    "span#ContentPlaceHolder1_modShopFinder_repBusinessHours_labBusinessDay_"
-                    + str(nr)
-                    + "::text"
+                    "span#ContentPlaceHolder1_modShopFinder_repBusinessHours_labBusinessDay_" + str(nr) + "::text"
                 ).extract()[0]
                 openningHours = (
                     shops.css(
-                        "span#ContentPlaceHolder1_modShopFinder_repBusinessHours_labBusinessHour_"
-                        + str(nr)
-                        + "::text"
+                        "span#ContentPlaceHolder1_modShopFinder_repBusinessHours_labBusinessHour_" + str(nr) + "::text"
                     )
                     .extract()[0]
                     .split(" ")

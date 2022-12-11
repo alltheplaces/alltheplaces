@@ -24,9 +24,7 @@ class JbHifiSpider(scrapy.Spider):
         opening_hours = OpeningHours()
         for day in store_hours:
             if "NULL" not in day["OpeningTime"] and "NULL" not in day["ClosingTime"]:
-                opening_hours.add_range(
-                    DAYS[day["DayOfWeek"]], day["OpeningTime"], day["ClosingTime"]
-                )
+                opening_hours.add_range(DAYS[day["DayOfWeek"]], day["OpeningTime"], day["ClosingTime"])
 
         return opening_hours.as_opening_hours()
 
@@ -54,9 +52,7 @@ class JbHifiSpider(scrapy.Spider):
                 "lat": store["_geoloc"]["lat"],
                 "lon": store["_geoloc"]["lng"],
                 "phone": store["phone"],
-                "opening_hours": self.process_trading_hours(
-                    store["normalTradingHours"]
-                ),
+                "opening_hours": self.process_trading_hours(store["normalTradingHours"]),
             }
 
             yield GeojsonPointItem(**properties)

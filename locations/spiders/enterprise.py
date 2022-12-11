@@ -14,8 +14,7 @@ class EnterpriseSpider(scrapy.Spider):
             if u.startswith("/en/car-rental/locations"):
                 country = u.rsplit("/", 1)[1].rsplit(".", 1)[0]
                 yield scrapy.Request(
-                    "https://www.enterprise.com/en/car-rental/locations/%s/_jcr_content.mapdata.js"
-                    % country,
+                    "https://www.enterprise.com/en/car-rental/locations/%s/_jcr_content.mapdata.js" % country,
                     callback=self.parse_country,
                 )
 

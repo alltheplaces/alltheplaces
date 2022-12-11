@@ -35,9 +35,7 @@ class UspsCollectionBoxesSpider(scrapy.Spider):
 
     def start_requests(self):
 
-        with open(
-            "./locations/searchable_points/us_centroids_100mile_radius.csv"
-        ) as points:
+        with open("./locations/searchable_points/us_centroids_100mile_radius.csv") as points:
             next(points)
             for point in points:
                 _, lat, lon = tuple(map(float, point.strip().split(",")))
@@ -161,7 +159,6 @@ class UspsCollectionBoxesSpider(scrapy.Spider):
                 "country": "US",
                 "lat": store["latitude"],
                 "lon": store["longitude"],
-                "name": store["locationName"],
                 "extras": {},
             }
 

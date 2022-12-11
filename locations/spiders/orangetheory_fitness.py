@@ -42,9 +42,7 @@ class OrangetheoryFitnessSpider(scrapy.Spider):
 
         for location in locations:
             # Handle junk data
-            if (
-                " live" in location[0]["studioName"].lower()
-            ):  # Skip Orangetheory Live virtual records
+            if " live" in location[0]["studioName"].lower():  # Skip Orangetheory Live virtual records
                 continue
             if location[0]["studioLocation"]["physicalAddress"] in [
                 "*",
@@ -60,13 +58,9 @@ class OrangetheoryFitnessSpider(scrapy.Spider):
                 continue
 
             # Handle coordinates
-            if (
-                float(location[0]["studioLocation"]["latitude"]) < -55.0
-            ):  # Drop handful of bad coords in Antarctica
+            if float(location[0]["studioLocation"]["latitude"]) < -55.0:  # Drop handful of bad coords in Antarctica
                 lat = lon = ""
-            elif (
-                float(location[0]["studioLocation"]["longitude"]) < -180.0
-            ):  # Drop handful of bad coords
+            elif float(location[0]["studioLocation"]["longitude"]) < -180.0:  # Drop handful of bad coords
                 lat = lon = ""
             else:
                 lat = location[0]["studioLocation"]["latitude"]

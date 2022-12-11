@@ -12,11 +12,9 @@ class HalifaxGB(SitemapSpider, StructuredDataSpider):
         "extras": Categories.BANK.value,
     }
     sitemap_urls = ["https://branches.halifax.co.uk/sitemap.xml"]
-    sitemap_rules = [
-        (r"https:\/\/branches\.halifax\.co\.uk\/[-'\w]+\/[-'\/\w]+$", "parse_sd")
-    ]
+    sitemap_rules = [(r"https:\/\/branches\.halifax\.co\.uk\/[-'\w]+\/[-'\/\w]+$", "parse_sd")]
 
     def sitemap_filter(self, entries):
         for entry in entries:
-            if not "event" in entry["loc"].lower():
+            if "event" not in entry["loc"].lower():
                 yield entry

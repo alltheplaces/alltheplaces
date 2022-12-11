@@ -27,9 +27,7 @@ class LidlFRSpider(scrapy.Spider):
         page_size = 250
 
         while offset < total_count:
-            yield scrapy.Request(
-                self.base_url + f"&$top={page_size}&$skip={offset}&$format=json"
-            )
+            yield scrapy.Request(self.base_url + f"&$top={page_size}&$skip={offset}&$format=json")
             offset += page_size
 
     def parse(self, response):

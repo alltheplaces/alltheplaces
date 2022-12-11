@@ -7,9 +7,7 @@ from locations.dict_parser import DictParser
 class ColruytSpider(scrapy.Spider):
     name = "colruyt"
     item_attributes = {"brand": "Colruyt", "brand_wikidata": "Q2363991"}
-    start_urls = [
-        "https://ecgplacesmw.colruyt.be/ecgplacesmw/v3/nl/places/searchPlaces?ensignId=8&placeTypeId=1"
-    ]
+    start_urls = ["https://ecgplacesmw.colruyt.be/ecgplacesmw/v3/nl/places/searchPlaces?ensignId=8&placeTypeId=1"]
 
     def parse(self, response):
         for store in response.json():

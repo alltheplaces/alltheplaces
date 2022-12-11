@@ -17,9 +17,7 @@ class BuffaloWildWingsSpider(scrapy.Spider):
             "x_client_secret": "786c1B856fA542C4b383F3E8Cdd36f3f",
         }
 
-        with open(
-            "./locations/searchable_points/us_centroids_50mile_radius.csv"
-        ) as points:
+        with open("./locations/searchable_points/us_centroids_50mile_radius.csv") as points:
             next(points)
             for point in points:
                 _, lat, lon = point.strip().split(",")

@@ -27,28 +27,20 @@ class FarmersHomeFurnitureSpider(scrapy.Spider):
                     "phone": store_data[3],
                 }
 
-                store_link = store.xpath("./@onclick").re_first(
-                    "/stores/[0-9a-z-]+.inc"
-                )
+                store_link = store.xpath("./@onclick").re_first("/stores/[0-9a-z-]+.inc")
                 store_url = f"https://www.farmershomefurniture.com{store_link}"
 
-                yield scrapy.Request(
-                    store_url, callback=self.parse_store, cb_kwargs=properties
-                )
+                yield scrapy.Request(store_url, callback=self.parse_store, cb_kwargs=properties)
 
     def parse_store(self, response, city, state, address, phone):
         opening_hours = OpeningHours()
-        store_hours = response.xpath(
-            '//div[@class="workspacearea"]/div/div/p/text()'
-        ).extract()[2:]
+        store_hours = response.xpath('//div[@class="workspacearea"]/div/div/p/text()').extract()[2:]
 
         for hours in store_hours:
             if "closed" in hours.lower():
                 continue
             hours = hours.strip()
-            if m := re.match(
-                r"(\w{3}):\s?(\d+)(:\d+)?(AM|PM)?-(\d+)(:\d+)?(AM|PM)?", hours
-            ):
+            if m := re.match(r"(\w{3}):\s?(\d+)(:\d+)?(AM|PM)?-(\d+)(:\d+)?(AM|PM)?", hours):
                 (
                     day,
                     start_hour,
@@ -65,9 +57,7 @@ class FarmersHomeFurnitureSpider(scrapy.Spider):
                     time_format="%I:%M%p",
                 )
 
-        store_coordinates = (
-            response.xpath("//script/text()").re_first("lat .*[\n].*").split(";")[:2]
-        )
+        store_coordinates = response.xpath("//script/text()").re_first("lat .*[\n].*").split(";")[:2]
 
         properties = {
             "street_address": address,

@@ -12,13 +12,9 @@ class StarbucksEUSpider(scrapy.Spider):
     allowed_domains = ["starbucks.co.uk"]
 
     def start_requests(self):
-        base_url = (
-            "https://www.starbucks.co.uk/api/v1/store-finder?latLng={lat}%2C{lon}"
-        )
+        base_url = "https://www.starbucks.co.uk/api/v1/store-finder?latLng={lat}%2C{lon}"
 
-        with open(
-            "./locations/searchable_points/eu_centroids_20km_radius_country.csv"
-        ) as points:
+        with open("./locations/searchable_points/eu_centroids_20km_radius_country.csv") as points:
             reader = csv.DictReader(points)
             for point in reader:
                 yield scrapy.http.Request(

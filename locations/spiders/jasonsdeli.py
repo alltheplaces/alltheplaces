@@ -25,12 +25,8 @@ class JasonsDeliSpider(scrapy.Spider):
             ).groups()
             opening_hours.add_range(
                 day=day[0:2],
-                open_time=datetime.datetime.strptime(open_time, "%I:%M %p").strftime(
-                    "%H:%M"
-                ),
-                close_time=datetime.datetime.strptime(close_time, "%I:%M %p").strftime(
-                    "%H:%M"
-                ),
+                open_time=datetime.datetime.strptime(open_time, "%I:%M %p").strftime("%H:%M"),
+                close_time=datetime.datetime.strptime(close_time, "%I:%M %p").strftime("%H:%M"),
             )
         return opening_hours.as_opening_hours()
 
@@ -38,39 +34,21 @@ class JasonsDeliSpider(scrapy.Spider):
         ref = re.search(r".+/(.+)", response.url).group(1)
 
         properties = {
-            "addr_full": response.xpath('//div[@class="address"]/text()')
-            .extract_first()[0]
-            .split("\n")[0],
-            "city": response.xpath('//div[@class="address"]/text()')
-            .extract()[-1]
-            .split(",")[0],
-            "state": response.xpath('//div[@class="address"]/text()')
-            .extract()[-1]
-            .split(", ")[1]
-            .split(" ")[-2],
-            "postcode": response.xpath('//div[@class="address"]/text()')
-            .extract()[-1]
-            .split(", ")[1]
-            .split(" ")[-1],
+            "addr_full": response.xpath('//div[@class="address"]/text()').extract_first()[0].split("\n")[0],
+            "city": response.xpath('//div[@class="address"]/text()').extract()[-1].split(",")[0],
+            "state": response.xpath('//div[@class="address"]/text()').extract()[-1].split(", ")[1].split(" ")[-2],
+            "postcode": response.xpath('//div[@class="address"]/text()').extract()[-1].split(", ")[1].split(" ")[-1],
             "ref": ref,
             "website": response.url,
             "phone": response.xpath('//a[@class="cnphone"]/text()').extract_first(),
         }
 
-        hours = self.parse_hours(
-            response.xpath('//div[@class="loc-hours"]/p/text()').extract()
-        )
+        hours = self.parse_hours(response.xpath('//div[@class="loc-hours"]/p/text()').extract())
 
         try:
-            bus_name = (
-                response.xpath('//div[@class="loc-title"]/text()')
-                .extract()[0]
-                .split(": ")[1]
-            )
+            bus_name = response.xpath('//div[@class="loc-title"]/text()').extract()[0].split(": ")[1]
         except IndexError:
-            bus_name = response.xpath(
-                '//div[@class="loc-title"]/text()'
-            ).extract_first()
+            bus_name = response.xpath('//div[@class="loc-title"]/text()').extract_first()
         properties["name"] = bus_name
 
         if hours:

@@ -5,6 +5,7 @@ from urllib.parse import urljoin
 
 import lxml
 import parsel
+import scrapy
 
 
 def token_split(val):
@@ -261,9 +262,7 @@ def convert_item(item):
         # parse the correct item later down. See test_multiple_addresses
         return
     for k, v in item["properties"].items():
-        ld[k] = filter(
-            None, [convert_item(val) if isinstance(val, dict) else val for val in v]
-        )
+        ld[k] = filter(None, [convert_item(val) if isinstance(val, dict) else val for val in v])
         ld[k] = remove_duplicates(ld[k])
         if len(ld[k]) == 1:
             ld[k] = ld[k][0]

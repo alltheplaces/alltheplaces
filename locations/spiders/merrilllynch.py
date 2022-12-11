@@ -33,9 +33,7 @@ class MerrillLynchSpider(scrapy.Spider):
             yield GeojsonPointItem(**properties)
 
     def parse(self, response):
-        states = response.xpath(
-            '//section[@class="state-view"]//li/a/@data-state-abbrev'
-        ).extract()
+        states = response.xpath('//section[@class="state-view"]//li/a/@data-state-abbrev').extract()
 
         for state in states:
             url = "https://fa.ml.com/locator/api/InternalSearch"

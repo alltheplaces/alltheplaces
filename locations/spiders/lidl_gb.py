@@ -42,9 +42,7 @@ class LidlGBSpider(scrapy.Spider):
 
         for store in stores:
 
-            if match := re.match(
-                r"(\w{1,2}\d{1,2}\w?) (\d|O)(\w{2})", store["Locality"].upper()
-            ):
+            if match := re.match(r"(\w{1,2}\d{1,2}\w?) (\d|O)(\w{2})", store["Locality"].upper()):
                 if match.group(2) == "O":
                     postcode = match.group(1) + " 0" + match.group(3)
                 else:

@@ -42,11 +42,12 @@ class OliveGardenSpider(scrapy.Spider):
     @staticmethod
     def parse_hours(data):
         oh = OpeningHours()
+
         # Sun = 1, Sat = 7
-        day = lambda d: data["daysOfWeeks"][d - 1][:2].title()
+        def day(d):
+            return data["daysOfWeeks"][d - 1][:2].title()
+
         for row in data["weeklyHours"]:
             if row["hourTypeDesc"] == "Hours of Operations":
-                oh.add_range(
-                    day(row["dayOfWeek"]), row["startTime"], row["endTime"], "%I:%M%p"
-                )
+                oh.add_range(day(row["dayOfWeek"]), row["startTime"], row["endTime"], "%I:%M%p")
         return oh.as_opening_hours()

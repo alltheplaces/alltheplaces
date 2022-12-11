@@ -29,27 +29,13 @@ class HoulihansSpider(scrapy.Spider):
         regex = re.compile(r"http(s://|://www.)houlihans.com/my-houlihans/\S+")
         if re.search(regex, response.request.url):
             properties = {
-                "name": response.xpath(
-                    '//span[@itemprop="name"]/text()'
-                ).extract_first(),
-                "ref": response.xpath(
-                    '//span[@itemprop="name"]/text()'
-                ).extract_first(),
-                "addr_full": response.xpath(
-                    '//span[@itemprop="streetAddress"]/text()'
-                ).extract_first(),
-                "city": response.xpath(
-                    '//span[@itemprop="addressLocality"]/text()'
-                ).extract_first(),
-                "state": response.xpath(
-                    '//span[@itemprop="addressRegion"]/text()'
-                ).extract_first(),
-                "postcode": response.xpath(
-                    '//span[@itemprop="postalCode"]/text()'
-                ).extract_first(),
-                "phone": response.xpath(
-                    '//span[@itemprop="telephone"]/a/text()'
-                ).extract_first(),
+                "name": response.xpath('//span[@itemprop="name"]/text()').extract_first(),
+                "ref": response.xpath('//span[@itemprop="name"]/text()').extract_first(),
+                "addr_full": response.xpath('//span[@itemprop="streetAddress"]/text()').extract_first(),
+                "city": response.xpath('//span[@itemprop="addressLocality"]/text()').extract_first(),
+                "state": response.xpath('//span[@itemprop="addressRegion"]/text()').extract_first(),
+                "postcode": response.xpath('//span[@itemprop="postalCode"]/text()').extract_first(),
+                "phone": response.xpath('//span[@itemprop="telephone"]/a/text()').extract_first(),
                 "website": response.request.url,
                 "opening_hours": " ".join(
                     str(

@@ -42,36 +42,22 @@ class HalfPriceBooksSpider(scrapy.Spider):
 
     def parse_store(self, response):
         ref = re.search(r".+/(.+)", response.url).group(1)
-        address = response.xpath(
-            '//div[@class="font-large font-pn-reg"]/div[1]/text()'
-        ).extract_first()
+        address = response.xpath('//div[@class="font-large font-pn-reg"]/div[1]/text()').extract_first()
         if address is None:
             return
         address = address.strip()
 
         properties = {
-            "name": response.xpath(
-                '//h1[@class="store-details-name"]/text()'
-            ).extract_first(),
+            "name": response.xpath('//h1[@class="store-details-name"]/text()').extract_first(),
             "addr_full": address,
-            "lat": float(
-                response.xpath(
-                    '//div[@class="stock_location"]/@data-lat'
-                ).extract_first()
-            ),
-            "lon": float(
-                response.xpath(
-                    '//div[@class="stock_location"]/@data-lng'
-                ).extract_first()
-            ),
+            "lat": float(response.xpath('//div[@class="stock_location"]/@data-lat').extract_first()),
+            "lon": float(response.xpath('//div[@class="stock_location"]/@data-lng').extract_first()),
             "phone": response.xpath('//div[@class="mts"]/text()').extract_first(),
             "ref": ref,
             "website": response.url,
         }
 
-        hours = self.parse_hours(
-            response.xpath('//ul[@class="store-details-hours mts"]/li/text()').extract()
-        )
+        hours = self.parse_hours(response.xpath('//ul[@class="store-details-hours mts"]/li/text()').extract())
 
         split_addr = address.split(",")
         if len(split_addr) == 3:
@@ -125,24 +111,18 @@ class HalfPriceBooksSpider(scrapy.Spider):
                 for day in day_by_day:
                     open_time = convert_24hour(hours.split("-")[0].strip())
                     close_time = convert_24hour(hours.split("-")[1].strip())
-                    opening_hours.add_range(
-                        day=day, open_time=open_time, close_time=close_time
-                    )
+                    opening_hours.add_range(day=day, open_time=open_time, close_time=close_time)
             elif days.split()[0:2] == ["Every", "day"]:
                 for day in day_list:
                     hours = days.split(None, 2)[2]
                     open_time = convert_24hour(hours.split("-")[0].strip())
                     close_time = convert_24hour(hours.split("-")[1].strip())
-                    opening_hours.add_range(
-                        day=day, open_time=open_time, close_time=close_time
-                    )
+                    opening_hours.add_range(day=day, open_time=open_time, close_time=close_time)
             else:
                 day = day_list[day_mapping[days.split()[0]]]
                 hours = days.split(None, 1)[1]
                 open_time = convert_24hour(hours.split("-")[0].strip())
                 close_time = convert_24hour(hours.split("-")[1].strip())
-                opening_hours.add_range(
-                    day=day, open_time=open_time, close_time=close_time
-                )
+                opening_hours.add_range(day=day, open_time=open_time, close_time=close_time)
 
         return opening_hours.as_opening_hours()

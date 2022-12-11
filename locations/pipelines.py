@@ -86,11 +86,9 @@ class CountryCodeCleanUpPipeline:
 
             # Still no country set, try an offline reverse geocoder.
             lat, lon = item.get("lat"), item.get("lon")
-            if lat != None and lon != None:
+            if lat is not None and lon is not None:
                 if c := reverse_geocode.search([(lat, lon)]):
-                    spider.crawler.stats.inc_value(
-                        "atp/field/country/from_reverse_geocoding"
-                    )
+                    spider.crawler.stats.inc_value("atp/field/country/from_reverse_geocoding")
                     item["country"] = c[0]["country_code"]
 
         return item
@@ -116,9 +114,7 @@ class PhoneCleanUpPipeline:
         try:
             ph = phonenumbers.parse(phone, country)
             if phonenumbers.is_valid_number(ph):
-                return phonenumbers.format_number(
-                    ph, phonenumbers.PhoneNumberFormat.INTERNATIONAL
-                )
+                return phonenumbers.format_number(ph, phonenumbers.PhoneNumberFormat.INTERNATIONAL)
         except NumberParseException:
             pass
         spider.crawler.stats.inc_value("atp/field/phone/invalid")
@@ -129,15 +125,11 @@ class ExtractGBPostcodePipeline:
     def process_item(self, item, spider):
         if item.get("country") == "GB":
             if item.get("addr_full") and not item.get("postcode"):
-                postcode = re.search(
-                    r"(\w{1,2}\d{1,2}\w? \d\w{2})", item["addr_full"].upper()
-                )
+                postcode = re.search(r"(\w{1,2}\d{1,2}\w? \d\w{2})", item["addr_full"].upper())
                 if postcode:
                     item["postcode"] = postcode.group(1)
                 else:
-                    postcode = re.search(
-                        r"(\w{1,2}\d{1,2}\w?) O(\w{2})", item["addr_full"].upper()
-                    )
+                    postcode = re.search(r"(\w{1,2}\d{1,2}\w?) O(\w{2})", item["addr_full"].upper())
                     if postcode:
                         item["postcode"] = postcode.group(1) + " 0" + postcode.group(2)
 
@@ -151,6 +143,16 @@ class AssertURLSchemePipeline:
                 item["image"] = "https:" + item["image"]
 
         return item
+
+
+def check_field(item, spider, param, allowed_types, match_regex=None):
+    if val := item.get(param):
+        if not isinstance(val, *allowed_types):
+            spider.crawler.stats.inc_value(f"atp/field/{param}/wrong_type")
+        elif match_regex and not match_regex.match(val):
+            spider.crawler.stats.inc_value(f"atp/field/{param}/invalid")
+    else:
+        spider.crawler.stats.inc_value(f"atp/field/{param}/missing")
 
 
 class CheckItemPropertiesPipeline:
@@ -177,30 +179,17 @@ class CheckItemPropertiesPipeline:
     min_lon = -180.0
     max_lon = 180.0
 
-    def process_item(self, item, spider):
-        if brand_wikidata := item.get("brand_wikidata"):
-            if not isinstance(brand_wikidata, str):
-                spider.crawler.stats.inc_value("atp/field/brand_wikidata/wrong_type")
-            elif not self.wikidata_regex.match(brand_wikidata):
-                spider.crawler.stats.inc_value("atp/field/brand_wikidata/invalid")
-        else:
-            spider.crawler.stats.inc_value("atp/field/brand_wikidata/missing")
-
-        if website := item.get("website"):
-            if not isinstance(website, str):
-                spider.crawler.stats.inc_value("atp/field/website/wrong_type")
-            elif not self.url_regex.match(website):
-                spider.crawler.stats.inc_value("atp/field/website/invalid")
-        else:
-            spider.crawler.stats.inc_value("atp/field/website/missing")
-
-        if image := item.get("image"):
-            if not isinstance(image, str):
-                spider.crawler.stats.inc_value("atp/field/image/wrong_type")
-            elif not self.url_regex.match(image):
-                spider.crawler.stats.inc_value("atp/field/image/invalid")
-        else:
-            spider.crawler.stats.inc_value("atp/field/image/missing")
+    def process_item(self, item, spider):  # noqa: C901
+        check_field(item, spider, "brand_wikidata", allowed_types=(str,), match_regex=self.wikidata_regex)
+        check_field(item, spider, "website", (str,), self.url_regex)
+        check_field(item, spider, "image", (str,), self.url_regex)
+        check_field(item, spider, "email", (str,), self.email_regex)
+        check_field(item, spider, "street_address", (str,))
+        check_field(item, spider, "city", (str,))
+        check_field(item, spider, "state", (str,))
+        check_field(item, spider, "postcode", (str,))
+        check_field(item, spider, "country", (str,))
+        check_field(item, spider, "brand", (str,))
 
         if lat := item.get("lat"):
             try:
@@ -225,67 +214,20 @@ class CheckItemPropertiesPipeline:
                 spider.crawler.stats.inc_value("atp/field/lon/invalid")
             item["lon"] = lon
 
-        if email := item.get("email"):
-            if not isinstance(email, str):
-                spider.crawler.stats.inc_value("atp/field/email/wrong_type")
-            elif not self.email_regex.match(email):
-                spider.crawler.stats.inc_value("atp/field/email/invalid")
-        else:
-            spider.crawler.stats.inc_value("atp/field/email/missing")
-
         if twitter := item.get("twitter"):
             if not isinstance(twitter, str):
                 spider.crawler.stats.inc_value("atp/field/twitter/wrong_type")
-            elif not (
-                self.url_regex.match(twitter) and "twitter.com" in twitter
-            ) and not self.twitter_regex.match(twitter):
+            elif not (self.url_regex.match(twitter) and "twitter.com" in twitter) and not self.twitter_regex.match(
+                twitter
+            ):
                 spider.crawler.stats.inc_value("atp/field/twitter/invalid")
         else:
             spider.crawler.stats.inc_value("atp/field/twitter/missing")
 
-        if street_address := item.get("street_address"):
-            if not isinstance(street_address, str):
-                spider.crawler.stats.inc_value("atp/field/street_address/wrong_type")
-        else:
-            spider.crawler.stats.inc_value("atp/field/street_address/missing")
-
-        if city := item.get("city"):
-            if not isinstance(city, str):
-                spider.crawler.stats.inc_value("atp/field/city/wrong_type")
-        else:
-            spider.crawler.stats.inc_value("atp/field/city/missing")
-
-        if postcode := item.get("postcode"):
-            if not isinstance(postcode, str):
-                spider.crawler.stats.inc_value("atp/field/postcode/wrong_type")
-        else:
-            spider.crawler.stats.inc_value("atp/field/postcode/missing")
-
-        if brand := item.get("brand"):
-            if not isinstance(brand, str):
-                spider.crawler.stats.inc_value("atp/field/brand/wrong_type")
-        else:
-            spider.crawler.stats.inc_value("atp/field/brand/missing")
-
-        if country := item.get("country"):
-            if not isinstance(country, str):
-                spider.crawler.stats.inc_value("atp/field/country/wrong_type")
-        else:
-            spider.crawler.stats.inc_value("atp/field/country/missing")
-
-        if state := item.get("state"):
-            if not isinstance(state, str):
-                spider.crawler.stats.inc_value("atp/field/state/wrong_type")
-        else:
-            spider.crawler.stats.inc_value("atp/field/state/missing")
-
         if opening_hours := item.get("opening_hours"):
             if not isinstance(opening_hours, str):
                 spider.crawler.stats.inc_value("atp/field/opening_hours/wrong_type")
-            elif (
-                not self.opening_hours_regex.match(opening_hours)
-                and opening_hours != "24/7"
-            ):
+            elif not self.opening_hours_regex.match(opening_hours) and opening_hours != "24/7":
                 spider.crawler.stats.inc_value("atp/field/opening_hours/invalid")
         else:
             spider.crawler.stats.inc_value("atp/field/opening_hours/missing")

@@ -17,9 +17,7 @@ class ReiSpider(SitemapSpider, StructuredDataSpider):
     wanted_types = ["Store"]
 
     def inspect_item(self, item, response):
-        hours = json.loads(
-            response.xpath('//script[@id="store-schema"]/text()').extract_first()
-        )["openingHours"]
+        hours = json.loads(response.xpath('//script[@id="store-schema"]/text()').extract_first())["openingHours"]
         for i, h in enumerate(hours):
             hours[i] = (
                 h.replace("Mon", "Mo")

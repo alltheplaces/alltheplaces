@@ -98,9 +98,7 @@ class NeimanMarcusSpider(scrapy.Spider):
                 "lon": lng,
             }
             hours = self.parse_hours(
-                store.xpath(
-                    './div[@class="grid-40 tablet-grid-50 grid-parent store-hours directory"]/table/tr'
-                )
+                store.xpath('./div[@class="grid-40 tablet-grid-50 grid-parent store-hours directory"]/table/tr')
             )
             if hours:
                 properties["opening_hours"] = hours

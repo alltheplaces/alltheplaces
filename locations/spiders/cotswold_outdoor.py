@@ -11,9 +11,7 @@ class CotswoldOutdoorGB(SitemapSpider, StructuredDataSpider):
         "country": "GB",
     }
     sitemap_urls = ["https://www.cotswoldoutdoor.com/sitemap/store-1.xml"]
-    sitemap_rules = [
-        (r"https:\/\/www\.cotswoldoutdoor\.com\/stores\/([-\w]+)\.html$", "parse_sd")
-    ]
+    sitemap_rules = [(r"https:\/\/www\.cotswoldoutdoor\.com\/stores\/([-\w]+)\.html$", "parse_sd")]
     wanted_types = ["LocalBusiness"]
 
     def inspect_item(self, item, response):

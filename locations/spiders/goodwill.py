@@ -22,9 +22,7 @@ class GoodwillSpider(scrapy.Spider):
     download_delay = 0.2
 
     def start_requests(self):
-        with open(
-            "./locations/searchable_points/us_centroids_25mile_radius.csv"
-        ) as points:
+        with open("./locations/searchable_points/us_centroids_25mile_radius.csv") as points:
             reader = csv.DictReader(points)
             for point in reader:
                 # Unable to find a way to specify a search radius

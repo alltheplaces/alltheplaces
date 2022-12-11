@@ -16,7 +16,7 @@ class BestBuySpider(scrapy.Spider):
         o = OpeningHours()
 
         for hour in hours:
-            if hour.get("holidayHoursIsRegular") == False:
+            if not hour.get("holidayHoursIsRegular"):
                 continue
 
             short_day = hour["day"].title()[:2]
@@ -30,42 +30,24 @@ class BestBuySpider(scrapy.Spider):
         return o.as_opening_hours()
 
     def parse_location(self, response):
-        opening_hours = (
-            response.css(".js-location-hours").xpath("@data-days").extract_first()
-        )
+        opening_hours = response.css(".js-location-hours").xpath("@data-days").extract_first()
         if opening_hours:
             opening_hours = json.loads(opening_hours)
             opening_hours = self.normalize_hours(opening_hours)
 
         name = response.xpath('//span[@id="location-name"]/text()').extract_first()
         if not name.strip():
-            name = "".join(
-                response.xpath('//span[@id="location-name"]//text()').extract()
-            )
+            name = "".join(response.xpath('//span[@id="location-name"]//text()').extract())
 
         props = {
             "name": name,
-            "brand": "Pacific Sales Kitchen & Home"
-            if "Pacific Sales" in name
-            else self.item_attributes["brand"],
-            "addr_full": response.xpath(
-                '//meta[@itemprop="streetAddress"]/@content'
-            ).extract_first(),
-            "lat": float(
-                response.xpath('//meta[@itemprop="latitude"]/@content').extract_first()
-            ),
-            "lon": float(
-                response.xpath('//meta[@itemprop="longitude"]/@content').extract_first()
-            ),
-            "city": response.xpath(
-                '//span[@class="c-address-city"]/text()'
-            ).extract_first(),
-            "postcode": response.xpath(
-                '//span[@class="c-address-postal-code"]/text()'
-            ).extract_first(),
-            "state": response.xpath(
-                '//abbr[@class="c-address-state"]/text()'
-            ).extract_first(),
+            "brand": "Pacific Sales Kitchen & Home" if "Pacific Sales" in name else self.item_attributes["brand"],
+            "addr_full": response.xpath('//meta[@itemprop="streetAddress"]/@content').extract_first(),
+            "lat": float(response.xpath('//meta[@itemprop="latitude"]/@content').extract_first()),
+            "lon": float(response.xpath('//meta[@itemprop="longitude"]/@content').extract_first()),
+            "city": response.xpath('//span[@class="c-address-city"]/text()').extract_first(),
+            "postcode": response.xpath('//span[@class="c-address-postal-code"]/text()').extract_first(),
+            "state": response.xpath('//abbr[@class="c-address-state"]/text()').extract_first(),
             "phone": response.xpath(
                 '//span[@class="c-phone-number-span c-phone-main-number-span"]/text()'
             ).extract_first(),
@@ -76,23 +58,15 @@ class BestBuySpider(scrapy.Spider):
         return GeojsonPointItem(**props)
 
     def parse(self, response):
-        locations = response.xpath(
-            '//a[@class="c-directory-list-content-item-link"]/@href'
-        ).extract()
+        locations = response.xpath('//a[@class="c-directory-list-content-item-link"]/@href').extract()
         if not locations:
-            stores = response.xpath(
-                '//div[@class="c-LocationGrid"]//a[@class="Link Teaser-titleLink"]/@href'
-            ).extract()
+            stores = response.xpath('//div[@class="c-LocationGrid"]//a[@class="Link Teaser-titleLink"]/@href').extract()
             if not stores:
                 yield self.parse_location(response)
             for store in stores:
                 if store.endswith("/magnolia.html"):  # store within a store
                     continue
-                yield scrapy.Request(
-                    url=response.urljoin(store), callback=self.parse_location
-                )
+                yield scrapy.Request(url=response.urljoin(store), callback=self.parse_location)
         else:
             for location in locations:
-                yield scrapy.Request(
-                    url=response.urljoin(location), callback=self.parse
-                )
+                yield scrapy.Request(url=response.urljoin(location), callback=self.parse)

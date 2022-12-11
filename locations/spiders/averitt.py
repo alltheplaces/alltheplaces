@@ -1,6 +1,7 @@
 import scrapy
-from locations.items import GeojsonPointItem
+
 from locations.google_url import extract_google_position
+from locations.items import GeojsonPointItem
 
 
 class AverittSpider(scrapy.spiders.SitemapSpider):
@@ -28,20 +29,20 @@ class AverittSpider(scrapy.spiders.SitemapSpider):
         ).get()
 
         # 2
-        if city == None:
+        if city is None:
             address_full = response.xpath(
                 "/html/body/div[2]/div/div[1]/div/div/span/div[4]/div/div/div/div[2]/div/div/p[1]/span[2]/text()"
             ).get()
             city_state_postcode = response.xpath(
                 "/html/body/div[2]/div/div[1]/div/div/span/div[4]/div/div/div/div[2]/div/div/p[1]/span[2]/text()"
             ).get()
-            if address_full != None:
+            if address_full is not None:
                 postcode = city_state_postcode.split()[-1]
                 state = city_state_postcode.split()[-2]
                 city = " ".join(city_state_postcode.split()[:-2]).replace(",", "")
 
         # 3
-        if city == None:
+        if city is None:
             address_full = response.xpath(
                 "/html/body/div[2]/div/div[1]/div/div/span/div[4]/div/div/div/div[2]/div/div/p/text()"
             ).get()
@@ -55,7 +56,7 @@ class AverittSpider(scrapy.spiders.SitemapSpider):
                 city = " ".join(city_state_postcode.split()[:-2]).replace(",", "")
 
         # 4
-        if city == None:
+        if city is None:
             address_full = response.xpath(
                 "/html/body/div[2]/div/div[1]/div/div/span/div[4]/div/div/div/div[2]/div/div/p[1]/span/text()"
             ).get()
@@ -72,9 +73,7 @@ class AverittSpider(scrapy.spiders.SitemapSpider):
             "/html/body/div[2]/div/div[1]/div/div/span/div[2]/div/div/div/div[1]/div/div/p/a/text()"
         ).get()
         email = (
-            response.xpath(
-                "/html/body/div[2]/div/div[1]/div/div/span/div[2]/div/div/div/div[2]/div/div/span/a/@href"
-            )
+            response.xpath("/html/body/div[2]/div/div[1]/div/div/span/div[2]/div/div/div/div[2]/div/div/span/a/@href")
             .get()
             .replace("mailto:", "")
         )

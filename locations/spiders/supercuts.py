@@ -65,14 +65,10 @@ class SuperCutsSpider(scrapy.Spider):
             if "-" in spec["days"]:
                 start_day, end_day = spec["days"].split(" - ")
                 for day in day_range(start_day[:2], end_day[:2]):
-                    oh.add_range(
-                        day, spec["hours"]["open"], spec["hours"]["close"], "%I:%M %p"
-                    )
+                    oh.add_range(day, spec["hours"]["open"], spec["hours"]["close"], "%I:%M %p")
             else:
                 day = spec["days"][:2]
                 if "" in (spec["hours"]["open"], spec["hours"]["close"]):
                     continue
-                oh.add_range(
-                    day, spec["hours"]["open"], spec["hours"]["close"], "%I:%M %p"
-                )
+                oh.add_range(day, spec["hours"]["open"], spec["hours"]["close"], "%I:%M %p")
         return oh.as_opening_hours()

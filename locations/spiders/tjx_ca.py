@@ -47,31 +47,19 @@ class TjxCASpider(scrapy.Spider):
                 continue
 
             if ":" in open_time:
-                open_time = datetime.datetime.strptime(
-                    open_time.strip(), "%I:%M%p"
-                ).strftime("%H:%M")
+                open_time = datetime.datetime.strptime(open_time.strip(), "%I:%M%p").strftime("%H:%M")
             else:
-                open_time = datetime.datetime.strptime(
-                    open_time.strip(), "%I%p"
-                ).strftime("%H:%M")
+                open_time = datetime.datetime.strptime(open_time.strip(), "%I%p").strftime("%H:%M")
 
             if ":" in close_time:
-                close_time = datetime.datetime.strptime(
-                    close_time.strip(), "%I:%M%p"
-                ).strftime("%H:%M")
+                close_time = datetime.datetime.strptime(close_time.strip(), "%I:%M%p").strftime("%H:%M")
             else:
-                close_time = datetime.datetime.strptime(
-                    close_time.strip(), "%I%p"
-                ).strftime("%H:%M")
+                close_time = datetime.datetime.strptime(close_time.strip(), "%I%p").strftime("%H:%M")
 
             if "-" in days:
                 start_day, end_day = days.split("-")
-                for day in DAYS[
-                    DAYS.index(start_day.strip()) : DAYS.index(end_day.strip()) + 1
-                ]:
-                    opening_hours.add_range(
-                        day[:2], open_time=open_time, close_time=close_time
-                    )
+                for day in DAYS[DAYS.index(start_day.strip()) : DAYS.index(end_day.strip()) + 1]:
+                    opening_hours.add_range(day[:2], open_time=open_time, close_time=close_time)
 
             else:
                 day = days.strip()[:2]
@@ -86,9 +74,7 @@ class TjxCASpider(scrapy.Spider):
             properties = {
                 "name": store["Name"],
                 "ref": store["StoreID"],
-                "street_address": ", ".join(
-                    filter(None, [store["Address"], store["Address2"]])
-                ),
+                "street_address": ", ".join(filter(None, [store["Address"], store["Address2"]])),
                 "city": store["City"],
                 "state": store["State"],
                 "postcode": store["Zip"],

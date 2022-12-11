@@ -1,11 +1,13 @@
 import re
 from datetime import datetime
+
+from geonamescache import GeonamesCache
+from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule
+
+from locations.google_url import extract_google_position
 from locations.hours import OpeningHours
 from locations.items import GeojsonPointItem
-from geonamescache import GeonamesCache
-from scrapy.spiders import CrawlSpider, Rule
-from scrapy.linkextractors import LinkExtractor
-from locations.google_url import extract_google_position
 
 
 class BcpizzaSpider(CrawlSpider):
@@ -22,20 +24,12 @@ class BcpizzaSpider(CrawlSpider):
 
     def parse(self, response):
         name = response.xpath('//div[@class="wpb_wrapper"]/h1/text()').get()
-        address_full = response.xpath(
-            '//div[@class="wpb_text_column wpb_content_element"]//p/text()'
-        ).get()
-        address = response.xpath(
-            'string(//div[@class="wpb_text_column wpb_content_element"]//p)'
-        ).get()
+        address_full = response.xpath('//div[@class="wpb_text_column wpb_content_element"]//p/text()').get()
+        address = response.xpath('string(//div[@class="wpb_text_column wpb_content_element"]//p)').get()
         if address == address_full:
-            address = response.xpath(
-                '//div[@class="wpb_text_column wpb_content_element"]//p[2]/text()'
-            ).get()
+            address = response.xpath('//div[@class="wpb_text_column wpb_content_element"]//p[2]/text()').get()
         city_state_postcode = address.replace(address_full, "").replace("\n", "")
-        postcode = re.findall("[0-9]{5}|[A-Z0-9]{3} [A-Z0-9]{3}", city_state_postcode)[
-            0
-        ]
+        postcode = re.findall("[0-9]{5}|[A-Z0-9]{3} [A-Z0-9]{3}", city_state_postcode)[0]
         city = city_state_postcode.split(",")[0]
         state = city_state_postcode.split(",")[1].replace(postcode, "").strip()
         for item in GeonamesCache().get_us_states().keys():
@@ -55,12 +49,8 @@ class BcpizzaSpider(CrawlSpider):
             open_time, close_time = hh.split(" – ")
             oh.add_range(
                 day=dd,
-                open_time=datetime.strftime(
-                    datetime.strptime(open_time, "%I:%M %p"), "%H:%M"
-                ),
-                close_time=datetime.strftime(
-                    datetime.strptime(close_time, "%I:%M %p"), "%H:%M"
-                ),
+                open_time=datetime.strftime(datetime.strptime(open_time, "%I:%M %p"), "%H:%M"),
+                close_time=datetime.strftime(datetime.strptime(close_time, "%I:%M %p"), "%H:%M"),
             )
 
         properties = {

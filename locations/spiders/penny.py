@@ -11,9 +11,7 @@ class PennySpider(Spider):
 
     def start_requests(self):
         for country in ["at", "cz", "hu", "it", "ro"]:
-            yield JsonRequest(
-                url=f"https://www.penny.{country}/api/stores", cb_kwargs={"cc": country}
-            )
+            yield JsonRequest(url=f"https://www.penny.{country}/api/stores", cb_kwargs={"cc": country})
 
     def parse(self, response, **kwargs):
         for store in response.json():

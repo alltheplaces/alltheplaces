@@ -38,134 +38,107 @@ class LeesFamousRecipeSpider(scrapy.Spider):
         try:
             days = hours.split(": ")[0].strip()
             if "-" in days:
-                startDay = daysKey[days.split("-")[0]]
-                endDay = daysKey[days.split("-")[1]]
-                dayOutput = startDay + "-" + endDay
+                start_day = daysKey[days.split("-")[0]]
+                end_day = daysKey[days.split("-")[1]]
+                day_output = start_day + "-" + end_day
             else:
-                dayOutput = daysKey[days]
+                day_output = daysKey[days]
 
-            bothHours = hours.split(": ")[1].replace(" ", "")
-            openHours = bothHours.split("-")[0]
-            closeHours = bothHours.split("-")[1]
+            both_hours = hours.split(": ")[1].replace(" ", "")
+            open_hours = both_hours.split("-")[0]
+            close_hours = both_hours.split("-")[1]
 
-            if "am" in openHours:
-                openHours = openHours.replace("am", "")
-                if ":" in openHours:
-                    openH = openHours.split(":")[0]
-                    openM = openHours.split(":")[1]
+            if "am" in open_hours:
+                open_hours = open_hours.replace("am", "")
+                if ":" in open_hours:
+                    open_h = open_hours.split(":")[0]
+                    open_m = open_hours.split(":")[1]
                 else:
-                    openH = openHours
-                    openM = "00"
-                openHours = openH + ":" + openM
+                    open_h = open_hours
+                    open_m = "00"
+                open_hours = open_h + ":" + open_m
 
-            if "pm" in openHours:
-                openHours = openHours.replace("pm", "")
-                if ":" in openHours:
-                    openH = openHours.split(":")[0]
-                    openM = openHours.split(":")[1]
+            if "pm" in open_hours:
+                open_hours = open_hours.replace("pm", "")
+                if ":" in open_hours:
+                    open_h = open_hours.split(":")[0]
+                    open_m = open_hours.split(":")[1]
                 else:
-                    openH = openHours
-                    openM = "00"
-                openH = str(int(openH) + 12)
-                openHours = openH + ":" + openM
+                    open_h = open_hours
+                    open_m = "00"
+                open_h = str(int(open_h) + 12)
+                open_hours = open_h + ":" + open_m
 
-            if "am" in closeHours:
-                closeHours = closeHours.replace("am", "")
-                if ":" in closeHours:
-                    closeH = closeHours.split(":")[0]
-                    closeM = closeHours.split(":")[1]
+            if "am" in close_hours:
+                close_hours = close_hours.replace("am", "")
+                if ":" in close_hours:
+                    close_h = close_hours.split(":")[0]
+                    close_m = close_hours.split(":")[1]
                 else:
-                    closeH = closeHours
-                    closeM = "00"
-                closeHours = closeH + ":" + closeM
+                    close_h = close_hours
+                    close_m = "00"
+                close_hours = close_h + ":" + close_m
 
-            if "pm" in closeHours:
-                closeHours = closeHours.replace("pm", "")
-                if ":" in closeHours:
-                    closeH = closeHours.split(":")[0]
-                    closeM = closeHours.split(":")[1]
+            if "pm" in close_hours:
+                close_hours = close_hours.replace("pm", "")
+                if ":" in close_hours:
+                    close_h = close_hours.split(":")[0]
+                    close_m = close_hours.split(":")[1]
                 else:
-                    closeH = closeHours
-                    closeM = "00"
-                closeH = str(int(closeH) + 12)
-                closeHours = closeH + ":" + closeM
-            return dayOutput + " " + openHours.replace(" ", "") + "-" + closeHours + ";"
+                    close_h = close_hours
+                    close_m = "00"
+                close_h = str(int(close_h) + 12)
+                close_hours = close_h + ":" + close_m
+            return day_output + " " + open_hours.replace(" ", "") + "-" + close_hours + ";"
         except (KeyError, IndexError):
             return ""
 
     def parse(self, response):
         if "https://www.leesfamousrecipe.com/locations/all" == response.url:
-            for match in response.xpath(
-                "//div[contains(@class,'field-content')]/a/@href"
-            ):
+            for match in response.xpath("//div[contains(@class,'field-content')]/a/@href"):
                 request = scrapy.Request(match.extract())
                 yield request
         else:
-            nameString = (
-                response.xpath("//h1[@class='node-title']/text()")
-                .extract_first()
-                .strip()
-            )
-            shortString = response.xpath(
-                "//h1[@class='node-title']/small/text()"
-            ).extract_first()
-            if shortString is None:
-                shortString = ""
-            nameString = nameString + " " + shortString
-            nameString = nameString.strip()
+            name_string = response.xpath("//h1[@class='node-title']/text()").extract_first().strip()
+            short_string = response.xpath("//h1[@class='node-title']/small/text()").extract_first()
+            if short_string is None:
+                short_string = ""
+            name_string = name_string + " " + short_string
+            name_string = name_string.strip()
 
-            googleMapSrc = response.xpath(
-                "//*[@id='block-system-main']/div/div/iframe"
-            ).extract_first()
-            [latString, lonString] = re.findall('center=(.*?)"', googleMapSrc)[0].split(
-                ","
-            )
+            google_map_src = response.xpath("//*[@id='block-system-main']/div/div/iframe").extract_first()
+            [lat_string, lon_string] = re.findall('center=(.*?)"', google_map_src)[0].split(",")
 
-            openingHoursString = ""
-            firstHourBlock = response.xpath(
+            opening_hours_string = ""
+            first_hour_block = response.xpath(
                 "//div[contains(@class,'field-name-field-hours-summer')]/div/div/p/br/parent::p/text()"
             )
-            for hourLine in firstHourBlock:
-                openingHoursString = (
-                    openingHoursString + " " + self.store_hours(hourLine.extract())
-                )
-            openingHoursString = openingHoursString.strip(";").strip()
+            for hourLine in first_hour_block:
+                opening_hours_string = opening_hours_string + " " + self.store_hours(hourLine.extract())
+            opening_hours_string = opening_hours_string.strip(";").strip()
 
             if "british-columbia" in response.url:
-                countryString = "CA"
-                stateString = "BC"
+                country_string = "CA"
+                state_string = "BC"
             else:
-                countryString = "US"
-                mapUrl = response.xpath(
-                    "//div[contains(@class,'map-link')]/div/a/@href"
-                ).extract_first()
-                stateString = response.xpath(
-                    "//div[contains(@class,'adr')]/div[2]/span[2]/text()"
-                ).extract_first()
+                country_string = "US"
+                state_string = response.xpath("//div[contains(@class,'adr')]/div[2]/span[2]/text()").extract_first()
 
             yield GeojsonPointItem(
-                ref=nameString,
-                addr_full=response.xpath("//div[@class='street-address']/text()")
+                ref=name_string,
+                addr_full=response.xpath("//div[@class='street-address']/text()").extract_first().strip(),
+                city=response.xpath("//div[@class='city-state-zip']/span[@class='locality']/text()")
                 .extract_first()
                 .strip(),
-                city=response.xpath(
-                    "//div[@class='city-state-zip']/span[@class='locality']/text()"
-                )
-                .extract_first()
-                .strip(),
-                opening_hours=openingHoursString,
-                state=stateString,
-                postcode=response.xpath(
-                    "//div[@class='city-state-zip']/span[@class='postal-code']/text()"
-                )
+                opening_hours=opening_hours_string,
+                state=state_string,
+                postcode=response.xpath("//div[@class='city-state-zip']/span[@class='postal-code']/text()")
                 .extract_first()
                 .strip(),
                 phone=self.parse_phone(
-                    response.xpath("//div[contains(@class,'adr')]/div[3]/text()")
-                    .extract_first()
-                    .strip()
+                    response.xpath("//div[contains(@class,'adr')]/div[3]/text()").extract_first().strip()
                 ),
-                country=countryString,
-                lat=float(latString),
-                lon=float(lonString),
+                country=country_string,
+                lat=lat_string,
+                lon=lon_string,
             )

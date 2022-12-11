@@ -21,9 +21,7 @@ class ChuysSpider(scrapy.Spider):
         location_ids = re.findall(re_location_id, data)
 
         for location_id in location_ids:
-            re_pattern_store_info = (
-                rf"infoWindowContent{location_id}\s\+=(?!.*Coming Soon).+;"
-            )
+            re_pattern_store_info = rf"infoWindowContent{location_id}\s\+=(?!.*Coming Soon).+;"
             store_info = re.findall(re_pattern_store_info, data)
 
             name = re.search(r"<strong>(.*?)</strong>", store_info[0]).group(1)

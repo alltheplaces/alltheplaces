@@ -30,9 +30,7 @@ class Phillips66Conoco76Spider(scrapy.Spider):
         page_size = 250
 
         while offset < total_count:
-            yield scrapy.Request(
-                self.base_url + f"&$top={page_size}&$skip={offset}&$format=json"
-            )
+            yield scrapy.Request(self.base_url + f"&$top={page_size}&$skip={offset}&$format=json")
             offset += page_size
 
     def parse(self, response):
@@ -59,11 +57,7 @@ class Phillips66Conoco76Spider(scrapy.Spider):
                     "fuel:diesel": station["Diesel"],
                     "fuel:biodiesel": station["rd"],
                     "car_wash": station["CarWash"],
-                    "shop": "convenience"
-                    if station["CStore"]
-                    else "kiosk"
-                    if station["Snacks"]
-                    else None,
+                    "shop": "convenience" if station["CStore"] else "kiosk" if station["Snacks"] else None,
                     "atm": station["ATM"],
                 },
             )

@@ -12,9 +12,7 @@ class CGIGroupSpider(scrapy.Spider):
     )
 
     def parse(self, response):
-        offices = response.xpath(
-            '//span[@class="region-wrapper"]/div[@class="vcard-wrapper"]'
-        )
+        offices = response.xpath('//span[@class="region-wrapper"]/div[@class="vcard-wrapper"]')
 
         for office in offices:
 
@@ -23,12 +21,8 @@ class CGIGroupSpider(scrapy.Spider):
                     filter(
                         None,
                         [
-                            office.xpath(
-                                './div[@class="vcard"]/h4[@class="locality"]/text()'
-                            ).get(),
-                            office.xpath(
-                                './div[@class="vcard"]/div[@class="adr"]/h4/text()'
-                            ).get(),
+                            office.xpath('./div[@class="vcard"]/h4[@class="locality"]/text()').get(),
+                            office.xpath('./div[@class="vcard"]/div[@class="adr"]/h4/text()').get(),
                         ],
                     )
                 ).strip(),
@@ -37,9 +31,7 @@ class CGIGroupSpider(scrapy.Spider):
                 )
                 .get()
                 .strip(),
-                "city": office.xpath(
-                    './div[@class="vcard"]/div[@class="adr"]/span[@class="locality"]/text()'
-                )
+                "city": office.xpath('./div[@class="vcard"]/div[@class="adr"]/span[@class="locality"]/text()')
                 .get()
                 .strip(),
                 "postcode": office.xpath(
@@ -56,20 +48,10 @@ class CGIGroupSpider(scrapy.Spider):
             }
 
             if properties.get("phone"):
-                properties["phone"] = (
-                    properties["phone"]
-                    .strip()
-                    .replace("-", "")
-                    .replace("(", "")
-                    .replace(")", "")
-                )
+                properties["phone"] = properties["phone"].strip().replace("-", "").replace("(", "").replace(")", "")
             if properties["extras"].get("contact:fax"):
                 properties["extras"]["contact:fax"] = (
-                    properties["extras"]["contact:fax"]
-                    .strip()
-                    .replace("-", "")
-                    .replace("(", "")
-                    .replace(")", "")
+                    properties["extras"]["contact:fax"].strip().replace("-", "").replace("(", "").replace(")", "")
                 )
 
             if "(Mailing address)" in properties["name"]:

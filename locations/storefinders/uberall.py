@@ -12,9 +12,7 @@ class UberallSpider(Spider):
     business_id_filter = None
 
     def start_requests(self):
-        yield JsonRequest(
-            url=f"https://uberall.com/api/storefinders/{self.key}/locations/all"
-        )
+        yield JsonRequest(url=f"https://uberall.com/api/storefinders/{self.key}/locations/all")
 
     def parse(self, response, **kwargs):
         if response.json()["status"] != "SUCCESS":
@@ -25,16 +23,12 @@ class UberallSpider(Spider):
                 if feature["businessId"] != self.business_id_filter:
                     continue
 
-            feature["street_address"] = ", ".join(
-                filter(None, [feature["streetAndNumber"], feature["addressExtra"]])
-            )
+            feature["street_address"] = ", ".join(filter(None, [feature["streetAndNumber"], feature["addressExtra"]]))
             feature["ref"] = feature.get("identifier")
 
             item = DictParser.parse(feature)
 
-            item["image"] = ";".join(
-                filter(None, [p.get("publicUrl") for p in feature["photos"] or []])
-            )
+            item["image"] = ";".join(filter(None, [p.get("publicUrl") for p in feature["photos"] or []]))
 
             oh = OpeningHours()
             for rule in feature["openingHours"]:

@@ -20,9 +20,7 @@ class WaitroseSpider(scrapy.Spider):
 
         # if this is a store details page then it will have the following
         # div section.
-        details = response.xpath(
-            '//div[@role="article"]/div' '/div[@class="parbase details section"]'
-        )
+        details = response.xpath('//div[@role="article"]/div' '/div[@class="parbase details section"]')
 
         if details:
             name = response.xpath("//head/title")[0].root.text
@@ -38,11 +36,7 @@ class WaitroseSpider(scrapy.Spider):
                 "ref": response.meta["waitrose_store_id"],
             }
 
-            branch_details = (
-                details[0]
-                .xpath('div[@class="col branch-details"]/p')[0]
-                .root.text_content()
-            )
+            branch_details = details[0].xpath('div[@class="col branch-details"]/p')[0].root.text_content()
             if branch_details:
                 branch_details = self._branch_details(branch_details)
             if branch_details:
@@ -54,9 +48,7 @@ class WaitroseSpider(scrapy.Spider):
             if opening_hours:
                 properties.update(opening_hours)
 
-            branch_map = (
-                details[0].xpath('div[@class="branch-finder-map"]/p/a')[0].root.attrib
-            )
+            branch_map = details[0].xpath('div[@class="branch-finder-map"]/p/a')[0].root.attrib
             properties.update(
                 {
                     "lon": float(branch_map["data-long"]),

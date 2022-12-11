@@ -41,9 +41,7 @@ class ChiquitoSpider(scrapy.Spider):
                 "website": "https://" + store["fields"]["url"],
                 "extras": {
                     "delivery": "yes" if store["fields"]["enableDeliveries"] else "no",
-                    "takeaway": "yes"
-                    if store["fields"]["enableClickAndCollect"]
-                    else "no",
+                    "takeaway": "yes" if store["fields"]["enableClickAndCollect"] else "no",
                     "contact:deliveroo": store["fields"].get("deliverooDirectLink"),
                     "contact:uberEats": store["fields"].get("uberEatsDirectLink"),
                     "contact:justEat": store["fields"].get("justEatDirectLink"),
@@ -61,9 +59,7 @@ class ChiquitoSpider(scrapy.Spider):
                 "Sunday",
             ]:
                 open_time = self.parse_time(store["fields"]["open" + day].split("-")[0])
-                close_time = self.parse_time(
-                    store["fields"]["open" + day].split("-")[1]
-                )
+                close_time = self.parse_time(store["fields"]["open" + day].split("-")[1])
 
                 oh.add_range(
                     day[0:2],

@@ -26,9 +26,7 @@ class BJsWholesaleSpider(scrapy.Spider):
             hours = hours[0].get("value").split("<br>") or []
             for hour in hours:
                 try:
-                    day, open_time, close_time = re.search(
-                        r"(.*?):\s(.*?)\s-\s(.*?)$", hour
-                    ).groups()
+                    day, open_time, close_time = re.search(r"(.*?):\s(.*?)\s-\s(.*?)$", hour).groups()
                 except AttributeError:  # closed
                     continue
                 open_time = (
@@ -46,12 +44,7 @@ class BJsWholesaleSpider(scrapy.Spider):
                     start_day, end_day = day.split("-")
                     start_day = start_day.strip()
                     end_day = end_day.strip()
-                    for d in DAY_MAPPING[
-                        DAY_MAPPING.index(start_day[:2]) : DAY_MAPPING.index(
-                            end_day[:2]
-                        )
-                        + 1
-                    ]:
+                    for d in DAY_MAPPING[DAY_MAPPING.index(start_day[:2]) : DAY_MAPPING.index(end_day[:2]) + 1]:
                         opening_hours.add_range(
                             day=d,
                             open_time=open_time,
@@ -72,16 +65,12 @@ class BJsWholesaleSpider(scrapy.Spider):
             "postcode": data["postalCode"].strip(),
             "country": data["country"].strip(),
             "phone": data.get("telephone1", "").strip(),
-            "website": "https://www.bjs.com/mapDetail;city={}".format(
-                data["storeName"]
-            ),
+            "website": "https://www.bjs.com/mapDetail;city={}".format(data["storeName"]),
             "lat": float(data["latitude"]),
             "lon": float(data["longitude"]),
         }
 
-        hours = self.parse_hours(
-            [attr for attr in data["Attribute"] if attr["name"] == "Hours of Operation"]
-        )
+        hours = self.parse_hours([attr for attr in data["Attribute"] if attr["name"] == "Hours of Operation"])
         if hours:
             properties["opening_hours"] = hours
 

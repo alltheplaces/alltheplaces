@@ -28,18 +28,8 @@ class MisterCarWashSpider(scrapy.Spider):
                 stri += match[8][:3] + " "
             except Exception:
                 stri += " "
-            stri += (
-                str(int(match[1]) + (12 if match[3] in ["pm", "mp"] else 0))
-                + ":"
-                + match[2]
-                + "-"
-            )
-            stri += (
-                str(int(match[4]) + (12 if match[6] in ["pm", "mp"] else 0))
-                + ":"
-                + match[5]
-                + ";"
-            )
+            stri += str(int(match[1]) + (12 if match[3] in ["pm", "mp"] else 0)) + ":" + match[2] + "-"
+            stri += str(int(match[4]) + (12 if match[6] in ["pm", "mp"] else 0)) + ":" + match[5] + ";"
 
         return stri.rstrip(";")
 
@@ -48,25 +38,10 @@ class MisterCarWashSpider(scrapy.Spider):
             r"\+?(\s+)*(\d{1})?(\s|\()*(\d{3})(\s+|\))*(\d{3})(\s+|-)?(\d{2})(\s+|-)?(\d{2})",
             phone,
         )
-        return (
-            (
-                "("
-                + r.group(4)
-                + ") "
-                + r.group(6)
-                + "-"
-                + r.group(8)
-                + "-"
-                + r.group(10)
-            )
-            if r
-            else phone
-        )
+        return ("(" + r.group(4) + ") " + r.group(6) + "-" + r.group(8) + "-" + r.group(10)) if r else phone
 
     def parse(self, response):  # high-level list of states
-        washers_str = response.xpath(
-            '//script[contains(.,"markers =")]'
-        ).extract_first()
+        washers_str = response.xpath('//script[contains(.,"markers =")]').extract_first()
         j_beg = washers_str.find("markers =") + 10
         j_end = washers_str.find("\n\t", j_beg)
         wash_list = json.loads(washers_str[j_beg:j_end].strip().rstrip(";"))
@@ -77,9 +52,7 @@ class MisterCarWashSpider(scrapy.Spider):
                 wash["address"],
             )
             if not address_parts:
-                address_parts = re.match(
-                    r"(.*),\s*(\D{2,}\s?\D{2,}?\s?\D*)\s(\D{2})", wash["address"]
-                )
+                address_parts = re.match(r"(.*),\s*(\D{2,}\s?\D{2,}?\s?\D*)\s(\D{2})", wash["address"])
             if not address_parts:
                 address_parts = re.match(r"(.*),\s?(\D*)", wash["address"])
             try:
@@ -98,9 +71,7 @@ class MisterCarWashSpider(scrapy.Spider):
             phone = self.phone_normalize(
                 wash["infoContent"][
                     wash["infoContent"].find("<b>Phone:</b>")
-                    + 13 : wash["infoContent"].find(
-                        "/div", wash["infoContent"].find("<b>Phone:</b>")
-                    )
+                    + 13 : wash["infoContent"].find("/div", wash["infoContent"].find("<b>Phone:</b>"))
                     - 1
                 ]
             )
@@ -109,8 +80,7 @@ class MisterCarWashSpider(scrapy.Spider):
                 lat=float(wash["lat"]),
                 lon=float(wash["lng"]),
                 phone=phone,
-                website="http://mistercarwash.com/locations/"
-                + wash["name"].lower().replace(" ", "-"),
+                website="http://mistercarwash.com/locations/" + wash["name"].lower().replace(" ", "-"),
                 ref=wash["loc_id"],
                 opening_hours=self.store_hours(wash["loc_hours"]),
                 addr_full=address_parts[1],

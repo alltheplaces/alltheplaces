@@ -22,12 +22,8 @@ class LidsSpider(scrapy.Spider):
 
         if "monFriOpen" in hours:
             day = "Mo-Fr"
-            open_time = datetime.datetime.strptime(
-                hours["monFriOpen"], "%H:%M %p"
-            ).strftime("%H:%M")
-            close_time = datetime.datetime.strptime(
-                hours["monFriClose"], "%H:%M %p"
-            ).strftime("%H:%M")
+            open_time = datetime.datetime.strptime(hours["monFriOpen"], "%H:%M %p").strftime("%H:%M")
+            close_time = datetime.datetime.strptime(hours["monFriClose"], "%H:%M %p").strftime("%H:%M")
             for day in Days:
                 opening_hours.add_range(
                     day=day,
@@ -38,27 +34,15 @@ class LidsSpider(scrapy.Spider):
 
         if "satOpen" in hours:
             day = "Sa"
-            open_time = datetime.datetime.strptime(
-                hours["satOpen"], "%H:%M %p"
-            ).strftime("%H:%M")
-            close_time = datetime.datetime.strptime(
-                hours["satClose"], "%H:%M %p"
-            ).strftime("%H:%M")
-            opening_hours.add_range(
-                day=day, open_time=open_time, close_time=close_time, time_format="%H:%M"
-            )
+            open_time = datetime.datetime.strptime(hours["satOpen"], "%H:%M %p").strftime("%H:%M")
+            close_time = datetime.datetime.strptime(hours["satClose"], "%H:%M %p").strftime("%H:%M")
+            opening_hours.add_range(day=day, open_time=open_time, close_time=close_time, time_format="%H:%M")
 
         if "sunOpen" in hours:
             day = "Su"
-            open_time = datetime.datetime.strptime(
-                hours["sunOpen"], "%H:%M %p"
-            ).strftime("%H:%M")
-            close_time = datetime.datetime.strptime(
-                hours["sunClose"], "%H:%M %p"
-            ).strftime("%H:%M")
-            opening_hours.add_range(
-                day=day, open_time=open_time, close_time=close_time, time_format="%H:%M"
-            )
+            open_time = datetime.datetime.strptime(hours["sunOpen"], "%H:%M %p").strftime("%H:%M")
+            close_time = datetime.datetime.strptime(hours["sunClose"], "%H:%M %p").strftime("%H:%M")
+            opening_hours.add_range(day=day, open_time=open_time, close_time=close_time, time_format="%H:%M")
 
         return opening_hours.as_opening_hours()
 

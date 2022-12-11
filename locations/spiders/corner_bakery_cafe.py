@@ -50,9 +50,7 @@ class CornerBakeryCafeSpider(scrapy.Spider):
 
     def parse_store(self, response):
         data = json.loads(
-            response.xpath('//script[@type="application/ld+json"]/text()')
-            .extract_first()
-            .replace("\r\n", "")
+            response.xpath('//script[@type="application/ld+json"]/text()').extract_first().replace("\r\n", "")
         )
 
         properties = {

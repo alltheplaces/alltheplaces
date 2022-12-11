@@ -27,9 +27,7 @@ class BbvaCompassSpider(scrapy.Spider):
 
         properties = {
             "name": html.unescape(data["name"]),
-            "ref": "_".join(
-                re.search(r".+/(.+?)/(.+?)/(.+?)/?(?:\.html|$)", response.url).groups()
-            ),
+            "ref": "_".join(re.search(r".+/(.+?)/(.+?)/(.+?)/?(?:\.html|$)", response.url).groups()),
             "addr_full": data["address"]["streetAddress"],
             "city": data["address"]["addressLocality"],
             "state": data["address"]["addressRegion"],
@@ -48,9 +46,7 @@ class BbvaCompassSpider(scrapy.Spider):
         yield GeojsonPointItem(**properties)
 
     def parse(self, response):
-        urls = response.xpath(
-            '//div[contains(@class, "container-content")]//ul/li/a/@href'
-        ).extract()
+        urls = response.xpath('//div[contains(@class, "container-content")]//ul/li/a/@href').extract()
 
         if urls:
             for url in urls:
@@ -59,6 +55,4 @@ class BbvaCompassSpider(scrapy.Spider):
         else:
             urls = response.xpath('//div[@class="address-block"]//a/@href').extract()
             for url in urls:
-                yield scrapy.Request(
-                    response.urljoin(url), callback=self.parse_location
-                )
+                yield scrapy.Request(response.urljoin(url), callback=self.parse_location)

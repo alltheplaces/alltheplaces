@@ -27,9 +27,7 @@ class CricketWirelessSpider(scrapy.Spider):
 
     def get_page(self, n):
         url = f"https://api.momentfeed.com/v1/analytics/api/llp/cricket.json?pageSize=100&page={n}"
-        return scrapy.Request(
-            url, headers={"Authorization": "IVNLPNUOBXFPALWE"}, meta={"page": n}
-        )
+        return scrapy.Request(url, headers={"Authorization": "IVNLPNUOBXFPALWE"}, meta={"page": n})
 
     def start_requests(self):
         yield self.get_page(1)

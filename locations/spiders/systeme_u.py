@@ -38,28 +38,18 @@ class SystemeUSpider(scrapy.Spider):
         properties = {
             "ref": re.search(r".+/(.+?)/?(?:\.html|$)", response.url).group(1),
             "name": response.xpath('//*[@id="libelle-magasin"]/text()').extract_first(),
-            "addr_full": response.xpath(
-                'normalize-space(//*[@itemprop="streetAddress"]/text())'
-            ).extract_first(),
-            "city": response.xpath(
-                '//*[@itemprop="addressLocality"]/text()'
-            ).extract_first(),
-            "postcode": response.xpath(
-                '//*[@itemprop="postalCode"]/text()'
-            ).extract_first(),
+            "addr_full": response.xpath('normalize-space(//*[@itemprop="streetAddress"]/text())').extract_first(),
+            "city": response.xpath('//*[@itemprop="addressLocality"]/text()').extract_first(),
+            "postcode": response.xpath('//*[@itemprop="postalCode"]/text()').extract_first(),
             "country": "FR",
             "lat": response.xpath('//*[@id="map-magasin"]/@data-lat').extract_first(),
             "lon": response.xpath('//*[@id="map-magasin"]/@data-lng').extract_first(),
-            "phone": response.xpath(
-                '//*[@itemprop="telephone"]/text()'
-            ).extract_first(),
+            "phone": response.xpath('//*[@itemprop="telephone"]/text()').extract_first(),
             "website": response.url,
         }
 
         try:
-            h = self.parse_hours(
-                response.xpath('//*[@itemprop="openingHours"]/@content').extract()
-            )
+            h = self.parse_hours(response.xpath('//*[@itemprop="openingHours"]/@content').extract())
 
             if h:
                 properties["opening_hours"] = h

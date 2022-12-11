@@ -20,9 +20,7 @@ class VueCinemasSpider(scrapy.Spider):
                 )
 
     def parse_cinema(self, response):
-        cinema_name = response.xpath(
-            '//h2[@class="article-title gradient-fill"]/text()'
-        ).extract_first()
+        cinema_name = response.xpath('//h2[@class="article-title gradient-fill"]/text()').extract_first()
 
         address_parts = response.xpath('//img[@alt="location-pin"]/../text()').extract()
         if not address_parts:

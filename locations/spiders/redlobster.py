@@ -81,8 +81,7 @@ class RedLobsterSpider(scrapy.Spider):
                 "postcode": location["zip"],
                 "phone": location["phone"],
                 "opening_hours": self.store_hours(location["hours"]),
-                "website": "https://www.redlobster.com/locations/list/"
-                + location["localPageURL"],
+                "website": "https://www.redlobster.com/locations/list/" + location["localPageURL"],
                 "ref": location["rlid"],
                 "lon": location["longitude"],
                 "lat": location["latitude"],

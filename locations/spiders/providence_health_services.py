@@ -24,22 +24,15 @@ class ProvidenceHealthServicesSpider(SitemapSpider):
     def sitemap_filter(self, entries):
         for entry in entries:
             # sitemap now includes language codes, but are always redirected to the base url
-            entry["loc"] = entry["loc"].replace(
-                "https://www.providence.org/en/", "https://www.providence.org/"
-            )
+            entry["loc"] = entry["loc"].replace("https://www.providence.org/en/", "https://www.providence.org/")
             # skip bad page
-            if (
-                entry["loc"]
-                == "https://www.providence.org/locations/saint-johns-santa-monica-pediatrics-1811-wilshire"
-            ):
+            if entry["loc"] == "https://www.providence.org/locations/saint-johns-santa-monica-pediatrics-1811-wilshire":
                 continue
 
             yield entry
 
     def parse_location(self, response):
-        ldjson = json.loads(
-            response.css('script[type="application/ld+json"]::text').get()
-        )
+        ldjson = json.loads(response.css('script[type="application/ld+json"]::text').get())
 
         if ldjson["@type"] == "SpecialAnnouncement":
             ldjson = ldjson["announcementLocation"]

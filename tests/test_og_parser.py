@@ -1,5 +1,6 @@
-from locations.open_graph_parser import OpenGraphParser
 from scrapy.http import HtmlResponse
+
+from locations.open_graph_parser import OpenGraphParser
 
 
 def test_open_graph_parser():

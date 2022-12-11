@@ -17,18 +17,14 @@ class CuraleafSpider(scrapy.Spider):
             yield scrapy.Request(response.urljoin(url), callback=self.parse_location)
 
     def parse_location(self, response):
-        location_data = (
-            response.xpath("/html/head/meta[18]/@content").extract_first().split(";")
-        )
+        location_data = response.xpath("/html/head/meta[18]/@content").extract_first().split(";")
         latitude = location_data[0]
         longitude = location_data[1]
         street = response.xpath(
             '//div[@class="storeLocation-template-module--address--3-eLF"]/p/text()'
         ).extract_first()
         city = (
-            response.xpath(
-                '//div[@class="storeLocation-template-module--address--3-eLF"]/p[2]/text()'
-            )
+            response.xpath('//div[@class="storeLocation-template-module--address--3-eLF"]/p[2]/text()')
             .extract_first()
             .split(",")[0]
         )
@@ -39,9 +35,7 @@ class CuraleafSpider(scrapy.Spider):
         # re to grab state from city_state_zip
         state = re.search(r"[a-zA-Z]+(?:\s+[a-zA-Z]+)*(?=[^,]*$)", city_state_zip)[0]
         postcode = int(
-            response.xpath(
-                '//div[@class="storeLocation-template-module--address--3-eLF"]/p[2]/text()'
-            )
+            response.xpath('//div[@class="storeLocation-template-module--address--3-eLF"]/p[2]/text()')
             .extract_first()
             .split()[-1]
         )

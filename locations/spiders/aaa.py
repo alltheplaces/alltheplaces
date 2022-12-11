@@ -28,9 +28,7 @@ class AAASpider(scrapy.Spider):
                 "ident": "AAACOM",
                 "destination": ",".join([lat, lon]),
             }
-            yield scrapy.http.Request(
-                "https://tdr.aaa.com/tdrl/search.jsp?" + urlencode(params)
-            )
+            yield scrapy.http.Request("https://tdr.aaa.com/tdrl/search.jsp?" + urlencode(params))
 
     def parse(self, response):
         locations = response.json()["aaa"]["services"].get("travelItems")

@@ -21,9 +21,7 @@ class TacobuenoSpider(scrapy.Spider):
 
     def start_requests(self):
         for state in GeonamesCache().get_us_states():
-            yield scrapy.Request(
-                f"https://buenoonthego.com/mp/ndXTAL/searchByStateCode_JSON?stateCode='{state}'"
-            )
+            yield scrapy.Request(f"https://buenoonthego.com/mp/ndXTAL/searchByStateCode_JSON?stateCode='{state}'")
 
     def convert_hours(self, hours):
         converted_times = ""

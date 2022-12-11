@@ -14,9 +14,7 @@ class ChevronSpider(scrapy.Spider):
     download_delay = 0.2
 
     def start_requests(self):
-        with open(
-            "./locations/searchable_points/us_centroids_10mile_radius.csv"
-        ) as points:
+        with open("./locations/searchable_points/us_centroids_10mile_radius.csv") as points:
             next(points)  # skip the header row
             for point in points:
                 row = point.split(",")

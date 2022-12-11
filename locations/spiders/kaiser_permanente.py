@@ -37,9 +37,7 @@ class KaiserPermanenteSpider(scrapy.Spider):
 
     def parse_location(self, response):
         data = json.loads(
-            response.xpath(
-                '//script[@type="application/json" and contains(text(), "address")]/text()'
-            ).extract_first()
+            response.xpath('//script[@type="application/json" and contains(text(), "address")]/text()').extract_first()
         )
 
         coords = data.get("position", "")  # Handle missing coordinates

@@ -10,9 +10,7 @@ class MichaelsSpider(scrapy.spiders.SitemapSpider):
     sitemap_urls = [
         "https://locations.michaels.com/robots.txt",
     ]
-    sitemap_rules = [
-        (r"^https://locations\.michaels\.com/[^/]+/[^/]+/[^/]+/$", "parse")
-    ]
+    sitemap_rules = [(r"^https://locations\.michaels\.com/[^/]+/[^/]+/[^/]+/$", "parse")]
 
     def parse(self, response):
         item = LinkedDataParser.parse(response, "HobbyShop")

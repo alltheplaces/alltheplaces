@@ -55,9 +55,7 @@ class CalvinKleinSpider(scrapy.Spider):
             "Quebec",
         ]
 
-        s_url = (
-            "https://secure.gotwww.com/gotlocations.com/ck.com/ckna.php?address={state}"
-        )
+        s_url = "https://secure.gotwww.com/gotlocations.com/ck.com/ckna.php?address={state}"
 
         for state in states:
             url = s_url.format(state=state)
@@ -153,11 +151,7 @@ class CalvinKleinSpider(scrapy.Spider):
 
             html = re.search(r"bindPopup\('(.*)'\);", place).groups()[0]
 
-            info = (
-                Selector(text=html)
-                .xpath('//*[@class="map_text"]/table/tr[7]/td/text()')
-                .getall()
-            )
+            info = Selector(text=html).xpath('//*[@class="map_text"]/table/tr[7]/td/text()').getall()
             if len(info) == 5:
                 country = info[3]
                 phone = info[4]

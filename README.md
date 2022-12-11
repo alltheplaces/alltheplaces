@@ -59,12 +59,12 @@ To get started, you'll want to install the dependencies for this project.
     ```
 
     This blank/template spider will start at the given `start_urls`, only touch the domains listed in `allowed_domains`, and all web requests will be returned to the `parse()` function with response content in the `response` argument. Once you have the response content, you can perform various operations on it. For example, the most useful is probably running [XPath](https://developer.mozilla.org/en-US/docs/Web/XPath) selections on the HTML of the page to extract data out of the page. Check out the "Scraper tips" section below for more information about how to use these tools to efficiently get data out of the page.
-    
+
     There are a couple ways to get the `brand_wikidata` value:
-   
+
     1. Run `pipenv run scrapy nsi --name "Brand Name"` OR
     2. Visit https://www.wikidata.org/ and search by brand name.
- 
+
 1. Once you have your spider written, you can give it a test run to make sure it's finding the expected results.
 
    ```
@@ -121,7 +121,7 @@ For store locators that do allow searches by latitude/longitude, a grid of searc
 
 For stores that do not have a national footprint ([e.g. #1034](https://github.com/alltheplaces/alltheplaces/issues/1034)), there are separate point files that include a state/territory attribute e.g. <i>'us_centroids_100mile_radius_state.csv'</i>. This allows for points to be filtered down to specific states/territories when a national search is unnecessary.
 
-**Note**: A search radius may overlap multiple states especially when it’s centered near a state boundary. This creates a one to many relationship between the search radius point and the states covered in that search zone. This means that for the state files, there will be records that share the same latlon associated to differing states. The same is true for the European and Canadian territory files. 
+**Note**: A search radius may overlap multiple states especially when it’s centered near a state boundary. This creates a one to many relationship between the search radius point and the states covered in that search zone. This means that for the state files, there will be records that share the same latlon associated to differing states. The same is true for the European and Canadian territory files.
 
 
 ### You can send the spider to other pages
