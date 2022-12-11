@@ -9,9 +9,7 @@ class HypovereinsbankDESpider(UberallSpider):
     business_id_filter = 77215
 
     def parse_item(self, item, feature, **kwargs):
-        item[
-            "website"
-        ] = "https://www.hypovereinsbank.de/hvb/kontaktwege/filiale#!/l/{}/{}/{}".format(
+        item["website"] = "https://www.hypovereinsbank.de/hvb/kontaktwege/filiale#!/l/{}/{}/{}".format(
             item["city"].replace(" ", "-").lower(),
             feature["streetAndNumber"].replace(" ", "-").lower(),
             feature["identifier"],

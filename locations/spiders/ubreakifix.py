@@ -19,10 +19,7 @@ class uBreakiFixSpider(SitemapSpider, StructuredDataSpider):
     def pre_process_data(self, ld_data, **kwargs):
         if isinstance(ld_data["openingHours"], str):
             ld_data["openingHours"] = (
-                ld_data["openingHours"]
-                .replace(": ", " ")
-                .replace(" - ", "-")
-                .replace("Tues", "Tu")
+                ld_data["openingHours"].replace(": ", " ").replace(" - ", "-").replace("Tues", "Tu")
             )
 
     def post_process_item(self, item, response, ld_data, **kwargs):

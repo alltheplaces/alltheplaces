@@ -8,12 +8,6 @@ class AldiNordLUSpider(UberallSpider):
 
     def parse_item(self, item, feature, **kwargs):
         item["ref"] = str(feature["id"])
-        slug = (
-            "/".join([item["city"], item["street_address"], item["ref"]])
-            .lower()
-            .replace(" ", "-")
-        )
-        item["website"] = (
-            "https://www.aldi.lu/de/information/supermaerkte.html/l/" + slug
-        )
+        slug = "/".join([item["city"], item["street_address"], item["ref"]]).lower().replace(" ", "-")
+        item["website"] = "https://www.aldi.lu/de/information/supermaerkte.html/l/" + slug
         yield item

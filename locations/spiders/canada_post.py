@@ -64,12 +64,8 @@ class CanadaPostSpider(scrapy.Spider):
 
     def parse_office(self, response):
         try:
-            addr_parts = response.xpath(
-                '//*[@id="results"]/div/div[1]/address/p[1]/text()'
-            ).extract()
-            addr_parts = list(
-                filter(None, [l.strip().replace("\xa0", " ") for l in addr_parts])
-            )
+            addr_parts = response.xpath('//*[@id="results"]/div/div[1]/address/p[1]/text()').extract()
+            addr_parts = list(filter(None, [line.strip().replace("\xa0", " ") for line in addr_parts]))
             city_state = addr_parts.pop()
             name = addr_parts.pop(0)
             addr = " ".join(addr_parts)
@@ -82,20 +78,14 @@ class CanadaPostSpider(scrapy.Spider):
             return
 
         properties = {
-            "ref": response.xpath(
-                '//*[@id="results"]/div/div[1]/address/p[1]/text()[1]'
-            ).extract_first(),
+            "ref": response.xpath('//*[@id="results"]/div/div[1]/address/p[1]/text()[1]').extract_first(),
             "name": name,
             "addr_full": addr,
             "city": city,
             "state": state,
             "postcode": postcode,
-            "lat": response.xpath(
-                '//*[@id="fpoDetailForm:latitude"]/@value'
-            ).extract_first(),
-            "lon": response.xpath(
-                '//*[@id="fpoDetailForm:longitude"]/@value'
-            ).extract_first(),
+            "lat": response.xpath('//*[@id="fpoDetailForm:latitude"]/@value').extract_first(),
+            "lon": response.xpath('//*[@id="fpoDetailForm:longitude"]/@value').extract_first(),
             "website": response.xpath('//*[@id="selectme"]/text()').extract_first(),
         }
         hours = self.parse_hours(

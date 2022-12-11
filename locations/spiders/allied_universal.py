@@ -107,24 +107,16 @@ class AlliedUniversalSpider(scrapy.Spider):
             yield from self.parse_location(location_selector)
 
     def parse_location(self, location):
-        ref = (
-            location.xpath('.//div[@class="Address-1"]/text()').extract_first().strip()
-        )
+        ref = location.xpath('.//div[@class="Address-1"]/text()').extract_first().strip()
         street_address = (
             location.xpath('.//div[@class="Address-1"]/text()').extract_first().strip()
             + ", "
-            + location.xpath('.//div[@class="Address-2"]/text()')
-            .extract_first()
-            .strip()
+            + location.xpath('.//div[@class="Address-2"]/text()').extract_first().strip()
         )
-        postcode = (
-            location.xpath('.//span[@class="Zip"]/text()').extract_first().strip()
-        )
+        postcode = location.xpath('.//span[@class="Zip"]/text()').extract_first().strip()
         city = location.xpath('.//span[@class="City"]/text()').extract_first().strip()
         state = location.xpath('.//span[@class="State"]/text()').extract_first().strip()
-        country = (
-            location.xpath('.//div[@class="Country"]/text()').extract_first().strip()
-        )
+        country = location.xpath('.//div[@class="Country"]/text()').extract_first().strip()
         if not country:
             country = "USA"
             if state in USA_STATES:
@@ -132,12 +124,7 @@ class AlliedUniversalSpider(scrapy.Spider):
         elif country == "Mexico":
             if state in MEXICO_STATES:
                 state = MEXICO_STATES.get(state)
-        phone = (
-            location.xpath('.//div[@class="PhoneNum"]/text()')
-            .extract_first()
-            .replace(".", "-")
-            .strip()
-        )
+        phone = location.xpath('.//div[@class="PhoneNum"]/text()').extract_first().replace(".", "-").strip()
         website = location.xpath(".//a/@href").extract_first()
         if website:
             if website[0] == "/":

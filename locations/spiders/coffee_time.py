@@ -7,9 +7,7 @@ class CoffeeTimeSpider(scrapy.Spider):
     name = "coffeetime"
     item_attributes = {"brand": "Coffee Time"}
     allowed_domains = ["www.coffeetime.com"]
-    start_urls = [
-        "http://www.coffeetime.com/locations.aspx?address=&Countryui=CA&pageNumber=1"
-    ]
+    start_urls = ["http://www.coffeetime.com/locations.aspx?address=&Countryui=CA&pageNumber=1"]
 
     def parse_store(self, response):
         container = response.xpath('//div[contains(@class, "col-md-9")]')
@@ -24,31 +22,11 @@ class CoffeeTimeSpider(scrapy.Spider):
                 phone = ""
 
             if i.xpath(".//div/ul/li[2]/p/a/@href").extract_first():
-                lat = (
-                    i.xpath(".//div/ul/li[2]/p/a/@href")
-                    .extract_first()
-                    .split("=")[2]
-                    .split(",")[0]
-                )
-                lon = (
-                    i.xpath(".//div/ul/li[2]/p/a/@href")
-                    .extract_first()
-                    .split("=")[2]
-                    .split(",")[1]
-                )
+                lat = i.xpath(".//div/ul/li[2]/p/a/@href").extract_first().split("=")[2].split(",")[0]
+                lon = i.xpath(".//div/ul/li[2]/p/a/@href").extract_first().split("=")[2].split(",")[1]
             else:
-                lat = (
-                    i.xpath(".//div/ul/li/p/a/@href")
-                    .extract_first()
-                    .split("=")[2]
-                    .split(",")[0]
-                )
-                lon = (
-                    i.xpath(".//div/ul/li/p/a/@href")
-                    .extract_first()
-                    .split("=")[2]
-                    .split(",")[1]
-                )
+                lat = i.xpath(".//div/ul/li/p/a/@href").extract_first().split("=")[2].split(",")[0]
+                lon = i.xpath(".//div/ul/li/p/a/@href").extract_first().split("=")[2].split(",")[1]
 
             city = cty_st_zip.split(", ")[0]
             state = cty_st_zip.split(", ")[1].split(", ")[0]
@@ -69,10 +47,7 @@ class CoffeeTimeSpider(scrapy.Spider):
             )
 
     def parse(self, response):
-        base_url = (
-            "http://www.coffeetime.com/locations.aspx?"
-            "address=&Countryui=CA&pageNumber="
-        )
+        base_url = "http://www.coffeetime.com/locations.aspx?" "address=&Countryui=CA&pageNumber="
         for i in range(1, 9):
             page = base_url + str(i)
             yield scrapy.Request(page, callback=self.parse_store)

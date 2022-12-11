@@ -45,9 +45,7 @@ class GameGB(SitemapSpider, StructuredDataSpider):
 
         if located_in := re.match(r"(?i)c\/o ([\w ]+), (.+)", item["street_address"]):
             item["located_in"] = located_in.group(1)
-            item["located_in_wikidata"] = self.located_in_brands.get(
-                located_in.group(1)
-            )
+            item["located_in_wikidata"] = self.located_in_brands.get(located_in.group(1))
             item["street_address"] = located_in.group(2)
 
         if item.get("twitter") == "@GAMEdigital":

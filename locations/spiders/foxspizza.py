@@ -17,20 +17,14 @@ class FoxsPizzaSpider(scrapy.Spider):
             yield scrapy.Request(url, callback=self.parse_store)
 
     def parse_store(self, response):
-        lat, lng = map(
-            float, re.search(r"LatLng\((.*),(.*)\),", response.text).groups()
-        )
+        lat, lng = map(float, re.search(r"LatLng\((.*),(.*)\),", response.text).groups())
         properties = {
             "lat": lat,
             "lon": lng,
             "ref": response.url,
             "website": response.url,
-            "opening_hours": "; ".join(
-                response.xpath('//*[@class="timings_list"]//text()').extract()
-            ),
-            "addr_full": response.xpath('//*[@class="loc_address"]/text()')
-            .get()
-            .replace("\xa0", " "),
+            "opening_hours": "; ".join(response.xpath('//*[@class="timings_list"]//text()').extract()),
+            "addr_full": response.xpath('//*[@class="loc_address"]/text()').get().replace("\xa0", " "),
             "phone": response.xpath('//*[@class="phone_no"]//text()').get(),
             "name": response.xpath("//title/text()").get(),
         }

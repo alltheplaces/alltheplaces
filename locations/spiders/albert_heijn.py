@@ -23,18 +23,14 @@ class AlbertHeijnSpider(scrapy.Spider):
                 yield scrapy.Request(url, callback=self.parse_store)
 
     def parse_store(self, response):
-        for ldjson in response.xpath(
-            '//script[@type="application/ld+json"]/text()'
-        ).extract():
+        for ldjson in response.xpath('//script[@type="application/ld+json"]/text()').extract():
             data = json.loads(ldjson)
             if data["@type"] != "GroceryStore":
                 continue
 
             opening_hours = OpeningHours()
             for spec in data["openingHoursSpecification"]:
-                opening_hours.add_range(
-                    spec["dayOfWeek"][:2], spec["opens"], spec["closes"]
-                )
+                opening_hours.add_range(spec["dayOfWeek"][:2], spec["opens"], spec["closes"])
 
             properties = {
                 "ref": response.url,

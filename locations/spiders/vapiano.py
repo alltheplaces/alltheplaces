@@ -16,9 +16,7 @@ class VapianoSpider(scrapy.Spider):
     start_urls = ["https://us.vapiano.com/en/restaurants/"]
 
     def parse(self, response):
-        script = response.xpath('//script[contains(., "var restaurants")]/text()')[
-            0
-        ].extract()
+        script = response.xpath('//script[contains(., "var restaurants")]/text()')[0].extract()
 
         data = re.search(regex, script).group()
         data = json.loads(data)

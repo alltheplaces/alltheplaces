@@ -24,11 +24,7 @@ class JumboCHSpider(SitemapSpider):
         # linked data items of type LocalBusiness. The first contains
         # the branch name, the second all the other properties.
         MicrodataParser.convert_to_json_ld(response)
-        ld_items = [
-            o
-            for o in LinkedDataParser.iter_linked_data(response)
-            if o.get("@type") == "LocalBusiness"
-        ]
+        ld_items = [o for o in LinkedDataParser.iter_linked_data(response) if o.get("@type") == "LocalBusiness"]
         if len(ld_items) < 2:
             return
         branch = LinkedDataParser.parse_ld(ld_items[0])["name"].strip()

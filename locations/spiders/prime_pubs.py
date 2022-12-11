@@ -27,9 +27,7 @@ class PrimePubsSpider(scrapy.Spider):
             properties = {
                 "ref": place["gsx$storenumber"]["$t"],
                 "name": place["gsx$storename"]["$t"],
-                "addr_full": place["gsx$streetnumber"]["$t"]
-                + " "
-                + place["gsx$street"]["$t"],
+                "addr_full": place["gsx$streetnumber"]["$t"] + " " + place["gsx$street"]["$t"],
                 "city": place["gsx$city"]["$t"],
                 "state": place["gsx$province"]["$t"],
                 "postcode": place["gsx$postalcode"]["$t"],

@@ -90,8 +90,7 @@ class AlnaturaDESpider(scrapy.Spider):
 
         for stores in data["Payload"]:
             yield scrapy.Request(
-                f"https://www.alnatura.de/api/sitecore/stores/StoreDetails"
-                f"?storeid={stores['Id']}",
+                f"https://www.alnatura.de/api/sitecore/stores/StoreDetails" f"?storeid={stores['Id']}",
                 callback=self.parse_stores,
                 meta={
                     "lat": stores["Lat"].replace(",", "."),

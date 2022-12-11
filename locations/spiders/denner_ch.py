@@ -33,9 +33,7 @@ class DennerCHSpider(SitemapSpider, StructuredDataSpider):
 
     @staticmethod
     def parse_opening_date(response):
-        if opening := response.xpath(
-            '//div[normalize-space(text())="Neueröffnung"]/..'
-        ).get():
+        if opening := response.xpath('//div[normalize-space(text())="Neueröffnung"]/..').get():
             if match := re.search(r"Ab (\d+)\.(\d+)\.(2\d{3})", opening):
                 day, month, year = [int(x) for x in match.groups()]
                 if date(year, month, day) > date.today():

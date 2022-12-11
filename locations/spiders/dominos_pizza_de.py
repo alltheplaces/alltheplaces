@@ -24,12 +24,8 @@ class DominosPizzaDESpider(SitemapSpider):
             "name": response.xpath('//h1[@class="storetitle"]/text()').extract_first(),
             "street_address": address_data[0].strip().strip(","),
             "country": country,
-            "lat": response.xpath('//input[@id="store-lat"]/@value')
-            .get()
-            .replace(",", "."),
-            "lon": response.xpath('//input[@id="store-lon"]/@value')
-            .get()
-            .replace(",", "."),
+            "lat": response.xpath('//input[@id="store-lat"]/@value').get().replace(",", "."),
+            "lon": response.xpath('//input[@id="store-lon"]/@value').get().replace(",", "."),
             "website": response.url,
         }
         if locality_data:

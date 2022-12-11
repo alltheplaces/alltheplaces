@@ -19,9 +19,7 @@ class AppleSpider(scrapy.Spider):
             yield scrapy.Request(url, callback=self.parse_store)
 
     def parse_store(self, response):
-        ldjson = json.loads(
-            response.css('script[type="application/ld+json"]::text').get()
-        )
+        ldjson = json.loads(response.css('script[type="application/ld+json"]::text').get())
 
         opening_hours = OpeningHours()
         for spec in ldjson["openingHoursSpecification"]:

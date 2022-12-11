@@ -53,8 +53,6 @@ class HomeDepotCASpider(SitemapSpider):
         location_hours = re.findall(r"([a-zA-Z]*)\s(.*?)\s-\s(.*?)\s", open_hours)
 
         for weekday in location_hours:
-            opening_hours.add_range(
-                day=weekday[0], open_time=weekday[1], close_time=weekday[2]
-            )
+            opening_hours.add_range(day=weekday[0], open_time=weekday[1], close_time=weekday[2])
 
         return opening_hours.as_opening_hours()

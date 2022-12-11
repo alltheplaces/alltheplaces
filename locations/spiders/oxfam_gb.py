@@ -15,13 +15,9 @@ class OxfamGBSpider(SitemapSpider):
     def parse_shop(self, response):
         item = GeojsonPointItem()
         item["website"] = item["ref"] = response.url
-        item["street_address"] = response.xpath(
-            '//*[@class="shop-address"]/li/text()'
-        ).get()
+        item["street_address"] = response.xpath('//*[@class="shop-address"]/li/text()').get()
         item["city"] = response.xpath('//*[@class="shop-address"]/li[2]/text()').get()
-        item["postcode"] = response.xpath(
-            '//*[@class="shop-address"]/li[3]/text()'
-        ).get()
+        item["postcode"] = response.xpath('//*[@class="shop-address"]/li[3]/text()').get()
 
         extract_google_position(item, response)
         extract_email(item, response)

@@ -56,9 +56,7 @@ class MarriottHotelsSpider(scrapy.Spider):
         # Generate all possible Marriott brand codes.
         for x in letters:
             for y in letters:
-                url = "https://pacsys.marriott.com/data/marriott_properties_{}_en-US.json".format(
-                    x + y
-                )
+                url = "https://pacsys.marriott.com/data/marriott_properties_{}_en-US.json".format(x + y)
                 yield scrapy.Request(url, callback=self.parse_brand_json)
 
     def parse_brand_json(self, response):

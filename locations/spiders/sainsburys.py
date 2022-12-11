@@ -24,9 +24,7 @@ class SainsburysSpider(scrapy.Spider):
             store.update(store.pop("contact"))
             store["id"] = store["code"]
 
-            store["street_address"] = ", ".join(
-                filter(None, [store["address1"], store["address2"]])
-            )
+            store["street_address"] = ", ".join(filter(None, [store["address1"], store["address2"]]))
 
             store["name"] = store["other_name"]
 
@@ -35,9 +33,7 @@ class SainsburysSpider(scrapy.Spider):
             oh = OpeningHours()
             for rule in store["opening_times"]:
                 for time in rule["times"]:
-                    oh.add_range(
-                        DAYS[rule["day"]], time["start_time"], time["end_time"]
-                    )
+                    oh.add_range(DAYS[rule["day"]], time["start_time"], time["end_time"])
 
             item["opening_hours"] = oh.as_opening_hours()
             item["website"] = "https://stores.sainsburys.co.uk/{}/{}".format(
@@ -48,18 +44,10 @@ class SainsburysSpider(scrapy.Spider):
             item["extras"]["fhrs:id"] = store["fsa_scores"]["fhrs_id"]
 
             # https://stores.sainsburys.co.uk/api/v1/facilities
-            item["extras"]["atm"] = yes_or_no(
-                any(f["id"] == 2 for f in store["facilities"])
-            )
-            item["extras"]["sells:national_lottery"] = yes_or_no(
-                any(f["id"] == 6 for f in store["facilities"])
-            )
-            item["extras"]["car_wash"] = yes_or_no(
-                any(f["id"] == 30 for f in store["facilities"])
-            )
-            item["extras"]["wheelchair"] = yes_or_no(
-                any(f["id"] == 162 for f in store["facilities"])
-            )
+            item["extras"]["atm"] = yes_or_no(any(f["id"] == 2 for f in store["facilities"]))
+            item["extras"]["sells:national_lottery"] = yes_or_no(any(f["id"] == 6 for f in store["facilities"]))
+            item["extras"]["car_wash"] = yes_or_no(any(f["id"] == 30 for f in store["facilities"]))
+            item["extras"]["wheelchair"] = yes_or_no(any(f["id"] == 162 for f in store["facilities"]))
 
             if any(f["id"] == 28 for f in store["facilities"]):
                 item["extras"]["has_parking"] = "yes"
@@ -67,19 +55,11 @@ class SainsburysSpider(scrapy.Spider):
                 item["extras"]["parking:capacity:disabled"] = yes_or_no(
                     any(f["id"] == 166 for f in store["facilities"])
                 )
-                item["extras"]["parking:capacity:parent"] = yes_or_no(
-                    any(f["id"] == 167 for f in store["facilities"])
-                )
+                item["extras"]["parking:capacity:parent"] = yes_or_no(any(f["id"] == 167 for f in store["facilities"]))
 
-            item["extras"]["toilets"] = yes_or_no(
-                any(f["id"] == 16 for f in store["facilities"])
-            )
-            item["extras"]["changing_table"] = yes_or_no(
-                any(f["id"] == 169 for f in store["facilities"])
-            )
-            item["extras"]["toilets:wheelchair"] = yes_or_no(
-                any(f["id"] == 9 for f in store["facilities"])
-            )
+            item["extras"]["toilets"] = yes_or_no(any(f["id"] == 16 for f in store["facilities"]))
+            item["extras"]["changing_table"] = yes_or_no(any(f["id"] == 169 for f in store["facilities"]))
+            item["extras"]["toilets:wheelchair"] = yes_or_no(any(f["id"] == 9 for f in store["facilities"]))
 
             if any(f["id"] == 221 for f in store["facilities"]):
                 item["extras"]["internet_access"] = "wlan"
@@ -88,12 +68,8 @@ class SainsburysSpider(scrapy.Spider):
             item["extras"]["self_checkout"] = yes_or_no(
                 any(f["id"] == 4 or f["id"] == 224 for f in store["facilities"])
             )
-            item["extras"]["payment:contactless"] = yes_or_no(
-                any(f["id"] == 104 for f in store["facilities"])
-            )
-            item["extras"]["paypoint"] = yes_or_no(
-                any(f["id"] == 231 for f in store["facilities"])
-            )
+            item["extras"]["payment:contactless"] = yes_or_no(any(f["id"] == 104 for f in store["facilities"]))
+            item["extras"]["paypoint"] = yes_or_no(any(f["id"] == 231 for f in store["facilities"]))
 
             if store["store_type"] == "local":
                 item.update(self.SAINSBURYS_LOCAL)
@@ -101,29 +77,17 @@ class SainsburysSpider(scrapy.Spider):
             elif store["store_type"] == "main":
                 item["extras"]["shop"] = "supermarket"
 
-                item["extras"]["key_cutting"] = yes_or_no(
-                    any(f["id"] == 32 for f in store["facilities"])
-                )
+                item["extras"]["key_cutting"] = yes_or_no(any(f["id"] == 32 for f in store["facilities"]))
             elif store["store_type"] == "argos":
                 continue  # ArgosSpider
             elif store["store_type"] == "pfs":
                 item["extras"]["amenity"] = "fuel"
 
-                item["extras"]["fuel:diesel"] = yes_or_no(
-                    any(f["id"] == 17 for f in store["facilities"])
-                )
-                item["extras"]["fuel:electric"] = yes_or_no(
-                    any(f["id"] == 108 for f in store["facilities"])
-                )
-                item["extras"]["fuel:lpg"] = yes_or_no(
-                    any(f["id"] == 192 for f in store["facilities"])
-                )
-                item["extras"]["fuel:super_unleaded"] = yes_or_no(
-                    any(f["id"] == 34 for f in store["facilities"])
-                )
-                item["extras"]["fuel:petrol"] = yes_or_no(
-                    any(f["id"] == 11 for f in store["facilities"])
-                )
+                item["extras"]["fuel:diesel"] = yes_or_no(any(f["id"] == 17 for f in store["facilities"]))
+                item["extras"]["fuel:electric"] = yes_or_no(any(f["id"] == 108 for f in store["facilities"]))
+                item["extras"]["fuel:lpg"] = yes_or_no(any(f["id"] == 192 for f in store["facilities"]))
+                item["extras"]["fuel:super_unleaded"] = yes_or_no(any(f["id"] == 34 for f in store["facilities"]))
+                item["extras"]["fuel:petrol"] = yes_or_no(any(f["id"] == 11 for f in store["facilities"]))
             elif store["store_type"] == "pharmacy":
                 continue  # LloydsPharmacyGBSpider
             elif store["store_type"] == "tm":

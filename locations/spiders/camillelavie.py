@@ -27,21 +27,11 @@ class CamilleLaVieSpider(scrapy.Spider):
             "addr_full": response.xpath(
                 '//table[@class="locations"]/tbody//h3/div/span[2]/span/text()'
             ).extract_first(),
-            "city": response.xpath(
-                '//table[@class="locations"]/tbody//h3/div/span[3]/text()'
-            ).extract_first(),
-            "state": response.xpath(
-                '//table[@class="locations"]/tbody//h3/div/span[4]/text()'
-            ).extract_first(),
-            "postcode": response.xpath(
-                '//table[@class="locations"]/tbody//h3/div/span[5]/text()'
-            ).extract_first(),
-            "phone": response.xpath(
-                '//table[@class="locations"]/tbody//h3/div/span[6]/span/text()'
-            ).extract_first(),
-            "name": response.xpath(
-                '//table[@class="locations"]/tbody//h3/div/span[1]/text()'
-            ).extract_first(),
+            "city": response.xpath('//table[@class="locations"]/tbody//h3/div/span[3]/text()').extract_first(),
+            "state": response.xpath('//table[@class="locations"]/tbody//h3/div/span[4]/text()').extract_first(),
+            "postcode": response.xpath('//table[@class="locations"]/tbody//h3/div/span[5]/text()').extract_first(),
+            "phone": response.xpath('//table[@class="locations"]/tbody//h3/div/span[6]/span/text()').extract_first(),
+            "name": response.xpath('//table[@class="locations"]/tbody//h3/div/span[1]/text()').extract_first(),
             "lat": float(lat_lng[0]),
             "lon": float(lat_lng[1]),
             "website": response.url,

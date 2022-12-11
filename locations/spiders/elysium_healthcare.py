@@ -16,9 +16,7 @@ class ElysiumHealthcareSpider(scrapy.Spider):
     download_delay = 0.3
 
     def parse(self, response):
-        urls = response.xpath(
-            '//li[@class="elementor-icon-list-item"]/a/@href'
-        ).extract()
+        urls = response.xpath('//li[@class="elementor-icon-list-item"]/a/@href').extract()
 
         for url in urls:
             yield scrapy.Request(url=url, callback=self.parse_location)
@@ -42,9 +40,7 @@ class ElysiumHealthcareSpider(scrapy.Spider):
                     '//div[contains(@class, "contact-link-small")]/div/div/p/text()'
                 ).extract_first()
                 if not addr_first_line:
-                    addr_first_line = "".join(
-                        [x for x in unit_addr if x not in clutter]
-                    )
+                    addr_first_line = "".join([x for x in unit_addr if x not in clutter])
                     addr_first_line = addr_first_line.replace("or\xa0Email us \xa0", "")
             else:  # No unit_addr, just first_line
                 addr_first_line = response.xpath(
@@ -60,12 +56,7 @@ class ElysiumHealthcareSpider(scrapy.Spider):
                 ).extract_first()
                 if addr_last_line not in addr_first_line:  # Check for overlap
                     if welsh_ll_addr:
-                        addr_full = (
-                            addr_first_line
-                            + " "
-                            + addr_last_line
-                            + welsh_ll_addr.rstrip("or ")
-                        )
+                        addr_full = addr_first_line + " " + addr_last_line + welsh_ll_addr.rstrip("or ")
                     else:
                         addr_full = addr_first_line + " " + addr_last_line
                 else:  # if there is first_line last_line overlap
@@ -74,12 +65,8 @@ class ElysiumHealthcareSpider(scrapy.Spider):
                     else:
                         addr_full = "".join(unit_addr) + addr_last_line
             else:  # Handle single line formatting
-                addr_full = response.xpath(
-                    '(//div[contains(@class, "contact-link-small")]//p/text())'
-                ).extract_first()
-            map_settings = response.xpath(
-                '//div[contains(@id, "wpgmza_map")]/@data-settings'
-            ).extract_first()
+                addr_full = response.xpath('(//div[contains(@class, "contact-link-small")]//p/text())').extract_first()
+            map_settings = response.xpath('//div[contains(@id, "wpgmza_map")]/@data-settings').extract_first()
             if map_settings:
                 map_data = json.loads(map_settings)
                 lat = map_data["map_start_lat"]
@@ -87,9 +74,7 @@ class ElysiumHealthcareSpider(scrapy.Spider):
             else:  # No map available
                 lat = ""
                 lon = ""
-            telephone = response.xpath(
-                '//div[@class="darkbglink"]/p/a/text()'
-            ).extract_first()
+            telephone = response.xpath('//div[@class="darkbglink"]/p/a/text()').extract_first()
             if telephone:
                 telephone.replace("Email us", "")
 

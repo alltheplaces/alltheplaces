@@ -17,9 +17,7 @@ class XlPartsSpider(scrapy.Spider):
 
     def parse(self, response):
         stores = response.xpath('//div[contains(@id, "store")]')
-        script_data = response.xpath(
-            '//script[contains(text(), "var map")]'
-        ).extract_first()
+        script_data = response.xpath('//script[contains(text(), "var map")]').extract_first()
 
         for store in stores:
             item = GeojsonPointItem()

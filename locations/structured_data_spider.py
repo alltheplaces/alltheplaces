@@ -73,7 +73,7 @@ class StructuredDataSpider(Spider):
     search_for_image = True
     parse_json_comments = False
 
-    def parse_sd(self, response):
+    def parse_sd(self, response):  # noqa: C901
         MicrodataParser.convert_to_json_ld(response)
         for wanted_type in self.wanted_types:
             if ld_item := LinkedDataParser.find_linked_data(

@@ -19,9 +19,7 @@ class RegisSalonGB(CrawlSpider):
     download_delay = 4.0
     rules = [
         Rule(
-            LinkExtractor(
-                allow=r"https://www.regissalons.co.uk/salon-locator/[-\w]+/$"
-            ),
+            LinkExtractor(allow=r"https://www.regissalons.co.uk/salon-locator/[-\w]+/$"),
             callback="parse",
         )
     ]
@@ -33,9 +31,7 @@ class RegisSalonGB(CrawlSpider):
 
         item["name"] = response.xpath('//h1[@class="page-title"]/span/text()').get()
 
-        item["addr_full"] = response.xpath(
-            '//div[@class="amlocator-salon-left-address"]/p/text()'
-        ).get()
+        item["addr_full"] = response.xpath('//div[@class="amlocator-salon-left-address"]/p/text()').get()
 
         extract_google_position(item, response)
         extract_phone(item, response)

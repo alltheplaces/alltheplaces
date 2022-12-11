@@ -25,24 +25,12 @@ class OrkinSpider(scrapy.Spider):
     def parse_location(self, response):
 
         properties = {
-            "ref": response.xpath(
-                '//section[@class="branch-data"]/@data-branch-id'
-            ).extract_first(),
-            "addr_full": response.xpath(
-                '//span[@itemprop ="streetAddress"]/text()'
-            ).extract_first(),
-            "city": response.xpath(
-                '//span[@itemprop ="addressLocality"]/text()'
-            ).extract_first(),
-            "state": response.xpath(
-                '//span[@itemprop ="addressRegion"]/text()'
-            ).extract_first(),
-            "phone": response.xpath(
-                '//span[@itemprop="telephone"]/text()'
-            ).extract_first(),
-            "name": response.xpath(
-                '//h1[@class="locations-title"]/text()'
-            ).extract_first(),
+            "ref": response.xpath('//section[@class="branch-data"]/@data-branch-id').extract_first(),
+            "addr_full": response.xpath('//span[@itemprop ="streetAddress"]/text()').extract_first(),
+            "city": response.xpath('//span[@itemprop ="addressLocality"]/text()').extract_first(),
+            "state": response.xpath('//span[@itemprop ="addressRegion"]/text()').extract_first(),
+            "phone": response.xpath('//span[@itemprop="telephone"]/text()').extract_first(),
+            "name": response.xpath('//h1[@class="locations-title"]/text()').extract_first(),
             "website": response.url,
         }
 

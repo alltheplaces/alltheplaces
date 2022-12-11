@@ -15,9 +15,7 @@ class BarnesAndNobleCollegeSpider(scrapy.Spider):
         locations = response.xpath('//section[@id="map-results"]//h3')
         address_data = response.xpath('//div[@class="address"]/p')
 
-        for location, addresses, citypostal in zip(
-            locations, address_data, address_data
-        ):
+        for location, addresses, citypostal in zip(locations, address_data, address_data):
             name = location.xpath(".//text()").extract_first()
             address = addresses.xpath(".//text()").extract_first()
             city_postal = citypostal.xpath(".//text()").extract().pop(-1).strip()

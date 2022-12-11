@@ -10,12 +10,10 @@ class OldNavySpider(scrapy.Spider):
     item_attributes = {"brand": "Old Navy", "brand_wikidata": "Q2735242"}
     allowed_domains = ["oldnavy.gap.com"]
     oldnavy_url = "http://www.oldnavy.com/products/store-locations.jsp"
-    store_url = (
-        "http://oldnavy.gap.com/resources/storeLocations/v1/us/store/?storeid={}"
-    )
+    store_url = "http://oldnavy.gap.com/resources/storeLocations/v1/us/store/?storeid={}"
     start_urls = (oldnavy_url,)
 
-    def store_hours(self, store_hours):
+    def store_hours(self, store_hours):  # noqa: C901
         if store_hours is None:
             return ""
         day_groups = []
@@ -86,9 +84,7 @@ class OldNavySpider(scrapy.Spider):
         for store in data:
             match = re.search(r"^.+(-store)\-(\d{1,4})(.jsp)$", store)
             (_, store_id, _) = match.groups()
-            yield scrapy.Request(
-                self.store_url.format(store_id), callback=self.parse_store
-            )
+            yield scrapy.Request(self.store_url.format(store_id), callback=self.parse_store)
 
     def parse_store(self, response):
         store = response.json()["storeLocations"]["storeLocationList"]

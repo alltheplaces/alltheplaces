@@ -59,9 +59,7 @@ class StadtZuerichCHSpider(scrapy.Spider):
         # Sometimes we get 3 coordinates, but the z value is always zero.
         lon, lat = coords[0], coords[1]
         id = f["id"]
-        (operator, operator_wikidata) = self.operators.get(
-            props.get("da"), (None, None)
-        )
+        (operator, operator_wikidata) = self.operators.get(props.get("da"), (None, None))
         tags = {
             "email": props.get("mail"),
             "name": self.parse_name(props),
@@ -169,15 +167,9 @@ class StadtZuerichCHSpider(scrapy.Spider):
         return tags
 
     def parse_fountain(self, p):
-        column_material, column_material_wikidata = MATERIALS_DE.get(
-            p.get("material_saeule"), (None, None)
-        )
-        sculpture_material, sculpture_material_wikidata = MATERIALS_DE.get(
-            p.get("material_figur"), (None, None)
-        )
-        trough_material, trough_material_wikidata = MATERIALS_DE.get(
-            p.get("material_trog"), (None, None)
-        )
+        column_material, column_material_wikidata = MATERIALS_DE.get(p.get("material_saeule"), (None, None))
+        sculpture_material, sculpture_material_wikidata = MATERIALS_DE.get(p.get("material_figur"), (None, None))
+        trough_material, trough_material_wikidata = MATERIALS_DE.get(p.get("material_trog"), (None, None))
         if addr := (p.get("standort") or "").strip():
             addr = addr + ", Zürich"
         return {
@@ -225,16 +217,10 @@ class StadtZuerichCHSpider(scrapy.Spider):
                     if h.count(";") == 3:
                         open_am, close_am, open_pm, close_pm = h.split(";")
                         if close_am and open_pm:
-                            oh.add_range(
-                                DAYS_DE[day], open_am, close_am, time_format="%H.%M"
-                            )
-                            oh.add_range(
-                                DAYS_DE[day], open_pm, close_pm, time_format="%H.%M"
-                            )
+                            oh.add_range(DAYS_DE[day], open_am, close_am, time_format="%H.%M")
+                            oh.add_range(DAYS_DE[day], open_pm, close_pm, time_format="%H.%M")
                         else:
-                            oh.add_range(
-                                DAYS_DE[day], open_am, close_pm, time_format="%H.%M"
-                            )
+                            oh.add_range(DAYS_DE[day], open_am, close_pm, time_format="%H.%M")
                         break
         return oh.as_opening_hours()
 
@@ -294,9 +280,7 @@ class StadtZuerichCHSpider(scrapy.Spider):
             "oel": "oil",
             "textilien": "textiles",
         }
-        recycling = {
-            osm_tag for (feed_tag, osm_tag) in tags.items() if p.get(feed_tag) == "X"
-        }
+        recycling = {osm_tag for (feed_tag, osm_tag) in tags.items() if p.get(feed_tag) == "X"}
         return {
             "amenity": "recycling",
             "name": None,  # feed repeats address
@@ -310,11 +294,7 @@ class StadtZuerichCHSpider(scrapy.Spider):
             isced_level = "2"
         elif p.get("da") == "Fachschule Viventa":
             isced_level = "3"
-        name_words = [
-            word
-            for word in p["name"].split()
-            if word not in {"Sek", "Sekundar", "Sekundarstufe"}
-        ]
+        name_words = [word for word in p["name"].split() if word not in {"Sek", "Sekundar", "Sekundarstufe"}]
         name = " ".join(name_words).removesuffix(",")
         tags = {
             "amenity": "school",

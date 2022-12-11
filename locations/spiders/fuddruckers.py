@@ -6,9 +6,7 @@ from locations.linked_data_parser import LinkedDataParser
 class FuddruckersSpider(scrapy.Spider):
     name = "fuddruckers"
     item_attributes = {"brand": "Fuddruckers", "brand_wikidata": "Q5507056"}
-    start_urls = [
-        "http://www.fuddruckers.com/services/location/get_stores_by_position.php"
-    ]
+    start_urls = ["http://www.fuddruckers.com/services/location/get_stores_by_position.php"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
     download_delay = 1.0
 

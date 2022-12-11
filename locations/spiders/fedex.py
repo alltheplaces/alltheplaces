@@ -35,9 +35,7 @@ class FedExSpider(SitemapSpider):
             "name": main.xpath('normalize-space(.//h2[@itemprop="name"])').get(),
             "lat": main.xpath('.//*[@itemprop="latitude"]/@content').get(),
             "lon": main.xpath('.//*[@itemprop="longitude"]/@content').get(),
-            "street_address": main.xpath(
-                './/*[@itemprop="streetAddress"]/@content'
-            ).get(),
+            "street_address": main.xpath('.//*[@itemprop="streetAddress"]/@content').get(),
             "city": main.css(".Address-city::text").get(),
             "state": main.xpath('.//*[@itemprop="addressRegion"]/text()').get(),
             "postcode": main.xpath('.//*[@itemprop="postalCode"]/text()').get(),

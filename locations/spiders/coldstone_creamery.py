@@ -9,9 +9,7 @@ class ColdstoneCreamerySpider(scrapy.Spider):
     name = "coldstone_creamery"
     item_attributes = {"brand": "Cold Stone Creamery", "brand_wikidata": "Q1094923"}
     allowed_domains = ["www.coldstonecreamery.com"]
-    start_urls = (
-        "https://www.coldstonecreamery.com/locator/index.php?brand=14&mode=desktop&pagesize=7000&q=55114",
-    )
+    start_urls = ("https://www.coldstonecreamery.com/locator/index.php?brand=14&mode=desktop&pagesize=7000&q=55114",)
 
     def parse(self, response):
         for location_node in response.xpath('//div[@class="listing"]/script/text()'):

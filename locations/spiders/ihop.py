@@ -19,15 +19,10 @@ class IHOPSpider(scrapy.Spider):
         for item in hours:
             day = item.xpath('.//span[@class="daypart"]/@data-daypart').extract_first()
             open_time = item.xpath('.//span[@class="time-open"]/text()').extract_first()
-            close_time = item.xpath(
-                './/span[@class="time-close"]/text()'
-            ).extract_first()
+            close_time = item.xpath('.//span[@class="time-close"]/text()').extract_first()
 
             if not open_time:
-                if (
-                    item.xpath('.//span[@class="time"]/span/text()').extract_first()
-                    == "Open 24 Hours"
-                ):
+                if item.xpath('.//span[@class="time"]/span/text()').extract_first() == "Open 24 Hours":
                     open_time = "12:00am"
                     close_time = "11:59pm"
                 else:
@@ -43,9 +38,7 @@ class IHOPSpider(scrapy.Spider):
         return opening_hours.as_opening_hours()
 
     def parse(self, response):
-        state_urls = response.xpath(
-            '//div[@class="browse-container"]//li//a/@href'
-        ).extract()
+        state_urls = response.xpath('//div[@class="browse-container"]//li//a/@href').extract()
         for state_url in state_urls:
             yield scrapy.Request(url=state_url, callback=self.parse_state)
 
@@ -55,9 +48,7 @@ class IHOPSpider(scrapy.Spider):
             yield scrapy.Request(url=city_url, callback=self.parse_city)
 
     def parse_city(self, response):
-        location_urls = response.xpath(
-            '//div[@class="map-list-item-header"]/a/@href'
-        ).extract()
+        location_urls = response.xpath('//div[@class="map-list-item-header"]/a/@href').extract()
         for location_url in location_urls:
             if location_url != "#":
                 yield scrapy.Request(url=location_url, callback=self.parse_location)
@@ -78,15 +69,11 @@ class IHOPSpider(scrapy.Spider):
             "postcode": basic_info["address"]["postalCode"],
             "phone": basic_info["address"]["telephone"],
             "website": basic_info["url"],
-            "ref": "_".join(
-                re.search(r".+/(.+?)/(.+?)/(.+?)/?(?:\.html|$)", response.url).groups()
-            ),
+            "ref": "_".join(re.search(r".+/(.+?)/(.+?)/(.+?)/?(?:\.html|$)", response.url).groups()),
         }
 
         hours = self.parse_opening_hours(
-            response.xpath(
-                '//div[contains(@class, "hide-mobile")]//div[@class="day-hour-row"]'
-            )
+            response.xpath('//div[contains(@class, "hide-mobile")]//div[@class="day-hour-row"]')
         )
         if hours:
             point["opening_hours"] = hours

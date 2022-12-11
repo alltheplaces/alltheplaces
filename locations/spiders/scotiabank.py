@@ -19,9 +19,7 @@ def calculate_offset_point(x, y, d, b):
     """
     R = 6378.137  # km
     x, y, b = math.radians(x), math.radians(y), math.radians(b)
-    new_y = math.asin(
-        (math.sin(y) * math.cos(d / R)) + (math.cos(y) * math.sin(d / R) * math.cos(b))
-    )
+    new_y = math.asin((math.sin(y) * math.cos(d / R)) + (math.cos(y) * math.sin(d / R) * math.cos(b)))
     new_x = x + math.atan2(
         math.sin(b) * math.sin(d / R) * math.cos(y),
         math.cos(d / R) - math.sin(y) * math.sin(new_y),
@@ -41,9 +39,7 @@ class ScotiabankSpider(scrapy.Spider):
     custom_settings = {"DEFAULT_REQUEST_HEADERS": {"Accept": "application/json"}}
 
     def start_requests(self):
-        with open(
-            "./locations/searchable_points/ca_centroids_100mile_radius.csv"
-        ) as points:
+        with open("./locations/searchable_points/ca_centroids_100mile_radius.csv") as points:
             reader = csv.DictReader(points)
             for row in reader:
                 lat, lon = row["latitude"], row["longitude"]

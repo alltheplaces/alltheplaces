@@ -63,16 +63,12 @@ class KingSooperSpider(scrapy.Spider):
                 day_short = day.title()[:2]
 
                 if not this_day_group:
-                    this_day_group = dict(
-                        from_day=day_short, to_day=day_short, hours=hours
-                    )
+                    this_day_group = dict(from_day=day_short, to_day=day_short, hours=hours)
                 elif this_day_group["hours"] == hours:
                     this_day_group["to_day"] = day_short
                 elif this_day_group["hours"] != hours:
                     day_groups.append(this_day_group)
-                    this_day_group = dict(
-                        from_day=day_short, to_day=day_short, hours=hours
-                    )
+                    this_day_group = dict(from_day=day_short, to_day=day_short, hours=hours)
             day_groups.append(this_day_group)
 
             if len(day_groups) == 1:
@@ -85,9 +81,7 @@ class KingSooperSpider(scrapy.Spider):
                     if day_group["from_day"] == day_group["to_day"]:
                         opening_hours += "{from_day} {hours}; ".format(**day_group)
                     else:
-                        opening_hours += "{from_day}-{to_day} {hours}; ".format(
-                            **day_group
-                        )
+                        opening_hours += "{from_day}-{to_day} {hours}; ".format(**day_group)
                 opening_hours = opening_hours[:-2]
 
             return opening_hours
@@ -158,9 +152,7 @@ class KingSooperSpider(scrapy.Spider):
 
             for corner in box_corners:
                 if corner in self.ll_requests:
-                    self.logger.info(
-                        "Skipping request for %s because we already did it", corner
-                    )
+                    self.logger.info("Skipping request for %s because we already did it", corner)
                 else:
                     self.ll_requests.add(corner)
                     yield scrapy.Request(

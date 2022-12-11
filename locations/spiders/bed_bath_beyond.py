@@ -64,39 +64,21 @@ class BedBathBeyondSpider(scrapy.Spider):
             "addr_full": response.xpath(
                 '//address[@itemprop="address"]/span[@itemprop="streetAddress"]/span/text()'
             ).extract_first(),
-            "city": response.xpath(
-                '//span[@itemprop="addressLocality"]/text()'
-            ).extract_first(),
-            "state": response.xpath(
-                '//abbr[@itemprop="addressRegion"]/text()'
-            ).extract_first(),
-            "postcode": response.xpath(
-                '//span[@itemprop="postalCode"]/text()'
-            ).extract_first(),
+            "city": response.xpath('//span[@itemprop="addressLocality"]/text()').extract_first(),
+            "state": response.xpath('//abbr[@itemprop="addressRegion"]/text()').extract_first(),
+            "postcode": response.xpath('//span[@itemprop="postalCode"]/text()').extract_first(),
             "ref": response.url,
             "website": response.url,
-            "lon": float(
-                response.xpath(
-                    '//span/meta[@itemprop="longitude"]/@content'
-                ).extract_first()
-            ),
-            "lat": float(
-                response.xpath(
-                    '//span/meta[@itemprop="latitude"]/@content'
-                ).extract_first()
-            ),
+            "lon": float(response.xpath('//span/meta[@itemprop="longitude"]/@content').extract_first()),
+            "lat": float(response.xpath('//span/meta[@itemprop="latitude"]/@content').extract_first()),
         }
 
-        phone = response.xpath(
-            '//a[@class="c-phone-number-link c-phone-main-number-link"]/text()'
-        ).extract_first()
+        phone = response.xpath('//a[@class="c-phone-number-link c-phone-main-number-link"]/text()').extract_first()
         if phone:
             properties["phone"] = phone
 
         hours = json.loads(
-            response.xpath(
-                '//div[@class="c-location-hours-today js-location-hours"]/@data-days'
-            ).extract_first()
+            response.xpath('//div[@class="c-location-hours-today js-location-hours"]/@data-days').extract_first()
         )
 
         opening_hours = self.store_hours(hours)
@@ -106,9 +88,7 @@ class BedBathBeyondSpider(scrapy.Spider):
         yield GeojsonPointItem(**properties)
 
     def parse(self, response):
-        urls = response.xpath(
-            '//a[@class="c-directory-list-content-item-link"]/@href'
-        ).extract()
+        urls = response.xpath('//a[@class="c-directory-list-content-item-link"]/@href').extract()
         for path in urls:
             if path.rsplit("-", 1)[-1].isnumeric():
                 # If there's only one store, the URL will have a store number at the end

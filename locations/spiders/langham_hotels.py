@@ -16,19 +16,13 @@ class LanghamHotelsSpider(scrapy.Spider):
 
     def parse(self, response):
         # gather URLs of all Langham Hotel locations
-        all_locations = response.xpath(
-            '//div[@class="listing-item locations-item"]/a/@href'
-        ).extract()
+        all_locations = response.xpath('//div[@class="listing-item locations-item"]/a/@href').extract()
 
         for locations in all_locations:
-            yield scrapy.Request(
-                response.urljoin(locations), callback=self.parse_locations
-            )
+            yield scrapy.Request(response.urljoin(locations), callback=self.parse_locations)
 
     def parse_locations(self, response):
-        data = response.xpath(
-            '//script[@type="application/ld+json"]/text()'
-        ).extract_first()
+        data = response.xpath('//script[@type="application/ld+json"]/text()').extract_first()
 
         if data:
             try:
@@ -54,9 +48,7 @@ class LanghamHotelsSpider(scrapy.Spider):
                 yield GeojsonPointItem(**properties)
 
             except Exception as e:
-                self.logger.warn(
-                    "----------------- Error -----------------: {}".format(e)
-                )
+                self.logger.warn("----------------- Error -----------------: {}".format(e))
 
         else:
             # some of the websites don't provide location information with application/ld+json

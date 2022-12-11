@@ -18,14 +18,10 @@ class KpmgFrSpider(scrapy.Spider):
         data = response.json()
 
         for place in data["Europe"]["France"]:
-            yield scrapy.Request(
-                url="https://home.kpmg" + place["url"], callback=self.parse_office
-            )
+            yield scrapy.Request(url="https://home.kpmg" + place["url"], callback=self.parse_office)
 
     def parse_office(self, response):
-        office = response.xpath(
-            '//script[@type="text/javascript"]/text()'
-        ).extract_first()
+        office = response.xpath('//script[@type="text/javascript"]/text()').extract_first()
         json_data = re.search("kpmgMetaData=(.+?);", office).group(1)
         data = json.loads(json_data)
 

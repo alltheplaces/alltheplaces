@@ -34,9 +34,7 @@ class McDonaldsMASpider(scrapy.Spider):
     def parse_position(self, data):
         lat = ""
         lon = ""
-        latlon = (
-            data.xpath(".//div[@class='linktomap']/a/@href").extract_first().strip()
-        )
+        latlon = data.xpath(".//div[@class='linktomap']/a/@href").extract_first().strip()
         match = re.search(r"al=([\-|\d|\.]{1,})&lo=([\-|\d|\.]{1,})", latlon)
         lat, lon = match.groups()
         return lat, lon
@@ -45,11 +43,7 @@ class McDonaldsMASpider(scrapy.Spider):
         stores = response.xpath('//div[@class="cont_restau_infos"]')
         index = 0
         for store in stores:
-            name = (
-                store.xpath('.//span[@class="restauName"]/text()')
-                .extract_first()
-                .strip()
-            )
+            name = store.xpath('.//span[@class="restauName"]/text()').extract_first().strip()
             data = store.extract().strip()
             address, city = self.parse_address(data)
             phone = self.parse_phone(data)

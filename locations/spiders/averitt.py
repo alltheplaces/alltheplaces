@@ -73,9 +73,7 @@ class AverittSpider(scrapy.spiders.SitemapSpider):
             "/html/body/div[2]/div/div[1]/div/div/span/div[2]/div/div/div/div[1]/div/div/p/a/text()"
         ).get()
         email = (
-            response.xpath(
-                "/html/body/div[2]/div/div[1]/div/div/span/div[2]/div/div/div/div[2]/div/div/span/a/@href"
-            )
+            response.xpath("/html/body/div[2]/div/div[1]/div/div/span/div[2]/div/div/div/div[2]/div/div/span/a/@href")
             .get()
             .replace("mailto:", "")
         )

@@ -85,18 +85,14 @@ if __name__ == "__main__":
                 if stats_json := get_object(client, bucket_name, stats_suffix):
                     stats = json.load(stats_json)
                     run_data["spiders"] = stats["count"]
-                    run_data["total_lines"] = sum(
-                        s["features"] for s in stats["results"]
-                    )
+                    run_data["total_lines"] = sum(s["features"] for s in stats["results"])
             except json.decoder.JSONDecodeError:
                 print(f"Couldn't decode {stats_json}, skipping")
                 pass
 
         insights_suffix = f"runs/{run_id}/stats/_insights.json"
         if object_exists(client, bucket_name, insights_suffix):
-            run_data[
-                "insights_url"
-            ] = f"https://data.alltheplaces.xyz/{insights_suffix}"
+            run_data["insights_url"] = f"https://data.alltheplaces.xyz/{insights_suffix}"
 
         start_time = datetime.datetime.strptime(run_id, "%Y-%m-%d-%H-%M-%S")
         run_data["start_time"] = start_time.strftime("%Y-%m-%dT%H:%M:%S") + "Z"
@@ -108,9 +104,7 @@ if __name__ == "__main__":
             output_suffix = f"runs/{run_id}/output.zip"
             if size_bytes := object_size(client, bucket_name, output_suffix):
                 run_data["size_bytes"] = size_bytes
-                run_data[
-                    "output_url"
-                ] = f"https://data.alltheplaces.xyz/{output_suffix}"
+                run_data["output_url"] = f"https://data.alltheplaces.xyz/{output_suffix}"
 
         latest_element = run_data
         history_elements.append(run_data)

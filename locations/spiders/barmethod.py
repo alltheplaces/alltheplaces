@@ -31,9 +31,7 @@ class BarMethodSpider(scrapy.Spider):
 
     def parse_store(self, response):
 
-        infos = response.xpath(
-            "string(/html/body/div[2]/div/main/article/div[1]/div[2]/div/div/div[2])"
-        ).get()
+        infos = response.xpath("string(/html/body/div[2]/div/main/article/div[1]/div[2]/div/div/div[2])").get()
         address_full = infos.split("\n")[0]
         address = infos.split("\n")[1]
         state = re.findall("[A-Z]{2}", address)[0]
@@ -45,9 +43,7 @@ class BarMethodSpider(scrapy.Spider):
         facebook = response.xpath('//a[contains(@href, "facebook")]/@href').get()
         ref = response.request.url.replace(self.start_urls[0], "_")
         email = self.decodeEmail(
-            response.xpath('//a[@class="studio-contact-email"]/@href')
-            .get()
-            .replace("/cdn-cgi/l/email-protection#", "")
+            response.xpath('//a[@class="studio-contact-email"]/@href').get().replace("/cdn-cgi/l/email-protection#", "")
         )
 
         properties = {

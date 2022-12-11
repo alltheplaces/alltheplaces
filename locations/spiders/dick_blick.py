@@ -24,9 +24,7 @@ class DickBlickSpider(scrapy.Spider):
             "website": response.url,
         }
 
-        day_groups = response.xpath(
-            '//ul[@class="hours"]/li[@class="storehours"]/text()'
-        ).extract()
+        day_groups = response.xpath('//ul[@class="hours"]/li[@class="storehours"]/text()').extract()
 
         opening_hours = []
         for day_group in day_groups:
@@ -47,8 +45,6 @@ class DickBlickSpider(scrapy.Spider):
             yield scrapy.Request(response.urljoin(path), callback=self.parse_store)
 
     def parse(self, response):
-        urls = response.xpath(
-            '//div[@class="statechooser"]/select/option/@value'
-        ).extract()
+        urls = response.xpath('//div[@class="statechooser"]/select/option/@value').extract()
         for path in urls:
             yield scrapy.Request(response.urljoin(path), callback=self.parse_state)

@@ -13,7 +13,5 @@ class SierraSpider(StructuredDataSpider):
     user_agent = BROSWER_DEFAULT
 
     def parse(self, response):
-        for url in response.xpath(
-            '//div[@class="m-b"]/a [contains(., "Store Info and Directions")]/@href'
-        ).extract():
+        for url in response.xpath('//div[@class="m-b"]/a [contains(., "Store Info and Directions")]/@href').extract():
             yield scrapy.Request(response.urljoin(url), callback=self.parse_sd)

@@ -39,22 +39,14 @@ class SephoraSpider(scrapy.Spider):
                     open = open.strip()
                     close = close.strip()
                     if ":" in open:
-                        open_time = datetime.datetime.strptime(
-                            open, "%I:%M%p"
-                        ).strftime("%H:%M")
+                        open_time = datetime.datetime.strptime(open, "%I:%M%p").strftime("%H:%M")
                     else:
-                        open_time = datetime.datetime.strptime(open, "%I%p").strftime(
-                            "%H:%M"
-                        )
+                        open_time = datetime.datetime.strptime(open, "%I%p").strftime("%H:%M")
 
                     if ":" in close:
-                        close_time = datetime.datetime.strptime(
-                            close, "%I:%M%p"
-                        ).strftime("%H:%M")
+                        close_time = datetime.datetime.strptime(close, "%I:%M%p").strftime("%H:%M")
                     else:
-                        close_time = datetime.datetime.strptime(close, "%I%p").strftime(
-                            "%H:%M"
-                        )
+                        close_time = datetime.datetime.strptime(close, "%I%p").strftime("%H:%M")
                 except ValueError:
                     continue
                 opening_hours.add_range(
@@ -73,9 +65,7 @@ class SephoraSpider(scrapy.Spider):
             yield scrapy.Request(response.urljoin(url), callback=self.parse_store)
 
     def parse_store(self, response):
-        jsondata = json.loads(
-            response.xpath('//script[@id="linkJSON"]/text()').extract_first()
-        )
+        jsondata = json.loads(response.xpath('//script[@id="linkJSON"]/text()').extract_first())
         data = jsondata[2]["props"]
         properties = {
             "website": response.urljoin(data["storeInfo"]["seoCanonicalUrl"]),

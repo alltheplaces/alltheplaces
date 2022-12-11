@@ -36,9 +36,7 @@ class HardeesCarlsJrSpider(SitemapSpider):
             "lat": response.css('[itemprop="latitude"]').attrib["content"],
             "lon": response.css('[itemprop="longitude"]').attrib["content"],
             "name": response.xpath("//title/text()").get().split(":")[0],
-            "street_address": response.css('[itemprop="streetAddress"]').attrib[
-                "content"
-            ],
+            "street_address": response.css('[itemprop="streetAddress"]').attrib["content"],
             "city": response.css(".Address-city::text").get(),
             "state": response.css('[itemprop="addressRegion"]::text').get(),
             "postcode": response.css('[itemprop="postalCode"]::text').get(),

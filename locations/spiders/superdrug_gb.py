@@ -15,9 +15,7 @@ class SuperdrugGBSpider(SitemapSpider, StructuredDataSpider):
     user_agent = BROSWER_DEFAULT
 
     def inspect_item(self, item, response):
-        item["addr_full"] = clean_address(
-            item["street_address"].replace("Superdrug", "")
-        )
+        item["addr_full"] = clean_address(item["street_address"].replace("Superdrug", ""))
         item["street_address"] = clean_address(
             item["addr_full"].replace(item["city"], "").replace(item["postcode"], "")
         )

@@ -123,12 +123,7 @@ def sanitise_day(day: str, days: {} = DAYS_EN) -> str:
 
     day = day.strip("-.\t ").lower()
 
-    day = (
-        day.replace("https://", "")
-        .replace("http://", "")
-        .replace("schema.org/", "")
-        .title()
-    )
+    day = day.replace("https://", "").replace("http://", "").replace("schema.org/", "").title()
 
     if "#" in day:
         day = day.split("#", 1)[1]
@@ -208,11 +203,7 @@ class OpeningHours:
     def from_linked_data(self, linked_data, time_format="%H:%M"):
         if linked_data.get("openingHoursSpecification"):
             for rule in linked_data["openingHoursSpecification"]:
-                if (
-                    not rule.get("dayOfWeek")
-                    or not rule.get("opens")
-                    or not rule.get("closes")
-                ):
+                if not rule.get("dayOfWeek") or not rule.get("opens") or not rule.get("closes"):
                     continue
 
                 days = rule["dayOfWeek"]

@@ -16,9 +16,7 @@ class RedRobinSpider(scrapy.Spider):
         for href in response.css("ul.sb-directory-list ::attr(href)").extract():
             yield scrapy.Request(response.urljoin(href))
 
-        for ldjson in response.xpath(
-            '//script[@type="application/ld+json"]/text()'
-        ).extract():
+        for ldjson in response.xpath('//script[@type="application/ld+json"]/text()').extract():
             data = json.loads(ldjson)
             if data["@type"] == "Restaurant":
                 yield self.parse_store(response, data)

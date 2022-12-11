@@ -56,14 +56,8 @@ class FairwayMarketUSSpider(scrapy.Spider):
             try:
                 city = re.search(r",\s(.*?),", store["location"]["address"]).groups()[0]
             except:
-                city = (
-                    re.search(r"(Avenue|Parkway)(.*?),", store["location"]["address"])
-                    .groups()[1]
-                    .strip()
-                )
-                addr = re.search(
-                    r"^(.*)(Avenue|Parkway)", store["location"]["address"]
-                ).group(0)
+                city = re.search(r"(Avenue|Parkway)(.*?),", store["location"]["address"]).groups()[1].strip()
+                addr = re.search(r"^(.*)(Avenue|Parkway)", store["location"]["address"]).group(0)
 
             state = re.search(r"[A-Z]{2}", store["location"]["address"])[0]
             postal = re.search(r"[0-9]{5}", store["location"]["address"])[0]

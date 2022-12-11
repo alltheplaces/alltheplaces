@@ -55,8 +55,7 @@ class AutoNationSpider(scrapy.Spider):
                 "lat": store["Latitude"],
                 "lon": store["Longitude"],
                 "phone": store["Phone"],
-                "website": "https://www.autonation.com/dealers/"
-                + store["StoreDetailsUrl"],
+                "website": "https://www.autonation.com/dealers/" + store["StoreDetailsUrl"],
                 "extras": {"sells": store["Makes"]},
             }
 

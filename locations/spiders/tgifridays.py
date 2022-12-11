@@ -43,11 +43,7 @@ class TGIFridaysSpider(scrapy.Spider):
 
     def parse_store(self, response):
         # The JSON blob has an extra "}\r\n" at the end
-        data = json.loads(
-            response.xpath(
-                '//script[@type="application/ld+json"]/text()'
-            ).extract_first()[:-3]
-        )
+        data = json.loads(response.xpath('//script[@type="application/ld+json"]/text()').extract_first()[:-3])
 
         properties = {
             "addr_full": data["address"]["streetAddress"],

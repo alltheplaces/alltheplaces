@@ -21,9 +21,7 @@ class AthletaSpider(scrapy.Spider):
     def parse(self, response):
         data = response.xpath('//a[@class="ga-link"]/@href').extract()
         for store in data:
-            yield scrapy.Request(
-                self.athleta_url + store, callback=self.parse_list_store
-            )
+            yield scrapy.Request(self.athleta_url + store, callback=self.parse_list_store)
 
     def parse_list_store(self, response):
         data = response.xpath('//a[@class="ga-link"]/@href').extract()
@@ -55,9 +53,7 @@ class AthletaSpider(scrapy.Spider):
             "opening_hours": oh.as_opening_hours(),
             "addr_full": json_data["address_1"],
             "housenumber": json_data["address_1"].strip().split()[0],
-            "street": json_data["address_1"]
-            .replace(json_data["address_1"].strip().split()[0], "")
-            .strip(),
+            "street": json_data["address_1"].replace(json_data["address_1"].strip().split()[0], "").strip(),
             "city": json_data["city"],
             "state": json_data["region"],
             "postcode": json_data["post_code"],

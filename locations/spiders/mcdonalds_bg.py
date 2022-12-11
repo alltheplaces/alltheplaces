@@ -32,6 +32,7 @@ class McDonaldsBGSpider(scrapy.Spider):
                 "phone": phone if phone else "",
                 "lon": lon,
                 "lat": lat,
+                "city": city,
                 "name": "McDonalds",
                 "addr_full": address,
             }

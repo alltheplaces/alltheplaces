@@ -22,9 +22,7 @@ class LuLuLemonSpider(SitemapSpider):
         geo = {}
         hours = {}
         status = "CLOSED"
-        data = json.loads(
-            response.xpath('//script[@type="application/json"]/text()').extract_first()
-        )
+        data = json.loads(response.xpath('//script[@type="application/json"]/text()').extract_first())
 
         ref = data["props"]["pageProps"]["storeData"]["name"]
         address["full"] = data["props"]["pageProps"]["storeData"].get("fullAddress")

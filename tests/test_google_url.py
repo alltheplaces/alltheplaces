@@ -36,9 +36,7 @@ def test_maps_url():
         52.578594,
         -2.112396,
     )
-    assert url_to_coords(
-        "http://maps.google.com/maps?saddr=current+location&ll=57.213,-2.187"
-    ) == (
+    assert url_to_coords("http://maps.google.com/maps?saddr=current+location&ll=57.213,-2.187") == (
         57.213,
         -2.187,
     )
@@ -46,18 +44,14 @@ def test_maps_url():
         44.5043,
         8.9074,
     )
-    assert url_to_coords(
-        "https://maps.google.com?daddr=52.01390075683594,4.152029991149902"
-    ) == (
+    assert url_to_coords("https://maps.google.com?daddr=52.01390075683594,4.152029991149902") == (
         52.01390075683594,
         4.152029991149902,
     )
 
 
 def test_directions():
-    assert url_to_coords(
-        "https://www.google.com/maps/dir//51.4063062, -0.02920658/"
-    ) == (
+    assert url_to_coords("https://www.google.com/maps/dir//51.4063062, -0.02920658/") == (
         51.4063062,
         -0.02920658,
     )
@@ -82,6 +76,7 @@ def test_place():
 
 
 def test_search():
-    assert url_to_coords(
-        "https://www.google.com/maps/search/?api=1&query=55.0046686,-1.6200268"
-    ) == (55.0046686, -1.6200268)
+    assert url_to_coords("https://www.google.com/maps/search/?api=1&query=55.0046686,-1.6200268") == (
+        55.0046686,
+        -1.6200268,
+    )

@@ -29,24 +29,16 @@ class DominosPizzaJPSpider(scrapy.Spider):
 
         properties = {
             "ref": ref,
-            "name": response.xpath(
-                'normalize-space(//h1[@class="storetitle"][1]/text())'
-            ).extract_first(),
+            "name": response.xpath('normalize-space(//h1[@class="storetitle"][1]/text())').extract_first(),
             "addr_full": response.xpath(
                 'normalize-space(//span[@id="store-address-info"]/p/text()[4])'
             ).extract_first(),
             "postcode": re.search(
                 r"([\d-]*)$",
-                response.xpath(
-                    'normalize-space(//div[@class="store-details-text"]/span/p/text()[2])'
-                ).extract_first(),
+                response.xpath('normalize-space(//div[@class="store-details-text"]/span/p/text()[2])').extract_first(),
             ).group(1),
-            "lat": response.xpath(
-                'normalize-space(//input[@id="store-lat"]/@value)'
-            ).extract_first(),
-            "lon": response.xpath(
-                'normalize-space(//input[@id="store-lon"]/@value)'
-            ).extract_first(),
+            "lat": response.xpath('normalize-space(//input[@id="store-lat"]/@value)').extract_first(),
+            "lon": response.xpath('normalize-space(//input[@id="store-lon"]/@value)').extract_first(),
             "phone": response.xpath('//div[@id="store-tel"]/a/text()').extract_first(),
             "website": response.url,
         }

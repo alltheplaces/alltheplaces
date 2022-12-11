@@ -23,9 +23,7 @@ class SimplySelfStorageSpider(scrapy.spiders.SitemapSpider):
 
         response.selector.root.set("itemscope")
         response.selector.root.set("itemtype", "http://schema.org/Thing")
-        ld = MicrodataParser.convert_to_graph(
-            MicrodataParser.extract_microdata(response)
-        )
+        ld = MicrodataParser.convert_to_graph(MicrodataParser.extract_microdata(response))
         oh = OpeningHours()
         oh.from_linked_data(ld, "%I:%M %p")
         item["opening_hours"] = oh.as_opening_hours()

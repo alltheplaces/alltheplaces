@@ -17,12 +17,8 @@ class McDonaldsZASpider(scrapy.Spider):
             name = store.xpath('.//div[@class="a"]/p/strong/text()').extract_first()
             if not name:
                 continue
-            address = (
-                store.xpath('.//div[@class="b"]/p[2]/text()').extract_first().strip()
-            )
-            phone = (
-                store.xpath('.//div[@class="c"]/p[2]/text()').extract_first().strip()
-            )
+            address = store.xpath('.//div[@class="b"]/p[2]/text()').extract_first().strip()
+            phone = store.xpath('.//div[@class="c"]/p[2]/text()').extract_first().strip()
 
             properties = {
                 "ref": ref,

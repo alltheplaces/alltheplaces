@@ -19,10 +19,7 @@ class PAWineSpiritsSpider(scrapy.Spider):
     def parse(self, response):
         for row in response.css(".tabContentRow"):
             columnAddress = row.css(".columnAddress")
-            addressPhoneFax = [
-                s.strip()
-                for s in columnAddress.xpath('*[@class="normalText"]//text()').extract()
-            ]
+            addressPhoneFax = [s.strip() for s in columnAddress.xpath('*[@class="normalText"]//text()').extract()]
             if "Fax:" in addressPhoneFax:
                 i = addressPhoneFax.index("Fax:")
                 fax = addressPhoneFax[i + 1]
@@ -36,15 +33,10 @@ class PAWineSpiritsSpider(scrapy.Spider):
 
             ref = columnAddress.xpath('*[@class="boldMaroonText"]/text()').get().strip()
 
-            type_text = [
-                s.strip()
-                for s in row.xpath('*[@class="columnTypeOfStore"]//text()').extract()
-            ]
+            type_text = [s.strip() for s in row.xpath('*[@class="columnTypeOfStore"]//text()').extract()]
             type_of_store = [s for s in type_text if s]
 
-            hours_txt = row.xpath(
-                '*[@class="columnHoursOfOprn"]/div/*/text()'
-            ).extract()
+            hours_txt = row.xpath('*[@class="columnHoursOfOprn"]/div/*/text()').extract()
             hour_pairs = list(zip(*[iter(hours_txt)] * 2))
             hours = ", ".join(" ".join(x) for x in hour_pairs)
 

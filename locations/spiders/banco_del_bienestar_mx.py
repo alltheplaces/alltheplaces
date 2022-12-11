@@ -67,14 +67,10 @@ class BancoDelBienestarMXSpider(scrapy.Spider):
         for bank in DictParser.get_nested_key(data, "z:row"):
             item = GeojsonPointItem()
             item["ref"] = bank["@ows_ID"]
-            if m := re.match(
-                r"POINT\((-?\d+\.\d+) (-?\d+\.\d+)\)", bank.get("@ows_Localizacion", "")
-            ):
+            if m := re.match(r"POINT\((-?\d+\.\d+) (-?\d+\.\d+)\)", bank.get("@ows_Localizacion", "")):
                 item["lon"], item["lat"] = m.groups()
             item["name"] = bank["@ows_Title"]
             item["addr_full"] = bank.get("@ows_Direccion")
             item["city"] = bank.get("@ows_Municipio") or bank.get("@ows_Localidad")
-            item["phone"] = ";".join(
-                [n.strip() for n in bank.get("@ows_Telefono", "").split("/")]
-            )
+            item["phone"] = ";".join([n.strip() for n in bank.get("@ows_Telefono", "").split("/")])
             yield item

@@ -94,20 +94,14 @@ class CVSSpider(scrapy.Spider):
 
         for store in stores:
 
-            direction = store.xpath(
-                'normalize-space(.//span[@class="store-number"]/a/@href)'
-            ).extract_first()
+            direction = store.xpath('normalize-space(.//span[@class="store-number"]/a/@href)').extract_first()
             if direction:
-                yield scrapy.Request(
-                    response.urljoin(direction), callback=self.parse_stores
-                )
+                yield scrapy.Request(response.urljoin(direction), callback=self.parse_stores)
 
     def parse_state(self, response):
         city_urls = response.xpath('//div[@class="states"]/ul/li/a/@href').extract()
         for path in city_urls:
-            yield scrapy.Request(
-                response.urljoin(path), callback=self.parse_city_stores
-            )
+            yield scrapy.Request(response.urljoin(path), callback=self.parse_city_stores)
 
     def parse(self, response):
         urls = response.xpath('//div[@class="states"]/ul/li/a/@href').extract()

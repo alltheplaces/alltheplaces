@@ -10,9 +10,7 @@ class HeartOfEnglandCooperativeSpider(Spider):
         "brand_wikidata": "Q5692254",
         "country": "GB",
     }
-    start_urls = [
-        "https://www.cawtest.com/heartofengland/wp-content/plugins/superstorefinder-wp/ssf-wp-xml.php"
-    ]
+    start_urls = ["https://www.cawtest.com/heartofengland/wp-content/plugins/superstorefinder-wp/ssf-wp-xml.php"]
 
     def parse(self, response):
         for store in response.xpath("/locator/store/item"):

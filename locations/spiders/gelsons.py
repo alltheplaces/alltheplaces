@@ -26,9 +26,9 @@ class GelsonsSpider(scrapy.spiders.SitemapSpider):
 
     def parse_store(self, response):
 
-        content = json.loads(
-            response.xpath('//script[@type="application/json"]/text()').extract_first()
-        )["props"]["pageProps"]
+        content = json.loads(response.xpath('//script[@type="application/json"]/text()').extract_first())["props"][
+            "pageProps"
+        ]
         store_json = content["store"]
         hours = content["pageComponents"][0]["headline"]
 

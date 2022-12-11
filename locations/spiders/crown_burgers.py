@@ -29,15 +29,9 @@ class CrownBurgersSpider(scrapy.Spider):
                 position_data.extract_first(),
                 callback=self.parse_store,
                 meta={
-                    "shop": shops.xpath(
-                        "(//p)[" + str(shop) + "]/text()"
-                    ).extract_first(),
-                    "address": shops.xpath(
-                        "(//p)[" + str(shop + 1) + "]/text()"
-                    ).extract()[0],
-                    "phone": shops.xpath(
-                        "(//p)[" + str(shop + 1) + "]/text()"
-                    ).extract()[2],
+                    "shop": shops.xpath("(//p)[" + str(shop) + "]/text()").extract_first(),
+                    "address": shops.xpath("(//p)[" + str(shop + 1) + "]/text()").extract()[0],
+                    "phone": shops.xpath("(//p)[" + str(shop + 1) + "]/text()").extract()[2],
                     "city": address2.group(1).rstrip(","),
                     "state": STATES[address2.group(3)],
                     "postcode": address2.group(4),
@@ -45,11 +39,9 @@ class CrownBurgersSpider(scrapy.Spider):
             )
 
     def parse_store(self, response):
-        pos = json.loads(
-            re.search(
-                r"initEmbed\((.*)\);", response.xpath("//script").extract()[2]
-            ).groups()[0]
-        )[21][3][0][2]
+        pos = json.loads(re.search(r"initEmbed\((.*)\);", response.xpath("//script").extract()[2]).groups()[0])[21][3][
+            0
+        ][2]
         yield GeojsonPointItem(
             lat=float(pos[0]),
             lon=float(pos[1]),

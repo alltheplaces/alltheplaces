@@ -107,9 +107,7 @@ class CreditUnionSpider(scrapy.Spider):
         except IndexError:
             phone = ""
 
-        href = bank.xpath(
-            './/div[@class="location-results__share"]/div/a/@href'
-        ).extract_first()
+        href = bank.xpath('.//div[@class="location-results__share"]/div/a/@href').extract_first()
         lat, lon = re.search(r"lat=(.*?)&lng=(.*?)&", href).groups()
         name = bank.xpath(".//h3/text()").extract_first()
         ref = name + "-" + "-".join(address[0].split(" "))
@@ -127,20 +125,14 @@ class CreditUnionSpider(scrapy.Spider):
             "lon": float(lon),
             "brand": name,
         }
-        hours = self.parse_hours(
-            bank.xpath(
-                './/div[contains(@class, "location-results__hours")]/p/text()'
-            ).extract()
-        )
+        hours = self.parse_hours(bank.xpath('.//div[contains(@class, "location-results__hours")]/p/text()').extract())
         if hours:
             properties["opening_hours"] = hours
         return properties
 
     def parse(self, response):
         page_num = int(re.search(r"lp=(\d+)$", response.url).groups()[0])
-        pages = response.xpath(
-            '//select[@class="locator-pager-select"]/option/text()'
-        ).extract()
+        pages = response.xpath('//select[@class="locator-pager-select"]/option/text()').extract()
         if pages:
             max_page = max([int(p) for p in pages])
         else:
@@ -152,8 +144,4 @@ class CreditUnionSpider(scrapy.Spider):
             yield GeojsonPointItem(**properties)
 
         if page_num < max_page:
-            yield scrapy.Request(
-                response.url.replace(
-                    "lp={}".format(page_num), "lp={}".format(page_num + 1)
-                )
-            )
+            yield scrapy.Request(response.url.replace("lp={}".format(page_num), "lp={}".format(page_num + 1)))

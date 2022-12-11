@@ -157,9 +157,7 @@ class BurgerKingSpider(scrapy.Spider):
             item["name"] = "Burger King"
             item["country"] = country_code
             item["addr_full"] = None
-            item["website"] = self.store_locator_templates[country_code].format(
-                row["_id"]
-            )
+            item["website"] = self.store_locator_templates[country_code].format(row["_id"])
             item["extras"] = {
                 "operator": row["franchiseGroupName"],
                 "internet_access": "wlan" if row["hasWifi"] is True else "no",

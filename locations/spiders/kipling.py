@@ -15,10 +15,7 @@ class KiplingSpider(scrapy.Spider):
         data = response.json()
 
         for store in data:
-            if (
-                data[store]["department"] == "Outlet Store"
-                or data[store]["department"] == "Retail Store"
-            ):
+            if data[store]["department"] == "Outlet Store" or data[store]["department"] == "Retail Store":
                 properties = {
                     "ref": data[store]["storeID"],
                     "name": data[store]["name"],

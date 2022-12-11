@@ -42,9 +42,7 @@ class GulfSpider(scrapy.Spider):
 
         for tbody in results.xpath("//tbody"):
             name = tbody.xpath("tr[1]/th[1]//text()").get()
-            contact = (
-                results.xpath("//tbody")[0].xpath("tr[2]/td[1]/p/text()").extract()
-            )
+            contact = results.xpath("//tbody")[0].xpath("tr[2]/td[1]/p/text()").extract()
             address = ", ".join([r.strip() for r in contact[:2]])
             phone = contact[2].replace("Phone Number: ", "")
             html_content = tbody.get()
@@ -59,9 +57,7 @@ class GulfSpider(scrapy.Spider):
                     "fuel:diesel": yes_or_no("Diesel" in html_content),
                     "toilets": yes_or_no("Restrooms" in html_content),
                     "atm": yes_or_no("ATM" in html_content),
-                    "shop": "convenience"
-                    if "Convenience Store" in html_content
-                    else "no",
+                    "shop": "convenience" if "Convenience Store" in html_content else "no",
                 },
             )
 

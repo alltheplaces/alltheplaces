@@ -33,11 +33,7 @@ class TimHortonsSpider(scrapy.Spider):
             for interval in day_info["intervals"]:
                 f_time = str(interval["start"]).zfill(4)
                 t_time = str(interval["end"]).zfill(4)
-                hour_intervals.append(
-                    "{}:{}-{}:{}".format(
-                        f_time[0:2], f_time[2:4], t_time[0:2], t_time[2:4]
-                    )
-                )
+                hour_intervals.append("{}:{}-{}:{}".format(f_time[0:2], f_time[2:4], t_time[0:2], t_time[2:4]))
             hours = ",".join(hour_intervals)
 
             if not this_day_group:
@@ -73,9 +69,7 @@ class TimHortonsSpider(scrapy.Spider):
         properties = {
             "lon": response.xpath('//*[@itemprop="longitude"]/@content').get(),
             "lat": response.xpath('//*[@itemprop="latitude"]/@content').get(),
-            "street_address": address.xpath(
-                './/*[@itemprop="streetAddress"]/@content'
-            ).get(),
+            "street_address": address.xpath('.//*[@itemprop="streetAddress"]/@content').get(),
             "city": address.css(".Address-city::text").get(),
             "state": address.xpath('.//*[@itemprop="addressRegion"]/text()').get(),
             "country": "US" if "locations.timhortons.com" in response.url else "CA",
@@ -86,9 +80,7 @@ class TimHortonsSpider(scrapy.Spider):
             "website": response.url,
         }
 
-        hours_elem = response.xpath(
-            '//div[@class="c-location-hours-details-wrapper js-location-hours"]/@data-days'
-        )
+        hours_elem = response.xpath('//div[@class="c-location-hours-details-wrapper js-location-hours"]/@data-days')
         opening_hours = None
         if hours_elem:
             hours = json.loads(hours_elem.extract_first())

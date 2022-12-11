@@ -40,9 +40,7 @@ class AdegSpider(scrapy.Spider):
             oh = OpeningHours()
             for row in scrapy.Selector(text=store["openingHours"]).xpath(".//dt"):
                 day = wochentag[row.xpath("normalize-space()").get().removesuffix(":")]
-                for interval in row.xpath(
-                    "./following-sibling::dd[position()=1]/span/text()"
-                ).extract():
+                for interval in row.xpath("./following-sibling::dd[position()=1]/span/text()").extract():
                     open_time, close_time = interval.strip(",").split(" \u2013 ")
                     if (open_time, close_time) == ("", ""):
                         continue

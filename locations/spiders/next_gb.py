@@ -21,9 +21,7 @@ class NextGBSpider(scrapy.Spider):
             open_time, close_time = store_hours[day].split("-")
             open_time = open_time.rstrip()
             close_time = close_time.rstrip()
-            if (len(open_time) < 3 or len(open_time) > 4) and (
-                len(close_time) < 3 or len(close_time) > 4
-            ):
+            if (len(open_time) < 3 or len(open_time) > 4) and (len(close_time) < 3 or len(close_time) > 4):
                 pass
             else:
                 o.add_range(
@@ -55,9 +53,7 @@ class NextGBSpider(scrapy.Spider):
             )
 
     def parse_shop(self, response):
-        text = response.xpath(
-            '//script[contains(.,"window.lctr.single_search")]/text()'
-        ).extract_first()
+        text = response.xpath('//script[contains(.,"window.lctr.single_search")]/text()').extract_first()
         parts = text.split("window.lctr.results.push(")
 
         for place in range(1, 2):
@@ -97,9 +93,7 @@ class NextGBSpider(scrapy.Spider):
                 properties["state"] = shop["county"]
 
             if shop["AddressLine"] and shop["centre"] and shop["street"]:
-                properties["addr_full"] = (
-                    shop["AddressLine"] + ", " + shop["centre"] + ", " + shop["street"]
-                )
+                properties["addr_full"] = shop["AddressLine"] + ", " + shop["centre"] + ", " + shop["street"]
             elif shop["street"] and shop["centre"]:
                 properties["addr_full"] = shop["centre"] + "," + shop["street"]
             elif shop["AddressLine"] and shop["centre"]:

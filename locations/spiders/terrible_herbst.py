@@ -16,23 +16,17 @@ class TerribleHerbstSpider(scrapy.Spider):
 
         for place in response.xpath("//Placemark"):
             self.logger.info(place.get())
-            city_state = (
-                place.xpath('.//Data[@name="CITY/STATE"]/value/text()').get().split(",")
-            )
+            city_state = place.xpath('.//Data[@name="CITY/STATE"]/value/text()').get().split(",")
 
             city = city_state[0]
             state = city_state[1] if len(city_state) > 1 else None
 
-            features = (
-                place.xpath('.//Data[@name="FEATURES"]/value/text()').get() or ""
-            ).lower()
+            features = (place.xpath('.//Data[@name="FEATURES"]/value/text()').get() or "").lower()
 
             yield GeojsonPointItem(
                 ref=place.xpath("name/text()").get(),
                 name=place.xpath("name/text()").get(),
-                addr_full=place.xpath(
-                    './/Data[@name="STREET ADDRESS"]/value/text()'
-                ).get(),
+                addr_full=place.xpath('.//Data[@name="STREET ADDRESS"]/value/text()').get(),
                 postcode=place.xpath('.//Data[@name="ZIP CODE"]/value/text()').get(),
                 city=city.strip(),
                 state=state and state.strip(),

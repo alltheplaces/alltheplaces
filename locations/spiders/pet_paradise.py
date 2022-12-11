@@ -18,9 +18,7 @@ class PetParadiseSpider(scrapy.Spider):
             "Accept": "application/javascript",
         }
 
-        yield scrapy.http.FormRequest(
-            url=url, method="GET", headers=headers, callback=self.parse
-        )
+        yield scrapy.http.FormRequest(url=url, method="GET", headers=headers, callback=self.parse)
 
     def parse(self, response):
         text1 = response.text

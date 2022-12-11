@@ -17,9 +17,7 @@ class BlueRhinoSpider(scrapy.Spider):
     custom_settings = {"DEFAULT_REQUEST_HEADERS": {"Accept": "application/json"}}
 
     def start_requests(self):
-        with open(
-            "locations/searchable_points/us_centroids_100mile_radius.csv"
-        ) as points:
+        with open("locations/searchable_points/us_centroids_100mile_radius.csv") as points:
             for point in csv.DictReader(points):
                 yield scrapy.Request(
                     f'https://bluerhino.com/api/propane/GetRetailersNearPoint?latitude={point["latitude"]}&longitude={point["longitude"]}&radius=100&name=&type=&top=5000&cache=false'
@@ -32,9 +30,7 @@ class BlueRhinoSpider(scrapy.Spider):
                 "lon": row["Longitude"],
                 "ref": row["RetailKey"],
                 "name": row["RetailName"],
-                "addr_full": " ".join(
-                    [row["Address1"], row["Address2"], row["Address3"]]
-                ),
+                "addr_full": " ".join([row["Address1"], row["Address2"], row["Address3"]]),
                 "city": row["City"],
                 "state": row["State"],
                 "postcode": row["Zip"],

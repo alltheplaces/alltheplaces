@@ -31,10 +31,7 @@ class LittleCaesarsSpider(scrapy.Spider):
 
     def start_requests(self):
         for record in postal_regions("US"):
-            url = (
-                "https://api.cloud.littlecaesars.com/bff/api/stores?zip="
-                + record["postal_region"]
-            )
+            url = "https://api.cloud.littlecaesars.com/bff/api/stores?zip=" + record["postal_region"]
             yield scrapy.http.Request(url, self.parse, method="GET")
 
     def parse(self, response):

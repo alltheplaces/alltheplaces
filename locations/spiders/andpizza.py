@@ -79,8 +79,6 @@ class AndPizzaSpider(scrapy.Spider):
             props["postcode"] = store["location"]["zipcode"]
             props["phone"] = store["location"]["phone"]
 
-            props["opening_hours"] = self.parse_hours(
-                store["service_schedule"]["general"]
-            )
+            props["opening_hours"] = self.parse_hours(store["service_schedule"]["general"])
 
             yield GeojsonPointItem(**props)

@@ -47,9 +47,7 @@ class BPSpider(scrapy.Spider):
                     website=result["website"],
                     ref=result["id"],
                     brand=BRANDS.get(result["site_brand"], BRANDS["BP"]),
-                    brand_wikidata=WIKIBRANDS.get(
-                        result["site_brand"], WIKIBRANDS["BP"]
-                    ),
+                    brand_wikidata=WIKIBRANDS.get(result["site_brand"], WIKIBRANDS["BP"]),
                     extras={
                         "amenity:chargingstation": "electricity" in products,
                         "amenity:fuel": True,
@@ -60,25 +58,17 @@ class BPSpider(scrapy.Spider):
                         "fuel:diesel": any("diesel" in p for p in products) or None,
                         "fuel:disel:class2": "diesel_frost" in products or None,
                         "fuel:e10": "e10" in products or None,
-                        "fuel:e5": "euro_95" in products
-                        or "super_e5" in products
-                        or None,
-                        "fuel:GTL_diesel": any("ultimate_diesel" in p for p in products)
-                        or None,
+                        "fuel:e5": "euro_95" in products or "super_e5" in products or None,
+                        "fuel:GTL_diesel": any("ultimate_diesel" in p for p in products) or None,
                         "fuel:HGV_diesel": "truck_diesel" in products or None,
                         "fuel:lpg": "lpg" in products or None,
                         "fuel:octane_100": any("100" in p for p in products) or None,
                         "fuel:octane_102": any("102" in p for p in products) or None,
-                        "fuel:octane_91": any("premium_unlead" in p for p in products)
-                        or None,
+                        "fuel:octane_91": any("premium_unlead" in p for p in products) or None,
                         "fuel:octane_92": any("92" in p for p in products) or None,
                         "fuel:octane_93": any("93" in p for p in products) or None,
-                        "fuel:octane_95": "unlead" in products
-                        or any("unleaded_95" in p for p in products)
-                        or None,
-                        "fuel:octane_98": "ultimate_unleaded" in products
-                        or any("98" in p for p in products)
-                        or None,
+                        "fuel:octane_95": "unlead" in products or any("unleaded_95" in p for p in products) or None,
+                        "fuel:octane_98": "ultimate_unleaded" in products or any("98" in p for p in products) or None,
                         "fuel:untaxed_diesel": "red_diesel" in products or None,
                         "hgv": any("truck" in f for f in facilities),
                         "shop": "convenience" if "shop" in facilities else "",

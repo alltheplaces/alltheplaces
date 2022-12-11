@@ -14,9 +14,7 @@ class BinnysSpider(SitemapSpider):
     sitemap_rules = [(r"/store-locator/", "parse")]
 
     def parse(self, response):
-        script = response.xpath(
-            '//script/text()[contains(.,"var serverSideViewModel")]'
-        ).get()
+        script = response.xpath('//script/text()[contains(.,"var serverSideViewModel")]').get()
         data = chompjs.parse_js_object(script)
         oh = OpeningHours()
         hours = scrapy.selector.Selector(text=data["storeHours"])

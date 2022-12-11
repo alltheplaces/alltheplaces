@@ -33,30 +33,16 @@ class HolidayStationstoresSpider(scrapy.Spider):
     def parse(self, response):
         store = response.meta["store"]
 
-        address = (
-            response.xpath('//div[@class="col-lg-4 col-sm-12"]/text()')[1]
-            .extract()
-            .strip()
-        )
-        city_state = (
-            response.xpath('//div[@class="col-lg-4 col-sm-12"]/text()')[2]
-            .extract()
-            .strip()
-        )
+        address = response.xpath('//div[@class="col-lg-4 col-sm-12"]/text()')[1].extract().strip()
+        city_state = response.xpath('//div[@class="col-lg-4 col-sm-12"]/text()')[2].extract().strip()
         city, state = city_state.split(", ")
-        phone = (
-            response.xpath('//div[@class="HolidayFontColorRed"]/text()')
-            .extract_first()
-            .strip()
-        )
+        phone = response.xpath('//div[@class="HolidayFontColorRed"]/text()').extract_first().strip()
         services = "|".join(
             response.xpath(
                 '//ul[@style="list-style-type: none; padding-left: 1.0em; font-size: 12px;"]/li/text()'
             ).extract()
         ).lower()
-        open_24_hours = (
-            "24 hours" in response.css(".body-content .col-lg-4").get().lower()
-        )
+        open_24_hours = "24 hours" in response.css(".body-content .col-lg-4").get().lower()
 
         properties = {
             "name": f"Holiday #{store['Name']}",
@@ -84,20 +70,14 @@ class HolidayStationstoresSpider(scrapy.Spider):
         yield GeojsonPointItem(**properties)
 
     def opening_hours(self, response):
-        hour_part_elems = response.xpath(
-            '//div[@class="row"][@style="font-size: 12px;"]'
-        )
+        hour_part_elems = response.xpath('//div[@class="row"][@style="font-size: 12px;"]')
         day_groups = []
         this_day_group = None
 
         if hour_part_elems:
             for hour_part_elem in hour_part_elems:
-                day = hour_part_elem.xpath(
-                    './/div[@class="col-3"]/text()'
-                ).extract_first()
-                hours = hour_part_elem.xpath(
-                    './/div[@class="col-9"]/text()'
-                ).extract_first()
+                day = hour_part_elem.xpath('.//div[@class="col-3"]/text()').extract_first()
+                hours = hour_part_elem.xpath('.//div[@class="col-9"]/text()').extract_first()
 
                 if not hours or hours.lower() == "closed":
                     continue
@@ -138,13 +118,9 @@ class HolidayStationstoresSpider(scrapy.Spider):
             if this_day_group:
                 day_groups.append(this_day_group)
 
-        hour_part_elems = response.xpath(
-            '//span[@style="font-size:90%"]/text()'
-        ).extract()
+        hour_part_elems = response.xpath('//span[@style="font-size:90%"]/text()').extract()
         if hour_part_elems:
-            day_groups.append(
-                {"from_day": "Mo", "to_day": "Su", "hours": "00:00-23:59"}
-            )
+            day_groups.append({"from_day": "Mo", "to_day": "Su", "hours": "00:00-23:59"})
 
         opening_hours = ""
         if len(day_groups) == 1 and day_groups[0]["hours"] in (

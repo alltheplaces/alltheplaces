@@ -63,14 +63,10 @@ class TiffanySpider(scrapy.Spider):
         return "; ".join(hours)
 
     def parse(self, response):
-        for href in response.xpath(
-            '//@href[contains(., "/jewelry-stores/")]'
-        ).extract():
+        for href in response.xpath('//@href[contains(., "/jewelry-stores/")]').extract():
             yield scrapy.Request(response.urljoin(href))
 
-        for ldjson in response.xpath(
-            '//script[@type="application/ld+json"]/text()'
-        ).extract():
+        for ldjson in response.xpath('//script[@type="application/ld+json"]/text()').extract():
             data = json.loads(ldjson)
             if data["@type"] != "Store":
                 continue
@@ -89,9 +85,7 @@ class TiffanySpider(scrapy.Spider):
                 "lon": response.xpath("//tiffany-maps/@markeratlng").extract_first(),
             }
 
-            hours = self.parse_hours(
-                response.xpath('//div[@id="divExtendedInfo"]/text()').extract()
-            )
+            hours = self.parse_hours(response.xpath('//div[@id="divExtendedInfo"]/text()').extract())
             if hours:
                 properties["opening_hours"] = hours
             yield GeojsonPointItem(**properties)

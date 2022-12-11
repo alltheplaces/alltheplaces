@@ -56,29 +56,17 @@ class OreillyAutoSpider(scrapy.Spider):
         opening_hours = self.parse_hours(hours)
 
         props = {
-            "addr_full": response.xpath(
-                '//span[@class="c-address-street-1"]/text()'
-            ).extract_first(),
+            "addr_full": response.xpath('//span[@class="c-address-street-1"]/text()').extract_first(),
             "phone": response.xpath(
                 '//span[@class="c-phone-number-span c-phone-main-number-span"]/text()'
             ).extract_first(),
-            "city": response.xpath(
-                '//span[@itemprop="addressLocality"]/text()'
-            ).extract_first(),
-            "state": response.xpath(
-                '//abbr[@itemprop="addressRegion"]/text()'
-            ).extract_first(),
-            "postcode": response.xpath(
-                '//span[@itemprop="postalCode"]/text()'
-            ).extract_first(),
+            "city": response.xpath('//span[@itemprop="addressLocality"]/text()').extract_first(),
+            "state": response.xpath('//abbr[@itemprop="addressRegion"]/text()').extract_first(),
+            "postcode": response.xpath('//span[@itemprop="postalCode"]/text()').extract_first(),
             "ref": response.url,
             "website": response.url,
-            "lat": float(
-                response.xpath('//meta[@itemprop="latitude"]/@content').extract_first()
-            ),
-            "lon": float(
-                response.xpath('//meta[@itemprop="longitude"]/@content').extract_first()
-            ),
+            "lat": float(response.xpath('//meta[@itemprop="latitude"]/@content').extract_first()),
+            "lon": float(response.xpath('//meta[@itemprop="longitude"]/@content').extract_first()),
             "opening_hours": opening_hours,
         }
 
@@ -94,9 +82,7 @@ class OreillyAutoSpider(scrapy.Spider):
 
         city_urls = response.xpath('//div[@class="filter_item"]/a/@href').extract()
         for path in city_urls:
-            yield scrapy.Request(
-                response.urljoin(path), callback=self.parse_city_stores
-            )
+            yield scrapy.Request(response.urljoin(path), callback=self.parse_city_stores)
 
     def parse(self, response):
 

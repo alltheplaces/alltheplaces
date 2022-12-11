@@ -27,9 +27,7 @@ class RoadysSpider(scrapy.Spider):
         title = single_rloc.xpath('.//div[@class="rloc_title"]/text()').extract_first()
 
         # location address
-        rloc_address = single_rloc.xpath(
-            './/div[@class="rloc_address"]//text()'
-        ).extract()
+        rloc_address = single_rloc.xpath('.//div[@class="rloc_address"]//text()').extract()
         if len(rloc_address) == 2:
             addr_full, city_state_postcode = rloc_address
             addr_full = addr_full.strip()
@@ -51,9 +49,7 @@ class RoadysSpider(scrapy.Spider):
             postcode = None
 
         # lat/lng coordinates
-        rloc_address = response.xpath('//div[@class="rloc_address"]/text()')[
-            -1
-        ].extract()
+        rloc_address = response.xpath('//div[@class="rloc_address"]/text()')[-1].extract()
         latitude, longitude = rloc_address.split(",")
         latitude = float(latitude)
         longitude = float(longitude)

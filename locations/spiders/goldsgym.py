@@ -21,9 +21,7 @@ class GoldsGymSpider(scrapy.Spider):
     def parse_hours(self, hours):
         opening_hours = OpeningHours()
         for group in hours:
-            days, open_time, close_time = re.search(
-                r"([a-zA-Z,]+)\s([\d:]+)-([\d:]+)", group
-            ).groups()
+            days, open_time, close_time = re.search(r"([a-zA-Z,]+)\s([\d:]+)-([\d:]+)", group).groups()
             days = days.split(",")
             for day in days:
                 opening_hours.add_range(
@@ -39,9 +37,7 @@ class GoldsGymSpider(scrapy.Spider):
         if "locate-a-gym" in response.url or "/markets/" in response.url:
             return  # closed gym, redirects
 
-        data = response.xpath(
-            '//script[@type="application/ld+json"]/text()'
-        ).extract_first()
+        data = response.xpath('//script[@type="application/ld+json"]/text()').extract_first()
         if data:
             data = json.loads(data)
         else:
@@ -84,6 +80,4 @@ class GoldsGymSpider(scrapy.Spider):
         urls = xml.xpath("//loc/text()").extract()
         for url in urls:
             path = "/".join(urlparse(url).path.split("/")[:-1])
-            yield scrapy.Request(
-                response.urljoin(path) + "/", callback=self.parse_hotel
-            )
+            yield scrapy.Request(response.urljoin(path) + "/", callback=self.parse_hotel)

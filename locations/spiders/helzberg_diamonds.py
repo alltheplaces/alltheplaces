@@ -21,9 +21,7 @@ class HelzbergDiamondsSpider(scrapy.Spider):
                 yield scrapy.Request(url, callback=self.parse_store)
 
     def parse_store(self, response):
-        data = json.loads(
-            response.xpath('//script[@type="application/ld+json"]/text()').get()
-        )[0]
+        data = json.loads(response.xpath('//script[@type="application/ld+json"]/text()').get())[0]
         ref = re.search(r"jewelry-store-(\d+).html", data["url"])[1]
         properties = {
             "ref": ref,

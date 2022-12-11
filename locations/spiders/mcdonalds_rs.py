@@ -30,7 +30,6 @@ class McDonaldsRSSpider(scrapy.Spider):
         data = Selector(text=data).xpath("//p//text()").extract()
         address = self.normalize_item(data[0])
         postalCode, city = self.parse_postalCity(data)
-        length = len(data)
         return address, postalCode, city
 
     def parse(self, response):
