@@ -29,7 +29,7 @@ class BeaconAndBridgeSpider(scrapy.Spider):
             properties = {
                 "ref": re.split(" - | -", store.xpath(".//h3/text()").get())[0],
                 "name": re.split(" - | -", store.xpath(".//h3/text()").get())[1],
-                "addr_full": store.xpath(".//span/a/text()[1]").get(),
+                "street_address": store.xpath(".//span/a/text()[1]").get(),
                 "city": store.xpath(".//span/a/text()[2]").get().split(", ")[0],
                 "state": store.xpath(".//span/a/text()[2]").get().split(", ")[1],
                 "postcode": store.xpath(".//span/a/text()[3]").get(),
