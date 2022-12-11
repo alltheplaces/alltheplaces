@@ -44,9 +44,9 @@ class BcpizzaSpider(CrawlSpider):
                 break
         phone = response.xpath('//a[contains(@href, "tel")]/text()').get()
         facebook = response.xpath('//a[@class="vc_icon_element-link"]/@href').get()
+        
         days = response.xpath('//table[contains(@class, "op-table")]//tr')
         oh = OpeningHours()
-
         for i, day in enumerate(days):
             dd = day.xpath(f"//tr[{i+1}]//th/text()").get()
             hh = day.xpath(f"//tr[{i+1}]//span/text()").get()
@@ -72,6 +72,7 @@ class BcpizzaSpider(CrawlSpider):
             "addr_full": address_full,
             "phone": phone,
             "facebook": facebook,
+            "website": response.url,
             "opening_hours": oh.as_opening_hours(),
         }
 
