@@ -34,7 +34,7 @@ class BeaconAndBridgeSpider(scrapy.Spider):
                 )[0],
                 "name": re.split(
                     " - | -",
-                    store.xpath(f".//h3/text()").get(),
+                    store.xpath(".//h3/text()").get(),
                 )[1],
                 "addr_full": store.xpath(".//span/a/text()[1]").get(),
                 "city": store.xpath(".//span/a/text()[2]").get().split(", ")[0],
