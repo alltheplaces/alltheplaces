@@ -1,8 +1,9 @@
-import scrapy
 import re
-from locations.hours import OpeningHours
+
+import scrapy
+
+from locations.hours import DAYS, OpeningHours
 from locations.items import GeojsonPointItem
-from locations.hours import DAYS
 
 
 class BeaconAndBridgeSpider(scrapy.Spider):
@@ -11,9 +12,7 @@ class BeaconAndBridgeSpider(scrapy.Spider):
     start_urls = ["https://beaconandbridge.com/locations/"]
 
     def parse(self, response):
-        address_list = response.xpath(
-            '//div[@id="section_2"]//div[contains(@class, "yes_heads")]'
-        )
+        address_list = response.xpath('//div[@id="section_2"]//div[contains(@class, "yes_heads")]')
         for store in address_list:
             hour = store.xpath(".//p/text()[2]").get().replace("HOURS: ", "")
             oh = OpeningHours()
