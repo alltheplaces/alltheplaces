@@ -13,14 +13,12 @@ class FordDealersSpider(CrawlSpider, StructuredDataSpider):
     wanted_types = ["AutoDealer"]
     rules = [
         Rule(
-            LinkExtractor(
-                allow=r"^https://www.ford.com/dealerships/dealer-directory/"
-            ),
+            LinkExtractor(allow=r"^https://www.ford.com/dealerships/dealer-directory/"),
         ),
         Rule(
             LinkExtractor(
                 allow=r"^https://www.ford.com/content/brand_ford/en_us/brand/dealerships/dealer-details/.*.html$",
             ),
             callback="parse_sd",
-        )
+        ),
     ]
