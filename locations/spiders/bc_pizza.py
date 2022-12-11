@@ -1,84 +1,26 @@
 import re
-import scrapy
 from datetime import datetime
 from locations.hours import OpeningHours
 from locations.items import GeojsonPointItem
+from geonamescache import GeonamesCache
+from scrapy.spiders import CrawlSpider, Rule
+from scrapy.linkextractors import LinkExtractor
 from locations.google_url import extract_google_position
 
-# source: https://gist.github.com/rogerallen/1583593
-us_state_to_abbrev = {
-    "Alabama": "AL",
-    "Alaska": "AK",
-    "Arizona": "AZ",
-    "Arkansas": "AR",
-    "California": "CA",
-    "Colorado": "CO",
-    "Connecticut": "CT",
-    "Delaware": "DE",
-    "Florida": "FL",
-    "Georgia": "GA",
-    "Hawaii": "HI",
-    "Idaho": "ID",
-    "Illinois": "IL",
-    "Indiana": "IN",
-    "Iowa": "IA",
-    "Kansas": "KS",
-    "Kentucky": "KY",
-    "Louisiana": "LA",
-    "Maine": "ME",
-    "Maryland": "MD",
-    "Massachusetts": "MA",
-    "Michigan": "MI",
-    "Minnesota": "MN",
-    "Mississippi": "MS",
-    "Missouri": "MO",
-    "Montana": "MT",
-    "Nebraska": "NE",
-    "Nevada": "NV",
-    "New Hampshire": "NH",
-    "New Jersey": "NJ",
-    "New Mexico": "NM",
-    "New York": "NY",
-    "North Carolina": "NC",
-    "North Dakota": "ND",
-    "Ohio": "OH",
-    "Oklahoma": "OK",
-    "Oregon": "OR",
-    "Pennsylvania": "PA",
-    "Rhode Island": "RI",
-    "South Carolina": "SC",
-    "South Dakota": "SD",
-    "Tennessee": "TN",
-    "Texas": "TX",
-    "Utah": "UT",
-    "Vermont": "VT",
-    "Virginia": "VA",
-    "Washington": "WA",
-    "West Virginia": "WV",
-    "Wisconsin": "WI",
-    "Wyoming": "WY",
-    "District of Columbia": "DC",
-    "American Samoa": "AS",
-    "Guam": "GU",
-    "Northern Mariana Islands": "MP",
-    "Puerto Rico": "PR",
-    "United States Minor Outlying Islands": "UM",
-    "U.S. Virgin Islands": "VI",
-}
 
-
-class BcpizzaSpider(scrapy.Spider):
+class BcpizzaSpider(CrawlSpider):
     name = "bcpizza"
     item_attributes = {"brand": "BC Pizza"}
     allowed_domains = ["bc.pizza"]
-    start_urls = ["https://bc.pizza/project-cat/bc-pizza-locations/"]
+    start_urls = ["https://bc.pizza/locations/"]
+    rules = [
+        Rule(
+            LinkExtractor(allow=r"\/locations\/[-\w]+\/$"),
+            callback="parse",
+        )
+    ]
 
     def parse(self, response):
-        urls = response.xpath("//a[@rel='bookmark']/@href").extract()
-        for url in urls:
-            yield scrapy.Request(url, self.parse_locations)
-
-    def parse_locations(self, response):
         name = response.xpath('//div[@class="wpb_wrapper"]/h1/text()').get()
         address_full = response.xpath(
             '//div[@class="wpb_text_column wpb_content_element"]//p/text()'
@@ -96,8 +38,10 @@ class BcpizzaSpider(scrapy.Spider):
         ]
         city = city_state_postcode.split(",")[0]
         state = city_state_postcode.split(",")[1].replace(postcode, "").strip()
-        if state in us_state_to_abbrev:
-            state = us_state_to_abbrev[state]
+        for item in GeonamesCache().get_us_states().keys():
+            if state == GeonamesCache().get_us_states()[item]["name"]:
+                state = item
+                break
         phone = response.xpath('//a[contains(@href, "tel")]/text()').get()
         facebook = response.xpath('//a[@class="vc_icon_element-link"]/@href').get()
         days = response.xpath('//table[contains(@class, "op-table")]//tr')
