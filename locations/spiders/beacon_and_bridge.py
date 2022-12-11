@@ -28,20 +28,9 @@ class BeaconAndBridgeSpider(scrapy.Spider):
                 h_h = re.split(" - | -", hour)
                 oh.add_range(
                     day=day,
-                    open_time=datetime.strftime(
-                        datetime.strptime(
-                            h_h[0].replace("am", " am").replace("pm", " pm"),
-                            "%I:%M %p",
-                        ),
-                        "%H:%M",
-                    ),
-                    close_time=datetime.strftime(
-                        datetime.strptime(
-                            h_h[1].replace("am", " am").replace("pm", " pm"),
-                            "%I:%M %p",
-                        ),
-                        "%H:%M",
-                    ),
+                    open_time=h_h[0],
+                    close_time=h_h[1],
+                    time_format="%I:%M%p",
                 )
             properties = {
                 "ref": re.split(
