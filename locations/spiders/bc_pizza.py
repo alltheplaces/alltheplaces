@@ -44,7 +44,7 @@ class BcpizzaSpider(CrawlSpider):
                 break
         phone = response.xpath('//a[contains(@href, "tel")]/text()').get()
         facebook = response.xpath('//a[@class="vc_icon_element-link"]/@href').get()
-        
+
         days = response.xpath('//table[contains(@class, "op-table")]//tr')
         oh = OpeningHours()
         for i, day in enumerate(days):
