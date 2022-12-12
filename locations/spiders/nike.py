@@ -2,19 +2,19 @@ import datetime
 
 import scrapy
 
+from locations.categories import Categories
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
 
 class NikeSpider(scrapy.Spider):
     name = "nike"
-    item_attributes = {"brand": "Nike", "brand_wikidata": "Q483915"}
+    item_attributes = {"brand": "Nike", "brand_wikidata": "Q483915", "extras": Categories.SHOP_CLOTHES.value}
     start_urls = ["https://storeviews-cdn.risedomain-prod.nikecloud.com/store-locations-static.json"]
 
     def parse(self, response):
         all_stores = response.json()["stores"]
         for store in all_stores.values():
-            store.update(store.get("coordinates"))
             item = DictParser.parse(store)
 
             days = DictParser.get_nested_key(store, "regularHours")
@@ -46,5 +46,13 @@ class NikeSpider(scrapy.Spider):
             item["opening_hours"] = opening_hours.as_opening_hours()
             item["website"] = "https://www.nike.com/retail/s/" + store["slug"]
             item["image"] = store["imageURL"]
-            item["extras"] = {"store_type": store.get("facilityType")}
+            item["extras"] = {"owner:type": store["facilityType"]}
+            if store["businessConcept"] == "FACTORY":
+                item["brand"] = "Nike Factory Store"
+            elif store["businessConcept"] == "CLEARANCE":
+                item["brand"] = "Nike Clearance Store"
+            elif store["businessConcept"] == "COMMUNITY":
+                item["brand"] = "Nike Community Store"
+            else:
+                item["extras"]["type"] = store["businessConcept"]
             yield item
