@@ -20,22 +20,21 @@ class BrewdogSpider(scrapy.Spider):
         for bar in bars:
             item["ref"] = bar["sys"]["id"]
             item["name"] = bar["fields"]["name"]
-            item["addr_full"] = bar["fields"]["address"] if "address" in bar["fields"].keys() else None
-            item["phone"] = bar["fields"]["contactNumber"] if "contactNumber" in bar["fields"].keys() else None
-            item["email"] = bar["fields"]["contactEmail"] if "contactEmail" in bar["fields"].keys() else None
-            item["lat"] = bar["fields"]["location"]["lat"] if "location" in bar["fields"].keys() else None
-            item["lon"] = bar["fields"]["location"]["lon"] if "location" in bar["fields"] else None
-            openingHours = bar["fields"]["openingHours"] if "openingHours" in bar["fields"].keys() else None
+            item["addr_full"] = bar["fields"].get("address")
+            item["phone"] = bar["fields"].get("contactNumber")
+            item["email"] = bar["fields"].get("contactEmail")
+            item["lat"] = bar["fields"].get("location", {}).get("lat")
+            item["lon"] = bar["fields"].get("location", {}).get("lon")
+            openingHours = bar["fields"].get("openingHours")
             oh = OpeningHours()
             if openingHours:
                 for key, value in openingHours.items():
                     if key == "exceptions" or value["is_open"] == False:
                         continue
-                    if "open" and "close" in value.keys():
-                        oh.add_range(
-                            day=key,
-                            open_time=value["open"],
-                            close_time=value["close"],
-                        )
+                    oh.add_range(
+                        day=key,
+                        open_time=value.get("open"),
+                        close_time=value.get("close"),
+                    )
             item["opening_hours"] = oh.as_opening_hours()
             yield item
