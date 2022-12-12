@@ -2,9 +2,9 @@ import json
 
 import scrapy
 
+from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.items import GeojsonPointItem
-from locations.dict_parser import DictParser
 
 
 class BrewdogSpider(scrapy.Spider):
