@@ -23,11 +23,7 @@ class CinemarkSpider(SitemapSpider):
 
         item["ref"] = "/".join(response.url.rsplit("/")[-2:])
         item["lat"], item["lon"] = parse_qs(
-            urlparse(
-                response.css(".theatreInfoCollapseMap")
-                .xpath("//a/img/@data-src")
-                .extract_first()
-            ).query
+            urlparse(response.css(".theatreInfoCollapseMap").xpath("//a/img/@data-src").extract_first()).query
         )["pp"][0].split(",")
 
         yield item

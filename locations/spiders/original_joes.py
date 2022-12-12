@@ -15,9 +15,7 @@ class OriginalJoesSpider(scrapy.Spider):
     ]
 
     def parse(self, response):
-        data = response.xpath(
-            '//script[contains(text(),"ojlocations")]/text()'
-        ).extract_first()
+        data = response.xpath('//script[contains(text(),"ojlocations")]/text()').extract_first()
 
         ## Fix lots of formatting issues
         json_data = data.replace("var ojlocations = ", "")

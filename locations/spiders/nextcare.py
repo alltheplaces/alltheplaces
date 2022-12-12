@@ -65,9 +65,7 @@ class NextcareSpider(scrapy.Spider):
         return "; ".join(normalize_day_times)
 
     def parse(self, response):
-        for location_url in response.xpath(
-            '//div[@class="all_locs_address"]/a/@href'
-        ).extract():
+        for location_url in response.xpath('//div[@class="all_locs_address"]/a/@href').extract():
             yield scrapy.Request(
                 location_url,
                 callback=self.parse_location,
@@ -76,32 +74,18 @@ class NextcareSpider(scrapy.Spider):
     def parse_location(self, response):
         unp = {}  # Unprocessed properties
         properties = {}
-        unp["phone"] = response.xpath(
-            '//span[@itemprop="telephone"]/a/text()'
-        ).extract_first()
-        unp["name"] = response.xpath(
-            '//span[@itemprop="name"]/h2[@class="loc_d_title"]/text()'
-        ).extract_first()
+        unp["phone"] = response.xpath('//span[@itemprop="telephone"]/a/text()').extract_first()
+        unp["name"] = response.xpath('//span[@itemprop="name"]/h2[@class="loc_d_title"]/text()').extract_first()
         unp["ref"] = response.url
         unp["website"] = response.url
 
         addressdiv = response.xpath('//div[@itemprop="address"]')[0]
-        unp["addr_full"] = addressdiv.xpath(
-            './/span[@itemprop="streetAddress"]/text()'
-        ).extract_first()
-        unp["city"] = addressdiv.xpath(
-            './/span[@itemprop="addressLocality"]/text()'
-        ).extract_first()
-        unp["state"] = addressdiv.xpath(
-            './/span[@itemprop="addressRegion"]/text()'
-        ).extract_first()
-        unp["postcode"] = addressdiv.xpath(
-            './/span[@itemprop="postalCode"]/text()'
-        ).extract_first()
+        unp["addr_full"] = addressdiv.xpath('.//span[@itemprop="streetAddress"]/text()').extract_first()
+        unp["city"] = addressdiv.xpath('.//span[@itemprop="addressLocality"]/text()').extract_first()
+        unp["state"] = addressdiv.xpath('.//span[@itemprop="addressRegion"]/text()').extract_first()
+        unp["postcode"] = addressdiv.xpath('.//span[@itemprop="postalCode"]/text()').extract_first()
 
-        uber_url = response.xpath(
-            '//div[@class="heading-desktop"]/h5/a/@href'
-        ).extract_first()
+        uber_url = response.xpath('//div[@class="heading-desktop"]/h5/a/@href').extract_first()
         latitude = uber_url.split("[latitude]=")[1]
         latitude = latitude.split("&dropoff")[0]
         longitude = uber_url.split("[longitude]=")[1]

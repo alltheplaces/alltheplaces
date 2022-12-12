@@ -12,9 +12,7 @@ class TwentyFourHourFitnessSpider(scrapy.Spider):
         for club in response.json()["clubs"]:
             club["ref"] = club["clubNumber"]
             club["address"]["street_address"] = club["address"].pop("street")
-            club["website"] = (
-                "https://www.24hourfitness.com/Website/Club/" + club["clubNumber"]
-            )
+            club["website"] = "https://www.24hourfitness.com/Website/Club/" + club["clubNumber"]
             club["location"] = club.pop("coordinate")
             item = DictParser.parse(club)
             if club["type"] == "SuperSport":

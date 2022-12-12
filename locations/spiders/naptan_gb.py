@@ -18,9 +18,7 @@ class NaptanGBSpider(Spider):
             item = GeojsonPointItem()
             item["extras"] = {"check_date": point.xpath("@ModificationDateTime").get()}
 
-            item["ref"] = item["extras"]["naptan:AtcoCode"] = point.xpath(
-                "StopAreaCode/text()"
-            ).get()
+            item["ref"] = item["extras"]["naptan:AtcoCode"] = point.xpath("StopAreaCode/text()").get()
 
             item["lat"] = point.xpath("Location/Translation/Latitude/text()").get()
             item["lon"] = point.xpath("Location/Translation/Longitude/text()").get()

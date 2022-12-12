@@ -44,9 +44,7 @@ class StewartsShopsSpider(scrapy.Spider):
                 "extras": {
                     "amenity:fuel": "Gas Station" in fields or None,
                     "fuel:diesel": "Diesel" in fields or None,
-                    "fuel:e0_octane_91": "Gas Station with 91 Premium Non-Ethanol"
-                    in fields
-                    or None,
+                    "fuel:e0_octane_91": "Gas Station with 91 Premium Non-Ethanol" in fields or None,
                     "fuel:kerosene": "Kerosene" in fields or None,
                     "atm": "ATM" in fields or None,
                     "car_wash": "Car Wash" in fields or None,

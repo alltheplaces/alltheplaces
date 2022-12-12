@@ -21,9 +21,7 @@ class HuntingtonBankSpider(scrapy.Spider):
                 yield scrapy.Request(url, callback=self.parse_store)
 
     def parse_store(self, response):
-        ldjson = response.xpath(
-            '//script[@type="application/ld+json"]/text()[contains(.,"@context")]'
-        ).get()
+        ldjson = response.xpath('//script[@type="application/ld+json"]/text()[contains(.,"@context")]').get()
         if ldjson is None:
             return
         [data] = json.loads(ldjson)

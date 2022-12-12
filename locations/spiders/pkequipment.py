@@ -26,15 +26,9 @@ class PKEquipmentSpider(scrapy.Spider):
                 '//script[@type="application/ld+json" and contains(text(), "streetAddress")]/text()'
             ).extract_first()
         )
-        mapdata = response.xpath(
-            '//div[@class="clearfix map_equipment"]/script[2]'
-        ).extract_first()
-        lat = re.search(
-            r'(?:lat":)(-?\d+\.\d+),.*(?:long":)(-?\d*.\d*)', mapdata
-        ).group(1)
-        lon = re.search(
-            r'(?:lat":)(-?\d+\.\d+),.*(?:long":)(-?\d*.\d*)', mapdata
-        ).group(2)
+        mapdata = response.xpath('//div[@class="clearfix map_equipment"]/script[2]').extract_first()
+        lat = re.search(r'(?:lat":)(-?\d+\.\d+),.*(?:long":)(-?\d*.\d*)', mapdata).group(1)
+        lon = re.search(r'(?:lat":)(-?\d+\.\d+),.*(?:long":)(-?\d*.\d*)', mapdata).group(2)
         properties = {
             "ref": ref,
             "name": data["name"],

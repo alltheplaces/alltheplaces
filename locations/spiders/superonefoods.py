@@ -34,6 +34,5 @@ class SuperonefoodsSpider(scrapy.Spider):
                 city=item.get("city"),
                 state=item.get("state"),
                 postcode=item.get("zip"),
-                website="https://www.superonefoods.com/store-details/"
-                + item.get("url"),
+                website="https://www.superonefoods.com/store-details/" + item.get("url"),
             )

@@ -52,9 +52,7 @@ class WalmartSpider(CrawlSpider):
         if data is None:
             return
 
-        store = data["props"]["pageProps"]["initialData"]["initialDataNodeDetail"][
-            "data"
-        ]["nodeDetail"]
+        store = data["props"]["pageProps"]["initialData"]["initialDataNodeDetail"]["data"]["nodeDetail"]
 
         if store is None:
             return
@@ -79,8 +77,6 @@ class WalmartSpider(CrawlSpider):
 
         item["extras"] = {}
         item["extras"]["type"] = store.get("type")
-        item["extras"]["amenity:fuel"] = any(
-            s["name"] == "GAS_STATION" for s in store["services"]
-        )
+        item["extras"]["amenity:fuel"] = any(s["name"] == "GAS_STATION" for s in store["services"])
 
         return item

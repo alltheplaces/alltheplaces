@@ -74,9 +74,7 @@ class MarketBasketSpider(scrapy.Spider):
                 city = ""
         properties = {
             "addr_full": addr_full,
-            "phone": response.xpath(
-                'normalize-space(//span[@itemprop="telephone"]/text())'
-            ).extract_first(),
+            "phone": response.xpath('normalize-space(//span[@itemprop="telephone"]/text())').extract_first(),
             "city": city,
             "state": state,
             "postcode": postcode,
@@ -85,9 +83,7 @@ class MarketBasketSpider(scrapy.Spider):
             "lat": float(location[0]),
             "lon": float(location[1]),
         }
-        hours = self.parse_hours(
-            response.xpath('//div[@class="textwidget custom-html-widget"]/ul/li')
-        )
+        hours = self.parse_hours(response.xpath('//div[@class="textwidget custom-html-widget"]/ul/li'))
         if hours:
             properties["opening_hours"] = hours
 
@@ -99,8 +95,6 @@ class MarketBasketSpider(scrapy.Spider):
             yield scrapy.Request(response.urljoin(path), callback=self.parse_stores)
 
     def parse(self, response):
-        urls = response.xpath(
-            '//div[@class="cs-block-buton"]/a[@class="cs-button-links"]/@href'
-        ).extract()
+        urls = response.xpath('//div[@class="cs-block-buton"]/a[@class="cs-button-links"]/@href').extract()
         for path in urls:
             yield scrapy.Request(response.urljoin(path), callback=self.parse_area)

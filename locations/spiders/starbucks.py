@@ -86,8 +86,6 @@ class StarbucksSpider(scrapy.Spider):
                 ]
                 urls = [STORELOCATOR.format(c[1], c[0]) for c in nextCoordinates]
                 for url in urls:
-                    request = scrapy.Request(
-                        url=url, headers=HEADERS, callback=self.parse
-                    )
+                    request = scrapy.Request(url=url, headers=HEADERS, callback=self.parse)
                     request.meta["distance"] = nextDistance
                     yield request

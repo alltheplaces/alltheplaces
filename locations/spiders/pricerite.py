@@ -13,9 +13,7 @@ class PriceRiteSpider(scrapy.Spider):
     start_urls = ("https://www.priceritemarketplace.com/",)
 
     def parse(self, response):
-        script = response.xpath(
-            '//script[contains(text(), "__PRELOADED_STATE__")]/text()'
-        ).extract_first()
+        script = response.xpath('//script[contains(text(), "__PRELOADED_STATE__")]/text()').extract_first()
         script = script[script.index("{") :]
         stores = json.loads(script)["stores"]["availablePlanningStores"]["items"]
 

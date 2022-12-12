@@ -22,9 +22,7 @@ class FederalSavingsBankSpider(scrapy.Spider):
         properties = {
             "ref": re.search(r".+/(.+?)/?(?:\.html|$)", response.url).group(1),
             "name": response.xpath("//h1/text()").extract_first(),
-            "addr_full": response.xpath(
-                '//*[@class="lpo_street"]/text()'
-            ).extract_first(),
+            "addr_full": response.xpath('//*[@class="lpo_street"]/text()').extract_first(),
             "city": response.xpath('//*[@class="lpo_city"]/text()').extract_first(),
             "state": response.xpath('//*[@class="lpo_state"]/text()').extract_first(),
             "postcode": response.xpath('//*[@class="lpo_zip"]/text()').extract_first(),

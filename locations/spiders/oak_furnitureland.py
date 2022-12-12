@@ -19,9 +19,7 @@ class OakFurniturelandSpider(SitemapSpider):
     ]
 
     def parse(self, response):
-        if "PERMANENTLY CLOSED" in "".join(
-            response.xpath('//div[@id="title"]/descendant::*/text()').getall()
-        ):
+        if "PERMANENTLY CLOSED" in "".join(response.xpath('//div[@id="title"]/descendant::*/text()').getall()):
             return
 
         item = LinkedDataParser.parse(response, "LocalBusiness")

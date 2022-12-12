@@ -24,12 +24,10 @@ class AveraSpider(scrapy.Spider):
 
     def parse_loc(self, response):
         locs = response.xpath('//div[@class="LocationsList"]//a/@href').extract()
-        for l in locs:
-            if l.startswith("../profile"):
-                loc_url = l.replace("..", "https://www.avera.org/locations")
-                yield scrapy.Request(
-                    response.urljoin(loc_url), callback=self.parse_data
-                )
+        for loc in locs:
+            if loc.startswith("../profile"):
+                loc_url = loc.replace("..", "https://www.avera.org/locations")
+                yield scrapy.Request(response.urljoin(loc_url), callback=self.parse_data)
 
     def parse_data(self, response):
         try:
@@ -38,7 +36,7 @@ class AveraSpider(scrapy.Spider):
                     '//script[@type="application/ld+json" and contains(text(), "latitude")]/text()'
                 ).extract_first()
             )
-        except:
+        except Exception:
             data = "skip"
         if data != "skip":
             try:

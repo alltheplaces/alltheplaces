@@ -99,18 +99,10 @@ class NettoSpider(scrapy.Spider):
                 ),
             }
 
-            properties["opening_hours"] = self.parse_opening_hours(
-                store["store_opening"]
-            )
+            properties["opening_hours"] = self.parse_opening_hours(store["store_opening"])
 
             yield GeojsonPointItem(**properties)
 
     def urlify(self, param):
         # They also do ß -> ss, but it's not vital
-        return (
-            param.lower()
-            .replace(" ", "-")
-            .replace(".", "")
-            .replace(",", "")
-            .replace("'", "")
-        )
+        return param.lower().replace(" ", "-").replace(".", "").replace(",", "").replace("'", "")

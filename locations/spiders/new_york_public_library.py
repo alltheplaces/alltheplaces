@@ -73,8 +73,7 @@ class NewYorkPublicLibrarySpider(scrapy.Spider):
                 "postcode": location["postal_code"],
                 "country": "US",
                 "phone": location.get("contacts", {}).get("phone"),
-                "website": location.get("_links", {}).get("self", {}).get("about")
-                or response.url,
+                "website": location.get("_links", {}).get("self", {}).get("about") or response.url,
                 "lat": lat,
                 "lon": lon,
             }

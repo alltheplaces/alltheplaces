@@ -90,9 +90,7 @@ class DictParser:
         item["ref"] = DictParser.get_first_key(obj, DictParser.ref_keys)
         item["name"] = DictParser.get_first_key(obj, DictParser.name_keys)
 
-        location = DictParser.get_first_key(
-            obj, ["location", "geo-location", "geo", "geo-point", "coordinates"]
-        )
+        location = DictParser.get_first_key(obj, ["location", "geo-location", "geo", "geo-point", "coordinates"])
         # If not a good location object then use the parent
         if not location or not isinstance(location, dict):
             location = obj
@@ -107,13 +105,9 @@ class DictParser:
         if not address or not isinstance(address, dict):
             address = obj
 
-        item["housenumber"] = DictParser.get_first_key(
-            address, DictParser.house_number_keys
-        )
+        item["housenumber"] = DictParser.get_first_key(address, DictParser.house_number_keys)
         item["street"] = DictParser.get_first_key(address, ["street", "streetName"])
-        item["street_address"] = DictParser.get_first_key(
-            address, DictParser.street_address_keys
-        )
+        item["street_address"] = DictParser.get_first_key(address, DictParser.street_address_keys)
         item["city"] = DictParser.get_first_key(address, DictParser.city_keys)
         item["state"] = DictParser.get_first_key(address, DictParser.region_keys)
         item["postcode"] = DictParser.get_first_key(address, DictParser.postcode_keys)

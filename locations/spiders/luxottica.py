@@ -21,9 +21,7 @@ class LuxotticaSpider(scrapy.Spider):
             if "Closed" or "All" in group:
                 pass
             else:
-                days, open_time, close_time = re.search(
-                    r"([a-zA-Z,]+)\s([\d:]+)-([\d:]+)", group
-                ).groups()
+                days, open_time, close_time = re.search(r"([a-zA-Z,]+)\s([\d:]+)-([\d:]+)", group).groups()
                 days = days.split(",")
                 for day in days:
                     opening_hours.add_range(
@@ -51,35 +49,19 @@ class LuxotticaSpider(scrapy.Spider):
                 "city": response.xpath(
                     '//*[@itemprop="addressLocality"]/text() | //*[@itemprop="addressLocality"]/@content'
                 ).extract_first(),
-                "state": response.xpath(
-                    '//*[@itemprop="addressRegion"]/text()'
-                ).extract_first(),
-                "postcode": response.xpath(
-                    '//*[@itemprop="postalCode"]/text()'
-                ).extract_first(),
-                "phone": response.xpath(
-                    '//*[@itemprop="telephone"]/text()'
-                ).extract_first(),
-                "ref": "_".join(
-                    re.search(
-                        r".+/(.+?)/(.+?)/(.+?)/?(?:\.html|$)", response.url
-                    ).groups()
-                ),
+                "state": response.xpath('//*[@itemprop="addressRegion"]/text()').extract_first(),
+                "postcode": response.xpath('//*[@itemprop="postalCode"]/text()').extract_first(),
+                "phone": response.xpath('//*[@itemprop="telephone"]/text()').extract_first(),
+                "ref": "_".join(re.search(r".+/(.+?)/(.+?)/(.+?)/?(?:\.html|$)", response.url).groups()),
                 "website": response.url,
-                "lat": response.xpath(
-                    '//*[@itemprop="latitude"]/@content'
-                ).extract_first(),
-                "lon": response.xpath(
-                    '//*[@itemprop="longitude"]/@content'
-                ).extract_first(),
+                "lat": response.xpath('//*[@itemprop="latitude"]/@content').extract_first(),
+                "lon": response.xpath('//*[@itemprop="longitude"]/@content').extract_first(),
                 "brand": response.xpath(
                     '//*[@class="c-location-title"]/text() | //*[@itemprop="name"]/span/text()'
                 ).extract_first(),
             }
 
-            hours = self.parse_hours(
-                response.xpath('//*[@itemprop="openingHours"]/@content').extract()
-            )
+            hours = self.parse_hours(response.xpath('//*[@itemprop="openingHours"]/@content').extract())
             if hours:
                 properties["opening_hours"] = hours
 

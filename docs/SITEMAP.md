@@ -59,7 +59,7 @@ https://smashburger.com/item_type-sitemap.xml
 The store sitemap look interesting, let's see some page links from it:
 
 ```
-$ pipenv run scrapy sitemap --pages https://smashburger.com/store-sitemap.xml 
+$ pipenv run scrapy sitemap --pages https://smashburger.com/store-sitemap.xml
 https://smashburger.com/locations/us/co/glendale/1120-s-colorado-blvd/
 https://smashburger.com/locations/us/co/lafayette/2755-dagny-way/
 https://smashburger.com/locations/us/co/wheatridge/3356-youngfield-st/

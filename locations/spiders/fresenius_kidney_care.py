@@ -22,16 +22,12 @@ class FreseniusKidneyCareSpider(scrapy.Spider):
     item_attributes = {"brand": "Fresenius Kidney Care", "brand_wikidata": "Q650259"}
     allowed_domains = ["www.freseniuskidneycare.com"]
     download_delay = 0.2
-    start_urls = (
-        "https://www.freseniuskidneycare.com/dialysis-centers#locator-search",
-    )
+    start_urls = ("https://www.freseniuskidneycare.com/dialysis-centers#locator-search",)
 
     def start_requests(self):
         base_url = "https://www.freseniuskidneycare.com/dialysis-centers?lat={lat}&lng={lng}&radius=100&page=1"
 
-        with open(
-            "./locations/searchable_points/us_centroids_100mile_radius.csv"
-        ) as points:
+        with open("./locations/searchable_points/us_centroids_100mile_radius.csv") as points:
             next(points)
             for point in points:
                 _, lat, lon = point.strip().split(",")
@@ -42,9 +38,7 @@ class FreseniusKidneyCareSpider(scrapy.Spider):
         opening_hours = OpeningHours()
 
         for group in hours:
-            days, open_time, close_time = re.search(
-                r"([a-zA-Z,]+)\s([\d:]+)-([\d:]+)", group
-            ).groups()
+            days, open_time, close_time = re.search(r"([a-zA-Z,]+)\s([\d:]+)-([\d:]+)", group).groups()
             days = days.split(",")
             for day in days:
                 opening_hours.add_range(

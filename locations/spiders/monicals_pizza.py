@@ -85,23 +85,13 @@ class MonicalsPizzaSpider(scrapy.Spider):
 
         phone = response.xpath('//div[@class="title-wrap"]/div/text()').extract_first()
 
-        street = (
-            response.xpath('//li[@itemprop="streetAddress"]/text()')
-            .extract_first()
-            .strip()
-        )
+        street = response.xpath('//li[@itemprop="streetAddress"]/text()').extract_first().strip()
 
-        city = response.xpath(
-            '//span[@itemprop="addressLocality"]/text()'
-        ).extract_first()
+        city = response.xpath('//span[@itemprop="addressLocality"]/text()').extract_first()
 
-        state = response.xpath(
-            '//span[@itemprop="addressRegion"]/text()'
-        ).extract_first()
+        state = response.xpath('//span[@itemprop="addressRegion"]/text()').extract_first()
 
-        postcode = response.xpath(
-            '//span[@itemprop="postalCode"]/text()'
-        ).extract_first()
+        postcode = response.xpath('//span[@itemprop="postalCode"]/text()').extract_first()
 
         website = response.xpath('//*[@id="my_location_url"]/@value').extract_first()
 
@@ -136,6 +126,7 @@ class MonicalsPizzaSpider(scrapy.Spider):
         yield GeojsonPointItem(
             lat=lat,
             lon=lon,
+            name=name,
             addr_full=address,
             street=street,
             city=city,

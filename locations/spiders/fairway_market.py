@@ -21,28 +21,20 @@ class FairwayMarketSpider(scrapy.Spider):
         for store in data.xpath('.//div[@class="art-Post-inner"]'):
 
             properties = {
-                "ref": store.xpath(
-                    'div[@class="art-PostContent"]/div[@class="art-article"]/p/text()'
-                ).extract_first(),
+                "ref": store.xpath('div[@class="art-PostContent"]/div[@class="art-article"]/p/text()').extract_first(),
                 "addr_full": store.xpath(
                     'div[@class="art-PostContent"]/div[@class="art-article"]/p/text()'
                 ).extract_first(),
-                "name": store.xpath('h2/span[@class="art-PostHeader"]/text()')
-                .extract_first()
-                .replace("\n", ""),
+                "name": store.xpath('h2/span[@class="art-PostHeader"]/text()').extract_first().replace("\n", ""),
                 "city": self.city(
-                    store.xpath(
-                        'div[@class="art-PostContent"]/div[@class="art-article"]/p/text()'
-                    )[1].extract()
+                    store.xpath('div[@class="art-PostContent"]/div[@class="art-article"]/p/text()')[1].extract()
                 ),
                 "state": self.state(
-                    store.xpath(
-                        'div[@class="art-PostContent"]/div[@class="art-article"]/p/text()'
-                    )[1].extract()
+                    store.xpath('div[@class="art-PostContent"]/div[@class="art-article"]/p/text()')[1].extract()
                 ),
-                "postcode": store.xpath(
-                    'div[@class="art-PostContent"]/div[@class="art-article"]/p/text()'
-                )[2].extract(),
+                "postcode": store.xpath('div[@class="art-PostContent"]/div[@class="art-article"]/p/text()')[
+                    2
+                ].extract(),
                 "opening_hours": self.store_hours(
                     store.xpath(
                         'div[@class="art-PostContent"]/div[@class="art-article"]/p/strong/text()'

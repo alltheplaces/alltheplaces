@@ -31,9 +31,7 @@ class LundsAndByerlysSpider(scrapy.Spider):
         for store in response.json():
             item = DictParser.parse(store)
 
-            item["street_address"] = ", ".join(
-                filter(None, [store["address"], store["address2"]])
-            )
+            item["street_address"] = ", ".join(filter(None, [store["address"], store["address2"]]))
             item["addr_full"] = None
             item["website"] = response.urljoin(store["url"])
             item["name"] = store["store"]

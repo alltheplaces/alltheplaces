@@ -49,36 +49,20 @@ class PDQSpider(scrapy.Spider):
                 storeHours = response.xpath('//div[@class="hours"]/div').extract()
 
             properties = {
-                "name": response.xpath(
-                    '//div[@class="name"]/h1/text()'
-                ).extract_first(),
+                "name": response.xpath('//div[@class="name"]/h1/text()').extract_first(),
                 "ref": response.xpath('//div[@class="name"]/h1/text()').extract_first(),
-                "addr_full": response.xpath('//div[@class="address"]/text()')
-                .extract_first()
-                .strip(),
-                "city": response.xpath('//div[@class="address"]/text()[2]')
-                .extract_first()
-                .split(",")[0],
-                "state": response.xpath('//div[@class="address"]/text()[2]')
-                .extract_first()
-                .split()[1],
-                "postcode": response.xpath('//div[@class="address"]/text()[2]')
-                .extract_first()
-                .split()[-1],
+                "addr_full": response.xpath('//div[@class="address"]/text()').extract_first().strip(),
+                "city": response.xpath('//div[@class="address"]/text()[2]').extract_first().split(",")[0],
+                "state": response.xpath('//div[@class="address"]/text()[2]').extract_first().split()[1],
+                "postcode": response.xpath('//div[@class="address"]/text()[2]').extract_first().split()[-1],
                 "phone": response.xpath("//tel/a[@href]/text()").extract_first(),
                 "website": response.request.url,
                 "opening_hours": storeHours,
                 "lat": float(
-                    response.xpath('//div[@class="address"]/a/@href')
-                    .extract_first()
-                    .split("@")[1]
-                    .split(",")[0]
+                    response.xpath('//div[@class="address"]/a/@href').extract_first().split("@")[1].split(",")[0]
                 ),
                 "lon": float(
-                    response.xpath('//div[@class="address"]/a/@href')
-                    .extract_first()
-                    .split("@")[1]
-                    .split(",")[1]
+                    response.xpath('//div[@class="address"]/a/@href').extract_first().split("@")[1].split(",")[1]
                 ),
             }
 

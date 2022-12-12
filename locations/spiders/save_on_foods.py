@@ -87,9 +87,7 @@ class SaveOnFoodsSpider(scrapy.Spider):
                 day_hours = day_hours.replace(match.group(), hours)
                 opening_hours.append(day_hours)
             else:
-                match = re.search(
-                    r"(\d{1,2}):(\d{2}) (A|P)M-(\d{1,2}):(\d{2}) (A|P)M", day_hours
-                )
+                match = re.search(r"(\d{1,2}):(\d{2}) (A|P)M-(\d{1,2}):(\d{2}) (A|P)M", day_hours)
                 if match:
                     (f_hr, f_min, f_ampm, t_hr, t_min, t_ampm) = match.groups()
                     f_hr = int(f_hr)

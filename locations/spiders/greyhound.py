@@ -31,18 +31,12 @@ class GreyhoundSpider(scrapy.Spider):
                 "state": "{}".format(state),
             }
 
-            yield scrapy.http.Request(
-                search_url + urlencode(params), callback=self.parse_location_list
-            )
+            yield scrapy.http.Request(search_url + urlencode(params), callback=self.parse_location_list)
 
     def parse_location_list(self, response):
-        location_urls = response.xpath(
-            '//div[@class="col-md-6 col-xs-8 station_city_info"]/a/@href'
-        ).extract()
+        location_urls = response.xpath('//div[@class="col-md-6 col-xs-8 station_city_info"]/a/@href').extract()
         for location_url in location_urls:
-            yield scrapy.http.Request(
-                response.urljoin(location_url), callback=self.parse_location
-            )
+            yield scrapy.http.Request(response.urljoin(location_url), callback=self.parse_location)
 
     def parse_location(self, response):
         ref = re.search(r".+/(.+?)/?(?:\.html|$)", response.url).group(1)
@@ -58,9 +52,7 @@ class GreyhoundSpider(scrapy.Spider):
         ).extract_first()
         match = re.search(r"([\w\s]+),\s(\w+)\s(\w+)", city_state_zip)
         city, state, postcode = match.groups()
-        country = re.search(
-            r".+/(.+?)/(.+?)/(.+?)/(.+?)/?(?:\.html|$)", response.url
-        ).groups()[0]
+        country = re.search(r".+/(.+?)/(.+?)/(.+?)/(.+?)/?(?:\.html|$)", response.url).groups()[0]
         phone = response.xpath(
             'normalize-space(//*/text()[normalize-space(.)="Main:"]/following::text())'
         ).extract_first()
@@ -69,9 +61,7 @@ class GreyhoundSpider(scrapy.Spider):
         map_data = response.xpath(
             '//script[@type="text/javascript"][contains(text(), "new L.LatLng")]/text()'
         ).extract_first()
-        coordinates = re.search(
-            r"new L.Marker\(new L.LatLng\((.*)\)\);", map_data
-        ).groups()[0]
+        coordinates = re.search(r"new L.Marker\(new L.LatLng\((.*)\)\);", map_data).groups()[0]
         lat, lon = coordinates.split(", ")
 
         properties = {

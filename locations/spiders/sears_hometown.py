@@ -1,4 +1,4 @@
-from datetime import *
+from datetime import datetime, timedelta
 
 import scrapy
 
@@ -30,23 +30,21 @@ class SearsHometownSpider(scrapy.Spider):
             yield scrapy.Request(url, self.parse_zipcode)
 
     def parse_zipcode(self, response):
-        stores = response.json()["showstorelocator"]["getstorelocator"][
-            "storelocations"
-        ]["storelocation"]
+        stores = response.json()["showstorelocator"]["getstorelocator"]["storelocations"]["storelocation"]
+
         for store in stores:
             item = DictParser.parse(store)
             item["phone"] = store["storephones"]["storephone"]
             oh = OpeningHours()
-            seconds_since_midnight = lambda seconds: (
-                datetime.fromtimestamp(0) + timedelta(seconds=seconds)
-            ).strftime("%H:%M")
+
+            def seconds_since_midnight(seconds):
+                return (datetime.fromtimestamp(0) + timedelta(seconds=seconds)).strftime("%H:%M")
+
             for day in ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]:
-                open_time = seconds_since_midnight(
-                    int(store["storeworkinghours"][day + "opentime"])
-                )
-                close_time = seconds_since_midnight(
-                    int(store["storeworkinghours"][day + "closetime"])
-                )
+                open_time = seconds_since_midnight(int(store["storeworkinghours"][day + "opentime"]))
+                close_time = seconds_since_midnight(int(store["storeworkinghours"][day + "closetime"]))
                 oh.add_range(day[:2].title(), open_time, close_time)
+
             item["opening_hours"] = oh.as_opening_hours()
+
             yield item

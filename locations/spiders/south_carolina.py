@@ -9,9 +9,7 @@ class SouthCarolinaSpider(scrapy.Spider):
     download_delay = 0.2
     name = "south_carolina"
     allowed_domains = ["sc.gov"]
-    start_urls = (
-        "https://applications.sc.gov/PortalMapApi/api/Map/GetMapItemsByCategoryId/1,2,3,4,5,6,7",
-    )
+    start_urls = ("https://applications.sc.gov/PortalMapApi/api/Map/GetMapItemsByCategoryId/1,2,3,4,5,6,7",)
     item_attributes = {"brand_wikidata": "Q1456"}
 
     def parse(self, response):

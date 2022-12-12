@@ -74,9 +74,7 @@ class JoAnnFabricsSpider(scrapy.Spider):
 
         for state in STATES:
             state_url = base_url.format(state)
-            request = scrapy.Request(
-                state_url, callback=self.parse_state, headers=HEADERS
-            )
+            request = scrapy.Request(state_url, callback=self.parse_state, headers=HEADERS)
             request.meta["state"] = state
             yield request
 
@@ -97,11 +95,7 @@ class JoAnnFabricsSpider(scrapy.Spider):
 
     def parse_store_data(self, response):
         """Yield a GeojsonPointItem of the store's data"""  # Pull the data off the stores page
-        store = json.loads(
-            remove_tags(
-                response.xpath('//script[@type="application/ld+json"]')[1:].extract()[0]
-            )
-        )
+        store = json.loads(remove_tags(response.xpath('//script[@type="application/ld+json"]')[1:].extract()[0]))
         store_hours = self.hours(store)
         yield GeojsonPointItem(
             ref=store["url"],

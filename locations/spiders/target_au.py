@@ -17,9 +17,7 @@ class TargetAUSpider(scrapy.Spider):
     }
     custom_settings = {
         "DEFAULT_REQUEST_HEADERS": headers,
-        "DOWNLOAD_HANDLERS": {
-            "https": "scrapy.core.downloader.handlers.http2.H2DownloadHandler"
-        },
+        "DOWNLOAD_HANDLERS": {"https": "scrapy.core.downloader.handlers.http2.H2DownloadHandler"},
     }
 
     def parse(self, response):
@@ -28,9 +26,7 @@ class TargetAUSpider(scrapy.Spider):
             yield scrapy.Request(url, callback=self.parse_state)
 
     def parse_state(self, response):
-        data = json.loads(
-            response.xpath('//script[@id="store-json-data"]/text()').get()
-        )
+        data = json.loads(response.xpath('//script[@id="store-json-data"]/text()').get())
         for row in data["locations"]:
             body = scrapy.Selector(text=row["content"])
             href = body.xpath("//@href").get()
@@ -40,10 +36,7 @@ class TargetAUSpider(scrapy.Spider):
                 "lat": row["lat"],
                 "lon": row["lng"],
                 "addr_full": " ".join(
-                    s.strip()
-                    for s in body.xpath(
-                        '//*[@itemprop="streetAddress"]//text()'
-                    ).extract()
+                    s.strip() for s in body.xpath('//*[@itemprop="streetAddress"]//text()').extract()
                 ),
                 "city": body.xpath('//*[@itemprop="addressLocality"]/text()').get(),
                 "state": body.xpath('//*[@itemprop="addressRegion"]/text()').get(),

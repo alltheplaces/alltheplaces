@@ -23,24 +23,16 @@ class CasinoSpider(scrapy.Spider):
 
         name = response.xpath('.//span[@class="Brand"]/text()').get()
 
-        telephone = response.xpath(
-            './/div[@class="StoreInformations"]//a[@itemprop="telephone"]/text()'
-        ).get()
+        telephone = response.xpath('.//div[@class="StoreInformations"]//a[@itemprop="telephone"]/text()').get()
         openingHours = response.xpath(
             './/div[@class="StoreInformations"]//meta[@itemprop="openingHours"]/@content'
         ).get()
 
         city = response.xpath('.//span[@class="City"]/text()').get()
-        postalCode = response.xpath(
-            './/div[@class="StoreInformations"]//span[@itemprop="postalCode"]/text()'
-        ).get()
-        postalCode = response.xpath(
-            './/div[@class="StoreInformations"]//span[@itemprop="postalCode"]/text()'
-        ).get()
+        postalCode = response.xpath('.//div[@class="StoreInformations"]//span[@itemprop="postalCode"]/text()').get()
+        postalCode = response.xpath('.//div[@class="StoreInformations"]//span[@itemprop="postalCode"]/text()').get()
         streetAddress = (
-            response.xpath(
-                './/div[@class="StoreInformations"]//span[@itemprop="streetAddress"]/text()'
-            )
+            response.xpath('.//div[@class="StoreInformations"]//span[@itemprop="streetAddress"]/text()')
             .get()
             .replace("\n", "")
             .replace("\r", "")

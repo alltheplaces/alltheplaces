@@ -40,9 +40,7 @@ class AnthonysRestaurantsSpider(scrapy.Spider):
             "postcode": address["zip_code"],
             "name": name,
             "website": response.url,
-            "phone": (
-                response.xpath("//*[starts-with(@href, 'tel:')]/@href").get() or ""
-            )[4:],
+            "phone": (response.xpath("//*[starts-with(@href, 'tel:')]/@href").get() or "")[4:],
             "opening_hours": hours,
         }
         return GeojsonPointItem(**properties)

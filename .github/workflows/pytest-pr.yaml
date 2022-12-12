@@ -13,7 +13,10 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
     - name: Setup Python
-      uses: actions/setup-python@master
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        cache: 'pipenv'
     - name: Install pipenv
       run: |
         pip --quiet install pipenv
@@ -23,4 +26,3 @@ jobs:
     - name: Run pytest
       run: |
         pipenv run pytest
-

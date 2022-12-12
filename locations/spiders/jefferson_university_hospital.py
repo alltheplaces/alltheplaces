@@ -17,11 +17,7 @@ class JeffersonUniversityHospitalSpider(scrapy.Spider):
     ]
 
     def parse(self, response):
-        data = " ".join(
-            response.xpath(
-                '//script[contains(text(), "itemsArray.push")]/text()'
-            ).extract()
-        )
+        data = " ".join(response.xpath('//script[contains(text(), "itemsArray.push")]/text()').extract())
         locations = re.findall(r"itemsArray.push\((.+?)\);", data)
 
         for loc in locations:
@@ -44,9 +40,7 @@ class JeffersonUniversityHospitalSpider(scrapy.Spider):
                 properties = {
                     "name": locname,
                     "ref": loctype + "_" + locname,
-                    "addr_full": addr_full
-                    if addr_full
-                    else re.search(r"</h3> <p>(.+?)<br>", html).groups()[0],
+                    "addr_full": addr_full if addr_full else re.search(r"</h3> <p>(.+?)<br>", html).groups()[0],
                     "city": re.search(r"<br>(.+?),", html).groups()[0],
                     "state": re.search(r",(\s\D{2})", html).groups()[0].strip(),
                     "postcode": postcode if postcode else None,

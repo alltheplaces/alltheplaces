@@ -112,9 +112,7 @@ class SignetJewelersSpider(scrapy.Spider):
             yield scrapy.Request(response.urljoin(i), callback=self.parse)
 
     def parse(self, response):
-        script = " ".join(
-            response.xpath('//*[@id="js-store-details"]/div/script/text()').extract()
-        )
+        script = " ".join(response.xpath('//*[@id="js-store-details"]/div/script/text()').extract())
         data = None
 
         if re.search(r"storeInformation\s=\s((?s).*)", script) is not None:

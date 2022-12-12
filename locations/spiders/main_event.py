@@ -22,15 +22,11 @@ class MainEventSpider(scrapy.Spider):
         urls = response.xpath("//url/loc/text()").extract()
         for url in urls:
             if re.match(r".*/locations/.+$", url):
-                yield scrapy.Request(
-                    url=url, callback=self.parse_location, meta={"url": url}
-                )
+                yield scrapy.Request(url=url, callback=self.parse_location, meta={"url": url})
 
     def parse_location(self, response):
 
-        store_data = response.xpath(
-            '//script[@type="application/ld+json"]/text()'
-        ).extract_first()
+        store_data = response.xpath('//script[@type="application/ld+json"]/text()').extract_first()
 
         # Stores pending "Grand Opening" won't have this
         if not store_data:
@@ -39,9 +35,7 @@ class MainEventSpider(scrapy.Spider):
         store_json = json.loads(store_data)
 
         # \\"latitude\\":33.318367794546674,\\"longitude\\":-111.74067152513123,
-        map_data = response.xpath(
-            "//script[contains(text(), 'googleInfo')]/text()"
-        ).extract_first()
+        map_data = response.xpath("//script[contains(text(), 'googleInfo')]/text()").extract_first()
 
         yield GeojsonPointItem(
             ref=response.url.split("/")[-2],

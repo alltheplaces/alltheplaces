@@ -50,12 +50,8 @@ class RogersCommunicationsSpider(scrapy.Spider):
 
                 open_time = time[0].replace(" ", "")
                 close_time = time[1].replace(" ", "")
-                open_time = datetime.datetime.strptime(open_time, "%I:%M%p").strftime(
-                    "%H:%M"
-                )
-                close_time = datetime.datetime.strptime(close_time, "%I:%M%p").strftime(
-                    "%H:%M"
-                )
+                open_time = datetime.datetime.strptime(open_time, "%I:%M%p").strftime("%H:%M")
+                close_time = datetime.datetime.strptime(close_time, "%I:%M%p").strftime("%H:%M")
 
                 opening_hours.add_range(
                     day=day,

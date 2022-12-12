@@ -63,11 +63,7 @@ class DominosPizzaSpider(scrapy.Spider):
             yield scrapy.Request(url, callback=self.parse_state_sitemap)
 
     def parse_place(self, response):
-        data = json.loads(
-            response.xpath(
-                '//script[@type="application/ld+json"]/text()'
-            ).extract_first()
-        )
+        data = json.loads(response.xpath('//script[@type="application/ld+json"]/text()').extract_first())
 
         yield GeojsonPointItem(
             name=data["name"],

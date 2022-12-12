@@ -31,12 +31,8 @@ class JusticeSpider(scrapy.Spider):
                 unp["lon"] = float(unp["lon"])
 
             unp["ref"] = store["locationId"]
-            unp["addr_full"] = html.xpath(
-                '//div[contains(@class, "addr")]/text()'
-            ).extract_first()
-            unp["phone"] = html.xpath(
-                '//div[contains(@class, "phone")]/text()'
-            ).extract_first()
+            unp["addr_full"] = html.xpath('//div[contains(@class, "addr")]/text()').extract_first()
+            unp["phone"] = html.xpath('//div[contains(@class, "phone")]/text()').extract_first()
             unp["name"] = html.xpath('//div[@class="loc-name"]/text()').extract_first()
             addr2 = html.xpath('//div[contains(@class, "csz")]/text()').extract_first()
             if addr2:

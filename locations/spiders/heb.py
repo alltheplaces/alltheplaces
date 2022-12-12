@@ -25,11 +25,7 @@ class HEBSpider(scrapy.Spider):
         if response.request.meta.get("redirect_urls"):
             return
 
-        store_json = json.loads(
-            response.xpath(
-                '//script[@type="application/ld+json"]/text()'
-            ).extract_first()
-        )
+        store_json = json.loads(response.xpath('//script[@type="application/ld+json"]/text()').extract_first())
         yield GeojsonPointItem(
             ref=response.url.split("/")[-1],
             name=store_json["name"],

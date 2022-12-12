@@ -1,4 +1,7 @@
-import re, scrapy
+import re
+
+import scrapy
+
 from locations.items import GeojsonPointItem
 
 
@@ -32,7 +35,7 @@ class CoopVitalityCHSpider(scrapy.Spider):
             p = located_in.split(",", 1)
             located_in, street = p if len(p) == 2 else (None, p[0])
         m = re.search(r"^\s*(.+?)\s+([0-9]+[A-Za-z]?)$", street)
-        if m != None:
+        if m is not None:
             street, housenumber = m.group(1), m.group(2)
         if located_in in {"Allée du Communet", "Beim Neumarkt 4"}:
             located_in = None

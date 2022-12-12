@@ -100,8 +100,6 @@ class RealCanadianSuperstoreSpider(scrapy.Spider):
 
             if "todaysHours" in data["details"]:
                 if data["details"]["todaysHours"]:
-                    properties["opening_hours"] = self.store_hours(
-                        data["details"]["todaysHours"]
-                    )
+                    properties["opening_hours"] = self.store_hours(data["details"]["todaysHours"])
 
             yield GeojsonPointItem(**properties)

@@ -15,8 +15,7 @@ class TommyHilfigerSpider(scrapy.Spider):
         regions = response.json()["GeoNode"]
         for region in regions:
             yield scrapy.Request(
-                "https://uk.tommy.com/wcs/resources/store/30027/storelocator/byGeoNode/"
-                + region["uniqueID"],
+                "https://uk.tommy.com/wcs/resources/store/30027/storelocator/byGeoNode/" + region["uniqueID"],
                 callback=self.parse_stores,
             )
 

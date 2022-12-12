@@ -18,9 +18,7 @@ class SweetTomatoesSpider(scrapy.Spider):
         yield from response.follow_all(xpath="//area/@href", callback=self.parse_region)
 
     def parse_region(self, response):
-        yield from response.follow_all(
-            css="div#locations a", callback=self.parse_restaurant
-        )
+        yield from response.follow_all(css="div#locations a", callback=self.parse_restaurant)
 
     def parse_restaurant(self, response):
         item = OpenGraphParser.parse(response)
@@ -40,7 +38,5 @@ class SweetTomatoesSpider(scrapy.Spider):
                 for day in day_range(start_day[:2], end_day[:2]):
                     oh.add_range(day, open_time, close_time, "%I:%M %p")
         item["opening_hours"] = oh.as_opening_hours()
-        item["brand"] = response.xpath(
-            '//meta[@property="og:site_name"]/@content'
-        ).get()
+        item["brand"] = response.xpath('//meta[@property="og:site_name"]/@content').get()
         yield item

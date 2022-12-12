@@ -24,16 +24,12 @@ class McDonaldsLUSpider(scrapy.Spider):
                 break
 
             hours = ""
-            match = re.search(
-                r"([0-9]{1,2}):([0-9]{1,2}) - ([0-9]{1,2}):([0-9]{1,2}) ", day_hour
-            )
+            match = re.search(r"([0-9]{1,2}):([0-9]{1,2}) - ([0-9]{1,2}):([0-9]{1,2}) ", day_hour)
             if not match:
                 return None
             sh, sm, eh, em = match.groups()
             short_day = weekdays[index]
-            hours = "{}:{}-{}:{}".format(
-                sh, sm, int(eh) + 12 if int(eh) < 12 else int(eh), em
-            )
+            hours = "{}:{}-{}:{}".format(sh, sm, int(eh) + 12 if int(eh) < 12 else int(eh), em)
             if not this_day_group:
                 this_day_group = {
                     "from_day": short_day,

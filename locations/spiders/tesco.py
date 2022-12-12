@@ -51,9 +51,7 @@ class TescoSpider(SitemapSpider):
         return opening_hours.as_opening_hours()
 
     def parse_store(self, response):
-        store_details = response.xpath(
-            '//script[@type="application/json"][@id="storeData"]/text()'
-        ).extract_first()
+        store_details = response.xpath('//script[@type="application/json"][@id="storeData"]/text()').extract_first()
         if store_details:
             store_data = json.loads(store_details)
             ref = store_data["store"]
@@ -70,9 +68,7 @@ class TescoSpider(SitemapSpider):
 
             properties = {
                 "ref": ref,
-                "name": response.xpath(
-                    '//h1[@itemprop="name"]/descendant-or-self::*/text()'
-                ).get(),
+                "name": response.xpath('//h1[@itemprop="name"]/descendant-or-self::*/text()').get(),
                 "street_address": addr_full,
                 "city": response.xpath(
                     '//div[@class="Core-infoWrapper"]//span[@class="Address-field Address-city"]/text()'
@@ -87,16 +83,11 @@ class TescoSpider(SitemapSpider):
                 "lon": response.xpath(
                     '//div[@class="Core-infoWrapper"]//span[@class="Address-coordinates"]/meta[@itemprop="longitude"]/@content'
                 ).extract_first(),
-                "phone": "+44 "
-                + response.xpath(
-                    '//span[@itemprop="telephone"]/text()'
-                ).extract_first()[1:],
+                "phone": "+44 " + response.xpath('//span[@itemprop="telephone"]/text()').extract_first()[1:],
                 "website": response.url,
             }
 
-            hours = response.xpath(
-                '//div[@class="Core-infoWrapper"]//@data-days'
-            ).extract_first()
+            hours = response.xpath('//div[@class="Core-infoWrapper"]//@data-days').extract_first()
             if hours:
                 properties["opening_hours"] = self.store_hours(hours)
 

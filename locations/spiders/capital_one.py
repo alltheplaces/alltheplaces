@@ -41,9 +41,7 @@ class CapitalOneSpider(scrapy.Spider):
         return opening_hours.as_opening_hours()
 
     def start_requests(self):
-        with open(
-            "./locations/searchable_points/us_centroids_50mile_radius.csv"
-        ) as points:
+        with open("./locations/searchable_points/us_centroids_50mile_radius.csv") as points:
             next(points)  # Ignore the header
             for point in points:
                 row = point.split(",")

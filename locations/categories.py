@@ -8,6 +8,7 @@ class Categories(Enum):
     BUS_STOP = {"highway": "bus_stop", "public_transport": "platform"}
     BUS_STATION = {"amenity": "bus_station", "public_transport": "station"}
 
+    SHOP_CLOTHES = {"shop": "clothes"}
     SHOP_BOOKS = {"shop": "books"}
     SHOP_CONVENIENCE = {"shop": "convenience"}
     SHOP_SUPERMARKET = {"shop": "supermarket"}
@@ -16,6 +17,7 @@ class Categories(Enum):
     SHOP_TRAVEL = {"shop": "travel_agency"}
     SHOP_CAR = {"shop": "car"}
     SHOP_WHOLESALE = {"shop": "wholesale"}
+    SHOP_CHARITY = {"shop": "charity"}
 
     CAR_REPAIR = {"shop": "car_repair"}
     FUNERAL_DIRECTORS = {"shop": "funeral_directors"}

@@ -57,11 +57,7 @@ class IntermarcheSpider(scrapy.Spider):
                         oh.add_range(DAYS[i], rules["startHours"], rules["endHours"])
             item["opening_hours"] = oh.as_opening_hours()
 
-            item["extras"] = {
-                "atm": yes_or_no(
-                    any(s["code"] == "dis" for s in place["ecommerce"]["services"])
-                )
-            }
+            item["extras"] = {"atm": yes_or_no(any(s["code"] == "dis" for s in place["ecommerce"]["services"]))}
 
             if place.get("modelLabel") in [
                 "SUPER ALIMENTAIRE",

@@ -32,14 +32,10 @@ class HannafordSpider(scrapy.Spider):
         storeid = [x.strip('t.id = "').strip('"') for x in storeid]
         lat_lon = list(zip(storeid, lat, lon))
 
-        stores = response.xpath(
-            '//*[@id="pageContentWrapperInner"]//descendant::*/a[2]/@href'
-        ).extract()
+        stores = response.xpath('//*[@id="pageContentWrapperInner"]//descendant::*/a[2]/@href').extract()
         for store in stores:
             store = base_url + store
-            yield scrapy.Request(
-                store, callback=self.parse_store, meta={"lat_lon": lat_lon}
-            )
+            yield scrapy.Request(store, callback=self.parse_store, meta={"lat_lon": lat_lon})
 
     def combine_hours(self, hours):
         days = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"]
@@ -101,24 +97,12 @@ class HannafordSpider(scrapy.Spider):
         postcode = cty_st_zip.split("-")[1]
         addr_full = "{}{},{} {}".format(street, city, state, postcode)
 
-        phone = (
-            response.xpath('//div[@class="storeContact"]/p[2]/text()')
-            .extract_first()
-            .split("\xa0")[1]
-        )
-        name = (
-            response.xpath('//h1[@style="display:block;"]/text()')
-            .extract_first()
-            .split(" to ")[1]
-        )
-        website = response.xpath(
-            '//div[@class="storeContact"]/descendant::*/a/@href'
-        ).extract_first()
+        phone = response.xpath('//div[@class="storeContact"]/p[2]/text()').extract_first().split("\xa0")[1]
+        name = response.xpath('//h1[@style="display:block;"]/text()').extract_first().split(" to ")[1]
+        website = response.xpath('//div[@class="storeContact"]/descendant::*/a/@href').extract_first()
         if not website:
             website = response.url
-        hours = response.xpath(
-            '//div[@class="storeHours"]/div/p/descendant::*/text()'
-        ).extract()
+        hours = response.xpath('//div[@class="storeHours"]/div/p/descendant::*/text()').extract()
 
         opening_hours = self.combine_hours(hours)
 

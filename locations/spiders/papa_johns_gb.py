@@ -12,9 +12,7 @@ class PapaJohnsGBSpider(SitemapSpider, StructuredDataSpider):
         "country": "GB",
     }
     sitemap_urls = ["https://www.papajohns.co.uk/sitemap.xml"]
-    sitemap_rules = [
-        (r"https:\/\/www\.papajohns\.co\.uk\/stores\/(.+)\/home\.aspx$", "parse_sd")
-    ]
+    sitemap_rules = [(r"https:\/\/www\.papajohns\.co\.uk\/stores\/(.+)\/home\.aspx$", "parse_sd")]
     wanted_types = ["LocalBusiness"]
 
     def inspect_item(self, item, response):

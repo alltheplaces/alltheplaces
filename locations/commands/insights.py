@@ -28,9 +28,7 @@ def iter_features(files_and_dirs):
                 file_list.append(os.path.abspath(os.path.join(file_or_dir, file_name)))
         else:
             raise UsageError("no such file or directory: " + file_or_dir)
-    file_list = list(
-        filter(lambda f: f.endswith("json") and os.path.getsize(f) > 0, file_list)
-    )
+    file_list = list(filter(lambda f: f.endswith("json") and os.path.getsize(f) > 0, file_list))
     if len(file_list) == 0:
         raise UsageError("no non-empty JSON files found")
     for file_path in file_list:

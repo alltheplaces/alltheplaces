@@ -12,10 +12,7 @@ class DmSpider(scrapy.Spider):
     name = "dm"
     item_attributes = {"brand": "dm", "brand_wikidata": "Q266572"}
     allowed_domains = ["store-data-service.services.dmtech.com"]
-    start_urls = [
-        "https://store-data-service.services.dmtech.com/stores/bbox/"
-        "85.999%2C-179.999%2C-89.999%2C179.999"
-    ]
+    start_urls = ["https://store-data-service.services.dmtech.com/stores/bbox/" "85.999%2C-179.999%2C-89.999%2C179.999"]
     download_delay = 0.2
 
     def parse_hours(self, store_hours):
@@ -30,9 +27,7 @@ class DmSpider(scrapy.Spider):
 
             if open_time is None and close_time is None:
                 continue
-            opening_hours.add_range(
-                day=day, open_time=open_time, close_time=close_time, time_format="%H:%M"
-            )
+            opening_hours.add_range(day=day, open_time=open_time, close_time=close_time, time_format="%H:%M")
 
         return opening_hours.as_opening_hours()
 

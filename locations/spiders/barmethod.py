@@ -1,3 +1,5 @@
+import re
+
 import scrapy
 
 from locations.items import GeojsonPointItem
@@ -18,27 +20,42 @@ class BarMethodSpider(scrapy.Spider):
                 callback=self.parse_store,
             )
 
+    def decodeEmail(self, protectedEmail):
+        decode = ""
+        k = int(protectedEmail[:2], 16)
+
+        for i in range(2, len(protectedEmail) - 1, 2):
+            decode += chr(int(protectedEmail[i : i + 2], 16) ^ k)
+
+        return decode
+
     def parse_store(self, response):
 
+        infos = response.xpath("string(/html/body/div[2]/div/main/article/div[1]/div[2]/div/div/div[2])").get()
+        address_full = infos.split("\n")[0]
+        address = infos.split("\n")[1]
+        state = re.findall("[A-Z]{2}", address)[0]
+        postcode = re.findall("[0-9]{5}|[A-Z0-9]{3} [A-Z0-9]{3}", address)[0]
+        city = address.replace(state, "").replace(postcode, "").strip().replace(",", "")
+
+        name = response.xpath('//h1[@class="x-text-content-text-primary"]/text()').get()
+        phone = response.xpath('//a[@class="studio-contact-phone"]/text()').get()
+        facebook = response.xpath('//a[contains(@href, "facebook")]/@href').get()
+        ref = response.request.url.replace(self.start_urls[0], "_")
+        email = self.decodeEmail(
+            response.xpath('//a[@class="studio-contact-email"]/@href').get().replace("/cdn-cgi/l/email-protection#", "")
+        )
+
         properties = {
-            "name": response.xpath('//h2[@class="mtn"]/text()').extract_first(),
-            "ref": response.xpath('//h2[@class="mtn"]/text()').extract_first(),
-            "addr_full": response.xpath("//address/text()").extract_first().strip(),
-            "city": response.xpath("//address/text()")
-            .extract()[1]
-            .strip()
-            .split(",")[0],
-            "state": response.xpath("//address/text()")
-            .extract()[1]
-            .strip()
-            .split()[-2],
-            "postcode": response.xpath("//address/text()")
-            .extract()[1]
-            .strip()
-            .split()[-1],
-            "phone": response.xpath(
-                '//span[@id="phone-number"]/text()'
-            ).extract_first(),
+            "name": name,
+            "ref": ref,
+            "addr_full": address_full,
+            "city": city,
+            "state": state,
+            "postcode": postcode,
+            "phone": phone,
+            "email": email,
+            "facebook": facebook,
             "website": response.request.url,
         }
 

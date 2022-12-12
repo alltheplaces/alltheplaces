@@ -33,19 +33,13 @@ class McCoysSpider(scrapy.Spider):
     def parse_store(self, response):
         properties = response.meta["properties"]
 
-        address1, address2 = response.xpath(
-            '//a[contains(@href, "maps")]/text()'
-        ).extract()
-        city, state, zipcode = re.search(
-            r"^(.*),\s+([a-z]{2})\s+([0-9]{5})$", address2.strip(), re.IGNORECASE
-        ).groups()
+        address1, address2 = response.xpath('//a[contains(@href, "maps")]/text()').extract()
+        city, state, zipcode = re.search(r"^(.*),\s+([a-z]{2})\s+([0-9]{5})$", address2.strip(), re.IGNORECASE).groups()
 
         properties.update(
             {
                 "addr_full": address1.strip(),
-                "phone": response.xpath(
-                    '//div[contains(text(), "Call")]/span/text()'
-                ).extract_first(),
+                "phone": response.xpath('//div[contains(text(), "Call")]/span/text()').extract_first(),
                 "city": city,
                 "state": state,
                 "postcode": zipcode,
@@ -54,9 +48,7 @@ class McCoysSpider(scrapy.Spider):
             }
         )
 
-        hours = response.xpath(
-            '//div[contains(text(), "Store Hours")]/following-sibling::table//td/text()'
-        ).extract()
+        hours = response.xpath('//div[contains(text(), "Store Hours")]/following-sibling::table//td/text()').extract()
         opening_hours = self.parse_hours(hours)
         if hours:
             properties["opening_hours"] = opening_hours
@@ -70,13 +62,9 @@ class McCoysSpider(scrapy.Spider):
             properties = {
                 "lat": float(store.xpath("./@data-lat").extract_first()),
                 "lon": float(store.xpath("./@data-long").extract_first()),
-                "name": store.xpath('.//div[@class="mc-bold-text"]/text()')
-                .extract_first()
-                .strip(),
+                "name": store.xpath('.//div[@class="mc-bold-text"]/text()').extract_first().strip(),
             }
-            url = store.xpath(
-                './/a[contains(text(), "Store Information")]/@href'
-            ).extract_first()
+            url = store.xpath('.//a[contains(text(), "Store Information")]/@href').extract_first()
 
             yield scrapy.Request(
                 response.urljoin(url),

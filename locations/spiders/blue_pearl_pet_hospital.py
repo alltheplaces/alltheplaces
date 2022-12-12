@@ -18,21 +18,13 @@ class BluePearlPetHospitalSpider(scrapy.Spider):
         for url in response.xpath("//url/loc/text()").extract():
             if url == "https://bluepearlvet.com/hospital/":
                 pass
-            elif (
-                "our-vets" in url
-                or "referring-vets" in url
-                or "specialties-services" in url
-            ):
+            elif "our-vets" in url or "referring-vets" in url or "specialties-services" in url:
                 pass
             else:
                 yield scrapy.Request(url, callback=self.parse_store)
 
     def parse_store(self, response):
-        data = json.loads(
-            response.xpath(
-                '//*/script[@type="application/ld+json"]/text()'
-            ).extract_first()
-        )
+        data = json.loads(response.xpath('//*/script[@type="application/ld+json"]/text()').extract_first())
 
         if data["address"]["addressLocality"] == "":
             pass

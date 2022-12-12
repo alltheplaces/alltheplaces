@@ -71,9 +71,7 @@ class WoodsCoffeeSpider(scrapy.Spider):
                     )
                 ),
                 city=store["city"],
-                street_address=", ".join(
-                    filter(None, [store["address_line_1"], store["address_line_2"]])
-                ),
+                street_address=", ".join(filter(None, [store["address_line_1"], store["address_line_2"]])),
                 state=store["state"],
                 postcode=store["postal_code"],
                 phone=store["phone"],

@@ -45,13 +45,7 @@ class VisionWorksSpider(scrapy.Spider):
             # let's bypass that with requests to their api instead
             base_url = URL
             path_components = location_url.split("/")
-            address = (
-                path_components[-1]
-                .replace("+~", "&")
-                .replace("-", " ")
-                .replace("~", "-")
-                .replace("_", ".")
-            )
+            address = path_components[-1].replace("+~", "&").replace("-", " ").replace("~", "-").replace("_", ".")
             locality = path_components[-2].replace("-", " ").replace("~", "-")
             state = path_components[-3]
 
@@ -74,10 +68,6 @@ class VisionWorksSpider(scrapy.Spider):
                 "multi_account": "true",
             }
 
-            url = base_url + urlencode(params).replace("%2A", ",").replace(
-                "-%23E201", ""
-            )
+            url = base_url + urlencode(params).replace("%2A", ",").replace("-%23E201", "")
 
-            yield scrapy.http.Request(
-                url=url, headers=headers, callback=self.parse_store
-            )
+            yield scrapy.http.Request(url=url, headers=headers, callback=self.parse_store)

@@ -24,9 +24,7 @@ class NordstromSpider(scrapy.Spider):
             item["street_address"] = store.get("address")
             item["addr_full"] = None
 
-            item["website"] = "https://www.nordstrom.com/store-details/" + store.get(
-                "path"
-            )
+            item["website"] = "https://www.nordstrom.com/store-details/" + store.get("path")
 
             item["extras"] = {}
             item["extras"]["type"] = store.get("type")

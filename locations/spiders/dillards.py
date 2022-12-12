@@ -20,17 +20,11 @@ class DillardsSpider(SitemapSpider):
         if "Access Denied" in response.text:
             return get_retry_request(response.request, spider=self, reason="throttle")
 
-        ldjson = response.xpath(
-            '//script[@type="application/ld+json"]/text()[contains(.,"DepartmentStore")]'
-        ).get()
+        ldjson = response.xpath('//script[@type="application/ld+json"]/text()[contains(.,"DepartmentStore")]').get()
         data = json.loads(ldjson)
 
-        script = response.xpath(
-            '//script/text()[contains(.,"__INITIAL_STATE__")]'
-        ).get()
-        script_data = json.decoder.JSONDecoder().raw_decode(script, script.index("{"))[
-            0
-        ]
+        script = response.xpath('//script/text()[contains(.,"__INITIAL_STATE__")]').get()
+        script_data = json.decoder.JSONDecoder().raw_decode(script, script.index("{"))[0]
         lat = script_data["contentData"]["store"]["latitude"]
         lon = script_data["contentData"]["store"]["longitude"]
 

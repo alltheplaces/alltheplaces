@@ -10,8 +10,6 @@ class BelkSpider(CrawlSpider, StructuredDataSpider):
     allowed_domains = ["www.belk.com"]
     download_delay = 0.2
     start_urls = ["https://www.belk.com/customer-service/store-directory/"]
-    rules = [
-        Rule(LinkExtractor(allow=r"\/store\/.+\/?StoreID=\d+$"), callback="parse_sd")
-    ]
+    rules = [Rule(LinkExtractor(allow=r"\/store\/.+\/?StoreID=\d+$"), callback="parse_sd")]
     # source JSON is malformed, use json5
     parse_json_comments = True

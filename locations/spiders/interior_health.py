@@ -15,26 +15,16 @@ class InteriorHealthSpider(scrapy.Spider):
     download_delay = 0.3
 
     def parse(self, response):
-        search_url = (
-            "https://www.interiorhealth.ca/FindUs/_layouts/FindUs/By.aspx?type=Location"
-        )
+        search_url = "https://www.interiorhealth.ca/FindUs/_layouts/FindUs/By.aspx?type=Location"
         yield scrapy.Request(url=search_url, callback=self.parse_location_search)
 
     def parse_location_search(self, response):
         # Get the view state
-        view_state = response.xpath(
-            '//input[@name="__VIEWSTATE"]/@value'
-        ).extract_first()
-        request_digest = response.xpath(
-            '//input[@name="__REQUESTDIGEST"]/@value'
-        ).extract_first()
-        event_validation = response.xpath(
-            '//input[@name="__EVENTVALIDATION"]/@value'
-        ).extract_first()
+        view_state = response.xpath('//input[@name="__VIEWSTATE"]/@value').extract_first()
+        request_digest = response.xpath('//input[@name="__REQUESTDIGEST"]/@value').extract_first()
+        event_validation = response.xpath('//input[@name="__EVENTVALIDATION"]/@value').extract_first()
 
-        url = (
-            "https://www.interiorhealth.ca/FindUs/_layouts/FindUs/By.aspx?type=Location"
-        )
+        url = "https://www.interiorhealth.ca/FindUs/_layouts/FindUs/By.aspx?type=Location"
 
         headers = {
             "Connection": "keep-alive",
@@ -96,26 +86,18 @@ class InteriorHealthSpider(scrapy.Spider):
     def parse_location_list(self, response):
         location_urls = response.xpath('//td[@class="alt"]/a/@href').extract()
         for location_url in location_urls:
-            yield scrapy.Request(
-                response.urljoin(location_url), callback=self.parse_location
-            )
+            yield scrapy.Request(response.urljoin(location_url), callback=self.parse_location)
 
     def parse_location(self, response):
         ref = re.search(r".+/(.+?)/?(?:\.html|$)", response.url).group(1)
-        state_postal = response.xpath(
-            '(//td[@class="content"]/label/text())[4]'
-        ).extract_first()
+        state_postal = response.xpath('(//td[@class="content"]/label/text())[4]').extract_first()
         state, postal = state_postal.split(" ", 1)
 
         properties = {
             "ref": ref,
             "name": response.xpath('//span[@class="heading1"]/text()').extract_first(),
-            "addr_full": response.xpath(
-                '(//td[@class="content"]/label/text())[2]'
-            ).extract_first(),
-            "city": response.xpath('(//td[@class="content"]/label/text())[3]')
-            .extract_first()
-            .strip(", "),
+            "addr_full": response.xpath('(//td[@class="content"]/label/text())[2]').extract_first(),
+            "city": response.xpath('(//td[@class="content"]/label/text())[3]').extract_first().strip(", "),
             "state": state,
             "postcode": postal,
             "country": "CA",

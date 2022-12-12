@@ -9,9 +9,7 @@ class PizzaHutGB(SitemapSpider, StructuredDataSpider):
     item_attributes = {"brand": "Pizza Hut", "brand_wikidata": "Q191615"}
     PIZZA_HUT_DELIVERY = {"brand": "Pizza Hut Delivery", "brand_wikidata": "Q107293079"}
     sitemap_urls = ["https://www.pizzahut.co.uk/sitemap.xml"]
-    sitemap_rules = [
-        (r"https:\/\/www\.pizzahut\.co\.uk\/huts\/[-\w]+\/([-.\w]+)\/$", "parse_sd")
-    ]
+    sitemap_rules = [(r"https:\/\/www\.pizzahut\.co\.uk\/huts\/[-\w]+\/([-.\w]+)\/$", "parse_sd")]
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["street_address"] = clean_address(item["street_address"])

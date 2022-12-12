@@ -15,9 +15,7 @@ class HabitBurgerSpider(scrapy.Spider):
 
         for region in regions:
             region_body = response.xpath(
-                '//h2[@id = "{region}"]/following-sibling::ul[@class = "reglist"]'.format(
-                    region=region
-                )
+                '//h2[@id = "{region}"]/following-sibling::ul[@class = "reglist"]'.format(region=region)
             ).get()
             pois = Selector(text=region_body).css(".loc").extract()
 
@@ -28,23 +26,14 @@ class HabitBurgerSpider(scrapy.Spider):
                     name = Selector(text=poi).xpath("//h3/text()").extract()
                 name = "".join(name)
 
-                map_link = (
-                    Selector(text=poi)
-                    .xpath('//div[@class = "locaddress"]/a')
-                    .xpath("@href")
-                    .extract_first()
-                )
+                map_link = Selector(text=poi).xpath('//div[@class = "locaddress"]/a').xpath("@href").extract_first()
                 lat, long = None, None
                 if "daddr" in map_link:
                     coords = map_link.split("daddr=")[1].split(",")
                     lat = coords[0]
                     long = coords[1]
 
-                addr = (
-                    Selector(text=poi)
-                    .xpath('//div[@class = "locaddress"]/a')
-                    .extract_first()
-                )
+                addr = Selector(text=poi).xpath('//div[@class = "locaddress"]/a').extract_first()
                 addr = Selector(text=addr).xpath("//a/text()").extract()
                 addr = [a.strip() for a in addr]
 
@@ -67,13 +56,9 @@ class HabitBurgerSpider(scrapy.Spider):
 
                 phone = Selector(text=poi).xpath('//div[@class="locinfo"]/text()').get()
                 phone = phone.strip() if phone else None
-                opening_hours = (
-                    Selector(text=poi).xpath('//div[@class="lochrs"]/text()').extract()
-                )
+                opening_hours = Selector(text=poi).xpath('//div[@class="lochrs"]/text()').extract()
                 opening_hours = opening_hours = (
-                    ", ".join([hours.strip() for hours in opening_hours])
-                    if opening_hours
-                    else None
+                    ", ".join([hours.strip() for hours in opening_hours]) if opening_hours else None
                 )
 
                 properties = {

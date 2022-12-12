@@ -9,9 +9,7 @@ class CostaCoffeeIESpider(scrapy.Spider):
     item_attributes = {"brand": "Costa Coffee", "brand_wikidata": "Q608845"}
     allowed_domains = ["costaireland.ie"]
     # May need to do pagination at some point
-    start_urls = [
-        "https://www.costaireland.ie/api/cf/?content_type=storeLocatorStore&limit=1000"
-    ]
+    start_urls = ["https://www.costaireland.ie/api/cf/?content_type=storeLocatorStore&limit=1000"]
 
     def parse(self, response):
         for store_data in response.json()["items"]:

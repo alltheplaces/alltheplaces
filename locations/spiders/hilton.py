@@ -43,9 +43,7 @@ class HiltonSpider(scrapy.spiders.SitemapSpider, StructuredDataSpider):
             if x.url.endswith(".xml"):
                 yield x
             elif x.url.endswith("/hotel-info/"):
-                yield scrapy.Request(
-                    x.url.replace("/hotel-info/", "/"), callback=self.parse_sd
-                )
+                yield scrapy.Request(x.url.replace("/hotel-info/", "/"), callback=self.parse_sd)
 
     def lookup_brand(self, response):
         if "-dt-doubletree-" in response.url:

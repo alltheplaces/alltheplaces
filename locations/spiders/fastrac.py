@@ -21,8 +21,6 @@ class FastracSpider(scrapy.Spider):
                 "city": row.xpath('.//*[@class="city"]/text()').get(),
                 "state": row.xpath('.//*[@class="state"]/text()').get(),
                 "postcode": row.xpath('.//*[@class="zip"]/text()').get(),
-                "opening_hours": row.xpath(
-                    './/*[@class="store-info"]//li[1]/text()'
-                ).get(),
+                "opening_hours": row.xpath('.//*[@class="store-info"]//li[1]/text()').get(),
             }
             yield GeojsonPointItem(**properties)

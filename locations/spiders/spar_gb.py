@@ -13,9 +13,7 @@ class SparGBSpider(scrapy.Spider):
     def start_requests(self):
         for record in postal_regions("GB"):
             yield scrapy.Request(
-                "https://www.spar.co.uk/umbraco/api/storelocationapi/stores?location={}".format(
-                    record["postal_region"]
-                )
+                "https://www.spar.co.uk/umbraco/api/storelocationapi/stores?location={}".format(record["postal_region"])
             )
 
     def parse(self, response):

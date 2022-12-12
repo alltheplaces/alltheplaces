@@ -11,9 +11,7 @@ class PrimarkGBSpider(SitemapSpider):
     item_attributes = {"brand": "Primark", "brand_wikidata": "Q137023"}
     allowed_domains = ["primark.com"]
     sitemap_urls = ["https://www.primark.com/en-gb/sitemap/sitemap-store-locator.xml"]
-    sitemap_rules = [
-        (r"https:\/\/www\.primark\.com\/en-gb\/stores\/[-\w]+\/.+$", "parse")
-    ]
+    sitemap_rules = [(r"https:\/\/www\.primark\.com\/en-gb\/stores\/[-\w]+\/.+$", "parse")]
 
     def parse(self, response):
         data = json.loads(response.xpath('//script[@id="__NEXT_DATA__"]/text()').get())
@@ -24,9 +22,7 @@ class PrimarkGBSpider(SitemapSpider):
         item["lat"] = store["displayCoordinate"]["latitude"]
         item["lon"] = store["displayCoordinate"]["longitude"]
         item["name"] = " ".join([store["name"], store["geomodifier"]])
-        item["street_address"] = ", ".join(
-            filter(None, [store["address"]["line1"], store["address"]["line2"]])
-        )
+        item["street_address"] = ", ".join(filter(None, [store["address"]["line1"], store["address"]["line2"]]))
         item["city"] = store["address"]["city"]
         item["postcode"] = store["address"]["postalCode"]
         item["country"] = store["address"]["countryCode"]

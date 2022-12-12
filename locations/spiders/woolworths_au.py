@@ -19,9 +19,7 @@ class WoolworthsAUSpider(scrapy.Spider):
             if not i["IsOpen"]:
                 continue
 
-            i["street_address"] = ", ".join(
-                filter(None, [i["AddressLine1"], i["AddressLine2"]])
-            )
+            i["street_address"] = ", ".join(filter(None, [i["AddressLine1"], i["AddressLine2"]]))
             i["ref"] = i.pop("StoreNo")
             i["city"] = i.pop("Suburb")
 
@@ -29,9 +27,7 @@ class WoolworthsAUSpider(scrapy.Spider):
 
             item["website"] = (
                 "https://www.woolworths.com.au/shop/storelocator/"
-                + "-".join(
-                    [item["state"], item["city"], item["ref"], i["Division"]]
-                ).lower()
+                + "-".join([item["state"], item["city"], item["ref"], i["Division"]]).lower()
             )
 
             # TODO: types needs some work, NSI seems out of date too

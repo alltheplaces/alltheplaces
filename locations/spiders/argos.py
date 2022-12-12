@@ -38,12 +38,7 @@ class ArgosSpider(SitemapSpider):
         oh = OpeningHours()
         for item in json_data["store"]["store"]["storeTimes"]:
             open_time, close_time = item["time"].split(" - ")
-            if (
-                open_time
-                and not open_time.isspace()
-                and close_time
-                and not close_time.isspace()
-            ):
+            if open_time and not open_time.isspace() and close_time and not close_time.isspace():
                 oh.add_range(item["date"][:2], open_time, close_time)
 
         properties["opening_hours"] = oh.as_opening_hours()

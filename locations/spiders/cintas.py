@@ -22,9 +22,7 @@ class CintasSpider(scrapy.Spider):
     def parse_state(self, response):
         facilityurls = response.xpath('//ul[@id="accordion"]//a/@href').extract()
         for facilityurl in facilityurls:
-            yield scrapy.Request(
-                response.urljoin(facilityurl), callback=self.parse_store
-            )
+            yield scrapy.Request(response.urljoin(facilityurl), callback=self.parse_store)
 
     def parse_store(self, response):
         try:
@@ -41,9 +39,7 @@ class CintasSpider(scrapy.Spider):
                 + data["address"]["addressRegion"]
             )
 
-            storeurl = "https://www.cintas.com/sitefinity/public/services/locationfinder.svc/search/{}/25".format(
-                store
-            )
+            storeurl = "https://www.cintas.com/sitefinity/public/services/locationfinder.svc/search/{}/25".format(store)
             yield scrapy.Request(response.urljoin(storeurl), callback=self.parse_loc)
         except:
             pass

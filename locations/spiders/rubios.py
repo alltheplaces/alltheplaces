@@ -25,36 +25,18 @@ class RubiosSpider(scrapy.Spider):
     def parse_store(self, response):
 
         properties = {
-            "name": response.xpath(
-                '//meta[@property="og:title"]/@content'
-            ).extract_first(),
+            "name": response.xpath('//meta[@property="og:title"]/@content').extract_first(),
             "ref": response.url,
-            "addr_full": response.xpath(
-                '//meta[@property="og:street_address"]/@content'
-            ).extract_first(),
-            "city": response.xpath(
-                '//meta[@property="og:locality"]/@content'
-            ).extract_first(),
-            "state": response.xpath(
-                '//meta[@property="og:region"]/@content'
-            ).extract_first(),
-            "postcode": response.xpath(
-                '//meta[@property="og:postal_code"]/@content'
-            ).extract_first(),
-            "country": response.xpath(
-                '//meta[@property="og:country_name"]/@content'
-            ).extract_first(),
-            "phone": response.xpath('//@href[contains(.,"tel:")]')
-            .extract_first()
-            .replace("tel:", ""),
+            "addr_full": response.xpath('//meta[@property="og:street_address"]/@content').extract_first(),
+            "city": response.xpath('//meta[@property="og:locality"]/@content').extract_first(),
+            "state": response.xpath('//meta[@property="og:region"]/@content').extract_first(),
+            "postcode": response.xpath('//meta[@property="og:postal_code"]/@content').extract_first(),
+            "country": response.xpath('//meta[@property="og:country_name"]/@content').extract_first(),
+            "phone": response.xpath('//@href[contains(.,"tel:")]').extract_first().replace("tel:", ""),
             "website": response.url,
             "opening_hours": "".join(response.css(".oh-wrapper ::text").extract()),
-            "lon": response.xpath(
-                '//meta[@property="og:longitude"]/@content'
-            ).extract_first(),
-            "lat": response.xpath(
-                '//meta[@property="og:latitude"]/@content'
-            ).extract_first(),
+            "lon": response.xpath('//meta[@property="og:longitude"]/@content').extract_first(),
+            "lat": response.xpath('//meta[@property="og:latitude"]/@content').extract_first(),
         }
 
         yield GeojsonPointItem(**properties)

@@ -17,9 +17,7 @@ class CoxHealthSpider(scrapy.Spider):
 
     def parse_loc(self, response):
         name = response.xpath('//h2[@class="section-title"]/text()').extract_first()
-        address = response.xpath(
-            '//div[@class="default-x-spacing reg-background module-card-new"]//p/text()'
-        ).extract()
+        address = response.xpath('//div[@class="default-x-spacing reg-background module-card-new"]//p/text()').extract()
         x = response.xpath('//div[@class="map"]').extract()
         xy = x[0].split('"')
         address = " ".join(address)

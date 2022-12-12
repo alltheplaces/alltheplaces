@@ -11,9 +11,7 @@ class BelhavenPubsSpider(SitemapSpider):
         "country": "GB",
     }
     sitemap_urls = ["https://www.belhavenpubs.co.uk/xml-sitemap"]
-    sitemap_rules = [
-        (r"https:\/\/www\.belhavenpubs\.co\.uk\/pubs\/([-\w]+)\/([-\w]+)\/$", "parse")
-    ]
+    sitemap_rules = [(r"https:\/\/www\.belhavenpubs\.co\.uk\/pubs\/([-\w]+)\/([-\w]+)\/$", "parse")]
 
     def parse(self, response):
         yield LinkedDataParser.parse(response, "BarOrPub")

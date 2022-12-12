@@ -75,9 +75,7 @@ class JambaJuiceSpider(scrapy.Spider):
             if day["from_day"] == day["to_day"]:
                 osm_hours = "{} {}".format(day["from_day"], day["hours"])
             else:
-                osm_hours = "{}-{} {}".format(
-                    day["from_day"], day["to_day"], day["hours"]
-                )
+                osm_hours = "{}-{} {}".format(day["from_day"], day["to_day"], day["hours"])
 
             opening_hours.append(osm_hours)
 
@@ -97,9 +95,7 @@ class JambaJuiceSpider(scrapy.Spider):
 
             props["opening_hours"] = self.parse_hours(store_info.get("store_hours", ""))
 
-            props["addr_full"] = ", ".join(
-                [store_info["address"], store_info.get("address_extended", "")]
-            )
+            props["addr_full"] = ", ".join([store_info["address"], store_info.get("address_extended", "")])
 
             sieve_out = ["website", "phone", "postcode", "country"]
 

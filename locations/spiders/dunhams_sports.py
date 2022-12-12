@@ -62,40 +62,21 @@ class DunhamsSportsSpider(scrapy.Spider):
 
     def parse(self, response):
         for match in response.xpath("//markers/marker"):
-            fullAddress = (
-                match.xpath(".//@address").extract_first().replace("<br>", ", ")
-            )
+            fullAddress = match.xpath(".//@address").extract_first().replace("<br>", ", ")
             addrString = fullAddress.split(",")[0].strip()
             refString = addrString.replace(" ", "_")
 
-            stateString = fullAddress.split(" ")[
-                len(fullAddress.split(" ")) - 2
-            ].strip()
+            stateString = fullAddress.split(" ")[len(fullAddress.split(" ")) - 2].strip()
             postString = fullAddress.split(" ")[len(fullAddress.split(" ")) - 1].strip()
 
             if len(addrString.split(" - ")) > 1:
                 name = addrString.split(" - ")[0].strip()
                 addrString = addrString.split(" - ")[1].strip()
 
-            hoursMonString = self.store_hours(
-                match.xpath(".//@hours_mon").extract_first().strip()
-            )
-            hoursSatString = self.store_hours(
-                match.xpath(".//@hours_sat").extract_first().strip()
-            )
-            hoursSunString = self.store_hours(
-                match.xpath(".//@hours_sun").extract_first().strip()
-            )
-            allHours = (
-                "Mo-Fr "
-                + hoursMonString
-                + "; "
-                + "Sa "
-                + hoursSatString
-                + "; "
-                + "Su "
-                + hoursSunString
-            )
+            hoursMonString = self.store_hours(match.xpath(".//@hours_mon").extract_first().strip())
+            hoursSatString = self.store_hours(match.xpath(".//@hours_sat").extract_first().strip())
+            hoursSunString = self.store_hours(match.xpath(".//@hours_sun").extract_first().strip())
+            allHours = "Mo-Fr " + hoursMonString + "; " + "Sa " + hoursSatString + "; " + "Su " + hoursSunString
 
             yield GeojsonPointItem(
                 ref=refString,

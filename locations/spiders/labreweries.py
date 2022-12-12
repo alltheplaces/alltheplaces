@@ -91,12 +91,8 @@ class LaBreweriesSpider(scrapy.Spider):
     def parse_store(self, response):
 
         properties = {
-            "website": response.xpath(
-                '//head/link[@rel="canonical"]/@href'
-            ).extract_first(),
-            "ref": str(
-                response.xpath("/html/body/div[1]/div[1]/header/h1/text()").extract()
-            ).strip("['']"),
+            "website": response.xpath('//head/link[@rel="canonical"]/@href').extract_first(),
+            "ref": str(response.xpath("/html/body/div[1]/div[1]/header/h1/text()").extract()).strip("['']"),
             "opening_hours": re.sub(
                 r"\s+",
                 " ",
@@ -113,9 +109,7 @@ class LaBreweriesSpider(scrapy.Spider):
             # 'lat': float(data['geo']['latitude']),    # not lat on page
         }
 
-        address = self.address(
-            response.xpath("/html/body/div[1]/div[1]/aside/address/text()").extract()
-        )
+        address = self.address(response.xpath("/html/body/div[1]/div[1]/aside/address/text()").extract())
         if address:
             properties.update(address)
 

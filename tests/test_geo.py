@@ -1,4 +1,4 @@
-from locations.geo import point_locations, city_locations, postal_regions
+from locations.geo import city_locations, point_locations, postal_regions
 
 
 def test_point_locations():

@@ -57,11 +57,7 @@ class BigWSpider(scrapy.Spider):
         )
 
     def parse_store(self, response):
-        store_name = (
-            response.xpath("//h1[@class='blue']/strong/text()")
-            .get()
-            .replace("BIG W ", "")
-        )
+        store_name = response.xpath("//h1[@class='blue']/strong/text()").get().replace("BIG W ", "")
         hours = self.parse_hours(
             response.xpath(
                 "//div[@id='collapseOne']/div/div/div[contains(@class, 'text-right') and contains(@class, 'col-xs-8')]/text()"

@@ -10,8 +10,6 @@ class ELeclercSpider(WoosmapSpider):
     def parse_item(self, item, feature, **kwargs):
         item["website"] = feature["properties"]["user_properties"].get("urlStore")
         item["extras"] = {
-            "store_type": feature["properties"]["user_properties"]
-            .get("commercialActivity", {})
-            .get("label")
+            "store_type": feature["properties"]["user_properties"].get("commercialActivity", {}).get("label")
         }
         yield item

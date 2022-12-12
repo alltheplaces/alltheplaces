@@ -30,9 +30,7 @@ class ShellSpider(scrapy.Spider):
                         f"https://shellgsllocator.geoapp.me/api/v1/locations/within_bounds?sw%5B%5D={b['sw'][0]}&sw%5B%5D={b['sw'][1]}&ne%5B%5D={b['ne'][0]}&ne%5B%5D={b['ne'][1]}"
                     )
                 elif "name" in item:
-                    yield scrapy.Request(
-                        f"https://shellgsllocator.geoapp.me/api/v1/locations/{item['id']}"
-                    )
+                    yield scrapy.Request(f"https://shellgsllocator.geoapp.me/api/v1/locations/{item['id']}")
         else:
             if result["inactive"]:
                 return
@@ -63,15 +61,11 @@ class ShellSpider(scrapy.Spider):
                     "atm": yes_or_no("atm" in amenities),
                     "car_wash": yes_or_no("carwash" in amenities),
                     "fuel:adblue": yes_or_no(any("adblue" in a for a in amenities)),
-                    "fuel:biodiesel": yes_or_no(
-                        "biodiesel" in fuels or "biofuel_gasoline" in fuels
-                    ),
+                    "fuel:biodiesel": yes_or_no("biodiesel" in fuels or "biofuel_gasoline" in fuels),
                     "fuel:cng": yes_or_no("cng" in fuels),
                     "fuel:diesel": yes_or_no(any("diesel" in f for f in fuels)),
                     "fuel:GTL_diesel": yes_or_no("gtl" in fuels),
-                    "fuel:HGV_diesel": yes_or_no(
-                        "truck_diesel" in fuels or "hgv_lane" in amenities
-                    ),
+                    "fuel:HGV_diesel": yes_or_no("truck_diesel" in fuels or "hgv_lane" in amenities),
                     "fuel:LH2": yes_or_no("hydrogen" in fuels),
                     "fuel:lng": yes_or_no("lng" in fuels),
                     "fuel:lpg": yes_or_no("autogas_lpg" in fuels),
@@ -80,13 +74,10 @@ class ShellSpider(scrapy.Spider):
                     "fuel:octane_92": yes_or_no("low_octane_gasoline" in fuels),
                     # definition of mid-octane varies by country; 95 is most common
                     "fuel:octane_95": yes_or_no(
-                        any("midgrade_gasoline" in f for f in fuels)
-                        or "unleaded_super" in fuels
+                        any("midgrade_gasoline" in f for f in fuels) or "unleaded_super" in fuels
                     ),
                     # the US region seems to also use 'premium_gasoline' to refer to non-diesel gas products
-                    "fuel:octane_98": yes_or_no(
-                        any("98" in f for f in fuels) or "premium_gasoline" in fuels
-                    ),
+                    "fuel:octane_98": yes_or_no(any("98" in f for f in fuels) or "premium_gasoline" in fuels),
                     "fuel:propane": yes_or_no("auto_rv_propane" in fuels),
                     "hgv": yes_or_no("hgv_lane" in amenities),
                     "shop": "convenience" if "shop" in "amenities" else "no",

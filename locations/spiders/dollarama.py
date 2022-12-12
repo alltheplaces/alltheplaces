@@ -18,9 +18,7 @@ class DollaramaSpider(scrapy.Spider):
 
         params = {"distance": "100", "units": "miles"}
 
-        with open(
-            "./locations/searchable_points/ca_centroids_100mile_radius.csv"
-        ) as points:
+        with open("./locations/searchable_points/ca_centroids_100mile_radius.csv") as points:
             next(points)
             for point in points:
                 _, lat, lon = point.strip().split(",")

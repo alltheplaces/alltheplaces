@@ -61,9 +61,7 @@ class CulversSpider(scrapy.Spider):
             properties = {
                 "ref": str(store.xpath("number/text()").extract_first()),
                 "name": store.xpath("name/text()").extract_first(),
-                "opening_hours": self.store_hours(
-                    json.loads(store.xpath("bho/text()").extract_first())
-                ),
+                "opening_hours": self.store_hours(json.loads(store.xpath("bho/text()").extract_first())),
                 "website": store.xpath("url/text()").extract_first(),
                 "addr_full": store.xpath("address1/text()").extract_first(),
                 "city": store.xpath("city/text()").extract_first(),

@@ -25,9 +25,7 @@ class XfinitySpider(scrapy.Spider):
 
     def start_requests(self):
         for state in GeonamesCache().get_us_states() | US_TERRITORIES:
-            yield scrapy.http.Request(
-                url=f"https://api-support.xfinity.com/servicecenters?location={state}"
-            )
+            yield scrapy.http.Request(url=f"https://api-support.xfinity.com/servicecenters?location={state}")
 
     def store_hours(self, store_hours):
         day_groups = []
@@ -35,7 +33,6 @@ class XfinitySpider(scrapy.Spider):
         days = ("Mo", "Tu", "We", "Th", "Fr", "Sa", "Su")
         hours_list = store_hours.split(",")
         for day, day_hours in zip(days, hours_list):
-            hour_intervals = []
             day_hours = day_hours[2:]
             hours = ""
             match = re.search(r"(\d{1,2}:\d{2}):(\d{1,2}:\d{2})", day_hours)
