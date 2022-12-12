@@ -16,4 +16,9 @@ class PopeyesSpider(SitemapSpider, StructuredDataSpider):
                 item["lat"] = loc["latitude"]
                 item["lon"] = loc["longitude"]
 
+        item["street_address"] = response.xpath('//address//span[contains(@class, "Address-line1")]/text()').get()
+        item["city"] = response.xpath('//address//span[contains(@class, "Address-city")]/text()').get()
+        item["state"] = response.xpath('//address//abbr[contains(@class, "Address-region--code")]/text()').get()
+        item["postcode"] = response.xpath('//address//span[contains(@class, "Address-postalCode")]/text()').get()
+
         yield item
