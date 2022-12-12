@@ -38,12 +38,9 @@ class CostaCoffeeIESpider(scrapy.Spider):
 
             opening_hours = OpeningHours()
             for day in DAYS_FULL:
-                if day.lower() + "Opening" in data:
-                    opening_hours.add_range(
-                        day[0:2],
-                        data[day.lower() + "Opening"],
-                        data[day.lower() + "Closing"],
-                    )
+                if open_time := data.get(day.lower() + "Opening"):
+                    if close_time := data.get(day.lower() + "Closing"):
+                        opening_hours.add_range(day, open_time, close_time)
             properties["opening_hours"] = opening_hours.as_opening_hours()
 
             yield GeojsonPointItem(**properties)
