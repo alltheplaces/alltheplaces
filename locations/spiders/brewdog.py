@@ -17,8 +17,8 @@ class BrewdogSpider(scrapy.Spider):
         data = response.xpath('//script[@id="__NEXT_DATA__"]/text()').get()
         data_json = json.loads(data)
         bars = data_json["props"]["pageProps"]["content"]
-        item = GeojsonPointItem()
         for bar in bars:
+            item = GeojsonPointItem()
             item = DictParser.parse(bar["fields"])
             item["ref"] = bar["sys"]["id"]
             openingHours = bar["fields"].get("openingHours")
