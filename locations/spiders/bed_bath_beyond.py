@@ -1,6 +1,8 @@
 import json
 import re
+
 import scrapy
+
 from locations.hours import OpeningHours
 from locations.items import GeojsonPointItem
 
@@ -9,9 +11,7 @@ class BedBathBeyondSpider(scrapy.Spider):
     name = "bed_bath_beyond"
     item_attributes = {"brand": "Bed Bath & Beyond", "brand_wikidata": "Q813782"}
     allowed_domains = ["bedbathandbeyond.com"]
-    start_urls = (
-        "https://www.bedbathandbeyond.com/apis/services/store/v1.0/store/states?site_id=BedBathUS",
-    )
+    start_urls = ("https://www.bedbathandbeyond.com/apis/services/store/v1.0/store/states?site_id=BedBathUS",)
 
     def parse(self, response):
         data = json.loads(response.text)["data"]
@@ -38,12 +38,8 @@ class BedBathBeyondSpider(scrapy.Spider):
             item["lon"] = store["stores"][0]["longitude"]
             item["lat"] = store["stores"][0]["latitude"]
             item["country"] = store["stores"][0]["countryCode"]
-            item[
-                "website"
-            ] = f'https://www.{self.allowed_domains[0]}{store["stores"][0]["storeUrl"].replace(" ", "")}'
-            storeTimings = re.split(
-                ", |,", store["stores"][0]["storeTimings"].strip("\t")
-            )
+            item["website"] = f'https://www.{self.allowed_domains[0]}{store["stores"][0]["storeUrl"].replace(" ", "")}'
+            storeTimings = re.split(", |,", store["stores"][0]["storeTimings"].strip("\t"))
 
             for timing in storeTimings:
                 if timing.split(": ")[1] == "Closed":
