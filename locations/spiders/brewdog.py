@@ -4,6 +4,7 @@ import scrapy
 
 from locations.hours import OpeningHours
 from locations.items import GeojsonPointItem
+from locations.dict_parser import DictParser
 
 
 class BrewdogSpider(scrapy.Spider):
@@ -18,18 +19,13 @@ class BrewdogSpider(scrapy.Spider):
         bars = data_json["props"]["pageProps"]["content"]
         item = GeojsonPointItem()
         for bar in bars:
-            item["ref"] = bar["sys"].get("id")
-            item["name"] = bar["fields"].get("name")
-            item["addr_full"] = bar["fields"].get("address")
-            item["phone"] = bar["fields"].get("contactNumber")
-            item["email"] = bar["fields"].get("contactEmail")
-            item["lat"] = bar["fields"].get("location", {}).get("lat")
-            item["lon"] = bar["fields"].get("location", {}).get("lon")
+            item = DictParser.parse(bar["fields"])
+            item["ref"] = bar["sys"]["id"]
             openingHours = bar["fields"].get("openingHours")
             oh = OpeningHours()
             if openingHours:
                 for key, value in openingHours.items():
-                    if key == "exceptions" or value["is_open"] is False:
+                    if key == "exceptions" or value.get("is_open") is False:
                         continue
                     oh.add_range(
                         day=key,
