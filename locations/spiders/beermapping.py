@@ -1,7 +1,7 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
 from locations.geo import point_locations
+from locations.items import GeojsonPointItem
 
 
 class BeerMappingSpider(scrapy.Spider):
