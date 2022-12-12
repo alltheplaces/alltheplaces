@@ -18,8 +18,8 @@ class BrewdogSpider(scrapy.Spider):
         bars = data_json["props"]["pageProps"]["content"]
         item = GeojsonPointItem()
         for bar in bars:
-            item["ref"] = bar["sys"]["id"]
-            item["name"] = bar["fields"]["name"]
+            item["ref"] = bar["sys"].get("id")
+            item["name"] = bar["fields"].get("name")
             item["addr_full"] = bar["fields"].get("address")
             item["phone"] = bar["fields"].get("contactNumber")
             item["email"] = bar["fields"].get("contactEmail")
@@ -29,7 +29,7 @@ class BrewdogSpider(scrapy.Spider):
             oh = OpeningHours()
             if openingHours:
                 for key, value in openingHours.items():
-                    if key == "exceptions" or value["is_open"] == False:
+                    if key == "exceptions" or value["is_open"] is False:
                         continue
                     oh.add_range(
                         day=key,
