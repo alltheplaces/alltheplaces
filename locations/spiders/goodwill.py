@@ -1,9 +1,10 @@
+import base64
 import csv
-import json
 from urllib.parse import urlencode
 
 import scrapy
 
+from locations.categories import Categories
 from locations.items import GeojsonPointItem
 
 CATEGORY_MAPPING = {
@@ -15,10 +16,20 @@ CATEGORY_MAPPING = {
 }
 
 
+def b64_wrap(obj) -> str:
+    return base64.b64encode(str(obj).encode()).decode()
+
+
 class GoodwillSpider(scrapy.Spider):
     name = "goodwill"
-    item_attributes = {"brand": "Goodwill", "brand_wikidata": "Q5583655"}
+    item_attributes = {
+        "brand": "Goodwill",
+        "brand_wikidata": "Q5583655",
+        "nsi_id": -1,
+        "extras": Categories.SHOP_CHARITY.value,
+    }
     allowed_domains = ["www.goodwill.org"]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
     download_delay = 0.2
 
     def start_requests(self):
@@ -37,21 +48,25 @@ class GoodwillSpider(scrapy.Spider):
                 yield scrapy.Request(url=url)
 
     def parse(self, response):
-        data = json.loads(response.text)
-
-        for store in data:
+        for store in response.json():
             properties = {
                 "name": store["LocationName"],
                 "ref": store["LocationId"],
-                "addr_full": store["LocationStreetAddress1"],
+                "street_address": store["LocationStreetAddress1"],
                 "city": store["LocationCity1"],
                 "state": store["LocationState1"],
                 "postcode": store["LocationPostal1"],
                 "phone": store.get("LocationPhoneOffice"),
                 "lat": store.get("LocationLatitude1"),
                 "lon": store.get("LocationLongitude1"),
+                "website": f'https://www.goodwill.org/locator/location/?store={b64_wrap(store["LocationId"])}&lat={b64_wrap(store["LocationLatitude1"])}&lng={b64_wrap(store["LocationLongitude1"])}',
                 "extras": {
                     "store_categories": store.get("calcd_ServicesOffered"),
+                    "operator": store.get("Name_Parent"),
+                    "operator:website": store.get("LocationParentWebsite"),
+                    "operator:phone": store.get("Phone_Parent"),
+                    "operator:facebook": store.get("LocationParentURLFacebook"),
+                    "operator:twitter": store.get("LocationParentURLTwitter"),
                 },
             }
 
