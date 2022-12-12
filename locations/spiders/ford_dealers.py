@@ -3,8 +3,8 @@ from scrapy.spiders import CrawlSpider, Rule
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class FordDealersSpider(CrawlSpider, StructuredDataSpider):
-    name = "ford_dealers"
+class FordDealersUSSpider(CrawlSpider, StructuredDataSpider):
+    name = "ford_dealers_us"
     item_attributes = {
         "brand": "Ford Motor Company",
         "brand_wikidata": "Q44294",
