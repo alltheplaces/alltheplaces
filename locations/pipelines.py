@@ -289,6 +289,8 @@ class ApplyNSICategoriesPipeline:
                 continue
 
             include = match["locationSet"].get("include", [])
+            # Ignore non string such as: {"include":[[-122.835,45.5,2]]}
+            include = filter(lambda i: isinstance(i, str), include)
             # "gb-eng" -> "gb"
             include = [i.split("-")[0] for i in include]
             if cc in include:

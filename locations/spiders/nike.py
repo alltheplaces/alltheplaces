@@ -2,13 +2,14 @@ import datetime
 
 import scrapy
 
+from locations.categories import Categories
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
 
 class NikeSpider(scrapy.Spider):
     name = "nike"
-    item_attributes = {"brand": "Nike", "brand_wikidata": "Q483915"}
+    item_attributes = {"brand": "Nike", "brand_wikidata": "Q483915", "extras": Categories.SHOP_CLOTHES.value}
     start_urls = ["https://storeviews-cdn.risedomain-prod.nikecloud.com/store-locations-static.json"]
 
     def parse(self, response):
