@@ -15,7 +15,6 @@ class NikeSpider(scrapy.Spider):
     def parse(self, response):
         all_stores = response.json()["stores"]
         for store in all_stores.values():
-            store.update(store.get("coordinates"))
             item = DictParser.parse(store)
 
             days = DictParser.get_nested_key(store, "regularHours")
@@ -47,5 +46,13 @@ class NikeSpider(scrapy.Spider):
             item["opening_hours"] = opening_hours.as_opening_hours()
             item["website"] = "https://www.nike.com/retail/s/" + store["slug"]
             item["image"] = store["imageURL"]
-            item["extras"] = {"store_type": store.get("facilityType")}
+            item["extras"] = {"owner:type": store["facilityType"]}
+            if store["businessConcept"] == "FACTORY":
+                item["brand"] = "Nike Factory Store"
+            elif store["businessConcept"] == "CLEARANCE":
+                item["brand"] = "Nike Clearance Store"
+            elif store["businessConcept"] == "COMMUNITY":
+                item["brand"] = "Nike Community Store"
+            else:
+                item["extras"]["type"] = store["businessConcept"]
             yield item
