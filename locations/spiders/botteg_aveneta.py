@@ -12,6 +12,7 @@ class BottegAvenetaSpider(scrapy.Spider):
     }
     allowed_domains = ["bottegaveneta.com"]
     start_urls = ["https://www.bottegaveneta.com/de-de/storelocator"]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def parse(self, response):
         countries = response.xpath('//select[@id="country"]/option/@value').extract()
