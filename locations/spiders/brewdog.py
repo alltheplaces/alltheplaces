@@ -4,7 +4,6 @@ import scrapy
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
 
 
 class BrewdogSpider(scrapy.Spider):
@@ -18,7 +17,6 @@ class BrewdogSpider(scrapy.Spider):
         data_json = json.loads(data)
         bars = data_json["props"]["pageProps"]["content"]
         for bar in bars:
-            item = GeojsonPointItem()
             item = DictParser.parse(bar["fields"])
             item["ref"] = bar["sys"]["id"]
             openingHours = bar["fields"].get("openingHours")
