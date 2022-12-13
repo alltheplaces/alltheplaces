@@ -2,6 +2,7 @@ import json
 
 from scrapy.spiders import SitemapSpider
 
+from locations.categories import Categories, apply_category
 from locations.hours import DAYS, OpeningHours
 from locations.items import GeojsonPointItem
 
@@ -9,32 +10,25 @@ from locations.items import GeojsonPointItem
 class MigrosCHSpider(SitemapSpider):
     name = "migros_ch"
     brands = {
-        "alna": ("Alnatura", "Q876811", {"shop": "supermarket"}),
-        "chng": ("Migros Change", "Q115659823", {"amenity": "bureau_de_change"}),
-        "cof": (
-            "Migros Café",
-            "Q115661379",
-            {"amenity": "cafe", "cuisine": "coffee_shop"},
-        ),
-        "doi": ("Do It + Garden", "Q108866119", {"shop": "doityourself"}),
-        "flori": ("Florissimo", "Q115659418", {"shop": "florist"}),
-        "gour": ("Migros Take Away", "Q111826610", {"amenity": "fast_food"}),
-        "mec": ("melectronics", "Q110276002", {"shop": "electronics"}),
-        "mica": ("Micasa", "Q1926676", {"shop": "furniture"}),
-        "mno": ("Migrolino", "Q56745088", {"shop": "convenience"}),
-        "mp": ("Migros Partner", "Q115661515", {"shop": "supermarket"}),
-        "obi": ("OBI", "Q300518", {"shop": "doityourself"}),
-        "out": ("Outlet Migros", "Q115659564", {"shop": "supermarket"}),
-        "pickmup_247pmubox": (
-            "PickMup Box",
-            "Q115679275",
-            {"amenity": "product_pickup", "opening_hours": "24/7"},
-        ),
-        "res": ("Migros Restaurant", "Q111803848", {"amenity": "restaurant"}),
-        "super": ("Migros", "Q115661152", {"shop": "supermarket"}),
-        "spx": ("SportXX", "Q19309319", {"shop": "sports"}),
-        "voi": ("VOI", "Q110277616", {"shop": "supermarket"}),
+        "alna": ("Alnatura", "Q876811", Categories.SHOP_SUPERMARKET),
+        "chng": ("Migros Change", "Q115659823", Categories.BUREAU_DE_CHANGE),
+        "cof": ("Migros Café", "Q115661379", Categories.COFFEE_SHOP),
+        "doi": ("Do It + Garden", "Q108866119", Categories.SHOP_DO_IT_YOURSELF),
+        "flori": ("Florissimo", "Q115659418", Categories.SHOP_FLORIST),
+        "gour": ("Migros Take Away", "Q111826610", Categories.FAST_FOOD),
+        "mec": ("melectronics", "Q110276002", Categories.SHOP_ELECTRONICS),
+        "mica": ("Micasa", "Q1926676", Categories.SHOP_FURNITURE),
+        "mno": ("Migrolino", "Q56745088", Categories.SHOP_CONVENIENCE),
+        "mp": ("Migros Partner", "Q115661515", Categories.SHOP_SUPERMARKET),
+        "obi": ("OBI", "Q300518", Categories.SHOP_DO_IT_YOURSELF),
+        "out": ("Outlet Migros", "Q115659564", Categories.SHOP_SUPERMARKET),
+        "pickmup": ("PickMup Box", "Q115679275", Categories.PRODUCT_PICKUP),
+        "res": ("Migros Restaurant", "Q111803848", Categories.RESTAURANT),
+        "super": ("Migros", "Q115661152", Categories.SHOP_SUPERMARKET),
+        "spx": ("SportXX", "Q19309319", Categories.SHOP_SPORTS),
+        "voi": ("VOI", "Q110277616", Categories.SHOP_SUPERMARKET),
     }
+    obsolete_brands = {"mod"}
     allowed_domains = ["filialen.migros.ch"]
     sitemap_urls = ["https://filialen.migros.ch/sitemap.xml"]
     sitemap_follow = ["/de/"]
@@ -49,36 +43,40 @@ class MigrosCHSpider(SitemapSpider):
         for market in store["markets"]:
             if market["slug"] != page_props["initialSlug"]:
                 continue
-            brand, brand_wikidata, brand_extras = self.brands.get(market["type"], (None, None, {}))
+            brand_key = market["type"].split("_")[0]
+            if brand_key not in self.brands:
+                if brand_key not in self.obsolete_brands:
+                    self.logger.error('unknown brand: "%s"' % brand_key)
+                continue
+            brand, brand_wikidata, category = self.brands[brand_key]
             extras = {
                 "start_date": market.get("opening_date"),
                 "end_date": market.get("closing_date"),
             }
-            extras = {k: v for k, v in extras.items() if v}
-            props = {
-                "brand": brand,
-                "brand_wikidata": brand_wikidata,
-                "city": loc["city"],
-                "country": loc["country"],
-                "email": market["email"],
-                "extras": extras,
-                "lat": loc["geo"]["lat"],
-                "lon": loc["geo"]["lon"],
-                "name": brand,
-                "opening_hours": self.parse_opening_hours(market),
-                "phone": market.get("phone"),
-                "postcode": loc.get("zip"),
-                "ref": market["id"],
-                "street_address": loc.get("address"),
-                "website": response.url,
-            }
-            extras.update(brand_extras)
-            if oh := extras.pop("opening_hours", None):
-                props["opening_hours"] = oh
-            yield GeojsonPointItem(**props)
+            item = GeojsonPointItem(
+                brand=brand,
+                brand_wikidata=brand_wikidata,
+                city=loc["city"],
+                country=loc["country"],
+                email=market["email"],
+                extras={k: v for k, v in extras.items() if v},
+                lat=loc["geo"]["lat"],
+                lon=loc["geo"]["lon"],
+                name=brand,
+                opening_hours=self.parse_opening_hours(market),
+                phone=market.get("phone"),
+                postcode=loc.get("zip"),
+                ref=market["id"],
+                street_address=loc.get("address"),
+                website=response.url,
+            )
+            apply_category(category, item)
+            yield item
 
     @staticmethod
     def parse_opening_hours(market):
+        if market["type"] == "pickmup_247pmubox":
+            return "24/7"
         oh = OpeningHours()
         for o in market.get("opening_hours", []):
             if o.get("active"):
