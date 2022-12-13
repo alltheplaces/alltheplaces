@@ -11,3 +11,4 @@ class JardilandSpider(WoosmapSpider):
         item[
             "website"
         ] = f'https://www.jardiland.com/storelocator/store/view/name/{feature["properties"]["contact"]["website"]}/'
+        yield item
