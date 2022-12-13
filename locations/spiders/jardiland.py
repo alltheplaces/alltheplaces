@@ -8,4 +8,6 @@ class JardilandSpider(WoosmapSpider):
     custom_settings = {"DEFAULT_REQUEST_HEADERS": {"Origin": "https://www.jardiland.com/"}}
 
     def parse_item(self, item, feature, **kwargs):
-        item["website"] = f'https://www.jardiland.com/storelocator/store/view/name/{feature["properties"]["contact"]["website"]}/'
+        item[
+            "website"
+        ] = f'https://www.jardiland.com/storelocator/store/view/name/{feature["properties"]["contact"]["website"]}/'
