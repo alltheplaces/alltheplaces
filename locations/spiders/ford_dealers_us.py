@@ -12,13 +12,17 @@ class FordDealersUSSpider(CrawlSpider, StructuredDataSpider):
     }
     start_urls = ["https://www.ford.com/dealerships/dealer-directory/browse-all/"]
     wanted_types = ["AutoDealer"]
+    json_parser = "chompjs"
     rules = [
         Rule(
             LinkExtractor(allow=r"^https://www.ford.com/dealerships/dealer-directory/"),
         ),
         Rule(
             LinkExtractor(
-                allow=r"^https://www.ford.com/content/brand_ford/en_us/brand/dealerships/dealer-details/.*.html$",
+                allow=(
+                    r"^https://www.ford.com/content/brand_ford/en_us/brand/dealerships/dealer-details/.*.html$",
+                    r"^https://www.ford.com/dealerships/dealer-details/.*$",
+                ),
             ),
             callback="parse_sd",
         ),
