@@ -19,7 +19,7 @@ class LinkedDataParser:
                     ld_obj = chompjs.parse_js_object(ld)
                 else:
                     ld_obj = json.loads(ld, strict=False)
-            except json.decoder.JSONDecodeError:
+            except (json.decoder.JSONDecodeError, ValueError):
                 continue
 
             if isinstance(ld_obj, dict):
