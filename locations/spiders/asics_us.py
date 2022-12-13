@@ -15,8 +15,7 @@ class AsicsUsSpider(scrapy.Spider):
     ]
 
     def parse(self, response):
-        data_json = json.loads(response.text)
-        for store in data_json["markers"]:
+        for store in response.json()["markers"]:
             oh = OpeningHours()
             item = DictParser.parse(store)
             for day in DAYS_FULL:
