@@ -5,13 +5,15 @@ from locations.dict_parser import DictParser
 
 class AsicsDeSpider(scrapy.Spider):
 
-    name = "asics_de"
+    name = "asics_eu"
     item_attributes = {"brand": "asics", "brand_wikidata": "Q327247"}
     allowed_domains = ["www.asics.com"]
     start_urls = ["https://cdn.crobox.io/content/ujf067/stores.json"]
 
     def parse(self, response):
         for store in response.json():
-            item = DictParser.parse(store)
-            item["ref"] = store["name"]
-            yield item
+            if store["storetype"] in ["factory-outlet", "retail-store"]:
+                item = DictParser.parse(store)
+                item["ref"] = store["name"]
+                item["brand"] = f'ascis-{store["storetype"]}'
+                yield item
