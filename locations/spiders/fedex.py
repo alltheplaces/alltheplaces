@@ -18,7 +18,10 @@ DEPARTMENTS = [
 class FedExSpider(SitemapSpider):
     name = "fedex"
     item_attributes = {"brand": "FedEx", "brand_wikidata": "Q459477"}
-    sitemap_urls = ["https://local.fedex.com/sitemap.xml"]
+    sitemap_urls = [
+        "https://local.fedex.com/sitemap.xml.0",
+        "https://local.fedex.com/sitemap.xml.1",
+    ]
 
     def sitemap_filter(self, entries):
         for entry in entries:
