@@ -14,6 +14,7 @@ class AsicsEuSpider(scrapy.Spider):
         for store in response.json():
             if store["storetype"] in ["factory-outlet", "retail-store"]:
                 item = DictParser.parse(store)
+                item["street_address"] = item.pop("addr_full")
                 item["ref"] = store["name"]
                 item["brand"] = f'ascis-{store["storetype"]}'
                 yield item
