@@ -16,5 +16,5 @@ class AsicsEuSpider(scrapy.Spider):
                 item = DictParser.parse(store)
                 item["street_address"] = item.pop("addr_full")
                 item["ref"] = store["name"]
-                item["brand"] = f'ascis {store["storetype"]}'.replace("-", "")
+                item["brand"] = f'ascis {store["storetype"]}'.replace("-", " ").title()
                 yield item
