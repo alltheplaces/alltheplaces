@@ -1,8 +1,5 @@
-import json
-
 import scrapy
 
-from locations.items import GeojsonPointItem
 from locations.dict_parser import DictParser
 
 
@@ -14,9 +11,7 @@ class AsicsDeSpider(scrapy.Spider):
     start_urls = ["https://cdn.crobox.io/content/ujf067/stores.json"]
 
     def parse(self, response):
-        data_json = json.loads(response.text)
-        for store in data_json:
-            item = GeojsonPointItem()
+        for store in response.json():
             item = DictParser.parse(store)
             item["ref"] = store["name"]
             yield item
