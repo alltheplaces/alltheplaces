@@ -7,7 +7,7 @@ from locations.geo import point_locations
 class BeerBmwUkSpider(scrapy.Spider):
     name = "bmw_uk"
     item_attributes = {
-        "brand": "bmw",
+        "brand": "BMW",
         "brand_wikidata": "Q26678",
     }
     allowed_domains = ["bmw.co.uk"]
@@ -26,7 +26,7 @@ class BeerBmwUkSpider(scrapy.Spider):
                 "ref": data.get("dealer_number"),
                 "lon": data.get("longitude"),
                 "lat": data.get("latitude"),
-                "addr_full": data.get("address_line_1").strip(),
+                "street_address": data.get("address_line_1").strip(),
                 "phone": data.get("primary_phone"),
                 "postcode": data.get("postcode"),
                 "website": data.get("url"),
