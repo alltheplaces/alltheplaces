@@ -15,22 +15,22 @@ class TeslaSpider(scrapy.Spider):
     ]
     download_delay = 0.5
     custom_settings = {
-        "USER_AGENT":
-            "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.86 Safari/537.36",
+        "USER_AGENT": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.86 Safari/537.36",
     }
 
     def parse(self, response):
         # Only scrape stores and service centers. Pass through set to deduplicate the country URLs.
         # Some countries appear twice on the page (like US).
-        country_urls = \
-            set(response.xpath(
-                '//a[contains(@href,"stores") or contains(@href,"services") or contains(@href,"superchargers")]/@href')
-                .extract())
+        country_urls = set(
+            response.xpath(
+                '//a[contains(@href,"stores") or contains(@href,"services") or contains(@href,"superchargers")]/@href'
+            ).extract()
+        )
         for country_url in country_urls:
             yield scrapy.Request(response.urljoin(country_url), callback=self.parse_store_list)
 
     def parse_store_list(self, response):
-        store_urls = response.xpath('//address/a/@href').extract()
+        store_urls = response.xpath("//address/a/@href").extract()
         for store_url in store_urls:
             yield scrapy.Request(response.urljoin(store_url), callback=self.parse_store)
 
