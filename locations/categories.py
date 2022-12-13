@@ -10,12 +10,17 @@ class Categories(Enum):
 
     SHOP_CLOTHES = {"shop": "clothes"}
     SHOP_BOOKS = {"shop": "books"}
+    SHOP_CAR = {"shop": "car"}
     SHOP_CONVENIENCE = {"shop": "convenience"}
-    SHOP_SUPERMARKET = {"shop": "supermarket"}
+    SHOP_DO_IT_YOURSELF = {"shop": "doityourself"}
+    SHOP_ELECTRONICS = {"shop": "electronics"}
+    SHOP_FLORIST = {"shop": "florist"}
+    SHOP_FURNITURE = {"shop": "furniture"}
     SHOP_NEWSAGENT = {"shop": "newsagent"}
     SHOP_OPTICIAN = {"shop": "optician"}
+    SHOP_SPORTS = {"shop": "sports"}
+    SHOP_SUPERMARKET = {"shop": "supermarket"}
     SHOP_TRAVEL = {"shop": "travel_agency"}
-    SHOP_CAR = {"shop": "car"}
     SHOP_WHOLESALE = {"shop": "wholesale"}
     SHOP_CHARITY = {"shop": "charity"}
 
@@ -23,23 +28,27 @@ class Categories(Enum):
     FUNERAL_DIRECTORS = {"shop": "funeral_directors"}
     DEPARTMENT_STORE = {"shop": "department_store"}
 
+    ATM = {"amenity": "atm"}
+    BANK = {"amenity": "bank"}
+    BUREAU_DE_CHANGE = {"amenity": "bureau_de_change"}
     CAFE = {"amenity": "cafe"}
+    CLINIC_URGENT = {"amenity": "clinic", "healthcare": "clinic", "urgent_care": "yes"}
     COFFEE_SHOP = {"amenity": "cafe", "cuisine": "coffee_shop"}
     DENTIST = {"amenity": "dentist"}
-    CLINIC_URGENT = {"amenity": "clinic", "healthcare": "clinic", "urgent_care": "yes"}
     DOCTOR_GP = {
         "amenity": "doctors",
         "healthcare": "doctor",
         "healthcare:speciality": "community",
     }
-    HOSPITAL = {"amenity": "hospital"}
-    PUB = {"amenity": "pub"}
-    PHARMACY = {"amenity": "pharmacy"}
+    FAST_FOOD = {"amenity": "fast_food"}
     FUEL_STATION = {"amenity": "fuel"}
-    BANK = {"amenity": "bank"}
-    ATM = {"amenity": "atm"}
-    POST_OFFICE = {"amenity": "post_office"}
+    HOSPITAL = {"amenity": "hospital"}
+    PHARMACY = {"amenity": "pharmacy"}
     POST_BOX = {"amenity": "post_box"}
+    POST_OFFICE = {"amenity": "post_office"}
+    PRODUCT_PICKUP = {"amenity": "product_pickup"}
+    PUB = {"amenity": "pub"}
+    RESTAURANT = {"amenity": "restaurant"}
 
 
 def apply_category(category, item):
