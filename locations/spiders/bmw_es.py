@@ -1,14 +1,13 @@
 import scrapy
-
-import json
 import xmltodict
+
 from locations.dict_parser import DictParser
 
 
 class BeerBmwEsSpider(scrapy.Spider):
     name = "bmw_es"
     item_attributes = {
-        "brand": "bmw",
+        "brand": "BMW",
         "brand_wikidata": "Q26678",
     }
     allowed_domains = ["bmw.es"]
@@ -17,8 +16,7 @@ class BeerBmwEsSpider(scrapy.Spider):
     ]
 
     def parse(self, response):
-        data_dict = xmltodict.parse(response.text)
-        json_data = json.loads(json.dumps(data_dict))
+        json_data = xmltodict.parse(response.text)
         results = json_data["result"]["data"]["pois"]["poi"]
         for data in results:
             item = DictParser.parse(data)
