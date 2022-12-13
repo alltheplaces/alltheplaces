@@ -1,3 +1,6 @@
+import json
+import xmltodict
+
 import scrapy
 
 from locations.dict_parser import DictParser
@@ -15,7 +18,9 @@ class BeerBmwFrSpider(scrapy.Spider):
     ]
 
     def parse(self, response):
-        results = response.json()["data"]["pois"]
+        data_dict = xmltodict.parse(response.text)
+        json_data = json.loads(json.dumps(data_dict))
+        results = json_data["result"]["data"]["pois"]["poi"]
         for data in results:
             item = DictParser.parse(data)
             item["ref"] = data.get("key")
