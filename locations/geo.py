@@ -119,5 +119,18 @@ def postal_regions(country_code):
                     "latitude": row["lat"],
                     "longitude": row["lng"],
                 }
+
+    elif country_code == "FR":
+        # US zip code database from https://datanova.legroupe.laposte.fr
+
+        with gzip.open(
+            "./locations/searchable_points/postcodes/frzips.csv.gz", mode="rt"
+        ) as points:
+            for row in csv.DictReader(points):
+                yield {
+                    "postal_region": row["Code_postal"],
+                    "latitude": row["lat"],
+                    "longitude": row["lng"],
+                }
     else:
         raise Exception("country code not supported: " + country_code)
