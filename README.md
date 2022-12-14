@@ -6,13 +6,12 @@ A project to extract GeoJSON from the web focusing on websites that have 'store 
 
 The project is built using [`scrapy`](https://scrapy.org/), a Python-based web scraping framework. Each target website gets its own [spider](https://doc.scrapy.org/en/latest/topics/spiders.html), which does the work of extracting interesting details about locations and outputting results in a useful format.
 
-## Contact
+## Contact Us
 
 You can contact us in several ways:
 
-- [Issue Tracker](https://github.com/alltheplaces/alltheplaces/issues)
-- [POI channel](https://osmus.slack.com/archives/CDJ4LKA2Y) on [OSM US Slack](https://slack.openstreetmap.us/)
-- Individual contributors email addresses are in git
+- File issues on the GitHub [issue tracker](https://github.com/alltheplaces/alltheplaces/issues).
+- The [#poi channel](https://osmus.slack.com/archives/CDJ4LKA2Y) on [OSM US Slack](https://slack.openstreetmap.us/).
 
 ## Adding a spider
 
