@@ -13,6 +13,12 @@ class StadtZuerichCHSpider(scrapy.Spider):
     name = "stadt_zuerich_ch"
     allowed_domains = ["ogd.stadt-zuerich.ch"]
 
+    dataset_attributes = {
+        "license": "Creative Commons Zero",
+        "license:website": "https://www.stadt-zuerich.ch/portal/de/index/ogd/rahmenbedingungen.html#nutzungsbedingungen",
+        "license:wikidata": "Q6938433",
+    }
+
     operators = {
         "ERZ Entsorgung + Recycling Zürich": (
             "Entsorgung + Recycling Zürich",
