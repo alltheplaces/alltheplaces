@@ -11,7 +11,7 @@ The project is built using [`scrapy`](https://scrapy.org/), a Python-based web s
 You can contact us in several ways:
 
 - [Issue Tracker](https://github.com/alltheplaces/alltheplaces/issues)
-- [OSM US Slack, POI](https://osmus.slack.com/archives/CDJ4LKA2Y)
+- [POI channel](https://osmus.slack.com/archives/CDJ4LKA2Y) on [OSM US Slack](https://slack.openstreetmap.us/)
 - Individual contributors email addresses are in git
 
 ## Adding a spider
