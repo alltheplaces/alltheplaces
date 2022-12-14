@@ -123,9 +123,7 @@ def postal_regions(country_code):
     elif country_code == "FR":
         # French postal code database from https://datanova.legroupe.laposte.fr
 
-        with gzip.open(
-            "./locations/searchable_points/postcodes/frzips.csv.gz", mode="rt"
-        ) as points:
+        with gzip.open("./locations/searchable_points/postcodes/frzips.csv.gz", mode="rt") as points:
             for row in csv.DictReader(points):
                 yield {
                     "postal_region": row["Code_postal"],
