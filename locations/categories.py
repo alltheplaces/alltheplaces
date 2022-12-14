@@ -4,6 +4,13 @@ from enum import Enum
 from locations.items import GeojsonPointItem
 
 
+# Where possible the project tries to apply POI categories and attributes according
+# to OSM specifications which is in itself something of an art form. Where the attribution
+# cannot be done through NSI related pipeline magic then a spider is free to apply any
+# categories and attributes itself. This file provides some help in that area. It certainly
+# reduces the number of finger fumble mistypes which are the inevitable by-product
+# of lots of string bashing. If ever NSI / ATP where to change / augment the category scheme
+# then the level of indirection provided here may also be of help!
 class Categories(Enum):
     BUS_STOP = {"highway": "bus_stop", "public_transport": "platform"}
     BUS_STATION = {"amenity": "bus_station", "public_transport": "station"}
@@ -91,3 +98,40 @@ def get_category_tags(source) -> {}:
         if v := tags.get(top_level_tag):
             categories[top_level_tag] = v
     return categories or None
+
+
+# See: https://wiki.openstreetmap.org/wiki/Key:fuel#Examples
+class Fuel(Enum):
+    # Diesel
+    DIESEL = "fuel:diesel"
+    GTL_DIESEL = "fuel:GTL_diesel"
+    HGV_DIESEL = "fuel:HGV_diesel"
+    BIODIESEL = "fuel:biodiesel"
+    UNTAXED_DIESEL = "fuel:untaxed_diesel"
+    COLD_WEATHER_DIESEL = "fuel:diesel:class2"
+    # Octane levels
+    OCTANE_80 = "fuel:octane_80"
+    OCTANE_87 = "fuel:octane_87"
+    OCTANE_91 = "fuel:octane_91"
+    OCTANE_92 = "fuel:octane_92"
+    OCTANE_93 = "fuel:octane_93"
+    OCTANE_95 = "fuel:octane_95"
+    OCTANE_98 = "fuel:octane_98"
+    OCTANE_100 = "fuel:octane_100"
+    # Formulas
+    E5 = "fuel:e5"
+    E10 = "fuel:e10"
+    E85 = "fuel:e85"
+    BIOGAS = "fuel:biogas"
+    LPG = "fuel:lpg"
+    CNG = "fuel:cng"
+    LNG = "fuel:lng"
+    PROPANE = "fuel:propane"
+    LH2 = "fuel:LH2"
+    # Additives
+    ADBLUE = "fuel:adblue"
+
+    def apply(self, item, value):
+        if value:
+            update = {self.value: "yes"}
+            apply_category(update, item)
