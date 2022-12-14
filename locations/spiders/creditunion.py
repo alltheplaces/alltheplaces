@@ -1,3 +1,4 @@
+import logging
 import re
 
 import scrapy
@@ -61,7 +62,6 @@ STATES = [
 
 
 class CreditUnionSpider(scrapy.Spider):
-
     name = "creditunion"
     download_delay = 0.5
     allowed_domains = ["co-opcreditunions.org"]
@@ -107,24 +107,29 @@ class CreditUnionSpider(scrapy.Spider):
         except IndexError:
             phone = ""
 
-        href = bank.xpath('.//div[@class="location-results__share"]/div/a/@href').extract_first()
-        lat, lon = re.search(r"lat=(.*?)&lng=(.*?)&", href).groups()
         name = bank.xpath(".//h3/text()").extract_first()
-        ref = name + "-" + "-".join(address[0].split(" "))
+        ref = "-".join(name.split(" ")) + "-" + "-".join(address[0].split(" "))
 
         properties = {
             "name": name,
-            "addr_full": address[0].strip(),
+            "street_address": address[0].strip(),
             "city": address[1].split(",")[0].strip(),
             "state": address[1].split(",")[1].strip(),
             "postcode": address[2].strip(),
             "phone": phone,
             "ref": ref,
             "website": bank.xpath("./div[1]/a/@href").extract_first(),
-            "lat": float(lat),
-            "lon": float(lon),
             "brand": name,
         }
+
+        href = bank.xpath('.//div[@class="location-results__share"]/div/a/@href').extract_first()
+        try:
+            lat, lon = re.search(r"lat=(.*?)&lng=(.*?)&", href).groups()
+            properties["lat"] = float(lat)
+            properties["lon"] = float(lon)
+        except TypeError:
+            logging.debug("Missing coordinates")
+
         hours = self.parse_hours(bank.xpath('.//div[contains(@class, "location-results__hours")]/p/text()').extract())
         if hours:
             properties["opening_hours"] = hours
