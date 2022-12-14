@@ -121,7 +121,7 @@ def postal_regions(country_code):
                 }
 
     elif country_code == "FR":
-        # US zip code database from https://datanova.legroupe.laposte.fr
+        # French postal code database from https://datanova.legroupe.laposte.fr
 
         with gzip.open(
             "./locations/searchable_points/postcodes/frzips.csv.gz", mode="rt"
