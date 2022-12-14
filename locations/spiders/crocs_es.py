@@ -1,6 +1,5 @@
-import xmltodict
-
 import scrapy
+import xmltodict
 
 from locations.items import GeojsonPointItem
 
