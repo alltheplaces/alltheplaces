@@ -96,12 +96,28 @@ class LineDelimitedGeoJsonExporter(JsonLinesItemExporter):
 class GeoJsonExporter(JsonItemExporter):
     def __init__(self, file, **kwargs):
         super().__init__(file, **kwargs)
-        self.spider_names = set()
+        self.spider_name = None
+
+    def start_exporting(self):
+        pass
+
+    def export_item(self, item):
+        if spider_name := item.get("extras", {}).get("@spider"):
+            if self.spider_name == None:
+                self.spider_name = spider_name
+                self.write_geojson_header()
+            if spider_name != self.spider_name:
+                # It really should not happen that a single exporter instance
+                # handles output from different spiders. If it does happen,
+                # we rather crash than emit GeoJSON with the wrong dataset
+                # properties, which may include legally relevant license tags.
+                raise ValueError(
+                    f"harvest from multiple spiders ({spider_name, self.spider_name}) cannot be written to same GeoJSON file"
+                )
+
+        super().export_item(item)
 
     def _get_serialized_fields(self, item, default_value=None, include_empty=None):
-        if spider_name := item.get("extras", {}).get("@spider"):
-            self.spider_names.add(spider_name)
-
         feature = []
         feature.append(("type", "Feature"))
         feature.append(("id", compute_hash(item)))
@@ -125,33 +141,21 @@ class GeoJsonExporter(JsonItemExporter):
 
         return feature
 
-    def start_exporting(self):
-        self.file.write(to_bytes('{"type":"FeatureCollection","features":[\n', self.encoding))
+    def write_geojson_header(self):
+        header = io.StringIO()
+        header.write('{"type":"FeatureCollection","properties":')
+        props = {"@spider": self.spider_name} if self.spider_name else {}
+        if spider := self.find_spider_class(self.spider_name):
+            props.update(getattr(spider, "dataset_attributes", {}))
+        json.dump(props, header, ensure_ascii=False, separators=(",", ":"), sort_keys=True)
+        header.write(',"features":[\n')
+        self.file.write(to_bytes(header.getvalue(), self.encoding))
 
     def finish_exporting(self):
-        trailer = io.StringIO()
-        props = {}
-        if spider := self.find_spider_class():
-            props = getattr(spider, "dataset_attributes", {})
-        trailer.write('],\n"properties":')
-        json.dump(props, trailer, ensure_ascii=False, separators=(",", ":"), sort_keys=True)
-        trailer.write("}\n")
-        self.file.write(to_bytes(trailer.getvalue(), self.encoding))
+        self.file.write(b"\n]}\n")
 
-    def find_spider_class(self):
-        if not self.spider_names:
-            return None
-
-        # It really should not happen that a single exporter instance
-        # handles output from different spiders. If it somehow still happens,
-        # we rather crash than emit GeoJSON with bogus dataset attributes
-        # which might include legally relevant license tags.
-        if len(self.spider_names) != 1:
-            raise ValueError(f"output from multiple spiders {self.spider_names} cannot be written to same GeoJSON file")
-        (spider_name,) = self.spider_names
-
-        # When this code gets called, Scrapy has already loaded all spiders,
-        # but we cannot get access to the SpiderLoader instance.
+    @staticmethod
+    def find_spider_class(spider_name):
         for module in walk_modules("locations.spiders"):
             for spider_class in iter_spider_classes(module):
                 if spider_name == spider_class.name:

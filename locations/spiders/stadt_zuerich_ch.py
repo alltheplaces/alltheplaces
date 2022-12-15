@@ -14,8 +14,13 @@ class StadtZuerichCHSpider(scrapy.Spider):
     allowed_domains = ["ogd.stadt-zuerich.ch"]
 
     dataset_attributes = {
+        "attribution": "optional",
+        "attribution:name:de": "Stadt Zürich",
+        "attribution:name:en": "City of Zurich",
+        "attribution:website:de": "https://www.stadt-zuerich.ch/",
+        "attribution:website:en": "https://www.stadt-zuerich.ch/en.html",
         "license": "Creative Commons Zero",
-        "license:website": "https://www.stadt-zuerich.ch/portal/de/index/ogd/rahmenbedingungen.html#nutzungsbedingungen",
+        "license:website:de": "https://www.stadt-zuerich.ch/portal/de/index/ogd/rahmenbedingungen.html#nutzungsbedingungen",
         "license:wikidata": "Q6938433",
     }
 
