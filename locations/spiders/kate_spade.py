@@ -15,12 +15,11 @@ class KateSpadeSpider(scrapy.Spider):
     ]
 
     def parse(self, response):
-        stores = response.json().get("stores")
-        for store_id in stores:
-            item = DictParser.parse(stores.get(store_id))
-            item["lat"] = stores.get(store_id, {}).get("latitude").replace(",", ".")
-            item["lon"] = stores.get(store_id, {}).get("longitude").replace(",", ".")
-            item["ref"] = stores.get(store_id, {}).get("name")
-            item["website"] = f'{self.allowed_domains[0]}{stores.get(store_id, {}).get("storeURL")}'
+        for ref, store in response.json()["stores"].items():
+            item = DictParser.parse(store)
+            item["lat"] = store.get("latitude").replace(",", ".")
+            item["lon"] = store.get("longitude").replace(",", ".")
+            item["ref"] = ref
+            item["website"] = f'https://{self.allowed_domains[0]}{store.get("storeURL")}'
 
             yield item
