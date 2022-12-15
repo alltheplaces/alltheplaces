@@ -13,23 +13,18 @@ class EngelAndVolkersSpider(scrapy.Spider):
         "brand_wikidata": "Q1341765",
     }
     allowed_domains = ["engelvoelkers.com"]
-    start_urls = ["https://www.engelvoelkers.com/api/?source=locations&bu=&jsonp=markerinit_map_offices"]
+    start_urls = ["https://www.engelvoelkers.com/api/?source=locations"]
 
     def parse(self, response):
-        data = response.text.replace("markerinit_map_offices(", "").replace(");", "")
-        data_json = json.loads(data)
-        for agence in data_json["response"]:
-            template_url = "https://www.engelvoelkers.com/api/?source=locations&jsonp=markerdetail_map_offices_{}&id={}"
+        for agence in response.json().get("response"):
+            template_url = "https://www.engelvoelkers.com/api/?source=locations&id={}"
             yield scrapy.Request(
-                template_url.format(agence["id"], agence["id"]),
+                template_url.format(agence["id"]),
                 callback=self.agence_parse,
             )
 
     def agence_parse(self, response):
-        id = re.findall("id=[0-9]*", response.url)[0].replace("id=", "")
-        data = response.text.replace(f"markerdetail_map_offices_{id}(", "").replace(");", "")
-        data_json = json.loads(data)
-        agence = data_json["response"]
+        agence = response.json().get("response")
         item = DictParser.parse(agence)
         item["name"] = agence.get("name", {}).get("en")
         item["website"] = agence.get("contact", {}).get("www")
