@@ -2,63 +2,10 @@ import logging
 import re
 
 import scrapy
+from geonamescache import GeonamesCache
 
 from locations.hours import OpeningHours
 from locations.items import GeojsonPointItem
-
-STATES = [
-    "AL",
-    "AK",
-    "AZ",
-    "AR",
-    "CA",
-    "CO",
-    "CT",
-    "DC",
-    "DE",
-    "FL",
-    "GA",
-    "HI",
-    "ID",
-    "IL",
-    "IN",
-    "IA",
-    "KS",
-    "KY",
-    "LA",
-    "ME",
-    "MD",
-    "MA",
-    "MI",
-    "MN",
-    "MS",
-    "MO",
-    "MT",
-    "NE",
-    "NV",
-    "NH",
-    "NJ",
-    "NM",
-    "NY",
-    "NC",
-    "ND",
-    "OH",
-    "OK",
-    "OR",
-    "PA",
-    "RI",
-    "SC",
-    "SD",
-    "TN",
-    "TX",
-    "UT",
-    "VT",
-    "VA",
-    "WA",
-    "WV",
-    "WI",
-    "WY",
-]
 
 
 class CreditUnionSpider(scrapy.Spider):
@@ -69,7 +16,7 @@ class CreditUnionSpider(scrapy.Spider):
     def start_requests(self):
         base_url = "https://co-opcreditunions.org/locator/search-results/?loctype=S&state={state}&statewide=yes&country=&Submit=Search&lp=1"
 
-        for state in STATES:
+        for state in GeonamesCache().get_us_states().keys():
             url = base_url.format(state=state)
             yield scrapy.Request(url)
 
@@ -108,7 +55,7 @@ class CreditUnionSpider(scrapy.Spider):
             phone = ""
 
         name = bank.xpath(".//h3/text()").extract_first()
-        ref = "-".join(name.split(" ")) + "-" + "-".join(address[0].split(" "))
+        ref = name + "-" + "-".join(address[0].split(" "))
 
         properties = {
             "name": name,
