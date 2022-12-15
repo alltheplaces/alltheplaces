@@ -1,67 +1,14 @@
+import logging
 import re
 
 import scrapy
+from geonamescache import GeonamesCache
 
 from locations.hours import OpeningHours
 from locations.items import GeojsonPointItem
 
-STATES = [
-    "AL",
-    "AK",
-    "AZ",
-    "AR",
-    "CA",
-    "CO",
-    "CT",
-    "DC",
-    "DE",
-    "FL",
-    "GA",
-    "HI",
-    "ID",
-    "IL",
-    "IN",
-    "IA",
-    "KS",
-    "KY",
-    "LA",
-    "ME",
-    "MD",
-    "MA",
-    "MI",
-    "MN",
-    "MS",
-    "MO",
-    "MT",
-    "NE",
-    "NV",
-    "NH",
-    "NJ",
-    "NM",
-    "NY",
-    "NC",
-    "ND",
-    "OH",
-    "OK",
-    "OR",
-    "PA",
-    "RI",
-    "SC",
-    "SD",
-    "TN",
-    "TX",
-    "UT",
-    "VT",
-    "VA",
-    "WA",
-    "WV",
-    "WI",
-    "WY",
-]
-
 
 class CreditUnionSpider(scrapy.Spider):
-
     name = "creditunion"
     download_delay = 0.5
     allowed_domains = ["co-opcreditunions.org"]
@@ -69,7 +16,7 @@ class CreditUnionSpider(scrapy.Spider):
     def start_requests(self):
         base_url = "https://co-opcreditunions.org/locator/search-results/?loctype=S&state={state}&statewide=yes&country=&Submit=Search&lp=1"
 
-        for state in STATES:
+        for state in GeonamesCache().get_us_states().keys():
             url = base_url.format(state=state)
             yield scrapy.Request(url)
 
@@ -107,24 +54,29 @@ class CreditUnionSpider(scrapy.Spider):
         except IndexError:
             phone = ""
 
-        href = bank.xpath('.//div[@class="location-results__share"]/div/a/@href').extract_first()
-        lat, lon = re.search(r"lat=(.*?)&lng=(.*?)&", href).groups()
         name = bank.xpath(".//h3/text()").extract_first()
         ref = name + "-" + "-".join(address[0].split(" "))
 
         properties = {
             "name": name,
-            "addr_full": address[0].strip(),
+            "street_address": address[0].strip(),
             "city": address[1].split(",")[0].strip(),
             "state": address[1].split(",")[1].strip(),
             "postcode": address[2].strip(),
             "phone": phone,
             "ref": ref,
             "website": bank.xpath("./div[1]/a/@href").extract_first(),
-            "lat": float(lat),
-            "lon": float(lon),
             "brand": name,
         }
+
+        href = bank.xpath('.//div[@class="location-results__share"]/div/a/@href').extract_first()
+        try:
+            lat, lon = re.search(r"lat=(.*?)&lng=(.*?)&", href).groups()
+            properties["lat"] = float(lat)
+            properties["lon"] = float(lon)
+        except TypeError:
+            logging.debug("Missing coordinates")
+
         hours = self.parse_hours(bank.xpath('.//div[contains(@class, "location-results__hours")]/p/text()').extract())
         if hours:
             properties["opening_hours"] = hours
