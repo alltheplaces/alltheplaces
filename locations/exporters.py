@@ -103,7 +103,7 @@ class GeoJsonExporter(JsonItemExporter):
 
     def export_item(self, item):
         if spider_name := item.get("extras", {}).get("@spider"):
-            if self.spider_name == None:
+            if self.spider_name is None:
                 self.spider_name = spider_name
                 self.write_geojson_header()
             if spider_name != self.spider_name:
