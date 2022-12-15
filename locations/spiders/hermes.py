@@ -13,7 +13,10 @@ class HermesSpider(scrapy.Spider):
     start_urls = ["https://bck.hermes.com/stores?lang=en"]
 
     def parse(self, response):
-        for store in response.json()["shops"]:
+        for store in response.json().get("shops"):
+            store["location"] = store.pop("geoCoordinates")
             item = DictParser.parse(store)
-            item["ref"] = store.get("shortTitle")
+            item["ref"] = store.get("shopId")
+            item["website"] = f'https://www.hermes.com/uk/en/{store["url"]}'
+
             yield item
