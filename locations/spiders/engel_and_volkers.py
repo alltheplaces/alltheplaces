@@ -8,10 +8,7 @@ from locations.dict_parser import DictParser
 
 class EngelAndVolkersSpider(scrapy.Spider):
     name = "engel_and_volkers"
-    item_attributes = {
-        "brand": "Engel&Volkers",
-        "brand_wikidata": "Q1341765",
-    }
+    item_attributes = {"brand": "Engel & Völkers", "brand_wikidata": "Q1341765"}
     allowed_domains = ["engelvoelkers.com"]
     start_urls = ["https://www.engelvoelkers.com/api/?source=locations"]
 
