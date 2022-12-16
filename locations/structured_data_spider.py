@@ -1,4 +1,5 @@
 import re
+from urllib.parse import urljoin
 
 from scrapy import Spider
 
@@ -65,6 +66,7 @@ class StructuredDataSpider(Spider):
         "AutomotiveBusiness",
         "BarOrPub",
         "SportingGoodsStore",
+        "Dentist",
     ]
     search_for_email = True
     search_for_phone = True
@@ -123,6 +125,9 @@ class StructuredDataSpider(Spider):
 
                 if self.search_for_image and item.get("image") is None:
                     extract_image(item, response)
+
+                if item.get("image") and item["image"].startswith("/"):
+                    item["image"] = urljoin(response.url, item["image"])
 
                 yield from self.post_process_item(item, response, ld_item)
 
