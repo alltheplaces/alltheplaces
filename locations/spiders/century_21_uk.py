@@ -28,12 +28,12 @@ class Century21UkSpider(scrapy.Spider):
             data_json = json.loads(data)
             item = LinkedDataParser.parse_ld(data_json)
             item["ref"] = data_json.get("name")
-            
+
             yield item
-            
+
         else:
             address = response.xpath('normalize-space(//ul[@class="contact-details"]/li/text())').get()
-            if address != '':
+            if address != "":
                 postcode = re.findall("[0-9]{5}|[A-Z0-9]{3} [A-Z0-9]{3}", address)[0]
                 phone = response.xpath('normalize-space(//ul[@class="contact-details"]/li/a/text())').get()
                 email = response.xpath('//ul[@class="contact-details"]//a[contains(@href, "mailto")]/@href').get()
@@ -41,12 +41,22 @@ class Century21UkSpider(scrapy.Spider):
                 days = response.xpath('//ul[@class="opening-hours"]/li')
                 oh = OpeningHours()
                 for day in days:
-                    if day.xpath('./text()')[1].get().replace('\t', '').replace('\n', '').strip() == 'CLOSED':
+                    if day.xpath("./text()")[1].get().replace("\t", "").replace("\n", "").strip() == "CLOSED":
                         continue
                     oh.add_range(
-                        day=day.xpath('./span/text()').get().strip().split(" - ")[0][:3],
-                        open_time=day.xpath('./text()')[1].get().replace('\t', '').replace('\n', '').split(" - ")[0].strip(),
-                        close_time=day.xpath('./text()')[1].get().replace('\t', '').replace('\n', '').split(" - ")[1].strip(),
+                        day=day.xpath("./span/text()").get().strip().split(" - ")[0][:3],
+                        open_time=day.xpath("./text()")[1]
+                        .get()
+                        .replace("\t", "")
+                        .replace("\n", "")
+                        .split(" - ")[0]
+                        .strip(),
+                        close_time=day.xpath("./text()")[1]
+                        .get()
+                        .replace("\t", "")
+                        .replace("\n", "")
+                        .split(" - ")[1]
+                        .strip(),
                     )
                 properties = {
                     "name": name,
