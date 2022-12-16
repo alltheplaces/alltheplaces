@@ -91,6 +91,7 @@ class CAndASpider(scrapy.Spider):
 
             yield GeojsonPointItem(**properties)
 
+
 def find_between(s, first, last):
     try:
         start = s.index(first) + len(first)
