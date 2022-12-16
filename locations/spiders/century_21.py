@@ -34,5 +34,5 @@ class Century21Spider(scrapy.spiders.SitemapSpider):
             )
 
         # Pagination next page
-        if response.xpath('//a[contains(@aria-label, "Siguiente")]/@href').get():
+        if next := response.xpath('//a[contains(@aria-label, "Next")]/@href').get():
             yield scrapy.Request(url=f"https://www.{self.allowed_domains[0]}{next}", callback=self.parse)
