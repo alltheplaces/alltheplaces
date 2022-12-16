@@ -5,10 +5,7 @@ from locations.dict_parser import DictParser
 
 class KateSpadeSpider(scrapy.Spider):
     name = "kate_spade"
-    item_attributes = {
-        "brand": "KateSpade",
-        "brand_wikidata": "Q275094",
-    }
+    item_attributes = {"brand": "Kate Spade New York", "brand_wikidata": "Q6375797"}
     allowed_domains = ["eu.katespade.com"]
     start_urls = [
         "https://eu.katespade.com/on/demandware.store/Sites-ksEuRoe-Site/en_FR/Stores-GetNearestStores?latitude=39.629490&longitude=-100.059825&distanceUnit=Meilen&maxdistance=300000"
