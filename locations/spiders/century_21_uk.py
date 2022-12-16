@@ -28,7 +28,6 @@ class Century21UkSpider(scrapy.Spider):
             data_json = json.loads(data)
             item = LinkedDataParser.parse_ld(data_json)
             item["ref"] = data_json.get("name")
-            item["addr_full"] = item.pop("street_address")
             
             yield item
             
