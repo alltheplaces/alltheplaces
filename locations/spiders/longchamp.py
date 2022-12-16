@@ -7,6 +7,7 @@ from locations.geo import point_locations
 class LongChampSpider(scrapy.Spider):
     name = "longchamp"
     item_attributes = {"brand": "Longchamp", "brand_wikidata": "Q1869471"}
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def start_requests(self):
         template = "https://www.longchamp.com/on/demandware.store/Sites-Longchamp-EU-Site/de_DE/Stores-FindStores?showMap=true&radius=300&lat={}&lng={}"
