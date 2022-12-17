@@ -34,10 +34,10 @@ class MercureEuSpider(scrapy.Spider):
                 yield scrapy.Request(url=url, callback=self.parse_hotel_detail)
 
     def parse_hotel_detail(self, response):
-        data = response.xpath("/html/head/script[12]/text()").get()
-        if not json.loads(data).get("address"):
+        data = response.xpath("/html/head/text()").get().strip()
+        if data == "" or not json.loads(data).get("address"):
             data = response.xpath("/html/head/script[13]/text()").get()
-        if not json.loads(data).get("address"):
+        if data == "" or not json.loads(data).get("address"):
             data = response.xpath("/html/head/script[14]/text()").get()
 
         if data:
