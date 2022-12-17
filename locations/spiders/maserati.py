@@ -7,7 +7,7 @@ class MaseratiSpider(scrapy.Spider):
     name = "maserati"
     item_attributes = {
         "brand": "Maserati",
-        "brand_wikidata": "Q26678",
+        "brand_wikidata": "Q35962",
     }
     allowed_domains = ["maserati.com"]
     start_urls = [
