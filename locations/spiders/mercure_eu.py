@@ -40,9 +40,10 @@ class MercureEuSpider(scrapy.Spider):
         if not json.loads(data).get("address"):
             data = response.xpath("/html/head/script[14]/text()").get()
 
-        data_json = json.loads(data)
-        item = LinkedDataParser.parse_ld(data_json)
-        item["name"] = data_json.get("legalName")
-        item["ref"] = response.url.replace("https://all.accor.com/hotel/", "").replace("/index.en.shtml", "")
+        if data:
+            data_json = json.loads(data)
+            item = LinkedDataParser.parse_ld(data_json)
+            item["name"] = data_json.get("legalName")
+            item["ref"] = response.url.replace("https://all.accor.com/hotel/", "").replace("/index.en.shtml", "")
 
         yield item
