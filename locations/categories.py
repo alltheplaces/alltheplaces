@@ -12,12 +12,17 @@ from locations.items import GeojsonPointItem
 # of lots of string bashing. If ever NSI / ATP where to change / augment the category scheme
 # then the level of indirection provided here may also be of help!
 class Categories(Enum):
+    BICYCLE_PARKING = {"amenity": "bicycle_parking"}
+    BICYCLE_RENTAL = {"amenity": "bicycle_rental"}
+
     BUS_STOP = {"highway": "bus_stop", "public_transport": "platform"}
     BUS_STATION = {"amenity": "bus_station", "public_transport": "station"}
 
-    SHOP_CLOTHES = {"shop": "clothes"}
+    SHOP_BICYCLE = {"shop": "bicycle"}
     SHOP_BOOKS = {"shop": "books"}
     SHOP_CAR = {"shop": "car"}
+    SHOP_CHARITY = {"shop": "charity"}
+    SHOP_CLOTHES = {"shop": "clothes"}
     SHOP_CONVENIENCE = {"shop": "convenience"}
     SHOP_DO_IT_YOURSELF = {"shop": "doityourself"}
     SHOP_ELECTRONICS = {"shop": "electronics"}
@@ -29,7 +34,6 @@ class Categories(Enum):
     SHOP_SUPERMARKET = {"shop": "supermarket"}
     SHOP_TRAVEL = {"shop": "travel_agency"}
     SHOP_WHOLESALE = {"shop": "wholesale"}
-    SHOP_CHARITY = {"shop": "charity"}
 
     CAR_REPAIR = {"shop": "car_repair"}
     FUNERAL_DIRECTORS = {"shop": "funeral_directors"}
@@ -41,6 +45,7 @@ class Categories(Enum):
     CAFE = {"amenity": "cafe"}
     CLINIC_URGENT = {"amenity": "clinic", "healthcare": "clinic", "urgent_care": "yes"}
     COFFEE_SHOP = {"amenity": "cafe", "cuisine": "coffee_shop"}
+    COMPRESSED_AIR = {"amenity": "compressed_air"}
     DENTIST = {"amenity": "dentist", "healthcare": "dentist"}
     DOCTOR_GP = {
         "amenity": "doctors",
@@ -56,6 +61,11 @@ class Categories(Enum):
     PRODUCT_PICKUP = {"amenity": "product_pickup"}
     PUB = {"amenity": "pub"}
     RESTAURANT = {"amenity": "restaurant"}
+
+    VENDING_MACHINE_BICYCLE_TUBE = {
+        "amenity": "vending_machine",
+        "vending": "bicycle_tube",
+    }
 
 
 def apply_category(category, item):
