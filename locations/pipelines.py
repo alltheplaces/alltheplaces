@@ -97,6 +97,10 @@ class CountryCodeCleanUpPipeline:
 class PhoneCleanUpPipeline:
     def process_item(self, item, spider):
         phone, country = item.get("phone"), item.get("country")
+        extras = item.get("extras", {})
+        for key in filter(self.is_phone_key, extras.keys()):
+            extras[key] = self.normalize_numbers(extras[key], country, spider)
+
         if isinstance(phone, int):
             phone = str(phone)
         elif not phone:
@@ -105,9 +109,16 @@ class PhoneCleanUpPipeline:
         elif not isinstance(phone, str):
             spider.crawler.stats.inc_value("atp/field/phone/wrong_type")
             return item
-        numbers = [self.normalize(p, country, spider) for p in re.split(r";|/", phone)]
-        item["phone"] = ";".join(filter(None, numbers))
+        item["phone"] = self.normalize_numbers(phone, country, spider)
         return item
+
+    @staticmethod
+    def is_phone_key(tag):
+        return tag in ("phone", "fax") or tag.endswith(":phone") or tag.endswith(":fax")
+
+    def normalize_numbers(self, phone, country, spider):
+        numbers = [self.normalize(p, country, spider) for p in re.split(r";|/", str(phone))]
+        return ";".join(filter(None, numbers))
 
     def normalize(self, phone, country, spider):
         phone = phone.strip()
