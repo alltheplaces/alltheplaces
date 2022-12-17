@@ -15,19 +15,19 @@ class MaseratiSpider(scrapy.Spider):
     ]
 
     def parse(self, response):
-        for row in response.json()["data"]["results"]["features"]:
+        for row in response.json().get("data", {}).get("results", {}).get("features"):
             properties = {
-                "ref": row["properties"]["otm_id"],
-                "name": row["properties"]["dealername"],
-                "country": row["properties"]["countryIsoCode2"],
-                "city": row["properties"]["city"],
-                "lat": row["geometry"]["coordinates"][1],
-                "lon": row["geometry"]["coordinates"][0],
-                "phone": row["properties"]["phone"],
-                "email": row["properties"]["emailAddr"],
-                "street_address": row["properties"]["address"],
-                "postcode": row["properties"]["postcode"],
-                "website": row["properties"]["url"],
+                "ref": row.get("properties", {}).get("otm_id"),
+                "name": row.get("properties", {}).get("dealername"),
+                "country": row.get("properties", {}).get("countryIsoCode2"),
+                "city": row.get("properties", {}).get("city"),
+                "lat": row.get("geometry", {}).get("coordinates")[1],
+                "lon": row.get("geometry", {}).get("coordinates")[0],
+                "phone": row.get("properties", {}).get("phone"),
+                "email": row.get("properties", {}).get("emailAddr"),
+                "street_address": row.get("properties", {}).get("address"),
+                "postcode": row.get("properties", {}).get("postcode"),
+                "website": row.get("properties", {}).get("url"),
             }
 
             yield GeojsonPointItem(**properties)
