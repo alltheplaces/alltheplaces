@@ -131,7 +131,22 @@ class Fuel(Enum):
     # Additives
     ADBLUE = "fuel:adblue"
 
-    def apply(self, item, value):
-        if value:
-            update = {self.value: "yes"}
-            apply_category(update, item)
+
+def apply_yes_no(attribute, item: GeojsonPointItem, state: bool, apply_positive_only: bool = True):
+    """
+    Many OSM POI attribute tags values are "yes"/"no". Provide support for setting these from spider code.
+    :param attribute: the tag to use for the attribute (str or Enum accepted)
+    :param item: the POI instance to update
+    :param state: if the attribute to set True or False
+    :param apply_positive_only: only add the tag if state is True
+    """
+    if not state and apply_positive_only:
+        return
+    if isinstance(attribute, str):
+        tag_key = attribute
+    elif isinstance(attribute, Enum):
+        tag_key = attribute.value
+    else:
+        raise AttributeError("string or Enum required")
+    tag_value = "yes" if state else "no"
+    apply_category({tag_key: tag_value}, item)

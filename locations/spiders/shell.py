@@ -1,9 +1,8 @@
 import scrapy
 
-from locations.categories import Categories, Fuel, apply_category
+from locations.categories import Categories, Fuel, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.spiders.bp import decode_hours
-from locations.spiders.costacoffee_gb import yes_or_no
 
 
 class ShellSpider(scrapy.Spider):
@@ -36,33 +35,31 @@ class ShellSpider(scrapy.Spider):
         # Definitions extracted from https://shellgsllocator.geoapp.me/config/published/retail/prod/en_US.json?format=json
         amenities = result["amenities"]
         fuels = result["fuels"]
-        item["extras"] = {
-            "amenity:chargingstation": yes_or_no("electric_charging_other" in fuels or "shell_recharge" in fuels),
-            "toilets": yes_or_no("toilet" in amenities),
-            "atm": yes_or_no("atm" in amenities),
-            "car_wash": yes_or_no("carwash" in amenities),
-            "hgv": yes_or_no("hgv_lane" in amenities),
-            "wheelchair": yes_or_no("disabled_facilities" in amenities),
-        }
         apply_category(Categories.FUEL_STATION, item)
         if "shop" in amenities:
             apply_category(Categories.SHOP_CONVENIENCE, item)
-        Fuel.DIESEL.apply(item, any("diesel" in f for f in fuels))
-        Fuel.ADBLUE.apply(item, any("adblue" in a for a in amenities))
-        Fuel.BIODIESEL.apply(item, "biodiesel" in fuels or "biofuel_gasoline" in fuels)
-        Fuel.CNG.apply(item, "cng" in fuels)
-        Fuel.GTL_DIESEL.apply(item, "gtl" in fuels)
-        Fuel.HGV_DIESEL.apply(item, "truck_diesel" in fuels or "hgv_lane" in amenities)
-        Fuel.PROPANE.apply(item, "auto_rv_propane" in fuels)
-        Fuel.LH2.apply(item, "hydrogen" in fuels)
-        Fuel.LNG.apply(item, "lng" in fuels)
-        Fuel.LPG.apply(item, "autogas_lpg" in fuels)
+        apply_yes_no("amenity:chargingstation", item, "electric_charging_other" in fuels or "shell_recharge" in fuels)
+        apply_yes_no("toilets", item, "toilet" in amenities)
+        apply_yes_no("atm", item, "atm" in amenities)
+        apply_yes_no("car_wash", item, "carwash" in amenities)
+        apply_yes_no("hgv", item, "hgv_lane" in amenities)
+        apply_yes_no("wheelchair", item, "disabled_facilities" in amenities)
+        apply_yes_no(Fuel.DIESEL, item, any("diesel" in f for f in fuels))
+        apply_yes_no(Fuel.ADBLUE, item, any("adblue" in a for a in amenities))
+        apply_yes_no(Fuel.BIODIESEL, item, "biodiesel" in fuels or "biofuel_gasoline" in fuels)
+        apply_yes_no(Fuel.CNG, item, "cng" in fuels)
+        apply_yes_no(Fuel.GTL_DIESEL, item, "gtl" in fuels)
+        apply_yes_no(Fuel.HGV_DIESEL, item, "truck_diesel" in fuels or "hgv_lane" in amenities)
+        apply_yes_no(Fuel.PROPANE, item, "auto_rv_propane" in fuels)
+        apply_yes_no(Fuel.LH2, item, "hydrogen" in fuels)
+        apply_yes_no(Fuel.LNG, item, "lng" in fuels)
+        apply_yes_no(Fuel.LPG, item, "autogas_lpg" in fuels)
         # definition of low-octane varies by country; 92 is most common
-        Fuel.OCTANE_92.apply(item, "low_octane_gasoline" in fuels)
+        apply_yes_no(Fuel.OCTANE_92, item, "low_octane_gasoline" in fuels)
         # definition of mid-octane varies by country; 95 is most common
-        Fuel.OCTANE_95.apply(item, any("midgrade_gasoline" in f for f in fuels) or "unleaded_super" in fuels)
+        apply_yes_no(Fuel.OCTANE_95, item, any("midgrade_gasoline" in f for f in fuels) or "unleaded_super" in fuels)
         # the US region seems to also use 'premium_gasoline' to refer to non-diesel gas products
-        Fuel.OCTANE_98.apply(item, any("98" in f for f in fuels) or "premium_gasoline" in fuels)
-        Fuel.OCTANE_100.apply(item, "super_premium_gasoline" in fuels)
+        apply_yes_no(Fuel.OCTANE_98, item, any("98" in f for f in fuels) or "premium_gasoline" in fuels)
+        apply_yes_no(Fuel.OCTANE_100, item, "super_premium_gasoline" in fuels)
         decode_hours(item, result)
         yield item
