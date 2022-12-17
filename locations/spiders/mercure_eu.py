@@ -37,7 +37,7 @@ class MercureEuSpider(scrapy.Spider):
         data = response.xpath("/html/head/script[12]/text()").get()
         if not json.loads(data).get("address"):
             data = response.xpath("/html/head/script[13]/text()").get()
-        elif not json.loads(data).get("address"):
+        if not json.loads(data).get("address"):
             data = response.xpath("/html/head/script[14]/text()").get()
 
         data_json = json.loads(data)
