@@ -39,7 +39,7 @@ class Categories(Enum):
     CLINIC_URGENT = {"amenity": "clinic", "healthcare": "clinic", "urgent_care": "yes"}
     COFFEE_SHOP = {"amenity": "cafe", "cuisine": "coffee_shop"}
     COMPRESSED_AIR = {"amenity": "compressed_air"}
-    DENTIST = {"amenity": "dentist"}
+    DENTIST = {"amenity": "dentist", "healthcare": "dentist"}
     DOCTOR_GP = {
         "amenity": "doctors",
         "healthcare": "doctor",
