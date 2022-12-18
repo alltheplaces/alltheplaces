@@ -1,5 +1,6 @@
 import scrapy
 
+from locations.hours import DAYS, OpeningHours
 from locations.dict_parser import DictParser
 from locations.user_agents import BROSWER_DEFAULT
 from locations.geo import point_locations
@@ -22,5 +23,16 @@ class OyshoSpider(scrapy.Spider):
     def parse(self, response):
         for data in response.json().get("closerStores"):
             item = DictParser.parse(data)
+            item["phone"] = data.get("phones")[0]
+            item["street_address"] = data.get("addressLines")[0]
+            oh = OpeningHours()
+            for openHour in data.get("openingHours", {}).get("schedule"):
+                for day in openHour.get("weekdays"):
+                    oh.add_range(
+                        day=DAYS[day - 1],
+                        open_time=openHour.get("timeStripList")[0].get("initHour"),
+                        close_time=openHour.get("timeStripList")[0].get("endHour"),
+                    )
+            item["opening_hours"] = oh.as_opening_hours()
 
             yield item
