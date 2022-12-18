@@ -4,6 +4,7 @@ import scrapy
 
 from locations.dict_parser import DictParser
 
+
 class OmegawatchesSpider(scrapy.Spider):
     name = "omegawatches"
     item_attributes = {
@@ -14,7 +15,7 @@ class OmegawatchesSpider(scrapy.Spider):
     start_urls = [
         "https://www.omegawatches.com/store/country/usa"
     ]
-    
+
     def find_between(self, text, first, last):
         start = text.index(first) + len(first)
         end = text.index(last, start)
@@ -28,7 +29,6 @@ class OmegawatchesSpider(scrapy.Spider):
             item["email"] = data.get("contacts", {}).get("email")
             item["phone"] = data.get("contacts", {}).get("phone")
             item["street_address"] = data.get("adr").replace("<br />", " ")
-            url = data.get("websiteUrl")
             item["website"] = f'https://{self.allowed_domains[0]}/{data.get("websiteUrl")}'
 
             yield item
