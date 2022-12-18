@@ -1,8 +1,8 @@
 import scrapy
 
+from locations.dict_parser import DictParser
 from locations.geo import point_locations
 from locations.hours import DAYS, OpeningHours
-from locations.dict_parser import DictParser
 from locations.user_agents import BROSWER_DEFAULT
 
 
