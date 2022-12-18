@@ -12,9 +12,7 @@ class OmegawatchesSpider(scrapy.Spider):
         "brand_wikidata": "Q659224",
     }
     allowed_domains = ["omegawatches.com"]
-    start_urls = [
-        "https://www.omegawatches.com/store/country/usa"
-    ]
+    start_urls = ["https://www.omegawatches.com/store/country/usa"]
 
     def find_between(self, text, first, last):
         start = text.index(first) + len(first)
