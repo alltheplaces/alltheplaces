@@ -1,13 +1,13 @@
 import scrapy
 
+from locations.geo import point_locations
 from locations.hours import DAYS, OpeningHours
 from locations.dict_parser import DictParser
 from locations.user_agents import BROSWER_DEFAULT
-from locations.geo import point_locations
 
 
-class OyshoSpider(scrapy.Spider):
-    name = "oysho"
+class OyshoEsSpider(scrapy.Spider):
+    name = "oysho_es"
     item_attributes = {
         "brand": "Oysho",
         "brand_wikidata": "Q3327046",
