@@ -1,7 +1,8 @@
+import re
+
 import scrapy
 
 from locations.dict_parser import DictParser
-from locations.hours import OpeningHours
 
 
 class RemaxItSpider(scrapy.Spider):
@@ -19,5 +20,7 @@ class RemaxItSpider(scrapy.Spider):
             item["lat"] = data.get("coordinates", {})[1]
             item["lon"] = data.get("coordinates", {})[0]
             item["phone"] = data.get("phone_nr")
+            item["state"] = (re.findall("[A-Z]{2}", item["addr_full"])[0:1] or (None,))[0]
+            item["postcode"] = (re.findall("[0-9]{5}|[A-Z0-9]{3} [A-Z0-9]{3}", item["addr_full"])[0:1] or (None,))[0]
 
             yield item
