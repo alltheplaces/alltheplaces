@@ -16,15 +16,17 @@ class OyshoFRSpider(scrapy.Spider):
     user_agent = BROSWER_DEFAULT
 
     def start_requests(self):
+        url = "https://www.oysho.com/itxrest/2/bam/store/64009601/physical-store?languageId=-1&appId=1&latitude={}&longitude={}&countryCode=FR&radioMax=5000"
         for lat, lon in point_locations("eu_centroids_120km_radius_country.csv", "FR"):
-            url = "https://www.oysho.com/itxrest/2/bam/store/64009601/physical-store?languageId=-1&appId=1&latitude={}&longitude={}&countryCode=FR&radioMax=5000"
             yield scrapy.Request(url=url.format(lat, lon))
 
     def parse(self, response):
         for data in response.json().get("closerStores"):
             item = DictParser.parse(data)
+
             item["phone"] = data.get("phones")[0]
             item["street_address"] = data.get("addressLines")[0]
+
             oh = OpeningHours()
             for openHour in data.get("openingHours", {}).get("schedule"):
                 for day in openHour.get("weekdays"):
