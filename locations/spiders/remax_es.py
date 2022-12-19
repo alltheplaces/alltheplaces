@@ -10,9 +10,7 @@ class RemaxEsSpider(scrapy.Spider):
         "brand_wikidata": "Q965845",
     }
     allowed_domains = ["remax.es"]
-    start_urls = [
-        "https://www.remax.es/buscador-de-oficinas/jsonData.php?classification=&type=&subtype=&bedrooms=&bathrooms=&caract=&price=&referencia=&codigopostal=&requery=&provincia=&city=&distrito=&anaconda=&favorite=0&collection=0&_=1671458112266"
-    ]
+    start_urls = ["https://www.remax.es/buscador-de-oficinas/jsonData.php"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def parse(self, response):
