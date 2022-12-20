@@ -3,8 +3,8 @@ import scrapy
 from locations.dict_parser import DictParser
 
 
-class RemaxUkSpider(scrapy.Spider):
-    name = "remax_uk"
+class RemaxGbSpider(scrapy.Spider):
+    name = "remax_gb"
     item_attributes = {
         "brand": "RE/MAX",
         "brand_wikidata": "Q965845",
