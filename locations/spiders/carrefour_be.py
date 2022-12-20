@@ -7,9 +7,7 @@ from locations.hours import DAYS_FULL, OpeningHours
 
 class CarrefourBESpider(scrapy.Spider):
     name = "carrefour_be"
-    start_urls = [
-        "https://winkels.carrefour.be/api/v3/locations"
-    ]
+    start_urls = ["https://winkels.carrefour.be/api/v3/locations"]
     brands = {
         "express": ("Carrefour Express", "Q2940190", None),
         "orange": ("Carrefour Express", "Q2940190", None),
@@ -38,6 +36,7 @@ class CarrefourBESpider(scrapy.Spider):
 
             item["opening_hours"] = oh.as_opening_hours()
             item["website"] = "https://winkels.carrefour.be/nl/s/carrefour/{slug}/{id}".format(
-                slug=data.get("slug"), id=data.get("externalId"))
+                slug=data.get("slug"), id=data.get("externalId")
+            )
 
             yield item
