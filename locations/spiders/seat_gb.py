@@ -21,5 +21,6 @@ class SeatGbSpider(scrapy.Spider):
             item["phone"] = store.get("phone1")
             item["lat"] = store.get("mapcoordinate", {}).get("latitude")
             item["lon"] = store.get("mapcoordinate", {}).get("longitude")
+            item["website"] = f'https://{store.get("url")}'
 
             yield item
