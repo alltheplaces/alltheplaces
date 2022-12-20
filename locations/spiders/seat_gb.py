@@ -4,8 +4,8 @@ import xmltodict
 from locations.dict_parser import DictParser
 
 
-class SeatUkSpider(scrapy.Spider):
-    name = "seat_uk"
+class SeatGbSpider(scrapy.Spider):
+    name = "seat_gb"
     item_attributes = {
         "brand": "SEAT",
         "brand_wikidata": "Q188217",
