@@ -1,5 +1,4 @@
 import scrapy
-
 import xmltodict
 
 from locations.dict_parser import DictParser
