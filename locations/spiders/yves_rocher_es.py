@@ -42,8 +42,6 @@ class YvesRocherEsSpider(scrapy.Spider):
             "openingSaturday",
             "openingSunday",
         ]
-        if data_json.get("openingMonday"):
-            print("\n", data_json.get("openingMonday"), "\n")
         for day in days:
             if data_json.get(day):
                 for ilem in data_json.get(day).split("<br>"):
