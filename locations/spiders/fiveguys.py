@@ -6,7 +6,10 @@ from locations.microdata_parser import MicrodataParser
 
 class FiveguysSpider(scrapy.spiders.SitemapSpider):
     name = "fiveguys"
-    item_attributes = {"brand": "Five Guys", "brand_wikidata": "Q1131810"}
+    item_attributes = {
+        "brand": "Five Guys",
+        "brand_wikidata": "Q1131810",
+    }
     sitemap_urls = [
         "https://restaurants.fiveguys.com/sitemap.xml",
         "https://restaurants.fiveguys.ae/sitemap.xml",
@@ -28,22 +31,29 @@ class FiveguysSpider(scrapy.spiders.SitemapSpider):
         "https://restaurants.fiveguys.sg/sitemap.xml",
         "https://restaurants.fiveguys.co.uk/sitemap.xml",
     ]
+    sitemap_follow = [
+        r"^https://restaurants\.fiveguys\.com\/[^/]+$",
+        r"^https://restaurants\.fiveguys\.ae\/en_ae\/[^/]+$",
+        r"^https://restaurants\.fiveguys\.be\/en_be\/[^/]+$",
+        r"^https://restaurants\.fiveguys\.ca\/[^/]+$",
+        r"^https://restaurants\.fiveguys\.ch\/en_ch\/[^/]+$",
+        r"^https://restaurants\.fiveguys\.cn\/en\/[^/]+$",
+        r"^https://restaurants\.fiveguys\.de\/[^/]+\/[^/]+$",
+        r"^https://restaurants\.fiveguys\.es\/[^/]+\/[^/]+$",
+        r"^https://restaurants\.fiveguys\.fr\/[^/]+\/[^/]+$",
+        r"^https://restaurants\.fiveguys\.ie\/[^/]+$",
+        r"^https://restaurants\.fiveguys\.com\.kw\/en_kw\/[^/]+$",
+        r"^https://restaurants\.fiveguys\.it\/en_it\/[^/]+$",
+        r"^https://restaurants\.fiveguys\.lu\/en_lu\/[^/]+$",
+        r"^https://restaurants\.fiveguys\.my\/en\/[^/]+$",
+        r"^https://restaurants\.fiveguys\.nl\/en_nl\/[^/]+$",
+        r"^https://restaurants\.fiveguys\.qa\/en_qa\/[^/]+$",
+        r"^https://restaurants\.fiveguys\.sa\/en_sa\/[^/]+$",
+        r"^https://restaurants\.fiveguys\.sg\/[^/]+$",
+        r"^https://restaurants\.fiveguys\.co\.uk\/.+$",
+    ]
     download_delay = 0.5
 
-    def _parse_sitemap(self, response):
-        for x in super()._parse_sitemap(response):
-            # Brittle, but hey saves on GET requests, all site pages presently have a hyphen in the URL
-            if "-" in x.url:
-                yield x
-
     def parse(self, response):
-        # How do you like your duplicates served?
-        # Prefer English, but some estates are only native language.
-        lang = response.xpath("/html/@lang").get().lower()
-        is_a_keeper = lang.startswith("en")
-        for s in ["guys.fr/", "guys.es/", "guys.de/"]:
-            if s in response.url:
-                is_a_keeper = True
-        if is_a_keeper:
-            MicrodataParser.convert_to_json_ld(response)
-            yield LinkedDataParser.parse(response, "FastFoodRestaurant")
+        MicrodataParser.convert_to_json_ld(response)
+        yield LinkedDataParser.parse(response, "FastFoodRestaurant")

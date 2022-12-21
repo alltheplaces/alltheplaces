@@ -1,4 +1,5 @@
 import re
+from urllib.parse import urljoin
 
 from scrapy import Spider
 
@@ -65,20 +66,20 @@ class StructuredDataSpider(Spider):
         "AutomotiveBusiness",
         "BarOrPub",
         "SportingGoodsStore",
+        "Dentist",
+        "AutoRental",
     ]
     search_for_email = True
     search_for_phone = True
     search_for_twitter = True
     search_for_facebook = True
     search_for_image = True
-    parse_json_comments = False
+    json_parser = "json"
 
     def parse_sd(self, response):  # noqa: C901
         MicrodataParser.convert_to_json_ld(response)
         for wanted_type in self.wanted_types:
-            if ld_item := LinkedDataParser.find_linked_data(
-                response, wanted_type, parse_json5=self.parse_json_comments
-            ):
+            if ld_item := LinkedDataParser.find_linked_data(response, wanted_type, json_parser=self.json_parser):
                 self.pre_process_data(ld_item)
 
                 item = LinkedDataParser.parse_ld(ld_item)
@@ -125,6 +126,9 @@ class StructuredDataSpider(Spider):
 
                 if self.search_for_image and item.get("image") is None:
                     extract_image(item, response)
+
+                if item.get("image") and item["image"].startswith("/"):
+                    item["image"] = urljoin(response.url, item["image"])
 
                 yield from self.post_process_item(item, response, ld_item)
 

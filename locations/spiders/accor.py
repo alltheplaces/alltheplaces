@@ -51,5 +51,5 @@ class AccorSpider(WoosmapSpider):
     def parse_item(self, item, feature, **kwargs):
         if match := self.brand_mapping.get(feature["properties"]["types"][0]):
             item.update(match)
-
+        item["website"] = f"https://all.accor.com/hotel/{item['ref']}/index.en.shtml"
         yield item
