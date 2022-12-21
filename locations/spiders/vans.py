@@ -1,9 +1,9 @@
 import json
 
 import scrapy
+from scrapy.spiders import SitemapSpider
 
 from locations.dict_parser import DictParser
-from scrapy.spiders import SitemapSpider
 
 
 class VansSpider(SitemapSpider):
