@@ -2,7 +2,9 @@ import scrapy
 
 from locations.hours import OpeningHours
 from locations.items import GeojsonPointItem
-from locations.spiders.lidl_gb import LidlGBSpider
+from locations.categories import Categories
+import json
+import csv
 
 DAY_MAPPING = {
     "Mo": "Mo",
@@ -14,18 +16,36 @@ DAY_MAPPING = {
     "So": "Su",
 }
 
+HEADERS = {"X-Requested-With": "XMLHttpRequest"}
+STORELOCATOR = "https://spatial.virtualearth.net/REST/v1/data/ab055fcbaac04ec4bc563e65ffa07097/Filialdaten-SEC/Filialdaten-SEC?$select=*,__Distance&$filter=Adresstyp%20eq%201&key=AiUPPcYK4rdGkNaJ9FLpcgcgcEfzdPNcqEafbU8B6m8hzjcQk_urZxCWtLvFsHSq&$format=json&jsonp=Microsoft_Maps_Network_QueryAPI_3&spatialFilter=nearby({:},{:},40.1931215)"
 
 class LidlDESpider(scrapy.Spider):
     name = "lidl_de"
-    item_attributes = LidlGBSpider.item_attributes
-    allowed_domains = ["lidl.de"]
+    item_attributes = {
+        "brand": "Lidl",
+        "brand_wikidata": "Q151954",
+        "extras": Categories.SHOP_SUPERMARKET.value,
+    }
     handle_httpstatus_list = [404]
-    start_urls = ["https://www.lidl.de/f/"]
+
+    def start_requests(self):
+        with open("locations/searchable_points/germany_grid_15km.csv") as openFile:
+            results = csv.DictReader(openFile)
+            for result in results:
+                longitude = float(result["longitude"])
+                latitude = float(result["latitude"])
+                request = scrapy.Request(
+                    url=STORELOCATOR.format(latitude, longitude),
+                    headers=HEADERS,
+                    callback=self.parse,
+                )
+                yield request
+        
 
     def parse_hours(self, hours):
         opening_hours = OpeningHours()
-
-        for item in hours:
+        hoursAll = hours.split('<br>')
+        for item in hoursAll:
             if item.split():
                 try:
                     day = DAY_MAPPING[item.split()[0]]
@@ -40,43 +60,25 @@ class LidlDESpider(scrapy.Spider):
 
         return opening_hours.as_opening_hours()
 
-    def parse_details(self, response):
-
-        lidlShops = response.css(".ret-o-store-detail")
-
-        for shop in lidlShops:
-            shopAddress = shop.css(".ret-o-store-detail__address::text").extract()
-            street = shopAddress[0]
-            postalCode = shopAddress[1].split()[0]
-            city = shopAddress[1].split()[1]
-            openingHours = shop.css(".ret-o-store-detail__opening-hours::text").extract()
-            services = response.css(".ret-o-store-detail__store-icon-wrapper")[0]
-            link = services.css('a::attr("href")').get()
-            coordinates = link.split("pos.")[1].split("_L")[0]
-            latitude = coordinates.split("_")[0]
-            longitude = coordinates.split("_")[1]
-
-            properties = {
-                "ref": latitude + longitude,
-                "street_address": street,
-                "postcode": postalCode,
-                "city": city,
-                "lat": latitude,
-                "lon": longitude,
-            }
-
-            hours = self.parse_hours(openingHours)
-
-            if hours:
-                properties["opening_hours"] = hours
-
-            yield GeojsonPointItem(**properties)
-
     def parse(self, response):
+        data = response.body.decode('utf-8').split('Microsoft_Maps_Network_QueryAPI_3(')[1]
+        fixed_data = data.rstrip(data[-1])
+        jsonData = json.loads(fixed_data)
+        shops_of_the_area = jsonData['d']['results']
 
-        cities = response.css(".ret-o-store-detail-city").css("a::attr(href)")
+        shop_property = {}
 
-        for city in cities:
-            city = f"https://www.lidl.de{city.get()}"
-
-            yield scrapy.Request(url=city, callback=self.parse_details)
+        for shop in shops_of_the_area:
+            shop_property['ref'] = shop['EntityID']
+            shop_property['country'] = shop['CountryRegion']
+            shop_property['city'] = shop['Locality']
+            shop_property['postcode'] = shop['PostalCode']
+            shop_property['street'] = shop['AddressLine']
+            shop_property['lat'] = shop['Latitude']
+            shop_property['lon'] = shop['Longitude']
+            hours = self.parse_hours(shop['OpeningTimes'])
+            if hours:
+                shop_property["opening_hours"] = hours
+            
+            yield GeojsonPointItem(**shop_property)
+        
