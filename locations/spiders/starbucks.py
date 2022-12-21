@@ -64,6 +64,7 @@ class StarbucksSpider(scrapy.Spider):
                 "website": f'https://www.starbucks.com/store-locator/store/{store["id"]}/{store["slug"]}',
                 "extras": {
                     "number": store["storeNumber"],
+                    "ownership_type": store["ownershipTypeCode"]
                 },
             }
             yield GeojsonPointItem(**properties)
