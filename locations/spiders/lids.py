@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.hours import OpeningHours, DAYS_FULL, DAYS_EN
+from locations.hours import DAYS_EN, DAYS_FULL, OpeningHours
 from locations.items import GeojsonPointItem
 
 TIME_FORMAT = "%H:%M %p"
@@ -24,7 +24,8 @@ class LidsSpider(scrapy.Spider):
                 day=DAYS_EN[day],
                 open_time=hours[day.lower() + "Open"],
                 close_time=hours[day.lower() + "Closed"],
-                time_format=TIME_FORMAT)
+                time_format=TIME_FORMAT,
+            )
 
         return opening_hours.as_opening_hours()
 
