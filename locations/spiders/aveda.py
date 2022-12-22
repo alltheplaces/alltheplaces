@@ -1,0 +1,30 @@
+import scrapy
+
+from locations.dict_parser import DictParser
+
+
+class AvedaSpider(scrapy.Spider):
+    name = "aveda"
+    item_attributes = {
+        "brand": "Aveda",
+        "brand_wikidata": "Q4827965",
+    }
+    allowed_domains = ["aveda.com"]
+
+    def start_requests(self):
+        url = "https://www.aveda.com/rpc/jsonrpc.tmpl?dbgmethod=locator.doorsandevents"
+        headers = {"Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"}
+        payload = 'JSONRPC=[{"method":"locator.doorsandevents","params":[{"fields":"ACTUAL_ADDRESS, ACTUAL_ADDRESS2, ACTUAL_CITY, STORE_TYPE, STATE, ZIP, DOORNAME, ADDRESS, ADDRESS2, CITY, STATE_OR_PROVINCE, ZIP_OR_POSTAL, COUNTRY, PHONE1, LONGITUDE, LATITUDE, LOCATION, WEBURL, EMAILADDRESS, APPT_URL","radius":"10200","latitude":48.9098994,"longitude":8.2499462,"uom":"miles"}]}]'
+        yield scrapy.Request(url=url, body=payload, method="POST", headers=headers, callback=self.parse)
+
+    def parse(self, response):
+        data = response.json()[0].get("result", {}).get("value", {}).get("results", {}).items()
+        for key, value in data:
+            item = DictParser.parse(value)
+            item["ref"] = key
+            item["name"] = value.get("DOORNAME")
+            item["street_address"] = value.get("ACTUAL_ADDRESS")
+            item["phone"] = value.get("PHONE1")
+            item["website"] = value.get("WEBURL")
+
+            yield item
