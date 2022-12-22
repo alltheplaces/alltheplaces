@@ -3,7 +3,7 @@ import scrapy
 from locations.hours import DAYS_EN, DAYS_FULL, OpeningHours
 from locations.items import GeojsonPointItem
 
-TIME_FORMAT = "%H:%M %p"
+TIME_FORMAT = "%I:%M %p"
 
 
 class LidsSpider(scrapy.Spider):
@@ -23,10 +23,16 @@ class LidsSpider(scrapy.Spider):
     def parse_hours(self, hours):
         opening_hours = OpeningHours()
         for day in DAYS_FULL:
+            open_time = hours[day.lower() + "Open"]
+            close_time = hours[day.lower() + "Close"]
+
+            if close_time == '' or open_time == '':
+                return
+
             opening_hours.add_range(
                 day=DAYS_EN[day],
-                open_time=hours[day.lower() + "Open"],
-                close_time=hours[day.lower() + "Close"],
+                open_time=open_time,
+                close_time=close_time,
                 time_format=TIME_FORMAT,
             )
 
@@ -44,11 +50,18 @@ class LidsSpider(scrapy.Spider):
                 "postcode": row["address"]["zip"],
                 "state": row["address"]["state"],
                 "country": row["address"]["country"],
-                "lat": row["location"]["coordinate"]["latitude"],
-                "lon": row["location"]["coordinate"]["longitude"],
-                "phone": row["phone"],
                 "website": "https://www.lids.com" + row["taggedUrl"],
             }
+            try:
+                properties["phone"] = row["phone"]
+            except KeyError:
+                pass
+
+            try:
+                properties["lat"] = row["location"]["coordinate"]["latitude"]
+                properties["lon"] = row["location"]["coordinate"]["longitude"]
+            except KeyError:
+                pass
 
             hours = self.parse_hours(row)
 
