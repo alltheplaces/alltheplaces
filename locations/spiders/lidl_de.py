@@ -66,9 +66,9 @@ class LidlDESpider(scrapy.Spider):
         jsonData = json.loads(fixed_data)
         shops_of_the_area = jsonData['d']['results']
 
-        shop_property = {}
 
         for shop in shops_of_the_area:
+            shop_property = {}
             shop_property['ref'] = shop['EntityID']
             shop_property['country'] = shop['CountryRegion']
             shop_property['city'] = shop['Locality']
