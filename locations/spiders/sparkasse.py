@@ -29,7 +29,7 @@ class SparkasseSpider(scrapy.Spider):
             try:
                 (day, time) = store_day.split()
             except ValueError:
-                print("Error in store_day: {}".format(store_day))
+                self.logger.warn("Error in store_day: %s", store_day)
 
             if time:
                 (open_time, close_time) = time.split("-")
