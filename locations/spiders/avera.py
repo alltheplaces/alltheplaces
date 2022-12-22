@@ -29,7 +29,6 @@ class AveraSpider(scrapy.Spider):
 
         try:
             next_href = "https://www.avera.org" + response.xpath('//a[@class="Next"]/@href').extract_first()
-            print(next_href)
             yield scrapy.Request(url=next_href, callback=self.parse_loc)
         except:
             pass
