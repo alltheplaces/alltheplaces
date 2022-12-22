@@ -32,7 +32,7 @@ class DrogerieMarktSpider(SitemapSpider):
         item["street_address"] = data["address"]["street"]
         item["street"] = None
         item["name"] = data["address"]["name"]
-        item["website"] = response.urljoin(data["storeUrlPath"])
+        item["website"] = f"https://dm.de{data['storeUrlPath']}"
 
         oh = OpeningHours()
         for o in data["openingHours"]:
