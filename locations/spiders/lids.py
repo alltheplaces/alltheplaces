@@ -44,8 +44,8 @@ class LidsSpider(scrapy.Spider):
                 "postcode": row["address"]["zip"],
                 "state": row["address"]["state"],
                 "country": row["address"]["country"],
-                "lat": row["location"]["coordinates"]["latitude"],
-                "lon": row["location"]["coordinates"]["longitude"],
+                "lat": row["location"]["coordinate"]["latitude"],
+                "lon": row["location"]["coordinate"]["longitude"],
                 "phone": row["phone"],
                 "website": "https://www.lids.com" + row["taggedUrl"],
             }
