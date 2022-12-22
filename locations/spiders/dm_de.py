@@ -32,6 +32,7 @@ class DrogerieMarktSpider(SitemapSpider):
         item["street_address"] = data["address"]["street"]
         item["street"] = None
         item["name"] = data["address"]["name"]
+        item["website"] = response.urljoin(data["storeUrlPath"])
 
         oh = OpeningHours()
         for o in data["openingHours"]:
