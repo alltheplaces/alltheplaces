@@ -15,6 +15,22 @@ from locations.items import GeojsonPointItem
 class BernCHSpider(scrapy.Spider):
     name = "bern_ch"
     allowed_domains = ["map.bern.ch"]
+
+    dataset_attributes = {
+        "attribution": "required",
+        "attribution:name:de": "Geodaten Stadt Bern",
+        "attribution:name:en": "Geodata City of Bern",
+        "attribution:website": "https://www.bern.ch/themen/planen-und-bauen/geodaten-und-plane",
+        "contact:email": "geoinformation@bern.ch",
+        "license": "opendata.swiss BY-ASK",
+        "license:website": "https://opendata.swiss/de/terms-of-use#terms_by_ask",
+        "license:wikidata": "Q115716001",
+        "use:commercial": "permit",
+        # permission for import to OpenStreetMap has been granted, 2022-12-22
+        "use:openstreetmap": "yes",
+        "website": "https://opendata.swiss/de/dataset/velo-themen",
+    }
+
     operators = {
         "carvelo2go": ("Q110278232", {"rental": "cargo_bike"}),
         "PubliBike": ("Q3555363", {}),
