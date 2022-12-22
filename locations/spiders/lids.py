@@ -26,7 +26,7 @@ class LidsSpider(scrapy.Spider):
             open_time = hours[day.lower() + "Open"]
             close_time = hours[day.lower() + "Close"]
 
-            if close_time == '' or open_time == '':
+            if close_time == "" or open_time == "":
                 return
 
             opening_hours.add_range(
