@@ -10,7 +10,10 @@ class LidsSpider(scrapy.Spider):
     name = "lids"
     item_attributes = {"brand": "Lids", "brand_wikidata": "Q19841609"}
     allowed_domains = ["lids.com"]
-    custom_settings = {"COOKIES_ENABLED": True}
+    custom_settings = {
+        "COOKIES_ENABLED": True,
+        "USER_AGENT": " Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36",
+    }
 
     def start_requests(self):
         url = "https://www.lids.com/api/data/v2/stores/514599?lat=30.2729209&long=-97.74438630000002&num=12000&shipToStore=false"
