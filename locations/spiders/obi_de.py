@@ -14,3 +14,4 @@ class ObiDESpider(CrawlSpider, StructuredDataSpider):
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["website"] = response.url
+        yield item
