@@ -34,7 +34,6 @@ class AveraSpider(scrapy.Spider):
         except:
             pass
 
-
     def parse_data(self, response):
         data = json.loads(
             response.xpath(
@@ -47,9 +46,7 @@ class AveraSpider(scrapy.Spider):
         item["country"] = "US"
 
         try:
-            item["extras"] = {
-                "fax": data["faxNumber"]
-            }
+            item["extras"] = {"fax": data["faxNumber"]}
         except KeyError:
             pass
 
