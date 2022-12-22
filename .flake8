@@ -3,3 +3,6 @@
     max-line-length = 120
     max-complexity = 18
     select = B,C,E,F,W,T4,B9,T20
+    per-file-ignores =
+        ci/restore_history.py: T20
+        locations/commands/*: T20
