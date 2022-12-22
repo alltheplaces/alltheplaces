@@ -25,11 +25,11 @@ jobs:
         pip --quiet install pipenv
     - name: Install dependencies
       run: |
-        pipenv --bare install --system --deploy
+        pipenv --bare install --deploy
         sudo apt-get install jq
     - name: Run Scrapy check
       run: |
-        scrapy check
+        pipenv run scrapy check
     - name: Run spiders that changed
       shell: bash
       run: |
@@ -60,7 +60,7 @@ jobs:
             LOGFILE="${SPIDER_RUN_DIR}/log.txt"
             OUTFILE="${SPIDER_RUN_DIR}/output.geojson"
 
-            scrapy runspider \
+            pipenv run scrapy runspider \
                 -o "file://${OUTFILE}:geojson" \
                 --loglevel=INFO \
                 --logfile="${LOGFILE}" \

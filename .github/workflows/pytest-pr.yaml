@@ -22,7 +22,7 @@ jobs:
         pip --quiet install pipenv
     - name: Install dependencies
       run: |
-        pipenv --bare install --system --dev
+        pipenv --bare install --dev
     - name: Run pytest
       run: |
         pipenv run pytest
