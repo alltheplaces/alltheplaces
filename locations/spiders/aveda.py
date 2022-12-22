@@ -23,6 +23,7 @@ class AvedaSpider(scrapy.Spider):
             item = DictParser.parse(value)
             item["ref"] = key
             item["name"] = value.get("DOORNAME")
+            item["addr_full"] = None  # The DictParser puts street address in the wrong spot
             item["street_address"] = value.get("ACTUAL_ADDRESS")
             item["phone"] = value.get("PHONE1")
             item["website"] = value.get("WEBURL")
