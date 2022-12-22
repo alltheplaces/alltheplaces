@@ -9,8 +9,8 @@ class ObiDESpider(CrawlSpider, StructuredDataSpider):
     item_attributes = {"brand": "Obi", "brand_wikidata": "Q300518"}
     allowed_domains = ["www.obi.de"]
     start_urls = ["https://www.obi.de/markt/index.html"]
-    rules = [Rule(LinkExtractor(allow="https://www.obi.de/markt/.*"), callback="parse_sd", follow=True)]
+    rules = [Rule(LinkExtractor(allow="https://www.obi.de/markt/.*"), callback="parse_sd")]
     download_delay = 0.5
 
-    def parse(self, response):
-        print("foo")
+    def post_process_item(self, item, response, ld_data, **kwargs):
+        item["website"] = response.url
