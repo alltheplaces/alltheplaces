@@ -36,7 +36,7 @@ class VirtualEarthSpider(Spider):
             feature["ref"] = feature["EntityID"]
             feature["address"] = {
                 "street_address": feature.get("AddressLine"),
-                "coty": feature.get("Locality"),
+                "city": feature.get("Locality"),
                 "state": feature.get("AdminDistrict"),
                 "post_code": feature.get("PostalCode"),
                 "country": feature.get("CountryRegion"),
