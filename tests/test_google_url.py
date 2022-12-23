@@ -58,6 +58,10 @@ def test_directions():
     assert url_to_coords(
         "https://www.google.com/maps/dir//Unit+35B%2C+The+Meadows%2C+42-47+High+Street%2C+Chelmsford%2C+CM2+6FD%2C+United+Kingdom/@51.73135800,0.47663600,17z"
     ) == (51.73135800, 0.47663600)
+    assert url_to_coords("https://www.google.com/maps/dir/?api=1&destination=51.5286809,7.4703131") == (
+        51.5286809,
+        7.4703131,
+    )
 
 
 def test_place():
