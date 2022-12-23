@@ -19,8 +19,8 @@ class KampsDESpider(SitemapSpider):
             "phone": response.xpath('//a[contains(@href, "tel:")]/text()').extract_first(),
             "website": response.xpath('//link[@rel="canonical"]/@href').extract_first(),
             "street_address": response.xpath('//div[@class="card-block"]/p/text()').extract()[0].strip(),
-            "city": response.xpath('//div[@class="card-block"]/p/text()').extract()[1].strip().split(" ", 1)[0],
-            "postcode": response.xpath('//div[@class="card-block"]/p/text()').extract()[1].strip().split(" ", 1)[1],
+            "city": response.xpath('//div[@class="card-block"]/p/text()').extract()[1].strip().split(" ", 1)[1],
+            "postcode": response.xpath('//div[@class="card-block"]/p/text()').extract()[1].strip().split(" ", 1)[0],
         }
 
         oh = OpeningHours()
