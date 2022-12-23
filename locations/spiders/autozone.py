@@ -1,3 +1,5 @@
+import re
+
 from locations.user_agents import BROSWER_DEFAULT
 from scrapy.spiders import SitemapSpider
 from locations.structured_data_spider import StructuredDataSpider
@@ -19,3 +21,8 @@ class AutoZoneSpider(SitemapSpider, StructuredDataSpider):
             "Accept-Encoding": "gzip, deflate, br",
         }
     }
+
+    def inspect_item(self, item, response):
+        name = response.xpath('//h1[@id="location-name"]/span[2]/text()').get().strip()
+        item["ref"] = re.findall(r"#[0-9]+", name)[0]
+        yield item
