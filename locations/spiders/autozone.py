@@ -23,6 +23,6 @@ class AutoZoneSpider(SitemapSpider, StructuredDataSpider):
     }
 
     def inspect_item(self, item, response):
-        name = response.xpath('//h1[@id="location-name"]/span[2]/text()').get().strip()
-        item["ref"] = re.findall(r"#[0-9]+", name)[0]
+        name = response.xpath('//h1[@id="location-name"]/span[2]/text()').get()
+        item["ref"] = re.findall(r"#[0-9]+", name.strip())[0] if name else response.url
         yield item
