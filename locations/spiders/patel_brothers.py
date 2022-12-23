@@ -1,6 +1,5 @@
 # # -*- coding: utf-8 -*-
 import scrapy
-from locations.dict_parser import DictParser
 from locations.items import GeojsonPointItem
 
 
@@ -14,7 +13,6 @@ class PatelBrothersSpider(scrapy.Spider):
 
     def parse(self, response):
         items = response.xpath('//store/item')
-        lats = {}
         for item in items:
             properties = {
                 "lat" : item.xpath('latitude//text()').extract_first(),
