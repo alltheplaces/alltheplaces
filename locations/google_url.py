@@ -60,8 +60,14 @@ def url_to_coords(url: str) -> (float, float):  # noqa: C901
             lat, lon = ll.split(",")
             return float(lat), float(lon)
     elif url.startswith("https://www.google.com/maps/dir/"):
-        lat, lon = url.split("/")[6].split(",")
-        return float(lat.strip()), float(lon.strip())
+        slash_splits = url.split("/")
+        if len(slash_splits) > 6:
+            lat, lon = slash_splits[6].split(",")
+            return float(lat.strip()), float(lon.strip())
+
+        for ll in get_query_param(url, "destination"):
+            lat, lon = ll.split(",")
+            return float(lat), float(lon)
     elif url.startswith("https://www.google.com/maps/place/"):
         lat, lon = url.split("/")[5].split(",")
         return float(lat.strip()), float(lon.strip())
