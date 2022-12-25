@@ -8,5 +8,8 @@ class CabelasSpider(SitemapSpider, StructuredDataSpider):
     item_attributes = {"brand": "Cabela's", "brand_wikidata": "Q2793714"}
     allowed_domains = ["stores.cabelas.com", "cabelas.ca"]
     sitemap_urls = ["https://stores.cabelas.com/sitemap.xml", "https://www.cabelas.ca/sitemap.xml"]
-    sitemap_rules = [("https://stores.cabelas.com/[-\w]+", "parse_sd"), ("/find-a-store/", "parse_sd")]
+    sitemap_rules = [
+        (r"https://stores.cabelas.com/[-\w]+", "parse_sd"),
+        ("/find-a-store/", "parse_sd"),
+    ]
     wanted_types = ["SportingGoodsStore", "Store"]
