@@ -1,8 +1,7 @@
 import scrapy
 
-from locations.hours import OpeningHours
+from locations.hours import DAYS, OpeningHours
 from locations.items import GeojsonPointItem
-from locations.hours import DAYS
 
 
 class CaptainDSpider(scrapy.spiders.SitemapSpider):
