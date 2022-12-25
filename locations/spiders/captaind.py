@@ -2,66 +2,51 @@ import scrapy
 
 from locations.hours import OpeningHours
 from locations.items import GeojsonPointItem
-
-NUMBER_DAY = {
-    "1": "Mo",
-    "2": "Tu",
-    "3": "We",
-    "4": "Th",
-    "5": "Fr",
-    "6": "Sa",
-    "7": "Su",
-}
+from locations.hours import DAYS
 
 
-class CaptainDSpider(scrapy.Spider):
-
+class CaptainDSpider(scrapy.spiders.SitemapSpider):
     name = "captaind"
     item_attributes = {"brand": "Captain D's", "brand_wikidata": "Q5036616"}
-    allowed_domains = [
-        "momentfeed-prod.apigee.net",
-    ]
-
-    start_urls = (
-        "https://momentfeed-prod.apigee.net/api/llp.json?auth_token=AJXCZOENNNXKHAKZ&country=US&sitemap=true",
-    )
-
-    def parse_hours(self, hours):
-        "1,1030,2200;2,1030,2200;3,1030,2200;4,1030,2200;5,1030,2300;6,1030,2300;7,1030,2200;"
-        opening_hours = OpeningHours()
-        if hours:
-            days = [day for day in hours.split(";") if day]
-            for day in days:
-                day, from_hr, to_hr = day.split(",")
-                opening_hours.add_range(
-                    day=NUMBER_DAY[day],
-                    open_time=from_hr,
-                    close_time=to_hr,
-                    time_format="%H%M",
-                )
-        return opening_hours.as_opening_hours()
+    allowed_domains = ["locations.captainds.com", "api.momentfeed.com"]
+    sitemap_urls = ["https://locations.captainds.com/sitemap.xml"]
+    sitempa_rules = [("", "parse")]
 
     def parse(self, response):
+        headers = {"Host": "api.momentfeed.com", "Authorization": "AJXCZOENNNXKHAKZ"}
+        url = "https://api.momentfeed.com/v1/analytics/api/llp.json?address={}"
+        yield scrapy.Request(
+            url=url.format(response.url.split("/")[-1].replace("-", "+").replace("_", ".")),
+            headers=headers,
+            callback=self.parse_store,
+        )
 
-        stores = response.json()
+    def parse_store(self, response):
 
-        for store in stores:
-            opening_hours = ""
-            if store.get("store_info", "").get("store_hours", ""):
-                opening_hours = self.parse_hours(store["store_info"]["store_hours"])
+        store = response.json()[0].get("store_info")
 
-            props = {
-                "name": store["store_info"]["brand_name"],
-                "ref": store["store_info"]["corporate_id"],
-                "addr_full": store["store_info"]["address"],
-                "postcode": store["store_info"]["postcode"],
-                "state": store["store_info"]["region"],
-                "website": store["store_info"]["website"],
-                "city": store["store_info"]["locality"],
-                "phone": store["store_info"]["phone"],
-                "lat": float(store["store_info"]["latitude"]),
-                "lon": float(store["store_info"]["longitude"]),
-                "opening_hours": opening_hours,
-            }
+        oh = OpeningHours()
+        for day in store.get("store_hours").split(";")[:-1]:
+            info_day = day.split(",")
+            oh.add_range(
+                day=DAYS[int(info_day[0]) - 1],
+                open_time=info_day[1],
+                close_time=info_day[2],
+                time_format="%H%M",
+            )
 
-            yield GeojsonPointItem(**props)
+        props = {
+            "name": store.get("brand_name"),
+            "ref": store.get("corporate_id"),
+            "addr_full": store.get("address"),
+            "postcode": store.get("postcode"),
+            "state": store.get("region"),
+            "website": store.get("website"),
+            "city": store.get("locality"),
+            "phone": store.get("phone"),
+            "lat": float(store.get("latitude")),
+            "lon": float(store.get("longitude")),
+            "opening_hours": oh.as_opening_hours(),
+        }
+
+        yield GeojsonPointItem(**props)
