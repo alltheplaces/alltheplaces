@@ -1,68 +1,69 @@
-import json
+import re
 
 import scrapy
-from scrapy import Selector
+
 
 from locations.hours import OpeningHours
 from locations.items import GeojsonPointItem
 
-DAYS = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
+from locations.user_agents import BROSWER_DEFAULT
 
 
-class CanadianTireSpider(scrapy.Spider):
+class CanadianTireSpider(scrapy.spiders.SitemapSpider):
     name = "canadiantire"
-    allowed_domains = ["canadiantire.ca"]
-    start_urls = [
-        "https://www.canadiantire.ca/sitemap_0_4.xml.gz",
-    ]
     item_attributes = {"brand": "Canadian Tire", "brand_wikidata": "Q1032400"}
-
-    def parse_hours(self, hours):
-        opening_hours = OpeningHours()
-        for hour, day in zip(hours, DAYS):
-            if hour == "Closed":
-                continue
-            hour = json.loads(hour)
-            opening_hours.add_range(day, open_time=hour["open"], close_time=hour["close"])
-
-        return opening_hours.as_opening_hours()
-
-    def parse(self, response):
-        xml = Selector(response)
-        xml.remove_namespaces()
-
-        urls = xml.xpath("//loc/text()").extract()
-        urls = [url.strip() for url in urls]
-
-        for url in urls:
-            if "store-details" in url:
-                yield scrapy.Request(url, callback=self.parse_store)
+    allowed_domains = ["canadiantire.ca"]
+    sitemap_urls = [
+        "https://www.canadiantire.ca/sitemap_store_en_01.xml",
+    ]
+    sitemap_rules = [("", "parse_store")]
+    custom_settings = {
+        "DEFAULT_REQUEST_HEADERS": {
+            "Host": "www.canadiantire.ca",
+            "User-Agent": BROSWER_DEFAULT,
+        }
+    }
 
     def parse_store(self, response):
-        check = response.xpath('//tr[contains(@class, "hours-table")]/@data-working-hours').extract_first()
-        if not check or check == "12:00 AM - 12:00 AM":
-            # there's some empty/placeholder/test store pages
-            return
+        headers = {
+            "User-Agent": BROSWER_DEFAULT,
+            "Host": "apim.canadiantire.ca",
+            "baseSiteId": "CTR",
+            "Ocp-Apim-Subscription-Key": "c01ef3612328420c9f5cd9277e815a0e",
+        }
+        id_url = re.findall("[0-9]+", response.url)[0]
+        template = "https://apim.canadiantire.ca/v1/store/store/{id_url}?lang=en_CA"
 
-        data = json.loads(response.xpath('//div[@data-component="StoreLocatorPage"]/@data-config').extract_first())
+        yield scrapy.Request(url=template.format(id_url=id_url), headers=headers, callback=self.parse_store_details)
+
+    def parse_store_details(self, response):
+
+        oh = OpeningHours()
+        if response.json().get("storeServices"):
+            for day in response.json().get("storeServices", {})[0].get("weekDayOpeningList"):
+                if day.get("closed"):
+                    continue
+                oh.add_range(
+                    day=day.get("weekDay"),
+                    open_time=day.get("openingTime", {}).get("formattedHour").replace(".", ""),
+                    close_time=day.get("closingTime", {}).get("formattedHour").replace(".", ""),
+                    time_format="%I:%M %p",
+                )
 
         properties = {
-            "brand": "Canadian Tire",
-            "name": data["storeName"],
-            "ref": data["storeNumber"],
-            "addr_full": data["storeAddress1"],
-            "city": data["storeCityName"],
-            "state": data["storeProvince"],
-            "postcode": data["storePostalCode"],
-            "country": "CA",
-            "phone": data["storeTelephone"],
-            "website": response.url,
-            "lat": float(data["storeLatitude"]),
-            "lon": float(data["storeLongitude"]),
+            "ref": response.json().get("id"),
+            "name": response.json().get("name"),
+            "country": response.json().get("country"),
+            "state": response.json().get("address", {}).get("country", {}).get("isocode"),
+            "postcode": response.json().get("address", {}).get("postalCode"),
+            "country": response.json().get("address", {}).get("country", {}).get("isocode"),
+            "lat": response.json().get("geoPoint", {}).get("latitude"),
+            "lon": response.json().get("geoPoint", {}).get("longitude"),
+            "phone": response.json().get("address", {}).get("phone"),
+            "email": response.json().get("address", {}).get("email"),
+            "street_address": response.json().get("address", {}).get("line1"),
+            "website": f'https://www.canadiantire.ca{response.json().get("url")}',
+            "opening_hours": oh.as_opening_hours(),
         }
-
-        hours = self.parse_hours(response.xpath('//tr[contains(@class, "hours-table")]/@data-working-hours').extract())
-        if hours:
-            properties["opening_hours"] = hours
 
         yield GeojsonPointItem(**properties)
