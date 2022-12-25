@@ -2,10 +2,8 @@ import re
 
 import scrapy
 
-
 from locations.hours import OpeningHours
 from locations.items import GeojsonPointItem
-
 from locations.user_agents import BROSWER_DEFAULT
 
 
@@ -53,8 +51,6 @@ class CanadianTireSpider(scrapy.spiders.SitemapSpider):
         properties = {
             "ref": response.json().get("id"),
             "name": response.json().get("name"),
-            "country": response.json().get("country"),
-            "state": response.json().get("address", {}).get("country", {}).get("isocode"),
             "postcode": response.json().get("address", {}).get("postalCode"),
             "country": response.json().get("address", {}).get("country", {}).get("isocode"),
             "lat": response.json().get("geoPoint", {}).get("latitude"),
