@@ -33,6 +33,7 @@ class Categories(Enum):
     SHOP_SPORTS = {"shop": "sports"}
     SHOP_SUPERMARKET = {"shop": "supermarket"}
     SHOP_TRAVEL = {"shop": "travel_agency"}
+    SHOP_VARIETY_STORE = {"shop": "variety_store"}
     SHOP_WHOLESALE = {"shop": "wholesale"}
 
     CAR_REPAIR = {"shop": "car_repair"}
