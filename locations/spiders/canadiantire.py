@@ -16,10 +16,11 @@ class CanadianTireSpider(scrapy.spiders.SitemapSpider):
     ]
     sitemap_rules = [("", "parse_store")]
     custom_settings = {
+        "ROBOTSTXT_OBEY": False,
         "DEFAULT_REQUEST_HEADERS": {
             "Host": "www.canadiantire.ca",
             "User-Agent": BROSWER_DEFAULT,
-        }
+        },
     }
 
     def parse_store(self, response):
