@@ -33,7 +33,7 @@ class CroixRougeFrancaiseSpider(scrapy.Spider):
                 "postcode": postal,
                 "country": "FR",
                 "phone": feature["properties"]["telephone"],
-                "website": f'https://{feature["properties"]["site"]}'.strip("\/"),
+                "website": f'https://{feature["properties"]["site"]}'.strip("/").strip("\\"),
                 "lat": float(feature["geometry"]["coordinates"][1]),
                 "lon": float(feature["geometry"]["coordinates"][0]),
                 "extras": {"type": feature["properties"]["type"]},
