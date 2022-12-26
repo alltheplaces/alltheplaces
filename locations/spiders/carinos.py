@@ -2,8 +2,8 @@ import json
 
 import scrapy
 
-from locations.hours import OpeningHours
 from locations.dict_parser import DictParser
+from locations.hours import OpeningHours
 
 
 class CarinosSpider(scrapy.Spider):
