@@ -1,13 +1,12 @@
 import scrapy
 
-from locations.geo import point_locations
 from locations.dict_parser import DictParser
+from locations.geo import point_locations
 
 
 class ChevronSpider(scrapy.Spider):
     name = "chevron"
     item_attributes = {"brand": "Chevron", "brand_wikidata": "Q319642"}
-    allowed_domains = ["www.chevronwithtechron.com"]
 
     def start_requests(self):
         url = "https://apis.chevron.com/api/StationFinder/nearby?clientid=A67B7471&lat={}&lng={}&brand=chevronTexaco&radius=35"
