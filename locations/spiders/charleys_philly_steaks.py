@@ -13,7 +13,7 @@ class CharleysPhillySteaksSpider(scrapy.Spider):
 
     def start_requests(self):
         url = "https://www.charleys.com/wp-admin/admin-ajax.php"
-        payload = "action=get_nearby_locations&lat=46.8054947&lng=-100.7876931&distance=5000"
+        payload = "action=get_nearby_locations&lat=40.7127753&lng=-74.0059728&distance=5000"
         headers = {"Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"}
 
         yield scrapy.Request(url=url, headers=headers, method="POST", body=payload, callback=self.parse_list)
@@ -30,6 +30,8 @@ class CharleysPhillySteaksSpider(scrapy.Spider):
         oh = OpeningHours()
         if days := response.xpath('//div[@id="business-0"]//tr'):
             for day in days:
+                if day.xpath("./td/text()").get().strip() == "Closed":
+                    continue
                 oh.add_range(
                     day=day.xpath("./th/text()").get().strip(),
                     open_time=re.split(" - |-", day.xpath("./td/text()").get().strip())[0],
