@@ -26,7 +26,7 @@ class DierbergsSpider(scrapy.Spider):
     def parse(self, response):
         for data in response.json().get("data", {}).get("locations"):
             item = DictParser.parse(data)
-            item["lat"], item["lon"] = data.get("location").split("/")
+            item["lon"], item["lat"] = data.get("location").split("/")
             item["country"] = "US"
             oh = OpeningHours()
             for day in data.get("hours"):
