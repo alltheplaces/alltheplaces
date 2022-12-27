@@ -10,3 +10,7 @@ class CompleteCashSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://locations.completecash.net/sitemap.xml"]
     sitemap_rules = [("", "parse_sd")]
     wanted_types = ["Place"]
+
+    def inspect_item(self, item, response):
+        item["street_address"] = item["street_address"].replace(", null", "")
+        yield item
