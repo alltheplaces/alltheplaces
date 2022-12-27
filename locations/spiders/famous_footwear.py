@@ -10,7 +10,7 @@ class FamousFootwearSpider(SitemapSpider, StructuredDataSpider):
     name = "famous_footwear"
     item_attributes = {"brand": "Famous Footwear", "brand_wikidata": "Q5433457"}
     sitemap_urls = ["https://ecomprdsharedstorage.blob.core.windows.net/sitemaps/20000/stores-sitemap.xml"]
-    sitemap_rules = [("/stores/", "parse_sd")]
+    sitemap_rules = [("", "parse_sd")]
     wanted_types = ["Store"]
     user_agent = BROSWER_DEFAULT
     custom_settings = {"ROBOTSTXT_OBEY": False}
