@@ -22,8 +22,8 @@ class ChuysSpider(scrapy.Spider):
                 "city": data.get("address", {}).get("parts", {}).get("city"),
                 "state": (re.findall("[A-Z]{2}", data.get("address", {}).get("address"))[0:1] or (None,))[0],
                 "website": data.get("url"),
-                "lat": data.get("lat"),
-                "lon": data.get("lon"),
+                "lat": data.get("address", {}).get("lat"),
+                "lon": data.get("address", {}).get("lng"),
                 "phone": data.get("phoneNumber", {}).get("text") if data.get("phoneNumber") else None,
             }
 
