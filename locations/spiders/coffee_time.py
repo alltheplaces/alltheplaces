@@ -1,53 +1,41 @@
 import scrapy
+from scrapy.spiders import SitemapSpider
 
-from locations.items import GeojsonPointItem
+from locations.dict_parser import DictParser
+from locations.hours import DAYS, OpeningHours
 
 
-class CoffeeTimeSpider(scrapy.Spider):
+class CoffeeTimeSpider(SitemapSpider):
     name = "coffeetime"
     item_attributes = {"brand": "Coffee Time"}
-    allowed_domains = ["www.coffeetime.com"]
-    start_urls = ["http://www.coffeetime.com/locations.aspx?address=&Countryui=CA&pageNumber=1"]
-
-    def parse_store(self, response):
-        container = response.xpath('//div[contains(@class, "col-md-9")]')
-        for i in container:
-            street = i.xpath(".//div/p[1]/text()").extract_first().strip()
-            cty_st_zip = i.xpath(".//div/p[2]/text()").extract_first().strip()
-
-            # Keep missing phone/<li> from breaking script
-            if i.xpath(".//div/ul/li[2]/p/text()").extract_first():
-                phone = i.xpath(".//div/ul/li[1]/p/text()").extract_first().strip()
-            else:
-                phone = ""
-
-            if i.xpath(".//div/ul/li[2]/p/a/@href").extract_first():
-                lat = i.xpath(".//div/ul/li[2]/p/a/@href").extract_first().split("=")[2].split(",")[0]
-                lon = i.xpath(".//div/ul/li[2]/p/a/@href").extract_first().split("=")[2].split(",")[1]
-            else:
-                lat = i.xpath(".//div/ul/li/p/a/@href").extract_first().split("=")[2].split(",")[0]
-                lon = i.xpath(".//div/ul/li/p/a/@href").extract_first().split("=")[2].split(",")[1]
-
-            city = cty_st_zip.split(", ")[0]
-            state = cty_st_zip.split(", ")[1].split(", ")[0]
-            postcode = cty_st_zip.split(", ")[2]
-
-            addr_full = "{} {}, {} {}".format(street, city, state, postcode)
-
-            yield GeojsonPointItem(
-                ref=street,
-                city=city,
-                state=state,
-                postcode=postcode,
-                addr_full=addr_full,
-                phone=phone,
-                lat=float(lat),
-                lon=float(lon),
-                country="CA",
-            )
+    allowed_domains = ["locations.coffeetime.com", "api.momentfeed.com"]
+    sitemap_urls = ["https://locations.coffeetime.com/sitemap.xml"]
+    sitemap_rules = [("", "parse")]
 
     def parse(self, response):
-        base_url = "http://www.coffeetime.com/locations.aspx?" "address=&Countryui=CA&pageNumber="
-        for i in range(1, 9):
-            page = base_url + str(i)
-            yield scrapy.Request(page, callback=self.parse_store)
+        headers = {"Host": "api.momentfeed.com", "Authorization": "YDGUJSNDOUAFKPRL"}
+        url = "https://api.momentfeed.com/v1/analytics/api/llp.json?address={}"
+        yield scrapy.Request(
+            url=url.format(response.url.split("/")[-1].replace("-", "+").replace("_", ".")),
+            headers=headers,
+            callback=self.parse_store,
+        )
+
+    def parse_store(self, response):
+        item = DictParser.parse(response.json()[0].get("store_info"))
+        item["ref"] = response.json()[0].get("store_info", {}).get("corporate_id")
+        item["website"] = f'https://{self.allowed_domains[0]}{response.json()[0].get("llp_url")}'
+
+        oh = OpeningHours()
+        for day in response.json()[0].get("store_info", {}).get("store_hours").split(";")[:-1]:
+            info_day = day.split(",")
+            oh.add_range(
+                day=DAYS[int(info_day[0]) - 1],
+                open_time=info_day[1],
+                close_time=info_day[2],
+                time_format="%H%M",
+            )
+
+        item["opening_hours"] = oh.as_opening_hours()
+
+        yield item
