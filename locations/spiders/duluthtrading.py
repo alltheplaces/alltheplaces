@@ -23,6 +23,10 @@ class DuluthTradingSpider(CrawlSpider):
 
     def parse_store(self, response):
         item = DictParser.parse(response.json())
+
+        if item["email"] == "NULL":
+            item["email"] = None
+
         days = json.loads(response.json().get("storeHoursData").replace("\n", "").replace("\t", "")).get("storeHours")
         oh = OpeningHours()
         for day in days:
