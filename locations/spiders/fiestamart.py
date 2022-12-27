@@ -15,8 +15,8 @@ class FiestaMartSpider(scrapy.Spider):
     def parse(self, response):
         for data in response.json():
             item = DictParser.parse(data)
-            item["state"] = (re.findall("[A-Z]{2}", item["addr_full"])[:1] or (None,))[0]
-            item["postcode"] = (re.findall("[0-9]{5}$|[A-Z0-9]{3} [A-Z0-9]{3}$", item["addr_full"])[:1] or (None,))[0]
+            item["state"] = (re.findall("[A-Z]{2}", item["addr_full"])[:1] or (None,))[-1]
+            item["postcode"] = re.findall("[0-9]{5}$|[A-Z0-9]{3} [A-Z0-9]{3}$", item["addr_full"])[-1]
             item["ref"] = (re.findall("[0-9]+", item["website"])[:1] or (None,))[0]
             item["city"] = re.findall(", [a-zA-Z ]+,", item["addr_full"])[0].replace(",", "").strip()
             item["street_address"] = (
