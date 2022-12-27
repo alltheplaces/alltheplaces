@@ -1,44 +1,41 @@
-import json
+import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.dict_parser import DictParser
+from locations.hours import DAYS, OpeningHours
 
 
 class FiestaMartSpider(scrapy.Spider):
     name = "fiestamart"
     item_attributes = {"brand": "Fiesta Mart"}
     allowed_domains = ["fiestamart.com"]
-    start_urls = [
-        "https://www.fiestamart.com/store-locator/",
-    ]
-
-    def start_requests(self):
-        template = "https://www.fiestamart.com/wp-json/store_locations/all"
-
-        headers = {
-            "Accept": "application/json",
-        }
-
-        yield scrapy.http.FormRequest(url=template, method="GET", headers=headers, callback=self.parse)
+    start_urls = ["https://www.fiestamart.com/wp-json/fiesta/v1/stores"]
 
     def parse(self, response):
-        jsonresponse = response.json()
-        for stores in jsonresponse["locations"]:
-            store = json.dumps(stores)
-            store_data = json.loads(store)
+        for data in response.json():
+            item = DictParser.parse(data)
+            item["state"] = (re.findall("[A-Z]{2}", item["addr_full"])[:1] or (None,))[0]
+            item["postcode"] = (re.findall("[0-9]{5}$|[A-Z0-9]{3} [A-Z0-9]{3}$", item["addr_full"])[:1] or (None,))[0]
+            item["ref"] = (re.findall("[0-9]+", item["website"])[:1] or (None,))[0]
+            item["city"] = re.findall(", [a-zA-Z ]+,", item["addr_full"])[0].replace(",", "").strip()
+            item["street_address"] = (
+                item["addr_full"]
+                .replace(item["city"], "")
+                .replace(item["postcode"], "")
+                .replace(item["state"], "")
+                .replace(",", "")
+            ).strip()
+            oh = OpeningHours()
+            for day in DAYS:
+                if not data.get("hours"):
+                    continue
+                oh.add_range(
+                    day=day,
+                    open_time=re.split(" - |-", data.get("hours"))[0],
+                    close_time=re.split(" - |-", data.get("hours"))[1],
+                    time_format="%I:%M %p",
+                )
+            item["opening_hours"] = oh.as_opening_hours()
 
-            properties = {
-                "name": store_data["name"],
-                "ref": store_data["id"],
-                "addr_full": store_data["address"],
-                "city": store_data["city"],
-                "state": store_data["state"],
-                "postcode": store_data["postal"],
-                "phone": store_data["phone"],
-                "lat": float(store_data["lat"]),
-                "lon": float(store_data["lng"]),
-                "website": response.url,
-            }
-
-            yield GeojsonPointItem(**properties)
+            yield item
