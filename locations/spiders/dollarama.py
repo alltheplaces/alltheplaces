@@ -2,10 +2,8 @@ from urllib.parse import urlencode
 
 import scrapy
 
-from locations.hours import OpeningHours
+from locations.hours import DAYS, OpeningHours
 from locations.items import GeojsonPointItem
-
-from locations.hours import DAYS
 
 
 class DollaramaSpider(scrapy.Spider):
