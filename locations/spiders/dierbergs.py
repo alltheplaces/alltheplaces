@@ -1,29 +1,40 @@
+import json
+
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.dict_parser import DictParser
+from locations.hours import OpeningHours
 
 
 class DierbergsSpider(scrapy.Spider):
-    download_delay = 0.2
     name = "dierbergs"
     item_attributes = {"brand": "Dierberg's"}
-    allowed_domains = ["www.dierbergs.com"]
+    allowed_domains = ["api.dierbergs.com"]
+
+    def start_requests(self):
+        headers = {"content-type": "application/json"}
+        url = "https://api.dierbergs.com/graphql/"
+        payload = json.dumps(
+            {
+                "operationName": "SearchStoresByCoord",
+                "query": "query SearchStoresByCoord($lat: String, $long: String) {\n  locations(lat: $lat, long: $long) {\n    distance\n    ...LocationFields\n    __typename\n  }\n}\n\nfragment LocationFields on Location {\n  id\n  name\n  image\n  location\n  locationId\n  googleMapsUrl\n  streetAddress\n  zipCode\n  city\n  state\n  name\n  director\n  number\n  phone\n  departments {\n    hours {\n      id\n      end\n      start\n      __typename\n    }\n    name\n    phone\n    __typename\n  }\n  scheduledHours {\n    date\n    end\n    start\n    __typename\n  }\n  hours {\n    day\n    start\n    end\n    __typename\n  }\n  __typename\n}",
+                "variables": {},
+            }
+        )
+        yield scrapy.Request(url=url, headers=headers, method="POST", body=payload, callback=self.parse)
 
     def parse(self, response):
-        data = response.xpath('.//div[@class="location-listing-item row"]')
-        base_url = "http://www.dierbergs.com"
+        for data in response.json().get("data", {}).get("locations"):
+            item = DictParser.parse(data)
+            item["lon"], item["lat"] = data.get("location").split("/")
+            item["country"] = "US"
+            oh = OpeningHours()
+            for day in data.get("hours"):
+                oh.add_range(
+                    day=day.get("day"),
+                    open_time=day.get("start")[:5],
+                    close_time=day.get("end")[:5],
+                )
+            item["opening_hours"] = oh.as_opening_hours()
 
-        for store in data:
-            properties = {
-                "ref": store.xpath(".//strong//text()").extract_first().strip(),
-                "addr_full": store.xpath(".//span[@class='address']//text()").extract_first().strip(),
-                "city": store.xpath(".//span[@class='city']//text()").extract_first().strip(),
-                "state": store.xpath(".//span[@class='state']//text()").extract_first().strip(),
-                "postcode": store.xpath(".//span[@class='zip']//text()").extract_first().strip(),
-                "phone": store.xpath(".//span[@class='phone']//a//text()").extract_first().strip(),
-                "lon": store.xpath("@data-lon").extract_first(),
-                "lat": store.xpath("@data-lat").extract_first(),
-                "website": base_url + store.xpath(".//a[@target='_top']//@href").extract_first(),
-            }
-
-            yield GeojsonPointItem(**properties)
+            yield item
