@@ -6,44 +6,11 @@ from locations.user_agents import BROSWER_DEFAULT
 
 class HollisterSpider(scrapy.Spider):
     name = "hollister"
-    item_attributes = {"brand": "Hollister"}
+    item_attributes = {"brand": "Hollister", "brand_wikidata": "Q1257477"}
     allowed_domains = ["hollisterco.com"]
-
-    # Website is blocking scrapers so I had to change the User Agent to get around this
+    start_urls = ["https://www.hollisterco.com/api/ecomm/h-us/storelocator/search?country="]
     user_agent = BROSWER_DEFAULT
     custom_settings = {"ROBOTSTXT_OBEY": False}
-
-    def start_requests(self):
-        countries = [
-            "US",
-            "CA",
-            "BE",
-            "FR",
-            "DE",
-            "HK",
-            "IE",
-            "IT",
-            "JP",
-            "KW",
-            "CN",
-            "MX",
-            "NL",
-            "QA",
-            "SA",
-            "ES",
-            "AE",
-            "GB",
-            "KR",
-            "SE",
-            "AT",
-            "PL",
-        ]
-
-        template = "https://www.hollisterco.com/api/ecomm/h-us/storelocator/search?country={country}"
-
-        for country in countries:
-            url = template.format(country=country)
-            yield scrapy.Request(url, callback=self.parse)
 
     def parse(self, response):
         data = response.json()
