@@ -7,21 +7,22 @@ from locations.hours import OpeningHours
 class GuzmanyGomezSpider(scrapy.Spider):
     name = "guzmany_gomez"
     item_attributes = {"brand": "Guzman Y Gomez", "brand_wikidata": "Q23019759"}
-    allowed_domains = ["guzmanygomez.com.au"]
     start_urls = ["https://api-external.prod.apps.gyg.com.au/prod/store"]
 
     def parse(self, response):
         for data in response.json():
+            data["street_address"] = ", ".join(filter(None, [data["address1"], data["address2"]]))
             item = DictParser.parse(data)
             oh = OpeningHours()
-            for day in data.get("tradingHours"):
-                if not day.get("timePeriods"):
-                    continue
-                oh.add_range(
-                    day=day.get("dayOfWeek"),
-                    open_time=day.get("timePeriods")[0].get("openTime"),
-                    close_time=day.get("timePeriods")[0].get("endTime"),
-                )
+            for day in data["tradingHours"]:
+                for period in day["timePeriods"]:
+                    oh.add_range(
+                        day=day["dayOfWeek"],
+                        open_time=period["openTime"],
+                        close_time=period["endTime"],
+                    )
             item["opening_hours"] = oh.as_opening_hours()
+
+            item["website"] = data["orderLink"]
 
             yield item
