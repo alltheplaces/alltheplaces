@@ -1,47 +1,51 @@
-import json
 import re
 
-import scrapy
+from scrapy.spiders import SitemapSpider
 
-from locations.hours import DAYS, OpeningHours
+from locations.hours import OpeningHours
 from locations.items import GeojsonPointItem
+from locations.structured_data_spider import StructuredDataSpider
+from locations.user_agents import BROSWER_DEFAULT
 
 
-class HelzbergDiamondsSpider(scrapy.Spider):
+class HelzbergDiamondsSpider(SitemapSpider, StructuredDataSpider):
     name = "helzberg_diamonds"
     item_attributes = {"brand": "Helzberg Diamonds", "brand_wikidata": "Q16995161"}
-    allowed_domains = ["stores.helzberg.com"]
-    start_urls = ("https://stores.helzberg.com/sitemap.xml",)
+    allowed_domains = ["helzberg.com"]
+    sitemap_urls = ["https://www.helzberg.com/sitemap_stores.xml"]
+    sitemap_rules = [("", "parse")]
+    user_agent = BROSWER_DEFAULT
 
     def parse(self, response):
-        response.selector.remove_namespaces()
-        locations = response.xpath("//url/loc/text()").getall()
-        for url in locations:
-            if url.endswith(".html"):
-                yield scrapy.Request(url, callback=self.parse_store)
+        item = GeojsonPointItem()
+        address = response.xpath('//p[@class="address"]/text()').extract()
+        item["ref"] = re.findall("[0-9]+", response.url)[0]
+        item["name"] = response.xpath('//h1[@class="store-title"]/text()').get()
+        item["phone"] = response.xpath('//a[@class="storelocator-phone"]/text()').get()
+        item["website"] = response.url
+        item["city"] = address[-3].replace("\n", "").split(",")[0]
+        item["postcode"] = re.findall("[0-9]+", address[-3].replace("\n", "").split(",")[1])[0]
+        item["state"] = re.findall("[A-Z]{2}", address[-3].replace("\n", "").split(",")[1])[0]
+        item["street_address"] = (
+            address[:-2][0].replace("\n", "") + address[:-2][1].replace("\n", "")
+            if len(address[:-2]) > 2
+            else address[:-2][0].replace("\n", "")
+        ).strip()
+        item["lat"], item["lon"] = re.findall(
+            "[0-9]+.+", response.xpath('//a[contains(@class,"store-map")]/@href').get()
+        )[0].split(",")
+        days = response.xpath('//div[@class="store-hours"]/p/text()').extract()
+        days.append(response.xpath('//main[@id="maincontent"]//b/text()').get())  # get and insert first_day
+        oh = OpeningHours()
+        for day in days:
+            if "Closed" in day:
+                continue
+            oh.add_range(
+                day=re.findall(r"[-\w]+", day)[0],
+                open_time=re.findall(r"[0-9]+.+", day)[0].split(" - ")[0],
+                close_time=re.findall(r"[0-9]+.+", day)[0].split(" - ")[1],
+                time_format="%I:%M%p",
+            )
+        item["opening_hours"] = oh.as_opening_hours()
 
-    def parse_store(self, response):
-        data = json.loads(response.xpath('//script[@type="application/ld+json"]/text()').get())[0]
-        ref = re.search(r"jewelry-store-(\d+).html", data["url"])[1]
-        properties = {
-            "ref": ref,
-            "lat": data["geo"]["latitude"],
-            "lon": data["geo"]["longitude"],
-            "name": data["name"],
-            "addr_full": data["address"]["streetAddress"],
-            "city": data["address"]["addressLocality"],
-            "state": data["address"]["addressRegion"],
-            "postcode": data["address"]["postalCode"],
-            "phone": data["address"]["telephone"],
-            "website": response.url,
-            "opening_hours": self.parse_hours(data["openingHours"]),
-        }
-        yield GeojsonPointItem(**properties)
-
-    def parse_hours(self, hours):
-        opening_hours = OpeningHours()
-        groups = re.findall(rf'(({"|".join(DAYS)}) \S+ - \S+)', hours)
-        for (g, _) in groups:
-            day, open, _, close = g.split()
-            opening_hours.add_range(day, open, close)
-        return opening_hours.as_opening_hours()
+        yield item
