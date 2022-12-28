@@ -25,7 +25,7 @@ class HollisterSpider(scrapy.Spider):
                 "lat": row["latitude"],
                 "lon": row["longitude"],
                 "phone": row["telephone"],
-                "addr_full": row["addressLine"][0],
+                "street_address": row["addressLine"][0],
                 "postcode": row["postalCode"],
             }
 
