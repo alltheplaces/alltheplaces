@@ -8,23 +8,23 @@ from locations.structured_data_spider import StructuredDataSpider
 
 class HannafordSpider(SitemapSpider, StructuredDataSpider):
     name = "hannaford"
-    item_attributes = {"brand": "Hannaford"}
+    item_attributes = {"brand": "Hannaford", "brand_wikidata": "Q5648760"}
     allowed_domains = ["hannaford.com"]
     sitemap_urls = ["https://stores.hannaford.com/sitemap.xml"]
     sitemap_rules = [(r"[0-9]+$", "parse_sd")]
     wanted_types = ["GroceryStore"]
 
     def inspect_item(self, item, response):
-        days = json.loads(response.xpath('//h4[text()="Store Hours"]/following::div[1]/@data-days').get())
+        days = json.loads(response.xpath("//@data-days").get())
         oh = OpeningHours()
         for day in days:
-            opentime = str(day.get("intervals")[0].get("start")).zfill(4)
-            closetime = str(day.get("intervals")[0].get("end")).zfill(4)
-            oh.add_range(
-                day=day.get("day"),
-                open_time=f"{opentime[:2]}:{opentime[2:]}",
-                close_time=f"{closetime[:2]}:{closetime[2:]}",
-            )
+            for halfday in day.get("intervals"):
+                oh.add_range(
+                    day=day.get("day"),
+                    open_time=str(halfday.get("start")).zfill(4),
+                    close_time=str(halfday.get("end")).zfill(4),
+                    time_format="%H%M",
+                )
         item["opening_hours"] = oh.as_opening_hours()
 
         yield item
