@@ -1,31 +1,27 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.dict_parser import DictParser
+from locations.hours import OpeningHours
 
 
 class GuzmanyGomezSpider(scrapy.Spider):
     name = "guzmany_gomez"
     item_attributes = {"brand": "Guzman Y Gomez", "brand_wikidata": "Q23019759"}
     allowed_domains = ["guzmanygomez.com.au"]
-    start_urls = [
-        "https://www.guzmanygomez.com.au/wp-json/wpapi/v2/getall",
-    ]
+    start_urls = ["https://api-external.prod.apps.gyg.com.au/prod/store"]
 
     def parse(self, response):
-        data = response.json()
+        for data in response.json():
+            item = DictParser.parse(data)
+            oh = OpeningHours()
+            for day in data.get("tradingHours"):
+                if not day.get("timePeriods"):
+                    continue
+                oh.add_range(
+                    day=day.get("dayOfWeek"),
+                    open_time=day.get("timePeriods")[0].get("openTime"),
+                    close_time=day.get("timePeriods")[0].get("endTime"),
+                )
+            item["opening_hours"] = oh.as_opening_hours()
 
-        for i in data:
-            properties = {
-                "ref": i["OrderLink"],
-                "name": i["Name"],
-                "addr_full": i["Address1"],
-                "city": i["City"],
-                "state": i["State"],
-                "postcode": i["Postcode"],
-                "country": "AU",
-                "phone": i["Phone"],
-                "lat": i["Latitude"],
-                "lon": i["Longitude"],
-            }
-
-            yield GeojsonPointItem(**properties)
+            yield item
