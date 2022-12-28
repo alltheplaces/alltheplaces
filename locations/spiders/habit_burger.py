@@ -13,7 +13,7 @@ class HabitBurgerSpider(SitemapSpider, StructuredDataSpider):
     sitemap_rules = [("", "parse_sd")]
     wanted_types = ["Restaurant"]
 
-    def inspect_item(self, item, response):
+    def post_process_item(self, item, response, ld_data):
         openingHour = json.loads(response.xpath('//*[@id="content"]/script[1]/text()').get())
         openingHour = openingHour.get("openingHours")[0].split()
         days = [openingHour[i] for i in range(0, len(openingHour), 2)]
