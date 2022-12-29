@@ -1,3 +1,4 @@
+import re
 import scrapy
 
 from locations.dict_parser import DictParser
@@ -10,12 +11,9 @@ class RemaxDeSpider(scrapy.Spider):
         "brand": "RE/MAX",
         "brand_wikidata": "Q965845",
     }
-    allowed_domains = ["remax.com/"]
-
-    def start_requests(self):
-        url = "https://wp.ooremax.com/wp-json/eapi/v1/agencies?per_page=24&page={}"
-        for i in range(11):
-            yield scrapy.Request(url=url.format(i), callback=self.parse)
+    allowed_domains = ["remax.com", "wp.ooremax.com"]
+    start_urls = ["https://wp.ooremax.com/wp-json/eapi/v1/agencies?per_page=24&page=1"]
+    per_page = 24
 
     def parse(self, response):
         for data in response.json():
@@ -35,3 +33,8 @@ class RemaxDeSpider(scrapy.Spider):
             item["opening_hours"] = oh.as_opening_hours()
 
             yield item
+
+        page = int(re.findall("\d+$", response.url)[0]) + 1
+        if len(response.json()) == self.per_page:
+            url = f"https://wp.ooremax.com/wp-json/eapi/v1/agencies?per_page={self.per_page}&page={page}"
+            yield scrapy.Request(url=url, callback=self.parse)
