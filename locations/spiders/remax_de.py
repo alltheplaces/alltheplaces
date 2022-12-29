@@ -13,8 +13,8 @@ class RemaxDeSpider(scrapy.Spider):
         "brand_wikidata": "Q965845",
     }
     allowed_domains = ["remax.com", "wp.ooremax.com"]
-    start_urls = ["https://wp.ooremax.com/wp-json/eapi/v1/agencies?per_page=24&page=1"]
     per_page = 24
+    start_urls = [f"https://wp.ooremax.com/wp-json/eapi/v1/agencies?per_page={per_page}&page=1"]
 
     def parse(self, response):
         for data in response.json():
@@ -36,6 +36,6 @@ class RemaxDeSpider(scrapy.Spider):
             yield item
 
         page = int(re.findall(r"\d+$", response.url)[0]) + 1
-        if len(response.json()) == self.per_page:
+        if len(response.json()):
             url = f"https://wp.ooremax.com/wp-json/eapi/v1/agencies?per_page={self.per_page}&page={page}"
             yield scrapy.Request(url=url, callback=self.parse)
