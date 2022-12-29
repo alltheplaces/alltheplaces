@@ -1,15 +1,14 @@
-import scrapy
+from scrapy.spiders import SitemapSpider
 
-from locations.linked_data_parser import LinkedDataParser
-from locations.open_graph_parser import OpenGraphParser
+from locations.structured_data_spider import StructuredDataSpider
 
 
-class IHGHotelsSpider(scrapy.spiders.SitemapSpider):
+class IHGHotelsSpider(SitemapSpider, StructuredDataSpider):
     name = "ihg_hotels"
     allowed_domains = ["ihg.com"]
     sitemap_urls = ["https://www.ihg.com/bin/sitemapindex.xml"]
     sitemap_rules = [(r".*/us/en/.*/hoteldetail$", "parse")]
-    download_delay = 0.5
+    wanted_types = ["Hotel"]
 
     my_brands = {
         "armyhotels": ("Army Hotels", "Q16994722"),
@@ -18,35 +17,23 @@ class IHGHotelsSpider(scrapy.spiders.SitemapSpider):
         "crowneplaza": ("Crowne Plaza", "Q2746220"),
         "evenhotels": ("Even Hotels", "Q5416522"),
         "holidayinn": ("Holiday Inn", "Q2717882"),
-        "holidayinnclubvacations": None,
+        "holidayinnclubvacations": (None, None),
         "holidayinnexpress": ("Holiday Inn Express", "Q5880423"),
-        "holidayinnresorts": None,
+        "holidayinnresorts": (None, None),
         "hotelindigo": ("Hotel Indigo", "Q5911596"),
         "intercontinental": ("InterContinental", "Q1825730"),
         "kimptonhotels": ("Kimpton", "Q6410248"),
         "regent": ("Regent", "Q3250375"),
-        "spnd": None,
+        "spnd": (None, None),
         "staybridge": ("Staybridge Suites", "Q7605116"),
-        "vignettecollection": None,
+        "vignettecollection": (None, None),
         "voco": ("Voco Hotels", "Q60750454"),
     }
 
-    def parse(self, response):
-        if "/destinations" in response.url:
-            return
+    def post_process_item(self, item, response, ld_data):
+        item["name"] = item["name"].strip("\n").strip("\t")
 
-        hotel_type = response.url.split("/")[3]
-        brand = self.my_brands.get(hotel_type)
-        if not brand:
-            self.logger.error("no brand/dispatch for: %s / %s", hotel_type, response.url)
-            return
+        if (hotel_type := response.url.split("/")[3]) in self.my_brands:
+            item["brand"], item["brand_wikidata"] = self.my_brands.get(hotel_type)
 
-        if hotel_type in ["hotelindigo"]:
-            item = OpenGraphParser.parse(response)
-        else:
-            item = LinkedDataParser.parse(response, "Hotel")
-
-        if item:
-            item["ref"] = response.url
-            item["brand"], item["brand_wikidata"] = brand
-            yield item
+        yield item
