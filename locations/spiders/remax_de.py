@@ -35,7 +35,7 @@ class RemaxDeSpider(scrapy.Spider):
 
             yield item
 
-        page = int(re.findall("\d+$", response.url)[0]) + 1
+        page = int(re.findall(r"\d+$", response.url)[0]) + 1
         if len(response.json()) == self.per_page:
             url = f"https://wp.ooremax.com/wp-json/eapi/v1/agencies?per_page={self.per_page}&page={page}"
             yield scrapy.Request(url=url, callback=self.parse)
