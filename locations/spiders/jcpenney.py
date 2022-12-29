@@ -1,13 +1,14 @@
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
+from locations.categories import Categories
 from locations.structured_data_spider import StructuredDataSpider
 from locations.user_agents import BROSWER_DEFAULT
 
 
 class JCPenneySpider(CrawlSpider, StructuredDataSpider):
     name = "jcpenney"
-    item_attributes = {"brand": "JCPenney", "brand_wikidata": "Q920037"}
+    item_attributes = {"brand": "JCPenney", "brand_wikidata": "Q920037", "extras": Categories.DEPARTMENT_STORE.value}
     allowed_domains = ["jcpenney.com"]
     start_urls = ["https://jcpenney.com/locations/"]
     rules = [
