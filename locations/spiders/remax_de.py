@@ -1,4 +1,5 @@
 import re
+
 import scrapy
 
 from locations.dict_parser import DictParser
