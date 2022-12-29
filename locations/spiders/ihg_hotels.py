@@ -6,8 +6,8 @@ from locations.structured_data_spider import StructuredDataSpider
 class IHGHotelsSpider(SitemapSpider, StructuredDataSpider):
     name = "ihg_hotels"
     allowed_domains = ["ihg.com"]
-    sitemap_urls = ["https://www.ihg.com/bin/sitemap.holidayinnresorts.en.hoteldetail.xml"]
-    sitemap_rules = [(r"/hoteldetail$", "parse")]
+    sitemap_urls = ["https://www.ihg.com/bin/sitemapindex.xml"]
+    sitemap_rules = [(r".*/us/en/.*/hoteldetail$", "parse")]
     wanted_types = ["Hotel"]
 
     my_brands = {
