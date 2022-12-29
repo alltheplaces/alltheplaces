@@ -1,6 +1,5 @@
-import json
-
 import scrapy
+from scrapy.http import JsonRequest
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
@@ -8,20 +7,18 @@ from locations.hours import OpeningHours
 
 class DierbergsSpider(scrapy.Spider):
     name = "dierbergs"
-    item_attributes = {"brand": "Dierberg's"}
+    item_attributes = {"brand": "Dierberg's", "brand_wikidata": "Q5274978"}
     allowed_domains = ["api.dierbergs.com"]
 
     def start_requests(self):
-        headers = {"content-type": "application/json"}
-        url = "https://api.dierbergs.com/graphql/"
-        payload = json.dumps(
-            {
+        yield JsonRequest(
+            url="https://api.dierbergs.com/graphql/",
+            data={
                 "operationName": "SearchStoresByCoord",
                 "query": "query SearchStoresByCoord($lat: String, $long: String) {\n  locations(lat: $lat, long: $long) {\n    distance\n    ...LocationFields\n    __typename\n  }\n}\n\nfragment LocationFields on Location {\n  id\n  name\n  image\n  location\n  locationId\n  googleMapsUrl\n  streetAddress\n  zipCode\n  city\n  state\n  name\n  director\n  number\n  phone\n  departments {\n    hours {\n      id\n      end\n      start\n      __typename\n    }\n    name\n    phone\n    __typename\n  }\n  scheduledHours {\n    date\n    end\n    start\n    __typename\n  }\n  hours {\n    day\n    start\n    end\n    __typename\n  }\n  __typename\n}",
                 "variables": {},
-            }
+            },
         )
-        yield scrapy.Request(url=url, headers=headers, method="POST", body=payload, callback=self.parse)
 
     def parse(self, response):
         for data in response.json().get("data", {}).get("locations"):
