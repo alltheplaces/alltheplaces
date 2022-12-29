@@ -1,59 +1,27 @@
-import re
-
 import scrapy
+from scrapy.spiders import SitemapSpider
 
-from locations.items import GeojsonPointItem
+from locations.dict_parser import DictParser
+from locations.user_agents import BROSWER_DEFAULT
 
 
-class JeffersonUniversityHospitalSpider(scrapy.Spider):
+class JeffersonUniversityHospitalSpider(SitemapSpider):
     name = "jefferson_univ_hosp"
     item_attributes = {
         "brand": "Jefferson University Hospital",
         "brand_wikidata": "Q59676202",
     }
-    allowed_domains = ["https://hospitals.jefferson.edu"]
-    start_urls = [
-        "https://hospitals.jefferson.edu/find-a-location.html",
-    ]
+    allowed_domains = ["jeffersonhealth.org"]
+    sitemap_urls = ["https://www.jeffersonhealth.org/sitemap.xml"]
+    sitemap_rules = [(r"/locations/[-\w]+$", "parse")]
+    user_agent = BROSWER_DEFAULT
+
+    def _parse_sitemap(self, response):
+        for row in super()._parse_sitemap(response):
+            yield scrapy.Request(url=f"{row.url}.model.json", callback=self.parse)
 
     def parse(self, response):
-        data = " ".join(response.xpath('//script[contains(text(), "itemsArray.push")]/text()').extract())
-        locations = re.findall(r"itemsArray.push\((.+?)\);", data)
+        item = DictParser.parse(response.json().get("locationLinkingData"))
+        item["ref"] = item["website"]
 
-        for loc in locations:
-            if len(loc.split(";")) == 6:
-
-                loctype, locname, html, url, lat, lon = loc.strip("'").split(";")
-
-                phone = re.search(r"Phone:.*?([\d\-]+?)</p>", html)
-                if phone:
-                    phone = phone.groups()[0]
-
-                postcode = re.search(r"<br>.+?,.+?(\d{5})</p>", html)
-                if postcode:
-                    postcode = postcode.groups()[0]
-
-                addr_full = re.search(r"</h3><p>(.+?)<br>", html)
-                if addr_full:
-                    addr_full = addr_full.groups()[0]
-
-                properties = {
-                    "name": locname,
-                    "ref": loctype + "_" + locname,
-                    "addr_full": addr_full if addr_full else re.search(r"</h3> <p>(.+?)<br>", html).groups()[0],
-                    "city": re.search(r"<br>(.+?),", html).groups()[0],
-                    "state": re.search(r",(\s\D{2})", html).groups()[0].strip(),
-                    "postcode": postcode if postcode else None,
-                    "phone": phone if phone else None,
-                    "website": url,
-                    "lat": float(lat),
-                    "lon": float(lon),
-                }
-
-            else:
-                loctype, html = loc.strip("'").split(";")
-                locname, addr_full = html.split("(")
-
-                properties = {"name": locname, "ref": loc, "addr_full": addr_full}
-
-            yield GeojsonPointItem(**properties)
+        yield item
