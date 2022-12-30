@@ -7,38 +7,30 @@ from locations.items import GeojsonPointItem
 class KauflandSpider(scrapy.Spider):
     name = "kaufland"
     item_attributes = {"brand": "Kaufland", "brand_wikidata": "Q685967"}
-    allowed_domains = ["kaufland.de"]
-    start_urls = [
-        "https://filiale.kaufland.de/.klstorefinder.json",
-    ]
+    website_formats = {
+        "https://filiale.kaufland.de/.klstorefinder.json": "https://filiale.kaufland.de/service/filiale/frankfurt-oder-spitzkrug-multi-center-{}.html",
+        "https://www.kaufland.bg/.klstorefinder.json": "https://www.kaufland.bg/moyat-kaufland/uslugi/filiali/{}.html",
+    }
+    start_urls = website_formats.keys()
 
-    def parse_hours(self, hours):
-        opening_hours = OpeningHours()
-        for hour in hours:
-            day, open_time, close_time = hour.split("|")
-            opening_hours.add_range(day=day[:2], open_time=open_time, close_time=close_time)
+    def parse(self, response, **kwargs):
+        for location in response.json():
+            item = GeojsonPointItem()
 
-        return opening_hours.as_opening_hours()
+            item["ref"] = location["n"]
+            item["lat"] = location["lat"]
+            item["lon"] = location["lng"]
+            item["name"] = location["cn"]
+            item["phone"] = location["p"].replace("/", "")
+            item["postcode"] = location["pc"]
+            item["street_address"] = location["sn"]
 
-    def parse(self, response):
-        stores = response.json()
+            oh = OpeningHours()
+            for rule in location["wod"]:
+                day, start_time, end_time = rule.split("|")
+                oh.add_range(day, start_time, end_time)
+            item["opening_hours"] = oh.as_opening_hours()
 
-        for store in stores:
-            properties = {
-                "name": store["cn"],
-                "ref": store["n"],
-                "addr_full": store["sn"],
-                "city": store["t"],
-                "postcode": store["pc"],
-                "country": "DE",
-                "phone": store["p"],
-                "website": "https://www.kaufland.de/service/filiale.storeName={}.html".format(store["n"]),
-                "lat": float(store["lat"]),
-                "lon": float(store["lng"]),
-            }
+            item["website"] = self.website_formats.get(response.url).format(location["friendlyUrl"])
 
-            hours = self.parse_hours(store["wod"])
-            if hours:
-                properties["opening_hours"] = hours
-
-            yield GeojsonPointItem(**properties)
+            yield item
