@@ -8,7 +8,7 @@ from locations.structured_data_spider import StructuredDataSpider
 
 class KekeSpider(SitemapSpider, StructuredDataSpider):
     name = "keke"
-    item_attributes = {"brand": "Keke's Breakfast Cafe"}
+    item_attributes = {"brand": "Keke's Breakfast Cafe", "brand_wikidata": "Q115930150"}
     allowed_domains = ["kekes.com"]
     sitemap_urls = ["https://www.kekes.com/sitemap.xml"]
     sitemap_rules = [("/kekes-", "parse_sd")]
