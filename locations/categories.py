@@ -28,6 +28,8 @@ class Categories(Enum):
     SHOP_ELECTRONICS = {"shop": "electronics"}
     SHOP_FLORIST = {"shop": "florist"}
     SHOP_FURNITURE = {"shop": "furniture"}
+    SHOP_MOTORCYCLE = {"shop": "motorcycle"}
+    SHOP_MOTORCYCLE_REPAIR = {"shop": "motorcycle_repair"}
     SHOP_NEWSAGENT = {"shop": "newsagent"}
     SHOP_OPTICIAN = {"shop": "optician"}
     SHOP_SPORTS = {"shop": "sports"}
