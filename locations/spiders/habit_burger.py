@@ -18,15 +18,11 @@ class HabitBurgerSpider(SitemapSpider, StructuredDataSpider):
         openingHour = openingHour.get("openingHours")[0].split()
         days = [openingHour[i] for i in range(0, len(openingHour), 2)]
         hours = [openingHour[i] for i in range(1, len(openingHour), 2)]
-        oh = OpeningHours()
+        openhours = []
         for i in range(len(openingHour) // 2):
-            for day in days[i].split(","):
-                oh.add_range(
-                    day=day,
-                    open_time=hours[i].split("-")[0],
-                    close_time=hours[i].split("-")[1],
-                    time_format="%I:%M%p",
-                )
+            openhours.extend(f"{day} {hours[i]}" for day in days[i].split(","))
+        oh = OpeningHours()
+        oh.from_linked_data({"openingHours": openhours}, "%I:%M%p")
         item["opening_hours"] = oh.as_opening_hours()
 
         yield item
