@@ -49,8 +49,7 @@ class StadtZuerichCHSpider(scrapy.Spider):
 
     start_urls = [
         url_pattern % ("Brunnen", "wvz_brunnen"),
-        url_pattern
-        % ("Oeffentliche_Beleuchtung_der_Stadt_Zuerich", "ewz_brennstelle_p"),
+        url_pattern % ("Oeffentliche_Beleuchtung_der_Stadt_Zuerich", "ewz_brennstelle_p"),
         url_pattern % ("Park", "poi_park_view"),
         url_pattern % ("Sammelstelle", "poi_sammelstelle_view"),
         url_pattern % ("Schulanlagen", "poi_kindergarten_view"),
