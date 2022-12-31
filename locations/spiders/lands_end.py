@@ -17,7 +17,6 @@ class LandsEndSpider(scrapy.Spider):
     def parse(self, response):
         json_data = xmltodict.parse(response.text).get("markers", {}).get("marker")
         for store in json_data:
-            print("\n", store.get("@storehours"), "\n")
             openingHours = store.get("@storehours").replace(":", ": ").replace(" - ", "-").split()
             days = [openingHours[i] for i in range(0, len(openingHours), 2)]
             hours = [openingHours[i] for i in range(1, len(openingHours), 2)]
