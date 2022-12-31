@@ -39,7 +39,12 @@ jobs:
         export AWS_SECRET_ACCESS_KEY=$(echo -n "${AWS_SEC}" | base64 --decode)
         export AWS_REGION="us-east-1"
 
-        SPIDERS=$(curl -sL https://api.github.com/repos/alltheplaces/alltheplaces/pulls/${{ github.event.number }}/files | jq -r '.[] | select(.status != "removed") | .filename')
+        pr_file_changes=$(curl -sL "https://api.github.com/repos/alltheplaces/alltheplaces/pulls/${{ github.event.number }}/files")
+        SPIDERS=$(echo $pr_file_changes | jq -r '.[] | select(.status != "removed") | .filename')
+        if [ ! $retval -eq 0 ]; then
+            (>&2 echo "checking file changes failed. response was ${pr_file_changes}")
+            exit 1
+        fi
 
         RUN_DIR="${GITHUB_WORKSPACE}/output"
         EXIT_CODE=0
