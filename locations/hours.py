@@ -116,6 +116,16 @@ DAYS_FR = {
     "Di": "Su",
 }
 
+DAYS_NL = {
+    "Ma": "Mo",
+    "Di": "Tu",
+    "Wo": "We",
+    "Do": "Th",
+    "Vr": "Fr",
+    "Za": "Sa",
+    "Zo": "Su",
+}
+
 
 def day_range(start_day, end_day):
     start_ix = DAYS.index(start_day)
