@@ -1,36 +1,51 @@
 import scrapy
+import xmltodict
 
+from locations.hours import DAYS, OpeningHours
 from locations.items import GeojsonPointItem
 
 
 class LandsEndSpider(scrapy.Spider):
     name = "landsend"
-    item_attributes = {"brand": "Lands' End"}
+    item_attributes = {"brand": "Lands' End", "brand_wikidata": "Q839555"}
     allowed_domains = ["landsend.com"]
+    start_urls = [
+        "https://www.landsend.com/pp/StoreLocator?lat=42.7456634&lng=-90.4879916&radius=3000&S=S&L=L&C=undefined&N=N"
+    ]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
-    def start_requests(self):
-        base_url = "https://www.landsend.com/pp/StoreLocator?lat={lat}&lng={lng}&radius=100&S=S&L=L&C=undefined&N=N"
-        with open("./locations/searchable_points/us_centroids_100mile_radius.csv") as points:
-            next(points)
-            for point in points:
-                _, lat, lon = point.strip().split(",")
-                url = base_url.format(lat=lat, lng=lon)
-                yield scrapy.Request(url=url, callback=self.parse_store)
+    def parse(self, response):
+        json_data = xmltodict.parse(response.text).get("markers", {}).get("marker")
+        for store in json_data:
+            print("\n", store.get("@storehours"), "\n")
+            openingHours = store.get("@storehours").replace(":", ": ").replace(" - ", "-").split()
+            days = [openingHours[i] for i in range(0, len(openingHours), 2)]
+            hours = [openingHours[i] for i in range(1, len(openingHours), 2)]
+            openHourResult = []
+            for j in range(len(openingHours) // 2):
+                if hours[j] in ["CLOSED", "Closed"]:
+                    continue
+                if len(days[j].strip(":").split("-")) == 2:
+                    start = [DAYS.index(row) for row in DAYS if row[:1] == days[j].strip(":").split("-")[0][0]][-1]
+                    end = [DAYS.index(row) for row in DAYS if row[:1] == days[j].strip(":").split("-")[1][0]][-1]
+                    openHourResult.extend(f"{DAYS[i]} {hours[j]}" for i in range(start, end + 1))
+                else:
+                    openHourResult.append(f"{days[j].strip(':')[:2]} {hours[j]}")
 
-    def parse_store(self, response):
-        for store in response.xpath("//markers/marker"):
-            if store:
-                properties = {
-                    "ref": store.xpath("./@storenumber").extract_first(),
-                    "name": store.xpath("./@name").extract_first(),
-                    "addr_full": store.xpath("./@address").extract_first(),
-                    "city": store.xpath("./@city").extract_first(),
-                    "state": store.xpath("./@state").extract_first(),
-                    "postcode": store.xpath("./@zip").extract_first(),
-                    "phone": store.xpath("./@phonenumber").extract_first(),
-                    "lat": float(store.xpath("./@lat").extract_first()),
-                    "lon": float(store.xpath("./@lng").extract_first()),
-                    "website": response.url,
-                }
+            oh = OpeningHours()
+            oh.from_linked_data({"openingHours": openHourResult}, "%I")
 
-                yield GeojsonPointItem(**properties)
+            properties = {
+                "ref": store.get("@storenumber"),
+                "name": store.get("@name"),
+                "street_address": store.get("@address"),
+                "city": store.get("@city"),
+                "state": store.get("@state"),
+                "postcode": store.get("@zip"),
+                "phone": store.get("@phonenumber"),
+                "lat": store.get("@lat"),
+                "lon": store.get("@lng"),
+                "opening_hours": oh.as_opening_hours(),
+            }
+
+            yield GeojsonPointItem(**properties)
