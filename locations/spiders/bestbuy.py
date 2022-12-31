@@ -2,13 +2,14 @@ import json
 
 import scrapy
 
+from locations.categories import Categories
 from locations.hours import OpeningHours
 from locations.items import GeojsonPointItem
 
 
 class BestBuySpider(scrapy.Spider):
     name = "bestbuy"
-    item_attributes = {"brand": "Best Buy", "brand_wikidata": "Q533415"}
+    item_attributes = {"brand": "Best Buy", "brand_wikidata": "Q533415", "extras": Categories.SHOP_ELECTRONICS.value}
     allowed_domains = ["stores.bestbuy.com"]
     start_urls = ("https://stores.bestbuy.com/",)
 

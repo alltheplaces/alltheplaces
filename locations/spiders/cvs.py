@@ -3,6 +3,7 @@ import re
 
 import scrapy
 
+from locations.categories import Categories
 from locations.hours import OpeningHours
 from locations.items import GeojsonPointItem
 
@@ -12,10 +13,11 @@ DAYS = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
 class CVSSpider(scrapy.Spider):
 
     name = "cvs"
-    item_attributes = {"brand": "CVS", "brand_wikidata": "Q2078880"}
+    item_attributes = {"brand": "CVS", "brand_wikidata": "Q2078880", "extras": Categories.PHARMACY.value}
     allowed_domains = ["www.cvs.com"]
     download_delay = 0.5
     start_urls = ("https://www.cvs.com/store-locator/cvs-pharmacy-locations",)
+    requires_proxy = True
 
     def parse_hours(self, hours):
         opening_hours = OpeningHours()

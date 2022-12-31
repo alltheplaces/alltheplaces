@@ -50,25 +50,20 @@ class Categories(Enum):
     COFFEE_SHOP = {"amenity": "cafe", "cuisine": "coffee_shop"}
     COMPRESSED_AIR = {"amenity": "compressed_air"}
     DENTIST = {"amenity": "dentist", "healthcare": "dentist"}
-    DOCTOR_GP = {
-        "amenity": "doctors",
-        "healthcare": "doctor",
-        "healthcare:speciality": "community",
-    }
+    DOCTOR_GP = {"amenity": "doctors", "healthcare": "doctor", "healthcare:speciality": "community"}
     FAST_FOOD = {"amenity": "fast_food"}
     FUEL_STATION = {"amenity": "fuel"}
-    HOSPITAL = {"amenity": "hospital"}
-    PHARMACY = {"amenity": "pharmacy"}
+    HOSPITAL = {"amenity": "hospital", "healthcare": "hospital"}
+    HOTEL = {"tourism": "hotel"}
+    MONEY_TRANSFER = {"amenity": "money_transfer"}
+    PHARMACY = {"amenity": "pharmacy", "healthcare": "pharmacy"}
     POST_BOX = {"amenity": "post_box"}
     POST_OFFICE = {"amenity": "post_office"}
     PRODUCT_PICKUP = {"amenity": "product_pickup"}
     PUB = {"amenity": "pub"}
     RESTAURANT = {"amenity": "restaurant"}
 
-    VENDING_MACHINE_BICYCLE_TUBE = {
-        "amenity": "vending_machine",
-        "vending": "bicycle_tube",
-    }
+    VENDING_MACHINE_BICYCLE_TUBE = {"amenity": "vending_machine", "vending": "bicycle_tube"}
 
 
 def apply_category(category, item):
