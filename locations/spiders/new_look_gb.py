@@ -15,3 +15,7 @@ class NewLookGB(SitemapSpider, StructuredDataSpider):
         for entry in entries:
             if "closed" not in entry["loc"].lower():
                 yield entry
+
+    def inspect_item(self, item, response):
+        item["website"] = response.urljoin(item["website"])
+        yield item
