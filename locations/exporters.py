@@ -138,7 +138,8 @@ class GeoJsonExporter(JsonItemExporter):
                 )
             except ValueError:
                 logging.warning("Couldn't convert lat (%s) and lon (%s) to string", lat, lon)
-
+        elif geometry := item.get("geometry"):
+            feature.append(("geometry", geometry))
         return feature
 
     def write_geojson_header(self):
