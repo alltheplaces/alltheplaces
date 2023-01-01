@@ -5,7 +5,7 @@ import zipfile
 
 import scrapy
 
-from locations.categories import Categories, apply_category
+from locations.categories import Categories, apply_category, apply_yes_no
 from locations.items import Feature
 
 
@@ -111,7 +111,7 @@ class BernCHSpider(scrapy.Spider):
     def parse_bicycle_road(self, f):
         item = self.parse_feature(f)
         apply_category(Categories.HIGHWAY_RESIDENTIAL, item)
-        item["extras"]["bicycle_road"] = "yes"
+        apply_yes_no("bicycle_road", item, True)
         return item
 
     def parse_bicycle_shop(self, f):
