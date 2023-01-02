@@ -1,4 +1,5 @@
 import scrapy
+from scrapy import FormRequest
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
@@ -11,21 +12,41 @@ class OlliesBargainOutletSpider(scrapy.Spider):
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def start_requests(self):
+        formdata = {
+            "Page": "0",
+            "PageSize": "1",
+            "StartIndex": "0",
+            "EndIndex": "5",
+            "Longitude": "-74.006065",
+            "Latitude": "40.712792",
+            "City": "",
+            "State": "",
+            "F": "GetNearestLocations",
+            "RangeInMiles": "5000",
+        }
         url = "https://www.ollies.us/admin/locations/ajax.aspx"
-        payload = "Page=0&PageSize=1&StartIndex=0&EndIndex=5&Longitude=-74.006065&Latitude=40.712792&City=&State=&F=GetNearestLocations&RangeInMiles=5000"
         headers = {"content-type": "application/x-www-form-urlencoded; charset=UTF-8"}
 
-        yield scrapy.Request(url=url, method="POST", headers=headers, body=payload, callback=self.get_all_locations)
+        yield FormRequest(url=url, method="POST", headers=headers, formdata=formdata, callback=self.get_all_locations)
 
     def get_all_locations(self, response):
         number_locations = response.json().get("LocationsCount")
+        formdata = {
+            "Page": "0",
+            "PageSize": str(number_locations),
+            "StartIndex": "0",
+            "EndIndex": "5",
+            "Longitude": "-74.006065",
+            "Latitude": "40.712792",
+            "City": "",
+            "State": "",
+            "F": "GetNearestLocations",
+            "RangeInMiles": "5000",
+        }
         url = "https://www.ollies.us/admin/locations/ajax.aspx"
-        payload = "Page=0&PageSize={}&StartIndex=0&EndIndex=5&Longitude=-74.006065&Latitude=40.712792&City=&State=&F=GetNearestLocations&RangeInMiles=5000"
         headers = {"content-type": "application/x-www-form-urlencoded; charset=UTF-8"}
 
-        yield scrapy.Request(
-            url=url, method="POST", headers=headers, body=payload.format(number_locations), callback=self.parse
-        )
+        yield FormRequest(url=url, method="POST", headers=headers, formdata=formdata, callback=self.parse)
 
     def parse(self, response):
         for data in response.json().get("Locations"):
