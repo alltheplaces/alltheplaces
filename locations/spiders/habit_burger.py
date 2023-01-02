@@ -1,5 +1,3 @@
-import json
-
 from scrapy.spiders import SitemapSpider
 
 from locations.hours import OpeningHours
@@ -7,22 +5,19 @@ from locations.structured_data_spider import StructuredDataSpider
 
 
 class HabitBurgerSpider(SitemapSpider, StructuredDataSpider):
-    name = "habit-burger"
+    name = "habit_burger"
+    item_attributes = {"brand": "The Habit Burger Grill", "brand_wikidata": "Q18158741"}
     allowed_domains = ["habitburger.com"]
     sitemap_urls = ["https://www.habitburger.com/locations-sitemap.xml"]
-    sitemap_rules = [("", "parse_sd")]
     wanted_types = ["Restaurant"]
 
     def post_process_item(self, item, response, ld_data):
-        openingHour = json.loads(response.xpath('//*[@id="content"]/script[1]/text()').get())
-        openingHour = openingHour.get("openingHours")[0].split()
-        days = [openingHour[i] for i in range(0, len(openingHour), 2)]
-        hours = [openingHour[i] for i in range(1, len(openingHour), 2)]
-        openhours = []
-        for i in range(len(openingHour) // 2):
-            openhours.extend(f"{day} {hours[i]}" for day in days[i].split(","))
+        rules = ld_data["openingHours"][0].split()
+        opening_hours = []
+        for days, hours in zip(rules[::2], rules[1::2]):
+            opening_hours.extend(f"{day} {hours}" for day in days.split(","))
         oh = OpeningHours()
-        oh.from_linked_data({"openingHours": openhours}, "%I:%M%p")
+        oh.from_linked_data({"openingHours": opening_hours}, "%I:%M%p")
         item["opening_hours"] = oh.as_opening_hours()
 
         yield item
