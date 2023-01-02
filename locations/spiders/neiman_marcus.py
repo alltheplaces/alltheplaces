@@ -15,15 +15,19 @@ class NeimanMarcusSpider(CrawlSpider):
     rules = [Rule(LinkExtractor(allow=r"/stores/[-\w]+/[-\w]+/[-\w]+/[0-9]+$"), callback="parse", follow=True)]
 
     def parse(self, response):
-        data = json.loads(response.xpath('//script[@id="__NEXT_DATA__"]/text()').get())
+        ldjson = json.loads(response.xpath('//script[@id="__NEXT_DATA__"]/text()').get())
         data = (
-            data.get("props", {}).get("pageProps", {}).get("storeInfo", {}).get("storeServices", {}).get("curbside", {})
+            ldjson.get("props", {})
+            .get("pageProps", {})
+            .get("storeInfo", {})
+            .get("storeServices", {})
+            .get("curbside", {})
         )
         item = DictParser.parse(data.get("addressDetails")[0])
         item["website"] = response.url
         item["name"] = data.get("props", {}).get("pageProps", {}).get("storeInfo", {}).get("name")
         item["phone"] = data.get("phoneNumbers")[0]
-        item["ref"] = data.get("props", {}).get("pageProps", {}).get("storeInfo", {}).get("storeNumber")
+        item["ref"] = ldjson.get("props", {}).get("pageProps", {}).get("storeInfo", {}).get("storeNumber")
         oh = OpeningHours()
         for day in data.get("workingHours"):
             for helfday in day.get("hours"):
