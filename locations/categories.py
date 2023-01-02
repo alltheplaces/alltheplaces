@@ -23,6 +23,7 @@ class Categories(Enum):
     SHOP_BICYCLE = {"shop": "bicycle"}
     SHOP_BOOKS = {"shop": "books"}
     SHOP_CAR = {"shop": "car"}
+    SHOP_CAR_REPAIR = {"shop": "car_repair"}
     SHOP_CHARITY = {"shop": "charity"}
     SHOP_CLOTHES = {"shop": "clothes"}
     SHOP_CONVENIENCE = {"shop": "convenience"}
@@ -48,6 +49,7 @@ class Categories(Enum):
     BANK = {"amenity": "bank"}
     BUREAU_DE_CHANGE = {"amenity": "bureau_de_change"}
     CAFE = {"amenity": "cafe"}
+    CHARGING_STATION = {"amenity": "charging_station"}
     CLINIC_URGENT = {"amenity": "clinic", "healthcare": "clinic", "urgent_care": "yes"}
     COFFEE_SHOP = {"amenity": "cafe", "cuisine": "coffee_shop"}
     COMPRESSED_AIR = {"amenity": "compressed_air"}

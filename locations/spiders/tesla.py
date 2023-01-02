@@ -3,6 +3,7 @@ import urllib.parse
 
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.items import GeojsonPointItem
 
 
@@ -90,7 +91,15 @@ class TeslaSpider(scrapy.Spider):
             "website": response.url,
             "lat": lat,
             "lon": lon,
-            "extras": {"location_type": location_type},  # Is this a service center or store/gallery
         }
+
+        if location_type == "supercharger":
+            apply_category(Categories.CHARGING_STATION, properties)
+        elif location_type == "store":
+            apply_category(Categories.SHOP_CAR, properties)
+        elif location_type == "service":
+            apply_category(Categories.SHOP_CAR_REPAIR, properties)
+        else:
+            properties["extras"] = {"location_type": location_type}
 
         yield GeojsonPointItem(**properties)
