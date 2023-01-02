@@ -17,8 +17,8 @@ class OttosCHSpider(scrapy.Spider):
     def parse(self, response):
         opening_hours = {}
         for store in response.xpath("//span[@data-amid]"):
-            ref = store.xpath("@data-amid").get().strip()
-            opening_hours[ref] = self.parse_opening_hours(store)
+            key = store.css(".location_header").xpath("text()").get()
+            opening_hours[key] = self.parse_opening_hours(store)
 
         js = re.search("jsonLocations:(.*),", response.text).group(1)
         for store in json.loads(js)["items"]:
@@ -28,7 +28,7 @@ class OttosCHSpider(scrapy.Spider):
                 "name": "Otto’s",
                 "city": store["city"],
                 "country": store["country"],
-                "opening_hours": opening_hours.get(str(store["id"])),
+                "opening_hours": opening_hours.get(store["name"]),
                 "phone": store["phone"],
                 "postcode": store["zip"],
                 "ref": store["id"],
