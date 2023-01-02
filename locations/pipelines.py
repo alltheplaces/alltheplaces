@@ -331,7 +331,7 @@ class ApplyNSICategoriesPipeline:
             if key == "brand:wikidata":
                 key = "brand_wikidata"
 
-            # Fields defined in GeojsonPointItem are added directly otherwise add them to extras
+            # Fields defined in Feature are added directly otherwise add them to extras
             # Never override anything set by the spider
             if key in item.fields:
                 if item.get(key) is None:

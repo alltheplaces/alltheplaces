@@ -1,9 +1,9 @@
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 from locations.pipelines import ExtractGBPostcodePipeline
 
 
 def test_extraction():
-    item = GeojsonPointItem()
+    item = Feature()
     item["country"] = "GB"
     item["addr_full"] = "Great Gutter Lane, Hull, hu10 6DP, United Kingdom"
 
@@ -14,7 +14,7 @@ def test_extraction():
 
 
 def test_badformat_o():
-    item = GeojsonPointItem()
+    item = Feature()
     item["country"] = "GB"
     item["addr_full"] = "Eastfields Rd, Woodmansey, HU17 OXL, Beverley, United Kingdom"
 
