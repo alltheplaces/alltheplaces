@@ -18,6 +18,8 @@ class Categories(Enum):
     BUS_STOP = {"highway": "bus_stop", "public_transport": "platform"}
     BUS_STATION = {"amenity": "bus_station", "public_transport": "station"}
 
+    HIGHWAY_RESIDENTIAL = {"highway": "residential"}
+
     SHOP_BICYCLE = {"shop": "bicycle"}
     SHOP_BOOKS = {"shop": "books"}
     SHOP_CAR = {"shop": "car"}

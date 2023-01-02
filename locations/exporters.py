@@ -125,19 +125,17 @@ class GeoJsonExporter(JsonItemExporter):
 
         lat = item.get("lat")
         lon = item.get("lon")
-        if lat and lon:
+        geometry = item.get("geometry")
+        if lat and lon and not geometry:
             try:
-                feature.append(
-                    (
-                        "geometry",
-                        {
-                            "type": "Point",
-                            "coordinates": [float(item["lon"]), float(item["lat"])],
-                        },
-                    )
-                )
+                geometry = {
+                    "type": "Point",
+                    "coordinates": [float(item["lon"]), float(item["lat"])],
+                }
             except ValueError:
-                logging.warning("Couldn't convert lat (%s) and lon (%s) to string", lat, lon)
+                logging.warning("Couldn't convert lat (%s) and lon (%s) to float", lat, lon)
+        if geometry:
+            feature.append(("geometry", geometry))
 
         return feature
 
