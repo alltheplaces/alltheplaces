@@ -15,7 +15,7 @@ class McCoysSpider(SitemapSpider, StructuredDataSpider):
 
     def post_process_item(self, item, response, ld_data):
         oh = OpeningHours()
-        oh.from_linked_data(ld_data, time_format="%I:%M %p")
+        oh.from_linked_data(ld_data, time_format="%-I:%M %p")
         item["opening_hours"] = oh.as_opening_hours()
 
         yield item
