@@ -95,6 +95,8 @@ class TeslaSpider(scrapy.Spider):
 
         if location_type == "supercharger":
             apply_category(Categories.CHARGING_STATION, properties)
+            properties["brand_wikidata"] = "Q17089620"
+            properties["brand"] = "Tesla Supercharger"
         elif location_type == "store":
             apply_category(Categories.SHOP_CAR, properties)
         elif location_type == "service":
