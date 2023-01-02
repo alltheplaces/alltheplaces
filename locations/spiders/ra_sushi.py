@@ -10,12 +10,9 @@ class RaSushiSpider(scrapy.spiders.SitemapSpider):
     }
 
     sitemap_urls = ["https://rasushi.com/stores-sitemap.xml"]
-    sitemap_rules = [("/locations/.+", "parse_store")]
+    sitemap_rules = [("/locations/", "parse_store")]
 
     def parse_store(self, response):
-        if response.url == "https://rasushi.com/locations/":
-            return  # not found, redirects
-
         location = response.xpath("//div[@id='store_locator_single_map']")
         address = response.xpath("//span[@class='addressGet']//text()").extract()
         type = response.xpath("//span[@class='devOp1']/text()").extract_first()
