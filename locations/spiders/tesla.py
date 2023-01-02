@@ -37,58 +37,60 @@ class TeslaSpider(scrapy.Spider):
     def parse_store(self, response):
         # Skip if "Coming Soon" - no content to capture yet
         if response.xpath('//span[@class="coming-soon"]/text()').extract_first() == "Coming Soon":
-            pass
+            return
+
+        ref = re.search(r".+/(.+?)/?(?:\.html|$)", response.url).group(1)
+
+        # city, state, and zip do not have separate classes - contained together in locality class as text
+        name = response.xpath("normalize-space(//header/h1/text())").extract_first()
+        common_name = response.xpath('normalize-space(//span[@class="common-name"]//text())').extract_first()
+        street_address = response.xpath('normalize-space(//span[@class="street-address"]//text())').extract_first()
+        city_state_zip = response.xpath('normalize-space(//span[@class="locality"]//text())').extract_first()
+
+        if common_name and street_address and city_state_zip:
+            addr_full = common_name + " " + street_address + ", " + city_state_zip
+        elif street_address and not city_state_zip:
+            addr_full = street_address
+        elif city_state_zip and not street_address:
+            addr_full = city_state_zip
+        elif street_address and city_state_zip:
+            addr_full = street_address + ", " + city_state_zip
         else:
-            ref = re.search(r".+/(.+?)/?(?:\.html|$)", response.url).group(1)
+            addr_full = None
 
-            # city, state, and zip do not have separate classes - contained together in locality class as text
-            name = response.xpath("normalize-space(//header/h1/text())").extract_first()
-            common_name = response.xpath('normalize-space(//span[@class="common-name"]//text())').extract_first()
-            street_address = response.xpath('normalize-space(//span[@class="street-address"]//text())').extract_first()
-            city_state_zip = response.xpath('normalize-space(//span[@class="locality"]//text())').extract_first()
+        country_url = response.xpath('//header[@class="findus-list-header"]/a/@href').extract_first()
+        country = urllib.parse.unquote_plus(re.search(r".+/(.+?)/?(?:\.html|$)", country_url).group(1))
+        phone = response.xpath('normalize-space(//span[@class="tel"]/span[2]/text())').extract_first()
+        location_type = re.search(r".+/(.+?)/(.+?)/?(?:\.html|$)", response.url).group(1)
 
-            addr_full = ""
-            if common_name and street_address and city_state_zip:
-                addr_full = common_name + " " + street_address + ", " + city_state_zip
-            elif street_address and not city_state_zip:
-                addr_full = street_address
-            elif city_state_zip and not street_address:
-                addr_full = city_state_zip
-            elif street_address and city_state_zip:
-                addr_full = street_address + ", " + city_state_zip
+        # map link varies across store pages
+        if response.xpath('normalize-space(//a[contains(@href,"maps.google")]/@href)').extract_first():
+            map_link = response.xpath('normalize-space(//a[contains(@href,"maps.google")]/@href)').extract_first()
+        else:
+            map_link = response.xpath('normalize-space(//img[contains(@src,"maps.google")]/@src)').extract_first()
 
-            country_url = response.xpath('//header[@class="findus-list-header"]/a/@href').extract_first()
-            country = urllib.parse.unquote_plus(re.search(r".+/(.+?)/?(?:\.html|$)", country_url).group(1))
-            phone = response.xpath('normalize-space(//span[@class="tel"]/span[2]/text())').extract_first()
-            location_type = re.search(r".+/(.+?)/(.+?)/?(?:\.html|$)", response.url).group(1)
+        # extract coordinates from map link
+        if re.search(r".+=([0-9.-]+),\s?([0-9.-]+)", map_link):
+            lat = re.search(r".+=([0-9.-]+),\s?([0-9.-]+)", map_link).group(1)
+            lon = re.search(r".+=([0-9.-]+),\s?([0-9.-]+)", map_link).group(2)
+        elif re.search(r".+@([0-9.-]+),\s?([0-9.-]+)", map_link):
+            lat = re.search(r".+@([0-9.-]+),\s?([0-9.-]+)", map_link).group(1)
+            lon = re.search(r".+@([0-9.-]+),\s?([0-9.-]+)", map_link).group(2)
+        else:
+            lat = None
+            lon = None
 
-            # map link varies across store pages
-            if response.xpath('normalize-space(//a[contains(@href,"maps.google")]/@href)').extract_first():
-                map_link = response.xpath('normalize-space(//a[contains(@href,"maps.google")]/@href)').extract_first()
-            else:
-                map_link = response.xpath('normalize-space(//img[contains(@src,"maps.google")]/@src)').extract_first()
+        properties = {
+            "ref": ref,
+            "name": name,
+            "addr_full": addr_full,
+            "street_address": street_address,
+            "country": country,
+            "phone": phone,
+            "website": response.url,
+            "lat": lat,
+            "lon": lon,
+            "extras": {"location_type": location_type},  # Is this a service center or store/gallery
+        }
 
-            # extract coordinates from map link
-            if re.search(r".+=([0-9.-]+),\s?([0-9.-]+)", map_link):
-                lat = re.search(r".+=([0-9.-]+),\s?([0-9.-]+)", map_link).group(1)
-                lon = re.search(r".+=([0-9.-]+),\s?([0-9.-]+)", map_link).group(2)
-            elif re.search(r".+@([0-9.-]+),\s?([0-9.-]+)", map_link):
-                lat = re.search(r".+@([0-9.-]+),\s?([0-9.-]+)", map_link).group(1)
-                lon = re.search(r".+@([0-9.-]+),\s?([0-9.-]+)", map_link).group(2)
-            else:
-                lat = None
-                lon = None
-
-            properties = {
-                "ref": ref,
-                "name": name,
-                "addr_full": addr_full,
-                "country": country,
-                "phone": phone,
-                "website": response.url,
-                "lat": lat,
-                "lon": lon,
-                "extras": {"location_type": location_type},  # Is this a service center or store/gallery
-            }
-
-            yield GeojsonPointItem(**properties)
+        yield GeojsonPointItem(**properties)
