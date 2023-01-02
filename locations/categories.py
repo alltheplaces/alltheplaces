@@ -1,7 +1,7 @@
 import logging
 from enum import Enum
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 # Where possible the project tries to apply POI categories and attributes according
@@ -98,7 +98,7 @@ top_level_tags = [
 
 
 def get_category_tags(source) -> {}:
-    if isinstance(source, GeojsonPointItem):
+    if isinstance(source, Feature):
         tags = source.get("extras", {})
     elif isinstance(source, Enum):
         tags = source.value
@@ -144,7 +144,7 @@ class Fuel(Enum):
     ADBLUE = "fuel:adblue"
 
 
-def apply_yes_no(attribute, item: GeojsonPointItem, state: bool, apply_positive_only: bool = True):
+def apply_yes_no(attribute, item: Feature, state: bool, apply_positive_only: bool = True):
     """
     Many OSM POI attribute tags values are "yes"/"no". Provide support for setting these from spider code.
     :param attribute: the tag to use for the attribute (str or Enum accepted)
