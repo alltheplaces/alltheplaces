@@ -13,11 +13,8 @@ class PenskeSpider(SitemapSpider, StructuredDataSpider):
     sitemap_rules = [(r"/locations/us/[-\w]+/[-\w]+/[0-9]+/$", "parse_sd")]
     wanted_types = ["LocalBusiness"]
 
-    def sitemap_filter(self, entries):
-        yield from entries
-
     def post_process_item(self, item, response, ld_data):
         item["ref"] = re.findall("[0-9]+", response.url)[0]
-        item.pop("email")
+        item.pop("email", None)
 
         yield item
