@@ -141,9 +141,6 @@ class EVGoSpider(scrapy.Spider):
             response_data = response_data[1]
 
         for item in response_data:
-            if not item.get("siteId"):
-                self.logger.error("No site ID in item: %s", json.dumps(item))
-
             yield scrapy.http.JsonRequest(
                 url="https://account.evgo.com/stationFacade/findStationsByIds",
                 headers={
@@ -155,7 +152,7 @@ class EVGoSpider(scrapy.Spider):
                 callback=self.parse_station,
                 meta={
                     "name": response.meta.get("name"),
-                    "site_id": item["siteId"],
+                    "site_id": response.meta.get("site_id"),
                 },
             )
 
