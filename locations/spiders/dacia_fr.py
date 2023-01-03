@@ -16,7 +16,7 @@ class DaciaFrSpider(scrapy.Spider):
     ]
 
     def start_requests(self):
-        point_files = "eu_centroids_120km_radius_country.csv"
+        point_files = "eu_centroids_20km_radius_country.csv"
         for lat, lon in point_locations(point_files, "FR"):
             yield scrapy.Request(
                 f"https://www.dacia.fr/wired/commerce/v1/dealers/locator?lat={lat}&lon={lon}&language=fr&country=fr&filters=dacia.blacklisted%3D%3Dfalse&count=10000000&renaultChoice=true",
