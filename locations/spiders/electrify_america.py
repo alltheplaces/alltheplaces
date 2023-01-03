@@ -17,10 +17,15 @@ class ElectrifyAmericaSpider(scrapy.Spider):
         for item in response.json():
             feature = DictParser.parse(item)
 
-            feature["extras"]["capacity"] = item.get("evseMax")
+            extras = dict()
+            extras["capacity"] = item.get("evseMax")
 
             if access := item.get("type"):
                 if access == "PUBLIC":
-                    feature["extras"]["access"] = "public"
+                    extras["access"] = "public"
+
+            if "extras" not in feature:
+                feature["extras"] = dict()
+            feature["extras"].update(extras)
 
             yield feature
