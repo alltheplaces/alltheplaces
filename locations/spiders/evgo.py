@@ -93,9 +93,6 @@ class EVGoSpider(scrapy.Spider):
 
         for item in response_data:
             if item.get("cluster") is None:
-                if not item.get("siteId"):
-                    self.logger.error("No site ID in item: %s", json.dumps(item))
-
                 yield scrapy.http.JsonRequest(
                     url="https://account.evgo.com/stationFacade/findStationsBySiteId",
                     headers={
@@ -135,7 +132,18 @@ class EVGoSpider(scrapy.Spider):
             )
 
     def parse_site(self, response):
-        for item in response.json().get("data"):
+        response_data = response.json().get("data")
+
+        # Sometimes this responds with data types in the JSON even though
+        # the x-json-types header is supposed to turn that off, so check
+        # for that and extract the data we care about
+        if len(response_data) == 2 and response_data[0] == "java.util.ArrayList":
+            response_data = response_data[1]
+
+        for item in response_data:
+            if not item.get("siteId"):
+                self.logger.error("No site ID in item: %s", json.dumps(item))
+
             yield scrapy.http.JsonRequest(
                 url="https://account.evgo.com/stationFacade/findStationsByIds",
                 headers={
