@@ -25,6 +25,8 @@ class WHSmithGBSpider(scrapy.Spider):
 
             item = DictParser.parse(store)
 
+            item["city"] = item["city"].strip()
+
             item["street_address"] = ", ".join(filter(None, [store.get("address1"), store.get("address2")]))
 
             oh = OpeningHours()
