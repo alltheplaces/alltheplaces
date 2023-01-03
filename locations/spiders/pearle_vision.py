@@ -10,7 +10,7 @@ from locations.user_agents import BROSWER_DEFAULT
 
 class PearleVisionSpider(SitemapSpider):
     name = "pearle_vision"
-    item_attributes = {"brand": "Pearle Vision"}
+    item_attributes = {"brand": "Pearle Vision", "brand_wikidata": "Q2231148"}
     allowed_domains = ["pearlevision.com", "www.pearlevision.ca"]
     sitemap_urls = ["https://www.pearlevision.com/sitemap-store-locations.xml"]
     sitemap_rules = [(r"/[0-9]+/$", "parse")]
