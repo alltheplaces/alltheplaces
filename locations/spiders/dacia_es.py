@@ -1,6 +1,7 @@
-from locations.items import GeojsonPointItem
-from locations.geo import point_locations
 import scrapy
+
+from locations.geo import point_locations
+from locations.items import GeojsonPointItem
 
 
 class DaciaEsSpider(scrapy.Spider):
