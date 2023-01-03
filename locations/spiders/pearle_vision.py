@@ -14,7 +14,6 @@ class PearleVisionSpider(SitemapSpider):
     allowed_domains = ["pearlevision.com", "www.pearlevision.ca"]
     sitemap_urls = ["https://www.pearlevision.com/sitemap-store-locations.xml"]
     sitemap_rules = [(r"/[0-9]+/$", "parse")]
-    download_delay = 1
     custom_settings = {
         "ROBOTSTXT_OBEY": False,
         "DEFAULT_REQUEST_HEADERS": {
