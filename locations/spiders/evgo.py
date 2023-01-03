@@ -94,7 +94,7 @@ class EVGoSpider(scrapy.Spider):
         for item in response_data:
             if item.get("cluster") is None:
                 if not item.get("siteId"):
-                    self.logger.warn("No site ID in item: %s", json.dumps(item))
+                    self.logger.error("No site ID in item: %s", json.dumps(item))
 
                 yield scrapy.http.JsonRequest(
                     url="https://account.evgo.com/stationFacade/findStationsBySiteId",
