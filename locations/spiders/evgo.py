@@ -1,6 +1,5 @@
 import json
-import pprint
-import re
+import random
 
 import scrapy
 
@@ -82,9 +81,17 @@ class EVGoSpider(scrapy.Spider):
     def parse(self, response):
         subrequests = set()
         incoming_bounds = response.meta["bounds"]
-        subdivisions = make_subdivisions(incoming_bounds, 16)
+        subdivisions = make_subdivisions(incoming_bounds, 32)
 
-        for item in response.json().get("data"):
+        response_data = response.json().get("data")
+
+        # Sometimes this responds with data types in the JSON even though
+        # the x-json-types header is supposed to turn that off, so check
+        # for that and extract the data we care about
+        if len(response_data) == 2 and response_data[0] == "java.util.ArrayList":
+            response_data = response_data[1]
+
+        for item in response_data:
             if item.get("cluster") is None:
                 yield scrapy.http.JsonRequest(
                     url="https://account.evgo.com/stationFacade/findStationsBySiteId",
@@ -96,16 +103,17 @@ class EVGoSpider(scrapy.Spider):
                         "filterBySiteId": item["siteId"],
                     },
                     callback=self.parse_site,
+                    meta={
+                        "name": item.get("dn"),
+                        "site_id": item["siteId"],
+                    },
                 )
-
-            # pprint.pprint(item)
-            for subdivision in subdivisions:
-                if bbox_contains(subdivision, (item["longitude"], item["latitude"])):
-                    subrequests.add(subdivision)
+            else:
+                for subdivision in subdivisions:
+                    if bbox_contains(subdivision, (item["longitude"], item["latitude"])):
+                        subrequests.add(subdivision)
 
         for bounds in subrequests:
-            # polygon_geojson = bbox_to_geojson(bounds)
-            # print(json.dumps(polygon_geojson))
             yield scrapy.http.JsonRequest(
                 url="https://account.evgo.com/stationFacade/findSitesInBounds",
                 headers={
@@ -134,6 +142,10 @@ class EVGoSpider(scrapy.Spider):
                     "filterByIds": [item["id"]],
                 },
                 callback=self.parse_station,
+                meta={
+                    "name": response.meta.get("name"),
+                    "site_id": item["siteId"],
+                },
             )
 
     def parse_station(self, response):
@@ -145,6 +157,10 @@ class EVGoSpider(scrapy.Spider):
                 "street_address": item["addressAddress1"],
                 "city": item["addressCity"],
                 "state": item["addressUsaStateCode"],
+                "name": response.meta.get("name"),
+                "extras": {
+                    "evgo:site_id": response.meta.get("site_id"),
+                },
             }
 
             apply_category(Categories.CHARGING_STATION, item)
