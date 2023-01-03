@@ -24,7 +24,6 @@ class DaciaFrSpider(scrapy.Spider):
             item = GeojsonPointItem()
             item["ref"] = data.get("birId")
             item["name"] = data.get("name")
-            item["name"] = data.get("name")
             item["country"] = data.get("country")
             item["lat"] = data.get("geolocalization", {}).get("lat")
             item["lon"] = data.get("geolocalization", {}).get("lon")
