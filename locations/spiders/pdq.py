@@ -6,7 +6,7 @@ from locations.items import GeojsonPointItem
 
 class PDQSpider(scrapy.Spider):
     name = "pdq"
-    item_attributes = {"brand": "PDQ"}
+    item_attributes = {"brand": "PDQ", "brand_wikidata": "Q87675367"}
     allowed_domains = ["eatpdq.qatserver.com"]
     start_urls = [
         "https://eatpdq.qatserver.com/Widgets/LocationSearchResult.ashx?latitude=32.9754859&longitude=-96.8853773&distance=6000"
