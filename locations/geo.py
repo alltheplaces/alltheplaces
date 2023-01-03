@@ -132,3 +132,70 @@ def postal_regions(country_code):
                 }
     else:
         raise Exception("country code not supported: " + country_code)
+
+
+def make_subdivisions(
+    bounds: tuple[float, float, float, float], num_tiles: int = 4
+) -> list[tuple[float, float, float, float]]:
+    """
+    Divide the given bounds into num_tiles*num_tiles equal subdivisions.
+
+    :param bounds: A tuple representing a lat/lon bounding box. Uses (xmin, ymin, xmax, ymax).
+    :param num_tiles: The number of subdivisions (tiles) to create in the X and Y direction.
+    :return: An array of bounding box tuples.
+    """
+    xmin, ymin, xmax, ymax = bounds
+    width = xmax - xmin
+    height = ymax - ymin
+
+    # Calculate the width and height of each tile
+    tile_width = width / num_tiles
+    tile_height = height / num_tiles
+
+    # Initialize a list to store the tiles
+    tiles = []
+
+    # Iterate over the tiles and append them to the list
+    for i in range(num_tiles):
+        for j in range(num_tiles):
+            # Calculate the bounding box for the tile
+            x0 = xmin + i * tile_width
+            y0 = ymin + j * tile_height
+            x1 = x0 + tile_width
+            y1 = y0 + tile_height
+            tiles.append((x0, y0, x1, y1))
+
+    return tiles
+
+
+def bbox_contains(bounds: tuple[float, float, float, float], point: tuple[float, float]) -> bool:
+    """
+    Returns true if the lat/lon point is contained in the given lat/lon bounding box.
+
+    :param bounds: A tuple representing a lat/lon bounding box. Uses (xmin, ymin, xmax, ymax).
+    :param point: A (x, y) point - usually lon, lat.
+    :return: True if the point is contained inside the bounds.
+    """
+    x, y = point
+    xmin, ymin, xmax, ymax = bounds
+
+    if xmin <= x <= xmax and ymin <= y <= ymax:
+        return True
+
+    return False
+
+
+def bbox_to_geojson(bounds: tuple[float, float, float, float]) -> dict:
+    """
+    Convert a bounding box tuple into a Polygon GeoJSON geometry dict. Useful for debugging.
+
+    :param bounds: A tuple representing a lat/lon bounding box. Uses (xmin, ymin, xmax, ymax).
+    :return: A GeoJSON geometry dict.
+    """
+
+    xmin, ymin, xmax, ymax = bounds
+    polygon = {
+        "type": "Polygon",
+        "coordinates": [[[xmin, ymin], [xmin, ymax], [xmax, ymax], [xmax, ymin], [xmin, ymin]]],
+    }
+    return polygon
