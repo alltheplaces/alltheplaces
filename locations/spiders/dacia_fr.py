@@ -11,9 +11,6 @@ class DaciaFrSpider(scrapy.Spider):
         "brand_wikidata": "Q27460",
     }
     allowed_domains = ["dacia.fr"]
-    start_urls = [
-        "https://www.dacia.fr/wired/commerce/v1/dealers/locator?lat=48.85799300000001&lon=2.381153&language=fr&country=fr&filters=dacia.blacklisted%3D%3Dfalse&pageSize=10000000&count=10000000&renaultChoice=true"
-    ]
 
     def start_requests(self):
         point_files = "eu_centroids_20km_radius_country.csv"
