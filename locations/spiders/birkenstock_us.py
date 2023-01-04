@@ -7,7 +7,7 @@ from locations.geo import point_locations
 class BirkenstockUsSpider(scrapy.Spider):
     name = "birkenstock_us"
     item_attributes = {
-        "brand": "Dacia",
+        "brand": "Birkenstock",
         "brand_wikidata": "Q648458",
     }
     allowed_domains = ["birkenstock.com"]
