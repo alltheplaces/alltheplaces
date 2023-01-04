@@ -22,7 +22,7 @@ class VueCinemasSpider(SitemapSpider):
         address_parts = cinema.xpath('.//img[@alt="location-pin"]/../text()').getall()
         if not address_parts:
             address_parts = cinema.xpath(
-                f'.//div[contains(@data-page-url, "/getting-here")]/following-sibling::div//div[@class="container container--scroll"]/div/p/text()'
+                './/div[contains(@data-page-url, "/getting-here")]/following-sibling::div//div[@class="container container--scroll"]/div/p/text()'
             ).getall()
 
         item["addr_full"] = clean_address(address_parts)
