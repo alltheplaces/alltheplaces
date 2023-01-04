@@ -1,10 +1,11 @@
+from datetime import datetime
+
 import scrapy
 import xmltodict
 
-from datetime import datetime
-
-from locations.items import GeojsonPointItem
 from locations.hours import DAYS_EN, OpeningHours
+from locations.items import GeojsonPointItem
+
 
 class ChemistWarehouseSpider(scrapy.Spider):
     name = "chemist_warehouse_au"
