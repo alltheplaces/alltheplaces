@@ -14,6 +14,9 @@ def extract_google_position(item, response):
     for link in response.xpath("//a[contains(@href, 'google')][contains(@href, 'maps')]/@href").getall():
         item["lat"], item["lon"] = url_to_coords(link)
         return
+    for link in response.xpath("//a[contains(@href, 'maps.apple.com')]/@href").getall():
+        item["lat"], item["lon"] = url_to_coords(link)
+        return
 
 
 def url_to_coords(url: str) -> (float, float):  # noqa: C901
@@ -79,6 +82,11 @@ def url_to_coords(url: str) -> (float, float):  # noqa: C901
             daddr = daddr.split(",")
             if len(daddr) == 2:
                 return float(daddr[0]), float(daddr[1])
+    elif "maps.apple.com" in url:
+        for q in get_query_param(url, "q"):
+            coords = q.split(",")
+            if len(coords) == 2:
+                return float(coords[0]), float(coords[1])
 
     if "/maps.google.com/" in url:
         for ll in get_query_param(url, "ll"):
