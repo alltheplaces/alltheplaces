@@ -145,6 +145,10 @@ class GeoJsonExporter(JsonItemExporter):
         props = {"@spider": self.spider_name} if self.spider_name else {}
         if spider := self.find_spider_class(self.spider_name):
             props.update(getattr(spider, "dataset_attributes", {}))
+            settings = getattr(spider, "custom_settings", {}) or {}
+            if not settings.get("ROBOTSTXT_OBEY", True):
+                # See https://github.com/alltheplaces/alltheplaces/issues/4537
+                props["spider:robots_txt"] = "ignored"
         json.dump(props, header, ensure_ascii=False, separators=(",", ":"), sort_keys=True)
         header.write(',"features":[\n')
         self.file.write(to_bytes(header.getvalue(), self.encoding))
