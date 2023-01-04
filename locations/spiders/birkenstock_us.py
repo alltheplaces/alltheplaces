@@ -21,4 +21,6 @@ class BirkenstockUsSpider(scrapy.Spider):
 
     def parse(self, response):
         for _, data in response.json().get("stores").items():
-            yield DictParser.parse(data)
+            item = DictParser.parse(data)
+            item["website"] = data.get("storeDetailsFlyinLink")
+            yield item
