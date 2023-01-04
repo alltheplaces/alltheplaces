@@ -1,13 +1,11 @@
-from datetime import datetime
-
 import scrapy
 import xmltodict
 
-from locations.hours import DAYS_EN, OpeningHours
+from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import GeojsonPointItem
 
 
-class ChemistWarehouseSpider(scrapy.Spider):
+class ChemistWarehouseAUSpider(scrapy.Spider):
     name = "chemist_warehouse_au"
     item_attributes = {"brand": "Chemist Warehouse", "brand_wikidata": "Q48782120"}
     allowed_domains = ["www.chemistwarehouse.com.au"]
@@ -30,22 +28,12 @@ class ChemistWarehouseSpider(scrapy.Spider):
             item["phone"] = data.get("@storephone")
             item["email"] = data.get("@storeemail")
             oh = OpeningHours()
-            for day in ("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"):
-                open_hour_raw = data.get("@store" + day.lower()).split(" - ")[0].replace(".", ":")
-                if "CLOSED" in open_hour_raw:
-                    open_hour = "closed"
-                elif open_hour_raw == "00:00AM":
-                    open_hour = "00:00"
-                else:
-                    open_hour = datetime.strptime(open_hour_raw, "%I:%M%p").strftime("%H:%M")
-                close_hour_raw = data.get("@store" + day.lower()).split(" - ")[1].replace(".", ":")
-                if "CLOSED" in open_hour_raw:
-                    close_hour = "closed"
-                elif close_hour_raw == "00:00AM":
-                    close_hour = "24:00"
-                else:
-                    close_hour = datetime.strptime(close_hour_raw, "%I:%M%p").strftime("%H:%M")
-                oh.add_range(DAYS_EN[day], open_hour, close_hour)
+            for day in DAYS_FULL:
+                rule = (
+                    data["@store" + day[:3].lower()].replace(".", ":").replace("00:00AM - 00:00AM", "12:00AM - 12:00AM")
+                )
+                open_time, close_time = rule.split(" - ")
+                oh.add_range(day, open_time, close_time, time_format="%I:%M%p")
             item["opening_hours"] = oh.as_opening_hours()
 
             yield item
