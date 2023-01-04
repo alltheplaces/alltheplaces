@@ -215,6 +215,8 @@ class CheckItemPropertiesPipeline:
                 lat = None
                 spider.crawler.stats.inc_value("atp/field/lat/invalid")
             item["lat"] = lat
+        else:
+            spider.crawler.stats.inc_value("atp/field/lat/missing")
         if lon := item.get("lon"):
             try:
                 lon = float(lon)
@@ -226,6 +228,8 @@ class CheckItemPropertiesPipeline:
                 lon = None
                 spider.crawler.stats.inc_value("atp/field/lon/invalid")
             item["lon"] = lon
+        else:
+            spider.crawler.stats.inc_value("atp/field/lon/missing")
 
         if twitter := item.get("twitter"):
             if not isinstance(twitter, str):
