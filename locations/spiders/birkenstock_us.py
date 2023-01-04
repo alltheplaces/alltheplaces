@@ -16,7 +16,7 @@ class BirkenstockUsSpider(scrapy.Spider):
         point_files = "us_centroids_100mile_radius_state.csv"
         for lat, lon in point_locations(point_files):
             yield scrapy.Request(
-                f"https://www.birkenstock.com/on/demandware.store/Sites-US-Site/en_US/Stores-GetStoresJson?latitude={lat}&longitude={lon}&storeid=&distance=100&distanceunit=mi&searchText=&countryCode=US&storeLocatorType=regular",
+                f"https://www.birkenstock.com/on/demandware.store/Sites-US-Site/en_US/Stores-GetStoresJson?latitude={lat}&longitude={lon}&storeid=&distance=100&distanceunit=mi&searchText=&countryCode=US&storeLocatorType=regular&storetype1=true"
             )
 
     def parse(self, response):
