@@ -29,7 +29,7 @@ class DaciaItSpider(scrapy.Spider):
             item["street_address"] = row.get("address", {}).get("extendedAddress")
             item["lat"] = row.get("geolocalization", {}).get("lat")
             item["lon"] = row.get("geolocalization", {}).get("lon")
-            item["phone"] = row.get("telephone")
+            item["phone"] = row.get("telephone", {}).get("value")
 
             yield item
 
