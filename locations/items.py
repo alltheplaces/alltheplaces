@@ -39,5 +39,10 @@ class GeojsonPointItem(scrapy.Item):
     nsi_id = scrapy.Field()
     extras = scrapy.Field()
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if not self._values.get("extras"):
+            self.__setitem__("extras", {})
+
 
 Feature = GeojsonPointItem
