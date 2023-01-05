@@ -30,9 +30,7 @@ class FranprixFRSpider(Spider):
                 )
             properties = {
                 "ref": store.get("id"),
-                "name": f"Franprix - {store.get('store_name')}"
-                if store.get("store_name")
-                else "Franprix",
+                "name": f"Franprix - {store.get('store_name')}" if store.get("store_name") else "Franprix",
                 "addr_full": store.get("street"),
                 "city": store.get("city"),
                 "phone": store.get("phone"),
