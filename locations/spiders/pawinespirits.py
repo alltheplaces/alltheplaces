@@ -1,5 +1,6 @@
 import scrapy
 
+from locations.hours import OpeningHours
 from locations.items import GeojsonPointItem
 
 
@@ -11,6 +12,7 @@ class PAWineSpiritsSpider(scrapy.Spider):
         "brand_wikidata": "Q64514776",
     }
     allowed_domains = ["www.finewineandgoodspirits.com"]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def start_requests(self):
         url = "https://www.finewineandgoodspirits.com/webapp/wcs/stores/servlet/FindStoreView?storeId=10051&langId=-1&catalogId=10051&pageNum=1&listSize=1000&category=&city=&zip_code=&county=All+Stores&storeNO="
@@ -37,8 +39,13 @@ class PAWineSpiritsSpider(scrapy.Spider):
             type_of_store = [s for s in type_text if s]
 
             hours_txt = row.xpath('*[@class="columnHoursOfOprn"]/div/*/text()').extract()
-            hour_pairs = list(zip(*[iter(hours_txt)] * 2))
-            hours = ", ".join(" ".join(x) for x in hour_pairs)
+            opening_hours = [
+                f"{hours_txt[i]} {hours_txt[i+1]}"
+                for i in range(0, len(hours_txt) // 2, 2)
+                if hours_txt[i + 1] != "Closed"
+            ]
+            oh = OpeningHours()
+            oh.from_linked_data({"openingHours": opening_hours}, "%I:%M %p")
 
             [lat, lon] = row.xpath("*/form/input").re('name=".*itude" value="(.*)"')
             if float(lat) == 0 and float(lon) == 0:
@@ -55,6 +62,6 @@ class PAWineSpiritsSpider(scrapy.Spider):
                     "type_of_store": type_of_store,
                 },
                 "ref": ref,
-                "opening_hours": hours,
+                "opening_hours": oh.as_opening_hours(),
             }
             yield GeojsonPointItem(**properties)

@@ -1,9 +1,9 @@
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 from locations.pipelines import AssertURLSchemePipeline
 
 
 def test_addition():
-    item = GeojsonPointItem()
+    item = Feature()
     item["image"] = "//example.org/image.png"
 
     pl = AssertURLSchemePipeline()
@@ -13,7 +13,7 @@ def test_addition():
 
 
 def test_no_action():
-    item = GeojsonPointItem()
+    item = Feature()
     item["image"] = "https://example.org/image.png"
 
     pl = AssertURLSchemePipeline()

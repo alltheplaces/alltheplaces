@@ -92,6 +92,7 @@ ITEM_PIPELINES = {
     "locations.pipelines.AssertURLSchemePipeline": 500,
     "locations.pipelines.CheckItemPropertiesPipeline": 600,
     "locations.pipelines.ApplyNSICategoriesPipeline": 700,
+    "locations.pipelines.CountCategoriesPipeline": 800,
 }
 
 

@@ -12,6 +12,7 @@ from scrapy.exceptions import DropItem
 
 from locations.categories import get_category_tags
 from locations.country_utils import CountryUtils
+from locations.hours import OpeningHours
 from locations.name_suggestion_index import NSI
 
 
@@ -83,6 +84,7 @@ class CountryCodeCleanUpPipeline:
             if country := self.country_utils.country_code_from_url(item.get("website")):
                 spider.crawler.stats.inc_value("atp/field/country/from_website_url")
                 item["country"] = country
+                return item
 
             # Still no country set, try an offline reverse geocoder.
             lat, lon = item.get("lat"), item.get("lon")
@@ -90,6 +92,7 @@ class CountryCodeCleanUpPipeline:
                 if c := reverse_geocode.search([(lat, lon)]):
                     spider.crawler.stats.inc_value("atp/field/country/from_reverse_geocoding")
                     item["country"] = c[0]["country_code"]
+                    return item
 
         return item
 
@@ -143,6 +146,12 @@ class ExtractGBPostcodePipeline:
                     postcode = re.search(r"(\w{1,2}\d{1,2}\w?) O(\w{2})", item["addr_full"].upper())
                     if postcode:
                         item["postcode"] = postcode.group(1) + " 0" + postcode.group(2)
+        elif item.get("country") == "IE":
+            if item.get("addr_full") and not item.get("postcode"):
+                if postcode := re.search(
+                    r"([AC-FHKNPRTV-Y][0-9]{2}|D6W)[ -]?([0-9AC-FHKNPRTV-Y]{4})", item["addr_full"].upper()
+                ):
+                    item["postcode"] = "{} {}".format(postcode.group(1), postcode.group(2))
 
         return item
 
@@ -213,6 +222,8 @@ class CheckItemPropertiesPipeline:
                 lat = None
                 spider.crawler.stats.inc_value("atp/field/lat/invalid")
             item["lat"] = lat
+        else:
+            spider.crawler.stats.inc_value("atp/field/lat/missing")
         if lon := item.get("lon"):
             try:
                 lon = float(lon)
@@ -224,6 +235,8 @@ class CheckItemPropertiesPipeline:
                 lon = None
                 spider.crawler.stats.inc_value("atp/field/lon/invalid")
             item["lon"] = lon
+        else:
+            spider.crawler.stats.inc_value("atp/field/lon/missing")
 
         if twitter := item.get("twitter"):
             if not isinstance(twitter, str):
@@ -236,7 +249,9 @@ class CheckItemPropertiesPipeline:
             spider.crawler.stats.inc_value("atp/field/twitter/missing")
 
         if opening_hours := item.get("opening_hours"):
-            if not isinstance(opening_hours, str):
+            if isinstance(opening_hours, OpeningHours):
+                item["opening_hours"] = opening_hours.as_opening_hours()
+            elif not isinstance(opening_hours, str):
                 spider.crawler.stats.inc_value("atp/field/opening_hours/wrong_type")
             elif not self.opening_hours_regex.match(opening_hours) and opening_hours != "24/7":
                 spider.crawler.stats.inc_value("atp/field/opening_hours/invalid")
@@ -329,7 +344,7 @@ class ApplyNSICategoriesPipeline:
             if key == "brand:wikidata":
                 key = "brand_wikidata"
 
-            # Fields defined in GeojsonPointItem are added directly otherwise add them to extras
+            # Fields defined in Feature are added directly otherwise add them to extras
             # Never override anything set by the spider
             if key in item.fields:
                 if item.get(key) is None:
@@ -340,4 +355,17 @@ class ApplyNSICategoriesPipeline:
 
         item["extras"] = extras
 
+        return item
+
+
+class CountCategoriesPipeline:
+    def process_item(self, item, spider):
+        if categories := get_category_tags(item):
+            for k, v in sorted(categories.items()):
+                spider.crawler.stats.inc_value("atp/category/%s/%s" % (k, v))
+                break
+            if len(categories) > 1:
+                spider.crawler.stats.inc_value("atp/category/multiple")
+        else:
+            spider.crawler.stats.inc_value("atp/category/missing")
         return item

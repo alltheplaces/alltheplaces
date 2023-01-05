@@ -50,6 +50,8 @@ def get_url(response) -> str:
 
 
 class StructuredDataSpider(Spider):
+    dataset_attributes = {"source": "structured_data"}
+
     wanted_types = [
         "LocalBusiness",
         "ConvenienceStore",
@@ -67,6 +69,7 @@ class StructuredDataSpider(Spider):
         "BarOrPub",
         "SportingGoodsStore",
         "Dentist",
+        "AutoRental",
     ]
     search_for_email = True
     search_for_phone = True

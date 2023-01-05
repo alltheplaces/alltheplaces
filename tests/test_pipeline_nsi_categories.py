@@ -1,7 +1,7 @@
 from scrapy.crawler import Crawler
 
 from locations.categories import Categories, apply_category, get_category_tags
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 from locations.pipelines import ApplyNSICategoriesPipeline
 from locations.spiders.greggs_gb import GreggsGBSpider
 
@@ -12,7 +12,7 @@ def get_objects():
 
     spider = Spider()
     spider.crawler = Crawler(GreggsGBSpider)
-    return GeojsonPointItem(), ApplyNSICategoriesPipeline(), spider
+    return Feature(), ApplyNSICategoriesPipeline(), spider
 
 
 def test_no_categories():

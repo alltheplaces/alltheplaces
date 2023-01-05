@@ -6,9 +6,15 @@
 import scrapy
 
 
+# TODO: In the past, all ATP items had point geometry (or, rarely,
+# no known geometry at all), hence the name of this class. While this
+# still is the case for the vast majority of data, it might make sense
+# to rename "GeojsonPointItem" to "Feature" across the ATP codebase
+# in a global search-and-replace.
 class GeojsonPointItem(scrapy.Item):
     lat = scrapy.Field()
     lon = scrapy.Field()
+    geometry = scrapy.Field()
     name = scrapy.Field()
     addr_full = scrapy.Field()
     housenumber = scrapy.Field()
@@ -32,3 +38,11 @@ class GeojsonPointItem(scrapy.Item):
     located_in_wikidata = scrapy.Field()
     nsi_id = scrapy.Field()
     extras = scrapy.Field()
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if not self._values.get("extras"):
+            self.__setitem__("extras", {})
+
+
+Feature = GeojsonPointItem

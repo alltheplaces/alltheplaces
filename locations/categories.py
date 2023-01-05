@@ -1,7 +1,7 @@
 import logging
 from enum import Enum
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 # Where possible the project tries to apply POI categories and attributes according
@@ -18,9 +18,12 @@ class Categories(Enum):
     BUS_STOP = {"highway": "bus_stop", "public_transport": "platform"}
     BUS_STATION = {"amenity": "bus_station", "public_transport": "station"}
 
+    HIGHWAY_RESIDENTIAL = {"highway": "residential"}
+
     SHOP_BICYCLE = {"shop": "bicycle"}
     SHOP_BOOKS = {"shop": "books"}
     SHOP_CAR = {"shop": "car"}
+    SHOP_CAR_REPAIR = {"shop": "car_repair"}
     SHOP_CHARITY = {"shop": "charity"}
     SHOP_CLOTHES = {"shop": "clothes"}
     SHOP_CONVENIENCE = {"shop": "convenience"}
@@ -28,11 +31,14 @@ class Categories(Enum):
     SHOP_ELECTRONICS = {"shop": "electronics"}
     SHOP_FLORIST = {"shop": "florist"}
     SHOP_FURNITURE = {"shop": "furniture"}
+    SHOP_MOTORCYCLE = {"shop": "motorcycle"}
+    SHOP_MOTORCYCLE_REPAIR = {"shop": "motorcycle_repair"}
     SHOP_NEWSAGENT = {"shop": "newsagent"}
     SHOP_OPTICIAN = {"shop": "optician"}
     SHOP_SPORTS = {"shop": "sports"}
     SHOP_SUPERMARKET = {"shop": "supermarket"}
     SHOP_TRAVEL = {"shop": "travel_agency"}
+    SHOP_VARIETY_STORE = {"shop": "variety_store"}
     SHOP_WHOLESALE = {"shop": "wholesale"}
 
     CAR_REPAIR = {"shop": "car_repair"}
@@ -43,29 +49,25 @@ class Categories(Enum):
     BANK = {"amenity": "bank"}
     BUREAU_DE_CHANGE = {"amenity": "bureau_de_change"}
     CAFE = {"amenity": "cafe"}
+    CHARGING_STATION = {"amenity": "charging_station"}
     CLINIC_URGENT = {"amenity": "clinic", "healthcare": "clinic", "urgent_care": "yes"}
     COFFEE_SHOP = {"amenity": "cafe", "cuisine": "coffee_shop"}
     COMPRESSED_AIR = {"amenity": "compressed_air"}
     DENTIST = {"amenity": "dentist", "healthcare": "dentist"}
-    DOCTOR_GP = {
-        "amenity": "doctors",
-        "healthcare": "doctor",
-        "healthcare:speciality": "community",
-    }
+    DOCTOR_GP = {"amenity": "doctors", "healthcare": "doctor", "healthcare:speciality": "community"}
     FAST_FOOD = {"amenity": "fast_food"}
     FUEL_STATION = {"amenity": "fuel"}
-    HOSPITAL = {"amenity": "hospital"}
-    PHARMACY = {"amenity": "pharmacy"}
+    HOSPITAL = {"amenity": "hospital", "healthcare": "hospital"}
+    HOTEL = {"tourism": "hotel"}
+    MONEY_TRANSFER = {"amenity": "money_transfer"}
+    PHARMACY = {"amenity": "pharmacy", "healthcare": "pharmacy"}
     POST_BOX = {"amenity": "post_box"}
     POST_OFFICE = {"amenity": "post_office"}
     PRODUCT_PICKUP = {"amenity": "product_pickup"}
     PUB = {"amenity": "pub"}
     RESTAURANT = {"amenity": "restaurant"}
 
-    VENDING_MACHINE_BICYCLE_TUBE = {
-        "amenity": "vending_machine",
-        "vending": "bicycle_tube",
-    }
+    VENDING_MACHINE_BICYCLE_TUBE = {"amenity": "vending_machine", "vending": "bicycle_tube"}
 
 
 def apply_category(category, item):
@@ -96,7 +98,7 @@ top_level_tags = [
 
 
 def get_category_tags(source) -> {}:
-    if isinstance(source, GeojsonPointItem):
+    if isinstance(source, Feature):
         tags = source.get("extras", {})
     elif isinstance(source, Enum):
         tags = source.value
@@ -142,7 +144,7 @@ class Fuel(Enum):
     ADBLUE = "fuel:adblue"
 
 
-def apply_yes_no(attribute, item: GeojsonPointItem, state: bool, apply_positive_only: bool = True):
+def apply_yes_no(attribute, item: Feature, state: bool, apply_positive_only: bool = True):
     """
     Many OSM POI attribute tags values are "yes"/"no". Provide support for setting these from spider code.
     :param attribute: the tag to use for the attribute (str or Enum accepted)

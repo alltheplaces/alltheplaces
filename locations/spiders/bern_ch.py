@@ -5,8 +5,8 @@ import zipfile
 
 import scrapy
 
-from locations.categories import Categories, apply_category
-from locations.items import GeojsonPointItem
+from locations.categories import Categories, apply_category, apply_yes_no
+from locations.items import Feature
 
 
 # Open Data of the Land Surveying Office of the City of Bern, Switzerland
@@ -15,6 +15,22 @@ from locations.items import GeojsonPointItem
 class BernCHSpider(scrapy.Spider):
     name = "bern_ch"
     allowed_domains = ["map.bern.ch"]
+
+    dataset_attributes = {
+        "attribution": "required",
+        "attribution:name:de": "Geodaten Stadt Bern",
+        "attribution:name:en": "Geodata City of Bern",
+        "attribution:website": "https://www.bern.ch/themen/planen-und-bauen/geodaten-und-plane",
+        "contact:email": "geoinformation@bern.ch",
+        "license": "opendata.swiss BY-ASK",
+        "license:website": "https://opendata.swiss/de/terms-of-use#terms_by_ask",
+        "license:wikidata": "Q115716001",
+        "use:commercial": "permit",
+        # permission for import to OpenStreetMap has been granted, 2022-12-22
+        "use:openstreetmap": "yes",
+        "website": "https://opendata.swiss/de/dataset/velo-themen",
+    }
+
     operators = {
         "carvelo2go": ("Q110278232", {"rental": "cargo_bike"}),
         "PubliBike": ("Q3555363", {}),
@@ -46,14 +62,13 @@ class BernCHSpider(scrapy.Spider):
                     yield item
 
     def parse_feature(self, f):
-        (lon, lat), props = f["geometry"]["coordinates"][:2], f["properties"]
+        props = f["properties"]
         feature_json = json.dumps(f, sort_keys=True)
         ref = hashlib.sha1(feature_json.encode("utf-8")).hexdigest()
         return {
-            "lat": lat,
-            "lon": lon,
+            "geometry": f["geometry"],
             "ref": ref,
-            "street": props["strasse"],
+            "street": props.get("strasse"),
             "housenumber": props.get("hausnummer"),
             "postcode": props.get("plz"),
             "city": props.get("ort"),
@@ -64,7 +79,7 @@ class BernCHSpider(scrapy.Spider):
     def parse_bicycle_parking(self, f):
         item = self.parse_feature(f)
         apply_category(Categories.BICYCLE_PARKING, item)
-        return GeojsonPointItem(**item)
+        return Feature(**item)
 
     def parse_bicycle_pump(self, f):
         item = self.parse_feature(f)
@@ -76,7 +91,7 @@ class BernCHSpider(scrapy.Spider):
                 "valves": "schrader;sclaverand",
             }
         )
-        return GeojsonPointItem(**item)
+        return Feature(**item)
 
     def parse_bicycle_rental(self, f):
         item, props = self.parse_feature(f), f["properties"]
@@ -91,13 +106,13 @@ class BernCHSpider(scrapy.Spider):
             )
             item["extras"].update(extras)
         apply_category(Categories.BICYCLE_RENTAL, item)
-        return GeojsonPointItem(**item)
+        return Feature(**item)
 
     def parse_bicycle_road(self, f):
-        # Not emitting road geometry until AllThePlaces has made a decision
-        # on whether this kind of GIS data should be considered in scope.
-        # See also https://github.com/alltheplaces/alltheplaces/pull/4298.
-        return None
+        item = self.parse_feature(f)
+        apply_category(Categories.HIGHWAY_RESIDENTIAL, item)
+        apply_yes_no("bicycle_road", item, True)
+        return item
 
     def parse_bicycle_shop(self, f):
         item, props = self.parse_feature(f), f["properties"]
@@ -110,7 +125,7 @@ class BernCHSpider(scrapy.Spider):
             }
         )
         apply_category(Categories.SHOP_BICYCLE, item)
-        return GeojsonPointItem(**item)
+        return Feature(**item)
 
     def parse_bicycle_tube_vending_machine(self, f):
         item, props = self.parse_feature(f), f["properties"]
@@ -123,4 +138,4 @@ class BernCHSpider(scrapy.Spider):
             }
         )
         apply_category(Categories.VENDING_MACHINE_BICYCLE_TUBE, item)
-        return GeojsonPointItem(**item)
+        return Feature(**item)

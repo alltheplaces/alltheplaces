@@ -2,6 +2,7 @@ import json
 
 from scrapy.spiders import SitemapSpider
 
+from locations.dict_parser import DictParser
 from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import GeojsonPointItem
 
@@ -16,7 +17,7 @@ class PrimarkGBSpider(SitemapSpider):
     def parse(self, response):
         data = json.loads(response.xpath('//script[@id="__NEXT_DATA__"]/text()').get())
 
-        store = data["props"]["pageProps"]["storeDetailsPage"]["props"]["storeDetails"]
+        store = DictParser.get_nested_key(data, "storeDetails")
 
         item = GeojsonPointItem()
         item["lat"] = store["displayCoordinate"]["latitude"]

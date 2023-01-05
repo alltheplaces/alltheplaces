@@ -12,6 +12,7 @@ class CroixRougeFrancaiseSpider(scrapy.Spider):
     start_urls = [
         "https://www.croix-rouge.fr/index_bridge.php?exportStructures=1&dpts_reg[]=&filiereTheme[]=&actionsTheme[]=&geojson",
     ]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def parse(self, response):
         data = response.json()
@@ -26,16 +27,17 @@ class CroixRougeFrancaiseSpider(scrapy.Spider):
             properties = {
                 "name": feature["properties"]["name"],
                 "ref": feature["id"],
-                "addr_full": feature["properties"]["address1"].strip(),
+                "addr_full": feature["properties"]["address"].strip(),
                 "city": city,
                 "state": state,  # actually department
                 "postcode": postal,
                 "country": "FR",
                 "phone": feature["properties"]["telephone"],
-                "website": feature["properties"]["site"],
+                "website": f'https://{feature["properties"]["site"]}'.strip("/").strip("\\"),
                 "lat": float(feature["geometry"]["coordinates"][1]),
                 "lon": float(feature["geometry"]["coordinates"][0]),
                 "extras": {"type": feature["properties"]["type"]},
+                "street_address": feature["properties"]["address"],
             }
 
             yield GeojsonPointItem(**properties)

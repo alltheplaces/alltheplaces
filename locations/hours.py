@@ -106,6 +106,25 @@ DAYS_IT = {
     "Sab": "Sa",
     "Dom": "Su",
 }
+DAYS_FR = {
+    "Lu": "Mo",
+    "Ma": "Tu",
+    "Me": "We",
+    "Je": "Th",
+    "Ve": "Fr",
+    "Sa": "Sa",
+    "Di": "Su",
+}
+
+DAYS_NL = {
+    "Ma": "Mo",
+    "Di": "Tu",
+    "Wo": "We",
+    "Do": "Th",
+    "Vr": "Fr",
+    "Za": "Sa",
+    "Zo": "Su",
+}
 
 
 def day_range(start_day, end_day):

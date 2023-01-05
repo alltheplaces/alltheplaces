@@ -1,4 +1,4 @@
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class DictParser:
@@ -84,8 +84,8 @@ class DictParser:
     website_keys = ["url", "website"]
 
     @staticmethod
-    def parse(obj) -> GeojsonPointItem:
-        item = GeojsonPointItem()
+    def parse(obj) -> Feature:
+        item = Feature()
 
         item["ref"] = DictParser.get_first_key(obj, DictParser.ref_keys)
         item["name"] = DictParser.get_first_key(obj, DictParser.name_keys)

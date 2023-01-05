@@ -1,69 +1,30 @@
-import re
-
 import scrapy
-from scrapy.utils.gz import gunzip
+import xmltodict
 
 from locations.items import GeojsonPointItem
 
 
 class PDQSpider(scrapy.Spider):
     name = "pdq"
-    item_attributes = {"brand": "PDQ"}
+    item_attributes = {"brand": "PDQ", "brand_wikidata": "Q87675367"}
     allowed_domains = ["eatpdq.qatserver.com"]
-    start_urls = ("http://eatpdq.qatserver.com/sitemap/sitemap.gz",)
+    start_urls = [
+        "https://eatpdq.qatserver.com/Widgets/LocationSearchResult.ashx?latitude=32.9754859&longitude=-96.8853773&distance=6000"
+    ]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def parse(self, response):
+        for data in xmltodict.parse(response.text).get("markers").get("marker"):
+            item = GeojsonPointItem()
+            item["ref"] = data.get("@id")
+            item["website"] = data.get("@href")
+            item["name"] = data.get("@name")
+            item["lat"] = data.get("@lat")
+            item["lon"] = data.get("@lng")
+            item["addr_full"] = data.get("@addressTEXT")
+            item["street_address"] = data.get("@addressTEXT").split(", ")[0]
+            item["city"] = data.get("@addressTEXT").split(", ")[1]
+            item["state"] = data.get("@addressTEXT").split(", ")[2].split()[0]
+            item["postcode"] = data.get("@addressTEXT").split(", ")[2].split()[-1]
 
-        sitemap = gunzip(response.body)
-        regex = re.compile(r"http://eatpdq.qatserver.com/locations/\S+(?=</loc>)")
-        city_urls = re.findall(regex, str(sitemap))
-
-        for path in city_urls:
-            if path.strip() == "http://eatpdq.qatserver.com/locations/find-a-location":
-                pass
-            else:
-                yield scrapy.Request(
-                    path.strip(),
-                    callback=self.parse_store,
-                )
-
-    def parse_store(self, response):
-        if "Sitefinity trial version" in response.xpath("//title/text()").extract():
-            yield scrapy.Request(
-                response.request.url,
-                callback=self.parse_store,
-            )
-        else:
-            if response.xpath('//div[@class="hours"]/div').extract():
-                storeHoursHTML = (
-                    str(response.xpath('//div[@class="hours"]/div').extract())
-                    .replace("'", "")
-                    .replace("[", "")
-                    .replace("]", "")
-                )
-                p = re.compile(r"<.*?>")
-                storeHours = p.sub("", storeHoursHTML)
-                storeHours = storeHours.replace("\\n", " - ")
-                storeHours = "".join(storeHours.strip())
-            else:
-                storeHours = response.xpath('//div[@class="hours"]/div').extract()
-
-            properties = {
-                "name": response.xpath('//div[@class="name"]/h1/text()').extract_first(),
-                "ref": response.xpath('//div[@class="name"]/h1/text()').extract_first(),
-                "addr_full": response.xpath('//div[@class="address"]/text()').extract_first().strip(),
-                "city": response.xpath('//div[@class="address"]/text()[2]').extract_first().split(",")[0],
-                "state": response.xpath('//div[@class="address"]/text()[2]').extract_first().split()[1],
-                "postcode": response.xpath('//div[@class="address"]/text()[2]').extract_first().split()[-1],
-                "phone": response.xpath("//tel/a[@href]/text()").extract_first(),
-                "website": response.request.url,
-                "opening_hours": storeHours,
-                "lat": float(
-                    response.xpath('//div[@class="address"]/a/@href').extract_first().split("@")[1].split(",")[0]
-                ),
-                "lon": float(
-                    response.xpath('//div[@class="address"]/a/@href').extract_first().split("@")[1].split(",")[1]
-                ),
-            }
-
-            yield GeojsonPointItem(**properties)
+            yield item

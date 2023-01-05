@@ -1,9 +1,10 @@
+from locations.categories import Categories
 from locations.storefinders.woosmap import WoosmapSpider
 
 
 class TotalEnergiesSpider(WoosmapSpider):
     name = "totalenergies"
-    item_attributes = {"brand": "TotalEnergies", "brand_wikidata": "Q154037"}
+    item_attributes = {"brand": "TotalEnergies", "brand_wikidata": "Q154037", "extras": Categories.FUEL_STATION.value}
     key = "mapstore-prod-woos"
     custom_settings = {"DEFAULT_REQUEST_HEADERS": {"Origin": "https://totalenergies.com"}}
 
