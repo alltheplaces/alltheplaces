@@ -22,3 +22,14 @@ def test_badformat_o():
     pl.process_item(item, None)
 
     assert item["postcode"] == "HU17 0XL"
+
+
+def test_ie():
+    item = Feature()
+    item["country"] = "IE"
+    item["addr_full"] = "7-9 Ennis Road Retail Park, Ennis Road, Limerick, V94 K240"
+
+    pl = ExtractGBPostcodePipeline()
+    pl.process_item(item, None)
+
+    assert item["postcode"] == "V94 K240"

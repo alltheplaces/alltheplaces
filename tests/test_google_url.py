@@ -84,3 +84,8 @@ def test_search():
         55.0046686,
         -1.6200268,
     )
+
+
+def test_apple_maps():
+    assert url_to_coords("http://maps.apple.com/?q=53.26471,-2.88613") == (53.26471, -2.88613)
+    assert url_to_coords("https://maps.apple.com/?q=53.26471,-2.88613") == (53.26471, -2.88613)

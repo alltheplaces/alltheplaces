@@ -146,6 +146,12 @@ class ExtractGBPostcodePipeline:
                     postcode = re.search(r"(\w{1,2}\d{1,2}\w?) O(\w{2})", item["addr_full"].upper())
                     if postcode:
                         item["postcode"] = postcode.group(1) + " 0" + postcode.group(2)
+        elif item.get("country") == "IE":
+            if item.get("addr_full") and not item.get("postcode"):
+                if postcode := re.search(
+                    r"([AC-FHKNPRTV-Y][0-9]{2}|D6W)[ -]?([0-9AC-FHKNPRTV-Y]{4})", item["addr_full"].upper()
+                ):
+                    item["postcode"] = "{} {}".format(postcode.group(1), postcode.group(2))
 
         return item
 
@@ -216,6 +222,8 @@ class CheckItemPropertiesPipeline:
                 lat = None
                 spider.crawler.stats.inc_value("atp/field/lat/invalid")
             item["lat"] = lat
+        else:
+            spider.crawler.stats.inc_value("atp/field/lat/missing")
         if lon := item.get("lon"):
             try:
                 lon = float(lon)
@@ -227,6 +235,8 @@ class CheckItemPropertiesPipeline:
                 lon = None
                 spider.crawler.stats.inc_value("atp/field/lon/invalid")
             item["lon"] = lon
+        else:
+            spider.crawler.stats.inc_value("atp/field/lon/missing")
 
         if twitter := item.get("twitter"):
             if not isinstance(twitter, str):
