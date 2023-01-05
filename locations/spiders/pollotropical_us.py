@@ -11,17 +11,11 @@ class PolloTropicalUSSpider(scrapy.Spider):
     start_urls = ["https://www.pollotropical.com/locations"]
 
     def parse(self, response, **kwargs):
-        data = chompjs.parse_js_object(
-            response.xpath('//script[contains(text(), "locations")]').get()
-        )
+        data = chompjs.parse_js_object(response.xpath('//script[contains(text(), "locations")]').get())
         for location in DictParser.get_nested_key(data, "list"):
             location["state"] = location["cached_data"]["state"]
             item = DictParser.parse(location)
 
-            item[
-                "website"
-            ] = "https://olo.pollotropical.com/menu/{}?showInfoModal=true".format(
-                location["slug"]
-            )
+            item["website"] = "https://olo.pollotropical.com/menu/{}?showInfoModal=true".format(location["slug"])
 
             yield item
