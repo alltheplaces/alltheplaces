@@ -1,19 +1,14 @@
-import json
-
 from scrapy import Spider
-from scrapy.http import JsonRequest
 
 from locations.hours import OpeningHours
 from locations.items import GeojsonPointItem
 
 
-class FranprixSpider(Spider):
+class FranprixFRSpider(Spider):
     name = "franprix_fr"
-    item_attributes = {
-        "brand": "Franprix",
-        "brand_wikidata": "Q2420096",
-    }
-    start_urls = ("https://www.franprix.fr/xhr-cache/resource/stores",)
+    item_attributes = {"brand": "Franprix", "brand_wikidata": "Q2420096"}
+    start_urls = ["https://www.franprix.fr/xhr-cache/resource/stores"]
+    requires_proxy = True
 
     def parse(self, response):
         data = response.json()
@@ -38,7 +33,7 @@ class FranprixSpider(Spider):
                 "name": f"Franprix - {store.get('store_name')}"
                 if store.get("store_name")
                 else "Franprix",
-                "street_address": store.get("street"),
+                "addr_full": store.get("street"),
                 "city": store.get("city"),
                 "phone": store.get("phone"),
                 "postcode": store.get("postcode"),
