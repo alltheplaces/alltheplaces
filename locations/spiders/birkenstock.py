@@ -12,7 +12,26 @@ class BirkenstockUsSpider(scrapy.Spider):
     allowed_domains = ["birkenstock.com"]
 
     def start_requests(self):
-        countries = {"EU": ["en_ES", "en_PT", "en_PL", "en_NL", "en_LU", "en_IT", "en_IE", "en_HU", "en_GR", "en_DK", "en_CZ", "en_HR"], "DE": ["de_AT", "en_DE"], "GB": ["en_GB"], "JP": ["js_JP"], "US": ["en_US"]}
+        countries = {
+            "EU": [
+                "en_ES",
+                "en_PT",
+                "en_PL",
+                "en_NL",
+                "en_LU",
+                "en_IT",
+                "en_IE",
+                "en_HU",
+                "en_GR",
+                "en_DK",
+                "en_CZ",
+                "en_HR",
+            ],
+            "DE": ["de_AT", "en_DE"],
+            "GB": ["en_GB"],
+            "JP": ["js_JP"],
+            "US": ["en_US"],
+        }
         for key, value in countries.items():
             for country in value:
                 url = f"https://www.birkenstock.com/on/demandware.store/Sites-{key}-Site/{country}/Stores-GetStoresJson?&storeLocatorType=regular&storetype1=true"
