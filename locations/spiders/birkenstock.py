@@ -41,6 +41,8 @@ class BirkenstockUsSpider(scrapy.Spider):
         for _, data in response.json().get("stores").items():
             item = DictParser.parse(data)
             item["website"] = data.get("storeDetailsFlyinLink")
-            item["phone"] = f'{data.get("phoneAreaCode")} {item["phone"]}'
+            
+            if data.get("phoneAreaCode"):
+                item["phone"] = f'{data.get("phoneAreaCode")} {item["phone"]}'
 
             yield item
