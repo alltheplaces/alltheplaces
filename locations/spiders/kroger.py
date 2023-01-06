@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 WIKIBRANDS = {
     "Baker's": "Q4849080",
@@ -71,4 +71,4 @@ class KrogerSpider(scrapy.Spider):
                 "brand_wikidata": wiki,
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

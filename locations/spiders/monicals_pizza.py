@@ -3,7 +3,7 @@ import unicodedata
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 regex = r"(^\D)"
 regex_time = r"(1[0-2]|0[1-9]|[1-9]):[0-5]\d\s?[AaPp][Mm]"
@@ -123,7 +123,7 @@ class MonicalsPizzaSpider(scrapy.Spider):
 
         opening_hours = ", ".join("{} : {}".format(*t) for t in zip(day, hour))
 
-        yield GeojsonPointItem(
+        yield Feature(
             lat=lat,
             lon=lon,
             name=name,

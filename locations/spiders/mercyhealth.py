@@ -2,7 +2,7 @@ import json
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class MercyHealthSpider(scrapy.Spider):
@@ -41,4 +41,4 @@ class MercyHealthSpider(scrapy.Spider):
                 "website": store_data["Location"]["Link"],
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

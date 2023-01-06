@@ -2,7 +2,7 @@ import json
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class KindercareSpider(scrapy.Spider):
@@ -38,7 +38,7 @@ class KindercareSpider(scrapy.Spider):
             "lon": float(data["geo"]["longitude"]),
         }
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)
 
     def parse(self, response):
         urls = response.xpath('//div[contains(@class, "link-index-results")]//li/a/@href').extract()

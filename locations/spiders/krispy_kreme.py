@@ -1,7 +1,7 @@
 import scrapy
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class KrispyKremeSpider(scrapy.Spider):
@@ -18,7 +18,7 @@ class KrispyKremeSpider(scrapy.Spider):
 
     def parse_store(self, response):
 
-        yield GeojsonPointItem(
+        yield Feature(
             ref=response.url.split("/")[-1],
             name=response.xpath("//title/text()").extract_first(),
             lat=response.xpath("//meta[@itemprop='latitude']/@content").extract_first(),

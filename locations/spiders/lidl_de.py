@@ -1,7 +1,7 @@
 import scrapy
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 from locations.spiders.lidl_gb import LidlGBSpider
 
 DAY_MAPPING = {
@@ -70,7 +70,7 @@ class LidlDESpider(scrapy.Spider):
             if hours:
                 properties["opening_hours"] = hours
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)
 
     def parse(self, response):
 

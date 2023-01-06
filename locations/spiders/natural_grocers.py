@@ -1,7 +1,7 @@
 from scrapy.spiders import SitemapSpider
 
 from locations.hours import OpeningHours, day_range, sanitise_day
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class NaturalGrocersSpider(SitemapSpider):
@@ -18,7 +18,7 @@ class NaturalGrocersSpider(SitemapSpider):
 
     def parse_store(self, response):
 
-        item = GeojsonPointItem(
+        item = Feature(
             ref=response.url,
             website=response.url,
             name=response.css(".node-title span::text").get().strip(),

@@ -3,7 +3,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 from locations.user_agents import BROSWER_DEFAULT
 
 
@@ -39,7 +39,7 @@ class LibertyMutualSpider(scrapy.Spider):
                 "lon": lon,
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)
 
     def parse(self, response):
         response.selector.remove_namespaces()

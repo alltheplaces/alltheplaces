@@ -5,7 +5,7 @@ import scrapy
 
 from locations.categories import Categories, apply_category
 from locations.hours import DAYS_DE, OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class OttosCHSpider(scrapy.Spider):
@@ -34,7 +34,7 @@ class OttosCHSpider(scrapy.Spider):
                 "ref": store["id"],
                 "street_address": store["address"],
             }
-            item = GeojsonPointItem(**props)
+            item = Feature(**props)
             apply_category(Categories.SHOP_VARIETY_STORE, item)
             yield item
 

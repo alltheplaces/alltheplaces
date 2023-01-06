@@ -2,7 +2,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class MichaelkorsSpider(scrapy.Spider):
@@ -33,7 +33,7 @@ class MichaelkorsSpider(scrapy.Spider):
         if hours != []:
             hours = "; ".join(hours)
             properties["opening_hours"] = hours
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)
 
     def parse_city_stores(self, response):
         stores = response.xpath('//a[@class="LocationCard-storeLink"]/@href').extract()

@@ -2,7 +2,7 @@ import json
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class KaiserPermanenteSpider(scrapy.Spider):
@@ -59,4 +59,4 @@ class KaiserPermanenteSpider(scrapy.Spider):
             "lon": lon,
         }
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

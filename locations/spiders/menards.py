@@ -2,7 +2,7 @@ import json
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class MenardsSpider(scrapy.Spider):
@@ -16,7 +16,7 @@ class MenardsSpider(scrapy.Spider):
         data = json.loads(script.extract_first().split("initialStores = ", 1)[1].rsplit(";\n", 1)[0])
 
         for store in data:
-            yield GeojsonPointItem(
+            yield Feature(
                 ref=store["number"],
                 name=store["name"],
                 addr_full=f"{store['street']} {store['city']}, {store['state']} {store['zip']}",

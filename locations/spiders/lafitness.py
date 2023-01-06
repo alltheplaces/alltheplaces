@@ -4,7 +4,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 DAY_MAPPING = {
     "Mon": "Mo",
@@ -97,7 +97,7 @@ class LAFitnessSpider(scrapy.Spider):
         if opening_hours:
             properties["opening_hours"] = opening_hours
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)
 
     def parse(self, response):
         locations = response.json()["d"]

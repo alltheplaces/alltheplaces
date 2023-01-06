@@ -2,7 +2,7 @@ import json
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class LoewsHotelsSpider(scrapy.Spider):
@@ -48,7 +48,7 @@ class LoewsHotelsSpider(scrapy.Spider):
                 "lon": float(data["geo"]["longitude"]),
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)
         except:
             properties = {
                 "ref": data["name"],
@@ -61,4 +61,4 @@ class LoewsHotelsSpider(scrapy.Spider):
                 "phone": data.get("telephone"),
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

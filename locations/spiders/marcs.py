@@ -4,7 +4,7 @@ from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class MarcsSpider(CrawlSpider):
@@ -45,4 +45,4 @@ class MarcsSpider(CrawlSpider):
             "opening_hours": oh.as_opening_hours(),
         }
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 from locations.user_agents import BROSWER_DEFAULT
 
 
@@ -41,4 +41,4 @@ class KelseysOriginalRoadhouseSpider(scrapy.Spider):
                 "phone": place["phoneNumber"],
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

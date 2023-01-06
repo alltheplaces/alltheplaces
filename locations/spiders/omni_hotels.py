@@ -2,7 +2,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 ca_states = [
     "Alberta",
@@ -99,7 +99,7 @@ class OmniHotelsSpider(scrapy.Spider):
                 "lon": latlon[1:-1].split(",")[1],
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)
         except (TypeError, IndexError):  # 'Coming Soon' Locations
             pass
 

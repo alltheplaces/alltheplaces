@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 from locations.spiders.costacoffee_gb import yes_or_no
 
 
@@ -98,4 +98,4 @@ class MarstonsPlcSpider(scrapy.Spider):
             if self.store_types[place["phc"]] == 2:
                 properties["extras"]["tourism"] = "hotel"
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

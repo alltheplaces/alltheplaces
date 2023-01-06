@@ -3,7 +3,7 @@ import json
 import scrapy
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class MarksAndSpencerSpider(scrapy.Spider):
@@ -51,7 +51,7 @@ class MarksAndSpencerSpider(scrapy.Spider):
             elif name.endswith("outlet"):
                 properties["brand"] = "M&S Outlet"
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)
 
     def get_opening_hours(self, store):
         o = OpeningHours()

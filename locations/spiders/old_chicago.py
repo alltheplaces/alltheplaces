@@ -2,7 +2,7 @@ import json
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class OldChicagoSpider(scrapy.Spider):
@@ -42,7 +42,7 @@ class OldChicagoSpider(scrapy.Spider):
             address = node["address"]
             hours = ", ".join(["{} {}".format(h["days"], h["hours"]) for h in node["simpleHours"]])
             addr_full = "{} {}".format(address["streetNumber"], address["route"])
-            yield GeojsonPointItem(
+            yield Feature(
                 ref=node["locationId"],
                 lat=node["latitude"],
                 lon=node["longitude"],

@@ -2,7 +2,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class MyEyeDrSpider(scrapy.Spider):
@@ -45,4 +45,4 @@ class MyEyeDrSpider(scrapy.Spider):
             "lon": response.xpath('normalize-space(//meta[@itemprop="longitude"]/@content)').extract_first(),
         }
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

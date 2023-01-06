@@ -2,7 +2,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class KristoilSpider(scrapy.Spider):
@@ -60,4 +60,4 @@ class KristoilSpider(scrapy.Spider):
             }
             if value["phone"]:
                 properties["phone"] = value["phone"]
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

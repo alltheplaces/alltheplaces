@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class LushSpider(scrapy.Spider):
@@ -19,7 +19,7 @@ class LushSpider(scrapy.Spider):
     def parse(self, response):
         results = response.json()
         for i in results["stores"]:
-            yield GeojsonPointItem(
+            yield Feature(
                 ref=i["ID"],
                 name=i["name"],
                 phone=i.get("phone"),

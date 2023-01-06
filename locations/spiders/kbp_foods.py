@@ -2,7 +2,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 BRAND_MAPPING = {
     "KFC": "KFC",
@@ -116,6 +116,6 @@ class KBPFoodsSpider(scrapy.Spider):
                     "extras": {"store_brands": BRAND_MAPPING[store_brand["brand"]]},
                 }
 
-                yield GeojsonPointItem(**properties)
+                yield Feature(**properties)
         else:  # If no locations in this area
             pass

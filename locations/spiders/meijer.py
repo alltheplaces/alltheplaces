@@ -3,7 +3,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 STATES = [
     "AL",
@@ -109,7 +109,7 @@ class MeijerSpider(scrapy.Spider):
 
                 n = n + 1
 
-                yield GeojsonPointItem(**properties)
+                yield Feature(**properties)
 
     def hours(self, data):
         if data == "Open 24 hrs a day, 364 days a year.":
