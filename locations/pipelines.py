@@ -104,11 +104,11 @@ class PhoneCleanUpPipeline:
         for key in filter(self.is_phone_key, extras.keys()):
             extras[key] = self.normalize_numbers(extras[key], country, spider)
 
+        if not phone:
+            return item
+
         if isinstance(phone, int):
             phone = str(phone)
-        elif not phone:
-            spider.crawler.stats.inc_value("atp/field/phone/missing")
-            return item
         elif not isinstance(phone, str):
             spider.crawler.stats.inc_value("atp/field/phone/wrong_type")
             return item
@@ -124,7 +124,10 @@ class PhoneCleanUpPipeline:
         return ";".join(filter(None, numbers))
 
     def normalize(self, phone, country, spider):
+        phone = re.sub(r"tel:", "", phone, flags=re.IGNORECASE)
         phone = phone.strip()
+        if not phone:
+            return None
         try:
             ph = phonenumbers.parse(phone, country)
             if phonenumbers.is_valid_number(ph):
@@ -204,6 +207,7 @@ class CheckItemPropertiesPipeline:
         check_field(item, spider, "website", (str,), self.url_regex)
         check_field(item, spider, "image", (str,), self.url_regex)
         check_field(item, spider, "email", (str,), self.email_regex)
+        check_field(item, spider, "phone", (str,))
         check_field(item, spider, "street_address", (str,))
         check_field(item, spider, "city", (str,))
         check_field(item, spider, "state", (str,))
