@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class CoopNorgeSpider(scrapy.Spider):
@@ -25,4 +25,4 @@ class CoopNorgeSpider(scrapy.Spider):
                 "lon": i["Lng"],
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

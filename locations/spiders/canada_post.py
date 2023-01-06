@@ -4,7 +4,7 @@ import scrapy
 
 from locations.geo import point_locations
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class CanadaPostSpider(scrapy.Spider):
@@ -64,4 +64,4 @@ class CanadaPostSpider(scrapy.Spider):
             "opening_hours": oh.as_opening_hours(),
         }
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

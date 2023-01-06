@@ -5,7 +5,7 @@ import time
 
 from scrapy.spiders import SitemapSpider
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class BrightHorizonsSpider(SitemapSpider):
@@ -71,4 +71,4 @@ class BrightHorizonsSpider(SitemapSpider):
 
                     properties["opening_hours"] = f"Mo-Fr {start_time}-{end_time}"
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

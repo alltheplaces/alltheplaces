@@ -2,7 +2,7 @@ import json
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class ColdstoneCreamerySpider(scrapy.Spider):
@@ -31,4 +31,4 @@ class ColdstoneCreamerySpider(scrapy.Spider):
                 "lon": store_obj["Longitude"],
             }
 
-            yield GeojsonPointItem(**props)
+            yield Feature(**props)

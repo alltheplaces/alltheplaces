@@ -4,7 +4,7 @@ import re
 import scrapy
 from scrapy.utils.gz import gunzip
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class BassettFurnitureSpider(scrapy.Spider):
@@ -51,4 +51,4 @@ class BassettFurnitureSpider(scrapy.Spider):
                 "lon": float(store_data["geo"]["longitude"]),
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

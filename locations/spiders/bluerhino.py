@@ -2,7 +2,7 @@ import csv
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class BlueRhinoSpider(scrapy.Spider):
@@ -37,4 +37,4 @@ class BlueRhinoSpider(scrapy.Spider):
                 "phone": row["Phone"],
                 "extras": {"fax": row["Fax"]},
             }
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

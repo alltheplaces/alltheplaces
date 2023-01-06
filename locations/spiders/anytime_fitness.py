@@ -3,7 +3,7 @@ import json
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class AnytimeFitnessSpider(scrapy.Spider):
@@ -19,7 +19,7 @@ class AnytimeFitnessSpider(scrapy.Spider):
         gyms = json.loads(response.text)
 
         for gym in gyms:
-            yield GeojsonPointItem(
+            yield Feature(
                 lat=gym["latitude"],
                 lon=gym["longitude"],
                 addr_full=", ".join(filter(None, [gym["content"]["address"], gym["content"]["address2"]])),

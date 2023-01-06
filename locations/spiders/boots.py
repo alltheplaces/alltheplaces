@@ -1,7 +1,7 @@
 import scrapy
 
 from locations.categories import Categories, apply_category
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class BootsSpider(scrapy.Spider):
@@ -69,7 +69,7 @@ class BootsSpider(scrapy.Spider):
         else:
             apply_category(Categories.PHARMACY, properties)
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)
 
     def parse(self, response):
         urls = response.xpath('//div[@class="brand_list_viewer"]/div[@class="column"]/ul/li/a/@href').extract()

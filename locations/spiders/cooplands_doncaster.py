@@ -1,7 +1,7 @@
 import scrapy
 
 from locations.hours import DAYS, OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 from locations.spiders.vapestore_gb import clean_address
 
 
@@ -33,7 +33,7 @@ class CooplandsDoncasterSpider(scrapy.Spider):
             data = store.xpath("ul/li/text()").extract()
             addr_full = clean_address(data[:-1])
 
-            yield GeojsonPointItem(
+            yield Feature(
                 ref=index,
                 name=store.xpath("h4/text()").extract_first(),
                 addr_full=addr_full,

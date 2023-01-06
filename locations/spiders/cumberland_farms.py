@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class CumberlandFarmsSpider(scrapy.Spider):
@@ -15,7 +15,7 @@ class CumberlandFarmsSpider(scrapy.Spider):
             if "StoreId" not in store:
                 continue
 
-            yield GeojsonPointItem(
+            yield Feature(
                 ref=store["StoreId"],
                 lon=store["Longitude"],
                 lat=store["Latitude"],

@@ -5,7 +5,7 @@ import scrapy
 from geonamescache import GeonamesCache
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class CreditUnionSpider(scrapy.Spider):
@@ -93,7 +93,7 @@ class CreditUnionSpider(scrapy.Spider):
         banks = response.xpath('//div[@class="location-results"]/div')
         for bank in banks:
             properties = self.parse_bank(bank)
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)
 
         if page_num < max_page:
             yield scrapy.Request(response.url.replace("lp={}".format(page_num), "lp={}".format(page_num + 1)))

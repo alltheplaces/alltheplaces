@@ -4,7 +4,7 @@ import re
 import scrapy
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 DAY_MAPPING = {
     "MONDAY": "Mo",
@@ -74,4 +74,4 @@ class ATTSpider(scrapy.Spider):
         hours = response.xpath('//span[@class="c-hours-today js-hours-today"]/@data-days').extract_first()
         properties["opening_hours"] = self.parse_hours(hours)
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

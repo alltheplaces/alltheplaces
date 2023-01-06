@@ -3,7 +3,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class BayshoreHealthcareSpider(scrapy.Spider):
@@ -54,4 +54,4 @@ class BayshoreHealthcareSpider(scrapy.Spider):
                 "website": "https://www.bayshore.ca" + store["url"],
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

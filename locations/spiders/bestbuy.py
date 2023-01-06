@@ -4,7 +4,7 @@ import scrapy
 
 from locations.categories import Categories
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class BestBuySpider(scrapy.Spider):
@@ -56,7 +56,7 @@ class BestBuySpider(scrapy.Spider):
             "website": response.url,
             "opening_hours": opening_hours,
         }
-        return GeojsonPointItem(**props)
+        return Feature(**props)
 
     def parse(self, response):
         locations = response.xpath('//a[@class="c-directory-list-content-item-link"]/@href').extract()

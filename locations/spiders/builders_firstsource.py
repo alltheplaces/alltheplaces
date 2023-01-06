@@ -2,7 +2,7 @@ import json
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class BuildersFirstSourceSpider(scrapy.Spider):
@@ -37,4 +37,4 @@ class BuildersFirstSourceSpider(scrapy.Spider):
                 "lat": i["Latitude"],
                 "lon": i["Longitude"],
             }
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

@@ -1,7 +1,7 @@
 import scrapy
 from scrapy.selector.unified import Selector
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class CoenMarketsSpider(scrapy.Spider):
@@ -30,4 +30,4 @@ class CoenMarketsSpider(scrapy.Spider):
         props["phone"] = js["phone_number"]
         hours = response.css(".hours p:not(:empty)").xpath("text()").get()
         props["opening_hours"] = hours
-        return GeojsonPointItem(**props)
+        return Feature(**props)

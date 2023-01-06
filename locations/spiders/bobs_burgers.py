@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 regex_street = (
     r"^(\s?\d{1,5}\s[a-zA-Z]+\.?\s?\#?\d{0,5}[a-zA-Z]{0,10}"
@@ -45,7 +45,7 @@ class BobsBurgersSpider(scrapy.Spider):
             addr_full = "{} {}, WA {}".format(street, city, postcode).strip()
             phone = phones[i].replace(".", " ").strip()
 
-            yield GeojsonPointItem(
+            yield Feature(
                 ref=name,
                 name=name,
                 street=street,

@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class DairyQueenSpider(scrapy.Spider):
@@ -41,4 +41,4 @@ class DairyQueenSpider(scrapy.Spider):
                 "lon": lon,
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

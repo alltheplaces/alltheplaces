@@ -3,7 +3,7 @@ import re
 
 from scrapy.spiders import SitemapSpider
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 from locations.user_agents import BROSWER_DEFAULT
 
 
@@ -71,4 +71,4 @@ class ChoiceHotelsSpider(SitemapSpider):
                 data["property"]["brandName"],
             )
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

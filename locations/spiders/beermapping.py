@@ -1,7 +1,7 @@
 import scrapy
 
 from locations.geo import point_locations
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class BeerMappingSpider(scrapy.Spider):
@@ -38,4 +38,4 @@ class BeerMappingSpider(scrapy.Spider):
                 "website": data["url"],
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

@@ -3,7 +3,7 @@ import urllib.parse
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class BassProShopsSpider(scrapy.Spider):
@@ -42,4 +42,4 @@ class BassProShopsSpider(scrapy.Spider):
             "opening_hours": "; ".join(main.xpath('.//*[@itemprop="openingHours"]/@content').extract()),
         }
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

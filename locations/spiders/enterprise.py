@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class EnterpriseSpider(scrapy.Spider):
@@ -35,4 +35,4 @@ class EnterpriseSpider(scrapy.Spider):
                     "lon": d.get("longitude"),
                     "ref": d.get("station_id"),
                 }
-                yield GeojsonPointItem(**properties)
+                yield Feature(**properties)

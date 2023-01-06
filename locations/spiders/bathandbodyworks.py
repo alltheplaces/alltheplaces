@@ -2,7 +2,7 @@ import hashlib
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class BathAndBodyWorksSpider(scrapy.Spider):
@@ -61,4 +61,4 @@ class BathAndBodyWorksSpider(scrapy.Spider):
 
             properties["ref"] = hashlib.md5(ref_input.encode("utf-8")).hexdigest()
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

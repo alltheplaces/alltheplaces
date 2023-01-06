@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class AramarkSpider(scrapy.Spider):
@@ -37,4 +37,4 @@ class AramarkSpider(scrapy.Spider):
                 }
             except:
                 continue
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

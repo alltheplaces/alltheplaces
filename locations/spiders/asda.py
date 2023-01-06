@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class AsdaSpider(scrapy.Spider):
@@ -34,7 +34,7 @@ class AsdaSpider(scrapy.Spider):
         shops = response.json()["d"]["results"]
 
         for place in shops:
-            yield GeojsonPointItem(
+            yield Feature(
                 lat=place["Latitude"],
                 lon=place["Longitude"],
                 name=place["name"],

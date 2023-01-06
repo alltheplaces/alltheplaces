@@ -2,7 +2,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class DominosPizzaAUSpider(scrapy.Spider):
@@ -42,4 +42,4 @@ class DominosPizzaAUSpider(scrapy.Spider):
             "lon": float(response.xpath('//div[@class="store-details-info"]/div[1]/input[2]/@value').extract_first()),
             "website": response.url,
         }
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

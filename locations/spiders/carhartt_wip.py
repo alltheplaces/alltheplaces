@@ -2,7 +2,7 @@ from scrapy import Spider
 from scrapy.http import JsonRequest
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class CarharttWipSpider(Spider):
@@ -63,4 +63,4 @@ class CarharttWipSpider(Spider):
                 "website": f"https://www.carhartt-wip.com{store.get('c_storedetailseiten_URL')}",
                 "opening_hours": oh.as_opening_hours(),
             }
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

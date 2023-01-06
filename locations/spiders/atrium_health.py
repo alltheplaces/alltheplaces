@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class AtriumHealthSpider(scrapy.Spider):
@@ -43,4 +43,4 @@ class AtriumHealthSpider(scrapy.Spider):
                 "website": "https://atriumhealth.org" + place["ClickableUri"],
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

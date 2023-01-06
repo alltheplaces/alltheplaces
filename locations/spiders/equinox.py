@@ -2,7 +2,7 @@ import json
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 from locations.user_agents import BROSWER_DEFAULT
 
 
@@ -27,7 +27,7 @@ class EquinoxSpider(scrapy.Spider):
         data = json.loads(response.text)
         for item in data["items"]:
             fields = item["fields"]
-            yield GeojsonPointItem(
+            yield Feature(
                 name=fields["name"],
                 addr_full=fields["address"],
                 city=fields["city"],

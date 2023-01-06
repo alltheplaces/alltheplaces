@@ -4,7 +4,7 @@ from scrapy.downloadermiddlewares.retry import get_retry_request
 from scrapy.spiders import SitemapSpider
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class DillardsSpider(SitemapSpider):
@@ -46,4 +46,4 @@ class DillardsSpider(SitemapSpider):
             "postcode": data["address"]["postalCode"],
             "opening_hours": hours.as_opening_hours(),
         }
-        return GeojsonPointItem(**properties)
+        return Feature(**properties)

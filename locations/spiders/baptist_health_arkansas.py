@@ -2,7 +2,7 @@ import json
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 from locations.user_agents import BROSWER_DEFAULT
 
 
@@ -58,4 +58,4 @@ class BaptistHealthArkansasSpider(scrapy.Spider):
                     "lat": float(j["_geoloc"]["lat"]),
                     "lon": float(j["_geoloc"]["lng"]),
                 }
-                yield GeojsonPointItem(**properties)
+                yield Feature(**properties)

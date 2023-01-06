@@ -4,7 +4,7 @@ import re
 import scrapy
 from scrapy import Selector
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class BootsTHSpider(scrapy.Spider):
@@ -38,4 +38,4 @@ class BootsTHSpider(scrapy.Spider):
                 "lon": store_data[2],
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)
