@@ -12,5 +12,7 @@ mkdir -p "${BUILD_ID}"
 
 SPIDERS=$(curl "https://data.alltheplaces.xyz/runs/${BUILD_ID}/stats/_results.json" | jq -r ".results[].spider")
 for SPIDER in $SPIDERS; do
-    curl "https://data.alltheplaces.xyz/runs/${BUILD_ID}/stats/${SPIDER}.json" | jq > "${BUILD_ID}/${SPIDER}.json"
+    if [ ! -f "${BUILD_ID}/${SPIDER}.json" ]; then
+        curl "https://data.alltheplaces.xyz/runs/${BUILD_ID}/stats/${SPIDER}.json" | jq > "${BUILD_ID}/${SPIDER}.json"
+    fi
 done
