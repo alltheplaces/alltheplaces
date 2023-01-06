@@ -2,7 +2,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class SpencersSpider(scrapy.Spider):
@@ -45,4 +45,4 @@ class SpencersSpider(scrapy.Spider):
                     "website": response.url,
                     "extras": {"number": number},
                 }
-                yield GeojsonPointItem(**properties)
+                yield Feature(**properties)

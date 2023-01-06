@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class RaSushiSpider(scrapy.spiders.SitemapSpider):
@@ -18,7 +18,7 @@ class RaSushiSpider(scrapy.spiders.SitemapSpider):
         type = response.xpath("//span[@class='devOp1']/text()").extract_first()
         addr_dict = self.parse_address(address, type)
 
-        yield GeojsonPointItem(
+        yield Feature(
             ref=response.url.split("/")[-2],
             name=response.xpath("//h1[@class='title']/text()").extract_first().strip(),
             lat=location.xpath("@data-lat").extract_first(),

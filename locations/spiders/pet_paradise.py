@@ -2,7 +2,7 @@ import json
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class PetParadiseSpider(scrapy.Spider):
@@ -43,4 +43,4 @@ class PetParadiseSpider(scrapy.Spider):
                 "website": store_data["interestpointMoreInfoLink"],
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

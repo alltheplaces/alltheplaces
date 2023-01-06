@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class PrimePubsSpider(scrapy.Spider):
@@ -38,4 +38,4 @@ class PrimePubsSpider(scrapy.Spider):
                 "brand": brand,
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

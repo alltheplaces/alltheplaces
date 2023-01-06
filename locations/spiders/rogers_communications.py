@@ -3,7 +3,7 @@ import datetime
 import scrapy
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class RogersCommunicationsSpider(scrapy.Spider):
@@ -105,4 +105,4 @@ class RogersCommunicationsSpider(scrapy.Spider):
             except:
                 pass
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

@@ -3,7 +3,7 @@ import json
 from scrapy.spiders import SitemapSpider
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 DAY_MAPPING = {
     "MONDAY": "Mo",
@@ -101,4 +101,4 @@ class TescoSpider(SitemapSpider):
                 properties["brand"] = "Tesco Extra"
                 properties["brand_wikidata"] = "Q25172225"
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

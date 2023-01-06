@@ -3,7 +3,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class SpiritHalloweenSpider(scrapy.Spider):
@@ -35,7 +35,7 @@ class SpiritHalloweenSpider(scrapy.Spider):
             "website": response.url,
         }
 
-        return GeojsonPointItem(**props)
+        return Feature(**props)
 
     def parse_city_stores(self, response):
 

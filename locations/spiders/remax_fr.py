@@ -3,7 +3,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class RemaxFrSpider(scrapy.Spider):
@@ -63,4 +63,4 @@ class RemaxFrSpider(scrapy.Spider):
             "city": city,
             "postcode": postcode,
         }
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

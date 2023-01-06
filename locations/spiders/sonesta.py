@@ -3,7 +3,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class SonestaSpider(scrapy.Spider):
@@ -66,4 +66,4 @@ class SonestaSpider(scrapy.Spider):
             "lon": float(re.search('.longitude":(.+?)}.', jdata).group(1)),
         }
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

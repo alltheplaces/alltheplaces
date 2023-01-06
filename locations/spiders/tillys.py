@@ -3,7 +3,7 @@ import re
 import scrapy
 
 from locations.hours import DAYS, OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 AM_PM = r"am|pm|a.m.|p.m.|a|p"
 
@@ -51,4 +51,4 @@ class Tillys(scrapy.Spider):
                 "lon": data.get("longitude"),
             }
 
-            yield GeojsonPointItem(**props)
+            yield Feature(**props)

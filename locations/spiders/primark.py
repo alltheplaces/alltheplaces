@@ -3,7 +3,7 @@ import json
 from scrapy.spiders import SitemapSpider
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class PrimarkSpider(SitemapSpider):
@@ -74,4 +74,4 @@ class PrimarkSpider(SitemapSpider):
         if js["name"] == "Penneys":
             properties["brand"] = "Penneys"
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

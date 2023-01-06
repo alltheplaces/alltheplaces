@@ -3,7 +3,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class RegalTheatersSpider(scrapy.Spider):
@@ -32,4 +32,4 @@ class RegalTheatersSpider(scrapy.Spider):
                 "website": "https://www.regmovies.com" + theater["uri"],
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

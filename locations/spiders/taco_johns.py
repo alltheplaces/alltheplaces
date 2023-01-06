@@ -2,7 +2,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class TacoJohnsSpider(scrapy.Spider):
@@ -55,4 +55,4 @@ class TacoJohnsSpider(scrapy.Spider):
             "lon": response.xpath('//*[@itemprop="longitude"]/@content').extract_first(),
         }
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

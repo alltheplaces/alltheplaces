@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class TerribleHerbstSpider(scrapy.Spider):
@@ -23,7 +23,7 @@ class TerribleHerbstSpider(scrapy.Spider):
 
             features = (place.xpath('.//Data[@name="FEATURES"]/value/text()').get() or "").lower()
 
-            yield GeojsonPointItem(
+            yield Feature(
                 ref=place.xpath("name/text()").get(),
                 name=place.xpath("name/text()").get(),
                 addr_full=place.xpath('.//Data[@name="STREET ADDRESS"]/value/text()').get(),

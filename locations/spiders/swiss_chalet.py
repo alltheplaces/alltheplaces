@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class SwissChaletSpider(scrapy.Spider):
@@ -36,4 +36,4 @@ class SwissChaletSpider(scrapy.Spider):
                 "phone": place["phoneNumber"],
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

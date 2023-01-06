@@ -3,7 +3,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class QualityDairySpider(scrapy.Spider):
@@ -99,4 +99,4 @@ class QualityDairySpider(scrapy.Spider):
         open_dates = response.xpath('//table[@id="hours-table"]//tr')
         product["opening_hours"] = self.store_hours(open_dates) if len(open_dates) > 0 else "24/7"
 
-        yield GeojsonPointItem(**product)
+        yield Feature(**product)

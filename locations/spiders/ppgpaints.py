@@ -3,7 +3,7 @@ import urllib
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class PPGPaintsSpider(scrapy.Spider):
@@ -41,4 +41,4 @@ class PPGPaintsSpider(scrapy.Spider):
             "phone": response.xpath('//*[@itemprop="telephone"]/text()').get(),
             "country": response.url.split("/")[4].upper(),
         }
-        return GeojsonPointItem(**properties)
+        return Feature(**properties)

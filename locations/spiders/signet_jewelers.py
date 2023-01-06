@@ -3,7 +3,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class SignetJewelersSpider(scrapy.Spider):
@@ -146,7 +146,7 @@ class SignetJewelersSpider(scrapy.Spider):
                 "brand": re.search(r"www.(\w+)", response.url)[1],
             }
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)
 
     def parse_uk(self, response):
         data = re.search(r"Signet.allStoreDetails=((?s).*)", response.text)[1]
@@ -166,4 +166,4 @@ class SignetJewelersSpider(scrapy.Spider):
                 "brand": re.search(r"www.(\w+)", response.url)[1],
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

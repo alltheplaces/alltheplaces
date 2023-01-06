@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class RaisingCanesSpider(scrapy.Spider):
@@ -38,4 +38,4 @@ class RaisingCanesSpider(scrapy.Spider):
                     "phone": store["properties"]["field_phone"],
                     "website": store["properties"]["path"].strip('<a href="').strip('">Restaurant Details</a>'),
                 }
-                yield GeojsonPointItem(**properties)
+                yield Feature(**properties)

@@ -3,7 +3,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class SafewaySpider(scrapy.Spider):
@@ -107,7 +107,7 @@ class SafewaySpider(scrapy.Spider):
         if fuel_link:
             yield scrapy.Request(fuel_link, callback=self.add_fuel, meta={"properties": properties})
         else:
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)
 
     def add_fuel(self, response):
         properties = response.meta["properties"]
@@ -115,4 +115,4 @@ class SafewaySpider(scrapy.Spider):
 
         properties["extras"].update({"amenity:fuel": True, "fuel:diesel": "Diesel" in services})
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

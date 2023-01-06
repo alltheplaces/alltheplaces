@@ -1,7 +1,7 @@
 import scrapy
 import xmltodict
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class PDQSpider(scrapy.Spider):
@@ -15,7 +15,7 @@ class PDQSpider(scrapy.Spider):
 
     def parse(self, response):
         for data in xmltodict.parse(response.text).get("markers").get("marker"):
-            item = GeojsonPointItem()
+            item = Feature()
             item["ref"] = data.get("@id")
             item["website"] = data.get("@href")
             item["name"] = data.get("@name")

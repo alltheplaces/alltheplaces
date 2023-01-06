@@ -3,7 +3,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class StateAndMainSpider(scrapy.Spider):
@@ -46,6 +46,6 @@ class StateAndMainSpider(scrapy.Spider):
                     "phone": places[place]["telephone"],
                 }
 
-                yield GeojsonPointItem(**properties)
+                yield Feature(**properties)
             except:
                 pass

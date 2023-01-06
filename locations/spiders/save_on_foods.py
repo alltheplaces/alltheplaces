@@ -2,7 +2,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class SaveOnFoodsSpider(scrapy.Spider):
@@ -127,7 +127,7 @@ class SaveOnFoodsSpider(scrapy.Spider):
                 "phone": store["Phone"],
                 "opening_hours": self.store_hours(store["SectionSchedule"]),
             }
-            yield GeojsonPointItem(**store_properties)
+            yield Feature(**store_properties)
 
             if len(item["Sections"]) > 1:
                 pharmacy = item["Sections"][1]
@@ -144,4 +144,4 @@ class SaveOnFoodsSpider(scrapy.Spider):
                     "opening_hours": self.store_hours(pharmacy["SectionSchedule"]),
                 }
 
-                yield GeojsonPointItem(**pharmacy_properties)
+                yield Feature(**pharmacy_properties)

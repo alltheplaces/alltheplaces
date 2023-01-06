@@ -3,7 +3,7 @@ import json
 import scrapy
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class RedRobinSpider(scrapy.Spider):
@@ -42,4 +42,4 @@ class RedRobinSpider(scrapy.Spider):
             "opening_hours": hours.as_opening_hours(),
             "website": response.url,
         }
-        return GeojsonPointItem(**properties)
+        return Feature(**properties)

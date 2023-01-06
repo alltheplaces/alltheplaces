@@ -4,7 +4,7 @@ from urllib.parse import urlencode
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 from locations.user_agents import BROSWER_DEFAULT
 
 
@@ -161,4 +161,4 @@ class SherwinWilliamsSpider(scrapy.Spider):
                     },
                 }
 
-                yield GeojsonPointItem(**properties)
+                yield Feature(**properties)
