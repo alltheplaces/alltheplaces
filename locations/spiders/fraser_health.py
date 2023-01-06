@@ -2,7 +2,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class FraserHealthSpider(scrapy.Spider):
@@ -36,7 +36,7 @@ class FraserHealthSpider(scrapy.Spider):
             "website": response.url,
         }
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)
 
     def parse(self, response):
         places = response.json()

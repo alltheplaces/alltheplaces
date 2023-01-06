@@ -3,7 +3,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class FoodLionSpider(scrapy.Spider):
@@ -56,7 +56,7 @@ class FoodLionSpider(scrapy.Spider):
             if hours:
                 properties["opening_hours"] = self.process_hours(hours)
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)
 
     def process_hours(self, hours):
         day_groups = []

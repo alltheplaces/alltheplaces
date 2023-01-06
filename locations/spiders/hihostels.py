@@ -2,7 +2,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class HiHostelsSpider(scrapy.Spider):
@@ -62,4 +62,4 @@ class HiHostelsSpider(scrapy.Spider):
             "lat": float(response.xpath('//*[@id ="lat"]/@value').extract()[0]),
         }
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

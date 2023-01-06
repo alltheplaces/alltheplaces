@@ -2,7 +2,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class HangerclinicSpider(scrapy.Spider):
@@ -117,4 +117,4 @@ class HangerclinicSpider(scrapy.Spider):
             "lon": float(store_info.xpath("//div[@id='locLong']/text()").extract()[0].strip()),
         }
 
-        yield (GeojsonPointItem(**properties))
+        yield (Feature(**properties))

@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class GamestopSpider(scrapy.Spider):
@@ -32,7 +32,7 @@ class GamestopSpider(scrapy.Spider):
 
         # iterate items
         for item in jsondata["d"]["results"]:
-            yield GeojsonPointItem(
+            yield Feature(
                 ref=item["EntityID"],
                 lat=float(item["Latitude"]),
                 lon=float(item["Longitude"]),

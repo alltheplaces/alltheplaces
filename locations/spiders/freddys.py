@@ -4,7 +4,7 @@ import re
 import scrapy
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class FreddysSpider(scrapy.Spider):
@@ -65,4 +65,4 @@ class FreddysSpider(scrapy.Spider):
             "phone": store["telephone"],
         }
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

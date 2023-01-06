@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class HibachisanSpider(scrapy.Spider):
@@ -44,7 +44,7 @@ class HibachisanSpider(scrapy.Spider):
                 "website": response.url,
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)
 
         next_page = response.xpath("//a[@id='ctl00_ContentPlaceHolder1_btnNext']/@href").extract_first()
         if next_page:

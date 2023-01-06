@@ -6,7 +6,7 @@ import scrapy
 from scrapy.selector import Selector
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class GoldsGymSpider(scrapy.Spider):
@@ -71,7 +71,7 @@ class GoldsGymSpider(scrapy.Spider):
         if hours:
             properties["opening_hours"] = hours
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)
 
     def parse(self, response):
         xml = Selector(response)

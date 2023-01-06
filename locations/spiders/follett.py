@@ -2,7 +2,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 BASE_URL = "https://www.follett.com"
 
@@ -43,4 +43,4 @@ class FollettSpider(scrapy.Spider):
             "lon": response.xpath('normalize-space(//meta[@itemprop="longitude"]/@content)').extract_first(),
         }
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

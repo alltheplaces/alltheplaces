@@ -3,7 +3,7 @@ import json
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class InsomniaCookiesSpider(scrapy.Spider):
@@ -48,4 +48,4 @@ class InsomniaCookiesSpider(scrapy.Spider):
                 "phone": store.get("phone"),
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

@@ -3,7 +3,7 @@ import re
 import scrapy
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class FarmersHomeFurnitureSpider(scrapy.Spider):
@@ -71,4 +71,4 @@ class FarmersHomeFurnitureSpider(scrapy.Spider):
             "website": response.url,
         }
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)
