@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class VoyageCareSpider(scrapy.Spider):
@@ -36,4 +36,4 @@ class VoyageCareSpider(scrapy.Spider):
                 "lon": float(store["properties"]["address1_longitude"]),
                 "website": response.url,
             }
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

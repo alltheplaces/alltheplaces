@@ -3,7 +3,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class UhaulSpider(scrapy.Spider):
@@ -62,7 +62,7 @@ class UhaulSpider(scrapy.Spider):
 
         if properties["lat"] and properties["lon"]:
             # Can skip the call to the next one if this page happened to have lat/lon
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)
 
         yield scrapy.Request(
             url="https://www.uhaul.com/Locations/Directions-to-%s/" % ref,
@@ -115,4 +115,4 @@ class UhaulSpider(scrapy.Spider):
         properties["lat"] = lat
         properties["lon"] = lon
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

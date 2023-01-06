@@ -1,7 +1,7 @@
 import scrapy
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class ZumiezSpider(scrapy.Spider):
@@ -44,4 +44,4 @@ class ZumiezSpider(scrapy.Spider):
             "lon": response.xpath('normalize-space(//meta[@itemprop="longitude"]/@content)').extract_first(),
             "opening_hours": oh.as_opening_hours(),
         }
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

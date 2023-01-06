@@ -3,7 +3,7 @@ import re
 import scrapy
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 from locations.user_agents import BROSWER_DEFAULT
 
 DAY_MAPPING = {
@@ -100,7 +100,7 @@ class VRBankSpider(scrapy.Spider):
         if hours:
             properties["opening_hours"] = self.process_hours(hours)
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)
 
     def parse(self, response):
         index = response.xpath('//div[has-class("module module-linklist ym-clearfix")]/ul/li/a/@href').getall()

@@ -1,7 +1,7 @@
 import scrapy
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class WaterstonesSpider(scrapy.Spider):
@@ -33,7 +33,7 @@ class WaterstonesSpider(scrapy.Spider):
             "opening_hours": self.get_opening_hours(response),
             "website": response.url,
         }
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)
 
     def get_meta_property(self, response, property):
         return response.xpath(f'//meta[@property="{property}"]/@content').extract_first()

@@ -3,7 +3,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class WellsFargoSpider(scrapy.Spider):
@@ -97,7 +97,7 @@ class WellsFargoSpider(scrapy.Spider):
             if hours_elem:
                 opening_hours = self.store_hours(hours_elem[0])
 
-            yield GeojsonPointItem(
+            yield Feature(
                 lat=lat,
                 lon=lon,
                 addr_full=result_elem.xpath('.//div[@itemprop="addressRegion"]/text()').extract_first(),

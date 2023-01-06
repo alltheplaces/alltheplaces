@@ -1,7 +1,7 @@
 import scrapy
 from geonamescache import GeonamesCache
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class USArmyNationalGuardSpider(scrapy.Spider):
@@ -30,4 +30,4 @@ class USArmyNationalGuardSpider(scrapy.Spider):
                 "lon": row["longitude"],
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

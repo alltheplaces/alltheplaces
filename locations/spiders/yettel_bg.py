@@ -1,6 +1,6 @@
 from scrapy import Selector, Spider
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class YettelBGSpider(Spider):
@@ -14,7 +14,7 @@ class YettelBGSpider(Spider):
 
     def parse(self, response):
         for store in response.json()["features"]:
-            item = GeojsonPointItem()
+            item = Feature()
 
             item["lon"], item["lat"] = store["geometry"]["coordinates"]
 

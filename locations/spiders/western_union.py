@@ -3,7 +3,7 @@ import json
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class WesternUnionSpider(SitemapSpider):
@@ -61,4 +61,4 @@ class WesternUnionSpider(SitemapSpider):
             "country": store["country"],
             "phone": store["phone"],
         }
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)
