@@ -21,18 +21,16 @@ class DaciaFrSpider(scrapy.Spider):
 
     def parse(self, response):
         for data in response.json():
-            item = GeojsonPointItem()
-            item["ref"] = data.get("birId")
-            item["name"] = data.get("name")
-            item["country"] = data.get("country")
-            item["lat"] = data.get("geolocalization", {}).get("lat")
-            item["lon"] = data.get("geolocalization", {}).get("lon")
-            item["city"] = data.get("regionalDirectorate")
-            item["city"] = data.get("regionalDirectorate")
-            item["postcode"] = data.get("address", {}).get("postalCode")
-            item["street"] = data.get("address", {}).get("streetAddress")
-            item["housenumber"] = data.get("address", {}).get("postOfficeBox")
-            item["street_address"] = f'{item["housenumber"]} {item["street"]}'
-            item["phone"] = data.get("telephone", {}).get("value")
+            if not data.get("blacklisted"):
+                item = GeojsonPointItem()
+                item["ref"] = data.get("dealerId")
+                item["name"] = data.get("name")
+                item["country"] = data.get("country")
+                item["lat"] = data.get("geolocalization", {}).get("lat")
+                item["lon"] = data.get("geolocalization", {}).get("lon")
+                item["city"] = data.get("regionalDirectorate")
+                item["postcode"] = data.get("address", {}).get("postalCode")
+                item["street_address"] = data.get("address", {}).get("streetAddress")
+                item["phone"] = data.get("telephone", {}).get("value")
 
-            yield item
+                yield item
