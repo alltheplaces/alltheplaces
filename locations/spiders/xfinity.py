@@ -1,97 +1,31 @@
-# -*- coding: utf-8 -*-
-import scrapy
 import json
 import re
 
+import scrapy
+from geonamescache import GeonamesCache
+
 from locations.items import GeojsonPointItem
 
-STATES = [
-    "AL",
-    "AK",
-    "AS",
-    "AZ",
-    "AR",
-    "CA",
-    "CO",
-    "CT",
-    "DE",
-    "DC",
-    "FM",
-    "FL",
-    "GA",
-    "GU",
-    "HI",
-    "ID",
-    "IL",
-    "IN",
-    "IA",
-    "KS",
-    "KY",
-    "LA",
-    "ME",
-    "MH",
-    "MD",
-    "MA",
-    "MI",
-    "MN",
-    "MS",
-    "MO",
-    "MT",
-    "NE",
-    "NV",
-    "NH",
-    "NJ",
-    "NM",
-    "NY",
-    "NC",
-    "ND",
-    "MP",
-    "OH",
-    "OK",
-    "OR",
-    "PW",
-    "PA",
-    "PR",
-    "RI",
-    "SC",
-    "SD",
-    "TN",
-    "TX",
-    "UT",
-    "VT",
-    "VI",
-    "VA",
-    "WA",
-    "WV",
-    "WI",
-    "WY",
-]
+US_TERRITORIES = {
+    "AS": {"code": "AS", "name": "American Samoa"},
+    "FM": {"code": "FM", "name": "Micronesia"},
+    "GU": {"code": "GU", "name": "Guam"},
+    "MH": {"code": "MH", "name": "Marshall Islands"},
+    "MP": {"code": "MP", "name": "Northern Mariana Islands"},
+    "PW": {"code": "PW", "name": "Palau"},
+    "PR": {"code": "PR", "name": "Puerto Rico"},
+    "VI": {"code": "VI", "name": "U.S. Virgin Islands"},
+}
 
 
 class XfinitySpider(scrapy.Spider):
     name = "xfinity"
     item_attributes = {"brand": "Xfinity", "brand_wikidata": "Q5151002"}
     allowed_domains = ["www.xfinity.com"]
-    base_url = "https://www.xfinity.com/support/service-center-locations/"
 
     def start_requests(self):
-        headers = {
-            "accept-Language": "en-US,en;q=0.9",
-            "origin": "https://www.xfinity.com",
-            "accept-Encoding": "gzip, deflate, br",
-            "accept": "*/*",
-            "referer": "https://www.xfinity.com/support/service-center-locations/",
-            "user-agent": "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36",
-        }
-        for state in STATES:
-            yield scrapy.http.Request(
-                "https://api-support.xfinity.com/servicecenters?location={}".format(
-                    state
-                ),
-                self.parse,
-                method="GET",
-                headers=headers,
-            )
+        for state in GeonamesCache().get_us_states() | US_TERRITORIES:
+            yield scrapy.http.Request(url=f"https://api-support.xfinity.com/servicecenters?location={state}")
 
     def store_hours(self, store_hours):
         day_groups = []
@@ -99,7 +33,6 @@ class XfinitySpider(scrapy.Spider):
         days = ("Mo", "Tu", "We", "Th", "Fr", "Sa", "Su")
         hours_list = store_hours.split(",")
         for day, day_hours in zip(days, hours_list):
-            hour_intervals = []
             day_hours = day_hours[2:]
             hours = ""
             match = re.search(r"(\d{1,2}:\d{2}):(\d{1,2}:\d{2})", day_hours)

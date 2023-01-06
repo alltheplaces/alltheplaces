@@ -1,10 +1,6 @@
-# -*- coding: utf-8 -*-
-import re
-
 import scrapy
 
 from locations.items import GeojsonPointItem
-from locations.hours import OpeningHours
 
 
 class JllSpider(scrapy.Spider):
@@ -31,11 +27,13 @@ class JllSpider(scrapy.Spider):
                 "city": place["city"],
                 "state": place["stateProvince"],
                 "postcode": place["postalCode"],
-                "country": place["country"],
                 "lat": place["latitude"],
                 "lon": place["longitude"],
                 "phone": place["telephoneNumber"],
                 "website": place["cityPageLink"],
             }
+
+            if "https://www.us.jll.com/en/locations" in properties["website"]:
+                properties["country"] = "US"
 
             yield GeojsonPointItem(**properties)

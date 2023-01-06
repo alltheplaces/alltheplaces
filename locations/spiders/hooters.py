@@ -1,6 +1,7 @@
-# -*- coding: utf-8 -*-
-import scrapy
 import re
+
+import scrapy
+
 from locations.items import GeojsonPointItem
 
 
@@ -30,9 +31,7 @@ class HootersSpider(scrapy.Spider):
         if re.search(r"\d+$", store_json["address"]["line-2"]):
             city = store_json["address"]["line-2"].split(",")[0].strip()
             state = store_json["address"]["line-2"].split(",")[1].strip()[:2].strip()
-            postcode = store_json["address"]["line-2"][
-                -5:
-            ].strip()  # Get last five characters in string
+            postcode = store_json["address"]["line-2"][-5:].strip()  # Get last five characters in string
             country = "US"
         # Canadian address have the format "Edmonton, AB Canada"
         elif "Canada" in store_json["address"]["line-2"]:
@@ -49,9 +48,7 @@ class HootersSpider(scrapy.Spider):
         if store_opening_hours is not None:
             for key, value in self.day_mapping.items():
                 hours = store_opening_hours.get(key)
-                opening_hours_result.append(
-                    value + " " + hours["open"][:5] + "-" + hours["close"][:5]
-                )
+                opening_hours_result.append(value + " " + hours["open"][:5] + "-" + hours["close"][:5])
 
         opening_hours = ";".join(opening_hours_result)
 

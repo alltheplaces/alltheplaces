@@ -1,4 +1,5 @@
 import re
+
 import scrapy
 
 from locations.items import GeojsonPointItem
@@ -22,16 +23,12 @@ class VictoriasSecretGBSpider(scrapy.Spider):
                     None,
                     map(
                         str.strip,
-                        store.xpath(
-                            './button[@class="vs-store-btn"]/descendant-or-self::text()'
-                        ).getall(),
+                        store.xpath('./button[@class="vs-store-btn"]/descendant-or-self::text()').getall(),
                     ),
                 )
             )
             item["phone"] = (
-                store.xpath(
-                    './div[@class="vs-store-details"]/div[@class="vs-store-address"]/strong/text()'
-                )
+                store.xpath('./div[@class="vs-store-details"]/div[@class="vs-store-address"]/strong/text()')
                 .get()
                 .strip()
             )

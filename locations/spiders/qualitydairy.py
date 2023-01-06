@@ -1,7 +1,7 @@
-# -*- coding: utf-8 -*-
-import scrapy
 import json
 import re
+
+import scrapy
 
 from locations.items import GeojsonPointItem
 
@@ -28,15 +28,9 @@ class QualityDairySpider(scrapy.Spider):
 
         for day_info in store_hours:
             date_values = day_info.xpath(".//td")
-            date_values[0] = re.search(
-                "<td>(.*?)</td>", date_values[0].extract()
-            ).group(1)
-            date_values[1] = re.search(
-                "<td>(.*?)</td>", date_values[1].extract()
-            ).group(1)
-            date_values[3] = re.search(
-                "<td>(.*?)</td>", date_values[3].extract()
-            ).group(1)
+            date_values[0] = re.search("<td>(.*?)</td>", date_values[0].extract()).group(1)
+            date_values[1] = re.search("<td>(.*?)</td>", date_values[1].extract()).group(1)
+            date_values[3] = re.search("<td>(.*?)</td>", date_values[3].extract()).group(1)
 
             day = date_values[0][:2].title()
 
@@ -103,8 +97,6 @@ class QualityDairySpider(scrapy.Spider):
     def parse_detail_product(self, response):
         product = response.meta.get("product")
         open_dates = response.xpath('//table[@id="hours-table"]//tr')
-        product["opening_hours"] = (
-            self.store_hours(open_dates) if len(open_dates) > 0 else "24/7"
-        )
+        product["opening_hours"] = self.store_hours(open_dates) if len(open_dates) > 0 else "24/7"
 
         yield GeojsonPointItem(**product)

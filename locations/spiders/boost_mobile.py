@@ -1,9 +1,9 @@
-# -*- coding: utf-8 -*-
-import scrapy
 import json
 
-from locations.geo import postal_regions
+import scrapy
+
 from locations.dict_parser import DictParser
+from locations.geo import postal_regions
 
 
 class BoostMobileSpider(scrapy.Spider):

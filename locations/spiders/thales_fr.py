@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import io
 import re
 import zipfile
@@ -6,7 +5,6 @@ import zipfile
 import scrapy
 
 from locations.items import GeojsonPointItem
-from locations.hours import OpeningHours
 
 
 class ThalesFrSpider(scrapy.Spider):
@@ -29,7 +27,6 @@ class ThalesFrSpider(scrapy.Spider):
             placemark.xpath(".//description/text()").extract_first(),
         )[1]
         if "France" not in addr:
-            addr_full = addr
             street = locality = postal = ""
         else:
             addr_split = addr.split(",")
@@ -42,14 +39,12 @@ class ThalesFrSpider(scrapy.Spider):
                 postal = re.search(r"\d{5}", addr_split[1]).group(0)
                 locality = addr_split[1].replace(postal, "").strip()
 
-        x, y, z = (
-            placemark.xpath(".//coordinates/text()").extract_first().strip().split(",")
-        )
+        x, y, z = placemark.xpath(".//coordinates/text()").extract_first().strip().split(",")
 
         properties = {
             "ref": ref,
             "name": placemark.xpath(".//name/text()").extract_first(),
-            "addr_full": street,
+            "street_address": street,
             "city": locality,
             "postcode": postal,
             "country": "FR",

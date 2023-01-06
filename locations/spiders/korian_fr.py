@@ -1,10 +1,6 @@
-# -*- coding: utf-8 -*-
-import re
-
 import scrapy
 
 from locations.items import GeojsonPointItem
-from locations.hours import OpeningHours
 
 
 class KorianFrSpider(scrapy.Spider):
@@ -37,9 +33,7 @@ class KorianFrSpider(scrapy.Spider):
 
         for type in types:
             for region in regions:
-                url = "https://api-www.korian.fr/api-front/FR/{type}/{region}".format(
-                    type=type, region=region
-                )
+                url = "https://api-www.korian.fr/api-front/FR/{type}/{region}".format(type=type, region=region)
                 yield scrapy.Request(url=url, callback=self.parse)
 
     def parse(self, response):

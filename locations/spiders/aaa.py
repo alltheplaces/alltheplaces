@@ -1,9 +1,9 @@
-# -*- coding: utf-8 -*-
+from urllib.parse import urlencode
+
 import scrapy
 
 from locations.geo import point_locations
 from locations.items import GeojsonPointItem
-from urllib.parse import urlencode
 
 
 class AAASpider(scrapy.Spider):
@@ -28,9 +28,7 @@ class AAASpider(scrapy.Spider):
                 "ident": "AAACOM",
                 "destination": ",".join([lat, lon]),
             }
-            yield scrapy.http.Request(
-                "https://tdr.aaa.com/tdrl/search.jsp?" + urlencode(params)
-            )
+            yield scrapy.http.Request("https://tdr.aaa.com/tdrl/search.jsp?" + urlencode(params))
 
     def parse(self, response):
         locations = response.json()["aaa"]["services"].get("travelItems")

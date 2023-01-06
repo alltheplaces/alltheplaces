@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import json
 import re
 
@@ -20,9 +19,7 @@ class NandosOMSpider(scrapy.Spider):
         urls = response.xpath('//div[@class="row"]/a/@href').extract()
 
         for url in urls:
-            yield scrapy.Request(
-                url=response.urljoin(url.strip()), callback=self.parse_store
-            )
+            yield scrapy.Request(url=response.urljoin(url.strip()), callback=self.parse_store)
 
     def parse_store(self, response):
         data = response.xpath(

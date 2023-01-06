@@ -1,8 +1,8 @@
-# -*- coding: utf-8 -*-
 import scrapy
 
-from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
+from locations.items import GeojsonPointItem
+from locations.spiders.lidl_gb import LidlGBSpider
 
 DAY_MAPPING = {
     "Mo": "Mo",
@@ -17,7 +17,7 @@ DAY_MAPPING = {
 
 class LidlDESpider(scrapy.Spider):
     name = "lidl_de"
-    item_attributes = {"brand": "Lidl", "brand_wikidata": "Q151954", "country": "DE"}
+    item_attributes = LidlGBSpider.item_attributes
     allowed_domains = ["lidl.de"]
     handle_httpstatus_list = [404]
     start_urls = ["https://www.lidl.de/f/"]
@@ -49,9 +49,7 @@ class LidlDESpider(scrapy.Spider):
             street = shopAddress[0]
             postalCode = shopAddress[1].split()[0]
             city = shopAddress[1].split()[1]
-            openingHours = shop.css(
-                ".ret-o-store-detail__opening-hours::text"
-            ).extract()
+            openingHours = shop.css(".ret-o-store-detail__opening-hours::text").extract()
             services = response.css(".ret-o-store-detail__store-icon-wrapper")[0]
             link = services.css('a::attr("href")').get()
             coordinates = link.split("pos.")[1].split("_L")[0]

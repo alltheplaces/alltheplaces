@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import scrapy
 from scrapy.selector.unified import Selector
 
@@ -18,9 +16,7 @@ class CoenMarketsSpider(scrapy.Spider):
             url_title = location["url_title"]
             # Note: embedded in an iframe; not useful as item's website
             store_url = f"https://coen1923.com/locations/location/{url_title}"
-            yield scrapy.Request(
-                store_url, self.parse_store, cb_kwargs={"js": location}
-            )
+            yield scrapy.Request(store_url, self.parse_store, cb_kwargs={"js": location})
 
     def parse_store(self, response, js):
         props = {}

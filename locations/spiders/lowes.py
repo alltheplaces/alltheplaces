@@ -1,9 +1,10 @@
-# -*- coding: utf-8 -*-
-import scrapy
-import re
 import json
-from locations.items import GeojsonPointItem
+import re
+
+import scrapy
+
 from locations.hours import OpeningHours
+from locations.items import GeojsonPointItem
 from locations.user_agents import BROSWER_DEFAULT
 
 day_mapping = {
@@ -58,11 +59,7 @@ class LowesSpider(scrapy.Spider):
         return opening_hours.as_opening_hours()
 
     def parse_store(self, response):
-        ref = re.search(r".+/(.+)", response.url).group(1)
-
-        script_content = response.xpath(
-            '//script[contains(text(),"storeHours")]/text()'
-        ).extract_first()
+        script_content = response.xpath('//script[contains(text(),"storeHours")]/text()').extract_first()
         if not script_content:
             return
 
@@ -72,9 +69,6 @@ class LowesSpider(scrapy.Spider):
         json_data = json.loads(script_data)
         store_hours = json_data.get("storeHours")
 
-        state_texts = response.xpath(
-            '//span[@itemprop="addressRegion"]/text()'
-        ).extract()
         properties = {
             "lat": json_data["storeDetails"]["lat"],
             "lon": json_data["storeDetails"]["long"],

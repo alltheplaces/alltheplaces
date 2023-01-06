@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import json
 
 import scrapy
@@ -15,24 +14,18 @@ class BanfieldPetHospitalSpider(scrapy.Spider):
     start_urls = ("https://www.banfield.com/locations/hospitals-by-state",)
 
     def parse(self, response):
-        for href in response.xpath(
-            '//div[@class="state-hospital-name"]//@href'
-        ).extract():
+        for href in response.xpath('//div[@class="state-hospital-name"]//@href').extract():
             yield scrapy.Request(response.urljoin(href), callback=self.parse_store)
 
     def parse_store(self, response):
-        for ldjson in response.xpath(
-            '//script[@type="application/ld+json"]/text()'
-        ).extract():
+        for ldjson in response.xpath('//script[@type="application/ld+json"]/text()').extract():
             data = json.loads(ldjson)
             if data["@type"] != ["VeterinaryCare", "LocalBusiness"]:
                 continue
             ref = response.url.rsplit("/", 1)[-1]
             opening_hours = OpeningHours()
             for spec in data["openingHoursSpecification"]:
-                opening_hours.add_range(
-                    spec["dayOfWeek"][:2], spec["opens"], spec["closes"]
-                )
+                opening_hours.add_range(spec["dayOfWeek"][:2], spec["opens"], spec["closes"])
             properties = {
                 "ref": ref,
                 "website": response.url,

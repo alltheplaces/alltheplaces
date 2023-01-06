@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import json
 
 import scrapy
@@ -15,9 +14,7 @@ class CrunchFitnessSpider(scrapy.Spider):
     ]
 
     def parse(self, response):
-        data = json.loads(
-            response.xpath("//div[@data-react-props]/@data-react-props").extract_first()
-        )
+        data = json.loads(response.xpath("//div[@data-react-props]/@data-react-props").extract_first())
 
         for club in data["clubs"]:
             properties = {

@@ -1,9 +1,10 @@
-# -*- coding: utf-8 -*-
 import json
 import re
+
 import scrapy
-from locations.items import GeojsonPointItem
+
 from locations.hours import OpeningHours
+from locations.items import GeojsonPointItem
 
 
 class Pier1Spider(scrapy.Spider):
@@ -16,9 +17,7 @@ class Pier1Spider(scrapy.Spider):
     download_delay = 2  # Pier1's site struggles to keep up with faster downloads
 
     def parse(self, response):
-        urls = response.xpath(
-            '//div[@class="store-info card hover z-depth-0"]/a/@href'
-        ).extract()
+        urls = response.xpath('//div[@class="store-info card hover z-depth-0"]/a/@href').extract()
         for url in urls:
             yield scrapy.Request(response.urljoin(url), callback=self.parse_store)
 

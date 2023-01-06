@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import json
 import re
 
@@ -17,7 +16,7 @@ class ExtraSpaceStorageSpider(SitemapSpider):
     # Seems to be sufficient to allow the site to include correct ldjson
     download_delay = 1.6
 
-    sitemap_urls = ["https://www.extraspace.com/facility-intent-sitemap.xml"]
+    sitemap_urls = ["https://www.extraspace.com/facility-sitemap.xml"]
     sitemap_rules = [(r"/facilities/", "parse")]
 
     def sitemap_filter(self, entries):
@@ -30,9 +29,7 @@ class ExtraSpaceStorageSpider(SitemapSpider):
         try:
             data = self.get_json_data(response)
         except TypeError:
-            yield get_retry_request(
-                response.request, spider=self, reason="missing ldjson"
-            )
+            yield get_retry_request(response.request, spider=self, reason="missing ldjson")
             return
 
         data_address = data["address"]

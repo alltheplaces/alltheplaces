@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import scrapy
 
 from locations.items import GeojsonPointItem
@@ -35,11 +34,9 @@ class QuiktripSpider(scrapy.Spider):
                 extras={
                     "amenity:fuel": True,
                     "atm": has_feature(shop, "atm"),
-                    "fuel:diesel": has_feature(shop, "autodiesel")
-                    or has_feature(shop, "truckdiesel"),
+                    "fuel:diesel": has_feature(shop, "autodiesel") or has_feature(shop, "truckdiesel"),
                     "fuel:e15": has_feature(shop, "e15"),
                     "fuel:HGV_diesel": has_feature(shop, "truckdiesel"),
-                    "hgv": has_feature(shop, "truckdiesel")
-                    or has_feature(shop, "certifiedscales"),
+                    "hgv": has_feature(shop, "truckdiesel") or has_feature(shop, "certifiedscales"),
                 },
             )

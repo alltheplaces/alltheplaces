@@ -1,11 +1,10 @@
-# -*- coding: utf-8 -*-
 import json
 import re
-import scrapy
 
-from locations.items import GeojsonPointItem
+import scrapy
 from scrapy.spiders import SitemapSpider
 
+from locations.items import GeojsonPointItem
 from locations.user_agents import BROSWER_DEFAULT
 
 URL = "https://data.discounttire.com/webapi/discounttire.graph"

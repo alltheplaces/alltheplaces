@@ -1,5 +1,5 @@
-# -*- coding: utf-8 -*-
 import scrapy
+
 from locations.items import GeojsonPointItem
 
 
@@ -11,9 +11,7 @@ class SoulCycleSpider(scrapy.Spider):
 
     def parse(self, response):
         response.selector.remove_namespaces()
-        city_urls = response.xpath(
-            '//div[@class="open-modal studio-detail"]/@data-url'
-        ).extract()
+        city_urls = response.xpath('//div[@class="open-modal studio-detail"]/@data-url').extract()
         for path in city_urls:
             yield scrapy.Request(
                 "https://www.soul-cycle.com" + path.strip(),
@@ -23,27 +21,13 @@ class SoulCycleSpider(scrapy.Spider):
     def parse_store(self, response):
 
         properties = {
-            "name": response.xpath(
-                '//*[@class="studio-name"]/@data-studio-name'
-            ).extract_first(),
-            "ref": response.xpath(
-                '//*[@class="studio-name"]/@data-studio-name'
-            ).extract_first(),
-            "addr_full": response.xpath(
-                '//span[@itemprop="streetAddress"]/text()'
-            ).extract_first(),
-            "city": response.xpath(
-                '//span[@itemprop="addressLocality"]/text()'
-            ).extract_first(),
-            "state": response.xpath(
-                '//span[@itemprop="addressRegion"]/text()'
-            ).extract_first(),
-            "postcode": response.xpath('//span[@itemprop="address"]/text()').extract()[
-                3
-            ],
-            "phone": response.xpath(
-                '//a[@itemprop="telephone"]/text()'
-            ).extract_first(),
+            "name": response.xpath('//*[@class="studio-name"]/@data-studio-name').extract_first(),
+            "ref": response.xpath('//*[@class="studio-name"]/@data-studio-name').extract_first(),
+            "addr_full": response.xpath('//span[@itemprop="streetAddress"]/text()').extract_first(),
+            "city": response.xpath('//span[@itemprop="addressLocality"]/text()').extract_first(),
+            "state": response.xpath('//span[@itemprop="addressRegion"]/text()').extract_first(),
+            "postcode": response.xpath('//span[@itemprop="address"]/text()').extract()[3],
+            "phone": response.xpath('//a[@itemprop="telephone"]/text()').extract_first(),
             "website": response.request.url,
             "lat": response.xpath("//div[@class]/div[@class]/script")
             .extract()[-1]

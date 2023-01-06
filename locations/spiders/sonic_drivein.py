@@ -1,6 +1,6 @@
-# -*- coding: utf-8 -*-
-import scrapy
 import json
+
+import scrapy
 
 from locations.items import GeojsonPointItem
 
@@ -31,9 +31,7 @@ class SonicDriveinSpider(scrapy.Spider):
             yield scrapy.Request(url, callback=self.parse_store)
 
     def parse_store(self, response):
-        data = response.xpath(
-            '//script[@type="application/ld+json"]/text()'
-        ).extract_first()
+        data = response.xpath('//script[@type="application/ld+json"]/text()').extract_first()
         if data:
             data = json.loads(data)[0]
         else:

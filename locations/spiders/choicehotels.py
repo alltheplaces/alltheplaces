@@ -1,8 +1,9 @@
 import json
 import re
-from locations.items import GeojsonPointItem
+
 from scrapy.spiders import SitemapSpider
 
+from locations.items import GeojsonPointItem
 from locations.user_agents import BROSWER_DEFAULT
 
 
@@ -31,9 +32,7 @@ class ChoiceHotelsSpider(SitemapSpider):
 
     def parse(self, response):
         script = "".join(response.xpath("//script/text()").extract())
-        data = json.loads(
-            re.search(r"window.PRELOADED_STATE = (.*)?;", script).group(1)
-        )["page"]
+        data = json.loads(re.search(r"window.PRELOADED_STATE = (.*)?;", script).group(1))["page"]
 
         # Remove unused extra bits to get to the random key with the useful stuff in it
         data.pop("referrerState", None)

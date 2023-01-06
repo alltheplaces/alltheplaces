@@ -1,11 +1,9 @@
-# -*- coding: utf-8 -*-
 import json
 import re
 
 import scrapy
 
 from locations.items import GeojsonPointItem
-from locations.hours import OpeningHours
 
 
 class BayshoreHealthcareSpider(scrapy.Spider):
@@ -26,9 +24,7 @@ class BayshoreHealthcareSpider(scrapy.Spider):
             "search_type": "location",
         }
 
-        yield scrapy.http.FormRequest(
-            url, self.parse, method="POST", headers=headers, formdata=formdata
-        )
+        yield scrapy.http.FormRequest(url, self.parse, method="POST", headers=headers, formdata=formdata)
 
     def parse(self, response):
         stores = json.loads(response.body)

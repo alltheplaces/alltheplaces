@@ -1,13 +1,16 @@
 import json
 import re
+
 import scrapy
 from scrapy.selector import Selector
+
 from locations.items import GeojsonPointItem
+from locations.spiders.mcdonalds import McDonaldsSpider
 
 
 class McDonaldsRSSpider(scrapy.Spider):
     name = "mcdonalds_rs"
-    item_attributes = {"brand": "McDonald's", "brand_wikidata": "Q38076"}
+    item_attributes = McDonaldsSpider.item_attributes
     allowed_domains = ["www.mcdonalds.rs"]
 
     start_urls = ("http://www.mcdonalds.rs/restoran-lokator/",)
@@ -27,7 +30,6 @@ class McDonaldsRSSpider(scrapy.Spider):
         data = Selector(text=data).xpath("//p//text()").extract()
         address = self.normalize_item(data[0])
         postalCode, city = self.parse_postalCity(data)
-        length = len(data)
         return address, postalCode, city
 
     def parse(self, response):

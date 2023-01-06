@@ -1,10 +1,8 @@
-# -*- coding: utf-8 -*-
 import re
 
 import scrapy
 
 from locations.items import GeojsonPointItem
-from locations.hours import OpeningHours
 
 
 class BrandywineLivingSpider(scrapy.Spider):
@@ -15,17 +13,13 @@ class BrandywineLivingSpider(scrapy.Spider):
     ]
 
     def parse(self, response):
-        urls = response.xpath(
-            '//*[@class="card communities-archive__card"]/a/@href'
-        ).extract()
+        urls = response.xpath('//*[@class="card communities-archive__card"]/a/@href').extract()
 
         for url in urls:
             yield scrapy.Request(url, callback=self.parse_community)
 
     def parse_community(self, response):
-        addr = response.xpath(
-            '//*[@class="community-hero__address-text"]/text()'
-        ).extract_first()
+        addr = response.xpath('//*[@class="community-hero__address-text"]/text()').extract_first()
         addr_list = addr.split(",")
         addr1 = addr_list[0]
         if len(addr_list) == 3:
@@ -45,9 +39,7 @@ class BrandywineLivingSpider(scrapy.Spider):
             "state": state,
             "postcode": zip,
             "country": "US",
-            "phone": response.xpath(
-                '//*[@class="community-hero__phone-text"]/text()'
-            ).extract_first(),
+            "phone": response.xpath('//*[@class="community-hero__phone-text"]/text()').extract_first(),
             "website": response.url,
         }
 

@@ -1,8 +1,8 @@
-# -*- coding: utf-8 -*-
 import re
 
-from locations.items import GeojsonPointItem
 from scrapy.spiders import SitemapSpider
+
+from locations.items import GeojsonPointItem
 
 
 class DominosPizzaFRSpider(SitemapSpider):
@@ -19,9 +19,7 @@ class DominosPizzaFRSpider(SitemapSpider):
 
     def parse_store(self, response):
         address_data = response.xpath('//a[@id="open-map-address"]/text()').extract()
-        locality_data = re.match(
-            r"([\d]+)? ?([-\ \w'À-Ÿ()]+)$", address_data[1].strip()
-        )
+        locality_data = re.match(r"([\d]+)? ?([-\ \w'À-Ÿ()]+)$", address_data[1].strip())
         properties = {
             "ref": response.url,
             "name": response.xpath('//h2[@class="storetitle"]/text()').extract_first(),
@@ -29,12 +27,8 @@ class DominosPizzaFRSpider(SitemapSpider):
             "city": locality_data.group(2),
             "postcode": locality_data.group(1),
             "country": "FR",
-            "lat": response.xpath('//input[@id="store-lat"]/@value')
-            .get()
-            .replace(",", "."),
-            "lon": response.xpath('//input[@id="store-lon"]/@value')
-            .get()
-            .replace(",", "."),
+            "lat": response.xpath('//input[@id="store-lat"]/@value').get().replace(",", "."),
+            "lon": response.xpath('//input[@id="store-lon"]/@value').get().replace(",", "."),
             "website": response.url,
         }
         yield GeojsonPointItem(**properties)

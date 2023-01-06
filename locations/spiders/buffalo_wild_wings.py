@@ -1,10 +1,7 @@
-# -*- coding: utf-8 -*-
-import re
-
 import scrapy
 
-from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
+from locations.items import GeojsonPointItem
 
 
 class BuffaloWildWingsSpider(scrapy.Spider):
@@ -20,9 +17,7 @@ class BuffaloWildWingsSpider(scrapy.Spider):
             "x_client_secret": "786c1B856fA542C4b383F3E8Cdd36f3f",
         }
 
-        with open(
-            "./locations/searchable_points/us_centroids_50mile_radius.csv"
-        ) as points:
+        with open("./locations/searchable_points/us_centroids_50mile_radius.csv") as points:
             next(points)
             for point in points:
                 _, lat, lon = point.strip().split(",")
@@ -37,11 +32,11 @@ class BuffaloWildWingsSpider(scrapy.Spider):
         for d in days_of_week:
             try:
                 day = d[:-1]
-                open_name = "HourOfOperation{0}Open".format(d)
+                open_name = "HourOfOperation{}Open".format(d)
                 if d == "Mon":
-                    close_name = "HourOfOperation{0}close".format(d)
+                    close_name = "HourOfOperation{}close".format(d)
                 else:
-                    close_name = "HourOfOperation{0}Close".format(d)
+                    close_name = "HourOfOperation{}Close".format(d)
                 open_time = hours[open_name]
                 close_time = hours[close_name]
             except:

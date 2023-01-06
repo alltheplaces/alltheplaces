@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
 import scrapy
-from scrapy.spiders import Rule
 from scrapy.linkextractors import LinkExtractor
-
+from scrapy.spiders import Rule
 
 from locations.hours import OpeningHours
 from locations.linked_data_parser import LinkedDataParser

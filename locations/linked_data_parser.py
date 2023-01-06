@@ -1,22 +1,25 @@
 import json
 
+import chompjs
 import json5
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
-class LinkedDataParser(object):
+class LinkedDataParser:
     @staticmethod
-    def iter_linked_data(response, parse_json5=False):
+    def iter_linked_data(response, json_parser="json"):
         lds = response.xpath('//script[@type="application/ld+json"]//text()').getall()
         for ld in lds:
             try:
-                if parse_json5:
+                if json_parser == "json5":
                     ld_obj = json5.loads(ld)
+                elif json_parser == "chompjs":
+                    ld_obj = chompjs.parse_js_object(ld)
                 else:
                     ld_obj = json.loads(ld, strict=False)
-            except json.decoder.JSONDecodeError:
+            except (json.decoder.JSONDecodeError, ValueError):
                 continue
 
             if isinstance(ld_obj, dict):
@@ -30,10 +33,8 @@ class LinkedDataParser(object):
                 raise TypeError(ld_obj)
 
     @staticmethod
-    def find_linked_data(response, wanted_type, parse_json5=False) -> {}:
-        for ld_obj in LinkedDataParser.iter_linked_data(
-            response, parse_json5=parse_json5
-        ):
+    def find_linked_data(response, wanted_type, json_parser="json") -> {}:
+        for ld_obj in LinkedDataParser.iter_linked_data(response, json_parser=json_parser):
             if not ld_obj.get("@type"):
                 continue
 
@@ -54,21 +55,17 @@ class LinkedDataParser(object):
             for wanted_type in wanted_types:
                 valid_type = True
                 for t in types:
-                    if not t in wanted_types:
+                    if t not in wanted_types:
                         valid_type = False
 
                 if valid_type:
                     return ld_obj
 
     @staticmethod
-    def parse_ld(ld) -> GeojsonPointItem:
-        item = GeojsonPointItem()
+    def parse_ld(ld) -> Feature:  # noqa: C901
+        item = Feature()
 
-        if (
-            (geo := ld.get("geo"))
-            or "location" in ld
-            and (geo := ld["location"].get("geo"))
-        ):
+        if (geo := ld.get("geo")) or "location" in ld and (geo := ld["location"].get("geo")):
             if isinstance(geo, list):
                 geo = geo[0]
 
@@ -86,21 +83,15 @@ class LinkedDataParser(object):
                 item["addr_full"] = addr
             elif isinstance(addr, dict):
                 if LinkedDataParser.check_type(addr.get("@type"), "PostalAddress"):
-                    item["street_address"] = LinkedDataParser.get_case_insensitive(
-                        addr, "streetAddress"
-                    )
-                    item["city"] = LinkedDataParser.get_case_insensitive(
-                        addr, "addressLocality"
-                    )
-                    item["state"] = LinkedDataParser.get_case_insensitive(
-                        addr, "addressRegion"
-                    )
-                    item["postcode"] = LinkedDataParser.get_case_insensitive(
-                        addr, "postalCode"
-                    )
-                    country = LinkedDataParser.get_case_insensitive(
-                        addr, "addressCountry"
-                    )
+                    if street_address := LinkedDataParser.get_case_insensitive(addr, "streetAddress"):
+                        if isinstance(street_address, list):
+                            street_address = ", ".join(street_address)
+
+                        item["street_address"] = street_address
+                    item["city"] = LinkedDataParser.get_case_insensitive(addr, "addressLocality")
+                    item["state"] = LinkedDataParser.get_case_insensitive(addr, "addressRegion")
+                    item["postcode"] = LinkedDataParser.get_case_insensitive(addr, "postalCode")
+                    country = LinkedDataParser.get_case_insensitive(addr, "addressCountry")
 
                     if isinstance(country, str):
                         item["country"] = country
@@ -154,10 +145,8 @@ class LinkedDataParser(object):
         return item
 
     @staticmethod
-    def parse(response, wanted_type, parse_json5=False) -> GeojsonPointItem:
-        ld_item = LinkedDataParser.find_linked_data(
-            response, wanted_type, parse_json5=parse_json5
-        )
+    def parse(response, wanted_type, json_parser="json") -> Feature:
+        ld_item = LinkedDataParser.find_linked_data(response, wanted_type, json_parser=json_parser)
         if ld_item:
             item = LinkedDataParser.parse_ld(ld_item)
 
@@ -177,7 +166,7 @@ class LinkedDataParser(object):
             if isinstance(value, str):
                 if value == "null":
                     return None
-                return value.strip()
+                return value.strip(" ,")
             return value
 
     @staticmethod
@@ -199,9 +188,4 @@ class LinkedDataParser(object):
 
     @staticmethod
     def clean_type(type: str) -> str:
-        return (
-            type.lower()
-            .replace("http://", "")
-            .replace("https://", "")
-            .replace("schema.org/", "")
-        )
+        return type.lower().replace("http://", "").replace("https://", "").replace("schema.org/", "")

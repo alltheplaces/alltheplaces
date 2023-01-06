@@ -1,6 +1,7 @@
 import json
-import re
+
 import scrapy
+
 from locations.items import GeojsonPointItem
 
 
@@ -11,15 +12,15 @@ class NorthsideHospitalSpider(scrapy.Spider):
     start_urls = ("https://www.northside.com/locations",)
 
     def start_requests(self):
-        template = "https://locations-api.northside.production.merge-digital.com/api/LocationsSearch?Page=1&PageSize=454"
+        template = (
+            "https://locations-api.northside.production.merge-digital.com/api/LocationsSearch?Page=1&PageSize=454"
+        )
 
         headers = {
             "Accept": "application/json",
         }
 
-        yield scrapy.http.FormRequest(
-            url=template, method="GET", headers=headers, callback=self.parse
-        )
+        yield scrapy.http.FormRequest(url=template, method="GET", headers=headers, callback=self.parse)
 
     def parse(self, response):
         jsonresponse = response.json()

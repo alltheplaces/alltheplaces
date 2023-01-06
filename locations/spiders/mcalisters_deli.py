@@ -1,6 +1,6 @@
-# -*- coding: utf-8 -*-
 import json
 import re
+
 import scrapy
 
 from locations.hours import OpeningHours
@@ -19,28 +19,12 @@ class McalistersDeliSpider(scrapy.Spider):
 
         ref = re.search(r".*\/([0-9]+[a-z\-]+)", response.url).group(1)
         name = response.xpath("//title/text()").extract_first().split("|")[0]
-        addr_full = response.xpath(
-            "//meta[@itemprop='streetAddress']/@content"
-        ).extract_first()
-        city = response.xpath(
-            "//meta[@itemprop='addressLocality']/@content"
-        ).extract_first()
-        postcode = response.xpath(
-            "//span[@itemprop='postalCode']/text()"
-        ).extract_first()
-        geo_region = (
-            response.xpath("//meta[@name='geo.region']/@content")
-            .extract_first()
-            .split("-")
-        )
-        coordinates = (
-            response.xpath("//meta[@name='geo.position']/@content")
-            .extract_first()
-            .split(";")
-        )
-        phone = response.xpath(
-            "//div[@class='Phone-display Phone-display--withLink']/text()"
-        ).extract_first()
+        addr_full = response.xpath("//meta[@itemprop='streetAddress']/@content").extract_first()
+        city = response.xpath("//meta[@itemprop='addressLocality']/@content").extract_first()
+        postcode = response.xpath("//span[@itemprop='postalCode']/text()").extract_first()
+        geo_region = response.xpath("//meta[@name='geo.region']/@content").extract_first().split("-")
+        coordinates = response.xpath("//meta[@name='geo.position']/@content").extract_first().split(";")
+        phone = response.xpath("//div[@class='Phone-display Phone-display--withLink']/text()").extract_first()
         hours = self.parse_hours(response)
 
         properties = {
@@ -62,9 +46,7 @@ class McalistersDeliSpider(scrapy.Spider):
 
     def parse_hours(self, response):
         opening_hours = OpeningHours()
-        data = response.xpath(
-            "//script[@type='text/data' and @class='js-hours-config']/text()"
-        ).extract_first()
+        data = response.xpath("//script[@type='text/data' and @class='js-hours-config']/text()").extract_first()
 
         if not data:
             return opening_hours
@@ -87,8 +69,6 @@ class McalistersDeliSpider(scrapy.Spider):
 
     def parse(self, response):
         response.selector.remove_namespaces()
-        urls = response.xpath("//loc").re(
-            "https://locations.mcalistersdeli.com\/[a-z]{2}\/[a-z\-]+\/[0-9]+[a-z\-]+"
-        )
+        urls = response.xpath("//loc").re(r"https://locations.mcalistersdeli.com\/[a-z]{2}\/[a-z\-]+\/[0-9]+[a-z\-]+")
         for url in urls:
             yield scrapy.Request(url, callback=self.parse_store)

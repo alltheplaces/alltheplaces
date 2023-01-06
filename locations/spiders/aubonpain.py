@@ -1,8 +1,10 @@
-import scrapy
-import re
 import json
-from locations.items import GeojsonPointItem
+import re
+
+import scrapy
+
 from locations.hours import OpeningHours
+from locations.items import GeojsonPointItem
 
 
 class AuBonPainSpider(scrapy.Spider):
@@ -40,22 +42,14 @@ class AuBonPainSpider(scrapy.Spider):
         ref = re.findall(r"[^(\/)]+$", response.url)[0]
 
         scripts = "".join(response.xpath("//script/text()").extract())
-        lat, lon = re.search(
-            r".*Microsoft.Maps.Location\(([0-9.-]*),\s+([0-9-.]*)\).*", scripts
-        ).groups()
+        lat, lon = re.search(r".*Microsoft.Maps.Location\(([0-9.-]*),\s+([0-9-.]*)\).*", scripts).groups()
 
-        address1, address2 = response.xpath(
-            '//dt[contains(text(), "Address")]/following-sibling::dd/text()'
-        ).extract()
-        city, state, zipcode = re.search(
-            r"^(.*),\s+([a-z]{2})\s+([0-9]+)$", address2.strip(), re.IGNORECASE
-        ).groups()
+        address1, address2 = response.xpath('//dt[contains(text(), "Address")]/following-sibling::dd/text()').extract()
+        city, state, zipcode = re.search(r"^(.*),\s+([a-z]{2})\s+([0-9]+)$", address2.strip(), re.IGNORECASE).groups()
 
         properties = {
             "addr_full": address1.strip(", "),
-            "phone": response.xpath(
-                '//dt[contains(text(), "Phone")]/following-sibling::dd/a/text()'
-            ).extract_first(),
+            "phone": response.xpath('//dt[contains(text(), "Phone")]/following-sibling::dd/a/text()').extract_first(),
             "city": city,
             "state": state,
             "postcode": zipcode,
@@ -64,9 +58,7 @@ class AuBonPainSpider(scrapy.Spider):
             "lat": float(lat),
             "lon": float(lon),
         }
-        hours = json.loads(
-            re.search(r".*var\shours\s*=\s*(.*?);.*", scripts).groups()[0]
-        )
+        hours = json.loads(re.search(r".*var\shours\s*=\s*(.*?);.*", scripts).groups()[0])
         hours = self.parse_hours(hours)
         if hours:
             properties["opening_hours"] = hours
@@ -74,9 +66,7 @@ class AuBonPainSpider(scrapy.Spider):
         yield GeojsonPointItem(**properties)
 
     def parse(self, response):
-        urls = response.xpath(
-            '//section/div/div//a[contains(@href, "stores")]/@href'
-        ).extract()
+        urls = response.xpath('//section/div/div//a[contains(@href, "stores")]/@href').extract()
 
         for url in urls:
             url = url.replace("\r\n", "")

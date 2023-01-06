@@ -1,7 +1,7 @@
-# -*- coding: utf-8 -*-
 import gzip
 import json
 import re
+
 import scrapy
 
 from locations.hours import OpeningHours
@@ -39,9 +39,7 @@ class GenghisGrillSpider(scrapy.Spider):
     def parse_hours(self, response):
         opening_hours = OpeningHours()
 
-        hours = response.xpath(
-            "//script/text()[contains(., 'Primary Hours')]"
-        ).extract_first()
+        hours = response.xpath("//script/text()[contains(., 'Primary Hours')]").extract_first()
 
         hours_dict = json.loads(re.search(r'"days":(.*]})', hours).group(1))
         for day, times in hours_dict.items():
@@ -58,7 +56,7 @@ class GenghisGrillSpider(scrapy.Spider):
         xml = scrapy.Selector(type="xml", text=gzip.decompress(response.body))
         xml.remove_namespaces()
         urls = xml.xpath("//loc").re(
-            "https:\/\/locations.genghisgrill.com\/[a-z]{2}\/[a-z\-]+\/genghis-grill-[0-9]+\.html"
+            r"https:\/\/locations.genghisgrill.com\/[a-z]{2}\/[a-z\-]+\/genghis-grill-[0-9]+\.html"
         )
         for url in urls:
             yield scrapy.Request(url, callback=self.parse_store)

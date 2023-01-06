@@ -1,7 +1,7 @@
-# -*- coding: utf-8 -*-
-import scrapy
 import json
 import re
+
+import scrapy
 
 from locations.items import GeojsonPointItem
 
@@ -67,20 +67,7 @@ class ZaxbysSpider(scrapy.Spider):
             r"\+?(\s+)*(\d{1})?(\s|\()*(\d{3})(\s+|\)|-)*(\d{3})(\s+|-)?(\d{2})(\s+|-)?(\d{2})",
             phone,
         )
-        return (
-            (
-                "("
-                + r.group(4)
-                + ") "
-                + r.group(6)
-                + "-"
-                + r.group(8)
-                + "-"
-                + r.group(10)
-            )
-            if r
-            else phone
-        )
+        return ("(" + r.group(4) + ") " + r.group(6) + "-" + r.group(8) + "-" + r.group(10)) if r else phone
 
     def parse(self, response):  # high-level list of states
         states = response.xpath('//map/area[@shape="poly"]/@href').extract()
@@ -92,30 +79,23 @@ class ZaxbysSpider(scrapy.Spider):
             stores = json.loads(
                 re.search(
                     r"var locations =(.*);",
-                    response.xpath(
-                        '//script[contains(.,"var locations")]'
-                    ).extract_first(),
+                    response.xpath('//script[contains(.,"var locations")]').extract_first(),
                 )[1]
             )
         else:
             stores = []
         for store in stores:
-            yield scrapy.Request(
-                response.urljoin(store["Website"]), callback=self.parse_store
-            )
+            yield scrapy.Request(response.urljoin(store["Website"]), callback=self.parse_store)
 
     def parse_store(self, response):
         try:
             data = json.loads(
                 re.search(
                     r'(.*)"acceptsReservations.*',
-                    response.xpath('//script[@type="application/ld+json"]/text()')
-                    .extract_first()
-                    .replace("\r\n", ""),
+                    response.xpath('//script[@type="application/ld+json"]/text()').extract_first().replace("\r\n", ""),
                 )[1]
             )
-        except Exception as e:
-
+        except Exception:
             yield scrapy.Request(response.url, callback=self.parse_store)
             return
 

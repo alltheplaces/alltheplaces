@@ -1,7 +1,6 @@
-# -*- coding: utf-8 -*-
-import scrapy
 from xml.etree import ElementTree as ET
-from scrapy import Selector
+
+import scrapy
 
 from locations.items import GeojsonPointItem
 

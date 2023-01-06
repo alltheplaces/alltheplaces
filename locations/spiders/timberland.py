@@ -1,8 +1,7 @@
-# -*- coding: utf-8 -*-
 import scrapy
+from scrapy.selector import Selector
 
 from locations.items import GeojsonPointItem
-from scrapy.selector import Selector
 
 
 class TimberlandSpider(scrapy.Spider):
@@ -20,13 +19,13 @@ class TimberlandSpider(scrapy.Spider):
 
         for poi in pois:
             state = Selector(text=poi).xpath("//state/text()").get()
-            if state == None:
+            if state is None:
                 state = Selector(text=poi).xpath("//province/text()").get()
 
             addr = Selector(text=poi).xpath("//address1/text()").get()
-            if addr == None:
+            if addr is None:
                 addr = Selector(text=poi).xpath("//address2/text()").get()
-                if addr == None:
+                if addr is None:
                     addr = Selector(text=poi).xpath("//dsply_adr/text()").get()
 
             name = Selector(text=poi).xpath("//name/text()").get()

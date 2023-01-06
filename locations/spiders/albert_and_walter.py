@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
 import scrapy
-import re
 
 from locations.items import GeojsonPointItem
 
@@ -83,9 +81,7 @@ class AlbertAndWalterSpider(scrapy.Spider):
                 "name": data["restaurant_name"],
                 "lat": data["latitude"],
                 "lon": data["longitude"],
-                "addr_full": data[
-                    "public_address"
-                ],  # data['address1'] + ' ' + data['address2'],
+                "addr_full": data["public_address"],  # data['address1'] + ' ' + data['address2'],
                 "city": data["city_name"],
                 "state": data["province_code"],
                 "postcode": data["postal_code"],

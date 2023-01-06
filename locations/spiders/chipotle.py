@@ -1,8 +1,9 @@
-# -*- coding: utf-8 -*-
-import scrapy
 import re
-from locations.items import GeojsonPointItem
+
+import scrapy
+
 from locations.hours import OpeningHours
+from locations.items import GeojsonPointItem
 
 
 class ChipotleSpider(scrapy.Spider):
@@ -25,9 +26,7 @@ class ChipotleSpider(scrapy.Spider):
                     meta={"url": "https://locations.chipotle.co.uk/"},
                 )
             else:
-                yield scrapy.Request(
-                    url=url, callback=self.parse_state, meta={"url": url}
-                )
+                yield scrapy.Request(url=url, callback=self.parse_state, meta={"url": url})
 
     def parse_state(self, response):
         states = response.xpath('//*[@class="Directory-listLink"]/@href').extract()
@@ -40,18 +39,12 @@ class ChipotleSpider(scrapy.Spider):
             if c == "(1)":
                 yield scrapy.Request(url=url, callback=self.parse_store)
             elif state == "dc/washington" or state == "nd/fargo":
-                yield scrapy.Request(
-                    url=url, callback=self.parse_same_city, meta={"url": base_url}
-                )
+                yield scrapy.Request(url=url, callback=self.parse_same_city, meta={"url": base_url})
             else:
-                yield scrapy.Request(
-                    url=url, callback=self.parse_city, meta={"url": base_url}
-                )
+                yield scrapy.Request(url=url, callback=self.parse_city, meta={"url": base_url})
 
     def parse_city(self, response):
-        city_count = response.xpath(
-            '//*[@class="Directory-listLink"]/@data-count'
-        ).extract()
+        city_count = response.xpath('//*[@class="Directory-listLink"]/@data-count').extract()
         cities = response.xpath('//*[@class="Directory-listLink"]/@href').extract()
 
         base_url = response.meta.get("url")
@@ -61,9 +54,7 @@ class ChipotleSpider(scrapy.Spider):
             if count == "(1)":
                 yield scrapy.Request(url=url, callback=self.parse_store)
             else:
-                yield scrapy.Request(
-                    url=url, callback=self.parse_same_city, meta={"url": base_url}
-                )
+                yield scrapy.Request(url=url, callback=self.parse_same_city, meta={"url": base_url})
 
     def parse_same_city(self, response):
         stores = response.xpath('//*[@class="Teaser-titleLink"]/@href').extract()
@@ -87,47 +78,27 @@ class ChipotleSpider(scrapy.Spider):
             day = hour[0]
             open_time, close_time = hour[1].split("-")
 
-            opening_hours.add_range(
-                day=day, open_time=open_time, close_time=close_time, time_format="%H:%M"
-            )
+            opening_hours.add_range(day=day, open_time=open_time, close_time=close_time, time_format="%H:%M")
 
         return opening_hours.as_opening_hours()
 
     def parse_store(self, response):
         properties = {
-            "ref": "_".join(
-                re.search(r".+/(.+?)/(.+?)/(.+?)/?(?:\.html|$)", response.url).groups()
-            ),
+            "ref": "_".join(re.search(r".+/(.+?)/(.+?)/(.+?)/?(?:\.html|$)", response.url).groups()),
             "name": response.xpath('//*[@itemprop="name"]/text()').extract_first(),
-            "addr_full": response.xpath(
-                '//*[@class="c-address-street-1"]/text()'
-            ).extract_first(),
-            "city": response.xpath(
-                '//*[@class="c-address-city"]/text()'
-            ).extract_first(),
-            "state": response.xpath(
-                '//*[@itemprop="addressRegion"]/text()'
-            ).extract_first(),
-            "postcode": response.xpath(
-                '//*[@itemprop="postalCode"]/text()'
-            ).extract_first(),
-            "country": response.xpath(
-                '//*[@itemprop="addressCountry"]/text()'
-            ).extract_first(),
+            "addr_full": response.xpath('//*[@class="c-address-street-1"]/text()').extract_first(),
+            "city": response.xpath('//*[@class="c-address-city"]/text()').extract_first(),
+            "state": response.xpath('//*[@itemprop="addressRegion"]/text()').extract_first(),
+            "postcode": response.xpath('//*[@itemprop="postalCode"]/text()').extract_first(),
+            "country": response.xpath('//*[@itemprop="addressCountry"]/text()').extract_first(),
             "lat": response.xpath('//*[@itemprop="latitude"]/@content').extract_first(),
-            "lon": response.xpath(
-                '//*[@itemprop="longitude"]/@content'
-            ).extract_first(),
-            "phone": response.xpath(
-                '//*[@itemprop="telephone"]/text()'
-            ).extract_first(),
+            "lon": response.xpath('//*[@itemprop="longitude"]/@content').extract_first(),
+            "phone": response.xpath('//*[@itemprop="telephone"]/text()').extract_first(),
             "website": response.url,
         }
 
         try:
-            hours = self.parse_hours(
-                response.xpath('//*[@itemprop="openingHours"]/@content').extract()
-            )
+            hours = self.parse_hours(response.xpath('//*[@itemprop="openingHours"]/@content').extract())
 
             if hours:
                 properties["opening_hours"] = hours

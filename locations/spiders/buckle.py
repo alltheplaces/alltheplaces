@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
-import scrapy
-import re
 import json
-from urllib.parse import urlparse
+
+import scrapy
 
 from locations.linked_data_parser import LinkedDataParser
 
@@ -26,15 +24,11 @@ class BuckleSpider(scrapy.spiders.SitemapSpider):
         lds = response.xpath('//script[@type="application/ld+json"]//text()').getall()
         for ld in lds:
             try:
-                ld_obj = json.loads(ld, strict=False)
+                pass
             except json.decoder.JSONDecodeError:
                 ld_nocomments = (line.strip() for line in ld.split("\n"))
-                ld = "".join(
-                    line for line in ld_nocomments if not line.startswith("//")
-                )
-                script = response.selector.root.makeelement(
-                    "script", {"type": "application/ld+json"}
-                )
+                ld = "".join(line for line in ld_nocomments if not line.startswith("//"))
+                script = response.selector.root.makeelement("script", {"type": "application/ld+json"})
                 script.text = ld
                 response.selector.root.append(script)
 

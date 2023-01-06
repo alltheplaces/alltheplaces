@@ -1,7 +1,8 @@
-# -*- coding: utf-8 -*-
-from scrapy.spiders import SitemapSpider
-from locations.linked_data_parser import LinkedDataParser
 from urllib.parse import parse_qs, urlparse
+
+from scrapy.spiders import SitemapSpider
+
+from locations.linked_data_parser import LinkedDataParser
 
 
 class CinemarkSpider(SitemapSpider):
@@ -22,11 +23,7 @@ class CinemarkSpider(SitemapSpider):
 
         item["ref"] = "/".join(response.url.rsplit("/")[-2:])
         item["lat"], item["lon"] = parse_qs(
-            urlparse(
-                response.css(".theatreInfoCollapseMap")
-                .xpath("//a/img/@data-src")
-                .extract_first()
-            ).query
+            urlparse(response.css(".theatreInfoCollapseMap").xpath("//a/img/@data-src").extract_first()).query
         )["pp"][0].split(",")
 
         yield item

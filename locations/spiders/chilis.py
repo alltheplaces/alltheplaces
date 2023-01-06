@@ -1,10 +1,10 @@
 import html
 import json
+
 import scrapy
 
-from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
-
+from locations.items import GeojsonPointItem
 
 DAY_MAPPING = {
     "Monday": "Mo",
@@ -37,12 +37,8 @@ class ChilisSpider(scrapy.Spider):
         return opening_hours.as_opening_hours()
 
     def parse_store(self, response):
-        scripts = response.xpath(
-            '//script[@type="application/ld+json"]/text()'
-        ).extract()
-        data = [
-            json.loads(x) for x in scripts if json.loads(x)["@type"] == "Restaurant"
-        ][0]
+        scripts = response.xpath('//script[@type="application/ld+json"]/text()').extract()
+        data = [json.loads(x) for x in scripts if json.loads(x)["@type"] == "Restaurant"][0]
 
         properties = {
             "addr_full": html.unescape(data["address"]["streetAddress"]),
@@ -70,8 +66,6 @@ class ChilisSpider(scrapy.Spider):
             yield scrapy.Request(response.urljoin(url), callback=self.parse_store)
 
     def parse(self, response):
-        urls = response.xpath(
-            '//div[contains(@class, "city-locations")]//a[@class="city-link"]/@href'
-        ).extract()
+        urls = response.xpath('//div[contains(@class, "city-locations")]//a[@class="city-link"]/@href').extract()
         for url in urls:
             yield scrapy.Request(response.urljoin(url), callback=self.parse_city)

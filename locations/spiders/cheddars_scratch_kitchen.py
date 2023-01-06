@@ -1,10 +1,6 @@
-# -*- coding: utf-8 -*-
-import re
-
 import scrapy
 
 from locations.items import GeojsonPointItem
-from locations.hours import OpeningHours
 
 
 class CheddarsScratchKitchenSpider(scrapy.Spider):
@@ -18,9 +14,7 @@ class CheddarsScratchKitchenSpider(scrapy.Spider):
     def start_requests(self):
         url = "https://www.cheddars.com/web-api/restaurants"
 
-        with open(
-            "./locations/searchable_points/us_centroids_100mile_radius.csv"
-        ) as points:
+        with open("./locations/searchable_points/us_centroids_100mile_radius.csv") as points:
             next(points)  # Ignore the header
             for point in points:
                 _, lat, lon = point.strip().split(",")

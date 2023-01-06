@@ -1,8 +1,9 @@
-# -*- coding: utf-8 -*-
-import scrapy
-from locations.items import GeojsonPointItem
 import json
 import re
+
+import scrapy
+
+from locations.items import GeojsonPointItem
 
 
 class NorthernCaliforniaBreweriesSpider(scrapy.Spider):
@@ -30,8 +31,9 @@ class NorthernCaliforniaBreweriesSpider(scrapy.Spider):
                 ref=item.get("Brewery"),
                 lat=latitude,
                 lon=longitude,
-                addr_full=item.get("Address"),
+                street_address=item.get("Address"),
                 city=item.get("City"),
                 state="CA",
+                country="US",
                 website=item.get("Website"),
             )

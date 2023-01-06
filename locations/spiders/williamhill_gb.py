@@ -1,8 +1,9 @@
-# -*- coding: utf-8 -*-
 import json
 import re
-from scrapy.spiders import CrawlSpider, Rule
+
 from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule
+
 from locations.dict_parser import DictParser
 
 
@@ -19,9 +20,7 @@ class WilliamHillGBSpider(CrawlSpider):
     download_delay = 0.5
 
     def parse_func(self, response):
-        pattern = re.compile(
-            r"window.lctr.results.push\((.*?)\);", re.MULTILINE | re.DOTALL
-        )
+        pattern = re.compile(r"window.lctr.results.push\((.*?)\);", re.MULTILINE | re.DOTALL)
         s = response.xpath('//script[contains(., "lctr")]/text()').re(pattern)
         if s:
             store = json.loads(s[0])

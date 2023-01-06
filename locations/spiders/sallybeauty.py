@@ -1,10 +1,10 @@
-# -*- coding: utf-8 -*-
+from urllib.parse import urlencode
+
 import scrapy
+from scrapy.selector import Selector
 
 from locations.hours import OpeningHours
 from locations.items import GeojsonPointItem
-from scrapy.selector import Selector
-from urllib.parse import urlencode
 
 
 class SallyBeautySpider(scrapy.Spider):
@@ -64,9 +64,7 @@ class SallyBeautySpider(scrapy.Spider):
             properties = {
                 "ref": row["ID"],
                 "name": row["name"],
-                "addr_full": " ".join(
-                    [row["address1"], row.get("address2", "") or ""]
-                ).strip(),
+                "addr_full": " ".join([row["address1"], row.get("address2", "") or ""]).strip(),
                 "city": row["city"],
                 "postcode": row["postalCode"],
                 "lat": row["latitude"],

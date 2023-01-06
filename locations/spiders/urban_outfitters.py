@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import re
 
 from scrapy.spiders import SitemapSpider
@@ -53,9 +52,7 @@ class UrbanOutfitters(SitemapSpider, StructuredDataSpider):
 
             days = self.parse_days(d)
             for day in days:
-                oh.add_range(
-                    day=day, open_time=ot, close_time=ct, time_format="%I:%M %p"
-                )
+                oh.add_range(day=day, open_time=ot, close_time=ct, time_format="%I:%M %p")
 
         return oh.as_opening_hours()
 

@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
 from urllib.parse import urlencode
 
 import scrapy
 
-from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
+from locations.items import GeojsonPointItem
 
 DAY_MAPPING = {
     "Monday": "Mo",
@@ -40,18 +39,14 @@ class TMobileUSSpider(scrapy.Spider):
             close_time = store_day.get("closes")
             if open_time is None and close_time is None:
                 continue
-            opening_hours.add_range(
-                day=day, open_time=open_time, close_time=close_time, time_format="%H:%M"
-            )
+            opening_hours.add_range(day=day, open_time=open_time, close_time=close_time, time_format="%H:%M")
 
         return opening_hours.as_opening_hours()
 
     def start_requests(self):
         url = BASE_URL
 
-        with open(
-            "./locations/searchable_points/us_centroids_25mile_radius.csv"
-        ) as points:
+        with open("./locations/searchable_points/us_centroids_25mile_radius.csv") as points:
 
             next(points)  # Ignore the header
             for point in points:

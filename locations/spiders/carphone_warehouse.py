@@ -1,8 +1,7 @@
-import re
 import scrapy
 
-from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
+from locations.items import GeojsonPointItem
 
 DAYS = {
     "monday": "Mo",
@@ -55,9 +54,7 @@ class CarphoneWarehouseSpider(scrapy.Spider):
                 "lat": value["Latitude"],
                 "lon": value["Longitude"],
                 "phone": value.get("telephone"),
-                "website": "https://www.carphonewarehouse.com/store-locator/"
-                + value["pageName"]
-                + ".html",
+                "website": "https://www.carphonewarehouse.com/store-locator/" + value["pageName"] + ".html",
             }
 
             opening_hours = self.store_hours(value)

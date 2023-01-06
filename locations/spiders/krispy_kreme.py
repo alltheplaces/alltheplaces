@@ -1,7 +1,7 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
+from locations.items import GeojsonPointItem
 
 
 class KrispyKremeSpider(scrapy.Spider):
@@ -22,27 +22,15 @@ class KrispyKremeSpider(scrapy.Spider):
             ref=response.url.split("/")[-1],
             name=response.xpath("//title/text()").extract_first(),
             lat=response.xpath("//meta[@itemprop='latitude']/@content").extract_first(),
-            lon=response.xpath(
-                "//meta[@itemprop='longitude']/@content"
-            ).extract_first(),
-            addr_full=response.xpath(
-                "//meta[@itemprop='streetAddress']/@content"
-            ).extract_first(),
-            city=response.xpath(
-                "//meta[@itemprop='addressLocality']/@content"
-            ).extract_first(),
-            state=response.xpath(
-                "//abbr[@itemprop='addressRegion']/text()"
-            ).extract_first(),
-            postcode=response.xpath(
-                "//span[@itemprop='postalCode']/text()"
-            ).extract_first(),
+            lon=response.xpath("//meta[@itemprop='longitude']/@content").extract_first(),
+            addr_full=response.xpath("//meta[@itemprop='streetAddress']/@content").extract_first(),
+            city=response.xpath("//meta[@itemprop='addressLocality']/@content").extract_first(),
+            state=response.xpath("//abbr[@itemprop='addressRegion']/text()").extract_first(),
+            postcode=response.xpath("//span[@itemprop='postalCode']/text()").extract_first(),
             country="US",
             phone=response.xpath("//div[@itemprop='telephone']/text()").extract_first(),
             website=response.url,
-            opening_hours=self.parse_hours(
-                response.xpath("//tr[@itemprop='openingHours']/@content").extract()
-            ),
+            opening_hours=self.parse_hours(response.xpath("//tr[@itemprop='openingHours']/@content").extract()),
         )
 
     def parse_hours(self, hours):

@@ -1,13 +1,12 @@
-# -*- coding: utf-8 -*-
 import scrapy
 
-from locations.geo import city_locations
 from locations.dict_parser import DictParser
+from locations.geo import city_locations
 
 
 class McDonaldsSpider(scrapy.Spider):
     name = "mcdonalds"
-    item_attributes = {"brand": "McDonald's", "brand_wikidata": "Q38076"}
+    item_attributes = {"brand": "McDonald’s", "brand_wikidata": "Q38076"}
     allowed_domains = ["www.mcdonalds.com"]
     download_delay = 0.5
 
@@ -36,13 +35,9 @@ class McDonaldsSpider(scrapy.Spider):
             country = locale.split("-")[1]
             for city in city_locations(country.upper(), 20000):
                 if country == "sa":
-                    url = template.format(
-                        city["latitude"], city["longitude"], "sar", "en"
-                    )
+                    url = template.format(city["latitude"], city["longitude"], "sar", "en")
                 else:
-                    url = template.format(
-                        city["latitude"], city["longitude"], country, locale
-                    )
+                    url = template.format(city["latitude"], city["longitude"], country, locale)
                 yield scrapy.Request(
                     url,
                     self.parse_major_api,
@@ -68,9 +63,7 @@ class McDonaldsSpider(scrapy.Spider):
                 "zh-tw",
             ]:
                 # Individual store site pages in these locale's have a common pattern.
-                store_url = "https://www.mcdonalds.com/{}/{}/location/{}.html".format(
-                    country, locale, store_identifier
-                )
+                store_url = "https://www.mcdonalds.com/{}/{}/location/{}.html".format(country, locale, store_identifier)
             elif locale in ["de-de"]:
                 store_url = properties.get("restaurantUrl")
                 if not store_url.startswith("https://www.mcdonalds.com/"):

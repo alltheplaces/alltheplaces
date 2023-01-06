@@ -1,9 +1,7 @@
-# -*- coding: utf-8 -*-
-
 import scrapy
 
-from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
+from locations.items import GeojsonPointItem
 
 DAY_MAPPING = {
     "Mon": "Mo",
@@ -75,8 +73,7 @@ class NewYorkPublicLibrarySpider(scrapy.Spider):
                 "postcode": location["postal_code"],
                 "country": "US",
                 "phone": location.get("contacts", {}).get("phone"),
-                "website": location.get("_links", {}).get("self", {}).get("about")
-                or response.url,
+                "website": location.get("_links", {}).get("self", {}).get("about") or response.url,
                 "lat": lat,
                 "lon": lon,
             }

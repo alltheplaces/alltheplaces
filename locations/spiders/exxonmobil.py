@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Exxonmobil has 1,679 locations worldwide except a few nations(those may even change with time)
 This crawler crawls https://www.exxon.com/en/api/locator/Locations
@@ -26,10 +25,11 @@ max_width and max_height have been optimized to return less than 250 results, wh
 result returned from exxonmobil no matter how big the boundingbox is.
 
 """
-import scrapy
-from locations.items import GeojsonPointItem
 import re
 
+import scrapy
+
+from locations.items import GeojsonPointItem
 from locations.spiders.costacoffee_gb import yes_or_no
 from locations.user_agents import BROSWER_DEFAULT
 
@@ -65,9 +65,7 @@ class CreateStartURLs:
         "magadascar": (-11.29, 42.80, -26.07, 50.89, 1, 1),  # maxresult=0
     }
     urls = []
-    base_url = (
-        "https://www.exxon.com/en/api/locator/Locations?DataSource=RetailGasStations"
-    )
+    base_url = "https://www.exxon.com/en/api/locator/Locations?DataSource=RetailGasStations"
 
     def __init__(self):
         self.build_start_urls()
@@ -119,9 +117,7 @@ class CreateStartURLs:
         :param max_height: maximum height
         :return:
         """
-        number_of_box = int(
-            abs(row_width) / max_width + 1
-        )  # safe to assume the are left overs
+        number_of_box = int(abs(row_width) / max_width + 1)  # safe to assume the are left overs
         for box in range(abs(number_of_box)):
             b_lon_left = start_lon
             b_lat_left = start_lat
@@ -168,9 +164,7 @@ class ExxonMobilSpider(scrapy.Spider):
                 features = location["FeaturedItems"] + location["StoreAmenities"]
                 properties = {
                     "name": location["DisplayName"],
-                    "addr_full": location["AddressLine1"]
-                    + " "
-                    + location["AddressLine2"],
+                    "addr_full": location["AddressLine1"] + " " + location["AddressLine2"],
                     "city": location["City"],
                     "state": location["StateProvince"],
                     "country": location["Country"],
@@ -182,34 +176,16 @@ class ExxonMobilSpider(scrapy.Spider):
                     "lon": float(location["Longitude"]),
                     "extras": {
                         "amenity": "fuel",
-                        "toilets": yes_or_no(
-                            any("Restroom" in f["Name"] for f in features)
-                        ),
+                        "toilets": yes_or_no(any("Restroom" in f["Name"] for f in features)),
                         "atm": yes_or_no(any("ATM" in f["Name"] for f in features)),
-                        "car_wash": yes_or_no(
-                            any("Carwash" in f["Name"] for f in features)
-                        ),
-                        "fuel:diesel": yes_or_no(
-                            any("Diesel" in f["Name"] for f in features)
-                        ),
-                        "fuel:octane_87": yes_or_no(
-                            any("Regular" == f["Name"] for f in features)
-                        ),
-                        "fuel:octane_89": yes_or_no(
-                            any("Extra" == f["Name"] for f in features)
-                        ),
-                        "fuel:octane_91": yes_or_no(
-                            any("Supreme" == f["Name"] for f in features)
-                        ),
-                        "fuel:octane_93": yes_or_no(
-                            any("Supreme+" == f["Name"] for f in features)
-                        ),
-                        "fuel:propane": yes_or_no(
-                            any("Propane" == f["Name"] for f in features)
-                        ),
-                        "shop": "convenience"
-                        if any("Convenience Store" in f["Name"] for f in features)
-                        else "no",
+                        "car_wash": yes_or_no(any("Carwash" in f["Name"] for f in features)),
+                        "fuel:diesel": yes_or_no(any("Diesel" in f["Name"] for f in features)),
+                        "fuel:octane_87": yes_or_no(any("Regular" == f["Name"] for f in features)),
+                        "fuel:octane_89": yes_or_no(any("Extra" == f["Name"] for f in features)),
+                        "fuel:octane_91": yes_or_no(any("Supreme" == f["Name"] for f in features)),
+                        "fuel:octane_93": yes_or_no(any("Supreme+" == f["Name"] for f in features)),
+                        "fuel:propane": yes_or_no(any("Propane" == f["Name"] for f in features)),
+                        "shop": "convenience" if any("Convenience Store" in f["Name"] for f in features) else "no",
                     },
                     **self.brand(location),
                 }
@@ -283,19 +259,12 @@ class ExxonMobilSpider(scrapy.Spider):
                 if last_entry[-14:-12] == match_order[get_prev_index]:
                     # day of previous append complies with out match_order
                     p = final_working_hours.pop(-1)
-                    final_working_hours.append(
-                        p[0:2] + "-" + hour[0:2] + prev_hours[-12:]
-                    )
+                    final_working_hours.append(p[0:2] + "-" + hour[0:2] + prev_hours[-12:])
                     prev_hours = hour
-                elif (
-                    last_entry[-8:-6] == match_order[get_prev_index]
-                    and hour[-4:] == "24/7"
-                ):
+                elif last_entry[-8:-6] == match_order[get_prev_index] and hour[-4:] == "24/7":
                     # lets do same for 24/7, they have this wierd Mon 24/7, Tue 24/7 etc
                     p = final_working_hours.pop(-1)
-                    final_working_hours.append(
-                        p[0:2] + "-" + hour[0:2] + prev_hours[-6:]
-                    )
+                    final_working_hours.append(p[0:2] + "-" + hour[0:2] + prev_hours[-6:])
                     prev_hours = hour
                 else:
                     # no match, let it be

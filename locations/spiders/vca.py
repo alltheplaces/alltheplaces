@@ -1,7 +1,6 @@
-# -*- coding: utf-8 -*-
-import scrapy
 import json
-import re
+
+import scrapy
 
 from locations.items import GeojsonPointItem
 
@@ -30,9 +29,7 @@ class VCASpider(scrapy.Spider):
 
     def parse_store(self, response):
         try:
-            data = response.xpath(
-                '//script[@type="application/ld+json"]/text()'
-            ).extract_first()
+            data = response.xpath('//script[@type="application/ld+json"]/text()').extract_first()
             data = data.replace("\t", " ")
             data = json.loads(data)
         except AttributeError:

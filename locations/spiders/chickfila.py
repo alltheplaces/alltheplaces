@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from scrapy.spiders import SitemapSpider
 
 from locations.google_url import url_to_coords
@@ -12,7 +11,7 @@ class ChickFilASpider(SitemapSpider):
     sitemap_urls = ["https://www.chick-fil-a.com/sitemap.xml"]
     sitemap_rules = [
         (
-            "https:\/\/www.chick-fil-a.com\/locations\/..\/.*$",
+            r"https:\/\/www.chick-fil-a.com\/locations\/..\/.*$",
             "parse",
         ),
     ]
@@ -22,13 +21,9 @@ class ChickFilASpider(SitemapSpider):
 
         # Note that their opening hours specification doesn't include closing times, so no opening hours for now
         item["ref"] = "-".join(response.url.rsplit("/", 2)[-2:])
-        item["phone"] = response.xpath(
-            "//a[@id='LocationDetail-PhoneNumber']/a/text()"
-        ).extract_first()
+        item["phone"] = response.xpath("//a[@id='LocationDetail-PhoneNumber']/a/text()").extract_first()
 
-        google_link = response.xpath(
-            "//div[@id='map-modal']/div/div/a/@href"
-        ).extract_first()
+        google_link = response.xpath("//div[@id='map-modal']/div/div/a/@href").extract_first()
         if google_link:
             item["lat"], item["lon"] = url_to_coords(google_link)
 

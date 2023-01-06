@@ -1,13 +1,6 @@
 import json
 
-from locations.hours import (
-    OpeningHours,
-    day_range,
-    DAYS,
-    sanitise_day,
-    DAYS_BG,
-    DAYS_DE,
-)
+from locations.hours import DAYS, DAYS_BG, DAYS_DE, OpeningHours, day_range, sanitise_day
 
 
 def test_day_range():
@@ -38,10 +31,7 @@ def test_mixed_ranges():
     o.add_range("Fr", "07:00", "17:00")
     o.add_range("Su", "09:00", "17:00")
 
-    assert (
-        o.as_opening_hours()
-        == "Mo-Tu 08:00-17:00; We-Th 09:00-18:00; Fr 07:00-17:00; Su 09:00-17:00"
-    )
+    assert o.as_opening_hours() == "Mo-Tu 08:00-17:00; We-Th 09:00-18:00; Fr 07:00-17:00; Su 09:00-17:00"
 
 
 def test_closed_sunday():
@@ -100,6 +90,7 @@ def test_sanitise_days():
     assert sanitise_day("schema.org/monday") == "Mo"
     assert sanitise_day("https://schema.org/monday") == "Mo"
     assert sanitise_day("http://schema.org/monday") == "Mo"
+    assert sanitise_day("http://purl.org/goodrelations/v1#Monday") == "Mo"
     assert sanitise_day("   Monday ") == "Mo"
     assert sanitise_day("not_a_day") is None
     assert sanitise_day("пон", DAYS_BG) == "Mo"
@@ -197,6 +188,56 @@ def test_ld_parse_openingHours():
         )
     )
     assert o.as_opening_hours() == "Mo-Th 09:00-12:00"
+
+
+def test_ld_parse_openingHours_days_3_chars():
+    o = OpeningHours()
+    o.from_linked_data(
+        json.loads(
+            """
+            {
+                "@context": "https://schema.org",
+                "@type": "Pharmacy",
+                "name": "Philippa's Pharmacy",
+                "description": "A superb collection of fine pharmaceuticals for your beauty and healthcare convenience, a department of Delia's Drugstore.",
+                "openingHours": "Mon-Thu 09:00-12:00",
+                "telephone": "+18005551234"
+            }
+            """
+        )
+    )
+    assert o.as_opening_hours() == "Mo-Th 09:00-12:00"
+
+    o = OpeningHours()
+    o.from_linked_data(
+        json.loads(
+            """
+            {
+                "@context": "https://schema.org",
+                "@type": "Pharmacy",
+                "name": "Philippa's Pharmacy",
+                "description": "A superb collection of fine pharmaceuticals for your beauty and healthcare convenience, a department of Delia's Drugstore.",
+                "openingHours": "Mon-Tue 09:00-12:00 Wed,Thu 09:00-12:00",
+                "telephone": "+18005551234"
+            }
+            """
+        )
+    )
+    assert o.as_opening_hours() == "Mo-Th 09:00-12:00"
+
+    o = OpeningHours()
+    o.from_linked_data(
+        json.loads(
+            """
+            {
+                "@context": "https://schema.org",
+                "@type": "Pharmacy",
+                "openingHours": "Mon-Sat 10:00 - 19:00 Sun 12:00-17:00"
+            }
+            """
+        )
+    )
+    assert o.as_opening_hours() == "Mo-Sa 10:00-19:00; Su 12:00-17:00"
 
 
 def test_ld_parse_openingHours_array():

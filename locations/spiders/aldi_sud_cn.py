@@ -1,6 +1,6 @@
 from scrapy import Spider
 
-from locations.hours import OpeningHours, DAYS
+from locations.hours import DAYS, OpeningHours
 from locations.items import GeojsonPointItem
 
 

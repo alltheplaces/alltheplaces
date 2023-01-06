@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import datetime
 import re
 
@@ -20,9 +19,7 @@ class FreddysSpider(scrapy.Spider):
 
     def parse(self, response):
         today = datetime.date.today().strftime("%Y%m%d")
-        nextweek = (datetime.date.today() + datetime.timedelta(days=7)).strftime(
-            "%Y%m%d"
-        )
+        nextweek = (datetime.date.today() + datetime.timedelta(days=7)).strftime("%Y%m%d")
         response.selector.remove_namespaces()
         for url in response.xpath("//loc/text()").extract():
             if m := re.search("/location/([^/]+)/", url):
@@ -36,9 +33,7 @@ class FreddysSpider(scrapy.Spider):
         oh = OpeningHours()
         if calendars := store.get("calendars").get("calendar"):
             # Look for the first calendar showing "business hours"
-            business_hours_calendar = next(
-                filter(lambda c: c["type"] == "business", calendars)
-            )
+            business_hours_calendar = next(filter(lambda c: c["type"] == "business", calendars))
 
             calendar_ranges = business_hours_calendar.get("ranges")
             first_day_seen = None

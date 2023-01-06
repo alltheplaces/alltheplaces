@@ -21,16 +21,12 @@ class LincolnshireCooperativeSpider(SitemapSpider):
 
     def parse_item(self, response):
         ld_item = response.xpath('//script[@type="application/ld+json"]//text()').get()
-        ld_item = json.loads(
-            ld_item.replace('// "addressLocality"', '"addressLocality"'), strict=False
-        )
+        ld_item = json.loads(ld_item.replace('// "addressLocality"', '"addressLocality"'), strict=False)
 
         item = LinkedDataParser.parse_ld(ld_item)
 
         if item.get("image"):
-            item["image"] = item["image"].replace(
-                "https://www.lincolnshire.coophttps://", "https://"
-            )
+            item["image"] = item["image"].replace("https://www.lincolnshire.coophttps://", "https://")
 
         if item.get("phone"):
             item["phone"] = item["phone"].replace(" (24 hours)", "")

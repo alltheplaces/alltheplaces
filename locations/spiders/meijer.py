@@ -1,7 +1,8 @@
-# -*- coding: utf-8 -*-
-import scrapy
 import json
 import re
+
+import scrapy
+
 from locations.items import GeojsonPointItem
 
 STATES = [
@@ -83,12 +84,8 @@ class MeijerSpider(scrapy.Spider):
             stores = stores.replace("']", '"]')
             stores = json.loads(stores)
             loc_data = response.css("script").extract()[10]
-            lat_matches = re.findall(
-                r"(\"LAT\"), (\")([+-]?([0-9]*[.])?[0-9]+)(\")", loc_data
-            )
-            lon_matches = re.findall(
-                r"(\"LNG\"), (\")([+-]?([0-9]*[.])?[0-9]+)(\")", loc_data
-            )
+            lat_matches = re.findall(r"(\"LAT\"), (\")([+-]?([0-9]*[.])?[0-9]+)(\")", loc_data)
+            lon_matches = re.findall(r"(\"LNG\"), (\")([+-]?([0-9]*[.])?[0-9]+)(\")", loc_data)
 
             n = 0
             for store in stores:

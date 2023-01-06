@@ -10,7 +10,7 @@ class SouthernCoopSpider(SitemapSpider):
     sitemap_urls = ["https://stores.thesouthernco-operative.co.uk/sitemap.xml"]
     sitemap_rules = [
         (
-            "https:\/\/stores\.thesouthernco-operative\.co\.uk\/[-\w]+\/[-\w]+\/[-\w]+\.html$",
+            r"https:\/\/stores\.thesouthernco-operative\.co\.uk\/[-\w]+\/[-\w]+\/[-\w]+\.html$",
             "parse_item",
         )
     ]

@@ -1,18 +1,16 @@
-# -*- coding: utf-8 -*-
 import scrapy
 
+from locations.categories import Categories, apply_category
+from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import GeojsonPointItem
-from locations.hours import OpeningHours, DAYS_FULL
 
 
 class CostaCoffeeIESpider(scrapy.Spider):
     name = "costacoffee_ie"
-    item_attributes = {"brand": "Costa Coffee", "brand_wikidata": "Q608845"}
+    item_attributes = {"brand": "Costa Coffee", "brand_wikidata": "Q608845", "nsi_id": -1}
     allowed_domains = ["costaireland.ie"]
     # May need to do pagination at some point
-    start_urls = [
-        "https://www.costaireland.ie/api/cf/?content_type=storeLocatorStore&limit=1000"
-    ]
+    start_urls = ["https://www.costaireland.ie/api/cf/?content_type=storeLocatorStore&limit=1000"]
 
     def parse(self, response):
         for store_data in response.json()["items"]:
@@ -30,8 +28,7 @@ class CostaCoffeeIESpider(scrapy.Spider):
 
             label = data["cmsLabel"]
             if label.startswith("STORE"):
-                properties["extras"]["amenity"] = "cafe"
-                properties["extras"]["cuisine"] = "coffee_shop"
+                apply_category(Categories.COFFEE_SHOP, properties)
             elif label.startswith("EXPRESS"):
                 properties["brand"] = "Costa Express"
                 properties["extras"]["amenity"] = "vending_machine"
@@ -41,12 +38,9 @@ class CostaCoffeeIESpider(scrapy.Spider):
 
             opening_hours = OpeningHours()
             for day in DAYS_FULL:
-                if day.lower() + "Opening" in data:
-                    opening_hours.add_range(
-                        day[0:2],
-                        data[day.lower() + "Opening"],
-                        data[day.lower() + "Closing"],
-                    )
+                if open_time := data.get(day.lower() + "Opening"):
+                    if close_time := data.get(day.lower() + "Closing"):
+                        opening_hours.add_range(day, open_time, close_time)
             properties["opening_hours"] = opening_hours.as_opening_hours()
 
             yield GeojsonPointItem(**properties)

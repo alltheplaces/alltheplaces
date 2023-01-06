@@ -1,7 +1,8 @@
 import json
 
-from locations.items import GeojsonPointItem
 from scrapy.spiders import SitemapSpider
+
+from locations.items import GeojsonPointItem
 
 
 class SullivansSteakhouseSpider(SitemapSpider):
@@ -13,9 +14,7 @@ class SullivansSteakhouseSpider(SitemapSpider):
 
     def parse(self, response):
         ld = json.loads(
-            response.xpath(
-                '//script[@type="application/ld+json"][@class="yoast-schema-graph"]/text()'
-            ).get()
+            response.xpath('//script[@type="application/ld+json"][@class="yoast-schema-graph"]/text()').get()
         )
 
         for node in ld["@graph"]:
@@ -27,9 +26,7 @@ class SullivansSteakhouseSpider(SitemapSpider):
                     "website": response.url,
                     "name": node["name"].replace("Sullivan&#039;s Steakhouse ", ""),
                     "phone": node["telephone"],
-                    "addr_full": node["address"]["streetAddress"]
-                    .replace("  ", " ")
-                    .replace("\t", "")
+                    "addr_full": node["address"]["streetAddress"].replace("  ", " ").replace("\t", "")
                     + ", United States",
                     "city": node["address"]["addressLocality"],
                     "state": node["address"]["addressRegion"],

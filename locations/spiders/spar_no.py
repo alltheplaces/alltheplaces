@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import scrapy
 
 from locations.items import GeojsonPointItem
@@ -15,9 +14,7 @@ class SparNoSpider(scrapy.Spider):
     def parse(self, response):
         shops = response.xpath('//div[@id="js_subnav"]//li[@class="level-1"]/a/@href')
         for shop in shops:
-            yield scrapy.Request(
-                response.urljoin(shop.extract()), callback=self.parse_shop
-            )
+            yield scrapy.Request(response.urljoin(shop.extract()), callback=self.parse_shop)
 
     def parse_shop(self, response):
         props = {}
@@ -53,21 +50,15 @@ class SparNoSpider(scrapy.Spider):
         if phone:
             props["phone"] = phone
 
-        addr_full = response.xpath(
-            '//div[@itemprop="streetAddress"]/text()'
-        ).extract_first()
+        addr_full = response.xpath('//div[@itemprop="streetAddress"]/text()').extract_first()
         if addr_full:
             props["addr_full"] = addr_full
 
-        postcode = response.xpath(
-            '//span[@itemprop="postalCode"]/text()'
-        ).extract_first()
+        postcode = response.xpath('//span[@itemprop="postalCode"]/text()').extract_first()
         if postcode:
             props["postcode"] = postcode
 
-        city = response.xpath(
-            '//span[@itemprop="addressLocality"]/text()'
-        ).extract_first()
+        city = response.xpath('//span[@itemprop="addressLocality"]/text()').extract_first()
         if city:
             props["city"] = city.strip()
 

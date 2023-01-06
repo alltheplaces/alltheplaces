@@ -1,8 +1,7 @@
-# -*- coding: utf-8 -*-
 import scrapy
 
-from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
+from locations.items import GeojsonPointItem
 
 DAY_MAPPING = {
     "Mo.": "Mo",
@@ -22,10 +21,8 @@ class NettoSpider(scrapy.Spider):
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def start_requests(self):
-        url = "https://www.netto-online.de/INTERSHOP/web/WFS/Plus-NettoDE-Site/de_DE/-/EUR/ViewNettoStoreFinder-GetStoreItems"
         yield scrapy.http.FormRequest(
-            url=url,
-            method="POST",
+            url="https://www.netto-online.de/INTERSHOP/web/WFS/Plus-NettoDE-Site/de_DE/-/EUR/ViewNettoStoreFinder-GetStoreItems",
             formdata={
                 "n": "56.0",
                 "e": "15.0",
@@ -37,7 +34,6 @@ class NettoSpider(scrapy.Spider):
                 "beverage": "false",
                 "nonfood": "false",
             },
-            callback=self.parse,
         )
 
     def parse_opening_hours(self, hours):
@@ -55,28 +51,30 @@ class NettoSpider(scrapy.Spider):
         for block in hours.split("<br />"):
             if not block:
                 continue
-            days, hrs = block.split(":")
-            if hrs.strip().lower() == "geschlossen":
-                continue
-            if "-" in days:
-                start_day, end_day = days.split("-")
-            else:
-                start_day, end_day = days, days
-            for day in DAYS[DAYS.index(start_day) : DAYS.index(end_day) + 1]:
-                open_time, close_time = hrs.split("-")
-                close_time = close_time.replace("Uhr", "").strip()
-                open_time = open_time.strip()
-                if open_time == "24.00":
-                    open_time = "23.59"
-                if close_time == "24.00":
-                    close_time = "23.59"
-                opening_hours.add_range(
-                    day=DAY_MAPPING[day],
-                    open_time=open_time,
-                    close_time=close_time,
-                    time_format="%H.%M",
-                )
-
+            try:
+                days, hrs = block.split(":")
+                if hrs.strip().lower() == "geschlossen":
+                    continue
+                if "-" in days:
+                    start_day, end_day = days.split("-")
+                else:
+                    start_day, end_day = days, days
+                for day in DAYS[DAYS.index(start_day) : DAYS.index(end_day) + 1]:
+                    open_time, close_time = hrs.split("-")
+                    close_time = close_time.replace("Uhr", "").strip()
+                    open_time = open_time.strip()
+                    if open_time == "24.00":
+                        open_time = "23.59"
+                    if close_time == "24.00":
+                        close_time = "23.59"
+                    opening_hours.add_range(
+                        day=DAY_MAPPING[day],
+                        open_time=open_time,
+                        close_time=close_time,
+                        time_format="%H.%M",
+                    )
+            except:
+                pass
         return opening_hours.as_opening_hours()
 
     def parse(self, response):
@@ -86,6 +84,7 @@ class NettoSpider(scrapy.Spider):
             properties = {
                 "ref": store["store_id"],
                 "name": store["store_name"],
+                "brand": store["store_name"],
                 "street_address": store["street"],
                 "city": store["city"],
                 "state": store["state"],
@@ -100,18 +99,10 @@ class NettoSpider(scrapy.Spider):
                 ),
             }
 
-            properties["opening_hours"] = self.parse_opening_hours(
-                store["store_opening"]
-            )
+            properties["opening_hours"] = self.parse_opening_hours(store["store_opening"])
 
             yield GeojsonPointItem(**properties)
 
     def urlify(self, param):
         # They also do ß -> ss, but it's not vital
-        return (
-            param.lower()
-            .replace(" ", "-")
-            .replace(".", "")
-            .replace(",", "")
-            .replace("'", "")
-        )
+        return param.lower().replace(" ", "-").replace(".", "").replace(",", "").replace("'", "")

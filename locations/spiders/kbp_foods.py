@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import re
 
 import scrapy
@@ -44,18 +43,14 @@ class KBPFoodsSpider(scrapy.Spider):
             "accept-language": "en-US,en;q=0.9",
         }
 
-        yield scrapy.http.Request(
-            brand_url, self.parse, method="POST", headers=headers, body=payload
-        )
+        yield scrapy.http.Request(brand_url, self.parse, method="POST", headers=headers, body=payload)
 
     def parse(self, response):
         brand_data = response.json()
 
         url = "https://kbp-foods.com/wp-json/facetwp/v1/refresh"
 
-        with open(
-            "./locations/searchable_points/us_centroids_100mile_radius.csv"
-        ) as points:
+        with open("./locations/searchable_points/us_centroids_100mile_radius.csv") as points:
             next(points)  # Ignore the header
             for point in points:
                 row = point.split(",")
@@ -102,9 +97,7 @@ class KBPFoodsSpider(scrapy.Spider):
 
         locations = result["settings"].get("map", {}).get("locations", [])
 
-        if (
-            len(locations) > 1
-        ):  # Gather the location data - always returns "Your location" as first result
+        if len(locations) > 1:  # Gather the location data - always returns "Your location" as first result
             for location in locations[1:]:  # Skip "Your location"
                 content = location["content"]
                 ref, addr_full = re.search(
@@ -113,9 +106,7 @@ class KBPFoodsSpider(scrapy.Spider):
                     flags=re.DOTALL,
                 ).groups()
 
-                store_brand = [x for x in meta_brand if x["title"] == ref][
-                    0
-                ]  # Match the store id to the brand data
+                store_brand = [x for x in meta_brand if x["title"] == ref][0]  # Match the store id to the brand data
 
                 properties = {
                     "ref": ref,

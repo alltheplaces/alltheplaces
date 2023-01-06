@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import json
 import re
 
@@ -34,9 +33,7 @@ class LibertyMutualSpider(scrapy.Spider):
                 "city": store_data["address"]["city"],
                 "state": store_data["address"]["state"]["code"],
                 "postcode": store_data["address"]["zip"],
-                "phone": store_data.get("phones", {})
-                .get("primary", {})
-                .get("number", ""),
+                "phone": store_data.get("phones", {}).get("primary", {}).get("number", ""),
                 "website": store_data.get("url") or response.url,
                 "lat": lat,
                 "lon": lon,
@@ -46,9 +43,7 @@ class LibertyMutualSpider(scrapy.Spider):
 
     def parse(self, response):
         response.selector.remove_namespaces()
-        urls = [
-            x for x in response.xpath("//url/loc/text()").extract() if x.count("/") > 4
-        ]
+        urls = [x for x in response.xpath("//url/loc/text()").extract() if x.count("/") > 4]
 
         for url in urls:
             yield scrapy.Request(url, callback=self.parse_store)

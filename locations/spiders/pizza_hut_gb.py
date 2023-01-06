@@ -7,17 +7,17 @@ from locations.structured_data_spider import StructuredDataSpider
 class PizzaHutGB(SitemapSpider, StructuredDataSpider):
     name = "pizza_hut_gb"
     item_attributes = {"brand": "Pizza Hut", "brand_wikidata": "Q191615"}
+    PIZZA_HUT_DELIVERY = {"brand": "Pizza Hut Delivery", "brand_wikidata": "Q107293079"}
     sitemap_urls = ["https://www.pizzahut.co.uk/sitemap.xml"]
-    sitemap_rules = [
-        (r"https:\/\/www\.pizzahut\.co\.uk\/huts\/[-\w]+\/([-.\w]+)\/$", "parse_sd")
-    ]
-    wanted_types = ["FastFoodRestaurant"]
+    sitemap_rules = [(r"https:\/\/www\.pizzahut\.co\.uk\/huts\/[-\w]+\/([-.\w]+)\/$", "parse_sd")]
 
-    def inspect_item(self, item, response):
+    def post_process_item(self, item, response, ld_data, **kwargs):
         item["street_address"] = clean_address(item["street_address"])
 
         if item["website"].startswith("https://www.pizzahut.co.uk/huts/"):
-            item["brand"] = "Pizza Hut Delivery"
-            item["brand_wikidata"] = "Q107293079"
+            item.update(self.PIZZA_HUT_DELIVERY)
+
+        if not item["opening_hours"]:
+            return
 
         yield item

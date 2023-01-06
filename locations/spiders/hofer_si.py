@@ -1,8 +1,7 @@
-# -*- coding: utf-8 -*-
 import scrapy
 
 from locations.dict_parser import DictParser
-from locations.hours import OpeningHours, sanitise_day, DAYS_SI
+from locations.hours import DAYS_SI, OpeningHours, sanitise_day
 
 
 class HoferSISpider(scrapy.Spider):  # Aldi Sud

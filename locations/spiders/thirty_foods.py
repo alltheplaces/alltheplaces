@@ -1,6 +1,6 @@
-# -*- coding: utf-8 -*-
-import scrapy
 import re
+
+import scrapy
 
 from locations.items import GeojsonPointItem
 
@@ -27,9 +27,7 @@ class ThirtyFoodsSpider(scrapy.Spider):
             return store_hours.replace("Open 24 hours", "00:00-24:00")
         else:
             hours = ""
-            match = re.search(
-                r"(\d{1,2}):(\d{2}) (A|P)M - (\d{1,2}):(\d{2}) (A|P)M", store_hours
-            )
+            match = re.search(r"(\d{1,2}):(\d{2}) (A|P)M - (\d{1,2}):(\d{2}) (A|P)M", store_hours)
             if match:
                 (f_hr, f_min, f_ampm, t_hr, t_min, t_ampm) = match.groups()
                 f_hr = int(f_hr)

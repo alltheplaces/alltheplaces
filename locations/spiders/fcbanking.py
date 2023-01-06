@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import json
 import re
 import urllib.parse
@@ -6,7 +5,6 @@ import urllib.parse
 from scrapy.spiders import SitemapSpider
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
 from locations.linked_data_parser import LinkedDataParser
 
 
@@ -33,10 +31,7 @@ class FcBankingSpider(SitemapSpider):
         item["website"] = response.url
         path = urllib.parse.urlsplit(response.url).path
         item["ref"] = path.removeprefix("/branch-locations")
-        hours_fixed = [
-            re.sub(r"([ap])\.m\.?", r"\1m", row).replace("\u2013", "-")
-            for row in data["openingHours"]
-        ]
+        hours_fixed = [re.sub(r"([ap])\.m\.?", r"\1m", row).replace("\u2013", "-") for row in data["openingHours"]]
         oh = OpeningHours()
         oh.from_linked_data({"openingHours": hours_fixed}, "%I:%M %p")
         item["opening_hours"] = oh.as_opening_hours()

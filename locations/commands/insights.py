@@ -1,11 +1,13 @@
 import json
-import geonamescache
 import os
-import requests
 from collections import Counter
-from locations.name_suggestion_index import NSI
+
+import requests
 from scrapy.commands import ScrapyCommand
 from scrapy.exceptions import UsageError
+
+from locations.country_utils import CountryUtils
+from locations.name_suggestion_index import NSI
 
 
 def iter_features(files_and_dirs):
@@ -26,16 +28,13 @@ def iter_features(files_and_dirs):
                 file_list.append(os.path.abspath(os.path.join(file_or_dir, file_name)))
         else:
             raise UsageError("no such file or directory: " + file_or_dir)
-    file_list = list(
-        filter(lambda f: f.endswith("json") and os.path.getsize(f) > 0, file_list)
-    )
+    file_list = list(filter(lambda f: f.endswith("json") and os.path.getsize(f) > 0, file_list))
     if len(file_list) == 0:
         raise UsageError("no non-empty JSON files found")
     for file_path in file_list:
-        with open(file_path, "r") as f:
+        with open(file_path) as f:
             try:
-                for feature in json.load(f)["features"]:
-                    yield feature
+                yield from json.load(f)["features"]
             except Exception as e:
                 print("Failed to decode: " + file_path)
                 print(e)
@@ -208,50 +207,3 @@ class InsightsCommand(ScrapyCommand):
         for_datatables = {"data": list(wikidata_dict.values())}
         with open(outfile, "w") as f:
             json.dump(for_datatables, f)
-
-
-class CountryUtils(object):
-    def __init__(self):
-        self.gc = geonamescache.GeonamesCache()
-
-    # All keys in this dict should be lower case. The idea is also that we
-    # only place totally non contentious common mappings here.
-    UNHANDLED_COUNTRY_MAPPINGS = {
-        "espana": "ES",
-        "great britain": "GB",
-        "norge": "NO",
-        "uk": "GB",
-        "united states of america": "US",
-    }
-
-    def to_iso_alpha2_country_code(self, country_str):
-        """
-        Map country string to an ISO alpha-2 country string. This method understands
-        ISO alpha-3 to ISO alpha-2 mapping. It also copes with a few common non
-        contentious mappings such as "UK" -> "GB", "United Kingdom." -> "GB"
-        :param country_str: the string to map to an ISO alpha-2 country code
-        :return: ISO alpha-2 country code or None if no clean mapping
-        """
-        if not country_str:
-            return None
-        # Clean up some common appendages we see on country strings.
-        country_str = country_str.strip().replace(".", "")
-        if len(country_str) < 2:
-            return None
-        if len(country_str) == 2:
-            # Check for the clean/fast path, spider has given us a 2-alpha iso country code.
-            if self.gc.get_countries().get(country_str.upper()):
-                return country_str.upper()
-        if len(country_str) == 3:
-            # Check for a 3-alpha code, this is done by iteration.
-            country_str = country_str.upper()
-            for country in self.gc.get_countries().values():
-                if country["iso3"] == country_str:
-                    return country["iso"]
-        # Failed so far, now let's try a match by name.
-        country_name = country_str.lower()
-        for country in self.gc.get_countries().values():
-            if country["name"].lower() == country_name:
-                return country["iso"]
-        # Finally let's go digging in the random country string collection!
-        return self.UNHANDLED_COUNTRY_MAPPINGS.get(country_name)

@@ -1,17 +1,16 @@
-# -*- coding: utf-8 -*-
-import scrapy
 import re
 
+import scrapy
+
 from locations.items import GeojsonPointItem
+from locations.spiders.mcdonalds import McDonaldsSpider
 
 
 class McDonaldsILSpider(scrapy.Spider):
     name = "mcdonalds_il"
-    item_attributes = {"brand": "McDonald's", "brand_wikidata": "Q38076"}
+    item_attributes = McDonaldsSpider.item_attributes
     allowed_domains = ["www.mcdonalds.co.il"]
-    start_urls = (
-        "https://www.mcdonalds.co.il/%D7%90%D7%99%D7%AA%D7%95%D7%A8_%D7%9E%D7%A1%D7%A2%D7%93%D7%94",
-    )
+    start_urls = ("https://www.mcdonalds.co.il/%D7%90%D7%99%D7%AA%D7%95%D7%A8_%D7%9E%D7%A1%D7%A2%D7%93%D7%94",)
 
     def store_hours(self, data):
         day_groups = []
@@ -86,9 +85,7 @@ class McDonaldsILSpider(scrapy.Spider):
         return lat, lon
 
     def parse_phone(self, phone):
-        phone = phone.xpath(
-            '//div[@class="padding_hf_v sp_padding_qt_v"]/a/text()'
-        ).extract_first()
+        phone = phone.xpath('//div[@class="padding_hf_v sp_padding_qt_v"]/a/text()').extract_first()
         if not phone:
             return ""
         return phone.strip()
@@ -98,7 +95,6 @@ class McDonaldsILSpider(scrapy.Spider):
         return address.strip()
 
     def parse_store(self, response):
-        data = response.text
         name = self.parse_name(response)
         address = self.parse_address(response)
         phone = self.parse_phone(response)
@@ -118,6 +114,4 @@ class McDonaldsILSpider(scrapy.Spider):
         stores = response.xpath('//div[@class="store_wrap link"]/a/@href').extract()
         for store in stores:
             ref = self.parse_Ref(store)
-            yield scrapy.Request(
-                "https:" + store, meta={"ref": ref}, callback=self.parse_store
-            )
+            yield scrapy.Request("https:" + store, meta={"ref": ref}, callback=self.parse_store)

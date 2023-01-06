@@ -1,6 +1,7 @@
-# -*- coding: utf-8 -*-
 import json
+
 import scrapy
+
 from locations.items import GeojsonPointItem
 
 
@@ -19,9 +20,7 @@ class MercyHealthSpider(scrapy.Spider):
             "Accept": "application/json",
         }
 
-        yield scrapy.http.FormRequest(
-            url=template, method="GET", headers=headers, callback=self.parse
-        )
+        yield scrapy.http.FormRequest(url=template, method="GET", headers=headers, callback=self.parse)
 
     def parse(self, response):
         jsonresponse = response.json()

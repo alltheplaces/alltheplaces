@@ -1,5 +1,5 @@
-# -*- coding: utf-8 -*-
 import scrapy
+
 from locations.items import GeojsonPointItem
 
 
@@ -9,9 +9,7 @@ class MaverikSpider(scrapy.Spider):
     allowed_domains = ["maverik.com"]
 
     def start_requests(self):
-        yield scrapy.Request(
-            "https://gateway.maverik.com/ac-loc/location/all", callback=self.add_fuels
-        )
+        yield scrapy.Request("https://gateway.maverik.com/ac-loc/location/all", callback=self.add_fuels)
 
     def add_fuels(self, response):
         yield scrapy.Request(
@@ -43,21 +41,12 @@ class MaverikSpider(scrapy.Spider):
                 postcode=address["postalCode"],
                 country=address["country"],
                 phone=address["phone"],
-                opening_hours="24/7"
-                if "12:00AM - 12:00AM" == location.get("hoursOfOperation")
-                else None,
+                opening_hours="24/7" if "12:00AM - 12:00AM" == location.get("hoursOfOperation") else None,
                 extras={
                     "rv": metadata and any(m.get("RV_Lanes") for m in metadata) or None,
-                    "hgv": metadata
-                    and any(m.get("Hi_Flow_La") for m in metadata)
-                    or None,
-                    "fuel:HGV_diesel": metadata
-                    and any(m.get("Hi_Flow_La") for m in metadata),
-                    "fuel:diesel": fuel
-                    and any(
-                        f["fuelType"] == "Diesel" for f in fuel["priceMatchDiscounts"]
-                    )
-                    or None,
+                    "hgv": metadata and any(m.get("Hi_Flow_La") for m in metadata) or None,
+                    "fuel:HGV_diesel": metadata and any(m.get("Hi_Flow_La") for m in metadata),
+                    "fuel:diesel": fuel and any(f["fuelType"] == "Diesel" for f in fuel["priceMatchDiscounts"]) or None,
                     "amenity:fuel": True,
                     # 'amenity:toilets': 'Restroom' in details or None,
                     # 'atm': 'ATM' in details,

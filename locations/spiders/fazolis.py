@@ -1,7 +1,6 @@
-# -*- coding: utf-8 -*-
-import scrapy
 import json
-import re
+
+import scrapy
 
 from locations.items import GeojsonPointItem
 
@@ -62,18 +61,10 @@ class FazolisSpider(scrapy.Spider):
         return opening_hours
 
     def store_info(self, store):
-        address = store.xpath(
-            '//meta[contains(@itemprop,"streetAddress")]/@content'
-        ).extract_first()
-        city = store.xpath(
-            '//span[contains(@itemprop,"addressLocality")]/text()'
-        ).extract_first()
-        state = store.xpath(
-            '//abbr[contains(@itemprop,"addressRegion")]/text()'
-        ).extract_first()
-        zip_code = store.xpath(
-            '//span[contains(@itemprop,"postalCode")]/text()'
-        ).extract_first()
+        address = store.xpath('//meta[contains(@itemprop,"streetAddress")]/@content').extract_first()
+        city = store.xpath('//span[contains(@itemprop,"addressLocality")]/text()').extract_first()
+        state = store.xpath('//abbr[contains(@itemprop,"addressRegion")]/text()').extract_first()
+        zip_code = store.xpath('//span[contains(@itemprop,"postalCode")]/text()').extract_first()
         hours = json.loads(
             store.xpath(
                 '//div[@class="location-info-col-split right-split"]//div[@class="c-location-hours-details-wrapper js-location-hours"]/@data-days'
@@ -84,24 +75,12 @@ class FazolisSpider(scrapy.Spider):
             "city": city,
             "state": state,
             "postcode": zip_code,
-            "phone": store.xpath(
-                '//span[contains(@itemprop,"telephone")]/text()'
-            ).extract_first(),
+            "phone": store.xpath('//span[contains(@itemprop,"telephone")]/text()').extract_first(),
             "ref": store.url,
-            "name": store.xpath(
-                'string(//h1[contains(@itemprop,"name")])'
-            ).extract_first(),
+            "name": store.xpath('string(//h1[contains(@itemprop,"name")])').extract_first(),
             "website": store.url,
-            "lat": float(
-                store.xpath(
-                    '//meta[contains(@itemprop,"latitude")]/@content'
-                ).extract_first()
-            ),
-            "lon": float(
-                store.xpath(
-                    '//meta[contains(@itemprop,"longitude")]/@content'
-                ).extract_first()
-            ),
+            "lat": float(store.xpath('//meta[contains(@itemprop,"latitude")]/@content').extract_first()),
+            "lon": float(store.xpath('//meta[contains(@itemprop,"longitude")]/@content').extract_first()),
         }
         if hours:
             props["opening_hours"] = self.store_hours(hours)
@@ -114,9 +93,7 @@ class FazolisSpider(scrapy.Spider):
     # Once per city, parse stores
     def parse_city(self, city):
         # Some times >1 store per city.
-        city_stores = city.xpath(
-            '//ul[@class="c-LocationGridList"]/li//a[@class="Teaser-titleLink"]/@href'
-        ).extract()
+        city_stores = city.xpath('//ul[@class="c-LocationGridList"]/li//a[@class="Teaser-titleLink"]/@href').extract()
         if len(city_stores) > 0:
             for store in city_stores:
                 yield scrapy.Request(city.urljoin(store), callback=self.parse_store)
@@ -126,12 +103,8 @@ class FazolisSpider(scrapy.Spider):
 
     # Once per state, gets cities.
     def parse_state(self, state):
-        cities = state.xpath(
-            '//ul[@class="c-directory-list-content"]/li/a/@href'
-        ).extract()
-        state_stores = state.xpath(
-            '//ul[@class="c-LocationGridList"]/li//a[@class="Teaser-titleLink"]/@href'
-        ).extract()
+        cities = state.xpath('//ul[@class="c-directory-list-content"]/li/a/@href').extract()
+        state_stores = state.xpath('//ul[@class="c-LocationGridList"]/li//a[@class="Teaser-titleLink"]/@href').extract()
         # Check for city listings first:
         if len(cities) > 0:
             for city in cities:
@@ -146,8 +119,6 @@ class FazolisSpider(scrapy.Spider):
 
     # Initial request, gets states.
     def parse(self, response):
-        states = response.xpath(
-            '//ul[@class="c-directory-list-content"]/li/a/@href'
-        ).extract()
+        states = response.xpath('//ul[@class="c-directory-list-content"]/li/a/@href').extract()
         for state in states:
             yield scrapy.Request(response.urljoin(state), callback=self.parse_state)

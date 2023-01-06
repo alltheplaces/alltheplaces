@@ -1,121 +1,55 @@
-# -*- coding: utf-8 -*-
 import json
+import re
+
 import scrapy
 
+from locations.hours import OpeningHours
 from locations.items import GeojsonPointItem
 
 
 class BedBathBeyondSpider(scrapy.Spider):
     name = "bed_bath_beyond"
     item_attributes = {"brand": "Bed Bath & Beyond", "brand_wikidata": "Q813782"}
-    allowed_domains = ["stores.bedbathandbeyond.com"]
-    start_urls = ("https://stores.bedbathandbeyond.com/",)
-
-    def store_hours(self, store_hours):
-        day_groups = []
-        this_day_group = None
-        for day_info in store_hours:
-            day = day_info["day"][:2].title()
-
-            hour_intervals = []
-            for interval in day_info["intervals"]:
-                f_time = str(interval["start"]).zfill(4)
-                t_time = str(interval["end"]).zfill(4)
-                hour_intervals.append(
-                    "{}:{}-{}:{}".format(
-                        f_time[0:2],
-                        f_time[2:4],
-                        t_time[0:2],
-                        t_time[2:4],
-                    )
-                )
-            hours = ",".join(hour_intervals)
-
-            if not this_day_group:
-                this_day_group = {"from_day": day, "to_day": day, "hours": hours}
-            elif this_day_group["hours"] != hours:
-                day_groups.append(this_day_group)
-                this_day_group = {"from_day": day, "to_day": day, "hours": hours}
-            elif this_day_group["hours"] == hours:
-                this_day_group["to_day"] = day
-
-        day_groups.append(this_day_group)
-
-        opening_hours = ""
-        if len(day_groups) == 1 and day_groups[0]["hours"] in (
-            "00:00-23:59",
-            "00:00-00:00",
-        ):
-            opening_hours = "24/7"
-        else:
-            for day_group in day_groups:
-                if day_group["from_day"] == day_group["to_day"]:
-                    opening_hours += "{from_day} {hours}; ".format(**day_group)
-                elif day_group["from_day"] == "Su" and day_group["to_day"] == "Sa":
-                    opening_hours += "{hours}; ".format(**day_group)
-                else:
-                    opening_hours += "{from_day}-{to_day} {hours}; ".format(**day_group)
-            opening_hours = opening_hours[:-2]
-
-        return opening_hours
-
-    def parse_store(self, response):
-        properties = {
-            "addr_full": response.xpath(
-                '//address[@itemprop="address"]/span[@itemprop="streetAddress"]/span/text()'
-            ).extract_first(),
-            "city": response.xpath(
-                '//span[@itemprop="addressLocality"]/text()'
-            ).extract_first(),
-            "state": response.xpath(
-                '//abbr[@itemprop="addressRegion"]/text()'
-            ).extract_first(),
-            "postcode": response.xpath(
-                '//span[@itemprop="postalCode"]/text()'
-            ).extract_first(),
-            "ref": response.url,
-            "website": response.url,
-            "lon": float(
-                response.xpath(
-                    '//span/meta[@itemprop="longitude"]/@content'
-                ).extract_first()
-            ),
-            "lat": float(
-                response.xpath(
-                    '//span/meta[@itemprop="latitude"]/@content'
-                ).extract_first()
-            ),
-        }
-
-        phone = response.xpath(
-            '//a[@class="c-phone-number-link c-phone-main-number-link"]/text()'
-        ).extract_first()
-        if phone:
-            properties["phone"] = phone
-
-        hours = json.loads(
-            response.xpath(
-                '//div[@class="c-location-hours-today js-location-hours"]/@data-days'
-            ).extract_first()
-        )
-
-        opening_hours = self.store_hours(hours)
-        if opening_hours:
-            properties["opening_hours"] = opening_hours
-
-        yield GeojsonPointItem(**properties)
+    allowed_domains = ["bedbathandbeyond.com"]
+    start_urls = ("https://www.bedbathandbeyond.com/apis/services/store/v1.0/store/states?site_id=BedBathUS",)
 
     def parse(self, response):
-        urls = response.xpath(
-            '//a[@class="c-directory-list-content-item-link"]/@href'
-        ).extract()
-        for path in urls:
-            if path.rsplit("-", 1)[-1].isnumeric():
-                # If there's only one store, the URL will have a store number at the end
-                yield scrapy.Request(response.urljoin(path), callback=self.parse_store)
-            else:
-                yield scrapy.Request(response.urljoin(path))
+        data = json.loads(response.text)["data"]
+        for url in data:
+            yield scrapy.Request(
+                f'https://www.{self.allowed_domains[0]}/locations/state/{url["code"]}',
+                callback=self.parse_store,
+            )
 
-        urls = response.xpath('//a[@class="c-location-grid-item-link"]/@href').extract()
-        for path in urls:
-            yield scrapy.Request(response.urljoin(path), callback=self.parse_store)
+    def parse_store(self, response):
+        data = response.xpath('//script[@id="__NEXT_DATA__"]/text()').get()
+        data_json = json.loads(data)
+        stores = data_json["props"]["pageProps"]["stateData"]
+        item = GeojsonPointItem()
+        oh = OpeningHours()
+        for store in stores:
+            item["ref"] = store["stores"][0]["storeId"]
+            item["name"] = store["stores"][0]["commonName"]
+            item["addr_full"] = store["stores"][0]["address"]
+            item["city"] = store["stores"][0]["city"]
+            item["state"] = store["stores"][0]["state"]
+            item["postcode"] = store["stores"][0]["postalCode"]
+            item["phone"] = store["stores"][0]["phone"]
+            item["lon"] = store["stores"][0]["longitude"]
+            item["lat"] = store["stores"][0]["latitude"]
+            item["country"] = store["stores"][0]["countryCode"]
+            item["website"] = f'https://www.{self.allowed_domains[0]}{store["stores"][0]["storeUrl"].replace(" ", "")}'
+            storeTimings = re.split(", |,", store["stores"][0]["storeTimings"].strip("\t"))
+
+            for timing in storeTimings:
+                if timing.split(": ")[1] == "Closed":
+                    continue
+                for day in re.split("-| - ", timing.split(": ")[0]):
+                    oh.add_range(
+                        day=day,
+                        open_time=re.split("-| - ", timing.split(": ")[1])[0],
+                        close_time=re.split("-| - ", timing.split(": ")[1])[1],
+                        time_format="%I:%M%p",
+                    )
+            item["opening_hours"] = oh.as_opening_hours()
+            return item

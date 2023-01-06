@@ -1,9 +1,9 @@
-# -*- coding: utf-8 -*-
-import scrapy
 import json
 
-from locations.items import GeojsonPointItem
+import scrapy
+
 from locations.hours import OpeningHours
+from locations.items import GeojsonPointItem
 
 STATES = [
     "AL",
@@ -107,9 +107,7 @@ class MurphyUSASpider(scrapy.Spider):
                 "country": "US",
                 "extras": {
                     "amenity:fuel": True,
-                    "fuel:diesel": any(
-                        d["StoreNum"] == store["StoreNum"] for d in diesel_stores
-                    ),
+                    "fuel:diesel": any(d["StoreNum"] == store["StoreNum"] for d in diesel_stores),
                 },
             }
 

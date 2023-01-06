@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import json
 
 from scrapy.spiders import SitemapSpider
@@ -12,9 +11,7 @@ class PrimarkSpider(SitemapSpider):
     item_attributes = {"brand": "Primark", "brand_wikidata": "Q137023"}
     allowed_domains = ["primark.com"]
     sitemap_urls = ["https://stores.primark.com/sitemap.xml"]
-    sitemap_rules = [
-        (r"https:\/\/stores\.primark\.com\/[-\w]+\/[-\w]+\/[-\w%']+", "parse")
-    ]
+    sitemap_rules = [(r"https:\/\/stores\.primark\.com\/[-\w]+\/[-\w]+\/[-\w%']+", "parse")]
 
     def parse(self, response):
         json_text = response.xpath('//script[@class="js-map-config"]/text()').get()

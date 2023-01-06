@@ -1,13 +1,14 @@
-# -*- coding: utf-8 -*-
-import scrapy
 import re
 
+import scrapy
+
 from locations.items import GeojsonPointItem
+from locations.spiders.mcdonalds import McDonaldsSpider
 
 
 class McDonaldsMASpider(scrapy.Spider):
     name = "mcdonalds_ma"
-    item_attributes = {"brand": "McDonald's", "brand_wikidata": "Q38076"}
+    item_attributes = McDonaldsSpider.item_attributes
     allowed_domains = ["www.mcdonalds.ma"]
     start_urls = ("http://www.mcdonalds.ma/nos-restaurants/r%C3%A9seau-maroc",)
 
@@ -33,9 +34,7 @@ class McDonaldsMASpider(scrapy.Spider):
     def parse_position(self, data):
         lat = ""
         lon = ""
-        latlon = (
-            data.xpath(".//div[@class='linktomap']/a/@href").extract_first().strip()
-        )
+        latlon = data.xpath(".//div[@class='linktomap']/a/@href").extract_first().strip()
         match = re.search(r"al=([\-|\d|\.]{1,})&lo=([\-|\d|\.]{1,})", latlon)
         lat, lon = match.groups()
         return lat, lon
@@ -44,11 +43,7 @@ class McDonaldsMASpider(scrapy.Spider):
         stores = response.xpath('//div[@class="cont_restau_infos"]')
         index = 0
         for store in stores:
-            name = (
-                store.xpath('.//span[@class="restauName"]/text()')
-                .extract_first()
-                .strip()
-            )
+            name = store.xpath('.//span[@class="restauName"]/text()').extract_first().strip()
             data = store.extract().strip()
             address, city = self.parse_address(data)
             phone = self.parse_phone(data)

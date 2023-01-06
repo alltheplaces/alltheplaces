@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from scrapy.spiders import SitemapSpider
 
 from locations.google_url import extract_google_position
@@ -13,14 +12,10 @@ class SuperdrugGBSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://www.superdrug.com/sitemap.xml"]
     sitemap_follow = ["Store"]
     sitemap_rules = [(r"https:\/\/www\.superdrug\.com\/store\/(.+)$", "parse_sd")]
-    wanted_types = ["LocalBusiness"]
-    download_delay = 0.5
     user_agent = BROSWER_DEFAULT
 
     def inspect_item(self, item, response):
-        item["addr_full"] = clean_address(
-            item["street_address"].replace("Superdrug", "")
-        )
+        item["addr_full"] = clean_address(item["street_address"].replace("Superdrug", ""))
         item["street_address"] = clean_address(
             item["addr_full"].replace(item["city"], "").replace(item["postcode"], "")
         )

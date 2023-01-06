@@ -1,5 +1,5 @@
-# -*- coding: utf-8 -*-
 import json
+
 import scrapy
 
 from locations.items import GeojsonPointItem
@@ -13,9 +13,7 @@ class TheFreshGrocerSpider(scrapy.Spider):
     start_urls = ("https://www.thefreshgrocer.com/",)
 
     def parse(self, response):
-        script = response.xpath(
-            '//script[contains(text(), "__PRELOADED_STATE__")]/text()'
-        ).extract_first()
+        script = response.xpath('//script[contains(text(), "__PRELOADED_STATE__")]/text()').extract_first()
         script = script[script.index("{") :]
         stores = json.loads(script)["stores"]["availablePlanningStores"]["items"]
 

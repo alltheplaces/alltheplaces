@@ -1,10 +1,7 @@
-# -*- coding: utf-8 -*-
-import re
-
 import scrapy
 
-from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
+from locations.items import GeojsonPointItem
 
 DAY_MAPPING = {0: "Mo", 1: "Tu", 2: "We", 3: "Th", 4: "Fr", 5: "Sa", 6: "Su"}
 
@@ -58,8 +55,7 @@ class AutoNationSpider(scrapy.Spider):
                 "lat": store["Latitude"],
                 "lon": store["Longitude"],
                 "phone": store["Phone"],
-                "website": "https://www.autonation.com/dealers/"
-                + store["StoreDetailsUrl"],
+                "website": "https://www.autonation.com/dealers/" + store["StoreDetailsUrl"],
                 "extras": {"sells": store["Makes"]},
             }
 

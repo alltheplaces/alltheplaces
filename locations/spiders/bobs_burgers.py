@@ -1,4 +1,5 @@
 import scrapy
+
 from locations.items import GeojsonPointItem
 
 regex_street = (
@@ -19,23 +20,19 @@ class BobsBurgersSpider(scrapy.Spider):
     def parse(self, response):
 
         names = response.xpath(
-            '//td[contains(@style,"300px") and contains('
-            '., "MAP")]/descendant-or-self::*/text()'
+            '//td[contains(@style,"300px") and contains(' '., "MAP")]/descendant-or-self::*/text()'
         ).re(regex_name)
 
         streets = response.xpath(
-            '//td[contains(@style,"300px") and contains('
-            '., "MAP")]/descendant-or-self::*/text()'
+            '//td[contains(@style,"300px") and contains(' '., "MAP")]/descendant-or-self::*/text()'
         ).re(regex_street)
 
         phones = response.xpath(
-            '//td[contains(@style,"300px") and contains('
-            '., "MAP")]/descendant-or-self::*/text()'
+            '//td[contains(@style,"300px") and contains(' '., "MAP")]/descendant-or-self::*/text()'
         ).re(regex_phone)
 
         cities = response.xpath(
-            '//td[contains(@style,"300px") and contains('
-            '., "MAP")]/descendant-or-self::*/text()'
+            '//td[contains(@style,"300px") and contains(' '., "MAP")]/descendant-or-self::*/text()'
         ).re(regex_cty_st_zip)
 
         stores = response.xpath('//td[contains(@style,"300px") and contains(., "MAP")]')

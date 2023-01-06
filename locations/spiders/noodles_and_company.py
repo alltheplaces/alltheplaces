@@ -1,6 +1,6 @@
-# -*- coding: utf-8 -*-
-import scrapy
 import json
+
+import scrapy
 
 from locations.items import GeojsonPointItem
 
@@ -60,17 +60,15 @@ class NoodlesAndCompanySpider(scrapy.Spider):
         return opening_hours
 
     def parse(self, response):
-        for state_url in response.xpath(
-            '//a[@class="c-directory-list-content-item-link"]/@href'
-        ).re(r"(^[^\/]+$)"):
+        for state_url in response.xpath('//a[@class="c-directory-list-content-item-link"]/@href').re(r"(^[^\/]+$)"):
             yield scrapy.Request(
                 response.urljoin(state_url),
                 callback=self.parse_state,
             )
 
-        for location_url in response.xpath(
-            '//a[@class="c-directory-list-content-item-link"]/@href'
-        ).re(r"(^[^\/]+\/[^\/]+\/.+$)"):
+        for location_url in response.xpath('//a[@class="c-directory-list-content-item-link"]/@href').re(
+            r"(^[^\/]+\/[^\/]+\/.+$)"
+        ):
             yield scrapy.Request(
                 response.urljoin(location_url),
                 callback=self.parse_location,
@@ -78,18 +76,18 @@ class NoodlesAndCompanySpider(scrapy.Spider):
 
     def parse_state(self, response):
         # For counties that have multiple locations, go to a county page listing, and go to each individual location from there.
-        for county_url in response.xpath(
-            '//a[@class="c-directory-list-content-item-link"]/@href'
-        ).re(r"(^[^\/]+\/[^\/]+$)"):
+        for county_url in response.xpath('//a[@class="c-directory-list-content-item-link"]/@href').re(
+            r"(^[^\/]+\/[^\/]+$)"
+        ):
             yield scrapy.Request(
                 response.urljoin(county_url),
                 callback=self.parse_county,
             )
 
         # For counties that have only one location, go directly to that location page.
-        for location_url in response.xpath(
-            '//a[@class="c-directory-list-content-item-link"]/@href'
-        ).re(r"(^[^\/]+\/[^\/]+\/.+$)"):
+        for location_url in response.xpath('//a[@class="c-directory-list-content-item-link"]/@href').re(
+            r"(^[^\/]+\/[^\/]+\/.+$)"
+        ):
             yield scrapy.Request(
                 response.urljoin(location_url),
                 callback=self.parse_location,
@@ -97,9 +95,7 @@ class NoodlesAndCompanySpider(scrapy.Spider):
 
     def parse_county(self, response):
         for location_block in response.xpath('//div[@class="c-location-grid-item"]'):
-            location_url = location_block.xpath(
-                './/a[@class="c-location-grid-item-link"]/@href'
-            ).extract_first()
+            location_url = location_block.xpath('.//a[@class="c-location-grid-item-link"]/@href').extract_first()
             yield scrapy.Request(
                 response.urljoin(location_url),
                 callback=self.parse_location,
@@ -107,41 +103,19 @@ class NoodlesAndCompanySpider(scrapy.Spider):
 
     def parse_location(self, response):
         properties = {
-            "lon": float(
-                response.xpath(
-                    '//span/meta[@itemprop="longitude"]/@content'
-                ).extract_first()
-            ),
-            "lat": float(
-                response.xpath(
-                    '//span/meta[@itemprop="latitude"]/@content'
-                ).extract_first()
-            ),
-            "addr_full": response.xpath('//span[@class="c-address-street-1"]/text()')
-            .extract_first()
-            .strip(),
-            "city": response.xpath(
-                '//span[@itemprop="addressLocality"]/text()'
-            ).extract_first(),
-            "state": response.xpath(
-                '//abbr[@itemprop="addressRegion"]/text()'
-            ).extract_first(),
-            "postcode": response.xpath('//span[@itemprop="postalCode"]/text()')
-            .extract_first()
-            .strip(),
-            "phone": response.xpath(
-                '//span[@itemprop="telephone"]/text()'
-            ).extract_first(),
-            "name": response.xpath(
-                '//span[@class="location-name-geo"]/text()'
-            ).extract_first(),
+            "lon": float(response.xpath('//span/meta[@itemprop="longitude"]/@content').extract_first()),
+            "lat": float(response.xpath('//span/meta[@itemprop="latitude"]/@content').extract_first()),
+            "addr_full": response.xpath('//span[@class="c-address-street-1"]/text()').extract_first().strip(),
+            "city": response.xpath('//span[@itemprop="addressLocality"]/text()').extract_first(),
+            "state": response.xpath('//abbr[@itemprop="addressRegion"]/text()').extract_first(),
+            "postcode": response.xpath('//span[@itemprop="postalCode"]/text()').extract_first().strip(),
+            "phone": response.xpath('//span[@itemprop="telephone"]/text()').extract_first(),
+            "name": response.xpath('//span[@class="location-name-geo"]/text()').extract_first(),
             "ref": response.url,
             "website": response.url,
         }
 
-        hours_elem = response.xpath(
-            '//div[@class="c-location-hours-details-wrapper js-location-hours"]/@data-days'
-        )
+        hours_elem = response.xpath('//div[@class="c-location-hours-details-wrapper js-location-hours"]/@data-days')
         opening_hours = None
         if hours_elem:
             hours = json.loads(hours_elem.extract_first())

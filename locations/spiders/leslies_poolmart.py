@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import re
 
 import scrapy
@@ -17,9 +16,7 @@ class LesliesPoolmartSpider(scrapy.Spider):
 
     def parse(self, response):
         response.selector.remove_namespaces()
-        urls = response.xpath(
-            '//url/loc[contains(text(), "/location/")]/text()'
-        ).extract()
+        urls = response.xpath('//url/loc[contains(text(), "/location/")]/text()').extract()
 
         for url in urls:
             yield scrapy.Request(url=url, callback=self.parse_store)
@@ -31,9 +28,7 @@ class LesliesPoolmartSpider(scrapy.Spider):
         if store_title:
             ref = re.search(r".*\s#?([0-9]*)", store_title).group(1)
 
-            city_state_postal = response.xpath(
-                '//h5[@class="store-detail-address"]/span[3]/text()'
-            ).extract_first()
+            city_state_postal = response.xpath('//h5[@class="store-detail-address"]/span[3]/text()').extract_first()
 
             if city_state_postal:  # Get store details, otherwise pass if empty page
                 city, state, zipcode = re.search(
@@ -44,12 +39,8 @@ class LesliesPoolmartSpider(scrapy.Spider):
 
                 properties = {
                     "ref": ref,
-                    "name": response.xpath(
-                        '//h5[@class="store-detail-address"]/span[1]/text()'
-                    ).extract_first(),
-                    "addr_full": response.xpath(
-                        '//h5[@class="store-detail-address"]/span[2]/text()'
-                    ).extract_first(),
+                    "name": response.xpath('//h5[@class="store-detail-address"]/span[1]/text()').extract_first(),
+                    "addr_full": response.xpath('//h5[@class="store-detail-address"]/span[2]/text()').extract_first(),
                     "city": city,
                     "state": state,
                     "postcode": zipcode,
@@ -64,9 +55,7 @@ class LesliesPoolmartSpider(scrapy.Spider):
                             '//a[contains(@class, "select-store-button")]/@data-store-longitude'
                         ).extract_first()
                     ),
-                    "phone": response.xpath(
-                        '//h5[contains(@class, "store-detail-phone")]/text()'
-                    ).extract_first(),
+                    "phone": response.xpath('//h5[contains(@class, "store-detail-phone")]/text()').extract_first(),
                     "website": response.url,
                 }
 

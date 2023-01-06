@@ -1,11 +1,10 @@
-# -*- coding: utf-8 -*-
 import json
 import re
+
 import scrapy
 
-from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
-
+from locations.items import GeojsonPointItem
 
 DAY_MAPPING = {
     "mo": "Mo",
@@ -77,9 +76,7 @@ class CommerzbankDESpider(scrapy.Spider):
                 yield GeojsonPointItem(**properties)
 
     def parse(self, response):
-        branches = response.xpath(
-            '//div[@class="mainContent"]//a[@class="SitemapLink"]/@href'
-        ).getall()
+        branches = response.xpath('//div[@class="mainContent"]//a[@class="SitemapLink"]/@href').getall()
 
         for branch in branches:
             yield scrapy.Request(url=branch, callback=self.parse_details)

@@ -1,10 +1,10 @@
-# -*- coding: utf-8 -*-
 import re
+
 import scrapy
+from scrapy.selector import Selector
 
 from locations.geo import postal_regions
 from locations.items import GeojsonPointItem
-from scrapy.selector import Selector
 
 
 class VetcoClinicsSpider(scrapy.Spider):
@@ -14,9 +14,7 @@ class VetcoClinicsSpider(scrapy.Spider):
 
     def start_requests(self):
         for record in postal_regions("US"):
-            url_template = (
-                "https://www.vetcoclinics.com/_assets/dynamic/ajax/locator.php?zip={}"
-            )
+            url_template = "https://www.vetcoclinics.com/_assets/dynamic/ajax/locator.php?zip={}"
             yield scrapy.http.Request(url_template.format(record["postal_region"]))
 
     def parse(self, response):
@@ -28,26 +26,14 @@ class VetcoClinicsSpider(scrapy.Spider):
                     body = stores["label"]
                     address = Selector(text=body).xpath("//address/text()").extract()
                     if len(address) == 3:
-                        addr_full, city_state_postal, phone = [
-                            item.split(",") for item in address
-                        ]
-                        city, state_postal = [
-                            item.split(",") for item in city_state_postal
-                        ]
-                        state, postal = re.search(
-                            r"([A-Z]{2}) (\d{5})", state_postal[0]
-                        ).groups()
+                        addr_full, city_state_postal, phone = (item.split(",") for item in address)
+                        city, state_postal = (item.split(",") for item in city_state_postal)
+                        state, postal = re.search(r"([A-Z]{2}) (\d{5})", state_postal[0]).groups()
 
                     else:
-                        addr_full, city_state_postal = [
-                            item.split(",") for item in address
-                        ]
-                        city, state_postal = [
-                            item.split(",") for item in city_state_postal
-                        ]
-                        state, postal = re.search(
-                            r"([A-Z]{2}) (\d{5})", state_postal[0]
-                        ).groups()
+                        addr_full, city_state_postal = (item.split(",") for item in address)
+                        city, state_postal = (item.split(",") for item in city_state_postal)
+                        state, postal = re.search(r"([A-Z]{2}) (\d{5})", state_postal[0]).groups()
 
                     properties = {
                         "ref": addr_full[0].strip(),

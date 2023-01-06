@@ -1,94 +1,71 @@
-# -*- coding: utf-8 -*-
-import scrapy
 import re
+from datetime import datetime
+
+from geonamescache import GeonamesCache
+from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule
+
+from locations.google_url import extract_google_position
+from locations.hours import OpeningHours
 from locations.items import GeojsonPointItem
 
-regex_am = r"\s?([Aa][Mm])"
-regex_pm = r"\s?([Pp][Mm])"
-regex_hours = (
-    r"\d{1,2}:\d{1,2}\s?[Aa]?[Pp]?[Mm]\s?-\s?\d{1,2}:\d{1,2}\s?" r"[Aa]?[Pp]?[Mm]"
-)
 
-
-class BcpizzaSpider(scrapy.Spider):
+class BcpizzaSpider(CrawlSpider):
     name = "bcpizza"
     item_attributes = {"brand": "BC Pizza"}
     allowed_domains = ["bc.pizza"]
-    start_urls = [
-        "https://bc.pizza/wp-admin/admin-ajax.php?action=store_search&lat=42.331427&lng=-83.0457538&max_results=100&search_radius=1000&_=1515354445197"
+    start_urls = ["https://bc.pizza/locations/"]
+    rules = [
+        Rule(
+            LinkExtractor(allow=r"\/locations\/[-\w]+\/$"),
+            callback="parse",
+        )
     ]
-    custom_settings = {"ROBOTSTXT_OBEY": False}
-
-    def convert_hours(self, hours):
-        hours = [x.strip() for x in hours]
-        hours = [x for x in hours if x]
-        for i in range(len(hours)):
-            converted_times = ""
-            if hours[i] != "Closed":
-                if hours[i] != "Open 24 Hours":
-                    from_hr, to_hr = [hr.strip() for hr in hours[i].split("-")]
-                    if re.search(regex_am, from_hr):
-                        from_hr = re.sub(regex_am, "", from_hr)
-                        hour_min = from_hr.split(":")
-                        if len(hour_min[0]) < 2:
-                            hour_min[0].zfill(2)
-                        converted_times += (":".join(hour_min)) + "-"
-                    else:
-                        from_hr = re.sub(regex_pm, "", from_hr)
-                        hour_min = from_hr.split(":")
-                        if int(hour_min[0]) < 12:
-                            hour_min[0] = str(12 + int(hour_min[0]))
-                        converted_times += (":".join(hour_min)) + "-"
-
-                    if re.search(regex_am, to_hr):
-                        to_hr = re.sub(regex_am, "", to_hr)
-                        hour_min = to_hr.split(":")
-                        if len(hour_min[0]) < 2:
-                            hour_min[0].zfill(2)
-                        if int(hour_min[0]) == 12:
-                            hour_min[0] = "00"
-                        converted_times += ":".join(hour_min)
-                    else:
-                        to_hr = re.sub(regex_pm, "", to_hr)
-                        hour_min = to_hr.split(":")
-                        if int(hour_min[0]) < 12:
-                            hour_min[0] = str(12 + int(hour_min[0]))
-                        converted_times += ":".join(hour_min)
-                else:
-                    converted_times = "00:00-24:00"
-            else:
-                converted_times += "off"
-            hours[i] = converted_times
-        days = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
-        hours = "".join("{} {} ".format(*t) for t in zip(days, hours))
-        return hours
 
     def parse(self, response):
-        results = response.json()
-        for i in results:
-            ref = i["id"]
-            street = i["address"]
-            city = i["city"]
-            state = i["state"]
-            postcode = i["zip"]
-            lat = float(i["lat"])
-            lon = float(i["lng"])
-            hours = i["hours"]
-            hours = self.convert_hours(re.findall(regex_hours, hours))
-            phone = i["phone"]
-            website = i["facebook_url"]
-            addr_full = "{} {}, {} {}".format(street, city, state, postcode)
+        name = response.xpath('//div[@class="wpb_wrapper"]/h1/text()').get()
+        address_full = response.xpath('//div[@class="wpb_text_column wpb_content_element"]//p/text()').get()
+        address = response.xpath('string(//div[@class="wpb_text_column wpb_content_element"]//p)').get()
+        if address == address_full:
+            address = response.xpath('//div[@class="wpb_text_column wpb_content_element"]//p[2]/text()').get()
+        city_state_postcode = address.replace(address_full, "").replace("\n", "")
+        postcode = re.findall("[0-9]{5}|[A-Z0-9]{3} [A-Z0-9]{3}", city_state_postcode)[0]
+        city = city_state_postcode.split(",")[0]
+        state = city_state_postcode.split(",")[1].replace(postcode, "").strip()
+        for item in GeonamesCache().get_us_states().keys():
+            if state == GeonamesCache().get_us_states()[item]["name"]:
+                state = item
+                break
+        phone = response.xpath('//a[contains(@href, "tel")]/text()').get()
+        facebook = response.xpath('//a[@class="vc_icon_element-link"]/@href').get()
 
-            yield GeojsonPointItem(
-                ref=ref,
-                street=street,
-                city=city,
-                state=state,
-                postcode=postcode,
-                addr_full=addr_full,
-                lat=lat,
-                lon=lon,
-                phone=phone,
-                website=website,
-                opening_hours=hours,
+        days = response.xpath('//table[contains(@class, "op-table")]//tr')
+        oh = OpeningHours()
+        for i, day in enumerate(days):
+            dd = day.xpath(f"//tr[{i+1}]//th/text()").get()
+            hh = day.xpath(f"//tr[{i+1}]//span/text()").get()
+            if hh == "Closed":
+                continue
+            open_time, close_time = hh.split(" – ")
+            oh.add_range(
+                day=dd,
+                open_time=datetime.strftime(datetime.strptime(open_time, "%I:%M %p"), "%H:%M"),
+                close_time=datetime.strftime(datetime.strptime(close_time, "%I:%M %p"), "%H:%M"),
             )
+
+        properties = {
+            "ref": response.url,
+            "name": name,
+            "city": city,
+            "state": state,
+            "postcode": postcode,
+            "addr_full": address_full,
+            "phone": phone,
+            "facebook": facebook,
+            "website": response.url,
+            "opening_hours": oh.as_opening_hours(),
+        }
+
+        extract_google_position(properties, response)
+
+        yield GeojsonPointItem(**properties)

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import scrapy
 
 from locations.dict_parser import DictParser
@@ -17,9 +16,7 @@ class Motel6Spider(scrapy.Spider):
     def parse(self, response):
         for hotel_id in response.json().keys():
             try:
-                url = "https://www.motel6.com/bin/g6/propertydata.{}.json".format(
-                    int(hotel_id)
-                )
+                url = "https://www.motel6.com/bin/g6/propertydata.{}.json".format(int(hotel_id))
                 yield scrapy.Request(url, callback=self.parse_hotel)
             except ValueError:
                 continue
@@ -35,9 +32,6 @@ class Motel6Spider(scrapy.Spider):
             data["city"].lower().replace(" ", "-"),
             data["property_id"],
         )
-        item["image"] = (
-            "https://www.motel6.com/bin/g6/image.g6PropertyDetailSlider.jpg"
-            + data["lead_image_path"]
-        )
+        item["image"] = "https://www.motel6.com/bin/g6/image.g6PropertyDetailSlider.jpg" + data["lead_image_path"]
         item["brand"] = BRANDS[data["brand_id"]]
         yield item

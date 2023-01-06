@@ -1,6 +1,6 @@
-# -*- coding: utf-8 -*-
-import scrapy
 import re
+
+import scrapy
 
 from locations.items import GeojsonPointItem
 
@@ -21,24 +21,14 @@ class MontessoriSchoolSpider(scrapy.Spider):
     def parse_state(self, response):
         for school_elem in response.xpath('//div[@class="locationCard"]'):
 
-            addr_elem = school_elem.xpath(
-                './/a[@class="addrLink addrLinkToMap"]/span[@class="addr"]'
-            )
-            city_state_str = addr_elem.xpath(
-                './/span[@class="cityState"]/text()'
-            ).extract_first()
-            (city, state, postcode) = re.search(
-                r"^(.*), ([A-Z]{2}) (\d{5})$", city_state_str
-            ).groups()
+            addr_elem = school_elem.xpath('.//a[@class="addrLink addrLinkToMap"]/span[@class="addr"]')
+            city_state_str = addr_elem.xpath('.//span[@class="cityState"]/text()').extract_first()
+            (city, state, postcode) = re.search(r"^(.*), ([A-Z]{2}) (\d{5})$", city_state_str).groups()
 
             properties = {
                 "ref": school_elem.xpath("@data-school-id")[0].extract(),
-                "name": school_elem.xpath(
-                    './/a[@class="schoolNameLink"]/text()'
-                ).extract_first(),
-                "addr_full": addr_elem.xpath('.//span[@class="street"]/text()')
-                .extract_first()
-                .strip(),
+                "name": school_elem.xpath('.//a[@class="schoolNameLink"]/text()').extract_first(),
+                "addr_full": addr_elem.xpath('.//span[@class="street"]/text()').extract_first().strip(),
                 "city": city,
                 "state": state,
                 "postcode": postcode,

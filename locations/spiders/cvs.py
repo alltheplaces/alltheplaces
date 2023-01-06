@@ -1,8 +1,11 @@
 import json
-import scrapy
 import re
-from locations.items import GeojsonPointItem
+
+import scrapy
+
+from locations.categories import Categories
 from locations.hours import OpeningHours
+from locations.items import GeojsonPointItem
 
 DAYS = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
 
@@ -10,10 +13,11 @@ DAYS = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
 class CVSSpider(scrapy.Spider):
 
     name = "cvs"
-    item_attributes = {"brand": "CVS", "brand_wikidata": "Q2078880"}
+    item_attributes = {"brand": "CVS", "brand_wikidata": "Q2078880", "extras": Categories.PHARMACY.value}
     allowed_domains = ["www.cvs.com"]
     download_delay = 0.5
     start_urls = ("https://www.cvs.com/store-locator/cvs-pharmacy-locations",)
+    requires_proxy = True
 
     def parse_hours(self, hours):
         opening_hours = OpeningHours()
@@ -92,20 +96,14 @@ class CVSSpider(scrapy.Spider):
 
         for store in stores:
 
-            direction = store.xpath(
-                'normalize-space(.//span[@class="store-number"]/a/@href)'
-            ).extract_first()
+            direction = store.xpath('normalize-space(.//span[@class="store-number"]/a/@href)').extract_first()
             if direction:
-                yield scrapy.Request(
-                    response.urljoin(direction), callback=self.parse_stores
-                )
+                yield scrapy.Request(response.urljoin(direction), callback=self.parse_stores)
 
     def parse_state(self, response):
         city_urls = response.xpath('//div[@class="states"]/ul/li/a/@href').extract()
         for path in city_urls:
-            yield scrapy.Request(
-                response.urljoin(path), callback=self.parse_city_stores
-            )
+            yield scrapy.Request(response.urljoin(path), callback=self.parse_city_stores)
 
     def parse(self, response):
         urls = response.xpath('//div[@class="states"]/ul/li/a/@href').extract()

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import json
 import re
 
@@ -33,21 +32,14 @@ class BassettFurnitureSpider(scrapy.Spider):
         ).extract_first()
 
         if data:
-            parsed_data = (
-                re.search(
-                    r'(.*),\s*"branchOf":\s{', data, flags=re.MULTILINE | re.DOTALL
-                ).group(1)
-                + "}"
-            )
+            parsed_data = re.search(r'(.*),\s*"branchOf":\s{', data, flags=re.MULTILINE | re.DOTALL).group(1) + "}"
             store_data = json.loads(parsed_data)
             ref = re.search(r".+/(.+?)/?(?:\.html|$)", response.url).group(1)
             phone = re.search(r'"telephone":\s*"([0-9.]+)"', data).group(1)
 
             properties = {
                 "ref": ref,
-                "name": response.xpath(
-                    '//div[@class="address_inner"]/h1/text()'
-                ).extract_first(),
+                "name": response.xpath('//div[@class="address_inner"]/h1/text()').extract_first(),
                 "addr_full": store_data["address"]["streetAddress"],
                 "city": store_data["address"]["addressLocality"],
                 "state": store_data["address"]["addressRegion"],

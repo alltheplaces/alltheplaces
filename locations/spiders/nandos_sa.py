@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import json
 import re
 
@@ -17,9 +16,7 @@ class NandosSASpider(scrapy.Spider):
     download_delay = 0.3
 
     def parse(self, response):
-        urls = response.xpath(
-            '//li[@class="accordion-listing__item"]/a/@href'
-        ).extract()
+        urls = response.xpath('//li[@class="accordion-listing__item"]/a/@href').extract()
 
         for url in urls:
             yield scrapy.Request(url=response.urljoin(url), callback=self.parse_store)

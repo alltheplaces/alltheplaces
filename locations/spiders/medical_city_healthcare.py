@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import json
 import re
 
@@ -16,9 +15,7 @@ class MedicalCityHealthcareSpider(scrapy.Spider):
     ]
 
     def parse(self, response):
-        script = response.xpath(
-            '//script[contains(text(), "hostLocations")]'
-        ).extract_first()
+        script = response.xpath('//script[contains(text(), "hostLocations")]').extract_first()
         data = re.search(r"var hostLocations = (.*]);", script).group(1)
         locations = json.loads(data)
 

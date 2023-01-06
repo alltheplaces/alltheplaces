@@ -1,11 +1,9 @@
-# -*- coding: utf-8 -*-
 import json
 import re
 
 import scrapy
 
 from locations.items import GeojsonPointItem
-from locations.hours import OpeningHours
 
 
 class StateAndMainSpider(scrapy.Spider):
@@ -17,16 +15,12 @@ class StateAndMainSpider(scrapy.Spider):
     ]
 
     def parse(self, response):
-        data = response.xpath(
-            '//script[contains(text(),"ojlocations")]/text()'
-        ).extract_first()
+        data = response.xpath('//script[contains(text(),"ojlocations")]/text()').extract_first()
 
         ## Fix lots of formatting issues
         json_data = data.replace("var ojlocations = ", "")
         json_data = re.sub(r'"hours":\s{((?s).*?)},', "", json_data)
-        json_data = re.sub(
-            r'"holidayHours":\s{((?s).*?)},', '"holidayHours": {}', json_data
-        )
+        json_data = re.sub(r'"holidayHours":\s{((?s).*?)},', '"holidayHours": {}', json_data)
         json_data = re.sub(r"var currentLocation\s=\s{((?s).*?)};", "", json_data)
         json_data = json_data.replace(";", "")
         json_data = json_data[:-8]

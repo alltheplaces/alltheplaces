@@ -1,10 +1,6 @@
-# -*- coding: utf-8 -*-
-import re
-
 import scrapy
 
 from locations.items import GeojsonPointItem
-from locations.hours import OpeningHours
 
 
 class AtriumHealthSpider(scrapy.Spider):
@@ -28,9 +24,7 @@ class AtriumHealthSpider(scrapy.Spider):
         for page in range(1, 160):
             url = base_url.format(page=page)
 
-            yield scrapy.http.FormRequest(
-                url=url, method="GET", headers=headers, callback=self.parse
-            )
+            yield scrapy.http.FormRequest(url=url, method="GET", headers=headers, callback=self.parse)
 
     def parse(self, response):
         data = response.json()

@@ -1,7 +1,8 @@
-# -*- coding: utf-8 -*-
 import csv
-import scrapy
 import json
+
+import scrapy
+
 from locations.items import GeojsonPointItem
 
 HEADERS = {"X-Requested-With": "XMLHttpRequest"}
@@ -61,9 +62,7 @@ class StarbucksSpider(scrapy.Spider):
                 "lat": storeLat,
                 "brand": store["brandName"],
                 "website": f'https://www.starbucks.com/store-locator/store/{store["id"]}/{store["slug"]}',
-                "extras": {
-                    "number": store["storeNumber"],
-                },
+                "extras": {"number": store["storeNumber"], "ownership_type": store["ownershipTypeCode"]},
             }
             yield GeojsonPointItem(**properties)
 
@@ -85,8 +84,6 @@ class StarbucksSpider(scrapy.Spider):
                 ]
                 urls = [STORELOCATOR.format(c[1], c[0]) for c in nextCoordinates]
                 for url in urls:
-                    request = scrapy.Request(
-                        url=url, headers=HEADERS, callback=self.parse
-                    )
+                    request = scrapy.Request(url=url, headers=HEADERS, callback=self.parse)
                     request.meta["distance"] = nextDistance
                     yield request

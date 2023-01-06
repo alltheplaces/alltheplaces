@@ -1,22 +1,18 @@
-# -*- coding: utf-8 -*-
-from pathlib import Path
-import urllib.parse
-
 from scrapy.spiders import SitemapSpider
-from locations.linked_data_parser import LinkedDataParser
+
+from locations.structured_data_spider import StructuredDataSpider
 
 
-class CubeSmartSpider(SitemapSpider):
+class CubeSmartSpider(SitemapSpider, StructuredDataSpider):
     name = "cubesmart"
-    item_attributes = {
-        "brand": "CubeSmart",
-        "brand_wikidata": "Q5192200",
-    }
+    item_attributes = {"brand": "CubeSmart", "brand_wikidata": "Q5192200"}
     allowed_domains = ["www.cubesmart.com"]
     sitemap_urls = ["https://www.cubesmart.com/sitemap-facility.xml"]
+    sitemap_rules = [("", "parse_sd")]
+    wanted_types = ["SelfStorage"]
+    requires_proxy = True
 
-    def parse(self, response):
-        item = LinkedDataParser.parse(response, "SelfStorage")
+    def post_process_item(self, item, response, ld_data, **kwargs):
         item["lon"] = "-" + item["lon"]
-        item["ref"] = Path(urllib.parse.urlsplit(response.url).path).stem
+
         yield item

@@ -1,5 +1,5 @@
-# -*- coding: utf-8 -*-
 import scrapy
+
 from locations.items import GeojsonPointItem
 
 
@@ -20,19 +20,13 @@ class StaterBrosSpider(scrapy.Spider):
         for index, store in enumerate(stores):
             properties = {
                 "addr_full": store.xpath("@data-address").extract_first(),
-                "phone": store.xpath(
-                    'div[@class="left"]/div[@class="phone"]/p/text()'
-                ).extract()[1],
+                "phone": store.xpath('div[@class="left"]/div[@class="phone"]/p/text()').extract()[1],
                 "ref": index,
                 "lon": store.xpath("@data-longitude").extract_first(),
                 "lat": store.xpath("@data-latitude").extract_first(),
                 "opening_hours": " ".join(
-                    stores[0]
-                    .xpath('div[@class="right"]/div[@class="hours"]/p/text()')
-                    .extract()[:2]
+                    stores[0].xpath('div[@class="right"]/div[@class="hours"]/p/text()').extract()[:2]
                 ),
-                "name": store.xpath(
-                    'div[@class="left"]/div[@class="name"]/text()'
-                ).extract_first(),
+                "name": store.xpath('div[@class="left"]/div[@class="name"]/text()').extract_first(),
             }
             yield GeojsonPointItem(**properties)

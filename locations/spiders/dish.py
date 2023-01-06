@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
 import scrapy
 
 from locations.items import GeojsonPointItem
-
 
 POSTALS = [
     "26601",
@@ -69,11 +67,7 @@ class DishSpider(scrapy.Spider):
 
     def parse(self, response):
         for postal in POSTALS:
-            url = (
-                "https://www.dish.com/find-retailer/getretailershandler.ashx?Zip="
-                + postal
-                + "&Miles=1000"
-            )
+            url = "https://www.dish.com/find-retailer/getretailershandler.ashx?Zip=" + postal + "&Miles=1000"
 
             yield scrapy.http.FormRequest(
                 url,

@@ -1,6 +1,6 @@
-# -*- coding: utf-8 -*-
-import scrapy
 import re
+
+import scrapy
 
 from locations.items import GeojsonPointItem
 
@@ -15,18 +15,14 @@ class SuperAmericaSpider(scrapy.Spider):
     )
 
     def store_hours(self, store_hours):
-        matches = re.findall(
-            r"<tr><td>(.*?)<\/td><td><time>(.*?)<\/time><\/td><\/tr>", store_hours
-        )
+        matches = re.findall(r"<tr><td>(.*?)<\/td><td><time>(.*?)<\/time><\/td><\/tr>", store_hours)
 
         day_groups = []
         this_day_group = None
 
         for day, hours in matches:
             day = day[:2]
-            match = re.search(
-                r"(\d{1,2}):(\d{2}) ([AP])M - (\d{1,2}):(\d{2}) ([AP])M", hours
-            )
+            match = re.search(r"(\d{1,2}):(\d{2}) ([AP])M - (\d{1,2}):(\d{2}) ([AP])M", hours)
             (f_hr, f_min, f_ampm, t_hr, t_min, t_ampm) = match.groups()
 
             f_hr = int(f_hr)

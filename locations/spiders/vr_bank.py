@@ -1,8 +1,9 @@
-import scrapy
 import re
 
-from locations.items import GeojsonPointItem
+import scrapy
+
 from locations.hours import OpeningHours
+from locations.items import GeojsonPointItem
 from locations.user_agents import BROSWER_DEFAULT
 
 DAY_MAPPING = {
@@ -48,9 +49,7 @@ class VRBankSpider(scrapy.Spider):
 
                 for tm in tms:
                     try:
-                        open_time, close_time = [
-                            t.strip() for t in tm.replace("Uhr", "").strip().split("-")
-                        ]
+                        open_time, close_time = (t.strip() for t in tm.replace("Uhr", "").strip().split("-"))
 
                         if open_time and close_time and day:
                             opening_hours.add_range(
@@ -84,9 +83,7 @@ class VRBankSpider(scrapy.Spider):
         if m:
             longitude = m.group(1)
 
-        hours = response.xpath(
-            '//p[@itemprop="openingHoursSpecification"]/text()'
-        ).getall()
+        hours = response.xpath('//p[@itemprop="openingHoursSpecification"]/text()').getall()
 
         properties = {
             "ref": response.request.url,
@@ -106,9 +103,7 @@ class VRBankSpider(scrapy.Spider):
         yield GeojsonPointItem(**properties)
 
     def parse(self, response):
-        index = response.xpath(
-            '//div[has-class("module module-linklist ym-clearfix")]/ul/li/a/@href'
-        ).getall()
+        index = response.xpath('//div[has-class("module module-linklist ym-clearfix")]/ul/li/a/@href').getall()
 
         for page in index:
             yield scrapy.Request(
@@ -117,9 +112,7 @@ class VRBankSpider(scrapy.Spider):
             )
 
     def parse_links(self, response):
-        list = response.xpath(
-            '//div[has-class("module module-teaserlist ym-clearfix")]/div/a/@href'
-        ).getall()
+        list = response.xpath('//div[has-class("module module-teaserlist ym-clearfix")]/div/a/@href').getall()
         for item in list:
             yield scrapy.Request(
                 url=item,

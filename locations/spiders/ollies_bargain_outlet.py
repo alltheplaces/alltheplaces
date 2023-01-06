@@ -1,10 +1,7 @@
-# -*- coding: utf-8 -*-
-import re
-
 import scrapy
 
-from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
+from locations.items import GeojsonPointItem
 
 
 class OlliesBargainOutletSpider(scrapy.Spider):
@@ -34,9 +31,7 @@ class OlliesBargainOutletSpider(scrapy.Spider):
                 "RangeInMiles": "5000",
             }
 
-            yield scrapy.http.FormRequest(
-                url, self.parse, method="POST", headers=headers, formdata=formdata
-            )
+            yield scrapy.http.FormRequest(url, self.parse, method="POST", headers=headers, formdata=formdata)
 
     def parse_hours(self, hours):
         opening_hours = OpeningHours()

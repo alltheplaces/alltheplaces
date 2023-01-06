@@ -1,6 +1,6 @@
-# -*- coding: utf-8 -*-
-import scrapy
 import re
+
+import scrapy
 
 from locations.items import GeojsonPointItem
 
@@ -46,21 +46,11 @@ class CurvesSpider(scrapy.Spider):
         properties = {
             "name": response.xpath("//h1/text()").extract_first(),
             "ref": response.xpath("//h1/text()").extract_first(),
-            "addr_full": response.xpath(
-                '//div[@class="thoroughfare"]/text()'
-            ).extract_first(),
-            "city": response.xpath(
-                '//div[@class]/span[@class="locality"]/text()'
-            ).extract_first(),
-            "state": response.xpath(
-                '//div[@class]/span[@class="state"]/text()'
-            ).extract_first(),
-            "postcode": response.xpath(
-                '//span[@itemprop="postalCode"]/text()'
-            ).extract_first(),
-            "country": response.xpath(
-                '//span[@class="country"]/text()'
-            ).extract_first(),
+            "addr_full": response.xpath('//div[@class="thoroughfare"]/text()').extract_first(),
+            "city": response.xpath('//div[@class]/span[@class="locality"]/text()').extract_first(),
+            "state": response.xpath('//div[@class]/span[@class="state"]/text()').extract_first(),
+            "postcode": response.xpath('//span[@itemprop="postalCode"]/text()').extract_first(),
+            "country": response.xpath('//span[@class="country"]/text()').extract_first(),
             "phone": response.xpath(
                 '//div[@class="field field-name-field-franchise-phone field-type-telephone field-label-hidden"]/div/div[@class="field-item even"]/text()'
             ).extract_first(),

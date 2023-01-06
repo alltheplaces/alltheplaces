@@ -1,5 +1,6 @@
 import json
 import re
+
 import scrapy
 
 from locations.items import GeojsonPointItem
@@ -40,12 +41,10 @@ class PizzaRanchSpider(scrapy.Spider):
     def parse_hours(self, lis):
         hours = []
         for li in lis:
-            day = li.xpath(
-                'normalize-space(.//td[@class="c-location-hours-details-row-day"]/text())'
-            ).extract_first()[:2]
-            times = li.xpath(
-                './/td[@class="c-location-hours-details-row-intervals"]/span/span/text()'
-            ).extract()
+            day = li.xpath('normalize-space(.//td[@class="c-location-hours-details-row-day"]/text())').extract_first()[
+                :2
+            ]
+            times = li.xpath('.//td[@class="c-location-hours-details-row-intervals"]/span/span/text()').extract()
             times = "".join(x for x in times)
             if times and day:
                 parsed_time = self.parse_times(times)
@@ -59,24 +58,16 @@ class PizzaRanchSpider(scrapy.Spider):
         ).extract_first()
         map_json = json.loads(map_data)
         properties = {
-            "name": response.xpath(
-                '//span[@class="location-name-geo"]/text()'
-            ).extract_first(),
+            "name": response.xpath('//span[@class="location-name-geo"]/text()').extract_first(),
             "addr_full": response.xpath(
                 'normalize-space(//span[@itemprop="streetAddress"]/span/text())'
             ).extract_first(),
             "phone": response.xpath(
                 'normalize-space(//div[@class="c-phone-number c-phone-main-number"]/span[@class="c-phone-number-span c-phone-main-number-span"]/text())'
             ).extract_first(),
-            "city": response.xpath(
-                'normalize-space(//span[@itemprop="addressLocality"]/text())'
-            ).extract_first(),
-            "state": response.xpath(
-                'normalize-space(//abbr[@itemprop="addressRegion"]/text())'
-            ).extract_first(),
-            "postcode": response.xpath(
-                'normalize-space(//span[@itemprop="postalCode"]/text())'
-            ).extract_first(),
+            "city": response.xpath('normalize-space(//span[@itemprop="addressLocality"]/text())').extract_first(),
+            "state": response.xpath('normalize-space(//abbr[@itemprop="addressRegion"]/text())').extract_first(),
+            "postcode": response.xpath('normalize-space(//span[@itemprop="postalCode"]/text())').extract_first(),
             "ref": map_json["locs"][0]["id"],
             "website": response.url,
             "lat": float(map_json["locs"][0]["latitude"]),
@@ -98,9 +89,7 @@ class PizzaRanchSpider(scrapy.Spider):
         for store in stores:
             yield scrapy.Request(response.urljoin(store), callback=self.parse_stores)
 
-        next_page_url = response.xpath(
-            '//div[@class="pagination"]//li[@class="next"]/a/@href'
-        ).extract_first()
+        next_page_url = response.xpath('//div[@class="pagination"]//li[@class="next"]/a/@href').extract_first()
 
         if next_page_url:
             yield scrapy.Request(next_page_url, callback=self.parse_state_stores)
@@ -108,6 +97,4 @@ class PizzaRanchSpider(scrapy.Spider):
     def parse(self, response):
         urls = response.xpath('//ol[@class="state-list"]/li/a/@href').extract()
         for path in urls:
-            yield scrapy.Request(
-                response.urljoin(path), callback=self.parse_state_stores
-            )
+            yield scrapy.Request(response.urljoin(path), callback=self.parse_state_stores)

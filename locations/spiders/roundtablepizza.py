@@ -1,6 +1,7 @@
-# -*- coding: utf-8 -*-
-import scrapy
 import re
+
+import scrapy
+
 from locations.items import GeojsonPointItem
 
 
@@ -17,7 +18,7 @@ class RoundTablePizzaSpider(scrapy.Spider):
                 store.attrib.get("data-address2").strip(),
             )
             city = state = postcode = None
-            if address_search != None:
+            if address_search is not None:
                 address_groups = address_search.groups()
                 city = address_groups[0]
                 state = address_groups[1]

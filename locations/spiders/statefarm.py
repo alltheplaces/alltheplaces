@@ -38,9 +38,7 @@ class StateFarmSpider(scrapy.Spider):
             "postcode": response.xpath(
                 '//div[@itemtype="http://schema.org/PostalAddress"]//*[@itemprop="postalCode"]/text()'
             ).extract_first(),
-            "phone": response.xpath(
-                '//*[@itemprop="telephone"]/a/text()'
-            ).extract_first(),
+            "phone": response.xpath('//*[@itemprop="telephone"]/a/text()').extract_first(),
             "lat": float(response.xpath("//@data-latitude").extract_first()),
             "lon": float(response.xpath("//@data-longitude").extract_first()),
             "website": response.url,
@@ -54,14 +52,10 @@ class StateFarmSpider(scrapy.Spider):
 
         if agents:
             for agent in agents:
-                agent_site = agent.xpath(
-                    './/a[contains(text(), "Agent Website")]/@href'
-                ).extract_first()
+                agent_site = agent.xpath('.//a[contains(text(), "Agent Website")]/@href').extract_first()
                 if not agent_site:
                     raise Exception("no agent site found")
-                yield scrapy.Request(
-                    response.urljoin(agent_site), callback=self.parse_location
-                )
+                yield scrapy.Request(response.urljoin(agent_site), callback=self.parse_location)
 
         else:
             urls = response.xpath("//li/div/a/@href").extract()

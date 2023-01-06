@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import json
 import re
 
@@ -16,9 +15,7 @@ class NewYorkFriesSpider(scrapy.Spider):
     ]
 
     def parse(self, response):
-        data = response.xpath(
-            '//script[contains(.,"canadaEntries")]/text()'
-        ).extract_first()
+        data = response.xpath('//script[contains(.,"canadaEntries")]/text()').extract_first()
 
         places_ca = re.search(r"canadaEntries\s=\s(.*)", data).groups()[0]
 

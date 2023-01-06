@@ -1,9 +1,9 @@
-# -*- coding: utf-8 -*-
 import re
+
 import scrapy
+from scrapy import Selector
 
 from locations.items import GeojsonPointItem
-from scrapy import Selector
 
 
 class CostaCoffeeUSSpider(scrapy.Spider):
@@ -23,9 +23,7 @@ class CostaCoffeeUSSpider(scrapy.Spider):
 
             item["name"] = html.xpath('//*[@class="amlocator-title"]/text()').get()
 
-            for line in html.xpath(
-                '//div[@class="amlocator-info-popup"]/text()'
-            ).getall():
+            for line in html.xpath('//div[@class="amlocator-info-popup"]/text()').getall():
                 line = line.strip()
                 if m := re.match(r"City: (.*)", line):
                     item["city"] = m.group(1)

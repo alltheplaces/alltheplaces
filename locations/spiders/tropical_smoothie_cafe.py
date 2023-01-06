@@ -43,9 +43,7 @@ class TropicalSmoothieCafeSpider(scrapy.Spider):
         properties = {
             "name": response.xpath('//h1[@itemprop="name"]/text()').get(),
             "extras": {"branch": response.css("div.Hero-city").xpath("./text()").get()},
-            "addr_full": response.xpath(
-                '//*[@itemprop="streetAddress"]/@content'
-            ).get(),
+            "addr_full": response.xpath('//*[@itemprop="streetAddress"]/@content').get(),
             "city": response.xpath('//*[@itemprop="addressLocality"]/@content').get(),
             "state": response.xpath('//*[@itemprop="addressRegion"]/text()').get(),
             "postcode": response.xpath('//*[@itemprop="postalCode"]/text()').get(),
@@ -65,7 +63,5 @@ class TropicalSmoothieCafeSpider(scrapy.Spider):
             for interval in date["intervals"]:
                 start_hr, start_min = divmod(interval["start"], 100)
                 end_hr, end_min = divmod(interval["end"], 100)
-                opening_hours.add_range(
-                    day, f"{start_hr}:{start_min}", f"{end_hr}:{end_min}"
-                )
+                opening_hours.add_range(day, f"{start_hr}:{start_min}", f"{end_hr}:{end_min}")
         return opening_hours.as_opening_hours()

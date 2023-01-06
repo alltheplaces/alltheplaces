@@ -1,83 +1,27 @@
-# -*- coding: utf-8 -*-
-import json
-
 import scrapy
+from geonamescache import GeonamesCache
 
 from locations.items import GeojsonPointItem
-
-STATES = [
-    "AL",
-    "AK",
-    "AZ",
-    "AR",
-    "CA",
-    "CO",
-    "CT",
-    "DC",
-    "DE",
-    "FL",
-    "GA",
-    "HI",
-    "ID",
-    "IL",
-    "IN",
-    "IA",
-    "KS",
-    "KY",
-    "LA",
-    "ME",
-    "MD",
-    "MA",
-    "MI",
-    "MN",
-    "MS",
-    "MO",
-    "MT",
-    "NE",
-    "NV",
-    "NH",
-    "NJ",
-    "NM",
-    "NY",
-    "NC",
-    "ND",
-    "OH",
-    "OK",
-    "OR",
-    "PA",
-    "RI",
-    "SC",
-    "SD",
-    "TN",
-    "TX",
-    "UT",
-    "VT",
-    "VA",
-    "WA",
-    "WV",
-    "WI",
-    "WY",
-]
 
 
 class CaliberHomeLoansSpider(scrapy.Spider):
     name = "caliber_home_loans"
-    item_attributes = {"brand": "Caliber Home Loans", "brand_wikidata": "Q25055134"}
+    item_attributes = {
+        "brand": "Caliber Home Loans",
+        "brand_wikidata": "Q25055134",
+        "country": "US",
+    }
     allowed_domains = ["www.caliberhomeloans.com"]
     download_delay = 0.3
 
     def start_requests(self):
-        url = "https://www.caliberhomeloans.com/Home/BranchList?stateCode={state}&LCSpeciality=all&SpanishSpeaking=no"
-
-        for state in STATES:
+        for state in GeonamesCache().get_us_states():
             yield scrapy.http.Request(
-                method="GET", url=url.format(state=state), callback=self.parse_state
+                url=f"https://www.caliberhomeloans.com/Home/BranchList?stateCode={state}&LCSpeciality=all&SpanishSpeaking=no"
             )
 
-    def parse_state(self, response):
-        data = json.loads(response.text)
-
-        if data:
+    def parse(self, response, **kwargs):
+        if data := response.json():
             for store in data:
 
                 properties = {

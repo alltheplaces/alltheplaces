@@ -1,7 +1,8 @@
-# -*- coding: utf-8 -*-
 import scrapy
-from locations.linked_data_parser import LinkedDataParser
+
+from locations.categories import Categories
 from locations.google_url import extract_google_position
+from locations.linked_data_parser import LinkedDataParser
 
 
 class BritishHeartFoundationGBSpider(scrapy.spiders.SitemapSpider):
@@ -9,10 +10,10 @@ class BritishHeartFoundationGBSpider(scrapy.spiders.SitemapSpider):
     item_attributes = {
         "brand": "British Heart Foundation",
         "brand_wikidata": "Q4970039",
+        "extras": Categories.SHOP_CHARITY.value,
     }
     sitemap_urls = ["https://www.bhf.org.uk/sitemap.xml"]
     sitemap_rules = [("-bhf-shop", "parse_shop")]
-    download_delay = 0.5
 
     def parse_shop(self, response):
         if "news-archive" in response.url:

@@ -1,6 +1,5 @@
-# -*- coding: utf-8 -*-
 import scrapy
-import json
+
 from locations.items import GeojsonPointItem
 
 
@@ -25,9 +24,7 @@ class CotoSpider(scrapy.Spider):
             fri = "Fr " + data["hor_vi"]
             sat = "Sa " + data["hor_sa"]
             sun = "Su " + data["hor_do"] if data["hor_do"] != "Cerrado" else "Su off"
-            opening_hours = "{}; {}; {}; {}".format(mon_thu, fri, sat, sun).replace(
-                " a ", "-"
-            )
+            opening_hours = "{}; {}; {}; {}".format(mon_thu, fri, sat, sun).replace(" a ", "-")
 
             yield GeojsonPointItem(
                 ref=ref,

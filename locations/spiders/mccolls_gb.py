@@ -1,6 +1,7 @@
-# -*- coding: utf-8 -*-
-import scrapy
 import json
+
+import scrapy
+
 from locations.dict_parser import DictParser
 
 
@@ -14,9 +15,7 @@ class McCollsGBSpider(scrapy.Spider):
     download_delay = 0.5
 
     def parse(self, response):
-        script = json.loads(
-            response.xpath('//script[contains(., "allStores")]/text()').get()
-        )
+        script = json.loads(response.xpath('//script[contains(., "allStores")]/text()').get())
         for store in DictParser.get_nested_key(script, "items"):
             yield scrapy.Request(
                 store["store_url"],

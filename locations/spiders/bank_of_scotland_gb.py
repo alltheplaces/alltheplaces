@@ -1,6 +1,7 @@
-from locations.structured_data_spider import StructuredDataSpider
-
 from scrapy.spiders import SitemapSpider
+
+from locations.categories import Categories
+from locations.structured_data_spider import StructuredDataSpider
 
 
 class BankOfScotlandGB(SitemapSpider, StructuredDataSpider):
@@ -8,7 +9,7 @@ class BankOfScotlandGB(SitemapSpider, StructuredDataSpider):
     item_attributes = {
         "brand": "Bank of Scotland",
         "brand_wikidata": "Q627381",
-        "extras": {"amenity": "bank"},
+        "extras": Categories.BANK.value,
     }
     sitemap_urls = ["https://branches.bankofscotland.co.uk/sitemap.xml"]
     sitemap_rules = [
@@ -17,4 +18,3 @@ class BankOfScotlandGB(SitemapSpider, StructuredDataSpider):
             "parse_sd",
         )
     ]
-    wanted_types = ["BankOrCreditUnion"]

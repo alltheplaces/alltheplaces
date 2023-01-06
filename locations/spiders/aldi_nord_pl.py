@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from scrapy.spiders import SitemapSpider
 
 from locations.items import GeojsonPointItem
@@ -14,18 +13,12 @@ class AldiNordPLSpider(SitemapSpider):
     def parse_store(self, response):
         properties = {
             "ref": response.xpath("//@data-store-id").get() or response.url,
-            "name": response.xpath(
-                '//div[@class="mod-overview-intro__content"]/h1/text()'
-            ).extract_first(),
+            "name": response.xpath('//div[@class="mod-overview-intro__content"]/h1/text()').extract_first(),
             "street_address": response.xpath(
                 'normalize-space(//span[@itemprop="streetAddress"]//text())'
             ).extract_first(),
-            "city": response.xpath(
-                'normalize-space(//span[@itemprop="addressLocality"]//text())'
-            ).extract_first(),
-            "postcode": response.xpath(
-                'normalize-space(//span[@itemprop="postalCode"]//text())'
-            ).extract_first(),
+            "city": response.xpath('normalize-space(//span[@itemprop="addressLocality"]//text())').extract_first(),
+            "postcode": response.xpath('normalize-space(//span[@itemprop="postalCode"]//text())').extract_first(),
             "website": response.url,
         }
 

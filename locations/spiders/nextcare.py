@@ -1,6 +1,6 @@
-# -*- coding: utf-8 -*-
-import scrapy
 import re
+
+import scrapy
 
 from locations.items import GeojsonPointItem
 
@@ -29,7 +29,7 @@ class NextcareSpider(scrapy.Spider):
         normalize_day_times = []
 
         for day_time in day_times:
-            day, hours = [x.strip() for x in day_time.split(": ")]
+            day, hours = (x.strip() for x in day_time.split(": "))
             normalize_hours = []
 
             if re.search("-", day):
@@ -47,7 +47,7 @@ class NextcareSpider(scrapy.Spider):
                     for hour in hours:
                         if hour[-2:] == "PM":
                             if re.search(":", hour[:-2]):
-                                hora, minute = [x.strip() for x in hour[:-2].split(":")]
+                                hora, minute = (x.strip() for x in hour[:-2].split(":"))
                                 if int(hora) < 12:
                                     norm_hours = str(int(hora) + 12) + ":" + minute
                             else:
@@ -56,7 +56,7 @@ class NextcareSpider(scrapy.Spider):
 
                         elif hour[-2:] == "AM":
                             if re.search(":", hour[:-2]):
-                                hora, minute = [x.strip() for x in hour[:-2].split(":")]
+                                hora, minute = (x.strip() for x in hour[:-2].split(":"))
                                 norm_hours = hora + ":" + minute
                             else:
                                 norm_hours = hour[:-2] + ":00"
@@ -65,9 +65,7 @@ class NextcareSpider(scrapy.Spider):
         return "; ".join(normalize_day_times)
 
     def parse(self, response):
-        for location_url in response.xpath(
-            '//div[@class="all_locs_address"]/a/@href'
-        ).extract():
+        for location_url in response.xpath('//div[@class="all_locs_address"]/a/@href').extract():
             yield scrapy.Request(
                 location_url,
                 callback=self.parse_location,
@@ -76,32 +74,18 @@ class NextcareSpider(scrapy.Spider):
     def parse_location(self, response):
         unp = {}  # Unprocessed properties
         properties = {}
-        unp["phone"] = response.xpath(
-            '//span[@itemprop="telephone"]/a/text()'
-        ).extract_first()
-        unp["name"] = response.xpath(
-            '//span[@itemprop="name"]/h2[@class="loc_d_title"]/text()'
-        ).extract_first()
+        unp["phone"] = response.xpath('//span[@itemprop="telephone"]/a/text()').extract_first()
+        unp["name"] = response.xpath('//span[@itemprop="name"]/h2[@class="loc_d_title"]/text()').extract_first()
         unp["ref"] = response.url
         unp["website"] = response.url
 
         addressdiv = response.xpath('//div[@itemprop="address"]')[0]
-        unp["addr_full"] = addressdiv.xpath(
-            './/span[@itemprop="streetAddress"]/text()'
-        ).extract_first()
-        unp["city"] = addressdiv.xpath(
-            './/span[@itemprop="addressLocality"]/text()'
-        ).extract_first()
-        unp["state"] = addressdiv.xpath(
-            './/span[@itemprop="addressRegion"]/text()'
-        ).extract_first()
-        unp["postcode"] = addressdiv.xpath(
-            './/span[@itemprop="postalCode"]/text()'
-        ).extract_first()
+        unp["addr_full"] = addressdiv.xpath('.//span[@itemprop="streetAddress"]/text()').extract_first()
+        unp["city"] = addressdiv.xpath('.//span[@itemprop="addressLocality"]/text()').extract_first()
+        unp["state"] = addressdiv.xpath('.//span[@itemprop="addressRegion"]/text()').extract_first()
+        unp["postcode"] = addressdiv.xpath('.//span[@itemprop="postalCode"]/text()').extract_first()
 
-        uber_url = response.xpath(
-            '//div[@class="heading-desktop"]/h5/a/@href'
-        ).extract_first()
+        uber_url = response.xpath('//div[@class="heading-desktop"]/h5/a/@href').extract_first()
         latitude = uber_url.split("[latitude]=")[1]
         latitude = latitude.split("&dropoff")[0]
         longitude = uber_url.split("[longitude]=")[1]

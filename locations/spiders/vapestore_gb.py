@@ -22,12 +22,7 @@ def extract_phone_link(item, response):
 
 def clean_address(addr):
     if isinstance(addr, str):
-        addr = (
-            addr.replace("\n", ",")
-            .replace("\r", ",")
-            .replace("\t", ",")
-            .replace("\f", ",")
-        )
+        addr = addr.replace("\n", ",").replace("\r", ",").replace("\t", ",").replace("\f", ",")
         addr = addr.split(",")
 
     if not isinstance(addr, list):
@@ -64,9 +59,7 @@ class VapeStoreGB(SitemapSpider):
         item["website"] = response.url
 
         item["name"] = response.xpath('//div[@class="flt_left"]/strong/text()').get()
-        item["addr_full"] = clean_address(
-            response.xpath('//div[@class="flt_left"]/text()').getall()
-        )
+        item["addr_full"] = clean_address(response.xpath('//div[@class="flt_left"]/text()').getall())
 
         item["country"] = "GB"
 

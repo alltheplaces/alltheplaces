@@ -1,8 +1,8 @@
-# -*- coding: utf-8 -*-
-from scrapy.spiders import SitemapSpider
-from locations.structured_data_spider import StructuredDataSpider
 import json
 
+from scrapy.spiders import SitemapSpider
+
+from locations.structured_data_spider import StructuredDataSpider
 from locations.user_agents import BROSWER_DEFAULT
 
 
@@ -17,9 +17,7 @@ class ReiSpider(SitemapSpider, StructuredDataSpider):
     wanted_types = ["Store"]
 
     def inspect_item(self, item, response):
-        hours = json.loads(
-            response.xpath('//script[@id="store-schema"]/text()').extract_first()
-        )["openingHours"]
+        hours = json.loads(response.xpath('//script[@id="store-schema"]/text()').extract_first())["openingHours"]
         for i, h in enumerate(hours):
             hours[i] = (
                 h.replace("Mon", "Mo")

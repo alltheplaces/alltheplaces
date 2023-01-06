@@ -1,7 +1,7 @@
-from locations.structured_data_spider import StructuredDataSpider
-
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
+
+from locations.structured_data_spider import StructuredDataSpider
 
 
 class FrankieAndBennysGBSpider(CrawlSpider, StructuredDataSpider):
@@ -10,8 +10,12 @@ class FrankieAndBennysGBSpider(CrawlSpider, StructuredDataSpider):
     allowed_domains = ["www.frankieandbennys.com"]
     start_urls = ["https://www.frankieandbennys.com/restaurants/index.html"]
     rules = [
-        Rule(LinkExtractor(allow="/restaurants/"), callback="parse_sd", follow=True)
+        Rule(
+            LinkExtractor(allow=r"/restaurants/[-\w]+/[-\w]+/[-\w]+$"),
+            callback="parse_sd",
+        ),
+        Rule(LinkExtractor(allow=r"/restaurants/[-\w]+/?[-\w]+?$")),
     ]
-    download_delay = 1
     wanted_types = ["Restaurant"]
     search_for_email = False
+    requires_proxy = True

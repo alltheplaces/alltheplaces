@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import json
 import re
 
@@ -19,9 +18,7 @@ class GeicoSpider(scrapy.Spider):
     def parse(self, response):
         response.selector.remove_namespaces()
 
-        urls = response.xpath(
-            '//loc[contains(text(), "insurance-agents")]/text()'
-        ).extract()
+        urls = response.xpath('//loc[contains(text(), "insurance-agents")]/text()').extract()
 
         for url in urls:
             if len(url.split("/")) > 7:  # location page
@@ -33,9 +30,7 @@ class GeicoSpider(scrapy.Spider):
         ).extract_first()
         if script_data:
             data = json.loads(script_data)
-            ref = "_".join(
-                re.search(r".+/(.+?)/(.+?)/?(?:\.html|$)", response.url).groups()
-            )
+            ref = "_".join(re.search(r".+/(.+?)/(.+?)/?(?:\.html|$)", response.url).groups())
 
             metadata = {
                 "name": data["name"],

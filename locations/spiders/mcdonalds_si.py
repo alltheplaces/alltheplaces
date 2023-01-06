@@ -1,21 +1,20 @@
-# -*- coding: utf-8 -*-
-import scrapy
 import re
 
+import scrapy
+
 from locations.items import GeojsonPointItem
+from locations.spiders.mcdonalds import McDonaldsSpider
 
 
 class McDonaldsSISpider(scrapy.Spider):
     name = "mcdonalds_si"
-    item_attributes = {"brand": "McDonald's", "brand_wikidata": "Q38076"}
+    item_attributes = McDonaldsSpider.item_attributes
     allowed_domains = ["www.mcdonalds.si"]
     start_urls = ("https://www.mcdonalds.si/restavracije/",)
 
     def parse_hour(self, time_str):
         sh = sm = eh = em = ""
-        match = re.search(
-            r"([0-9]{1,2}):([0-9]{1,2}) - ([0-9]{1,2}):([0-9]{1,2})", time_str
-        )
+        match = re.search(r"([0-9]{1,2}):([0-9]{1,2}) - ([0-9]{1,2}):([0-9]{1,2})", time_str)
         if match:
             sh, sm, eh, em = match.groups()
 

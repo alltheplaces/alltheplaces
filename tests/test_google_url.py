@@ -11,6 +11,9 @@ def test_embed():
     assert url_to_coords(
         "https://www.google.com/maps/embed?pb=!4v1609582314852!6m8!1m7!1sCAoSLEFGMVFpcFB3TzhsbGwtQ1RuMWhpS3I0cjZXYmZqaUloT3FRQ1VUNnhCRWo3!2m2!1d53.22113234117468!2d-0.5585914791344676!3f33.35570201128006!4f-4.604534739231056!5f0.7820865974627469"
     ) == (53.22113234117468, -0.5585914791344676)
+    assert url_to_coords(
+        "https://www.google.com/maps/embed/v1/place?key=AIzaSyBjjIa7P4QKNHSPXay5bq64BWfQXMQAX94&q=24.614918,73.705124"
+    ) == (24.614918, 73.705124)
 
 
 def test_staticmap():
@@ -33,24 +36,32 @@ def test_maps_url():
         52.578594,
         -2.112396,
     )
-    assert url_to_coords(
-        "http://maps.google.com/maps?saddr=current+location&ll=57.213,-2.187"
-    ) == (
+    assert url_to_coords("http://maps.google.com/maps?saddr=current+location&ll=57.213,-2.187") == (
         57.213,
         -2.187,
+    )
+    assert url_to_coords("https://www.google.com/maps?daddr=44.5043,8.9074") == (
+        44.5043,
+        8.9074,
+    )
+    assert url_to_coords("https://maps.google.com?daddr=52.01390075683594,4.152029991149902") == (
+        52.01390075683594,
+        4.152029991149902,
     )
 
 
 def test_directions():
-    assert url_to_coords(
-        "https://www.google.com/maps/dir//51.4063062, -0.02920658/"
-    ) == (
+    assert url_to_coords("https://www.google.com/maps/dir//51.4063062, -0.02920658/") == (
         51.4063062,
         -0.02920658,
     )
     assert url_to_coords(
         "https://www.google.com/maps/dir//Unit+35B%2C+The+Meadows%2C+42-47+High+Street%2C+Chelmsford%2C+CM2+6FD%2C+United+Kingdom/@51.73135800,0.47663600,17z"
     ) == (51.73135800, 0.47663600)
+    assert url_to_coords("https://www.google.com/maps/dir/?api=1&destination=51.5286809,7.4703131") == (
+        51.5286809,
+        7.4703131,
+    )
 
 
 def test_place():
@@ -69,6 +80,12 @@ def test_place():
 
 
 def test_search():
-    assert url_to_coords(
-        "https://www.google.com/maps/search/?api=1&query=55.0046686,-1.6200268"
-    ) == (55.0046686, -1.6200268)
+    assert url_to_coords("https://www.google.com/maps/search/?api=1&query=55.0046686,-1.6200268") == (
+        55.0046686,
+        -1.6200268,
+    )
+
+
+def test_apple_maps():
+    assert url_to_coords("http://maps.apple.com/?q=53.26471,-2.88613") == (53.26471, -2.88613)
+    assert url_to_coords("https://maps.apple.com/?q=53.26471,-2.88613") == (53.26471, -2.88613)

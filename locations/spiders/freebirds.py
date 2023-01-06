@@ -1,13 +1,12 @@
-# -*- coding: utf-8 -*-
 import scrapy
-import json
+
 from locations.items import GeojsonPointItem
 
 
 class Freebirds(scrapy.Spider):
     name = "freebirds"
     item_attributes = {"brand": "Freebirds World Burrito", "brand_wikidata": "Q5500367"}
-    start_urls = ["https://www.freebirds.com/api/restaurants?includePrivate=false"]
+    start_urls = ["https://www.freebirds.com/api/locations?includePrivate=false"]
 
     def parse(self, response):
         results = response.json()
@@ -24,5 +23,6 @@ class Freebirds(scrapy.Spider):
                 "lat": data.get("latitude"),
                 "lon": data.get("longitude"),
             }
+            # TODO: find root domain for slug
 
             yield GeojsonPointItem(**props)

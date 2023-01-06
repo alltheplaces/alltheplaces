@@ -1,13 +1,14 @@
-# -*- coding: utf-8 -*-
-import scrapy
 import json
 
+import scrapy
+
 from locations.items import GeojsonPointItem
+from locations.spiders.mcdonalds import McDonaldsSpider
 
 
 class McDonaldsLocalizerSpider(scrapy.Spider):
     name = "mclocalizer"
-    item_attributes = {"brand": "McDonald's", "brand_wikidata": "Q38076"}
+    item_attributes = McDonaldsSpider.item_attributes
     allowed_domains = [
         "www.mcdonalds.com",
         "www.mcdonalds.com.pr",
@@ -52,8 +53,6 @@ class McDonaldsLocalizerSpider(scrapy.Spider):
             name = contact_info[: contact_info.find("</br")]
 
             properties["name"] = name
-            properties["addr_full"] = data["name"][data["name"].find("<small>") : -8][
-                8:
-            ]
+            properties["addr_full"] = data["name"][data["name"].find("<small>") : -8][8:]
 
             yield GeojsonPointItem(**properties)

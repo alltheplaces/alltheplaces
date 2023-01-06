@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
 import scrapy
-import re
 
 from locations.linked_data_parser import LinkedDataParser
 from locations.microdata_parser import MicrodataParser
@@ -27,9 +25,7 @@ class MODPizzaSpider(scrapy.spiders.SitemapSpider):
         item = LinkedDataParser.parse(response, "FastFoodRestaurant")
 
         # The address isn't in the microdata.
-        item["street_address"] = response.css(
-            ".Address-field.Address-line1::text"
-        ).get()
+        item["street_address"] = response.css(".Address-field.Address-line1::text").get()
         item["city"] = response.css(".Address-city::text").get()
         item["state"] = response.css(".Address-field.Address-region::text").get()
         item["postcode"] = response.css(".Address-field.Address-postalCode::text").get()

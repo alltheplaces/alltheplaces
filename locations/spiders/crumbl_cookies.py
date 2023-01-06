@@ -1,6 +1,6 @@
-# -*- coding: utf-8 -*-
-import scrapy
 import json
+
+import scrapy
 
 from locations.items import GeojsonPointItem
 
@@ -12,9 +12,9 @@ class CrumblCookiesSpider(scrapy.Spider):
     start_urls = ("https://crumblcookies.com/stores",)
 
     def parse(self, response):
-        data = json.loads(
-            response.xpath('//script[@type="application/json"]/text()').extract_first()
-        )["props"]["pageProps"]["stores"]
+        data = json.loads(response.xpath('//script[@type="application/json"]/text()').extract_first())["props"][
+            "pageProps"
+        ]["stores"]
         for store in data:
             properties = {
                 "ref": store["storeId"],

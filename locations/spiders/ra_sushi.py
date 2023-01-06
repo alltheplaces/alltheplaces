@@ -10,12 +10,9 @@ class RaSushiSpider(scrapy.spiders.SitemapSpider):
     }
 
     sitemap_urls = ["https://rasushi.com/stores-sitemap.xml"]
-    sitemap_rules = [("/locations/.+", "parse_store")]
+    sitemap_rules = [("/locations/", "parse_store")]
 
     def parse_store(self, response):
-        if response.url == "https://rasushi.com/locations/":
-            return  # not found, redirects
-
         location = response.xpath("//div[@id='store_locator_single_map']")
         address = response.xpath("//span[@class='addressGet']//text()").extract()
         type = response.xpath("//span[@class='devOp1']/text()").extract_first()
@@ -51,9 +48,7 @@ class RaSushiSpider(scrapy.spiders.SitemapSpider):
         else:
             city_state = address[-1]
             addr_dict = {
-                "street_address": ",".join(address[0:2])
-                if len(address) == 3
-                else address[0].strip(),
+                "street_address": ",".join(address[0:2]) if len(address) == 3 else address[0].strip(),
                 "city": city_state.split(",")[0].strip(),
                 "state": city_state.split(",")[1].strip().split(" ")[0].strip(),
                 "postcode": city_state.split(",")[-1].strip().split(" ")[1].strip(),

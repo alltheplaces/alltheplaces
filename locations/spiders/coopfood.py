@@ -1,7 +1,7 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
+from locations.items import GeojsonPointItem
 
 
 class CoopFoodSpider(scrapy.Spider):
@@ -22,9 +22,7 @@ class CoopFoodSpider(scrapy.Spider):
             if hour["type"] == "24_hour":
                 close_time = "23:59"
             try:
-                opening_hours.add_range(
-                    day=hour["name"][:2], open_time=open_time, close_time=close_time
-                )
+                opening_hours.add_range(day=hour["name"][:2], open_time=open_time, close_time=close_time)
             except:  # no opening hours
                 continue
         return opening_hours.as_opening_hours()

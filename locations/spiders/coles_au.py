@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
-import re
+import json
 
 import scrapy
-import json
 
 from locations.items import GeojsonPointItem
 
@@ -16,9 +14,7 @@ class ColesAUSpider(scrapy.Spider):
     ]
 
     def parse(self, response):
-        with open(
-            "./locations/searchable_points/au_centroids_20km_radius.csv"
-        ) as points:
+        with open("./locations/searchable_points/au_centroids_20km_radius.csv") as points:
             next(points)
             for point in points:
                 row = point.replace("\n", "").split(",")
@@ -27,9 +23,7 @@ class ColesAUSpider(scrapy.Spider):
                 searchurl = "https://apigw.coles.com.au/digital/colesweb/v1/stores/search?latitude={la}&longitude={lo}&brandIds=2,1&numberOfStores=10".format(
                     la=lati, lo=long
                 )
-                yield scrapy.Request(
-                    response.urljoin(searchurl), callback=self.parse_search
-                )
+                yield scrapy.Request(response.urljoin(searchurl), callback=self.parse_search)
 
     def parse_search(self, response):
         data = json.loads(json.dumps(response.json()))

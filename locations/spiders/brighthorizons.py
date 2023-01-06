@@ -1,11 +1,11 @@
-# -*- coding: utf-8 -*-
 import json
 import logging
 import re
 import time
 
-from locations.items import GeojsonPointItem
 from scrapy.spiders import SitemapSpider
+
+from locations.items import GeojsonPointItem
 
 
 class BrightHorizonsSpider(SitemapSpider):
@@ -34,9 +34,7 @@ class BrightHorizonsSpider(SitemapSpider):
                 yield entry
 
     def parse_store(self, response):
-        linked_data = response.xpath(
-            '//script[@type="application/ld+json"]/text()'
-        ).getall()
+        linked_data = response.xpath('//script[@type="application/ld+json"]/text()').getall()
         for ld in linked_data:
             item = json.loads(ld)
 
@@ -66,16 +64,10 @@ class BrightHorizonsSpider(SitemapSpider):
                 if days != "M-F":
                     logging.error("Unexpected days: " + days)
                 else:
-                    start_time, end_time = (
-                        times.replace("a.m.", "AM").replace("p.m.", "PM").split(" to ")
-                    )
+                    start_time, end_time = times.replace("a.m.", "AM").replace("p.m.", "PM").split(" to ")
 
-                    start_time = time.strftime(
-                        "%H:%M", time.strptime(start_time, "%I:%M %p")
-                    )
-                    end_time = time.strftime(
-                        "%H:%M", time.strptime(end_time, "%I:%M %p")
-                    )
+                    start_time = time.strftime("%H:%M", time.strptime(start_time, "%I:%M %p"))
+                    end_time = time.strftime("%H:%M", time.strptime(end_time, "%I:%M %p"))
 
                     properties["opening_hours"] = f"Mo-Fr {start_time}-{end_time}"
 

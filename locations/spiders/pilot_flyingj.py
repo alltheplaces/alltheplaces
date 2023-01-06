@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import json
 
 import scrapy
@@ -14,18 +13,14 @@ class PilotFlyingJSpider(scrapy.Spider):
     start_urls = ["https://locations.pilotflyingj.com/"]
 
     def parse(self, response):
-        for href in response.xpath(
-            '//a[@data-ya-track="todirectory" or @data-ya-track="visitpage"]/@href'
-        ).extract():
+        for href in response.xpath('//a[@data-ya-track="todirectory" or @data-ya-track="visitpage"]/@href').extract():
             yield scrapy.Request(response.urljoin(href))
 
         for item in response.xpath('//*[@itemtype="http://schema.org/LocalBusiness"]'):
             yield from self.parse_store(response, item)
 
     def parse_store(self, response, item):
-        jsdata = json.loads(
-            item.xpath('.//script[@class="js-map-config"]/text()').get()
-        )
+        jsdata = json.loads(item.xpath('.//script[@class="js-map-config"]/text()').get())
         store = jsdata["entities"][0]["profile"]
         properties = {
             "ref": store["meta"]["id"],

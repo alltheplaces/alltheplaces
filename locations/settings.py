@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Scrapy settings for locations project
 #
 # For simplicity, this file contains only settings considered important or
@@ -10,8 +8,10 @@
 #     http://scrapy.readthedocs.org/en/latest/topics/spider-middleware.html
 
 import os
-import locations
+
 import scrapy
+
+import locations
 
 BOT_NAME = "locations"
 
@@ -87,10 +87,12 @@ ITEM_PIPELINES = {
     "locations.pipelines.ApplySpiderLevelAttributesPipeline": 300,
     "locations.pipelines.ApplySpiderNamePipeline": 350,
     "locations.pipelines.CountryCodeCleanUpPipeline": 355,
+    "locations.pipelines.PhoneCleanUpPipeline": 360,
     "locations.pipelines.ExtractGBPostcodePipeline": 400,
     "locations.pipelines.AssertURLSchemePipeline": 500,
     "locations.pipelines.CheckItemPropertiesPipeline": 600,
     "locations.pipelines.ApplyNSICategoriesPipeline": 700,
+    "locations.pipelines.CountCategoriesPipeline": 800,
 }
 
 

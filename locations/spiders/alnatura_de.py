@@ -1,10 +1,10 @@
-import scrapy
-import re
 import json
+import re
 
-from locations.items import GeojsonPointItem
+import scrapy
+
 from locations.hours import OpeningHours
-
+from locations.items import GeojsonPointItem
 
 DAY_MAPPING = {
     1: "Mo",
@@ -90,8 +90,7 @@ class AlnaturaDESpider(scrapy.Spider):
 
         for stores in data["Payload"]:
             yield scrapy.Request(
-                f"https://www.alnatura.de/api/sitecore/stores/StoreDetails"
-                f"?storeid={stores['Id']}",
+                f"https://www.alnatura.de/api/sitecore/stores/StoreDetails" f"?storeid={stores['Id']}",
                 callback=self.parse_stores,
                 meta={
                     "lat": stores["Lat"].replace(",", "."),

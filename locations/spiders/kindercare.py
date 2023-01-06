@@ -1,11 +1,8 @@
-# -*- coding: utf-8 -*-
 import json
-import re
 
 import scrapy
 
 from locations.items import GeojsonPointItem
-from locations.hours import OpeningHours
 
 
 class KindercareSpider(scrapy.Spider):
@@ -44,9 +41,7 @@ class KindercareSpider(scrapy.Spider):
         yield GeojsonPointItem(**properties)
 
     def parse(self, response):
-        urls = response.xpath(
-            '//div[contains(@class, "link-index-results")]//li/a/@href'
-        ).extract()
+        urls = response.xpath('//div[contains(@class, "link-index-results")]//li/a/@href').extract()
 
         for url in urls:
             yield scrapy.Request(response.urljoin(url), callback=self.parse_location)

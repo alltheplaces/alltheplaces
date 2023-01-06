@@ -1,47 +1,25 @@
-# -*- coding: utf-8 -*-
 from scrapy.spiders import SitemapSpider
 
-from locations.items import GeojsonPointItem
+from locations.structured_data_spider import StructuredDataSpider
 
 
-DEPARTMENTS = [
-    "/shipping-services",
-    "/packaging-support",
-    "/pickup-options",
-    "/value-added-options",
-    "/office-services",
-    "/computer-rental-wifi",
-    "/copy-print-services",
-    "/packaging-shipping-supplies",
-    "/photo-printing",
-]
-
-
-class FedExSpider(SitemapSpider):
+class FedExSpider(SitemapSpider, StructuredDataSpider):
     name = "fedex"
     item_attributes = {"brand": "FedEx", "brand_wikidata": "Q459477"}
-    sitemap_urls = ["https://local.fedex.com/sitemap.xml"]
+    sitemap_urls = [
+        "https://local.fedex.com/sitemap.xml",
+    ]
+    sitemap_rules = [
+        (r"\/[a-z0-9]{4,5}$", "parse_sd"),
+        (r"\/office-[0-9]{4}$", "parse_sd"),
+    ]
+    wanted_types = ["LocalBusiness"]
 
-    def sitemap_filter(self, entries):
-        for entry in entries:
-            if all(not entry["loc"].endswith(d) for d in DEPARTMENTS):
-                yield entry
+    def post_process_item(self, item, response, ld_data, **kwargs):
+        item["email"] = response.xpath('//a[@class="Hero-emailLink Link--primary"]/@href').extract_first()
+        if item["email"]:
+            item["email"] = item["email"][5:]
 
-    def parse(self, response):
-        main = response.xpath('//main[@itemtype="http://schema.org/LocalBusiness"]')
-        if not main:
-            return
-        properties = {
-            "ref": main.attrib["itemid"],
-            "website": response.url,
-            "name": main.xpath('normalize-space(.//h2[@itemprop="name"])').get(),
-            "lat": main.xpath('.//*[@itemprop="latitude"]/@content').get(),
-            "lon": main.xpath('.//*[@itemprop="longitude"]/@content').get(),
-            "street_address": main.xpath(
-                './/*[@itemprop="streetAddress"]/@content'
-            ).get(),
-            "city": main.css(".Address-city::text").get(),
-            "state": main.xpath('.//*[@itemprop="addressRegion"]/text()').get(),
-            "postcode": main.xpath('.//*[@itemprop="postalCode"]/text()').get(),
-        }
-        return GeojsonPointItem(**properties)
+        item["city"] = response.xpath('//span[@class="Address-field Address-city"]/text()').extract_first()
+
+        yield item

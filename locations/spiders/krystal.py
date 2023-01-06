@@ -1,7 +1,8 @@
 import json
-import scrapy
-from locations.items import GeojsonPointItem
 
+import scrapy
+
+from locations.items import GeojsonPointItem
 
 STATES = [
     "AL",
@@ -73,7 +74,7 @@ class KrystalSpider(scrapy.Spider):
             if epoch["open"] == "99":
                 epoch["open"] = "00"
 
-            if set(epoch.values()) == set(["99"]):
+            if set(epoch.values()) == {"99"}:
                 hours[key] = "00:00-24:00"
             elif len(epoch["close"]) < 2 and len(epoch["open"]) < 2:
                 hours[key] = "0{}:00-0{}:00".format(epoch["open"], epoch["close"])
@@ -120,9 +121,7 @@ class KrystalSpider(scrapy.Spider):
                     "state": store_infor["state"],
                     "postcode": store_infor["zip"],
                     "ref": store_infor["unit"],
-                    "website": "{}{}{}".format(
-                        "http://", self.allowed_domains[0], store_infor["url"]
-                    ),
+                    "website": "{}{}{}".format("http://", self.allowed_domains[0], store_infor["url"]),
                     "lat": store_infor["lat"],
                     "lon": store_infor["lng"],
                     "opening_hours": opening_hours,

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import scrapy
 
 from locations.items import GeojsonPointItem
@@ -28,9 +27,7 @@ class TacocabanaSpider(scrapy.Spider):
         )
 
     def request(self, url):
-        return scrapy.Request(
-            url, headers={"Authorization": f"Bearer {self.access_token}"}
-        )
+        return scrapy.Request(url, headers={"Authorization": f"Bearer {self.access_token}"})
 
     def parse(self, response):
         data = response.json()

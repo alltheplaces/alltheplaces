@@ -1,4 +1,5 @@
 import json
+
 import scrapy
 
 from locations.items import GeojsonPointItem
@@ -85,12 +86,8 @@ class PaneraBreadSpider(scrapy.Spider):
         hours = loc.xpath(
             '//div[@class="c-location-hours-details-wrapper js-location-hours"]/@data-days'
         ).extract_first()
-        props["lat"] = loc.xpath(
-            '//meta[@itemprop="latitude"]/@content'
-        ).extract_first()
-        props["lon"] = loc.xpath(
-            '//meta[@itemprop="longitude"]/@content'
-        ).extract_first()
+        props["lat"] = loc.xpath('//meta[@itemprop="latitude"]/@content').extract_first()
+        props["lon"] = loc.xpath('//meta[@itemprop="longitude"]/@content').extract_first()
         props["opening_hours"] = self.store_hours(json.loads(hours))
 
         return GeojsonPointItem(**props)
@@ -101,23 +98,17 @@ class PaneraBreadSpider(scrapy.Spider):
         ).extract()
         if len(locations) > 0:
             for loc in locations:
-                yield scrapy.Request(
-                    city_page.urljoin(loc), callback=self.parse_location
-                )
+                yield scrapy.Request(city_page.urljoin(loc), callback=self.parse_location)
         else:
             yield self.parse_location(city_page)
 
     def parse_state(self, state_page):
-        cities = state_page.xpath(
-            '//a[@class="c-directory-list-content-item-link"]/@href'
-        ).extract()
+        cities = state_page.xpath('//a[@class="c-directory-list-content-item-link"]/@href').extract()
         for city in cities:
             yield scrapy.Request(state_page.urljoin(city), callback=self.parse_city)
 
     def parse(self, response):
 
-        states = response.xpath(
-            '//a[@class="c-directory-list-content-item-link"]/@href'
-        ).extract()
+        states = response.xpath('//a[@class="c-directory-list-content-item-link"]/@href').extract()
         for state in states:
             yield scrapy.Request(response.urljoin(state), callback=self.parse_state)

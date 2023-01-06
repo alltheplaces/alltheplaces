@@ -1,13 +1,9 @@
-# -*- coding: utf-8 -*-
 import csv
 import json
-import re
 
 import scrapy
 
-
 from locations.items import GeojsonPointItem
-
 
 states = ["AL", "FL", "GA", "NC", "SC", "TN", "VA"]
 
@@ -19,9 +15,7 @@ class PublixSpider(scrapy.Spider):
     download_delay = 0.2
 
     def start_requests(self):
-        with open(
-            "./locations/searchable_points/us_centroids_10mile_radius_state.csv"
-        ) as points:
+        with open("./locations/searchable_points/us_centroids_10mile_radius_state.csv") as points:
             for row in csv.DictReader(points):
                 if row["state"] not in states:
                     continue

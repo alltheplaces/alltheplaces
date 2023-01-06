@@ -1,6 +1,6 @@
-# -*- coding: utf-8 -*-
-import scrapy
 import json
+
+import scrapy
 
 from locations.items import GeojsonPointItem
 
@@ -37,12 +37,8 @@ class TheRangeSpider(scrapy.Spider):
                         "country": store["address"]["addressCountry"],
                         "street": store["address"]["streetAddress"],
                         "phone": store["telephone"],
-                        "lat": self.store_to_geo[store["name"].split(":")[1].strip()][
-                            0
-                        ],
-                        "lon": self.store_to_geo[store["name"].split(":")[1].strip()][
-                            1
-                        ],
+                        "lat": self.store_to_geo[store["name"].split(":")[1].strip()][0],
+                        "lon": self.store_to_geo[store["name"].split(":")[1].strip()][1],
                     }
 
                     yield GeojsonPointItem(**properties)
@@ -63,9 +59,7 @@ class TheRangeSpider(scrapy.Spider):
                 markers_str = s.split("var markers = [")[1].split("];")[0].strip()
 
                 # Turn the string into a list of individual store strings "Store,Lat,Lon"
-                markers = (
-                    markers_str.replace("[", "").replace("\n", "").split("],")[:-1]
-                )
+                markers = markers_str.replace("[", "").replace("\n", "").split("],")[:-1]
 
                 # Save data into store_to_geo class variable
                 for marker in markers:
@@ -75,6 +69,4 @@ class TheRangeSpider(scrapy.Spider):
                     ]
 
         for store in response.css("#storelist li a::attr(href)").getall():
-            yield scrapy.Request(
-                response.urljoin(store), callback=self.parse_store_page
-            )
+            yield scrapy.Request(response.urljoin(store), callback=self.parse_store_page)

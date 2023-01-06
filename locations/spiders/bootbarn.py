@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
 import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
+from locations.items import GeojsonPointItem
 
 
 class BootbarnSpider(scrapy.Spider):
@@ -32,31 +31,17 @@ class BootbarnSpider(scrapy.Spider):
     def parse_location(self, response):
         properties = {
             "ref": re.search(r".+/?StoreID=(.+)", response.url).group(1),
-            "name": response.xpath(
-                'normalize-space(//span[@class="store-name"]//text())'
-            ).extract_first(),
-            "addr_full": response.xpath(
-                'normalize-space(//span[@class="store-address1"]//text())'
-            ).extract_first(),
-            "city": response.xpath(
-                'normalize-space(//span[@class="store-address-city"]//text())'
-            ).extract_first(),
-            "state": response.xpath(
-                'normalize-space(//span[@class="store-address-state"]//text())'
-            ).extract_first(),
+            "name": response.xpath('normalize-space(//span[@class="store-name"]//text())').extract_first(),
+            "addr_full": response.xpath('normalize-space(//span[@class="store-address1"]//text())').extract_first(),
+            "city": response.xpath('normalize-space(//span[@class="store-address-city"]//text())').extract_first(),
+            "state": response.xpath('normalize-space(//span[@class="store-address-state"]//text())').extract_first(),
             "postcode": response.xpath(
                 'normalize-space(//span[@class="store-address-postal-code"]//text())'
             ).extract_first(),
-            "phone": response.xpath(
-                'normalize-space(//span[@class="store-phone"]//text())'
-            ).extract_first(),
+            "phone": response.xpath('normalize-space(//span[@class="store-phone"]//text())').extract_first(),
             "website": response.url,
-            "lat": response.xpath(
-                '//div[@id="store-detail-coords"]/@data-lat'
-            ).extract_first(),
-            "lon": response.xpath(
-                '//div[@id="store-detail-coords"]/@data-lon'
-            ).extract_first(),
+            "lat": response.xpath('//div[@id="store-detail-coords"]/@data-lat').extract_first(),
+            "lon": response.xpath('//div[@id="store-detail-coords"]/@data-lon').extract_first(),
         }
 
         properties["opening_hours"] = self.parse_hours(
@@ -68,9 +53,7 @@ class BootbarnSpider(scrapy.Spider):
         yield GeojsonPointItem(**properties)
 
     def parse(self, response):
-        urls = response.xpath(
-            '//div[@class="store"]/div[@class="city"]/a/@href'
-        ).extract()
+        urls = response.xpath('//div[@class="store"]/div[@class="city"]/a/@href').extract()
 
         for url in urls:
             yield scrapy.Request(response.urljoin(url), callback=self.parse_location)

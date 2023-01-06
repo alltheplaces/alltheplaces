@@ -1,11 +1,10 @@
-# -*- coding: utf-8 -*-
-import json
 import re
-import scrapy
 
+import scrapy
 from scrapy.spiders import Spider
-from locations.items import GeojsonPointItem
+
 from locations.hours import OpeningHours
+from locations.items import GeojsonPointItem
 
 
 class PotbellySandwichShopSpider(Spider):
@@ -31,9 +30,7 @@ class PotbellySandwichShopSpider(Spider):
         oh = OpeningHours()
         if calendars := store.get("calendars"):
             # Look for the first calendar showing "business hours"
-            business_hours_calendar = next(
-                filter(lambda c: c["type"] == "business", calendars)
-            )
+            business_hours_calendar = next(filter(lambda c: c["type"] == "business", calendars))
 
             calendar_ranges = business_hours_calendar.get("ranges")
             first_day_seen = None

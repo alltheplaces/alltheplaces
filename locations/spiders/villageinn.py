@@ -1,6 +1,6 @@
-# -*- coding: utf-8 -*-
-import scrapy
 import re
+
+import scrapy
 
 from locations.items import GeojsonPointItem
 
@@ -16,14 +16,10 @@ class VillageInnSpider(scrapy.Spider):
         links = selector.css("a.animatedlink::attr(href)")
 
         for link in links:
-            yield scrapy.Request(
-                response.urljoin(link.extract().strip()), callback=self.parse_link
-            )
+            yield scrapy.Request(response.urljoin(link.extract().strip()), callback=self.parse_link)
 
     def parse_link(self, response):
-        website = response.xpath(
-            '//head/meta[@property="og:url"]/@content'
-        ).extract_first()
+        website = response.xpath('//head/meta[@property="og:url"]/@content').extract_first()
         ref = website.split("/")[-1]
         lat = response.css("#h_lat::attr(value)").extract_first()
         lng = response.css("#h_lng::attr(value)").extract_first()

@@ -1,13 +1,14 @@
-# -*- coding: utf-8 -*-
-import scrapy
 import re
+
+import scrapy
+
 from locations.items import GeojsonPointItem
+from locations.spiders.mcdonalds import McDonaldsSpider
 
 
 class McDonaldsMTSpider(scrapy.Spider):
-
     name = "mcdonalds_mt"
-    item_attributes = {"brand": "McDonald's", "brand_wikidata": "Q38076"}
+    item_attributes = McDonaldsSpider.item_attributes
     allowed_domains = ["mcdonalds.com.mt"]
     start_urls = ("http://mcdonalds.com.mt/find-restaurants",)
 
@@ -36,16 +37,12 @@ class McDonaldsMTSpider(scrapy.Spider):
         for day_hour in day_hours:
             day_hour = day_hour.strip()
             hours = ""
-            match = re.search(
-                r"([0-9]{1,2}).([0-9]{1,2}) - ([0-9]{1,2}).([0-9]{1,2})", day_hour
-            )
+            match = re.search(r"([0-9]{1,2}).([0-9]{1,2}) - ([0-9]{1,2}).([0-9]{1,2})", day_hour)
             if not match:
                 continue
             else:
                 sh, sm, eh, em = match.groups()
-                hours = "{}:{}-{}:{}".format(
-                    sh, sm, int(eh) + 12 if int(eh) < 12 else int(eh), em
-                )
+                hours = "{}:{}-{}:{}".format(sh, sm, int(eh) + 12 if int(eh) < 12 else int(eh), em)
             short_day = weekdays[index]
             if not this_day_group:
                 this_day_group = {

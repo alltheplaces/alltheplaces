@@ -6,12 +6,12 @@ class Singleton(type):
 
     def __call__(cls, *args, **kwargs):
         if cls not in cls._instances:
-            cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
+            cls._instances[cls] = super().__call__(*args, **kwargs)
         return cls._instances[cls]
 
 
 # This is a lazy initialised singleton as it pulls (over the network) quite a lot of data into memory.
-class NSI(object, metaclass=Singleton):
+class NSI(metaclass=Singleton):
     """
     Interact with Name Suggestion Index (NSI). The NSI people publish a JSON version of their database
     which is used by the OSM editor to do rather useful brand suggestions when editing POIs.
@@ -24,10 +24,7 @@ class NSI(object, metaclass=Singleton):
 
     @staticmethod
     def _request_file(file):
-        resp = requests.get(
-            "https://raw.githubusercontent.com/osmlab/name-suggestion-index/main/dist/"
-            + file
-        )
+        resp = requests.get("https://raw.githubusercontent.com/osmlab/name-suggestion-index/main/dist/" + file)
         if not resp.status_code == 200:
             raise Exception("NSI load failure")
         return resp.json()
@@ -75,6 +72,8 @@ class NSI(object, metaclass=Singleton):
                 if not wikidata_code:
                     yield item
                 elif wikidata_code == item["tags"].get("brand:wikidata"):
+                    yield item
+                elif wikidata_code == item["tags"].get("operator:wikidata"):
                     yield item
 
     @staticmethod

@@ -1,5 +1,5 @@
-# -*- coding: utf-8 -*-
 import re
+
 import scrapy
 
 from locations.items import GeojsonPointItem
@@ -15,9 +15,7 @@ class DominosPizzaAUSpider(scrapy.Spider):
     def parse(self, response):
         store_urls = response.xpath('//link[@rel="canonical"]/@href').extract()
         for store_url in store_urls:
-            yield scrapy.Request(
-                response.urljoin(store_url), callback=self.parse_region
-            )
+            yield scrapy.Request(response.urljoin(store_url), callback=self.parse_region)
 
     def parse_region(self, response):
         regions = response.xpath('//ul[@id="region-links"]/li/a/@href').extract()
@@ -25,9 +23,7 @@ class DominosPizzaAUSpider(scrapy.Spider):
             yield scrapy.Request(response.urljoin(region), callback=self.parse_locality)
 
     def parse_locality(self, response):
-        stores = response.xpath(
-            '//div[@class="store-information"]/h4/a/@href'
-        ).extract()
+        stores = response.xpath('//div[@class="store-information"]/h4/a/@href').extract()
         for store in stores:
             yield scrapy.Request(response.urljoin(store), callback=self.pares_store)
 
@@ -42,16 +38,8 @@ class DominosPizzaAUSpider(scrapy.Spider):
             "name": response.xpath('//div[@class="storetitle"]/text()').extract_first(),
             "addr_full": addr_full.strip(),
             "country": country,
-            "lat": float(
-                response.xpath(
-                    '//div[@class="store-details-info"]/div[1]/input[1]/@value'
-                ).extract_first()
-            ),
-            "lon": float(
-                response.xpath(
-                    '//div[@class="store-details-info"]/div[1]/input[2]/@value'
-                ).extract_first()
-            ),
+            "lat": float(response.xpath('//div[@class="store-details-info"]/div[1]/input[1]/@value').extract_first()),
+            "lon": float(response.xpath('//div[@class="store-details-info"]/div[1]/input[2]/@value').extract_first()),
             "website": response.url,
         }
         yield GeojsonPointItem(**properties)

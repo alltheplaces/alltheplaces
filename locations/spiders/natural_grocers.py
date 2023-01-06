@@ -1,8 +1,7 @@
-import time
 from scrapy.spiders import SitemapSpider
 
-from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours, day_range, sanitise_day
+from locations.items import GeojsonPointItem
 
 
 class NaturalGrocersSpider(SitemapSpider):
@@ -23,22 +22,12 @@ class NaturalGrocersSpider(SitemapSpider):
             ref=response.url,
             website=response.url,
             name=response.css(".node-title span::text").get().strip(),
-            lat=response.xpath('//div[@id="main"]//meta[@property="latitude"]').attrib[
-                "content"
-            ],
-            lon=response.xpath('//div[@id="main"]//meta[@property="longitude"]').attrib[
-                "content"
-            ],
-            addr_full=response.xpath('//div[@id="main"]')
-            .css(".address-line1::text")
-            .get(),
+            lat=response.xpath('//div[@id="main"]//meta[@property="latitude"]').attrib["content"],
+            lon=response.xpath('//div[@id="main"]//meta[@property="longitude"]').attrib["content"],
+            addr_full=response.xpath('//div[@id="main"]').css(".address-line1::text").get(),
             city=response.xpath('//div[@id="main"]').css(".locality::text").get(),
-            state=response.xpath('//div[@id="main"]')
-            .css(".administrative-area::text")
-            .get(),
-            postcode=response.xpath('//div[@id="main"]')
-            .css(".postal-code::text")
-            .get(),
+            state=response.xpath('//div[@id="main"]').css(".administrative-area::text").get(),
+            postcode=response.xpath('//div[@id="main"]').css(".postal-code::text").get(),
             country=response.xpath('//div[@id="main"]').css(".country::text").get(),
             opening_hours=self.get_hours(response),
         )
@@ -48,12 +37,8 @@ class NaturalGrocersSpider(SitemapSpider):
     def get_hours(self, response):
         o = OpeningHours()
         for days, hours in zip(
-            response.css(
-                ".store-info.store-hours .office-hours__item-label::text"
-            ).getall(),
-            response.css(
-                ".store-info.store-hours .office-hours__item-slots::text"
-            ).getall(),
+            response.css(".store-info.store-hours .office-hours__item-label::text").getall(),
+            response.css(".store-info.store-hours .office-hours__item-slots::text").getall(),
         ):
             days = [sanitise_day(d.strip(" :")) for d in days.split("-")]
             if len(days) == 2:

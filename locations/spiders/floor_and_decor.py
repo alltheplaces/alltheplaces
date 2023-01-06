@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import re
 
 import scrapy
@@ -16,9 +15,7 @@ class FloorAndDecorSpider(scrapy.Spider):
     download_delay = 0.3
 
     def parse(self, response):
-        store_urls = re.findall(
-            r"<div class='store-footer'><a href='(.*)'>", response.text
-        )
+        store_urls = re.findall(r"<div class='store-footer'><a href='(.*)'>", response.text)
 
         for store_url in store_urls:
             yield scrapy.Request(store_url, callback=self.parse_store)
@@ -28,37 +25,17 @@ class FloorAndDecorSpider(scrapy.Spider):
 
         properties = {
             "ref": ref,
-            "name": response.xpath(
-                'normalize-space(//div[@class="name"]/h1/text())'
-            ).extract_first(),
-            "addr_full": response.xpath(
-                'normalize-space(//span[@itemprop="streetAddress"]//text())'
-            ).extract_first(),
-            "city": response.xpath(
-                'normalize-space(//span[@itemprop="addressLocality"]//text())'
-            )
+            "name": response.xpath('normalize-space(//div[@class="name"]/h1/text())').extract_first(),
+            "addr_full": response.xpath('normalize-space(//span[@itemprop="streetAddress"]//text())').extract_first(),
+            "city": response.xpath('normalize-space(//span[@itemprop="addressLocality"]//text())')
             .extract_first()
             .strip(","),
-            "state": response.xpath(
-                'normalize-space(//span[@itemprop="addressRegion"]//text())'
-            ).extract_first(),
-            "postcode": response.xpath(
-                'normalize-space(//span[@itemprop="postalCode"]//text())'
-            ).extract_first(),
-            "phone": response.xpath(
-                'normalize-space(//span[@itemprop="telephone"]//text())'
-            ).extract_first(),
+            "state": response.xpath('normalize-space(//span[@itemprop="addressRegion"]//text())').extract_first(),
+            "postcode": response.xpath('normalize-space(//span[@itemprop="postalCode"]//text())').extract_first(),
+            "phone": response.xpath('normalize-space(//span[@itemprop="telephone"]//text())').extract_first(),
             "website": response.url,
-            "lat": float(
-                response.xpath(
-                    'normalize-space(//meta[@itemprop="latitude"]/@content)'
-                ).extract_first()
-            ),
-            "lon": float(
-                response.xpath(
-                    'normalize-space(//meta[@itemprop="longitude"]/@content)'
-                ).extract_first()
-            ),
+            "lat": float(response.xpath('normalize-space(//meta[@itemprop="latitude"]/@content)').extract_first()),
+            "lon": float(response.xpath('normalize-space(//meta[@itemprop="longitude"]/@content)').extract_first()),
         }
 
         yield GeojsonPointItem(**properties)

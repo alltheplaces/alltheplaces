@@ -1,9 +1,9 @@
-# -*- coding: utf-8 -*-
-import re
 import json
+import re
+
+from scrapy.spiders import SitemapSpider
 
 from locations.items import GeojsonPointItem
-from scrapy.spiders import SitemapSpider
 
 
 class FarmersInsuranceSpider(SitemapSpider):
@@ -23,30 +23,16 @@ class FarmersInsuranceSpider(SitemapSpider):
         ref = re.search(r".+/(.+)", response.url).group(1)
         properties = {
             "ref": ref.strip("/"),
-            "addr_full": response.xpath(
-                '//meta[@itemprop="streetAddress"]/@content'
-            ).extract_first(),
-            "city": response.xpath(
-                '//meta[@itemprop="addressLocality"]/@content'
-            ).extract_first(),
-            "state": response.xpath(
-                '//abbr[@class="c-address-state"]/text()'
-            ).extract_first(),
-            "postcode": response.xpath(
-                '//span[@class="c-address-postal-code"]/text()'
-            ).extract_first(),
-            "phone": response.xpath(
-                '//span[@itemprop="telephone"]/text()'
-            ).extract_first(),
+            "addr_full": response.xpath('//meta[@itemprop="streetAddress"]/@content').extract_first(),
+            "city": response.xpath('//meta[@itemprop="addressLocality"]/@content').extract_first(),
+            "state": response.xpath('//abbr[@class="c-address-state"]/text()').extract_first(),
+            "postcode": response.xpath('//span[@class="c-address-postal-code"]/text()').extract_first(),
+            "phone": response.xpath('//span[@itemprop="telephone"]/text()').extract_first(),
             "country": response.xpath(
                 '//abbr[@class="c-address-country-name c-address-country-us"]/text()'
             ).extract_first(),
-            "lat": float(
-                response.xpath('//meta[@itemprop="latitude"]/@content').extract_first()
-            ),
-            "lon": float(
-                response.xpath('//meta[@itemprop="longitude"]/@content').extract_first()
-            ),
+            "lat": float(response.xpath('//meta[@itemprop="latitude"]/@content').extract_first()),
+            "lon": float(response.xpath('//meta[@itemprop="longitude"]/@content').extract_first()),
             "website": response.url,
         }
 
@@ -70,10 +56,7 @@ class FarmersInsuranceSpider(SitemapSpider):
         for day in days:
             start_day = day["day"][:2].title()
             intervals = day["intervals"]
-            hours = [
-                "%04d-%04d" % (interval["start"], interval["end"])
-                for interval in intervals
-            ]
+            hours = ["%04d-%04d" % (interval["start"], interval["end"]) for interval in intervals]
             if len(intervals):
                 out_hours.append("{} {}".format(start_day, ",".join(hours)))
         if len(out_hours):

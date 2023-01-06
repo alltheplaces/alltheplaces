@@ -1,8 +1,8 @@
-# -*- coding: utf-8 -*-
 import re
 
-from locations.linked_data_parser import LinkedDataParser
 from scrapy.spiders import SitemapSpider
+
+from locations.linked_data_parser import LinkedDataParser
 
 BRANDS = {
     "laquinta": ["La Quinta by Wyndham", "Q6464734"],
@@ -36,9 +36,7 @@ class WyndhamSpider(SitemapSpider):
     download_delay = 1
     allowed_domains = ["www.wyndhamhotels.com"]
     sitemap_urls = ["https://www.wyndhamhotels.com/sitemap.xml"]
-    sitemap_follow = [
-        r"https:\/\/www\.wyndhamhotels\.com\/sitemap_en-us_([\w]{2})_properties_\d\.xml"
-    ]
+    sitemap_follow = [r"https:\/\/www\.wyndhamhotels\.com\/sitemap_en-us_([\w]{2})_properties_\d\.xml"]
     sitemap_rules = [
         (
             r"https:\/\/www\.wyndhamhotels\.com\/([-\w]+)\/([-\w]+)\/([-\w]+)\/overview",
@@ -58,9 +56,7 @@ class WyndhamSpider(SitemapSpider):
         if ref:
             item["ref"] = ref.group(1)
         else:
-            item["ref"] = response.url.replace(
-                "https://www.wyndhamhotels.com/", ""
-            ).replace("/overview", "")
+            item["ref"] = response.url.replace("https://www.wyndhamhotels.com/", "").replace("/overview", "")
 
         brand_id = re.match(self.sitemap_rules[0][0], response.url).group(1)
         brand = BRANDS[brand_id]

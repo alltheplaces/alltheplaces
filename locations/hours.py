@@ -1,8 +1,6 @@
 import re
-from collections import defaultdict
-
 import time
-
+from collections import defaultdict
 
 DAYS = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
 DAYS_FULL = [
@@ -42,12 +40,19 @@ DAYS_EN = {
     "Su": "Su",
 }
 DAYS_DE = {
+    "Montag": "Mo",
     "Mo": "Mo",
+    "Dienstag": "Tu",
     "Di": "Tu",
+    "Mittwoch": "We",
     "Mi": "We",
+    "Donnerstag": "Th",
     "Do": "Th",
+    "Freitag": "Fr",
     "Fr": "Fr",
+    "Samstag": "Sa",
     "Sa": "Sa",
+    "Sonntag": "Su",
     "So": "Su",
 }
 DAYS_BG = {
@@ -92,6 +97,34 @@ DAYS_SI = {
     "ne": "Su",
     "Ned": "Su",
 }
+DAYS_IT = {
+    "Lun": "Mo",
+    "Mar": "Tu",
+    "Mer": "We",
+    "Gio": "Th",
+    "Ven": "Fr",
+    "Sab": "Sa",
+    "Dom": "Su",
+}
+DAYS_FR = {
+    "Lu": "Mo",
+    "Ma": "Tu",
+    "Me": "We",
+    "Je": "Th",
+    "Ve": "Fr",
+    "Sa": "Sa",
+    "Di": "Su",
+}
+
+DAYS_NL = {
+    "Ma": "Mo",
+    "Di": "Tu",
+    "Wo": "We",
+    "Do": "Th",
+    "Vr": "Fr",
+    "Za": "Sa",
+    "Zo": "Su",
+}
 
 
 def day_range(start_day, end_day):
@@ -109,17 +142,15 @@ def sanitise_day(day: str, days: {} = DAYS_EN) -> str:
 
     day = day.strip("-.\t ").lower()
 
-    day = (
-        day.replace("https://", "")
-        .replace("http://", "")
-        .replace("schema.org/", "")
-        .title()
-    )
+    day = day.replace("https://", "").replace("http://", "").replace("schema.org/", "").title()
+
+    if "#" in day:
+        day = day.split("#", 1)[1]
 
     return days.get(day)
 
 
-class OpeningHours(object):
+class OpeningHours:
     def __init__(self):
         self.day_hours = defaultdict(list)
 
@@ -191,11 +222,7 @@ class OpeningHours(object):
     def from_linked_data(self, linked_data, time_format="%H:%M"):
         if linked_data.get("openingHoursSpecification"):
             for rule in linked_data["openingHoursSpecification"]:
-                if (
-                    not rule.get("dayOfWeek")
-                    or not rule.get("opens")
-                    or not rule.get("closes")
-                ):
+                if not rule.get("dayOfWeek") or not rule.get("opens") or not rule.get("closes"):
                     continue
 
                 days = rule["dayOfWeek"]
@@ -213,7 +240,7 @@ class OpeningHours(object):
             rules = linked_data["openingHours"]
             if not isinstance(rules, list):
                 rules = re.findall(
-                    r"((\w\w|\w\w\s?\-\s?\w\w|(\w\w,)+\w\w)\s(\d\d:\d\d)\s?\-\s?(\d\d:\d\d))",
+                    r"((\w{2,3}|\w{2,3}\s?\-\s?\w{2,3}|(\w{2,3},)+\w{2,3})\s(\d\d:\d\d)\s?\-\s?(\d\d:\d\d))",
                     rules,
                 )
                 rules = [r[0] for r in rules]

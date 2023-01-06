@@ -1,8 +1,9 @@
 import json
+
 import scrapy
 
-from locations.hours import OpeningHours
 from locations.geo import postal_regions
+from locations.hours import OpeningHours
 from locations.items import GeojsonPointItem
 from locations.user_agents import BROSWER_DEFAULT
 
@@ -30,10 +31,7 @@ class LittleCaesarsSpider(scrapy.Spider):
 
     def start_requests(self):
         for record in postal_regions("US"):
-            url = (
-                "https://api.cloud.littlecaesars.com/bff/api/stores?zip="
-                + record["postal_region"]
-            )
+            url = "https://api.cloud.littlecaesars.com/bff/api/stores?zip=" + record["postal_region"]
             yield scrapy.http.Request(url, self.parse, method="GET")
 
     def parse(self, response):

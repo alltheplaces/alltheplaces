@@ -1,8 +1,7 @@
-# -*- coding: utf-8 -*-
 import scrapy
 
-from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
+from locations.items import GeojsonPointItem
 
 
 class DressBarnSpider(scrapy.Spider):
@@ -19,46 +18,26 @@ class DressBarnSpider(scrapy.Spider):
             if hrs == "Closed":
                 continue
             open_time, close_time = hrs.split("-")
-            opening_hours.add_range(
-                day=day, open_time=open_time, close_time=close_time, time_format="%H:%M"
-            )
+            opening_hours.add_range(day=day, open_time=open_time, close_time=close_time, time_format="%H:%M")
 
         return opening_hours.as_opening_hours()
 
     def parse_stores(self, response):
 
         props = {
-            "name": response.xpath(
-                '//span[@id="location-name"]/text()'
-            ).extract_first(),
-            "addr_full": response.xpath(
-                '//meta[@itemprop="streetAddress"]/@content'
-            ).extract_first(),
-            "phone": response.xpath(
-                '//div[@itemprop="telephone"]/text()'
-            ).extract_first(),
-            "city": response.xpath(
-                '//meta[@itemprop="addressLocality"]/@content'
-            ).extract_first(),
-            "state": response.xpath(
-                '//*[@itemprop="addressRegion"]/text()'
-            ).extract_first(),
-            "postcode": response.xpath(
-                '//*[@itemprop="postalCode"]/text()'
-            ).extract_first(),
-            "lat": float(
-                response.xpath('//meta[@itemprop="latitude"]/@content').extract_first()
-            ),
-            "lon": float(
-                response.xpath('//meta[@itemprop="longitude"]/@content').extract_first()
-            ),
+            "name": response.xpath('//span[@id="location-name"]/text()').extract_first(),
+            "addr_full": response.xpath('//meta[@itemprop="streetAddress"]/@content').extract_first(),
+            "phone": response.xpath('//div[@itemprop="telephone"]/text()').extract_first(),
+            "city": response.xpath('//meta[@itemprop="addressLocality"]/@content').extract_first(),
+            "state": response.xpath('//*[@itemprop="addressRegion"]/text()').extract_first(),
+            "postcode": response.xpath('//*[@itemprop="postalCode"]/text()').extract_first(),
+            "lat": float(response.xpath('//meta[@itemprop="latitude"]/@content').extract_first()),
+            "lon": float(response.xpath('//meta[@itemprop="longitude"]/@content').extract_first()),
             "ref": response.url,
             "website": response.url,
         }
 
-        opening_hours = self.parse_hours(
-            response.xpath('//tr[@itemprop="openingHours"]/@content').extract()
-        )
+        opening_hours = self.parse_hours(response.xpath('//tr[@itemprop="openingHours"]/@content').extract())
         if opening_hours:
             props["opening_hours"] = opening_hours
 

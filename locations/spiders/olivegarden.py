@@ -1,53 +1,46 @@
-# -*- coding: utf-8 -*-
+import re
+
 import scrapy
+from scrapy.spiders import SitemapSpider
 
-from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.dict_parser import DictParser
+from locations.hours import DAYS, OpeningHours
 
 
-class OliveGardenSpider(scrapy.Spider):
+class OliveGardenSpider(SitemapSpider):
     name = "olivegarden"
     item_attributes = {"brand": "Olive Garden", "brand_wikidata": "Q3045312"}
     allowed_domains = ["olivegarden.com"]
-    start_urls = [
+    sitemap_urls = [
         "https://www.olivegarden.com/en-locations-sitemap.xml",
     ]
+    sitemap_rules = [(r"[0-9]+$", "parse")]
 
-    def parse(self, response):
-        response.selector.remove_namespaces()
-        for loc in response.xpath("//loc/text()").extract():
-            ref = int(loc.split("/")[-1])
-            url = f"https://www.olivegarden.com/web-api/restaurant/{ref}?locale=en_US&restNumFlag=true&restaurantNumber={ref}"
-            yield scrapy.Request(url, self.parse_restaurant, meta={"website": loc})
+    def _parse_sitemap(self, response):
+        for row in super()._parse_sitemap(response):
+            store_id = re.findall(r"[0-9]+$", row.url)[0]
+            url = f"https://www.olivegarden.com/web-api/restaurant/{store_id}?locale=en_US&restNumFlag=true&restaurantNumber={store_id}"
+            yield scrapy.Request(
+                url=url, callback=self.parse_store, cb_kwargs={"store_id": store_id, "website": row.url}
+            )
 
-    def parse_restaurant(self, response):
-        data = response.json()["successResponse"]["restaurantDetails"]
-        # Field is named longitudeLatitude and contains latitude, longitude.
-        lat, lon = data["address"]["longitudeLatitude"].split(",")
-        properties = {
-            "lon": lon,
-            "lat": lat,
-            "website": response.meta["website"],
-            "ref": data["restaurantNum"],
-            "name": data["restaurantName"],
-            "street_address": data["address"]["address1"],
-            "city": data["address"]["city"],
-            "state": data["address"]["state"],
-            "postcode": data["address"]["zipCode"],
-            "country": data["address"]["country"],
-            "phone": data["restPhoneNumber"][0]["Phone"],
-            "opening_hours": self.parse_hours(data),
-        }
-        yield GeojsonPointItem(**properties)
-
-    @staticmethod
-    def parse_hours(data):
+    def parse_store(self, response, store_id, website):
+        data = response.json().get("successResponse", {}).get("restaurantDetails", {})
+        item = DictParser.parse(data.get("address"))
+        item["ref"] = store_id
+        item["name"] = data.get("restaurantName")
+        item["phone"] = data.get("restPhoneNumber")[0].get("Phone")
+        item["lat"], item["lon"] = data.get("address", {}).get("longitudeLatitude").split(",")
+        item["website"] = website
+        days = [day for day in data.get("weeklyHours") if day.get("hourCode") == "OP"]
         oh = OpeningHours()
-        # Sun = 1, Sat = 7
-        day = lambda d: data["daysOfWeeks"][d - 1][:2].title()
-        for row in data["weeklyHours"]:
-            if row["hourTypeDesc"] == "Hours of Operations":
-                oh.add_range(
-                    day(row["dayOfWeek"]), row["startTime"], row["endTime"], "%I:%M%p"
-                )
-        return oh.as_opening_hours()
+        for day in days:
+            oh.add_range(
+                day=DAYS[day.get("dayOfWeek") - 1],
+                open_time=day.get("startTime"),
+                close_time=day.get("endTime"),
+                time_format="%I:%M%p",
+            )
+        item["opening_hours"] = oh.as_opening_hours()
+
+        yield item

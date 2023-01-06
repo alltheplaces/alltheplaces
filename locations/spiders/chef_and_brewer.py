@@ -11,9 +11,7 @@ class ChefAndBrewerSpider(SitemapSpider):
         "country": "GB",
     }
     sitemap_urls = ["https://www.chefandbrewer.com/xml-sitemap"]
-    sitemap_rules = [
-        (r"https:\/\/www\.chefandbrewer\.com\/pubs\/([-\w]+)\/([-\w]+)\/$", "parse")
-    ]
+    sitemap_rules = [(r"https:\/\/www\.chefandbrewer\.com\/pubs\/([-\w]+)\/([-\w]+)\/$", "parse")]
 
     def parse(self, response):
         yield LinkedDataParser.parse(response, "BarOrPub")

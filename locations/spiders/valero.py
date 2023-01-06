@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import scrapy
 
 from locations.items import GeojsonPointItem
@@ -37,7 +36,9 @@ class ValeroSpider(scrapy.Spider):
     def parse(self, response):
         for row in response.json():
             amenities = [detail["Description"] for detail in row["LocationDetails"]]
-            website = f"https://locations.valero.com/en-us/LocationDetails/Index/{row['DetailPageUrlID']}/{row['LocationID']}"
+            website = (
+                f"https://locations.valero.com/en-us/LocationDetails/Index/{row['DetailPageUrlID']}/{row['LocationID']}"
+            )
             item = {
                 "ref": row["LocationID"],
                 "lat": row["Latitude"],

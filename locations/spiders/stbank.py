@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import scrapy
 
 from locations.hours import OpeningHours
@@ -21,9 +20,7 @@ class STBankSpider(scrapy.Spider):
             if "isClosed" in intervals:
                 continue
             for interval in intervals["openIntervals"]:
-                hours.add_range(
-                    day[:2].capitalize(), interval["start"], interval["end"]
-                )
+                hours.add_range(day[:2].capitalize(), interval["start"], interval["end"])
 
         properties = {
             "lat": location["geocodedCoordinate"]["latitude"],

@@ -1,8 +1,9 @@
-# -*- coding: utf-8 -*-
-import scrapy
 import json
-from locations.items import GeojsonPointItem
+
+import scrapy
+
 from locations.hours import OpeningHours
+from locations.items import GeojsonPointItem
 
 DAY_MAPPING = {
     "Mon": "Mo",
@@ -29,9 +30,7 @@ class StageStoreSpider(scrapy.Spider):
             "Accept": "application/json",
         }
 
-        yield scrapy.http.FormRequest(
-            url=template, method="GET", headers=headers, callback=self.parse
-        )
+        yield scrapy.http.FormRequest(url=template, method="GET", headers=headers, callback=self.parse)
 
     def parse(self, response):
         jsonresponse = response.json()

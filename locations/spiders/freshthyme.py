@@ -1,7 +1,7 @@
-# -*- coding: utf-8 -*-
 import json
 
 import scrapy
+
 from locations.hours import OpeningHours
 from locations.items import GeojsonPointItem
 
@@ -21,9 +21,7 @@ class FreshThymeSpider(scrapy.Spider):
             properties = {
                 "name": location["name"],
                 "ref": location["id"],
-                "street": ", ".join(
-                    filter(None, [address.get(f"address{x}") for x in range(1, 4)])
-                ),
+                "street": ", ".join(filter(None, [address.get(f"address{x}") for x in range(1, 4)])),
                 "city": address["city"],
                 "postcode": address["postal_code"],
                 "state": address["province"],

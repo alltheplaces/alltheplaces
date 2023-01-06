@@ -1,9 +1,10 @@
 import json
+
 import scrapy
+from scrapy.selector import Selector
 
 from locations.hours import OpeningHours
 from locations.items import GeojsonPointItem
-from scrapy.selector import Selector
 
 
 class TargetSpider(scrapy.Spider):
@@ -40,9 +41,7 @@ class TargetSpider(scrapy.Spider):
         return opening_hours.as_opening_hours()
 
     def parse_store(self, response):
-        data = response.xpath('//script[@type="application/ld+json"]/text()').re_first(
-            ".*"
-        )
+        data = response.xpath('//script[@type="application/ld+json"]/text()').re_first(".*")
         if data:
             data = json.loads(data)
         else:

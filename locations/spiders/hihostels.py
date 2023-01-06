@@ -1,6 +1,6 @@
-# -*- coding: utf-8 -*-
-import scrapy
 import re
+
+import scrapy
 
 from locations.items import GeojsonPointItem
 
@@ -28,50 +28,36 @@ class HiHostelsSpider(scrapy.Spider):
 
         properties = {
             "name": " ".join(
-                response.xpath("/html/body/div[1]/div[6]/div[2]/div[1]/h1/span/text()")
-                .extract()[0]
-                .split()
+                response.xpath("/html/body/div[1]/div[6]/div[2]/div[1]/h1/span/text()").extract()[0].split()
             ),
             "ref": " ".join(
-                response.xpath("/html/body/div[1]/div[6]/div[2]/div[1]/h1/span/text()")
-                .extract()[0]
-                .split()
+                response.xpath("/html/body/div[1]/div[6]/div[2]/div[1]/h1/span/text()").extract()[0].split()
             ),
             "addr_full": " ".join(
-                response.xpath(
-                    "/html/body/div[1]/div[6]/div[2]/div[1]/div[2]/p[1]/text()"
-                )
+                response.xpath("/html/body/div[1]/div[6]/div[2]/div[1]/div[2]/p[1]/text()")
                 .extract()[0]
                 .split(",")[0]
                 .split()
             ),
             "city": " ".join(
-                response.xpath(
-                    "/html/body/div[1]/div[6]/div[2]/div[1]/div[2]/p[1]/text()"
-                )
+                response.xpath("/html/body/div[1]/div[6]/div[2]/div[1]/div[2]/p[1]/text()")
                 .extract()[0]
                 .split(",")[1]
                 .split()
             ),
             "postcode": " ".join(
-                response.xpath(
-                    "/html/body/div[1]/div[6]/div[2]/div[1]/div[2]/p[1]/text()"
-                )
+                response.xpath("/html/body/div[1]/div[6]/div[2]/div[1]/div[2]/p[1]/text()")
                 .extract()[0]
                 .split(",")[-2]
                 .split()
             ),
             "country": " ".join(
-                response.xpath(
-                    "/html/body/div[1]/div[6]/div[2]/div[1]/div[2]/p[1]/text()"
-                )
+                response.xpath("/html/body/div[1]/div[6]/div[2]/div[1]/div[2]/p[1]/text()")
                 .extract()[0]
                 .split(",")[-1]
                 .split()
             ),
-            "website": response.xpath(
-                '//head/link[@rel="canonical"]/@href'
-            ).extract_first(),
+            "website": response.xpath('//head/link[@rel="canonical"]/@href').extract_first(),
             "lon": float(response.xpath('//*[@id ="lon"]/@value').extract()[0]),
             "lat": float(response.xpath('//*[@id ="lat"]/@value').extract()[0]),
         }

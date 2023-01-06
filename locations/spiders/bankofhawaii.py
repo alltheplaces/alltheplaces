@@ -1,5 +1,5 @@
-# -*- coding: utf-8 -*-
 import json
+
 import scrapy
 
 from locations.items import GeojsonPointItem
@@ -14,17 +14,13 @@ class BankOfHawaiiSpider(scrapy.Spider):
     ]
 
     def start_requests(self):
-        template = (
-            "https://www.boh.com/get-locations?lat=21.33&lng=-157.845934&radius=25"
-        )
+        template = "https://www.boh.com/get-locations?lat=21.33&lng=-157.845934&radius=25"
 
         headers = {
             "Accept": "application/json",
         }
 
-        yield scrapy.http.FormRequest(
-            url=template, method="GET", headers=headers, callback=self.parse
-        )
+        yield scrapy.http.FormRequest(url=template, method="GET", headers=headers, callback=self.parse)
 
     def parse(self, response):
         jsonresponse = response.json()

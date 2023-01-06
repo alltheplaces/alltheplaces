@@ -1,7 +1,7 @@
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
-class DictParser(object):
+class DictParser:
 
     ref_keys = ["ref", "id", "store-id", "shop-number", "slug"]
 
@@ -10,8 +10,8 @@ class DictParser(object):
     house_number_keys = ["house-number", "house-no", "street-number"]
 
     street_address_keys = [
-        "address1",
         "street-address",
+        "address1",
         "address-line1",
         "line1",
         "address-line-one",
@@ -44,6 +44,7 @@ class DictParser(object):
     postcode_keys = [
         "postal-code",
         "post-code",
+        "postcode",
         "zip",
         "zipcode",
         "address-post-code",
@@ -51,7 +52,7 @@ class DictParser(object):
         "zip-code",
     ]
 
-    email_keys = ["email", "contact-email"]
+    email_keys = ["email", "contact-email", "email-address"]
 
     phone_keys = [
         "phone-number",
@@ -80,16 +81,16 @@ class DictParser(object):
         "yext-display-lng",
     ]
 
+    website_keys = ["url", "website"]
+
     @staticmethod
-    def parse(obj) -> GeojsonPointItem:
-        item = GeojsonPointItem()
+    def parse(obj) -> Feature:
+        item = Feature()
 
         item["ref"] = DictParser.get_first_key(obj, DictParser.ref_keys)
         item["name"] = DictParser.get_first_key(obj, DictParser.name_keys)
 
-        location = DictParser.get_first_key(
-            obj, ["location", "geo-location", "geo", "geo-point"]
-        )
+        location = DictParser.get_first_key(obj, ["location", "geo-location", "geo", "geo-point", "coordinates"])
         # If not a good location object then use the parent
         if not location or not isinstance(location, dict):
             location = obj
@@ -104,13 +105,9 @@ class DictParser(object):
         if not address or not isinstance(address, dict):
             address = obj
 
-        item["housenumber"] = DictParser.get_first_key(
-            address, DictParser.house_number_keys
-        )
+        item["housenumber"] = DictParser.get_first_key(address, DictParser.house_number_keys)
         item["street"] = DictParser.get_first_key(address, ["street", "streetName"])
-        item["street_address"] = DictParser.get_first_key(
-            address, DictParser.street_address_keys
-        )
+        item["street_address"] = DictParser.get_first_key(address, DictParser.street_address_keys)
         item["city"] = DictParser.get_first_key(address, DictParser.city_keys)
         item["state"] = DictParser.get_first_key(address, DictParser.region_keys)
         item["postcode"] = DictParser.get_first_key(address, DictParser.postcode_keys)
@@ -122,6 +119,7 @@ class DictParser(object):
 
         item["email"] = DictParser.get_first_key(contact, DictParser.email_keys)
         item["phone"] = DictParser.get_first_key(contact, DictParser.phone_keys)
+        item["website"] = DictParser.get_first_key(contact, DictParser.website_keys)
 
         return item
 

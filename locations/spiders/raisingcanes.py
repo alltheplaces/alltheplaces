@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
 import scrapy
-
 
 from locations.items import GeojsonPointItem
 
@@ -14,9 +12,7 @@ class RaisingCanesSpider(scrapy.Spider):
     def start_requests(self):
         base_url = "https://www.raisingcanes.com/sites/all/themes/raising_cane_s/locator/include/locationsNew.php?&lat={lat}&lng={lng}"
 
-        with open(
-            "./locations/searchable_points/us_centroids_100mile_radius.csv"
-        ) as points:
+        with open("./locations/searchable_points/us_centroids_100mile_radius.csv") as points:
             next(points)
             for point in points:
                 _, lat, lon = point.strip().split(",")
@@ -40,8 +36,6 @@ class RaisingCanesSpider(scrapy.Spider):
                     "lat": float(store["geometry"]["coordinates"][1]),
                     "lon": float(store["geometry"]["coordinates"][0]),
                     "phone": store["properties"]["field_phone"],
-                    "website": store["properties"]["path"]
-                    .strip('<a href="')
-                    .strip('">Restaurant Details</a>'),
+                    "website": store["properties"]["path"].strip('<a href="').strip('">Restaurant Details</a>'),
                 }
                 yield GeojsonPointItem(**properties)

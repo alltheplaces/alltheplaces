@@ -29,9 +29,7 @@ class TUISpider(SitemapSpider):
         item["ref"] = response.url.split("/")[-1]
 
         if item.get("lat") is None or item.get("lon") is None:
-            item["lat"], item["lon"] = url_to_coords(
-                response.xpath('//p[@class="-Directions"]/a/@href').get()
-            )
+            item["lat"], item["lon"] = url_to_coords(response.xpath('//p[@class="-Directions"]/a/@href').get())
 
         if "INSIDE NEXT" in item["name"].upper():
             item["located_in"] = "Next"

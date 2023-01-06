@@ -1,11 +1,10 @@
-# -*- coding: utf-8 -*-
 import json
-import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.categories import Categories
 from locations.hours import OpeningHours
+from locations.items import GeojsonPointItem
 
 DAYS_NAME = {
     "MO": "Mo",
@@ -20,13 +19,15 @@ DAYS_NAME = {
 
 class UspsSpider(scrapy.Spider):
     name = "usps"
-    item_attributes = {"brand": "USPS", "brand_wikidata": "Q668687"}
+    item_attributes = {
+        "brand": "United States Postal Service",
+        "brand_wikidata": "Q668687",
+        "extras": Categories.POST_OFFICE.value,
+    }
     allowed_domains = ["usps.com"]
 
     def start_requests(self):
-        url = (
-            "https://tools.usps.com/UspsToolsRestServices/rest/POLocator/findLocations"
-        )
+        url = "https://tools.usps.com/UspsToolsRestServices/rest/POLocator/findLocations"
 
         headers = {
             "origin": "https://tools.usps.com",
@@ -34,9 +35,7 @@ class UspsSpider(scrapy.Spider):
             "content-type": "application/json;charset=UTF-8",
         }
 
-        with open(
-            "./locations/searchable_points/us_centroids_25mile_radius.csv"
-        ) as points:
+        with open("./locations/searchable_points/us_centroids_25mile_radius.csv") as points:
             next(points)
             for point in points:
                 _, lat, lon = point.strip().split(",")
@@ -65,8 +64,7 @@ class UspsSpider(scrapy.Spider):
             if len(hour["times"]) == 0:
                 pass
             else:
-                d = hour["dayOfTheWeek"]
-                day = DAYS_NAME[d]
+                day = hour["dayOfTheWeek"][:2].title()
                 open_time = hour["times"][0]["open"][:-3]
                 close_time = hour["times"][0]["close"][:-3]
 
@@ -80,34 +78,24 @@ class UspsSpider(scrapy.Spider):
         return opening_hours.as_opening_hours()
 
     def parse(self, response):
-        stores = json.loads(response.body)
+        stores = response.json()["locations"]
 
-        try:
-            stores = stores["locations"]
+        for store in stores:
+            properties = {
+                "ref": store["locationID"],
+                "name": store["locationName"],
+                "addr_full": store["address1"],
+                "city": store["city"],
+                "state": store["state"],
+                "postcode": store["zip5"],
+                "country": "US",
+                "lat": store["latitude"],
+                "lon": store["longitude"],
+                "phone": store["phone"],
+            }
 
-            for store in stores:
-                properties = {
-                    "ref": store["locationID"],
-                    "name": store["locationName"],
-                    "addr_full": store["address1"],
-                    "city": store["city"],
-                    "state": store["state"],
-                    "postcode": store["zip5"],
-                    "country": "US",
-                    "lat": store["latitude"],
-                    "lon": store["longitude"],
-                    "phone": store["phone"],
-                }
+            h = self.parse_hours(store["locationServiceHours"][0]["dailyHoursList"])
+            if h:
+                properties["opening_hours"] = h
 
-                try:
-                    h = self.parse_hours(
-                        store["locationServiceHours"][0]["dailyHoursList"]
-                    )
-                    if h:
-                        properties["opening_hours"] = h
-                except:
-                    pass
-
-                yield GeojsonPointItem(**properties)
-        except:
-            pass
+            yield GeojsonPointItem(**properties)

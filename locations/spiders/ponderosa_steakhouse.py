@@ -1,6 +1,7 @@
-# -*- coding: utf-8 -*-
 import re
+
 import scrapy
+
 from locations.items import GeojsonPointItem
 
 
@@ -39,34 +40,16 @@ class PonderosaSteakhouseSpider(scrapy.Spider):
 
         properties = {
             "ref": ref.strip("/"),
-            "name": response.xpath('//h2[@class="About-title"]/text()')
-            .extract_first()
-            .strip("About "),
-            "addr_full": response.xpath(
-                '//meta[@itemprop="streetAddress"]/@content'
-            ).extract_first(),
-            "city": response.xpath(
-                '//meta[@itemprop="addressLocality"]/@content'
-            ).extract_first(),
-            "state": response.xpath(
-                '//meta[@itemprop="addressRegion"]/@content'
-            ).extract_first(),
-            "postcode": response.xpath(
-                '//meta[@itemprop="postalCode"]/@content'
-            ).extract_first(),
-            "country": response.xpath(
-                '//meta[@itemprop="addressCountry"]/@content'
-            ).extract_first(),
-            "phone": response.xpath(
-                '//meta[@itemprop="telephone"]/@content'
-            ).extract_first(),
+            "name": response.xpath('//h2[@class="About-title"]/text()').extract_first().strip("About "),
+            "addr_full": response.xpath('//meta[@itemprop="streetAddress"]/@content').extract_first(),
+            "city": response.xpath('//meta[@itemprop="addressLocality"]/@content').extract_first(),
+            "state": response.xpath('//meta[@itemprop="addressRegion"]/@content').extract_first(),
+            "postcode": response.xpath('//meta[@itemprop="postalCode"]/@content').extract_first(),
+            "country": response.xpath('//meta[@itemprop="addressCountry"]/@content').extract_first(),
+            "phone": response.xpath('//meta[@itemprop="telephone"]/@content').extract_first(),
             "website": response.url,
-            "lat": float(
-                response.xpath('//meta[@itemprop="latitude"]/@content').extract_first()
-            ),
-            "lon": float(
-                response.xpath('//meta[@itemprop="longitude"]/@content').extract_first()
-            ),
+            "lat": float(response.xpath('//meta[@itemprop="latitude"]/@content').extract_first()),
+            "lon": float(response.xpath('//meta[@itemprop="longitude"]/@content').extract_first()),
         }
 
         yield GeojsonPointItem(**properties)

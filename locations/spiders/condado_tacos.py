@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import re
 
 from scrapy.spiders import SitemapSpider
@@ -12,7 +11,7 @@ class CondadoTacosSpider(SitemapSpider, StructuredDataSpider):
     wanted_types = [["Restaurant", "BarOrPub", "LocalBusiness"]]
     allowed_domains = ["locations.condadotacos.com"]
     sitemap_urls = ["https://locations.condadotacos.com/sitemap.xml"]
-    sitemap_rules = [(r"/condado-tacos-", "parse_sd")]
+    sitemap_rules = [(r"https://locations.condadotacos.com\/([-\w]+)\/([-\w]+)$", "parse_sd")]
 
     def inspect_item(self, item, response):
         description = response.css("meta[name=description]").attrib["content"]

@@ -1,10 +1,10 @@
-# -*- coding: utf-8 -*-
 import json
 import re
 
-from locations.items import GeojsonPointItem
-from locations.hours import OpeningHours
 from scrapy.spiders import SitemapSpider
+
+from locations.hours import OpeningHours
+from locations.items import GeojsonPointItem
 
 
 class HomeDepotCASpider(SitemapSpider):
@@ -15,7 +15,7 @@ class HomeDepotCASpider(SitemapSpider):
     sitemap_urls = ["https://stores.homedepot.ca/sitemap.xml"]
     sitemap_rules = [
         (
-            "https:\/\/stores\.homedepot\.ca\/([\w]{2})\/([-\w]+)\/([-\w]+)([\d]+)\.html$",
+            r"https:\/\/stores\.homedepot\.ca\/([\w]{2})\/([-\w]+)\/([-\w]+)([\d]+)\.html$",
             "parse_store",
         ),
     ]
@@ -53,8 +53,6 @@ class HomeDepotCASpider(SitemapSpider):
         location_hours = re.findall(r"([a-zA-Z]*)\s(.*?)\s-\s(.*?)\s", open_hours)
 
         for weekday in location_hours:
-            opening_hours.add_range(
-                day=weekday[0], open_time=weekday[1], close_time=weekday[2]
-            )
+            opening_hours.add_range(day=weekday[0], open_time=weekday[1], close_time=weekday[2])
 
         return opening_hours.as_opening_hours()

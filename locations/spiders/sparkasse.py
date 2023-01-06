@@ -1,9 +1,10 @@
-import scrapy
 import json
 import re
 
-from locations.items import GeojsonPointItem
+import scrapy
+
 from locations.hours import OpeningHours
+from locations.items import GeojsonPointItem
 
 
 class SparkasseSpider(scrapy.Spider):
@@ -27,8 +28,8 @@ class SparkasseSpider(scrapy.Spider):
             day = time = open_time = close_time = ""
             try:
                 (day, time) = store_day.split()
-            except ValueError as e:
-                print("Error in store_day: {}".format(store_day))
+            except ValueError:
+                self.logger.warn("Error in store_day: %s", store_day)
 
             if time:
                 (open_time, close_time) = time.split("-")
@@ -37,16 +38,12 @@ class SparkasseSpider(scrapy.Spider):
 
             if open_time is None and close_time is None:
                 continue
-            opening_hours.add_range(
-                day=day, open_time=open_time, close_time=close_time, time_format="%H:%M"
-            )
+            opening_hours.add_range(day=day, open_time=open_time, close_time=close_time, time_format="%H:%M")
 
         return opening_hours.as_opening_hours()
 
     def parse_details(self, response):
-        json_data = response.xpath(
-            '//script[@type="application/ld+json"]/text()'
-        ).getall()
+        json_data = response.xpath('//script[@type="application/ld+json"]/text()').getall()
         if json_data:
             json_data = json_data[0]
         store = json.loads(json_data)
@@ -73,12 +70,8 @@ class SparkasseSpider(scrapy.Spider):
         yield GeojsonPointItem(**properties)
 
     def parse(self, response):
-        links = re.findall(
-            r'<a class="object-link grey-link" href="(.+?)">', response.text
-        )
+        links = re.findall(r'<a class="object-link grey-link" href="(.+?)">', response.text)
         if links:
-            for l in links:
-                url = "https://www.sparkasse.de/filialen/{}".format(l)
-                yield scrapy.Request(
-                    url=url, callback=self.parse_details, meta={"url": url}
-                )
+            for link in links:
+                url = "https://www.sparkasse.de/filialen/{}".format(link)
+                yield scrapy.Request(url=url, callback=self.parse_details, meta={"url": url})

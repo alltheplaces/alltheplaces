@@ -1,7 +1,7 @@
-# -*- coding: utf-8 -*-
 import scrapy
-from locations.microdata_parser import MicrodataParser
+
 from locations.linked_data_parser import LinkedDataParser
+from locations.microdata_parser import MicrodataParser
 
 
 class SuperdrySpider(scrapy.spiders.SitemapSpider):

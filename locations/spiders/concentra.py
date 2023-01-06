@@ -1,7 +1,7 @@
-import re
 import scrapy
-from locations.items import GeojsonPointItem
 from scrapy.http import HtmlResponse
+
+from locations.items import GeojsonPointItem
 
 
 class ConcentraSpider(scrapy.Spider):
@@ -29,23 +29,13 @@ class ConcentraSpider(scrapy.Spider):
             # Most of the data is stored as an html blob inside the json
             # so build a new HtmlResponse from it which we can parse.
             html = HtmlResponse(url=url, body=store["Html"].encode("utf-8"))
-            addr1 = html.xpath(
-                '//div[@class="field-addressline1"]/text()'
-            ).extract_first()
-            addr2 = html.xpath(
-                '//div[@class="field-addressline2"]/text()'
-            ).extract_first()
-            postcode = html.xpath(
-                '//span[@class="field-zipcode"]/text()'
-            ).extract_first()
+            addr1 = html.xpath('//div[@class="field-addressline1"]/text()').extract_first()
+            addr2 = html.xpath('//div[@class="field-addressline2"]/text()').extract_first()
+            postcode = html.xpath('//span[@class="field-zipcode"]/text()').extract_first()
             phone = html.xpath('//div[@class="field-mainphone"]/text()').extract_first()
-            state = html.xpath(
-                '//span[@class="field-stateabbreviation"]/text()'
-            ).extract_first()
+            state = html.xpath('//span[@class="field-stateabbreviation"]/text()').extract_first()
             city = html.xpath('//div[@class="field-centername"]/text()').extract_first()
-            name = html.xpath(
-                '//div[@class="location-clinic-link"]/a/@title'
-            ).extract_first()
+            name = html.xpath('//div[@class="location-clinic-link"]/a/@title').extract_first()
 
             if addr1:
                 addr1 = addr1.strip()

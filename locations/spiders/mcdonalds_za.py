@@ -1,13 +1,12 @@
-# -*- coding: utf-8 -*-
 import scrapy
-import re
+
 from locations.items import GeojsonPointItem
+from locations.spiders.mcdonalds import McDonaldsSpider
 
 
 class McDonaldsZASpider(scrapy.Spider):
-
     name = "mcdonalds_za"
-    item_attributes = {"brand": "McDonald's", "brand_wikidata": "Q38076"}
+    item_attributes = McDonaldsSpider.item_attributes
     allowed_domains = ["www.mcdonalds.co", "www.mcdonalds.co.za"]
     start_urls = ("https://www.mcdonalds.co.za/restaurants",)
 
@@ -18,12 +17,8 @@ class McDonaldsZASpider(scrapy.Spider):
             name = store.xpath('.//div[@class="a"]/p/strong/text()').extract_first()
             if not name:
                 continue
-            address = (
-                store.xpath('.//div[@class="b"]/p[2]/text()').extract_first().strip()
-            )
-            phone = (
-                store.xpath('.//div[@class="c"]/p[2]/text()').extract_first().strip()
-            )
+            address = store.xpath('.//div[@class="b"]/p[2]/text()').extract_first().strip()
+            phone = store.xpath('.//div[@class="c"]/p[2]/text()').extract_first().strip()
 
             properties = {
                 "ref": ref,

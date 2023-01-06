@@ -1,11 +1,11 @@
-# -*- coding: utf-8 -*-
-import scrapy
 import json
 import re
+
+import scrapy
 from scrapy.selector import Selector
 
-from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
+from locations.items import GeojsonPointItem
 
 DAY_MAPPING = {
     "Sunday": "Su",
@@ -63,11 +63,7 @@ class DominosPizzaSpider(scrapy.Spider):
             yield scrapy.Request(url, callback=self.parse_state_sitemap)
 
     def parse_place(self, response):
-        data = json.loads(
-            response.xpath(
-                '//script[@type="application/ld+json"]/text()'
-            ).extract_first()
-        )
+        data = json.loads(response.xpath('//script[@type="application/ld+json"]/text()').extract_first())
 
         yield GeojsonPointItem(
             name=data["name"],

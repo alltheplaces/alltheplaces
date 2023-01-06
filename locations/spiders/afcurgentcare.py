@@ -3,17 +3,15 @@ import urllib.parse
 
 import scrapy
 
+from locations.hours import DAYS, OpeningHours
 from locations.items import GeojsonPointItem
-from locations.hours import OpeningHours, DAYS
 
 
 class AfcUrgentCareSpider(scrapy.Spider):
     name = "afcurgentcare"
     item_attributes = {"brand": "AFC Urgent Care", "brand_wikidata": "Q110552174"}
     allowed_domains = ["afcurgentcare.com"]
-    start_urls = (
-        "https://www.afcurgentcare.com/modules/multilocation/?near_lat=39&near_lon=-98",
-    )
+    start_urls = ("https://www.afcurgentcare.com/modules/multilocation/?near_lat=39&near_lon=-98",)
 
     def parse(self, response):
         j = json.loads(response.body)

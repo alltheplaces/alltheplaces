@@ -1,6 +1,7 @@
+from urllib.parse import urlencode
+
 import scrapy
 
-from six.moves.urllib.parse import urlencode
 from locations.items import GeojsonPointItem
 
 LAT_LONS = [

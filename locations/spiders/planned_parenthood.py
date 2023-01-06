@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import re
 
 from scrapy.spiders import SitemapSpider
@@ -29,28 +28,16 @@ class PlannedParenthoodSpider(SitemapSpider):
             return
 
         properties = {
-            "street_address": response.xpath(
-                '//*[@itemprop="streetAddress"]/text()'
-            ).extract_first(),
-            "city": response.xpath(
-                '//*[@itemprop="addressLocality"]/text()'
-            ).extract_first(),
-            "state": response.xpath(
-                '//*[@itemprop="addressRegion"]/text()'
-            ).extract_first(),
-            "postcode": response.xpath(
-                '//*[@itemprop="postalCode"]/text()'
-            ).extract_first(),
-            "phone": response.xpath(
-                '//a[@itemprop="telephone"][@data-link]/text()'
-            ).extract_first(),
+            "street_address": response.xpath('//*[@itemprop="streetAddress"]/text()').extract_first(),
+            "city": response.xpath('//*[@itemprop="addressLocality"]/text()').extract_first(),
+            "state": response.xpath('//*[@itemprop="addressRegion"]/text()').extract_first(),
+            "postcode": response.xpath('//*[@itemprop="postalCode"]/text()').extract_first(),
+            "phone": response.xpath('//a[@itemprop="telephone"][@data-link]/text()').extract_first(),
             "ref": response.url,
             "website": response.url,
         }
 
-        if map_image := response.xpath(
-            '//img[@class="address-map"]/@data-lazy-interchange'
-        ).get():
+        if map_image := response.xpath('//img[@class="address-map"]/@data-lazy-interchange').get():
             if match := re.search(r"center=(.*?),(.*?)&zoom", map_image):
                 properties["lat"] = float(match.group(1))
                 properties["lon"] = float(match.group(2))

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from scrapy.spiders import SitemapSpider
 
 from locations.hours import OpeningHours
@@ -10,9 +9,7 @@ class GiantFoodStoresSpider(SitemapSpider):
     sitemap_urls = ["https://stores.giantfoodstores.com/robots.txt"]
     item_attributes = {"brand": "Giant", "brand_wikidata": "Q5558332"}
 
-    sitemap_rules = [
-        (r"^https://stores.giantfoodstores.com/[^/]*/[^/]*/[^/]*$", "parse")
-    ]
+    sitemap_rules = [(r"^https://stores.giantfoodstores.com/[^/]*/[^/]*/[^/]*$", "parse")]
 
     def parse(self, response):
         main = response.xpath("//main")

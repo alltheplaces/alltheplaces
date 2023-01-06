@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import scrapy
 
 from locations.items import GeojsonPointItem
@@ -9,27 +8,16 @@ class RoadRangerSpider(scrapy.Spider):
     item_attributes = {"brand": "Road Ranger", "brand_wikidata": "Q7339377"}
     allowed_domains = ["roadrangerusa.com"]
 
-    start_urls = (
-        "https://www.roadrangerusa.com/locations-amenities/find-a-road-ranger",
-    )
+    start_urls = ("https://www.roadrangerusa.com/locations-amenities/find-a-road-ranger",)
 
     def parse(self, response):
         # scrapy.shell.inspect_response(response, self)
 
         for location in response.css(".store-location-row"):
-            coordinates = (
-                location.css(".coordinates::text")
-                .extract_first()
-                .strip()
-                .split(":")[-1]
-            )
+            coordinates = location.css(".coordinates::text").extract_first().strip().split(":")[-1]
             (lat, lon) = coordinates.split(", ")
 
-            address = (
-                location.css(".store-location-teaser__address::text")
-                .extract_first()
-                .strip()
-            )
+            address = location.css(".store-location-teaser__address::text").extract_first().strip()
 
             amenities = location.css(".store-location-teaser__amenities").get()
 

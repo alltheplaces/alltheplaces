@@ -1,6 +1,8 @@
 import json
 import re
+
 import scrapy
+
 from locations.items import GeojsonPointItem
 
 
@@ -34,27 +36,18 @@ class DeloitteSpider(scrapy.Spider):
         :param response:
         :return:
         """
-        offices = response.xpath(
-            '//div[contains(@class, "offices-container")]//div[@class="offices"]'
-        )
+        offices = response.xpath('//div[contains(@class, "offices-container")]//div[@class="offices"]')
 
         for office in offices:
 
-            address_parts = office.xpath(
-                './/div[@class="address"]//p//text()'
-            ).extract()
-            address_parts = [
-                a.strip().replace("\u200b", "").replace("\n", "").replace("\t", "")
-                for a in address_parts
-            ]
+            address_parts = office.xpath('.//div[@class="address"]//p//text()').extract()
+            address_parts = [a.strip().replace("\u200b", "").replace("\n", "").replace("\t", "") for a in address_parts]
             country = address_parts.pop(-1)
             if country == "United States":
                 postcode = address_parts.pop(-1)
                 try:
                     city, state = address_parts.pop(-1).split(",")
-                    city, state = city.strip().replace(
-                        "\u200b", ""
-                    ), state.strip().replace("\u200b", "")
+                    city, state = city.strip().replace("\u200b", ""), state.strip().replace("\u200b", "")
                 except:
                     city, state = None, None
             else:
@@ -70,10 +63,9 @@ class DeloitteSpider(scrapy.Spider):
             properties = {
                 "ref": name.strip().replace(" ", "-"),
                 "name": name.strip(),
-                "phone": (
-                    office.xpath('.//div[@class="contact"]//a/text()').extract_first()
-                    or ""
-                ).replace("\u200b", ""),
+                "phone": (office.xpath('.//div[@class="contact"]//a/text()').extract_first() or "").replace(
+                    "\u200b", ""
+                ),
                 "addr_full": address,
                 "city": city,
                 "state": state,
@@ -109,11 +101,7 @@ class DeloitteSpider(scrapy.Spider):
         properties = response.meta["properties"]
 
         try:
-            store_data = json.loads(
-                response.xpath(
-                    '//script[@type="application/ld+json"]/text()'
-                ).extract_first()
-            )
+            store_data = json.loads(response.xpath('//script[@type="application/ld+json"]/text()').extract_first())
 
             try:
                 lat = float(store_data["geo"]["latitude"])
@@ -134,38 +122,20 @@ class DeloitteSpider(scrapy.Spider):
                 phone = phone[0].replace("\u200b", "")
 
             addresses = store_data["address"].get("streetAddress") or []
-            address = (
-                " ".join([a.strip().replace("\u200b", "") for a in addresses]) or None
-            )
+            address = " ".join([a.strip().replace("\u200b", "") for a in addresses]) or None
 
             properties.update(
                 {
-                    "ref": "-".join(
-                        re.search(r".*/(.*)/(.*).html", response.url).groups()
-                    ),
+                    "ref": "-".join(re.search(r".*/(.*)/(.*).html", response.url).groups()),
                     "name": store_data["name"],
                     "lat": lat,
                     "lon": lon,
                     "phone": phone,
                     "addr_full": address,
-                    "city": store_data["address"]
-                    .get("addressLocality", "")
-                    .strip()
-                    .replace("\u200b", "")
-                    or None,
-                    "state": store_data["address"]
-                    .get("addressRegion", "")
-                    .strip()
-                    .replace("\u200b", "")
-                    or None,
-                    "postcode": store_data["address"]
-                    .get("postalCode", "")
-                    .strip()
-                    .replace("\u200b", "")
-                    or None,
-                    "country": (store_data["address"]["addressCountry"] or {}).get(
-                        "name"
-                    ),
+                    "city": store_data["address"].get("addressLocality", "").strip().replace("\u200b", "") or None,
+                    "state": store_data["address"].get("addressRegion", "").strip().replace("\u200b", "") or None,
+                    "postcode": store_data["address"].get("postalCode", "").strip().replace("\u200b", "") or None,
+                    "country": (store_data["address"]["addressCountry"] or {}).get("name"),
                     "website": response.url,
                 }
             )
@@ -175,9 +145,7 @@ class DeloitteSpider(scrapy.Spider):
             # properties from the overview page
             properties.update(
                 {
-                    "ref": "-".join(
-                        re.search(r".*/(.*)/(.*).html", response.url).groups()
-                    ),
+                    "ref": "-".join(re.search(r".*/(.*)/(.*).html", response.url).groups()),
                     "website": response.url,
                 }
             )

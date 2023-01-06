@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-import re
 import json
 
 import scrapy
@@ -16,7 +14,6 @@ class LoewsHotelsSpider(scrapy.Spider):
 
     def parse(self, response):
         urls = response.xpath('//div[@class="row"]//p//a/@href').extract()
-        x = "/omni-partnership"
         for url in urls:
             if url.startswith("/booking"):
                 pass
@@ -41,9 +38,7 @@ class LoewsHotelsSpider(scrapy.Spider):
             properties = {
                 "ref": data["name"],
                 "name": data["name"],
-                "addr_full": response.xpath('//span[@class="street-address"]/text()')[0]
-                .extract()
-                .strip("]["),
+                "addr_full": response.xpath('//span[@class="street-address"]/text()')[0].extract().strip("]["),
                 "city": data["address"]["addressLocality"],
                 "state": data["address"]["addressRegion"],
                 "postcode": data["address"]["postalCode"],
@@ -58,9 +53,7 @@ class LoewsHotelsSpider(scrapy.Spider):
             properties = {
                 "ref": data["name"],
                 "name": data["name"],
-                "addr_full": response.xpath('//span[@class="street-address"]/text()')
-                .extract()[0]
-                .strip("]["),
+                "addr_full": response.xpath('//span[@class="street-address"]/text()').extract()[0].strip("]["),
                 "city": data["address"]["addressLocality"],
                 "state": data["address"]["addressRegion"],
                 "postcode": data["address"]["postalCode"],

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import json
 import re
 
@@ -24,15 +23,12 @@ class RegisSalonSpider(scrapy.Spider):
         data = json.loads(json_txt)["locations"][0]
         # decode entities
         name = scrapy.Selector(text=data["store"]).xpath("//text()").get()
-        phone = (
-            response.xpath('//@href[contains(., "tel:")]')
-            .extract_first()
-            .replace("tel:", "")
-        )
+        phone = response.xpath('//@href[contains(., "tel:")]').extract_first().replace("tel:", "")
         properties = {
             "lat": data["lat"],
             "lon": data["lng"],
             "ref": data["id"],
+            "name": name,
             "website": response.url,
             "addr_full": data["address2"],
             "city": data["city"],

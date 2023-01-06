@@ -1,37 +1,37 @@
-import scrapy
-from locations.items import GeojsonPointItem
 from urllib.parse import urlencode
-from scrapy.selector import Selector
-from locations.hours import OpeningHours
 
-Days = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"]
+import scrapy
+
+from locations.hours import DAYS, OpeningHours
+from locations.items import GeojsonPointItem
 
 
 class DollaramaSpider(scrapy.Spider):
     name = "dollarama"
-    item_attributes = {"brand": "Dollarama"}
+    item_attributes = {
+        "brand": "Dollarama",
+        "brand_wikidata": "Q3033947",
+    }
     allowed_domains = ["dollarama.com"]
 
     def start_requests(self):
-        base_url = "https://www.dollarama.com/en-CA/locations/anydata-api?"
+        base_url = "https://www.dollarama.com/en-CA/locations/GetDataByCoordinates?"
 
         params = {"distance": "100", "units": "miles"}
 
-        with open(
-            "./locations/searchable_points/ca_centroids_100mile_radius.csv"
-        ) as points:
+        with open("./locations/searchable_points/ca_centroids_100mile_radius.csv") as points:
             next(points)
             for point in points:
                 _, lat, lon = point.strip().split(",")
-                params.update({"latitude": lat, "longitude": lon})
-                yield scrapy.Request(url=base_url + urlencode(params))
+                params |= {"latitude": lat, "longitude": lon}
+                yield scrapy.Request(url=base_url + urlencode(params), method="POST")
 
     def parse_hours(self, hours):
         hrs = hours.split("|")
 
         opening_hours = OpeningHours()
 
-        for day, hour in zip(Days, hrs):
+        for day, hour in zip(DAYS, hrs):
             if hour == "Closed":
                 continue
             open_time, close_time = hour.split("-")
@@ -61,8 +61,7 @@ class DollaramaSpider(scrapy.Spider):
                 "phone": row["ExtraData"]["Phone"],
             }
 
-            hours = self.parse_hours(row["ExtraData"]["Hours of operations"])
-            if hours:
+            if hours := self.parse_hours(row["ExtraData"]["Hours of operations"]):
                 properties["opening_hours"] = hours
 
             yield GeojsonPointItem(**properties)

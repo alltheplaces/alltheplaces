@@ -1,6 +1,5 @@
-# -*- coding: utf-8 -*-
 import scrapy
-import re
+
 from locations.items import GeojsonPointItem
 
 base_url = "https://www.elclubdelamilanesa.com/"
@@ -19,9 +18,7 @@ class MilanesaSpider(scrapy.Spider):
             yield scrapy.Request(store, callback=self.parse_store)
 
         continued_urls = []
-        next_page_url = response.xpath(
-            '//*[@id="nav-delivery"]//descendant::*/@href'
-        ).extract()
+        next_page_url = response.xpath('//*[@id="nav-delivery"]//descendant::*/@href').extract()
         for i in next_page_url:
             absolute_next_page = base_url + i
             continued_urls.append(absolute_next_page)
@@ -56,52 +53,28 @@ class MilanesaSpider(scrapy.Spider):
         return days
 
     def parse_store(self, response):
-        ref = response.xpath(
-            '//*[@id="profile"]/p/span[1]/span[3]/text()'
-        ).extract_first()
+        ref = response.xpath('//*[@id="profile"]/p/span[1]/span[3]/text()').extract_first()
 
-        street = response.xpath(
-            '//*[@id="profile"]/p/span[1]/span[2]/text()'
-        ).extract_first()
+        street = response.xpath('//*[@id="profile"]/p/span[1]/span[2]/text()').extract_first()
 
-        city = response.xpath(
-            '//*[@id="profile"]/p/span[1]/span[4]/text()'
-        ).extract_first()
+        city = response.xpath('//*[@id="profile"]/p/span[1]/span[4]/text()').extract_first()
 
         # Fix for "C?rdoba"
         city = city.replace("�", "o")
 
-        postcode = response.xpath(
-            '//*[@id="profile"]/p/span[1]/span[5]/text()'
-        ).extract_first()
+        postcode = response.xpath('//*[@id="profile"]/p/span[1]/span[5]/text()').extract_first()
 
-        country = response.xpath(
-            '//*[@id="profile"]/p/span[1]/span[6]/text()'
-        ).extract_first()
+        country = response.xpath('//*[@id="profile"]/p/span[1]/span[6]/text()').extract_first()
 
-        name = (
-            response.xpath('//*[@id="profile"]/p/span[1]/span[1]/a/text()')
-            .extract_first()
-            .strip()
-        )
+        name = response.xpath('//*[@id="profile"]/p/span[1]/span[1]/a/text()').extract_first().strip()
 
-        phone = response.xpath(
-            '//*[@id="profile"]/p/span[2]/a/span/text()'
-        ).extract_first()
+        phone = response.xpath('//*[@id="profile"]/p/span[2]/a/span/text()').extract_first()
 
         days = self.convert_days(
-            response.xpath('//*[@id="profile"]/p/span[3]/text()')
-            .extract_first()
-            .strip("Abierto ")
-            .split(": ")[0]
+            response.xpath('//*[@id="profile"]/p/span[3]/text()').extract_first().strip("Abierto ").split(": ")[0]
         )
 
-        hours = (
-            response.xpath('//*[@id="profile"]/p/span[3]/text()')
-            .extract_first()
-            .strip("Abierto ")
-            .split(": ")[1]
-        )
+        hours = response.xpath('//*[@id="profile"]/p/span[3]/text()').extract_first().strip("Abierto ").split(": ")[1]
 
         address = "{} {}, {}, {}".format(
             street,
@@ -123,5 +96,5 @@ class MilanesaSpider(scrapy.Spider):
             phone=phone,
             website=response.url,
             opening_hours=opening_hours,
-            ref=response.url,
+            ref=ref,
         )

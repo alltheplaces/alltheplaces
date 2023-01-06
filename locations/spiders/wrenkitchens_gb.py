@@ -1,6 +1,5 @@
-# -*- coding: utf-8 -*-
-from scrapy.spiders import CrawlSpider, Rule
 from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule
 
 from locations import google_url
 from locations.structured_data_spider import StructuredDataSpider
@@ -17,9 +16,7 @@ class WrenKitchensGB(CrawlSpider, StructuredDataSpider):
     start_urls = ["https://www.wrenkitchens.com/showrooms/"]
     rules = [
         Rule(
-            LinkExtractor(
-                allow=r"https:\/\/www\.wrenkitchens\.com\/showrooms\/([_\w]+)$"
-            ),
+            LinkExtractor(allow=r"https:\/\/www\.wrenkitchens\.com\/showrooms\/([_\w]+)$"),
             callback="parse_sd",
             follow=False,
         )

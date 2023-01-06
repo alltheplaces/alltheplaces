@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import json
 
 import scrapy
@@ -13,11 +12,7 @@ class TijuanaFlatsSpider(scrapy.Spider):
     start_urls = ("https://www.tijuanaflats.com/locations",)
 
     def parse(self, response):
-        data = json.loads(
-            response.xpath(
-                '//tjs-view-locations/attribute::*[name()=":locations"]'
-            ).extract_first()
-        )
+        data = json.loads(response.xpath('//tjs-view-locations/attribute::*[name()=":locations"]').extract_first())
         for row in data:
             for ent in row["yoast_json_ld"][0]["@graph"]:
                 if ent["@type"] == "WebPage" and row["slug"] in ent["url"]:
@@ -25,9 +20,7 @@ class TijuanaFlatsSpider(scrapy.Spider):
 
             # extract text from html snippet
             hours_of_operation = scrapy.Selector(text=row["acf"]["hours_of_operation"])
-            opening_hours = "; ".join(
-                a.strip() for a in hours_of_operation.xpath("//text()").extract()
-            )
+            opening_hours = "; ".join(a.strip() for a in hours_of_operation.xpath("//text()").extract())
 
             properties = {
                 "ref": row["slug"],

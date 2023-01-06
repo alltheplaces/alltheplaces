@@ -1,5 +1,7 @@
-import scrapy
 import re
+
+import scrapy
+
 from locations.items import GeojsonPointItem
 
 DAY_MAPPING = {
@@ -65,9 +67,7 @@ class KoppsSpider(scrapy.Spider):
                 day = day[0]
             else:
                 day = "Mon-Sun"
-            times = re.findall(
-                r"[0-9]{2}:[0-9]{2}[a|p]m - [0-9]{2}:[0-9]{2}[a|p]m", day_times
-            )
+            times = re.findall(r"[0-9]{2}:[0-9]{2}[a|p]m - [0-9]{2}:[0-9]{2}[a|p]m", day_times)
             times = times[0]
             if times and day:
                 parsed_time = self.parse_times(times)
@@ -82,43 +82,29 @@ class KoppsSpider(scrapy.Spider):
 
         for location in locations:
             properties = {
-                "addr_full": location.xpath(
-                    "normalize-space(./div/address/a/text())"
-                ).extract_first(),
-                "phone": location.xpath(
-                    "normalize-space(./div/ul/li/span/a/text())"
-                ).extract_first(),
+                "addr_full": location.xpath("normalize-space(./div/address/a/text())").extract_first(),
+                "phone": location.xpath("normalize-space(./div/ul/li/span/a/text())").extract_first(),
                 "city": location.xpath("./div/address/a/text()")
                 .extract()[1]
                 .replace(" ", "")
                 .split(",")[0]
                 .replace("\r\n", ""),
-                "state": location.xpath("./div/address/a/text()")
-                .extract()[1]
-                .lstrip()
-                .split(",")[1]
-                .split(" ")[1],
+                "state": location.xpath("./div/address/a/text()").extract()[1].lstrip().split(",")[1].split(" ")[1],
                 "postcode": location.xpath("./div/address/a/text()")
                 .extract()[1]
                 .lstrip()
                 .split(",")[1]
                 .split(" ")[2]
                 .replace("\r\n", ""),
-                "ref": location.xpath(
-                    "normalize-space(./div/address/a/@href)"
-                ).extract_first(),
+                "ref": location.xpath("normalize-space(./div/address/a/@href)").extract_first(),
                 "website": response.url,
                 "lat": re.findall(
                     r"\/[0-9]{2}[^(\/)]+z",
-                    location.xpath(
-                        "normalize-space(./div/address/a/@href)"
-                    ).extract_first(),
+                    location.xpath("normalize-space(./div/address/a/@href)").extract_first(),
                 )[0][1:].split(",")[0],
                 "lon": re.findall(
                     r"\/[0-9]{2}[^(\/)]+z",
-                    location.xpath(
-                        "normalize-space(./div/address/a/@href)"
-                    ).extract_first(),
+                    location.xpath("normalize-space(./div/address/a/@href)").extract_first(),
                 )[0][1:].split(",")[1],
             }
 

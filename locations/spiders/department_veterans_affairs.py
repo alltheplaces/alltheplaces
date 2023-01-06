@@ -1,9 +1,10 @@
-# -*- coding: utf-8 -*-
-import scrapy
 import datetime
 import re
-from locations.items import GeojsonPointItem
+
+import scrapy
+
 from locations.hours import OpeningHours
+from locations.items import GeojsonPointItem
 
 
 class DepartmentVeteransAffairsSpider(scrapy.Spider):
@@ -48,12 +49,8 @@ class DepartmentVeteransAffairsSpider(scrapy.Spider):
                     hours,
                 )
                 try:
-                    open = datetime.datetime.strptime(m.group(1), "%I:%M%p").strftime(
-                        "%H:%M"
-                    )
-                    close = datetime.datetime.strptime(m.group(5), "%I:%M%p").strftime(
-                        "%H:%M"
-                    )
+                    open = datetime.datetime.strptime(m.group(1), "%I:%M%p").strftime("%H:%M")
+                    close = datetime.datetime.strptime(m.group(5), "%I:%M%p").strftime("%H:%M")
                 except:
                     continue
 

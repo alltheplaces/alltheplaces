@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import json
 import urllib.parse
 
@@ -23,9 +22,7 @@ class AwrestaurantsSpider(scrapy.Spider):
                 yield scrapy.Request(response.urljoin(path), callback=self.parse_store)
 
     def parse_store(self, response):
-        data = json.loads(
-            response.xpath('//script[@type="application/ld+json"]/text()').get()
-        )
+        data = json.loads(response.xpath('//script[@type="application/ld+json"]/text()').get())
 
         hours = OpeningHours()
         for row in data["openingHoursSpecification"]:

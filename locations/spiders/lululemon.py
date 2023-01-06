@@ -1,7 +1,9 @@
 import json
+
 from scrapy.spiders import SitemapSpider
-from locations.items import GeojsonPointItem
+
 from locations.hours import OpeningHours
+from locations.items import GeojsonPointItem
 
 WEEKDAYS = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
 
@@ -20,9 +22,7 @@ class LuLuLemonSpider(SitemapSpider):
         geo = {}
         hours = {}
         status = "CLOSED"
-        data = json.loads(
-            response.xpath('//script[@type="application/json"]/text()').extract_first()
-        )
+        data = json.loads(response.xpath('//script[@type="application/json"]/text()').extract_first())
 
         ref = data["props"]["pageProps"]["storeData"]["name"]
         address["full"] = data["props"]["pageProps"]["storeData"].get("fullAddress")

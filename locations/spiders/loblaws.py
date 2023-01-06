@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
 import scrapy
-import re
 
 from locations.items import GeojsonPointItem
 
@@ -62,11 +60,7 @@ class LoblawsSpider(scrapy.Spider):
                     "name": i["name"],
                     "lat": i["geoPoint"]["latitude"],
                     "lon": i["geoPoint"]["longitude"],
-                    "street_address": ", ".join(
-                        filter(
-                            None, [i["address"].get("line2"), i["address"].get("line1")]
-                        )
-                    ),
+                    "street_address": ", ".join(filter(None, [i["address"].get("line2"), i["address"].get("line1")])),
                     "city": i["address"]["town"],
                     "state": i["address"]["region"],
                     "postcode": i["address"]["postalCode"],

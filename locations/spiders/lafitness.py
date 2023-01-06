@@ -1,10 +1,10 @@
 import datetime
-import scrapy
-import re
 import json
+import re
+
+import scrapy
 
 from locations.items import GeojsonPointItem
-
 
 DAY_MAPPING = {
     "Mon": "Mo",
@@ -48,9 +48,7 @@ class LAFitnessSpider(scrapy.Spider):
                 return "24/7"
 
             try:
-                open_time, close_time = re.search(
-                    r"(.*)\s-\s(.*)", hour[1], re.IGNORECASE
-                ).groups()
+                open_time, close_time = re.search(r"(.*)\s-\s(.*)", hour[1], re.IGNORECASE).groups()
             except:
                 if hour[1] == "24 Hours Open":
                     open_time, close_time = "12:00am", "11:59pm"
@@ -61,12 +59,8 @@ class LAFitnessSpider(scrapy.Spider):
             if open_time == "Midnight":
                 open_time = "12:00am"
 
-            open_time = datetime.datetime.strptime(open_time, "%I:%M%p").strftime(
-                "%H:%M"
-            )
-            close_time = datetime.datetime.strptime(close_time, "%I:%M%p").strftime(
-                "%H:%M"
-            )
+            open_time = datetime.datetime.strptime(open_time, "%I:%M%p").strftime("%H:%M")
+            close_time = datetime.datetime.strptime(close_time, "%I:%M%p").strftime("%H:%M")
 
             day_range = re.search(r"([a-z]{3})\s-\s([a-z]{3})", hour[0], re.IGNORECASE)
             if day_range:
@@ -80,9 +74,7 @@ class LAFitnessSpider(scrapy.Spider):
                     )
                 )
             else:
-                opening_hours.append(
-                    "{} {}-{}".format(DAY_MAPPING[hour[0]], open_time, close_time)
-                )
+                opening_hours.append("{} {}-{}".format(DAY_MAPPING[hour[0]], open_time, close_time))
 
         return ";".join(opening_hours)
 
@@ -91,28 +83,16 @@ class LAFitnessSpider(scrapy.Spider):
 
         properties.update(
             {
-                "phone": response.xpath(
-                    '//span[contains(@id, "lblClubPhone")]/text()'
-                ).extract_first(),
-                "addr_full": response.xpath(
-                    '//span[contains(@id, "lblClubAddress")]/text()'
-                ).extract_first(),
-                "city": response.xpath(
-                    '//span[contains(@id, "lblClubCity")]/text()'
-                ).extract_first(),
-                "state": response.xpath(
-                    '//span[contains(@id, "lblClubState")]/text()'
-                ).extract_first(),
-                "postcode": response.xpath(
-                    '//span[contains(@id, "lblZipCode")]/text()'
-                ).extract_first(),
+                "phone": response.xpath('//span[contains(@id, "lblClubPhone")]/text()').extract_first(),
+                "addr_full": response.xpath('//span[contains(@id, "lblClubAddress")]/text()').extract_first(),
+                "city": response.xpath('//span[contains(@id, "lblClubCity")]/text()').extract_first(),
+                "state": response.xpath('//span[contains(@id, "lblClubState")]/text()').extract_first(),
+                "postcode": response.xpath('//span[contains(@id, "lblZipCode")]/text()').extract_first(),
                 "website": response.url,
             }
         )
 
-        opening_hours = self.parse_hours(
-            response.xpath('//div[@id="divClubHourPanel"]//tr')
-        )
+        opening_hours = self.parse_hours(response.xpath('//div[@id="divClubHourPanel"]//tr'))
 
         if opening_hours:
             properties["opening_hours"] = opening_hours

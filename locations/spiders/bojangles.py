@@ -1,5 +1,5 @@
-# -*- coding: utf-8 -*-
 import scrapy
+
 from locations.linked_data_parser import LinkedDataParser
 from locations.microdata_parser import MicrodataParser
 
@@ -17,7 +17,5 @@ class BojanglesSpider(scrapy.spiders.SitemapSpider):
     def parse_store(self, response):
         MicrodataParser.convert_to_json_ld(response)
         item = LinkedDataParser.parse(response, "FastFoodRestaurant")
-        item["ref"] = response.url.replace(
-            "https://locations.bojangles.com/", ""
-        ).replace(".html", "")
+        item["ref"] = response.url.replace("https://locations.bojangles.com/", "").replace(".html", "")
         yield item

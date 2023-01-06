@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
+import json
 import re
 
 import scrapy
-import json
 
-from locations.hours import OpeningHours, sanitise_day, day_range
+from locations.hours import OpeningHours, day_range, sanitise_day
 from locations.items import GeojsonPointItem
 
 
@@ -36,8 +35,7 @@ class FreshMarketSpider(scrapy.Spider):
                 "state": store["state"],
                 "postcode": store["postalCode"],
                 "phone": store["phoneNumber"],
-                "website": "https://www.thefreshmarket.com/my-market/store/"
-                + store["slug"],
+                "website": "https://www.thefreshmarket.com/my-market/store/" + store["slug"],
                 "lat": float(store["storeLocation"]["lat"]),
                 "lon": float(store["storeLocation"]["lon"]),
             }

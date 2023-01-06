@@ -1,5 +1,6 @@
 import html
 import json
+
 import scrapy
 
 from locations.dict_parser import DictParser
@@ -18,9 +19,7 @@ class BashasSpider(scrapy.spiders.SitemapSpider):
     sitemap_rules = [("/stores/", "parse_store")]
 
     def parse_store(self, response):
-        script = response.xpath(
-            "//script[@id='wpsl-js-js-extra']/text()"
-        ).extract_first()
+        script = response.xpath("//script[@id='wpsl-js-js-extra']/text()").extract_first()
         open_brace = script.find('"locations":[{') + 13
         close_brace = script.rfind("}]}") + 1
         store_json = json.loads(script[open_brace:close_brace])
@@ -31,9 +30,7 @@ class BashasSpider(scrapy.spiders.SitemapSpider):
         item["country"] = "US"
         item["name"] = html.unescape(store_json["store"])
         item["website"] = response.url
-        item["phone"] = response.xpath(
-            "//div[@class='wpsl-contact-details']//text()"
-        ).extract()[1]
+        item["phone"] = response.xpath("//div[@class='wpsl-contact-details']//text()").extract()[1]
         item["opening_hours"] = self.parse_hours(hours)
 
         yield item

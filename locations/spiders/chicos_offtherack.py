@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import json
 
 import scrapy
@@ -35,8 +34,7 @@ class ChicosOffTheRackSpider(scrapy.Spider):
                 "state": data["attributes"]["state"],
                 "postcode": data["attributes"]["postalCode"],
                 "country": data["attributes"]["countryCode"],
-                "website": "https://stores.chicosofftherack.com/s/"
-                + data["attributes"]["slug"],
+                "website": "https://stores.chicosofftherack.com/s/" + data["attributes"]["slug"],
                 "lat": float(data["attributes"]["latitude"]),
                 "lon": float(data["attributes"]["longitude"]),
             }

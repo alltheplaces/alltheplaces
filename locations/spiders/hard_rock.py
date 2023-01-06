@@ -1,7 +1,7 @@
-# -*- coding: utf-8 -*-
 import json
 
 import scrapy
+
 from locations.items import GeojsonPointItem
 
 
@@ -10,14 +10,10 @@ class HardRockSpider(scrapy.Spider):
     # TODO: has hotels, cafes etc in wikidata, spider will need more work for applying wikidata
     item_attributes = {"brand": "Hard Rock"}
     allowed_domains = ["www.hardrock.com"]
-    start_urls = [
-        "https://www.hardrock.com/files/5880/widget935343.js?callback=widget935343DataCallback"
-    ]
+    start_urls = ["https://www.hardrock.com/files/5880/widget935343.js?callback=widget935343DataCallback"]
 
     def parse(self, response):
-        data = json.loads(
-            response.text.replace("widget935343DataCallback(", "").replace(");", "")
-        )
+        data = json.loads(response.text.replace("widget935343DataCallback(", "").replace(");", ""))
         for location in data.get("PropertyorInterestPoint", []):
             properties = {
                 "name": location["interestpointpropertyname"],

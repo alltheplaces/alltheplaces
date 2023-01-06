@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import json
 
 import scrapy
@@ -22,9 +21,7 @@ class EightyFourLumberSpider(scrapy.Spider):
     item_attributes = {"brand": "84 Lumber", "brand_wikidata": "Q4644779"}
     allowed_domains = ["84lumber.com"]
 
-    start_urls = [
-        "https://www.84lumber.com/umbraco/surface/StoreSupport/StoreSearch?radius=10000"
-    ]
+    start_urls = ["https://www.84lumber.com/umbraco/surface/StoreSupport/StoreSearch?radius=10000"]
 
     def parse(self, response):
         data = json.loads(json.loads(response.text))

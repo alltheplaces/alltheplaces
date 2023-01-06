@@ -1,11 +1,10 @@
-# -*- coding: utf-8 -*-
 import json
-import re
 
 import scrapy
 
+from locations.categories import Categories
+from locations.geo import MILES_TO_KILOMETERS, vincenty_distance
 from locations.items import GeojsonPointItem
-from locations.geo import vincenty_distance, MILES_TO_KILOMETERS
 
 DAYS_NAME = {
     "MO": "Mo",
@@ -26,15 +25,17 @@ USPS_HEADERS = {
 
 class UspsCollectionBoxesSpider(scrapy.Spider):
     name = "usps_collection_boxes"
-    item_attributes = {"brand": "USPS", "brand_wikidata": "Q668687"}
+    item_attributes = {
+        "brand": "United States Postal Service",
+        "brand_wikidata": "Q668687",
+        "extras": Categories.POST_BOX.value,
+    }
     allowed_domains = ["usps.com"]
     download_delay = 0.1
 
     def start_requests(self):
 
-        with open(
-            "./locations/searchable_points/us_centroids_100mile_radius.csv"
-        ) as points:
+        with open("./locations/searchable_points/us_centroids_100mile_radius.csv") as points:
             next(points)
             for point in points:
                 _, lat, lon = tuple(map(float, point.strip().split(",")))
@@ -158,7 +159,6 @@ class UspsCollectionBoxesSpider(scrapy.Spider):
                 "country": "US",
                 "lat": store["latitude"],
                 "lon": store["longitude"],
-                "name": store["locationName"],
                 "extras": {},
             }
 

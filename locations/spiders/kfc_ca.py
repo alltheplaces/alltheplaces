@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from scrapy.spiders import SitemapSpider
 
 from locations.hours import OpeningHours
@@ -31,8 +30,6 @@ class KFCCASpider(SitemapSpider, StructuredDataSpider):
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["street_address"] = item["addr_full"]
-        item["addr_full"] += (
-            ", " + response.xpath('//span[@class="postal-code"]/text()').get()
-        )
+        item["addr_full"] += ", " + response.xpath('//span[@class="postal-code"]/text()').get()
 
         yield item

@@ -1,11 +1,10 @@
-# -*- coding: utf-8 -*-
 import json
 import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
+from locations.items import GeojsonPointItem
 
 
 class CornerBakeryCafeSpider(scrapy.Spider):
@@ -51,9 +50,7 @@ class CornerBakeryCafeSpider(scrapy.Spider):
 
     def parse_store(self, response):
         data = json.loads(
-            response.xpath('//script[@type="application/ld+json"]/text()')
-            .extract_first()
-            .replace("\r\n", "")
+            response.xpath('//script[@type="application/ld+json"]/text()').extract_first().replace("\r\n", "")
         )
 
         properties = {

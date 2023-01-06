@@ -1,5 +1,5 @@
-# -*- coding: utf-8 -*-
 import scrapy
+
 from locations.items import GeojsonPointItem
 
 
@@ -17,12 +17,7 @@ class BlueBottleCafeSpider(scrapy.Spider):
         for region_name in results["cafes"]:
             for store_data in results["cafes"][region_name]:
 
-                address_string = (
-                    store_data["address"]
-                    .replace("\n", " ")
-                    .replace("\r", "")
-                    .replace("<br>", ", ")
-                )
+                address_string = store_data["address"].replace("\n", " ").replace("\r", "").replace("<br>", ", ")
 
                 properties = {
                     "name": store_data["name"],

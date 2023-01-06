@@ -1,15 +1,15 @@
-# -*- coding: utf-8 -*-
 import json
+
 import scrapy
 
-from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
+from locations.items import GeojsonPointItem
 
 
 class MoneygramSpider(scrapy.Spider):
     download_delay = 0.2
     name = "moneygram"
-    item_attributes = {"brand": "Moneygram", "brand_wikidata": "Q1944412"}
+    item_attributes = {"brand": "MoneyGram", "brand_wikidata": "Q1944412"}
     allowed_domains = ["locations.moneygram.com"]
     start_urls = ("http://locations.moneygram.com/",)
 
@@ -20,9 +20,7 @@ class MoneygramSpider(scrapy.Spider):
             yield scrapy.Request(response.urljoin(url), callback=self.parse_state)
 
     def parse_state(self, response):
-        location_urls = response.xpath(
-            '//div[@class="citylist_item"]/a/@href'
-        ).extract()
+        location_urls = response.xpath('//div[@class="citylist_item"]/a/@href').extract()
 
         for url in location_urls:
             yield scrapy.Request(response.urljoin(url), callback=self.parse_city)
@@ -34,11 +32,7 @@ class MoneygramSpider(scrapy.Spider):
             yield scrapy.Request(response.urljoin(url), callback=self.parse_location)
 
     def parse_location(self, response):
-        data = json.loads(
-            response.xpath(
-                '//script[@type="application/ld+json"][2]/text()'
-            ).extract_first()
-        )
+        data = json.loads(response.xpath('//script[@type="application/ld+json"][2]/text()').extract_first())
 
         properties = {
             "ref": data.get("@id"),
@@ -46,7 +40,7 @@ class MoneygramSpider(scrapy.Spider):
             "city": data.get("address", {}).get("addressLocality"),
             "state": data.get("address", {}).get("addressRegion"),
             "postcode": data.get("address", {}).get("postalCode"),
-            "postcode": data.get("name"),
+            "name": data.get("name"),
             "phone": data.get("telephone"),
             "country": data.get("address", {}).get("addressCountry"),
             "lat": data.get("geo", {}).get("latitude"),

@@ -1,9 +1,9 @@
-# -*- coding: utf-8 -*-
-import scrapy
 import re
-from locations.items import GeojsonPointItem
 from itertools import groupby
 
+import scrapy
+
+from locations.items import GeojsonPointItem
 
 _DAYNAMES = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
 
@@ -20,9 +20,7 @@ class WaitroseSpider(scrapy.Spider):
 
         # if this is a store details page then it will have the following
         # div section.
-        details = response.xpath(
-            '//div[@role="article"]/div' '/div[@class="parbase details section"]'
-        )
+        details = response.xpath('//div[@role="article"]/div' '/div[@class="parbase details section"]')
 
         if details:
             name = response.xpath("//head/title")[0].root.text
@@ -38,11 +36,7 @@ class WaitroseSpider(scrapy.Spider):
                 "ref": response.meta["waitrose_store_id"],
             }
 
-            branch_details = (
-                details[0]
-                .xpath('div[@class="col branch-details"]/p')[0]
-                .root.text_content()
-            )
+            branch_details = details[0].xpath('div[@class="col branch-details"]/p')[0].root.text_content()
             if branch_details:
                 branch_details = self._branch_details(branch_details)
             if branch_details:
@@ -54,9 +48,7 @@ class WaitroseSpider(scrapy.Spider):
             if opening_hours:
                 properties.update(opening_hours)
 
-            branch_map = (
-                details[0].xpath('div[@class="branch-finder-map"]/p/a')[0].root.attrib
-            )
+            branch_map = details[0].xpath('div[@class="branch-finder-map"]/p/a')[0].root.attrib
             properties.update(
                 {
                     "lon": float(branch_map["data-long"]),
@@ -147,10 +139,10 @@ class WaitroseSpider(scrapy.Spider):
         for times, indices in groupby(range(len(hours)), lambda i: hours[i]):
             indices = list(indices)
             if len(indices) == 1:
-                formatted.append("%s %s" % (_DAYNAMES[indices[0]], times))
+                formatted.append("{} {}".format(_DAYNAMES[indices[0]], times))
             else:
                 dayrange = _DAYNAMES[indices[0]] + "-" + _DAYNAMES[indices[-1]]
-                formatted.append("%s %s" % (dayrange, times))
+                formatted.append("{} {}".format(dayrange, times))
 
         properties = {
             "opening_hours": "; ".join(formatted),

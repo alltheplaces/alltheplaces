@@ -46,10 +46,7 @@ def test_ld():
     assert i["postcode"] == "94086"
     assert i["street_address"] == "1901 Lemur Ave"
     assert i["name"] == "GreatFood"
-    assert (
-        i["opening_hours"]
-        == "Mo-Th 11:00-14:30,17:00-21:30; Fr-Sa 11:00-14:30,17:00-22:00"
-    )
+    assert i["opening_hours"] == "Mo-Th 11:00-14:30,17:00-21:30; Fr-Sa 11:00-14:30,17:00-22:00"
     assert i["phone"] == "(408) 714-1489"
     assert i["email"] == "example@example.org"
     assert i["website"] == "http://www.greatfood.com"
@@ -227,12 +224,7 @@ def test_check_type():
     assert LinkedDataParser.check_type("Country", "COUNTRY") is True
     assert LinkedDataParser.check_type("postalAddress", "PostalAddress") is True
     assert LinkedDataParser.check_type("geocoordinates", "GeoCoordinates") is True
-    assert (
-        LinkedDataParser.check_type(
-            "https://schema.org/GeoCoordinates", "GeoCoordinates"
-        )
-        is True
-    )
+    assert LinkedDataParser.check_type("https://schema.org/GeoCoordinates", "GeoCoordinates") is True
     assert LinkedDataParser.check_type("postalAddress", "GeoCoordinates") is False
 
 
@@ -256,8 +248,5 @@ def test_multiple_types():
             </script>""",
     )
 
-    assert (
-        LinkedDataParser.find_linked_data(response, ["Place", "Thing"])["name"]
-        == "test 1"
-    )
+    assert LinkedDataParser.find_linked_data(response, ["Place", "Thing"])["name"] == "test 1"
     assert LinkedDataParser.find_linked_data(response, "Place")["name"] == "test 2"

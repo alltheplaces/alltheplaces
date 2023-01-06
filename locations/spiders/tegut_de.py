@@ -1,8 +1,8 @@
-import scrapy
 import json
 
-from locations.items import GeojsonPointItem
+import scrapy
 
+from locations.items import GeojsonPointItem
 
 DAY_MAPPING = {
     "Montag": "Mo",
@@ -49,18 +49,12 @@ class TegutDeSpider(scrapy.Spider):
             yield GeojsonPointItem(**properties)
 
     def parse(self, response):
-        stores = response.xpath(
-            '//h3[@class="h4 store-title float-left mr-1"]//a/@href'
-        ).getall()
+        stores = response.xpath('//h3[@class="h4 store-title float-left mr-1"]//a/@href').getall()
         for store in stores:
-            yield scrapy.Request(
-                f"https://www.tegut.com{store}", callback=self.parse_data
-            )
+            yield scrapy.Request(f"https://www.tegut.com{store}", callback=self.parse_data)
 
         for link in response.xpath('//li[@class="list-inline-item"]//a'):
             next = link.xpath("./text()").get().strip()
             if next == ">":
                 next_link = link.xpath("./@href").get()
-                yield scrapy.Request(
-                    f"https://www.tegut.com{next_link}", callback=self.parse
-                )
+                yield scrapy.Request(f"https://www.tegut.com{next_link}", callback=self.parse)

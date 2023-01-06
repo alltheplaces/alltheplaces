@@ -1,10 +1,7 @@
-# -*- coding: utf-8 -*-
-import re
-
 import scrapy
 
-from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
+from locations.items import GeojsonPointItem
 
 
 class MerkurSpider(scrapy.Spider):
@@ -33,9 +30,7 @@ class MerkurSpider(scrapy.Spider):
                 open_time, close_time = item["time"].split(" - ")
             except KeyError:
                 continue
-            opening_hours.add_range(
-                day=item["dayOfWeek"][:2], open_time=open_time, close_time=close_time
-            )
+            opening_hours.add_range(day=item["dayOfWeek"][:2], open_time=open_time, close_time=close_time)
 
         return opening_hours.as_opening_hours()
 

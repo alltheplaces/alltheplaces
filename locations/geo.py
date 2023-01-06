@@ -1,8 +1,9 @@
 import csv
-import geonamescache
 import gzip
 import json
 import math
+
+import geonamescache
 
 # Radius of the Earth in kilometers
 EARTH_RADIUS = 6378.1
@@ -22,15 +23,11 @@ def vincenty_distance(lat, lon, distance_km, bearing_deg):
 
     lat2 = math.asin(
         math.sin(lat_rad) * math.cos(distance_km / EARTH_RADIUS)
-        + math.cos(lat_rad)
-        * math.sin(distance_km / EARTH_RADIUS)
-        * math.cos(bearing_rad)
+        + math.cos(lat_rad) * math.sin(distance_km / EARTH_RADIUS) * math.cos(bearing_rad)
     )
 
     lon2 = lon_rad + math.atan2(
-        math.sin(bearing_rad)
-        * math.sin(distance_km / EARTH_RADIUS)
-        * math.cos(lat_rad),
+        math.sin(bearing_rad) * math.sin(distance_km / EARTH_RADIUS) * math.cos(lat_rad),
         math.cos(distance_km / EARTH_RADIUS) - math.sin(lat_rad) * math.sin(lat2),
     )
 
@@ -60,9 +57,7 @@ def point_locations(areas_csv_file, area_field_filter=None):
                 area = get_key(row, ["country", "territory", "state"])
                 if area_field_filter:
                     if not area:
-                        raise Exception(
-                            "trying to perform area filter on file with no area support"
-                        )
+                        raise Exception("trying to perform area filter on file with no area support")
                     if area not in area_field_filter:
                         continue
                 yield lat, lon
@@ -77,10 +72,7 @@ def city_locations(country_code, min_population=0):
     :return: iterator of city names with locations
     """
     for city in geonamescache.GeonamesCache().get_cities().values():
-        if (
-            city["countrycode"].lower() == country_code.lower()
-            and city["population"] >= min_population
-        ):
+        if city["countrycode"].lower() == country_code.lower() and city["population"] >= min_population:
             yield city
 
 
@@ -98,9 +90,7 @@ def postal_regions(country_code):
     :return: post code regions with possible extras
     """
     if country_code == "GB":
-        with gzip.open(
-            "./locations/searchable_points/postcodes/outward_gb.json.gz"
-        ) as points:
+        with gzip.open("./locations/searchable_points/postcodes/outward_gb.json.gz") as points:
             for outward_code in json.load(points):
                 yield {
                     "postal_region": outward_code["postcode"],
@@ -120,14 +110,23 @@ def postal_regions(country_code):
         # easily found though links on the root domain. The link must be clearly visible to the human eye.
         # The backlink must be placed before the Customer uses the Database in production.
         #
-        with gzip.open(
-            "./locations/searchable_points/postcodes/uszips.csv.gz", mode="rt"
-        ) as points:
+        with gzip.open("./locations/searchable_points/postcodes/uszips.csv.gz", mode="rt") as points:
             for row in csv.DictReader(points):
                 yield {
                     "postal_region": row["zip"],
                     "city": row["city"],
                     "state": row["state_id"],
+                    "latitude": row["lat"],
+                    "longitude": row["lng"],
+                }
+
+    elif country_code == "FR":
+        # French postal code database from https://datanova.legroupe.laposte.fr
+
+        with gzip.open("./locations/searchable_points/postcodes/frzips.csv.gz", mode="rt") as points:
+            for row in csv.DictReader(points):
+                yield {
+                    "postal_region": row["Code_postal"],
                     "latitude": row["lat"],
                     "longitude": row["lng"],
                 }
