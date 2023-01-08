@@ -1,7 +1,7 @@
 import scrapy
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class STBankSpider(scrapy.Spider):
@@ -37,4 +37,4 @@ class STBankSpider(scrapy.Spider):
             "extras": {"fax": location.get("fax")},
             "opening_hours": hours.as_opening_hours(),
         }
-        return GeojsonPointItem(**properties)
+        return Feature(**properties)

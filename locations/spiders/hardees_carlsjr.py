@@ -3,7 +3,7 @@ import urllib.parse
 from scrapy.spiders import SitemapSpider
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 BRANDS = {
     "locations.carlsjr.com": {"brand": "Carl's Jr.", "brand_wikidata": "Q1043486"},
@@ -45,4 +45,4 @@ class HardeesCarlsJrSpider(SitemapSpider):
         }
         hostname = urllib.parse.urlparse(response.url).hostname
         properties.update(BRANDS[hostname])
-        return GeojsonPointItem(**properties)
+        return Feature(**properties)

@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class AliceDeliceSpider(scrapy.Spider):
@@ -60,4 +60,4 @@ class AliceDeliceSpider(scrapy.Spider):
             **geo,
         )
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

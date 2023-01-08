@@ -3,7 +3,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class DeloitteSpider(scrapy.Spider):
@@ -84,7 +84,7 @@ class DeloitteSpider(scrapy.Spider):
                     meta={"properties": properties},
                 )
             else:
-                yield GeojsonPointItem(**properties)
+                yield Feature(**properties)
 
     def parse_global(self, response):
         countries = response.xpath('////div[contains(@class, "country-details")]')
@@ -150,4 +150,4 @@ class DeloitteSpider(scrapy.Spider):
                 }
             )
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

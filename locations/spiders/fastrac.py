@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class FastracSpider(scrapy.Spider):
@@ -23,4 +23,4 @@ class FastracSpider(scrapy.Spider):
                 "postcode": row.xpath('.//*[@class="zip"]/text()').get(),
                 "opening_hours": row.xpath('.//*[@class="store-info"]//li[1]/text()').get(),
             }
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

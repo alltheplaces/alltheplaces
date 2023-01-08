@@ -3,7 +3,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class AnthonysRestaurantsSpider(scrapy.Spider):
@@ -43,4 +43,4 @@ class AnthonysRestaurantsSpider(scrapy.Spider):
             "phone": (response.xpath("//*[starts-with(@href, 'tel:')]/@href").get() or "")[4:],
             "opening_hours": hours,
         }
-        return GeojsonPointItem(**properties)
+        return Feature(**properties)

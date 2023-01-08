@@ -1,7 +1,7 @@
 import scrapy
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 DAY_MAPPING = {
     "Понеделник": "Mo",
@@ -24,7 +24,7 @@ class A1Spider(scrapy.Spider):
         data = response.json()
 
         for store in data["response"]:
-            item = GeojsonPointItem()
+            item = Feature()
             item["ref"] = store["id"]
             item["name"] = store["name"]
             item["addr_full"] = store["address"].strip()

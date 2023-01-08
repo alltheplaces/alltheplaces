@@ -1,7 +1,7 @@
 import scrapy
 
 from locations.hours import DAYS_EN, DAYS_FULL, OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 TIME_FORMAT = "%I:%M %p"
 
@@ -68,4 +68,4 @@ class LidsSpider(scrapy.Spider):
             if hours:
                 properties["opening_hours"] = hours
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

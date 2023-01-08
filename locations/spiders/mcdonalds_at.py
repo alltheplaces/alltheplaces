@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 from locations.spiders.mcdonalds import McDonaldsSpider
 
 
@@ -12,7 +12,7 @@ class McDonaldsATSpider(scrapy.spiders.SitemapSpider):
     download_delay = 0.5
 
     def parse(self, response):
-        item = GeojsonPointItem()
+        item = Feature()
         item["website"] = item["ref"] = response.url
         item["lat"] = response.xpath('//*[@class="marker"]/@data-lat').get()
         item["lon"] = response.xpath('//*[@class="marker"]/@data-lng').get()

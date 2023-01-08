@@ -3,7 +3,7 @@ import json
 import scrapy
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class VodafoneDeSpider(scrapy.Spider):
@@ -53,7 +53,7 @@ class VodafoneDeSpider(scrapy.Spider):
                 "opening_hours": oh.as_opening_hours(),
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)
 
         urls = response.xpath('//a[contains(@class, "Teaser-link Teaser-locationLink")]/@href')
         for url in urls:

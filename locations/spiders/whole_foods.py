@@ -4,7 +4,7 @@ import re
 import scrapy
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class WholeFoodsSpider(scrapy.Spider):
@@ -35,7 +35,7 @@ class WholeFoodsSpider(scrapy.Spider):
             return
 
         store_json = json.loads(response.xpath('//script[@type="application/ld+json"]/text()').extract_first())
-        yield GeojsonPointItem(
+        yield Feature(
             ref=response.url.split("/")[-1],
             name=response.xpath("//h1/text()").extract_first().strip(),
             lat=float(store_json["geo"]["latitude"]),
@@ -74,7 +74,7 @@ class WholeFoodsSpider(scrapy.Spider):
         ]["storeAPIData"]
 
         # Coordinates are listed as [lon, lat]
-        yield GeojsonPointItem(
+        yield Feature(
             ref=store_json["folder"],
             name=store_json["name"],
             lat=float(store_json["geo_location"]["coordinates"][1]),

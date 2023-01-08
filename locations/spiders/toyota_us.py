@@ -4,7 +4,7 @@ import scrapy
 from scrapy.linkextractors import LinkExtractor
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class ToyotaUSSpider(scrapy.Spider):
@@ -49,7 +49,7 @@ class ToyotaUSSpider(scrapy.Spider):
             self.parse_hours(info["hoursOfOperation"][0]["daysOfWeek"]) if "hoursOfOperation" in info else None
         )
 
-        return GeojsonPointItem(
+        return Feature(
             ref=ref,
             lat=lat,
             lon=lon,

@@ -3,7 +3,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class ArcoSpider(scrapy.Spider):
@@ -22,7 +22,7 @@ class ArcoSpider(scrapy.Spider):
             yield scrapy.Request(f"https://www.arco.com{match.group(1)}")
         else:
             for station in csv.DictReader(response.text.splitlines()):
-                yield GeojsonPointItem(
+                yield Feature(
                     lat=station["Lat"],
                     lon=station["Lng"],
                     name=station["StoreName"],

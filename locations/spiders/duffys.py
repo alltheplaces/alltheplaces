@@ -2,7 +2,7 @@ import scrapy
 from scrapy.http import JsonRequest
 
 from locations.hours import OpeningHours, day_range, sanitise_day
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class Duffys(scrapy.Spider):
@@ -63,4 +63,4 @@ class Duffys(scrapy.Spider):
                 "lon": store.get("longitude"),
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

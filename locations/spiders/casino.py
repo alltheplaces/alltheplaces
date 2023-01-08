@@ -2,7 +2,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class CasinoSpider(scrapy.Spider):
@@ -62,4 +62,4 @@ class CasinoSpider(scrapy.Spider):
             "extras": {"addr_2_housenumber": secondRoadNum},
         }
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

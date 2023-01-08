@@ -2,7 +2,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class BenchmarkHospitalitySpider(scrapy.Spider):
@@ -56,4 +56,4 @@ class BenchmarkHospitalitySpider(scrapy.Spider):
             }
         )
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

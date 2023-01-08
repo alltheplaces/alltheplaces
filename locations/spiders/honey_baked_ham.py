@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class HoneyBakedHamSpider(scrapy.Spider):
@@ -39,4 +39,4 @@ class HoneyBakedHamSpider(scrapy.Spider):
                 "lat": float(i["storeInformation"]["location"]["coordinates"][1]),
                 "lon": float(i["storeInformation"]["location"]["coordinates"][0]),
             }
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

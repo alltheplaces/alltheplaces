@@ -5,7 +5,7 @@ import re
 import scrapy
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class GenghisGrillSpider(scrapy.Spider):
@@ -34,7 +34,7 @@ class GenghisGrillSpider(scrapy.Spider):
             "opening_hours": hours.as_opening_hours(),
         }
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)
 
     def parse_hours(self, response):
         opening_hours = OpeningHours()

@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class AureconGroupSpider(scrapy.Spider):
@@ -39,4 +39,4 @@ class AureconGroupSpider(scrapy.Spider):
                 coordinates = (coordinates.split("=")[1]).split(",")
                 properties["lat"] = float(coordinates[0])
                 properties["lon"] = float(coordinates[1])
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

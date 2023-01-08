@@ -1,7 +1,7 @@
 import scrapy
 
 from locations.hours import DAYS_FULL, OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class CavaSpider(scrapy.Spider):
@@ -52,7 +52,7 @@ class CavaSpider(scrapy.Spider):
             "phone": phone,
             "opening_hours": opening_hours,
         }
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)
 
     def parse_opening_hours(self, timings):
         oh = OpeningHours()

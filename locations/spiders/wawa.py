@@ -2,7 +2,7 @@ from urllib.parse import urlencode
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 LAT_LONS = [
     # Northeast locations
@@ -105,4 +105,4 @@ class WawaSpider(scrapy.Spider):
                 "opening_hours": opening_hours,
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

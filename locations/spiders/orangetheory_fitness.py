@@ -2,7 +2,7 @@ import json
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class OrangetheoryFitnessSpider(scrapy.Spider):
@@ -79,4 +79,4 @@ class OrangetheoryFitnessSpider(scrapy.Spider):
                 "phone": location[0]["studioLocation"]["phoneNumber"],
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

@@ -2,7 +2,7 @@ import json
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class SendiksSpider(scrapy.spiders.SitemapSpider):
@@ -39,4 +39,4 @@ class SendiksSpider(scrapy.spiders.SitemapSpider):
             "lat": data["latitude"],
             "lon": data["longitude"],
         }
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

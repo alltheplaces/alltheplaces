@@ -4,7 +4,7 @@ import scrapy
 from scrapy.spiders import SitemapSpider
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 from locations.user_agents import BROSWER_DEFAULT
 
 
@@ -55,7 +55,7 @@ class PearleVisionSpider(SitemapSpider):
             )
 
     def pares_store(self, response, website, opening_hours):
-        item = GeojsonPointItem()
+        item = Feature()
         data = response.xpath('//script/text()[contains(., "var storeName")]').get()
         item["name"] = self.find_between(data, 'var storeName = "', '".trim();').strip()
         item["street_address"] = self.find_between(data, 'var address = "', '".trim();').strip()

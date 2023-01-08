@@ -4,7 +4,7 @@ import re
 import scrapy
 from scrapy.spiders import SitemapSpider
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 from locations.user_agents import BROSWER_DEFAULT
 
 URL = "https://data.discounttire.com/webapi/discounttire.graph"
@@ -64,4 +64,4 @@ class DiscountTireSpider(SitemapSpider):
                 "lon": float(data["geoPoint"]["longitude"]),
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

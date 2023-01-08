@@ -2,7 +2,7 @@ import scrapy
 
 from locations.geo import point_locations
 from locations.hours import DAYS, OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class CadillacSpider(scrapy.Spider):
@@ -27,7 +27,7 @@ class CadillacSpider(scrapy.Spider):
 
     def parse(self, response):
         for data in response.json().get("payload", {}).get("dealers"):
-            item = GeojsonPointItem()
+            item = Feature()
             item["ref"] = data.get("dealerCode")
             item["name"] = data.get("dealerName")
             item["website"] = data.get("dealerUrl")

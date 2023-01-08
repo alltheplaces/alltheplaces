@@ -2,7 +2,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 from locations.linked_data_parser import LinkedDataParser
 
 
@@ -21,7 +21,7 @@ class PandoraSpider(scrapy.spiders.SitemapSpider):
         yield self.parse_item(response, self.sitemap_rules[0][0])
 
     @staticmethod
-    def parse_item(response, ref_regex) -> GeojsonPointItem:
+    def parse_item(response, ref_regex) -> Feature:
         ld_item = LinkedDataParser.find_linked_data(response, "JewelryStore")
 
         if not ld_item:

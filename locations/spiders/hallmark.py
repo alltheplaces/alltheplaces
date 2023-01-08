@@ -4,7 +4,7 @@ import scrapy
 from scrapy.selector import Selector
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class HallmarkSpider(scrapy.Spider):
@@ -36,7 +36,7 @@ class HallmarkSpider(scrapy.Spider):
                 "lon": float(location["lng"]),
                 "opening_hours": self.parse_hours(hours["days"]) if hours.get("days") else None,
             }
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)
 
     def parse_hours(self, store_hours):
         opening_hours = OpeningHours()

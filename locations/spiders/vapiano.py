@@ -3,7 +3,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 regex = r"\[{.*}\]"
 
@@ -33,7 +33,7 @@ class VapianoSpider(scrapy.Spider):
             country = i["country"]
             addr_full = "{} {}, {}".format(city, street, state)
 
-            yield GeojsonPointItem(
+            yield Feature(
                 ref=name,
                 city=city,
                 street=street,

@@ -4,7 +4,7 @@ import scrapy
 
 from locations.categories import Categories
 from locations.geo import MILES_TO_KILOMETERS, vincenty_distance
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 DAYS_NAME = {
     "MO": "Mo",
@@ -170,4 +170,4 @@ class UspsCollectionBoxesSpider(scrapy.Spider):
             if h:
                 properties["extras"]["collection_times"] = h
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

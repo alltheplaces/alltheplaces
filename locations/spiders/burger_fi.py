@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class BurgerFiSpider(scrapy.Spider):
@@ -29,4 +29,4 @@ class BurgerFiSpider(scrapy.Spider):
                 "website": "https://order.burgerfi.com/locations/" + r.xpath("@slug").extract_first(),
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

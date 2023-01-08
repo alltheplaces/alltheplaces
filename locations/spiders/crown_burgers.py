@@ -2,7 +2,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class CrownBurgersSpider(scrapy.Spider):
@@ -19,7 +19,7 @@ class CrownBurgersSpider(scrapy.Spider):
         for name, info, maps_url in zip(names, infos, maps_urls):
             maps_url = maps_url.get()
             coords = re.findall("-{0,1}[0-9]{1,3}.[0-9]+,-{0,1}[0-9]{1,3}.[0-9]+", maps_url) if maps_url else None
-            yield GeojsonPointItem(
+            yield Feature(
                 ref=name.xpath("./text()[1]").get(),
                 name=name.xpath("./text()[1]").get(),
                 phone=info.xpath("./text()[3]").get(),

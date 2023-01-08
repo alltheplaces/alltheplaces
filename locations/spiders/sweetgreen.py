@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class SweetgreenSpider(scrapy.Spider):
@@ -12,7 +12,7 @@ class SweetgreenSpider(scrapy.Spider):
     def parse(self, response):
         location_hrefs = response.xpath('//a[contains(@class, "location")]')
         for location_href in location_hrefs:
-            yield GeojsonPointItem(
+            yield Feature(
                 name=location_href.xpath("@title").extract_first(),
                 addr_full=location_href.xpath("@data-street").extract_first(),
                 phone=location_href.xpath("@data-phone").extract_first(),

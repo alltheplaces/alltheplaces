@@ -4,7 +4,7 @@ import re
 import scrapy
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 DAY_MAPPING = {
     "Sunday": "Su",
@@ -87,7 +87,7 @@ class FirehouseSubsSpider(scrapy.Spider):
                     cb_kwargs={"properties": properties},
                 )
             else:
-                yield GeojsonPointItem(**properties)
+                yield Feature(**properties)
 
     def add_hours(self, response, properties):
         opening_hours = OpeningHours()
@@ -122,4 +122,4 @@ class FirehouseSubsSpider(scrapy.Spider):
             opening_hours.add_range(DAY_MAPPING[day], open_time, close_time, time_format="%I:%M%p")
 
         properties["opening_hours"] = opening_hours.as_opening_hours()
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

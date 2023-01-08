@@ -2,7 +2,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class CitiTrendsSpider(scrapy.Spider):
@@ -30,7 +30,7 @@ class CitiTrendsSpider(scrapy.Spider):
         hours = "; ".join(hours)
         if hours:
             properties["opening_hours"] = hours
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)
 
     def parse_city_stores(self, response):
         stores = response.xpath('//h2[@class="c-location-grid-item-title"]/a/@href').extract()

@@ -3,7 +3,7 @@ import json
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class KumAndGoSpider(scrapy.Spider):
@@ -37,7 +37,7 @@ class KumAndGoSpider(scrapy.Spider):
         result = json.loads(response.text)
         for store in result:
 
-            yield GeojsonPointItem(
+            yield Feature(
                 ref=store["id"],
                 lon=store["lng"],
                 lat=store["lat"],

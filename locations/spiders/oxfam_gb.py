@@ -1,7 +1,7 @@
 from scrapy.spiders import SitemapSpider
 
 from locations.google_url import extract_google_position
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 from locations.structured_data_spider import extract_email, extract_phone
 
 
@@ -13,7 +13,7 @@ class OxfamGBSpider(SitemapSpider):
     download_delay = 0.5
 
     def parse_shop(self, response):
-        item = GeojsonPointItem()
+        item = Feature()
         item["website"] = item["ref"] = response.url
         item["street_address"] = response.xpath('//*[@class="shop-address"]/li/text()').get()
         item["city"] = response.xpath('//*[@class="shop-address"]/li[2]/text()').get()

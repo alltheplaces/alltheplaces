@@ -2,7 +2,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class FloorAndDecorSpider(scrapy.Spider):
@@ -38,4 +38,4 @@ class FloorAndDecorSpider(scrapy.Spider):
             "lon": float(response.xpath('normalize-space(//meta[@itemprop="longitude"]/@content)').extract_first()),
         }
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

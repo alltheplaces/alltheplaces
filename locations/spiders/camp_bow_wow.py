@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class CampBowWowSpider(scrapy.Spider):
@@ -29,4 +29,4 @@ class CampBowWowSpider(scrapy.Spider):
                 "phone": place["Phone"],
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

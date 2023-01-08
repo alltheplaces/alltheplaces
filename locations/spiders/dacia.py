@@ -2,7 +2,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class DaciaSpider(scrapy.Spider):
@@ -18,7 +18,7 @@ class DaciaSpider(scrapy.Spider):
         data = response.json().get("data")
         for row in data:
             if not row.get("blacklisted"):
-                item = GeojsonPointItem()
+                item = Feature()
                 item["ref"] = row.get("dealerId")
                 item["name"] = row.get("name")
                 item["country"] = row.get("country")

@@ -2,7 +2,7 @@ import json
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class CAndASpider(scrapy.Spider):
@@ -89,7 +89,7 @@ class CAndASpider(scrapy.Spider):
                     properties["lat"] = coords[0]
                     properties["lon"] = coords[1]
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)
 
 
 def find_between(s, first, last):

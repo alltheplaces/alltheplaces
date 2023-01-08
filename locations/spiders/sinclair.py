@@ -2,7 +2,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class SinclairSpider(scrapy.Spider):
@@ -82,7 +82,7 @@ class SinclairSpider(scrapy.Spider):
                 else:
                     continue
 
-            yield GeojsonPointItem(
+            yield Feature(
                 lon=lon,
                 lat=lat,
                 ref=phone,

@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class TerminixSpider(scrapy.Spider):
@@ -43,4 +43,4 @@ class TerminixSpider(scrapy.Spider):
             "lon": float(response.xpath('//span[@class="coordinates"]/meta[2]/@content').extract()[0]),
         }
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

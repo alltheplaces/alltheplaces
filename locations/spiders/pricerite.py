@@ -2,7 +2,7 @@ import json
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class PriceRiteSpider(scrapy.Spider):
@@ -33,4 +33,4 @@ class PriceRiteSpider(scrapy.Spider):
                 "opening_hours": store["openingHours"],
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

@@ -3,7 +3,7 @@ import re
 import scrapy
 from geonamescache import GeonamesCache
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 regex_am = r"\s?([Aa][Mm])"
 regex_pm = r"\s?([Pp][Mm])"
@@ -77,7 +77,7 @@ class TacobuenoSpider(scrapy.Spider):
                 hours = self.convert_hours(i["businesshours"])
                 addr_full = "{} {}, {} {}".format(street, city, state, postcode)
 
-                yield GeojsonPointItem(
+                yield Feature(
                     ref=ref,
                     name=name,
                     street_address=street,

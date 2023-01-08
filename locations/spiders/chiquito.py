@@ -1,7 +1,7 @@
 import scrapy
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class ChiquitoSpider(scrapy.Spider):
@@ -70,7 +70,7 @@ class ChiquitoSpider(scrapy.Spider):
 
             properties["opening_hours"] = oh.as_opening_hours()
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)
 
     def parse_time(self, time):
         time = time.strip()

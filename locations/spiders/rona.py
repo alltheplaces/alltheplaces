@@ -3,7 +3,7 @@ import re
 import scrapy
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 from locations.user_agents import BROSWER_DEFAULT
 
 
@@ -57,4 +57,4 @@ class RonaSpider(scrapy.Spider):
         if hours:
             properties["opening_hours"] = self.parse_hours(hours)
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

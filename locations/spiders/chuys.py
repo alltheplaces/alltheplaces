@@ -2,7 +2,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class ChuysSpider(scrapy.Spider):
@@ -27,4 +27,4 @@ class ChuysSpider(scrapy.Spider):
                 "phone": data.get("phoneNumber", {}).get("text") if data.get("phoneNumber") else None,
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

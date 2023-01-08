@@ -4,7 +4,7 @@ import re
 import scrapy
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class ApplebeesSpider(scrapy.Spider):
@@ -99,7 +99,7 @@ class ApplebeesSpider(scrapy.Spider):
             if open_time and close_time:
                 o.add_range(d, open_time, close_time, "%I:%M%p")
 
-        yield GeojsonPointItem(
+        yield Feature(
             lat=float(data["geo"]["latitude"]),
             lon=float(data["geo"]["longitude"]),
             website=response.xpath('//head/link[@rel="canonical"]/@href').extract_first(),

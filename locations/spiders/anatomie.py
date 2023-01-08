@@ -1,7 +1,7 @@
 import lxml
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class AnatomieSpider(scrapy.Spider):
@@ -30,4 +30,4 @@ class AnatomieSpider(scrapy.Spider):
                 "lat": float(item["lat"]),
                 "lon": float(item["lng"]),
             }
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

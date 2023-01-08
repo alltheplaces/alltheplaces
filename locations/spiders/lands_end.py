@@ -2,7 +2,7 @@ import scrapy
 import xmltodict
 
 from locations.hours import DAYS, OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class LandsEndSpider(scrapy.Spider):
@@ -47,4 +47,4 @@ class LandsEndSpider(scrapy.Spider):
                 "opening_hours": oh.as_opening_hours(),
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

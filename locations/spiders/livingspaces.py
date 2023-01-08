@@ -3,7 +3,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class LivingSpacesSpider(scrapy.Spider):
@@ -42,7 +42,7 @@ class LivingSpacesSpider(scrapy.Spider):
                 "website": store_data.get("url"),
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)
 
         else:
             pass

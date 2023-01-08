@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class StateFarmSpider(scrapy.Spider):
@@ -44,7 +44,7 @@ class StateFarmSpider(scrapy.Spider):
             "website": response.url,
         }
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)
 
     def parse(self, response):
         agents = response.xpath('//div[contains(@id, "agent-details")]')

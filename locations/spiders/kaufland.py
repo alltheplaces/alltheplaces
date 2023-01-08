@@ -2,7 +2,7 @@ import scrapy
 
 from locations.categories import Categories
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class KauflandSpider(scrapy.Spider):
@@ -22,7 +22,7 @@ class KauflandSpider(scrapy.Spider):
 
     def parse(self, response, **kwargs):
         for location in response.json():
-            item = GeojsonPointItem()
+            item = Feature()
 
             item["ref"] = location["n"]
             item["lat"] = location["lat"]

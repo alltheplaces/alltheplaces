@@ -2,7 +2,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class CroixRougeFrancaiseSpider(scrapy.Spider):
@@ -40,4 +40,4 @@ class CroixRougeFrancaiseSpider(scrapy.Spider):
                 "street_address": feature["properties"]["address"],
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

@@ -1,7 +1,7 @@
 import scrapy
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 DAYS = [
     "Sun",
@@ -28,7 +28,7 @@ class DutchBrosSpider(scrapy.Spider):
             if store["future_stand"]:
                 continue
 
-            item = GeojsonPointItem(
+            item = Feature(
                 ref=store["store_number"],
                 name=store["store_nickname"],
                 lat=store["lat"],

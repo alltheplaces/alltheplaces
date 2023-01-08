@@ -2,7 +2,7 @@ import time
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class WoodsCoffeeSpider(scrapy.Spider):
@@ -53,7 +53,7 @@ class WoodsCoffeeSpider(scrapy.Spider):
                     opening_hours += "; "
                 opening_hours += self.store_hours(hoursMatch)
 
-            yield GeojsonPointItem(
+            yield Feature(
                 lat=store["latitude"],
                 lon=store["longitude"],
                 name=store["name"],

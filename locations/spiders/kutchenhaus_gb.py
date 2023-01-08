@@ -1,6 +1,6 @@
 from scrapy.spiders import SitemapSpider
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class KutchenhausGBSpider(SitemapSpider):
@@ -16,7 +16,7 @@ class KutchenhausGBSpider(SitemapSpider):
             if label.strip() == "COMING SOON":
                 return
 
-        item = GeojsonPointItem()
+        item = Feature()
 
         item["lat"] = response.xpath('//div[@id="storeDetailsMap"]/@data-store-geopoint-latitude').get()
         item["lon"] = response.xpath('//div[@id="storeDetailsMap"]/@data-store-geopoint-longitude').get()

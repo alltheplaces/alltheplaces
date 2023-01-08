@@ -5,7 +5,7 @@ import scrapy
 from scrapy.selector import Selector
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 DAY_MAPPING = {
     "Sunday": "Su",
@@ -65,7 +65,7 @@ class DominosPizzaSpider(scrapy.Spider):
     def parse_place(self, response):
         data = json.loads(response.xpath('//script[@type="application/ld+json"]/text()').extract_first())
 
-        yield GeojsonPointItem(
+        yield Feature(
             name=data["name"],
             lat=float(data["geo"]["latitude"]),
             lon=float(data["geo"]["longitude"]),

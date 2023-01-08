@@ -2,7 +2,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class FairwayMarketSpider(scrapy.Spider):
@@ -44,7 +44,7 @@ class FairwayMarketSpider(scrapy.Spider):
                 # "lat": float(store.xpath('latitude/text()').extract_first()),
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)
         else:
             self.logger.info("No results")
 

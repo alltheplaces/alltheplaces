@@ -2,7 +2,7 @@ import re
 
 from scrapy import Selector, Spider
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class PaperSourceUSSpider(Spider):
@@ -12,7 +12,7 @@ class PaperSourceUSSpider(Spider):
 
     def parse(self, response, **kwargs):
         for store in response.json()["items"]:
-            item = GeojsonPointItem()
+            item = Feature()
             item["ref"] = store["id"]
             item["lat"] = store["lat"]
             item["lon"] = store["lng"]

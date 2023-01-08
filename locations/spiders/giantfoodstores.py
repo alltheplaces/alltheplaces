@@ -1,7 +1,7 @@
 from scrapy.spiders import SitemapSpider
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class GiantFoodStoresSpider(SitemapSpider):
@@ -35,4 +35,4 @@ class GiantFoodStoresSpider(SitemapSpider):
             "postcode": main.css("[itemprop=postalCode]::text").get(),
             "opening_hours": hours.as_opening_hours(),
         }
-        return GeojsonPointItem(**properties)
+        return Feature(**properties)

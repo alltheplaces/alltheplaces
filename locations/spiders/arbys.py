@@ -2,7 +2,7 @@ import json
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class ArbysSpider(scrapy.Spider):
@@ -40,7 +40,7 @@ class ArbysSpider(scrapy.Spider):
                 "opening_hours": data["openingHours"],
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)
 
     def parse_store(self, response):
         city_stores = response.xpath('//a[@class="location-name ga-link"]/@href').extract()

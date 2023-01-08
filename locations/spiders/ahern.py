@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class AhernSpider(scrapy.Spider):
@@ -29,4 +29,4 @@ class AhernSpider(scrapy.Spider):
                 "lon": i.get("lng"),
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

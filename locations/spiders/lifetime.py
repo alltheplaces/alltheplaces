@@ -2,7 +2,7 @@ import json
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class LifetimeSpider(scrapy.Spider):
@@ -40,4 +40,4 @@ class LifetimeSpider(scrapy.Spider):
             "lon": data["geo"]["longitude"],
         }
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

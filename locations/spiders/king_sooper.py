@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class KingSooperSpider(scrapy.Spider):
@@ -140,7 +140,7 @@ class KingSooperSpider(scrapy.Spider):
             bounding_box["min_lon"] = min(bounding_box["min_lon"], lon_lat[0])
             bounding_box["max_lon"] = max(bounding_box["max_lon"], lon_lat[0])
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)
 
         if data:
             box_corners = [

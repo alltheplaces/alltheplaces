@@ -3,7 +3,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class NorthernCaliforniaBreweriesSpider(scrapy.Spider):
@@ -27,7 +27,7 @@ class NorthernCaliforniaBreweriesSpider(scrapy.Spider):
             if item.get("Longitude") is not None:
                 longitude = float(item.get("Longitude"))
 
-            yield GeojsonPointItem(
+            yield Feature(
                 ref=item.get("Brewery"),
                 lat=latitude,
                 lon=longitude,

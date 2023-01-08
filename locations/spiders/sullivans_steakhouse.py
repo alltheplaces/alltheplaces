@@ -2,7 +2,7 @@ import json
 
 from scrapy.spiders import SitemapSpider
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class SullivansSteakhouseSpider(SitemapSpider):
@@ -42,4 +42,4 @@ class SullivansSteakhouseSpider(SitemapSpider):
                     "country": "US",
                 }
 
-                yield GeojsonPointItem(**properties)
+                yield Feature(**properties)

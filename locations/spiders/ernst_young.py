@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class ErnstYoungSpider(scrapy.Spider):
@@ -38,11 +38,11 @@ class ErnstYoungSpider(scrapy.Spider):
                         properties = self.parse_office(office)
                         properties["state"] = state_abbr
                         properties["website"] = response.urljoin(office["href"])
-                        yield GeojsonPointItem(**properties)
+                        yield Feature(**properties)
 
             for city in country["cities"]:
 
                 for office in city["offices"]:
                     properties = self.parse_office(office)
                     properties["website"] = response.urljoin(office["href"])
-                    yield GeojsonPointItem(**properties)
+                    yield Feature(**properties)

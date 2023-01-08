@@ -2,7 +2,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 from locations.spiders.mcdonalds import McDonaldsSpider
 
 
@@ -108,7 +108,7 @@ class McDonaldsILSpider(scrapy.Spider):
             "addr_full": address,
         }
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)
 
     def parse(self, response):
         stores = response.xpath('//div[@class="store_wrap link"]/a/@href').extract()

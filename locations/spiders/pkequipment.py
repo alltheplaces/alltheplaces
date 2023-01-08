@@ -3,7 +3,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class PKEquipmentSpider(scrapy.Spider):
@@ -42,4 +42,4 @@ class PKEquipmentSpider(scrapy.Spider):
             "website": data.get("url"),
         }
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

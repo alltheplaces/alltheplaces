@@ -3,7 +3,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class CintasSpider(scrapy.Spider):
@@ -75,6 +75,6 @@ class CintasSpider(scrapy.Spider):
                         "lon": float(geoc_list[7].replace("Longitude:", "")),
                     }
 
-                    yield GeojsonPointItem(**properties)
+                    yield Feature(**properties)
         except:
             pass

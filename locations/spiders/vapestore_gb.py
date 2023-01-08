@@ -3,7 +3,7 @@ import re
 from scrapy.spiders import SitemapSpider
 
 from locations.google_url import extract_google_position
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 def extract_email_link(item, response):
@@ -53,7 +53,7 @@ class VapeStoreGB(SitemapSpider):
                 yield entry
 
     def parse(self, response, **kwargs):
-        item = GeojsonPointItem()
+        item = Feature()
 
         item["ref"] = re.match(self.sitemap_rules[0][0], response.url).group(1)
         item["website"] = response.url

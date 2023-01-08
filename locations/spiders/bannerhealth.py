@@ -5,7 +5,7 @@ import time
 from scrapy.spiders import SitemapSpider
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class BannerHealthSpider(SitemapSpider):
@@ -71,4 +71,4 @@ class BannerHealthSpider(SitemapSpider):
                 "opening_hours": oh.as_opening_hours(),
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

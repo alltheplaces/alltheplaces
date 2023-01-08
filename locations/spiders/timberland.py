@@ -1,7 +1,7 @@
 import scrapy
 from scrapy.selector import Selector
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class TimberlandSpider(scrapy.Spider):
@@ -47,4 +47,4 @@ class TimberlandSpider(scrapy.Spider):
                 "phone": Selector(text=poi).xpath("//phone/text()").get(),
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

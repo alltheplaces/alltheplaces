@@ -2,7 +2,7 @@ import scrapy
 import xmltodict
 
 from locations.hours import DAYS_FULL, OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class ChemistWarehouseAUSpider(scrapy.Spider):
@@ -15,7 +15,7 @@ class ChemistWarehouseAUSpider(scrapy.Spider):
 
     def parse(self, response):
         for data in xmltodict.parse(response.text).get("markers").get("marker"):
-            item = GeojsonPointItem()
+            item = Feature()
             item["ref"] = data.get("@id")
             item["name"] = data.get("@storename")
             item["lat"] = data.get("@lat")

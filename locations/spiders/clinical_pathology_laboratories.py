@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class ClinicalPathologyLaboratoriesSpider(scrapy.Spider):
@@ -29,4 +29,4 @@ class ClinicalPathologyLaboratoriesSpider(scrapy.Spider):
                 "lat": item["lat"],
                 "lon": item["lng"],
             }
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

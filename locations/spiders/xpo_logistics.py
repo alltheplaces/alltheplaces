@@ -2,7 +2,7 @@ import ast
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class XPOLogisticsSpider(scrapy.Spider):
@@ -16,7 +16,7 @@ class XPOLogisticsSpider(scrapy.Spider):
         data = ast.literal_eval(script)
 
         for store in data:
-            yield GeojsonPointItem(
+            yield Feature(
                 lat=float(store["latitude"]),
                 lon=float(store["longitude"].replace(",", "")),
                 phone=store["telephone"],

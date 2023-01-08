@@ -2,7 +2,7 @@ import scrapy
 
 from locations.categories import Categories, apply_category
 from locations.google_url import extract_google_position
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 from locations.spiders.vapestore_gb import clean_address
 
 
@@ -64,7 +64,7 @@ class NhsScotlandGBSpider(scrapy.Spider):
             yield scrapy.Request(response.urljoin(link), cb_kwargs=dict(service=service))
 
     def parse_service(self, response, service):
-        item = GeojsonPointItem()
+        item = Feature()
         extract_google_position(item, response)
         apply_category(self.services.get(service), item)
         item["name"] = response.xpath('//input[@id="ServiceName"]/@value').get().strip()

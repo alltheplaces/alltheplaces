@@ -1,7 +1,7 @@
 import scrapy
 from scrapy.http import JsonRequest
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class WinnDixieSpider(scrapy.Spider):
@@ -32,4 +32,4 @@ class WinnDixieSpider(scrapy.Spider):
             slug = f'{properties["city"]}/{properties["state"]}?search={properties["ref"]}'.lower()
             properties["website"] = f"https://www.winndixie.com/storedetails/{slug}"
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

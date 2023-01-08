@@ -3,7 +3,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class TiffanySpider(scrapy.Spider):
@@ -88,4 +88,4 @@ class TiffanySpider(scrapy.Spider):
             hours = self.parse_hours(response.xpath('//div[@id="divExtendedInfo"]/text()').extract())
             if hours:
                 properties["opening_hours"] = hours
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

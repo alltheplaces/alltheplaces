@@ -2,7 +2,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class UPSFreightServiceCentersSpider(scrapy.Spider):
@@ -27,7 +27,7 @@ class UPSFreightServiceCentersSpider(scrapy.Spider):
             "country": ref.split("qcountry=")[1].split("&svc")[0],
         }
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)
 
     def parse_state(self, response):
         location_urls = response.xpath('//*[@id="app_ctl00_scTable_hlDetail"]/@href').extract()

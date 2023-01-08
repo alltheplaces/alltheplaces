@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class RoadRangerSpider(scrapy.Spider):
@@ -36,4 +36,4 @@ class RoadRangerSpider(scrapy.Spider):
                 "lon": float(longitude),
                 "lat": float(latitude),
             }
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

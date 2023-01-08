@@ -3,7 +3,7 @@ import re
 import scrapy
 from scrapy import Selector
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class CostaCoffeeUSSpider(scrapy.Spider):
@@ -14,7 +14,7 @@ class CostaCoffeeUSSpider(scrapy.Spider):
 
     def parse(self, response):
         for store in response.json()["items"]:
-            item = GeojsonPointItem()
+            item = Feature()
             item["ref"] = store["id"]
             item["lat"] = store["lat"]
             item["lon"] = store["lng"]

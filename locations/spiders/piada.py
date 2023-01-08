@@ -3,7 +3,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class PiadaSpider(scrapy.Spider):
@@ -46,4 +46,4 @@ class PiadaSpider(scrapy.Spider):
                 "phone": phone,
                 "opening_hours": f"{open_time}-{close_time}",
             }
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

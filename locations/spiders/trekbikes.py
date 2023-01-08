@@ -3,7 +3,7 @@ import re
 import scrapy
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class TrekBikesSpider(scrapy.Spider):
@@ -59,4 +59,4 @@ class TrekBikesSpider(scrapy.Spider):
         if "embedsocial" in response.text:
             properties.update({"brand": "Trek", "brand_wikidata": "Q1067617"})
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

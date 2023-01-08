@@ -2,7 +2,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class Century21Spider(scrapy.spiders.SitemapSpider):
@@ -23,7 +23,7 @@ class Century21Spider(scrapy.spiders.SitemapSpider):
             lat = agence.xpath(".//@data-lat").get()
             lon = agence.xpath(".//@data-lng").get()
 
-            yield GeojsonPointItem(
+            yield Feature(
                 name=name,
                 ref=id,
                 addr_full=address,

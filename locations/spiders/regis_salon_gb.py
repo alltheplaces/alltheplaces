@@ -3,7 +3,7 @@ from scrapy.spiders import CrawlSpider, Rule
 
 from locations.google_url import extract_google_position
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 from locations.structured_data_spider import extract_phone
 
 
@@ -25,7 +25,7 @@ class RegisSalonGB(CrawlSpider):
     ]
 
     def parse(self, response):
-        item = GeojsonPointItem()
+        item = Feature()
 
         item["ref"] = item["website"] = response.url
 

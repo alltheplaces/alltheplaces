@@ -3,7 +3,7 @@ import json
 import scrapy
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class DunkinSpider(scrapy.Spider):
@@ -51,4 +51,4 @@ class DunkinSpider(scrapy.Spider):
             "phone": response.xpath('//*[@itemprop="telephone"]/text()').get(),
             "opening_hours": opening_hours.as_opening_hours(),
         }
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

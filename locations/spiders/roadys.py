@@ -3,7 +3,7 @@ from functools import partial
 import scrapy
 from scrapy.http import FormRequest
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class RoadysSpider(scrapy.Spider):
@@ -74,7 +74,7 @@ class RoadysSpider(scrapy.Spider):
             properties["state"] = state
         if postcode:
             properties["postcode"] = postcode
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)
 
     def parse(self, response):
         urls = response.xpath('//a[contains(@href, "/location/")]/@href').extract()

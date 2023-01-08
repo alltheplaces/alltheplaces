@@ -1,7 +1,7 @@
 import scrapy
 
 from locations.hours import DAYS_FULL, OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class SafeliteSpider(scrapy.Spider):
@@ -49,7 +49,7 @@ class SafeliteSpider(scrapy.Spider):
             "lat": lat,
             "lon": lon,
         }
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)
 
     def parse_opening_hours(self, timings):
         timings = [timing for timing in timings if "closed" not in timing.lower()]

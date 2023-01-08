@@ -1,7 +1,7 @@
 import scrapy
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class BuceesSpider(scrapy.Spider):
@@ -34,7 +34,7 @@ class BuceesSpider(scrapy.Spider):
                     time_format="%I:%M %p",
                 )
 
-            yield GeojsonPointItem(
+            yield Feature(
                 ref=store["id"],
                 lon=store["lng"],
                 lat=store["lat"],

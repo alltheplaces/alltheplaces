@@ -2,7 +2,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 from locations.spiders.mcdonalds import McDonaldsSpider
 
 
@@ -37,4 +37,4 @@ class McDonaldsBGSpider(scrapy.Spider):
                 "addr_full": address,
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

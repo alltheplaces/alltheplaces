@@ -3,7 +3,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class VitaminShoppeSpider(scrapy.Spider):
@@ -36,7 +36,7 @@ class VitaminShoppeSpider(scrapy.Spider):
             "website": response.url,
         }
 
-        return GeojsonPointItem(**props)
+        return Feature(**props)
 
     def parse_city_stores(self, response):
 

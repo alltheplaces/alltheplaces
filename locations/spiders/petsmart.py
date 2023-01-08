@@ -4,7 +4,7 @@ import urllib.parse
 import scrapy
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 day_mapping = {
     "MON": "Mo",
@@ -86,7 +86,7 @@ class PetSmartSpider(scrapy.Spider):
         if hours_elements:
             properties["opening_hours"] = self.parse_hours(hours_elements)
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)
 
     def parse_hours(self, elements):
         opening_hours = OpeningHours()

@@ -2,7 +2,7 @@ import json
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 DAYS = {
     "Monday": "Mo",
@@ -62,9 +62,9 @@ class SunLoanSpider(scrapy.Spider):
         except:
             pass
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)
 
-        # yield GeojsonPointItem(
+        # yield Feature(
         #     lat=float(data['geo']['latitude']),
         #     lon=float(data['geo']['longitude']),
         #     website=response.url,

@@ -2,7 +2,7 @@ import scrapy
 from scrapy.http import JsonRequest
 
 from locations.categories import Categories, apply_category
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class CitiSpider(scrapy.Spider):
@@ -76,4 +76,4 @@ class CitiSpider(scrapy.Spider):
             elif feature["properties"]["type"] == "private bank":
                 pass
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

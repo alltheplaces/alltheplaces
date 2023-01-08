@@ -2,7 +2,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class LouGreySpider(scrapy.Spider):
@@ -34,7 +34,7 @@ class LouGreySpider(scrapy.Spider):
         if hours != []:
             hours = " ; ".join(hours)
             properties["opening_hours"] = hours
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)
 
     def parse_city_stores(self, response):
         stores = response.xpath('//h3[@class="Teaser-title Link Link--teaser Heading--h5"]/a/@href').extract()

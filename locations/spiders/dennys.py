@@ -3,7 +3,7 @@ import re
 import scrapy
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class DennysSpider(scrapy.Spider):
@@ -43,7 +43,7 @@ class DennysSpider(scrapy.Spider):
         if hours_container := response.xpath('//table[@class="c-hours-details"]'):
             properties["opening_hours"] = self.parse_hours(hours_container[0])
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)
 
     def parse(self, response):
         urls = response.xpath('//li[@class="Directory-listItem"]/a/@href').extract()

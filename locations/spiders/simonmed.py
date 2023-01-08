@@ -2,7 +2,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class SimonMedSpider(scrapy.Spider):
@@ -56,7 +56,7 @@ class SimonMedSpider(scrapy.Spider):
                 "opening_hours": "; ".join(opening_hours),
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)
 
     def start_requests(self):
         headers = {

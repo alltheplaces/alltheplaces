@@ -3,7 +3,7 @@ import json
 import scrapy
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class BanfieldPetHospitalSpider(scrapy.Spider):
@@ -39,4 +39,4 @@ class BanfieldPetHospitalSpider(scrapy.Spider):
                 "country": data["address"]["addressCountry"],
                 "phone": data["telephone"],
             }
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

@@ -3,7 +3,7 @@ from urllib.parse import urlencode
 import scrapy
 
 from locations.hours import DAYS, OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class DollaramaSpider(scrapy.Spider):
@@ -64,4 +64,4 @@ class DollaramaSpider(scrapy.Spider):
             if hours := self.parse_hours(row["ExtraData"]["Hours of operations"]):
                 properties["opening_hours"] = hours
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

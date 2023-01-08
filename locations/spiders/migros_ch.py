@@ -4,7 +4,7 @@ from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
 from locations.hours import DAYS, OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class MigrosCHSpider(SitemapSpider):
@@ -53,7 +53,7 @@ class MigrosCHSpider(SitemapSpider):
                 "start_date": market.get("opening_date"),
                 "end_date": market.get("closing_date"),
             }
-            item = GeojsonPointItem(
+            item = Feature(
                 brand=brand,
                 brand_wikidata=brand_wikidata,
                 city=loc["city"],

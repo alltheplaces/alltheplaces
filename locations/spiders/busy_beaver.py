@@ -3,7 +3,7 @@ import json
 import scrapy
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class BusyBeaverSpider(scrapy.Spider):
@@ -41,4 +41,4 @@ class BusyBeaverSpider(scrapy.Spider):
             "phone": data["phone"],
             "opening_hours": opening_hours.as_opening_hours(),
         }
-        return GeojsonPointItem(**properties)
+        return Feature(**properties)
