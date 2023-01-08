@@ -25,6 +25,7 @@ class Categories(Enum):
     SHOP_CAR = {"shop": "car"}
     SHOP_CAR_REPAIR = {"shop": "car_repair"}
     SHOP_CHARITY = {"shop": "charity"}
+    SHOP_CHEMIST = {"shop": "chemist"}
     SHOP_CLOTHES = {"shop": "clothes"}
     SHOP_CONVENIENCE = {"shop": "convenience"}
     SHOP_DO_IT_YOURSELF = {"shop": "doityourself"}
