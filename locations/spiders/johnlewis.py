@@ -5,7 +5,7 @@ from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 from locations.user_agents import BROSWER_DEFAULT
 
 
@@ -23,7 +23,7 @@ class JohnLewisSpider(CrawlSpider):
     user_agent = BROSWER_DEFAULT
 
     def parse_stores(self, response):
-        item = GeojsonPointItem()
+        item = Feature()
         item["ref"] = item["website"] = response.url
 
         if location := json.loads(response.xpath('//script[@id="jsonPageData"]/text()').get()):

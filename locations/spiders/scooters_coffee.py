@@ -4,7 +4,7 @@ import re
 import scrapy
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 DAY_MAPPING = {
     "Mon": "Mo",
@@ -76,4 +76,4 @@ class ScootersCoffeeSpider(scrapy.Spider):
                 store_hours = self.parse_hours(hours)
                 properties["opening_hours"] = store_hours
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

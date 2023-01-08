@@ -2,7 +2,7 @@ import json
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class JimmyJohnsSpider(scrapy.Spider):
@@ -32,4 +32,4 @@ class JimmyJohnsSpider(scrapy.Spider):
         if data[0]["address"]["telephone"]:
             properties["phone"] = data[0]["address"]["telephone"]
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

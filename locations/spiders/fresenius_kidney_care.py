@@ -4,7 +4,7 @@ import re
 import scrapy
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 DAY_MAPPING = {
     "Mon": "Mo",
@@ -81,7 +81,7 @@ class FreseniusKidneyCareSpider(scrapy.Spider):
                         pass
                     else:
                         properties["opening_hours"] = hours
-                    yield GeojsonPointItem(**properties)
+                    yield Feature(**properties)
                 except:
                     properties = {
                         "name": json_data["name"],
@@ -101,7 +101,7 @@ class FreseniusKidneyCareSpider(scrapy.Spider):
                         pass
                     else:
                         properties["opening_hours"] = hours
-                    yield GeojsonPointItem(**properties)
+                    yield Feature(**properties)
                 else:
                     pass
         except:

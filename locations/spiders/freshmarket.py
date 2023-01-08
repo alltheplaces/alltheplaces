@@ -4,7 +4,7 @@ import re
 import scrapy
 
 from locations.hours import OpeningHours, day_range, sanitise_day
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class FreshMarketSpider(scrapy.Spider):
@@ -50,4 +50,4 @@ class FreshMarketSpider(scrapy.Spider):
                     oh.add_range(day, start_time, end_time, time_format="%I%p")
             properties["opening_hours"] = oh.as_opening_hours()
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

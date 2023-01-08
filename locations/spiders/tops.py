@@ -2,7 +2,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 day_formats = {
     "Mon": "Mo",
@@ -148,7 +148,7 @@ class TopsSpider(scrapy.Spider):
             "lat": response.meta["lat"],
         }
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)
 
     def parse(self, response):
         try:

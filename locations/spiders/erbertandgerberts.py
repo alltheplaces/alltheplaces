@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 from locations.user_agents import BROSWER_DEFAULT
 
 
@@ -43,4 +43,4 @@ class ErbertandGerbertsSpider(scrapy.Spider):
             .split('"')[1],
         }
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

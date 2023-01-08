@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class TedsMontanaGrillSpider(scrapy.Spider):
@@ -33,4 +33,4 @@ class TedsMontanaGrillSpider(scrapy.Spider):
             "postcode": postcode,
             "addr_full": addr_full,
         }
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

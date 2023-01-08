@@ -3,7 +3,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class MarinerFinanceSpider(scrapy.Spider):
@@ -86,4 +86,4 @@ class MarinerFinanceSpider(scrapy.Spider):
         properties["lat"] = lat
         properties["lon"] = lon
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

@@ -2,7 +2,7 @@ from xml.etree import ElementTree as ET
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class BiggbySpider(scrapy.Spider):
@@ -21,7 +21,7 @@ class BiggbySpider(scrapy.Spider):
 
         # iterate items
         for item in root:
-            yield GeojsonPointItem(
+            yield Feature(
                 ref=item.attrib["name"],
                 lat=float(item.attrib["lat"]),
                 lon=float(item.attrib["lng"]),

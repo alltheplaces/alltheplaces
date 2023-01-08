@@ -2,7 +2,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class RoyalLePageSpider(scrapy.Spider):
@@ -30,7 +30,7 @@ class RoyalLePageSpider(scrapy.Spider):
             "lon": float(lon) if lon else None,
         }
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)
 
     def parse(self, response):
         urls = response.xpath("//address//a/@href").extract()

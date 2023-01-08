@@ -4,7 +4,7 @@ import scrapy
 
 from locations.categories import Categories, apply_category
 from locations.geo import point_locations
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class VolgCHSpider(scrapy.Spider):
@@ -34,7 +34,7 @@ class VolgCHSpider(scrapy.Spider):
         marker = response.css(".map-marker")
         text = marker.xpath("@data-text").get()
         lines = [line.strip() for line in text.split("<br />")]
-        item = GeojsonPointItem(
+        item = Feature(
             city=lines[2],
             country="CH",
             extras=self.parse_extras(response),

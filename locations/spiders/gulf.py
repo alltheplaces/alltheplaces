@@ -3,7 +3,7 @@ import hashlib
 import scrapy
 from scrapy import FormRequest
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 from locations.spiders.costacoffee_gb import yes_or_no
 
 
@@ -47,7 +47,7 @@ class GulfSpider(scrapy.Spider):
             phone = contact[2].replace("Phone Number: ", "")
             html_content = tbody.get()
 
-            yield GeojsonPointItem(
+            yield Feature(
                 ref=hashlib.sha256((name + address).encode("utf_8")).hexdigest(),
                 name=name,
                 addr_full=address,

@@ -1,7 +1,7 @@
 import scrapy
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class SafewayCaSpider(scrapy.Spider):
@@ -31,7 +31,7 @@ class SafewayCaSpider(scrapy.Spider):
             "opening_hours": self.parse_hours(response),
         }
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)
 
     def parse_hours(self, response):
         tbl = response.css(".holiday_hours_tbl")[-1].xpath("./tbody//text()")

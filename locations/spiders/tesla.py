@@ -4,7 +4,7 @@ import urllib.parse
 import scrapy
 
 from locations.categories import Categories, apply_category
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class TeslaSpider(scrapy.Spider):
@@ -104,4 +104,4 @@ class TeslaSpider(scrapy.Spider):
         else:
             properties["extras"] = {"location_type": location_type}
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

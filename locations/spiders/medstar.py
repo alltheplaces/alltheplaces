@@ -2,7 +2,7 @@ import json
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class MedstarSpider(scrapy.Spider):
@@ -39,4 +39,4 @@ class MedstarSpider(scrapy.Spider):
             "lon": float(response.xpath('//div[@class="field-distance fieldlocation "]/span/@data-lon').extract()[0]),
         }
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

@@ -4,7 +4,7 @@ import scrapy
 
 from locations.geo import postal_regions
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 from locations.user_agents import BROSWER_DEFAULT
 
 DAY_MAPPING = {
@@ -97,7 +97,7 @@ class LittleCaesarsSpider(scrapy.Spider):
         if opening_hours:
             properties["opening_hours"] = opening_hours
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)
 
     def add_hours(self, ordering_hours):
         opening_hours = OpeningHours()

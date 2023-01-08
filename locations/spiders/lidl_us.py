@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 from locations.spiders.lidl_gb import LidlGBSpider
 
 
@@ -29,4 +29,4 @@ class LidlUSSpider(scrapy.Spider):
                 "lon": float(store["coordinates"]["lon"]),
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

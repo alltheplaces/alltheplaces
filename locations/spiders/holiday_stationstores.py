@@ -3,7 +3,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class HolidayStationstoresSpider(scrapy.Spider):
@@ -67,7 +67,7 @@ class HolidayStationstoresSpider(scrapy.Spider):
             },
         }
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)
 
     def opening_hours(self, response):
         hour_part_elems = response.xpath('//div[@class="row"][@style="font-size: 12px;"]')

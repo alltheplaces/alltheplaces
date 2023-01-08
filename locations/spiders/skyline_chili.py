@@ -3,7 +3,7 @@ import json
 import scrapy
 
 from locations.hours import DAYS, OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class SkylineChiliSpider(scrapy.Spider):
@@ -37,7 +37,7 @@ class SkylineChiliSpider(scrapy.Spider):
             "website": data["url"],
             "opening_hours": self.parse_hours(data.get("openingHoursSpecification", [])),
         }
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)
 
     def parse_hours(self, hours):
         opening_hours = OpeningHours()

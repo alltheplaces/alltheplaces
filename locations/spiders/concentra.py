@@ -1,7 +1,7 @@
 import scrapy
 from scrapy.http import HtmlResponse
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class ConcentraSpider(scrapy.Spider):
@@ -69,4 +69,4 @@ class ConcentraSpider(scrapy.Spider):
             if lon:
                 properties["lon"] = lon
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

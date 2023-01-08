@@ -3,7 +3,7 @@ import re
 import scrapy
 
 from locations.google_url import extract_google_position
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 DAYS = {
     "Monday": "Mo",
@@ -103,4 +103,4 @@ class McmenaminsSpider(scrapy.Spider):
         }
         extract_google_position(properties, response)
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

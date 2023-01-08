@@ -2,7 +2,7 @@ import json
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class BankOfAmericaSpider(scrapy.Spider):
@@ -65,4 +65,4 @@ class BankOfAmericaSpider(scrapy.Spider):
             if ent["@type"] != "BankOrCreditUnion":
                 # i.e. the interesting of the two types
                 properties["extras"].update({"type": ent["@type"]})
-        return GeojsonPointItem(**properties)
+        return Feature(**properties)

@@ -2,7 +2,7 @@ import json
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class ChromeIndustriesSpider(scrapy.Spider):
@@ -28,4 +28,4 @@ class ChromeIndustriesSpider(scrapy.Spider):
                 "lat": float(item["latitude"]),
                 "lon": float(item["longitude"]),
             }
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

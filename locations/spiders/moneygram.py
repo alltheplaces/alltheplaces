@@ -3,7 +3,7 @@ import json
 import scrapy
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class MoneygramSpider(scrapy.Spider):
@@ -56,7 +56,7 @@ class MoneygramSpider(scrapy.Spider):
         if hours:
             properties["opening_hours"] = hours
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)
 
     def parse_hours(self, response):
         opening_hours = OpeningHours()

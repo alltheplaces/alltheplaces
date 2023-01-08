@@ -2,7 +2,7 @@ import json
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class TheNorthFaceSpider(scrapy.Spider):
@@ -93,4 +93,4 @@ class TheNorthFaceSpider(scrapy.Spider):
                 "website": store["url"],
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

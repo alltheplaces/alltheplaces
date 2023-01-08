@@ -3,7 +3,7 @@ import datetime
 import scrapy
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 from locations.user_agents import BROSWER_DEFAULT
 
 
@@ -57,4 +57,4 @@ class PandaExpressSpider(scrapy.Spider):
                 "phone": store["telephone"],
                 "website": f"https://www.pandaexpress.com/locations/{slug}",
             }
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

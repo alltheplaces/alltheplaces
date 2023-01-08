@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class MensWearhouseSpider(scrapy.Spider):
@@ -28,7 +28,7 @@ class MensWearhouseSpider(scrapy.Spider):
             "opening_hours": response.xpath('//time[@itemprop="openingHours"]/@datetime').extract(),
         }
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)
 
     def parse(self, response):
         urls = response.xpath('//li[@class="directory__state-item"]/a/@href').extract()

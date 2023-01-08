@@ -3,7 +3,7 @@ import urllib.parse
 import scrapy
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class AuntieAnnesSpider(scrapy.Spider):
@@ -45,4 +45,4 @@ class AuntieAnnesSpider(scrapy.Spider):
             "country": response.xpath('//*[@itemprop="addressCountry"]/text()').extract_first(),
             "phone": response.xpath('//*[@itemprop="telephone"]/text()').extract_first(),
         }
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

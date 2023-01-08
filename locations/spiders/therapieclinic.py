@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class TherapieClinicSpider(scrapy.Spider):
@@ -32,4 +32,4 @@ class TherapieClinicSpider(scrapy.Spider):
             properties["lat"] = lat.strip()
             properties["lon"] = lon.strip()
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

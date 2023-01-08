@@ -2,7 +2,7 @@ import json
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class MerrillLynchSpider(scrapy.Spider):
@@ -30,7 +30,7 @@ class MerrillLynchSpider(scrapy.Spider):
                 "extras": {"unit": location.get("Address2") or None},
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)
 
     def parse(self, response):
         states = response.xpath('//section[@class="state-view"]//li/a/@data-state-abbrev').extract()

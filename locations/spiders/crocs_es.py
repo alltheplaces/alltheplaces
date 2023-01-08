@@ -1,7 +1,7 @@
 import scrapy
 import xmltodict
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class CrocsEsDeSpider(scrapy.Spider):
@@ -30,4 +30,4 @@ class CrocsEsDeSpider(scrapy.Spider):
                 "website": data["@link"],
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

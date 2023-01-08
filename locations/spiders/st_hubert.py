@@ -3,7 +3,7 @@ import re
 import scrapy
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class StHubertSpider(scrapy.Spider):
@@ -54,7 +54,7 @@ class StHubertSpider(scrapy.Spider):
         except:
             pass
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)
 
     def parse(self, response):
         urls = response.xpath('//*[@class="content_options"]/div/a/@href').extract()

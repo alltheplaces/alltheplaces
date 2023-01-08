@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class GoodstartSpider(scrapy.Spider):
@@ -28,4 +28,4 @@ class GoodstartSpider(scrapy.Spider):
                 "lon": i["Longitude"],
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

@@ -2,7 +2,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class XlPartsSpider(scrapy.Spider):
@@ -20,7 +20,7 @@ class XlPartsSpider(scrapy.Spider):
         script_data = response.xpath('//script[contains(text(), "var map")]').extract_first()
 
         for store in stores:
-            item = GeojsonPointItem()
+            item = Feature()
             store_div = store.xpath("./@id").extract_first()
             item["ref"] = re.search(r"store_div_([0-9]*)", store_div).group(1)
             item["name"] = store.xpath("./h3/text()").extract_first().strip()

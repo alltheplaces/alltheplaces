@@ -2,7 +2,7 @@ import json
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class CrunchFitnessSpider(scrapy.Spider):
@@ -31,4 +31,4 @@ class CrunchFitnessSpider(scrapy.Spider):
                 "lon": float(club["longitude"]),
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

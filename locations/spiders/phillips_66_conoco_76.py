@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 BRANDS = {"U76": "76", "P66": "Phillips 66", "CON": "Conoco"}
 
@@ -37,7 +37,7 @@ class Phillips66Conoco76Spider(scrapy.Spider):
         stations = response.json()["d"]["results"]
 
         for station in stations:
-            yield GeojsonPointItem(
+            yield Feature(
                 lat=station["Latitude"],
                 lon=station["Longitude"],
                 name=station["Name"],

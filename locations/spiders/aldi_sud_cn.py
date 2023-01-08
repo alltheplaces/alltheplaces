@@ -1,7 +1,7 @@
 from scrapy import Spider
 
 from locations.hours import DAYS, OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class AldiSudCNSpider(Spider):
@@ -13,7 +13,7 @@ class AldiSudCNSpider(Spider):
         districts = response.json().values()
         for district in districts:
             for id, store in district["stores"].items():
-                item = GeojsonPointItem()
+                item = Feature()
                 item["ref"] = id
 
                 item["name"] = store["title-en"]

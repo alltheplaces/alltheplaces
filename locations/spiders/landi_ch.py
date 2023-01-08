@@ -6,7 +6,7 @@ from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
 from locations.hours import DAYS_DE, OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class LandiCHSpider(SitemapSpider):
@@ -70,7 +70,7 @@ class LandiCHSpider(SitemapSpider):
         for key in ["fax", "source:website"]:
             extras[key] = props.pop(key, "")
         extras = {k: v for (k, v) in extras.items() if v}
-        item = GeojsonPointItem(**props)
+        item = Feature(**props)
         self.set_category(item)
         yield item
 

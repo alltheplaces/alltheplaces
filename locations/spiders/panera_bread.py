@@ -2,7 +2,7 @@ import json
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class PaneraBreadSpider(scrapy.Spider):
@@ -90,7 +90,7 @@ class PaneraBreadSpider(scrapy.Spider):
         props["lon"] = loc.xpath('//meta[@itemprop="longitude"]/@content').extract_first()
         props["opening_hours"] = self.store_hours(json.loads(hours))
 
-        return GeojsonPointItem(**props)
+        return Feature(**props)
 
     def parse_city(self, city_page):
         locations = city_page.xpath(

@@ -1,7 +1,7 @@
 from scrapy import Spider
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class FranprixFRSpider(Spider):
@@ -40,4 +40,4 @@ class FranprixFRSpider(Spider):
                 "website": f"https://www.franprix.fr/magasins/{store.get('id')}",
                 "opening_hours": oh.as_opening_hours(),
             }
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

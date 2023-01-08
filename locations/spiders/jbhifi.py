@@ -4,7 +4,7 @@ import scrapy
 from scrapy.http import JsonRequest
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 DAYS = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"]
 
@@ -55,4 +55,4 @@ class JbHifiSpider(scrapy.Spider):
                 "opening_hours": self.process_trading_hours(store["normalTradingHours"]),
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

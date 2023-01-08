@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 DAYS = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
 
@@ -72,4 +72,4 @@ class SparNoSpider(scrapy.Spider):
 
         props["website"] = response.url
 
-        yield GeojsonPointItem(**props)
+        yield Feature(**props)

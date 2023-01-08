@@ -3,7 +3,7 @@ import json
 import scrapy
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class HEBSpider(scrapy.Spider):
@@ -26,7 +26,7 @@ class HEBSpider(scrapy.Spider):
             return
 
         store_json = json.loads(response.xpath('//script[@type="application/ld+json"]/text()').extract_first())
-        yield GeojsonPointItem(
+        yield Feature(
             ref=response.url.split("/")[-1],
             name=store_json["name"],
             lat=float(store_json["geo"]["latitude"]),

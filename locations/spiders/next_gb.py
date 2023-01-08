@@ -3,7 +3,7 @@ import json
 import scrapy
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 DAYS = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
 
@@ -109,4 +109,4 @@ class NextGBSpider(scrapy.Spider):
             else:
                 properties["addr_full"] = ""
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

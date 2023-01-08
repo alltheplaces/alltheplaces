@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class AlbertAndWalterSpider(scrapy.Spider):
@@ -89,4 +89,4 @@ class AlbertAndWalterSpider(scrapy.Spider):
                 "opening_hours": self.store_hours(data["hours"]),
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

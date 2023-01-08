@@ -2,7 +2,7 @@ import csv
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 HEADERS = {"X-Requested-With": "XMLHttpRequest"}
 STORELOCATOR = "https://api.gls-pakete.de/parcelshops?version=4&coordinates={:0.5},{:0.5}&distance=40"
@@ -41,7 +41,7 @@ class GeneralLogisticsSystemsSpider(scrapy.Spider):
         results = first_results["shops"]
 
         for result in results:
-            item = GeojsonPointItem()
+            item = Feature()
             address = result["address"]
             phone = result["phone"]
             coordinates = address["coordinates"]

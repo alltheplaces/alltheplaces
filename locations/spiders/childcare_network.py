@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class ChildcareNetworkSpider(scrapy.Spider):
@@ -21,7 +21,7 @@ class ChildcareNetworkSpider(scrapy.Spider):
     def parse_location(self, response):
         address = response.xpath('//*[@id="address"]/div[1]/span/text()').extract()
         if len(address) == 1:
-            yield GeojsonPointItem(
+            yield Feature(
                 name=response.xpath('//*[@id="location-name"]/span[2]/text()').extract()[0],
                 addr_full=address[0],
                 city=response.xpath('//*[@id="address"]/div[2]/span[1]/text()').extract()[0],

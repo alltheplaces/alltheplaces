@@ -3,7 +3,7 @@ import re
 import scrapy
 
 from locations.hours import DAYS_NL, OpeningHours, sanitise_day
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class KruidvatSpider(scrapy.Spider):
@@ -42,4 +42,4 @@ class KruidvatSpider(scrapy.Spider):
                 "opening_hours": oh.as_opening_hours(),
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

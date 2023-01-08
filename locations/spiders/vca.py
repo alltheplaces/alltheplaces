@@ -2,7 +2,7 @@ import json
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 DAYS = {
     "Monday": "Mo",
@@ -37,7 +37,7 @@ class VCASpider(scrapy.Spider):
         if not data:
             return
 
-        yield GeojsonPointItem(
+        yield Feature(
             lat=float(data["geo"]["latitude"]),
             lon=float(data["geo"]["longitude"]),
             phone=data["telephone"],

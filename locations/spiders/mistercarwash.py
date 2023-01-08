@@ -3,7 +3,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class MisterCarWashSpider(scrapy.Spider):
@@ -76,7 +76,7 @@ class MisterCarWashSpider(scrapy.Spider):
                 ]
             )
 
-            yield GeojsonPointItem(
+            yield Feature(
                 lat=float(wash["lat"]),
                 lon=float(wash["lng"]),
                 phone=phone,

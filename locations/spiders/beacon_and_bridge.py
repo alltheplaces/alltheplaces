@@ -3,7 +3,7 @@ import re
 import scrapy
 
 from locations.hours import DAYS, OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class BeaconAndBridgeSpider(scrapy.Spider):
@@ -37,4 +37,4 @@ class BeaconAndBridgeSpider(scrapy.Spider):
                 "opening_hours": oh.as_opening_hours(),
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

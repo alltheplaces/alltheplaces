@@ -3,7 +3,7 @@ import re
 
 from scrapy.spiders import SitemapSpider
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class KpmgSpider(SitemapSpider):
@@ -36,4 +36,4 @@ class KpmgSpider(SitemapSpider):
             "website": response.url,
         }
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

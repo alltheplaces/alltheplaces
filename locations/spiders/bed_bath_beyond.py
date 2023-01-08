@@ -4,7 +4,7 @@ import re
 import scrapy
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class BedBathBeyondSpider(scrapy.Spider):
@@ -25,7 +25,7 @@ class BedBathBeyondSpider(scrapy.Spider):
         data = response.xpath('//script[@id="__NEXT_DATA__"]/text()').get()
         data_json = json.loads(data)
         stores = data_json["props"]["pageProps"]["stateData"]
-        item = GeojsonPointItem()
+        item = Feature()
         oh = OpeningHours()
         for store in stores:
             item["ref"] = store["stores"][0]["storeId"]

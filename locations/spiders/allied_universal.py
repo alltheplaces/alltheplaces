@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 USA_STATES = {
     "AK": "Alaska",
@@ -141,4 +141,4 @@ class AlliedUniversalSpider(scrapy.Spider):
             "addr_full": addr_full,
             "website": website,
         }
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

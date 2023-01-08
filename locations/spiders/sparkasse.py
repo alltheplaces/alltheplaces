@@ -4,7 +4,7 @@ import re
 import scrapy
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class SparkasseSpider(scrapy.Spider):
@@ -67,7 +67,7 @@ class SparkasseSpider(scrapy.Spider):
         if hours:
             properties["opening_hours"] = hours
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)
 
     def parse(self, response):
         links = re.findall(r'<a class="object-link grey-link" href="(.+?)">', response.text)

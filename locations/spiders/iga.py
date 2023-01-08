@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class IgaSpider(scrapy.Spider):
@@ -15,7 +15,7 @@ class IgaSpider(scrapy.Spider):
         stores = response.xpath('//div[@class="span6"]/div[@class="row-fluid-wrapper"]')
         for store in stores:
             addr_full = store.xpath(".//@data-address").get().strip()
-            yield GeojsonPointItem(
+            yield Feature(
                 lat=store.xpath(".//@data-lat").get(),
                 lon=store.xpath(".//@data-long").get(),
                 phone=store.xpath("//strong/a/text()").get(),

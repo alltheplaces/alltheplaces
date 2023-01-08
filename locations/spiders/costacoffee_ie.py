@@ -2,7 +2,7 @@ import scrapy
 
 from locations.categories import Categories, apply_category
 from locations.hours import DAYS_FULL, OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class CostaCoffeeIESpider(scrapy.Spider):
@@ -43,4 +43,4 @@ class CostaCoffeeIESpider(scrapy.Spider):
                         opening_hours.add_range(day, open_time, close_time)
             properties["opening_hours"] = opening_hours.as_opening_hours()
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

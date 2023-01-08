@@ -3,7 +3,7 @@ import json
 import scrapy
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 DAYS_NAME = {
     "Monday": "Mo",
@@ -130,4 +130,4 @@ class WellStarSpider(scrapy.Spider):
             hours = self.parse_hours(row.get("Hours"))
             properties["opening_hours"] = hours
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

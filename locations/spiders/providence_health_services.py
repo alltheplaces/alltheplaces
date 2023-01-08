@@ -2,7 +2,7 @@ import json
 
 from scrapy.spiders import SitemapSpider
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class ProvidenceHealthServicesSpider(SitemapSpider):
@@ -59,4 +59,4 @@ class ProvidenceHealthServicesSpider(SitemapSpider):
                     "postcode": address["postalCode"],
                 }
             )
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

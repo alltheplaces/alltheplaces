@@ -3,7 +3,7 @@ import re
 import scrapy
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class SystemeUSpider(scrapy.Spider):
@@ -56,7 +56,7 @@ class SystemeUSpider(scrapy.Spider):
         except:
             pass
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)
 
     def parse(self, response):
         xml = scrapy.selector.Selector(response)

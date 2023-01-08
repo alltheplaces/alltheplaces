@@ -3,7 +3,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class TheBurgersPriestSpider(scrapy.Spider):
@@ -47,4 +47,4 @@ class TheBurgersPriestSpider(scrapy.Spider):
                 "website": place["properties"]["url"],
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

@@ -3,7 +3,7 @@ import json
 import scrapy
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class DollarTreeSpider(scrapy.Spider):
@@ -74,4 +74,4 @@ class DollarTreeSpider(scrapy.Spider):
         if address:
             properties.update(address)
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

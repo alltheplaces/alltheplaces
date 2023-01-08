@@ -2,7 +2,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class FlemingsSteakhouseSpider(scrapy.Spider):
@@ -37,4 +37,4 @@ class FlemingsSteakhouseSpider(scrapy.Spider):
             "website": response.url,
             "phone": response.xpath('//a[@class="phone"]/text()').extract_first(),
         }
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

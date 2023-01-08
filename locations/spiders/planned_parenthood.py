@@ -2,7 +2,7 @@ import re
 
 from scrapy.spiders import SitemapSpider
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class PlannedParenthoodSpider(SitemapSpider):
@@ -42,4 +42,4 @@ class PlannedParenthoodSpider(SitemapSpider):
                 properties["lat"] = float(match.group(1))
                 properties["lon"] = float(match.group(2))
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

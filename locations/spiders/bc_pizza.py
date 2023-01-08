@@ -7,7 +7,7 @@ from scrapy.spiders import CrawlSpider, Rule
 
 from locations.google_url import extract_google_position
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class BcpizzaSpider(CrawlSpider):
@@ -68,4 +68,4 @@ class BcpizzaSpider(CrawlSpider):
 
         extract_google_position(properties, response)
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

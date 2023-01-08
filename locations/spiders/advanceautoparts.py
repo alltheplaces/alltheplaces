@@ -4,7 +4,7 @@ import re
 import scrapy
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class AdvanceautopartsSpider(scrapy.Spider):
@@ -71,4 +71,4 @@ class AdvanceautopartsSpider(scrapy.Spider):
             "opening_hours": opening_hours,
             "extras": {"shop": "car_parts"},
         }
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

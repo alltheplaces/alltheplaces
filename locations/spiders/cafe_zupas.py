@@ -1,7 +1,7 @@
 import scrapy
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class CafeZupasSpider(scrapy.Spider):
@@ -61,4 +61,4 @@ class CafeZupasSpider(scrapy.Spider):
                     "facebook": location["facebook_url"],
                     "opening_hours": self.parse_hours(location),
                 }
-                yield GeojsonPointItem(**properties)
+                yield Feature(**properties)

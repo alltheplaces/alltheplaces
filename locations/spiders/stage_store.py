@@ -3,7 +3,7 @@ import json
 import scrapy
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 DAY_MAPPING = {
     "Mon": "Mo",
@@ -56,7 +56,7 @@ class StageStoreSpider(scrapy.Spider):
             if hours:
                 properties["opening_hours"] = self.process_hours(hours)
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)
 
     def process_hours(self, hours):
         opening_hours = OpeningHours()

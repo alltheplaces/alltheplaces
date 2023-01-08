@@ -4,7 +4,7 @@ import re
 import scrapy
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class IHOPSpider(scrapy.Spider):
@@ -78,4 +78,4 @@ class IHOPSpider(scrapy.Spider):
         if hours:
             point["opening_hours"] = hours
 
-        return GeojsonPointItem(**point)
+        return Feature(**point)

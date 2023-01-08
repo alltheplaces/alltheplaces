@@ -2,7 +2,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class BarMethodSpider(scrapy.Spider):
@@ -59,4 +59,4 @@ class BarMethodSpider(scrapy.Spider):
             "website": response.request.url,
         }
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

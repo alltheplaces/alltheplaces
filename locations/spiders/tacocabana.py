@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class TacocabanaSpider(scrapy.Spider):
@@ -45,7 +45,7 @@ class TacocabanaSpider(scrapy.Spider):
                 "postcode": store["zip_code"],
                 "phone": store["phone_number"],
             }
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)
 
         next_url = data["meta"]["pagination"]["links"]["next"]
         if next_url:

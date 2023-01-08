@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class BigBoySpider(scrapy.Spider):
@@ -37,7 +37,7 @@ class BigBoySpider(scrapy.Spider):
                 0
             ].extract()
 
-            yield GeojsonPointItem(
+            yield Feature(
                 lat=lat,
                 lon=lon,
                 ref=name,

@@ -3,7 +3,7 @@ import json
 import scrapy
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 from locations.spiders.bestbuy import BestBuySpider
 
 
@@ -53,7 +53,7 @@ class BestBuyCASpider(scrapy.Spider):
             "name": response.xpath('//span[@class="LocationName-brand"]/text()').extract_first(),
             "opening_hours": opening_hours,
         }
-        return GeojsonPointItem(**props)
+        return Feature(**props)
 
     def parse(self, response):
         locations = response.xpath('//a[@class="Directory-listLink"]/@href').extract()

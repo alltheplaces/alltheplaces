@@ -2,7 +2,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 daysKey = {
     "Monday": "Mo",
@@ -124,7 +124,7 @@ class LeesFamousRecipeSpider(scrapy.Spider):
                 country_string = "US"
                 state_string = response.xpath("//div[contains(@class,'adr')]/div[2]/span[2]/text()").extract_first()
 
-            yield GeojsonPointItem(
+            yield Feature(
                 ref=name_string,
                 addr_full=response.xpath("//div[@class='street-address']/text()").extract_first().strip(),
                 city=response.xpath("//div[@class='city-state-zip']/span[@class='locality']/text()")

@@ -2,7 +2,7 @@ import json
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 from locations.spiders.mcdonalds import McDonaldsSpider
 
 
@@ -55,4 +55,4 @@ class McDonaldsLocalizerSpider(scrapy.Spider):
             properties["name"] = name
             properties["addr_full"] = data["name"][data["name"].find("<small>") : -8][8:]
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

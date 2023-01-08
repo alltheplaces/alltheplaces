@@ -2,7 +2,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 BASE_URL = "https://www.premierinn.com/gb/en/"
 
@@ -44,4 +44,4 @@ class PremierInnSpider(scrapy.spiders.SitemapSpider):
             "website": response.url,
         }
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

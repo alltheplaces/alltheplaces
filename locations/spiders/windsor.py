@@ -2,7 +2,7 @@ import json
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class WindsorSpider(scrapy.Spider):
@@ -41,4 +41,4 @@ class WindsorSpider(scrapy.Spider):
                 "website": store_data.get("url"),
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

@@ -2,7 +2,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class CoopVitalityCHSpider(scrapy.Spider):
@@ -27,7 +27,7 @@ class CoopVitalityCHSpider(scrapy.Spider):
             if branch:
                 properties["extras"] = {"branch": branch}
             properties = {k: v for (k, v) in properties.items() if v}
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)
 
     def parse_addr(self, s):
         located_in, street, housenumber = s.get("address"), s.get("address_2"), ""

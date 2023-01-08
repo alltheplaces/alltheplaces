@@ -3,7 +3,7 @@ import re
 from scrapy.spiders import SitemapSpider
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 from locations.user_agents import BROSWER_DEFAULT
 
@@ -17,7 +17,7 @@ class HelzbergDiamondsSpider(SitemapSpider, StructuredDataSpider):
     user_agent = BROSWER_DEFAULT
 
     def parse(self, response):
-        item = GeojsonPointItem()
+        item = Feature()
         address = response.xpath('//p[@class="address"]/text()').extract()
         item["ref"] = re.findall("[0-9]+", response.url)[0]
         item["name"] = response.xpath('//h1[@class="store-title"]/text()').get()

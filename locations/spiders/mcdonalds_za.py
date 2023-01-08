@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 from locations.spiders.mcdonalds import McDonaldsSpider
 
 
@@ -27,5 +27,5 @@ class McDonaldsZASpider(scrapy.Spider):
                 "name": name,
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)
             ref = ref + 1

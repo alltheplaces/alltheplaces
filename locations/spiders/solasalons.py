@@ -3,7 +3,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class SolaSalonsSpider(scrapy.Spider):
@@ -43,4 +43,4 @@ class SolaSalonsSpider(scrapy.Spider):
             "country": data["address"]["addressCountry"],
             "phone": data["telephone"],
         }
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

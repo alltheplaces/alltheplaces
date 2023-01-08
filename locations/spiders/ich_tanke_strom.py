@@ -5,7 +5,7 @@ from urllib.parse import urlparse
 import scrapy
 from parsel import Selector
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 # “Ich tanke Strom“, charging stations for electric vehicles.
 # Published as Open Data by the Swiss Federal Office of Energy.
@@ -76,7 +76,7 @@ class IchTankeStromSpider(scrapy.Spider):
                 "ref": f["id"],
             }
             properties.update(self.parse_address(html))
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)
 
     def parse_access(self, html):
         # Occasionally, the feed gives multiple access restrictions.

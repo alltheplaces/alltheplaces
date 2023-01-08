@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class SteakNShakeSpider(scrapy.Spider):
@@ -31,4 +31,4 @@ class SteakNShakeSpider(scrapy.Spider):
                 "lon": store_data["address"]["loc"][0],
                 "website": f"https://www.steaknshake.com/locations/{store_data['slug']}/",
             }
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

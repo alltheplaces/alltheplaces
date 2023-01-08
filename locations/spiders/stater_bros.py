@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class StaterBrosSpider(scrapy.Spider):
@@ -29,4 +29,4 @@ class StaterBrosSpider(scrapy.Spider):
                 ),
                 "name": store.xpath('div[@class="left"]/div[@class="name"]/text()').extract_first(),
             }
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

@@ -3,7 +3,7 @@ import re
 from scrapy import Spider
 
 from locations.hours import DAYS, OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 from locations.spiders.calvin_klein import CalvinKleinSpider
 from locations.spiders.vapestore_gb import clean_address
 
@@ -15,7 +15,7 @@ class CalvinKleinAUSpider(Spider):
 
     def parse(self, response, **kwargs):
         for location in response.json():
-            item = GeojsonPointItem()
+            item = Feature()
             item["ref"] = location["i"]
             item["lat"] = location["l"]
             item["lon"] = location["g"]

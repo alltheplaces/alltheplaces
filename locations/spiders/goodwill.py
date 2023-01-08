@@ -5,7 +5,7 @@ from urllib.parse import urlencode
 import scrapy
 
 from locations.categories import Categories
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 CATEGORY_MAPPING = {
     "1": "Donation Site",
@@ -70,4 +70,4 @@ class GoodwillSpider(scrapy.Spider):
                 },
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

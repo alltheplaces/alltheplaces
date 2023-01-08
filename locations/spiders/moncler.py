@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class MonclerSpider(scrapy.Spider):
@@ -25,4 +25,4 @@ class MonclerSpider(scrapy.Spider):
                 "lon": i["longitude"],
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

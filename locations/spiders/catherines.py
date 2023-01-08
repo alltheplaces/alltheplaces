@@ -3,7 +3,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class CatherinesSpider(scrapy.Spider):
@@ -33,7 +33,7 @@ class CatherinesSpider(scrapy.Spider):
                 "lon": json_data[0]["geo"]["longitude"],
             }
             properties["opening_hours"] = (json_data[0]["openingHours"],)
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)
         except ValueError:
             return
 

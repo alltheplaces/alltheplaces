@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class CleanHarborsSpider(scrapy.Spider):
@@ -59,4 +59,4 @@ class CleanHarborsSpider(scrapy.Spider):
             "lon": float(lon),
         }
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

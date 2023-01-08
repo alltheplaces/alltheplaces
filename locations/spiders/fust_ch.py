@@ -4,7 +4,7 @@ import re
 from scrapy.spiders import SitemapSpider
 
 from locations.hours import DAYS_DE, OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class FustCHSpider(SitemapSpider):
@@ -42,7 +42,7 @@ class FustCHSpider(SitemapSpider):
             "street_address": s.xpath("@data-prj-adress").get(),
             "website": response.url,
         }
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)
 
     def parse_branch(self, s):
         return s.xpath("@data-prj-city").get().split("(")[0].strip()

@@ -3,7 +3,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class UniversityMarylandMedicalSystemSpider(scrapy.Spider):
@@ -48,4 +48,4 @@ class UniversityMarylandMedicalSystemSpider(scrapy.Spider):
             "lat": float(data["items"][0]["coordinates"][0]["lat"]),
             "lon": float(data["items"][0]["coordinates"][0]["lng"]),
         }
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

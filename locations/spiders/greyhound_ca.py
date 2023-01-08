@@ -3,7 +3,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class GreyhoundCASpider(scrapy.Spider):
@@ -39,4 +39,4 @@ class GreyhoundCASpider(scrapy.Spider):
                 "website": website_url,
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

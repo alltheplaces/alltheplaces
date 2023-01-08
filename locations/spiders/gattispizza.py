@@ -4,7 +4,7 @@ import traceback
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 URL = "http://gattispizza.com/wp-admin/admin-ajax.php"
 HEADERS = {
@@ -71,7 +71,7 @@ class GattispizzaSpider(scrapy.Spider):
             product["phone"] = ""
             self.log("Error while parsing the json data: {}".format(traceback.format_exc()))
 
-        yield GeojsonPointItem(
+        yield Feature(
             lat=product.get("lat"),
             lon=product.get("lon"),
             ref=str(product.get("ref")),

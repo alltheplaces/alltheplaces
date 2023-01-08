@@ -2,7 +2,7 @@ import json
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class CrumblCookiesSpider(scrapy.Spider):
@@ -27,4 +27,4 @@ class CrumblCookiesSpider(scrapy.Spider):
                 "lon": store["longitude"],
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

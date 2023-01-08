@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 from locations.user_agents import BROSWER_DEFAULT
 
 
@@ -54,5 +54,5 @@ class SheetzSpider(scrapy.Spider):
                     "fuel:propane": features["propane"],
                 },
             }
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)
         yield self.make_request(response.meta["state"], 1 + response.meta["page"])

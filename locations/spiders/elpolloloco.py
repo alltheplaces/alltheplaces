@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class ElPolloLocoSpider(scrapy.Spider):
@@ -34,7 +34,7 @@ class ElPolloLocoSpider(scrapy.Spider):
                     "lon": float(store[9]),
                     "website": response.url,
                 }
-                yield GeojsonPointItem(**properties)
+                yield Feature(**properties)
 
             except ValueError:
                 continue

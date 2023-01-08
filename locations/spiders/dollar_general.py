@@ -1,7 +1,7 @@
 from scrapy.spiders import SitemapSpider
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class DollarGeneralSpider(SitemapSpider):
@@ -49,4 +49,4 @@ class DollarGeneralSpider(SitemapSpider):
 
         properties["opening_hours"] = o.as_opening_hours()
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

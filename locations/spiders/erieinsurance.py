@@ -4,7 +4,7 @@ import re
 from scrapy.spiders import SitemapSpider
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 def am_pm(s):
@@ -59,4 +59,4 @@ class ErieInsuranceSpider(SitemapSpider):
             "extras": {"fax": agent_contact.get("Fax")},
             "opening_hours": opening_hours and opening_hours.as_opening_hours() or None,
         }
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)
