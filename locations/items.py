@@ -15,6 +15,7 @@ class Feature(scrapy.Item):
     housenumber = scrapy.Field()
     street = scrapy.Field()
     street_address = scrapy.Field()
+    suburb = scrapy.Field()
     city = scrapy.Field()
     state = scrapy.Field()
     postcode = scrapy.Field()

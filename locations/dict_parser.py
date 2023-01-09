@@ -17,6 +17,10 @@ class DictParser:
         "address-line-one",
     ]
 
+    suburb_keys = [
+        "suburb",
+    ]
+
     city_keys = [
         "address-locality",
         "city",
@@ -108,6 +112,7 @@ class DictParser:
         item["housenumber"] = DictParser.get_first_key(address, DictParser.house_number_keys)
         item["street"] = DictParser.get_first_key(address, ["street", "streetName"])
         item["street_address"] = DictParser.get_first_key(address, DictParser.street_address_keys)
+        item["suburb"] = DictParser.get_first_key(address, DictParser.suburb_keys)
         item["city"] = DictParser.get_first_key(address, DictParser.city_keys)
         item["state"] = DictParser.get_first_key(address, DictParser.region_keys)
         item["postcode"] = DictParser.get_first_key(address, DictParser.postcode_keys)

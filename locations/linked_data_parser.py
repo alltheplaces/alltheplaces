@@ -102,6 +102,13 @@ class LinkedDataParser:
                     # Common mistake to put "telephone" in "address"
                     item["phone"] = LinkedDataParser.get_clean(addr, "telephone")
 
+        # Australia uses addr:suburb not addr:city
+        # Refer to https://wiki.openstreetmap.org/wiki/Australian_Tagging_Guidelines/Australian_features#Addresses
+        # Refer to https://en.wikipedia.org/wiki/Suburbs_and_localities_(Australia)
+        if "country" in item and "city" in item:
+            if item["country"] in {"AU", "Australia"}:
+                item["suburb"] = item.pop("city")
+
         if item.get("phone") is None:
             item["phone"] = LinkedDataParser.get_clean(ld, "telephone")
 

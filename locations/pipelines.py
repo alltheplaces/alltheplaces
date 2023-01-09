@@ -209,6 +209,7 @@ class CheckItemPropertiesPipeline:
         check_field(item, spider, "email", (str,), self.email_regex)
         check_field(item, spider, "phone", (str,))
         check_field(item, spider, "street_address", (str,))
+        check_field(item, spider, "suburb", (str,))
         check_field(item, spider, "city", (str,))
         check_field(item, spider, "state", (str,))
         check_field(item, spider, "postcode", (str,))

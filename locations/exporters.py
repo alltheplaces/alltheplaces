@@ -17,6 +17,7 @@ mapping = (
     ("housenumber", "addr:housenumber"),
     ("street", "addr:street"),
     ("street_address", "addr:street_address"),
+    ("suburb", "addr:suburb"),
     ("city", "addr:city"),
     ("state", "addr:state"),
     ("postcode", "addr:postcode"),

@@ -31,6 +31,7 @@ Each GeoJSON feature will have a `properties` object with the following keys:
 | `addr:housenumber`    | No  | The house number part of the address.
 | `addr:street`         | No  | The street name.
 | `addr:street_address` | No  | The street address, including street name and house number and/or name.
+| `addr:suburb`         | No  | The suburb part of the address.
 | `addr:city`           | No  | The city part of the address.
 | `addr:state`          | No  | The state or province part of the address.
 | `addr:postcode`       | No  | The postcode part of the address.
