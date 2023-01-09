@@ -1,4 +1,4 @@
-from locations.categories import Fuel, apply_yes_no
+from locations.categories import Categories, Fuel, apply_yes_no
 from locations.items import Feature
 
 
@@ -19,3 +19,10 @@ def test_apply_yes_no():
     except AttributeError:
         # Expected
         pass
+
+
+def test_shop_tag_sanity():
+    for cat in Categories:
+        if cat.name.startswith("SHOP_"):
+            shop_name = cat.name.split("_", 1)[1].lower()
+            assert cat.value.get("shop") == shop_name
