@@ -18,7 +18,7 @@ class RedRoosterSpider(scrapy.Spider):
                 "ref": i["storeNumber"],
                 "name": i["title"],
                 "street_address": i["address"],
-                "city": i["suburb"],
+                "suburb": i["suburb"],
                 "state": i.get("state"),
                 "postcode": i["postcode"],
                 "country": "AU",
