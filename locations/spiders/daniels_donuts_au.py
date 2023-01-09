@@ -16,7 +16,9 @@ class DanielsDonutsAUSpider(StorepointSpider):
         for day in DAYS_FULL:
             if times := location.get(day.lower()):
                 for start_hour, start_min, start_am_pm, end_hour, end_min, end_am_pm in re.findall(
-                        r"(\d{1,2})(?:[:\.](\d{2}))?\s*(AM|PM)\s*-\s*(\d{1,2})(?:[:\.](\d{2}))?\s*(AM|PM)", times, flags=re.IGNORECASE
+                    r"(\d{1,2})(?:[:\.](\d{2}))?\s*(AM|PM)\s*-\s*(\d{1,2})(?:[:\.](\d{2}))?\s*(AM|PM)",
+                    times,
+                    flags=re.IGNORECASE,
                 ):
                     if len(start_hour) == 1:
                         start_hour = "0" + start_hour
