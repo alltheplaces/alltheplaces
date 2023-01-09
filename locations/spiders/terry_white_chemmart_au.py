@@ -7,6 +7,7 @@ from scrapy.http import JsonRequest
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 
+
 class TerryWhiteChemmartAUSpider(scrapy.Spider):
     name = "terry_white_chemmart_au"
     item_attributes = {
@@ -32,7 +33,7 @@ class TerryWhiteChemmartAUSpider(scrapy.Spider):
 
             if "addressLine1" in item and "addressLine2" in item:
                 item["street_address"] = ", ".join([store["addressLine1"], store["addressLine2"]])
-            
+
             item["website"] = "https://terrywhitechemmart.com.au/stores/" + store["storeSlug"]
 
             item["opening_hours"] = OpeningHours()
@@ -42,6 +43,6 @@ class TerryWhiteChemmartAUSpider(scrapy.Spider):
                     store["availability"],
                     flags=re.IGNORECASE,
                 ):
-                    if start_time != '' and end_time != '':
+                    if start_time != "" and end_time != "":
                         item["opening_hours"].add_range(day, start_time, end_time, time_format="%H%M")
-            yield(item)
+            yield (item)
