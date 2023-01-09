@@ -162,12 +162,14 @@ class OpeningHours:
 
         if open_time is None or close_time is None:
             return
-        if open_time.lower() == "closed":
-            return
-        if close_time.lower() == "closed":
-            return
-        if close_time == "24:00" or close_time == "00:00":
-            close_time = "23:59"
+        if isinstance(open_time, str):
+            if open_time.lower() == "closed":
+                return
+        if isinstance(close_time, str):
+            if close_time.lower() == "closed":
+                return
+            if close_time == "24:00" or close_time == "00:00":
+                close_time = "23:59"
         if not isinstance(open_time, time.struct_time):
             open_time = time.strptime(open_time, time_format)
         if not isinstance(close_time, time.struct_time):

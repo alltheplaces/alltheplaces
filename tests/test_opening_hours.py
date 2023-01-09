@@ -1,4 +1,5 @@
 import json
+import time
 
 from locations.hours import DAYS, DAYS_BG, DAYS_DE, OpeningHours, day_range, sanitise_day
 
@@ -16,6 +17,14 @@ def test_duplicates():
     o.add_range("Mo", "07:00", "17:00")
 
     assert o.as_opening_hours() == "Mo 07:00-17:00"
+
+
+def test_times():
+    o = OpeningHours()
+    o.add_range("Mo", time.strptime("07:00", "%H:%M"), time.strptime("17:00", "%H:%M"))
+    o.add_range("Tu", "09:00", "19:00")
+
+    assert o.as_opening_hours() == "Mo 07:00-17:00; Tu 09:00-19:00"
 
 
 def test_two_ranges():
