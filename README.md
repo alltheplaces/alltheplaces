@@ -15,7 +15,7 @@ You can contact us in several ways:
 
 ## Adding a spider
 
-To scrape a new website for locations, you'll want to create a new spider. You can copy from existing spiders or start from a blank, but the result is always a Python class that has a `process()` function that `yield`s [`GeojsonPointItem`s](https://github.com/iandees/all-the-places/blob/master/locations/items.py). The Scrapy framework does the work of outputting the GeoJSON based on these objects that the spider generates.
+To scrape a new website for locations, you'll want to create a new spider. You can copy from existing spiders or start from a blank, but the result is always a Python class that has a `process()` function that `yield`s [Features](https://github.com/iandees/all-the-places/blob/master/locations/items.py). The Scrapy framework does the work of outputting the GeoJSON based on these objects that the spider generates.
 
 ## Development setup
 
@@ -51,7 +51,7 @@ To get started, you'll want to install the dependencies for this project.
     ```python
     # -*- coding: utf-8 -*-
     import scrapy
-    from locations.items import GeojsonPointItem
+    from locations.items import Feature
 
     class TemplateSpider(scrapy.Spider):
         name = "template"
@@ -86,11 +86,11 @@ To get started, you'll want to install the dependencies for this project.
    pipenv run scrapy crawl template -O output.geojson
    ```
 
-1. Finally, make sure your `parse()` function is `yield`ing `GeojsonPointItem`s that contain the location and property data that you extract from the page:
+1. Finally, make sure your `parse()` function is `yield`ing `Feature`s that contain the location and property data that you extract from the page:
 
    ```python
    def parse(self, response):
-      yield GeojsonPointItem(
+      yield Feature(
           lat=latitude,
           lon=longitude,
           street_address="1234 Fifth Street",
@@ -133,7 +133,7 @@ For stores that do not have a national footprint ([e.g. #1034](https://github.co
 
 ### You can send the spider to other pages
 
-The simplest thing a spider can do is to load the `start_urls`, process the page, and `yield` the data as `GeojsonPointItem` objects from the `parse()` method. Usually that's not enough to get at useful data, though. The `parse()` method can also `yield` a [Request object](https://doc.scrapy.org/en/latest/topics/request-response.html#request-objects), which scrapy will use to add another URL to the request queue.
+The simplest thing a spider can do is to load the `start_urls`, process the page, and `yield` the data as `Feature` objects from the `parse()` method. Usually that's not enough to get at useful data, though. The `parse()` method can also `yield` a [Request object](https://doc.scrapy.org/en/latest/topics/request-response.html#request-objects), which scrapy will use to add another URL to the request queue.
 
 By default, the `parse()` method on the spider will be called with the response for the new request. In many cases it's easier to create a new function to parse the new page's content and pass that function in via the `Request` object's `callback` parameter like so:
 

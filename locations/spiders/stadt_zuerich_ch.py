@@ -4,7 +4,7 @@ import re
 import scrapy
 
 from locations.hours import DAYS_DE, OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 from locations.materials import MATERIALS_DE
 
 
@@ -121,7 +121,7 @@ class StadtZuerichCHSpider(scrapy.Spider):
         }
         item["extras"] = {k: v for (k, v) in tags.items() if v}
         item = {k: v for (k, v) in item.items() if v}
-        return GeojsonPointItem(**item)
+        return Feature(**item)
 
     def parse_access(self, p):
         if p.get("oeffentlicher_grund") == "öffentlicher Grund":
