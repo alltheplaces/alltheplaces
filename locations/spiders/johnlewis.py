@@ -6,7 +6,7 @@ from scrapy.spiders import CrawlSpider, Rule
 
 from locations.hours import OpeningHours
 from locations.items import Feature
-from locations.user_agents import BROSWER_DEFAULT
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class JohnLewisSpider(CrawlSpider):
@@ -20,7 +20,7 @@ class JohnLewisSpider(CrawlSpider):
         )
     ]
     custom_settings = {"REDIRECT_ENABLED": False}
-    user_agent = BROSWER_DEFAULT
+    user_agent = BROWSER_DEFAULT
 
     def parse_stores(self, response):
         item = Feature()

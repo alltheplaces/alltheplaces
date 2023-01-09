@@ -3,7 +3,7 @@ from scrapy.spiders import SitemapSpider
 from locations.google_url import extract_google_position
 from locations.spiders.vapestore_gb import clean_address
 from locations.structured_data_spider import StructuredDataSpider
-from locations.user_agents import BROSWER_DEFAULT
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class SuperdrugGBSpider(SitemapSpider, StructuredDataSpider):
@@ -12,7 +12,7 @@ class SuperdrugGBSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://www.superdrug.com/sitemap.xml"]
     sitemap_follow = ["Store"]
     sitemap_rules = [(r"https:\/\/www\.superdrug\.com\/store\/(.+)$", "parse_sd")]
-    user_agent = BROSWER_DEFAULT
+    user_agent = BROWSER_DEFAULT
 
     def inspect_item(self, item, response):
         item["addr_full"] = clean_address(item["street_address"].replace("Superdrug", ""))

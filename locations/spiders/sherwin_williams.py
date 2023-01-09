@@ -5,14 +5,14 @@ from urllib.parse import urlencode
 import scrapy
 
 from locations.items import Feature
-from locations.user_agents import BROSWER_DEFAULT
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class SherwinWilliamsSpider(scrapy.Spider):
     name = "sherwin_williams"
     item_attributes = {"brand": "Sherwin-Williams", "brand_wikidata": "Q48881"}
     allowed_domains = ["www.sherwin-williams.com"]
-    user_agent = BROSWER_DEFAULT
+    user_agent = BROWSER_DEFAULT
 
     #  Covers United States, Canada, UK, Puerto Rico, Bahamas with 500 mile radius - (from regis spider)
     lats = [

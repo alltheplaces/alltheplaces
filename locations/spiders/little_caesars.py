@@ -5,7 +5,7 @@ import scrapy
 from locations.geo import postal_regions
 from locations.hours import OpeningHours
 from locations.items import Feature
-from locations.user_agents import BROSWER_DEFAULT
+from locations.user_agents import BROWSER_DEFAULT
 
 DAY_MAPPING = {
     "SUN": "Su",
@@ -27,7 +27,7 @@ class LittleCaesarsSpider(scrapy.Spider):
     }
     allowed_domains = ["littlecaesars.com"]
     download_delay = 0.1
-    user_agent = BROSWER_DEFAULT
+    user_agent = BROWSER_DEFAULT
 
     def start_requests(self):
         for record in postal_regions("US"):

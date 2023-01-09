@@ -1,7 +1,7 @@
 import scrapy
 
 from locations.items import Feature
-from locations.user_agents import BROSWER_DEFAULT
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class KelseysOriginalRoadhouseSpider(scrapy.Spider):
@@ -14,7 +14,7 @@ class KelseysOriginalRoadhouseSpider(scrapy.Spider):
     start_urls = [
         "https://iosapi.kelseys.ca/CaraAPI/servlet/VESBCmdServlet?application=VECOMV1&service=AuthenticationService&command=createSession&reqJSON=%7B%22request%22%3A%7B%22requestHeader%22%3A%7B%22caller%22%3A%22Mobile%22%7D%2C%22requestContent%22%3A%7B%22@class%22%3A%22createSessionRqstModel%22%2C%22lang%22%3A%22en%22%2C%22version%22%3A%221.0.1%22%2C%22appType%22%3A%22web%22%7D%7D%7D",
     ]
-    user_agent = BROSWER_DEFAULT
+    user_agent = BROWSER_DEFAULT
 
     def parse(self, response):
         base_url = "https://iosapi.kelseys.ca/CaraAPI/servlet/VESBCmdServlet?application=VECOMV1&service=OrganizationService&command=getStoreList&reqJSON=%7B%22request%22%3A%7B%22requestHeader%22%3A%7B%22caller%22%3A%22Mobile%22%2C%22sessionId%22%3A%22{session_id}%22%7D%2C%22requestContent%22%3A%7B%22@class%22%3A%22storeListRqstModel%22%2C%22eCommOnly%22%3A%22N%22%2C%22fromLatitude%22%3A90.0000%2C%22toLatitude%22%3A0.00000%2C%22fromLongitude%22%3A-180.0000%2C%22toLongitude%22%3A-1.56301%7D%7D%7D"

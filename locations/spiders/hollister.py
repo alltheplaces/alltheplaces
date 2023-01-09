@@ -1,7 +1,7 @@
 import scrapy
 
 from locations.items import Feature
-from locations.user_agents import BROSWER_DEFAULT
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class HollisterSpider(scrapy.Spider):
@@ -9,7 +9,7 @@ class HollisterSpider(scrapy.Spider):
     item_attributes = {"brand": "Hollister", "brand_wikidata": "Q1257477"}
     allowed_domains = ["hollisterco.com"]
     start_urls = ["https://www.hollisterco.com/api/ecomm/h-us/storelocator/search?country="]
-    user_agent = BROSWER_DEFAULT
+    user_agent = BROWSER_DEFAULT
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def parse(self, response):

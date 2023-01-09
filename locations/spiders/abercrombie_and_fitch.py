@@ -1,7 +1,7 @@
 import scrapy
 
 from locations.items import Feature
-from locations.user_agents import BROSWER_DEFAULT
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class AbercrombieAndFitchSpider(scrapy.Spider):
@@ -11,7 +11,7 @@ class AbercrombieAndFitchSpider(scrapy.Spider):
     custom_settings = {
         "ROBOTSTXT_OBEY": False,
     }
-    user_agent = BROSWER_DEFAULT
+    user_agent = BROWSER_DEFAULT
 
     start_urls = [
         'https://www.abercrombie.com/api/ecomm/a-ca/storelocator/search?shopRegion=["US", "CA", "UK", "EU", "AM"]'
