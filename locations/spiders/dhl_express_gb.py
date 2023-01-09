@@ -1,7 +1,7 @@
 import scrapy
 
 from locations.hours import DAYS, OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class DhlExpressGbSpider(scrapy.Spider):
@@ -15,7 +15,7 @@ class DhlExpressGbSpider(scrapy.Spider):
 
     def parse(self, response):
         for data in response.json():
-            item = GeojsonPointItem()
+            item = Feature()
             item["ref"] = data.get("DepotNumber")
             item["name"] = data.get("DepotName")
             item["postcode"] = data.get("DepotAddress", {}).get("Postcode")
