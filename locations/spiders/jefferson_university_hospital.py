@@ -1,7 +1,7 @@
 import scrapy
 
 from locations.dict_parser import DictParser
-from locations.user_agents import BROSWER_DEFAULT
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class JeffersonUniversityHospitalSpider(scrapy.Spider):
@@ -11,7 +11,7 @@ class JeffersonUniversityHospitalSpider(scrapy.Spider):
         "brand_wikidata": "Q59676202",
     }
     allowed_domains = ["jeffersonhealth.org", "jeffersonhealth-prod.searchstax.com"]
-    user_agent = BROSWER_DEFAULT
+    user_agent = BROWSER_DEFAULT
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def start_requests(self):

@@ -4,7 +4,7 @@ import scrapy
 
 from locations.hours import OpeningHours
 from locations.items import Feature
-from locations.user_agents import BROSWER_DEFAULT
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class PandaExpressSpider(scrapy.Spider):
@@ -12,7 +12,7 @@ class PandaExpressSpider(scrapy.Spider):
     item_attributes = {"brand": "Panda Express", "brand_wikidata": "Q1358690"}
     allowed_domains = ["pandaexpress.com"]
     custom_settings = {"ROBOTSTXT_OBEY": False, "RETRY_TIMES": 10}
-    user_agent = BROSWER_DEFAULT
+    user_agent = BROWSER_DEFAULT
 
     def start_requests(self):
         today = datetime.date.today().strftime("%Y%m%d")

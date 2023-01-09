@@ -1,7 +1,7 @@
 from scrapy.spiders import SitemapSpider
 
 from locations.structured_data_spider import StructuredDataSpider
-from locations.user_agents import BROSWER_DEFAULT
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class OriginalJoesSpider(SitemapSpider, StructuredDataSpider):
@@ -15,7 +15,7 @@ class OriginalJoesSpider(SitemapSpider, StructuredDataSpider):
         "DEFAULT_REQUEST_HEADERS": {
             "Accept-Encoding": "gzip, deflate, br",
             "Accept": "*/*",
-            "User-Agent": BROSWER_DEFAULT,
+            "User-Agent": BROWSER_DEFAULT,
             "Connection": "keep-alive",
         }
     }

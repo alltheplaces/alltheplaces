@@ -6,7 +6,7 @@ from scrapy.spiders import SitemapSpider
 
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
-from locations.user_agents import BROSWER_DEFAULT
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class GreyhoundSpider(SitemapSpider):
@@ -15,7 +15,7 @@ class GreyhoundSpider(SitemapSpider):
     allowed_domains = ["greyhound.com", "openair-california.airtrfx.com"]
     sitemap_urls = ["https://www.greyhound.com/en-us/sitemap43.xml"]
     sitemap_rules = [(r"/bus-station-[0-9]+", "parse")]
-    user_agent = BROSWER_DEFAULT
+    user_agent = BROWSER_DEFAULT
 
     def parse(self, response):
         url = "https://openair-california.airtrfx.com/hangar-service/v2/ghl/airports/search"
@@ -31,7 +31,7 @@ class GreyhoundSpider(SitemapSpider):
         headers = {
             "Content-Type": "application/json;charset=UTF-8",
             "Origin": "https://www.greyhound.com",
-            "User-Agent": BROSWER_DEFAULT,
+            "User-Agent": BROWSER_DEFAULT,
             "em-api-key": "HeQpRjsFI5xlAaSx2onkjc1HTK0ukqA1IrVvd5fvaMhNtzLTxInTpeYB1MK93pah",
         }
         station_id = re.findall("[0-9]+", response.url)[0]

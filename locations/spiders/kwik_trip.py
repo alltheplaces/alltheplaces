@@ -1,7 +1,7 @@
 import scrapy
 
 from locations.items import Feature
-from locations.user_agents import BROSWER_DEFAULT
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class KwikTripSpider(scrapy.Spider):
@@ -9,7 +9,7 @@ class KwikTripSpider(scrapy.Spider):
     item_attributes = {"brand": "Kwik Trip", "brand_wikidata": "Q6450420"}
     allowed_domains = ["www.kwiktrip.com"]
     download_delay = 0
-    user_agent = BROSWER_DEFAULT
+    user_agent = BROWSER_DEFAULT
     start_urls = ["https://www.kwiktrip.com/Maps-Downloads/Store-List"]
 
     def parse(self, response):

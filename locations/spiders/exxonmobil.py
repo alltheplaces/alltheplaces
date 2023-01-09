@@ -31,7 +31,7 @@ import scrapy
 
 from locations.items import GeojsonPointItem
 from locations.spiders.costacoffee_gb import yes_or_no
-from locations.user_agents import BROSWER_DEFAULT
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class CreateStartURLs:
@@ -152,7 +152,7 @@ class ExxonMobilSpider(scrapy.Spider):
     crawled_locations = set()
     allowed_domains = ["exxon.com"]
     start_urls = CreateStartURLs().get_urls()
-    user_agent = BROSWER_DEFAULT
+    user_agent = BROWSER_DEFAULT
 
     def parse(self, response):
         json_data = response.json()

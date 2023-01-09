@@ -4,7 +4,7 @@ import scrapy
 
 from locations.hours import OpeningHours
 from locations.items import Feature
-from locations.user_agents import BROSWER_DEFAULT
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class CanadianTireSpider(scrapy.spiders.SitemapSpider):
@@ -19,13 +19,13 @@ class CanadianTireSpider(scrapy.spiders.SitemapSpider):
         "ROBOTSTXT_OBEY": False,
         "DEFAULT_REQUEST_HEADERS": {
             "Host": "www.canadiantire.ca",
-            "User-Agent": BROSWER_DEFAULT,
+            "User-Agent": BROWSER_DEFAULT,
         },
     }
 
     def parse_store(self, response):
         headers = {
-            "User-Agent": BROSWER_DEFAULT,
+            "User-Agent": BROWSER_DEFAULT,
             "Host": "apim.canadiantire.ca",
             "baseSiteId": "CTR",
             "Ocp-Apim-Subscription-Key": "c01ef3612328420c9f5cd9277e815a0e",
