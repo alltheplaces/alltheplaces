@@ -45,14 +45,15 @@ def item_to_properties(item):
         props["ref"] = str(ref)
 
     # Add in the extra bits
-    extras = item.get("extras")
-    if extras:
-        props.update(extras)
+    if extras := item.get("extras"):
+        for key, value in extras.items():
+            if value:
+                # Only export populated values
+                props[key] = value
 
     # Bring in the optional stuff
     for map_from, map_to in mapping:
-        item_value = item.get(map_from)
-        if item_value:
+        if item_value := item.get(map_from):
             props[map_to] = item_value
 
     return props
@@ -62,8 +63,7 @@ def compute_hash(item):
     ref = str(item.get("ref") or uuid.uuid1()).encode("utf8")
     sha1 = hashlib.sha1(ref)
 
-    spider_name = item.get("extras", {}).get("@spider")
-    if spider_name:
+    if spider_name := item.get("extras", {}).get("@spider"):
         sha1.update(spider_name.encode("utf8"))
 
     return base64.urlsafe_b64encode(sha1.digest()).decode("utf8")

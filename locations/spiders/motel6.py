@@ -1,7 +1,7 @@
 import scrapy
 
 from locations.dict_parser import DictParser
-from locations.user_agents import BROSWER_DEFAULT
+from locations.user_agents import BROWSER_DEFAULT
 
 BRANDS = {"MS": "Motel 6", "SS": "Studio 6", "HS": "Hotel 6"}
 
@@ -11,7 +11,7 @@ class Motel6Spider(scrapy.Spider):
     item_attributes = {"brand": "Motel 6", "brand_wikidata": "Q2188884"}
     start_urls = ["https://www.motel6.com/content/g6-cache/property-summary.1.json"]
     download_delay = 0.5
-    user_agent = BROSWER_DEFAULT
+    user_agent = BROWSER_DEFAULT
 
     def parse(self, response):
         for hotel_id in response.json().keys():

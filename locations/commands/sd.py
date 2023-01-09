@@ -9,14 +9,14 @@ from scrapy.exceptions import UsageError
 from locations.linked_data_parser import LinkedDataParser
 from locations.microdata_parser import MicrodataParser
 from locations.structured_data_spider import StructuredDataSpider
-from locations.user_agents import BROSWER_DEFAULT
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class MySpider(StructuredDataSpider):
     name = "my_spider"
     start_urls = None
     item_attributes = {}
-    user_agent = BROSWER_DEFAULT
+    user_agent = BROWSER_DEFAULT
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def parse(self, response):

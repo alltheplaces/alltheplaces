@@ -3,7 +3,7 @@ import re
 from scrapy.spiders import SitemapSpider
 
 from locations.structured_data_spider import StructuredDataSpider
-from locations.user_agents import BROSWER_DEFAULT
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class AutoZoneSpider(SitemapSpider, StructuredDataSpider):
@@ -17,7 +17,7 @@ class AutoZoneSpider(SitemapSpider, StructuredDataSpider):
         "DEFAULT_REQUEST_HEADERS": {
             "Host": "www.autozone.com",
             "Accept": "*/*",
-            "User-Agent": BROSWER_DEFAULT,
+            "User-Agent": BROWSER_DEFAULT,
             "Connection": "keep-alive",
             "Accept-Encoding": "gzip, deflate, br",
         }

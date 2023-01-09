@@ -1,4 +1,5 @@
 import json
+import time
 
 from locations.hours import DAYS, DAYS_BG, DAYS_DE, OpeningHours, day_range, sanitise_day
 
@@ -8,6 +9,22 @@ def test_day_range():
         assert day_range(day, day) == [day]
     for day, next_day in zip(DAYS, DAYS[1:] + DAYS[:1]):
         assert sorted(day_range(next_day, day), key=DAYS.index) == DAYS
+
+
+def test_duplicates():
+    o = OpeningHours()
+    o.add_range("Mo", "07:00", "17:00")
+    o.add_range("Mo", "07:00", "17:00")
+
+    assert o.as_opening_hours() == "Mo 07:00-17:00"
+
+
+def test_times():
+    o = OpeningHours()
+    o.add_range("Mo", time.strptime("07:00", "%H:%M"), time.strptime("17:00", "%H:%M"))
+    o.add_range("Tu", "09:00", "19:00")
+
+    assert o.as_opening_hours() == "Mo 07:00-17:00; Tu 09:00-19:00"
 
 
 def test_two_ranges():
@@ -137,7 +154,7 @@ def test_ld_parse():
     assert o.as_opening_hours() == "Mo-Fr 09:00-11:00; Sa 12:00-14:00"
 
 
-def test_ld_parse_openingHours():
+def test_ld_parse_opening_hours():
     o = OpeningHours()
     o.from_linked_data(
         json.loads(
@@ -190,7 +207,7 @@ def test_ld_parse_openingHours():
     assert o.as_opening_hours() == "Mo-Th 09:00-12:00"
 
 
-def test_ld_parse_openingHours_days_3_chars():
+def test_ld_parse_opening_hours_days_3_chars():
     o = OpeningHours()
     o.from_linked_data(
         json.loads(
@@ -240,7 +257,7 @@ def test_ld_parse_openingHours_days_3_chars():
     assert o.as_opening_hours() == "Mo-Sa 10:00-19:00; Su 12:00-17:00"
 
 
-def test_ld_parse_openingHours_array():
+def test_ld_parse_opening_hours_array():
     o = OpeningHours()
     o.from_linked_data(
         json.loads(
@@ -262,7 +279,7 @@ def test_ld_parse_openingHours_array():
     assert o.as_opening_hours() == "Mo-Fr 10:00-19:00; Sa 10:00-22:00; Su 10:00-21:00"
 
 
-def test_ld_parse_openingHours_day_range():
+def test_ld_parse_opening_hours_day_range():
     o = OpeningHours()
     o.from_linked_data(
         json.loads(
@@ -277,7 +294,7 @@ def test_ld_parse_openingHours_day_range():
     assert o.as_opening_hours() == "Mo-Tu 09:00-17:00; Th-Su 09:00-17:00"
 
 
-def test_ld_parse_openingHours_array_with_commas():
+def test_ld_parse_opening_hours_array_with_commas():
     o = OpeningHours()
     o.from_linked_data(
         json.loads(

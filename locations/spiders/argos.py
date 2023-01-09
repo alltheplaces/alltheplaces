@@ -5,7 +5,7 @@ from scrapy.spiders import SitemapSpider
 
 from locations.hours import OpeningHours
 from locations.items import Feature
-from locations.user_agents import BROSWER_DEFAULT
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class ArgosSpider(SitemapSpider):
@@ -15,7 +15,7 @@ class ArgosSpider(SitemapSpider):
     download_delay = 0.5
     sitemap_urls = ["https://www.argos.co.uk/stores_sitemap.xml"]
     sitemap_rules = [(r"https://www.argos.co.uk/stores/([\d]+)-([\w-]+)", "parse")]
-    user_agent = BROSWER_DEFAULT
+    user_agent = BROWSER_DEFAULT
 
     def parse(self, response):
         data = re.findall(r"window.INITIAL_STATE =[^<]+", response.text)

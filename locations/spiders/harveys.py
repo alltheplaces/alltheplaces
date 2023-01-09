@@ -1,7 +1,7 @@
 from scrapy.spiders import SitemapSpider
 
 from locations.structured_data_spider import StructuredDataSpider
-from locations.user_agents import BROSWER_DEFAULT
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class HarveysSpider(SitemapSpider, StructuredDataSpider):
@@ -11,4 +11,4 @@ class HarveysSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://www.harveys.ca/en/locations/sitemap.xml"]
     sitemap_rules = [(r"/locations/[-\w]+/[-\w]+/[-\w]+", "parse_sd")]
     wanted_types = ["Restaurant"]
-    user_agent = BROSWER_DEFAULT
+    user_agent = BROWSER_DEFAULT

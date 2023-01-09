@@ -1,7 +1,7 @@
 from scrapy.spiders import SitemapSpider
 
 from locations.structured_data_spider import StructuredDataSpider
-from locations.user_agents import BROSWER_DEFAULT
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class EastSideMariosSpider(SitemapSpider, StructuredDataSpider):
@@ -11,5 +11,5 @@ class EastSideMariosSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://www.eastsidemarios.com/en/locations/sitemap.xml"]
     sitemap_rules = [(r"/locations/[-\w]+/[-\w]+", "parse_sd")]
     wanted_types = ["Restaurant"]
-    user_agent = BROSWER_DEFAULT
+    user_agent = BROWSER_DEFAULT
     requires_proxy = True

@@ -4,7 +4,7 @@ import scrapy
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
-from locations.user_agents import BROSWER_DEFAULT
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class YvesRocherEsSpider(scrapy.Spider):
@@ -15,7 +15,7 @@ class YvesRocherEsSpider(scrapy.Spider):
     }
     allowed_domains = ["yves-rocher.es"]
     start_urls = ["https://www.yves-rocher.es/filialen-und-kosmetik-institute/SL"]
-    user_agent = BROSWER_DEFAULT
+    user_agent = BROWSER_DEFAULT
 
     def parse(self, response):
         urls = response.xpath('//div[@id="all-store-container"]//a/@href')
