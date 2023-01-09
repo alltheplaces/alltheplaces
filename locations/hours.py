@@ -152,7 +152,7 @@ def sanitise_day(day: str, days: {} = DAYS_EN) -> str:
 
 class OpeningHours:
     def __init__(self):
-        self.day_hours = defaultdict(list)
+        self.day_hours = defaultdict(set)
 
     def add_range(self, day, open_time, close_time, time_format="%H:%M"):
         day = sanitise_day(day)
@@ -173,7 +173,7 @@ class OpeningHours:
         if not isinstance(close_time, time.struct_time):
             close_time = time.strptime(close_time, time_format)
 
-        self.day_hours[day].append((open_time, close_time))
+        self.day_hours[day].add((open_time, close_time))
 
     def as_opening_hours(self):
         day_groups = []
