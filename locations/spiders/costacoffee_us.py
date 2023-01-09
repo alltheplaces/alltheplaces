@@ -4,7 +4,7 @@ import re
 import scrapy
 from scrapy import Selector
 
-from locations.categories import apply_category, Categories
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
@@ -20,7 +20,7 @@ class CostaCoffeeUSSpider(scrapy.Spider):
         start = script.index("jsonLocations: ") + len("jsonLocations: ")
         stop = script.index("imageLocations")
 
-        locations = script[start:stop].strip().strip(',')
+        locations = script[start:stop].strip().strip(",")
         items = json.loads(locations)["items"]
 
         for store in items:
