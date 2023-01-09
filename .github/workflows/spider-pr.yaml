@@ -42,8 +42,14 @@ jobs:
         pr_file_changes=$(curl -sL --header 'authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' "https://api.github.com/repos/alltheplaces/alltheplaces/pulls/${{ github.event.number }}/files")
         (>&2 echo "PR response: ${pr_file_changes}")
         SPIDERS=$(echo $pr_file_changes | jq -r '.[] | select(.status != "removed") | .filename')
+        retval=$?
         if [ ! $retval -eq 0 ]; then
             (>&2 echo "checking file changes failed. response was ${pr_file_changes}")
+            exit 1
+        fi
+
+        if [ $(wc -l <<< "$SPIDERS") -gt 5 ]; then
+            (>&2 echo "refusing to run on more than 5 spiders")
             exit 1
         fi
 
