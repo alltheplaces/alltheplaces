@@ -33,7 +33,7 @@ class ColesAUSpider(scrapy.Spider):
                 "ref": i["storeId"],
                 "name": i["brandName"],
                 "addr_full": i["address"],
-                "city": i["suburb"],
+                "suburb": i["suburb"],
                 "state": i["state"],
                 "postcode": i["postcode"],
                 "country": "AU",
