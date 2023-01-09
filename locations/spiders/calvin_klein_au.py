@@ -22,7 +22,7 @@ class CalvinKleinAUSpider(Spider):
             item["name"] = location["n"]
             item["addr_full"] = clean_address(location.get("a"))
             item["street_address"] = location["a"][0]
-            item["city"] = location["a"][1]
+            item["suburb"] = location["a"][1]
             item["state"] = location["a"][2]
             item["postcode"] = location["a"][3]
             item["website"] = f'https://www.calvinklein.com.au{location["u"]}'
