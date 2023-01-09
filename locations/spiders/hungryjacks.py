@@ -19,7 +19,7 @@ class HungryJacksSpider(scrapy.Spider):
                 "ref": i["store_id"],
                 "name": i["name"],
                 "addr_full": i["location"]["address"],
-                "city": i["location"]["suburb"],
+                "suburb": i["location"]["suburb"],
                 "state": i["location"]["state"],
                 "postcode": i["location"]["postcode"],
                 "country": "AU",
