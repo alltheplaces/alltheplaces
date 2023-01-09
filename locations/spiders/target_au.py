@@ -38,7 +38,7 @@ class TargetAUSpider(scrapy.Spider):
                 "addr_full": " ".join(
                     s.strip() for s in body.xpath('//*[@itemprop="streetAddress"]//text()').extract()
                 ),
-                "city": body.xpath('//*[@itemprop="addressLocality"]/text()').get(),
+                "suburb": body.xpath('//*[@itemprop="addressLocality"]/text()').get(),
                 "state": body.xpath('//*[@itemprop="addressRegion"]/text()').get(),
                 "postcode": body.xpath('//*[@itemprop="postalCode"]/text()').get(),
                 "phone": body.xpath("//p[last()-1]/text()").get(),
