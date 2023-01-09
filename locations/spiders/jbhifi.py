@@ -45,7 +45,7 @@ class JbHifiSpider(scrapy.Spider):
                         ],
                     )
                 ),
-                "city": store["storeAddress"]["Suburb"],
+                "suburb": store["storeAddress"]["Suburb"],
                 "state": store["storeAddress"]["State"],
                 "postcode": store["storeAddress"]["Postcode"],
                 "country": "AU",
