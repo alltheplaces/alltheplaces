@@ -41,6 +41,7 @@ class Categories(Enum):
     SHOP_DRY_CLEANING = {"shop": "dry_cleaning"}
     SHOP_ELECTRONICS = {"shop": "electronics"}
     SHOP_FLORIST = {"shop": "florist"}
+    SHOP_FUNERAL_DIRECTORS = {"shop": "funeral_directors"}
     SHOP_FURNITURE = {"shop": "furniture"}
     SHOP_GARDEN_CENTRE = {"shop": "garden_centre"}
     SHOP_GIFT = {"shop": "gift"}
