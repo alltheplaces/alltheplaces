@@ -21,13 +21,13 @@ class WoolworthsAUSpider(scrapy.Spider):
 
             i["street_address"] = ", ".join(filter(None, [i["AddressLine1"], i["AddressLine2"]]))
             i["ref"] = i.pop("StoreNo")
-            i["city"] = i.pop("Suburb")
+            i["suburb"] = i.pop("Suburb")
 
             item = DictParser.parse(i)
 
             item["website"] = (
                 "https://www.woolworths.com.au/shop/storelocator/"
-                + "-".join([item["state"], item["city"], item["ref"], i["Division"]]).lower()
+                + "-".join([item["state"], item["suburb"], item["ref"], i["Division"]]).lower()
             )
 
             # TODO: types needs some work, NSI seems out of date too
