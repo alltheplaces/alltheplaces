@@ -29,7 +29,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 from locations.spiders.costacoffee_gb import yes_or_no
 from locations.user_agents import BROSWER_DEFAULT
 
@@ -189,7 +189,7 @@ class ExxonMobilSpider(scrapy.Spider):
                     },
                     **self.brand(location),
                 }
-                yield GeojsonPointItem(**properties)
+                yield Feature(**properties)
 
     def brand(self, location):
         if "mobil" in location["BrandingImage"]:
