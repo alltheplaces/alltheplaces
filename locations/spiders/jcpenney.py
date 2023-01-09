@@ -8,7 +8,11 @@ from locations.user_agents import BROSWER_DEFAULT
 
 class JCPenneySpider(CrawlSpider, StructuredDataSpider):
     name = "jcpenney"
-    item_attributes = {"brand": "JCPenney", "brand_wikidata": "Q920037", "extras": Categories.DEPARTMENT_STORE.value}
+    item_attributes = {
+        "brand": "JCPenney",
+        "brand_wikidata": "Q920037",
+        "extras": Categories.SHOP_DEPARTMENT_STORE.value,
+    }
     allowed_domains = ["jcpenney.com"]
     start_urls = ["https://jcpenney.com/locations/"]
     rules = [

@@ -1,5 +1,3 @@
-import itertools
-import json
 import re
 
 from scrapy.spiders import SitemapSpider
@@ -17,18 +15,18 @@ class LandiCHSpider(SitemapSpider):
     sitemap_rules = [(r"https://www\.landi\.ch/places/de/", "parse")]
     categories = {
         "2": Categories.SHOP_MOTORCYCLE,
-        "auto": Categories.CAR_REPAIR,
-        "autohilfe": Categories.CAR_REPAIR,
-        "automobile": Categories.CAR_REPAIR,
-        "autotechnik": Categories.CAR_REPAIR,
+        "auto": Categories.SHOP_CAR_REPAIR,
+        "autohilfe": Categories.SHOP_CAR_REPAIR,
+        "automobile": Categories.SHOP_CAR_REPAIR,
+        "autotechnik": Categories.SHOP_CAR_REPAIR,
         "bikecenter": Categories.SHOP_MOTORCYCLE,
         "bikes": Categories.SHOP_MOTORCYCLE,
         "bimoto": Categories.SHOP_MOTORCYCLE_REPAIR,
         "cycles": Categories.SHOP_MOTORCYCLE,
-        "fahrzeugtechnik": Categories.CAR_REPAIR,
-        "garage": Categories.CAR_REPAIR,
+        "fahrzeugtechnik": Categories.SHOP_CAR_REPAIR,
+        "garage": Categories.SHOP_CAR_REPAIR,
         "laden": Categories.SHOP_SUPERMARKET,
-        "landgarage": Categories.CAR_REPAIR,
+        "landgarage": Categories.SHOP_CAR_REPAIR,
         "landi": Categories.SHOP_SUPERMARKET,
         "mofag": Categories.SHOP_MOTORCYCLE,
         "moto": Categories.SHOP_MOTORCYCLE,
@@ -39,12 +37,12 @@ class LandiCHSpider(SitemapSpider):
         "motorrad": Categories.SHOP_MOTORCYCLE,
         "motos": Categories.SHOP_MOTORCYCLE,
         "motoshop": Categories.SHOP_MOTORCYCLE,
-        "pneu": Categories.CAR_REPAIR,
+        "pneu": Categories.SHOP_CAR_REPAIR,
         "probike": Categories.SHOP_MOTORCYCLE,
         "rad": Categories.SHOP_MOTORCYCLE,
-        "reincar": Categories.CAR_REPAIR,
+        "reincar": Categories.SHOP_CAR_REPAIR,
         "roues": Categories.SHOP_MOTORCYCLE,
-        "schlossgarage": Categories.CAR_REPAIR,
+        "schlossgarage": Categories.SHOP_CAR_REPAIR,
         "toeffklinik": Categories.SHOP_MOTORCYCLE_REPAIR,
         "zweirad": Categories.SHOP_MOTORCYCLE,
         "zweiradtechnik": Categories.SHOP_MOTORCYCLE_REPAIR,
