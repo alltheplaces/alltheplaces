@@ -48,6 +48,11 @@ jobs:
             exit 1
         fi
 
+        if [ $(wc -l <<< "$SPIDERS") -gt 5 ]; then
+            (>&2 echo "refusing to run on more than 5 spiders")
+            exit 1
+        fi
+
         RUN_DIR="${GITHUB_WORKSPACE}/output"
         EXIT_CODE=0
         for file_changed in $SPIDERS
