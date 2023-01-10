@@ -2,7 +2,7 @@ import re
 
 from scrapy.spiders import SitemapSpider
 
-from locations.categories import apply_category, Categories
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
@@ -14,20 +14,21 @@ class FederalSavingsBankSpider(SitemapSpider):
 
     def parse_store(self, response):
         info = response.xpath(
-            '//div[@class="banner-content l-banner__col col-12 col-lg-7 order-2 order-lg-1"]/p[2]/text()')
+            '//div[@class="banner-content l-banner__col col-12 col-lg-7 order-2 order-lg-1"]/p[2]/text()'
+        )
 
-        intro_text = [line.extract().strip('\n') for line in info]
-        if intro_text[0].startswith('('):
+        intro_text = [line.extract().strip("\n") for line in info]
+        if intro_text[0].startswith("("):
             intro_text = intro_text[1:]
 
-        state_city = intro_text[1].split(', ')[1]
+        state_city = intro_text[1].split(", ")[1]
         properties = {
             "ref": re.search(r".+/(.+?)/?(?:\.html|$)", response.url).group(1),
             "name": response.xpath("//h1/text()").extract(),
             "street_address": intro_text[0],
-            "city": intro_text[1].split(',')[0],
-            "state": state_city.split(' ')[0],
-            "postcode": state_city.split(' ')[1],
+            "city": intro_text[1].split(",")[0],
+            "state": state_city.split(" ")[0],
+            "postcode": state_city.split(" ")[1],
             "country": "US",
             "website": response.url,
         }
