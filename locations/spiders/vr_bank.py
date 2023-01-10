@@ -1,7 +1,8 @@
 import re
 
-import scrapy
+from scrapy.spiders import SitemapSpider
 
+from locations.categories import Categories
 from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.user_agents import BROWSER_DEFAULT
@@ -17,12 +18,13 @@ DAY_MAPPING = {
 }
 
 
-class VRBankSpider(scrapy.Spider):
+class VRBankSpider(SitemapSpider):
     name = "vr_bank"
     allowed_domains = ["www.vr.de"]
-    start_urls = ["https://www.vr.de/service/filialen-a-z/a.html"]
+    sitemap_urls = ["https://www.vr.de/standorte.sitemap.xml"]
+    sitemap_rules = [(r"-\d+\.html$", "parse_details")]
     user_agent = BROWSER_DEFAULT
-    item_attributes = {"country": "DE"}
+    item_attributes = {"country": "DE", "extras": Categories.BANK.value}
 
     def process_hours(self, store_hours):
         opening_hours = OpeningHours()
@@ -101,20 +103,3 @@ class VRBankSpider(scrapy.Spider):
             properties["opening_hours"] = self.process_hours(hours)
 
         yield Feature(**properties)
-
-    def parse(self, response):
-        index = response.xpath('//div[has-class("module module-linklist ym-clearfix")]/ul/li/a/@href').getall()
-
-        for page in index:
-            yield scrapy.Request(
-                url=page,
-                callback=self.parse_links,
-            )
-
-    def parse_links(self, response):
-        list = response.xpath('//div[has-class("module module-teaserlist ym-clearfix")]/div/a/@href').getall()
-        for item in list:
-            yield scrapy.Request(
-                url=item,
-                callback=self.parse_details,
-            )

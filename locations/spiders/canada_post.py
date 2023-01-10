@@ -2,6 +2,7 @@ import re
 
 import scrapy
 
+from locations.categories import Categories
 from locations.geo import point_locations
 from locations.hours import OpeningHours
 from locations.items import Feature
@@ -9,7 +10,7 @@ from locations.items import Feature
 
 class CanadaPostSpider(scrapy.Spider):
     name = "canadapost"
-    item_attributes = {"brand": "Canada Post", "brand_wikidata": "Q1032001"}
+    item_attributes = {"brand": "Canada Post", "brand_wikidata": "Q1032001", "extras": Categories.POST_OFFICE.value}
     allowed_domains = ["canadapost-postescanada.ca"]
 
     def start_requests(self):
