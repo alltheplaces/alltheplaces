@@ -4,6 +4,7 @@ import re
 import scrapy
 from geonamescache import GeonamesCache
 
+from locations.categories import Categories
 from locations.hours import OpeningHours
 from locations.items import Feature
 
@@ -11,6 +12,7 @@ from locations.items import Feature
 class CreditUnionSpider(scrapy.Spider):
     name = "creditunion"
     download_delay = 0.5
+    item_attributes = {"extras": Categories.BANK.value}
     allowed_domains = ["co-opcreditunions.org"]
 
     def start_requests(self):

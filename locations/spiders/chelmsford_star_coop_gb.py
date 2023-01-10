@@ -30,10 +30,10 @@ class ChelmsfordStarCoopGBSpider(Spider):
             if any(cat["name"] == "Food" for cat in store["categories"]):
                 apply_category(Categories.SHOP_SUPERMARKET, item)
             elif any(cat["name"] == "Funeral" for cat in store["categories"]):
-                apply_category(Categories.FUNERAL_DIRECTORS, item)
+                apply_category(Categories.SHOP_FUNERAL_DIRECTORS, item)
             elif any(cat["name"] == "Travel" for cat in store["categories"]):
-                apply_category(Categories.SHOP_TRAVEL, item)
+                apply_category(Categories.SHOP_TRAVEL_AGENCY, item)
             elif any(cat["name"] == "Department store (Quadrant)" for cat in store["categories"]):
-                apply_category(Categories.DEPARTMENT_STORE, item)
+                apply_category(Categories.SHOP_DEPARTMENT_STORE, item)
 
             yield item
