@@ -1,34 +1,42 @@
 import re
 
-import scrapy
+from scrapy.spiders import SitemapSpider
 
+from locations.categories import apply_category, Categories
 from locations.items import Feature
 
 
-class FederalSavingsBankSpider(scrapy.Spider):
+class FederalSavingsBankSpider(SitemapSpider):
     name = "federal_savings_bank"
     allowed_domains = ["thefederalsavingsbank.com"]
-    start_urls = [
-        "https://www.thefederalsavingsbank.com/sitemap.xml",
-    ]
-
-    def parse(self, response):
-        response.selector.remove_namespaces()
-        for url in response.xpath("//loc/text()").extract():
-            if "/our-locations/" in url:
-                yield scrapy.Request(url, callback=self.parse_store)
+    sitemap_urls = ["https://www.thefederalsavingsbank.com/robots.txt"]
+    sitemap_rules = [(r"location\/.*\/$", "parse_store")]
 
     def parse_store(self, response):
+        info = response.xpath(
+            '//div[@class="banner-content l-banner__col col-12 col-lg-7 order-2 order-lg-1"]/p[2]/text()')
+
+        intro_text = [line.extract().strip('\n') for line in info]
+        if intro_text[0].startswith('('):
+            intro_text = intro_text[1:]
+
+        state_city = intro_text[1].split(', ')[1]
         properties = {
             "ref": re.search(r".+/(.+?)/?(?:\.html|$)", response.url).group(1),
-            "name": response.xpath("//h1/text()").extract_first(),
-            "addr_full": response.xpath('//*[@class="lpo_street"]/text()').extract_first(),
-            "city": response.xpath('//*[@class="lpo_city"]/text()').extract_first(),
-            "state": response.xpath('//*[@class="lpo_state"]/text()').extract_first(),
-            "postcode": response.xpath('//*[@class="lpo_zip"]/text()').extract_first(),
+            "name": response.xpath("//h1/text()").extract(),
+            "street_address": intro_text[0],
+            "city": intro_text[1].split(',')[0],
+            "state": state_city.split(' ')[0],
+            "postcode": state_city.split(' ')[1],
             "country": "US",
-            "phone": response.xpath('//*[@class="lpo_phone"]/a/text()').extract_first(),
             "website": response.url,
         }
+        try:
+            properties["phone"] = intro_text[2]
+        except IndexError:
+            pass
 
-        yield Feature(**properties)
+        item = Feature(**properties)
+        apply_category(Categories.BANK, item)
+
+        yield item
