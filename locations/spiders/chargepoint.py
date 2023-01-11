@@ -146,9 +146,9 @@ class ChargePointSpider(scrapy.Spider):
                 "lat": summary["lat"],
                 "lon": summary["lon"],
                 "name": " ".join(summary["station_name"]),
-                "city": summary["address"]["city"],
-                "state": summary["address"]["state_name"],
-                "street_address": summary["address"]["address1"],
+                "city": summary.get("address", {}).get("city"),
+                "state": summary.get("address", {}).get("state_name"),
+                "street_address": summary.get("address", {}).get("address1"),
             }
 
             apply_category(Categories.CHARGING_STATION, properties)
