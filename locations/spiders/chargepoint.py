@@ -145,7 +145,7 @@ class ChargePointSpider(scrapy.Spider):
                 "ref": summary["device_id"],
                 "lat": summary["lat"],
                 "lon": summary["lon"],
-                "name": " ".join(summary.get("station_name")) or None,
+                "name": " ".join(summary.get("station_name", [])) or None,
                 "city": summary.get("address", {}).get("city"),
                 "state": summary.get("address", {}).get("state_name"),
                 "street_address": summary.get("address", {}).get("address1"),
