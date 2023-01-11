@@ -39,6 +39,6 @@ class FederalSavingsBankSpider(SitemapSpider):
             pass
 
         item = Feature(**properties)
-        apply_category(Categories.BANK, item)
+        apply_category(Categories.OFFICE_FINANCIAL, item)
 
         yield item
