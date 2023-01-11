@@ -1,32 +1,18 @@
 import json
 
-from scrapy.linkextractors import LinkExtractor
-from scrapy.spiders import CrawlSpider, Rule
+from scrapy.spiders import SitemapSpider
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
 
-class WalmartSpider(CrawlSpider):
+class WalmartSpider(SitemapSpider):
     name = "walmart"
     item_attributes = {"brand": "Walmart", "brand_wikidata": "Q483551", "country": "US"}
     allowed_domains = ["walmart.com"]
     download_delay = 5
-    start_urls = ["https://www.walmart.com/store/directory"]
-    rules = [
-        Rule(
-            LinkExtractor(
-                allow=[
-                    r"https:\/\/www\.walmart\.com\/store\/directory\/\w{2}$",
-                    r"https:\/\/www\.walmart\.com\/store\/directory\/\w{2}\/[-.\w]+$",
-                ]
-            )
-        ),
-        Rule(
-            LinkExtractor(allow=r"https:\/\/www\.walmart\.com\/store\/\d+$"),
-            callback="parse_store",
-        ),
-    ]
+    sitemap_urls = ["https://www.walmart.com/sitemap_store_main.xml"]
+    sitemap_rules = [("", "parse_store")]
 
     def store_hours(self, store):
         if store.get("open24Hours") is True:
