@@ -8,6 +8,7 @@ from locations.items import Feature
 
 class FederalSavingsBankSpider(SitemapSpider):
     name = "federal_savings_bank"
+    item_attributes = {"brand": "Federal Savings Bank", "brand_wikidata": "Q116161036"}
     allowed_domains = ["thefederalsavingsbank.com"]
     sitemap_urls = ["https://www.thefederalsavingsbank.com/robots.txt"]
     sitemap_rules = [(r"location\/.*\/$", "parse_store")]
