@@ -17,7 +17,4 @@ class TotalEnergiesSpider(WoosmapSpider):
     def parse_item(self, item, feature, **kwargs):
         item["website"] = f'https://store.totalenergies.fr/en_EN/{item["ref"]}'
 
-        # They seem to have flipped their lat and lon
-        item["lat"], item["lon"] = item["lon"], item["lat"]
-
         yield item
