@@ -78,6 +78,8 @@ class Categories(Enum):
 
     OFFICE_FINANCIAL = {"office": "financial"}
 
+    OFFICE_FINANCIAL = {"office": "financial"}
+
     ATM = {"amenity": "atm"}
     BANK = {"amenity": "bank"}
     BUREAU_DE_CHANGE = {"amenity": "bureau_de_change"}
