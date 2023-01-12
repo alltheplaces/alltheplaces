@@ -3,11 +3,7 @@ import scrapy
 from locations.hours import OpeningHours
 from locations.items import Feature
 
-DAY_MAPPING = {
-    0: "Mo-Fr",
-    1: "Sa",
-    2: "Su"
-}
+DAY_MAPPING = {0: "Mo-Fr", 1: "Sa", 2: "Su"}
 
 
 class TechnomarketSpider(scrapy.Spider):
@@ -34,8 +30,8 @@ class TechnomarketSpider(scrapy.Spider):
             for index, day in store["wh"]:
                 oh.add_range(
                     DAY_MAPPING[index],
-                    day.split(' до ')[0],
-                    day.split(' до ')[1],
+                    day.split(" до ")[0],
+                    day.split(" до ")[1],
                     "%H:%M",
                 )
 
