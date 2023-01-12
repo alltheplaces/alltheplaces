@@ -17,7 +17,7 @@ class WoosmapSpider(Spider):
                 item = DictParser.parse(feature["properties"])
 
                 item["street_address"] = ", ".join(filter(None, feature["properties"]["address"]["lines"]))
-                item["lon"], item["lat"] = feature["geometry"]["coordinates"]
+                item["geometry"] = feature["geometry"]
 
                 oh = OpeningHours()
                 for day, rules in feature["properties"].get("opening_hours", {}).get("usual", {}).items():
@@ -31,7 +31,7 @@ class WoosmapSpider(Spider):
                         oh.add_range(DAYS[int(day) - 1], start, end)
                 item["opening_hours"] = oh.as_opening_hours()
 
-                yield from self.parse_item(item, feature)
+                yield from self.parse_item(item, feature) or []
 
         if pagination := response.json()["pagination"]:
             if pagination["page"] < pagination["pageCount"]:
