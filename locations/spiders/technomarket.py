@@ -15,7 +15,7 @@ class TechnomarketSpider(scrapy.Spider):
     def parse(self, response):
         data = response.json()
 
-        for store in data["response"]:
+        for store in data:
             item = Feature()
             item["ref"] = store["code"]
             item["name"] = store["name"]
