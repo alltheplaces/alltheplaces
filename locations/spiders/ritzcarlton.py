@@ -5,10 +5,10 @@ import scrapy
 from locations.linked_data_parser import LinkedDataParser
 
 
-class RitzcarltonSpider(scrapy.Spider):
+class RitzCarltonSpider(scrapy.Spider):
     name = "ritzcarlton"
     item_attributes = {
-        "brand": "THE RITZ-CARLTON",
+        "brand": "The Ritz Carlton",
         "brand_wikidata": "Q782200",
     }
     start_urls = ["https://www.ritzcarlton.com/en/hotels"]
