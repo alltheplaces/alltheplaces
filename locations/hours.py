@@ -171,7 +171,7 @@ class OpeningHours:
         if day not in DAYS:
             raise ValueError(f"day must be one of {DAYS}, not {day!r}")
 
-        if open_time is None or close_time is None:
+        if not open_time or not close_time:
             return
         if isinstance(open_time, str):
             if open_time.lower() == "closed":
@@ -199,7 +199,7 @@ class OpeningHours:
                     time.strftime("%H:%M", h[0]),
                     time.strftime("%H:%M", h[1]).replace("23:59", "24:00"),
                 )
-                for h in self.day_hours[day]
+                for h in sorted(self.day_hours[day])
             )
 
             if not this_day_group:
