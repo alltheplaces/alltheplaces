@@ -27,7 +27,7 @@ class TechnomarketSpider(scrapy.Spider):
             item["website"] = "https://www.technomarket.bg/" + store["url"]["city"] + "/" + store["url"]["store"]
 
             oh = OpeningHours()
-            for index, day in store["wh"]:
+            for index, day in enumerate(store["wh"]):
                 oh.add_range(
                     DAY_MAPPING[index],
                     day.split(" до ")[0],
