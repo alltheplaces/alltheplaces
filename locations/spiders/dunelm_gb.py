@@ -37,7 +37,6 @@ class DunelmGB(Spider):
 
             item["opening_hours"] = oh.as_opening_hours()
 
-            item["email"] = store["email"]
             item["extras"] = {"storeType": store.get("storeType")}
 
             yield item
