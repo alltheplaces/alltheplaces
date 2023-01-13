@@ -1,9 +1,7 @@
 import scrapy
 
-from locations.hours import OpeningHours
+from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
-
-DAY_MAPPING = {0: "Mo-Fr", 1: "Sa", 2: "Su"}
 
 
 class TechnomarketSpider(scrapy.Spider):
@@ -27,13 +25,15 @@ class TechnomarketSpider(scrapy.Spider):
             item["website"] = "https://www.technomarket.bg/" + store["url"]["city"] + "/" + store["url"]["store"]
 
             oh = OpeningHours()
-            for index, day in enumerate(store["wh"]):
-                oh.add_range(
-                    DAY_MAPPING[index],
-                    day.split(" до ")[0],
-                    day.split(" до ")[1],
-                    "%H:%M",
-                )
+            for day in DAYS[0:5]:
+                from_str, to_str = store["wh"][0].split(" до ")
+                oh.add_range(day, from_str, to_str, "%H:%M")
+            for day in DAYS[5:6]:
+                from_str, to_str = store["wh"][1].split(" до ")
+                oh.add_range(day, from_str, to_str, "%H:%M")
+            for day in DAYS[6:7]:
+                from_str, to_str = store["wh"][2].split(" до ")
+                oh.add_range(day, from_str, to_str, "%H:%M")
 
             item["opening_hours"] = oh.as_opening_hours()
 
