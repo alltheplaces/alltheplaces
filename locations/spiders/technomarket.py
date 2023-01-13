@@ -27,12 +27,26 @@ class TechnomarketSpider(scrapy.Spider):
 
             oh = OpeningHours()
             for day in DAYS[0:5]:
+                if store["wh"][0] == "Почивен ден":
+                    # "day off" = closed
+                    continue
+
                 from_str, to_str = store["wh"][0].split(" до ")
                 oh.add_range(day, from_str.strip(), to_str.strip(), "%H:%M")
+
             for day in DAYS[5:6]:
+                if store["wh"][1] == "Почивен ден":
+                    # "day off" = closed
+                    continue
+
                 from_str, to_str = store["wh"][1].split(" до ")
                 oh.add_range(day, from_str.strip(), to_str.strip(), "%H:%M")
+
             for day in DAYS[6:7]:
+                if store["wh"][1] == "Почивен ден":
+                    # "day off" = closed
+                    continue
+
                 from_str, to_str = store["wh"][2].split(" до ")
                 oh.add_range(day, from_str.strip(), to_str.strip(), "%H:%M")
 
