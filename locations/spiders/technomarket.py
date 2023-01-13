@@ -18,7 +18,7 @@ class TechnomarketSpider(scrapy.Spider):
             item = Feature()
             item["ref"] = store["code"]
             item["name"] = store["name"]
-            item["addr_full"] = store["address"].strip()
+            item["street_address"] = store["address"].strip()
             item["lat"] = store["latLng"]["lat"]
             item["lon"] = store["latLng"]["lng"]
             item["phone"] = store["tel"]
