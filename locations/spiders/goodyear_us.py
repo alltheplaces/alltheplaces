@@ -1,8 +1,9 @@
 import json
+
 from scrapy.spiders import SitemapSpider
 
-from locations.structured_data_spider import StructuredDataSpider
 from locations.hours import OpeningHours
+from locations.structured_data_spider import StructuredDataSpider
 
 
 class GoodYearSpider(SitemapSpider, StructuredDataSpider):
@@ -15,20 +16,16 @@ class GoodYearSpider(SitemapSpider, StructuredDataSpider):
     sitemap_rules = [("/tire-shop/", "parse_sd"), ("/shop/", "parse_sd")]
 
     def post_process_item(self, item, response, ld_data):
-        ldjson = response.xpath('//script[@type="application/ld+json"]/text()[contains(.,"LocalBusiness")]').get()
-        data = json.loads(ldjson)
-        item["lat"] = data.get("areaServed", {}).get("geoMidpoint", {}).get("latitude")
-        item["lon"] = data.get("areaServed", {}).get("geoMidpoint", {}).get("longitude")
+        item["lat"] = ld_data.get("areaServed", {}).get("geoMidpoint", {}).get("latitude")
+        item["lon"] = ld_data.get("areaServed", {}).get("geoMidpoint", {}).get("longitude")
+
+        if not item["lat"]:
+            coords = json.loads(response.xpath("//@data-location").get())
+            item["lat"] = coords.get("latitude")
+            item["lon"] = coords.get("longitude")
 
         oh = OpeningHours()
-        if days := data.get("openingHoursSpecification"):
-            for day in days:
-                oh.add_range(
-                    day=day.get("dayOfWeek"),
-                    open_time=day.get("opens"),
-                    close_time=day.get("closes"),
-                    time_format="%I:%M %p",
-                )
-            item["opening_hours"] = oh.as_opening_hours()
+        oh.from_linked_data(ld_data, time_format="%I:%M %p")
+        item["opening_hours"] = oh.as_opening_hours()
 
         yield item
