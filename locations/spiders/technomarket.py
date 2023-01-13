@@ -7,7 +7,7 @@ DAY_MAPPING = {0: "Mo-Fr", 1: "Sa", 2: "Su"}
 
 
 class TechnomarketSpider(scrapy.Spider):
-    name = "Техномаркет"
+    name = "technomarket_bg"
     item_attributes = {"brand": "Техномаркет", "brand_wikidata": "Q7692633", "country": "BG"}
     allowed_domains = ["www.technomarket.bg"]
     start_urls = ["https://www.technomarket.bg/api/frontend/stores"]
