@@ -43,7 +43,7 @@ class TechnomarketSpider(scrapy.Spider):
                 oh.add_range(day, from_str.strip(), to_str.strip(), "%H:%M")
 
             for day in DAYS[6:7]:
-                if store["wh"][1] == "Почивен ден":
+                if store["wh"][2] == "Почивен ден":
                     # "day off" = closed
                     continue
 
