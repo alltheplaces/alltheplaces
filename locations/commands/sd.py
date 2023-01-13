@@ -2,11 +2,9 @@ import json
 import os
 import pathlib
 
-import scrapy
 from scrapy.commands import BaseRunSpiderCommand
 from scrapy.exceptions import UsageError
 
-from locations.linked_data_parser import LinkedDataParser
 from locations.microdata_parser import MicrodataParser
 from locations.structured_data_spider import StructuredDataSpider
 from locations.user_agents import BROWSER_DEFAULT
