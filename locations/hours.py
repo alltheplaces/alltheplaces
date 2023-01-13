@@ -199,7 +199,7 @@ class OpeningHours:
                     time.strftime("%H:%M", h[0]),
                     time.strftime("%H:%M", h[1]).replace("23:59", "24:00"),
                 )
-                for h in self.day_hours[day]
+                for h in sorted(self.day_hours[day])
             )
 
             if not this_day_group:
