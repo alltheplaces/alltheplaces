@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import scrapy
 
 from locations.hours import DAYS, OpeningHours
@@ -26,14 +27,14 @@ class TechnomarketSpider(scrapy.Spider):
 
             oh = OpeningHours()
             for day in DAYS[0:5]:
-                from_str, to_str = store["wh"][0].split("до")
-                oh.add_range(day, from_str.strip(), to_str.strip(), "%H:%M")
+                from_str, to_str = store["wh"][0].split(" до ")
+                oh.add_range(day, from_str, to_str, "%H:%M")
             for day in DAYS[5:6]:
-                from_str, to_str = store["wh"][1].split("до")
-                oh.add_range(day, from_str.strip(), to_str.strip(), "%H:%M")
+                from_str, to_str = store["wh"][1].split(" до ")
+                oh.add_range(day, from_str, to_str, "%H:%M")
             for day in DAYS[6:7]:
-                from_str, to_str = store["wh"][2].split("до")
-                oh.add_range(day, from_str.strip(), to_str.strip(), "%H:%M")
+                from_str, to_str = store["wh"][2].split(" до ")
+                oh.add_range(day, from_str, to_str, "%H:%M")
 
             item["opening_hours"] = oh.as_opening_hours()
 
