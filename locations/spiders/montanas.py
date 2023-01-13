@@ -1,7 +1,7 @@
 from scrapy.spiders import SitemapSpider
 
 from locations.structured_data_spider import StructuredDataSpider
-from locations.user_agents import BROSWER_DEFAULT
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class MontanasSpider(SitemapSpider, StructuredDataSpider):
@@ -14,7 +14,7 @@ class MontanasSpider(SitemapSpider, StructuredDataSpider):
     custom_settings = {
         "DEFAULT_REQUEST_HEADERS": {
             "Host": "www.montanas.ca",
-            "User-Agent": BROSWER_DEFAULT,
+            "User-Agent": BROWSER_DEFAULT,
             "Accept": "*/*",
             "Accept-Encoding": "gzip, deflate, br",
             "Connection": "keep-alive",

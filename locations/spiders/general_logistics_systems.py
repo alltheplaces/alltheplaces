@@ -2,6 +2,8 @@ import csv
 
 import scrapy
 
+from locations.categories import Categories
+from locations.hours import OpeningHours
 from locations.items import Feature
 
 HEADERS = {"X-Requested-With": "XMLHttpRequest"}
@@ -15,6 +17,7 @@ class GeneralLogisticsSystemsSpider(scrapy.Spider):
         "brand": "General Logistics Systems",
         "brand_wikidata": "Q46495823",
         "country": "DE",
+        "extras": Categories.POST_OFFICE.value,
     }
 
     def start_requests(self):
@@ -48,7 +51,10 @@ class GeneralLogisticsSystemsSpider(scrapy.Spider):
             longitude = coordinates["longitude"]
             latitude = coordinates["latitude"]
             name = address["name"]
-            opening_hours = result["openingHours"]
+            opening_hours = OpeningHours()
+            for day, time_ranges in result["openingHours"].items():
+                for time_range in time_ranges:
+                    opening_hours.add_range(day, time_range["from"], time_range["to"])
 
             item["ref"] = result["id"]
             item["name"] = name
@@ -59,5 +65,5 @@ class GeneralLogisticsSystemsSpider(scrapy.Spider):
             item["city"] = address["city"]
             item["postcode"] = address["postalCode"]
             item["phone"] = phone["number"]
-            item["opening_hours"] = opening_hours
+            item["opening_hours"] = opening_hours.as_opening_hours()
             yield item

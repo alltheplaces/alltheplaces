@@ -5,7 +5,7 @@ import scrapy
 
 from locations.hours import OpeningHours
 from locations.items import Feature
-from locations.user_agents import BROSWER_DEFAULT
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class VerizonSpider(scrapy.Spider):
@@ -13,7 +13,7 @@ class VerizonSpider(scrapy.Spider):
     item_attributes = {"brand": "Verizon", "brand_wikidata": "Q919641"}
     allowed_domains = ["www.verizonwireless.com"]
     start_urls = ["https://www.verizonwireless.com/sitemap_storelocator.xml"]
-    user_agent = BROSWER_DEFAULT
+    user_agent = BROWSER_DEFAULT
 
     def parse_hours(self, store_hours):
         opening_hours = OpeningHours()

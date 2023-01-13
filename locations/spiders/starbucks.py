@@ -3,6 +3,7 @@ import json
 
 import scrapy
 
+from locations.categories import Categories
 from locations.items import Feature
 
 HEADERS = {"X-Requested-With": "XMLHttpRequest"}
@@ -11,7 +12,7 @@ STORELOCATOR = "https://www.starbucks.com/bff/locations?lat={}&lng={}"
 
 class StarbucksSpider(scrapy.Spider):
     name = "starbucks"
-    item_attributes = {"brand": "Starbucks", "brand_wikidata": "Q37158"}
+    item_attributes = {"brand": "Starbucks", "brand_wikidata": "Q37158", "extras": Categories.COFFEE_SHOP.value}
     allowed_domains = ["www.starbucks.com"]
 
     def start_requests(self):

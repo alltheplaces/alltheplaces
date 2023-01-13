@@ -2,20 +2,78 @@
 
 A project to generate
 [point of interest (POI)](https://en.wikipedia.org/wiki/Point_of_interest)
-data sourced primarily from major websites with 'store location' pages,
-The project is built using [`scrapy`](https://scrapy.org/),
-a Python-based web scraping framework. Each target website gets
-its own [spider](https://doc.scrapy.org/en/latest/topics/spiders.html), which
-does the work of extracting the detail.
-Many of the sites provide their data in a [standard format](docs/STRUCTURED_DATA.md).
-Others export their data [via simple APIs](docs/API_SPIDER.md).
-The output from running the project is [published on a regular cadence](docs/WEEKLY_RUN.md)
-to our website: [alltheplaces.xyz](https://www.alltheplaces.xyz/).
+data sourced
+[primarily from major websites](docs/WHY_SPIDER.md)
+with 'store location' pages. The project uses
+[`scrapy`](https://scrapy.org/), a popular Python-based
+web scraping framework, to write individual site
+[spiders](https://doc.scrapy.org/en/latest/topics/spiders.html)
+to retrieve POI data, publishing the results in a
+[standard format](DATA_FORMAT.md).
+There are various `scrapy` tutorials,
+[this series on YouTube](https://www.youtube.com/watch?v=s4jtkzHhLzY)
+is reasonable.
 
 ## Getting started
 
-If you feel that you would like to contribute, and that would be great, then
-we have provided some simple [development advice](docs/GETTING_STARTED.md).
+### Development setup
+
+1. Clone a copy of the project from the
+   [GitHub All The Places](https://github.com/alltheplaces/alltheplaces/)
+   repo (or your own fork if you are considering contributing to the project):
+
+   ```
+   $ git clone git@github.com:alltheplaces/alltheplaces.git
+   ```
+
+1. If not done so already then
+   [install `pipenv`](https://github.com/pypa/pipenv#installation),
+   check it runs:
+
+   ```
+   $ pipenv --version
+   pipenv, version 2022.8.30
+   ```
+
+1. Use `pipenv` to install the project dependencies:
+
+   ```
+   $ cd alltheplaces
+   $ pipenv install
+   ```
+
+1. Test for successful project installation:
+
+   ```
+   $ pipenv run scrapy
+   ```
+
+   If the above ran without complaint, then you have a
+   functional installation and are ready to run and write
+   spiders.
+
+### Contributing code
+
+
+Many of the sites provide their data in a [standard format](docs/STRUCTURED_DATA.md).
+Others export their data [via simple APIs](docs/API_SPIDER.md).
+We have a number of guides to help you develop spiders:
+
+* [what should I call my spider?](docs/SPIDER_NAMING.md)
+* [Wikidata and the NSI are an online "brand service"](docs/WIKIDATA.md)
+* [use sitemaps, if available, to find POI pages easily](docs/SITEMAP.md)
+* [data from many POI pages can be extracted without writing code](docs/STRUCTURED_DATA.md)
+* [what is expected in a pull request?](docs/PULL_REQUEST.md)
+
+### The weekly run
+
+The output from running the project is [published on a regular cadence](docs/WEEKLY_RUN.md)
+to our website: [alltheplaces.xyz](https://www.alltheplaces.xyz/),
+i.e. you do not need to run all the spiders to pick up the output.
+In fact, the less the project "bothers" a website the more we
+will be tolerated.
+
+## Contact us
 
 Communication is primarily through tickets on the project
 GitHub [issue tracker](https://github.com/alltheplaces/alltheplaces/issues).

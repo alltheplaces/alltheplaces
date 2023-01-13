@@ -3,12 +3,16 @@ from scrapy.spiders import CrawlSpider, Rule
 
 from locations.categories import Categories
 from locations.structured_data_spider import StructuredDataSpider
-from locations.user_agents import BROSWER_DEFAULT
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class JCPenneySpider(CrawlSpider, StructuredDataSpider):
     name = "jcpenney"
-    item_attributes = {"brand": "JCPenney", "brand_wikidata": "Q920037", "extras": Categories.DEPARTMENT_STORE.value}
+    item_attributes = {
+        "brand": "JCPenney",
+        "brand_wikidata": "Q920037",
+        "extras": Categories.SHOP_DEPARTMENT_STORE.value,
+    }
     allowed_domains = ["jcpenney.com"]
     start_urls = ["https://jcpenney.com/locations/"]
     rules = [
@@ -19,5 +23,5 @@ class JCPenneySpider(CrawlSpider, StructuredDataSpider):
             callback="parse_sd",
         ),
     ]
-    user_agent = BROSWER_DEFAULT
+    user_agent = BROWSER_DEFAULT
     wanted_types = ["DepartmentStore"]

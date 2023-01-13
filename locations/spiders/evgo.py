@@ -1,54 +1,8 @@
-import json
-import random
-
 import scrapy
 
 from locations.categories import Categories, apply_category
+from locations.geo import bbox_contains, make_subdivisions
 from locations.items import Feature
-
-
-def make_subdivisions(bounds, num_tiles=4):
-    xmin, ymin, xmax, ymax = bounds
-    width = xmax - xmin
-    height = ymax - ymin
-
-    # Calculate the width and height of each tile
-    tile_width = width / num_tiles
-    tile_height = height / num_tiles
-
-    # Initialize a list to store the tiles
-    tiles = []
-
-    # Iterate over the tiles and append them to the list
-    for i in range(num_tiles):
-        for j in range(num_tiles):
-            # Calculate the bounding box for the tile
-            x0 = xmin + i * tile_width
-            y0 = ymin + j * tile_height
-            x1 = x0 + tile_width
-            y1 = y0 + tile_height
-            tiles.append((x0, y0, x1, y1))
-
-    return tiles
-
-
-def bbox_contains(bounds, point):
-    x, y = point
-    xmin, ymin, xmax, ymax = bounds
-
-    if xmin <= x <= xmax and ymin <= y <= ymax:
-        return True
-
-    return False
-
-
-def bbox_to_geojson(bounds):
-    xmin, ymin, xmax, ymax = bounds
-    polygon = {
-        "type": "Polygon",
-        "coordinates": [[[xmin, ymin], [xmin, ymax], [xmax, ymax], [xmax, ymin], [xmin, ymin]]],
-    }
-    return polygon
 
 
 class EVGoSpider(scrapy.Spider):

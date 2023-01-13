@@ -5,7 +5,7 @@ from scrapy.spiders import SitemapSpider
 
 from locations.hours import OpeningHours
 from locations.items import Feature
-from locations.user_agents import BROSWER_DEFAULT
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class PearleVisionSpider(SitemapSpider):
@@ -18,7 +18,7 @@ class PearleVisionSpider(SitemapSpider):
         "ROBOTSTXT_OBEY": False,
         "DEFAULT_REQUEST_HEADERS": {
             "Accept": "*/*",
-            "User-Agent": BROSWER_DEFAULT,
+            "User-Agent": BROWSER_DEFAULT,
             "Connection": "keep-alive",
             "Accept-Encoding": "gzip, deflate, br",
         },

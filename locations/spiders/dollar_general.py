@@ -1,6 +1,7 @@
 from scrapy.spiders import SitemapSpider
 
-from locations.hours import OpeningHours
+from locations.categories import Categories
+from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import Feature
 
 
@@ -10,15 +11,11 @@ class DollarGeneralSpider(SitemapSpider):
         "brand": "Dollar General",
         "brand_wikidata": "Q145168",
         "country": "US",
+        "extras": Categories.SHOP_VARIETY_STORE.value,
     }
     allowed_domains = ["dollargeneral.com"]
     sitemap_urls = ["https://www.dollargeneral.com/sitemap-main.xml"]
-    sitemap_rules = [
-        (
-            r"https:\/\/www\.dollargeneral\.com\/store-directory\/\w{2}\/.*\/\d+$",
-            "parse",
-        ),
-    ]
+    sitemap_rules = [(r"https:\/\/www\.dollargeneral\.com\/store-directory\/\w{2}\/.*\/\d+$", "parse")]
 
     def parse(self, response):
         properties = {
@@ -34,18 +31,10 @@ class DollarGeneralSpider(SitemapSpider):
         }
 
         o = OpeningHours()
-        for d in [
-            "monday",
-            "tuesday",
-            "wednesday",
-            "thursday",
-            "friday",
-            "saturday",
-            "sunday",
-        ]:
-            hours = response.xpath(f"//div[@data-{d}]/@data-{d}").extract_first()
+        for d in DAYS_FULL:
+            hours = response.xpath(f"//@data-{d.lower()}").get()
             from_time, to_time = hours.split(":")
-            o.add_range(d.title()[:2], from_time, to_time, "%H%M")
+            o.add_range(d, from_time, to_time, "%H%M")
 
         properties["opening_hours"] = o.as_opening_hours()
 

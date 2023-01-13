@@ -1,87 +1,30 @@
 import json
-import re
 
-import scrapy
+from scrapy.spiders import SitemapSpider
 
+from locations.categories import Categories
 from locations.hours import OpeningHours
-from locations.items import Feature
-
-DAY_MAPPING = {
-    "Monday": "Mo",
-    "Tuesday": "Tu",
-    "Wednesday": "We",
-    "Thursday": "Th",
-    "Friday": "Fr",
-    "Saturday": "Sa",
-    "Sunday": "Su",
-}
+from locations.structured_data_spider import StructuredDataSpider
 
 
-class CreditAgricoleSpider(scrapy.Spider):
+class CreditAgricoleSpider(SitemapSpider, StructuredDataSpider):
     name = "credit_agricole"
-    item_attributes = {"brand": "Credit Agricole", "brand_wikidata": "Q590952"}
+    item_attributes = {"brand": "Credit Agricole", "brand_wikidata": "Q590952", "extras": Categories.BANK.value}
     allowed_domains = ["credit-agricole.fr"]
-    start_urls = [
-        "https://www.credit-agricole.fr/particulier/agence.html",
-    ]
+    sitemap_urls = ["https://www.credit-agricole.fr/robots.txt"]
+    sitemap_rules = [(r"/particulier/agence/[-\w]+/([-\w]+)\.html$", "parse_sd")]
+    wanted_types = ["FinancialService"]
 
-    def parse(self, response):
-        urls = response.xpath('//ul[@class="indexCR-list"]/li/a/@href').extract()
+    def post_process_item(self, item, response, ld_data, **kwargs):
+        if name := ld_data.get("Name"):
+            ld_data["name"] = name
 
-        for url in urls:
-            yield scrapy.Request(response.urljoin(url), callback=self.parse_provence)
+        if geodata := response.xpath('//div[@class="CardAgencyMap js-CardAgencyMap"]/@data-value').get():
+            coords = json.loads(geodata)
+            item["lat"] = coords["latitude"]
+            item["lon"] = coords["longitude"]
 
-    def parse_provence(self, response):
-        province_urls = response.xpath('//ul[@class="alphabetList js-alphabetList"]/li/a/@href').extract()
+        item["opening_hours"] = OpeningHours()
+        item["opening_hours"].from_linked_data(ld_data, "%H:%M:%S")
 
-        for province in province_urls:
-            yield scrapy.Request(response.urljoin(province), callback=self.parse_locality)
-
-    def parse_locality(self, response):
-        locality_urls = response.xpath('//a[@class="storeLoc-selectAgency"]/@href').extract()
-
-        for locality in locality_urls:
-            yield scrapy.Request(response.urljoin(locality), callback=self.parse_location)
-
-    def parse_location(self, response):
-        ref = re.search(r".+-(.+?)/?(?:\.html|$)", response.url).group(1)
-        data = json.loads(
-            response.xpath(
-                '//script[@type="application/ld+json" and contains(text(), "streetAddress")]/text()'
-            ).extract_first()
-        )
-        geodata = json.loads(
-            response.xpath('//div[@class="CardAgencyMap js-CardAgencyMap"]/@data-value').extract_first()
-        )
-        properties = {
-            "name": data["Name"],
-            "ref": ref,
-            "addr_full": data["address"]["streetAddress"],
-            "city": data["address"]["addressLocality"],
-            "postcode": data["address"]["postalCode"],
-            "country": "FR",
-            "phone": data["telephone"],
-            "website": response.url,
-            "lat": float(geodata["latitude"]),
-            "lon": float(geodata["longitude"]),
-        }
-
-        hours = self.parse_hours(data["openingHoursSpecification"])
-        if hours:
-            properties["opening_hours"] = hours
-
-        yield Feature(**properties)
-
-    def parse_hours(self, hours):
-        opening_hours = OpeningHours()
-
-        for hour in hours:
-            day = hour["dayOfWeek"][0]
-            opening_hours.add_range(
-                day=DAY_MAPPING[day],
-                open_time=hour["opens"],
-                close_time=hour["closes"],
-                time_format="%H:%M:%S",
-            )
-
-        return opening_hours.as_opening_hours()
+        yield item

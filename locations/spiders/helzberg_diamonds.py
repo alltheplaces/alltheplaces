@@ -5,7 +5,7 @@ from scrapy.spiders import SitemapSpider
 from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
-from locations.user_agents import BROSWER_DEFAULT
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class HelzbergDiamondsSpider(SitemapSpider, StructuredDataSpider):
@@ -14,7 +14,7 @@ class HelzbergDiamondsSpider(SitemapSpider, StructuredDataSpider):
     allowed_domains = ["helzberg.com"]
     sitemap_urls = ["https://www.helzberg.com/sitemap_stores.xml"]
     sitemap_rules = [("", "parse")]
-    user_agent = BROSWER_DEFAULT
+    user_agent = BROWSER_DEFAULT
 
     def parse(self, response):
         item = Feature()

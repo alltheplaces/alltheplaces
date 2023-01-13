@@ -6,12 +6,12 @@ from scrapy.exceptions import UsageError
 from scrapy.spiders.sitemap import iterloc
 from scrapy.utils.sitemap import Sitemap, sitemap_urls_from_robots
 
-from locations.user_agents import BROSWER_DEFAULT
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class MySitemapSpider(scrapy.spiders.SitemapSpider):
     name = "my_sitemap_spider"
-    user_agent = BROSWER_DEFAULT
+    user_agent = BROWSER_DEFAULT
     custom_settings = {"ROBOTSTXT_OBEY": False}
     pages = False
     download_delay = 0.5

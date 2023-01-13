@@ -1,7 +1,7 @@
 from scrapy.spiders import SitemapSpider
 
 from locations.structured_data_spider import StructuredDataSpider
-from locations.user_agents import BROSWER_DEFAULT
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class DominiosGB(SitemapSpider, StructuredDataSpider):
@@ -18,4 +18,4 @@ class DominiosGB(SitemapSpider, StructuredDataSpider):
             "parse_sd",
         )
     ]
-    user_agent = BROSWER_DEFAULT
+    user_agent = BROWSER_DEFAULT

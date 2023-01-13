@@ -1,6 +1,7 @@
 import scrapy
 from scrapy import Request
 
+from locations.categories import Categories
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
@@ -9,18 +10,26 @@ class EdekaDESpider(scrapy.Spider):
     name = "edeka_de"
     start_urls = ["https://www.edeka.de/api/marketsearch/markets?size=100"]
 
-    NAH_UND_GUT = {"brand": "nah und gut", "brand_wikidata": "Q701755"}
-    AKTIV_MARKT = {"brand": "EDEKA aktiv markt", "brand_wikidata": "Q701755"}
-    XPRESS = {"brand": "EDEKA aktiv markt", "brand_wikidata": "Q701755"}
-    DISKA = {"brand": "diska", "brand_wikidata": "Q62390177"}
-    EDEKA = {"brand": "EDEKA", "brand_wikidata": "Q701755"}
-    ECENTER = {"brand": "E-Center", "brand_wikidata": "Q701755"}
-    ECENTER_HERKULES = {"brand": "HERKULES Ecenter", "brand_wikidata": "Q701755"}
+    NAH_UND_GUT = {"brand": "nah und gut", "brand_wikidata": "Q701755", "extras": Categories.SHOP_SUPERMARKET.value}
+    AKTIV_MARKT = {
+        "brand": "EDEKA aktiv markt",
+        "brand_wikidata": "Q701755",
+        "extras": Categories.SHOP_SUPERMARKET.value,
+    }
+    XPRESS = {"brand": "EDEKA xpress", "brand_wikidata": "Q701755", "extras": Categories.SHOP_SUPERMARKET.value}
+    DISKA = {"brand": "diska", "brand_wikidata": "Q62390177", "extras": Categories.SHOP_SUPERMARKET.value}
+    EDEKA = {"brand": "EDEKA", "brand_wikidata": "Q701755", "extras": Categories.SHOP_SUPERMARKET.value}
+    ECENTER = {"brand": "E-Center", "brand_wikidata": "Q701755", "extras": Categories.SHOP_SUPERMARKET.value}
+    ECENTER_HERKULES = {
+        "brand": "HERKULES Ecenter",
+        "brand_wikidata": "Q701755",
+        "extras": Categories.SHOP_SUPERMARKET.value,
+    }
     MARKTKAUF = {"brand": "MARKTKAUF", "brand_wikidata": "Q1533254"}
     CAPMARKT = {"brand": "CAP", "brand_wikidata": "Q1022827"}
     NPMARKT = {"brand": "NP", "brand_wikidata": "Q15836148"}
     MARKT_BACKEREI = {"brand": "Markt-Bäckerei", "brand_wikidata": "Q1719433"}
-    ELLI = {"brand": "Elli", "brand_wikidata": "Q701755"}
+    ELLI = {"brand": "Elli", "brand_wikidata": "Q701755", "extras": Categories.SHOP_SUPERMARKET.value}
 
     def parse(self, response):
         for store in response.json()["markets"]:
