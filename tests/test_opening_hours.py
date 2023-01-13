@@ -99,6 +99,16 @@ def test_multiple_times():
     o.add_range("Mo", "13:00", "17:30")
     assert o.as_opening_hours() == "Mo 08:00-12:00,13:00-17:30"
 
+    o2 = OpeningHours()
+    o2.add_range("Tu", "09:00", "12:00")
+    o2.add_range("Tu", "15:00", "17:00")
+    assert o2.as_opening_hours() == "Tu 09:00-12:00,15:00-17:00"
+
+    o3 = OpeningHours()
+    o3.add_range("Tu", "15:00", "17:00")
+    o3.add_range("Tu", "09:00", "12:00")
+    assert o3.as_opening_hours() == "Tu 09:00-12:00,15:00-17:00"
+
 
 def test_sanitise_days():
     assert sanitise_day("Mo") == "Mo"
