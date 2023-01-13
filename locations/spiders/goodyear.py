@@ -5,9 +5,9 @@ from scrapy.spiders import SitemapSpider
 from locations.items import Feature
 
 
-class GoodYearSpider(SitemapSpider):
-    name = "goodyear"
-    item_attributes = {"brand": "GOODYEAR", "brand_wikidata": "Q620875"}
+class GoodyearEUSpider(SitemapSpider):
+    name = "goodyear_eu"
+    item_attributes = {"brand": "Goodyear", "brand_wikidata": "Q620875"}
     allowed_domains = ["www.goodyear.eu"]
     sitemap_urls = ["https://www.goodyear.eu/robots.txt"]
     sitemap_rules = [(r"", "parse_store")]
