@@ -74,7 +74,6 @@ if __name__ == "__main__":
 
         run_data = {
             "run_id": run_id,
-            "output_url": f"https://data.alltheplaces.xyz/runs/{run_id}/output.tar.gz",
         }
 
         stats_suffix = f"runs/{run_id}/stats/_results.json"
@@ -100,6 +99,7 @@ if __name__ == "__main__":
         output_suffix = f"runs/{run_id}/output.tar.gz"
         if size_bytes := object_size(client, bucket_name, output_suffix):
             run_data["size_bytes"] = size_bytes
+            run_data["output_url"] = f"https://data.alltheplaces.xyz/{output_suffix}"
         else:
             output_suffix = f"runs/{run_id}/output.zip"
             if size_bytes := object_size(client, bucket_name, output_suffix):

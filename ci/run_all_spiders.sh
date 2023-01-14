@@ -127,12 +127,12 @@ if [ ! $retval -eq 0 ]; then
 fi
 
 (>&2 echo "Saving embed to https://data.alltheplaces.xyz/runs/latest/info_embed.html")
-OUTPUT_FILESIZE=$(du "${SPIDER_RUN_DIR}/output.zip"  | awk '{ print $1 }')
-OUTPUT_FILESIZE_PRETTY=$(echo "$OUTPUT_FILESIZE" | awk '{printf "%0.1f", $1/1024}')
+OUTPUT_FILESIZE=$(du -b "${SPIDER_RUN_DIR}/output.zip"  | awk '{ print $1 }')
+OUTPUT_FILESIZE_PRETTY=$(echo "$OUTPUT_FILESIZE" | numfmt --to=si --format=%0.1f)
 cat > "${SPIDER_RUN_DIR}/info_embed.html" << EOF
 <html><body>
 <a href="${RUN_URL_PREFIX}/output.zip">Download</a>
-(${OUTPUT_FILESIZE_PRETTY} MB)<br/><small>$(printf "%'d" "${OUTPUT_LINECOUNT}") rows from
+(${OUTPUT_FILESIZE_PRETTY})<br/><small>$(printf "%'d" "${OUTPUT_LINECOUNT}") rows from
 ${SPIDER_COUNT} spiders, updated $(date)</small>
 </body></html>
 EOF
