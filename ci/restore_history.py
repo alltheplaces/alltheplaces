@@ -96,15 +96,19 @@ if __name__ == "__main__":
         start_time = datetime.datetime.strptime(run_id, "%Y-%m-%d-%H-%M-%S")
         run_data["start_time"] = start_time.strftime("%Y-%m-%dT%H:%M:%S") + "Z"
 
-        output_suffix = f"runs/{run_id}/output.tar.gz"
-        if size_bytes := object_size(client, bucket_name, output_suffix):
-            run_data["size_bytes"] = size_bytes
-            run_data["output_url"] = f"https://data.alltheplaces.xyz/{output_suffix}"
-        else:
-            output_suffix = f"runs/{run_id}/output.zip"
+        output_suffix_options = [
+            f"runs/{run_id}/output.tar.gz",
+            f"runs/{run_id}/output.zip",
+            f"runs/{run_id}/output.geojson.gz",
+        ]
+
+        for output_suffix in output_suffix_options:
+            print(f"Trying output suffix {output_suffix}")
             if size_bytes := object_size(client, bucket_name, output_suffix):
+                print(f" ... found size {size_bytes}")
                 run_data["size_bytes"] = size_bytes
                 run_data["output_url"] = f"https://data.alltheplaces.xyz/{output_suffix}"
+                break
 
         latest_element = run_data
         history_elements.append(run_data)
