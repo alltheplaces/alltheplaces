@@ -15,7 +15,7 @@ class DhlExpressFrSpider(scrapy.Spider):
     def start_requests(self):
         point_files = "eu_centroids_120km_radius_country.csv"
         for lat, lon in point_locations(point_files, "FR"):
-            url = f"https://stores.ikks.com/mobify/proxy/ocapi/s/IKKS_COM/dw/shop/v21_3/stores?latitude={lat}&longitude={lon}&client_id=1c53da3a-3640-4a31-adad-0f43be6c0904&max_distance=120&start=0&count=200"
+            url = f"https://stores.ikks.com/mobify/proxy/ocapi/s/IKKS_COM/dw/shop/v21_3/stores?latitude={lat}&longitude={lon}&client_id=1c53da3a-3640-4a31-adad-0f43be6c0904&max_distance=120&count=200"
             yield scrapy.Request(url=url)
 
     def parse(self, response):
