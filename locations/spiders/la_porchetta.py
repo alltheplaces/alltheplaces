@@ -1,3 +1,5 @@
+import re
+
 from locations.storefinders.storepoint import StorepointSpider
 
 
