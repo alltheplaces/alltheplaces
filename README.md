@@ -1,34 +1,18 @@
 # All the Places
 
-A project to generate
-[point of interest (POI)](https://en.wikipedia.org/wiki/Point_of_interest)
-data sourced
-[primarily from major websites](docs/WHY_SPIDER.md)
-with 'store location' pages. The project uses
-[`scrapy`](https://scrapy.org/), a popular Python-based
-web scraping framework, to write individual site
-[spiders](https://doc.scrapy.org/en/latest/topics/spiders.html)
-to retrieve POI data, publishing the results in a
-[standard format](DATA_FORMAT.md).
-There are various `scrapy` tutorials,
-[this series on YouTube](https://www.youtube.com/watch?v=s4jtkzHhLzY)
-is reasonable.
+A project to generate [point of interest (POI)](https://en.wikipedia.org/wiki/Point_of_interest) data sourced [primarily from major websites](docs/WHY_SPIDER.md) with 'store location' pages. The project uses [`scrapy`](https://scrapy.org/), a popular Python-based web scraping framework, to write individual site [spiders](https://doc.scrapy.org/en/latest/topics/spiders.html) to retrieve POI data, publishing the results in a [standard format](DATA_FORMAT.md). There are various `scrapy` tutorials, [this series on YouTube](https://www.youtube.com/watch?v=s4jtkzHhLzY) is reasonable.
 
 ## Getting started
 
 ### Development setup
 
-1. Clone a copy of the project from the
-   [GitHub All The Places](https://github.com/alltheplaces/alltheplaces/)
-   repo (or your own fork if you are considering contributing to the project):
+1. Clone a copy of the project from the [GitHub All The Places](https://github.com/alltheplaces/alltheplaces/) repo (or your own fork if you are considering contributing to the project):
 
    ```
    $ git clone git@github.com:alltheplaces/alltheplaces.git
    ```
 
-1. If not done so already then
-   [install `pipenv`](https://github.com/pypa/pipenv#installation),
-   check it runs:
+1. If you haven't done so already, [install `pipenv`](https://github.com/pypa/pipenv#installation) and check that it runs:
 
    ```
    $ pipenv --version
@@ -48,39 +32,25 @@ is reasonable.
    $ pipenv run scrapy
    ```
 
-   If the above ran without complaint, then you have a
-   functional installation and are ready to run and write
-   spiders.
+   If the above runs without complaint, then you have a functional installation and are ready to run and write spiders.
 
 ### Contributing code
 
+Many of the sites provide their data in a [standard format](docs/STRUCTURED_DATA.md). Others export their data [via simple APIs](docs/API_SPIDER.md). We have a number of guides to help you develop spiders:
 
-Many of the sites provide their data in a [standard format](docs/STRUCTURED_DATA.md).
-Others export their data [via simple APIs](docs/API_SPIDER.md).
-We have a number of guides to help you develop spiders:
-
-* [what should I call my spider?](docs/SPIDER_NAMING.md)
-* [Wikidata and the NSI are an online "brand service"](docs/WIKIDATA.md)
-* [use sitemaps, if available, to find POI pages easily](docs/SITEMAP.md)
-* [data from many POI pages can be extracted without writing code](docs/STRUCTURED_DATA.md)
-* [what is expected in a pull request?](docs/PULL_REQUEST.md)
+* [What should I call my spider?](docs/SPIDER_NAMING.md)
+* [Using Wikidata and the Name Suggestion Index](docs/WIKIDATA.md)
+* [Sitemaps make finding POI pages easier](docs/SITEMAP.md)
+* [Data from many POI pages can be extracted without writing code](docs/STRUCTURED_DATA.md)
+* [What is expected in a pull request?](docs/PULL_REQUEST.md)
 
 ### The weekly run
 
-The output from running the project is [published on a regular cadence](docs/WEEKLY_RUN.md)
-to our website: [alltheplaces.xyz](https://www.alltheplaces.xyz/),
-i.e. you do not need to run all the spiders to pick up the output.
-In fact, the less the project "bothers" a website the more we
-will be tolerated.
+The output from running the project is [published on a regular cadence](docs/WEEKLY_RUN.md) to our website: [alltheplaces.xyz](https://www.alltheplaces.xyz/). You should not run all the spiders to pick up the output: the less the project "bothers" a website the more we will be tolerated.
 
 ## Contact us
 
-Communication is primarily through tickets on the project
-GitHub [issue tracker](https://github.com/alltheplaces/alltheplaces/issues).
-Many contributors are also present on
-[OSM US Slack](https://slack.openstreetmap.us/),
-in particular we watch the [#poi](https://osmus.slack.com/archives/CDJ4LKA2Y)
-channel.
+Communication is primarily through tickets on the project GitHub [issue tracker](https://github.com/alltheplaces/alltheplaces/issues). Many contributors are also present on [OSM US Slack](https://slack.openstreetmap.us/), in particular we watch the [#poi](https://osmus.slack.com/archives/CDJ4LKA2Y) channel.
 
 ## License
 
