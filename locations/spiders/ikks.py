@@ -34,7 +34,9 @@ class IkksSpider(scrapy.Spider):
                         )
                     else:
                         oh.add_range(
-                            day=DAYS_FR[day.get("title")[:2]], open_time=day.get("amBegin"), close_time=day.get("pmEnd")
+                            day=DAYS_FR[day.get("title")[:2]], 
+                            open_time=day.get("pmBegin") or day.get("amBegin"), 
+                            close_time=day.get("pmEnd"),
                         )
                 item["opening_hours"] = oh.as_opening_hours()
 
