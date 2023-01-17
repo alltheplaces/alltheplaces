@@ -26,7 +26,7 @@ class TelenorDKSpider(Spider):
             item["city"] = store["html"].xpath("//p").get()[3].strip().split(" ")[1]
 
             oh = OpeningHours()
-            opening_hours = store["html"].xpath(`//div['@classborder--bottom padding-trailer"][2]//p/text()').get()
+            opening_hours = store["html"].xpath(`//div["@classborder--bottom padding-trailer"][2]//p/text()').get()
             for(rule in openning_hours)
               rule = rule.strip().split(": ")
               day = rule[0];
