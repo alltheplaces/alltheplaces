@@ -5,14 +5,12 @@ from locations.items import Feature
 
 class TelenorDKSpider(Spider):
     name = "telenor_dk"
-    item_attributes = {
-        "brand": "Telenor",
-        "brand_wikidata": "Q1796954",
-        "country": "DK",
-    }
+    item_attributes = {"brand": "Telenor", "brand_wikidata": "Q845632"}
     start_urls = [
         "https://www.telenor.dk/da/custom/FindNearestShopBlock/GetShops/2bd5f376-3f79-475b-aa1e-b45174b9a2f3/?blockId=1590"
     ]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
+    no_refs = True
 
     def parse(self, response):
         for store in response.json():
@@ -20,23 +18,23 @@ class TelenorDKSpider(Spider):
 
             item["lon"] = store["longitude"]
             item["lat"] = store["latitude"]
+            item["name"] = store["title"]
+            item["extras"]["type"] = store["type"]
 
-            item["phone"] = store["html"].xpath("//p").get()[8].strip().split(": ")[1]
+            html = Selector(text=store["html"])
 
-            item["street_address"] = store["html"].xpath("//p").get()[2].strip()
-            item["poscode"] = store["html"].xpath("//p").get()[3].strip().split(" ")[0]
-            item["city"] = store["html"].xpath("//p").get()[3].strip().split(" ")[1]
+            address = html.xpath(
+                '//div[@class="border--bottom padding-trailer"]/div[@class="margin-trailer--small"][1]/p/text()'
+            ).getall()
+            item["addr_full"] = ", ".join(address)
+            item["street_address"] = address[0]
+            item["postcode"], item["city"] = address[1].split(" ", maxsplit=1)
 
-            oh = OpeningHours()
-            opening_hours = store["html"].xpath('//div["@classborder--bottom padding-trailer"][2]//p/text()').get()
-            for rule in openning_hours:
-                rule = rule.strip().split(": ")
-                day = rule[0]
-                if day == "Hverdage":
-                    oh.add("Mo-Fr " + rule[1])
-                elif day == "Lørdag":
-                    oh.add("Sa " + rule[1])
-                elif day == "Søndag":
-                    oh.add("Su " + rule[1])
+            item["phone"] = html.xpath('//p[contains(text(), "Telefon:")]/text()').get().replace("Telefon:", "")
+            if slug := html.xpath('//a[contains(@href, "find-butik")]/@href').get():
+                item["ref"] = slug
+                item["website"] = f"https://www.telenor.dk{slug}"
+            if email := html.xpath('//p[contains(text(), "@telenor.dk")]/text()').get():
+                item["email"] = email.strip()
 
             yield item
