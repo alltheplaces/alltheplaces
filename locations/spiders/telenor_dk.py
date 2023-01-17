@@ -30,11 +30,11 @@ class TelenorDKSpider(Spider):
             for rule in openning_hours:
               rule = rule.strip().split(": ")
               day = rule[0];
-              if(day=="Hverdage")
+              if day=="Hverdage":
                 oh.add("Mo-Fr "+rule[1])
-              elif(day=="Lørdag")
+              elif day=="Lørdag":
                 oh.add("Sa "+rule[1])
-              elif(day=="Søndag")
+              elif day=="Søndag":
                 oh.add("Su "+rule[1])
 
             yield item
