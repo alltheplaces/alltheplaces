@@ -27,7 +27,7 @@ class TelenorDKSpider(Spider):
 
             oh = OpeningHours()
             opening_hours = store["html"].xpath('//div["@classborder--bottom padding-trailer"][2]//p/text()').get()
-            for(rule in openning_hours)
+            for rule in openning_hours:
               rule = rule.strip().split(": ")
               day = rule[0];
               if(day=="Hverdage")
