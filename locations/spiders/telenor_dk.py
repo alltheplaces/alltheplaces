@@ -10,7 +10,9 @@ class TelenorDKSpider(Spider):
         "brand_wikidata": "Q1796954",
         "country": "DK",
     }
-    start_urls = ["https://www.telenor.dk/da/custom/FindNearestShopBlock/GetShops/2bd5f376-3f79-475b-aa1e-b45174b9a2f3/?blockId=1590"]
+    start_urls = [
+        "https://www.telenor.dk/da/custom/FindNearestShopBlock/GetShops/2bd5f376-3f79-475b-aa1e-b45174b9a2f3/?blockId=1590"
+    ]
 
     def parse(self, response):
         for store in response.json():
@@ -28,13 +30,13 @@ class TelenorDKSpider(Spider):
             oh = OpeningHours()
             opening_hours = store["html"].xpath('//div["@classborder--bottom padding-trailer"][2]//p/text()').get()
             for rule in openning_hours:
-              rule = rule.strip().split(": ")
-              day = rule[0];
-              if day=="Hverdage":
-                oh.add("Mo-Fr "+rule[1])
-              elif day=="Lørdag":
-                oh.add("Sa "+rule[1])
-              elif day=="Søndag":
-                oh.add("Su "+rule[1])
+                rule = rule.strip().split(": ")
+                day = rule[0]
+                if day == "Hverdage":
+                    oh.add("Mo-Fr " + rule[1])
+                elif day == "Lørdag":
+                    oh.add("Sa " + rule[1])
+                elif day == "Søndag":
+                    oh.add("Su " + rule[1])
 
             yield item
