@@ -25,6 +25,7 @@ class GoodstartSpider(scrapy.Spider):
             item["image"] = "https://www.goodstart.org.au" + i["imageUrl"]
             item["addr_full"] = i["fullAddress"]
             item["street_address"] = i["address"]
+            item["city"] = i["suburb"]
 
             oh = OpeningHours()
             (hour_range, days_range) = i["hours"].split(", ")
