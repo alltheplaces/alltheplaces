@@ -93,6 +93,7 @@ ITEM_PIPELINES = {
     "locations.pipelines.CheckItemPropertiesPipeline": 600,
     "locations.pipelines.ApplyNSICategoriesPipeline": 700,
     "locations.pipelines.CountCategoriesPipeline": 800,
+    "locations.pipelines.CountBrandsPipeline": 810,
 }
 
 
