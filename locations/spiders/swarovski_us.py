@@ -8,7 +8,7 @@ from locations.user_agents import BROWSER_DEFAULT
 
 
 class SwarovskiUsSpider(scrapy.Spider):
-    name = "swarovski_usa"
+    name = "swarovski_us"
     item_attributes = {"brand": "Swarovski", "brand_wikidata": "Q611115"}
     allowed_domains = ["swarovski.com"]
     headers = {"User-Agent": BROWSER_DEFAULT}
