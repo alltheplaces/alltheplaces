@@ -19,6 +19,10 @@ class GamestopSpider(scrapy.Spider):
 
     def parse(self, response):
         for data in response.json():
+            for key, value in data.items():
+                if value == "undefined":
+                    data[key] = None
+
             item = Feature()
             item["ref"] = data.get("Id")
             item["name"] = data.get("Name")
