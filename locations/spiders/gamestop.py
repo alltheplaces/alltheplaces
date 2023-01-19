@@ -25,6 +25,7 @@ class GamestopSpider(scrapy.Spider):
 
             item = Feature()
             item["name"] = data.get("Name")
+            item["street_address"] = data.get("Address")
             item["postcode"] = data.get("Zip")
             item["city"] = data.get("City")
             item["state"] = data.get("Province")
