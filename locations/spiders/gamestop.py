@@ -1,4 +1,5 @@
 import re
+
 import scrapy
 
 from locations.items import Feature
@@ -26,8 +27,8 @@ class GamestopSpider(scrapy.Spider):
             item["state"] = data.get("Province")
             item["phone"] = data.get("Phones")
             item["email"] = data.get("Email")
-            item["lat"] = data.get("Longitude") if data.get("Longitude") != "undefined" else None
-            item["lon"] = data.get("Latitude") if data.get("Latitude") != "undefined" else None
+            item["lat"] = data.get("Latitude")
+            item["lon"] = data.get("Longitude")
             item["country"] = re.findall(r"\.[a-z]{2}/", response.url)[-1][1:3].upper()
 
             yield item
