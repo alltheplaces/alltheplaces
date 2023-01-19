@@ -83,6 +83,7 @@ class Categories(Enum):
     BUREAU_DE_CHANGE = {"amenity": "bureau_de_change"}
     CAFE = {"amenity": "cafe"}
     CHARGING_STATION = {"amenity": "charging_station"}
+    CHILD_CARE = {"amenity": "childcare"}
     CLINIC_URGENT = {"amenity": "clinic", "healthcare": "clinic", "urgent_care": "yes"}
     COFFEE_SHOP = {"amenity": "cafe", "cuisine": "coffee_shop"}
     COMPRESSED_AIR = {"amenity": "compressed_air"}
