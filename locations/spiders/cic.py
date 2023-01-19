@@ -3,14 +3,20 @@ from scrapy.spiders import CrawlSpider, Rule
 
 from locations.hours import DAYS_FR, OpeningHours
 from locations.items import Feature
+from locations.structured_data_spider import StructuredDataSpider
 
 
-class CicSpider(CrawlSpider):
+class CiceSpider(CrawlSpider, StructuredDataSpider):
     name = "cic"
     item_attributes = {"brand": "cic", "brand_wikidata": "Q746525"}
-    start_urls = ["https://www.cic.fr/banqueprivee/fr/nos-agences.html"]
+    start_urls = ["https://www.cic.fr/fr/banques/entreprises/agences-et-distributeurs/BrowseSubdivision.aspx"]
     allowed_domains = ["cic.fr"]
-    rules = [Rule(LinkExtractor(allow=r"/agences/[0-9]"), callback="parse", follow=True)]
+    rules = [
+        Rule(LinkExtractor(allow=r"SubdivisionId"), follow=True),
+        Rule(LinkExtractor(allow=r"type=branch&loca"), follow=True),
+        Rule(LinkExtractor(allow=r"/fr/agence/"), callback="parse", follow=True),
+        Rule(LinkExtractor(allow=r"/fr/agences"), callback="parse", follow=True),
+    ]
 
     def parse(self, response):
         item = Feature()
@@ -23,12 +29,13 @@ class CicSpider(CrawlSpider):
         item["city"] = response.xpath('//*[@itemprop="addressLocality"]/text()').get()
         item["lat"] = response.xpath('//*[@itemprop="latitude"]/@content').get()
         item["lon"] = response.xpath('//*[@itemprop="longitude"]/@content').get()
-        item["email"] = response.xpath('//a[@class="popmail"]/@href').get().replace("mailto:", "")
+
         oh = OpeningHours()
         for day in response.xpath("//tbody/tr[@class]"):
             if day.xpath("./td[1]/text()").get().strip() == "Fermé":
                 continue
-            for i in range(1, 3 if day.xpath("./td[2]/text()").get() else 2):
+            halfday = day.xpath("./td[2]/text()").get()
+            for i in range(1, 3 if halfday and halfday.strip() != "Fermé" else 2):
                 oh.add_range(
                     day=DAYS_FR[day.xpath("./th/text()").get().strip()[:2]],
                     open_time=day.xpath(f"./td[{i}]/text()").get().strip().replace("h", ":").split("-")[0],
