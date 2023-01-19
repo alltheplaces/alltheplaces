@@ -24,7 +24,6 @@ class GamestopSpider(scrapy.Spider):
                     data[key] = None
 
             item = Feature()
-            item["ref"] = data.get("Id")
             item["name"] = data.get("Name")
             item["postcode"] = data.get("Zip")
             item["city"] = data.get("City")
@@ -34,5 +33,6 @@ class GamestopSpider(scrapy.Spider):
             item["lat"] = data.get("Latitude")
             item["lon"] = data.get("Longitude")
             item["country"] = re.findall(r"\.[a-z]{2}/", response.url)[-1][1:3].upper()
+            item["ref"] = f'{item["country"]}-{data.get("Id")}'
 
             yield item
