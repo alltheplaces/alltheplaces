@@ -7,40 +7,20 @@ class GamestopSpider(scrapy.Spider):
     name = "gamestop"
     item_attributes = {"brand": "GameStop"}
     allowed_domains = ["www.gamestop.com"]
-    start_urls = (
-        "https://spatial.virtualearth.net/REST/v1/data/8f92e4701aa94bbba485642dc6d15873/_AllStores/StoreSchema?s=1&$format=json&callback=getStoreInfoSuccess&spatialFilter=&$filter=DisplayType%20Eq%20%271%27%20and%20StoreName%20Ne%20%27GameStop.com%27%20and%20StoreName%20Ne%20%27Internet%20/%20Stores%27%20and%20StoreName%20Ne%20%27GameStop%20Military%27&key=AleEo0hykwhhc2_vhIDzSZvfqbcmdTVzwZp3TrNliPr6CPJtxveXCdwIr7zAHu2O&$top=250&callback=jQuery111105958918103101543_1513486119155&_=1513486119161",
-    )
-
-    def parseAddr(self, addr1, addr2):
-        if addr2 == "":
-            return addr1
-        else:
-            return addr1 + ", " + addr2
+    start_urls = ["https://www.gamestop.ca/StoreLocator/GetStoresForStoreLocatorByProduct?value=&language=en-CA"]
 
     def parse(self, response):
-        # retrieve JSON data from REST endpoint
-        # items = response.xpath('//text()').extract()
+        for data in response.json():
+            item = Feature()
+            item["ref"] = data.get("Id")
+            item["name"] = data.get("Name")
+            item["postcode"] = data.get("Zip")
+            item["city"] = data.get("City")
+            item["state"] = data.get("Province")
+            item["phone"] = data.get("Phones")
+            item["email"] = data.get("Email")
+            item["lat"] = data.get("Longitude") if data.get("Longitude") != "undefined" else None
+            item["lon"] = data.get("Latitude") if data.get("Latitude") != "undefined" else None
+            item["country"] = "CA"
 
-        # convert data variable from unicode to string
-        # items = str(items)
-
-        # convert type string representation of list to type list
-        # data = [items]
-
-        # load list into json object for parsing
-        jsondata = response.json()
-
-        # iterate items
-        for item in jsondata["d"]["results"]:
-            yield Feature(
-                ref=item["EntityID"],
-                lat=float(item["Latitude"]),
-                lon=float(item["Longitude"]),
-                addr_full=self.parseAddr(item["Address1"], item["Address2"]),
-                city=item["Locality"],
-                state=item["AdminDistrict"],
-                postcode=item["PostalCode"],
-                name=item["MallName"],
-                phone=item["Phone"],
-                opening_hours=item["StoreHours"],
-            )
+            yield item
