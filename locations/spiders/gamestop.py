@@ -1,13 +1,20 @@
+import re
 import scrapy
 
 from locations.items import Feature
 
 
 class GamestopSpider(scrapy.Spider):
-    name = "gamestop_ca"
-    item_attributes = {"brand": "GameStop", "brand_wikidata":"Q202210"}
+    name = "gamestop"
+    item_attributes = {"brand": "GameStop", "brand_wikidata": "Q202210"}
     allowed_domains = ["www.gamestop.com"]
-    start_urls = ["https://www.gamestop.ca/StoreLocator/GetStoresForStoreLocatorByProduct?value=&language=en-CA"]
+    start_urls = [
+        "https://www.gamestop.ca/StoreLocator/GetStoresForStoreLocatorByProduct",
+        "https://www.gamestop.de/StoreLocator/GetStoresForStoreLocatorByProduct",
+        "https://www.gamestop.ie/StoreLocator/GetStoresForStoreLocatorByProduct",
+        "https://www.gamestop.it/StoreLocator/GetStoresForStoreLocatorByProduct",
+        "https://www.gamestop.ch/StoreLocator/GetStoresForStoreLocatorByProduct",
+    ]
 
     def parse(self, response):
         for data in response.json():
@@ -21,5 +28,6 @@ class GamestopSpider(scrapy.Spider):
             item["email"] = data.get("Email")
             item["lat"] = data.get("Longitude") if data.get("Longitude") != "undefined" else None
             item["lon"] = data.get("Latitude") if data.get("Latitude") != "undefined" else None
+            item["country"] = re.findall(r"\.[a-z]{2}/", response.url)[-1][1:3].upper()
 
             yield item
