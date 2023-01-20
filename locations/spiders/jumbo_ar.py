@@ -5,9 +5,8 @@ from locations.dict_parser import DictParser
 
 
 class JumboARSpider(scrapy.Spider):
-    name = "jumbo_argentina"
-    item_attributes = {"brand": "Jumbo", "brand_wikidata": "Q116259940"}
-    allowed_domains = ["www.jumbo.com.ar"]
+    name = "jumbo_ar"
+    item_attributes = {"brand": "Jumbo", "brand_wikidata": "Q6310864"}
 
     def start_requests(self):
         url = "https://www.jumbo.com.ar/api/dataentities/NT/search?_fields=name,grouping,image_maps,geocoordinates,SellerName,id,country,city,neighborhood,number,postalCode,state,street,schedule,services,paymentMethods,opening,hasPickup,hasDelivery,address,url_image,phone&an=jumboargentina"
