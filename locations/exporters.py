@@ -174,7 +174,7 @@ class GeoJsonExporter(JsonItemExporter):
 
     def write_geojson_header(self):
         header = io.StringIO()
-        header.write('{"type":"FeatureCollection","properties":')
+        header.write('{"type":"FeatureCollection","dataset_attributes":')
         json.dump(
             get_dataset_attributes(self.spider_name), header, ensure_ascii=False, separators=(",", ":"), sort_keys=True
         )
