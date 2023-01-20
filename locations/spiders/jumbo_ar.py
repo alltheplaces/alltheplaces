@@ -6,7 +6,7 @@ from locations.dict_parser import DictParser
 
 class JumboARSpider(scrapy.Spider):
     name = "jumbo_argentina"
-    item_attributes = {"brand": "Jumbo"}
+    item_attributes = {"brand": "Jumbo", "brand_wikidata": "Q116259940"}
     allowed_domains = ["www.jumbo.com.ar"]
 
     def start_requests(self):
