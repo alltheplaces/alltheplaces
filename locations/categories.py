@@ -158,6 +158,7 @@ class Fuel(Enum):
     # Octane levels
     OCTANE_80 = "fuel:octane_80"
     OCTANE_87 = "fuel:octane_87"
+    OCTANE_90 = "fuel:octane_90"
     OCTANE_91 = "fuel:octane_91"
     OCTANE_92 = "fuel:octane_92"
     OCTANE_93 = "fuel:octane_93"
