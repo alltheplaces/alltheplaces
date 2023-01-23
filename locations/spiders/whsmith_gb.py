@@ -1,3 +1,5 @@
+import re
+
 import scrapy
 
 from locations.categories import Categories
@@ -10,14 +12,17 @@ class WHSmithGBSpider(scrapy.Spider):
     item_attributes = {"brand": "WHSmith", "brand_wikidata": "Q1548712", "extras": Categories.SHOP_NEWSAGENT.value}
     allowed_domains = ["whsmith.co.uk"]
     start_urls = [
-        "https://www.whsmith.co.uk/mobify/proxy/api/s/whsmith/dw/shop/v21_3/stores?latitude=57.28687230000001&longitude=-2.3815684&distance_unit=mi&max_distance=20000&count=200"
+        "https://www.whsmith.co.uk/mobify/proxy/api/s/whsmith/dw/shop/v21_3/stores?latitude=57.28687230000001&longitude=-2.3815684&distance_unit=mi&max_distance=20012&start=0&count=200"
     ]
-    custom_settings = {"DEFAULT_REQUEST_HEADERS": {"x-dw-client-id": "e67cbaf5-f422-4895-967a-abf461ba92e2"}}
-    download_delay = 1  # Requested by robots.txt
+    custom_settings = {
+        "ROBOTSTXT_OBEY": False,
+        # trunk-ignore(gitleaks/generic-api-key)
+        "DEFAULT_REQUEST_HEADERS": {"x-dw-client-id": "e67cbaf5-f422-4895-967a-abf461ba92e2"},
+    }
 
     def parse(self, response):
-        if next_url := response.json().get("next"):
-            yield scrapy.Request(url=next_url)
+        if not response.json().get("count"):
+            return
 
         for store in response.json()["data"]:
             if not store["store_locator_enabled"]:
@@ -31,22 +36,15 @@ class WHSmithGBSpider(scrapy.Spider):
 
             oh = OpeningHours()
             for day in DAYS_FULL:
-                if not store.get("c_openingTimes" + day):
+                if not store.get(f"c_openingTimes{day}") or "closed" in store[f"c_openingTimes{day}"].lower():
                     continue
 
-                if "closed" in store["c_openingTimes" + day].lower():
-                    continue
-
-                start_time, end_time = store["c_openingTimes" + day].split("-")
-                if start_time == "24hr":
-                    start_time = "00:00"
-                if end_time == "24hr":
-                    end_time = "24:00"
-                if ":" not in start_time:
-                    start_time += ":00"
-                if ":" not in end_time:
-                    end_time += ":00"
-                oh.add_range(day, start_time, end_time)
+                start_time, end_time = store[f"c_openingTimes{day}"].split("-")
+                oh.add_range(
+                    day=day,
+                    open_time="00:00" if start_time == "24hr" else start_time,
+                    close_time="24:00" if end_time == "24hr" else end_time,
+                )
 
             item["opening_hours"] = oh.as_opening_hours()
 
@@ -55,3 +53,7 @@ class WHSmithGBSpider(scrapy.Spider):
             item["extras"] = {"type": store["_type"]}
 
             yield item
+
+        start = int(re.findall(r"start=[0-9]+", response.url)[-1][6:]) + 200
+        url = f"https://www.whsmith.co.uk/mobify/proxy/api/s/whsmith/dw/shop/v21_3/stores?latitude=57.28687230000001&longitude=-2.3815684&distance_unit=mi&max_distance=20012&start={start}&count=200"
+        yield scrapy.Request(url=url, callback=self.parse)
