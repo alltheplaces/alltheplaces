@@ -7,7 +7,7 @@ from locations.hours import OpeningHours
 
 class DhlExpressFrSpider(scrapy.Spider):
     name = "dhl_express_fr"
-    item_attributes = {"brand": "DHL", "brand_wikidata": "Q489815"}
+    item_attributes = {"brand": "DHL Express", "brand_wikidata": "Q489815"}
     allowed_domains = ["wsbexpress.dhl.com"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
 

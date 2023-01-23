@@ -8,7 +8,7 @@ from locations.structured_data_spider import StructuredDataSpider
 class DhlExpressUsSpider(SitemapSpider, StructuredDataSpider):
     name = "dhl_express_us_ca"
     item_attributes = {
-        "brand": "DHL",
+        "brand": "DHL Express",
         "brand_wikidata": "Q489815",
     }
     sitemap_urls = [

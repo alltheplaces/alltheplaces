@@ -8,7 +8,7 @@ from locations.hours import OpeningHours
 
 class DhlExpressDeSpider(scrapy.Spider):
     name = "dhl_express_de"
-    item_attributes = {"brand": "DHL", "brand_wikidata": "Q489815"}
+    item_attributes = {"brand": "DHL Express", "brand_wikidata": "Q489815"}
     allowed_domains = ["dhl.de", "locator.dhl.com", "wsbexpress.dhl.com"]
     start_urls = ["https://www.dhl.de/en/geschaeftskunden/express/kontakt-express/dhl-express-stationen.html"]
     custom_settings = {"ROBOTSTXT_OBEY": False}

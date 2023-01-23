@@ -6,7 +6,7 @@ from locations.items import Feature
 
 class DhlExpressGbSpider(scrapy.Spider):
     name = "dhl_express_gb"
-    item_attributes = {"brand": "DHL", "brand_wikidata": "Q489815"}
+    item_attributes = {"brand": "DHL Express", "brand_wikidata": "Q489815"}
     allowed_domains = ["dhlparcel.co.uk"]
 
     def start_requests(self):
