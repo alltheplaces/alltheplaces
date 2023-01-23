@@ -2,7 +2,7 @@ import json
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class ChicosOffTheRackSpider(scrapy.Spider):
@@ -39,4 +39,4 @@ class ChicosOffTheRackSpider(scrapy.Spider):
                 "lon": float(data["attributes"]["longitude"]),
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

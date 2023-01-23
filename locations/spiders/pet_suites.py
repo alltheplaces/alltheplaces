@@ -3,7 +3,7 @@ import json
 import scrapy
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class PetSuitesSpider(scrapy.Spider):
@@ -28,7 +28,7 @@ class PetSuitesSpider(scrapy.Spider):
     def parse(self, response):
         data = json.loads(response.text).get("response")
         for entity in data["entities"]:
-            yield GeojsonPointItem(
+            yield Feature(
                 lat=entity["geocodedCoordinate"]["latitude"],
                 lon=entity["geocodedCoordinate"]["longitude"],
                 name=entity["name"],

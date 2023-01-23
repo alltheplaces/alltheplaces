@@ -12,7 +12,7 @@ class HMSpider(scrapy.Spider):
     def parse(self, response):
         for country_code in response.xpath("//@data-location").getall():
             yield scrapy.Request(
-                url=f"https://api.storelocator.hmgroup.tech/v2/brand/hm/stores/locale/en_gb/country/{country_code}?departments=true&openinghours=true&maxnumberofstores=10000",
+                url=f"https://api.storelocator.hmgroup.tech/v2/brand/hm/stores/locale/en_us/country/{country_code}?_type=json&campaigns=true&departments=true&openinghours=true",
                 callback=self.parse_country,
             )
 

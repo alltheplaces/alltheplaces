@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class SmilebrandsSpider(scrapy.Spider):
@@ -27,4 +27,4 @@ class SmilebrandsSpider(scrapy.Spider):
                 "website": place["url"],
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

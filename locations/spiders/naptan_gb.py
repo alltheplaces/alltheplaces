@@ -1,6 +1,6 @@
 from scrapy import Spider
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class NaptanGBSpider(Spider):
@@ -15,7 +15,7 @@ class NaptanGBSpider(Spider):
             if point.xpath("@Status").get() != "active":
                 continue
 
-            item = GeojsonPointItem()
+            item = Feature()
             item["extras"] = {"check_date": point.xpath("@ModificationDateTime").get()}
 
             item["ref"] = item["extras"]["naptan:AtcoCode"] = point.xpath("StopAreaCode/text()").get()

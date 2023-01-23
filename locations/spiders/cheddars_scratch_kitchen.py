@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class CheddarsScratchKitchenSpider(scrapy.Spider):
@@ -52,6 +52,6 @@ class CheddarsScratchKitchenSpider(scrapy.Spider):
                     "website": response.url,
                 }
 
-                yield GeojsonPointItem(**properties)
+                yield Feature(**properties)
         except:
             pass

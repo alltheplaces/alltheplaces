@@ -2,7 +2,7 @@ import re
 
 from scrapy import Spider
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class VivacomBGSpider(Spider):
@@ -20,7 +20,7 @@ class VivacomBGSpider(Spider):
             if "partners" in store["store_img"]:
                 continue
 
-            item = GeojsonPointItem()
+            item = Feature()
 
             item["ref"] = store["store_id"]
             item["lat"], item["lon"] = store["latlng"].split(",")

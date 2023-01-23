@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 from locations.spiders.mcdonalds import McDonaldsSpider
 
 
@@ -11,7 +11,7 @@ class McDonaldsTHSpider(scrapy.Spider):
 
     def parse(self, response):
         for s in response.xpath("//a[@data-lat]"):
-            item = GeojsonPointItem()
+            item = Feature()
             item["name"] = s.xpath('div[@class="name"]/text()').get()
             item["website"] = item["ref"] = s.xpath("@href").get()
             item["lat"] = s.xpath("@data-lat").get()

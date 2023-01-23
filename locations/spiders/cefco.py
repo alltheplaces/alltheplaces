@@ -2,7 +2,7 @@ import json
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class CefcoSpider(scrapy.Spider):
@@ -16,7 +16,7 @@ class CefcoSpider(scrapy.Spider):
         map_data = response.css("#map_data::text").get()
 
         for store in json.loads(map_data):
-            yield GeojsonPointItem(
+            yield Feature(
                 ref=store["id"],
                 lon=store["longitude"],
                 lat=store["latitude"],

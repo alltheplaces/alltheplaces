@@ -2,7 +2,7 @@ import re
 
 from scrapy.spiders import SitemapSpider
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class DominosPizzaNLSpider(SitemapSpider):
@@ -33,4 +33,4 @@ class DominosPizzaNLSpider(SitemapSpider):
         if locality_data:
             properties["city"] = locality_data.group(1)
             properties["postcode"] = locality_data.group(3)
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

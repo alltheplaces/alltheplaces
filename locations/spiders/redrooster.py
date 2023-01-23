@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class RedRoosterSpider(scrapy.Spider):
@@ -27,4 +27,4 @@ class RedRoosterSpider(scrapy.Spider):
                 "lon": i["longitude"],
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

@@ -2,7 +2,7 @@ import json
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class SuperonefoodsSpider(scrapy.Spider):
@@ -24,9 +24,9 @@ class SuperonefoodsSpider(scrapy.Spider):
         # load list into json object for parsing
         jsondata = json.loads(data[0])
 
-        # loop through json data object and retrieve values; yield the values to GeojsonPointItem
+        # loop through json data object and retrieve values; yield the values to Feature
         for item in jsondata:
-            yield GeojsonPointItem(
+            yield Feature(
                 ref=item.get("_id"),
                 lat=float(item.get("latitude")),
                 lon=float(item.get("longitude")),

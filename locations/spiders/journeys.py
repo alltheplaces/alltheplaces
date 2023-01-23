@@ -3,7 +3,7 @@ import re
 import scrapy
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class JourneysSpider(scrapy.Spider):
@@ -62,7 +62,7 @@ class JourneysSpider(scrapy.Spider):
         if hours:
             properties["opening_hours"] = hours
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)
 
     def parse_store_list(self, response):
         urls = response.xpath('//div[@class="store-heading"]//a[1]/@href').extract()

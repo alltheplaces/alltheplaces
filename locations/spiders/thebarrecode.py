@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class TheBarreCodeSpider(scrapy.Spider):
@@ -43,4 +43,4 @@ class TheBarreCodeSpider(scrapy.Spider):
             lon = float(lon)
             properties["lon"] = lon
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

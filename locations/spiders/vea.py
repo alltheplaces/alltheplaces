@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class VeaSpider(scrapy.Spider):
@@ -22,4 +22,4 @@ class VeaSpider(scrapy.Spider):
                 "phone": store["telefonos"],
                 "ref": str(store["codigo"]).replace("SM ", ""),
             }
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class SoulCycleSpider(scrapy.Spider):
@@ -41,4 +41,4 @@ class SoulCycleSpider(scrapy.Spider):
             .split(",")[1],
         }
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

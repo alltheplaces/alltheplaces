@@ -2,7 +2,7 @@ from scrapy.spiders import SitemapSpider
 
 from locations.google_url import extract_google_position
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class UnionSavingsBankSpider(SitemapSpider):
@@ -39,4 +39,4 @@ class UnionSavingsBankSpider(SitemapSpider):
             "country": "US",
         }
         extract_google_position(properties, response)
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

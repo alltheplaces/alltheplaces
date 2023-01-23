@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 HEADERS = {
     "authority": "prd.location.enterprise.com",
@@ -48,4 +48,4 @@ class NationalSpider(scrapy.Spider):
                 "ref": loc["id"],
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

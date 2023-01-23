@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class TheBigBiscuitSpider(scrapy.Spider):
@@ -32,4 +32,4 @@ class TheBigBiscuitSpider(scrapy.Spider):
                     "phone": phone,
                     "website": website,
                 }
-                yield GeojsonPointItem(**properties)
+                yield Feature(**properties)

@@ -3,7 +3,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class AnthonysSpider(scrapy.Spider):
@@ -18,7 +18,7 @@ class AnthonysSpider(scrapy.Spider):
                 r"<p>(\d+) ([-. \w]+)<\/p>\n<p>([ \w]+), (\w{2}) (\d+)<\/p>",
                 store["acf"]["page"]["info"]["address"],
             )
-            item = GeojsonPointItem(
+            item = Feature(
                 {
                     "lat": store["acf"]["coords"]["latitude"],
                     "lon": store["acf"]["coords"]["longitude"],

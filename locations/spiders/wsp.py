@@ -2,7 +2,7 @@ import json
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class WSPSpider(scrapy.Spider):
@@ -41,4 +41,4 @@ class WSPSpider(scrapy.Spider):
             except IndexError:
                 continue
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

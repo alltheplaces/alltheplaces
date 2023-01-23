@@ -3,7 +3,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 DAY_MAPPING = {
     "Mon": "Mo",
@@ -95,4 +95,4 @@ class JcrewSpider(scrapy.Spider):
             except:
                 pass
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

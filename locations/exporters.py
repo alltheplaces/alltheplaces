@@ -1,10 +1,16 @@
 import base64
 import hashlib
+import io
+import json
 import logging
 import uuid
 
 from scrapy.exporters import JsonItemExporter, JsonLinesItemExporter
+from scrapy.utils.misc import walk_modules
 from scrapy.utils.python import to_bytes
+from scrapy.utils.spider import iter_spider_classes
+
+from locations.settings import SPIDER_MODULES
 
 mapping = (
     ("addr_full", "addr:full"),
@@ -39,14 +45,15 @@ def item_to_properties(item):
         props["ref"] = str(ref)
 
     # Add in the extra bits
-    extras = item.get("extras")
-    if extras:
-        props.update(extras)
+    if extras := item.get("extras"):
+        for key, value in extras.items():
+            if value:
+                # Only export populated values
+                props[key] = value
 
     # Bring in the optional stuff
     for map_from, map_to in mapping:
-        item_value = item.get(map_from)
-        if item_value:
+        if item_value := item.get(map_from):
             props[map_to] = item_value
 
     return props
@@ -56,40 +63,93 @@ def compute_hash(item):
     ref = str(item.get("ref") or uuid.uuid1()).encode("utf8")
     sha1 = hashlib.sha1(ref)
 
-    spider_name = item.get("extras", {}).get("@spider")
-    if spider_name:
+    if spider_name := item.get("extras", {}).get("@spider"):
         sha1.update(spider_name.encode("utf8"))
 
     return base64.urlsafe_b64encode(sha1.digest()).decode("utf8")
 
 
+def find_spider_class(spider_name):
+    if not spider_name:
+        return None
+    for mod in SPIDER_MODULES:
+        for module in walk_modules(mod):
+            for spider_class in iter_spider_classes(module):
+                if spider_name == spider_class.name:
+                    return spider_class
+    return None
+
+
+def get_dataset_attributes(spider_name) -> {}:
+    spider_class = find_spider_class(spider_name)
+    dataset_attributes = getattr(spider_class, "dataset_attributes", {})
+    settings = getattr(spider_class, "custom_settings", {}) or {}
+    if not settings.get("ROBOTSTXT_OBEY", True):
+        # See https://github.com/alltheplaces/alltheplaces/issues/4537
+        dataset_attributes["spider:robots_txt"] = "ignored"
+    dataset_attributes["@spider"] = spider_name
+
+    return dataset_attributes
+
+
 class LineDelimitedGeoJsonExporter(JsonLinesItemExporter):
+    dataset_attributes = None
+    first_item = True
+
+    def export_item(self, item):
+        if self.first_item:
+            self.first_item = False
+            self.dataset_attributes = get_dataset_attributes(item["extras"].get("@spider"))
+        super().export_item(item)
+
     def _get_serialized_fields(self, item, default_value=None, include_empty=None):
         feature = []
         feature.append(("type", "Feature"))
         feature.append(("id", compute_hash(item)))
+        feature.append(("dataset_attributes", self.dataset_attributes))
         feature.append(("properties", item_to_properties(item)))
 
         lat = item.get("lat")
         lon = item.get("lon")
-        if lat and lon:
+        geometry = item.get("geometry")
+        if lat and lon and not geometry:
             try:
-                feature.append(
-                    (
-                        "geometry",
-                        {
-                            "type": "Point",
-                            "coordinates": [float(item["lon"]), float(item["lat"])],
-                        },
-                    )
-                )
+                geometry = {
+                    "type": "Point",
+                    "coordinates": [float(item["lon"]), float(item["lat"])],
+                }
             except ValueError:
-                logging.warning("Couldn't convert lat (%s) and lon (%s) to string", lat, lon)
+                logging.warning("Couldn't convert lat (%s) and lon (%s) to float", lat, lon)
+        if geometry:
+            feature.append(("geometry", geometry))
 
         return feature
 
 
 class GeoJsonExporter(JsonItemExporter):
+    def __init__(self, file, **kwargs):
+        super().__init__(file, **kwargs)
+        self.spider_name = None
+
+    def start_exporting(self):
+        pass
+
+    def export_item(self, item):
+        spider_name = item.get("extras", {}).get("@spider")
+        if self.first_item:
+            self.spider_name = spider_name
+            self.write_geojson_header()
+        if spider_name != self.spider_name:
+            # It really should not happen that a single exporter instance
+            # handles output from different spiders. If it does happen,
+            # we rather crash than emit GeoJSON with the wrong dataset
+            # properties, which may include legally relevant license tags.
+            raise ValueError(
+                f"harvest from multiple spiders ({spider_name, self.spider_name}) cannot be written to same GeoJSON file"
+            )
+
+        super().export_item(item)
+
     def _get_serialized_fields(self, item, default_value=None, include_empty=None):
         feature = []
         feature.append(("type", "Feature"))
@@ -98,24 +158,28 @@ class GeoJsonExporter(JsonItemExporter):
 
         lat = item.get("lat")
         lon = item.get("lon")
-        if lat and lon:
+        geometry = item.get("geometry")
+        if lat and lon and not geometry:
             try:
-                feature.append(
-                    (
-                        "geometry",
-                        {
-                            "type": "Point",
-                            "coordinates": [float(item["lon"]), float(item["lat"])],
-                        },
-                    )
-                )
+                geometry = {
+                    "type": "Point",
+                    "coordinates": [float(item["lon"]), float(item["lat"])],
+                }
             except ValueError:
-                logging.warning("Couldn't convert lat (%s) and lon (%s) to string", lat, lon)
+                logging.warning("Couldn't convert lat (%s) and lon (%s) to float", lat, lon)
+        if geometry:
+            feature.append(("geometry", geometry))
 
         return feature
 
-    def start_exporting(self):
-        self.file.write(to_bytes('{"type":"FeatureCollection","features":[', self.encoding))
+    def write_geojson_header(self):
+        header = io.StringIO()
+        header.write('{"type":"FeatureCollection","dataset_attributes":')
+        json.dump(
+            get_dataset_attributes(self.spider_name), header, ensure_ascii=False, separators=(",", ":"), sort_keys=True
+        )
+        header.write(',"features":[\n')
+        self.file.write(to_bytes(header.getvalue(), self.encoding))
 
     def finish_exporting(self):
-        self.file.write(to_bytes("]}", self.encoding))
+        self.file.write(b"\n]}\n")

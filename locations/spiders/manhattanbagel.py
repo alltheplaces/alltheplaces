@@ -3,7 +3,7 @@ import re
 import scrapy
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 DAY_MAPPING = {
     "Monday": "Mo",
@@ -76,7 +76,7 @@ class ManhattanBagelSpider(scrapy.Spider):
         if hours:
             properties["opening_hours"] = hours
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)
 
     def parse(self, response):
         urls = response.xpath('//a[@class="Directory-listLink"]/@href').extract()

@@ -2,7 +2,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class JDWetherspoonSpider(scrapy.Spider):
@@ -34,4 +34,4 @@ class JDWetherspoonSpider(scrapy.Spider):
             "website": response.url,
         }
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

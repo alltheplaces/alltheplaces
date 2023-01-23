@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class RoadRangerSpider(scrapy.Spider):
@@ -21,7 +21,7 @@ class RoadRangerSpider(scrapy.Spider):
 
             amenities = location.css(".store-location-teaser__amenities").get()
 
-            yield GeojsonPointItem(
+            yield Feature(
                 ref=address,
                 name="Road Ranger",
                 addr_full=address,

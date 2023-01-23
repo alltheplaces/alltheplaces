@@ -2,7 +2,7 @@ import json
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class PrimroseSchoolsSpider(scrapy.Spider):
@@ -44,4 +44,4 @@ class PrimroseSchoolsSpider(scrapy.Spider):
                     "lat": float(i["latitude"]),
                     "lon": float(i["longitude"]),
                 }
-                yield GeojsonPointItem(**properties)
+                yield Feature(**properties)

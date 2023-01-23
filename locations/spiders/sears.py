@@ -1,7 +1,7 @@
 import scrapy
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class SearsSpider(scrapy.spiders.SitemapSpider):
@@ -48,4 +48,4 @@ class SearsSpider(scrapy.spiders.SitemapSpider):
             # Likely stale; these are now american_freight
             # Refs are distinct
             properties.update({"brand": "Sears Outlet", "brand_wikidata": "Q20080412"})
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

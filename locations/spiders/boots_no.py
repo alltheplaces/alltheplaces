@@ -3,7 +3,7 @@ import urllib.parse
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class BootsNOSpider(scrapy.Spider):
@@ -33,7 +33,7 @@ class BootsNOSpider(scrapy.Spider):
             "website": response.meta["website"],
         }
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)
 
     def parse_store(self, response):
         ref = re.search(r".+/(.+?)/?(?:\.html|$)", response.url).group(1)

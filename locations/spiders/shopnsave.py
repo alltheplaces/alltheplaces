@@ -2,7 +2,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 DAY_DICT = {
     "Mon": "Mo",
@@ -55,7 +55,7 @@ class ShopnSaveSpider(scrapy.Spider):
                 "phone": self.phone(store.xpath('td[@class="store-result-phone"]/strong/text()')[0].extract()),
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)
 
     def city(self, data):
         str_list = data.split(",")

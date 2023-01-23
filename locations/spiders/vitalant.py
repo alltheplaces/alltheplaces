@@ -3,7 +3,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class VitalantSpider(scrapy.Spider):
@@ -41,4 +41,4 @@ class VitalantSpider(scrapy.Spider):
                 "state": state,
                 "postcode": postcode,
             }
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

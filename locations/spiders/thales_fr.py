@@ -4,7 +4,7 @@ import zipfile
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class ThalesFrSpider(scrapy.Spider):
@@ -52,4 +52,4 @@ class ThalesFrSpider(scrapy.Spider):
             "lon": x,
         }
 
-        return GeojsonPointItem(**properties)
+        return Feature(**properties)

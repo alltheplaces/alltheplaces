@@ -2,7 +2,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class DelawareNorthSpider(scrapy.Spider):
@@ -29,6 +29,6 @@ class DelawareNorthSpider(scrapy.Spider):
                 "addr_full": address,
                 "website": response.url,
             }
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)
         except:
             pass

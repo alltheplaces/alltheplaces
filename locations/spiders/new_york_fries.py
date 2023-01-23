@@ -3,7 +3,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class NewYorkFriesSpider(scrapy.Spider):
@@ -34,7 +34,7 @@ class NewYorkFriesSpider(scrapy.Spider):
                 "website": place["url"],
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)
 
         places_intl = re.search(r"intlEntries\s=\s(.*)", data).groups()[0]
 
@@ -53,4 +53,4 @@ class NewYorkFriesSpider(scrapy.Spider):
                 "website": place["url"],
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

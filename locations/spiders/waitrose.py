@@ -3,7 +3,7 @@ from itertools import groupby
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 _DAYNAMES = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
 
@@ -56,7 +56,7 @@ class WaitroseSpider(scrapy.Spider):
                 }
             )
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)
             return
 
         # otherwise it's the top-level store page

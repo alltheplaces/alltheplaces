@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class SentryFoodsSpider(scrapy.Spider):
@@ -40,4 +40,4 @@ class SentryFoodsSpider(scrapy.Spider):
                 "state": state,
                 "postcode": zipcode,
             }
-            yield GeojsonPointItem(**props)
+            yield Feature(**props)

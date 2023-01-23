@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class CenexSpider(scrapy.Spider):
@@ -44,7 +44,7 @@ class CenexSpider(scrapy.Spider):
         for store in result["SearchResponse"]["Locations"]:
             amenities = "|".join([a["Name"] for a in store["Amenities"]])
 
-            yield GeojsonPointItem(
+            yield Feature(
                 lon=store["Long"],
                 lat=store["Lat"],
                 ref=store["LocationId"],

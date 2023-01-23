@@ -1,7 +1,7 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
-from locations.user_agents import BROSWER_DEFAULT
+from locations.items import Feature
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class ErbertandGerbertsSpider(scrapy.Spider):
@@ -9,7 +9,7 @@ class ErbertandGerbertsSpider(scrapy.Spider):
     item_attributes = {"brand": "Erbert & Gerbert's", "brand_wikidata": "Q5385097"}
     allowed_domains = ["erbertandgerberts.com"]
     start_urls = ["https://www.erbertandgerberts.com/store-sitemap.xml"]
-    user_agent = BROSWER_DEFAULT
+    user_agent = BROWSER_DEFAULT
 
     def parse(self, response):
         response.selector.remove_namespaces()
@@ -43,4 +43,4 @@ class ErbertandGerbertsSpider(scrapy.Spider):
             .split('"')[1],
         }
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

@@ -1,7 +1,7 @@
 import scrapy
 from xlrd import open_workbook
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 BRANDS = {"T": "TravelCenters of America", "P": "Petro", "TE": "TA Express"}
 
@@ -35,7 +35,7 @@ class TAPetroSpider(scrapy.Spider):
                 continue
 
             ref = "{}-{}-{}".format(store["SITE ID#"], store["BRAND"], store["LOCATION_ID"])
-            yield GeojsonPointItem(
+            yield Feature(
                 ref=ref,
                 lat=float(store["LATITUDE"]),
                 lon=float(store["LONGITUDE"]),

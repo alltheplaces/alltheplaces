@@ -3,8 +3,8 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
-from locations.user_agents import BROSWER_DEFAULT
+from locations.items import Feature
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class LibertyMutualSpider(scrapy.Spider):
@@ -14,7 +14,7 @@ class LibertyMutualSpider(scrapy.Spider):
     start_urls = ["http://www.libertymutual.com/office-sitemap.xml"]
     download_delay = 10
     custom_settings = {"CONCURRENT_REQUESTS": "1"}
-    user_agent = BROSWER_DEFAULT
+    user_agent = BROWSER_DEFAULT
 
     def parse_store(self, response):
         data = re.search(
@@ -39,7 +39,7 @@ class LibertyMutualSpider(scrapy.Spider):
                 "lon": lon,
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)
 
     def parse(self, response):
         response.selector.remove_namespaces()

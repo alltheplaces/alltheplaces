@@ -5,7 +5,7 @@ import scrapy
 from scrapy.selector import Selector
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class TropicalSmoothieCafeSpider(scrapy.Spider):
@@ -54,7 +54,7 @@ class TropicalSmoothieCafeSpider(scrapy.Spider):
             "lat": response.xpath('//*[@itemprop="latitude"]/@content').get(),
             "lon": response.xpath('//*[@itemprop="longitude"]/@content').get(),
         }
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)
 
     def parse_hours(self, hours_json):
         opening_hours = OpeningHours()

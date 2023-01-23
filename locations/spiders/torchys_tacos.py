@@ -1,7 +1,7 @@
 import scrapy
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 WEEKDAYS = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
 
@@ -40,7 +40,7 @@ class TorchysTacosSpider(scrapy.Spider):
             "lon": store_info.xpath('.//div[@id="ttMap"]/@data-lon').extract_first(),
             "opening_hours": oh,
         }
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)
 
     def parse_hours(self, hours):
         oh = OpeningHours()

@@ -4,7 +4,7 @@ from datetime import datetime
 import scrapy
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class WhidbeyCoffeeSpider(scrapy.Spider):
@@ -29,7 +29,7 @@ class WhidbeyCoffeeSpider(scrapy.Spider):
 
         lat, lon = re.search(r".*@(-?[\d.]+),(-?[\d.]+).*", map_link).groups()
 
-        yield GeojsonPointItem(
+        yield Feature(
             ref=response.url.split("/")[-1],
             name=response.xpath("//h1/text()").extract_first().strip(),
             lat=float(lat),

@@ -2,12 +2,13 @@ import json
 
 from scrapy.spiders import SitemapSpider
 
-from locations.items import GeojsonPointItem
+from locations.categories import Categories
+from locations.items import Feature
 
 
 class WesternUnionSpider(SitemapSpider):
     name = "western_union"
-    item_attributes = {"brand": "Western Union", "brand_wikidata": "Q861042"}
+    item_attributes = {"brand": "Western Union", "brand_wikidata": "Q861042", "extras": Categories.MONEY_TRANSFER.value}
     allowed_domains = ["location.westernunion.com", "locations.westernunion.com"]
     # Use plural, singular responds with a redirect confusing to scrapy?
     sitemap_urls = ["https://locations.westernunion.com/robots.txt"]
@@ -60,4 +61,4 @@ class WesternUnionSpider(SitemapSpider):
             "country": store["country"],
             "phone": store["phone"],
         }
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

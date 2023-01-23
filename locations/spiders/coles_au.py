@@ -2,7 +2,7 @@ import json
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class ColesAUSpider(scrapy.Spider):
@@ -42,4 +42,4 @@ class ColesAUSpider(scrapy.Spider):
                 "lon": i["longitude"],
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

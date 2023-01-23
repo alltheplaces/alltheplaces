@@ -2,7 +2,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 DAYS = {
     "Monday": "Mo",
@@ -106,4 +106,4 @@ class NextcareSpider(scrapy.Spider):
             if unp[key]:
                 properties[key] = unp[key].strip()
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

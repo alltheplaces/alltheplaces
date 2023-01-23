@@ -4,7 +4,7 @@ import chompjs
 import json5
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class LinkedDataParser:
@@ -62,8 +62,8 @@ class LinkedDataParser:
                     return ld_obj
 
     @staticmethod
-    def parse_ld(ld) -> GeojsonPointItem:  # noqa: C901
-        item = GeojsonPointItem()
+    def parse_ld(ld) -> Feature:  # noqa: C901
+        item = Feature()
 
         if (geo := ld.get("geo")) or "location" in ld and (geo := ld["location"].get("geo")):
             if isinstance(geo, list):
@@ -145,7 +145,7 @@ class LinkedDataParser:
         return item
 
     @staticmethod
-    def parse(response, wanted_type, json_parser="json") -> GeojsonPointItem:
+    def parse(response, wanted_type, json_parser="json") -> Feature:
         ld_item = LinkedDataParser.find_linked_data(response, wanted_type, json_parser=json_parser)
         if ld_item:
             item = LinkedDataParser.parse_ld(ld_item)

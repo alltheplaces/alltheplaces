@@ -2,7 +2,7 @@ import json
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class TijuanaFlatsSpider(scrapy.Spider):
@@ -35,4 +35,4 @@ class TijuanaFlatsSpider(scrapy.Spider):
                 "website": f'https://www.tijuanaflats.com/locations/{row["slug"]}',
                 "opening_hours": opening_hours,
             }
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

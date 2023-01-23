@@ -3,7 +3,7 @@ import json
 from scrapy.spiders import SitemapSpider
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 WEEKDAYS = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
 
@@ -53,7 +53,7 @@ class LuLuLemonSpider(SitemapSpider):
             "lon": geo.get("lon"),
             "opening_hours": oh,
         }
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)
 
     def parse_hours(self, hours):
         oh = OpeningHours()

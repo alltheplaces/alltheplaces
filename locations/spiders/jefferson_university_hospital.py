@@ -1,8 +1,7 @@
-import re
-
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.dict_parser import DictParser
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class JeffersonUniversityHospitalSpider(scrapy.Spider):
@@ -11,49 +10,28 @@ class JeffersonUniversityHospitalSpider(scrapy.Spider):
         "brand": "Jefferson University Hospital",
         "brand_wikidata": "Q59676202",
     }
-    allowed_domains = ["https://hospitals.jefferson.edu"]
-    start_urls = [
-        "https://hospitals.jefferson.edu/find-a-location.html",
-    ]
+    allowed_domains = ["jeffersonhealth.org", "jeffersonhealth-prod.searchstax.com"]
+    user_agent = BROWSER_DEFAULT
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
-    def parse(self, response):
-        data = " ".join(response.xpath('//script[contains(text(), "itemsArray.push")]/text()').extract())
-        locations = re.findall(r"itemsArray.push\((.+?)\);", data)
+    def start_requests(self):
+        url = "https://jeffersonhealth-prod.searchstax.com/solr/jh-prod/search-name-location?rows=10&start=0&fq=content_type:health2021/content-type/location"
+        headers = {"Authorization": "Basic amgtcHJvZC1yZWFkb25seTpjMyoyZEpOdm1jYVRReTch"}
+        yield scrapy.Request(url=url, headers=headers, callback=self.get_number_locations)
 
-        for loc in locations:
-            if len(loc.split(";")) == 6:
+    def get_number_locations(self, response):
+        numbers_locations = response.json().get("response", {}).get("numFound")
+        url = f"https://jeffersonhealth-prod.searchstax.com/solr/jh-prod/search-name-location?rows={numbers_locations}&start=0&fq=content_type:health2021/content-type/location"
+        headers = {"Authorization": "Basic amgtcHJvZC1yZWFkb25seTpjMyoyZEpOdm1jYVRReTch"}
+        yield scrapy.Request(url=url, headers=headers, callback=self.get_details_location)
 
-                loctype, locname, html, url, lat, lon = loc.strip("'").split(";")
+    def get_details_location(self, response):
+        domain = "https://www.jeffersonhealth.org"
+        for url in response.json().get("response", {}).get("docs", {}):
+            yield scrapy.Request(url=f'{domain}{url.get("page_url")}.model.json', callback=self.parse_location)
 
-                phone = re.search(r"Phone:.*?([\d\-]+?)</p>", html)
-                if phone:
-                    phone = phone.groups()[0]
+    def parse_location(self, response):
+        item = DictParser.parse(response.json().get("locationLinkingData"))
+        item["ref"] = item["website"]
 
-                postcode = re.search(r"<br>.+?,.+?(\d{5})</p>", html)
-                if postcode:
-                    postcode = postcode.groups()[0]
-
-                addr_full = re.search(r"</h3><p>(.+?)<br>", html)
-                if addr_full:
-                    addr_full = addr_full.groups()[0]
-
-                properties = {
-                    "name": locname,
-                    "ref": loctype + "_" + locname,
-                    "addr_full": addr_full if addr_full else re.search(r"</h3> <p>(.+?)<br>", html).groups()[0],
-                    "city": re.search(r"<br>(.+?),", html).groups()[0],
-                    "state": re.search(r",(\s\D{2})", html).groups()[0].strip(),
-                    "postcode": postcode if postcode else None,
-                    "phone": phone if phone else None,
-                    "website": url,
-                    "lat": float(lat),
-                    "lon": float(lon),
-                }
-
-            else:
-                loctype, html = loc.strip("'").split(";")
-                locname, addr_full = html.split("(")
-
-                properties = {"name": locname, "ref": loc, "addr_full": addr_full}
-
-            yield GeojsonPointItem(**properties)
+        yield item

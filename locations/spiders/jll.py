@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class JllSpider(scrapy.Spider):
@@ -36,4 +36,4 @@ class JllSpider(scrapy.Spider):
             if "https://www.us.jll.com/en/locations" in properties["website"]:
                 properties["country"] = "US"
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

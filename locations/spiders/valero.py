@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 usa_bbox = [-125, 24, -65, 51]
 xstep = 5
@@ -61,4 +61,4 @@ class ValeroSpider(scrapy.Spider):
                     "fuel:e85": "E-85" in amenities or None,
                 },
             }
-            yield GeojsonPointItem(**item)
+            yield Feature(**item)

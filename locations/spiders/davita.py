@@ -1,7 +1,7 @@
 import scrapy
 from geonamescache import GeonamesCache
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class DavitaSpider(scrapy.Spider):
@@ -31,4 +31,4 @@ class DavitaSpider(scrapy.Spider):
                 "lon": location["address"].get("longitude"),
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

@@ -2,7 +2,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class LovinghutSpider(scrapy.Spider):
@@ -98,7 +98,7 @@ class LovinghutSpider(scrapy.Spider):
 
         product["opening_hours"] = opening_hours
 
-        yield GeojsonPointItem(**product)
+        yield Feature(**product)
 
     def _clean_text(self, text):
         return re.sub("[\r\n\t]", "", text).strip()

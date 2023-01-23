@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class SupervaluSpider(scrapy.Spider):
@@ -15,7 +15,7 @@ class SupervaluSpider(scrapy.Spider):
     def parse(self, response):
         stores = response.json()
         for store in stores:
-            yield GeojsonPointItem(
+            yield Feature(
                 city=store["city"],
                 ref=store["id"],
                 lat=store["lat"],

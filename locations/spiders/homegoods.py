@@ -4,8 +4,8 @@ import re
 from scrapy.spiders import SitemapSpider
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
-from locations.user_agents import BROSWER_DEFAULT
+from locations.items import Feature
+from locations.user_agents import BROWSER_DEFAULT
 
 DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 
@@ -24,7 +24,7 @@ class HomeGoodsSpider(SitemapSpider):
             "parse",
         )
     ]
-    user_agent = BROSWER_DEFAULT
+    user_agent = BROWSER_DEFAULT
 
     def parse_hours(self, hours):
         """Mon-Thu: 9am - 9pm, Black Friday: 8am - 10pm, Sat: 9am - 9pm, Sun: 10am - 8pm"""
@@ -62,7 +62,7 @@ class HomeGoodsSpider(SitemapSpider):
         return opening_hours.as_opening_hours()
 
     def parse(self, response):
-        item = GeojsonPointItem()
+        item = Feature()
 
         item["name"] = response.xpath('//input[@name="storeName"]/@value').get()
         item["opening_hours"] = self.parse_hours(response.xpath('//input[@name="hours"]/@value').get())

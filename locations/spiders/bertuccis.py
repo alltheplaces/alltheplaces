@@ -4,7 +4,7 @@ import re
 import scrapy
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class BertuccisSpider(scrapy.Spider):
@@ -47,7 +47,7 @@ class BertuccisSpider(scrapy.Spider):
             "website": response.url,
             "opening_hours": opening_hours,
         }
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)
 
     def parse_hours(self, store_hours):
         opening_hours = OpeningHours()

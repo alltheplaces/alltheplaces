@@ -2,8 +2,8 @@ import json
 
 import scrapy
 
-from locations.items import GeojsonPointItem
-from locations.user_agents import BROSWER_DEFAULT
+from locations.items import Feature
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class EquinoxSpider(scrapy.Spider):
@@ -11,7 +11,7 @@ class EquinoxSpider(scrapy.Spider):
     item_attributes = {"brand": "Equinox Fitness", "brand_wikidata": "Q5384535"}
     allowed_domains = ["cdn.contentful.com"]
     start_url = "https://cdn.contentful.com/spaces/drib7o8rcbyf/environments/master/entries?content_type=club&include=3"
-    user_agent = BROSWER_DEFAULT
+    user_agent = BROWSER_DEFAULT
 
     headers = {
         "Authorization": "Bearer jQC0m25d6MdSBGuBMFANzxpuWt5O_sdQOIYfLpqxcAI",
@@ -27,7 +27,7 @@ class EquinoxSpider(scrapy.Spider):
         data = json.loads(response.text)
         for item in data["items"]:
             fields = item["fields"]
-            yield GeojsonPointItem(
+            yield Feature(
                 name=fields["name"],
                 addr_full=fields["address"],
                 city=fields["city"],

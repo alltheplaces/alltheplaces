@@ -4,7 +4,7 @@ import re
 import scrapy
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 DAY_MAPPING = {
     "MONDAY": "Mo",
@@ -80,4 +80,4 @@ class QdobaSpider(scrapy.Spider):
         if hours:
             properties["opening_hours"] = self.parse_hours(hours)
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

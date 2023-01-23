@@ -3,7 +3,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class QuestDiagnosticsSpider(scrapy.Spider):
@@ -42,4 +42,4 @@ class QuestDiagnosticsSpider(scrapy.Spider):
                 "postcode": data["address"]["postalCode"],
                 "country": data["address"]["addressCountry"],
             }
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

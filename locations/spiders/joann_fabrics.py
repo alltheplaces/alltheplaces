@@ -4,7 +4,7 @@ import scrapy
 from scrapy.linkextractors import LinkExtractor
 from w3lib.html import remove_tags
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 STATES = [
     "al",
@@ -94,10 +94,10 @@ class JoAnnFabricsSpider(scrapy.Spider):
             yield scrapy.Request(store, callback=self.parse_store_data, headers=HEADERS)
 
     def parse_store_data(self, response):
-        """Yield a GeojsonPointItem of the store's data"""  # Pull the data off the stores page
+        """Yield a Feature of the store's data"""  # Pull the data off the stores page
         store = json.loads(remove_tags(response.xpath('//script[@type="application/ld+json"]')[1:].extract()[0]))
         store_hours = self.hours(store)
-        yield GeojsonPointItem(
+        yield Feature(
             ref=store["url"],
             lat=store["geo"]["latitude"],
             lon=store["geo"]["longitude"],

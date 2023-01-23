@@ -2,7 +2,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class VillageInnSpider(scrapy.Spider):
@@ -42,7 +42,7 @@ class VillageInnSpider(scrapy.Spider):
         if address:
             properties.update(address)
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)
 
     def address(self, data):
         address = data.css(".block::text").extract()

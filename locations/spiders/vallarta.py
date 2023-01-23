@@ -1,7 +1,7 @@
 import scrapy
 
 from locations.hours import DAYS, OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class VallartaSpider(scrapy.Spider):
@@ -24,7 +24,7 @@ class VallartaSpider(scrapy.Spider):
         address = response.xpath("//div[@class='blade store-location']/div/div/div[2]/p[1]/text()").extract()
 
         # No lat/lon in source code; Google map link contains address
-        yield GeojsonPointItem(
+        yield Feature(
             ref=response.url.split("/")[-2],
             name=response.xpath("//div[@class='page-breadcrumb']/span/text()").extract_first(),
             addr_full=address[1].strip(),

@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class NespressoSpider(scrapy.Spider):
@@ -34,4 +34,4 @@ class NespressoSpider(scrapy.Spider):
                 "phone": store["point_of_interest"]["phone"],
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

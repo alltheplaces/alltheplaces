@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class TommyHilfigerSpider(scrapy.Spider):
@@ -41,4 +41,4 @@ class TommyHilfigerSpider(scrapy.Spider):
             if store.get("telephone1"):
                 properties["phone"] = store["telephone1"].strip()
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

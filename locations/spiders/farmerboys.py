@@ -4,7 +4,7 @@ import re
 import scrapy
 
 from locations.hours import OpeningHours, day_range, sanitise_day
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class FarmerBoys(scrapy.Spider):
@@ -59,4 +59,4 @@ class FarmerBoys(scrapy.Spider):
 
             properties["opening_hours"] = oh.as_opening_hours()
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

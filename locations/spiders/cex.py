@@ -1,7 +1,7 @@
 import scrapy
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class CeXSpider(scrapy.Spider):
@@ -22,7 +22,7 @@ class CeXSpider(scrapy.Spider):
         store = response.json()["response"]["data"]["store"]
         ref = response.url.split("/")[5]
 
-        item = GeojsonPointItem()
+        item = Feature()
 
         item["lat"] = store["latitude"]
         item["lon"] = store["longitude"]

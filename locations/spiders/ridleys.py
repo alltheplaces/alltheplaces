@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class Ridleys(scrapy.Spider):
@@ -25,4 +25,4 @@ class Ridleys(scrapy.Spider):
                 "country": "US",
             }
 
-            yield GeojsonPointItem(**props)
+            yield Feature(**props)

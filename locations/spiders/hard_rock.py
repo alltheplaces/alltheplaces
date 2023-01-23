@@ -2,7 +2,7 @@ import json
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class HardRockSpider(scrapy.Spider):
@@ -28,4 +28,4 @@ class HardRockSpider(scrapy.Spider):
                 "phone": location["interestpointPhoneNumber"],
                 "website": location["interestpointMoreInfoLink"],
             }
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

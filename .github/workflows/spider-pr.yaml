@@ -16,25 +16,20 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
-    - name: Setup Python
-      uses: actions/setup-python@master
+    - uses: actions/setup-python@v4
       with:
-        python-version: '3.10'
+        python-version: '3.11'
+        cache: 'pipenv'
     - name: Install pipenv
       run: |
         pip --quiet install pipenv
-    # https://github.com/actions/cache/blob/main/examples.md#python---pipenv
-    - uses: actions/cache@v3
-      with:
-        path: ~/.local/share/virtualenvs
-        key: ${{ runner.os }}-python-${{ steps.setup-python.outputs.python-version }}-pipenv-${{ hashFiles('Pipfile.lock') }}
     - name: Install dependencies
       run: |
-        pipenv --bare install --system --deploy
+        pipenv --bare install --deploy
         sudo apt-get install jq
     - name: Run Scrapy check
       run: |
-        scrapy check
+        pipenv run scrapy check
     - name: Run spiders that changed
       shell: bash
       run: |
@@ -44,7 +39,19 @@ jobs:
         export AWS_SECRET_ACCESS_KEY=$(echo -n "${AWS_SEC}" | base64 --decode)
         export AWS_REGION="us-east-1"
 
-        SPIDERS=$(curl -sL https://api.github.com/repos/alltheplaces/alltheplaces/pulls/${{ github.event.number }}/files | jq -r '.[] | select(.status != "removed") | .filename')
+        pr_file_changes=$(curl -sL --header 'authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' "https://api.github.com/repos/alltheplaces/alltheplaces/pulls/${{ github.event.number }}/files")
+        (>&2 echo "PR response: ${pr_file_changes}")
+        SPIDERS=$(echo $pr_file_changes | jq -r '.[] | select(.status != "removed") | .filename')
+        retval=$?
+        if [ ! $retval -eq 0 ]; then
+            (>&2 echo "checking file changes failed. response was ${pr_file_changes}")
+            exit 1
+        fi
+
+        if [ $(wc -l <<< "$SPIDERS") -gt 5 ]; then
+            (>&2 echo "refusing to run on more than 5 spiders")
+            exit 1
+        fi
 
         RUN_DIR="${GITHUB_WORKSPACE}/output"
         EXIT_CODE=0
@@ -65,7 +72,7 @@ jobs:
             LOGFILE="${SPIDER_RUN_DIR}/log.txt"
             OUTFILE="${SPIDER_RUN_DIR}/output.geojson"
 
-            scrapy runspider \
+            pipenv run scrapy runspider \
                 -o "file://${OUTFILE}:geojson" \
                 --loglevel=INFO \
                 --logfile="${LOGFILE}" \

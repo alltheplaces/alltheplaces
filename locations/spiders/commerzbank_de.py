@@ -4,7 +4,7 @@ import re
 import scrapy
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 DAY_MAPPING = {
     "mo": "Mo",
@@ -73,7 +73,7 @@ class CommerzbankDESpider(scrapy.Spider):
                 if hours:
                     properties["opening_hours"] = hours
 
-                yield GeojsonPointItem(**properties)
+                yield Feature(**properties)
 
     def parse(self, response):
         branches = response.xpath('//div[@class="mainContent"]//a[@class="SitemapLink"]/@href').getall()

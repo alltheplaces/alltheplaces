@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class KorianFrSpider(scrapy.Spider):
@@ -55,4 +55,4 @@ class KorianFrSpider(scrapy.Spider):
                 "website": "https://www.korian.fr/" + store["redirecturl"],
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

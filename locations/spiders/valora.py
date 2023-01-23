@@ -3,7 +3,7 @@ import re
 import scrapy
 
 from locations.categories import Categories
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class ValoraSpider(scrapy.Spider):
@@ -64,7 +64,7 @@ class ValoraSpider(scrapy.Spider):
                 if k in properties:
                     properties.setdefault("extras", {})[k] = properties[k]
                     del properties[k]
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)
 
     def parse_countries(self, feed):
         countries = {}

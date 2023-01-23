@@ -2,8 +2,8 @@ import json
 
 import scrapy
 
-from locations.items import GeojsonPointItem
-from locations.user_agents import BROSWER_DEFAULT
+from locations.items import Feature
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class BaptistHealthArkansasSpider(scrapy.Spider):
@@ -14,7 +14,7 @@ class BaptistHealthArkansasSpider(scrapy.Spider):
     }
     allowed_domains = ["algolia.net", "baptist-health.com"]
     start_urls = ["https://www.baptist-health.com/healthcare-arkansas-locations/"]
-    user_agent = BROSWER_DEFAULT
+    user_agent = BROWSER_DEFAULT
 
     def parse(self, response):
         url = "https://6eh1ib012d-dsn.algolia.net/1/indexes/*/queries?x-algolia-agent=Algolia%20for%20JavaScript%20(3.33.0)%3B%20Browser%20(lite)%3B%20instantsearch.js%20(3.6.0)%3B%20Vue%20(2.6.10)%3B%20Vue%20InstantSearch%20(2.3.0)%3B%20JS%20Helper%20(2.28.0)&x-algolia-application-id=6EH1IB012D&x-algolia-api-key=66eafc59867885378e0a81317ea35987"
@@ -58,4 +58,4 @@ class BaptistHealthArkansasSpider(scrapy.Spider):
                     "lat": float(j["_geoloc"]["lat"]),
                     "lon": float(j["_geoloc"]["lng"]),
                 }
-                yield GeojsonPointItem(**properties)
+                yield Feature(**properties)

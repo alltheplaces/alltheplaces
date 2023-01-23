@@ -3,7 +3,7 @@ import re
 import scrapy
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class ShoneysSpider(scrapy.Spider):
@@ -30,4 +30,4 @@ class ShoneysSpider(scrapy.Spider):
                 "phone": row["acf"]["phone"],
                 "opening_hours": hours.as_opening_hours(),
             }
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

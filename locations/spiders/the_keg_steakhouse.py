@@ -3,7 +3,7 @@ import datetime
 import scrapy
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 DAYS_NAME = {
     "Monday": "Mo",
@@ -64,4 +64,4 @@ class TheKegSteakhouseSpider(scrapy.Spider):
                 if h:
                     properties["opening_hours"] = h
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

@@ -3,7 +3,7 @@ import re
 
 from scrapy.spiders import SitemapSpider
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class FarmersInsuranceSpider(SitemapSpider):
@@ -44,7 +44,7 @@ class FarmersInsuranceSpider(SitemapSpider):
 
         if hours_data:
             properties["opening_hours"] = hours_data
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)
 
     def parse_hours(self, hours_data):
         if hours_data is None:

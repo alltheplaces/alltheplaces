@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class BeefOBradysSpider(scrapy.Spider):
@@ -33,4 +33,4 @@ class BeefOBradysSpider(scrapy.Spider):
                 },
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class CGIGroupSpider(scrapy.Spider):
@@ -59,4 +59,4 @@ class CGIGroupSpider(scrapy.Spider):
 
             properties["ref"] = hash(str(properties))
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

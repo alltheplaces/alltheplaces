@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class CaesarsSpider(scrapy.Spider):
@@ -39,4 +39,4 @@ class CaesarsSpider(scrapy.Spider):
                 "extras": {"brand": store["brand"]},
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

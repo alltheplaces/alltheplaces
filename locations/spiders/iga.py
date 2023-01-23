@@ -1,44 +1,33 @@
-import re
-
 import scrapy
 
-from locations.items import GeojsonPointItem
-
-DAYS = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
+from locations.items import Feature
 
 
 class IgaSpider(scrapy.Spider):
     name = "iga"
-    item_attributes = {"brand": "IGA"}
+    item_attributes = {"brand": "IGA", "brand_wikidata": "Q3146662"}
     allowed_domains = ["iga.com"]
-    start_urls = ("https://www.iga.com/consumer/locator.aspx",)
+    start_urls = ["https://www.iga.com/find-a-store"]
 
     def parse(self, response):
-        next_page = response.xpath('//li[@class="next"]/a/@href').extract_first()
+        next_page = response.xpath('//a[@class="blog-navigation-next"]/@href').get()
 
-        stores = response.xpath('//ol[contains(@class,"results")]/li')
+        stores = response.xpath('//div[@class="span6"]/div[@class="row-fluid-wrapper"]')
         for store in stores:
-            position = re.search(
-                r"\?daddr=(.*),(.*)",
-                store.xpath('.//a[contains(.,"Driving Directions")]/@href').extract_first(),
+            addr_full = store.xpath(".//@data-address").get().strip()
+            yield Feature(
+                lat=store.xpath(".//@data-lat").get(),
+                lon=store.xpath(".//@data-long").get(),
+                phone=store.xpath("//strong/a/text()").get(),
+                ref=store.xpath('.//div[@class="store-logo"]/img/@alt').get().replace("Logo", "").strip(),
+                name=store.xpath('.//div[@class="store-logo"]/img/@alt').get().replace("Logo", "").strip(),
+                website=store.xpath('.//a[@class="store-website-link"]/@href').get(),
+                addr_full=addr_full,
+                postcode=addr_full.split(",")[-1:][0].strip(),
+                city=addr_full.split(",")[-3:][0].strip(),
+                state=addr_full.split(",")[-2:][0].strip(),
+                street_address=addr_full.split(",")[:1][0].strip(),
             )
 
-            phone = store.xpath('.//span[contains(@class,"tel")]/text()').extract_first()
-            if phone:
-                phone = phone.replace("- Main", "").strip()
-
-            yield GeojsonPointItem(
-                lat=float(position[1]),
-                lon=float(position[2]),
-                phone=phone,
-                website=store.xpath('.//a[contains(.,"View Our Website")]/@href').extract_first(),
-                ref=store.xpath('.//div[contains(@class,"org")]/text()').extract_first(),
-                addr_full=store.xpath('.//div[contains(@class,"street-address")]/text()').extract_first(),
-                city=store.xpath('.//span[contains(@class,"locality")]/text()').extract_first().rstrip(","),
-                state=store.xpath('.//span[contains(@class,"region")]/text()').extract_first().strip(),
-                postcode=store.xpath('.//span[contains(@class,"postal-code")]/text()').extract_first().strip(),
-                country="USA",
-            )
-
-        if next_page:
+        if next_page and stores:
             yield scrapy.Request(response.urljoin(next_page))

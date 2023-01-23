@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class JJillSpider(scrapy.Spider):
@@ -42,7 +42,7 @@ class JJillSpider(scrapy.Spider):
                 "lon": float(longitude),
                 "opening_hours": self.parse_hours(hours) if hours else None,
             }
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)
 
     def parse_hours(self, store_hours):
         opening_hours = []

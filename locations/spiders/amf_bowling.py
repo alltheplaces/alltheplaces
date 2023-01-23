@@ -2,7 +2,7 @@ import json
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class AMFBowlingSpider(scrapy.Spider):
@@ -12,7 +12,7 @@ class AMFBowlingSpider(scrapy.Spider):
 
     def parse(self, response):
         for location in json.loads(response.body):
-            yield GeojsonPointItem(
+            yield Feature(
                 name=location["name"],
                 ref=location["id"],
                 addr_full=location["address1"],

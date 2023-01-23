@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class BeerStoreSpider(scrapy.Spider):
@@ -24,4 +24,4 @@ class BeerStoreSpider(scrapy.Spider):
                 "street_address": description[: description.find(end_str)],
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

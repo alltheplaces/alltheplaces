@@ -2,7 +2,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class FoxsPizzaSpider(scrapy.Spider):
@@ -28,4 +28,4 @@ class FoxsPizzaSpider(scrapy.Spider):
             "phone": response.xpath('//*[@class="phone_no"]//text()').get(),
             "name": response.xpath("//title/text()").get(),
         }
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

@@ -1,60 +1,41 @@
-import scrapy
+import re
 
-from locations.items import GeojsonPointItem
+from locations.hours import DAYS_FR, OpeningHours, day_range, sanitise_day
 from locations.spiders.lidl_gb import LidlGBSpider
+from locations.storefinders.virtualearth import VirtualEarthSpider
 
 
-class LidlFRSpider(scrapy.Spider):
+class LidlFRSpider(VirtualEarthSpider):
     name = "lidl_fr"
     item_attributes = LidlGBSpider.item_attributes
-    allowed_domains = ["virtualearth.net"]
-    base_url = (
-        "https://spatial.virtualearth.net/REST/v1/data/717c7792c09a4aa4a53bb789c6bb94ee/Filialdaten-FR/Filialdaten-FR"
-        "?key=AgC167Ojch2BCIEvqkvyrhl-yLiZLv6nCK_p0K1wyilYx4lcOnTjm6ud60JnqQAa"
-        "&$filter=Adresstyp Eq 1"
-        "&$select=EntityID,ShownStoreName,AddressLine,Locality,PostalCode,CountryRegion,CityDistrict,Latitude,Longitude"
-    )
 
-    def start_requests(self):
-        yield scrapy.Request(
-            self.base_url + "&$inlinecount=allpages" + "&$format=json",
-            callback=self.get_pages,
-        )
+    dataset_id = "717c7792c09a4aa4a53bb789c6bb94ee"
+    dataset_name = "Filialdaten-FR/Filialdaten-FR"
+    key = "AgC167Ojch2BCIEvqkvyrhl-yLiZLv6nCK_p0K1wyilYx4lcOnTjm6ud60JnqQAa"
 
-    def get_pages(self, response):
-        total_count = int(response.json()["d"]["__count"])
-        offset = 0
-        page_size = 250
+    def parse_item(self, item, feature, **kwargs):
+        item["name"] = feature["ShownStoreName"]
 
-        while offset < total_count:
-            yield scrapy.Request(self.base_url + f"&$top={page_size}&$skip={offset}&$format=json")
-            offset += page_size
+        oh = OpeningHours()
+        for day, start_time, end_time in re.findall(
+            r"(\w+ - \w+|\w+) (\d{2}:\d{2})-(\d{2}:\d{2})",
+            feature["OpeningTimes"],
+        ):
+            if "-" in day:
+                start_day, end_day = day.split("-")
 
-    def parse(self, response):
-        stores = response.json()["d"]["results"]
+                start_day = sanitise_day(start_day, DAYS_FR)
+                end_day = sanitise_day(end_day, DAYS_FR)
+            else:
+                start_day = sanitise_day(day, DAYS_FR)
+                end_day = None
 
-        for store in stores:
-            properties = {
-                "name": store["ShownStoreName"],
-                "ref": store["EntityID"],
-                "street_address": store["AddressLine"],
-                "city": store["Locality"],
-                "postcode": store["PostalCode"],
-                "country": store["CountryRegion"],
-                "addr_full": ", ".join(
-                    filter(
-                        None,
-                        (
-                            store["AddressLine"],
-                            store["Locality"],
-                            store["CityDistrict"],
-                            store["PostalCode"],
-                            "France",
-                        ),
-                    )
-                ),
-                "lat": float(store["Latitude"]),
-                "lon": float(store["Longitude"]),
-            }
+            if start_day and end_day:
+                for d in day_range(start_day, end_day):
+                    oh.add_range(d, start_time, end_time)
+            elif start_day:
+                oh.add_range(start_day, start_time, end_time)
 
-            yield GeojsonPointItem(**properties)
+        item["opening_hours"] = oh.as_opening_hours()
+
+        yield item

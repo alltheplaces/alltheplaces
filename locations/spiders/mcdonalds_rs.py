@@ -4,7 +4,7 @@ import re
 import scrapy
 from scrapy.selector import Selector
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 from locations.spiders.mcdonalds import McDonaldsSpider
 
 
@@ -52,4 +52,4 @@ class McDonaldsRSSpider(scrapy.Spider):
                 "postcode": postalCode,
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

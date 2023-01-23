@@ -4,7 +4,7 @@ import re
 import scrapy
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class MainEventSpider(scrapy.Spider):
@@ -37,7 +37,7 @@ class MainEventSpider(scrapy.Spider):
         # \\"latitude\\":33.318367794546674,\\"longitude\\":-111.74067152513123,
         map_data = response.xpath("//script[contains(text(), 'googleInfo')]/text()").extract_first()
 
-        yield GeojsonPointItem(
+        yield Feature(
             ref=response.url.split("/")[-2],
             name=store_json["name"],
             lat=re.search('.*latitude\\\\":(-?\\d+\\.\\d+),.*', map_data).group(1),

@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class BenihanaSpider(scrapy.Spider):
@@ -25,4 +25,4 @@ class BenihanaSpider(scrapy.Spider):
                 "country": row["co"],
                 "phone": row.get("te"),
             }
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

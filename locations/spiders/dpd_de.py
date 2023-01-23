@@ -3,7 +3,7 @@ import csv
 import scrapy
 from scrapy import FormRequest
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class DPDDESpider(scrapy.Spider):
@@ -61,7 +61,7 @@ class DPDDESpider(scrapy.Spider):
         shop = shopList.css("a")
         lengthOfShops = len(shop) - 1
         for nr in range(lengthOfShops):
-            item = GeojsonPointItem()
+            item = Feature()
             name = shop.css(
                 "span#ContentPlaceHolder1_modShopFinder_repShopList_labShopName_" + str(nr) + "::text"
             ).extract()[0]

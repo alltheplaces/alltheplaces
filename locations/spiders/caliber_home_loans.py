@@ -1,7 +1,7 @@
 import scrapy
 from geonamescache import GeonamesCache
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class CaliberHomeLoansSpider(scrapy.Spider):
@@ -36,4 +36,4 @@ class CaliberHomeLoansSpider(scrapy.Spider):
                     "website": response.url,
                 }
 
-                yield GeojsonPointItem(**properties)
+                yield Feature(**properties)

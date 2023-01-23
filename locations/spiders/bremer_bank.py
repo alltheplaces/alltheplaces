@@ -1,7 +1,7 @@
 from scrapy.spiders import SitemapSpider
 
 from locations.google_url import extract_google_position
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class BremerBankSpider(SitemapSpider):
@@ -28,4 +28,4 @@ class BremerBankSpider(SitemapSpider):
 
         extract_google_position(properties, response)
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

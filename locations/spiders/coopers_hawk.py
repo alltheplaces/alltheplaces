@@ -3,7 +3,7 @@ import json
 import scrapy
 from parsel import Selector
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class CoopersHawkSpider(scrapy.Spider):
@@ -21,7 +21,7 @@ class CoopersHawkSpider(scrapy.Spider):
             city_name, extra = address_lines[1].strip().split(", ")
             state, postcode = extra.split(" ")
 
-            yield GeojsonPointItem(
+            yield Feature(
                 lat=marker["locations"][0]["lat"],
                 lon=marker["locations"][0]["lng"],
                 ref=marker["locations"][0]["id"].split("-")[0],

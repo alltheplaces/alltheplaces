@@ -4,7 +4,7 @@ import math
 import scrapy
 from scrapy.downloadermiddlewares.retry import get_retry_request
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class WorldcatSpider(scrapy.Spider):
@@ -82,4 +82,4 @@ class WorldcatSpider(scrapy.Spider):
             "postcode": street_address.get("postalCode"),
             "country": street_address.get("countryDescription"),
         }
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

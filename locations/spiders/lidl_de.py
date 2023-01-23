@@ -1,82 +1,26 @@
-import scrapy
+import re
 
-from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
-from locations.spiders.lidl_gb import LidlGBSpider
-
-DAY_MAPPING = {
-    "Mo": "Mo",
-    "Di": "Tu",
-    "Mi": "We",
-    "Do": "Th",
-    "Fr": "Fr",
-    "Sa": "Sa",
-    "So": "Su",
-}
+from locations.categories import Categories
+from locations.hours import DAYS_DE, OpeningHours, sanitise_day
+from locations.storefinders.virtualearth import VirtualEarthSpider
 
 
-class LidlDESpider(scrapy.Spider):
+class LidlDESpider(VirtualEarthSpider):
     name = "lidl_de"
-    item_attributes = LidlGBSpider.item_attributes
-    allowed_domains = ["lidl.de"]
-    handle_httpstatus_list = [404]
-    start_urls = ["https://www.lidl.de/f/"]
+    item_attributes = {"brand": "Lidl", "brand_wikidata": "Q151954", "extras": Categories.SHOP_SUPERMARKET.value}
 
-    def parse_hours(self, hours):
-        opening_hours = OpeningHours()
+    dataset_id = "ab055fcbaac04ec4bc563e65ffa07097"
+    dataset_name = "Filialdaten-SEC/Filialdaten-SEC"
+    key = "AnTPGpOQpGHsC_ryx9LY3fRTI27dwcRWuPrfg93-WZR2m-1ax9e9ghlD4s1RaHOq"
 
-        for item in hours:
-            if item.split():
-                try:
-                    day = DAY_MAPPING[item.split()[0]]
-                    hour = item.split()[1]
-                    opening_hours.add_range(
-                        day=day,
-                        open_time=hour.split("-")[0],
-                        close_time=hour.split("-")[1],
-                    )
-                except KeyError:
-                    pass
+    def parse_item(self, item, feature, **kwargs):
+        item["name"] = feature["ShownStoreName"]
 
-        return opening_hours.as_opening_hours()
+        item["opening_hours"] = OpeningHours()
+        for day, start_time, end_time in re.findall(
+            r"(\w{2} ?- ?\w{2}|\w{2}) (\d{2}:\d{2})\*?-(\d{2}:\d{2})",
+            feature["OpeningTimes"],
+        ):
+            item["opening_hours"].add_range(sanitise_day(day, DAYS_DE), start_time, end_time)
 
-    def parse_details(self, response):
-
-        lidlShops = response.css(".ret-o-store-detail")
-
-        for shop in lidlShops:
-            shopAddress = shop.css(".ret-o-store-detail__address::text").extract()
-            street = shopAddress[0]
-            postalCode = shopAddress[1].split()[0]
-            city = shopAddress[1].split()[1]
-            openingHours = shop.css(".ret-o-store-detail__opening-hours::text").extract()
-            services = response.css(".ret-o-store-detail__store-icon-wrapper")[0]
-            link = services.css('a::attr("href")').get()
-            coordinates = link.split("pos.")[1].split("_L")[0]
-            latitude = coordinates.split("_")[0]
-            longitude = coordinates.split("_")[1]
-
-            properties = {
-                "ref": latitude + longitude,
-                "street_address": street,
-                "postcode": postalCode,
-                "city": city,
-                "lat": latitude,
-                "lon": longitude,
-            }
-
-            hours = self.parse_hours(openingHours)
-
-            if hours:
-                properties["opening_hours"] = hours
-
-            yield GeojsonPointItem(**properties)
-
-    def parse(self, response):
-
-        cities = response.css(".ret-o-store-detail-city").css("a::attr(href)")
-
-        for city in cities:
-            city = f"https://www.lidl.de{city.get()}"
-
-            yield scrapy.Request(url=city, callback=self.parse_details)
+        yield item

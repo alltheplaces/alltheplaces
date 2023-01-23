@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class CoxHealthSpider(scrapy.Spider):
@@ -60,4 +60,4 @@ class CoxHealthSpider(scrapy.Spider):
             "lon": float(xy[3].strip(",")),
         }
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

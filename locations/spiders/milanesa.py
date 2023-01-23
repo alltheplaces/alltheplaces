@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 base_url = "https://www.elclubdelamilanesa.com/"
 
@@ -87,7 +87,7 @@ class MilanesaSpider(scrapy.Spider):
 
         name = "elclubdelamilanesa - " + name
 
-        yield GeojsonPointItem(
+        yield Feature(
             name=name,
             addr_full=address,
             street=street,

@@ -2,7 +2,7 @@ import json
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 DAYS = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"]
 
@@ -54,7 +54,7 @@ class IowaUniversitySpider(scrapy.Spider):
                 "website": store["url"],
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)
 
         if stores["page"] < stores["nbPages"]:
             yield self._prepare_request(int(stores["page"]) + 1)

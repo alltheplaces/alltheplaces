@@ -2,7 +2,7 @@ import json
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class FazolisSpider(scrapy.Spider):
@@ -85,7 +85,7 @@ class FazolisSpider(scrapy.Spider):
         if hours:
             props["opening_hours"] = self.store_hours(hours)
 
-        return GeojsonPointItem(**props)
+        return Feature(**props)
 
     def parse_store(self, store):
         yield self.store_info(store)

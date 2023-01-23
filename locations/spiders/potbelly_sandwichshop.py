@@ -4,7 +4,7 @@ import scrapy
 from scrapy.spiders import Spider
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class PotbellySandwichShopSpider(Spider):
@@ -67,4 +67,4 @@ class PotbellySandwichShopSpider(Spider):
             },
         }
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

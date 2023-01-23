@@ -2,7 +2,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class RoundTablePizzaSpider(scrapy.Spider):
@@ -24,7 +24,7 @@ class RoundTablePizzaSpider(scrapy.Spider):
                 state = address_groups[1]
                 postcode = address_groups[2]
 
-            yield GeojsonPointItem(
+            yield Feature(
                 lat=store.attrib.get("data-latitude"),
                 lon=store.attrib.get("data-longitude"),
                 name=store.attrib.get("data-name"),

@@ -3,7 +3,7 @@ import re
 import scrapy
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 DAY_MAPPING = {
     "1": "Mo",
@@ -67,7 +67,7 @@ class SevenElevenCASpider(scrapy.Spider):
                 if hours:
                     properties["opening_hours"] = hours
 
-                yield GeojsonPointItem(**properties)
+                yield Feature(**properties)
 
             offset = int(re.search(r"offset=(\d+)", response.url).groups()[0])
             url = response.urljoin(response.url.replace("offset={}".format(offset), "offset={}".format(offset + 50)))

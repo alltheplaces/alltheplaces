@@ -3,8 +3,8 @@ import re
 
 from scrapy.spiders import SitemapSpider
 
-from locations.items import GeojsonPointItem
-from locations.user_agents import BROSWER_DEFAULT
+from locations.items import Feature
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class ChoiceHotelsSpider(SitemapSpider):
@@ -12,7 +12,7 @@ class ChoiceHotelsSpider(SitemapSpider):
     item_attributes = {"brand": "Choice Hotels", "brand_wikidata": "Q1075788"}
     allowed_domains = ["choicehotels.com"]
     sitemap_urls = ["https://www.choicehotels.com/propertysitemap.xml"]
-    user_agent = BROSWER_DEFAULT
+    user_agent = BROWSER_DEFAULT
     download_delay = 5
 
     brand_mapping = {
@@ -71,4 +71,4 @@ class ChoiceHotelsSpider(SitemapSpider):
                 data["property"]["brandName"],
             )
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

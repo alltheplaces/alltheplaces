@@ -1,7 +1,7 @@
 import scrapy
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class HeronFoodsSpider(scrapy.Spider):
@@ -53,4 +53,4 @@ class HeronFoodsSpider(scrapy.Spider):
                 properties["brand"] = "B&M Express"
                 properties["brand_wikidata"] = "Q99640578"
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

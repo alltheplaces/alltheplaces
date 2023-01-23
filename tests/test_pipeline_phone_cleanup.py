@@ -1,6 +1,6 @@
 from scrapy.crawler import Crawler
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 from locations.pipelines import PhoneCleanUpPipeline
 from locations.spiders.greggs_gb import GreggsGBSpider
 
@@ -9,7 +9,7 @@ def get_objects(phone, country):
     spider = GreggsGBSpider()
     spider.crawler = Crawler(GreggsGBSpider)
     return (
-        GeojsonPointItem(phone=phone, country=country),
+        Feature(phone=phone, country=country),
         PhoneCleanUpPipeline(),
         spider,
     )

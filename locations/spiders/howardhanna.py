@@ -2,7 +2,7 @@ import re
 
 from scrapy.spiders import SitemapSpider
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class HowardHannaSpider(SitemapSpider):
@@ -40,4 +40,4 @@ class HowardHannaSpider(SitemapSpider):
                 "lon": lon,
             }
         )
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)
