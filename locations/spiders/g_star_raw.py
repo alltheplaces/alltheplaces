@@ -8,6 +8,7 @@ from locations.items import Feature
 class GStarRawSpider(scrapy.Spider):
     name = "g_star_raw"
     item_attributes = {"brand": "G-Star Raw", "brand_wikidata": "Q1484081"}
+    allowed_domains = ["g-star.com"]
     start_urls = ["https://www.g-star.com/en_us/find-a-store/g-star-raw-brand-store"]
 
     def parse(self, response):
