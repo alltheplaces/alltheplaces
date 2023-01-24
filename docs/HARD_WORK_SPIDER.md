@@ -3,7 +3,7 @@
 
 Many sites export clean [structured data](./STRUCTURED_DATA.md)
 or have a simple [JSON API](./API_SPIDER.md) available.
-Many sites index their store pages with a [siteamp](./SITEMAP.md).
+Many sites index their store pages with a [sitemap](./SITEMAP.md).
 A good deal of other sites are what we might call **hard work**,
 lacking much of the aforementioned support.
 These sites are to be avoided, if you can,
