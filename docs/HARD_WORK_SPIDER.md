@@ -3,7 +3,7 @@
 
 Many sites export clean [structured data](./STRUCTURED_DATA.md)
 or have a simple [JSON API](./API_SPIDER.md) available.
-Many sites index their store pages with a [siteamp](./SITEMAP.md).
+Many sites index their store pages with a [sitemap](./SITEMAP.md).
 A good deal of other sites are what we might call **hard work**,
 lacking much of the aforementioned support.
 These sites are to be avoided, if you can,
@@ -20,7 +20,7 @@ a page and experiment with XPath queries. When you're happy with the query,
 you can use it in your code. This is a lot easier than running
 a `crawl` every time you make a change to your spider.
 
-To enter the shell, use `pripenv run scrapy shell http://example.com` (where you replace
+To enter the shell, use `pipenv run scrapy shell http://example.com` (where you replace
 the URL with your own). It will dump you into a Python shell after having requested the
 page and parsing it. Once in the shell, you can do things with the `response` object
 as if you were in your spider. The shell also offers a shortcut function
