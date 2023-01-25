@@ -9,7 +9,9 @@ from locations.hours import OpeningHours, day_range, sanitise_day
 class SportsceneSpider(Spider):
     name = "foschini"
     item_attributes = {"brand": "sportscene", "brand_wikidata": "Q116378841"}
-    start_urls = [f"https://www.sportscene.co.za/browse/storeLocatorSearch.jsp?searchText={letter}" for letter in "aeiou"]
+    start_urls = [
+        f"https://www.sportscene.co.za/browse/storeLocatorSearch.jsp?searchText={letter}" for letter in "aeiou"
+    ]
 
     def parse(self, response, **kwargs):
         for location in response.json()["items"]:
