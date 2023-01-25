@@ -238,8 +238,14 @@ def test_multiple_types():
                     "@type": ["http://schema.org/Place", "Thing"],
                     "name": "test 1"
                 }
-            </script>
-            <script type="application/ld+json">
+            </script>""",
+    )
+    assert LinkedDataParser.find_linked_data(response, ["Place", "Thing"])["name"] == "test 1"
+
+    response = HtmlResponse(
+        url="",
+        encoding="utf-8",
+        body="""<script type="application/ld+json">
                 {
                     "@context": "https://schema.org",
                     "@type": "http://schema.org/Place",
@@ -247,6 +253,47 @@ def test_multiple_types():
                 }
             </script>""",
     )
-
-    assert LinkedDataParser.find_linked_data(response, ["Place", "Thing"])["name"] == "test 1"
     assert LinkedDataParser.find_linked_data(response, "Place")["name"] == "test 2"
+
+    response = HtmlResponse(
+        url="",
+        encoding="utf-8",
+        body="""<script type="application/ld+json">
+                {
+                    "@context": "https://schema.org",
+                    "@graph": [
+                        {
+                            "@context": "http://schema.org",
+                            "@type": "BreadcrumbList",
+                            "itemListElement": [
+                                {
+                                    "@type": "ListItem",
+                                    "position": 1,
+                                    "item": {"@id": "https://www.lahalle.com/", "name": "La Halle"}
+                                },
+                                {
+                                    "@type": "ListItem",
+                                    "position": 2,
+                                    "item": {"@id": "https://www.lahalle.com/magasins", "name": "Magasin Vêtements et chaussures"}
+                                },
+                                {
+                                    "@type": "ListItem",
+                                    "position": 3,
+                                    "item": {"@id": "https://www.lahalle.com/magasins-paris-75.htm", "name": "75 Paris"}
+                                },
+                                {
+                                    "@type": "ListItem",
+                                    "position": 4,
+                                    "item": {
+                                        "@id": "https://www.lahalle.com/magasins-paris-75-paris-flandre-168.html",
+                                        "name": "PARIS FLANDRE"
+                                    }
+                                }
+                            ]
+                        },
+                        {"@context": "https://schema.org", "@type": ["LocalBusiness", "ClothingStore"], "name": "test 3"}
+                    ]
+                }
+            </script>""",
+    )
+    assert LinkedDataParser.find_linked_data(response, ["LocalBusiness", "ClothingStore"])["name"] == "test 3"
