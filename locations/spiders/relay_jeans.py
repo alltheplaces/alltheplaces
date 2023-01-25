@@ -9,7 +9,9 @@ from locations.hours import OpeningHours, day_range, sanitise_day
 class RelayJeansSpider(Spider):
     name = "relayjeans"
     item_attributes = {"brand": "Relay Jeans", "brand_wikidata": "Q116378360"}
-    start_urls = [f"https://www.relayjeans.co.za/browse/storeLocatorSearch.jsp?searchText={letter}" for letter in "aeiou"]
+    start_urls = [
+        f"https://www.relayjeans.co.za/browse/storeLocatorSearch.jsp?searchText={letter}" for letter in "aeiou"
+    ]
 
     def parse(self, response, **kwargs):
         for location in response.json()["items"]:
