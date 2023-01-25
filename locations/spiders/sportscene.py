@@ -7,7 +7,7 @@ from locations.hours import OpeningHours, day_range, sanitise_day
 
 
 class SportsceneSpider(Spider):
-    name = "foschini"
+    name = "sportscene"
     item_attributes = {"brand": "sportscene", "brand_wikidata": "Q116378841"}
     start_urls = [
         f"https://www.sportscene.co.za/browse/storeLocatorSearch.jsp?searchText={letter}" for letter in "aeiou"
