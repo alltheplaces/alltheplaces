@@ -23,6 +23,7 @@ class DictParser:
         "address-city",
         "town",
         "locality",
+        "suburb",
     ]
 
     region_keys = [
