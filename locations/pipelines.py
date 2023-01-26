@@ -215,32 +215,33 @@ class CheckItemPropertiesPipeline:
         check_field(item, spider, "country", (str,))
         check_field(item, spider, "brand", (str,))
 
-        if lat := item.get("lat"):
-            try:
-                lat = float(lat)
-                if not (self.min_lat < lat < self.max_lat):
+        if not item.get("geometry"):
+            if lat := item.get("lat"):
+                try:
+                    lat = float(lat)
+                    if not (self.min_lat < lat < self.max_lat):
+                        spider.crawler.stats.inc_value("atp/field/lat/invalid")
+                    if math.fabs(lat) < 0.01:
+                        spider.crawler.stats.inc_value("atp/field/lat/invalid")
+                except:
+                    lat = None
                     spider.crawler.stats.inc_value("atp/field/lat/invalid")
-                if math.fabs(lat) < 0.01:
-                    spider.crawler.stats.inc_value("atp/field/lat/invalid")
-            except:
-                lat = None
-                spider.crawler.stats.inc_value("atp/field/lat/invalid")
-            item["lat"] = lat
-        else:
-            spider.crawler.stats.inc_value("atp/field/lat/missing")
-        if lon := item.get("lon"):
-            try:
-                lon = float(lon)
-                if not (self.min_lon < lon < self.max_lon):
+                item["lat"] = lat
+            else:
+                spider.crawler.stats.inc_value("atp/field/lat/missing")
+            if lon := item.get("lon"):
+                try:
+                    lon = float(lon)
+                    if not (self.min_lon < lon < self.max_lon):
+                        spider.crawler.stats.inc_value("atp/field/lon/invalid")
+                    if math.fabs(lon) < 0.01:
+                        spider.crawler.stats.inc_value("atp/field/lon/invalid")
+                except:
+                    lon = None
                     spider.crawler.stats.inc_value("atp/field/lon/invalid")
-                if math.fabs(lon) < 0.01:
-                    spider.crawler.stats.inc_value("atp/field/lon/invalid")
-            except:
-                lon = None
-                spider.crawler.stats.inc_value("atp/field/lon/invalid")
-            item["lon"] = lon
-        else:
-            spider.crawler.stats.inc_value("atp/field/lon/missing")
+                item["lon"] = lon
+            else:
+                spider.crawler.stats.inc_value("atp/field/lon/missing")
 
         if twitter := item.get("twitter"):
             if not isinstance(twitter, str):
