@@ -4,6 +4,7 @@ from scrapy.spiders import SitemapSpider
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class WalmartSpider(SitemapSpider):
@@ -13,6 +14,7 @@ class WalmartSpider(SitemapSpider):
     download_delay = 5
     sitemap_urls = ["https://www.walmart.com/sitemap_store_main.xml"]
     sitemap_rules = [("", "parse_store")]
+    custom_settings = {"AUTOTHROTTLE_ENABLED": True, "USER_AGENT": BROWSER_DEFAULT}
 
     def store_hours(self, store):
         if store.get("open24Hours") is True:
