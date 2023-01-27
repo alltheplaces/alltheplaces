@@ -33,6 +33,7 @@ class DictParser:
         "state-province",
         "province",
         "state-code",
+        "county",
     ]
 
     country_keys = [
