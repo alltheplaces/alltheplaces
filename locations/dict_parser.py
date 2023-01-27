@@ -108,7 +108,7 @@ class DictParser:
             address = obj
 
         item["housenumber"] = DictParser.get_first_key(address, DictParser.house_number_keys)
-        item["street"] = DictParser.get_first_key(address, ["street", "streetName"])
+        item["street"] = DictParser.get_first_key(address, ["street", "street-name"])
         item["street_address"] = DictParser.get_first_key(address, DictParser.street_address_keys)
         item["city"] = DictParser.get_first_key(address, DictParser.city_keys)
         item["state"] = DictParser.get_first_key(address, DictParser.region_keys)
