@@ -177,6 +177,38 @@ class Fuel(Enum):
     LH2 = "fuel:LH2"
     # Additives
     ADBLUE = "fuel:adblue"
+    ENGINE_OIL = "fuel:engineoil"
+    # Planes
+    AV91UL = "fuel:91UL"
+    AV100LL = "fuel:100LL"
+    AVAUTO_GAS = "fuel:autogas"
+    AVJetA1 = "fuel:JetA1"
+
+    KEROSENE = "fuel:kerosene"
+
+
+class Extras(Enum):
+    ATM = "atm"
+    CAR_WASH = "car_wash"
+    OIL_CHANGE = "service:vehicle:oil_change"
+    TOILETS = "toilets"
+    WHEELCHAIR = "wheelchair"
+    WIFI = "internet_access=wlan"
+
+
+class PaymentMethods(Enum):
+    AMERICAN_EXPRESS = "payment:american_express"
+    APPLE_PAY = "payment:apple_pay"
+    CASH = "payment:cash"
+    CONTACTLESS = "payment:contactless"
+    CREDIT_CARDS = "payment:credit_cards"
+    DEBIT_CARDS = "payment:debit_cards"
+    GOOGLE_PAY = "payment:google_pay"
+    GIROCARD = "payment:girocard"
+    MAESTRO = "payment:maestro"
+    MASTER_CARD = "payment:mastercard"
+    VISA = "payment:visa"
+    V_PAY = "payment:v_pay"
 
 
 def apply_yes_no(attribute, item: Feature, state: bool, apply_positive_only: bool = True):
@@ -195,5 +227,8 @@ def apply_yes_no(attribute, item: Feature, state: bool, apply_positive_only: boo
         tag_key = attribute.value
     else:
         raise AttributeError("string or Enum required")
-    tag_value = "yes" if state else "no"
+    if "=" in tag_key:
+        tag_key, tag_value = tag_key.split("=")
+    else:
+        tag_value = "yes" if state else "no"
     apply_category({tag_key: tag_value}, item)
