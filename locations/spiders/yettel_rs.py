@@ -19,6 +19,7 @@ class YettelRSSpider(scrapy.Spider):
     def parse(self, response):
         for index, store in enumerate(response.json()["data"]["stores"]):
             item = Feature()
+            item["ref"] = store["id"]
 
             item["lat"] = store["lat"]
             item["lon"] = store["lng"]
