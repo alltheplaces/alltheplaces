@@ -1,6 +1,7 @@
+import scrapy
+
 from locations.hours import OpeningHours
 from locations.items import Feature
-import scrapy
 
 
 class YettelRSSpider(scrapy.Spider):
