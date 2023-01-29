@@ -2,7 +2,12 @@ import scrapy
 
 class YettelRSSpider(scrapy.Spider):
     name = "yettel_rs"
-
+    item_attributes = {
+        "brand": "Yettel",
+        "brand_wikidata": "Q1780171",
+        "country": "RS",
+    }
+    
     def start_requests(self):
         url = "https://www.yettel.rs/stores/latlong/"
         yield scrapy.http.FormRequest(url=url, formdata={"initial": "true"}, method="POST")
