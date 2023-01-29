@@ -1,3 +1,5 @@
+from locations.hours import OpeningHours
+from locations.items import Feature
 import scrapy
 
 
@@ -15,6 +17,8 @@ class YettelRSSpider(scrapy.Spider):
 
     def parse(self, response):
         for index, store in enumerate(response.json()["data"]["stores"]):
+            item = Feature()
+
             item["lat"] = store["lat"]
             item["lon"] = store["lng"]
 
@@ -22,7 +26,7 @@ class YettelRSSpider(scrapy.Spider):
             item["postal_code"] = store["post_number"]
             item["street_address"] = store["address"]
 
-            oh = opening_hours()
+            oh = OpeningHours()
 
             for wh in store["workingHoursFormated"]:
                 if wh.day == "Ponedeljak":
