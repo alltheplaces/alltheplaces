@@ -12,6 +12,9 @@ COPY Pipfile Pipfile
 COPY Pipfile.lock Pipfile.lock
 RUN pipenv install --dev --deploy --system
 
+RUN pipenv run playwright install firefox
+RUN playwright install-deps
+
 COPY . .
 
 CMD ["/opt/app/ci/run_all_spiders.sh"]

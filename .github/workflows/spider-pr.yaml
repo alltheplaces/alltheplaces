@@ -53,6 +53,11 @@ jobs:
             exit 1
         fi
 
+        if [ grep PLAYWRIGHT -q -m 1 $SPIDERS ]; then
+            playwright install firefox
+            playwright install-deps
+        fi
+
         RUN_DIR="${GITHUB_WORKSPACE}/output"
         EXIT_CODE=0
         for file_changed in $SPIDERS
