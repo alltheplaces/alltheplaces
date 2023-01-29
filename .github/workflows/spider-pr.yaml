@@ -55,8 +55,8 @@ jobs:
 
         if grep PLAYWRIGHT -q -m 1 $SPIDERS; then
             echo "Playwright detected. Installing requirements."
-            playwright install-deps
-            playwright install firefox
+            pipenv run playwright install-deps
+            pipenv run playwright install firefox
         fi
 
         RUN_DIR="${GITHUB_WORKSPACE}/output"
