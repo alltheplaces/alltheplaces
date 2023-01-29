@@ -26,19 +26,19 @@ class YettelRSSpider(scrapy.Spider):
 
             for wh in store["workingHoursFormated"]:
                 if wh.day == "Ponedeljak":
-                    oh.add("Mo", wh.startTime, wh.endTime)
+                    oh.addRange("Mo", wh.startTime, wh.endTime)
                 if wh.day == "Utorak":
-                    oh.add("Tu", wh.startTime, wh.endTime)
+                    oh.addRange("Tu", wh.startTime, wh.endTime)
                 if wh.day == "Sreda":
-                    oh.add("We", wh.startTime, wh.endTime)
+                    oh.addRange("We", wh.startTime, wh.endTime)
                 if wh.day == "Četvrtak":
-                    oh.add("Th", wh.startTime, wh.endTime)
+                    oh.addRange("Th", wh.startTime, wh.endTime)
                 if wh.day == "Petak":
-                    oh.add("Fr", wh.startTime, wh.endTime)
+                    oh.addRange("Fr", wh.startTime, wh.endTime)
                 if wh.day == "Subota":
-                    oh.add("Sa", wh.startTime, wh.endTime)
+                    oh.addRange("Sa", wh.startTime, wh.endTime)
                 if wh.day == "Nedelja":
-                    oh.add("Su", wh.startTime, wh.endTime)
+                    oh.addRange("Su", wh.startTime, wh.endTime)
 
             item["opening_hours"] = oh
             yield item
