@@ -43,7 +43,7 @@ class YettelRSSpider(scrapy.Spider):
                     oh.add_range("Fr", wh["startTime"], wh["endTime"])
                 if wh["day"] == "Subota":
                     oh.add_range("Sa", wh["startTime"], wh["endTime"])
-                if wh["dat"] == "Nedelja":
+                if wh["day"] == "Nedelja":
                     oh.add_range("Su", wh["startTime"], wh["endTime"])
 
             item["opening_hours"] = oh
