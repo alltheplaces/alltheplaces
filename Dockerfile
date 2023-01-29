@@ -12,8 +12,8 @@ COPY Pipfile Pipfile
 COPY Pipfile.lock Pipfile.lock
 RUN pipenv install --dev --deploy --system
 
-RUN pipenv run playwright install firefox
 RUN playwright install-deps
+RUN playwright install firefox
 
 COPY . .
 
