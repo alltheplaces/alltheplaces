@@ -9,6 +9,7 @@ class OdeonGBSpider(Spider):
     name = "odeon_gb"
     item_attributes = {"brand": "Odeon", "brand_wikidata": "Q6127470"}
     start_urls = ["https://www.odeon.co.uk/cinemas/"]
+    requires_proxy = True
 
     def parse(self, response, **kwargs):
         data = json.loads(response.xpath("//@data-v-site-list").get())
