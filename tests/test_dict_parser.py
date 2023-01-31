@@ -137,7 +137,7 @@ def test_dict_parse():
                 "country": {
                     isocode: "UK",
                     name: "United Kingdom"
-                }
+                },
                 "postcode": "DY10 2DG",
             },
             "geoPoint": {"latitude": "52.38839100", "longitude": "-2.24784700"},
