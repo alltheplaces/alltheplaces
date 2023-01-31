@@ -123,7 +123,7 @@ class DictParser:
             isocode = DictParser.get_first_key(country, DictParser.isocode_keys)
             if isocode and isinstance(isocode, str):
                 item["country"] = isocode
-            #TODO: Handle other potential country fields inside the dict?
+            # TODO: Handle other potential country fields inside the dict?
         else:
             item["country"] = country
 
