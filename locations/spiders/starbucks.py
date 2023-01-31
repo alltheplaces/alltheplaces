@@ -1,14 +1,15 @@
 import csv
 import json
+from math import sqrt
 
 import scrapy
 
-from math import sqrt
 from locations.categories import Categories
 from locations.items import Feature
 
 HEADERS = {"X-Requested-With": "XMLHttpRequest"}
 STORELOCATOR = "https://www.starbucks.com/bff/locations?lat={}&lng={}"
+
 
 class StarbucksSpider(scrapy.Spider):
     name = "starbucks"
@@ -76,7 +77,7 @@ class StarbucksSpider(scrapy.Spider):
         if paging["returned"] > 0 and paging["limit"] == paging["returned"]:
             if response.meta["distance"] > 0.10:
                 nextDistance = response.meta["distance"] / 2
-                nextDistanceCorner = nextDistance * (sqrt(2)/2)
+                nextDistanceCorner = nextDistance * (sqrt(2) / 2)
                 # Create eight new coordinate pairs
                 nextCoordinates = [
                     [center[0] - nextDistanceCorner, center[1] + nextDistanceCorner],
