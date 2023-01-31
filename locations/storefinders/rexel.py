@@ -37,9 +37,10 @@ class RexelSpider(Spider):
             ] = f'https://{self.base_url}/{feature["address"]["town"].replace(" ", "-")}/store/{feature["ref"]}'
             item["opening_hours"] = self.decode_hours(feature)
             # We could also fall back to cartIcon here...
-            storeImages = filter(lambda x: (x["format"] == "store" and x["url"]), feature["storeImages"])
-            if storeImages:
-                item["image"] = next(storeImages)["url"]
+            if feature["storeImages"]:
+                storeImages = filter(lambda x: (x["format"] == "store" and x["url"]), feature["storeImages"])
+                if storeImages:
+                    item["image"] = next(storeImages)["url"]
             yield from self.parse_item(item, feature) or []
 
     @staticmethod
