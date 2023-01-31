@@ -3,7 +3,7 @@ from datetime import datetime
 from scrapy import Spider
 
 from locations.dict_parser import DictParser
-from locations.hours import DAYS, OpeningHours
+from locations.hours import OpeningHours
 
 
 class DenmansGBSpider(Spider):
@@ -40,7 +40,7 @@ class DenmansGBSpider(Spider):
         oh = OpeningHours()
         for r in store["openingHours"]["rexelWeekDayOpeningList"]:
             oh.add_range(
-                DAYS[r["weekDay"]],
+                r["weekDay"],
                 r["openingTime"]["formattedHour"],
                 r["closingTime"]["formattedHour"],
             )
