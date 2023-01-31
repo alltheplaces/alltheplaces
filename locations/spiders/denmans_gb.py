@@ -47,6 +47,6 @@ class DenmansGBSpider(Spider):
                 r["weekDay"],
                 r["openingTime"]["formattedHour"],
                 r["closingTime"]["formattedHour"],
-                time_format = "%I:%M %p",
+                time_format="%I:%M %p",
             )
         return oh.as_opening_hours()
