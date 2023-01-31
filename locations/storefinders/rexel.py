@@ -10,7 +10,9 @@ class RexelSpider(Spider):
     search_lon = ""
 
     # This seems to return all stores regardless of lat-long; as long as it's in the right country/area?
-    start_urls = [f"https://{self.base_url}/store-finder/findNearbyStores?latitude={self.search_lat}&longitude={self.search_lon}"]
+    start_urls = [
+        f"https://{self.base_url}/store-finder/findNearbyStores?latitude={self.search_lat}&longitude={self.search_lon}"
+    ]
 
     def parse(self, response):
         for store in response.json()["results"]:
