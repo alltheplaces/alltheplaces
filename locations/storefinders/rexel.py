@@ -11,7 +11,9 @@ class RexelSpider(Spider):
 
     def start_requests(self):
         # This seems to return all stores regardless of lat-long; as long as it's in the right country/area?
-        yield JsonRequest(url=f"https://{self.base_url}/store-finder/findNearbyStores?latitude={self.search_lat}&longitude={self.search_lon}")
+        yield JsonRequest(
+            url=f"https://{self.base_url}/store-finder/findNearbyStores?latitude={self.search_lat}&longitude={self.search_lon}"
+        )
 
     def parse(self, response):
         for store in response.json()["results"]:
