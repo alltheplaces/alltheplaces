@@ -6,7 +6,7 @@ from locations.hours import OpeningHours
 
 class DenmansGBSpider(Spider):
     name = "denmans_gb"
-    item_attributes = {"brand": "Denmans", "brand_wikidata": "Q1"}
+    item_attributes = {"brand": "Denmans", "brand_wikidata": "Q116508855"}
     # Seems to return all stores regardless of lat long as long as it's in the UK?
     start_urls = ["https://www.denmans.co.uk/den/store-finder/findNearbyStores?latitude=51&longitude=-0"]
 
@@ -41,7 +41,7 @@ class DenmansGBSpider(Spider):
     @staticmethod
     def decode_hours(store):
         oh = OpeningHours()
-        for r in filter(lambda x: (!x["closed"]), store["openingHours"]["rexelWeekDayOpeningList"]):
+        for r in filter(lambda x: (not x["closed"]), store["openingHours"]["rexelWeekDayOpeningList"]):
               oh.add_range(
                   r["weekDay"],
                   r["openingTime"]["formattedHour"],
