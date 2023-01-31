@@ -32,19 +32,19 @@ class DenmansGBSpider(Spider):
                 "website"
             ] = f'https://www.denmans.co.uk/den/{store["address"]["town"].replace(" ", "-")}/store/{store["name"]}'
             item["opening_hours"] = self.decode_hours(store)
-            #We could also fall back to cartIcon here...
+            # We could also fall back to cartIcon here...
             storeImages = filter(lambda x: (x["format"] == "store"), store["storeImages"])
             if storeImages:
-              item["image"] = storeImages[0]
+                item["image"] = storeImages[0]
             yield item
 
     @staticmethod
     def decode_hours(store):
         oh = OpeningHours()
         for r in filter(lambda x: (not x["closed"]), store["openingHours"]["rexelWeekDayOpeningList"]):
-              oh.add_range(
-                  r["weekDay"],
-                  r["openingTime"]["formattedHour"],
-                  r["closingTime"]["formattedHour"],
+            oh.add_range(
+                r["weekDay"],
+                r["openingTime"]["formattedHour"],
+                r["closingTime"]["formattedHour"],
             )
         return oh.as_opening_hours()
