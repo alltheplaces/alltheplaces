@@ -1,6 +1,7 @@
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
+from locations.categories import Extras, Fuel, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
@@ -33,8 +34,13 @@ class PetrolSpider(Spider):
                 for time_range in times:
                     item["opening_hours"].add_range(day, time_range["open"], time_range["close"])
 
-            if any(cat["characteristic"]["key"] == "211" for cat in location["storeCharacteristics"]):
-                item.update(self.CRODUX)
+            for cat in location["storeCharacteristics"]:
+                if cat["characteristic"]["key"] == "28":
+                    item.update(self.CRODUX)
+                elif cat["characteristic"]["key"] == "160":
+                    apply_yes_no(Fuel.DIESEL, item, True)
+                elif cat["characteristic"]["key"] == "191":
+                    apply_yes_no(Extras.WIFI, item, True)
 
             yield item
 
