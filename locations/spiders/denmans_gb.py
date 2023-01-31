@@ -23,10 +23,12 @@ class DenmansGBSpider(Spider):
                 )
             )
             item = DictParser.parse(store["address"])
-            item["phone"] = store["address"]["phone"]
-            item["contact:email"] = store["address"]["email"]
+            #item["phone"] = store["address"]["phone"]
+            #item["email"] = store["address"]["email"]
             item["name"] = store["displayName"]
             item["ref"] = store["name"]
+            item["lat"]: float(store["geoPoint"]["latitude"]),
+            item["lon"]: float(store["geoPoint"]["longitude"]),
             # https://www.denmans.co.uk/den/Bradley-Stoke-Bristol/store/1AR
             item[
                 "website"
