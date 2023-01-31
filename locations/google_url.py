@@ -2,21 +2,19 @@ import re
 from urllib.parse import parse_qs, urlsplit
 
 
+def _get_possible_links(response):
+    yield from response.xpath('//img[contains(@src, "maps/api/staticmap")]/@src').getall()
+    yield from response.xpath('//iframe[contains(@src, "maps/embed")]/@src').getall()
+    yield from response.xpath("//a[contains(@href, 'google')][contains(@href, 'maps')]/@href").getall()
+    yield from response.xpath("//a[contains(@href, 'maps.apple.com')]/@href").getall()
+
+
 def extract_google_position(item, response):
-    for link in response.xpath("//img/@src").extract():
-        if link.startswith("https://maps.googleapis.com/maps/api/staticmap"):
-            item["lat"], item["lon"] = url_to_coords(link)
+    for link in _get_possible_links(response):
+        coords = url_to_coords(link)
+        if coords != (None, None):
+            item["lat"], item["lon"] = coords
             return
-    for link in response.xpath("//iframe/@src").getall():
-        if link.startswith("https://www.google.com/maps/embed"):
-            item["lat"], item["lon"] = url_to_coords(link)
-            return
-    for link in response.xpath("//a[contains(@href, 'google')][contains(@href, 'maps')]/@href").getall():
-        item["lat"], item["lon"] = url_to_coords(link)
-        return
-    for link in response.xpath("//a[contains(@href, 'maps.apple.com')]/@href").getall():
-        item["lat"], item["lon"] = url_to_coords(link)
-        return
 
 
 def url_to_coords(url: str) -> (float, float):  # noqa: C901
@@ -49,9 +47,8 @@ def url_to_coords(url: str) -> (float, float):  # noqa: C901
             return float(maps_keys[lat_index]), float(maps_keys[lon_index])
     elif url.startswith("https://www.google.com/maps/embed/v1/place"):
         for q in get_query_param(url, "q"):
-            q = q.split(",")
-            if len(q) == 2:
-                return float(q[0]), float(q[1])
+            if match := re.match(r"(-?\d+.\d+),\s?(-?\d+.\d+)", q):
+                return float(match.group(1)), float(match.group(2))
     elif url.startswith("https://maps.googleapis.com/maps/api/staticmap"):
         # find the first marker location, or the map center
         for markers in get_query_param(url, "markers"):

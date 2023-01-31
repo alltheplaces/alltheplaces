@@ -137,6 +137,16 @@ DAYS_DK = {
     "Søn": "Su",
 }
 
+DAYS_RS = {
+    "Ponedeljak": "Mo",
+    "Utorak": "Tu",
+    "Sreda": "We",
+    "Četvrtak": "Th",
+    "Petak": "Fr",
+    "Subota": "Sa",
+    "Nedelja": "Su",
+}
+
 
 def day_range(start_day, end_day):
     start_ix = DAYS.index(start_day)
@@ -280,4 +290,5 @@ class OpeningHours:
                             self.add_range(day, start_time, end_time, time_format)
                     else:
                         for day in days.split(","):
-                            self.add_range(day, start_time, end_time, time_format)
+                            if d := sanitise_day(day):
+                                self.add_range(d, start_time, end_time, time_format)
