@@ -23,7 +23,7 @@ class AbercrombieAndFitchSpider(scrapy.Spider):
 
     def parse(self, response):
         data = response.json()
-        
+
         if data["physicalStores"] is None:
             return
 
