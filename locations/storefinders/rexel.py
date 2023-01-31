@@ -17,35 +17,35 @@ class RexelSpider(Spider):
         )
 
     def parse(self, response):
-        for store in response.json()["results"]:
-            store["address"]["street_address"] = ", ".join(
+        for feature in response.json()["results"]:
+            feature["address"]["street_address"] = ", ".join(
                 filter(
                     None,
                     [
-                        store["address"].pop("line1"),
-                        store["address"].pop("line2"),
-                        store["address"].pop("line3"),
+                        feature["address"].pop("line1"),
+                        feature["address"].pop("line2"),
+                        feature["address"].pop("line3"),
                     ],
                 )
             )
-            store["ref"] = store.pop("name")
-            item = DictParser.parse(store)
-            item["phone"] = store["address"]["phone"]
+            feature["ref"] = feature.pop("name")
+            item = DictParser.parse(feature)
+            item["phone"] = feature["address"]["phone"]
             # e.g. https://www.denmans.co.uk/den/Bradley-Stoke-Bristol/store/1AR
             item[
                 "website"
-            ] = f'https://{self.base_url}/{store["address"]["town"].replace(" ", "-")}/store/{store["ref"]}'
-            item["opening_hours"] = self.decode_hours(store)
+            ] = f'https://{self.base_url}/{feature["address"]["town"].replace(" ", "-")}/store/{feature["ref"]}'
+            item["opening_hours"] = self.decode_hours(feature)
             # We could also fall back to cartIcon here...
-            storeImages = filter(lambda x: (x["format"] == "store" and x["url"]), store["storeImages"])
+            storeImages = filter(lambda x: (x["format"] == "store" and x["url"]), feature["storeImages"])
             if storeImages:
                 item["image"] = next(storeImages)["url"]
             yield from self.parse_item(item, feature) or []
 
     @staticmethod
-    def decode_hours(store):
+    def decode_hours(feature):
         oh = OpeningHours()
-        for r in filter(lambda x: (not x["closed"]), store["openingHours"]["rexelWeekDayOpeningList"]):
+        for r in filter(lambda x: (not x["closed"]), feature["openingHours"]["rexelWeekDayOpeningList"]):
             oh.add_range(
                 r["weekDay"],
                 r["openingTime"]["formattedHour"],
