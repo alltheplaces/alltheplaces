@@ -28,7 +28,7 @@ class DenmansGBSpider(Spider):
             item["ref"] = store["name"]
             item["lat"] = float(store["geoPoint"]["latitude"])
             item["lon"] = float(store["geoPoint"]["longitude"])
-            #e.g. https://www.denmans.co.uk/den/Bradley-Stoke-Bristol/store/1AR
+            # e.g. https://www.denmans.co.uk/den/Bradley-Stoke-Bristol/store/1AR
             item[
                 "website"
             ] = f'https://www.denmans.co.uk/den/{store["address"]["town"].replace(" ", "-")}/store/{store["name"]}'
