@@ -7,7 +7,7 @@ from locations.hours import OpeningHours
 class DenmansGBSpider(Spider):
     name = "denmans_gb"
     item_attributes = {"brand": "Denmans", "brand_wikidata": "Q116508855"}
-    # This seems to return all stores regardless of lat long as long as it's in the UK?
+    # This seems to return all stores regardless of lat-long; as long as it's in the UK?
     start_urls = ["https://www.denmans.co.uk/den/store-finder/findNearbyStores?latitude=51&longitude=-0"]
 
     def parse(self, response):
