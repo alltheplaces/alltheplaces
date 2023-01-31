@@ -1,5 +1,3 @@
-from datetime import datetime
-
 from scrapy import Spider
 
 from locations.dict_parser import DictParser
@@ -26,6 +24,7 @@ class DenmansGBSpider(Spider):
             )
             item = DictParser.parse(store["address"])
             item["phone"] = store["address"]["phone"]
+            item["contact:email"] = store["address"]["email"]
             item["name"] = store["displayName"]
             item["ref"] = store["name"]
             # https://www.denmans.co.uk/den/Bradley-Stoke-Bristol/store/1AR
@@ -33,15 +32,19 @@ class DenmansGBSpider(Spider):
                 "website"
             ] = f'https://www.denmans.co.uk/den/{store["address"]["town"].replace(" ", "-")}/store/{store["name"]}'
             item["opening_hours"] = self.decode_hours(store)
+            #We could also fall back to cartIcon here...
+            storeImages = filter(lambda x: (x["format"] == "store"), store["storeImages"])
+            if storeImages:
+              item["image"] = storeImages[0]
             yield item
 
     @staticmethod
     def decode_hours(store):
         oh = OpeningHours()
-        for r in store["openingHours"]["rexelWeekDayOpeningList"]:
-            oh.add_range(
-                r["weekDay"],
-                r["openingTime"]["formattedHour"],
-                r["closingTime"]["formattedHour"],
+        for r in filter(lambda x: (!x["closed"]), store["openingHours"]["rexelWeekDayOpeningList"]):
+              oh.add_range(
+                  r["weekDay"],
+                  r["openingTime"]["formattedHour"],
+                  r["closingTime"]["formattedHour"],
             )
         return oh.as_opening_hours()
