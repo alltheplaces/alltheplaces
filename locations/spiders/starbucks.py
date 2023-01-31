@@ -1,7 +1,8 @@
 import csv
 import json
 from math import sqrt
-import numpy as np
+import numpy as npfrom math import sqrt
+
 import scrapy
 
 from locations.items import GeojsonPointItem
@@ -9,6 +10,7 @@ from math import sqrt
 
 HEADERS = {"X-Requested-With": "XMLHttpRequest"}
 STORELOCATOR = "https://www.starbucks.com/bff/locations?lat={}&lng={}"
+
 
 class StarbucksSpider(scrapy.Spider):
     name = "starbucks"
