@@ -28,7 +28,7 @@ class DenmansGBSpider(Spider):
             item["phone"] = store["address"]["phone"]
             item["name"] = store["displayName"]
             item["ref"] = store["name"]
-            # https://www.denmans.co.uk/den/Bradley-Stoke-Bristol/store/1AR
+            #https://www.denmans.co.uk/den/Bradley-Stoke-Bristol/store/1AR
             item[
                 "website"
             ] = f'https://www.denmans.co.uk/den/{store["address"]["town"].replace(" ", "-")}/store/{store["name"]}'
