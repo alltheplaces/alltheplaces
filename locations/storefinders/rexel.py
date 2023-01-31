@@ -4,11 +4,13 @@ from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
 
-class DenmansGBSpider(Spider):
-    name = "denmans_gb"
-    item_attributes = {"brand": "Denmans", "brand_wikidata": "Q116508855"}
-    # This seems to return all stores regardless of lat-long; as long as it's in the UK?
-    start_urls = ["https://www.denmans.co.uk/den/store-finder/findNearbyStores?latitude=51&longitude=-0"]
+class RexelSpider(Spider):
+    base_url = ""
+    search_lat = ""
+    search_lon = ""
+
+    # This seems to return all stores regardless of lat-long; as long as it's in the right country/area?
+    start_urls = [f"https://{self.base_url}/store-finder/findNearbyStores?latitude={self.search_lat}&longitude={self.search_lon}"]
 
     def parse(self, response):
         for store in response.json()["results"]:
@@ -28,13 +30,13 @@ class DenmansGBSpider(Spider):
             # e.g. https://www.denmans.co.uk/den/Bradley-Stoke-Bristol/store/1AR
             item[
                 "website"
-            ] = f'https://www.denmans.co.uk/den/{store["address"]["town"].replace(" ", "-")}/store/{store["ref"]}'
+            ] = f'https://{self.base_url}/{store["address"]["town"].replace(" ", "-")}/store/{store["ref"]}'
             item["opening_hours"] = self.decode_hours(store)
             # We could also fall back to cartIcon here...
             storeImages = filter(lambda x: (x["format"] == "store" and x["url"]), store["storeImages"])
             if storeImages:
                 item["image"] = next(storeImages)["url"]
-            yield item
+            yield from self.parse_item(item, feature) or []
 
     @staticmethod
     def decode_hours(store):
