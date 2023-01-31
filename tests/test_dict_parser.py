@@ -189,6 +189,10 @@ def test_get_variations():
         "streetaddress",
         "STREETADDRESS",
         "StreetAddress",
+        "street_address",
+        "STREET_ADDRESS",
+        "street_Address",
+        "Street_Address",
     ]
 
     variations = DictParser.get_variations(key)
