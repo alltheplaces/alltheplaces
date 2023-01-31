@@ -14,11 +14,11 @@ class AbercrombieAndFitchSpider(scrapy.Spider):
     user_agent = BROWSER_DEFAULT
 
     start_urls = [
-    'https://www.abercrombie.com/api/ecomm/a-uk/storelocator/search?country=US',
-        'https://www.abercrombie.com/api/ecomm/a-uk/storelocator/search?country=CA',
-        'https://www.abercrombie.com/api/ecomm/a-uk/storelocator/search?country=UK',
-        'https://www.abercrombie.com/api/ecomm/a-uk/storelocator/search?country=EU',
-        'https://www.abercrombie.com/api/ecomm/a-uk/storelocator/search?country=AM',
+        "https://www.abercrombie.com/api/ecomm/a-uk/storelocator/search?country=US",
+        "https://www.abercrombie.com/api/ecomm/a-uk/storelocator/search?country=CA",
+        "https://www.abercrombie.com/api/ecomm/a-uk/storelocator/search?country=UK",
+        "https://www.abercrombie.com/api/ecomm/a-uk/storelocator/search?country=EU",
+        "https://www.abercrombie.com/api/ecomm/a-uk/storelocator/search?country=AM",
     ]
 
     def parse(self, response):
