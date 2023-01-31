@@ -137,6 +137,16 @@ DAYS_DK = {
     "Søn": "Su",
 }
 
+DAYS_RS = {
+    "Ponedeljak": "Mo",
+    "Utorak": "Tu",
+    "Sreda": "We",
+    "Četvrtak": "Th",
+    "Petak": "Fr",
+    "Subota": "Sa",
+    "Nedelja": "Su",
+}
+
 
 def day_range(start_day, end_day):
     start_ix = DAYS.index(start_day)

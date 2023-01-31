@@ -189,6 +189,7 @@ class CheckItemPropertiesPipeline:
         r"(?:/?|[/?]\S+)$",
         re.IGNORECASE,
     )
+    country_regex = re.compile(r"(^[A-Z]{2}$)")
     email_regex = re.compile(r"(^[-\w_.+]+@[-\w]+\.[-\w.]+$)")
     twitter_regex = re.compile(r"^@?([-\w_]+)$")
     wikidata_regex = re.compile(
@@ -212,7 +213,7 @@ class CheckItemPropertiesPipeline:
         check_field(item, spider, "city", (str,))
         check_field(item, spider, "state", (str,))
         check_field(item, spider, "postcode", (str,))
-        check_field(item, spider, "country", (str,))
+        check_field(item, spider, "country", (str,), self.country_regex)
         check_field(item, spider, "brand", (str,))
 
         if not item.get("geometry"):
