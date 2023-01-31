@@ -22,12 +22,8 @@ class DenmansGBSpider(Spider):
                     ],
                 )
             )
-            store["address"]["country"] = store["address"]["country"]["isocode"]
+            store["ref"] = store.pop("name")
             item = DictParser.parse(store)
-            item["name"] = store["displayName"]
-            item["ref"] = store["name"]
-            # We can either pass in store, and it picks up the lat/long, or store["address"] and it gets the email and phone
-            item["email"] = store["address"]["email"]
             item["phone"] = store["address"]["phone"]
             # e.g. https://www.denmans.co.uk/den/Bradley-Stoke-Bristol/store/1AR
             item[
@@ -50,4 +46,4 @@ class DenmansGBSpider(Spider):
                 r["closingTime"]["formattedHour"],
                 time_format="%I:%M %p",
             )
-        return oh.as_opening_hours()
+        return oh
