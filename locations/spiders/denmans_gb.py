@@ -28,7 +28,7 @@ class DenmansGBSpider(Spider):
             # e.g. https://www.denmans.co.uk/den/Bradley-Stoke-Bristol/store/1AR
             item[
                 "website"
-            ] = f'https://www.denmans.co.uk/den/{store["address"]["town"].replace(" ", "-")}/store/{store["name"]}'
+            ] = f'https://www.denmans.co.uk/den/{store["address"]["town"].replace(" ", "-")}/store/{store["ref"]}'
             item["opening_hours"] = self.decode_hours(store)
             # We could also fall back to cartIcon here...
             storeImages = filter(lambda x: (x["format"] == "store" and x["url"]), store["storeImages"])
