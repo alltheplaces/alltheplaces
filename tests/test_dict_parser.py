@@ -134,7 +134,7 @@ def test_dict_parse():
                 "company": "Poundland",
                 "line": ["3-6 Coventry Street", "Swan Centre"],
                 "city": "Kidderminster",
-                "country": {isocode: "UK", name: "United Kingdom"},
+                "country": {"isocode": "UK", "name": "United Kingdom"},
                 "postcode": "DY10 2DG",
             },
             "geoPoint": {"latitude": "52.38839100", "longitude": "-2.24784700"},
