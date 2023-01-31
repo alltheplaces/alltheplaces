@@ -36,7 +36,7 @@ class DenmansGBSpider(Spider):
             # We could also fall back to cartIcon here...
             storeImages = filter(lambda x: (x["format"] == "store"), store["storeImages"])
             if storeImages:
-                item["image"] =   next(storeImages)
+                item["image"] = next(storeImages)
             yield item
 
     @staticmethod
