@@ -34,9 +34,9 @@ class DenmansGBSpider(Spider):
             ] = f'https://www.denmans.co.uk/den/{store["address"]["town"].replace(" ", "-")}/store/{store["name"]}'
             item["opening_hours"] = self.decode_hours(store)
             # We could also fall back to cartIcon here...
-            storeImages = filter(lambda x: (x["format"] == "store"), store["storeImages"])
+            storeImages = filter(lambda x: (x["format"] == "store" and x["url"]), store["storeImages"])
             if storeImages:
-                item["image"] = next(storeImages)
+                item["image"] = next(storeImages)["url"]
             yield item
 
     @staticmethod
