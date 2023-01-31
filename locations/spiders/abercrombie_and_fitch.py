@@ -52,8 +52,10 @@ class AbercrombieAndFitchSpider(scrapy.Spider):
                 "lon": row["longitude"],
                 "phone": row["telephone"],
                 "street_address": row["addressLine"][0],
-                "postcode": row["postalCode"],
             }
+            # Hong Kong seems to list postcodes with just - in them
+            if row["postalCode"] is not "-":
+                properties["postcode"] = row["postalCode"]
 
             for brand in row["physicalStoreAttribute"]:
                 if brand["name"] == "Brand":
