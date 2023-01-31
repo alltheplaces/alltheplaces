@@ -121,10 +121,11 @@ class DictParser:
         country = DictParser.get_first_key(address, DictParser.country_keys)
         if country and isinstance(country, dict):
             isocode = DictParser.get_first_key(country, DictParser.isocode_keys)
-            if isocode:
+            if isocode and isinstance(isocode, str):
                 item["country"] = isocode
-            elif isinstance(country, str):
-                item["country"] = country
+            #TODO: Handle other potential country fields inside the dict?
+        else:
+            item["country"] = country
 
         contact = DictParser.get_first_key(obj, ["contact"])
         if not contact or not isinstance(contact, dict):
