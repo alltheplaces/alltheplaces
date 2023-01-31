@@ -290,4 +290,5 @@ class OpeningHours:
                             self.add_range(day, start_time, end_time, time_format)
                     else:
                         for day in days.split(","):
-                            self.add_range(day, start_time, end_time, time_format)
+                            if d := sanitise_day(day):
+                                self.add_range(d, start_time, end_time, time_format)
