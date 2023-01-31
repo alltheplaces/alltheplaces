@@ -5,7 +5,7 @@ from zipfile import ZipFile
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class SpeedwaySpider(scrapy.Spider):
@@ -32,7 +32,7 @@ class SpeedwaySpider(scrapy.Spider):
             amenities = store["amenities"]
             fuels = store["fuelItems"]
 
-            yield GeojsonPointItem(
+            yield Feature(
                 lat=store["latitude"],
                 lon=store["longitude"],
                 name=store["brandName"],

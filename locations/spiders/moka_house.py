@@ -2,7 +2,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class MokaHouseSpider(scrapy.Spider):
@@ -66,7 +66,7 @@ class MokaHouseSpider(scrapy.Spider):
             "opening_hours": opening_hours,
         }
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)
 
     def hasDigit(self, str):
         return bool(re.search(r"\d", str))

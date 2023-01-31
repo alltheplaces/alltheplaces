@@ -3,7 +3,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class KindredHealthcareSpider(scrapy.Spider):
@@ -48,7 +48,7 @@ class KindredHealthcareSpider(scrapy.Spider):
                 "extras": {"facility_type": facility_type},
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)
 
     def parse(self, response):
         response.selector.remove_namespaces()

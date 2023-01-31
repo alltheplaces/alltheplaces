@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class BostonPizzaSpider(scrapy.Spider):
@@ -33,4 +33,4 @@ class BostonPizzaSpider(scrapy.Spider):
                 "name": store["restaurantName"],
                 "lon": store["longitude"],
             }
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

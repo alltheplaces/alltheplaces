@@ -2,7 +2,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 STATES = ["NC", "AL", "GA", "KY", "MD", "MS", "SC", "TN", "VA", "WV"]
 
@@ -102,7 +102,7 @@ class CookoutSpider(scrapy.Spider):
             if hours:
                 properties["opening_hours"] = self.store_hours(hours)
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)
 
         else:
             self.logger.info("No results")

@@ -2,7 +2,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class MontessoriSchoolSpider(scrapy.Spider):
@@ -36,4 +36,4 @@ class MontessoriSchoolSpider(scrapy.Spider):
                 "lat": float(addr_elem.xpath(".//@data-latitude").extract_first()),
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

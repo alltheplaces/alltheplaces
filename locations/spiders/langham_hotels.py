@@ -2,7 +2,7 @@ import json
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class LanghamHotelsSpider(scrapy.Spider):
@@ -45,7 +45,7 @@ class LanghamHotelsSpider(scrapy.Spider):
                     "postcode": address_data.get("postalCode", None),
                 }
 
-                yield GeojsonPointItem(**properties)
+                yield Feature(**properties)
 
             except Exception as e:
                 self.logger.warn("----------------- Error -----------------: {}".format(e))

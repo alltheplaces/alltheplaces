@@ -2,7 +2,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class CBRESpider(scrapy.Spider):
@@ -41,6 +41,6 @@ class CBRESpider(scrapy.Spider):
                     "lon": float(item.split(",")[-1].replace('"', "")),
                 }
 
-                yield GeojsonPointItem(**properties)
+                yield Feature(**properties)
             else:
                 pass

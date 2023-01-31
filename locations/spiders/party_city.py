@@ -3,7 +3,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class PartyCitySpider(scrapy.Spider):
@@ -25,7 +25,7 @@ class PartyCitySpider(scrapy.Spider):
         if response.request.meta.get("redirect_urls"):
             for map_item in response.xpath("//div[@class='map-list-item']"):
                 properties = self.parse_map_page(map_item)
-                yield GeojsonPointItem(**properties)
+                yield Feature(**properties)
         else:
             script = json.loads(
                 response.xpath(
@@ -51,7 +51,7 @@ class PartyCitySpider(scrapy.Spider):
                 "website": response.request.url,
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)
 
     def parse_map_page(self, element):
         # Use the store urls for the ref even if it redirects, it's still unique and consistent with parse_store refs

@@ -3,7 +3,7 @@ import json
 from scrapy.spiders import SitemapSpider
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 
@@ -52,4 +52,4 @@ class CrackerBarrelSpider(SitemapSpider):
             "phone": data["Phone"]["value"],
             "opening_hours": hours.as_opening_hours(),
         }
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

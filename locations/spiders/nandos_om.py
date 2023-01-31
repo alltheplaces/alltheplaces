@@ -3,7 +3,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class NandosOMSpider(scrapy.Spider):
@@ -44,4 +44,4 @@ class NandosOMSpider(scrapy.Spider):
                 "lon": store_data["geo"]["longitude"],
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

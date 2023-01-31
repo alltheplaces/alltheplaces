@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class JiffyLubeSpider(scrapy.Spider):
@@ -32,4 +32,4 @@ class JiffyLubeSpider(scrapy.Spider):
             "website": "https://www.jiffylube.com" + store_data["_links"]["_self"],
         }
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

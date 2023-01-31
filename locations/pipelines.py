@@ -12,6 +12,7 @@ from scrapy.exceptions import DropItem
 
 from locations.categories import get_category_tags
 from locations.country_utils import CountryUtils
+from locations.hours import OpeningHours
 from locations.name_suggestion_index import NSI
 
 
@@ -83,6 +84,7 @@ class CountryCodeCleanUpPipeline:
             if country := self.country_utils.country_code_from_url(item.get("website")):
                 spider.crawler.stats.inc_value("atp/field/country/from_website_url")
                 item["country"] = country
+                return item
 
             # Still no country set, try an offline reverse geocoder.
             lat, lon = item.get("lat"), item.get("lon")
@@ -90,6 +92,7 @@ class CountryCodeCleanUpPipeline:
                 if c := reverse_geocode.search([(lat, lon)]):
                     spider.crawler.stats.inc_value("atp/field/country/from_reverse_geocoding")
                     item["country"] = c[0]["country_code"]
+                    return item
 
         return item
 
@@ -101,11 +104,11 @@ class PhoneCleanUpPipeline:
         for key in filter(self.is_phone_key, extras.keys()):
             extras[key] = self.normalize_numbers(extras[key], country, spider)
 
+        if not phone:
+            return item
+
         if isinstance(phone, int):
             phone = str(phone)
-        elif not phone:
-            spider.crawler.stats.inc_value("atp/field/phone/missing")
-            return item
         elif not isinstance(phone, str):
             spider.crawler.stats.inc_value("atp/field/phone/wrong_type")
             return item
@@ -121,7 +124,10 @@ class PhoneCleanUpPipeline:
         return ";".join(filter(None, numbers))
 
     def normalize(self, phone, country, spider):
+        phone = re.sub(r"tel:", "", phone, flags=re.IGNORECASE)
         phone = phone.strip()
+        if not phone:
+            return None
         try:
             ph = phonenumbers.parse(phone, country)
             if phonenumbers.is_valid_number(ph):
@@ -143,6 +149,12 @@ class ExtractGBPostcodePipeline:
                     postcode = re.search(r"(\w{1,2}\d{1,2}\w?) O(\w{2})", item["addr_full"].upper())
                     if postcode:
                         item["postcode"] = postcode.group(1) + " 0" + postcode.group(2)
+        elif item.get("country") == "IE":
+            if item.get("addr_full") and not item.get("postcode"):
+                if postcode := re.search(
+                    r"([AC-FHKNPRTV-Y][0-9]{2}|D6W)[ -]?([0-9AC-FHKNPRTV-Y]{4})", item["addr_full"].upper()
+                ):
+                    item["postcode"] = "{} {}".format(postcode.group(1), postcode.group(2))
 
         return item
 
@@ -177,13 +189,14 @@ class CheckItemPropertiesPipeline:
         r"(?:/?|[/?]\S+)$",
         re.IGNORECASE,
     )
+    country_regex = re.compile(r"(^[A-Z]{2}$)")
     email_regex = re.compile(r"(^[-\w_.+]+@[-\w]+\.[-\w.]+$)")
     twitter_regex = re.compile(r"^@?([-\w_]+)$")
     wikidata_regex = re.compile(
         r"^Q[0-9]+$",
     )
     opening_hours_regex = re.compile(
-        r"^(?:(?:Mo|Tu|We|Th|Fr|Sa|Su)(?:-(?:Mo|Tu|We|Th|Fr|Sa|Su))? [0-9]{2}:[0-9]{2}-[0-9]{2}:[0-9]{2}(?:; )?)+$"
+        r"^(?:(?:Mo|Tu|We|Th|Fr|Sa|Su)(?:-(?:Mo|Tu|We|Th|Fr|Sa|Su))? (?:,?[0-9]{2}:[0-9]{2}-[0-9]{2}:[0-9]{2})+(?:; )?)+$"
     )
     min_lat = -90.0
     max_lat = 90.0
@@ -195,35 +208,41 @@ class CheckItemPropertiesPipeline:
         check_field(item, spider, "website", (str,), self.url_regex)
         check_field(item, spider, "image", (str,), self.url_regex)
         check_field(item, spider, "email", (str,), self.email_regex)
+        check_field(item, spider, "phone", (str,))
         check_field(item, spider, "street_address", (str,))
         check_field(item, spider, "city", (str,))
         check_field(item, spider, "state", (str,))
         check_field(item, spider, "postcode", (str,))
-        check_field(item, spider, "country", (str,))
+        check_field(item, spider, "country", (str,), self.country_regex)
         check_field(item, spider, "brand", (str,))
 
-        if lat := item.get("lat"):
-            try:
-                lat = float(lat)
-                if not (self.min_lat < lat < self.max_lat):
+        if not item.get("geometry"):
+            if lat := item.get("lat"):
+                try:
+                    lat = float(lat)
+                    if not (self.min_lat < lat < self.max_lat):
+                        spider.crawler.stats.inc_value("atp/field/lat/invalid")
+                    if math.fabs(lat) < 0.01:
+                        spider.crawler.stats.inc_value("atp/field/lat/invalid")
+                except:
+                    lat = None
                     spider.crawler.stats.inc_value("atp/field/lat/invalid")
-                if math.fabs(lat) < 0.01:
-                    spider.crawler.stats.inc_value("atp/field/lat/invalid")
-            except:
-                lat = None
-                spider.crawler.stats.inc_value("atp/field/lat/invalid")
-            item["lat"] = lat
-        if lon := item.get("lon"):
-            try:
-                lon = float(lon)
-                if not (self.min_lon < lon < self.max_lon):
+                item["lat"] = lat
+            else:
+                spider.crawler.stats.inc_value("atp/field/lat/missing")
+            if lon := item.get("lon"):
+                try:
+                    lon = float(lon)
+                    if not (self.min_lon < lon < self.max_lon):
+                        spider.crawler.stats.inc_value("atp/field/lon/invalid")
+                    if math.fabs(lon) < 0.01:
+                        spider.crawler.stats.inc_value("atp/field/lon/invalid")
+                except:
+                    lon = None
                     spider.crawler.stats.inc_value("atp/field/lon/invalid")
-                if math.fabs(lon) < 0.01:
-                    spider.crawler.stats.inc_value("atp/field/lon/invalid")
-            except:
-                lon = None
-                spider.crawler.stats.inc_value("atp/field/lon/invalid")
-            item["lon"] = lon
+                item["lon"] = lon
+            else:
+                spider.crawler.stats.inc_value("atp/field/lon/missing")
 
         if twitter := item.get("twitter"):
             if not isinstance(twitter, str):
@@ -236,7 +255,9 @@ class CheckItemPropertiesPipeline:
             spider.crawler.stats.inc_value("atp/field/twitter/missing")
 
         if opening_hours := item.get("opening_hours"):
-            if not isinstance(opening_hours, str):
+            if isinstance(opening_hours, OpeningHours):
+                item["opening_hours"] = opening_hours.as_opening_hours()
+            elif not isinstance(opening_hours, str):
                 spider.crawler.stats.inc_value("atp/field/opening_hours/wrong_type")
             elif not self.opening_hours_regex.match(opening_hours) and opening_hours != "24/7":
                 spider.crawler.stats.inc_value("atp/field/opening_hours/invalid")
@@ -329,7 +350,7 @@ class ApplyNSICategoriesPipeline:
             if key == "brand:wikidata":
                 key = "brand_wikidata"
 
-            # Fields defined in GeojsonPointItem are added directly otherwise add them to extras
+            # Fields defined in Feature are added directly otherwise add them to extras
             # Never override anything set by the spider
             if key in item.fields:
                 if item.get(key) is None:
@@ -340,4 +361,26 @@ class ApplyNSICategoriesPipeline:
 
         item["extras"] = extras
 
+        return item
+
+
+class CountCategoriesPipeline:
+    def process_item(self, item, spider):
+        if categories := get_category_tags(item):
+            for k, v in sorted(categories.items()):
+                spider.crawler.stats.inc_value("atp/category/%s/%s" % (k, v))
+                break
+            if len(categories) > 1:
+                spider.crawler.stats.inc_value("atp/category/multiple")
+        else:
+            spider.crawler.stats.inc_value("atp/category/missing")
+        return item
+
+
+class CountBrandsPipeline:
+    def process_item(self, item, spider):
+        if brand := item.get("brand"):
+            spider.crawler.stats.inc_value(f"atp/brand/{brand}")
+        if wikidata := item.get("brand_wikidata"):
+            spider.crawler.stats.inc_value(f"atp/brand_wikidata/{wikidata}")
         return item

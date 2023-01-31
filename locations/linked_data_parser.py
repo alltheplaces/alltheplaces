@@ -4,7 +4,7 @@ import chompjs
 import json5
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class LinkedDataParser:
@@ -34,6 +34,11 @@ class LinkedDataParser:
 
     @staticmethod
     def find_linked_data(response, wanted_type, json_parser="json") -> {}:
+        if isinstance(wanted_type, list):
+            wanted_types = [LinkedDataParser.clean_type(t) for t in wanted_type]
+        else:
+            wanted_types = [LinkedDataParser.clean_type(wanted_type)]
+
         for ld_obj in LinkedDataParser.iter_linked_data(response, json_parser=json_parser):
             if not ld_obj.get("@type"):
                 continue
@@ -45,25 +50,12 @@ class LinkedDataParser:
 
             types = [LinkedDataParser.clean_type(t) for t in types]
 
-            if isinstance(wanted_type, list):
-                wanted_types = wanted_type
-            else:
-                wanted_types = [wanted_type]
-
-            wanted_types = [LinkedDataParser.clean_type(t) for t in wanted_types]
-
-            for wanted_type in wanted_types:
-                valid_type = True
-                for t in types:
-                    if t not in wanted_types:
-                        valid_type = False
-
-                if valid_type:
-                    return ld_obj
+            if all(wanted in types for wanted in wanted_types):
+                return ld_obj
 
     @staticmethod
-    def parse_ld(ld) -> GeojsonPointItem:  # noqa: C901
-        item = GeojsonPointItem()
+    def parse_ld(ld) -> Feature:  # noqa: C901
+        item = Feature()
 
         if (geo := ld.get("geo")) or "location" in ld and (geo := ld["location"].get("geo")):
             if isinstance(geo, list):
@@ -145,7 +137,7 @@ class LinkedDataParser:
         return item
 
     @staticmethod
-    def parse(response, wanted_type, json_parser="json") -> GeojsonPointItem:
+    def parse(response, wanted_type, json_parser="json") -> Feature:
         ld_item = LinkedDataParser.find_linked_data(response, wanted_type, json_parser=json_parser)
         if ld_item:
             item = LinkedDataParser.parse_ld(ld_item)

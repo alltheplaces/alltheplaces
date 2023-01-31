@@ -2,7 +2,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class LaBreweriesSpider(scrapy.Spider):
@@ -113,4 +113,4 @@ class LaBreweriesSpider(scrapy.Spider):
         if address:
             properties.update(address)
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

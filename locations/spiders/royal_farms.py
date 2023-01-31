@@ -2,7 +2,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class RoyalFarmsSpider(scrapy.Spider):
@@ -68,4 +68,4 @@ class RoyalFarmsSpider(scrapy.Spider):
                 },
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

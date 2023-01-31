@@ -5,7 +5,7 @@ import zlib
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class TacototeSpider(scrapy.Spider):
@@ -37,4 +37,4 @@ class TacototeSpider(scrapy.Spider):
                 "name": marker["title"],
                 "addr_full": marker["address"],
             }
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

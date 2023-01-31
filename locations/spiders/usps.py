@@ -4,7 +4,7 @@ import scrapy
 
 from locations.categories import Categories
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 DAYS_NAME = {
     "MO": "Mo",
@@ -98,4 +98,4 @@ class UspsSpider(scrapy.Spider):
             if h:
                 properties["opening_hours"] = h
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

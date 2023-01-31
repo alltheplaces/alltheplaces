@@ -3,7 +3,7 @@ import re
 import scrapy
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 DAY_MAPPING = {
     "Mon": "Mo",
@@ -100,7 +100,7 @@ class AvisSpider(scrapy.Spider):
         hours = response.xpath('//meta[@itemprop="openingHours"]/@content').extract_first()
         if hours:
             properties["opening_hours"] = self.parse_hours(hours)
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)
 
     def parse_state(self, response):
         urls = response.xpath('//ul[contains(@class, "location-list-ul")]//li/a/@href').extract()

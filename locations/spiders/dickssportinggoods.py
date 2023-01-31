@@ -4,7 +4,7 @@ import string
 import scrapy
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 DAY_MAPPING = {
     "Monday": "Mo",
@@ -42,7 +42,7 @@ class DicksSportingGoodsSpider(scrapy.Spider):
         if shopping_center:
             name = ", ".join([name, shopping_center])
 
-        yield GeojsonPointItem(
+        yield Feature(
             lat=float(response.xpath('//meta[@property="place:location:latitude"]/@content').extract_first()),
             lon=float(response.xpath('//meta[@property="place:location:longitude"]/@content').extract_first()),
             addr_full=response.xpath(

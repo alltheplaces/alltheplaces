@@ -5,7 +5,7 @@ import xmltodict
 
 from locations.categories import Categories
 from locations.dict_parser import DictParser
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class BancoDelBienestarMXSpider(scrapy.Spider):
@@ -65,7 +65,7 @@ class BancoDelBienestarMXSpider(scrapy.Spider):
     def parse(self, response):
         data = xmltodict.parse(response.body)
         for bank in DictParser.get_nested_key(data, "z:row"):
-            item = GeojsonPointItem()
+            item = Feature()
             item["ref"] = bank["@ows_ID"]
             if m := re.match(r"POINT\((-?\d+\.\d+) (-?\d+\.\d+)\)", bank.get("@ows_Localizacion", "")):
                 item["lon"], item["lat"] = m.groups()

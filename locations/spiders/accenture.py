@@ -2,7 +2,7 @@ import json
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 countries = [
     "Argentina",
@@ -104,4 +104,4 @@ class AccentureSpider(scrapy.Spider):
                 "website": store_data.get("LocationURL"),
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

@@ -1,7 +1,7 @@
 import scrapy
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 wochentag = {
     "Mo": "Mo",
@@ -59,4 +59,4 @@ class AdegSpider(scrapy.Spider):
                 "website": response.urljoin(store["url"]),
                 "opening_hours": oh.as_opening_hours(),
             }
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

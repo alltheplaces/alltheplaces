@@ -3,7 +3,7 @@ import json
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 states = ["AL", "FL", "GA", "NC", "SC", "TN", "VA"]
 
@@ -41,4 +41,4 @@ class PublixSpider(scrapy.Spider):
                 "extras": {"fax": row["FAX"]},
                 "website": f"https://www.publix.com/locations/{ref}",
             }
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

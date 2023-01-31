@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class QuiktripSpider(scrapy.Spider):
@@ -21,7 +21,7 @@ class QuiktripSpider(scrapy.Spider):
             return shop.xpath(f".//{feature}/text()").extract_first() == "1"
 
         for shop in shops:
-            yield GeojsonPointItem(
+            yield Feature(
                 ref=shop.xpath(".//clientkey/text()").extract_first(),
                 phone=shop.xpath(".//phone/text()").extract_first(),
                 addr_full=shop.xpath(".//address1/text()").extract_first(),

@@ -4,7 +4,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class BbvaCompassSpider(scrapy.Spider):
@@ -43,7 +43,7 @@ class BbvaCompassSpider(scrapy.Spider):
         if hours:
             properties["opening_hours"] = hours
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)
 
     def parse(self, response):
         urls = response.xpath('//div[contains(@class, "container-content")]//ul/li/a/@href').extract()

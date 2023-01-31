@@ -22,7 +22,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class HyVeeSpider(scrapy.Spider):
@@ -94,7 +94,7 @@ class HyVeeSpider(scrapy.Spider):
             "lat": lat,
             "lon": lon,
         }
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)
 
     def process_hours(self, hours):
         """

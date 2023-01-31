@@ -3,7 +3,7 @@ from urllib.parse import urlencode
 import scrapy
 
 from locations.geo import point_locations
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class AAASpider(scrapy.Spider):
@@ -51,4 +51,4 @@ class AAASpider(scrapy.Spider):
                 "lon": location["position"]["longitude"],
                 "phone": location["phones"].get("phone", {}).get("content"),
             }
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

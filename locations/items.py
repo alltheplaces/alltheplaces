@@ -6,9 +6,10 @@
 import scrapy
 
 
-class GeojsonPointItem(scrapy.Item):
+class Feature(scrapy.Item):
     lat = scrapy.Field()
     lon = scrapy.Field()
+    geometry = scrapy.Field()
     name = scrapy.Field()
     addr_full = scrapy.Field()
     housenumber = scrapy.Field()
@@ -32,3 +33,8 @@ class GeojsonPointItem(scrapy.Item):
     located_in_wikidata = scrapy.Field()
     nsi_id = scrapy.Field()
     extras = scrapy.Field()
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if not self._values.get("extras"):
+            self.__setitem__("extras", {})

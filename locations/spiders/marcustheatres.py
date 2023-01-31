@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class MarcusTheatresSpider(scrapy.Spider):
@@ -36,4 +36,4 @@ class MarcusTheatresSpider(scrapy.Spider):
             ),
         }
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

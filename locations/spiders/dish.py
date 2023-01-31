@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 POSTALS = [
     "26601",
@@ -88,4 +88,4 @@ class DishSpider(scrapy.Spider):
                 "name": store["storename"],
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

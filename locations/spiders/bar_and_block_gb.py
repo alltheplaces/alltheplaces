@@ -2,7 +2,7 @@ from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
 from locations.google_url import url_to_coords
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class BarAndBlockGB(CrawlSpider):
@@ -12,7 +12,7 @@ class BarAndBlockGB(CrawlSpider):
     rules = [Rule(LinkExtractor(allow=r"\/en-gb\/locations\/[-\w]+$"), callback="parse")]
 
     def parse(self, response, **kwargs):
-        item = GeojsonPointItem()
+        item = Feature()
 
         item["name"] = response.xpath("//@data-ldname").get()
         item["ref"] = response.xpath("//@data-lid").get()

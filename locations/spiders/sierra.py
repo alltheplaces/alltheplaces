@@ -1,7 +1,7 @@
 import scrapy
 
 from locations.structured_data_spider import StructuredDataSpider
-from locations.user_agents import BROSWER_DEFAULT
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class SierraSpider(StructuredDataSpider):
@@ -10,7 +10,7 @@ class SierraSpider(StructuredDataSpider):
     allowed_domains = ["sierra.com"]
     start_urls = ["https://www.sierra.com/lp2/retail-stores/"]
     wanted_types = ["LocalBusiness"]
-    user_agent = BROSWER_DEFAULT
+    user_agent = BROWSER_DEFAULT
 
     def parse(self, response):
         for url in response.xpath('//div[@class="m-b"]/a [contains(., "Store Info and Directions")]/@href').extract():

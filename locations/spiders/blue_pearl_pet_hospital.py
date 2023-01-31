@@ -3,7 +3,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class BluePearlPetHospitalSpider(scrapy.Spider):
@@ -41,4 +41,4 @@ class BluePearlPetHospitalSpider(scrapy.Spider):
                 "website": response.url,
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

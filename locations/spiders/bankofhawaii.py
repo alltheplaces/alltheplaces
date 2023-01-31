@@ -2,7 +2,7 @@ import json
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class BankOfHawaiiSpider(scrapy.Spider):
@@ -50,4 +50,4 @@ class BankOfHawaiiSpider(scrapy.Spider):
                 "extras": {"location_type": location_type},
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

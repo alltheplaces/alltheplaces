@@ -2,7 +2,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class PonderosaSteakhouseSpider(scrapy.Spider):
@@ -52,4 +52,4 @@ class PonderosaSteakhouseSpider(scrapy.Spider):
             "lon": float(response.xpath('//meta[@itemprop="longitude"]/@content').extract_first()),
         }
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

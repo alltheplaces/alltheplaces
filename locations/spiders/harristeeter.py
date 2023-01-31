@@ -3,7 +3,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 DAYS = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
 
@@ -95,4 +95,4 @@ class HarristeeterSpider(scrapy.Spider):
                 "opening_hours": shop["StoreHours"].replace("Open 24 Hours", "Mo-Su 0:00-24:00"),
             }
 
-            yield GeojsonPointItem(**props)
+            yield Feature(**props)

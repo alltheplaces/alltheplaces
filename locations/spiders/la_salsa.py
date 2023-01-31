@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class LaSalsaSpider(scrapy.Spider):
@@ -11,7 +11,7 @@ class LaSalsaSpider(scrapy.Spider):
 
     def parse(self, response):
         for match in response.xpath("//markers/marker"):
-            yield GeojsonPointItem(
+            yield Feature(
                 ref=match.xpath(".//@name").extract_first(),
                 lat=float(match.xpath(".//@latitude").extract_first()),
                 lon=float(match.xpath(".//@longitude").extract_first()),

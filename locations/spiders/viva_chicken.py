@@ -3,7 +3,7 @@ import json
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class VivaChickenSpider(scrapy.Spider):
@@ -22,4 +22,4 @@ class VivaChickenSpider(scrapy.Spider):
                 "lat": row["latitude"],
                 "lon": row["longitude"],
             }
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

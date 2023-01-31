@@ -1,7 +1,7 @@
 import scrapy
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 DAY_MAPPING = {
     "Mo.": "Mo",
@@ -101,7 +101,7 @@ class NettoSpider(scrapy.Spider):
 
             properties["opening_hours"] = self.parse_opening_hours(store["store_opening"])
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)
 
     def urlify(self, param):
         # They also do ß -> ss, but it's not vital

@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class MaseratiSpider(scrapy.Spider):
@@ -30,4 +30,4 @@ class MaseratiSpider(scrapy.Spider):
                 "website": row.get("properties", {}).get("url"),
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

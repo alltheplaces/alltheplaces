@@ -2,7 +2,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 BASE_URL = "http://www.vch.ca/_api/Web/Lists(guid'51d09f82-eddf-47c9-95e9-9f5f0ec838c5')/"
 
@@ -64,4 +64,4 @@ class VancouverCoastalHealthSpider(scrapy.Spider):
             "website": website,
         }
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

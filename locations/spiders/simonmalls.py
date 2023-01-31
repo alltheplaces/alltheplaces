@@ -1,65 +1,46 @@
-import json
-import re
-
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.dict_parser import DictParser
+from locations.hours import OpeningHours, day_range, sanitise_day
 
 
 class SimonMallsSpider(scrapy.Spider):
-    download_delay = 0.2
     name = "simonmalls"
-    item_attributes = {"brand": "Simon Malls"}
-    allowed_domains = ["simon.com"]
-    start_urls = ("https://api.simon.com/v1.2/centers/all/index",)
+    item_attributes = {"brand": "Simon Malls", "brand_wikidata": "Q2287759"}
+    start_urls = ["https://api.simon.com/v1.2/mall"]
+    custom_settings = {
+        "DEFAULT_REQUEST_HEADERS": {"key": "40A6F8C3-3678-410D-86A5-BAEE2804C8F2"},
+        "ROBOTSTXT_OBEY": False,
+    }
 
-    def parse(self, response):
-        base_url = "https://www.simon.com/mall/"
+    def parse(self, response, **kwargs):
+        for location in response.json():
+            location["ref"] = location["mallId"]
+            location["name"] = location["mallName"]
+            location["address"]["street_address"] = ", ".join(
+                filter(None, [location["address"].pop("street1"), location["address"].pop("street2")])
+            )
+            location["phone"] = location["phones"].get("information")
 
-        # build store urls
-        jsonresponse = response.json()
-        for stores in jsonresponse:
-            store = json.dumps(stores)
-            store_data = json.loads(store)
-            store_name = store_data["urlFriendlyName"]
-            if store_data["address"]["country"] != "UNITED STATES":
-                pass
-            elif store_data["urlFriendlyName"] == "one-phipps-plaza":
-                # skip does not have a store page
-                pass
-            else:
-                store_url = base_url + store_name
-                yield scrapy.Request(
-                    store_url,
-                    callback=self.parse_store,
-                    meta={
-                        "country": store_data["address"]["country"],
-                        "phone": store_data["mallPhone"],
-                        "location_type": store_data["propertyType"],
-                    },
-                )
+            item = DictParser.parse(location)
 
-    def parse_store(self, response):
-        extracted_script = response.xpath(
-            '//script[@type="text/javascript" and contains(text(), "FullAddress")]/text()'
-        ).extract_first()
-        if extracted_script is None:
-            pass
-        else:
-            store_data = json.loads(re.search(r"var mallObj =(.*)", extracted_script).group(1))
+            if location["propertyType"] == "OutletCenter":
+                item["brand"] = "Premium Outlets"
 
-            properties = {
-                "name": store_data["DisplayName"].replace("\u00ae", " ").strip(" "),
-                "ref": store_data["Id"],
-                "addr_full": store_data["FullAddress"],
-                "city": store_data["City"],
-                "state": store_data["StateCode"],
-                "postcode": store_data["ZipCode"],
-                "country": response.meta["country"],
-                "phone": response.meta["phone"],
-                "website": response.url,
-                "lat": float(store_data["Latitude"]),
-                "lon": float(store_data["Longitude"]),
-                "extras": {"location_type": response.meta["location_type"]},
-            }
-            yield GeojsonPointItem(**properties)
+            oh = OpeningHours()
+            for rule in location["hours"]:
+                if rule["isClosed"]:
+                    continue
+                start_day = sanitise_day(rule["startDayOfWeek"])
+                end_day = sanitise_day(rule["endDayOfWeek"])
+                if start_day and end_day:
+                    for day in day_range(start_day, end_day):
+                        oh.add_range(day, rule["startTime"], rule["endTime"], time_format="%I:%M%p")
+            item["opening_hours"] = oh.as_opening_hours()
+
+            item["website"] = f"https://www.simon.com/mall/{location['urlFriendlyName']}"
+            item["image"] = location["propertyPhotoLrg"]
+            item["facebook"] = location["socialLinks"].get("Facebook")
+            item["twitter"] = location["socialLinks"].get("Twitter")
+
+            yield item

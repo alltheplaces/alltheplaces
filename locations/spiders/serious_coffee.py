@@ -2,7 +2,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class SeriousCoffeeSpider(scrapy.Spider):
@@ -121,7 +121,7 @@ class SeriousCoffeeSpider(scrapy.Spider):
         if hours:
             properties["opening_hours"] = hours
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)
 
     def parse_city_stores(self, response):
         stores = response.xpath(

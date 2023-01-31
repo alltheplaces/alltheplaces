@@ -106,6 +106,46 @@ DAYS_IT = {
     "Sab": "Sa",
     "Dom": "Su",
 }
+DAYS_FR = {
+    "Lu": "Mo",
+    "Ma": "Tu",
+    "Me": "We",
+    "Je": "Th",
+    "Ve": "Fr",
+    "Sa": "Sa",
+    "Di": "Su",
+}
+
+DAYS_NL = {
+    "Ma": "Mo",
+    "Di": "Tu",
+    "Wo": "We",
+    "Do": "Th",
+    "Vr": "Fr",
+    "Za": "Sa",
+    "Zo": "Su",
+}
+
+DAYS_DK = {
+    "Man": "Mo",
+    "Tors": "Th",
+    "Fredag": "Fr",
+    "Fre": "Fr",
+    "Lørdag": "Sa",
+    "Lør": "Sa",
+    "Søndag": "Su",
+    "Søn": "Su",
+}
+
+DAYS_RS = {
+    "Ponedeljak": "Mo",
+    "Utorak": "Tu",
+    "Sreda": "We",
+    "Četvrtak": "Th",
+    "Petak": "Fr",
+    "Subota": "Sa",
+    "Nedelja": "Su",
+}
 
 
 def day_range(start_day, end_day):
@@ -133,7 +173,7 @@ def sanitise_day(day: str, days: {} = DAYS_EN) -> str:
 
 class OpeningHours:
     def __init__(self):
-        self.day_hours = defaultdict(list)
+        self.day_hours = defaultdict(set)
 
     def add_range(self, day, open_time, close_time, time_format="%H:%M"):
         day = sanitise_day(day)
@@ -141,20 +181,22 @@ class OpeningHours:
         if day not in DAYS:
             raise ValueError(f"day must be one of {DAYS}, not {day!r}")
 
-        if open_time is None or close_time is None:
+        if not open_time or not close_time:
             return
-        if open_time.lower() == "closed":
-            return
-        if close_time.lower() == "closed":
-            return
-        if close_time == "24:00" or close_time == "00:00":
-            close_time = "23:59"
+        if isinstance(open_time, str):
+            if open_time.lower() == "closed":
+                return
+        if isinstance(close_time, str):
+            if close_time.lower() == "closed":
+                return
+            if close_time == "24:00" or close_time == "00:00":
+                close_time = "23:59"
         if not isinstance(open_time, time.struct_time):
             open_time = time.strptime(open_time, time_format)
         if not isinstance(close_time, time.struct_time):
             close_time = time.strptime(close_time, time_format)
 
-        self.day_hours[day].append((open_time, close_time))
+        self.day_hours[day].add((open_time, close_time))
 
     def as_opening_hours(self):
         day_groups = []
@@ -167,7 +209,7 @@ class OpeningHours:
                     time.strftime("%H:%M", h[0]),
                     time.strftime("%H:%M", h[1]).replace("23:59", "24:00"),
                 )
-                for h in self.day_hours[day]
+                for h in sorted(self.day_hours[day])
             )
 
             if not this_day_group:
@@ -248,4 +290,5 @@ class OpeningHours:
                             self.add_range(day, start_time, end_time, time_format)
                     else:
                         for day in days.split(","):
-                            self.add_range(day, start_time, end_time, time_format)
+                            if d := sanitise_day(day):
+                                self.add_range(d, start_time, end_time, time_format)

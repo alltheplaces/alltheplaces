@@ -4,7 +4,7 @@ import urllib.parse
 import scrapy
 
 from locations.hours import DAYS, OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class AfcUrgentCareSpider(scrapy.Spider):
@@ -43,4 +43,4 @@ class AfcUrgentCareSpider(scrapy.Spider):
             o.add_range(day, open_time, close_time, "%H:%M:%S")
         properties["opening_hours"] = o.as_opening_hours()
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

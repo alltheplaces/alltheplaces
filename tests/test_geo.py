@@ -1,4 +1,11 @@
-from locations.geo import city_locations, point_locations, postal_regions
+from locations.geo import (
+    bbox_contains,
+    bbox_to_geojson,
+    city_locations,
+    make_subdivisions,
+    point_locations,
+    postal_regions,
+)
 
 
 def test_point_locations():
@@ -25,3 +32,27 @@ def test_postal_regions():
     assert 2000 < uk_codes < 3000
     us_codes = len(list(postal_regions("US")))
     assert 33000 < us_codes < 34000
+
+
+def test_make_subdivisions():
+    out = make_subdivisions((0, 0, 100, 100), 2)
+    assert len(out) == 4
+    assert out == [
+        (0.0, 0.0, 50.0, 50.0),
+        (0.0, 50.0, 50.0, 100.0),
+        (50.0, 0.0, 100.0, 50.0),
+        (50.0, 50.0, 100.0, 100.0),
+    ]
+
+
+def test_bbox_contains():
+    assert bbox_contains((0, 0, 100, 100), (-10, 100)) is False
+    assert bbox_contains((0, 0, 100, 100), (50, 50)) is True
+    assert bbox_contains((0, 0, 100, 100), (0, 0)) is True
+
+
+def test_bbox_to_geojson():
+    assert bbox_to_geojson((0, 0, 100, 100)) == {
+        "coordinates": [[[0, 0], [0, 100], [100, 100], [100, 0], [0, 0]]],
+        "type": "Polygon",
+    }

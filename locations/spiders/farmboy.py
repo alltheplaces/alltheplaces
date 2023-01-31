@@ -2,7 +2,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class FarmBoySpider(scrapy.Spider):
@@ -65,7 +65,7 @@ class FarmBoySpider(scrapy.Spider):
                     "phone": self.phone(store.xpath('div/div/div[@id="cinfo"]/p/text()').extract_first()),
                     "opening_hours": self.parse_hours(store.xpath('div/div/div[@id="sinfo"]/table[1]/tbody/tr')),
                 }
-                yield GeojsonPointItem(**properties)
+                yield Feature(**properties)
 
     def city(self, data):
         str_list = data.split(",")

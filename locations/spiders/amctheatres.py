@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class AmcTheatresSpider(scrapy.Spider):
@@ -25,4 +25,4 @@ class AmcTheatresSpider(scrapy.Spider):
                 "lon": float(theater_elem.xpath('.//Attribute[@name="longitude"]/text()').extract_first()),
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

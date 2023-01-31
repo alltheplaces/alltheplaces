@@ -1,6 +1,6 @@
 from scrapy.spiders import SitemapSpider
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class AldiNordESSpider(SitemapSpider):
@@ -22,4 +22,4 @@ class AldiNordESSpider(SitemapSpider):
             "website": response.url,
         }
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

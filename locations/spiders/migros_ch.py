@@ -4,7 +4,7 @@ from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
 from locations.hours import DAYS, OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class MigrosCHSpider(SitemapSpider):
@@ -13,14 +13,14 @@ class MigrosCHSpider(SitemapSpider):
         "alna": ("Alnatura", "Q876811", Categories.SHOP_SUPERMARKET),
         "chng": ("Migros Change", "Q115659823", Categories.BUREAU_DE_CHANGE),
         "cof": ("Migros Café", "Q115661379", Categories.COFFEE_SHOP),
-        "doi": ("Do It + Garden", "Q108866119", Categories.SHOP_DO_IT_YOURSELF),
+        "doi": ("Do It + Garden", "Q108866119", Categories.SHOP_DOITYOURSELF),
         "flori": ("Florissimo", "Q115659418", Categories.SHOP_FLORIST),
         "gour": ("Migros Take Away", "Q111826610", Categories.FAST_FOOD),
         "mec": ("melectronics", "Q110276002", Categories.SHOP_ELECTRONICS),
         "mica": ("Micasa", "Q1926676", Categories.SHOP_FURNITURE),
         "mno": ("Migrolino", "Q56745088", Categories.SHOP_CONVENIENCE),
         "mp": ("Migros Partner", "Q115661515", Categories.SHOP_SUPERMARKET),
-        "obi": ("OBI", "Q300518", Categories.SHOP_DO_IT_YOURSELF),
+        "obi": ("OBI", "Q300518", Categories.SHOP_DOITYOURSELF),
         "out": ("Outlet Migros", "Q115659564", Categories.SHOP_SUPERMARKET),
         "pickmup": ("PickMup Box", "Q115679275", Categories.PRODUCT_PICKUP),
         "res": ("Migros Restaurant", "Q111803848", Categories.RESTAURANT),
@@ -53,7 +53,7 @@ class MigrosCHSpider(SitemapSpider):
                 "start_date": market.get("opening_date"),
                 "end_date": market.get("closing_date"),
             }
-            item = GeojsonPointItem(
+            item = Feature(
                 brand=brand,
                 brand_wikidata=brand_wikidata,
                 city=loc["city"],

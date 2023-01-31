@@ -92,6 +92,8 @@ ITEM_PIPELINES = {
     "locations.pipelines.AssertURLSchemePipeline": 500,
     "locations.pipelines.CheckItemPropertiesPipeline": 600,
     "locations.pipelines.ApplyNSICategoriesPipeline": 700,
+    "locations.pipelines.CountCategoriesPipeline": 800,
+    "locations.pipelines.CountBrandsPipeline": 810,
 }
 
 
@@ -115,3 +117,5 @@ ITEM_PIPELINES = {
 # HTTPCACHE_DIR = 'httpcache'
 # HTTPCACHE_IGNORE_HTTP_CODES = []
 # HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
+
+REQUEST_FINGERPRINTER_IMPLEMENTATION = "2.7"

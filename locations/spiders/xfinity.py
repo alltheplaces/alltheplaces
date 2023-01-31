@@ -4,7 +4,7 @@ import re
 import scrapy
 from geonamescache import GeonamesCache
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 US_TERRITORIES = {
     "AS": {"code": "AS", "name": "American Samoa"},
@@ -88,4 +88,4 @@ class XfinitySpider(scrapy.Spider):
                 "website": store["websiteUrl"],
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

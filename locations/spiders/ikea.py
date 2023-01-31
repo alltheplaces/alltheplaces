@@ -1,7 +1,7 @@
 import scrapy
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class IkeaSpider(scrapy.Spider):
@@ -92,4 +92,4 @@ class IkeaSpider(scrapy.Spider):
             if properties["country"] == "US":
                 properties["state"] = store["address"].get("stateProvinceCode")[2:]
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

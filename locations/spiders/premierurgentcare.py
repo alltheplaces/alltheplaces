@@ -2,7 +2,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class DifferentHours(Exception):
@@ -48,4 +48,4 @@ class PremierurgentcareSpider(scrapy.Spider):
                 "lon": float(store["lng"]),
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

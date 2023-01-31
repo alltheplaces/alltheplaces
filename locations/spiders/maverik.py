@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class MaverikSpider(scrapy.Spider):
@@ -30,7 +30,7 @@ class MaverikSpider(scrapy.Spider):
             if not ("longitude" in location and "latitude" in location):
                 continue
 
-            yield GeojsonPointItem(
+            yield Feature(
                 lon=location["longitude"],
                 lat=location["latitude"],
                 ref=location["code"],

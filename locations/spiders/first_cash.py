@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class FirstCashSpider(scrapy.Spider):
@@ -36,4 +36,4 @@ class FirstCashSpider(scrapy.Spider):
                 "brand": place["brand"].split(" #")[0],
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

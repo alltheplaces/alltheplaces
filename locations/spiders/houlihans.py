@@ -2,7 +2,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class HoulihansSpider(scrapy.Spider):
@@ -66,7 +66,7 @@ class HoulihansSpider(scrapy.Spider):
                 ),
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)
 
         else:
             pass

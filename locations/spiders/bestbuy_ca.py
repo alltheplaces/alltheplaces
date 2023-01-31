@@ -3,12 +3,13 @@ import json
 import scrapy
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
+from locations.spiders.bestbuy import BestBuySpider
 
 
 class BestBuyCASpider(scrapy.Spider):
     name = "bestbuy-ca"
-    item_attributes = {"brand": "Best Buy", "brand_wikidata": "Q533415"}
+    item_attributes = BestBuySpider.item_attributes
     allowed_domains = ["stores.bestbuy.ca"]
     bb_url = "https://stores.bestbuy.ca/en-ca/index.html"
 
@@ -52,7 +53,7 @@ class BestBuyCASpider(scrapy.Spider):
             "name": response.xpath('//span[@class="LocationName-brand"]/text()').extract_first(),
             "opening_hours": opening_hours,
         }
-        return GeojsonPointItem(**props)
+        return Feature(**props)
 
     def parse(self, response):
         locations = response.xpath('//a[@class="Directory-listLink"]/@href').extract()

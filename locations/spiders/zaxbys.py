@@ -3,7 +3,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 DAYS = {
     "Monday": "Mo",
@@ -99,7 +99,7 @@ class ZaxbysSpider(scrapy.Spider):
             yield scrapy.Request(response.url, callback=self.parse_store)
             return
 
-        yield GeojsonPointItem(
+        yield Feature(
             lat=float(data["geo"]["latitude"]),
             lon=float(data["geo"]["longitude"]),
             phone=self.phone_normalize(data["telephone"]),

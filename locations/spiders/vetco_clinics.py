@@ -4,7 +4,7 @@ import scrapy
 from scrapy.selector import Selector
 
 from locations.geo import postal_regions
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class VetcoClinicsSpider(scrapy.Spider):
@@ -46,4 +46,4 @@ class VetcoClinicsSpider(scrapy.Spider):
                         "website": response.url,
                     }
 
-                    yield GeojsonPointItem(**properties)
+                    yield Feature(**properties)

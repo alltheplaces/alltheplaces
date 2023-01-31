@@ -4,7 +4,7 @@ from scrapy.spiders import SitemapSpider
 
 from locations.google_url import url_to_coords
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class GraetersSpider(SitemapSpider):
@@ -31,7 +31,7 @@ class GraetersSpider(SitemapSpider):
             "phone": response.css("a.location-phone::text").get(),
             "opening_hours": hours,
         }
-        yield GeojsonPointItem(**item)
+        yield Feature(**item)
 
     def parse_hours(self, ul):
         opening_hours = OpeningHours()

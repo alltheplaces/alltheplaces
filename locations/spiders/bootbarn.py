@@ -3,7 +3,7 @@ import re
 import scrapy
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class BootbarnSpider(scrapy.Spider):
@@ -50,7 +50,7 @@ class BootbarnSpider(scrapy.Spider):
             ).extract()
         )
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)
 
     def parse(self, response):
         urls = response.xpath('//div[@class="store"]/div[@class="city"]/a/@href').extract()

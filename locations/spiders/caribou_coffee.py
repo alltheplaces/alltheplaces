@@ -2,7 +2,7 @@ import urllib.parse
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class CaribouCoffeeSpider(scrapy.Spider):
@@ -42,4 +42,4 @@ class CaribouCoffeeSpider(scrapy.Spider):
             "phone": main.xpath('.//*[@itemprop="telephone"]/text()').get(),
             "opening_hours": "; ".join(main.xpath('.//*[@itemprop="openingHours"]/@content').extract()),
         }
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

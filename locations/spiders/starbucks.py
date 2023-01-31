@@ -3,15 +3,16 @@ import json
 
 import scrapy
 
-from locations.items import GeojsonPointItem
 from math import sqrt
+from locations.categories import Categories
+from locations.items import Feature
 
 HEADERS = {"X-Requested-With": "XMLHttpRequest"}
 STORELOCATOR = "https://www.starbucks.com/bff/locations?lat={}&lng={}"
 
 class StarbucksSpider(scrapy.Spider):
     name = "starbucks"
-    item_attributes = {"brand": "Starbucks", "brand_wikidata": "Q37158"}
+    item_attributes = {"brand": "Starbucks", "brand_wikidata": "Q37158", "extras": Categories.COFFEE_SHOP.value}
     allowed_domains = ["www.starbucks.com"]
 
     def start_requests(self):
@@ -64,7 +65,7 @@ class StarbucksSpider(scrapy.Spider):
                 "website": f'https://www.starbucks.com/store-locator/store/{store["id"]}/{store["slug"]}',
                 "extras": {"number": store["storeNumber"], "ownership_type": store["ownershipTypeCode"]},
             }
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)
 
         # Get lat and lng from URL
         pairs = response.url.split("?")[-1].split("&")

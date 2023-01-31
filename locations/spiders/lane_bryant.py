@@ -3,7 +3,7 @@ import re
 import scrapy
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class LaneBryantSpider(scrapy.Spider):
@@ -114,7 +114,7 @@ class LaneBryantSpider(scrapy.Spider):
             if hours:
                 properties["opening_hours"] = hours
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)
         else:
             for path in urls:
                 yield scrapy.Request(url=response.urljoin(path), callback=self.parse)

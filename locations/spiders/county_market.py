@@ -2,7 +2,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 SIEVE = ("View on Map", "Make My Preferred Store!")
 DAYS = r"M|Tue|Wed|Thu|Sat|Sun|Fri"
@@ -48,7 +48,7 @@ class CountyMarketSpider(scrapy.Spider):
             "phone": phone,
         }
 
-        yield GeojsonPointItem(**props)
+        yield Feature(**props)
 
     def parse(self, response):
 

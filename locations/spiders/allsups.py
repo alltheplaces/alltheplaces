@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class AllsupsSpider(scrapy.Spider):
@@ -28,4 +28,4 @@ class AllsupsSpider(scrapy.Spider):
                 "phone": store["acf"]["primary_phone"],
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

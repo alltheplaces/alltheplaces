@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class TheLearningExperienceSpider(scrapy.Spider):
@@ -31,4 +31,4 @@ class TheLearningExperienceSpider(scrapy.Spider):
             "lat": float(response.xpath('//meta[@name="place:location:latitude"]/@content').extract_first()),
         }
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

@@ -1,7 +1,7 @@
 import scrapy
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class DressBarnSpider(scrapy.Spider):
@@ -41,7 +41,7 @@ class DressBarnSpider(scrapy.Spider):
         if opening_hours:
             props["opening_hours"] = opening_hours
 
-        return GeojsonPointItem(**props)
+        return Feature(**props)
 
     def parse_city_stores(self, response):
 

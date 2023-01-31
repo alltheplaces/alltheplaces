@@ -3,7 +3,7 @@ import re
 import scrapy
 from scrapy.http import HtmlResponse
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class JusticeSpider(scrapy.Spider):
@@ -49,4 +49,4 @@ class JusticeSpider(scrapy.Spider):
                 if unp[key]:
                     properties[key] = unp[key]
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

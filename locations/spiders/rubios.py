@@ -2,7 +2,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class RubiosSpider(scrapy.Spider):
@@ -39,4 +39,4 @@ class RubiosSpider(scrapy.Spider):
             "lat": response.xpath('//meta[@property="og:latitude"]/@content').extract_first(),
         }
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

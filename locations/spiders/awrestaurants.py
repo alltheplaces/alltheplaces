@@ -4,7 +4,7 @@ import urllib.parse
 import scrapy
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class AwrestaurantsSpider(scrapy.Spider):
@@ -43,4 +43,4 @@ class AwrestaurantsSpider(scrapy.Spider):
             "phone": data["telephone"],
             "opening_hours": hours.as_opening_hours(),
         }
-        return GeojsonPointItem(**properties)
+        return Feature(**properties)

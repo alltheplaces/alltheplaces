@@ -2,17 +2,18 @@ import json
 
 import scrapy
 
+from locations.categories import Categories
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
-from locations.user_agents import BROSWER_DEFAULT
+from locations.items import Feature
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class HuntingtonBankSpider(scrapy.Spider):
     name = "huntingtonbank"
-    item_attributes = {"brand": "Huntington Bank", "brand_wikidata": "Q798819"}
+    item_attributes = {"brand": "Huntington Bank", "brand_wikidata": "Q798819", "extras": Categories.BANK.value}
     allowed_domains = ["www.huntington.com"]
     start_urls = ["https://www.huntington.com/~/media/SEO_Files/sitemap.xml"]
-    user_agent = BROSWER_DEFAULT
+    user_agent = BROWSER_DEFAULT
 
     def parse(self, response):
         response.selector.remove_namespaces()
@@ -47,4 +48,4 @@ class HuntingtonBankSpider(scrapy.Spider):
             "phone": data["telephone"],
             "extras": {"fax": data["faxNumber"]},
         }
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

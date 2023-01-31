@@ -1,7 +1,7 @@
 import scrapy
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class CoopFoodSpider(scrapy.Spider):
@@ -53,7 +53,7 @@ class CoopFoodSpider(scrapy.Spider):
                 "phone": store["phone"],
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)
 
         if data["next"] is not None:
             self.page_number = self.page_number + 1

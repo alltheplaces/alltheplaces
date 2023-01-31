@@ -3,7 +3,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class ValvolineInstantOilChangeSpider(scrapy.Spider):
@@ -58,4 +58,4 @@ class ValvolineInstantOilChangeSpider(scrapy.Spider):
             "website": data[0]["url"],
         }
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

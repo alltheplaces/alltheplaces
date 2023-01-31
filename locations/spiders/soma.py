@@ -2,7 +2,7 @@ import json
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class SomaSpider(scrapy.Spider):
@@ -38,4 +38,4 @@ class SomaSpider(scrapy.Spider):
                 "lon": float(data["attributes"]["longitude"]),
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

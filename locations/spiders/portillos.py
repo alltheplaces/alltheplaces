@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class PortillosSpider(scrapy.Spider):
@@ -47,4 +47,4 @@ class PortillosSpider(scrapy.Spider):
             "lat": float(store_data["Lat"]),
         }
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

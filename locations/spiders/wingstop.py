@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class WingstopSpider(scrapy.Spider):
@@ -10,7 +10,7 @@ class WingstopSpider(scrapy.Spider):
     start_urls = ("https://api.wingstop.com/restaurants/",)
 
     def parse_store(self, store_json):
-        return GeojsonPointItem(
+        return Feature(
             lat=store_json["latitude"],
             lon=store_json["longitude"],
             name=store_json["name"],

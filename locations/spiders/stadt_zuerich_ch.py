@@ -4,7 +4,7 @@ import re
 import scrapy
 
 from locations.hours import DAYS_DE, OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 from locations.materials import MATERIALS_DE
 
 
@@ -29,6 +29,7 @@ class StadtZuerichCHSpider(scrapy.Spider):
             "Entsorgung + Recycling Zürich",
             "Q1345452",
         ),
+        "EWZ": ("Elektrizitätswerk der Stadt Zürich", "Q1326645"),
         "Fachschule Viventa": ("Schul- und Sportdepartement", "Q33121519"),
         "Grün Stadt Zürich": ("Grün Stadt Zürich", "Q1551785"),
         "Schulamt": ("Schulamt der Stadt Zürich", "Q115322776"),
@@ -48,6 +49,7 @@ class StadtZuerichCHSpider(scrapy.Spider):
 
     start_urls = [
         url_pattern % ("Brunnen", "wvz_brunnen"),
+        url_pattern % ("Oeffentliche_Beleuchtung_der_Stadt_Zuerich", "ewz_brennstelle_p"),
         url_pattern % ("Park", "poi_park_view"),
         url_pattern % ("Sammelstelle", "poi_sammelstelle_view"),
         url_pattern % ("Schulanlagen", "poi_kindergarten_view"),
@@ -88,6 +90,7 @@ class StadtZuerichCHSpider(scrapy.Spider):
         # The type-specific parsers should come after the general ones,
         # so they can overwrite tags.
         if parser := {
+            "ewz_brennstelle_p": self.parse_street_lamp,
             "poi_kindergarten_view": self.parse_kindergarten,
             "poi_kinderhort_view": self.parse_after_school,
             "poi_park_view": self.parse_park,
@@ -118,7 +121,7 @@ class StadtZuerichCHSpider(scrapy.Spider):
         }
         item["extras"] = {k: v for (k, v) in tags.items() if v}
         item = {k: v for (k, v) in item.items() if v}
-        return GeojsonPointItem(**item)
+        return Feature(**item)
 
     def parse_access(self, p):
         if p.get("oeffentlicher_grund") == "öffentlicher Grund":
@@ -315,6 +318,16 @@ class StadtZuerichCHSpider(scrapy.Spider):
         if p.get("kategorie") == "Sonderschule":
             tags["school"] = "special_education_needs"
         return tags
+
+    def parse_street_lamp(self, p):
+        operator, operator_wikidata = self.operators["EWZ"]
+        return {
+            "highway": "street_lamp",
+            "light:direction": str(p.get("orientierung", "")),
+            "operator": operator,
+            "operator:wikidata": operator_wikidata,
+            "ref": p["nisnr"],
+        }
 
     def parse_toilets(self, p):
         # Unstructured text in comments, which we emit as "note";

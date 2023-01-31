@@ -3,7 +3,7 @@ import re
 import scrapy
 
 from locations.hours import DAYS, OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class LowesFoodsSpider(scrapy.Spider):
@@ -28,7 +28,7 @@ class LowesFoodsSpider(scrapy.Spider):
 
         map_data = response.xpath('//script[contains(text(), "initMap")]').extract_first()
 
-        yield GeojsonPointItem(
+        yield Feature(
             ref=response.url.split("/")[-1],
             name=response.xpath("//div[@class='store-details__heading']/h1/text()").extract_first().strip(),
             lat=re.search(r".*lat: (-?\d+\.\d+),.*", map_data).group(1),

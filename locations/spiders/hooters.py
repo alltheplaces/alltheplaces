@@ -2,7 +2,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class HootersSpider(scrapy.Spider):
@@ -52,7 +52,7 @@ class HootersSpider(scrapy.Spider):
 
         opening_hours = ";".join(opening_hours_result)
 
-        return GeojsonPointItem(
+        return Feature(
             lat=store_json["latitude"],
             lon=store_json["longitude"],
             name=store_json["name"],

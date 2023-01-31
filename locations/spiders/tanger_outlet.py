@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class TangerOutletSpider(scrapy.Spider):
@@ -32,4 +32,4 @@ class TangerOutletSpider(scrapy.Spider):
                 "lat": storeselector[i].xpath(".//@data-latitude").extract_first(),
                 "lon": storeselector[i].xpath(".//@data-longitude").extract_first(),
             }
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

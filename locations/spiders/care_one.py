@@ -1,7 +1,7 @@
 import scrapy
 from scrapy.selector import Selector
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class CareOneSpider(scrapy.Spider):
@@ -36,4 +36,4 @@ class CareOneSpider(scrapy.Spider):
                 "lon": lon,
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

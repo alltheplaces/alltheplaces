@@ -3,7 +3,7 @@ import json
 import scrapy
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 day_formats = {
     "1": "Mo",
@@ -67,7 +67,7 @@ class HugoBossSpider(scrapy.Spider):
 
                     properties["extras"]["clothes"] = ";".join(clothes)
 
-                yield GeojsonPointItem(**properties)
+                yield Feature(**properties)
             if "next" in data:
                 yield scrapy.Request(
                     url=data["next"],

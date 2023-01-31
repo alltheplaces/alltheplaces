@@ -1,6 +1,6 @@
 from scrapy import Spider
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class HeartOfEnglandCooperativeSpider(Spider):
@@ -14,7 +14,7 @@ class HeartOfEnglandCooperativeSpider(Spider):
 
     def parse(self, response):
         for store in response.xpath("/locator/store/item"):
-            item = GeojsonPointItem()
+            item = Feature()
 
             item["name"] = store.xpath("./location/text()").get()
             item["addr_full"] = store.xpath("./address/text()").get()

@@ -2,7 +2,7 @@ from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class TalbotsSpider(CrawlSpider):
@@ -22,7 +22,7 @@ class TalbotsSpider(CrawlSpider):
             "opening_hours": self.sanitize_time(response.xpath('//*[@id="storeHours"]/div/text()').getall()),
         }
         properties["lat"], properties["lon"] = response.xpath('//input[@id="address"]/@value').get().split(", ")
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)
 
     def get_address(self, response):
         address = []

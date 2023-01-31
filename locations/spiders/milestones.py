@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class MilestonesSpider(scrapy.Spider):
@@ -28,4 +28,4 @@ class MilestonesSpider(scrapy.Spider):
                 "phone": place["gsx$phonenumber"]["$t"],
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

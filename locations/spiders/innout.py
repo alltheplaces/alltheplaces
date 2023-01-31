@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class InNOutSpider(scrapy.Spider):
@@ -39,4 +39,4 @@ class InNOutSpider(scrapy.Spider):
                 "lat": float(lat),
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

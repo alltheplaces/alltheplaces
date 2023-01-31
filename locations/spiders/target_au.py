@@ -2,7 +2,7 @@ import json
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class TargetAUSpider(scrapy.Spider):
@@ -44,4 +44,4 @@ class TargetAUSpider(scrapy.Spider):
                 "phone": body.xpath("//p[last()-1]/text()").get(),
                 "website": response.urljoin(href),
             }
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

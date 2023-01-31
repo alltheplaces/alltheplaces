@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 countries = ["England", "Uk", "Ireland", "Scotland"]
 
@@ -44,7 +44,7 @@ class CurrysPcWorldSpider(scrapy.Spider):
             city, postal_code = address[3].split(sep=",")  # Only relevant section
             store_url = store.css("a::attr(href)").extract_first()
 
-            yield GeojsonPointItem(
+            yield Feature(
                 ref=store_url,
                 lat=latitude,
                 lon=longitude,

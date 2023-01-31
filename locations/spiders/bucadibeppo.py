@@ -4,7 +4,7 @@ import re
 import scrapy
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class BucadiBeppoSpider(scrapy.Spider):
@@ -49,7 +49,7 @@ class BucadiBeppoSpider(scrapy.Spider):
                 "lon": float(longitude),
                 "opening_hours": self.parse_hours(hours) if hours else None,
             }
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)
 
     def xpath_join(self, values: list, sep=" ") -> str:
         return f"{sep}".join(filter(None, [value.strip() for value in values]))

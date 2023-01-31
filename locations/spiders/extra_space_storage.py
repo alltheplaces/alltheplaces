@@ -5,7 +5,7 @@ from scrapy.downloadermiddlewares.retry import get_retry_request
 from scrapy.spiders import SitemapSpider
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class ExtraSpaceStorageSpider(SitemapSpider):
@@ -55,7 +55,7 @@ class ExtraSpaceStorageSpider(SitemapSpider):
             "opening_hours": opening_hours.as_opening_hours(),
         }
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)
 
     def get_json_data(self, response):
         # Note: Page omits the good ldjson when given a browser user-agent

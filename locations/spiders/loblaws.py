@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class LoblawsSpider(scrapy.Spider):
@@ -67,4 +67,4 @@ class LoblawsSpider(scrapy.Spider):
                     "country": i["address"]["country"],
                 }
 
-                yield GeojsonPointItem(**properties)
+                yield Feature(**properties)

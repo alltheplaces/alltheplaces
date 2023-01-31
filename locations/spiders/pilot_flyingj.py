@@ -2,7 +2,7 @@ import json
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class PilotFlyingJSpider(scrapy.Spider):
@@ -43,7 +43,7 @@ class PilotFlyingJSpider(scrapy.Spider):
             },
         }
         properties.update(self.brand_info(store["name"]))
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)
 
     def brand_info(self, name):
         if "Pilot" in name:

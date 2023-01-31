@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class BlueBottleCafeSpider(scrapy.Spider):
@@ -29,4 +29,4 @@ class BlueBottleCafeSpider(scrapy.Spider):
                     "lat": store_data["latitude"],
                 }
 
-                yield GeojsonPointItem(**properties)
+                yield Feature(**properties)

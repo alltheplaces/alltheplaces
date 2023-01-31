@@ -2,7 +2,7 @@ import json
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class TheRangeSpider(scrapy.Spider):
@@ -41,7 +41,7 @@ class TheRangeSpider(scrapy.Spider):
                         "lon": self.store_to_geo[store["name"].split(":")[1].strip()][1],
                     }
 
-                    yield GeojsonPointItem(**properties)
+                    yield Feature(**properties)
 
                 except:
                     return

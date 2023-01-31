@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class Freebirds(scrapy.Spider):
@@ -25,4 +25,4 @@ class Freebirds(scrapy.Spider):
             }
             # TODO: find root domain for slug
 
-            yield GeojsonPointItem(**props)
+            yield Feature(**props)

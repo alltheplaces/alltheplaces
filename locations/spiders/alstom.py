@@ -2,7 +2,7 @@ import json
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 countries = (
     "Algeria,DZ",
@@ -125,4 +125,4 @@ class AlstomSpider(scrapy.Spider):
                     "lon": float(lng),
                 }
 
-                yield GeojsonPointItem(**properties)
+                yield Feature(**properties)

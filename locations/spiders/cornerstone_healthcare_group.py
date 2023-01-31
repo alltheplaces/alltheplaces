@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class CornerstoneHealthcareGroupSpider(scrapy.Spider):
@@ -28,4 +28,4 @@ class CornerstoneHealthcareGroupSpider(scrapy.Spider):
                 "lat": item["acf"]["latitude"],
                 "lon": item["acf"]["longitude"],
             }
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

@@ -3,7 +3,7 @@ import re
 import scrapy
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class YMCASpider(scrapy.Spider):
@@ -33,7 +33,7 @@ class YMCASpider(scrapy.Spider):
 
         geo = response.xpath('//div[contains(@class, "geolocation-location")]')
 
-        yield GeojsonPointItem(
+        yield Feature(
             ref=response.url.split("/")[-1],
             name=response.xpath("//h1/text()").extract_first().strip(),
             lat=float(geo.attrib["data-lat"]),

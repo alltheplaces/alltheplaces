@@ -3,7 +3,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 MAP_URL = "https://www.geico.com/public/php/geo_map.php?"
 
@@ -85,4 +85,4 @@ class GeicoSpider(scrapy.Spider):
             "website": response.meta["website"],
         }
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

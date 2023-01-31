@@ -2,7 +2,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class BarnesAndNobleCollegeSpider(scrapy.Spider):
@@ -36,4 +36,4 @@ class BarnesAndNobleCollegeSpider(scrapy.Spider):
                 "website": response.url,
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

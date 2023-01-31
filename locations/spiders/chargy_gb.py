@@ -1,6 +1,6 @@
 from scrapy import Spider
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class ChargyGBSpider(Spider):
@@ -14,7 +14,7 @@ class ChargyGBSpider(Spider):
 
     def parse(self, response):
         for charger in response.json()["features"]:
-            item = GeojsonPointItem()
+            item = Feature()
 
             item["lon"], item["lat"] = charger["geometry"]["coordinates"]
 

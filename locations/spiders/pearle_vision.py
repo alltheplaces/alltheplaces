@@ -1,61 +1,71 @@
 import re
 
 import scrapy
+from scrapy.spiders import SitemapSpider
 
-from locations.items import GeojsonPointItem
+from locations.hours import OpeningHours
+from locations.items import Feature
+from locations.user_agents import BROWSER_DEFAULT
 
 
-class PearleVisionSpider(scrapy.Spider):
+class PearleVisionSpider(SitemapSpider):
     name = "pearle_vision"
-    item_attributes = {"brand": "Pearle Vision"}
-    allowed_domains = ["pearlevision.com"]
-    download_delay = 1
+    item_attributes = {"brand": "Pearle Vision", "brand_wikidata": "Q2231148"}
+    allowed_domains = ["pearlevision.com", "www.pearlevision.ca"]
+    sitemap_urls = ["https://www.pearlevision.com/sitemap-store-locations.xml"]
+    sitemap_rules = [(r"/[0-9]+/$", "parse")]
+    custom_settings = {
+        "ROBOTSTXT_OBEY": False,
+        "DEFAULT_REQUEST_HEADERS": {
+            "Accept": "*/*",
+            "User-Agent": BROWSER_DEFAULT,
+            "Connection": "keep-alive",
+            "Accept-Encoding": "gzip, deflate, br",
+        },
+    }
 
-    def start_requests(self):
-        base_url = "https://www.pearlevision.com/webapp/wcs/stores/servlet/AjaxStoreLocatorResultsView?storeId=12002&catalogId=15951&langId=-1&resultSize=100&latitude={lat}&longitude={lng}&location=dallas%2C+tx"
+    def find_between(self, text, first, last):
+        start = text.index(first) + len(first)
+        end = text.index(last, start)
+        return text[start:end]
 
-        with open("./locations/searchable_points/us_centroids_100mile_radius.csv") as points:
-            next(points)
-            for point in points:
-                _, lat, lon = point.strip().split(",")
-                url = base_url.format(lat=lat, lng=lon)
-                yield scrapy.Request(url=url, callback=self.parse_store)
-
-    def parse_store(self, response):
-        urls = response.xpath('//*[@class="location-details-link"]/@href').extract()
-
-        for path in urls:
-            yield scrapy.Request(url=response.urljoin(path), callback=self.parse)
+    def _parse_sitemap(self, response):
+        for row in super()._parse_sitemap(response):
+            yield scrapy.Request(row.url.strip("/"), callback=self.parse)
 
     def parse(self, response):
-        coords = response.xpath('//script[@type="text/javascript"]').extract()
+        if url := response.xpath('//iframe[@id="brandHeader"]/@src').get():
+            hours = (
+                self.find_between(response.text, "var storeHoursRaw = siteHour ? [", "] :")
+                .replace("\r\n", "")
+                .replace(" ", "")
+                .replace('"', "")
+                .replace("'", "")
+                .split(",")
+            )
+            days = self.find_between(response.text, "var days = [", "]").replace(" ", "").replace('"', "").split(",")
+            opening_hours = [f"{days[i]} {hours[i]}" for i in range(len(days)) if hours[i] != "-"]
+            oh = OpeningHours()
+            oh.from_linked_data({"openingHours": opening_hours}, "%I:%M%p")
 
-        for data in coords:
-            if "LatLng" in data:
-                lat = re.search(r'LatLng\(parseFloat\("(\d*.\d*)"', data).groups()[0]
-                lng = re.search(r',parseFloat\("(-\d*.\d*)"', data).groups()[0]
+            yield scrapy.Request(
+                url=url,
+                callback=self.pares_store,
+                cb_kwargs={"website": response.url, "opening_hours": oh.as_opening_hours()},
+            )
 
-        properties = {
-            "ref": "_".join(re.search(r".+/(.+?)/(.+?)/(.+?)/?(?:\.html|$)", response.url).groups()),
-            "name": response.xpath('//*[@class="storeInfo"]/h2/text()').extract_first(),
-            "addr_full": response.xpath('normalize-space(//*[@class="storeInfo"]/p/text())').extract_first(),
-            "city": re.search(
-                r"^(.*),",
-                response.xpath('normalize-space(//*[@class="storeInfo"]/p/text()[2])').extract_first(),
-            ).groups()[0],
-            "state": re.search(
-                r",\s([A-Z]{2})\s",
-                response.xpath('normalize-space(//*[@class="storeInfo"]/p/text()[2])').extract_first(),
-            ).groups()[0],
-            "postcode": re.search(
-                r"[A-Z]{2}\s(.*)$",
-                response.xpath('normalize-space(//*[@class="storeInfo"]/p/text()[2])').extract_first(),
-            ).groups()[0],
-            "country": "US",
-            "lat": lat,
-            "lon": lng,
-            "phone": response.xpath('//*[@class="tel"]/text()').extract_first(),
-            "website": response.url,
-        }
+    def pares_store(self, response, website, opening_hours):
+        item = Feature()
+        data = response.xpath('//script/text()[contains(., "var storeName")]').get()
+        item["name"] = self.find_between(data, 'var storeName = "', '".trim();').strip()
+        item["street_address"] = self.find_between(data, 'var address = "', '".trim();').strip()
+        item["state"] = self.find_between(data, 'var state = "', '".trim();').strip().upper()
+        item["postcode"] = self.find_between(data, 'var zipCode = "', '".trim();').strip()
+        item["phone"] = self.find_between(data, 'var telephone = "', '".trim();').strip()
+        item["lat"] = self.find_between(data, 'var latitude = "', '".trim();').strip()
+        item["lon"] = self.find_between(data, 'var longitude = "', '".trim();').strip()
+        item["website"] = website
+        item["ref"] = re.findall("[0-9]+$", website)[0]
+        item["opening_hours"] = opening_hours
 
-        yield GeojsonPointItem(**properties)
+        yield item

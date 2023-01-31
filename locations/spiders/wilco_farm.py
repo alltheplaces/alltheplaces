@@ -3,7 +3,7 @@ import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class WilcoFarmSpider(scrapy.Spider):
@@ -31,4 +31,4 @@ class WilcoFarmSpider(scrapy.Spider):
                 "opening_hours": item["storeHours"],
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)
