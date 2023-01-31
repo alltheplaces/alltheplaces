@@ -1,5 +1,6 @@
 import csv
 import json
+from math import sqrt
 
 import scrapy
 
@@ -74,14 +75,19 @@ class StarbucksSpider(scrapy.Spider):
 
         paging = responseJson["paging"]
         if paging["returned"] > 0 and paging["limit"] == paging["returned"]:
-            if response.meta["distance"] > 0.15:
+            if response.meta["distance"] > 0.10:
                 nextDistance = response.meta["distance"] / 2
-                # Create four new coordinate pairs
+                nextDistanceCorner = nextDistance * (sqrt(2) / 2)
+                # Create eight new coordinate pairs
                 nextCoordinates = [
-                    [center[0] - nextDistance, center[1] + nextDistance],
-                    [center[0] + nextDistance, center[1] + nextDistance],
-                    [center[0] - nextDistance, center[1] - nextDistance],
-                    [center[0] + nextDistance, center[1] - nextDistance],
+                    [center[0] - nextDistanceCorner, center[1] + nextDistanceCorner],
+                    [center[0] + nextDistanceCorner, center[1] + nextDistanceCorner],
+                    [center[0] - nextDistanceCorner, center[1] - nextDistanceCorner],
+                    [center[0] + nextDistanceCorner, center[1] - nextDistanceCorner],
+                    [center[0] - nextDistance, center[1]],
+                    [center[0] + nextDistance, center[1]],
+                    [center[0], center[1] - nextDistance],
+                    [center[0], center[1] + nextDistance],
                 ]
                 urls = [STORELOCATOR.format(c[1], c[0]) for c in nextCoordinates]
                 for url in urls:
