@@ -43,6 +43,10 @@ class DictParser:
         "country-name",
     ]
 
+    isocode_keys = [
+        "iso-code",
+    ]
+
     postcode_keys = [
         "postal-code",
         "post-code",
@@ -54,7 +58,7 @@ class DictParser:
         "zip-code",
     ]
 
-    email_keys = ["email", "contact-email", "email-address"]
+    email_keys = ["email", "contact-email", "email-address", "email1"]
 
     phone_keys = [
         "phone-number",
@@ -113,7 +117,15 @@ class DictParser:
         item["city"] = DictParser.get_first_key(address, DictParser.city_keys)
         item["state"] = DictParser.get_first_key(address, DictParser.region_keys)
         item["postcode"] = DictParser.get_first_key(address, DictParser.postcode_keys)
-        item["country"] = DictParser.get_first_key(address, DictParser.country_keys)
+
+        country = DictParser.get_first_key(address, DictParser.country_keys)
+        if country and isinstance(country, dict):
+            isocode = DictParser.get_first_key(country, DictParser.isocode_keys)
+            if isocode and isinstance(isocode, str):
+                item["country"] = isocode
+            # TODO: Handle other potential country fields inside the dict?
+        else:
+            item["country"] = country
 
         contact = DictParser.get_first_key(obj, ["contact"])
         if not contact or not isinstance(contact, dict):
