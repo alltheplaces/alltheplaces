@@ -7,6 +7,3 @@ class IdealAUSpider(RexelSpider):
     base_url = "www.idealelectrical.com/aie"
     search_lat = -33
     search_lon = 151
-
-    def parse_item(self, item, feature, **kwargs):
-        yield item
