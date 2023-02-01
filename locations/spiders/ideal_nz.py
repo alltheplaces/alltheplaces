@@ -7,6 +7,3 @@ class IdealNZSpider(RexelSpider):
     base_url = "www.ideal.co.nz/nzi"
     search_lat = -41
     search_lon = 174
-
-    def parse_item(self, item, feature, **kwargs):
-        yield item
