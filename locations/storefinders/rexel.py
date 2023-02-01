@@ -49,11 +49,12 @@ class RexelSpider(Spider):
     @staticmethod
     def decode_hours(feature):
         oh = OpeningHours()
-        for r in filter(lambda x: (not x["closed"]), feature["openingHours"]["rexelWeekDayOpeningList"]):
-            oh.add_range(
-                r["weekDay"],
-                r["openingTime"]["formattedHour"],
-                r["closingTime"]["formattedHour"],
-                time_format="%I:%M %p",
-            )
-        return oh
+        if feature["openingHours"] and feature["openingHours"]["rexelWeekDayOpeningList"]:
+            for r in filter(lambda x: (not x["closed"]), feature["openingHours"]["rexelWeekDayOpeningList"]):
+                oh.add_range(
+                    r["weekDay"],
+                    r["openingTime"]["formattedHour"],
+                    r["closingTime"]["formattedHour"],
+                    time_format="%I:%M %p",
+                )
+                return oh
