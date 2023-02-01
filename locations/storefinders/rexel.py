@@ -54,4 +54,7 @@ class RexelSpider(Spider):
                     r["closingTime"]["formattedHour"],
                     time_format="%I:%M %p",
                 )
-        return oh
+                return oh
+
+    def parse_item(self, item, feature, **kwargs):
+        yield item
