@@ -7,6 +7,3 @@ class RexelGBSpider(RexelSpider):
     base_url = "www.rexel.co.uk/uki"
     search_lat = 51
     search_lon = -0
-
-    def parse_item(self, item, feature, **kwargs):
-        yield item
