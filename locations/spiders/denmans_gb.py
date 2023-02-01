@@ -7,6 +7,3 @@ class DenmansGBSpider(RexelSpider):
     base_url = "www.denmans.co.uk/den"
     search_lat = 51
     search_lon = -0
-
-    def parse_item(self, item, feature, **kwargs):
-        yield item
