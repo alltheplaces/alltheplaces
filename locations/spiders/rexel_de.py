@@ -7,6 +7,3 @@ class RexelDESpider(RexelSpider):
     base_url = "www.rexel.de"
     search_lat = 50
     search_lon = 11
-
-    def parse_item(self, item, feature, **kwargs):
-        yield item
