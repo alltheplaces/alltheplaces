@@ -43,6 +43,9 @@ class RexelSpider(Spider):
                     item["image"] = next(storeImages)["url"]
             yield from self.parse_item(item, feature) or []
 
+    def parse_item(self, item, feature, **kwargs):
+        yield item
+
     @staticmethod
     def decode_hours(feature):
         oh = OpeningHours()
@@ -55,6 +58,3 @@ class RexelSpider(Spider):
                     time_format="%I:%M %p",
                 )
                 return oh
-
-    def parse_item(self, item, feature, **kwargs):
-        yield item
