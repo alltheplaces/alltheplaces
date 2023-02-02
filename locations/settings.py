@@ -119,3 +119,15 @@ ITEM_PIPELINES = {
 # HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
 
 REQUEST_FINGERPRINTER_IMPLEMENTATION = "2.7"
+
+DEFAULT_PLAYWRIGHT_SETTINGS = {
+    "PLAYWRIGHT_BROWSER_TYPE": "firefox",
+    "PLAYWRIGHT_DEFAULT_NAVIGATION_TIMEOUT": 30 * 1000,
+    "PLAYWRIGHT_ABORT_REQUEST": lambda request: not request.resource_type == "document",
+    "TWISTED_REACTOR": "twisted.internet.asyncioreactor.AsyncioSelectorReactor",
+    "DOWNLOAD_HANDLERS": {
+        "http": "scrapy_playwright.handler.ScrapyPlaywrightDownloadHandler",
+        "https": "scrapy_playwright.handler.ScrapyPlaywrightDownloadHandler",
+    },
+    "DOWNLOADER_MIDDLEWARES": {"locations.middlewares.playwright_middleware.PlaywrightMiddleware": 543},
+}

@@ -1,16 +1,66 @@
-FROM python:3
+FROM ubuntu:22.04
 
-RUN pip install pipenv
-WORKDIR /opt/app
+# This is from https://hub.docker.com/r/yahwang/ubuntu-pyenv/dockerfile
+ARG PYTHON_VERSION=3.10
+ARG BUILD_PYTHON_DEPS=" \
+        make \
+        build-essential \
+        libbz2-dev \
+        libffi-dev \
+        libgdbm-dev \
+        liblzma-dev \
+        libncurses5-dev \
+        libncursesw5-dev \
+        libnss3-dev \
+        libreadline-dev \
+        libsqlite3-dev \
+        libssl-dev \
+        xz-utils \
+        zlib1g-dev \
+        "
+ARG BUILD_OPT_DEPS=" \
+        sudo \
+        locales \
+        git \
+        ca-certificates \
+        curl \
+        jq \
+        zip \
+        "
 
-# Used by the run all spiders script to build output JSON
+# basic update & locale setting
 RUN apt-get update \
-    && apt-get install -y jq zip \
-    && rm -rf /var/lib/apt/lists/*
+ && apt-get upgrade -yqq \
+ && apt-get install -y --no-install-recommends \
+        ${BUILD_PYTHON_DEPS} \
+        ${BUILD_OPT_DEPS} \
+ && localedef -f UTF-8 -i en_US en_US.UTF-8 \
+ && useradd -m -s /bin/bash ubuntu \
+ && echo 'ubuntu ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers \
+ && apt-get autoremove -yqq --purge \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+USER ubuntu
+
+WORKDIR /home/ubuntu
+
+ENV LANG=en_US.UTF-8 \
+    PYENV_ROOT="/home/ubuntu/.pyenv" \
+    PATH="/home/ubuntu/.pyenv/versions/${PYTHON_VERSION}/bin:/home/ubuntu/.pyenv/bin:/home/ubuntu/.pyenv/shims:$PATH"
+
+# install pyenv & python
+RUN curl https://pyenv.run | bash \
+ && pyenv install ${PYTHON_VERSION} \
+ && pyenv global ${PYTHON_VERSION} \
+ && pip install --upgrade pip pipenv
 
 COPY Pipfile Pipfile
 COPY Pipfile.lock Pipfile.lock
-RUN pipenv install --dev --deploy --system
+RUN pipenv install --dev --deploy --system && pyenv rehash
+
+RUN playwright install-deps
+RUN playwright install firefox
 
 COPY . .
 
