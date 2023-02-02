@@ -189,6 +189,7 @@ class Fuel(Enum):
 
 class Extras(Enum):
     ATM = "atm"
+    BABY_CHANGING_TABLE = "changing_table"
     CAR_WASH = "car_wash"
     OIL_CHANGE = "service:vehicle:oil_change"
     TOILETS = "toilets"
