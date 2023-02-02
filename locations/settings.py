@@ -66,9 +66,9 @@ TELNETCONSOLE_ENABLED = False
 
 # Enable or disable downloader middlewares
 # See http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html
-DOWNLOADER_MIDDLEWARES = {
-    "locations.middlewares.playwright_middleware.PlaywrightMiddleware": 543,
-}
+# DOWNLOADER_MIDDLEWARES = {
+#    'locations.middlewares.MyCustomDownloaderMiddleware': 543,
+# }
 
 # Enable or disable extensions
 # See http://scrapy.readthedocs.org/en/latest/topics/extensions.html
@@ -125,5 +125,9 @@ DEFAULT_PLAYWRIGHT_SETTINGS = {
     "PLAYWRIGHT_DEFAULT_NAVIGATION_TIMEOUT": 30 * 1000,
     "PLAYWRIGHT_ABORT_REQUEST": lambda request: not request.resource_type == "document",
     "TWISTED_REACTOR": "twisted.internet.asyncioreactor.AsyncioSelectorReactor",
-    "DOWNLOAD_HANDLERS": {"https": "scrapy_playwright.handler.ScrapyPlaywrightDownloadHandler"},
+    "DOWNLOAD_HANDLERS": {
+        "http": "scrapy_playwright.handler.ScrapyPlaywrightDownloadHandler",
+        "https": "scrapy_playwright.handler.ScrapyPlaywrightDownloadHandler",
+    },
+    "DOWNLOADER_MIDDLEWARES": {"locations.middlewares.playwright_middleware.PlaywrightMiddleware": 543},
 }
