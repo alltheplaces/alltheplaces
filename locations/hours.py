@@ -175,6 +175,10 @@ class OpeningHours:
     def __init__(self):
         self.day_hours = defaultdict(set)
 
+    def add_days_range(self, days: [str], open_time, close_time, time_format="%H:%M"):
+        for day in days:
+            self.add_range(day, open_time, close_time, time_format=time_format)
+
     def add_range(self, day, open_time, close_time, time_format="%H:%M"):
         day = sanitise_day(day)
 
