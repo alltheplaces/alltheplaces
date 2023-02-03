@@ -50,5 +50,7 @@ class McCollsGBSpider(scrapy.Spider):
             elif store["store_type"] == "CONVENIENCE PLUS":
                 apply_category(Categories.SHOP_CONVENIENCE, item)
 
-            # TODO: parse opening hours from the store JSON
+            item["opening_hours"] = OpeningHours()
+            for day, times in store["schedule_array"].items():
+                item["opening_hours"].add_range(day, ":".join(times["from"]), ":".join(times["to"]))
             yield item
