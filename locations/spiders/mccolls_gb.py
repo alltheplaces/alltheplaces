@@ -2,30 +2,56 @@ import json
 
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
+from locations.hours import OpeningHours
 
 
 class McCollsGBSpider(scrapy.Spider):
     name = "mccolls_gb"
-    item_attributes = {
-        "brand": "McColl's",
-        "brand_wikidata": "Q16997477",
-    }
+    MCCOLLS = {"brand": "McColl's", "brand_wikidata": "Q16997477"}
+    MARTINS = {"brand": "Martin's", "brand_wikidata": "Q16997477"}
+    RSMCCOLL = {"brand": "RS McColl", "brand_wikidata": "Q7277785"}
+    MORRISONS_DAILY = {"brand": "Morrisons Daily", "brand_wikidata": "Q99752411"}
+    item_attributes = MCCOLLS
     start_urls = ["https://www.mccolls.co.uk/storelocator/"]
-    download_delay = 0.5
 
     def parse(self, response):
         script = json.loads(response.xpath('//script[contains(., "allStores")]/text()').get())
         for store in DictParser.get_nested_key(script, "items"):
-            yield scrapy.Request(
-                store["store_url"],
-                self.parse_store,
-                cb_kwargs=dict(store=store),
+            item = DictParser.parse(store)
+            item["website"] = store["store_url"]
+            item["street_address"] = store.get("address")
+            item["addr_full"] = ", ".join(
+                filter(
+                    None,
+                    [
+                        store.get("address"),
+                        store.get("address_1"),
+                        store.get("address_2"),
+                        store.get("address_3"),
+                        store.get("town"),
+                        store.get("county"),
+                        store.get("zip"),
+                    ],
+                )
             )
 
-    def parse_store(self, response, store):
-        item = DictParser.parse(store)
-        item["website"] = response.url
-        item["street_address"] = store.get("address")
-        # TODO: open hours available in both store JSON and page response
-        return item
+            if store["trading_name"] == "MORRISONS DAILY":
+                item.update(self.MORRISONS_DAILY)
+            elif store["trading_name"] == "MARTINS":
+                item.update(self.MARTINS)
+            elif store["trading_name"] == "RS MCCOLL":
+                item.update(self.RSMCCOLL)
+
+            if store["store_type"] == "NEWSAGENT":
+                apply_category(Categories.SHOP_NEWSAGENT, item)
+            elif store["store_type"] == "CONVENIENCE":
+                apply_category(Categories.SHOP_CONVENIENCE, item)
+            elif store["store_type"] == "CONVENIENCE PLUS":
+                apply_category(Categories.SHOP_CONVENIENCE, item)
+
+            item["opening_hours"] = OpeningHours()
+            for day, times in store["schedule_array"].items():
+                item["opening_hours"].add_range(day, ":".join(times["from"]), ":".join(times["to"]))
+            yield item
