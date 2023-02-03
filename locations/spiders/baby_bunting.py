@@ -4,7 +4,7 @@ import scrapy
 from scrapy.http import JsonRequest
 
 from locations.dict_parser import DictParser
-from locations.hours import DAYS_FULL, DAYS_EN, OpeningHours
+from locations.hours import DAYS_EN, DAYS_FULL, OpeningHours
 
 
 class BabyBuntingSpider(scrapy.Spider):
@@ -18,7 +18,7 @@ class BabyBuntingSpider(scrapy.Spider):
     def start_requests(self):
         yield JsonRequest(
             url="https://www.babybunting.com.au/api/cnts/getAllFromType",
-            data=[{"type":"store"}],
+            data=[{"type": "store"}],
             method="POST",
         )
 
@@ -29,7 +29,7 @@ class BabyBuntingSpider(scrapy.Spider):
             item["ref"] = str(store["supplychannel_id"])
             item["lat"] = store["address_lat_lng"].replace(" ", "").split(",")[0]
             item["lon"] = store["address_lat_lng"].replace(" ", "").split(",")[1]
-            item["addr_full"] = store["address_text"].replace(u"\xa0", " ")
+            item["addr_full"] = store["address_text"].replace("\xa0", " ")
             item["postcode"] = str(item["postcode"])
             item["country"] = "AU"
             if "lat" in item and "lon" in item:
