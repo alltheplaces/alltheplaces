@@ -8,10 +8,10 @@ from locations.dict_parser import DictParser
 
 class McCollsGBSpider(scrapy.Spider):
     name = "mccolls_gb"
-    MCCOLLS = {"brand": "McColl's","brand_wikidata": "Q16997477"}
-    MARTINS = {"brand": "Martin's","brand_wikidata": "Q16997477"}
-    RSMCCOLL = {"brand": "RS McColl","brand_wikidata": "Q7277785"}
-    MORRISONS_DAILY = {"brand": "Morrisons Daily","brand_wikidata": "Q99752411"}
+    MCCOLLS = {"brand": "McColl's", "brand_wikidata": "Q16997477"}
+    MARTINS = {"brand": "Martin's", "brand_wikidata": "Q16997477"}
+    RSMCCOLL = {"brand": "RS McColl", "brand_wikidata": "Q7277785"}
+    MORRISONS_DAILY = {"brand": "Morrisons Daily", "brand_wikidata": "Q99752411"}
     item_attributes = MCCOLLS
     start_urls = ["https://www.mccolls.co.uk/storelocator/"]
 
@@ -21,7 +21,20 @@ class McCollsGBSpider(scrapy.Spider):
             item = DictParser.parse(store)
             item["website"] = store["store_url"]
             item["street_address"] = store.get("address")
-            item["addr_full"] = ", ".join(filter(None,[store.get("address"),store.get("address_1"),store.get("address_2"),store.get("address_3"),store.get("town"),store.get("county"),store.get("zip")]))
+            item["addr_full"] = ", ".join(
+                filter(
+                    None,
+                    [
+                        store.get("address"),
+                        store.get("address_1"),
+                        store.get("address_2"),
+                        store.get("address_3"),
+                        store.get("town"),
+                        store.get("county"),
+                        store.get("zip"),
+                    ],
+                )
+            )
 
             if store["trading_name"] == "MORRISONS DAILY":
                 item.update(self.MORRISONS_DAILY)
