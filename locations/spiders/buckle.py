@@ -24,6 +24,7 @@ class BuckleSpider(scrapy.spiders.SitemapSpider):
         lds = response.xpath('//script[@type="application/ld+json"]//text()').getall()
         for ld in lds:
             try:
+                json.loads(ld)
                 pass
             except json.decoder.JSONDecodeError:
                 ld_nocomments = (line.strip() for line in ld.split("\n"))
