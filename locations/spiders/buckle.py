@@ -1,9 +1,9 @@
-import scrapy
+from scrapy.spiders import SitemapSpider
 
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class BuckleSpider(scrapy.spiders.SitemapSpider, StructuredDataSpider):
+class BuckleSpider(SitemapSpider, StructuredDataSpider):
     name = "buckle"
     item_attributes = {
         "brand": "Buckle",
