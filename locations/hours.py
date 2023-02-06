@@ -115,7 +115,6 @@ DAYS_FR = {
     "Sa": "Sa",
     "Di": "Su",
 }
-
 DAYS_NL = {
     "Ma": "Mo",
     "Di": "Tu",
@@ -125,7 +124,6 @@ DAYS_NL = {
     "Za": "Sa",
     "Zo": "Su",
 }
-
 DAYS_DK = {
     "Man": "Mo",
     "Tors": "Th",
@@ -136,7 +134,6 @@ DAYS_DK = {
     "Søndag": "Su",
     "Søn": "Su",
 }
-
 DAYS_RS = {
     "Ponedeljak": "Mo",
     "Utorak": "Tu",
@@ -145,6 +142,15 @@ DAYS_RS = {
     "Petak": "Fr",
     "Subota": "Sa",
     "Nedelja": "Su",
+}
+DAYS_NO = {
+    "Mandag": "Mo",
+    "Tirsdag": "Tu",
+    "Onsdag": "We",
+    "Torsdag": "Th",
+    "Fredag": "Fr",
+    "Lørdag": "Sa",
+    "Søndag": "Su",
 }
 
 
