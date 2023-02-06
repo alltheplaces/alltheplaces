@@ -1,11 +1,10 @@
-import json
+from scrapy.spiders import SitemapSpider
 
-import scrapy
+from locations.hours import OpeningHours
+from locations.structured_data_spider import StructuredDataSpider
 
-from locations.linked_data_parser import LinkedDataParser
 
-
-class BuckleSpider(scrapy.spiders.SitemapSpider):
+class BuckleSpider(SitemapSpider, StructuredDataSpider):
     name = "buckle"
     item_attributes = {
         "brand": "Buckle",
@@ -17,20 +16,10 @@ class BuckleSpider(scrapy.spiders.SitemapSpider):
         "https://local.buckle.com/robots.txt",
     ]
     sitemap_rules = [(r"https://local\.buckle\.com/.*\d/", "parse")]
+    json_parser = "json5"
 
-    def parse(self, response):
-        # Buckle left a comment in the middle of the JSON LD in their
-        # HTML, so we create a new one without it.
-        lds = response.xpath('//script[@type="application/ld+json"]//text()').getall()
-        for ld in lds:
-            try:
-                pass
-            except json.decoder.JSONDecodeError:
-                ld_nocomments = (line.strip() for line in ld.split("\n"))
-                ld = "".join(line for line in ld_nocomments if not line.startswith("//"))
-                script = response.selector.root.makeelement("script", {"type": "application/ld+json"})
-                script.text = ld
-                response.selector.root.append(script)
-
-        item = LinkedDataParser.parse(response, "ClothingStore")
+    def post_process_item(self, item, response, ld_data, **kwargs):
+        oh = OpeningHours()
+        oh.from_linked_data(ld_data, time_format="%I:%M %p")
+        item["opening_hours"] = oh.as_opening_hours()
         yield item
