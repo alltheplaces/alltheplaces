@@ -64,4 +64,4 @@ RUN playwright install firefox
 
 COPY . .
 
-CMD ["/opt/app/ci/run_all_spiders.sh"]
+CMD ["/home/ubuntu/ci/run_all_spiders.sh"]
