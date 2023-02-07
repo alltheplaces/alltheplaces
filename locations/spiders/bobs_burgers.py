@@ -18,7 +18,6 @@ class BobsBurgersSpider(scrapy.Spider):
     start_urls = ["https://www.bobsburgersandbrew.com/content/locations/locations"]
 
     def parse(self, response):
-
         names = response.xpath(
             '//td[contains(@style,"300px") and contains(' '., "MAP")]/descendant-or-self::*/text()'
         ).re(regex_name)

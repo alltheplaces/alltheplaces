@@ -70,7 +70,6 @@ class KrystalSpider(scrapy.Spider):
     def parse_hours(self, hours):
         hours = json.loads(hours)
         for key, epoch in hours.items():
-
             if epoch["open"] == "99":
                 epoch["open"] = "00"
 
@@ -90,7 +89,6 @@ class KrystalSpider(scrapy.Spider):
 
         reversed_hours = {}
         for key, epoch in hours.items():
-
             reversed_hours.setdefault(epoch, [])
             reversed_hours[epoch].append(key[:2].title())
 
@@ -129,7 +127,6 @@ class KrystalSpider(scrapy.Spider):
                 yield Feature(**properties)
 
     def start_requests(self):
-
         headers = {
             "Accept-Language": "en-US,en;q=0.8,ru;q=0.6",
             "Origin": "http://krystal.com",

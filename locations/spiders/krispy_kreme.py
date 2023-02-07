@@ -17,7 +17,6 @@ class KrispyKremeSpider(scrapy.Spider):
             yield scrapy.Request(url=response.urljoin(url), callback=self.parse_store)
 
     def parse_store(self, response):
-
         yield Feature(
             ref=response.url.split("/")[-1],
             name=response.xpath("//title/text()").extract_first(),

@@ -36,7 +36,6 @@ class KumAndGoSpider(scrapy.Spider):
     def parse(self, response):
         result = json.loads(response.text)
         for store in result:
-
             yield Feature(
                 ref=store["id"],
                 lon=store["lng"],

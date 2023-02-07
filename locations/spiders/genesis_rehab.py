@@ -38,7 +38,6 @@ class GenesisRehabSpider(scrapy.Spider):
     start_urls = ("https://www.genesishcc.com/page-data/findlocations/page-data.json",)
 
     def parse(self, response):
-
         data = json.loads(json.dumps(response.xpath("/html/body").extract()))
         data2 = data[0].split('}}}}]}}},{"node')
         for j in data2[1:]:

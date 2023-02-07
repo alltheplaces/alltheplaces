@@ -24,7 +24,6 @@ class TerminixSpider(scrapy.Spider):
             yield scrapy.Request(response.urljoin(city), callback=self.parse_store)
 
     def parse_store(self, response):
-
         try:
             phone = response.xpath('//span[@class="Phone Phone--desktop"]/text()').extract()[0]
         except:

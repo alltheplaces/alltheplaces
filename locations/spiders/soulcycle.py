@@ -19,7 +19,6 @@ class SoulCycleSpider(scrapy.Spider):
             )
 
     def parse_store(self, response):
-
         properties = {
             "name": response.xpath('//*[@class="studio-name"]/@data-studio-name').extract_first(),
             "ref": response.xpath('//*[@class="studio-name"]/@data-studio-name').extract_first(),

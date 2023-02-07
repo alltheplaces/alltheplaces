@@ -79,7 +79,6 @@ class DishSpider(scrapy.Spider):
         store_data = response.json()
 
         for store in store_data:
-
             properties = {
                 "ref": store["address"],
                 "addr_full": store["address"],

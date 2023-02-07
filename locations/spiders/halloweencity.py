@@ -13,7 +13,6 @@ class HalloweenCitySpider(scrapy.Spider):
     start_urls = ("http://stores.halloweencity.com/",)
 
     def parse_stores(self, response):
-
         app_json = json.loads(
             response.xpath('normalize-space(//script[contains(text(), "markerData")]/text())').re_first(
                 r"RLS.defaultData = (\{.*?\});"
@@ -39,7 +38,6 @@ class HalloweenCitySpider(scrapy.Spider):
         return Feature(**props)
 
     def parse_city_stores(self, response):
-
         stores = response.xpath('//div[@class="map-list-item-section map-list-item-top"]/a/@href').extract()
         for store in stores:
             yield scrapy.Request(response.urljoin(store), callback=self.parse_stores)
@@ -47,13 +45,11 @@ class HalloweenCitySpider(scrapy.Spider):
             yield self.parse_stores(response)
 
     def parse_state(self, response):
-
         city_urls = response.xpath('//div[@class="map-list-item is-single"]/a/@href').extract()
         for path in city_urls:
             yield scrapy.Request(response.urljoin(path), callback=self.parse_city_stores)
 
     def parse(self, response):
-
         urls = response.xpath('//div[@class="map-list-item is-single"]/a/@href').extract()
         for path in urls:
             yield scrapy.Request(response.urljoin(path), callback=self.parse_state)

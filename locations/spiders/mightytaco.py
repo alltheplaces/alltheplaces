@@ -18,7 +18,6 @@ day_formats = {
 
 
 class MightytacoSpider(scrapy.Spider):
-
     name = "mightytaco"
     item_attributes = {"brand": "Mighty Taco"}
     allowed_domains = ["www.mightytaco.com"]
@@ -26,7 +25,6 @@ class MightytacoSpider(scrapy.Spider):
     start_urls = ("https://www.mightytaco.com/Locations",)
 
     def parse_day(self, day):
-
         if re.search("&", day):
             days = day.split("&")
             osm_days = []

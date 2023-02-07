@@ -16,7 +16,6 @@ class AndPizzaSpider(scrapy.Spider):
     }
 
     def start_requests(self):
-
         url = self.start_urls[0]
 
         headers = {
@@ -65,7 +64,6 @@ class AndPizzaSpider(scrapy.Spider):
         return opening_hours
 
     def parse(self, response):
-
         stores = response.json().get("data")
         for store in stores:
             props = {}

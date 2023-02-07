@@ -4,7 +4,6 @@ from locations.structured_data_spider import StructuredDataSpider
 
 
 class ScrubsAndBeyondSpider(SitemapSpider, StructuredDataSpider):
-
     name = "scrubs_and_beyond"
     item_attributes = {"brand": "Scrubs and Beyond"}
     allowed_domains = ["locations.scrubsandbeyond.com"]

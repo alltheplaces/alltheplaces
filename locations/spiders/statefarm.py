@@ -18,7 +18,6 @@ class StateFarmSpider(scrapy.Spider):
     ]
 
     def parse_location(self, response):
-
         name = response.xpath('//span[@itemprop="name"]/text()').extract_first()
         if name:
             name += " - State Farm Insurance Agent"

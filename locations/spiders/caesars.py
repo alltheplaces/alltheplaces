@@ -23,7 +23,6 @@ class CaesarsSpider(scrapy.Spider):
     def parse(self, response):
         stores = response.json()
         for store in stores:
-
             properties = {
                 "ref": store["id"],
                 "name": store["name"],

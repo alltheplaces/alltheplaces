@@ -9,7 +9,6 @@ DAY_MAPPING = {"Lunes": "Mo", "Sábados": "Sa", "Domingos": "Su"}
 
 
 class LagenovesaSpider(scrapy.Spider):
-
     name = "lagenovesa"
     item_attributes = {"brand": "La Genovesa"}
     allowed_domains = ["lagenovesasuper.com.ar"]
@@ -17,7 +16,6 @@ class LagenovesaSpider(scrapy.Spider):
     start_urls = ("http://lagenovesasuper.com.ar/index.php/empresa/sucursales",)
 
     def parse_day(self, day):
-
         if re.search("Domingos", day):
             return DAY_MAPPING[day.strip()]
         if re.search(" a ", day):

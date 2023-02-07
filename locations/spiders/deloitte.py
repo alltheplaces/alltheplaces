@@ -39,7 +39,6 @@ class DeloitteSpider(scrapy.Spider):
         offices = response.xpath('//div[contains(@class, "offices-container")]//div[@class="offices"]')
 
         for office in offices:
-
             address_parts = office.xpath('.//div[@class="address"]//p//text()').extract()
             address_parts = [a.strip().replace("\u200b", "").replace("\n", "").replace("\t", "") for a in address_parts]
             country = address_parts.pop(-1)

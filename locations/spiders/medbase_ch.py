@@ -66,7 +66,7 @@ class MedbaseCHSpider(scrapy.Spider):
                 line = line.removeprefix(prefix)
             if m := re.match(r"^\s*(\D+)\s+(\d.+)", line):
                 for day in self.parse_days(m.group(1)):
-                    for (open_time, close_time) in self.parse_hours(m.group(2)):
+                    for open_time, close_time in self.parse_hours(m.group(2)):
                         oh.add_range(day, open_time, close_time)
         feature["opening_hours"] = oh.as_opening_hours()
 

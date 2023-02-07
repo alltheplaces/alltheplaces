@@ -12,7 +12,7 @@ class PetsAtHomeGBSpider(StructuredDataSpider):
     download_delay = 0.2
 
     def start_requests(self):
-        for (lat, lon) in point_locations("eu_centroids_20km_radius_country.csv", "UK"):
+        for lat, lon in point_locations("eu_centroids_20km_radius_country.csv", "UK"):
             yield FormRequest(
                 url="https://community.petsathome.com/models/utils.cfc",
                 formdata={

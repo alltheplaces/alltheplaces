@@ -6,7 +6,6 @@ from locations.items import Feature
 
 
 class Duffys(scrapy.Spider):
-
     name = "duffys"
     item_attributes = {"brand": "Duffys"}
     custom_settings = {"ROBOTSTXT_OBEY": False}

@@ -23,7 +23,6 @@ class DressBarnSpider(scrapy.Spider):
         return opening_hours.as_opening_hours()
 
     def parse_stores(self, response):
-
         props = {
             "name": response.xpath('//span[@id="location-name"]/text()').extract_first(),
             "addr_full": response.xpath('//meta[@itemprop="streetAddress"]/@content').extract_first(),
@@ -44,7 +43,6 @@ class DressBarnSpider(scrapy.Spider):
         return Feature(**props)
 
     def parse_city_stores(self, response):
-
         stores = response.xpath('//a[@class="Teaser-titleLink"]/@href').extract()
         for store in stores:
             yield scrapy.Request(response.urljoin(store), callback=self.parse_stores)

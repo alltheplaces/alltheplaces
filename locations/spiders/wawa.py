@@ -83,7 +83,6 @@ class WawaSpider(scrapy.Spider):
         wawa_stores = response.json()
 
         for loc in wawa_stores["locations"]:
-
             addr, city, state, zipc = self.get_addr(loc["addresses"][0])
             lat, lng = self.get_lat_lng(loc["addresses"][1])
             opening_hours = self.get_opening_hours(loc) or None

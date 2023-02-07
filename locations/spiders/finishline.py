@@ -51,7 +51,6 @@ class FinishlineSpider(scrapy.Spider):
         yield Feature(**properties)
 
     def parse_city_stores(self, response):
-
         stores = response.xpath('//div[@class="c-location-grid-item"]')
         for store in stores:
             url = store.xpath(

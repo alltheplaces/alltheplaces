@@ -48,7 +48,7 @@ class ApplySpiderLevelAttributesPipeline:
 
         item_attributes = spider.item_attributes
 
-        for (key, value) in item_attributes.items():
+        for key, value in item_attributes.items():
             if key == "extras":
                 extras = item.get("extras", {})
                 for k, v in value.items():
@@ -346,7 +346,7 @@ class ApplyNSICategoriesPipeline:
         item["nsi_id"] = match["id"]
 
         # Apply NSI tags to item
-        for (key, value) in match["tags"].items():
+        for key, value in match["tags"].items():
             if key == "brand:wikidata":
                 key = "brand_wikidata"
 

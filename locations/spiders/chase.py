@@ -30,7 +30,6 @@ class ChaseSpider(scrapy.Spider):
         return o.as_opening_hours()
 
     def parse(self, response):
-
         regex = re.compile(r"https://locator.chase.com/\w+/\S+(?=</loc>)")
         urls = re.findall(regex, response.text)
 
@@ -47,7 +46,6 @@ class ChaseSpider(scrapy.Spider):
                 continue
 
     def parse_store(self, response):
-
         atm_only = True
         if response.xpath('//div[@class="Core-branch"]/*[1]').extract_first():
             atm_only = False

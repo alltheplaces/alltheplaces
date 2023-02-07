@@ -7,7 +7,6 @@ from locations.items import Feature
 
 
 class VitaminShoppeSpider(scrapy.Spider):
-
     name = "vitamin-shoppe"
     item_attributes = {"brand": "The Vitamin Shoppe", "brand_wikidata": "Q7772938"}
     download_delay = 0.2
@@ -15,7 +14,6 @@ class VitaminShoppeSpider(scrapy.Spider):
     start_urls = ("https://locations.vitaminshoppe.com",)
 
     def parse_stores(self, response):
-
         app_json = json.loads(
             response.xpath('normalize-space(//script[@type="application/ld+json"]/text())').extract_first()
         )
@@ -39,19 +37,16 @@ class VitaminShoppeSpider(scrapy.Spider):
         return Feature(**props)
 
     def parse_city_stores(self, response):
-
         stores = response.xpath('//div[@class="map-list-item-header"]/a/@href').extract()
         for store in stores:
             yield scrapy.Request(response.urljoin(store), callback=self.parse_stores)
 
     def parse_state(self, response):
-
         city_urls = response.xpath('//div[@class="map-list-item is-single"]/a/@href').extract()
         for path in city_urls:
             yield scrapy.Request(response.urljoin(path), callback=self.parse_city_stores)
 
     def parse(self, response):
-
         urls = response.xpath('//div[@class="map-list-item is-single"]/a/@href').extract()
         for path in urls:
             yield scrapy.Request(response.urljoin(path), callback=self.parse_state)

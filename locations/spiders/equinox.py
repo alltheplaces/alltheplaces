@@ -20,7 +20,6 @@ class EquinoxSpider(scrapy.Spider):
     }
 
     def start_requests(self):
-
         yield scrapy.Request(self.start_url, callback=self.parse, headers=self.headers, meta={"skip": 0})
 
     def parse(self, response):

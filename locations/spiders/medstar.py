@@ -21,7 +21,6 @@ class MedstarSpider(scrapy.Spider):
             yield scrapy.Request(response.urljoin(url), callback=self.parse_loc)
 
     def parse_loc(self, response):
-
         try:
             phone = response.xpath('//div[@class="field-phone-number"]/a/@href').extract()[0].replace("tel:", "")
         except:

@@ -20,7 +20,6 @@ class VallartaSpider(scrapy.Spider):
             yield scrapy.Request(url=url, callback=self.parse_store, meta={"url": url})
 
     def parse_store(self, response):
-
         address = response.xpath("//div[@class='blade store-location']/div/div/div[2]/p[1]/text()").extract()
 
         # No lat/lon in source code; Google map link contains address

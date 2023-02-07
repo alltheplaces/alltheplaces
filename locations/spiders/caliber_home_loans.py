@@ -23,7 +23,6 @@ class CaliberHomeLoansSpider(scrapy.Spider):
     def parse(self, response, **kwargs):
         if data := response.json():
             for store in data:
-
                 properties = {
                     "ref": store["BranchID"],
                     "name": store["Name"],

@@ -5,7 +5,6 @@ from locations.items import Feature
 
 
 class AnatomieSpider(scrapy.Spider):
-
     name = "anatomie"
     item_attributes = {"brand": "Anatomie", "brand_wikidata": "Q115608133"}
     allowed_domains = ["stores.boldapps.net"]

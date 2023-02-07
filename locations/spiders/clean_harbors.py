@@ -19,7 +19,6 @@ class CleanHarborsSpider(scrapy.Spider):
                 yield scrapy.Request(response.urljoin(url), callback=self.parse_store)
 
     def parse_store(self, response):
-
         lati = response.xpath('//meta[@property="latitude"]').extract_first()
         longi = response.xpath('//meta[@property="longitude"]').extract_first()
         lat = lati.split("content=")[1].strip('">')

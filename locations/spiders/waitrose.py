@@ -9,7 +9,6 @@ _DAYNAMES = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
 
 
 class WaitroseSpider(scrapy.Spider):
-
     name = "waitrose"
     item_attributes = {"brand": "Waitrose", "brand_wikidata": "Q771734"}
     allowed_domains = ["www.waitrose.com"]
@@ -17,7 +16,6 @@ class WaitroseSpider(scrapy.Spider):
     start_urls = (bf_home + "/bf.html",)
 
     def parse(self, response):
-
         # if this is a store details page then it will have the following
         # div section.
         details = response.xpath('//div[@role="article"]/div' '/div[@class="parbase details section"]')

@@ -6,7 +6,6 @@ from locations.items import Feature
 
 
 class FazolisSpider(scrapy.Spider):
-
     name = "fazolis"
     item_attributes = {"brand": "Fazoli's", "brand_wikidata": "Q1399195"}
     allowed_domains = ["locations.fazolis.com"]

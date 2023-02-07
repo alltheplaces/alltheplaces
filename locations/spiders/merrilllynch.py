@@ -12,7 +12,6 @@ class MerrillLynchSpider(scrapy.Spider):
     start_urls = ("https://fa.ml.com/",)
 
     def parse_branch(self, response):
-
         data = response.json()
 
         for location in data["Results"]:

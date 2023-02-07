@@ -48,7 +48,6 @@ class DollaramaSpider(scrapy.Spider):
         data = response.json()
 
         for row in data.get("StoreLocations", []):
-
             properties = {
                 "ref": row["LocationNumber"],
                 "name": row["Name"],

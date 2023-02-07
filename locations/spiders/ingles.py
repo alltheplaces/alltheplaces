@@ -44,7 +44,6 @@ class InglesSpider(scrapy.Spider):
         return opening_hours.as_opening_hours()
 
     def parse_store(self, response):
-
         properties = {
             "ref": response.meta["ref"],
             "name": response.meta["name"],

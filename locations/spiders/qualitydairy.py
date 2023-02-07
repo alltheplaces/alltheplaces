@@ -74,7 +74,6 @@ class QualityDairySpider(scrapy.Spider):
         stores = json.loads(re.search("qd_locations = (.*);", data).group(1))
 
         for store in stores:
-
             props = {
                 "lat": store.get("lat"),
                 "lon": store.get("lng"),

@@ -20,7 +20,6 @@ class TjxCASpider(scrapy.Spider):
     }
 
     def start_requests(self):
-
         for lat, lon in point_locations("ca_centroids_100mile_radius.csv"):
             yield scrapy.http.FormRequest(
                 url="https://marketingsl.tjx.com/storelocator/GetSearchResults",

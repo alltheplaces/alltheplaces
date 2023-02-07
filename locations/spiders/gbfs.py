@@ -37,7 +37,6 @@ class GBFSSpider(CSVFeedSpider):
             return
 
         for station in DictParser.get_nested_key(data, "stations") or []:
-
             station["id"] = kwargs["System ID"] + "-" + str(station["station_id"])
             if station.get("address"):
                 station["street_address"] = station.pop("address")

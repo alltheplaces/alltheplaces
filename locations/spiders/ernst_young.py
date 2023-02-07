@@ -30,7 +30,6 @@ class ErnstYoungSpider(scrapy.Spider):
         data = response.json()
 
         for country in data["countries"]:
-
             for state in country["states"]:
                 state_abbr = state["stateAbbreviation"]
                 for city in state["cities"]:
@@ -41,7 +40,6 @@ class ErnstYoungSpider(scrapy.Spider):
                         yield Feature(**properties)
 
             for city in country["cities"]:
-
                 for office in city["offices"]:
                     properties = self.parse_office(office)
                     properties["website"] = response.urljoin(office["href"])

@@ -19,7 +19,6 @@ class FairwayMarketSpider(scrapy.Spider):
     def parse(self, response):
         data = response.xpath('//div[@class="art-content-wide"]')
         for store in data.xpath('.//div[@class="art-Post-inner"]'):
-
             properties = {
                 "ref": store.xpath('div[@class="art-PostContent"]/div[@class="art-article"]/p/text()').extract_first(),
                 "addr_full": store.xpath(

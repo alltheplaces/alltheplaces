@@ -47,7 +47,6 @@ class TMobileUSSpider(scrapy.Spider):
         url = BASE_URL
 
         with open("./locations/searchable_points/us_centroids_25mile_radius.csv") as points:
-
             next(points)  # Ignore the header
             for point in points:
                 _, lat, lon = point.strip().split(",")

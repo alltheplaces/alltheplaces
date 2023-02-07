@@ -60,7 +60,6 @@ class SallyBeautySpider(scrapy.Spider):
         jdata = response.json()
 
         for row in jdata.get("stores", []):
-
             properties = {
                 "ref": row["ID"],
                 "name": row["name"],

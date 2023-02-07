@@ -18,7 +18,6 @@ DAY_MAPPING = {
 
 
 class StaplesSpider(scrapy.Spider):
-
     name = "staples"
     item_attributes = {"brand": "Staples", "brand_wikidata": "Q785943"}
     allowed_domains = ["stores.staples.com"]
@@ -85,7 +84,6 @@ class StaplesSpider(scrapy.Spider):
             urls = response.xpath('//a[contains(@class,"Teaser-titleLink")]/@href').extract()
 
         for url in urls:
-
             if re.search(r".{2}/.+/.+", url):
                 yield scrapy.Request(response.urljoin(url), callback=self.parse_store)
             else:

@@ -12,7 +12,6 @@ class McDonaldsJPSpider(scrapy.Spider):
     )
 
     def parse(self, response):
-
         results = response.json()
         for data in results:
             properties = {

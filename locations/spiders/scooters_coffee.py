@@ -56,7 +56,6 @@ class ScootersCoffeeSpider(scrapy.Spider):
         if "*permanently closed" in name.lower():
             pass
         else:  # Gather the store details
-
             properties = {
                 "ref": store_data["id"],
                 "name": store_data["name"].strip(" *COMING SOON"),

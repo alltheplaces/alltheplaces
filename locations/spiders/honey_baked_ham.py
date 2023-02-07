@@ -26,7 +26,6 @@ class HoneyBakedHamSpider(scrapy.Spider):
         data = response.json()
 
         for i in data:
-
             properties = {
                 "ref": i["storeInformation"]["storeId"],
                 "name": i["storeInformation"]["displayName"],

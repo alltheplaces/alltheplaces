@@ -4,7 +4,6 @@ from locations.structured_data_spider import StructuredDataSpider
 
 
 class JennyCraigSpider(SitemapSpider, StructuredDataSpider):
-
     name = "jenny_craig"
     item_attributes = {"brand": "Jenny Craig", "brand_wikidata": "Q6179221"}
     allowed_domains = ["locations.jennycraig.com"]

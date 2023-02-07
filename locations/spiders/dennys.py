@@ -53,7 +53,6 @@ class DennysSpider(scrapy.Spider):
             urls = response.xpath('//a[contains(@class,"Teaser-titleLink")]/@href').extract()
 
         for url in urls:
-
             if re.search(r".{2}/.+/.+", url):
                 yield scrapy.Request(response.urljoin(url), callback=self.parse_store)
             else:
