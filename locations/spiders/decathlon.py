@@ -3,12 +3,18 @@ import json
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
+from locations.categories import Categories
 from locations.dict_parser import DictParser
 
 
 class Decathlon(CrawlSpider):
     name = "decathlon"
-    item_attributes = {"brand": "Decathlon", "brand_wikidata": "Q509349"}
+    item_attributes = {
+        "brand": "Decathlon",
+        "brand_wikidata": "Q509349",
+        "extras": Categories.SHOP_SPORTS.value,
+        "nsi_id": -1,
+    }
     start_urls = [
         "https://www.decathlon.be/nl/store-locator",
         "https://www.decathlon.ch/fr/store-locator",
@@ -28,7 +34,6 @@ class Decathlon(CrawlSpider):
     ]
     rules = [Rule(LinkExtractor(allow="/store-view/"), callback="parse", follow=False)]
     custom_settings = {"ROBOTSTXT_OBEY": False}
-    download_delay = 0.5
 
     def parse(self, response):
         if script := response.xpath('//script[@id="__dkt"]/text()').get():
