@@ -4,7 +4,6 @@ from locations.items import Feature
 
 
 class BlueBottleCafeSpider(scrapy.Spider):
-
     name = "bluebottlecafe"
     item_attributes = {"brand": "Blue Bottle Cafe"}
     allowed_domains = ["www.bluebottlecoffee.com"]
@@ -16,7 +15,6 @@ class BlueBottleCafeSpider(scrapy.Spider):
         results = response.json()
         for region_name in results["cafes"]:
             for store_data in results["cafes"][region_name]:
-
                 address_string = store_data["address"].replace("\n", " ").replace("\r", "").replace("<br>", ", ")
 
                 properties = {

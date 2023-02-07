@@ -8,7 +8,6 @@ from locations.items import Feature
 
 
 class AdvanceautopartsSpider(scrapy.Spider):
-
     name = "advanceautoparts"
     item_attributes = {
         "brand": "Advance Auto Parts",

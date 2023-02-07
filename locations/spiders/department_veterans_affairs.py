@@ -16,7 +16,6 @@ class DepartmentVeteransAffairsSpider(scrapy.Spider):
     allowed_domains = ["api.va.gov"]
 
     def start_requests(self):
-
         for i in range(1, 117):
             URL = (
                 "https://api.va.gov/v0/facilities/va?address=United%%20States&bbox[]=-180&bbox[]=90&bbox[]=180&bbox[]=-90&type=all&page=%s"

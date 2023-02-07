@@ -36,7 +36,7 @@ class AfcUrgentCareSpider(scrapy.Spider):
         }
 
         o = OpeningHours()
-        for ([h, _], day) in zip(obj["hours_of_operation"], DAYS):
+        for [h, _], day in zip(obj["hours_of_operation"], DAYS):
             if not h:
                 continue
             open_time, close_time = h

@@ -42,7 +42,6 @@ class AmericanEagleOutfittersSpider(scrapy.Spider):
         single_location = response.xpath('//*[@class="Core-address"]').extract_first()
 
         if single_location:
-
             properties = {
                 "ref": "_".join(re.search(r".+/(.+?)/(.+?)/(.+?)/?(?:\.html|$)", response.url).groups()),
                 "name": response.xpath('//*[@class="LocationName-geo"]/text()').extract_first(),

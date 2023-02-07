@@ -13,7 +13,6 @@ class MicrosoftSpider(scrapy.Spider):
     start_urls = ("https://www.microsoft.com/en-us/store/locations/all-locations",)
 
     def parse_stores(self, response):
-
         properties = {
             "name": response.xpath("normalize-space(//h1/strong/text())").extract_first(),
             "addr_full": response.xpath(

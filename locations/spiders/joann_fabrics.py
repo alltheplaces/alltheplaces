@@ -90,7 +90,6 @@ class JoAnnFabricsSpider(scrapy.Spider):
         """Yields a scrapy.Request for the store information page for each store in the city"""
         stores = response.xpath('//a[@linktrack="Landing page"]/@href').extract()
         for store in stores:
-
             yield scrapy.Request(store, callback=self.parse_store_data, headers=HEADERS)
 
     def parse_store_data(self, response):

@@ -33,7 +33,6 @@ class BaylorScottWhiteHealthSpider(scrapy.Spider):
         ldata = response.json()["locationResults"]
 
         for row in ldata:
-
             properties = {
                 "ref": row["locationID"],
                 "name": row["locationName"],

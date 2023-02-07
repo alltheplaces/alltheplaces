@@ -8,7 +8,6 @@ from locations.hours import DAYS, OpeningHours
 
 
 class MomentFeedSpider(Spider):
-
     id = ""
 
     page_size = 100

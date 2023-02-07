@@ -49,7 +49,6 @@ class RicohEuropeSpider(scrapy.Spider):
         for store in stores["Dealers"]:
             self.REF += 1
             if "ricoh" in store["Url"]:
-
                 properties = {
                     "ref": self.REF,
                     "name": store["Name"],

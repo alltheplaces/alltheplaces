@@ -30,7 +30,6 @@ class BarMethodSpider(scrapy.Spider):
         return decode
 
     def parse_store(self, response):
-
         infos = response.xpath("string(/html/body/div[2]/div/main/article/div[1]/div[2]/div/div/div[2])").get()
         address_full = infos.split("\n")[0]
         address = infos.split("\n")[1]

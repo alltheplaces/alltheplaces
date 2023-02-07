@@ -6,7 +6,6 @@ from locations.items import Feature
 
 
 class MarketBasketSpider(scrapy.Spider):
-
     name = "market_basket"
     item_attributes = {"brand": "Market Basket"}
     allowed_domains = ["www.mydemoulas.net"]

@@ -18,7 +18,6 @@ DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 
 
 class AvisSpider(scrapy.Spider):
-
     name = "avis"
     item_attributes = {"brand": "Avis", "brand_wikidata": "Q791136"}
     download_delay = 0.5

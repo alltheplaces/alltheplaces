@@ -16,7 +16,6 @@ class BannerHealthSpider(SitemapSpider):
     sitemap_rules = [(r"https://www.bannerhealth.com/locations/[-\w]+", "parse_location")]
 
     def parse_location(self, response):
-
         other = response.xpath("/html/body/div[1]/div[2]/div/div[2]/div").get()
         if not (data := response.xpath('//div[@data-js="map_canvas"]/@data-map-config').get()):
             data = response.xpath('//div[@data-js="map_canvas-v2"]/@data-map-config').get()

@@ -40,7 +40,6 @@ class TacoJohnsSpider(scrapy.Spider):
             yield scrapy.Request(response.urljoin(url), callback=self.parse_location)
 
     def parse_location(self, response):
-
         properties = {
             "ref": response.url,
             "name": response.xpath('//div[@itemprop="name"]//text()').extract_first(),

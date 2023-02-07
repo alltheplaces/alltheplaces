@@ -25,7 +25,6 @@ class MainEventSpider(scrapy.Spider):
                 yield scrapy.Request(url=url, callback=self.parse_location, meta={"url": url})
 
     def parse_location(self, response):
-
         store_data = response.xpath('//script[@type="application/ld+json"]/text()').extract_first()
 
         # Stores pending "Grand Opening" won't have this

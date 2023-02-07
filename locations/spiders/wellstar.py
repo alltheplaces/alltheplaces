@@ -77,7 +77,6 @@ class WellStarSpider(scrapy.Spider):
         )
 
     def parse_hours(self, hours):
-
         opening_hours = OpeningHours()
 
         if hours:

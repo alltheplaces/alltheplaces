@@ -23,7 +23,6 @@ class TheRangeSpider(scrapy.Spider):
 
         for s in scripts:
             if "Store" in s and "schema.org" in s:
-
                 try:
                     # Get a JS object with store information
                     store = json.loads(s)
@@ -54,7 +53,6 @@ class TheRangeSpider(scrapy.Spider):
 
         for s in scripts:
             if "initStoreFinder()" in s:
-
                 # Extract markers array as a string
                 markers_str = s.split("var markers = [")[1].split("];")[0].strip()
 

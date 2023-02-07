@@ -6,7 +6,6 @@ from locations.items import Feature
 
 
 class ArbysSpider(scrapy.Spider):
-
     name = "arby"
     item_attributes = {"brand": "Arby's", "brand_wikidata": "Q630866"}
     allowed_domains = ["locations.arbys.com"]
@@ -48,7 +47,6 @@ class ArbysSpider(scrapy.Spider):
             yield scrapy.Request(response.urljoin(city_store), callback=self.get_store_info)
 
     def parse_state(self, response):
-
         cities = response.xpath('//a[@class="ga-link"]/@href').extract()
         for city in cities:
             yield scrapy.Request(response.urljoin(city), callback=self.parse_store)

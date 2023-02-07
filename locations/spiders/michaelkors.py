@@ -6,7 +6,6 @@ from locations.items import Feature
 
 
 class MichaelkorsSpider(scrapy.Spider):
-
     name = "michaelkors"
     item_attributes = {"brand": "Michael Kors", "brand_wikidata": "Q19572998"}
     allowed_domains = ["locations.michaelkors.com"]

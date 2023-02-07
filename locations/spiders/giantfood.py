@@ -53,7 +53,6 @@ class GiantFoodSpider(scrapy.Spider):
         yield Feature(**properties)
 
     def parse_hours(self, hours):
-
         opening_hours = OpeningHours()
         for hour in hours:
             if "All Day" in hour:

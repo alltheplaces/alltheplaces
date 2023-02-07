@@ -24,7 +24,6 @@ class DairyQueenSpider(scrapy.Spider):
         data = response.json()
 
         for store in data["contentlets"]:
-
             lat, lon = store.get("latlong", ",").split(",", 2)
 
             properties = {

@@ -25,7 +25,6 @@ class CurvesSpider(scrapy.Spider):
                 pass
 
     def parse_store(self, response):
-
         if response.xpath(
             '//div[@class="field field-name-field-franchise-club-hours field-type-text-long field-label-hidden"]/div/div'
         ).extract_first():

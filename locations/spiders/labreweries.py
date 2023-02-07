@@ -89,7 +89,6 @@ class LaBreweriesSpider(scrapy.Spider):
                 )
 
     def parse_store(self, response):
-
         properties = {
             "website": response.xpath('//head/link[@rel="canonical"]/@href').extract_first(),
             "ref": str(response.xpath("/html/body/div[1]/div[1]/header/h1/text()").extract()).strip("['']"),

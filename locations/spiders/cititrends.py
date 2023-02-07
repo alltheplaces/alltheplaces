@@ -6,7 +6,6 @@ from locations.items import Feature
 
 
 class CitiTrendsSpider(scrapy.Spider):
-
     name = "cititrends"
     item_attributes = {"brand": "Citi Trends", "brand_wikidata": "Q5122438"}
     allowed_domains = ["locations.cititrends.com"]

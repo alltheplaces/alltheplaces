@@ -6,7 +6,6 @@ from scrapy.exceptions import UsageError
 
 
 class FilenameCommand(ScrapyCommand):
-
     requires_project = True
     default_settings = {"LOG_ENABLED": False}
 

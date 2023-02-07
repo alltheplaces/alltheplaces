@@ -7,7 +7,6 @@ from locations.items import Feature
 
 
 class ExpressSpider(scrapy.Spider):
-
     name = "express"
     item_attributes = {"brand": "Express", "brand_wikidata": "Q1384784"}
     allowed_domains = ["stores.express.com", "stores.expressfactoryoutlet.com"]

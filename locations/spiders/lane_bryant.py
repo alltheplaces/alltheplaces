@@ -12,7 +12,6 @@ class LaneBryantSpider(scrapy.Spider):
     allowed_domains = ["stores.lanebryant.com"]
 
     def start_requests(self):
-
         states = [
             "al",
             "ak",

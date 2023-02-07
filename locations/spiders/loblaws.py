@@ -4,7 +4,6 @@ from locations.items import Feature
 
 
 class LoblawsSpider(scrapy.Spider):
-
     name = "loblaws"
     allowed_domains = ["www.loblaws.ca"]
     start_urls = ("https://www.loblaws.ca/api/pickup-locations",)

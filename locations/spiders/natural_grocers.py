@@ -17,7 +17,6 @@ class NaturalGrocersSpider(SitemapSpider):
     ]
 
     def parse_store(self, response):
-
         item = Feature(
             ref=response.url,
             website=response.url,

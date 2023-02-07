@@ -20,7 +20,6 @@ class MedicalCityHealthcareSpider(scrapy.Spider):
         locations = json.loads(data)
 
         for location in locations:
-
             properties = {
                 "ref": location["id"],
                 "name": location["title"],

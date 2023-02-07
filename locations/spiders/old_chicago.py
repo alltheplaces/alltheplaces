@@ -6,7 +6,6 @@ from locations.items import Feature
 
 
 class OldChicagoSpider(scrapy.Spider):
-
     name = "oldchicago"
     item_attributes = {"brand": "Old Chicago", "brand_wikidata": "Q64411347"}
     allowed_domains = ["oc-api-prod.azurewebsites.com"]

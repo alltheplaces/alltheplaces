@@ -21,7 +21,6 @@ class ErbertandGerbertsSpider(scrapy.Spider):
             )
 
     def parse_store(self, response):
-
         properties = {
             "name": response.xpath('//h1[@class="ph__title text-cursive mb0"]/text()').extract_first(),
             "ref": response.xpath('//h1[@class="ph__title text-cursive mb0"]/text()').extract_first(),

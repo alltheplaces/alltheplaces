@@ -103,7 +103,6 @@ class LAFitnessSpider(scrapy.Spider):
         locations = response.json()["d"]
 
         for location in locations:
-
             properties = {
                 "name": location["Description"],
                 "ref": location["ClubID"],

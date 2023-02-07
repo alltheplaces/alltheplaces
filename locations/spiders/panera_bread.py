@@ -6,7 +6,6 @@ from locations.items import Feature
 
 
 class PaneraBreadSpider(scrapy.Spider):
-
     name = "panera"
     item_attributes = {"brand": "Panera Bread", "brand_wikidata": "Q7130852"}
     download_delay = 1.5
@@ -108,7 +107,6 @@ class PaneraBreadSpider(scrapy.Spider):
             yield scrapy.Request(state_page.urljoin(city), callback=self.parse_city)
 
     def parse(self, response):
-
         states = response.xpath('//a[@class="c-directory-list-content-item-link"]/@href').extract()
         for state in states:
             yield scrapy.Request(response.urljoin(state), callback=self.parse_state)

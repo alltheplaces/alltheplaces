@@ -178,7 +178,6 @@ def get_object(item: lxml.html.HtmlElement, memory=None):
     # given by the algorithm that returns the properties of an item, run the
     # following substeps:
     for element in item_props(item):
-
         # 7.1. Let value be the property value of element.
         value = property_value(element)
 

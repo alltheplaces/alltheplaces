@@ -21,7 +21,6 @@ class JerseyMikesSpider(scrapy.Spider):
             yield scrapy.Request(response.urljoin(path), callback=self.parse_store)
 
     def parse_store(self, response):
-
         properties = {
             "name": response.xpath("//title/text()").extract_first().strip("\n\t"),
             "ref": response.xpath("//title/text()").extract_first().strip("\n\t"),

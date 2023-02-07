@@ -25,7 +25,6 @@ class HoulihansSpider(scrapy.Spider):
                 pass
 
     def parse_store(self, response):
-
         regex = re.compile(r"http(s://|://www.)houlihans.com/my-houlihans/\S+")
         if re.search(regex, response.request.url):
             properties = {

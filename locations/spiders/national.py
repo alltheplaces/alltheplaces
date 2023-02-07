@@ -33,7 +33,6 @@ class NationalSpider(scrapy.Spider):
         loc_data = response.json()
 
         for loc in loc_data:
-
             properties = {
                 "name": loc["name"],
                 "brand": loc["brand"],

@@ -25,7 +25,6 @@ class GelsonsSpider(scrapy.spiders.SitemapSpider):
             yield entry
 
     def parse_store(self, response):
-
         content = json.loads(response.xpath('//script[@type="application/json"]/text()').extract_first())["props"][
             "pageProps"
         ]

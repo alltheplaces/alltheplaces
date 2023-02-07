@@ -6,7 +6,6 @@ from locations.items import Feature
 
 
 class SeriousCoffeeSpider(scrapy.Spider):
-
     name = "seriouscoffee"
     item_attributes = {"brand": "Serious Coffee"}
     allowed_domains = ["www.seriouscoffee.com"]

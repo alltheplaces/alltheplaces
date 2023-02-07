@@ -5,7 +5,6 @@ from locations.dict_parser import DictParser
 
 
 class VirtualEarthSpider(Spider):
-
     dataset_id = ""
     dataset_name = ""
     key = ""

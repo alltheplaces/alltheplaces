@@ -16,7 +16,6 @@ class MedExpressSpider(scrapy.Spider):
         stores = data["locations"]
 
         for store in stores:
-
             if re.search("closed", store["locationName"], re.IGNORECASE):
                 continue
 

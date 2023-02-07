@@ -16,7 +16,6 @@ class VivacomBGSpider(Spider):
 
     def parse(self, response):
         for store in response.json():
-
             if "partners" in store["store_img"]:
                 continue
 

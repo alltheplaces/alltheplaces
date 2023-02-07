@@ -24,7 +24,6 @@ class StopAndShopSpider(scrapy.Spider):
                 else:
                     jdata = json.loads(json.dumps(j))
                     for item in jdata:
-
                         properties = {
                             "ref": item["storeNo"],
                             "name": item["name"],

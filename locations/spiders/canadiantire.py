@@ -36,7 +36,6 @@ class CanadianTireSpider(scrapy.spiders.SitemapSpider):
         yield scrapy.Request(url=template.format(id_url=id_url), headers=headers, callback=self.parse_store_details)
 
     def parse_store_details(self, response):
-
         oh = OpeningHours()
         if response.json().get("storeServices"):
             for day in response.json().get("storeServices", {})[0].get("weekDayOpeningList"):

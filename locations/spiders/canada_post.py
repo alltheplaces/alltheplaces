@@ -26,7 +26,6 @@ class CanadaPostSpider(scrapy.Spider):
             yield scrapy.Request(url=f"https://www.{self.allowed_domains[0]}{url.get()}", callback=self.parse_office)
 
     def parse_office(self, response):
-
         address = response.xpath('//div[@id="results"]//address/p[1]/text()[3]').get()
         state = re.findall("[A-Z]{2}", address)[0]
         postcode = re.findall("[0-9]{5}|[A-Z0-9]{3} [A-Z0-9]{3}", address)[0]

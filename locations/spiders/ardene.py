@@ -26,7 +26,6 @@ class ArdeneSpider(scrapy.Spider):
         store_data = response.json()
 
         for store in store_data:
-
             if "LIQUIDATION" in store["name"]:
                 continue
 

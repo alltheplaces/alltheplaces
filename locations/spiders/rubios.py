@@ -23,7 +23,6 @@ class RubiosSpider(scrapy.Spider):
                 )
 
     def parse_store(self, response):
-
         properties = {
             "name": response.xpath('//meta[@property="og:title"]/@content').extract_first(),
             "ref": response.url,

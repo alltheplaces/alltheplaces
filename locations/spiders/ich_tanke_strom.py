@@ -139,7 +139,7 @@ class IchTankeStromSpider(scrapy.Spider):
         # Collect type and power output (in kilowatts) of available sockets
         # into a dict like {"type2": [22.0, 22.0], "type2_combo": [50.0]}.
         sockets = {}
-        for (key, val) in itertools.pairwise(t):
+        for key, val in itertools.pairwise(t):
             if socket := socket_types.get(key):
                 if m := re.search(r"([0-9\.]+)\s*kW", val):
                     power = float(m.group(1))

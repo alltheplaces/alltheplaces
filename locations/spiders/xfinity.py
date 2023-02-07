@@ -73,7 +73,6 @@ class XfinitySpider(scrapy.Spider):
         stores = json.loads(data)["locations"]
 
         for store in stores:
-
             properties = {
                 "ref": store["id"],
                 "name": store["locationName"],

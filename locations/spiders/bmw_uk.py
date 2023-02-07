@@ -15,7 +15,6 @@ class BeerBmwUkSpider(scrapy.Spider):
     def start_requests(self):
         point_files = "eu_centroids_120km_radius_country.csv"
         for lat, lon in point_locations(point_files):
-
             yield scrapy.Request(f"https://discover.bmw.co.uk/proxy/api/dealers?q={lat},{lon}&type=new")
 
     def parse(self, response):

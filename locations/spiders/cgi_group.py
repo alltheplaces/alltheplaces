@@ -15,7 +15,6 @@ class CGIGroupSpider(scrapy.Spider):
         offices = response.xpath('//span[@class="region-wrapper"]/div[@class="vcard-wrapper"]')
 
         for office in offices:
-
             properties = {
                 "name": " ".join(
                     filter(

@@ -7,7 +7,6 @@ from locations.hours import DAYS_FULL, OpeningHours
 
 
 class AsicsUsSpider(scrapy.Spider):
-
     name = "asics_us"
     item_attributes = {"brand": "asics", "brand_wikidata": "Q327247"}
     allowed_domains = ["www.asics.com"]

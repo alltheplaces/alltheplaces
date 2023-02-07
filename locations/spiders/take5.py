@@ -20,7 +20,7 @@ class Take5OilChangeSpider(scrapy.Spider):
         script = response.xpath('//script/text()[contains(.,"var CITIES =")]').get()
         start = script.index("{", script.index("var CITIES ="))
         data = json.decoder.JSONDecoder().raw_decode(script, start)[0]
-        for (state, cities) in data.items():
+        for state, cities in data.items():
             for city in cities:
                 url = f"https://www.take5oilchange.com/locations/{state}/{city['citySlug']}/"
                 yield scrapy.Request(url, callback=self.parse_city)
