@@ -1,20 +1,10 @@
-import json
-
 import scrapy
+from scrapy.http import JsonRequest
 
 from locations.categories import Categories
+from locations.geo import point_locations
 from locations.hours import OpeningHours
 from locations.items import Feature
-
-DAYS_NAME = {
-    "MO": "Mo",
-    "TU": "Tu",
-    "WE": "We",
-    "TH": "Th",
-    "FR": "Fr",
-    "SA": "Sa",
-    "SU": "Su",
-}
 
 
 class UspsSpider(scrapy.Spider):
@@ -24,67 +14,32 @@ class UspsSpider(scrapy.Spider):
         "brand_wikidata": "Q668687",
         "extras": Categories.POST_OFFICE.value,
     }
-    allowed_domains = ["usps.com"]
 
     def start_requests(self):
-        url = "https://tools.usps.com/UspsToolsRestServices/rest/POLocator/findLocations"
+        for lat, lon in point_locations("us_centroids_25mile_radius.csv"):
+            yield JsonRequest(
+                url="https://tools.usps.com/UspsToolsRestServices/rest/POLocator/findLocations",
+                data={"requestGPSLat": lat, "requestGPSLng": lon, "maxDistance": "100", "requestType": "PO"},
+            )
 
-        headers = {
-            "origin": "https://tools.usps.com",
-            "Referer": "https://tools.usps.com/find-location.htm?",
-            "content-type": "application/json;charset=UTF-8",
-        }
-
-        with open("./locations/searchable_points/us_centroids_25mile_radius.csv") as points:
-            next(points)
-            for point in points:
-                _, lat, lon = point.strip().split(",")
-
-                current_state = json.dumps(
-                    {
-                        "requestGPSLat": lat,
-                        "requestGPSLng": lon,
-                        "maxDistance": "100",
-                        "requestType": "po",
-                    }
-                )
-
-                yield scrapy.Request(
-                    url,
-                    method="POST",
-                    body=current_state,
-                    headers=headers,
-                    callback=self.parse,
-                )
-
-    def parse_hours(self, hours):
+    @staticmethod
+    def parse_hours(rules) -> OpeningHours:
         opening_hours = OpeningHours()
 
-        for hour in hours:
-            if len(hour["times"]) == 0:
-                pass
-            else:
-                day = hour["dayOfTheWeek"][:2].title()
-                open_time = hour["times"][0]["open"][:-3]
-                close_time = hour["times"][0]["close"][:-3]
-
+        for rule in rules:
+            for time in rule["times"]:
                 opening_hours.add_range(
-                    day=day,
-                    open_time=open_time,
-                    close_time=close_time,
-                    time_format="%H:%M",
+                    day=rule["dayOfTheWeek"], open_time=time["open"], close_time=time["close"], time_format="%H:%M:%S"
                 )
 
-        return opening_hours.as_opening_hours()
+        return opening_hours
 
-    def parse(self, response):
-        stores = response.json()["locations"]
-
-        for store in stores:
+    def parse(self, response, **kwargs):
+        for store in response.json().get("locations", []):
             properties = {
                 "ref": store["locationID"],
                 "name": store["locationName"],
-                "addr_full": store["address1"],
+                "street_address": store["address1"],
                 "city": store["city"],
                 "state": store["state"],
                 "postcode": store["zip5"],
@@ -93,9 +48,9 @@ class UspsSpider(scrapy.Spider):
                 "lon": store["longitude"],
                 "phone": store["phone"],
             }
-
-            h = self.parse_hours(store["locationServiceHours"][0]["dailyHoursList"])
-            if h:
-                properties["opening_hours"] = h
+            for service in store["locationServiceHours"]:
+                if service["name"] == "BUSINESS":
+                    properties["opening_hours"] = self.parse_hours(service["dailyHoursList"])
+                    break
 
             yield Feature(**properties)
