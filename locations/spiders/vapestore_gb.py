@@ -4,6 +4,7 @@ from scrapy.spiders import SitemapSpider
 
 from locations.google_url import extract_google_position
 from locations.items import Feature
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 
 
 def extract_email_link(item, response):
@@ -40,12 +41,13 @@ def clean_address(addr):
     return ", ".join(return_addr)
 
 
-class VapeStoreGB(SitemapSpider):
+class VapeStoreGBSpider(SitemapSpider):
     name = "vapestore_gb"
-    item_attributes = {"brand": "vapestore"}
+    item_attributes = {"brand": "vapestore", "brand_wikidata": "Q116710778"}
     sitemap_urls = ["https://www.vapestore.co.uk/pub/sitemap/vapestore_sitemap.xml"]
     sitemap_rules = [(r"https:\/\/www\.vapestore\.co\.uk\/vapestore-([-\w]+)", "parse")]
-    download_delay = 5
+    is_playwright_spider = True
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
 
     def sitemap_filter(self, entries):
         for entry in entries:
@@ -60,8 +62,6 @@ class VapeStoreGB(SitemapSpider):
 
         item["name"] = response.xpath('//div[@class="flt_left"]/strong/text()').get()
         item["addr_full"] = clean_address(response.xpath('//div[@class="flt_left"]/text()').getall())
-
-        item["country"] = "GB"
 
         extract_email_link(item, response)
         extract_google_position(item, response)
