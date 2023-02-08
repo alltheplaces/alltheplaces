@@ -12,7 +12,8 @@ class Where2GetItSpider(Spider):
 
     w2gi_api = "https://hosted.where2getit.com/rest/locatorsearch"
     w2gi_id = ""
-    w2gi_query = None
+    w2gi_query = "US"
+    w2gi_filter = None
     request_size = 1000
 
     def make_request(self, offset: int) -> JsonRequest:
@@ -25,9 +26,9 @@ class Where2GetItSpider(Spider):
                         "dataview": "store_default",
                         "limit": self.request_size,
                         "offset": offset,
-                        "geolocs": {"geoloc": [{"addressline": "US"}]},
+                        "geolocs": {"geoloc": [{"addressline": self.w2gi_query}]},
                         "searchradius": "5000",
-                        "where": self.w2gi_query,
+                        "where": self.w2gi_filter,
                     },
                 }
             },
