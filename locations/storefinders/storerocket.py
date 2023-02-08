@@ -7,10 +7,10 @@ from locations.items import Feature
 
 
 class StorerocketSpider(Spider):
-    id = ""
+    storerocket_id = ""
 
     def start_requests(self):
-        yield JsonRequest(url=f"https://storerocket.io/api/user/{self.id}/locations")
+        yield JsonRequest(url=f"https://storerocket.io/api/user/{self.storerocket_id}/locations")
 
     def parse(self, response, **kwargs):
         for location in response.json()["results"]["locations"]:
