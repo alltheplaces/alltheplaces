@@ -10,24 +10,24 @@ from locations.items import Feature
 class Where2GetItSpider(Spider):
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
-    api = "https://hosted.where2getit.com/rest/locatorsearch"
-    app_key = ""
+    w2gi_api = "https://hosted.where2getit.com/rest/locatorsearch"
+    w2gi_id = ""
+    w2gi_query = None
     request_size = 1000
-    query = None
 
     def make_request(self, offset: int) -> JsonRequest:
         return JsonRequest(
-            url=self.api,
+            url=self.w2gi_api,
             data={
                 "request": {
-                    "appkey": self.app_key,
+                    "appkey": self.w2gi_id,
                     "formdata": {
                         "dataview": "store_default",
                         "limit": self.request_size,
                         "offset": offset,
                         "geolocs": {"geoloc": [{"addressline": "US"}]},
                         "searchradius": "5000",
-                        "where": self.query,
+                        "where": self.w2gi_query,
                     },
                 }
             },
