@@ -9,8 +9,7 @@ class ShellSpider(scrapy.Spider):
     name = "shell"
     item_attributes = {"brand": "Shell", "brand_wikidata": "Q110716465"}
     url_template = "https://shellgsllocator.geoapp.me/api/v1/locations/within_bounds?sw%5B%5D={}&sw%5B%5D={}&ne%5B%5D={}&ne%5B%5D={}"
-    custom_settings = {"ROBOTSTXT_OBEY": False}
-    download_delay = 0.5
+    custom_settings = {"ROBOTSTXT_OBEY": False, "AUTOTHROTTLE_ENABLED": True}
 
     def start_requests(self):
         yield scrapy.Request(self.url_template.format(-90, -180, 90, 180))
