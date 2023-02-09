@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.hours import OpeningHours, DAYS_FULL
+from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import Feature
 
 
@@ -25,7 +25,7 @@ class QuestDiagnosticsSpider(scrapy.Spider):
             "name": response.xpath('//div[@class="location-detail-title"]/text()').extract_first().strip(),
             "website": response.url,
             "phone": response.xpath('//a[@id="phone"]/text()').extract_first(),
-            "addr_full": ', '.join(' '.join(x.split()) for x in address_components),
+            "addr_full": ", ".join(" ".join(x.split()) for x in address_components),
         }
 
         fax = response.xpath('//a[@id="fax"]/text()').extract_first()
@@ -36,10 +36,11 @@ class QuestDiagnosticsSpider(scrapy.Spider):
         for day in DAYS_FULL:
             hour = response.xpath(
                 '//div[@class="week-time-content"]/ul/li/p[contains(text(), $day)]/following-sibling::span/text()',
-                day=day).extract_first()
-            for x in hour.split(' , '):
+                day=day,
+            ).extract_first()
+            for x in hour.split(" , "):
                 try:
-                    open_time, close_time = x.split('-')
+                    open_time, close_time = x.split("-")
                     oh.add_range(day, open_time, close_time, "%I:%M %p")
                 except ValueError:
                     pass
