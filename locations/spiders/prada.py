@@ -6,7 +6,7 @@ from locations.hours import DAYS_EN, OpeningHours
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class Prada(SitemapSpider, StructuredDataSpider):
+class PradaSpider(SitemapSpider, StructuredDataSpider):
     name = "prada"
     item_attributes = {"brand": "Prada", "brand_wikidata": "Q193136"}
     allowed_domains = ["www.prada.com"]
