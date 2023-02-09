@@ -233,3 +233,10 @@ def apply_yes_no(attribute, item: Feature, state: bool, apply_positive_only: boo
     else:
         tag_value = "yes" if state else "no"
     apply_category({tag_key: tag_value}, item)
+
+
+class Clothes(Enum):
+    BABY = "babies"
+    CHILDREN = "children"
+    UNDERWEAR = "underwear"
+    MATERNITY = "maternity"
