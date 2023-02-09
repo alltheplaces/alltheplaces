@@ -1,5 +1,3 @@
-import pprint
-
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
@@ -39,7 +37,6 @@ class Where2GetItSpider(Spider):
         yield self.make_request(0)
 
     def parse(self, response, **kwargs):
-        pprint.pp(response.json())
         if response.json()["response"]["collectioncount"] == self.request_size:
             yield self.make_request(response.meta["offset"] + self.request_size)
 

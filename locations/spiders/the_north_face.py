@@ -1,3 +1,4 @@
+from locations.items import Feature
 from locations.storefinders.where2getit import Where2GetItSpider
 
 # The spider gets Stores and Outlets
@@ -10,3 +11,9 @@ class TheNorthFaceSpider(Where2GetItSpider):
     w2gi_id = "C1907EFA-14E9-11DF-8215-BBFCBD236D0E"
     w2gi_filter = {"or": {"northface": {"eq": "1"}, "outletstore": {"eq": "1"}}}
     w2gi_query = "CA"
+
+    def parse_item(self, item: Feature, location: dict, **kwargs):
+        if item["state"].upper() == "TNF RETAIL":
+            item["state"] = None
+
+        yield item
