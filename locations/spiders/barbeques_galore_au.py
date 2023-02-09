@@ -5,7 +5,7 @@ from locations.hours import DAYS_EN, OpeningHours
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class BarbequesGaloreAU(CrawlSpider, StructuredDataSpider):
+class BarbequesGaloreAUSpider(CrawlSpider, StructuredDataSpider):
     name = "barbeques_galore_au"
     item_attributes = {"brand": "Barbeques Galore", "brand_wikidata": "Q4859570"}
     allowed_domains = ["www.barbequesgalore.com.au"]
