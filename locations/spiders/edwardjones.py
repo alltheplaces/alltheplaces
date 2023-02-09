@@ -20,11 +20,14 @@ class EdwardJonesSpider(SitemapSpider, StructuredDataSpider):
         page = 1
         while flag:
             url = "https://www.edwardjones.com/api/v3/financial-advisor/results?q={postcode}&distance=75&distance_unit=mi&page={page}&searchtype=2".format(
-                postcode=item["postcode"], page=page)
+                postcode=item["postcode"], page=page
+            )
 
-            headers = {"Host": "www.edwardjones.com",
-                       "Accept": "application/json",
-                       "Referer": "https://www.edwardjones.com/us-en/search/financial-advisor/results"}
+            headers = {
+                "Host": "www.edwardjones.com",
+                "Accept": "application/json",
+                "Referer": "https://www.edwardjones.com/us-en/search/financial-advisor/results",
+            }
             response = requests.get(url, headers=headers, data={}).json()
 
             for x in response["results"]:
