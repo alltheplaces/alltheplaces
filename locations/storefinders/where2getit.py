@@ -6,6 +6,8 @@ from locations.items import Feature
 
 
 class Where2GetItSpider(Spider):
+    dataset_attributes = {"source": "api", "api": "where2getit.com"}
+
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
     w2gi_api = "https://hosted.where2getit.com/rest/locatorsearch"

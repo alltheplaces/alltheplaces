@@ -6,6 +6,8 @@ from locations.items import Feature
 
 
 class StoreRocketSpider(Spider):
+    dataset_attributes = {"source": "api", "api": "storerocket.io"}
+
     storerocket_id = ""
     base_url = None
 
