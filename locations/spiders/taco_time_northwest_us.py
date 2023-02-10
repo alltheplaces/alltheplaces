@@ -6,7 +6,7 @@ from locations.dict_parser import DictParser
 from locations.items import Feature
 
 
-class TacoTimeNorthwestUS(scrapy.Spider):
+class TacoTimeNorthwestUSSpider(scrapy.Spider):
     name = "taco_time_northwest_us"
     item_attributes = {"brand": "Taco Time Northwest", "brand_wikidata": "Q7673970"}
     allowed_domains = ["tacotimenw.com"]
@@ -25,5 +25,4 @@ class TacoTimeNorthwestUS(scrapy.Spider):
             item["image"] = store["image"]
             item["website"] = store["order"]
             item["name"] = item["name"].replace("&#8211;", "–")
-            item["phone"] = "+1-" + item["phone"].replace(".", "-")
             yield item
