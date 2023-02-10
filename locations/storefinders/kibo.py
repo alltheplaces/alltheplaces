@@ -22,10 +22,12 @@ class KiboSpider(Spider):
             item = DictParser.parse(location)
 
             item["ref"] = location["code"]
+            item["city"] = location["address"]["cityOrTown"]
             item["state"] = location["address"]["stateOrProvince"]
             item["postcode"] = location["address"]["postalOrZipCode"]
-            item["email"] = location["shippingOriginContact"]["email"]
-            if not item["phone"]:
+            if "email" in location["shippingOriginContact"]:
+                item["email"] = location["shippingOriginContact"]["email"]
+            if not item["phone"] and "phoneNumber" in location["shippingOriginContact"]:
                 item["phone"] = location["shippingOriginContact"]["phoneNumber"]
 
             oh = OpeningHours()
@@ -38,7 +40,7 @@ class KiboSpider(Spider):
             yield from self.parse_item(item, location) or []
 
             self.page_size = response.json()["pageSize"]
-            locations_remaining = response.json()["totalCount"] - response.json()["startIndex"] + self.page_size
+            locations_remaining = response.json()["totalCount"] - (response.json()["startIndex"] + self.page_size)
             if locations_remaining > 0:
                 next_start_index = response.json()["startIndex"] + self.page_size
                 yield JsonRequest(url=f"{self.start_urls[0]}?pageSize={self.page_size}&startIndex={next_start_index}")
