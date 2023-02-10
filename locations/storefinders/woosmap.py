@@ -6,6 +6,8 @@ from locations.hours import DAYS, OpeningHours
 
 
 class WoosmapSpider(Spider):
+    dataset_attributes = {"source": "api", "api": "woosmap.com"}
+
     key = ""
 
     def start_requests(self):

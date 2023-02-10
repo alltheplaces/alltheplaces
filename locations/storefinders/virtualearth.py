@@ -5,6 +5,8 @@ from locations.dict_parser import DictParser
 
 
 class VirtualEarthSpider(Spider):
+    dataset_attributes = {"source": "api", "api": "virtualearth.net"}
+
     dataset_id = ""
     dataset_name = ""
     key = ""

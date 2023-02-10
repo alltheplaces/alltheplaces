@@ -8,6 +8,8 @@ from locations.hours import DAYS_FULL, OpeningHours
 
 
 class StorepointSpider(Spider):
+    dataset_attributes = {"source": "api", "api": "storepoint.co"}
+
     key = ""
 
     custom_settings = {"ROBOTSTXT_OBEY": False}

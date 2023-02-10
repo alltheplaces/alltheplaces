@@ -2,17 +2,22 @@ from scrapy import Spider
 from scrapy.http import JsonRequest
 
 from locations.dict_parser import DictParser
-from locations.hours import OpeningHours, sanitise_day
 from locations.items import Feature
 
 
-class StorerocketSpider(Spider):
+class StoreRocketSpider(Spider):
+    dataset_attributes = {"source": "api", "api": "storerocket.io"}
+
     storerocket_id = ""
+    base_url = None
 
     def start_requests(self):
         yield JsonRequest(url=f"https://storerocket.io/api/user/{self.storerocket_id}/locations")
 
     def parse(self, response, **kwargs):
+        if not response.json()["success"]:
+            return
+
         for location in response.json()["results"]["locations"]:
             item = DictParser.parse(location)
 
@@ -22,12 +27,8 @@ class StorerocketSpider(Spider):
             item["extras"]["instagram"] = location.get("instagram")
             item["twitter"] = location.get("twitter")
 
-            item["opening_hours"] = OpeningHours()
-            for day, times in location["hours"].items():
-                day = sanitise_day(day)
-                if day and times:
-                    start_time, end_time = times.split("-")
-                    item["opening_hours"].add_range(day, start_time, end_time)
+            if self.base_url:
+                item["website"] = f'{self.base_url}?location={location["slug"]}'
 
             yield from self.parse_item(item, location) or []
 

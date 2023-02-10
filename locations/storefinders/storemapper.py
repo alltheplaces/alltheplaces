@@ -5,6 +5,8 @@ from locations.dict_parser import DictParser
 
 
 class StoremapperSpider(Spider):
+    dataset_attributes = {"source": "api", "api": "storemapper.com"}
+
     key = ""
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
