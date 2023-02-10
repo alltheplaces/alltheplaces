@@ -9,3 +9,4 @@ class JackInTheBoxSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://locations.jackinthebox.com/sitemap.xml"]
     sitemap_rules = [("", "parse_sd")]
     download_delay = 0.5
+    json_parser = "chompjs"
