@@ -1,8 +1,6 @@
-import json
-import re
-
 import scrapy
 
+from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import Feature
 
 
@@ -18,28 +16,39 @@ class QuestDiagnosticsSpider(scrapy.Spider):
             yield scrapy.Request(url, callback=self.parse_location)
 
     def parse_location(self, response):
-        for ldjson in response.xpath('//script[@type="application/ld+json"]/text()').extract():
-            # Unescaped newlines
-            ldjson = re.sub(r'"description": "[^"]*",', "", ldjson, flags=re.M)
-            data = json.loads(ldjson)
-            if data["@type"] != "LocalBusiness":
-                continue
+        address_components = response.xpath('//div[@class="address"]/text()').extract()
 
-            lat = response.xpath('//div[@class="latitude"]/text()').get()
-            lon = response.xpath('//div[@class="longitude"]/text()').get()
+        properties = {
+            "ref": response.url,
+            "lat": response.xpath('//div[@class="latitude"]/text()').get(),
+            "lon": response.xpath('//div[@class="longitude"]/text()').get(),
+            "name": response.xpath('//div[@class="location-detail-title"]/text()').extract_first().strip(),
+            "website": response.url,
+            "phone": response.xpath('//a[@id="phone"]/text()').extract_first(),
+            "addr_full": ", ".join(" ".join(x.split()) for x in address_components),
+        }
 
-            properties = {
-                "ref": data["@id"],
-                "lat": lat,
-                "lon": lon,
-                "name": data["name"],
-                "website": response.url,
-                "phone": data["telephone"],
-                "extras": {"fax": data["faxNumber"]},
-                "addr_full": data["address"]["streetAddress"],
-                "city": data["address"]["addressLocality"],
-                "state": data["address"]["addressRegion"],
-                "postcode": data["address"]["postalCode"],
-                "country": data["address"]["addressCountry"],
-            }
-            yield Feature(**properties)
+        if not properties["name"]:
+            # Invalid location
+            return
+
+        fax = response.xpath('//a[@id="fax"]/text()').extract_first()
+        if fax:
+            properties["extras"] = {"fax": fax}
+
+        oh = OpeningHours()
+        for day in DAYS_FULL:
+            hour = response.xpath(
+                '//div[@class="week-time-content"]/ul/li/p[contains(text(), $day)]/following-sibling::span/text()',
+                day=day,
+            ).extract_first()
+            for x in hour.split(" , "):
+                try:
+                    open_time, close_time = x.split("-")
+                    oh.add_range(day, open_time, close_time, "%I:%M %p")
+                except ValueError:
+                    pass
+
+        properties["opening_hours"] = oh.as_opening_hours()
+
+        yield Feature(**properties)
