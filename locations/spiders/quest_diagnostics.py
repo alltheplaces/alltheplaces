@@ -28,6 +28,10 @@ class QuestDiagnosticsSpider(scrapy.Spider):
             "addr_full": ", ".join(" ".join(x.split()) for x in address_components),
         }
 
+        if not properties["name"]:
+            # Invalid location
+            return
+
         fax = response.xpath('//a[@id="fax"]/text()').extract_first()
         if fax:
             properties["extras"] = {"fax": fax}
