@@ -10,7 +10,10 @@ from locations.hours import OpeningHours
 class BunningsSpider(scrapy.Spider):
     name = "bunnings"
     allowed_domains = ["bunnings.com.au"]
-    start_urls = ["https://api.prod.bunnings.com.au/v1/stores/country/AU?fields=FULL","https://api.prod.bunnings.com.au/v1/stores/country/NZ?fields=FULL"]
+    start_urls = [
+        "https://api.prod.bunnings.com.au/v1/stores/country/AU?fields=FULL",
+        "https://api.prod.bunnings.com.au/v1/stores/country/NZ?fields=FULL",
+    ]
     item_attributes = {"brand": "Bunnings", "brand_wikidata": "Q4997829"}
     custom_settings = {
         "COOKIES_ENABLED": True,
@@ -55,12 +58,7 @@ class BunningsSpider(scrapy.Spider):
                 item["state"] = location["address"]["region"]["isocode"]
                 website_prefix = "https://www.bunnings.com.au/stores/"
             if "urlRegion" in location:
-                item["website"] = (
-                    website_prefix
-                    + location["urlRegion"]
-                    + "/"
-                    + item["name"].lower().replace(" ", "-")
-                )
+                item["website"] = website_prefix + location["urlRegion"] + "/" + item["name"].lower().replace(" ", "-")
             if "mapIcon" in location:
                 item["extras"]["website:map"] = location["mapIcon"]["url"]
             oh = OpeningHours()
