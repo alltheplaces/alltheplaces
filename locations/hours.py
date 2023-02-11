@@ -18,6 +18,7 @@ DAYS_EN = {
     "Mon": "Mo",
     "Mo": "Mo",
     "Tuesday": "Tu",
+    "Tues": "Tu",
     "Tue": "Tu",
     "Tu": "Tu",
     "Wednesday": "We",
