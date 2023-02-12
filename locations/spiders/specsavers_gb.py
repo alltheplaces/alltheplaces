@@ -1,20 +1,14 @@
-import re
-
-import scrapy
+from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule
 
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class SpecsaversGBSpider(StructuredDataSpider, scrapy.Spider):
+class SpecsaversGBSpider(CrawlSpider, StructuredDataSpider):
     name = "specsavers_gb"
     item_attributes = {"brand": "Specsavers", "brand_wikidata": "Q2000610"}
-    allowed_domains = ["specsavers.co.uk"]
     start_urls = ["https://www.specsavers.co.uk/stores/full-store-list"]
-
-    def parse(self, response):
-        for link in response.xpath("//*/@href").getall():
-            if re.fullmatch("https:\/\/www\.specsavers\.co\.uk\/stores\/(.+)", response.urljoin(link)):
-                yield scrapy.Request(response.urljoin(link), callback=self.parse_sd)
+    rules = [Rule(LinkExtractor(allow=r"https:\/\/www\.specsavers\.co\.uk\/stores\/(.+)"), callback="parse_sd")]
 
     # Stores that include hearing tests are given an extra page e.g.
     # https://www.specsavers.co.uk/stores/barnsley-hearing
