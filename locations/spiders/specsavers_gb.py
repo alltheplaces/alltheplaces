@@ -1,19 +1,20 @@
-from scrapy.spiders import SitemapSpider
-
+import scrapy
+import re
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class SpecsaversGBSpider(SitemapSpider, StructuredDataSpider):
+class SpecsaversGBSpider(StructuredDataSpider,scrapy.Spider):
     name = "specsavers_gb"
     item_attributes = {"brand": "Specsavers", "brand_wikidata": "Q2000610"}
     allowed_domains = ["specsavers.co.uk"]
-    sitemap_urls = ["https://www.specsavers.co.uk/sitemap.xml"]
-    sitemap_rules = [
-        (
-            r"https:\/\/www\.specsavers\.co\.uk\/stores\/(.+)",
-            "parse_sd",
-        ),
-    ]
+    start_urls = ["https://www.specsavers.co.uk/stores/full-store-list"]
+
+    def parse(self, response):
+        for link in response.xpath('//*/@href').getall():
+            if re.fullmatch("https:\/\/www\.specsavers\.co\.uk\/stores\/(.+)",
+                            response.urljoin(link) ):
+                yield scrapy.Request(response.urljoin(link), callback=self.parse_sd)
+
     # Stores that include hearing tests are given an extra page e.g.
     # https://www.specsavers.co.uk/stores/barnsley-hearing
     # We can't just ignore any that end with "-hearing" as some are valid e.g
