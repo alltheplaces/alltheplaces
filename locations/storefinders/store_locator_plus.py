@@ -21,9 +21,9 @@ class StoreLocatorPlusSpider(Spider):
             return
 
         for location in response.json()["data"]["response"]:
-            location["street_address"] = ", ".join(filter(None, [location.pop("address2"), location.pop("address")]))
-
             item = DictParser.parse(location)
+            item["addr_full"] = None
+            item["street_address"] = ", ".join(filter(None, [location["address2"], location["address"]]))
 
             yield from self.parse_item(item, location) or []
 
