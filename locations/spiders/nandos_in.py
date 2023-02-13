@@ -13,6 +13,7 @@ class NandosINSpider(CrawlSpider, StructuredDataSpider):
     rules = [Rule(LinkExtractor(allow=r"/eat/restaurant/"), callback="parse_sd")]
 
     def post_process_item(self, item, response, ld_data, **kwargs):
+        item["website"] = response.url
         item["addr_full"] = clean_address(item.pop("street_address"))
 
         yield item
