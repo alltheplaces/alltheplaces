@@ -17,7 +17,6 @@ class LandsEndUSSpider(scrapy.Spider):
 
     def parse(self, response, **kwargs):
         for xml_location in xmltodict.parse(response.text)["markers"]["marker"]:
-
             # strip "@" prefix
             location = {}
             for k, v in xml_location.items():
