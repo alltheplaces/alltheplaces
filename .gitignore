@@ -97,3 +97,4 @@ ENV/
 *geojson
 *zip
 commands.txt
+http_cache.sqlite
