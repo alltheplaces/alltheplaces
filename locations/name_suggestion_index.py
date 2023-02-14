@@ -1,5 +1,4 @@
 import requests
-import requests_cache
 
 
 class Singleton(type):
@@ -32,7 +31,6 @@ class NSI(metaclass=Singleton):
 
     def _ensure_loaded(self):
         if not self.loaded:
-            requests_cache.install_cache(expire_after=60 * 60 * 24 * 3)
             self.wikidata_json = self._request_file("wikidata.min.json")["wikidata"]
             self.nsi_json = self._request_file("nsi.min.json")["nsi"]
             self.loaded = True
