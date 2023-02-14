@@ -1,56 +1,104 @@
+<!doctype html>
 <html>
     <head>
-        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.2.0/dist/leaflet.css"
-            integrity="sha512-M2wvCLH6DSRazYeZRIm1JnYyh22purTM+FDB5CsyxtQJYeKq83arPe5wgbNmcFXGqiSH2XR8dT/fJISVA1r/zQ=="
+        <meta name="viewport" content="width=device-width,initial-scale=1" />
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"
+            integrity="sha512-mD70nAW2ThLsWH0zif8JPbfraZ8hbCtjQ+5RU1m4+ztZq6/MymyZeB55pWsi4YAX+73yvcaJyk61mzfYMvtm9w=="
             crossorigin=""/>
-        <script src="https://unpkg.com/leaflet@1.2.0/dist/leaflet.js"
-            integrity="sha512-lInM/apFSqyy1o6s89K4iQUKg6ppXEgsVxT35HbzUupEVRh2Eu9Wdl4tHj7dZO0s1uvplcYGmt3498TtHq+log=="
+        <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"
+            integrity="sha512-Dqm3h1Y4qiHUjbhxTuBGQsza0Tfppn53SHlu/uj1f+RT+xfShfe7r6czRf5r2NmllO2aKx+tYJgoxboOkn1Scg=="
             crossorigin=""></script>
-        <script type="text/javascript" src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
+        <script src="https://unpkg.com/supercluster@7.1.5/dist/supercluster.min.js"
+            integrity="sha512-n4SmGefzBIvHLS4/PXlnamlOFKY/xAmPUo6dt2WU9/t8GZ51dWVKq03hu2LE3fWbMqlp4P8AJ+OurjVLQwpMHg=="
+            crossorigin=""></script>
+        <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css"
+            integrity="sha512-mQ77VzAakzdpWdgfL/lM1ksNy89uFgibRQANsNneSTMD/bj0Y/8+94XMwYhnbzx8eki2hrbPpDm0vD0CiT2lcg=="
+            crossorigin=""/>
+        <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css"
+            integrity="sha512-6ZCLMiYwTeli2rVh3XAPxy3YoR5fVxGdH/pz+KMCzRY2M65Emgkw00Yqmhh8qLGeYQ3LbVZGdmOX9KUjSKr0TA=="
+            crossorigin=""/>
     </head>
-<body>
-    <div id="map" style="width: 100%; height: 100%; margin: 0px;"></div>
-    <script type="text/javascript">
-        var map = L.map('map');
+<body style="margin: 0px;">
+    <div id="map" style="position: absolute; width: 100%; height: 100%;"></div>
+    <script>
+        var map = L.map("map");
         var layer = new L.tileLayer("https://stamen-tiles-{s}.a.ssl.fastly.net/toner/{z}/{x}/{y}.png", {
             attribution: 'Map tiles by <a href="https://stamen.com/">Stamen Design</a>, under <a href="https://creativecommons.org/licenses/by/3.0/">CC BY 3.0</a>. Data by <a href="https://www.openstreetmap.org/">OpenStreetMap</a>, under <a href="https://www.openstreetmap.org/copyright">ODbL</a>.',
         });
         map.setView([35.9908385, -78.9005222], 3);
         map.addLayer(layer);
 
-        function addDataToMap(data, map) {
-            var dataLayer = L.geoJson(data, {
-                onEachFeature: function(feature, layer) {
-                    var popupText = "<pre>" + JSON.stringify(feature.properties, null, 2) + "</pre>";
-                    layer.bindPopup(popupText);
-                },
-                attribution: 'Data by <a href="https://www.alltheplaces.xyz/">All The Places</a>.',
-            });
-            dataLayer.addTo(map);
-
-        }
-
-        function getParameterByName(name, url) {
-            if (!url) url = window.location.href;
-            name = name.replace(/[\[\]]/g, "\\$&");
-            var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
-                results = regex.exec(url);
-            if (!results) return null;
-            if (!results[2]) return '';
-            return decodeURIComponent(results[2].replace(/\+/g, " "));
-        }
-
-        $(function() {
-            var url = getParameterByName("show");
-            if (url) {
-                console.log("Fetching GeoJSON at " + url);
-                $.getJSON(url, function(data) {
-                    addDataToMap(data, map);
-                });
+        addEventListener("DOMContentLoaded", () => {
+            const url = new URL(location);
+            if (url.searchParams.has("show")) {
+                const show = url.searchParams.get("show");
+                console.log("Fetching GeoJSON at " + show);
+                fetch(show)
+                    .then(response => response.json())
+                    .then(data => addDataToMap(data, map));
             } else {
                 console.log("No GeoJSON file specified.");
             }
-        })
+        });
+
+        function popupHandler(layer) {
+            const popup = document.createElement("pre");
+            popup.textContent = JSON.stringify(layer.feature.properties, null, 2);
+            return popup;
+        }
+
+        function addDataToMap(data, map) {
+            if (data.features.length > 500) {
+                const index = new Supercluster({
+                    radius: 60,
+                    extent: 256,
+                    maxZoom: 17,
+                }).load(data.features);
+
+                const markers = L.geoJson(null, {
+                    pointToLayer: createClusterIcon,
+                }).addTo(map);
+
+                markers.on("click", (e) => {
+                    if (e.layer.feature.properties.cluster_id) {
+                        map.flyTo(e.latlng, index.getClusterExpansionZoom(e.layer.feature.properties.cluster_id));
+                    } else {
+                        L.popup({ content: popupHandler }, e.layer).setLatLng(e.layer.getLatLng()).openOn(map);
+                    }
+                });
+
+                const update = () => {
+                    const bounds = map.getBounds();
+                    markers.clearLayers();
+                    markers.addData(
+                        index.getClusters(
+                            [bounds.getWest(), bounds.getSouth(), bounds.getEast(), bounds.getNorth()],
+                            map.getZoom()
+                        )
+                    );
+                };
+                update();
+                map.on("moveend", update);
+            } else {
+                const dataLayer = L.geoJson(data, {
+                    attribution: 'Data by <a href="https://www.alltheplaces.xyz/">All The Places</a>.',
+                }).bindPopup(popupHandler);
+                dataLayer.addTo(map);
+            }
+        }
+
+        function createClusterIcon(feature, latlng) {
+            if (!feature.properties.cluster) return L.marker(latlng);
+            const count = feature.properties.point_count;
+            const size = count < 100 ? "small" : count < 1000 ? "medium" : "large";
+            const icon = L.divIcon({
+                html: `<div><span>${feature.properties.point_count_abbreviated}</span></div>`,
+                className: `marker-cluster marker-cluster-${size}`,
+                iconSize: L.point(40, 40),
+            });
+            return L.marker(latlng, { icon });
+        }
+
     </script>
 </body>
 </html>
