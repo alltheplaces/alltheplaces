@@ -131,3 +131,10 @@ DEFAULT_PLAYWRIGHT_SETTINGS = {
     },
     "DOWNLOADER_MIDDLEWARES": {"locations.middlewares.playwright_middleware.PlaywrightMiddleware": 543},
 }
+
+REQUESTS_CACHE_ENABLED = True
+REQUESTS_CACHE_BACKEND_SETTINGS = {
+    "expire_after": 60 * 60 * 24 * 3,
+    "backend": "filesystem",
+    "wal": True,
+}

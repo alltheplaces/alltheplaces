@@ -1,5 +1,12 @@
-import requests_cache
-
 __version__ = "1.0"
 
-requests_cache.install_cache(expire_after=60 * 60 * 24 * 3, backend="filesystem")
+import requests_cache
+
+from locations.settings import REQUESTS_CACHE_BACKEND_SETTINGS, REQUESTS_CACHE_ENABLED
+
+try:
+    if REQUESTS_CACHE_ENABLED:
+        requests_cache.install_cache(**REQUESTS_CACHE_BACKEND_SETTINGS)
+except Exception as e:
+    print("requests_cache install failed:")
+    print(e)
