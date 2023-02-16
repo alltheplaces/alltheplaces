@@ -6,7 +6,7 @@ from locations.items import Feature
 
 class CoopNOSpider(scrapy.Spider):
     name = "coop_se"
-    item_attributes = {"brand": "Coop", "brand_wikidata": "Q15229319"}
+    item_attributes = {"brand": "Coop", "brand_wikidata": "Q15229319", "country": "SE"}
     start_urls = ["https://proxy.api.coop.se/external/store/stores/?api-version=v1"]
 
     custom_settings = {
