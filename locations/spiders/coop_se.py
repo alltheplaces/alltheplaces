@@ -7,19 +7,13 @@ from locations.items import Feature
 class CoopSESpider(scrapy.Spider):
     name = "coop_se"
     item_attributes = {"brand": "Coop", "brand_wikidata": "Q15229319"}
-    start_urls = ["https://proxy.api.coop.se/external/store/stores/?api-version=v1"]
-
-    custom_settings = {
-        "ROBOTSTXT_OBEY": False,
-        "DEFAULT_REQUEST_HEADERS": {
-            "ocp-apim-subscription-key": "990520e65cc44eef89e9e9045b57f4e9",
-        },
-    }
+    start_urls = ["https://proxy.api.coop.se/external/store/stores?api-version=v2"]
+    custom_settings = {"DEFAULT_REQUEST_HEADERS": {"ocp-apim-subscription-key": "990520e65cc44eef89e9e9045b57f4e9"}}
 
     def parse(self, response, **kwargs):
         for store in response.json().get("stores"):
             yield scrapy.Request(
-                f"https://proxy.api.coop.se/external/store/stores/{store.get('ledgerAccountNumber')}?api-version=v1",
+                f"https://proxy.api.coop.se/external/store/stores/{store.get('ledgerAccountNumber')}?api-version=v3",
                 callback=self.parse_store,
             )
 
@@ -39,9 +33,11 @@ class CoopSESpider(scrapy.Spider):
 
         yield Feature(
             {
-                "ref": store.get("id"),
+                "ref": str(store.get("id")),
                 "name": store.get("name"),
                 "street_address": store.get("address"),
+                "postcode": store["postalCode"],
+                "city": store["city"],
                 "phone": store.get("phone"),
                 "website": f"https://www.coop.se{store.get('url')}" if store.get("url") else None,
                 "lat": store.get("latitude"),
