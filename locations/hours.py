@@ -82,6 +82,17 @@ DAYS_HU = {
     "Szo": "Sa",
     "Vas": "Su",
 }
+
+DAYS_SE = {
+    "Måndag": "Mo",
+    "Tisdag": "Tu",
+    "Onsdag": "We",
+    "Torsdag": "Th",
+    "Fredag": "Fr",
+    "Lördag": "Sa",
+    "Söndag": "Su",
+}
+
 DAYS_SI = {
     "po": "Mo",
     "Pon": "Mo",
@@ -209,7 +220,7 @@ class OpeningHours:
 
         self.day_hours[day].add((open_time, close_time))
 
-    def as_opening_hours(self):
+    def as_opening_hours(self) -> str:
         day_groups = []
         this_day_group = None
 
