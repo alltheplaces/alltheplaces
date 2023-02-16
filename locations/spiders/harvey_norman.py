@@ -11,7 +11,7 @@ class HarveyNormanSpider(StructuredDataSpider):
     item_attributes = {"brand": "Harvey Norman", "brand_wikidata": "Q4040441"}
     allowed_domains = ["stores.harveynorman.com.au", "stores.harveynorman.co.nz"]
     start_urls = ["https://stores.harveynorman.com.au/", "https://stores.harveynorman.co.nz/"]
-    requires_proxy = True
+    requires_proxy = "AU"
 
     def parse(self, response):
         data_raw = response.xpath('//script[@type="application/ld+json"]/text()').get()
