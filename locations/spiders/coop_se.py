@@ -6,7 +6,7 @@ from locations.items import Feature
 
 class CoopSESpider(scrapy.Spider):
     name = "coop_se"
-    item_attributes = {"brand": "Coop", "brand_wikidata": "Q15229319"}
+    item_attributes = {"brand": "Coop", "brand_wikidata": "Q15229319", "country": "SE"}
     start_urls = ["https://proxy.api.coop.se/external/store/stores?api-version=v2"]
     custom_settings = {"DEFAULT_REQUEST_HEADERS": {"ocp-apim-subscription-key": "990520e65cc44eef89e9e9045b57f4e9"}}
 
@@ -36,8 +36,8 @@ class CoopSESpider(scrapy.Spider):
                 "ref": str(store.get("id")),
                 "name": store.get("name"),
                 "street_address": store.get("address"),
-                "postcode": store["postalCode"],
-                "city": store["city"],
+                "postcode": store.get("postalCode"),
+                "city": store.get("city"),
                 "phone": store.get("phone"),
                 "website": f"https://www.coop.se{store.get('url')}" if store.get("url") else None,
                 "lat": store.get("latitude"),
