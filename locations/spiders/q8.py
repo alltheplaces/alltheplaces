@@ -18,7 +18,6 @@ class Q8Spider(scrapy.Spider):
                 if hours == "":
                     continue
                 hours = hours.split("-")
-                print(day, hours)
                 opening_hours.add_range(day, hours[0], hours[-1])
             yield Feature(
                 {
