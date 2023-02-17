@@ -17,8 +17,9 @@ class Q8Spider(scrapy.Spider):
             for day, hours in ohs.items():
                 if hours == "":
                     continue
-                hours = hours.split("-")
-                opening_hours.add_range(day, hours[0], hours[-1])
+                for period in hours.split(" "):
+                    start_time, end_time = period.split("-")
+                    opening_hours.add_range(day, start_time, end_time)
             yield Feature(
                 {
                     "ref": store.get("StationId"),
