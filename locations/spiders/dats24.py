@@ -2,7 +2,6 @@ import json
 
 import scrapy
 
-from locations.hours import DAYS_SE, OpeningHours, day_range, sanitise_day
 from locations.items import Feature
 
 
@@ -15,27 +14,28 @@ class Dats24BESpider(scrapy.Spider):
         script_tags = response.text.split("<script")
         for script_tag in script_tags:
             if 'class="locatorMapData"' in script_tag:
-                # Extract the JSON data from the <script> tag
-                start_index = script_tag.find('>') + 1
-                end_index = script_tag.find('</script>', start_index)
+                start_index = script_tag.find(">") + 1
+                end_index = script_tag.find("</script>", start_index)
                 json_data = script_tag[start_index:end_index]
                 break
-        # Load the JSON data as a Python object using the json library
-        data = json.loads(json_data)
 
-        for store in data.get("store"):
+        data = json.loads(json_data)
+        for store in data.get("stores"):
             yield Feature(
                 {
                     "ref": store.get("id"),
                     "name": store.get("name"),
-                    "street_address": store.get("address"),
-                    "postcode": store["postalCode"],
-                    "city": store["city"],
-                    "phone": store.get("phone"),
-                    "website": f"https://www.coop.se{store.get('url')}" if store.get("url") else None,
-                    "lat": store.get("latitude"),
-                    "lon": store.get("longitude"),
-                    "opening_hours": oh,
-                    "extras": {"store_type": store.get("concept").get("name")},
+                    "addr_full": " ".join(
+                        filter(
+                            None,
+                            [store.get("houseNumber"), store.get("street"), store.get("city"), store.get("postalCode")],
+                        )
+                    ),
+                    "street": store.get("street"),
+                    "postcode": store.get("postalCode"),
+                    "city": store.get("city"),
+                    "housenumber": store.get("houseNumber"),
+                    "lat": store.get("lat"),
+                    "lon": store.get("lng"),
                 }
             )
