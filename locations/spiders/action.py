@@ -39,8 +39,6 @@ class ActionSpider(scrapy.Spider):
 
     def parse_store(self, response):
         store = response.json().get("data").get("getStore")
-        if store is None:
-            return None
         geoloc = store.get("geoLocation")
         oh = OpeningHours()
         for opening_hour in store.get("openingTimes"):
