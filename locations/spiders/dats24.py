@@ -31,6 +31,12 @@ class Dats24BESpider(scrapy.Spider):
                             [store.get("houseNumber"), store.get("street"), store.get("city"), store.get("postalCode")],
                         )
                     ),
+                    "street_address": " ".join(
+                        filter(
+                            None,
+                            [store.get("houseNumber"), store.get("street")],
+                        )
+                    ),
                     "street": store.get("street"),
                     "postcode": store.get("postalCode"),
                     "city": store.get("city"),
