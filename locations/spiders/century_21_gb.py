@@ -6,14 +6,12 @@ import scrapy
 from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.linked_data_parser import LinkedDataParser
+from locations.spiders.century_21 import Century21Spider
 
 
-class Century21UkSpider(scrapy.Spider):
-    name = "century_21_uk"
-    item_attributes = {
-        "brand": "Century21",
-        "brand_wikidata": "Q1054480",
-    }
+class Century21GBSpider(scrapy.Spider):
+    name = "century_21_gb"
+    item_attributes = Century21Spider.item_attributes
     allowed_domains = ["century21uk.com"]
     start_urls = ["https://www.century21uk.com/find-an-agent/"]
 
