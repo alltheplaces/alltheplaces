@@ -1,5 +1,6 @@
 import scrapy
 
+from locations.categories import Extras, apply_yes_no
 from locations.hours import DAYS_SE, OpeningHours, day_range, sanitise_day
 from locations.items import Feature
 from locations.user_agents import BROWSER_DEFAULT
@@ -21,7 +22,7 @@ class AbnAmroNLSpider(scrapy.Spider):
                         continue
                     starting, closing = hours[0].split("-")
                     oh.add_range(day, starting, closing)
-            yield Feature(
+            item = Feature(
                 {
                     "ref": store.get("propRef"),
                     "name": store.get("owner"),
@@ -31,6 +32,7 @@ class AbnAmroNLSpider(scrapy.Spider):
                     "lat": store.get("lat"),
                     "lon": store.get("lng"),
                     "opening_hours": oh,
-                    "extras": {"store_type": store.get("locationType")},
                 }
             )
+            apply_yes_no(Extras.ATM, item, "CASHPOINT" in store.get("locationType"))
+            yield item
