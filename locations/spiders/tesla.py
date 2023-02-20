@@ -13,13 +13,20 @@ class TeslaSpider(scrapy.Spider):
     item_attributes = {"brand": "Tesla", "brand_wikidata": "Q478214"}
     allowed_domains = ["www.tesla.com"]
     start_urls = [
-        "https://www.tesla.com/cua-api/tesla-locations?translate=en_US&usetrt=true",
+        "https://www.tesla.com/findus",
     ]
     is_playwright_spider = True
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
     download_delay = 0.5
 
     def parse(self, response):
+        # Load the main page and then make requests using the API.
+        yield scrapy.Request(
+            "https://www.tesla.com/cua-api/tesla-locations?translate=en_US&usetrt=true",
+            callback=self.parse_json_subrequest,
+        )
+
+    def parse_json_subrequest(self, response):
         for location in response.json():
             # Skip if "Coming Soon" - no content to capture yet
             if location.get("open_soon") == "1":
