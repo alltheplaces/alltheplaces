@@ -18,6 +18,7 @@ class TeslaSpider(scrapy.Spider):
     is_playwright_spider = True
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
     download_delay = 0.5
+    requires_proxy = True
 
     def parse(self, response):
         # Load the main page and then make requests using the API.
