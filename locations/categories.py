@@ -68,6 +68,7 @@ class Categories(Enum):
     SHOP_STATIONERY = {"shop": "stationery"}
     SHOP_STORAGE_RENTAL = {"shop": "storage_rental"}
     SHOP_SUPERMARKET = {"shop": "supermarket"}
+    SHOP_SUPERMARKET_DRIVE_THROUGH = {"shop": "supermarket", "drive_through": "yes"}
     SHOP_TELECOMMUNICATION = {"shop": "telecommunication"}
     SHOP_TOYS = {"shop": "toys"}
     SHOP_TRADE = {"shop": "trade"}
