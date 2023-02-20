@@ -13,7 +13,7 @@ class CarrefourBESpider(scrapy.Spider):
         "orange": ("Carrefour Express", "Q2940190", None),
         "market": ("Carrefour Market", "Q2689639", Categories.SHOP_SUPERMARKET),
         "hyper": ("Carrefour", "Q217599", Categories.SHOP_SUPERMARKET),
-        "drive-2": ("Carrefour", "Q217599", {**Categories.SHOP_SUPERMARKET, "drive_through": "yes"}),
+        "drive-2": ("Carrefour", "Q217599", {**Categories.SHOP_SUPERMARKET.value, "drive_through": "yes"}),
     }
 
     def parse(self, response):
