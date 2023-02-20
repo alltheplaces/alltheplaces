@@ -1,7 +1,7 @@
 import scrapy
 
-from locations.categories import Extras, apply_yes_no
-from locations.hours import DAYS_SE, OpeningHours, day_range, sanitise_day
+from locations.categories import Categories, apply_category
+from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.user_agents import BROWSER_DEFAULT
 
@@ -34,5 +34,9 @@ class AbnAmroNLSpider(scrapy.Spider):
                     "opening_hours": oh,
                 }
             )
-            apply_yes_no(Extras.ATM, item, "CASHPOINT" in store.get("locationType"))
+            location_type = store.get("locationType")
+            if location_type == "CASHPOINT":
+                apply_category(Categories.ATM, item)
+            elif location_type == "OFFICE":
+                apply_category(Categories.BANK, item)
             yield item
