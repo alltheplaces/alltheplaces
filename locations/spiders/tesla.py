@@ -5,6 +5,7 @@ import scrapy
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 
 
 class TeslaSpider(scrapy.Spider):
@@ -15,9 +16,8 @@ class TeslaSpider(scrapy.Spider):
         "https://www.tesla.com/findus/list",
     ]
     download_delay = 0.5
-    custom_settings = {
-        "USER_AGENT": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.86 Safari/537.36",
-    }
+    is_playwright_spider = True
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
 
     def parse(self, response):
         # Only scrape stores and service centers. Pass through set to deduplicate the country URLs.
