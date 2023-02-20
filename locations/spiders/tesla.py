@@ -12,19 +12,16 @@ class TeslaSpider(scrapy.Spider):
     name = "tesla"
     item_attributes = {"brand": "Tesla", "brand_wikidata": "Q478214"}
     allowed_domains = ["www.tesla.com"]
-    start_urls = [
-        "https://www.tesla.com/findus",
-    ]
     is_playwright_spider = True
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
     download_delay = 0.5
     requires_proxy = True
 
-    def parse(self, response):
-        # Load the main page and then make requests using the API.
+    def start_requests(self):
         yield scrapy.Request(
             "https://www.tesla.com/cua-api/tesla-locations?translate=en_US&usetrt=true",
             callback=self.parse_json_subrequest,
+            meta={"http_proxy": "154.85.58.149:80"},
         )
 
     def parse_json_subrequest(self, response):
@@ -40,6 +37,7 @@ class TeslaSpider(scrapy.Spider):
             yield scrapy.Request(
                 url=f"https://www.tesla.com/cua-api/tesla-location?translate=en_US&usetrt=true&id={location.get('location_id')}",
                 callback=self.parse_location,
+                meta={"http_proxy": "154.85.58.149:80"},
             )
 
     def parse_location(self, response):
