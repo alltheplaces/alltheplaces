@@ -62,8 +62,8 @@ class LinkedDataParser:
                 geo = geo[0]
 
             if LinkedDataParser.check_type(geo.get("@type"), "GeoCoordinates"):
-                item["lat"] = LinkedDataParser.get_clean(geo, "latitude")
-                item["lon"] = LinkedDataParser.get_clean(geo, "longitude")
+                item["lat"] = LinkedDataParser.clean_float(LinkedDataParser.get_clean(geo, "latitude"))
+                item["lon"] = LinkedDataParser.clean_float(LinkedDataParser.get_clean(geo, "longitude"))
 
         item["name"] = LinkedDataParser.get_clean(ld, "name")
 
@@ -181,3 +181,15 @@ class LinkedDataParser:
     @staticmethod
     def clean_type(type: str) -> str:
         return type.lower().replace("http://", "").replace("https://", "").replace("schema.org/", "")
+
+    @staticmethod
+    def clean_float(value: str | float) -> float:
+        if isinstance(value, float):
+            return value
+        if isinstance(value, str):
+            try:
+                return float(value.replace(",", "."))
+            except:
+                pass
+        # Pass the bad data forward and let the validation pipeline complain
+        return value
