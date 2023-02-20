@@ -5,7 +5,7 @@ import scrapy
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
-from locations.items import Feature
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 
 
 class TeslaSpider(scrapy.Spider):
@@ -15,6 +15,8 @@ class TeslaSpider(scrapy.Spider):
     start_urls = [
         "https://www.tesla.com/cua-api/tesla-locations?translate=en_US&usetrt=true",
     ]
+    is_playwright_spider = True
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
     download_delay = 0.5
 
     def parse(self, response):
