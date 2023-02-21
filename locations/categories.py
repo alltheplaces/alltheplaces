@@ -80,6 +80,7 @@ class Categories(Enum):
 
     ATM = {"amenity": "atm"}
     BANK = {"amenity": "bank"}
+    BOAT_FUEL_STATION = {"waterway": "fuel"}
     BUREAU_DE_CHANGE = {"amenity": "bureau_de_change"}
     CAFE = {"amenity": "cafe"}
     CHARGING_STATION = {"amenity": "charging_station"}
@@ -191,6 +192,7 @@ class Extras(Enum):
     ATM = "atm"
     BABY_CHANGING_TABLE = "changing_table"
     CAR_WASH = "car_wash"
+    COMPRESSED_AIR = "compressed_air"
     OIL_CHANGE = "service:vehicle:oil_change"
     TOILETS = "toilets"
     WHEELCHAIR = "wheelchair"
