@@ -23,9 +23,7 @@ class SystembolagetSESpider(scrapy.Spider):
                 start, end = opening_hour.get("openFrom"), opening_hour.get("openTo")
                 if start == end:
                     continue
-                oh.add_range(
-                    day_of_week, start, end, time_format="%H:%M:%S"
-                )
+                oh.add_range(day_of_week, start, end, time_format="%H:%M:%S")
 
             yield Feature(
                 {
