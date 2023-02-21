@@ -33,7 +33,7 @@ class Q8ItaliaSpider(Spider):
 
             b = location["tipologie"][0]["tipologia"]
             if b == "TANGO":
-                continue  # TangoSpider
+                continue  # Throw away Tango POIs as duplicates data from TangoSpider
 
             if brand := self.BRANDS.get(b):
                 item.update(brand)
