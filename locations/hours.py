@@ -184,7 +184,7 @@ def day_range(start_day, end_day):
     start_ix = DAYS.index(start_day)
     end_ix = DAYS.index(end_day)
     if start_ix <= end_ix:
-        return DAYS[start_ix: end_ix + 1]
+        return DAYS[start_ix : end_ix + 1]
     else:
         return DAYS[start_ix:] + DAYS[: end_ix + 1]
 
@@ -260,8 +260,8 @@ class OpeningHours:
 
         opening_hours = ""
         if len(day_groups) == 1 and day_groups[0]["hours"] in (
-                "00:00-24:00",
-                "00:00-00:00",
+            "00:00-24:00",
+            "00:00-00:00",
         ):
             opening_hours = "24/7"
         else:
