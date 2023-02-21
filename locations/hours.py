@@ -126,6 +126,13 @@ DAYS_FR = {
     "Ve": "Fr",
     "Sa": "Sa",
     "Di": "Su",
+    "Lundi": "Mo",
+    "Mardi": "Tu",
+    "Mercredi": "We",
+    "Jeudi": "Th",
+    "Vendredi": "Fr",
+    "Samedi": "Sa",
+    "Dimanche": "Su",
 }
 DAYS_NL = {
     "Ma": "Mo",
@@ -135,6 +142,13 @@ DAYS_NL = {
     "Vr": "Fr",
     "Za": "Sa",
     "Zo": "Su",
+    "Maandag": "Mo",
+    "Dinsdag": "Tu",
+    "Woensdag": "We",
+    "Donderdag": "Th",
+    "Vrijdag": "Fr",
+    "Zaterdag": "Sa",
+    "Zondag": "Su",
 }
 DAYS_DK = {
     "Man": "Mo",
@@ -170,7 +184,7 @@ def day_range(start_day, end_day):
     start_ix = DAYS.index(start_day)
     end_ix = DAYS.index(end_day)
     if start_ix <= end_ix:
-        return DAYS[start_ix : end_ix + 1]
+        return DAYS[start_ix: end_ix + 1]
     else:
         return DAYS[start_ix:] + DAYS[: end_ix + 1]
 
@@ -246,8 +260,8 @@ class OpeningHours:
 
         opening_hours = ""
         if len(day_groups) == 1 and day_groups[0]["hours"] in (
-            "00:00-24:00",
-            "00:00-00:00",
+                "00:00-24:00",
+                "00:00-00:00",
         ):
             opening_hours = "24/7"
         else:
