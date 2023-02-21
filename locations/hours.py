@@ -126,6 +126,13 @@ DAYS_FR = {
     "Ve": "Fr",
     "Sa": "Sa",
     "Di": "Su",
+    "Lundi": "Mo",
+    "Mardi": "Tu",
+    "Mercredi": "We",
+    "Jeudi": "Th",
+    "Vendredi": "Fr",
+    "Samedi": "Sa",
+    "Dimanche": "Su",
 }
 DAYS_NL = {
     "Ma": "Mo",
@@ -135,6 +142,13 @@ DAYS_NL = {
     "Vr": "Fr",
     "Za": "Sa",
     "Zo": "Su",
+    "Maandag": "Mo",
+    "Dinsdag": "Tu",
+    "Woensdag": "We",
+    "Donderdag": "Th",
+    "Vrijdag": "Fr",
+    "Zaterdag": "Sa",
+    "Zondag": "Su",
 }
 DAYS_DK = {
     "Man": "Mo",
