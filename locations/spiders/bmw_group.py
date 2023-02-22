@@ -151,7 +151,7 @@ class BMWGroupSpider(scrapy.Spider):
     def start_requests(self):
         for country in self.available_countries:
             url = f"https://www.bmw.com/c2b-localsearch/services/api/v4/clients/BMWSTAGE2_DLO/DE/pois?brand=BMW_BMWI_BMWM&cached=off&language=en&lat=0&lng=0&maxResults=7000&showAll=true&unit=km&country={country}"
-        yield scrapy.Request(url=url, callback=self.parse)
+            yield scrapy.Request(url=url, callback=self.parse)
 
     def parse(self, response):
         response = response.json().get("data").get("pois")
