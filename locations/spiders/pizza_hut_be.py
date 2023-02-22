@@ -1,7 +1,6 @@
-import re
-
 import scrapy
-from locations.hours import OpeningHours, DAYS
+
+from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 
 
@@ -15,9 +14,8 @@ class PizzaHutBESpider(scrapy.Spider):
 
     def parse(self, response):
         for data in response.json():
-            yield scrapy.Request(f"https://api.pizzahut.be/stores/{data.get('id')}", callback=self.parse_store)        
-            
-            
+            yield scrapy.Request(f"https://api.pizzahut.be/stores/{data.get('id')}", callback=self.parse_store)
+
     def parse_store(self, response):
         oh = OpeningHours()
         store = response.json().get("store")
@@ -28,7 +26,14 @@ class PizzaHutBESpider(scrapy.Spider):
         address_details = store.get("address")
         properties = {
             "ref": store.get("code"),
-            "addr_full": " ".join([address_details.get("address1"), address_details.get("address2"), address_details.get("city"), address_details.get("zipCode")]),
+            "addr_full": " ".join(
+                [
+                    address_details.get("address1"),
+                    address_details.get("address2"),
+                    address_details.get("city"),
+                    address_details.get("zipCode"),
+                ]
+            ),
             "street_address": address_details.get("address2"),
             "postcode": address_details.get("zipCode"),
             "city": address_details.get("city"),
@@ -36,7 +41,7 @@ class PizzaHutBESpider(scrapy.Spider):
             "lat": address_details.get("coordinates").get("latitude"),
             "lon": address_details.get("coordinates").get("longitude"),
             "phone": store.get("contact").get("phone"),
-            "opening_hours": oh
+            "opening_hours": oh,
         }
 
         yield Feature(**properties)
