@@ -125,7 +125,6 @@ class MercedesBenzGroupSpider(scrapy.Spider):
             item["lon"] = address_details.get("longitude")
             item["opening_hours"] = oh
             if len(data.get("brands")) > 1:
-                print("HAS MORE THAN ONE BRAND", base_info.get("externalId"))
                 item["brand"] = self.brand_mapping.get("Mercedes-Benz").get("brand")
                 item["brand_wikidata"] = self.brand_mapping.get("Mercedes-Benz").get("brand_wikidata")
             else:
