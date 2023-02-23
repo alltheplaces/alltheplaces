@@ -26,7 +26,7 @@ class PizzaHutBESpider(scrapy.Spider):
         address_details = store.get("address")
         properties = {
             "ref": store.get("code"),
-            "addr_full": " ".join(
+            "addr_full": ", ".join(
                 [
                     address_details.get("address1"),
                     address_details.get("address2"),
