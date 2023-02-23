@@ -34,7 +34,7 @@ class PizzaHutBESpider(scrapy.Spider):
                     address_details.get("zipCode"),
                 ]
             ),
-            "street_address": address_details.get("address2"),
+            "street_address": ", ".join(filter(None, [address_details.get("address1"), address_details.get("address2")])),
             "postcode": address_details.get("zipCode"),
             "city": address_details.get("city"),
             "website": f"https://restaurants.pizzahut.be/fr/restaurant/{store.get('slug')}",
