@@ -10,5 +10,5 @@ class ScrewfixGBSpider(CrawlSpider, StructuredDataSpider):
     allowed_domains = ["www.screwfix.com"]
     download_delay = 0.1
     start_urls = ["https://www.screwfix.com/stores/all"]
-    rules = [Rule(LinkExtractor(allow=r"\/stores\/(\d+)\/.+$"), callback="parse_sd")]
+    rules = [Rule(LinkExtractor(allow=r"\/stores\/([A-Z][A-Z][0-9])\/.+$"), callback="parse_sd")]
     wanted_types = ["HardwareStore"]
