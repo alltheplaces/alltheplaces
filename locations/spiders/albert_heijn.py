@@ -9,10 +9,7 @@ class AlbertHeijnSpider(scrapy.Spider):
     name = "albert_heijn"
     item_attributes = {"brand": "Albert Heijn", "brand_wikidata": "Q1653985"}
     allowed_domains = ["www.ah.nl", "www.ah.be"]
-    start_urls = [
-        "https://www.ah.nl/gql",
-        "https://www.ah.be/gql"
-    ]
+    start_urls = ["https://www.ah.nl/gql", "https://www.ah.be/gql"]
 
     def get_page(self, gql_url, page_number):
         gql_query = """
@@ -102,15 +99,17 @@ fragment storeOpeningHour on StoreOpeningHour {
   __typename
 }
 """
-        query = [{
-            "operationName": "stores",
-            "query": gql_query,
-            "variables": {
-                "filter": {},
-                "size": 100,
-                "start": page_number * 100,
+        query = [
+            {
+                "operationName": "stores",
+                "query": gql_query,
+                "variables": {
+                    "filter": {},
+                    "size": 100,
+                    "start": page_number * 100,
+                },
             }
-        }]
+        ]
         headers = {
             "client-name": "alltheplaces",
             "client-version": "1",
@@ -131,7 +130,12 @@ fragment storeOpeningHour on StoreOpeningHour {
             oh = OpeningHours()
             for day in location["openingDays"]:
                 if day["dayName"].title() in DAYS_NL and day.get("openingHour"):
-                    oh.add_range(DAYS_NL[day["dayName"].title()], day["openingHour"]["openFrom"], day["openingHour"]["openUntil"], "%H:%M")
+                    oh.add_range(
+                        DAYS_NL[day["dayName"].title()],
+                        day["openingHour"]["openFrom"],
+                        day["openingHour"]["openUntil"],
+                        "%H:%M",
+                    )
             item["opening_hours"] = oh.as_opening_hours()
             yield item
         if response.json()[0]["data"]["stores"]["page"]["hasNextPage"] == True:
