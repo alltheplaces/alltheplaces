@@ -5,6 +5,7 @@ from locations.categories import Categories, Extras, apply_category, apply_yes_n
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
+
 class BankOfHawaiiUSSpider(scrapy.Spider):
     name = "bank_of_hawaii_us"
     item_attributes = {"brand": "Bank of Hawaii", "brand_wikidata": "Q4856124"}
