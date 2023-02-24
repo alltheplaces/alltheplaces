@@ -13,11 +13,11 @@ class VeritasBESpider(scrapy.Spider):
     item_attributes = {"brand": "Veritas"}
 
     def parse(self, response, **kwargs):
-        for stores_text in response.xpath('//script[@type="text/x-magento-init"]/text()'):
-            store_text = stores_text.get()
-            if "store-locator-search" in store_text:
-                stores_json = json.loads(store_text)
-                break
+        stores_json = json.loads(
+            response.xpath(
+                '//script[contains(text(), "store-locator-search") and @type="text/x-magento-init"]/text()'
+            ).get()
+        )
 
         for store in (
             stores_json.get("*")
