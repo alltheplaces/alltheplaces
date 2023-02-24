@@ -1,9 +1,11 @@
-from scrapy.linkextractors import LinkExtractor
-from scrapy.spiders import CrawlSpider, Rule
-from locations.linked_data_parser import LinkedDataParser
-
 import html
 import json
+
+from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule
+
+from locations.linked_data_parser import LinkedDataParser
+
 
 class ScrewfixGBSpider(CrawlSpider):
     name = "screwfix_gb"
@@ -21,5 +23,5 @@ class ScrewfixGBSpider(CrawlSpider):
             data_json = json.loads(data)
             if data_json:
                 item = LinkedDataParser.parse_ld(data_json)
-                item['website'] = response.url
+                item["website"] = response.url
                 yield item
