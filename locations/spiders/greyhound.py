@@ -4,7 +4,7 @@ import re
 import scrapy
 from scrapy.spiders import SitemapSpider
 
-from locations.categories import apply_category, Categories
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 from locations.user_agents import BROWSER_DEFAULT
@@ -44,8 +44,12 @@ class GreyhoundSpider(SitemapSpider):
         payload.get("filterFields")[1].update({"values": [station_id]})
 
         yield scrapy.Request(
-            url=url, method="POST", body=(json.dumps(payload)), headers=headers, callback=self.parse_station,
-            cb_kwargs={"ref": ref}
+            url=url,
+            method="POST",
+            body=(json.dumps(payload)),
+            headers=headers,
+            callback=self.parse_station,
+            cb_kwargs={"ref": ref},
         )
 
     def parse_station(self, response, ref):
@@ -58,13 +62,13 @@ class GreyhoundSpider(SitemapSpider):
         item["name"] = data.get("name")
         item["phone"] = data.get("extraInfo", {}).get("metaData", {}).get("phoneNumbers", {}).get("phoneNumber")
         item["ref"] = ref
-        item["website"] = f'https://www.greyhound.com/en-us/bus-station-{ref}'
+        item["website"] = f"https://www.greyhound.com/en-us/bus-station-{ref}"
         item["street_address"] = item.pop("street")
         item["city"] = data.get("extraInfo", {}).get("address", {}).get("cityName")
 
         oh = OpeningHours()
         for day, value in (
-                data.get("extraInfo", {}).get("metaData", {}).get("hours", {}).get("hoursBusStation", {}).items()
+            data.get("extraInfo", {}).get("metaData", {}).get("hours", {}).get("hoursBusStation", {}).items()
         ):
             if value:
                 oh.add_range(
