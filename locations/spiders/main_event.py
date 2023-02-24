@@ -1,3 +1,5 @@
+import re
+
 from scrapy.spiders import SitemapSpider
 
 from locations.structured_data_spider import StructuredDataSpider
@@ -14,5 +16,6 @@ class MainEventSpider(SitemapSpider, StructuredDataSpider):
     sitemap_rules = [(r"\/locations\/", "parse_sd")]
 
     def post_process_item(self, item, response, ld_data, **kwargs):
-        item["ref"] = item["name"]
+        item["ref"] = item["website"]
+
         yield item
