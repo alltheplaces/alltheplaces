@@ -19,9 +19,10 @@ class BankOfHawaiiUSSpider(scrapy.Spider):
             item["lon"] = location["geocode"]["longitude"]
             oh = OpeningHours()
             for day_name, day in location["operationalHours"]["hours"].items():
-                if day["isClosed"] == True:
+                if day["isClosed"]:
                     continue
-                oh.add_range(day_name.title(), day["hours"][0]["openTime"], day["hours"][0]["closeTime"], "%H:%M:%S")
+                for hours_range in day["hours"]:
+                    oh.add_range(day_name.title(), hours_range["openTime"], hours_range["closeTime"], "%H:%M:%S")
             # Branch without an ATM
             if "Branch" in location["type"] and "ATM" not in location["type"]:
                 apply_category(Categories.BANK, item)
