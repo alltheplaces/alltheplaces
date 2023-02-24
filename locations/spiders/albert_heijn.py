@@ -138,5 +138,5 @@ fragment storeOpeningHour on StoreOpeningHour {
                     )
             item["opening_hours"] = oh.as_opening_hours()
             yield item
-        if response.json()[0]["data"]["stores"]["page"]["hasNextPage"] == True:
+        if response.json()[0]["data"]["stores"]["page"]["hasNextPage"]:
             yield from self.get_page(response.url, response.meta["page_number"] + 1)
