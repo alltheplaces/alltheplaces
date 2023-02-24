@@ -9,8 +9,7 @@ from locations.items import Feature
 class VeritasBESpider(scrapy.Spider):
     name = "veritas_be"
     start_urls = ["https://www.veritas.be/fr_be/stores"]
-
-    item_attributes = {"brand": "Veritas"}
+    item_attributes = {"brand": "Veritas", "brand_wikidata": "Q56239194"}
 
     def parse(self, response, **kwargs):
         stores_json = json.loads(
