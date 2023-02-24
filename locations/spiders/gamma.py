@@ -8,13 +8,15 @@ class GammaSpider(scrapy.Spider):
     name = "gamma"
     item_attributes = {"brand": "Gamma", "brand_wikidata": "Q2294120"}
     start_urls = [
-        "https://api.gamma.nl/store/2/stores/closest/location?query=Amsterdam&rangeInKm=999&limit=9000",
-        "https://api.gamma.be/store/2/stores/closest/location?query=Bruxelle&rangeInKm=999&limit=9000",
+        "https://api.gamma.nl/store/2/stores",
+        "https://api.gamma.be/store/2/stores",
     ]
 
     def parse(self, response):
-        for data in response.json():
-            store = data.get("store")
+        for store in response.json():
+            if "webshop" in store["slug"]:
+                continue
+
             address_details = store.get("address")
             coordinates = store.get("geoLocation")
             country_code = address_details.get("country")
@@ -43,10 +45,9 @@ class GammaSpider(scrapy.Spider):
                     "phone": address_details.get("phoneNumber"),
                     "postcode": address_details.get("postalCode"),
                     "city": address_details.get("city"),
-                    "addr_full": " ".join(
+                    "addr_full": ", ".join(
                         [
-                            address_details.get("streetNumber"),
-                            address_details.get("street"),
+                            " ".join([address_details.get("streetNumber"), address_details.get("street")]),
                             address_details.get("city"),
                             address_details.get("postalCode"),
                         ]
