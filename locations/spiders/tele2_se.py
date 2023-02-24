@@ -13,11 +13,11 @@ class Tele2SESpider(scrapy.Spider):
     item_attributes = {"brand": "Tele2", "brand_wikidata": "Q309865"}
 
     def parse(self, response, **kwargs):
-        for stores_text in response.xpath("//script/text()"):
-            store_text = stores_text.get()
-            if "__INITIAL_DATA__" in store_text:
-                stores_json = json.loads(store_text.lstrip("window.__INITIAL_DATA__ = "))
-                break
+        stores_json = json.loads(
+            response.xpath("//script[contains(text(), '__INITIAL_DATA__')]/text()")
+            .get()
+            .lstrip("window.__INITIAL_DATA__ = ")
+        )
         for store in stores_json.get("state").get("entities").get("store").get("values").values():
             opening_hours = OpeningHours()
             website = store.get("slug")
