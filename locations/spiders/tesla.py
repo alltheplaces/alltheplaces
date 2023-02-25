@@ -40,6 +40,8 @@ class TeslaSpider(scrapy.Spider):
 
     def parse_location(self, response):
         location_data = response.json()
+        if isinstance(location_data, list):
+            return
         feature = DictParser.parse(location_data)
         feature["ref"] = location_data.get("location_id")
         feature["street_address"] = location_data["address_line_1"].replace("<br />", ", ")
