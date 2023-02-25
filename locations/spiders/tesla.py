@@ -53,7 +53,7 @@ class TeslaSpider(scrapy.Spider):
             feature["brand"] = "Tesla Supercharger"
 
             # Capture capacity of the supercharger
-            regex = r"(\d+) Superchargers, available 24\/7, up to (\d+)kW(<br />CCS Compatibility)?"
+            regex = r"(\d+) Superchargers, available 24\/7, up to (\d+kW)(<br />CCS Compatibility)?"
             regex_matches = re.findall(regex, location_data.get("chargers"))
             if regex_matches:
                 for match in regex_matches:
