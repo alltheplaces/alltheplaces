@@ -53,12 +53,18 @@ class TeslaSpider(scrapy.Spider):
             feature["brand"] = "Tesla Supercharger"
 
             # Capture capacity of the supercharger
-            regex = r"<p><strong>Charging<\/strong><br \/>(\d+) Superchargers, available 24\/7, up to (\d+)kW<\/p>"
+            regex = r"<p><strong>Charging<\/strong><br \/>(\d+) Superchargers, available 24\/7, up to (\d+)kW(<br />CCS Compatibility)?<\/p>"
             regex_matches = re.findall(regex, feature.get("chargers"))
             if regex_matches:
-                capacity, output = regex_matches[0]
-                feature["extras"]["socket:tesla_supercharger"] = capacity
-                feature["extras"]["socket:tesla_supercharger:output"] = output
+                capacity, output, ccs_compat = regex_matches[0]
+                
+                if ccs_compat:
+                    feature["extras"]["socket:tesla_supercharger_ccs"] = capacity
+                    feature["extras"]["socket:tesla_supercharger_ccs:output"] = output
+                else:
+                    feature["extras"]["socket:tesla_supercharger"] = capacity
+                    feature["extras"]["socket:tesla_supercharger:output"] = output
+                    
 
         if "tesla_center_delivery" in location_data.get("location_type"):
             apply_category(Categories.SHOP_CAR, feature)
