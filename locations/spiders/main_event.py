@@ -17,5 +17,9 @@ class MainEventSpider(SitemapSpider, StructuredDataSpider):
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["ref"] = item["website"]
+        latitude = re.search(r'\\"latitude\\":(-?\d+\.\d+)', response.text).group(1)
+        longitude = re.search(r'\\"longitude\\":(-?\d+\.\d+)', response.text).group(1)
+        item["lat"] = float(latitude)
+        item["lon"] = float(longitude)
 
         yield item
