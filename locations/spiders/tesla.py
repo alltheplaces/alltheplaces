@@ -45,11 +45,20 @@ class TeslaSpider(scrapy.Spider):
         feature = DictParser.parse(location_data)
         feature["ref"] = location_data.get("location_id")
         feature["street_address"] = location_data["address_line_1"].replace("<br />", ", ")
+        feature["state"] = location_data.get("province_state") or None
 
         if "supercharger" in location_data.get("location_type"):
             apply_category(Categories.CHARGING_STATION, feature)
             feature["brand_wikidata"] = "Q17089620"
             feature["brand"] = "Tesla Supercharger"
+
+            # Capture capacity of the supercharger
+            regex = r"<p><strong>Charging<\/strong><br \/>(\d+) Superchargers, available 24\/7, up to (\d+)kW<\/p>"
+            regex_matches = re.findall(regex, feature.get("chargers"))
+            if regex_matches:
+                capacity, output = regex_matches[0]
+                feature["extras"]["socket:tesla_supercharger"] = capacity
+                feature["extras"]["socket:tesla_supercharger:output"] = output
 
         if "tesla_center_delivery" in location_data.get("location_type"):
             apply_category(Categories.SHOP_CAR, feature)
