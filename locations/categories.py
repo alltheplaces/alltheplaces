@@ -193,6 +193,7 @@ class Extras(Enum):
     BABY_CHANGING_TABLE = "changing_table"
     CAR_WASH = "car_wash"
     COMPRESSED_AIR = "compressed_air"
+    DRIVE_THROUGH = "drive_through"
     OIL_CHANGE = "service:vehicle:oil_change"
     TOILETS = "toilets"
     WHEELCHAIR = "wheelchair"
