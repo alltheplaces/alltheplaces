@@ -54,7 +54,7 @@ class TeslaSpider(scrapy.Spider):
 
             # Capture capacity of the supercharger
             regex = r"<p><strong>Charging<\/strong><br \/>(\d+) Superchargers, available 24\/7, up to (\d+)kW(<br />CCS Compatibility)?<\/p>"
-            regex_matches = re.findall(regex, feature.get("chargers"))
+            regex_matches = re.findall(regex, location_data.get("chargers"))
             if regex_matches:
                 capacity, output, ccs_compat = regex_matches[0]
 
