@@ -11,7 +11,12 @@ class ThreeGB(SitemapSpider, StructuredDataSpider):
         "country": "GB",
     }
     sitemap_urls = ["https://locator.three.co.uk/sitemap.xml"]
-    sitemap_rules = [(r"^https:\/\/locator\.three\.co\.uk\/(london|london-&-ni|midlands|north|south)\/([-a-z]+)\/([-0-9a-z']+)$", "parse_sd")]
+    sitemap_rules = [
+        (
+            r"^https:\/\/locator\.three\.co\.uk\/(london|london-&-ni|midlands|north|south)\/([-a-z]+)\/([-0-9a-z']+)$",
+            "parse_sd",
+        )
+    ]
     wanted_types = ["MobilePhoneStore"]
 
     def post_process_item(self, item, response, ld_data, **kwargs):
