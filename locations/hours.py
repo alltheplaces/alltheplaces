@@ -184,6 +184,7 @@ NAMED_DAY_RANGES_EN = {
     "Weekends": ["Sa", "Su"],
 }
 
+
 def day_range(start_day, end_day):
     start_ix = DAYS.index(start_day)
     end_ix = DAYS.index(end_day)
@@ -333,7 +334,7 @@ class OpeningHours:
                             if d := sanitise_day(day):
                                 self.add_range(d, start_time, end_time, time_format)
 
-    def add_ranges_from_string(self, ranges_string, days = DAYS_EN, named_day_ranges = NAMED_DAY_RANGES_EN):
+    def add_ranges_from_string(self, ranges_string, days=DAYS_EN, named_day_ranges=NAMED_DAY_RANGES_EN):
         # Build two regular expressions--one for extracting 12h
         # opening hour information, and one for extracting 24h
         # opening hour information from a supplied string.
@@ -346,7 +347,7 @@ class OpeningHours:
         for i in range(0, 6, 1):
             start_day_string = r"(?<!\w)(" + r"|".join(day_synonyms[DAYS[i]]) + r")(?!\w)"
             end_days = []
-            for j in range(i+1, 7, 1):
+            for j in range(i + 1, 7, 1):
                 end_days.append("|".join(day_synonyms[DAYS[j]]))
             end_days_string = r"(?<!\w)(" + r"|".join(end_days) + r")(?!\w)"
             days_regex_parts.append(start_day_string + delimiter_regex + end_days_string)
