@@ -343,3 +343,21 @@ def test_ld_parse_time_format():
         "%H:%M:%S",
     )
     assert o.as_opening_hours() == "Sa 12:00-14:00"
+
+def test_add_ranges_from_string():
+    o = OpeningHours()
+    o.add_ranges_from_string("Monday-Wednesday: 5pm - 7pm")
+    o.add_ranges_from_string("Monday-Wednesday 08:00-14:00")
+    o.add_ranges_from_string("Monday to Tuesday: 15:00:01 to 16:35")
+    o.add_ranges_from_string("Thurs 2PM-6:30PM")
+    o.add_ranges_from_string(" Fri    9am  -  11am ")
+    o.add_ranges_from_string("Weekends: 8:00 AM to 6:00 PM")
+    assert o.as_opening_hours() == "Mo-Tu 08:00-14:00,15:00-16:35,17:00-19:00; We 08:00-14:00,17:00-19:00; Th 14:00-18:30; Fr 09:00-11:00; Sa-Su 08:00-18:00"
+
+    o = OpeningHours()
+    o.add_ranges_from_string("Monday to Thursday 7am to 7pm, Friday 12am to 11:59pm, Weekends CLOSED")
+    assert o.as_opening_hours() == "Mo-Th 07:00-19:00; Fr 00:00-24:00"
+
+    o = OpeningHours()
+    o.add_ranges_from_string("Monday - Sunday: 00:00 - 23:59")
+    assert o.as_opening_hours() == "24/7"

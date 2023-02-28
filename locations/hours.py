@@ -179,6 +179,10 @@ DAYS_NO = {
     "Søndag": "Su",
 }
 
+NAMED_DAY_RANGES_EN = {
+    "Weekdays": ["Mo", "Tu", "We", "Th", "Fr"],
+    "Weekends": ["Sa", "Su"],
+}
 
 def day_range(start_day, end_day):
     start_ix = DAYS.index(start_day)
@@ -328,3 +332,79 @@ class OpeningHours:
                         for day in days.split(","):
                             if d := sanitise_day(day):
                                 self.add_range(d, start_time, end_time, time_format)
+
+    def add_ranges_from_string(self, ranges_string, days = DAYS_EN, named_day_ranges = NAMED_DAY_RANGES_EN):
+        # Build two regular expressions--one for extracting 12h
+        # opening hour information, and one for extracting 24h
+        # opening hour information from a supplied string.
+        delimiter_regex = r"\s*(?:-|TO)\s*"
+        days_regex = r"(?:"
+        day_synonyms = defaultdict(list)
+        for synonym, day in sorted(days.items()):
+            day_synonyms[day].append(re.escape(synonym))
+        days_regex_parts = []
+        for i in range(0, 6, 1):
+            start_day_string = r"(?<!\w)(" + r"|".join(day_synonyms[DAYS[i]]) + r")(?!\w)"
+            end_days = []
+            for j in range(i+1, 7, 1):
+                end_days.append("|".join(day_synonyms[DAYS[j]]))
+            end_days_string = r"(?<!\w)(" + r"|".join(end_days) + r")(?!\w)"
+            days_regex_parts.append(start_day_string + delimiter_regex + end_days_string)
+        named_day_range_regex = r"(?<!\w)(" + r"|".join(named_day_ranges.keys()) + r")(?!\w)"
+        days_regex_parts.append(named_day_range_regex)
+        single_days_regex = r"(?<!\w)(" + r"|".join(days.keys()) + r")(?!\w)"
+        days_regex_parts.append(single_days_regex)
+        days_regex = days_regex + r"|".join(days_regex_parts) + r")"
+        time_regex_12h = r"(?<!\d)(0?[0-9]|1[012])(?:(?:[:\.]([0-5][0-9]))(?:[:\.][0-5][0-9])?)?\s*([AP]M)?(?!\d)"
+        time_regex_24h = r"(?<!\d)(0?[0-9]|1[0-9]|2[0-4])(?:[:\.]([0-5][0-9]))(?:[:\.][0-5][0-9])?(?!\d)"
+        full_regex_12h = days_regex + r"\W+" + time_regex_12h + delimiter_regex + time_regex_12h
+        full_regex_24h = days_regex + r"\W+" + time_regex_24h + delimiter_regex + time_regex_24h
+
+        # Execute both regular expressions.
+        results_12h = re.findall(full_regex_12h, ranges_string, re.IGNORECASE)
+        results_24h = re.findall(full_regex_24h, ranges_string, re.IGNORECASE)
+
+        # Normalise results to 24h time.
+        results_normalised = []
+        if len(results_12h) > 0:
+            # Parse 12h opening hour information.
+            for result in results_12h:
+                time_start = result[-6] + ":"
+                if result[-5]:
+                    time_start = time_start + result[-5]
+                else:
+                    time_start = time_start + "00"
+                time_start = time_start + result[-4].upper()
+                time_start_24h = time.strptime(time_start, "%I:%M%p")
+                time_start_24h = time.strftime("%H:%M", time_start_24h)
+                time_end = result[-3] + ":"
+                if result[-2]:
+                    time_end = time_end + result[-2]
+                else:
+                    time_end = time_end + "00"
+                time_end = time_end + result[-1].upper()
+                time_end_24h = time.strptime(time_end, "%I:%M%p")
+                time_end_24h = time.strftime("%H:%M", time_end_24h)
+                start_and_end_days = list(filter(None, result[:-6]))
+                results_normalised.append([start_and_end_days, time_start_24h, time_end_24h])
+        if len(results_24h) > 0:
+            # Parse 24h opening hour information.
+            for result in results_24h:
+                time_start = result[-4] + ":" + result[-3]
+                time_end = result[-2] + ":" + result[-1]
+                start_and_end_days = list(filter(None, result[:-4]))
+                results_normalised.append([start_and_end_days, time_start, time_end])
+
+        # Add ranges to OpeningHours object from normalised results.
+        for result in results_normalised:
+            if len(result[0]) == 1:
+                if result[0][0] in named_day_ranges.keys():
+                    day_list = named_day_ranges[result[0][0]]
+                else:
+                    day_list = [days[result[0][0]]]
+            else:
+                start_day = days[result[0][0]]
+                end_day = days[result[0][1]]
+                day_list = day_range(start_day, end_day)
+            for day in day_list:
+                self.add_range(day, result[1], result[2])
