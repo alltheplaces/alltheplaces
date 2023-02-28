@@ -15,7 +15,7 @@ class TrueValueSpider(CrawlSpider, StructuredDataSpider):
     rules = [
         Rule(LinkExtractor(allow=r"https://stores.truevalue.com/[a-z]{2}/$"), follow=True),
         Rule(LinkExtractor(allow=r"https://stores.truevalue.com/[a-z]{2}/[a-z\-]+/$"), follow=True),
-        Rule(LinkExtractor(allow=r"https://stores.truevalue.com/[a-z]{2}/[a-z\-]+/[0-9]+/$"), callback="parse_sd")
+        Rule(LinkExtractor(allow=r"https://stores.truevalue.com/[a-z]{2}/[a-z\-]+/[0-9]+/$"), callback="parse_sd"),
     ]
     json_parser = "json5"
 
