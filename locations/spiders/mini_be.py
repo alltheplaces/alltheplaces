@@ -19,7 +19,6 @@ class MiniSpider(scrapy.Spider):
     ]
 
     def parse(self, response):
-
         if "xml" in str(response.headers.get("content-type")):
             data = xmltodict.parse(response.body)
             pois = data.get("result", {}).get("data", {}).get("pois", {}).get("poi")
