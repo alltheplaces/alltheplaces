@@ -42,7 +42,7 @@ class PizzaHutBESpider(scrapy.Spider):
             "name": store["name"],
             "postcode": address_details.get("zipCode"),
             "city": address_details.get("city"),
-            "website": f"https://restaurants.pizzahut.be/fr/restaurant/{store.get('slug')}",
+            "website": store.get("infoUrl"),
             "lat": address_details.get("coordinates").get("latitude"),
             "lon": address_details.get("coordinates").get("longitude"),
             "phone": store.get("contact").get("phone").replace("/", ""),
