@@ -180,6 +180,7 @@ DAYS_NO = {
 }
 
 NAMED_DAY_RANGES_EN = {
+    "Daily": ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"],
     "Weekdays": ["Mo", "Tu", "We", "Th", "Fr"],
     "Weekends": ["Sa", "Su"],
 }
@@ -340,10 +341,17 @@ class OpeningHours:
         # opening hour information from a supplied string.
         delimiter_regex = r"\s*(?:-|TO)\s*"
         days_regex = r"(?:"
+        days_regex_parts = []
+
+        # For each day of the week, create a list of synonyms.
         day_synonyms = defaultdict(list)
         for synonym, day in sorted(days.items()):
             day_synonyms[day].append(re.escape(synonym))
-        days_regex_parts = []
+
+        # Assuming a week starts on Monday (most opening hours are
+        # listed as such due to business vs. weekend hours), create
+        # a regular expression of all day ranges possible in the
+        # week starting Monday (or later).
         for i in range(0, 6, 1):
             start_day_string = r"(?<!\w)(" + r"|".join(day_synonyms[DAYS[i]]) + r")(?!\w)"
             end_days = []
@@ -351,13 +359,31 @@ class OpeningHours:
                 end_days.append("|".join(day_synonyms[DAYS[j]]))
             end_days_string = r"(?<!\w)(" + r"|".join(end_days) + r")(?!\w)"
             days_regex_parts.append(start_day_string + delimiter_regex + end_days_string)
+
+        # Some sources will have a week start on Sunday and will
+        # express day ranges as Sunday to Thursday (for example).
+        # Create a regular expression to capture these day ranges
+        # that commence on Sunday.
+        start_day_string = r"(?<!\w)(" + r"|".join(day_synonyms["Su"]) + r")(?!\w)"
+        end_days = []
+        for j in range(0, 6, 1):
+            end_days.append("|".join(day_synonyms[DAYS[j]]))
+        end_days_string = r"(?<!\w)(" + r"|".join(end_days) + r")(?!\w)"
+        days_regex_parts.append(start_day_string + delimiter_regex + end_days_string)
+
+        # Create a regular expression for named day ranges.
         named_day_range_regex = r"(?<!\w)(" + r"|".join(named_day_ranges.keys()) + r")(?!\w)"
         days_regex_parts.append(named_day_range_regex)
+
+        # Create a regular expression for single days of the week.
         single_days_regex = r"(?<!\w)(" + r"|".join(days.keys()) + r")(?!\w)"
         days_regex_parts.append(single_days_regex)
+
+        # Compile regular expression parts together to create the
+        # two regular expressions.
         days_regex = days_regex + r"|".join(days_regex_parts) + r")"
-        time_regex_12h = r"(?<!\d)(0?[0-9]|1[012])(?:(?:[:\.]([0-5][0-9]))(?:[:\.][0-5][0-9])?)?\s*([AP]M)?(?!\d)"
-        time_regex_24h = r"(?<!\d)(0?[0-9]|1[0-9]|2[0-4])(?:[:\.]([0-5][0-9]))(?:[:\.][0-5][0-9])?(?!\d)"
+        time_regex_12h = r"(?<!\d)(0?[0-9]|1[012])(?:(?:[:\.]?([0-5][0-9]))(?:[:\.]?[0-5][0-9])?)?\s*([AP]M)?(?!\d)"
+        time_regex_24h = r"(?<!\d)(0?[0-9]|1[0-9]|2[0-4])(?:[:\.]?([0-5][0-9]))(?:[:\.]?[0-5][0-9])?(?!\d)"
         full_regex_12h = days_regex + r"\W+" + time_regex_12h + delimiter_regex + time_regex_12h
         full_regex_24h = days_regex + r"\W+" + time_regex_24h + delimiter_regex + time_regex_24h
 
