@@ -201,6 +201,7 @@ class Extras(Enum):
     TAKEAWAY = "takeaway"
     DELIVERY = "delivery"
 
+
 class PaymentMethods(Enum):
     AMERICAN_EXPRESS = "payment:american_express"
     APPLE_PAY = "payment:apple_pay"
