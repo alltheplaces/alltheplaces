@@ -1,94 +1,43 @@
 import scrapy
 
+from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
-from locations.items import Feature
 
 
 class OlliesBargainOutletSpider(scrapy.Spider):
     name = "ollies_bargain_outlet"
     allowed_domains = ["ollies.us"]
     item_attributes = {"brand": "Ollie's Bargain Outlet", "brand_wikidata": "Q7088304"}
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def start_requests(self):
         url = "https://www.ollies.us/admin/locations/ajax.aspx"
+        payload = "Page=0&PageSize=1&StartIndex=0&EndIndex=5&Longitude=-74.006065&Latitude=40.712792&City=&State=&F=GetNearestLocations&RangeInMiles=5000"
+        headers = {"content-type": "application/x-www-form-urlencoded; charset=UTF-8"}
 
-        headers = {
-            "origin": "https://www.ollies.us",
-            "Referer": "https://www.ollies.us/locations/",
-        }
+        yield scrapy.Request(url=url, method="POST", headers=headers, body=payload, callback=self.get_all_locations)
 
-        for n in range(1, 85):
-            formdata = {
-                "Page": str(n),
-                "PageSize": "5",
-                "StartIndex": "0",
-                "EndIndex": "5",
-                "Longitude": "-97.708694",
-                "Latitude": "30.377566",
-                "City": "",
-                "State": "",
-                "F": "GetNearestLocations",
-                "RangeInMiles": "5000",
-            }
+    def get_all_locations(self, response):
+        number_locations = response.json().get("LocationsCount")
+        url = "https://www.ollies.us/admin/locations/ajax.aspx"
+        payload = "Page=0&PageSize={}&StartIndex=0&EndIndex=5&Longitude=-74.006065&Latitude=40.712792&City=&State=&F=GetNearestLocations&RangeInMiles=5000"
+        headers = {"content-type": "application/x-www-form-urlencoded; charset=UTF-8"}
 
-            yield scrapy.http.FormRequest(url, self.parse, method="POST", headers=headers, formdata=formdata)
-
-    def parse_hours(self, hours):
-        opening_hours = OpeningHours()
-        other_days = ["Mo", "Tu", "We", "Th", "Fr", "Sa"]
-
-        hours_list = hours.split("<br />")
-        hours_list.pop()
-
-        if "Coming soon!" not in hours_list:
-            for h in hours_list:
-                d, time = h.split(": ")
-                start_time, end_time = time.split("-")
-
-                if d == "Sunday":
-                    day = "Su"
-                    opening_hours.add_range(
-                        day=day,
-                        open_time=start_time,
-                        close_time=end_time,
-                        time_format="%H%p",
-                    )
-
-                if d == "Monday-Saturday":
-                    for day in other_days:
-                        opening_hours.add_range(
-                            day=day,
-                            open_time=start_time,
-                            close_time=end_time,
-                            time_format="%H%p",
-                        )
-
-        return opening_hours.as_opening_hours()
+        yield scrapy.Request(
+            url=url, method="POST", headers=headers, body=payload.format(number_locations), callback=self.parse
+        )
 
     def parse(self, response):
-        data = response.json()
+        for data in response.json().get("Locations"):
+            item = DictParser.parse(data)
+            item["ref"] = data.get("StoreCode")
+            item["country"] = "US"
+            item["website"] = f'https://www.{self.allowed_domains[0]}{data.get("CustomUrl")}'
 
-        for store in data["Locations"]:
-            properties = {
-                "ref": store["StoreCode"],
-                "name": store["Name"],
-                "addr_full": store["Address1"],
-                "city": store["City"],
-                "state": store["State"],
-                "postcode": store["Zip"],
-                "country": "US",
-                "lat": store["Latitude"],
-                "lon": store["Longitude"],
-                "phone": store["Phone"],
-                "website": "https://www.ollies.us" + store["CustomUrl"],
-            }
+            openHours = data.get("OpenHours").split("<br />")
+            openHourFiltered = [row.replace(":", "") for row in openHours if "-" in row]
+            oh = OpeningHours()
+            oh.from_linked_data({"openingHours": openHourFiltered}, "%I%p")
+            item["opening_hours"] = oh.as_opening_hours()
 
-            try:
-                hours = self.parse_hours(store["OpenHours"])
-
-                if hours:
-                    properties["opening_hours"] = hours
-            except:
-                pass
-
-            yield Feature(**properties)
+            yield item
