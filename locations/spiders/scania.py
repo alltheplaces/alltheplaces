@@ -104,7 +104,6 @@ class ScaniaSpider(scrapy.Spider):
                             oh.add_range(
                                 day=sanitise_day(day), open_time=hours.get("timeFrom"), close_time=hours.get("timeTo")
                             )
-            item = DictParser.parse(store)
             address_details = store.get("visitingAddress")
             postal_address = address_details.get("postalAddress").get("physicalAddress")
             legal_address = store.get("legalAddress").get("postalAddress").get("physicalAddress")
@@ -130,6 +129,9 @@ class ScaniaSpider(scrapy.Spider):
                     "email": address_details.get("electronicMailAddress"),
                     "postcode": postal_address.get("postalCode"),
                     "city": postal_address.get("city").get("value"),
+                    "state": postal_address.get("countryRegion").get("value")
+                    if postal_address.get("countryRegion")
+                    else None,
                     "lat": lat,
                     "lon": lon,
                     "opening_hours": oh,
