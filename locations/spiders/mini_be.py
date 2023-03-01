@@ -1,4 +1,5 @@
 import scrapy
+import xmltodict
 
 from locations.items import Feature
 from locations.user_agents import BROWSER_DEFAULT
@@ -12,12 +13,18 @@ class MiniSpider(scrapy.Spider):
     }
     allowed_domains = ["mini.be"]
     user_agent = BROWSER_DEFAULT
+    custom_settings = {"ROBOTSTXT_OBEY": False}
     start_urls = [
         "https://www.mini.be/c2b-localsearch/services/api/v4/clients/BMWSTAGE2_DLO/BE/pois?brand=MINI&cached=off&category=MI&country=BE&language=nl&lat=0&lng=0&maxResults=700&showAll=true&unit=km"
     ]
 
     def parse(self, response):
-        pois = response.json().get("data", {}).get("pois")
+
+        if "xml" in str(response.headers.get("content-type")):
+            data = xmltodict.parse(response.body)
+            pois = data.get("result", {}).get("data", {}).get("pois", {}).get("poi")
+        else:
+            pois = response.json().get("status", {}).get("data", {}).get("pois")
         for row in pois:
             item = Feature()
             item["ref"] = row.get("key")
