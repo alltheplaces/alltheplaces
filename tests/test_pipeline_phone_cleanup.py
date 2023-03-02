@@ -26,6 +26,11 @@ def test_handle():
     pipeline.process_item(item, spider)
     assert item.get("phone") == "+1 248-446-8015"
 
+    # Belgium
+    item, pipeline, spider = get_objects("02/633.17.59", "BE")
+    pipeline.process_item(item, spider)
+    assert item.get("phone") == "+32 2 633 17 59"
+
     for key in ["fax", "operator:phone", "operator:fax"]:
         assert pipeline.is_phone_key(key)
         item, pipeline, spider = get_objects(None, "TR")
