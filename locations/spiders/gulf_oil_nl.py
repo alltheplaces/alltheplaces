@@ -19,15 +19,19 @@ class GulfOilNLSpider(scrapy.Spider):
 
     def parse_store(self, response):
         store_info = response.json().get("info")
+
         oh = OpeningHours()
         for key, value in store_info.items():
             if "from" in key:
                 day = key.split("_")[1]
-                open_time = value
-                close_time = store_info.get(f"open_{day}_till")
+                open_time = value.strip()
+                close_time = store_info.get(f"open_{day}_till").strip()
+
                 if not open_time or not close_time:
                     continue
+
                 oh.add_range(day=sanitise_day(day), open_time=open_time, close_time=close_time, time_format="%H:%M")
+
         yield Feature(
             {
                 "ref": store_info.get("id"),
