@@ -2,6 +2,7 @@ import json
 
 import scrapy
 from scrapy.selector import Selector
+
 from locations.items import Feature
 from locations.user_agents import BROWSER_DEFAULT
 
