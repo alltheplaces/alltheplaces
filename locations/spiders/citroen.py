@@ -1,14 +1,18 @@
+import re
+
 import scrapy
 
-from locations.hours import DAYS_FR, DAYS_NL, OpeningHours, sanitise_day
+from locations.hours import DAYS_FR, DAYS_NL, DAYS_SE, OpeningHours, sanitise_day
 from locations.items import Feature
 
 
-class CitroenBESpider(scrapy.Spider):
-    name = "citroen_be"
+class CitroenSpider(scrapy.Spider):
+    name = "citroen"
     item_attributes = {"brand": "Citroen", "brand_wikidata": "Q6746"}
     start_urls = [
-        "https://www.citroen.be/apps/atomic/DealersServlet?distance=30000&latitude=50.84439&longitude=4.35608&maxResults=1000&orderResults=false&path=L2NvbnRlbnQvY2l0cm9lbi93b3JsZHdpZGUvYmVsZ2l1bS9mcl9mcg%3D%3D&searchType=latlong"
+        "https://www.citroen.be/apps/atomic/DealersServlet?distance=30000&latitude=50.84439&longitude=4.35608&maxResults=1000&orderResults=false&path=L2NvbnRlbnQvY2l0cm9lbi93b3JsZHdpZGUvYmVsZ2l1bS9mcl9mcg%3D%3D&searchType=latlong",
+        "https://www.citroen.nl/apps/atomic/DealersServlet?distance=300&latitude=52.36993&longitude=4.90787&maxResults=40&orderResults=false&path=L2NvbnRlbnQvY2l0cm9lbi93b3JsZHdpZGUvbmV0aGVybGFuZHMvbmw=&searchType=latlong",
+        "https://www.citroen.se/apps/atomic/DealersServlet?distance=300&latitude=59.33257&longitude=18.06682&maxResults=40&orderResults=false&path=L2NvbnRlbnQvY2l0cm9lbi93b3JsZHdpZGUvc3dlZGVuL3Nl&searchType=latlong",
     ]
 
     def parse(self, response, **kwargs):
@@ -23,7 +27,7 @@ class CitroenBESpider(scrapy.Spider):
                     if ":" not in day or "gesloten" in day.lower():
                         continue
                     day, hours = day.split(":", maxsplit=1)
-                    day = sanitise_day(day, {**DAYS_NL, **DAYS_FR})
+                    day = sanitise_day(day, {**DAYS_NL, **DAYS_FR, **DAYS_SE})
                     for hours in hours.split(" "):
                         if "-" in hours:
                             start, end = hours.split("-", maxsplit=1)
@@ -36,6 +40,7 @@ class CitroenBESpider(scrapy.Spider):
                     "street_address": address_details.get("addressLine1"),
                     "postcode": address_details.get("postalCode"),
                     "city": address_details.get("cityName"),
+                    "country": re.findall(r"\.[a-z]{2}/", response.url)[0][1:3].upper(),
                     "phone": contact_details.get("phone1"),
                     "email": contact_details.get("email"),
                     "website": store.get("dealerUrl"),
