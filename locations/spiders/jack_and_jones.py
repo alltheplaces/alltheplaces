@@ -1,3 +1,4 @@
+import re
 import scrapy
 
 from locations.items import Feature
@@ -32,10 +33,10 @@ class jackAndJonesSpider(scrapy.Spider):
             item["street_address"] = row.get("address", {}).get("street")
             item["city"] = row.get("address", {}).get("city")
             item["postcode"] = row.get("address", {}).get("postalCode")
-            item["country"] = row.get("address", {}).get("countryCode")[:2]
+            item["country"] = re.findall(r"en-[a-z]{2}", response.url)[0][3:].upper()
             item["phone"] = row.get("address", {}).get("phone")
             item["email"] = row.get("address", {}).get("email")
-            item["lat"] = row.get("address", {}).get("longitude")
-            item["lon"] = row.get("address", {}).get("latitude")
+            item["lat"] = row.get("address", {}).get("latitude")
+            item["lon"] = row.get("address", {}).get("longitude")
 
             yield item
