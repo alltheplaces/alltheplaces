@@ -178,11 +178,34 @@ DAYS_NO = {
     "Lørdag": "Sa",
     "Søndag": "Su",
 }
+DAYS_ES = {
+    "Lunes": "Mo",
+    "Martes": "Tu",
+    "Miércoles": "We",
+    "Jueves": "Th",
+    "Viernes": "Fr",
+    "Sábado": "Sa",
+    "Domingo": "Su",
+}
 
 NAMED_DAY_RANGES_EN = {
     "Daily": ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"],
     "Weekdays": ["Mo", "Tu", "We", "Th", "Fr"],
     "Weekends": ["Sa", "Su"],
+}
+
+DELIMITERS_EN = {
+    "-",
+    "to",
+    "and",
+    "from",
+}
+
+DELIMITERS_ES = {
+    "-",
+    "a",
+    "y",
+    "de",
 }
 
 
@@ -335,13 +358,19 @@ class OpeningHours:
                             if d := sanitise_day(day):
                                 self.add_range(d, start_time, end_time, time_format)
 
-    def add_ranges_from_string(self, ranges_string, days=DAYS_EN, named_day_ranges=NAMED_DAY_RANGES_EN):
+    def add_ranges_from_string(self, ranges_string, days=DAYS_EN, named_day_ranges=NAMED_DAY_RANGES_EN, delimiters=DELIMITERS_EN):
         # Build two regular expressions--one for extracting 12h
         # opening hour information, and one for extracting 24h
         # opening hour information from a supplied string.
-        delimiter_regex = r"\s*(?:-|TO)\s*"
         days_regex = r"(?:"
         days_regex_parts = []
+
+        # Build delimiters regular expression.
+        delimiter_regex = r"\s*(?:"
+        delimiter_regex_parts = []
+        for delimiter in delimiters:
+            delimiter_regex_parts.append(re.escape(delimiter))
+        delimiter_regex = delimiter_regex + r"|".join(delimiter_regex_parts) + r")\s*"
 
         # For each day of the week, create a list of synonyms.
         day_synonyms = defaultdict(list)
@@ -384,8 +413,8 @@ class OpeningHours:
         days_regex = days_regex + r"|".join(days_regex_parts) + r")"
         time_regex_12h = r"(?<!\d)(0?[0-9]|1[012])(?:(?:[:\.]?([0-5][0-9]))(?:[:\.]?[0-5][0-9])?)?\s*([AP]M)?(?!\d)"
         time_regex_24h = r"(?<!\d)(0?[0-9]|1[0-9]|2[0-4])(?:[:\.]?([0-5][0-9]))(?:[:\.]?[0-5][0-9])?(?!\d)"
-        full_regex_12h = days_regex + r"\W+" + time_regex_12h + delimiter_regex + time_regex_12h
-        full_regex_24h = days_regex + r"\W+" + time_regex_24h + delimiter_regex + time_regex_24h
+        full_regex_12h = days_regex + r"(?:\W+|" + delimiter_regex + r")" + time_regex_12h + delimiter_regex + time_regex_12h
+        full_regex_24h = days_regex + r"(?:\W+|" + delimiter_regex + r")" + time_regex_24h + delimiter_regex + time_regex_24h
 
         # Execute both regular expressions.
         results_12h = re.findall(full_regex_12h, ranges_string, re.IGNORECASE)
@@ -393,7 +422,14 @@ class OpeningHours:
 
         # Normalise results to 24h time.
         results_normalised = []
-        if len(results_12h) > 0:
+        if len(results_24h) > 0:
+            # Parse 24h opening hour information.
+            for result in results_24h:
+                time_start = result[-4] + ":" + result[-3]
+                time_end = result[-2] + ":" + result[-1]
+                start_and_end_days = list(filter(None, result[:-4]))
+                results_normalised.append([start_and_end_days, time_start, time_end])
+        elif len(results_12h) > 0:
             # Parse 12h opening hour information.
             for result in results_12h:
                 time_start = result[-6] + ":"
@@ -414,13 +450,6 @@ class OpeningHours:
                 time_end_24h = time.strftime("%H:%M", time_end_24h)
                 start_and_end_days = list(filter(None, result[:-6]))
                 results_normalised.append([start_and_end_days, time_start_24h, time_end_24h])
-        if len(results_24h) > 0:
-            # Parse 24h opening hour information.
-            for result in results_24h:
-                time_start = result[-4] + ":" + result[-3]
-                time_end = result[-2] + ":" + result[-1]
-                start_and_end_days = list(filter(None, result[:-4]))
-                results_normalised.append([start_and_end_days, time_start, time_end])
 
         # Add ranges to OpeningHours object from normalised results.
         for result in results_normalised:

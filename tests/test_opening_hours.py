@@ -1,7 +1,7 @@
 import json
 import time
 
-from locations.hours import DAYS, DAYS_BG, DAYS_DE, OpeningHours, day_range, sanitise_day
+from locations.hours import DAYS, DAYS_BG, DAYS_DE, DAYS_ES, DELIMITERS_ES, OpeningHours, day_range, sanitise_day
 
 
 def test_day_range():
@@ -369,3 +369,8 @@ def test_add_ranges_from_string():
     o = OpeningHours()
     o.add_ranges_from_string("Monday - Sunday: 00:00 - 23:59")
     assert o.as_opening_hours() == "24/7"
+
+    o = OpeningHours()
+    o.add_ranges_from_string("Lunes a Domingo: 11:00 a 20:30 / Viernes y Sábado: 11:00 a 21:00", days=DAYS_ES, named_day_ranges={}, delimiters=DELIMITERS_ES)
+    o.add_ranges_from_string("Lunes a Sábado de 09:00 a 10:15 / Domingo de 09:00:00 a 10:00:00", days=DAYS_ES, named_day_ranges={}, delimiters=DELIMITERS_ES)
+    assert o.as_opening_hours() == "Mo-Th 09:00-10:15,11:00-20:30; Fr-Sa 09:00-10:15,11:00-20:30,11:00-21:00; Su 09:00-10:00,11:00-20:30"
