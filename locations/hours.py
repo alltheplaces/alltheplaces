@@ -358,7 +358,9 @@ class OpeningHours:
                             if d := sanitise_day(day):
                                 self.add_range(d, start_time, end_time, time_format)
 
-    def add_ranges_from_string(self, ranges_string, days=DAYS_EN, named_day_ranges=NAMED_DAY_RANGES_EN, delimiters=DELIMITERS_EN):
+    def add_ranges_from_string(
+        self, ranges_string, days=DAYS_EN, named_day_ranges=NAMED_DAY_RANGES_EN, delimiters=DELIMITERS_EN
+    ):
         # Build two regular expressions--one for extracting 12h
         # opening hour information, and one for extracting 24h
         # opening hour information from a supplied string.
@@ -413,8 +415,12 @@ class OpeningHours:
         days_regex = days_regex + r"|".join(days_regex_parts) + r")"
         time_regex_12h = r"(?<!\d)(0?[0-9]|1[012])(?:(?:[:\.]?([0-5][0-9]))(?:[:\.]?[0-5][0-9])?)?\s*([AP]M)?(?!\d)"
         time_regex_24h = r"(?<!\d)(0?[0-9]|1[0-9]|2[0-4])(?:[:\.]?([0-5][0-9]))(?:[:\.]?[0-5][0-9])?(?!\d)"
-        full_regex_12h = days_regex + r"(?:\W+|" + delimiter_regex + r")" + time_regex_12h + delimiter_regex + time_regex_12h
-        full_regex_24h = days_regex + r"(?:\W+|" + delimiter_regex + r")" + time_regex_24h + delimiter_regex + time_regex_24h
+        full_regex_12h = (
+            days_regex + r"(?:\W+|" + delimiter_regex + r")" + time_regex_12h + delimiter_regex + time_regex_12h
+        )
+        full_regex_24h = (
+            days_regex + r"(?:\W+|" + delimiter_regex + r")" + time_regex_24h + delimiter_regex + time_regex_24h
+        )
 
         # Execute both regular expressions.
         results_12h = re.findall(full_regex_12h, ranges_string, re.IGNORECASE)
