@@ -1,4 +1,5 @@
 import re
+
 import scrapy
 
 from locations.hours import DAYS_FR, DAYS_NL, DAYS_SE, OpeningHours, sanitise_day
