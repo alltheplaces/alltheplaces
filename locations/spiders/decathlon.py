@@ -30,6 +30,7 @@ class Decathlon(CrawlSpider):
         "https://www.decathlon.pt/store-locator",
         "https://www.decathlon.ro/store-locator",
         "https://www.decathlon.com.tr/store-locator",
+        "https://www.decathlon.be/fr/store-locator"
         # TODO: more domains no doubt
     ]
     rules = [Rule(LinkExtractor(allow="/store-view/"), callback="parse", follow=False)]
