@@ -198,6 +198,8 @@ class Extras(Enum):
     TOILETS = "toilets"
     WHEELCHAIR = "wheelchair"
     WIFI = "internet_access=wlan"
+    TAKEAWAY = "takeaway"
+    DELIVERY = "delivery"
 
 
 class PaymentMethods(Enum):
