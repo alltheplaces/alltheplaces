@@ -191,6 +191,15 @@ DAYS_DK = {
     "Søndag": "Su",
     "Søn": "Su",
 }
+DAYS_FI = {
+    "Maanantai": "Mo",
+    "Tiistai": "Tu",
+    "Keskiviikko": "We",
+    "Torstai": "Th",
+    "Perjantai": "Fr",
+    "Lauantai": "Sa",
+    "Sunnuntai": "Su",
+}
 
 
 def day_range(start_day, end_day):
