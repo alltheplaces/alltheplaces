@@ -188,6 +188,7 @@ DAYS_FI = {
     "Sunnuntai": "Su",
 }
 
+
 def day_range(start_day, end_day):
     start_ix = DAYS.index(start_day)
     end_ix = DAYS.index(end_day)
