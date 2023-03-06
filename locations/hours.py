@@ -150,16 +150,6 @@ DAYS_NL = {
     "Zaterdag": "Sa",
     "Zondag": "Su",
 }
-DAYS_DK = {
-    "Man": "Mo",
-    "Tors": "Th",
-    "Fredag": "Fr",
-    "Fre": "Fr",
-    "Lørdag": "Sa",
-    "Lør": "Sa",
-    "Søndag": "Su",
-    "Søn": "Su",
-}
 DAYS_RS = {
     "Ponedeljak": "Mo",
     "Utorak": "Tu",
@@ -171,12 +161,35 @@ DAYS_RS = {
 }
 DAYS_NO = {
     "Mandag": "Mo",
+    "Måndag": "Mo",
+    "Man": "Mo",
+    "Tirsdag": "Tu",
+    "Tysdag": "Tu",
+    "Onsdag": "We",
+    "Torsdag": "Th",
+    "Tors": "Th",
+    "Fredag": "Fr",
+    "Fre": "Fr",
+    "Lørdag": "Sa",
+    "Laurdag": "Sa",
+    "Lør": "Sa",
+    "Søndag": "Su",
+    "Sundag": "Su",
+    "Søn": "Su",
+}
+DAYS_DK = {
+    "Mandag": "Mo",
+    "Man": "Mo",
     "Tirsdag": "Tu",
     "Onsdag": "We",
     "Torsdag": "Th",
+    "Tors": "Th",
     "Fredag": "Fr",
+    "Fre": "Fr",
     "Lørdag": "Sa",
+    "Lør": "Sa",
     "Søndag": "Su",
+    "Søn": "Su",
 }
 
 
