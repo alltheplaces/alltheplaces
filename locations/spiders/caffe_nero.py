@@ -1,16 +1,20 @@
 import chompjs
-from scrapy import Spider
+from scrapy import Request, Spider
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
 
-class CaffeNeroGBSpider(Spider):
-    name = "caffe_nero_gb"
+class CaffeNeroSpider(Spider):
+    name = "caffe_nero"
     item_attributes = {"brand": "Caffe Nero", "brand_wikidata": "Q675808"}
     start_urls = ["https://caffenero.com/uk/stores/"]
 
     def parse(self, response, **kwargs):
+        for region in response.xpath('//li[@role="menuitem"]/a[not(@class="global")]/@href').getall():
+            yield Request(url=f"{region}/stores/", callback=self.parse_country)
+
+    def parse_country(self, response, **kwargs):
         for location in chompjs.parse_js_object(response.xpath('//script[contains(., "storesData")]/text()').get())[
             "stores"
         ]:
