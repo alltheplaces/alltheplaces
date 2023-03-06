@@ -9,9 +9,7 @@ class SpecsaversIESpider(CrawlSpider, StructuredDataSpider):
     item_attributes = {"brand": "Specsavers", "brand_wikidata": "Q2000610"}
     start_urls = ["https://www.specsavers.ie/stores/full-store-list"]
     rules = [
-        Rule(
-            LinkExtractor(allow=r"^https:\/\/www\.specsavers\.ie\/stores\/(.(?!-hearing))+$"), callback="parse_sd"
-        )
+        Rule(LinkExtractor(allow=r"^https:\/\/www\.specsavers\.ie\/stores\/(.(?!-hearing))+$"), callback="parse_sd")
     ]
     wanted_types = ["Optician"]
 
