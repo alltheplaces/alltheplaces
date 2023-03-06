@@ -12,10 +12,17 @@ class SpecsaversCASpider(CrawlSpider):
     name = "specsavers_ca"
     item_attributes = {"brand": "Specsavers", "brand_wikidata": "Q2000610"}
     start_urls = ["https://www.specsavers.ca/stores/full-store-list"]
-    rules = [Rule(LinkExtractor(allow=r"^https:\/\/www\.specsavers\.ca\/stores\/(?!full-store-list)((?!<\/).+)$"), callback="parse_store")]
+    rules = [
+        Rule(
+            LinkExtractor(allow=r"^https:\/\/www\.specsavers\.ca\/stores\/(?!full-store-list)((?!<\/).+)$"),
+            callback="parse_store",
+        )
+    ]
 
     def parse_store(self, response):
-        data_raw = response.xpath('//script[@type="application/json" and @data-drupal-selector="drupal-settings-json"]/text()').get()
+        data_raw = response.xpath(
+            '//script[@type="application/json" and @data-drupal-selector="drupal-settings-json"]/text()'
+        ).get()
         data_json = json.loads(data_raw)
         for guid in data_json:
             if not isinstance(data_json[guid], collections.abc.Mapping):
