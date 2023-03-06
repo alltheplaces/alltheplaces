@@ -14,17 +14,33 @@ class SchnitzAUSpider(SitemapSpider):
         properties = {
             "ref": response.url,
             "name": response.xpath('//div[contains(@class, "hero-module__text-lockup")]/div/h1/text()').get().strip(),
-            "lat": response.xpath('//div/@data-lat').get().strip(),
-            "lon": response.xpath('//div/@data-lng').get().strip(),
-            "addr_full": response.xpath('//div[contains(@class, "hero-module__contact")]/div/div[1]/text()').get().strip(),
+            "lat": response.xpath("//div/@data-lat").get().strip(),
+            "lon": response.xpath("//div/@data-lng").get().strip(),
+            "addr_full": response.xpath('//div[contains(@class, "hero-module__contact")]/div/div[1]/text()')
+            .get()
+            .strip(),
             "phone": response.xpath('//div[contains(@class, "hero-module__contact")]/div/div[2]/text()').get(),
             "website": response.url,
         }
         if properties["phone"]:
             properties["phone"] = properties["phone"].strip()
-        
+
         oh = OpeningHours()
-        hours_raw = (" ".join(response.xpath('//ul[contains(@class, "single-store-content__details-oh-list")]/li/span/text()').getall())).replace("26th January", "Jan26").replace("Closed", "0:00 am to 0:00 am").replace(" to ", " ").replace(" am", "AM").replace(" pm", "PM").split()
+        hours_raw = (
+            (
+                " ".join(
+                    response.xpath(
+                        '//ul[contains(@class, "single-store-content__details-oh-list")]/li/span/text()'
+                    ).getall()
+                )
+            )
+            .replace("26th January", "Jan26")
+            .replace("Closed", "0:00 am to 0:00 am")
+            .replace(" to ", " ")
+            .replace(" am", "AM")
+            .replace(" pm", "PM")
+            .split()
+        )
         hours_raw = [hours_raw[n : n + 3] for n in range(0, len(hours_raw), 3)]
         for day in hours_raw:
             if day[0] == "Jan26":
