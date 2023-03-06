@@ -1,7 +1,7 @@
 import scrapy
 
 from locations.dict_parser import DictParser
-from locations.hours import DAYS, DAYS_EN, OpeningHours
+from locations.hours import OpeningHours
 
 
 class MuffinBreakAUSpider(scrapy.Spider):
