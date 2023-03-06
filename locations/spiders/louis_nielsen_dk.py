@@ -37,7 +37,7 @@ class LouisNielsenDKSpider(CrawlSpider):
             "website": response.url,
         }
 
-        properties["opening_hours"] = OpeningHours()
+        oh = OpeningHours()
         hours_raw = (
             (" ".join(response.xpath('//tr[@itemprop="openingHours"]/@content').getall()))
             .replace("Lukket", "0:00 - 0:00")
@@ -48,6 +48,7 @@ class LouisNielsenDKSpider(CrawlSpider):
         for day in hours_raw:
             if day[1] == "0:00" and day[2] == "0:00":
                 continue
-            properties["opening_hours"].add_range(DAYS_DK[day[0]], day[1].upper(), day[2].upper())
+            oh.add_range(DAYS_DK[day[0]], day[1].upper(), day[2].upper())
+        properties["opening_hours"] = oh.as_opening_hours()
 
         yield Feature(**properties)
