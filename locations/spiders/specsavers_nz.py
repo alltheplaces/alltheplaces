@@ -12,11 +12,18 @@ class SpecsaversNZSpider(CrawlSpider):
     name = "specsavers_nz"
     item_attributes = {"brand": "Specsavers", "brand_wikidata": "Q2000610"}
     start_urls = ["https://www.specsavers.co.nz/stores/full-store-list"]
-    rules = [Rule(LinkExtractor(allow=r"^https:\/\/www\.specsavers\.co\.nz\/stores\/(?!full-store-list)((?!<\/)(.(?!-hearing))+)$"), callback="parse_store_page")]
+    rules = [
+        Rule(
+            LinkExtractor(
+                allow=r"^https:\/\/www\.specsavers\.co\.nz\/stores\/(?!full-store-list)((?!<\/)(.(?!-hearing))+)$"
+            ),
+            callback="parse_store_page",
+        )
+    ]
 
     def parse_store_page(self, response):
-        url = response.xpath('//div/@data-yext-url').get()
-        yield scrapy.Request(url, self.parse_yext_data, meta = {"website": response.url})
+        url = response.xpath("//div/@data-yext-url").get()
+        yield scrapy.Request(url, self.parse_yext_data, meta={"website": response.url})
 
     def parse_yext_data(self, response):
         location = response.json()["response"]
