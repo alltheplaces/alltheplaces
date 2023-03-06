@@ -178,7 +178,15 @@ DAYS_NO = {
     "Lørdag": "Sa",
     "Søndag": "Su",
 }
-
+DAYS_FI = {
+    "Maanantai": "Mo",
+    "Tiistai": "Tu",
+    "Keskiviikko": "We",
+    "Torstai": "Th",
+    "Perjantai": "Fr",
+    "Lauantai": "Sa",
+    "Sunnuntai": "Su",
+}
 
 def day_range(start_day, end_day):
     start_ix = DAYS.index(start_day)
