@@ -36,9 +36,15 @@ class KFCSGSpider(scrapy.Spider):
                 "SelectedRestaurantId": restaurant_id,
                 "topOneStore": False,
                 "IsAllKFC": False,
-                "isShowOrderButton": True
+                "isShowOrderButton": True,
             }
-            yield JsonRequest(url="https://www.kfc.com.sg/KFCLocation/StoreDetails", method="POST", data=data, meta={"restaurant_id": restaurant_id}, callback=self.parse_store)
+            yield JsonRequest(
+                url="https://www.kfc.com.sg/KFCLocation/StoreDetails",
+                method="POST",
+                data=data,
+                meta={"restaurant_id": restaurant_id},
+                callback=self.parse_store,
+            )
 
     def parse_store(self, response):
         data_html = Selector(text=" ".join(response.json()["DataObject"].split()))
@@ -47,11 +53,17 @@ class KFCSGSpider(scrapy.Spider):
             "name": data_html.xpath('//div[contains(@class, "content")]/h1/text()').get().strip(),
             "lat": data_html.xpath('//input[@id="Latitude"]/@value').get().strip(),
             "lon": data_html.xpath('//input[@id="Longitude"]/@value').get().strip(),
-            "addr_full": " ".join(" ".join(data_html.xpath('//address/text()').getall()).split()),
+            "addr_full": " ".join(" ".join(data_html.xpath("//address/text()").getall()).split()),
             "phone": data_html.xpath('//a[contains(@href, "tel:")]/text()').get(),
         }
         oh = OpeningHours()
-        hours_raw = (" ".join(data_html.xpath('//table[contains(@class, "open-hours")]/tbody/tr/td/text()').getall()).replace("Closed", "0:00 AM-0:00 AM").replace("-", " ").replace(" AM", "AM").replace(" PM", "PM")).split()
+        hours_raw = (
+            " ".join(data_html.xpath('//table[contains(@class, "open-hours")]/tbody/tr/td/text()').getall())
+            .replace("Closed", "0:00 AM-0:00 AM")
+            .replace("-", " ")
+            .replace(" AM", "AM")
+            .replace(" PM", "PM")
+        ).split()
         hours_raw = [hours_raw[n : n + 3] for n in range(0, len(hours_raw), 3)]
         for day in hours_raw:
             if day[1] == "0:00AM" and day[2] == "0:00AM":
