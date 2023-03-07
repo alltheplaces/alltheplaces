@@ -5,11 +5,11 @@ from locations.items import Feature
 
 class TravelexSpider(scrapy.Spider):
     name = "travelex"
-    item_attributes = {"brand": "Travelex", "brand_wikidata": "Q2337964"}
+    item_attributes = {"brand": "GWK Travelex", "brand_wikidata": "Q2337964"}
     allowed_domains = ["https://www.travelex.co.uk/"]
 
     def start_requests(self):
-        countries = ['dech', 'au', 'gb', 'enbh', 'de', "zhhk", "jajp", "my", "nz", "qa"]
+        countries = ["nl"]
         for country in countries:
             yield scrapy.Request(
                 f"https://api.travelex.net/salt/store/search?key=Travelex&mode=storeLocator&site=/{country}&lat={0.0}&lng={0.0}",
