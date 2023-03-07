@@ -33,15 +33,22 @@ class KFCAUSpider(scrapy.Spider):
                 elif contact_method["key"] == "phoneNumber":
                     item["phone"] = contact_method["value"]
             web_path = item["name"].lower().replace(" ", "-") + "/" + item["postcode"]
-            item["website"] = "https://www.kfc.com.au/restaurants/" + web_path 
+            item["website"] = "https://www.kfc.com.au/restaurants/" + web_path
             details_url = "https://orderserv-kfc-apac-olo-api.yum.com/dev/v1/stores/details/" + web_path
-            yield JsonRequest(url=details_url, headers={"x-tenant-id": self.tenant_id}, meta={"item": item}, callback=self.parse_hours)
+            yield JsonRequest(
+                url=details_url, headers={"x-tenant-id": self.tenant_id}, meta={"item": item}, callback=self.parse_hours
+            )
 
     def parse_hours(self, response):
         item = response.meta["item"]
         trading_days = response.json()["availableTradingHours"]
         oh = OpeningHours()
         for trading_day in trading_days:
-            oh.add_range(trading_day["dayOfWeek"].title(), trading_day["availableHours"]["startTime"], trading_day["availableHours"]["endTime"], "%H%M")
+            oh.add_range(
+                trading_day["dayOfWeek"].title(),
+                trading_day["availableHours"]["startTime"],
+                trading_day["availableHours"]["endTime"],
+                "%H%M",
+            )
         item["opening_hours"] = oh.as_opening_hours()
         yield item
