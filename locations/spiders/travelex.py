@@ -5,13 +5,15 @@ from locations.items import Feature
 
 class TravelexSpider(scrapy.Spider):
     name = "travelex"
-    item_attributes = {"brand": "Tranvelex", "brand_wikidata": "Q2337964"}
+    item_attributes = {"brand": "Travelex", "brand_wikidata": "Q2337964"}
     allowed_domains = ["https://www.travelex.co.uk/"]
 
     def start_requests(self):
-        yield scrapy.Request(
-            "https://api.travelex.net/salt/store/search?key=Travelex&mode=storeLocator&lat=52.0&lng=5.0",
-        )
+        countries = ['dech', 'au', 'gb', 'enbh', 'de', "nl", "zhhk", "jajp", "my", "nz", "qa"]
+        for country in countries:
+            yield scrapy.Request(
+                f"https://api.travelex.net/salt/store/search?key=Travelex&mode=storeLocator&site=/{country}&lat={0.0}&lng={0.0}",
+            )
 
     def parse(self, response):
         data = response.json()
@@ -19,7 +21,7 @@ class TravelexSpider(scrapy.Spider):
         item_categories = data.get("items")
         for category in item_categories:
             stores = category.get("stores")
-            print(len(stores))
+            #print(len(stores))
             for row in stores:
                 properties = {
                     "ref": row.get("storeId"),
@@ -38,5 +40,5 @@ class TravelexSpider(scrapy.Spider):
                         "terminal": row.get("terminal")
                     }
                 }
-
+                #print(row.get("address").get("language"))
                 yield Feature(**properties)
