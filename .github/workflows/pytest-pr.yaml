@@ -5,6 +5,8 @@ on:
     paths:
     - '.github/workflows/*.yaml'
     - 'locations/*.py'
+    - 'tests/*.py'
+
 
 jobs:
   pytest:
