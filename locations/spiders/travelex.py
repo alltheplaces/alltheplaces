@@ -9,7 +9,7 @@ class TravelexSpider(scrapy.Spider):
     allowed_domains = ["https://www.travelex.co.uk/"]
 
     def start_requests(self):
-        countries = ['dech', 'au', 'gb', 'enbh', 'de', "zhhk", "jajp", "my", "nz", "qa"]
+        countries = ["dech", "au", "gb", "enbh", "de", "zhhk", "jajp", "my", "nz", "qa"]
         for country in countries:
             yield scrapy.Request(
                 f"https://api.travelex.net/salt/store/search?key=Travelex&mode=storeLocator&site=/{country}&lat={0.0}&lng={0.0}",
@@ -36,7 +36,7 @@ class TravelexSpider(scrapy.Spider):
                     "extras": {
                         "directions": row.get("directions"),
                         "notes": row.get("notes"),
-                        "terminal": row.get("terminal")
-                    }
+                        "terminal": row.get("terminal"),
+                    },
                 }
                 yield Feature(**properties)

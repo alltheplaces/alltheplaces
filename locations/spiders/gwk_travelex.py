@@ -36,7 +36,7 @@ class TravelexSpider(scrapy.Spider):
                     "extras": {
                         "directions": row.get("directions"),
                         "notes": row.get("notes"),
-                        "terminal": row.get("terminal")
-                    }
+                        "terminal": row.get("terminal"),
+                    },
                 }
                 yield Feature(**properties)
