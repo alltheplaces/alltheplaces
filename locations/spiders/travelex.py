@@ -24,19 +24,15 @@ class TravelexSpider(scrapy.Spider):
             stores = category.get("stores")
             for row in stores:
                 item = DictParser.parse(row)
-                properties = {
-                    "addr_full": row.get("formattedAddress"),
-                    "street_address": row.get("address").get("address1"),
-                    "city": row.get("address").get("city"),
-                    "postcode": row.get("address").get("postalCode"),
-                    "extras": {
-                        "directions": row.get("directions"),
-                        "notes": row.get("notes"),
-                        "terminal": row.get("terminal"),
-                    },
+                item["addr_full"] = row.get("formattedAddress")
+                item["street_address"] = row.get("address").get("address1")
+                item["city"] = row.get("address").get("city")
+                item["postcode"] = row.get("address").get("postalCode")
+                item["extras"] = {
+                    "directions": row.get("directions"),
+                    "notes": row.get("notes"),
+                    "terminal": row.get("terminal"),
                 }
                 if response.meta.get("country") == "nl":
-                    properties["brand"] = "GWK Travelex"
-
-                item = {**item, **properties}
+                    item["brand"] = "GWK Travelex"
                 yield item
