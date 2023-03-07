@@ -13,10 +13,10 @@ class KFCNZSpider(XMLFeedSpider):
     item_attributes = {"brand": "KFC", "brand_wikidata": "Q524757"}
     allowed_domains = ["kfc.co.nz"]
     start_urls = ["https://kfc.co.nz/sitemap.xml"]
-    itertag = 'loc'
+    itertag = "loc"
 
     def parse_node(self, response, node):
-        url = node.xpath('//text()').get()
+        url = node.xpath("//text()").get()
         if m := re.match(r"^https:\/\/kfc.co.nz\/find-a-kfc\/kfc-(.+)$", url):
             yield JsonRequest(url="https://api.kfc.co.nz/find-a-kfc/kfc-" + m.group(1), callback=self.parse_store)
 
