@@ -4,7 +4,7 @@ from locations.items import Feature
 
 
 class TravelexSpider(scrapy.Spider):
-    name = "travelex"
+    name = "travelex_nl"
     item_attributes = {"brand": "GWK Travelex", "brand_wikidata": "Q2337964"}
     allowed_domains = ["https://www.travelex.co.uk/"]
 
