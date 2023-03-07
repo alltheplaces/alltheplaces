@@ -419,7 +419,7 @@ class OpeningHours:
         # two regular expressions.
         days_regex = days_regex + r"|".join(days_regex_parts) + r")"
         time_regex_12h = r"(?<!\d)(0?[0-9]|1[012])(?:(?:[:\.]?([0-5][0-9]))(?:[:\.]?[0-5][0-9])?)?\s*([AP]M)?(?!\d)"
-        time_regex_24h = r"(?<!\d)(0?[0-9]|1[0-9]|2[0-4])(?:[:\.]?([0-5][0-9]))(?:[:\.]?[0-5][0-9])?(?!\d)"
+        time_regex_24h = r"(?<!\d)(0?[0-9]|1[0-9]|2[0-4])(?:[:\.]?([0-5][0-9]))(?:[:\.]?[0-5][0-9])?(?!(?:\d|[AP]M))"
         full_regex_12h = (
             days_regex + r"(?:\W+|" + delimiter_regex + r")" + time_regex_12h + delimiter_regex + time_regex_12h
         )
@@ -448,7 +448,11 @@ class OpeningHours:
                     time_start = time_start + result[-5]
                 else:
                     time_start = time_start + "00"
-                time_start = time_start + result[-4].upper()
+                if result[-4]:
+                    time_start = time_start + result[-4].upper()
+                else:
+                    # If AM/PM is not specified, it is almost always going to be AM for start times.
+                    time_start = time_start + "AM"
                 time_start_24h = time.strptime(time_start, "%I:%M%p")
                 time_start_24h = time.strftime("%H:%M", time_start_24h)
                 time_end = result[-3] + ":"
@@ -456,7 +460,11 @@ class OpeningHours:
                     time_end = time_end + result[-2]
                 else:
                     time_end = time_end + "00"
-                time_end = time_end + result[-1].upper()
+                if result[-1]:
+                    time_end = time_end + result[-1].upper()
+                else:
+                    # If AM/PM is not specified, it is almost always going to be PM for end times.
+                    time_end = time_end + "PM"
                 time_end_24h = time.strptime(time_end, "%I:%M%p")
                 time_end_24h = time.strftime("%H:%M", time_end_24h)
                 start_and_end_days = list(filter(None, result[:-6]))
@@ -465,13 +473,13 @@ class OpeningHours:
         # Add ranges to OpeningHours object from normalised results.
         for result in results_normalised:
             if len(result[0]) == 1:
-                if result[0][0] in named_day_ranges.keys():
-                    day_list = named_day_ranges[result[0][0]]
+                if result[0][0].title() in named_day_ranges.keys():
+                    day_list = named_day_ranges[result[0][0].title()]
                 else:
-                    day_list = [days[result[0][0]]]
+                    day_list = [days[result[0][0].title()]]
             else:
-                start_day = days[result[0][0]]
-                end_day = days[result[0][1]]
+                start_day = days[result[0][0].title()]
+                end_day = days[result[0][1].title()]
                 day_list = day_range(start_day, end_day)
             for day in day_list:
                 self.add_range(day, result[1], result[2])
