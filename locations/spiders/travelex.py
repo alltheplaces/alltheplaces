@@ -10,10 +10,11 @@ class TravelexSpider(scrapy.Spider):
     allowed_domains = ["https://www.travelex.co.uk/"]
 
     def start_requests(self):
-        countries = ["dech", "au", "gb", "enbh", "de", "zhhk", "jajp", "my", "nz", "qa"]
+        countries = ["dech", "au", "gb", "enbh", "de", "zhhk", "jajp", "my", "nz", "qa", "om", "ae", "nl"]
         for country in countries:
             yield scrapy.Request(
                 f"https://api.travelex.net/salt/store/search?key=Travelex&mode=storeLocator&site=/{country}&lat={0.0}&lng={0.0}",
+                meta={"country": country},
             )
 
     def parse(self, response):
@@ -24,7 +25,6 @@ class TravelexSpider(scrapy.Spider):
             for row in stores:
                 item = DictParser.parse(row)
                 properties = {
-                    "brand": self.item_attributes.get("brand"),
                     "addr_full": row.get("formattedAddress"),
                     "street_address": row.get("address").get("address1"),
                     "city": row.get("address").get("city"),
@@ -35,5 +35,8 @@ class TravelexSpider(scrapy.Spider):
                         "terminal": row.get("terminal"),
                     },
                 }
+                if response.meta.get("country") == "nl":
+                    properties["brand"] = "GWK Travelex"
+
                 item = {**item, **properties}
                 yield item
