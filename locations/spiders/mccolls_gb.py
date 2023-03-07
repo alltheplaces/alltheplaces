@@ -10,7 +10,7 @@ from locations.hours import OpeningHours
 class McCollsGBSpider(scrapy.Spider):
     name = "mccolls_gb"
     MCCOLLS = {"brand": "McColl's", "brand_wikidata": "Q16997477"}
-    MARTINS = {"brand": "Martin's", "brand_wikidata": "Q16997477"}
+    MARTINS = {"brand": "Martin's", "brand_wikidata": "Q116779207"}
     RSMCCOLL = {"brand": "RS McColl", "brand_wikidata": "Q7277785"}
     MORRISONS_DAILY = {"brand": "Morrisons Daily", "brand_wikidata": "Q99752411"}
     item_attributes = MCCOLLS

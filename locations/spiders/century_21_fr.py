@@ -2,14 +2,12 @@ import scrapy
 
 from locations.dict_parser import DictParser
 from locations.geo import postal_regions
+from locations.spiders.century_21 import Century21Spider
 
 
 class Century21FrSpider(scrapy.Spider):
     name = "century_21_fr"
-    item_attributes = {
-        "brand": "Century21",
-        "brand_wikidata": "Q1054480",
-    }
+    item_attributes = Century21Spider.item_attributes
     allowed_domains = ["century21.fr"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
 

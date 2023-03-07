@@ -82,6 +82,17 @@ DAYS_HU = {
     "Szo": "Sa",
     "Vas": "Su",
 }
+
+DAYS_SE = {
+    "Måndag": "Mo",
+    "Tisdag": "Tu",
+    "Onsdag": "We",
+    "Torsdag": "Th",
+    "Fredag": "Fr",
+    "Lördag": "Sa",
+    "Söndag": "Su",
+}
+
 DAYS_SI = {
     "po": "Mo",
     "Pon": "Mo",
@@ -115,6 +126,13 @@ DAYS_FR = {
     "Ve": "Fr",
     "Sa": "Sa",
     "Di": "Su",
+    "Lundi": "Mo",
+    "Mardi": "Tu",
+    "Mercredi": "We",
+    "Jeudi": "Th",
+    "Vendredi": "Fr",
+    "Samedi": "Sa",
+    "Dimanche": "Su",
 }
 DAYS_NL = {
     "Ma": "Mo",
@@ -124,16 +142,13 @@ DAYS_NL = {
     "Vr": "Fr",
     "Za": "Sa",
     "Zo": "Su",
-}
-DAYS_DK = {
-    "Man": "Mo",
-    "Tors": "Th",
-    "Fredag": "Fr",
-    "Fre": "Fr",
-    "Lørdag": "Sa",
-    "Lør": "Sa",
-    "Søndag": "Su",
-    "Søn": "Su",
+    "Maandag": "Mo",
+    "Dinsdag": "Tu",
+    "Woensdag": "We",
+    "Donderdag": "Th",
+    "Vrijdag": "Fr",
+    "Zaterdag": "Sa",
+    "Zondag": "Su",
 }
 DAYS_RS = {
     "Ponedeljak": "Mo",
@@ -146,12 +161,78 @@ DAYS_RS = {
 }
 DAYS_NO = {
     "Mandag": "Mo",
+    "Måndag": "Mo",
+    "Man": "Mo",
+    "Tirsdag": "Tu",
+    "Tysdag": "Tu",
+    "Onsdag": "We",
+    "Torsdag": "Th",
+    "Tors": "Th",
+    "Fredag": "Fr",
+    "Fre": "Fr",
+    "Lørdag": "Sa",
+    "Laurdag": "Sa",
+    "Lør": "Sa",
+    "Søndag": "Su",
+    "Sundag": "Su",
+    "Søn": "Su",
+}
+DAYS_DK = {
+    "Mandag": "Mo",
+    "Man": "Mo",
     "Tirsdag": "Tu",
     "Onsdag": "We",
     "Torsdag": "Th",
+    "Tors": "Th",
     "Fredag": "Fr",
+    "Fre": "Fr",
     "Lørdag": "Sa",
+    "Lør": "Sa",
     "Søndag": "Su",
+    "Søn": "Su",
+}
+DAYS_FI = {
+    "Maanantai": "Mo",
+    "Tiistai": "Tu",
+    "Keskiviikko": "We",
+    "Torstai": "Th",
+    "Perjantai": "Fr",
+    "Lauantai": "Sa",
+    "Sunnuntai": "Su",
+}
+DAYS_ES = {
+    "Lunes": "Mo",
+    "Martes": "Tu",
+    "Miércoles": "We",
+    "Jueves": "Th",
+    "Viernes": "Fr",
+    "Sábado": "Sa",
+    "Domingo": "Su",
+}
+
+NAMED_DAY_RANGES_EN = {
+    "Daily": ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"],
+    "All days": ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"],
+    "Weekdays": ["Mo", "Tu", "We", "Th", "Fr"],
+    "Weekends": ["Sa", "Su"],
+}
+
+DELIMITERS_EN = {
+    "-",
+    "–",
+    "—",
+    "―",
+    "‒",
+    "to",
+    "and",
+    "from",
+}
+
+DELIMITERS_ES = {
+    "-",
+    "a",
+    "y",
+    "de",
 }
 
 
@@ -209,7 +290,7 @@ class OpeningHours:
 
         self.day_hours[day].add((open_time, close_time))
 
-    def as_opening_hours(self):
+    def as_opening_hours(self) -> str:
         day_groups = []
         this_day_group = None
 
@@ -303,3 +384,124 @@ class OpeningHours:
                         for day in days.split(","):
                             if d := sanitise_day(day):
                                 self.add_range(d, start_time, end_time, time_format)
+
+    def add_ranges_from_string(
+        self, ranges_string, days=DAYS_EN, named_day_ranges=NAMED_DAY_RANGES_EN, delimiters=DELIMITERS_EN
+    ):
+        # Build two regular expressions--one for extracting 12h
+        # opening hour information, and one for extracting 24h
+        # opening hour information from a supplied string.
+        days_regex = r"(?:"
+        days_regex_parts = []
+
+        # Build delimiters regular expression.
+        delimiter_regex = r"\s*(?:"
+        delimiter_regex_parts = []
+        for delimiter in delimiters:
+            delimiter_regex_parts.append(re.escape(delimiter))
+        delimiter_regex = delimiter_regex + r"|".join(delimiter_regex_parts) + r")\s*"
+
+        # For each day of the week, create a list of synonyms.
+        day_synonyms = defaultdict(list)
+        for synonym, day in sorted(days.items()):
+            day_synonyms[day].append(re.escape(synonym))
+
+        # Assuming a week starts on Monday (most opening hours are
+        # listed as such due to business vs. weekend hours), create
+        # a regular expression of all day ranges possible in the
+        # week starting Monday (or later).
+        for i in range(0, 6, 1):
+            start_day_string = r"(?<!\w)(" + r"|".join(day_synonyms[DAYS[i]]) + r")(?!\w)"
+            end_days = []
+            for j in range(i + 1, 7, 1):
+                end_days.append("|".join(day_synonyms[DAYS[j]]))
+            end_days_string = r"(?<!\w)(" + r"|".join(end_days) + r")(?!\w)"
+            days_regex_parts.append(start_day_string + delimiter_regex + end_days_string)
+
+        # Some sources will have a week start on Sunday and will
+        # express day ranges as Sunday to Thursday (for example).
+        # Create a regular expression to capture these day ranges
+        # that commence on Sunday.
+        start_day_string = r"(?<!\w)(" + r"|".join(day_synonyms["Su"]) + r")(?!\w)"
+        end_days = []
+        for j in range(0, 6, 1):
+            end_days.append("|".join(day_synonyms[DAYS[j]]))
+        end_days_string = r"(?<!\w)(" + r"|".join(end_days) + r")(?!\w)"
+        days_regex_parts.append(start_day_string + delimiter_regex + end_days_string)
+
+        # Create a regular expression for named day ranges.
+        named_day_range_regex = r"(?<!\w)(" + r"|".join(named_day_ranges.keys()) + r")(?!\w)"
+        days_regex_parts.append(named_day_range_regex)
+
+        # Create a regular expression for single days of the week.
+        single_days_regex = r"(?<!\w)(" + r"|".join(days.keys()) + r")(?!\w)"
+        days_regex_parts.append(single_days_regex)
+
+        # Compile regular expression parts together to create the
+        # two regular expressions.
+        days_regex = days_regex + r"|".join(days_regex_parts) + r")"
+        time_regex_12h = r"(?<!\d)(0?[0-9]|1[012])(?:(?:[:\.]?([0-5][0-9]))(?:[:\.]?[0-5][0-9])?)?\s*([AP]M)?(?!\d)"
+        time_regex_24h = r"(?<!\d)(0?[0-9]|1[0-9]|2[0-4])(?:[:\.]?([0-5][0-9]))(?:[:\.]?[0-5][0-9])?(?!(?:\d|[AP]M))"
+        full_regex_12h = (
+            days_regex + r"(?:\W+|" + delimiter_regex + r")" + time_regex_12h + delimiter_regex + time_regex_12h
+        )
+        full_regex_24h = (
+            days_regex + r"(?:\W+|" + delimiter_regex + r")" + time_regex_24h + delimiter_regex + time_regex_24h
+        )
+
+        # Execute both regular expressions.
+        results_12h = re.findall(full_regex_12h, ranges_string, re.IGNORECASE)
+        results_24h = re.findall(full_regex_24h, ranges_string, re.IGNORECASE)
+
+        # Normalise results to 24h time.
+        results_normalised = []
+        if len(results_24h) > 0:
+            # Parse 24h opening hour information.
+            for result in results_24h:
+                time_start = result[-4] + ":" + result[-3]
+                time_end = result[-2] + ":" + result[-1]
+                start_and_end_days = list(filter(None, result[:-4]))
+                results_normalised.append([start_and_end_days, time_start, time_end])
+        elif len(results_12h) > 0:
+            # Parse 12h opening hour information.
+            for result in results_12h:
+                time_start = result[-6] + ":"
+                if result[-5]:
+                    time_start = time_start + result[-5]
+                else:
+                    time_start = time_start + "00"
+                if result[-4]:
+                    time_start = time_start + result[-4].upper()
+                else:
+                    # If AM/PM is not specified, it is almost always going to be AM for start times.
+                    time_start = time_start + "AM"
+                time_start_24h = time.strptime(time_start, "%I:%M%p")
+                time_start_24h = time.strftime("%H:%M", time_start_24h)
+                time_end = result[-3] + ":"
+                if result[-2]:
+                    time_end = time_end + result[-2]
+                else:
+                    time_end = time_end + "00"
+                if result[-1]:
+                    time_end = time_end + result[-1].upper()
+                else:
+                    # If AM/PM is not specified, it is almost always going to be PM for end times.
+                    time_end = time_end + "PM"
+                time_end_24h = time.strptime(time_end, "%I:%M%p")
+                time_end_24h = time.strftime("%H:%M", time_end_24h)
+                start_and_end_days = list(filter(None, result[:-6]))
+                results_normalised.append([start_and_end_days, time_start_24h, time_end_24h])
+
+        # Add ranges to OpeningHours object from normalised results.
+        for result in results_normalised:
+            if len(result[0]) == 1:
+                if result[0][0].title() in named_day_ranges.keys():
+                    day_list = named_day_ranges[result[0][0].title()]
+                else:
+                    day_list = [days[result[0][0].title()]]
+            else:
+                start_day = days[result[0][0].title()]
+                end_day = days[result[0][1].title()]
+                day_list = day_range(start_day, end_day)
+            for day in day_list:
+                self.add_range(day, result[1], result[2])

@@ -70,6 +70,7 @@ class StructuredDataSpider(Spider):
         "SportingGoodsStore",
         "Dentist",
         "AutoRental",
+        "HardwareStore",
     ]
     search_for_email = True
     search_for_phone = True
@@ -113,6 +114,8 @@ class StructuredDataSpider(Spider):
                     item["website"] = url
                 elif item["website"].startswith("www"):
                     item["website"] = "https://" + item["website"]
+                elif item["website"].startswith("/"):
+                    item["website"] = urljoin(response.url, item["website"])
 
                 if self.search_for_email and item["email"] is None:
                     extract_email(item, response)
