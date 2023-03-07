@@ -19,14 +19,16 @@ class SuzukiBeSpider(scrapy.Spider):
             item = Feature()
             item["ref"] = key
             item["name"] = row.get("title")
-            item["street_address"] = (
-                Selector(text=row.get("infowindow_content")).xpath("//div/p/text()[1]").get().strip()
-            )
-            city_codepost = Selector(text=row.get("infowindow_content")).xpath("//div/p/text()[2]").get().strip()
+
+            infowindow_selector = Selector(text=row.get("infowindow_content"))
+            item["phone"] = infowindow_selector.xpath("//p//a/text()").get()
+            item["street_address"] = infowindow_selector.xpath("//div/p/text()[1]").get().strip()
+
+            city_codepost = infowindow_selector.xpath("//div/p/text()[2]").get().strip()
             item["postcode"] = city_codepost.split(" ")[0]
             item["city"] = city_codepost.split(" ")[1]
+
             item["lat"] = row.get("latitude")
             item["lon"] = row.get("longitude")
-            item["phone"] = Selector(text=row.get("infowindow_content")).xpath("//p//a/text()").get()
 
             yield item
