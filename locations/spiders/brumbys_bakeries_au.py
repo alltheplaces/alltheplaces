@@ -28,9 +28,19 @@ class BrumbysBakeriesAUSpider(scrapy.Spider):
 
     def parse_hours(self, response):
         item = response.meta["item"]
-        hours_raw = " ".join((" ".join(response.xpath(
-            '//h3[contains(@class, "heading-hours")]/following::table/tbody/tr/td/text()'
-        ).getall())).split()).upper().replace("24 HOURS", "Mon - Sun 12:00 AM - 11:59 PM")
+        hours_raw = (
+            " ".join(
+                (
+                    " ".join(
+                        response.xpath(
+                            '//h3[contains(@class, "heading-hours")]/following::table/tbody/tr/td/text()'
+                        ).getall()
+                    )
+                ).split()
+            )
+            .upper()
+            .replace("24 HOURS", "Mon - Sun 12:00 AM - 11:59 PM")
+        )
         oh = OpeningHours()
         oh.add_ranges_from_string(hours_raw)
         item["opening_hours"] = oh.as_opening_hours()
