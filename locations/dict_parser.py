@@ -2,7 +2,7 @@ from locations.items import Feature
 
 
 class DictParser:
-    ref_keys = ["ref", "id", "store-id", "shop-number", "slug", "storeId"]
+    ref_keys = ["ref", "id", "store-id", "shop-number", "slug"]
 
     name_keys = ["name", "store-name", "display-name", "title"]
 
@@ -98,7 +98,7 @@ class DictParser:
         "yext-display-lng",
     ]
 
-    website_keys = ["url", "website", "permalink", "storeUrl"]
+    website_keys = ["url", "website", "permalink", "store-url"]
 
     @staticmethod
     def parse(obj) -> Feature:
