@@ -190,12 +190,17 @@ DAYS_ES = {
 
 NAMED_DAY_RANGES_EN = {
     "Daily": ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"],
+    "All days": ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"],
     "Weekdays": ["Mo", "Tu", "We", "Th", "Fr"],
     "Weekends": ["Sa", "Su"],
 }
 
 DELIMITERS_EN = {
     "-",
+    "–",
+    "—",
+    "―",
+    "‒",
     "to",
     "and",
     "from",
