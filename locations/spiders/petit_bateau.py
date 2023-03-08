@@ -1,8 +1,4 @@
-import html
-
 from scrapy.spiders import SitemapSpider
-
-from locations.categories import Categories, apply_category
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -10,5 +6,5 @@ class PetitBateauSpider(SitemapSpider, StructuredDataSpider):
     name = "petit_bateau"
     item_attributes = {"brand": "Petit Bateau", "brand_wikidata": "Q3377090"}
     sitemap_urls = ["https://stores.petit-bateau.com/sitemap.xml"]
-    sitemap_rules = [(r"https://stores.petit-bateau.com/", "parse_sd")]
+    sitemap_rules = [(r"https://stores\.petit-bateau\.com/(?:\w+)/(?:\w+)/(?:\w+)/(?:\w+)", "parse_sd")]
     wanted_types = ["ClothingStore"]
