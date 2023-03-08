@@ -11,7 +11,7 @@ class KFCMYSpider(scrapy.Spider):
     start_urls = ["https://kfc.com.my/graphql"]
 
     def start_requests(self):
-        gql_query ="""query allLocation {
+        gql_query = """query allLocation {
     allLocation {
         locations {
             address
