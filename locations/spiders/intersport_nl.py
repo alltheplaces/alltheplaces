@@ -20,7 +20,7 @@ class IntersportNLSpider(scrapy.Spider):
             oh = OpeningHours()
             for day, hours in store.get("storeHours", {}).items():
                 capitalized_day = day.capitalize()
-                if day.capitalize() not in DAYS_EN.keys():
+                if capitalized_day not in DAYS_EN.keys():
                     continue
                 oh.add_range(
                     day=DAYS_EN.get(capitalized_day),
