@@ -1,7 +1,9 @@
 import scrapy
 
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.geo import city_locations
+from locations.hours import DAYS_FULL, OpeningHours
 
 
 class McDonaldsSpider(scrapy.Spider):
@@ -88,68 +90,33 @@ class McDonaldsSpider(scrapy.Spider):
             item = DictParser.parse(properties)
             item["ref"] = store_identifier
             item["website"] = store_url
-            item["street_address"] = properties.get("addressLine1")
+            item["street_address"] = ", ".join(
+                filter(None, [properties.get("addressLine1"), properties.get("addressLine2")])
+            )
             item["city"] = properties.get("addressLine3")
             item["state"] = properties.get("subDivision")
             item["country"] = country.upper()
-            coords = store["geometry"]["coordinates"]
-            item["lat"] = coords[1]
-            item["lon"] = coords[0]
+            item["lon"], item["lat"] = store["geometry"]["coordinates"]
 
-            hours = properties.get("restauranthours")
-            try:
-                hours = self.store_hours(hours)
-                if hours:
-                    item["opening_hours"] = hours
-            except:
-                self.logger.exception("Couldn't process opening hours: %s", hours)
+            apply_category(Categories.FAST_FOOD, item)
+            apply_yes_no(Extras.DRIVE_THROUGH, item, "DRIVETHRU" in properties["filterType"])
+            apply_yes_no(Extras.WIFI, item, "WIFI" in properties["filterType"])
+
+            if hours := self.store_hours(properties.get("restauranthours")):
+                item["opening_hours"] = hours
 
             yield item
 
     def store_hours(self, store_hours):
         if not store_hours:
             return None
-        if all([h == "" for h in store_hours.values()]):
-            return None
 
-        day_groups = []
-        this_day_group = None
-        for day in (
-            "Monday",
-            "Tuesday",
-            "Wednesday",
-            "Thursday",
-            "Friday",
-            "Saturday",
-            "Sunday",
-        ):
-            hours = store_hours.get("hours" + day)
-            if not hours:
-                continue
-
-            hours = hours.replace(" - ", "-")
-            day_short = day[:2]
-
-            if not this_day_group:
-                this_day_group = dict(from_day=day_short, to_day=day_short, hours=hours)
-            elif this_day_group["hours"] == hours:
-                this_day_group["to_day"] = day_short
-            elif this_day_group["hours"] != hours:
-                day_groups.append(this_day_group)
-                this_day_group = dict(from_day=day_short, to_day=day_short, hours=hours)
-        day_groups.append(this_day_group)
-
-        if len(day_groups) == 1:
-            opening_hours = day_groups[0]["hours"]
-            if opening_hours == "04:00-04:00":
-                opening_hours = "24/7"
-        else:
-            opening_hours = ""
-            for day_group in day_groups:
-                if day_group["from_day"] == day_group["to_day"]:
-                    opening_hours += "{from_day} {hours}; ".format(**day_group)
-                else:
-                    opening_hours += "{from_day}-{to_day} {hours}; ".format(**day_group)
-            opening_hours = opening_hours[:-2]
-
-        return opening_hours
+        oh = OpeningHours()
+        for day in DAYS_FULL:
+            if hours := store_hours.get("hours" + day):
+                try:
+                    start_time, end_time = hours.split(" - ")
+                    oh.add_range(day, start_time.replace("24:00", "00:00"), end_time)
+                except:
+                    self.logger.debug(f"Couldn't process opening hours: {hours}")
+        return oh
