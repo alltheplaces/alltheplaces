@@ -32,5 +32,5 @@ class LeylandSDMGBSpider(AmastyStoreLocatorSpider):
                 oh.add_range(day_name.title(), open_time, break_start)
                 oh.add_range(day_name.title(), break_end, close_time)
         item["opening_hours"] = oh.as_opening_hours()
-        
+
         yield item
