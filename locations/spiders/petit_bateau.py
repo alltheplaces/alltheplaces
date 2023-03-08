@@ -12,4 +12,3 @@ class PetitBateauSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://stores.petit-bateau.com/sitemap.xml"]
     sitemap_rules = [(r"https://stores.petit-bateau.com/", "parse_sd")]
     wanted_types = ["ClothingStore"]
-
