@@ -1,9 +1,6 @@
 import scrapy
-import xmltodict
 
-from locations.hours import OpeningHours
 from locations.items import Feature
-from locations.user_agents import BROWSER_DEFAULT
 
 
 class MiniSESpider(scrapy.Spider):
