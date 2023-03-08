@@ -110,13 +110,11 @@ class AudiSpider(Spider):
     def parse(self, response):
         data = response.json()
         store_data = data.get("data").get("dealersByGeoLocation").get("dealers")
-        count = data.get("data").get("dealersByGeoLocation").get("meta").get("resultCount")
-        assert count < 100
         for store in store_data:
             properties = {
                 "ref": store.get("dealerId"),
                 "name": store.get("name"),
-                "addr_full": " ".join(store.get("address")),
+                "addr_full": ", ".join(store.get("address")),
                 "housenumber": store.get("houseNumber"),
                 "street": store.get("street"),
                 "street_address": store.get("address")[0],
