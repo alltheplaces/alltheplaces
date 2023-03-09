@@ -44,15 +44,15 @@ class KFCJPSpider(Spider):
             if location[range_name] == "None" or not location[range_name]:
                 continue
             for day in days:
-                open_time = location[range_name].split('-')[0]
-                close_time = location[range_name].split('-')[1]
-                if len(open_time) == 4: #HHMM should be HH:MM
+                open_time = location[range_name].split("-")[0]
+                close_time = location[range_name].split("-")[1]
+                if len(open_time) == 4:  # HHMM should be HH:MM
                     open_time = open_time[:2] + ":" + open_time[:-2]
-                elif len(open_time) != 5: #HH:MM expected
+                elif len(open_time) != 5:  # HH:MM expected
                     break
-                if len(close_time) == 4: #HHMM should be HH:MM
+                if len(close_time) == 4:  # HHMM should be HH:MM
                     close_time = close_time[:2] + ":" + close_time[:-2]
-                elif len(close_time) != 5: #HH:MM expected
+                elif len(close_time) != 5:  # HH:MM expected
                     break
                 oh.add_range(day, open_time, close_time)
         item["opening_hours"] = oh.as_opening_hours()
