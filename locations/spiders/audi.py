@@ -1,6 +1,7 @@
 import requests
 from scrapy import Spider
 from scrapy.http import JsonRequest
+
 from locations.items import Feature
 
 
@@ -17,9 +18,9 @@ class AudiSpider(Spider):
             url=self.graphql_url,
             json={
                 "query": "query Dealer {\n  marketInfo {\n    markets {\n      market\n      scope\n    }\n  }\n}\n",
-            }
+            },
         )
-        market_data = market_request.json().get('data').get('marketInfo').get('markets')
+        market_data = market_request.json().get("data").get("marketInfo").get("markets")
 
         for market in market_data:
             yield JsonRequest(
@@ -27,9 +28,9 @@ class AudiSpider(Spider):
                 method="POST",
                 data={
                     "operationName": "Dealer",
-                    "variables": {"market": market.get('market')},
+                    "variables": {"market": market.get("market")},
                     "query": "query Dealer ($market: Market!) {\n    dealersByMarket(market: $market) {\n        dealers {\n            dealerId\n            name\n            services\n            latitude\n            longitude\n            phone: phoneInternational\n            fax: faxInternational\n            email\n            url\n            operator: chainId\n            country\n            openingHours {\n                departments {\n                    departmentName\n                    openingHours {\n                        timeRanges {\n                            openTime\n                            closeTime\n                        }\n                    }\n                }\n            }\n            address\n            houseNumber\n            street\n            city\n            zipCode\n        }\n    }\n}",
-                }
+                },
             )
 
     def parse(self, response):
