@@ -32,7 +32,7 @@ class FreedomFurnitureSpider(Spider):
             item["phone"] = location["address"]["phone"]
             if "storeEmail" in location:
                 item["email"] = location["storeEmail"]
-            
+
             if "openingHours" in location:
                 oh = OpeningHours()
                 for day in location["openingHours"]["weekDayOpeningList"]:
