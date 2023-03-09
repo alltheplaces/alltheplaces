@@ -26,13 +26,22 @@ class SpotlightSpider(SitemapSpider):
             "name": response.xpath('//div[@id="maps_canvas"]/@data-storename').get(),
             "lat": response.xpath('//div[@id="maps_canvas"]/@data-latitude').get(),
             "lon": response.xpath('//div[@id="maps_canvas"]/@data-longitude').get(),
-            "addr_full": " ".join((" ".join(response.xpath('//div[contains(@class, "store-detail-desc")]/ul[1]/li/text()').getall())).split()),
+            "addr_full": " ".join(
+                (
+                    " ".join(response.xpath('//div[contains(@class, "store-detail-desc")]/ul[1]/li/text()').getall())
+                ).split()
+            ),
             "phone": response.xpath('//a[contains(@class, "call-store")]/@href').get().replace("tel:", ""),
             "website": response.url,
         }
 
         oh = OpeningHours()
-        hours_raw = " ".join((" ".join(response.xpath('(//table)[2]/tbody/tr/td/text()').getall())).split()).replace(" to ", " ").replace("Closed", "12:00am 12:00am").split()
+        hours_raw = (
+            " ".join((" ".join(response.xpath("(//table)[2]/tbody/tr/td/text()").getall())).split())
+            .replace(" to ", " ")
+            .replace("Closed", "12:00am 12:00am")
+            .split()
+        )
         hours_raw = [hours_raw[n : n + 3] for n in range(0, len(hours_raw), 3)]
         for day in hours_raw:
             if day[1].upper() == "12:00am" and day[2].upper() == "12:00am":
