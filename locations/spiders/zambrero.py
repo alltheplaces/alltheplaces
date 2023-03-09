@@ -22,7 +22,7 @@ class ZambreroSpider(SitemapSpider):
         "https://www.zambrero.com/sitemap.xml",
     ]
     sitemap_rules = [(r"\/locations\/[^\/]+$", "parse")]
-    custom_settings = {"ROBOTSTXT_OBEY": False} # robots.txt returns a HTTP 404 page that Scrapy tries to parse
+    custom_settings = {"ROBOTSTXT_OBEY": False}  # robots.txt returns a HTTP 404 page that Scrapy tries to parse
 
     def parse(self, response):
         properties = {
@@ -39,7 +39,14 @@ class ZambreroSpider(SitemapSpider):
             properties.pop("phone")
 
         oh = OpeningHours()
-        hours_raw = " ".join((" ".join(response.xpath('//div[contains(@class, "hours-item")]/span/text()').getall())).split()).replace(" : ", " ").replace(" - ", " ").replace("a.m.", "AM").replace("p.m.", "PM").split()
+        hours_raw = (
+            " ".join((" ".join(response.xpath('//div[contains(@class, "hours-item")]/span/text()').getall())).split())
+            .replace(" : ", " ")
+            .replace(" - ", " ")
+            .replace("a.m.", "AM")
+            .replace("p.m.", "PM")
+            .split()
+        )
         hours_raw = [hours_raw[n : n + 3] for n in range(0, len(hours_raw), 3)]
         for day in hours_raw:
             if "AM" in day[1].upper() or "PM" in day[1].upper() or "AM" in day[2].upper() or "PM" in day[2].upper():
