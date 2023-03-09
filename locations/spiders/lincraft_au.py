@@ -1,6 +1,5 @@
-from locations.storefinders.stockist import StockistSpider
-
 from locations.hours import OpeningHours
+from locations.storefinders.stockist import StockistSpider
 
 
 class LincraftAUSpider(StockistSpider):
@@ -11,7 +10,13 @@ class LincraftAUSpider(StockistSpider):
     def parse_item(self, item, location):
         item["website"] = location["custom_fields"][0]["value"].replace("lincraftau.myshopify.com", "lincraft.com.au")
         oh = OpeningHours()
-        hours_raw = " ".join(location["description"].split()).replace("Store Trading Hours", "").replace("9am-10am-5pm", "10am-5pm").replace("-", " ").split()
+        hours_raw = (
+            " ".join(location["description"].split())
+            .replace("Store Trading Hours", "")
+            .replace("9am-10am-5pm", "10am-5pm")
+            .replace("-", " ")
+            .split()
+        )
         hours_raw = hours_raw = [hours_raw[n : n + 3] for n in range(0, len(hours_raw), 3)]
         for day in hours_raw:
             open_time = day[1].upper()
