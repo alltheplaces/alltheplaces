@@ -16,7 +16,7 @@ class DictParser:
         "line1",
         "address-line-one",
         # JP
-        "町域以下住所",
+        "町域以下住所", # "address below town limits"
     ]
 
     city_keys = [
@@ -28,7 +28,7 @@ class DictParser:
         "locality",
         "suburb",
         # JP
-        "市区町村",
+        "市区町村", # "municipality"
     ]
 
     region_keys = [
@@ -41,7 +41,7 @@ class DictParser:
         "state-code",
         "county",
         # JP
-        "都道府県",
+        "都道府県", # "prefecture"
     ]
 
     country_keys = [
@@ -66,7 +66,7 @@ class DictParser:
         "postal",
         "zip-code",
         # JP
-        "郵便番号",
+        "郵便番号", # "post code"
     ]
 
     email_keys = ["email", "contact-email", "email-address", "email1"]
