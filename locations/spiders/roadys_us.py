@@ -1,7 +1,7 @@
 import scrapy
 from scrapy.http import JsonRequest
 
-from locations.categories import apply_category, apply_yes_no, Categories, Extras, Fuel, PaymentMethods
+from locations.categories import Categories, Extras, Fuel, PaymentMethods, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 
@@ -73,7 +73,9 @@ class RoadysUSSpider(scrapy.Spider):
                     case "Accepted Credit Cards":
                         apply_yes_no(PaymentMethods.VISA, item, "Visa" in amenity["status"], False)
                         apply_yes_no(PaymentMethods.MASTER_CARD, item, "MasterCard" in amenity["status"], False)
-                        apply_yes_no(PaymentMethods.AMERICAN_EXPRESS, item, "American Express" in amenity["status"], False)
+                        apply_yes_no(
+                            PaymentMethods.AMERICAN_EXPRESS, item, "American Express" in amenity["status"], False
+                        )
                         apply_yes_no(PaymentMethods.DISCOVER_CARD, item, "Discover" in amenity["status"], False)
                         apply_yes_no(PaymentMethods.DINERS_CLUB, item, "Diners Club" in amenity["status"], False)
 

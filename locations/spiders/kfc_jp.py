@@ -2,7 +2,7 @@ import json
 
 from scrapy import Request, Spider
 
-from locations.categories import apply_yes_no, Extras, PaymentMethods
+from locations.categories import Extras, PaymentMethods, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
