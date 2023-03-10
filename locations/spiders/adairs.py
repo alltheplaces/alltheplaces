@@ -40,7 +40,7 @@ class AdairsSpider(Spider):
                 item["website"] = "https://www.adairs.com.au" + location["link"]["url"]
             elif "adairs.co.nz" in response.url:
                 item["website"] = "https://www.adairs.co.nz" + location["link"]["url"]
-            
+
             oh = OpeningHours()
             for day_name in DAYS_FULL:
                 open_time = None
@@ -64,5 +64,5 @@ class AdairsSpider(Spider):
                     close_time = close_time.replace(" AM", ":00 AM").replace(" PM", ":00 PM")
                 oh.add_range(day_name, open_time, close_time, "%I:%M %p")
             item["opening_hours"] = oh.as_opening_hours()
-            
+
             yield item
