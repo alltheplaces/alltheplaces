@@ -45,5 +45,7 @@ class KFCMYSpider(Spider):
             if len(location["selfcollect_close"].split(":")) == 2:
                 location["selfcollect_close"] = location["selfcollect_close"] + ":00"
             location["selfcollect_close"] = location["selfcollect_close"].replace("24:00:00", "23:59:00")
-            item["opening_hours"].add_days_range(DAYS, location["selfcollect_open"], location["selfcollect_close"], "%H:%M:%S")
+            item["opening_hours"].add_days_range(
+                DAYS, location["selfcollect_open"], location["selfcollect_close"], "%H:%M:%S"
+            )
             yield item
