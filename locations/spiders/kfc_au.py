@@ -1,6 +1,7 @@
 import scrapy
 from scrapy.http import JsonRequest
 
+from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
@@ -32,6 +33,10 @@ class KFCAUSpider(scrapy.Spider):
                     item["email"] = contact_method["value"]
                 elif contact_method["key"] == "phoneNumber":
                     item["phone"] = contact_method["value"]
+            for channel in location["channelWiseServices"]:
+                if channel["channel"] == "web":
+                    apply_yes_no(Extras.DELIVERY, item, "delivery" in channel["services"], False)
+                    break
             web_path = item["name"].lower().replace(" ", "-") + "/" + item["postcode"]
             item["website"] = "https://www.kfc.com.au/restaurants/" + web_path
             details_url = "https://orderserv-kfc-apac-olo-api.yum.com/dev/v1/stores/details/" + web_path
@@ -42,13 +47,12 @@ class KFCAUSpider(scrapy.Spider):
     def parse_hours(self, response):
         item = response.meta["item"]
         trading_days = response.json()["availableTradingHours"]
-        oh = OpeningHours()
+        item["opening_hours"] = OpeningHours()
         for trading_day in trading_days:
-            oh.add_range(
+            item["opening_hours"].add_range(
                 trading_day["dayOfWeek"].title(),
                 trading_day["availableHours"]["startTime"],
                 trading_day["availableHours"]["endTime"],
                 "%H%M",
             )
-        item["opening_hours"] = oh.as_opening_hours()
         yield item
