@@ -1,5 +1,6 @@
 from scrapy import Spider
 
+from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
@@ -16,6 +17,9 @@ class OportoAUSpider(Spider):
             item = DictParser.parse(location)
             item["ref"] = location["storeNumber"]
             item["website"] = "https://www.oporto.com.au/locations/" + location["slug"] + "/"
+            apply_yes_no(Extras.DRIVE_THROUGH, item, location["driveThru"], False)
+            apply_yes_no(Extras.TAKEAWAY, item, location["pickup"], False)
+            apply_yes_no(Extras.DELIVERY, item, location["delivery"], False)
             oh = OpeningHours()
             for day_name, hours in location["opening_hours"].items():
                 if hours is False:
