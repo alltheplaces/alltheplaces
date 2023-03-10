@@ -191,17 +191,25 @@ class Fuel(Enum):
 class Extras(Enum):
     ATM = "atm"
     BABY_CHANGING_TABLE = "changing_table"
+    CALLING = "service:phone"
     CAR_WASH = "car_wash"
     COMPRESSED_AIR = "compressed_air"
+    COMPUTING = "service:computer"
+    COPYING = "service:copy"
+    DELIVERY = "delivery"
     DRIVE_THROUGH = "drive_through"
+    FAXING = "service:fax"
     INDOOR_SEATING = "indoor_seating"
     OIL_CHANGE = "service:vehicle:oil_change"
     OUTDOOR_SEATING = "outdoor_seating"
+    PRINTING = "service:print"
+    SCANING = "service:scan"
+    SHOWERS = "shower"
+    TAKEAWAY = "takeaway"
     TOILETS = "toilets"
+    TRUCK_WASH = "truck_wash"
     WHEELCHAIR = "wheelchair"
     WIFI = "internet_access=wlan"
-    TAKEAWAY = "takeaway"
-    DELIVERY = "delivery"
 
 
 class PaymentMethods(Enum):
