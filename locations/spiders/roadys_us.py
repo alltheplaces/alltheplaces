@@ -62,7 +62,7 @@ class RoadysUSSpider(scrapy.Spider):
                     case "Diesel Pumps":
                         item["extras"].update({"capacity:hgv": amenity["status"][0]})
                     case "# of Gas Pumps":
-                        item["extras"].update({"capacity:motor": amenity["status"][0]})
+                        item["extras"].update({"capacity:motorcar": amenity["status"][0]})
                     case "Fuel Service":
                         if "Self" in amenity["status"][0]:
                             item["extras"].update({"self_service": "yes"})
