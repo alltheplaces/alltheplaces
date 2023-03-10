@@ -1,10 +1,12 @@
-import scrapy
+from scrapy import Spider
+from scrapy.http import JsonRequest
 
+from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 
 
-class KFCMYSpider(scrapy.Spider):
+class KFCMYSpider(Spider):
     name = "kfc_my"
     item_attributes = {"brand": "KFC", "brand_wikidata": "Q524757"}
     allowed_domains = ["kfc.com.my"]
@@ -18,7 +20,7 @@ class KFCMYSpider(scrapy.Spider):
             city
             country
             lat
-            locationId
+            ref: locationId
             long
             name
             phone
@@ -26,26 +28,22 @@ class KFCMYSpider(scrapy.Spider):
             selfcollect_open
             state
             zip
-            __typename
+            drivethru
         }
-        __typename
     }
 }"""
         url = self.start_urls[0] + f"?query={gql_query}"
-        yield scrapy.Request(url=url, callback=self.parse)
+        yield JsonRequest(url=url)
 
     def parse(self, response):
         for location in response.json()["data"]["allLocation"]["locations"]:
             item = DictParser.parse(location)
-            item["ref"] = location["locationId"]
-            oh = OpeningHours()
-            for day in DAYS:
-                if len(location["selfcollect_open"].split(":")) == 2:
-                    location["selfcollect_open"] = location["selfcollect_open"] + ":00"
-                if len(location["selfcollect_close"].split(":")) == 2:
-                    location["selfcollect_close"] = location["selfcollect_close"] + ":00"
-                if location["selfcollect_close"] == "24:00:00":
-                    location["selfcollect_close"] = "23:59:00"
-                oh.add_range(day, location["selfcollect_open"], location["selfcollect_close"], "%H:%M:%S")
-            item["opening_hours"] = oh.as_opening_hours()
+            apply_yes_no(Extras.DRIVE_THROUGH, item, location["drivethru"] == "1", False)
+            item["opening_hours"] = OpeningHours()
+            if len(location["selfcollect_open"].split(":")) == 2:
+                location["selfcollect_open"] = location["selfcollect_open"] + ":00"
+            if len(location["selfcollect_close"].split(":")) == 2:
+                location["selfcollect_close"] = location["selfcollect_close"] + ":00"
+            location["selfcollect_close"] = location["selfcollect_close"].replace("24:00:00", "23:59:00")
+            item["opening_hours"].add_days_range(DAYS, location["selfcollect_open"], location["selfcollect_close"], "%H:%M:%S")
             yield item
