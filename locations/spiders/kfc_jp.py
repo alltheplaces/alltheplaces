@@ -2,6 +2,7 @@ import json
 
 from scrapy import Request, Spider
 
+from locations.categories import apply_yes_no, Extras, PaymentMethods
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
@@ -33,7 +34,25 @@ class KFCJPSpider(Spider):
             if value:
                 item[key] = value
 
-        oh = OpeningHours()
+        apply_yes_no(Extras.DRIVE_THROUGH, item, location["ドライブスルー"], False)
+        apply_yes_no(Extras.DELIVERY, item, location["お届けケンタッキー"], False)
+        apply_yes_no(Extras.WIFI, item, location["無線LAN対応"], False)
+        apply_yes_no(PaymentMethods.VISA, item, location["クレジットカード:VISA"], False)
+        apply_yes_no(PaymentMethods.MASTER_CARD, item, location["クレジットカード:Master Card"], False)
+        apply_yes_no(PaymentMethods.AMERICAN_EXPRESS, item, location["クレジットカード:American Express"], False)
+        apply_yes_no(PaymentMethods.DINERS_CLUB, item, location["クレジットカード:Diners Club"], False)
+        apply_yes_no(PaymentMethods.JCB, item, location["クレジットカード:JCB"], False)
+        apply_yes_no(PaymentMethods.PAYPAY, item, location["QRコード決済：PayPay"], False)
+        apply_yes_no(PaymentMethods.LINE_PAY, item, location["QRコード決済：LINE Pay"], False)
+        apply_yes_no(PaymentMethods.RAKUTEN_PAY, item, location["QRコード決済：R Pay（楽天ペイ）"], False)
+        apply_yes_no(PaymentMethods.ALIPAY, item, location["QRコード決済：ALIPAY（支付宝）"], False)
+        apply_yes_no(PaymentMethods.WECHAT, item, location["QRコード決済：WeChat Pay（微信支付）"], False)
+        apply_yes_no(PaymentMethods.QUICPAY, item, location["電子マネー：QUICPay"], False)
+        apply_yes_no(PaymentMethods.NANACO, item, location["電子マネー：nanaco"], False)
+        apply_yes_no(PaymentMethods.WAON, item, location["電子マネー：WAON"], False)
+        apply_yes_no(PaymentMethods.EDY, item, location["電子マネー：楽天Edy"], False)
+
+        item["opening_hours"] = OpeningHours()
         day_ranges = {
             "平日営業時間": ["Mo", "Tu", "We", "Th", "Fr"],
             "土日祝営業時間": ["Sa", "Su"],
@@ -54,7 +73,6 @@ class KFCJPSpider(Spider):
                     close_time = close_time[:2] + ":" + close_time[:-2]
                 elif len(close_time) != 5:  # HH:MM expected
                     break
-                oh.add_range(day, open_time, close_time)
-        item["opening_hours"] = oh.as_opening_hours()
+                item["opening_hours"].add_range(day, open_time, close_time)
 
         yield item
