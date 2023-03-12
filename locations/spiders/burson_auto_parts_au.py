@@ -1,5 +1,4 @@
 from chompjs import chompjs
-
 from scrapy import Request, Selector, Spider
 
 from locations.dict_parser import DictParser
@@ -18,7 +17,10 @@ class BursonAutoPartsAU(Spider):
             yield Request(url=url, callback=self.get_markers_js)
 
     def get_markers_js(self, response):
-        js_url = "https://www.burson.com.au/" + response.xpath('(//body/script[@type="application/javascript"])[last()]/@src').get()
+        js_url = (
+            "https://www.burson.com.au/"
+            + response.xpath('(//body/script[@type="application/javascript"])[last()]/@src').get()
+        )
         yield Request(url=js_url)
 
     def parse(self, response):
@@ -27,13 +29,20 @@ class BursonAutoPartsAU(Spider):
             location_html = Selector(text=location[1])
             properties = {
                 "ref": location[0],
-                "name": location_html.xpath('//h3/text()').get(),
+                "name": location_html.xpath("//h3/text()").get(),
                 "lat": location[3],
                 "lon": location[4],
-                "addr_full": " ".join(location_html.xpath('//strong[text()="Address"]/following::text()').get(default="")[2:].replace("\xa0", " ").split()),
+                "addr_full": " ".join(
+                    location_html.xpath('//strong[text()="Address"]/following::text()')
+                    .get(default="")[2:]
+                    .replace("\xa0", " ")
+                    .split()
+                ),
                 "phone": location_html.xpath('//strong[text()="Phone"]/following::text()').get(default="")[2:],
                 "email": location_html.xpath('//strong[text()="Email"]/following::text()').get(default="")[2:],
                 "opening_hours": OpeningHours(),
             }
-            properties["opening_hours"].add_ranges_from_string(location_html.xpath('//strong[text()="Hours"]/following::text()').get()[2:])
+            properties["opening_hours"].add_ranges_from_string(
+                location_html.xpath('//strong[text()="Hours"]/following::text()').get()[2:]
+            )
             yield Feature(**properties)
