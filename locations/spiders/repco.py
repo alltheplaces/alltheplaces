@@ -4,6 +4,7 @@ from scrapy.http import JsonRequest
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_EN, OpeningHours
 
+
 class RepcoSpider(Spider):
     name = "repco"
     item_attributes = {"brand": "Repco", "brand_wikidata": "Q173425"}
@@ -40,11 +41,13 @@ class RepcoSpider(Spider):
                 item["website"] = f"https://www.repco.com.au/en/store/{slug}"
             elif "repco.co.nz" in response.url:
                 item["website"] = f"https://www.repco.co.nz/en/store/{slug}"
-            
+
             item["opening_hours"] = OpeningHours()
             for day_name, hours in location["openings"].items():
                 if hours.upper() == "CLOSED":
                     continue
-                item["opening_hours"].add_range(DAYS_EN[day_name], hours.split(" - ")[0], hours.split(" - ")[1], "%I:%M %p")
-            
+                item["opening_hours"].add_range(
+                    DAYS_EN[day_name], hours.split(" - ")[0], hours.split(" - ")[1], "%I:%M %p"
+                )
+
             yield item
