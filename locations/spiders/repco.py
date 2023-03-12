@@ -16,7 +16,7 @@ class RepcoSpider(Spider):
         "https://www.repco.com.au/en/store-finder/store-locator?q=&page=0",
         "https://www.repco.co.nz/en/store-finder/store-locator?q=&page=0",
     ]
-    requires_proxy = "AU" # or NZ
+    requires_proxy = "AU"  # or NZ
 
     def start_requests(self):
         for url in self.start_urls:
