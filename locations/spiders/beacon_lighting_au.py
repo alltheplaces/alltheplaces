@@ -35,5 +35,5 @@ class BeaconLightingAUSpider(Spider):
                 else:
                     item["opening_hours"].add_range(day_name.title(), open_time_1, close_time_1)
                     item["opening_hours"].add_range(day_name.title(), open_time_2, close_time_2)
-            
+
             yield item
