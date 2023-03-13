@@ -1,15 +1,17 @@
-from scrapy.spiders import SitemapSpider
-
-from locations.structured_data_spider import StructuredDataSpider
+from locations.storefinders.where2getit import Where2GetItSpider
 
 
-class TheCheesecakeFactorySpider(SitemapSpider, StructuredDataSpider):
-    download_delay = 0.1
+class TheCheesecakeFactorySpider(Where2GetItSpider):
     name = "thecheesecakefactory"
     item_attributes = {"brand": "The Cheesecake Factory", "brand_wikidata": "Q1045842"}
-    allowed_domains = [
-        "www.thecheesecakefactory.com",
-        "locations.thecheesecakefactory.com",
-    ]
-    sitemap_urls = ["https://locations.thecheesecakefactory.com/robots.txt"]
-    sitemap_rules = [(r"https:\/\/locations\.thecheesecakefactory\.com\/.+\.html", "parse_sd")]
+    w2gi_id = "320C479E-6D70-11DE-9D8B-E57E37ABAA09"
+    w2gi_filter = {
+        "or": {
+            "CATERINGFLAG": {"EQ": ""},
+            "CURBSIDEFLAG": {"EQ": ""},
+            "DELIVERYFLAG": {"EQ": ""},
+            "BANQUETS": {"eq": ""},
+            "PATIO": {"eq": ""},
+        }
+    }
+    w2gi_query = "CA"
