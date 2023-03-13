@@ -2,9 +2,9 @@ import csv
 import gzip
 import json
 import math
-import pandas
 
 import geonamescache
+import pandas
 
 # Radius of the Earth in kilometers
 EARTH_RADIUS = 6378.1

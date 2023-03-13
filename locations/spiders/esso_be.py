@@ -15,20 +15,17 @@ class EssoSpider(Spider):
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def start_requests(self):
-        for lat, lng in points(grid_size=5, a2_country_codes=['BE']):
+        for lat, lng in points(grid_size=5, a2_country_codes=["BE"]):
             print(lat, lng)
             be_url = f"https://www.esso.be/fr-be/api/RetailLocator/GetRetailLocations?DataSource=RetailGasStations&country=BE&Latitude1={lat-0.5}&Longitude1={lng-1}&Latitude2={lat+0.5}&Longitude2={lng+1}"
-            market_request = JsonRequest(
-                url=be_url,
-                method="GET"
-            )
+            market_request = JsonRequest(url=be_url, method="GET")
             yield market_request
 
     def parse(self, response):
         locations = response.json().get("Locations")
         print("parsing", response.json())
         for location in locations:
-            print(location.get('LocationID'))
+            print(location.get("LocationID"))
             p = DictParser().parse(location)
-            p['ref'] = location.get('LocationID')
+            p["ref"] = location.get("LocationID")
             yield p
