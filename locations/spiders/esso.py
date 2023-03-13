@@ -13,9 +13,9 @@ class EssoSpider(Spider):
     }
     custom_settings = {"ROBOTSTXT_OBEY": False}
     fr_url = "https://carburant.esso.fr/api/RetailLocator/GetRetailLocations?DataSource=RetailGasStations"
-    be_url = "https://www.esso.be/api/RetailLocator/GetRetailLocations?DataSource=RetailGasStations"
+    be_url = "https://www.esso.be/fr-be/api/RetailLocator/GetRetailLocations?DataSource=RetailGasStations"
     uk_url = "https://www.esso.co.uk/api/RetailLocator/GetRetailLocations?DataSource=RetailGasStations"
-    urls = [fr_url, be_url, uk_url]
+    urls = [be_url]
 
     def start_requests(self):
         for url in self.urls:
@@ -27,6 +27,7 @@ class EssoSpider(Spider):
 
     def parse(self, response):
         locations = response.json().get("Locations")
+        print("parsing", response.json())
         for location in locations:
             print(location.get('LocationID'))
             p = DictParser().parse(location)
