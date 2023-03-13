@@ -1,12 +1,10 @@
-from scrapy.spiders import SitemapSpider
-
 from locations.spiders.calvin_klein import CalvinKleinSpider
-from locations.structured_data_spider import StructuredDataSpider
+from locations.storefinders.where2getit import Where2GetItSpider
 
 
-class CalvinKleinCAUSSpider(SitemapSpider, StructuredDataSpider):
+class CalvinKleinCAUSSpider(Where2GetItSpider):
     name = "calvin_klein_us"
     item_attributes = CalvinKleinSpider.item_attributes
-    sitemap_urls = ["https://stores.calvinklein.us/robots.txt"]
-    sitemap_rules = [(r"https://stores\.calvinklein\.us/\w\w/[-\w]+/\d+/", "parse_sd")]
-    json_parser = "json5"
+    w2gi_id = "F5C66E24-E944-11EA-A1DF-53CCF48ECC77"
+    w2gi_filter = {"or": {"icon": {"like": ""}}}
+    w2gi_query = "CA"
