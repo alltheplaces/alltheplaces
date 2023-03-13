@@ -16,4 +16,5 @@ class TeknikmagasinetSESpider(scrapy.Spider):
     def parse(self, response, **kwargs):
         d = response.json().get("pageProps").get("data").get("shops")
         for store in d:
+           store["street_address"] = store.pop("Address")
             yield DictParser.parse(store)
