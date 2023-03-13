@@ -6,8 +6,8 @@ from locations.dict_parser import DictParser
 from locations.items import Feature
 
 
-class BigmatBESpider(scrapy.Spider):
-    name = "teknikmagasinet"
+class TeknikmagasinetSESpider(scrapy.Spider):
+    name = "teknikmagasinet_se"
     start_urls = [
         "https://www.teknikmagasinet.se/_next/data/l27oTv8kIMOzrHw2WFLQi/sv/teknikmagasinet/find-your-store.json"
     ]
