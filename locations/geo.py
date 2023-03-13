@@ -2,6 +2,7 @@ import csv
 import gzip
 import json
 import math
+import pandas
 
 import geonamescache
 
@@ -9,6 +10,33 @@ import geonamescache
 EARTH_RADIUS = 6378.1
 # Kilometers per mile
 MILES_TO_KILOMETERS = 1.60934
+
+
+def points(grid_size: int, **kwargs) -> [(float, float)]:
+    """
+    Returns a list of (lat, lng) tuples worldwide or country filtered
+    """
+
+    def h3_resolution_from_grid_size(size: int) -> int:
+        """
+        returns the resolution of h3 from the desired grid size in km.
+        """
+        h3_sizes = {1900: 0, 700: 1, 275: 2, 100: 3, 40: 4, 14: 5, 5: 6}
+        try:
+            return h3_sizes[size]
+        except KeyError:
+            raise ValueError(f"Size should be one of the following: {h3_sizes.keys()}. Received: {size}")
+
+    resolution = h3_resolution_from_grid_size(size=grid_size)
+    df = pandas.read_csv("./locations/searchable_points/h3.csv")
+    df = df.loc[df["resolution"] == resolution]
+    countries = kwargs.get("countries", [])
+    a2_country_codes = kwargs.get("a2_country_codes", [])
+    a3_country_codes = kwargs.get("a3_country_codes", [])
+    df = df.loc[
+        df["country"].isin(countries) | df["alpha_2"].isin(a2_country_codes) | df["alpha_3"].isin(a3_country_codes)
+    ]
+    return list(df[["latitude", "longitude"]].itertuples(index=False, name=None))
 
 
 def vincenty_distance(lat, lon, distance_km, bearing_deg):
