@@ -1,4 +1,5 @@
 import scrapy
+
 from locations.dict_parser import DictParser
 from locations.spiders.vapestore_gb import clean_address
 
@@ -31,9 +32,8 @@ class TravelexSpider(scrapy.Spider):
         "qa",
         "uk",
         "us",
-        "za"
+        "za",
     ]
-
 
     # API documentation
     # https://api.travelex.net/docs/api/index.html#api-store-getStoreAll
@@ -41,7 +41,6 @@ class TravelexSpider(scrapy.Spider):
     # Countries check
     # If a new country is added to the brand, you might want to check them here:
     # https://api.travelex.net/salt/site/list?key=Travelex
-
 
     def start_requests(self):
         for country in self.countries:
