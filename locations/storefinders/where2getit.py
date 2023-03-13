@@ -13,6 +13,7 @@ class Where2GetItSpider(Spider):
     w2gi_api = "https://hosted.where2getit.com/rest/locatorsearch"
     w2gi_id = ""
     w2gi_query = "US"
+    w2gi_country_code = ""
     w2gi_filter = None
     request_size = 1000
 
@@ -26,7 +27,7 @@ class Where2GetItSpider(Spider):
                         "dataview": "store_default",
                         "limit": self.request_size,
                         "offset": offset,
-                        "geolocs": {"geoloc": [{"addressline": self.w2gi_query}]},
+                        "geolocs": {"geoloc": [{"addressline": self.w2gi_query, "country": self.w2gi_country_code}]},
                         "searchradius": "5000",
                         "where": self.w2gi_filter,
                     },
