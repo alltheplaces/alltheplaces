@@ -19,11 +19,10 @@ class EssoSpider(Spider):
         for url in self.urls:
             market_request = JsonRequest(url=url, method="GET")
             yield market_request
+
     def parse(self, response):
         locations = response.json().get("Locations")
-        print("parsing", response.json())
         for location in locations:
-            print(location.get("LocationID"))
             p = DictParser().parse(location)
             p["ref"] = location.get("LocationID")
             yield p

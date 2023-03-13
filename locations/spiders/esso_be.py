@@ -23,9 +23,7 @@ class EssoSpider(Spider):
 
     def parse(self, response):
         locations = response.json().get("Locations")
-        print("parsing", response.json())
         for location in locations:
-            print(location.get("LocationID"))
             p = DictParser().parse(location)
             p["ref"] = location.get("LocationID")
             yield p
