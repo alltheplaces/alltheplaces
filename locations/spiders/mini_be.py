@@ -5,7 +5,7 @@ from locations.items import Feature
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class MiniSpider(scrapy.Spider):
+class MiniBESpider(scrapy.Spider):
     name = "mini_be"
     item_attributes = {
         "brand": "Mini",
