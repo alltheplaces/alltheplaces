@@ -1,3 +1,4 @@
+from locations.items import Feature
 from locations.storefinders.where2getit import Where2GetItSpider
 
 # The spider gets Stores and Outlets in Europe
@@ -24,3 +25,7 @@ class TheNorthFaceSpider(Where2GetItSpider):
     }
     w2gi_query = "Brussels"
     w2gi_country_code = "BE"
+
+    def parse_item(self, item: Feature, location: dict, **kwargs):
+        if location["icon"] != "RetailStore":
+            yield item
