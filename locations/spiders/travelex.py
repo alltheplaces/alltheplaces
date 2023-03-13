@@ -1,18 +1,50 @@
 import scrapy
-
 from locations.dict_parser import DictParser
-from locations.items import Feature
 from locations.spiders.vapestore_gb import clean_address
 
 
 class TravelexSpider(scrapy.Spider):
     name = "travelex"
     item_attributes = {"brand": "Travelex", "brand_wikidata": "Q2337964"}
-    allowed_domains = ["https://www.travelex.co.uk/"]
+    countries = [
+        "ae",
+        "au",
+        "nlbe",
+        "enbh",
+        "enca",
+        "ench",
+        "encn",
+        "cz",
+        "de",
+        "fr",
+        "gb",
+        "enhk",
+        "in",
+        "itit",
+        "enjp",
+        "mo",
+        "my",
+        "nl",
+        "nm",
+        "nz",
+        "om",
+        "qa",
+        "uk",
+        "us",
+        "za"
+    ]
+
+
+    # API documentation
+    # https://api.travelex.net/docs/api/index.html#api-store-getStoreAll
+    #
+    # Countries check
+    # If a new country is added to the brand, you might want to check them here:
+    # https://api.travelex.net/salt/site/list?key=Travelex
+
 
     def start_requests(self):
-        countries = ["dech", "au", "gb", "enbh", "de", "zhhk", "jajp", "my", "nz", "qa", "om", "ae", "nl"]
-        for country in countries:
+        for country in self.countries:
             yield scrapy.Request(
                 f"https://api.travelex.net/salt/store/search?key=Travelex&mode=storeLocator&site=/{country}&lat={0.0}&lng={0.0}",
                 meta={"country": country},
