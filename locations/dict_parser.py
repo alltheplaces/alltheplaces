@@ -98,7 +98,7 @@ class DictParser:
         "yext-display-lng",
     ]
 
-    website_keys = ["url", "website", "permalink"]
+    website_keys = ["url", "website", "permalink", "store-url"]
 
     @staticmethod
     def parse(obj) -> Feature:
