@@ -1,6 +1,7 @@
 import scrapy
 
 from locations.categories import Categories, apply_category
+from locations.hours import OpeningHours, sanitise_day
 from locations.items import Feature
 
 
@@ -8,23 +9,20 @@ class BootsSpider(scrapy.Spider):
     name = "boots"
     item_attributes = {"brand": "Boots", "brand_wikidata": "Q6123139"}
     allowed_domains = ["www.boots.com", "www.boots.ie"]
-    download_delay = 0.5
     start_urls = ["http://www.boots.com/store-a-z", "http://www.boots.ie/store-a-z"]
 
-    def parse_hours(self, lis):
-        hours = []
-        for li in lis:
-            day = li.xpath('normalize-space(./td[@class="store_hours_day"]/text())').extract_first()
+    def parse_hours(self, rules) -> OpeningHours:
+        hours = OpeningHours()
+        for rule in rules:
+            day = sanitise_day(rule.xpath('./td[@class="store_hours_day"]/text()').get())
             times = (
-                li.xpath('normalize-space(./td[@class="store_hours_time"]/text())')
-                .extract_first()
-                .replace(" ", "")
-                .replace("Closed-Closed", "off")
+                rule.xpath('normalize-space(./td[@class="store_hours_time"]/text())').extract_first().replace(" ", "")
             )
             if times and day:
-                hours.append(day[:2] + " " + times)
+                start_time, end_time = times.split("-")
+                hours.add_range(day, start_time, end_time)
 
-        return "; ".join(hours)
+        return hours
 
     def parse_stores(self, response):
         addr_full = response.xpath(
@@ -53,14 +51,9 @@ class BootsSpider(scrapy.Spider):
             "lon": response.xpath('normalize-space(//input[@id="lon"]/@value)').extract_first(),
         }
 
-        hours = self.parse_hours(
-            response.xpath(
-                '//div[@class="row store_all_opening_hours"]/div[1]/table[@class="store_opening_hours "]/tbody/tr'
-            )
+        properties["opening_hours"] = self.parse_hours(
+            response.xpath('//table[@class="store_opening_hours "][contains(., "Store:")]/tbody/tr')
         )
-        if hours:
-            properties["opening_hours"] = hours
-
         if properties["name"].startswith("Opticians"):
             properties["brand"] = "Boots Opticians"
             properties["brand_wikidata"] = "Q4944037"
