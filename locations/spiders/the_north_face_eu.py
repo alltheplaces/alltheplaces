@@ -1,7 +1,7 @@
 from locations.storefinders.where2getit import Where2GetItSpider
 
 # The spider gets Stores and Outlets in Europe
-# A single query for CA collects both CA and US
+# A single query for BE collects EU stores
 
 
 class TheNorthFaceSpider(Where2GetItSpider):
