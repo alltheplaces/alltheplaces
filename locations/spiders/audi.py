@@ -1,6 +1,7 @@
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
+from locations.categories import apply_category, Categories
 from locations.items import Feature
 
 
@@ -53,4 +54,5 @@ class AudiSpider(Spider):
                     "lat": store.get("latitude"),
                     "lon": store.get("longitude"),
                 }
+                apply_category(Categories.SHOP_CAR, properties)
                 yield Feature(**properties)
