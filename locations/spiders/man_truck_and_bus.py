@@ -16,10 +16,10 @@ class ManTruckAndBusSpider(scrapy.Spider):
             coordinates_data = store[3]
             phone_data = store[4]
             name = name_data[0] or name_data[1]
-            
+
             if len(coordinates_data) < 2:
                 continue
-            
+
             yield Feature(
                 {
                     "ref": store[0],
