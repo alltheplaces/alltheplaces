@@ -12,13 +12,10 @@ class EssoSpider(Spider):
     }
     custom_settings = {"ROBOTSTXT_OBEY": False}
     fr_url = "https://carburant.esso.fr/api/RetailLocator/GetRetailLocations?DataSource=RetailGasStations"
-    uk_url = "https://www.esso.co.uk/api/RetailLocator/GetRetailLocations?DataSource=RetailGasStations"
-    urls = [fr_url, uk_url]
 
     def start_requests(self):
-        for url in self.urls:
-            market_request = JsonRequest(url=url, method="GET")
-            yield market_request
+        market_request = JsonRequest(url=self.fr_url, method="GET")
+        yield market_request
 
     def parse(self, response):
         locations = response.json().get("Locations")
