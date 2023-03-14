@@ -5,7 +5,7 @@ from locations.dict_parser import DictParser
 
 
 class EssoSpider(Spider):
-    name = "esso"
+    name = "esso_fr"
     item_attributes = {
         "brand": "Esso",
         "brand_wikidata": "Q867662",
