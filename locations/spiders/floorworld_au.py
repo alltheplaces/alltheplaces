@@ -1,5 +1,4 @@
 import chompjs
-
 from scrapy import Selector, Spider
 
 from locations.dict_parser import DictParser
@@ -13,7 +12,9 @@ class FloorworldAUSpider(Spider):
     start_urls = ["https://www.floorworld.com.au/store-finder"]
 
     def parse(self, response):
-        locations = chompjs.parse_js_object(response.xpath('(//div[contains(@class, "goto-next")]/following::script)/text()').get())["objects"]
+        locations = chompjs.parse_js_object(
+            response.xpath('(//div[contains(@class, "goto-next")]/following::script)/text()').get()
+        )["objects"]
         for location in locations:
             item = DictParser.parse(location)
             item["ref"] = item["name"]
@@ -25,7 +26,8 @@ class FloorworldAUSpider(Spider):
             if location.get("store_facebook_url"):
                 item["facebook"] = location["store_facebook_url"].split("?utm_campaign=", 1)[0]
             item["opening_hours"] = OpeningHours()
-            hours_string = " ".join(Selector(text=location["opening_hours"]).xpath('//p/text()').getall()).replace("12 noon", "12:00 pm")
+            hours_string = " ".join(Selector(text=location["opening_hours"]).xpath("//p/text()").getall()).replace(
+                "12 noon", "12:00 pm"
+            )
             item["opening_hours"].add_ranges_from_string(hours_string)
             yield item
-        
