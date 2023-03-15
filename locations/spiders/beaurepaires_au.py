@@ -14,7 +14,11 @@ class BeaurepairesAUSpider(AmastyStoreLocatorSpider):
 
     def start_requests(self):
         for domain in self.allowed_domains:
-            yield Request(url=f"https://{domain}/amlocator/index/ajax/", method="POST", headers={"X-Requested-With": "XMLHttpRequest"})
+            yield Request(
+                url=f"https://{domain}/amlocator/index/ajax/",
+                method="POST",
+                headers={"X-Requested-With": "XMLHttpRequest"},
+            )
 
     def parse_item(self, item, location, popup_html):
         item["street_address"] = item.pop("addr_full")
