@@ -17,17 +17,19 @@ class JaxTyresAndAutoAUSpider(Spider):
     def parse_store_list(self, response):
         stores = response.xpath('//div[contains(@class, "pgFnSt-storeContainerSingleReg")]/a[not(@class)]')
         for store in stores:
-            name = store.xpath('text()').get()
-            url = "https://www.jaxtyres.com.au" + store.xpath('@href').get()
+            name = store.xpath("text()").get()
+            url = "https://www.jaxtyres.com.au" + store.xpath("@href").get()
             yield Request(url=url, meta={"name": name})
 
     def parse(self, response):
         properties = {
             "ref": response.url,
             "name": response.meta["name"],
-            "lat": response.xpath('//main/@data-lat').get(),
-            "lon": response.xpath('//main/@data-lng').get(),
-            "addr_full": " ".join((" ".join(response.xpath('//p[contains(@class, "pgStLcSn-addressContent")]/text()').getall())).split()),
+            "lat": response.xpath("//main/@data-lat").get(),
+            "lon": response.xpath("//main/@data-lng").get(),
+            "addr_full": " ".join(
+                (" ".join(response.xpath('//p[contains(@class, "pgStLcSn-addressContent")]/text()').getall())).split()
+            ),
             "phone": response.xpath('//a[contains(@class, "pgStLcSn-phoneNumber")]/@href').get(),
             "website": response.url,
         }
