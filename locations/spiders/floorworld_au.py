@@ -17,7 +17,7 @@ class FloorworldAUSpider(Spider):
         )["objects"]
         for location in locations:
             item = DictParser.parse(location)
-            item["ref"] = item["name"]
+            item["ref"] = location["hs_path"]
             if item.get("addr_full"):
                 item["street_address"] = item.pop("addr_full").strip()
             item["state"] = location["state"]["name"]
