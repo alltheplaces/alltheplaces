@@ -45,7 +45,7 @@ class VirtualEarthSpider(Spider):
 
             item = DictParser.parse(feature)
 
-            yield from self.parse_item(item, feature)
+            yield from self.parse_item(item, feature) or []
 
     def parse_item(self, item, feature, **kwargs):
         yield item

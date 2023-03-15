@@ -58,10 +58,17 @@ DAYS_DE = {
 }
 DAYS_BG = {
     "Пон": "Mo",
-    "Пт": "Fr",
+    "По": "Mo",
+    "Вт": "Tu",
+    "Ср": "We",
+    "Че": "Th",
     "Пет": "Fr",
+    "Пе": "Fr",
+    "Пт": "Fr",
     "Съб": "Sa",
+    "Съ": "Sa",
     "нед": "Su",
+    "Не": "Su",
     "Нд": "Su",
 }
 DAYS_CH = {
@@ -73,13 +80,53 @@ DAYS_CH = {
     "Sa": "Sa",
     "So": "Su",
 }
+DAYS_CZ = {
+    "Pondělí": "Mo",
+    "Po": "Mo",
+    "Úterý": "Tu",
+    "Út": "Tu",
+    "Středa": "We",
+    "St": "We",
+    "Čtvrtek": "Th",
+    "Čt": "Th",
+    "Pátek": "Fr",
+    "Pá": "Fr",
+    "Sobota": "Sa",
+    "So": "Sa",
+    "Neděle": "Su",
+    "Ne": "Su",
+}
+DAYS_GR = {
+    "Δε": "Mo",
+    "Τρ": "Tu",
+    "Τε": "We",
+    "Πέ": "Th",
+    "Πα": "Fr",
+    "Σά": "Sa",
+    "Κυ": "Su",
+}
 DAYS_HU = {
+    "Hétfő": "Mo",
     "Hé": "Mo",
+    "H": "Mo",
+    "Kedd": "Tu",
     "Ke": "Tu",
+    "K": "Tu",
+    "Szerda": "We",
     "Sze": "We",
+    # "Sz": "We",
+    "Csütörtök": "Th",
     "Csü": "Th",
+    "Cs": "Th",
+    "Péntek": "Fr",
     "Pé": "Fr",
+    "P": "Fr",
+    "Szombat": "Sa",
     "Szo": "Sa",
+    # "Sz": "Sa",
+    "Va": "Sa",
+    "V": "Su",
+    "Vasárnap": "Su",
     "Vas": "Su",
 }
 
@@ -92,7 +139,6 @@ DAYS_SE = {
     "Lördag": "Sa",
     "Söndag": "Su",
 }
-
 DAYS_SI = {
     "po": "Mo",
     "Pon": "Mo",
@@ -111,12 +157,19 @@ DAYS_SI = {
 }
 DAYS_IT = {
     "Lun": "Mo",
+    "Lu": "Mo",
     "Mar": "Tu",
+    "Ma": "Tu",
     "Mer": "We",
+    "Me": "We",
     "Gio": "Th",
+    "Gi": "Th",
     "Ven": "Fr",
+    "Ve": "Fr",
     "Sab": "Sa",
+    "Sa": "Sa",
     "Dom": "Su",
+    "Do": "Su",
 }
 DAYS_FR = {
     "Lu": "Mo",
@@ -150,6 +203,38 @@ DAYS_NL = {
     "Zaterdag": "Sa",
     "Zondag": "Su",
 }
+DAYS_PL = {
+    "Pn": "Mo",
+    "Po": "Mo",
+    "Wt": "Tu",
+    "Śr": "We",
+    "Cz": "Th",
+    "Pt": "Fr",
+    "Pi": "Fr",
+    "Sb": "Sa",
+    "So": "Sa",
+    "Nd": "Su",
+    "Ni": "Su",
+}
+DAYS_PT = {
+    # "Se": "Mo",
+    "Te": "Tu",
+    # "Qu": "We",
+    # "Qu": "Th",
+    # "Se": "Fr",
+    "Sa": "Sa",
+    "Sá": "Sa",
+    "Do": "Su",
+}
+DAYS_SK = {
+    "Po": "Mo",
+    "Ut": "Tu",
+    "St": "We",
+    "Št": "Th",
+    "Pi": "Fr",
+    "So": "Sa",
+    "Ne": "Su",
+}
 DAYS_RS = {
     "Ponedeljak": "Mo",
     "Utorak": "Tu",
@@ -180,34 +265,62 @@ DAYS_NO = {
 DAYS_DK = {
     "Mandag": "Mo",
     "Man": "Mo",
+    "Ma": "Mo",
     "Tirsdag": "Tu",
+    "Ti": "Tu",
     "Onsdag": "We",
+    "On": "We",
     "Torsdag": "Th",
     "Tors": "Th",
+    "To": "Th",
     "Fredag": "Fr",
     "Fre": "Fr",
+    "Fr": "Fr",
     "Lørdag": "Sa",
     "Lør": "Sa",
+    "Lø": "Sa",
     "Søndag": "Su",
     "Søn": "Su",
+    "So": "Su",
 }
 DAYS_FI = {
     "Maanantai": "Mo",
+    "Ma": "Mo",
     "Tiistai": "Tu",
+    "Ti": "Tu",
     "Keskiviikko": "We",
+    "Ke": "We",
     "Torstai": "Th",
+    "To": "Th",
     "Perjantai": "Fr",
+    "Pe": "Fr",
     "Lauantai": "Sa",
+    "La": "Sa",
     "Sunnuntai": "Su",
+    "Su": "Su",
 }
 DAYS_ES = {
     "Lunes": "Mo",
+    "Lun": "Mo",
+    "Lu": "Mo",
     "Martes": "Tu",
+    "Mar": "Tu",
+    "Ma": "Tu",
     "Miércoles": "We",
+    "Mié": "We",
+    "Mi": "We",
     "Jueves": "Th",
+    "Jue": "Th",
+    "Ju": "Th",
     "Viernes": "Fr",
+    "Vie": "Fr",
+    "Vi": "Fr",
     "Sábado": "Sa",
+    "Sáb": "Sa",
+    "Sa": "Sa",
     "Domingo": "Su",
+    "Dom": "Su",
+    "Do": "Su",
 }
 
 NAMED_DAY_RANGES_EN = {
