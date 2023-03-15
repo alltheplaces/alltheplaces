@@ -14,7 +14,13 @@ class CarpetCourtAUSpider(Spider):
     start_urls = ["https://www.carpetcourt.com.au/stores"]
 
     def parse(self, response):
-        locations = json.loads((response.xpath('//div[@id="store-selector"]/following::script/text()').get().split("availableStores\": ", 1))[1].split("          }\n", 1)[0])
+        locations = json.loads(
+            (
+                response.xpath('//div[@id="store-selector"]/following::script/text()')
+                .get()
+                .split('availableStores": ', 1)
+            )[1].split("          }\n", 1)[0]
+        )
         for location_ref, location in locations.items():
             item = DictParser.parse(location)
             item["street_address"] = html.unescape(item.pop("addr_full")).strip(" ,")
@@ -43,8 +49,14 @@ class CarpetCourtAUSpider(Spider):
     def add_hours(self, response):
         item = response.meta["item"]
         if response.xpath('//div[contains(@class, "amlocator-location-image")]'):
-            item["image"] = ((response.xpath('//div[contains(@class, "amlocator-location-image")]/@style').get().split("url('", 1))[1].split("');", 1))[0]
+            item["image"] = (
+                (response.xpath('//div[contains(@class, "amlocator-location-image")]/@style').get().split("url('", 1))[
+                    1
+                ].split("');", 1)
+            )[0]
         item["opening_hours"] = OpeningHours()
-        hours_string = " ".join(response.xpath('//div[contains(@class, "amlocator-schedule-table")]/div/span/text()').getall())
+        hours_string = " ".join(
+            response.xpath('//div[contains(@class, "amlocator-schedule-table")]/div/span/text()').getall()
+        )
         item["opening_hours"].add_ranges_from_string(hours_string)
         yield item
