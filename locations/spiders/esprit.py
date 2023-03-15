@@ -30,9 +30,12 @@ class EspritSpider(scrapy.Spider):
                     close_time=f"{closing.get('h')}:{closing.get('m')}",
                     time_format="%H:%M",
                 )
+            store["street_address"] = ", ".join(filter(None, [store["address_additional"], store.pop("address")]))
             item = DictParser.parse(store)
             item["lat"] = store.get("geo_latitude")
             item["lon"] = store.get("geo_longitude")
-            item["street_address"] = store.get("address")
+            item[
+                "website"
+            ] = f'https://www.esprit.com/storefinder?storeid={store["store_id"]}&location={store["geo_latitude"]},{store["geo_longitude"]}'
             item["opening_hours"] = oh
             yield item
