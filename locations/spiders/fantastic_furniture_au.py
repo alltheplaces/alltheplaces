@@ -1,6 +1,6 @@
-from chompjs import chompjs
 import re
 
+from chompjs import chompjs
 from scrapy import Selector, Spider
 
 from locations.dict_parser import DictParser
@@ -23,12 +23,31 @@ class FantasticFurnitureAUSpider(Spider):
             location = chompjs.parse_js_object(js_dict)
             item = DictParser.parse(location)
             tooltip_html = Selector(text=location["contentString"])
-            item["street_address"] = " ".join(tooltip_html.xpath('//div[contains(@class, "store_details")]/p[not(@class)]/text()').getall())
+            item["street_address"] = " ".join(
+                tooltip_html.xpath('//div[contains(@class, "store_details")]/p[not(@class)]/text()').getall()
+            )
             item["city"] = location["name"]
-            item["phone"] = tooltip_html.xpath('//div[contains(@class, "store_details")]/p[contains(@class, "phone")]/text()').get().strip()
-            item["website"] = "https://www.fantasticfurniture.com.au" + tooltip_html.xpath('//div[contains(@class, "store_details")]/h2/a/@href').get()
+            item["phone"] = (
+                tooltip_html.xpath('//div[contains(@class, "store_details")]/p[contains(@class, "phone")]/text()')
+                .get()
+                .strip()
+            )
+            item["website"] = (
+                "https://www.fantasticfurniture.com.au"
+                + tooltip_html.xpath('//div[contains(@class, "store_details")]/h2/a/@href').get()
+            )
             item["opening_hours"] = OpeningHours()
-            hours_raw = " ".join(tooltip_html.xpath('//div[contains(@class, "trading_hours")]/ul/li/*[self::strong or self::small]/text()').getall()).replace(" - ", " ").replace(" AM", "AM").replace(" PM", "PM").split(" ")
+            hours_raw = (
+                " ".join(
+                    tooltip_html.xpath(
+                        '//div[contains(@class, "trading_hours")]/ul/li/*[self::strong or self::small]/text()'
+                    ).getall()
+                )
+                .replace(" - ", " ")
+                .replace(" AM", "AM")
+                .replace(" PM", "PM")
+                .split(" ")
+            )
             hours_raw = [hours_raw[n : n + 3] for n in range(0, len(hours_raw), 3)]
             for day in hours_raw:
                 item["opening_hours"].add_range(day[0], day[1], day[2], "%I:%M%p")
