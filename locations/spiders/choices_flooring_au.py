@@ -13,14 +13,14 @@ class ChoicesFlooringAUSpider(Spider):
     item_attributes = {"brand": "Choices Flooring", "brand_wikidata": "Q117155570"}
     allowed_domains = ["www.choicesflooring.com.au"]
     start_urls = [
-        "https://www.choicesflooring.com.au/CMSPages/WebService.asmx/GetAllStoresByStateId?stateId=1&filter='ALL'&mood=0", # ACT
-        "https://www.choicesflooring.com.au/CMSPages/WebService.asmx/GetAllStoresByStateId?stateId=2&filter='ALL'&mood=0", # WA
-        "https://www.choicesflooring.com.au/CMSPages/WebService.asmx/GetAllStoresByStateId?stateId=3&filter='ALL'&mood=0", # NSW
-        "https://www.choicesflooring.com.au/CMSPages/WebService.asmx/GetAllStoresByStateId?stateId=4&filter='ALL'&mood=0", # QLD
-        "https://www.choicesflooring.com.au/CMSPages/WebService.asmx/GetAllStoresByStateId?stateId=5&filter='ALL'&mood=0", # VIC
-        "https://www.choicesflooring.com.au/CMSPages/WebService.asmx/GetAllStoresByStateId?stateId=6&filter='ALL'&mood=0", # TAS
-        "https://www.choicesflooring.com.au/CMSPages/WebService.asmx/GetAllStoresByStateId?stateId=7&filter='ALL'&mood=0", # SA
-        "https://www.choicesflooring.com.au/CMSPages/WebService.asmx/GetAllStoresByStateId?stateId=8&filter='ALL'&mood=0", # NT
+        "https://www.choicesflooring.com.au/CMSPages/WebService.asmx/GetAllStoresByStateId?stateId=1&filter='ALL'&mood=0",  # ACT
+        "https://www.choicesflooring.com.au/CMSPages/WebService.asmx/GetAllStoresByStateId?stateId=2&filter='ALL'&mood=0",  # WA
+        "https://www.choicesflooring.com.au/CMSPages/WebService.asmx/GetAllStoresByStateId?stateId=3&filter='ALL'&mood=0",  # NSW
+        "https://www.choicesflooring.com.au/CMSPages/WebService.asmx/GetAllStoresByStateId?stateId=4&filter='ALL'&mood=0",  # QLD
+        "https://www.choicesflooring.com.au/CMSPages/WebService.asmx/GetAllStoresByStateId?stateId=5&filter='ALL'&mood=0",  # VIC
+        "https://www.choicesflooring.com.au/CMSPages/WebService.asmx/GetAllStoresByStateId?stateId=6&filter='ALL'&mood=0",  # TAS
+        "https://www.choicesflooring.com.au/CMSPages/WebService.asmx/GetAllStoresByStateId?stateId=7&filter='ALL'&mood=0",  # SA
+        "https://www.choicesflooring.com.au/CMSPages/WebService.asmx/GetAllStoresByStateId?stateId=8&filter='ALL'&mood=0",  # NT
     ]
 
     def start_requests(self):
@@ -36,7 +36,9 @@ class ChoicesFlooringAUSpider(Spider):
             item["website"] = "https://www.choicesflooring.com.au" + location["NodeAliasPath"]
             item["opening_hours"] = OpeningHours()
             hours_html = Selector(text=location["OpeningHours"])
-            hours_raw = hours_html.xpath('//span[contains(@class, "st-day") or contains(@class, "st-time")]/text()').getall()
+            hours_raw = hours_html.xpath(
+                '//span[contains(@class, "st-day") or contains(@class, "st-time")]/text()'
+            ).getall()
             hours_string = html.unescape(" ".join(hours_raw))
             item["opening_hours"].add_ranges_from_string(hours_string)
             yield item
