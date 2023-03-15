@@ -15,8 +15,11 @@ class ChoicesFlooringNZSpider(Spider):
     def parse(self, response):
         images = response.xpath('//a[contains(@class, "store_imageNZ")]')
         for image in images:
-            store_url = "https://www.choicesflooring.co.nz" + image.xpath('@href').get()
-            image_url = "https://www.choicesflooring.co.nz" + ((image.xpath('@style').get().split("background-image: url('", 1))[1].split("');", 1))[0]
+            store_url = "https://www.choicesflooring.co.nz" + image.xpath("@href").get()
+            image_url = (
+                "https://www.choicesflooring.co.nz"
+                + ((image.xpath("@style").get().split("background-image: url('", 1))[1].split("');", 1))[0]
+            )
             yield Request(url=store_url, meta={"image": image_url}, callback=self.parse_store)
 
     def parse_store(self, response):
@@ -24,7 +27,9 @@ class ChoicesFlooringNZSpider(Spider):
             "ref": response.xpath('//input[@id="hdnQuoteStoreId"]/@value').get(),
             "name": response.xpath('//div[contains(@class, "st__address")]/h2/text()').get(),
             "addr_full": response.xpath('//div[contains(@class, "st__address")]/address/text()').get(),
-            "phone": response.xpath('//div[contains(@class, "st__address")]/span[contains(@class, "phone")]/text()').get().replace("Phone: ", ""),
+            "phone": response.xpath('//div[contains(@class, "st__address")]/span[contains(@class, "phone")]/text()')
+            .get()
+            .replace("Phone: ", ""),
             "website": response.url,
             "image": response.meta["image"],
         }
@@ -38,5 +43,5 @@ class ChoicesFlooringNZSpider(Spider):
         hours_raw = response.xpath('//div[contains(@class, "st__hours-inner")]//text()').getall()
         hours_string = html.unescape(" ".join(hours_raw))
         properties["opening_hours"].add_ranges_from_string(hours_string)
-        
+
         yield Feature(**properties)
