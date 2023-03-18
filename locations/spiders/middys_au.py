@@ -12,7 +12,7 @@ class MiddysAUSpider(Spider):
     custom_settings = {"DEFAULT_REQUEST_HEADERS": {"Accept": "text/plain; charset=utf-8"}}
 
     def start_request(self):
-        for url in start_urls:
+        for url in self.start_urls:
             yield Request(url=url, headers={"X-Requested-With": "XMLHttpRequest"})
 
     def parse(self, response):
