@@ -16,7 +16,9 @@ class GrilldAUSpider(Spider):
             item = DictParser.parse(location)
             if "TRAINING" in item["name"]:
                 return
-            item["street_address"] = ", ".join(filter(None, [location["location"]["street1"].strip(), location["location"]["street2"].strip()]))
+            item["street_address"] = ", ".join(
+                filter(None, [location["location"]["street1"].strip(), location["location"]["street2"].strip()])
+            )
             item["city"] = location["location"]["city"]
             item["state"] = location["location"]["state"]
             item["postcode"] = location["location"]["postcode"]
