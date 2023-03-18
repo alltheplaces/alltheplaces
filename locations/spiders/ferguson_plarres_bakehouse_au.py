@@ -14,7 +14,7 @@ class FergusonPlarresBakehouseAUSpider(Spider):
     start_urls = ["https://www.fergusonplarre.com.au/rest/e/get/locations"]
 
     def start_requests(self):
-        query = {"sort":[{"position":{"order":"asc"}}],"size":100,"query":{"term":{"status":1}}}
+        query = {"sort": [{"position": {"order": "asc"}}], "size": 100, "query": {"term": {"status": 1}}}
         for url in self.start_urls:
             yield JsonRequest(url=url, data=query, method="POST")
 
