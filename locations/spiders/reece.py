@@ -1,6 +1,7 @@
 from scrapy import Selector
 from scrapy.spiders import SitemapSpider
 
+from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.structured_data_spider import StructuredDataSpider
 
@@ -30,6 +31,24 @@ class ReeceSpider(SitemapSpider, StructuredDataSpider):
             item["phone"] = response.xpath("//input/@data-phone").get()
         item["website"] = response.url
         item.pop("image")
+
+        apply_category(Categories.SHOP_TRADE, item)
+        match item["brand"]:
+            case "Reece Actrol" | "Reece HVAC-R":
+                apply_category(Categories.TRADE_HVAC, item)
+            case "Reece Bathroom Life" | "Reece NZ Bathroom Life":
+                apply_category(Categories.TRADE_BATHROOM, item)
+            case "Reece Civil" | "Reece Onsite" | "Reece Plumbing Centre" | "Reece Viadux":
+                apply_category(Categories.TRADE_PLUMBING, item)
+            case "Reece Fire":
+                apply_category(Categories.TRADE_FIRE_PROTECTION, item)
+            case "Reece Irrigation & Pools":
+                apply_category(Categories.TRADE_IRRIGATION, item)
+                apply_category(Categories.TRADE_SWIMMING_POOL_SUPPLIES, item)
+            case "Reece Pipeline Supplies Aust":
+                apply_category(Categories.TRADE_FIRE_PROTECTION, item)
+                apply_category(Categories.TRADE_HVAC, item)
+                apply_category(Categories.TRADE_PLUMBING, item)
 
         item["opening_hours"] = OpeningHours()
         hours_string = " ".join(response.xpath('//tr[contains(@class, "branch-hours")]/td/text()').getall())
