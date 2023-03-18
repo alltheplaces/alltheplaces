@@ -17,21 +17,29 @@ class MiddysAUSpider(Spider):
 
     def parse(self, response):
         for location in response.json()["branches"]:
-            info_window_html = Selector(text=location["infoWindowHtml"].replace('\"', '"').replace("\t", ""))
+            info_window_html = Selector(text=location["infoWindowHtml"].replace('"', '"').replace("\t", ""))
             properties = {
-                "ref": info_window_html.xpath('//h3/a/@href').get().replace("/branch/locator/", ""),
-                "name": info_window_html.xpath('//h3/a/text()').get(),
+                "ref": info_window_html.xpath("//h3/a/@href").get().replace("/branch/locator/", ""),
+                "name": info_window_html.xpath("//h3/a/text()").get(),
                 "lat": location["latitude"],
                 "lon": location["longitude"],
-                "addr_full": " ".join(info_window_html.xpath('//h3/following::p/text()[position() <= (last() - 2)]').getall()),
+                "addr_full": " ".join(
+                    info_window_html.xpath("//h3/following::p/text()[position() <= (last() - 2)]").getall()
+                ),
                 "phone": info_window_html.xpath('(//p/span[contains(@class, "branch-phoneNumber")])[1]/text()').get(),
-                "email": info_window_html.xpath('//span[contains(@class, "branch-phoneNumber")]/a[contains(@href, "mailto:")]/@href').get().replace("mailto:", ""),
-                "website": "https://mybranch.middys.com.au" + info_window_html.xpath('//h3/a/@href').get(),
+                "email": info_window_html.xpath(
+                    '//span[contains(@class, "branch-phoneNumber")]/a[contains(@href, "mailto:")]/@href'
+                )
+                .get()
+                .replace("mailto:", ""),
+                "website": "https://mybranch.middys.com.au" + info_window_html.xpath("//h3/a/@href").get(),
             }
             properties["image"] = "https://mybranch.middys.com.au/images/branch/" + properties["ref"] + ".jpg"
-            
+
             properties["opening_hours"] = OpeningHours()
-            hours_string = " ".join((" ".join(info_window_html.xpath('//div[contains(@class, "branchTimings")]//text()').getall())).split())
+            hours_string = " ".join(
+                (" ".join(info_window_html.xpath('//div[contains(@class, "branchTimings")]//text()').getall())).split()
+            )
             day_pairs = [
                 ["Monday", "Tuesday"],
                 ["Tuesday", "Wednesday"],
