@@ -104,6 +104,18 @@ class Categories(Enum):
 
     VENDING_MACHINE_BICYCLE_TUBE = {"amenity": "vending_machine", "vending": "bicycle_tube"}
 
+    TRADE_AGRICULTURAL_SUPPLIES = {"trade": "agricultural_supplies"}
+    TRADE_BATHROOM = {"trade": "bathroom"}
+    TRADE_BUILDING_SUPPLIES = {"trade": "building_supplies"}
+    TRADE_ELECTRICAL = {"trade": "electrical"}
+    TRADE_FIRE_PROTECTION = {"trade": "fire_protection"}
+    TRADE_HVAC = {"trade": "hvac"}
+    TRADE_IRRIGATION = {"trade": "irrigation"}
+    TRADE_KITCHEN = {"trade": "kitchen"}
+    TRADE_LANDSCAPING_SUPPLIES = {"trade": "landscaping_supplies"}
+    TRADE_PLUMBING = {"trade": "plumbing"}
+    TRADE_SWIMMING_POOL_SUPPLIES = {"trade": "swimming_pool_supplies"}
+
 
 def apply_category(category, item):
     if isinstance(category, Enum):
@@ -116,7 +128,11 @@ def apply_category(category, item):
 
     if not item.get("extras"):
         item["extras"] = {}
-    item["extras"].update(tags)
+    for key, value in tags.items():
+        if key in item["extras"].keys():
+            item["extras"][key] = item["extras"][key] + ";" + value
+        else:
+            item["extras"][key] = value
 
 
 top_level_tags = [
