@@ -2,6 +2,7 @@ from scrapy import Spider
 from scrapy.http import JsonRequest
 
 from locations.dict_parser import DictParser
+from locations.hours import DAYS_EN, OpeningHours
 from locations.items import Feature
 
 
@@ -29,6 +30,16 @@ class StoreRocketSpider(Spider):
 
             if self.base_url:
                 item["website"] = f'{self.base_url}?location={location["slug"]}'
+
+            item["opening_hours"] = OpeningHours()
+            for day in ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]:
+                if not location[day]:
+                    continue
+                hour_ranges = location[day].split(",")
+                for hour_range in hour_ranges:
+                    open_time = hour_range.split("-")[0].strip()
+                    close_time = hour_range.split("-")[1].strip()
+                    item["opening_hours"].add_range(DAYS_EN[day.title()], open_time, close_time)
 
             yield from self.parse_item(item, location) or []
 
