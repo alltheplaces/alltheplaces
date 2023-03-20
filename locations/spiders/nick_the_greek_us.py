@@ -1,6 +1,3 @@
-import re
-
-from locations.hours import DAYS_EN, OpeningHours
 from locations.storefinders.storerocket import StoreRocketSpider
 
 
@@ -22,12 +19,4 @@ class NickTheGreekUSSpider(StoreRocketSpider):
         item.pop("twitter")
         item["extras"].pop("instagram")
 
-        item["opening_hours"] = OpeningHours()
-        for day in ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]:
-            hour_ranges = location[day].split(",")
-            for hour_range in hour_ranges:
-                open_time = hour_range.split("-")[0].strip()
-                close_time = hour_range.split("-")[1].strip()
-                item["opening_hours"].add_range(DAYS_EN[day.title()], open_time, close_time)
-        
         yield item
