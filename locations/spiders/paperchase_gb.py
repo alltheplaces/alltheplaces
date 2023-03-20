@@ -1,4 +1,4 @@
-from locations.spiders.next_gb import NextGBSpider
+from locations.spiders.next import NextSpider
 from locations.spiders.tesco_gb import set_located_in
 from locations.storefinders.storemapper import StoremapperSpider
 
@@ -10,6 +10,6 @@ class PaperchaseGBSpider(StoremapperSpider):
 
     def parse_item(self, item, location, **kwargs):
         if item["addr_full"].startswith("Next"):
-            set_located_in(NextGBSpider.item_attributes, item)
+            set_located_in(NextSpider.NEXT, item)
 
         yield item
