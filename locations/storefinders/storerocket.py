@@ -35,11 +35,20 @@ class StoreRocketSpider(Spider):
             for day in ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]:
                 if not location[day]:
                     continue
+                if "CLOSED" in location[day].upper():
+                    continue
                 hour_ranges = location[day].split(",")
                 for hour_range in hour_ranges:
-                    open_time = hour_range.split("-")[0].strip()
-                    close_time = hour_range.split("-")[1].strip()
-                    item["opening_hours"].add_range(DAYS_EN[day.title()], open_time, close_time)
+                    open_time = hour_range.split("-")[0].strip().replace(" ", "")
+                    close_time = hour_range.split("-")[1].strip().replace(" ", "")
+                    if "AM" in open_time.upper() or "PM" in open_time.upper() or "AM" in close_time.upper() or "PM" in close_time.upper():
+                        if ":" not in open_time:
+                            open_time.replace("AM", ":00AM").replace("PM", ":00PM")
+                        if ":" not in close_time:
+                            close_time.replace("AM", ":00AM").replace("PM", ":00PM")
+                        item["opening_hours"].add_range(DAYS_EN[day.title()], open_time, close_time, "%I:%M%p")
+                    else:
+                        item["opening_hours"].add_range(DAYS_EN[day.title()], open_time, close_time)
 
             yield from self.parse_item(item, location) or []
 
