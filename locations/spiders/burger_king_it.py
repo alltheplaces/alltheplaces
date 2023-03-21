@@ -29,8 +29,12 @@ class BurgerKingItSpider(scrapy.Spider):
             for day_name, hours in store["orari"]["ristorante"].items():
                 if hours["lunch_end"] and hours["dinner_start"]:
                     item["opening_hours"].add_range(DAYS_IT[day_name.title()], hours["lunch_start"], hours["lunch_end"])
-                    item["opening_hours"].add_range(DAYS_IT[day_name.title()], hours["dinner_start"], hours["dinner_end"])
+                    item["opening_hours"].add_range(
+                        DAYS_IT[day_name.title()], hours["dinner_start"], hours["dinner_end"]
+                    )
                 else:
-                    item["opening_hours"].add_range(DAYS_IT[day_name.title()], hours["lunch_start"], hours["dinner_end"])
+                    item["opening_hours"].add_range(
+                        DAYS_IT[day_name.title()], hours["lunch_start"], hours["dinner_end"]
+                    )
 
             yield item
