@@ -15,7 +15,7 @@ class SoulPattinsonChemistAUSpider(Spider):
             item["name"] = location["store"].replace("&#038;", "&")
             item["street_address"] = item.pop("addr_full")
             hours = Selector(text=location["hours"])
-            hours_string = " ".join(hours.xpath('//text()').getall())
+            hours_string = " ".join(hours.xpath("//text()").getall())
             item["opening_hours"] = OpeningHours()
             item["opening_hours"].add_ranges_from_string(hours_string)
             yield item
