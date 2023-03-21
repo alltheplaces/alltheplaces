@@ -429,6 +429,9 @@ DAYS_SR = {
     "Ned": "Su",
     "Nedelja": "Su",
     "Недеља": "Su",
+
+NAMED_DAY_RANGES_DK = {
+    "Hverdage": ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"], # Weekdays
 }
 
 NAMED_DAY_RANGES_EN = {
@@ -438,8 +441,9 @@ NAMED_DAY_RANGES_EN = {
     "Weekends": ["Sa", "Su"],
 }
 
-NAMED_DAY_RANGES_DK = {
-    "Hverdage": ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"],  # Weekdays
+NAMED_TIMES_EN = {
+    "Midday": ["12:00PM", "12:00"],
+    "Midnight": ["12:00AM", "00:00"],
 }
 
 NAMED_DAY_RANGES_RU = {
@@ -622,7 +626,7 @@ class OpeningHours:
                                 self.add_range(d, start_time, end_time, time_format)
 
     def add_ranges_from_string(
-        self, ranges_string, days=DAYS_EN, named_day_ranges=NAMED_DAY_RANGES_EN, delimiters=DELIMITERS_EN
+        self, ranges_string, days=DAYS_EN, named_day_ranges=NAMED_DAY_RANGES_EN, named_times=NAMED_TIMES_EN, delimiters=DELIMITERS_EN
     ):
         # Build two regular expressions--one for extracting 12h
         # opening hour information, and one for extracting 24h
@@ -679,54 +683,63 @@ class OpeningHours:
         time_regex_12h = r"(?<!\d)(\d(?!\d)|0\d|1[012])(?:(?:[:\.]?([0-5]\d))(?:[:\.]?[0-5]\d)?)?\s*([AP]M)?(?!\d)"
         time_regex_24h = r"(?<!\d)(\d(?!\d)|[01]\d|2[0-4])(?:[:\.]?([0-5]\d))(?:[:\.]?[0-5]\d)?(?!(?:\d|[AP]M))"
         full_regex_12h = (
-            days_regex + r"(?:\W+|" + delimiter_regex + r")" + time_regex_12h + delimiter_regex + time_regex_12h
+            days_regex + r"(?:\W+|" + delimiter_regex + r")((?:(?:\s*,?\s*)?" + time_regex_12h + delimiter_regex + time_regex_12h + r")+)"
         )
         full_regex_24h = (
-            days_regex + r"(?:\W+|" + delimiter_regex + r")" + time_regex_24h + delimiter_regex + time_regex_24h
+            days_regex + r"(?:\W+|" + delimiter_regex + r")((?:(?:\s*,?\s*)?" + time_regex_24h + delimiter_regex + time_regex_24h + r")+)"
         )
 
+        # Replace named times in source ranges string (e.g. midnight -> 24:00)
+        ranges_string_12h = ranges_string
+        ranges_string_24h = ranges_string
+        for named_time_name, named_time_time in named_times.items():
+            ranges_string_12h = ranges_string_12h.replace(named_time_name.lower(), named_time_time[0]).replace(named_time_name.title(), named_time_time[0]).replace(named_time_name.upper(), named_time_time[0])
+            ranges_string_24h = ranges_string_24h.replace(named_time_name.lower(), named_time_time[1]).replace(named_time_name.title(), named_time_time[1]).replace(named_time_name.upper(), named_time_time[1])
+
         # Execute both regular expressions.
-        results_12h = re.findall(full_regex_12h, ranges_string, re.IGNORECASE)
-        results_24h = re.findall(full_regex_24h, ranges_string, re.IGNORECASE)
+        results_12h = re.findall(full_regex_12h, ranges_string_12h, re.IGNORECASE)
+        results_24h = re.findall(full_regex_24h, ranges_string_24h, re.IGNORECASE)
 
         # Normalise results to 24h time.
         results_normalised = []
         if len(results_24h) > 0:
             # Parse 24h opening hour information.
             for result in results_24h:
-                time_start = result[-4] + ":" + result[-3]
-                time_end = result[-2] + ":" + result[-1]
-                start_and_end_days = list(filter(None, result[:-4]))
-                results_normalised.append([start_and_end_days, time_start, time_end])
+                time_start_index = result.index(next(filter(lambda x: len(x) > 0 and x[0].isdigit(), result)))
+                start_and_end_days = list(filter(None, result[:time_start_index]))
+                time_ranges = re.findall(time_regex_24h + delimiter_regex + time_regex_24h, result[time_start_index], re.IGNORECASE)
+                for time_range in time_ranges:
+                    results_normalised.append([start_and_end_days, f"{time_range[0]}:{time_range[1]}", f"{time_range[2]}:{time_range[3]}"])
         elif len(results_12h) > 0:
             # Parse 12h opening hour information.
             for result in results_12h:
-                time_start = result[-6] + ":"
-                if result[-5]:
-                    time_start = time_start + result[-5]
-                else:
-                    time_start = time_start + "00"
-                if result[-4]:
-                    time_start = time_start + result[-4].upper()
-                else:
-                    # If AM/PM is not specified, it is almost always going to be AM for start times.
-                    time_start = time_start + "AM"
-                time_start_24h = time.strptime(time_start, "%I:%M%p")
-                time_start_24h = time.strftime("%H:%M", time_start_24h)
-                time_end = result[-3] + ":"
-                if result[-2]:
-                    time_end = time_end + result[-2]
-                else:
-                    time_end = time_end + "00"
-                if result[-1]:
-                    time_end = time_end + result[-1].upper()
-                else:
-                    # If AM/PM is not specified, it is almost always going to be PM for end times.
-                    time_end = time_end + "PM"
-                time_end_24h = time.strptime(time_end, "%I:%M%p")
-                time_end_24h = time.strftime("%H:%M", time_end_24h)
-                start_and_end_days = list(filter(None, result[:-6]))
-                results_normalised.append([start_and_end_days, time_start_24h, time_end_24h])
+                time_start_index = result.index(next(filter(lambda x: len(x) > 0 and x[0].isdigit(), result)))
+                start_and_end_days = list(filter(None, result[:time_start_index]))
+                time_ranges = re.findall(time_regex_12h + delimiter_regex + time_regex_12h, result[time_start_index], re.IGNORECASE)
+                for time_range in time_ranges:
+                    if time_range[1]:
+                        time_start = f"{time_range[0]}:{time_range[1]}"
+                    else:
+                        time_start = f"{time_range[0]}:00"
+                    if time_range[2]:
+                        time_start = f"{time_start}{time_range[2].upper()}"
+                    else:
+                        # If AM/PM is not specified, it is almost always going to be AM for start times.
+                        time_start = f"{time_start}AM"
+                    time_start_24h = time.strptime(time_start, "%I:%M%p")
+                    time_start_24h = time.strftime("%H:%M", time_start_24h)
+                    if time_range[4]:
+                        time_end = f"{time_range[3]}:{time_range[4]}"
+                    else:
+                        time_end = f"{time_range[3]}:00"
+                    if time_range[5]:
+                        time_end = f"{time_end}{time_range[5].upper()}"
+                    else:
+                        # If AM/PM is not specified, it is almost always going to be PM for start times.
+                        time_end = f"{time_end}PM"
+                    time_end_24h = time.strptime(time_end, "%I:%M%p")
+                    time_end_24h = time.strftime("%H:%M", time_end_24h)
+                    results_normalised.append([start_and_end_days, time_start_24h, time_end_24h])
 
         # Add ranges to OpeningHours object from normalised results.
         for result in results_normalised:
