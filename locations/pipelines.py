@@ -71,7 +71,7 @@ class CountryCodeCleanUpPipeline:
             if clean_country := self.country_utils.to_iso_alpha2_country_code(country):
                 item["country"] = clean_country
         else:
-            if hasattr(spider, "skip_auto_cc") and getattr(spider, "skip_auto_cc"):
+            if getattr(spider, "skip_auto_cc", False):
                 return item
 
             # No country set, see if it can be cleanly deduced from the spider name
@@ -87,7 +87,15 @@ class CountryCodeCleanUpPipeline:
                 return item
 
             # Still no country set, try an offline reverse geocoder.
-            lat, lon = item.get("lat"), item.get("lon")
+            lat = None
+            lon = None
+            if geometry := item.get("geometry"):
+                if isinstance(geometry, dict):
+                    if geometry.get("type") == "Point":
+                        if coords := geometry.get("coordinates"):
+                            lon, lat = coords
+            else:
+                lat, lon = item.get("lat"), item.get("lon")
             if lat is not None and lon is not None:
                 if c := reverse_geocode.search([(lat, lon)]):
                     spider.crawler.stats.inc_value("atp/field/country/from_reverse_geocoding")
