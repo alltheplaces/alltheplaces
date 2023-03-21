@@ -1,5 +1,6 @@
 import json
 import os
+import re
 from collections import Counter
 
 import requests
@@ -78,6 +79,12 @@ class InsightsCommand(ScrapyCommand):
             default="/tmp/out.json",
             help="Write result of run to file",
         )
+        parser.add_argument(
+            "--html-encoding",
+            dest="html_encoding",
+            action="store_true",
+            help="Check fields for html escaped content",
+        )
 
     def run(self, args, opts):
         if len(args) < 1:
@@ -90,6 +97,9 @@ class InsightsCommand(ScrapyCommand):
             return
         if opts.atp_nsi_osm:
             self.analyze_atp_nsi_osm(args, opts.outfile)
+            return
+        if opts.html_encoding:
+            self.check_html_encoding(args)
             return
 
     def show_counter(self, msg, counter):
@@ -144,6 +154,17 @@ class InsightsCommand(ScrapyCommand):
                 pass
         self.show_counter("SPIDERS WITH NO BRAND DATA:", spider_empty_counter)
         self.show_counter("NSI MISSING WIKIDATA CODE:", spider_nsi_missing_counter)
+
+    def check_html_encoding(self, args):
+        spider_counter = Counter()
+        for feature in iter_features(args):
+            spider_name = feature["properties"]["@spider"]
+            for key, value in feature["properties"].items():
+                if isinstance(value, str):
+                    if re.search(r"&#?\w+;", value):
+                        spider_counter[spider_name] += 1
+                        break
+        self.show_counter("SPIDERS WITH HTML ENCODED OUTPUT:", spider_counter)
 
     def analyze_atp_nsi_osm(self, args, outfile):
         """
