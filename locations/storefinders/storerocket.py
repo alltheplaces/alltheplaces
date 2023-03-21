@@ -39,9 +39,9 @@ class StoreRocketSpider(Spider):
                     continue
                 hour_ranges = location[day].split(",")
                 for hour_range in hour_ranges:
-                    open_time = hour_range.split("-")[0].strip().replace(" ", "")
-                    close_time = hour_range.split("-")[1].strip().replace(" ", "")
-                    if "AM" in open_time.upper() or "PM" in open_time.upper() or "AM" in close_time.upper() or "PM" in close_time.upper():
+                    open_time = hour_range.split("-")[0].strip().replace(" ", "").upper()
+                    close_time = hour_range.split("-")[1].strip().replace(" ", "").upper()
+                    if "AM" in open_time or "PM" in open_time or "AM" in close_time or "PM" in close_time:
                         if ":" not in open_time:
                             open_time.replace("AM", ":00AM").replace("PM", ":00PM")
                         if ":" not in close_time:
