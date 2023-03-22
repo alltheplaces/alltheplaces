@@ -25,9 +25,6 @@ class DeichmannSpider(SitemapSpider, StructuredDataSpider):
 
         item["ref"] = item["ref"].split("#")[1]
 
-        item["opening_hours"] = OpeningHours()
-        item["opening_hours"].from_linked_data(ld_data)
-
         # remove fields that aren't unique amongst stores
         item.pop("email")
         item.pop("image")
