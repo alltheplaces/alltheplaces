@@ -16,7 +16,6 @@ class SoulOriginAUSpider(Spider):
             item["lat"] = location["lat"]
             item["lon"] = location["lng"]
             item["name"] = location["title"]
-            item["ref"] = location["store_id"]
 
             info = location_list.xpath(f'//li[@id="li_{location["store_id"]}"]')
             item["addr_full"] = info.xpath(".//p/text()").get()
