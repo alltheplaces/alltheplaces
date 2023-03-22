@@ -3,6 +3,7 @@ from scrapy.http import JsonRequest
 
 from locations.dict_parser import DictParser
 
+
 class AramarkUniformServicesUSSpider(Spider):
     name = "aramark_uniform_services_us"
     item_attributes = {"brand": "Aramark", "brand_wikidata": "Q625708"}
@@ -15,9 +16,7 @@ class AramarkUniformServicesUSSpider(Spider):
     def request_graphql_page(self, cursor: str = None):
         query = {
             "operationName": "findLocations",
-            "variables": {
-                "afterCursor": cursor
-            },
+            "variables": {"afterCursor": cursor},
             "query": """query findLocations($state: String, $search: String, $city: String, $zipCode: String, $longitude: String, $latitude: String, $afterCursor: String) {
     locations(first: 100, after: $afterCursor, where: {search: $search, state: $state, city: $city, zipCode: $zipCode, latitude: $latitude, longitude: $longitude}) {
         edges {
@@ -44,7 +43,7 @@ class AramarkUniformServicesUSSpider(Spider):
             endCursor
         }
     }
-}"""
+}""",
         }
         yield JsonRequest(url=self.start_urls[0], method="POST", data=query)
 
@@ -54,7 +53,9 @@ class AramarkUniformServicesUSSpider(Spider):
             yield from self.request_graphql_page(pagination["endCursor"])
         for location in response.json()["data"]["locations"]["edges"]:
             item = DictParser.parse(location["node"])
-            extra_fields_1 = {k: v for k, v in DictParser.parse(location["node"]["postLocation"]["locationGoogleMap"]).items() if v}
+            extra_fields_1 = {
+                k: v for k, v in DictParser.parse(location["node"]["postLocation"]["locationGoogleMap"]).items() if v
+            }
             item.update(extra_fields_1)
             extra_fields_2 = {k: v for k, v in DictParser.parse(location["node"]["postLocation"]).items() if v}
             item.update(extra_fields_2)
