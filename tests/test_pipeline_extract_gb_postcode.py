@@ -1,5 +1,5 @@
 from locations.items import Feature
-from locations.pipelines import ExtractGBPostcodePipeline
+from locations.pipelines.extract_gb_postcode import ExtractGBPostcodePipeline
 
 
 def test_extraction():

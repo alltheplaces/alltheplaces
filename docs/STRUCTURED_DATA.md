@@ -86,7 +86,7 @@ XL.png", "brand": "Smashburger", "brand:wikidata": "Q17061332"}, "geometry": {"t
 }}]}
 ```
 
-Note that the [ATP pipeline](../locations/pipelines.py) code has used the QID to apply OSM
+Note that the [ATP pipeline](../locations/pipelines/apply_nsi_categories.py) code has used the QID to apply OSM
 POI category tags, from NSI, to the output: `"amenity": "fast_food", "cuisine": "burger", "takeaway": "yes"`.
 
 The `smashburger.geojson` file can be examined in any number of tools,
