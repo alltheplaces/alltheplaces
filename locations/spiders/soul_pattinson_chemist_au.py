@@ -1,3 +1,5 @@
+import html
+
 from scrapy import Selector, Spider
 
 from locations.dict_parser import DictParser
@@ -12,7 +14,7 @@ class SoulPattinsonChemistAUSpider(Spider):
     def parse(self, response):
         for location in response.json():
             item = DictParser.parse(location)
-            item["name"] = location["store"].replace("&#038;", "&")
+            item["name"] = html.unescape(location["store"])
             item["street_address"] = item.pop("addr_full")
             hours = Selector(text=location["hours"])
             hours_string = " ".join(hours.xpath("//text()").getall())
