@@ -2,6 +2,7 @@ import re
 
 import scrapy
 
+from locations.hours import OpeningHours
 from locations.items import Feature
 
 
@@ -43,14 +44,9 @@ class HootersSpider(scrapy.Spider):
             addr_full = " ".join([addr_full, store_json["address"]["line-2"]])
 
         # Opening hours
-        store_opening_hours = store_json.get("hours")
-        opening_hours_result = []
-        if store_opening_hours is not None:
-            for key, value in self.day_mapping.items():
-                hours = store_opening_hours.get(key)
-                opening_hours_result.append(value + " " + hours["open"][:5] + "-" + hours["close"][:5])
-
-        opening_hours = ";".join(opening_hours_result)
+        opening_hours = OpeningHours()
+        for day, times in (store_json["hours"] or {}).items():
+            opening_hours.add_range(day, times["open"], times["close"], time_format="%H:%M:%S")
 
         return Feature(
             lat=store_json["latitude"],
