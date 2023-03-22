@@ -1,7 +1,7 @@
 from scrapy.crawler import Crawler
 
 from locations.items import Feature
-from locations.pipeline.country_code_clean_up import CountryCodeCleanUpPipeline
+from locations.pipelines.country_code_clean_up import CountryCodeCleanUpPipeline
 from locations.spiders.greggs_gb import GreggsGBSpider
 
 

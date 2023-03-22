@@ -83,17 +83,17 @@ EXTENSIONS = {
 # Configure item pipelines
 # See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-    "locations.pipelines.DuplicatesPipeline": 200,
-    "locations.pipelines.ApplySpiderLevelAttributesPipeline": 300,
-    "locations.pipelines.ApplySpiderNamePipeline": 350,
-    "locations.pipelines.CountryCodeCleanUpPipeline": 355,
-    "locations.pipelines.PhoneCleanUpPipeline": 360,
-    "locations.pipelines.ExtractGBPostcodePipeline": 400,
-    "locations.pipelines.AssertURLSchemePipeline": 500,
-    "locations.pipelines.CheckItemPropertiesPipeline": 600,
-    "locations.pipelines.ApplyNSICategoriesPipeline": 700,
-    "locations.pipelines.CountCategoriesPipeline": 800,
-    "locations.pipelines.CountBrandsPipeline": 810,
+    "locations.pipelines.duplicates.DuplicatesPipeline": 200,
+    "locations.pipelines.apply_spider_level_attributes.ApplySpiderLevelAttributesPipeline": 300,
+    "locations.pipelines.apply_spider_name.ApplySpiderNamePipeline": 350,
+    "locations.pipelines.country_code_clean_up.CountryCodeCleanUpPipeline": 355,
+    "locations.pipelines.phone_clean_up.PhoneCleanUpPipeline": 360,
+    "locations.pipelines.extract_gb_postcode.ExtractGBPostcodePipeline": 400,
+    "locations.pipelines.assert_url_scheme.AssertURLSchemePipeline": 500,
+    "locations.pipelines.check_item_properties.CheckItemPropertiesPipeline": 600,
+    "locations.pipelines.apply_nsi_categories.ApplyNSICategoriesPipeline": 700,
+    "locations.pipelines.count_categories.CountCategoriesPipeline": 800,
+    "locations.pipelines.count_brands.CountBrandsPipeline": 810,
 }
 
 
