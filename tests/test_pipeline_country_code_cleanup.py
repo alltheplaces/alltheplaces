@@ -1,7 +1,7 @@
 from scrapy.crawler import Crawler
 
 from locations.items import Feature
-from locations.pipelines import CountryCodeCleanUpPipeline
+from locations.pipeline.country_code_clean_up import CountryCodeCleanUpPipeline
 from locations.spiders.greggs_gb import GreggsGBSpider
 
 
@@ -26,6 +26,12 @@ def test_country_from_spider_name():
     pipeline.process_item(item, spider)
     assert "GB" == item.get("country")
     assert 1 == spider.crawler.stats.get_value("atp/field/country/from_spider_name")
+
+
+def test_multiple_countries_in_spider_name():
+    item, pipeline, spider = get_objects("homebase_gb_ie")
+    pipeline.process_item(item, spider)
+    assert not item.get("country")
 
 
 def test_country_from_website_url():

@@ -62,7 +62,7 @@ class CountryUtils:
         return self.UNHANDLED_COUNTRY_MAPPINGS.get(country_name)
 
     def _convert_to_iso2_country_code(self, splits):
-        if len(splits) > 1 and len(splits[-1]) == 2:
+        if len(splits) > 0 and len(splits[-1]) == 2:
             candidate = splits[-1].upper()
             if self.gc.get_countries().get(candidate):
                 return candidate
@@ -72,7 +72,9 @@ class CountryUtils:
 
     def country_code_from_spider_name(self, spider_name):
         if isinstance(spider_name, str):
-            return self._convert_to_iso2_country_code(spider_name.split("_"))
+            splits = [split for split in spider_name.split("_") if len(split) == 2]
+            if len(splits) == 1:  # Skip multiple countries e.g. homebase_gb_ie
+                return self._convert_to_iso2_country_code(splits)
         return None
 
     def country_code_from_url(self, url):
