@@ -6,12 +6,11 @@ from locations.hours import OpeningHours
 from locations.items import Feature
 
 
-class DunkinSpider(scrapy.Spider):
-    name = "dunkindonuts"
+class DunkinUSSpider(scrapy.Spider):
+    name = "dunkin_us"
     item_attributes = {
         "brand": "Dunkin'",
         "brand_wikidata": "Q847743",
-        "country": "US",
     }
     allowed_domains = ["dunkindonuts.com"]
     start_urls = [
