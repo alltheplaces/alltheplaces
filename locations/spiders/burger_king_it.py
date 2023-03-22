@@ -13,27 +13,28 @@ class BurgerKingItSpider(scrapy.Spider):
 
     def parse(self, response):
         for store in response.json():
-            opening_hours = OpeningHours()
-
-            opening_time = store["orari"]["ristorante"]
-            for d in DAYS_IT:
-                opening_hours.add_range(
-                    DAYS_IT[d],
-                    opening_time[d.lower()]["lunch_start"],
-                    opening_time[d.lower()]["dinner_end"],
-                )
-
             item = DictParser.parse(store)
-
             item["ref"] = store["storeId"]
             item["name"] = "Burger King"
             item["addr_full"] = store["address"]
             item["city"] = store["name"]
             item["country"] = "IT"
-            item["opening_hours"] = opening_hours.as_opening_hours()
             item["extras"] = {
                 "internet_access": "wlan" if "WIFI" in store["servizi"] else "no",
                 "drive_through": "yes" if "KingDrive" in store["servizi"] else "no",
                 "delivery": "yes" if "HomeDelivery" in store["servizi"] else "no",
             }
+
+            item["opening_hours"] = OpeningHours()
+            for day_name, hours in store["orari"]["ristorante"].items():
+                if hours["lunch_end"] and hours["dinner_start"]:
+                    item["opening_hours"].add_range(DAYS_IT[day_name.title()], hours["lunch_start"], hours["lunch_end"])
+                    item["opening_hours"].add_range(
+                        DAYS_IT[day_name.title()], hours["dinner_start"], hours["dinner_end"]
+                    )
+                else:
+                    item["opening_hours"].add_range(
+                        DAYS_IT[day_name.title()], hours["lunch_start"], hours["dinner_end"]
+                    )
+
             yield item
