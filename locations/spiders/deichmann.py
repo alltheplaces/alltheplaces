@@ -15,22 +15,22 @@ class DeichmannSpider(SitemapSpider, StructuredDataSpider):
     ]
     sitemap_rules = [
         (r"^https:\/\/stores\.deichmann\.com\/[a-z]{2}-[a-z]{2}\/[a-z]{2}(?:\/[-\w]+){3}$", "parse_sd"),
-        (r"^https:\/\/stores\.dosenbach\.ch\/ch-de\/ch(?:\/[-\w]+){3}$", "parse_sd")
+        (r"^https:\/\/stores\.dosenbach\.ch\/ch-de\/ch(?:\/[-\w]+){3}$", "parse_sd"),
     ]
     wanted_types = ["LocalBusiness"]
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         if "dosenbach.ch" in response.url:
             item.update(self.DOSENBACH)
-        
+
         item["ref"] = item["ref"].split("#")[1]
-        
+
         item["opening_hours"] = OpeningHours()
         item["opening_hours"].from_linked_data(ld_data)
-        
+
         # remove fields that aren't unique amongst stores
         item.pop("email")
         item.pop("image")
         item.pop("facebook")
-        
+
         yield item
