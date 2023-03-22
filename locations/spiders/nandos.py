@@ -25,7 +25,7 @@ class NandosSpider(scrapy.spiders.SitemapSpider):
         ("nandos.ca/find/", "parse_json1"),
     ]
     download_delay = 0.5
-    skip_auto_cc = True
+    skip_auto_cc_domain = True
 
     @staticmethod
     def country_from_url(response):

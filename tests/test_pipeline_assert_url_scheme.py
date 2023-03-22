@@ -1,5 +1,5 @@
 from locations.items import Feature
-from locations.pipelines import AssertURLSchemePipeline
+from locations.pipelines.assert_url_scheme import AssertURLSchemePipeline
 
 
 def test_addition():

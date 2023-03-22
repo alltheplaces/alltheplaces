@@ -8,7 +8,8 @@ from locations.spiders.vapestore_gb import clean_address
 class TopsSpider(Spider):
     name = "tops_at_spar"
     item_attributes = {"brand": "Tops", "brand_wikidata": "Q116377563"}
-    skip_auto_cc = True
+    skip_auto_cc_spider_name = True
+    skip_auto_cc_domain = True
 
     def start_requests(self):
         yield JsonRequest(

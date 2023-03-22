@@ -2,7 +2,7 @@ from scrapy.crawler import Crawler
 
 from locations.categories import Categories, apply_category, get_category_tags
 from locations.items import Feature
-from locations.pipelines import ApplyNSICategoriesPipeline
+from locations.pipelines.apply_nsi_categories import ApplyNSICategoriesPipeline
 from locations.spiders.greggs_gb import GreggsGBSpider
 
 
