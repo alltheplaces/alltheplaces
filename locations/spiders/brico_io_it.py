@@ -1,38 +1,42 @@
+import collections
+
 from scrapy import Spider
 
-from locations.hours import DAYS_IT, OpeningHours, sanitise_day
-from locations.items import Feature
+from locations.dict_parser import DictParser
+from locations.hours import DAYS, OpeningHours
 
 
 class Brico_ioITSpider(Spider):
     name = "brico_io_it"
-    item_attributes = {"brand_wikidata": "Q15965705"}
-    start_urls = ["https://www.bricoio.it/api/organa/stores.aspx"]
+    item_attributes = {"brand": "Brico io", "brand_wikidata": "Q15965705"}
+    allowed_domains = ["www.bricoio.it"]
+    start_urls = ["https://www.bricoio.it/it/it/brit/storelocator/getallstores"]
 
-    def parse(self, response, **kwargs):
+    def parse(self, response):
         for location in response.json():
-            if not location["Attivo"]:
+            if not location["isActive"]:
                 continue
+            
+            item = DictParser.parse(location)
+            item["ref"] = location["code"]
+            item["name"] = location["alias"]
+            address_fields = {k: v for k, v in DictParser.parse(location["address"]).items() if v}
+            print(address_fields)
+            item["street_address"] = " ".join(filter(None, [location["address"]["street1"], location["address"]["street2"]]))
+            item.update(address_fields)
+            for contact_method in location["contacts"]:
+                if contact_method["type"] == 1:
+                    item["email"] = contact_method["destination"]
+                if contact_method["type"] == 3:
+                    item["phone"] = contact_method["destination"]
+            item["website"] = "https://www.bricoio.it/it/it/brit/storelocator/store/" + item["ref"]
 
-            item = Feature()
-            item["ref"] = location["Codice"]
-            item["name"] = location["Nome"]
-            item["street_address"] = location["Indirizzo"]["Descrizione"]
-            item["city"] = location["Indirizzo"]["Localita"]
-            item["state"] = location["Indirizzo"]["Provincia"]
-            item["postcode"] = location["Indirizzo"]["CodicePostale"]
-            item["country"] = location["Indirizzo"]["Nazione"]
-            item["phone"] = location["Telefono"].replace("/", "")
-            item["email"] = location["Email"]
-            item["lat"] = location["Coordinate"]["Latitudine"]
-            item["lon"] = location["Coordinate"]["Longitudine"]
-            item["website"] = f'https://www.bricoio.it{location["URL"]}'
-
+            day_list = collections.deque(DAYS.copy())
+            day_list.rotate(1)
             item["opening_hours"] = OpeningHours()
-            for rule in location["Orari"]["FasceOrarie"]:
-                day = sanitise_day(rule["Giorno"][:3], DAYS_IT)
-                for time in rule["Orario"].split(" / "):
-                    start_time, end_time = time.split("-")
-                    item["opening_hours"].add_range(day, start_time, end_time, time_format="%H.%M")
-
+            for timeslot in location["hours"]["timeslots"]:
+                open_time = str(timeslot["from"]["hours"]) + ":" + str(timeslot["from"]["minutes"]).zfill(2)
+                close_time = str(timeslot["to"]["hours"]) + ":" + str(timeslot["to"]["minutes"]).zfill(2)
+                item["opening_hours"].add_range(day_list[timeslot["dayOfWeek"]], open_time, close_time)
+            
             yield item
