@@ -1,5 +1,7 @@
 import scrapy
+from scrapy import Selector
 
+from locations.hours import OpeningHours
 from locations.items import Feature
 
 
@@ -44,14 +46,23 @@ class JJillSpider(scrapy.Spider):
             }
             yield Feature(**properties)
 
-    def parse_hours(self, store_hours):
-        opening_hours = []
+    def parse_hours(self, store_hours: Selector) -> OpeningHours:
+        opening_hours = OpeningHours()
 
-        for day_hour in store_hours:
-            day = day_hour.xpath('.//*[@class="day"]/text()').extract_first().strip(" :").title()
-            hrs = day_hour.xpath('.//*[@class="hr"]/text()').extract_first()
-            if "closed" in hrs.lower():
+        for rule in store_hours:
+            day = rule.xpath('.//*[@class="day"]/text()').get().strip(" :")
+            hours = rule.xpath('.//*[@class="hr"]/text()').get()
+            if "closed" in hours.lower():
                 continue
-            opening_hours.append(f"{day[:2]} {hrs}")
+            start_time, end_time = hours.split("-")
+            start_time = self.sanitise_time(start_time)
+            end_time = self.sanitise_time(end_time)
+            opening_hours.add_range(day, start_time, end_time, time_format="%I:%M%p")
+        return opening_hours
 
-        return "; ".join(opening_hours)
+    @staticmethod
+    def sanitise_time(time: str) -> str:
+        time = time.replace("a", "am").replace("p", "pm").replace(" ", "")
+        if ":" not in time:
+            time = time[0:-2] + ":00" + time[-2:]
+        return time
