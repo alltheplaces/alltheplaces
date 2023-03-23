@@ -25,10 +25,10 @@ max_width and max_height have been optimized to return less than 250 results, wh
 result returned from exxonmobil no matter how big the boundingbox is.
 
 """
-import re
 
 import scrapy
 
+from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 from locations.spiders.costacoffee_gb import yes_or_no
 from locations.user_agents import BROWSER_DEFAULT
@@ -164,14 +164,14 @@ class ExxonMobilSpider(scrapy.Spider):
                 features = location["FeaturedItems"] + location["StoreAmenities"]
                 properties = {
                     "name": location["DisplayName"],
-                    "addr_full": location["AddressLine1"] + " " + location["AddressLine2"],
+                    "street_address": ", ".join(filter(None, [location["AddressLine1"], location["AddressLine2"]])),
                     "city": location["City"],
                     "state": location["StateProvince"],
                     "country": location["Country"],
                     "postcode": location["PostalCode"],
                     "phone": location["Telephone"],
                     "ref": location_id,
-                    "opening_hours": self.store_hours(location["WeeklyOperatingDays"]),
+                    "opening_hours": self.store_hours(location["HoursOfOperation24"]),
                     "lat": float(location["Latitude"]),
                     "lon": float(location["Longitude"]),
                     "extras": {
@@ -201,98 +201,22 @@ class ExxonMobilSpider(scrapy.Spider):
         else:
             return {"brand": location["BrandingImage"]}
 
-    def store_hours(self, hours):
+    @staticmethod
+    def store_hours(hours: str) -> OpeningHours:
         """
-        convert hours, falls back to param hours if it fails our match
+        :param hours: hours to convert come in format "04:00,23:00;04:00,23:00;04:00,23:00;04:00,23:00;04:00,23:00;04:00,23:00;04:00,23:00;"
+        :return: OpeningHours
+        """
+        oh = OpeningHours()
+        for index, times in enumerate(hours.strip(";").split(";")):
+            if not times or times == "Closed":
+                continue
+            if times == "All Day":
+                times = "00:00,23:59"
+            try:
+                start_time, end_time = times.split(",")
+                oh.add_range(DAYS[index], start_time, end_time)
+            except:  # A few edge cases like "2200" not "22:00"
+                pass
 
-        :param hours: hours to convert come in format Monday:09:15 AM-09:15 PM<br>Tues...
-        :return: our format 'Mo 04:30-23:00; Tu-Sa 04:30-23:30; Su 04:30-23:00'
-        """
-        hours_list = hours.split("<br/>")
-        stripped_hours = [hour for hour in hours_list if hour]
-        working_hours = []
-        for hour in stripped_hours:
-            match = re.search(
-                r"^(\w{2})\w+:(?:(\d+):(\d+)\s(AM|PM)-(\d+):(\d+)\s(AM|PM))?(\w+)?(Open\s24\sHours)?$",
-                hour.strip(),
-            )
-            if match:
-                m = match.groups()
-                if m[7] is None and m[8] is None:
-                    # Open hours
-                    working_hours.append(
-                        m[0]
-                        + " "
-                        + str(int(m[1]) + self.am_pm(m[1], m[3])).zfill(2)
-                        + ":"
-                        + m[2]
-                        + "-"
-                        + str(int(m[4]) + self.am_pm(m[4], m[6])).zfill(2)
-                        + ":"
-                        + m[5]
-                    )
-                elif m[8] is not None:
-                    working_hours.append(m[0] + ": 24/7")
-                elif m[1] is None:
-                    # closed
-                    working_hours.append(m[0] + ": " + m[7])
-        # we need to reduce the weekdays from something like
-        # Mo 08:00-18:00, We 08:00-18:00, Th 08:00-18:00
-        # to
-        # Mo 08:00-18:00, We-Th 08:00-18:00
-        # lets hold the previous working hour outside the loop
-        prev_hours = ""
-        final_working_hours = []
-        # define how they should follow each other
-        match_order = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
-        for hour in working_hours:
-            if hour[2:] != prev_hours[2:]:
-                # hour being processed time range does not match previous
-                # we let it be
-                prev_hours = hour
-                final_working_hours.append(hour)
-            else:
-                # hour matches, let's try to compress
-                last_entry = final_working_hours[-1]
-                # get index of what the day of prev_hour should be if we have to compress this
-                get_prev_index = match_order.index(hour[0:2]) - 1
-                if last_entry[-14:-12] == match_order[get_prev_index]:
-                    # day of previous append complies with out match_order
-                    p = final_working_hours.pop(-1)
-                    final_working_hours.append(p[0:2] + "-" + hour[0:2] + prev_hours[-12:])
-                    prev_hours = hour
-                elif last_entry[-8:-6] == match_order[get_prev_index] and hour[-4:] == "24/7":
-                    # lets do same for 24/7, they have this wierd Mon 24/7, Tue 24/7 etc
-                    p = final_working_hours.pop(-1)
-                    final_working_hours.append(p[0:2] + "-" + hour[0:2] + prev_hours[-6:])
-                    prev_hours = hour
-                else:
-                    # no match, let it be
-                    final_working_hours.append(hour)
-
-        if final_working_hours:
-            return "; ".join(final_working_hours)
-        elif hours == "Open 24 Hours":
-            # there is also a scenario where, 24/7 has no day of week prepended.
-            return "24/7"
-        else:
-            # if it all fails
-            return hours
-
-    def am_pm(self, hr, a_p):
-        """
-            A convenience method to fix noon and midnight issues
-        :param hr: the hour has to be passed in to accurately decide 12noon and midnight
-        :param a_p: this is either a or p i.e am pm
-        :return: the hours that must be added
-        """
-        diff = 0
-        if a_p == "AM":
-            if int(hr) < 12:
-                diff = 0
-            else:
-                diff = -12
-        else:
-            if int(hr) < 12:
-                diff = 12
-        return diff
+        return oh
