@@ -15,7 +15,9 @@ class BluePearlPetHospitalUSSpider(SitemapSpider, StructuredDataSpider):
 
     def post_process_item(self, item, response, ld_data):
         name_html = Selector(text=ld_data["name"])
-        item["name"] = " ".join((" ".join(name_html.xpath('//text()').getall())).split()).replace(" - BluePearl Pet Hospital", "")
+        item["name"] = " ".join((" ".join(name_html.xpath("//text()").getall())).split()).replace(
+            " - BluePearl Pet Hospital", ""
+        )
         item.pop("twitter")
         item.pop("facebook")
         if "24/7" in ld_data["openingHours"]:
