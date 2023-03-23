@@ -20,10 +20,11 @@ from locations.hours import OpeningHours
 class YextSpider(Spider):
     api_key = ""
     api_version = ""
+    search_filter = "{}"
     page_limit = 50
 
     def request_page(self, next_offset):
-        yield JsonRequest(url=f"https://cdn.yextapis.com/v2/accounts/me/entities?api_key={self.api_key}&v={self.api_version}&limit={self.page_limit}&offset={next_offset}&filter={{}}", meta={"offset": next_offset})
+        yield JsonRequest(url=f"https://cdn.yextapis.com/v2/accounts/me/entities?api_key={self.api_key}&v={self.api_version}&limit={self.page_limit}&offset={next_offset}&filter={self.search_filter}", meta={"offset": next_offset})
 
     def start_requests(self):
         now = datetime.datetime.now()
