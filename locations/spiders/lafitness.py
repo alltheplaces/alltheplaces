@@ -15,6 +15,7 @@ class LAFitnessSpider(scrapy.Spider):
     item_attributes = {"brand": "LA Fitness", "brand_wikidata": "Q6457180"}
     allowed_domains = ["lafitness.com"]
     download_delay = 0.1
+    requires_proxy = True
 
     def start_requests(self):
         yield JsonRequest(
