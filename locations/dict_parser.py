@@ -107,7 +107,9 @@ class DictParser:
         item["ref"] = DictParser.get_first_key(obj, DictParser.ref_keys)
         item["name"] = DictParser.get_first_key(obj, DictParser.name_keys)
 
-        location = DictParser.get_first_key(obj, ["location", "geo-location", "geo", "geo-point", "geocodedCoordinate", "coordinates"])
+        location = DictParser.get_first_key(
+            obj, ["location", "geo-location", "geo", "geo-point", "geocodedCoordinate", "coordinates"]
+        )
         # If not a good location object then use the parent
         if not location or not isinstance(location, dict):
             location = obj

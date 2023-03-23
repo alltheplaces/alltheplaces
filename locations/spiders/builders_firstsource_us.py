@@ -10,9 +10,19 @@ class BuildersFirstSourceUSSpider(YextSpider):
         if "c_locationStoreName" in location:
             item["name"] = location["c_locationStoreName"]
         if "c_websiteLocationName" in location:
-            item["website"] = "https://www.bldr.com/location/" + location["c_websiteLocationName"].lower().replace(" ", "-") + "/" + location["meta"]["id"]
+            item["website"] = (
+                "https://www.bldr.com/location/"
+                + location["c_websiteLocationName"].lower().replace(" ", "-")
+                + "/"
+                + location["meta"]["id"]
+            )
         elif "c_locationStoreName" in location:
-            item["website"] = "https://www.bldr.com/location/" + location["c_locationStoreName"].lower().replace(" ", "-") + "/" + location["meta"]["id"]
+            item["website"] = (
+                "https://www.bldr.com/location/"
+                + location["c_locationStoreName"].lower().replace(" ", "-")
+                + "/"
+                + location["meta"]["id"]
+            )
         item.pop("twitter")
         item["extras"].pop("contact:instagram")
         yield item

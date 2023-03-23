@@ -24,7 +24,10 @@ class YextSpider(Spider):
     page_limit = 50
 
     def request_page(self, next_offset):
-        yield JsonRequest(url=f"https://cdn.yextapis.com/v2/accounts/me/entities?api_key={self.api_key}&v={self.api_version}&limit={self.page_limit}&offset={next_offset}&filter={self.search_filter}", meta={"offset": next_offset})
+        yield JsonRequest(
+            url=f"https://cdn.yextapis.com/v2/accounts/me/entities?api_key={self.api_key}&v={self.api_version}&limit={self.page_limit}&offset={next_offset}&filter={self.search_filter}",
+            meta={"offset": next_offset},
+        )
 
     def start_requests(self):
         if not self.api_version:
@@ -38,7 +41,9 @@ class YextSpider(Spider):
                 continue
             item = DictParser.parse(location)
             item["ref"] = location["meta"]["id"]
-            item["street_address"] = " ".join(filter(None, [location["address"].get("line1"), location["address"].get("line2")]))
+            item["street_address"] = " ".join(
+                filter(None, [location["address"].get("line1"), location["address"].get("line2")])
+            )
             if "websiteUrl" in location:
                 item["website"] = location["websiteUrl"].get("url")
             if "emails" in location:

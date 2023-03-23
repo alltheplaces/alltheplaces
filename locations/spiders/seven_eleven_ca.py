@@ -1,4 +1,4 @@
-from locations.categories import apply_yes_no, Extras
+from locations.categories import Extras, apply_yes_no
 from locations.storefinders.yext import YextSpider
 
 
