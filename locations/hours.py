@@ -484,7 +484,7 @@ class OpeningHours:
             for rule in rules:
                 days, time_ranges = rule.split(" ", 1)
 
-                if time_ranges.lower() == "closed":
+                if "-" not in time_ranges:
                     continue
 
                 for time_range in time_ranges.split(","):
