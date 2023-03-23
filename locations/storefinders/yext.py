@@ -34,11 +34,13 @@ class YextSpider(Spider):
 
     def parse(self, response):
         for location in response.json()["response"]["entities"]:
+            if location.get("closed") or "CLOSED" in location["name"].upper():
+                continue
             item = DictParser.parse(location)
             item["ref"] = location["meta"]["id"]
             item["street_address"] = " ".join(filter(None, [location["address"].get("line1"), location["address"].get("line2")]))
             if "websiteUrl" in location:
-                item["website"] = location["websiteUrl"]["url"]
+                item["website"] = location["websiteUrl"].get("url")
             if "emails" in location:
                 item["email"] = location["emails"][0]
             item["phone"] = location.get("mainPhone")

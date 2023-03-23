@@ -7,8 +7,6 @@ class BuildersFirstSourceUSSpider(YextSpider):
     api_key = "75d03100e13baa02575a046100dc4a15"
 
     def parse_item(self, item, location):
-        if location.get("closed") or "CLOSED" in location["name"]:
-            return
         if "c_locationStoreName" in location:
             item["name"] = location["c_locationStoreName"]
         if "c_websiteLocationName" in location:
