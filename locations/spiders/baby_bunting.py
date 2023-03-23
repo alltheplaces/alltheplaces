@@ -25,6 +25,8 @@ class BabyBuntingSpider(scrapy.Spider):
     def parse(self, response):
         stores = json.loads(response.body)
         for store in stores:
+            if "COMING SOON" in store["title"].upper():
+                continue
             item = DictParser.parse(store)
             item["ref"] = str(store["supplychannel_id"])
             item["lat"] = store["address_lat_lng"].replace(" ", "").split(",")[0]
