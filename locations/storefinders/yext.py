@@ -27,8 +27,9 @@ class YextSpider(Spider):
         yield JsonRequest(url=f"https://cdn.yextapis.com/v2/accounts/me/entities?api_key={self.api_key}&v={self.api_version}&limit={self.page_limit}&offset={next_offset}&filter={self.search_filter}", meta={"offset": next_offset})
 
     def start_requests(self):
-        now = datetime.datetime.now()
-        self.api_version = now.strftime("%Y%m%d")
+        if not self.api_version:
+            now = datetime.datetime.now()
+            self.api_version = now.strftime("%Y%m%d")
         yield from self.request_page(0)
 
     def parse(self, response):
