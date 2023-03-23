@@ -51,16 +51,17 @@ class YextSpider(Spider):
             else:
                 item["facebook"] = location.get("facebookPageUrl")
 
-            item["opening_hours"] = OpeningHours()
-            for day_name, day_intervals in location["hours"].items():
-                if day_name == "holidayHours":
-                    continue
-                if "isClosed" in day_intervals and day_intervals["isClosed"]:
-                    continue
-                if "openIntervals" not in day_intervals:
-                    continue
-                for interval in day_intervals["openIntervals"]:
-                    item["opening_hours"].add_range(day_name.title(), interval["start"], interval["end"])
+            if "hours" in location:
+                item["opening_hours"] = OpeningHours()
+                for day_name, day_intervals in location["hours"].items():
+                    if day_name == "holidayHours":
+                        continue
+                    if "isClosed" in day_intervals and day_intervals["isClosed"]:
+                        continue
+                    if "openIntervals" not in day_intervals:
+                        continue
+                    for interval in day_intervals["openIntervals"]:
+                        item["opening_hours"].add_range(day_name.title(), interval["start"], interval["end"])
 
             yield from self.parse_item(item, location) or []
 
