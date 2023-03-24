@@ -1,4 +1,3 @@
-import logging
 from enum import Enum
 
 from locations.items import Feature
@@ -123,14 +122,19 @@ def apply_category(category, item):
     elif isinstance(category, dict):
         tags = category
     else:
-        logging.error("Invalid category format")
-        return
+        raise TypeError("dict or Enum required")
 
     if not item.get("extras"):
         item["extras"] = {}
+
     for key, value in tags.items():
         if key in item["extras"].keys():
-            item["extras"][key] = item["extras"][key] + ";" + value
+            existing_values = item["extras"][key].split(";")
+            if value in existing_values:
+                continue
+            existing_values.append(value)
+            existing_values.sort()
+            item["extras"][key] = ";".join(existing_values)
         else:
             item["extras"][key] = value
 
@@ -175,6 +179,7 @@ class Fuel(Enum):
     # Octane levels
     OCTANE_80 = "fuel:octane_80"
     OCTANE_87 = "fuel:octane_87"
+    OCTANE_89 = "fuel:octane_89"
     OCTANE_90 = "fuel:octane_90"
     OCTANE_91 = "fuel:octane_91"
     OCTANE_92 = "fuel:octane_92"
@@ -277,6 +282,20 @@ class PaymentMethods(Enum):
     WECHAT = "payment:wechat"
 
 
+class FuelCards(Enum):
+    ALLSTAR = "Allstar Card"
+    AVIA = "Avia Card"
+    BP = "BP card"
+    DEUTSCHLAND = "fuel:discount:deutschland_card"
+    DKV = "fuel:discount:dkv"
+    ESSO_NATIONAL = "fuel:discount:esso_national"
+    EXXONMOBIL_FLEET = "ExxonMobil Fleet Card"
+    LOGPAY = "LogPay Card"
+    MOBIL = "Mobilcard"
+    SHELL = "fuel:discount:shell"
+    UTA = "fuel:discount:uta"
+
+
 def apply_yes_no(attribute, item: Feature, state: bool, apply_positive_only: bool = True):
     """
     Many OSM POI attribute tags values are "yes"/"no". Provide support for setting these from spider code.
@@ -292,7 +311,8 @@ def apply_yes_no(attribute, item: Feature, state: bool, apply_positive_only: boo
     elif isinstance(attribute, Enum):
         tag_key = attribute.value
     else:
-        raise AttributeError("string or Enum required")
+        raise TypeError("string or Enum required")
+
     if "=" in tag_key:
         tag_key, tag_value = tag_key.split("=")
     else:
