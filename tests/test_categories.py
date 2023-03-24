@@ -16,7 +16,7 @@ def test_apply_yes_no():
     try:
         apply_yes_no({}, item, True)
         assert False
-    except AttributeError:
+    except TypeError:
         # Expected
         pass
 
