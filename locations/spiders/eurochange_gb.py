@@ -25,5 +25,5 @@ class WilkoGBSpider(SitemapSpider, StructuredDataSpider):
             item["image"] = None
         if "NM Money" in item["name"]:
             item.update(self.NM_MONEY)
-            item["website"] = item["website"].replace("eurochange.co.uk","nmmoney.co.uk")
+            item["website"] = item["website"].replace("eurochange.co.uk", "nmmoney.co.uk")
         yield from self.inspect_item(item, response)
