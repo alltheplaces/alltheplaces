@@ -1,7 +1,8 @@
 from scrapy.spiders import SitemapSpider
 
-from locations.structured_data_spider import StructuredDataSpider
 from locations.hours import OpeningHours
+from locations.structured_data_spider import StructuredDataSpider
+
 
 class WilkoGBSpider(SitemapSpider, StructuredDataSpider):
     name = "eurochange_gb"
