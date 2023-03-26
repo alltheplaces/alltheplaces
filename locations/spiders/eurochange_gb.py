@@ -1,7 +1,7 @@
 from scrapy.spiders import SitemapSpider
 
 from locations.structured_data_spider import StructuredDataSpider
-
+from locations.hours import OpeningHours
 
 class WilkoGBSpider(SitemapSpider, StructuredDataSpider):
     name = "eurochange_gb"
@@ -19,11 +19,13 @@ class WilkoGBSpider(SitemapSpider, StructuredDataSpider):
     wanted_types = ["Store"]
 
     def post_process_item(self, item, response, ld_data, **kwargs):
-        if "facebook" in item.keys() and item["facebook"] == "https://www.facebook.com/eurochange/":
+        if item.get("facebook") == "https://www.facebook.com/eurochange/":
             item["facebook"] = None
-        if "image" in item.keys() and item["image"] == "https://www.eurochange.co.uk/assets/img/logo.svg":
+        if item.get("image") == "https://www.eurochange.co.uk/assets/img/logo.svg":
             item["image"] = None
         if "NM Money" in item["name"]:
             item.update(self.NM_MONEY)
             item["website"] = item["website"].replace("eurochange.co.uk", "nmmoney.co.uk")
-        yield from self.inspect_item(item, response)
+        item["opening_hours"] = OpeningHours()
+        item["opening_hours"].from_linked_data(ld_data, time_format="%H.%M")
+        yield item
