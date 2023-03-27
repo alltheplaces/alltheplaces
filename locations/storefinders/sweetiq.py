@@ -1,9 +1,8 @@
 import chompjs
-
 from scrapy import Request, Spider
 from scrapy.http import JsonRequest
 
-from locations.categories import apply_yes_no, PaymentMethods
+from locations.categories import PaymentMethods, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
@@ -23,8 +22,12 @@ class SweetIQSpider(Spider):
         api_store_locator_id = locations_data["dataSettings"]["storeLocatorId"]
         api_client_id = locations_data["dataSettings"]["clientId"]
         api_client_name = locations_data["dataSettings"]["cname"]
-        location_ids = [location["properties"]["id"] for location in locations_data["dataLocations"]["collection"]["features"]]
-        location_ids_batches = [location_ids[n : n + self.request_batch_size] for n in range(0, len(location_ids), self.request_batch_size)]
+        location_ids = [
+            location["properties"]["id"] for location in locations_data["dataLocations"]["collection"]["features"]
+        ]
+        location_ids_batches = [
+            location_ids[n : n + self.request_batch_size] for n in range(0, len(location_ids), self.request_batch_size)
+        ]
         for location_ids_batch in location_ids_batches:
             location_ids_batch_string = ",".join(str(location_id) for location_id in location_ids_batch)
             url = f"{api_url_base}/{api_store_locator_id}/locations-details?locale=en_US&ids={location_ids_batch_string}&clientId={api_client_id}&cname={api_client_name}"
@@ -34,12 +37,14 @@ class SweetIQSpider(Spider):
         for location in response.json()["features"]:
             if location["properties"]["isPermanentlyClosed"]:
                 return
-            
+
             item = DictParser.parse(location["properties"])
             item["ref"] = location["properties"]["branch"]
             item["lat"] = location["geometry"]["coordinates"][1]
             item["lon"] = location["geometry"]["coordinates"][0]
-            item["street_address"] = ", ".join(filter(None, [location["properties"]["addressLine1"], location["properties"]["addressLine2"]]))
+            item["street_address"] = ", ".join(
+                filter(None, [location["properties"]["addressLine1"], location["properties"]["addressLine2"]])
+            )
 
             item["opening_hours"] = OpeningHours()
             for day_name, time_ranges in location["properties"]["hoursOfOperation"].items():
