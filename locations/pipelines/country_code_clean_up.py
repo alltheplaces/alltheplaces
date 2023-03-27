@@ -52,6 +52,9 @@ class CountryCodeCleanUpPipeline:
                     spider.crawler.stats.inc_value("atp/field/country/from_reverse_geocoding")
                     item["country"] = results[0]["cc"]
 
+                    if not item.get("state"):
+                        item["state"] = results[0].get("admin1")
+
                     return item
 
         return item
