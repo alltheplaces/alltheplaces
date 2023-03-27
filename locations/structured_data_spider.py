@@ -78,6 +78,7 @@ class StructuredDataSpider(Spider):
     search_for_facebook = True
     search_for_image = True
     json_parser = "json"
+    time_format = "%H:%M"
 
     def parse_sd(self, response):  # noqa: C901
         MicrodataParser.convert_to_json_ld(response)
@@ -85,7 +86,7 @@ class StructuredDataSpider(Spider):
             if ld_item := LinkedDataParser.find_linked_data(response, wanted_type, json_parser=self.json_parser):
                 self.pre_process_data(ld_item)
 
-                item = LinkedDataParser.parse_ld(ld_item)
+                item = LinkedDataParser.parse_ld(ld_item, time_format=self.time_format)
 
                 url = get_url(response)
 
