@@ -49,8 +49,8 @@ class BunningsSpider(scrapy.Spider):
             item = DictParser.parse(location)
             item["ref"] = location["name"]
             item["name"] = location["displayName"]
-            item["phone"] = location["address"]["phone"]
-            item["email"] = location["address"]["email"]
+            item["phone"] = location["address"].get("phone")
+            item["email"] = location["address"].get("email")
             if item["country"] == "NZ":
                 item.pop("state")
                 website_prefix = "https://www.bunnings.co.nz/stores/"
