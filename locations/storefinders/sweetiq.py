@@ -40,8 +40,7 @@ class SweetIQSpider(Spider):
 
             item = DictParser.parse(location["properties"])
             item["ref"] = location["properties"]["branch"]
-            item["lat"] = location["geometry"]["coordinates"][1]
-            item["lon"] = location["geometry"]["coordinates"][0]
+            item["geometry"] = location["geometry"]
             item["street_address"] = ", ".join(
                 filter(None, [location["properties"]["addressLine1"], location["properties"]["addressLine2"]])
             )
@@ -53,24 +52,18 @@ class SweetIQSpider(Spider):
 
             payment_methods = {
                 "AMEX": PaymentMethods.AMERICAN_EXPRESS,
-                "American Express": PaymentMethods.AMERICAN_EXPRESS,
+                "AMERICAN EXPRESS": PaymentMethods.AMERICAN_EXPRESS,
                 "CASH ONLY": PaymentMethods.CASH,
                 "CASH": PaymentMethods.CASH,
-                "Cash": PaymentMethods.CASH,
                 "DEBIT": PaymentMethods.DEBIT_CARDS,
-                "Debit": PaymentMethods.DEBIT_CARDS,
                 "DISCOVER": PaymentMethods.DISCOVER_CARD,
-                "Discover": PaymentMethods.DISCOVER_CARD,
                 "MASTERCARD": PaymentMethods.MASTER_CARD,
-                "Mastercard": PaymentMethods.MASTER_CARD,
-                "MasterCard": PaymentMethods.MASTER_CARD,
                 "NFC": PaymentMethods.CONTACTLESS,
                 "VISA": PaymentMethods.VISA,
-                "Visa": PaymentMethods.VISA,
             }
             for payment_method in location["properties"]["paymentMethods"]:
-                if payment_method in payment_methods.keys():
-                    apply_yes_no(payment_methods[payment_method], item, True)
+                if payment_method.upper() in payment_methods.keys():
+                    apply_yes_no(payment_methods[payment_method.upper()], item, True)
 
             yield from self.parse_item(item, location) or []
 
