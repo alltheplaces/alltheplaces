@@ -54,7 +54,7 @@ class LinkedDataParser:
                 return ld_obj
 
     @staticmethod
-    def parse_ld(ld) -> Feature:  # noqa: C901
+    def parse_ld(ld, time_format: str = "%H:%M") -> Feature:  # noqa: C901
         item = Feature()
 
         if (geo := ld.get("geo")) or "location" in ld and (geo := ld["location"].get("geo")):
@@ -112,8 +112,8 @@ class LinkedDataParser:
 
         try:
             oh = OpeningHours()
-            oh.from_linked_data(ld)
-            item["opening_hours"] = oh.as_opening_hours()
+            oh.from_linked_data(ld, time_format=time_format)
+            item["opening_hours"] = oh
         except:
             pass
 
