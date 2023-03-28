@@ -1,8 +1,7 @@
-import datetime
-
 import chompjs
 import scrapy
 
+from locations.hours import DAYS_FULL
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -27,10 +26,16 @@ class TheGoodGuysAUSpider(StructuredDataSpider):
             "latitude": coordinates.split(",")[0],
             "longitude": coordinates.split(",")[1],
         }
-        ld_data["openingHoursSpecification"] = ld_data.pop("OpeningHoursSpecification", None)
-        for day in ld_data["openingHoursSpecification"]:
-            if "Today" in day["dayOfWeek"]:
-                day["dayOfWeek"] = datetime.datetime.today().strftime("%A")
+        oh_spec = ld_data.pop("OpeningHoursSpecification", [])
+        days_to_find = DAYS_FULL.copy()
+        for day in oh_spec:
+            day_name = day["dayOfWeek"].replace("http://schema.org/", "")
+            if day_name in DAYS_FULL:
+                days_to_find.remove(day_name)
+        for day in oh_spec:
+            if day["dayOfWeek"].replace("http://schema.org/", "") == "Today":
+                day["dayOfWeek"] = "http://schema.org/" + days_to_find[0]
+        ld_data["openingHoursSpecification"] = oh_spec
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item.pop("facebook")
