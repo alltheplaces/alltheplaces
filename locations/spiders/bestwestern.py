@@ -19,7 +19,7 @@ class BestWesternSpider(scrapy.spiders.SitemapSpider):
     ]
     allowed_domains = ["bestwestern.com"]
     sitemap_urls = ["https://www.bestwestern.com/etc/seo/bestwestern/hotels.xml"]
-    sitemap_rules = [(r"/book/.*\.html", "parse_hotel")]
+    sitemap_rules = [(r"en_US/book/.*\.html", "parse_hotel")]
     download_delay = 0.5
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
