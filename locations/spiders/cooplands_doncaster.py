@@ -15,16 +15,10 @@ class CooplandsDoncasterSpider(scrapy.Spider):
     }
     start_urls = ["https://cooplands.co.uk/shop-locations"]
 
-    hours = OpeningHours()
-    for DAY in DAYS[0:6]:
-        hours.add_range(day=DAY, open_time="08:00", close_time="17:00")
-
-    item_attributes = {
-        "brand": "Cooplands",
-        "brand_wikidata": "Q96622197",
-        "country": "GB",
-        "opening_hours": hours.as_opening_hours(),
-    }
+    def __init__(self):
+        self.item_attributes["opening_hours"] = OpeningHours()
+        for DAY in DAYS[0:6]:
+            self.item_attributes["opening_hours"].add_range(day=DAY, open_time="08:00", close_time="17:00")
 
     def parse(self, response):
         stores = response.xpath("//div[@class='box box-store']")
