@@ -358,8 +358,8 @@ DELIMITERS_ES = {
 
 
 def day_range(start_day, end_day):
-    start_ix = DAYS.index(start_day)
-    end_ix = DAYS.index(end_day)
+    start_ix = DAYS.index(sanitise_day(start_day))
+    end_ix = DAYS.index(sanitise_day(end_day))
     if start_ix <= end_ix:
         return DAYS[start_ix : end_ix + 1]
     else:
