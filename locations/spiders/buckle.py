@@ -1,6 +1,5 @@
 from scrapy.spiders import SitemapSpider
 
-from locations.hours import OpeningHours
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -17,9 +16,4 @@ class BuckleSpider(SitemapSpider, StructuredDataSpider):
     ]
     sitemap_rules = [(r"https://local\.buckle\.com/.*\d/", "parse")]
     json_parser = "json5"
-
-    def post_process_item(self, item, response, ld_data, **kwargs):
-        oh = OpeningHours()
-        oh.from_linked_data(ld_data, time_format="%I:%M %p")
-        item["opening_hours"] = oh.as_opening_hours()
-        yield item
+    time_format = "%I:%M %p"

@@ -1,6 +1,5 @@
 import scrapy
 
-from locations.hours import OpeningHours
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -10,6 +9,7 @@ class JustCutsSpider(StructuredDataSpider):
     allowed_domains = ["www.justcuts.com.au"]
     start_urls = ["https://www.justcuts.com.au/salonlocator/SalonsLatLongUpdate.aspx"]
     wanted_types = ["HairSalon"]
+    time_format = "%I:%M %p"
 
     def parse(self, response):
         for urlpath in response.xpath("//marker/@storeurl").getall():
@@ -25,7 +25,4 @@ class JustCutsSpider(StructuredDataSpider):
             item.pop("facebook")
         if item["phone"] == 0:
             item.pop("phone")
-        oh = OpeningHours()
-        oh.from_linked_data(ld_data, time_format="%I:%M %p")
-        item["opening_hours"] = oh.as_opening_hours()
         yield item

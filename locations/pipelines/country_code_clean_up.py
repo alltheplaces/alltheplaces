@@ -1,6 +1,21 @@
-import reverse_geocode
+import reverse_geocoder
 
 from locations.country_utils import CountryUtils
+from locations.items import Feature
+
+
+def get_lat_lon(item: Feature) -> (float, float):
+    if geometry := item.get("geometry"):
+        if isinstance(geometry, dict):
+            if geometry.get("type") == "Point":
+                if coords := geometry.get("coordinates"):
+                    return coords[1], coords[0]
+    else:
+        try:
+            return float(item.get("lat")), float(item.get("lon"))
+        except TypeError:
+            pass
+    return None
 
 
 class CountryCodeCleanUpPipeline:
@@ -32,19 +47,14 @@ class CountryCodeCleanUpPipeline:
 
         if not getattr(spider, "skip_auto_cc_geocoder", False):
             # Still no country set, try an offline reverse geocoder.
-            lat = None
-            lon = None
-            if geometry := item.get("geometry"):
-                if isinstance(geometry, dict):
-                    if geometry.get("type") == "Point":
-                        if coords := geometry.get("coordinates"):
-                            lon, lat = coords
-            else:
-                lat, lon = item.get("lat"), item.get("lon")
-            if lat is not None and lon is not None:
-                if c := reverse_geocode.search([(lat, lon)]):
+            if location := get_lat_lon(item):
+                if results := reverse_geocoder.search([(location[0], location[1])]):
                     spider.crawler.stats.inc_value("atp/field/country/from_reverse_geocoding")
-                    item["country"] = c[0]["country_code"]
+                    item["country"] = results[0]["cc"]
+
+                    if not item.get("state"):
+                        item["state"] = results[0].get("admin1")
+
                     return item
 
         return item

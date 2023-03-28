@@ -1,6 +1,5 @@
 from scrapy.spiders import SitemapSpider
 
-from locations.hours import OpeningHours
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -12,10 +11,7 @@ class McCoysSpider(SitemapSpider, StructuredDataSpider):
     sitemap_rules = [(r"/stores/[-\w]+", "parse_sd")]
     wanted_types = ["Store"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
+    time_format = "%I:%M %p"
 
-    def post_process_item(self, item, response, ld_data):
-        oh = OpeningHours()
-        oh.from_linked_data(ld_data, time_format="%I:%M %p")
-        item["opening_hours"] = oh.as_opening_hours()
-
-        yield item
+    def pre_process_data(self, ld_data, **kwargs):
+        ld_data["openingHoursSpecification"] = ld_data.pop("OpeningHoursSpecification", None)
