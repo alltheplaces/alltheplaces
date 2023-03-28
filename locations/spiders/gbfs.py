@@ -45,7 +45,7 @@ class GBFSSpider(CSVFeedSpider):
             item = DictParser.parse(station)
 
             item["brand"] = kwargs["Name"]  # Closer to OSM operator or network?
-            item["extras"] = {"capacity": station.get("capacity")}
+            item["extras"]["capacity"] = station.get("capacity")
             # This URL isn't POI specific, but it is Network specific
             item["website"] = kwargs["URL"]
 
