@@ -1,8 +1,9 @@
 import re
+
 import scrapy
 
+from locations.hours import DAYS_FR, OpeningHours
 from locations.items import Feature
-from locations.hours import OpeningHours, DAYS_FR
 
 
 class MediaMarktBESpider(scrapy.Spider):
