@@ -1,8 +1,9 @@
+import unicodedata
+
 import scrapy
 
-from locations.hours import NAMED_DAY_RANGES_EN, DAYS_FULL, DAYS, OpeningHours
+from locations.hours import DAYS, DAYS_FULL, NAMED_DAY_RANGES_EN, OpeningHours
 from locations.items import Feature
-import unicodedata
 
 
 class IntersportSESpider(scrapy.Spider):
@@ -106,4 +107,3 @@ class IntersportSESpider(scrapy.Spider):
         :return: value without accent
         """
         return unicodedata.normalize("NFKD", value).encode("ASCII", "ignore").decode("utf-8", "ignore")
-
