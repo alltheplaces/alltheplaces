@@ -7,7 +7,6 @@ class UnitedColorsOfBenettonSpider(WoosmapSpider):
     key = "woos-77ab54a0-3d40-3188-8f64-58f02485a654"
     custom_settings = {"DEFAULT_REQUEST_HEADERS": {"Origin": "https://world.benetton.com/"}}
 
-
     def parse_item(self, item, feature, **kwargs):
-        item.pop('website')
+        item.pop("website")
         yield item
