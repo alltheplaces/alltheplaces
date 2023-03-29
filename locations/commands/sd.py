@@ -2,11 +2,10 @@ import json
 import os
 import pathlib
 
-import scrapy
 from scrapy.commands import BaseRunSpiderCommand
 from scrapy.exceptions import UsageError
 
-from locations.linked_data_parser import LinkedDataParser
+from locations.hours import OpeningHours
 from locations.microdata_parser import MicrodataParser
 from locations.structured_data_spider import StructuredDataSpider
 from locations.user_agents import BROWSER_DEFAULT
@@ -27,7 +26,10 @@ class MySpider(StructuredDataSpider):
     def pre_process_data(self, ld_data, **kwargs):
         self.logger.debug("JSON-LD %s", json.dumps(ld_data, indent=2))
 
-    def inspect_item(self, item, response):
+    def post_process_item(self, item, response, ld_data, **kwargs):
+        if isinstance(item.get("opening_hours"), OpeningHours):
+            item["opening_hours"] = item["opening_hours"].as_opening_hours()
+
         print(item)
         yield item
 
