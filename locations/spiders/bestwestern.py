@@ -19,8 +19,9 @@ class BestWesternSpider(scrapy.spiders.SitemapSpider):
     ]
     allowed_domains = ["bestwestern.com"]
     sitemap_urls = ["https://www.bestwestern.com/etc/seo/bestwestern/hotels.xml"]
-    sitemap_rules = [(r"/en_US/book/hotels-in-.*\.html", "parse_hotel")]
-    download_delay = 0.5
+    sitemap_rules = [(r"en_US/book/.*\.html", "parse_hotel")]
+    download_delay = 2.0
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def parse_hotel(self, response):
         hotel_details = response.xpath('//div[@id="hotel-details-info"]/@data-hoteldetails').get()
