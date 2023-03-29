@@ -8,7 +8,7 @@ from locations.spiders.bestbuy import BestBuySpider
 
 
 class BestBuyCASpider(scrapy.Spider):
-    name = "bestbuy-ca"
+    name = "bestbuy_ca"
     item_attributes = BestBuySpider.item_attributes
     allowed_domains = ["stores.bestbuy.ca"]
     bb_url = "https://stores.bestbuy.ca/en-ca/index.html"
