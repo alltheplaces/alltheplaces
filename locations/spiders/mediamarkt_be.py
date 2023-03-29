@@ -1,11 +1,8 @@
 import re
 
-import scrapy
-from scrapy.linkextractors import LinkExtractor
-from scrapy.spiders import CrawlSpider, Rule, SitemapSpider
+from scrapy.spiders import SitemapSpider
 
 from locations.hours import DAYS_FR, OpeningHours
-from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -14,13 +11,7 @@ class MediaMarktBESpider(SitemapSpider, StructuredDataSpider):
     item_attributes = {"brand": "MediaMarkt", "brand_wikidata": "Q2381223"}
     sitemap_urls = ["https://www.mediamarkt.be/sitemap/sitemap-marketinfo.xml"]
     allowed_domains = ["www.mediamarkt.be"]
-    rules = [
-        Rule(
-            LinkExtractor(allow=".*/mcs/marketinfo/.*"),
-            callback="parse_sd",
-            follow=False,
-        )
-    ]
+    headers = {"Content-language": "fr-BE"}
     domain = "https://www.mediamarkt.be"
 
     def post_process_item(self, item, response, ld_data, **kwargs):
