@@ -14,6 +14,9 @@ def test_embed():
     assert url_to_coords(
         "https://www.google.com/maps/embed/v1/place?key=AIzaSyBjjIa7P4QKNHSPXay5bq64BWfQXMQAX94&q=24.614918,73.705124"
     ) == (24.614918, 73.705124)
+    assert url_to_coords(
+        "https://www.google.com/maps/embed/v1/place?key=AIzaSyDzsQHIZxyrYB5OfyJBmVvbGPhut4wvLts&q=Lee%27s+Famous+Recipe+Chicken+1635+North+21st+Street,+Newark+OH+43055&center=40.092651,-82.427392"
+    ) == (40.092651, -82.427392)
 
 
 def test_staticmap():
