@@ -50,15 +50,11 @@ def url_to_coords(url: str) -> (float, float):  # noqa: C901
             if match := re.match(r"(-?\d+.\d+),\s?(-?\d+.\d+)", q):
                 return float(match.group(1)), float(match.group(2))
     elif url.startswith("https://maps.googleapis.com/maps/api/staticmap"):
-        # find the first marker location, or the map center
         for markers in get_query_param(url, "markers"):
             for val in markers.split("|"):
                 if m := re.match(r"(-?\d+.\d+),(-?\d+.\d+)", val):
                     lat, lon = float(m.group(1)), float(m.group(2))
                     return lat, lon
-        for ll in get_query_param(url, "center"):
-            lat, lon = ll.split(",")
-            return float(lat), float(lon)
     elif url.startswith("https://www.google.com/maps/dir/"):
         slash_splits = url.split("/")
         if len(slash_splits) > 6:
@@ -73,8 +69,9 @@ def url_to_coords(url: str) -> (float, float):  # noqa: C901
         lat, lon = url.split("/")[5].split(",")
         return float(lat.strip()), float(lon.strip())
     elif url.startswith("https://www.google.com/maps/search"):
-        lat, lon = url.replace("https://www.google.com/maps/search/?api=1&query=", "").split(",")
-        return float(lat.strip()), float(lon.strip())
+        for query in get_query_param(url, "query"):
+            if m := re.match(r"(-?\d+.\d+),(-?\d+.\d+)", query):
+                return float(m.group(1)), float(m.group(2))
     elif "daddr" in url:
         for daddr in get_query_param(url, "daddr"):
             daddr = daddr.split(",")
@@ -90,5 +87,9 @@ def url_to_coords(url: str) -> (float, float):  # noqa: C901
         for ll in get_query_param(url, "ll"):
             lat, lon = ll.split(",")
             return float(lat), float(lon)
+
+    for center in get_query_param(url, "center"):
+        lat, lon = center.split(",")
+        return float(lat), float(lon)
 
     return None, None
