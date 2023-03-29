@@ -80,7 +80,11 @@ class MrBircolageBeSpider(scrapy.Spider):
         for i in range(1, 8):
             if (day_path := open_hours_path.xpath(f"//tr[{i}]/td/text()").getall()) is not None:
                 # Add Week days
-                day, hours = self.clean_text(day_path[0]), self.clean_text(day_path[1])
+                if len(day_path) == 2:
+                    day, hours = self.clean_text(day_path[0]), self.clean_text(day_path[1])
+                else:
+                    day = self.clean_text(day_path[0])
+                    hours = open_hours_path.xpath(f"//tr[{i}]/td[2]/span/text()").get()
                 if hours != "Fermé":
                     open_hours, close_hours = hours.split(" ")[0], hours.split(" ")[2]
                     opening_hours.add_range(
