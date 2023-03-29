@@ -7,7 +7,6 @@ class MephistoBESpider(AmastyStoreLocatorSpider):
     allowed_domains = ["www.mephisto.com/be-fr"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
-
     def parse_item(self, item, location, popup_html):
         # We don't want resellers. Only brand shop.
         if item["name"] == "MEPHISTO-SHOP":
