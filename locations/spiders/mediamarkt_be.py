@@ -1,14 +1,12 @@
 import re
 
 import scrapy
+from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule, SitemapSpider
 
 from locations.hours import DAYS_FR, OpeningHours
 from locations.items import Feature
-from locations.hours import OpeningHours, DAYS_FR
-from scrapy.spiders import SitemapSpider
 from locations.structured_data_spider import StructuredDataSpider
-from scrapy.spiders import CrawlSpider, Rule
-from scrapy.linkextractors import LinkExtractor
 
 
 class MediaMarktBESpider(SitemapSpider, StructuredDataSpider):
