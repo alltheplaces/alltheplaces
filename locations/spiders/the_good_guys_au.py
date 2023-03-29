@@ -1,8 +1,7 @@
-import json
-
+import chompjs
 import scrapy
 
-from locations.hours import DAYS_FULL, OpeningHours
+from locations.hours import DAYS_FULL
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -11,13 +10,10 @@ class TheGoodGuysAUSpider(StructuredDataSpider):
     item_attributes = {"brand": "The Good Guys", "brand_wikidata": "Q7737217"}
     allowed_domains = ["www.thegoodguys.com.au"]
     start_urls = ["https://www.thegoodguys.com.au/store-locator"]
+    time_format = "%I:%M%p"
 
     def parse(self, response):
-        data_raw = response.xpath('//div[@id="allStoreJson"]/text()').extract_first()
-        data_clean = data_raw
-        for field in "latitude:", "longitude:", "storeId:", "description:", "url:":
-            data_clean = data_clean.replace(field, '"' + field[:-1] + '":')
-        data_json = json.loads(data_clean)
+        data_json = chompjs.parse_js_object(response.xpath('//div[@id="allStoreJson"]/text()').extract_first())
         for store in data_json["locations"]:
             yield scrapy.Request(store["url"], self.parse_sd)
 
@@ -30,7 +26,7 @@ class TheGoodGuysAUSpider(StructuredDataSpider):
             "latitude": coordinates.split(",")[0],
             "longitude": coordinates.split(",")[1],
         }
-        oh_spec = ld_data.pop("OpeningHoursSpecification")
+        oh_spec = ld_data.pop("OpeningHoursSpecification", [])
         days_to_find = DAYS_FULL.copy()
         for day in oh_spec:
             day_name = day["dayOfWeek"].replace("http://schema.org/", "")
@@ -44,7 +40,5 @@ class TheGoodGuysAUSpider(StructuredDataSpider):
     def post_process_item(self, item, response, ld_data, **kwargs):
         item.pop("facebook")
         item.pop("image")
-        oh = OpeningHours()
-        oh.from_linked_data(ld_data, time_format="%I:%M%p")
-        item["opening_hours"] = oh.as_opening_hours()
+
         yield item

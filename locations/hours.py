@@ -358,8 +358,8 @@ DELIMITERS_ES = {
 
 
 def day_range(start_day, end_day):
-    start_ix = DAYS.index(start_day)
-    end_ix = DAYS.index(end_day)
+    start_ix = DAYS.index(sanitise_day(start_day))
+    end_ix = DAYS.index(sanitise_day(end_day))
     if start_ix <= end_ix:
         return DAYS[start_ix : end_ix + 1]
     else:
@@ -455,7 +455,7 @@ class OpeningHours:
 
         return opening_hours
 
-    def from_linked_data(self, linked_data, time_format="%H:%M"):
+    def from_linked_data(self, linked_data, time_format: str = "%H:%M"):
         if linked_data.get("openingHoursSpecification"):
             for rule in linked_data["openingHoursSpecification"]:
                 if not rule.get("dayOfWeek") or not rule.get("opens") or not rule.get("closes"):

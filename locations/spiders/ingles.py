@@ -2,7 +2,7 @@ import re
 
 import scrapy
 
-from locations.hours import OpeningHours
+from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 
 STORE_STATES = [
@@ -13,8 +13,6 @@ STORE_STATES = [
     "Tennessee",
     "Virginia",
 ]
-
-DAYS = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
 
 
 class InglesSpider(scrapy.Spider):
@@ -38,10 +36,10 @@ class InglesSpider(scrapy.Spider):
                 day=day,
                 open_time=("".join(open_time).strip()),
                 close_time=("".join(close_time).strip()),
-                time_format="%H:%M%p",
+                time_format="%I:%M%p",
             )
 
-        return opening_hours.as_opening_hours()
+        return opening_hours
 
     def parse_store(self, response):
         properties = {
