@@ -20,6 +20,6 @@ class MephistoSpider(AmastyStoreLocatorSpider):
 
     def parse_item(self, item, location, popup_html):
         # We don't want resellers. Only brand shop.
-        if item["name"] == "MEPHISTO-SHOP":
+        if item["name"] in ("MEPHISTO-SHOP", "MEPHISTO SHOP"):
             item["addr_full"] = f"{item['addr_full']}, {item['postcode']} {item['city']}"
             yield item
