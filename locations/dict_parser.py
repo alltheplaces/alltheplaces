@@ -6,7 +6,7 @@ class DictParser:
 
     name_keys = ["name", "store-name", "display-name", "title"]
 
-    house_number_keys = ["house-number", "house-no", "street-number"]
+    house_number_keys = ["house-number", "house-no", "street-number", "street-no"]
 
     street_address_keys = [
         # EN
