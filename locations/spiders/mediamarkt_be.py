@@ -1,27 +1,17 @@
 import re
 
-import scrapy
+from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule
 
 from locations.hours import DAYS_FR, OpeningHours
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class MediaMarktBESpider(StructuredDataSpider):
+class MediaMarktBESpider(CrawlSpider, StructuredDataSpider):
     name = "media_markt_be"
     item_attributes = {"brand": "MediaMarkt", "brand_wikidata": "Q2381223"}
     start_urls = ["https://www.mediamarkt.be/fr/marketselection.html"]
-    domain = "https://www.mediamarkt.be"
-
-    headers = {"Content-language": "fr-BE"}
-
-    def parse(self, response):
-        store_urls = response.css(".all-markets-list").xpath("./li/a/@href").extract()
-        for store_url in store_urls:
-            yield scrapy.http.Request(
-                url=self.domain + store_url,
-                method="GET",
-                callback=self.parse_sd,
-            )
+    rules = [Rule(LinkExtractor(restrict_css=".all-markets-list"), callback="parse_sd")]
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         name = response.xpath('//*[@id="my-market-content"]/h1/text()').get()
