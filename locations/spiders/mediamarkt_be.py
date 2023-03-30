@@ -17,30 +17,23 @@ class MediaMarktBESpider(CrawlSpider, StructuredDataSpider):
         name = response.xpath('//*[@id="my-market-content"]/h1/text()').get()
         if name:
             item["name"] = name
-        opening_hours = self.parse_hours(response)
+        opening_hours = self.parse_hours(ld_data)
         if opening_hours:
             item["opening_hours"] = opening_hours
 
         yield item
 
-    def parse_hours(self, response):
+    @staticmethod
+    def parse_hours(ld_data: dict):
         opening_hours = OpeningHours()
+        regex = re.compile(r"(lu|ma|me|je|ve|sa|su)\s+(\d{2}:\d{2})\s*-(\d{2}:\d{2})")
+        for hours_str in ld_data["openingHours"]:
+            match = re.search(regex, hours_str)
+            if match:
+                day_of_week = match.group(1).capitalize()
+                open_time = match.group(2)
+                close_time = match.group(3)
 
-        store = response.xpath('//*[@itemtype="https://schema.org/LocalBusiness"]')
-        if store:
-            all_hours = store.xpath('//*[@itemprop="openingHours"]/@content')
-            regex = re.compile(r"(lu|ma|me|je|ve|sa|su)\s+(\d{2}:\d{2})\s*-(\d{2}:\d{2})")
-            for hours in all_hours:
-                hours_str = hours.get().strip()
-                match = re.search(regex, hours_str)
-                if match:
-                    day_of_week = match.group(1).capitalize()
-                    open_time = match.group(2)
-                    close_time = match.group(3)
+                opening_hours.add_range(day=DAYS_FR[day_of_week], open_time=open_time, close_time=close_time)
 
-                    if close_time == "00:00":
-                        close_time = "23:59"
-
-                    opening_hours.add_range(day=DAYS_FR[day_of_week], open_time=open_time, close_time=close_time)
-
-        return opening_hours.as_opening_hours()
+        return opening_hours
