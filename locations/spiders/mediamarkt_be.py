@@ -1,28 +1,64 @@
 import re
+import scrapy
 
-from scrapy.spiders import SitemapSpider
-
-from locations.hours import DAYS_FR, OpeningHours
-from locations.structured_data_spider import StructuredDataSpider
+from locations.items import Feature
+from locations.hours import OpeningHours, DAYS_FR
 
 
-class MediaMarktBESpider(SitemapSpider, StructuredDataSpider):
+class MediaMarktBESpider(scrapy.Spider):
     name = "media_markt_be"
     item_attributes = {"brand": "MediaMarkt", "brand_wikidata": "Q2381223"}
-    sitemap_urls = ["https://www.mediamarkt.be/sitemap/sitemap-marketinfo.xml"]
-    allowed_domains = ["www.mediamarkt.be"]
-    headers = {"Content-language": "fr-BE"}
+    start_urls = ["https://www.mediamarkt.be/fr/marketselection.html"]
     domain = "https://www.mediamarkt.be"
 
-    def post_process_item(self, item, response, ld_data, **kwargs):
-        name = response.xpath('//*[@id="my-market-content"]/h1/text()').get()
-        if name:
-            item["name"] = name
+    headers = {"Content-language": "fr-BE"}
+
+    def parse(self, response):
+        store_urls = response.css(".all-markets-list").xpath("./li/a/@href").extract()
+        for store_url in store_urls:
+            yield scrapy.http.Request(
+                url=self.domain + store_url,
+                method="GET",
+                callback=self.parse_store,
+            )
+
+    def parse_store(self, response):
+        store = response.xpath('//*[@itemtype="https://schema.org/LocalBusiness"]')
+        address = store.xpath("//*/address")
+        postaladdress = address.xpath('//*[@itemtype="https://schema.org/PostalAddress"]')
+        geocoordinates = address.xpath('//*[@itemtype="https://schema.org/GeoCoordinates"]')
+
+        ref = response.url
+        name = store.xpath('//*[@id="my-market-content"]/h1/text()').get()
+        street_address = postaladdress.xpath('//*[@itemprop="streetAddress"]/text()').get()
+        city = postaladdress.xpath('//*[@itemprop="addressLocality"]/text()').get()
+        postcode = postaladdress.xpath('//*[@itemprop="postalCode"]/text()').get().strip()
+        addr_full = f"{street_address}, {postcode} {city}"
+        lon = float(geocoordinates.xpath('//*/meta[@itemprop="longitude"]/@content').get())
+        lat = float(geocoordinates.xpath('//*/meta[@itemprop="latitude"]/@content').get())
+        phone = postaladdress.xpath('//*[@itemprop="telephone"]/text()').get()
+        website = response.url
+        email = postaladdress.xpath('//*[@itemprop="email"]/text()').get()
+
+        properties = {
+            "ref": ref,
+            "name": name,
+            "addr_full": addr_full,
+            "street_address": street_address,
+            "city": city,
+            "postcode": postcode,
+            "lon": lon,
+            "lat": lat,
+            "phone": phone,
+            "website": website,
+            "email": email,
+        }
+
         opening_hours = self.parse_hours(response)
         if opening_hours:
-            item["opening_hours"] = opening_hours
+            properties["opening_hours"] = opening_hours
 
-        yield item
+        yield Feature(**properties)
 
     def parse_hours(self, response):
         opening_hours = OpeningHours()
