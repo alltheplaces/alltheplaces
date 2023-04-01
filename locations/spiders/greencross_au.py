@@ -1,7 +1,7 @@
 from scrapy import Selector, Spider
 from scrapy.http import JsonRequest
 
-from locations.categories import apply_category, Categories
+from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
 
@@ -22,14 +22,14 @@ class GreencrossAUSpider(Spider):
                 "name": location["n"],
                 "lat": location["l"],
                 "lon": location["g"],
-                "street_address": ", ".join(location["a"][0:len(location["a"]) - 3]),
+                "street_address": ", ".join(location["a"][0 : len(location["a"]) - 3]),
                 "city": location["a"][-3],
                 "state": location["a"][-2],
                 "postcode": location["a"][-1],
                 "email": location["e"],
                 "phone": location["p"],
                 "website": "https://www.petbarn.com.au" + location["u"],
-                "nsi_id": "-1", # Skip NSI matching
+                "nsi_id": "-1",  # Skip NSI matching
             }
             if "Greencross Vets" in properties["name"]:
                 properties["brand"] = "Greencross Vets"
@@ -59,9 +59,9 @@ class GreencrossAUSpider(Spider):
                 else:
                     properties["extras"]["shop"] = "pet_grooming"
             properties["opening_hours"] = OpeningHours()
-            hours_raw = [s for s in Selector(text=location["oh"]).xpath('//text()').getall() if s.strip()]
-            day_names = hours_raw[:len(hours_raw)//2]
-            day_times = hours_raw[len(hours_raw)//2:]
+            hours_raw = [s for s in Selector(text=location["oh"]).xpath("//text()").getall() if s.strip()]
+            day_names = hours_raw[: len(hours_raw) // 2]
+            day_times = hours_raw[len(hours_raw) // 2 :]
             hours_string = ""
             for index, day_name in enumerate(day_names):
                 hours_string = f"{hours_string} {day_name}: {day_times[index]}"
