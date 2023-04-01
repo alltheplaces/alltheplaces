@@ -11,10 +11,7 @@ from locations.hours import OpeningHours
 class FlightCentreAUSpider(Spider):
     name = "flight_centre_au"
     item_attributes = {"brand": "Flight Centre", "brand_wikidata": "Q5459202"}
-    allowed_domains = [
-        "www.flightcentre.com.au",
-        "aws.found.io"
-    ]
+    allowed_domains = ["www.flightcentre.com.au", "aws.found.io"]
     start_urls = ["https://www.flightcentre.com.au/stores"]
 
     def start_requests(self):
@@ -31,9 +28,7 @@ class FlightCentreAUSpider(Spider):
         api_pass = nextdata["props"]["pageProps"]["config"]["data"]["stores"]["password"]
         api_token = f"{api_user}:{api_pass}"
         query = {
-            "query": {
-                "match_all": {}
-            },
+            "query": {"match_all": {}},
             "size": 10000,
             "_source": {
                 "includes": [
@@ -48,12 +43,12 @@ class FlightCentreAUSpider(Spider):
                     "toll_free_number__tel",
                     "geo_location",
                 ],
-                "excludes": []
+                "excludes": [],
             },
             "from": 0,
-            "sort": []
+            "sort": [],
         }
-        body = '{"preference":"StoreController"}\n' + json.dumps(query) + '\n'
+        body = '{"preference":"StoreController"}\n' + json.dumps(query) + "\n"
         headers = {
             "Authorization": "Basic " + base64.b64encode(api_token.encode("ascii")).decode("ascii"),
             "Content-Type": "application/x-ndjson",
@@ -66,7 +61,16 @@ class FlightCentreAUSpider(Spider):
                 continue
             item = DictParser.parse(location["_source"])
             item["ref"] = location["_id"].split(":", 1)[0]
-            item["street_address"] = ", ".join(filter(None, [location["_source"].get("address1"), location["_source"].get("address2"), location["_source"].get("address3")]))
+            item["street_address"] = ", ".join(
+                filter(
+                    None,
+                    [
+                        location["_source"].get("address1"),
+                        location["_source"].get("address2"),
+                        location["_source"].get("address3"),
+                    ],
+                )
+            )
             item["phone"] = location["_source"].get("toll_free_number__tel")
             if location["_source"].get("slug"):
                 item["website"] = "https://www.flightcentre.com.au/stores/" + location["_source"]["slug"]
