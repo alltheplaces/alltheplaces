@@ -1,6 +1,5 @@
 import re
 
-import geonamescache
 import scrapy
 
 from locations.hours import DAYS_FR, OpeningHours
