@@ -100,6 +100,7 @@ class Categories(Enum):
     PRODUCT_PICKUP = {"amenity": "product_pickup"}
     PUB = {"amenity": "pub"}
     RESTAURANT = {"amenity": "restaurant"}
+    VETERINARY = {"amenity": "veterinary"}
 
     VENDING_MACHINE_BICYCLE_TUBE = {"amenity": "vending_machine", "vending": "bicycle_tube"}
 
