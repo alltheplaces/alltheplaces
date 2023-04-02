@@ -38,11 +38,16 @@ class SmatchLUSpider(scrapy.Spider):
         properties["name"] = response.xpath('//*[@class="store-informations-title"]/text()').get()
 
         street_address, postcode_city = response.xpath('//*[@class="store-informations-address"]/text()').getall()
-        postcode, city = postcode_city.strip().split(" ", maxsplit=1)
-        properties["street_address"] = street_address.strip()
-        properties["postcode"] = postcode
-        properties["city"] = city
+        separation = postcode_city.strip().split(" ", maxsplit=1)
+        if len(separation) == 2:
+            postcode, city = separation
+            properties["postcode"] = postcode
+            properties["city"] = city
+        else:
+            city = separation[0]
+            properties["city"] = city
 
+        properties["street_address"] = street_address.strip()
         properties["phone"] = response.xpath('//*[@class="link--phone"]/@href').get().replace("tel:", "")
         properties["opening_hours"] = self.parse_opening_hours(response)
 
