@@ -1,8 +1,10 @@
-import scrapy
-import geonamescache
-from locations.hours import OpeningHours, DAYS_FR
-from locations.items import Feature
 import re
+
+import geonamescache
+import scrapy
+
+from locations.hours import DAYS_FR, OpeningHours
+from locations.items import Feature
 
 
 class GeoxSpider(scrapy.Spider):
