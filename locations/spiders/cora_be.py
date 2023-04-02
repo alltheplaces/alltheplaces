@@ -41,4 +41,4 @@ class CoraSpider(Spider):
             day = row.xpath('.//*[@class="ca-MiscStore-openingDay"]/text()').get()
             hours = row.xpath('.//*[@class="ca-MiscStore-openingHours"]/text()').get().replace("h", ":")
             opening_hours.add_ranges_from_string(ranges_string=day + hours, days=DAYS_FR, delimiters=[" > ", " - "])
-        return opening_hours
+        return opening_hours.as_opening_hours()

@@ -9,8 +9,7 @@ class CoraFRSpider(WoosmapSpider):
 
     def parse_item(self, item, feature, **kwargs):
         # Filter only on CORA shop and not affiliated shop
-        if item["name"].startswith("CORA"):
-            item["website"] = "https://www.cora.fr" + item["website"]
-            item["lat"] = item["geometry"]["coordinates"][0]
-            item["lon"] = item["geometry"]["coordinates"][1]
-            yield item
+        if not item["name"].startswith("CORA"):
+            return
+        item["website"] = "https://www.cora.fr" + item["website"]
+        yield item
