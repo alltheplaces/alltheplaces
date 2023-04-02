@@ -1,8 +1,11 @@
+import urllib.parse
+
 from scrapy import Request, Spider
-from locations.hours import OpeningHours, DAYS_FR, DAYS
+
+from locations.hours import DAYS, DAYS_FR, OpeningHours
 from locations.items import Feature
 from locations.spiders.vapestore_gb import clean_address
-import urllib.parse
+
 
 class CoraSpider(Spider):
     # For BE and LU only
@@ -28,7 +31,7 @@ class CoraSpider(Spider):
         item["opening_hours"] = self.parse_opening_hours(store_info)
         item["website"] = response.url
         item["name"] = "Cora " + item["city"]
-        item["country"] = urllib.parse.urlparse(response.url).netloc.split('.')[-1].upper()
+        item["country"] = urllib.parse.urlparse(response.url).netloc.split(".")[-1].upper()
         yield item
 
     def parse_opening_hours(self, store_info):
