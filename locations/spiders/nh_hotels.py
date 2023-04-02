@@ -1,6 +1,7 @@
 from scrapy.spiders import Request, SitemapSpider
 
 from locations.items import Feature
+from locations.spiders.vapestore_gb import clean_address
 from locations.user_agents import BROWSER_DEFAULT
 
 
@@ -25,9 +26,8 @@ class NHHotelsSpider(SitemapSpider):
         item["name"] = data["name"]
         item["city"] = data["city"]
         item["country"] = data["country"]
-        item["street_address"] = data["address"]["street"]
+        item["street_address"] = clean_address(data["address"]["street"])
         item["postcode"] = data["address"]["postalCode"]
-        item["addr_full"] = f"""{item["street_address"]}, {item["postcode"]} {item["city"]}, {item["country"]}"""
         item["lat"] = data["address"]["latitud"]
         item["lon"] = data["address"]["longitud"]
         item["email"] = data["contact"]["mail"]
