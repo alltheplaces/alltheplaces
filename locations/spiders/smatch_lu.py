@@ -1,9 +1,10 @@
-import scrapy
-from locations.items import Feature
-from locations.hours import OpeningHours, DAYS_FR
 import json
 import re
 
+import scrapy
+
+from locations.hours import DAYS_FR, OpeningHours
+from locations.items import Feature
 from locations.user_agents import BROWSER_DEFAULT
 
 
@@ -34,7 +35,6 @@ class SmatchLUSpider(scrapy.Spider):
                 )
 
     def parse_store(self, response, properties):
-
         properties["name"] = response.xpath('//*[@class="store-informations-title"]/text()').get()
 
         street_address, postcode_city = response.xpath('//*[@class="store-informations-address"]/text()').getall()
@@ -43,9 +43,9 @@ class SmatchLUSpider(scrapy.Spider):
         properties["postcode"] = postcode
         properties["city"] = city
 
-        properties['phone'] = response.xpath('//*[@class="link--phone"]/@href').get().replace('tel:', '')
-        properties['opening_hours'] = self.parse_opening_hours(response)
-        
+        properties["phone"] = response.xpath('//*[@class="link--phone"]/@href').get().replace("tel:", "")
+        properties["opening_hours"] = self.parse_opening_hours(response)
+
         yield Feature(**properties)
 
     def parse_opening_hours(self, response):
@@ -53,7 +53,7 @@ class SmatchLUSpider(scrapy.Spider):
 
         days = response.xpath('//*[@class="store-timetable-table-day"]/text()').getall()
         hours = response.xpath('//*[@class="store-timetable-table-hours"]/text()').getall()
-        for day,hour in zip(days, hours):
+        for day, hour in zip(days, hours):
             hour_strip = hour.strip()
             oh.add_ranges_from_string(ranges_string=day + " " + hour_strip, days=DAYS_FR)
 

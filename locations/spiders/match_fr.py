@@ -1,6 +1,7 @@
 import scrapy
+
+from locations.hours import DAYS_FR, OpeningHours
 from locations.items import Feature
-from locations.hours import OpeningHours, DAYS_FR
 
 
 class MatchFRSpider(scrapy.Spider):
