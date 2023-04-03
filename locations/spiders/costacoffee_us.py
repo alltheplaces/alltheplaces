@@ -1,6 +1,7 @@
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
+from locations.categories import apply_category, Categories
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_FULL, OpeningHours
 
@@ -29,6 +30,7 @@ class CostaCoffeeUSSpider(Spider):
                     item["opening_hours"].add_range(day_name, "00:00", "24:00")
                 elif open_time and close_time:
                     item["opening_hours"].add_range(day_name, open_time, close_time)
+            apply_category(Categories.COFFEE_SHOP, item)
             yield item
 
         offset = response.json()["skip"]
