@@ -6,7 +6,6 @@ from scrapy.http import JsonRequest
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_FULL, OpeningHours
 
-
 USA_STATES = {
     "AK": "Alaska",
     "AL": "Alabama",
@@ -111,9 +110,7 @@ class DickeysBarbecuePitUSSpider(Spider):
         }
     }
 }"""
-        data = {
-            "query": graphql_query
-        }
+        data = {"query": graphql_query}
         for url in self.start_urls:
             yield JsonRequest(url=url, data=data, method="POST")
 
@@ -124,10 +121,22 @@ class DickeysBarbecuePitUSSpider(Spider):
             item = DictParser.parse(location["node"])
             item["lat"] = location["node"]["address"]["latitude"]
             item["lon"] = location["node"]["address"]["longitude"]
-            item["website"] = "https://www.dickeys.com/locations/" + USA_STATES[item["state"]].lower() + "/" + urllib.parse.quote(item["city"].lower()) + "/" + location["node"]["slug"]
+            item["website"] = (
+                "https://www.dickeys.com/locations/"
+                + USA_STATES[item["state"]].lower()
+                + "/"
+                + urllib.parse.quote(item["city"].lower())
+                + "/"
+                + location["node"]["slug"]
+            )
             item["opening_hours"] = OpeningHours()
             for hours_range in location["node"]["locationWeekdayConnection"]["edges"]:
                 if hours_range["node"]["weekday"]["day_name"].title() not in DAYS_FULL:
                     continue
-                item["opening_hours"].add_range(hours_range["node"]["weekday"]["day_name"], hours_range["node"]["open_time"], hours_range["node"]["close_time"], "%H:%M:%S")
+                item["opening_hours"].add_range(
+                    hours_range["node"]["weekday"]["day_name"],
+                    hours_range["node"]["open_time"],
+                    hours_range["node"]["close_time"],
+                    "%H:%M:%S",
+                )
             yield item
