@@ -38,7 +38,7 @@ class JaxTyresAndAutoAUSpider(Spider):
         properties["opening_hours"] = OpeningHours()
         day_names = response.xpath('//div[contains(@class, "pgStLcSn-openingHours")]/div[1]/p/text()').getall()
         hour_ranges = response.xpath('//div[contains(@class, "pgStLcSn-openingHours")]/div[2]/p/text()').getall()
-        for i in range(1, 7, 1):
-            if m := re.match(r"(\d?\d:\d\d\s*[AP]M)\s*-\s*(\d?\d:\d\d\s*[AP]M)", hour_ranges[i]):
-                properties["opening_hours"].add_range(day_names[i], m.group(1), m.group(2), "%I:%M %p")
+        for day_name, hours in zip(day_names, hour_ranges):
+            if m := re.match(r"(\d?\d:\d\d\s*[AP]M)\s*-\s*(\d?\d:\d\d\s*[AP]M)", hours):
+                properties["opening_hours"].add_range(day_name, m.group(1), m.group(2), "%I:%M %p")
         yield Feature(**properties)
