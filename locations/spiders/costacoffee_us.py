@@ -1,49 +1,36 @@
-import json
-import re
+from scrapy import Spider
+from scrapy.http import JsonRequest
 
-import scrapy
-from scrapy import Selector
-
-from locations.categories import Categories, apply_category
-from locations.items import Feature
+from locations.dict_parser import DictParser
+from locations.hours import DAYS_FULL, OpeningHours
 
 
-class CostaCoffeeUSSpider(scrapy.Spider):
+class CostaCoffeeUSSpider(Spider):
     name = "costacoffee_us"
     item_attributes = {"brand": "Costa Coffee", "brand_wikidata": "Q608845"}
     allowed_domains = ["us.costacoffee.com"]
-    start_urls = ["https://us.costacoffee.com/amlocator/index/ajax"]
+    start_urls = ["https://us.costacoffee.com/api/cf/?content_type=storeLocatorStore"]
+    page_size = 1000
+
+    def start_requests(self):
+        for url in self.start_urls:
+            yield JsonRequest(url=f"{url}&limit={self.page_size}")
 
     def parse(self, response):
-        script = response.xpath('//script[contains(text(), "amLocator")]/text()').extract_first()
-
-        start = script.index("jsonLocations: ") + len("jsonLocations: ")
-        stop = script.index("imageLocations")
-
-        locations = script[start:stop].strip().strip(",")
-        items = json.loads(locations)["items"]
-
-        for store in items:
-            item = Feature()
-            item["ref"] = store["id"]
-            item["lat"] = store["lat"]
-            item["lon"] = store["lng"]
-
-            html = Selector(text=store["popup_html"])
-
-            item["name"] = html.xpath('//*[@class="amlocator-title"]/text()').get()
-
-            for line in html.xpath('//div[@class="amlocator-info-popup"]/text()').getall():
-                line = line.strip()
-                if m := re.match(r"City: (.*)", line):
-                    item["city"] = m.group(1)
-                elif m := re.match(r"Zip: (.*)", line):
-                    item["postcode"] = m.group(1)
-                elif m := re.match(r"Address: (.*)", line):
-                    item["street_address"] = m.group(1)
-                elif m := re.match(r"State: (.*)", line):
-                    item["state"] = m.group(1)
-
-            apply_category(Categories.COFFEE_SHOP, item)
-
+        for location in response.json()["items"]:
+            item = DictParser.parse(location["fields"])
+            item["ref"] = location["sys"]["id"]
+            item["addr_full"] = location["fields"]["storeAddress"]
+            item["opening_hours"] = OpeningHours()
+            for day_name in [s.lower() for s in DAYS_FULL]:
+                open_time = location["fields"].get(f"{day_name}Opening")
+                close_time = location["fields"].get(f"{day_name}Closing")
+                if open_time and "24 HOURS" in open_time.upper():
+                    item["opening_hours"].add_range(day_name, "00:00", "24:00")
+                elif open_time and close_time:
+                    item["opening_hours"].add_range(day_name, open_time, close_time)
             yield item
+
+        offset = response.json()["skip"]
+        if offset + response.json()["limit"] < response.json()["total"]:
+            yield JsonRequest(url=f"{response.request.url}&limit={self.page_size}&offset={offset}")
