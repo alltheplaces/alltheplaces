@@ -1,4 +1,5 @@
 from scrapy.spiders import Request, SitemapSpider
+from locations.categories import Categories, apply_category
 
 from locations.items import Feature
 from locations.spiders.vapestore_gb import clean_address
@@ -31,5 +32,6 @@ class NHHotelsSpider(SitemapSpider):
         item["email"] = data["contact"]["mail"]
         item["phone"] = data["contact"]["phone"]
         item["website"] = website
+        apply_category(Categories.HOTEL, item)
 
         yield item
