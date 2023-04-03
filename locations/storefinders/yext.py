@@ -37,10 +37,15 @@ class YextSpider(Spider):
 
     def parse(self, response):
         for location in response.json()["response"]["entities"]:
+            if location["meta"].get("entityType") != "location":
+                continue
             if location.get("closed") or "CLOSED" in location["name"].upper():
                 continue
             item = DictParser.parse(location)
             item["ref"] = location["meta"]["id"]
+            if not item["lat"] and not item["lon"] and "yextDisplayCoordinate" in location:
+                item["lat"] = location["yextDisplayCoordinate"]["latitude"]
+                item["lon"] = location["yextDisplayCoordinate"]["longitude"]
             item["street_address"] = " ".join(
                 filter(None, [location["address"].get("line1"), location["address"].get("line2")])
             )
