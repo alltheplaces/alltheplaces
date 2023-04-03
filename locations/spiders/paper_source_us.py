@@ -21,7 +21,7 @@ class PaperSourceUSSpider(AmastyStoreLocatorSpider):
             "attributes[0][value]": "",
             "attributes[1][name]": "6",
             "attributes[1][value]": "",
-            "sortByDistance": "1"
+            "sortByDistance": "1",
         }
         for url in self.start_urls:
             yield FormRequest(url=url, formdata=formdata, headers={"X-Requested-With": "XMLHttpRequest"}, method="POST")
@@ -32,12 +32,22 @@ class PaperSourceUSSpider(AmastyStoreLocatorSpider):
 
     def add_location_details(self, response):
         item = response.meta["item"]
-        item["ref"] = response.xpath('//div[contains(@data-amlocator-js, "location-attributes")]/div[2]/div[3]/div/span/text()').get()
-        item["street_address"] = response.xpath('//div[contains(@class, "amlocator-location-info")]/div[4]/span[2]/text()').get()
+        item["ref"] = response.xpath(
+            '//div[contains(@data-amlocator-js, "location-attributes")]/div[2]/div[3]/div/span/text()'
+        ).get()
+        item["street_address"] = response.xpath(
+            '//div[contains(@class, "amlocator-location-info")]/div[4]/span[2]/text()'
+        ).get()
         item["city"] = response.xpath('//div[contains(@class, "amlocator-location-info")]/div[3]/span[2]/text()').get()
-        item["postcode"] = response.xpath('//div[contains(@class, "amlocator-location-info")]/div[1]/span[2]/text()').get()
-        item["phone"] = response.xpath('//div[contains(@class, "amlocator-location-info")]/div[contains(@class, "-contact")]/div[1]/a/text()').get()
-        item["email"] = response.xpath('//div[contains(@class, "amlocator-location-info")]/div[contains(@class, "-contact")]/div[2]/a/text()').get()
+        item["postcode"] = response.xpath(
+            '//div[contains(@class, "amlocator-location-info")]/div[1]/span[2]/text()'
+        ).get()
+        item["phone"] = response.xpath(
+            '//div[contains(@class, "amlocator-location-info")]/div[contains(@class, "-contact")]/div[1]/a/text()'
+        ).get()
+        item["email"] = response.xpath(
+            '//div[contains(@class, "amlocator-location-info")]/div[contains(@class, "-contact")]/div[2]/a/text()'
+        ).get()
         item["image"] = response.xpath('//a[contains(@data-amlocator-js, "location-image")]/@href').get()
         hours_string = " ".join(response.xpath('//div[contains(@class, "amlocator-schedule-table")]//text()').getall())
         item["opening_hours"] = OpeningHours()
