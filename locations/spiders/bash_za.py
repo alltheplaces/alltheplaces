@@ -54,7 +54,9 @@ BASH_BRANDS = {
 class BashZASpider(Spider):
     name = "bash_za"
     allowed_domains = ["bash.com"]
-    start_urls = ['https://bash.com/_v/public/graphql/v1?operationName=getStores&extensions={"persistedQuery":{"version":1,"sha256Hash":"53e625f7c1d5013253fe27c99d9d0b4f9aba2545fffe7b5d8691efbe57ff419c","sender":"thefoschini.store-locator@0.x","provider":"thefoschini.store-locator@0.x"}}']
+    start_urls = [
+        'https://bash.com/_v/public/graphql/v1?operationName=getStores&extensions={"persistedQuery":{"version":1,"sha256Hash":"53e625f7c1d5013253fe27c99d9d0b4f9aba2545fffe7b5d8691efbe57ff419c","sender":"thefoschini.store-locator@0.x","provider":"thefoschini.store-locator@0.x"}}'
+    ]
 
     def start_requests(self):
         for url in self.start_urls:
@@ -63,18 +65,35 @@ class BashZASpider(Spider):
     def parse(self, response):
         for location in response.json()["data"]["getStores"]["items"]:
             location["name"] = location["name"].strip()
-            if not location["isActive"] or location["name"] in ["TFG Money Account Payment", "MARKRAND", "T B A", "DIEPSLOOT", "ELIM MALL"]:
+            if not location["isActive"] or location["name"] in [
+                "TFG Money Account Payment",
+                "MARKRAND",
+                "T B A",
+                "DIEPSLOOT",
+                "ELIM MALL",
+            ]:
                 continue
             item = DictParser.parse(location)
             item["name"] = item.pop("name").replace("Sportcene", "Sportscene")
             item["lat"] = location["address"]["location"]["latitude"]
             item["lon"] = location["address"]["location"]["longitude"]
             item.pop("street")
-            item["street_address"] = " ".join(filter(None, [location["address"]["street"], location["address"]["complement"]])).strip()
-            item["website"] = "https://bash.com/store/" + item["name"].lower().replace(" ", "-") + "-" + item["postcode"] + "/" + item["ref"]
+            item["street_address"] = " ".join(
+                filter(None, [location["address"]["street"], location["address"]["complement"]])
+            ).strip()
+            item["website"] = (
+                "https://bash.com/store/"
+                + item["name"].lower().replace(" ", "-")
+                + "-"
+                + item["postcode"]
+                + "/"
+                + item["ref"]
+            )
             item["opening_hours"] = OpeningHours()
             for hours_range in location["businessHours"]:
-                item["opening_hours"].add_range(DAYS[hours_range["dayOfWeek"]], hours_range["openingTime"], hours_range["closingTime"], "%H:%M:%S")
+                item["opening_hours"].add_range(
+                    DAYS[hours_range["dayOfWeek"]], hours_range["openingTime"], hours_range["closingTime"], "%H:%M:%S"
+                )
 
             brands_regex_group = r"|".join(BASH_BRANDS)
             brand_name_regex = r"^(" + brands_regex_group + r") "
