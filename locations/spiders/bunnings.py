@@ -17,7 +17,7 @@ class BunningsSpider(scrapy.Spider):
     custom_settings = {
         "COOKIES_ENABLED": True,
     }
-    client_id = "mHPVWnzuBkrW7rmt56XGwKkb5Gp9BJMk" # Fixed value of APIGEE_CLIENT_ID variable from store locator page.
+    client_id = "mHPVWnzuBkrW7rmt56XGwKkb5Gp9BJMk"  # Fixed value of APIGEE_CLIENT_ID variable from store locator page.
     auth_token = ""
 
     def start_requests(self):
