@@ -37,7 +37,7 @@ class JaxTyresAndAutoAUSpider(Spider):
         day_names = response.xpath('//div[contains(@class, "pgStLcSn-openingHours")]/div[1]/p/text()').getall()
         hour_ranges = response.xpath('//div[contains(@class, "pgStLcSn-openingHours")]/div[2]/p/text()').getall()
         for i in range(1, 7, 1):
-            if hour_ranges[i].upper() == "CLOSED":
+            if not any(char.isdigit() for char in hour_ranges[i]):
                 continue
             open_time = hour_ranges[i].split(" - ")[0]
             close_time = hour_ranges[i].split(" - ")[1]
