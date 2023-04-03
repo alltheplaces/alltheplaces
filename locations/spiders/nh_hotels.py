@@ -13,11 +13,9 @@ class NHHotelsSpider(SitemapSpider):
     user_agent = BROWSER_DEFAULT
 
     def parse(self, response):
-        store_id = response.xpath(
-            '//section/div/button[@class="btn btn-primary js-track-book-hp js-track-book-hpGA4"]/@data-id'
-        ).get()
-        url = "https://www.nh-hotels.com/rest/datalayer/hotelPage/" + store_id
-        yield Request(url=url, callback=self.parse_site, cb_kwargs={"website": response.url})
+        if store_id := response.xpath("//@data-id").get():
+            url = "https://www.nh-hotels.com/rest/datalayer/hotelPage/" + store_id
+            yield Request(url=url, callback=self.parse_site, cb_kwargs={"website": response.url})
 
     def parse_site(self, response, website):
         data = response.json()
