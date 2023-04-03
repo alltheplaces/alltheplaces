@@ -43,12 +43,16 @@ class FantasticFurnitureAUSpider(Spider):
                         '//div[contains(@class, "trading_hours")]/ul/li/*[self::strong or self::small]/text()'
                     ).getall()
                 )
+                .upper()
                 .replace(" - ", " ")
                 .replace(" AM", "AM")
                 .replace(" PM", "PM")
+                .replace("CLOSED", "0:00AM 0:00AM")
                 .split(" ")
             )
             hours_raw = [hours_raw[n : n + 3] for n in range(0, len(hours_raw), 3)]
             for day in hours_raw:
+                if day[1] == "0:00AM" and day[2] == "0:00AM":
+                    continue
                 item["opening_hours"].add_range(day[0], day[1], day[2], "%I:%M%p")
             yield item
