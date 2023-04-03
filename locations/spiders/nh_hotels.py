@@ -1,6 +1,6 @@
 from scrapy.spiders import Request, SitemapSpider
-from locations.categories import Categories, apply_category
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.spiders.vapestore_gb import clean_address
 from locations.user_agents import BROWSER_DEFAULT
