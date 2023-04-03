@@ -19,7 +19,7 @@ class NHHotelsSpider(SitemapSpider):
         url = "https://www.nh-hotels.com/rest/datalayer/hotelPage/" + store_id
         yield Request(url=url, callback=self.parse_site, cb_kwargs={'website': response.url})
 
-    def parse_site(self, response):
+    def parse_site(self, response, website):
         data = response.json()
         item = Feature()
         item["ref"] = data["id"]
@@ -32,6 +32,6 @@ class NHHotelsSpider(SitemapSpider):
         item["lon"] = data["address"]["longitud"]
         item["email"] = data["contact"]["mail"]
         item["phone"] = data["contact"]["phone"]
-        item["website"] = response.url
+        item["website"] = website
 
         yield item
