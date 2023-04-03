@@ -11,14 +11,13 @@ class BunningsSpider(scrapy.Spider):
     name = "bunnings"
     allowed_domains = ["bunnings.com.au"]
     start_urls = [
-        "https://api.prod.bunnings.com.au/v1/stores/country/AU?fields=FULL",
-        "https://api.prod.bunnings.com.au/v1/stores/country/NZ?fields=FULL",
+        "https://api.prod.bunnings.com.au/v1/stores?latitude=-23.12&longitude=132.13&currentPage=0&fields=FULL&pageSize=10000&radius=9000000",
     ]
     item_attributes = {"brand": "Bunnings", "brand_wikidata": "Q4997829"}
     custom_settings = {
         "COOKIES_ENABLED": True,
     }
-    client_id = "mHPVWnzuBkrW7rmt56XGwKkb5Gp9BJMk"
+    client_id = "mHPVWnzuBkrW7rmt56XGwKkb5Gp9BJMk"  # Fixed value of APIGEE_CLIENT_ID variable from store locator page.
     auth_token = ""
 
     def start_requests(self):
@@ -45,7 +44,9 @@ class BunningsSpider(scrapy.Spider):
     def parse(self, response):
         if response.json()["statusDetails"]["state"] != "SUCCESS":
             return
-        for location in response.json()["data"]["pointOfServices"]:
+        for location in response.json()["data"]["stores"]:
+            if not location["isActiveLocation"]:
+                continue
             item = DictParser.parse(location)
             item["ref"] = location["name"]
             item["name"] = location["displayName"]
@@ -59,8 +60,7 @@ class BunningsSpider(scrapy.Spider):
                 website_prefix = "https://www.bunnings.com.au/stores/"
             if "urlRegion" in location:
                 item["website"] = website_prefix + location["urlRegion"] + "/" + item["name"].lower().replace(" ", "-")
-            if "mapIcon" in location:
-                item["extras"]["website:map"] = location["mapIcon"]["url"]
+            item["extras"]["website:map"] = location.get("mapUrl")
             oh = OpeningHours()
             for day in location["openingHours"]["weekDayOpeningList"]:
                 if not day["closed"]:
