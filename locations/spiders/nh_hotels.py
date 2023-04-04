@@ -47,7 +47,6 @@ class NHHotelGroupSpider(SitemapSpider):
                 (sub_brand in name)
                 or (sub_brand.lower() in email)
                 or ("".join(sub_brand.lower().split(" ")) in email)
-                or ()
             ):
                 return "NH Hotels" if sub_brand == "NH" else sub_brand
         return "NH Hotel Group"
