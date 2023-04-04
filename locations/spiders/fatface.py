@@ -11,9 +11,9 @@ class FatFaceSpider(CrawlSpider):
     item_attributes = {"brand": "FATFACE", "brand_wikidata": "Q5437186"}
     allowed_domains = ["www.fatface.com", "us.fatface.com"]
     start_urls = [
-        "https://www.fatface.com/stores", # GB
-        "https://us.fatface.com/stores", # US and CA
-        "https://www.fatface.com/international/stores", # IE
+        "https://www.fatface.com/stores",  # GB
+        "https://us.fatface.com/stores",  # US and CA
+        "https://www.fatface.com/international/stores",  # IE
     ]
     rules = [
         Rule(LinkExtractor(allow="/store/"), callback="parse", follow=False),
