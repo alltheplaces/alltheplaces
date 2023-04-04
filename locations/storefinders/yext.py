@@ -1,6 +1,6 @@
 import datetime
 
-from scrapy import Request, Spider
+from scrapy import Spider
 from scrapy.http import JsonRequest
 
 from locations.dict_parser import DictParser
@@ -23,6 +23,8 @@ class YextSpider(Spider):
     search_filter = "{}"
     page_limit = 50
 
+    wanted_type = "location"
+
     def request_page(self, next_offset):
         yield JsonRequest(
             url=f"https://cdn.yextapis.com/v2/accounts/me/entities?api_key={self.api_key}&v={self.api_version}&limit={self.page_limit}&offset={next_offset}&filter={self.search_filter}",
@@ -37,7 +39,7 @@ class YextSpider(Spider):
 
     def parse(self, response):
         for location in response.json()["response"]["entities"]:
-            if location["meta"].get("entityType") != "location":
+            if location["meta"].get("entityType") != self.wanted_type:
                 continue
             if location.get("closed") or "CLOSED" in location["name"].upper():
                 continue
