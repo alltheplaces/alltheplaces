@@ -8,48 +8,20 @@ class FamilyDollarUSSpider(Where2GetItSpider):
     w2gi_id = "D2F68B64-7E11-11E7-B734-190193322438"
     w2gi_filter = {
         "and": {
-            "distributioncenter": {
-                "distinctfrom": "1"
-            },
-            "bopis": {
-                "eq": ""
-            },
-            "tobacco": {
-                "eq": ""
-            },
-            "adult_beverages": {
-                "eq": ""
-            },
-            "propane": {
-                "eq": ""
-            },
-            "red_box": {
-                "eq": ""
-            },
-            "ebt": {
-                "eq": ""
-            },
-            "atm": {
-                "eq": ""
-            },
-            "ice": {
-                "eq": ""
-            },
-            "water_machine": {
-                "eq": ""
-            },
-            "refrigerated_frozen": {
-                "eq": ""
-            },
-            "helium": {
-                "eq": ""
-            },
-            "fresh_produce": {
-                "eq": ""
-            },
-            "billpay": {
-                "eq": ""
-            }
+            "distributioncenter": {"distinctfrom": "1"},
+            "bopis": {"eq": ""},
+            "tobacco": {"eq": ""},
+            "adult_beverages": {"eq": ""},
+            "propane": {"eq": ""},
+            "red_box": {"eq": ""},
+            "ebt": {"eq": ""},
+            "atm": {"eq": ""},
+            "ice": {"eq": ""},
+            "water_machine": {"eq": ""},
+            "refrigerated_frozen": {"eq": ""},
+            "helium": {"eq": ""},
+            "fresh_produce": {"eq": ""},
+            "billpay": {"eq": ""},
         }
     }
     w2gi_country_code = "US"
@@ -59,7 +31,15 @@ class FamilyDollarUSSpider(Where2GetItSpider):
         if location["coming_soon"] == "Y" or location["temp_closed"] == "Y" or location["temporarily_closed"] == "Y":
             return
         item["street_address"] = ", ".join(filter(None, [location["address1"], location["address2"]]))
-        item["website"] = "https://www.familydollar.com/locations/" + item["state"].lower() + "/" + item["city"].lower().replace(" ", "-") + "/" + item["ref"] + "/"
+        item["website"] = (
+            "https://www.familydollar.com/locations/"
+            + item["state"].lower()
+            + "/"
+            + item["city"].lower().replace(" ", "-")
+            + "/"
+            + item["ref"]
+            + "/"
+        )
         hours_string = ""
         for day in ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]:
             open_time = location.get(day.lower() + "open")
