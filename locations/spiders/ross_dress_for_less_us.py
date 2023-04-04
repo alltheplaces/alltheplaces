@@ -1,9 +1,9 @@
 from locations.hours import DAYS_FULL, OpeningHours
 from locations.storefinders.where2getit import Where2GetItSpider
 
-class RossDressUSSpider(Where2GetItSpider):
-    name = "ross_dress_us"
-    item_attributes = {"brand": "Ross Dress for Less"}
+class RossDressForLessUSSpider(Where2GetItSpider):
+    name = "ross_dress_for_less_us"
+    item_attributes = {"brand": "Ross Dress for Less", "brand_wikidata": "Q3442791"}
     w2gi_id = "097D3C64-7006-11E8-9405-6974C403F339"
     w2gi_filter = {
         "clientkey": {"eq": ""},
