@@ -1,5 +1,4 @@
 import geonamescache
-
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
@@ -15,7 +14,9 @@ class EnterpriseSpider(Spider):
         gc = geonamescache.GeonamesCache()
         countries = gc.get_countries()
         for country_code in countries.keys():
-            yield JsonRequest(url=f"https://prd.location.enterprise.com/enterprise-sls/search/location/enterprise/web/country/{country_code}")
+            yield JsonRequest(
+                url=f"https://prd.location.enterprise.com/enterprise-sls/search/location/enterprise/web/country/{country_code}"
+            )
 
     def parse(self, response):
         for location in response.json():
