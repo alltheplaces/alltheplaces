@@ -1,8 +1,8 @@
 name: Build and Push Image to ECR
 
 on:
-  push:
-    branches: [ master ]
+  schedule:
+    - cron: '23 */6 * * *'
 
 jobs:
   build:
