@@ -1,5 +1,4 @@
 import chompjs
-
 from scrapy.http import FormRequest
 
 from locations.hours import OpeningHours
@@ -20,7 +19,7 @@ class TimberlandZASpider(AmastyStoreLocatorSpider):
             "storeListId": "amlocator_store_list642c14a7bd651",
             "product": "",
             "category": "",
-            "attributes": ""
+            "attributes": "",
         }
         for url in self.start_urls:
             yield FormRequest(url=url, formdata=formdata, headers={"X-Requested-With": "XMLHttpRequest"}, method="POST")
