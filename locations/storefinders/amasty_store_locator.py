@@ -35,13 +35,16 @@ class AmastyStoreLocatorSpider(Spider):
     def parse(self, response, **kwargs):
         for location in response.json()["items"]:
             item = DictParser.parse(location)
-            popup_html = Selector(text=location["popup_html"])
-            if not item["name"]:
-                item["name"] = " ".join(
-                    popup_html.xpath('//div[contains(@class, "amlocator-title")]//text()').get().split()
-                )
-            if not item["website"]:
-                item["website"] = popup_html.xpath('//a[contains(@class, "amlocator-link")]/@href').get()
+            if "popup_html" in location:
+                popup_html = Selector(text=location["popup_html"])
+                if not item["name"]:
+                    item["name"] = " ".join(
+                        popup_html.xpath('//div[contains(@class, "amlocator-title")]//text()').get().split()
+                    )
+                if not item["website"]:
+                    item["website"] = popup_html.xpath('//a[contains(@class, "amlocator-link")]/@href').get()
+            else:
+                popup_html = None
             yield from self.parse_item(item, location, popup_html)
 
     def parse_item(self, item, location, popup_html):
