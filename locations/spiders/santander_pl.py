@@ -17,16 +17,16 @@ class SantanderPLSpider(Spider):
     def parse(self, response, **kwargs):
         data = chompjs.parse_js_object(response.text)
         for ref, branch in data["atm"].items():
-            yield self.parse_itme(ref, branch, Categories.ATM)
+            yield self.parse_item(ref, branch, Categories.ATM)
         for ref, branch in data["branch"].items():
-            yield self.parse_itme(ref, branch, Categories.BANK)
+            yield self.parse_item(ref, branch, Categories.BANK)
         for ref, branch in data["cashin"].items():
-            item = self.parse_itme(ref, branch, Categories.ATM)
+            item = self.parse_item(ref, branch, Categories.ATM)
             apply_yes_no("cash_in", item, True)
             yield item
 
     @staticmethod
-    def parse_itme(ref: str, data: dict, category) -> Feature:
+    def parse_item(ref: str, data: dict, category) -> Feature:
         data["basicParameters"]["street_address"] = data["basicParameters"].pop("street")
         item = DictParser.parse(data["basicParameters"])
         item["ref"] = ref
