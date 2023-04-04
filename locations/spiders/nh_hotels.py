@@ -43,6 +43,11 @@ class NHHotelGroupSpider(SitemapSpider):
         name = data["name"]
         email = data["contact"]["mail"]
         for sub_brand in SUB_BRANDS:
-            if (sub_brand in name) or (sub_brand.lower() in email) or ("".join(sub_brand.lower().split(" ")) in email) or ():
+            if (
+                (sub_brand in name)
+                or (sub_brand.lower() in email)
+                or ("".join(sub_brand.lower().split(" ")) in email)
+                or ()
+            ):
                 return "NH Hotels" if sub_brand == "NH" else sub_brand
         return "NH Hotel Group"
