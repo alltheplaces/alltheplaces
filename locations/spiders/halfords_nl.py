@@ -1,10 +1,11 @@
-import re
 import json
-from scrapy import Spider, Request
+import re
 
+from scrapy import Request, Spider
+
+from locations.hours import DAYS_NL, OpeningHours
 from locations.items import Feature
 from locations.structured_data_spider import extract_email, extract_phone
-from locations.hours import OpeningHours, DAYS_NL
 
 
 class HalfordsNLSpider(Spider):
