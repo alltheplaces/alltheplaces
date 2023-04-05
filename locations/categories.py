@@ -103,6 +103,7 @@ class Categories(Enum):
     VETERINARY = {"amenity": "veterinary"}
 
     VENDING_MACHINE_BICYCLE_TUBE = {"amenity": "vending_machine", "vending": "bicycle_tube"}
+    VENDING_MACHINE_COFFEE = {"amenity": "vending_machine", "vending": "coffee"}
 
     TRADE_AGRICULTURAL_SUPPLIES = {"trade": "agricultural_supplies"}
     TRADE_BATHROOM = {"trade": "bathroom"}
