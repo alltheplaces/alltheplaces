@@ -2,8 +2,9 @@ import re
 
 import scrapy
 
+from locations.hours import DAYS_NL, OpeningHours
 from locations.items import Feature
-from locations.hours import OpeningHours, DAYS_NL
+
 
 class CurvesNLSpider(scrapy.Spider):
     name = "curves_nl"
@@ -37,5 +38,5 @@ class CurvesNLSpider(scrapy.Spider):
             day = parsed_opening_hours[i][1]
             hours_list = re.findall(regex_hours, parsed_opening_hours[i + 1][1])
             for hours in hours_list:
-                oh.add_ranges_from_string(ranges_string=day + ' ' + hours[1], days=DAYS_NL, delimiters=[' - '])
+                oh.add_ranges_from_string(ranges_string=day + " " + hours[1], days=DAYS_NL, delimiters=[" - "])
         return oh.as_opening_hours()
