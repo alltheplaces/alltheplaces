@@ -53,7 +53,7 @@ class CostaCoffeeGBSpider(scrapy.Spider):
                         pass
 
             item["opening_hours"] = opening_hours.as_opening_hours()
-            item["extras"] = {"email": store_data["email"]}
+            item["extras"]["email"] = store_data["email"]
 
             for storeFacility in store_data["storeFacilities"]:
                 if storeFacility["name"] == "Wifi":
@@ -78,8 +78,8 @@ class CostaCoffeeGBSpider(scrapy.Spider):
 
             if store_data["storeType"] == "COSTA EXPRESS":
                 item["brand"] = "Costa Express"
-                item["extras"]["amenity"] = "vending_machine"
-                item["extras"]["vending"] = "coffee"
+                item["brand_wikidata"] = "Q113556385"
+                apply_category(Categories.VENDING_MACHINE_COFFEE, item)
             else:
                 apply_category(Categories.COFFEE_SHOP, item)
 
