@@ -25,6 +25,6 @@ class EssentielAntwerpSpider(scrapy.Spider):
             item["lon"] = float(store["longtitude"])
             item["street_address"] = store["address"]
             item["city"] = store["city"]
-            item["name"] = "Essentiel Antwerp" + " " + store["rewrite_request_path"].replace("-", " ").title()
+            item["name"] = store["name"]
             item["website"] = f'https://www.essentiel-antwerp.com/eu/{store["rewrite_request_path"]}/'
             yield item
