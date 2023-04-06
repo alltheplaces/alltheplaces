@@ -13,7 +13,7 @@ class EssentielAntwerpSpider(scrapy.Spider):
 
     def parse(self, response):
         data = response.xpath(".").get()
-        stores = json.loads("[" + re.findall("(stores:\[)(.*?)(])", data)[0][1] + "]")
+        stores = json.loads("[" + re.findall(r"(stores:\[)(.*?)(])", data)[0][1] + "]")
         for store in stores:
             item = Feature()
             item["ref"] = store["storelocator_id"]
