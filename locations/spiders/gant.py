@@ -1,6 +1,7 @@
-from locations.items import Feature
-from locations.hours import *
 import scrapy
+
+from locations.hours import *
+from locations.items import Feature
 
 
 class GantSpider(scrapy.Spider):
