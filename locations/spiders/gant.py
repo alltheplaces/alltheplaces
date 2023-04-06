@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.hours import DAYS_NL, DAYS_DE, DAYS_DK, DAYS_SE, DAYS_FI, DAYS_FR, DAYS_ES, DAYS_IT, DAYS_EN
+from locations.hours import DAYS_DE, DAYS_DK, DAYS_EN, DAYS_ES, DAYS_FI, DAYS_FR, DAYS_IT, DAYS_NL, DAYS_SE
 from locations.items import Feature
 
 
