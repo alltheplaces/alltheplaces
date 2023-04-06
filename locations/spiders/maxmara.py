@@ -26,19 +26,20 @@ class MaxmaraSpider(scrapy.Spider):
     def parse(self, response):
         stores = response.json().get("features")
         for store in stores:
-            store_info = store["properties"]
-            item = DictParser.parse(store_info)
-            item["ref"] = store_info["name"]
-            item["name"] = store_info["displayName"]
-            item["phone"] = store_info["phone1"]
-            item["addr_full"] = store_info["formattedAddress"]
+            if not store.get("storeHidden"):
+                store_info = store["properties"]
+                item = DictParser.parse(store_info)
+                item["ref"] = store_info["name"]
+                item["name"] = store_info["displayName"]
+                item["phone"] = store_info["phone1"]
+                item["addr_full"] = store_info["formattedAddress"]
 
-            oh = OpeningHours()
-            for day, hours in store_info.get("openingHours").items():
-                for chunk in hours:
-                    open_at = chunk.split(" - ")[0].replace(".", ":")
-                    close_at = chunk.split(" - ")[1].replace(".", ":")
-                    oh.add_range(day=DAYS_EN[day], open_time=open_at, close_time=close_at, time_format="%H:%M")
-            item["opening_hours"] = oh
+                oh = OpeningHours()
+                for day, hours in store_info.get("openingHours").items():
+                    for chunk in hours:
+                        open_at = chunk.split(" - ")[0].replace(".", ":")
+                        close_at = chunk.split(" - ")[1].replace(".", ":")
+                        oh.add_range(day=DAYS_EN[day], open_time=open_at, close_time=close_at, time_format="%H:%M")
+                item["opening_hours"] = oh
 
-            yield item
+                yield item
