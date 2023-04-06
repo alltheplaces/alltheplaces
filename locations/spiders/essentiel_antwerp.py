@@ -1,7 +1,9 @@
-import scrapy
-import re
-from locations.items import Feature
 import json
+import re
+
+import scrapy
+
+from locations.items import Feature
 
 
 class EssentielAntwerpSpider(scrapy.Spider):
