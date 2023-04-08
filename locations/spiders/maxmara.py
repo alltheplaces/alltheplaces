@@ -37,8 +37,7 @@ class MaxmaraSpider(scrapy.Spider):
                 oh = OpeningHours()
                 for day, hours in store_info.get("openingHours").items():
                     for chunk in hours:
-                        open_at = chunk.split(" - ")[0].replace(".", ":")
-                        close_at = chunk.split(" - ")[1].replace(".", ":")
+                        open_at, close_at = chunk.replace(".", ":").split(" - ")
                         oh.add_range(day=DAYS_EN[day], open_time=open_at, close_time=close_at, time_format="%H:%M")
                 item["opening_hours"] = oh
 
