@@ -1,8 +1,10 @@
-import scrapy
 import json
+
+import scrapy
+
 from locations.categories import Categories, apply_category
 from locations.items import Feature
-from locations.structured_data_spider import extract_phone, extract_email
+from locations.structured_data_spider import extract_email, extract_phone
 
 
 class FirstHotelsSpider(scrapy.Spider):
