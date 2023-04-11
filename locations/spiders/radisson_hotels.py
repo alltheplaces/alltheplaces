@@ -1,8 +1,10 @@
-from typing import List
-from locations.items import Feature
-import scrapy
 import json
 import re
+from typing import List
+
+import scrapy
+
+from locations.items import Feature
 from locations.structured_data_spider import extract_email, extract_phone
 from locations.user_agents import BROWSER_DEFAULT
 
