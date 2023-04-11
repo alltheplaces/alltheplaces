@@ -33,7 +33,6 @@ class EuromasterNLSpider(scrapy.Spider):
     def parse_shop(self, response):
         data = json.loads(response.xpath('//*[@type="application/ld+json"]/text()').get())
         if not data["name"].startswith("Euromaster"):
-            print(data["name"])
             return
         item = Feature()
         item["ref"] = data["url"]
