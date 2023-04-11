@@ -7,12 +7,7 @@ class TheNorthFaceSpider(Where2GetItSpider):
     item_attributes = {"brand": "The North Face", "brand_wikidata": "Q152784"}
     api_brand_name = "northface"
     api_key = "C1907EFA-14E9-11DF-8215-BBFCBD236D0E"
-    api_filter = {
-        "or": {
-            "northface": {"eq": "1"},
-            "outletstore": {"eq": "1"}
-        }
-    }
+    api_filter = {"or": {"northface": {"eq": "1"}, "outletstore": {"eq": "1"}}}
 
     def parse_item(self, item, location):
         if location.get("enterprise_store_identifier"):

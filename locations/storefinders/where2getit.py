@@ -73,52 +73,29 @@ class Where2GetItSpider(Spider):
     def make_request(self, country_code: str = None) -> JsonRequest:
         where_clause = {}
         if country_code and self.api_filter:
-            where_clause = {
-                "and": {
-                    "country": {
-                        "eq": country_code
-                    }
-                }
-            }
+            where_clause = {"and": {"country": {"eq": country_code}}}
             where_clause["and"].update(self.api_filter)
         elif country_code:
-            where_clause = {
-                "country": {
-                    "eq": country_code
-                }
-            }
+            where_clause = {"country": {"eq": country_code}}
         elif self.api_filter:
             where_clause = self.api_filter
         print(where_clause)
         yield JsonRequest(
             url=f"https://hosted.where2getit.com/{self.api_brand_name}/rest/getlist",
-            data = {
-                "request": {
-                    "appkey": self.api_key,
-                    "formdata": {
-                        "objectname": "Locator::Store",
-                        "where": where_clause
-                    }
-                }
+            data={
+                "request": {"appkey": self.api_key, "formdata": {"objectname": "Locator::Store", "where": where_clause}}
             },
-            method = "POST",
-            callback = self.parse_locations
+            method="POST",
+            callback=self.parse_locations,
         )
 
     def start_requests(self):
         if self.separate_api_call_per_country:
             yield JsonRequest(
-                url = f"https://hosted.where2getit.com/{self.api_brand_name}/rest/getlist",
-                data = {
-                    "request": {
-                        "appkey": self.api_key,
-                        "formdata": {
-                            "objectname": "Account::Country"
-                        }
-                    }
-                },
-                method = "POST",
-                callback = self.parse_country_list
+                url=f"https://hosted.where2getit.com/{self.api_brand_name}/rest/getlist",
+                data={"request": {"appkey": self.api_key, "formdata": {"objectname": "Account::Country"}}},
+                method="POST",
+                callback=self.parse_country_list,
             )
         else:
             yield from self.make_request()
@@ -132,7 +109,9 @@ class Where2GetItSpider(Spider):
             item = DictParser.parse(location)
             if not item["ref"]:
                 item["ref"] = location["clientkey"]
-            item["street_address"] = ", ".join(filter(None, [location.get("address1"), location.get("address2"), location.get("address3")]))
+            item["street_address"] = ", ".join(
+                filter(None, [location.get("address1"), location.get("address2"), location.get("address3")])
+            )
             yield from self.parse_item(item, location)
 
     def parse_item(self, item: Feature, location: dict, **kwargs):

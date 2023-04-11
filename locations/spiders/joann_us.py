@@ -15,11 +15,21 @@ class JOANNUSSpider(Where2GetItSpider):
         if "COMING SOON" in location["notes"]:
             return
         item["state"] = location["state"]
-        item["website"] = "https://stores.joann.com/" + item["state"].lower() + "/" + item["city"].lower().replace(" ", "-") + "/" + item["ref"] + "/"
+        item["website"] = (
+            "https://stores.joann.com/"
+            + item["state"].lower()
+            + "/"
+            + item["city"].lower().replace(" ", "-")
+            + "/"
+            + item["ref"]
+            + "/"
+        )
         hours_string = ""
         for day_abbrev, day in zip(["mon", "tue", "wed", "thu", "fri", "sat", "sun"], DAYS):
             if location.get(day_abbrev + "open") and location.get(day_abbrev + "close"):
-                hours_string = f"{hours_string} {day}: " + location[day_abbrev + "open"] + "-" + location[day_abbrev + "close"]
+                hours_string = (
+                    f"{hours_string} {day}: " + location[day_abbrev + "open"] + "-" + location[day_abbrev + "close"]
+                )
         item["opening_hours"] = OpeningHours()
         item["opening_hours"].add_ranges_from_string(hours_string)
         yield item

@@ -9,9 +9,7 @@ class TimberlandSpider(Where2GetItSpider):
     item_attributes = {"brand": "Timberland", "brand_wikidata": "Q1539185"}
     api_brand_name = "timberland"
     api_key = "478C75E0-34A6-11E5-BDEC-1E25B945EC6E"
-    api_filter = {
-        "icon": {"in": "retail,factory,Timberland_Store,Timberland_Outlet_Store,default"}
-    }
+    api_filter = {"icon": {"in": "retail,factory,Timberland_Store,Timberland_Outlet_Store,default"}}
 
     def parse_item(self, item, location):
         if location.get("enterprise_store_identifier"):
