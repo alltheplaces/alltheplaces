@@ -1,8 +1,8 @@
+import json
+
 import scrapy
 
-import json
 from locations.hours import DAYS_NL, OpeningHours
-
 from locations.items import Feature
 
 
