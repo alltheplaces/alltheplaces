@@ -8,7 +8,7 @@ from locations.items import Feature
 
 class AnthonysRestaurantsSpider(scrapy.Spider):
     name = "anthonys_restaurants"
-    item_attributes = {"brand": "Anthony's"}
+    item_attributes = {"brand": "Anthony's", "country": "US"}
     allowed_domains = ["www.anthonys.com"]
     start_urls = ("https://www.anthonys.com/restaurants/",)
 
@@ -34,7 +34,7 @@ class AnthonysRestaurantsSpider(scrapy.Spider):
             "ref": re.search(r"postid-(\d+)", response.css("body").attrib["class"])[1],
             "lat": address["latitude"],
             "lon": address["longitude"],
-            "addr_full": address["address"],
+            "street_address": address["address"],
             "city": address["city"],
             "state": address["state"],
             "postcode": address["zip_code"],

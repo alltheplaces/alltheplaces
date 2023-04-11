@@ -51,7 +51,7 @@ class AthletaSpider(scrapy.Spider):
             "ref": json_data["fid"],
             "name": json_data["location_name"],
             "opening_hours": oh.as_opening_hours(),
-            "addr_full": json_data["address_1"],
+            "street_address": json_data["address_1"],
             "housenumber": json_data["address_1"].strip().split()[0],
             "street": json_data["address_1"].replace(json_data["address_1"].strip().split()[0], "").strip(),
             "city": json_data["city"],

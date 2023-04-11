@@ -48,7 +48,7 @@ class AuBonPainSpider(scrapy.Spider):
         city, state, zipcode = re.search(r"^(.*),\s+([a-z]{2})\s+([0-9]+)$", address2.strip(), re.IGNORECASE).groups()
 
         properties = {
-            "addr_full": address1.strip(", "),
+            "street_address": address1.strip(", "),
             "phone": response.xpath('//dt[contains(text(), "Phone")]/following-sibling::dd/a/text()').extract_first(),
             "city": city,
             "state": state,
