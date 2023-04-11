@@ -1,9 +1,9 @@
-import scrapy
-
 import json
 
+import scrapy
+
+from locations.hours import DAYS_EN, DAYS_FULL, OpeningHours
 from locations.items import Feature
-from locations.hours import DAYS_FULL, DAYS_EN, OpeningHours
 
 
 class EccoSpider(scrapy.Spider):
@@ -14,11 +14,14 @@ class EccoSpider(scrapy.Spider):
     ]
     custom_settings = {"ROBOTSTXT_OBEY": False}
     download_delay = 0.1
+
     def parse(self, response):
         stores = json.loads(response.text)
         for store in stores:
-            if 'ecco' in store['n'].lower():
-                yield scrapy.Request(url="https://se.ecco.com/api/store/finder/" + store["i"], callback=self.parse_store)
+            if "ecco" in store["n"].lower():
+                yield scrapy.Request(
+                    url="https://se.ecco.com/api/store/finder/" + store["i"], callback=self.parse_store
+                )
 
     def parse_store(self, response):
         store = json.loads(response.text)
