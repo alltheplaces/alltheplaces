@@ -1,5 +1,5 @@
-from datetime import datetime
 import json
+from datetime import datetime
 from zoneinfo import ZoneInfo
 
 from scrapy import Spider
@@ -18,6 +18,7 @@ STATE_TIMEZONES = {
     "Victoria": "Australia/Melbourne",
     "Western Australia": "Australia/Perth",
 }
+
 
 class FortyWinksAUSpider(Spider):
     name = "forty_winks_au"
@@ -45,6 +46,8 @@ class FortyWinksAUSpider(Spider):
                         if not hours_range["Start"] or not hours_range["Finish"]:
                             continue
                         open_time = datetime.fromisoformat(hours_range["Start"]).astimezone(time_zone).strftime("%H:%M")
-                        close_time = datetime.fromisoformat(hours_range["Finish"]).astimezone(time_zone).strftime("%H:%M")
+                        close_time = (
+                            datetime.fromisoformat(hours_range["Finish"]).astimezone(time_zone).strftime("%H:%M")
+                        )
                         item["opening_hours"].add_range(day_name, open_time, close_time)
             yield item
