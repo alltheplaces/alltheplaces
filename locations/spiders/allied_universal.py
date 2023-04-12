@@ -129,7 +129,6 @@ class AlliedUniversalSpider(scrapy.Spider):
         if website:
             if website[0] == "/":
                 website = "https://www.aus.com" + website
-        addr_full = street_address + ", " + state + ", " + postcode
         properties = {
             "ref": ref,
             "street_address": street_address,
@@ -138,7 +137,6 @@ class AlliedUniversalSpider(scrapy.Spider):
             "state": state,
             "country": country,
             "phone": phone,
-            "addr_full": addr_full,
             "website": website,
         }
         yield Feature(**properties)

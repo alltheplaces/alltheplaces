@@ -8,7 +8,7 @@ from locations.items import Feature
 
 class AnthonysSpider(scrapy.Spider):
     name = "anthonys"
-    item_attributes = {"brand": "Anthony's Coal Fired Pizza", "country": "US"}
+    item_attributes = {"brand": "Anthony's Coal Fired Pizza", "brand_wikidata": "Q117536208", "country": "US"}
     allowed_domains = ["wp.acfp.com"]
     start_urls = ["https://wp.acfp.com/wp-json/wp/v2/locations?per_page=100"]
 

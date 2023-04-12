@@ -1,9 +1,8 @@
 import scrapy
 
-from locations.hours import OpeningHours
+from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
-
-DAY_MAPPING = {0: "Mo", 1: "Tu", 2: "We", 3: "Th", 4: "Fr", 5: "Sa", 6: "Su"}
+from locations.spiders.vapestore_gb import clean_address
 
 
 class AutoNationSpider(scrapy.Spider):
@@ -11,15 +10,15 @@ class AutoNationSpider(scrapy.Spider):
     allowed_domains = ["autonation.com"]
     item_attributes = {"brand": "Auto Nation", "brand_wikidata": "Q784804"}
     start_urls = [
-        "https://www.autonation.com/StoreDetails/Get/?lat=30.218908309936523&long=-97.8546142578125&radius=5000\
-        &zipcode=78749&d=1602263009819",
+        "https://www.autonation.com/StoreDetails/Get/?lat=30.218908309936523&long=-97.8546142578125&radius=5000&zipcode=78749"
     ]
+    requires_proxy = True
 
     def parse_hours(self, hours):
         opening_hours = OpeningHours()
         for hour in hours:
             try:
-                day = DAY_MAPPING[hour["Day"]]
+                day = DAYS[hour["Day"]]
                 open_time = hour["StartTime"]
                 if len(open_time) == 7:
                     open_time = open_time.rjust(8, "0")
@@ -47,7 +46,7 @@ class AutoNationSpider(scrapy.Spider):
             properties = {
                 "ref": store["StoreId"],
                 "name": store["Name"],
-                "addr_full": store["AddressLine1"],
+                "street_address": clean_address([store["AddressLine1"], store["AddressLine2"]]),
                 "city": store["City"],
                 "state": store["StateCode"],
                 "postcode": store["PostalCode"],
