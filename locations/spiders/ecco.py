@@ -13,7 +13,6 @@ class EccoSpider(scrapy.Spider):
         "https://se.ecco.com/api/store/search?latitudeMin=-90&longitudeMin=-180&latitudeMax=90&longitudeMax=180"
     ]
     custom_settings = {"ROBOTSTXT_OBEY": False}
-    download_delay = 0.1
 
     def parse(self, response):
         stores = json.loads(response.text)
