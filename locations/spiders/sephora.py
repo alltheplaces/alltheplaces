@@ -1,88 +1,54 @@
-import datetime
 import json
 
-import scrapy
+from scrapy.spiders import SitemapSpider
 
+from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
-from locations.items import Feature
-
-DAY_MAPPING = {
-    "fridayHours": "Fr",
-    "mondayHours": "Mo",
-    "saturdayHours": "Sa",
-    "sundayHours": "Su",
-    "thursdayHours": "Th",
-    "tuesdayHours": "Tu",
-    "wednesdayHours": "We",
-}
+from locations.spiders.vapestore_gb import clean_address
+from locations.user_agents import BROWSER_DEFAULT
 
 
-class SephoraSpider(scrapy.Spider):
+class SephoraSpider(SitemapSpider):
     name = "sephora"
     item_attributes = {"brand": "Sephora", "brand_wikidata": "Q2408041"}
     allowed_domains = ["www.sephora.com"]
-    download_delay = 0.2
-    start_urls = ("https://www.sephora.com/storelist",)
+    download_delay = 5  # Requested by robots.txt
+    user_agent = BROWSER_DEFAULT
+    sitemap_urls = [
+        "https://www.sephora.com/sephora-store-sitemap.xml",  # US
+        "https://www.sephora.com/sephora-store-sitemap_en-CA.xml",  # CA
+    ]
+    sitemap_rules = [(r"/happening/stores/", "parse_store")]
 
-    def store_hours(self, response):
+    @staticmethod
+    def parse_hours(rules) -> OpeningHours:
         opening_hours = OpeningHours()
-        weekdays = response
 
-        for day, hrs in weekdays.items():
-            if "closedDays" in day or "textColor" in day or "timeZone" in day:
+        for day, hours in rules.items():
+            if not day.endswith("Hours"):
                 continue
-            elif "CLOSED" in hrs:
+            if not hours or not isinstance(hours, str):
                 continue
-            else:
-                try:
-                    open, close = hrs.split("-")
-                    open = open.strip()
-                    close = close.strip()
-                    if ":" in open:
-                        open_time = datetime.datetime.strptime(open, "%I:%M%p").strftime("%H:%M")
-                    else:
-                        open_time = datetime.datetime.strptime(open, "%I%p").strftime("%H:%M")
+            if "CLOSED" in hours:
+                continue
 
-                    if ":" in close:
-                        close_time = datetime.datetime.strptime(close, "%I:%M%p").strftime("%H:%M")
-                    else:
-                        close_time = datetime.datetime.strptime(close, "%I%p").strftime("%H:%M")
-                except ValueError:
-                    continue
-                opening_hours.add_range(
-                    DAY_MAPPING[day],
-                    open_time=open_time,
-                    close_time=close_time,
-                    time_format="%H:%M",
-                )
+            start_time, end_time = hours.split("-")
 
-        return opening_hours.as_opening_hours()
-
-    def parse(self, response):
-        urls = response.xpath('//a[@class="css-j9u336 "]/@href').extract()
-
-        for url in urls:
-            yield scrapy.Request(response.urljoin(url), callback=self.parse_store)
+            opening_hours.add_range(
+                day.replace("Hours", ""),
+                open_time=start_time.strip(),
+                close_time=end_time.strip(),
+                time_format="%I:%M%p",
+            )
+        return opening_hours
 
     def parse_store(self, response):
-        jsondata = json.loads(response.xpath('//script[@id="linkJSON"]/text()').extract_first())
-        data = jsondata[2]["props"]
-        properties = {
-            "website": response.urljoin(data["storeInfo"]["seoCanonicalUrl"]),
-            "ref": data["storeInfo"]["storeId"],
-            "name": data["storeInfo"]["displayName"],
-            "phone": data["storeInfo"]["address"]["phone"],
-            "addr_full": data["storeInfo"]["address"]["address1"],
-            "city": data["storeInfo"]["address"]["city"],
-            "state": data["storeInfo"]["address"]["state"],
-            "postcode": data["storeInfo"]["address"]["postalCode"],
-            "country": data["storeInfo"]["address"]["country"],
-            "lon": float(data["storeInfo"]["longitude"]),
-            "lat": float(data["storeInfo"]["latitude"]),
-        }
-        opening_hours = self.store_hours(data["storeInfo"]["storeHours"])
+        data = json.loads(response.xpath('//script[@id="linkStore"]/text()').get())
+        for location in DictParser.get_nested_key(data, "stores"):
+            item = DictParser.parse(location)
+            item["street_address"] = clean_address([location["address"]["address1"], location["address"]["address2"]])
+            item["website"] = response.url
+            item["phone"] = location["address"]["phone"]
+            item["opening_hours"] = self.parse_hours(location["storeHours"])
 
-        if opening_hours:
-            properties["opening_hours"] = opening_hours
-
-        yield Feature(**properties)
+            yield item
