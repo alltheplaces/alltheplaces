@@ -7,4 +7,3 @@ class IbisNLSpider(YextSpider):
     api_key = "f60a800cdb7af0904b988d834ffeb221"
     wanted_type = "hotel"
     search_filter = {"name": {"$contains": "Ibis"}, "countryCode": "NL"}
-
