@@ -79,7 +79,6 @@ class Where2GetItSpider(Spider):
             where_clause = {"country": {"eq": country_code}}
         elif self.api_filter:
             where_clause = self.api_filter
-        print(where_clause)
         yield JsonRequest(
             url=f"https://hosted.where2getit.com/{self.api_brand_name}/rest/getlist",
             data={
