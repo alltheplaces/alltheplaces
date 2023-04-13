@@ -2,6 +2,7 @@ import scrapy
 
 from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.spiders.vapestore_gb import clean_address
 
 
 class BuffaloWildWingsSpider(scrapy.Spider):
@@ -59,7 +60,9 @@ class BuffaloWildWingsSpider(scrapy.Spider):
                 properties = {
                     "ref": place["RestaurantNumber"],
                     "name": place["LocationName"],
-                    "addr_full": place["AddressLine1"],
+                    "street_address": clean_address(
+                        [place["AddressLine1"], place["AddressLine2"], place["AddressLine3"]]
+                    ),
                     "city": place["City"],
                     "state": place["State"],
                     "postcode": place["PostalCode"],

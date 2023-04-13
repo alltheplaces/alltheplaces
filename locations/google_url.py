@@ -25,7 +25,7 @@ def url_to_coords(url: str) -> (float, float):  # noqa: C901
 
     url = url.replace("google.co.uk", "google.com")
 
-    if match := re.search(r"@(-?\d+.\d+),\s?(-?\d+.\d+),\d+z", url):
+    if match := re.search(r"@(-?\d+.\d+),\s?(-?\d+.\d+),[\d.]+[zm]", url):
         return float(match.group(1)), float(match.group(2))
 
     if url.startswith("https://www.google.com/maps/embed?pb="):

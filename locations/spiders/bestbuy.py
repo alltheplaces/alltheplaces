@@ -43,7 +43,7 @@ class BestBuySpider(scrapy.Spider):
         props = {
             "name": name,
             "brand": "Pacific Sales Kitchen & Home" if "Pacific Sales" in name else self.item_attributes["brand"],
-            "addr_full": response.xpath('//meta[@itemprop="streetAddress"]/@content').extract_first(),
+            "street_address": response.xpath('//meta[@itemprop="streetAddress"]/@content').extract_first(),
             "lat": float(response.xpath('//meta[@itemprop="latitude"]/@content').extract_first()),
             "lon": float(response.xpath('//meta[@itemprop="longitude"]/@content').extract_first()),
             "city": response.xpath('//span[@class="c-address-city"]/text()').extract_first(),

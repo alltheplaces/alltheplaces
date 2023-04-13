@@ -1,5 +1,4 @@
 import re
-from datetime import datetime
 
 from geonamescache import GeonamesCache
 from scrapy.linkextractors import LinkExtractor
@@ -12,7 +11,7 @@ from locations.items import Feature
 
 class BcpizzaSpider(CrawlSpider):
     name = "bcpizza"
-    item_attributes = {"brand": "BC Pizza"}
+    item_attributes = {"brand": "BC Pizza", "brand_wikidata": "Q117600284"}
     allowed_domains = ["bc.pizza"]
     start_urls = ["https://bc.pizza/locations/"]
     rules = [
@@ -47,11 +46,7 @@ class BcpizzaSpider(CrawlSpider):
             if hh == "Closed":
                 continue
             open_time, close_time = hh.split(" – ")
-            oh.add_range(
-                day=dd,
-                open_time=datetime.strftime(datetime.strptime(open_time, "%I:%M %p"), "%H:%M"),
-                close_time=datetime.strftime(datetime.strptime(close_time, "%I:%M %p"), "%H:%M"),
-            )
+            oh.add_range(day=dd, open_time=open_time, close_time=close_time, time_format="%I:%M %p")
 
         properties = {
             "ref": response.url,
@@ -59,11 +54,11 @@ class BcpizzaSpider(CrawlSpider):
             "city": city,
             "state": state,
             "postcode": postcode,
-            "addr_full": address_full,
+            "street_address": address_full,
             "phone": phone,
             "facebook": facebook,
             "website": response.url,
-            "opening_hours": oh.as_opening_hours(),
+            "opening_hours": oh,
         }
 
         extract_google_position(properties, response)
