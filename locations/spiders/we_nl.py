@@ -5,7 +5,6 @@ import scrapy
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_NL, OpeningHours, sanitise_day
 
-
 class WeNLSpider(scrapy.Spider):
     name = "we_nl"
 
