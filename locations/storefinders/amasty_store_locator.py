@@ -33,7 +33,10 @@ class AmastyStoreLocatorSpider(Spider):
                 yield Request(url=url)
 
     def parse(self, response, **kwargs):
-        for location in response.json()["items"]:
+        yield from self.parse_items(response.json()["items"])
+
+    def parse_items(self, items: [dict]):
+        for location in items:
             item = DictParser.parse(location)
             if "popup_html" in location:
                 popup_html = Selector(text=location["popup_html"])

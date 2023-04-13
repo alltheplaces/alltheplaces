@@ -24,7 +24,7 @@ class BostonPizzaSpider(scrapy.Spider):
                 "phone": store["restaurantPhoneNumber"],
                 "country": store["country"],
                 "ref": store["identifier"],
-                "addr_full": store["address"],
+                "street_address": store["address"],
                 "city": store["city"],
                 "lat": store["latitude"],
                 "postcode": store["postalCode"],

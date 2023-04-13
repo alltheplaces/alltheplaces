@@ -1,10 +1,10 @@
-import json
 import urllib.parse
 
 import scrapy
 
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
+from locations.spiders.vapestore_gb import clean_address
 
 
 class AfcUrgentCareSpider(scrapy.Spider):
@@ -14,7 +14,7 @@ class AfcUrgentCareSpider(scrapy.Spider):
     start_urls = ("https://www.afcurgentcare.com/modules/multilocation/?near_lat=39&near_lon=-98",)
 
     def parse(self, response):
-        j = json.loads(response.body)
+        j = response.json()
         if j["meta"]["next"] is not None:
             qs = "?" + urllib.parse.urlparse(j["meta"]["next"]).query
             yield scrapy.Request(urllib.parse.urljoin(response.url, qs))
@@ -27,10 +27,11 @@ class AfcUrgentCareSpider(scrapy.Spider):
             "lat": obj["lat"],
             "lon": obj["lon"],
             "phone": obj["phonemap_e164"].get("phone"),
-            "addr_full": obj["street"],
+            "street_address": clean_address([obj["street"], obj["street2"]]),
             "name": obj["location_name"],
             "city": obj["city"],
             "state": obj["state"],
+            "country": obj["country"],
             "postcode": obj["postal_code"],
             "website": obj["location_url"],
         }
@@ -41,6 +42,6 @@ class AfcUrgentCareSpider(scrapy.Spider):
                 continue
             open_time, close_time = h
             o.add_range(day, open_time, close_time, "%H:%M:%S")
-        properties["opening_hours"] = o.as_opening_hours()
+        properties["opening_hours"] = o
 
         yield Feature(**properties)

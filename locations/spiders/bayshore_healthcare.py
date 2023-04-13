@@ -43,7 +43,7 @@ class BayshoreHealthcareSpider(scrapy.Spider):
             properties = {
                 "ref": store["id"],
                 "name": store["name"],
-                "addr_full": addr,
+                "street_address": addr,
                 "city": city,
                 "state": state,
                 "postcode": postal,

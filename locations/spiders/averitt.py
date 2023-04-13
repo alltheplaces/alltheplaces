@@ -83,7 +83,7 @@ class AverittSpider(scrapy.spiders.SitemapSpider):
         properties = {
             "ref": response.url,
             "name": name,
-            "addr_full": address_full,
+            "street_address": address_full,
             "city": city,
             "state": state,
             "postcode": postcode,

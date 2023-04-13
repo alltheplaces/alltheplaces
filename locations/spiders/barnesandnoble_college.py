@@ -28,7 +28,7 @@ class BarnesAndNobleCollegeSpider(scrapy.Spider):
             properties = {
                 "ref": name,
                 "name": name,
-                "addr_full": address,
+                "street_address": address,
                 "city": city.strip(),
                 "state": state.strip(),
                 "postcode": postal.strip(),
