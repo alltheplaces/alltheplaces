@@ -34,7 +34,7 @@ class BusyBeaverSpider(scrapy.Spider):
             "ref": data["id"],
             "website": data["permalink"],
             "name": data["store"],
-            "addr_full": data["address"],
+            "street_address": data["address"],
             "city": data["city"],
             "state": data["state"],
             "postcode": data["zip"],

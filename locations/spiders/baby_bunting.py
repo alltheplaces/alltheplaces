@@ -1,5 +1,3 @@
-import json
-
 import scrapy
 from scrapy.http import JsonRequest
 
@@ -23,8 +21,7 @@ class BabyBuntingSpider(scrapy.Spider):
         )
 
     def parse(self, response):
-        stores = json.loads(response.body)
-        for store in stores:
+        for store in response.json():
             if "COMING SOON" in store["title"].upper():
                 continue
             item = DictParser.parse(store)

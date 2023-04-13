@@ -51,7 +51,7 @@ class BloomingdalesSpider(scrapy.Spider):
 
         properties = {
             "name": brand + " " + name,
-            "addr_full": response.xpath('//span[contains(@class, "c-address-street-1")]/text()').extract_first(),
+            "street_address": response.xpath('//span[contains(@class, "c-address-street-1")]/text()').extract_first(),
             "city": response.xpath('//span[@itemprop="addressLocality"]/text()').extract_first(),
             "state": response.xpath('//abbr[@itemprop="addressRegion"]/text()').extract_first(),
             "postcode": response.xpath('//span[@itemprop="postalCode"]/text()').extract_first().strip(),

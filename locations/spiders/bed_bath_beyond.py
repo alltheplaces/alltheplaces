@@ -14,7 +14,7 @@ class BedBathBeyondSpider(scrapy.Spider):
     start_urls = ("https://www.bedbathandbeyond.com/apis/services/store/v1.0/store/states?site_id=BedBathUS",)
 
     def parse(self, response):
-        data = json.loads(response.text)["data"]
+        data = response.json()["data"]
         for url in data:
             yield scrapy.Request(
                 f'https://www.{self.allowed_domains[0]}/locations/state/{url["code"]}',
@@ -30,7 +30,7 @@ class BedBathBeyondSpider(scrapy.Spider):
         for store in stores:
             item["ref"] = store["stores"][0]["storeId"]
             item["name"] = store["stores"][0]["commonName"]
-            item["addr_full"] = store["stores"][0]["address"]
+            item["street_address"] = store["stores"][0]["address"]
             item["city"] = store["stores"][0]["city"]
             item["state"] = store["stores"][0]["state"]
             item["postcode"] = store["stores"][0]["postalCode"]

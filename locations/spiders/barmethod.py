@@ -7,7 +7,7 @@ from locations.items import Feature
 
 class BarMethodSpider(scrapy.Spider):
     name = "barmethod"
-    item_attributes = {"brand": "The Bar Method"}
+    item_attributes = {"brand": "The Bar Method", "brand_wikidata": "Q117599728"}
     allowed_domains = ["barmethod.com"]
     start_urls = ("https://barmethod.com/locations/",)
 
@@ -48,14 +48,14 @@ class BarMethodSpider(scrapy.Spider):
         properties = {
             "name": name,
             "ref": ref,
-            "addr_full": address_full,
+            "street_address": address_full,
             "city": city,
             "state": state,
             "postcode": postcode,
             "phone": phone,
             "email": email,
             "facebook": facebook,
-            "website": response.request.url,
+            "website": response.url,
         }
 
         yield Feature(**properties)
