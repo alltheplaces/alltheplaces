@@ -12,8 +12,8 @@ class WeNLSpider(scrapy.Spider):
         "brand": "We",
         "brand_wikidata": "Q1987861"
     }
-    start_urls = [
-        "https://www.wefashion.nl/s/WE-NL/dw/shop/v20_9/stores?client_id=f2fbfde0-02ea-4ad8-8864-5b6e62ad8c65&country_code=NL&longitude=52.1326&latitude=5.2913&count=200"]
+    start_urls = ["https://www.wefashion.nl/s/WE-NL/dw/shop/v20_9/stores?client_id=f2fbfde0-02ea-4ad8-8864"
+                  "-5b6e62ad8c65&country_code=NL&longitude=52.1326&latitude=5.2913&count=200"]
 
     def parse(self, response):
         for store in response.json().get("data"):
