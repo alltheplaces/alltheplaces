@@ -8,6 +8,6 @@ class BassettFurnitureSpider(SitemapSpider, StructuredDataSpider):
     item_attributes = {"brand": "Bassett Furniture", "brand_wikidata": "Q4868109"}
     allowed_domains = ["stores.bassettfurniture.com"]
     sitemap_urls = ["https://stores.bassettfurniture.com/robots.txt"]
-    sitemap_rules = [("https://stores\.bassettfurniture\.com/[-\w]+/[-\w]+/\d+/$", "parse_sd")]
+    sitemap_rules = [(r"https://stores\.bassettfurniture\.com/[-\w]+/[-\w]+/\d+/$", "parse_sd")]
     wanted_types = ["FurnitureStore"]
     json_parser = "json5"
