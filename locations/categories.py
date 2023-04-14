@@ -223,6 +223,7 @@ class Extras(Enum):
     DELIVERY = "delivery"
     DRIVE_THROUGH = "drive_through"
     FAXING = "service:fax"
+    FEE = "fee"
     INDOOR_SEATING = "indoor_seating"
     OIL_CHANGE = "service:vehicle:oil_change"
     OUTDOOR_SEATING = "outdoor_seating"
