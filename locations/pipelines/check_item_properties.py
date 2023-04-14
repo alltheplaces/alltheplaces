@@ -92,7 +92,11 @@ class CheckItemPropertiesPipeline:
 
         if opening_hours := item.get("opening_hours"):
             if isinstance(opening_hours, OpeningHours):
-                item["opening_hours"] = opening_hours.as_opening_hours()
+                if opening_hours.day_hours:
+                    item["opening_hours"] = opening_hours.as_opening_hours()
+                else:
+                    item["opening_hours"] = None
+                    spider.crawler.stats.inc_value("atp/field/opening_hours/missing")
             elif not isinstance(opening_hours, str):
                 spider.crawler.stats.inc_value("atp/field/opening_hours/wrong_type")
             elif not self.opening_hours_regex.match(opening_hours) and opening_hours != "24/7":
