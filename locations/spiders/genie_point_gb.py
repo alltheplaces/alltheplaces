@@ -1,0 +1,18 @@
+from scrapy import Spider
+
+from locations.categories import Extras, apply_yes_no
+from locations.dict_parser import DictParser
+
+
+class GeniePointGBSpider(Spider):
+    name = "genie_point_gb"
+    item_attributes = {"brand": "GeniePoint", "brand_wikidata": "Q111363966"}
+    start_urls = ["https://www.geniepoint.co.uk/ds/PublicMap/GetAllLocations"]
+
+    def parse(self, response, **kwargs):
+        for location in response.json()["rows"]:
+            item = DictParser.parse(location)
+
+            apply_yes_no(Extras.FEE, item, location["IsFreeCharge"], False)
+
+            yield item
