@@ -1,7 +1,7 @@
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
-from locations.categories import apply_category, apply_yes_no, Categories, Extras, Fuel
+from locations.categories import Categories, Extras, Fuel, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_FULL, OpeningHours
 
@@ -37,16 +37,28 @@ class UnitedPetroleumAUSpider(Spider):
     def parse(self, response):
         for location in response.json():
             item = DictParser.parse(location)
-            item["addr_full"] = " ".join(filter(None, [location["address1"], location["address2"], location["address3"]]))
+            item["addr_full"] = " ".join(
+                filter(None, [location["address1"], location["address2"], location["address3"]])
+            )
             item["phone"] = location["publicPhoneNumber"]
             item["opening_hours"] = OpeningHours()
             for day_name in DAYS_FULL:
                 if location["openingHours"][f"closedOn{day_name}"]:
                     continue
-                if location["openingHours"][f"open24Hours{day_name}"] or "24 HOURS" in location["openingHours"][day_name.lower()].upper():
+                if (
+                    location["openingHours"][f"open24Hours{day_name}"]
+                    or "24 HOURS" in location["openingHours"][day_name.lower()].upper()
+                ):
                     item["opening_hours"].add_range(day_name, "00:00", "23:59")
                 else:
-                    open_time, close_time = location["openingHours"][day_name.lower()].upper().replace("TO", "-").replace(".", ":").replace("`", "").split("-", 2)
+                    open_time, close_time = (
+                        location["openingHours"][day_name.lower()]
+                        .upper()
+                        .replace("TO", "-")
+                        .replace(".", ":")
+                        .replace("`", "")
+                        .split("-", 2)
+                    )
                     if "AM" in open_time or "AM" in close_time or "PM" in open_time or "PM" in close_time:
                         if ":" not in open_time:
                             open_time = open_time.replace("AM", ":00AM").replace("PM", ":00PM")
