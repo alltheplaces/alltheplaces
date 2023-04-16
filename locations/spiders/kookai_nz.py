@@ -1,5 +1,6 @@
 from locations.storefinders.stockinstore import StockInStoreSpider
 
+
 class KookaiNZSpider(StockInStoreSpider):
     name = "kookai_nz"
     item_attributes = {"brand": "Kookai", "brand_wikidata": "Q1783759"}

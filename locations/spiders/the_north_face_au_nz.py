@@ -1,5 +1,6 @@
 from locations.storefinders.stockinstore import StockInStoreSpider
 
+
 class TheNorthFaceAUNZSpider(StockInStoreSpider):
     name = "the_north_face_au_nz"
     item_attributes = {"brand": "The North Face", "brand_wikidata": "Q152784"}

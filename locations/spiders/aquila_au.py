@@ -1,5 +1,6 @@
 from locations.storefinders.stockinstore import StockInStoreSpider
 
+
 class AquilaAUSpider(StockInStoreSpider):
     name = "aquila_au"
     item_attributes = {"brand": "Aquila", "brand_wikidata": "Q17985574"}

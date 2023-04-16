@@ -1,5 +1,6 @@
 from locations.storefinders.stockinstore import StockInStoreSpider
 
+
 class ManningCartellAUSpider(StockInStoreSpider):
     name = "manning_cartell_au"
     item_attributes = {"brand": "Manning Cartell", "brand_wikidata": "Q117746697"}

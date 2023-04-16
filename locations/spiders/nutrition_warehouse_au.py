@@ -1,5 +1,6 @@
 from locations.storefinders.stockinstore import StockInStoreSpider
 
+
 class NutritionWarehouseAUSpider(StockInStoreSpider):
     name = "nutrition_warehouse_au"
     item_attributes = {"brand": "Nutrition Warehouse", "brand_wikidata": "Q117747424"}

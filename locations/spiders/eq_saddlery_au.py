@@ -1,5 +1,6 @@
 from locations.storefinders.stockinstore import StockInStoreSpider
 
+
 class EQSaddleryAUSpider(StockInStoreSpider):
     name = "eq_saddlery_au"
     item_attributes = {"brand": "EQ Saddlery", "brand_wikidata": "Q117746041"}

@@ -1,5 +1,6 @@
 from locations.storefinders.stockinstore import StockInStoreSpider
 
+
 class ZOMPAUSpider(StockInStoreSpider):
     name = "zomp_au"
     item_attributes = {"brand": "ZOMP", "brand_wikidata": "Q117747772"}

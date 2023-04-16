@@ -1,5 +1,6 @@
 from locations.storefinders.stockinstore import StockInStoreSpider
 
+
 class TentworldAUSpider(StockInStoreSpider):
     name = "tentworld_au"
     item_attributes = {"brand": "Tentworld", "brand_wikidata": "Q117747711"}

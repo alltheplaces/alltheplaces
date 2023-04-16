@@ -42,7 +42,12 @@ class StockInStoreSpider(Spider):
             "info": "none",
             "preview": "false",
         }
-        yield FormRequest(url="https://stockinstore.net/stores/getAllStores", method="POST", headers={"Origin": self.api_origin}, formdata=data)
+        yield FormRequest(
+            url="https://stockinstore.net/stores/getAllStores",
+            method="POST",
+            headers={"Origin": self.api_origin},
+            formdata=data,
+        )
 
     def parse(self, response):
         for location in response.json()["response"]["stores_list"]:

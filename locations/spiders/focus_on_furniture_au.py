@@ -1,5 +1,6 @@
 from locations.storefinders.stockinstore import StockInStoreSpider
 
+
 class FocusOnFurnitureAUSpider(StockInStoreSpider):
     name = "focus_on_furniture_au"
     item_attributes = {"brand": "Focus on Furniture", "brand_wikidata": "Q117746060"}

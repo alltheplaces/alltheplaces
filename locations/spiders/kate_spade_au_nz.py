@@ -1,5 +1,6 @@
 from locations.storefinders.stockinstore import StockInStoreSpider
 
+
 class KateSpadeAUNZSpider(StockInStoreSpider):
     name = "kate_spade_au_nz"
     item_attributes = {"brand": "Kate Spade New York", "brand_wikidata": "Q6375797"}

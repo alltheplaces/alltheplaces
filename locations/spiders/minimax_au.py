@@ -1,5 +1,6 @@
 from locations.storefinders.stockinstore import StockInStoreSpider
 
+
 class MinimaxAUSpider(StockInStoreSpider):
     name = "minimax_au"
     item_attributes = {"brand": "Minimax", "brand_wikidata": "Q117747075"}

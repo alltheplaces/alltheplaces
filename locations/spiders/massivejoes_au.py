@@ -1,5 +1,6 @@
 from locations.storefinders.stockinstore import StockInStoreSpider
 
+
 class MassiveJoesAUSpider(StockInStoreSpider):
     name = "massivejoes_au"
     item_attributes = {"brand": "MassiveJoes", "brand_wikidata": "Q117746887"}
