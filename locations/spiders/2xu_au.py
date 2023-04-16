@@ -18,8 +18,20 @@ class TwoX2AUSpider(StockistSpider):
             hours_ranges = custom_field["value"].replace(") ", "),").split(",")
             hours_string = ""
             for hours_range in hours_ranges:
-                if m := re.match(r"\s*(\d{1,2}(?:[:.]\d{1,2})?)-(\d{1,2}(?:[:.]\d{1,2})?)\s*\((\w+(?:-\w+)?)\)\s*", hours_range):
-                    days = m.group(3).replace("M-W", "Mon-Wed").replace("M-T", "Mon-Thu").replace("M-F", "Mon-Fri").replace("T-F", "Thu-Fri").replace("(T)", "(Thu)").replace("(F)", "(Fri)").replace("T-S", "Thu-Sat").replace("F-S", "Fri-Sat")
+                if m := re.match(
+                    r"\s*(\d{1,2}(?:[:.]\d{1,2})?)-(\d{1,2}(?:[:.]\d{1,2})?)\s*\((\w+(?:-\w+)?)\)\s*", hours_range
+                ):
+                    days = (
+                        m.group(3)
+                        .replace("M-W", "Mon-Wed")
+                        .replace("M-T", "Mon-Thu")
+                        .replace("M-F", "Mon-Fri")
+                        .replace("T-F", "Thu-Fri")
+                        .replace("(T)", "(Thu)")
+                        .replace("(F)", "(Fri)")
+                        .replace("T-S", "Thu-Sat")
+                        .replace("F-S", "Fri-Sat")
+                    )
                     open_time = m.group(1) + "AM"
                     close_time = m.group(2) + "PM"
                     hours_string = f"{hours_string} {days}: {open_time}-{close_time}"
