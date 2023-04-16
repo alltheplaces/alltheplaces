@@ -9,7 +9,9 @@ class CityBeachAUSpider(Spider):
     name = "city_beach_au"
     item_attributes = {"brand": "City Beach", "brand_wikidata": "Q16958619"}
     allowed_domains = ["www.citybeach.com.au"]
-    start_urls = ["https://www.citybeach.com/on/demandware.store/Sites-CityBeachAustralia-Site/default/Stores-FindStores?showMap=true&radius=10000&postalCode=0870"]
+    start_urls = [
+        "https://www.citybeach.com/on/demandware.store/Sites-CityBeachAustralia-Site/default/Stores-FindStores?showMap=true&radius=10000&postalCode=0870"
+    ]
 
     def start_requests(self):
         for url in self.start_urls:
