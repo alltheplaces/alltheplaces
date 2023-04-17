@@ -30,7 +30,7 @@ class SupercheapAutoSpider(SitemapSpider):
             filter(None, response.xpath('//div[contains(@class, "opening-hours")]/dl[1]/*/text()').getall())
         )
         # Remove AM/PM from 24 hour timestamps (not supported by add_ranges_from_string function)
-        if re.search("(?<!\d)(?:1[3-9]|2\d):\d{2}(?!\d)", hours_string):
+        if re.search(r"(?<!\d)(?:1[3-9]|2\d):\d{2}(?!\d)", hours_string):
             hours_string = re.sub(r"(?<=\d)\s*[AP]M", "", hours_string)
         item["opening_hours"] = OpeningHours()
         item["opening_hours"].add_ranges_from_string(hours_string)
