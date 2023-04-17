@@ -1,7 +1,7 @@
 from scrapy import Spider
 from scrapy.http import FormRequest
 
-from locations.categories import Fuel, Categories, apply_category, apply_yes_no
+from locations.categories import Categories, Fuel, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 
 
@@ -12,11 +12,7 @@ class TravelCentersOfAmericaUSSpider(Spider):
     start_urls = ["https://www.ta-petro.com/api/locations/search"]
 
     def start_requests(self):
-        data = {
-            "PostalCode": "",
-            "StateCode": "",
-            "HighwayId": "0"
-        }
+        data = {"PostalCode": "", "StateCode": "", "HighwayId": "0"}
         for url in self.start_urls:
             yield FormRequest(url=url, method="POST", formdata=data, headers={"Accept": "application/json"})
 
@@ -33,7 +29,9 @@ class TravelCentersOfAmericaUSSpider(Spider):
                     item["brand"] = "TA Express"
             item["ref"] = location["TAAccessNumber"]
             item["street_address"] = item.pop("street")
-            item["website"] = "https://www.ta-petro.com/location/" + item["state"].lower() + "/" + location["FileName"] + "/"
+            item["website"] = (
+                "https://www.ta-petro.com/location/" + item["state"].lower() + "/" + location["FileName"] + "/"
+            )
             fuel_codes = [fuel_price["FuelCode"] for fuel_price in location["FuelPrices"]]
             apply_category(Categories.FUEL_STATION, item)
             apply_yes_no(Fuel.OCTANE_87, item, 1 in fuel_codes, False)
