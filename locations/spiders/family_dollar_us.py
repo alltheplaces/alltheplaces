@@ -5,8 +5,9 @@ from locations.storefinders.where2getit import Where2GetItSpider
 class FamilyDollarUSSpider(Where2GetItSpider):
     name = "family_dollar_us"
     item_attributes = {"brand": "Family Dollar", "brand_wikidata": "Q5433101"}
-    w2gi_id = "D2F68B64-7E11-11E7-B734-190193322438"
-    w2gi_filter = {
+    api_brand_name = "familydollar"
+    api_key = "D2F68B64-7E11-11E7-B734-190193322438"
+    api_filter = {
         "and": {
             "distributioncenter": {"distinctfrom": "1"},
             "bopis": {"eq": ""},
@@ -24,8 +25,6 @@ class FamilyDollarUSSpider(Where2GetItSpider):
             "billpay": {"eq": ""},
         }
     }
-    w2gi_country_code = "US"
-    w2gi_query = ""
 
     def parse_item(self, item, location):
         if location["coming_soon"] == "Y" or location["temp_closed"] == "Y" or location["temporarily_closed"] == "Y":
