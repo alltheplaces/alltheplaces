@@ -41,7 +41,6 @@ class HolidayStationstoresUSSpider(Spider):
         open_24_hours = "24 hours" in response.css(".body-content .col-lg-4").get().lower()
 
         properties = {
-            "name": f"Holiday #{store['id']}",
             "lon": store["lng"],
             "lat": store["lat"],
             "addr_full": address,
