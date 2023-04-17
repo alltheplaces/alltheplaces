@@ -18,7 +18,6 @@ class EvyveGBSpider(Spider):
             .split("');", 2)[0]
         )
         for location in locations:
-            print(location)
             if not location["publish"]:
                 continue  # location not open (coming soon or other reason)
             item = DictParser.parse(location)
