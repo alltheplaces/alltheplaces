@@ -11,14 +11,12 @@ class FuzzysTacoShopUSSpider(CrawlSpider, StructuredDataSpider):
     allowed_domains = ["fuzzystacoshop.com"]
     start_urls = ["https://fuzzystacoshop.com/locations/list/"]
     rules = [
-        Rule(
-            LinkExtractor(allow=r"https:\/\/fuzzystacoshop\.com\/locations\/list\/.+")
-        ),
+        Rule(LinkExtractor(allow=r"https:\/\/fuzzystacoshop\.com\/locations\/list\/.+")),
         Rule(
             LinkExtractor(allow=r"https:\/\/fuzzystacoshop\.com\/locations\/(?!list\/).+"),
             callback="parse_sd",
-            follow=False
-        )
+            follow=False,
+        ),
     ]
 
     def post_process_item(self, item, response, ld_data):
