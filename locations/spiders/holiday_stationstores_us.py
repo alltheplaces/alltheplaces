@@ -21,7 +21,10 @@ class HolidayStationstoresUSSpider(Spider):
 
     def parse_all_stores(self, response):
         for store_id, store in response.json().items():
-            yield Request(url=f"https://www.holidaystationstores.com/Locations/Detail?storeNumber={store_id}", meta={"store": store})
+            yield Request(
+                url=f"https://www.holidaystationstores.com/Locations/Detail?storeNumber={store_id}",
+                meta={"store": store},
+            )
 
     def parse(self, response):
         store = response.meta["store"]
