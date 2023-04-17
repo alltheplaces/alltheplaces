@@ -26,7 +26,9 @@ class SupercheapAutoSpider(SitemapSpider):
         if item["country"] == "NZ":
             item.pop("state")
         item["website"] = response.url
-        hours_string = " ".join(filter(None, response.xpath('//div[contains(@class, "opening-hours")]/dl[1]/*/text()').getall()))
+        hours_string = " ".join(
+            filter(None, response.xpath('//div[contains(@class, "opening-hours")]/dl[1]/*/text()').getall())
+        )
         # Remove AM/PM from 24 hour timestamps (not supported by add_ranges_from_string function)
         if re.search("(?<!\d)(?:1[3-9]|2\d):\d{2}(?!\d)", hours_string):
             hours_string = re.sub(r"(?<=\d)\s*[AP]M", "", hours_string)
