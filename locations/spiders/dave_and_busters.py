@@ -8,6 +8,7 @@ class DaveAndBustersSpider(Spider):
     item_attributes = {"brand": "Dave and Busters", "brand_wikidata": "Q5228205"}
     allowed_domains = ["www.daveandbusters.com"]
     start_urls = ["https://www.daveandbusters.com/content/dnb-request/datadetails.json?mode=location"]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def parse(self, response):
         for location in response.json()["locations"]:
