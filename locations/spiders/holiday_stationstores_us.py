@@ -1,34 +1,27 @@
 import json
 import re
 
-import scrapy
+from scrapy import Request, Spider
+from scrapy.http import JsonRequest
 
 from locations.items import Feature
 
 
-class HolidayStationstoresSpider(scrapy.Spider):
-    name = "holiday_stationstores"
+class HolidayStationstoresUSSpider(Spider):
+    name = "holiday_stationstores_us"
     item_attributes = {"brand": "Holiday Stationstores", "brand_wikidata": "Q5880490"}
     allowed_domains = ["www.holidaystationstores.com"]
-    download_delay = 0.2
 
     def start_requests(self):
-        yield scrapy.Request(
+        yield JsonRequest(
             "https://www.holidaystationstores.com/Locations/GetAllStores",
             method="POST",
             callback=self.parse_all_stores,
         )
 
     def parse_all_stores(self, response):
-        all_stores = json.loads(response.text)
-
-        for store_id, store in all_stores.items():
-            # GET requests get blocked by their Incapsula bot protection, but POST works fine
-            yield scrapy.Request(
-                f"https://www.holidaystationstores.com/Locations/Detail?storeNumber={store_id}",
-                method="POST",
-                meta={"store": store},
-            )
+        for store_id, store in response.json().items():
+            yield Request(url=f"https://www.holidaystationstores.com/Locations/Detail?storeNumber={store_id}", meta={"store": store})
 
     def parse(self, response):
         store = response.meta["store"]
@@ -45,12 +38,12 @@ class HolidayStationstoresSpider(scrapy.Spider):
         open_24_hours = "24 hours" in response.css(".body-content .col-lg-4").get().lower()
 
         properties = {
-            "name": f"Holiday #{store['Name']}",
-            "lon": store["Lng"],
-            "lat": store["Lat"],
+            "name": f"Holiday #{store['id']}",
+            "lon": store["lng"],
+            "lat": store["lat"],
             "addr_full": address,
             "phone": phone,
-            "ref": store["ID"],
+            "ref": store["id"],
             "city": city.strip(),
             "state": state.strip(),
             "website": response.url,
