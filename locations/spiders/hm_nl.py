@@ -1,5 +1,4 @@
 import scrapy
-
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_NL, OpeningHours, sanitise_day
 
