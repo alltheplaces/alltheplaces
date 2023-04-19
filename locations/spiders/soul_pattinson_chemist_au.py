@@ -1,23 +1,8 @@
-import html
-
-from scrapy import Selector, Spider
-
-from locations.dict_parser import DictParser
-from locations.hours import OpeningHours
+from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
 
 
-class SoulPattinsonChemistAUSpider(Spider):
+class SoulPattinsonChemistAUSpider(WPStoreLocatorSpider):
     name = "soul_pattinson_chemist_au"
     item_attributes = {"brand": "Soul Pattinson Chemist", "brand_wikidata": "Q117225301"}
-    start_urls = ["https://soulpattinson.com.au/wp-admin/admin-ajax.php?action=store_search&autoload=1"]
-
-    def parse(self, response):
-        for location in response.json():
-            item = DictParser.parse(location)
-            item["name"] = html.unescape(location["store"])
-            item["street_address"] = item.pop("addr_full")
-            hours = Selector(text=location["hours"])
-            hours_string = " ".join(hours.xpath("//text()").getall())
-            item["opening_hours"] = OpeningHours()
-            item["opening_hours"].add_ranges_from_string(hours_string)
-            yield item
+    allowed_domains = ["soulpattinson.com.au"]
+    time_format = "%I:%M %p"
