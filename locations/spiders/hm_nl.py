@@ -7,7 +7,7 @@ from locations.hours import DAYS_NL, OpeningHours, sanitise_day
 class HmNLSpider(scrapy.Spider):
     name = "hm_nl"
     item_attributes = {
-        "brand": "Hm",
+        "brand": "H&M",
         "brand_wikidata": "Q188326",
     }
     start_urls = [
