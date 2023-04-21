@@ -9,7 +9,10 @@ def get_lat_lon(item: Feature) -> (float, float):
         if isinstance(geometry, dict):
             if geometry.get("type") == "Point":
                 if coords := geometry.get("coordinates"):
-                    return coords[1], coords[0]
+                    try:
+                        return float(coords[1]), float(coords[0])
+                    except TypeError:
+                        pass
     else:
         try:
             return float(item.get("lat")), float(item.get("lon"))
