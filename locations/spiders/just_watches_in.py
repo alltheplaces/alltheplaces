@@ -11,7 +11,7 @@ class JustWatchesINSpider(MetizsoftSpider):
 
     def parse_item(self, item, location):
         if "ALL DAYS" in location["hour_of_operation"]:
-            if m := re.match("(\d{2})\.(\d{2}) ([AP])\.M - (\d{2})\.(\d{2}) ([AP])\.M", location["hour_of_operation"]):
+            if m := re.match(r"(\d{2})\.(\d{2}) ([AP])\.M - (\d{2})\.(\d{2}) ([AP])\.M", location["hour_of_operation"]):
                 start_time = m.group(1) + ":" + m.group(2) + m.group(3) + "M"
                 end_time = m.group(4) + ":" + m.group(5) + m.group(6) + "M"
                 item["opening_hours"] = OpeningHours()
