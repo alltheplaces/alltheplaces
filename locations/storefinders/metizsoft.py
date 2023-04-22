@@ -4,17 +4,21 @@ from scrapy.http import FormRequest
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
-
 # To use, specify the Shopify URL for the brand in the format of
 # {brand-name}.myshopify.com . You may then need to override the
 # parse_item function to adjust extracted field values.
+
 
 class MetizsoftSpider(Spider):
     dataset_attributes = {"source": "api", "api": "storelocator.metizapps.com"}
     shopify_url = ""
 
     def start_requests(self):
-        yield FormRequest(url=f"https://storelocator.metizapps.com/stores/storeDataGet", method="POST", formdata={"shopData": self.shopify_url})
+        yield FormRequest(
+            url=f"https://storelocator.metizapps.com/stores/storeDataGet",
+            method="POST",
+            formdata={"shopData": self.shopify_url},
+        )
 
     def parse(self, response, **kwargs):
         if not response.json()["success"]:

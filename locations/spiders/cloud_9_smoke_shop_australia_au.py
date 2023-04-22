@@ -2,6 +2,7 @@ import json
 
 from locations.storefinders.metizsoft import MetizsoftSpider
 
+
 class Cloud9SmokeShopAustraliaAUSpider(MetizsoftSpider):
     name = "cloud_9_smoke_shop_australia_au"
     item_attributes = {"brand": "Cloud 9 Smoke Shop Australia", "brand_wikidata": "Q117822054"}
