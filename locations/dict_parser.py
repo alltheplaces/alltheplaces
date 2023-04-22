@@ -27,6 +27,7 @@ class DictParser:
         "town",
         "locality",
         "suburb",
+        "city-name",
         # JP
         "市区町村",  # "municipality"
     ]
@@ -40,6 +41,7 @@ class DictParser:
         "province",
         "state-code",
         "county",
+        "state-name",
         # JP
         "都道府県",  # "prefecture"
     ]
@@ -87,6 +89,7 @@ class DictParser:
         "lat",
         "display-lat",
         "yext-display-lat",
+        "mapLatitude",
     ]
 
     lon_keys = [
@@ -96,6 +99,7 @@ class DictParser:
         "lng",
         "display-lng",
         "yext-display-lng",
+        "mapLongitude",
     ]
 
     website_keys = ["url", "website", "permalink", "store-url"]
