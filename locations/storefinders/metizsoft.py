@@ -15,7 +15,7 @@ class MetizsoftSpider(Spider):
 
     def start_requests(self):
         yield FormRequest(
-            url=f"https://storelocator.metizapps.com/stores/storeDataGet",
+            url="https://storelocator.metizapps.com/stores/storeDataGet",
             method="POST",
             formdata={"shopData": self.shopify_url},
         )
