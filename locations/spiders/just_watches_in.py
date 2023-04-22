@@ -3,6 +3,7 @@ import re
 from locations.hours import DAYS, OpeningHours
 from locations.storefinders.metizsoft import MetizsoftSpider
 
+
 class JustWatchesINSpider(MetizsoftSpider):
     name = "just_watches_in"
     item_attributes = {"brand": "Just Watches", "brand_wikidata": "Q117822349"}
