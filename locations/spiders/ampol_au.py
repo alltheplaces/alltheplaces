@@ -1,8 +1,8 @@
 from scrapy import Spider
 
-from locations.categories import apply_category, apply_yes_no, Categories, Fuel
-from locations.hours import OpeningHours
+from locations.categories import Categories, Fuel, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
+from locations.hours import OpeningHours
 
 
 class AmpolAUSpider(Spider):
@@ -30,7 +30,11 @@ class AmpolAUSpider(Spider):
                 if location[f"{day}_AllDay"]:
                     item["opening_hours"].add_range(day, "00:00", "23:59")
                 else:
-                    item["opening_hours"].add_range(day, location[f"{day}_Openning"].replace("Midnight", "00:00"), location[f"{day}_Closing"].replace("Midnight", "23:59"))
+                    item["opening_hours"].add_range(
+                        day,
+                        location[f"{day}_Openning"].replace("Midnight", "00:00"),
+                        location[f"{day}_Closing"].replace("Midnight", "23:59"),
+                    )
 
             apply_yes_no(Fuel.E10, item, location["E10"], False)
             apply_yes_no(Fuel.OCTANE_91, item, location["ULP"], False)
@@ -40,5 +44,5 @@ class AmpolAUSpider(Spider):
             apply_yes_no(Fuel.DIESEL, item, location["DSL"] or location["VXDSL"] or location["ATDSL"], False)
             apply_yes_no(Fuel.ADBLUE, item, location["ADBLU"], False)
             apply_yes_no(Fuel.PROPANE, item, location["BBQGas"], False)
-            
+
             yield item
