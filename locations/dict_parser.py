@@ -2,7 +2,7 @@ from locations.items import Feature
 
 
 class DictParser:
-    ref_keys = ["ref", "id", "store-id", "shop-number", "slug"]
+    ref_keys = ["ref", "id", "store-id", "shop-number", "LocationID", "slug"]
 
     name_keys = ["name", "store-name", "display-name", "title"]
 
@@ -168,6 +168,9 @@ class DictParser:
 
         upper = key.upper()
         results.add(upper)
+
+        title = key.title()
+        results.add(title)
 
         flatcase = key.lower().replace("-", "")
         results.add(flatcase)
