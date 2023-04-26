@@ -1,3 +1,4 @@
+from locations.categories import Extras, apply_yes_no
 from locations.spiders.mcdonalds import McDonaldsSpider
 from locations.storefinders.woosmap import WoosmapSpider
 
@@ -12,4 +13,5 @@ class McDonaldsFRSpider(WoosmapSpider):
         item[
             "website"
         ] = f'https://www.mcdonalds.fr/restaurants{feature["properties"]["contact"]["website"]}/{feature["properties"]["store_id"]}'
+        apply_yes_no(Extras.DRIVE_THROUGH, item, "mcdrive" in feature["properties"]["tags"])
         yield item
