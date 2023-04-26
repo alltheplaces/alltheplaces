@@ -9,6 +9,7 @@ class AussieDisposalsAUSpider(AmastyStoreLocatorSpider):
     item_attributes = {"brand": "Aussie Disposals", "brand_wikidata": "Q117847729"}
     allowed_domains = ["www.aussiedisposals.com.au"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
+    requires_proxy = "AU"
 
     def parse_item(self, item, location, popup_html):
         item["street_address"] = item.pop("addr_full")
