@@ -13,7 +13,7 @@ class MatchboxAUSpider(Spider):
     start_urls = ["https://matchbox.com.au/pages/store-locator"]
 
     def parse(self, response):
-        data_json = json.loads(response.xpath('//script[@data-store-locator-json]/text()').get())
+        data_json = json.loads(response.xpath("//script[@data-store-locator-json]/text()").get())
         for location_name, location in data_json.items():
             item = DictParser.parse(location)
             item["website"] = "https://matchbox.com.au" + item["website"]
