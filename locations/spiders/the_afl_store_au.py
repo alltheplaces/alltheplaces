@@ -9,7 +9,9 @@ class TheAFLStoreAUSpider(Spider):
     name = "the_afl_store_au"
     item_attributes = {"brand": "The AFL Store", "brand_wikidata": "Q117851311"}
     allowed_domains = ["www.theaflstore.com.au"]
-    start_urls = ["https://search-developer-toolkit-3loaafdn4dugiezkplh33pnacq.ap-southeast-2.es.amazonaws.com/the-afl-store-au-location/document/_search"]
+    start_urls = [
+        "https://search-developer-toolkit-3loaafdn4dugiezkplh33pnacq.ap-southeast-2.es.amazonaws.com/the-afl-store-au-location/document/_search"
+    ]
 
     def start_requests(self):
         for url in self.start_urls:
