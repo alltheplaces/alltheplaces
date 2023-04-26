@@ -19,7 +19,9 @@ class AussieDisposalsAUSpider(AmastyStoreLocatorSpider):
             item["state"] = "VIC"
         elif location["state"] == "573":
             item["state"] = "SA"
-        hours_string = " ".join(filter(None, Selector(text=location["description"]).xpath('//./span[@style]/text()').getall()))
+        hours_string = " ".join(
+            filter(None, Selector(text=location["description"]).xpath("//./span[@style]/text()").getall())
+        )
         print(hours_string)
         item["opening_hours"] = OpeningHours()
         item["opening_hours"].add_ranges_from_string(hours_string)
