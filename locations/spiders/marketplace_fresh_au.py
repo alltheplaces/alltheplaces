@@ -25,8 +25,10 @@ class MarketPlaceFreshAUSpider(Spider):
             item["postcode"] = location["location"]["post_code"]
             item["state"] = location["location"]["state_short"]
             item["addr_full"] = location["location"]["address"]
-            item["phone"] = Selector(text=location["phone"]).xpath('//a/text').get()
+            item["phone"] = Selector(text=location["phone"]).xpath("//a/text").get()
             item["website"] = location["link"]
             item["opening_hours"] = OpeningHours()
-            item["opening_hours"].add_ranges_from_string(location["hours"].replace("<strong>", "").replace("</strong>", ""))
+            item["opening_hours"].add_ranges_from_string(
+                location["hours"].replace("<strong>", "").replace("</strong>", "")
+            )
             yield item
