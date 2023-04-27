@@ -1,22 +1,22 @@
 import re
 from urllib.parse import urljoin
 
-from scrapy import Spider
+from scrapy import Selector, Spider
 
 from locations.linked_data_parser import LinkedDataParser
 from locations.microdata_parser import MicrodataParser
 
 
-def extract_email(item, response):
-    for link in response.xpath("//a[contains(@href, 'mailto')]/@href").getall():
+def extract_email(item, sel: Selector):
+    for link in sel.xpath(".//a[contains(@href, 'mailto')]/@href").getall():
         link = link.strip()
         if link.startswith("mailto:"):
             item["email"] = link.replace("mailto:", "")
             return
 
 
-def extract_phone(item, response):
-    for link in response.xpath("//a[contains(@href, 'tel')]/@href").getall():
+def extract_phone(item, sel: Selector):
+    for link in sel.xpath(".//a[contains(@href, 'tel')]/@href").getall():
         link = link.strip()
         if link.startswith("tel:"):
             item["phone"] = link.replace("tel:", "")
