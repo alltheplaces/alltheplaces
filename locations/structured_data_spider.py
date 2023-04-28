@@ -19,7 +19,7 @@ def extract_phone(item, sel: Selector):
     for link in sel.xpath(".//a[contains(@href, 'tel')]/@href").getall():
         link = link.strip()
         if link.startswith("tel:"):
-            item["phone"] = link.replace("tel:", "")
+            item["phone"] = link.replace("tel:", "").replace("/", "")
             return
 
 
