@@ -20,17 +20,34 @@ class PaddyPallinAUSpider(AmastyStoreLocatorSpider):
 
     def add_hours(self, response):
         item = response.meta["item"]
-        if response.xpath('//div[contains(@class, "amlocator-location-info")]').get(): 
-            item["email"] = response.xpath('//div[contains(@class, "amlocator-location-info")]//a[contains(@href, "mailto:")]/text()').get().strip()
-            item["phone"] = response.xpath('//div[contains(@class, "amlocator-location-info")]//a[contains(@href, "tel:")]/text()').get().strip()
-            hours_string = " ".join(filter(None, response.xpath('//div[contains(@class, "amlocator-schedule-table")]//text()').getall()))
+        if response.xpath('//div[contains(@class, "amlocator-location-info")]').get():
+            item["email"] = (
+                response.xpath(
+                    '//div[contains(@class, "amlocator-location-info")]//a[contains(@href, "mailto:")]/text()'
+                )
+                .get()
+                .strip()
+            )
+            item["phone"] = (
+                response.xpath('//div[contains(@class, "amlocator-location-info")]//a[contains(@href, "tel:")]/text()')
+                .get()
+                .strip()
+            )
+            hours_string = " ".join(
+                filter(None, response.xpath('//div[contains(@class, "amlocator-schedule-table")]//text()').getall())
+            )
             item["opening_hours"] = OpeningHours()
             item["opening_hours"].add_ranges_from_string(hours_string)
         yield item
 
     def parse_item(self, item, location, popup_html):
         item["image"] = popup_html.xpath('//div[contains(@class, "amlocator-image")]/img/@src').get()
-        address_fields = list(filter(lambda field: field.strip(), popup_html.xpath('//div[contains(@class, "amlocator-info-popup")]/text()').getall()))
+        address_fields = list(
+            filter(
+                lambda field: field.strip(),
+                popup_html.xpath('//div[contains(@class, "amlocator-info-popup")]/text()').getall(),
+            )
+        )
         item["city"] = address_fields[0].strip().replace("City: ", "")
         item["postcode"] = address_fields[1].strip().replace("Zip: ", "")
         item["addr_full"] = address_fields[2].strip().replace("Address: ", "")
