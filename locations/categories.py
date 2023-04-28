@@ -63,6 +63,7 @@ class Categories(Enum):
     SHOP_PAWNBROKER = {"shop": "pawnbroker"}
     SHOP_PERFUMERY = {"shop": "perfumery"}
     SHOP_PET = {"shop": "pet"}
+    SHOP_SECOND_HAND = {"shop": "second_hand"}
     SHOP_SHOES = {"shop": "shoes"}
     SHOP_SPORTS = {"shop": "sports"}
     SHOP_STATIONERY = {"shop": "stationery"}
