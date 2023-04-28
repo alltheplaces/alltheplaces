@@ -27,7 +27,9 @@ class HouseAUSpider(Spider):
             item["ref"] = location["WarehouseCode"]
             if "House Bed and Bath" in item["name"]:
                 item["brand"] = "House Bed & Bath"
-            item["street_address"] = ", ".join(filter(None, [location.get("AddressLine1"), location.get("AddressLine2")]))
+            item["street_address"] = ", ".join(
+                filter(None, [location.get("AddressLine1"), location.get("AddressLine2")])
+            )
             item["website"] = "https://www.house.com.au/store-locator/" + item["name"].lower().replace(" ", "-")
             item["opening_hours"] = OpeningHours()
             for day_name in DAYS_FULL:
