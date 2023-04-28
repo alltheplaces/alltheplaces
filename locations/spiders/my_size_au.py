@@ -15,7 +15,6 @@ class MySizeAUSpider(Spider):
     def parse(self, response):
         locations = response.xpath('//div[contains(@class, "tab-content")]')
         for location in locations:
-            print(location)
             properties = {
                 "ref": location.xpath("h2[1]/strong/text()").get().strip(),
                 "name": location.xpath("h2[1]/text()").get().strip(),
