@@ -21,13 +21,24 @@ class TedsCameraStoresAUSpider(AmastyStoreLocatorSpider):
     def add_hours(self, response):
         item = response.meta["item"]
         if response.xpath('//div[contains(@class, "amlocator-location-info")]').get():
-            item["email"] = response.xpath('//div[contains(@class, "am-email")]/a[contains(@href, "mailto:")]/text()').get().strip()
-            item["phone"] = response.xpath('//div[contains(@class, "am-phone")]/a[contains(@href, "tel:")]/text()').get().strip()
-            hours_string = " ".join(filter(None, response.xpath('//div[contains(@class, "amlocator-schedule-table")]//text()').getall()))
+            item["email"] = (
+                response.xpath('//div[contains(@class, "am-email")]/a[contains(@href, "mailto:")]/text()').get().strip()
+            )
+            item["phone"] = (
+                response.xpath('//div[contains(@class, "am-phone")]/a[contains(@href, "tel:")]/text()').get().strip()
+            )
+            hours_string = " ".join(
+                filter(None, response.xpath('//div[contains(@class, "amlocator-schedule-table")]//text()').getall())
+            )
             item["opening_hours"] = OpeningHours()
             item["opening_hours"].add_ranges_from_string(hours_string)
         yield item
 
     def parse_item(self, item, location, popup_html):
-        item["addr_full"] = ", ".join(filter(lambda field: field.strip(), popup_html.xpath('//div[contains(@class, "amlocator-info-popup")]/text()').getall()))
+        item["addr_full"] = ", ".join(
+            filter(
+                lambda field: field.strip(),
+                popup_html.xpath('//div[contains(@class, "amlocator-info-popup")]/text()').getall(),
+            )
+        )
         yield Request(url=item["website"], meta={"item": item}, callback=self.add_hours)
