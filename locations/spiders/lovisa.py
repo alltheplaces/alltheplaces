@@ -14,5 +14,5 @@ class LovisaSpider(Spider):
             item = DictParser.parse(location)
             item["ref"] = str(location["branch"])
             item["street_address"] = ", ".join(filter(None, [location.get("address1"), location.get("address2")]))
-            item.pop("website") # websites are generally just malls, not individual stores within
+            item.pop("website")  # websites are generally just malls, not individual stores within
             yield item
