@@ -17,16 +17,16 @@ class MySizeAUSpider(Spider):
         for location in locations:
             print(location)
             properties = {
-                "ref": location.xpath('h2[1]/strong/text()').get().strip(),
-                "name": location.xpath('h2[1]/text()').get().strip(),
+                "ref": location.xpath("h2[1]/strong/text()").get().strip(),
+                "name": location.xpath("h2[1]/text()").get().strip(),
                 "lat": location.xpath('div[contains(@class, "hidden")]/text()').get().split(",", 1)[0].strip(),
                 "lon": location.xpath('div[contains(@class, "hidden")]/text()').get().split(",", 1)[1].strip(),
-                "addr_full": re.sub(r"\s+", " ", ", ".join(location.xpath('p[1]/text()').getall()[:-1])).strip(),
-                "phone": re.sub(r"\s+", " ", location.xpath('p[1]/text()').getall()[-1]).strip(),
+                "addr_full": re.sub(r"\s+", " ", ", ".join(location.xpath("p[1]/text()").getall()[:-1])).strip(),
+                "phone": re.sub(r"\s+", " ", location.xpath("p[1]/text()").getall()[-1]).strip(),
             }
-            if image_src := location.xpath('p//img/@src').get():
+            if image_src := location.xpath("p//img/@src").get():
                 properties["image"] = "https://www.mysize.com.au/" + image_src.split("?", 1)[0]
-            hours_string = " ".join(location.xpath('table/tbody/tr/td//text()').getall())
+            hours_string = " ".join(location.xpath("table/tbody/tr/td//text()").getall())
             properties["opening_hours"] = OpeningHours()
             properties["opening_hours"].add_ranges_from_string(hours_string)
             yield Feature(**properties)
