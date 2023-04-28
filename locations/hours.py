@@ -489,6 +489,8 @@ class OpeningHours:
                 rules = [r[0] for r in rules]
 
             for rule in rules:
+                if not rule:
+                    continue
                 days, time_ranges = rule.split(" ", 1)
 
                 if "-" not in time_ranges:
