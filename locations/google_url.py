@@ -33,7 +33,7 @@ def url_to_coords(url: str) -> (float, float):  # noqa: C901
         params = url[38:].split("!")
         maps_keys = {}
         for i in range(0, len(params)):
-            if m := re.match(r"^(\d)d([-.\d]+)$",params[i]):
+            if m := re.match(r"^(\d)d([-.\d]+)$", params[i]):
                 maps_keys[m.group(1)] = m.group(2)
         lat_index = lon_index = None
         if maps_keys.keys() == {"1", "2", "3"}:
@@ -62,7 +62,7 @@ def url_to_coords(url: str) -> (float, float):  # noqa: C901
                 return float(lat.strip()), float(lon.strip())
 
         for ll in get_query_param(url, "destination"):
-            if m := re.match(r"^(-?[.\d]+),(-?[.\d]+)$",ll):
+            if m := re.match(r"^(-?[.\d]+),(-?[.\d]+)$", ll):
                 return float(m.group(1)), float(m.group(2))
     elif url.startswith("https://www.google.com/maps/place/"):
         lat, lon = url.split("/")[5].split(",")
