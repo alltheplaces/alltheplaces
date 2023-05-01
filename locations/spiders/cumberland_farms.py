@@ -1,38 +1,35 @@
-import scrapy
+from scrapy import Spider
+from scrapy.http import JsonRequest
 
-from locations.items import Feature
+from locations.categories import Categories, apply_category, apply_yes_no
+from locations.dict_parser import DictParser
 
 
-class CumberlandFarmsSpider(scrapy.Spider):
-    name = "cumberland_farms"
+class CumberlandFarmsUSSpider(Spider):
+    name = "cumberland_farms_us"
     item_attributes = {"brand": "Cumberland Farms", "brand_wikidata": "Q1143685"}
     allowed_domains = ["cumberlandfarms.com"]
+    start_urls = ["https://www.cumberlandfarms.com/api/stores-locator/store-locator-search/results?bannerId=1"]
 
-    start_urls = ["https://www.cumberlandfarms.com/storedata/getstoredatabylocation"]
+    def parse(self, response, **kwargs):
+        results = response.json()["value"]["listResults"]
+        for location in results["pageItems"]:
+            location["street_address"] = location.pop("address")
+            item = DictParser.parse(location)
+            item["website"] = location["pageUrl"]
 
-    def parse(self, response):
-        for store in response.json():
-            if "StoreId" not in store:
-                continue
+            features = [f["name"] for f in location["features"]]
 
-            yield Feature(
-                ref=store["StoreId"],
-                lon=store["Longitude"],
-                lat=store["Latitude"],
-                name=f"Cumberland Farms #{store['StoreId']}",
-                addr_full=store["Address"],
-                city=store["City"],
-                state=store["State"],
-                postcode=store["Zip"],
-                country="US",
-                phone=store["Phone"],
-                opening_hours="24/7" if store["Hours24"] else None,
-                website=f"https://www.cumberlandfarms.com{store['Url']}",
-                extras={
-                    "amenity:fuel": store["Gas"] == "Y",
-                    "amenity:chargingstation": store["EvChargingStations"] == "Y",
-                    "fuel:diesel": store["Diesel"] == "Y",
-                    "fuel:propane": store["Propane"] == "Y",
-                    "atm": store["Atm"] == "Y",
-                },
+            if "Fuel" in features:
+                apply_category(Categories.FUEL_STATION, item)
+            else:
+                apply_category(Categories.SHOP_CONVENIENCE, item)
+
+            apply_yes_no("sells:alcohol", item, "Beer" in features)
+
+            yield item
+
+        if results["pageNumber"] < results["totalPages"]:
+            yield JsonRequest(
+                f'https://www.cumberlandfarms.com/api/stores-locator/store-locator-search/results?bannerId=1&pageNumber={response.json()["value"]["listResults"]["pageNumber"]+1}'
             )
