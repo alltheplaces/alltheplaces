@@ -51,7 +51,7 @@ class CommerzbankDESpider(scrapy.Spider):
                 properties = {
                     "name": branch["orgTypName"],
                     "ref": branch["id"],
-                    "addr_full": branch["anschriftStrasse"],
+                    "street_address": branch["anschriftStrasse"],
                     "city": branch["anschriftOrt"],
                     "postcode": branch["postanschriftPostleitzahl"],
                     "country": "DE",

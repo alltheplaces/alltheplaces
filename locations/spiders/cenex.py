@@ -1,6 +1,7 @@
 import scrapy
 
 from locations.items import Feature
+from locations.spiders.vapestore_gb import clean_address
 
 
 class CenexSpider(scrapy.Spider):
@@ -49,7 +50,7 @@ class CenexSpider(scrapy.Spider):
                 lat=store["Lat"],
                 ref=store["LocationId"],
                 name=store["Name"],
-                addr_full=" ".join([store["Address1"], store["Address2"]]).strip(),
+                street_address=clean_address([store["Address1"], store["Address2"]]),
                 city=store["City"],
                 state=store["State"],
                 postcode=store["Zip"],

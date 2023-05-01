@@ -85,7 +85,7 @@ class CookoutSpider(scrapy.Spider):
                 "ref": store["id"],
                 "name": store["store"],
                 "website": store["url"],
-                "addr_full": store.get("address"),
+                "street_address": store.get("address"),
                 "city": store.get("city"),
                 "state": store.get("state"),
                 "postcode": store.get("zip"),
