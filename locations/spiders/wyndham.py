@@ -33,7 +33,6 @@ BRANDS = {
 
 class WyndhamSpider(SitemapSpider):
     name = "wyndham"
-    download_delay = 1
     allowed_domains = ["www.wyndhamhotels.com"]
     sitemap_urls = ["https://www.wyndhamhotels.com/sitemap.xml"]
     sitemap_follow = [r"https:\/\/www\.wyndhamhotels\.com\/sitemap_en-us_([\w]{2})_properties_\d\.xml"]

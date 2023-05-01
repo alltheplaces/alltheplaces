@@ -9,7 +9,6 @@ from locations.dict_parser import DictParser
 class ToolstationSpider(scrapy.spiders.SitemapSpider):
     name = "toolstation"
     item_attributes = {"brand": "Toolstation", "brand_wikidata": "Q7824103"}
-    download_delay = 1.0
     sitemap_urls = [
         "https://www.toolstation.com/sitemap/branches.xml",
         "https://www.toolstation.fr/sitemap/branches.xml",

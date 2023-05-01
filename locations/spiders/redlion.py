@@ -14,7 +14,6 @@ class RedLionSpider(scrapy.spiders.SitemapSpider):
         "/red-lion-hotels/": ("Red Lion Hotels", "Q25047720"),
         "/red-lion-inn-suites/": ("Red Lion Hotels", "Q25047720"),
     }
-    download_delay = 1.0
 
     def _parse_sitemap(self, response):
         for x in super()._parse_sitemap(response):

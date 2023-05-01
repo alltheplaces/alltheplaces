@@ -7,7 +7,6 @@ from locations.items import Feature
 
 
 class DesignerShoeWarehouseSpider(SitemapSpider):
-    download_delay = 1
     name = "dsw"
     item_attributes = {"brand": "Designer Shoe Warehouse", "brand_wikidata": "Q5206207"}
     allowed_domains = [
