@@ -37,7 +37,6 @@ class CroixRougeFrancaiseSpider(scrapy.Spider):
                 "lat": float(feature["geometry"]["coordinates"][1]),
                 "lon": float(feature["geometry"]["coordinates"][0]),
                 "extras": {"type": feature["properties"]["type"]},
-                "street_address": feature["properties"]["address"],
             }
 
             yield Feature(**properties)

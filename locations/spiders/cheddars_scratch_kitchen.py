@@ -1,6 +1,7 @@
 import scrapy
 
 from locations.items import Feature
+from locations.spiders.vapestore_gb import clean_address
 
 
 class CheddarsScratchKitchenSpider(scrapy.Spider):
@@ -41,7 +42,7 @@ class CheddarsScratchKitchenSpider(scrapy.Spider):
                 properties = {
                     "ref": place["restaurantNumber"],
                     "name": place["restaurantName"],
-                    "addr_full": place["AddressOne"],
+                    "street_address": clean_address([place["AddressOne"], place["AddressTwo"]]),
                     "city": place["city"],
                     "state": place["state"],
                     "postcode": place["zip"],

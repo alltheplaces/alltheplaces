@@ -53,7 +53,7 @@ class CafeZupasSpider(scrapy.Spider):
                     "phone": location["phone"],
                     "lat": location["lat"],
                     "lon": location["long"],
-                    "addr_full": location["address"],
+                    "street_address": location["address"],
                     "city": location["city"],
                     "state": location["state"],
                     "postcode": location["zip"],
