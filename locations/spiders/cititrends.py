@@ -14,7 +14,9 @@ class CitiTrendsSpider(scrapy.Spider):
 
     def parse_stores(self, response):
         properties = {
-            "addr_full": response.xpath('normalize-space(//span[@class="c-address-street-1"]/text())').extract_first(),
+            "street_address": response.xpath(
+                'normalize-space(//span[@class="c-address-street-1"]/text())'
+            ).extract_first(),
             "phone": response.xpath('normalize-space(//span[@itemprop="telephone"]/text())').extract_first(),
             "city": response.xpath('normalize-space(//span[@itemprop="addressLocality"]/text())').extract_first(),
             "state": response.xpath('normalize-space(//span[@itemprop="addressRegion"]/text())').extract_first(),

@@ -2,6 +2,7 @@ import scrapy
 
 from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.spiders.vapestore_gb import clean_address
 
 
 class CoopFoodSpider(scrapy.Spider):
@@ -38,12 +39,8 @@ class CoopFoodSpider(scrapy.Spider):
                 "name": store["name"],
                 "opening_hours": open_hours,
                 "website": "https://www.coop.co.uk" + store["url"],
-                "addr_full": " ".join(
-                    [
-                        store["street_address"],
-                        store["street_address2"],
-                        store["street_address3"],
-                    ]
+                "street_address": clean_address(
+                    [store["street_address"], store["street_address2"], store["street_address3"]]
                 ),
                 "city": store["town"],
                 "postcode": store["postcode"],

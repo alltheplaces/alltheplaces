@@ -20,7 +20,7 @@ class CrunchFitnessSpider(scrapy.Spider):
             properties = {
                 "name": club["name"],
                 "ref": club["id"],
-                "addr_full": club["address"]["address_1"],
+                "street_address": club["address"]["address_1"],
                 "city": club["address"]["city"],
                 "state": club["address"]["state"],
                 "postcode": club["address"]["zip"],

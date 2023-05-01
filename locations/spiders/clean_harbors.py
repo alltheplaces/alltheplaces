@@ -43,12 +43,12 @@ class CleanHarborsSpider(scrapy.Spider):
                 + response.xpath('//span[@class="address-line2"]//text()').extract_first()
             )
             city = response.xpath('//span[@class="locality"]//text()').extract_first()
-            state = "N/A"
+            state = None
             ref = add + city
         properties = {
             "ref": ref,
             "name": response.xpath('//span[@class="organization"]//text()').extract_first(),
-            "addr_full": add,
+            "street_address": add,
             "city": city,
             "state": state,
             "postcode": response.xpath('//span[@class="postal-code"]//text()').extract_first(),

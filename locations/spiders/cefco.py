@@ -21,7 +21,7 @@ class CefcoSpider(scrapy.Spider):
                 lon=store["longitude"],
                 lat=store["latitude"],
                 name=store["title"],
-                addr_full=store["address"],
+                street_address=store["address"],
                 city=store["city"],
                 state=store["state"],
                 postcode=store["zip"],

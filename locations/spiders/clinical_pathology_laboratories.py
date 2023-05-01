@@ -15,17 +15,15 @@ class ClinicalPathologyLaboratoriesSpider(scrapy.Spider):
     ]
 
     def parse(self, response):
-        data = response.json()
-        for i, item in enumerate(data):
+        for item in response.json():
             properties = {
                 "name": item["nm"],
-                "addr_full": item["s"],
+                "street_address": item["s"],
                 "city": item["city"],
                 "state": item["state"],
                 "postcode": item["zip"],
                 "country": "US",
                 "ref": item["id"],
-                "website": "na",
                 "lat": item["lat"],
                 "lon": item["lng"],
             }

@@ -29,7 +29,7 @@ class ChicosSpider(scrapy.Spider):
             properties = {
                 "name": data["attributes"]["name"],
                 "ref": data["id"],
-                "addr_full": data["attributes"]["address1"],
+                "street_address": data["attributes"]["address1"],
                 "city": data["attributes"]["city"],
                 "state": data["attributes"]["state"],
                 "postcode": data["attributes"]["postalCode"],

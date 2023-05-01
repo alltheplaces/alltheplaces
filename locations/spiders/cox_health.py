@@ -50,7 +50,7 @@ class CoxHealthSpider(scrapy.Spider):
         properties = {
             "ref": add,
             "name": name,
-            "addr_full": address1,
+            "street_address": address1,
             "city": city,
             "state": state,
             "postcode": zip,
