@@ -2,6 +2,7 @@ import scrapy
 
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
+from locations.spiders.vapestore_gb import clean_address
 
 
 class DeutscheBankBESpider(scrapy.Spider):
@@ -19,14 +20,14 @@ class DeutscheBankBESpider(scrapy.Spider):
                         opening_time, closing_time = hour.split(" - ")
                         oh.add_range(day=DAYS[i], open_time=opening_time, close_time=closing_time)
             website = store.get("webpage", {})
-            street_address = store.get("address").get("fr").replace("<br />", " ")
+            street_address = clean_address(store.get("address").get("fr").replace("<br />", ","))
             phone = store.get("phone").get("fr")
 
             yield Feature(
                 {
                     "ref": store.get("branchId"),
                     "name": store.get("id"),
-                    "street_address": street_address,
+                    "addr_full": street_address,
                     "phone": phone,
                     "website": website.get("fr"),
                     "lat": store.get("lat"),

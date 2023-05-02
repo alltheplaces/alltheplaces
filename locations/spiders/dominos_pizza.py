@@ -73,7 +73,7 @@ class DominosPizzaSpider(scrapy.Spider):
             website=response.url,
             ref=data["branchCode"],
             opening_hours=self.parse_hours(data["openingHoursSpecification"]),
-            addr_full=data["address"]["streetAddress"],
+            street_address=data["address"]["streetAddress"],
             city=data["address"]["addressLocality"],
             state=data["address"]["addressRegion"],
             postcode=data["address"]["postalCode"],
