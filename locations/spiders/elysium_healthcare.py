@@ -81,7 +81,7 @@ class ElysiumHealthcareSpider(scrapy.Spider):
             properties = {
                 "ref": ref,
                 "name": name,
-                "addr_full": addr_full.strip(),
+                "addr_full": addr_full.replace("\xa0", " ").strip(),
                 "country": "GB",
                 "lat": lat,
                 "lon": lon,
