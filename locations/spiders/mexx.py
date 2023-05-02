@@ -18,7 +18,6 @@ class MexxSpider(scrapy.Spider):
             "user-agent": BROWSER_DEFAULT,
         },
     }
-    download_delay = 1.0
 
     def start_requests(self):
         for country_code in self.gc.get_countries().keys():
