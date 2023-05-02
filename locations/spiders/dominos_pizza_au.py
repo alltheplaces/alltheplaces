@@ -3,6 +3,7 @@ import re
 import scrapy
 
 from locations.items import Feature
+from locations.spiders.vapestore_gb import clean_address
 
 
 class DominosPizzaAUSpider(scrapy.Spider):
@@ -30,13 +31,10 @@ class DominosPizzaAUSpider(scrapy.Spider):
     def pares_store(self, response):
         ref = re.search(r".+-(.+?)/?(?:\.html|$)", response.url).group(1)
         country = re.search(r"com\.([a-z]{2})\/", response.url).group(1)
-        address_data = response.xpath('//a[@id="open-map-address"]/text()').extract()
-        address = " "
-        addr_full = address.join(address_data)
         properties = {
             "ref": ref.strip("/"),
             "name": response.xpath('//div[@class="storetitle"]/text()').extract_first(),
-            "addr_full": addr_full.strip(),
+            "addr_full": clean_address(response.xpath('//a[@id="open-map-address"]/text()').getall()),
             "country": country,
             "lat": float(response.xpath('//div[@class="store-details-info"]/div[1]/input[1]/@value').extract_first()),
             "lon": float(response.xpath('//div[@class="store-details-info"]/div[1]/input[2]/@value').extract_first()),

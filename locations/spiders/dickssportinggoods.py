@@ -45,7 +45,7 @@ class DicksSportingGoodsSpider(scrapy.Spider):
         yield Feature(
             lat=float(response.xpath('//meta[@property="place:location:latitude"]/@content').extract_first()),
             lon=float(response.xpath('//meta[@property="place:location:longitude"]/@content').extract_first()),
-            addr_full=response.xpath(
+            street_address=response.xpath(
                 '//meta[@property="business:contact_data:street_address"]/@content'
             ).extract_first(),
             city=response.xpath('//meta[@property="business:contact_data:locality"]/@content').extract_first(),
@@ -57,9 +57,6 @@ class DicksSportingGoodsSpider(scrapy.Spider):
             ref=ref,
             name=name,
             opening_hours=self.parse_hours(response),
-            extras={
-                "number": ref,
-            },
         )
 
     def parse_city(self, response):
