@@ -13,7 +13,6 @@ class AAASpider(scrapy.Spider):
         "brand_wikidata": "Q463436",
     }
     allowed_domains = ["tdr.aaa.com"]
-    download_delay = 1.0
 
     def start_requests(self):
         point_files = [

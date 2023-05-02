@@ -30,7 +30,6 @@ def calculate_offset_point(x, y, d, b):
 
 class ScotiabankSpider(scrapy.Spider):
     name = "scotiabank"
-    download_delay = 1.0
     allowed_domains = ["scotiabank.com"]
     item_attributes = {"brand": "Scotiabank", "brand_wikidata": "Q451476"}
     base_url = "https://mapsms.scotiabank.com/branches?1=1&latitude={lat}&longitude={lon}&recordlimit=20&locationtypes=1&options=&languagespoken=any&language=en&address=&province=&city="
