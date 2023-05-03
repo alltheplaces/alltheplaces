@@ -6,9 +6,9 @@ from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 
 
-class FiestaMartSpider(scrapy.Spider):
+class FiestaMartUSSpider(scrapy.Spider):
     name = "fiestamart"
-    item_attributes = {"brand": "Fiesta Mart"}
+    item_attributes = {"brand": "Fiesta Mart", "brand_wikidata": "Q5447326"}
     allowed_domains = ["fiestamart.com"]
     start_urls = ["https://www.fiestamart.com/wp-json/fiesta/v1/stores"]
 
