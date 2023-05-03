@@ -31,7 +31,7 @@ class ConadITSpider(Spider):
             "brand_wikidata": None,
             "extras": Categories.SHOP_CONVENIENCE.value,
         },
-        "SPAZIO CONAD": {"brand": "Spazio Conad", "brand_wikidata": None},
+        "SPAZIO CONAD": {"brand": "Spazio Conad", "brand_wikidata": "Q118130063"},
         "SPESA FACILE": {"brand": "Spesa Facile", "brand_wikidata": None},
         "TUDAY CONAD": {"brand": "Tuday Conad", "brand_wikidata": None, "extras": Categories.SHOP_CONVENIENCE.value},
     }
