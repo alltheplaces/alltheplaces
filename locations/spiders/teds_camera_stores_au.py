@@ -13,7 +13,6 @@ class TedsCameraStoresAUSpider(AmastyStoreLocatorSpider):
         # The request won't work without the headers supplied below.
         headers = {
             "X-Requested-With": "XMLHttpRequest",
-            "Origin": "https://www.paddypallin.com.au",
         }
         for domain in self.allowed_domains:
             yield Request(url=f"https://{domain}/amlocator/index/ajax/", method="POST", headers=headers)
