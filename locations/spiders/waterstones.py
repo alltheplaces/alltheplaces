@@ -9,7 +9,7 @@ class WaterstonesSpider(scrapy.Spider):
     name = "waterstones"
     item_attributes = {"brand": "Waterstones", "brand_wikidata": "Q151779"}
     allowed_domains = ["www.waterstones.com"]
-    start_urls = ["https://www.waterstones.com/bookshops/directory/"+chr(i) for i in range(ord('a'), ord('z')+1)]
+    start_urls = ["https://www.waterstones.com/bookshops/directory/" + chr(i) for i in range(ord("a"), ord("z") + 1)]
     # Use the alphabetical list pages rather than the paginated "view
     # all" list used previously, since in the latter the final page
     # is not reached by a rel=next link.
