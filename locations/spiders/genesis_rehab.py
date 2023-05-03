@@ -67,7 +67,7 @@ class GenesisRehabSpider(scrapy.Spider):
             properties = {
                 "ref": address + state + city,
                 "name": "Genesis Healthcare",
-                "addr_full": address,
+                "street_address": address,
                 "city": city,
                 "state": state,
                 "postcode": zip,

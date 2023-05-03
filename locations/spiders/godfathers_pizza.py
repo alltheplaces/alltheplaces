@@ -20,7 +20,7 @@ class GodfathersPizzaSpider(scrapy.Spider):
             properties = {
                 "ref": store["storeName"],
                 "name": store["storeName"],
-                "addr_full": store["street"],
+                "street_address": store["street"],
                 "city": store["city"],
                 "state": store["state"],
                 "postcode": store["zipCode"],
