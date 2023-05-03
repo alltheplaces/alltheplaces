@@ -31,7 +31,7 @@ class FinishlineSpider(scrapy.Spider):
 
         address_parts = response.xpath('//span[@itemprop="streetAddress"]/span/text()').extract()
         properties = {
-            "addr_full": " ".join([a.strip() for a in address_parts]),
+            "street_address": " ".join([a.strip() for a in address_parts]),
             "name": response.xpath('//span[@class="location-name-geo"]/text()').extract_first(),
             "phone": response.xpath('normalize-space(//span[@itemprop="telephone"]/text())').extract_first(),
             "city": response.xpath('normalize-space(//span[@itemprop="addressLocality"]/text())').extract_first(),
@@ -70,7 +70,7 @@ class FinishlineSpider(scrapy.Spider):
                     .strip()
                 )
                 properties = {
-                    "addr_full": " ".join([a.strip() for a in address_parts]),
+                    "street_address": " ".join([a.strip() for a in address_parts]),
                     "name": name,
                     "phone": store.xpath(
                         'normalize-space(.//span[contains(@class, "c-phone-main-number-span")]/text())'

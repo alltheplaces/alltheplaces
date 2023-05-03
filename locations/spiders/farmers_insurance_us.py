@@ -6,9 +6,9 @@ from scrapy.spiders import SitemapSpider
 from locations.items import Feature
 
 
-class FarmersInsuranceSpider(SitemapSpider):
+class FarmersInsuranceUSSpider(SitemapSpider):
     download_delay = 0.2
-    name = "farmers-insurance"
+    name = "farmers_insurance_us"
     item_attributes = {"brand": "Farmers Insurance", "brand_wikidata": "Q1396863"}
     allowed_domains = ["agents.farmers.com"]
     sitemap_urls = ["https://agents.farmers.com/sitemap.xml"]
@@ -23,7 +23,7 @@ class FarmersInsuranceSpider(SitemapSpider):
         ref = re.search(r".+/(.+)", response.url).group(1)
         properties = {
             "ref": ref.strip("/"),
-            "addr_full": response.xpath('//meta[@itemprop="streetAddress"]/@content').extract_first(),
+            "street_address": response.xpath('//meta[@itemprop="streetAddress"]/@content').extract_first(),
             "city": response.xpath('//meta[@itemprop="addressLocality"]/@content').extract_first(),
             "state": response.xpath('//abbr[@class="c-address-state"]/text()').extract_first(),
             "postcode": response.xpath('//span[@class="c-address-postal-code"]/text()').extract_first(),
