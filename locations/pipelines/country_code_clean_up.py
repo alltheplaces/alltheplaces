@@ -11,12 +11,12 @@ def get_lat_lon(item: Feature) -> (float, float):
                 if coords := geometry.get("coordinates"):
                     try:
                         return float(coords[1]), float(coords[0])
-                    except TypeError:
+                    except (TypeError, ValueError):
                         pass
     else:
         try:
             return float(item.get("lat")), float(item.get("lon"))
-        except TypeError:
+        except (TypeError, ValueError):
             pass
     return None
 
