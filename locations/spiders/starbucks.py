@@ -1,7 +1,7 @@
 import csv
 import json
 from math import sqrt
-
+import numpy as np
 import scrapy
 
 from locations.categories import Categories
@@ -75,22 +75,59 @@ class StarbucksSpider(scrapy.Spider):
 
         paging = responseJson["paging"]
         if paging["returned"] > 0 and paging["limit"] == paging["returned"]:
-            if response.meta["distance"] > 0.10:
+            if response.meta["distance"] > 0.15:
                 nextDistance = response.meta["distance"] / 2
-                nextDistanceCorner = nextDistance * (sqrt(2) / 2)
                 # Create eight new coordinate pairs
                 nextCoordinates = [
-                    [center[0] - nextDistanceCorner, center[1] + nextDistanceCorner],
-                    [center[0] + nextDistanceCorner, center[1] + nextDistanceCorner],
-                    [center[0] - nextDistanceCorner, center[1] - nextDistanceCorner],
-                    [center[0] + nextDistanceCorner, center[1] - nextDistanceCorner],
-                    [center[0] - nextDistance, center[1]],
-                    [center[0] + nextDistance, center[1]],
-                    [center[0], center[1] - nextDistance],
-                    [center[0], center[1] + nextDistance],
+                    [center[0] - nextDistance, center[1] + nextDistance],
+                    [center[0] + nextDistance, center[1] + nextDistance],
+                    [center[0] - nextDistance, center[1] - nextDistance],
+                    [center[0] + nextDistance, center[1] - nextDistance],
                 ]
                 urls = [STORELOCATOR.format(c[1], c[0]) for c in nextCoordinates]
                 for url in urls:
                     request = scrapy.Request(url=url, headers=HEADERS, callback=self.parse)
                     request.meta["distance"] = nextDistance
                     yield request
+            elif response.meta["distance"] > 0.10:
+                # Only used to track how often this happens
+                self.logger.info("Using secondary search of far away stores")
+                nextDistance = response.meta["distance"] / 2 
+
+                nextCoordinates = []
+                current_center = center
+                additional_stores = 5
+                distances_array = np.full((len(stores), additional_stores), np.nan)
+
+                # Loop through to find 5 more stores
+                for ii in range(additional_stores):
+
+                    # Find distance between current center and all stores
+                    for jj, store in enumerate(stores): 
+                        store_lat = store["coordinates"]["latitude"]
+                        store_lon = store["coordinates"]["longitude"]
+                        distances_array[jj,ii] = sqrt((current_center[1] - store_lat)**2 + (current_center[0] - store_lon)**2)
+
+                    # Find mean distance each store and center/new search coords 
+                    mean_distances = np.nanmean(distances_array, 1)
+
+                    # Find store furthest away
+                    max_store = np.argmax(mean_distances)
+
+                    # Replace current center
+                    current_center = [stores[max_store]["coordinates"]["longitude"], 
+                                      stores[max_store]["coordinates"]["latitude"]]
+                    
+                    # Append it to the next search list
+                    nextCoordinates.append([stores[max_store]["coordinates"]["longitude"], 
+                                      stores[max_store]["coordinates"]["latitude"]])
+                urls = [STORELOCATOR.format(c[1], c[0]) for c in nextCoordinates]
+                for url in urls:
+                    self.logger.info("Adding %s to list", url)
+
+                    request = scrapy.Request(url=url, headers=HEADERS, callback=self.parse)
+                    request.meta["distance"] = nextDistance
+                    yield request
+
+
+                
