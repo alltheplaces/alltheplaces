@@ -1,8 +1,7 @@
 import csv
 import json
 from math import sqrt
-import numpy as npfrom math import sqrt
-
+import numpy as np
 import scrapy
 
 from locations.items import GeojsonPointItem
@@ -76,7 +75,7 @@ class StarbucksSpider(scrapy.Spider):
 
         paging = responseJson["paging"]
         if paging["returned"] > 0 and paging["limit"] == paging["returned"]:
-            if response.meta["distance"] > 0.10:
+            if response.meta["distance"] > 0.15:
                 nextDistance = response.meta["distance"] / 2
                 # Create four new coordinate pairs
                 nextCoordinates = [
