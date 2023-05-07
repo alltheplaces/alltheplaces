@@ -5,7 +5,8 @@ from math import sqrt
 import numpy as np
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.categories import Categories
+from locations.items import Feature
 
 HEADERS = {"X-Requested-With": "XMLHttpRequest"}
 STORELOCATOR = "https://www.starbucks.com/bff/locations?lat={}&lng={}"
@@ -92,7 +93,7 @@ class StarbucksSpider(scrapy.Spider):
 
             elif response.meta["distance"] > 0.10:
                 # Only used to track how often this happens
-                self.logger.info("Using secondary search of far away stores")
+                self.logger.debug("Using secondary search of far away stores")
                 nextDistance = response.meta["distance"] / 2
 
                 nextCoordinates = []
@@ -128,7 +129,7 @@ class StarbucksSpider(scrapy.Spider):
                     )
                 urls = [STORELOCATOR.format(c[1], c[0]) for c in nextCoordinates]
                 for url in urls:
-                    self.logger.info("Adding %s to list", url)
+                    self.logger.debug("Adding %s to list", url)
 
                     request = scrapy.Request(url=url, headers=HEADERS, callback=self.parse)
                     request.meta["distance"] = nextDistance
