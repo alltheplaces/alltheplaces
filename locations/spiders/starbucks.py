@@ -129,6 +129,3 @@ class StarbucksSpider(scrapy.Spider):
                     request = scrapy.Request(url=url, headers=HEADERS, callback=self.parse)
                     request.meta["distance"] = nextDistance
                     yield request
-
-
-                
