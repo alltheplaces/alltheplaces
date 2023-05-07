@@ -6,3 +6,4 @@
     per-file-ignores =
         ci/restore_history.py: T20
         locations/commands/*: T20
+        locations/__init__.py: T201

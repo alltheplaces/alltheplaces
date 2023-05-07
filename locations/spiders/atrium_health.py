@@ -33,7 +33,7 @@ class AtriumHealthSpider(scrapy.Spider):
             properties = {
                 "ref": place["ItemId"],
                 "name": place["Name"],
-                "addr_full": place["Address"],
+                "street_address": place["Address"],
                 "city": place["City"],
                 "state": place["State"],
                 "postcode": place["PostalCode"],

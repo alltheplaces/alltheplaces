@@ -8,6 +8,7 @@ from locations.hours import DAYS, OpeningHours
 
 
 class MomentFeedSpider(Spider):
+    dataset_attributes = {"source": "api", "api": "momentfeed.com"}
 
     id = ""
 

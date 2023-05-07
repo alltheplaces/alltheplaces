@@ -23,7 +23,6 @@ class OrkinSpider(scrapy.Spider):
             yield scrapy.Request(response.urljoin(url), callback=self.parse_location)
 
     def parse_location(self, response):
-
         properties = {
             "ref": response.xpath('//section[@class="branch-data"]/@data-branch-id').extract_first(),
             "addr_full": response.xpath('//span[@itemprop ="streetAddress"]/text()').extract_first(),

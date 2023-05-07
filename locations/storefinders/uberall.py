@@ -8,6 +8,8 @@ from locations.hours import DAYS, OpeningHours
 
 
 class UberallSpider(Spider):
+    dataset_attributes = {"source": "api", "api": "uberall.com"}
+
     key = ""
     business_id_filter = None
 

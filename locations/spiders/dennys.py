@@ -27,7 +27,7 @@ class DennysSpider(scrapy.Spider):
 
     def parse_store(self, response):
         properties = {
-            "addr_full": response.xpath('//meta[@itemprop="streetAddress"]/@content').extract_first(),
+            "street_address": response.xpath('//meta[@itemprop="streetAddress"]/@content').extract_first(),
             "city": response.xpath('//meta[@itemprop="addressLocality"]/@content').extract_first(),
             "state": response.xpath('//abbr[@itemprop="addressRegion"]/text()').extract_first(),
             "postcode": response.xpath('//span[@itemprop="postalCode"]/text()').extract_first(),
@@ -53,7 +53,6 @@ class DennysSpider(scrapy.Spider):
             urls = response.xpath('//a[contains(@class,"Teaser-titleLink")]/@href').extract()
 
         for url in urls:
-
             if re.search(r".{2}/.+/.+", url):
                 yield scrapy.Request(response.urljoin(url), callback=self.parse_store)
             else:

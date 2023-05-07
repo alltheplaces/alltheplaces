@@ -45,7 +45,6 @@ class CafeZupasSpider(scrapy.Spider):
         data = response.json()
         for i in data["data"]["data"]:
             for location in i["locations"]:
-
                 properties = {
                     "ref": location["id"],
                     "website": "https://cafezupas.com/locationcopy/info/" + location["name"].lower().replace(" ", "-"),
@@ -54,7 +53,7 @@ class CafeZupasSpider(scrapy.Spider):
                     "phone": location["phone"],
                     "lat": location["lat"],
                     "lon": location["long"],
-                    "addr_full": location["address"],
+                    "street_address": location["address"],
                     "city": location["city"],
                     "state": location["state"],
                     "postcode": location["zip"],

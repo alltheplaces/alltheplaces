@@ -127,7 +127,6 @@ class BurgerKingSpider(scrapy.Spider):
         raise Exception("Bogus City: " + city_name)
 
     def start_requests(self):
-
         # TODO: DK, IE, MX, at the least do not follow this API.
 
         # TODO: https://www.burgerking.nl/kingfinder

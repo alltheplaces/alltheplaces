@@ -46,7 +46,7 @@ def test_ld():
     assert i["postcode"] == "94086"
     assert i["street_address"] == "1901 Lemur Ave"
     assert i["name"] == "GreatFood"
-    assert i["opening_hours"] == "Mo-Th 11:00-14:30,17:00-21:30; Fr-Sa 11:00-14:30,17:00-22:00"
+    assert i["opening_hours"].as_opening_hours() == "Mo-Th 11:00-14:30,17:00-21:30; Fr-Sa 11:00-14:30,17:00-22:00"
     assert i["phone"] == "(408) 714-1489"
     assert i["email"] == "example@example.org"
     assert i["website"] == "http://www.greatfood.com"
@@ -134,12 +134,12 @@ def test_ld_lowercase_attributes():
     assert i["postcode"] == "68847"
     assert i["street_address"] == "1107 2ND AVE"
     assert i["name"] == "KEARNEY #7"
-    assert i["opening_hours"] == "Mo-Su 05:00-23:00"
+    assert i["opening_hours"].as_opening_hours() == "Mo-Su 05:00-23:00"
     assert i["phone"] == "(308) 234-3062"
     assert i["website"] is None
     assert i["ref"] is None
-    assert i["lat"] == "40.6862"
-    assert i["lon"] == "-99.08411"
+    assert i["lat"] == 40.6862
+    assert i["lon"] == -99.08411
 
 
 def test_ld_lat_lon():
@@ -160,8 +160,30 @@ def test_ld_lat_lon():
         )
     )
 
-    assert i["lat"] == "40.75"
-    assert i["lon"] == "-73.98"
+    assert i["lat"] == 40.75
+    assert i["lon"] == -73.98
+
+
+def test_funky_coords():
+    i = LinkedDataParser.parse_ld(
+        json.loads(
+            """
+            {
+                "@context": "https://schema.org",
+                "@type": "Place",
+                "geo": {
+                    "@type": "GeoCoordinates",
+                    "latitude": "40,75",
+                    "longitude": -73.98
+                },
+                "name": "Empire State Building"
+            }
+            """
+        )
+    )
+
+    assert i["lat"] == 40.75
+    assert i["lon"] == -73.98
 
 
 def test_default_types():
@@ -186,8 +208,8 @@ def test_default_types():
         )
     )
 
-    assert i["lat"] == "40.75"
-    assert i["lon"] == "-73.98"
+    assert i["lat"] == 40.75
+    assert i["lon"] == -73.98
     assert i["country"] == "US"
     assert i["state"] == "NE"
     assert i["postcode"] == "68847"

@@ -55,6 +55,6 @@ e.g. [mcdonalds_baltics.py](../locations/spiders/mcdonalds_baltics.py).
 It is quite important that you only add a two character
 suffix to the spider name if you are sure that all POIs generated
 by the spider are in the same country. The reason for this
-is that [ATP pipeline code](../locations/pipelines.py) will add
+is that [ATP pipeline code](../locations/pipelines/country_code_clean_up.py) will add
 this country suffix as the country code to scraped POIs if it
 has not been set by the spider itself.

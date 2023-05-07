@@ -13,7 +13,6 @@ class AldiSudHUSpider(Spider):
 
     def parse(self, response):
         for store in response.json()["stores"]:
-
             item = DictParser.parse(store)
             if store["storeType"] == "N":
                 continue

@@ -25,7 +25,6 @@ class HiHostelsSpider(scrapy.Spider):
                 )
 
     def parse_store(self, response):
-
         properties = {
             "name": " ".join(
                 response.xpath("/html/body/div[1]/div[6]/div[2]/div[1]/h1/span/text()").extract()[0].split()

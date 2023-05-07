@@ -1,7 +1,7 @@
 from scrapy.crawler import Crawler
 
 from locations.items import Feature
-from locations.pipelines import PhoneCleanUpPipeline
+from locations.pipelines.phone_clean_up import PhoneCleanUpPipeline
 from locations.spiders.greggs_gb import GreggsGBSpider
 
 
@@ -25,6 +25,11 @@ def test_handle():
     item, pipeline, spider = get_objects("(248) 446-8015", "US")
     pipeline.process_item(item, spider)
     assert item.get("phone") == "+1 248-446-8015"
+
+    # Belgium
+    item, pipeline, spider = get_objects("02/633.17.59", "BE")
+    pipeline.process_item(item, spider)
+    assert item.get("phone") == "+32 2 633 17 59"
 
     for key in ["fax", "operator:phone", "operator:fax"]:
         assert pipeline.is_phone_key(key)

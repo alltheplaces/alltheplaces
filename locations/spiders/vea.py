@@ -4,14 +4,12 @@ from locations.items import Feature
 
 
 class VeaSpider(scrapy.Spider):
-
     name = "vea"
     item_attributes = {"brand": "Vea Cencosud"}
     allowed_domains = ["www.supermercadosvea.com"]
     start_urls = ("http://www.supermercadosvea.com.ar/sucursales-obtener.html",)
 
     def parse(self, response):
-
         store_list = response.json()
         for store in store_list:
             properties = {

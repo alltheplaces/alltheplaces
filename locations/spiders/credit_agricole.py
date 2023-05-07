@@ -3,7 +3,6 @@ import json
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories
-from locations.hours import OpeningHours
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -14,6 +13,7 @@ class CreditAgricoleSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://www.credit-agricole.fr/robots.txt"]
     sitemap_rules = [(r"/particulier/agence/[-\w]+/([-\w]+)\.html$", "parse_sd")]
     wanted_types = ["FinancialService"]
+    time_format = "%H:%M:%S"
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         if name := ld_data.get("Name"):
@@ -23,8 +23,5 @@ class CreditAgricoleSpider(SitemapSpider, StructuredDataSpider):
             coords = json.loads(geodata)
             item["lat"] = coords["latitude"]
             item["lon"] = coords["longitude"]
-
-        item["opening_hours"] = OpeningHours()
-        item["opening_hours"].from_linked_data(ld_data, "%H:%M:%S")
 
         yield item

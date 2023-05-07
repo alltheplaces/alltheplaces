@@ -44,11 +44,6 @@ class BashasSpider(scrapy.spiders.SitemapSpider):
 
         for day, time_range in zip(days, times):
             open_time, close_time = time_range.split(" - ")
-            opening_hours.add_range(
-                day=day[0:2],
-                open_time=open_time,
-                close_time=close_time,
-                time_format="%H:%M %p",
-            )
+            opening_hours.add_range(day=day[0:2], open_time=open_time, close_time=close_time, time_format="%I:%M %p")
 
-        return opening_hours.as_opening_hours()
+        return opening_hours

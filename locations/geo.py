@@ -134,9 +134,7 @@ def postal_regions(country_code):
         raise Exception("country code not supported: " + country_code)
 
 
-def make_subdivisions(
-    bounds: tuple[float, float, float, float], num_tiles: int = 4
-) -> list[tuple[float, float, float, float]]:
+def make_subdivisions(bounds, num_tiles=4):
     """
     Divide the given bounds into num_tiles*num_tiles equal subdivisions.
 
@@ -168,7 +166,7 @@ def make_subdivisions(
     return tiles
 
 
-def bbox_contains(bounds: tuple[float, float, float, float], point: tuple[float, float]) -> bool:
+def bbox_contains(bounds, point):
     """
     Returns true if the lat/lon point is contained in the given lat/lon bounding box.
 
@@ -185,7 +183,7 @@ def bbox_contains(bounds: tuple[float, float, float, float], point: tuple[float,
     return False
 
 
-def bbox_to_geojson(bounds: tuple[float, float, float, float]) -> dict:
+def bbox_to_geojson(bounds):
     """
     Convert a bounding box tuple into a Polygon GeoJSON geometry dict. Useful for debugging.
 

@@ -120,8 +120,7 @@ class LineDelimitedGeoJsonExporter(JsonLinesItemExporter):
                 }
             except ValueError:
                 logging.warning("Couldn't convert lat (%s) and lon (%s) to float", lat, lon)
-        if geometry:
-            feature.append(("geometry", geometry))
+        feature.append(("geometry", geometry))
 
         return feature
 
@@ -167,8 +166,7 @@ class GeoJsonExporter(JsonItemExporter):
                 }
             except ValueError:
                 logging.warning("Couldn't convert lat (%s) and lon (%s) to float", lat, lon)
-        if geometry:
-            feature.append(("geometry", geometry))
+        feature.append(("geometry", geometry))
 
         return feature
 

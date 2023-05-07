@@ -34,6 +34,8 @@ class BQSpider(scrapy.Spider):
             item["street_address"] = ", ".join(filter(None, store["geoCoordinates"]["address"]["lines"][:3]))
             oh = OpeningHours()
             for rule in store["openingHoursSpecifications"]:
+                if not rule.get("opens"):
+                    continue
                 oh.add_range(rule["dayOfWeek"], rule["opens"][:5], rule["closes"][:5])
             item["opening_hours"] = oh.as_opening_hours()
 

@@ -17,7 +17,6 @@ class SteakNShakeSpider(scrapy.Spider):
 
     def parse(self, response):
         for store_data in response.json():
-
             properties = {
                 "ref": store_data["brandChainId"],
                 "name": store_data["name"],

@@ -19,7 +19,6 @@ class Rue21Spider(scrapy.Spider):
         hours = elements.xpath('.//tr[@itemprop="openingHours"]/@content').extract()
 
         for hour in hours:
-
             if hour.split()[-1].lower() == "closed":
                 continue
             else:

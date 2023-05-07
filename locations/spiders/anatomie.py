@@ -1,11 +1,10 @@
-import lxml
 import scrapy
 
 from locations.items import Feature
+from locations.spiders.vapestore_gb import clean_address
 
 
 class AnatomieSpider(scrapy.Spider):
-
     name = "anatomie"
     item_attributes = {"brand": "Anatomie", "brand_wikidata": "Q115608133"}
     allowed_domains = ["stores.boldapps.net"]
@@ -17,17 +16,18 @@ class AnatomieSpider(scrapy.Spider):
     def parse(self, response):
         json_data = response.json()
         for item in json_data["stores"]:
-            address = lxml.html.fromstring(item["summary"])
             properties = {
-                "addr_full": address.xpath('normalize-space(.//span[@class="address"]/text())'),
-                "phone": "",
-                "name": address.xpath('normalize-space(.//span[@class="name"]/text())'),
-                "city": address.xpath('normalize-space(.//span[@class="city"]/text())'),
-                "state": address.xpath('normalize-space(.//span[@class="prov_state"]/text())'),
-                "postcode": address.xpath('normalize-space(.//span[@class="postal_zip"]/text())'),
+                "street_address": clean_address([item["address"], item["address2"]]),
+                "name": item["name"],
+                "city": item["city"],
+                "state": item["prov_state"],
+                "country": item["country"],
+                "postcode": item["postal_zip"],
                 "ref": item["store_id"],
-                "website": response.url,
+                "phone": item["phone"],
+                "website": item["website"],
                 "lat": float(item["lat"]),
                 "lon": float(item["lng"]),
+                "extras": {"check_date": item["updated_at"]},
             }
             yield Feature(**properties)

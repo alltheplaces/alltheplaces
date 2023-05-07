@@ -3,23 +3,24 @@ import re
 import scrapy
 
 from locations.items import Feature
+from locations.spiders.vapestore_gb import clean_address
 
 
 class Century21Spider(scrapy.spiders.SitemapSpider):
     name = "century_21"
-    item_attributes = {"brand": "Century21", "brand_wikidata": "Q1054480"}
+    item_attributes = {"brand": "Century 21", "brand_wikidata": "Q1054480"}
     allowed_domains = ["century21global.com"]
     sitemap_urls = ["https://www.century21global.com/sitemap.xml"]
     sitemap_rules = [("/real-estate-offices/", "parse")]
 
     def parse(self, response):
+        country = response.url.split("?")[0].split("/")[-1].replace("-", " ")
         agences = response.xpath('//div[contains(@class,"search-col-results")]/div[contains(@class,"search-result")]')
         for agence in agences:
             url = agence.xpath('.//a[contains(@class, "search-result-info")]/@href').get()
             id = re.findall("id=[0-9]*", url)[0].replace("id=", "")
             name = agence.xpath('.//span[contains(@class, "name-label")]/text()').get()
-            address = agence.xpath("normalize-space(./a/span[2]/text()[1])").get()
-            country = agence.xpath("normalize-space(./a/span[2]/text()[3])").get()
+            address = clean_address(agence.xpath("./a/span[2]/text()").getall())
             lat = agence.xpath(".//@data-lat").get()
             lon = agence.xpath(".//@data-lng").get()
 

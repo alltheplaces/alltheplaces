@@ -41,7 +41,6 @@ class HyVeeSpider(scrapy.Spider):
             yield scrapy.Request(response.urljoin(params), method="GET", callback=self.parse_links)
 
     def parse_links(self, response):
-
         latlon_js = [
             x
             for x in response.xpath('//script[@type="text/javascript"]/text()').extract()

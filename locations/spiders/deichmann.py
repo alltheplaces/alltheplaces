@@ -1,5 +1,6 @@
 from scrapy.spiders import SitemapSpider
 
+from locations.hours import OpeningHours
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -13,29 +14,20 @@ class DeichmannSpider(SitemapSpider, StructuredDataSpider):
         "https://stores.dosenbach.ch/sitemap.xml",
     ]
     sitemap_rules = [
-        (
-            r"https://stores\.dosenbach\.ch/[-\w]+/[-\w]+/[-\w]+\.html",
-            "parse_sd",
-        ),  # CH
-        (
-            r"https://stores\.deichmann\.com/[-\w]+/[-\w]+/[-\w]+\.html",
-            "parse_sd",
-        ),  # DE
-        (
-            r"https://stores\.deichmann\.com/\w\w-\w\w/[-\w]+/[-\w]+/[-\w]+\.html",
-            "parse_sd",
-        ),  # All the others
+        (r"^https:\/\/stores\.deichmann\.com\/[a-z]{2}-[a-z]{2}\/[a-z]{2}(?:\/[-\w]+){3}$", "parse_sd"),
+        (r"^https:\/\/stores\.dosenbach\.ch\/ch-de\/ch(?:\/[-\w]+){3}$", "parse_sd"),
     ]
-    wanted_types = ["ShoeStore"]
-
-    def sitemap_filter(self, entries):
-        for entry in entries:
-            # Filter out excessive matches
-            if not entry["loc"].endswith("index.html"):
-                yield entry
+    wanted_types = ["LocalBusiness"]
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         if "dosenbach.ch" in response.url:
             item.update(self.DOSENBACH)
+
+        item["ref"] = item["ref"].split("#")[1]
+
+        # remove fields that aren't unique amongst stores
+        item.pop("email")
+        item.pop("image")
+        item.pop("facebook")
 
         yield item

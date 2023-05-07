@@ -25,7 +25,6 @@ class GelsonsSpider(scrapy.spiders.SitemapSpider):
             yield entry
 
     def parse_store(self, response):
-
         content = json.loads(response.xpath('//script[@type="application/json"]/text()').extract_first())["props"][
             "pageProps"
         ]
@@ -60,6 +59,6 @@ class GelsonsSpider(scrapy.spiders.SitemapSpider):
 
         if "7 days a week" in hour_string:
             for day in DAYS:
-                hours.add_range(day, open_time, close_time, time_format="%H:%M%p")
+                hours.add_range(day, open_time, close_time, time_format="%I:%M%p")
 
-        return hours.as_opening_hours()
+        return hours

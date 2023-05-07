@@ -34,7 +34,7 @@ class BrandywineLivingSpider(scrapy.Spider):
         properties = {
             "ref": re.search(r".+/(.+?)/?(?:\.html|$)", response.url).group(1),
             "name": response.xpath("//h1/text()").extract_first(),
-            "addr_full": addr1,
+            "street_address": addr1,
             "city": city,
             "state": state,
             "postcode": zip,

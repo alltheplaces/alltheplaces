@@ -22,7 +22,7 @@ the name disambiguation.
 If possible please apply a Wikidata QID to the POIs generated
 by your spider. The simplest way is to add it to the
 `item_attributes` field of the spider for it to be automatically
-applied by [pipeline code](../locations/pipelines.py). For example:
+applied by [pipeline code](../locations/pipelines/apply_spider_level_attributes.py). For example:
 
 ```python
 import scrapy
@@ -94,7 +94,7 @@ of the tag set that the NSI is "suggesting" in this case.
 
 ### Automatic POI categorisation
 
-The [ATP item pipeline](../locations/pipelines.py)
+The [ATP item pipeline](../locations/pipelines/apply_nsi_categories.py)
 will attempt to enhance POIs it sees automatically with OSM category
 data from the NSI. It only does this if there is a non-ambiguous match
 of QID, country location (if appropriate) and category suggestion.

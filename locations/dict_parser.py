@@ -2,31 +2,38 @@ from locations.items import Feature
 
 
 class DictParser:
-
-    ref_keys = ["ref", "id", "store-id", "shop-number", "slug"]
+    ref_keys = ["ref", "id", "store-id", "shop-number", "LocationID", "slug"]
 
     name_keys = ["name", "store-name", "display-name", "title"]
 
-    house_number_keys = ["house-number", "house-no", "street-number"]
+    house_number_keys = ["house-number", "house-no", "street-number", "street-no"]
 
     street_address_keys = [
+        # EN
         "street-address",
         "address1",
         "address-line1",
         "line1",
         "address-line-one",
+        # JP
+        "町域以下住所",  # "address below town limits"
     ]
 
     city_keys = [
+        # EN
         "address-locality",
         "city",
         "address-city",
         "town",
         "locality",
         "suburb",
+        "city-name",
+        # JP
+        "市区町村",  # "municipality"
     ]
 
     region_keys = [
+        # EN
         "address-region",
         "region",
         "state",
@@ -34,6 +41,9 @@ class DictParser:
         "province",
         "state-code",
         "county",
+        "state-name",
+        # JP
+        "都道府県",  # "prefecture"
     ]
 
     country_keys = [
@@ -48,6 +58,7 @@ class DictParser:
     ]
 
     postcode_keys = [
+        # EN
         "postal-code",
         "post-code",
         "postcode",
@@ -56,6 +67,8 @@ class DictParser:
         "address-post-code",
         "postal",
         "zip-code",
+        # JP
+        "郵便番号",  # "post code"
     ]
 
     email_keys = ["email", "contact-email", "email-address", "email1"]
@@ -76,6 +89,7 @@ class DictParser:
         "lat",
         "display-lat",
         "yext-display-lat",
+        "mapLatitude",
     ]
 
     lon_keys = [
@@ -85,9 +99,10 @@ class DictParser:
         "lng",
         "display-lng",
         "yext-display-lng",
+        "mapLongitude",
     ]
 
-    website_keys = ["url", "website", "permalink"]
+    website_keys = ["url", "website", "permalink", "store-url"]
 
     @staticmethod
     def parse(obj) -> Feature:
@@ -96,7 +111,9 @@ class DictParser:
         item["ref"] = DictParser.get_first_key(obj, DictParser.ref_keys)
         item["name"] = DictParser.get_first_key(obj, DictParser.name_keys)
 
-        location = DictParser.get_first_key(obj, ["location", "geo-location", "geo", "geo-point", "coordinates"])
+        location = DictParser.get_first_key(
+            obj, ["location", "geo-location", "geo", "geo-point", "geocodedCoordinate", "coordinates"]
+        )
         # If not a good location object then use the parent
         if not location or not isinstance(location, dict):
             location = obj
@@ -155,6 +172,9 @@ class DictParser:
 
         upper = key.upper()
         results.add(upper)
+
+        title = key.title()
+        results.add(title)
 
         flatcase = key.lower().replace("-", "")
         results.add(flatcase)

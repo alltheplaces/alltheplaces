@@ -51,7 +51,6 @@ class CountyMarketSpider(scrapy.Spider):
         yield Feature(**props)
 
     def parse(self, response):
-
         stores = response.xpath('//div[@style="padding:5px;"]/a/@href').extract()
         for store in stores:
             yield scrapy.Request(url=response.urljoin(store), callback=self.process_store)

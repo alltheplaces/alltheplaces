@@ -59,7 +59,7 @@ class BJsWholesaleSpider(scrapy.Spider):
         properties = {
             "name": data["Description"][0]["displayStoreName"],
             "ref": data["storeName"],
-            "addr_full": " ".join(data["addressLine"]).strip(),
+            "street_address": " ".join(data["addressLine"]).strip(),
             "city": data["city"].strip(),
             "state": data["stateOrProvinceName"].strip(),
             "postcode": data["postalCode"].strip(),

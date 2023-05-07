@@ -49,7 +49,6 @@ class CreditUnionSpider(scrapy.Spider):
         return opening_hours.as_opening_hours()
 
     def parse_bank(self, bank):
-
         address = bank.xpath(".//address/text()").extract()
         try:
             phone = address[3].strip()

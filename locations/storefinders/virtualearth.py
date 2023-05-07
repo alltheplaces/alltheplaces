@@ -5,6 +5,7 @@ from locations.dict_parser import DictParser
 
 
 class VirtualEarthSpider(Spider):
+    dataset_attributes = {"source": "api", "api": "virtualearth.net"}
 
     dataset_id = ""
     dataset_name = ""
@@ -44,7 +45,7 @@ class VirtualEarthSpider(Spider):
 
             item = DictParser.parse(feature)
 
-            yield from self.parse_item(item, feature)
+            yield from self.parse_item(item, feature) or []
 
     def parse_item(self, item, feature, **kwargs):
         yield item

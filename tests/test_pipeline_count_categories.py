@@ -2,7 +2,7 @@ from scrapy.crawler import Crawler
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
-from locations.pipelines import CountCategoriesPipeline
+from locations.pipelines.count_categories import CountCategoriesPipeline
 from locations.spiders.greggs_gb import GreggsGBSpider
 
 

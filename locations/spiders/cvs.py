@@ -11,7 +11,6 @@ DAYS = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
 
 
 class CVSSpider(scrapy.Spider):
-
     name = "cvs"
     item_attributes = {"brand": "CVS", "brand_wikidata": "Q2078880", "extras": Categories.PHARMACY.value}
     allowed_domains = ["www.cvs.com"]
@@ -95,7 +94,6 @@ class CVSSpider(scrapy.Spider):
         stores = response.xpath('//div[@class="each-store"]')
 
         for store in stores:
-
             direction = store.xpath('normalize-space(.//span[@class="store-number"]/a/@href)').extract_first()
             if direction:
                 yield scrapy.Request(response.urljoin(direction), callback=self.parse_stores)

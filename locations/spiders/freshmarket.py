@@ -26,7 +26,6 @@ class FreshMarketSpider(scrapy.Spider):
             return
         allStores = json.loads(match.group(1))
         for store in allStores:
-
             properties = {
                 "name": store["storeName"],
                 "ref": store["storeNumber"],

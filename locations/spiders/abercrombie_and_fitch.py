@@ -14,11 +14,32 @@ class AbercrombieAndFitchSpider(scrapy.Spider):
     user_agent = BROWSER_DEFAULT
 
     start_urls = [
-        'https://www.abercrombie.com/api/ecomm/a-ca/storelocator/search?shopRegion=["US", "CA", "UK", "EU", "AM"]'
+        "https://www.abercrombie.com/api/ecomm/a-uk/storelocator/search?country=AE",
+        "https://www.abercrombie.com/api/ecomm/a-uk/storelocator/search?country=BE",
+        "https://www.abercrombie.com/api/ecomm/a-uk/storelocator/search?country=CA",
+        "https://www.abercrombie.com/api/ecomm/a-uk/storelocator/search?country=CN",
+        "https://www.abercrombie.com/api/ecomm/a-uk/storelocator/search?country=DE",
+        "https://www.abercrombie.com/api/ecomm/a-uk/storelocator/search?country=ES",
+        "https://www.abercrombie.com/api/ecomm/a-uk/storelocator/search?country=FR",
+        "https://www.abercrombie.com/api/ecomm/a-uk/storelocator/search?country=GB",
+        "https://www.abercrombie.com/api/ecomm/a-uk/storelocator/search?country=HK",
+        "https://www.abercrombie.com/api/ecomm/a-uk/storelocator/search?country=IT",
+        "https://www.abercrombie.com/api/ecomm/a-uk/storelocator/search?country=JP",
+        "https://www.abercrombie.com/api/ecomm/a-uk/storelocator/search?country=KW",
+        "https://www.abercrombie.com/api/ecomm/a-uk/storelocator/search?country=MX",
+        "https://www.abercrombie.com/api/ecomm/a-uk/storelocator/search?country=QA",
+        "https://www.abercrombie.com/api/ecomm/a-uk/storelocator/search?country=SA",
+        "https://www.abercrombie.com/api/ecomm/a-uk/storelocator/search?country=US",
     ]
+    # Old regions:
+    # "https://www.abercrombie.com/api/ecomm/a-uk/storelocator/search?country=EU",
+    # "https://www.abercrombie.com/api/ecomm/a-uk/storelocator/search?country=AM",
 
     def parse(self, response):
         data = response.json()
+
+        if data["physicalStores"] is None:
+            return
 
         for row in data["physicalStores"]:
             properties = {
@@ -31,8 +52,10 @@ class AbercrombieAndFitchSpider(scrapy.Spider):
                 "lon": row["longitude"],
                 "phone": row["telephone"],
                 "street_address": row["addressLine"][0],
-                "postcode": row["postalCode"],
             }
+            # Hong Kong seems to list postcodes with just - in them
+            if row["postalCode"] and row["postalCode"] != "-":
+                properties["postcode"] = row["postalCode"]
 
             for brand in row["physicalStoreAttribute"]:
                 if brand["name"] == "Brand":

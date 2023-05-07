@@ -29,8 +29,8 @@ class ValeroSpider(scrapy.Spider):
     def start_requests(self):
         xs = list(range(usa_bbox[0], usa_bbox[2] + xstep, xstep))
         ys = list(range(usa_bbox[1], usa_bbox[3] + ystep, ystep))
-        for (xmin, xmax) in zip(xs, xs[1:]):
-            for (ymin, ymax) in zip(ys, ys[1:]):
+        for xmin, xmax in zip(xs, xs[1:]):
+            for ymin, ymax in zip(ys, ys[1:]):
                 yield self.make_search(xmin, ymin, xmax, ymax)
 
     def parse(self, response):

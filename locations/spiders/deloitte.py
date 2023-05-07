@@ -39,7 +39,6 @@ class DeloitteSpider(scrapy.Spider):
         offices = response.xpath('//div[contains(@class, "offices-container")]//div[@class="offices"]')
 
         for office in offices:
-
             address_parts = office.xpath('.//div[@class="address"]//p//text()').extract()
             address_parts = [a.strip().replace("\u200b", "").replace("\n", "").replace("\t", "") for a in address_parts]
             country = address_parts.pop(-1)
@@ -66,7 +65,7 @@ class DeloitteSpider(scrapy.Spider):
                 "phone": (office.xpath('.//div[@class="contact"]//a/text()').extract_first() or "").replace(
                     "\u200b", ""
                 ),
-                "addr_full": address,
+                "street_address": address,
                 "city": city,
                 "state": state,
                 "postcode": postcode,
@@ -131,7 +130,7 @@ class DeloitteSpider(scrapy.Spider):
                     "lat": lat,
                     "lon": lon,
                     "phone": phone,
-                    "addr_full": address,
+                    "street_address": address,
                     "city": store_data["address"].get("addressLocality", "").strip().replace("\u200b", "") or None,
                     "state": store_data["address"].get("addressRegion", "").strip().replace("\u200b", "") or None,
                     "postcode": store_data["address"].get("postalCode", "").strip().replace("\u200b", "") or None,

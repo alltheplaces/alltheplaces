@@ -34,7 +34,6 @@ class UspsCollectionBoxesSpider(scrapy.Spider):
     download_delay = 0.1
 
     def start_requests(self):
-
         with open("./locations/searchable_points/us_centroids_100mile_radius.csv") as points:
             next(points)
             for point in points:

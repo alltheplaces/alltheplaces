@@ -8,11 +8,9 @@ from locations.items import Feature
 
 
 class WhidbeyCoffeeSpider(scrapy.Spider):
-
     name = "whidbeycoffee"
     item_attributes = {"brand": "Whidbey Coffee"}
     allowed_domains = ["www.whidbeycoffee.com"]
-    download_delay = 1
     start_urls = ("https://www.whidbeycoffee.com/sitemap_pages_1.xml",)
 
     def parse(self, response):
@@ -44,7 +42,6 @@ class WhidbeyCoffeeSpider(scrapy.Spider):
         )
 
     def parse_hours(self, hours):
-
         opening_hours = OpeningHours()
 
         DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]

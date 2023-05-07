@@ -59,7 +59,6 @@ class TractorSupplySpider(scrapy.Spider):
         store_data = data["storesList"]
 
         for store in store_data:
-
             properties = {
                 "ref": store["stlocId"],
                 "name": store["storeName"],

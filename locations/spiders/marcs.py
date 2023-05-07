@@ -21,7 +21,6 @@ class MarcsSpider(CrawlSpider):
         return text[start:end]
 
     def parse(self, response):
-
         ldjson = response.xpath('//script[@type="application/ld+json"]/text()[contains(.,\'"Store"\')]').get()
         data = json.decoder.JSONDecoder().raw_decode(ldjson, ldjson.index("{"))[0]
 

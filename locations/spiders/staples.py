@@ -1,24 +1,13 @@
-import datetime
 import re
 
 import scrapy
 
 from locations.hours import OpeningHours
 from locations.items import Feature
-
-DAY_MAPPING = {
-    "Mon": "Mo",
-    "Tue": "Tu",
-    "Wed": "We",
-    "Thu": "Th",
-    "Fri": "Fr",
-    "Sat": "Sa",
-    "Sun": "Su",
-}
+from locations.spiders.vapestore_gb import clean_address
 
 
 class StaplesSpider(scrapy.Spider):
-
     name = "staples"
     item_attributes = {"brand": "Staples", "brand_wikidata": "Q785943"}
     allowed_domains = ["stores.staples.com"]
@@ -34,7 +23,7 @@ class StaplesSpider(scrapy.Spider):
             if intervals.xpath("./text()").extract_first() == "Closed":
                 continue
             if intervals.xpath("./span/text()").extract_first() == "Open 24 hours":
-                opening_hours.add_range(day=DAY_MAPPING[day], open_time="0:00", close_time="23:59")
+                opening_hours.add_range(day=day, open_time="0:00", close_time="23:59")
             else:
                 start_time = elem.xpath(
                     './/span[@class="c-hours-details-row-intervals-instance-open"]/text()'
@@ -42,13 +31,9 @@ class StaplesSpider(scrapy.Spider):
                 end_time = elem.xpath(
                     './/span[@class="c-hours-details-row-intervals-instance-close"]/text()'
                 ).extract_first()
-                opening_hours.add_range(
-                    day=DAY_MAPPING[day],
-                    open_time=datetime.datetime.strptime(start_time, "%H:%M %p").strftime("%H:%M"),
-                    close_time=datetime.datetime.strptime(end_time, "%H:%M %p").strftime("%H:%M"),
-                )
+                opening_hours.add_range(day=day, open_time=start_time, close_time=end_time, time_format="%I:%M %p")
 
-        return opening_hours.as_opening_hours()
+        return opening_hours
 
     def parse_store(self, response):
         ref = re.search(r".+/(.+)$", response.url).group(1)
@@ -57,7 +42,7 @@ class StaplesSpider(scrapy.Spider):
         address2 = response.xpath('//span[@class="c-address-street-2"]/text()').extract_first() or ""
 
         properties = {
-            "addr_full": " ".join([address1, address2]).strip(),
+            "street_address": clean_address([address1, address2]),
             "phone": response.xpath('//span[@itemprop="telephone"]/text()').extract_first(),
             "city": response.xpath('//span[@class="c-address-city"]/text()').extract_first(),
             "state": response.xpath('//abbr[@itemprop="addressRegion"]/text()').extract_first(),
@@ -85,7 +70,6 @@ class StaplesSpider(scrapy.Spider):
             urls = response.xpath('//a[contains(@class,"Teaser-titleLink")]/@href').extract()
 
         for url in urls:
-
             if re.search(r".{2}/.+/.+", url):
                 yield scrapy.Request(response.urljoin(url), callback=self.parse_store)
             else:

@@ -53,7 +53,6 @@ class MacysSpider(scrapy.Spider):
                 yield scrapy.Request(response.urljoin(url))
 
     def parse_store(self, response):
-
         brand = response.xpath('//span[@class="LocationName-brand"]/text()').extract_first()
         name = response.xpath('//span[@class="LocationName-geo"]/text()').extract_first()
 

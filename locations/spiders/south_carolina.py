@@ -25,7 +25,6 @@ class SouthCarolinaSpider(scrapy.Spider):
         data = json.loads(json.dumps(response.json()))
 
         for i in data:
-
             try:
                 properties = {
                     "ref": i["Id"],

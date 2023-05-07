@@ -21,7 +21,6 @@ class LowesFoodsSpider(scrapy.Spider):
                 yield scrapy.Request(url=url, callback=self.parse_store, meta={"url": url})
 
     def parse_store(self, response):
-
         city_state_zip = (
             response.xpath("//div[@class='store-details__store-info']/ul/li[4]/text()").extract_first().strip()
         )

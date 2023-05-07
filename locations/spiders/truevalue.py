@@ -1,32 +1,27 @@
-import ast
-import re
+import html
 
-from scrapy.spiders import SitemapSpider
+from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule
 
-from locations.hours import OpeningHours
-from locations.linked_data_parser import LinkedDataParser
+from locations.structured_data_spider import StructuredDataSpider
 
 
-class TrueValueSpider(SitemapSpider):
+class TrueValueSpider(CrawlSpider, StructuredDataSpider):
     name = "truevalue"
     item_attributes = {"brand": "True Value", "brand_wikidata": "Q7847545"}
+    start_urls = ["https://stores.truevalue.com"]
     allowed_domains = ["stores.truevalue.com"]
-    sitemap_urls = ["https://stores.truevalue.com/robots.txt"]
-    sitemap_rules = [
-        (r"stores\.truevalue\.com/.*/.*/.*/", "parse"),
+    rules = [
+        Rule(LinkExtractor(allow=r"https://stores.truevalue.com/[a-z]{2}/$"), follow=True),
+        Rule(LinkExtractor(allow=r"https://stores.truevalue.com/[a-z]{2}/[a-z\-]+/$"), follow=True),
+        Rule(LinkExtractor(allow=r"https://stores.truevalue.com/[a-z]{2}/[a-z\-]+/[0-9]+/$"), callback="parse_sd"),
     ]
-    custom_settings = {
-        "METAREFRESH_ENABLED": False,
-    }
+    json_parser = "json5"
+    time_format = "%I:%M %p"
 
-    def parse(self, response):
-        script = response.xpath('//script[@type="application/ld+json"]/text()')[1].get()
-        # json with // comments, trailing commas, etc.
-        script = re.sub('//[^"]*$', "", script, flags=re.M)
-        ld = ast.literal_eval(script[script.index("{") :])
-        hours = ld.pop("openingHoursSpecification")
-        item = LinkedDataParser.parse_ld(ld)
-        oh = OpeningHours()
-        oh.from_linked_data({"openingHoursSpecification": hours}, "%I:%M %p")
-        item["opening_hours"] = oh.as_opening_hours()
+    def post_process_item(self, item, response, ld_data, **kwargs):
+        item["ref"] = ld_data["@id"]
+        item["name"] = html.unescape(item["name"])
+        item["street_address"] = html.unescape(item["street_address"])
+
         yield item

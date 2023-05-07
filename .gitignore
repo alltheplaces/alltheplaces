@@ -90,10 +90,12 @@ ENV/
 
 # IDE files
 .idea
-
+.history
 .DS_Store
 
 *json
 *geojson
 *zip
 commands.txt
+http_cache.sqlite
+http_cache/

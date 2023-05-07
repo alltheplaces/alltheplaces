@@ -46,13 +46,12 @@ class BloomingdalesSpider(scrapy.Spider):
             yield scrapy.Request(response.urljoin(url), callback=self.parse_store)
 
     def parse_store(self, response):
-
         brand = response.xpath('//span[@class="LocationName-brand"]/text()').extract_first()
         name = response.xpath('//span[@class="LocationName-geo"]/text()').extract_first()
 
         properties = {
             "name": brand + " " + name,
-            "addr_full": response.xpath('//span[contains(@class, "c-address-street-1")]/text()').extract_first(),
+            "street_address": response.xpath('//span[contains(@class, "c-address-street-1")]/text()').extract_first(),
             "city": response.xpath('//span[@itemprop="addressLocality"]/text()').extract_first(),
             "state": response.xpath('//abbr[@itemprop="addressRegion"]/text()').extract_first(),
             "postcode": response.xpath('//span[@itemprop="postalCode"]/text()').extract_first().strip(),

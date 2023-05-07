@@ -39,7 +39,6 @@ class ShopnSaveSpider(scrapy.Spider):
     )
 
     def parse(self, response):
-
         stores = response.xpath('//table[@id="store-search-result"]/tbody/tr[@class="" or @class="store-grey"]')
         for store in stores:
             properties = {

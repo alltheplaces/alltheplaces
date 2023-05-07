@@ -37,7 +37,6 @@ class GBFSSpider(CSVFeedSpider):
             return
 
         for station in DictParser.get_nested_key(data, "stations") or []:
-
             station["id"] = kwargs["System ID"] + "-" + str(station["station_id"])
             if station.get("address"):
                 station["street_address"] = station.pop("address")
@@ -46,7 +45,7 @@ class GBFSSpider(CSVFeedSpider):
             item = DictParser.parse(station)
 
             item["brand"] = kwargs["Name"]  # Closer to OSM operator or network?
-            item["extras"] = {"capacity": station.get("capacity")}
+            item["extras"]["capacity"] = station.get("capacity")
             # This URL isn't POI specific, but it is Network specific
             item["website"] = kwargs["URL"]
 

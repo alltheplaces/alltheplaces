@@ -6,7 +6,6 @@ from locations.items import Feature
 
 
 class HyattSpider(scrapy.Spider):
-
     name = "hyatt"
     item_attributes = {"brand": "Hyatt", "brand_wikidata": "Q1425063"}
     allowed_domains = ["hyatt.com"]

@@ -1,4 +1,3 @@
-import logging
 from enum import Enum
 
 from locations.items import Feature
@@ -18,6 +17,7 @@ class Categories(Enum):
     BUS_STOP = {"highway": "bus_stop", "public_transport": "platform"}
     BUS_STATION = {"amenity": "bus_station", "public_transport": "station"}
 
+    BOWLING = {"leisure": "bowling_alley"}
     GYM = {"leisure": "fitness_centre"}
 
     HIGHWAY_RESIDENTIAL = {"highway": "residential"}
@@ -63,6 +63,7 @@ class Categories(Enum):
     SHOP_PAWNBROKER = {"shop": "pawnbroker"}
     SHOP_PERFUMERY = {"shop": "perfumery"}
     SHOP_PET = {"shop": "pet"}
+    SHOP_SECOND_HAND = {"shop": "second_hand"}
     SHOP_SHOES = {"shop": "shoes"}
     SHOP_SPORTS = {"shop": "sports"}
     SHOP_STATIONERY = {"shop": "stationery"}
@@ -80,6 +81,7 @@ class Categories(Enum):
 
     ATM = {"amenity": "atm"}
     BANK = {"amenity": "bank"}
+    BOAT_FUEL_STATION = {"waterway": "fuel"}
     BUREAU_DE_CHANGE = {"amenity": "bureau_de_change"}
     CAFE = {"amenity": "cafe"}
     CHARGING_STATION = {"amenity": "charging_station"}
@@ -100,8 +102,22 @@ class Categories(Enum):
     PRODUCT_PICKUP = {"amenity": "product_pickup"}
     PUB = {"amenity": "pub"}
     RESTAURANT = {"amenity": "restaurant"}
+    VETERINARY = {"amenity": "veterinary"}
 
     VENDING_MACHINE_BICYCLE_TUBE = {"amenity": "vending_machine", "vending": "bicycle_tube"}
+    VENDING_MACHINE_COFFEE = {"amenity": "vending_machine", "vending": "coffee"}
+
+    TRADE_AGRICULTURAL_SUPPLIES = {"trade": "agricultural_supplies"}
+    TRADE_BATHROOM = {"trade": "bathroom"}
+    TRADE_BUILDING_SUPPLIES = {"trade": "building_supplies"}
+    TRADE_ELECTRICAL = {"trade": "electrical"}
+    TRADE_FIRE_PROTECTION = {"trade": "fire_protection"}
+    TRADE_HVAC = {"trade": "hvac"}
+    TRADE_IRRIGATION = {"trade": "irrigation"}
+    TRADE_KITCHEN = {"trade": "kitchen"}
+    TRADE_LANDSCAPING_SUPPLIES = {"trade": "landscaping_supplies"}
+    TRADE_PLUMBING = {"trade": "plumbing"}
+    TRADE_SWIMMING_POOL_SUPPLIES = {"trade": "swimming_pool_supplies"}
 
 
 def apply_category(category, item):
@@ -110,12 +126,21 @@ def apply_category(category, item):
     elif isinstance(category, dict):
         tags = category
     else:
-        logging.error("Invalid category format")
-        return
+        raise TypeError("dict or Enum required")
 
     if not item.get("extras"):
         item["extras"] = {}
-    item["extras"].update(tags)
+
+    for key, value in tags.items():
+        if key in item["extras"].keys():
+            existing_values = item["extras"][key].split(";")
+            if value in existing_values:
+                continue
+            existing_values.append(value)
+            existing_values.sort()
+            item["extras"][key] = ";".join(existing_values)
+        else:
+            item["extras"][key] = value
 
 
 top_level_tags = [
@@ -158,16 +183,19 @@ class Fuel(Enum):
     # Octane levels
     OCTANE_80 = "fuel:octane_80"
     OCTANE_87 = "fuel:octane_87"
+    OCTANE_89 = "fuel:octane_89"
     OCTANE_90 = "fuel:octane_90"
     OCTANE_91 = "fuel:octane_91"
     OCTANE_92 = "fuel:octane_92"
     OCTANE_93 = "fuel:octane_93"
     OCTANE_95 = "fuel:octane_95"
+    OCTANE_97 = "fuel:octane_97"
     OCTANE_98 = "fuel:octane_98"
     OCTANE_100 = "fuel:octane_100"
     # Formulas
     E5 = "fuel:e5"
     E10 = "fuel:e10"
+    E20 = "fuel:e20"
     E85 = "fuel:e85"
     BIOGAS = "fuel:biogas"
     LPG = "fuel:lpg"
@@ -189,26 +217,90 @@ class Fuel(Enum):
 
 class Extras(Enum):
     ATM = "atm"
+    BABY_CHANGING_TABLE = "changing_table"
+    CALLING = "service:phone"
     CAR_WASH = "car_wash"
+    COMPRESSED_AIR = "compressed_air"
+    COMPUTING = "service:computer"
+    COPYING = "service:copy"
+    DELIVERY = "delivery"
+    DRIVE_THROUGH = "drive_through"
+    FAXING = "service:fax"
+    FEE = "fee"
+    INDOOR_SEATING = "indoor_seating"
     OIL_CHANGE = "service:vehicle:oil_change"
+    OUTDOOR_SEATING = "outdoor_seating"
+    PRINTING = "service:print"
+    SCANING = "service:scan"
+    SHOWERS = "shower"
+    TAKEAWAY = "takeaway"
     TOILETS = "toilets"
+    TRUCK_WASH = "truck_wash"
     WHEELCHAIR = "wheelchair"
     WIFI = "internet_access=wlan"
 
 
 class PaymentMethods(Enum):
+    ALIPAY = "payment:alipay"
     AMERICAN_EXPRESS = "payment:american_express"
+    AMERICAN_EXPRESS_CONTACTLESS = "payment:american_express_contactless"
+    APP = "payment:app"
     APPLE_PAY = "payment:apple_pay"
+    BCA_CARD = "payment:bca_card"
+    BLIK = "payment:blik"
     CASH = "payment:cash"
+    CHEQUE = "payment:cheque"
+    COINS = "payment:coins"
     CONTACTLESS = "payment:contactless"
     CREDIT_CARDS = "payment:credit_cards"
+    D_BARAI = "payment:d_barai"
     DEBIT_CARDS = "payment:debit_cards"
+    DINACARD = "payment:dinacard"
+    DINERS_CLUB = "payment:diners_club"
+    DISCOVER_CARD = "payment:discover_card"
+    EDY = "payment:edy"
+    GCASH = "payment:gcash"
     GOOGLE_PAY = "payment:google_pay"
     GIROCARD = "payment:girocard"
+    HUAWEI_PAY = "payment:huawei_pay"
+    ID = "payment:id"
+    JCB = "payment:jcb"
+    LINE_PAY = "payment:line_pay"
     MAESTRO = "payment:maestro"
     MASTER_CARD = "payment:mastercard"
+    MASTER_CARD_CONTACTLESS = "payment:mastercard_contactless"
+    MASTER_CARD_DEBIT = "payment:mastercard_debit"
+    MERPAY = "payment:merpay"
+    MIPAY = "payment:mipay"
+    NANACO = "payment:nanaco"
+    NOTES = "payment:notes"
+    PAYPAY = "payment:paypay"
+    QUICPAY = "payment:quicpay"
+    RAKUTEN_PAY = "payment:rakuten_pay"
+    SAMSUNG_PAY = "payment:samsung_pay"
+    SATISPAY = "payment:satispay"
+    TWINT = "payment:twint"
+    UNIONPAY = "payment:unionpay"
     VISA = "payment:visa"
+    VISA_CONTACTLESS = "payment:visa_contactless"
+    VISA_DEBIT = "payment:visa_debit"
     V_PAY = "payment:v_pay"
+    WAON = "payment:waon"
+    WECHAT = "payment:wechat"
+
+
+class FuelCards(Enum):
+    ALLSTAR = "Allstar Card"
+    AVIA = "Avia Card"
+    BP = "BP card"
+    DEUTSCHLAND = "fuel:discount:deutschland_card"
+    DKV = "fuel:discount:dkv"
+    ESSO_NATIONAL = "fuel:discount:esso_national"
+    EXXONMOBIL_FLEET = "ExxonMobil Fleet Card"
+    LOGPAY = "LogPay Card"
+    MOBIL = "Mobilcard"
+    SHELL = "fuel:discount:shell"
+    UTA = "fuel:discount:uta"
 
 
 def apply_yes_no(attribute, item: Feature, state: bool, apply_positive_only: bool = True):
@@ -226,9 +318,17 @@ def apply_yes_no(attribute, item: Feature, state: bool, apply_positive_only: boo
     elif isinstance(attribute, Enum):
         tag_key = attribute.value
     else:
-        raise AttributeError("string or Enum required")
+        raise TypeError("string or Enum required")
+
     if "=" in tag_key:
         tag_key, tag_value = tag_key.split("=")
     else:
         tag_value = "yes" if state else "no"
     apply_category({tag_key: tag_value}, item)
+
+
+class Clothes(Enum):
+    BABY = "babies"
+    CHILDREN = "children"
+    UNDERWEAR = "underwear"
+    MATERNITY = "maternity"

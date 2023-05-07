@@ -30,7 +30,6 @@ class YMCASpider(scrapy.Spider):
             yield scrapy.Request(url.strip(), callback=self.parse_location)
 
     def parse_location(self, response):
-
         geo = response.xpath('//div[contains(@class, "geolocation-location")]')
 
         yield Feature(

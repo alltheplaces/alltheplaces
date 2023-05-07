@@ -2,105 +2,38 @@ import re
 
 import scrapy
 
-from locations.hours import OpeningHours
-from locations.items import Feature
-
-DAY_MAPPING = {
-    "Mon": "Mo",
-    "Tue": "Tu",
-    "Wed": "We",
-    "Thu": "Th",
-    "Fri": "Fr",
-    "Sat": "Sa",
-    "Sun": "Su",
-}
-DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+from locations.hours import OpeningHours, day_range, sanitise_day
+from locations.structured_data_spider import StructuredDataSpider
 
 
-class AvisSpider(scrapy.Spider):
-
+# TODO: turn this into a CrawlSpider
+class AvisSpider(StructuredDataSpider):
     name = "avis"
     item_attributes = {"brand": "Avis", "brand_wikidata": "Q791136"}
     download_delay = 0.5
-    allowed_domains = [
-        "avis.com",
-    ]
-    start_urls = ("https://www.avis.com/en/locations/avisworldwide",)
+    allowed_domains = ["avis.com"]
+    start_urls = ["https://www.avis.com/en/locations/avisworldwide"]
+    search_for_image = False
 
-    def parse_hours(self, hours):
-        "Sun - Sat 7:00 AM - 10:00 PM"
-        opening_hours = OpeningHours()
-        hours = [h.strip() for h in hours.split(";")]
+    def post_process_item(self, item, response, ld_data, **kwargs):
+        item["lat"] = response.xpath('//meta[@itemprop="latitude"]/@content').get()
+        item["lon"] = response.xpath('//meta[@itemprop="longitude"]/@content').get()
 
-        for hour in hours:
-            if hour == "Sun - Sat open 24 hrs":
-                return "24/7"
-            range_match = re.search(
-                r"([A-Za-z]{3})\s-\s([A-Za-z]{3})\s([\d:\sAMP]+)\s-\s([\d:\sAMP]+)",
-                hour,
-            )
-            if range_match:
-                start_day, end_day, start_time, end_time = range_match.groups()
-            else:
-                single_match = re.search(r"([A-Za-z]{3})\s([\d:\sAMP]+)\s-\s([\d:\sAMP]+)", hour)
-                if not single_match:
-                    continue
-                start_day, start_time, end_time = single_match.groups()
+        item["opening_hours"] = OpeningHours()
+        for start_day, end_day, start_time, end_time in re.findall(
+            r"(\w{3})(?:\s-\s(\w{3}))?\s(\d+:\d\d\s[APM]+)\s-\s(\d+:\d\d\s[APM]+)",
+            response.xpath('//meta[@itemprop="openingHours"]/@content').get(),
+        ):
+            start_day = sanitise_day(start_day)
+            end_day = sanitise_day(end_day)
+            if not end_day:
                 end_day = start_day
-
-            for day in DAYS[DAYS.index(start_day) : DAYS.index(end_day) + 1]:
-                opening_hours.add_range(
-                    day=DAY_MAPPING[day],
-                    open_time=start_time.strip(),
-                    close_time=end_time.strip(),
-                    time_format="%I:%M %p",
+            if start_day:
+                item["opening_hours"].add_days_range(
+                    day_range(start_day, end_day), start_time, end_time, time_format="%I:%M %p"
                 )
-        return opening_hours.as_opening_hours()
 
-    def parse_store(self, response):
-        if response.url == "https://www.avis.com/en/error/500":
-            # some closed locations get redirected to this error page
-            return
-
-        def clean(val):
-            if val:
-                return val.strip(", ")
-            return val
-
-        ref = response.url.split("/")[-1]
-
-        latitude = None
-        longitude = None
-
-        if response.xpath('//meta[@itemprop="latitude"]/@content').extract_first() is not None:
-            latitude = float(response.xpath('//meta[@itemprop="latitude"]/@content').extract_first())
-
-        if response.xpath('//meta[@itemprop="longitude"]/@content').extract_first() is not None:
-            longitude = float(response.xpath('//meta[@itemprop="longitude"]/@content').extract_first())
-
-        properties = {
-            "name": clean(response.xpath('//h2/span[@itemprop="name"]/text()').extract_first()),
-            "addr_full": clean(
-                response.xpath('normalize-space(//span[@itemprop="streetAddress"]/text())').extract_first()
-            ),
-            "phone": response.xpath('normalize-space(//span[@itemprop="telephone"]/text())').extract_first(),
-            "city": clean(
-                response.xpath('normalize-space(//span[@itemprop="addressLocality"]/text())').extract_first()
-            ),
-            "state": clean(response.xpath('normalize-space(//span[@itemprop="addressRegion"]/text())').extract_first()),
-            "postcode": clean(response.xpath('normalize-space(//span[@itemprop="postalCode"]/text())').extract_first()),
-            "country": clean(
-                response.xpath('normalize-space(//span[@itemprop="addressCountry"]/text())').extract_first()
-            ),
-            "ref": ref,
-            "website": response.url,
-            "lat": latitude,
-            "lon": longitude,
-        }
-        hours = response.xpath('//meta[@itemprop="openingHours"]/@content').extract_first()
-        if hours:
-            properties["opening_hours"] = self.parse_hours(hours)
-        yield Feature(**properties)
+        yield item
 
     def parse_state(self, response):
         urls = response.xpath('//ul[contains(@class, "location-list-ul")]//li/a/@href').extract()
@@ -115,7 +48,7 @@ class AvisSpider(scrapy.Spider):
 
         for url in urls:
             if single_location.match(url) or us_single_location.match(url):
-                yield scrapy.Request(response.urljoin(url), callback=self.parse_store)
+                yield scrapy.Request(response.urljoin(url), callback=self.parse_sd)
             elif location_list.match(url):
                 # skip these, we get them already
                 continue

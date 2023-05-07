@@ -1,39 +1,40 @@
 import scrapy
+from scrapy.spiders import SitemapSpider
 
-from locations.linked_data_parser import LinkedDataParser
+from locations.hours import OpeningHours
+from locations.structured_data_spider import StructuredDataSpider
 
 
-class EdwardJonesSpider(scrapy.Spider):
+class EdwardJonesSpider(SitemapSpider, StructuredDataSpider):
     name = "edwardjones"
     item_attributes = {"brand": "Edward Jones", "brand_wikidata": "Q5343830"}
     allowed_domains = ["www.edwardjones.com"]
+    sitemap_urls = ["https://www.edwardjones.com/us-en/sitemap/financial-advisor/sitemap.xml"]
 
-    def get_page(self, n):
-        return scrapy.Request(
-            f"https://www.edwardjones.com/api/v2/financial-advisor/results?q=57717&distance=75000&distance_unit=mi&page={n}",
-            meta={"page": n},
+    def post_process_item(self, item, response, ld_data, **kwargs):
+        oh = OpeningHours()
+        oh.from_linked_data(ld_data, time_format="%H:%M:%S")
+        item["opening_hours"] = oh.as_opening_hours()
+
+        yield from self.get_location(item, 1)
+
+    def get_location(self, item, page):
+        url = "https://www.edwardjones.com/api/v3/financial-advisor/results?q={postcode}&distance=75&distance_unit=mi&page={page}&searchtype=2".format(
+            postcode=item["postcode"], page=page
         )
+        yield scrapy.Request(url=url, cb_kwargs={"item": item, "page": 1}, callback=self.parse_location)
 
-    def start_requests(self):
-        yield self.get_page(1)
+    def parse_location(self, response, item, page):
+        json = response.json()
+        results = json["results"]
 
-    def parse(self, response):
-        data = response.json()["results"]
-        if data == []:
-            return
-        for row in data:
-            url = "https://www.edwardjones.com" + row["faUrl"]
-            meta = {
-                "lat": row["lat"],
-                "lon": row["lon"],
-            }
-            yield scrapy.Request(url, callback=self.parse_location, meta=meta)
-        yield self.get_page(1 + response.meta["page"])
+        for x in results:
+            if item["website"].endswith(x["faUrl"]):
+                item["lat"] = x["lat"]
+                item["lon"] = x["lon"]
+                break
 
-    def parse_location(self, response):
-        ld = LinkedDataParser.find_linked_data(response, "LocalBusiness")
-        del ld["openingHoursSpecification"]
-        item = LinkedDataParser.parse_ld(ld)
-        item["lat"] = response.meta["lat"]
-        item["lon"] = response.meta["lon"]
-        yield item
+        if ("lat" in item and "lon" in item) or json["resultCount" == 0] or len(results) < json["itemsPerPage"]:
+            yield item
+        else:
+            yield from self.get_location(item, page + 1)

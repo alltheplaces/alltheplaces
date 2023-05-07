@@ -64,14 +64,12 @@ class HarristeeterSpider(scrapy.Spider):
         )
 
     def check_login(self, response):
-
         yield scrapy.Request(
             "https://www.harristeeter.com/store/#/app/store-locator",
             callback=self.get_store_locator,
         )
 
     def get_store_locator(self, response):
-
         yield scrapy.Request(
             "https://www.harristeeter.com/api/v1/stores/search?Address=98011&Radius=20000&AllStores=true",
             callback=self.parse_shop,

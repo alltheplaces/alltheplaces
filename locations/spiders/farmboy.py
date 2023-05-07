@@ -52,7 +52,6 @@ class FarmBoySpider(scrapy.Spider):
         return "; ".join(opening_hours)
 
     def parse(self, response):
-
         stores = response.xpath('//div[@id="portfolio"]/article')
         for store in stores:
             if store.xpath("@class").extract_first() != "all portfolio-item toronto":

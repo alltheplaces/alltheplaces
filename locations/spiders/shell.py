@@ -8,22 +8,24 @@ from locations.spiders.bp import decode_hours
 class ShellSpider(scrapy.Spider):
     name = "shell"
     item_attributes = {"brand": "Shell", "brand_wikidata": "Q110716465"}
-    url_template = "https://shellgsllocator.geoapp.me/api/v1/locations/within_bounds?sw%5B%5D={}&sw%5B%5D={}&ne%5B%5D={}&ne%5B%5D={}"
-    custom_settings = {"ROBOTSTXT_OBEY": False}
-    download_delay = 0.5
+    url_template = "https://shellgsllocator.geoapp.me/api/v2/locations/within_bounds?sw%5B%5D={}&sw%5B%5D={}&ne%5B%5D={}&ne%5B%5D={}"
+    custom_settings = {"ROBOTSTXT_OBEY": False, "AUTOTHROTTLE_ENABLED": True}
 
     def start_requests(self):
         yield scrapy.Request(self.url_template.format(-90, -180, 90, 180))
 
     def parse(self, response):
-        for item in response.json():
-            if b := item.get("bounds"):
-                # Result is an array of bounding boxes.
-                yield scrapy.Request(self.url_template.format(b["sw"][0], b["sw"][1], b["ne"][0], b["ne"][1]))
-            elif item.get("name"):
-                # Result is an array of station listings.
-                station_url = f"https://shellgsllocator.geoapp.me/api/v1/locations/{item['id']}"
-                yield scrapy.Request(station_url, callback=self.parse_station)
+        for type, value in response.json().items():
+            if type == "clusters":
+                for bound in value:
+                    if b := bound.get("bounds"):
+                        # Result is an array of bounding boxes.
+                        yield scrapy.Request(self.url_template.format(b["sw"][0], b["sw"][1], b["ne"][0], b["ne"][1]))
+            if type == "locations":
+                for location in value:
+                    # Result is an array of station listings.
+                    station_url = f"https://shellgsllocator.geoapp.me/api/v2/locations/{location['id']}"
+                    yield scrapy.Request(station_url, callback=self.parse_station)
 
     def parse_station(self, response):
         result = response.json()

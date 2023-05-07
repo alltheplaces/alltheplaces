@@ -1,7 +1,7 @@
 import json
 import time
 
-from locations.hours import DAYS, DAYS_BG, DAYS_DE, OpeningHours, day_range, sanitise_day
+from locations.hours import DAYS, DAYS_BG, DAYS_DE, DAYS_ES, DELIMITERS_ES, OpeningHours, day_range, sanitise_day
 
 
 def test_day_range():
@@ -343,3 +343,47 @@ def test_ld_parse_time_format():
         "%H:%M:%S",
     )
     assert o.as_opening_hours() == "Sa 12:00-14:00"
+
+
+def test_add_ranges_from_string():
+    o = OpeningHours()
+    o.add_ranges_from_string("Monday-Wednesday: 5pm - 7pm")
+    o.add_ranges_from_string("Monday-Wednesday 08:00-14:00")
+    o.add_ranges_from_string("Monday to Tuesday: 15:00:01 to 16:35")
+    o.add_ranges_from_string("Thurs 2PM-6:30PM")
+    o.add_ranges_from_string(" Fri    9am  -  11am ")
+    o.add_ranges_from_string("Weekends: 8:00 AM to 6:00 PM")
+    assert (
+        o.as_opening_hours()
+        == "Mo-Tu 08:00-14:00,15:00-16:35,17:00-19:00; We 08:00-14:00,17:00-19:00; Th 14:00-18:30; Fr 09:00-11:00; Sa-Su 08:00-18:00"
+    )
+
+    o = OpeningHours()
+    o.add_ranges_from_string("Monday to Thursday 7am to 7pm, Friday 12am to 11:59pm, Weekends CLOSED")
+    assert o.as_opening_hours() == "Mo-Th 07:00-19:00; Fr 00:00-24:00"
+
+    o = OpeningHours()
+    o.add_ranges_from_string("Sunday to Thursday 0800-1400, Wed-Sat 1300-1800")
+    assert o.as_opening_hours() == "Mo-Tu 08:00-14:00; We-Th 08:00-14:00,13:00-18:00; Fr-Sa 13:00-18:00; Su 08:00-14:00"
+
+    o = OpeningHours()
+    o.add_ranges_from_string("Monday - Sunday: 00:00 - 23:59")
+    assert o.as_opening_hours() == "24/7"
+
+    o = OpeningHours()
+    o.add_ranges_from_string(
+        "Lunes a Domingo: 11:00 a 20:30 / Viernes y Sábado: 11:00 a 21:00",
+        days=DAYS_ES,
+        named_day_ranges={},
+        delimiters=DELIMITERS_ES,
+    )
+    o.add_ranges_from_string(
+        "Lunes a Sábado de 09:00 a 10:15 / Domingo de 09:00:00 a 10:00:00",
+        days=DAYS_ES,
+        named_day_ranges={},
+        delimiters=DELIMITERS_ES,
+    )
+    assert (
+        o.as_opening_hours()
+        == "Mo-Th 09:00-10:15,11:00-20:30; Fr-Sa 09:00-10:15,11:00-20:30,11:00-21:00; Su 09:00-10:00,11:00-20:30"
+    )

@@ -1,84 +1,47 @@
-import re
+from scrapy import Spider
+from scrapy.http import JsonRequest
 
-import scrapy
-from scrapy.utils.request import request_fingerprint
+from locations.dict_parser import DictParser
+from locations.hours import OpeningHours, day_range, sanitise_day
+from locations.spiders.vapestore_gb import clean_address
 
-from locations.items import Feature
 
-
-class AndPizzaSpider(scrapy.Spider):
+class AndPizzaSpider(Spider):
     name = "andpizza"
     item_attributes = {"brand": "&pizza", "brand_wikidata": "Q21189222"}
-    start_urls = ("https://api.andpizza.com/webapi/v100/partners/shops",)
-    custom_settings = {
-        "REQUEST_FINGERPRINTER_IMPLEMENTATION": "2.7",
-        "ROBOTSTXT_OBEY": False,
-    }
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def start_requests(self):
-
-        url = self.start_urls[0]
-
-        headers = {
-            "Accept": "application/json, text/plain, */*",
-            "Referer": "https://order.andpizza.com/",
-            "Connection": "keep-alive",
-            "Authorization": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOjIsInBhcnRuZXIiOiJpNzIiLCJpc3MiOiJodHRwczovL2FwaS5hbmRwaXp6YS5jb20iLCJpYXQiOjE1OTgyOTEwNzUsImV4cCI6MTkxMzY1MTA3NSwibmJmIjoxNTk4MjkxMDc1LCJqdGkiOiI4VWh1VnhJRjFwZFhrSXplIn0.rXJL4rt5YbT4XRk21sSrkoGffJ5ttowV3UbHInZcnMs",
-        }
-
-        yield scrapy.Request(url=url, headers=headers, callback=self.parse)
-
-    def normalize_time(sef, time_str):
-        match = re.search(r"([0-9]{1,2}):([0-9]{2}) (a|p)m$", time_str)
-        if not match:
-            match = re.search(r"([0-9]{1,2}):([0-9]{2})(a|p)m$", time_str)
-            h, m, am_pm = match.groups()
-        else:
-            h, m, am_pm = match.groups()
-
-        return "%02d:%02d" % (
-            int(h) + 12 if am_pm == "p" else int(h),
-            int(m),
+        yield JsonRequest(
+            url="https://api.andpizza.com/webapi/v100/partners/shops",
+            headers={
+                "Authorization": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOjIsInBhcnRuZXIiOiJpNzIiLCJpc3MiOiJodHRwczovL2FwaS5hbmRwaXp6YS5jb20iLCJpYXQiOjE1OTgyOTEwNzUsImV4cCI6MTkxMzY1MTA3NSwibmJmIjoxNTk4MjkxMDc1LCJqdGkiOiI4VWh1VnhJRjFwZFhrSXplIn0.rXJL4rt5YbT4XRk21sSrkoGffJ5ttowV3UbHInZcnMs",
+            },
         )
 
-    def parse_hours(self, data):
-        opening_hours = ""
+    @staticmethod
+    def parse_hours(rules: [dict]) -> OpeningHours:
+        oh = OpeningHours()
 
-        for i in range(len(data)):
-            days = data[i]["label"].split(" - ")
-            hours = data[i]["value"]
-            if len(days) == 1:
-                day = days[0][:2]
-            elif len(days) == 2:
-                day = days[0][:2] + "-" + days[1][:2]
+        for rule in rules:
+            if "-" in rule["label"]:
+                start_day, end_day = rule["label"].split("-")
             else:
-                day = "Mo-Su"
+                start_day = end_day = rule["label"]
+            start_day = sanitise_day(start_day)
+            end_day = sanitise_day(end_day) or start_day
+            if start_day:
+                start_time, end_time = rule["value"].split(" - ")
+                oh.add_days_range(day_range(start_day, end_day), start_time, end_time, time_format="%I:%M %p")
 
-            hours = hours.split(" - ")
-            open = self.normalize_time(hours[0].strip())
-            close = self.normalize_time(hours[1].strip())
-
-            open_close = "{}-{}".format(open, close)
-
-            opening_hours += "{} {}; ".format(day, open_close)
-
-        return opening_hours
+        return oh
 
     def parse(self, response):
+        for location in response.json()["data"]:
+            location.update(location.pop("location"))
+            item = DictParser.parse(location)
+            item["street_address"] = clean_address([location["address1"], location["address2"]])
 
-        stores = response.json().get("data")
-        for store in stores:
-            props = {}
-            props["name"] = store["name"]
-            props["ref"] = store["id"]
-            props["addr_full"] = store["location"]["address1"]
-            props["city"] = store["location"]["city"]
-            props["state"] = store["location"]["state"]
-            props["lat"] = store["location"]["latitude"]
-            props["lon"] = store["location"]["longitude"]
-            props["postcode"] = store["location"]["zipcode"]
-            props["phone"] = store["location"]["phone"]
+            item["opening_hours"] = self.parse_hours(location["service_schedule"]["general"])
 
-            props["opening_hours"] = self.parse_hours(store["service_schedule"]["general"])
-
-            yield Feature(**props)
+            yield item

@@ -7,7 +7,6 @@ from locations.items import Feature
 
 
 class ExpressSpider(scrapy.Spider):
-
     name = "express"
     item_attributes = {"brand": "Express", "brand_wikidata": "Q1384784"}
     allowed_domains = ["stores.express.com", "stores.expressfactoryoutlet.com"]
@@ -42,7 +41,7 @@ class ExpressSpider(scrapy.Spider):
             ref = ref[0].split(".")[0]
         properties = {
             "name": response.xpath('//h1[contains(@class, "Hero-subTitle")]/text()').extract_first(),
-            "addr_full": response.xpath('//meta[@itemprop="streetAddress"]/@content').extract_first(),
+            "street_address": response.xpath('//meta[@itemprop="streetAddress"]/@content').extract_first(),
             "phone": response.xpath('normalize-space(//div[@itemprop="telephone"]/text())').extract_first(),
             "city": response.xpath('//meta[@itemprop="addressLocality"]/@content').extract_first(),
             "state": response.xpath('//abbr[@itemprop="addressRegion"]/text()').extract_first(),

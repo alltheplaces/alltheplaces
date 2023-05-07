@@ -20,7 +20,6 @@ DAY_ORDER = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
 
 
 class BarnesAndNobleSpider(scrapy.Spider):
-
     name = "barnesandnoble"
     item_attributes = {"brand": "Barnes and Noble"}
     download_delay = 0.5
