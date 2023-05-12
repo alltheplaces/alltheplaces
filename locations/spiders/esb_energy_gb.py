@@ -6,14 +6,14 @@ from scrapy.http import JsonRequest
 from locations.dict_parser import DictParser
 
 
-class EcarsSpider(Spider):
-    name = "ecars"
-    item_attributes = {"brand": "ecars", "brand_wikidata": "Q3050566"}
+class ESBEnergyGBSpider(Spider):
+    name = "esb_energy_gb"
+    item_attributes = {"brand_wikidata": "Q118261834"}
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def start_requests(self):
         yield JsonRequest(
-            url="https://myaccount.esbecars.com/stationFacade/findSitesInBounds",
+            url="https://myevaccount.esbenergy.co.uk/stationFacade/findSitesInBounds",
             data={
                 "filterByBounds": {"northEastLat": 90, "northEastLng": 180, "southWestLat": -90, "southWestLng": -180}
             },
@@ -28,6 +28,6 @@ class EcarsSpider(Spider):
                 continue
 
             item = DictParser.parse(location)
-            item["addr_full"] = location["dn"]
+            item["street_address"] = location["dn"]
 
             yield item
