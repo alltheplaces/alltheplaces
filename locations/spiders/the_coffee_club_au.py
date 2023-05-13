@@ -13,7 +13,9 @@ class TheCoffeeClubAUSpider(Spider):
 
     def start_requests(self):
         for state in self.states_list:
-            yield JsonRequest(url=f"https://api.mdkl.com.au/v1/Stores/GetByCountryAndState?brandId=TCC&country=Australia&stateAbr={state}")
+            yield JsonRequest(
+                url=f"https://api.mdkl.com.au/v1/Stores/GetByCountryAndState?brandId=TCC&country=Australia&stateAbr={state}"
+            )
 
     def parse(self, response):
         for location in response.json():
@@ -22,10 +24,17 @@ class TheCoffeeClubAUSpider(Spider):
             item = DictParser.parse(location)
             item["ref"] = location["storeNumber"]
             item["street_address"] = ", ".join(filter(None, [location["addressLine1"], location["addressLine2"]]))
-            item["website"] = "https://coffeeclub.com.au/pages/store-details?country=Australia&name=" + location["displayName"].lower().replace(" ", "-")
+            item["website"] = "https://coffeeclub.com.au/pages/store-details?country=Australia&name=" + location[
+                "displayName"
+            ].lower().replace(" ", "-")
             item["opening_hours"] = OpeningHours()
             for day_hours in location["openingHours"]:
                 if day_hours["closed"]:
                     continue
-                item["opening_hours"].add_range(day_hours["dayName"], day_hours["displayHours"].split(" - ", 1)[0], day_hours["displayHours"].split(" - ", 1)[1], "%I:%M %p")
+                item["opening_hours"].add_range(
+                    day_hours["dayName"],
+                    day_hours["displayHours"].split(" - ", 1)[0],
+                    day_hours["displayHours"].split(" - ", 1)[1],
+                    "%I:%M %p",
+                )
             yield item
