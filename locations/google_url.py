@@ -65,8 +65,10 @@ def url_to_coords(url: str) -> (float, float):  # noqa: C901
             if m := re.match(r"^(-?[.\d]+),(-?[.\d]+)$", ll):
                 return float(m.group(1)), float(m.group(2))
     elif url.startswith("https://www.google.com/maps/place/"):
-        lat, lon = url.split("/")[5].split(",")
-        return float(lat.strip()), float(lon.strip())
+        slash_splits = url.split("/")
+        if len(slash_splits) > 5:
+            if m := re.match(r"(-?\d+.\d+),\s?(-?\d+.\d+)", slash_splits[5]):
+                return float(m.group(1)), float(m.group(2))
     elif url.startswith("https://www.google.com/maps/search"):
         for query in get_query_param(url, "query"):
             if m := re.match(r"(-?\d+.\d+),(-?\d+.\d+)", query):
