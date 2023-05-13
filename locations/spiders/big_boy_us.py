@@ -1,8 +1,8 @@
 from scrapy.spiders import SitemapSpider
 
-from locations.items import Feature
 from locations.google_url import extract_google_position
 from locations.hours import OpeningHours
+from locations.items import Feature
 
 
 class BigBoyUSSpider(SitemapSpider):
@@ -15,14 +15,16 @@ class BigBoyUSSpider(SitemapSpider):
     def parse(self, response):
         properties = {
             "ref": response.url,
-            "name": response.xpath('//main/section/div[2]/div[3]/div[2]/h2/text()').get().replace("®", ""),
-            "addr_full": response.xpath('//main/section/div[2]/div[2]/div[4]/div[3]/p/a/text()').get(),
-            "phone": response.xpath('//main/section/div[2]/div[2]/div[7]/div[3]/p/a/text()').get(),
+            "name": response.xpath("//main/section/div[2]/div[3]/div[2]/h2/text()").get().replace("®", ""),
+            "addr_full": response.xpath("//main/section/div[2]/div[2]/div[4]/div[3]/p/a/text()").get(),
+            "phone": response.xpath("//main/section/div[2]/div[2]/div[7]/div[3]/p/a/text()").get(),
             "website": response.url,
         }
         extract_google_position(properties, response)
         oh = OpeningHours()
-        hours_raw = " ".join((" ".join(response.xpath('//main/section/div[2]/div[2]/div[11]/div[3]/p/text()').getall())).split())
+        hours_raw = " ".join(
+            (" ".join(response.xpath("//main/section/div[2]/div[2]/div[11]/div[3]/p/text()").getall())).split()
+        )
         oh.add_ranges_from_string(hours_raw)
         properties["opening_hours"] = oh.as_opening_hours()
         yield Feature(**properties)
