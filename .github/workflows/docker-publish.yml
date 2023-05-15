@@ -3,6 +3,9 @@ name: Build and Push Image to ECR
 on:
   schedule:
     - cron: '23 */6 * * *'
+  push:
+    branches:
+      - "dont-use-requests-cache-on-list"
 
 jobs:
   build:
