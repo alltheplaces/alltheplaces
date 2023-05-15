@@ -22,16 +22,25 @@ class MidasAUSpider(Spider):
         results = Selector(text=response.json()["result_listing"])
         for location in results.xpath('//div[@class = "result-list"]'):
             properties = {
-                "ref": location.xpath('.//h4/@data-index').get().strip(),
-                "name": location.xpath('.//h4/text()').get().strip(),
-                "lat": location.xpath('.//h4/@data-lat').get().strip(),
-                "lon": location.xpath('.//h4/@data-lng').get().strip(),
-                "addr_full": re.sub(r"\s{2,}", " ", " ".join(location.xpath('.//div/p[1]/text()').getall())).strip(),
+                "ref": location.xpath(".//h4/@data-index").get().strip(),
+                "name": location.xpath(".//h4/text()").get().strip(),
+                "lat": location.xpath(".//h4/@data-lat").get().strip(),
+                "lon": location.xpath(".//h4/@data-lng").get().strip(),
+                "addr_full": re.sub(r"\s{2,}", " ", " ".join(location.xpath(".//div/p[1]/text()").getall())).strip(),
                 "website": location.xpath('.//div/p[1]/a[contains(@href, "/stores/")]/@href').get().strip(),
-                "phone": location.xpath('.//div/p[2]/a[contains(@href, "tel:")]/@href').get().strip().replace("tel:", ""),
-                "email": unquote(location.xpath('.//div/p[2]/a[contains(@href, "admin_email=")]/@href').get().strip().split("admin_email=", 1)[1].split('"', 1)[0]),
+                "phone": location.xpath('.//div/p[2]/a[contains(@href, "tel:")]/@href')
+                .get()
+                .strip()
+                .replace("tel:", ""),
+                "email": unquote(
+                    location.xpath('.//div/p[2]/a[contains(@href, "admin_email=")]/@href')
+                    .get()
+                    .strip()
+                    .split("admin_email=", 1)[1]
+                    .split('"', 1)[0]
+                ),
             }
-            hours_string = " ".join(location.xpath('.//table/tr/td/text()').getall())
+            hours_string = " ".join(location.xpath(".//table/tr/td/text()").getall())
             day_pairs = [
                 ["Monday", "Tuesday"],
                 ["Tuesday", "Wednesday"],
