@@ -3,6 +3,7 @@ from scrapy import Spider
 from locations.hours import OpeningHours
 from locations.items import Feature
 
+
 class GANTAUSpider(Spider):
     name = "gant_au"
     item_attributes = {"brand": "GANT", "brand_wikidata": "Q1493667"}
@@ -12,7 +13,12 @@ class GANTAUSpider(Spider):
     def parse(self, response):
         for location in response.xpath('//div[contains(@class, "stores-data")]/div'):
             properties = {
-                "ref": location.xpath('./p[@class = "name"]/text()').get().replace('"', "").replace(" ", "_").lower().strip(),
+                "ref": location.xpath('./p[@class = "name"]/text()')
+                .get()
+                .replace('"', "")
+                .replace(" ", "_")
+                .lower()
+                .strip(),
             }
             field_map = {
                 "state": "state",
@@ -23,7 +29,9 @@ class GANTAUSpider(Spider):
                 "coords-long": "lon",
             }
             for field_source, field_mapped in field_map.items():
-                properties[field_mapped] = location.xpath(f"./p[@class = \"{field_source}\"]/text()").get().replace('"', "").strip()
+                properties[field_mapped] = (
+                    location.xpath(f'./p[@class = "{field_source}"]/text()').get().replace('"', "").strip()
+                )
             properties["opening_hours"] = OpeningHours()
             hours_string = location.xpath('./p[@class = "hours"]/text()').get().replace('"', "").replace("\n", " ")
             properties["opening_hours"].add_ranges_from_string(hours_string)
