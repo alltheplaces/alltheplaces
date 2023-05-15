@@ -1,7 +1,7 @@
-from chompjs import chompjs
 import html
 import re
 
+from chompjs import chompjs
 from scrapy import Selector, Spider
 
 from locations.dict_parser import DictParser
@@ -32,9 +32,11 @@ class JustGroupSpider(Spider):
                 if brand_name in item["name"]:
                     item["brand"] = brand_name
                     item["brand_wikidata"] = brand_wikidata
-            item["street_address"] = html.unescape(", ".join(filter(None, [location["shopAddress"], location["streetAddress"]]))).replace(",,", "")
+            item["street_address"] = html.unescape(
+                ", ".join(filter(None, [location["shopAddress"], location["streetAddress"]]))
+            ).replace(",,", "")
             if item["country"] == "SG":
-                if m := re.search(r"\s+(\d{6})", location["city"]): 
+                if m := re.search(r"\s+(\d{6})", location["city"]):
                     item["postcode"] = m.group(1)
                 item.pop("city")
             item["postcode"] = item.pop("postcode").strip()
@@ -44,11 +46,25 @@ class JustGroupSpider(Spider):
                 item.pop("state")
             if location["suburb"].strip() == item.get("city"):
                 location["suburb"] = None
-            item["addr_full"] = ", ".join(filter(None, [item.get("street_address"), location["suburb"], item.get("city"), item.get("state"), item.get("postcode"), location["countryName"]])).replace(",,", "")
+            item["addr_full"] = ", ".join(
+                filter(
+                    None,
+                    [
+                        item.get("street_address"),
+                        location["suburb"],
+                        item.get("city"),
+                        item.get("state"),
+                        item.get("postcode"),
+                        location["countryName"],
+                    ],
+                )
+            ).replace(",,", "")
             item["phone"] = item.pop("phone").strip()
             item["website"] = location["storeURL"]
             hours_html = Selector(text=html.unescape(location["storehours"]))
-            hours_string = " ".join(hours_html.xpath('//div[contains(@class, "stores__schedule")]/div/text()').getall()).strip()
+            hours_string = " ".join(
+                hours_html.xpath('//div[contains(@class, "stores__schedule")]/div/text()').getall()
+            ).strip()
             if hours_string:
                 item["opening_hours"] = OpeningHours()
                 item["opening_hours"].add_ranges_from_string(hours_string)
