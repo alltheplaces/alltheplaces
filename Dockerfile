@@ -64,4 +64,6 @@ RUN playwright install firefox
 
 COPY . .
 
+RUN scrapy list
+
 CMD ["/home/ubuntu/ci/run_all_spiders.sh"]
