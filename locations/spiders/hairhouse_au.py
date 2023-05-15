@@ -20,5 +20,7 @@ class HairhouseAUSpider(Spider):
             item["opening_hours"] = OpeningHours()
             for day in DAYS_FULL:
                 day_abbrev = day[:3].lower()
-                item["opening_hours"].add_range(day, location[f"{day_abbrev}Start"], location[f"{day_abbrev}Ending"], "%I:%M %p")
+                item["opening_hours"].add_range(
+                    day, location[f"{day_abbrev}Start"], location[f"{day_abbrev}Ending"], "%I:%M %p"
+                )
             yield item
