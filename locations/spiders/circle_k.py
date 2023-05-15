@@ -3,7 +3,7 @@ import re
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
-from locations.categories import apply_category, apply_yes_no, Categories, Extras, Fuel
+from locations.categories import Categories, Extras, Fuel, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 
 
@@ -35,11 +35,24 @@ class CircleKSpider(Spider):
             apply_yes_no(Extras.BABY_CHANGING_TABLE, item, "EU_BABY_CHANGING" in services)
             apply_yes_no(Extras.SHOWERS, item, "EU_SHOWER" in services)
             apply_yes_no(Extras.WIFI, item, "EU_WIFI" in services)
-            apply_yes_no(Extras.CAR_WASH, item, "car_wash" in services or "car_wash_cleanfreak" in services or "rainstorm_car_wash" in services or "EU_CARWASH" in services or "EU_CARWASH_JETWASH" in services)
+            apply_yes_no(
+                Extras.CAR_WASH,
+                item,
+                "car_wash" in services
+                or "car_wash_cleanfreak" in services
+                or "rainstorm_car_wash" in services
+                or "EU_CARWASH" in services
+                or "EU_CARWASH_JETWASH" in services,
+            )
             apply_yes_no(Fuel.DIESEL, item, "diesel" in services)
             apply_yes_no(Fuel.HGV_DIESEL, item, "EU_TRUCKDIESEL_NETWORK" in services)
             apply_yes_no(Fuel.ADBLUE, item, "EU_ADBLUE_SERVICE" in services)
-            if "gas" in services or "EU_GAS" in services or "diesel" in services or "EU_TRUCKDIESEL_NETWORK" in services:
+            if (
+                "gas" in services
+                or "EU_GAS" in services
+                or "diesel" in services
+                or "EU_TRUCKDIESEL_NETWORK" in services
+            ):
                 apply_category(Categories.FUEL_STATION, item)
             if "ev_charger" in services or "EU_HIGH_SPEED_CHARGER" in services:
                 apply_category(Categories.CHARGING_STATION, item)
