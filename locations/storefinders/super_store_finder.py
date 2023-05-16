@@ -39,11 +39,20 @@ class SuperStoreFinderSpider(Spider):
                 "email": location.xpath('./email/text()').get(),
                 "website": location.xpath('./website/text()').get(),
             }
+            
+            # In the event that the brand doesn't use store
+            # identifiers, fall back to using the sort order of the
+            # returned results for a unique identifier of each
+            # store.
+            if not properties["ref"]:
+                properties["ref"] = location.xpath('./sortord/text()').get()
+            
             hours_string = location.xpath('./operatingHours/text()').get()
             if hours_string:
                 hours_string = hours_string.replace("<div>", " ").replace("</div>", " ").strip()
                 properties["opening_hours"] = OpeningHours()
                 properties["opening_hours"].add_ranges_from_string(hours_string)
+            
             yield from self.parse_item(Feature(**properties), location) or []
 
     def parse_item(self, item: Feature, location: Selector, **kwargs):
