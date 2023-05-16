@@ -8,10 +8,7 @@ from locations.items import Feature
 
 class DollaramaSpider(scrapy.Spider):
     name = "dollarama"
-    item_attributes = {
-        "brand": "Dollarama",
-        "brand_wikidata": "Q3033947",
-    }
+    item_attributes = {"brand": "Dollarama", "brand_wikidata": "Q3033947"}
     allowed_domains = ["dollarama.com"]
 
     def start_requests(self):
@@ -51,10 +48,11 @@ class DollaramaSpider(scrapy.Spider):
             properties = {
                 "ref": row["LocationNumber"],
                 "name": row["Name"],
-                "addr_full": row["ExtraData"]["Address"]["AddressNonStruct_Line1"],
+                "street_address": row["ExtraData"]["Address"]["AddressNonStruct_Line1"],
                 "city": row["ExtraData"]["Address"]["Locality"],
                 "state": row["ExtraData"]["Address"]["Region"],
                 "postcode": row["ExtraData"]["Address"]["PostalCode"],
+                "country": row["ExtraData"]["Address"]["CountryCode"],
                 "lat": row["Location"]["coordinates"][1],
                 "lon": row["Location"]["coordinates"][0],
                 "phone": row["ExtraData"]["Phone"],

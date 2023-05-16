@@ -6,12 +6,8 @@ from locations.items import Feature
 
 class BaylorScottWhiteHealthSpider(scrapy.Spider):
     name = "baylorscottwhite"
-    item_attributes = {
-        "brand": "Baylor Scott & White Health",
-        "brand_wikidata": "Q41568258",
-    }
+    item_attributes = {"brand": "Baylor Scott & White Health", "brand_wikidata": "Q41568258"}
     allowed_domains = ["phyndapi.bswapi.com"]
-    download_delay = 1
     base_url = "https://phyndapi.bswapi.com/V4/Places/GetLocations"
 
     def start_requests(self):

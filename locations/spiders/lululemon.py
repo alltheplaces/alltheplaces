@@ -12,7 +12,6 @@ class LuLuLemonSpider(SitemapSpider):
     name = "lululemon"
     item_attributes = {"brand": "LuLuLemon", "brand_wikidata": "Q6702957"}
     sitemap_urls = ("https://shop.lululemon.com/sitemap.xml",)
-    download_delay = 1.0
     sitemap_rules = [
         (r"^https://shop.lululemon.com/stores/[^/]+/[^/]+/[^/]+$", "parse_store"),
     ]

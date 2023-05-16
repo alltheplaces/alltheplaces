@@ -17,7 +17,6 @@ class ApcoaSpider(CrawlSpider, StructuredDataSpider):
             callback="parse_sd",
         ),
     ]
-    download_delay = 1
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         extract_google_position(item, response)

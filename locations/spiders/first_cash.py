@@ -25,7 +25,7 @@ class FirstCashSpider(scrapy.Spider):
             properties = {
                 "ref": place["storeNumber"],
                 "name": place["shortName"],
-                "addr_full": place["address"]["address1"],
+                "street_address": place["address"]["address1"],
                 "city": place["address"]["city"],
                 "state": place["address"]["state"],
                 "postcode": place["address"]["zipCode"],

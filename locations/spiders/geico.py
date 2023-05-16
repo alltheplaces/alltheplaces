@@ -35,7 +35,7 @@ class GeicoSpider(scrapy.Spider):
             metadata = {
                 "name": data["name"],
                 "ref": ref,
-                "addr_full": data["address"]["streetAddress"],
+                "street_address": data["address"]["streetAddress"],
                 "city": data["address"]["addressLocality"],
                 "state": data["address"]["addressRegion"],
                 "postcode": data["address"]["postalCode"],
@@ -75,7 +75,7 @@ class GeicoSpider(scrapy.Spider):
         properties = {
             "ref": response.meta["ref"],
             "name": response.meta["name"],
-            "addr_full": response.meta["addr_full"],
+            "street_address": response.meta["street_address"],
             "city": response.meta["city"],
             "state": response.meta["state"],
             "postcode": response.meta["postcode"],

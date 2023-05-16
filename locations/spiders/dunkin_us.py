@@ -43,7 +43,7 @@ class DunkinUSSpider(scrapy.Spider):
             "lat": coords["latitude"],
             "lon": coords["longitude"],
             "website": response.url,
-            "addr_full": address.xpath('.//*[@itemprop="streetAddress"]/@content').get(),
+            "street_address": address.xpath('.//*[@itemprop="streetAddress"]/@content').get(),
             "city": address.xpath('.//*[@itemprop="addressLocality"]/@content').get(),
             "state": address.xpath('.//*[@itemprop="addressRegion"]/text()').get(),
             "postcode": address.xpath('.//*[@itemprop="postalCode"]/text()').get(),

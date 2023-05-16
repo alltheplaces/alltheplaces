@@ -11,15 +11,7 @@ class Dats24BESpider(scrapy.Spider):
     start_urls = ["https://customer.dats24.be/wps/portal/datscustomer/fr/b2c/locator"]
 
     def parse(self, response, **kwargs):
-        script_tags = response.text.split("<script")
-        for script_tag in script_tags:
-            if 'class="locatorMapData"' in script_tag:
-                start_index = script_tag.find(">") + 1
-                end_index = script_tag.find("</script>", start_index)
-                json_data = script_tag[start_index:end_index]
-                break
-
-        data = json.loads(json_data)
+        data = json.loads(response.xpath('//script[@class="locatorMapData"]/text()').get())
         for store in data.get("stores"):
             yield Feature(
                 {

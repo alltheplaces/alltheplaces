@@ -28,7 +28,7 @@ class EquinoxSpider(scrapy.Spider):
             fields = item["fields"]
             yield Feature(
                 name=fields["name"],
-                addr_full=fields["address"],
+                street_address=fields["address"],
                 city=fields["city"],
                 state=fields["state"],
                 postcode=fields["zip"],

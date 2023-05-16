@@ -102,7 +102,7 @@ class DictParser:
         "mapLongitude",
     ]
 
-    website_keys = ["url", "website", "permalink", "store-url"]
+    website_keys = ["url", "website", "permalink", "store-url", "storeURL"]
 
     @staticmethod
     def parse(obj) -> Feature:

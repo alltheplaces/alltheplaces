@@ -17,5 +17,4 @@ class SpecsaversGBSpider(CrawlSpider, StructuredDataSpider):
     # However the fake ones currently redirect to "?hearing=true"
     # So we can disable redirecting
     custom_settings = {"REDIRECT_ENABLED": False}
-    download_delay = 1
     wanted_types = ["Optician"]

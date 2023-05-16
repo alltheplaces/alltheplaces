@@ -2,26 +2,23 @@ import datetime
 import re
 
 import scrapy
+from scrapy.http import JsonRequest
 
 from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.spiders.vapestore_gb import clean_address
 
 
 class DepartmentVeteransAffairsSpider(scrapy.Spider):
     name = "department_veterans_affairs"
-    item_attributes = {
-        "brand": "Department Veterans Affairs",
-        "brand_wikidata": "Q592576",
-    }
+    item_attributes = {"brand": "Department Veterans Affairs", "brand_wikidata": "Q592576"}
     allowed_domains = ["api.va.gov"]
 
     def start_requests(self):
-        for i in range(1, 117):
-            URL = (
-                "https://api.va.gov/v0/facilities/va?address=United%%20States&bbox[]=-180&bbox[]=90&bbox[]=180&bbox[]=-90&type=all&page=%s"
-                % i
-            )
-            yield scrapy.Request(URL, callback=self.parse_info)
+        yield JsonRequest(
+            "https://api.va.gov/facilities_api/v1/va?bbox[]=-180&bbox[]=90&bbox[]=180&bbox[]=-90&per_page=50",
+            callback=self.parse_info,
+        )
 
     def store_hours(self, store_hours):
         o = OpeningHours()
@@ -67,24 +64,23 @@ class DepartmentVeteransAffairsSpider(scrapy.Spider):
         for row in data:
             place_info = row["attributes"]
 
-            try:
-                addr = place_info["address"]["physical"]["address_1"]
-            except:
-                addr = place_info["address"]["mailing"]["address_1"]
+            addr = place_info["address"]["physical"]
+            if not addr:
+                addr = place_info["address"]["mailing"]
 
             properties = {
                 "ref": row["id"],
                 "name": place_info["name"],
                 "lat": place_info["lat"],
                 "lon": place_info["long"],
-                "addr_full": addr,
-                "city": place_info["address"]["physical"]["city"],
-                "state": place_info["address"]["physical"]["state"],
+                "street_address": clean_address([addr.get("address1"), addr.get("address2"), addr.get("address3")]),
+                "city": addr.get("city"),
+                "state": addr.get("state"),
                 "country": "US",
-                "postcode": place_info["address"]["physical"]["zip"],
+                "postcode": addr.get("zip"),
                 "website": place_info["website"],
                 "phone": place_info["phone"]["main"],
-                "extras": {"type": place_info["facility_type"]},
+                "extras": {"type": row["type"]},
             }
 
             hours = place_info.get("hours")
@@ -93,3 +89,6 @@ class DepartmentVeteransAffairsSpider(scrapy.Spider):
                 properties["opening_hours"] = opening_hours
 
             yield Feature(**properties)
+
+        if next_url := response.json()["links"]["next"]:
+            yield JsonRequest(next_url, callback=self.parse_info)

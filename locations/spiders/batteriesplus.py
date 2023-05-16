@@ -10,7 +10,6 @@ daysRe = rf"(?:{'|'.join(DAYS)})"
 
 class BatteriesPlusSpider(scrapy.spiders.SitemapSpider):
     name = "batteriesplus"
-    # download_delay = 1
     item_attributes = {"brand": "Batteries Plus Bulbs", "brand_wikidata": "Q17005157"}
     allowed_domains = ["batteriesplus.com"]
     sitemap_urls = [
