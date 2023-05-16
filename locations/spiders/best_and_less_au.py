@@ -31,7 +31,9 @@ class BestAndLessAUSpider(Spider):
             item = DictParser.parse(location)
             item.pop("housenumber")
             item.pop("street")
-            item["street_address"] = ", ".join(filter(None, [location["address"]["line1"], location["address"]["line2"]]))
+            item["street_address"] = ", ".join(
+                filter(None, [location["address"]["line1"], location["address"]["line2"]])
+            )
             item["addr_full"] = location["address"]["formattedAddress"]
             item["state"] = location["address"]["state"]
             item["phone"] = location["address"]["phone"]
@@ -41,5 +43,10 @@ class BestAndLessAUSpider(Spider):
             for day in location["openingHours"]["weekDayOpeningList"]:
                 if day["closed"]:
                     continue
-                item["opening_hours"].add_range(day["weekDay"], day["openingTime"]["formattedHour"].upper(), day["closingTime"]["formattedHour"].upper(), "%I:%M %p")
+                item["opening_hours"].add_range(
+                    day["weekDay"],
+                    day["openingTime"]["formattedHour"].upper(),
+                    day["closingTime"]["formattedHour"].upper(),
+                    "%I:%M %p",
+                )
             yield item
