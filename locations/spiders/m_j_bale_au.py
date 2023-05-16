@@ -21,7 +21,9 @@ class MJBaleAUSpider(Spider):
                 continue
             item = DictParser.parse(location)
             item["ref"] = location["number"]
-            item["street_address"] = ", ".join(filter(None, [location["address"]["address1"], location["address"]["address2"]]))
+            item["street_address"] = ", ".join(
+                filter(None, [location["address"]["address1"], location["address"]["address2"]])
+            )
             item.pop("website")
             item["email"] = location["website"]
             item["opening_hours"] = OpeningHours()
