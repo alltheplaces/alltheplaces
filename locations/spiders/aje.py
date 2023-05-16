@@ -3,7 +3,7 @@ from locations.storefinders.storemapper import StoremapperSpider
 
 class AjeSpider(StoremapperSpider):
     name = "aje"
-    item_attributes = {"brand": "AJE", "brand_wikidata": "Q2470307"}
+    item_attributes = {"brand": "Aje", "brand_wikidata": "Q2470307"}
     key = "7370"
 
     def parse_item(self, item, location):
