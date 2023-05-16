@@ -15,15 +15,17 @@ class SephoraMXSpider(Spider):
     user_agent = BROWSER_DEFAULT
 
     def parse(self, response):
-        for location in response.xpath('//li[@data-storeaddress]'):
+        for location in response.xpath("//li[@data-storeaddress]"):
             properties = {
-                "lat": location.xpath('./@data-latitude').get().strip(),
-                "lon": location.xpath('./@data-longitude').get().strip(),
-                "addr_full": re.sub(r"\s*\d+$", "", html.unescape(location.xpath('./@data-storeaddress').get().strip())),
-                "postcode": re.search(r"(\d+)", location.xpath('./@data-zip').get()).group(1),
-                "phone": location.xpath('./@data-phone').get().strip(),
+                "lat": location.xpath("./@data-latitude").get().strip(),
+                "lon": location.xpath("./@data-longitude").get().strip(),
+                "addr_full": re.sub(
+                    r"\s*\d+$", "", html.unescape(location.xpath("./@data-storeaddress").get().strip())
+                ),
+                "postcode": re.search(r"(\d+)", location.xpath("./@data-zip").get()).group(1),
+                "phone": location.xpath("./@data-phone").get().strip(),
             }
-            properties["name"] = html.unescape(location.xpath('./@data-name').get().strip())
+            properties["name"] = html.unescape(location.xpath("./@data-name").get().strip())
             if " - " in properties["name"]:
                 properties["name"] = properties["name"].split(" - ", 1)[1]
             properties["ref"] = properties["name"].lower().replace(" ", "_")
