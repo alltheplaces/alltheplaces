@@ -24,5 +24,7 @@ class HouseAUSpider(Spider):
             for day_name, hours in location["storeHours"].items():
                 if hours["open"] == "-" or hours["close"] == "-":
                     continue
-                item["opening_hours"].add_range(day_name.title(), hours["open"].replace(".", ":"), hours["close"].replace(".", ":"))
+                item["opening_hours"].add_range(
+                    day_name.title(), hours["open"].replace(".", ":"), hours["close"].replace(".", ":")
+                )
             yield item
