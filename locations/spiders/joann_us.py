@@ -12,7 +12,7 @@ class JOANNUSSpider(Where2GetItSpider):
     def parse_item(self, item, location):
         # Filtering server-side with a "notlike" condition doesn't
         # appear to work, so client-side filtering is used instead.
-        if "COMING SOON" in location["notes"]:
+        if location["notes"] and "COMING SOON" in location["notes"]:
             return
         item["state"] = location["state"]
         item["website"] = (
