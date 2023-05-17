@@ -14,7 +14,7 @@ class TacoTimeNorthwestUSSpider(scrapy.Spider):
 
     def parse(self, response):
         data_raw = (
-            response.xpath('//script[@id="app-js"]/following::script')
+            response.xpath('//script[contains(text(), "#bh-sl-map-container")]/text()')
             .extract_first()
             .split("dataRaw: ", 1)[1]
             .split(",\n", 1)[0]
