@@ -20,8 +20,8 @@ class BILLAATSpider(Spider):
             if not location["open"]:
                 continue
             item = DictParser.parse(location)
-            item["lat"] = location["coordinate"]["x"]
-            item["lon"] = location["coordinate"]["y"]
+            item["lon"] = location["coordinate"]["x"]
+            item["lat"] = location["coordinate"]["y"]
             item["opening_hours"] = OpeningHours()
             for day_hours in location["openingTimes"]:
                 item["opening_hours"].add_range(day_hours["dayOfWeek"], day_hours["times"][0], day_hours["times"][1])
