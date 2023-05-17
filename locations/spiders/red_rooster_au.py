@@ -3,7 +3,7 @@ import re
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
-from locations.categories import apply_yes_no, Extras, PaymentMethods
+from locations.categories import Extras, PaymentMethods, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
@@ -31,9 +31,13 @@ class RedRoosterAUSpider(Spider):
             item["name"] = location["attributes"]["storeName"]
             item["phone"] = location["attributes"].get("storePhone")
             item["email"] = location["attributes"].get("storeEmail")
-            
+
             if "urlPath" in location["relationships"].keys():
-                item["website"] = "https://redrooster.com.au/locations/" + location["relationships"]["urlPath"]["data"]["attributes"]["path"] + "/"
+                item["website"] = (
+                    "https://redrooster.com.au/locations/"
+                    + location["relationships"]["urlPath"]["data"]["attributes"]["path"]
+                    + "/"
+                )
 
             if "storeAddress" in location["relationships"].keys():
                 address_fields = location["relationships"]["storeAddress"]["data"]["attributes"]["addressComponents"]
@@ -60,17 +64,36 @@ class RedRoosterAUSpider(Spider):
                 apply_yes_no(PaymentMethods.CASH, item, "cash" in payment_methods, False)
                 apply_yes_no(PaymentMethods.APPLE_PAY, item, "apple_pay" in payment_methods, False)
                 apply_yes_no(PaymentMethods.GOOGLE_PAY, item, "google_pay" in payment_methods, False)
-            
+
             if "amenities" in location["relationships"].keys():
-                amenities = [amenity for amenity, available in location["relationships"]["amenities"]["data"]["attributes"].items() if available]
+                amenities = [
+                    amenity
+                    for amenity, available in location["relationships"]["amenities"]["data"]["attributes"].items()
+                    if available
+                ]
                 apply_yes_no(Extras.WIFI, item, "haveWifi" in amenities, False)
                 apply_yes_no(Extras.TOILETS, item, "haveToilet" in amenities, False)
-            
+
             if "collection" in location["relationships"].keys():
-                apply_yes_no(Extras.DRIVE_THROUGH, item, location["relationships"]["collection"]["data"]["attributes"]["pickupTypes"]["driveThru"], False)
-                apply_yes_no(Extras.TAKEAWAY, item, location["relationships"]["collection"]["data"]["attributes"]["pickupTypes"]["instore"], False)
-            
+                apply_yes_no(
+                    Extras.DRIVE_THROUGH,
+                    item,
+                    location["relationships"]["collection"]["data"]["attributes"]["pickupTypes"]["driveThru"],
+                    False,
+                )
+                apply_yes_no(
+                    Extras.TAKEAWAY,
+                    item,
+                    location["relationships"]["collection"]["data"]["attributes"]["pickupTypes"]["instore"],
+                    False,
+                )
+
             if "availability" in location["relationships"].keys():
-                apply_yes_no(Extras.DELIVERY, item, location["relationships"]["availability"]["data"]["attributes"]["web"]["delivery"]["isEnabled"], False)
-            
+                apply_yes_no(
+                    Extras.DELIVERY,
+                    item,
+                    location["relationships"]["availability"]["data"]["attributes"]["web"]["delivery"]["isEnabled"],
+                    False,
+                )
+
             yield item
