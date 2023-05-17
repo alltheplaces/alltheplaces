@@ -33,6 +33,8 @@ class ChemistWarehouseAUSpider(scrapy.Spider):
                     data["@store" + day[:3].lower()].replace(".", ":").replace("00:00AM - 00:00AM", "12:00AM - 12:00AM")
                 )
                 open_time, close_time = rule.split(" - ")
+                if open_time == "0" or close_time == "0":
+                    continue
                 oh.add_range(day, open_time, close_time, time_format="%I:%M%p")
             item["opening_hours"] = oh.as_opening_hours()
 
