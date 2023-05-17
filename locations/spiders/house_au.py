@@ -19,12 +19,12 @@ class HouseAUSpider(Spider):
         for location in response.json():
             item = DictParser.parse(location)
 
-            item["geometry"] = location["location"]
             # Some stores have wildly incorrect coordinates for
-            # locations as far away as France. Skip these stores.
+            # locations as far away as France. Only add geometry
+            # where coordinates existing within Australia.
             if result := reverse_geocoder.get((location["latitude"], location["longitude"]), mode=1, verbose=False):
-                if result["cc"] != "AU":
-                    continue
+                if result["cc"] == "AU":
+                    item["geometry"] = location["location"]
 
             item["street_address"] = ", ".join(filter(None, [location["address1"], location["address2"]]))
             item["website"] = "https://www.house.com.au/stores/" + location["slug"]
