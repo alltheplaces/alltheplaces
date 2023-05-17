@@ -1,3 +1,5 @@
+import reverse_geocoder
+
 from scrapy import Request, Spider
 
 from locations.dict_parser import DictParser
@@ -17,7 +19,14 @@ class HouseAUSpider(Spider):
     def parse(self, response):
         for location in response.json():
             item = DictParser.parse(location)
+
             item["geometry"] = location["location"]
+            # Some stores have wildly incorrect coordinates for
+            # locations as far away as France. Skip these stores.
+            if result := reverse_geocoder.get((location["latitude"], location["longitude"]), mode=1, verbose=False):
+                if result["cc"] != "AU":
+                    continue
+
             item["street_address"] = ", ".join(filter(None, [location["address1"], location["address2"]]))
             item["website"] = "https://www.house.com.au/stores/" + location["slug"]
             item["opening_hours"] = OpeningHours()
