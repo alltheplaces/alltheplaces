@@ -1,5 +1,4 @@
 import reverse_geocoder
-
 from scrapy import Request, Spider
 
 from locations.dict_parser import DictParser
