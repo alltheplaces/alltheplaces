@@ -1,9 +1,7 @@
-import pprint
-
 from scrapy import Spider
 from scrapy.crawler import Crawler
 
-from locations.items import Feature
+from locations.items import Feature, get_lat_lon
 from locations.pipelines.check_item_properties import CheckItemPropertiesPipeline
 
 
@@ -58,7 +56,6 @@ def test_invalid():
     for item in items:
         pipeline.process_item(item, spider)
 
-        pprint.pp(item)
         assert item.get("lat") is None
         assert item.get("lon") is None
         assert item.get("geometry") is None
@@ -79,5 +76,4 @@ def test_casting():
     for item in items:
         pipeline.process_item(item, spider)
 
-        assert item.get("lat") == 20.0
-        assert item.get("lon") == 20.0
+        assert get_lat_lon(item) == (20.0, 20.0)

@@ -58,6 +58,12 @@ def get_lat_lon(item: Feature) -> (float, float):
 
 
 def set_lat_lon(item: Feature, lat: float, lon: float):
-    item["lat"] = lat
-    item["lon"] = lon
-    item["geometry"] = None
+    item["lat"] = None
+    item["lon"] = None
+    if lat and lon:
+        item["geometry"] = {
+            "type": "Point",
+            "coordinates": [lon, lat],
+        }
+    else:
+        item["geometry"] = None
