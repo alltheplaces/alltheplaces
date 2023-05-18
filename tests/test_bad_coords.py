@@ -64,3 +64,12 @@ def test_bad_geometry():
         assert item.get("lat") is None
         assert item.get("lon") is None
         assert item.get("geometry") is None
+
+
+def test_casting():
+    items, pipeline, spider = get_objects(int(20), "20.0")
+    for item in items:
+        pipeline.process_item(item, spider)
+
+        assert item.get("lat") == 20.0
+        assert item.get("lon") == 20.0
