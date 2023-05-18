@@ -16,7 +16,7 @@ def get_objects(lat, lon):
             Feature(
                 geometry={
                     "type": "Point",
-                    "coordinates": [lat, lon],
+                    "coordinates": [lon, lat],
                 }
             ),
         ],
