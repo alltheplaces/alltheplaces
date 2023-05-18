@@ -1,0 +1,66 @@
+import pprint
+
+from scrapy import Spider
+from scrapy.crawler import Crawler
+
+from locations.items import Feature
+from locations.pipelines.check_item_properties import CheckItemPropertiesPipeline
+
+
+def get_objects(lat, lon):
+    spider = Spider("test")
+    spider.crawler = Crawler(Spider)
+    return (
+        [
+            Feature(lat=lat, lon=lon),
+            Feature(
+                geometry={
+                    "type": "Point",
+                    "coordinates": [lat, lon],
+                }
+            ),
+        ],
+        CheckItemPropertiesPipeline(),
+        spider,
+    )
+
+
+def test_out_of_bounds():
+    items, pipeline, spider = get_objects(100000, -100000)
+    for item in items:
+        pipeline.process_item(item, spider)
+
+        assert item.get("lat") is None
+        assert item.get("lon") is None
+        assert item.get("geometry") is None
+
+
+def test_throw_away_null_island():
+    items, pipeline, spider = get_objects(0, 0)
+    for item in items:
+        pipeline.process_item(item, spider)
+
+        assert item.get("lat") is None
+        assert item.get("lon") is None
+        assert item.get("geometry") is None
+
+
+def test_invalid():
+    items, pipeline, spider = get_objects("0", "0")
+    for item in items:
+        pipeline.process_item(item, spider)
+
+        pprint.pp(item)
+        assert item.get("lat") is None
+        assert item.get("lon") is None
+        assert item.get("geometry") is None
+
+
+def test_bad_geometry():
+    items, pipeline, spider = get_objects(None, None)
+    for item in items:
+        pipeline.process_item(item, spider)
+
+        assert item.get("lat") is None
+        assert item.get("lon") is None
+        assert item.get("geometry") is None

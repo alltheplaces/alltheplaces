@@ -1,24 +1,7 @@
 import reverse_geocoder
 
 from locations.country_utils import CountryUtils
-from locations.items import Feature
-
-
-def get_lat_lon(item: Feature) -> (float, float):
-    if geometry := item.get("geometry"):
-        if isinstance(geometry, dict):
-            if geometry.get("type") == "Point":
-                if coords := geometry.get("coordinates"):
-                    try:
-                        return float(coords[1]), float(coords[0])
-                    except (TypeError, ValueError):
-                        pass
-    else:
-        try:
-            return float(item.get("lat")), float(item.get("lon"))
-        except (TypeError, ValueError):
-            pass
-    return None
+from locations.items import get_lat_lon
 
 
 class CountryCodeCleanUpPipeline:
