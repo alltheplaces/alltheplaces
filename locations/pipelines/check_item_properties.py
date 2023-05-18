@@ -64,10 +64,11 @@ class CheckItemPropertiesPipeline:
                 spider.crawler.stats.inc_value("atp/field/lon/invalid")
                 lon = None
 
-            if math.fabs(lat) < 3 and math.fabs(lon) < 3:
-                spider.crawler.stats.inc_value("atp/geometry/null_island")
-                lat = None
-                lon = None
+            if isinstance(lat, float) and isinstance(lon, float):
+                if math.fabs(lat) < 3 and math.fabs(lon) < 3:
+                    spider.crawler.stats.inc_value("atp/geometry/null_island")
+                    lat = None
+                    lon = None
 
             set_lat_lon(item, lat, lon)
 
