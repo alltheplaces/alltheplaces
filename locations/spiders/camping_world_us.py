@@ -1,16 +1,15 @@
+import base64
 import json
 
 import scrapy
 from scrapy.http import JsonRequest, Request
 
-import base64
-
 from locations.items import Feature
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class CampingWorldSpider(scrapy.Spider):
-    name = "campingworld"
+class CampingWorldUSSpider(scrapy.Spider):
+    name = "camping_world_us"
     item_attributes = {"brand": "Camping World", "brand_wikidata": "Q5028383"}
 
     locator_url = "https://rv.campingworld.com/locations"
@@ -35,10 +34,7 @@ class CampingWorldSpider(scrapy.Spider):
 
     def parse_locator(self, response):
         # The locator HTML contains a JWT in a meta tag that we need to make the API call.
-        meta = response.xpath('//meta/@content')
-        meta_content = [s.get() for s in meta]
-        tokens = [s for s in meta_content if s.startswith("eyJ") and ".eyJ" in s]
-        token = tokens[0]
+        token = response.xpath('//meta[starts-with(@content, "eyJ")][contains(@content, ".eyJ")]/@content').get()
 
         if token is None:
             raise Exception("No token found in locator HTML")
@@ -47,8 +43,9 @@ class CampingWorldSpider(scrapy.Spider):
             url=self.api_url,
             method="POST",
             body=self.request_json,
-            headers={ "x-auth-token": token },
-            callback=self.parse)
+            headers={"x-auth-token": token},
+            callback=self.parse,
+        )
 
     def parse(self, response):
         for store in response.json()["closestDealer"]:
@@ -62,6 +59,7 @@ class CampingWorldSpider(scrapy.Spider):
                 postcode=store["billingpostalcode"],
                 city=store["billingcity"],
                 state=store["billingstatecode"],
+                country="US",
                 phone=store["phone"],
                 website=f"https://rv.campingworld.com/dealer/wichita-kansas{store['dealer_url']}",
             )
