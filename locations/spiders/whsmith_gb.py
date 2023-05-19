@@ -1,4 +1,5 @@
 import re
+import reverse_geocoder
 
 import scrapy
 
@@ -33,6 +34,15 @@ class WHSmithGBSpider(scrapy.Spider):
             item["street_address"] = ", ".join(filter(None, [store.get("address1"), store.get("address2")]))
             item["website"] = "https://www.whsmith.co.uk/stores/details/?StoreID=" + item["ref"]
             item["extras"] = {"type": store["_type"]}
+
+            # Some stores have wildly incorrect coordinates for
+            # locations as far away as the Indian Ocean. Only
+            # add geometry where coordinates existing within
+            # the United Kingdom.
+            if item.get("geometry"):
+                if result := reverse_geocoder.get((item["geometry"][0], item["geometry"][1]), mode=1, verbose=False):
+                    if result["cc"] != "GB":
+                        item.pop("geometry")
 
             item["opening_hours"] = OpeningHours()
             for day in DAYS_FULL:
