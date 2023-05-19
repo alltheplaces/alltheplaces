@@ -24,9 +24,13 @@ class TelenorDKSpider(Spider):
         for location in response.json():
             item = DictParser.parse(location)
             html = Selector(text=location["html"])
-            item["addr_full"] = re.sub(r"\s+", " ", ", ".join(filter(None, html.xpath('//div/div/div[1]/div/p/text()').getall())))
-            item["phone"] = html.xpath('//div/div/div[2]/p[1]/text()').get().replace("Telefon:", "").strip()
+            item["addr_full"] = re.sub(
+                r"\s+", " ", ", ".join(filter(None, html.xpath("//div/div/div[1]/div/p/text()").getall()))
+            )
+            item["phone"] = html.xpath("//div/div/div[2]/p[1]/text()").get().replace("Telefon:", "").strip()
             item["opening_hours"] = OpeningHours()
-            hours_string = " ".join(html.xpath('//div/div/div[3]/div//text()').getall()).strip()
-            item["opening_hours"].add_ranges_from_string(hours_string, days=DAYS_DK, named_day_ranges=NAMED_DAY_RANGES_DK)
+            hours_string = " ".join(html.xpath("//div/div/div[3]/div//text()").getall()).strip()
+            item["opening_hours"].add_ranges_from_string(
+                hours_string, days=DAYS_DK, named_day_ranges=NAMED_DAY_RANGES_DK
+            )
             yield item

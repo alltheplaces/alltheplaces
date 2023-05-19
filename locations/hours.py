@@ -351,7 +351,7 @@ NAMED_DAY_RANGES_EN = {
 }
 
 NAMED_DAY_RANGES_DK = {
-    "Hverdage": ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"], #Weekdays
+    "Hverdage": ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"],  # Weekdays
 }
 
 DELIMITERS_EN = {
