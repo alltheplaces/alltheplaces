@@ -216,6 +216,7 @@ class Fuel(Enum):
 
 
 class Extras(Enum):
+    AIR_CONDITIONING = "air_conditioning"
     ATM = "atm"
     BABY_CHANGING_TABLE = "changing_table"
     CALLING = "service:phone"
@@ -233,8 +234,10 @@ class Extras(Enum):
     PRINTING = "service:print"
     SCANING = "service:scan"
     SHOWERS = "shower"
+    SMOKING_AREA = "smoking=isolated"
     TAKEAWAY = "takeaway"
     TOILETS = "toilets"
+    TOILETS_WHEELCHAIR = "toilets:wheelchair"
     TRUCK_WASH = "truck_wash"
     WHEELCHAIR = "wheelchair"
     WIFI = "internet_access=wlan"
@@ -319,6 +322,8 @@ def apply_yes_no(attribute, item: Feature, state: bool, apply_positive_only: boo
         tag_key = attribute.value
     else:
         raise TypeError("string or Enum required")
+    if not state and "=" in tag_key:
+        return
 
     if "=" in tag_key:
         tag_key, tag_value = tag_key.split("=")
