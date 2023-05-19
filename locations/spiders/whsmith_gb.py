@@ -39,8 +39,8 @@ class WHSmithGBSpider(scrapy.Spider):
             # locations as far away as the Indian Ocean. Only
             # add geometry where coordinates existing within
             # the United Kingdom.
-            if item.get("geometry"):
-                if result := reverse_geocoder.get((item["geometry"][0], item["geometry"][1]), mode=1, verbose=False):
+            if item.get("geometry") and item["geometry"]["type"] == "Point":
+                if result := reverse_geocoder.get((item["geometry"]["coordinates"][0], item["geometry"]["coordinates"][1]), mode=1, verbose=False):
                     if result["cc"] != "GB":
                         item.pop("geometry")
 
