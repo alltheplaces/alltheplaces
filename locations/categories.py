@@ -97,7 +97,9 @@ class Categories(Enum):
     HOTEL = {"tourism": "hotel"}
     MONEY_TRANSFER = {"amenity": "money_transfer"}
     PHARMACY = {"amenity": "pharmacy", "healthcare": "pharmacy"}
+    PARCEL_LOCKER = {"amenity": "parcel_locker"}
     POST_BOX = {"amenity": "post_box"}
+    POST_DEPOT = {"amenity": "post_depot"}
     POST_OFFICE = {"amenity": "post_office"}
     PRODUCT_PICKUP = {"amenity": "product_pickup"}
     PUB = {"amenity": "pub"}
@@ -145,10 +147,14 @@ def apply_category(category, item):
 
 top_level_tags = [
     "amenity",
+    "club",
+    "craft",
     "emergency",
     "healthcare",
     "highway",
+    "landuse",
     "leisure",
+    "man_made",
     "office",
     "public_transport",
     "shop",
