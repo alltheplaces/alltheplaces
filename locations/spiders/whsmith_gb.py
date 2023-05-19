@@ -1,6 +1,6 @@
 import re
-import reverse_geocoder
 
+import reverse_geocoder
 import scrapy
 
 from locations.categories import Categories
