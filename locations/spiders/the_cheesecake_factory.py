@@ -13,9 +13,10 @@ class TheCheesecakeFactorySpider(Where2GetItSpider):
     def parse_item(self, item, location):
         if location["mallname"]:
             item["name"] = location["mallname"]
-        item["website"] = (
-            location["menu_url"].replace("https://menu.", "https://locations.").split("?utm_source=", 1)[0]
-        )
+        if location["menu_url"]:
+            item["website"] = (
+                location["menu_url"].replace("https://menu.", "https://locations.").split("?utm_source=", 1)[0]
+            )
         item["opening_hours"] = OpeningHours()
         for day_index in range(-1, 5, 1):
             item["opening_hours"].add_range(

@@ -1,7 +1,7 @@
 import reverse_geocoder
 from geonamescache import GeonamesCache
 
-from locations.pipelines.country_code_clean_up import get_lat_lon
+from locations.items import get_lat_lon
 from locations.spiders.xfinity import US_TERRITORIES
 
 STATES = {
