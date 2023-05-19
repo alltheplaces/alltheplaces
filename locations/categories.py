@@ -103,6 +103,7 @@ class Categories(Enum):
     POST_OFFICE = {"amenity": "post_office"}
     PRODUCT_PICKUP = {"amenity": "product_pickup"}
     PUB = {"amenity": "pub"}
+    TELEPHONE = {"amenity": "telephone"}
     RESTAURANT = {"amenity": "restaurant"}
     VETERINARY = {"amenity": "veterinary"}
 
