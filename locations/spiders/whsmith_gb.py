@@ -33,7 +33,7 @@ class WHSmithGBSpider(scrapy.Spider):
             item["street_address"] = ", ".join(filter(None, [store.get("address1"), store.get("address2")]))
             item["website"] = "https://www.whsmith.co.uk/stores/details/?StoreID=" + item["ref"]
             item["extras"] = {"type": store["_type"]}
-            
+
             item["opening_hours"] = OpeningHours()
             for day in DAYS_FULL:
                 if not store.get(f"c_openingTimes{day}") or "closed" in store[f"c_openingTimes{day}"].lower():
