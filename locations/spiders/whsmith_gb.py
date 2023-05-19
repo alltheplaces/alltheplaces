@@ -29,28 +29,31 @@ class WHSmithGBSpider(scrapy.Spider):
                 continue
 
             item = DictParser.parse(store)
-
             item["city"] = item["city"].strip()
-
             item["street_address"] = ", ".join(filter(None, [store.get("address1"), store.get("address2")]))
-
-            oh = OpeningHours()
+            item["website"] = "https://www.whsmith.co.uk/stores/details/?StoreID=" + item["ref"]
+            item["extras"] = {"type": store["_type"]}
+            
+            item["opening_hours"] = OpeningHours()
             for day in DAYS_FULL:
                 if not store.get(f"c_openingTimes{day}") or "closed" in store[f"c_openingTimes{day}"].lower():
                     continue
-
                 start_time, end_time = store[f"c_openingTimes{day}"].split("-")
-                oh.add_range(
-                    day=day,
-                    open_time="00:00" if start_time == "24hr" else start_time,
-                    close_time="24:00" if end_time == "24hr" else end_time,
-                )
-
-            item["opening_hours"] = oh.as_opening_hours()
-
-            item["website"] = "https://www.whsmith.co.uk/stores/details/?StoreID=" + item["ref"]
-
-            item["extras"] = {"type": store["_type"]}
+                if ":" not in start_time:
+                    if start_time == "24hr":
+                        start_time = "00:00"
+                    elif len(start_time) == 3:
+                        start_time = f"{start_time[0]}:{start_time[1:2]}"
+                    elif len(start_time) == 4:
+                        start_time = f"{start_time[0:1]}:{start_time[2:3]}"
+                if ":" not in end_time:
+                    if end_time == "24hr":
+                        end_time = "24:00"
+                    elif len(end_time) == 3:
+                        end_time = f"{end_time[0]}:{end_time[1:2]}"
+                    elif len(end_time) == 4:
+                        end_time = f"{end_time[0:1]}:{end_time[2:3]}"
+                item["opening_hours"].add_range(day, start_time, end_time)
 
             yield item
 
