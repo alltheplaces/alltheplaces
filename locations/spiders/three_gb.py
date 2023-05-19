@@ -1,5 +1,6 @@
 from locations.storefinders.yext import YextSpider
 
+
 class ThreeGB(YextSpider):
     name = "three_gb"
     item_attributes = {"brand": "Three", "brand_wikidata": "Q407009"}
