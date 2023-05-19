@@ -18,7 +18,11 @@ class CaffeNeroGBSpider(Spider):
 
     def parse(self, response):
         for location in response.json()["features"]:
-            if not location["properties"]["status"]["open"] or location["properties"]["status"]["opening_soon"] or location["properties"]["status"]["temp_closed"]:
+            if (
+                not location["properties"]["status"]["open"]
+                or location["properties"]["status"]["opening_soon"]
+                or location["properties"]["status"]["temp_closed"]
+            ):
                 continue
 
             item = DictParser.parse(location["properties"])
@@ -33,7 +37,7 @@ class CaffeNeroGBSpider(Spider):
                 if day_name == "holiday":
                     continue
                 item["opening_hours"].add_range(day_name.title(), day_hours["open"], day_hours["close"])
-            
+
             apply_yes_no(Extras.TAKEAWAY, item, location["properties"]["status"]["takeaway"], False)
             apply_yes_no(Extras.DELIVERY, item, location["properties"]["status"]["delivery"], False)
             apply_yes_no(Extras.WIFI, item, location["properties"]["amenities"]["wifi"], False)
