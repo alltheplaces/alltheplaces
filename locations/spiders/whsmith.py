@@ -1,15 +1,15 @@
 import re
-
 import reverse_geocoder
-import scrapy
+
+from scrapy import Request, Spider
 
 from locations.categories import Categories
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_FULL, OpeningHours
 
 
-class WHSmithGBSpider(scrapy.Spider):
-    name = "whsmith_gb"
+class WHSmithSpider(Spider):
+    name = "whsmith"
     item_attributes = {"brand": "WHSmith", "brand_wikidata": "Q1548712", "extras": Categories.SHOP_NEWSAGENT.value}
     allowed_domains = ["whsmith.co.uk"]
     start_urls = [
@@ -36,15 +36,17 @@ class WHSmithGBSpider(scrapy.Spider):
             item["extras"] = {"type": store["_type"]}
 
             # Some stores have wildly incorrect coordinates for
-            # locations as far away as the Indian Ocean. Only
-            # add geometry where coordinates existing within
-            # the United Kingdom.
-            if item.get("geometry") and item["geometry"]["type"] == "Point":
-                if result := reverse_geocoder.get(
-                    (item["geometry"]["coordinates"][0], item["geometry"]["coordinates"][1]), mode=1, verbose=False
-                ):
-                    if result["cc"] != "GB":
-                        item.pop("geometry")
+            # locations as far away as the Indian Ocean. Remove
+            # these incorrect coordinates.
+            # Some stores are located in IE rather than GB. Make
+            # the required change to the item's country.
+            if result := reverse_geocoder.get((item["lat"], item["lon"]), mode=1, verbose=False):
+                match result["cc"]:
+                    case "GB" | "IE" | "JE" | "IM" | "GG":
+                        item["country"] = result["cc"]
+                    case _:
+                        item.pop("lat")
+                        item.pop("lon")
 
             item["opening_hours"] = OpeningHours()
             for day in DAYS_FULL:
@@ -71,4 +73,4 @@ class WHSmithGBSpider(scrapy.Spider):
 
         start = int(re.findall(r"start=[0-9]+", response.url)[-1][6:]) + 200
         url = f"https://www.whsmith.co.uk/mobify/proxy/api/s/whsmith/dw/shop/v21_3/stores?latitude=57.28687230000001&longitude=-2.3815684&distance_unit=mi&max_distance=20012&start={start}&count=200"
-        yield scrapy.Request(url=url, callback=self.parse)
+        yield Request(url=url, callback=self.parse)
