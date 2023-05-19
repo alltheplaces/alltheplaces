@@ -16,7 +16,12 @@ class QuickBELUSpider(Spider):
             yield Request(url=url, callback=self.find_json_file)
 
     def find_json_file(self, response):
-        build_id = response.xpath('//script[contains(@src, "/_buildManifest.js")]/@src').get().replace("/_next/static/", "").replace("/_buildManifest.js", "")
+        build_id = (
+            response.xpath('//script[contains(@src, "/_buildManifest.js")]/@src')
+            .get()
+            .replace("/_next/static/", "")
+            .replace("/_buildManifest.js", "")
+        )
         yield JsonRequest(f"https://www.quick.be/_next/data/{build_id}/fr/restaurants.json")
 
     def parse(self, response):
@@ -33,5 +38,7 @@ class QuickBELUSpider(Spider):
             for day in location["opening_hours"]:
                 if day["opening_type"] != 1:
                     continue
-                item["opening_hours"].add_range(DAYS[day["weekday_from"] - 1], day["from_hour"], day["to_hour"], "%H:%M:%S")
+                item["opening_hours"].add_range(
+                    DAYS[day["weekday_from"] - 1], day["from_hour"], day["to_hour"], "%H:%M:%S"
+                )
             yield item
