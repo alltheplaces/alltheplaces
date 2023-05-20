@@ -11,6 +11,8 @@ class VakifBankTRSpider(scrapy.Spider):
     name = "vakifbank_tr"
     item_attributes = {"brand": "Vakıfbank", "brand_wikidata": "Q1148521"}
     allowed_domains = ["vakifbank.com.tr"]
+    # ATMs and branches may have the same id
+    no_refs = True
 
     def start_requests(self):
         url = "https://maps.vakifbank.com.tr/API/api/v1/Search/GetAllBranchAndAtmWithFiltersObj"
@@ -31,10 +33,6 @@ class VakifBankTRSpider(scrapy.Spider):
         data = response.json()
         for poi in data.get("ReturnObjectList"):
             item = Feature()
-            # TODO: more attributes:
-            #    "Branch/ATM for Physically Disabled",
-            #    "Branch/ATM for Visualy Disabled",
-            #    "Foreign Withdrawal ATM"
             item["ref"] = poi[7]
             item["lat"] = poi[0]
             item["lon"] = poi[1]
@@ -43,6 +41,6 @@ class VakifBankTRSpider(scrapy.Spider):
             item["phone"] = poi[4]
             if poi[8] == "ATM":
                 apply_category(Categories.ATM, item)
-            if poi[8] == "SUBE":
+            if poi[8] == "SUBE" or poi[8] == "B_SUBE":
                 apply_category(Categories.BANK, item)
             yield item
