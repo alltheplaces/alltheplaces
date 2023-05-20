@@ -16,7 +16,7 @@ class VakifBankTRSpider(scrapy.Spider):
         url = "https://maps.vakifbank.com.tr/API/api/v1/Search/GetAllBranchAndAtmWithFiltersObj"
         payload = {
             "CountryId": 0,
-            "WhichOne": 1,
+            "WhichOne": 1, # Branches
             "BranchNameOrCode": "",
             "CityId": -1,
             "TownId": -1,
@@ -24,14 +24,17 @@ class VakifBankTRSpider(scrapy.Spider):
             "Options": [],
         }
         yield JsonRequest(url=url, method="POST", body=json.dumps(payload), callback=self.parse)
-        payload['WhichOne'] = 2
+        payload["WhichOne"] = 2 # ATMs
         yield JsonRequest(url=url, method="POST", body=json.dumps(payload), callback=self.parse)
 
     def parse(self, response, **kwargs):
         data = response.json()
         for poi in data.get("ReturnObjectList"):
             item = Feature()
-            # TODO: attributes "Branch/ATM for Physically Disabled", "Branch/ATM for Visualy Disabled" and "Foreign Withdrawal ATM"
+            # TODO: more attributes:
+            #    "Branch/ATM for Physically Disabled", 
+            #    "Branch/ATM for Visualy Disabled",
+            #    "Foreign Withdrawal ATM"
             item["ref"] = poi[7]
             item["lat"] = poi[0]
             item["lon"] = poi[1]
