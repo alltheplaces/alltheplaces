@@ -11,7 +11,7 @@ class VakifBankTRSpider(scrapy.Spider):
     name = "vakifbank_tr"
     item_attributes = {"brand": "Vakıfbank", "brand_wikidata": "Q1148521"}
     allowed_domains = ["vakifbank.com.tr"]
-    # ATMs and branches may have the same id
+    requires_proxy = "TR"
     no_refs = True
 
     def start_requests(self):
