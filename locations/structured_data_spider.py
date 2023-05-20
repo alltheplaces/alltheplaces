@@ -34,6 +34,7 @@ def clean_twitter(url: str) -> str:
         .replace("twitter.com", "")
         .replace("twitter.co.uk", "")
         .strip("@/")
+        .split("?", 1)[0]
     )
 
 
