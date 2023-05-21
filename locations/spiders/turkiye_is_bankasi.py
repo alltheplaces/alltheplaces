@@ -1,6 +1,6 @@
 from urllib.parse import urljoin
+
 import scrapy
-from scrapy.http import JsonRequest
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
