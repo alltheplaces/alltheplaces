@@ -26,5 +26,5 @@ class WrenKitchensGB(CrawlSpider, StructuredDataSpider):
 
     def post_process_item(self, item, response, ld_data):
         google_url.extract_google_position(item, response)
-        item["website"] = response.url #Some URLs redirect
+        item["website"] = response.url  # Some URLs redirect
         yield item
