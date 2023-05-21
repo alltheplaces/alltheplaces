@@ -16,10 +16,18 @@ class CintasSpider(Spider):
     def start_requests(self):
         for url in self.start_urls:
             # A few search locations are needed to cover the United States and Canada
-            yield JsonRequest(url=url, method="POST", data={"lat": "38.80", "lng": "-116.42", "radiusInMiles": 10000}) #Nevada
-            yield JsonRequest(url=url, method="POST", data={"lat": "35.52", "lng": "-86.58", "radiusInMiles": 10000}) #Tennessee
-            yield JsonRequest(url=url, method="POST", data={"lat": "46.88", "lng": "-110.36", "radiusInMiles": 10000}) #Montana
-            yield JsonRequest(url=url, method="POST", data={"lat": "51.25", "lng": "-85.32", "radiusInMiles": 10000}) #Ontario
+            yield JsonRequest(
+                url=url, method="POST", data={"lat": "38.80", "lng": "-116.42", "radiusInMiles": 10000}
+            )  # Nevada
+            yield JsonRequest(
+                url=url, method="POST", data={"lat": "35.52", "lng": "-86.58", "radiusInMiles": 10000}
+            )  # Tennessee
+            yield JsonRequest(
+                url=url, method="POST", data={"lat": "46.88", "lng": "-110.36", "radiusInMiles": 10000}
+            )  # Montana
+            yield JsonRequest(
+                url=url, method="POST", data={"lat": "51.25", "lng": "-85.32", "radiusInMiles": 10000}
+            )  # Ontario
 
     def parse(self, response):
         for location in response.xpath("//li[@data-location]"):
