@@ -18,12 +18,12 @@ class KuveytTurkTRSpider(Spider):
 
     def parse(self, response, **kwargs):
         endpoint = response.xpath('//script[contains(text(), "addresses")]/text()').re_first(r'"bnh":"(.+?)"')
-        params = {"p6": 0} # Branches
-        yield JsonRequest(urljoin(self.base_url, endpoint + "&" + urlencode(params)), callback=self.parse_pois)  
-        params["p6"] = 1 # ATMs
-        yield JsonRequest(urljoin(self.base_url, endpoint + "&" + urlencode(params)), callback=self.parse_pois)  
-        params["p6"] = 2 # XTMs (a special type of ATMs)
-        yield JsonRequest(urljoin(self.base_url, endpoint + "&" + urlencode(params)), callback=self.parse_pois)  
+        params = {"p6": 0}  # Branches
+        yield JsonRequest(urljoin(self.base_url, endpoint + "&" + urlencode(params)), callback=self.parse_pois)
+        params["p6"] = 1  # ATMs
+        yield JsonRequest(urljoin(self.base_url, endpoint + "&" + urlencode(params)), callback=self.parse_pois)
+        params["p6"] = 2  # XTMs (a special type of ATMs)
+        yield JsonRequest(urljoin(self.base_url, endpoint + "&" + urlencode(params)), callback=self.parse_pois)
 
     def parse_pois(self, response, **kwargs):
         pois = response.json()
