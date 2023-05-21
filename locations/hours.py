@@ -579,8 +579,8 @@ class OpeningHours:
         # Compile regular expression parts together to create the
         # two regular expressions.
         days_regex = days_regex + r"|".join(days_regex_parts) + r")"
-        time_regex_12h = r"(?<!\d)(0?[0-9]|1[012])(?:(?:[:\.]?([0-5][0-9]))(?:[:\.]?[0-5][0-9])?)?\s*([AP]M)?(?!\d)"
-        time_regex_24h = r"(?<!\d)(0?[0-9]|1[0-9]|2[0-4])(?:[:\.]?([0-5][0-9]))(?:[:\.]?[0-5][0-9])?(?!(?:\d|[AP]M))"
+        time_regex_12h = r"(?<!\d)(\d(?!\d)|0\d|1[012])(?:(?:[:\.]?([0-5]\d))(?:[:\.]?[0-5]\d)?)?\s*([AP]M)?(?!\d)"
+        time_regex_24h = r"(?<!\d)(\d(?!\d)|[01]\d|2[0-4])(?:[:\.]?([0-5]\d))(?:[:\.]?[0-5]\d)?(?!(?:\d|[AP]M))"
         full_regex_12h = (
             days_regex + r"(?:\W+|" + delimiter_regex + r")" + time_regex_12h + delimiter_regex + time_regex_12h
         )
