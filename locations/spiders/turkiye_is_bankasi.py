@@ -13,16 +13,6 @@ class TurkiyeIsBankasi(scrapy.Spider):
     custom_settings = {"ROBOTSTXT_OBEY": False}
     base_url = "https://www.isbank.com.tr/_layouts/15/DV.Isbank.Web/ATMBranchLocatorHandler.ashx"
 
-    # def start_requests(self):
-    #     yield JsonRequest(
-    #         url="https://www.isbank.com.tr/_layouts/15/DV.Isbank.Web/ATMBranchLocatorHandler.ashx?MethodName=getAllDomesticCities&lang=tr",
-    #         callback=self.parse,
-    #     )
-    #     yield JsonRequest(
-    #         url="https://www.isbank.com.tr/_layouts/15/DV.Isbank.Web/ATMBranchLocatorHandler.ashx?MethodName=getAbroadCountries&lang=tr",
-    #         callback=self.parse,
-    #     )
-
     def start_requests(self):
         urls = [
             {"url": urljoin(self.base_url, "?MethodName=getAllDomesticCities&lang=tr"), "callback": self.parse_cities},
