@@ -18,7 +18,6 @@ class DenizbankTRSpider(scrapy.Spider):
             item = DictParser.parse(poi)
             # TODO: map "is-visually-imparied", "is-orthopedical-handicapped", "is-exchange-support" to OSM tags if possible
             item["ref"] = poi.get("code")
-            item["name"] = "Denizbank"
             item["phone"] = poi.get("phone").strip() if poi.get("phone") else None
             if poi["record-type"] == "atm":
                 apply_category(Categories.ATM, item)
