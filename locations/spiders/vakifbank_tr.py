@@ -25,9 +25,9 @@ class VakifBankTRSpider(scrapy.Spider):
             "NeighborhoodId": -1,
             "Options": [],
         }
-        yield JsonRequest(url=url, method="POST", body=json.dumps(payload), callback=self.parse)
+        yield JsonRequest(url=url, data=payload, callback=self.parse)
         payload["WhichOne"] = 2  # ATMs
-        yield JsonRequest(url=url, method="POST", body=json.dumps(payload), callback=self.parse)
+        yield JsonRequest(url=url, data=payload, callback=self.parse)
 
     def parse(self, response, **kwargs):
         data = response.json()
