@@ -1,15 +1,12 @@
-
-
 import scrapy
-from locations.categories import Categories
-from locations.categories import apply_category
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
 
 class VakifKatilimTRSpider(scrapy.Spider):
     name = "vakif_katilim_tr"
-    item_attributes = { 'brand': "Vakıf Katılım", "brand_wikidata": "Q31188912" }
+    item_attributes = {"brand": "Vakıf Katılım", "brand_wikidata": "Q31188912"}
     start_urls = ["https://www.vakifkatilim.com.tr/tr/diger/subeler-ve-atmler"]
 
     def parse(self, response):
@@ -23,9 +20,9 @@ class VakifKatilimTRSpider(scrapy.Spider):
         data = response.json()
         for poi in data.get("information"):
             item = DictParser.parse(poi)
-            item['ref'] = poi.get("branchType")
-            item['extras']['addr:district'] = poi.get("districtName")
-            if poi.get('type'):
+            item["ref"] = poi.get("branchType")
+            item["extras"]["addr:district"] = poi.get("districtName")
+            if poi.get("type"):
                 apply_category(Categories.ATM, item)
             else:
                 apply_category(Categories.BANK, item)
