@@ -389,5 +389,7 @@ def test_add_ranges_from_string():
     )
 
     o = OpeningHours()
-    o.add_ranges_from_string("{Sun|056:00AM-08:00PM}{Mon|05:00AM-09:00PM}{Tue|05:00AM-09:00PM}{Wed|05:00AM-09:00PM}{Thu|05:00AM-09:00PM}{Fri|05:00AM-09:00PM}{Sat|c}")
+    o.add_ranges_from_string(
+        "{Sun|056:00AM-08:00PM}{Mon|05:00AM-09:00PM}{Tue|05:00AM-09:00PM}{Wed|05:00AM-09:00PM}{Thu|05:00AM-09:00PM}{Fri|05:00AM-09:00PM}{Sat|c}"
+    )
     assert o.as_opening_hours() == "Mo-Fr 05:00-21:00"

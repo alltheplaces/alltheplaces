@@ -12,6 +12,7 @@ from locations.hours import OpeningHours
 # To use this spider, specify a brand_id (Itemid in API URLs)
 # as well as one or more country names in the country_list array.
 
+
 class MetaLocatorSpider(Spider):
     dataset_attributes = {"source": "api", "api": "metalocator.com"}
     brand_id = None
@@ -21,7 +22,9 @@ class MetaLocatorSpider(Spider):
     def start_requests(self):
         for country in self.country_list:
             country_urlsafe = quote_plus(country)
-            yield JsonRequest(url=f"https://code.metalocator.com/webapi/api/search/?Itemid={self.brand_id}&country={country_urlsafe}&limit=1000000")
+            yield JsonRequest(
+                url=f"https://code.metalocator.com/webapi/api/search/?Itemid={self.brand_id}&country={country_urlsafe}&limit=1000000"
+            )
 
     def parse(self, response, **kwargs):
         for location in response.json():
