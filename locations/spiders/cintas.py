@@ -7,15 +7,19 @@ from locations.hours import OpeningHours
 from locations.items import Feature
 
 
-class CintasUSSpider(Spider):
-    name = "cintas_us"
+class CintasSpider(Spider):
+    name = "cintas"
     item_attributes = {"brand": "Cintas", "brand_wikidata": "Q1092571"}
     allowed_domains = ["cintas.com"]
     start_urls = ["https://www.cintas.com/location-finder/GetLocationsByGeoCoordinates"]
 
     def start_requests(self):
         for url in self.start_urls:
-            yield JsonRequest(url=url, method="POST", data={"lat": "44.97", "lng": "-103.77", "radiusInMiles": 100000})
+            # A few search locations are needed to cover the United States and Canada
+            yield JsonRequest(url=url, method="POST", data={"lat": "38.80", "lng": "-116.42", "radiusInMiles": 10000}) #Nevada
+            yield JsonRequest(url=url, method="POST", data={"lat": "35.52", "lng": "-86.58", "radiusInMiles": 10000}) #Tennessee
+            yield JsonRequest(url=url, method="POST", data={"lat": "46.88", "lng": "-110.36", "radiusInMiles": 10000}) #Montana
+            yield JsonRequest(url=url, method="POST", data={"lat": "51.25", "lng": "-85.32", "radiusInMiles": 10000}) #Ontario
 
     def parse(self, response):
         for location in response.xpath("//li[@data-location]"):
