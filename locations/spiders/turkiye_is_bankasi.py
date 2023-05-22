@@ -1,6 +1,7 @@
 from urllib.parse import urljoin
 
 import scrapy
+from scrapy import Request, FormRequest
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
@@ -14,17 +15,11 @@ class TurkiyeIsBankasi(scrapy.Spider):
     base_url = "https://www.isbank.com.tr/_layouts/15/DV.Isbank.Web/ATMBranchLocatorHandler.ashx"
 
     def start_requests(self):
-        urls = [
-            {"url": urljoin(self.base_url, "?MethodName=getAllDomesticCities&lang=tr"), "callback": self.parse_cities},
-            {"url": urljoin(self.base_url, "?MethodName=getAbroadCountries&lang=tr"), "callback": self.parse_countries},
-        ]
-
-        for url in urls:
-            yield scrapy.Request(url=url["url"], callback=url["callback"])
+        yield Request(url=urljoin(self.base_url, "?MethodName=getAllDomesticCities&lang=tr"), callback=self.parse_cities)
+        yield Request(url=urljoin(self.base_url, "?MethodName=getAbroadCountries&lang=tr"), callback=self.parse_countries)
 
     def parse_cities(self, response):
-        data = response.json()
-        cities = data
+        cities = response.json()
 
         for city in cities:
             city_name = city["CityName"]
@@ -37,7 +32,7 @@ class TurkiyeIsBankasi(scrapy.Spider):
                 "ATMInput": "{}",
             }
 
-            yield scrapy.FormRequest(
+            yield FormRequest(
                 urljoin(self.base_url, "?MethodName=doSearchByCityProvince"),
                 formdata=form_data,
                 callback=self.parse_pois,
@@ -45,8 +40,7 @@ class TurkiyeIsBankasi(scrapy.Spider):
             )
 
     def parse_countries(self, response):
-        data = response.json()
-        countries = data
+        countries = response.json()
 
         for country in countries:
             country_code = country["CountryCode"]
@@ -60,7 +54,7 @@ class TurkiyeIsBankasi(scrapy.Spider):
             # TODO: get city for pois in countries other than Turkey
             #       from "?MethodName=getCityByCountry" endpoint
 
-            yield scrapy.FormRequest(
+            yield FormRequest(
                 urljoin(self.base_url, "?MethodName=doSearchByCityCountry"),
                 formdata=form_data,
                 callback=self.parse_pois,
