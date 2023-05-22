@@ -15,6 +15,6 @@ class BlueIllusionSpider(Spider):
         script = response.xpath('//script[contains(text(), "stores")]/text()').get()
         for location in json5.loads(re.search(r"stores:\s*(\[.+?\])", script, re.DOTALL).group(1)):
             item = DictParser.parse(location)
-            item["website"] = f'https://www.blueillusion.com{location["url"]}'
+            item["website"] = response.urljoin(location["url"])
 
             yield item
