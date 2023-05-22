@@ -1,7 +1,7 @@
 from urllib.parse import urljoin
 
 import scrapy
-from scrapy import Request, FormRequest
+from scrapy import FormRequest, Request
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
@@ -15,8 +15,12 @@ class TurkiyeIsBankasi(scrapy.Spider):
     base_url = "https://www.isbank.com.tr/_layouts/15/DV.Isbank.Web/ATMBranchLocatorHandler.ashx"
 
     def start_requests(self):
-        yield Request(url=urljoin(self.base_url, "?MethodName=getAllDomesticCities&lang=tr"), callback=self.parse_cities)
-        yield Request(url=urljoin(self.base_url, "?MethodName=getAbroadCountries&lang=tr"), callback=self.parse_countries)
+        yield Request(
+            url=urljoin(self.base_url, "?MethodName=getAllDomesticCities&lang=tr"), callback=self.parse_cities
+        )
+        yield Request(
+            url=urljoin(self.base_url, "?MethodName=getAbroadCountries&lang=tr"), callback=self.parse_countries
+        )
 
     def parse_cities(self, response):
         cities = response.json()
