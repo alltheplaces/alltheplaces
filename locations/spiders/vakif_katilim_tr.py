@@ -10,8 +10,7 @@ class VakifKatilimTRSpider(scrapy.Spider):
     start_urls = ["https://www.vakifkatilim.com.tr/tr/diger/subeler-ve-atmler"]
 
     def parse(self, response):
-        script_text = response.xpath('//script[contains(text(), "langId:")]//text()').get()
-        lang_id = scrapy.Selector(text=script_text).re_first(r"langId:\s*'([^']+)'")
+        lang_id = response.xpath('//script[contains(text(), "langId:")]//text()').re_first(r"langId:\s*'([^']+)'")
 
         pois_url = f"https://www.vakifkatilim.com.tr/plugins/Informations?langId={lang_id}&slug=sube-ve-atm"
         yield scrapy.Request(pois_url, callback=self.parse_pois)
