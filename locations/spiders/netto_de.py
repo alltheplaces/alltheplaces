@@ -1,5 +1,6 @@
 import scrapy
 
+from locations.categories import Categories
 from locations.hours import OpeningHours
 from locations.items import Feature
 
@@ -14,9 +15,20 @@ DAY_MAPPING = {
 }
 
 
-class NettoSpider(scrapy.Spider):
-    name = "netto"
-    item_attributes = {"brand": "Netto Marken-Discount", "brand_wikidata": "Q879858"}
+class NettoDESpider(scrapy.Spider):
+    name = "netto_de"
+    NETTO_CITY = {"brand": "Netto City", "brand_wikidata": "Q879858", "extras": Categories.SHOP_SUPERMARKET.value}
+    NETTO_GETRANKE = {
+        "brand": "Netto Getränke-Discount",
+        "brand_wikidata": "Q879858",
+        "extras": Categories.SHOP_BEVERAGES.value,
+    }
+    NETTO_MARKEN = {
+        "brand": "Netto Marken-Discount",
+        "brand_wikidata": "Q879858",
+        "extras": Categories.SHOP_SUPERMARKET.value,
+    }
+    item_attributes = NETTO_MARKEN
     allowed_domains = ["netto-online.de"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
@@ -89,7 +101,6 @@ class NettoSpider(scrapy.Spider):
                 "city": store["city"],
                 "state": store["state"],
                 "postcode": store["post_code"],
-                "country": "DE",
                 "lat": store["coord_latitude"],
                 "lon": store["coord_longitude"],
                 "website": "https://www.netto-online.de/filialen/{city}/{street}/{id}".format(
@@ -98,6 +109,16 @@ class NettoSpider(scrapy.Spider):
                     id=store["store_id"],
                 ),
             }
+
+            if store["store_name"] == "Netto City":
+                properties.update(self.NETTO_CITY)
+            elif store["store_name"] == "Netto Getränke-Discount":
+                properties.update(self.NETTO_GETRANKE)
+            elif store["store_name"] == "Netto Marken-Discount":
+                properties.update(self.NETTO_MARKEN)
+            else:
+                properties["brand"] = store["store_name"]
+                self.crawler.stats.inc_value(f'atp/netto_de/unmapped_brand/{store["store_name"]}')
 
             properties["opening_hours"] = self.parse_opening_hours(store["store_opening"])
 

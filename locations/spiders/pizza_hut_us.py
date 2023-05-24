@@ -2,18 +2,25 @@ import re
 
 import scrapy
 
+from locations.categories import Categories
 from locations.items import Feature
 
 
-class PizzaHutSpider(scrapy.Spider):
-    name = "pizza_hut"
-    item_attributes = {
-        "brand": "Pizza Hut",
+class PizzaHutUSSpider(scrapy.Spider):
+    name = "pizza_hut_us"
+    PIZZA_HUT = {"brand": "Pizza Hut", "brand_wikidata": "Q191615", "extras": Categories.RESTAURANT.value}
+    PIZZA_HUT_EXPRESS = {
+        "brand": "Pizza Hut Express",
         "brand_wikidata": "Q191615",
-        "country": "US",
+        "extras": Categories.FAST_FOOD.value,
     }
+    PIZZA_HUT_DELIVERY = {
+        "brand": "Pizza Hut Delivery",
+        "brand_wikidata": "Q191615",
+        "extras": Categories.FAST_FOOD.value,
+    }
+    item_attributes = PIZZA_HUT
     allowed_domains = ["pizzahut.com"]
-    download_delay = 0.1
     start_urls = ("https://locations.pizzahut.com/",)
 
     def parse(self, response):
@@ -44,7 +51,7 @@ class PizzaHutSpider(scrapy.Spider):
         ref = "_".join(ref)
         properties = {
             "name": response.xpath('//span[@class="c-address-street-1"]/text()').extract_first(),
-            "addr_full": response.xpath('//span[@class="c-address-street-1"]/text()').extract_first(),
+            "street_address": response.xpath('//span[@class="c-address-street-1"]/text()').extract_first(),
             "phone": response.xpath('//span[@itemprop="telephone"]/text()').extract_first(),
             "city": response.xpath('//span[@class="c-address-city"]/text()').extract_first(),
             "state": response.xpath('//abbr[@class="c-address-state"]/text()').extract_first(),
@@ -54,5 +61,16 @@ class PizzaHutSpider(scrapy.Spider):
             "lat": float(response.xpath('//meta[@itemprop="latitude"]/@content').extract_first()),
             "lon": float(response.xpath('//meta[@itemprop="longitude"]/@content').extract_first()),
         }
+
+        brand = response.xpath(
+            '//h1[@class="HeroRedesign-title Heading-head--redesign"]/span[@itemprop="name"]/text()'
+        ).get()
+        if brand == "Pizza Hut":
+            properties.update(self.PIZZA_HUT)
+        elif brand == "Pizza Hut Express":
+            properties.update(self.PIZZA_HUT_EXPRESS)
+        else:
+            properties["brand"] = brand
+            self.crawler.stats.inc_value(f"atp/pizza_hut_us/unmapped_brand/{brand}")
 
         yield Feature(**properties)
