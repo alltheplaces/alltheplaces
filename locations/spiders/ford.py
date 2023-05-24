@@ -1,9 +1,9 @@
 import functools
-import json
 
 import pycountry
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_FULL, OpeningHours
 
@@ -148,12 +148,11 @@ class FordSpider(scrapy.Spider):
 
     def start_requests(self):
         for country in self.available_countries:
-            url = f"https://spatial.virtualearth.net/REST/v1/data/1652026ff3b247cd9d1f4cc12b9a080b/FordEuropeDealers_Transition/Dealer?$filter=CountryCode%20Eq%20%27{country}%27&$top=100000&$format=json&key=Al1EdZ_aW5T6XNlr-BJxCw1l4KaA0tmXFI_eTl1RITyYptWUS0qit_MprtcG7w2F&Jsonp=collectResults&$skip=0"
+            url = f"https://spatial.virtualearth.net/REST/v1/data/1652026ff3b247cd9d1f4cc12b9a080b/FordEuropeDealers_Transition/Dealer?$filter=CountryCode%20Eq%20%27{country}%27&$top=100000&$format=json&key=Al1EdZ_aW5T6XNlr-BJxCw1l4KaA0tmXFI_eTl1RITyYptWUS0qit_MprtcG7w2F&$skip=0"
             yield scrapy.Request(url=url, callback=self.parse_stores)
 
     def parse_stores(self, response):
-        response_json = json.loads(response.text.lstrip("collectResults(").rstrip(")"))
-        results = response_json.get("d").get("results")
+        results = response.json().get("d").get("results")
 
         for data in results:
             oh = OpeningHours()
@@ -175,8 +174,16 @@ class FordSpider(scrapy.Spider):
             item["name"] = data.get("DealerName")
             item["country"] = self.get_country_code(data.get("CountryCode"))
             item["opening_hours"] = oh
+            item["website"] = data["PrimaryURL"]
             item["brand"] = self.brand_mapping.get(data.get("Brand")).get("brand")
             item["brand_wikidata"] = self.brand_mapping.get(data.get("Brand")).get("brand_wikidata")
+
+            if data["HasSalesDepartmentPV"] or data["HasSalesDepartmentCV"]:
+                apply_category(Categories.SHOP_CAR, item)
+            elif data["HasServiceDepartmentPV"] or data["HasServiceDepartmentCV"]:
+                apply_category(Categories.SHOP_CAR_REPAIR, item)
+            elif data["HasPartsDepartment"]:
+                apply_category(Categories.SHOP_CAR_PARTS, item)
 
             yield item
 
