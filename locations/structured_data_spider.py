@@ -1,4 +1,5 @@
 import re
+from typing import Iterable
 from urllib.parse import parse_qs, urlencode, urljoin, urlparse
 
 from scrapy import Selector, Spider
@@ -138,51 +139,79 @@ class StructuredDataSpider(Spider):
     json_parser = "json"
     time_format = "%H:%M"
 
-    def parse_sd(self, response):  # noqa: C901
+    def __init__(self):
+        for i, wanted in enumerate(self.wanted_types):
+            if isinstance(wanted, list):
+                self.wanted_types[i] = [LinkedDataParser.clean_type(t) for t in wanted]
+            else:
+                self.wanted_types[i] = LinkedDataParser.clean_type(wanted)
+
+    def parse(self, response: Response, **kwargs):
+        yield from self.parse_sd(response)
+
+    def parse_sd(self, response: Response):  # noqa: C901
         MicrodataParser.convert_to_json_ld(response)
-        for wanted_type in self.wanted_types:
-            if ld_item := LinkedDataParser.find_linked_data(response, wanted_type, json_parser=self.json_parser):
-                self.pre_process_data(ld_item)
+        for ld_item in self.iter_linked_data(response):
+            self.pre_process_data(ld_item)
 
-                item = LinkedDataParser.parse_ld(ld_item, time_format=self.time_format)
+            item = LinkedDataParser.parse_ld(ld_item, time_format=self.time_format)
 
-                url = get_url(response)
+            url = get_url(response)
 
-                if item["ref"] is None:
-                    item["ref"] = self.get_ref(url, response)
+            if item["ref"] is None:
+                item["ref"] = self.get_ref(url, response)
 
-                if isinstance(item["website"], list):
-                    item["website"] = item["website"][0]
+            if isinstance(item["website"], list):
+                item["website"] = item["website"][0]
 
-                if not item["website"]:
-                    item["website"] = url
-                elif item["website"].startswith("www"):
-                    item["website"] = "https://" + item["website"]
-                elif item["website"].startswith("/"):
-                    item["website"] = urljoin(response.url, item["website"])
+            if not item["website"]:
+                item["website"] = url
+            elif item["website"].startswith("www"):
+                item["website"] = "https://" + item["website"]
+            elif item["website"].startswith("/"):
+                item["website"] = urljoin(response.url, item["website"])
 
-                if self.search_for_email and item["email"] is None:
-                    extract_email(item, response)
+            if self.search_for_email and item["email"] is None:
+                extract_email(item, response)
 
-                if self.search_for_phone and item["phone"] is None:
-                    extract_phone(item, response)
+            if self.search_for_phone and item["phone"] is None:
+                extract_phone(item, response)
 
-                if self.search_for_twitter and item.get("twitter") is None:
-                    extract_twitter(item, response)
+            if self.search_for_twitter and item.get("twitter") is None:
+                extract_twitter(item, response)
 
-                if self.search_for_facebook and item.get("facebook") is None:
-                    extract_facebook(item, response)
+            if self.search_for_facebook and item.get("facebook") is None:
+                extract_facebook(item, response)
 
-                if self.search_for_image and item.get("image") is None:
-                    extract_image(item, response)
+            if self.search_for_image and item.get("image") is None:
+                extract_image(item, response)
 
-                if self.search_for_instagram and not item["extras"].get("instagram"):
-                    extract_instagram(item, response)
+            if self.search_for_instagram and not item["extras"].get("instagram"):
+                extract_instagram(item, response)
 
-                if item.get("image") and item["image"].startswith("/"):
-                    item["image"] = urljoin(response.url, item["image"])
+            if item.get("image") and item["image"].startswith("/"):
+                item["image"] = urljoin(response.url, item["image"])
 
-                yield from self.post_process_item(item, response, ld_item) or []
+            yield from self.post_process_item(item, response, ld_item) or []
+
+    def iter_linked_data(self, response: Response) -> Iterable[dict]:
+        for ld_obj in LinkedDataParser.iter_linked_data(response):
+            if not ld_obj.get("@type"):
+                continue
+
+            types = ld_obj["@type"]
+
+            if not isinstance(types, list):
+                types = [types]
+
+            types = [LinkedDataParser.clean_type(t) for t in types]
+
+            for wanted_types in self.wanted_types:
+                if isinstance(wanted_types, list):
+                    if all(wanted in types for wanted in wanted_types):
+                        yield ld_obj
+                elif wanted_types in types:
+                    yield ld_obj
 
     def get_ref(self, url: str, response: Response) -> str:
         if hasattr(self, "rules"):  # Attempt to pull a match from CrawlSpider.rules
@@ -198,9 +227,6 @@ class StructuredDataSpider(Spider):
                     if len(match.groups()) > 0:
                         return match.group(1)
         return url
-
-    def parse(self, response, **kwargs):
-        yield from self.parse_sd(response)
 
     def pre_process_data(self, ld_data, **kwargs):
         """Override with any pre-processing on the item."""
