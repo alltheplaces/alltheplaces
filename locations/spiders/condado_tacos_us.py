@@ -5,10 +5,9 @@ from scrapy.spiders import SitemapSpider
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class CondadoTacosSpider(SitemapSpider, StructuredDataSpider):
-    name = "condado_tacos"
-    item_attributes = {"brand": "Condado Tacos"}
-    wanted_types = [["Restaurant", "BarOrPub", "LocalBusiness"]]
+class CondadoTacosUSSpider(SitemapSpider, StructuredDataSpider):
+    name = "condado_tacos_us"
+    item_attributes = {"brand": "Condado Tacos", "brand:wikidata": "Q118640152"}
     allowed_domains = ["locations.condadotacos.com"]
     sitemap_urls = ["https://locations.condadotacos.com/sitemap.xml"]
     sitemap_rules = [(r"https://locations.condadotacos.com\/([-\w]+)\/([-\w]+)$", "parse_sd")]
