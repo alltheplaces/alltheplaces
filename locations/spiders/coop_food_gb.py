@@ -1,15 +1,15 @@
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.spiders.vapestore_gb import clean_address
 
 
-class CoopFoodSpider(scrapy.Spider):
-    name = "coopfood"
+class CoopFoodGBSpider(scrapy.Spider):
+    name = "coop_food_gb"
     item_attributes = {"brand": "Co-op Food", "brand_wikidata": "Q3277439"}
     allowed_domains = ["coop.co.uk"]
-    download_delay = 0.5
     page_number = 1
     start_urls = (
         "https://www.coop.co.uk/store-finder/api/locations/food?location=54.9966124%2C-7.308574799999974&distance=30000000000&always_one=true&format=json",
@@ -32,6 +32,8 @@ class CoopFoodSpider(scrapy.Spider):
         data = response.json()
 
         for store in data["results"]:
+            if not store["public"]:
+                continue
             open_hours = self.parse_hours(store["opening_hours"])
 
             properties = {
@@ -44,11 +46,16 @@ class CoopFoodSpider(scrapy.Spider):
                 ),
                 "city": store["town"],
                 "postcode": store["postcode"],
-                "country": "United Kingdom",
                 "lon": float(store["position"]["x"]),
                 "lat": float(store["position"]["y"]),
                 "phone": store["phone"],
+                "extras": {
+                    "operator": store["society"],
+                    "location_type": store["location_type"],
+                },
             }
+
+            apply_category(Categories.SHOP_CONVENIENCE, properties)
 
             yield Feature(**properties)
 
