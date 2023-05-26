@@ -1,5 +1,4 @@
 import chompjs
-
 from scrapy import Spider
 
 from locations.dict_parser import DictParser
@@ -13,7 +12,12 @@ class SizzlerSpider(Spider):
     start_urls = ["https://sizzler.com/locations/"]
 
     def parse(self, response):
-        locations_raw = response.xpath('//script[contains(text(), "var locations_meta = ")]/text()').get().split("var locations_meta = ", 1)[1].split("var locationsMapObject = ", 1)[0]
+        locations_raw = (
+            response.xpath('//script[contains(text(), "var locations_meta = ")]/text()')
+            .get()
+            .split("var locations_meta = ", 1)[1]
+            .split("var locationsMapObject = ", 1)[0]
+        )
         for location in chompjs.parse_js_object(locations_raw):
             location = location["location"]
             item = DictParser.parse(location)
@@ -31,5 +35,10 @@ class SizzlerSpider(Spider):
             item["website"] = "https://sizzler.com/locations/sizzler-" + item["city"].lower().replace(" ", "-") + "/"
             item["opening_hours"] = OpeningHours()
             for day_name, hours_range in location["opening_hours"].items():
-                item["opening_hours"].add_range(day_name.title(), hours_range.split(" - ", 1)[0].upper(), hours_range.split(" - ", 1)[1].upper(), "%I:%M%p")
+                item["opening_hours"].add_range(
+                    day_name.title(),
+                    hours_range.split(" - ", 1)[0].upper(),
+                    hours_range.split(" - ", 1)[1].upper(),
+                    "%I:%M%p",
+                )
             yield item
