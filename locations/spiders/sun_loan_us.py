@@ -10,7 +10,9 @@ class SunLoanUSSpider(Spider):
     name = "sun_loan_us"
     item_attributes = {"brand": "Sun Loan", "brand_wikidata": "Q118725658"}
     allowed_domains = ["www.sunloan.com"]
-    start_urls = ["https://www.sunloan.com/wp-admin/admin-ajax.php?action=sunloan_store_search&lat=31.968599&lng=-99.901813&max_results=10000&search_radius=20000&autoload=false&cat="]
+    start_urls = [
+        "https://www.sunloan.com/wp-admin/admin-ajax.php?action=sunloan_store_search&lat=31.968599&lng=-99.901813&max_results=10000&search_radius=20000&autoload=false&cat="
+    ]
 
     def parse(self, response):
         for location in response.json():
@@ -23,7 +25,7 @@ class SunLoanUSSpider(Spider):
             item["street_address"] = ", ".join(filter(None, [location["address"], location["address2"]]))
 
             hours_html = Selector(text=location["hours"])
-            hours_string = " ".join(hours_html.xpath('//text()').getall())
+            hours_string = " ".join(hours_html.xpath("//text()").getall())
             item["opening_hours"] = OpeningHours()
             item["opening_hours"].add_ranges_from_string(hours_string)
 
