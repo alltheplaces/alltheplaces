@@ -1,5 +1,6 @@
 import scrapy
 
+from locations.categories import Categories, Extras, Fuel, apply_category, apply_yes_no
 from locations.items import Feature
 
 usa_bbox = [-125, 24, -65, 51]
@@ -52,13 +53,13 @@ class ValeroSpider(scrapy.Spider):
                 "country": row["Country"],
                 "postcode": row["PostalCode"],
                 "opening_hours": "24/7" if "24 Hour" in amenities else None,
-                "extras": {
-                    "atm": "ATM" in amenities or None,
-                    "amenity:fuel": True,
-                    "amenity:toilets": "Public Restroom" in amenities or None,
-                    "car_wash": "Car Wash" in amenities or None,
-                    "fuel:diesel": "Diesel" in amenities or None,
-                    "fuel:e85": "E-85" in amenities or None,
-                },
             }
+
+            apply_category(Categories.FUEL_STATION, item)
+            apply_yes_no(Extras.ATM, item, "ATM" in amenities)
+            apply_yes_no(Extras.TOILETS, item, "Public Restroom" in amenities)
+            apply_yes_no(Extras.CAR_WASH, item, "Car Wash" in amenities)
+            apply_yes_no(Fuel.DIESEL, item, "Diesel" in amenities)
+            apply_yes_no(Fuel.E85, item, "E-85" in amenities)
+
             yield Feature(**item)
