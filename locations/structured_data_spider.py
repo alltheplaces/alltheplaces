@@ -27,6 +27,8 @@ def extract_phone(item, sel: Selector):
 
 
 def clean_twitter(url: str) -> str:
+    if not url:
+        return None
     return (
         url.strip()
         .replace("http:", "")
@@ -50,6 +52,28 @@ def extract_twitter(item: Feature, sel: Selector):
             return
 
 
+def clean_facebook(url: str) -> str:
+    if not url:
+        return None
+    clean_url = urlparse(url)
+    if "facebook.com" not in clean_url.netloc:
+        return None
+    if clean_url.path in [None, "/", ""]:
+        return None
+    elif clean_url.path in ["/profile.php", "/group.php"]:
+        # Just copy id/gid param eg https://www.facebook.com/profile.php?id=100057371322568
+        query = parse_qs(clean_url.query)
+        clean_query = {}
+        for k, v in query.items():
+            if k in ["id", "gid"]:
+                clean_query[k] = v[0]
+        clean_url = clean_url._replace(scheme="https", netloc="www.facebook.com", query=urlencode(clean_query), fragment="")
+    else:
+        # Just copy the path eg https://www.facebook.com/Ernstingsfamily/
+        clean_url = clean_url._replace(scheme="https", netloc="www.facebook.com", query="", fragment="")
+        return clean_url.geturl()
+
+
 def extract_facebook(item: Feature, sel: Selector):
     for fb in sel.xpath(
         './/a[contains(@href, "facebook.com")]'
@@ -59,38 +83,32 @@ def extract_facebook(item: Feature, sel: Selector):
         '[not(contains(@href, "sharer.php"))]'
         '[not(contains(@href, "share.php"))]/@href'
     ).getall():
-        url = urlparse(fb)
-        if "facebook.com" not in url.netloc:
-            continue
-        if url.path in [None, "/", ""]:
-            continue
-        elif url.path in ["/profile.php", "/group.php"]:
-            # Just copy id/gid param eg https://www.facebook.com/profile.php?id=100057371322568
-            query = parse_qs(url.query)
-            clean_query = {}
-            for k, v in query.items():
-                if k in ["id", "gid"]:
-                    clean_query[k] = v[0]
-            url = url._replace(scheme="https", netloc="www.facebook.com", query=urlencode(clean_query), fragment="")
-        else:
-            # Just copy the path eg https://www.facebook.com/Ernstingsfamily/
-            url = url._replace(scheme="https", netloc="www.facebook.com", query="", fragment="")
-        item["facebook"] = url.geturl()
-        return
+        if url := clean_facebook(fb):
+            item["facebook"] = url
+            return
 
     if fb := sel.xpath('.//div[@class="fb-customerchat"][@page_id]/@page_id').get():
         item["facebook"] = f"https://www.facebook.com/profile.php?id={fb}"
         return
 
 
+def clean_instagram(url: str) -> str:
+    if not url:
+        return None
+    clean_url = urlparse(url)
+    if "instagram.com" not in clean_url.netloc:
+        return None
+    if clean_url.path in [None, "/", ""]:
+        return None
+    clean_url = clean_url._replace(scheme="https", netloc="www.instagram.com", query="", fragment="")
+    return clean_url.geturl()
+
+
 def extract_instagram(item: Feature, response: Selector):
     for instagram in response.xpath('.//a[contains(@href, "instagram.com")]/@href').getall():
-        url = urlparse(instagram)
-        if "instagram.com" not in url.netloc:
-            continue
-        url = url._replace(scheme="https", netloc="www.instagram.com", query="", fragment="")
-        item["extras"]["contact:instagram"] = url.geturl()
-        return
+        if url := clean_instagram(instagram):
+            item["extras"]["contact:instagram"] = url
+            return
 
 
 def extract_image(item, response):
