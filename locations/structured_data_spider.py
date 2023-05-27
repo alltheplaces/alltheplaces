@@ -67,7 +67,9 @@ def clean_facebook(url: str) -> str:
         for k, v in query.items():
             if k in ["id", "gid"]:
                 clean_query[k] = v[0]
-        clean_url = clean_url._replace(scheme="https", netloc="www.facebook.com", query=urlencode(clean_query), fragment="")
+        clean_url = clean_url._replace(
+            scheme="https", netloc="www.facebook.com", query=urlencode(clean_query), fragment=""
+        )
     else:
         # Just copy the path eg https://www.facebook.com/Ernstingsfamily/
         clean_url = clean_url._replace(scheme="https", netloc="www.facebook.com", query="", fragment="")
