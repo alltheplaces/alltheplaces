@@ -1,8 +1,8 @@
 from locations.storefinders.yext import YextSpider
 
 
-class RecipeUnlimitedCA(YextSpider):
-    name = "recipe_unlimited_ca"
+class RecipeUnlimitedSpider(YextSpider):
+    name = "recipe_unlimited"
     api_key = "13a5875d18fe490377fc4bf35de52851"
     wanted_type = "restaurant"
 
