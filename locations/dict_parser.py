@@ -82,6 +82,7 @@ class DictParser:
         "telephone1",
         "contact-number",
         "phone-no",
+        "contact-phone",
     ]
 
     lat_keys = [
