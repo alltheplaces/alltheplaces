@@ -13,7 +13,7 @@ class RecipeUnlimitedCA(YextSpider):
         "East Side Mario's": {"brand": "East Side Mario's", "brand_wikidata": "Q5329375"},
         "Elephant & Castle": {"brand": "Elephant & Castle", "brand_wikidata": "Q118744342"},
         "Express St-Hubert": {"brand": "St-Hubert Express", "brand_wikidata": "Q3495225"},
-        "Fresh Kitchen + Juice Bar": {"brand": "Fresh Kitchen + Juice Bar", "brand_wikidata":"Q118744242"},
+        "Fresh Kitchen + Juice Bar": {"brand": "Fresh Kitchen + Juice Bar", "brand_wikidata": "Q118744242"},
         "Harvey's": {"brand": "Harvey's", "brand_wikidata": "Q1466184"},
         "Kelseys Original Roadhouse": {"brand": "Kelseys Original Roadhouse", "brand_wikidata": "Q6386459"},
         "Landing": {"brand": "The Landing Group", "brand_wikidata": "Q118744373"},
@@ -34,7 +34,7 @@ class RecipeUnlimitedCA(YextSpider):
             store_name = location["c_storeName"]
         else:
             store_name = item["name"]
-        
+
         if "1909 Taverne Moderne" in store_name or "Recipe Unlimited" in store_name:
             # These brands are either defunct or not legitimate
             # and do not have a 'closed' field to filter on.
