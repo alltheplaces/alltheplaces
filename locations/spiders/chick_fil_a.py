@@ -4,7 +4,7 @@ from locations.structured_data_spider import clean_instagram, clean_twitter
 
 
 class ChickfilASpider(YextSpider):
-    name = "chick-fil-a"
+    name = "chick_fil_a"
     item_attributes = {"brand": "Chick-fil-A", "brand_wikidata": "Q491516"}
     api_key = "71620ba70d81b48c7c72331e25462ebc"
     wanted_type = "restaurant"
