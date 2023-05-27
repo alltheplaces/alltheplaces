@@ -21,7 +21,9 @@ class RiteAidUSSpider(SitemapSpider, StructuredDataSpider):
     def sitemap_filter(self, entries):
         for entry in entries:
             if "www.riteaid.com/locations/" in entry.get("loc"):
-                entry["loc"] = entry["loc"].replace("www.riteaid.com/locations/", "locations2.riteaid.com.yext-cdn.com/")
+                entry["loc"] = entry["loc"].replace(
+                    "www.riteaid.com/locations/", "locations2.riteaid.com.yext-cdn.com/"
+                )
                 yield entry
 
     def post_process_item(self, item, response, ld_data):
