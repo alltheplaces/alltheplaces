@@ -99,7 +99,7 @@ class BMOHarrisSpider(scrapy.Spider):
                     item["located_in_wikidata"] = SpeedwaySpider.item_attributes["brand_wikidata"]
                 elif item["name"] == "Rite Aid":
                     item["located_in"] = RiteAidUSSpider.item_attributes["brand"]
-                    item["located_in_wikidata"] = RiteAidSpider.item_attributes["brand_wikidata"]
+                    item["located_in_wikidata"] = RiteAidUSSpider.item_attributes["brand_wikidata"]
                 elif item["name"] == "Target":
                     item["located_in"] = TargetUSSpider.item_attributes["brand"]
                     item["located_in_wikidata"] = TargetUSSpider.item_attributes["brand_wikidata"]
