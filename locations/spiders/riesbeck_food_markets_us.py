@@ -1,5 +1,4 @@
 import chompjs
-
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
@@ -22,7 +21,9 @@ class RiesbeckFoodMarketsUSSpider(CrawlSpider):
     ]
 
     def parse(self, response):
-        location = chompjs.parse_js_object(response.xpath('//script[contains(text(), "var storeJsonData = ")]/text()').get())
+        location = chompjs.parse_js_object(
+            response.xpath('//script[contains(text(), "var storeJsonData = ")]/text()').get()
+        )
         item = DictParser.parse(location)
         item["ref"] = location["store_number"]
         item["street_address"] = ", ".join(filter(None, [location.get("address_1"), location.get("address_2")]))
