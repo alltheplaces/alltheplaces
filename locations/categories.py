@@ -86,9 +86,11 @@ class Categories(Enum):
     CAFE = {"amenity": "cafe"}
     CHARGING_STATION = {"amenity": "charging_station"}
     CHILD_CARE = {"amenity": "childcare"}
+    CINEMA = {"amenity": "cinema"}
     CLINIC = {"amenity": "clinic", "healthcare": "clinic"}
     CLINIC_URGENT = {"amenity": "clinic", "healthcare": "clinic", "urgent_care": "yes"}
     COFFEE_SHOP = {"amenity": "cafe", "cuisine": "coffee_shop"}
+    COMMUNITY_CENTRE = {"amenity": "community_centre"}
     COMPRESSED_AIR = {"amenity": "compressed_air"}
     DENTIST = {"amenity": "dentist", "healthcare": "dentist"}
     DOCTOR_GP = {"amenity": "doctors", "healthcare": "doctor", "healthcare:speciality": "community"}
@@ -97,6 +99,7 @@ class Categories(Enum):
     HOSPITAL = {"amenity": "hospital", "healthcare": "hospital"}
     HOTEL = {"tourism": "hotel"}
     MONEY_TRANSFER = {"amenity": "money_transfer"}
+    MUSEUM = {"tourism": "museum"}
     PHARMACY = {"amenity": "pharmacy", "healthcare": "pharmacy"}
     PARCEL_LOCKER = {"amenity": "parcel_locker"}
     POST_BOX = {"amenity": "post_box"}
