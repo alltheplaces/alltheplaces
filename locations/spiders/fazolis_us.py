@@ -11,8 +11,7 @@ class FazolisUSSpider(YextSpider):
         if location.get("c_pagesURL"):
             item["website"] = location["c_pagesURL"]
         item.pop("twitter")
-        if "instagram" in item["extras"].keys():
-            item["extras"].pop("instagram")
+        item["extras"].pop("contact:instagram", None)
         if location.get("products"):
             apply_yes_no(Extras.DRIVE_THROUGH, item, "Drive-thru" in location["products"], False)
             apply_yes_no(Extras.TAKEAWAY, item, "Take-out" in location["products"], False)
