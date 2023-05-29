@@ -3,27 +3,29 @@ import re
 
 from scrapy.spiders import SitemapSpider
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.user_agents import BROWSER_DEFAULT
 
 
 class ChoiceHotelsSpider(SitemapSpider):
-    name = "choicehotels"
+    name = "choice_hotels"
     item_attributes = {"brand": "Choice Hotels", "brand_wikidata": "Q1075788"}
     allowed_domains = ["choicehotels.com"]
     sitemap_urls = ["https://www.choicehotels.com/propertysitemap.xml"]
     user_agent = BROWSER_DEFAULT
     download_delay = 5
+    requires_proxy = True
 
     brand_mapping = {
         "AC": ("Ascend Hotel Collection", "Q113152464"),
-        "BR": ("Cambria Hotels", "Q113152476"),
-        "CI": ("Comfort Inn", "Q113152349"),
-        "CL": ("Clarion Hotels", "Q113152454"),
+        "BR": ("Cambria Hotel", "Q113152476"),
+        "CI": ("Comfort Inn", "Q113152349", Categories.HOTEL),
+        "CL": ("Clarion Hotels", "Q10454567"),
         "CS": ("Comfort Suites", "Q55525150"),
         "EL": ("Econo Lodge", "Q5333330"),
         "MS": ("MainStay Suites", "Q113152432"),
-        "QI": ("Quality Inn", "Q113152195"),
+        "QI": ("Quality Inn", "Q113152195", Categories.HOTEL),
         "RW": ("Rodeway Inn", "Q7356709"),
         "SB": ("Suburban Extended Stay Hotel", "Q113152401"),
         "SL": ("Sleep Inn", "Q69588194"),
@@ -59,16 +61,17 @@ class ChoiceHotelsSpider(SitemapSpider):
             "website": response.url,
         }
 
-        brand_info = self.brand_mapping.get(data["property"]["brandCode"])
-        if brand_info:
-            brand_name, brand_wikidata = brand_info
-            properties["brand"] = brand_name
-            properties["brand_wikidata"] = brand_wikidata
+        if brand_info := self.brand_mapping.get(data["property"]["brandCode"]):
+            properties["brand_wikidata"] = brand_info[1]
+            if len(brand_info) == 3:
+                apply_category(brand_info[2], properties)
         else:
+            self.crawler.stats.inc_value(
+                f'atp/choice_hotels/unmapped_category/{data["property"]["brandCode"]}/{data["property"]["brandName"]}'
+            )
+            self.crawler.stats.inc_value(f"atp/choice_hotels/unmapped_category/{response.url}")
             self.logger.warning(
-                "Missing brand mapping for %s, %s",
-                data["property"]["brandCode"],
-                data["property"]["brandName"],
+                "Missing brand mapping for %s, %s", data["property"]["brandCode"], data["property"]["brandName"]
             )
 
         yield Feature(**properties)
