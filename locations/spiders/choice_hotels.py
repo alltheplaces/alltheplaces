@@ -21,7 +21,7 @@ class ChoiceHotelsSpider(SitemapSpider):
         "AC": ("Ascend Hotel Collection", "Q113152464"),
         "BR": ("Cambria Hotel", "Q113152476"),
         "CI": ("Comfort Inn", "Q113152349", Categories.HOTEL),
-        "CL": ("Clarion Hotels", "Q78165540"),
+        "CL": ("Clarion Hotels", "Q10454567"),
         "CS": ("Comfort Suites", "Q55525150"),
         "EL": ("Econo Lodge", "Q5333330"),
         "MS": ("MainStay Suites", "Q113152432"),
