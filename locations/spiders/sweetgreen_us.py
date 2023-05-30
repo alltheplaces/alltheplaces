@@ -11,7 +11,6 @@ class SweetgreenUSSpider(Spider):
     item_attributes = {"brand": "Sweetgreen", "brand_wikidata": "Q18636413"}
     allowed_domains = ["www.sweetgreen.com"]
     start_urls = ["https://order.sweetgreen.com/graphql"]
-    download_delay = 0.2
 
     def start_requests(self):
         graphql_query = "query LocationsSearchByArea($topLeft: GeoCoordinates!, $bottomRight: GeoCoordinates!, $showHidden: Boolean) { searchLocationsByBoundingBox(topLeft: $topLeft bottomRight: $bottomRight showHidden: $showHidden) {location { id name latitude longitude slug address city state zipCode isOutpost phone storeHours enabled acceptingOrders notAcceptingOrdersReason imageUrl hidden }}}"
