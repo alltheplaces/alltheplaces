@@ -1,7 +1,7 @@
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
-from locations.categories import apply_yes_no, Extras
+from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 
@@ -10,7 +10,9 @@ class TacoJohnsUSSpider(Spider):
     name = "taco_johns_us"
     item_attributes = {"brand": "Taco John's", "brand_wikidata": "Q7673962"}
     allowed_domains = ["locations.tacojohns.com"]
-    start_urls = ["https://locations.tacojohns.com/modules/multilocation/?near_location=90210&threshold=50000&distance_unit=miles&limit=50000&services__in=&language_code=en-us&published=1&within_business=true"]
+    start_urls = [
+        "https://locations.tacojohns.com/modules/multilocation/?near_location=90210&threshold=50000&distance_unit=miles&limit=50000&services__in=&language_code=en-us&published=1&within_business=true"
+    ]
 
     def start_requests(self):
         for url in self.start_urls:
