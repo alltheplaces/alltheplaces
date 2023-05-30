@@ -63,7 +63,7 @@ class IHOPSpider(scrapy.Spider):
             "lat": basic_info["geo"]["latitude"],
             "lon": basic_info["geo"]["longitude"],
             "name": basic_info["name"],
-            "addr_full": basic_info["address"]["streetAddress"],
+            "street_address": basic_info["address"]["streetAddress"],
             "city": basic_info["address"]["addressLocality"],
             "state": basic_info["address"]["addressRegion"],
             "postcode": basic_info["address"]["postalCode"],
