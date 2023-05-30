@@ -1,8 +1,8 @@
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
-from locations.geo import point_locations, vincenty_distance
 from locations.dict_parser import DictParser
+from locations.geo import point_locations, vincenty_distance
 from locations.hours import OpeningHours
 
 
