@@ -18,7 +18,7 @@ class HungryJacksSpider(scrapy.Spider):
             properties = {
                 "ref": i["store_id"],
                 "name": i["name"],
-                "addr_full": i["location"]["address"],
+                "street_address": i["location"]["address"],
                 "city": i["location"]["suburb"],
                 "state": i["location"]["state"],
                 "postcode": i["location"]["postcode"],

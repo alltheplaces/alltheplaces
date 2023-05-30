@@ -1,4 +1,3 @@
-import json
 import re
 
 from scrapy import Request, Spider
@@ -43,7 +42,7 @@ class HolidayStationstoresUSSpider(Spider):
         properties = {
             "lon": store["lng"],
             "lat": store["lat"],
-            "addr_full": address,
+            "street_address": address,
             "phone": phone,
             "ref": store["id"],
             "city": city.strip(),
