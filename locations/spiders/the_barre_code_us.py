@@ -14,8 +14,12 @@ class TheBarreCodeUSSpider(SitemapSpider):
     def parse(self, response):
         properties = {
             "name": response.xpath('//span[@id="site_title"]/text()').get().strip(),
-            "phone": response.xpath('//div[@class="info-container"]/div/div[1]//a[contains(@href, "tel:")]/@href').get().strip(),
-            "addr_full": ", ".join(filter(None, response.xpath('//div[@class="info-container"]/div/div[2]//p/text()').getall())).strip(),
+            "phone": response.xpath('//div[@class="info-container"]/div/div[1]//a[contains(@href, "tel:")]/@href')
+            .get()
+            .strip(),
+            "addr_full": ", ".join(
+                filter(None, response.xpath('//div[@class="info-container"]/div/div[2]//p/text()').getall())
+            ).strip(),
             "email": response.xpath('//div[@class="info-container"]/div/div[4]//p/text()').get().strip(),
             "website": response.url.replace("/contact-us/", "/"),
             "ref": response.url.replace("/contact-us/", "/"),
