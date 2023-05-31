@@ -17,7 +17,7 @@ class TacototeSpider(scrapy.Spider):
     def parse(self, response):
         response.selector.remove_namespaces()
         for url in response.xpath("//loc/text()").extract():
-            if re.search(r"/locations/.", url):
+            if re.search(r"/locations-old/.", url):
                 yield scrapy.Request(url, callback=self.parse_city)
 
     def parse_city(self, response):
