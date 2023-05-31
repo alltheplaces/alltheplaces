@@ -215,7 +215,7 @@ class StructuredDataSpider(Spider):
             yield from self.post_process_item(item, response, ld_item) or []
 
     def iter_linked_data(self, response: Response) -> Iterable[dict]:
-        for ld_obj in LinkedDataParser.iter_linked_data(response):
+        for ld_obj in LinkedDataParser.iter_linked_data(response, self.json_parser):
             if not ld_obj.get("@type"):
                 continue
 
