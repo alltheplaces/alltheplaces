@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+set -x
+echo "git revision: ${GIT_COMMIT}"
 
 if [ -z "${S3_BUCKET}" ]; then
     (>&2 echo "Please set S3_BUCKET environment variable")
