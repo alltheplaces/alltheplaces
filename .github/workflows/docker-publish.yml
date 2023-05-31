@@ -3,6 +3,7 @@ name: Build and Push Image to ECR
 on:
   schedule:
     - cron: '23 */6 * * *'
+  workflow_dispatch:
 
 jobs:
   build:
