@@ -12,6 +12,7 @@ black = "*"
 autoflake8 = "*"
 isort = "*"
 pre-commit = "*"
+exceptiongroup = "*"
 
 [packages]
 scrapy = "*"
