@@ -26,7 +26,7 @@ class HopdoddyBurgerBarSpider(scrapy.Spider):
             properties = {
                 "ref": place["id"],
                 "name": place["name"],
-                "addr_full": place["streetaddress"],
+                "street_address": place["streetaddress"],
                 "city": place["city"],
                 "state": place["state"],
                 "postcode": place["zip"],

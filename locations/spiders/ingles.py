@@ -45,7 +45,7 @@ class InglesSpider(scrapy.Spider):
         properties = {
             "ref": response.meta["ref"],
             "name": response.meta["name"],
-            "addr_full": response.meta["addr_full"],
+            "street_address": response.meta["street_address"],
             "city": response.meta["city"],
             "state": response.meta["state"],
             "postcode": re.search(
@@ -81,7 +81,7 @@ class InglesSpider(scrapy.Spider):
                     meta={
                         "ref": id,
                         "name": name,
-                        "addr_full": addr,
+                        "street_address": addr,
                         "city": city,
                         "state": state,
                         "lat": lats,
