@@ -1,5 +1,6 @@
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.geo import point_locations
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
@@ -51,5 +52,7 @@ class ChevroletSpider(scrapy.Spider):
                         time_format="%I:%M %p",
                     )
             item["opening_hours"] = oh.as_opening_hours()
+
+            apply_category(Categories.SHOP_CAR, item)
 
             yield item

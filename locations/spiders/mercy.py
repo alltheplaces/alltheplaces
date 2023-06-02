@@ -2,6 +2,7 @@ import json
 
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
@@ -12,6 +13,17 @@ class MercySpider(scrapy.Spider):
     allowed_domains = ["mercy.net"]
     start_urls = [
         "https://www.mercy.net/content/mercy/us/en.solrQueryhandler?q=*:*&solrsort=&latitude=38.627002&longitude=-90.199404&start=0&rows=10&locationType=&locationOfferings=&servicesOffered=&distance=9999&noResultsSuggestions=true&pagePath=%2Fsearch%2Flocation"
+    ]
+
+    categories = [
+        ("Doctor's Office", Categories.DOCTOR_GP),
+        ("Hospital or Emergency Room", Categories.HOSPITAL),
+        ("Pharmacy", Categories.PHARMACY),
+        ("Imaging, Labs or Tests", {"healthcare": "laboratory"}),
+        ("Rehabilitation, Sports Medicine or Fitness", {"healthcare": "physiotherapist"}),
+        ("Behavioral Health", {"healthcare": "counselling"}),
+        ("Childbirth", {"healthcare": "midwife"}),
+        ("Vaccinations", {"healthcare": "vaccination_centre"}),
     ]
 
     def parse(self, response):
@@ -41,6 +53,17 @@ class MercySpider(scrapy.Spider):
                             close_time=helfday.get("end"),
                         )
 
-            item["opening_hours"] = oh.as_opening_hours()
+            item["opening_hours"] = oh
+
+            if not data.get("marketSiteOfServiceType"):
+                self.crawler.stats.inc_value("atp/mercy/no_categories")
+            else:
+                for label, cat in self.categories:
+                    if label in data["marketSiteOfServiceType"]:
+                        apply_category(cat, item)
+                        break
+                else:
+                    for cat in data["marketSiteOfServiceType"]:
+                        self.crawler.stats.inc_value(f"atp/mercy/unmatched_category/{cat}")
 
             yield item

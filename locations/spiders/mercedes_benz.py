@@ -1,5 +1,6 @@
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours, sanitise_day
 
@@ -86,7 +87,7 @@ class MercedesBenzGroupSpider(scrapy.Spider):
         "Mercedes-Benz": {"brand": "Mercedes-Benz", "brand_wikidata": "Q36008"},
         "Maybach": {"brand": "Maybach", "brand_wikidata": "Q35989"},
         "Smart": {"brand": "Smart", "brand_wikidata": "Q156490"},
-        "Fuso": {"brand": "Fuso", "brand_wikidata": "Q1190247"},
+        "Fuso": {"brand": "Fuso", "brand_wikidata": "Q36033"},
         "Setra": {"brand": "Setra", "brand_wikidata": "Q938615"},
     }
     custom_settings = {"DEFAULT_REQUEST_HEADERS": {"x-apikey": "45ab9277-3014-4c9e-b059-6c0542ad9484"}}
@@ -97,12 +98,12 @@ class MercedesBenzGroupSpider(scrapy.Spider):
             yield scrapy.Request(url=url, callback=self.get_store_info)
 
     def get_store_info(self, response):
-        for store in response.json().get("results"):
+        for store in response.json().get("results", []):
             url = f"https://api.oneweb.mercedes-benz.com/dlc-dms/v2/dealers/search/byId?localeLanguage=false&id={store.get('baseInfo').get('externalId')}&fields=*"
             yield scrapy.Request(url=url, callback=self.parse)
 
     def parse(self, response):
-        for data in response.json().get("results"):
+        for data in response.json().get("results", []):
             oh = OpeningHours()
             for function in data.get("functions"):
                 if function.get("activityCode") != "SALES":
@@ -130,5 +131,10 @@ class MercedesBenzGroupSpider(scrapy.Spider):
             else:
                 item["brand"] = data.get("brands")[0].get("brand").get("name")
                 item["brand_wikidata"] = self.brand_mapping.get(item["brand"]).get("brand_wikidata")
+
+            if isinstance(item["state"], dict):
+                item["state"] = item["state"].get("region")
+
+            apply_category(Categories.SHOP_CAR, item)
 
             yield item
