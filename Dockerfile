@@ -1,7 +1,7 @@
 FROM ubuntu:22.04
 
 # This is from https://hub.docker.com/r/yahwang/ubuntu-pyenv/dockerfile
-ARG PYTHON_VERSION=3.10
+ARG PYTHON_VERSION=3.11
 ARG BUILD_PYTHON_DEPS=" \
         make \
         build-essential \
@@ -63,5 +63,8 @@ RUN playwright install-deps
 RUN playwright install firefox
 
 COPY . .
+
+ARG GIT_COMMIT
+ENV GIT_COMMIT=$GIT_COMMIT
 
 CMD ["/home/ubuntu/ci/run_all_spiders.sh"]
