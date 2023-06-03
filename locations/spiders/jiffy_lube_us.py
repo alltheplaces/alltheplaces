@@ -1,5 +1,4 @@
 import pycountry
-
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
