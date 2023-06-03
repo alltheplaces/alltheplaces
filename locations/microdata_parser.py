@@ -13,7 +13,7 @@ def token_split(val):
 
 
 def top_level_items(selector: parsel.Selector):
-    yield from selector.xpath("//*[@itemscope][not(@itemprop)]")
+    yield from selector.xpath("//*[@itemscope]")
 
 
 def property_value(element: lxml.html.HtmlElement):
@@ -88,7 +88,7 @@ def property_value(element: lxml.html.HtmlElement):
     # Otherwise
     else:
         # The value is the element's descendant text content.
-        value = element.text_content()
+        value = " ".join(filter(None, list(map(str.strip, list(element.itertext())))))
         return value
 
 
