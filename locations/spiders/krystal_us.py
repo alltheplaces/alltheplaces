@@ -14,12 +14,12 @@ class KrystalUSSpider(SitemapSpider, StructuredDataSpider):
     sitemap_rules = [(r"\/locations\/[a-z]{2}\/[\w\-]+\/[\w\-]+\/?$", "parse_sd")]
 
     def post_process_item(self, item, response, ld_data):
-        store_ref = response.xpath('//h1[1]/text()').get()
+        store_ref = response.xpath("//h1[1]/text()").get()
         if m := re.match(r"^KRYSTAL ([\w]+) \|", store_ref, re.IGNORECASE):
             item["ref"] = m.group(1)
         else:
             item["ref"] = response.url
-        item["name"] = response.xpath('//title/text()').get().split(" | ", 1)[0]
+        item["name"] = response.xpath("//title/text()").get().split(" | ", 1)[0]
         item["addr_full"] = " ".join(filter(None, response.xpath('//div[@class="center-box"]/p[1]/text()').getall()))
         item["website"] = response.url
         item["opening_hours"] = OpeningHours()
