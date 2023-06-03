@@ -1,7 +1,7 @@
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
-from locations.categories import apply_yes_no, Extras, Fuel
+from locations.categories import Extras, Fuel, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_FULL, OpeningHours
 
@@ -31,7 +31,9 @@ class MurphyUSAUSSpider(Spider):
         for day in DAYS_FULL:
             day_name = day.lower()
             if location.get(f"{day_name}Open") and location.get(f"{day_name}Close"):
-                item["opening_hours"].add_range(day, location.get(f"{day_name}Open"), location.get(f"{day_name}Close"), "%I:%M%p")
+                item["opening_hours"].add_range(
+                    day, location.get(f"{day_name}Open"), location.get(f"{day_name}Close"), "%I:%M%p"
+                )
         apply_yes_no(Extras.TOILETS, item, location.get("hasPublicRestroom"), False)
         apply_yes_no(Fuel.DIESEL, item, location.get("sellDiesel"), False)
         apply_yes_no(Extras.ATM, item, location.get("hasAtm"), False)
