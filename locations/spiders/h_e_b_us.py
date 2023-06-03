@@ -24,11 +24,7 @@ class HEBUSSpider(Spider):
                     }
                 },
                 "operationName": "StoreDetailsSearch",
-                "variables": {
-                    "address": "90210",
-                    "radius": 10000,
-                    "size": 5000
-                }
+                "variables": {"address": "90210", "radius": 10000, "size": 5000},
             }
         ]
         for url in self.start_urls:
@@ -37,7 +33,18 @@ class HEBUSSpider(Spider):
     def parse(self, response):
         for location in response.json()[0]["data"]["searchStoresByAddress"]["stores"]:
             item = DictParser.parse(location["store"])
-            item["website"] = "https://www.heb.com/heb-store/" + item["country"] + "/" + item["state"].lower() + "/" + item["city"].lower() + "/" + re.sub(r"[^\w]", "-", item["name"].lower()) + "-" + str(item["ref"])
+            item["website"] = (
+                "https://www.heb.com/heb-store/"
+                + item["country"]
+                + "/"
+                + item["state"].lower()
+                + "/"
+                + item["city"].lower()
+                + "/"
+                + re.sub(r"[^\w]", "-", item["name"].lower())
+                + "-"
+                + str(item["ref"])
+            )
             item["opening_hours"] = OpeningHours()
             for day in location["store"]["storeHours"]:
                 if day["day"].title() in DAYS_FULL:
