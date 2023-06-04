@@ -9,7 +9,12 @@ class BILLASpider(Spider):
     name = "billa"
     item_attributes = {"brand": "BILLA", "brand_wikidata": "Q537781"}
     allowed_domains = ["www.billa.at", "www.billa.bg", "www.billa.sk", "www.billa.cz"]
-    start_urls = ["https://www.billa.at/api/stores", "https://www.billa.bg/api/stores", "https://www.billa.sk/api/stores", "https://www.billa.cz/api/stores"]
+    start_urls = [
+        "https://www.billa.at/api/stores",
+        "https://www.billa.bg/api/stores",
+        "https://www.billa.sk/api/stores",
+        "https://www.billa.cz/api/stores",
+    ]
 
     def start_requests(self):
         for url in self.start_urls:
