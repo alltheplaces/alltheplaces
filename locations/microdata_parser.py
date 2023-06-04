@@ -13,7 +13,7 @@ def token_split(val):
 
 
 def top_level_items(selector: parsel.Selector):
-    yield from selector.xpath("//*[@itemscope]")
+    yield from selector.xpath("//*[@itemscope][not(@itemprop)]")
 
 
 def property_value(element: lxml.html.HtmlElement):
