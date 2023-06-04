@@ -16,7 +16,9 @@ class ProvidenceUSSpider(StructuredDataSpider):
     def parse(self, response):
         self.parse_location_results(response)
         pager_script = response.xpath('//script[contains(text(), "dig.modules.paging(")]/text()').get()
-        if total_pages_search_result := re.search(r"\", (\d+), \d+, \"__locationSearchGetPageRequest\"\);", pager_script):
+        if total_pages_search_result := re.search(
+            r"\", (\d+), \d+, \"__locationSearchGetPageRequest\"\);", pager_script
+        ):
             total_pages = int(total_pages_search_result.group(1))
         else:
             return
@@ -33,7 +35,21 @@ class ProvidenceUSSpider(StructuredDataSpider):
         item["twitter"] = None
         item["image"] = None
         item["opening_hours"] = OpeningHours()
-        hours_string = " ".join(filter(None, response.xpath('//div[contains(@class, "location-detail")][1]/div[contains(@class, "hours-text")]//text()').getall()))
-        hours_string = hours_string.strip().replace(";", ":").replace("a.m.", "AM").replace("a.m", "AM").replace("p.m.", "PM").replace("p.m", "PM")
+        hours_string = " ".join(
+            filter(
+                None,
+                response.xpath(
+                    '//div[contains(@class, "location-detail")][1]/div[contains(@class, "hours-text")]//text()'
+                ).getall(),
+            )
+        )
+        hours_string = (
+            hours_string.strip()
+            .replace(";", ":")
+            .replace("a.m.", "AM")
+            .replace("a.m", "AM")
+            .replace("p.m.", "PM")
+            .replace("p.m", "PM")
+        )
         item["opening_hours"].add_ranges_from_string(hours_string)
         yield item
