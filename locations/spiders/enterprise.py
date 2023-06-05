@@ -8,15 +8,20 @@ from locations.dict_parser import DictParser
 class EnterpriseSpider(Spider):
     name = "enterprise"
     item_attributes = {"brand": "Enterprise Rent-A-Car", "brand_wikidata": "Q17085454"}
-    allowed_domains = ["prd.location.enterprise.com"]
+    allowed_domains = ["prd.location.enterprise.com", "int1.location.enterprise.com"]
 
     def start_requests(self):
         gc = geonamescache.GeonamesCache()
         countries = gc.get_countries()
         for country_code in countries.keys():
-            yield JsonRequest(
-                url=f"https://prd.location.enterprise.com/enterprise-sls/search/location/enterprise/web/country/{country_code}"
-            )
+            # It appears that countries are sharded between two
+            # servers. Other servers are int2, xqa1, xqa2, xqa3
+            # but search of these servers reveals no additional
+            # locations on top of just prd and int1.
+            for subdomain in ["prd", "int1"]:
+                yield JsonRequest(
+                    url=f"https://{subdomain}.location.enterprise.com/enterprise-sls/search/location/enterprise/web/country/{country_code}"
+                )
 
     def parse(self, response):
         for location in response.json():
