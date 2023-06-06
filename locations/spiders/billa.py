@@ -42,7 +42,7 @@ class BILLASpider(Spider):
             for day_hours in location["openingTimes"]:
                 if len(day_hours.get("times", [])) != 2:
                     continue
-                if day := sanitise_day(day_hours["dayOfWeek"], days):
+                if day := sanitise_day(day_hours["dayOfWeek"].strip(":"), days):
                     item["opening_hours"].add_range(day, day_hours["times"][0], day_hours["times"][1])
             if "parking" in location and "spotCount" in location["parking"]:
                 item["extras"]["capacity:motorcar"] = location["parking"]["spotCount"]
