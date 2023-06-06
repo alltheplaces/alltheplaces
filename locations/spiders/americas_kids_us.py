@@ -1,6 +1,6 @@
+from locations.hours import DAYS_FULL, OpeningHours
 from locations.storefinders.storelocatorwidgets import StoreLocatorWidgetsSpider
 
-from locations.hours import DAYS_FULL, OpeningHours
 
 class AmericasKidsUSSpider(StoreLocatorWidgetsSpider):
     name = "americas_kids_us"
@@ -9,7 +9,7 @@ class AmericasKidsUSSpider(StoreLocatorWidgetsSpider):
         "Kids World": {"brand": "Kids World", "brand_wikidata": "Q119141647"},
         "Lazarus": {"brand": "Lazarus", "brand_wikidata": "Q119141646"},
         "Young Land": {"brand": "Young Land", "brand_wikidata": "Q119141643"},
-        "Young World": {"brand": "Young World", "brand_wikidata": "Q119141641"}
+        "Young World": {"brand": "Young World", "brand_wikidata": "Q119141641"},
     }
     key = "8b5da83104f650ef1c1194d92228c489"
 
