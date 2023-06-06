@@ -1,6 +1,5 @@
+from locations.categories import Categories, apply_category
 from locations.storefinders.storelocatorwidgets import StoreLocatorWidgetsSpider
-
-from locations.categories import apply_category, Categories
 
 
 class CrossroadsIGAUSSpider(StoreLocatorWidgetsSpider):
