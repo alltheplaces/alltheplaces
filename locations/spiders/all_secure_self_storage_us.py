@@ -1,6 +1,5 @@
-from locations.storefinders.storelocatorwidgets import StoreLocatorWidgetsSpider
-
 from locations.hours import DAYS_FULL, OpeningHours
+from locations.storefinders.storelocatorwidgets import StoreLocatorWidgetsSpider
 
 
 class AllSecureSelfStorageUSSpider(StoreLocatorWidgetsSpider):
