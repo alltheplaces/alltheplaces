@@ -13,37 +13,37 @@ class CroixRougeFrancaiseFRSpider(Spider):
 
     def start_requests(self):
         graphql_query = """query GET_SEARCH_STRUCTURE_ELASTICSEARCH_QUERY($actionIds: [ID], $activityIds: [ID], $from: Int, $lat: Float, $lon: Float, $search: String!, $size: Int) {
-	searchStructuresDocuments(
-		actionIds: $actionIds
-		activityIds: $activityIds
-		from: $from
-		lat: $lat
-		lon: $lon
-		search: $search
-		size: $size
-	) {
-		items {
-			actions
-			activities { activity }
-			address_complement
-			address_number
-			address_place
-			address_street
-			address_street_type
-			city
-			contentful_content_id
-			distance
-			id
-			latitude
-			longitude
-			name
-			slug
-			schedule
-			specialities
-			structure_type
-			zip_code
-		}
-	}
+    searchStructuresDocuments(
+        actionIds: $actionIds
+        activityIds: $activityIds
+        from: $from
+        lat: $lat
+        lon: $lon
+        search: $search
+        size: $size
+    ) {
+        items {
+            actions
+            activities { activity }
+            address_complement
+            address_number
+            address_place
+            address_street
+            address_street_type
+            city
+            contentful_content_id
+            distance
+            id
+            latitude
+            longitude
+            name
+            slug
+            schedule
+            specialities
+            structure_type
+            zip_code
+        }
+    }
 }"""
         data = {
             "operationName": "GET_SEARCH_STRUCTURE_ELASTICSEARCH_QUERY",
