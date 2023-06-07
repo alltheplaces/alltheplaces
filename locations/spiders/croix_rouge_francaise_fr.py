@@ -2,7 +2,7 @@ from scrapy import Spider
 from scrapy.http import JsonRequest
 
 from locations.dict_parser import DictParser
-from locations.hours import sanitise_day, DAYS_FR, OpeningHours
+from locations.hours import DAYS_FR, OpeningHours, sanitise_day
 
 
 class CroixRougeFrancaiseFRSpider(Spider):
@@ -55,8 +55,8 @@ class CroixRougeFrancaiseFRSpider(Spider):
                 "lat": 44.8624,
                 "lon": -0.5848,
                 "search": "",
-                "size": 10000
-            }
+                "size": 10000,
+            },
         }
         for url in self.start_urls:
             yield JsonRequest(url=url, method="POST", data=data)
@@ -70,5 +70,7 @@ class CroixRougeFrancaiseFRSpider(Spider):
                 item["website"] = "https://www.croix-rouge.fr/" + location["slug"]
             item["opening_hours"] = OpeningHours()
             for day_hours in location["schedule"]:
-                item["opening_hours"].add_range(sanitise_day(day_hours["day"], DAYS_FR), day_hours["open"], day_hours["closed"])
+                item["opening_hours"].add_range(
+                    sanitise_day(day_hours["day"], DAYS_FR), day_hours["open"], day_hours["closed"]
+                )
             yield item
