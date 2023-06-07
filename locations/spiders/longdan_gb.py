@@ -1,9 +1,8 @@
 import html
 import re
 
-from locations.storefinders.storelocatorwidgets import StoreLocatorWidgetsSpider
-
 from locations.hours import OpeningHours
+from locations.storefinders.storelocatorwidgets import StoreLocatorWidgetsSpider
 
 
 class LongdanGBSpider(StoreLocatorWidgetsSpider):
