@@ -4,7 +4,7 @@ import re
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
-from locations.items import Feature
+from locations.dict_parser import DictParser
 from locations.user_agents import BROWSER_DEFAULT
 
 
@@ -14,7 +14,7 @@ class ChoiceHotelsSpider(SitemapSpider):
     allowed_domains = ["choicehotels.com"]
     sitemap_urls = ["https://www.choicehotels.com/propertysitemap.xml"]
     user_agent = BROWSER_DEFAULT
-    download_delay = 5
+    download_delay = 5  # Requested by https://www.choicehotels.com/robots.txt
     requires_proxy = True
 
     brand_mapping = {
@@ -33,45 +33,24 @@ class ChoiceHotelsSpider(SitemapSpider):
     }
 
     def parse(self, response):
-        script = "".join(response.xpath("//script/text()").extract())
-        data = json.loads(re.search(r"window.PRELOADED_STATE = (.*)?;", script).group(1))["page"]
+        data = json.loads(re.search(r"window.PRELOADED_STATE = (.*)?;", response.text).group(1))["page"]
+        location = DictParser.get_nested_key(data, "property")
 
-        # Remove unused extra bits to get to the random key with the useful stuff in it
-        data.pop("referrerState", None)
-        data.pop("screenParams", None)
-        data.pop("hasUserScrolled", None)
-        data.pop("ready", None)
-        data = list(data.values())[0]
+        item = DictParser.parse(location)
 
-        if "property" not in data:
-            return
+        item["brand"] = location["brandName"]
+        item["state"] = location["address"].get("subdivision")
+        item["website"] = response.url
 
-        properties = {
-            "ref": data["property"]["id"],
-            "name": data["property"]["name"],
-            "street_address": data["property"]["address"]["line1"],
-            "city": data["property"]["address"]["city"],
-            "state": data["property"]["address"].get("subdivision"),
-            "postcode": data["property"]["address"].get("postalCode"),
-            "country": data["property"]["address"]["country"],
-            "phone": data["property"]["phone"],
-            "lat": data["property"]["lat"],
-            "lon": data["property"]["lon"],
-            "brand": data["property"]["brandName"],
-            "website": response.url,
-        }
-
-        if brand_info := self.brand_mapping.get(data["property"]["brandCode"]):
-            properties["brand_wikidata"] = brand_info[1]
+        if brand_info := self.brand_mapping.get(location["brandCode"]):
+            item["brand_wikidata"] = brand_info[1]
             if len(brand_info) == 3:
-                apply_category(brand_info[2], properties)
+                apply_category(brand_info[2], item)
         else:
             self.crawler.stats.inc_value(
-                f'atp/choice_hotels/unmapped_category/{data["property"]["brandCode"]}/{data["property"]["brandName"]}'
+                f'atp/choice_hotels/unmapped_category/{location["brandCode"]}/{location["brandName"]}'
             )
             self.crawler.stats.inc_value(f"atp/choice_hotels/unmapped_category/{response.url}")
-            self.logger.warning(
-                "Missing brand mapping for %s, %s", data["property"]["brandCode"], data["property"]["brandName"]
-            )
+            self.logger.warning("Missing brand mapping for %s, %s", location["brandCode"], location["brandName"])
 
-        yield Feature(**properties)
+        yield item
