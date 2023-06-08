@@ -10,7 +10,7 @@ class ClosePipeline:
         if name := item.get("name"):
             for label in self.closed_labels:
                 if label in name.lower():
-                    spider.crawler.stats.inc_value(f"atp/closed_check")
+                    spider.crawler.stats.inc_value("atp/closed_check")
                     spider.logger.warn(f'Found {label} in {name} ({item.get("ref")})')
                     break
 
