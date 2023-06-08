@@ -63,7 +63,13 @@ class BunningsSpider(scrapy.Spider):
             item["extras"]["website:map"] = location.get("mapUrl")
             oh = OpeningHours()
             for day in location["openingHours"]["weekDayOpeningList"]:
-                if not day["closed"]:
+                if (
+                    not day["closed"]
+                    and day.get("openingTime")
+                    and day["openingTime"].get("formattedHour")
+                    and day.get("closingTime")
+                    and day["closingTime"].get("formattedHour")
+                ):
                     oh.add_range(
                         day=day["weekDay"],
                         open_time=day["openingTime"]["formattedHour"],

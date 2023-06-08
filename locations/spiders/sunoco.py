@@ -19,6 +19,8 @@ class SunocoSpider(scrapy.Spider):
                 if not key.endswith("_Hours"):
                     continue
                 day = key[:2].capitalize()
+                if val == "Open Today":
+                    continue
                 if val == "24 hours":
                     open_time = close_time = "12 AM"
                 else:

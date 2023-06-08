@@ -80,7 +80,7 @@ class ExxonMobilSpider(SitemapSpider):
             yield request
 
     def parse(self, response, **kwargs):
-        for location in response.json():
+        for location in response.json()["Locations"]:
             if location["Brand"] == "Mobilcard":
                 continue  # 170 NZ POIs that seem to third party ones that accept there loyalty cards
 

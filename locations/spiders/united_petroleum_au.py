@@ -43,6 +43,8 @@ class UnitedPetroleumAUSpider(Spider):
             item["phone"] = location["publicPhoneNumber"]
             item["opening_hours"] = OpeningHours()
             for day_name in DAYS_FULL:
+                if not location["openingHours"].get("from") or not location["openingHours"].get("to"):
+                    continue
                 if location["openingHours"][f"closedOn{day_name}"]:
                     continue
                 if (

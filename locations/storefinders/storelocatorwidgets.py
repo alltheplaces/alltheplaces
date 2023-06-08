@@ -74,7 +74,7 @@ class StoreLocatorWidgetsSpider(Spider):
             item["ref"] = location["storeid"]
             item["lat"] = location["data"]["map_lat"]
             item["lon"] = location["data"]["map_lng"]
-            item["addr_full"] = location["data"]["address"]
+            item["addr_full"] = location["data"].get("address")
             if "phone" in location["data"]:
                 item["phone"] = location["data"]["phone"]
             if "email" in location["data"]:

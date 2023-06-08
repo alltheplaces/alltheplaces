@@ -1,26 +1,11 @@
-from scrapy.spiders import SitemapSpider
-
-from locations.structured_data_spider import StructuredDataSpider
+from locations.storefinders.yext import YextSpider
 
 
-class ThreeGB(SitemapSpider, StructuredDataSpider):
+class ThreeGB(YextSpider):
     name = "three_gb"
-    item_attributes = {
-        "brand": "Three",
-        "brand_wikidata": "Q407009",
-        "country": "GB",
-    }
-    sitemap_urls = ["https://locator.three.co.uk/sitemap.xml"]
-    sitemap_rules = [
-        (
-            r"^https:\/\/locator\.three\.co\.uk\/(london|london-&-ni|midlands|north|south)\/([-a-z]+)\/([-0-9a-z']+)$",
-            "parse_sd",
-        )
-    ]
-    wanted_types = ["MobilePhoneStore"]
+    item_attributes = {"brand": "Three", "brand_wikidata": "Q407009"}
+    api_key = "46281e259fc6522cc15ea1a0011c21a9"
 
-    def post_process_item(self, item, response, ld_data, **kwargs):
-        if " closed " in item["name"].lower():
-            # Some closed stores still have pages
-            return
+    def parse_item(self, item, location):
+        item["name"] = location["c_pageH1"]
         yield item

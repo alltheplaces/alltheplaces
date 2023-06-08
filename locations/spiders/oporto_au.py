@@ -26,6 +26,8 @@ class OportoAUSpider(Spider):
                     continue
                 if hours is True:
                     hours = {"open": "00:00", "close": "23:59"}
+                if hours["open"] == "24:00":
+                    hours = {"open": "00:00", "close": hours["close"]}
                 oh.add_range(day_name.title(), hours["open"], hours["close"])
             item["opening_hours"] = oh.as_opening_hours()
             yield item

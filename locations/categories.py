@@ -13,6 +13,7 @@ from locations.items import Feature
 class Categories(Enum):
     BICYCLE_PARKING = {"amenity": "bicycle_parking"}
     BICYCLE_RENTAL = {"amenity": "bicycle_rental"}
+    CAR_RENTAL = {"amenity": "car_rental"}
 
     BUS_STOP = {"highway": "bus_stop", "public_transport": "platform"}
     BUS_STATION = {"amenity": "bus_station", "public_transport": "station"}
@@ -86,6 +87,7 @@ class Categories(Enum):
     CAFE = {"amenity": "cafe"}
     CHARGING_STATION = {"amenity": "charging_station"}
     CHILD_CARE = {"amenity": "childcare"}
+    CLINIC = {"amenity": "clinic", "healthcare": "clinic"}
     CLINIC_URGENT = {"amenity": "clinic", "healthcare": "clinic", "urgent_care": "yes"}
     COFFEE_SHOP = {"amenity": "cafe", "cuisine": "coffee_shop"}
     COMPRESSED_AIR = {"amenity": "compressed_air"}
@@ -97,10 +99,13 @@ class Categories(Enum):
     HOTEL = {"tourism": "hotel"}
     MONEY_TRANSFER = {"amenity": "money_transfer"}
     PHARMACY = {"amenity": "pharmacy", "healthcare": "pharmacy"}
+    PARCEL_LOCKER = {"amenity": "parcel_locker"}
     POST_BOX = {"amenity": "post_box"}
+    POST_DEPOT = {"amenity": "post_depot"}
     POST_OFFICE = {"amenity": "post_office"}
     PRODUCT_PICKUP = {"amenity": "product_pickup"}
     PUB = {"amenity": "pub"}
+    TELEPHONE = {"amenity": "telephone"}
     RESTAURANT = {"amenity": "restaurant"}
     VETERINARY = {"amenity": "veterinary"}
 
@@ -145,10 +150,14 @@ def apply_category(category, item):
 
 top_level_tags = [
     "amenity",
+    "club",
+    "craft",
     "emergency",
     "healthcare",
     "highway",
+    "landuse",
     "leisure",
+    "man_made",
     "office",
     "public_transport",
     "shop",
@@ -216,6 +225,7 @@ class Fuel(Enum):
 
 
 class Extras(Enum):
+    AIR_CONDITIONING = "air_conditioning"
     ATM = "atm"
     BABY_CHANGING_TABLE = "changing_table"
     CALLING = "service:phone"
@@ -233,8 +243,10 @@ class Extras(Enum):
     PRINTING = "service:print"
     SCANING = "service:scan"
     SHOWERS = "shower"
+    SMOKING_AREA = "smoking=isolated"
     TAKEAWAY = "takeaway"
     TOILETS = "toilets"
+    TOILETS_WHEELCHAIR = "toilets:wheelchair"
     TRUCK_WASH = "truck_wash"
     WHEELCHAIR = "wheelchair"
     WIFI = "internet_access=wlan"
@@ -319,6 +331,8 @@ def apply_yes_no(attribute, item: Feature, state: bool, apply_positive_only: boo
         tag_key = attribute.value
     else:
         raise TypeError("string or Enum required")
+    if not state and "=" in tag_key:
+        return
 
     if "=" in tag_key:
         tag_key, tag_value = tag_key.split("=")

@@ -12,6 +12,7 @@ black = "*"
 autoflake8 = "*"
 isort = "*"
 pre-commit = "*"
+exceptiongroup = "*"
 
 [packages]
 scrapy = "*"
@@ -29,3 +30,5 @@ requests-cache = "*"
 requests = "*"
 pycountry = "*"
 reverse-geocoder = "*"
+ijson = "*"
+tzdata = "*"
