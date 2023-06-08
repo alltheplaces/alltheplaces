@@ -1,8 +1,8 @@
 import csv
 import json
 from math import sqrt
+from collections import defaultdict
 
-import numpy as np
 import scrapy
 
 from locations.categories import Categories
@@ -99,7 +99,7 @@ class StarbucksSpider(scrapy.Spider):
                 nextCoordinates = []
                 current_center = center
                 additional_stores = 5
-                distances_array = np.full((len(stores), additional_stores), np.nan)
+                store_distances = defaultdict(list)
 
                 # Loop through to find 5 more stores
                 for ii in range(additional_stores):
@@ -107,16 +107,15 @@ class StarbucksSpider(scrapy.Spider):
                     for jj, store in enumerate(stores):
                         store_lat = store["coordinates"]["latitude"]
                         store_lon = store["coordinates"]["longitude"]
-                        distances_array[jj, ii] = sqrt(
+                        store_distances[jj].append(sqrt(
                             (current_center[1] - store_lat) ** 2 + (current_center[0] - store_lon) ** 2
-                        )
-
-                    # Find mean distance each store and center/new search coords
-                    mean_distances = np.nanmean(distances_array, 1)
+                        ))
+                    
+                    # Find total distance from each store to each center point 
+                    total_distances = {key:sum(val) for key, val in store_distances.items()}
 
                     # Find store furthest away
-                    max_store = np.argmax(mean_distances)
-
+                    max_store = max(total_distances, key=total_distances.get)
                     # Replace current center
                     current_center = [
                         stores[max_store]["coordinates"]["longitude"],
@@ -127,9 +126,10 @@ class StarbucksSpider(scrapy.Spider):
                     nextCoordinates.append(
                         [stores[max_store]["coordinates"]["longitude"], stores[max_store]["coordinates"]["latitude"]]
                     )
+                    
                 urls = [STORELOCATOR.format(c[1], c[0]) for c in nextCoordinates]
                 for url in urls:
-                    self.logger.debug("Adding %s to list", url)
+                    self.logger.debug(f"Adding {url} to list")
 
                     request = scrapy.Request(url=url, headers=HEADERS, callback=self.parse)
                     request.meta["distance"] = nextDistance
