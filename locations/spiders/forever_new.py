@@ -13,7 +13,7 @@ class ForeverNewSpider(Spider):
     allowed_domains = ["www.forevernew.com.au", "www.forevernew.co.nz"]
     start_urls = [
         "https://www.forevernew.com.au/locator/index/search/?longitude=0&latitude=0&radius=100000&type=all",
-        "https://www.forevernew.co.nz/locator/index/search/?longitude=0&latitude=0&radius=100000&type=all"
+        "https://www.forevernew.co.nz/locator/index/search/?longitude=0&latitude=0&radius=100000&type=all",
     ]
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
