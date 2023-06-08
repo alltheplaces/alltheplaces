@@ -1,7 +1,7 @@
 import csv
 import json
-from math import sqrt
 from collections import defaultdict
+from math import sqrt
 
 import scrapy
 
@@ -107,12 +107,12 @@ class StarbucksSpider(scrapy.Spider):
                     for jj, store in enumerate(stores):
                         store_lat = store["coordinates"]["latitude"]
                         store_lon = store["coordinates"]["longitude"]
-                        store_distances[jj].append(sqrt(
-                            (current_center[1] - store_lat) ** 2 + (current_center[0] - store_lon) ** 2
-                        ))
-                    
-                    # Find total distance from each store to each center point 
-                    total_distances = {key:sum(val) for key, val in store_distances.items()}
+                        store_distances[jj].append(
+                            sqrt((current_center[1] - store_lat) ** 2 + (current_center[0] - store_lon) ** 2)
+                        )
+
+                    # Find total distance from each store to each center point
+                    total_distances = {key: sum(val) for key, val in store_distances.items()}
 
                     # Find store furthest away
                     max_store = max(total_distances, key=total_distances.get)
@@ -126,7 +126,7 @@ class StarbucksSpider(scrapy.Spider):
                     nextCoordinates.append(
                         [stores[max_store]["coordinates"]["longitude"], stores[max_store]["coordinates"]["latitude"]]
                     )
-                    
+
                 urls = [STORELOCATOR.format(c[1], c[0]) for c in nextCoordinates]
                 for url in urls:
                     self.logger.debug(f"Adding {url} to list")
