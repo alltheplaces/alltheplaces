@@ -78,7 +78,7 @@ class StarbucksSpider(scrapy.Spider):
         if paging["returned"] > 0 and paging["limit"] == paging["returned"]:
             if response.meta["distance"] > 0.15:
                 nextDistance = response.meta["distance"] / 2
-                # Create eight new coordinate pairs
+                # Create four new coordinate pairs
                 nextCoordinates = [
                     [center[0] - nextDistance, center[1] + nextDistance],
                     [center[0] + nextDistance, center[1] + nextDistance],
