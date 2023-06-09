@@ -21,5 +21,7 @@ class AGWarehouseAUSpider(Spider):
             item["name"] = item["name"].strip()
             item["street_address"] = item.pop("street")
             item["opening_hours"] = OpeningHours()
-            item["opening_hours"].add_ranges_from_string(location["open_hours"].replace("\\\"", "\"").replace("[", "").replace("]", ""))
+            item["opening_hours"].add_ranges_from_string(
+                location["open_hours"].replace('\\"', '"').replace("[", "").replace("]", "")
+            )
             yield item
