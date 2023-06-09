@@ -1,5 +1,4 @@
 import chompjs
-
 from scrapy import Selector, Spider
 
 from locations.items import Feature
@@ -21,7 +20,9 @@ class AlanHowardGBSpider(Spider):
                 "name": location[0],
                 "lat": location[1],
                 "lon": location[2],
-                "addr_full": ", ".join(filter(None, location_info.xpath('//*[not(self::a)]/text()').getall())).replace(", Telephone: ", ""),
+                "addr_full": ", ".join(filter(None, location_info.xpath("//*[not(self::a)]/text()").getall())).replace(
+                    ", Telephone: ", ""
+                ),
                 "phone": location_info.xpath('//a[contains(@href, "tel:")]/@href').get().replace("tel:", ""),
                 "website": "https://www.alanhoward.co.uk" + location_info.xpath('//a[@class="anchorLink"]/@href').get(),
             }
