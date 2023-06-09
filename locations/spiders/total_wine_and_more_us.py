@@ -1,9 +1,8 @@
 import pycountry
-
 from scrapy import Spider
 from scrapy.http import FormRequest
 
-from locations.categories import apply_yes_no, Extras
+from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
@@ -23,7 +22,9 @@ class TotalWineAndMoreUSSpider(Spider):
                     "components[0][parameters][type]": "GET_STORES",
                     "components[0][parameters][query]": state.name,
                 }
-                yield FormRequest(url=url, method="POST", headers={"Accept": "application/vnd.oc.unrendered+json"}, formdata=formdata)
+                yield FormRequest(
+                    url=url, method="POST", headers={"Accept": "application/vnd.oc.unrendered+json"}, formdata=formdata
+                )
 
     def parse(self, response):
         pagination = response.json()[0]["response"]["data"]["reactComponent"]["props"]["data"]["pagination"]
@@ -49,6 +50,8 @@ class TotalWineAndMoreUSSpider(Spider):
                 for day_hours in location["storeHours"]["days"]:
                     if day_hours["closedStatus"]:
                         continue
-                    item["opening_hours"].add_range(day_hours["dayOfWeek"].title(), day_hours["openingTime"], day_hours["closingTime"], "%I:%M %p")
-            
+                    item["opening_hours"].add_range(
+                        day_hours["dayOfWeek"].title(), day_hours["openingTime"], day_hours["closingTime"], "%I:%M %p"
+                    )
+
             yield item
