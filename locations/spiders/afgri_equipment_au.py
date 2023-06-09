@@ -1,0 +1,11 @@
+from locations.storefinders.storepoint import StorepointSpider
+
+
+class AFGRIEquipmentAUSpider(StorepointSpider):
+    name = "afgri_equipment_au"
+    item_attributes = {"brand": "AFGRI Equipment", "brand_wikidata": "Q119264464"}
+    key = "15f4466ee99d2b"
+
+    def parse_item(self, item, location):
+        item.pop("website")
+        yield item
