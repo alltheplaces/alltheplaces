@@ -1,5 +1,4 @@
 import chompjs
-
 from scrapy import Selector, Spider
 
 from locations.dict_parser import DictParser
@@ -12,7 +11,7 @@ class AGnVETAUSpider(Spider):
     start_urls = ["https://agnvet.com.au/group/locations/"]
 
     def parse(self, response):
-        data_raw = response.xpath('//script[contains(text(), \'},"places":[{\')]/text()').get()
+        data_raw = response.xpath("//script[contains(text(), '},\"places\":[{')]/text()").get()
         data_raw = data_raw.split('},"places":', 1)[1]
         locations = chompjs.parse_js_object(data_raw)
         for location in locations:
