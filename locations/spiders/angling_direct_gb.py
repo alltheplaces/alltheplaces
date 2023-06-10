@@ -23,8 +23,12 @@ class AnglingDirectGBSpider(Spider):
                 return
             item = DictParser.parse(location)
             item["ref"] = location["location_id"]
-            item["website"] = "https://www.anglingdirect.co.uk/storelocator/" + item["name"].replace("Angling Direct ", "").lower().replace(" ", "-")
+            item["website"] = "https://www.anglingdirect.co.uk/storelocator/" + item["name"].replace(
+                "Angling Direct ", ""
+            ).lower().replace(" ", "-")
             item["opening_hours"] = OpeningHours()
             for day_name, day_hours in location["opening_hours"].items():
-                item["opening_hours"].add_range(day_name.title(), day_hours.split(" - ", 1)[0], day_hours.split(" - ", 1)[1])
+                item["opening_hours"].add_range(
+                    day_name.title(), day_hours.split(" - ", 1)[0], day_hours.split(" - ", 1)[1]
+                )
             yield item
