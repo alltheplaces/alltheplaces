@@ -9,6 +9,7 @@ from locations.hours import DAYS, OpeningHours
 # To use this spider, supply the API 'key' which typically starts
 # with 'woos-' followed by a UUID.
 
+
 class WoosmapSpider(Spider):
     dataset_attributes = {"source": "api", "api": "woosmap.com"}
     key = ""
@@ -40,7 +41,9 @@ class WoosmapSpider(Spider):
 
         if pagination := response.json()["pagination"]:
             if pagination["page"] < pagination["pageCount"]:
-                yield JsonRequest(url=f'https://api.woosmap.com/stores?key={self.key}&stores_by_page=300&page={pagination["page"]+1}')
+                yield JsonRequest(
+                    url=f'https://api.woosmap.com/stores?key={self.key}&stores_by_page=300&page={pagination["page"]+1}'
+                )
 
     def parse_item(self, item, feature, **kwargs):
         yield item
