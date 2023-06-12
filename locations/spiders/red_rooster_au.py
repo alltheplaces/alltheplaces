@@ -23,7 +23,6 @@ class RedRoosterAUSpider(Spider):
 
     def parse(self, response):
         for location in response.json()["store"]:
-            print(location)
             item = DictParser.parse(location)
             if (
                 location["attributes"]["isStorePermanentclosed"]
