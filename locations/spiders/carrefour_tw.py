@@ -12,8 +12,11 @@ class CarrefourTWSpider(Spider):
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
     brands = {
-        "量販": {"brand": "Carrefour", "brand_wikidata": "Q217599"}, # "Mass sales" (bad translation but as there are fewer of this type, it is probably the hypermarket brand)
-        "超市": {"brand": "Carrefour Market", "brand_wikidata": "Q2689639"}, # "Supermarket"
+        "量販": {
+            "brand": "Carrefour",
+            "brand_wikidata": "Q217599",
+        },  # "Mass sales" (bad translation but as there are fewer of this type, it is probably the hypermarket brand)
+        "超市": {"brand": "Carrefour Market", "brand_wikidata": "Q2689639"},  # "Supermarket"
     }
 
     def start_requests(self):
@@ -35,5 +38,7 @@ class CarrefourTWSpider(Spider):
             else:
                 for day_name in ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]:
                     if location.get(f"{day_name}_start") and location.get(f"{day_name}_end"):
-                        item["opening_hours"].add_range(day_name.title(), location.get(f"{day_name}_start"), location.get(f"{day_name}_end"))
+                        item["opening_hours"].add_range(
+                            day_name.title(), location.get(f"{day_name}_start"), location.get(f"{day_name}_end")
+                        )
             yield item
