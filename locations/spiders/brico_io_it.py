@@ -12,7 +12,6 @@ class Brico_ioITSpider(Spider):
 
     def parse(self, response):
         for location in response.json():
-            print(location)
             if not location["isActive"]:
                 continue
 
