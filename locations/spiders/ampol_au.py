@@ -13,7 +13,12 @@ class AmpolAUSpider(Spider):
     start_urls = ["https://www.ampol.com.au/custom/api/locator/get"]
 
     def start_requests(self):
-        yield JsonRequest(url="https://www.ampol.com.au/custom/api/authorize/token", method="POST", headers={"X-Requested-With": "XMLHttpRequest"}, callback=self.parse_auth_token)
+        yield JsonRequest(
+            url="https://www.ampol.com.au/custom/api/authorize/token",
+            method="POST",
+            headers={"X-Requested-With": "XMLHttpRequest"},
+            callback=self.parse_auth_token,
+        )
 
     def parse_auth_token(self, response):
         token = response.json()
