@@ -28,14 +28,18 @@ class CarrefourITSpider(Spider):
                 continue
             item.update(self.brands[location["Type"]])
             for day_name, day_hours in location["Orari"].items():
-                if day_hours.upper() == "CHIUSO": # Closed
+                if day_hours.upper() == "CHIUSO":  # Closed
                     continue
                 if "," in day_hours:
                     time_ranges = day_hours.split(",")
                     for time_range in time_ranges:
                         if len(time_range.split("-")) == 2:
-                            item["opening_hours"].add_range(DAYS_IT[day_name.title()], time_range.split("-", 1)[0], time_range.split("-", 1)[1])
+                            item["opening_hours"].add_range(
+                                DAYS_IT[day_name.title()], time_range.split("-", 1)[0], time_range.split("-", 1)[1]
+                            )
                 else:
                     if len(day_hours.split("-")) == 2:
-                        item["opening_hours"].add_range(DAYS_IT[day_name.title()], day_hours.split("-", 1)[0], day_hours.split("-", 1)[1])
+                        item["opening_hours"].add_range(
+                            DAYS_IT[day_name.title()], day_hours.split("-", 1)[0], day_hours.split("-", 1)[1]
+                        )
             yield item
