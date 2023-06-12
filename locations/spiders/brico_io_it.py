@@ -32,6 +32,8 @@ class Brico_ioITSpider(Spider):
 
             item["opening_hours"] = OpeningHours()
             for timeslot in location["hours"]["timeslots"]:
-                item["opening_hours"].add_range(DAYS[timeslot["dayOfWeek"] - 1], timeslot["from"], timeslot["to"], "%H:%M:%S")
+                item["opening_hours"].add_range(
+                    DAYS[timeslot["dayOfWeek"] - 1], timeslot["from"], timeslot["to"], "%H:%M:%S"
+                )
 
             yield item
