@@ -25,7 +25,11 @@ class RedRoosterAUSpider(Spider):
         for location in response.json()["store"]:
             print(location)
             item = DictParser.parse(location)
-            if location["attributes"]["isStorePermanentclosed"] or not location["attributes"]["isEnabled"] or location["attributes"]["storeName"] == "Red Rooster Lab Test Store":
+            if (
+                location["attributes"]["isStorePermanentclosed"]
+                or not location["attributes"]["isEnabled"]
+                or location["attributes"]["storeName"] == "Red Rooster Lab Test Store"
+            ):
                 continue
 
             item["name"] = location["attributes"]["storeName"]
