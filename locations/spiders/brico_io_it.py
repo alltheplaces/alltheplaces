@@ -12,6 +12,7 @@ class Brico_ioITSpider(Spider):
 
     def parse(self, response):
         for location in response.json():
+            print(location)
             if not location["isActive"]:
                 continue
 
@@ -31,10 +32,6 @@ class Brico_ioITSpider(Spider):
 
             item["opening_hours"] = OpeningHours()
             for timeslot in location["hours"]["timeslots"]:
-                if not timeslot.get("from") or not timeslot.get("to"):
-                    continue
-                open_time = str(timeslot["from"]["hours"]) + ":" + str(timeslot["from"]["minutes"]).zfill(2)
-                close_time = str(timeslot["to"]["hours"]) + ":" + str(timeslot["to"]["minutes"]).zfill(2)
-                item["opening_hours"].add_range(DAYS[timeslot["dayOfWeek"] - 1], open_time, close_time)
+                item["opening_hours"].add_range(DAYS[timeslot["dayOfWeek"] - 1], timeslot["from"], timeslot["to"], "%H:%M:%S")
 
             yield item
