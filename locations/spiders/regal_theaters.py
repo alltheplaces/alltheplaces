@@ -11,6 +11,7 @@ class RegalTheatersSpider(scrapy.Spider):
     item_attributes = {"brand": "Regal Theaters"}
     allowed_domains = ["www.regmovies.com"]
     start_urls = ["https://www.regmovies.com/theatres/regal-riviera/0690"]
+    requires_proxy = "US"
 
     def parse(self, response):
         data = response.xpath('//script[contains(., "apiSitesList")]').extract_first()
