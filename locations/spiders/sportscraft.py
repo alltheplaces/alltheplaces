@@ -5,8 +5,8 @@ from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
 
-class SportscraftAUSpider(Spider):
-    name = "sportscraft_au"
+class SportscraftSpider(Spider):
+    name = "sportscraft"
     item_attributes = {"brand": "Sportscraft", "brand_wikidata": "Q7579966"}
     allowed_domains = ["www.sportscraft.com.au"]
     start_urls = ["https://www.sportscraft.com.au/custom_api/commercetools/channels"]
