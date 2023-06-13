@@ -11,5 +11,5 @@ class DelhaizeBESpider(SitemapSpider, StructuredDataSpider):
         "country": "BE",
     }
     sitemap_urls = ["https://stores.delhaize.be/sitemap.xml"]
-    sitemap_rules = [(".*\/fr\/.*", "parse_sd")]
+    sitemap_rules = [(".*/fr/.*", "parse_sd")]
     download_delay = 0.5
