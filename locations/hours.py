@@ -346,6 +346,16 @@ DAYS_ES = {
     "Do": "Su",
 }
 
+DAYS_RO = {
+    "Luni": "Mo",
+    "Marți": "Tu",
+    "Miercuri": "We",
+    "Joi": "Th",
+    "Vineri": "Fr",
+    "Sâmbătă": "Sa",
+    "Duminică": "Su",
+}
+
 NAMED_DAY_RANGES_EN = {
     "Daily": ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"],
     "All days": ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"],
