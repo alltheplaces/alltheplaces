@@ -24,7 +24,14 @@ class ShaverShopSpider(Spider):
         for location in response.json()["stores"]:
             item = DictParser.parse(location)
             if "shavershop.net.nz" in response.url:
-                item["website"] = "https://www.shavershop.net.nz/stores/" + location["stateCode"] + "/" + location["city"] + "/" + location["id"]
+                item["website"] = (
+                    "https://www.shavershop.net.nz/stores/"
+                    + location["stateCode"]
+                    + "/"
+                    + location["city"]
+                    + "/"
+                    + location["id"]
+                )
                 item.pop("state")
             else:
                 item["website"] = "https://www.shavershop.com.au/stores/" + location["stateCode"] + "/" + location["id"]
