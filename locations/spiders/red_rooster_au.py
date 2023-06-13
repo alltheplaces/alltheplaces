@@ -24,13 +24,17 @@ class RedRoosterAUSpider(Spider):
     def parse(self, response):
         for location in response.json()["store"]:
             item = DictParser.parse(location)
-            if location["attributes"]["isStorePermanentclosed"] or not location["attributes"]["isEnabled"]:
+            if (
+                location["attributes"]["isStorePermanentclosed"]
+                or not location["attributes"]["isEnabled"]
+                or location["attributes"]["storeName"] == "Red Rooster Lab Test Store"
+            ):
                 continue
 
-            item["ref"] = location["relationships"]["salesforce"]["data"]["attributes"]["storeNumber"]
             item["name"] = location["attributes"]["storeName"]
             item["phone"] = location["attributes"].get("storePhone")
             item["email"] = location["attributes"].get("storeEmail")
+            item["ref"] = item["email"].split("@", 1)[0][-4:]
 
             if "urlPath" in location["relationships"].keys():
                 item["website"] = (
