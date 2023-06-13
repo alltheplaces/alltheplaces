@@ -20,13 +20,17 @@ class SportscraftAUSpider(Spider):
             item = DictParser.parse(location)
             item["ref"] = location["key"]
             item["name"] = item["name"].split("(", 1)[0].strip()
-            item["street_address"] = ", ".join(filter(None, [location["address1"].strip(), location["address2"].strip()]))
+            item["street_address"] = ", ".join(
+                filter(None, [location["address1"].strip(), location["address2"].strip()])
+            )
             item["city"] = item["city"].strip()
             item["website"] = "https://www.sportscraft.com.au/store-locator/store-details?id=" + location["key"]
             item["opening_hours"] = OpeningHours()
             hours_string = ""
             for day in ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]:
                 if f"hours_{day}_open" in location.keys() and f"hours_{day}_close" in location.keys():
-                    hours_string = f"{hours_string} {day}: " + location[f"hours_{day}_open"] + "-" + location[f"hours_{day}_close"]
+                    hours_string = (
+                        f"{hours_string} {day}: " + location[f"hours_{day}_open"] + "-" + location[f"hours_{day}_close"]
+                    )
             item["opening_hours"].add_ranges_from_string(hours_string)
             yield item
