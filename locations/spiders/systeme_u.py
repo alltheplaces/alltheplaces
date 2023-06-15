@@ -6,6 +6,7 @@ from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.user_agents import BROWSER_DEFAULT
 
+
 class SystemeUSpider(scrapy.Spider):
     name = "systeme_u"
     item_attributes = {"brand": "Systeme U", "brand_wikidata": "Q2529029"}
@@ -17,7 +18,6 @@ class SystemeUSpider(scrapy.Spider):
     requires_proxy = True
     download_delay = 5
 
-    
     def parse_hours(self, hours):
         opening_hours = OpeningHours()
         days = hours[0].split(",")
