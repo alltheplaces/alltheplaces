@@ -4,7 +4,7 @@ import scrapy
 
 from locations.hours import OpeningHours
 from locations.items import Feature
-
+from locations.user_agents import BROWSER_DEFAULT
 
 class SystemeUSpider(scrapy.Spider):
     name = "systeme_u"
@@ -13,7 +13,11 @@ class SystemeUSpider(scrapy.Spider):
     start_urls = [
         "https://www.magasins-u.com/sitemap.xml",
     ]
+    custom_settings = {"AUTOTHROTTLE_ENABLED": True, "USER_AGENT": BROWSER_DEFAULT}
+    requires_proxy = True
+    download_delay = 5
 
+    
     def parse_hours(self, hours):
         opening_hours = OpeningHours()
         days = hours[0].split(",")
