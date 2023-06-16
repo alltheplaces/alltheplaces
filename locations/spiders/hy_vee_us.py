@@ -20,8 +20,12 @@ class HyVeeUSSpider(CrawlSpider):
         properties = {
             "ref": response.url.split("=", 1)[1],
             "name": response.xpath('//div[@id="page_content"]/h1/text()').get().strip(),
-            "addr_full": re.sub(r"\s+", " ", " ".join(response.xpath('//div[@id="page_content"]/div[2]/div[1]/text()').getall())).strip(),
-            "phone": response.xpath('//div[@id="page_content"]/div[2]/div[2]/a[contains(@href, "tel:")]/@href').get().replace("tel:", ""),
+            "addr_full": re.sub(
+                r"\s+", " ", " ".join(response.xpath('//div[@id="page_content"]/div[2]/div[1]/text()').getall())
+            ).strip(),
+            "phone": response.xpath('//div[@id="page_content"]/div[2]/div[2]/a[contains(@href, "tel:")]/@href')
+            .get()
+            .replace("tel:", ""),
             "website": response.url,
         }
 
@@ -32,8 +36,14 @@ class HyVeeUSSpider(CrawlSpider):
             else:
                 properties["image"] = "https://www.hy-vee.com" + image_path
 
-        hours_string = re.sub(r"\s+", " ", " ".join(response.xpath('//div[@id="page_content"]/p[2]/text()').getall())).upper().replace("OPEN DAILY,", "Mon-Sun:").replace("A.M.", "AM").replace("P.M.", "PM")
+        hours_string = (
+            re.sub(r"\s+", " ", " ".join(response.xpath('//div[@id="page_content"]/p[2]/text()').getall()))
+            .upper()
+            .replace("OPEN DAILY,", "Mon-Sun:")
+            .replace("A.M.", "AM")
+            .replace("P.M.", "PM")
+        )
         properties["opening_hours"] = OpeningHours()
         properties["opening_hours"].add_ranges_from_string(hours_string)
-        
+
         yield Feature(**properties)
