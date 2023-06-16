@@ -34,6 +34,10 @@ class HomeDepotSpider(CrawlSpider, StructuredDataSpider):
                 store_info = v
                 break
 
+        if not store_info:
+            self.logger.warn("No store_info JSON found in %s", json.dumps(data))
+            yield item
+
         store_info = store_info["stores"][0]
 
         item["lat"] = store_info["coordinates"]["lat"]
