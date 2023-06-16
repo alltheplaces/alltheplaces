@@ -26,11 +26,15 @@ class HoulihansUSSpider(Spider):
         properties = {
             "ref": response.url,
             "name": re.sub(r"\s+", " ", response.xpath('//h1[@class="loc-name"]/text()').get()).strip(),
-            "addr_full": re.sub(r"\s+", " ", " ".join(response.xpath('//p[@class="loc-address"]/a/text()').getall())).strip(),
+            "addr_full": re.sub(
+                r"\s+", " ", " ".join(response.xpath('//p[@class="loc-address"]/a/text()').getall())
+            ).strip(),
             "phone": response.xpath('//p[@class="loc-phone"]/a/text()').get().strip(),
             "website": response.url,
         }
-        hours_string = " ".join(filter(None, response.xpath('//p[@class="loc-hours"]/following-sibling::p[not(@*)]').getall()))
+        hours_string = " ".join(
+            filter(None, response.xpath('//p[@class="loc-hours"]/following-sibling::p[not(@*)]').getall())
+        )
         properties["opening_hours"] = OpeningHours()
         properties["opening_hours"].add_ranges_from_string(hours_string)
         yield Feature(**properties)
