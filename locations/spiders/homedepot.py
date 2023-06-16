@@ -14,6 +14,7 @@ class HomeDepotSpider(SitemapSpider):
     sitemap_rules = [
         (r"^https:\/\/www.homedepot.com\/l\/.*\/\d*$", "parse_store"),
     ]
+    requires_proxy = "US"
 
     def parse_store(self, response):
         item = LinkedDataParser.parse(response, "LocalBusiness")
