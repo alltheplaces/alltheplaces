@@ -22,7 +22,7 @@ class KFCJPSpider(Spider):
 
     def parse_hours(self, response):
         item = response.meta["item"]
-        data_raw = response.xpath('//div[@id="sl-root"]/script[not(@src)][1]/text()').get().split("\n")
+        data_raw = response.xpath("//script[contains(text(), \"angular.module('slApp')\")]/text()").get().split("\n")
         data_json = "{}"
         for constant in data_raw:
             if ".constant('CURRENT_POINT'" in constant:

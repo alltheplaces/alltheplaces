@@ -13,6 +13,7 @@ from locations.items import Feature
 class Categories(Enum):
     BICYCLE_PARKING = {"amenity": "bicycle_parking"}
     BICYCLE_RENTAL = {"amenity": "bicycle_rental"}
+    CAR_RENTAL = {"amenity": "car_rental"}
 
     BUS_STOP = {"highway": "bus_stop", "public_transport": "platform"}
     BUS_STATION = {"amenity": "bus_station", "public_transport": "station"}

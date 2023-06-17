@@ -88,7 +88,7 @@ def property_value(element: lxml.html.HtmlElement):
     # Otherwise
     else:
         # The value is the element's descendant text content.
-        value = element.text_content()
+        value = " ".join(filter(None, list(map(str.strip, list(element.itertext())))))
         return value
 
 

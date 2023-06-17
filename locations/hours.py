@@ -59,6 +59,7 @@ DAYS_DE = {
 }
 DAYS_BG = {
     "Понеделник": "Mo",
+    "Пн": "Mo",
     "Пон": "Mo",
     "По": "Mo",
     "Вторник": "Tu",
@@ -67,6 +68,7 @@ DAYS_BG = {
     "Ср": "We",
     "Четвъртък": "Th",
     "Че": "Th",
+    "Чт": "Th",
     "Петък": "Fr",
     "Пет": "Fr",
     "Пе": "Fr",
@@ -74,6 +76,7 @@ DAYS_BG = {
     "Събота": "Sa",
     "Съб": "Sa",
     "Съ": "Sa",
+    "Сб": "Sa",
     "Неделя": "Su",
     "нед": "Su",
     "Не": "Su",
@@ -341,6 +344,16 @@ DAYS_ES = {
     "Domingo": "Su",
     "Dom": "Su",
     "Do": "Su",
+}
+
+DAYS_RO = {
+    "Luni": "Mo",
+    "Marți": "Tu",
+    "Miercuri": "We",
+    "Joi": "Th",
+    "Vineri": "Fr",
+    "Sâmbătă": "Sa",
+    "Duminică": "Su",
 }
 
 NAMED_DAY_RANGES_EN = {

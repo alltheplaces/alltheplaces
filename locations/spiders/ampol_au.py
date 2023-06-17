@@ -1,4 +1,5 @@
 from scrapy import Spider
+from scrapy.http import JsonRequest
 
 from locations.categories import Categories, Fuel, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
@@ -10,6 +11,19 @@ class AmpolAUSpider(Spider):
     item_attributes = {"brand": "Ampol", "brand_wikidata": "Q4748528"}
     allowed_domains = ["www.ampol.com.au"]
     start_urls = ["https://www.ampol.com.au/custom/api/locator/get"]
+
+    def start_requests(self):
+        yield JsonRequest(
+            url="https://www.ampol.com.au/custom/api/authorize/token",
+            method="POST",
+            headers={"X-Requested-With": "XMLHttpRequest"},
+            callback=self.parse_auth_token,
+        )
+
+    def parse_auth_token(self, response):
+        token = response.json()
+        for url in self.start_urls:
+            yield JsonRequest(url=url, headers={"Authorization": f"Bearer {token}"})
 
     def parse(self, response):
         for location in response.json()["value"]:
