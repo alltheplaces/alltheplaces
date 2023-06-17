@@ -71,7 +71,7 @@ class MkrfRUSpider(Spider):
     dataset_attributes = {
         "attribution": "required",
         "attribution:name:en": "Ministry of Culture of the Russian Federation",
-        "attribution:name:ru": "Министерством культуры Российской Федерации",
+        "attribution:name:ru": "Министерство культуры Российской Федерации",
         "attribution:website": "https://opendata.mkrf.ru/",
         "license:website": "https://opendata.mkrf.ru/item/license",
         "use:commercial": "permit",
