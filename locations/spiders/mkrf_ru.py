@@ -13,53 +13,53 @@ CATEGORY_MAPPING = {
 }
 
 MUSEUM_TYPES = {
-'Авиации и космонавтики': 'aviation',
- 'Автотранспорта': 'transport',
- 'Антропологический': 'archaeological',
- 'Археологический': 'archaeological',
- 'Архитектурно-ансамблевый': 'architecture',
- 'Архитектурный': 'architecture',
- 'Биологический': 'nature',
- 'Ботанический сад, Парк': 'nature',
- 'Военно-Исторический': 'military',
- 'Военно-Морской': 'military',
- 'Геологический': 'geology',
- 'Горного дела': 'geology',
- 'Дворцово-парковый ансамбль': 'architecture',
- 'Дек.прикладного и нар. искусства': 'art',
- 'Естественнонаучный': 'nature',
- 'Жел./дор. транспорта и метро': 'transport',
- 'Зоопарк, Аквариум': 'nature',
- 'Изобразительного исскуства': 'art',
- 'Истории организаций': 'history',
- 'Историко-Революционный': 'history',
- 'Историко-бытовой': 'history',
- 'Исторический': 'history',
- 'Краеведческий': 'history',
- 'Литературный': 'art',
- 'Медицинский': 'science',
- 'Морской': 'maritime',
- 'Музеи скульптуры': 'art',
- 'Музей современного искусства': 'art',
- 'Музей-заповедник': None,
- 'Музей-усадьба': 'architecture',
- 'Музей-храм, монастырь': 'architecture',
- 'Музыкальный': 'art',
- 'Науки, техники и отраслей н.х.': 'technology',
- 'Общеисторический': 'history',
- 'Отраслевые': 'history',
- 'Палеонтологический': 'paleontology',
- 'Персональный, мемориальный': 'person',
- 'Сельского хозяйства': 'agriculture',
- 'Спортивная': 'sport',
- 'Средств связи': 'technology',
- 'Судостроения': 'maritime',
- 'Театральный': 'art',
- 'Фотографии': 'art',
- 'Художественный': 'art',
- 'Художественных ремесел': 'art',
- 'Художественных ремёсел': 'art',
- 'Этнографический': 'ethnography',
+    "Авиации и космонавтики": "aviation",
+    "Автотранспорта": "transport",
+    "Антропологический": "archaeological",
+    "Археологический": "archaeological",
+    "Архитектурно-ансамблевый": "architecture",
+    "Архитектурный": "architecture",
+    "Биологический": "nature",
+    "Ботанический сад, Парк": "nature",
+    "Военно-Исторический": "military",
+    "Военно-Морской": "military",
+    "Геологический": "geology",
+    "Горного дела": "geology",
+    "Дворцово-парковый ансамбль": "architecture",
+    "Дек.прикладного и нар. искусства": "art",
+    "Естественнонаучный": "nature",
+    "Жел./дор. транспорта и метро": "transport",
+    "Зоопарк, Аквариум": "nature",
+    "Изобразительного исскуства": "art",
+    "Истории организаций": "history",
+    "Историко-Революционный": "history",
+    "Историко-бытовой": "history",
+    "Исторический": "history",
+    "Краеведческий": "history",
+    "Литературный": "art",
+    "Медицинский": "science",
+    "Морской": "maritime",
+    "Музеи скульптуры": "art",
+    "Музей современного искусства": "art",
+    "Музей-заповедник": None,
+    "Музей-усадьба": "architecture",
+    "Музей-храм, монастырь": "architecture",
+    "Музыкальный": "art",
+    "Науки, техники и отраслей н.х.": "technology",
+    "Общеисторический": "history",
+    "Отраслевые": "history",
+    "Палеонтологический": "paleontology",
+    "Персональный, мемориальный": "person",
+    "Сельского хозяйства": "agriculture",
+    "Спортивная": "sport",
+    "Средств связи": "technology",
+    "Судостроения": "maritime",
+    "Театральный": "art",
+    "Фотографии": "art",
+    "Художественный": "art",
+    "Художественных ремесел": "art",
+    "Художественных ремёсел": "art",
+    "Этнографический": "ethnography",
 }
 
 
@@ -74,15 +74,10 @@ class MkrfRUSpider(Spider):
         "attribution:name:ru": "Министерством культуры Российской Федерации",
         "attribution:website": "https://opendata.mkrf.ru/",
         "license:website": "https://opendata.mkrf.ru/item/license",
-        "use:commercial": "permit"
+        "use:commercial": "permit",
     }
     # TODO: add more datasets from https://opendata.mkrf.ru/item/api
-    datasets = [
-        "museums", 
-        "cinema", 
-        "libraries", 
-        "culture_palaces_clubs"
-        ]
+    datasets = ["museums", "cinema", "libraries", "culture_palaces_clubs"]
 
     api_key = "be088ddb94bfd718a196c7ac7f67d32303ba69681948ec0a21744cdd4f78bd16"
 
@@ -122,7 +117,6 @@ class MkrfRUSpider(Spider):
                         item["lat"] = coordinates[1]
                         item["lon"] = coordinates[0]
 
-            
             if contacts := poi_attributes.get("contacts"):
                 item["email"] = contacts.get("email")
                 item["website"] = contacts.get("website")
@@ -133,7 +127,7 @@ class MkrfRUSpider(Spider):
             self.parse_category(item, poi_attributes)
             self.parse_hours(item, poi_attributes)
             self.parse_museum_types(item, poi_attributes)
-         
+
             yield item
 
     def parse_category(self, item, poi_attributes):
@@ -152,11 +146,10 @@ class MkrfRUSpider(Spider):
                 self.crawler.stats.inc_value("atp/mkrf/failed_to_parse_hours")
 
     def parse_museum_types(self, item, poi_attributes):
-        if poi_attributes.get("category",{}).get("sysName") == "muzei-i-galerei":
+        if poi_attributes.get("category", {}).get("sysName") == "muzei-i-galerei":
             if types := poi_attributes.get("extraFields", {}).get("types"):
                 for type in types:
                     if value := MUSEUM_TYPES.get(type):
-                        apply_category({'museum': value}, item)
+                        apply_category({"museum": value}, item)
                     else:
                         self.crawler.stats.inc_value(f"atp/mkrf/museum_types/failed/{type}")
-
