@@ -1,66 +1,71 @@
 import scrapy
 from scrapy.http import JsonRequest, Request
+
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_RU, OpeningHours
-
 from locations.items import Feature
 
 # TODO: more datasets from https://data-new.mos.ru/
-DATASETS = {
-    "Household services in Moscow": 1904
-}
+DATASETS = {"Household services in Moscow": 1904}
 
 CATEGORY_MAPPING = {
     "ремонт телефонов, планшетов": Categories.CRAFT_ELECTRONICS_REPAIR.value | {"electronics_repair": "phone"},
-    'автомойка': Categories.CAR_WASH,
-    'детейлинг': Categories.SHOP_CAR_REPAIR.value | {"service": "detailing"},
-    'изготовление и ремонт мебели': Categories.CRAFT_CARPENTER,
-    'косметические услуги': Categories.SHOP_BEAUTY,
-    'парикмахерская': Categories.SHOP_HAIRDRESSER,
-    'парикмахерские и косметические услуги': Categories.SHOP_BEAUTY,
-    'прачечные самообслуживания': Categories.SHOP_LAUNDRY.value | {"self_service": "yes"},
-    'прачечные самообслуживания (стирка и глажение методом самообслуживания)': Categories.SHOP_LAUNDRY.value | {"self_service": "yes", "dry_cleaning": "yes"},
-    'приемный пункт в химчистку и стирку': Categories.SHOP_DRY_CLEANING,
-    'ремонт бытовой техники (холодильники, стиральные машины, телевизоры и другие)': Categories.CRAFT_ELECTRONICS_REPAIR.value | {"repair": "appliance"},
-    'ремонт и изготовление металлоизделий': Categories.CRAFT_KEY_CUTTER,
-    'ремонт и изготовление металлоизделий (ключей, зонтов, замков, заточка коньков и другие)': Categories.CRAFT_KEY_CUTTER,
-    'ремонт и пошив швейных, меховых и кожаных изделий, головных уборов и изделий текстильной галантереи, ремонт, пошив и вязание трикотажных изделий': Categories.CRAFT_TAILOR,
-    'ремонт и техническое обслуживание бытовой радиоэлектронной аппаратуры, бытовых машин и бытовых приборов, техники': Categories.CRAFT_ELECTRONICS_REPAIR.value | {"repair": "appliance"},
-    'ремонт иных видов техники (садовая, стартеры, генераторы, климат системы и другие)': Categories.CRAFT_ELECTRONICS_REPAIR.value | {"repair": "appliance"},
-    'ремонт компьютеров, радиоэлектронной аппаратуры': Categories.CRAFT_ELECTRONICS_REPAIR.value | {"electronics_repair": "computer"},
-    'ремонт спортивного инвентаря (велосипеды, самокаты, электроскутеры и другие)': Categories.SHOP_BICYCLE.value | {"service:bicycle:repair": "yes", "service:bicycle:retail": "no"},
-    'ремонт часов': Categories.CRAFTT_CLOCKMAKER,
-    'ремонт ювелирных изделий': Categories.CRAFT_JEWELLER,
-    'ремонт, окраска и пошив обуви': Categories.CRAFT_SHOEMAKER,
-    'ритуальные и обрядовые услуги': Categories.SHOP_FUNERAL_DIRECTORS,
-    'стирка белья (прачечные)': Categories.SHOP_LAUNDRY,
-    'татуаж': Categories.SHOP_BEAUTY,
-    'техническое обслуживание и ремонт транспортных средств': Categories.SHOP_CAR_REPAIR,
-    'услуги багетных и зеркальных мастерских': Categories.SHOP_FRAME,
-    'услуги бань': Categories.SAUNA,
-    'услуги ломбарда': Categories.SHOP_PAWNBROKER,
-    'услуги ногтевого сервиса (маникюр, педикюр)': Categories.SHOP_BEAUTY.value | {"beauty": "nails"},
-    'услуги саун': Categories.SAUNA,
-    'фабрика - прачечная, прачечная (стирка - производство)': Categories.SHOP_LAUNDRY,
-    'фото и копировальные услуги, малая полиграфия': Categories.SHOP_COPYSHOP,
-    'фотоателье, фотоуслуги': Categories.SHOP_PHOTO,
-    'химическая чистка и крашение': Categories.SHOP_DRY_CLEANING,
-    'химчистка - прачечная (химчистка и стирка - производство)': Categories.SHOP_DRY_CLEANING,
-    'химчистка методом самообслуживания': Categories.SHOP_DRY_CLEANING.value | {"self_service": "yes"},
-    'химчистки самообслуживания': Categories.SHOP_DRY_CLEANING.value | {"self_service": "yes"},
-    'шиномонтаж': Categories.SHOP_CAR_REPAIR.value | {"service": "tyres", "service:vehicle:tyres": "yes"},
+    "автомойка": Categories.CAR_WASH,
+    "детейлинг": Categories.SHOP_CAR_REPAIR.value | {"service": "detailing"},
+    "изготовление и ремонт мебели": Categories.CRAFT_CARPENTER,
+    "косметические услуги": Categories.SHOP_BEAUTY,
+    "парикмахерская": Categories.SHOP_HAIRDRESSER,
+    "парикмахерские и косметические услуги": Categories.SHOP_BEAUTY,
+    "прачечные самообслуживания": Categories.SHOP_LAUNDRY.value | {"self_service": "yes"},
+    "прачечные самообслуживания (стирка и глажение методом самообслуживания)": Categories.SHOP_LAUNDRY.value
+    | {"self_service": "yes", "dry_cleaning": "yes"},
+    "приемный пункт в химчистку и стирку": Categories.SHOP_DRY_CLEANING,
+    "ремонт бытовой техники (холодильники, стиральные машины, телевизоры и другие)": Categories.CRAFT_ELECTRONICS_REPAIR.value
+    | {"repair": "appliance"},
+    "ремонт и изготовление металлоизделий": Categories.CRAFT_KEY_CUTTER,
+    "ремонт и изготовление металлоизделий (ключей, зонтов, замков, заточка коньков и другие)": Categories.CRAFT_KEY_CUTTER,
+    "ремонт и пошив швейных, меховых и кожаных изделий, головных уборов и изделий текстильной галантереи, ремонт, пошив и вязание трикотажных изделий": Categories.CRAFT_TAILOR,
+    "ремонт и техническое обслуживание бытовой радиоэлектронной аппаратуры, бытовых машин и бытовых приборов, техники": Categories.CRAFT_ELECTRONICS_REPAIR.value
+    | {"repair": "appliance"},
+    "ремонт иных видов техники (садовая, стартеры, генераторы, климат системы и другие)": Categories.CRAFT_ELECTRONICS_REPAIR.value
+    | {"repair": "appliance"},
+    "ремонт компьютеров, радиоэлектронной аппаратуры": Categories.CRAFT_ELECTRONICS_REPAIR.value
+    | {"electronics_repair": "computer"},
+    "ремонт спортивного инвентаря (велосипеды, самокаты, электроскутеры и другие)": Categories.SHOP_BICYCLE.value
+    | {"service:bicycle:repair": "yes", "service:bicycle:retail": "no"},
+    "ремонт часов": Categories.CRAFTT_CLOCKMAKER,
+    "ремонт ювелирных изделий": Categories.CRAFT_JEWELLER,
+    "ремонт, окраска и пошив обуви": Categories.CRAFT_SHOEMAKER,
+    "ритуальные и обрядовые услуги": Categories.SHOP_FUNERAL_DIRECTORS,
+    "стирка белья (прачечные)": Categories.SHOP_LAUNDRY,
+    "татуаж": Categories.SHOP_BEAUTY,
+    "техническое обслуживание и ремонт транспортных средств": Categories.SHOP_CAR_REPAIR,
+    "услуги багетных и зеркальных мастерских": Categories.SHOP_FRAME,
+    "услуги бань": Categories.SAUNA,
+    "услуги ломбарда": Categories.SHOP_PAWNBROKER,
+    "услуги ногтевого сервиса (маникюр, педикюр)": Categories.SHOP_BEAUTY.value | {"beauty": "nails"},
+    "услуги саун": Categories.SAUNA,
+    "фабрика - прачечная, прачечная (стирка - производство)": Categories.SHOP_LAUNDRY,
+    "фото и копировальные услуги, малая полиграфия": Categories.SHOP_COPYSHOP,
+    "фотоателье, фотоуслуги": Categories.SHOP_PHOTO,
+    "химическая чистка и крашение": Categories.SHOP_DRY_CLEANING,
+    "химчистка - прачечная (химчистка и стирка - производство)": Categories.SHOP_DRY_CLEANING,
+    "химчистка методом самообслуживания": Categories.SHOP_DRY_CLEANING.value | {"self_service": "yes"},
+    "химчистки самообслуживания": Categories.SHOP_DRY_CLEANING.value | {"self_service": "yes"},
+    "шиномонтаж": Categories.SHOP_CAR_REPAIR.value | {"service": "tyres", "service:vehicle:tyres": "yes"},
     # Below types are too broad to categorize
-    'услуги проката': None,
-    'услуги профессиональной уборки - клининговые услуги': None,
-    'иные объекты бытового обслуживания': None,
-    'комплексное предприятие бытового обслуживания': None,
+    "услуги проката": None,
+    "услуги профессиональной уборки - клининговые услуги": None,
+    "иные объекты бытового обслуживания": None,
+    "комплексное предприятие бытового обслуживания": None,
 }
+
 
 class OpendataMosRuSpider(scrapy.Spider):
     name = "opendata_mos_ru"
     allowed_domains = ["apidata-new.mos.ru"]
-    api_key = '8caab471-cc9f-46c8-aeea-fa3f5e1c765c'
+    api_key = "8caab471-cc9f-46c8-aeea-fa3f5e1c765c"
     # TODO: license
 
     def start_requests(self):
@@ -70,7 +75,7 @@ class OpendataMosRuSpider(scrapy.Spider):
                 callback=self.parse,
                 meta={"id": id, "name": name},
             )
-    
+
     def parse(self, response):
         id = response.meta["id"]
         name = response.meta["name"]
@@ -80,9 +85,9 @@ class OpendataMosRuSpider(scrapy.Spider):
             # a max number of rows to fetch is top=500
             yield JsonRequest(
                 url=f"https://apidata-new.mos.ru/v1/datasets/{id}/rows?$top=500&$skip={offset}&api_key={self.api_key}",
-                callback=self.parse_data
+                callback=self.parse_data,
             )
-          
+
     def parse_data(self, response):
         for row in response.json():
             yield self.parse_row(row)
@@ -90,32 +95,31 @@ class OpendataMosRuSpider(scrapy.Spider):
     def parse_row(self, row):
         cells = row.get("Cells", {})
         item = DictParser.parse(cells)
-        item['lat'] = cells.get('Latitude_WGS84')
-        item['lon'] = cells.get('Longitude_WGS84')
-        item['extras']['operator'] = cells.get('OperatingCompany')
+        item["lat"] = cells.get("Latitude_WGS84")
+        item["lon"] = cells.get("Longitude_WGS84")
+        item["extras"]["operator"] = cells.get("OperatingCompany")
         self.parse_category(item, cells.get("TypeObject"))
         self.parse_phones(item, cells)
         self.parse_hours(item, cells)
         # TODO: parse district
         return item
-    
+
     def parse_category(self, item: Feature, category: str):
         if tags := CATEGORY_MAPPING.get(category):
             apply_category(tags, item)
         else:
             self.crawler.stats.inc_value(f"atp/opendata_mos_ru/category/failed/{category}")
-    
+
     def parse_phones(self, item: Feature, cells: dict):
         if phones := cells.get("PublicPhone"):
             item_phones = []
             for phone in phones:
-                deleted = phone.get('is_deleted')
-                number = phone.get('PublicPhone')
-                if deleted == '0' and number != 'нет телефона':
+                deleted = phone.get("is_deleted")
+                number = phone.get("PublicPhone")
+                if deleted == "0" and number != "нет телефона":
                     item_phones.append(number)
             if item_phones:
-                item['phone'] = '; '.join(item_phones)
-                    
+                item["phone"] = "; ".join(item_phones)
 
     def parse_hours(self, item: Feature, cells: dict):
         if hours := cells.get("WorkingHours"):
@@ -124,12 +128,9 @@ class OpendataMosRuSpider(scrapy.Spider):
                 for hour in hours:
                     if hour.get("is_deleted") == "0":
                         day = DAYS_RU.get(hour.get("DayOfWeek", "").title())
-                        times = hour.get('Hours', "").split('-')
+                        times = hour.get("Hours", "").split("-")
                         open, close = times[0], times[1]
                         oh.add_range(day, open, close)
-                item['opening_hours'] = oh.as_opening_hours()
+                item["opening_hours"] = oh.as_opening_hours()
             except Exception as e:
                 self.crawler.stats.inc_value("atp/opendata_mos_ru/hours/failed")
-
-                        
-      
