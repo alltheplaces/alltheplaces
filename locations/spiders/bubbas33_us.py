@@ -15,7 +15,7 @@ class Bubbas33USSpider(SitemapSpider):
     sitemap_rules = [("/locations/", "parse")]
 
     def parse(self, response, **kwargs):
-        location = json.loads(re.search("window.__location__ = (\{.+\});", response.text).group(1))
+        location = json.loads(re.search(r"window.__location__ = (\{.+\});", response.text).group(1))
 
         location["street_address"] = clean_address([location.pop("address1"), location.pop("address2")])
         item = DictParser.parse(location)
