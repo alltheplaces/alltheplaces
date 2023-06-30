@@ -1,0 +1,7 @@
+from locations.storefinders.located_map import LocatedMapSpider
+
+
+class TwoHandsUSSpider(LocatedMapSpider):
+    name = "two_hands_us"
+    item_attributes = {"brand": "Two Hands", "brand_wikidata": "Q116817465"}
+    lm_key = "VKXWzOxkMo9dMs5n55mchWSghdQ4XQjKt0a14Vy6OUI.eyJpbnN0YW5jZUlkIjoiYWU2NjM0MTgtNmFmZC00NTEwLWJkMjYtODVlYzI2OWZiOGVmIiwiYXBwRGVmSWQiOiIxMzk0MjM4NC1hZTk5LWYxNjAtMGY1My0zYTBjYWUyOTJhODIiLCJzaWduRGF0ZSI6IjIwMjMtMDItMThUMTE6MjU6MTIuODE0WiIsInZlbmRvclByb2R1Y3RJZCI6IjEyNTQ5MzIzLTEwMCIsImRlbW9Nb2RlIjpmYWxzZSwiYWlkIjoiZmFmNGY1ZDAtZWYwNS00MDc4LTk1MGEtMTY2MjgyMTMxZTA5Iiwic2l0ZU93bmVySWQiOiJjMzU3MzliNS0zNmIzLTQ2ZDMtOGZiZS1mY2UwOTE3ZTYyMWUifQ"
