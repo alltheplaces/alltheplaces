@@ -6,7 +6,7 @@ from locations.dict_parser import DictParser
 
 class DixyRUSpider(scrapy.Spider):
     name = "dixy_ru"
-    item_attributes = {"brand": "Dixy", "brand_wikidata": "Q4161561"}
+    item_attributes = {"brand": "Дикси", "brand_wikidata": "Q4161561"}
     allowed_domains = ["dixy.ru"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
