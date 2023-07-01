@@ -40,7 +40,7 @@ CATEGORY_MAPPING = {
     | {"electronics_repair": "computer"},
     "ремонт спортивного инвентаря (велосипеды, самокаты, электроскутеры и другие)": Categories.SHOP_BICYCLE.value
     | {"service:bicycle:repair": "yes", "service:bicycle:retail": "no"},
-    "ремонт часов": Categories.CRAFTT_CLOCKMAKER,
+    "ремонт часов": Categories.CRAFT_CLOCKMAKER,
     "ремонт ювелирных изделий": Categories.CRAFT_JEWELLER,
     "ремонт, окраска и пошив обуви": Categories.CRAFT_SHOEMAKER,
     "ритуальные и обрядовые услуги": Categories.SHOP_FUNERAL_DIRECTORS,

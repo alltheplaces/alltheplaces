@@ -26,7 +26,7 @@ class Categories(Enum):
     HIGHWAY_RESIDENTIAL = {"highway": "residential"}
 
     CRAFT_CARPENTER = {"craft": "carpenter"}
-    CRAFTT_CLOCKMAKER = {"craft": "clockmaker"}
+    CRAFT_CLOCKMAKER = {"craft": "clockmaker"}
     CRAFT_ELECTRONICS_REPAIR = {"craft": "electronics_repair"}
     CRAFT_JEWELLER = {"craft": "jeweller"}
     CRAFT_KEY_CUTTER = {"craft": "key_cutter"}
