@@ -19,8 +19,7 @@ class BurgerKingRUSpider(scrapy.Spider):
             item = DictParser.parse(poi)
             item["phone"] = poi.get("phone", "").replace(":", "")
             self.parse_hours(item, poi)
-            if poi.get("wifi") == "1":
-                apply_category({"internet_access": "wlan"}, item)
+            apply_yes_no("internet_access=wlan", item, poi.get("wifi") == "1")
             apply_yes_no("drive_through", item, poi.get("king_drive") == "1")
             yield item
 
