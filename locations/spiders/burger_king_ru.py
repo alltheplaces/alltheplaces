@@ -17,10 +17,11 @@ class BurgerKingRUSpider(scrapy.Spider):
     def parse(self, response):
         for poi in response.json().get("response"):
             item = DictParser.parse(poi)
+            item['phone'] = poi.get("phone", '').replace(':', '')
             self.parse_hours(item, poi)
-            apply_yes_no("drive_through", item, poi.get("king_drive") == "1")
             if poi.get("wifi") == "1":
                 apply_category({"internet_access": "wlan"}, item)
+            apply_yes_no("drive_through", item, poi.get("king_drive") == "1")
             yield item
 
     def parse_hours(self, item, poi):
