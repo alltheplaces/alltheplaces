@@ -69,7 +69,7 @@ CATEGORY_MAPPING = {
 }
 
 
-class OpendataMosHouseholdServicesRuSpider(scrapy.Spider):
+class OpendataMosHouseholdServicesRUSpider(scrapy.Spider):
     name = "opendata_mos_household_services_ru"
     allowed_domains = ["apidata-new.mos.ru"]
     api_key = "8caab471-cc9f-46c8-aeea-fa3f5e1c765c"
