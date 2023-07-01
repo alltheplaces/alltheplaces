@@ -1,7 +1,7 @@
 import scrapy
 from scrapy.http import JsonRequest
 
-from locations.categories import apply_category, apply_yes_no
+from locations.categories import apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 
