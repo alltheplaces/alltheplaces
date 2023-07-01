@@ -6,7 +6,13 @@ from locations.dict_parser import DictParser
 from locations.hours import DAYS_RU, OpeningHours
 from locations.items import Feature
 
-# TODO: more datasets from https://data-new.mos.ru/
+# Open Data Portal of Moscow Government
+# Documentation: https://data-new.mos.ru/developers
+# More datasets: https://data-new.mos.ru/
+# TODO: Make this a storefinder and include more datasets, 
+#       each dataset will have its own parse method and category mapping
+#       as data format of each dataset is different. 
+
 DATASETS = {"Household services in Moscow": 1904}
 
 CATEGORY_MAPPING = {
@@ -54,25 +60,36 @@ CATEGORY_MAPPING = {
     "химчистка методом самообслуживания": Categories.SHOP_DRY_CLEANING.value | {"self_service": "yes"},
     "химчистки самообслуживания": Categories.SHOP_DRY_CLEANING.value | {"self_service": "yes"},
     "шиномонтаж": Categories.SHOP_CAR_REPAIR.value | {"service": "tyres", "service:vehicle:tyres": "yes"},
+    # TODO: categorize
+    "услуги профессиональной уборки - клининговые услуги": None,
     # Below types are too broad to categorize
     "услуги проката": None,
-    "услуги профессиональной уборки - клининговые услуги": None,
     "иные объекты бытового обслуживания": None,
     "комплексное предприятие бытового обслуживания": None,
 }
 
 
-class OpendataMosRuSpider(scrapy.Spider):
-    name = "opendata_mos_ru"
+class OpendataMosHouseholdServicesRuSpider(scrapy.Spider):
+    name = "opendata_mos_household_services_ru"
     allowed_domains = ["apidata-new.mos.ru"]
     api_key = "8caab471-cc9f-46c8-aeea-fa3f5e1c765c"
-    # TODO: license
+    download_delay = 0.25
+    dataset_attributes = {
+        "attribution": "required",
+        "attribution:name:ru": "ПОРТАЛ ОТКРЫТЫХ ДАННЫХ Правительства Москвы",
+        "attribution:name:en": "OPEN DATA PORTAL of Moscow Government",
+        "attribution:website": "https://data-new.mos.ru/",
+        "contact:email": "opendata@mos.ru",
+        "license": "Creative Commons Attribution 3.0 Unported",
+        "license:website": "https://creativecommons.org/licenses/by/3.0/",
+        "license:wikidata": "Q14947546",
+        "use:commercial": "permit",
+    }
 
     def start_requests(self):
         for name, id in DATASETS.items():
             yield Request(
                 url=f"https://apidata-new.mos.ru/v1/datasets/{id}/count?api_key={self.api_key}",
-                callback=self.parse,
                 meta={"id": id, "name": name},
             )
 
@@ -83,6 +100,8 @@ class OpendataMosRuSpider(scrapy.Spider):
         self.logger.info(f"Found {count} rows in dataset {name}(id={id})")
         for offset in range(0, count, 500):
             # a max number of rows to fetch is top=500
+            # q: how to set a delay in scrapy framework JsonRequests?
+            # a: https://stackoverflow.com/questions/25077954/scrapy-how-to-set-a-delay-between-requests
             yield JsonRequest(
                 url=f"https://apidata-new.mos.ru/v1/datasets/{id}/rows?$top=500&$skip={offset}&api_key={self.api_key}",
                 callback=self.parse_data,
@@ -98,17 +117,17 @@ class OpendataMosRuSpider(scrapy.Spider):
         item["lat"] = cells.get("Latitude_WGS84")
         item["lon"] = cells.get("Longitude_WGS84")
         item["extras"]["operator"] = cells.get("OperatingCompany")
-        self.parse_category(item, cells.get("TypeObject"))
         self.parse_phones(item, cells)
         self.parse_hours(item, cells)
-        # TODO: parse district
-        return item
+        return self.parse_category(item, cells.get("TypeObject"))
 
     def parse_category(self, item: Feature, category: str):
         if tags := CATEGORY_MAPPING.get(category):
             apply_category(tags, item)
+            return item
         else:
             self.crawler.stats.inc_value(f"atp/opendata_mos_ru/category/failed/{category}")
+            return None
 
     def parse_phones(self, item: Feature, cells: dict):
         if phones := cells.get("PublicPhone"):
@@ -116,21 +135,23 @@ class OpendataMosRuSpider(scrapy.Spider):
             for phone in phones:
                 deleted = phone.get("is_deleted")
                 number = phone.get("PublicPhone")
-                if deleted == "0" and number != "нет телефона":
+                if deleted == 0 and number != "нет телефона":
                     item_phones.append(number)
             if item_phones:
                 item["phone"] = "; ".join(item_phones)
 
     def parse_hours(self, item: Feature, cells: dict):
+        # TODO: parse ClarificationOfWorkingHours
         if hours := cells.get("WorkingHours"):
             try:
                 oh = OpeningHours()
                 for hour in hours:
-                    if hour.get("is_deleted") == "0":
+                    if hour.get("is_deleted") == 0:
                         day = DAYS_RU.get(hour.get("DayOfWeek", "").title())
                         times = hour.get("Hours", "").split("-")
                         open, close = times[0], times[1]
                         oh.add_range(day, open, close)
                 item["opening_hours"] = oh.as_opening_hours()
             except Exception as e:
+                # TODO: 1,5k hours failed
                 self.crawler.stats.inc_value("atp/opendata_mos_ru/hours/failed")
