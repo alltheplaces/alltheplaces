@@ -146,11 +146,16 @@ class OpendataMosHouseholdServicesRUSpider(scrapy.Spider):
                 oh = OpeningHours()
                 for hour in hours:
                     if hour.get("is_deleted") == 0:
-                        day = DAYS_RU.get(hour.get("DayOfWeek", "").title())
-                        times = hour.get("Hours", "").split("-")
-                        open, close = times[0], times[1]
-                        oh.add_range(day, open, close)
+                        if times := hour.get("Hours"):
+                            if times == 'выходной': # day off
+                                continue
+                            if times == 'круглосуточно': # 24 hours
+                                times = '00:00-24:00'
+                            day = DAYS_RU.get(hour.get("DayOfWeek", "").title())
+                            times = times.split("-")
+                            open, close = times[0], times[1]
+                            oh.add_range(day, open, close)
                 item["opening_hours"] = oh.as_opening_hours()
             except Exception as e:
-                # TODO: 1,5k hours failed
+                self.logger.warning(f'Parse hours failed: {hours}')
                 self.crawler.stats.inc_value("atp/opendata_mos_ru/hours/failed")
