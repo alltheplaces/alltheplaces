@@ -139,7 +139,7 @@ class OpendataMosHouseholdServicesRuSpider(scrapy.Spider):
                 item["phone"] = "; ".join(item_phones)
 
     def parse_hours(self, item: Feature, cells: dict):
-        # TODO: parse ClarificationOfWorkingHours 
+        # TODO: parse ClarificationOfWorkingHours
         if hours := cells.get("WorkingHours"):
             try:
                 oh = OpeningHours()
