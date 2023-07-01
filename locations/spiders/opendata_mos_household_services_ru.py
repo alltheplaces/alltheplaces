@@ -74,6 +74,7 @@ class OpendataMosHouseholdServicesRuSpider(scrapy.Spider):
     allowed_domains = ["apidata-new.mos.ru"]
     api_key = "8caab471-cc9f-46c8-aeea-fa3f5e1c765c"
     download_delay = 0.25
+    requires_proxy = True
     dataset_attributes = {
         "attribution": "required",
         "attribution:name:ru": "ПОРТАЛ ОТКРЫТЫХ ДАННЫХ Правительства Москвы",
@@ -139,7 +140,7 @@ class OpendataMosHouseholdServicesRuSpider(scrapy.Spider):
                 item["phone"] = "; ".join(item_phones)
 
     def parse_hours(self, item: Feature, cells: dict):
-        # TODO: parse ClarificationOfWorkingHours 
+        # TODO: parse ClarificationOfWorkingHours
         if hours := cells.get("WorkingHours"):
             try:
                 oh = OpeningHours()
