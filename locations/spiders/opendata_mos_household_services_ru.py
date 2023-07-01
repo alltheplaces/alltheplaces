@@ -9,9 +9,9 @@ from locations.items import Feature
 # Open Data Portal of Moscow Government
 # Documentation: https://data-new.mos.ru/developers
 # More datasets: https://data-new.mos.ru/
-# TODO: Make this a storefinder and include more datasets, 
+# TODO: Make this a storefinder and include more datasets,
 #       each dataset will have its own parse method and category mapping
-#       as data format of each dataset is different. 
+#       as data format of each dataset is different.
 
 DATASETS = {"Household services in Moscow": 1904}
 
