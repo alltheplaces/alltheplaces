@@ -100,8 +100,6 @@ class OpendataMosHouseholdServicesRuSpider(scrapy.Spider):
         self.logger.info(f"Found {count} rows in dataset {name}(id={id})")
         for offset in range(0, count, 500):
             # a max number of rows to fetch is top=500
-            # q: how to set a delay in scrapy framework JsonRequests?
-            # a: https://stackoverflow.com/questions/25077954/scrapy-how-to-set-a-delay-between-requests
             yield JsonRequest(
                 url=f"https://apidata-new.mos.ru/v1/datasets/{id}/rows?$top=500&$skip={offset}&api_key={self.api_key}",
                 callback=self.parse_data,
