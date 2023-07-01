@@ -200,7 +200,7 @@ class InsightsCommand(ScrapyCommand):
 
     def analyze_atp_nsi_osm(self, args, opts):
         """
-        Trawl ATM, NSI and OSM for per wikidata code information.
+        Trawl ATP, NSI and OSM for per wikidata code information.
         :param args: ATP output GeoJSON files / directories to load
         :param outfile: JSON result file name to write
         """
@@ -213,7 +213,8 @@ class InsightsCommand(ScrapyCommand):
                 "code": wikidata_code,
                 "osm_count": 0,
                 "nsi_brand": None,
-                "nsi_description": None,
+                "q_title": None,
+                "q_description": None,
                 "atp_count": None,
                 "atp_brand": None,
                 "atp_country_count": 0,
@@ -244,8 +245,14 @@ class InsightsCommand(ScrapyCommand):
         nsi = NSI()
         for k, v in nsi.iter_wikidata():
             r = lookup_code(k)
-            r["nsi_brand"] = v.get("label", "NO NSI LABEL!")
-            r["nsi_description"] = v.get("description", "NO NSI DESC!")
+            r["q_title"] = v.get("label", "NO NSI LABEL!")
+            r["q_description"] = v.get("description", "NO NSI DESC!")
+
+        # Build a lookup table from NSI id's to associated brand name if any.
+        nsi_id_to_brand = {}
+        for item in nsi.iter_nsi():
+            if brand := item.get("tags", {}).get("brand"):
+                nsi_id_to_brand[item["id"]] = brand
 
         # TODO: Could go through ATP spiders themselves looking for Q-codes. Add an atp_count=-1
         #       which would be written over if a matching POI had been scraped by the code below.
@@ -259,6 +266,13 @@ class InsightsCommand(ScrapyCommand):
                 continue
             brand = properties.get("brand")
             r = lookup_code(brand_wikidata)
+
+            if properties.get("nsi_id"):
+                # If we have found the brand in NSI then show the NSI brand name in the
+                # output JSON to help highlight where a spider brand name differs from
+                # the NSI brand name.
+                r["nsi_brand"] = nsi_id_to_brand.get(properties.get("nsi_id"))
+
             count = r.get("atp_count")
             if not count:
                 count = 0
