@@ -46,7 +46,7 @@ class WesternUnionSpider(Spider):
                     "sortOrder": "Distance",
                     "pageNumber": str(page_number),
                 }
-            }
+            },
         }
         yield JsonRequest(url=self.start_urls[0], method="POST", headers=headers, data=data)
 
@@ -57,14 +57,16 @@ class WesternUnionSpider(Spider):
         # results to be returned.
         for country in country_coordinates():
             yield from self.request_page(country["isocode"], country["lat"], country["lon"], 1)
- 
+
     def parse(self, response):
         # If crawling too fast, the server responds with a JSON
         # blob containing an error message. Schedule a retry.
         if "results" not in response.json()["data"]["locations"]:
             if "errorCode" in response.json()["data"]["locations"]:
                 if response.json()["data"]["locations"]["errorCode"] == 500:
-                    yield get_retry_request(response.request, spider=self, max_retry_times=5, reason="Retry after rate limiting error")
+                    yield get_retry_request(
+                        response.request, spider=self, max_retry_times=5, reason="Retry after rate limiting error"
+                    )
                     return
             # In case of an unhandled error, skip parsing.
             return
@@ -85,4 +87,9 @@ class WesternUnionSpider(Spider):
         total_pages = response.json()["data"]["locations"]["pageCount"]
         if current_page == 1 and total_pages > 1:
             for page_number in range(2, total_pages, 1):
-                yield from self.request_page(request_data["variables"]["req"]["country"], request_data["variables"]["req"]["latitude"], request_data["variables"]["req"]["longitude"], page_number)
+                yield from self.request_page(
+                    request_data["variables"]["req"]["country"],
+                    request_data["variables"]["req"]["latitude"],
+                    request_data["variables"]["req"]["longitude"],
+                    page_number,
+                )

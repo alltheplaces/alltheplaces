@@ -198,6 +198,7 @@ def bbox_to_geojson(bounds):
     }
     return polygon
 
+
 def country_coordinates():
     """
     Return a dictionary of ISO 3166-2 alpha-2 country codes with
