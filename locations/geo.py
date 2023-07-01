@@ -197,3 +197,18 @@ def bbox_to_geojson(bounds):
         "coordinates": [[[xmin, ymin], [xmin, ymax], [xmax, ymax], [xmax, ymin], [xmin, ymin]]],
     }
     return polygon
+
+def country_coordinates():
+    """
+    Return a dictionary of ISO 3166-2 alpha-2 country codes with
+    coordinates approximating a centroid of the largest landmass
+    or multiple largest landmasses for countries with multiple
+    landmasses.
+
+    This is useful for supplying coordinates of a country to an API
+    that then expects to reverse geocode a country from the supplied
+    coordinates.
+
+    :return A dictionary of ISO 3166-2 alpha-2 country codes with corresponding latitude and longitude for each country.
+    """
+    return json.load(open("./locations/searchable_points/country_coordinates.json"))
