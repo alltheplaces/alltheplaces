@@ -2,7 +2,7 @@ import scrapy
 from scrapy.http import JsonRequest
 
 from locations.dict_parser import DictParser
-from locations.hours import OpeningHours
+
 
 class DixyRUSpider(scrapy.Spider):
     name = "dixy_ru"
@@ -15,22 +15,19 @@ class DixyRUSpider(scrapy.Spider):
 
     def parse(self, response):
         for store in response.json()["features"]:
-            properties = store.get('properties', {})
-            geometry = store.get('geometry', {})
+            properties = store.get("properties", {})
+            geometry = store.get("geometry", {})
             item = DictParser.parse(properties)
-            item['addr_full'] = None
-            item['street_address'] = properties.get('address')
+            item["addr_full"] = None
+            item["street_address"] = properties.get("address")
             item["lat"] = geometry.get("coordinates")[0]
             item["lon"] = geometry.get("coordinates")[1]
-            self.parse_hours(item, properties.get('workingHours'))
+            self.parse_hours(item, properties.get("workingHours"))
             yield item
 
     def parse_hours(self, item, hours):
-        if hours == '24 часа':
+        if hours == "24 часа":
             item["opening_hours"] = "24/7"
         else:
-            item["opening_hours"] = f'Mo-Su {hours}'
+            item["opening_hours"] = f"Mo-Su {hours}"
         return item
-                
-
-
