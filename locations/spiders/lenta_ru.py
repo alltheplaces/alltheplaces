@@ -18,8 +18,8 @@ class LentaRUSpider(scrapy.Spider):
     def parse(self, response):
         for poi in response.json():
             item = DictParser.parse(poi)
-            item['street_address'] = poi.get("address")
-            item['addr_full'] = None
+            item["street_address"] = poi.get("address")
+            item["addr_full"] = None
             self.parse_hours(item, poi)
             # A few stores are marked as pet shops
             if poi.get("type") == "zoo":
