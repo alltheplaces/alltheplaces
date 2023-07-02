@@ -53,7 +53,7 @@ ENV LANG=en_US.UTF-8 \
 RUN curl https://pyenv.run | bash \
  && pyenv install ${PYTHON_VERSION} \
  && pyenv global ${PYTHON_VERSION} \
- && pip install --upgrade pip pipenv
+ && pip install --upgrade pip pipenv==2023.6.26
 
 COPY Pipfile Pipfile
 COPY Pipfile.lock Pipfile.lock
