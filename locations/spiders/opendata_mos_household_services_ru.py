@@ -156,6 +156,6 @@ class OpendataMosHouseholdServicesRUSpider(scrapy.Spider):
                             open, close = times[0], times[1]
                             oh.add_range(day, open, close)
                 item["opening_hours"] = oh.as_opening_hours()
-            except Exception as e:
+            except Exception:
                 self.logger.warning(f"Parse hours failed: {hours}")
                 self.crawler.stats.inc_value("atp/opendata_mos_ru/hours/failed")
