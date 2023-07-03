@@ -689,12 +689,9 @@ class OpeningHours:
             days_regex + r"(?:\W+|" + delimiter_regex + r")((?:(?:\s*,?\s*)?" + time_regex_24h + delimiter_regex + time_regex_24h + r")+)"
         )
 
-        # Replace named times in source ranges string (e.g. midnight -> 24:00)
-        ranges_string_12h = ranges_string
-        ranges_string_24h = ranges_string
-        for named_time_name, named_time_time in named_times.items():
-            ranges_string_12h = ranges_string_12h.replace(named_time_name.lower(), named_time_time[0]).replace(named_time_name.title(), named_time_time[0]).replace(named_time_name.upper(), named_time_time[0])
-            ranges_string_24h = ranges_string_24h.replace(named_time_name.lower(), named_time_time[1]).replace(named_time_name.title(), named_time_time[1]).replace(named_time_name.upper(), named_time_time[1])
+        # Replace named times in source ranges string (e.g. midnight -> 00:00)
+        ranges_string_12h = self.replace_named_times(ranges_string, named_times, False)
+        ranges_string_24h = self.replace_named_times(ranges_string, named_times, True)
 
         # Execute both regular expressions.
         results_12h = re.findall(full_regex_12h, ranges_string_12h, re.IGNORECASE)
@@ -754,3 +751,27 @@ class OpeningHours:
                 day_list = day_range(start_day, end_day)
             for day in day_list:
                 self.add_range(day, result[1], result[2])
+
+    @staticmethod
+    def replace_named_times(hours_string: str, named_times: dict, time_24h: bool = True) -> str:
+        """
+        Replaces named times (e.g. Midnight) in a string with their
+        12h equivalent (e.g. 12:00AM) or 24h equivalent (e.g 00:00).
+        :param hours_string: string of opening hours information
+                             containing named times.
+        :param named_times: dict where the key is the string to
+                            replace, the value is an array of 2
+                            items, the first value being 24h
+                            time replacement, second being 12h
+                            time replacement.
+        :returns: hours_string with named times replaced with their
+                  24h equivalent or 12h equivalent times.
+        """
+        replaced_hours_string = hours_string
+        if time_24h is True:
+            for named_time_name, named_time_time in named_times.items():
+                replaced_hours_string = replaced_hours_string.replace(named_time_name.lower(), named_time_time[1]).replace(named_time_name.title(), named_time_time[1]).replace(named_time_name.upper(), named_time_time[1])
+        else:
+            for named_time_name, named_time_time in named_times.items():
+                replaced_hours_string = replaced_hours_string.replace(named_time_name.lower(), named_time_time[0]).replace(named_time_name.title(), named_time_time[0]).replace(named_time_name.upper(), named_time_time[0])
+        return replaced_hours_string
