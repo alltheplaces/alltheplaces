@@ -53,7 +53,7 @@ class napa(scrapy.Spider):
                 "lon": data["geo"]["longitude"],
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)
         else:
             urls = response.xpath('//div[@class="store-browse-content-listing"]//a/@href').extract()
             for url in urls:
