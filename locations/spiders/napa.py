@@ -84,4 +84,4 @@ class napa(scrapy.Spider):
             "lon": data["geo"]["longitude"],
         }
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)
