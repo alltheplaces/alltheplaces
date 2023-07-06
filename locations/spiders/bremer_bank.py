@@ -1,9 +1,7 @@
-# -*- coding: utf-8 -*-
-import re
-
 from scrapy.spiders import SitemapSpider
-from locations.items import GeojsonPointItem
+
 from locations.google_url import extract_google_position
+from locations.items import Feature
 
 
 class BremerBankSpider(SitemapSpider):
@@ -16,19 +14,12 @@ class BremerBankSpider(SitemapSpider):
     def parse(self, response):
         properties = {
             "ref": response.url.split("/")[-1],
-            "street_address": response.xpath(
-                '//div[@class="col-sm-12 col-lg-4"]/div/p/text()'
-            )
-            .extract_first()
-            .strip(),
+            "street_address": response.xpath('//div[@class="col-sm-12 col-lg-4"]/div/p/text()').extract_first().strip(),
             "phone": response.xpath('//a[@class="phoneLink"]/text()').extract_first(),
         }
 
         city, state, postcode = (
-            response.xpath('//div[@class="col-sm-12 col-lg-4"]/div/p/text()')[2]
-            .extract()
-            .strip()
-            .split("\n")
+            response.xpath('//div[@class="col-sm-12 col-lg-4"]/div/p/text()')[2].extract().strip().split("\n")
         )
 
         properties["city"] = city.strip(",")
@@ -37,4 +28,4 @@ class BremerBankSpider(SitemapSpider):
 
         extract_google_position(properties, response)
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

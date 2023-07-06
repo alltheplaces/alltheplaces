@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
 import csv
-import scrapy
 import json
 
-from locations.items import GeojsonPointItem
-from locations.hours import OpeningHours
+import scrapy
+
+from locations.items import Feature
 
 
 class KumAndGoSpider(scrapy.Spider):
@@ -14,9 +13,7 @@ class KumAndGoSpider(scrapy.Spider):
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def start_requests(self):
-        with open(
-            "./locations/searchable_points/us_centroids_100mile_radius_state.csv"
-        ) as points:
+        with open("./locations/searchable_points/us_centroids_100mile_radius_state.csv") as points:
             reader = csv.DictReader(points)
             for point in reader:
                 if point["state"] in (
@@ -39,8 +36,7 @@ class KumAndGoSpider(scrapy.Spider):
     def parse(self, response):
         result = json.loads(response.text)
         for store in result:
-
-            yield GeojsonPointItem(
+            yield Feature(
                 ref=store["id"],
                 lon=store["lng"],
                 lat=store["lat"],

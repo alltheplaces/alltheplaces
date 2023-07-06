@@ -1,8 +1,7 @@
-# -*- coding: utf-8 -*-
 from scrapy.spiders import SitemapSpider
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class GiantFoodStoresSpider(SitemapSpider):
@@ -10,9 +9,7 @@ class GiantFoodStoresSpider(SitemapSpider):
     sitemap_urls = ["https://stores.giantfoodstores.com/robots.txt"]
     item_attributes = {"brand": "Giant", "brand_wikidata": "Q5558332"}
 
-    sitemap_rules = [
-        (r"^https://stores.giantfoodstores.com/[^/]*/[^/]*/[^/]*$", "parse")
-    ]
+    sitemap_rules = [(r"^https://stores.giantfoodstores.com/[^/]*/[^/]*/[^/]*$", "parse")]
 
     def parse(self, response):
         main = response.xpath("//main")
@@ -38,4 +35,4 @@ class GiantFoodStoresSpider(SitemapSpider):
             "postcode": main.css("[itemprop=postalCode]::text").get(),
             "opening_hours": hours.as_opening_hours(),
         }
-        return GeojsonPointItem(**properties)
+        return Feature(**properties)

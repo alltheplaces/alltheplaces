@@ -1,20 +1,13 @@
 import datetime
-import scrapy
 import re
-import json
 
-from locations.items import GeojsonPointItem
+import scrapy
+from scrapy import Selector
+from scrapy.http import JsonRequest
 
-
-DAY_MAPPING = {
-    "Mon": "Mo",
-    "Tue": "Tu",
-    "Wed": "We",
-    "Thu": "Th",
-    "Fri": "Fr",
-    "Sat": "Sa",
-    "Sun": "Su",
-}
+from locations.hours import OpeningHours, day_range, sanitise_day
+from locations.items import Feature
+from locations.spiders.vapestore_gb import clean_address
 
 
 class LAFitnessSpider(scrapy.Spider):
@@ -22,18 +15,16 @@ class LAFitnessSpider(scrapy.Spider):
     item_attributes = {"brand": "LA Fitness", "brand_wikidata": "Q6457180"}
     allowed_domains = ["lafitness.com"]
     download_delay = 0.1
+    requires_proxy = True
 
     def start_requests(self):
-        data = {"zipCode": None, "state": None}
-        yield scrapy.Request(
-            url="https://www.lafitness.com/Pages/GetClubLocations.aspx/GetClubLocationsByStateAndZipCode",
+        yield JsonRequest(
+            url="https://lafitness.com/Pages/GetClubLocations.aspx/GetClubLocation",
             method="POST",
-            body=json.dumps(data),
-            headers={"Content-Type": "application/json"},
         )
 
-    def parse_hours(self, elems):
-        opening_hours = []
+    def parse_hours(self, elems: Selector) -> OpeningHours:
+        opening_hours = OpeningHours()
 
         hours = elems.xpath(".//text()").extract()
 
@@ -48,9 +39,7 @@ class LAFitnessSpider(scrapy.Spider):
                 return "24/7"
 
             try:
-                open_time, close_time = re.search(
-                    r"(.*)\s-\s(.*)", hour[1], re.IGNORECASE
-                ).groups()
+                open_time, close_time = re.search(r"(.*)\s-\s(.*)", hour[1], re.IGNORECASE).groups()
             except:
                 if hour[1] == "24 Hours Open":
                     open_time, close_time = "12:00am", "11:59pm"
@@ -61,74 +50,46 @@ class LAFitnessSpider(scrapy.Spider):
             if open_time == "Midnight":
                 open_time = "12:00am"
 
-            open_time = datetime.datetime.strptime(open_time, "%I:%M%p").strftime(
-                "%H:%M"
-            )
-            close_time = datetime.datetime.strptime(close_time, "%I:%M%p").strftime(
-                "%H:%M"
-            )
+            open_time = datetime.datetime.strptime(open_time, "%I:%M%p").strftime("%H:%M")
+            close_time = datetime.datetime.strptime(close_time, "%I:%M%p").strftime("%H:%M")
 
-            day_range = re.search(r"([a-z]{3})\s-\s([a-z]{3})", hour[0], re.IGNORECASE)
-            if day_range:
-                day_start, day_end = day_range.groups()
-                opening_hours.append(
-                    "{}-{} {}-{}".format(
-                        DAY_MAPPING[day_start],
-                        DAY_MAPPING[day_end],
-                        open_time,
-                        close_time,
-                    )
+            if days := re.search(r"([a-z]{3})\s-\s([a-z]{3})", hour[0], re.IGNORECASE):
+                day_start, day_end = days.groups()
+                opening_hours.add_days_range(
+                    day_range(sanitise_day(day_start), sanitise_day(day_end)), open_time, close_time
                 )
             else:
-                opening_hours.append(
-                    "{} {}-{}".format(DAY_MAPPING[hour[0]], open_time, close_time)
-                )
+                opening_hours.add_range(sanitise_day(hour[0]), open_time, close_time)
 
-        return ";".join(opening_hours)
+        return opening_hours
 
     def parse_club(self, response):
         properties = response.meta["properties"]
 
         properties.update(
             {
-                "phone": response.xpath(
-                    '//span[contains(@id, "lblClubPhone")]/text()'
-                ).extract_first(),
-                "addr_full": response.xpath(
-                    '//span[contains(@id, "lblClubAddress")]/text()'
-                ).extract_first(),
-                "city": response.xpath(
-                    '//span[contains(@id, "lblClubCity")]/text()'
-                ).extract_first(),
-                "state": response.xpath(
-                    '//span[contains(@id, "lblClubState")]/text()'
-                ).extract_first(),
-                "postcode": response.xpath(
-                    '//span[contains(@id, "lblZipCode")]/text()'
-                ).extract_first(),
+                "phone": response.xpath('//span[contains(@id, "lblClubPhone")]/text()').extract_first(),
+                "street_address": response.xpath('//span[contains(@id, "lblClubAddress")]/text()').extract_first(),
+                "postcode": response.xpath('//span[contains(@id, "lblZipCode")]/text()').extract_first(),
                 "website": response.url,
+                "opening_hours": self.parse_hours(response.xpath('//div[@id="divClubHourPanel"]//tr')),
             }
         )
 
-        opening_hours = self.parse_hours(
-            response.xpath('//div[@id="divClubHourPanel"]//tr')
-        )
-
-        if opening_hours:
-            properties["opening_hours"] = opening_hours
-
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)
 
     def parse(self, response):
         locations = response.json()["d"]
-
         for location in locations:
-
             properties = {
                 "name": location["Description"],
                 "ref": location["ClubID"],
                 "lat": float(location["Latitude"]),
                 "lon": float(location["Longitude"]),
+                "image": f'https://lafitness.com/Pages/Images/ClubExterior/{location["ClubID"]}.jpg',
+                "addr_full": clean_address(location["Address"].replace("<br />", ",")),
+                "city": location["City"],
+                "state": location["State"],
             }
 
             yield scrapy.Request(

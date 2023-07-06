@@ -1,57 +1,45 @@
-# -*- coding: utf-8 -*-
-import re
-
 import scrapy
 
-from locations.items import GeojsonPointItem
-from locations.hours import OpeningHours
+from locations.items import Feature
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class AbercrombieAndFitchSpider(scrapy.Spider):
     name = "abercrombie_and_fitch"
     item_attributes = {"brand": "Abercrombie & Fitch", "brand_wikidata": "Q319344"}
     allowed_domains = ["abercrombie.com"]
-    # Website is blocking scrapers so I had to change the User Agent to get around this
-    headers = {
-        "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36",
-    }
     custom_settings = {
         "ROBOTSTXT_OBEY": False,
     }
+    user_agent = BROWSER_DEFAULT
 
-    def start_requests(self):
-        countries = [
-            "US",
-            "CA",
-            "BE",
-            "FR",
-            "DE",
-            "HK",
-            "IE",
-            "IT",
-            "JP",
-            "KW",
-            "CN",
-            "MX",
-            "NL",
-            "QA",
-            "SA",
-            "SG",
-            "ES",
-            "AE",
-            "GB",
-        ]
-
-        for country in countries:
-            yield scrapy.Request(
-                url=f"https://www.abercrombie.com/api/ecomm/a-ca/storelocator/search?country={country}",
-                method="GET",
-                callback=self.parse,
-                headers=self.headers,
-            )
+    start_urls = [
+        "https://www.abercrombie.com/api/ecomm/a-uk/storelocator/search?country=AE",
+        "https://www.abercrombie.com/api/ecomm/a-uk/storelocator/search?country=BE",
+        "https://www.abercrombie.com/api/ecomm/a-uk/storelocator/search?country=CA",
+        "https://www.abercrombie.com/api/ecomm/a-uk/storelocator/search?country=CN",
+        "https://www.abercrombie.com/api/ecomm/a-uk/storelocator/search?country=DE",
+        "https://www.abercrombie.com/api/ecomm/a-uk/storelocator/search?country=ES",
+        "https://www.abercrombie.com/api/ecomm/a-uk/storelocator/search?country=FR",
+        "https://www.abercrombie.com/api/ecomm/a-uk/storelocator/search?country=GB",
+        "https://www.abercrombie.com/api/ecomm/a-uk/storelocator/search?country=HK",
+        "https://www.abercrombie.com/api/ecomm/a-uk/storelocator/search?country=IT",
+        "https://www.abercrombie.com/api/ecomm/a-uk/storelocator/search?country=JP",
+        "https://www.abercrombie.com/api/ecomm/a-uk/storelocator/search?country=KW",
+        "https://www.abercrombie.com/api/ecomm/a-uk/storelocator/search?country=MX",
+        "https://www.abercrombie.com/api/ecomm/a-uk/storelocator/search?country=QA",
+        "https://www.abercrombie.com/api/ecomm/a-uk/storelocator/search?country=SA",
+        "https://www.abercrombie.com/api/ecomm/a-uk/storelocator/search?country=US",
+    ]
+    # Old regions:
+    # "https://www.abercrombie.com/api/ecomm/a-uk/storelocator/search?country=EU",
+    # "https://www.abercrombie.com/api/ecomm/a-uk/storelocator/search?country=AM",
 
     def parse(self, response):
         data = response.json()
+
+        if data["physicalStores"] is None:
+            return
 
         for row in data["physicalStores"]:
             properties = {
@@ -64,8 +52,10 @@ class AbercrombieAndFitchSpider(scrapy.Spider):
                 "lon": row["longitude"],
                 "phone": row["telephone"],
                 "street_address": row["addressLine"][0],
-                "postcode": row["postalCode"],
             }
+            # Hong Kong seems to list postcodes with just - in them
+            if row["postalCode"] and row["postalCode"] != "-":
+                properties["postcode"] = row["postalCode"]
 
             for brand in row["physicalStoreAttribute"]:
                 if brand["name"] == "Brand":
@@ -76,4 +66,4 @@ class AbercrombieAndFitchSpider(scrapy.Spider):
                         properties["brand"] = "Abercrombie Kids"
                         properties["brand_wikidata"] = "Q429856"
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

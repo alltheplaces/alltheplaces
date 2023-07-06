@@ -5,14 +5,11 @@ from urllib.parse import urljoin
 
 import lxml
 import parsel
-
-
-class MicrodataError(Exception):
-    pass
+import scrapy
 
 
 def token_split(val):
-    return re.findall("\S+", val, flags=re.ASCII)
+    return re.findall(r"\S+", val, flags=re.ASCII)
 
 
 def top_level_items(selector: parsel.Selector):
@@ -91,7 +88,7 @@ def property_value(element: lxml.html.HtmlElement):
     # Otherwise
     else:
         # The value is the element's descendant text content.
-        value = element.text_content()
+        value = " ".join(filter(None, list(map(str.strip, list(element.itertext())))))
         return value
 
 
@@ -125,11 +122,12 @@ def item_props(scope: lxml.html.HtmlElement):
     # 5. While pending is not empty:
     while pending:
         # 5. 1. Remove an element from pending and let current be that element.
-        current = pending.pop()
+        current = pending.pop(0)
         # 5. 2. If current is already in memory, there is a microdata error;
         # continue.
         if current in memory:
-            raise MicrodataError
+            # FIXME show a warning?
+            continue
 
         # 5. 3. Add current to memory.
         memory.append(current)
@@ -180,7 +178,6 @@ def get_object(item: lxml.html.HtmlElement, memory=None):
     # given by the algorithm that returns the properties of an item, run the
     # following substeps:
     for element in item_props(item):
-
         # 7.1. Let value be the property value of element.
         value = property_value(element)
 
@@ -257,8 +254,14 @@ def convert_item(item):
     # Properties is a list; if its length is 1 then flatten, else don't.
     if itemid := item.get("id"):
         ld["@id"] = itemid
+    if len(item["properties"].items()) == 0:
+        # Guard against goofy use of microdata such as:
+        # <a itemscope itemprop=address itemtype=PostalAddress>...</a>
+        # Which produce an item with no properties and make it difficult to
+        # parse the correct item later down. See test_multiple_addresses
+        return
     for k, v in item["properties"].items():
-        ld[k] = [convert_item(val) if isinstance(val, dict) else val for val in v]
+        ld[k] = filter(None, [convert_item(val) if isinstance(val, dict) else val for val in v])
         ld[k] = remove_duplicates(ld[k])
         if len(ld[k]) == 1:
             ld[k] = ld[k][0]

@@ -1,7 +1,6 @@
-# -*- coding: utf-8 -*-
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class PortillosSpider(scrapy.Spider):
@@ -28,8 +27,7 @@ class PortillosSpider(scrapy.Spider):
 
         for location in data["locations"]:
             yield scrapy.Request(
-                "https://www.portillos.com/ajax/location/getLocationDetails/?id=%s"
-                % location["Id"],
+                "https://www.portillos.com/ajax/location/getLocationDetails/?id=%s" % location["Id"],
                 callback=self.parse_store,
             )
 
@@ -49,4 +47,4 @@ class PortillosSpider(scrapy.Spider):
             "lat": float(store_data["Lat"]),
         }
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

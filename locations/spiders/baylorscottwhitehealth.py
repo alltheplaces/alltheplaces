@@ -1,17 +1,13 @@
 import scrapy
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class BaylorScottWhiteHealthSpider(scrapy.Spider):
     name = "baylorscottwhite"
-    item_attributes = {
-        "brand": "Baylor Scott & White Health",
-        "brand_wikidata": "Q41568258",
-    }
+    item_attributes = {"brand": "Baylor Scott & White Health", "brand_wikidata": "Q41568258"}
     allowed_domains = ["phyndapi.bswapi.com"]
-    download_delay = 1
     base_url = "https://phyndapi.bswapi.com/V4/Places/GetLocations"
 
     def start_requests(self):
@@ -26,22 +22,17 @@ class BaylorScottWhiteHealthSpider(scrapy.Spider):
         page_size = 100
 
         while page_number * page_size < total_count:
-            yield scrapy.Request(
-                self.base_url + f"?perPage={page_size}&pageNumber={page_number+1}"
-            )
+            yield scrapy.Request(self.base_url + f"?perPage={page_size}&pageNumber={page_number+1}")
             page_number += 1
 
     def parse(self, response):
         ldata = response.json()["locationResults"]
 
         for row in ldata:
-
             properties = {
                 "ref": row["locationID"],
                 "name": row["locationName"],
-                "street_address": " ".join(
-                    [row["locationStreet1"], row.get("locationStreet2", "")]
-                ).strip(),
+                "street_address": " ".join([row["locationStreet1"], row.get("locationStreet2", "")]).strip(),
                 "city": row["locationCity"],
                 "postcode": row["locationZip"],
                 "state": row["locationState"],
@@ -63,4 +54,4 @@ class BaylorScottWhiteHealthSpider(scrapy.Spider):
 
             properties["opening_hours"] = oh.as_opening_hours()
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

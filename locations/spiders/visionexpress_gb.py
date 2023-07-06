@@ -1,25 +1,24 @@
-# -*- coding: utf-8 -*-
-import scrapy
-from locations.linked_data_parser import LinkedDataParser
+from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule
+
 from locations.google_url import extract_google_position
+from locations.structured_data_spider import StructuredDataSpider
 
 
-class VisionExpressGBSpider(scrapy.spiders.SitemapSpider):
+class VisionExpressGBSpider(CrawlSpider, StructuredDataSpider):
     name = "visionexpress_gb"
-    item_attributes = {
-        "brand": "VisionExpress",
-        "brand_wikidata": "Q7936150",
-    }
-    sitemap_urls = ["https://www.visionexpress.com/sitemap.xml"]
-    sitemap_rules = [("/opticians/", "parse")]
-    download_delay = 0.2
+    item_attributes = {"brand": "VisionExpress", "brand_wikidata": "Q7936150"}
+    start_urls = ["https://www.visionexpress.com/store-overview"]
+    rules = [
+        Rule(LinkExtractor(allow=r"/opticians/[-\w]+$")),
+        Rule(LinkExtractor(allow=r"/opticians/[-\w]+/[-\w]+$"), callback="parse_sd"),
+    ]
+    search_for_twitter = False
 
-    def parse(self, response):
-        item = LinkedDataParser.parse(response, "Store")
-        if item:
-            item["street_address"] = item["street_address"].replace(" undefined", "")
-            # TODO: when there is an agreed solution to this.
-            # if "-tesco" in response.url:
-            #    set_located_in(item, "Tesco Extra", "Q25172225")
-            extract_google_position(item, response)
-            return item
+    def post_process_item(self, item, response, ld_data, **kwargs):
+        item["street_address"] = item["street_address"].replace(" undefined", "")
+        # TODO: when there is an agreed solution to this.
+        # if "-tesco" in response.url:
+        #    set_located_in(item, "Tesco Extra", "Q25172225")
+        extract_google_position(item, response)
+        yield item

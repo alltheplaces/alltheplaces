@@ -1,6 +1,6 @@
 from scrapy.spiders import SitemapSpider
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class KutchenhausGBSpider(SitemapSpider):
@@ -8,9 +8,7 @@ class KutchenhausGBSpider(SitemapSpider):
     item_attributes = {"brand": "Kutchenhaus", "country": "GB"}
     sitemap_urls = ["https://uk.kutchenhaus.com/sitemap.xml"]
     sitemap_follow = ["Store"]
-    sitemap_rules = [
-        (r"https:\/\/uk\.kutchenhaus\.com\/store-finder\/[-\w]+$", "parse")
-    ]
+    sitemap_rules = [(r"https:\/\/uk\.kutchenhaus\.com\/store-finder\/[-\w]+$", "parse")]
     custom_settings = {"REDIRECT_ENABLED": False}
 
     def parse(self, response, **kwargs):
@@ -18,25 +16,13 @@ class KutchenhausGBSpider(SitemapSpider):
             if label.strip() == "COMING SOON":
                 return
 
-        item = GeojsonPointItem()
+        item = Feature()
 
-        item["lat"] = response.xpath(
-            '//div[@id="storeDetailsMap"]/@data-store-geopoint-latitude'
-        ).get()
-        item["lon"] = response.xpath(
-            '//div[@id="storeDetailsMap"]/@data-store-geopoint-longitude'
-        ).get()
-        item["name"] = response.xpath(
-            '//div[@class="store-details--caption"]/h1/text()'
-        ).get()
-        item["addr_full"] = (
-            response.xpath('//div[@class="store-details--info-item col-10"]/text()')
-            .getall()[0]
-            .strip()
-        )
-        item["phone"] = response.xpath(
-            '//div[@class="store-details--info-item col-10"]/a/text()'
-        ).get()
+        item["lat"] = response.xpath('//div[@id="storeDetailsMap"]/@data-store-geopoint-latitude').get()
+        item["lon"] = response.xpath('//div[@id="storeDetailsMap"]/@data-store-geopoint-longitude').get()
+        item["name"] = response.xpath('//div[@class="store-details--caption"]/h1/text()').get()
+        item["addr_full"] = response.xpath('//div[@class="store-details--info-item col-10"]/text()').getall()[0].strip()
+        item["phone"] = response.xpath('//div[@class="store-details--info-item col-10"]/a/text()').get()
         item["ref"] = item["website"] = response.url
 
         return item

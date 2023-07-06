@@ -1,18 +1,16 @@
-# -*- coding: utf-8 -*-
-import json
 import re
-import scrapy
 
+import scrapy
 from scrapy.spiders import Spider
-from locations.items import GeojsonPointItem
+
 from locations.hours import OpeningHours
+from locations.items import Feature
 
 
 class PotbellySandwichShopSpider(Spider):
     name = "potbelly_sandwich"
     item_attributes = {"brand": "Potbelly Sandwich Shop", "brand_wikidata": "Q7234777"}
     allowed_domains = ["www.potbelly.com", "api.prod.potbelly.com"]
-    download_delay = 1.0
     start_urls = [
         "https://www.potbelly.com/sitemap_locations.xml",
     ]
@@ -31,9 +29,7 @@ class PotbellySandwichShopSpider(Spider):
         oh = OpeningHours()
         if calendars := store.get("calendars"):
             # Look for the first calendar showing "business hours"
-            business_hours_calendar = next(
-                filter(lambda c: c["type"] == "business", calendars)
-            )
+            business_hours_calendar = next(filter(lambda c: c["type"] == "business", calendars))
 
             calendar_ranges = business_hours_calendar.get("ranges")
             first_day_seen = None
@@ -70,4 +66,4 @@ class PotbellySandwichShopSpider(Spider):
             },
         }
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

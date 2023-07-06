@@ -1,9 +1,9 @@
-# -*- coding: utf-8 -*-
 import json
+
 import scrapy
 
-from locations.linked_data_parser import LinkedDataParser
 from locations.dict_parser import DictParser
+from locations.linked_data_parser import LinkedDataParser
 
 
 class NandosSpider(scrapy.spiders.SitemapSpider):
@@ -25,6 +25,7 @@ class NandosSpider(scrapy.spiders.SitemapSpider):
         ("nandos.ca/find/", "parse_json1"),
     ]
     download_delay = 0.5
+    skip_auto_cc_domain = True
 
     @staticmethod
     def country_from_url(response):

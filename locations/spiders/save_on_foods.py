@@ -1,6 +1,8 @@
 import re
+
 import scrapy
-from locations.items import GeojsonPointItem
+
+from locations.items import Feature
 
 
 class SaveOnFoodsSpider(scrapy.Spider):
@@ -85,9 +87,7 @@ class SaveOnFoodsSpider(scrapy.Spider):
                 day_hours = day_hours.replace(match.group(), hours)
                 opening_hours.append(day_hours)
             else:
-                match = re.search(
-                    r"(\d{1,2}):(\d{2}) (A|P)M-(\d{1,2}):(\d{2}) (A|P)M", day_hours
-                )
+                match = re.search(r"(\d{1,2}):(\d{2}) (A|P)M-(\d{1,2}):(\d{2}) (A|P)M", day_hours)
                 if match:
                     (f_hr, f_min, f_ampm, t_hr, t_min, t_ampm) = match.groups()
                     f_hr = int(f_hr)
@@ -127,7 +127,7 @@ class SaveOnFoodsSpider(scrapy.Spider):
                 "phone": store["Phone"],
                 "opening_hours": self.store_hours(store["SectionSchedule"]),
             }
-            yield GeojsonPointItem(**store_properties)
+            yield Feature(**store_properties)
 
             if len(item["Sections"]) > 1:
                 pharmacy = item["Sections"][1]
@@ -144,4 +144,4 @@ class SaveOnFoodsSpider(scrapy.Spider):
                     "opening_hours": self.store_hours(pharmacy["SectionSchedule"]),
                 }
 
-                yield GeojsonPointItem(**pharmacy_properties)
+                yield Feature(**pharmacy_properties)

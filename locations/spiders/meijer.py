@@ -1,8 +1,9 @@
-# -*- coding: utf-8 -*-
-import scrapy
 import json
 import re
-from locations.items import GeojsonPointItem
+
+import scrapy
+
+from locations.items import Feature
 
 STATES = [
     "AL",
@@ -83,12 +84,8 @@ class MeijerSpider(scrapy.Spider):
             stores = stores.replace("']", '"]')
             stores = json.loads(stores)
             loc_data = response.css("script").extract()[10]
-            lat_matches = re.findall(
-                r"(\"LAT\"), (\")([+-]?([0-9]*[.])?[0-9]+)(\")", loc_data
-            )
-            lon_matches = re.findall(
-                r"(\"LNG\"), (\")([+-]?([0-9]*[.])?[0-9]+)(\")", loc_data
-            )
+            lat_matches = re.findall(r"(\"LAT\"), (\")([+-]?([0-9]*[.])?[0-9]+)(\")", loc_data)
+            lon_matches = re.findall(r"(\"LNG\"), (\")([+-]?([0-9]*[.])?[0-9]+)(\")", loc_data)
 
             n = 0
             for store in stores:
@@ -112,7 +109,7 @@ class MeijerSpider(scrapy.Spider):
 
                 n = n + 1
 
-                yield GeojsonPointItem(**properties)
+                yield Feature(**properties)
 
     def hours(self, data):
         if data == "Open 24 hrs a day, 364 days a year.":

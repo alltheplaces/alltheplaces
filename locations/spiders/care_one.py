@@ -1,8 +1,7 @@
-# -*- coding: utf-8 -*-
 import scrapy
-
-from locations.items import GeojsonPointItem
 from scrapy.selector import Selector
+
+from locations.items import Feature
 
 
 class CareOneSpider(scrapy.Spider):
@@ -16,9 +15,7 @@ class CareOneSpider(scrapy.Spider):
         ).extract()
 
         for poi in pois:
-            address = (
-                Selector(text=poi).xpath('//p[@class="\\\'museo"]/text()').extract()
-            )
+            address = Selector(text=poi).xpath('//p[@class="\\\'museo"]/text()').extract()
             city_state_postcode = address[-2].split(", ")
             info = Selector(text=poi).xpath("//p/text()").get().split("\n")
             geo = info[1].split("new result_node(")[1].split(",")
@@ -39,4 +36,4 @@ class CareOneSpider(scrapy.Spider):
                 "lon": lon,
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

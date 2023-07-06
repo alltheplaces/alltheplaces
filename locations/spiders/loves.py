@@ -1,8 +1,8 @@
-# -*- coding: utf-8 -*-
-import scrapy
 import json
 
-from locations.items import GeojsonPointItem
+import scrapy
+
+from locations.items import Feature
 
 HEADERS = {"Content-Type": "application/json"}
 
@@ -38,7 +38,7 @@ class LovesSpider(scrapy.Spider):
     def parse(self, response):
         stores = response.json()
         for store in stores[0]["Points"]:
-            yield GeojsonPointItem(
+            yield Feature(
                 name=store["Name"],
                 ref=store["SiteId"],
                 addr_full=store["Address1"],

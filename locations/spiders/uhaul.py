@@ -1,11 +1,9 @@
-# -*- coding: utf-8 -*-
 import json
 import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
-from locations.hours import OpeningHours
+from locations.items import Feature
 
 
 class UhaulSpider(scrapy.Spider):
@@ -24,15 +22,11 @@ class UhaulSpider(scrapy.Spider):
             # We want to pick the first one to get to a store details page.
             store_url = store_nav.xpath(".//a/@href").extract_first()
 
-            yield scrapy.Request(
-                url=response.urljoin(store_url), callback=self.parse_store
-            )
+            yield scrapy.Request(url=response.urljoin(store_url), callback=self.parse_store)
 
     def parse_store(self, response):
         store_obj = None
-        for script in response.xpath(
-            '//script[@type="application/ld+json"]/text()'
-        ).extract():
+        for script in response.xpath('//script[@type="application/ld+json"]/text()').extract():
             tmp_obj = json.loads(script)
             ldjson_type = tmp_obj.get("@type")
             if ldjson_type in ("SelfStorage", "LocalBusiness"):
@@ -47,9 +41,7 @@ class UhaulSpider(scrapy.Spider):
         elif ldjson_type == "LocalBusiness":
             ref = store_obj["@id"].split("/")[-2]
 
-        telephone = store_obj.get("telephone") or store_obj.get("contactPoint", {}).get(
-            "telephone"
-        )
+        telephone = store_obj.get("telephone") or store_obj.get("contactPoint", {}).get("telephone")
         hour_elements = response.xpath(
             '//div[@class="callout flat radius hide-for-native"]/ul/li[@itemprop="openinghours"]/@datetime'
         )
@@ -70,7 +62,7 @@ class UhaulSpider(scrapy.Spider):
 
         if properties["lat"] and properties["lon"]:
             # Can skip the call to the next one if this page happened to have lat/lon
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)
 
         yield scrapy.Request(
             url="https://www.uhaul.com/Locations/Directions-to-%s/" % ref,
@@ -123,4 +115,4 @@ class UhaulSpider(scrapy.Spider):
         properties["lat"] = lat
         properties["lon"] = lon
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

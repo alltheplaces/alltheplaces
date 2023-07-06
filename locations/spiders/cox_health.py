@@ -1,9 +1,6 @@
-# -*- coding: utf-8 -*-
-import re
-
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class CoxHealthSpider(scrapy.Spider):
@@ -20,9 +17,7 @@ class CoxHealthSpider(scrapy.Spider):
 
     def parse_loc(self, response):
         name = response.xpath('//h2[@class="section-title"]/text()').extract_first()
-        address = response.xpath(
-            '//div[@class="default-x-spacing reg-background module-card-new"]//p/text()'
-        ).extract()
+        address = response.xpath('//div[@class="default-x-spacing reg-background module-card-new"]//p/text()').extract()
         x = response.xpath('//div[@class="map"]').extract()
         xy = x[0].split('"')
         address = " ".join(address)
@@ -55,7 +50,7 @@ class CoxHealthSpider(scrapy.Spider):
         properties = {
             "ref": add,
             "name": name,
-            "addr_full": address1,
+            "street_address": address1,
             "city": city,
             "state": state,
             "postcode": zip,
@@ -65,4 +60,4 @@ class CoxHealthSpider(scrapy.Spider):
             "lon": float(xy[3].strip(",")),
         }
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

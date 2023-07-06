@@ -1,9 +1,8 @@
-# -*- coding: utf-8 -*-
 import json
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class RitasItalianIceSpider(scrapy.Spider):
@@ -42,4 +41,4 @@ class RitasItalianIceSpider(scrapy.Spider):
             "phone": response.xpath('//*[@class="wpsl-phone-wrap"]//text()').get(),
             "website": response.url,
         }
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

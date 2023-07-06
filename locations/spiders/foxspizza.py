@@ -1,38 +1,35 @@
-# -*- coding: utf-8 -*-
 import re
 
-import scrapy
+from scrapy.spiders import SitemapSpider
 
-from locations.items import GeojsonPointItem
+from locations.hours import OpeningHours
+from locations.items import Feature
 
 
-class FoxsPizzaSpider(scrapy.Spider):
+class FoxsPizzaSpider(SitemapSpider):
     name = "foxspizza"
     item_attributes = {"brand": "Fox's Pizza Den", "brand_wikidata": "Q5476498"}
     allowed_domains = ["foxspizza.com"]
-    start_urls = ["https://www.foxspizza.com/store-sitemap.xml"]
+    sitemap_urls = ["https://www.foxspizza.com/store-sitemap.xml"]
+    oh_pattern = re.compile(r"(\w+):\s*(\d+:\d\d [AP]M) to (\d+:\d\d [AP]M)", re.IGNORECASE)
 
     def parse(self, response):
-        response.selector.remove_namespaces()
-        for url in response.xpath("//loc/text()").extract():
-            yield scrapy.Request(url, callback=self.parse_store)
-
-    def parse_store(self, response):
-        lat, lng = map(
-            float, re.search(r"LatLng\((.*),(.*)\),", response.text).groups()
-        )
+        lat, lng = map(float, re.search(r"LatLng\((.*),(.*)\),", response.text).groups())
         properties = {
             "lat": lat,
             "lon": lng,
             "ref": response.url,
             "website": response.url,
-            "opening_hours": "; ".join(
-                response.xpath('//*[@class="timings_list"]//text()').extract()
-            ),
-            "addr_full": response.xpath('//*[@class="loc_address"]/text()')
-            .get()
-            .replace("\xa0", " "),
+            "opening_hours": self.parse_opening_hours(response.xpath('//*[@class="timings_list"]//text()').getall()),
+            "addr_full": response.xpath('//*[@class="loc_address"]/text()').get().replace("\xa0", " "),
             "phone": response.xpath('//*[@class="phone_no"]//text()').get(),
             "name": response.xpath("//title/text()").get(),
         }
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)
+
+    def parse_opening_hours(self, rules: [str]) -> OpeningHours:
+        oh = OpeningHours()
+        for rule in rules:
+            if m := re.match(self.oh_pattern, rule):
+                oh.add_range(m.group(1), m.group(2), m.group(3), time_format="%I:%M %p")
+        return oh

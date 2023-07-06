@@ -1,7 +1,9 @@
 import json
+
 import scrapy
-from locations.items import GeojsonPointItem
+
 from locations.hours import OpeningHours
+from locations.items import Feature
 
 DAYS_NAME = {
     "Monday": "Mo",
@@ -75,7 +77,6 @@ class WellStarSpider(scrapy.Spider):
         )
 
     def parse_hours(self, hours):
-
         opening_hours = OpeningHours()
 
         if hours:
@@ -89,7 +90,7 @@ class WellStarSpider(scrapy.Spider):
                         close_time=close_time.replace(":", "").strip(),
                         time_format="%H%M",
                     )
-                except:
+                except Exception:
                     continue
 
         return opening_hours.as_opening_hours()
@@ -116,9 +117,7 @@ class WellStarSpider(scrapy.Spider):
             properties = {
                 "ref": row.get("LocationID"),
                 "name": row.get("Name"),
-                "addr_full": " ".join(
-                    [row.get("Address").split(",")[0], row.get("Address2", "") or ""]
-                ).strip(),
+                "addr_full": " ".join([row.get("Address").split(",")[0], row.get("Address2", "") or ""]).strip(),
                 "city": address_attributes.get("city"),
                 "state": address_attributes.get("state"),
                 "postcode": address_attributes.get("postcode"),
@@ -130,4 +129,4 @@ class WellStarSpider(scrapy.Spider):
             hours = self.parse_hours(row.get("Hours"))
             properties["opening_hours"] = hours
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

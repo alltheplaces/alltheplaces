@@ -1,5 +1,6 @@
 from scrapy.commands import ScrapyCommand
 from scrapy.exceptions import UsageError
+
 from locations.name_suggestion_index import NSI
 
 
@@ -45,8 +46,13 @@ class NameSuggestionIndexCommand(ScrapyCommand):
             self.lookup_code(args)
 
     def lookup_name(self, args):
-        for k, v in self.nsi.iter_wikidata(args[0]):
-            NameSuggestionIndexCommand.show(k, v)
+        result = list(self.nsi.iter_wikidata(args[0]))
+        if len(result) == 1:
+            # Only one match, so go and lookup full NSI details by Q-code
+            self.lookup_code(result[0])
+        else:
+            for k, v in result:
+                NameSuggestionIndexCommand.show(k, v)
 
     def lookup_code(self, args):
         if v := self.nsi.lookup_wikidata(args[0]):
@@ -56,19 +62,11 @@ class NameSuggestionIndexCommand(ScrapyCommand):
 
     @staticmethod
     def show(code, data):
-        print('"{0}", "{1}"'.format(data["label"], code))
+        print('"{}", "{}"'.format(data["label"], code))
         print("       -> https://www.wikidata.org/wiki/{}".format(code))
-        print(
-            "       -> https://www.wikidata.org/wiki/Special:EntityData/{}.json".format(
-                code
-            )
-        )
+        print("       -> https://www.wikidata.org/wiki/Special:EntityData/{}.json".format(code))
         if s := data.get("description"):
             print("       -> {}".format(s))
         if s := data.get("identities"):
             print("       -> {}".format(s.get("website", "N/A")))
-        print(
-            '       -> item_attributes = {{"brand": "{0}", "brand_wikidata": "{1}"}}'.format(
-                data["label"], code
-            )
-        )
+        print('       -> item_attributes = {{"brand": "{0}", "brand_wikidata": "{1}"}}'.format(data["label"], code))

@@ -1,11 +1,9 @@
-# -*- coding: utf-8 -*-
-import re
 import datetime
+import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
-from locations.hours import OpeningHours
+from locations.items import Feature
 
 DAY_MAPPING = {
     "Mon": "Mo",
@@ -53,9 +51,9 @@ class JcrewSpider(scrapy.Spider):
             days = DAY_MAPPING[i["days"]]
 
             if days == "Su":
-                sunday_hours = "%s %s-%s" % (days, start, end)
+                sunday_hours = "{} {}-{}".format(days, start, end)
             else:
-                opening_hours = "%s %s-%s" % (days, start, end)
+                opening_hours = "{} {}-{}".format(days, start, end)
                 o_hours.append(opening_hours)
 
         o_hours.append(sunday_hours)
@@ -97,4 +95,4 @@ class JcrewSpider(scrapy.Spider):
             except:
                 pass
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

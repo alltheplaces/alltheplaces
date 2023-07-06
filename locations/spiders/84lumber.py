@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
 import json
 
 import scrapy
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 DAYS = [
     "Monday",
@@ -22,9 +21,7 @@ class EightyFourLumberSpider(scrapy.Spider):
     item_attributes = {"brand": "84 Lumber", "brand_wikidata": "Q4644779"}
     allowed_domains = ["84lumber.com"]
 
-    start_urls = [
-        "https://www.84lumber.com/umbraco/surface/StoreSupport/StoreSearch?radius=10000"
-    ]
+    start_urls = ["https://www.84lumber.com/umbraco/surface/StoreSupport/StoreSearch?radius=10000"]
 
     def parse(self, response):
         data = json.loads(json.loads(response.text))
@@ -49,4 +46,4 @@ class EightyFourLumberSpider(scrapy.Spider):
                 "phone": row["Phone"],
                 "opening_hours": opening_hours.as_opening_hours(),
             }
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

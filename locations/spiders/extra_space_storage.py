@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import json
 import re
 
@@ -6,7 +5,7 @@ from scrapy.downloadermiddlewares.retry import get_retry_request
 from scrapy.spiders import SitemapSpider
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class ExtraSpaceStorageSpider(SitemapSpider):
@@ -17,7 +16,7 @@ class ExtraSpaceStorageSpider(SitemapSpider):
     # Seems to be sufficient to allow the site to include correct ldjson
     download_delay = 1.6
 
-    sitemap_urls = ["https://www.extraspace.com/facility-intent-sitemap.xml"]
+    sitemap_urls = ["https://www.extraspace.com/facility-sitemap.xml"]
     sitemap_rules = [(r"/facilities/", "parse")]
 
     def sitemap_filter(self, entries):
@@ -30,9 +29,7 @@ class ExtraSpaceStorageSpider(SitemapSpider):
         try:
             data = self.get_json_data(response)
         except TypeError:
-            yield get_retry_request(
-                response.request, spider=self, reason="missing ldjson"
-            )
+            yield get_retry_request(response.request, spider=self, reason="missing ldjson")
             return
 
         data_address = data["address"]
@@ -58,7 +55,7 @@ class ExtraSpaceStorageSpider(SitemapSpider):
             "opening_hours": opening_hours.as_opening_hours(),
         }
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)
 
     def get_json_data(self, response):
         # Note: Page omits the good ldjson when given a browser user-agent

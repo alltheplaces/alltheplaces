@@ -1,15 +1,15 @@
-# -*- coding: utf-8 -*-
 import re
+
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 hour_label = ["Mo-Th", "Fr", "Sa", "Su"]
 
 
 class LarosasSpider(scrapy.Spider):
     name = "larosas"
-    item_attributes = {"brand": "Larosa's"}
+    item_attributes = {"brand": "Larosa's", "brand_wikidata": "Q6460833"}
     allowed_domains = ["www.larosas.com"]
     start_urls = ("https://www.larosas.com/pizzeria.aspx",)
 
@@ -105,4 +105,4 @@ class LarosasSpider(scrapy.Spider):
             if opening_hours:
                 properties["opening_hours"] = opening_hours
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

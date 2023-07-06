@@ -1,51 +1,38 @@
-# -*- coding: utf-8 -*-
-import re
-
 import scrapy
-import json
+from scrapy.http import JsonRequest
 
-from locations.items import GeojsonPointItem
+from locations.categories import Categories
+from locations.dict_parser import DictParser
+from locations.geo import point_locations
 
 
 class ColesAUSpider(scrapy.Spider):
     name = "coles_au"
-    item_attributes = {"brand": "Coles", "brand_wikidata": "Q1108172"}
-    allowed_domains = ["apigw.coles.com.au"]
-    start_urls = [
-        "https://apigw.coles.com.au/digital/colesweb/v1/stores/search?latitude=-28.014547&longitude=135.171168&brandIds=2,1&numberOfStores=10",
-    ]
 
-    def parse(self, response):
-        with open(
-            "./locations/searchable_points/au_centroids_20km_radius.csv"
-        ) as points:
-            next(points)
-            for point in points:
-                row = point.replace("\n", "").split(",")
-                lati = row[1]
-                long = row[2]
-                searchurl = "https://apigw.coles.com.au/digital/colesweb/v1/stores/search?latitude={la}&longitude={lo}&brandIds=2,1&numberOfStores=10".format(
-                    la=lati, lo=long
-                )
-                yield scrapy.Request(
-                    response.urljoin(searchurl), callback=self.parse_search
-                )
+    BRANDS = {
+        1: {"brand": "Coles Express", "brand_wikidata": "Q5144653", "extras": Categories.SHOP_CONVENIENCE.value},
+        2: {"brand": "Coles Supermarkets", "brand_wikidata": "Q1108172"},
+        3: {"brand": "Liquorland", "brand_wikidata": "Q2283837"},
+        4: {"brand": "1st Choice", "brand_wikidata": "Q4596269"},  # AKA First Choice Liquor
+        5: {"brand": "Vintage Cellars", "brand_wikidata": "Q7932815"},
+    }
 
-    def parse_search(self, response):
-        data = json.loads(json.dumps(response.json()))
+    def start_requests(self):
+        for lat, lon in point_locations("au_centroids_20km_radius.csv"):
+            yield JsonRequest(
+                f"https://apigw.coles.com.au/digital/colesweb/v1/stores/search?latitude={lat}&longitude={lon}&brandIds=1,2,3,4,5&numberOfStores=15",
+            )
 
-        for i in data["stores"]:
-            properties = {
-                "ref": i["storeId"],
-                "name": i["brandName"],
-                "addr_full": i["address"],
-                "city": i["suburb"],
-                "state": i["state"],
-                "postcode": i["postcode"],
-                "country": "AU",
-                "phone": i["phone"],
-                "lat": i["latitude"],
-                "lon": i["longitude"],
-            }
+    def parse(self, response, **kwargs):
+        for location in response.json()["stores"]:
+            location["street_address"] = location.pop("address")
+            item = DictParser.parse(location)
 
-            yield GeojsonPointItem(**properties)
+            if brand := self.BRANDS.get(location["brandId"]):
+                item.update(brand)
+            else:
+                item["brand"] = location["brandName"]
+
+            # TODO: tradingHours
+
+            yield item

@@ -1,5 +1,3 @@
-import logging
-
 import scrapy
 
 from locations.dict_parser import DictParser
@@ -21,9 +19,7 @@ class PretAMangerSpider(scrapy.Spider):
 
             item = DictParser.parse(store)
 
-            item["street_address"] = ", ".join(
-                filter(None, [item["housenumber"], item["street"]])
-            )
+            item["street_address"] = ", ".join(filter(None, [item["housenumber"], item["street"]]))
             item["housenumber"] = item["street"] = None
 
             oh = OpeningHours()
@@ -36,12 +32,10 @@ class PretAMangerSpider(scrapy.Spider):
                     if len(rule) != 2:
                         continue
 
-                    if rule[0] == "0:00AM":
-                        rule[0] = "12:00AM"
-                    if rule[1] == "0:00AM":
-                        rule[1] = "12:00AM"
-                    if rule[0] == "0:01AM":
-                        rule[0] = "12:01AM"
+                    if rule[0].startswith("0:"):
+                        rule[0] = rule[0].replace("0:", "12:", 1)
+                    if rule[1].startswith("0:"):
+                        rule[1] = rule[1].replace("0:", "12:", 1)
 
                     oh.add_range(DAYS[i], rule[0], rule[1], "%I:%M%p")
 
@@ -49,16 +43,10 @@ class PretAMangerSpider(scrapy.Spider):
 
             item["extras"] = {}
 
-            item["extras"]["delivery"] = (
-                "yes" if store["features"]["delivery"] else "no"
-            )
+            item["extras"]["delivery"] = "yes" if store["features"]["delivery"] else "no"
             item["extras"]["storeType"] = store["features"].get("storeType")
-            item["extras"]["wheelchair"] = (
-                "yes" if store["features"]["wheelchairAccess"] else "no"
-            )
-            item["extras"]["internet_access"] = (
-                "wlan" if store["features"]["wifi"] else "no"
-            )
+            item["extras"]["wheelchair"] = "yes" if store["features"]["wheelchairAccess"] else "no"
+            item["extras"]["internet_access"] = "wlan" if store["features"]["wifi"] else "no"
 
             if store["features"].get("storeType") == "veggie-pret":
                 item["brand"] = self.veggie_pret["brand"]

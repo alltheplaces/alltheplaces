@@ -1,23 +1,22 @@
-# -*- coding: utf-8 -*-
 import datetime
 
 import scrapy
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class PandaExpressSpider(scrapy.Spider):
     name = "pandaexpress"
     item_attributes = {"brand": "Panda Express", "brand_wikidata": "Q1358690"}
     allowed_domains = ["pandaexpress.com"]
-    custom_settings = {"ROBOTSTXT_OBEY": False, "RETRY_TIMES": 5}
+    custom_settings = {"ROBOTSTXT_OBEY": False, "RETRY_TIMES": 10}
+    user_agent = BROWSER_DEFAULT
 
     def start_requests(self):
         today = datetime.date.today().strftime("%Y%m%d")
-        nextweek = (datetime.date.today() + datetime.timedelta(days=7)).strftime(
-            "%Y%m%d"
-        )
+        nextweek = (datetime.date.today() + datetime.timedelta(days=7)).strftime("%Y%m%d")
 
         yield scrapy.Request(
             f"https://nomnom-prod-api.pandaexpress.com/restaurants?nomnom=calendars&nomnom_calendars_from={today}&nomnom_calendars_to={nextweek}",
@@ -30,9 +29,7 @@ class PandaExpressSpider(scrapy.Spider):
         for store in data["restaurants"]:
             oh = OpeningHours()
             if len(store.get("calendars").get("calendar")) > 0:
-                calendar_ranges = (
-                    store.get("calendars").get("calendar")[0].get("ranges")
-                )
+                calendar_ranges = store.get("calendars").get("calendar")[0].get("ranges")
                 for oh_range in calendar_ranges:
                     oh.add_range(
                         oh_range.get("weekday")[:2],
@@ -40,6 +37,12 @@ class PandaExpressSpider(scrapy.Spider):
                         oh_range.get("end").split(" ")[-1],
                         time_format="%H:%M",
                     )
+            slug = (
+                "/".join([store["state"], store["city"], store["streetaddress"]])
+                .lower()
+                .replace(".", "")
+                .replace(" ", "-")
+            )
             properties = {
                 "ref": store["id"],
                 "lat": store["latitude"],
@@ -52,5 +55,6 @@ class PandaExpressSpider(scrapy.Spider):
                 "postcode": store["zip"],
                 "country": store["country"],
                 "phone": store["telephone"],
+                "website": f"https://www.pandaexpress.com/locations/{slug}",
             }
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

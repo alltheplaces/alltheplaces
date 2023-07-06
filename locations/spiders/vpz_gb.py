@@ -1,18 +1,17 @@
-from scrapy import Spider
-
-from locations.dict_parser import DictParser
+from locations.storefinders.storemapper import StoremapperSpider
 
 
-class VPZGB(Spider):
+class VPZGBSpider(StoremapperSpider):
     name = "vpz_gb"
-    item_attributes = {"brand": "VPZ", "brand_wikidata": "Q107300487", "country": "GB"}
-    start_urls = [
-        "https://storemapper-herokuapp-com.global.ssl.fastly.net/api/users/14072/stores.js"
-    ]
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    item_attributes = {"brand": "VPZ", "brand_wikidata": "Q107300487"}
+    key = "14072-3UOwEWhgZ0NnwVEo"
 
-    def parse(self, response, **kwargs):
-        for store in response.json()["stores"]:
-            item = DictParser.parse(store)
-
-            yield item
+    def parse_item(self, item, location):
+        for custom_field in location["store_custom_fields"]:
+            if custom_field["custom_field_id"] == 42770:
+                item["city"] = custom_field["value"]
+            if custom_field["custom_field_id"] == 42771:
+                item["state"] = custom_field["value"]
+        item.pop("website")
+        item.pop("email")
+        yield item

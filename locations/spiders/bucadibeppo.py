@@ -1,10 +1,10 @@
-# -*- coding: utf-8 -*-
 import json
 import re
 
 import scrapy
+
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class BucadiBeppoSpider(scrapy.Spider):
@@ -17,44 +17,21 @@ class BucadiBeppoSpider(scrapy.Spider):
         urls = response.xpath(
             '//a[@class="c-directory-list-content-item-link"]/@href | //*[@class="Teaser-titleLink Link Link--primary"]/@href'
         ).extract()
-        if (
-            urls
-            and not response.xpath('//*[@class="c-nearby-locations-header"]').extract()
-        ):
+        if urls and not response.xpath('//*[@class="c-nearby-locations-header"]').extract():
             for url in urls:
                 yield scrapy.Request(response.urljoin(url), callback=self.parse)
         else:
-            name = self.xpath_join(
-                response.xpath(
-                    '//*[@id="location-name" and @itemprop="name"]//text()'
-                ).extract()
-            )
+            name = self.xpath_join(response.xpath('//*[@id="location-name" and @itemprop="name"]//text()').extract())
             address = response.xpath('//*[@itemprop="address"]')[0]
-            street = self.xpath_join(
-                address.xpath('.//*[@itemprop="streetAddress"]//text()').extract()
-            )
-            city = address.xpath(
-                './/*[@itemprop="addressLocality"]/text()'
-            ).extract_first()
-            state = address.xpath(
-                './/*[@itemprop="addressRegion"]/text()'
-            ).extract_first()
-            postalcode = address.xpath(
-                './/*[@itemprop="postalCode"]/text()'
-            ).extract_first()
+            street = self.xpath_join(address.xpath('.//*[@itemprop="streetAddress"]//text()').extract())
+            city = address.xpath('.//*[@itemprop="addressLocality"]/text()').extract_first()
+            state = address.xpath('.//*[@itemprop="addressRegion"]/text()').extract_first()
+            postalcode = address.xpath('.//*[@itemprop="postalCode"]/text()').extract_first()
             phone = address.xpath('//*[@itemprop="telephone"]/text()').extract_first()
-            hours = response.xpath(
-                '//*[@class="Nap-addressHoursWrapper"]//@data-days'
-            ).extract_first()
-            latitude = response.xpath(
-                '//*[@itemprop="latitude"]/@content'
-            ).extract_first()
-            longitude = response.xpath(
-                '//*[@itemprop="longitude"]/@content'
-            ).extract_first()
-            reservation_url = response.xpath(
-                '//*[text()="Make a Reservation"]/@href'
-            ).extract_first()
+            hours = response.xpath('//*[@class="Nap-addressHoursWrapper"]//@data-days').extract_first()
+            latitude = response.xpath('//*[@itemprop="latitude"]/@content').extract_first()
+            longitude = response.xpath('//*[@itemprop="longitude"]/@content').extract_first()
+            reservation_url = response.xpath('//*[text()="Make a Reservation"]/@href').extract_first()
             ref = response.url.split("/")[-1]
             if reservation_url:
                 ref = "".join(re.findall("store=([0-9]+)&", reservation_url))
@@ -72,7 +49,7 @@ class BucadiBeppoSpider(scrapy.Spider):
                 "lon": float(longitude),
                 "opening_hours": self.parse_hours(hours) if hours else None,
             }
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)
 
     def xpath_join(self, values: list, sep=" ") -> str:
         return f"{sep}".join(filter(None, [value.strip() for value in values]))

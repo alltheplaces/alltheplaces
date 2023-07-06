@@ -1,7 +1,6 @@
-# -*- coding: utf-8 -*-
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class TacocabanaSpider(scrapy.Spider):
@@ -28,9 +27,7 @@ class TacocabanaSpider(scrapy.Spider):
         )
 
     def request(self, url):
-        return scrapy.Request(
-            url, headers={"Authorization": f"Bearer {self.access_token}"}
-        )
+        return scrapy.Request(url, headers={"Authorization": f"Bearer {self.access_token}"})
 
     def parse(self, response):
         data = response.json()
@@ -48,7 +45,7 @@ class TacocabanaSpider(scrapy.Spider):
                 "postcode": store["zip_code"],
                 "phone": store["phone_number"],
             }
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)
 
         next_url = data["meta"]["pagination"]["links"]["next"]
         if next_url:

@@ -1,7 +1,8 @@
-# -*- coding: utf-8 -*-
-import scrapy
 import re
-from locations.items import GeojsonPointItem
+
+import scrapy
+
+from locations.items import Feature
 
 
 class HangerclinicSpider(scrapy.Spider):
@@ -69,22 +70,15 @@ class HangerclinicSpider(scrapy.Spider):
             "P.M.": "",
         }
         pattern = re.compile(r"\b(" + "|".join(day_dict.keys()) + r")\b")
-        datestring = pattern.sub(
-            lambda x: day_dict[x.group()], datestring.replace(" - ", "-")
-        )
+        datestring = pattern.sub(lambda x: day_dict[x.group()], datestring.replace(" - ", "-"))
 
         return datestring
 
     def parse(self, response):
-        states = response.xpath(
-            "//select[@class='locationsByStateSelect']/option/text()"
-        )
+        states = response.xpath("//select[@class='locationsByStateSelect']/option/text()")
 
         for state in states:
-            link = (
-                "http://www.hangerclinic.com/locations/Pages/by-state.aspx?state="
-                + state.extract()
-            )
+            link = "http://www.hangerclinic.com/locations/Pages/by-state.aspx?state=" + state.extract()
             request = scrapy.Request(link, callback=self.parse_state)
             yield request
 
@@ -106,11 +100,7 @@ class HangerclinicSpider(scrapy.Spider):
             .replace("\r", "")
             .split(",")
         )
-        opening_hours = (
-            store_info.xpath("//div[@id='locHours']/span[@class='locContent']/text()")
-            .extract()[0]
-            .strip()
-        )
+        opening_hours = store_info.xpath("//div[@id='locHours']/span[@class='locContent']/text()").extract()[0].strip()
         street = store_info.xpath("//span[@id='locStreet']/text()").extract()[0].strip()
 
         properties = {
@@ -122,17 +112,9 @@ class HangerclinicSpider(scrapy.Spider):
             "state": statezip[:2],
             "postcode": statezip[2:],
             "opening_hours": self.format_hours(opening_hours),
-            "phone": store_info.xpath(
-                "//div[@id='locPhone']/span[@class='locContent']/text()"
-            )
-            .extract()[0]
-            .strip(),
-            "lat": float(
-                store_info.xpath("//div[@id='locLat']/text()").extract()[0].strip()
-            ),
-            "lon": float(
-                store_info.xpath("//div[@id='locLong']/text()").extract()[0].strip()
-            ),
+            "phone": store_info.xpath("//div[@id='locPhone']/span[@class='locContent']/text()").extract()[0].strip(),
+            "lat": float(store_info.xpath("//div[@id='locLat']/text()").extract()[0].strip()),
+            "lon": float(store_info.xpath("//div[@id='locLong']/text()").extract()[0].strip()),
         }
 
-        yield (GeojsonPointItem(**properties))
+        yield (Feature(**properties))

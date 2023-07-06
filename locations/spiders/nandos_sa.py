@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
 import json
 import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class NandosSASpider(scrapy.Spider):
@@ -17,9 +16,7 @@ class NandosSASpider(scrapy.Spider):
     download_delay = 0.3
 
     def parse(self, response):
-        urls = response.xpath(
-            '//li[@class="accordion-listing__item"]/a/@href'
-        ).extract()
+        urls = response.xpath('//li[@class="accordion-listing__item"]/a/@href').extract()
 
         for url in urls:
             yield scrapy.Request(url=response.urljoin(url), callback=self.parse_store)
@@ -47,4 +44,4 @@ class NandosSASpider(scrapy.Spider):
                 "lon": store_data["geo"]["longitude"],
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

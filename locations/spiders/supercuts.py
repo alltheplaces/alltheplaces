@@ -1,8 +1,7 @@
-# -*- coding: utf-8 -*-
 import scrapy
 
 from locations.hours import OpeningHours, day_range
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class SuperCutsSpider(scrapy.Spider):
@@ -57,7 +56,7 @@ class SuperCutsSpider(scrapy.Spider):
             "opening_hours": self.get_hours(data["store_hours"]),
             "ref": data["storeID"],
         }
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)
 
     @staticmethod
     def get_hours(hours):
@@ -66,14 +65,10 @@ class SuperCutsSpider(scrapy.Spider):
             if "-" in spec["days"]:
                 start_day, end_day = spec["days"].split(" - ")
                 for day in day_range(start_day[:2], end_day[:2]):
-                    oh.add_range(
-                        day, spec["hours"]["open"], spec["hours"]["close"], "%I:%M %p"
-                    )
+                    oh.add_range(day, spec["hours"]["open"], spec["hours"]["close"], "%I:%M %p")
             else:
                 day = spec["days"][:2]
                 if "" in (spec["hours"]["open"], spec["hours"]["close"]):
                     continue
-                oh.add_range(
-                    day, spec["hours"]["open"], spec["hours"]["close"], "%I:%M %p"
-                )
+                oh.add_range(day, spec["hours"]["open"], spec["hours"]["close"], "%I:%M %p")
         return oh.as_opening_hours()

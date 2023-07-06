@@ -1,20 +1,28 @@
-# -*- coding: utf-8 -*-
-import scrapy
+from scrapy.spiders import SitemapSpider
 
-from locations.linked_data_parser import LinkedDataParser
+from locations.categories import Categories
+from locations.structured_data_spider import StructuredDataSpider
 
 
-class WalgreensSpider(scrapy.spiders.SitemapSpider):
+class WalgreensSpider(SitemapSpider, StructuredDataSpider):
     name = "walgreens"
-    sitemap_urls = ["https://www.walgreens.com/Store-Details.xml"]
+    WALGREENS = {"brand": "Walgreens", "brand_wikidata": "Q1591889", "extras": Categories.PHARMACY.value}
+    DUANE_READE = {"brand": "Duane Reade", "brand_wikidata": "Q5310380"}
+    sitemap_urls = ["https://www.walgreens.com/sitemap-storedetails.xml"]
+    sitemap_rules = [("", "parse_sd")]
     download_delay = 2.0
 
-    def parse(self, response):
-        item = LinkedDataParser.parse(response, "Store")
-        if item:
-            if "/locator/walgreens-" in response.url:
-                brand = ("Walgreens", "Q1591889")
-            else:
-                brand = ("Duane Reade", "Q5310380")
-            item["brand"], item["brand_wikidata"] = brand
-            yield item
+    def pre_process_data(self, ld_data, **kwargs):
+        # Tue Jan 10 -> Tu
+        for rule in ld_data.get("openingHoursSpecification"):
+            if len(rule["dayOfWeek"]) > 2:
+                rule["dayOfWeek"] = rule["dayOfWeek"][:2]
+
+    def post_process_item(self, item, response, ld_data, **kwargs):
+        if "/locator/walgreens-" in response.url:
+            item.update(self.WALGREENS)
+        elif item["name"] == "Duane Reade":
+            item.update(self.DUANE_READE)
+        # TODO: a few more brands here
+
+        yield item

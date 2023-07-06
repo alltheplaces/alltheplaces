@@ -1,10 +1,8 @@
-# -*- coding: utf-8 -*-
 import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
-from locations.hours import OpeningHours
+from locations.items import Feature
 
 
 class ServiceKingCollisionRepairSpider(scrapy.Spider):
@@ -25,12 +23,8 @@ class ServiceKingCollisionRepairSpider(scrapy.Spider):
         city, state, postal = info.split(",")
         properties = {
             "ref": re.search(r".+/(.+?)/?(?:\.html|$)", response.url).group(1),
-            "name": response.xpath(
-                "//*[@class='location-dtls__title']/span/text()"
-            ).extract_first(),
-            "addr_full": response.xpath("//*[@class='address']/text()")
-            .extract_first()
-            .strip(),
+            "name": response.xpath("//*[@class='location-dtls__title']/span/text()").extract_first(),
+            "addr_full": response.xpath("//*[@class='address']/text()").extract_first().strip(),
             "city": city.strip(),
             "state": state.strip(),
             "postcode": postal.strip(),
@@ -44,4 +38,4 @@ class ServiceKingCollisionRepairSpider(scrapy.Spider):
             "website": response.url,
         }
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

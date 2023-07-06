@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
 import json
 import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class MedicalCityHealthcareSpider(scrapy.Spider):
@@ -16,14 +15,11 @@ class MedicalCityHealthcareSpider(scrapy.Spider):
     ]
 
     def parse(self, response):
-        script = response.xpath(
-            '//script[contains(text(), "hostLocations")]'
-        ).extract_first()
+        script = response.xpath('//script[contains(text(), "hostLocations")]').extract_first()
         data = re.search(r"var hostLocations = (.*]);", script).group(1)
         locations = json.loads(data)
 
         for location in locations:
-
             properties = {
                 "ref": location["id"],
                 "name": location["title"],
@@ -37,4 +33,4 @@ class MedicalCityHealthcareSpider(scrapy.Spider):
                 "website": response.url,
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

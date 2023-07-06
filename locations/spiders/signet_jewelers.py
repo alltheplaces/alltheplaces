@@ -1,11 +1,9 @@
-# -*- coding: utf-8 -*-
 import json
 import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
-from locations.hours import OpeningHours
+from locations.items import Feature
 
 
 class SignetJewelersSpider(scrapy.Spider):
@@ -114,9 +112,7 @@ class SignetJewelersSpider(scrapy.Spider):
             yield scrapy.Request(response.urljoin(i), callback=self.parse)
 
     def parse(self, response):
-        script = " ".join(
-            response.xpath('//*[@id="js-store-details"]/div/script/text()').extract()
-        )
+        script = " ".join(response.xpath('//*[@id="js-store-details"]/div/script/text()').extract())
         data = None
 
         if re.search(r"storeInformation\s=\s((?s).*)", script) is not None:
@@ -150,7 +146,7 @@ class SignetJewelersSpider(scrapy.Spider):
                 "brand": re.search(r"www.(\w+)", response.url)[1],
             }
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)
 
     def parse_uk(self, response):
         data = re.search(r"Signet.allStoreDetails=((?s).*)", response.text)[1]
@@ -170,4 +166,4 @@ class SignetJewelersSpider(scrapy.Spider):
                 "brand": re.search(r"www.(\w+)", response.url)[1],
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

@@ -1,13 +1,13 @@
-# -*- coding: utf-8 -*-
-import scrapy
 import re
 
-from locations.items import GeojsonPointItem
+import scrapy
+
+from locations.items import Feature
 
 
 class VillageInnSpider(scrapy.Spider):
     name = "villageinn"
-    item_attributes = {"brand": "Village Inn"}
+    item_attributes = {"brand": "Village Inn", "brand_wikidata": "Q7930659"}
     allowed_domains = ["www.villageinn.com"]
     start_urls = ("http://www.villageinn.com/locations/bystate.php",)
 
@@ -16,14 +16,10 @@ class VillageInnSpider(scrapy.Spider):
         links = selector.css("a.animatedlink::attr(href)")
 
         for link in links:
-            yield scrapy.Request(
-                response.urljoin(link.extract().strip()), callback=self.parse_link
-            )
+            yield scrapy.Request(response.urljoin(link.extract().strip()), callback=self.parse_link)
 
     def parse_link(self, response):
-        website = response.xpath(
-            '//head/meta[@property="og:url"]/@content'
-        ).extract_first()
+        website = response.xpath('//head/meta[@property="og:url"]/@content').extract_first()
         ref = website.split("/")[-1]
         lat = response.css("#h_lat::attr(value)").extract_first()
         lng = response.css("#h_lng::attr(value)").extract_first()
@@ -46,7 +42,7 @@ class VillageInnSpider(scrapy.Spider):
         if address:
             properties.update(address)
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)
 
     def address(self, data):
         address = data.css(".block::text").extract()

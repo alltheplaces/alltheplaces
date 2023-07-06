@@ -1,11 +1,6 @@
-# -*- coding: utf-8 -*-
-import json
-import re
-
 import scrapy
 
-from locations.items import GeojsonPointItem
-from locations.hours import OpeningHours
+from locations.items import Feature
 
 # source: https://gist.github.com/rogerallen/1583593
 us_state_to_abbrev = {
@@ -98,4 +93,4 @@ class SpeeDeeSpider(scrapy.Spider):
                 "phone": store["phone"],
                 "website": store["website"],
             }
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

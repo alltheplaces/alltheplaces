@@ -1,6 +1,7 @@
 from scrapy.spiders import SitemapSpider
 
 from locations.structured_data_spider import StructuredDataSpider
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class DominiosGB(SitemapSpider, StructuredDataSpider):
@@ -17,7 +18,4 @@ class DominiosGB(SitemapSpider, StructuredDataSpider):
             "parse_sd",
         )
     ]
-    wanted_types = ["FastFoodRestaurant"]
-    user_agent = (
-        "Mozilla/5.0 (X11; Linux x86_64; rv:105.0) Gecko/20100101 Firefox/105.0"
-    )
+    user_agent = BROWSER_DEFAULT

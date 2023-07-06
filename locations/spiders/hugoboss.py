@@ -1,8 +1,9 @@
 import json
+
 import scrapy
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 day_formats = {
     "1": "Mo",
@@ -17,17 +18,12 @@ day_formats = {
 
 class HugoBossSpider(scrapy.Spider):
     name = "hugoboss"
-    item_attributes = {
-        "brand": "Hugo Boss",
-        "brand_wikidata": "Q491627",
-    }
-    allowed_domains = [
-        "production-na01-hugoboss.demandware.net",
-    ]
+    item_attributes = {"brand": "Hugo Boss", "brand_wikidata": "Q491627"}
+    allowed_domains = ["api.hugoboss.eu"]
     download_delay = 0.5
-    start_urls = (
-        "https://production-na01-hugoboss.demandware.net/s/US/dw/shop/v20_10/stores?client_id=871c988f-3549-4d76-b200-8e33df5b45ba&latitude=36.439068689946765&longitude=-95.71289100000001&count=200&maxDistance=100000000&distanceUnit=mi&start=0",
-    )
+    start_urls = [
+        "https://api.hugoboss.eu/s/UK/dw/shop/v20_10/stores?client_id=871c988f-3549-4d76-b200-8e33df5b45ba&latitude=36.439068689946765&longitude=-95.71289100000001&count=200&maxDistance=100000000&distanceUnit=mi&start=0"
+    ]
 
     def parse(self, response):
         data = response.json()
@@ -71,7 +67,7 @@ class HugoBossSpider(scrapy.Spider):
 
                     properties["extras"]["clothes"] = ";".join(clothes)
 
-                yield GeojsonPointItem(**properties)
+                yield Feature(**properties)
             if "next" in data:
                 yield scrapy.Request(
                     url=data["next"],

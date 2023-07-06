@@ -1,7 +1,7 @@
-# -*- coding: utf-8 -*-
 import scrapy
-from locations.microdata_parser import MicrodataParser
+
 from locations.linked_data_parser import LinkedDataParser
+from locations.microdata_parser import MicrodataParser
 
 
 class TacobellSpider(scrapy.spiders.SitemapSpider):
@@ -15,7 +15,6 @@ class TacobellSpider(scrapy.spiders.SitemapSpider):
         # "https://tacobell.es/restaurantes-sitemap.xml",
         # "https://tacobell.nl/location-sitemap.xml",
     ]
-    download_delay = 1.0
 
     def _parse_sitemap(self, response):
         def follow_link(url):

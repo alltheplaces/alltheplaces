@@ -1,7 +1,6 @@
-# -*- coding: utf-8 -*-
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class WegmansSpider(scrapy.Spider):
@@ -25,4 +24,4 @@ class WegmansSpider(scrapy.Spider):
                 "country": row["address"]["country"],
                 "phone": row["phone_number"],
             }
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

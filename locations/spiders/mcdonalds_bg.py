@@ -1,13 +1,14 @@
-# -*- coding: utf-8 -*-
-import scrapy
 import re
 
-from locations.items import GeojsonPointItem
+import scrapy
+
+from locations.items import Feature
+from locations.spiders.mcdonalds import McDonaldsSpider
 
 
 class McDonaldsBGSpider(scrapy.Spider):
     name = "mcdonalds_bg"
-    item_attributes = {"brand": "McDonald's", "brand_wikidata": "Q38076"}
+    item_attributes = McDonaldsSpider.item_attributes
     allowed_domains = ["mcdonalds.bg"]
     start_urls = ("http://mcdonalds.bg/map/",)
 
@@ -31,8 +32,9 @@ class McDonaldsBGSpider(scrapy.Spider):
                 "phone": phone if phone else "",
                 "lon": lon,
                 "lat": lat,
+                "city": city,
                 "name": "McDonalds",
                 "addr_full": address,
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

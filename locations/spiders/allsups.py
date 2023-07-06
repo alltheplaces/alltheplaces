@@ -1,10 +1,7 @@
-# -*- coding: utf-8 -*-
-import re
-
 import scrapy
 
-from locations.items import GeojsonPointItem
-from locations.hours import OpeningHours
+from locations.items import Feature
+from locations.spiders.vapestore_gb import clean_address
 
 
 class AllsupsSpider(scrapy.Spider):
@@ -22,7 +19,7 @@ class AllsupsSpider(scrapy.Spider):
             properties = {
                 "ref": store["acf"]["internal_store_code"],
                 "name": store["acf"]["business_name"],
-                "addr_full": store["acf"]["address_line_1"],
+                "street_address": clean_address([store["acf"]["address_line_1"], store["acf"]["address_line_2"]]),
                 "city": store["acf"]["city"],
                 "state": store["acf"]["state"],
                 "postcode": store["acf"]["postal_code"],
@@ -32,4 +29,4 @@ class AllsupsSpider(scrapy.Spider):
                 "phone": store["acf"]["primary_phone"],
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

@@ -1,7 +1,6 @@
-# -*- coding: utf-8 -*-
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 BRANDS = {"U76": "76", "P66": "Phillips 66", "CON": "Conoco"}
 
@@ -31,16 +30,14 @@ class Phillips66Conoco76Spider(scrapy.Spider):
         page_size = 250
 
         while offset < total_count:
-            yield scrapy.Request(
-                self.base_url + f"&$top={page_size}&$skip={offset}&$format=json"
-            )
+            yield scrapy.Request(self.base_url + f"&$top={page_size}&$skip={offset}&$format=json")
             offset += page_size
 
     def parse(self, response):
         stations = response.json()["d"]["results"]
 
         for station in stations:
-            yield GeojsonPointItem(
+            yield Feature(
                 lat=station["Latitude"],
                 lon=station["Longitude"],
                 name=station["Name"],
@@ -60,11 +57,7 @@ class Phillips66Conoco76Spider(scrapy.Spider):
                     "fuel:diesel": station["Diesel"],
                     "fuel:biodiesel": station["rd"],
                     "car_wash": station["CarWash"],
-                    "shop": "convenience"
-                    if station["CStore"]
-                    else "kiosk"
-                    if station["Snacks"]
-                    else None,
+                    "shop": "convenience" if station["CStore"] else "kiosk" if station["Snacks"] else None,
                     "atm": station["ATM"],
                 },
             )

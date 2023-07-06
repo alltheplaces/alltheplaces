@@ -1,8 +1,8 @@
-# -*- coding: utf-8 -*-
-import scrapy
 import json
 
-from locations.items import GeojsonPointItem
+import scrapy
+
+from locations.items import Feature
 
 
 class WhataburgerSpider(scrapy.Spider):
@@ -70,42 +70,18 @@ class WhataburgerSpider(scrapy.Spider):
                 yield scrapy.Request(response.urljoin(path))
 
     def parse_store(self, response):
-        hours_data = response.xpath(
-            '//div[@class="c-hours-details-wrapper js-hours-table"]/@data-days'
-        ).extract_first()
+        hours_data = response.xpath('//div[@class="c-hours-details-wrapper js-hours-table"]/@data-days').extract_first()
 
-        yield GeojsonPointItem(
-            lon=float(
-                response.xpath(
-                    '//span/meta[@itemprop="longitude"]/@content'
-                ).extract_first()
-            ),
-            lat=float(
-                response.xpath(
-                    '//span/meta[@itemprop="latitude"]/@content'
-                ).extract_first()
-            ),
-            name=response.xpath(
-                '//span[@class="Banner-titleGeo"]/text()'
-            ).extract_first(),
-            addr_full=response.xpath(
-                '//meta[@itemprop="streetAddress"]/@content'
-            ).extract_first(),
-            city=response.xpath(
-                '//meta[@itemprop="addressLocality"]/@content'
-            ).extract_first(),
-            state=response.xpath(
-                '//abbr[@itemprop="addressRegion"]/text()'
-            ).extract_first(),
-            postcode=response.xpath('//span[@itemprop="postalCode"]/text()')
-            .extract_first()
-            .strip(),
-            phone=response.xpath(
-                '//a[@class="c-phone-number-link c-phone-main-number-link"]/text()'
-            ).extract_first(),
-            opening_hours=self.store_hours(json.loads(hours_data))
-            if hours_data
-            else None,
+        yield Feature(
+            lon=float(response.xpath('//span/meta[@itemprop="longitude"]/@content').extract_first()),
+            lat=float(response.xpath('//span/meta[@itemprop="latitude"]/@content').extract_first()),
+            name=response.xpath('//span[@class="Banner-titleGeo"]/text()').extract_first(),
+            addr_full=response.xpath('//meta[@itemprop="streetAddress"]/@content').extract_first(),
+            city=response.xpath('//meta[@itemprop="addressLocality"]/@content').extract_first(),
+            state=response.xpath('//abbr[@itemprop="addressRegion"]/text()').extract_first(),
+            postcode=response.xpath('//span[@itemprop="postalCode"]/text()').extract_first().strip(),
+            phone=response.xpath('//a[@class="c-phone-number-link c-phone-main-number-link"]/text()').extract_first(),
+            opening_hours=self.store_hours(json.loads(hours_data)) if hours_data else None,
             ref=response.url,
             website=response.url,
         )

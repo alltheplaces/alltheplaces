@@ -1,10 +1,6 @@
-# -*- coding: utf-8 -*-
-import re
-
 import scrapy
 
-from locations.items import GeojsonPointItem
-from locations.hours import OpeningHours
+from locations.items import Feature
 
 
 class GodfathersPizzaSpider(scrapy.Spider):
@@ -24,7 +20,7 @@ class GodfathersPizzaSpider(scrapy.Spider):
             properties = {
                 "ref": store["storeName"],
                 "name": store["storeName"],
-                "addr_full": store["street"],
+                "street_address": store["street"],
                 "city": store["city"],
                 "state": store["state"],
                 "postcode": store["zipCode"],
@@ -34,4 +30,4 @@ class GodfathersPizzaSpider(scrapy.Spider):
                 "phone": store["phoneNumber"],
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

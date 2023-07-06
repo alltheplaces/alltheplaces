@@ -1,8 +1,8 @@
-# -*- coding: utf-8 -*-
-import scrapy
 import re
 
-from locations.items import GeojsonPointItem
+import scrapy
+
+from locations.items import Feature
 
 STATES = ["NC", "AL", "GA", "KY", "MD", "MS", "SC", "TN", "VA", "WV"]
 
@@ -16,9 +16,7 @@ class CookoutSpider(scrapy.Spider):
     def start_requests(self):
         base_url = "https://cookout.com/wp-admin/admin-ajax.php?action=store_search&lat={lat}&lng={lng}&max_results=300&search_radius=500"
 
-        with open(
-            "./locations/searchable_points/us_centroids_100mile_radius_state.csv"
-        ) as points:
+        with open("./locations/searchable_points/us_centroids_100mile_radius_state.csv") as points:
             next(points)
             for point in points:
                 _, lat, lon, state = point.strip().split(",")
@@ -27,9 +25,7 @@ class CookoutSpider(scrapy.Spider):
                     yield scrapy.Request(url=url, callback=self.parse)
 
     def store_hours(self, store_hours):
-        m = re.findall(
-            r"<tr><td>(\w*)<\/td><td><time>([0-9: APM-]*)</time></td></tr>", store_hours
-        )
+        m = re.findall(r"<tr><td>(\w*)<\/td><td><time>([0-9: APM-]*)</time></td></tr>", store_hours)
 
         day_groups = []
         this_day_group = dict()
@@ -89,7 +85,7 @@ class CookoutSpider(scrapy.Spider):
                 "ref": store["id"],
                 "name": store["store"],
                 "website": store["url"],
-                "addr_full": store.get("address"),
+                "street_address": store.get("address"),
                 "city": store.get("city"),
                 "state": store.get("state"),
                 "postcode": store.get("zip"),
@@ -106,7 +102,7 @@ class CookoutSpider(scrapy.Spider):
             if hours:
                 properties["opening_hours"] = self.store_hours(hours)
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)
 
         else:
             self.logger.info("No results")

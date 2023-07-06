@@ -1,88 +1,47 @@
-# -*- coding: utf-8 -*-
-import re
-
-import scrapy
-
-from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.categories import Categories, apply_category
+from locations.storefinders.woosmap import WoosmapSpider
 
 
-class ELeclercSpider(scrapy.Spider):
+class ELeclercSpider(WoosmapSpider):
     name = "e_leclerc"
-    item_attributes = {"brand": "E.Leclerc", "brand_wikidata": "Q1273376"}
-    allowed_domains = ["e-leclerc.com", "api.woosmap.com"]
-
+    item_attributes = {"brand": "E.Leclerc", "brand_wikidata": "Q1273376", "nsi_id": -1}
     key = "woos-6256d36f-af9b-3b64-a84f-22b2342121ba"
-    headers = {
-        "origin": "https://www.e.leclerc",
+    custom_settings = {"DEFAULT_REQUEST_HEADERS": {"Origin": "https://www.e.leclerc"}}
+
+    brands = {
+        "Jardi": ({"brand": "E.Leclerc Jardi"}, Categories.SHOP_GARDEN_CENTRE),
+        "Hyper": ({"brand": "E.Leclerc"}, Categories.SHOP_SUPERMARKET),
+        "Super": ({"brand": "E.Leclerc"}, Categories.SHOP_SUPERMARKET),
+        "Manège à Bijoux": ({"brand": "Manège à Bijoux"}, Categories.SHOP_JEWELRY),
+        "Drive": ({"brand": "E.Leclerc Drive"}, Categories.SHOP_SUPERMARKET),
+        "Une Heure Pour Soi": ({"brand": "Une Heure Pour Soi"}, Categories.SHOP_PERFUMERY),
+        "Station Service": ({"brand": "E.Leclerc"}, Categories.FUEL_STATION),
+        "Auto": ({"brand": "E.Leclerc"}, Categories.SHOP_CAR_REPAIR),
+        "E.Leclerc Express": ({"brand": "E.Leclerc Express"}, Categories.SHOP_SUPERMARKET),
+        "Voyages": ({"brand": "E.Leclerc"}, Categories.SHOP_TRAVEL_AGENCY),
+        "Espace Culturel": ({"brand": "E.Leclerc Espace Culturel"}, Categories.SHOP_ELECTRONICS),
+        "Parapharmacie": ({"brand": " E.Leclerc Parapharmacie"}, Categories.PHARMACY),
+        "Location": ({"brand": "E.Leclerc Location"}, Categories.CAR_RENTAL),
+        "Brico": ({"brand": "E.Leclerc Brico"}, Categories.SHOP_DOITYOURSELF),
+        "Click and Collect": None,
     }
 
-    day_range = {
-        1: "Mo",
-        2: "Tu",
-        3: "We",
-        4: "Th",
-        5: "Fr",
-        6: "Sa",
-        7: "Su",
-    }
+    def parse_item(self, item, feature, **kwargs):
+        if feature["properties"]["user_properties"]["type"] != "pdv":
+            return None
 
-    def start_requests(self):
-        yield scrapy.Request(
-            url=f"https://api.woosmap.com/stores/search?key={self.key}&lat=48.860245&lng=2.378051&stores_by_page=300&limit=300&page=1",
-            method="GET",
-            callback=self.parse,
-            headers=self.headers,
-        )
+        item["website"] = feature["properties"]["user_properties"].get("urlStore")
+        item["facebook"] = feature["properties"]["user_properties"].get("catchmentArea", {}).get("urlFacebook")
 
-    def parse(self, response):
-        json_obj = response.json()
-        pagination = json_obj.get("pagination")
-        for store in json_obj["features"]:
-            store_properties = store.get("properties")
-            contact = store_properties.get("contact")
-            address = store_properties.get("address")
-            user_properties = store_properties.get("user_properties")
-            coords = store.get("geometry").get("coordinates")
-            email = contact.get("email")
-            opening_hours = OpeningHours()
-            usual_oh = store_properties.get("opening_hours").get("usual")
-            for day_count in usual_oh if usual_oh else []:
-                if len(usual_oh.get(day_count)) >= 1:
-                    dates = usual_oh.get(day_count)[0]
-                    if dates["start"] != "":
-                        opening_hours.add_range(
-                            self.day_range.get(int(day_count)),
-                            dates["start"],
-                            dates["end"],
-                        )
-
-            properties = {
-                "name": f"E.Leclerc {store_properties.get('name')}",
-                "ref": store_properties.get("store_id"),
-                "street_address": address.get("lines")[0],
-                "city": address.get("city"),
-                "postcode": address.get("zipcode"),
-                "country": address.get("country_code"),
-                "phone": contact.get("phone"),
-                "website": user_properties.get("urlStore"),
-                "opening_hours": opening_hours.as_opening_hours(),
-                "lat": coords[1],
-                "lon": coords[0],
-                "email": email,
-                "extras": {
-                    "store_type": user_properties.get("commercialActivity").get("label")
-                    if user_properties.get("commercialActivity")
-                    else ""
-                },
-            }
-
-            yield GeojsonPointItem(**properties)
-
-        if pagination.get("page") != pagination.get("pageCount"):
-            next_page = pagination.get("page") + 1
-            yield scrapy.Request(
-                f"https://api.woosmap.com/stores/search?key={self.key}&lat=48.860245&lng=2.378051&stores_by_page=300&limit=300&page={next_page}",
-                callback=self.parse,
-                headers=self.headers,
+        store_type = feature["properties"]["user_properties"]["commercialActivity"]["label"]
+        if brand := self.brands.get(store_type):
+            item.update(brand[0])
+            if len(brand) == 2:
+                apply_category(brand[1], item)
+        else:
+            self.crawler.stats.inc_value(
+                f'atp/e_leclerc/unmapped_category/{store_type}/{feature["properties"]["user_properties"]["commercialActivity"]["activityCode"]}'
             )
+            return None
+
+        yield item

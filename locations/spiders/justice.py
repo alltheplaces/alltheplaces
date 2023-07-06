@@ -1,12 +1,14 @@
 import re
+
 import scrapy
-from locations.items import GeojsonPointItem
 from scrapy.http import HtmlResponse
+
+from locations.items import Feature
 
 
 class JusticeSpider(scrapy.Spider):
     name = "justice"
-    item_attributes = {"brand": "Justice"}
+    item_attributes = {"brand": "Justice", "brand_wikidata": "Q7857512"}
     allowed_domains = ["shopjustice.com"]
     start_urls = (
         "https://maps.shopjustice.com/api/getAsyncLocations?template=search&level=search&radius=50000&search=55401",
@@ -29,12 +31,8 @@ class JusticeSpider(scrapy.Spider):
                 unp["lon"] = float(unp["lon"])
 
             unp["ref"] = store["locationId"]
-            unp["addr_full"] = html.xpath(
-                '//div[contains(@class, "addr")]/text()'
-            ).extract_first()
-            unp["phone"] = html.xpath(
-                '//div[contains(@class, "phone")]/text()'
-            ).extract_first()
+            unp["addr_full"] = html.xpath('//div[contains(@class, "addr")]/text()').extract_first()
+            unp["phone"] = html.xpath('//div[contains(@class, "phone")]/text()').extract_first()
             unp["name"] = html.xpath('//div[@class="loc-name"]/text()').extract_first()
             addr2 = html.xpath('//div[contains(@class, "csz")]/text()').extract_first()
             if addr2:
@@ -51,4 +49,4 @@ class JusticeSpider(scrapy.Spider):
                 if unp[key]:
                     properties[key] = unp[key]
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

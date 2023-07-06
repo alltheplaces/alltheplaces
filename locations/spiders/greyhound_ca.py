@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
 import json
 import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class GreyhoundCASpider(scrapy.Spider):
@@ -16,12 +15,8 @@ class GreyhoundCASpider(scrapy.Spider):
     ]
 
     def parse(self, response):
-        locations_data = response.xpath(
-            '//script[contains(.,"stopArray")]'
-        ).extract_first()
-        locations = re.findall(
-            r"stopArray.push\((.*?)\);", locations_data, re.MULTILINE | re.DOTALL
-        )
+        locations_data = response.xpath('//script[contains(.,"stopArray")]').extract_first()
+        locations = re.findall(r"stopArray.push\((.*?)\);", locations_data, re.MULTILINE | re.DOTALL)
         for location in locations:
             location_info = json.loads(location)
             match = re.search(r":\s*(.+),\s(\w+)\s(\w+)", location_info["name"])
@@ -30,12 +25,7 @@ class GreyhoundCASpider(scrapy.Spider):
             else:  # no address information available
                 street_address, region, postcode = [""] * 3
 
-            website_url = (
-                "bustracker.greyhound.ca/stops/"
-                + location_info["id"]
-                + "/"
-                + location_info["linkName"]
-            )
+            website_url = "bustracker.greyhound.ca/stops/" + location_info["id"] + "/" + location_info["linkName"]
 
             properties = {
                 "ref": location_info["id"],
@@ -49,4 +39,4 @@ class GreyhoundCASpider(scrapy.Spider):
                 "website": website_url,
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

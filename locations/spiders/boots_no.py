@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
 import re
 import urllib.parse
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class BootsNOSpider(scrapy.Spider):
@@ -20,9 +19,7 @@ class BootsNOSpider(scrapy.Spider):
         map_data = response.xpath(
             '//script[@type="text/javascript" and contains(text(), "google.maps.LatLng")]/text()'
         ).extract_first()
-        coordinates = re.search(
-            r"var latlng \= new google\.maps\.LatLng\((.*)\)", map_data
-        ).group(1)
+        coordinates = re.search(r"var latlng \= new google\.maps\.LatLng\((.*)\)", map_data).group(1)
         lat, lon = coordinates.split(",")
 
         properties = {
@@ -36,22 +33,16 @@ class BootsNOSpider(scrapy.Spider):
             "website": response.meta["website"],
         }
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)
 
     def parse_store(self, response):
         ref = re.search(r".+/(.+?)/?(?:\.html|$)", response.url).group(1)
-        address_parts = response.xpath(
-            '//div[contains(text(),"Besøksadresse")]/following-sibling::text()'
-        ).extract()
+        address_parts = response.xpath('//div[contains(text(),"Besøksadresse")]/following-sibling::text()').extract()
         address = " ".join(map(str.strip, address_parts))
-        name = urllib.parse.unquote_plus(
-            re.search(r".+/(.+?)/(.+?)/?(?:\.html|$)", response.url).group(1)
-        )
+        name = urllib.parse.unquote_plus(re.search(r".+/(.+?)/(.+?)/?(?:\.html|$)", response.url).group(1))
         phone = response.xpath('//a[contains(@href,"tel")]/text()').extract_first()
 
-        map_url = "https://zpin.it/on/location/map/?key=440558&id={store_id}".format(
-            store_id=ref
-        )
+        map_url = "https://zpin.it/on/location/map/?key=440558&id={store_id}".format(store_id=ref)
 
         meta_props = {
             "ref": ref,

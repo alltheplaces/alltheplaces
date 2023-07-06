@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
 import csv
 import json
+
 import scrapy
 
-from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class InsomniaCookiesSpider(scrapy.Spider):
@@ -13,9 +12,7 @@ class InsomniaCookiesSpider(scrapy.Spider):
     allowed_domains = ["insomniacookies.com"]
 
     def start_requests(self):
-        with open(
-            "./locations/searchable_points/us_centroids_25mile_radius.csv"
-        ) as points:
+        with open("./locations/searchable_points/us_centroids_25mile_radius.csv") as points:
             reader = csv.DictReader(points)
             for line in reader:
                 graphql_query = {
@@ -51,4 +48,4 @@ class InsomniaCookiesSpider(scrapy.Spider):
                 "phone": store.get("phone"),
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

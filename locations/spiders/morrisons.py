@@ -1,8 +1,7 @@
 import scrapy
-import re
 
-from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
+from locations.items import Feature
 
 DAYS = {
     "mon": "Mo",
@@ -19,9 +18,7 @@ class MorrisonsSpider(scrapy.Spider):
     name = "morrisons"
     item_attributes = {"brand": "Morrisons", "brand_wikidata": "Q922344"}
     allowed_domains = ["api.morrisons.com"]
-    start_urls = [
-        "https://api.morrisons.com/location/v2//stores?apikey=kxBdM2chFwZjNvG2PwnSn3sj6C53dLEY&limit=20000"
-    ]
+    start_urls = ["https://api.morrisons.com/location/v2//stores?apikey=kxBdM2chFwZjNvG2PwnSn3sj6C53dLEY&limit=20000"]
 
     def store_hours(self, store_hours):
         oh = OpeningHours()
@@ -77,7 +74,7 @@ class MorrisonsSpider(scrapy.Spider):
         if hours:
             properties["opening_hours"] = hours
 
-        return GeojsonPointItem(**properties)
+        return Feature(**properties)
 
     def parse(self, response):
         # may need to do pagination at some point, but right now the API accepts any limit

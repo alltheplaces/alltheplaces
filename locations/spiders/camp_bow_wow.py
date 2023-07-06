@@ -1,10 +1,6 @@
-# -*- coding: utf-8 -*-
-import re
-
 import scrapy
 
-from locations.items import GeojsonPointItem
-from locations.hours import OpeningHours
+from locations.items import Feature
 
 
 class CampBowWowSpider(scrapy.Spider):
@@ -23,7 +19,7 @@ class CampBowWowSpider(scrapy.Spider):
             properties = {
                 "ref": place["FranchiseLocationID"],
                 "name": place["FranchiseLocationName"],
-                "addr_full": place["Address1"],
+                "street_address": place["Address1"],
                 "city": place["City"],
                 "state": place["State"],
                 "postcode": place["ZipCode"],
@@ -33,4 +29,4 @@ class CampBowWowSpider(scrapy.Spider):
                 "phone": place["Phone"],
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

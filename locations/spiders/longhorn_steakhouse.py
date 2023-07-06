@@ -1,11 +1,10 @@
-# -*- coding: utf-8 -*-
 import json
 import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
+from locations.items import Feature
 
 
 class LongHornSteakhouseSpider(scrapy.Spider):
@@ -27,9 +26,7 @@ class LongHornSteakhouseSpider(scrapy.Spider):
         for hour in hours:
             day, open_close = hour.split(" ")
             open_time, close_time = open_close.split("-")
-            opening_hours.add_range(
-                day=day, open_time=open_time, close_time=close_time, time_format="%H:%M"
-            )
+            opening_hours.add_range(day=day, open_time=open_time, close_time=close_time, time_format="%H:%M")
         return opening_hours.as_opening_hours()
 
     def parse(self, response):
@@ -47,18 +44,11 @@ class LongHornSteakhouseSpider(scrapy.Spider):
             ref = re.search(r".+/(.+?)/?(?:\.html|$)", response.url).group(1)
 
             # Handle store pages that are missing the application/ld+json data
-            addr, city_state_zip, phone = response.xpath(
-                '//p[@id="info-link-webhead"]/text()'
-            ).extract()
-            city, state, postcode = re.search(
-                r"(.*?),\s([A-Z]{2})\s([\d-]+)$", city_state_zip
-            ).groups()
+            addr, city_state_zip, phone = response.xpath('//p[@id="info-link-webhead"]/text()').extract()
+            city, state, postcode = re.search(r"(.*?),\s([A-Z]{2})\s([\d-]+)$", city_state_zip).groups()
 
             properties = {
-                "name": data.get("name")
-                or response.xpath('//h1[@class="style_h1"]/text()')
-                .extract_first()
-                .strip(),
+                "name": data.get("name") or response.xpath('//h1[@class="style_h1"]/text()').extract_first().strip(),
                 "ref": data["branchCode"] or ref,
                 "addr_full": data["address"]["streetAddress"].strip() or addr.strip(),
                 "city": data["address"]["addressLocality"] or city,
@@ -76,4 +66,4 @@ class LongHornSteakhouseSpider(scrapy.Spider):
                 store_hours = self.parse_hours(hours)
                 properties["opening_hours"] = store_hours
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

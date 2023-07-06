@@ -1,94 +1,34 @@
-# -*- coding: utf-8 -*-
-import re
-
 import scrapy
+from geonamescache import GeonamesCache
 
-from locations.items import GeojsonPointItem
-from locations.hours import OpeningHours
-
-
-STATES = [
-    "AL",
-    "AK",
-    "AZ",
-    "AR",
-    "CA",
-    "CO",
-    "CT",
-    "DC",
-    "DE",
-    "FL",
-    "GA",
-    "HI",
-    "ID",
-    "IL",
-    "IN",
-    "IA",
-    "KS",
-    "KY",
-    "LA",
-    "ME",
-    "MD",
-    "MA",
-    "MI",
-    "MN",
-    "MS",
-    "MO",
-    "MT",
-    "NE",
-    "NV",
-    "NH",
-    "NJ",
-    "NM",
-    "NY",
-    "NC",
-    "ND",
-    "OH",
-    "OK",
-    "OR",
-    "PA",
-    "RI",
-    "SC",
-    "SD",
-    "TN",
-    "TX",
-    "UT",
-    "VT",
-    "VA",
-    "WA",
-    "WV",
-    "WI",
-    "WY",
-]
+from locations.items import Feature
 
 
 class DavitaSpider(scrapy.Spider):
     name = "davita"
-    item_attributes = {"brand": "DaVita"}
+    item_attributes = {"brand": "DaVita", "brand_wikidata": "Q5207184", "country": "US"}
     allowed_domains = ["davita.com"]
-    start_urls = ("https://www.davita.com/tools/find-dialysis-center",)
+
+    def start_requests(self):
+        for state in GeonamesCache().get_us_states():
+            yield scrapy.Request(
+                url=f"https://www.davita.com/api/find-a-center?location={state}&p=1&lat=32.3182314&lng=-86.902298"
+            )
 
     def parse(self, response):
-        for state in STATES:
-            url = f"https://www.davita.com/api/find-a-center?location={state}&p=1&lat=32.3182314&lng=-86.902298"
-            yield scrapy.Request(url, callback=self.parse_locations)
-
-    def parse_locations(self, response):
         data = response.json()
         for location in data.get("locations", []) or []:
             properties = {
                 "name": location["facilityname"],
                 "ref": location["facilityid"],
-                "addr_full": location["address"]["address1"],
+                "street_address": location["address"]["address1"],
                 "city": location["address"]["city"],
                 "state": location["address"]["state"],
                 "postcode": location["address"]["zip"],
                 "phone": location.get("phone"),
-                "website": "https://davita.com/locations/{}".format(
-                    location["facilityid"]
-                ),
-                "lat": float(location["address"]["latitude"]),
-                "lon": float(location["address"]["longitude"]),
+                "website": f'https://davita.com/locations/{location["facilityid"]}',
+                "lat": location["address"].get("latitude"),
+                "lon": location["address"].get("longitude"),
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

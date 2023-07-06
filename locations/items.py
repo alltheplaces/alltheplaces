@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Define here the models for your scraped items
 #
 # See documentation in:
@@ -8,9 +6,10 @@
 import scrapy
 
 
-class GeojsonPointItem(scrapy.Item):
+class Feature(scrapy.Item):
     lat = scrapy.Field()
     lon = scrapy.Field()
+    geometry = scrapy.Field()
     name = scrapy.Field()
     addr_full = scrapy.Field()
     housenumber = scrapy.Field()
@@ -32,4 +31,39 @@ class GeojsonPointItem(scrapy.Item):
     brand_wikidata = scrapy.Field()
     located_in = scrapy.Field()
     located_in_wikidata = scrapy.Field()
+    nsi_id = scrapy.Field()
     extras = scrapy.Field()
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if not self._values.get("extras"):
+            self.__setitem__("extras", {})
+
+
+def get_lat_lon(item: Feature) -> (float, float):
+    if geometry := item.get("geometry"):
+        if isinstance(geometry, dict):
+            if geometry.get("type") == "Point":
+                if coords := geometry.get("coordinates"):
+                    try:
+                        return float(coords[1]), float(coords[0])
+                    except (TypeError, ValueError):
+                        item["geometry"] = None
+    else:
+        try:
+            return float(item.get("lat")), float(item.get("lon"))
+        except (TypeError, ValueError):
+            pass
+    return None
+
+
+def set_lat_lon(item: Feature, lat: float, lon: float):
+    item["lat"] = None
+    item["lon"] = None
+    if lat and lon:
+        item["geometry"] = {
+            "type": "Point",
+            "coordinates": [lon, lat],
+        }
+    else:
+        item["geometry"] = None

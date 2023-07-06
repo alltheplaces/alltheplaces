@@ -1,21 +1,23 @@
-# -*- coding: utf-8 -*-
-import scrapy
+from scrapy import Spider
 
-from locations.linked_data_parser import LinkedDataParser
+from locations.dict_parser import DictParser
 
 
-class DaveAndBustersSpider(scrapy.spiders.SitemapSpider):
+class DaveAndBustersSpider(Spider):
     name = "dave_and_busters"
-    item_attributes = {
-        "brand": "Dave and Busters",
-        "brand_wikidata": "Q5228205",
-    }
-    allowed_domains = ["daveandbusters.com"]
-    sitemap_urls = [
-        "https://www.daveandbusters.com/robots.txt",
-    ]
-    sitemap_rules = [(r"/locations/", "parse")]
+    item_attributes = {"brand": "Dave and Busters", "brand_wikidata": "Q5228205"}
+    allowed_domains = ["www.daveandbusters.com"]
+    start_urls = ["https://www.daveandbusters.com/content/dnb-request/datadetails.json?mode=location"]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def parse(self, response):
-        item = LinkedDataParser.parse(response, "Restaurant")
-        yield item
+        for location in response.json()["locations"]:
+            if "COMING SOON" in location["name"].upper():
+                continue
+
+            location["address"]["street_address"] = ", ".join(
+                filter(None, [location["address"].pop("line1"), location["address"].pop("line2")])
+            )
+            location["website"] = location.pop("websiteUrl")
+
+            yield DictParser.parse(location)

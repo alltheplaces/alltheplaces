@@ -1,13 +1,13 @@
-# -*- coding: utf-8 -*-
-import scrapy
 import re
 
-from locations.items import GeojsonPointItem
+import scrapy
+
+from locations.items import Feature
 
 
 class FairwayMarketSpider(scrapy.Spider):
     name = "fairway_market"
-    item_attributes = {"brand": "Fairway Market"}
+    item_attributes = {"brand": "Fairway Market", "brand_wikidata": "Q5430910"}
     allowed_domains = ["http://www.fairwaymarkets.com/"]
     start_urls = (
         "http://www.fairwaymarkets.com/index.php/store-locations/victoria",
@@ -19,30 +19,21 @@ class FairwayMarketSpider(scrapy.Spider):
     def parse(self, response):
         data = response.xpath('//div[@class="art-content-wide"]')
         for store in data.xpath('.//div[@class="art-Post-inner"]'):
-
             properties = {
-                "ref": store.xpath(
-                    'div[@class="art-PostContent"]/div[@class="art-article"]/p/text()'
-                ).extract_first(),
+                "ref": store.xpath('div[@class="art-PostContent"]/div[@class="art-article"]/p/text()').extract_first(),
                 "addr_full": store.xpath(
                     'div[@class="art-PostContent"]/div[@class="art-article"]/p/text()'
                 ).extract_first(),
-                "name": store.xpath('h2/span[@class="art-PostHeader"]/text()')
-                .extract_first()
-                .replace("\n", ""),
+                "name": store.xpath('h2/span[@class="art-PostHeader"]/text()').extract_first().replace("\n", ""),
                 "city": self.city(
-                    store.xpath(
-                        'div[@class="art-PostContent"]/div[@class="art-article"]/p/text()'
-                    )[1].extract()
+                    store.xpath('div[@class="art-PostContent"]/div[@class="art-article"]/p/text()')[1].extract()
                 ),
                 "state": self.state(
-                    store.xpath(
-                        'div[@class="art-PostContent"]/div[@class="art-article"]/p/text()'
-                    )[1].extract()
+                    store.xpath('div[@class="art-PostContent"]/div[@class="art-article"]/p/text()')[1].extract()
                 ),
-                "postcode": store.xpath(
-                    'div[@class="art-PostContent"]/div[@class="art-article"]/p/text()'
-                )[2].extract(),
+                "postcode": store.xpath('div[@class="art-PostContent"]/div[@class="art-article"]/p/text()')[
+                    2
+                ].extract(),
                 "opening_hours": self.store_hours(
                     store.xpath(
                         'div[@class="art-PostContent"]/div[@class="art-article"]/p/strong/text()'
@@ -52,7 +43,7 @@ class FairwayMarketSpider(scrapy.Spider):
                 # "lat": float(store.xpath('latitude/text()').extract_first()),
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)
         else:
             self.logger.info("No results")
 

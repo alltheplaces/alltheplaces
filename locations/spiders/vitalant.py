@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
 import itertools
 import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class VitalantSpider(scrapy.Spider):
@@ -14,9 +13,7 @@ class VitalantSpider(scrapy.Spider):
     start_urls = ("https://vitalant.org/Donate/Locations",)
 
     def parse(self, response):
-        [script] = response.xpath(
-            '//script/text()[contains(., "BasicGoogleMaps = ")]'
-        ).extract()
+        [script] = response.xpath('//script/text()[contains(., "BasicGoogleMaps = ")]').extract()
         marker_lines = []
         location_lines = []
         for line in script.splitlines():
@@ -28,10 +25,7 @@ class VitalantSpider(scrapy.Spider):
 
         for marker, location in itertools.zip_longest(marker_lines, location_lines):
             selector = scrapy.Selector(text=marker)
-            name, *addrs, addr2 = (
-                s.strip()
-                for s in selector.xpath("//b/text()[normalize-space()]").extract()
-            )
+            name, *addrs, addr2 = (s.strip() for s in selector.xpath("//b/text()[normalize-space()]").extract())
             city, state, postcode = re.search("(.*), (.*) (.*)", addr2).groups()
             website = selector.xpath("//@href").extract_first().strip(r"\"")
             lat, lon = location.split(", ")[1:3]
@@ -47,4 +41,4 @@ class VitalantSpider(scrapy.Spider):
                 "state": state,
                 "postcode": postcode,
             }
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

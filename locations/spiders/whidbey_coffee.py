@@ -1,17 +1,16 @@
-import scrapy
 import re
-
 from datetime import datetime
-from locations.items import GeojsonPointItem
+
+import scrapy
+
 from locations.hours import OpeningHours
+from locations.items import Feature
 
 
 class WhidbeyCoffeeSpider(scrapy.Spider):
-
     name = "whidbeycoffee"
     item_attributes = {"brand": "Whidbey Coffee"}
     allowed_domains = ["www.whidbeycoffee.com"]
-    download_delay = 1
     start_urls = ("https://www.whidbeycoffee.com/sitemap_pages_1.xml",)
 
     def parse(self, response):
@@ -21,45 +20,28 @@ class WhidbeyCoffeeSpider(scrapy.Spider):
             yield scrapy.Request(url.strip(), callback=self.parse_store)
 
     def parse_store(self, response):
-        map_link = response.xpath(
-            '//div[@itemprop="address"]/p/a/@href'
-        ).extract_first()
+        map_link = response.xpath('//div[@itemprop="address"]/p/a/@href').extract_first()
         if not map_link:
             self.logger.info(f"Skipping URL {response.url}")
             return
 
         lat, lon = re.search(r".*@(-?[\d.]+),(-?[\d.]+).*", map_link).groups()
 
-        yield GeojsonPointItem(
+        yield Feature(
             ref=response.url.split("/")[-1],
             name=response.xpath("//h1/text()").extract_first().strip(),
             lat=float(lat),
             lon=float(lon),
-            addr_full=response.xpath('//span[@itemprop="streetAddress"]/text()')
-            .extract_first()
-            .strip(),
-            city=response.xpath('//span[@itemprop="addressLocality"]/text()')
-            .extract_first()
-            .strip(),
-            state=response.xpath('//span[@itemprop="addressRegion"]/text()')
-            .extract_first()
-            .strip(),
-            postcode=response.xpath('//span[@itemprop="postalCode"]/text()')
-            .extract_first()
-            .strip(),
-            phone=response.xpath('//span[@itemprop="telephone"]/text()')
-            .extract_first()
-            .strip(),
+            addr_full=response.xpath('//span[@itemprop="streetAddress"]/text()').extract_first().strip(),
+            city=response.xpath('//span[@itemprop="addressLocality"]/text()').extract_first().strip(),
+            state=response.xpath('//span[@itemprop="addressRegion"]/text()').extract_first().strip(),
+            postcode=response.xpath('//span[@itemprop="postalCode"]/text()').extract_first().strip(),
+            phone=response.xpath('//span[@itemprop="telephone"]/text()').extract_first().strip(),
             website=response.url,
-            opening_hours=self.parse_hours(
-                response.xpath(
-                    '//p[strong[contains(text(), "Hours")]]//text()'
-                ).extract()
-            ),
+            opening_hours=self.parse_hours(response.xpath('//p[strong[contains(text(), "Hours")]]//text()').extract()),
         )
 
     def parse_hours(self, hours):
-
         opening_hours = OpeningHours()
 
         DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
@@ -82,9 +64,7 @@ class WhidbeyCoffeeSpider(scrapy.Spider):
             # Day range, e.g. Mon - Fri
             if "-" in day_range:
                 start_day, end_day = re.sub(r"[\s:]", "", day_range).split("-")
-                for day in DAYS[
-                    DAYS.index(start_day[0:3]) : DAYS.index(end_day[0:3]) + 1
-                ]:
+                for day in DAYS[DAYS.index(start_day[0:3]) : DAYS.index(end_day[0:3]) + 1]:
                     opening_hours.add_range(
                         day=day[0:2],
                         open_time=open_time,

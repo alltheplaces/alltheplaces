@@ -1,6 +1,8 @@
 import re
+
 import scrapy
-from locations.items import GeojsonPointItem
+
+from locations.items import Feature
 
 
 class MedExpressSpider(scrapy.Spider):
@@ -14,7 +16,6 @@ class MedExpressSpider(scrapy.Spider):
         stores = data["locations"]
 
         for store in stores:
-
             if re.search("closed", store["locationName"], re.IGNORECASE):
                 continue
 
@@ -44,4 +45,4 @@ class MedExpressSpider(scrapy.Spider):
             ):
                 properties["opening_hours"] = "Mo-Su 08:00-20:00"
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

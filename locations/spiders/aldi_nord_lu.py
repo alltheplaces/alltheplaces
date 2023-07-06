@@ -1,56 +1,13 @@
-# -*- coding: utf-8 -*-
-import re
-
-import scrapy
-
-from locations.items import GeojsonPointItem
+from locations.storefinders.uberall import UberallSpider
 
 
-class AldiNordLUSpider(scrapy.Spider):
+class AldiNordLUSpider(UberallSpider):
     name = "aldi_nord_lu"
-    item_attributes = {"brand": "ALDI Nord", "brand_wikidata": "Q41171373"}
-    allowed_domains = ["www.aldi.lu"]
-    start_urls = [
-        "https://www.aldi.lu/fr/informations/magasins-et-heures-d-ouverture.html",
-    ]
+    item_attributes = {"brand": "ALDI", "brand_wikidata": "Q41171373"}
+    key = "ALDINORDLU_klnge16WJnsW3DwfI5HVH28kqvo9sp"
 
-    def parse(self, response):
-        urls = response.xpath(
-            '//div[@class="mod-stores__multicolumn"]/p/a/@href'
-        ).extract()
-        is_store_list = response.xpath(
-            '//div[@class="mod mod-stores"]//div[@class="mod-stores__overview-company-tools"]/a/@href'
-        ).extract()
-
-        if not urls and is_store_list:
-            for store_url in is_store_list:
-                yield scrapy.Request(
-                    response.urljoin(store_url), callback=self.parse_store
-                )
-        else:
-            for url in urls:
-                yield scrapy.Request(response.urljoin(url))
-
-    def parse_store(self, response):
-        ref = re.search(r".+/(.+?)/?(?:\.html|$)", response.url).group(1)
-        country = re.search(r"aldi\.(\w{2}?)\/", response.url).group(1)
-
-        properties = {
-            "ref": ref,
-            "name": response.xpath(
-                '//div[@class="mod-overview-intro__content"]/h1/text()'
-            ).extract_first(),
-            "addr_full": response.xpath(
-                'normalize-space(//span[@itemprop="streetAddress"]//text())'
-            ).extract_first(),
-            "city": response.xpath(
-                'normalize-space(//span[@itemprop="addressLocality"]//text())'
-            ).extract_first(),
-            "postcode": response.xpath(
-                'normalize-space(//span[@itemprop="postalCode"]//text())'
-            ).extract_first(),
-            "country": country,
-            "website": response.url,
-        }
-
-        yield GeojsonPointItem(**properties)
+    def parse_item(self, item, feature, **kwargs):
+        item["ref"] = str(feature["id"])
+        slug = "/".join([item["city"], item["street_address"], item["ref"]]).lower().replace(" ", "-")
+        item["website"] = "https://www.aldi.lu/de/information/supermaerkte.html/l/" + slug
+        yield item

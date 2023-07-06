@@ -1,9 +1,8 @@
-# -*- coding: utf-8 -*-
 import json
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class PetParadiseSpider(scrapy.Spider):
@@ -19,9 +18,7 @@ class PetParadiseSpider(scrapy.Spider):
             "Accept": "application/javascript",
         }
 
-        yield scrapy.http.FormRequest(
-            url=url, method="GET", headers=headers, callback=self.parse
-        )
+        yield scrapy.http.FormRequest(url=url, method="GET", headers=headers, callback=self.parse)
 
     def parse(self, response):
         text1 = response.text
@@ -46,4 +43,4 @@ class PetParadiseSpider(scrapy.Spider):
                 "website": store_data["interestpointMoreInfoLink"],
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

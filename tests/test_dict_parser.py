@@ -124,6 +124,63 @@ def test_dict_parse():
     assert i["lon"] == -74.009354
     assert i["phone"] == "212 227 3108"
 
+    i = DictParser.parse(
+        {
+            "id": "2107",
+            "name": "Kidderminster, Swan Centre",
+            "type": "store",
+            "distance": 71.53,
+            "address": {
+                "company": "Poundland",
+                "line": ["3-6 Coventry Street", "Swan Centre"],
+                "city": "Kidderminster",
+                "country": {"isocode": "UK", "name": "United Kingdom"},
+                "postcode": "DY10 2DG",
+            },
+            "geoPoint": {"latitude": "52.38839100", "longitude": "-2.24784700"},
+            "store_id": "304",
+            "url_key": "2107",
+            "description": None,
+            "store_manager": "Steven Creighton",
+            "fax": "",
+            "tel": "01562 746695",
+            "email1": "example@example.org",
+            "store_features": '{"atm":"false","pepshopinshop":"true","icestore":"true","parking":"true","clickandcollect":"false","storetype":{"highstreet":"true","shoppingprecinct":"false","shoppingcentre":"false","retailpark":"false"}}',
+            "close_date": None,
+            "atm": "0",
+            "pepshopinshop": "1",
+            "icestore": "1",
+            "parking": "1",
+            "clickandcollect": "0",
+            "highstreet": "1",
+            "retailpark": "0",
+            "shoppingprecinct": "0",
+            "shoppingcentre": "0",
+            "is_pep_co_only": "0",
+            "route": "store-finder/2107",
+            "opening_hours": [
+                {"day": "Monday", "hours": "08:00 - 18:00"},
+                {"day": "Tuesday", "hours": "08:00 - 18:00"},
+                {"day": "Wednesday", "hours": "08:00 - 18:00"},
+                {"day": "Thursday", "hours": "08:00 - 18:00"},
+                {"day": "Friday", "hours": "08:00 - 18:00"},
+                {"day": "Saturday", "hours": "08:00 - 18:00"},
+                {"day": "Sunday", "hours": "10:00 - 16:00"},
+            ],
+            "open_today": "08:00 - 18:00",
+        }
+    )
+
+    assert i["ref"] == "2107"
+    assert i["name"] == "Kidderminster, Swan Centre"
+    assert i["city"] == "Kidderminster"
+    assert i["country"] == "UK"
+    assert i["postcode"] == "DY10 2DG"
+    assert i["lat"] == "52.38839100"
+    assert i["lon"] == "-2.24784700"
+    assert i["phone"] == "01562 746695"
+    assert i["email"] == "example@example.org"
+
 
 def test_get_variations():
     key = "street-address"
@@ -132,9 +189,15 @@ def test_get_variations():
         "streetaddress",
         "STREETADDRESS",
         "StreetAddress",
+        "street_address",
+        "STREET_ADDRESS",
+        "street_Address",
+        "Street_Address",
     ]
 
     variations = DictParser.get_variations(key)
 
     for variation in expected_variations:
         assert variation in variations
+
+    assert any("Postcode" in DictParser.get_variations(key) for key in DictParser.postcode_keys)

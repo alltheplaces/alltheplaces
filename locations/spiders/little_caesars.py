@@ -1,9 +1,11 @@
 import json
+
 import scrapy
 
-from locations.hours import OpeningHours
 from locations.geo import postal_regions
-from locations.items import GeojsonPointItem
+from locations.hours import OpeningHours
+from locations.items import Feature
+from locations.user_agents import BROWSER_DEFAULT
 
 DAY_MAPPING = {
     "SUN": "Su",
@@ -13,13 +15,6 @@ DAY_MAPPING = {
     "THU": "Th",
     "FRI": "Fr",
     "SAT": "Sa",
-}
-
-HEADERS = {
-    "Accept": "*/*",
-    "Accept-Encoding": "gzip, deflate, br",
-    "Accept-Language": "en-US",
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36",
 }
 
 
@@ -32,14 +27,12 @@ class LittleCaesarsSpider(scrapy.Spider):
     }
     allowed_domains = ["littlecaesars.com"]
     download_delay = 0.1
+    user_agent = BROWSER_DEFAULT
 
     def start_requests(self):
         for record in postal_regions("US"):
-            url = (
-                "https://api.cloud.littlecaesars.com/bff/api/stores?zip="
-                + record["postal_region"]
-            )
-            yield scrapy.http.Request(url, self.parse, method="GET", headers=HEADERS)
+            url = "https://api.cloud.littlecaesars.com/bff/api/stores?zip=" + record["postal_region"]
+            yield scrapy.http.Request(url, self.parse, method="GET")
 
     def parse(self, response):
         body = response.text
@@ -61,7 +54,6 @@ class LittleCaesarsSpider(scrapy.Spider):
                 url=f"https://api.cloud.littlecaesars.com/bff/api/stores/{store_id}",
                 method="GET",
                 callback=self.parse_store,
-                headers=HEADERS,
             )
 
     def parse_store(self, response):
@@ -105,7 +97,7 @@ class LittleCaesarsSpider(scrapy.Spider):
         if opening_hours:
             properties["opening_hours"] = opening_hours
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)
 
     def add_hours(self, ordering_hours):
         opening_hours = OpeningHours()

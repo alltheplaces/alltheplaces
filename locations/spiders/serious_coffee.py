@@ -1,10 +1,11 @@
-import scrapy
 import re
-from locations.items import GeojsonPointItem
+
+import scrapy
+
+from locations.items import Feature
 
 
 class SeriousCoffeeSpider(scrapy.Spider):
-
     name = "seriouscoffee"
     item_attributes = {"brand": "Serious Coffee"}
     allowed_domains = ["www.seriouscoffee.com"]
@@ -52,12 +53,8 @@ class SeriousCoffeeSpider(scrapy.Spider):
     def parse_hours(self, lis):
         hours = []
         for li in lis:
-            day = li.xpath(
-                'normalize-space(.//td[@class="locations_timetable_day"]/text())'
-            ).extract_first()
-            times = li.xpath(
-                'normalize-space(.//td[@class="locations_timetable_time"]/text())'
-            ).extract_first()
+            day = li.xpath('normalize-space(.//td[@class="locations_timetable_day"]/text())').extract_first()
+            times = li.xpath('normalize-space(.//td[@class="locations_timetable_time"]/text())').extract_first()
             if times and day:
                 parsed_time = self.parse_times(times)
                 parsed_day = self.parse_day(day)
@@ -119,13 +116,11 @@ class SeriousCoffeeSpider(scrapy.Spider):
             "lat": latitude,
             "lon": longitude,
         }
-        hours = self.parse_hours(
-            response.xpath('//table[@class="locations_timetable_table"]/tr')
-        )
+        hours = self.parse_hours(response.xpath('//table[@class="locations_timetable_table"]/tr'))
         if hours:
             properties["opening_hours"] = hours
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)
 
     def parse_city_stores(self, response):
         stores = response.xpath(
@@ -135,10 +130,6 @@ class SeriousCoffeeSpider(scrapy.Spider):
             yield scrapy.Request(response.urljoin(store), callback=self.parse_stores)
 
     def parse(self, response):
-        urls = response.xpath(
-            '//div[@class="cms_locations_main"]/div[@class="cms_locations_image"]/a/@href'
-        ).extract()
+        urls = response.xpath('//div[@class="cms_locations_main"]/div[@class="cms_locations_image"]/a/@href').extract()
         for path in urls:
-            yield scrapy.Request(
-                response.urljoin(path), callback=self.parse_city_stores
-            )
+            yield scrapy.Request(response.urljoin(path), callback=self.parse_city_stores)

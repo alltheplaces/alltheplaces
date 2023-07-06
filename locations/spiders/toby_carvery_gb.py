@@ -17,5 +17,5 @@ class TobyCarveryGB(SitemapSpider, StructuredDataSpider):
 
     def sitemap_filter(self, entries):
         for entry in entries:
-            if not "/test/" in entry["loc"]:
+            if "/test/" not in entry["loc"]:
                 yield entry

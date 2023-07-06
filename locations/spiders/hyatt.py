@@ -1,18 +1,15 @@
 import json
-import scrapy
-import logging
 
-from locations.items import GeojsonPointItem
+import scrapy
+
+from locations.items import Feature
 
 
 class HyattSpider(scrapy.Spider):
-
     name = "hyatt"
     item_attributes = {"brand": "Hyatt", "brand_wikidata": "Q1425063"}
     allowed_domains = ["hyatt.com"]
-    download_delay = (
-        1.5  # delay required to avoid getting temporarily blocked from hyatt.com (403s)
-    )
+    download_delay = 1.5  # delay required to avoid getting temporarily blocked from hyatt.com (403s)
 
     base_url = "https://www.hyatt.com/explore-hotels/partial?regionGroup={region}&categories=&brands="
 
@@ -30,11 +27,7 @@ class HyattSpider(scrapy.Spider):
             yield scrapy.Request(url=self.base_url.format(region=region))
 
     def parse_hotel(self, response):
-        data = json.loads(
-            response.xpath(
-                '//script[contains(text(), "streetAddress")]/text()'
-            ).extract_first()
-        )
+        data = json.loads(response.xpath('//script[contains(text(), "streetAddress")]/text()').extract_first())
 
         properties = {
             "ref": "_".join(response.url.split("/")[-3:]),
@@ -50,7 +43,7 @@ class HyattSpider(scrapy.Spider):
             "website": response.url,
         }
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)
 
     def parse(self, response):
         urls = response.xpath('//li[contains(@class, "property")]/a/@href').extract()

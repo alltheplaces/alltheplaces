@@ -23,11 +23,7 @@ class TheFoodWarehouse(scrapy.Spider):
             item["phone"] = store.get("store-number")
             item["image"] = store["store-image"]
             item["addr_full"] = clean_address(
-                item["addr_full"]
-                .replace("<br>", "")
-                .replace("<br />", "")
-                .replace("<p>", "")
-                .replace("</p>", "")
+                item["addr_full"].replace("<br>", "").replace("<br />", "").replace("<p>", "").replace("</p>", "")
             )
             # TODO: Opening hours
 

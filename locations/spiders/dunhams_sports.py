@@ -1,112 +1,33 @@
-# -*- coding: utf-8 -*-
 import scrapy
-from locations.items import GeojsonPointItem
+
+from locations.dict_parser import DictParser
+from locations.hours import OpeningHours
 
 
 class DunhamsSportsSpider(scrapy.Spider):
     name = "dunhams_sports"
-    item_attributes = {"brand": "Dunham's Sports"}
-    allowed_domains = ["http://www.dunhamssports.com"]
-    custom_settings = {"ROBOTSTXT_OBEY": False}
-    start_urls = (
-        "http://www.dunhamssports.com/wp-admin/admin-ajax.php?action=simloc_get_locations&lat=32.7258378&lng=-116.95580669999998&radius=200000",
-    )
-
-    def store_hours(self, hours):
-        openHours = hours.split("-")[0].strip()
-        closeHours = hours.split("-")[1].strip()
-
-        if "am" in openHours:
-            openHours = openHours.replace("am", "")
-            if ":" in openHours:
-                openH = openHours.split(":")[0]
-                openM = openHours.split(":")[1]
-            else:
-                openH = openHours
-                openM = "00"
-            openHours = openH + ":" + openM
-
-        if "pm" in openHours:
-            openHours = openHours.replace("pm", "")
-            if ":" in openHours:
-                openH = openHours.split(":")[0]
-                openM = openHours.split(":")[1]
-            else:
-                openH = openHours
-                openM = "00"
-            openH = str(int(openH) + 12)
-            openHours = openH + ":" + openM
-
-        if "am" in closeHours:
-            closeHours = closeHours.replace("am", "")
-            if ":" in closeHours:
-                closeH = closeHours.split(":")[0]
-                closeM = closeHours.split(":")[1]
-            else:
-                closeH = closeHours
-                closeM = "00"
-            closeHours = closeH + ":" + closeM
-
-        if "pm" in closeHours:
-            closeHours = closeHours.replace("pm", "")
-            if ":" in closeHours:
-                closeH = closeHours.split(":")[0]
-                closeM = closeHours.split(":")[1]
-            else:
-                closeH = closeHours
-                closeM = "00"
-            closeH = str(int(closeH) + 12)
-            closeHours = closeH + ":" + closeM
-
-            return openHours + "-" + closeHours
+    item_attributes = {"brand": "Dunham's Sports", "brand_wikidata": "Q5315238"}
+    allowed_domains = ["dunhamssports.com"]
+    start_urls = [
+        "https://www.dunhamssports.com/on/demandware.store/Sites-dunhamssports-Site/en_US/Stores-FindStores?showMap=true&radius=4000&lat=36.0711&long=-86.7196"
+    ]
 
     def parse(self, response):
-        for match in response.xpath("//markers/marker"):
-            fullAddress = (
-                match.xpath(".//@address").extract_first().replace("<br>", ", ")
-            )
-            addrString = fullAddress.split(",")[0].strip()
-            refString = addrString.replace(" ", "_")
+        for data in response.json().get("stores"):
+            oh = OpeningHours()
+            days = scrapy.selector.Selector(text=data.get("storeHours")).xpath("//tr")
+            for day in days:
+                oh.add_range(
+                    day=day.xpath("./td[1]/text()").get().strip(":"),
+                    open_time=day.xpath("./td[2]/text()").get().split(" to ")[0],
+                    close_time=day.xpath("./td[2]/text()").get().split(" to ")[1],
+                    time_format="%I:%H %p",
+                )
 
-            stateString = fullAddress.split(" ")[
-                len(fullAddress.split(" ")) - 2
-            ].strip()
-            postString = fullAddress.split(" ")[len(fullAddress.split(" ")) - 1].strip()
+            item = DictParser.parse(data)
+            item["opening_hours"] = oh.as_opening_hours()
+            item[
+                "website"
+            ] = f'https://www.dunhamssports.com/store-details?storeID={data.get("ID")}&city={data.get("city")}&state={data.get("stateCode")}'
 
-            if len(addrString.split(" - ")) > 1:
-                name = addrString.split(" - ")[0].strip()
-                addrString = addrString.split(" - ")[1].strip()
-
-            hoursMonString = self.store_hours(
-                match.xpath(".//@hours_mon").extract_first().strip()
-            )
-            hoursSatString = self.store_hours(
-                match.xpath(".//@hours_sat").extract_first().strip()
-            )
-            hoursSunString = self.store_hours(
-                match.xpath(".//@hours_sun").extract_first().strip()
-            )
-            allHours = (
-                "Mo-Fr "
-                + hoursMonString
-                + "; "
-                + "Sa "
-                + hoursSatString
-                + "; "
-                + "Su "
-                + hoursSunString
-            )
-
-            yield GeojsonPointItem(
-                ref=refString,
-                lat=float(match.xpath(".//@lat").extract_first().strip()),
-                lon=float(match.xpath(".//@lng").extract_first().strip()),
-                addr_full=addrString,
-                city=match.xpath(".//@city").extract_first().strip(),
-                state=stateString,
-                postcode=postString,
-                phone=match.xpath(".//@phone").extract_first().replace(" ", ""),
-                website=match.xpath(".//@permalink").extract_first().strip(),
-                opening_hours=allHours,
-                name=name,
-            )
+            yield item

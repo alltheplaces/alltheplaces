@@ -1,11 +1,12 @@
-import re
 import scrapy
-from locations.items import GeojsonPointItem
+
+from locations.items import Feature
+from locations.spiders.mcdonalds import McDonaldsSpider
 
 
 class McDonaldsSKSpider(scrapy.Spider):
     name = "mcdonalds_sk"
-    item_attributes = {"brand": "McDonald's", "brand_wikidata": "Q38076"}
+    item_attributes = McDonaldsSpider.item_attributes
     allowed_domains = ["www.mcdonalds.sk"]
 
     start_urls = ("https://www.mcdonalds.sk/wp-content/themes/mcdonaldscz/rests.php",)
@@ -80,4 +81,4 @@ class McDonaldsSKSpider(scrapy.Spider):
             if opening_hours:
                 properties["opening_hours"] = opening_hours
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

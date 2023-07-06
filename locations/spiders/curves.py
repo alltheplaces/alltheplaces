@@ -1,8 +1,8 @@
-# -*- coding: utf-8 -*-
-import scrapy
 import re
 
-from locations.items import GeojsonPointItem
+import scrapy
+
+from locations.items import Feature
 
 
 class CurvesSpider(scrapy.Spider):
@@ -25,7 +25,6 @@ class CurvesSpider(scrapy.Spider):
                 pass
 
     def parse_store(self, response):
-
         if response.xpath(
             '//div[@class="field field-name-field-franchise-club-hours field-type-text-long field-label-hidden"]/div/div'
         ).extract_first():
@@ -46,21 +45,11 @@ class CurvesSpider(scrapy.Spider):
         properties = {
             "name": response.xpath("//h1/text()").extract_first(),
             "ref": response.xpath("//h1/text()").extract_first(),
-            "addr_full": response.xpath(
-                '//div[@class="thoroughfare"]/text()'
-            ).extract_first(),
-            "city": response.xpath(
-                '//div[@class]/span[@class="locality"]/text()'
-            ).extract_first(),
-            "state": response.xpath(
-                '//div[@class]/span[@class="state"]/text()'
-            ).extract_first(),
-            "postcode": response.xpath(
-                '//span[@itemprop="postalCode"]/text()'
-            ).extract_first(),
-            "country": response.xpath(
-                '//span[@class="country"]/text()'
-            ).extract_first(),
+            "addr_full": response.xpath('//div[@class="thoroughfare"]/text()').extract_first(),
+            "city": response.xpath('//div[@class]/span[@class="locality"]/text()').extract_first(),
+            "state": response.xpath('//div[@class]/span[@class="state"]/text()').extract_first(),
+            "postcode": response.xpath('//span[@itemprop="postalCode"]/text()').extract_first(),
+            "country": response.xpath('//span[@class="country"]/text()').extract_first(),
             "phone": response.xpath(
                 '//div[@class="field field-name-field-franchise-phone field-type-telephone field-label-hidden"]/div/div[@class="field-item even"]/text()'
             ).extract_first(),
@@ -70,4 +59,4 @@ class CurvesSpider(scrapy.Spider):
             # 'lat': float(response.xpath('//head/script[9]').extract_first().split('"coordinates":[')[1].split(']')[0].split(',')[1]),
         }
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

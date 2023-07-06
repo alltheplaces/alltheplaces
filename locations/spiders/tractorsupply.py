@@ -1,8 +1,7 @@
-# -*- coding: utf-8 -*-
 import scrapy
 
-from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
+from locations.items import Feature
 
 DAYS_NAME = {
     "Monday": "Mo",
@@ -28,9 +27,7 @@ class TractorSupplySpider(scrapy.Spider):
     def start_requests(self):
         base_url = "https://www.tractorsupply.com/wcs/resources/store/10151/zipcode/fetchstoredetails?responseFormat=json&latitude={lat}&longitude={lng}"
 
-        with open(
-            "./locations/searchable_points/us_centroids_25mile_radius.csv"
-        ) as points:
+        with open("./locations/searchable_points/us_centroids_25mile_radius.csv") as points:
             for point in points:
                 _, lat, lon = point.strip().split(",")
                 url = base_url.format(lat=lat, lng=lon)
@@ -52,7 +49,7 @@ class TractorSupplySpider(scrapy.Spider):
                     close_time=close_time,
                     time_format="%I:%M %p",
                 )
-            except:
+            except Exception:
                 continue
 
         return opening_hours.as_opening_hours()
@@ -62,7 +59,6 @@ class TractorSupplySpider(scrapy.Spider):
         store_data = data["storesList"]
 
         for store in store_data:
-
             properties = {
                 "ref": store["stlocId"],
                 "name": store["storeName"],
@@ -79,4 +75,4 @@ class TractorSupplySpider(scrapy.Spider):
             if hours:
                 properties["opening_hours"] = hours
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

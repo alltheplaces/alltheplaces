@@ -1,8 +1,8 @@
-# -*- coding: utf-8 -*-
 import re
+
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class SinclairSpider(scrapy.Spider):
@@ -11,9 +11,7 @@ class SinclairSpider(scrapy.Spider):
     allowed_domains = ["www.sinclairoil.com"]
 
     def start_requests(self):
-        yield scrapy.Request(
-            "https://www.sinclairoil.com/location-feed", callback=self.add_locations
-        )
+        yield scrapy.Request("https://www.sinclairoil.com/location-feed", callback=self.add_locations)
 
     def add_locations(self, response):
         yield scrapy.Request(
@@ -26,19 +24,13 @@ class SinclairSpider(scrapy.Spider):
         yield scrapy.Request(
             "https://www.sinclairoil.com/gold-truck-stop-feed",
             callback=self.add_gold_truck_stops,
-            meta={
-                "locations": response.meta["locations"]
-                + self.parse_location_feed(response, "truck_stop")
-            },
+            meta={"locations": response.meta["locations"] + self.parse_location_feed(response, "truck_stop")},
         )
 
     def add_gold_truck_stops(self, response):
         yield scrapy.Request(
             "https://www.sinclairoil.com/customers/location-list?page=0",
-            meta={
-                "locations": response.meta["locations"]
-                + self.parse_location_feed(response, "truck_stop")
-            },
+            meta={"locations": response.meta["locations"] + self.parse_location_feed(response, "truck_stop")},
         )
 
     def parse_location_feed(self, feed_response, type):
@@ -72,18 +64,11 @@ class SinclairSpider(scrapy.Spider):
             postcode = row.css(".views-field-field-zip-code::text").get().strip()
             phone = row.css(".views-field-field-phone-number::text").get().strip()
 
-            self.logger.info(address)
-            self.logger.info(postcode)
-
-            lat = None
-            lon = None
             truck_stop = None
 
             try:
                 location = next(
-                    l
-                    for l in locations
-                    if (address in l["description"] and postcode in l["description"])
+                    loc for loc in locations if (address in loc["description"] and postcode in loc["description"])
                 )
 
                 truck_stop = location["type"] == "truck_stop"
@@ -97,7 +82,7 @@ class SinclairSpider(scrapy.Spider):
                 else:
                     continue
 
-            yield GeojsonPointItem(
+            yield Feature(
                 lon=lon,
                 lat=lat,
                 ref=phone,

@@ -1,15 +1,12 @@
-# -*- coding: utf-8 -*-
-import re
-
 import scrapy
 
-from locations.items import GeojsonPointItem
-from locations.hours import OpeningHours
+from locations.items import Feature
 
 
 class NespressoSpider(scrapy.Spider):
     name = "nespresso"
     allowed_domains = ["nespresso.com"]
+    item_attributes = {"brand": "Nespresso", "brand_wikidata": "Q301301"}
 
     def start_requests(self):
         countries = ["US", "CA", "FR", "NL", "GB", "DE", "CH", "IT", "ZA"]
@@ -26,9 +23,7 @@ class NespressoSpider(scrapy.Spider):
         for store in stores:
             properties = {
                 "ref": store["point_of_interest"]["point_of_interest_id"]["id"],
-                "name": store["point_of_interest"]["address"]["name"][
-                    "company_name_type"
-                ]["name"]["name"],
+                "name": store["point_of_interest"]["address"]["name"]["company_name_type"]["name"]["name"],
                 "addr_full": store["point_of_interest"]["address"]["address_line"],
                 "city": store["point_of_interest"]["address"]["city"]["name"],
                 "state": "",
@@ -39,4 +34,4 @@ class NespressoSpider(scrapy.Spider):
                 "phone": store["point_of_interest"]["phone"],
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

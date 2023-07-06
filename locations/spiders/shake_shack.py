@@ -1,8 +1,7 @@
-# -*- coding: utf-8 -*-
 import scrapy
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class ShakeShackSpider(scrapy.spiders.SitemapSpider):
@@ -40,4 +39,4 @@ class ShakeShackSpider(scrapy.spiders.SitemapSpider):
             "phone": response.css(".field--name-field-phone-number ::text").get(),
             "addr_full": addr_full,
         }
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

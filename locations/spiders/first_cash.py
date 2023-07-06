@@ -1,10 +1,6 @@
-# -*- coding: utf-8 -*-
-import re
-
 import scrapy
 
-from locations.items import GeojsonPointItem
-from locations.hours import OpeningHours
+from locations.items import Feature
 
 
 class FirstCashSpider(scrapy.Spider):
@@ -15,9 +11,7 @@ class FirstCashSpider(scrapy.Spider):
     def start_requests(self):
         base_url = "http://find.cashamerica.us/api/stores?p=1&s=100&lat={lat}&lng={lng}&d=2019-10-14T17:43:05.914Z&key=D21BFED01A40402BADC9B931165432CD"
 
-        with open(
-            "./locations/searchable_points/us_centroids_100mile_radius.csv"
-        ) as points:
+        with open("./locations/searchable_points/us_centroids_100mile_radius.csv") as points:
             next(points)
             for point in points:
                 _, lat, lon = point.strip().split(",")
@@ -31,7 +25,7 @@ class FirstCashSpider(scrapy.Spider):
             properties = {
                 "ref": place["storeNumber"],
                 "name": place["shortName"],
-                "addr_full": place["address"]["address1"],
+                "street_address": place["address"]["address1"],
                 "city": place["address"]["city"],
                 "state": place["address"]["state"],
                 "postcode": place["address"]["zipCode"],
@@ -42,4 +36,4 @@ class FirstCashSpider(scrapy.Spider):
                 "brand": place["brand"].split(" #")[0],
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

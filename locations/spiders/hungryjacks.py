@@ -1,9 +1,6 @@
-# -*- coding: utf-8 -*-
-import re
-
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class HungryJacksSpider(scrapy.Spider):
@@ -21,7 +18,7 @@ class HungryJacksSpider(scrapy.Spider):
             properties = {
                 "ref": i["store_id"],
                 "name": i["name"],
-                "addr_full": i["location"]["address"],
+                "street_address": i["location"]["address"],
                 "city": i["location"]["suburb"],
                 "state": i["location"]["state"],
                 "postcode": i["location"]["postcode"],
@@ -31,4 +28,4 @@ class HungryJacksSpider(scrapy.Spider):
                 "lon": i["location"]["long"],
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

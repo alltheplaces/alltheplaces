@@ -1,12 +1,10 @@
-# -*- coding: utf-8 -*-
-from scrapy.spiders import SitemapSpider
-from scrapy.downloadermiddlewares.retry import get_retry_request
-
-import re
 import json
 
+from scrapy.downloadermiddlewares.retry import get_retry_request
+from scrapy.spiders import SitemapSpider
+
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class DillardsSpider(SitemapSpider):
@@ -22,17 +20,11 @@ class DillardsSpider(SitemapSpider):
         if "Access Denied" in response.text:
             return get_retry_request(response.request, spider=self, reason="throttle")
 
-        ldjson = response.xpath(
-            '//script[@type="application/ld+json"]/text()[contains(.,"DepartmentStore")]'
-        ).get()
+        ldjson = response.xpath('//script[@type="application/ld+json"]/text()[contains(.,"DepartmentStore")]').get()
         data = json.loads(ldjson)
 
-        script = response.xpath(
-            '//script/text()[contains(.,"__INITIAL_STATE__")]'
-        ).get()
-        script_data = json.decoder.JSONDecoder().raw_decode(script, script.index("{"))[
-            0
-        ]
+        script = response.xpath('//script/text()[contains(.,"__INITIAL_STATE__")]').get()
+        script_data = json.decoder.JSONDecoder().raw_decode(script, script.index("{"))[0]
         lat = script_data["contentData"]["store"]["latitude"]
         lon = script_data["contentData"]["store"]["longitude"]
 
@@ -54,4 +46,4 @@ class DillardsSpider(SitemapSpider):
             "postcode": data["address"]["postalCode"],
             "opening_hours": hours.as_opening_hours(),
         }
-        return GeojsonPointItem(**properties)
+        return Feature(**properties)

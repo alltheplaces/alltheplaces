@@ -1,8 +1,9 @@
-# -*- coding: utf-8 -*-
-import scrapy
-from locations.items import GeojsonPointItem
 import json
+
+import scrapy
 from parsel import Selector
+
+from locations.items import Feature
 
 
 class CoopersHawkSpider(scrapy.Spider):
@@ -20,12 +21,12 @@ class CoopersHawkSpider(scrapy.Spider):
             city_name, extra = address_lines[1].strip().split(", ")
             state, postcode = extra.split(" ")
 
-            yield GeojsonPointItem(
+            yield Feature(
                 lat=marker["locations"][0]["lat"],
                 lon=marker["locations"][0]["lng"],
                 ref=marker["locations"][0]["id"].split("-")[0],
                 name=content.css(".location-capsule__heading::text").get().strip(),
-                addr_full=address_lines[0].strip(),
+                street_address=address_lines[0].strip(),
                 city=city_name,
                 state=state,
                 postcode=postcode,

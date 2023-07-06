@@ -1,8 +1,8 @@
-# -*- coding: utf-8 -*-
 import re
+
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class RoyalFarmsSpider(scrapy.Spider):
@@ -40,14 +40,10 @@ class RoyalFarmsSpider(scrapy.Spider):
             store_number = store.xpath("./strong/text()").re_first(r"STORE #(\d+)")
             self.logger.warn(store_number)
             addr_parts = store.xpath("./text()").extract()
-            addr_parts = list(
-                filter(None, [x.replace("\xa0", " ").strip() for x in addr_parts])
-            )
+            addr_parts = list(filter(None, [x.replace("\xa0", " ").strip() for x in addr_parts]))
             phone = addr_parts.pop(-1)
             last_line = addr_parts.pop(-1)
-            city, state, postal = re.search(
-                r"(.+?), ([A-Z]{2}) (\d{5})", last_line
-            ).groups()
+            city, state, postal = re.search(r"(.+?), ([A-Z]{2}) (\d{5})", last_line).groups()
             address = " ".join(addr_parts)
 
             properties = {
@@ -60,18 +56,16 @@ class RoyalFarmsSpider(scrapy.Spider):
                 "phone": phone,
                 "opening_hours": "24/7" if hours and "24 Hours" in hours else None,
                 "extras": {
-                    "amenity:chargingstation": "uploads/icon_electricveh_charging.png"
-                    in amenities,
+                    "amenity:chargingstation": "uploads/icon_electricveh_charging.png" in amenities,
                     "amenity:fuel": "uploads/icon_gas.png" in amenities,
                     # This icon actually means that there's DEF in the fuel lanes,
                     # which is a good indicator that it also has diesel fuel.
                     # There's no direct icon for diesel fuel availability though,
                     # and I've some stations that have diesel don't have DEF.
                     "fuel:diesel": "uploads/icon_diesel.png" in amenities or None,
-                    "fuel:e15": "uploads/icon_ethanol15percent.png" in amenities
-                    or None,
+                    "fuel:e15": "uploads/icon_ethanol15percent.png" in amenities or None,
                     "fuel:e85": "uploads/icon_gas_flexfuel.png" in amenities or None,
                 },
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

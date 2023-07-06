@@ -1,9 +1,11 @@
-import json
 import re
+
+import geonamescache
 import scrapy
+from scrapy.http import JsonRequest
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 DAY_MAPPING = {
     "Sunday": "Su",
@@ -22,38 +24,11 @@ class FirehouseSubsSpider(scrapy.Spider):
     allowed_domains = ["firehousesubs.com"]
 
     def start_requests(self):
-        with open(
-            "./locations/searchable_points/us_centroids_25mile_radius.csv"
-        ) as points:
-            next(points)  # Ignore the header
-            for point in points:
-                row = point.split(",")
-                lat = row[1]
-                lon = row[2]
-
-                url = f"https://www.firehousesubs.com/FindLocations/GetNearbyLocations/?maxRecords=250&latitude={lat}&longitude={lon}"
-
-                headers = {
-                    "Accept": "application/json, text/javascript, */*; q=0.01",
-                    "Accept-Encoding": "gzip, deflate, br",
-                    "Accept-Language": "en-US,en;q=0.9",
-                    "Host": "www.firehousesubs.com",
-                    "Referer": "https://www.firehousesubs.com/find-a-firehouse/",
-                    "X-Requested-With": "XMLHttpRequest",
-                }
-
-                yield scrapy.http.Request(
-                    url, self.parse, method="GET", headers=headers
-                )
+        for state in geonamescache.GeonamesCache().get_us_states().keys() | ["PR"]:
+            yield JsonRequest(url=f"https://www.firehousesubs.com/FindLocations/GetLocationsByState/?state={state}")
 
     def parse(self, response):
-        body = response.text
-        if body is None:
-            return
-
-        result = json.loads(body)
-
-        for store_json_data in result:
+        for store_json_data in response.json():
             addr_full = None
             address = store_json_data.get("address")
             address2 = store_json_data.get("address2")
@@ -70,7 +45,7 @@ class FirehouseSubsSpider(scrapy.Spider):
                 # So use it instead.
                 "ref": store_json_data.get("id"),
                 "name": store_json_data.get("title"),
-                "addr_full": addr_full,
+                "street_address": addr_full,
                 "city": store_json_data.get("city"),
                 "state": store_json_data.get("state"),
                 "postcode": store_json_data.get("zip"),
@@ -90,7 +65,7 @@ class FirehouseSubsSpider(scrapy.Spider):
                     cb_kwargs={"properties": properties},
                 )
             else:
-                yield GeojsonPointItem(**properties)
+                yield Feature(**properties)
 
     def add_hours(self, response, properties):
         opening_hours = OpeningHours()
@@ -110,9 +85,7 @@ class FirehouseSubsSpider(scrapy.Spider):
             # Note:
             # - Whitespace is inconsistent
             # - Some stores may have extra information after; e.g., "10:30am - 9:00pm (drive-thru opens 9:30)"
-            regex = re.compile(
-                r"^\s*(\d{1,2}:\d{2}\s*[a|p]m)\s*-\s*(\d{1,2}:\d{2}\s*[a|p]m)"
-            )
+            regex = re.compile(r"^\s*(\d{1,2}:\d{2}\s*[a|p]m)\s*-\s*(\d{1,2}:\d{2}\s*[a|p]m)")
             match = re.search(regex, times)
             if not match or len(match.groups()) != 2:
                 continue
@@ -124,9 +97,7 @@ class FirehouseSubsSpider(scrapy.Spider):
             open_time = open_time.replace(" ", "")
             close_time = close_time.replace(" ", "")
 
-            opening_hours.add_range(
-                DAY_MAPPING[day], open_time, close_time, time_format="%I:%M%p"
-            )
+            opening_hours.add_range(DAY_MAPPING[day], open_time, close_time, time_format="%I:%M%p")
 
         properties["opening_hours"] = opening_hours.as_opening_hours()
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

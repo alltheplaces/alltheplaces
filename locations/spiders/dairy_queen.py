@@ -1,9 +1,6 @@
-# -*- coding: utf-8 -*-
-import re
-
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class DairyQueenSpider(scrapy.Spider):
@@ -27,12 +24,11 @@ class DairyQueenSpider(scrapy.Spider):
         data = response.json()
 
         for store in data["contentlets"]:
-
             lat, lon = store.get("latlong", ",").split(",", 2)
 
             properties = {
                 "name": f'{store["address1"]} ({store["conceptType"]})',
-                "addr_full": store.get("address3"),
+                "street_address": store.get("address3"),
                 "phone": store.get("phone"),
                 "city": store.get("city"),
                 "state": store.get("stateProvince"),
@@ -44,4 +40,4 @@ class DairyQueenSpider(scrapy.Spider):
                 "lon": lon,
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

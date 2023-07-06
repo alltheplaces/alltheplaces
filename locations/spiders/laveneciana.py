@@ -1,6 +1,8 @@
-import scrapy
 import re
-from locations.items import GeojsonPointItem
+
+import scrapy
+
+from locations.items import Feature
 
 
 class LavenecianaSpider(scrapy.Spider):
@@ -45,4 +47,4 @@ class LavenecianaSpider(scrapy.Spider):
                     "lat": lat,
                     "lon": lon,
                 }
-                yield GeojsonPointItem(**properties)
+                yield Feature(**properties)

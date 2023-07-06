@@ -1,9 +1,8 @@
-# -*- coding: utf-8 -*-
 import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class MyEyeDrSpider(scrapy.Spider):
@@ -32,34 +31,18 @@ class MyEyeDrSpider(scrapy.Spider):
 
         properties = {
             "ref": ref,
-            "name": "".join(
-                response.xpath('//h1[@class="Hero-title"]//text()').extract()
-            ),
-            "addr_full": response.xpath(
-                'normalize-space(//span[@class="c-address-street-1"]//text())'
-            ).extract_first(),
-            "city": response.xpath(
-                'normalize-space(//span[@class="c-address-city"]//text())'
-            ).extract_first(),
-            "state": response.xpath(
-                'normalize-space(//abbr[@class="c-address-state"]//text())'
-            ).extract_first(),
+            "name": "".join(response.xpath('//h1[@class="Hero-title"]//text()').extract()),
+            "addr_full": response.xpath('normalize-space(//span[@class="c-address-street-1"]//text())').extract_first(),
+            "city": response.xpath('normalize-space(//span[@class="c-address-city"]//text())').extract_first(),
+            "state": response.xpath('normalize-space(//abbr[@class="c-address-state"]//text())').extract_first(),
             "postcode": response.xpath(
                 'normalize-space(//span[@class="c-address-postal-code"]//text())'
             ).extract_first(),
-            "country": response.xpath(
-                'normalize-space(//abbr[@itemprop="addressCountry"]//text())'
-            ).extract_first(),
-            "phone": response.xpath(
-                'normalize-space(//div[@itemprop="telephone"]//text())'
-            ).extract_first(),
+            "country": response.xpath('normalize-space(//abbr[@itemprop="addressCountry"]//text())').extract_first(),
+            "phone": response.xpath('normalize-space(//div[@itemprop="telephone"]//text())').extract_first(),
             "website": response.url,
-            "lat": response.xpath(
-                'normalize-space(//meta[@itemprop="latitude"]/@content)'
-            ).extract_first(),
-            "lon": response.xpath(
-                'normalize-space(//meta[@itemprop="longitude"]/@content)'
-            ).extract_first(),
+            "lat": response.xpath('normalize-space(//meta[@itemprop="latitude"]/@content)').extract_first(),
+            "lon": response.xpath('normalize-space(//meta[@itemprop="longitude"]/@content)').extract_first(),
         }
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

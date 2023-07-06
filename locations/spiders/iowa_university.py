@@ -1,8 +1,8 @@
-# -*- coding: utf-8 -*-
-import scrapy
 import json
-from locations.items import GeojsonPointItem
-from locations.hours import OpeningHours
+
+import scrapy
+
+from locations.items import Feature
 
 DAYS = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"]
 
@@ -43,7 +43,7 @@ class IowaUniversitySpider(scrapy.Spider):
             properties = {
                 "ref": store["objectID"],
                 "name": store["title"],
-                "addr_full": store["field_address:thoroughfare"],
+                "street_address": store["field_address:thoroughfare"],
                 "city": store["field_address:locality"],
                 "state": store["field_address:administrative_area"],
                 "postcode": store["field_address:postal_code"],
@@ -54,7 +54,7 @@ class IowaUniversitySpider(scrapy.Spider):
                 "website": store["url"],
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)
 
         if stores["page"] < stores["nbPages"]:
             yield self._prepare_request(int(stores["page"]) + 1)

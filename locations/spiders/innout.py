@@ -1,6 +1,6 @@
-# -*- coding: utf-8 -*-
 import scrapy
-from locations.items import GeojsonPointItem
+
+from locations.items import Feature
 
 
 class InNOutSpider(scrapy.Spider):
@@ -29,7 +29,7 @@ class InNOutSpider(scrapy.Spider):
 
             properties = {
                 "name": name,
-                "addr_full": addr_full,
+                "street_address": addr_full,
                 "city": city,
                 "state": state,
                 "postcode": zipcode,
@@ -39,4 +39,4 @@ class InNOutSpider(scrapy.Spider):
                 "lat": float(lat),
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

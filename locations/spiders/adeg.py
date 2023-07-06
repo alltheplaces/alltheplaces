@@ -1,10 +1,7 @@
-# -*- coding: utf-8 -*-
-import re
-
 import scrapy
 
-from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
+from locations.items import Feature
 
 wochentag = {
     "Mo": "Mo",
@@ -43,9 +40,7 @@ class AdegSpider(scrapy.Spider):
             oh = OpeningHours()
             for row in scrapy.Selector(text=store["openingHours"]).xpath(".//dt"):
                 day = wochentag[row.xpath("normalize-space()").get().removesuffix(":")]
-                for interval in row.xpath(
-                    "./following-sibling::dd[position()=1]/span/text()"
-                ).extract():
+                for interval in row.xpath("./following-sibling::dd[position()=1]/span/text()").extract():
                     open_time, close_time = interval.strip(",").split(" \u2013 ")
                     if (open_time, close_time) == ("", ""):
                         continue
@@ -64,4 +59,4 @@ class AdegSpider(scrapy.Spider):
                 "website": response.urljoin(store["url"]),
                 "opening_hours": oh.as_opening_hours(),
             }
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

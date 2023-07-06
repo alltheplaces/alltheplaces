@@ -2,7 +2,7 @@ import json
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class PrimroseSchoolsSpider(scrapy.Spider):
@@ -13,9 +13,7 @@ class PrimroseSchoolsSpider(scrapy.Spider):
     start_urls = ["https://www.primroseschools.com/find-a-school/"]
 
     def parse(self, response):
-        with open(
-            "./locations/searchable_points/us_centroids_50mile_radius.csv"
-        ) as points:
+        with open("./locations/searchable_points/us_centroids_50mile_radius.csv") as points:
             next(points)
             for point in points:
                 row = point.replace("\n", "").split(",")
@@ -24,9 +22,7 @@ class PrimroseSchoolsSpider(scrapy.Spider):
                 searchurl = "https://www.primroseschools.com/find-a-school/?search_string=USA&latitude={la}&longitude={lo}".format(
                     la=lati, lo=long
                 )
-                yield scrapy.Request(
-                    response.urljoin(searchurl), callback=self.parse_search
-                )
+                yield scrapy.Request(response.urljoin(searchurl), callback=self.parse_search)
 
     def parse_search(self, response):
         content = response.xpath('//script[@type="application/json"]/text()').get()
@@ -38,9 +34,7 @@ class PrimroseSchoolsSpider(scrapy.Spider):
             if i["address_1"]:
                 properties = {
                     "name": i["name"],
-                    "street_address": ", ".join(
-                        filter(None, [i["address_1"], i["address_2"]])
-                    ),
+                    "street_address": ", ".join(filter(None, [i["address_1"], i["address_2"]])),
                     "city": i["city"],
                     "state": i["state"],
                     "postcode": i["zip_code"],
@@ -50,4 +44,4 @@ class PrimroseSchoolsSpider(scrapy.Spider):
                     "lat": float(i["latitude"]),
                     "lon": float(i["longitude"]),
                 }
-                yield GeojsonPointItem(**properties)
+                yield Feature(**properties)

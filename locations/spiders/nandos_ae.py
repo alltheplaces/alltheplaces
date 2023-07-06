@@ -1,52 +1,19 @@
-# -*- coding: utf-8 -*-
-import json
-import re
+from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule
 
-import scrapy
+from locations.spiders.nandos import NandosSpider
+from locations.spiders.vapestore_gb import clean_address
+from locations.structured_data_spider import StructuredDataSpider
 
-from locations.items import GeojsonPointItem
 
-
-class NandosAESpider(scrapy.Spider):
+class NandosAESpider(CrawlSpider, StructuredDataSpider):
     name = "nandos_ae"
-    item_attributes = {"brand": "Nando's", "brand_wikidata": "Q3472954"}
-    allowed_domains = ["www.nandos.ae"]
-    start_urls = [
-        "https://www.nandos.ae/eat/restaurants-all",
-    ]
-    download_delay = 0.3
+    item_attributes = NandosSpider.item_attributes
+    start_urls = ["https://www.nandos.ae/eat/restaurants-all"]
+    rules = [Rule(LinkExtractor(allow=r"/eat/restaurant/"), callback="parse_sd")]
 
-    def parse(self, response):
-        urls = response.xpath(
-            '//ul[@class="row row-fixed-cols list-unstyled restaurant-list"]/li/a/@href'
-        ).extract()
+    def post_process_item(self, item, response, ld_data, **kwargs):
+        item["website"] = response.url
+        item["addr_full"] = clean_address(item.pop("street_address"))
 
-        for url in urls:
-            yield scrapy.Request(
-                url=response.urljoin(url.strip()), callback=self.parse_store
-            )
-
-    def parse_store(self, response):
-        data = response.xpath(
-            '//script[@type="application/ld+json" and contains(text(), "address")]/text()'
-        ).extract_first()
-
-        if data:
-            store_data = json.loads(data)
-            ref = re.search(r".+/(.+?)/?(?:\.html|$)", response.url).group(1)
-
-            properties = {
-                "name": store_data["name"],
-                "ref": ref,
-                "addr_full": store_data["address"]["streetAddress"],
-                "city": store_data["address"]["addressLocality"],
-                "state": store_data["address"]["addressRegion"],
-                "postcode": store_data["address"]["postalCode"],
-                "phone": store_data["contactPoint"][0].get("telephone"),
-                "website": response.url,
-                "country": "AE",
-                "lat": store_data["geo"]["latitude"],
-                "lon": store_data["geo"]["longitude"],
-            }
-
-            yield GeojsonPointItem(**properties)
+        yield item

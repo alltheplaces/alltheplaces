@@ -1,8 +1,9 @@
-# -*- coding: utf-8 -*-
 import json
+
 import scrapy
+
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class MarksAndSpencerSpider(scrapy.Spider):
@@ -14,9 +15,7 @@ class MarksAndSpencerSpider(scrapy.Spider):
 
     def parse(self, response):
         config = json.loads(response.text.replace("STORE_FINDER_CONFIG=", ""))
-        stores_api_url = (
-            f"{config['storeFinderAPIBaseURL']}?apikey={config['apiConsumerKey']}"
-        )
+        stores_api_url = f"{config['storeFinderAPIBaseURL']}?apikey={config['apiConsumerKey']}"
         yield response.follow(stores_api_url, self.parse_stores)
 
     def parse_stores(self, response):
@@ -52,7 +51,7 @@ class MarksAndSpencerSpider(scrapy.Spider):
             elif name.endswith("outlet"):
                 properties["brand"] = "M&S Outlet"
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)
 
     def get_opening_hours(self, store):
         o = OpeningHours()

@@ -1,7 +1,8 @@
-# -*- coding: utf-8 -*-
-import scrapy
 import re
-from locations.items import GeojsonPointItem
+
+import scrapy
+
+from locations.items import Feature
 
 
 class DifferentHours(Exception):
@@ -21,15 +22,7 @@ class PremierurgentcareSpider(scrapy.Spider):
         jsonresponse = response.json()
 
         for store in jsonresponse:
-            addr_full = (
-                store["address"]
-                + ", "
-                + store["city"]
-                + " "
-                + store["state"]
-                + " "
-                + store["zip"]
-            )
+            addr_full = store["address"] + ", " + store["city"] + " " + store["state"] + " " + store["zip"]
             datestring = store["hours"]
             hour_match = re.findall(r"(\d{1,2}:\d{1,2})", datestring)
 
@@ -37,9 +30,7 @@ class PremierurgentcareSpider(scrapy.Spider):
                 if hour == "9:00":
                     pass
                 else:
-                    raise DifferentHours(
-                        "Store added with different hours than 09:00-21:00"
-                    )
+                    raise DifferentHours("Store added with different hours than 09:00-21:00")
 
             properties = {
                 "name": store["store"],
@@ -57,4 +48,4 @@ class PremierurgentcareSpider(scrapy.Spider):
                 "lon": float(store["lng"]),
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

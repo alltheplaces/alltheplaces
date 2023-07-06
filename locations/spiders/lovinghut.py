@@ -1,41 +1,33 @@
-# -*- coding: utf-8 -*-
-import scrapy
 import re
 
-from locations.items import GeojsonPointItem
+import scrapy
+
+from locations.items import Feature
 
 
 class LovinghutSpider(scrapy.Spider):
     name = "lovinghut"
-    item_attributes = {"brand": "Loving Hut"}
+    item_attributes = {"brand": "Loving Hut", "brand_wikidata": "Q3491655"}
     allowed_domains = ["lovinghut.us"]
     start_urls = ("http://lovinghut.us/locations",)
 
     def normalize_time(self, time_str):
-        match = re.search(
-            "(.*) (am|a.m|pm|noon|p.m) \u2013 (.*) (am|a.m||pm|noon|p.m)", time_str
-        )
+        match = re.search("(.*) (am|a.m|pm|noon|p.m) \u2013 (.*) (am|a.m||pm|noon|p.m)", time_str)
         h1, am_pm1, h2, am_pm2 = match.groups()
         h1 = h1.split(":")
         h2 = h2.split(":")
 
         return "%02d:%02d-%02d:%02d" % (
-            int(h1[0]) + 12
-            if am_pm1 == "pm" or am_pm1 == "noon" or am_pm1 == "p.m"
-            else int(h1[0]),
+            int(h1[0]) + 12 if am_pm1 == "pm" or am_pm1 == "noon" or am_pm1 == "p.m" else int(h1[0]),
             int(h1[1]) if len(h1) > 1 else 0,
-            int(h2[0]) + 12
-            if am_pm2 == "pm" or am_pm2 == "noon" or am_pm2 == "p.m"
-            else int(h2[0]),
+            int(h2[0]) + 12 if am_pm2 == "pm" or am_pm2 == "noon" or am_pm2 == "p.m" else int(h2[0]),
             int(h2[1]) if len(h2) > 1 else 0,
         )
 
     def parse(self, response):
         stores = response.xpath('//td[@class="tg-citi"]')
         full_addresses = response.xpath('//td[@class="tg-addr"]/text()').extract()
-        phones = response.xpath(
-            '//tr[contains(@style, "padding-bottom:10px")]/td[1]//a//text()'
-        ).extract()
+        phones = response.xpath('//tr[contains(@style, "padding-bottom:10px")]/td[1]//a//text()').extract()
         index = 0
         for store in stores:
             store_url = store.xpath("a/@href")[0].extract()
@@ -57,9 +49,7 @@ class LovinghutSpider(scrapy.Spider):
 
             index += 1
 
-            yield scrapy.Request(
-                store_url, meta={"product": props}, callback=self.parse_detail_product
-            )
+            yield scrapy.Request(store_url, meta={"product": props}, callback=self.parse_detail_product)
 
     def parse_detail_product(self, response):
         tr_days = response.xpath('//table[@class="hours"]//tr')
@@ -108,7 +98,7 @@ class LovinghutSpider(scrapy.Spider):
 
         product["opening_hours"] = opening_hours
 
-        yield GeojsonPointItem(**product)
+        yield Feature(**product)
 
     def _clean_text(self, text):
         return re.sub("[\r\n\t]", "", text).strip()

@@ -1,11 +1,10 @@
-# -*- coding: utf-8 -*-
 import csv
 import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
-from locations.hours import OpeningHours
+from locations.categories import Categories, apply_category
+from locations.items import Feature
 
 
 class StarbucksEUSpider(scrapy.Spider):
@@ -14,13 +13,9 @@ class StarbucksEUSpider(scrapy.Spider):
     allowed_domains = ["starbucks.co.uk"]
 
     def start_requests(self):
-        base_url = (
-            "https://www.starbucks.co.uk/api/v1/store-finder?latLng={lat}%2C{lon}"
-        )
+        base_url = "https://www.starbucks.co.uk/api/v1/store-finder?latLng={lat}%2C{lon}"
 
-        with open(
-            "./locations/searchable_points/eu_centroids_20km_radius_country.csv"
-        ) as points:
+        with open("./locations/searchable_points/eu_centroids_20km_radius_country.csv") as points:
             reader = csv.DictReader(points)
             for point in reader:
                 yield scrapy.http.Request(
@@ -82,4 +77,6 @@ class StarbucksEUSpider(scrapy.Spider):
                 },
             }
 
-            yield GeojsonPointItem(**properties)
+            apply_category(Categories.COFFEE_SHOP, properties)
+
+            yield Feature(**properties)

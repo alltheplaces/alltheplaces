@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
 import scrapy
 
-from locations.items import GeojsonPointItem
-
+from locations.items import Feature
 
 POSTALS = [
     "26601",
@@ -69,11 +67,7 @@ class DishSpider(scrapy.Spider):
 
     def parse(self, response):
         for postal in POSTALS:
-            url = (
-                "https://www.dish.com/find-retailer/getretailershandler.ashx?Zip="
-                + postal
-                + "&Miles=1000"
-            )
+            url = "https://www.dish.com/find-retailer/getretailershandler.ashx?Zip=" + postal + "&Miles=1000"
 
             yield scrapy.http.FormRequest(
                 url,
@@ -85,7 +79,6 @@ class DishSpider(scrapy.Spider):
         store_data = response.json()
 
         for store in store_data:
-
             properties = {
                 "ref": store["address"],
                 "addr_full": store["address"],
@@ -94,4 +87,4 @@ class DishSpider(scrapy.Spider):
                 "name": store["storename"],
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

@@ -14,7 +14,6 @@ class FestivalFoodsSpider(Spider):
 
     def parse(self, response):
         for store in response.json()["items"]:
-
             # Other types are not stores
             if store["type_id"] != "1567647":
                 continue

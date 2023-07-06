@@ -1,10 +1,6 @@
-# -*- coding: utf-8 -*-
-import re
-
 import scrapy
 
-from locations.items import GeojsonPointItem
-from locations.hours import OpeningHours
+from locations.items import Feature
 
 
 class ErnstYoungSpider(scrapy.Spider):
@@ -27,16 +23,13 @@ class ErnstYoungSpider(scrapy.Spider):
             "lon": float(office["officeLongitude"]),
         }
         if office["officeAddress"]:
-            properties["addr_full"] = (
-                office["officeAddress"].strip().replace("\r\n", " ")
-            )
+            properties["addr_full"] = office["officeAddress"].strip().replace("\r\n", " ")
         return properties
 
     def parse(self, response):
         data = response.json()
 
         for country in data["countries"]:
-
             for state in country["states"]:
                 state_abbr = state["stateAbbreviation"]
                 for city in state["cities"]:
@@ -44,11 +37,10 @@ class ErnstYoungSpider(scrapy.Spider):
                         properties = self.parse_office(office)
                         properties["state"] = state_abbr
                         properties["website"] = response.urljoin(office["href"])
-                        yield GeojsonPointItem(**properties)
+                        yield Feature(**properties)
 
             for city in country["cities"]:
-
                 for office in city["offices"]:
                     properties = self.parse_office(office)
                     properties["website"] = response.urljoin(office["href"])
-                    yield GeojsonPointItem(**properties)
+                    yield Feature(**properties)

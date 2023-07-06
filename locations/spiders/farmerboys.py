@@ -1,11 +1,10 @@
-# -*- coding: utf-8 -*-
 import json
 import re
 
 import scrapy
 
-from locations.hours import OpeningHours, sanitise_day, day_range
-from locations.items import GeojsonPointItem
+from locations.hours import OpeningHours, day_range, sanitise_day
+from locations.items import Feature
 
 
 class FarmerBoys(scrapy.Spider):
@@ -15,10 +14,8 @@ class FarmerBoys(scrapy.Spider):
     start_urls = ["https://www.farmerboys.com/locations/"]
 
     def parse(self, response):
-        locations_js = response.xpath(
-            '//script[contains(text(), "initMap")]/text()'
-        ).extract_first()
-        locations = re.findall("var\s+locations\s*=\s*(\[.*\]);", locations_js)[0]
+        locations_js = response.xpath('//script[contains(text(), "initMap")]/text()').extract_first()
+        locations = re.findall(r"var\s+locations\s*=\s*(\[.*\]);", locations_js)[0]
         locations = json.loads(locations)
         for location in locations:
             properties = {
@@ -32,8 +29,7 @@ class FarmerBoys(scrapy.Spider):
                 "phone": location["phone"],
                 "website": "https://www.farmerboys.com/locations/location-detail.php?loc="
                 + location["location_url"].strip(),
-                "image": "https://www.farmerboys.com/images/locations/"
-                + location["location_pic"].strip()
+                "image": "https://www.farmerboys.com/images/locations/" + location["location_pic"].strip()
                 if location["location_pic"]
                 else None,
                 "lat": float(location["lat"]) if location["lat"] else None,
@@ -63,4 +59,4 @@ class FarmerBoys(scrapy.Spider):
 
             properties["opening_hours"] = oh.as_opening_hours()
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

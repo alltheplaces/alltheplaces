@@ -1,11 +1,10 @@
-# -*- coding: utf-8 -*-
 import json
 import math
 
 import scrapy
 from scrapy.downloadermiddlewares.retry import get_retry_request
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class WorldcatSpider(scrapy.Spider):
@@ -28,9 +27,7 @@ class WorldcatSpider(scrapy.Spider):
         )
 
     def parse_search_page(self, response):
-        total_records = int(
-            response.xpath("//script/text()").re_first(r"var totalRecords = '(\d+)'")
-        )
+        total_records = int(response.xpath("//script/text()").re_first(r"var totalRecords = '(\d+)'"))
         total_pages = math.ceil(total_records / 10)
         for i in range(1, total_pages + 1):
             yield self.get_page(i)
@@ -51,9 +48,7 @@ class WorldcatSpider(scrapy.Spider):
 
     def parse_library(self, response):
         script = response.xpath('//script/text()[contains(., "var JSON_Obj")]').get()
-        data = json.decoder.JSONDecoder().raw_decode(
-            script, script.index("{", script.index("var JSON_Obj"))
-        )[0]
+        data = json.decoder.JSONDecoder().raw_decode(script, script.index("{", script.index("var JSON_Obj")))[0]
 
         if "addresses" not in data:
             # No physical description, possibly related to another institution but that
@@ -61,11 +56,7 @@ class WorldcatSpider(scrapy.Spider):
             return
 
         geo_address = next(
-            (
-                addr
-                for addr in data["addresses"]
-                if {"latitude", "longitude"} <= addr.keys()
-            ),
+            (addr for addr in data["addresses"] if {"latitude", "longitude"} <= addr.keys()),
             {},
         )
 
@@ -75,9 +66,7 @@ class WorldcatSpider(scrapy.Spider):
 
         # We have coordinates, all other data should be optional
 
-        street_address = next(
-            (addr for addr in data["addresses"] if {"city"} <= addr.keys()), {}
-        )
+        street_address = next((addr for addr in data["addresses"] if {"city"} <= addr.keys()), {})
 
         properties = {
             "ref": response.url,
@@ -93,4 +82,4 @@ class WorldcatSpider(scrapy.Spider):
             "postcode": street_address.get("postalCode"),
             "country": street_address.get("countryDescription"),
         }
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

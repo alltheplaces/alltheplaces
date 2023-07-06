@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
 import json
 
 import scrapy
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class MicroCenterSpider(scrapy.Spider):
@@ -14,15 +13,11 @@ class MicroCenterSpider(scrapy.Spider):
     start_urls = ("https://www.microcenter.com/site/stores/default.aspx",)
 
     def parse(self, response):
-        for url in response.xpath(
-            '//div[@class="location-container"]//a/@href'
-        ).extract():
+        for url in response.xpath('//div[@class="location-container"]//a/@href').extract():
             yield scrapy.Request(response.urljoin(url), callback=self.parse_store)
 
     def parse_store(self, response):
-        for ldjson in response.xpath(
-            '//script[@type="application/ld+json"]/text()'
-        ).extract():
+        for ldjson in response.xpath('//script[@type="application/ld+json"]/text()').extract():
             data = json.loads(ldjson)
             if data["@type"] == "ComputerStore":
                 break
@@ -51,4 +46,4 @@ class MicroCenterSpider(scrapy.Spider):
             "opening_hours": opening_hours.as_opening_hours(),
         }
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

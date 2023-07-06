@@ -1,13 +1,14 @@
 import html
 import re
+
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class AnthonysSpider(scrapy.Spider):
     name = "anthonys"
-    item_attributes = {"brand": "Anthony's Coal Fired Pizza", "country": "US"}
+    item_attributes = {"brand": "Anthony's Coal Fired Pizza", "brand_wikidata": "Q117536208", "country": "US"}
     allowed_domains = ["wp.acfp.com"]
     start_urls = ["https://wp.acfp.com/wp-json/wp/v2/locations?per_page=100"]
 
@@ -17,7 +18,7 @@ class AnthonysSpider(scrapy.Spider):
                 r"<p>(\d+) ([-. \w]+)<\/p>\n<p>([ \w]+), (\w{2}) (\d+)<\/p>",
                 store["acf"]["page"]["info"]["address"],
             )
-            item = GeojsonPointItem(
+            item = Feature(
                 {
                     "lat": store["acf"]["coords"]["latitude"],
                     "lon": store["acf"]["coords"]["longitude"],

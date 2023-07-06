@@ -1,40 +1,35 @@
-# -*- coding: utf-8 -*-
-import scrapy
+import geonamescache
+from scrapy import Spider
+from scrapy.http import JsonRequest
 
-from locations.items import GeojsonPointItem
+from locations.dict_parser import DictParser
 
 
-class EnterpriseSpider(scrapy.Spider):
+class EnterpriseSpider(Spider):
     name = "enterprise"
     item_attributes = {"brand": "Enterprise Rent-A-Car", "brand_wikidata": "Q17085454"}
-    allowed_domains = ["www.enterprise.com"]
-    start_urls = ("https://www.enterprise.com/en/car-rental/locations.html",)
+    allowed_domains = ["prd.location.enterprise.com", "int1.location.enterprise.com"]
 
-    def parse(self, response):
-        for u in response.xpath('//div[@class="cf"]/ul/li/a/@href').extract():
-            if u.startswith("/en/car-rental/locations"):
-                country = u.rsplit("/", 1)[1].rsplit(".", 1)[0]
-                yield scrapy.Request(
-                    "https://www.enterprise.com/en/car-rental/locations/%s/_jcr_content.mapdata.js"
-                    % country,
-                    callback=self.parse_country,
+    def start_requests(self):
+        gc = geonamescache.GeonamesCache()
+        countries = gc.get_countries()
+        for country_code in countries.keys():
+            # It appears that countries are sharded between two
+            # servers. Other servers are int2, xqa1, xqa2, xqa3
+            # but search of these servers reveals no additional
+            # locations on top of just prd and int1.
+            for subdomain in ["prd", "int1"]:
+                yield JsonRequest(
+                    url=f"https://{subdomain}.location.enterprise.com/enterprise-sls/search/location/enterprise/web/country/{country_code}"
                 )
 
-    def parse_country(self, response):
-        data = response.json()
-        if data:
-            for d in data:
-                properties = {
-                    "name": d.get("name"),
-                    "phone": d.get("formatted_phone"),
-                    "website": d.get("url"),
-                    "addr_full": " ".join(d.get("address_lines") or []),
-                    "city": d.get("city"),
-                    "state": d.get("state"),
-                    "postcode": d.get("postal_code"),
-                    "country": d.get("country_code"),
-                    "lat": d.get("latitude"),
-                    "lon": d.get("longitude"),
-                    "ref": d.get("station_id"),
-                }
-                yield GeojsonPointItem(**properties)
+    def parse(self, response):
+        for location in response.json():
+            if location["closed"] or not location["physicalLocation"]:
+                continue
+            item = DictParser.parse(location)
+            item["ref"] = location["stationId"]
+            item["name"] = location["locationNameTranslation"]
+            item["street_address"] = ", ".join(filter(None, location["addressLines"]))
+            item["phone"] = location["formattedPhone"]
+            yield item

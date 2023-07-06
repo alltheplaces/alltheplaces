@@ -1,45 +1,69 @@
-# -*- coding: utf-8 -*-
 import json
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.categories import Categories, apply_category
+from locations.dict_parser import DictParser
+from locations.hours import OpeningHours
 
 
 class MercySpider(scrapy.Spider):
     name = "mercy"
-    item_attributes = {"brand": "Mercy"}
+    item_attributes = {"brand": "Mercy", "brand_wikidata": "Q30289045"}
     allowed_domains = ["mercy.net"]
+    start_urls = [
+        "https://www.mercy.net/content/mercy/us/en.solrQueryhandler?q=*:*&solrsort=&latitude=38.627002&longitude=-90.199404&start=0&rows=10&locationType=&locationOfferings=&servicesOffered=&distance=9999&noResultsSuggestions=true&pagePath=%2Fsearch%2Flocation"
+    ]
 
-    def start_requests(self):
-        offsets = [*range(50, 1550, 50)]
-        for offset in offsets:
-            url = "https://liveapi.yext.com/v2/accounts/me/answers/vertical/query?v=20190101&api_key=b848342a24483e001b626d8df6f913db&experienceKey=mercy_health_answers&version=PRODUCTION&verticalKey=Facilities&retrieveFacets=true&limit=50&offset={offset}".format(
-                offset=offset
-            )
-            yield scrapy.Request(url=url, callback=self.parse)
+    categories = [
+        ("Doctor's Office", Categories.DOCTOR_GP),
+        ("Hospital or Emergency Room", Categories.HOSPITAL),
+        ("Pharmacy", Categories.PHARMACY),
+        ("Imaging, Labs or Tests", {"healthcare": "laboratory"}),
+        ("Rehabilitation, Sports Medicine or Fitness", {"healthcare": "physiotherapist"}),
+        ("Behavioral Health", {"healthcare": "counselling"}),
+        ("Childbirth", {"healthcare": "midwife"}),
+        ("Vaccinations", {"healthcare": "vaccination_centre"}),
+    ]
 
     def parse(self, response):
-        jsonresponse = response.json()
-        locations = jsonresponse["response"]["results"]
-        for location in locations:
-            location_data = json.dumps(location)
-            data = json.loads(location_data)
+        number_locations = response.json().get("numFound")
+        url = f"https://www.mercy.net/content/mercy/us/en.solrQueryhandler?q=*:*&solrsort=&latitude=38.627002&longitude=-90.199404&start=0&rows={number_locations}&locationType=&locationOfferings=&servicesOffered=&distance=9999&noResultsSuggestions=true&pagePath=/search/location"
+        yield scrapy.Request(url=url, callback=self.parse_location)
 
-            try:
-                properties = {
-                    "name": data["data"]["name"],
-                    "ref": data["data"]["id"],
-                    "addr_full": data["data"]["address"]["line1"],
-                    "city": data["data"]["address"]["city"],
-                    "state": data["data"]["address"]["region"],
-                    "postcode": data["data"]["address"]["postalCode"],
-                    "country": data["data"]["address"]["countryCode"],
-                    "website": data["data"]["c_websiteBaseURL"],
-                    "lat": float(data["data"]["cityCoordinate"]["latitude"]),
-                    "lon": float(data["data"]["cityCoordinate"]["longitude"]),
-                }
-            except:
-                continue
+    def parse_location(self, response):
+        for data in response.json().get("docs"):
+            item = DictParser.parse(data)
+            item["lat"] = data.get("location_0_coordinate")
+            item["lon"] = data.get("location_1_coordinate")
+            item["name"] = data.get("jcr_title")
+            item["street_address"] = item.pop("addr_full")
+            item["website"] = f'https://www.{self.allowed_domains[0]}{data.get("url")}'
+            item["ref"] = f'https://www.{self.allowed_domains[0]}{data.get("id")}'
 
-            yield GeojsonPointItem(**properties)
+            oh = OpeningHours()
+            if data.get("operationHours"):
+                for day, value in json.loads(data.get("operationHours")[0]).items():
+                    if value.get("status") == "Closed":
+                        continue
+                    for helfday in value.get("hours"):
+                        oh.add_range(
+                            day=day,
+                            open_time=helfday.get("start"),
+                            close_time=helfday.get("end"),
+                        )
+
+            item["opening_hours"] = oh
+
+            if not data.get("marketSiteOfServiceType"):
+                self.crawler.stats.inc_value("atp/mercy/no_categories")
+            else:
+                for label, cat in self.categories:
+                    if label in data["marketSiteOfServiceType"]:
+                        apply_category(cat, item)
+                        break
+                else:
+                    for cat in data["marketSiteOfServiceType"]:
+                        self.crawler.stats.inc_value(f"atp/mercy/unmatched_category/{cat}")
+
+            yield item

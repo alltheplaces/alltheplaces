@@ -1,8 +1,12 @@
-# -*- coding: utf-8 -*-
 import csv
-import scrapy
 import json
-from locations.items import GeojsonPointItem
+from collections import defaultdict
+from math import sqrt
+
+import scrapy
+
+from locations.categories import Categories
+from locations.items import Feature
 
 HEADERS = {"X-Requested-With": "XMLHttpRequest"}
 STORELOCATOR = "https://www.starbucks.com/bff/locations?lat={}&lng={}"
@@ -10,7 +14,7 @@ STORELOCATOR = "https://www.starbucks.com/bff/locations?lat={}&lng={}"
 
 class StarbucksSpider(scrapy.Spider):
     name = "starbucks"
-    item_attributes = {"brand": "Starbucks", "brand_wikidata": "Q37158"}
+    item_attributes = {"brand": "Starbucks", "brand_wikidata": "Q37158", "extras": Categories.COFFEE_SHOP.value}
     allowed_domains = ["www.starbucks.com"]
 
     def start_requests(self):
@@ -41,7 +45,16 @@ class StarbucksSpider(scrapy.Spider):
             storeLon = store["coordinates"]["longitude"]
             properties = {
                 "name": store["name"],
-                "addr_full": store["address"]["streetAddressLine1"],
+                "street_address": ", ".join(
+                    filter(
+                        None,
+                        [
+                            store["address"]["streetAddressLine1"],
+                            store["address"]["streetAddressLine2"],
+                            store["address"]["streetAddressLine3"],
+                        ],
+                    )
+                ),
                 "city": store["address"]["city"],
                 "state": store["address"]["countrySubdivisionCode"],
                 "country": store["address"]["countryCode"],
@@ -51,11 +64,10 @@ class StarbucksSpider(scrapy.Spider):
                 "lon": storeLon,
                 "lat": storeLat,
                 "brand": store["brandName"],
-                "extras": {
-                    "number": store["storeNumber"],
-                },
+                "website": f'https://www.starbucks.com/store-locator/store/{store["id"]}/{store["slug"]}',
+                "extras": {"number": store["storeNumber"], "ownership_type": store["ownershipTypeCode"]},
             }
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)
 
         # Get lat and lng from URL
         pairs = response.url.split("?")[-1].split("&")
@@ -75,8 +87,50 @@ class StarbucksSpider(scrapy.Spider):
                 ]
                 urls = [STORELOCATOR.format(c[1], c[0]) for c in nextCoordinates]
                 for url in urls:
-                    request = scrapy.Request(
-                        url=url, headers=HEADERS, callback=self.parse
+                    request = scrapy.Request(url=url, headers=HEADERS, callback=self.parse)
+                    request.meta["distance"] = nextDistance
+                    yield request
+
+            elif response.meta["distance"] > 0.10:
+                # Only used to track how often this happens
+                self.logger.debug("Using secondary search of far away stores")
+                nextDistance = response.meta["distance"] / 2
+
+                nextCoordinates = []
+                current_center = center
+                additional_stores = 5
+                store_distances = defaultdict(list)
+
+                # Loop through to find 5 more stores
+                for ii in range(additional_stores):
+                    # Find distance between current center and all stores
+                    for jj, store in enumerate(stores):
+                        store_lat = store["coordinates"]["latitude"]
+                        store_lon = store["coordinates"]["longitude"]
+                        store_distances[jj].append(
+                            sqrt((current_center[1] - store_lat) ** 2 + (current_center[0] - store_lon) ** 2)
+                        )
+
+                    # Find total distance from each store to each center point
+                    total_distances = {key: sum(val) for key, val in store_distances.items()}
+
+                    # Find store furthest away
+                    max_store = max(total_distances, key=total_distances.get)
+                    # Replace current center
+                    current_center = [
+                        stores[max_store]["coordinates"]["longitude"],
+                        stores[max_store]["coordinates"]["latitude"],
+                    ]
+
+                    # Append it to the next search list
+                    nextCoordinates.append(
+                        [stores[max_store]["coordinates"]["longitude"], stores[max_store]["coordinates"]["latitude"]]
                     )
+
+                urls = [STORELOCATOR.format(c[1], c[0]) for c in nextCoordinates]
+                for url in urls:
+                    self.logger.debug(f"Adding {url} to list")
+
+                    request = scrapy.Request(url=url, headers=HEADERS, callback=self.parse)
                     request.meta["distance"] = nextDistance
                     yield request

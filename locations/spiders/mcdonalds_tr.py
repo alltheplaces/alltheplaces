@@ -1,13 +1,15 @@
-# -*- coding: utf-8 -*-
-import scrapy
 import json
 import re
-from locations.items import GeojsonPointItem
+
+import scrapy
+
+from locations.items import Feature
+from locations.spiders.mcdonalds import McDonaldsSpider
 
 
 class McDonaldsTRSpider(scrapy.Spider):
     name = "mcdonalds_tr"
-    item_attributes = {"brand": "McDonald's", "brand_wikidata": "Q38076"}
+    item_attributes = McDonaldsSpider.item_attributes
     allowed_domains = ["www.mcdonalds.com.tr"]
 
     def start_requests(self):
@@ -75,4 +77,4 @@ class McDonaldsTRSpider(scrapy.Spider):
             if opening_hours:
                 properties["opening_hours"] = opening_hours
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

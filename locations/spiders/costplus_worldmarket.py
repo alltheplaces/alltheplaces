@@ -1,10 +1,10 @@
-# -*- coding: utf-8 -*-
 import json
-import scrapy
 import re
 from urllib.parse import urlsplit
 
-from locations.items import GeojsonPointItem
+import scrapy
+
+from locations.items import Feature
 
 
 class CostPlusWorldMarketSpider(scrapy.Spider):
@@ -66,63 +66,33 @@ class CostPlusWorldMarketSpider(scrapy.Spider):
         ref = "_".join(ref)
 
         properties = {
-            "name": "".join(
-                response.xpath(
-                    '//span[@class="location-info-header-namee"]/text()'
-                ).extract()
-            ),
-            "addr_full": " ".join(
-                response.xpath('//span[@itemprop="streetAddress"]/text()').extract()
-            ),
-            "city": (
-                response.xpath(
-                    '//span[@itemprop="addressLocality"]/text()'
-                ).extract_first()
-                or ""
-            ).strip(","),
-            "state": response.xpath(
-                '//abbr[@itemprop="addressRegion"]/text()'
-            ).extract_first(),
-            "postcode": (
-                response.xpath('//span[@itemprop="postalCode"]/text()').extract_first()
-                or ""
-            ).strip(),
+            "name": "".join(response.xpath('//span[@class="location-info-header-namee"]/text()').extract()),
+            "street_address": " ".join(response.xpath('//span[@itemprop="streetAddress"]/text()').extract()),
+            "city": (response.xpath('//span[@itemprop="addressLocality"]/text()').extract_first() or "").strip(","),
+            "state": response.xpath('//abbr[@itemprop="addressRegion"]/text()').extract_first(),
+            "postcode": (response.xpath('//span[@itemprop="postalCode"]/text()').extract_first() or "").strip(),
             "ref": ref,
             "website": response.url,
-            "lon": float(
-                response.xpath(
-                    '//span/meta[@itemprop="longitude"]/@content'
-                ).extract_first()
-            ),
-            "lat": float(
-                response.xpath(
-                    '//span/meta[@itemprop="latitude"]/@content'
-                ).extract_first()
-            ),
+            "lon": float(response.xpath('//span/meta[@itemprop="longitude"]/@content').extract_first()),
+            "lat": float(response.xpath('//span/meta[@itemprop="latitude"]/@content').extract_first()),
         }
 
-        phone = response.xpath(
-            '//a[@class="c-phone-number-link c-phone-main-number-link"]/text()'
-        ).extract_first()
+        phone = response.xpath('//a[@class="c-phone-number-link c-phone-main-number-link"]/text()').extract_first()
         if phone:
             properties["phone"] = phone
 
         hours = json.loads(
-            response.xpath(
-                '//div[@class="c-location-hours-today js-location-hours"]/@data-days'
-            ).extract_first()
+            response.xpath('//div[@class="c-location-hours-today js-location-hours"]/@data-days').extract_first()
         )
 
         opening_hours = self.store_hours(hours)
         if opening_hours:
             properties["opening_hours"] = opening_hours
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)
 
     def parse(self, response):
-        urls = response.xpath(
-            '//a[@class="c-directory-list-content-item-link"]/@href'
-        ).extract()
+        urls = response.xpath('//a[@class="c-directory-list-content-item-link"]/@href').extract()
         for path in urls:
             if len(urlsplit(path).path.split("/")) == 3:
                 # If url is state/city/store.html style, it is a store

@@ -1,8 +1,9 @@
 import csv
-import geonamescache
 import gzip
 import json
 import math
+
+import geonamescache
 
 # Radius of the Earth in kilometers
 EARTH_RADIUS = 6378.1
@@ -22,15 +23,11 @@ def vincenty_distance(lat, lon, distance_km, bearing_deg):
 
     lat2 = math.asin(
         math.sin(lat_rad) * math.cos(distance_km / EARTH_RADIUS)
-        + math.cos(lat_rad)
-        * math.sin(distance_km / EARTH_RADIUS)
-        * math.cos(bearing_rad)
+        + math.cos(lat_rad) * math.sin(distance_km / EARTH_RADIUS) * math.cos(bearing_rad)
     )
 
     lon2 = lon_rad + math.atan2(
-        math.sin(bearing_rad)
-        * math.sin(distance_km / EARTH_RADIUS)
-        * math.cos(lat_rad),
+        math.sin(bearing_rad) * math.sin(distance_km / EARTH_RADIUS) * math.cos(lat_rad),
         math.cos(distance_km / EARTH_RADIUS) - math.sin(lat_rad) * math.sin(lat2),
     )
 
@@ -60,9 +57,7 @@ def point_locations(areas_csv_file, area_field_filter=None):
                 area = get_key(row, ["country", "territory", "state"])
                 if area_field_filter:
                     if not area:
-                        raise Exception(
-                            "trying to perform area filter on file with no area support"
-                        )
+                        raise Exception("trying to perform area filter on file with no area support")
                     if area not in area_field_filter:
                         continue
                 yield lat, lon
@@ -77,10 +72,7 @@ def city_locations(country_code, min_population=0):
     :return: iterator of city names with locations
     """
     for city in geonamescache.GeonamesCache().get_cities().values():
-        if (
-            city["countrycode"].lower() == country_code.lower()
-            and city["population"] >= min_population
-        ):
+        if city["countrycode"].lower() == country_code.lower() and city["population"] >= min_population:
             yield city
 
 
@@ -98,9 +90,7 @@ def postal_regions(country_code):
     :return: post code regions with possible extras
     """
     if country_code == "GB":
-        with gzip.open(
-            "./locations/searchable_points/postcodes/outward_gb.json.gz"
-        ) as points:
+        with gzip.open("./locations/searchable_points/postcodes/outward_gb.json.gz") as points:
             for outward_code in json.load(points):
                 yield {
                     "postal_region": outward_code["postcode"],
@@ -120,9 +110,7 @@ def postal_regions(country_code):
         # easily found though links on the root domain. The link must be clearly visible to the human eye.
         # The backlink must be placed before the Customer uses the Database in production.
         #
-        with gzip.open(
-            "./locations/searchable_points/postcodes/uszips.csv.gz", mode="rt"
-        ) as points:
+        with gzip.open("./locations/searchable_points/postcodes/uszips.csv.gz", mode="rt") as points:
             for row in csv.DictReader(points):
                 yield {
                     "postal_region": row["zip"],
@@ -131,5 +119,97 @@ def postal_regions(country_code):
                     "latitude": row["lat"],
                     "longitude": row["lng"],
                 }
+
+    elif country_code == "FR":
+        # French postal code database from https://datanova.legroupe.laposte.fr
+
+        with gzip.open("./locations/searchable_points/postcodes/frzips.csv.gz", mode="rt") as points:
+            for row in csv.DictReader(points):
+                yield {
+                    "postal_region": row["Code_postal"],
+                    "latitude": row["lat"],
+                    "longitude": row["lng"],
+                }
     else:
         raise Exception("country code not supported: " + country_code)
+
+
+def make_subdivisions(bounds, num_tiles=4):
+    """
+    Divide the given bounds into num_tiles*num_tiles equal subdivisions.
+
+    :param bounds: A tuple representing a lat/lon bounding box. Uses (xmin, ymin, xmax, ymax).
+    :param num_tiles: The number of subdivisions (tiles) to create in the X and Y direction.
+    :return: An array of bounding box tuples.
+    """
+    xmin, ymin, xmax, ymax = bounds
+    width = xmax - xmin
+    height = ymax - ymin
+
+    # Calculate the width and height of each tile
+    tile_width = width / num_tiles
+    tile_height = height / num_tiles
+
+    # Initialize a list to store the tiles
+    tiles = []
+
+    # Iterate over the tiles and append them to the list
+    for i in range(num_tiles):
+        for j in range(num_tiles):
+            # Calculate the bounding box for the tile
+            x0 = xmin + i * tile_width
+            y0 = ymin + j * tile_height
+            x1 = x0 + tile_width
+            y1 = y0 + tile_height
+            tiles.append((x0, y0, x1, y1))
+
+    return tiles
+
+
+def bbox_contains(bounds, point):
+    """
+    Returns true if the lat/lon point is contained in the given lat/lon bounding box.
+
+    :param bounds: A tuple representing a lat/lon bounding box. Uses (xmin, ymin, xmax, ymax).
+    :param point: A (x, y) point - usually lon, lat.
+    :return: True if the point is contained inside the bounds.
+    """
+    x, y = point
+    xmin, ymin, xmax, ymax = bounds
+
+    if xmin <= x <= xmax and ymin <= y <= ymax:
+        return True
+
+    return False
+
+
+def bbox_to_geojson(bounds):
+    """
+    Convert a bounding box tuple into a Polygon GeoJSON geometry dict. Useful for debugging.
+
+    :param bounds: A tuple representing a lat/lon bounding box. Uses (xmin, ymin, xmax, ymax).
+    :return: A GeoJSON geometry dict.
+    """
+
+    xmin, ymin, xmax, ymax = bounds
+    polygon = {
+        "type": "Polygon",
+        "coordinates": [[[xmin, ymin], [xmin, ymax], [xmax, ymax], [xmax, ymin], [xmin, ymin]]],
+    }
+    return polygon
+
+
+def country_coordinates():
+    """
+    Return a dictionary of ISO 3166-2 alpha-2 country codes with
+    coordinates approximating a centroid of the largest landmass
+    or multiple largest landmasses for countries with multiple
+    landmasses.
+
+    This is useful for supplying coordinates of a country to an API
+    that then expects to reverse geocode a country from the supplied
+    coordinates.
+
+    :return A dictionary of ISO 3166-2 alpha-2 country codes with corresponding latitude and longitude for each country.
+    """
+    return json.load(open("./locations/searchable_points/country_coordinates.json"))

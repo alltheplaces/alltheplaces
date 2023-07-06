@@ -1,11 +1,9 @@
-# -*- coding: utf-8 -*-
 import json
 import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
-from locations.hours import OpeningHours
+from locations.items import Feature
 
 
 class BayshoreHealthcareSpider(scrapy.Spider):
@@ -26,9 +24,7 @@ class BayshoreHealthcareSpider(scrapy.Spider):
             "search_type": "location",
         }
 
-        yield scrapy.http.FormRequest(
-            url, self.parse, method="POST", headers=headers, formdata=formdata
-        )
+        yield scrapy.http.FormRequest(url, self.parse, method="POST", headers=headers, formdata=formdata)
 
     def parse(self, response):
         stores = json.loads(response.body)
@@ -47,7 +43,7 @@ class BayshoreHealthcareSpider(scrapy.Spider):
             properties = {
                 "ref": store["id"],
                 "name": store["name"],
-                "addr_full": addr,
+                "street_address": addr,
                 "city": city,
                 "state": state,
                 "postcode": postal,
@@ -58,4 +54,4 @@ class BayshoreHealthcareSpider(scrapy.Spider):
                 "website": "https://www.bayshore.ca" + store["url"],
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

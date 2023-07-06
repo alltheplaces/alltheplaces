@@ -1,8 +1,9 @@
-# -*- coding: utf-8 -*-
 import json
+
 import scrapy
-from locations.items import GeojsonPointItem
+
 from locations.hours import OpeningHours
+from locations.items import Feature
 
 DAY_MAPPING = {2: "Mo", 3: "Tu", 4: "We", 5: "Th", 6: "Fr", 7: "Sa", 1: "Su"}
 
@@ -22,15 +23,14 @@ class VictoriassecretSpider(scrapy.Spider):
             "Accept": "application/json",
         }
 
-        yield scrapy.http.FormRequest(
-            url=template, method="GET", headers=headers, callback=self.parse
-        )
+        yield scrapy.http.FormRequest(url=template, method="GET", headers=headers, callback=self.parse)
 
     def parse(self, response):
         jsonresponse = response.json()
         for stores in jsonresponse:
             store = json.dumps(stores)
             store_data = json.loads(store)
+            properties = {}
 
             if store_data["latitudeDegrees"] == "":
                 properties["lat"] = float(0)
@@ -55,7 +55,7 @@ class VictoriassecretSpider(scrapy.Spider):
             if hours:
                 properties["opening_hours"] = self.process_hours(hours)
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)
 
     def process_hours(self, hours):
         opening_hours = OpeningHours()

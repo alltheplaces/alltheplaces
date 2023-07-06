@@ -1,11 +1,9 @@
-# -*- coding: utf-8 -*-
 import urllib.parse
 
-import scrapy
 from scrapy.spiders import SitemapSpider
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 BRANDS = {
     "locations.carlsjr.com": {"brand": "Carl's Jr.", "brand_wikidata": "Q1043486"},
@@ -38,9 +36,7 @@ class HardeesCarlsJrSpider(SitemapSpider):
             "lat": response.css('[itemprop="latitude"]').attrib["content"],
             "lon": response.css('[itemprop="longitude"]').attrib["content"],
             "name": response.xpath("//title/text()").get().split(":")[0],
-            "street_address": response.css('[itemprop="streetAddress"]').attrib[
-                "content"
-            ],
+            "street_address": response.css('[itemprop="streetAddress"]').attrib["content"],
             "city": response.css(".Address-city::text").get(),
             "state": response.css('[itemprop="addressRegion"]::text').get(),
             "postcode": response.css('[itemprop="postalCode"]::text').get(),
@@ -49,4 +45,4 @@ class HardeesCarlsJrSpider(SitemapSpider):
         }
         hostname = urllib.parse.urlparse(response.url).hostname
         properties.update(BRANDS[hostname])
-        return GeojsonPointItem(**properties)
+        return Feature(**properties)

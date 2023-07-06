@@ -1,23 +1,20 @@
-# -*- coding: utf-8 -*-
 import scrapy
-
 from scrapy.http import JsonRequest
 
-from locations.items import GeojsonPointItem
+from locations.categories import Categories, apply_category
+from locations.items import Feature
 
 
 class CitiSpider(scrapy.Spider):
     name = "citi"
-    item_attributes = {"brand": "Citi", "brand_wikidata": "Q219508"}
+    item_attributes = {"brand": "Citibank", "brand_wikidata": "Q857063"}
     allowed_domains = ["citi.com"]
     download_delay = 1.5
 
     headers = {"client_id": "4a51fb19-a1a7-4247-bc7e-18aa56dd1c40"}
 
     def start_requests(self):
-        with open(
-            "./locations/searchable_points/us_centroids_100mile_radius_state.csv"
-        ) as points:
+        with open("./locations/searchable_points/us_centroids_100mile_radius_state.csv") as points:
             next(points)
             for point in points:
                 _, lat, lon, state = point.strip().split(",")
@@ -55,10 +52,7 @@ class CitiSpider(scrapy.Spider):
             postcode = feature["properties"]["postalCode"]
 
             # fix 4-digit postcodes :(
-            if (
-                feature["properties"]["country"] == "united states of america"
-                and postcode
-            ):
+            if feature["properties"]["country"] == "united states of america" and postcode:
                 postcode = postcode.zfill(5)
 
             properties = {
@@ -75,4 +69,11 @@ class CitiSpider(scrapy.Spider):
                 "extras": {"type": feature["properties"]["type"]},
             }
 
-            yield GeojsonPointItem(**properties)
+            if feature["properties"]["type"] in ["atm", "moneypassatm"]:
+                apply_category(Categories.ATM, properties)
+            elif feature["properties"]["type"] == "branch":
+                apply_category(Categories.BANK, properties)
+            elif feature["properties"]["type"] == "private bank":
+                pass
+
+            yield Feature(**properties)

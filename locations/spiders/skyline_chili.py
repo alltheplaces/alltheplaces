@@ -1,9 +1,9 @@
-# -*- coding: utf-8 -*-
-import scrapy
 import json
 
-from locations.hours import OpeningHours, DAYS
-from locations.items import GeojsonPointItem
+import scrapy
+
+from locations.hours import DAYS, OpeningHours
+from locations.items import Feature
 
 
 class SkylineChiliSpider(scrapy.Spider):
@@ -24,9 +24,7 @@ class SkylineChiliSpider(scrapy.Spider):
             yield scrapy.Request(url, callback=self.parse_store)
 
     def parse_store(self, response):
-        data = json.loads(
-            response.xpath('//*/script[@type="application/ld+json"]/text()').get()
-        )
+        data = json.loads(response.xpath('//*/script[@type="application/ld+json"]/text()').get())
         properties = {
             "ref": data["@id"],
             "addr_full": data["address"]["streetAddress"],
@@ -37,19 +35,15 @@ class SkylineChiliSpider(scrapy.Spider):
             "lat": data["geo"]["latitude"],
             "phone": data.get("telephone"),
             "website": data["url"],
-            "opening_hours": self.parse_hours(
-                data.get("openingHoursSpecification", [])
-            ),
+            "opening_hours": self.parse_hours(data.get("openingHoursSpecification", [])),
         }
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)
 
     def parse_hours(self, hours):
         opening_hours = OpeningHours()
         for spec in hours:
             if {"dayOfWeek", "closes", "opens"} <= spec.keys():
-                opening_hours.add_range(
-                    spec["dayOfWeek"][:2], spec["opens"], spec["closes"]
-                )
+                opening_hours.add_range(spec["dayOfWeek"][:2], spec["opens"], spec["closes"])
             elif {"opens", "closes"} <= spec.keys():
                 for day in DAYS:
                     opening_hours.add_range(day, spec["opens"], spec["closes"])

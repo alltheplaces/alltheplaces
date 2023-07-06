@@ -1,11 +1,11 @@
-# -*- coding: utf-8 -*-
 import gzip
 import json
 import re
+
 import scrapy
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class GenghisGrillSpider(scrapy.Spider):
@@ -23,7 +23,7 @@ class GenghisGrillSpider(scrapy.Spider):
         properties = {
             "ref": ref,
             "name": data["name"].replace("About ", ""),
-            "addr_full": data["address"]["streetAddress"],
+            "street_address": data["address"]["streetAddress"],
             "city": data["address"]["addressLocality"],
             "postcode": data["address"]["postalCode"],
             "state": data["address"]["addressRegion"],
@@ -34,16 +34,17 @@ class GenghisGrillSpider(scrapy.Spider):
             "opening_hours": hours.as_opening_hours(),
         }
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)
 
     def parse_hours(self, response):
         opening_hours = OpeningHours()
 
-        hours = response.xpath(
-            "//script/text()[contains(., 'Primary Hours')]"
-        ).extract_first()
+        hours = response.xpath("//script/text()[contains(., 'Primary Hours')]").extract_first()
 
-        hours_dict = json.loads(re.search(r'"days":(.*]})', hours).group(1))
+        m = re.search(r'"days":(.*]})', hours)
+        if not m:
+            return
+        hours_dict = json.loads(m.group(1))
         for day, times in hours_dict.items():
             if times == "closed":
                 continue
@@ -58,7 +59,7 @@ class GenghisGrillSpider(scrapy.Spider):
         xml = scrapy.Selector(type="xml", text=gzip.decompress(response.body))
         xml.remove_namespaces()
         urls = xml.xpath("//loc").re(
-            "https:\/\/locations.genghisgrill.com\/[a-z]{2}\/[a-z\-]+\/genghis-grill-[0-9]+\.html"
+            r"https:\/\/locations.genghisgrill.com\/[a-z]{2}\/[a-z\-]+\/genghis-grill-[0-9]+\.html"
         )
         for url in urls:
             yield scrapy.Request(url, callback=self.parse_store)

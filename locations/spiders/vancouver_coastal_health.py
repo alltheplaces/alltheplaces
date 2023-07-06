@@ -1,73 +1,46 @@
-# -*- coding: utf-8 -*-
-import re
+import json
 
-import scrapy
+from scrapy import Spider
 
-from locations.items import GeojsonPointItem
-
-BASE_URL = (
-    "http://www.vch.ca/_api/Web/Lists(guid'51d09f82-eddf-47c9-95e9-9f5f0ec838c5')/"
-)
+from locations.categories import Categories, apply_category
+from locations.dict_parser import DictParser
 
 
-class VancouverCoastalHealthSpider(scrapy.Spider):
+class VancouverCoastalHealthSpider(Spider):
     name = "vancouver_coastal_health"
-    item_attributes = {
-        "brand": "Vancouver Coastal Health",
-        "brand_wikidata": "Q7914144",
+    item_attributes = {"brand": "Vancouver Coastal Health", "brand_wikidata": "Q7914144"}
+    start_urls = ["https://www.vch.ca/en/find-location"]
+
+    CATEGORIES = {
+        "0": Categories.HOSPITAL,
+        "1": None,  # "Urgent \\u0026 primary care centres",
+        "2": None,  # "Community health centres",
+        "3": None,  # "Long term care homes",
+        "4": {"amenity": "social_facility", "social_facility": "assisted_living"},
+        "5": {"healthcare": "hospice"},
+        "7": {"healthcare": "psychotherapist"},
+        "8": None,  # "Crisis intervention facilities",
+        "10": None,  # "Travel clinics",
+        "11": None,  # "Harm reduction site",
+        "12": None,  # "Environmental health \\u0026 inspections offices",
+        "13": None,  # "Other",
     }
-    allowed_domains = ["www.vch.ca"]
-    start_urls = [
-        "http://www.vch.ca/StaticDirectoryPages/sitemap1.xml",
-    ]
-    download_delay = 0.5
 
-    def parse(self, response):
-        response.selector.remove_namespaces()
+    def parse(self, response, **kwargs):
+        data = json.loads(response.xpath('//script[contains(., "find_location")]/text()').get())
 
-        locations = response.xpath("//url/loc/text()").extract()
-        location_ids = [
-            re.search(r"\/([0-9]+)\.aspx", location_id).group(1)
-            for location_id in locations
-        ]
-        urls = [BASE_URL + f"Items({location_id})" for location_id in location_ids]
+        for location in data["vch"]["find_location"]["locations"]:
+            location["location"] = location.pop("coords")
+            location["ref"] = location["nid"]
+            location["address"]["street_address"] = location["address"].pop("line_1")
+            location["url"] = f'https://www.vch.ca{location["url"]}'
 
-        for url in urls:
-            yield scrapy.Request(url, callback=self.parse_location)
+            item = DictParser.parse(location)
+            item["image"] = location["image"]
 
-    def parse_location(self, response):
-        response.selector.remove_namespaces()
-        ref = response.xpath("//ID/text()").extract_first()
-        coords = response.xpath("//Geocode/text()").extract_first()
-        if coords:
-            lat, lon = coords.split(",")
-            if float(lat) < 45.0:
-                lat, lon = None, None
-        else:
-            lat = None
-            lon = None
-        city = response.xpath("//City_x0020_Field/text()").extract_first()
-        if city == "[blank]":
-            city = None
-        phone_str = response.xpath("//Phone_x0020_1/text()").extract_first()
-        if phone_str:
-            phone = "".join(re.findall(r"([0-9]+)", phone_str))
-        else:
-            phone = None
-        website = "http://www.vch.ca/Locations-Services/result?res_id=" + ref
+            if cat := self.CATEGORIES.get(location["type"]["id"]):
+                apply_category(cat, item)
 
-        properties = {
-            "ref": ref,
-            "name": response.xpath("//Specific_x0020_Title/text()").extract_first(),
-            "addr_full": response.xpath("//Address_x0020_1/text()").extract_first(),
-            "city": city,
-            "state": response.xpath("//Province/text()").extract_first(),
-            "postcode": response.xpath("//Postal_x0020_Code/text()").extract_first(),
-            "country": "CA",
-            "lat": lat,
-            "lon": lon,
-            "phone": phone,
-            "website": website,
-        }
+            item["country"] = "CA"
 
-        yield GeojsonPointItem(**properties)
+            yield item

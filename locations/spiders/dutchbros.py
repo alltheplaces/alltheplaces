@@ -1,9 +1,7 @@
-# -*- coding: utf-8 -*-
-import re
-
 import scrapy
-from locations.items import GeojsonPointItem
+
 from locations.hours import OpeningHours
+from locations.items import Feature
 
 DAYS = [
     "Sun",
@@ -30,12 +28,12 @@ class DutchBrosSpider(scrapy.Spider):
             if store["future_stand"]:
                 continue
 
-            item = GeojsonPointItem(
+            item = Feature(
                 ref=store["store_number"],
                 name=store["store_nickname"],
                 lat=store["lat"],
                 lon=store["lon"],
-                addr_full=store["stand_address"],
+                street_address=store["stand_address"],
                 city=store["city"],
                 state=store["state"],
                 postcode=store["zip_code"],
@@ -57,9 +55,9 @@ class DutchBrosSpider(scrapy.Spider):
 
             try:
                 shour, ehour = hours.split("-", 1)
-                if not ":" in shour:
+                if ":" not in shour:
                     shour = shour[:2] + ":00" + shour[2:]
-                if not ":" in ehour:
+                if ":" not in ehour:
                     ehour = ehour[:2] + ":00" + ehour[2:]
             except ValueError:
                 if hours == "Closed":

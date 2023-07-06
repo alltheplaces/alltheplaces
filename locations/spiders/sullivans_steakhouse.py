@@ -1,7 +1,8 @@
 import json
 
-from locations.items import GeojsonPointItem
 from scrapy.spiders import SitemapSpider
+
+from locations.items import Feature
 
 
 class SullivansSteakhouseSpider(SitemapSpider):
@@ -9,13 +10,10 @@ class SullivansSteakhouseSpider(SitemapSpider):
     item_attributes = {"brand": "Sullivan's Steakhouse"}
     allowed_domains = ["www.sullivanssteakhouse.com"]
     sitemap_urls = ["https://www.sullivanssteakhouse.com/locations-sitemap.xml"]
-    # download_delay = 1
 
     def parse(self, response):
         ld = json.loads(
-            response.xpath(
-                '//script[@type="application/ld+json"][@class="yoast-schema-graph"]/text()'
-            ).get()
+            response.xpath('//script[@type="application/ld+json"][@class="yoast-schema-graph"]/text()').get()
         )
 
         for node in ld["@graph"]:
@@ -27,9 +25,7 @@ class SullivansSteakhouseSpider(SitemapSpider):
                     "website": response.url,
                     "name": node["name"].replace("Sullivan&#039;s Steakhouse ", ""),
                     "phone": node["telephone"],
-                    "addr_full": node["address"]["streetAddress"]
-                    .replace("  ", " ")
-                    .replace("\t", "")
+                    "addr_full": node["address"]["streetAddress"].replace("  ", " ").replace("\t", "")
                     + ", United States",
                     "city": node["address"]["addressLocality"],
                     "state": node["address"]["addressRegion"],
@@ -45,4 +41,4 @@ class SullivansSteakhouseSpider(SitemapSpider):
                     "country": "US",
                 }
 
-                yield GeojsonPointItem(**properties)
+                yield Feature(**properties)

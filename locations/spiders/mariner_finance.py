@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
 import json
 import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class MarinerFinanceSpider(scrapy.Spider):
@@ -24,9 +23,7 @@ class MarinerFinanceSpider(scrapy.Spider):
             yield scrapy.Request(url, callback=self.parse_store)
 
     def parse_store(self, response):
-        branch = response.xpath(
-            '//h2[contains(text(), "Address")]/following::a/following::text()'
-        ).extract_first()
+        branch = response.xpath('//h2[contains(text(), "Address")]/following::a/following::text()').extract_first()
         branch_number = re.search(r"Branch Number:\s([0-9]+)\s*.*", branch).group(1)
 
         data = json.loads(
@@ -75,10 +72,7 @@ class MarinerFinanceSpider(scrapy.Spider):
 
     def parse_branch_locator(self, response):
         properties = response.meta
-        [
-            properties.pop(k)
-            for k in ["download_timeout", "download_slot", "download_latency", "depth"]
-        ]  # pop meta keys
+        [properties.pop(k) for k in ["download_timeout", "download_slot", "download_latency", "depth"]]  # pop meta keys
         branch_results = json.loads(response.text)
         branch_data = branch_results["branchData"]
         branch_number = properties.get("ref")
@@ -92,4 +86,4 @@ class MarinerFinanceSpider(scrapy.Spider):
         properties["lat"] = lat
         properties["lon"] = lon
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

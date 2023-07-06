@@ -1,11 +1,9 @@
-# -*- coding: utf-8 -*-
 import json
 
-from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
 from scrapy.spiders import SitemapSpider
 
-DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+from locations.hours import DAYS_FULL, OpeningHours
+from locations.items import Feature
 
 
 class CrackerBarrelSpider(SitemapSpider):
@@ -13,19 +11,12 @@ class CrackerBarrelSpider(SitemapSpider):
     item_attributes = {"brand": "Cracker Barrel", "brand_wikidata": "Q4492609"}
     allowed_domains = ["crackerbarrel.com"]
     sitemap_urls = ["https://www.crackerbarrel.com/sitemap.xml"]
-    sitemap_rules = [
-        (
-            "https:\/\/crackerbarrel\.com\/Locations\/States\/(\w{2})\/([-\w]+)\/(\d+)$",
-            "parse_store",
-        )
-    ]
+    sitemap_rules = [(r"\/Locations\/States\/(\w{2})\/([-\w]+)\/(\d+)$", "parse_store")]
+    requires_proxy = True
 
     def sitemap_filter(self, entries):
         for entry in entries:
-            entry["loc"] = entry["loc"].replace(
-                "https://crackerbarrel.com/sitecore/shell/crackerbarrel/brandsite/home/",
-                "https://www.crackerbarrel.com/",
-            )
+            entry["loc"] = entry["loc"].replace("https://crackerbarrel.com/", "https://www.crackerbarrel.com/")
             yield entry
 
     def parse_store(self, response):
@@ -33,10 +24,10 @@ class CrackerBarrelSpider(SitemapSpider):
         data = json.loads(ldjson)["sitecore"]["route"]["fields"]
 
         hours = OpeningHours()
-        for day in DAYS:
+        for day in DAYS_FULL:
             start_time = data[f"{day}_Open"]["value"]
             end_time = data[f"{day}_Close"]["value"]
-            hours.add_range(day[:2], start_time, end_time, "%H:%M %p")
+            hours.add_range(day[:2], start_time, end_time, "%I:%M %p")
 
         properties = {
             "ref": data["Store Number"]["value"],
@@ -52,4 +43,4 @@ class CrackerBarrelSpider(SitemapSpider):
             "phone": data["Phone"]["value"],
             "opening_hours": hours.as_opening_hours(),
         }
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

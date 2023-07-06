@@ -1,22 +1,21 @@
-# -*- coding: utf-8 -*-
-import re
-
 import scrapy
 
-from locations.items import GeojsonPointItem
-from locations.hours import OpeningHours
+from locations.items import Feature
+from locations.spiders.vapestore_gb import clean_address
 
 
 class CheddarsScratchKitchenSpider(scrapy.Spider):
     name = "cheddars_scratch_kitchen"
     allowed_domains = ["cheddars.com"]
+    item_attributes = {
+        "brand": "Cheddar's Scratch Kitchen",
+        "brand_wikidata": "Q5089187",
+    }
 
     def start_requests(self):
         url = "https://www.cheddars.com/web-api/restaurants"
 
-        with open(
-            "./locations/searchable_points/us_centroids_100mile_radius.csv"
-        ) as points:
+        with open("./locations/searchable_points/us_centroids_100mile_radius.csv") as points:
             next(points)  # Ignore the header
             for point in points:
                 _, lat, lon = point.strip().split(",")
@@ -43,7 +42,7 @@ class CheddarsScratchKitchenSpider(scrapy.Spider):
                 properties = {
                     "ref": place["restaurantNumber"],
                     "name": place["restaurantName"],
-                    "addr_full": place["AddressOne"],
+                    "street_address": clean_address([place["AddressOne"], place["AddressTwo"]]),
                     "city": place["city"],
                     "state": place["state"],
                     "postcode": place["zip"],
@@ -54,6 +53,6 @@ class CheddarsScratchKitchenSpider(scrapy.Spider):
                     "website": response.url,
                 }
 
-                yield GeojsonPointItem(**properties)
+                yield Feature(**properties)
         except:
             pass

@@ -1,13 +1,12 @@
-# -*- coding: utf-8 -*-
 import json
 import re
 
 import scrapy
 
-from locations.hours import OpeningHours, day_range, DAYS
-from locations.items import GeojsonPointItem
+from locations.hours import DAYS, OpeningHours, day_range
+from locations.items import Feature
 
-kDaysRe = re.compile(f"(?:({'|'.join(DAYS)})\w*)")
+kDaysRe = re.compile(rf"(?:({'|'.join(DAYS)})\w*)")
 kTimesRe = re.compile(r"(\d+)(:\d+)? *([APap][Mm])")
 
 
@@ -20,9 +19,7 @@ class ShopriteSpider(scrapy.Spider):
     ]
 
     def parse(self, response):
-        script = response.xpath(
-            '//script[contains(text(), "__PRELOADED_STATE__")]/text()'
-        ).extract_first()
+        script = response.xpath('//script[contains(text(), "__PRELOADED_STATE__")]/text()').extract_first()
         script = script[script.index("{") :]
         stores = json.loads(script)["stores"]["availablePlanningStores"]["items"]
 
@@ -43,7 +40,7 @@ class ShopriteSpider(scrapy.Spider):
                 "opening_hours": self.parse_hours(store["openingHours"]),
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)
 
     @staticmethod
     def parse_hours(hours):

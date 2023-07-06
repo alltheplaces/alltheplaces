@@ -1,15 +1,14 @@
-# -*- coding: utf-8 -*-
 import json
 import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class KindredHealthcareSpider(scrapy.Spider):
     name = "kindred_healthcare"
-    item_attributes = {"brand": "Kindred Healthcare"}
+    item_attributes = {"brand": "Kindred Healthcare", "brand_wikidata": "Q921363"}
     allowed_domains = ["www.kindredhealthcare.com"]
     start_urls = [
         "https://www.kindredhealthcare.com/sitemap/sitemap.xml",
@@ -49,20 +48,15 @@ class KindredHealthcareSpider(scrapy.Spider):
                 "extras": {"facility_type": facility_type},
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)
 
     def parse(self, response):
         response.selector.remove_namespaces()
-        locations = response.xpath(
-            '//url/loc/text()[contains(., "locations")]'
-        ).extract()
+        locations = response.xpath('//url/loc/text()[contains(., "locations")]').extract()
 
         for location_url in locations:
             # For transitional care hospitals, reduce redundant requests by using just the contact-us pages
-            if (
-                "transitional-care-hospitals" in location_url
-                and "contact-us" not in location_url
-            ):
+            if "transitional-care-hospitals" in location_url and "contact-us" not in location_url:
                 continue
             # Do the same thing for the behavioral health pages
             if "behavioral-health" in location_url and "contact-us" not in location_url:

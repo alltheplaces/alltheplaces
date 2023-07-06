@@ -1,14 +1,13 @@
-# -*- coding: utf-8 -*-
 import json
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class SomaSpider(scrapy.Spider):
     name = "soma"
-    item_attributes = {"brand": "Soma"}
+    item_attributes = {"brand": "Soma", "brand_wikidata": "Q69882213"}
     allowed_domains = ["stores.soma.com"]
 
     def start_requests(self):
@@ -39,4 +38,4 @@ class SomaSpider(scrapy.Spider):
                 "lon": float(data["attributes"]["longitude"]),
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

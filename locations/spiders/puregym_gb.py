@@ -1,6 +1,6 @@
-from locations.google_url import extract_google_position
 from scrapy.spiders import SitemapSpider
 
+from locations.google_url import extract_google_position
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -15,7 +15,7 @@ class PureGymGBSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://www.puregym.com/sitemap.xml"]
     sitemap_rules = [
         (
-            "https:\/\/www\.puregym\.com\/gyms\/([\w-]+)\/$",
+            r"https:\/\/www\.puregym\.com\/gyms\/([\w-]+)\/$",
             "parse_sd",
         ),
     ]

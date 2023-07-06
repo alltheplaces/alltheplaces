@@ -1,8 +1,7 @@
-# -*- coding: utf-8 -*-
 import scrapy
 
-from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
+from locations.items import Feature
 
 WEEKDAYS = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
 
@@ -21,16 +20,9 @@ class TorchysTacosSpider(scrapy.Spider):
 
     def parse_store(self, response):
         store_info = response.xpath('//div[@class="row-wrap store-details"]')
-        store_address = response.xpath(
-            './/div[@class="item-details"]/p/a/text()'
-        ).extract()
+        store_address = response.xpath('.//div[@class="item-details"]/p/a/text()').extract()
         ref = response.xpath("//h1/text()").extract_first()
-        store_hours = [
-            d
-            for d in store_info.xpath(
-                './/div[@class="show-more"]/p/@datetime'
-            ).extract()
-        ]
+        store_hours = [d for d in store_info.xpath('.//div[@class="show-more"]/p/@datetime').extract()]
 
         full_address = [e.strip() for e in store_address[0].split("  ") if e.strip()]
         phone = store_address[1].strip() if len(store_address) > 1 else None
@@ -48,7 +40,7 @@ class TorchysTacosSpider(scrapy.Spider):
             "lon": store_info.xpath('.//div[@id="ttMap"]/@data-lon').extract_first(),
             "opening_hours": oh,
         }
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)
 
     def parse_hours(self, hours):
         oh = OpeningHours()

@@ -1,9 +1,8 @@
-# -*- coding: utf-8 -*-
 import json
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class ChicosSpider(scrapy.Spider):
@@ -30,7 +29,7 @@ class ChicosSpider(scrapy.Spider):
             properties = {
                 "name": data["attributes"]["name"],
                 "ref": data["id"],
-                "addr_full": data["attributes"]["address1"],
+                "street_address": data["attributes"]["address1"],
                 "city": data["attributes"]["city"],
                 "state": data["attributes"]["state"],
                 "postcode": data["attributes"]["postalCode"],
@@ -40,4 +39,4 @@ class ChicosSpider(scrapy.Spider):
                 "lon": float(data["attributes"]["longitude"]),
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

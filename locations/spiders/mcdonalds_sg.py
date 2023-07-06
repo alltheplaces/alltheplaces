@@ -1,17 +1,18 @@
 import re
+
 import scrapy
-from locations.items import GeojsonPointItem
+
+from locations.items import Feature
+from locations.spiders.mcdonalds import McDonaldsSpider
 
 
 class McDonaldsSGSpider(scrapy.Spider):
     name = "mcdonalds_sg"
-    item_attributes = {"brand": "McDonald's", "brand_wikidata": "Q38076"}
+    item_attributes = McDonaldsSpider.item_attributes
     allowed_domains = ["www.mcdonalds.com.sg"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
-    start_urls = (
-        "https://www.mcdonalds.com.sg/wp/wp-admin/admin-ajax.php?action=store_locator_locations",
-    )
+    start_urls = ("https://www.mcdonalds.com.sg/wp/wp-admin/admin-ajax.php?action=store_locator_locations",)
 
     def store_hours(self, data):
         if data == "24 hours":
@@ -45,4 +46,4 @@ class McDonaldsSGSpider(scrapy.Spider):
             if opening_hours:
                 properties["opening_hours"] = opening_hours
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

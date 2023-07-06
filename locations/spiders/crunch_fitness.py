@@ -1,9 +1,8 @@
-# -*- coding: utf-8 -*-
 import json
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class CrunchFitnessSpider(scrapy.Spider):
@@ -15,15 +14,13 @@ class CrunchFitnessSpider(scrapy.Spider):
     ]
 
     def parse(self, response):
-        data = json.loads(
-            response.xpath("//div[@data-react-props]/@data-react-props").extract_first()
-        )
+        data = json.loads(response.xpath("//div[@data-react-props]/@data-react-props").extract_first())
 
         for club in data["clubs"]:
             properties = {
                 "name": club["name"],
                 "ref": club["id"],
-                "addr_full": club["address"]["address_1"],
+                "street_address": club["address"]["address_1"],
                 "city": club["address"]["city"],
                 "state": club["address"]["state"],
                 "postcode": club["address"]["zip"],
@@ -34,4 +31,4 @@ class CrunchFitnessSpider(scrapy.Spider):
                 "lon": float(club["longitude"]),
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

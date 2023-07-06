@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import base64
 import json
 import re
@@ -6,7 +5,7 @@ import zlib
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class TacototeSpider(scrapy.Spider):
@@ -18,7 +17,7 @@ class TacototeSpider(scrapy.Spider):
     def parse(self, response):
         response.selector.remove_namespaces()
         for url in response.xpath("//loc/text()").extract():
-            if re.search(r"/locations/.", url):
+            if re.search(r"/locations-old/.", url):
                 yield scrapy.Request(url, callback=self.parse_city)
 
     def parse_city(self, response):
@@ -38,4 +37,4 @@ class TacototeSpider(scrapy.Spider):
                 "name": marker["title"],
                 "addr_full": marker["address"],
             }
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

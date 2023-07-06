@@ -1,19 +1,18 @@
-# -*- coding: utf-8 -*-
-import scrapy
 import html
 import json
 from urllib.parse import urlencode
 
-from locations.items import GeojsonPointItem
+import scrapy
+
+from locations.items import Feature
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class SherwinWilliamsSpider(scrapy.Spider):
     name = "sherwin_williams"
     item_attributes = {"brand": "Sherwin-Williams", "brand_wikidata": "Q48881"}
     allowed_domains = ["www.sherwin-williams.com"]
-    custom_settings = {
-        "USER_AGENT": "Mozilla/5.0 (X11; Linux x86_64; rv:99.0) Gecko/20100101 Firefox/99.0"
-    }
+    user_agent = BROWSER_DEFAULT
 
     #  Covers United States, Canada, UK, Puerto Rico, Bahamas with 500 mile radius - (from regis spider)
     lats = [
@@ -83,30 +82,22 @@ class SherwinWilliamsSpider(scrapy.Spider):
         ]
 
         # paint stores - search by 100 mile radius in US/CA
-        with open(
-            "./locations/searchable_points/us_centroids_50mile_radius.csv"
-        ) as points:
+        with open("./locations/searchable_points/us_centroids_50mile_radius.csv") as points:
             next(points)
             for point in points:
                 _, lat, lon = point.strip().split(",")
-                params.update(
-                    {"latitude": lat, "longitude": lon, "storeType": "PaintStore"}
-                )
+                params.update({"latitude": lat, "longitude": lon, "storeType": "PaintStore"})
                 yield scrapy.Request(
                     url=base_url + urlencode(params),
                     callback=self.parse,
                     meta={"store_type": "Sherwin-Williams Paint Store"},
                 )
 
-        with open(
-            "./locations/searchable_points/ca_centroids_50mile_radius.csv"
-        ) as points:
+        with open("./locations/searchable_points/ca_centroids_50mile_radius.csv") as points:
             next(points)
             for point in points:
                 _, lat, lon = point.strip().split(",")
-                params.update(
-                    {"latitude": lat, "longitude": lon, "storeType": "PaintStore"}
-                )
+                params.update({"latitude": lat, "longitude": lon, "storeType": "PaintStore"})
                 yield scrapy.Request(
                     url=base_url + urlencode(params),
                     callback=self.parse,
@@ -114,9 +105,7 @@ class SherwinWilliamsSpider(scrapy.Spider):
                 )
 
         for lat, lon in addtional_lat_lons:
-            params.update(
-                {"latitude": lat, "longitude": lon, "storeType": "PaintStore"}
-            )
+            params.update({"latitude": lat, "longitude": lon, "storeType": "PaintStore"})
             yield scrapy.Request(
                 url=base_url + urlencode(params),
                 callback=self.parse,
@@ -149,9 +138,7 @@ class SherwinWilliamsSpider(scrapy.Spider):
                 )
 
     def parse(self, response):
-        json_data = response.xpath(
-            '//script[@id="storeResultsJSON"]/text()'
-        ).extract_first()
+        json_data = response.xpath('//script[@id="storeResultsJSON"]/text()').extract_first()
         if json_data:
             data = json.loads(json_data)
             store_type = response.meta["store_type"]
@@ -174,4 +161,4 @@ class SherwinWilliamsSpider(scrapy.Spider):
                     },
                 }
 
-                yield GeojsonPointItem(**properties)
+                yield Feature(**properties)

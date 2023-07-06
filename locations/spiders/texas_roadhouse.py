@@ -1,7 +1,9 @@
 import json
+
 import scrapy
-from locations.items import GeojsonPointItem
+
 from locations.hours import OpeningHours
+from locations.items import Feature
 
 
 class TexasRoadhouseSpider(scrapy.Spider):
@@ -58,4 +60,4 @@ class TexasRoadhouseSpider(scrapy.Spider):
             "opening_hours": self.parse_hours(data["schedule"]),
         }
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

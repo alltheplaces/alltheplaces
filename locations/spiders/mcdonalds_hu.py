@@ -1,13 +1,14 @@
-# -*- coding: utf-8 -*-
-import scrapy
 import re
-from locations.items import GeojsonPointItem
+
+import scrapy
+
+from locations.items import Feature
+from locations.spiders.mcdonalds import McDonaldsSpider
 
 
 class McDonaldsHUSpider(scrapy.Spider):
-
     name = "mcdonalds_hu"
-    item_attributes = {"brand": "McDonald's", "brand_wikidata": "Q38076"}
+    item_attributes = McDonaldsSpider.item_attributes
     allowed_domains = ["www.mcdonalds.hu"]
     start_urls = ("https://www.mcdonalds.hu/ettermeink",)
 
@@ -15,9 +16,7 @@ class McDonaldsHUSpider(scrapy.Spider):
         day_groups = []
         this_day_group = {}
         weekdays = ["Mo", "Th", "We", "Tu", "Fr", "Sa", "Su"]
-        day_hours = data.xpath(
-            './/div[@class="grid__item one-half text--right"]//text()'
-        ).extract()
+        day_hours = data.xpath('.//div[@class="grid__item one-half text--right"]//text()').extract()
         index = 0
         for day_hour in day_hours:
             day_hour = day_hour.strip()
@@ -25,16 +24,12 @@ class McDonaldsHUSpider(scrapy.Spider):
                 break
 
             hours = ""
-            match = re.search(
-                r"([0-9]{1,2}):([0-9]{1,2})–([0-9]{1,2}):([0-9]{1,2})", day_hour
-            )
+            match = re.search(r"([0-9]{1,2}):([0-9]{1,2})–([0-9]{1,2}):([0-9]{1,2})", day_hour)
             if not match:
                 hours = "off"
             else:
                 sh, sm, eh, em = match.groups()
-                hours = "{}:{}-{}:{}".format(
-                    sh, sm, int(eh) + 12 if int(eh) < 12 else int(eh), em
-                )
+                hours = "{}:{}-{}:{}".format(sh, sm, int(eh) + 12 if int(eh) < 12 else int(eh), em)
             short_day = weekdays[index]
             if not this_day_group:
                 this_day_group = {
@@ -77,18 +72,14 @@ class McDonaldsHUSpider(scrapy.Spider):
         return opening_hours
 
     def parse_latlon(self, data):
-        map_url = (
-            data.xpath('//a[@title="Mutatás a térképen"]/@href').extract_first().strip()
-        )
+        map_url = data.xpath('//a[@title="Mutatás a térképen"]/@href').extract_first().strip()
         lat_lon = map_url.split("loc:")[1]
         lat = lat_lon.split(",")[0]
         lon = lat_lon.split(",")[1]
         return lat, lon
 
     def parse_store(self, response):
-        address = response.xpath(
-            '//h1[@class="text--uppercase"]/text()'
-        ).extract_first()
+        address = response.xpath('//h1[@class="text--uppercase"]/text()').extract_first()
         phone = response.xpath('//a[@title="Telefonszám"]/text()').extract_first()
         lat, lon = self.parse_latlon(response)
 
@@ -104,7 +95,7 @@ class McDonaldsHUSpider(scrapy.Spider):
         if opening_hours:
             properties["opening_hours"] = opening_hours
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)
 
     def parse(self, response):
         results = response.xpath("//article")

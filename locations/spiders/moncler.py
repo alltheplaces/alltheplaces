@@ -1,20 +1,14 @@
-# -*- coding: utf-8 -*-
-import re
-
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class MonclerSpider(scrapy.Spider):
-    # download_delay = 0.2
     name = "moncler"
-    item_attributes = {"brand": "Moncler"}
+    item_attributes = {"brand": "Moncler", "brand_wikidata": "Q1548951"}
     allowed_domains = ["moncler.com"]
-
-    start_urls = [
-        "https://www.moncler.com/on/demandware.store/Sites-MonclerEU-Site/it_IT/StoresApi-FindAll"
-    ]
+    start_urls = ["https://www.moncler.com/on/demandware.store/Sites-MonclerEU-Site/it_IT/StoresApi-FindAll"]
+    requires_proxy = True
 
     def parse(self, response):
         data = response.json()
@@ -31,4 +25,4 @@ class MonclerSpider(scrapy.Spider):
                 "lon": i["longitude"],
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

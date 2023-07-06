@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
-import scrapy
+from scrapy.spiders import SitemapSpider
 
-from locations.linked_data_parser import LinkedDataParser
+from locations.structured_data_spider import StructuredDataSpider
 
 
-class FrischsSpider(scrapy.spiders.SitemapSpider):
+class FrischsSpider(SitemapSpider, StructuredDataSpider):
     name = "frischs"
     item_attributes = {
         "brand": "Frisch's Big Boy",
@@ -12,9 +11,8 @@ class FrischsSpider(scrapy.spiders.SitemapSpider):
     }
     allowed_domains = ["locations.frischs.com"]
     sitemap_urls = [
-        "https://locations.frischs.com/sitemap.xml",
+        "https://locations.frischs.com/robots.txt",
     ]
-
-    def parse(self, response):
-        item = LinkedDataParser.parse(response, "Restaurant")
-        yield item
+    sitemap_rules = [
+        (r"/\d+/$", "parse_sd"),
+    ]

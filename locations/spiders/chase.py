@@ -1,9 +1,10 @@
-# -*- coding: utf-8 -*-
 import html
-import scrapy
 import re
+
+import scrapy
+
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class ChaseSpider(scrapy.Spider):
@@ -29,7 +30,6 @@ class ChaseSpider(scrapy.Spider):
         return o.as_opening_hours()
 
     def parse(self, response):
-
         regex = re.compile(r"https://locator.chase.com/\w+/\S+(?=</loc>)")
         urls = re.findall(regex, response.text)
 
@@ -46,7 +46,6 @@ class ChaseSpider(scrapy.Spider):
                 continue
 
     def parse_store(self, response):
-
         atm_only = True
         if response.xpath('//div[@class="Core-branch"]/*[1]').extract_first():
             atm_only = False
@@ -57,35 +56,20 @@ class ChaseSpider(scrapy.Spider):
 
         properties = {
             "name": name.strip(),
-            "ref": re.search(r"https://locator.chase.com/(.+)$", response.url).groups()[
-                0
-            ],
-            "addr_full": response.xpath(
-                '//meta[@itemprop="streetAddress"]/@content'
-            ).extract_first(),
-            "city": response.xpath(
-                '//meta[@itemprop="addressLocality"]/@content'
-            ).extract_first(),
-            "state": response.xpath(
-                '//abbr[@itemprop="addressRegion"]/text()'
-            ).extract_first(),
-            "postcode": response.xpath(
-                '//span[@itemprop="postalCode"]/text()'
-            ).extract_first(),
+            "ref": re.search(r"https://locator.chase.com/(.+)$", response.url).groups()[0],
+            "street_address": response.xpath('//meta[@itemprop="streetAddress"]/@content').extract_first(),
+            "city": response.xpath('//meta[@itemprop="addressLocality"]/@content').extract_first(),
+            "state": response.xpath('//abbr[@itemprop="addressRegion"]/text()').extract_first(),
+            "postcode": response.xpath('//span[@itemprop="postalCode"]/text()').extract_first(),
             "website": response.url,
-            "lat": float(
-                response.xpath('//meta[@itemprop="latitude"]/@content').extract_first()
-            ),
-            "lon": float(
-                response.xpath('//meta[@itemprop="longitude"]/@content').extract_first()
-            ),
+            "lat": float(response.xpath('//meta[@itemprop="latitude"]/@content').extract_first()),
+            "lon": float(response.xpath('//meta[@itemprop="longitude"]/@content').extract_first()),
+            "extras": {"amenity": "atm" if atm_only else "bank"},
         }
 
-        hours = response.xpath('//tr[@itemprop="openingHours"]/@content').extract()[
-            :7
-        ]  # lobby hours only
+        hours = response.xpath('//tr[@itemprop="openingHours"]/@content').extract()[:7]  # lobby hours only
         opening_hours = self.parse_hours(hours)
         if opening_hours:
             properties["opening_hours"] = opening_hours
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

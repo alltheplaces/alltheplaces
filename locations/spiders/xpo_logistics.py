@@ -1,9 +1,8 @@
-# -*- coding: utf-8 -*-
 import ast
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class XPOLogisticsSpider(scrapy.Spider):
@@ -13,13 +12,11 @@ class XPOLogisticsSpider(scrapy.Spider):
     start_urls = ("https://www.xpo.com/global-locations/",)
 
     def parse(self, response):
-        script = response.xpath(
-            '//script[@id="globalLocations"]/text()'
-        ).extract_first()
+        script = response.xpath('//script[@id="globalLocations"]/text()').extract_first()
         data = ast.literal_eval(script)
 
         for store in data:
-            yield GeojsonPointItem(
+            yield Feature(
                 lat=float(store["latitude"]),
                 lon=float(store["longitude"].replace(",", "")),
                 phone=store["telephone"],

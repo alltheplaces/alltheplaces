@@ -2,7 +2,7 @@ import json
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class CAndASpider(scrapy.Spider):
@@ -41,29 +41,18 @@ class CAndASpider(scrapy.Spider):
         stores = response.xpath(
             '//section[@class="resultFilter"]/div/div/div[contains(concat(" ", normalize-space(@class), " "), " store ")]'
         )
+        country = find_between(response.url, "stores/", "-").upper()
         for store in stores:
             flags = json.loads(store.xpath("./@data-flags").get())
-            contact = [
-                i.strip()
-                for i in store.xpath(
-                    './div[@class="addressBox"]/p[@class="Kontakt"]/text()'
-                ).getall()
-            ]
-            address = [
-                i.strip()
-                for i in store.xpath(
-                    './div[@class="addressBox"]/p[@class="address"]/text()'
-                ).getall()
-            ]
+            contact = [i.strip() for i in store.xpath('./div[@class="addressBox"]/p[@class="Kontakt"]/text()').getall()]
+            address = [i.strip() for i in store.xpath('./div[@class="addressBox"]/p[@class="address"]/text()').getall()]
             hours = [
                 i.xpath("./@data-day").get()[0:2]
                 + " "
                 + i.xpath("./@data-openingtime").get()
                 + "-"
                 + i.xpath("./@data-closingtime").get()
-                for i in store.xpath(
-                    './div[@class="addressBox"]/p[@class="openingHours hideopeninghours"]'
-                )
+                for i in store.xpath('./div[@class="addressBox"]/p[@class="openingHours hideopeninghours"]')
             ]
 
             properties = {
@@ -73,10 +62,9 @@ class CAndASpider(scrapy.Spider):
                         './div[@class="addressBox"]/p[@class="addBoxLinks"]/a[@class="btn cabtnBigRed"]/@href'
                     ).get()
                 ),
-                "name": store.xpath(
-                    './div[@class="addressBox"]/p[@class="store"]/text()'
-                ).get(),
+                "name": store.xpath('./div[@class="addressBox"]/p[@class="store"]/text()').get(),
                 "phone": contact[2].replace("Tel: ", ""),
+                "country": country,
                 "opening_hours": "; ".join(hours),
                 "street_address": address[0],
                 "city": address[1],
@@ -87,16 +75,10 @@ class CAndASpider(scrapy.Spider):
                 },
             }
 
-            properties["image"] = (
-                "https://www.c-and-a.com/shop-img/ca-store/"
-                + properties["ref"]
-                + ".JPG"
-            )
+            properties["image"] = "https://www.c-and-a.com/shop-img/ca-store/" + properties["ref"] + ".JPG"
 
             link = (
-                store.xpath(
-                    './div[@class="addressBox"]/p[@class="addBoxLinks"]/a[@class="filLink"]/@href'
-                )
+                store.xpath('./div[@class="addressBox"]/p[@class="addBoxLinks"]/a[@class="filLink"]/@href')
                 .get()
                 .split("/")
             )
@@ -107,4 +89,13 @@ class CAndASpider(scrapy.Spider):
                     properties["lat"] = coords[0]
                     properties["lon"] = coords[1]
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)
+
+
+def find_between(s, first, last):
+    try:
+        start = s.index(first) + len(first)
+        end = s.index(last, start)
+        return s[start:end]
+    except ValueError:
+        return ""

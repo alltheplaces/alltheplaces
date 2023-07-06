@@ -1,10 +1,6 @@
-# -*- coding: utf-8 -*-
-import re
-
 import scrapy
 
-from locations.items import GeojsonPointItem
-from locations.hours import OpeningHours
+from locations.items import Feature
 
 
 class ClinicalPathologyLaboratoriesSpider(scrapy.Spider):
@@ -19,18 +15,16 @@ class ClinicalPathologyLaboratoriesSpider(scrapy.Spider):
     ]
 
     def parse(self, response):
-        data = response.json()
-        for i, item in enumerate(data):
+        for item in response.json():
             properties = {
                 "name": item["nm"],
-                "addr_full": item["s"],
+                "street_address": item["s"],
                 "city": item["city"],
                 "state": item["state"],
                 "postcode": item["zip"],
                 "country": "US",
                 "ref": item["id"],
-                "website": "na",
                 "lat": item["lat"],
                 "lon": item["lng"],
             }
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

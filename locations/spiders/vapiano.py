@@ -1,7 +1,9 @@
-import scrapy
-from locations.items import GeojsonPointItem
-import re
 import json
+import re
+
+import scrapy
+
+from locations.items import Feature
 
 regex = r"\[{.*}\]"
 
@@ -14,9 +16,7 @@ class VapianoSpider(scrapy.Spider):
     start_urls = ["https://us.vapiano.com/en/restaurants/"]
 
     def parse(self, response):
-        script = response.xpath('//script[contains(., "var restaurants")]/text()')[
-            0
-        ].extract()
+        script = response.xpath('//script[contains(., "var restaurants")]/text()')[0].extract()
 
         data = re.search(regex, script).group()
         data = json.loads(data)
@@ -33,7 +33,7 @@ class VapianoSpider(scrapy.Spider):
             country = i["country"]
             addr_full = "{} {}, {}".format(city, street, state)
 
-            yield GeojsonPointItem(
+            yield Feature(
                 ref=name,
                 city=city,
                 street=street,

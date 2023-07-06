@@ -1,12 +1,10 @@
-# -*- coding: utf-8 -*-
-import logging
-
-import scrapy
+import json
 import re
 
-from locations.items import GeojsonPointItem
+import scrapy
+
 from locations.hours import OpeningHours
-import json
+from locations.items import Feature
 
 
 class WholeFoodsSpider(scrapy.Spider):
@@ -36,12 +34,8 @@ class WholeFoodsSpider(scrapy.Spider):
         if response.request.meta.get("redirect_urls"):
             return
 
-        store_json = json.loads(
-            response.xpath(
-                '//script[@type="application/ld+json"]/text()'
-            ).extract_first()
-        )
-        yield GeojsonPointItem(
+        store_json = json.loads(response.xpath('//script[@type="application/ld+json"]/text()').extract_first())
+        yield Feature(
             ref=response.url.split("/")[-1],
             name=response.xpath("//h1/text()").extract_first().strip(),
             lat=float(store_json["geo"]["latitude"]),
@@ -75,12 +69,12 @@ class WholeFoodsSpider(scrapy.Spider):
         store_text = response.xpath(
             '//script[@type="text/javascript" and contains(text(), "storeAPIData")]/text()'
         ).extract_first()
-        store_json = json.loads(
-            store_text[store_text.find("{") : store_text.rfind("}") + 1]
-        )["initialProps"]["siteData"]["storeAPIData"]
+        store_json = json.loads(store_text[store_text.find("{") : store_text.rfind("}") + 1])["initialProps"][
+            "siteData"
+        ]["storeAPIData"]
 
         # Coordinates are listed as [lon, lat]
-        yield GeojsonPointItem(
+        yield Feature(
             ref=store_json["folder"],
             name=store_json["name"],
             lat=float(store_json["geo_location"]["coordinates"][1]),

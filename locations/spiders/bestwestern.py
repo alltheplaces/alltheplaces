@@ -1,7 +1,9 @@
-# -*- coding: utf-8 -*-
-import scrapy
-import json
 import html
+import json
+
+import scrapy
+
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
 
@@ -18,13 +20,12 @@ class BestWesternSpider(scrapy.spiders.SitemapSpider):
     ]
     allowed_domains = ["bestwestern.com"]
     sitemap_urls = ["https://www.bestwestern.com/etc/seo/bestwestern/hotels.xml"]
-    sitemap_rules = [(r"/en_US/book/hotels-in-.*\.html", "parse_hotel")]
-    download_delay = 0.5
+    sitemap_rules = [(r"en_US/book/.*\.html", "parse_hotel")]
+    download_delay = 2.0
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def parse_hotel(self, response):
-        hotel_details = response.xpath(
-            '//div[@id="hotel-details-info"]/@data-hoteldetails'
-        ).get()
+        hotel_details = response.xpath('//div[@id="hotel-details-info"]/@data-hoteldetails').get()
 
         if not hotel_details:
             return
@@ -41,12 +42,13 @@ class BestWesternSpider(scrapy.spiders.SitemapSpider):
                 try:
                     # It's a big hotel chain, worth a bit of work to get the imagery.
                     image_path = hotel["imageCatalog"]["Media"][0]["ImagePath"]
-                    item[
-                        "image"
-                    ] = "https://images.bestwestern.com/bwi/brochures/{}/photos/1024/{}".format(
+                    item["image"] = "https://images.bestwestern.com/bwi/brochures/{}/photos/1024/{}".format(
                         summary["resort"], image_path
                     )
                 except IndexError:
                     pass
+
+                apply_category(Categories.HOTEL, item)
+
                 yield item
                 return

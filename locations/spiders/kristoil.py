@@ -1,6 +1,8 @@
 import re
+
 import scrapy
-from locations.items import GeojsonPointItem
+
+from locations.items import Feature
 
 
 class KristoilSpider(scrapy.Spider):
@@ -30,7 +32,6 @@ class KristoilSpider(scrapy.Spider):
         )
 
     def parse(self, response):
-        phoneregex = re.compile(r"^<a.+>([0-9\-]+)<\/a>$")
         stores = response.json()
         for key, value in stores.items():
             all_address = value["address"].split(",")
@@ -59,4 +60,4 @@ class KristoilSpider(scrapy.Spider):
             }
             if value["phone"]:
                 properties["phone"] = value["phone"]
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

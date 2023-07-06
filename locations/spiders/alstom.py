@@ -1,10 +1,7 @@
-# -*- coding: utf-8 -*-
-import re
-
 import scrapy
-import json
+from scrapy import Selector
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 countries = (
     "Algeria,DZ",
@@ -78,58 +75,30 @@ class AlstomSpider(scrapy.Spider):
     start_urls = ("https://www.alstom.com/alstom-page/maps/json/1826",)
 
     def parse(self, response):
-        data = json.loads(json.dumps(response.json()))
-
-        for i in data:
+        for i in response.json():
             for j in i["locations"]:
-                country = i["name"]
-                for codes in countries:
-                    if codes.split(",")[0] == country:
-                        code = codes.split(",")[1]
                 try:
                     lng = float(j["long"])
                 except:
                     lng = j["long"].replace(",", "").replace(".", "")
                     lng = lng[:3] + "." + lng[3:]
                 try:
-                    lat = float(j["lat"])
+                    lat = float(j["lat"].strip("\u200b"))
                 except:
                     lat = j["lat"].replace(",", "").replace(".", "")
                     lat = lat[:3] + "." + lat[3:]
-                try:
-                    addr = j["address"]
-                    addr_en = addr.encode("ascii", "ignore")
-                    addr_de = addr_en.decode()
-                    addr = (
-                        addr_de.replace("\r\n", "")
-                        .replace("<p>", "")
-                        .replace("<br />", " ")
-                        .replace("</p>", "")
-                        .replace("&nbsp;", "")
-                    )
-                except:
-                    addr = j["address"]
-                try:
-                    t = j["title"]
-                    t_en = t.encode("ascii", "ignore")
-                    t_de = t_en.decode()
-                    title = (
-                        t_de.replace("\r\n", "")
-                        .replace("<p>", "")
-                        .replace("<br />", " ")
-                        .replace("</p>", "")
-                    )
-                except:
-                    addr = j["address"]
+                if not j["address"]:
+                    j["address"] = ""
+                addr = Selector(text=j["address"]).xpath("//p/text()").get()
 
                 properties = {
                     "ref": j["id"],
-                    "name": title,
+                    "name": j["title"],
                     "addr_full": addr,
-                    "country": code,
-                    "phone": j["phone"],
+                    "country": i["name"],
+                    "phone": j["phone"] or None,
                     "lat": float(lat),
                     "lon": float(lng),
                 }
 
-                yield GeojsonPointItem(**properties)
+                yield Feature(**properties)

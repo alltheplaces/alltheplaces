@@ -1,20 +1,50 @@
+import re
+
 from scrapy.spiders import SitemapSpider
 
-from locations.spiders.vapestore_gb import clean_address
-from locations.structured_data_spider import StructuredDataSpider
+from locations.dict_parser import DictParser
+from locations.hours import OpeningHours
 
 
-class WolseleyGB(SitemapSpider, StructuredDataSpider):
+class WolseleyGBSpider(SitemapSpider):
     name = "wolseley_gb"
     item_attributes = {"brand": "Wolseley", "brand_wikidata": "Q8030423"}
     sitemap_urls = ["https://www.wolseley.co.uk/sitemap.xml"]
-    sitemap_rules = [
-        (f"https:\/\/www\.wolseley\.co\.uk\/branch\/[-\w]+\/$", "parse_sd")
-    ]
-    wanted_types = ["LocalBusiness"]
-    download_delay = 5
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
-    def inspect_item(self, item, response):
-        item["street_address"] = clean_address(item["street_address"])
+    def sitemap_filter(self, entries):
+        for entry in entries:
+            if entry["loc"].endswith(".xml"):
+                yield entry
+            if m := re.search(r"\.uk/branch/(.+)/$", entry["loc"]):
+                entry["loc"] = f"https://www.wolseley.co.uk/wcs/resources/store/10203/xstorelocator/{m.group(1)}"
+                yield entry
+
+    def parse(self, response, **kwargs):
+        store = response.json()["storeLocation"]
+        store["website"] = f'https://www.wolseley.co.uk/branch/{store["seoName"]}/'
+        store["address"]["street_address"] = ", ".join(
+            filter(
+                None,
+                [
+                    store["address"].pop("address1"),
+                    store["address"].pop("address2"),
+                    store["address"].pop("address3"),
+                ],
+            )
+        )
+        item = DictParser.parse(store)
+
+        item["image"] = ";".join(store["branchImageList"])
+
+        if m := re.match(r"formerly (?:trading as )?(.+)$", store["secondaryName"]):
+            item["extras"] = {"old_name": m.group(1)}
+
+        oh = OpeningHours()
+        for day in store["openingBusinessHours"]["hours"]:
+            if day["closed"]:
+                continue
+            oh.add_range(day["dayOfWeek"], day["openingTime"], day["closingTime"])
+        item["opening_hours"] = oh.as_opening_hours()
 
         yield item

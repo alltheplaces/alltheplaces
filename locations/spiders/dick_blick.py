@@ -1,54 +1,29 @@
-# -*- coding: utf-8 -*-
-import scrapy
-import re
+from scrapy.spiders import SitemapSpider
 
-from locations.items import GeojsonPointItem
+from locations.hours import OpeningHours
+from locations.structured_data_spider import StructuredDataSpider
+from locations.user_agents import BROWSER_DEFAULT
 
 
-class DickBlickSpider(scrapy.Spider):
+class DickBlickSpider(SitemapSpider, StructuredDataSpider):
     name = "dick_blick"
-    item_attributes = {"brand": "Dick Blick"}
+    item_attributes = {"brand": "Dick Blick", "brand_wikidata": "Q5272692"}
     allowed_domains = ["www.dickblick.com"]
-    start_urls = ("https://www.dickblick.com/stores/",)
+    sitemap_urls = ["https://www.dickblick.com/sitemap.aspx"]
+    sitemap_rules = [(r"/stores/[-\w]+/[-\w]+/$", "parse_sd")]
+    wanted_types = ["HobbyShop"]
+    user_agent = BROWSER_DEFAULT
 
-    def parse_store(self, response):
-        contacts = response.xpath('//ul[@class="contact"]/li/span/text()').extract()
-
-        properties = {
-            "addr_full": contacts[0],
-            "city": contacts[1],
-            "state": contacts[2],
-            "postcode": contacts[3],
-            "phone": contacts[4],
-            "ref": response.url,
-            "website": response.url,
-        }
-
-        day_groups = response.xpath(
-            '//ul[@class="hours"]/li[@class="storehours"]/text()'
-        ).extract()
-
-        opening_hours = []
-        for day_group in day_groups:
-            match = re.match(r"(.*): (\d+)-(\d+)", day_group)
-            days, f_hr, t_hr = match.groups()
-            f_hr = int(f_hr)
-            t_hr = int(t_hr) + 12
-            opening_hours.append("{} {:02d}:00-{:02d}:00".format(days, f_hr, t_hr))
-
-        if opening_hours:
-            properties["opening_hours"] = "; ".join(opening_hours)
-
-        yield GeojsonPointItem(**properties)
-
-    def parse_state(self, response):
-        urls = response.xpath('//div/ul[@class="storelist"]/li/a/@href').extract()
-        for path in urls:
-            yield scrapy.Request(response.urljoin(path), callback=self.parse_store)
-
-    def parse(self, response):
-        urls = response.xpath(
-            '//div[@class="statechooser"]/select/option/@value'
-        ).extract()
-        for path in urls:
-            yield scrapy.Request(response.urljoin(path), callback=self.parse_state)
+    def inspect_item(self, item, response):
+        oh = OpeningHours()
+        for day in response.xpath('//li[contains(@data-testid,"hours")]'):
+            if day.xpath("./text()").get().strip() == "Closed":
+                continue
+            oh.add_range(
+                day=day.xpath("normalize-space(./span/text())").get().strip(":")[:3],
+                open_time=day.xpath("./text()").get().split(" - ")[0],
+                close_time=day.xpath("./text()").get().split(" - ")[1],
+                time_format="%I:%M%p",
+            )
+        item["opening_hours"] = oh.as_opening_hours()
+        yield item

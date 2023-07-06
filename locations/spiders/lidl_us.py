@@ -1,15 +1,12 @@
-# -*- coding: utf-8 -*-
-import re
-
 import scrapy
 
-from locations.items import GeojsonPointItem
-from locations.hours import OpeningHours
+from locations.items import Feature
+from locations.spiders.lidl_gb import LidlGBSpider
 
 
 class LidlUSSpider(scrapy.Spider):
     name = "lidl_us"
-    item_attributes = {"brand": "Lidl", "brand_wikidata": "Q151954"}
+    item_attributes = LidlGBSpider.item_attributes
     allowed_domains = ["lidl.com"]
     start_urls = [
         "https://mobileapi.lidl.com/v1/stores",
@@ -32,4 +29,4 @@ class LidlUSSpider(scrapy.Spider):
                 "lon": float(store["coordinates"]["lon"]),
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

@@ -1,11 +1,9 @@
-# -*- coding: utf-8 -*-
 import json
-import re
 
 import scrapy
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class RedRobinSpider(scrapy.Spider):
@@ -18,9 +16,7 @@ class RedRobinSpider(scrapy.Spider):
         for href in response.css("ul.sb-directory-list ::attr(href)").extract():
             yield scrapy.Request(response.urljoin(href))
 
-        for ldjson in response.xpath(
-            '//script[@type="application/ld+json"]/text()'
-        ).extract():
+        for ldjson in response.xpath('//script[@type="application/ld+json"]/text()').extract():
             data = json.loads(ldjson)
             if data["@type"] == "Restaurant":
                 yield self.parse_store(response, data)
@@ -46,4 +42,4 @@ class RedRobinSpider(scrapy.Spider):
             "opening_hours": hours.as_opening_hours(),
             "website": response.url,
         }
-        return GeojsonPointItem(**properties)
+        return Feature(**properties)

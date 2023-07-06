@@ -1,8 +1,9 @@
 import json
-import scrapy
 from datetime import datetime
-from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+
+import scrapy
+
+from locations.items import Feature
 
 
 class EdibleArrangementsSpider(scrapy.Spider):
@@ -64,4 +65,4 @@ class EdibleArrangementsSpider(scrapy.Spider):
             if oh:
                 properties["opening_hours"] = "; ".join(oh)
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

@@ -1,12 +1,13 @@
-# -*- coding: utf-8 -*-
 import json
+
 import scrapy
-from locations.items import GeojsonPointItem
+
+from locations.items import Feature
 
 
 class SendiksSpider(scrapy.spiders.SitemapSpider):
     name = "sendiks"
-    item_attributes = {"brand": "Sendik's Food Market"}
+    item_attributes = {"brand": "Sendik's Food Market", "brand_wikidata": "Q23461945"}
     allowed_domains = ["www.sendiks.com"]
     sitemap_urls = (
         "https://www.sendiks.com/sitemap-pt-stores-2015-07.xml",
@@ -38,4 +39,4 @@ class SendiksSpider(scrapy.spiders.SitemapSpider):
             "lat": data["latitude"],
             "lon": data["longitude"],
         }
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

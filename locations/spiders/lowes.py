@@ -1,10 +1,11 @@
-# -*- coding: utf-8 -*-
-import scrapy
-import re
 import json
-from locations.items import GeojsonPointItem
-from locations.hours import OpeningHours
+import re
 
+import scrapy
+
+from locations.hours import OpeningHours
+from locations.items import Feature
+from locations.user_agents import BROWSER_DEFAULT
 
 day_mapping = {
     "Monday": "Mo",
@@ -24,10 +25,8 @@ class LowesSpider(scrapy.Spider):
     item_attributes = {"brand": "Lowe's", "brand_wikidata": "Q1373493"}
     allowed_domains = ["lowes.com"]
     download_delay = 0.1
-    custom_settings = {
-        "ROBOTSTXT_OBEY": False,
-        "USER_AGENT": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36 RuxitSynthetic/1.0 v2946028852165593646 t2919217341348717815",
-    }
+    custom_settings = {"ROBOTSTXT_OBEY": False}
+    user_agent = BROWSER_DEFAULT
 
     def start_requests(self):
         yield scrapy.Request(
@@ -60,11 +59,7 @@ class LowesSpider(scrapy.Spider):
         return opening_hours.as_opening_hours()
 
     def parse_store(self, response):
-        ref = re.search(r".+/(.+)", response.url).group(1)
-
-        script_content = response.xpath(
-            '//script[contains(text(),"storeHours")]/text()'
-        ).extract_first()
+        script_content = response.xpath('//script[contains(text(),"storeHours")]/text()').extract_first()
         if not script_content:
             return
 
@@ -74,9 +69,6 @@ class LowesSpider(scrapy.Spider):
         json_data = json.loads(script_data)
         store_hours = json_data.get("storeHours")
 
-        state_texts = response.xpath(
-            '//span[@itemprop="addressRegion"]/text()'
-        ).extract()
         properties = {
             "lat": json_data["storeDetails"]["lat"],
             "lon": json_data["storeDetails"]["long"],
@@ -93,7 +85,7 @@ class LowesSpider(scrapy.Spider):
             },
         }
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)
 
     def parse(self, response):
         response.selector.remove_namespaces()

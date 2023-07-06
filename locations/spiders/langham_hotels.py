@@ -1,8 +1,8 @@
-# -*- coding: utf-8 -*-
-import scrapy
 import json
 
-from locations.items import GeojsonPointItem
+import scrapy
+
+from locations.items import Feature
 
 
 class LanghamHotelsSpider(scrapy.Spider):
@@ -16,19 +16,13 @@ class LanghamHotelsSpider(scrapy.Spider):
 
     def parse(self, response):
         # gather URLs of all Langham Hotel locations
-        all_locations = response.xpath(
-            '//div[@class="listing-item locations-item"]/a/@href'
-        ).extract()
+        all_locations = response.xpath('//div[@class="listing-item locations-item"]/a/@href').extract()
 
         for locations in all_locations:
-            yield scrapy.Request(
-                response.urljoin(locations), callback=self.parse_locations
-            )
+            yield scrapy.Request(response.urljoin(locations), callback=self.parse_locations)
 
     def parse_locations(self, response):
-        data = response.xpath(
-            '//script[@type="application/ld+json"]/text()'
-        ).extract_first()
+        data = response.xpath('//script[@type="application/ld+json"]/text()').extract_first()
 
         if data:
             try:
@@ -51,13 +45,10 @@ class LanghamHotelsSpider(scrapy.Spider):
                     "postcode": address_data.get("postalCode", None),
                 }
 
-                yield GeojsonPointItem(**properties)
+                yield Feature(**properties)
 
             except Exception as e:
-                self.logger.warn(
-                    "----------------- Error -----------------: {}".format(e)
-                )
-                pass
+                self.logger.warn("----------------- Error -----------------: {}".format(e))
 
         else:
             # some of the websites don't provide location information with application/ld+json

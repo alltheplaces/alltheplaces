@@ -1,12 +1,10 @@
-import re
+from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule
 
 from locations.google_url import extract_google_position
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 from locations.structured_data_spider import extract_phone
-
-from scrapy.linkextractors import LinkExtractor
-from scrapy.spiders import CrawlSpider, Rule
 
 
 class RegisSalonGB(CrawlSpider):
@@ -21,23 +19,19 @@ class RegisSalonGB(CrawlSpider):
     download_delay = 4.0
     rules = [
         Rule(
-            LinkExtractor(
-                allow=r"https://www.regissalons.co.uk/salon-locator/[-\w]+/$"
-            ),
+            LinkExtractor(allow=r"https://www.regissalons.co.uk/salon-locator/[-\w]+/$"),
             callback="parse",
         )
     ]
 
     def parse(self, response):
-        item = GeojsonPointItem()
+        item = Feature()
 
         item["ref"] = item["website"] = response.url
 
         item["name"] = response.xpath('//h1[@class="page-title"]/span/text()').get()
 
-        item["addr_full"] = response.xpath(
-            '//div[@class="amlocator-salon-left-address"]/p/text()'
-        ).get()
+        item["addr_full"] = response.xpath('//div[@class="amlocator-salon-left-address"]/p/text()').get()
 
         extract_google_position(item, response)
         extract_phone(item, response)

@@ -1,7 +1,9 @@
-import scrapy
-import re
 import json
-from locations.items import GeojsonPointItem
+import re
+
+import scrapy
+
+from locations.items import Feature
 
 day_formats = {
     "Mon": "Mo",
@@ -16,7 +18,6 @@ day_formats = {
 
 
 class MightytacoSpider(scrapy.Spider):
-
     name = "mightytaco"
     item_attributes = {"brand": "Mighty Taco"}
     allowed_domains = ["www.mightytaco.com"]
@@ -24,7 +25,6 @@ class MightytacoSpider(scrapy.Spider):
     start_urls = ("https://www.mightytaco.com/Locations",)
 
     def parse_day(self, day):
-
         if re.search("&", day):
             days = day.split("&")
             osm_days = []
@@ -97,9 +97,7 @@ class MightytacoSpider(scrapy.Spider):
             '//div[@class="contentBlocks"]/div[@class="contentBlock animate clear"]/div[@class="float right half copy animate group"]/div'
         )
         map_data = response.xpath("string(//head)").extract_first().strip()
-        json_data = re.findall(r"GMap.init\(\{[^()]+json: '[^(')]+", map_data)[
-            0
-        ].replace(" ", "")[19:]
+        json_data = re.findall(r"GMap.init\(\{[^()]+json: '[^(')]+", map_data)[0].replace(" ", "")[19:]
         location_json = json.loads(json_data)
         data = {}
         for location in location_json["Groups"]:
@@ -111,31 +109,23 @@ class MightytacoSpider(scrapy.Spider):
         for store in stores:
             marker_id = store.xpath("./@id").extract_first()
             properties = {
-                "addr_full": store.xpath(
-                    'normalize-space(./div/div[@class="address"]/p/text())'
-                )
+                "addr_full": store.xpath('normalize-space(./div/div[@class="address"]/p/text())')
                 .extract_first()
                 .strip()
                 .split(",")[0],
                 "phone": store.xpath(
                     'normalize-space(./div/div[@class="gets"]/div[@class="phoneRow clear"]/p/a[@data-show-device="mobile"]/text())'
                 ).extract_first(),
-                "city": store.xpath(
-                    'normalize-space(./div/div[@class="address"]/p/text())'
-                )
+                "city": store.xpath('normalize-space(./div/div[@class="address"]/p/text())')
                 .extract_first()
                 .strip()
                 .split(",")[1],
-                "state": store.xpath(
-                    'normalize-space(./div/div[@class="address"]/p/text())'
-                )
+                "state": store.xpath('normalize-space(./div/div[@class="address"]/p/text())')
                 .extract_first()
                 .split(",")[2]
                 .lstrip()
                 .split(" ")[0],
-                "postcode": store.xpath(
-                    'normalize-space(./div/div[@class="address"]/p/text())'
-                )
+                "postcode": store.xpath('normalize-space(./div/div[@class="address"]/p/text())')
                 .extract_first()
                 .split(",")[2]
                 .lstrip()
@@ -152,4 +142,4 @@ class MightytacoSpider(scrapy.Spider):
             )
             if hours:
                 properties["opening_hours"] = hours
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

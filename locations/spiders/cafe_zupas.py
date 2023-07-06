@@ -1,16 +1,14 @@
-# -*- coding: utf-8 -*-
 import scrapy
-from locations.items import GeojsonPointItem
+
 from locations.hours import OpeningHours
+from locations.items import Feature
 
 
 class CafeZupasSpider(scrapy.Spider):
     name = "cafe_zupas"
     item_attributes = {"brand": "Cafe Zupas"}
     allowed_domains = ["cafezupas.com"]
-    start_urls = [
-        "https://cafezupas.com/server.php?url=https://api.controlcenter.zupas.com/api/markets/listing"
-    ]
+    start_urls = ["https://cafezupas.com/server.php?url=https://api.controlcenter.zupas.com/api/markets/listing"]
 
     def parse_hours(self, location):
         opening_hours = OpeningHours()
@@ -47,23 +45,19 @@ class CafeZupasSpider(scrapy.Spider):
         data = response.json()
         for i in data["data"]["data"]:
             for location in i["locations"]:
-
                 properties = {
                     "ref": location["id"],
-                    "website": "https://cafezupas.com/locationcopy/info/"
-                    + location["name"].lower().replace(" ", "-"),
+                    "website": "https://cafezupas.com/locationcopy/info/" + location["name"].lower().replace(" ", "-"),
                     "name": location["name"],
-                    "image": "https://cafezupas.com" + location["image"]
-                    if location["image"] is not None
-                    else None,
+                    "image": "https://cafezupas.com" + location["image"] if location["image"] is not None else None,
                     "phone": location["phone"],
                     "lat": location["lat"],
                     "lon": location["long"],
-                    "addr_full": location["address"],
+                    "street_address": location["address"],
                     "city": location["city"],
                     "state": location["state"],
                     "postcode": location["zip"],
                     "facebook": location["facebook_url"],
                     "opening_hours": self.parse_hours(location),
                 }
-                yield GeojsonPointItem(**properties)
+                yield Feature(**properties)

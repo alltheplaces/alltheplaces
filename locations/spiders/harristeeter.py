@@ -1,9 +1,9 @@
-# -*- coding: utf-8 -*-
-import scrapy
 import json
 import re
 
-from locations.items import GeojsonPointItem
+import scrapy
+
+from locations.items import Feature
 
 DAYS = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
 
@@ -51,16 +51,8 @@ class HarristeeterSpider(scrapy.Spider):
             else:
                 second_minutes = ":00"
 
-            res += (
-                str(int(match[4]) + (12 if match[7] in ["pm", "mp"] else 0))
-                + first_minutes
-                + "-"
-            )
-            res += (
-                str(int(match[8]) + (12 if match[10] in ["pm", "mp"] else 0))
-                + second_minutes
-                + ";"
-            )
+            res += str(int(match[4]) + (12 if match[7] in ["pm", "mp"] else 0)) + first_minutes + "-"
+            res += str(int(match[8]) + (12 if match[10] in ["pm", "mp"] else 0)) + second_minutes + ";"
 
         return res.rstrip(";").strip()
 
@@ -72,14 +64,12 @@ class HarristeeterSpider(scrapy.Spider):
         )
 
     def check_login(self, response):
-
         yield scrapy.Request(
             "https://www.harristeeter.com/store/#/app/store-locator",
             callback=self.get_store_locator,
         )
 
     def get_store_locator(self, response):
-
         yield scrapy.Request(
             "https://www.harristeeter.com/api/v1/stores/search?Address=98011&Radius=20000&AllStores=true",
             callback=self.parse_shop,
@@ -100,9 +90,7 @@ class HarristeeterSpider(scrapy.Spider):
                 "phone": shop["Telephone"],
                 "lat": float(shop["Latitude"]),
                 "lon": float(shop["Longitude"]),
-                "opening_hours": shop["StoreHours"].replace(
-                    "Open 24 Hours", "Mo-Su 0:00-24:00"
-                ),
+                "opening_hours": shop["StoreHours"].replace("Open 24 Hours", "Mo-Su 0:00-24:00"),
             }
 
-            yield GeojsonPointItem(**props)
+            yield Feature(**props)

@@ -1,26 +1,17 @@
-# -*- coding: utf-8 -*-
 import scrapy
+from scrapy.http import JsonRequest
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class WinnDixieSpider(scrapy.Spider):
     name = "winndixie"
     item_attributes = {"brand": "Winn Dixie", "brand_wikidata": "Q1264366"}
     allowed_domains = ["winndixie.com"]
-    start_urls = [
-        "https://www.winndixie.com/locator",
-    ]
 
     def start_requests(self):
-        template = "https://www.winndixie.com/V2/storelocator/getStores?search=jacksonville,%20fl&strDefaultMiles=1000&filter="
-
-        headers = {
-            "Accept": "application/json",
-        }
-
-        yield scrapy.http.FormRequest(
-            url=template, method="GET", headers=headers, callback=self.parse
+        yield JsonRequest(
+            url="https://www.winndixie.com/V2/storelocator/getStores?search=jacksonville,%20fl&strDefaultMiles=1000&filter=",
         )
 
     def parse(self, response):
@@ -35,9 +26,10 @@ class WinnDixieSpider(scrapy.Spider):
                 "postcode": store["Address"]["Zipcode"],
                 "country": store["Address"]["Country"],
                 "phone": store["Phone"],
-                "lat": float(store["Address"]["Latitude"]),
-                "lon": float(store["Address"]["Longitude"]),
-                "website": response.url,
+                "lat": float(store["Location"]["Latitude"]),
+                "lon": float(store["Location"]["Longitude"]),
             }
+            slug = f'{properties["city"]}/{properties["state"]}?search={properties["ref"]}'.lower()
+            properties["website"] = f"https://www.winndixie.com/storedetails/{slug}"
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

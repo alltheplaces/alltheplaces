@@ -1,7 +1,6 @@
-# -*- coding: utf-8 -*-
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class OrkinSpider(scrapy.Spider):
@@ -24,27 +23,14 @@ class OrkinSpider(scrapy.Spider):
             yield scrapy.Request(response.urljoin(url), callback=self.parse_location)
 
     def parse_location(self, response):
-
         properties = {
-            "ref": response.xpath(
-                '//section[@class="branch-data"]/@data-branch-id'
-            ).extract_first(),
-            "addr_full": response.xpath(
-                '//span[@itemprop ="streetAddress"]/text()'
-            ).extract_first(),
-            "city": response.xpath(
-                '//span[@itemprop ="addressLocality"]/text()'
-            ).extract_first(),
-            "state": response.xpath(
-                '//span[@itemprop ="addressRegion"]/text()'
-            ).extract_first(),
-            "phone": response.xpath(
-                '//span[@itemprop="telephone"]/text()'
-            ).extract_first(),
-            "name": response.xpath(
-                '//h1[@class="locations-title"]/text()'
-            ).extract_first(),
+            "ref": response.xpath('//section[@class="branch-data"]/@data-branch-id').extract_first(),
+            "addr_full": response.xpath('//span[@itemprop ="streetAddress"]/text()').extract_first(),
+            "city": response.xpath('//span[@itemprop ="addressLocality"]/text()').extract_first(),
+            "state": response.xpath('//span[@itemprop ="addressRegion"]/text()').extract_first(),
+            "phone": response.xpath('//span[@itemprop="telephone"]/text()').extract_first(),
+            "name": response.xpath('//h1[@class="locations-title"]/text()').extract_first(),
             "website": response.url,
         }
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

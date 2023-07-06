@@ -1,6 +1,8 @@
 import re
+
 import scrapy
-from locations.items import GeojsonPointItem
+
+from locations.items import Feature
 
 
 class JimNNicksBBQSpider(scrapy.Spider):
@@ -19,9 +21,7 @@ class JimNNicksBBQSpider(scrapy.Spider):
                 yield scrapy.Request(url)
 
     def parse_location(self, response):
-        is_actually_store_list = response.xpath(
-            '//ul[@class="directory-links"]/li/a/@href'
-        ).extract()
+        is_actually_store_list = response.xpath('//ul[@class="directory-links"]/li/a/@href').extract()
 
         if is_actually_store_list:
             for url in is_actually_store_list:
@@ -41,10 +41,8 @@ class JimNNicksBBQSpider(scrapy.Spider):
                 "state": state,
                 "postcode": postal,
                 "country": "US",
-                "phone": response.xpath(
-                    '//div[@class="elementor-shortcode"]/a/text()[1]'
-                ).extract_first(),
+                "phone": response.xpath('//div[@class="elementor-shortcode"]/a/text()[1]').extract_first(),
                 "website": response.url,
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

@@ -1,5 +1,6 @@
 import scrapy
-from locations.items import GeojsonPointItem
+
+from locations.items import Feature
 
 regex_street = (
     r"^(\s?\d{1,5}\s[a-zA-Z]+\.?\s?\#?\d{0,5}[a-zA-Z]{0,10}"
@@ -17,25 +18,20 @@ class BobsBurgersSpider(scrapy.Spider):
     start_urls = ["https://www.bobsburgersandbrew.com/content/locations/locations"]
 
     def parse(self, response):
-
         names = response.xpath(
-            '//td[contains(@style,"300px") and contains('
-            '., "MAP")]/descendant-or-self::*/text()'
+            '//td[contains(@style,"300px") and contains(' '., "MAP")]/descendant-or-self::*/text()'
         ).re(regex_name)
 
         streets = response.xpath(
-            '//td[contains(@style,"300px") and contains('
-            '., "MAP")]/descendant-or-self::*/text()'
+            '//td[contains(@style,"300px") and contains(' '., "MAP")]/descendant-or-self::*/text()'
         ).re(regex_street)
 
         phones = response.xpath(
-            '//td[contains(@style,"300px") and contains('
-            '., "MAP")]/descendant-or-self::*/text()'
+            '//td[contains(@style,"300px") and contains(' '., "MAP")]/descendant-or-self::*/text()'
         ).re(regex_phone)
 
         cities = response.xpath(
-            '//td[contains(@style,"300px") and contains('
-            '., "MAP")]/descendant-or-self::*/text()'
+            '//td[contains(@style,"300px") and contains(' '., "MAP")]/descendant-or-self::*/text()'
         ).re(regex_cty_st_zip)
 
         stores = response.xpath('//td[contains(@style,"300px") and contains(., "MAP")]')
@@ -48,7 +44,7 @@ class BobsBurgersSpider(scrapy.Spider):
             addr_full = "{} {}, WA {}".format(street, city, postcode).strip()
             phone = phones[i].replace(".", " ").strip()
 
-            yield GeojsonPointItem(
+            yield Feature(
                 ref=name,
                 name=name,
                 street=street,

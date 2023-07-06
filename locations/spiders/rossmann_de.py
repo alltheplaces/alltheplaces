@@ -1,69 +1,41 @@
-import scrapy
+import json
 
-from locations.items import GeojsonPointItem
-from locations.hours import OpeningHours
+from scrapy.spiders import SitemapSpider
 
-
-DAY_MAPPING = {
-    "Mo": "Mo",
-    "Di": "Tu",
-    "Mi": "We",
-    "Do": "Th",
-    "Fr": "Fr",
-    "Sa": "Sa",
-    "So": "Su",
-}
+from locations.categories import Categories, apply_category
+from locations.hours import DAYS_DE, OpeningHours, sanitise_day
+from locations.structured_data_spider import StructuredDataSpider
 
 
-class RossmannDeSpider(scrapy.Spider):
+class RossmannDESpider(SitemapSpider, StructuredDataSpider):
     name = "rossmann_de"
     item_attributes = {"brand": "Rossmann", "brand_wikidata": "Q316004"}
     allowed_domains = ["www.rossmann.de"]
-    start_urls = ("https://www.rossmann.de/de/filialen/assets/data/locations.json",)
-    download_delay = 0.2
+    sitemap_urls = ["https://www.rossmann.de/de/filialen/sitemap.xml"]
 
-    def parse_hours(self, store_hours):
-        opening_hours = OpeningHours()
-        if store_hours is None:
-            return
+    def sitemap_filter(self, entries):
+        for entry in entries:
+            if not entry["loc"].endswith("/index.html"):
+                yield entry
 
-        for store_day in store_hours:
-            day = DAY_MAPPING[store_day]
-            if store_hours[store_day]:
-                open_time = store_hours[store_day][0]["openTime"]
-                close_time = store_hours[store_day][0]["closeTime"]
-                if open_time is None and close_time is None:
-                    continue
-                opening_hours.add_range(
-                    day=day,
-                    open_time=open_time,
-                    close_time=close_time,
-                    time_format="%H:%M",
-                )
+    def pre_process_data(self, ld_data, **kwargs):
+        ld_data["name"] = ld_data["name"].split("\n")[0]
+        ld_data["image"] = None
 
-        return opening_hours.as_opening_hours()
+    def post_process_item(self, item, response, ld_data, **kwargs):
+        if ohjs := response.xpath("//@data-openingtimes").get():
+            ohjs = json.loads(ohjs)
+            item["opening_hours"] = OpeningHours()
+            for day, times in ohjs.items():
+                day_en = sanitise_day(day, DAYS_DE)
+                for time in times:
+                    item["opening_hours"].add_range(day_en, time["openTime"], time["closeTime"])
 
-    def parse(self, response):
-        stores = response.json()
-        for store in stores:
-            properties = {
-                "lat": stores[store]["lat"],
-                "lon": stores[store]["lng"],
-                "name": stores[store]["name"],
-                "street": stores[store]["address"],
-                "city": stores[store]["city"],
-                "postcode": stores[store]["postalCode"],
-                "ref": store,
-                "extras": {
-                    "maps_url": stores[store]["mapsUrl"],
-                    "url": stores[store]["url"],
-                    "region": stores[store]["region"],
-                    "store_code": stores[store]["storeCode"],
-                },
-            }
-            hours = self.parse_hours(stores[store]["openingHours"])
+        item["ref"] = item["website"] = response.url
 
-            if hours:
-                properties["opening_hours"] = hours
+        if "ROSSMANN Express" in response.text:
+            item["brand"] = "ROSSMANN Express"
 
-            yield GeojsonPointItem(**properties)
+        apply_category(Categories.SHOP_CHEMIST, item)
+
+        yield item

@@ -1,7 +1,6 @@
-# -*- coding: utf-8 -*-
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class AsdaSpider(scrapy.Spider):
@@ -28,16 +27,14 @@ class AsdaSpider(scrapy.Spider):
         page_size = 250
 
         while offset < total_count:
-            yield scrapy.Request(
-                self.base_url + f"&$top={page_size}&$skip={offset}&$format=json"
-            )
+            yield scrapy.Request(self.base_url + f"&$top={page_size}&$skip={offset}&$format=json")
             offset += page_size
 
     def parse(self, response):
         shops = response.json()["d"]["results"]
 
         for place in shops:
-            yield GeojsonPointItem(
+            yield Feature(
                 lat=place["Latitude"],
                 lon=place["Longitude"],
                 name=place["name"],
@@ -59,12 +56,8 @@ class AsdaSpider(scrapy.Spider):
                 city=place["town"],
                 phone="+44 " + place["telephone"][1:],
                 website="https://storelocator.asda.com/store/"
-                + place[
-                    "url_key"
-                ],  # Unfortunately this is a redirect, not the canonical URL
-                image=place[
-                    "store_photo_url"
-                ],  # TODO: find the root url for the images
+                + place["url_key"],  # Unfortunately this is a redirect, not the canonical URL
+                image=place["store_photo_url"],  # TODO: find the root url for the images
                 ref=place["imp_id"],
                 brand="Asda " + place["asda_store_type"],
             )

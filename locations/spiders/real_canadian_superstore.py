@@ -1,8 +1,8 @@
-# -*- coding: utf-8 -*-
-import scrapy
 import re
 
-from locations.items import GeojsonPointItem
+import scrapy
+
+from locations.items import Feature
 
 
 class RealCanadianSuperstoreSpider(scrapy.Spider):
@@ -100,8 +100,6 @@ class RealCanadianSuperstoreSpider(scrapy.Spider):
 
             if "todaysHours" in data["details"]:
                 if data["details"]["todaysHours"]:
-                    properties["opening_hours"] = self.store_hours(
-                        data["details"]["todaysHours"]
-                    )
+                    properties["opening_hours"] = self.store_hours(data["details"]["todaysHours"])
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

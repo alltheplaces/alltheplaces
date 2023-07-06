@@ -1,80 +1,47 @@
-# -*- coding: utf-8 -*-
-import scrapy
-import re
+from scrapy import Spider
+from scrapy.http import JsonRequest
 
-from locations.items import GeojsonPointItem
+from locations.dict_parser import DictParser
+from locations.hours import OpeningHours, day_range, sanitise_day
+from locations.spiders.vapestore_gb import clean_address
 
 
-class AndPizzaSpider(scrapy.Spider):
+class AndPizzaSpider(Spider):
     name = "andpizza"
-    item_attributes = {"brand": "&pizza"}
-    allowed_domains = ["andpizza.com"]
-    start_urls = ("https://andpizza.com",)
+    item_attributes = {"brand": "&pizza", "brand_wikidata": "Q21189222"}
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
-    def normalize_time(sef, time_str):
-        match = re.search(r"([0-9]{1,2}) (a|p)m$", time_str)
-        if not match:
-            match = re.search(r"([0-9]{1,2})(a|p)m$", time_str)
-            h, am_pm = match.groups()
-        else:
-            h, am_pm = match.groups()
-
-        return "%02d:%02d" % (
-            int(h) + 12 if am_pm == "p." else int(h),
-            int("0"),
+    def start_requests(self):
+        yield JsonRequest(
+            url="https://api.andpizza.com/webapi/v100/partners/shops",
+            headers={
+                "Authorization": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOjIsInBhcnRuZXIiOiJpNzIiLCJpc3MiOiJodHRwczovL2FwaS5hbmRwaXp6YS5jb20iLCJpYXQiOjE1OTgyOTEwNzUsImV4cCI6MTkxMzY1MTA3NSwibmJmIjoxNTk4MjkxMDc1LCJqdGkiOiI4VWh1VnhJRjFwZFhrSXplIn0.rXJL4rt5YbT4XRk21sSrkoGffJ5ttowV3UbHInZcnMs",
+            },
         )
-        return ""
 
-    def hours(self, data):
-        opening_hours = ""
+    @staticmethod
+    def parse_hours(rules: [dict]) -> OpeningHours:
+        oh = OpeningHours()
 
-        if "&bar" in data:
-            data = data[: data.index("&bar")]
-
-        for i in range(len(data) // 2):
-            days = data[i * 2].split(" ")
-            hours = data[i * 2 + 1]
-            if len(days) == 1:
-                day = days[0][:2]
-            elif len(days) == 3:
-                day = days[0][:2] + "-" + days[2][:2]
+        for rule in rules:
+            if "-" in rule["label"]:
+                start_day, end_day = rule["label"].split("-")
             else:
-                day = "Mo-Su"
+                start_day = end_day = rule["label"]
+            start_day = sanitise_day(start_day)
+            end_day = sanitise_day(end_day) or start_day
+            if start_day:
+                start_time, end_time = rule["value"].split(" - ")
+                oh.add_days_range(day_range(start_day, end_day), start_time, end_time, time_format="%I:%M %p")
 
-            hours = hours.split("-")
-            open = self.normalize_time(hours[0].strip())
-            close = self.normalize_time(hours[1].strip())
-
-            open_close = "{}-{}".format(open, close)
-
-            opening_hours += "{} {}; ".format(day, open_close)
-
-        return opening_hours
+        return oh
 
     def parse(self, response):
-        selector = scrapy.Selector(response)
-        stores = selector.css("div.location")
+        for location in response.json()["data"]:
+            location.update(location.pop("location"))
+            item = DictParser.parse(location)
+            item["street_address"] = clean_address([location["address1"], location["address2"]])
 
-        for store in stores:
-            ref = store.css("div.location::attr(class)").extract_first().split(" ")[1]
-            name = store.css("a.knockout *::text").extract_first()
-            address = store.css("address>a *::text").extract()
-            address1 = address[0]
-            address2 = address[len(address) - 1].split(",")
-            hours = store.css("div.hours")
+            item["opening_hours"] = self.parse_hours(location["service_schedule"]["general"])
 
-            store_hours = ""
-            if not hours.css("span>a"):
-                store_hours = self.hours(store.css("div.hours *::text").extract())
-
-            properties = {
-                "ref": ref,
-                "name": name,
-                "street": address1,
-                "city": address2[0],
-                "state": address2[1].split(" ")[1],
-                "postcode": address2[1].split(" ")[2],
-                "opening_hours": store_hours,
-            }
-
-            yield GeojsonPointItem(**properties)
+            yield item

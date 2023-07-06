@@ -1,15 +1,15 @@
-# -*- coding: utf-8 -*-
+from urllib.parse import urlencode
+
 import scrapy
+from scrapy.selector import Selector
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
-from scrapy.selector import Selector
-from urllib.parse import urlencode
+from locations.items import Feature
 
 
 class SallyBeautySpider(scrapy.Spider):
     name = "sallybeauty"
-    item_attributes = {"brand": "Sally Beauty"}
+    item_attributes = {"brand": "Sally Beauty", "brand_wikidata": "Q7405065"}
     allowed_domains = ["sallybeauty.com"]
 
     def start_requests(self):
@@ -60,13 +60,10 @@ class SallyBeautySpider(scrapy.Spider):
         jdata = response.json()
 
         for row in jdata.get("stores", []):
-
             properties = {
                 "ref": row["ID"],
                 "name": row["name"],
-                "addr_full": " ".join(
-                    [row["address1"], row.get("address2", "") or ""]
-                ).strip(),
+                "addr_full": " ".join([row["address1"], row.get("address2", "") or ""]).strip(),
                 "city": row["city"],
                 "postcode": row["postalCode"],
                 "lat": row["latitude"],
@@ -82,4 +79,4 @@ class SallyBeautySpider(scrapy.Spider):
                 if hours:
                     properties["opening_hours"] = hours
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

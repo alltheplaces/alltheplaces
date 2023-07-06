@@ -1,6 +1,6 @@
-# -*- coding: utf-8 -*-
 import scrapy
-from locations.items import GeojsonPointItem
+
+from locations.items import Feature
 
 
 class CorePowerYogaSpider(scrapy.Spider):
@@ -24,4 +24,4 @@ class CorePowerYogaSpider(scrapy.Spider):
                     "phone": data["Phone"],
                     "website": "https://www.corepoweryoga.com%s" % (data["path"]),
                 }
-                yield GeojsonPointItem(**properties)
+                yield Feature(**properties)

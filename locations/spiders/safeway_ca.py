@@ -1,10 +1,7 @@
-# -*- coding: utf-8 -*-
-import re
-
 import scrapy
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class SafewayCaSpider(scrapy.Spider):
@@ -22,25 +19,19 @@ class SafewayCaSpider(scrapy.Spider):
     def parse_store(self, response):
         properties = {
             "ref": response.xpath("//@data-store-id").extract_first(),
-            "name": response.xpath(
-                '//meta[@property="og:title"]/@content'
-            ).extract_first(),
+            "name": response.xpath('//meta[@property="og:title"]/@content').extract_first(),
             "website": response.url,
             "lat": response.xpath("//@data-lat").extract_first(),
             "lon": response.xpath("//@data-lng").extract_first(),
-            "addr_full": response.css(
-                ".location_address_address_1::text"
-            ).extract_first(),
+            "addr_full": response.css(".location_address_address_1::text").extract_first(),
             "city": response.css(".city::text").extract_first(),
             "state": response.css(".province::text").extract_first(),
             "postcode": response.css(".postal_code::text").extract_first(),
-            "phone": response.xpath(
-                '//a[contains(@href,"tel:")]/text()'
-            ).extract_first(),
+            "phone": response.xpath('//a[contains(@href,"tel:")]/text()').extract_first(),
             "opening_hours": self.parse_hours(response),
         }
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)
 
     def parse_hours(self, response):
         tbl = response.css(".holiday_hours_tbl")[-1].xpath("./tbody//text()")

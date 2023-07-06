@@ -1,6 +1,6 @@
-from scrapy import Spider, Selector
+from scrapy import Selector, Spider
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class YettelBGSpider(Spider):
@@ -14,7 +14,7 @@ class YettelBGSpider(Spider):
 
     def parse(self, response):
         for store in response.json()["features"]:
-            item = GeojsonPointItem()
+            item = Feature()
 
             item["lon"], item["lat"] = store["geometry"]["coordinates"]
 
@@ -23,12 +23,8 @@ class YettelBGSpider(Spider):
 
             address_block = Selector(text=store["properties"]["gsl_addressfield"])
 
-            item["street_address"] = address_block.xpath(
-                '//div[@class="thoroughfare"]/text()'
-            ).get()
-            item["postcode"] = address_block.xpath(
-                '//span[@class="postal-code"]/text()'
-            ).get()
+            item["street_address"] = address_block.xpath('//div[@class="thoroughfare"]/text()').get()
+            item["postcode"] = address_block.xpath('//span[@class="postal-code"]/text()').get()
             item["city"] = address_block.xpath('//span[@class="locality"]/text()').get()
 
             yield item

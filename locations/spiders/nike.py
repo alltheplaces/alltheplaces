@@ -1,20 +1,20 @@
 import datetime
+
 import scrapy
-from locations.hours import OpeningHours
+
+from locations.categories import Categories
 from locations.dict_parser import DictParser
+from locations.hours import OpeningHours
 
 
 class NikeSpider(scrapy.Spider):
     name = "nike"
-    item_attributes = {"brand": "Nike", "brand_wikidata": "Q483915"}
-    start_urls = [
-        "https://storeviews-cdn.risedomain-prod.nikecloud.com/store-locations-static.json"
-    ]
+    item_attributes = {"brand": "Nike", "brand_wikidata": "Q483915", "extras": Categories.SHOP_CLOTHES.value}
+    start_urls = ["https://storeviews-cdn.risedomain-prod.nikecloud.com/store-locations-static.json"]
 
     def parse(self, response):
         all_stores = response.json()["stores"]
         for store in all_stores.values():
-            store.update(store.get("coordinates"))
             item = DictParser.parse(store)
 
             days = DictParser.get_nested_key(store, "regularHours")
@@ -27,14 +27,8 @@ class NikeSpider(scrapy.Spider):
                 opening = oh.get("startTime")
                 closing = oh.get("duration")
 
-                closing_h = (
-                    closing.split("H")[0].replace("PT", "") if "H" in closing else "0"
-                )
-                closing_m = (
-                    closing[len(closing) - 3 :].replace("M", "")
-                    if "M" in closing
-                    else "0"
-                )
+                closing_h = closing.split("H")[0].replace("PT", "") if "H" in closing else "0"
+                closing_m = closing[len(closing) - 3 :].replace("M", "") if "M" in closing else "0"
 
                 start = opening.split(":")
                 closing_time = str(
@@ -45,14 +39,20 @@ class NikeSpider(scrapy.Spider):
                     closing_time = "00:00"
                 else:
                     split_closing_time = closing_time.split(":")
-                    closing_time = "".join(
-                        split_closing_time[0] + ":" + split_closing_time[1]
-                    )
+                    closing_time = "".join(split_closing_time[0] + ":" + split_closing_time[1])
 
                 opening_hours.add_range(day[0:2].title(), opening, closing_time)
 
             item["opening_hours"] = opening_hours.as_opening_hours()
             item["website"] = "https://www.nike.com/retail/s/" + store["slug"]
             item["image"] = store["imageURL"]
-            item["extras"] = {"store_type": store.get("facilityType")}
+            item["extras"] = {"owner:type": store["facilityType"]}
+            if store["businessConcept"] == "FACTORY":
+                item["brand"] = "Nike Factory Store"
+            elif store["businessConcept"] == "CLEARANCE":
+                item["brand"] = "Nike Clearance Store"
+            elif store["businessConcept"] == "COMMUNITY":
+                item["brand"] = "Nike Community Store"
+            else:
+                item["extras"]["type"] = store["businessConcept"]
             yield item

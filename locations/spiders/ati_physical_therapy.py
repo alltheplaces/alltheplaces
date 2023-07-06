@@ -1,69 +1,25 @@
-# -*- coding: utf-8 -*-
-import re
 import json
-import scrapy
 
-from locations.items import GeojsonPointItem
-from locations.hours import OpeningHours
+from scrapy.spiders import SitemapSpider
+
+from locations.linked_data_parser import LinkedDataParser
 
 
-class ATIPhysicalTherapySpider(scrapy.Spider):
-    download_delay = 1.2
+# Can't currently use StructuredDataSpider as there is no type in the source data
+class ATIPhysicalTherapySpider(SitemapSpider):
     name = "ati_physical_therapy"
-    item_attributes = {"brand": "ATI Physical Therapy", "brand_wikidata": "Q50039703"}
+    item_attributes = {
+        "brand": "ATI Physical Therapy",
+        "brand_wikidata": "Q50039703",
+        "country": "US",
+    }
     allowed_domains = ["locations.atipt.com"]
-    start_urls = ("https://locations.atipt.com/",)
+    sitemap_urls = ["https://locations.atipt.com/sitemap.xml"]
+    sitemap_rules = [(r"\.com\/([-\w]{3,})$", "parse")]
 
-    def parse(self, response):
-        urls = response.xpath('//ul[@class="list-unstyled"]/li/a/@href').extract()
-        for path in urls:
-            yield scrapy.Request(response.urljoin(path), callback=self.parse_state)
+    def parse(self, response, **kwargs):
+        if ld := response.xpath('//script[@type="application/ld+json"]//text()').get():
+            item = LinkedDataParser.parse_ld(json.loads(ld))
+            item["ref"] = response.url
 
-    def parse_state(self, response):
-        urls = response.xpath('//ul[@class="list-unstyled"]/li/a/@href').extract()
-        for path in urls:
-            yield scrapy.Request(response.urljoin(path), callback=self.parse_city)
-
-    def parse_city(self, response):
-        urls = response.xpath('//div[@id="group-list"]/div/div/a/@href').extract()
-        for path in urls:
-            yield scrapy.Request(response.urljoin(path), callback=self.parse_store)
-
-    def parse_store(self, response):
-        oh = OpeningHours()
-        ref = re.findall(r"[^(\/)]+$", response.url)[0]
-        data = json.loads(
-            response.xpath(
-                '//script[@type="application/ld+json"]/text()'
-            ).extract_first()
-        )
-
-        address = {}
-        geo = {}
-        if data.get("address"):
-            address["full"] = data["address"].get("streetAddress")
-            address["zip"] = data["address"].get("postalCode")
-            address["state"] = data["address"].get("addressRegion")
-            address["city"] = data["address"].get("addressLocality")
-        if data.get("geo"):
-            geo["lat"] = data["geo"].get("latitude")
-            geo["lon"] = data["geo"].get("longitude")
-        if data.get("openingHours"):
-            for t in data.get("openingHours"):
-                (day, ot, ct) = t.split()
-                oh.add_range(day, ot.strip(), ct.strip())
-
-        properties = {
-            "addr_full": address.get("full"),
-            "phone": data.get("telephone"),
-            "city": address.get("city"),
-            "state": address.get("state"),
-            "postcode": address.get("zip"),
-            "ref": ref,
-            "website": response.url,
-            "lat": geo.get("lat"),
-            "lon": geo.get("lon"),
-            "email": data.get("email"),
-            "opening_hours": oh.as_opening_hours(),
-        }
-        yield GeojsonPointItem(**properties)
+            yield item

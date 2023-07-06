@@ -1,11 +1,9 @@
-# -*- coding: utf-8 -*-
 import json
-import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
+from locations.items import Feature
 
 
 class RainbowShopsSpider(scrapy.Spider):
@@ -14,6 +12,7 @@ class RainbowShopsSpider(scrapy.Spider):
     start_urls = [
         "https://stores.rainbowshops.com/umbraco/api/location/GetAllLocations",
     ]
+    item_attributes = {"brand": "Rainbow Shops", "brand_wikidata": "Q7284708"}
 
     def parse(self, response):
         base_url = "https://stores.rainbowshops.com/umbraco/api/Location/GetDataByState?region={region}"
@@ -38,7 +37,7 @@ class RainbowShopsSpider(scrapy.Spider):
             day = h
             open_time = hours[h]["Ranges"][0]["StartTime"]
             close_time = hours[h]["Ranges"][0]["EndTime"]
-            if open_time != None:
+            if open_time is not None:
                 opening_hours.add_range(
                     day=day,
                     open_time=open_time,
@@ -73,4 +72,4 @@ class RainbowShopsSpider(scrapy.Spider):
             except:
                 pass
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

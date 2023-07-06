@@ -46,10 +46,7 @@ def test_ld():
     assert i["postcode"] == "94086"
     assert i["street_address"] == "1901 Lemur Ave"
     assert i["name"] == "GreatFood"
-    assert (
-        i["opening_hours"]
-        == "Mo-Th 11:00-14:30,17:00-21:30; Fr-Sa 11:00-14:30,17:00-22:00"
-    )
+    assert i["opening_hours"].as_opening_hours() == "Mo-Th 11:00-14:30,17:00-21:30; Fr-Sa 11:00-14:30,17:00-22:00"
     assert i["phone"] == "(408) 714-1489"
     assert i["email"] == "example@example.org"
     assert i["website"] == "http://www.greatfood.com"
@@ -137,12 +134,12 @@ def test_ld_lowercase_attributes():
     assert i["postcode"] == "68847"
     assert i["street_address"] == "1107 2ND AVE"
     assert i["name"] == "KEARNEY #7"
-    assert i["opening_hours"] == "Mo-Su 05:00-23:00"
+    assert i["opening_hours"].as_opening_hours() == "Mo-Su 05:00-23:00"
     assert i["phone"] == "(308) 234-3062"
     assert i["website"] is None
     assert i["ref"] is None
-    assert i["lat"] == "40.6862"
-    assert i["lon"] == "-99.08411"
+    assert i["lat"] == 40.6862
+    assert i["lon"] == -99.08411
 
 
 def test_ld_lat_lon():
@@ -163,8 +160,30 @@ def test_ld_lat_lon():
         )
     )
 
-    assert i["lat"] == "40.75"
-    assert i["lon"] == "-73.98"
+    assert i["lat"] == 40.75
+    assert i["lon"] == -73.98
+
+
+def test_funky_coords():
+    i = LinkedDataParser.parse_ld(
+        json.loads(
+            """
+            {
+                "@context": "https://schema.org",
+                "@type": "Place",
+                "geo": {
+                    "@type": "GeoCoordinates",
+                    "latitude": "40,75",
+                    "longitude": -73.98
+                },
+                "name": "Empire State Building"
+            }
+            """
+        )
+    )
+
+    assert i["lat"] == 40.75
+    assert i["lon"] == -73.98
 
 
 def test_default_types():
@@ -189,8 +208,8 @@ def test_default_types():
         )
     )
 
-    assert i["lat"] == "40.75"
-    assert i["lon"] == "-73.98"
+    assert i["lat"] == 40.75
+    assert i["lon"] == -73.98
     assert i["country"] == "US"
     assert i["state"] == "NE"
     assert i["postcode"] == "68847"
@@ -227,12 +246,7 @@ def test_check_type():
     assert LinkedDataParser.check_type("Country", "COUNTRY") is True
     assert LinkedDataParser.check_type("postalAddress", "PostalAddress") is True
     assert LinkedDataParser.check_type("geocoordinates", "GeoCoordinates") is True
-    assert (
-        LinkedDataParser.check_type(
-            "https://schema.org/GeoCoordinates", "GeoCoordinates"
-        )
-        is True
-    )
+    assert LinkedDataParser.check_type("https://schema.org/GeoCoordinates", "GeoCoordinates") is True
     assert LinkedDataParser.check_type("postalAddress", "GeoCoordinates") is False
 
 
@@ -246,8 +260,14 @@ def test_multiple_types():
                     "@type": ["http://schema.org/Place", "Thing"],
                     "name": "test 1"
                 }
-            </script>
-            <script type="application/ld+json">
+            </script>""",
+    )
+    assert LinkedDataParser.find_linked_data(response, ["Place", "Thing"])["name"] == "test 1"
+
+    response = HtmlResponse(
+        url="",
+        encoding="utf-8",
+        body="""<script type="application/ld+json">
                 {
                     "@context": "https://schema.org",
                     "@type": "http://schema.org/Place",
@@ -255,9 +275,47 @@ def test_multiple_types():
                 }
             </script>""",
     )
-
-    assert (
-        LinkedDataParser.find_linked_data(response, ["Place", "Thing"])["name"]
-        == "test 1"
-    )
     assert LinkedDataParser.find_linked_data(response, "Place")["name"] == "test 2"
+
+    response = HtmlResponse(
+        url="",
+        encoding="utf-8",
+        body="""<script type="application/ld+json">
+                {
+                    "@context": "https://schema.org",
+                    "@graph": [
+                        {
+                            "@context": "http://schema.org",
+                            "@type": "BreadcrumbList",
+                            "itemListElement": [
+                                {
+                                    "@type": "ListItem",
+                                    "position": 1,
+                                    "item": {"@id": "https://www.lahalle.com/", "name": "La Halle"}
+                                },
+                                {
+                                    "@type": "ListItem",
+                                    "position": 2,
+                                    "item": {"@id": "https://www.lahalle.com/magasins", "name": "Magasin Vêtements et chaussures"}
+                                },
+                                {
+                                    "@type": "ListItem",
+                                    "position": 3,
+                                    "item": {"@id": "https://www.lahalle.com/magasins-paris-75.htm", "name": "75 Paris"}
+                                },
+                                {
+                                    "@type": "ListItem",
+                                    "position": 4,
+                                    "item": {
+                                        "@id": "https://www.lahalle.com/magasins-paris-75-paris-flandre-168.html",
+                                        "name": "PARIS FLANDRE"
+                                    }
+                                }
+                            ]
+                        },
+                        {"@context": "https://schema.org", "@type": ["LocalBusiness", "ClothingStore"], "name": "test 3"}
+                    ]
+                }
+            </script>""",
+    )
+    assert LinkedDataParser.find_linked_data(response, ["LocalBusiness", "ClothingStore"])["name"] == "test 3"

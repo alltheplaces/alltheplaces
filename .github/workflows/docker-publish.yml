@@ -1,8 +1,9 @@
 name: Build and Push Image to ECR
 
 on:
-  push:
-    branches: [ master ]
+  schedule:
+    - cron: '23 */6 * * *'
+  workflow_dispatch:
 
 jobs:
   build:
@@ -12,7 +13,7 @@ jobs:
 
     steps:
       - name: Check out code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -31,5 +32,5 @@ jobs:
           ECR_REPOSITORY: alltheplaces
           IMAGE_TAG: latest
         run: |
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker build --build-arg GIT_COMMIT=$(git rev-parse HEAD) --tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG

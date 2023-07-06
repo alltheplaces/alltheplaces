@@ -1,8 +1,9 @@
-# -*- coding: utf-8 -*-
-import scrapy
-import re
 import json
-from locations.items import GeojsonPointItem
+import re
+
+import scrapy
+
+from locations.items import Feature
 
 
 class RegalTheatersSpider(scrapy.Spider):
@@ -10,6 +11,7 @@ class RegalTheatersSpider(scrapy.Spider):
     item_attributes = {"brand": "Regal Theaters"}
     allowed_domains = ["www.regmovies.com"]
     start_urls = ["https://www.regmovies.com/theatres/regal-riviera/0690"]
+    requires_proxy = "US"
 
     def parse(self, response):
         data = response.xpath('//script[contains(., "apiSitesList")]').extract_first()
@@ -31,4 +33,4 @@ class RegalTheatersSpider(scrapy.Spider):
                 "website": "https://www.regmovies.com" + theater["uri"],
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

@@ -1,71 +1,96 @@
-# -*- coding: utf-8 -*-
-import re
-
 import scrapy
 
-from locations.items import GeojsonPointItem
-from locations.hours import OpeningHours
+from locations.google_url import extract_google_position
+from locations.items import Feature
 
 
-class AverittSpider(scrapy.Spider):
+class AverittSpider(scrapy.spiders.SitemapSpider):
     name = "averitt"
     item_attributes = {"brand": "Averitt Express", "brand_wikidata": "Q4828320"}
-    allowed_domains = ["averittexpress.com"]
-    start_urls = [
-        "https://www.averittexpress.com/resources/facility-locator",
+    allowed_domains = ["averitt.com"]
+    sitemap_urls = ["https://www.averitt.com/sitemap.xml"]
+    sitemap_rules = [
+        (r"^https://www.averitt.com/locations/[^/]+/[^/]", "parse"),
     ]
 
     def parse(self, response):
-        states = response.xpath('//select[@name="state"]/option/@value').extract()
-        for state in states:
-            if state == "0":
-                continue
-            yield scrapy.FormRequest(
-                url=response.urljoin("/resources/facility-locator/results"),
-                method="POST",
-                formdata={"state": state},
-                meta={"state": state},
-                callback=self.parse_state,
-            )
+        # 1
+        address_full = response.xpath(
+            "/html/body/div[2]/div/div[1]/div/div/span/div[4]/div/div/div/div[2]/div/div/p[1]/span[1]/text()"
+        ).get()
+        city = response.xpath(
+            "/html/body/div[2]/div/div[1]/div/div/span/div[4]/div/div/div/div[2]/div/div/p[1]/span[3]/text()"
+        ).get()
+        state = response.xpath(
+            "/html/body/div[2]/div/div[1]/div/div/span/div[4]/div/div/div/div[2]/div/div/p[1]/span[5]/text()"
+        ).get()
+        postcode = response.xpath(
+            "/html/body/div[2]/div/div[1]/div/div/span/div[4]/div/div/div/div[2]/div/div/p[1]/span[7]/text()"
+        ).get()
 
-    def parse_state(self, response):
-        centers = response.xpath(
-            '//section[contains(@class, "content-main")]//div[@class="grid"]//a/@href'
-        ).extract()
-        for center in centers:
-            yield scrapy.Request(response.urljoin(center), callback=self.parse_center)
+        # 2
+        if city is None:
+            address_full = response.xpath(
+                "/html/body/div[2]/div/div[1]/div/div/span/div[4]/div/div/div/div[2]/div/div/p[1]/span[2]/text()"
+            ).get()
+            city_state_postcode = response.xpath(
+                "/html/body/div[2]/div/div[1]/div/div/span/div[4]/div/div/div/div[2]/div/div/p[1]/span[2]/text()"
+            ).get()
+            if address_full is not None:
+                postcode = city_state_postcode.split()[-1]
+                state = city_state_postcode.split()[-2]
+                city = " ".join(city_state_postcode.split()[:-2]).replace(",", "")
 
-    def parse_center(self, response):
-        map_url = response.xpath(
-            '//div[@id="google-map"]/@data-iframe-src'
-        ).extract_first()
-        try:
-            lat, lon = re.search(r"ll=([\d\-\.]+),([\d\-\.]+)&?", map_url).groups()
-        except:
-            lat, lon = None, None
+        # 3
+        if city is None:
+            address_full = response.xpath(
+                "/html/body/div[2]/div/div[1]/div/div/span/div[4]/div/div/div/div[2]/div/div/p/text()"
+            ).get()
+            address = response.xpath(
+                "string(/html/body/div[2]/div/div[1]/div/div/span/div[4]/div/div/div/div[2]/div/div/p)"
+            ).get()
+            if address_full:
+                city_state_postcode = address.replace(address_full, "")
+                postcode = city_state_postcode.split()[-1]
+                state = city_state_postcode.split()[-2]
+                city = " ".join(city_state_postcode.split()[:-2]).replace(",", "")
 
+        # 4
+        if city is None:
+            address_full = response.xpath(
+                "/html/body/div[2]/div/div[1]/div/div/span/div[4]/div/div/div/div[2]/div/div/p[1]/span/text()"
+            ).get()
+            address = response.xpath(
+                "string(/html/body/div[2]/div/div[1]/div/div/span/div[4]/div/div/div/div[2]/div/div/p[1]/span)"
+            ).get()
+            if address_full:
+                city_state_postcode = address.replace(address_full, "")
+                postcode = city_state_postcode.split()[-1]
+                state = city_state_postcode.split()[-2]
+                city = " ".join(city_state_postcode.split()[:-2]).replace(",", "")
+
+        phone = response.xpath(
+            "/html/body/div[2]/div/div[1]/div/div/span/div[2]/div/div/div/div[1]/div/div/p/a/text()"
+        ).get()
+        email = (
+            response.xpath("/html/body/div[2]/div/div[1]/div/div/span/div[2]/div/div/div/div[2]/div/div/span/a/@href")
+            .get()
+            .replace("mailto:", "")
+        )
+        name = response.xpath(
+            "/html/body/div[2]/div/div[1]/div/div/span/div[4]/div/div/div/div[2]/div/div/h3/strong/text()"
+        ).get()
         properties = {
-            "ref": "_".join(
-                re.search(r".+/(.+?)/(.+?)/?(?:\.jsp|$)", response.url).groups()
-            ),
-            "name": response.xpath(
-                '//section[contains(@class, "content-main")]//h4/text()'
-            ).extract_first(),
-            "addr_full": response.xpath(
-                'normalize-space(//span[@class="street-address"]//text())'
-            ).extract_first(),
-            "city": response.xpath(
-                'normalize-space(//span[@class="locality"]//text())'
-            ).extract_first(),
-            "state": response.xpath(
-                'normalize-space(//span[@class="region"]//text())'
-            ).extract_first(),
-            "postcode": response.xpath(
-                'normalize-space(//span[@class="postal-code"]//text())'
-            ).extract_first(),
+            "ref": response.url,
+            "name": name,
+            "street_address": address_full,
+            "city": city,
+            "state": state,
+            "postcode": postcode,
+            "phone": phone,
+            "email": email,
             "website": response.url,
-            "lat": float(lat) if lat else None,
-            "lon": float(lon) if lon else None,
         }
+        extract_google_position(properties, response)
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

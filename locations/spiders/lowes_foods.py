@@ -1,8 +1,9 @@
-import scrapy
 import re
 
-from locations.items import GeojsonPointItem
-from locations.hours import OpeningHours, DAYS
+import scrapy
+
+from locations.hours import DAYS, OpeningHours
+from locations.items import Feature
 
 
 class LowesFoodsSpider(scrapy.Spider):
@@ -17,48 +18,31 @@ class LowesFoodsSpider(scrapy.Spider):
         urls = response.xpath("//url/loc/text()").extract()
         for url in urls:
             if re.match(r".*store-locator/store-\d+$", url):
-                yield scrapy.Request(
-                    url=url, callback=self.parse_store, meta={"url": url}
-                )
+                yield scrapy.Request(url=url, callback=self.parse_store, meta={"url": url})
 
     def parse_store(self, response):
-
         city_state_zip = (
-            response.xpath("//div[@class='store-details__store-info']/ul/li[4]/text()")
-            .extract_first()
-            .strip()
+            response.xpath("//div[@class='store-details__store-info']/ul/li[4]/text()").extract_first().strip()
         )
 
-        map_data = response.xpath(
-            '//script[contains(text(), "initMap")]'
-        ).extract_first()
+        map_data = response.xpath('//script[contains(text(), "initMap")]').extract_first()
 
-        yield GeojsonPointItem(
+        yield Feature(
             ref=response.url.split("/")[-1],
-            name=response.xpath("//div[@class='store-details__heading']/h1/text()")
-            .extract_first()
-            .strip(),
-            lat=re.search(".*lat: (-?\d+\.\d+),.*", map_data).group(1),
-            lon=re.search(".*lng: (-?\d+\.\d+).*", map_data).group(1),
-            addr_full=response.xpath(
-                "//div[@class='store-details__store-info']/ul/li[2]/text()"
-            )
+            name=response.xpath("//div[@class='store-details__heading']/h1/text()").extract_first().strip(),
+            lat=re.search(r".*lat: (-?\d+\.\d+),.*", map_data).group(1),
+            lon=re.search(r".*lng: (-?\d+\.\d+).*", map_data).group(1),
+            addr_full=response.xpath("//div[@class='store-details__store-info']/ul/li[2]/text()")
             .extract_first()
             .strip(),
             city=city_state_zip.split(",")[0],
             state=city_state_zip.split(" ")[1],
             postcode=city_state_zip.split(" ")[2],
             country="United States",
-            phone=response.xpath(
-                "//div[@class='store-details__store-info__phone']/a/text()"
-            )
-            .extract_first()
-            .strip(),
+            phone=response.xpath("//div[@class='store-details__store-info__phone']/a/text()").extract_first().strip(),
             website=response.url,
             opening_hours=self.parse_hours(
-                response.xpath("//div[@class='store-details__heading']/h2/text()")
-                .extract_first()
-                .strip()
+                response.xpath("//div[@class='store-details__heading']/h2/text()").extract_first().strip()
             ),
         )
 

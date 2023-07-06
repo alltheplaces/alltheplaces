@@ -1,7 +1,7 @@
-# -*- coding: utf-8 -*-
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.categories import Categories, Extras, Fuel, apply_category, apply_yes_no
+from locations.items import Feature
 
 usa_bbox = [-125, 24, -65, 51]
 xstep = 5
@@ -30,14 +30,16 @@ class ValeroSpider(scrapy.Spider):
     def start_requests(self):
         xs = list(range(usa_bbox[0], usa_bbox[2] + xstep, xstep))
         ys = list(range(usa_bbox[1], usa_bbox[3] + ystep, ystep))
-        for (xmin, xmax) in zip(xs, xs[1:]):
-            for (ymin, ymax) in zip(ys, ys[1:]):
+        for xmin, xmax in zip(xs, xs[1:]):
+            for ymin, ymax in zip(ys, ys[1:]):
                 yield self.make_search(xmin, ymin, xmax, ymax)
 
     def parse(self, response):
         for row in response.json():
             amenities = [detail["Description"] for detail in row["LocationDetails"]]
-            website = f"https://locations.valero.com/en-us/LocationDetails/Index/{row['DetailPageUrlID']}/{row['LocationID']}"
+            website = (
+                f"https://locations.valero.com/en-us/LocationDetails/Index/{row['DetailPageUrlID']}/{row['LocationID']}"
+            )
             item = {
                 "ref": row["LocationID"],
                 "lat": row["Latitude"],
@@ -51,13 +53,13 @@ class ValeroSpider(scrapy.Spider):
                 "country": row["Country"],
                 "postcode": row["PostalCode"],
                 "opening_hours": "24/7" if "24 Hour" in amenities else None,
-                "extras": {
-                    "atm": "ATM" in amenities or None,
-                    "amenity:fuel": True,
-                    "amenity:toilets": "Public Restroom" in amenities or None,
-                    "car_wash": "Car Wash" in amenities or None,
-                    "fuel:diesel": "Diesel" in amenities or None,
-                    "fuel:e85": "E-85" in amenities or None,
-                },
             }
-            yield GeojsonPointItem(**item)
+
+            apply_category(Categories.FUEL_STATION, item)
+            apply_yes_no(Extras.ATM, item, "ATM" in amenities)
+            apply_yes_no(Extras.TOILETS, item, "Public Restroom" in amenities)
+            apply_yes_no(Extras.CAR_WASH, item, "Car Wash" in amenities)
+            apply_yes_no(Fuel.DIESEL, item, "Diesel" in amenities)
+            apply_yes_no(Fuel.E85, item, "E-85" in amenities)
+
+            yield Feature(**item)

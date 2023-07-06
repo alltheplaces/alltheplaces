@@ -1,10 +1,6 @@
-# -*- coding: utf-8 -*-
-import re
-
 import scrapy
 
-from locations.items import GeojsonPointItem
-from locations.hours import OpeningHours
+from locations.items import Feature
 
 
 class AtriumHealthSpider(scrapy.Spider):
@@ -28,9 +24,7 @@ class AtriumHealthSpider(scrapy.Spider):
         for page in range(1, 160):
             url = base_url.format(page=page)
 
-            yield scrapy.http.FormRequest(
-                url=url, method="GET", headers=headers, callback=self.parse
-            )
+            yield scrapy.http.FormRequest(url=url, method="GET", headers=headers, callback=self.parse)
 
     def parse(self, response):
         data = response.json()
@@ -39,7 +33,7 @@ class AtriumHealthSpider(scrapy.Spider):
             properties = {
                 "ref": place["ItemId"],
                 "name": place["Name"],
-                "addr_full": place["Address"],
+                "street_address": place["Address"],
                 "city": place["City"],
                 "state": place["State"],
                 "postcode": place["PostalCode"],
@@ -49,4 +43,4 @@ class AtriumHealthSpider(scrapy.Spider):
                 "website": "https://atriumhealth.org" + place["ClickableUri"],
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

@@ -1,10 +1,11 @@
-# -*- coding: utf-8 -*-
 import json
 import re
-import scrapy
 
-from locations.items import GeojsonPointItem
+import scrapy
 from scrapy.spiders import SitemapSpider
+
+from locations.items import Feature
+from locations.user_agents import BROWSER_DEFAULT
 
 URL = "https://data.discounttire.com/webapi/discounttire.graph"
 
@@ -26,9 +27,8 @@ class DiscountTireSpider(SitemapSpider):
         )
     ]
     download_delay = 5.0
-    custom_settings = {
-        "USER_AGENT": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36"
-    }
+    user_agent = BROWSER_DEFAULT
+    requires_proxy = True
 
     def parse_site(self, response):
         store_code = re.search(r".*/s/(\d*)$", response.url).group(1)
@@ -54,7 +54,7 @@ class DiscountTireSpider(SitemapSpider):
             properties = {
                 "name": data["displayName"],
                 "ref": data["code"],
-                "addr_full": data["address"]["line1"],
+                "street_address": data["address"]["line1"],
                 "city": data["address"]["town"],
                 "state": data["address"]["region"]["isocodeShort"],
                 "postcode": data["address"]["postalCode"],
@@ -65,4 +65,4 @@ class DiscountTireSpider(SitemapSpider):
                 "lon": float(data["geoPoint"]["longitude"]),
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

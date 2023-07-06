@@ -1,8 +1,8 @@
-# -*- coding: utf-8 -*-
-import scrapy
 import json
 
-from locations.items import GeojsonPointItem
+import scrapy
+
+from locations.items import Feature
 
 
 class JimmyJohnsSpider(scrapy.Spider):
@@ -12,18 +12,12 @@ class JimmyJohnsSpider(scrapy.Spider):
     start_urls = ("https://locations.jimmyjohns.com/sitemap.xml",)
 
     def parse(self, response):
-        stores = response.xpath(
-            '//url/loc[contains(text(),"sandwiches")]/text()'
-        ).extract()
+        stores = response.xpath('//url/loc[contains(text(),"sandwiches")]/text()').extract()
         for store in stores:
             yield scrapy.Request(response.urljoin(store), callback=self.parse_store)
 
     def parse_store(self, response):
-        data = json.loads(
-            response.xpath(
-                '//script[@type="application/ld+json"]//text()'
-            ).extract_first()
-        )
+        data = json.loads(response.xpath('//script[@type="application/ld+json"]//text()').extract_first())
 
         properties = {
             "ref": data[0]["url"],
@@ -38,4 +32,4 @@ class JimmyJohnsSpider(scrapy.Spider):
         if data[0]["address"]["telephone"]:
             properties["phone"] = data[0]["address"]["telephone"]
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

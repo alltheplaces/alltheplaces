@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import re
 
 from scrapy.linkextractors import LinkExtractor

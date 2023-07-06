@@ -1,16 +1,15 @@
-# -*- coding: utf-8 -*-
-import re
 import json
+import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class SonestaSpider(scrapy.Spider):
     download_delay = 0.2
     name = "sonesta"
-    item_attributes = {"brand": "Sonesta"}
+    item_attributes = {"brand": "Sonesta", "brand_wikidata": "Q81003878"}
     allowed_domains = ["sonesta.com"]
     start_urls = ("https://www.sonesta.com",)
 
@@ -67,4 +66,4 @@ class SonestaSpider(scrapy.Spider):
             "lon": float(re.search('.longitude":(.+?)}.', jdata).group(1)),
         }
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

@@ -1,8 +1,10 @@
 import json
 
-from locations.hours import OpeningHours, DAYS_FULL
-from locations.items import GeojsonPointItem
 from scrapy.spiders import SitemapSpider
+
+from locations.dict_parser import DictParser
+from locations.hours import DAYS_FULL, OpeningHours
+from locations.items import Feature
 
 
 class PrimarkGBSpider(SitemapSpider):
@@ -10,22 +12,18 @@ class PrimarkGBSpider(SitemapSpider):
     item_attributes = {"brand": "Primark", "brand_wikidata": "Q137023"}
     allowed_domains = ["primark.com"]
     sitemap_urls = ["https://www.primark.com/en-gb/sitemap/sitemap-store-locator.xml"]
-    sitemap_rules = [
-        (r"https:\/\/www\.primark\.com\/en-gb\/stores\/[-\w]+\/.+$", "parse")
-    ]
+    sitemap_rules = [(r"https:\/\/www\.primark\.com\/en-gb\/stores\/[-\w]+\/.+$", "parse")]
 
     def parse(self, response):
         data = json.loads(response.xpath('//script[@id="__NEXT_DATA__"]/text()').get())
 
-        store = data["props"]["pageProps"]["storeDetailsPage"]["props"]["storeDetails"]
+        store = DictParser.get_nested_key(data, "storeDetails")
 
-        item = GeojsonPointItem()
+        item = Feature()
         item["lat"] = store["displayCoordinate"]["latitude"]
         item["lon"] = store["displayCoordinate"]["longitude"]
         item["name"] = " ".join([store["name"], store["geomodifier"]])
-        item["street_address"] = ", ".join(
-            filter(None, [store["address"]["line1"], store["address"]["line2"]])
-        )
+        item["street_address"] = ", ".join(filter(None, [store["address"]["line1"], store["address"]["line2"]]))
         item["city"] = store["address"]["city"]
         item["postcode"] = store["address"]["postalCode"]
         item["country"] = store["address"]["countryCode"]

@@ -1,14 +1,12 @@
-# -*- coding: utf-8 -*-
 import json
 import re
 
 from scrapy.spiders import SitemapSpider
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
-
-HOURS_RE = re.compile("(?P<day>\w+) (?P<open_time>\S+) - (?P<close_time>\S+)")
+HOURS_RE = re.compile(r"(?P<day>\w+) (?P<open_time>\S+) - (?P<close_time>\S+)")
 
 
 class EatnParkSpider(SitemapSpider):
@@ -39,4 +37,4 @@ class EatnParkSpider(SitemapSpider):
             "opening_hours": opening_hours.as_opening_hours(),
             "phone": data["address"]["telephone"],
         }
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

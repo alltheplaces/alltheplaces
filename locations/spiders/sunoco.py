@@ -1,8 +1,7 @@
-# -*- coding: utf-8 -*-
 import scrapy
 
-from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
+from locations.items import Feature
 
 
 class SunocoSpider(scrapy.Spider):
@@ -20,13 +19,15 @@ class SunocoSpider(scrapy.Spider):
                 if not key.endswith("_Hours"):
                     continue
                 day = key[:2].capitalize()
+                if val == "Open Today":
+                    continue
                 if val == "24 hours":
                     open_time = close_time = "12 AM"
                 else:
                     open_time, close_time = val.split(" to ")
                 opening_hours.add_range(day, open_time, close_time, "%I %p")
 
-            yield GeojsonPointItem(
+            yield Feature(
                 ref=location["Store_ID"],
                 lon=location["Longitude"],
                 lat=location["Latitude"],

@@ -1,6 +1,7 @@
-# -*- coding: utf-8 -*-
 import scrapy
-from locations.items import GeojsonPointItem
+
+from locations.items import Feature
+from locations.spiders.vapestore_gb import clean_address
 
 
 class CenexSpider(scrapy.Spider):
@@ -44,12 +45,12 @@ class CenexSpider(scrapy.Spider):
         for store in result["SearchResponse"]["Locations"]:
             amenities = "|".join([a["Name"] for a in store["Amenities"]])
 
-            yield GeojsonPointItem(
+            yield Feature(
                 lon=store["Long"],
                 lat=store["Lat"],
                 ref=store["LocationId"],
                 name=store["Name"],
-                addr_full=" ".join([store["Address1"], store["Address2"]]).strip(),
+                street_address=clean_address([store["Address1"], store["Address2"]]),
                 city=store["City"],
                 state=store["State"],
                 postcode=store["Zip"],

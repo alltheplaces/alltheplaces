@@ -1,7 +1,8 @@
-# -*- coding: utf-8 -*-
-import scrapy
 import re
-from locations.items import GeojsonPointItem
+
+import scrapy
+
+from locations.items import Feature
 
 
 class RoundTablePizzaSpider(scrapy.Spider):
@@ -17,13 +18,13 @@ class RoundTablePizzaSpider(scrapy.Spider):
                 store.attrib.get("data-address2").strip(),
             )
             city = state = postcode = None
-            if address_search != None:
+            if address_search is not None:
                 address_groups = address_search.groups()
                 city = address_groups[0]
                 state = address_groups[1]
                 postcode = address_groups[2]
 
-            yield GeojsonPointItem(
+            yield Feature(
                 lat=store.attrib.get("data-latitude"),
                 lon=store.attrib.get("data-longitude"),
                 name=store.attrib.get("data-name"),

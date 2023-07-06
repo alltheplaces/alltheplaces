@@ -1,7 +1,6 @@
-# -*- coding: utf-8 -*-
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class BostonPizzaSpider(scrapy.Spider):
@@ -16,10 +15,7 @@ class BostonPizzaSpider(scrapy.Spider):
     ]
 
     def parse(self, response):
-        url = (
-            response.css(".restaurant-locator").attrib["data-res-path"]
-            + ".getAllRestaurants.json"
-        )
+        url = response.css(".restaurant-locator").attrib["data-res-path"] + ".getAllRestaurants.json"
         yield response.follow(url, callback=self.parse_restaurants)
 
     def parse_restaurants(self, response):
@@ -28,7 +24,7 @@ class BostonPizzaSpider(scrapy.Spider):
                 "phone": store["restaurantPhoneNumber"],
                 "country": store["country"],
                 "ref": store["identifier"],
-                "addr_full": store["address"],
+                "street_address": store["address"],
                 "city": store["city"],
                 "lat": store["latitude"],
                 "postcode": store["postalCode"],
@@ -37,4 +33,4 @@ class BostonPizzaSpider(scrapy.Spider):
                 "name": store["restaurantName"],
                 "lon": store["longitude"],
             }
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

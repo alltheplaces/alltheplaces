@@ -1,7 +1,6 @@
-# -*- coding: utf-8 -*-
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class ShellRechargeSpider(scrapy.Spider):
@@ -41,4 +40,4 @@ class ShellRechargeSpider(scrapy.Spider):
                 "postcode": row["zipCode"],
                 "country": row["country"],
             }
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

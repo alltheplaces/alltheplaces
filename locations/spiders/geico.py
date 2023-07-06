@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
 import json
 import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 MAP_URL = "https://www.geico.com/public/php/geo_map.php?"
 
@@ -19,9 +18,7 @@ class GeicoSpider(scrapy.Spider):
     def parse(self, response):
         response.selector.remove_namespaces()
 
-        urls = response.xpath(
-            '//loc[contains(text(), "insurance-agents")]/text()'
-        ).extract()
+        urls = response.xpath('//loc[contains(text(), "insurance-agents")]/text()').extract()
 
         for url in urls:
             if len(url.split("/")) > 7:  # location page
@@ -33,14 +30,12 @@ class GeicoSpider(scrapy.Spider):
         ).extract_first()
         if script_data:
             data = json.loads(script_data)
-            ref = "_".join(
-                re.search(r".+/(.+?)/(.+?)/?(?:\.html|$)", response.url).groups()
-            )
+            ref = "_".join(re.search(r".+/(.+?)/(.+?)/?(?:\.html|$)", response.url).groups())
 
             metadata = {
                 "name": data["name"],
                 "ref": ref,
-                "addr_full": data["address"]["streetAddress"],
+                "street_address": data["address"]["streetAddress"],
                 "city": data["address"]["addressLocality"],
                 "state": data["address"]["addressRegion"],
                 "postcode": data["address"]["postalCode"],
@@ -80,7 +75,7 @@ class GeicoSpider(scrapy.Spider):
         properties = {
             "ref": response.meta["ref"],
             "name": response.meta["name"],
-            "addr_full": response.meta["addr_full"],
+            "street_address": response.meta["street_address"],
             "city": response.meta["city"],
             "state": response.meta["state"],
             "postcode": response.meta["postcode"],
@@ -90,4 +85,4 @@ class GeicoSpider(scrapy.Spider):
             "website": response.meta["website"],
         }
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

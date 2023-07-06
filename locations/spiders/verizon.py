@@ -1,20 +1,19 @@
-# -*- coding: utf-8 -*-
-import scrapy
 import json
 import re
 
-from locations.items import GeojsonPointItem
+import scrapy
+
 from locations.hours import OpeningHours
+from locations.items import Feature
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class VerizonSpider(scrapy.Spider):
     name = "verizon"
     item_attributes = {"brand": "Verizon", "brand_wikidata": "Q919641"}
     allowed_domains = ["www.verizonwireless.com"]
-    start_urls = ("https://www.verizonwireless.com/sitemap_storelocator.xml",)
-    custom_settings = {
-        "USER_AGENT": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.86 Safari/537.36",
-    }
+    start_urls = ["https://www.verizonwireless.com/sitemap_storelocator.xml"]
+    user_agent = BROWSER_DEFAULT
 
     def parse_hours(self, store_hours):
         opening_hours = OpeningHours()
@@ -23,12 +22,7 @@ class VerizonSpider(scrapy.Spider):
             open_time = store_hours.get(f"{store_day}Open")
             close_time = store_hours.get(f"{store_day}Close")
 
-            if (
-                open_time
-                and close_time
-                and open_time.lower() != "closed"
-                and close_time.lower() != "closed"
-            ):
+            if open_time and close_time and open_time.lower() != "closed" and close_time.lower() != "closed":
                 opening_hours.add_range(
                     day=store_day[0:2],
                     open_time=open_time,
@@ -48,9 +42,7 @@ class VerizonSpider(scrapy.Spider):
                 yield scrapy.Request(url, callback=self.parse_store)
 
     def parse_store(self, response):
-        script = response.xpath(
-            '//script[contains(text(), "storeJSON")]/text()'
-        ).extract_first()
+        script = response.xpath('//script[contains(text(), "storeJSON")]/text()').extract_first()
         if not script:
             return
 
@@ -70,9 +62,7 @@ class VerizonSpider(scrapy.Spider):
             "lon": store_data["geo"].get("longitude"),
             "extras": {
                 # Sometimes 'postStoreDetail' exists with "None" value, usual get w/ default syntax isn't reliable
-                "business_name": (store_data.get("posStoreDetail") or {}).get(
-                    "businessName"
-                ),
+                "business_name": (store_data.get("posStoreDetail") or {}).get("businessName"),
                 "retail_id": store_data.get("retailId"),
                 "store_type": (store_data.get("posStoreDetail") or {}).get("storeType"),
                 "store_type_note": store_data.get("typeOfStore"),
@@ -83,4 +73,4 @@ class VerizonSpider(scrapy.Spider):
         if hours:
             properties["opening_hours"] = hours
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

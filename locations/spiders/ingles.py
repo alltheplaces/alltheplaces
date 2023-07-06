@@ -1,9 +1,9 @@
-# -*- coding: utf-8
-import scrapy
 import re
 
-from locations.items import GeojsonPointItem
-from locations.hours import OpeningHours
+import scrapy
+
+from locations.hours import DAYS, OpeningHours
+from locations.items import Feature
 
 STORE_STATES = [
     "Alabama",
@@ -14,8 +14,6 @@ STORE_STATES = [
     "Virginia",
 ]
 
-DAYS = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
-
 
 class InglesSpider(scrapy.Spider):
     name = "ingles"
@@ -25,8 +23,7 @@ class InglesSpider(scrapy.Spider):
     def start_requests(self):
         for state in STORE_STATES:
             yield scrapy.Request(
-                "https://www.ingles-markets.com/storelocate/storelocator.php?address="
-                + state,
+                "https://www.ingles-markets.com/storelocate/storelocator.php?address=" + state,
                 callback=self.parse,
             )
 
@@ -39,17 +36,16 @@ class InglesSpider(scrapy.Spider):
                 day=day,
                 open_time=("".join(open_time).strip()),
                 close_time=("".join(close_time).strip()),
-                time_format="%H:%M%p",
+                time_format="%I:%M%p",
             )
 
-        return opening_hours.as_opening_hours()
+        return opening_hours
 
     def parse_store(self, response):
-
         properties = {
             "ref": response.meta["ref"],
             "name": response.meta["name"],
-            "addr_full": response.meta["addr_full"],
+            "street_address": response.meta["street_address"],
             "city": response.meta["city"],
             "state": response.meta["state"],
             "postcode": re.search(
@@ -62,15 +58,11 @@ class InglesSpider(scrapy.Spider):
             "website": response.url,
         }
 
-        hours = self.parse_hours(
-            " ".join(
-                response.xpath("/html/body/fieldset/div[2]/text()")[1].getall()
-            ).strip()
-        )
+        hours = self.parse_hours(" ".join(response.xpath("/html/body/fieldset/div[2]/text()")[1].getall()).strip())
         if hours:
             properties["opening_hours"] = hours
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)
 
     def parse(self, response):
         for store in response.xpath("//markers/marker"):
@@ -84,13 +76,12 @@ class InglesSpider(scrapy.Spider):
 
             for id in ids:
                 yield scrapy.Request(
-                    "https://www.ingles-markets.com/storelocate/storeinfo.php?storenum="
-                    + id,
+                    "https://www.ingles-markets.com/storelocate/storeinfo.php?storenum=" + id,
                     callback=self.parse_store,
                     meta={
                         "ref": id,
                         "name": name,
-                        "addr_full": addr,
+                        "street_address": addr,
                         "city": city,
                         "state": state,
                         "lat": lats,

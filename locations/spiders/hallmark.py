@@ -1,10 +1,10 @@
-# -*- coding: utf-8 -*-
 import json
 
 import scrapy
-from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
 from scrapy.selector import Selector
+
+from locations.hours import OpeningHours
+from locations.items import Feature
 
 
 class HallmarkSpider(scrapy.Spider):
@@ -17,11 +17,7 @@ class HallmarkSpider(scrapy.Spider):
 
     def parse(self, response):
         maplist = json.loads(response.text)["maplist"]
-        data = json.loads(
-            "[{}]".format(
-                Selector(text=maplist).xpath("//div/text()").extract_first()[:-1]
-            )
-        )
+        data = json.loads("[{}]".format(Selector(text=maplist).xpath("//div/text()").extract_first()[:-1]))
         for location in data:
             hours = json.loads(location["hours_sets:primary"])
             properties = {
@@ -38,11 +34,9 @@ class HallmarkSpider(scrapy.Spider):
                 "website": location["url"],
                 "lat": float(location["lat"]),
                 "lon": float(location["lng"]),
-                "opening_hours": self.parse_hours(hours["days"])
-                if hours.get("days")
-                else None,
+                "opening_hours": self.parse_hours(hours["days"]) if hours.get("days") else None,
             }
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)
 
     def parse_hours(self, store_hours):
         opening_hours = OpeningHours()

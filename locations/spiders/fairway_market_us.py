@@ -1,11 +1,10 @@
-# -*- coding: utf-8 -*-
 import re
+from datetime import datetime
 
 import scrapy
 
-from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
-from datetime import datetime
+from locations.items import Feature
 
 DAYS_NAME = {
     "Monday": "Mo",
@@ -20,7 +19,7 @@ DAYS_NAME = {
 
 class FairwayMarketUSSpider(scrapy.Spider):
     name = "fairway_market_us"
-    item_attributes = {"brand": "Fairway Market"}
+    item_attributes = {"brand": "Fairway Market", "brand_wikidata": "Q5430910"}
     allowed_domains = ["fairwaymarket.com"]
     start_urls = [
         "https://www.fairwaymarket.com/api/models/stores?posts_per_page=40",
@@ -57,14 +56,8 @@ class FairwayMarketUSSpider(scrapy.Spider):
             try:
                 city = re.search(r",\s(.*?),", store["location"]["address"]).groups()[0]
             except:
-                city = (
-                    re.search(r"(Avenue|Parkway)(.*?),", store["location"]["address"])
-                    .groups()[1]
-                    .strip()
-                )
-                addr = re.search(
-                    r"^(.*)(Avenue|Parkway)", store["location"]["address"]
-                ).group(0)
+                city = re.search(r"(Avenue|Parkway)(.*?),", store["location"]["address"]).groups()[1].strip()
+                addr = re.search(r"^(.*)(Avenue|Parkway)", store["location"]["address"]).group(0)
 
             state = re.search(r"[A-Z]{2}", store["location"]["address"])[0]
             postal = re.search(r"[0-9]{5}", store["location"]["address"])[0]
@@ -87,4 +80,4 @@ class FairwayMarketUSSpider(scrapy.Spider):
             if h:
                 properties["opening_hours"] = h
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

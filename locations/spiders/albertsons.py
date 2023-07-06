@@ -1,110 +1,98 @@
-import re
-import json
+from scrapy.spiders import SitemapSpider
 
-import scrapy
-
-from locations.items import GeojsonPointItem
-from locations.hours import OpeningHours
+from locations.categories import Categories, apply_category
+from locations.structured_data_spider import StructuredDataSpider
 
 
-class AlbertsonsSpider(scrapy.Spider):
-
+class AlbertsonsSpider(SitemapSpider, StructuredDataSpider):
     name = "albertsons"
-    item_attributes = {"brand": "Albertsons", "brand_wikidata": "Q2831861"}
-    download_delay = 0.5
-
+    brands = {
+        "albertsons": {"brand": "Albertsons", "brand_wikidata": "Q2831861"},
+        "acmemarkets": {"brand": "ACME Markets", "brand_wikidata": "Q341975"},
+        "albertsonsmarket": {
+            "brand": "Albertsons Market",
+            "brand_wikidata": "Q115350320",
+        },
+        "amigosunited": {"brand": "Amigos", "brand_wikidata": "Q115350331"},
+        "andronicos": {"brand": "Andronico's", "brand_wikidata": "Q4759491"},
+        "carrsqc": {"brand": "Carrs", "brand_wikidata": "Q5046735"},
+        "jewelosco": {"brand": "Jewel-Osco", "brand_wikidata": "Q3178470"},
+        "kingsfoodmarkets": {"brand": "Kings", "brand_wikidata": "Q6412914"},
+        "luckylowprices": {"brand": "Lucky", "brand_wikidata": "Q115350483"},
+        "marketstreetunited": {
+            "brand": "Market Street",
+            "brand_wikidata": "Q113009729",
+        },
+        "pavilions": {"brand": "Pavilions", "brand_wikidata": "Q7155886"},
+        "randalls": {"brand": "Randalls", "brand_wikidata": "Q7291489"},
+        "shaws": {"brand": "Shaw's", "brand_wikidata": "Q578387"},
+        "starmarket": {"brand": "Star Market", "brand_wikidata": "Q7600795"},
+        "tomthumb": {"brand": "Tom Thumb", "brand_wikidata": "Q7817826"},
+        "unitedsupermarkets": {
+            "brand": "United Supermarkets",
+            "brand_wikidata": "Q17108901",
+        },
+        "vons": {"brand": "Vons", "brand_wikidata": "Q7941609"},
+    }
+    item_attributes = {"nsi_id": -1}  # Most of these are too small to justify NSI entries
     allowed_domains = [
         "local.albertsons.com",
+        "local.fuel.albertsons.com",
+        "local.pharmacy.albertsons.com",
         "local.acmemarkets.com",
+        "local.fuel.acmemarkets.com",
+        "local.pharmacy.acmemarkets.com",
         "local.albertsonsmarket.com",
+        "local.pharmacy.albertsonsmarket.com",
         "local.amigosunited.com",
+        "local.pharmacy.amigosunited.com",
         "local.andronicos.com",
         "local.carrsqc.com",
+        "local.fuel.carrsqc.com",
+        "local.pharmacy.carrsqc.com",
         "local.jewelosco.com",
+        "local.fuel.jewelosco.com",
+        "local.pharmacy.jewelosco.com",
         "local.kingsfoodmarkets.com",
         "local.luckylowprices.com",
+        "local.pharmacy.luckylowprices.com",
         "local.marketstreetunited.com",
+        "local.pharmacy.marketstreetunited.com",
         "local.pavilions.com",
+        "local.pharmacy.pavilions.com",
         "local.randalls.com",
+        "local.fuel.randalls.com",
+        "local.pharmacy.randalls.com",
         "local.shaws.com",
+        "local.pharmacy.shaws.com",
         "local.starmarket.com",
+        "local.pharmacy.starmarket.com",
         "local.tomthumb.com",
+        "local.fuel.tomthumb.com",
+        "local.pharmacy.tomthumb.com",
         "local.unitedsupermarkets.com",
+        "local.pharmacy.unitedsupermarkets.com",
         "local.vons.com",
+        "local.fuel.vons.com",
+        "local.pharmacy.vons.com",
     ]
-
-    start_urls = [f"https://{domain}" for domain in allowed_domains]
-
-    def parse_stores(self, response):
-        js = json.loads(
-            response.xpath('//script[contains(., "Yext.Profile")]/text()')
-            .extract_first()
-            .replace("window.Yext = (function(Yext){Yext.Profile = ", "")
-            .replace("; return Yext;})(window.Yext || {});", "")
+    sitemap_urls = [f"https://{domain}/robots.txt" for domain in allowed_domains]
+    sitemap_rules = [
+        (
+            r"https://local\.(?:fuel\.|pharmacy\.)?\w+\.com/\w\w/[-\w]+/[-\w]+\.html$",
+            "parse_sd",
         )
+    ]
+    wanted_types = ["GroceryStore", "GasStation", "Pharmacy"]
 
-        hours = OpeningHours()
-        for day_spec in js["hours"]["normalHours"]:
-            day = day_spec["day"][:2].capitalize()
-            for interval in day_spec["intervals"]:
-                open_hour, open_minute = divmod(interval["start"], 100)
-                close_hour, close_minute = divmod(interval["end"], 100)
-                open_time = f"{open_hour:02}:{open_minute:02}"
-                close_time = f"{close_hour:02}:{close_minute:02}"
-                hours.add_range(day, open_time, close_time)
+    def post_process_item(self, item, response, ld_data, **kwargs):
+        if ld_data["@type"] == "GroceryStore":
+            apply_category(Categories.SHOP_SUPERMARKET, item)
+        elif ld_data["@type"] == "GasStation":
+            apply_category(Categories.FUEL_STATION, item)
+        elif ld_data["@type"] == "Pharmacy":
+            apply_category(Categories.PHARMACY, item)
 
-        properties = {
-            "addr_full": js["address"]["line1"],
-            "extras": {
-                "addr:unit": js["address"]["line2"],
-                "loc_name": js["address"]["extraDescription"],
-            },
-            "phone": js["mainPhone"]["number"],
-            "city": js["address"]["city"],
-            "state": js["address"]["region"],
-            "postcode": js["address"]["postalCode"],
-            "name": js["name"],
-            "ref": js["meta"]["id"],
-            "website": response.url,
-            "lat": js["yextDisplayCoordinate"]["lat"],
-            "lon": js["yextDisplayCoordinate"]["long"],
-            "brand": js["c_groceryBrand"],
-            "opening_hours": hours.as_opening_hours(),
-        }
-        yield GeojsonPointItem(**properties)
+        item.update(self.brands[response.url.split("/")[2].split(".")[-2]])
 
-    def parse_city_stores(self, response):
-        stores = response.xpath(
-            '//div[@class="Directory-content"]//h2/a/@href'
-        ).extract()
-        for store in stores:
-            yield scrapy.Request(response.urljoin(store), callback=self.parse_stores)
-
-    def parse_state(self, response):
-        urls = response.xpath(
-            '//div[@class="Directory-content"]/ul/li/a/@href'
-        ).extract()
-        for path in urls:
-            pattern = re.compile(r"^[a-z]{2}\/[^()]+\/[^()]+.html$")
-            if pattern.match(path.strip()):
-                yield scrapy.Request(response.urljoin(path), callback=self.parse_stores)
-            else:
-                yield scrapy.Request(
-                    response.urljoin(path), callback=self.parse_city_stores
-                )
-
-    def parse(self, response):
-        urls = response.xpath(
-            '//div[@class="Directory-content"]/ul/li/a/@href'
-        ).extract()
-        for path in urls:
-            pattern = re.compile("^[a-z]{2}.html$")
-            pattern1 = re.compile(r"^[a-z]{2}\/[^()]+\/[^()]+.html$")
-            if pattern.match(path.strip()):
-                yield scrapy.Request(response.urljoin(path), callback=self.parse_state)
-            elif pattern1.match(path.strip()):
-                yield scrapy.Request(response.urljoin(path), callback=self.parse_stores)
-            else:
-                yield scrapy.Request(
-                    response.urljoin(path), callback=self.parse_city_stores
-                )
+        yield item

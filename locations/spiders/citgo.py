@@ -1,10 +1,10 @@
-# -*- coding: utf-8 -*-
-import scrapy
 import json
 import re
 
-from locations.items import GeojsonPointItem
+import scrapy
+
 from locations.hours import OpeningHours
+from locations.items import Feature
 
 SERVICE_VALUES = {"Yes": True, "No": False, "NR": None}
 TIME_PATTERN = re.compile(r"\d{2}:\d{2}")
@@ -24,9 +24,7 @@ class CitgoSpider(scrapy.Spider):
                 self.start_urls[0],
                 method="POST",
                 formdata={
-                    "__CMSCsrfToken": response.css(
-                        "#__CMSCsrfToken::attr(value)"
-                    ).get(),
+                    "__CMSCsrfToken": response.css("#__CMSCsrfToken::attr(value)").get(),
                     "__VIEWSTATE": response.css("#__VIEWSTATE::attr(value)").get(),
                     "__CALLBACKID": "p$lt$WebPartZone3$PageContent$pageplaceholder$p$lt$WebPartZone3$Widgets$StoreLocator",
                     "__CALLBACKPARAM": "66952|10000",
@@ -44,18 +42,14 @@ class CitgoSpider(scrapy.Spider):
                     open_time = location[f"hrs{hours_key}start"]
                     close_time = location[f"hrs{hours_key}start"]
 
-                    if not (
-                        TIME_PATTERN.match(open_time) and TIME_PATTERN.match(close_time)
-                    ):
+                    if not (TIME_PATTERN.match(open_time) and TIME_PATTERN.match(close_time)):
                         continue
 
                     if int(open_time[0:2]) >= 24:
                         open_time = f"{(int(open_time[0:2]) - 24):02d}{open_time[2:]}"
 
                     if int(close_time[0:2]) >= 24:
-                        close_time = (
-                            f"{(int(close_time[0:2]) - 24):02d}{close_time[2:]}"
-                        )
+                        close_time = f"{(int(close_time[0:2]) - 24):02d}{close_time[2:]}"
 
                     opening_hours.add_range(
                         day=hours_key[:2].capitalize(),
@@ -64,7 +58,7 @@ class CitgoSpider(scrapy.Spider):
                         time_format="%H:%M",
                     )
 
-                yield GeojsonPointItem(
+                yield Feature(
                     ref=location["number"],
                     lon=location["longitude"],
                     lat=location["latitude"],
@@ -83,8 +77,6 @@ class CitgoSpider(scrapy.Spider):
                         "fuel:diesel": SERVICE_VALUES.get(services["diesel"]),
                         "hgv": SERVICE_VALUES.get(services["truckstop"]),
                         "wheelchair": SERVICE_VALUES.get(services["handicapaccess"]),
-                        "shop": "convenience"
-                        if SERVICE_VALUES.get(services["cstore"])
-                        else None,
+                        "shop": "convenience" if SERVICE_VALUES.get(services["cstore"]) else None,
                     },
                 )

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Scrapy settings for locations project
 #
 # For simplicity, this file contains only settings considered important or
@@ -10,8 +8,10 @@
 #     http://scrapy.readthedocs.org/en/latest/topics/spider-middleware.html
 
 import os
-import locations
+
 import scrapy
+
+import locations
 
 BOT_NAME = "locations"
 
@@ -66,9 +66,9 @@ TELNETCONSOLE_ENABLED = False
 
 # Enable or disable downloader middlewares
 # See http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html
-# DOWNLOADER_MIDDLEWARES = {
-#    'locations.middlewares.MyCustomDownloaderMiddleware': 543,
-# }
+DOWNLOADER_MIDDLEWARES = {
+    "locations.middlewares.cdnstats.CDNStatsMiddleware": 500,
+}
 
 # Enable or disable extensions
 # See http://scrapy.readthedocs.org/en/latest/topics/extensions.html
@@ -83,12 +83,19 @@ EXTENSIONS = {
 # Configure item pipelines
 # See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-    "locations.pipelines.DuplicatesPipeline": 200,
-    "locations.pipelines.ApplySpiderNamePipeline": 250,
-    "locations.pipelines.ApplySpiderLevelAttributesPipeline": 300,
-    "locations.pipelines.ExtractGBPostcodePipeline": 400,
-    "locations.pipelines.AssertURLSchemePipeline": 500,
-    "locations.pipelines.CheckItemPropertiesPipeline": 600,
+    "locations.pipelines.duplicates.DuplicatesPipeline": 200,
+    "locations.pipelines.apply_spider_level_attributes.ApplySpiderLevelAttributesPipeline": 300,
+    "locations.pipelines.apply_spider_name.ApplySpiderNamePipeline": 350,
+    "locations.pipelines.country_code_clean_up.CountryCodeCleanUpPipeline": 355,
+    "locations.pipelines.state_clean_up.StateCodeCleanUpPipeline": 356,
+    "locations.pipelines.phone_clean_up.PhoneCleanUpPipeline": 360,
+    "locations.pipelines.extract_gb_postcode.ExtractGBPostcodePipeline": 400,
+    "locations.pipelines.assert_url_scheme.AssertURLSchemePipeline": 500,
+    "locations.pipelines.check_item_properties.CheckItemPropertiesPipeline": 600,
+    "locations.pipelines.closed.ClosePipeline": 650,
+    "locations.pipelines.apply_nsi_categories.ApplyNSICategoriesPipeline": 700,
+    "locations.pipelines.count_categories.CountCategoriesPipeline": 800,
+    "locations.pipelines.count_brands.CountBrandsPipeline": 810,
 }
 
 
@@ -112,3 +119,24 @@ ITEM_PIPELINES = {
 # HTTPCACHE_DIR = 'httpcache'
 # HTTPCACHE_IGNORE_HTTP_CODES = []
 # HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
+
+REQUEST_FINGERPRINTER_IMPLEMENTATION = "2.7"
+
+DEFAULT_PLAYWRIGHT_SETTINGS = {
+    "PLAYWRIGHT_BROWSER_TYPE": "firefox",
+    "PLAYWRIGHT_DEFAULT_NAVIGATION_TIMEOUT": 30 * 1000,
+    "PLAYWRIGHT_ABORT_REQUEST": lambda request: not request.resource_type == "document",
+    "TWISTED_REACTOR": "twisted.internet.asyncioreactor.AsyncioSelectorReactor",
+    "DOWNLOAD_HANDLERS": {
+        "http": "scrapy_playwright.handler.ScrapyPlaywrightDownloadHandler",
+        "https": "scrapy_playwright.handler.ScrapyPlaywrightDownloadHandler",
+    },
+    "DOWNLOADER_MIDDLEWARES": {"locations.middlewares.playwright_middleware.PlaywrightMiddleware": 543},
+}
+
+REQUESTS_CACHE_ENABLED = True
+REQUESTS_CACHE_BACKEND_SETTINGS = {
+    "expire_after": 60 * 60 * 24 * 3,
+    "backend": "filesystem",
+    "wal": True,
+}

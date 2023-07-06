@@ -1,10 +1,8 @@
-# -*- coding: utf-8 -*-
-import re
 import json
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class LoewsHotelsSpider(scrapy.Spider):
@@ -16,7 +14,6 @@ class LoewsHotelsSpider(scrapy.Spider):
 
     def parse(self, response):
         urls = response.xpath('//div[@class="row"]//p//a/@href').extract()
-        x = "/omni-partnership"
         for url in urls:
             if url.startswith("/booking"):
                 pass
@@ -41,9 +38,7 @@ class LoewsHotelsSpider(scrapy.Spider):
             properties = {
                 "ref": data["name"],
                 "name": data["name"],
-                "addr_full": response.xpath('//span[@class="street-address"]/text()')[0]
-                .extract()
-                .strip("]["),
+                "addr_full": response.xpath('//span[@class="street-address"]/text()')[0].extract().strip("]["),
                 "city": data["address"]["addressLocality"],
                 "state": data["address"]["addressRegion"],
                 "postcode": data["address"]["postalCode"],
@@ -53,14 +48,12 @@ class LoewsHotelsSpider(scrapy.Spider):
                 "lon": float(data["geo"]["longitude"]),
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)
         except:
             properties = {
                 "ref": data["name"],
                 "name": data["name"],
-                "addr_full": response.xpath('//span[@class="street-address"]/text()')
-                .extract()[0]
-                .strip("]["),
+                "addr_full": response.xpath('//span[@class="street-address"]/text()').extract()[0].strip("]["),
                 "city": data["address"]["addressLocality"],
                 "state": data["address"]["addressRegion"],
                 "postcode": data["address"]["postalCode"],
@@ -68,4 +61,4 @@ class LoewsHotelsSpider(scrapy.Spider):
                 "phone": data.get("telephone"),
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

@@ -1,9 +1,9 @@
-# -*- coding: utf-8 -*-
-import scrapy
-import json
 import base64
+import json
 
-from locations.items import GeojsonPointItem
+import scrapy
+
+from locations.items import Feature
 
 
 class RalphLaurenSpider(scrapy.Spider):
@@ -13,9 +13,7 @@ class RalphLaurenSpider(scrapy.Spider):
 
     def parse(self, response):
         # gather URLs of all countries
-        countries = response.xpath(
-            '//a[@class="store-directory-countrylink"]/@href'
-        ).extract()
+        countries = response.xpath('//a[@class="store-directory-countrylink"]/@href').extract()
 
         for country in countries:
             # build URL for per country overview of all stores, countrycode is after the equals sign, e.g. /Stores-ShowStates?countryCode=US
@@ -35,9 +33,7 @@ class RalphLaurenSpider(scrapy.Spider):
 
     def parse_locations(self, response):
         # get json which provides most of the data
-        data = response.xpath(
-            '//div[@class="storeJSON hide"]/@data-storejson'
-        ).extract_first()
+        data = response.xpath('//div[@class="storeJSON hide"]/@data-storejson').extract_first()
 
         # opening hourse are not in json, thus need to be scraped seperately
         hours = response.xpath('//tr[@class="store-hourrow"]//td//text()').getall()
@@ -75,4 +71,4 @@ class RalphLaurenSpider(scrapy.Spider):
                 "opening_hours": opening_hours,
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

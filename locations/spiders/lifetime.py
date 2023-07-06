@@ -1,8 +1,8 @@
-# -*- coding: utf-8 -*-
-import scrapy
 import json
 
-from locations.items import GeojsonPointItem
+import scrapy
+
+from locations.items import Feature
 
 
 class LifetimeSpider(scrapy.Spider):
@@ -23,10 +23,7 @@ class LifetimeSpider(scrapy.Spider):
             )
 
     def parse_store(self, response):
-
-        json_data = response.xpath(
-            '//script[@type="application/ld+json"]/text()'
-        ).extract_first()
+        json_data = response.xpath('//script[@type="application/ld+json"]/text()').extract_first()
         data = json.loads(json_data)
 
         properties = {
@@ -42,4 +39,4 @@ class LifetimeSpider(scrapy.Spider):
             "lon": data["geo"]["longitude"],
         }
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)

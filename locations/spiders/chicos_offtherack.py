@@ -1,9 +1,8 @@
-# -*- coding: utf-8 -*-
 import json
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class ChicosOffTheRackSpider(scrapy.Spider):
@@ -30,15 +29,14 @@ class ChicosOffTheRackSpider(scrapy.Spider):
             properties = {
                 "name": data["attributes"]["name"],
                 "ref": data["id"],
-                "addr_full": data["attributes"]["address1"],
+                "street_address": data["attributes"]["address1"],
                 "city": data["attributes"]["city"],
                 "state": data["attributes"]["state"],
                 "postcode": data["attributes"]["postalCode"],
                 "country": data["attributes"]["countryCode"],
-                "website": "https://stores.chicosofftherack.com/s/"
-                + data["attributes"]["slug"],
+                "website": "https://stores.chicosofftherack.com/s/" + data["attributes"]["slug"],
                 "lat": float(data["attributes"]["latitude"]),
                 "lon": float(data["attributes"]["longitude"]),
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

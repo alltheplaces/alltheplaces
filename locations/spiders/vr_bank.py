@@ -1,9 +1,11 @@
-import scrapy
 import re
 
-from locations.items import GeojsonPointItem
-from locations.hours import OpeningHours
+from scrapy.spiders import SitemapSpider
 
+from locations.categories import Categories
+from locations.hours import OpeningHours
+from locations.items import Feature
+from locations.user_agents import BROWSER_DEFAULT
 
 DAY_MAPPING = {
     "Montag": "Mo",
@@ -16,16 +18,13 @@ DAY_MAPPING = {
 }
 
 
-class VRBankSpider(scrapy.Spider):
+class VRBankSpider(SitemapSpider):
     name = "vr_bank"
     allowed_domains = ["www.vr.de"]
-    start_urls = ["https://www.vr.de/service/filialen-a-z/a.html"]
-    custom_settings = {
-        "USER_AGENT": "Mozilla/5.0 (iPhone; CPU iPhone OS 5_1 like Mac OS X) "
-        "AppleWebKit/534.46 (KHTML, like Gecko) Version/5.1 "
-        "Mobile/9B179 Safari/7534.48.3",
-    }
-    item_attributes = {"country": "DE"}
+    sitemap_urls = ["https://www.vr.de/standorte.sitemap.xml"]
+    sitemap_rules = [(r"-\d+\.html$", "parse_details")]
+    user_agent = BROWSER_DEFAULT
+    item_attributes = {"country": "DE", "extras": Categories.BANK.value}
 
     def process_hours(self, store_hours):
         opening_hours = OpeningHours()
@@ -52,9 +51,7 @@ class VRBankSpider(scrapy.Spider):
 
                 for tm in tms:
                     try:
-                        open_time, close_time = [
-                            t.strip() for t in tm.replace("Uhr", "").strip().split("-")
-                        ]
+                        open_time, close_time = (t.strip() for t in tm.replace("Uhr", "").strip().split("-"))
 
                         if open_time and close_time and day:
                             opening_hours.add_range(
@@ -88,9 +85,7 @@ class VRBankSpider(scrapy.Spider):
         if m:
             longitude = m.group(1)
 
-        hours = response.xpath(
-            '//p[@itemprop="openingHoursSpecification"]/text()'
-        ).getall()
+        hours = response.xpath('//p[@itemprop="openingHoursSpecification"]/text()').getall()
 
         properties = {
             "ref": response.request.url,
@@ -107,25 +102,4 @@ class VRBankSpider(scrapy.Spider):
         if hours:
             properties["opening_hours"] = self.process_hours(hours)
 
-        yield GeojsonPointItem(**properties)
-
-    def parse(self, response):
-        index = response.xpath(
-            '//div[has-class("module module-linklist ym-clearfix")]/ul/li/a/@href'
-        ).getall()
-
-        for page in index:
-            yield scrapy.Request(
-                url=page,
-                callback=self.parse_links,
-            )
-
-    def parse_links(self, response):
-        list = response.xpath(
-            '//div[has-class("module module-teaserlist ym-clearfix")]/div/a/@href'
-        ).getall()
-        for item in list:
-            yield scrapy.Request(
-                url=item,
-                callback=self.parse_details,
-            )
+        yield Feature(**properties)

@@ -1,9 +1,9 @@
-# -*- coding: utf-8 -*-
 import re
 import urllib
 
 import scrapy
-from locations.items import GeojsonPointItem
+
+from locations.items import Feature
 
 
 class PPGPaintsSpider(scrapy.Spider):
@@ -17,9 +17,7 @@ class PPGPaintsSpider(scrapy.Spider):
     ]
 
     def parse(self, response):
-        for href in response.xpath(
-            '//*[@class="store-locations-item"]//@href'
-        ).extract():
+        for href in response.xpath('//*[@class="store-locations-item"]//@href').extract():
             url = response.urljoin(href)
             yield scrapy.Request(url)
         for href in response.xpath('//*[@id="store-table"]//@href').extract():
@@ -27,9 +25,7 @@ class PPGPaintsSpider(scrapy.Spider):
             yield scrapy.Request(url, callback=self.parse_store)
 
     def parse_store(self, response):
-        map_url = re.search(
-            r"url\('(.*)'\);", response.css(".store-staticmap").attrib["style"]
-        ).group(1)
+        map_url = re.search(r"url\('(.*)'\);", response.css(".store-staticmap").attrib["style"]).group(1)
         [latlng] = urllib.parse.parse_qs(urllib.parse.urlparse(map_url).query)["center"]
         lat, lon = map(float, latlng.split(","))
         properties = {
@@ -38,13 +34,11 @@ class PPGPaintsSpider(scrapy.Spider):
             "lon": lon,
             "website": response.url,
             "name": response.xpath('//*[@itemprop="name"]/text()').get(),
-            "street_address": response.xpath(
-                '//*[@itemprop="streetAddress"]/text()'
-            ).get(),
+            "street_address": response.xpath('//*[@itemprop="streetAddress"]/text()').get(),
             "city": response.xpath('//*[@itemprop="addressLocality"]/text()').get(),
             "state": response.xpath('//*[@itemprop="addressRegion"]/text()').get(),
             "postcode": response.xpath('//*[@itemprop="postalCode"]/text()').get(),
             "phone": response.xpath('//*[@itemprop="telephone"]/text()').get(),
             "country": response.url.split("/")[4].upper(),
         }
-        return GeojsonPointItem(**properties)
+        return Feature(**properties)

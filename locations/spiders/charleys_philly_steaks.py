@@ -1,69 +1,46 @@
-# -*- coding: utf-8 -*-
 import re
 
 import scrapy
-import csv
 
-from locations.items import GeojsonPointItem
+from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
-
-DAY_MAPPING = {
-    "Mon": "Mo",
-    "Tue": "Tu",
-    "Wed": "We",
-    "Thu": "Th",
-    "Fri": "Fr",
-    "Sat": "Sa",
-    "Sun": "Su",
-}
 
 
 class CharleysPhillySteaksSpider(scrapy.Spider):
     name = "charleys_philly_steaks"
     allowed_domains = ["charleys.com"]
-    start_urls = [
-        "https://charleys.com/storelocator/StoreList/StoreList.ashx",
-    ]
+    item_attributes = {"brand": "Charley's Philly Steaks", "brand_wikidata": "Q1066777"}
 
-    def parse_hours(self, hours):
-        opening_hours = OpeningHours()
+    def start_requests(self):
+        url = "https://www.charleys.com/wp-admin/admin-ajax.php"
+        payload = "action=get_nearby_locations&lat=40.7127753&lng=-74.0059728&distance=5000"
+        headers = {"Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"}
 
-        hours_list = hours.split("<br />")
+        yield scrapy.Request(url=url, headers=headers, method="POST", body=payload, callback=self.parse_list)
 
-        if len(hours_list) != 1:
-            for days in hours_list:
-                if days != "":
-                    day, h = days.split(": ")
-                    day = DAY_MAPPING[day]
-                    if h != "Closed":
-                        open_time, close_time = h.split(" - ")
-                        if close_time == "0:00AM":
-                            close_time = "12:00AM"
-                            opening_hours.add_range(
-                                day=day,
-                                open_time=open_time,
-                                close_time=close_time,
-                                time_format="%I:%M%p",
-                            )
+    def parse_list(self, response):
+        for data in response.json().get("data"):
+            yield scrapy.Request(
+                url=data.get("permalink"),
+                callback=self.parse_store,
+                cb_kwargs={"data": data},
+            )
 
-        return opening_hours.as_opening_hours()
+    def parse_store(self, response, data):
+        oh = OpeningHours()
+        if days := response.xpath('//div[@id="business-0"]//tr'):
+            for day in days:
+                if day.xpath("./td/text()").get().strip() == "Closed":
+                    continue
+                oh.add_range(
+                    day=day.xpath("./th/text()").get().strip(),
+                    open_time=re.split(" - |-", day.xpath("./td/text()").get().strip())[0],
+                    close_time=re.split(" - |-", day.xpath("./td/text()").get().strip())[1],
+                    time_format="%I:%M%p",
+                )
 
-    def parse(self, response):
-        for row in csv.DictReader(response.text.splitlines()):
-            properties = {
-                "ref": row["store_id"],
-                "name": row["store_name"],
-                "addr_full": row["address1"],
-                "city": row["city"],
-                "state": row["state"],
-                "postcode": row["zip"],
-                "lat": row["lat"],
-                "lon": row["lng"],
-                "phone": row["phone1"],
-            }
+        item = DictParser.parse(data)
+        item["website"] = response.url
+        item["opening_hours"] = oh.as_opening_hours()
 
-            hours = self.parse_hours(row["hours"])
-            if hours:
-                properties["opening_hours"] = hours
-
-            yield GeojsonPointItem(**properties)
+        yield item

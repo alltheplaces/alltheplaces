@@ -1,9 +1,9 @@
 from scrapy.spiders import SitemapSpider
+
 from locations.structured_data_spider import StructuredDataSpider
 
 
 class MassageEnvySpider(SitemapSpider, StructuredDataSpider):
-
     name = "massage_envy"
     item_attributes = {"brand": "Massage Envy", "brand_wikidata": "Q22922899"}
     allowed_domains = ["locations.massageenvy.com"]

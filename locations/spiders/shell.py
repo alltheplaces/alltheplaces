@@ -1,93 +1,67 @@
-# -*- coding: utf-8 -*-
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.categories import Categories, Fuel, apply_category, apply_yes_no
+from locations.dict_parser import DictParser
+from locations.spiders.bp import decode_hours
 
 
 class ShellSpider(scrapy.Spider):
     name = "shell"
-    item_attributes = {"brand": "Shell", "brand_wikidata": "Q154950"}
-    allowed_domains = ["shellgsllocator.geoapp.me"]
-    download_delay = 0.2
-    start_urls = [
-        "https://shellgsllocator.geoapp.me/api/v1/locations/within_bounds?sw%5B%5D=-90&sw%5B%5D=-180&ne%5B%5D=90&ne%5B%5D=180"
-    ]
+    item_attributes = {"brand": "Shell", "brand_wikidata": "Q110716465"}
+    url_template = "https://shellgsllocator.geoapp.me/api/v2/locations/within_bounds?sw%5B%5D={}&sw%5B%5D={}&ne%5B%5D={}&ne%5B%5D={}"
+    custom_settings = {"ROBOTSTXT_OBEY": False, "AUTOTHROTTLE_ENABLED": True}
+
+    def start_requests(self):
+        yield scrapy.Request(self.url_template.format(-90, -180, 90, 180))
 
     def parse(self, response):
+        for type, value in response.json().items():
+            if type == "clusters":
+                for bound in value:
+                    if b := bound.get("bounds"):
+                        # Result is an array of bounding boxes.
+                        yield scrapy.Request(self.url_template.format(b["sw"][0], b["sw"][1], b["ne"][0], b["ne"][1]))
+            if type == "locations":
+                for location in value:
+                    # Result is an array of station listings.
+                    station_url = f"https://shellgsllocator.geoapp.me/api/v2/locations/{location['id']}"
+                    yield scrapy.Request(station_url, callback=self.parse_station)
+
+    def parse_station(self, response):
         result = response.json()
-
-        if isinstance(result, list):
-            for item in result:
-                # This within_bounds endpoint always returns an array with one of
-                # two kinds of response.
-                #
-                # 1. An array of smaller bounding boxes with counts
-                # 2. An array of station listings
-                if "bounds" in item:
-                    b = item["bounds"]
-
-                    yield scrapy.Request(
-                        f"https://shellgsllocator.geoapp.me/api/v1/locations/within_bounds?sw%5B%5D={b['sw'][0]}&sw%5B%5D={b['sw'][1]}&ne%5B%5D={b['ne'][0]}&ne%5B%5D={b['ne'][1]}"
-                    )
-                elif "name" in item:
-                    yield scrapy.Request(
-                        f"https://shellgsllocator.geoapp.me/api/v1/locations/{item['id']}"
-                    )
-        else:
-            if result["inactive"]:
-                return
-
-            amenities = result["amenities"]
-            fuels = result["fuels"]
-
-            yield GeojsonPointItem(
-                lat=result["lat"],
-                lon=result["lng"],
-                name=result["name"],
-                addr_full=result["address"],
-                city=result["city"],
-                state=result["state"],
-                postcode=result["postcode"],
-                country=result["country_code"],
-                opening_hours="24/7" if "twenty_four_hour" in amenities else "",
-                phone=result["telephone"],
-                website=result["website_url"],
-                ref=result["id"],
-                # Definitions extracted from https://shellgsllocator.geoapp.me/config/published/retail/prod/en_US.json?format=json
-                extras={
-                    "amenity:chargingstation": "electric_charging_other" in fuels
-                    or "shell_recharge" in fuels,
-                    "amenity:fuel": True,
-                    "amenity:toilets": "toilet" in amenities,
-                    "atm": "atm" in amenities,
-                    "car_wash": "carwash" in amenities,
-                    "fuel:adblue": any("adblue" in a for a in amenities) or None,
-                    "fuel:biodiesel": "biodiesel" in fuels
-                    or "biofuel_gasoline" in fuels
-                    or None,
-                    "fuel:cng": "cng" in fuels or None,
-                    "fuel:diesel": any("diesel" in f for f in fuels) or None,
-                    "fuel:GTL_diesel": "gtl" in fuels or None,
-                    "fuel:HGV_diesel": "truck_diesel" in fuels
-                    or "hgv_lane" in amenities
-                    or None,
-                    "fuel:LH2": "hydrogen" in fuels or None,
-                    "fuel:lng": "lng" in fuels or None,
-                    "fuel:lpg": "autogas_lpg" in fuels or None,
-                    "fuel:octane_100": "super_premium_gasoline" in fuels or None,
-                    # definition of low-octane varies by country; 92 is most common
-                    "fuel:octane_92": "low_octane_gasoline" in fuels or None,
-                    # definition of mid-octane varies by country; 95 is most common
-                    "fuel:octane_95": any("midgrade_gasoline" in f for f in fuels)
-                    or "unleaded_super" in fuels
-                    or None,
-                    # the US region seems to also use 'premium_gasoline' to refer to non-diesel gas products
-                    "fuel:octane_98": any("98" in f for f in fuels)
-                    or "premium_gasoline" in fuels
-                    or None,
-                    "fuel:propane": "auto_rv_propane" in fuels or None,
-                    "hgv": "hgv_lane" in amenities,
-                    "shop": "convenience" if "shop" in "amenities" else None,
-                    "wheelchair": "disabled_facilities" in amenities,
-                },
-            )
+        if result["inactive"]:
+            return
+        result["street_address"] = result.pop("address")
+        item = DictParser.parse(result)
+        item["website"] = result["website_url"]
+        # Definitions extracted from https://shellgsllocator.geoapp.me/config/published/retail/prod/en_US.json?format=json
+        amenities = result["amenities"]
+        fuels = result["fuels"]
+        apply_category(Categories.FUEL_STATION, item)
+        if "shop" in amenities:
+            apply_category(Categories.SHOP_CONVENIENCE, item)
+        apply_yes_no("amenity:chargingstation", item, "electric_charging_other" in fuels or "shell_recharge" in fuels)
+        apply_yes_no("toilets", item, "toilet" in amenities)
+        apply_yes_no("atm", item, "atm" in amenities)
+        apply_yes_no("car_wash", item, "carwash" in amenities)
+        apply_yes_no("hgv", item, "hgv_lane" in amenities)
+        apply_yes_no("wheelchair", item, "disabled_facilities" in amenities)
+        apply_yes_no(Fuel.DIESEL, item, any("diesel" in f for f in fuels))
+        apply_yes_no(Fuel.ADBLUE, item, any("adblue" in a for a in amenities))
+        apply_yes_no(Fuel.BIODIESEL, item, "biodiesel" in fuels or "biofuel_gasoline" in fuels)
+        apply_yes_no(Fuel.CNG, item, "cng" in fuels)
+        apply_yes_no(Fuel.GTL_DIESEL, item, "gtl" in fuels)
+        apply_yes_no(Fuel.HGV_DIESEL, item, "truck_diesel" in fuels or "hgv_lane" in amenities)
+        apply_yes_no(Fuel.PROPANE, item, "auto_rv_propane" in fuels)
+        apply_yes_no(Fuel.LH2, item, "hydrogen" in fuels)
+        apply_yes_no(Fuel.LNG, item, "lng" in fuels)
+        apply_yes_no(Fuel.LPG, item, "autogas_lpg" in fuels)
+        # definition of low-octane varies by country; 92 is most common
+        apply_yes_no(Fuel.OCTANE_92, item, "low_octane_gasoline" in fuels)
+        # definition of mid-octane varies by country; 95 is most common
+        apply_yes_no(Fuel.OCTANE_95, item, any("midgrade_gasoline" in f for f in fuels) or "unleaded_super" in fuels)
+        # the US region seems to also use 'premium_gasoline' to refer to non-diesel gas products
+        apply_yes_no(Fuel.OCTANE_98, item, any("98" in f for f in fuels) or "premium_gasoline" in fuels)
+        apply_yes_no(Fuel.OCTANE_100, item, "super_premium_gasoline" in fuels)
+        decode_hours(item, result)
+        yield item

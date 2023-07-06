@@ -1,7 +1,8 @@
+from urllib.parse import urlencode
+
 import scrapy
 
-from six.moves.urllib.parse import urlencode
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 LAT_LONS = [
     # Northeast locations
@@ -82,7 +83,6 @@ class WawaSpider(scrapy.Spider):
         wawa_stores = response.json()
 
         for loc in wawa_stores["locations"]:
-
             addr, city, state, zipc = self.get_addr(loc["addresses"][0])
             lat, lng = self.get_lat_lng(loc["addresses"][1])
             opening_hours = self.get_opening_hours(loc) or None
@@ -104,4 +104,4 @@ class WawaSpider(scrapy.Spider):
                 "opening_hours": opening_hours,
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

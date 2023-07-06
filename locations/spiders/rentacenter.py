@@ -1,11 +1,11 @@
 import json
-import scrapy
 import re
+
+import scrapy
 from scrapy.selector import Selector
 
-from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
-
+from locations.items import Feature
 
 DAY_MAPPING = {
     "Monday": "Mo",
@@ -41,9 +41,7 @@ class RentACenterSpider(scrapy.Spider):
         return opening_hours.as_opening_hours()
 
     def parse_location(self, response):
-        data = response.xpath(
-            '//script[@type="application/ld+json"]/text()'
-        ).extract_first()
+        data = response.xpath('//script[@type="application/ld+json"]/text()').extract_first()
         data = json.loads(data)
 
         ref = data.get("branchCode")
@@ -68,7 +66,7 @@ class RentACenterSpider(scrapy.Spider):
         if hours:
             properties["opening_hours"] = hours
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)
 
     def parse_state_sitemap(self, response):
         xml = Selector(response)
@@ -79,12 +77,7 @@ class RentACenterSpider(scrapy.Spider):
 
         # individual store pages are listed at top, then a state page, then bunch of other non-store pages
         # find the index position of the state page and then only parse urls before that
-        i = urls.index(
-            re.search(
-                r"^(https://locations.rentacenter.com/.+?)/.*$", urls[0]
-            ).groups()[0]
-            + "/"
-        )
+        i = urls.index(re.search(r"^(https://locations.rentacenter.com/.+?)/.*$", urls[0]).groups()[0] + "/")
         for url in urls[:i]:
             yield scrapy.Request(url, callback=self.parse_location)
 

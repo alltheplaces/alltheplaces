@@ -1,10 +1,6 @@
-# -*- coding: utf-8 -*-
-import re
-
 import scrapy
-import json
 
-from locations.items import GeojsonPointItem
+from locations.dict_parser import DictParser
 
 
 class PetValuSpider(scrapy.Spider):
@@ -19,14 +15,8 @@ class PetValuSpider(scrapy.Spider):
     def parse(self, response):
         data = response.json()
         for i in data["objects"]:
-            properties = {
-                "ref": i["location_url"],
-                "name": i["location_name"],
-                "addr_full": i["formatted_address"],
-                "postcode": i["postal_code"],
-                "country": i["country_name"],
-                "lat": i["lat"],
-                "lon": i["lon"],
-            }
-
-            yield GeojsonPointItem(**properties)
+            i["street_address"] = i.pop("street")
+            item = DictParser.parse(i)
+            item["addr_full"] = i["formatted_address"]
+            item["website"] = i["location_url"]
+            yield item

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import scrapy
 
 from locations.linked_data_parser import LinkedDataParser
@@ -15,9 +14,7 @@ class ChristmasTreeShopsSpider(scrapy.spiders.SitemapSpider):
     sitemap_urls = [
         "https://stores.christmastreeshops.com/robots.txt",
     ]
-    sitemap_rules = [
-        (r"https://stores\.christmastreeshops\.com/[^/]+/[^/]+/[^/]+$", "parse")
-    ]
+    sitemap_rules = [(r"https://stores\.christmastreeshops\.com/[^/]+/[^/]+/[^/]+$", "parse")]
 
     def parse(self, response):
         MicrodataParser.convert_to_json_ld(response)

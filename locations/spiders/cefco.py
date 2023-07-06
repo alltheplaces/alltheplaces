@@ -1,8 +1,8 @@
-# -*- coding: utf-8 -*-
-import scrapy
 import json
 
-from locations.items import GeojsonPointItem
+import scrapy
+
+from locations.items import Feature
 
 
 class CefcoSpider(scrapy.Spider):
@@ -16,32 +16,27 @@ class CefcoSpider(scrapy.Spider):
         map_data = response.css("#map_data::text").get()
 
         for store in json.loads(map_data):
-            yield GeojsonPointItem(
+            yield Feature(
                 ref=store["id"],
                 lon=store["longitude"],
                 lat=store["latitude"],
                 name=store["title"],
-                addr_full=store["address"],
+                street_address=store["address"],
                 city=store["city"],
                 state=store["state"],
                 postcode=store["zip"],
                 country="US",
                 opening_hours="24/7" if store["hours"] == "24 Hours" else None,
                 extras={
-                    "amenity:fuel": store["regular"] == True or store["regular"] == "1",
-                    "fuel:diesel": store["diesel"] == True or store["diesel"] == "1",
-                    "fuel:HGV_diesel": store["truckstop"] == True
-                    or store["truckstop"] == "1",
-                    "fuel:e85": store["e85"] == True or store["e85"] == "1",
-                    "fuel:octane_87": store["regular"] == True
-                    or store["regular"] == "1",
-                    "fuel:octane_89": store["midgrade"] == True
-                    or store["midgrade"] == "1",
-                    "fuel:octane_93": store["premium"] == True
-                    or store["premium"] == "1",
-                    "fuel:kerosene": store["kerosene"] == True
-                    or store["kerosene"] == "1",
-                    "car_wash": store["carwash"] == True or store["carwash"] == "1",
-                    "hgv": store["truckstop"] == True or store["truckstop"] == "1",
+                    "amenity:fuel": store["regular"] is True or store["regular"] == "1",
+                    "fuel:diesel": store["diesel"] is True or store["diesel"] == "1",
+                    "fuel:HGV_diesel": store["truckstop"] is True or store["truckstop"] == "1",
+                    "fuel:e85": store["e85"] is True or store["e85"] == "1",
+                    "fuel:octane_87": store["regular"] is True or store["regular"] == "1",
+                    "fuel:octane_89": store["midgrade"] is True or store["midgrade"] == "1",
+                    "fuel:octane_93": store["premium"] is True or store["premium"] == "1",
+                    "fuel:kerosene": store["kerosene"] is True or store["kerosene"] == "1",
+                    "car_wash": store["carwash"] is True or store["carwash"] == "1",
+                    "hgv": store["truckstop"] is True or store["truckstop"] == "1",
                 },
             )

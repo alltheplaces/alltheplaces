@@ -1,12 +1,10 @@
-# -*- coding: utf-8 -*-
 import csv
 import math
-import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
 from locations.hours import OpeningHours
+from locations.items import Feature
 
 
 def calculate_offset_point(x, y, d, b):
@@ -21,9 +19,7 @@ def calculate_offset_point(x, y, d, b):
     """
     R = 6378.137  # km
     x, y, b = math.radians(x), math.radians(y), math.radians(b)
-    new_y = math.asin(
-        (math.sin(y) * math.cos(d / R)) + (math.cos(y) * math.sin(d / R) * math.cos(b))
-    )
+    new_y = math.asin((math.sin(y) * math.cos(d / R)) + (math.cos(y) * math.sin(d / R) * math.cos(b)))
     new_x = x + math.atan2(
         math.sin(b) * math.sin(d / R) * math.cos(y),
         math.cos(d / R) - math.sin(y) * math.sin(new_y),
@@ -34,7 +30,6 @@ def calculate_offset_point(x, y, d, b):
 
 class ScotiabankSpider(scrapy.Spider):
     name = "scotiabank"
-    download_delay = 1.0
     allowed_domains = ["scotiabank.com"]
     item_attributes = {"brand": "Scotiabank", "brand_wikidata": "Q451476"}
     base_url = "https://mapsms.scotiabank.com/branches?1=1&latitude={lat}&longitude={lon}&recordlimit=20&locationtypes=1&options=&languagespoken=any&language=en&address=&province=&city="
@@ -43,9 +38,7 @@ class ScotiabankSpider(scrapy.Spider):
     custom_settings = {"DEFAULT_REQUEST_HEADERS": {"Accept": "application/json"}}
 
     def start_requests(self):
-        with open(
-            "./locations/searchable_points/ca_centroids_100mile_radius.csv"
-        ) as points:
+        with open("./locations/searchable_points/ca_centroids_100mile_radius.csv") as points:
             reader = csv.DictReader(points)
             for row in reader:
                 lat, lon = row["latitude"], row["longitude"]
@@ -112,4 +105,4 @@ class ScotiabankSpider(scrapy.Spider):
                 if hours:
                     properties["opening_hours"] = hours
 
-                yield GeojsonPointItem(**properties)
+                yield Feature(**properties)

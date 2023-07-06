@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
-
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class VoyageCareSpider(scrapy.Spider):
@@ -20,9 +18,7 @@ class VoyageCareSpider(scrapy.Spider):
             "Accept": "application/json",
         }
 
-        yield scrapy.http.FormRequest(
-            url=template, method="GET", headers=headers, callback=self.parse
-        )
+        yield scrapy.http.FormRequest(url=template, method="GET", headers=headers, callback=self.parse)
 
     def parse(self, response):
         jsondata = response.json()
@@ -40,4 +36,4 @@ class VoyageCareSpider(scrapy.Spider):
                 "lon": float(store["properties"]["address1_longitude"]),
                 "website": response.url,
             }
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

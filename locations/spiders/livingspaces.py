@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
 import json
 import re
 
 import scrapy
 
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class LivingSpacesSpider(scrapy.Spider):
@@ -31,9 +30,7 @@ class LivingSpacesSpider(scrapy.Spider):
 
             properties = {
                 "ref": ref,
-                "name": response.xpath('//h1[@class="page-title"]/text()')
-                .extract_first()
-                .strip(),
+                "name": response.xpath('//h1[@class="page-title"]/text()').extract_first().strip(),
                 "addr_full": store_data["address"]["streetAddress"],
                 "city": store_data["address"]["addressLocality"],
                 "state": store_data["address"]["addressRegion"],
@@ -45,7 +42,7 @@ class LivingSpacesSpider(scrapy.Spider):
                 "website": store_data.get("url"),
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)
 
         else:
             pass

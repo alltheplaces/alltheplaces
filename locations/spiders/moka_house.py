@@ -1,7 +1,8 @@
-# -*- coding: utf-8 -*-
-import scrapy
 import re
-from locations.items import GeojsonPointItem
+
+import scrapy
+
+from locations.items import Feature
 
 
 class MokaHouseSpider(scrapy.Spider):
@@ -16,9 +17,7 @@ class MokaHouseSpider(scrapy.Spider):
         for link in links:
             if link == links[-1]:
                 continue
-            name = re.search(
-                r"(.*)(\s\(.*\))", link.xpath("text()").extract_first()
-            ).groups()[0]
+            name = re.search(r"(.*)(\s\(.*\))", link.xpath("text()").extract_first()).groups()[0]
             yield scrapy.Request(
                 link.xpath("@href").extract_first(),
                 meta={"name": name},
@@ -26,9 +25,7 @@ class MokaHouseSpider(scrapy.Spider):
             )
 
     def parse_link(self, response):
-        ref = response.xpath(
-            '//div[@class="article-wrapper"]/article/@id'
-        ).extract_first()
+        ref = response.xpath('//div[@class="article-wrapper"]/article/@id').extract_first()
         name = response.meta["name"]
         website = response.url
 
@@ -54,9 +51,7 @@ class MokaHouseSpider(scrapy.Spider):
             phone_number = match.groups()[0]
 
         l_hours = p_4 + p_5
-        l_hours = [
-            x.replace("\n", "") for x in l_hours if x != "\n" and self.hasDigit(x)
-        ]
+        l_hours = [x.replace("\n", "") for x in l_hours if x != "\n" and self.hasDigit(x)]
         opening_hours = ";".join(l_hours)
 
         properties = {
@@ -71,7 +66,7 @@ class MokaHouseSpider(scrapy.Spider):
             "opening_hours": opening_hours,
         }
 
-        yield GeojsonPointItem(**properties)
+        yield Feature(**properties)
 
     def hasDigit(self, str):
         return bool(re.search(r"\d", str))

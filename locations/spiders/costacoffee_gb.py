@@ -1,6 +1,6 @@
-# -*- coding: utf-8 -*-
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
@@ -53,7 +53,7 @@ class CostaCoffeeGBSpider(scrapy.Spider):
                         pass
 
             item["opening_hours"] = opening_hours.as_opening_hours()
-            item["extras"] = {"email": store_data["email"]}
+            item["extras"]["email"] = store_data["email"]
 
             for storeFacility in store_data["storeFacilities"]:
                 if storeFacility["name"] == "Wifi":
@@ -68,9 +68,7 @@ class CostaCoffeeGBSpider(scrapy.Spider):
                     else:
                         item["extras"]["toilets:wheelchair"] = "no"
                 elif storeFacility["name"] == "Baby Changing":
-                    item["extras"]["changing_table"] = yes_or_no(
-                        storeFacility["active"]
-                    )
+                    item["extras"]["changing_table"] = yes_or_no(storeFacility["active"])
                 elif storeFacility["name"] == "Disabled Access":
                     item["extras"]["wheelchair"] = yes_or_no(storeFacility["active"])
                 elif storeFacility["name"] == "Drive Thru":
@@ -80,10 +78,9 @@ class CostaCoffeeGBSpider(scrapy.Spider):
 
             if store_data["storeType"] == "COSTA EXPRESS":
                 item["brand"] = "Costa Express"
-                item["extras"]["amenity"] = "vending_machine"
-                item["extras"]["vending"] = "coffee"
+                item["brand_wikidata"] = "Q113556385"
+                apply_category(Categories.VENDING_MACHINE_COFFEE, item)
             else:
-                item["extras"]["amenity"] = "cafe"
-                item["extras"]["cuisine"] = "coffee_shop"
+                apply_category(Categories.COFFEE_SHOP, item)
 
             yield item

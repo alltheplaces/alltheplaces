@@ -1,9 +1,9 @@
-# -*- coding: utf-8 -*-
+from urllib.parse import urlencode
+
 import scrapy
 
 from locations.geo import point_locations
-from locations.items import GeojsonPointItem
-from urllib.parse import urlencode
+from locations.items import Feature
 
 
 class AAASpider(scrapy.Spider):
@@ -13,7 +13,6 @@ class AAASpider(scrapy.Spider):
         "brand_wikidata": "Q463436",
     }
     allowed_domains = ["tdr.aaa.com"]
-    download_delay = 1.0
 
     def start_requests(self):
         point_files = [
@@ -28,9 +27,7 @@ class AAASpider(scrapy.Spider):
                 "ident": "AAACOM",
                 "destination": ",".join([lat, lon]),
             }
-            yield scrapy.http.Request(
-                "https://tdr.aaa.com/tdrl/search.jsp?" + urlencode(params)
-            )
+            yield scrapy.http.Request("https://tdr.aaa.com/tdrl/search.jsp?" + urlencode(params))
 
     def parse(self, response):
         locations = response.json()["aaa"]["services"].get("travelItems")
@@ -53,4 +50,4 @@ class AAASpider(scrapy.Spider):
                 "lon": location["position"]["longitude"],
                 "phone": location["phones"].get("phone", {}).get("content"),
             }
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

@@ -1,5 +1,5 @@
-from scrapy.spiders import CrawlSpider, Rule
 from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule
 
 from locations.google_url import url_to_coords
 from locations.linked_data_parser import LinkedDataParser
@@ -14,9 +14,7 @@ class GoOutdoorsSpider(CrawlSpider):
     start_urls = ["https://www.gooutdoors.co.uk/stores"]
     rules = [
         Rule(
-            LinkExtractor(
-                allow=r"https:\/\/www\.gooutdoors\.co\.uk\/stores\/([-\w]+)$"
-            ),
+            LinkExtractor(allow=r"https:\/\/www\.gooutdoors\.co\.uk\/stores\/([-\w]+)$"),
             callback="parse",
         )
     ]

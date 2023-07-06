@@ -1,14 +1,11 @@
-# -*- coding: utf-8 -*-
-import re
-
 import scrapy
 
-from locations.items import GeojsonPointItem
-from locations.hours import OpeningHours
+from locations.items import Feature
 
 
 class UclaHealthSpider(scrapy.Spider):
     name = "ucla_health"
+    item_attributes = {"brand": "UCLA Health", "brand_wikidata": "Q18394900"}
     allowed_domains = ["maps.uclahealth.org"]
     start_urls = [
         "https://maps.uclahealth.org/googlemaps/json/clinicdatabase.json",
@@ -32,4 +29,4 @@ class UclaHealthSpider(scrapy.Spider):
                 "website": place["Website"],
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

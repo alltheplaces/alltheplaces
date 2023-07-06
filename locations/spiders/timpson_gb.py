@@ -1,8 +1,9 @@
-# -*- coding: utf-8 -*-
 import json
 import re
-from scrapy.spiders import CrawlSpider, Rule
+
 from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule
+
 from locations.dict_parser import DictParser
 
 
@@ -19,9 +20,7 @@ class TimpsonGBSpider(CrawlSpider):
     @staticmethod
     def extract(response):
         pattern = re.compile(r"var lpr_vars = ({.*?})\n", re.MULTILINE | re.DOTALL)
-        for lpr_var in response.xpath(
-            '//script[contains(., "var lpr_vars")]/text()'
-        ).re(pattern):
+        for lpr_var in response.xpath('//script[contains(., "var lpr_vars")]/text()').re(pattern):
             store = json.loads(lpr_var)
             details = store["initial_location"]
             if type(details) is type(store):
@@ -31,9 +30,7 @@ class TimpsonGBSpider(CrawlSpider):
                     item["country"] = "IE"
                 else:
                     item["country"] = "GB"
-                item["street_address"] = join_address_fields(
-                    details, "street1", "street2"
-                )
+                item["street_address"] = join_address_fields(details, "street1", "street2")
 
                 # TODO: too painful to port at present
                 # for brand in [Brand.MORRISONS, Brand.SAINSBURYS, Brand.TESCO, Brand.ASDA, Brand.WAITROSE]:
@@ -64,11 +61,7 @@ def join_address_array(address_array, join_str=","):
     for i in range(0, len(all_parts)):
         for j in range(i + 1, len(all_parts)):
             # Remove duplicate consecutive entries
-            if (
-                all_parts[i]
-                and all_parts[j]
-                and all_parts[i].lower() == all_parts[j].lower()
-            ):
+            if all_parts[i] and all_parts[j] and all_parts[i].lower() == all_parts[j].lower():
                 all_parts[i] = None
     all_parts = list(filter(lambda s: s, all_parts))
     join_str = join_str + " "

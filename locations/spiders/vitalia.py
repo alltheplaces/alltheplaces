@@ -1,10 +1,10 @@
-import re
-import scrapy
 import json
+import re
 
-from locations.items import GeojsonPointItem
+import scrapy
+
 from locations.hours import OpeningHours
-
+from locations.items import Feature
 
 DAY_MAPPING = {
     "monday": "Mo",
@@ -31,10 +31,8 @@ class VitaliaSpider(scrapy.Spider):
         for store_day in store_hours:
             opening_hours.add_range(
                 day=DAY_MAPPING[store_day],
-                open_time=f"{store_hours[store_day]['from']['hours']}:"
-                f"{store_hours[store_day]['from']['minutes']}",
-                close_time=f"{store_hours[store_day]['to']['hours']}:"
-                f"{store_hours[store_day]['to']['minutes']}",
+                open_time=f"{store_hours[store_day]['from']['hours']}:" f"{store_hours[store_day]['from']['minutes']}",
+                close_time=f"{store_hours[store_day]['to']['hours']}:" f"{store_hours[store_day]['to']['minutes']}",
                 time_format="%H:%M",
             )
         return opening_hours.as_opening_hours()
@@ -69,4 +67,4 @@ class VitaliaSpider(scrapy.Spider):
                     if hours:
                         properties["opening_hours"] = hours
 
-                yield GeojsonPointItem(**properties)
+                yield Feature(**properties)

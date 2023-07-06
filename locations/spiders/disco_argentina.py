@@ -1,6 +1,8 @@
 import json
+
 import scrapy
-from locations.items import GeojsonPointItem
+
+from locations.items import Feature
 
 
 class DiscoArgentinaSpider(scrapy.Spider):
@@ -41,4 +43,4 @@ class DiscoArgentinaSpider(scrapy.Spider):
                 "phone": store["Local"]["Telefono"].strip(),
             }
             ref += 1
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

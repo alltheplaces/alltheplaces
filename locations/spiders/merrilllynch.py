@@ -1,7 +1,8 @@
-# -*- coding: utf-8 -*-
-import scrapy
-from locations.items import GeojsonPointItem
 import json
+
+import scrapy
+
+from locations.items import Feature
 
 
 class MerrillLynchSpider(scrapy.Spider):
@@ -11,7 +12,6 @@ class MerrillLynchSpider(scrapy.Spider):
     start_urls = ("https://fa.ml.com/",)
 
     def parse_branch(self, response):
-
         data = response.json()
 
         for location in data["Results"]:
@@ -29,12 +29,10 @@ class MerrillLynchSpider(scrapy.Spider):
                 "extras": {"unit": location.get("Address2") or None},
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)
 
     def parse(self, response):
-        states = response.xpath(
-            '//section[@class="state-view"]//li/a/@data-state-abbrev'
-        ).extract()
+        states = response.xpath('//section[@class="state-view"]//li/a/@data-state-abbrev').extract()
 
         for state in states:
             url = "https://fa.ml.com/locator/api/InternalSearch"

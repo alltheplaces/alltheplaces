@@ -1,8 +1,8 @@
-# -*- coding: utf-8 -*-
-import scrapy
 import re
 
-from locations.items import GeojsonPointItem
+import scrapy
+
+from locations.items import Feature
 
 DAY_DICT = {
     "Mon": "Mo",
@@ -39,43 +39,22 @@ class ShopnSaveSpider(scrapy.Spider):
     )
 
     def parse(self, response):
-
-        stores = response.xpath(
-            '//table[@id="store-search-result"]/tbody/tr[@class="" or @class="store-grey"]'
-        )
+        stores = response.xpath('//table[@id="store-search-result"]/tbody/tr[@class="" or @class="store-grey"]')
         for store in stores:
             properties = {
-                "ref": store.xpath(
-                    'td[@class="store-result-address"]/text()'
-                ).extract_first(),
-                "name": store.xpath(
-                    'td[@class="store-result-address"]/text()'
-                ).extract_first(),
+                "ref": store.xpath('td[@class="store-result-address"]/text()').extract_first(),
+                "name": store.xpath('td[@class="store-result-address"]/text()').extract_first(),
                 "opening_hours": self.store_hours(
-                    store.xpath(
-                        'td[@class="store-result-address"]/text()[last()-1]'
-                    ).extract_first()
+                    store.xpath('td[@class="store-result-address"]/text()[last()-1]').extract_first()
                 ),
-                "addr_full": store.xpath('td[@class="store-result-address"]/text()')[
-                    1
-                ].extract(),
-                "city": self.city(
-                    store.xpath('td[@class="store-result-address"]/text()')[2].extract()
-                ),
-                "state": self.state(
-                    store.xpath('td[@class="store-result-address"]/text()')[2].extract()
-                ),
-                "postcode": self.postCode(
-                    store.xpath('td[@class="store-result-address"]/text()')[2].extract()
-                ),
-                "phone": self.phone(
-                    store.xpath('td[@class="store-result-phone"]/strong/text()')[
-                        0
-                    ].extract()
-                ),
+                "addr_full": store.xpath('td[@class="store-result-address"]/text()')[1].extract(),
+                "city": self.city(store.xpath('td[@class="store-result-address"]/text()')[2].extract()),
+                "state": self.state(store.xpath('td[@class="store-result-address"]/text()')[2].extract()),
+                "postcode": self.postCode(store.xpath('td[@class="store-result-address"]/text()')[2].extract()),
+                "phone": self.phone(store.xpath('td[@class="store-result-phone"]/strong/text()')[0].extract()),
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)
 
     def city(self, data):
         str_list = data.split(",")

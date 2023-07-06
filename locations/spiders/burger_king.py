@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import scrapy
 
 from locations.dict_parser import DictParser
@@ -128,8 +127,7 @@ class BurgerKingSpider(scrapy.Spider):
         raise Exception("Bogus City: " + city_name)
 
     def start_requests(self):
-
-        # TODO: DK, IE, ES, MX, PT, IT, BE at the least do not follow this API.
+        # TODO: DK, IE, MX, at the least do not follow this API.
 
         # TODO: https://www.burgerking.nl/kingfinder
         # TODO: has an interface for central european and nordic countries
@@ -158,16 +156,14 @@ class BurgerKingSpider(scrapy.Spider):
             item["name"] = "Burger King"
             item["country"] = country_code
             item["addr_full"] = None
-            item["website"] = self.store_locator_templates[country_code].format(
-                row["_id"]
-            )
+            item["website"] = self.store_locator_templates[country_code].format(row["_id"])
             item["extras"] = {
                 "operator": row["franchiseGroupName"],
-                "internet_access": "wlan" if row["hasWifi"] == True else "no",
-                "diet:halal": "yes" if row["isHalal"] == True else "no",
-                "delivery": "yes" if row["hasDelivery"] == True else "no",
-                "drive_through": "yes" if row["hasDriveThru"] == True else "no",
-                "takeaway": "yes" if row["hasTakeOut"] == True else "no",
+                "internet_access": "wlan" if row["hasWifi"] is True else "no",
+                "diet:halal": "yes" if row["isHalal"] is True else "no",
+                "delivery": "yes" if row["hasDelivery"] is True else "no",
+                "drive_through": "yes" if row["hasDriveThru"] is True else "no",
+                "takeaway": "yes" if row["hasTakeOut"] is True else "no",
             }
             # TODO: somebody could decode the opening hours from the BK JSON.
             yield item

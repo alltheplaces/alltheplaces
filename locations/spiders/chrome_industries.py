@@ -1,13 +1,13 @@
-import scrapy
-import re
 import json
-import lxml
-from locations.items import GeojsonPointItem
+
+import scrapy
+
+from locations.items import Feature
 
 
 class ChromeIndustriesSpider(scrapy.Spider):
     name = "chrome_industries"
-    item_attributes = {"brand": "Chrome Industries"}
+    item_attributes = {"brand": "Chrome Industries", "brand_wikidata": "Q5113773"}
     allowed_domains = ["www.chromeindustries.com"]
     start_urls = (
         "https://www.chromeindustries.com/on/demandware.store/Sites-chrome_na-Site/en_US/Stores-Search?latitude=32.7269669&longitude=-117.16470939999999&maxDistance=50000000",
@@ -28,4 +28,4 @@ class ChromeIndustriesSpider(scrapy.Spider):
                 "lat": float(item["latitude"]),
                 "lon": float(item["longitude"]),
             }
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

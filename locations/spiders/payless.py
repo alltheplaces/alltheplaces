@@ -1,5 +1,6 @@
 import scrapy
-from locations.items import GeojsonPointItem
+
+from locations.items import Feature
 
 
 class PaylessSpider(scrapy.Spider):
@@ -49,15 +50,9 @@ class PaylessSpider(scrapy.Spider):
                 "lat": store["latitude"],
                 "lon": store["longitude"],
                 "name": store["name"],
-                "addr_full": "{street}, {city}, {stateCode}, {postalCode}".format(
-                    street=street, **store
-                ),
-                "housenumber": store["address1"].split(" ")[0]
-                if has_house_number
-                else None,
-                "street": " ".join(store["address1"].split(" ")[1:])
-                if has_house_number
-                else store["address1"],
+                "addr_full": "{street}, {city}, {stateCode}, {postalCode}".format(street=street, **store),
+                "housenumber": store["address1"].split(" ")[0] if has_house_number else None,
+                "street": " ".join(store["address1"].split(" ")[1:]) if has_house_number else store["address1"],
                 "city": store["city"],
                 "state": store["stateCode"],
                 "postcode": store["postalCode"],
@@ -74,4 +69,4 @@ class PaylessSpider(scrapy.Spider):
             except:
                 self.logger.exception("Couldn't parse hours '%s'", store["storeHours"])
 
-            yield GeojsonPointItem(**point)
+            yield Feature(**point)

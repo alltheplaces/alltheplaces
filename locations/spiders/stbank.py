@@ -1,8 +1,7 @@
-# -*- coding: utf-8 -*-
 import scrapy
 
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class STBankSpider(scrapy.Spider):
@@ -21,9 +20,7 @@ class STBankSpider(scrapy.Spider):
             if "isClosed" in intervals:
                 continue
             for interval in intervals["openIntervals"]:
-                hours.add_range(
-                    day[:2].capitalize(), interval["start"], interval["end"]
-                )
+                hours.add_range(day[:2].capitalize(), interval["start"], interval["end"])
 
         properties = {
             "lat": location["geocodedCoordinate"]["latitude"],
@@ -40,4 +37,4 @@ class STBankSpider(scrapy.Spider):
             "extras": {"fax": location.get("fax")},
             "opening_hours": hours.as_opening_hours(),
         }
-        return GeojsonPointItem(**properties)
+        return Feature(**properties)

@@ -1,9 +1,9 @@
-# -*- coding: utf-8 -*-
 import json
-import scrapy
 import re
 
-from locations.items import GeojsonPointItem
+import scrapy
+
+from locations.items import Feature
 
 
 class PartyCitySpider(scrapy.Spider):
@@ -25,7 +25,7 @@ class PartyCitySpider(scrapy.Spider):
         if response.request.meta.get("redirect_urls"):
             for map_item in response.xpath("//div[@class='map-list-item']"):
                 properties = self.parse_map_page(map_item)
-                yield GeojsonPointItem(**properties)
+                yield Feature(**properties)
         else:
             script = json.loads(
                 response.xpath(
@@ -37,9 +37,7 @@ class PartyCitySpider(scrapy.Spider):
 
             properties = {
                 "ref": ref,
-                "name": response.xpath(
-                    '(//span[@class="location-name fc-black bold"])[1]/text()'
-                ).extract_first(),
+                "name": response.xpath('(//span[@class="location-name fc-black bold"])[1]/text()').extract_first(),
                 "addr_full": data.get("address").get("streetAddress").strip(),
                 "city": data.get("address").get("addressLocality").strip(),
                 "state": data.get("address").get("addressRegion").strip(),
@@ -53,32 +51,20 @@ class PartyCitySpider(scrapy.Spider):
                 "website": response.request.url,
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)
 
     def parse_map_page(self, element):
         # Use the store urls for the ref even if it redirects, it's still unique and consistent with parse_store refs
-        ref_url = element.xpath(
-            ".//a[@class='gaq-link address-link']/@href"
-        ).extract_first()
+        ref_url = element.xpath(".//a[@class='gaq-link address-link']/@href").extract_first()
         ref = re.search(r".+/.+?([0-9]+).html", ref_url).group(1)
-        name = element.xpath(
-            ".//span[@class='location-name fc-black bold']/text()"
-        ).extract_first()
-        street_address = element.xpath(
-            ".//a[@class='gaq-link address-link']/div[1]/text()"
-        ).extract_first()
-        city_state_zip = element.xpath(
-            ".//a[@class='gaq-link address-link']/div[2]/text()"
-        ).extract_first()
+        name = element.xpath(".//span[@class='location-name fc-black bold']/text()").extract_first()
+        street_address = element.xpath(".//a[@class='gaq-link address-link']/div[1]/text()").extract_first()
+        city_state_zip = element.xpath(".//a[@class='gaq-link address-link']/div[2]/text()").extract_first()
         city, state_zip = city_state_zip.split(",")
         state, zipcode = state_zip.strip().split(" ")
-        country = re.search(r".+/(.+?)/(.+?)/(.+?)/(.+?)/?(?:\.html|$)", ref_url).group(
-            1
-        )
+        country = re.search(r".+/(.+?)/(.+?)/(.+?)/(.+?)/?(?:\.html|$)", ref_url).group(1)
         phone = element.xpath(".//a[@class='phone']/text()").extract_first()
-        map_link = element.xpath(
-            ".//a[@class='directions gaq-link']/@href"
-        ).extract_first()
+        map_link = element.xpath(".//a[@class='directions gaq-link']/@href").extract_first()
 
         # extract coordinates from map linkb
         if re.search(r".+=([0-9.-]+),\s?([0-9.-]+)", map_link):

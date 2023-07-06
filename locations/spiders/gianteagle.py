@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
 import re
 
 import scrapy
-from locations.items import GeojsonPointItem
-from locations.hours import OpeningHours
 
+from locations.hours import OpeningHours
+from locations.items import Feature
 
 DAY_MAPPING = {1: "Su", 2: "Mo", 3: "Tu", 4: "We", 5: "Th", 6: "Fr", 7: "Sa"}
 
@@ -59,7 +58,7 @@ class GiantEagleSpider(scrapy.Spider):
             properties = dict(
                 ref=store["Number"]["Value"],
                 name=store["Name"],
-                addr_full=self.parse_address(store["Address"]),
+                street_address=self.parse_address(store["Address"]),
                 lat=store["Address"]["Coordinates"]["Latitude"],
                 lon=store["Address"]["Coordinates"]["Longitude"],
                 country="US",
@@ -74,7 +73,7 @@ class GiantEagleSpider(scrapy.Spider):
                 },
             )
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)
 
         if stores:
             page += self.items_per_page

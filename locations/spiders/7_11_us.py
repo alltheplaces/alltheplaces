@@ -1,6 +1,6 @@
-# -*- coding: utf-8 -*-
-import scrapy
 import json
+
+import scrapy
 
 from locations.dict_parser import DictParser
 
@@ -11,7 +11,6 @@ class SevenElevenUSSpider(scrapy.spiders.SitemapSpider):
     allowed_domains = ["7-eleven.com"]
     sitemap_urls = ["https://www.7-eleven.com/sitemap.xml"]
     sitemap_rules = [("/locations/", "parse")]
-    download_delay = 1.0
 
     def parse(self, response):
         for ld in response.xpath('//script[@type="application/json"]//text()').getall():

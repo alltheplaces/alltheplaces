@@ -1,10 +1,6 @@
-# -*- coding: utf-8 -*-
-import re
-
 import scrapy
 
-from locations.items import GeojsonPointItem
-from locations.hours import OpeningHours
+from locations.items import Feature
 
 
 class RicohEuropeSpider(scrapy.Spider):
@@ -40,9 +36,7 @@ class RicohEuropeSpider(scrapy.Spider):
             "Italy",
         ]
 
-        base_url = (
-            "https://www.ricoh-europe.com/api/dealerfinder/product/country/{country}/"
-        )
+        base_url = "https://www.ricoh-europe.com/api/dealerfinder/product/country/{country}/"
 
         for country in countries:
             url = base_url.format(country=country)
@@ -55,7 +49,6 @@ class RicohEuropeSpider(scrapy.Spider):
         for store in stores["Dealers"]:
             self.REF += 1
             if "ricoh" in store["Url"]:
-
                 properties = {
                     "ref": self.REF,
                     "name": store["Name"],
@@ -69,6 +62,6 @@ class RicohEuropeSpider(scrapy.Spider):
                     "phone": store["Phone"],
                 }
 
-                yield GeojsonPointItem(**properties)
+                yield Feature(**properties)
             else:
                 pass

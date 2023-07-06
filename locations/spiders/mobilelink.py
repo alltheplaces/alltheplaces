@@ -1,10 +1,6 @@
-# -*- coding: utf-8 -*-
-import re
-
 import scrapy
 
-from locations.items import GeojsonPointItem
-from locations.hours import OpeningHours
+from locations.items import Feature
 
 
 class MobilelinkSpider(scrapy.Spider):
@@ -34,4 +30,4 @@ class MobilelinkSpider(scrapy.Spider):
                 "website": place["permalink"],
             }
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)

@@ -1,36 +1,34 @@
-# -*- coding: utf-8 -*-
-import scrapy
 import re
-from locations.items import GeojsonPointItem
-from itertools import groupby
 
+import scrapy
+from scrapy import Selector
 
-_DAYNAMES = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
+from locations.categories import Categories, apply_category
+from locations.hours import OpeningHours, sanitise_day
+from locations.items import Feature
 
 
 class WaitroseSpider(scrapy.Spider):
-
     name = "waitrose"
-    item_attributes = {"brand": "Waitrose", "brand_wikidata": "Q771734"}
+    LITTLE_WAITROSE = {"brand": "Little Waitrose", "brand_wikidata": "Q771734"}
+    WAITROSE = {"brand": "Waitrose", "brand_wikidata": "Q771734"}
+    item_attributes = WAITROSE
     allowed_domains = ["www.waitrose.com"]
     bf_home = "http://www.waitrose.com/content/waitrose/en/bf_home"
     start_urls = (bf_home + "/bf.html",)
 
     def parse(self, response):
-
         # if this is a store details page then it will have the following
         # div section.
-        details = response.xpath(
-            '//div[@role="article"]/div' '/div[@class="parbase details section"]'
-        )
+        details = response.xpath('//div[@role="article"]/div' '/div[@class="parbase details section"]')
 
         if details:
-            name = response.xpath("//head/title")[0].root.text
+            name = response.xpath("//head/title/text()").get()
             # sometimes, but not always, the name of the shop also has some
             # variant of " - Branch Finder..." appended. the fact that it's
             # not consistent between pages seems to indicate that it has been
             # entered by hand.
-            name = name.split("- ")[0].strip()
+            name = re.sub(r"Welcome to|Branch Finder|Waitrose.com", "", name, flags=re.IGNORECASE).strip(" -")
 
             properties = {
                 "name": name,
@@ -38,11 +36,14 @@ class WaitroseSpider(scrapy.Spider):
                 "ref": response.meta["waitrose_store_id"],
             }
 
-            branch_details = (
-                details[0]
-                .xpath('div[@class="col branch-details"]/p')[0]
-                .root.text_content()
-            )
+            if "little waitrose" in name.lower():
+                properties.update(self.LITTLE_WAITROSE)
+                apply_category(Categories.SHOP_CONVENIENCE, properties)
+            else:
+                properties.update(self.WAITROSE)
+                apply_category(Categories.SHOP_SUPERMARKET, properties)
+
+            branch_details = details[0].xpath('div[@class="col branch-details"]/p')[0].root.text_content()
             if branch_details:
                 branch_details = self._branch_details(branch_details)
             if branch_details:
@@ -50,13 +51,9 @@ class WaitroseSpider(scrapy.Spider):
 
             opening_hours = details[0].xpath('div[@class="opening-times"]')[0]
             if opening_hours:
-                opening_hours = self._opening_hours(opening_hours)
-            if opening_hours:
-                properties.update(opening_hours)
+                properties["opening_hours"] = self._opening_hours(opening_hours)
 
-            branch_map = (
-                details[0].xpath('div[@class="branch-finder-map"]/p/a')[0].root.attrib
-            )
+            branch_map = details[0].xpath('div[@class="branch-finder-map"]/p/a')[0].root.attrib
             properties.update(
                 {
                     "lon": float(branch_map["data-long"]),
@@ -64,7 +61,7 @@ class WaitroseSpider(scrapy.Spider):
                 }
             )
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)
             return
 
         # otherwise it's the top-level store page
@@ -132,27 +129,16 @@ class WaitroseSpider(scrapy.Spider):
         properties["addr_full"] = ", ".join(lines)
         return properties
 
-    def _opening_hours(self, opening_hours):
-        hours = ["off"] * 7
+    def _opening_hours(self, opening_hours: Selector) -> OpeningHours:
+        oh = OpeningHours()
         for row in opening_hours.xpath("//tr"):
             day, times = row.xpath("td/text()").extract()
             times = times.replace(" ", "")
             if times == "CLOSED":
-                times = "off"
-            assert day[0:2] in _DAYNAMES
-            day_idx = _DAYNAMES.index(day[0:2])
-            hours[day_idx] = times
-
-        formatted = []
-        for times, indices in groupby(range(len(hours)), lambda i: hours[i]):
-            indices = list(indices)
-            if len(indices) == 1:
-                formatted.append("%s %s" % (_DAYNAMES[indices[0]], times))
-            else:
-                dayrange = _DAYNAMES[indices[0]] + "-" + _DAYNAMES[indices[-1]]
-                formatted.append("%s %s" % (dayrange, times))
-
-        properties = {
-            "opening_hours": "; ".join(formatted),
-        }
-        return properties
+                continue
+            day = sanitise_day(day.strip(":"))
+            if not day:
+                continue
+            start_time, end_time = times.split("-")
+            oh.add_range(day, start_time, end_time)
+        return oh

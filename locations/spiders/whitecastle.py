@@ -1,10 +1,10 @@
-# -*- coding: utf-8 -*-
-import scrapy
 import re
+
+import scrapy
 
 from locations.geo import point_locations
 from locations.hours import OpeningHours
-from locations.items import GeojsonPointItem
+from locations.items import Feature
 
 
 class WhiteCastleSpider(scrapy.Spider):
@@ -38,9 +38,9 @@ class WhiteCastleSpider(scrapy.Spider):
             if close_time in ("12:00 AM", "Midnight"):
                 close_time = "00:00 AM"
 
-            o.add_range(day_name[:2], open_time, close_time, time_format="%H:%M %p")
+            o.add_range(day_name[:2], open_time, close_time, time_format="%I:%M %p")
 
-        return o.as_opening_hours()
+        return o
 
     def parse(self, response):
         for store in response.json():
@@ -64,4 +64,4 @@ class WhiteCastleSpider(scrapy.Spider):
                 if opening_hours:
                     properties["opening_hours"] = opening_hours
 
-            yield GeojsonPointItem(**properties)
+            yield Feature(**properties)
