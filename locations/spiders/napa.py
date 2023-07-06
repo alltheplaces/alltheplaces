@@ -30,7 +30,6 @@ class napa(scrapy.Spider):
         if response.xpath(
                 '//script[@type="application/ld+json" and contains(text(), "streetAddress")]/text()'
             ).extract_first():
-                print(response.url)
                 data = json.loads(response.xpath(
                 '//script[@type="application/ld+json" and contains(text(), "streetAddress")]/text()'
                 ).extract_first())
@@ -62,7 +61,6 @@ class napa(scrapy.Spider):
                 yield scrapy.Request(response.urljoin(url), callback=self.parse4thlevel)
 
     def parse4thlevel(self, response):
-        print(response.url)
         data = json.loads(response.xpath(
             '//script[@type="application/ld+json" and contains(text(), "streetAddress")]/text()'
         ).extract_first())
