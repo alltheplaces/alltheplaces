@@ -74,7 +74,7 @@ class napa(scrapy.Spider):
         properties = {
             "ref": data["url"],
             "name": data["name"],
-            "addr_full": data["address"]["streetAddress"],
+            "street_address": data["address"]["streetAddress"],
             "city": data["address"]["addressLocality"],
             "state": state,
             "postcode": data["address"]["postalCode"],
