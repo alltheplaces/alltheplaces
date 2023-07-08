@@ -6,7 +6,7 @@ from scrapy.http import JsonRequest
 
 from locations.categories import Categories
 from locations.dict_parser import DictParser
-from locations.geo import country_coordinates
+from locations.geo import point_locations
 from locations.hours import OpeningHours
 
 
@@ -18,7 +18,7 @@ class WesternUnionSpider(Spider):
     start_urls = ["https://www.westernunion.com/router/"]
     download_delay = 0.2
 
-    def request_page(self, country, latitude, longitude, page_number):
+    def request_page(self, latitude, longitude, page_number):
         # An access code for querying the GraphQL endpoint is
         # required, This is constant across different browser
         # sessions and the same for all users of the website.
@@ -30,17 +30,16 @@ class WesternUnionSpider(Spider):
         # size to be increased. Typically the page size is observed
         # by default to be 15 results per page.
         #
-        # A radius of 350km is reported in the response to each
-        # query, but this doesn't appear to be used because pages of
-        # results covering an entire country are returned from a
-        # single set of coordinates.
+        # A radius of 350km is used by the API to search around each
+        # provided coordinate. There does not appear to be a way to
+        # specify an alternative radius.
         data = {
             "query": "query locations($req:LocationInput) { locations(input: $req) }",
             "variables": {
                 "req": {
                     "longitude": longitude,
                     "latitude": latitude,
-                    "country": country,
+                    "country": "US", # Seemingly has no effect.
                     "openNow": "",
                     "services": [],
                     "sortOrder": "Distance",
@@ -51,12 +50,11 @@ class WesternUnionSpider(Spider):
         yield JsonRequest(url=self.start_urls[0], method="POST", headers=headers, data=data)
 
     def start_requests(self):
-        # The GraphQL query conducts a reverse geocode of the
-        # supplied coordinates, and matches it to the supplied
-        # ISO 3166-2 alpha-2 country code. A mismatch will cause no
-        # results to be returned.
-        for country in country_coordinates():
-            yield from self.request_page(country["isocode"], country["lat"], country["lon"], 1)
+        # The GraphQL query searches for locations within a 350km
+        # radius of supplied coordinates, then returns locations in
+        # pages of 15 locations each page.
+        for lat, lon in point_locations("earth_centroids_iseadgg_345km_radius.csv"):
+            yield from self.request_page(lat, lon, 1)
 
     def parse(self, response):
         # If crawling too fast, the server responds with a JSON
@@ -80,15 +78,15 @@ class WesternUnionSpider(Spider):
             item["opening_hours"].add_ranges_from_string(hours_string)
             yield item
 
-        # On the first response per country, generate requests for
-        # all subsequent pages of results for that country.
+        # On the first response per radius search of a coordinate,
+        # generate requests for all subsequent pages of results
+        # found by the API within the 350km search radius.
         request_data = json.loads(response.request.body)
         current_page = int(request_data["variables"]["req"]["pageNumber"])
         total_pages = response.json()["data"]["locations"]["pageCount"]
         if current_page == 1 and total_pages > 1:
             for page_number in range(2, total_pages, 1):
                 yield from self.request_page(
-                    request_data["variables"]["req"]["country"],
                     request_data["variables"]["req"]["latitude"],
                     request_data["variables"]["req"]["longitude"],
                     page_number,
