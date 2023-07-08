@@ -1,4 +1,5 @@
 import json
+from urllib.parse import urljoin
 
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
@@ -20,6 +21,6 @@ class MailBoxesEtcGBSpider(Spider):
         for location in json.loads(response.json()["d"]["StoreLocationResults"]):
             item = DictParser.parse(location)
 
-            item["website"] = response.urljoin(location["Directory"])
+            item["website"] = urljoin("https://www.mbe.co.uk", location["Directory"])
 
             yield item
