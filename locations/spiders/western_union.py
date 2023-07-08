@@ -39,7 +39,7 @@ class WesternUnionSpider(Spider):
                 "req": {
                     "longitude": longitude,
                     "latitude": latitude,
-                    "country": "US", # Seemingly has no effect.
+                    "country": "US",  # Seemingly has no effect.
                     "openNow": "",
                     "services": [],
                     "sortOrder": "Distance",

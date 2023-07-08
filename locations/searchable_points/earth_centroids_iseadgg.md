@@ -42,7 +42,7 @@ overlap between each radius search).
 
 Also inspect locations along the
 [prime meridian](https://en.wikipedia.org/wiki/Prime_meridian),
-along the 
+along the
 [180th meridian](https://en.wikipedia.org/wiki/180th_meridian) and
 [closest to poles](https://en.wikipedia.org/wiki/List_of_northernmost_settlements)
 to ensure that the API is not clipping radius searches around these
