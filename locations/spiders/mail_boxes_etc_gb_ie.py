@@ -7,9 +7,11 @@ from scrapy.http import JsonRequest, Response
 from locations.dict_parser import DictParser
 
 
-class MailBoxesEtcGBSpider(Spider):
-    name = "mail_boxes_etc_gb"
+class MailBoxesEtcGBIESpider(Spider):
+    name = "mail_boxes_etc_gb_ie"
     item_attributes = {"brand": "Mail Boxes Etc.", "brand_wikidata": "Q92922921"}
+    skip_auto_cc_spider_name = True
+    skip_auto_cc_domain = True
 
     def start_requests(self):
         yield JsonRequest(
