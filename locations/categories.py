@@ -14,14 +14,24 @@ class Categories(Enum):
     BICYCLE_PARKING = {"amenity": "bicycle_parking"}
     BICYCLE_RENTAL = {"amenity": "bicycle_rental"}
     CAR_RENTAL = {"amenity": "car_rental"}
+    CAR_WASH = {"amenity": "car_wash"}
 
     BUS_STOP = {"highway": "bus_stop", "public_transport": "platform"}
     BUS_STATION = {"amenity": "bus_station", "public_transport": "station"}
 
     BOWLING = {"leisure": "bowling_alley"}
     GYM = {"leisure": "fitness_centre"}
+    SAUNA = {"leisure": "sauna"}
 
     HIGHWAY_RESIDENTIAL = {"highway": "residential"}
+
+    CRAFT_CARPENTER = {"craft": "carpenter"}
+    CRAFT_CLOCKMAKER = {"craft": "clockmaker"}
+    CRAFT_ELECTRONICS_REPAIR = {"craft": "electronics_repair"}
+    CRAFT_JEWELLER = {"craft": "jeweller"}
+    CRAFT_KEY_CUTTER = {"craft": "key_cutter"}
+    CRAFT_TAILOR = {"craft": "tailor"}
+    CRAFT_SHOEMAKER = {"craft": "shoemaker"}
 
     SHOP_ALCOHOL = {"shop": "alcohol"}
     SHOP_BAKERY = {"shop": "bakery"}
@@ -39,6 +49,7 @@ class Categories(Enum):
     SHOP_CLOTHES = {"shop": "clothes"}
     SHOP_CONFECTIONERY = {"shop": "confectionery"}
     SHOP_CONVENIENCE = {"shop": "convenience"}
+    SHOP_COPYSHOP = {"shop": "copyshop"}
     SHOP_COSMETICS = {"shop": "cosmetics"}
     SHOP_DEPARTMENT_STORE = {"shop": "department_store"}
     SHOP_DOITYOURSELF = {"shop": "doityourself"}
@@ -47,11 +58,13 @@ class Categories(Enum):
     SHOP_FLORIST = {"shop": "florist"}
     SHOP_FUNERAL_DIRECTORS = {"shop": "funeral_directors"}
     SHOP_FURNITURE = {"shop": "furniture"}
+    SHOP_FRAME = {"shop": "frame"}
     SHOP_GARDEN_CENTRE = {"shop": "garden_centre"}
     SHOP_GIFT = {"shop": "gift"}
     SHOP_HAIRDRESSER = {"shop": "hairdresser"}
     SHOP_HARDWARE = {"shop": "hardware"}
     SHOP_JEWELRY = {"shop": "jewelry"}
+    SHOP_LAUNDRY = {"shop": "laundry"}
     SHOP_MOBILE_PHONE = {"shop": "mobile_phone"}
     SHOP_MONEY_LENDER = {"shop": "money_lender"}
     SHOP_MOTORCYCLE = {"shop": "motorcycle"}
@@ -64,6 +77,7 @@ class Categories(Enum):
     SHOP_PAWNBROKER = {"shop": "pawnbroker"}
     SHOP_PERFUMERY = {"shop": "perfumery"}
     SHOP_PET = {"shop": "pet"}
+    SHOP_PHOTO = {"shop": "photo"}
     SHOP_SECOND_HAND = {"shop": "second_hand"}
     SHOP_SHOES = {"shop": "shoes"}
     SHOP_SPORTS = {"shop": "sports"}
