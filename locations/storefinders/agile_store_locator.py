@@ -13,7 +13,7 @@ from locations.items import Feature
 # To use this store finder, specify allowed_domains = [x, y, ..]
 # (either one or more domains such as example.net) and the default
 # path for the Agile Store Locator API endpoint will be used.
-# In the event the default path is different, you an alternatively
+# In the event the default path is different, you can alternatively
 # specify one or more start_urls = [x, y, ..].
 #
 # If clean ups or additional field extraction is required from the
