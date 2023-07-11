@@ -6,7 +6,6 @@ from locations.hours import DAYS_EN, OpeningHours, sanitise_day
 from locations.items import Feature
 from locations.spiders.vapestore_gb import clean_address
 
-
 # Source code for the WP Store Locator API call used by this spider:
 # https://github.com/wp-plugins/wp-store-locator/blob/master/frontend/wpsl-ajax-functions.php
 #
@@ -29,6 +28,7 @@ from locations.spiders.vapestore_gb import clean_address
 # caution and double check this is the full count. If results are
 # truncated, you will need to stop using WPStoreLocatorSpider and
 # instead use another approach to obtaining locations.
+
 
 class WPStoreLocatorSpider(Spider):
     days = DAYS_EN
