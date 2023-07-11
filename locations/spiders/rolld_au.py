@@ -1,35 +1,13 @@
-from scrapy.linkextractors import LinkExtractor
-from scrapy.spiders import CrawlSpider, Rule
+from html import unescape
 
-from locations.google_url import extract_google_position
-from locations.items import Feature
-from locations.spiders.vapestore_gb import clean_address
+from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
 
-
-class RolldAUSpider(CrawlSpider):
+class RolldAUSpider(WPStoreLocatorSpider):
     name = "rolld_au"
     item_attributes = {"brand": "Roll'd", "brand_wikidata": "Q113114631"}
-    start_urls = ["https://rolld.com.au/location-sitemap/"]
-    rules = [Rule(LinkExtractor(allow="/location/"), callback="parse")]
+    allowed_domains = ["rolld.com.au"]
+    time_format = "%I:%M %p"
 
-    def parse(self, response, **kwargs):
-        item = Feature()
-
-        item["ref"] = item["website"] = response.url.split("?")[0]
-
-        item["name"] = response.xpath('//h1[@class="entry-title"]/text()').get()
-        item["street_address"] = clean_address(
-            response.xpath('//div[@class="wpsl-location-address"]/span/text()').get()
-        )
-        item["postcode"] = response.xpath('normalize-space(//span[@class="zip-code"]/text())').get()
-        item["addr_full"] = clean_address(response.xpath('//div[@class="wpsl-location-address"]/span/text()').getall())
-        item["phone"] = response.xpath('//div[@class="phone-number"]/text()').get()
-
-        if "closed" in item["name"].lower():
-            return
-        try:
-            extract_google_position(item, response)
-        except:
-            pass
-
+    def parse_item(self, item, location):
+        item["name"] = unescape(item["name"])
         yield item
