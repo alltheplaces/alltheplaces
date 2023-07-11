@@ -19,7 +19,9 @@ class MoneyGramSpider(Where2GetItSpider):
         #
         # 1. Ignore Polish post office locations outside of Poland.
         if item["country"] == "PL" and item["name"][:3] == "UP ":
-            if result := reverse_geocoder.get((float(location["latitude"]), float(location["longitude"])), mode=1, verbose=False):
+            if result := reverse_geocoder.get(
+                (float(location["latitude"]), float(location["longitude"])), mode=1, verbose=False
+            ):
                 if result["cc"] != "PL":
                     item.pop("lat")
                     item.pop("lon")
