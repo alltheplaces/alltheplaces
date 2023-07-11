@@ -8,7 +8,9 @@ from locations.items import Feature
 class NSWStateEmergencyServiceAUSpider(Spider):
     name = "nsw_state_emergency_service_au"
     allowed_domains = ["portal.spatial.nsw.gov.au"]
-    start_urls = ["https://portal.spatial.nsw.gov.au/server/rest/services/NSW_FOI_Emergency_Service_Facilities/FeatureServer/3/query?f=geojson"]
+    start_urls = [
+        "https://portal.spatial.nsw.gov.au/server/rest/services/NSW_FOI_Emergency_Service_Facilities/FeatureServer/3/query?f=geojson"
+    ]
     no_refs = True
 
     def start_requests(self):
@@ -29,7 +31,11 @@ class NSWStateEmergencyServiceAUSpider(Spider):
                 apply_category({"government": "emergency"}, properties)
             elif "MARINE RESCUE " in properties["name"]:
                 apply_category({"emergency": "water_rescue"}, properties)
-            elif " SES" in properties["name"] or " MINES RESCUE STATION" in properties["name"] or ("ACT ESA " in properties["name"] and " UNIT" in properties["name"]):
+            elif (
+                " SES" in properties["name"]
+                or " MINES RESCUE STATION" in properties["name"]
+                or ("ACT ESA " in properties["name"] and " UNIT" in properties["name"])
+            ):
                 apply_category({"amenity": "rescue_station"}, properties)
             else:
                 apply_category({"office": "government"}, properties)
