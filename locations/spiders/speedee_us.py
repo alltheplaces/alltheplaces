@@ -1,5 +1,6 @@
 from locations.storefinders.agile_store_locator import AgileStoreLocatorSpider
 
+
 class SpeeDeeUSSpider(AgileStoreLocatorSpider):
     name = "speedee_us"
     item_attributes = {"brand": "SpeeDee Oil Change and Auto Service", "brand_wikidata": "Q120537032"}
