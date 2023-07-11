@@ -14,12 +14,23 @@ class FireAndRescueNSWAUSpider(SitemapSpider):
 
     def parse(self, response):
         properties = {
-            "name": response.xpath('//main//h1/text()').get().strip(),
-            "addr_full": response.xpath('//main/div[2]//div[@class="card-panel white"][1]/p[contains(text(), "Address:")]/text()').get().replace("Address:", "").strip(),
+            "name": response.xpath("//main//h1/text()").get().strip(),
+            "addr_full": response.xpath(
+                '//main/div[2]//div[@class="card-panel white"][1]/p[contains(text(), "Address:")]/text()'
+            )
+            .get()
+            .replace("Address:", "")
+            .strip(),
             "state": "NSW",
-            "phone": response.xpath('//main/div[2]//div[@class="card-panel white"][1]/p[contains(text(), "Phone:")]/a/@href').get().replace("tel:", ""),
+            "phone": response.xpath(
+                '//main/div[2]//div[@class="card-panel white"][1]/p[contains(text(), "Phone:")]/a/@href'
+            )
+            .get()
+            .replace("tel:", ""),
             "website": response.url,
-            "facebook": response.xpath('//main/div[2]//div[@class="card-panel white"][1]/p[contains(text(), "Social media:")]/a/@href').get(),
+            "facebook": response.xpath(
+                '//main/div[2]//div[@class="card-panel white"][1]/p[contains(text(), "Social media:")]/a/@href'
+            ).get(),
         }
         extract_google_position(properties, response)
         apply_category({"amenity": "fire_station"}, properties)
