@@ -6,8 +6,30 @@ from locations.hours import DAYS_EN, OpeningHours, sanitise_day
 from locations.items import Feature
 from locations.spiders.vapestore_gb import clean_address
 
+# Source code for the WP Store Locator API call used by this spider:
+# https://github.com/wp-plugins/wp-store-locator/blob/master/frontend/wpsl-ajax-functions.php
+#
+# To use this store finder, specify allowed_domains = [x, y, ..]
+# (either one or more domains such as example.net) and the default
+# path for the WP Store Locator API endpoint will be used.
+# In the event the default path is different, you can alternatively
+# specify one or more start_urls = [x, y, ..].
+#
+# If clean ups or additional field extraction is required from the
+# source data, override the parse_item function. Two parameters are
+# passed, item (an ATP "Feature" class) and location (a dict which
+# is returned from the store locator JSON response for a particular
+# location).
+#
+# Important note: this store locator has a hard-coded "max_results"
+# attribute set server-side, that can be configured differently for
+# each installation and cannot be overridden client-side. Check the
+# number of results returned and if it is a round number (e.g. 50)
+# apply caution and double check this is the full count. If results
+# are truncated, you will need to stop using WPStoreLocatorSpider
+# and instead use another approach for scraping locations.
 
-# https://github.com/wp-plugins/wp-store-locator/blob/master/frontend/wpsl-ajax-functions.php#L15
+
 class WPStoreLocatorSpider(Spider):
     days = DAYS_EN
     time_format = "%H:%S"
