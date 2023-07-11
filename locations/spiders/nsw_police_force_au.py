@@ -52,7 +52,7 @@ class NSWPoliceForceAUSpider(CrawlSpider):
         for contact_line in response.xpath('//div[@itemprop="articleBody"]//p[2]//text()').getall():
             contact_line = contact_line.replace("\xa0", " ")
             if (
-                "NOTE:" in contact_line
+                "NOTE:" in contact_line.upper()
                 or "NOT OPEN 24 HOURS" in contact_line.upper()
                 or "FAX:" in contact_line.upper()
                 or "VIEW PAC MAP" in contact_line.upper()
