@@ -8,7 +8,9 @@ from locations.items import Feature
 class NSWRuralFireServiceAUSpider(Spider):
     name = "nsw_rural_fire_service_au"
     allowed_domains = ["portal.spatial.nsw.gov.au"]
-    start_urls = ["https://portal.spatial.nsw.gov.au/server/rest/services/NSW_FOI_Emergency_Service_Facilities/FeatureServer/2/query?f=geojson"]
+    start_urls = [
+        "https://portal.spatial.nsw.gov.au/server/rest/services/NSW_FOI_Emergency_Service_Facilities/FeatureServer/2/query?f=geojson"
+    ]
     no_refs = True
 
     def start_requests(self):
