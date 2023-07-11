@@ -68,5 +68,5 @@ class NSWPoliceForceAUSpider(CrawlSpider):
                 properties["addr_full"] = ", ".join(filter(None, [properties.get("addr_full"), contact_line.strip()]))
         apply_category({"amenity": "police"}, properties)
         properties["extras"]["operator"] = "New South Wales Police Force"
-        properties["extras"]["operator_wikidata"] = "Q7011763"
+        properties["extras"]["operator:wikidata"] = "Q7011763"
         yield Feature(**properties)
