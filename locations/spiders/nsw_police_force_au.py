@@ -9,7 +9,7 @@ from locations.items import Feature
 
 class NSWPoliceForceAUSpider(CrawlSpider):
     name = "nsw_police_force_au"
-    allowed_domains = ["www.police.nsw.gov.au"]
+    allowed_domains = ["www.police.nsw.gov.au", "portal.spatial.nsw.gov.au"]
     start_urls = ["https://www.police.nsw.gov.au/about_us/regions_commands_districts"]
     rules = [
         Rule(
