@@ -26,7 +26,11 @@ class NSWRuralFireServiceAUSpider(Spider):
             }
             if "ACT RFS " in properties["name"]:
                 properties["state"] = "ACT"
-            if " RFB" in properties["name"] or " FIRE CONTROL CENTRE" in properties["name"] or "ACT RFS " in properties["name"]:
+            if (
+                " RFB" in properties["name"]
+                or " FIRE CONTROL CENTRE" in properties["name"]
+                or "ACT RFS " in properties["name"]
+            ):
                 apply_category({"amenity": "fire_station"}, properties)
             else:
                 apply_category({"office": "government"}, properties)
