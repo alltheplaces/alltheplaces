@@ -1,6 +1,6 @@
+from scrapy.http import JsonRequest
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Request, Rule
-from scrapy.http import JsonRequest
 
 from locations.categories import apply_category
 from locations.hours import DAYS, OpeningHours
@@ -12,14 +12,28 @@ class NSWPoliceForceAUSpider(CrawlSpider):
     allowed_domains = ["www.police.nsw.gov.au"]
     start_urls = ["https://www.police.nsw.gov.au/about_us/regions_commands_districts"]
     rules = [
-        Rule(LinkExtractor(allow=r"^https:\/\/www\.police\.nsw\.gov\.au\/about_us\/regions_commands_districts\/[\w\-]+$"), follow=True),
-        Rule(LinkExtractor(allow=r"^https:\/\/www\.police\.nsw\.gov\.au\/about_us\/regions_commands_districts\/(?:[\w\-]+\/){1,2}[\w\-]+_police_station$"), callback="parse", follow=False),
+        Rule(
+            LinkExtractor(
+                allow=r"^https:\/\/www\.police\.nsw\.gov\.au\/about_us\/regions_commands_districts\/[\w\-]+$"
+            ),
+            follow=True,
+        ),
+        Rule(
+            LinkExtractor(
+                allow=r"^https:\/\/www\.police\.nsw\.gov\.au\/about_us\/regions_commands_districts\/(?:[\w\-]+\/){1,2}[\w\-]+_police_station$"
+            ),
+            callback="parse",
+            follow=False,
+        ),
     ]
     no_refs = True
     location_geometry = {}
 
     def start_requests(self):
-        yield JsonRequest(url="https://portal.spatial.nsw.gov.au/server/rest/services/NSW_FOI_Emergency_Service_Facilities/FeatureServer/1/query?f=geojson", callback=self.parse_geometry)
+        yield JsonRequest(
+            url="https://portal.spatial.nsw.gov.au/server/rest/services/NSW_FOI_Emergency_Service_Facilities/FeatureServer/1/query?f=geojson",
+            callback=self.parse_geometry,
+        )
 
     def parse_geometry(self, response):
         for location in response.json()["features"]:
@@ -37,7 +51,13 @@ class NSWPoliceForceAUSpider(CrawlSpider):
             properties["geometry"] = self.location_geometry[properties["name"].upper()]
         for contact_line in response.xpath('//div[@itemprop="articleBody"]//p[2]//text()').getall():
             contact_line = contact_line.replace("\xa0", " ")
-            if "NOTE:" in contact_line or "NOT OPEN 24 HOURS" in contact_line.upper() or "FAX:" in contact_line.upper() or "VIEW PAC MAP" in contact_line.upper() or "POSTAL ADDRESS:" in contact_line.upper():
+            if (
+                "NOTE:" in contact_line
+                or "NOT OPEN 24 HOURS" in contact_line.upper()
+                or "FAX:" in contact_line.upper()
+                or "VIEW PAC MAP" in contact_line.upper()
+                or "POSTAL ADDRESS:" in contact_line.upper()
+            ):
                 continue
             elif "OPEN 24 HOURS" in contact_line.upper():
                 properties["opening_hours"] = OpeningHours()
