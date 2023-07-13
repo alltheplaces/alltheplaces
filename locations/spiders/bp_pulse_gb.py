@@ -1,6 +1,7 @@
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
@@ -26,7 +27,7 @@ class BPPulseGBSpider(Spider):
             item["lat"] = location[0]
             item["lon"] = location[1]
             item["ref"] = ref
-
+            apply_category(Categories.CHARGING_STATION, item)
             yield item
 
         if response.json()["per_page"] * response.meta["page"] < response.json()["total"]:
