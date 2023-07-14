@@ -9,15 +9,60 @@ class RetailApparelGroupSpider(Spider):
     name = "retail_apparel_group"
     custom_settings = {"ROBOTSTXT_OBEY": False}
     brands = [
-        {"brand": "yd.", "brand_wikidata": "Q113469019", "api_endpoint": "https://mcprod2.yd.com.au/graphql", "store_id": "yd_au"},
-        {"brand": "yd.", "brand_wikidata": "Q113469019", "api_endpoint": "https://mcprod2.yd.com.au/graphql", "store_id": "yd_nz"},
-        {"brand": "Connor", "brand_wikidata": "Q113468988", "api_endpoint": "https://mcprod2.connor.com.au/graphql", "store_id": "cr_au"},
-        {"brand": "Connor", "brand_wikidata": "Q113468988", "api_endpoint": "https://mcprod2.connor.com.au/graphql", "store_id": "cr_nz"},
-        {"brand": "Johnny Bigg", "brand_wikidata": "Q113469024", "api_endpoint": "https://mcprod2.johnnybigg.com.au/graphql", "store_id": "jb_au"},
-        {"brand": "Johnny Bigg", "brand_wikidata": "Q113469024", "api_endpoint": "https://mcprod2.johnnybigg.com.au/graphql", "store_id": "jb_nz"},
-        {"brand": "Tarocash", "brand_wikidata": "Q7686519", "api_endpoint": "https://mcprod2.tarocash.com.au/graphql", "store_id": "tc_au"},
-        {"brand": "Tarocash", "brand_wikidata": "Q7686519", "api_endpoint": "https://mcprod2.tarocash.com.au/graphql", "store_id": "tc_nz"},
-        {"brand": "Rockwear", "brand_wikidata": "Q113469029", "api_endpoint": "https://mcprod2.rockwear.com.au/graphql", "store_id": "rw_au"},
+        {
+            "brand": "yd.",
+            "brand_wikidata": "Q113469019",
+            "api_endpoint": "https://mcprod2.yd.com.au/graphql",
+            "store_id": "yd_au",
+        },
+        {
+            "brand": "yd.",
+            "brand_wikidata": "Q113469019",
+            "api_endpoint": "https://mcprod2.yd.com.au/graphql",
+            "store_id": "yd_nz",
+        },
+        {
+            "brand": "Connor",
+            "brand_wikidata": "Q113468988",
+            "api_endpoint": "https://mcprod2.connor.com.au/graphql",
+            "store_id": "cr_au",
+        },
+        {
+            "brand": "Connor",
+            "brand_wikidata": "Q113468988",
+            "api_endpoint": "https://mcprod2.connor.com.au/graphql",
+            "store_id": "cr_nz",
+        },
+        {
+            "brand": "Johnny Bigg",
+            "brand_wikidata": "Q113469024",
+            "api_endpoint": "https://mcprod2.johnnybigg.com.au/graphql",
+            "store_id": "jb_au",
+        },
+        {
+            "brand": "Johnny Bigg",
+            "brand_wikidata": "Q113469024",
+            "api_endpoint": "https://mcprod2.johnnybigg.com.au/graphql",
+            "store_id": "jb_nz",
+        },
+        {
+            "brand": "Tarocash",
+            "brand_wikidata": "Q7686519",
+            "api_endpoint": "https://mcprod2.tarocash.com.au/graphql",
+            "store_id": "tc_au",
+        },
+        {
+            "brand": "Tarocash",
+            "brand_wikidata": "Q7686519",
+            "api_endpoint": "https://mcprod2.tarocash.com.au/graphql",
+            "store_id": "tc_nz",
+        },
+        {
+            "brand": "Rockwear",
+            "brand_wikidata": "Q113469029",
+            "api_endpoint": "https://mcprod2.rockwear.com.au/graphql",
+            "store_id": "rw_au",
+        },
     ]
 
     def start_requests(self):
@@ -64,10 +109,12 @@ class RetailApparelGroupSpider(Spider):
                         "lat": 0,
                         "lng": 0,
                         "radius": 500000000,
-                    }
-                }
+                    },
+                },
             }
-            yield JsonRequest(url=brand["api_endpoint"], data=query, headers={"Store": brand["store_id"]}, dont_filter=True)
+            yield JsonRequest(
+                url=brand["api_endpoint"], data=query, headers={"Store": brand["store_id"]}, dont_filter=True
+            )
 
     def parse(self, response):
         for location in response.json()["data"]["stockists"]["locations"]:
@@ -83,7 +130,9 @@ class RetailApparelGroupSpider(Spider):
                     break
             item["addr_full"] = location["address"]["addr_full"]
             item["phone"] = location["address"]["phone"]
-            item["website"] = response.json()["data"]["stockists"]["canonical_url"].replace("/stores", "/store/" + location["url_key"].lower().replace(" ", "-"))
+            item["website"] = response.json()["data"]["stockists"]["canonical_url"].replace(
+                "/stores", "/store/" + location["url_key"].lower().replace(" ", "-")
+            )
             item["opening_hours"] = OpeningHours()
             hours_string = " ".join([f"{day}: {hours}" for day, hours in location["trading_hours"].items()])
             item["opening_hours"].add_ranges_from_string(hours_string)
