@@ -24,6 +24,17 @@ class NSWAmbulanceAUSpider(Spider):
                 "state": "NSW",
                 "geometry": location["geometry"],
             }
+            if " HEADQUARTERS" in properties["name"]:
+                apply_category({"office": "government"}, properties)
+                apply_category({"government": "emergency"}, properties)
+            elif " HELO AMBULANCE STATION" in properties["name"]:
+                apply_category({"emergency": "air_rescue_service"}, properties)
+            elif (
+                " CFR" in properties["name"] or " VAO" in properties["name"]
+            ):  # Community First Responder (CFR) and Volunteer Ambulance Officer (VAO)
+                apply_category({"emergency": "first_aid"}, properties)
+            else:
+                apply_category({"emergency": "ambulance_station"}, properties)
             if properties["name"] in [
                 "DICKSON AMBULANCE STATION",
                 "GUNGAHLIN AMBULANCE STATION",
@@ -31,21 +42,15 @@ class NSWAmbulanceAUSpider(Spider):
                 "PHILLIP AMBULANCE STATION",
                 "KAMBAH AMBULANCE STATION",
                 "WEST BELCONNEN AMBULANCE STATION",
+                "BELCONNEN AMBULANCE STATION",
+                "FYSHWICK AMBULANCE STATION",
+                "GREENWAY AMBULANCE STATION",
+                "SOUTHCARE HELO AMBULANCE STATION",
             ]:
-                apply_category({"emergency": "ambulance_station"}, properties)
                 properties["state"] = "ACT"
                 properties["extras"]["operator"] = "Australian Capital Territory Ambulance Service"
                 properties["extras"]["operator:wikidata"] = "Q4823922"
-            if " HEADQUARTERS" in properties["name"]:
-                apply_category({"office": "government"}, properties)
-                apply_category({"government": "emergency"}, properties)
-            elif (
-                " CFR" in properties["name"] or " VAO" in properties["name"]
-            ):  # Community First Responder (CFR) and Volunteer Ambulance Officer (VAO)
-                apply_category({"emergency": "first_aid"}, properties)
             else:
-                apply_category({"emergency": "ambulance_station"}, properties)
-            if properties["state"] == "NSW":
                 properties["extras"]["operator"] = "New South Wales Ambulance"
                 properties["extras"]["operator:wikidata"] = "Q4741948"
             yield Feature(**properties)
