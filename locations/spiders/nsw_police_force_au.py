@@ -26,7 +26,6 @@ class NSWPoliceForceAUSpider(CrawlSpider):
             follow=False,
         ),
     ]
-    no_refs = True
     location_geometry = {}
 
     def start_requests(self):
@@ -43,6 +42,7 @@ class NSWPoliceForceAUSpider(CrawlSpider):
 
     def parse(self, response):
         properties = {
+            "ref": response.url,
             "name": response.xpath('//h3[@class="p-hero__heading"]/text()').get(),
             "state": "NSW",
             "website": response.url,
