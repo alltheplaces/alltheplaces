@@ -5,7 +5,6 @@ from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.items import Feature
 
-
 # The official home page of this Localisr store finder is:
 # https://matterdesign.com.au/localisr-a-geolocation-powered-store-finder-for-bigcommerce/
 #
@@ -28,7 +27,7 @@ from locations.items import Feature
 class LocalisrSpider(Spider):
     dataset_attributes = {"source": "api", "api": "localisr.io"}
     api_key = ""
-    api_version = "2.1.0" # Use the latest observed API version
+    api_version = "2.1.0"  # Use the latest observed API version
     search_coordinates = []
     search_radius = 400
 
@@ -37,11 +36,18 @@ class LocalisrSpider(Spider):
             "key": self.api_key,
             "version": self.api_version,
         }
-        yield JsonRequest(url="https://app.localisr.io/api/auth/v2/validate?type=&view=all&map_permission=false&map_trigger=initial", data=data, method="POST", callback=self.parse_session_token)
+        yield JsonRequest(
+            url="https://app.localisr.io/api/auth/v2/validate?type=&view=all&map_permission=false&map_trigger=initial",
+            data=data,
+            method="POST",
+            callback=self.parse_session_token,
+        )
 
     def parse_session_token(self, response):
         request_token = response.json()["data"]["request_token"]
-        user_token = Selector(text=response.json()["data"]["builder"]).xpath('//input[@id="slmUniqueUserToken"]/@value').get()
+        user_token = (
+            Selector(text=response.json()["data"]["builder"]).xpath('//input[@id="slmUniqueUserToken"]/@value').get()
+        )
         for search_coordinate in self.search_coordinates:
             url = f"https://app.localisr.io/api/v1/collection?lat={search_coordinate[0]}&lng={search_coordinate[1]}&radius={self.search_radius}&type=&view=all&map_permission=false&map_trigger=search"
             headers = {
@@ -63,7 +69,9 @@ class LocalisrSpider(Spider):
             item["state"] = location["location"].get("state")
             item["country"] = location["location"].get("country")
             item["addr_full"] = location["location"].get("address")
-            item["street_address"] = ", ".join(filter(None, [location["location"].get("address_1"), location["location"].get("address_2")]))
+            item["street_address"] = ", ".join(
+                filter(None, [location["location"].get("address_1"), location["location"].get("address_2")])
+            )
             item["phone"] = location["store"].get("phone")
             item["email"] = location["store"].get("email")
             item["opening_hours"] = OpeningHours()
