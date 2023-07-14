@@ -42,7 +42,7 @@ class MillersSpider(SitemapSpider):
             properties.pop("state")
         else:
             properties["country"] = "AU"
-        hours_text = " ".join(Selector(text=ldjson["openingHours"]).xpath("//text").getall())
+        hours_text = " ".join(Selector(text=ldjson["openingHours"]).xpath("//text()").getall())
         properties["opening_hours"] = OpeningHours()
         properties["opening_hours"].add_ranges_from_string(hours_text)
         yield Feature(**properties)
