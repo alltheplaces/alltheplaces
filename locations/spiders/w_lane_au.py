@@ -13,7 +13,7 @@ class WLaneAUSpider(SitemapSpider):
     item_attributes = {"brand": "W Lane", "brand_wikidata": "Q120645873"}
     allowed_domains = ["www.wlane.com.au"]
     sitemap_urls = ["https://www.wlane.com.au/Store.xml"]
-    sitemap_rules = [(r"\/stores\/(?!nz\/)", "parse")] # NZ location is not open to the public
+    sitemap_rules = [(r"\/stores\/(?!nz\/)", "parse")]  # NZ location is not open to the public
 
     def parse(self, response):
         ldjsontext = (
