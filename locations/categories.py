@@ -99,6 +99,7 @@ class Categories(Enum):
     BOAT_FUEL_STATION = {"waterway": "fuel"}
     BUREAU_DE_CHANGE = {"amenity": "bureau_de_change"}
     CAFE = {"amenity": "cafe"}
+    CARAVAN_SITE = {"tourism": "caravan_site"}
     CHARGING_STATION = {"amenity": "charging_station"}
     CHILD_CARE = {"amenity": "childcare"}
     CINEMA = {"amenity": "cinema"}
