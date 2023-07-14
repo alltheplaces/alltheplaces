@@ -24,7 +24,14 @@ class NSWAmbulanceAUSpider(Spider):
                 "state": "NSW",
                 "geometry": location["geometry"],
             }
-            if properties["name"] in ["DICKSON AMBULANCE STATION", "GUNGAHLIN AMBULANCE STATION", "CALWELL AMBULANCE STATION", "PHILLIP AMBULANCE STATION", "KAMBAH AMBULANCE STATION", "WEST BELCONNEN AMBULANCE STATION"]:
+            if properties["name"] in [
+                "DICKSON AMBULANCE STATION",
+                "GUNGAHLIN AMBULANCE STATION",
+                "CALWELL AMBULANCE STATION",
+                "PHILLIP AMBULANCE STATION",
+                "KAMBAH AMBULANCE STATION",
+                "WEST BELCONNEN AMBULANCE STATION",
+            ]:
                 apply_category({"emergency": "ambulance_station"}, properties)
                 properties["state"] = "ACT"
                 properties["extras"]["operator"] = "Australian Capital Territory Ambulance Service"
@@ -32,7 +39,9 @@ class NSWAmbulanceAUSpider(Spider):
             if " HEADQUARTERS" in properties["name"]:
                 apply_category({"office": "government"}, properties)
                 apply_category({"government": "emergency"}, properties)
-            elif " CFR" in properties["name"] or " VAO" in properties["name"]: # Community First Responder (CFR) and Volunteer Ambulance Officer (VAO)
+            elif (
+                " CFR" in properties["name"] or " VAO" in properties["name"]
+            ):  # Community First Responder (CFR) and Volunteer Ambulance Officer (VAO)
                 apply_category({"emergency": "first_aid"}, properties)
             else:
                 apply_category({"emergency": "ambulance_station"}, properties)
