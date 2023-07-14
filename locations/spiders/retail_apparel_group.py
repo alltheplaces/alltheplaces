@@ -67,36 +67,36 @@ class RetailApparelGroupSpider(Spider):
 
     def start_requests(self):
         graphql_query = """query storeLocations($location:LocationRequest $pageSize:Int=20 $currentPage:Int=1) {
-	stockists(location:$location pageSize:$pageSize currentPage:$currentPage) {
-		canonical_url
+    stockists(location:$location pageSize:$pageSize currentPage:$currentPage) {
+        canonical_url
         locations {
-			address {
+            address {
                 city2: city
-				country_code
-				phone
-				postcode
+                country_code
+                phone
+                postcode
                 state: region
                 addr_full: street
                 city: suburb
-			}
-			identifier
-			location {
-				lat
-				lng
-			}
-			name
-			trading_hours {
-				sunday
-				monday
-				tuesday
-				wednesday
-				thursday
-				friday
-				saturday
-			}
-			url_key
-		}
-	}
+            }
+            identifier
+            location {
+                lat
+                lng
+            }
+            name
+            trading_hours {
+                sunday
+                monday
+                tuesday
+                wednesday
+                thursday
+                friday
+                saturday
+            }
+            url_key
+        }
+    }
 }"""
         for brand in self.brands:
             query = {
