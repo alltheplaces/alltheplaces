@@ -23,5 +23,7 @@ class VinniesAUSpider(Spider):
             for day in location["openingTimes"]:
                 if day["closed"] or not day["open"] or not day["close"]:
                     continue
-                item["opening_hours"].add_range(day["weekday"], day["open"].split("T", 1)[1], day["close"].split("T", 1)[1], "%H:%M:%S")
+                item["opening_hours"].add_range(
+                    day["weekday"], day["open"].split("T", 1)[1], day["close"].split("T", 1)[1], "%H:%M:%S"
+                )
             yield item
