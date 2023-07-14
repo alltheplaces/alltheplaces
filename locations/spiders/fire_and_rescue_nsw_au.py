@@ -10,10 +10,10 @@ class FireAndRescueNSWAUSpider(SitemapSpider):
     allowed_domains = ["www.fire.nsw.gov.au"]
     sitemap_urls = ["https://www.fire.nsw.gov.au/feeds/sitemap.xml"]
     sitemap_rules = [(r"^https:\/\/www\.fire\.nsw\.gov\.au\/page\.php\?id=9210&station=\d+", "parse")]
-    no_refs = True
 
     def parse(self, response):
         properties = {
+            "ref": response.url,
             "name": response.xpath("//main//h1/text()").get().strip(),
             "addr_full": response.xpath(
                 '//main/div[2]//div[@class="card-panel white"][1]/p[contains(text(), "Address:")]/text()'
