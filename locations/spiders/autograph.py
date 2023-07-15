@@ -25,7 +25,7 @@ class AutographSpider(SitemapSpider):
             .replace("),", ",")
             .strip()
         )
-        ldjson = parse_js_object(ldjsontext)
+        ldjson = parse_js_object(ldjsontext, json_params={"strict": False})
         properties = {
             "ref": response.url,
             "name": ldjson["name"],
