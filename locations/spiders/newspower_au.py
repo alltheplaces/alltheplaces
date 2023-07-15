@@ -1,7 +1,7 @@
-from chompjs import parse_js_object
-from html import unescape
 import re
+from html import unescape
 
+from chompjs import parse_js_object
 from scrapy.spiders import SitemapSpider
 
 from locations.hours import OpeningHours
@@ -25,7 +25,15 @@ class NewspowerAUSpider(SitemapSpider):
         properties = {
             "ref": map_marker_dict["id"],
             "name": response.xpath('//div[@class="wpsl-locations-details"]/span/strong/text()').get().strip(),
-            "addr_full": unescape(re.sub(r"\s+", " ", ", ".join(filter(None, response.xpath('//div[@class="wpsl-location-address"]//text()').getall())))).replace(" ,", ",").strip(),
+            "addr_full": unescape(
+                re.sub(
+                    r"\s+",
+                    " ",
+                    ", ".join(filter(None, response.xpath('//div[@class="wpsl-location-address"]//text()').getall())),
+                )
+            )
+            .replace(" ,", ",")
+            .strip(),
             "street_address": ", ".join(filter(None, [map_marker_dict["address"], map_marker_dict["address2"]])),
             "city": map_marker_dict["city"],
             "state": map_marker_dict["state"],
@@ -34,7 +42,9 @@ class NewspowerAUSpider(SitemapSpider):
             "lon": map_marker_dict["lng"],
             "phone": response.xpath('//div[@class="wpsl-contact-details"]//a[contains(@href, "tel:")]/@href').get(),
             "website": response.url,
-            "facebook": response.xpath('//div[@class="entry-content"]//a[contains(@href, "https://www.facebook.com/")]/@href').get(),
+            "facebook": response.xpath(
+                '//div[@class="entry-content"]//a[contains(@href, "https://www.facebook.com/")]/@href'
+            ).get(),
         }
         if properties.get("phone") and "tel:" in properties.get("phone"):
             properties["phone"] = properties["phone"].replace("tel:", "")
