@@ -7,6 +7,6 @@ class BrasNThingsSpider(LimesharpStoreLocatorSpider):
     allowed_domains = [
         # All of these allowed domains return the same store data.
         "www.brasnthings.com",
-        #"www.brasnthings.co.nz",
-        #"www.brasnthings.co.za",
+        # "www.brasnthings.co.nz",
+        # "www.brasnthings.co.za",
     ]

@@ -32,7 +32,12 @@ class LimesharpStoreLocatorSpider(Spider):
 
     def parse(self, response, **kwargs):
         for location in response.json():
-            if not location["name"] and not location["latitude"] and not location["longitude"] and not location["address"]:
+            if (
+                not location["name"]
+                and not location["latitude"]
+                and not location["longitude"]
+                and not location["address"]
+            ):
                 continue
             item = DictParser.parse(location)
             item["ref"] = location["stockist_id"]
