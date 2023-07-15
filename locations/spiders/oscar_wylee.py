@@ -1,5 +1,5 @@
-from html import unescape
 import re
+from html import unescape
 
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
@@ -27,8 +27,15 @@ class OscarWyleeSpider(CrawlSpider):
     def parse(self, response):
         properties = {
             "ref": response.url,
-            "name": response.xpath('//h1[@class="static-location-header"]/text()').get().replace("Optometrist", "").strip(),
-            "addr_full": unescape(re.sub(r"\s+", " ", " ".join(filter(None, response.xpath('//p[@class="short-content"]//text()').getall())))).strip(),
+            "name": response.xpath('//h1[@class="static-location-header"]/text()')
+            .get()
+            .replace("Optometrist", "")
+            .strip(),
+            "addr_full": unescape(
+                re.sub(
+                    r"\s+", " ", " ".join(filter(None, response.xpath('//p[@class="short-content"]//text()').getall()))
+                )
+            ).strip(),
             "website": response.url,
         }
         if ".com.au" in response.url:
