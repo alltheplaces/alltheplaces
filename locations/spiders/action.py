@@ -33,5 +33,7 @@ class ActionSpider(Spider):
         for day_hours in location["openingHours"]:
             if day_hours["thisWeek"]["closed"]:
                 continue
-            item["opening_hours"].add_range(day_hours["dayName"], day_hours["thisWeek"]["opening"], day_hours["thisWeek"]["closing"])
+            item["opening_hours"].add_range(
+                day_hours["dayName"], day_hours["thisWeek"]["opening"], day_hours["thisWeek"]["closing"]
+            )
         yield item
