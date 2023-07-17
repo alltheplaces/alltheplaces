@@ -16,7 +16,7 @@ class HomeBargainsGB(CrawlSpider, StructuredDataSpider):
     download_delay = 0.5
 
     def inspect_item(self, item, response):
-        item["ref"] = response.url.split('/store/', 1)[1].split('/', 1)[0]
+        item["ref"] = response.url.split("/store/", 1)[1].split("/", 1)[0]
         full_address = response.xpath('//*[@itemprop="address"]/text()').extract()[:-1]
         item["addr_full"] = ",".join(full_address).strip()
         item["postcode"] = full_address[-1].strip()
