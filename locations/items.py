@@ -7,6 +7,8 @@ import scrapy
 
 
 class Feature(scrapy.Item):
+    _validation = scrapy.Field()
+
     lat = scrapy.Field()
     lon = scrapy.Field()
     geometry = scrapy.Field()
