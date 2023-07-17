@@ -11,7 +11,9 @@ class BuffaloWildWingsUSSpider(Spider):
     name = "buffalo_wild_wings_us"
     item_attributes = {"brand": "Buffalo Wild Wings", "brand_wikidata": "Q509255"}
     allowed_domains = ["buffalowildwings.com"]
-    start_urls = ["https://api-idp.buffalowildwings.com/bww/web-exp-api/v1/location?latitude=44.97&longitude=-103.77&radius=100000&limit=100&page=0&locale=en-us"]
+    start_urls = [
+        "https://api-idp.buffalowildwings.com/bww/web-exp-api/v1/location?latitude=44.97&longitude=-103.77&radius=100000&limit=100&page=0&locale=en-us"
+    ]
 
     def start_requests(self):
         for url in self.start_urls:
@@ -26,7 +28,16 @@ class BuffaloWildWingsUSSpider(Spider):
             item["ref"] = location["metadata"]["restaurantNumber"]
             item["lat"] = location["details"]["latitude"]
             item["lon"] = location["details"]["longitude"]
-            item["street_address"] = ", ".join(filter(None, [location["contactDetails"]["address"]["line1"], location["contactDetails"]["address"]["line2"], location["contactDetails"]["address"]["line3"]]))
+            item["street_address"] = ", ".join(
+                filter(
+                    None,
+                    [
+                        location["contactDetails"]["address"]["line1"],
+                        location["contactDetails"]["address"]["line2"],
+                        location["contactDetails"]["address"]["line3"],
+                    ],
+                )
+            )
             item["city"] = location["contactDetails"]["address"]["city"]
             item["state"] = location["contactDetails"]["address"]["stateProvinceCode"]
             item["postcode"] = location["contactDetails"]["address"]["postalCode"]
@@ -40,8 +51,10 @@ class BuffaloWildWingsUSSpider(Spider):
                         if day_hours["isTwentyFourHourService"]:
                             item["opening_hours"].add_range(day_hours["dayOfWeek"].title(), "00:00", "23:59")
                         else:
-                            item["opening_hours"].add_range(day_hours["dayOfWeek"].title(), day_hours["startTime"], day_hours["endTime"])
-            
+                            item["opening_hours"].add_range(
+                                day_hours["dayOfWeek"].title(), day_hours["startTime"], day_hours["endTime"]
+                            )
+
             yield item
 
         if not response.json()["metadata"]["isLastPage"]:
