@@ -66,7 +66,7 @@ class VkusvillRUSpider(Spider):
         # Skip darkstores as they are closed for public
         if "Даркстор" in item.get("street_address"):
             yield None
-        
+
         item["phone"] = self.sanitize(
             response.xpath('//a[@class="VV21_MapPanelCard__PhoneLink"]/text()').extract_first()
         )
