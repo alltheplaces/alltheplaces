@@ -1,11 +1,8 @@
-import json
-import random
 
 import scrapy
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
-from locations.items import Feature
 
 
 class ElectrifyAmericaSpider(scrapy.Spider):
@@ -27,5 +24,5 @@ class ElectrifyAmericaSpider(scrapy.Spider):
             if "extras" not in feature:
                 feature["extras"] = dict()
             feature["extras"].update(extras)
-
+            apply_category(Categories.CHARGING_STATION, feature)
             yield feature
