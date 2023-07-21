@@ -3,7 +3,7 @@ from scrapy.http import JsonRequest
 from scrapy.signals import spider_idle
 
 from locations.dict_parser import DictParser
-from locations.hours import day_range, DAYS, DAYS_EN, OpeningHours
+from locations.hours import DAYS, DAYS_EN, OpeningHours, day_range
 from locations.items import Feature
 
 # To use this store finder, specify key = x where x is the unique
@@ -43,12 +43,20 @@ class GeoMeSpider(Spider):
 
     def start_requests(self):
         self.crawler.signals.connect(self.start_location_requests, signal=spider_idle)
-        yield JsonRequest(url=self.url_within_bounds_template.format(self.key, self.api_version, -90, -180, 90, 180), callback=self.parse_bounding_box)
+        yield JsonRequest(
+            url=self.url_within_bounds_template.format(self.key, self.api_version, -90, -180, 90, 180),
+            callback=self.parse_bounding_box,
+        )
 
     def parse_bounding_box(self, response):
         for cluster in response.json().get("clusters", []):
             if b := cluster.get("bounds"):
-                yield JsonRequest(url=self.url_within_bounds_template.format(self.key, self.api_version, b["sw"][0], b["sw"][1], b["ne"][0], b["ne"][1]), callback=self.parse_bounding_box)
+                yield JsonRequest(
+                    url=self.url_within_bounds_template.format(
+                        self.key, self.api_version, b["sw"][0], b["sw"][1], b["ne"][0], b["ne"][1]
+                    ),
+                    callback=self.parse_bounding_box,
+                )
         for location in response.json().get("locations", []):
             self.locations_found[location["id"]] = (float(location["lat"]), float(location["lng"]))
 
@@ -56,7 +64,12 @@ class GeoMeSpider(Spider):
         self.crawler.signals.disconnect(self.start_location_requests, signal=spider_idle)
         if len(self.locations_found) > 0:
             first_search_location = self.locations_found.popitem()
-            first_request = JsonRequest(url=self.url_nearest_to_template.format(self.key, self.api_version, first_search_location[1][0], first_search_location[1][1]), callback=self.parse_locations)
+            first_request = JsonRequest(
+                url=self.url_nearest_to_template.format(
+                    self.key, self.api_version, first_search_location[1][0], first_search_location[1][1]
+                ),
+                callback=self.parse_locations,
+            )
             self.crawler.engine.crawl(first_request)
 
     def parse_locations(self, response):
@@ -76,7 +89,12 @@ class GeoMeSpider(Spider):
         # Get the next location to do a "nearest to" search from.
         if len(self.locations_found) > 0:
             next_search_location = self.locations_found.popitem()
-            yield JsonRequest(url=self.url_nearest_to_template.format(self.key, self.api_version, next_search_location[1][0], next_search_location[1][1]), callback=self.parse_locations)
+            yield JsonRequest(
+                url=self.url_nearest_to_template.format(
+                    self.key, self.api_version, next_search_location[1][0], next_search_location[1][1]
+                ),
+                callback=self.parse_locations,
+            )
 
     def extract_hours(self, item, location):
         item["opening_hours"] = OpeningHours()
