@@ -67,3 +67,11 @@ def set_lat_lon(item: Feature, lat: float, lon: float):
         }
     else:
         item["geometry"] = None
+
+
+def add_social_media(item: Feature, service: str, account: str):
+    service = service.lower()
+    if service in item.fields:
+        item[service] = account
+    else:
+        item["extras"][f"contact:{service}"] = account
