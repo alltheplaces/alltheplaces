@@ -25,5 +25,5 @@ class ElectrifyAmericaSpider(scrapy.Spider):
             if "extras" not in feature:
                 feature["extras"] = dict()
             feature["extras"].update(extras)
-            
+
             yield feature
