@@ -12,6 +12,8 @@ class ElectrifyAmericaSpider(scrapy.Spider):
     def parse(self, response):
         for item in response.json():
             feature = DictParser.parse(item)
+            apply_category(Categories.CHARGING_STATION, feature)
+            feature["street_address"] = feature.pop("addr_full")
 
             extras = dict()
             extras["capacity"] = item.get("evseMax")
@@ -23,5 +25,5 @@ class ElectrifyAmericaSpider(scrapy.Spider):
             if "extras" not in feature:
                 feature["extras"] = dict()
             feature["extras"].update(extras)
-            apply_category(Categories.CHARGING_STATION, feature)
+            
             yield feature
