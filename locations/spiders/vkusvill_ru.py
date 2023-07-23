@@ -4,7 +4,7 @@ from scrapy.http import FormRequest, Request
 from scrapy.spiders import Spider
 from scrapy.utils.sitemap import Sitemap
 
-from locations.hours import DAYS_RU, OpeningHours
+from locations.hours import DAYS_RU, NAMED_DAY_RANGES_RU, OpeningHours
 from locations.items import Feature
 
 
@@ -13,7 +13,7 @@ class VkusvillRUSpider(Spider):
     allowed_domains = ["vkusvill.ru"]
     start_urls = ["https://vkusvill.ru/"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
-    download_delay = 3
+    download_delay = 2
     item_attributes = {"brand": "ВкусВилл", "brand_wikidata": "Q57271676"}
     shop_ids = []
 
@@ -55,32 +55,44 @@ class VkusvillRUSpider(Spider):
             )
 
     def parse_shop(self, response, **kwargs):
-        item = Feature()
-        item["ref"] = response.meta.get("shop_id")
-        item["website"] = response.meta.get("url")
-        item["city"] = self.sanitize(response.xpath('//div[@class="VV21_MapPanelCard__Region"]/text()').extract_first())
-        item["street_address"] = self.sanitize(
-            response.xpath('//div[@class="VV21_MapPanelCard__BodyTitle"]/text()').extract_first()
-        )
 
-        # Skip darkstores as they are closed for public
-        if "Даркстор" in item.get("street_address"):
+        # TODO: Find a way to exclude vending machines
+
+        if self.closed(response):
             yield None
+        # Skip darkstores as they are closed for public
+        elif self.darkstore(response):
+            yield None
+        else:
+            item = Feature()
+            item["ref"] = response.meta.get("shop_id")
+            item["website"] = response.meta.get("url")
+            item["city"] = self.sanitize(response.xpath('//div[@class="VV21_MapPanelCard__Region"]/text()').extract_first())
+            item["street_address"] = self.sanitize(
+                response.xpath('//div[@class="VV21_MapPanelCard__BodyTitle"]/text()').extract_first()
+            )
+            item["phone"] = self.sanitize(
+                response.xpath('//a[@class="VV21_MapPanelCard__PhoneLink"]/text()').extract_first()
+            )
+            item["lat"] = self.sanitize(
+                response.xpath('//div[@class="VV21_MapPanelCard__Route"]/a/@data-lat').extract_first()
+            )
+            item["lon"] = self.sanitize(
+                response.xpath('//div[@class="VV21_MapPanelCard__Route"]/a/@data-lon').extract_first()
+            )
+            hours = self.sanitize(
+                response.xpath('//div[@class="VV21_MapPanelCard__WorkStatusTime"]/text()').extract_first()
+            )
+            self.parse_hours(hours, item)
+            yield item
 
-        item["phone"] = self.sanitize(
-            response.xpath('//a[@class="VV21_MapPanelCard__PhoneLink"]/text()').extract_first()
-        )
-        item["lat"] = self.sanitize(
-            response.xpath('//div[@class="VV21_MapPanelCard__Route"]/a/@data-lat').extract_first()
-        )
-        item["lon"] = self.sanitize(
-            response.xpath('//div[@class="VV21_MapPanelCard__Route"]/a/@data-lon').extract_first()
-        )
-        hours = self.sanitize(
-            response.xpath('//div[@class="VV21_MapPanelCard__WorkStatusTime"]/text()').extract_first()
-        )
-        self.parse_hours(hours, item)
-        yield item
+    def closed(self, response):
+        if status := response.xpath('//div[@class="VV21_MapPanelCard__WorkStatusText _close"]/text()').extract_first():
+            return 'Не работает' in status
+    
+    def darkstore(self, response):
+        if address := response.xpath('//div[@class="VV21_MapPanelCard__BodyTitle"]/text()').extract_first():
+            return 'Даркстор' in address
 
     def sanitize(self, value):
         if value:
@@ -89,10 +101,11 @@ class VkusvillRUSpider(Spider):
 
     def parse_hours(self, hours, item):
         # Expected format is "Пн-Вс: 08:00-22:00"
-        try:
-            oh = OpeningHours()
-            oh.add_ranges_from_string(hours, DAYS_RU)
-            item["opening_hours"] = oh.as_opening_hours()
-        except Exception:
-            self.logger.warning(f"Parse hours failed: {hours}")
-            self.crawler.stats.inc_value("atp/hours/failed")
+        if hours:
+            try:
+                oh = OpeningHours()
+                oh.add_ranges_from_string(hours, DAYS_RU, NAMED_DAY_RANGES_RU)
+                item["opening_hours"] = oh.as_opening_hours()
+            except Exception:
+                self.logger.warning(f"Parse hours failed: {hours}")
+                self.crawler.stats.inc_value("atp/hours/failed")
