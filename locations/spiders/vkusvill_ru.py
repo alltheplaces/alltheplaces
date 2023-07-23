@@ -55,7 +55,6 @@ class VkusvillRUSpider(Spider):
             )
 
     def parse_shop(self, response, **kwargs):
-
         # TODO: Find a way to exclude vending machines
 
         if self.closed(response):
@@ -67,7 +66,9 @@ class VkusvillRUSpider(Spider):
             item = Feature()
             item["ref"] = response.meta.get("shop_id")
             item["website"] = response.meta.get("url")
-            item["city"] = self.sanitize(response.xpath('//div[@class="VV21_MapPanelCard__Region"]/text()').extract_first())
+            item["city"] = self.sanitize(
+                response.xpath('//div[@class="VV21_MapPanelCard__Region"]/text()').extract_first()
+            )
             item["street_address"] = self.sanitize(
                 response.xpath('//div[@class="VV21_MapPanelCard__BodyTitle"]/text()').extract_first()
             )
@@ -88,11 +89,11 @@ class VkusvillRUSpider(Spider):
 
     def closed(self, response):
         if status := response.xpath('//div[@class="VV21_MapPanelCard__WorkStatusText _close"]/text()').extract_first():
-            return 'Не работает' in status
-    
+            return "Не работает" in status
+
     def darkstore(self, response):
         if address := response.xpath('//div[@class="VV21_MapPanelCard__BodyTitle"]/text()').extract_first():
-            return 'Даркстор' in address
+            return "Даркстор" in address
 
     def sanitize(self, value):
         if value:
