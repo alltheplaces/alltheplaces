@@ -47,9 +47,7 @@ class TeremokRUSpider(scrapy.Spider):
                 ranges.append(f"{days}: {time}")
             try:
                 oh = OpeningHours()
-                oh.add_ranges_from_string(
-                    '; '.join(ranges), DAYS_RU, NAMED_DAY_RANGES_RU
-                )
+                oh.add_ranges_from_string("; ".join(ranges), DAYS_RU, NAMED_DAY_RANGES_RU)
                 item["opening_hours"] = oh.as_opening_hours()
             except Exception:
                 self.logger.warning(f"Parse hours failed: {hours}")
