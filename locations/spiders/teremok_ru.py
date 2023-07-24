@@ -31,8 +31,9 @@ class TeremokRUSpider(scrapy.Spider):
 
     def parse_poi(self, poi, city_name):
         item = DictParser.parse(poi)
-        item["lat"] = poi.get("map", [])[0]
-        item["lon"] = poi.get("map", [])[1]
+        lat, lon = poi.get("map", [None, None])
+        item["lat"] = lat
+        item["lon"] = lon
         item["city"] = city_name
         item["website"] = urljoin(self.start_urls[0], poi.get("url"))
         self.parse_hours(poi, item)
