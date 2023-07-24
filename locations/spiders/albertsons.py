@@ -95,4 +95,8 @@ class AlbertsonsSpider(SitemapSpider, StructuredDataSpider):
 
         item.update(self.brands[response.url.split("/")[2].split(".")[-2]])
 
+        # Remove fields that are not specific to individual stores.
+        item.pop("facebook")
+        item.pop("twitter")
+
         yield item
