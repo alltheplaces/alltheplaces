@@ -1,5 +1,6 @@
 from scrapy import Spider
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
@@ -22,5 +23,5 @@ class ChargyGBSpider(Spider):
             item["website"] = "https://char.gy/" + charger["properties"]["slug"]
             item["street_address"] = charger["properties"]["description"]
             item["postcode"] = charger["properties"]["postcode"]
-
+            apply_category(Categories.CHARGING_STATION, item)
             yield item

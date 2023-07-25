@@ -11,6 +11,6 @@ class GreeneKingPubsGBSpider(SitemapSpider, StructuredDataSpider):
         "brand_wikidata": "Q5564162",
         "extras": Categories.PUB.value,
     }
-    sitemap_urls = ["https://www.greeneking-pubs.co.uk/robots.txt"]
-    sitemap_rules = [(r"\/pubs\/([-\w]+)\/([-\w]+)\/$", "parse_sd")]
+    sitemap_urls = ["https://www.greeneking.co.uk/sitemap.xml"]
+    sitemap_rules = [(r"\/pubs\/([-\w]+)\/([-\w]+)\/?$", "parse_sd")]
     custom_settings = {"REDIRECT_ENABLED": False}
