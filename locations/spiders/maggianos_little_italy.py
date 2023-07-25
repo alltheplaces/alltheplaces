@@ -13,7 +13,7 @@ class MaggianosLittleItalySpider(scrapy.Spider):
     item_attributes = {"brand": "Maggiano's Little Italy", "brand_wikidata": "Q6730149"}
     allowed_domains = ["maggianos.com"]
     start_urls = [
-        'https://www.maggianos.com/api//restaurant-data/',
+        "https://www.maggianos.com/api//restaurant-data/",
     ]
 
     def parse_hours(self, hours):
@@ -24,7 +24,6 @@ class MaggianosLittleItalySpider(scrapy.Spider):
             opening_hours.add_range(day, open_time=hour["open_time"], close_time=hour["end_time"])
 
         return opening_hours.as_opening_hours()
-
 
     def parse(self, response):
         data = response.json()
