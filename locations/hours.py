@@ -383,6 +383,12 @@ NAMED_DAY_RANGES_DK = {
     "Hverdage": ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"],  # Weekdays
 }
 
+NAMED_DAY_RANGES_RU = {
+    "Ежедневно": ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"],  # Daily
+    "По будням": ["Mo", "Tu", "We", "Th", "Fr"],  # Weekdays
+    "По выходным": ["Sa", "Su"],  # Weekends
+}
+
 DELIMITERS_EN = {
     "-",
     "–",
