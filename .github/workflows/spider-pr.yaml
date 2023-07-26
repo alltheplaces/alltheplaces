@@ -41,7 +41,7 @@ jobs:
 
         pr_file_changes=$(curl -sL --header 'authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' "https://api.github.com/repos/alltheplaces/alltheplaces/pulls/${{ github.event.number }}/files")
         (>&2 echo "PR response: ${pr_file_changes}")
-        SPIDERS=$(echo $pr_file_changes | jq -r '.[] | select(.status != "removed") | .filename')
+        SPIDERS=$(echo $pr_file_changes | jq -r '.[] | select(.status != "removed") | .filename' | grep "^locations/spiders/")
         retval=$?
         if [ ! $retval -eq 0 ]; then
             (>&2 echo "checking file changes failed. response was ${pr_file_changes}")
