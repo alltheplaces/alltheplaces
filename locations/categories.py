@@ -33,6 +33,8 @@ class Categories(Enum):
     CRAFT_TAILOR = {"craft": "tailor"}
     CRAFT_SHOEMAKER = {"craft": "shoemaker"}
 
+    LEISURE_PLAYGROUND = {"leisure": "playground"}
+
     SHOP_ALCOHOL = {"shop": "alcohol"}
     SHOP_BAKERY = {"shop": "bakery"}
     SHOP_BEAUTY = {"shop": "beauty"}
