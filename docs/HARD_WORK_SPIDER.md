@@ -83,6 +83,20 @@ is a very simple example of good structured data present but not latitude
 and longitude. These are available but must be dug out of the page with
 a `response.xpath` query.
 
+
+### Coordinate Reference Systems
+
+All our spiders emit geographic coordinates as latitude/longitude
+pairs according to the World Geodetic System WGS84, which is used by
+GPS and nearly all online mapping services. To convert coordinates
+from other reference systems to WGS84, we use
+[proj](https://proj.org/) via its Python wrapper
+[pyproj](https://pyproj4.github.io/pyproj/stable/examples.html).  For
+example, the [winterthur_ch.py](../locations/spiders/winterthur_ch.py)
+spider converts [Swiss CH1903+/LV95 coordinates](https://epsg.io/2056)
+to WGS84.
+
+
 ### Doing is learning
 
 The bottom line here is that a lot of the techniques for spidering POI data
