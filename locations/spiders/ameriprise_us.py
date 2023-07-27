@@ -7,8 +7,8 @@ from locations.items import Feature
 from locations.linked_data_parser import LinkedDataParser
 
 
-class AmeripriseSpider(SitemapSpider):
-    name = "ameriprise"
+class AmeripriseUSSpider(SitemapSpider):
+    name = "ameriprise_us"
     item_attributes = {"brand": "Ameriprise Financial", "brand_wikidata": "Q2843129"}
     sitemap_urls = ["https://www.ameripriseadvisors.com/robots.txt"]
     sitemap_rules = [(r"/contact/$", "parse")]
