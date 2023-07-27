@@ -9,6 +9,8 @@ class PhoneCleanUpPipeline:
         phone, country = item.get("phone"), item.get("country")
         extras = item.get("extras", {})
         for key in filter(self.is_phone_key, extras.keys()):
+            if not extras[key]:
+                continue
             extras[key] = self.normalize_numbers(extras[key], country, spider)
 
         if not phone:
