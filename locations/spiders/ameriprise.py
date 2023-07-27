@@ -3,8 +3,8 @@ import json
 from scrapy.spiders import SitemapSpider
 
 from locations.google_url import extract_google_position
-from locations.linked_data_parser import LinkedDataParser
 from locations.items import Feature
+from locations.linked_data_parser import LinkedDataParser
 
 
 class AmeripriseSpider(SitemapSpider):
