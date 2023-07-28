@@ -23,7 +23,7 @@ class MaggianosLittleItalySpider(scrapy.Spider):
             day = hour["day_name"][:2]
             opening_hours.add_range(day, open_time=hour["open_time"], close_time=hour["end_time"])
 
-        return opening_hours.as_opening_hours()
+        return opening_hours
 
     def parse(self, response):
         data = response.json()
@@ -32,7 +32,8 @@ class MaggianosLittleItalySpider(scrapy.Spider):
             properties = {
                 "name": place["properties"]["business_name"],
                 "ref": place["properties"]["store_code"],
-                "addr_full": place["properties"]["slug"]["address_line_1"],
+                "addr_full": place["properties"]["full_address"],
+                "street_address": place["properties"]["slug"]["address_line_1"],
                 "city": place["properties"]["slug"]["city"],
                 "state": place["properties"]["slug"]["state_abbreviation"],
                 "postcode": place["properties"]["slug"]["postal_code"],
@@ -42,8 +43,6 @@ class MaggianosLittleItalySpider(scrapy.Spider):
                 "lon": place["geometry"]["coordinates"]["longitude"],
             }
 
-            hours = self.parse_hours(place["properties"]["store_hours"])
-            if hours:
-                properties["opening_hours"] = hours
+            properties["opening_hours"] = self.parse_hours(place["properties"]["store_hours"])
 
             yield Feature(**properties)
