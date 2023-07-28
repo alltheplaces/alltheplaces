@@ -54,6 +54,14 @@ def test_handle_invalid():
 
 def test_handle_missing():
     item, pipeline, spider = get_objects(None, "CH")
+    item["extras"]["fax"] = None
+    pipeline.process_item(item, spider)
+    assert item.get("phone") is None
+    assert item.get("extras").get("fax") is None
+
+
+def test_handle_none():
+    item, pipeline, spider = get_objects(None, "US")
     pipeline.process_item(item, spider)
     assert item.get("phone") is None
 
