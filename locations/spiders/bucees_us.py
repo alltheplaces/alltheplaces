@@ -1,4 +1,4 @@
-import pprint
+import html
 
 from scrapy import Selector
 
@@ -12,9 +12,11 @@ class BuceesUSSpider(WPStoreLocatorSpider):
     name = "bucees_us"
     item_attributes = {"brand": "Buc-ee's", "brand_wikidata": "Q4982335"}
     allowed_domains = ["buc-ees.com"]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def parse_item(self, item: Feature, location: dict, **kwargs):
-        pprint.pp(location)
+        item["extras"]["branch"] = html.unescape(item.pop("name"))
+
         apply_category(Categories.FUEL_STATION, item)
         apply_yes_no(Fuel.DIESEL, item, True)
         apply_yes_no("car_wash", item, "carwash" in location["terms"])
