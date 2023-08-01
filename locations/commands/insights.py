@@ -226,9 +226,7 @@ class InsightsCommand(ScrapyCommand):
 
         def get_brand_name(item_tags: dict):
             # Prefer English brand name for insights application (https://www.alltheplaces.xyz/wikidata.html).
-            if brand_name := item_tags.get("brand:en"):
-                return brand_name
-            return item_tags.get("brand")
+            return item_tags.get("brand:en") or item_tags.get("brand")
 
         # A dict keyed by wikidata code.
         wikidata_dict = {}
