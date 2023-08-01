@@ -1,5 +1,6 @@
 import json
 import os
+import pprint
 import re
 from collections import Counter
 from zipfile import ZipFile
@@ -156,6 +157,8 @@ class InsightsCommand(ScrapyCommand):
             for k, v in feature["properties"].items():
                 if not isinstance(v, str):
                     stats.inc_value(f"{spider_name}/{k}/{type(v).__name__}")
+
+            pprint.pp(stats._stats)
 
     def check_country_codes(self, args, opts):
         country_utils = CountryUtils()
