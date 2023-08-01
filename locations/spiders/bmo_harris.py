@@ -7,7 +7,7 @@ from locations.hours import OpeningHours
 from locations.spiders.circle_k import CircleKSpider
 from locations.spiders.cvs import CVSSpider
 from locations.spiders.rite_aid_us import RiteAidUSSpider
-from locations.spiders.speedway import SpeedwaySpider
+from locations.spiders.speedway_us import SpeedwayUSSpider
 from locations.spiders.target_us import TargetUSSpider
 from locations.spiders.walgreens import WalgreensSpider
 
@@ -95,8 +95,8 @@ class BMOHarrisSpider(scrapy.Spider):
                     item["located_in"] = CircleKSpider.item_attributes["brand"]
                     item["located_in_wikidata"] = CircleKSpider.item_attributes["brand_wikidata"]
                 elif item["name"] == "Speedway":
-                    item["located_in"] = SpeedwaySpider.item_attributes["brand"]
-                    item["located_in_wikidata"] = SpeedwaySpider.item_attributes["brand_wikidata"]
+                    item["located_in"] = SpeedwayUSSpider.item_attributes["brand"]
+                    item["located_in_wikidata"] = SpeedwayUSSpider.item_attributes["brand_wikidata"]
                 elif item["name"] == "Rite Aid":
                     item["located_in"] = RiteAidUSSpider.item_attributes["brand"]
                     item["located_in_wikidata"] = RiteAidUSSpider.item_attributes["brand_wikidata"]
