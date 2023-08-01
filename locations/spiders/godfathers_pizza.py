@@ -12,22 +12,23 @@ class GodfathersPizzaSpider(scrapy.Spider):
         disposition=DINE_IN,PICKUP,DELIVERY&latitude=39.0213953&longitude=-94.3116155&maxResults=2000&radius=5000&\
         statuses=ACTIVE,TEMP-INACTIVE,ORDERING-DISABLED&tenant=gfp-us",
     ]
+    requires_proxy = True
 
     def parse(self, response):
         stores = response.json()
 
         for store in stores["getStoresResult"]["stores"]:
             properties = {
-                "ref": store["storeName"],
-                "name": store["storeName"],
+                "ref": store["storeId"],
                 "street_address": store["street"],
                 "city": store["city"],
                 "state": store["state"],
-                "postcode": store["zipCode"],
+                "postcode": str(store["zipCode"]),
                 "country": "US",
                 "lat": store["latitude"],
                 "lon": store["longitude"],
                 "phone": store["phoneNumber"],
+                "extras": {"operator": store["franchiseNm"]},
             }
 
             yield Feature(**properties)
