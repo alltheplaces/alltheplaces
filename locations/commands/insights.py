@@ -1,11 +1,13 @@
 import json
 import os
+import pprint
 import re
 from collections import Counter
 from zipfile import ZipFile
 
 import ijson
 import requests
+import scrapy.statscollectors
 from scrapy.commands import ScrapyCommand
 from scrapy.exceptions import UsageError
 
@@ -87,6 +89,12 @@ class InsightsCommand(ScrapyCommand):
             help="Do not process data for spider matching this file name fragment",
         )
         parser.add_argument(
+            "--value-types",
+            dest="value_types",
+            action="store_true",
+            help="Check property values are strings",
+        )
+        parser.add_argument(
             "--country-codes",
             dest="country_codes",
             action="store_true",
@@ -121,6 +129,9 @@ class InsightsCommand(ScrapyCommand):
     def run(self, args, opts):
         if len(args) < 1:
             raise UsageError()
+        if opts.value_types:
+            self.check_value_types(args, opts)
+            return
         if opts.country_codes:
             self.check_country_codes(args, opts)
             return
@@ -138,6 +149,16 @@ class InsightsCommand(ScrapyCommand):
         if len(counter.most_common()) > 0:
             print(msg)
             print(counter)
+
+    def check_value_types(self, args, opts):
+        stats = scrapy.statscollectors.StatsCollector(self)
+        for feature in iter_features(args, opts.filter_spiders):
+            spider_name = feature["properties"].get("@spider")
+            for k, v in feature["properties"].items():
+                if not isinstance(v, str):
+                    stats.inc_value(f"{spider_name}/{k}/{type(v).__name__}")
+
+            pprint.pp(stats._stats)
 
     def check_country_codes(self, args, opts):
         country_utils = CountryUtils()
