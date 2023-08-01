@@ -43,4 +43,8 @@ class CueSpider(Spider):
             item = DictParser.parse(location)
             item["opening_hours"] = OpeningHours()
             item["opening_hours"].add_ranges_from_string(str(location["StoreHours"]))
+
+            if postcode := item.get("postcode"):
+                item["postcode"] = str(postcode)
+
             yield item

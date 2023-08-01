@@ -41,4 +41,8 @@ class QuickBELUSpider(Spider):
                 item["opening_hours"].add_range(
                     DAYS[day["weekday_from"] - 1], day["from_hour"], day["to_hour"], "%H:%M:%S"
                 )
+
+            if postcode := item.get("postcode"):
+                item["postcode"] = str(postcode)
+
             yield item

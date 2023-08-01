@@ -16,12 +16,12 @@ class UclaHealthSpider(scrapy.Spider):
 
         for place in result:
             properties = {
-                "ref": place["UID"],
+                "ref": str(place["UID"]),
                 "name": place["Custom - Internal Name"],
-                "addr_full": place["Address1"],
+                "street_address": place["Address1"],
                 "city": place["City"],
                 "state": "CA",
-                "postcode": place["Zip"],
+                "postcode": str(place["Zip"]),
                 "country": "US",
                 "lat": place["Latitude"],
                 "lon": place["Longitude"],

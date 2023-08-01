@@ -26,4 +26,7 @@ class ZEnergyNZSpider(scrapy.Spider):
 
             apply_yes_no(Fuel.DIESEL, item, any("Diesel" in s["name"] for s in location["fuels"]))
 
+            if postcode := item.get("postcode"):
+                item["postcode"] = str(postcode)
+
             yield item
