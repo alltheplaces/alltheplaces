@@ -8,8 +8,8 @@ from locations.items import Feature
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class VerizonSpider(scrapy.Spider):
-    name = "verizon"
+class VerizonUSSpider(scrapy.Spider):
+    name = "verizon_us"
     item_attributes = {"brand": "Verizon", "brand_wikidata": "Q919641"}
     allowed_domains = ["www.verizonwireless.com"]
     start_urls = ["https://www.verizonwireless.com/sitemap_storelocator.xml"]
@@ -51,21 +51,21 @@ class VerizonSpider(scrapy.Spider):
         properties = {
             "name": store_data["storeName"],
             "ref": store_data["storeNumber"],
-            "addr_full": store_data["address"]["streetAddress"],
+            "street_address": store_data["address"]["streetAddress"],
             "city": store_data["address"]["addressLocality"],
             "state": store_data["address"]["addressRegion"],
             "postcode": store_data["address"]["postalCode"],
             "country": store_data["address"]["addressCountry"],
             "phone": store_data.get("telephone"),
-            "website": store_data.get("url") or response.url,
+            "website": response.url,
             "lat": store_data["geo"].get("latitude"),
             "lon": store_data["geo"].get("longitude"),
             "extras": {
                 # Sometimes 'postStoreDetail' exists with "None" value, usual get w/ default syntax isn't reliable
-                "business_name": (store_data.get("posStoreDetail") or {}).get("businessName"),
+                "operator": (store_data.get("posStoreDetail") or {}).get("businessName"),
                 "retail_id": store_data.get("retailId"),
                 "store_type": (store_data.get("posStoreDetail") or {}).get("storeType"),
-                "store_type_note": store_data.get("typeOfStore"),
+                "store_type_note": ";".join(store_data.get("typeOfStore")),
             },
         }
 
