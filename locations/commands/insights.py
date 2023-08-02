@@ -277,9 +277,7 @@ class InsightsCommand(ScrapyCommand):
                 # the NSI brand name.
                 r["nsi_brand"] = nsi_id_to_brand.get(nsi_id)
 
-            count = r.get("atp_count")
-            if not count:
-                count = 0
+            count = r.get("atp_count") or 0
             r["atp_count"] = count + 1
             if brand:
                 r["atp_brand"] = brand
@@ -292,9 +290,7 @@ class InsightsCommand(ScrapyCommand):
 
             spider = properties.get("@spider")
             r["atp_supplier_count"].add(spider)
-            spider_count = split.get(spider)
-            if not spider_count:
-                spider_count = 0
+            spider_count = split.get(spider) or 0
             split[spider] = spider_count + 1
 
         for record in wikidata_dict.values():
