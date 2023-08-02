@@ -5,7 +5,7 @@ from locations.dict_parser import DictParser
 from locations.geo import point_locations
 from locations.hours import OpeningHours
 from locations.spiders.circle_k import CircleKSpider
-from locations.spiders.cvs import CVSSpider
+from locations.spiders.cvs_us import CvsUSSpider
 from locations.spiders.rite_aid_us import RiteAidUSSpider
 from locations.spiders.speedway_us import SpeedwayUSSpider
 from locations.spiders.target_us import TargetUSSpider
