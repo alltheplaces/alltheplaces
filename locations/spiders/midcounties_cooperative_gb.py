@@ -34,8 +34,6 @@ class MidcountiesCooperativeGBSpider(Spider):
                         day, open_time.replace(".", ":").zfill(5), close_time.replace(".", ":").zfill(5)
                     )
 
-            item["extras"]["tradingGroupId"] = store["tradingGroupId"]
-
             if store["tradingGroupId"] == 1:
                 item["extras"]["branch"] = item.pop("name")
                 item["name"] = "Your Coop Food"
