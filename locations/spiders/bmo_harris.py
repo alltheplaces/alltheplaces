@@ -89,8 +89,8 @@ class BMOHarrisSpider(scrapy.Spider):
                     item["located_in"] = WalgreensSpider.WALGREENS["brand"]
                     item["located_in_wikidata"] = WalgreensSpider.WALGREENS["brand_wikidata"]
                 elif item["name"] == "CVS":
-                    item["located_in"] = CVSSpider.item_attributes["brand"]
-                    item["located_in_wikidata"] = CVSSpider.item_attributes["brand_wikidata"]
+                    item["located_in"] = CvsUSSpider.item_attributes["brand"]
+                    item["located_in_wikidata"] = CvsUSSpider.item_attributes["brand_wikidata"]
                 elif item["name"] == "Circle K":
                     item["located_in"] = CircleKSpider.item_attributes["brand"]
                     item["located_in_wikidata"] = CircleKSpider.item_attributes["brand_wikidata"]
