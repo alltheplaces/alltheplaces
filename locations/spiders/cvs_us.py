@@ -49,10 +49,11 @@ class CvsUSSpider(SitemapSpider, StructuredDataSpider):
         opening_hours = OpeningHours()
         for row in hours:
             if row["startTime"] == "Open 24 Hours":
-                intervals = [
-                    ("12:00 AM", "11:59 PM"),
-                ]
-            elif {"breakStart", "breakEnd"} <= row.keys():
+                row["startTime"] = "12:00 AM"
+            if row["endTime"] == "Open 24 Hours":
+                row["endTime"] = "11:59 PM"
+
+            if {"breakStart", "breakEnd"} <= row.keys():
                 intervals = [
                     (row["startTime"], row["breakStart"]),
                     (row["breakEnd"], row["endTime"]),
