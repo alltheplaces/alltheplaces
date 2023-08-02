@@ -245,6 +245,10 @@ class InsightsCommand(ScrapyCommand):
             wikidata_dict[wikidata_code] = record
             return record
 
+        def get_brand_name(item_tags: dict):
+            # Prefer English brand name for insights application (https://www.alltheplaces.xyz/wikidata.html).
+            return item_tags.get("brand:en") or item_tags.get("brand")
+
         # A dict keyed by wikidata code.
         wikidata_dict = {}
 
@@ -272,7 +276,7 @@ class InsightsCommand(ScrapyCommand):
         # Build a lookup table from NSI id's to associated brand name if any.
         nsi_id_to_brand = {}
         for item in nsi.iter_nsi():
-            if brand := item.get("tags", {}).get("brand"):
+            if brand := get_brand_name(item.get("tags", {})):
                 nsi_id_to_brand[item["id"]] = brand
 
         # TODO: Could go through ATP spiders themselves looking for Q-codes. Add an atp_count=-1
@@ -285,18 +289,16 @@ class InsightsCommand(ScrapyCommand):
             brand_wikidata = properties.get("brand:wikidata")
             if not brand_wikidata:
                 continue
-            brand = properties.get("brand")
+            brand = get_brand_name(properties)
             r = lookup_code(brand_wikidata)
 
-            if properties.get("nsi_id"):
+            if nsi_id := properties.get("nsi_id"):
                 # If we have found the brand in NSI then show the NSI brand name in the
                 # output JSON to help highlight where a spider brand name differs from
                 # the NSI brand name.
-                r["nsi_brand"] = nsi_id_to_brand.get(properties.get("nsi_id"))
+                r["nsi_brand"] = nsi_id_to_brand.get(nsi_id)
 
-            count = r.get("atp_count")
-            if not count:
-                count = 0
+            count = r.get("atp_count") or 0
             r["atp_count"] = count + 1
             if brand:
                 r["atp_brand"] = brand
@@ -309,9 +311,7 @@ class InsightsCommand(ScrapyCommand):
 
             spider = properties.get("@spider")
             r["atp_supplier_count"].add(spider)
-            spider_count = split.get(spider)
-            if not spider_count:
-                spider_count = 0
+            spider_count = split.get(spider) or 0
             split[spider] = spider_count + 1
 
         for record in wikidata_dict.values():
