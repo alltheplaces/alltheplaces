@@ -33,6 +33,7 @@ FEED_FORMAT = os.environ.get("FEED_FORMAT")
 FEED_EXPORTERS = {
     "geojson": "locations.exporters.geojson.GeoJsonExporter",
     "ndgeojson": "locations.exporters.ld_geojson.LineDelimitedGeoJsonExporter",
+    "osm": "locations.exporters.osm.OSMExporter",
 }
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
