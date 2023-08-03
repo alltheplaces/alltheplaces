@@ -1,3 +1,4 @@
+import logging
 from xml.sax.saxutils import XMLGenerator
 
 from scrapy.exporters import XmlItemExporter
@@ -17,6 +18,7 @@ class OSMExporter(XmlItemExporter):
     encoding = "UTF-8"
 
     def __init__(self, file, **kwargs):
+        logging.warning("Deprecated, no not use!")
         self.xg = XMLGenerator(file, encoding=self.encoding, short_empty_elements=True)
 
     def start_exporting(self):
