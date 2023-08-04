@@ -1,4 +1,5 @@
-from locations.exporters import GeoJsonExporter, LineDelimitedGeoJsonExporter, item_to_properties
+from locations.exporters.geojson import GeoJsonExporter, item_to_properties
+from locations.exporters.ld_geojson import LineDelimitedGeoJsonExporter
 from locations.items import Feature, add_social_media
 
 
