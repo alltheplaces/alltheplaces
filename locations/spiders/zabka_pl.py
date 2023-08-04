@@ -22,6 +22,7 @@ class ZabkaPLSpider(scrapy.Spider):
     def parse(self, response):
         for location in response.json():
             item = DictParser.parse(location)
+            item["street_address"] = item.pop("addr_full", "")
             # unset "state" field, it is taken from the "region" field which is some internal Żabka ID
             item["state"] = None
             item["opening_hours"] = OpeningHours()
