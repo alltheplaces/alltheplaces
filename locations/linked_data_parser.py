@@ -134,6 +134,9 @@ class LinkedDataParser:
         if item["ref"] == "":
             item["ref"] = None
 
+        if t := LinkedDataParser.clean_type(ld.get("@type", "")):
+            LinkedDataParser.parse_enhanced(t, ld, item)
+
         return item
 
     @staticmethod
@@ -193,3 +196,12 @@ class LinkedDataParser:
                 pass
         # Pass the bad data forward and let the validation pipeline complain
         return value
+
+    @staticmethod
+    def parse_enhanced(t: str, ld: dict, item: Feature):
+        if t == "hotel":
+            LinkedDataParser.parse_enhanced_hotel(ld, item)
+
+    @staticmethod
+    def parse_enhanced_hotel(ld: dict, item: Feature):
+        item["extras"]["stars"] = LinkedDataParser.get_clean(ld, "starRating")
