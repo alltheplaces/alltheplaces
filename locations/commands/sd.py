@@ -95,4 +95,4 @@ class SdCommand(BaseRunSpiderCommand):
         if stats_dict.get("item_scraped_count", 0) == 0:
             print("failed to decode structured data")
         if opts.stats:
-            print(pprint.pformat(stats_dict))
+            pprint.pprint(stats_dict)
