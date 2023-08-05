@@ -23,4 +23,3 @@ class FedExSpider(SitemapSpider, StructuredDataSpider):
         item["city"] = response.xpath('//span[@class="Address-field Address-city"]/text()').extract_first()
 
         yield item
-
