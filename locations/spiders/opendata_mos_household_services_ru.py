@@ -6,7 +6,6 @@ from locations.dict_parser import DictParser
 from locations.hours import DAYS_RU, OpeningHours
 from locations.items import Feature
 
-
 CATEGORY_MAPPING = {
     "ремонт телефонов, планшетов": Categories.CRAFT_ELECTRONICS_REPAIR.value | {"electronics_repair": "phone"},
     "автомойка": Categories.CAR_WASH,
@@ -59,6 +58,7 @@ CATEGORY_MAPPING = {
     "иные объекты бытового обслуживания": None,
     "комплексное предприятие бытового обслуживания": None,
 }
+
 
 class OpendataMosSpider(scrapy.Spider):
     """
@@ -176,4 +176,3 @@ class OpendataMosHouseholdServicesRUSpider(OpendataMosSpider):
     name = "opendata_mos_household_services_ru"
     datasets = {"Household services in Moscow": 1904}
     category_mapping = CATEGORY_MAPPING
-    
