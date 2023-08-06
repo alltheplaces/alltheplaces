@@ -33,6 +33,8 @@ class Categories(Enum):
     CRAFT_TAILOR = {"craft": "tailor"}
     CRAFT_SHOEMAKER = {"craft": "shoemaker"}
 
+    LEISURE_PLAYGROUND = {"leisure": "playground"}
+
     SHOP_ALCOHOL = {"shop": "alcohol"}
     SHOP_BAKERY = {"shop": "bakery"}
     SHOP_BEAUTY = {"shop": "beauty"}
@@ -225,7 +227,9 @@ class Fuel(Enum):
     # Formulas
     E5 = "fuel:e5"
     E10 = "fuel:e10"
+    E15 = "fuel:e15"
     E20 = "fuel:e20"
+    E30 = "fuel:e30"
     E85 = "fuel:e85"
     BIOGAS = "fuel:biogas"
     LPG = "fuel:lpg"

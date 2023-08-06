@@ -1,7 +1,7 @@
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
-from locations.categories import Extras, apply_yes_no
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
@@ -48,5 +48,5 @@ class CaffeNeroGBSpider(Spider):
             apply_yes_no(Extras.WHEELCHAIR, item, location["properties"]["amenities"].get("disabled_access"), False)
             apply_yes_no(Extras.TOILETS_WHEELCHAIR, item, location["properties"]["amenities"]["disabled_toilet"], False)
             apply_yes_no(Extras.OUTDOOR_SEATING, item, location["properties"]["amenities"]["outside_seating"], False)
-
+            apply_category(Categories.COFFEE_SHOP, item)
             yield item

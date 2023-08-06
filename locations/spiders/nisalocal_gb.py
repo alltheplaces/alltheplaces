@@ -1,6 +1,7 @@
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
+from locations.categories import Categories, apply_category
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -11,3 +12,7 @@ class NisaLocalGBSpider(CrawlSpider, StructuredDataSpider):
     start_urls = ["https://www.nisalocally.co.uk/stores/index.html"]
     rules = [Rule(LinkExtractor(allow=".*/stores/.*"), callback="parse_sd", follow=True)]
     download_delay = 0.5
+
+    def post_process_item(self, item, response, ld_data, **kwargs):
+        apply_category(Categories.SHOP_CONVENIENCE, item)
+        yield item

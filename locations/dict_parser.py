@@ -6,7 +6,7 @@ class DictParser:
 
     name_keys = ["name", "store-name", "display-name", "title", "businessName"]
 
-    house_number_keys = ["house-number", "house-no", "street-number", "street-no"]
+    house_number_keys = ["house-number", "house-no", "street-number", "street-no", "address-street-no"]
 
     street_address_keys = [
         # EN
@@ -67,6 +67,7 @@ class DictParser:
         "address-post-code",
         "postal",
         "zip-code",
+        "address-postal-code",
         # JP
         "郵便番号",  # "post code"
     ]
@@ -91,6 +92,7 @@ class DictParser:
         "display-lat",
         "yext-display-lat",
         "mapLatitude",
+        "geoLat",
     ]
 
     lon_keys = [
@@ -101,6 +103,7 @@ class DictParser:
         "display-lng",
         "yext-display-lng",
         "mapLongitude",
+        "geoLng",
     ]
 
     website_keys = ["url", "website", "permalink", "store-url", "storeURL", "website-url", "websiteURL"]
