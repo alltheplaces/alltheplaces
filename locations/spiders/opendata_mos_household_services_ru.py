@@ -85,7 +85,9 @@ class OpendataMosSpider(scrapy.Spider):
     }
     datasets = {}
     category_mapping = {}
-    filter_function = None
+    
+    def filter_function(self, i):
+        pass
 
     def start_requests(self):
         for name, id in self.datasets.items():
