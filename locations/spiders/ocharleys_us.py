@@ -11,9 +11,9 @@ from locations.items import Feature
 class OcharleysUSSpider(scrapy.Spider):
     name = "ocharleys_us"
     item_attributes = {"brand": "O'Charley's", "brand_wikidata": "Q7071703"}
-    allowed_domains = ['ocharleys.com']
+    allowed_domains = ["ocharleys.com"]
     start_urls = [
-        'https://orderback.ocharleys.com:8081/restaurants',
+        "https://orderback.ocharleys.com:8081/restaurants",
     ]
 
     def parse(self, response):
@@ -31,7 +31,7 @@ class OcharleysUSSpider(scrapy.Spider):
                 "phone": place["telephone"],
                 "lat": place["latitude"],
                 "lon": place["longitude"],
-                "website": place["url"]
+                "website": place["url"],
             }
 
             yield Feature(**properties)
