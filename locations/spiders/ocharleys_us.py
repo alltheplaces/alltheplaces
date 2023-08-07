@@ -8,8 +8,8 @@ from locations.hours import OpeningHours
 from locations.items import Feature
 
 
-class OcharleysSpider(scrapy.Spider):
-    name = "ocharleys"
+class OcharleysUSSpider(scrapy.Spider):
+    name = "ocharleys_us"
     item_attributes = {"brand": "O'Charley's", "brand_wikidata": "Q7071703"}
     allowed_domains = ['ocharleys.com']
     start_urls = [
