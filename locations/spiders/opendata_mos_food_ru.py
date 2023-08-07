@@ -18,9 +18,11 @@ class OpendataMosFoodRUSpider(OpendataMosSpider):
         # Data from below category is wrongly categorized, ignore it
         "магазин (отдел кулинарии)": None,
     }
+
     # Exclude some branded locations as they already
     # captured by other spiders with better quality.
-    filter_function = lambda self, row: row.get("Cells", {}).get("OperatingCompany") not in ["KFC", "Вкусно - и точка"]
+    def filter_function(self, row):
+        row.get("Cells", {}).get("OperatingCompany") not in ["KFC", "Вкусно - и точка"]
 
     def parse_extra_fields(self, item: Feature, cells: dict):
         if seats_count := cells.get("SeatsCount"):
