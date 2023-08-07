@@ -182,7 +182,8 @@ class StructuredDataSpider(Spider):
                 item["ref"] = self.get_ref(url, response)
 
             if isinstance(item["website"], list):
-                item["website"] = item["website"][0]
+                if len(item["website"]) > 0:
+                    item["website"] = item["website"][0]
 
             if not item["website"]:
                 item["website"] = url
