@@ -23,7 +23,7 @@ class LushSpider(scrapy.Spider):
                 ref=i["ID"],
                 name=i["name"],
                 phone=i.get("phone"),
-                addr_full=i["address1"],
+                street_address=i["address1"],
                 postcode=i["postalCode"],
                 city=i["city"],
                 state=i["stateCode"],

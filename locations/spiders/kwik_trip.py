@@ -11,6 +11,7 @@ class KwikTripSpider(scrapy.Spider):
     download_delay = 0
     user_agent = BROWSER_DEFAULT
     start_urls = ["https://www.kwiktrip.com/Maps-Downloads/Store-List"]
+    requires_proxy = True
 
     def parse(self, response):
         rows = response.xpath("(//tr)[position()>1]")  # Skip header of table
@@ -19,7 +20,7 @@ class KwikTripSpider(scrapy.Spider):
             properties = {
                 "ref": row.xpath('.//td[@class="column-1"]/text()').extract_first(),
                 "name": row.xpath('.//td[@class="column-2"]/text()').extract_first(),
-                "addr_full": row.xpath('.//td[@class="column-3"]/text()').extract_first(),
+                "street_address": row.xpath('.//td[@class="column-3"]/text()').extract_first(),
                 "city": row.xpath('.//td[@class="column-4"]/text()').extract_first(),
                 "state": row.xpath('.//td[@class="column-5"]/text()').extract_first(),
                 "postcode": row.xpath('.//td[@class="column-6"]/text()').extract_first(),

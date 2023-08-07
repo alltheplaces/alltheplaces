@@ -98,7 +98,7 @@ class LaneBryantSpider(scrapy.Spider):
         if len(urls) == 0:
             properties = {
                 "name": response.xpath('//*[@class="Core-geomodifier"]/text()').extract_first(),
-                "addr_full": response.xpath('//*[@class="c-address-street-1"]/text()').extract_first(),
+                "street_address": response.xpath('//*[@class="c-address-street-1"]/text()').extract_first(),
                 "city": response.xpath('//*[@class="c-address-city"]/text()').extract_first(),
                 "state": response.xpath('//*[@class="c-address-state"]/text()').extract_first(),
                 "postcode": response.xpath('//*[@class="c-address-postal-code"]/text()').extract_first(),

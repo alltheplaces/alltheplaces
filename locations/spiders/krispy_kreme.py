@@ -22,7 +22,7 @@ class KrispyKremeSpider(scrapy.Spider):
             name=response.xpath("//title/text()").extract_first(),
             lat=response.xpath("//meta[@itemprop='latitude']/@content").extract_first(),
             lon=response.xpath("//meta[@itemprop='longitude']/@content").extract_first(),
-            addr_full=response.xpath("//meta[@itemprop='streetAddress']/@content").extract_first(),
+            street_address=response.xpath("//meta[@itemprop='streetAddress']/@content").extract_first(),
             city=response.xpath("//meta[@itemprop='addressLocality']/@content").extract_first(),
             state=response.xpath("//abbr[@itemprop='addressRegion']/text()").extract_first(),
             postcode=response.xpath("//span[@itemprop='postalCode']/text()").extract_first(),
