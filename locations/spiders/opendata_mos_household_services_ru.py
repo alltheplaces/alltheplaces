@@ -6,15 +6,6 @@ from locations.dict_parser import DictParser
 from locations.hours import DAYS_RU, OpeningHours
 from locations.items import Feature
 
-# Open Data Portal of Moscow Government
-# Documentation: https://data-new.mos.ru/developers
-# More datasets: https://data-new.mos.ru/
-# TODO: Make this a storefinder and include more datasets,
-#       each dataset will have its own parse method and category mapping
-#       as data format of each dataset is different.
-
-DATASETS = {"Household services in Moscow": 1904}
-
 CATEGORY_MAPPING = {
     "ремонт телефонов, планшетов": Categories.CRAFT_ELECTRONICS_REPAIR.value | {"electronics_repair": "phone"},
     "автомойка": Categories.CAR_WASH,
@@ -69,8 +60,14 @@ CATEGORY_MAPPING = {
 }
 
 
-class OpendataMosHouseholdServicesRUSpider(scrapy.Spider):
-    name = "opendata_mos_household_services_ru"
+class OpendataMosSpider(scrapy.Spider):
+    """
+    A spider for Open Data Portal of Moscow Government.
+        Documentation: https://data-new.mos.ru/developers
+        More datasets: https://data-new.mos.ru/
+    Each dataset from this portal may have different data format.
+    """
+
     allowed_domains = ["apidata-new.mos.ru"]
     api_key = "8caab471-cc9f-46c8-aeea-fa3f5e1c765c"
     download_delay = 0.25
@@ -86,9 +83,14 @@ class OpendataMosHouseholdServicesRUSpider(scrapy.Spider):
         "license:wikidata": "Q14947546",
         "use:commercial": "permit",
     }
+    datasets = {}
+    category_mapping = {}
+
+    def filter_function(self, i):
+        pass
 
     def start_requests(self):
-        for name, id in DATASETS.items():
+        for name, id in self.datasets.items():
             yield Request(
                 url=f"https://apidata-new.mos.ru/v1/datasets/{id}/count?api_key={self.api_key}",
                 meta={"id": id, "name": name},
@@ -107,8 +109,15 @@ class OpendataMosHouseholdServicesRUSpider(scrapy.Spider):
             )
 
     def parse_data(self, response):
-        for row in response.json():
+        for row in self.filter_rows(response.json(), self.filter_function):
             yield self.parse_row(row)
+
+    def filter_rows(self, rows: list, function=None) -> list:
+        if not function:
+            return rows
+        filtered = list(filter(function, rows))
+        self.crawler.stats.inc_value("atp/opendata_mos_ru/filter", len(rows) - len(filtered))
+        return filtered
 
     def parse_row(self, row):
         cells = row.get("Cells", {})
@@ -118,10 +127,11 @@ class OpendataMosHouseholdServicesRUSpider(scrapy.Spider):
         item["extras"]["operator"] = cells.get("OperatingCompany")
         self.parse_phones(item, cells)
         self.parse_hours(item, cells)
+        self.parse_extra_fields(item, cells)
         return self.parse_category(item, cells.get("TypeObject"))
 
     def parse_category(self, item: Feature, category: str):
-        if tags := CATEGORY_MAPPING.get(category):
+        if tags := self.category_mapping.get(category):
             apply_category(tags, item)
             return item
         else:
@@ -159,3 +169,12 @@ class OpendataMosHouseholdServicesRUSpider(scrapy.Spider):
             except Exception:
                 self.logger.warning(f"Parse hours failed: {hours}")
                 self.crawler.stats.inc_value("atp/opendata_mos_ru/hours/failed")
+
+    def parse_extra_fields(self, item: Feature, cells: dict):
+        pass
+
+
+class OpendataMosHouseholdServicesRUSpider(OpendataMosSpider):
+    name = "opendata_mos_household_services_ru"
+    datasets = {"Household services in Moscow": 1904}
+    category_mapping = CATEGORY_MAPPING

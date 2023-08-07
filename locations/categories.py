@@ -98,9 +98,11 @@ class Categories(Enum):
 
     ATM = {"amenity": "atm"}
     BANK = {"amenity": "bank"}
+    BAR = {"amenity": "bar"}
     BOAT_FUEL_STATION = {"waterway": "fuel"}
     BUREAU_DE_CHANGE = {"amenity": "bureau_de_change"}
     CAFE = {"amenity": "cafe"}
+    CANTEEN = {"amenity": "canteen"}
     CARAVAN_SITE = {"tourism": "caravan_site"}
     CHARGING_STATION = {"amenity": "charging_station"}
     CHILD_CARE = {"amenity": "childcare"}
