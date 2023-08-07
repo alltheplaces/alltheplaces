@@ -66,6 +66,8 @@ class LinkedDataParser:
                 item["lon"] = LinkedDataParser.clean_float(LinkedDataParser.get_clean(geo, "longitude"))
 
         item["name"] = LinkedDataParser.get_clean(ld, "name")
+        if isinstance(item["name"], list):
+            item["name"] = item["name"][0]
 
         if addr := LinkedDataParser.get_clean(ld, "address"):
             if isinstance(addr, list):

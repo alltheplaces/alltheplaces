@@ -9,9 +9,9 @@ from locations.items import get_lat_lon, set_lat_lon
 
 def check_field(item, spider: Spider, param, allowed_types, match_regex=None):
     if val := item.get(param):
-        if not isinstance(val, *allowed_types):
+        if not isinstance(val, allowed_types):
             spider.crawler.stats.inc_value(f"atp/field/{param}/wrong_type")
-            spider.logger.error(f"Invalid type {type(val).__name__} on {param}")
+            spider.logger.error(f"Invalid type {type(val).__name__} on {param}, expected {allowed_types}")
         elif match_regex and not match_regex.match(val):
             spider.crawler.stats.inc_value(f"atp/field/{param}/invalid")
     else:
