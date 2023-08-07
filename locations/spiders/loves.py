@@ -41,7 +41,7 @@ class LovesSpider(scrapy.Spider):
             yield Feature(
                 name=store["Name"],
                 ref=store["SiteId"],
-                addr_full=store["Address1"],
+                street_address=store["Address1"],
                 city=store["City"],
                 state=store["State"],
                 postcode=store["Zip"],

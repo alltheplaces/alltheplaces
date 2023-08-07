@@ -21,7 +21,7 @@ class JimmyJohnsSpider(scrapy.Spider):
 
         properties = {
             "ref": data[0]["url"],
-            "addr_full": data[0]["address"]["streetAddress"],
+            "street_address": data[0]["address"]["streetAddress"],
             "city": data[0]["address"]["addressLocality"],
             "state": data[0]["address"]["addressRegion"],
             "postcode": data[0]["address"]["postalCode"],

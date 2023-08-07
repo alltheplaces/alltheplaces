@@ -28,7 +28,7 @@ class JDWetherspoonSpider(scrapy.Spider):
             "postcode": response.xpath('normalize-space(//span[@itemprop="postalCode"]/text())').extract_first(),
             "phone": response.xpath('//span[@class="location-block__telephone--ie"]/text()').extract_first(),
             "name": response.xpath('//h1[@class="banner-inner__title"]/text()').extract_first(),
-            "country": "UK",
+            "country": "GB",
             "lat": float(response.xpath('//meta[@itemprop="latitude"]/@content').extract_first()),
             "lon": float(response.xpath('//meta[@itemprop="longitude"]/@content').extract_first()),
             "website": response.url,

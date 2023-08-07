@@ -1,14 +1,13 @@
-import datetime
 import re
 
 import scrapy
 
 from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.spiders.vapestore_gb import clean_address
 
 
 class JasonsDeliSpider(scrapy.Spider):
-    download_delay = 0.2
     name = "jasonsdeli"
     item_attributes = {"brand": "Jason's Deli", "brand_wikidata": "Q16997641"}
     allowed_domains = ["jasonsdeli.com"]
@@ -18,23 +17,19 @@ class JasonsDeliSpider(scrapy.Spider):
         opening_hours = OpeningHours()
 
         for item in elements:
-            day, open_time, close_time = re.search(
-                r"([a-z]{3}):.([0-9:\sAPM]+)\s-\s([0-9:\sAPM]+)",
+            if m := re.search(
+                r"([a-z]+):.([0-9:\sAPM]+)\s-\s([0-9:\sAPM]+)",
                 item,
                 flags=re.IGNORECASE,
-            ).groups()
-            opening_hours.add_range(
-                day=day[0:2],
-                open_time=datetime.datetime.strptime(open_time, "%I:%M %p").strftime("%H:%M"),
-                close_time=datetime.datetime.strptime(close_time, "%I:%M %p").strftime("%H:%M"),
-            )
+            ):
+                opening_hours.add_range(m.group(1), m.group(2), m.group(3), time_format="%I:%M %p")
         return opening_hours.as_opening_hours()
 
     def parse_store(self, response):
         ref = re.search(r".+/(.+)", response.url).group(1)
 
         properties = {
-            "addr_full": response.xpath('//div[@class="address"]/text()').extract_first()[0].split("\n")[0],
+            "addr_full": clean_address(response.xpath('//div[@class="address"]/text()').getall()),
             "city": response.xpath('//div[@class="address"]/text()').extract()[-1].split(",")[0],
             "state": response.xpath('//div[@class="address"]/text()').extract()[-1].split(", ")[1].split(" ")[-2],
             "postcode": response.xpath('//div[@class="address"]/text()').extract()[-1].split(", ")[1].split(" ")[-1],
@@ -53,6 +48,9 @@ class JasonsDeliSpider(scrapy.Spider):
 
         if hours:
             properties["opening_hours"] = hours
+
+        if m := re.search(r'"center":\{"lat":"(-?\d+\.\d+)","lon":"(-?\d+\.\d+)"', response.text):
+            properties["lat"], properties["lon"] = m.groups()
 
         yield Feature(**properties)
 

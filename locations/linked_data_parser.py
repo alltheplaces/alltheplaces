@@ -206,4 +206,8 @@ class LinkedDataParser:
 
     @staticmethod
     def parse_enhanced_hotel(ld: dict, item: Feature):
-        item["extras"]["stars"] = LinkedDataParser.get_clean(ld, "starRating")
+        if stars := LinkedDataParser.get_clean(ld, "starRating"):
+            if isinstance(stars, str):
+                item["extras"]["stars"] = stars
+            elif isinstance(stars, dict):
+                item["extras"]["stars"] = stars.get("ratingValue")
