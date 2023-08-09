@@ -31,7 +31,7 @@ class MercyHealthSpider(scrapy.Spider):
             properties = {
                 "name": store_data["Location"]["Name"],
                 "ref": store_data["Location"]["KyruusId"],
-                "addr_full": store_data["Location"]["Address"]["Street1"],
+                "street_address": store_data["Location"]["Address"]["Street1"],
                 "city": store_data["Location"]["Address"]["City"],
                 "state": store_data["Location"]["Address"]["State"],
                 "postcode": store_data["Location"]["Address"]["PostalCode"],

@@ -36,7 +36,7 @@ class MicroCenterSpider(scrapy.Spider):
             "name": data["name"],
             "website": response.url,
             "phone": data["telephone"],
-            "addr_full": data["address"]["streetAddress"],
+            "street_address": data["address"]["streetAddress"],
             "city": data["address"]["addressLocality"],
             "state": data["address"]["addressRegion"],
             "postcode": data["address"]["postalCode"],

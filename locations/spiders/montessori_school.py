@@ -27,7 +27,7 @@ class MontessoriSchoolSpider(scrapy.Spider):
             properties = {
                 "ref": school_elem.xpath("@data-school-id")[0].extract(),
                 "name": school_elem.xpath('.//a[@class="schoolNameLink"]/text()').extract_first(),
-                "addr_full": addr_elem.xpath('.//span[@class="street"]/text()').extract_first().strip(),
+                "street_address": addr_elem.xpath('.//span[@class="street"]/text()').extract_first().strip(),
                 "city": city,
                 "state": state,
                 "postcode": postcode,
