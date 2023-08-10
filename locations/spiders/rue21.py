@@ -32,7 +32,7 @@ class Rue21Spider(scrapy.Spider):
         ref = re.search(r".+/(.+).html", response.url).group(1)
 
         properties = {
-            "addr_full": response.xpath('//span[@class="c-address-street-1"]/text()').extract_first().strip(),
+            "street_address": response.xpath('//span[@class="c-address-street-1"]/text()').extract_first().strip(),
             "city": response.xpath('//span[@itemprop="addressLocality"]/text()').extract_first(),
             "state": response.xpath('//abbr[@itemprop="addressRegion"]/text()').extract_first(),
             "postcode": response.xpath('//span[@itemprop="postalCode"]/text()').extract_first().strip(),

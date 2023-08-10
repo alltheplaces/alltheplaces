@@ -28,7 +28,7 @@ class PilotFlyingJSpider(scrapy.Spider):
             "lon": item.xpath('//*[@itemprop="longitude"]/@content').get(),
             "name": store["name"],
             "website": response.url,
-            "addr_full": store["address"]["line1"],
+            "street_address": store["address"]["line1"],
             "city": store["address"]["city"],
             "state": store["address"]["region"],
             "postcode": store["address"]["postalCode"],

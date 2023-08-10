@@ -33,7 +33,7 @@ class RitasItalianIceSpider(scrapy.Spider):
             "lat": lat,
             "lon": lon,
             "name": store["store"],
-            "addr_full": store["address"],
+            "street_address": store["address"],
             "city": store["city"],
             "state": store["state"],
             "postcode": store["zip"],

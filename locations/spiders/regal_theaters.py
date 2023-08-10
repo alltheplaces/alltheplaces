@@ -23,7 +23,7 @@ class RegalTheatersSpider(scrapy.Spider):
             properties = {
                 "ref": theater["externalCode"],
                 "name": theater["name"],
-                "addr_full": theater["address"]["address1"],
+                "street_address": theater["address"]["address1"],
                 "city": theater["address"]["city"],
                 "state": theater["address"]["state"],
                 "postcode": theater["address"]["postalCode"],

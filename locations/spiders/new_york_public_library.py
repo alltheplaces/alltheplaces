@@ -67,7 +67,7 @@ class NewYorkPublicLibrarySpider(scrapy.Spider):
             properties = {
                 "name": location["name"],
                 "ref": location["id"],
-                "addr_full": location["street_address"],
+                "street_address": location["street_address"],
                 "city": location["locality"],
                 "state": location["region"],
                 "postcode": location["postal_code"],

@@ -49,7 +49,7 @@ class RentACenterSpider(scrapy.Spider):
             return  # not a store page
 
         properties = {
-            "addr_full": data["address"]["streetAddress"],
+            "street_address": data["address"]["streetAddress"],
             "phone": data.get("telephone"),
             "city": data["address"]["addressLocality"],
             "state": data["address"]["addressRegion"],

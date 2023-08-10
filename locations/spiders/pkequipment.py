@@ -32,7 +32,7 @@ class PKEquipmentSpider(scrapy.Spider):
         properties = {
             "ref": ref,
             "name": data["name"],
-            "addr_full": data["address"]["streetAddress"],
+            "street_address": data["address"]["streetAddress"],
             "city": data["address"]["addressLocality"],
             "state": data["address"]["addressRegion"],
             "postcode": data["address"]["postalCode"],

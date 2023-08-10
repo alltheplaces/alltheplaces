@@ -30,7 +30,7 @@ class RegisSalonSpider(scrapy.Spider):
             "ref": data["id"],
             "name": name,
             "website": response.url,
-            "addr_full": data["address2"],
+            "street_address": data["address2"],
             "city": data["city"],
             "state": data["state"],
             "postcode": data["zip"],

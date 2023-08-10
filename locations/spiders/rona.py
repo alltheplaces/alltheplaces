@@ -42,7 +42,9 @@ class RonaSpider(scrapy.Spider):
         properties = {
             "ref": re.search(r".+/(.+?)/?(?:\.html|$)", response.url).group(1),
             "name": response.xpath('normalize-space(//*[@itemprop="name"]//text())').extract_first(),
-            "addr_full": response.xpath('normalize-space(//span[@itemprop="streetAddress"]//text())').extract_first(),
+            "street_address": response.xpath(
+                'normalize-space(//span[@itemprop="streetAddress"]//text())'
+            ).extract_first(),
             "city": response.xpath('normalize-space(//span[@itemprop="addressLocality"]//text())').extract_first(),
             "state": response.xpath('normalize-space(//span[@itemprop="addressRegion"]//text())').extract_first(),
             "postcode": response.xpath('normalize-space(//span[@itemprop="postalCode"]//text())').extract_first(),
