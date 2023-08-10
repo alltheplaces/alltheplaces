@@ -28,7 +28,7 @@ class RoundTablePizzaSpider(scrapy.Spider):
                 lat=store.attrib.get("data-latitude"),
                 lon=store.attrib.get("data-longitude"),
                 name=store.attrib.get("data-name"),
-                addr_full=store.attrib.get("data-address1"),
+                street_address=store.attrib.get("data-address1"),
                 city=city,
                 state=state,
                 postcode=postcode,

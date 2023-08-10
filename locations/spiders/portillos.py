@@ -39,7 +39,7 @@ class PortillosSpider(scrapy.Spider):
             "website": response.urljoin(store_data["Url"]),
             "ref": store_data["Id"],
             "name": store_data["Name"],
-            "addr_full": store_data["Address"],
+            "street_address": store_data["Address"],
             "postcode": store_data["Zip"],
             "state": store_data["State"],
             "city": store_data["City"],

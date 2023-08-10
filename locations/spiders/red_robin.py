@@ -33,7 +33,7 @@ class RedRobinSpider(scrapy.Spider):
             "ref": response.url.split("/")[-2],
             "lat": data["geo"]["latitude"],
             "lon": data["geo"]["longitude"],
-            "addr_full": data["address"]["streetAddress"],
+            "street_address": data["address"]["streetAddress"],
             "city": data["address"]["addressLocality"],
             "state": data["address"]["addressRegion"],
             "postcode": data["address"]["postalCode"],

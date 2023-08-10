@@ -77,7 +77,7 @@ class RogersCommunicationsSpider(scrapy.Spider):
             properties = {
                 "ref": store["properties"]["Record_ID"],
                 "name": name,
-                "addr_full": addr,
+                "street_address": addr,
                 "city": store["properties"]["City"],
                 "state": store["properties"]["StateOrProvince"],
                 "postcode": store["properties"]["ZIPOrPostalCode"],
