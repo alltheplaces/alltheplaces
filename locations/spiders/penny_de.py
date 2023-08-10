@@ -1,17 +1,7 @@
 import scrapy
 
-from locations.hours import OpeningHours
-from locations.items import Feature
-
-DAY_MAPPING = {
-    "Monday": "Mo",
-    "Tuesday": "Tu",
-    "Wednesday": "We",
-    "Thursday": "Th",
-    "Friday": "Fr",
-    "Saturday": "Sa",
-    "Sunday": "Su",
-}
+from locations.dict_parser import DictParser
+from locations.hours import DAYS_FULL, OpeningHours
 
 
 class PennyDESpider(scrapy.Spider):
@@ -20,40 +10,26 @@ class PennyDESpider(scrapy.Spider):
     allowed_domains = ["penny.de"]
     start_urls = ("https://www.penny.de/.rest/market",)
 
-    def parse_hours(self, store_info):
+    @staticmethod
+    def parse_hours(location: dict) -> OpeningHours:
         opening_hours = OpeningHours()
-        for day in DAY_MAPPING:
-            opening_time = store_info[f"opensAt{day}"]
-            closing_time = store_info[f"closesAt{day}"]
-            if any([opening_time == "", closing_time == ""]):
+        for day in DAYS_FULL:
+            if location.get(f"closed{day}"):
                 continue
-            opening_hours.add_range(
-                day=DAY_MAPPING[day],
-                open_time=opening_time,
-                close_time=closing_time,
-                time_format="%H:%M",
+            opening_hours.add_range(day, location[f"opensAt{day}"], location[f"closesAt{day}"])
+
+        return opening_hours
+
+    def parse(self, response, **kwargs):
+        for location in response.json():
+            item = DictParser.parse(location)
+            item["name"] = location["marketName"]
+            item["street_address"] = location["streetWithHouseNumber"]
+            item["website"] = response.urljoin(
+                "/".join(["/markt", location["citySlug"], location["wwIdent"], location["slug"]])
             )
+            item["image"] = location["image"]
+            item["ref"] = location["@id"]
+            item["opening_hours"] = self.parse_hours(location)
 
-        return opening_hours.as_opening_hours()
-
-    def parse(self, response):
-        data = response.json()
-
-        for store in data["results"]:
-            properties = {
-                "name": store["marketName"],
-                "ref": store["marketId"],
-                "addr_full": store["street"],
-                "city": store["city"],
-                "postcode": store["zipCode"],
-                "country": "DE",
-                "lat": float(store["latitude"]),
-                "lon": float(store["longitude"]),
-                "extras": {"addr:housenumber": store["streetNumber"]},
-            }
-            hours = self.parse_hours(store)
-
-            if hours:
-                properties["opening_hours"] = hours
-
-            yield Feature(**properties)
+            yield item
