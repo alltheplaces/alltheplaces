@@ -49,4 +49,7 @@ class CaffeNeroGBSpider(Spider):
             apply_yes_no(Extras.TOILETS_WHEELCHAIR, item, location["properties"]["amenities"]["disabled_toilet"], False)
             apply_yes_no(Extras.OUTDOOR_SEATING, item, location["properties"]["amenities"]["outside_seating"], False)
             apply_category(Categories.COFFEE_SHOP, item)
+
+            item["website"] = f'https://caffenero.com/uk/store/{location["properties"]["slug"]}/'
+
             yield item
