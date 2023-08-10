@@ -23,7 +23,7 @@ class MedicalCityHealthcareSpider(scrapy.Spider):
             properties = {
                 "ref": location["id"],
                 "name": location["title"],
-                "addr_full": location["address1"],
+                "street_address": location["address1"],
                 "city": location["city"],
                 "state": location["state"],
                 "postcode": location["zip"],

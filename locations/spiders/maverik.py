@@ -7,6 +7,7 @@ class MaverikSpider(scrapy.Spider):
     name = "maverik"
     item_attributes = {"brand": "Maverik", "brand_wikidata": "Q64149010"}
     allowed_domains = ["maverik.com"]
+    requires_proxy = True
 
     def start_requests(self):
         yield scrapy.Request("https://gateway.maverik.com/ac-loc/location/all", callback=self.add_fuels)
@@ -35,7 +36,7 @@ class MaverikSpider(scrapy.Spider):
                 lat=location["latitude"],
                 ref=location["code"],
                 name=f"Maverick {location['name']}",
-                addr_full=address["address1"],
+                street_address=address["address1"],
                 city=address["city"],
                 state=address["stateProvince"],
                 postcode=address["postalCode"],
