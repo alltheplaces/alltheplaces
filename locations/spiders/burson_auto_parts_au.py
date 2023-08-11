@@ -13,7 +13,13 @@ class BursonAutoPartsAU(Spider):
     start_urls = ["https://www.burson.com.au/find-a-store"]
 
     def parse(self, response):
-        raw_js = response.xpath('//script[contains(text(), "var markers = ")]/text()').get().split("var markers = ", 1)[1].split("var icon = ", 1)[0].strip()[:-1]
+        raw_js = (
+            response.xpath('//script[contains(text(), "var markers = ")]/text()')
+            .get()
+            .split("var markers = ", 1)[1]
+            .split("var icon = ", 1)[0]
+            .strip()[:-1]
+        )
         for location in chompjs.parse_js_object(raw_js):
             location_html = Selector(text=location[1])
             properties = {
