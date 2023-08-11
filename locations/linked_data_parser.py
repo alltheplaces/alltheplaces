@@ -136,7 +136,12 @@ class LinkedDataParser:
         if item["ref"] == "":
             item["ref"] = None
 
-        if t := LinkedDataParser.clean_type(ld.get("@type", "")):
+        types = ld.get("@type", [])
+        if not isinstance(types, list):
+            types = [types]
+        types = [LinkedDataParser.clean_type(t) for t in types]
+        for t in types:
+            print(t)
             LinkedDataParser.parse_enhanced(t, ld, item)
 
         return item
