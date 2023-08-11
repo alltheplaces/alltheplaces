@@ -27,5 +27,5 @@ class WindsorUSSpider(Spider):
             item["lon"] = location["geometry"]["coordinates"][1]
             item["street_address"] = location["properties"]["street_1"]
             if location["properties"].get("url"):
-                item["website"] = "https://www.windsorstore.com/" + location["properties"]["url"]
+                item["website"] = "https://www.windsorstore.com" + location["properties"]["url"]
             yield item
