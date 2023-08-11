@@ -1,5 +1,4 @@
 from chompjs import parse_js_object
-
 from scrapy.spiders import SitemapSpider
 
 from locations.dict_parser import DictParser
