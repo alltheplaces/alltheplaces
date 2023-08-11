@@ -19,12 +19,20 @@ class MySizeAUSpider(CrawlSpider):
         properties = {
             "ref": response.url,
             "name": response.xpath('//div[@id="textContent"]/h2[1]//text()').get().strip().title(),
-            "addr_full": re.sub(r"\s+", " ", " ".join(response.xpath('//div[@id="textContent"]/table[1]/tbody/tr[1]/td[1]/p[2]/text()').getall())).strip(),
-            "phone": " ".join(response.xpath('//div[@id="textContent"]/table[1]/tbody/tr[1]/td[1]/p[3]/text()').getall()).strip(),
+            "addr_full": re.sub(
+                r"\s+",
+                " ",
+                " ".join(response.xpath('//div[@id="textContent"]/table[1]/tbody/tr[1]/td[1]/p[2]/text()').getall()),
+            ).strip(),
+            "phone": " ".join(
+                response.xpath('//div[@id="textContent"]/table[1]/tbody/tr[1]/td[1]/p[3]/text()').getall()
+            ).strip(),
             "website": response.url,
         }
         extract_google_position(properties, response)
-        hours_string = " ".join(response.xpath('//div[@id="textContent"]/table[1]/tbody/tr[1]/td[2]/table[1]/tbody//text()').getall())
+        hours_string = " ".join(
+            response.xpath('//div[@id="textContent"]/table[1]/tbody/tr[1]/td[2]/table[1]/tbody//text()').getall()
+        )
         properties["opening_hours"] = OpeningHours()
         properties["opening_hours"].add_ranges_from_string(hours_string)
         yield Feature(**properties)
