@@ -15,17 +15,17 @@ class TigerWheelAndTyreZASpider(Spider):
     def parse(self, response, **kwargs):
         for location in response.json()["locations"]:
             item = Feature()
-            item["ref"] = location["storeCode"]
+            item["ref"] = location["id"]
             item["lat"] = location["latitude"]
             item["lon"] = location["longitude"]
             item["name"] = location["locationName"]
             item["street_address"] = clean_address(
                 [
-                    location["addressLine1"],
-                    location["addressLine2"],
-                    location["addressLine3"],
-                    location["addressLine4"],
-                    location["addressLine5"],
+                    location.get("addressLine1"),
+                    location.get("addressLine2"),
+                    location.get("addressLine3"),
+                    location.get("addressLine4"),
+                    location.get("addressLine5"),
                 ]
             )
             item["extras"]["addr:town"] = location["subLocality"]
@@ -42,8 +42,5 @@ class TigerWheelAndTyreZASpider(Spider):
                 if not rule["isOpen"]:
                     continue
                 item["opening_hours"].add_range(rule["openDay"], rule["openTime"], rule["closeTime"])
-
-            for social_media in location["socialMedia"]:
-                add_social_media(item, social_media["name"], social_media["url"])
 
             yield item
