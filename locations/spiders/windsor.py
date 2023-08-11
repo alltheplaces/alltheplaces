@@ -16,7 +16,10 @@ class WindsorUSSpider(Spider):
 
     def parse(self, response):
         for location in response.json()["features"]:
-            if "CLOSED" in location["properties"]["name"].upper().split() or "COMING" in location["properties"]["name"].upper().split():
+            if (
+                "CLOSED" in location["properties"]["name"].upper().split()
+                or "COMING" in location["properties"]["name"].upper().split()
+            ):
                 continue
             item = DictParser.parse(location["properties"])
             item["ref"] = location["properties"]["store_number"]
