@@ -12,6 +12,7 @@ class ChemistWarehouseAUSpider(scrapy.Spider):
     start_urls = [
         "https://www.chemistwarehouse.com.au/ams/webparts/Google_Map_SL_files/storelocator_data.ashx?searchedPoint=(0,%200)&TrafficSource=1&TrafficSourceState=0"
     ]
+    requires_proxy = True  # Residential IP addresses appear to be required.
 
     def parse(self, response):
         for data in xmltodict.parse(response.text).get("markers").get("marker"):
