@@ -141,7 +141,6 @@ class LinkedDataParser:
             types = [types]
         types = [LinkedDataParser.clean_type(t) for t in types]
         for t in types:
-            print(t)
             LinkedDataParser.parse_enhanced(t, ld, item)
 
         return item
