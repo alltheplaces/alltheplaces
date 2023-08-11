@@ -19,7 +19,22 @@ class DialABedZASpider(AmastyStoreLocatorSpider):
             yield Request(url=f"https://{domain}/amlocator/index/ajax/", method="POST", headers=headers)
 
     def parse_item(self, item, location, popup_html):
-        item["street_address"] = unescape(" ".join(popup_html.xpath('//div[@class="amlocator-info-popup"]/text()').getall()).split("   Address:", 1)[1].split("   ", 1)[0].strip())
-        item["city"] = unescape(" ".join(popup_html.xpath('//div[@class="amlocator-info-popup"]/text()').getall()).split("City:", 1)[1].split("   ", 1)[0].strip())
-        item["phone"] = unescape(" ".join(popup_html.xpath('//div[@class="amlocator-info-popup"]/text()').getall()).split("   Phone:", 1)[1].split("   ", 1)[0].strip())
+        item["street_address"] = unescape(
+            " ".join(popup_html.xpath('//div[@class="amlocator-info-popup"]/text()').getall())
+            .split("   Address:", 1)[1]
+            .split("   ", 1)[0]
+            .strip()
+        )
+        item["city"] = unescape(
+            " ".join(popup_html.xpath('//div[@class="amlocator-info-popup"]/text()').getall())
+            .split("City:", 1)[1]
+            .split("   ", 1)[0]
+            .strip()
+        )
+        item["phone"] = unescape(
+            " ".join(popup_html.xpath('//div[@class="amlocator-info-popup"]/text()').getall())
+            .split("   Phone:", 1)[1]
+            .split("   ", 1)[0]
+            .strip()
+        )
         yield item
