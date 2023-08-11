@@ -14,7 +14,11 @@ class ChaseUSSpider(SitemapSpider, StructuredDataSpider):
 
     def post_process_item(self, item, response, ld_data):
         item["ref"] = item["ref"].split("#", 1)[1]
-        hours_text = " ".join(response.xpath('//div[contains(@class, "Core-branchRow--hours")]//table[1]/tbody/tr[@itemprop="openingHours"]/@content').getall())
+        hours_text = " ".join(
+            response.xpath(
+                '//div[contains(@class, "Core-branchRow--hours")]//table[1]/tbody/tr[@itemprop="openingHours"]/@content'
+            ).getall()
+        )
         item["opening_hours"] = OpeningHours()
         item["opening_hours"].add_ranges_from_string(hours_text)
         atm_count = response.xpath('//div[@class="Core-atmCount"]/text()').get()
