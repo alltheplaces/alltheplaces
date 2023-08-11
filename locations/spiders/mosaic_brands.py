@@ -1,10 +1,9 @@
-
-from chompjs import parse_js_object
 from html import unescape
 
+from chompjs import parse_js_object
 from scrapy import Selector
 from scrapy.linkextractors import LinkExtractor
-from scrapy.spiders import Rule, CrawlSpider
+from scrapy.spiders import CrawlSpider, Rule
 
 from locations.hours import OpeningHours
 from locations.items import Feature
@@ -49,7 +48,7 @@ class MosaicBrandSpider(CrawlSpider):
             .strip()
         )
         ldjson = parse_js_object(ldjsontext, json_params={"strict": False})
-        
+
         properties = {
             "ref": response.url,
             "name": ldjson["name"],
