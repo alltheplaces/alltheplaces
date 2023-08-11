@@ -22,7 +22,9 @@ class FantasticFurnitureAUSpider(Spider):
 
             item = DictParser.parse(location)
             item["ref"] = location["code"]
-            item["street_address"] = ", ".join(filter(None, [location["address"].get("line1"), location["address"].get("line2")])).replace(" , ", ", ")
+            item["street_address"] = ", ".join(
+                filter(None, [location["address"].get("line1"), location["address"].get("line2")])
+            ).replace(" , ", ", ")
             item["addr_full"] = location["address"]["formattedAddress"].replace(" , ", ", ")
             item.pop("street")
             item["state"] = location["address"]["region"]["name"]
@@ -37,7 +39,12 @@ class FantasticFurnitureAUSpider(Spider):
             for day_hours in location["openingHours"]["weekDayOpeningList"]:
                 if day_hours["closed"]:
                     continue
-                item["opening_hours"].add_range(day_hours["weekDay"], day_hours["openingTime"]["formattedHour"], day_hours["closingTime"]["formattedHour"], "%I:%M %p")
+                item["opening_hours"].add_range(
+                    day_hours["weekDay"],
+                    day_hours["openingTime"]["formattedHour"],
+                    day_hours["closingTime"]["formattedHour"],
+                    "%I:%M %p",
+                )
 
             yield item
 
