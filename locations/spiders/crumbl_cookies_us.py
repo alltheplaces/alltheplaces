@@ -8,7 +8,7 @@ from locations.dict_parser import DictParser
 class CrumblCookiesUSSpider(Spider):
     name = "crumbl_cookies_us"
     item_attributes = {"brand": "Crumbl Cookies", "brand_wikidata": "Q106924414"}
-    start_urls = ["https://crumblcookies.com/_next/data/Y8ZeuvYi8OrQjzP4dncIo/en-US/stores.json"]
+    start_urls = ["https://crumblcookies.com/_next/data/3BIqAAWyo9F7K-iV7dNy9/en-US/stores.json"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def parse(self, response, **kwargs):
