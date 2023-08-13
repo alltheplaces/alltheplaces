@@ -1,4 +1,5 @@
 import base64
+import datetime
 import hashlib
 import io
 import json
@@ -88,6 +89,7 @@ def get_dataset_attributes(spider_name) -> {}:
         # See https://github.com/alltheplaces/alltheplaces/issues/4537
         dataset_attributes["spider:robots_txt"] = "ignored"
     dataset_attributes["@spider"] = spider_name
+    dataset_attributes["spider:collection_time"] = datetime.datetime.now().isoformat()
 
     return dataset_attributes
 
