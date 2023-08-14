@@ -244,6 +244,7 @@ class Fuel(Enum):
     AVAUTO_GAS = "fuel:autogas"
     AVJetA1 = "fuel:JetA1"
 
+    HEATING_OIL = "fuel:heating_oil"
     KEROSENE = "fuel:kerosene"
 
 
@@ -283,6 +284,7 @@ class PaymentMethods(Enum):
     APPLE_PAY = "payment:apple_pay"
     BCA_CARD = "payment:bca_card"
     BLIK = "payment:blik"
+    CARDS = "payment:cards"
     CASH = "payment:cash"
     CHEQUE = "payment:cheque"
     COINS = "payment:coins"
@@ -314,6 +316,7 @@ class PaymentMethods(Enum):
     RAKUTEN_PAY = "payment:rakuten_pay"
     SAMSUNG_PAY = "payment:samsung_pay"
     SATISPAY = "payment:satispay"
+    SBP = 'payment:sbp' # https://www.cbr.ru/eng/psystem/sfp/
     TWINT = "payment:twint"
     UNIONPAY = "payment:unionpay"
     VISA = "payment:visa"
@@ -325,17 +328,24 @@ class PaymentMethods(Enum):
 
 
 class FuelCards(Enum):
+    # TODO: clean tags here
     ALLSTAR = "Allstar Card"
     AVIA = "Avia Card"
+    ARIS = 'payment:aris'
     BP = "BP card"
     DEUTSCHLAND = "fuel:discount:deutschland_card"
     DKV = "fuel:discount:dkv"
+    E100 = "payment:e100" # https://e100.eu/en
     ESSO_NATIONAL = "fuel:discount:esso_national"
     EXXONMOBIL_FLEET = "ExxonMobil Fleet Card"
     LOGPAY = "LogPay Card"
+    LUKOIL = "payment:lukoil" # https://lukoil.ru/Products/business/fuelcards
+    LUKOIL_LOYALTY_PROGRAM = "fuel:discount:lukoil"
     MOBIL = "Mobilcard"
+    PETROL_PLUS_REGION = "payment:petrol_plus_region" # https://www.petrolplus.ru/
     SHELL = "fuel:discount:shell"
     UTA = "fuel:discount:uta"
+    ROSNEFT = "payment:rosneft" # https://www.rn-card.ru/
 
 
 def apply_yes_no(attribute, item: Feature, state: bool, apply_positive_only: bool = True):
