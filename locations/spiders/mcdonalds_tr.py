@@ -1,10 +1,11 @@
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
-from locations.categories import apply_yes_no, Extras
+from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 from locations.spiders.mcdonalds import McDonaldsSpider
+
 
 class McDonaldsTRSpider(Spider):
     name = "mcdonalds_tr"
@@ -35,8 +36,16 @@ class McDonaldsTRSpider(Spider):
             if location["TWENTYFOUR_HRS"]:
                 item["opening_hours"].add_days_range(DAYS, "00:00", "24:00")
             else:
-                open_time = str(location["STORE_OPEN_AT"]["Hours"]).zfill(2) + ":" + str(location["STORE_OPEN_AT"]["Minutes"]).zfill(2)
-                close_time = str(location["STORE_CLOSE_AT"]["Hours"]).zfill(2) + ":" + str(location["STORE_CLOSE_AT"]["Minutes"]).zfill(2)
+                open_time = (
+                    str(location["STORE_OPEN_AT"]["Hours"]).zfill(2)
+                    + ":"
+                    + str(location["STORE_OPEN_AT"]["Minutes"]).zfill(2)
+                )
+                close_time = (
+                    str(location["STORE_CLOSE_AT"]["Hours"]).zfill(2)
+                    + ":"
+                    + str(location["STORE_CLOSE_AT"]["Minutes"]).zfill(2)
+                )
                 item["opening_hours"].add_days_range(DAYS, open_time, close_time)
             apply_yes_no(Extras.DRIVE_THROUGH, item, location["MC_DRIVE"], False)
             apply_yes_no(Extras.DELIVERY, item, location["IS_DELIVERY_STORE"], False)
