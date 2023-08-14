@@ -46,10 +46,10 @@ class McDonaldsLatinAmericaSpider(Spider):
             item["ref"] = location["code"]
             if location["country"] in ["AR", "PR"]:
                 item["addr_full"] = location["address"]
-                item.pop("street_address")
+                item.pop("street_address", None)
             else:
                 item["street_address"] = location["address"]
-                item.pop("addr_full")
+                item.pop("addr_full", None)
 
             if location.get("generalHour"):
                 item["opening_hours"] = OpeningHours()
