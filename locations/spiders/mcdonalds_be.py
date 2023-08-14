@@ -3,7 +3,7 @@ import re
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
-from locations.categories import apply_yes_no, Extras
+from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.spiders.mcdonalds import McDonaldsSpider
@@ -35,7 +35,11 @@ class McDonaldsBESpider(Spider):
                 if day_hours["text"] == "24/24":
                     item["opening_hours"].add_range(day_hours["weekday"].title(), "00:00", "24:00")
                 else:
-                    item["opening_hours"].add_range(day_hours["weekday"].title(), day_hours["text"].split(" - ", 1)[0], day_hours["text"].split(" - ", 1)[1])
+                    item["opening_hours"].add_range(
+                        day_hours["weekday"].title(),
+                        day_hours["text"].split(" - ", 1)[0],
+                        day_hours["text"].split(" - ", 1)[1],
+                    )
 
             service_ids = [s["service_id"] for s in location["services"]]
             apply_yes_no(Extras.DRIVE_THROUGH, item, 2 in service_ids, False)
