@@ -12,7 +12,10 @@ class McDonaldsTRSpider(Spider):
     item_attributes = McDonaldsSpider.item_attributes
     allowed_domains = ["www.mcdonalds.com.tr"]
     start_urls = ["https://www.mcdonalds.com.tr/restaurants/getstores"]
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    # A significant proportion of requests are either blocked (possibly
+    # by the Turkish government) or the website is very unreliable.
+    # Minimise requests and retry a few extra times.
+    custom_settings = {"ROBOTSTXT_OBEY": False, "RETRY_TIMES": 10}
 
     def start_requests(self):
         data = {
