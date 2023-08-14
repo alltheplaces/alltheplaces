@@ -55,7 +55,9 @@ class McDonaldsLatinAmericaSpider(Spider):
                 item["opening_hours"] = OpeningHours()
                 for day_hours in location["generalHour"]["daysOfWeek"]:
                     for time_period in day_hours["timePeriods"]:
-                        item["opening_hours"].add_range(day_hours["day"].title(), time_period["start"], time_period["end"])
+                        item["opening_hours"].add_range(
+                            day_hours["day"].title(), time_period["start"], time_period["end"]
+                        )
 
             apply_yes_no(Extras.DRIVE_THROUGH, item, location["services"]["driveThru"], False)
             apply_yes_no(Extras.DELIVERY, item, location["services"]["mcDelivery"], False)
