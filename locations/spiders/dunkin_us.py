@@ -1,5 +1,4 @@
 from chompjs import parse_js_object
-
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Extras, apply_yes_no
@@ -14,7 +13,11 @@ class DunkinUSSpider(SitemapSpider, StructuredDataSpider):
     sitemap_rules = [(r"locations\.dunkindonuts\.com\/en\/[a-z]{2}\/[\w\-]+\/[\w\-]+\/\d+$", "parse_sd")]
 
     def post_process_item(self, item, response, ld_data):
-        data_js = parse_js_object(response.xpath('//head/script[contains(text(), "__INITIAL__DATA__ = ")]/text()').get().split("__INITIAL__DATA__ = ", 1)[1])
+        data_js = parse_js_object(
+            response.xpath('//head/script[contains(text(), "__INITIAL__DATA__ = ")]/text()')
+            .get()
+            .split("__INITIAL__DATA__ = ", 1)[1]
+        )
         item["ref"] = data_js["document"]["id"]
         if data_js["document"].get("geocodedCoordinate"):
             # Some location pages do not provide coordinates.
