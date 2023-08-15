@@ -20,9 +20,9 @@ class JardilandESPTSpider(Spider):
         for location in response.json()["listado"]:
             item = DictParser.parse(location)
             if "Portugal" in item["state"] or "Portugal" in item["addr_full"]:
-                country = "PT"
+                item["country"] = "PT"
                 item["state"] = item["state"].replace("(Portugal)", "").strip()
                 item["addr_full"] = item["addr_full"].replace("(Portugal)", "").strip()
             else:
-                country = "ES"
+                item["country"] = "ES"
             yield item
