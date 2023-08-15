@@ -26,7 +26,8 @@ class SainsburysSpider(scrapy.Spider):
 
             store["street_address"] = ", ".join(filter(None, [store["address1"], store["address2"]]))
 
-            store["name"] = store["other_name"]
+            if store.get("other_name"):
+                store["name"] = store["other_name"]
 
             item = DictParser.parse(store)
 
