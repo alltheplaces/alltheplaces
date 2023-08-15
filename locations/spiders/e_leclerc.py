@@ -4,9 +4,9 @@ from locations.storefinders.woosmap import WoosmapSpider
 
 class ELeclercSpider(WoosmapSpider):
     name = "e_leclerc"
-    item_attributes = {"brand": "E.Leclerc", "brand_wikidata": "Q1273376", "nsi_id": -1}
+    item_attributes = {"brand": "E.Leclerc", "brand_wikidata": "Q1273376"}
     key = "woos-6256d36f-af9b-3b64-a84f-22b2342121ba"
-    custom_settings = {"DEFAULT_REQUEST_HEADERS": {"Origin": "https://www.e.leclerc"}}
+    origin = "https://www.e.leclerc"
 
     brands = {
         "Jardi": ({"brand": "E.Leclerc Jardi"}, Categories.SHOP_GARDEN_CENTRE),
