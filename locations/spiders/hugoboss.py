@@ -1,75 +1,53 @@
 import json
 
-import scrapy
+from scrapy import Spider
+from scrapy.http import JsonRequest
 
-from locations.hours import OpeningHours
-from locations.items import Feature
-
-day_formats = {
-    "1": "Mo",
-    "2": "Tu",
-    "3": "We",
-    "4": "Th",
-    "5": "Fr",
-    "6": "Sa",
-    "7": "Su",
-}
+from locations.categories import Clothes, apply_clothes
+from locations.dict_parser import DictParser
+from locations.hours import DAYS, OpeningHours
 
 
-class HugoBossSpider(scrapy.Spider):
-    name = "hugoboss"
+class HugoBossSpider(Spider):
+    name = "hugo_boss"
     item_attributes = {"brand": "Hugo Boss", "brand_wikidata": "Q491627"}
     allowed_domains = ["api.hugoboss.eu"]
-    download_delay = 0.5
     start_urls = [
-        "https://api.hugoboss.eu/s/UK/dw/shop/v20_10/stores?client_id=871c988f-3549-4d76-b200-8e33df5b45ba&latitude=36.439068689946765&longitude=-95.71289100000001&count=200&maxDistance=100000000&distanceUnit=mi&start=0"
+        "https://api.hugoboss.eu/s/UK/dw/shop/v22_10/stores?client_id=871c988f-3549-4d76-b200-8e33df5b45ba&latitude=53.6912856662977&longitude=-2.0727839000000072&count=200&maxDistance=100000000&distanceUnit=mi&start=0"
     ]
 
+    def start_requests(self):
+        for url in self.start_urls:
+            yield JsonRequest(url=url)
+
     def parse(self, response):
-        data = response.json()
-        if "data" in data:
-            for store in data["data"]:
-                oh = OpeningHours()
-                if "store_hours" in store:
-                    open_hours = json.loads(store["store_hours"])
-                    for key, value in open_hours.items():
-                        if isinstance(value[0], str):
-                            oh.add_range(day_formats[key], value[0], value[1])
-                        else:
-                            oh.add_range(day_formats[key], value[0][0], value[0][1])
-                properties = {
-                    "ref": store["id"],
-                    "name": store["name"],
-                    "opening_hours": oh.as_opening_hours(),
-                    "street_address": store.get("address1"),
-                    "city": store.get("city"),
-                    "website": f"https://www.hugoboss.com/us/storedetail?storeid={store.get('id')}",
-                    "postcode": store.get("postal_code"),
-                    "country": store.get("country_code"),
-                    "lat": float(store.get("latitude")),
-                    "lon": float(store.get("longitude")),
-                    "phone": store.get("phone"),
-                    "email": store.get("c_contactEmail"),
-                    "extras": {"store_type": store["c_type"]},
-                }
-                if store.get("c_categories"):
-                    clothes = []
-                    for cat in store["c_categories"]:
-                        if cat == "womenswear":
-                            clothes.append("women")
-                            properties["extras"]["clothes:women"] = "yes"
-                        elif cat == "menswear":
-                            clothes.append("men")
-                            properties["extras"]["clothes:men"] = "yes"
-                        elif cat == "kidswear":
-                            clothes.append("children")
-                            properties["extras"]["clothes:children"] = "yes"
+        for location in response.json()["data"]:
+            item = DictParser.parse(location)
+            item["website"] = "https://www.hugoboss.com/us/storedetail?storeid=" + location["id"]
+            item["email"] = location.get("c_ContactEmail")
 
-                    properties["extras"]["clothes"] = ";".join(clothes)
+            if location.get("store_hours"):
+                opening_hours = json.loads(location["store_hours"])
+                item["opening_hours"] = OpeningHours()
+                for day_number, day_hours in opening_hours.items():
+                    if type(day_hours[0]) is list:
+                        for day_hours_period in day_hours:
+                            item["opening_hours"].add_range(
+                                DAYS[int(day_number) - 1], day_hours_period[0], day_hours_period[1]
+                            )
+                    else:
+                        item["opening_hours"].add_range(DAYS[int(day_number) - 1], day_hours[0], day_hours[1])
 
-                yield Feature(**properties)
-            if "next" in data:
-                yield scrapy.Request(
-                    url=data["next"],
-                    callback=self.parse,
-                )
+            clothes = []
+            if "womenswear" in location.get("c_categories", []):
+                clothes.append(Clothes.WOMEN.value)
+            if "menswear" in location.get("c_categories", []):
+                clothes.append(Clothes.MEN.value)
+            if "kidswear" in location.get("c_categories", []):
+                clothes.append(Clothes.CHILDREN.value)
+            apply_clothes(clothes, item)
+
+            yield item
+
+        if response.json().get("next"):
+            yield JsonRequest(url=response.json()["next"], callback=self.parse)

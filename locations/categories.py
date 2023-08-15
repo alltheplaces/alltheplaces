@@ -369,5 +369,13 @@ def apply_yes_no(attribute, item: Feature, state: bool, apply_positive_only: boo
 class Clothes(Enum):
     BABY = "babies"
     CHILDREN = "children"
-    UNDERWEAR = "underwear"
     MATERNITY = "maternity"
+    MEN = "men"
+    UNDERWEAR = "underwear"
+    WOMEN = "women"
+
+
+def apply_clothes(clothes: [str], item: Feature):
+    for c in clothes:
+        apply_yes_no(f"clothes:{c}", item, True)
+    item["extras"]["clothes"] = ";".join(clothes)
