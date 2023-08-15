@@ -5,7 +5,7 @@ from locations.storefinders.woosmap import WoosmapSpider
 class TotalEnergiesSpider(WoosmapSpider):
     name = "totalenergies"
     key = "mapstore-prod-woos"
-    custom_settings = {"DEFAULT_REQUEST_HEADERS": {"Origin": "https://totalenergies.com"}}
+    origin = "https://totalenergies.com"
 
     BRANDS = {
         "tot": {"brand": "Total", "brand_wikidata": "Q154037"},
