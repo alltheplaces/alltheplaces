@@ -7,13 +7,13 @@ from locations.items import Feature
 
 class BPPulseGBSpider(Spider):
     name = "bp_pulse_gb"
-    item_attributes = {"brand": "bp pulse", "brand_wikidata": "Q39057719", "country": "GB"}
+    item_attributes = {"brand": "bp pulse", "brand_wikidata": "Q39057719"}
 
     @staticmethod
     def make_request(page: int) -> JsonRequest:
         return JsonRequest(
             url=f"https://chargevision4.com/api/polar-plus/posts?page={page}",
-            headers={"API_KEY": "bd57efec9a21480a98b8fe1b6229ff43ec6b4628"},
+            headers={"API_KEY": "6147-f93fad682f5a-2a927fe95546-2d31"},
             meta={"page": page},
         )
 
