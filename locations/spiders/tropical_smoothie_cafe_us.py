@@ -1,4 +1,4 @@
-from locations.categories import apply_yes_no, Extras, PaymentMethods
+from locations.categories import Extras, PaymentMethods, apply_yes_no
 from locations.storefinders.yext import YextSpider
 
 
@@ -12,7 +12,9 @@ class TropicalSmoothieCafeUSSpider(YextSpider):
         apply_yes_no(Extras.DRIVE_THROUGH, item, "DRIVE_THRU" in location.get("c_locationPageServices", []), False)
         apply_yes_no(Extras.DELIVERY, item, "DELIVERY" in location.get("c_locationPageServices", []), False)
         apply_yes_no(Extras.WIFI, item, "WIFI" in location.get("c_locationPageServices", []), False)
-        apply_yes_no(PaymentMethods.AMERICAN_EXPRESS, item, "AMERICANEXPRESS" in location.get("paymentOptions", []), False)
+        apply_yes_no(
+            PaymentMethods.AMERICAN_EXPRESS, item, "AMERICANEXPRESS" in location.get("paymentOptions", []), False
+        )
         apply_yes_no(PaymentMethods.DISCOVER_CARD, item, "DISCOVER" in location.get("paymentOptions", []), False)
         apply_yes_no(PaymentMethods.MASTER_CARD, item, "MASTERCARD" in location.get("paymentOptions", []), False)
         apply_yes_no(PaymentMethods.VISA, item, "VISA" in location.get("paymentOptions", []), False)
