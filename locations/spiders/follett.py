@@ -39,12 +39,12 @@ class FollettSpider(Spider):
         }
 
         for name_data in location["description"]:
-            if name_data["languageId"] == "-1": # English
+            if name_data["languageId"] == "-1":  # English
                 properties["name"] = name_data["displayName"]
                 break
 
         for location_data in location["locationInfo"]:
-            if location_data["languageId"] == "-1": # English
+            if location_data["languageId"] == "-1":  # English
                 properties["street_address"] = ", ".join(filter(None, location_data["address"]["addressLine"]))
                 properties["city"] = location_data["address"].get("city")
                 properties["state"] = location_data["address"].get("stateOrProvinceName")
@@ -53,12 +53,12 @@ class FollettSpider(Spider):
                 break
 
         for contact_data in location["contactInfo"]:
-            if contact_data["languageId"] == "-1": # English
+            if contact_data["languageId"] == "-1":  # English
                 properties["email"] = location_data["address"].get("emailAddress1")
                 break
 
         for store_hours in location["storeHours"]["storeHours"]:
-            if store_hours["sequence"] == 0: # Usual bookshop hours
+            if store_hours["sequence"] == 0:  # Usual bookshop hours
                 hours_string = ""
                 for day_name in DAYS_FULL:
                     if not store_hours.get(day_name.lower()):
