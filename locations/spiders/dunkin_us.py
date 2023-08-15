@@ -1,53 +1,37 @@
-import json
+from chompjs import parse_js_object
+from scrapy.spiders import SitemapSpider
 
-import scrapy
-
-from locations.hours import OpeningHours
-from locations.items import Feature
+from locations.categories import Extras, apply_yes_no
+from locations.structured_data_spider import StructuredDataSpider
 
 
-class DunkinUSSpider(scrapy.Spider):
+class DunkinUSSpider(SitemapSpider, StructuredDataSpider):
     name = "dunkin_us"
-    item_attributes = {
-        "brand": "Dunkin'",
-        "brand_wikidata": "Q847743",
-    }
-    allowed_domains = ["dunkindonuts.com"]
-    start_urls = [
-        "https://locations.dunkindonuts.com/en",
-    ]
+    item_attributes = {"brand": "Dunkin'", "brand_wikidata": "Q847743"}
+    allowed_domains = ["locations.dunkindonuts.com"]
+    sitemap_urls = ["https://locations.dunkindonuts.com/sitemap.xml"]
+    sitemap_rules = [(r"locations\.dunkindonuts\.com\/en\/[a-z]{2}\/[\w\-]+\/[\w\-]+\/\d+$", "parse_sd")]
 
-    def parse(self, response):
-        for href in response.xpath('//*[@class="Directory-content"]//@href').extract():
-            yield scrapy.Request(response.urljoin(href))
-
-        if response.css('[itemtype="https://schema.org/FastFoodRestaurant"]'):
-            yield from self.parse_store(response)
-
-    def parse_store(self, response):
-        coords = json.loads(response.xpath('//script[@class="js-map-data"]/text()').get())
-        hours = json.loads(response.xpath('//script[@class="js-hours-config"]/text()').get())
-        opening_hours = OpeningHours()
-        for row in hours["hours"]:
-            day = row["day"][:2].capitalize()
-            for i in row["intervals"]:
-                start_hour, start_minute = divmod(i["start"], 100)
-                end_hour, end_minute = divmod(i["end"], 100)
-                start_time = f"{start_hour:02}:{start_minute:02}"
-                end_time = f"{end_hour:02}:{end_minute:02}"
-                opening_hours.add_range(day, start_time, end_time)
-
-        address = response.css("[itemprop=address]")
-        properties = {
-            "ref": response.url.rsplit("/", 1)[1],
-            "lat": coords["latitude"],
-            "lon": coords["longitude"],
-            "website": response.url,
-            "street_address": address.xpath('.//*[@itemprop="streetAddress"]/@content').get(),
-            "city": address.xpath('.//*[@itemprop="addressLocality"]/@content').get(),
-            "state": address.xpath('.//*[@itemprop="addressRegion"]/text()').get(),
-            "postcode": address.xpath('.//*[@itemprop="postalCode"]/text()').get(),
-            "phone": response.xpath('//*[@itemprop="telephone"]/text()').get(),
-            "opening_hours": opening_hours.as_opening_hours(),
-        }
-        yield Feature(**properties)
+    def post_process_item(self, item, response, ld_data):
+        data_js = parse_js_object(
+            response.xpath('//head/script[contains(text(), "__INITIAL__DATA__ = ")]/text()')
+            .get()
+            .split("__INITIAL__DATA__ = ", 1)[1]
+        )
+        item["ref"] = data_js["document"]["id"]
+        if data_js["document"].get("geocodedCoordinate"):
+            # Some location pages do not provide coordinates.
+            item["lat"] = data_js["document"]["geocodedCoordinate"]["latitude"]
+            item["lon"] = data_js["document"]["geocodedCoordinate"]["longitude"]
+        item.pop("facebook", None)
+        for social_link in data_js["document"]["ref_listings"]:
+            if social_link["publisher"] == "FACEBOOK":
+                # Most locations have their own Facebook page which
+                # can be used instead of the brand-wide Facebook page.
+                item["facebook"] = social_link["listingUrl"]
+                break
+        item.pop("twitter")
+        item.pop("image", None)
+        extra_features = filter(None, [feature.get("name") for feature in ld_data.get("makesOffer")])
+        apply_yes_no(Extras.DRIVE_THROUGH, item, "Drive Thru" in extra_features, False)
+        yield item
