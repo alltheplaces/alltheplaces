@@ -7,8 +7,8 @@ from locations.dict_parser import DictParser
 from locations.spiders.vapestore_gb import clean_address
 
 
-class CineworldGBSpider(Spider):
-    name = "cineworld_gb"
+class CineworldGBJESpider(Spider):
+    name = "cineworld_gb_je"
     item_attributes = {"brand": "Cineworld", "brand_wikidata": "Q5120901"}
     start_urls = ["https://www.cineworld.co.uk/"]
     requires_proxy = "GB"
@@ -24,6 +24,10 @@ class CineworldGBSpider(Spider):
                     location["address"]["address4"],
                 ]
             )
+            if item.get("postcode") and len(item["postcode"]) >= 2 and item["postcode"][:2] == "JE":
+                item["country"] = "JE"
+            else:
+                item["country"] = "GB"
             item["ref"] = location["externalCode"]
             item["website"] = response.urljoin("{}/{}".format(location["uri"], location["externalCode"]))
 
