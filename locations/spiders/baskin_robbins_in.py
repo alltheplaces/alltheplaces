@@ -2,7 +2,7 @@ from locations.hours import OpeningHours
 from locations.storefinders.stockist import StockistSpider
 
 
-class AftersIceCreamUSSpider(StockistSpider):
+class BaskinRobbinsINSpider(StockistSpider):
     name = "baskin_robbins_in"
     item_attributes = {"brand": "Baskin Robbins", "brand_wikidata": "Q584601"}
     key = "u11410"
