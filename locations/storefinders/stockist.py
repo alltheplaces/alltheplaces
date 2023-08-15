@@ -1,7 +1,7 @@
-from chompjs import parse_js_object
-import pygeohash
 import random
 
+import pygeohash
+from chompjs import parse_js_object
 from scrapy import Request, Spider
 from scrapy.http import JsonRequest
 from scrapy.spidermiddlewares.httperror import HttpError
@@ -32,7 +32,11 @@ class StockistSpider(Spider):
     coordinates_pending = []
 
     def start_requests(self):
-        yield JsonRequest(url=f"https://stockist.co/api/v1/{self.key}/locations/all", callback=self.parse_all_locations, errback=self.parse_all_locations_error)
+        yield JsonRequest(
+            url=f"https://stockist.co/api/v1/{self.key}/locations/all",
+            callback=self.parse_all_locations,
+            errback=self.parse_all_locations_error,
+        )
 
     def parse_all_locations(self, response, **kwargs):
         for location in response.json():
@@ -49,12 +53,16 @@ class StockistSpider(Spider):
             if failure.value.response.status == 400:
                 if "error" in failure.value.response.json().keys():
                     if failure.value.response.json()["error"] == "Method unavailable.":
-                        yield Request(url=f"https://stockist.co/api/v1/{self.key}/widget.js", callback=self.parse_search_config)
+                        yield Request(
+                            url=f"https://stockist.co/api/v1/{self.key}/widget.js", callback=self.parse_search_config
+                        )
 
     def parse_search_config(self, response, **kwargs):
         config = parse_js_object(response.text.split("(", 1)[1].split(");", 1)[0])
         self.max_distance = config["max_distance"]
-        yield JsonRequest(url=f"https://stockist.co/api/v1/{self.key}/locations/overview.js", callback=self.parse_geohashes)
+        yield JsonRequest(
+            url=f"https://stockist.co/api/v1/{self.key}/locations/overview.js", callback=self.parse_geohashes
+        )
 
     def parse_geohashes(self, response, **kwargs):
         self.coordinates_pending = [pygeohash.decode(geohash[:-1]) for geohash in response.json()["i"]]
@@ -63,7 +71,10 @@ class StockistSpider(Spider):
 
     def make_next_search_request(self):
         next_coordinates = random.choice(self.coordinates_pending)
-        yield JsonRequest(url=f"https://stockist.co/api/v1/{self.key}/locations/search?latitude={next_coordinates[0]}&longitude={next_coordinates[1]}&distance={self.max_distance}", callback=self.parse_search_results)
+        yield JsonRequest(
+            url=f"https://stockist.co/api/v1/{self.key}/locations/search?latitude={next_coordinates[0]}&longitude={next_coordinates[1]}&distance={self.max_distance}",
+            callback=self.parse_search_results,
+        )
 
     def parse_search_results(self, response, **kwargs):
         for location in response.json()["locations"]:
