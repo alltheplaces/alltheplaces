@@ -1,20 +1,15 @@
-from scrapy.spiders import SitemapSpider
+import re
 
-from locations.linked_data_parser import LinkedDataParser
+from locations.storefinders.woosmap import WoosmapSpider
 
 
-class HollandAndBarrettSpider(SitemapSpider):
+class HollandAndBarrettSpider(WoosmapSpider):
     name = "holland_and_barrett"
     item_attributes = {"brand": "Holland & Barrett", "brand_wikidata": "Q5880870"}
-    sitemap_urls = [
-        "https://www.hollandandbarrett.com/sitemap-stores.xml",
-        "https://www.hollandandbarrett.nl/sitemap-stores.xml",
-        "https://www.hollandandbarrett.be/sitemap-stores.xml",
-        "https://www.hollandandbarrett.ie/sitemap-stores.xml",
-    ]
-    sitemap_rules = [("/stores/", "parse"), ("/winkels/", "parse")]
+    key = "woos-7dcebde8-9cf4-37a7-bac3-1dce1c0942ee"
+    origin = "https://www.hollandandbarrett.com"
 
-    def parse(self, response):
-        item = LinkedDataParser.parse(response, "LocalBusiness")
-        item["website"] = response.urljoin(item["website"])
+    def parse_item(self, item, feature):
+        item["name"] = re.sub(r"\(\d+\)", "", item["name"]).strip()
+        item["website"] = "https://www.hollandandbarrett.com" + feature["properties"]["user_properties"]["storePath"]
         yield item
