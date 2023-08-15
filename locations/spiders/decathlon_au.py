@@ -5,6 +5,7 @@ from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.spiders.decathlon_fr import DecathlonFRSpider
 
+
 class DecathlonAUSpider(Spider):
     name = "decathlon_au"
     item_attributes = DecathlonFRSpider.item_attributes

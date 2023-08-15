@@ -1,4 +1,5 @@
 import re
+
 from unidecode import unidecode
 
 from locations.storefinders.woosmap import WoosmapSpider
