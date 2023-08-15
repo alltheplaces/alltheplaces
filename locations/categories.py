@@ -374,6 +374,7 @@ class Clothes(Enum):
     UNDERWEAR = "underwear"
     WOMEN = "women"
 
+
 def apply_clothes(clothes: [str], item: Feature):
     for c in clothes:
         apply_yes_no(f"clothes:{c}", item, True)
