@@ -18,6 +18,7 @@ class WinterthurCHSpider(scrapy.Spider):
         "license:website": "https://stadtplantest.winterthur.ch/stadtgruen/spielplatzkontrolle-service/swagger/index.html",
         "license:wikidata": "Q6938433",
     }
+    no_refs = True
 
     def start_requests(self):
         yield scrapy.Request(
@@ -38,13 +39,9 @@ class WinterthurCHSpider(scrapy.Spider):
             if len(coords) < 2:
                 continue
             lat, lon = coord_transformer.transform(coords[0], coords[1])
-            ref = str(props.get("fid"))
-            if props.get("nummer") > 0:
-                ref = str(props["nummer"])
             item = {
                 "lat": lat,
                 "lon": lon,
-                "ref": ref,
                 "extras": {
                     "operator": "Stadtgrün Winterthur",
                     "operator:wikidata": "Q56825906",
