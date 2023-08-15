@@ -18,7 +18,10 @@ class WoosmapSpider(Spider):
     origin = ""
 
     def start_requests(self):
-        yield JsonRequest(url=f"https://api.woosmap.com/stores?key={self.key}&stores_by_page=300&page=1", headers={"Origin": self.origin})
+        yield JsonRequest(
+            url=f"https://api.woosmap.com/stores?key={self.key}&stores_by_page=300&page=1",
+            headers={"Origin": self.origin},
+        )
 
     def parse(self, response, **kwargs):
         if features := response.json()["features"]:
