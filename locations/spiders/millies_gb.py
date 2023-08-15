@@ -50,7 +50,10 @@ class MilliesGBSpider(Spider):
                 if day_hours["open_break"] == day_hours["close_break"]:
                     opening_hours[day_name] = [(day_hours["open"], day_hours["close"])]
                 else:
-                    opening_hours[day_name] = [(day_hours["open"], day_hours["open_break"]), (day_hours["close_break"], day_hours["close"])]
+                    opening_hours[day_name] = [
+                        (day_hours["open"], day_hours["open_break"]),
+                        (day_hours["close_break"], day_hours["close"]),
+                    ]
             for day_name, day_hours in opening_hours.items():
                 for day_hours_period in day_hours:
                     item["opening_hours"].add_range(day_name, day_hours_period[0], day_hours_period[1])
