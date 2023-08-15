@@ -23,7 +23,11 @@ class JardilandFRSpider(Spider):
 
             item["opening_hours"] = OpeningHours()
             for day_number, day_name in enumerate(DAYS):
-                if not location.get("openingHours") or not location["openingHours"].get("weeklySchedule") or day_number >= len(location["openingHours"]["weeklySchedule"]):
+                if (
+                    not location.get("openingHours")
+                    or not location["openingHours"].get("weeklySchedule")
+                    or day_number >= len(location["openingHours"]["weeklySchedule"])
+                ):
                     continue
                 for day_hours in location["openingHours"]["weeklySchedule"][day_number]["schedule"]:
                     item["opening_hours"].add_range(day_name, day_hours["start"], day_hours["end"])
