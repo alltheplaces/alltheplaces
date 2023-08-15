@@ -1,6 +1,6 @@
 from scrapy.spiders import SitemapSpider
 
-from locations.categories import apply_yes_no, Extras
+from locations.categories import Extras, apply_yes_no
 from locations.structured_data_spider import StructuredDataSpider
 
 
