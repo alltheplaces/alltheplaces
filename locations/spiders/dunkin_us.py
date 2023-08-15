@@ -9,7 +9,7 @@ class DunkinUSSpider(SitemapSpider, StructuredDataSpider):
     item_attributes = {"brand": "Dunkin'", "brand_wikidata": "Q847743"}
     allowed_domains = ["locations.dunkindonuts.com"]
     sitemap_urls = ["https://locations.dunkindonuts.com/sitemap.xml"]
-    sitemap_rules = [(r"locations\.dunkindonuts\.com\/en\/[a-z]{2}\/", "parse_sd")]
+    sitemap_rules = [(r"locations\.dunkindonuts\.com\/en\/[a-z]{2}\/[\w\-]+\/[\w\-]+\/\d+$", "parse_sd")]
 
     def post_process_item(self, item, response, ld_data):
         item["ref"] = response.url.split("/")[-1]
