@@ -9,4 +9,5 @@ class BaskinRobbinsINSpider(StockistSpider):
     def parse_item(self, item, location):
         item.pop("email")
         item.pop("website")
+        item["addr_full"] = item.pop("street_address", None)
         yield item
