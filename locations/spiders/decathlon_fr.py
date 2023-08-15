@@ -13,6 +13,6 @@ class DecathlonFRSpider(WoosmapSpider):
     website_template = "https://www.decathlon.fr/store-view/magasin-de-sports-{slug}-{ref}"
 
     def parse_item(self, item, feature):
-        slug = re.sub("[^\w]+", " ", unidecode(item["name"].lower()).strip()).replace(" ", "-")
+        slug = re.sub(r"[^\w]+", " ", unidecode(item["name"].lower()).strip()).replace(" ", "-")
         item["website"] = self.website_template.format(slug=slug, ref=item["ref"])
         yield item
