@@ -11,7 +11,7 @@ class CineworldGBSpider(Spider):
     name = "cineworld_gb"
     item_attributes = {"brand": "Cineworld", "brand_wikidata": "Q5120901"}
     start_urls = ["https://www.cineworld.co.uk/"]
-    requires_proxy = True
+    requires_proxy = "GB"
 
     def parse(self, response, **kwargs):
         for location in json.loads(re.search(r"apiSitesList = (\[.+\]),", response.text).group(1)):
