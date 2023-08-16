@@ -1,5 +1,3 @@
-import json
-
 import scrapy
 from scrapy.selector import Selector
 

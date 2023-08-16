@@ -3,7 +3,6 @@ import json
 import scrapy
 
 from locations.dict_parser import DictParser
-from locations.items import Feature
 
 
 class TacoTimeNorthwestUSSpider(scrapy.Spider):

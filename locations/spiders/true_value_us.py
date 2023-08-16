@@ -1,4 +1,3 @@
-from locations.items import Feature
 from locations.storefinders.where2getit import Where2GetItSpider
 
 

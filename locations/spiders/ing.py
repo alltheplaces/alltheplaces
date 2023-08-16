@@ -2,7 +2,7 @@ import scrapy
 from scrapy.http import JsonRequest
 
 from locations.categories import Categories, apply_category
-from locations.hours import DAYS_EN, OpeningHours, sanitise_day
+from locations.hours import OpeningHours, sanitise_day
 from locations.items import Feature
 
 

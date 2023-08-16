@@ -1,7 +1,6 @@
 from scrapy.spiders import SitemapSpider
 
-from locations.categories import Categories, Clothes, apply_category, apply_clothes, apply_yes_no
-from locations.items import Feature
+from locations.categories import Categories, Clothes, apply_category, apply_clothes
 from locations.structured_data_spider import StructuredDataSpider
 
 

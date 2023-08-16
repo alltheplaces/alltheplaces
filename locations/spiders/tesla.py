@@ -1,11 +1,9 @@
 import re
-import urllib.parse
 
 import scrapy
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
-from locations.items import Feature
 
 
 class TeslaSpider(scrapy.Spider):

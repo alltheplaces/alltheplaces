@@ -1,4 +1,4 @@
-from locations.categories import Categories, Extras, Fuel, apply_yes_no
+from locations.categories import Fuel, apply_yes_no
 from locations.storefinders.storelocatorwidgets import StoreLocatorWidgetsSpider
 
 

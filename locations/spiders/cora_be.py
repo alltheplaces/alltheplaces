@@ -2,7 +2,7 @@ import urllib.parse
 
 from scrapy import Request, Spider
 
-from locations.hours import DAYS, DAYS_FR, OpeningHours
+from locations.hours import DAYS_FR, OpeningHours
 from locations.items import Feature
 from locations.spiders.vapestore_gb import clean_address
 
