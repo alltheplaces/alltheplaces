@@ -1,7 +1,7 @@
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
-from locations.categories import apply_yes_no, Extras
+from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
@@ -29,7 +29,9 @@ class FreshopSpider(Spider):
             if location.get("store_number"):
                 item["ref"] = location["store_number"]
 
-            item["street_address"] = ", ".join(filter(None, [location.get("address_1"), location.get("address_2"), location.get("address_3")]))
+            item["street_address"] = ", ".join(
+                filter(None, [location.get("address_1"), location.get("address_2"), location.get("address_3")])
+            )
 
             if location.get("hours_md"):
                 item["opening_hours"] = OpeningHours()
