@@ -1,7 +1,7 @@
 from scrapy import Spider
 
 from locations.hours import OpeningHours
-from locations.items import Feature, add_social_media
+from locations.items import Feature
 from locations.spiders.vapestore_gb import clean_address
 
 

@@ -1,6 +1,6 @@
 import re
 
-from scrapy import Request, Spider
+from scrapy import Request
 
 from locations.hours import OpeningHours
 from locations.structured_data_spider import StructuredDataSpider

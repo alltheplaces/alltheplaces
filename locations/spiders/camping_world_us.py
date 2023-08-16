@@ -1,6 +1,3 @@
-import base64
-import json
-
 import scrapy
 from scrapy.http import JsonRequest, Request
 

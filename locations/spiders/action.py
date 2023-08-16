@@ -2,7 +2,7 @@ from scrapy import Spider
 from scrapy.http import JsonRequest
 
 from locations.dict_parser import DictParser
-from locations.hours import DAYS_FULL, OpeningHours
+from locations.hours import OpeningHours
 
 
 class ActionSpider(Spider):
