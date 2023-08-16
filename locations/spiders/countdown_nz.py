@@ -20,10 +20,22 @@ class CountdownNZSpider(Spider):
             item = DictParser.parse(location["site"])
             if location["site"].get("email") == "null":
                 item.pop("email", None)
-            item["website"] = "https://www.countdown.co.nz/store-finder/" + str(item["ref"]) + "/" + item["city"].lower().replace(" ", "-").replace(",", "") + "/" + item["name"].lower().replace(" ", "-").replace(",", "")
+            item["website"] = (
+                "https://www.countdown.co.nz/store-finder/"
+                + str(item["ref"])
+                + "/"
+                + item["city"].lower().replace(" ", "-").replace(",", "")
+                + "/"
+                + item["name"].lower().replace(" ", "-").replace(",", "")
+            )
             item["opening_hours"] = OpeningHours()
             for day_name in DAYS_FULL:
                 if not location["tradingHours"][0].get(day_name.lower()):
                     continue
-                item["opening_hours"].add_range(day_name, location["tradingHours"][0].get(day_name.lower())["startTime"], location["tradingHours"][0].get(day_name.lower())["endTime"], "%H:%M:%S")
+                item["opening_hours"].add_range(
+                    day_name,
+                    location["tradingHours"][0].get(day_name.lower())["startTime"],
+                    location["tradingHours"][0].get(day_name.lower())["endTime"],
+                    "%H:%M:%S",
+                )
             yield item
