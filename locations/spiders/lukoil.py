@@ -27,7 +27,7 @@ COMPANY_BRANDS = {
     "Lukoil": LUKOIL_BRAND,
     "ЛУКОЙЛ": LUKOIL_BRAND,
     "LICARD": LUKOIL_BRAND,
-    # Companies with other brands
+    # Companies owned by Lukoil, but having other brand
     "Teboil": {"brand": "Teboil", "brand_wikidata": "Q7692079"},
 }
 
@@ -52,7 +52,7 @@ PAYMENT_METHODS = {
     "UTA fuel card": FuelCards.UTA,
     "Vpay": PaymentMethods.V_PAY,
     "Карта AMEX": PaymentMethods.AMERICAN_EXPRESS,
-    # TODO: unable to find/create payment method for the following
+    # TODO: find payment methods for the following
     '"Халва" cards': None,
     "Bancontact/mister cash": None,
     "Gift Cards": None,
@@ -110,7 +110,11 @@ SERVICES = {
     "toll payments acceptance": None,
 }
 
-PROPERTIES = {"Cafe": None}
+PROPERTIES = {
+    "Cafe": None,
+    # TODO: map high flow diesel pump, this seems an important attribute for petrol station!
+    "High Flow Diesel": None
+    }
 
 
 class LukoilSpider(scrapy.Spider):
