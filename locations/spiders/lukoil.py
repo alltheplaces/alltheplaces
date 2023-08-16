@@ -113,8 +113,8 @@ SERVICES = {
 PROPERTIES = {
     "Cafe": None,
     # TODO: map high flow diesel pump, this seems an important attribute for petrol station!
-    "High Flow Diesel": None
-    }
+    "High Flow Diesel": None,
+}
 
 
 class LukoilSpider(scrapy.Spider):
