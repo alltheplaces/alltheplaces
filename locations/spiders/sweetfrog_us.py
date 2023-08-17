@@ -1,5 +1,4 @@
 from chompjs import parse_js_object
-
 from scrapy import Request, Spider
 
 from locations.structured_data_spider import StructuredDataSpider
@@ -17,7 +16,12 @@ class SweetFrogUSSpider(StructuredDataSpider):
         location_js_blobs = list(filter(lambda x: "Locator.stores" in x, locator_js_blob.splitlines()))
         locations = [parse_js_object(x.split(" = ", 1)[1]) for x in location_js_blobs]
         for location in locations:
-            url = "https://www.sweetfrog.com/stores/frozen-yogurt-" + location["cleanCity"] + "/" + str(location["StoreId"])
+            url = (
+                "https://www.sweetfrog.com/stores/frozen-yogurt-"
+                + location["cleanCity"]
+                + "/"
+                + str(location["StoreId"])
+            )
             yield Request(url=url, callback=self.parse_sd)
 
     def post_process_item(self, item, response, ld_data):
