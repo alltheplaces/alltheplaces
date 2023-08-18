@@ -10,9 +10,6 @@ class MyDentistGBSpider(CrawlSpider, StructuredDataSpider):
     MYDENTIST = {"brand": "My Dentist", "brand_wikidata": "Q65118035"}
 
     name = "mydentist_gb"
-    item_attributes = {
-        "country": "GB",
-    }
     allowed_domains = ["mydentist.co.uk"]
     start_urls = ["https://www.mydentist.co.uk/dentists/practices/"]
     rules = [
