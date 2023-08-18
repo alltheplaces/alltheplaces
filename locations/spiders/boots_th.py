@@ -1,11 +1,6 @@
-import json
-import re
-
 import scrapy
-from scrapy import Selector
 
 from locations.dict_parser import DictParser
-from locations.items import Feature
 
 
 class BootsTHSpider(scrapy.Spider):

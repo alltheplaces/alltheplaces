@@ -15,6 +15,7 @@ class ShaverShopSpider(Spider):
         "https://www.shavershop.com.au/on/demandware.store/Sites-Shaver_Shop_au-Site/en_AU/Stores-GetAllStores?countryCode=AU",
         "https://www.shavershop.net.nz/on/demandware.store/Sites-Shaver_Shop_nz-Site/en_NZ/Stores-GetAllStores?countryCode=NZ",
     ]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def start_requests(self):
         for url in self.start_urls:

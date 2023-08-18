@@ -1,5 +1,3 @@
-import json
-
 from scrapy.spiders import SitemapSpider
 
 from locations.google_url import extract_google_position

@@ -1,6 +1,4 @@
-from urllib.parse import urljoin
-
-from scrapy import Selector, Spider
+from scrapy import Spider
 
 from locations.items import Feature
 

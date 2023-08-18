@@ -1,10 +1,6 @@
-import json
-
 import scrapy
 from scrapy.http import JsonRequest
 
-from locations.dict_parser import DictParser
-from locations.hours import DAYS_EN, DAYS_FULL, OpeningHours
 from locations.items import Feature
 
 

@@ -1,7 +1,6 @@
 from chompjs import chompjs
 from scrapy import Selector, Spider
 
-from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.items import Feature
 

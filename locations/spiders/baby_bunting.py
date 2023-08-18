@@ -22,7 +22,10 @@ class BabyBuntingSpider(scrapy.Spider):
 
     def parse(self, response):
         for store in response.json():
-            if "COMING SOON" in store["title"].upper():
+            if (
+                "COMING SOON" in store["title"].upper()
+                or len(list(filter(lambda h: ("CLOSED" in h.upper()), store["opening_hours"].values()))) > 0
+            ):
                 continue
             item = DictParser.parse(store)
             item["ref"] = str(store["supplychannel_id"])
