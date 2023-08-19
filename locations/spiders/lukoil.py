@@ -1,6 +1,7 @@
 import scrapy
+from scrapy.http import JsonRequest
 
-from locations.categories import Extras, Fuel, FuelCards, PaymentMethods, apply_yes_no
+from locations.categories import Categories, Extras, Fuel, FuelCards, PaymentMethods, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
@@ -23,7 +24,7 @@ FUEL_TYPES_MAPPING = {
 LUKOIL_BRAND = {"brand": "Лукойл", "brand_wikidata": "Q329347"}
 
 COMPANY_BRANDS = {
-    # Companies under LUKOIL brand
+    # Companies under Lukoil brand
     "Lukoil": LUKOIL_BRAND,
     "ЛУКОЙЛ": LUKOIL_BRAND,
     "LICARD": LUKOIL_BRAND,
@@ -31,7 +32,7 @@ COMPANY_BRANDS = {
     "Teboil": {"brand": "Teboil", "brand_wikidata": "Q7692079"},
 }
 
-PAYMENT_METHODS = {
+PAYMENT_TYPES = {
     "ARIS Poland fuel card": FuelCards.ARIS,
     "ARIS fuel card": FuelCards.ARIS,
     "American Express": PaymentMethods.AMERICAN_EXPRESS,
@@ -124,17 +125,15 @@ class LukoilSpider(scrapy.Spider):
     handle_httpstatus_list = [403]
 
     def start_requests(self):
-        yield scrapy.Request(
+        yield JsonRequest(
             "https://lukoil.bg/api/cartography/GetCountryDependentSearchObjectData?form=gasStation",
             callback=self.get_results,
         )
 
     def get_results(self, response):
         for station in response.json()["GasStations"]:
-            yield scrapy.Request(
-                "https://lukoil.bg/api/cartography/GetObjects?ids=gasStation{station_id}".format(
-                    station_id=station["GasStationId"]
-                )
+            yield JsonRequest(
+                f"https://lukoil.bg/api/cartography/GetObjects?ids=gasStation{station['GasStationId']}"
             )
 
     def parse(self, response):
@@ -144,11 +143,12 @@ class LukoilSpider(scrapy.Spider):
             item["ref"] = poi.get("GasStationId")
             item["image"] = poi.get("StationPhotoUrl")
             self.parse_brand(item, poi)
-            self.parse_attribute(item, poi, "PaymentTypes", PAYMENT_METHODS)
+            self.parse_attribute(item, poi, "PaymentTypes", PAYMENT_TYPES)
             self.parse_attribute(item, poi, "Services", SERVICES)
             self.parse_attribute(item, poi, "Properties", PROPERTIES)
             self.parse_hours(item, poi)
             self.parse_fuel_types(item, data)
+            apply_category(Categories.FUEL_STATION, item)
             yield item
 
     def parse_brand(self, item: Feature, poi: dict):
@@ -167,7 +167,8 @@ class LukoilSpider(scrapy.Spider):
             if tag := mapping.get(attribute_entity.get("Name")):
                 apply_yes_no(tag, item, True)
             else:
-                self.crawler.stats.inc_value(f"atp/lukoil/{attribute_name}/failed/{attribute_entity.get('Name')}")
+                pass
+                # self.crawler.stats.inc_value(f"atp/lukoil/{attribute_name}/failed/{attribute_entity.get('Name')}")
 
     def parse_hours(self, item: Feature, poi: dict):
         if poi.get("TwentyFourHour"):
