@@ -25,7 +25,8 @@ class REWEDESpider(Spider):
         for location in response.json()["markets"]:
             market_id = location["id"]
             yield JsonRequest(
-                url=f"https://mobile-api.rewe.de/api/v3/market/details?marketId={market_id}", callback=self.parse_location
+                url=f"https://mobile-api.rewe.de/api/v3/market/details?marketId={market_id}",
+                callback=self.parse_location,
             )
 
     def parse_location(self, response):
