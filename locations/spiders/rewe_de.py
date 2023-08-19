@@ -16,12 +16,17 @@ class REWEDESpider(Spider):
 
     def start_requests(self):
         for lat, lon in point_locations("de_centroids_iseadgg_50km_radius.csv"):
-            yield JsonRequest(url=f"https://mobile-api.rewe.de/api/v3/market/search?latitude={lat}&longitude={lon}&distance=50", callback=self.parse_search_results)
+            yield JsonRequest(
+                url=f"https://mobile-api.rewe.de/api/v3/market/search?latitude={lat}&longitude={lon}&distance=50",
+                callback=self.parse_search_results,
+            )
 
     def parse_search_results(self, response):
         for location in response.json()["markets"]:
             market_id = location["id"]
-            yield JsonRequest(url=f"https://mobile-api.rewe.de/api/v3/market/details?marketId={market_id}", callback=parse_location)
+            yield JsonRequest(
+                url=f"https://mobile-api.rewe.de/api/v3/market/details?marketId={market_id}", callback=parse_location
+            )
 
     def parse_location(self, response):
         item = DictParser.parse(response.json()["marketItem"])
