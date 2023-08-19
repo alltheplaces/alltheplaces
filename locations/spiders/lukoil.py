@@ -132,9 +132,7 @@ class LukoilSpider(scrapy.Spider):
 
     def get_results(self, response):
         for station in response.json()["GasStations"]:
-            yield JsonRequest(
-                f"https://lukoil.bg/api/cartography/GetObjects?ids=gasStation{station['GasStationId']}"
-            )
+            yield JsonRequest(f"https://lukoil.bg/api/cartography/GetObjects?ids=gasStation{station['GasStationId']}")
 
     def parse(self, response):
         if data := response.json()[0]:
