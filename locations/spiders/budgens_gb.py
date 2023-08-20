@@ -1,5 +1,6 @@
 from scrapy.spiders import SitemapSpider
 
+from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.open_graph_parser import OpenGraphParser
 
@@ -23,5 +24,7 @@ class BudgensGBSpider(SitemapSpider):
             elif times == ["Closed "]:
                 continue
             item["opening_hours"].add_range(day, times[0].strip(), times[1].strip())
+
+        apply_category(Categories.SHOP_CONVENIENCE, item)
 
         yield item
