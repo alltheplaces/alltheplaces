@@ -15,14 +15,14 @@ class WinterthurCHSpider(scrapy.Spider):
         "attribution:name:en": "City of Winterthur",
         "attribution:wikidata": "Q9125",
         "license": "Creative Commons Zero",
-        "license:website": "https://stadtplantest.winterthur.ch/stadtgruen/spielplatzkontrolle-service/swagger/index.html",
+        "license:website": "https://stadtplan.winterthur.ch/stadtgruen/spielplatzkontrolle-service/swagger/index.html",
         "license:wikidata": "Q6938433",
     }
     no_refs = True
 
     def start_requests(self):
         yield scrapy.Request(
-            "https://stadtplantest.winterthur.ch/stadtgruen/spielplatzkontrolle-service/collections/playgrounds/items/",
+            "https://stadtplan.winterthur.ch/stadtgruen/spielplatzkontrolle-service/Collections/Playgrounds/Items/",
             callback=self.parse_playgrounds,
         )
 
@@ -42,6 +42,10 @@ class WinterthurCHSpider(scrapy.Spider):
             item = {
                 "lat": lat,
                 "lon": lon,
+                "street": props.get("streetName"),
+                "housenumber": props.get("houseNo"),
+                "city": "Winterthur",
+                "country": "CH",
                 "extras": {
                     "operator": "Stadtgrün Winterthur",
                     "operator:wikidata": "Q56825906",
@@ -51,4 +55,7 @@ class WinterthurCHSpider(scrapy.Spider):
             if name_words := props.get("name", "").split():
                 name_words[0] = abbrevs.get(name_words[0], name_words[0])
                 item["name"] = " ".join(name_words)
+            ref_emergency = props.get("nummer")
+            if ref_emergency and ref_emergency > 0:
+                item["extras"]["ref:emergency"] = str(ref_emergency)
             yield Feature(**item)
