@@ -99,10 +99,10 @@ class GulfPRUSSpider(Spider):
             "website": response.url,
         }
         if properties["state"] == "PR":
-            country = "PR"
-            properties.pop("state")
+            properties["country"] = "PR"
+            properties.pop("state", None)
         else:
-            country = "US"
+            properties["country"] = "US"
         apply_yes_no(Fuel.DIESEL, properties, response.meta["diesel"], False)
         apply_yes_no(Fuel.E85, properties, response.meta["ethanol"], False)
         apply_yes_no(Extras.TOILETS, properties, response.meta["toilets"], False)
