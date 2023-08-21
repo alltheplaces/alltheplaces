@@ -12,6 +12,10 @@ class RubiosUSSpider(Spider):
     start_urls = ["https://rubiosbackend.azurewebsites.net/punchh_api/api2/dashboard/locations"]
     custom_settings = {"ROBOTSTXT_OBEY": False}  # No robots.txt. Unparseable HTML error page returned.
 
+    def start_requests(self):
+        for url in self.start_urls:
+            yield JsonRequest(url=url)
+
     def parse(self, response):
         for location in response.json():
             if location["status"] != "approved":
