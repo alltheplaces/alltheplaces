@@ -1,8 +1,8 @@
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
+from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
-from locations.spiders.costacoffee_gb import yes_or_no
 from locations.spiders.vapestore_gb import clean_address
 
 
@@ -25,9 +25,7 @@ class ChurchOfEnglandGBSpider(Spider):
             item["addr_full"] = clean_address(item.get("addr_full"))
             item["image"] = church["photo_image"]
             item["website"] = "https://www.achurchnearyou.com" + church["acny_url"]
-
-            item["extras"] = {"toilets": yes_or_no("toilets" in church["tags"])}
-
+            apply_yes_no(Extras.TOILETS, item, "toilets" in church["tags"])
             yield item
 
         if next_url := response.json()["next"]:
