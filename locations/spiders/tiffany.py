@@ -22,9 +22,20 @@ class TiffanySpider(Spider):
                 continue
             item["lat"] = location["store"]["geoCodeLattitude"]
             item["lon"] = location["store"]["geoCodeLongitude"]
-            item["street_address"] = ", ".join(filter(None, [location["store"].get("address1"), location["store"].get("address2"), location["store"].get("address3")]))
+            item["street_address"] = ", ".join(
+                filter(
+                    None,
+                    [
+                        location["store"].get("address1"),
+                        location["store"].get("address2"),
+                        location["store"].get("address3"),
+                    ],
+                )
+            )
             item["phone"] = location["store"]["phone"].split("/", 1)[0].strip()
-            item["website"] = "https://www.tiffany.com/jewelry-stores/" + location["storeSeoAttributes"][0]["canonicalUrlkeyword"]
+            item["website"] = (
+                "https://www.tiffany.com/jewelry-stores/" + location["storeSeoAttributes"][0]["canonicalUrlkeyword"]
+            )
             if location["store"]["storePhoto"] != "/shared/images/stores/store_location.jpg":
                 item["image"] = "https://www.tiffany.com" + location["store"]["storePhoto"]
             opening_soon = False
@@ -34,7 +45,9 @@ class TiffanySpider(Spider):
                         opening_soon = True
                         break
                     item["opening_hours"] = OpeningHours()
-                    item["opening_hours"].add_ranges_from_string(store_hours["storeHours"].replace("<br>", "").replace(".", ""))
+                    item["opening_hours"].add_ranges_from_string(
+                        store_hours["storeHours"].replace("<br>", "").replace(".", "")
+                    )
             if opening_soon:
                 continue
             yield item
