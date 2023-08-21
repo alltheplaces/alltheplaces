@@ -1,6 +1,6 @@
 from scrapy import Spider
 
-from locations.categories import apply_yes_no, Extras
+from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_FULL, OpeningHours
 from locations.spiders.asda import AsdaSpider
@@ -43,9 +43,18 @@ class KFCGB(Spider):
                     item["opening_hours"] = oh.as_opening_hours()
                     break
 
-            apply_yes_no(Extras.WHEELCHAIR, item, any(f["name"] == "Disability Access" for f in location["facilities"]), False)
-            apply_yes_no(Extras.DRIVE_THROUGH, item, any(f["name"] == "Drive Thru" for f in location["facilities"]), False)
-            apply_yes_no(Extras.BABY_CHANGING_TABLE, item, any(f["name"] == "Baby Changing Room" for f in location["facilities"]), False)
+            apply_yes_no(
+                Extras.WHEELCHAIR, item, any(f["name"] == "Disability Access" for f in location["facilities"]), False
+            )
+            apply_yes_no(
+                Extras.DRIVE_THROUGH, item, any(f["name"] == "Drive Thru" for f in location["facilities"]), False
+            )
+            apply_yes_no(
+                Extras.BABY_CHANGING_TABLE,
+                item,
+                any(f["name"] == "Baby Changing Room" for f in location["facilities"]),
+                False,
+            )
             apply_yes_no(Extras.WIFI, item, any(f["name"] == "Free Wifi" for f in location["facilities"]), False)
 
             if "ASDA" in item["name"].upper():
