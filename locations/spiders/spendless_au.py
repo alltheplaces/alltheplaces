@@ -36,7 +36,8 @@ class SpendlessAUSpider(Spider):
             item["ref"] = location["identifier"]
             item.pop("street")
             item["street_address"] = ", ".join(filter(None, [location.get("street"), location.get("street2")]))
-            hours_string = re.sub(r"\s+", " ", location["opening_hours"])
-            item["opening_hours"] = OpeningHours()
-            item["opening_hours"].add_ranges_from_string(hours_string)
+            hours_string = re.sub(r"\s+", " ", location.get("opening_hours", "")).strip()
+            if hours_string:
+                item["opening_hours"] = OpeningHours()
+                item["opening_hours"].add_ranges_from_string(hours_string)
             yield item
