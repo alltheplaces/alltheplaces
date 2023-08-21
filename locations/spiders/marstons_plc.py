@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.categories import apply_category, apply_yes_no, Categories
+from locations.categories import Categories, apply_category, apply_yes_no
 from locations.items import Feature
 
 
