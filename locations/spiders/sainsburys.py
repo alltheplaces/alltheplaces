@@ -1,7 +1,7 @@
 import scrapy
 from scrapy import Request
 
-from locations.categories import apply_category, apply_yes_no, Categories, Extras, Fuel, PaymentMethods
+from locations.categories import Categories, Extras, Fuel, PaymentMethods, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 
@@ -53,7 +53,9 @@ class SainsburysSpider(scrapy.Spider):
             apply_yes_no(Extras.TOILETS_WHEELCHAIR, item, any(f["id"] == 9 for f in store["facilities"]), False)
             apply_yes_no(Extras.BABY_CHANGING_TABLE, item, any(f["id"] == 169 for f in store["facilities"]), False)
             apply_yes_no(Extras.WIFI, item, any(f["id"] == 221 for f in store["facilities"]), False)
-            apply_yes_no(Extras.SELF_CHECKOUT, item, any(f["id"] == 4 or f["id"] == 224 for f in store["facilities"]), False)
+            apply_yes_no(
+                Extras.SELF_CHECKOUT, item, any(f["id"] == 4 or f["id"] == 224 for f in store["facilities"]), False
+            )
             if any(f["id"] == 28 for f in store["facilities"]):
                 apply_category(Categories.PARKING, item)
                 apply_yes_no(Extras.PARKING_PARENT, item, any(f["id"] == 167 for f in store["facilities"]), False)
@@ -75,8 +77,8 @@ class SainsburysSpider(scrapy.Spider):
                     apply_categoriy(Categories.CHARGING_STATION, item)
                 apply_yes_no(Fuel.DIESEL, item, any(f["id"] == 17 for f in store["facilities"]), False)
                 apply_yes_no(Fuel.LPG, item, any(f["id"] == 192 for f in store["facilities"]), False)
-                apply_yes_no(Fuel.OCTANE_95, any(f["id"] == 11 for f in store["facilities"]), False) # "Petrol"
-                apply_yes_no(Fuel.OCTANE_97, any(f["id"] == 34 for f in store["facilities"]), False) # "Super Unleaded"
+                apply_yes_no(Fuel.OCTANE_95, any(f["id"] == 11 for f in store["facilities"]), False)  # "Petrol"
+                apply_yes_no(Fuel.OCTANE_97, any(f["id"] == 34 for f in store["facilities"]), False)  # "Super Unleaded"
             elif store["store_type"] == "pharmacy":
                 continue  # LloydsPharmacyGBSpider
             elif store["store_type"] == "tm":
