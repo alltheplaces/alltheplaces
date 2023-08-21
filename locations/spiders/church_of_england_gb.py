@@ -1,7 +1,7 @@
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
-from locations.categories import apply_yes_no, Extras
+from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.spiders.vapestore_gb import clean_address
 
