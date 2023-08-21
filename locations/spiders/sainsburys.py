@@ -74,7 +74,7 @@ class SainsburysSpider(scrapy.Spider):
             elif store["store_type"] == "pfs":
                 apply_category(Categories.FUEL_STATION, item)
                 if any(f["id"] == 108 for f in store["facilities"]):
-                    apply_categoriy(Categories.CHARGING_STATION, item)
+                    apply_category(Categories.CHARGING_STATION, item)
                 apply_yes_no(Fuel.DIESEL, item, any(f["id"] == 17 for f in store["facilities"]), False)
                 apply_yes_no(Fuel.LPG, item, any(f["id"] == 192 for f in store["facilities"]), False)
                 apply_yes_no(Fuel.OCTANE_95, any(f["id"] == 11 for f in store["facilities"]), False)  # "Petrol"
