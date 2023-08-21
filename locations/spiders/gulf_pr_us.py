@@ -1,11 +1,11 @@
-from chompjs import parse_js_object
-from html import unescape
 import re
+from html import unescape
 
+from chompjs import parse_js_object
 from scrapy import Request, Selector, Spider
 from scrapy.http import FormRequest
 
-from locations.categories import apply_category, apply_yes_no, Categories, Extras, Fuel
+from locations.categories import Categories, Extras, Fuel, apply_category, apply_yes_no
 from locations.items import Feature
 
 
@@ -24,7 +24,12 @@ class GulfPRUSSpider(Spider):
             "view_name": "station_locator_search_block",
             "view_display_id": "block_2",
         }
-        return FormRequest(url="https://www.gulfoil.com/views/ajax?_wrapper_format=drupal_ajax", formdata=formdata, method="POST", meta={"page": page})
+        return FormRequest(
+            url="https://www.gulfoil.com/views/ajax?_wrapper_format=drupal_ajax",
+            formdata=formdata,
+            method="POST",
+            meta={"page": page},
+        )
 
     def start_requests(self):
         yield self.make_request(1)
@@ -41,10 +46,11 @@ class GulfPRUSSpider(Spider):
             return
 
         for result in results.xpath('//section[@role="article"]'):
-            url = "https://www.gulfoil.com" + result.xpath('./@about').get()
+            url = "https://www.gulfoil.com" + result.xpath("./@about").get()
             meta = {
                 "atm": result.xpath('.//li[contains(text(), "ATM")]/text()').get() is not None,
-                "convenience_store": result.xpath('.//li[contains(text(), "Convenience Store")]/text()').get() is not None,
+                "convenience_store": result.xpath('.//li[contains(text(), "Convenience Store")]/text()').get()
+                is not None,
                 "diesel": result.xpath('.//li[contains(text(), "Diesel Fuel")]/text()').get() is not None,
                 "ethanol": result.xpath('.//li[contains(text(), "Ethanol")]/text()').get() is not None,
                 "toilets": result.xpath('.//li[contains(text(), "Public Restrooms")]/text()').get() is not None,
@@ -56,16 +62,40 @@ class GulfPRUSSpider(Spider):
 
     def parse_station(self, response):
         properties = {
-            "ref": response.xpath('//div[contains(@class, "field--name-field-csv-id")]/div[@class="field__item"]/text()').get(),
+            "ref": response.xpath(
+                '//div[contains(@class, "field--name-field-csv-id")]/div[@class="field__item"]/text()'
+            ).get(),
             "name": unescape(response.xpath('//span[contains(@class, "field--name-title")]/text()').get()),
-            "lat": re.findall(r"\-?[\d\.]+", response.xpath('//div[contains(@class, "field--name-field-geofield")]/div[@class="field__item"]/text()').get())[1],
-            "lon": re.findall(r"\-?[\d\.]+", response.xpath('//div[contains(@class, "field--name-field-geofield")]/div[@class="field__item"]/text()').get())[0],
-            "housenumber": response.xpath('//div[contains(@class, "field--name-field-streetno")]/div[@class="field__item"]/text()').get(),
-            "street": response.xpath('//div[contains(@class, "field--name-field-site-street")]/div[@class="field__item"]/text()').get(),
-            "city": response.xpath('//div[contains(@class, "field--name-field-site-city")]/div[@class="field__item"]/text()').get(),
-            "state": response.xpath('//div[contains(@class, "field--name-field-site-state")]/div[@class="field__item"]/text()').get(),
-            "postcode": response.xpath('//div[contains(@class, "field--name-field-zipcode")]/div[@class="field__item"]/text()').get(),
-            "phone": response.xpath('//div[contains(@class, "field--name-field-phonenumber")]/div[@class="field__item"]/text()').get(),
+            "lat": re.findall(
+                r"\-?[\d\.]+",
+                response.xpath(
+                    '//div[contains(@class, "field--name-field-geofield")]/div[@class="field__item"]/text()'
+                ).get(),
+            )[1],
+            "lon": re.findall(
+                r"\-?[\d\.]+",
+                response.xpath(
+                    '//div[contains(@class, "field--name-field-geofield")]/div[@class="field__item"]/text()'
+                ).get(),
+            )[0],
+            "housenumber": response.xpath(
+                '//div[contains(@class, "field--name-field-streetno")]/div[@class="field__item"]/text()'
+            ).get(),
+            "street": response.xpath(
+                '//div[contains(@class, "field--name-field-site-street")]/div[@class="field__item"]/text()'
+            ).get(),
+            "city": response.xpath(
+                '//div[contains(@class, "field--name-field-site-city")]/div[@class="field__item"]/text()'
+            ).get(),
+            "state": response.xpath(
+                '//div[contains(@class, "field--name-field-site-state")]/div[@class="field__item"]/text()'
+            ).get(),
+            "postcode": response.xpath(
+                '//div[contains(@class, "field--name-field-zipcode")]/div[@class="field__item"]/text()'
+            ).get(),
+            "phone": response.xpath(
+                '//div[contains(@class, "field--name-field-phonenumber")]/div[@class="field__item"]/text()'
+            ).get(),
             "website": response.url,
         }
         if properties["state"] == "PR":
