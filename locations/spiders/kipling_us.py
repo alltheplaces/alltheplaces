@@ -11,7 +11,9 @@ class KiplingUSSpider(Spider):
     name = "kipling_us"
     item_attributes = {"brand": "Kipling", "brand_wikidata": "Q6414641"}
     allowed_domains = ["www.kipling-usa.com"]
-    start_urls = ["https://www.kipling-usa.com/on/demandware.store/Sites-kip-Site/default/Stores-GetNearestStores?&countryCode=US&onlyCountry=true&retailstores=true&outletstores=true"]
+    start_urls = [
+        "https://www.kipling-usa.com/on/demandware.store/Sites-kip-Site/default/Stores-GetNearestStores?&countryCode=US&onlyCountry=true&retailstores=true&outletstores=true"
+    ]
 
     def start_requests(self):
         for url in self.start_urls:
@@ -19,7 +21,10 @@ class KiplingUSSpider(Spider):
 
     def parse(self, response):
         for location in response.json().values():
-            if "STORE CLOSED" in location.get("storeHours", "").upper() or "STORE IS CLOSED" in location.get("storeHours", "").upper():
+            if (
+                "STORE CLOSED" in location.get("storeHours", "").upper()
+                or "STORE IS CLOSED" in location.get("storeHours", "").upper()
+            ):
                 continue
             item = DictParser.parse(location)
             item["ref"] = location["storeID"]
