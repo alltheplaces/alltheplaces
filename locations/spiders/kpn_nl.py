@@ -9,7 +9,10 @@ class KpnNLSpider(scrapy.Spider):
     start_urls = ["https://www.kpn.com/w3/rest/storelocator/stores"]
 
     item_attributes = {"brand": "KPN", "brand_wikidata": "Q338633"}
-    custom_settings = {"DEFAULT_REQUEST_HEADERS": {"referer": "https://www.kpn.com/w3/vind-een-winkel/"}}
+    custom_settings = {
+        "DEFAULT_REQUEST_HEADERS": {"referer": "https://www.kpn.com/w3/vind-een-winkel/"},
+        "ROBOTSTXT_OBEY": False,
+    }
 
     def parse(self, response, **kwargs):
         for store in response.json().get("stores"):
