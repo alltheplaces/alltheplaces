@@ -10,7 +10,7 @@ class OportoAUSpider(Spider):
     item_attributes = {"brand": "Oporto", "brand_wikidata": "Q4412342"}
     allowed_domains = ["www.oporto.com.au"]
     start_urls = ["https://www.oporto.com.au/api-proxy/stores?include=amenities,collection,storeAddress"]
-    custom_settings = {"ROBOTSTXT_OBEY": False} # robots.txt does not exist and HTML page returned instead.
+    custom_settings = {"ROBOTSTXT_OBEY": False}  # robots.txt does not exist and HTML page returned instead.
 
     def parse(self, response):
         for location in response.json()["data"]:
@@ -27,11 +27,15 @@ class OportoAUSpider(Spider):
             item["postcode"] = address["postcode"]["value"]
             item["phone"] = location["attributes"]["storePhone"]
             item["email"] = location["attributes"]["storeEmail"]
-            item["website"] = "https://www.oporto.com.au/locations/" + location["attributes"]["accountName"].lower().replace(" ", "-")
+            item["website"] = "https://www.oporto.com.au/locations/" + location["attributes"][
+                "accountName"
+            ].lower().replace(" ", "-")
             apply_yes_no(Extras.DRIVE_THROUGH, item, location["attributes"]["pickupTypes"]["driveThru"], False)
             apply_yes_no(Extras.TAKEAWAY, item, location["attributes"]["pickupTypes"]["instore"], False)
             apply_yes_no(Extras.DELIVERY, item, location["attributes"]["isDeliveryEnabled"], False)
-            extra_features = [k for k, v in location["relationships"]["amenities"]["data"]["attributes"].items() if v is True]
+            extra_features = [
+                k for k, v in location["relationships"]["amenities"]["data"]["attributes"].items() if v is True
+            ]
             apply_yes_no(Extras.TOILETS, item, "haveToilet" in extra_features, False)
             apply_yes_no(Extras.WIFI, item, "haveWifi" in extra_features, False)
             if location["relationships"].get("collection"):
