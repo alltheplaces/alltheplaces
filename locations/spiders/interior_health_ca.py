@@ -14,8 +14,8 @@ class InteriorHealthCASpider(SitemapSpider):
         properties = {
             "ref": response.url,
             "name": response.xpath('//div[contains(@class, "top-banner-header-content")]/h1/text()').get().strip(),
-            "lat": response.xpath('//@data-lat').get(),
-            "lon": response.xpath('//@data-lng').get(),
+            "lat": response.xpath("//@data-lat").get(),
+            "lon": response.xpath("//@data-lng").get(),
             "street_address": response.xpath('//span[@class="address-line1"]/text()').get().strip(),
             "city": response.xpath('//span[@class="locality"]/text()').get().strip(),
             "state": response.xpath('//span[@class="administrative-area"]/text()').get().strip(),
