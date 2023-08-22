@@ -38,11 +38,11 @@ class SainsburysSpider(scrapy.Spider):
 
             item["opening_hours"] = oh.as_opening_hours()
             item["website"] = "https://stores.sainsburys.co.uk/{}/{}".format(
-                item["ref"], item["name"].lower().replace(" ", "-")
+                item["ref"], item["name"].strip().lower().replace(" ", "-")
             )
 
-            item["extras"] = {}
-            item["extras"]["fhrs:id"] = store["fsa_scores"]["fhrs_id"]
+            if fhrs := store["fsa_scores"].get("fhrs_id"):
+                item["extras"]["fhrs:id"] = str(fhrs)
 
             # https://stores.sainsburys.co.uk/api/v1/facilities
             apply_yes_no(Extras.ATM, item, any(f["id"] == 2 for f in store["facilities"]), False)
@@ -77,8 +77,10 @@ class SainsburysSpider(scrapy.Spider):
                     apply_category(Categories.CHARGING_STATION, item)
                 apply_yes_no(Fuel.DIESEL, item, any(f["id"] == 17 for f in store["facilities"]), False)
                 apply_yes_no(Fuel.LPG, item, any(f["id"] == 192 for f in store["facilities"]), False)
-                apply_yes_no(Fuel.OCTANE_95, any(f["id"] == 11 for f in store["facilities"]), False)  # "Petrol"
-                apply_yes_no(Fuel.OCTANE_97, any(f["id"] == 34 for f in store["facilities"]), False)  # "Super Unleaded"
+                apply_yes_no(Fuel.OCTANE_95, item, any(f["id"] == 11 for f in store["facilities"]), False)  # "Petrol"
+                apply_yes_no(
+                    Fuel.OCTANE_97, item, any(f["id"] == 34 for f in store["facilities"]), False
+                )  # "Super Unleaded"
             elif store["store_type"] == "pharmacy":
                 continue  # LloydsPharmacyGBSpider
             elif store["store_type"] == "tm":
@@ -86,7 +88,6 @@ class SainsburysSpider(scrapy.Spider):
             elif store["store_type"] == "specsavers":
                 continue  # SpecsaversGBSpider
             elif store["store_type"] == "restaurant":
-                item["extras"]["amenity"] = "cafe"
                 apply_category(Categories.CAFE, item)
             elif store["store_type"] == "habitat":
                 continue  # https://www.habitat.co.uk/
