@@ -13,6 +13,22 @@ class KeyFoodUSSpider(Spider):
         "https://keyfoodstores.keyfood.com/store/keyFood/en/store-locator?q=90210&page=0&radius=100000&all=true"
     ]
     custom_settings = {"ROBOTSTXT_OBEY": False}
+    brands = {
+        "https://ernestklein.keyfood.com/store": {"brand": "Ernest Klein"},
+        "https://fooddynasty.keyfood.com/store": {"brand": "Food Dynasty"},
+        "https://foodemporium.keyfood.com/store": {"brand": "The Food Emporium"},
+        "https://fooduniverse.keyfood.com/store": {"brand": "Food Universe"},
+        "https://galafoods.keyfood.com/store": {"brand": "Gala Foods"},
+        "https://galafresh.keyfood.com/store": {"brand": "GalaFresh Farms"},
+        "https://halseytradersmarket.keyfood.com/store": {"brand": "Halsey Traders Market"},
+        "https://keyfoodmarketplace.keyfood.com/store": {"brand": "Key Food Marketplace"},
+        "https://keyfoodstores.keyfood.com/store": {"brand": "Key Food", "brand_wikidata": "Q6398037"},
+        "https://marketplace.keyfood.com/store": {"brand": "Marketplace"},
+        "https://superfresh.keyfood.com/store": {"brand": "SuperFresh"},
+        "https://tropicalsupermarket.keyfood.com/store": {"brand": "Tropical Supermarket"},
+        "https://urbanmarketplace.keyfood.com/store": {"brand": "Key Food Urban Marketplace"},
+        "https://www.keyfood.com/store": {"brand": "Key Food", "brand_wikidata": "Q6398037"},
+    }
 
     def start_requests(self):
         for url in self.start_urls:
@@ -29,45 +45,8 @@ class KeyFoodUSSpider(Spider):
             item["street_address"] = ", ".join(filter(None, [location["line1"], location["line2"]]))
             item["website"] = location["siteUrl"] + location["url"].split("?", 1)[0]
 
-            if "www.keyfood.com" in item["website"] or "keyfoodstores.keyfood.com" in item["website"]:
-                item["brand"] = "Key Food"
-                item["brand_wikidata"] = "Q6398037"
-            elif "keyfoodmarketplace.keyfood.com" in item["website"]:
-                item["brand"] = "Key Food Marketplace"
-                # item["brand_wikidata"] = ""
-            elif "urbanmarketplace.keyfood.com" in item["website"]:
-                item["brand"] = "Key Food Urban Marketplace"
-                # item["brand_wikidata"] = ""
-            elif "superfresh.keyfood.com" in item["website"]:
-                item["brand"] = "SuperFresh"
-                # item["brand_wikidata"] = ""
-            elif "galafoods.keyfood.com" in item["website"]:
-                item["brand"] = "Gala Foods"
-                # item["brand_wikidata"] = ""
-            elif "galafresh.keyfood.com" in item["website"]:
-                item["brand"] = "GalaFresh Farms"
-                # item["brand_wikidata"] = ""
-            elif "fooduniverse.keyfood.com" in item["website"]:
-                item["brand"] = "Food Universe"
-                # item["brand_wikidata"] = ""
-            elif "foodemporium.keyfood.com" in item["website"]:
-                item["brand"] = "The Food Emporium"
-                # item["brand_wikidata"] = ""
-            elif "fooddynasty.keyfood.com" in item["website"]:
-                item["brand"] = "Food Dynasty"
-                # item["brand_wikidata"] = ""
-            elif "tropicalsupermarket.keyfood.com" in item["website"]:
-                item["brand"] = "Tropical Supermarket"
-                # item["brand_wikidata"] = ""
-            elif "halseytradersmarket.keyfood.com" in item["website"]:
-                item["brand"] = "Halsey Traders Market"
-                # item["brand_wikidata"] = ""
-            elif "marketplace.keyfood.com" in item["website"]:
-                item["brand"] = "Marketplace"
-                # item["brand_wikidata"] = ""
-            elif "ernestklein.keyfood.com" in item["website"]:
-                item["brand"] = "Ernest Klein"
-                # item["brand_wikidata"] = ""
+            if brand := self.brands.get(location["siteUrl"]):
+                item.update(brand)
 
             apply_category(Categories.SHOP_SUPERMARKET, item)
 
@@ -76,9 +55,7 @@ class KeyFoodUSSpider(Spider):
                 item["opening_hours"].add_days_range(DAYS, "00:00", "23:59")
             else:
                 for day_name, day_hours in location["openings"].items():
-                    item["opening_hours"].add_range(
-                        day_name, day_hours.split(" - ", 1)[0], day_hours.split(" - ", 1)[1], "%I:%M %p"
-                    )
+                    item["opening_hours"].add_range(day_name, *day_hours.split(" - ", 1), "%I:%M %p")
 
             yield item
 
