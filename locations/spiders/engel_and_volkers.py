@@ -63,12 +63,21 @@ class EngelAndVolkersSpider(Spider):
             item["website"] = location["contactInfo"].get("website")
             if item["website"]:
                 item["website"] = re.sub(r"^engelvoelkers\.com\/", "https://engelvoelkers.com/", item["website"])
-                item["website"] = re.sub(r"^www\.engelvoelkers\.com\/", "https://www.engelvoelkers.com/", item["website"])
-                item["website"] = re.sub(r"^([\w\-]+)\.evrealestate\.com", r"https://\1.evrealestate.com", item["website"])
+                item["website"] = re.sub(
+                    r"^www\.engelvoelkers\.com\/", "https://www.engelvoelkers.com/", item["website"]
+                )
+                item["website"] = re.sub(
+                    r"^([\w\-]+)\.evrealestate\.com", r"https://\1.evrealestate.com", item["website"]
+                )
             if location.get("googlePlaceDetails") and location["googlePlaceDetails"].get("openingHours"):
                 item["opening_hours"] = OpeningHours()
                 for day_hours in location["googlePlaceDetails"]["openingHours"]["periods"]:
                     if not day_hours.get("open") or not day_hours.get("close"):
                         continue
-                    item["opening_hours"].add_range(DAYS[day_hours["open"]["day"] - 1], day_hours["open"]["time"], day_hours["close"]["time"], "%H%M")
+                    item["opening_hours"].add_range(
+                        DAYS[day_hours["open"]["day"] - 1],
+                        day_hours["open"]["time"],
+                        day_hours["close"]["time"],
+                        "%H%M",
+                    )
             yield item
