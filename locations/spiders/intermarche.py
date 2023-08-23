@@ -1,7 +1,7 @@
 import scrapy
 from scrapy import Request
 
-from locations.categories import apply_category, apply_yes_no, Categories, Extras
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 
