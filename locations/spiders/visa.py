@@ -10,10 +10,11 @@ from locations.dict_parser import DictParser
 
 class VisaSpider(Spider):
     name = "visa"
-    offset = 0
-    page_size = 1000
     no_refs = True
     custom_settings = {"AUTOTHROTTLE_ENABLED": True, "RETRY_TIMES": 5}
+
+    offset = 0
+    page_size = 1000
 
     def next_request(self) -> JsonRequest:
         return JsonRequest(
@@ -70,7 +71,6 @@ class VisaSpider(Spider):
                 yield item
 
             self.offset += self.page_size
-            print([self.offset, data["totalATMCount"], (100 / data["totalATMCount"]) * self.offset])
 
             if self.offset < data["totalATMCount"]:
                 yield self.next_request()
