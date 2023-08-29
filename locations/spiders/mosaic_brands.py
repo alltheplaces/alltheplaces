@@ -27,11 +27,18 @@ class MosaicBrandSpider(Spider):
 
     def start_requests(self):
         for brand_domain in self.allowed_domains:
-            yield JsonRequest(url=f"https://{brand_domain}/on/demandware.store/Sites-mosaic-au-Site/en_AU/Stores-FindStoresInBrand?showMap=false&radius=100000&limit=10000&postalCode=2000")
+            yield JsonRequest(
+                url=f"https://{brand_domain}/on/demandware.store/Sites-mosaic-au-Site/en_AU/Stores-FindStoresInBrand?showMap=false&radius=100000&limit=10000&postalCode=2000"
+            )
 
     def parse(self, response):
         for location in response.json()["stores"]:
-            if "ONLINE" in location["name"].upper().split() or "ONLINESTORE" in location["name"].upper().split() or "PRICING STORE" in location["name"].upper() or "CLOSED" in location["name"].upper().split():
+            if (
+                "ONLINE" in location["name"].upper().split()
+                or "ONLINESTORE" in location["name"].upper().split()
+                or "PRICING STORE" in location["name"].upper()
+                or "CLOSED" in location["name"].upper().split()
+            ):
                 continue
 
             item = DictParser.parse(location)
@@ -48,7 +55,7 @@ class MosaicBrandSpider(Spider):
                     item.update(brand_attributes)
                     break
 
-            hours_string = " ".join(filter(None, Selector(text=location["storeHours"]).xpath('//text()').getall()))
+            hours_string = " ".join(filter(None, Selector(text=location["storeHours"]).xpath("//text()").getall()))
             item["opening_hours"] = OpeningHours()
             item["opening_hours"].add_ranges_from_string(hours_string)
 
