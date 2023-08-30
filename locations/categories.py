@@ -278,6 +278,7 @@ class Extras(Enum):
     TOILETS = "toilets"
     TOILETS_WHEELCHAIR = "toilets:wheelchair"
     TRUCK_WASH = "truck_wash"
+    VACUUM_CLEANER = "vacuum_cleaner"
     WHEELCHAIR = "wheelchair"
     WIFI = "internet_access=wlan"
 
@@ -348,10 +349,12 @@ class FuelCards(Enum):
     LUKOIL = "payment:lukoil"  # https://lukoil.ru/Products/business/fuelcards
     LUKOIL_LOYALTY_PROGRAM = "fuel:discount:lukoil"
     MOBIL = "Mobilcard"
+    OMV = "payment:omv"  # https://www.omv.com/en/customers/services/fuel-cards
     PETROL_PLUS_REGION = "payment:petrol_plus_region"  # https://www.petrolplus.ru/
     SHELL = "fuel:discount:shell"
     UTA = "fuel:discount:uta"
     ROSNEFT = "payment:rosneft"  # https://www.rn-card.ru/
+    ROUTEX = "payment:routex"  # https://routex.com/
 
 
 def apply_yes_no(attribute, item: Feature, state: bool, apply_positive_only: bool = True):
