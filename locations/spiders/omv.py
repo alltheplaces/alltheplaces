@@ -1,8 +1,8 @@
-import scrapy
-import requests as r
 import re
-from locations.categories import Categories, Fuel, FuelCards, PaymentMethods, apply_category, Extras, apply_yes_no
 
+import scrapy
+
+from locations.categories import Categories, Extras, Fuel, FuelCards, PaymentMethods, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 
@@ -69,19 +69,19 @@ PAYMENT_METHODS_MAP = {
     "DKV": FuelCards.DKV,
     "Master Card": PaymentMethods.MASTER_CARD,
     "OMV Card": FuelCards.OMV,
-    'Routex Card': FuelCards.ROUTEX,
+    "Routex Card": FuelCards.ROUTEX,
     "UTA": FuelCards.UTA,
     "VISA Card": PaymentMethods.VISA,
     # TODO: find payment methods for the following
-    'ARBÖ Card': None,
-    'Cadhoc': None,
-    'CadouPass': None,
-    'CheckDejeuner': None,
-    'GustoPass': None,
-    'SmartPass': None,
-    'TicketRestaurant': None,
-    'Westaco': None,
-    'jö Karte': None,
+    "ARBÖ Card": None,
+    "Cadhoc": None,
+    "CadouPass": None,
+    "CheckDejeuner": None,
+    "GustoPass": None,
+    "SmartPass": None,
+    "TicketRestaurant": None,
+    "Westaco": None,
+    "jö Karte": None,
     "Lotto Toto acceptence": None,
 }
 

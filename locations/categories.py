@@ -283,7 +283,6 @@ class Extras(Enum):
     WIFI = "internet_access=wlan"
 
 
-
 class PaymentMethods(Enum):
     ALIPAY = "payment:alipay"
     AMERICAN_EXPRESS = "payment:american_express"
@@ -350,7 +349,7 @@ class FuelCards(Enum):
     LUKOIL = "payment:lukoil"  # https://lukoil.ru/Products/business/fuelcards
     LUKOIL_LOYALTY_PROGRAM = "fuel:discount:lukoil"
     MOBIL = "Mobilcard"
-    OMV = 'payment:omv'  # https://www.omv.com/en/customers/services/fuel-cards
+    OMV = "payment:omv"  # https://www.omv.com/en/customers/services/fuel-cards
     PETROL_PLUS_REGION = "payment:petrol_plus_region"  # https://www.petrolplus.ru/
     SHELL = "fuel:discount:shell"
     UTA = "fuel:discount:uta"
