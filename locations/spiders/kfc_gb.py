@@ -1,9 +1,9 @@
 from scrapy import Spider
 
+from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_FULL, OpeningHours
 from locations.spiders.asda import AsdaSpider
-from locations.spiders.costacoffee_gb import yes_or_no
 from locations.spiders.kfc import KFCSpider
 from locations.spiders.vets4pets_gb import set_located_in
 from locations.user_agents import BROWSER_DEFAULT
@@ -38,20 +38,24 @@ class KFCGB(Spider):
                         if day["close"] == 0:
                             day["close"] = "2359"
 
-                        oh.add_range(d, str(day["open"]), str(day["close"]), time_format="%H%M")
+                        oh.add_range(d, str(day["open"]).zfill(4), str(day["close"]).zfill(4), time_format="%H%M")
 
                     item["opening_hours"] = oh.as_opening_hours()
                     break
 
-            item["extras"] = {
-                "wheelchair": yes_or_no(any(f["name"] == "Disability Access" for f in location["facilities"])),
-                "drive_through": yes_or_no(any(f["name"] == "Drive Thru" for f in location["facilities"])),
-                "changing_table": yes_or_no(any(f["name"] == "Baby Changing Room" for f in location["facilities"])),
-            }
-
-            if any(f["name"] == "Free Wifi" for f in location["facilities"]):
-                item["extras"]["internet_access"] = "wlan"
-                item["extras"]["internet_access:fee"] = "no"
+            apply_yes_no(
+                Extras.WHEELCHAIR, item, any(f["name"] == "Disability Access" for f in location["facilities"]), False
+            )
+            apply_yes_no(
+                Extras.DRIVE_THROUGH, item, any(f["name"] == "Drive Thru" for f in location["facilities"]), False
+            )
+            apply_yes_no(
+                Extras.BABY_CHANGING_TABLE,
+                item,
+                any(f["name"] == "Baby Changing Room" for f in location["facilities"]),
+                False,
+            )
+            apply_yes_no(Extras.WIFI, item, any(f["name"] == "Free Wifi" for f in location["facilities"]), False)
 
             if "ASDA" in item["name"].upper():
                 set_located_in(item, AsdaSpider.item_attributes)
