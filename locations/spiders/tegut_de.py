@@ -52,7 +52,6 @@ class TegutDeSpider(scrapy.Spider):
 
         storeid = store.get("@id", None)
         if storeid:
-            print(store["openingHours"])
             properties = {
                 "ref": storeid,
                 "name": store["name"],
