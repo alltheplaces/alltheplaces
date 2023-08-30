@@ -24,7 +24,7 @@ class YextSpider(Spider):
     search_filter = "{}"
     page_limit = 50
 
-    wanted_type = "location"
+    wanted_types = ["location"]
 
     def request_page(self, next_offset):
         yield JsonRequest(
@@ -40,7 +40,7 @@ class YextSpider(Spider):
 
     def parse(self, response):
         for location in response.json()["response"]["entities"]:
-            if location["meta"].get("entityType") != self.wanted_type:
+            if location["meta"].get("entityType") not in self.wanted_types:
                 continue
             if location.get("closed") or "CLOSED" in location["name"].upper():
                 continue
