@@ -53,7 +53,7 @@ class UpsStoreSpider(scrapy.Spider):
             ref = re.search(
                 r"store(\d+)@theupsstore.com",
                 response.xpath('//a[@itemprop="email"]/text()').extract_first(),
-            ).groups()
+            ).group(0)
 
         properties = {
             "name": response.xpath('//span[@class="LocationName-geo"]/text()').extract_first(),
