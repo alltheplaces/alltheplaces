@@ -12,9 +12,7 @@ class CanadianTireSpiderCA(SitemapSpider):
     name = "canadian_tire_ca"
     item_attributes = {"brand": "Canadian Tire", "brand_wikidata": "Q1032400"}
     allowed_domains = ["canadiantire.ca"]
-    sitemap_urls = [
-        "https://www.canadiantire.ca/sitemap_Store-en_CA-CAD.xml"
-    ]
+    sitemap_urls = ["https://www.canadiantire.ca/sitemap_Store-en_CA-CAD.xml"]
     sitemap_rules = [("", "parse_store")]
     custom_settings = {
         "ROBOTSTXT_OBEY": False,
@@ -39,7 +37,11 @@ class CanadianTireSpiderCA(SitemapSpider):
         item = DictParser.parse(response.json())
         item["lat"] = response.json().get("geoPoint", {}).get("latitude")
         item["lon"] = response.json().get("geoPoint", {}).get("longitude")
-        item["street_address"] = ", ".join(filter(None, [response.json().get("address", {}).get("line1"), response.json().get("address", {}).get("line2")]))
+        item["street_address"] = ", ".join(
+            filter(
+                None, [response.json().get("address", {}).get("line1"), response.json().get("address", {}).get("line2")]
+            )
+        )
         item["city"] = response.json().get("address", {}).get("town")
         item["state"] = response.json().get("address", {}).get("region", {}).get("name")
         item["country"] = response.json().get("address", {}).get("country", {}).get("isocode")
