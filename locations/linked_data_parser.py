@@ -24,11 +24,11 @@ class LinkedDataParser:
 
             if isinstance(ld_obj, dict):
                 if "@graph" in ld_obj:
-                    yield from ld_obj["@graph"]
+                    yield from filter(None, ld_obj["@graph"])
                 else:
                     yield ld_obj
             elif isinstance(ld_obj, list):
-                yield from ld_obj
+                yield from filter(None, ld_obj)
             else:
                 raise TypeError(ld_obj)
 

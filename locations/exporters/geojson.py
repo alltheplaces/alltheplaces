@@ -149,4 +149,5 @@ class GeoJsonExporter(JsonItemExporter):
         self.file.write(to_bytes(header.getvalue(), self.encoding))
 
     def finish_exporting(self):
-        self.file.write(b"\n]}\n")
+        if not self.first_item:
+            self.file.write(b"\n]}\n")
