@@ -7,7 +7,7 @@ class ChickfilASpider(YextSpider):
     name = "chick_fil_a"
     item_attributes = {"brand": "Chick-fil-A", "brand_wikidata": "Q491516"}
     api_key = "71620ba70d81b48c7c72331e25462ebc"
-    wanted_type = "restaurant"
+    wanted_types = ["restaurant"]
 
     def parse_item(self, item, location):
         if location.get("c_status") and location["c_status"] != "OPEN":
