@@ -58,7 +58,6 @@ class SnapFitnessSpider(Spider):
                 location["customProperties"]["contactDetails"].get("instagramUrl", "")
             )
             item["facebook"] = clean_facebook(location["customProperties"]["contactDetails"].get("facebookUrl", ""))
-            print(location)
             if location["customProperties"]["contactDetails"].get("open24Hours"):
                 item["opening_hours"] = OpeningHours()
                 item["opening_hours"].add_days_range(DAYS, "00:00", "23:59")
