@@ -1,4 +1,4 @@
-from locations.categories import apply_category, Categories
+from locations.categories import Categories, apply_category
 from locations.storefinders.yext import YextSpider
 
 
