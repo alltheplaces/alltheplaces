@@ -1,7 +1,7 @@
 import scrapy
+
 from locations.categories import Categories, Extras, Fuel, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
-
 from locations.hours import OpeningHours
 
 
@@ -15,7 +15,7 @@ class SunocoUSSpider(scrapy.Spider):
     def parse(self, response):
         for location in response.json():
             item = DictParser.parse(location)
-            item['ref'] = location['Store_ID']
+            item["ref"] = location["Store_ID"]
             self.parse_hours(item, location)
             apply_category(Categories.FUEL_STATION, item)
             apply_yes_no(Fuel.DIESEL, item, location["HasDiesel"] == "Y")
