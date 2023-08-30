@@ -23,7 +23,9 @@ class TechnomarketSpider(scrapy.Spider):
             item["lon"] = store["latLng"]["lng"]
             item["phone"] = store["tel"]
             item["email"] = store["email"]
-            item["website"] = "https://www.technomarket.bg/" + store["url"]["city"] + "/" + store["url"]["store"]
+            item["website"] = (
+                "https://www.technomarket.bg/magazini/" + store["url"]["city"] + "/" + store["url"]["store"]
+            )
 
             oh = OpeningHours()
             for day in DAYS[0:5]:
