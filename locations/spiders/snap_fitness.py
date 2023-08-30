@@ -3,7 +3,7 @@ from scrapy.http import JsonRequest
 
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
-from locations.structured_data_spider import clean_instagram, clean_facebook
+from locations.structured_data_spider import clean_facebook, clean_instagram
 
 
 class SnapFitnessSpider(Spider):
@@ -42,11 +42,21 @@ class SnapFitnessSpider(Spider):
             item["name"] = location["name"]
             item["lat"] = location["customProperties"]["latitude"]
             item["lon"] = location["customProperties"]["longitude"]
-            item["street_address"] = ", ".join(filter(None, [location["customProperties"]["contactDetails"].get("address"), location["customProperties"]["contactDetails"].get("address2")]))
+            item["street_address"] = ", ".join(
+                filter(
+                    None,
+                    [
+                        location["customProperties"]["contactDetails"].get("address"),
+                        location["customProperties"]["contactDetails"].get("address2"),
+                    ],
+                )
+            )
             item["website"] = response.url.replace("/api/location-finder-edge", location["urlPath"])
             if not item.get("extras"):
                 item["extras"] = {}
-            item["extras"]["contact:instagram"] = clean_instagram(location["customProperties"]["contactDetails"].get("instagramUrl", ""))
+            item["extras"]["contact:instagram"] = clean_instagram(
+                location["customProperties"]["contactDetails"].get("instagramUrl", "")
+            )
             item["facebook"] = clean_facebook(location["customProperties"]["contactDetails"].get("facebookUrl", ""))
             print(location)
             if location["customProperties"]["contactDetails"].get("open24Hours"):
