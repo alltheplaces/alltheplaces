@@ -11,6 +11,7 @@ class SnapFitnessSpider(Spider):
     item_attributes = {"brand": "Snap Fitness", "brand_wikidata": "Q7547254"}
     allowed_domains = ["www.snapfitness.com"]
     country_codes = [
+        "ae",
         "au",
         "be",
         "ca",
@@ -24,7 +25,10 @@ class SnapFitnessSpider(Spider):
         "ph",
         "sa_en",
         "sg",
+        "tr",
         "tw",
+        "uk",
+        "us",
     ]
 
     def start_requests(self):
