@@ -5,29 +5,31 @@ from scrapy.spiders import SitemapSpider
 from locations.linked_data_parser import LinkedDataParser
 
 BRANDS = {
-    "laquinta": ["La Quinta by Wyndham", "Q6464734"],
     "americinn": ["AmericInn", "Q4742493"],
     "baymont": ["Baymont by Wyndham", "Q4874634"],
     "caesars-rewards": ["Caesars Rewards", None],
     "days-inn": ["Days Inn", "Q1047239"],
     "dazzler": ["Dazzler", None],
     "dolce": ["Dolce Hotels and Resorts", "Q28402655"],
+    "echo-suites": ["ECHO Suites", None],
     "esplendor": ["Esplendor by Wyndham", None],
     "hawthorn-extended-stay": ["Hawthorn Suites by Wyndham", "Q5685511"],
     "hojo": ["Howard Johnson", "Q5919997"],
+    "laquinta": ["La Quinta by Wyndham", "Q6464734"],
     "microtel": ["Microtel Inns & Suites", "Q6840402"],
     "ramada": ["Ramada", "Q1502859"],
+    "registry-collection": ["Registry Collection", None],
     "super-8": ["Super 8", "Q5364003"],
     "trademark": ["Trademark Collection by Wyndham", "Q112144846"],
     "travelodge": ["Travelodge", "Q7836087"],
     "tryp": ["TRYP", "Q6153452"],
+    "vienna-house": ["Vienna House", "Q2523363"],
     "wingate": ["Wingate by Wyndham", "Q8025144"],
+    "wyndham-alltra": ["Wyndham Alltra", None],
     "wyndham-garden": ["Wyndham Garden", "Q112144847"],
     "wyndham-grand": ["Wyndham Grand", "Q112144849"],
-    "wyndham": ["Wyndham Hotels and Resorts", "Q8040120"],
     "wyndham-vacations": ["Wyndham Vacation Clubs", "Q112144845"],
-    "registry-collection": ["Registry Collection", None],
-    "wyndham-alltra": ["Wyndham Alltra", None],
+    "wyndham": ["Wyndham Hotels and Resorts", "Q8040120"],
 }
 
 

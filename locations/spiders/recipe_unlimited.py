@@ -4,7 +4,7 @@ from locations.storefinders.yext import YextSpider
 class RecipeUnlimitedSpider(YextSpider):
     name = "recipe_unlimited"
     api_key = "13a5875d18fe490377fc4bf35de52851"
-    wanted_type = "restaurant"
+    wanted_types = ["restaurant"]
 
     brands = {
         "Añejo Restaurant": {"brand": "Añejo Restaurant", "brand_wikidata": "Q118744458"},

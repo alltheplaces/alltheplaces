@@ -398,6 +398,8 @@ DELIMITERS_EN = {
     "to",
     "and",
     "from",
+    "thru",
+    "through",
 }
 
 DELIMITERS_ES = {
