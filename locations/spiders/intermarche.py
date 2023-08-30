@@ -1,9 +1,9 @@
 import scrapy
 from scrapy import Request
 
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
-from locations.spiders.costacoffee_gb import yes_or_no
 
 
 class IntermarcheSpider(scrapy.Spider):
@@ -22,6 +22,7 @@ class IntermarcheSpider(scrapy.Spider):
     INTERMARCHE_HYPER = {"brand": "Intermarché Hyper", "brand_wikidata": "Q98278022"}
     item_attributes = {"country": "FR"}
     requires_proxy = True
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def start_requests(self):
         yield Request(
@@ -57,7 +58,7 @@ class IntermarcheSpider(scrapy.Spider):
                         oh.add_range(DAYS[i], rules["startHours"], rules["endHours"])
             item["opening_hours"] = oh.as_opening_hours()
 
-            item["extras"] = {"atm": yes_or_no(any(s["code"] == "dis" for s in place["ecommerce"]["services"]))}
+            apply_yes_no(Extras.ATM, item, any(s["code"] == "dis" for s in place["ecommerce"]["services"]), False)
 
             if place.get("modelLabel") in [
                 "SUPER ALIMENTAIRE",
@@ -80,7 +81,7 @@ class IntermarcheSpider(scrapy.Spider):
                 fuel["ref"] += "_fuel"
                 fuel.update(self.INTERMARCHE)
 
-                fuel["extras"]["amenity"] = "fuel"
+                apply_category(Categories.FUEL_STATION, fuel)
 
                 yield fuel
 
@@ -89,7 +90,7 @@ class IntermarcheSpider(scrapy.Spider):
                 car_wash["ref"] += "_carwash"
                 car_wash.update(self.INTERMARCHE)
 
-                car_wash["extras"]["amenity"] = "car_wash"
+                apply_category(Categories.CAR_WASH, car_wash)
 
                 yield car_wash
 
