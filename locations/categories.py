@@ -186,6 +186,8 @@ top_level_tags = [
     "public_transport",
     "shop",
     "tourism",
+    "aeroway",
+    "railway",
 ]
 
 
@@ -201,6 +203,8 @@ def get_category_tags(source) -> {}:
     for top_level_tag in top_level_tags:
         if v := tags.get(top_level_tag):
             categories[top_level_tag] = v
+    if len(categories.keys()) > 1 and categories.get("shop") == "yes":
+        categories.pop("shop")
     return categories or None
 
 
