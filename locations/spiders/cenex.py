@@ -1,12 +1,13 @@
 import scrapy
 
+from locations.categories import Extras, Fuel, apply_yes_no
 from locations.items import Feature
 from locations.spiders.vapestore_gb import clean_address
 
 
 class CenexSpider(scrapy.Spider):
     name = "cenex"
-    item_attributes = {"brand": "Cenex", "brand_wikidata": "Q5011381"}
+    item_attributes = {"brand": "Cenex", "brand_wikidata": "Q62127191"}
     allowed_domains = ["www.cenex.com"]
 
     def start_requests(self):
@@ -43,9 +44,8 @@ class CenexSpider(scrapy.Spider):
         result = response.json()
 
         for store in result["SearchResponse"]["Locations"]:
-            amenities = "|".join([a["Name"] for a in store["Amenities"]])
-
-            yield Feature(
+            amenities = [a["Name"] for a in store["Amenities"]]
+            item = Feature(
                 lon=store["Long"],
                 lat=store["Lat"],
                 ref=store["LocationId"],
@@ -57,17 +57,25 @@ class CenexSpider(scrapy.Spider):
                 country="US",
                 phone=store["Phone"],
                 website=store["WebsiteUrl"],
-                opening_hours="24/7" if "24-Hour" in amenities else None,
-                extras={
-                    "amenity:fuel": True,
-                    "atm": "ATM" in amenities,
-                    "car_wash": "Car Wash" in amenities,
-                    "fuel:biodiesel": "Biodiesel" in amenities or None,
-                    "fuel:diesel": "Diesel" in amenities or None,
-                    "fuel:e85": "Flex Fuels" in amenities or None,
-                    "fuel:HGV_diesel": "Truck Stop" in amenities or None,
-                    "fuel:propane": "Propane" in amenities or None,
-                    "hgv": "Truck Stop" in amenities or None,
-                    "shop": "convenience" if "Convenience Store" in amenities else None,
-                },
+                opening_hours="24/7" if "24-Hour Fueling" in amenities else None,
             )
+
+            apply_yes_no(Extras.ATM, item, "ATM" in amenities)
+            apply_yes_no(Extras.COMPRESSED_AIR, item, "Air" in amenities)
+            apply_yes_no(Fuel.BIODIESEL, item, "Biodiesel" in amenities)
+            apply_yes_no(Extras.CAR_WASH, item, "Car Wash" in amenities)
+            # "Cenex® Lubricants"
+            apply_yes_no(Fuel.DIESEL, item, "Cenex® Premium Diesel Fuel" in amenities)
+            apply_yes_no("shop=yes", item, "Convenience Store" in amenities)
+            # "DEF Available"
+            apply_yes_no(Fuel.DIESEL, item, "Diesel Fuel" in amenities)
+            apply_yes_no(Fuel.E85, item, "Flex Fuels" in amenities)
+            # "Made Fresh Foods"
+            # "No Inside Services"
+            apply_yes_no(Fuel.PROPANE, item, "Propane Cylinder Filling or Exchange" in amenities)
+            apply_yes_no("food=yes", item, "Restaurant" in amenities)
+            apply_yes_no("hgv", item, "Truck Stop" in amenities)
+            apply_yes_no(Fuel.HGV_DIESEL, item, "Truck Stop" in amenities)
+            apply_yes_no(Extras.WIFI, item, "Wi-Fi" in amenities)
+
+            yield item
