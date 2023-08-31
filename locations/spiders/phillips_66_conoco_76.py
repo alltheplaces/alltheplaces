@@ -58,8 +58,6 @@ class Phillips66Conoco76Spider(scrapy.Spider):
             )
             if brand := self.BRANDS.get(station["Brand"]):
                 item.update(brand)
-            else:
-                continue
 
             apply_category(Categories.FUEL_STATION, item)
             apply_yes_no(Fuel.E85, item, station["e85"])
