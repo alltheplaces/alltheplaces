@@ -22,7 +22,7 @@ class SunocoUSSpider(scrapy.Spider):
             apply_yes_no(Fuel.KEROSENE, item, location["HasKero"] == "Y")
             apply_yes_no(Fuel.OCTANE_94, item, location["ultra94"] == "Y")
             apply_yes_no(Extras.ATM, item, location["ATM"] == "Y")
-            apply_yes_no(Extras.CAR_WASH, item, location["CarWash"] == "Y")
+            apply_yes_no(Extras.CAR_WASH, item, location["CarWash"])
             yield item
 
     def parse_hours(self, item, location):
