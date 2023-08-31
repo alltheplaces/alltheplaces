@@ -65,7 +65,7 @@ tippecanoe --cluster-distance=25 \
            --layer="alltheplaces" \
            --attribution="<a href=\"https://www.alltheplaces.xyz/\">All The Places</a> ${RUN_TIMESTAMP}" \
            -o "${SPIDER_RUN_DIR}/output.pmtiles" \
-           -f "${SPIDER_RUN_DIR}"/output/*.geojson
+           --read-parallel "${SPIDER_RUN_DIR}"/output/*.geojson
 retval=$?
 if [ ! $retval -eq 0 ]; then
     (>&2 echo "Couldn't generate pmtiles")
