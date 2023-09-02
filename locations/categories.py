@@ -341,24 +341,23 @@ class PaymentMethods(Enum):
 
 
 class FuelCards(Enum):
-    # TODO: clean tags here
-    ALLSTAR = "Allstar Card"
-    AVIA = "Avia Card"
+    ALLSTAR = "payment:allstar"  # https://allstarcard.co.uk/
+    AVIA = "payment:avia_card"  # https://www.aviaitalia.com/en/avia-card/
     ARIS = "payment:aris"
-    BP = "BP card"
+    BP = "payment:bp_card"  # https://www.bp.com/en/global/corporate/products-and-services.html
     DEUTSCHLAND = "fuel:discount:deutschland_card"
-    DKV = "fuel:discount:dkv"
+    DKV = "payment:dkv"
     E100 = "payment:e100"  # https://e100.eu/en
-    ESSO_NATIONAL = "fuel:discount:esso_national"
-    EXXONMOBIL_FLEET = "ExxonMobil Fleet Card"
-    LOGPAY = "LogPay Card"
+    ESSO_NATIONAL = "payment:esso_card"
+    EXXONMOBIL_FLEET = "payment:exxonmobil_fleet"
+    LOGPAY = "payment:logpay"  # https://www.logpay.de/
     LUKOIL = "payment:lukoil"  # https://lukoil.ru/Products/business/fuelcards
     LUKOIL_LOYALTY_PROGRAM = "fuel:discount:lukoil"
-    MOBIL = "Mobilcard"
+    MOBIL = "payment:mobilcard"  # https://www.mobil.co.nz/en-nz/mobilcard
     OMV = "payment:omv"  # https://www.omv.com/en/customers/services/fuel-cards
     PETROL_PLUS_REGION = "payment:petrol_plus_region"  # https://www.petrolplus.ru/
-    SHELL = "fuel:discount:shell"
-    UTA = "fuel:discount:uta"
+    SHELL = "payment:shell"
+    UTA = "payment:uta"
     ROSNEFT = "payment:rosneft"  # https://www.rn-card.ru/
     ROUTEX = "payment:routex"  # https://routex.com/
 
