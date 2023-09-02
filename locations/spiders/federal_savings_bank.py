@@ -25,7 +25,7 @@ class FederalSavingsBankSpider(SitemapSpider):
         state_city = intro_text[1].split(", ")[1]
         properties = {
             "ref": re.search(r".+/(.+?)/?(?:\.html|$)", response.url).group(1),
-            "name": response.xpath("//h1/text()").extract(),
+            "name": " ".join(response.xpath("//h1/text()").extract()),
             "street_address": intro_text[0],
             "city": intro_text[1].split(",")[0],
             "state": state_city.split(" ")[0],
