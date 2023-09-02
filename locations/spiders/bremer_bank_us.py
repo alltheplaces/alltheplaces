@@ -21,8 +21,8 @@ class BremerBankSpider(SitemapSpider):
         }
 
         address_part2 = response.xpath('//div[@class="col-sm-12 col-lg-4"]/div/p/text()')[2].extract()
-        match = re.match(r"^([^,]*), +(.*) +(\d{5})$", address_part2)
-        (properties["city"], properties["state"], properties["postcode"]) = match.groups()
+        match = re.match(r"^([^,]*),\s+(.*)\s+(\d{5})$", address_part2)
+        (properties["city"], properties["state"], properties["postcode"]) = [m.strip() for m in match.groups()]
 
         extract_google_position(properties, response)
 
