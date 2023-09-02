@@ -20,15 +20,6 @@ class BarMethodSpider(scrapy.Spider):
                 callback=self.parse_store,
             )
 
-    def decodeEmail(self, protectedEmail):
-        decode = ""
-        k = int(protectedEmail[:2], 16)
-
-        for i in range(2, len(protectedEmail) - 1, 2):
-            decode += chr(int(protectedEmail[i : i + 2], 16) ^ k)
-
-        return decode
-
     def parse_store(self, response):
         infos = response.xpath("string(/html/body/div/div/main/article/div[1]/div[2]/div/div/div[2])").get().split("\n")
 
@@ -43,7 +34,7 @@ class BarMethodSpider(scrapy.Spider):
             country = "US"
         else:
             # CA
-            match = re.match(r"^([^,]*), (\w{2}) *([\w\d]{3} [\w\d]{3})?$", infos[1])
+            match = re.match(r"^([^,]*), (\w{2}) *([\w]{3} [\w]{3})?$", infos[1])
             city = match.group(1).strip()
             state = match.group(2).strip()
             postcode = match.group(3).strip() if len(match.groups()) > 2 else None
@@ -51,10 +42,6 @@ class BarMethodSpider(scrapy.Spider):
 
         email = infos[2]
         phone = infos[3]
-        # state = re.findall("[A-Z]{2}", address)[0]
-        # address = infos.split("\n")[1]
-        # postcode = re.findall("[0-9]{5}|[A-Z0-9]{3} [A-Z0-9]{3}", address)[0]
-        # city = address.replace(state, "").replace(postcode, "").strip().replace(",", "")
 
         name = response.xpath('//h1[@class="x-text-content-text-primary"]/text()').get()
         facebook = response.xpath('//a[contains(@href, "facebook")]/@href').get()
