@@ -188,6 +188,7 @@ top_level_tags = [
     "tourism",
     "aeroway",
     "railway",
+    "waterway",
 ]
 
 
