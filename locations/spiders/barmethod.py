@@ -15,6 +15,8 @@ class BarMethodSpider(scrapy.Spider):
         response.selector.remove_namespaces()
         city_urls = response.xpath('//a[@class="studioname"]/@href').extract()
         for path in city_urls:
+            if path == "https://barmethod.com/locations/bar-online/":
+                continue
             yield scrapy.Request(
                 path.strip(),
                 callback=self.parse_store,
@@ -49,7 +51,7 @@ class BarMethodSpider(scrapy.Spider):
 
         properties = {
             "name": name,
-            "ref": ref,
+            "ref": ref.strip("_/"),
             "street_address": street_address,
             "city": city,
             "state": state,
