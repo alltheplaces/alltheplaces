@@ -34,7 +34,7 @@ class BarMethodSpider(scrapy.Spider):
             country = "US"
         else:
             # CA
-            match = re.match(r"^([^,]*), (\w{2}) *([\w]{3} [\w]{3})?$", infos[1])
+            match = re.match(r"^([^,]*), (\w{2}) *(\w{3} \w{3})?$", infos[1])
             city = match.group(1).strip()
             state = match.group(2).strip()
             postcode = match.group(3).strip() if len(match.groups()) > 2 else None
