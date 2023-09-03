@@ -1,83 +1,85 @@
 import scrapy
 from scrapy.http import FormRequest
+
+from locations.categories import Categories, Extras, Fuel, FuelCards, PaymentMethods, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
-
 from locations.geo import country_coordinates
-from locations.categories import Fuel, Categories, FuelCards, apply_category, apply_yes_no, Extras, PaymentMethods
-
 
 FUEL_MAPPING = {
-    'Maingrade 95': Fuel.OCTANE_95,
-    'Premium Gasoline': Fuel.OCTANE_95,
-    'Premium Diesel': Fuel.DIESEL,
-    'Maingrade Diesel': Fuel.DIESEL,
-    'EVO 100 Plus (GASOLINE PREMIUM)': Fuel.OCTANE_100,
-    'EVO 95': Fuel.OCTANE_95,
-    'EVO Diesel Plus (DIESEL PREMIUM)': Fuel.DIESEL,
-    'AdBlue': Fuel.ADBLUE,
+    "Maingrade 95": Fuel.OCTANE_95,
+    "Premium Gasoline": Fuel.OCTANE_95,
+    "Premium Diesel": Fuel.DIESEL,
+    "Maingrade Diesel": Fuel.DIESEL,
+    "EVO 100 Plus (GASOLINE PREMIUM)": Fuel.OCTANE_100,
+    "EVO 95": Fuel.OCTANE_95,
+    "EVO Diesel Plus (DIESEL PREMIUM)": Fuel.DIESEL,
+    "AdBlue": Fuel.ADBLUE,
 }
 
 SERVICES_MAPPING = {
-  "Shop": None,
-  "Pre-packed sandwich": None,
-  "Hoover": None,
-  "Jet wash": Extras.CAR_WASH,
-  "Air/Compresor": Extras.COMPRESSED_AIR,
-  "Lubricant": Fuel.ENGINE_OIL,
-  "Internet (wifi)": Extras.WIFI,
-  "Hungarian Motorway Vignette": None,
-  "Cylinder PB Gas": None,
-  "Used cooking oil": None,
-  "EURO payment acceptance": None,
-  # TODO: map high speed pump
-  "High speed pump": None,
-  "Truck park": 'capacity:hgv=yes',
-  "Toll terminal": None,
-  "Fresh Coffee TO GO": None,
-  "Dog chip reader place (free)": None,
-  "Dog friendly": None,
-  "ENP - Electronically paying toll ": None,
-  "MOL Hygi": None,
-  "Base station for Food truck/Tuk-tuk": None,
-  "Fresh Coffee TOGO": None,
-  "Barista Coffee": None,
-  "MOL Shop": None
+    "Shop": None,
+    "Pre-packed sandwich": None,
+    "Hoover": None,
+    "Jet wash": Extras.CAR_WASH,
+    "Air/Compresor": Extras.COMPRESSED_AIR,
+    "Lubricant": Fuel.ENGINE_OIL,
+    "Internet (wifi)": Extras.WIFI,
+    "Hungarian Motorway Vignette": None,
+    "Cylinder PB Gas": None,
+    "Used cooking oil": None,
+    "EURO payment acceptance": None,
+    # TODO: map high speed pump
+    "High speed pump": None,
+    "Truck park": "capacity:hgv=yes",
+    "Toll terminal": None,
+    "Fresh Coffee TO GO": None,
+    "Dog chip reader place (free)": None,
+    "Dog friendly": None,
+    "ENP - Electronically paying toll ": None,
+    "MOL Hygi": None,
+    "Base station for Food truck/Tuk-tuk": None,
+    "Fresh Coffee TOGO": None,
+    "Barista Coffee": None,
+    "MOL Shop": None,
 }
 
 CARDS_MAPPING = {
-  "DKV Card": FuelCards.DKV,
-  "UTA Card": FuelCards.UTA,
-  "VISA": PaymentMethods.VISA,
-  "VISA Electron": PaymentMethods.VISA_ELECTRON,
-  "Eurocard/ Mastercard": PaymentMethods.MASTER_CARD,
-  "Maestro": PaymentMethods.MAESTRO,
-  "AMEX": PaymentMethods.AMERICAN_EXPRESS,
-  "MasterCard Electronic": PaymentMethods.MASTER_CARD,
-  "MOL Gold Card HU": FuelCards.MOLGROUP_CARDS,
-  "Slovnaft Gold Card SK": FuelCards.SLOVNAFT,
-  "MOL Gold Card RO": FuelCards.MOLGROUP_CARDS,
-  "MOL Gold Card SRB": FuelCards.MOLGROUP_CARDS,
-  "MOL Gold Card SLO": FuelCards.MOLGROUP_CARDS,
-  "MOL Silver Card HU": FuelCards.MOLGROUP_CARDS,
-  "MOL Red Card HU": FuelCards.MOLGROUP_CARDS,
-  "MOL Green Card HU": FuelCards.MOLGROUP_CARDS,
-  "INA Card": FuelCards.INA,
-  "Multipont Card HU": None,
-  "MOL Gold Card AT": FuelCards.MOLGROUP_CARDS,
-  "Tifon Gold Card HR": None,
-  "MOL RED Card RO": FuelCards.MOLGROUP_CARDS,
-  "Energopetrol Gold Card BiH": None,
-  "MOL Gold Card CZ": FuelCards.MOLGROUP_CARDS,
-  "E100 Card": FuelCards.E100,
-  "Morgan Fuels": None,
-  "MOL Red Card SLO": FuelCards.MOLGROUP_CARDS,
-  "AS24": FuelCards.AS24,
-  "Gold Card Europe": None,
-  "Gold Card Hungary": None,
-  "Gift Card Hungary": None,
-  "Partner Card Hungary": None,
-  "Gold Card Hungary Prepaid": None
+    "DKV Card": FuelCards.DKV,
+    "UTA Card": FuelCards.UTA,
+    "VISA": PaymentMethods.VISA,
+    "VISA Electron": PaymentMethods.VISA_ELECTRON,
+    "Eurocard/ Mastercard": PaymentMethods.MASTER_CARD,
+    "Maestro": PaymentMethods.MAESTRO,
+    "AMEX": PaymentMethods.AMERICAN_EXPRESS,
+    "MasterCard Electronic": PaymentMethods.MASTER_CARD,
+    # TODO: looks like https://www.molgroupcards.com/station-finder can be parsed for 6k fuel stations
+    #       https://www.molgroupcards.com/station-finder.json and https://www.molgroupcards.com/api/station?id=1189594
+    "MOL Gold Card HU": FuelCards.MOLGROUP_CARDS,
+    "Slovnaft Gold Card SK": FuelCards.SLOVNAFT,
+    "MOL Gold Card RO": FuelCards.MOLGROUP_CARDS,
+    "MOL Gold Card SRB": FuelCards.MOLGROUP_CARDS,
+    "MOL Gold Card SLO": FuelCards.MOLGROUP_CARDS,
+    "MOL Silver Card HU": FuelCards.MOLGROUP_CARDS,
+    "MOL Red Card HU": FuelCards.MOLGROUP_CARDS,
+    "MOL Green Card HU": FuelCards.MOLGROUP_CARDS,
+    "INA Card": FuelCards.INA,
+    "Multipont Card HU": None,
+    "MOL Gold Card AT": FuelCards.MOLGROUP_CARDS,
+    "Tifon Gold Card HR": None,
+    "MOL RED Card RO": FuelCards.MOLGROUP_CARDS,
+    "Energopetrol Gold Card BiH": None,
+    "MOL Gold Card CZ": FuelCards.MOLGROUP_CARDS,
+    "E100 Card": FuelCards.E100,
+    "Morgan Fuels": None,
+    "MOL Red Card SLO": FuelCards.MOLGROUP_CARDS,
+    "AS24": FuelCards.AS24,
+    "Gold Card Europe": None,
+    "Gold Card Hungary": None,
+    "Gift Card Hungary": None,
+    "Partner Card Hungary": None,
+    "Gold Card Hungary Prepaid": None,
 }
+
 
 class MolSpider(scrapy.Spider):
     name = "mol"
@@ -110,7 +112,7 @@ class MolSpider(scrapy.Spider):
             fs = poi.get("fs")
             item = DictParser.parse(fs)
             apply_category(Categories.FUEL_STATION, item)
-            item['phone'] = '; '.join(filter(None, [fs.get('fs_phone_num'), fs.get('fs_mobile_num')]))
+            item["phone"] = "; ".join(filter(None, [fs.get("fs_phone_num"), fs.get("fs_mobile_num")]))
             yield item
 
     def parse_attribute(self, item, data: dict, attribute_name: str, mapping: dict):

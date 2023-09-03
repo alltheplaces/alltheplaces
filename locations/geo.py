@@ -210,11 +210,11 @@ def country_coordinates(return_lookup=False):
     that then expects to reverse geocode a country from the supplied
     coordinates.
 
-    :return A list of ISO 3166-2 alpha-2 country codes with corresponding latitude and longitude for each country. 
+    :return A list of ISO 3166-2 alpha-2 country codes with corresponding latitude and longitude for each country.
             If return_lookup is True, return a dict of ISO 3166-2 alpha-2 to (lat, lon) instead.
     """
     file = json.load(open("./locations/searchable_points/country_coordinates.json"))
     if return_lookup:
         return {row["isocode"]: (row["lat"], row["lon"]) for row in file}
     else:
-        return file 
+        return file

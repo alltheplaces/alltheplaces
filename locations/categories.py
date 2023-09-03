@@ -357,11 +357,11 @@ class FuelCards(Enum):
     LUKOIL = "payment:lukoil"  # https://lukoil.ru/Products/business/fuelcards
     LUKOIL_LOYALTY_PROGRAM = "fuel:discount:lukoil"
     MOBIL = "payment:mobilcard"  # https://www.mobil.co.nz/en-nz/mobilcard
-    MOLGROUP_CARDS = "payment:molgroup_cards" # https://www.molgroupcards.com/
+    MOLGROUP_CARDS = "payment:molgroup_cards"  # https://www.molgroupcards.com/
     OMV = "payment:omv"  # https://www.omv.com/en/customers/services/fuel-cards
     PETROL_PLUS_REGION = "payment:petrol_plus_region"  # https://www.petrolplus.ru/
     SHELL = "payment:shell"
-    SLOVNAFT = 'payment:slovnaft' # https://slovnaft.sk/en/
+    SLOVNAFT = "payment:slovnaft"  # https://slovnaft.sk/en/
     UTA = "payment:uta"
     ROSNEFT = "payment:rosneft"  # https://www.rn-card.ru/
     ROUTEX = "payment:routex"  # https://routex.com/
