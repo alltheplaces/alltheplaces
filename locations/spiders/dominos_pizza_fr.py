@@ -3,12 +3,14 @@ import re
 from scrapy.spiders import SitemapSpider
 
 from locations.items import Feature
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class DominosPizzaFRSpider(SitemapSpider):
     name = "dominos_pizza_fr"
     item_attributes = {"brand": "Domino's", "brand_wikidata": "Q839466"}
     allowed_domains = ["dominos.fr"]
+    user_agent = BROWSER_DEFAULT
     sitemap_urls = ["https://www.dominos.fr/sitemap.aspx"]
     sitemap_rules = [
         (
