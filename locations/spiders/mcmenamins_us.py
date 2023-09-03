@@ -3,21 +3,12 @@ import re
 import scrapy
 
 from locations.google_url import extract_google_position
+from locations.hours import DAYS
 from locations.items import Feature
-
-DAYS = {
-    "Monday": "Mo",
-    "Tuesday": "Tu",
-    "Wednesday": "We",
-    "Friday": "Fr",
-    "Thursday": "Th",
-    "Saturday": "Sa",
-    "Sunday": "Su",
-}
 
 
 class McmenaminsSpider(scrapy.Spider):
-    name = "mcmenamins"
+    name = "mcmenamins_us"
     item_attributes = {"brand": "McMenamins", "brand_wikidata": "Q6802345"}
     allowed_domains = ["mcmenamins.com"]
     start_urls = ("https://www.mcmenamins.com/eat-drink",)
