@@ -15,6 +15,23 @@ from locations.country_utils import CountryUtils
 from locations.name_suggestion_index import NSI
 
 
+def iter_json(stream, file_name):
+    try:
+        if file_name.endswith("ndgeojson"):
+            # New line delimited GeoJSON is to be read a line at a time.
+            while True:
+                if line := stream.readline():
+                    yield json.loads(line)
+                    continue
+                return
+        # Assume the file is GeoJSON format, further assume many features and stream read the features.
+        yield from ijson.items(stream, "features.item", use_float=True)
+    except Exception as e:
+        # Fail hard (for this file) on the first JSON error we come across.
+        print("Failed to decode: " + file_name)
+        print(e)
+
+
 def iter_features(files_and_dirs, ignore_spiders):
     """
     Iterate through a set of GeoJSON files and directories. Each item in the iteration is a
@@ -34,22 +51,6 @@ def iter_features(files_and_dirs, ignore_spiders):
             return False
         else:
             return True
-
-    def iter_json(x, s):
-        try:
-            if s.endswith("ndgeojson"):
-                # New line delimited GeoJSON is to be read a line at a time.
-                while True:
-                    if line := x.readline():
-                        yield json.loads(line)
-                        continue
-                    return
-            # Assume the file is GeoJSON format, further assume many features and stream read the features.
-            yield from ijson.items(x, "features.item", use_float=True)
-        except Exception as e:
-            # Fail hard (for this file) on the first JSON error we come across.
-            print("Failed to decode: " + s)
-            print(e)
 
     file_list = []
     for file_or_dir in files_and_dirs:
