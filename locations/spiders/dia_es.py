@@ -1,5 +1,5 @@
-from gzip import decompress
 import json
+from gzip import decompress
 
 from scrapy import Request, Spider
 from scrapy.http import JsonRequest
@@ -19,10 +19,14 @@ class DiaESSpider(Spider):
         yield Request(url=store_list_url, callback=self.parse_store_list)
 
     def parse_store_list(self, response):
-        locations = json.loads(decompress(response.body).decode('utf-8'))
+        locations = json.loads(decompress(response.body).decode("utf-8"))
         for location in locations:
             store_id = location["idTienda"]
-            yield JsonRequest(url=f"https://www.dia.es/tiendas/buscadorTiendas.html?action=buscarInformacionTienda&id={store_id}", meta={"lat": location["posicionY"], "lon": location["posicionX"]}, callback=self.parse_store)
+            yield JsonRequest(
+                url=f"https://www.dia.es/tiendas/buscadorTiendas.html?action=buscarInformacionTienda&id={store_id}",
+                meta={"lat": location["posicionY"], "lon": location["posicionX"]},
+                callback=self.parse_store,
+            )
 
     def parse_store(self, response):
         properties = {
@@ -39,7 +43,9 @@ class DiaESSpider(Spider):
         for day_number, day_hours in response.json()["horariosTienda"].items():
             if "|" in day_hours:
                 for day_hours_range in day_hours.split(" | "):
-                    properties["opening_hours"].add_range(DAYS[int(day_number) - 1], *day_hours_range.split(" - ", 1), "%H:%M")
+                    properties["opening_hours"].add_range(
+                        DAYS[int(day_number) - 1], *day_hours_range.split(" - ", 1), "%H:%M"
+                    )
             else:
                 properties["opening_hours"].add_range(DAYS[int(day_number) - 1], *day_hours.split(" - ", 1), "%H:%M")
         yield Feature(**properties)
