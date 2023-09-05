@@ -52,8 +52,7 @@ CARDS_MAPPING = {
     "Maestro": PaymentMethods.MAESTRO,
     "AMEX": PaymentMethods.AMERICAN_EXPRESS,
     "MasterCard Electronic": PaymentMethods.MASTER_CARD,
-    # TODO: looks like https://www.molgroupcards.com/station-finder can be parsed for 6k fuel stations
-    #       https://www.molgroupcards.com/station-finder.json and https://www.molgroupcards.com/api/station?id=1189594
+    
     "MOL Gold Card HU": FuelCards.MOLGROUP_CARDS,
     "Slovnaft Gold Card SK": FuelCards.SLOVNAFT,
     "MOL Gold Card RO": FuelCards.MOLGROUP_CARDS,
@@ -80,14 +79,15 @@ CARDS_MAPPING = {
     "Gold Card Hungary Prepaid": None,
 }
 
-
+# MOL data is also available at https://www.molgroupcards.com/station-finder 
+# along with other brands, but not all POIs on this page have fuel types and services.
 class MolSpider(scrapy.Spider):
     name = "mol"
     allowed_domains = ["toltoallomaskereso.mol.hu"]
+    item_attributes = {"brand": "MOL", "brand_wikidata": "Q549181"}
 
     def start_requests(self):
         country_coords = country_coordinates(return_lookup=True)
-        self.logger.info(country_coords)
         for country in ["HU", "RO", "SL", "CZ", "SR"]:
             if coords := country_coords.get(country):
                 yield FormRequest(
@@ -111,6 +111,10 @@ class MolSpider(scrapy.Spider):
         if poi := response.json():
             fs = poi.get("fs")
             item = DictParser.parse(fs)
+            self.parse_attribute(item, poi, "products", FUEL_MAPPING)
+            self.parse_attribute(item, poi, "cards", CARDS_MAPPING)
+            self.parse_attribute(item, poi, "services", SERVICES_MAPPING)
+            self.crawler.stats.inc_value(f"atp/mol/brands/{poi.get('brand', {}).get('name')}")
             apply_category(Categories.FUEL_STATION, item)
             item["phone"] = "; ".join(filter(None, [fs.get("fs_phone_num"), fs.get("fs_mobile_num")]))
             yield item
