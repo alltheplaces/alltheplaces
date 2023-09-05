@@ -363,6 +363,10 @@ class FuelCards(Enum):
     ROUTEX = "payment:routex"  # https://routex.com/
 
 
+class Access(Enum):
+    HGV = "hgv"
+
+
 def apply_yes_no(attribute, item: Feature, state: bool, apply_positive_only: bool = True):
     """
     Many OSM POI attribute tags values are "yes"/"no". Provide support for setting these from spider code.
