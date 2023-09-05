@@ -48,10 +48,10 @@ class GnpITSpider(Spider):
             # "highFlow" "self" "selfGPL" "serve" "serveGPL"
             apply_yes_no(Access.HGV, item, location["suitableForTruck"])
 
-            services = [s["name"] if s["active"] else None for s in location["services"]]
-            fuels = [f["name"] for f in location["fuels"]]
-
             # TODO: services
+            # services = [s["name"] if s["active"] else None for s in location["services"]]
+
+            fuels = [f["name"] for f in location["fuels"]]
             apply_yes_no(Fuel.ADBLUE, item, "AdBlue" in fuels)
             apply_yes_no(Fuel.OCTANE_95, item, "Benzina S.P." in fuels)
             apply_yes_no(Fuel.OCTANE_98, item, "Benzina S.P. 98" in fuels)
