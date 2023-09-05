@@ -1,7 +1,8 @@
 from scrapy import Request, Spider
 
-from locations.categories import apply_category, Categories
+from locations.categories import Categories, apply_category
 from locations.items import Feature
+
 
 class CreditMutuelFRSpider(Spider):
     name = "credit_mutuel_fr"
@@ -19,7 +20,7 @@ class CreditMutuelFRSpider(Spider):
     def parse_location(self, response):
         properties = {
             "ref": "".join(response.xpath('.//span[@itemprop="branchCode"]/text()').getall()).strip(),
-            "name": "".join(response.xpath('.//title/text()').getall()).strip(),
+            "name": "".join(response.xpath(".//title/text()").getall()).strip(),
             "lat": response.xpath('.//meta[@itemprop="latitude"]/@content').get(),
             "lon": response.xpath('.//meta[@itemprop="longitude"]/@content').get(),
             "street_address": "".join(response.xpath('.//span[@itemprop="streetAddress"]/text()').getall()).strip(),
