@@ -52,7 +52,9 @@ class WPStoreLocatorSpider(Spider):
                 if len(self.searchable_points_files) > 0 and self.search_radius != 0 and self.max_results != 0:
                     for searchable_points_file in self.searchable_points_files:
                         for lat, lon in point_locations(searchable_points_file):
-                            yield JsonRequest(url=f"https://{domain}/wp-admin/admin-ajax.php?action=store_search&lat={lat}&lng={lon}&max_results={self.max_results}&search_radius={self.search_radius}")
+                            yield JsonRequest(
+                                url=f"https://{domain}/wp-admin/admin-ajax.php?action=store_search&lat={lat}&lng={lon}&max_results={self.max_results}&search_radius={self.search_radius}"
+                            )
                 else:
                     yield JsonRequest(url=f"https://{domain}/wp-admin/admin-ajax.php?action=store_search&autoload=1")
         elif len(self.start_urls) != 0:
@@ -60,7 +62,9 @@ class WPStoreLocatorSpider(Spider):
                 if len(self.searchable_points_files) > 0 and self.search_radius != 0 and self.max_results != 0:
                     for searchable_points_file in self.searchable_points_files:
                         for lat, lon in point_locations(searchable_points_file):
-                            yield JsonRequest(url=f"{url}&lat={lat}&lng={lon}&max_results={self.max_results}&search_radius={self.search_radius}")
+                            yield JsonRequest(
+                                url=f"{url}&lat={lat}&lng={lon}&max_results={self.max_results}&search_radius={self.search_radius}"
+                            )
                 else:
                     yield JsonRequest(url=url)
 
