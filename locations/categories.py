@@ -243,6 +243,7 @@ class Fuel(Enum):
     CNG = "fuel:cng"
     LNG = "fuel:lng"
     PROPANE = "fuel:propane"
+    BUTANE = "fuel:butane"
     LH2 = "fuel:LH2"
     # Additives
     ADBLUE = "fuel:adblue"
