@@ -24,7 +24,7 @@ class DiaESSpider(Spider):
             store_id = location["idTienda"]
             yield JsonRequest(
                 url=f"https://www.dia.es/tiendas/buscadorTiendas.html?action=buscarInformacionTienda&id={store_id}",
-                meta={"lat": location["posicionY"], "lon": location["posicionX"]},
+                meta={"lat": location["posicionX"], "lon": location["posicionY"]},
                 callback=self.parse_store,
             )
 
