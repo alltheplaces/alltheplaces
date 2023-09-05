@@ -23,8 +23,8 @@ class RepsolESSpider(Spider):
             properties = {
                 "ref": location.get("id"),
                 "name": location.get("nombre"),
-                "lat": location.get("x"),
-                "lon": location.get("y"),
+                "lat": location.get("y"),
+                "lon": location.get("x"),
                 "street_address": location.get("direccion"),
                 "city": location.get("localidad"),
                 "state": location.get("provincia"),
