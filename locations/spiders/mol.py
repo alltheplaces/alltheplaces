@@ -52,7 +52,6 @@ CARDS_MAPPING = {
     "Maestro": PaymentMethods.MAESTRO,
     "AMEX": PaymentMethods.AMERICAN_EXPRESS,
     "MasterCard Electronic": PaymentMethods.MASTER_CARD,
-    
     "MOL Gold Card HU": FuelCards.MOLGROUP_CARDS,
     "Slovnaft Gold Card SK": FuelCards.SLOVNAFT,
     "MOL Gold Card RO": FuelCards.MOLGROUP_CARDS,
@@ -79,7 +78,8 @@ CARDS_MAPPING = {
     "Gold Card Hungary Prepaid": None,
 }
 
-# MOL data is also available at https://www.molgroupcards.com/station-finder 
+
+# MOL data is also available at https://www.molgroupcards.com/station-finder
 # along with other brands, but not all POIs on this page have fuel types and services.
 class MolSpider(scrapy.Spider):
     name = "mol"
