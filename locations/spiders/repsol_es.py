@@ -46,9 +46,19 @@ class RepsolESSpider(Spider):
 
             apply_category(Categories.FUEL_STATION, properties)
             products = [x["producto"] for x in location["productos"]]
-            apply_yes_no(Fuel.OCTANE_95, properties, "Efitec 95" in products or "S/CHUMBO 95" in products or "Efitec 95 Premium" in products, False)
+            apply_yes_no(
+                Fuel.OCTANE_95,
+                properties,
+                "Efitec 95" in products or "S/CHUMBO 95" in products or "Efitec 95 Premium" in products,
+                False,
+            )
             apply_yes_no(Fuel.OCTANE_98, properties, "Efitec 98" in products, False)
-            apply_yes_no(Fuel.BUTANE, properties, "Butano 12,5 Kg" in products or "Butano 12 Kg (NEL)" in products or "Butano 6 Kg (K6)" in products, False)
+            apply_yes_no(
+                Fuel.BUTANE,
+                properties,
+                "Butano 12,5 Kg" in products or "Butano 12 Kg (NEL)" in products or "Butano 6 Kg (K6)" in products,
+                False,
+            )
             apply_yes_no(Fuel.PROPANE, properties, "Propano 11 Kg" in products, False)
             apply_yes_no(Fuel.DIESEL, properties, "Diésel e+" in products or "GASÓLEO" in products, False)
             apply_yes_no(Fuel.GTL_DIESEL, properties, "Diésel e+10" in products, False)
