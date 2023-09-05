@@ -3,7 +3,7 @@ import json
 from scrapy import Request
 from scrapy.spiders import CSVFeedSpider
 
-from locations.categories import Categories, apply_category
+from locations.categories import Categories, apply_category, apply_yes_no
 from locations.items import Feature
 from locations.spiders.arnold_clark import ArnoldClarkSpider
 from locations.spiders.kwik_fit_gb import KwikFitGBSpider
@@ -18,7 +18,7 @@ class GovMOTGBSpider(CSVFeedSpider):
         "license:wikidata": "Q99891702",
         "attribution": "required",
         "attribution:name": "Contains public sector information licensed under the Open Government Licence v3.0.",
-    }
+    }  # https://www.whatdotheyknow.com/request/re_use_of_active_mot_test_statio
 
     def start_requests(self):
         yield Request(
@@ -57,5 +57,6 @@ class GovMOTGBSpider(CSVFeedSpider):
             item["name"] = None
 
         apply_category(Categories.SHOP_CAR_REPAIR, item)
+        apply_yes_no("service:vehicle:mot", item, True)
 
         yield item
