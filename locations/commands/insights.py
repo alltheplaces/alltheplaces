@@ -18,8 +18,8 @@ from locations.name_suggestion_index import NSI
 def iter_features(files_and_dirs, ignore_spiders):
     """
     Iterate through a set of GeoJSON files and directories. Each item in the iteration is a
-    single feature. Zero length files are skipped. Only files ending .json or .geojson are
-    processed.
+    single feature. Zero length files are skipped. Only files ending .json, .geojson or .ndgeojson
+    are processed.
     :param files_and_dirs: a list of files and directories
     :param ignore_spiders: file names matching any of the strings in this list will be ignored
     :return: a GeoJSON feature iterator
@@ -37,8 +37,17 @@ def iter_features(files_and_dirs, ignore_spiders):
 
     def iter_json(x, s):
         try:
+            if s.endswith("ndgeojson"):
+                # New line delimited GeoJSON is to be read a line at a time.
+                while True:
+                    if line := x.readline():
+                        yield json.loads(line)
+                        continue
+                    return
+            # Assume the file is GeoJSON format, further assume many features and stream read the features.
             yield from ijson.items(x, "features.item", use_float=True)
         except Exception as e:
+            # Fail hard (for this file) on the first JSON error we come across.
             print("Failed to decode: " + s)
             print(e)
 
