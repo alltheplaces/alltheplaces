@@ -17,6 +17,6 @@ class FantastikoBGSpider(SitemapSpider, StructuredDataSpider):
         data = json.loads(response.xpath('//input[@id="shops-initial"]/@value').get())[0]
         item["lat"] = data["lat"]
         item["lon"] = data["lng"]
-        item["ref"] = response.xpath('//span[@class="shop-number"]/@value').get()
+        item["ref"] = response.xpath('//span[@class="feat-title white shop-number inline_block middle"]/@value').get()
 
         yield item
