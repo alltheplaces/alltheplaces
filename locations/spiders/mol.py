@@ -123,7 +123,7 @@ class MolSpider(scrapy.Spider):
                     meta={'country': country}
                 )
 
-    def parse(self, response):
+    def parse(self, response): 
         for poi in response.json():
             yield FormRequest(
                 url="https://toltoallomaskereso.mol.hu/en/portlet/routing/station_info.json",

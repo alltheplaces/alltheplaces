@@ -354,7 +354,7 @@ class FuelCards(Enum):
     ESSO_NATIONAL = "payment:esso_card"
     EXXONMOBIL_FLEET = "payment:exxonmobil_fleet"
     INA = "payment:ina"  # https://www.ina.hr/en/customers/ina-card/
-    LOGPAY = "payment:logpay"  # https://www.logpay.de/
+    LOGPAY = "payment:logpay"  # https://www.logpay.de/ 
     LUKOIL = "payment:lukoil"  # https://lukoil.ru/Products/business/fuelcards
     LUKOIL_LOYALTY_PROGRAM = "fuel:discount:lukoil"
     MOBIL = "payment:mobilcard"  # https://www.mobil.co.nz/en-nz/mobilcard
