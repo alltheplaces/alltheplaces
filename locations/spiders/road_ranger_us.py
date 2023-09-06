@@ -1,21 +1,23 @@
+import re
+
 import scrapy
 
 from locations.items import Feature
 
 
-class RoadRangerSpider(scrapy.Spider):
-    name = "road_ranger"
+class RoadRangerUSSpider(scrapy.Spider):
+    name = "road_ranger_us"
     item_attributes = {"brand": "Road Ranger", "brand_wikidata": "Q7339377"}
     allowed_domains = ["roadrangerusa.com"]
 
     start_urls = ("https://www.roadrangerusa.com/locations-amenities/find-a-road-ranger",)
 
     def parse(self, response):
-        # scrapy.shell.inspect_response(response, self)
-
         for location in response.css(".store-location-row"):
-            coordinates = location.css(".coordinates::text").extract_first().strip().split(":")[-1]
-            (lat, lon) = coordinates.split(", ")
+            if m := re.search(r"Coordinates:\s+(-?\d+\.\d+), (-?\d+\.\d+)", location.get()):
+                lat, lon = m.groups()
+            else:
+                lat, lon = None
 
             address = location.css(".store-location-teaser__address::text").extract_first().strip()
 
@@ -26,13 +28,13 @@ class RoadRangerSpider(scrapy.Spider):
                 name="Road Ranger",
                 addr_full=address,
                 country="US",
-                lat=float(lat.strip()),
-                lon=float(lon.strip()),
+                lat=lat,
+                lon=lon,
                 extras={
-                    "amenity:fuel": True,
-                    "fuel:diesel": True,
-                    "fuel:propane": "Propane" in amenities or None,
-                    "fuel:HGV_diesel": True,
-                    "hgv": True,
+                    "amenity": "fuel",
+                    "fuel:diesel": "yes",
+                    "fuel:propane": "yes" if "Propane" in amenities else "",
+                    "fuel:HGV_diesel": "yes",
+                    "hgv": "yes",
                 },
             )

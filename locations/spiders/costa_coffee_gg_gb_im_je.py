@@ -104,7 +104,7 @@ class CostaCoffeeGGGBIMJESpider(Spider):
         }
     }
 }"""
-        for lat, lon in point_locations("gg_gb_im_je_centroids_iseadgg_50km_radius.csv"):
+        for lat, lon in point_locations("gg_gb_im_je_centroids_iseadgg_48km_radius.csv"):
             graphql_query = graphql_query_template.replace("__LATITUDE__", str(lat)).replace("__LONGITUDE__", str(lon))
             yield JsonRequest(url=self.start_urls[0], data={"query": graphql_query})
 
