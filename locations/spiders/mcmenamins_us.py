@@ -3,21 +3,12 @@ import re
 import scrapy
 
 from locations.google_url import extract_google_position
+from locations.hours import DAYS
 from locations.items import Feature
-
-DAYS = {
-    "Monday": "Mo",
-    "Tuesday": "Tu",
-    "Wednesday": "We",
-    "Friday": "Fr",
-    "Thursday": "Th",
-    "Saturday": "Sa",
-    "Sunday": "Su",
-}
 
 
 class McmenaminsSpider(scrapy.Spider):
-    name = "mcmenamins"
+    name = "mcmenamins_us"
     item_attributes = {"brand": "McMenamins", "brand_wikidata": "Q6802345"}
     allowed_domains = ["mcmenamins.com"]
     start_urls = ("https://www.mcmenamins.com/eat-drink",)
@@ -86,19 +77,19 @@ class McmenaminsSpider(scrapy.Spider):
             )
 
     def parse_store(self, response):
-        address_full = response.xpath('//div[@class="mcm-logo-address"]')[0].xpath(".//a/p/text()").extract_first()
-        address_parts = re.match(r"(.{3,}),\s?(.{3,}),\s?(\w{2}) (\d{5})", address_full)
+        content = response.xpath('//div[@id="property_bar_address_no_button" or @id="property_bar_address"]')
+        info = content.xpath("(nobr|.)/a/@href").extract()
+
+        address_parts = re.match(r"^http:\/\/maps.google.com\/\?q=(.*),([^,]*),\s+(.*),\s+(\d{5})$", info[0])
 
         properties = {
             "ref": response.meta.get("ref"),
             "website": response.url,
-            "addr_full": address_parts[1].strip(),
-            "city": address_parts[2].strip(),
-            "state": address_parts[3].strip(),
-            "postcode": address_parts[4].strip(),
-            "phone": self.phone_normalize(
-                response.xpath('//div[@class="mcm-logo-address"]')[0].xpath(".//ul/li/a/@href").extract_first()
-            ),
+            "street_address": address_parts.group(1).strip(),
+            "city": address_parts.group(2).strip(),
+            "state": address_parts.group(3).strip(),
+            "postcode": address_parts.group(4).strip(),
+            "phone": self.phone_normalize(info[1]),
             "opening_hours": self.store_hours(response.xpath('//div[@id="MainContent_hoursText"]/p/text()').extract()),
         }
         extract_google_position(properties, response)
