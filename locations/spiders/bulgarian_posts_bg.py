@@ -1,6 +1,7 @@
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
+from locations.categories import apply_category, Categories
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_FULL, OpeningHours
 
@@ -24,7 +25,12 @@ class BulgarianPostsBGSpider(Spider):
             item["opening_hours"] = OpeningHours()
             for day_name in DAYS_FULL:
                 if location[f"working_hours_{day_name.lower()}"]:
+<<<<<<< Updated upstream
                     item["opening_hours"].add_range(
                         day_name, *location[f"working_hours_{day_name.lower()}"].split("-", 1), "%H:%M"
                     )
+=======
+                    item["opening_hours"].add_range(day_name, *location[f"working_hours_{day_name.lower()}"].split("-", 1), "%H:%M")
+            apply_category(Categories.POST_OFFICE, item)
+>>>>>>> Stashed changes
             yield item
