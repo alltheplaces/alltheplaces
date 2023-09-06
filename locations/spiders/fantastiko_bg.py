@@ -19,6 +19,6 @@ class FantastikoBGSpider(SitemapSpider, StructuredDataSpider):
         item["lon"] = data["lng"]
         item["ref"] = response.xpath(
             '//span[@class="feat-title white shop-number inline_block middle"]/text()'
-        ).extract()
+        ).extract_first()
 
         yield item
