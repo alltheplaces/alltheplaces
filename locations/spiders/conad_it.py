@@ -8,6 +8,7 @@ from locations.items import Feature
 
 class ConadITSpider(Spider):
     name = "conad_it"
+    requires_proxy = True
 
     brands = {
         "CONAD": {"brand": "Conad", "brand_wikidata": "Q639075"},

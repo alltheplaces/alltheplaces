@@ -14,6 +14,7 @@ class EasyHotelGB(SitemapSpider, StructuredDataSpider):
         )
     ]
     wanted_types = ["Hotel"]
+    requires_proxy = True
 
     def sitemap_filter(self, entries):
         for entry in entries:

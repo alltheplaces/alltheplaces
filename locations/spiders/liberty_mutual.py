@@ -15,6 +15,7 @@ class LibertyMutualSpider(scrapy.Spider):
     download_delay = 10
     custom_settings = {"CONCURRENT_REQUESTS": "1"}
     user_agent = BROWSER_DEFAULT
+    requires_proxy = True
 
     def parse_store(self, response):
         data = re.search(

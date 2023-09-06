@@ -9,6 +9,7 @@ from locations.dict_parser import DictParser
 class TeslaSpider(scrapy.Spider):
     name = "tesla"
     item_attributes = {"brand": "Tesla", "brand_wikidata": "Q478214"}
+    requires_proxy = True
 
     download_delay = 0.5
     custom_settings = {

@@ -18,6 +18,7 @@ class BatteriesPlusSpider(scrapy.spiders.SitemapSpider):
     sitemap_rules = [
         (r"/batteries-plus-", "parse"),
     ]
+    requires_proxy = True
 
     def parse(self, response):
         if 301 in response.request.meta.get("redirect_reasons", []):

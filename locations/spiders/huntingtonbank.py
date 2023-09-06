@@ -14,6 +14,7 @@ class HuntingtonBankSpider(scrapy.Spider):
     allowed_domains = ["www.huntington.com"]
     start_urls = ["https://www.huntington.com/~/media/SEO_Files/sitemap.xml"]
     user_agent = BROWSER_DEFAULT
+    requires_proxy = True
 
     def parse(self, response):
         response.selector.remove_namespaces()

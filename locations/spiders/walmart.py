@@ -16,6 +16,7 @@ class WalmartSpider(SitemapSpider):
     sitemap_rules = [("", "parse_store")]
     custom_settings = {"AUTOTHROTTLE_ENABLED": True, "USER_AGENT": BROWSER_DEFAULT}
     requires_proxy = True
+    requires_proxy = True
 
     def store_hours(self, store):
         if store.get("open24Hours") is True:

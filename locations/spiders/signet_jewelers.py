@@ -18,6 +18,7 @@ class SignetJewelersSpider(scrapy.Spider):
         "www.hsamuel.co.uk",
     ]
     download_delay = 0.5  # limit the delay to avoid 403 errors
+    requires_proxy = True
 
     ca_prov = [
         "Alberta",

@@ -16,6 +16,7 @@ class WaitroseSpider(scrapy.Spider):
     allowed_domains = ["www.waitrose.com"]
     bf_home = "http://www.waitrose.com/content/waitrose/en/bf_home"
     start_urls = (bf_home + "/bf.html",)
+    requires_proxy = True
 
     def parse(self, response):
         # if this is a store details page then it will have the following

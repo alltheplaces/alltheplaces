@@ -16,6 +16,7 @@ class ArgosSpider(SitemapSpider):
     sitemap_urls = ["https://www.argos.co.uk/stores_sitemap.xml"]
     sitemap_rules = [(r"https://www.argos.co.uk/stores/([\d]+)-([\w-]+)", "parse")]
     user_agent = BROWSER_DEFAULT
+    requires_proxy = True
 
     def parse(self, response):
         data = re.findall(r"window.INITIAL_STATE =[^<]+", response.text)

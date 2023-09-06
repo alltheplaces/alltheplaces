@@ -17,6 +17,7 @@ class GiantEagleSpider(scrapy.Spider):
         "https://www.gianteagle.com/api/sitecore/locations/getlocationlistvm?q=&orderBy=geo.distance(storeCoordinate,%20geography%27POINT(-97.68194299999999%2030.2737366)%27)%20asc&skip=0",
     )
     items_per_page = 12  # api limit
+    requires_proxy = True
 
     def parse_hours(self, hours):
         o = OpeningHours()

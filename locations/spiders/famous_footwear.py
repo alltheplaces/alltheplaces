@@ -14,6 +14,7 @@ class FamousFootwearSpider(SitemapSpider, StructuredDataSpider):
     wanted_types = ["Store"]
     user_agent = BROWSER_DEFAULT
     custom_settings = {"ROBOTSTXT_OBEY": False}
+    requires_proxy = True
 
     def inspect_item(self, item, response):
         matches = re.search(r'location: \["(.*)", "(.*)"\],', response.text)

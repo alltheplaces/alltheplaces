@@ -10,6 +10,7 @@ class EdwardJonesSpider(SitemapSpider, StructuredDataSpider):
     item_attributes = {"brand": "Edward Jones", "brand_wikidata": "Q5343830"}
     allowed_domains = ["www.edwardjones.com"]
     sitemap_urls = ["https://www.edwardjones.com/us-en/sitemap/financial-advisor/sitemap.xml"]
+    requires_proxy = True
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         oh = OpeningHours()

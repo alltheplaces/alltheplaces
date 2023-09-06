@@ -12,6 +12,7 @@ class Motel6Spider(scrapy.Spider):
     start_urls = ["https://www.motel6.com/content/g6-cache/property-summary.1.json"]
     download_delay = 0.5
     user_agent = BROWSER_DEFAULT
+    requires_proxy = True
 
     def parse(self, response):
         for hotel_id in response.json().keys():

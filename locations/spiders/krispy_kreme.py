@@ -10,6 +10,7 @@ class KrispyKremeSpider(scrapy.Spider):
     allowed_domains = ["krispykreme.com"]
     download_delay = 0.2
     start_urls = ("https://www.krispykreme.com/locate/all-locations",)
+    requires_proxy = True
 
     def parse(self, response):
         urls = response.xpath("//div[@class='locations']//a/@href").extract()

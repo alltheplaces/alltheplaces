@@ -13,6 +13,7 @@ class napa(scrapy.Spider):
     start_urls = [
         "https://www.napaonline.com/en/auto-parts-stores-near-me",
     ]
+    requires_proxy = True
 
     def parse(self, response):
         urls = response.xpath('//div[@class="box box-xpad-both nol-content-outer"]//a/@href').extract()

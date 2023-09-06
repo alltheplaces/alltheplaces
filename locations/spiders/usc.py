@@ -12,6 +12,7 @@ class USCSpider(CrawlSpider):
     start_urls = ["https://www.usc.co.uk/stores/all"]
     rules = [Rule(LinkExtractor(allow=".*-store-.*"), callback="parse", follow=False)]
     download_delay = 0.5
+    requires_proxy = True
 
     def parse(self, response):
         MicrodataParser.convert_to_json_ld(response)

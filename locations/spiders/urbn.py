@@ -10,6 +10,7 @@ class URBNSpider(Spider):
     allowed_domains = ["www.anthropologie.com"]
     start_urls = ["https://www.anthropologie.com/api/misl/v1/stores/search"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
+    requires_proxy = True
 
     brands = {
         "ANTHROPOLOGIE": {

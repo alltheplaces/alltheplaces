@@ -14,6 +14,7 @@ class FlemingsSteakhouseSpider(scrapy.Spider):
     }
     allowed_domains = ["flemingssteakhouse.com"]
     start_urls = ("https://www.flemingssteakhouse.com/locations",)
+    requires_proxy = True
 
     def parse(self, response):
         urls = response.xpath('//ul[@class="locations"]/li/a/@href').extract()

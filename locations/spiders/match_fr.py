@@ -8,6 +8,7 @@ class MatchFRSpider(scrapy.Spider):
     name = "match_fr"
     item_attributes = {"brand": "Match", "brand_wikidata": "Q513977"}
     start_urls = ["https://api-drive.drive.supermarchesmatch.fr/sites_searches"]
+    requires_proxy = True
 
     def parse(self, response):
         stores = response.json()["data"]

@@ -11,6 +11,7 @@ class PiadaUSSpider(Spider):
     name = "piada_us"
     item_attributes = {"brand": "Piada Italian Street Food", "brand_wikidata": "Q7190020"}
     start_urls = ["https://mypiada.com/locations"]
+    requires_proxy = True
 
     def parse(self, response, **kwargs):
         for m in re.findall(

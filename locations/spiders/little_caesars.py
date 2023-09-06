@@ -29,6 +29,7 @@ class LittleCaesarsSpider(scrapy.Spider):
     allowed_domains = ["littlecaesars.com"]
     download_delay = 0.1
     user_agent = BROWSER_DEFAULT
+    requires_proxy = True
 
     def start_requests(self):
         for record in postal_regions("US"):

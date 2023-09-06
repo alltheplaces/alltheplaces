@@ -10,6 +10,7 @@ class UhaulSpider(scrapy.Spider):
     name = "uhaul"
     item_attributes = {"brand": "U-Haul", "brand_wikidata": "Q7862902"}
     allowed_domains = ["www.uhaul.com"]
+    requires_proxy = True
 
     start_urls = ("https://www.uhaul.com/Locations/US_and_Canada/",)
 

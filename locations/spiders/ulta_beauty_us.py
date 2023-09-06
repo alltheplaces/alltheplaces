@@ -7,6 +7,7 @@ class UltaBeautyUSSpider(SweetIQSpider):
     item_attributes = {"brand": "Ulta Beauty", "brand_wikidata": "Q7880076"}
     start_urls = ["https://www.ulta.com/stores"]
     download_delay = 2.0
+    requires_proxy = True
 
     def parse_item(self, item, location):
         apply_category(Categories.SHOP_BEAUTY, item)

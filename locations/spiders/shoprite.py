@@ -17,6 +17,7 @@ class ShopriteSpider(scrapy.Spider):
     start_urls = [
         "https://www.shoprite.com/",
     ]
+    requires_proxy = True
 
     def parse(self, response):
         script = response.xpath('//script[contains(text(), "__PRELOADED_STATE__")]/text()').extract_first()

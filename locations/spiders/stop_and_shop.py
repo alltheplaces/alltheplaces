@@ -13,6 +13,7 @@ class StopAndShopSpider(scrapy.Spider):
     start_urls = (
         "https://stopandshop.com/apis/store-locator/locator/v1/stores/STSH?storeType=GROCERY&q=11797&maxDistance=1000000&details=true",
     )
+    requires_proxy = True
 
     def parse(self, response):
         data = json.loads(json.dumps(response.json()))

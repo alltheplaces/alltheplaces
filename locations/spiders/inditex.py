@@ -21,6 +21,7 @@ class InditexSpider(scrapy.Spider):
     custom_settings = {"ROBOTSTXT_OBEY": False}
     user_agent = BROWSER_DEFAULT
     download_delay = 2.0
+    requires_proxy = True
 
     def parse(self, response):
         config = response.json()["seoParamMap"]

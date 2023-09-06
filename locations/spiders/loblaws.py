@@ -7,6 +7,7 @@ class LoblawsSpider(scrapy.Spider):
     name = "loblaws"
     allowed_domains = ["www.loblaws.ca"]
     start_urls = ("https://www.loblaws.ca/api/pickup-locations",)
+    requires_proxy = True
 
     def parse(self, response):
         results = response.json()

@@ -10,6 +10,7 @@ class DominosPizzaAUSpider(scrapy.Spider):
     name = "dominos_pizza_au"
     item_attributes = {"brand": "Domino's", "brand_wikidata": "Q839466"}
     allowed_domains = ["dominos.com.au"]
+    requires_proxy = True
 
     start_urls = ("https://www.dominos.com.au/stores",)
 

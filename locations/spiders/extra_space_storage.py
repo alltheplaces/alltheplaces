@@ -12,6 +12,7 @@ class ExtraSpaceStorageSpider(SitemapSpider):
     name = "extra_space_storage"
     item_attributes = {"brand": "Extra Space Storage", "brand_wikidata": "Q5422162"}
     allowed_domains = ["www.extraspace.com"]
+    requires_proxy = True
 
     # Seems to be sufficient to allow the site to include correct ldjson
     download_delay = 1.6

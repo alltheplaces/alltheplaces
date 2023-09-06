@@ -12,6 +12,7 @@ class AfcUrgentCareSpider(scrapy.Spider):
     item_attributes = {"brand": "AFC Urgent Care", "brand_wikidata": "Q110552174"}
     allowed_domains = ["afcurgentcare.com"]
     start_urls = ("https://www.afcurgentcare.com/modules/multilocation/?near_lat=39&near_lon=-98",)
+    requires_proxy = True
 
     def parse(self, response):
         j = response.json()

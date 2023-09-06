@@ -48,6 +48,7 @@ class GucciSpider(scrapy.spiders.SitemapSpider):
         "https://www.gucci.com/uk/en_gb/",
         "https://www.gucci.com/us/en/",
     ]
+    requires_proxy = True
 
     def start_requests(self):
         for url in self.sites:

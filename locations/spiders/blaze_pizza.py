@@ -8,6 +8,7 @@ class BlazePizzaSpider(scrapy.Spider):
     item_attributes = {"brand": "Blaze Pizza"}
     allowed_domains = ["nomnom-prod-api.blazepizza.com"]
     start_urls = ["https://nomnom-prod-api.blazepizza.com/extras/restaurant/summary/state"]
+    requires_proxy = True
 
     def parse(self, response):
         url = "https://nomnom-prod-api.blazepizza.com"

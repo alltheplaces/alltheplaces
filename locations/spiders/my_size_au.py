@@ -14,6 +14,7 @@ class MySizeAUSpider(CrawlSpider):
     allowed_domains = ["www.mysize.com.au"]
     start_urls = ["https://www.mysize.com.au/locations/"]
     rules = [Rule(LinkExtractor(allow=r"/locations/[\w\-]+"), callback="parse")]
+    requires_proxy = True
 
     def parse(self, response):
         properties = {

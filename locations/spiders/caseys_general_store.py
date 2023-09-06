@@ -19,6 +19,7 @@ class CaseysGeneralStoreSpider(SitemapSpider):
             "parse",
         ),
     ]
+    requires_proxy = True
 
     def parse(self, response):
         item = LinkedDataParser.parse(response, "ConvenienceStore")

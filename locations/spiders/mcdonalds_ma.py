@@ -11,6 +11,7 @@ class McDonaldsMASpider(scrapy.Spider):
     item_attributes = McDonaldsSpider.item_attributes
     allowed_domains = ["www.mcdonalds.ma"]
     start_urls = ("http://www.mcdonalds.ma/nos-restaurants/r%C3%A9seau-maroc",)
+    requires_proxy = True
 
     def parse_address(self, data):
         address = ""

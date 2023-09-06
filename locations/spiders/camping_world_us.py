@@ -8,6 +8,7 @@ from locations.user_agents import BROWSER_DEFAULT
 class CampingWorldUSSpider(scrapy.Spider):
     name = "camping_world_us"
     item_attributes = {"brand": "Camping World", "brand_wikidata": "Q5028383"}
+    requires_proxy = True
 
     locator_url = "https://rv.campingworld.com/locations"
     api_url = "https://api.rvs.com/api/geodata/getclosestdealer"

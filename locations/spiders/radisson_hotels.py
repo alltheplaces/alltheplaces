@@ -35,6 +35,7 @@ class RadissonHotelsSpider(scrapy.Spider):
             "Accept-Language": "fr-FR",
         },
     }
+    requires_proxy = True
 
     def parse(self, response):
         cities = response.xpath('//*[@class="list-destinations--link font-bold"]/@href').getall()

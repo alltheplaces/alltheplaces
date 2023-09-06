@@ -12,6 +12,7 @@ class TorchysTacosSpider(scrapy.Spider):
     allowed_domains = ["torchystacos.com"]
     start_urls = ("https://torchystacos.com/locations/",)
     download_delay = 0.7
+    requires_proxy = True
 
     def parse(self, response):
         stores = response.xpath('//div[@class="details-title"]/a/@href').extract()

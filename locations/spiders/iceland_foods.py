@@ -16,6 +16,7 @@ class IcelandFoodsSpider(SitemapSpider, StructuredDataSpider):
     ]
     wanted_types = ["LocalBusiness"]
     search_for_phone = False
+    requires_proxy = True
 
     def inspect_item(self, item, response):
         item["name"] = response.xpath("/html/head/title/text()").get()

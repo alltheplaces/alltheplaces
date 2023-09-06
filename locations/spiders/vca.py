@@ -8,6 +8,7 @@ class VCASpider(scrapy.Spider):
     item_attributes = {"brand": "VCA", "brand_wikidata": "Q7906620"}
     allowed_domains = ["vcahospitals.com"]
     start_urls = ("https://vcahospitals.com/find-a-hospital/location-directory",)
+    requires_proxy = True
 
     def parse(self, response):
         urls = response.xpath('//span[@class="location-accordion__location-name"]/a/@href').extract()

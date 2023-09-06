@@ -12,6 +12,7 @@ class DominosPizzaBESpider(SitemapSpider):
     sitemap_urls = ["https://www.dominos.be/sitemap.aspx"]
     url_regex = r"https:\/\/www\.dominos\.be/nl/winkel\/([\w]+)-([\w]+)-([\d]+)$"
     sitemap_rules = [(url_regex, "parse_store")]
+    requires_proxy = True
 
     start_urls = ("https://www.dominos.be/winkels",)
 

@@ -11,6 +11,7 @@ class MaxmaraSpider(scrapy.Spider):
     item_attributes = {"brand": "Max Mara", "brand_wikidata": "Q1151774"}
     gc = GeonamesCache()
     custom_settings = {"ROBOTSTXT_OBEY": False}
+    requires_proxy = True
 
     def start_requests(self):
         for country_code in self.gc.get_countries().keys():

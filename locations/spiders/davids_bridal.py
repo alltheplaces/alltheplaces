@@ -11,6 +11,7 @@ class DavidsBridalSpider(scrapy.Spider):
     start_urls = [
         "https://www.davidsbridal.com/graphql?query={storeLocationList{active+name+phone+storeId+timezone+location{postalCode+state+city+country+countryCode+latitude+longitude+address1+address2+building+__typename}hours{regular{close+day+open+__typename}override{date+end+name+start+timeType+__typename}__typename}__typename}}"
     ]
+    requires_proxy = True
 
     def parse(self, response):
         for data in response.json().get("data", {}).get("storeLocationList"):

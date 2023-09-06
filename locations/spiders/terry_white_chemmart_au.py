@@ -16,6 +16,7 @@ class TerryWhiteChemmartAUSpider(scrapy.Spider):
         "country": "AU",
     }
     allowed_domains = ["terrywhitechemmart.com.au"]
+    requires_proxy = True
 
     def start_requests(self):
         yield JsonRequest(

@@ -9,6 +9,7 @@ class Take5USSpider(scrapy.Spider):
     item_attributes = {"brand": "Take 5", "brand_wikidata": "Q112359190"}
     allowed_domains = ["www.take5.com"]
     start_urls = ["https://www.take5.com/page-data/locations/page-data.json"]
+    requires_proxy = True
 
     def parse(self, response):
         for location in response.json()["result"]["pageContext"]["storeLocations"]:

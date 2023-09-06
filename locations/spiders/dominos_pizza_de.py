@@ -12,6 +12,7 @@ class DominosPizzaDESpider(SitemapSpider):
     sitemap_urls = ["https://www.dominos.de/sitemap.aspx"]
     url_regex = r"https:\/\/www\.dominos\.de\/filiale\/([\w]+)-([\w]+)-([\d]+)$"
     sitemap_rules = [(url_regex, "parse_store")]
+    requires_proxy = True
 
     def parse_store(self, response):
         match = re.match(self.url_regex, response.url)

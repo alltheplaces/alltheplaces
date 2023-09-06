@@ -15,6 +15,7 @@ class NinetyNineCentsOnlySpider(SitemapSpider):
             "parse_store",
         ),
     ]
+    requires_proxy = True
 
     def parse_store(self, response):
         item = LinkedDataParser.parse(response, "Store")

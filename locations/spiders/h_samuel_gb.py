@@ -12,6 +12,7 @@ class HSamuelGBSpider(CrawlSpider, StructuredDataSpider):
     item_attributes = {"brand": "H.Samuel", "brand_wikidata": "Q5628558"}
     start_urls = ["https://www.hsamuel.co.uk/store-finder/view-stores/GB%20Region"]
     rules = [Rule(LinkExtractor(allow="/store/"), callback="parse_sd")]
+    requires_proxy = True
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["extras"]["branch"] = item.pop("name")

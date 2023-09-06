@@ -9,6 +9,7 @@ class Mitre10NZSpider(scrapy.Spider):
     item_attributes = {"brand": "Mitre 10", "brand_wikidata": "Q6882394"}
     allowed_domains = ["www.mitre10.co.nz"]
     start_urls = ["https://www.mitre10.co.nz/store-locator?branchId=X1&page=0&type=data"]
+    requires_proxy = True
 
     def parse(self, response):
         current_page = response.meta.get("page", 0)

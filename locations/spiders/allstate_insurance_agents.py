@@ -12,6 +12,7 @@ class AllstateInsuranceAgentsSpider(scrapy.Spider):
     allowed_domains = ["agents.allstate.com"]
     download_delay = 0.5
     start_urls = ("https://agents.allstate.com/",)
+    requires_proxy = True
 
     def parse_hours(self, hours):
         opening_hours = OpeningHours()

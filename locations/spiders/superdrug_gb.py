@@ -13,6 +13,7 @@ class SuperdrugGBSpider(SitemapSpider, StructuredDataSpider):
     sitemap_follow = ["Store"]
     sitemap_rules = [(r"https:\/\/www\.superdrug\.com\/store\/(.+)$", "parse_sd")]
     user_agent = BROWSER_DEFAULT
+    requires_proxy = True
 
     def inspect_item(self, item, response):
         item["addr_full"] = clean_address(item["street_address"].replace("Superdrug", ""))

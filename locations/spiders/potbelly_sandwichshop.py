@@ -14,6 +14,7 @@ class PotbellySandwichShopSpider(Spider):
     start_urls = [
         "https://www.potbelly.com/sitemap_locations.xml",
     ]
+    requires_proxy = True
 
     def parse(self, response):
         response.selector.remove_namespaces()

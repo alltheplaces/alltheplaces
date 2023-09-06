@@ -18,6 +18,7 @@ class BJsWholesaleSpider(scrapy.Spider):
         "https://api.bjs.com/digital/live/apis/v1.0/clublocatorpage/statetowns/10201",
     ]
     headers = {"Content-Type": "application/json"}
+    requires_proxy = True
 
     def parse_hours(self, hours):
         opening_hours = OpeningHours()

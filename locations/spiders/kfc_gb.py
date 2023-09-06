@@ -14,6 +14,7 @@ class KFCGB(Spider):
     item_attributes = KFCSpider.item_attributes
     start_urls = ["https://www.kfc.co.uk/cms/api/data/restaurants_all"]
     user_agent = BROWSER_DEFAULT
+    requires_proxy = True
 
     def parse(self, response, **kwargs):
         for location in response.json():

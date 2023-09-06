@@ -13,6 +13,7 @@ class SunglassHutGBSpider(Spider):
         "https://www.sunglasshut.com/AjaxSGHFindPhysicalStoreLocations?latitude=53.4138458&longitude=-1.782017&radius=1000&storeId=11352"
     ]
     user_agent = BROWSER_DEFAULT
+    requires_proxy = True
 
     def parse(self, response, **kwargs):
         for location in response.json()["locationDetails"]:

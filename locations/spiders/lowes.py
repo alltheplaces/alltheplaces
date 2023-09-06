@@ -19,6 +19,7 @@ day_mapping = {
 
 class LowesSpider(scrapy.Spider):
     """ "This spider scrapes Lowes retail store locations"""
+    requires_proxy = True
 
     name = "lowes"
     item_attributes = {"brand": "Lowe's", "brand_wikidata": "Q1373493"}

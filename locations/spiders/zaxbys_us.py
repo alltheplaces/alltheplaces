@@ -11,6 +11,7 @@ class ZaxbysUSSpider(SitemapSpider, StructuredDataSpider):
     sitemap_rules = [(r"\/locations\/[a-z]{2}\/[\w\-]+\/[\w\-]+\/?$", "parse_sd")]
     wanted_types = ["Restaurant"]
     custom_settings = {"REDIRECT_ENABLED": False}
+    requires_proxy = True
 
     def sitemap_filter(self, entries):
         for entry in entries:

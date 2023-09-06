@@ -12,6 +12,7 @@ class AlbertHeijnSpider(Spider):
     allowed_domains = ["www.ah.nl", "www.ah.be"]
     start_urls = ["https://www.ah.nl/gql", "https://www.ah.be/gql"]
     user_agent = BROWSER_DEFAULT
+    requires_proxy = True
 
     def get_page(self, gql_url, page_number):
         gql_query = """

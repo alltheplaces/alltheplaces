@@ -13,6 +13,7 @@ class SephoraBRSpider(Spider):
     allowed_domains = ["www.sephora.com.br"]
     start_urls = ["https://www.sephora.com.br/nossas-lojas/"]
     user_agent = BROWSER_DEFAULT
+    requires_proxy = True
 
     def parse(self, response):
         for location in response.xpath("//li[@data-storeaddress]"):

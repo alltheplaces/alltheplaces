@@ -15,6 +15,7 @@ class KFCNZSpider(XMLFeedSpider):
     allowed_domains = ["kfc.co.nz"]
     start_urls = ["https://kfc.co.nz/sitemap.xml"]
     itertag = "loc"
+    requires_proxy = True
 
     def parse_node(self, response, node):
         url = node.xpath("//text()").get()

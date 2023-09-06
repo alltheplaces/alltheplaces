@@ -9,6 +9,7 @@ class PapaJohnsGBSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://www.papajohns.co.uk/sitemap.xml"]
     sitemap_rules = [(r"https:\/\/www\.papajohns\.co\.uk\/stores\/([-.\w]+)$", "parse_sd")]
     wanted_types = ["LocalBusiness"]
+    requires_proxy = True
 
     def post_process_item(self, item, response, ld_data):
         # extract_google_position(item, response)

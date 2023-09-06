@@ -8,6 +8,7 @@ class HiltonSpider(scrapy.spiders.SitemapSpider, StructuredDataSpider):
     name = "hilton"
     sitemap_urls = ["https://www.hilton.com/sitemap.xml"]
     download_delay = 0.2
+    requires_proxy = True
 
     HILTON_DOUBLETREE = ["DoubleTree by Hilton", "Q2504643"]
     HILTON_HOTELS = ["Hilton Hotels & Resorts", "Q598884"]

@@ -15,6 +15,7 @@ class ReiSpider(SitemapSpider, StructuredDataSpider):
     user_agent = BROWSER_DEFAULT
     download_delay = 2.5
     wanted_types = ["Store"]
+    requires_proxy = True
 
     def inspect_item(self, item, response):
         hours = json.loads(response.xpath('//script[@id="store-schema"]/text()').extract_first())["openingHours"]

@@ -15,6 +15,7 @@ class FarmersHomeFurnitureSpider(scrapy.Spider):
     }
     allowed_domains = ["www.farmershomefurniture.com"]
     start_urls = ["https://www.farmershomefurniture.com/store-list.inc"]
+    requires_proxy = True
 
     def parse(self, response):
         for store in response.xpath("//tr"):

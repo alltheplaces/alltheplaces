@@ -15,6 +15,7 @@ class DuluthTradingSpider(CrawlSpider):
     allowed_domains = ["duluthtrading.com"]
     start_urls = ["https://www.duluthtrading.com/our-stores"]
     rules = [Rule(LinkExtractor(allow="/locations/"), callback="parse", follow=True)]
+    requires_proxy = True
 
     def parse(self, response):
         url = "https://www.duluthtrading.com/mobify/proxy/ocapi/s/DTC/api/store/detail/?id={}"

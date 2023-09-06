@@ -21,6 +21,7 @@ class VolvoSpider(scrapy.Spider):
         "https://www.volvocars.com/it/dealers/concessionari",
     ]
     user_agent = BROWSER_DEFAULT
+    requires_proxy = True
 
     def parse(self, response):
         country = re.search(r"(\w\w)/dealers", response.url).group(1)

@@ -16,6 +16,7 @@ class DominosPizzaFRSpider(SitemapSpider):
             "parse_store",
         )
     ]
+    requires_proxy = True
 
     def parse_store(self, response):
         address_data = response.xpath('//a[@id="open-map-address"]/text()').extract()

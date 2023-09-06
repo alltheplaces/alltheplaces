@@ -19,6 +19,7 @@ class TopsSpider(scrapy.Spider):
     name = "tops"
     item_attributes = {"brand": "Tops", "brand_wikidata": "Q7825137"}
     allowed_domains = ["www.topsmarkets.com"]
+    requires_proxy = True
 
     start_urls = ("http://www.topsmarkets.com/StoreLocator/Store_MapLocation_S.las?State=all",)
 

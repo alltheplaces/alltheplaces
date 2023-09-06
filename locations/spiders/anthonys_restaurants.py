@@ -11,6 +11,7 @@ class AnthonysRestaurantsSpider(scrapy.Spider):
     item_attributes = {"brand": "Anthony's", "country": "US"}
     allowed_domains = ["www.anthonys.com"]
     start_urls = ("https://www.anthonys.com/restaurants/",)
+    requires_proxy = True
 
     def parse(self, response):
         script = response.css("#acf-block-locations-map-script-js-extra::text").get()

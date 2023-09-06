@@ -12,6 +12,7 @@ class SwarovskiUsSpider(scrapy.Spider):
     item_attributes = {"brand": "Swarovski", "brand_wikidata": "Q611115"}
     allowed_domains = ["swarovski.com"]
     headers = {"User-Agent": BROWSER_DEFAULT}
+    requires_proxy = True
 
     def start_requests(self):
         point_files = "us_centroids_100mile_radius_state.csv"

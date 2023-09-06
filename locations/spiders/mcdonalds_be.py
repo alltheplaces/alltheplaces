@@ -14,6 +14,7 @@ class McDonaldsBESpider(Spider):
     item_attributes = McDonaldsSpider.item_attributes
     allowed_domains = ["www.mcdonalds.be"]
     start_urls = ["https://www.mcdonalds.be/en/restaurants/api/restaurants"]
+    requires_proxy = True
 
     def start_requests(self):
         for url in self.start_urls:

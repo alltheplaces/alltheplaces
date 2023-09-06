@@ -40,6 +40,7 @@ class TescoGBSpider(SitemapSpider, StructuredDataSpider):
     ]
     wanted_types = ["Pharmacy", "GasStation", "CafeOrCoffeeShop", "GroceryStore"]
     user_agent = BROWSER_DEFAULT
+    requires_proxy = True
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         apply_category_from_ld(item, ld_data)

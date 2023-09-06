@@ -17,6 +17,7 @@ class DominosPizzaJPSpider(scrapy.Spider):
         "https://www.dominos.jp/sitemap.aspx",
     ]
     download_delay = 0.3
+    requires_proxy = True
 
     def parse(self, response):
         response.selector.remove_namespaces()

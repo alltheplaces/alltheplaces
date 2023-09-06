@@ -10,6 +10,7 @@ class InsomniaCookiesSpider(scrapy.Spider):
     name = "insomnia_cookies"
     item_attributes = {"brand": "Insomnia Cookies", "brand_wikidata": "Q16997024"}
     allowed_domains = ["insomniacookies.com"]
+    requires_proxy = True
 
     def start_requests(self):
         with open("./locations/searchable_points/us_centroids_25mile_radius.csv") as points:

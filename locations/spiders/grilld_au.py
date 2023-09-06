@@ -10,6 +10,7 @@ class GrilldAUSpider(Spider):
     item_attributes = {"brand": "Grill'd", "brand_wikidata": "Q18165852"}
     allowed_domains = ["www.grilld.com.au"]
     start_urls = ["https://www.grilld.com.au/api/locations.json"]
+    requires_proxy = True
 
     def parse(self, response):
         for location in response.json()["data"]:

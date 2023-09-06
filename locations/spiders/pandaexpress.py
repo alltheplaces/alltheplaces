@@ -13,6 +13,7 @@ class PandaExpressSpider(scrapy.Spider):
     allowed_domains = ["pandaexpress.com"]
     custom_settings = {"ROBOTSTXT_OBEY": False, "RETRY_TIMES": 10}
     user_agent = BROWSER_DEFAULT
+    requires_proxy = True
 
     def start_requests(self):
         today = datetime.date.today().strftime("%Y%m%d")

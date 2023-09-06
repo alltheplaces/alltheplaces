@@ -7,6 +7,7 @@ class JllSpider(scrapy.Spider):
     name = "jll"
     item_attributes = {"brand": "JLL", "brand_wikidata": "Q1703389"}
     allowed_domains = ["jll.com"]
+    requires_proxy = True
 
     def start_requests(self):
         base_url = "https://www.us.jll.com/bin/jll/search?q=locations&currentPage=/content/jll-dot-com/countries/amer/us/en/locations&top=100&p={page}&contentTypes=Location"

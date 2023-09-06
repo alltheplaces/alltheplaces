@@ -12,6 +12,7 @@ class SephoraUSCASpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://www.sephora.com/sephora-store-sitemap.xml"]
     sitemap_rules = [(r"\/happening\/stores\/(?!kohls).+", "parse_sd")]
     user_agent = BROWSER_DEFAULT
+    requires_proxy = True
 
     def post_process_item(self, item, response, ld_data):
         item.pop("image")

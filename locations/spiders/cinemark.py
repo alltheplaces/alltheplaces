@@ -17,6 +17,7 @@ class CinemarkSpider(SitemapSpider):
             "parse",
         ),
     ]
+    requires_proxy = True
 
     def parse(self, response):
         item = LinkedDataParser.parse(response, "MovieTheater")

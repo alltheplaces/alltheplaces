@@ -9,6 +9,7 @@ class PrimroseSchoolsSpider(scrapy.Spider):
     name = "primrose_schools"
     item_attributes = {"brand": "Primrose Schools", "brand_wikidata": "Q7243677"}
     allowed_domains = ["primroseschools.com"]
+    requires_proxy = True
 
     start_urls = ["https://www.primroseschools.com/find-a-school/"]
 

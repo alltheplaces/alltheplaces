@@ -10,6 +10,7 @@ class RoundTablePizzaSpider(scrapy.Spider):
     allowed_domains = ["www.roundtablepizza.com"]
     item_attributes = {"brand": "Round Table Pizza", "brand_wikidata": "Q7371139"}
     start_urls = ("https://ordering.roundtablepizza.com/site/rtp/locations",)
+    requires_proxy = True
 
     def parse(self, response):
         for store in response.xpath('//div[@class="coordinatos"]'):

@@ -11,6 +11,7 @@ class BarAndBlockGB(CrawlSpider):
     item_attributes = {"brand": "Bar + Block", "brand_wikidata": "Q117599706"}
     start_urls = ["https://www.barandblock.co.uk/en-gb/locations"]
     rules = [Rule(LinkExtractor(allow=r"\/en-gb\/locations\/[-\w]+$"), callback="parse")]
+    requires_proxy = True
 
     def parse(self, response, **kwargs):
         item = Feature()

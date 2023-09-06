@@ -7,6 +7,7 @@ class Freebirds(scrapy.Spider):
     name = "freebirds"
     item_attributes = {"brand": "Freebirds World Burrito", "brand_wikidata": "Q5500367"}
     start_urls = ["https://www.freebirds.com/api/locations?includePrivate=false"]
+    requires_proxy = True
 
     def parse(self, response):
         results = response.json()

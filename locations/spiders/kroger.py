@@ -33,6 +33,7 @@ class KrogerSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = [f"{brand}storelocator-sitemap.xml" for brand in BRANDS.keys()]
     sitemap_rules = [("/stores/grocery/", "parse_sd")]
     custom_settings = {"AUTOTHROTTLE_ENABLED": True, "USER_AGENT": BROWSER_DEFAULT}
+    requires_proxy = True
 
     def pre_process_data(self, ld_data, **kwargs):
         if phone := ld_data.get("telephone"):

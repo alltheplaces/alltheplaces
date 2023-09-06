@@ -7,6 +7,7 @@ class KrefelBESpider(Spider):
     name = "krefel_be"
     item_attributes = {"brand": "Krëfel", "brand_wikidata": "Q3200093"}
     start_urls = ["https://api.krefel.be/api/v2/krefel/stores?pageSize=100&lang=fr"]
+    requires_proxy = True
 
     def parse(self, response, **kwargs):
         for location in response.json()["stores"]:

@@ -16,6 +16,7 @@ class GamestopSpider(scrapy.Spider):
         "https://www.gamestop.it/StoreLocator/GetStoresForStoreLocatorByProduct",
         "https://www.gamestop.ch/StoreLocator/GetStoresForStoreLocatorByProduct",
     ]
+    requires_proxy = True
 
     def parse(self, response):
         for data in response.json():

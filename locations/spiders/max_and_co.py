@@ -15,6 +15,7 @@ class MaxAndCoSpider(Spider):
     ]
     no_refs = True
     user_agent = BROWSER_DEFAULT
+    requires_proxy = True
 
     def parse(self, response, **kwargs):
         for location in response.json()["features"]:
