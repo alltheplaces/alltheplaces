@@ -1,3 +1,5 @@
+import re
+
 from scrapy.spiders import SitemapSpider
 
 from locations.google_url import extract_google_position
@@ -15,16 +17,12 @@ class BremerBankSpider(SitemapSpider):
         properties = {
             "ref": response.url.split("/")[-1],
             "street_address": response.xpath('//div[@class="col-sm-12 col-lg-4"]/div/p/text()').extract_first().strip(),
-            "phone": response.xpath('//a[@class="phoneLink"]/text()').extract_first(),
+            "phone": response.xpath('//a[@class="phone-link"]/text()').extract_first(),
         }
 
-        city, state, postcode = (
-            response.xpath('//div[@class="col-sm-12 col-lg-4"]/div/p/text()')[2].extract().strip().split("\n")
-        )
-
-        properties["city"] = city.strip(",")
-        properties["state"] = state.strip()
-        properties["postcode"] = postcode.strip()
+        address_part2 = response.xpath('//div[@class="col-sm-12 col-lg-4"]/div/p/text()')[2].extract()
+        match = re.match(r"^([^,]*),\s+(.*)\s+(\d{5})$", address_part2)
+        (properties["city"], properties["state"], properties["postcode"]) = [m.strip() for m in match.groups()]
 
         extract_google_position(properties, response)
 

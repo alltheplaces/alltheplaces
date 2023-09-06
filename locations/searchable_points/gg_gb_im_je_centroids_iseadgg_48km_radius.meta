@@ -5,7 +5,7 @@ dggs_num_aperture_4_res 1
 dggs_res_spec 8
 
 point_output_type TEXT
-point_output_file_name gg_gb_im_je_centroids_iseadgg_50km_radius
+point_output_file_name gg_gb_im_je_centroids_iseadgg_48km_radius
 
 # gg_gb_im_je.shp generation method:
 # 1. Download and extract: https://www.naturalearthdata.com/http//www.naturalearthdata.com/download/10m/cultural/ne_10m_admin_0_countries_lakes.zip

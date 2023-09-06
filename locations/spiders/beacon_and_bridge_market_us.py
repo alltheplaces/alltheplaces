@@ -1,14 +1,14 @@
 import re
 
-import scrapy
+from scrapy import Spider
 
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 
 
-class BeaconAndBridgeSpider(scrapy.Spider):
-    name = "beacon_and_bridge"
-    item_attributes = {"brand": "Beacon Bridge Market"}
+class BeaconAndBridgeMarketUSSpider(Spider):
+    name = "beacon_and_bridge_market_us"
+    item_attributes = {"brand": "Beacon & Bridge Market", "brand_wikidata": "Q122209684"}
     start_urls = ["https://beaconandbridge.com/locations/"]
 
     def parse(self, response):
@@ -27,8 +27,8 @@ class BeaconAndBridgeSpider(scrapy.Spider):
                     time_format="%I:%M%p",
                 )
             properties = {
-                "ref": re.split(" - | -", store.xpath(".//h3/text()").get())[0],
-                "name": re.split(" - | -", store.xpath(".//h3/text()").get())[1],
+                "ref": store.xpath(".//h3/text()").get(),
+                "name": store.xpath(".//h3/text()").get(),
                 "street_address": store.xpath(".//span/a/text()[1]").get(),
                 "city": store.xpath(".//span/a/text()[2]").get().split(", ")[0],
                 "state": store.xpath(".//span/a/text()[2]").get().split(", ")[1],
