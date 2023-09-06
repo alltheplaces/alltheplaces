@@ -243,6 +243,7 @@ class Fuel(Enum):
     CNG = "fuel:cng"
     LNG = "fuel:lng"
     PROPANE = "fuel:propane"
+    BUTANE = "fuel:butane"
     LH2 = "fuel:LH2"
     # Additives
     ADBLUE = "fuel:adblue"
@@ -360,6 +361,10 @@ class FuelCards(Enum):
     UTA = "payment:uta"
     ROSNEFT = "payment:rosneft"  # https://www.rn-card.ru/
     ROUTEX = "payment:routex"  # https://routex.com/
+
+
+class Access(Enum):
+    HGV = "hgv"
 
 
 def apply_yes_no(attribute, item: Feature, state: bool, apply_positive_only: bool = True):
