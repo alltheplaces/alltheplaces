@@ -1,6 +1,6 @@
 from scrapy import Spider
 
-from locations.categories import apply_yes_no, apply_category, Categories, Extras, Fuel
+from locations.categories import Categories, Extras, Fuel, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 
 
