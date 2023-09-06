@@ -350,6 +350,7 @@ class FuelCards(Enum):
     DEUTSCHLAND = "fuel:discount:deutschland_card"
     DKV = "payment:dkv"
     E100 = "payment:e100"  # https://e100.eu/en
+    EUROWAG = "payment:eurowag"  # https://www.eurowag.com/
     ESSO_NATIONAL = "payment:esso_card"
     EXXONMOBIL_FLEET = "payment:exxonmobil_fleet"
     INA = "payment:ina"  # https://www.ina.hr/en/customers/ina-card/
@@ -358,10 +359,12 @@ class FuelCards(Enum):
     LUKOIL_LOYALTY_PROGRAM = "fuel:discount:lukoil"
     MOBIL = "payment:mobilcard"  # https://www.mobil.co.nz/en-nz/mobilcard
     MOLGROUP_CARDS = "payment:molgroup_cards"  # https://www.molgroupcards.com/
+    MORGAN_FUELS = 'payment:morgan_fuels'
     OMV = "payment:omv"  # https://www.omv.com/en/customers/services/fuel-cards
     PETROL_PLUS_REGION = "payment:petrol_plus_region"  # https://www.petrolplus.ru/
     SHELL = "payment:shell"
     SLOVNAFT = "payment:slovnaft"  # https://slovnaft.sk/en/
+    TIFON = 'payment:tifon'  # https://tifon.hr/hr/
     UTA = "payment:uta"
     ROSNEFT = "payment:rosneft"  # https://www.rn-card.ru/
     ROUTEX = "payment:routex"  # https://routex.com/
