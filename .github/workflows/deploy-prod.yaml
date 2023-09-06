@@ -1,0 +1,33 @@
+name: Deploy Production
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy:
+
+    name: Deploy to Zyte production project
+    runs-on: ubuntu-latest
+
+    env:
+      SHUB_APIKEY: ${{ secrets.scrapycloud_api_key }}
+      SHUB_PROJECTID: ${{ secrets.scrapycloud_project_id }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: 'pipenv'
+      - name: Install pipenv
+        run: |
+          pip --quiet install pipenv
+      - name: Install dependencies
+        run: |
+          pipenv install --dev
+      - name: Deploy code to scrapy cloud
+        shell: bash
+        run: shub deploy ${SHUB_PROJECTID} --version "master-${GITHUB_SHA}"

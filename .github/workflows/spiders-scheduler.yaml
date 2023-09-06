@@ -1,0 +1,38 @@
+name: Spiders Scheduler
+
+on:
+  schedule:
+    - cron: '* 18 0 * 5' # Every Friday at 18:00 UTC
+  workflow_dispatch:
+
+jobs:
+  scheduler:
+
+    name: Schedule all spiders on Zyte production project
+    runs-on: ubuntu-latest
+
+    env:
+      SHUB_PROJECTID: ${{ secrets.scrapycloud_project_id }}
+      SHUB_APIKEY: ${{ secrets.scrapycloud_api_key }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: 'pipenv'
+      - name: Install pipenv
+        run: |
+          pip --quiet install pipenv
+      - name: Install dependencies
+        run: |
+          pipenv install --dev
+      - name: Schedule spiders
+        shell: bash
+        # Currently reverse sort the list so that western_union, usps and visa
+        # run earlier and don't hold up the whole process at the end
+        # (long-term decision pending on excluding them)
+        # Priority 0 while we only have one container group - dev spiders will run first
+        run: |
+          pipenv run scrapy list | xargs -n1 | sort -r | xargs -P 10 -I § pipenv run shub schedule -p 0 $SHUB_PROJECTID/§
