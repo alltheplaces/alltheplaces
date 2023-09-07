@@ -75,6 +75,7 @@ if os.environ.get("ZYTE_API_KEY"):
         "https": "scrapy_zyte_api.ScrapyZyteAPIDownloadHandler",
     }
     DOWNLOADER_MIDDLEWARES = {
+        "locations.middlewares.zyte_api_by_country.ZyteApiByCountryMiddleware": 500,
         "scrapy_zyte_api.ScrapyZyteAPIDownloaderMiddleware": 1000,
     }
     REQUEST_FINGERPRINTER_CLASS = "scrapy_zyte_api.ScrapyZyteAPIRequestFingerprinter"

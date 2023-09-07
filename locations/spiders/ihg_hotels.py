@@ -10,9 +10,7 @@ class IHGHotelsSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://www.ihg.com/bin/sitemapindex.xml"]
     sitemap_rules = [(r".*/us/en/.*/hoteldetail$", "parse")]
     wanted_types = ["Hotel"]
-    custom_settings = {
-        "ZYTE_API_TRANSPARENT_MODE": True,
-    }
+    requires_proxy = True
 
     my_brands = {
         "armyhotels": ("Army Hotels", "Q16994722"),

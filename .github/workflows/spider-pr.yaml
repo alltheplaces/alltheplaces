@@ -49,8 +49,8 @@ jobs:
             exit 1
         fi
 
-        if [ $(wc -l <<< "$SPIDERS") -gt 5 ]; then
-            (>&2 echo "refusing to run on more than 5 spiders")
+        if [ $(wc -l <<< "$SPIDERS") -gt 15 ]; then
+            (>&2 echo "refusing to run on more than 15 spiders")
             exit 1
         fi
 

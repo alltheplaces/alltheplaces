@@ -15,9 +15,7 @@ class OliveGardenSpider(SitemapSpider):
         "https://www.olivegarden.com/en-locations-sitemap.xml",
     ]
     sitemap_rules = [(r"[0-9]+$", "parse")]
-    custom_settings = {
-        "ZYTE_API_TRANSPARENT_MODE": True,
-    }
+    requires_proxy = True
 
     def _parse_sitemap(self, response):
         for row in super()._parse_sitemap(response):
