@@ -62,7 +62,7 @@ class SheetzSpider(scrapy.Spider):
     def parse_stores(self, response):
         if store := response.json()["stores"]:
             for store in store:
-                store["addr_street"] = store.pop("address")
+                store["street-address"] = store.pop("address")
                 item = DictParser.parse(store)
                 item["ref"] = store.get("storeNumber")
                 item["website"] = f'https://orders.sheetz.com/findASheetz/store/{store["storeNumber"]}'
