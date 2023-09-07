@@ -9,7 +9,7 @@ class DuplicatesPipeline:
         self.duplicate_count = 0
 
     def process_item(self, item, spider):
-        if hasattr(spider, "no_refs") and getattr(spider, "no_refs"):
+        if getattr(spider, "no_refs", False):
             return item
 
         ref = (spider.name, item["ref"])
