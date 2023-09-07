@@ -14,8 +14,10 @@ class CitgoSpider(scrapy.Spider):
     name = "citgo"
     item_attributes = {"brand": "CITGO", "brand_wikidata": "Q2974437"}
     allowed_domains = ["citgo.com"]
-
     start_urls = ["https://citgo.com/locator/store-locators/store-locator"]
+    custom_settings = {
+        "ZYTE_API_TRANSPARENT_MODE": True,
+    }
 
     def parse(self, response):
         if response.request.method == "GET":
