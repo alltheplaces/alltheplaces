@@ -36,7 +36,7 @@ FUEL_MAPPING = {
 SERVICES_MAPPING = {
     "Air/Compresor": Extras.COMPRESSED_AIR,
     "Automatic car wash": Extras.CAR_WASH,
-    "Big enough to fit a truck": "capacity:hgv",
+    "Big enough to fit a truck": "hgv",
     "Disabled toilet": Extras.TOILETS_WHEELCHAIR,
     "Family Toilet": Extras.TOILETS,
     "Hamburger": "fast_food",
@@ -45,8 +45,8 @@ SERVICES_MAPPING = {
     "Internet (wifi)": Extras.WIFI,
     "Lubricant": Fuel.ENGINE_OIL,
     "Shower room": Extras.SHOWERS,
-    "Truck friendly": "capacity:hgv",
-    "Truck park": "capacity:hgv=yes",
+    "Truck friendly": "hgv",
+    "Truck park": "hgv",
     "Jet wash": Extras.CAR_WASH,
     # TODO: map high flow pump, this seems an important attribute for petrol stations!
     "High speed pump": None,
