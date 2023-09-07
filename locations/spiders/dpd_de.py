@@ -4,6 +4,7 @@ import scrapy
 from scrapy import FormRequest
 
 from locations.items import Feature
+from locations.searchable_points import open_searchable_points
 
 
 class DPDDESpider(scrapy.Spider):
@@ -13,11 +14,11 @@ class DPDDESpider(scrapy.Spider):
 
     def parse(self, response):
         searchable_point_files = [
-            "./locations/searchable_points/eu_centroids_20km_radius_country.csv",
+            "eu_centroids_20km_radius_country.csv",
         ]
 
         for point_file in searchable_point_files:
-            with open(point_file) as openFile:
+            with open_searchable_points(point_file) as openFile:
                 results = csv.DictReader(openFile)
                 for result in results:
                     if result["country"] == "DE":

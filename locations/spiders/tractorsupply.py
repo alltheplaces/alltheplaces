@@ -2,6 +2,7 @@ import scrapy
 
 from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.searchable_points import open_searchable_points
 
 DAYS_NAME = {
     "Monday": "Mo",
@@ -27,7 +28,7 @@ class TractorSupplySpider(scrapy.Spider):
     def start_requests(self):
         base_url = "https://www.tractorsupply.com/wcs/resources/store/10151/zipcode/fetchstoredetails?responseFormat=json&latitude={lat}&longitude={lng}"
 
-        with open("./locations/searchable_points/us_centroids_25mile_radius.csv") as points:
+        with open_searchable_points("us_centroids_25mile_radius.csv") as points:
             for point in points:
                 _, lat, lon = point.strip().split(",")
                 url = base_url.format(lat=lat, lng=lon)

@@ -4,6 +4,7 @@ import scrapy
 
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
+from locations.searchable_points import open_searchable_points
 
 
 class DollaramaSpider(scrapy.Spider):
@@ -16,7 +17,7 @@ class DollaramaSpider(scrapy.Spider):
 
         params = {"distance": "100", "units": "miles"}
 
-        with open("./locations/searchable_points/ca_centroids_100mile_radius.csv") as points:
+        with open_searchable_points("ca_centroids_100mile_radius.csv") as points:
             next(points)
             for point in points:
                 _, lat, lon = point.strip().split(",")

@@ -5,6 +5,8 @@ import math
 
 import geonamescache
 
+from locations.searchable_points import get_searchable_points_path, open_searchable_points
+
 # Radius of the Earth in kilometers
 EARTH_RADIUS = 6378.1
 # Kilometers per mile
@@ -49,7 +51,7 @@ def point_locations(areas_csv_file, area_field_filter=None):
     if area_field_filter and type(area_field_filter) is not list:
         area_field_filter = [area_field_filter]
     for csv_file in areas_csv_file:
-        with open("./locations/searchable_points/{}".format(csv_file)) as points:
+        with open_searchable_points("{}".format(csv_file)) as points:
             for row in csv.DictReader(points):
                 lat, lon = row["latitude"], row["longitude"]
                 if not lat or not lon:
@@ -90,7 +92,7 @@ def postal_regions(country_code):
     :return: post code regions with possible extras
     """
     if country_code == "GB":
-        with gzip.open("./locations/searchable_points/postcodes/outward_gb.json.gz") as points:
+        with gzip.open(get_searchable_points_path("postcodes/outward_gb.json.gz")) as points:
             for outward_code in json.load(points):
                 yield {
                     "postal_region": outward_code["postcode"],
@@ -110,7 +112,7 @@ def postal_regions(country_code):
         # easily found though links on the root domain. The link must be clearly visible to the human eye.
         # The backlink must be placed before the Customer uses the Database in production.
         #
-        with gzip.open("./locations/searchable_points/postcodes/uszips.csv.gz", mode="rt") as points:
+        with gzip.open(get_searchable_points_path("postcodes/uszips.csv.gz"), mode="rt") as points:
             for row in csv.DictReader(points):
                 yield {
                     "postal_region": row["zip"],
@@ -123,7 +125,7 @@ def postal_regions(country_code):
     elif country_code == "FR":
         # French postal code database from https://datanova.legroupe.laposte.fr
 
-        with gzip.open("./locations/searchable_points/postcodes/frzips.csv.gz", mode="rt") as points:
+        with gzip.open(get_searchable_points_path("postcodes/frzips.csv.gz"), mode="rt") as points:
             for row in csv.DictReader(points):
                 yield {
                     "postal_region": row["Code_postal"],
@@ -212,4 +214,4 @@ def country_coordinates():
 
     :return A dictionary of ISO 3166-2 alpha-2 country codes with corresponding latitude and longitude for each country.
     """
-    return json.load(open("./locations/searchable_points/country_coordinates.json"))
+    return json.load(open_searchable_points("country_coordinates.json"))
