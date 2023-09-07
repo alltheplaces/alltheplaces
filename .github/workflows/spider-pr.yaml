@@ -13,6 +13,7 @@ jobs:
       AWS_KEY: QUtJQTRLMllUQzIzRzVZRkxENkg=
       AWS_SEC: b1RmNXNxc0VSNlNKdFNhbUdlcjJwZHR6YXQwNXpRRDRPZUtoVkpPSA==
       BUCKET: alltheplaces.openaddresses.io
+      ZYTE_API_KEY: ${{ secrets.ZYTE_API_KEY }}
     steps:
     - name: Checkout code
       uses: actions/checkout@v3

@@ -44,7 +44,10 @@ class WyndhamSpider(SitemapSpider):
             "parse_property",
         )
     ]
-    custom_settings = {"REDIRECT_ENABLED": False}
+    custom_settings = {
+        "REDIRECT_ENABLED": False,
+        "ZYTE_API_TRANSPARENT_MODE": True,
+    }
 
     def parse_property(self, response):
         item = LinkedDataParser.parse(response, "Hotel")
