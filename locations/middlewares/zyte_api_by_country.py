@@ -9,7 +9,7 @@ def get_proxy_location(requires_proxy: bool | str, spider_name) -> str | None:
     Get the country to proxy from
     :param requires_proxy: True or country code from the spider
     :param spider_name:
-    :return: 2-Letter country code
+    :return: 2-Letter country code, or None when there is no data
     """
     if isinstance(requires_proxy, str):
         return requires_proxy
@@ -37,7 +37,7 @@ class ZyteApiByCountryMiddleware:
         # Calculate zyte_api_automap on the first request
         if self.zyte_api_automap is None:
             if requires_proxy := getattr(spider, "requires_proxy", False):
-                if cc := get_proxy_location(requires_proxy, spider):
+                if cc := get_proxy_location(requires_proxy, spider.name):
                     # Use the country code set in spider
                     self.zyte_api_automap = {"geolocation": cc.upper()}
                 else:

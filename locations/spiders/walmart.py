@@ -4,7 +4,6 @@ from scrapy.spiders import SitemapSpider
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
-from locations.user_agents import BROWSER_DEFAULT
 
 
 class WalmartSpider(SitemapSpider):
@@ -13,9 +12,6 @@ class WalmartSpider(SitemapSpider):
     allowed_domains = ["walmart.com"]
     sitemap_urls = ["https://www.walmart.com/sitemap_store_main.xml"]
     sitemap_rules = [("", "parse_store")]
-    custom_settings = {
-        "ZYTE_API_TRANSPARENT_MODE": True,
-    }
     requires_proxy = True
 
     def store_hours(self, store):
