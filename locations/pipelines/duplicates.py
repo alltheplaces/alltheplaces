@@ -4,6 +4,7 @@ from scrapy.exceptions import DropItem
 
 logger = logging.getLogger(__name__)
 
+
 class DuplicatesPipeline:
     def __init__(self):
         self.ids_seen = set()
