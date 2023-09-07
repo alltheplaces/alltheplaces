@@ -110,6 +110,7 @@ ITEM_PIPELINES = {
     "locations.pipelines.count_brands.CountBrandsPipeline": 810,
 }
 
+LOG_FORMATTER = "locations.logformatter.DebugDuplicateLogFormatter"
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See http://doc.scrapy.org/en/latest/topics/autothrottle.html
@@ -152,3 +153,4 @@ REQUESTS_CACHE_BACKEND_SETTINGS = {
     "backend": "filesystem",
     "wal": True,
 }
+
