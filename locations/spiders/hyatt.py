@@ -9,7 +9,9 @@ class HyattSpider(scrapy.Spider):
     name = "hyatt"
     item_attributes = {"brand": "Hyatt", "brand_wikidata": "Q1425063"}
     allowed_domains = ["hyatt.com"]
-    download_delay = 1.5  # delay required to avoid getting temporarily blocked from hyatt.com (403s)
+    custom_settings = {
+        "ZYTE_API_TRANSPARENT_MODE": True,
+    }
 
     base_url = "https://www.hyatt.com/explore-hotels/partial?regionGroup={region}&categories=&brands="
 
