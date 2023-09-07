@@ -13,9 +13,11 @@ class ChoiceHotelsSpider(SitemapSpider):
     item_attributes = {"brand": "Choice Hotels", "brand_wikidata": "Q1075788"}
     allowed_domains = ["choicehotels.com"]
     sitemap_urls = ["https://www.choicehotels.com/propertysitemap.xml"]
-    user_agent = BROWSER_DEFAULT
     download_delay = 5  # Requested by https://www.choicehotels.com/robots.txt
     requires_proxy = True
+    custom_settings = {
+        "ZYTE_API_TRANSPARENT_MODE": True,
+    }
 
     brand_mapping = {
         "AC": ("Ascend Hotel Collection", "Q113152464"),
