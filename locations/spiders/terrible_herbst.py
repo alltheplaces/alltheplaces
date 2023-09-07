@@ -37,5 +37,5 @@ class TerribleHerbstSpider(scrapy.Spider):
             # TODO: map EV charging on fuel stations properly
             if "ev charging" in features:
                 pass
-            
+
             yield item
