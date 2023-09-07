@@ -14,7 +14,9 @@ class WalmartSpider(SitemapSpider):
     download_delay = 5
     sitemap_urls = ["https://www.walmart.com/sitemap_store_main.xml"]
     sitemap_rules = [("", "parse_store")]
-    custom_settings = {"AUTOTHROTTLE_ENABLED": True, "USER_AGENT": BROWSER_DEFAULT}
+    custom_settings = {
+        "ZYTE_API_TRANSPARENT_MODE": True,
+    }
     requires_proxy = True
 
     def store_hours(self, store):
