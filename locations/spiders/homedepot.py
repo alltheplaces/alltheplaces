@@ -19,6 +19,9 @@ class HomeDepotSpider(CrawlSpider, StructuredDataSpider):
         Rule(LinkExtractor(allow=r"^https:\/\/www.homedepot.com\/l\/.*\/\d*$"), callback="parse_sd"),
     ]
     requires_proxy = "US"
+    custom_settings = {
+        "ZYTE_API_TRANSPARENT_MODE": True,
+    }
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         # There's a JSON blob in the HTML that has a "nearby stores" query that includes lat/lon for this store
