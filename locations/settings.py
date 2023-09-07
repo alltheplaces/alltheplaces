@@ -67,9 +67,20 @@ TELNETCONSOLE_ENABLED = False
 
 # Enable or disable downloader middlewares
 # See http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html
-DOWNLOADER_MIDDLEWARES = {
-    "locations.middlewares.cdnstats.CDNStatsMiddleware": 500,
-}
+DOWNLOADER_MIDDLEWARES = {}
+
+if os.environ.get("ZYTE_API_KEY"):
+    DOWNLOAD_HANDLERS = {
+        "http": "scrapy_zyte_api.ScrapyZyteAPIDownloadHandler",
+        "https": "scrapy_zyte_api.ScrapyZyteAPIDownloadHandler",
+    }
+    DOWNLOADER_MIDDLEWARES = {
+        "scrapy_zyte_api.ScrapyZyteAPIDownloaderMiddleware": 1000,
+    }
+    REQUEST_FINGERPRINTER_CLASS = "scrapy_zyte_api.ScrapyZyteAPIRequestFingerprinter"
+    TWISTED_REACTOR = "twisted.internet.asyncioreactor.AsyncioSelectorReactor"
+
+DOWNLOADER_MIDDLEWARES["locations.middlewares.cdnstats.CDNStatsMiddleware"] = 500
 
 # Enable or disable extensions
 # See http://scrapy.readthedocs.org/en/latest/topics/extensions.html
