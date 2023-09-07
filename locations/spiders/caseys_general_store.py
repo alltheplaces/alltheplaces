@@ -19,6 +19,9 @@ class CaseysGeneralStoreSpider(SitemapSpider):
             "parse",
         ),
     ]
+    custom_settings = {
+        "ZYTE_API_TRANSPARENT_MODE": True,
+    }
 
     def parse(self, response):
         item = LinkedDataParser.parse(response, "ConvenienceStore")
