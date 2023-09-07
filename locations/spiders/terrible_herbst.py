@@ -25,7 +25,8 @@ class TerribleHerbstSpider(scrapy.Spider):
 
             item["ref"] = place.xpath("name/text()").get()
             item["name"] = place.xpath("name/text()").get()
-            item["street_address"] = place.xpath('.//Data[@name="STREET ADDRESS"]/value/text()').get()
+            # Addresses are inconsistent, sometimes it's street address, sometimes full
+            item["addr_full"] = place.xpath('.//Data[@name="STREET ADDRESS"]/value/text()').get()
             item["postcode"] = place.xpath('.//Data[@name="ZIP CODE"]/value/text()').get()
             item["city"] = city.strip()
             item["state"] = state and state.strip()
@@ -34,5 +35,7 @@ class TerribleHerbstSpider(scrapy.Spider):
             apply_category(Categories.FUEL_STATION, item)
             apply_yes_no(Extras.CAR_WASH, item, "car wash" in features)
             # TODO: map EV charging on fuel stations properly
-            # apply_yes_no('amenity:chargingstation', item, "ev charging" in features)
+            if "ev charging" in features:
+                pass
+            
             yield item
