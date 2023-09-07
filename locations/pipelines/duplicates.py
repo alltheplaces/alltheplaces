@@ -2,6 +2,7 @@ import logging
 
 from scrapy.exceptions import DropItem
 
+logger = logging.getLogger(__name__)
 
 class DuplicatesPipeline:
     def __init__(self):
@@ -21,4 +22,4 @@ class DuplicatesPipeline:
             return item
 
     def close_spider(self, spider):
-        logging.info(f"Dropped {self.duplicate_count} duplicate items")
+        logger.info(f"Dropped {self.duplicate_count} duplicate items")
