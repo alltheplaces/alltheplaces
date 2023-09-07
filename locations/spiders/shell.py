@@ -1,4 +1,13 @@
-from locations.categories import Access, Categories, Extras, Fuel, FuelCards, PaymentMethods, apply_category, apply_yes_no
+from locations.categories import (
+    Access,
+    Categories,
+    Extras,
+    Fuel,
+    FuelCards,
+    PaymentMethods,
+    apply_category,
+    apply_yes_no,
+)
 from locations.hours import DAYS, OpeningHours
 from locations.storefinders.geo_me import GeoMeSpider
 
@@ -27,7 +36,9 @@ class ShellSpider(GeoMeSpider):
         apply_yes_no(Extras.BABY_CHANGING_TABLE, item, "baby_change_facilities" in amenities)
         apply_yes_no(Extras.SHOWERS, item, "shower" in amenities)
         apply_yes_no(Extras.ATM, item, "atm" in amenities or "atm_in" in amenities or "atm_out" in amenities)
-        apply_yes_no(Extras.CAR_WASH, item, any("carwash" in a for a in amenities) or any("car_wash" in a for a in amenities))
+        apply_yes_no(
+            Extras.CAR_WASH, item, any("carwash" in a for a in amenities) or any("car_wash" in a for a in amenities)
+        )
         apply_yes_no(Extras.WHEELCHAIR, item, "disabled_facilities" in amenities)
         apply_yes_no(Extras.COMPRESSED_AIR, item, "air_and_water" in amenities)
         apply_yes_no(Extras.VACUUM_CLEANER, item, "vacuum" in amenities)
