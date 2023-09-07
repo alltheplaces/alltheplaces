@@ -232,6 +232,7 @@ class Fuel(Enum):
     OCTANE_98 = "fuel:octane_98"
     OCTANE_100 = "fuel:octane_100"
     # Formulas
+    E0 = "fuel:e0"
     E5 = "fuel:e5"
     E10 = "fuel:e10"
     E15 = "fuel:e15"
