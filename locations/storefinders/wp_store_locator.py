@@ -2,6 +2,7 @@ from scrapy import Selector, Spider
 from scrapy.http import JsonRequest
 
 from locations.dict_parser import DictParser
+from locations.geo import point_locations
 from locations.hours import DAYS_EN, OpeningHours, sanitise_day
 from locations.items import Feature
 from locations.spiders.vapestore_gb import clean_address
@@ -9,11 +10,18 @@ from locations.spiders.vapestore_gb import clean_address
 # Source code for the WP Store Locator API call used by this spider:
 # https://github.com/wp-plugins/wp-store-locator/blob/master/frontend/wpsl-ajax-functions.php
 #
-# To use this store finder, specify allowed_domains = [x, y, ..]
-# (either one or more domains such as example.net) and the default
-# path for the WP Store Locator API endpoint will be used.
-# In the event the default path is different, you can alternatively
-# specify one or more start_urls = [x, y, ..].
+# There are two ways to use this spider:
+# 1. Attempt to return all locations with a single query.
+#      Specify allowed_domains = [x, y, ..] (either one or more
+#      domains such as example.net) and the default path for the WP
+#      Store Locator API endpoint will be used. In the event the
+#      default path is different, you can alternatively specify one
+#      or more start_urls = [x, y, ..].
+# 2. Perform a geographic radius search with multiple queries.
+#      In addition to method (1), also supply a list of searchable
+#      points files as searchable_points_files = [x, y..] and also
+#      specify a non-zero number for search_radius = x and
+#      max_results = x.
 #
 # If clean ups or additional field extraction is required from the
 # source data, override the parse_item function. Two parameters are
@@ -26,26 +34,44 @@ from locations.spiders.vapestore_gb import clean_address
 # each installation and cannot be overridden client-side. Check the
 # number of results returned and if it is a round number (e.g. 50)
 # apply caution and double check this is the full count. If results
-# are truncated, you will need to stop using WPStoreLocatorSpider
-# and instead use another approach for scraping locations.
+# are truncated, you will need to use the geographic radius search
+# method and choose a small enough x for search_radius = x to ensure
+# the "max_results" limit is never reached.
 
 
 class WPStoreLocatorSpider(Spider):
     days = DAYS_EN
     time_format = "%H:%S"
+    searchable_points_files = []
+    search_radius = 0
+    max_results = 0
 
     def start_requests(self):
         if len(self.start_urls) == 0 and hasattr(self, "allowed_domains"):
             for domain in self.allowed_domains:
-                yield JsonRequest(url=f"https://{domain}/wp-admin/admin-ajax.php?action=store_search&autoload=1")
+                if len(self.searchable_points_files) > 0 and self.search_radius != 0 and self.max_results != 0:
+                    for searchable_points_file in self.searchable_points_files:
+                        for lat, lon in point_locations(searchable_points_file):
+                            yield JsonRequest(
+                                url=f"https://{domain}/wp-admin/admin-ajax.php?action=store_search&lat={lat}&lng={lon}&max_results={self.max_results}&search_radius={self.search_radius}"
+                            )
+                else:
+                    yield JsonRequest(url=f"https://{domain}/wp-admin/admin-ajax.php?action=store_search&autoload=1")
         elif len(self.start_urls) != 0:
             for url in self.start_urls:
-                yield JsonRequest(url=url)
+                if len(self.searchable_points_files) > 0 and self.search_radius != 0 and self.max_results != 0:
+                    for searchable_points_file in self.searchable_points_files:
+                        for lat, lon in point_locations(searchable_points_file):
+                            yield JsonRequest(
+                                url=f"{url}&lat={lat}&lng={lon}&max_results={self.max_results}&search_radius={self.search_radius}"
+                            )
+                else:
+                    yield JsonRequest(url=url)
 
     def parse(self, response, **kwargs):
         for location in response.json():
-            location["street_address"] = clean_address([location.pop("address"), location.pop("address2")])
             item = DictParser.parse(location)
+            item["street_address"] = clean_address([location.get("address"), location.get("address2")])
             item["name"] = location["store"]
             item["opening_hours"] = self.parse_opening_hours(location)
             yield from self.parse_item(item, location) or []
