@@ -33,7 +33,8 @@ class OliveGardenSpider(SitemapSpider):
         item["ref"] = store_id
         item["name"] = data.get("restaurantName")
         item["phone"] = data.get("restPhoneNumber")[0].get("Phone")
-        item["lat"], item["lon"] = data.get("address", {}).get("longitudeLatitude").split(",")
+        if lat_lon_txt := data.get("address", {}).get("longitudeLatitude"):
+            item["lat"], item["lon"] = lat_lon_txt.split(",")
         item["website"] = website
         days = [day for day in data.get("weeklyHours") if day.get("hourCode") == "OP"]
         oh = OpeningHours()
