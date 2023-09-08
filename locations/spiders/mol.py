@@ -1,7 +1,16 @@
 import scrapy
 from scrapy.http import FormRequest
 
-from locations.categories import Access, Categories, Extras, Fuel, FuelCards, PaymentMethods, apply_category, apply_yes_no
+from locations.categories import (
+    Access,
+    Categories,
+    Extras,
+    Fuel,
+    FuelCards,
+    PaymentMethods,
+    apply_category,
+    apply_yes_no,
+)
 from locations.dict_parser import DictParser
 from locations.geo import country_coordinates
 from locations.hours import NAMED_DAY_RANGES_EN, OpeningHours
