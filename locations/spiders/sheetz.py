@@ -32,10 +32,6 @@ FEATURES_MAPPING = {
     "truckScales": None,
     "truckParking": None,
     "truckParkingSpots": None,
-    "evCcsDcFastCharging": None,
-    "evChaDemoDcFastCharging": None,
-    "evCharger": None,
-    "evTeslaSupercharger": None,
 }
 
 
@@ -66,25 +62,44 @@ class SheetzSpider(scrapy.Spider):
                 item["ref"] = store.get("storeNumber")
                 item["website"] = f'https://orders.sheetz.com/findASheetz/store/{store["storeNumber"]}'
                 item["image"] = f'https://orders.sheetz.com{store.get("imageUrl")}'
-                self.parse_features(item, store)
+                features = store.get("features", {})
+                self.parse_features(item, features)
+                self.parse_24_7(item, features)
+                self.parse_charging_station(item, features)
                 apply_category(Categories.FUEL_STATION, item)
                 yield item
             yield self.make_request(response.meta["state"], 1 + response.meta["page"])
 
-    def parse_features(self, item: Feature, store: dict):
-        features = store.get("features", {})
+    def parse_features(self, item: Feature, features: dict):
         for k, v in features.items():
-            if k == "open24x7" and v:
-                self.apply_24_7(item)
-            elif tag := FEATURES_MAPPING.get(k):
+            if tag := FEATURES_MAPPING.get(k):
                 if isinstance(v, bool):
                     apply_yes_no(tag, item, v)
                 elif isinstance(v, int):
                     apply_yes_no(f"{tag.value if isinstance(tag, Enum) else tag}={v}", item, True)
             else:
-                self.crawler.stats.inc_value(f"atp/sheetz/feature/failed/{k}")
+                # self.crawler.stats.inc_value(f"atp/sheetz/feature/failed/{k}")
+                continue
 
-    def apply_24_7(self, item):
-        oh = OpeningHours()
-        oh.add_days_range(DAYS, "00:00", "23:59")
-        item["opening_hours"] = oh.as_opening_hours()
+    def parse_24_7(self, item: Feature, features: dict):
+        if features.get("open24x7"):
+            oh = OpeningHours()
+            oh.add_days_range(DAYS, "00:00", "23:59")
+            item["opening_hours"] = oh.as_opening_hours()
+
+    def parse_charging_station(self, item: Feature, features: dict):
+        if features.get("evCharger"):
+            apply_category(Categories.CHARGING_STATION, item)
+
+        if features.get("evTeslaSupercharger"):
+            apply_category(Categories.CHARGING_STATION, item)
+            apply_yes_no('socket:tesla_supercharger', item, True)
+
+        if features.get("evChaDemoDcFastCharging"):
+            apply_category(Categories.CHARGING_STATION, item)
+            apply_yes_no('socket:chademo', item, True)
+
+        if features.get("evCcsDcFastCharging"):
+            apply_category(Categories.CHARGING_STATION, item)
+            # All POIs are in US so assume type1_combo socket
+            apply_yes_no('socket:type1_combo', item, True)
