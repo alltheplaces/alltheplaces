@@ -4,6 +4,7 @@ import scrapy
 
 from locations.categories import Categories, Extras, Fuel, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
+from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 from locations.user_agents import BROWSER_DEFAULT
 
@@ -12,7 +13,7 @@ FEATURES_MAPPING = {
     "atm": Extras.ATM,
     "bulkDef": None,
     "carWash": Extras.CAR_WASH,
-    "delivery": None,
+    "delivery": Extras.DELIVERY,
     "driveThru": Extras.DRIVE_THROUGH,
     "diesel": Fuel.DIESEL,
     "e0": Fuel.E0,
@@ -23,7 +24,6 @@ FEATURES_MAPPING = {
     "highFlowAutoDiesel": None,
     "highFlowDiesel": Fuel.HGV_DIESEL,
     "kerosene": Fuel.KEROSENE,
-    "open24x7": "opening_hours=24/7",
     "propane": Fuel.PROPANE,
     "pncAtm": Extras.ATM,
     "showers": Extras.SHOWERS,
@@ -36,7 +36,6 @@ FEATURES_MAPPING = {
     "evChaDemoDcFastCharging": None,
     "evCharger": None,
     "evTeslaSupercharger": None,
-    "evCharger": None,
 }
 
 
@@ -75,10 +74,17 @@ class SheetzSpider(scrapy.Spider):
     def parse_features(self, item: Feature, store: dict):
         features = store.get("features", {})
         for k, v in features.items():
-            if tag := FEATURES_MAPPING.get(k):
+            if k == "open24x7" and v:
+                self.apply_24_7(item)
+            elif tag := FEATURES_MAPPING.get(k):
                 if isinstance(v, bool):
                     apply_yes_no(tag, item, v)
                 elif isinstance(v, int):
                     apply_yes_no(f"{tag.value if isinstance(tag, Enum) else tag}={v}", item, True)
             else:
                 self.crawler.stats.inc_value(f"atp/sheetz/feature/failed/{k}")
+
+    def apply_24_7(self, item):
+        oh = OpeningHours()
+        oh.add_days_range(DAYS, "00:00", "23:59")
+        item["opening_hours"] = oh.as_opening_hours()
