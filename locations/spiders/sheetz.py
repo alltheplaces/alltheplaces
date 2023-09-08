@@ -93,13 +93,13 @@ class SheetzSpider(scrapy.Spider):
 
         if features.get("evTeslaSupercharger"):
             apply_category(Categories.CHARGING_STATION, item)
-            apply_yes_no('socket:tesla_supercharger', item, True)
+            apply_yes_no("socket:tesla_supercharger", item, True)
 
         if features.get("evChaDemoDcFastCharging"):
             apply_category(Categories.CHARGING_STATION, item)
-            apply_yes_no('socket:chademo', item, True)
+            apply_yes_no("socket:chademo", item, True)
 
         if features.get("evCcsDcFastCharging"):
             apply_category(Categories.CHARGING_STATION, item)
             # All POIs are in US so assume type1_combo socket
-            apply_yes_no('socket:type1_combo', item, True)
+            apply_yes_no("socket:type1_combo", item, True)
