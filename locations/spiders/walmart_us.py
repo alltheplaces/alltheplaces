@@ -2,17 +2,24 @@ import json
 
 from scrapy.spiders import SitemapSpider
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
 
-class WalmartSpider(SitemapSpider):
-    name = "walmart"
-    item_attributes = {"brand": "Walmart", "brand_wikidata": "Q483551", "country": "US"}
+class WalmartUSSpider(SitemapSpider):
+    name = "walmart_us"
+    item_attributes = {"brand": "Walmart", "brand_wikidata": "Q483551"}
     allowed_domains = ["walmart.com"]
     sitemap_urls = ["https://www.walmart.com/sitemap_store_main.xml"]
     sitemap_rules = [("", "parse_store")]
     requires_proxy = True
+
+    CATEGORIES = {
+        "GAS_STATION": Categories.FUEL_STATION,
+        "PHARMACY": Categories.PHARMACY,
+        "STORE": Categories.SHOP_SUPERMARKET,
+    }
 
     def store_hours(self, store):
         if store.get("open24Hours") is True:
@@ -61,8 +68,22 @@ class WalmartSpider(SitemapSpider):
             )
         item["website"] = response.url
 
-        item["extras"] = {}
-        item["extras"]["type"] = store.get("type")
-        item["extras"]["amenity:fuel"] = any(s["name"] == "GAS_STATION" for s in store["services"])
+        for service in store["services"]:
+            if service["name"] not in ["PHARMACY", "GAS_STATION"]:
+                self.crawler.stats.inc_value("atp/walmart/ignored/{}".format(service["name"]))
+                continue
+            poi = item.copy()
+            poi["ref"] += service["name"]
+            poi["name"] = service["displayName"]
+            poi["phone"] = service["phone"]
+            poi["opening_hours"] = self.store_hours(service)
 
-        return item
+            apply_category(self.CATEGORIES[service["name"]], poi)
+
+            yield poi
+
+        item["extras"]["type"] = store.get("type")
+        self.crawler.stats.inc_value("atp/walmart/type/{}".format(store.get("type")))  # TODO revisit after weekly
+        apply_category(Categories.SHOP_SUPERMARKET, item)
+
+        yield item
