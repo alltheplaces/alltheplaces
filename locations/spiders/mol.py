@@ -1,7 +1,7 @@
 import scrapy
 from scrapy.http import FormRequest
 
-from locations.categories import Categories, Extras, Fuel, FuelCards, PaymentMethods, apply_category, apply_yes_no
+from locations.categories import Access, Categories, Extras, Fuel, FuelCards, PaymentMethods, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.geo import country_coordinates
 from locations.hours import NAMED_DAY_RANGES_EN, OpeningHours
@@ -36,7 +36,7 @@ FUEL_MAPPING = {
 SERVICES_MAPPING = {
     "Air/Compresor": Extras.COMPRESSED_AIR,
     "Automatic car wash": Extras.CAR_WASH,
-    "Big enough to fit a truck": "hgv",
+    "Big enough to fit a truck": Access.HGV,
     "Disabled toilet": Extras.TOILETS_WHEELCHAIR,
     "Family Toilet": Extras.TOILETS,
     "Hamburger": "fast_food",
@@ -45,8 +45,8 @@ SERVICES_MAPPING = {
     "Internet (wifi)": Extras.WIFI,
     "Lubricant": Fuel.ENGINE_OIL,
     "Shower room": Extras.SHOWERS,
-    "Truck friendly": "hgv",
-    "Truck park": "hgv",
+    "Truck friendly": Access.HGV,
+    "Truck park": Access.HGV,
     "Jet wash": Extras.CAR_WASH,
     # TODO: map high flow pump, this seems an important attribute for petrol stations!
     "High speed pump": None,
