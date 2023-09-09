@@ -10,7 +10,7 @@ class CooplandsGBSpider(WPStoreLocatorSpider):
     max_results = 50
     time_format = "%I:%M %p"
 
-    #def parse_item(self, item, location):
-        #item["addr_full"] = location["address"]
-        #item.pop("street_address", None)
-        #yield item
+    # def parse_item(self, item, location):
+    # item["addr_full"] = location["address"]
+    # item.pop("street_address", None)
+    # yield item
