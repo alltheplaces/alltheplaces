@@ -18,6 +18,7 @@ BRANDS = {
     "https://www.fredmeyer.com/": {"brand": "Fred Meyer", "brand_wikidata": "Q5495932"},
     "https://www.frysfood.com/": {"brand": "Fry's Food Stores", "brand_wikidata": "Q5506547"},
     "https://www.gerbes.com/": {"brand": "Gerbes", "brand_wikidata": "Q5276954"},
+    "https://www.harristeeter.com/": {"brand": "Harris Teeter", "brand_wikidata": "Q5665067"},
     "https://www.jaycfoods.com/": {"brand": "JayC", "brand_wikidata": "Q6166302"},
     "https://www.kingsoopers.com/": {"brand": "King Soopers", "brand_wikidata": "Q6412065"},
     "https://www.kroger.com/": {"brand": "Kroger", "brand_wikidata": "Q153417"},
