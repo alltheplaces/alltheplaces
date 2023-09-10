@@ -61,7 +61,7 @@ class KrogerUSSpider(SitemapSpider):
         for location in response.json()["data"]["stores"]:
             properties = {
                 "ref": location["locationId"],
-                "name": location["vanityName"],
+                "name": location["facilityName"],
                 "lat": location["locale"]["location"]["lat"],
                 "lon": location["locale"]["location"]["lng"],
                 "street_address": clean_address(location["locale"]["address"]["addressLines"]),
@@ -70,7 +70,7 @@ class KrogerUSSpider(SitemapSpider):
                 "state": location["locale"]["address"]["stateProvince"],
                 "country": location["locale"]["address"]["countryCode"],
                 "phone": location["phoneNumber"].get("raw"),
-                "extras": {"operator": location["legalName"]},
+                "extras": {"operator": location["legalName"], "branch": location["vanityName"]},
             }
 
             for url, brand in BRANDS.items():
