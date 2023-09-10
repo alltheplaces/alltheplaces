@@ -1,6 +1,6 @@
 import re
 from copy import deepcopy
-from urllib.parse import urlparse
+from urllib.parse import urljoin, urlparse
 
 from scrapy import Request
 from scrapy.spiders import SitemapSpider
@@ -61,6 +61,14 @@ class KrogerUSSpider(SitemapSpider):
                     ",".join(url_map.keys()),
                 ),
                 meta={"url_map": url_map},
+                errback=self.parse_error,
+            )
+
+    def parse_error(self, failure, **kwargs):
+        for ref in failure.request.meta["url_map"].keys():
+            yield Request(
+                url=urljoin(failure.request.url, f"/atlas/v1/stores/v2/locator?filter.locationIds={ref}"),
+                meta={"url_map": failure.request.meta["url_map"]},
             )
 
     def parse(self, response, **kwargs):
