@@ -51,6 +51,7 @@ class SamsoniteEuSpider(scrapy.Spider):
             "SE",
             "PT",
             "RO",
+            "GB",
         ]
         template = "https://storelocator.samsonite.eu/data-exchange/getDealerLocatorMapV2_Radius.aspx?s=sams&country={}&search=dealer&lat=48.85799300000001&lng=2.381153&radius=100000"
         for country in country_eu:
@@ -62,6 +63,8 @@ class SamsoniteEuSpider(scrapy.Spider):
             stores = data.get("dealers", {}).get("dealer")
             stores = stores if type(stores) == list else [stores]
             for store in stores:
+                if store["fld_Deal_DeCl_ID"] != "9":
+                    continue
                 item = DictParser.parse(store)
                 item["ref"] = store.get("fld_Deal_Id")
                 item["street_address"] = store.get("fld_Deal_Address1")
@@ -70,5 +73,6 @@ class SamsoniteEuSpider(scrapy.Spider):
                 item["country"] = store.get("fld_Coun_Name")
                 item["phone"] = store.get("fld_Deal_Phone")
                 item["email"] = store.get("fld_Deal_Email")
+                item["website"] = store["fld_Deal_DetailPageUrl"]
 
                 yield item
