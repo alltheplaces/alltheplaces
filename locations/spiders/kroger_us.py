@@ -2,7 +2,10 @@ import re
 from copy import deepcopy
 from urllib.parse import urlparse
 
+from scrapy import Request
 from scrapy.spiders import SitemapSpider
+from scrapy.spiders.sitemap import iterloc
+from scrapy.utils.sitemap import Sitemap
 
 from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
@@ -39,24 +42,26 @@ class KrogerUSSpider(SitemapSpider):
     custom_settings = {"AUTOTHROTTLE_ENABLED": True, "USER_AGENT": BROWSER_DEFAULT}
     url_re = re.compile(r"/(\d{3})/(\d{5})$")
 
-    def sitemap_filter(self, entries):
+    def _parse_sitemap(self, response):
+        brand_domain = urlparse(response.url).hostname
+
         location_ids = []
-        brand_domain = ""
-        for entry in entries:
-            if m := re.search(self.url_re, entry["loc"]):
-                location_ids.append("{}{}".format(*m.groups()))
-                if not brand_domain:
-                    brand_domain = urlparse(entry["loc"]).hostname
-        location_groups = [location_ids[i : i + 25] for i in range(0, len(location_ids), 25)]
-        for location_group in location_groups:
-            new_entry = {
-                "loc": f"https://{brand_domain}/atlas/v1/stores/v2/locator?filter.locationIds="
-                + ",".join(location_group),
-                "lastmod": "2000-01-01T00:00:00+00:00",
-                "changefreq": "daily",
-                "priority": "1.0",
-            }
-            yield new_entry
+        for url in iterloc(Sitemap(self._get_sitemap_body(response))):
+            if m := re.search(self.url_re, url):
+                location_ids.append(("{}{}".format(*m.groups()), url))
+
+        for chunk in [location_ids[i : i + 25] for i in range(0, len(location_ids), 25)]:
+            url_map = {}
+            for ref, url in chunk:
+                url_map[ref] = url
+
+            yield Request(
+                url="https://{}/atlas/v1/stores/v2/locator?filter.locationIds={}".format(
+                    brand_domain,
+                    ",".join(url_map.keys()),
+                ),
+                meta={"url_map": url_map},
+            )
 
     def parse(self, response, **kwargs):
         for location in response.json()["data"]["stores"]:
@@ -71,6 +76,7 @@ class KrogerUSSpider(SitemapSpider):
                 "state": location["locale"]["address"]["stateProvince"],
                 "country": location["locale"]["address"]["countryCode"],
                 "phone": location["phoneNumber"].get("raw"),
+                "website": response.meta["url_map"][location["locationId"]],
                 "extras": {"operator": location["legalName"], "branch": location["vanityName"]},
             }
 
