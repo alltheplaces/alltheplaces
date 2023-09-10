@@ -1,5 +1,6 @@
 import re
 from copy import deepcopy
+from typing import Iterable
 from urllib.parse import urljoin, urlparse
 
 from scrapy import Request
@@ -41,6 +42,11 @@ class KrogerUSSpider(SitemapSpider):
     sitemap_urls = [f"{brand}storelocator-sitemap.xml" for brand in BRANDS.keys()]
     custom_settings = {"AUTOTHROTTLE_ENABLED": True, "USER_AGENT": BROWSER_DEFAULT}
     url_re = re.compile(r"/(\d{3})/(\d{5})$")
+
+    departments = {
+        "09": Categories.PHARMACY,
+        "10": Categories.FUEL_STATION,
+    }
 
     def _parse_sitemap(self, response):
         brand_domain = urlparse(response.url).hostname
@@ -100,19 +106,20 @@ class KrogerUSSpider(SitemapSpider):
                 properties["brand_wikidata"] = "Q64138262"
                 apply_category(Categories.PHARMACY, properties)
             else:
-                yield from self.parse_colocated_pharmacy(properties, location)
+                yield from self.parse_departments(properties, location) or []
                 apply_category(Categories.SHOP_SUPERMARKET, properties)
 
             yield Feature(**properties)
 
-    def parse_colocated_pharmacy(self, supermarket_properties, location):
+    def parse_departments(self, supermarket_properties, location) -> Iterable[Feature]:
         for department in location.get("departments"):
-            if department["code"] != "09":
+            cat = self.departments.get(department["code"])
+            if not cat:
                 continue
 
             properties = deepcopy(supermarket_properties)
             properties["ref"] += department["code"]
-            properties["phone"] = department["phoneNumber"].get("raw")
+            properties["phone"] = department.get("phoneNumber", {}).get("raw")
 
             if department.get("locale"):
                 properties["lat"] = department["locale"]["location"]["lat"]
@@ -125,7 +132,7 @@ class KrogerUSSpider(SitemapSpider):
 
             properties["opening_hours"] = self.parse_hours(department.get("prettyHours", []))
 
-            apply_category(Categories.PHARMACY, properties)
+            apply_category(cat, properties)
 
             yield Feature(**properties)
 
