@@ -76,14 +76,9 @@ class KrogerUSSpider(SitemapSpider):
             for url, brand in BRANDS.items():
                 if response.url.startswith(url):
                     properties.update(brand)
+                    break
 
-            hours_string = ""
-            for day_hours in location.get("prettyHours"):
-                day_range = day_hours.get("displayName")
-                hours_range = day_hours.get("displayHours")
-                hours_string = f"{hours_string} {day_range}: {hours_range}"
-            properties["opening_hours"] = OpeningHours()
-            properties["opening_hours"].add_ranges_from_string(hours_string)
+            properties["opening_hours"] = self.parse_hours(location.get("prettyHours", []))
 
             if location["brand"] == "THE LITTLE CLINIC":
                 properties["brand"] = "The Little Clinic"
@@ -125,14 +120,18 @@ class KrogerUSSpider(SitemapSpider):
                 properties["state"] = supermarket_properties.get("state")
                 properties["country"] = supermarket_properties.get("country")
 
-            hours_string = ""
-            for day_hours in department.get("prettyHours"):
-                day_range = day_hours.get("displayName")
-                hours_range = day_hours.get("displayHours")
-                hours_string = f"{hours_string} {day_range}: {hours_range}"
-            properties["opening_hours"] = OpeningHours()
-            properties["opening_hours"].add_ranges_from_string(hours_string)
+            properties["opening_hours"] = self.parse_hours(department.get("prettyHours", []))
 
             apply_category(Categories.PHARMACY, properties)
 
             yield Feature(**properties)
+
+    @staticmethod
+    def parse_hours(rules: [dict]) -> OpeningHours:
+        hours_string = ""
+        for day_hours in rules:
+            hours_string = "{} {}: {}".format(hours_string, day_hours["displayName"], day_hours["displayHours"])
+
+        oh = OpeningHours()
+        oh.add_ranges_from_string(hours_string)
+        return oh
