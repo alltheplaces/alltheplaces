@@ -80,7 +80,7 @@ class KrogerUSSpider(SitemapSpider):
 
             properties["opening_hours"] = self.parse_hours(location.get("prettyHours", []))
 
-            if location["brand"] == "THE LITTLE CLINIC":
+            if location["banner"] == "thelittleclinic":
                 properties["brand"] = "The Little Clinic"
                 properties["brand_wikidata"] = "Q64138262"
                 apply_category(Categories.PHARMACY, properties)
