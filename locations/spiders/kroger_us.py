@@ -1,4 +1,5 @@
 import re
+from copy import deepcopy
 from urllib.parse import urlparse
 
 from scrapy.spiders import SitemapSpider
@@ -85,8 +86,8 @@ class KrogerUSSpider(SitemapSpider):
                 properties["brand_wikidata"] = "Q64138262"
                 apply_category(Categories.PHARMACY, properties)
             else:
-                apply_category(Categories.SHOP_SUPERMARKET, properties)
                 yield from self.parse_colocated_pharmacy(properties, location)
+                apply_category(Categories.SHOP_SUPERMARKET, properties)
 
             yield Feature(**properties)
 
@@ -94,15 +95,11 @@ class KrogerUSSpider(SitemapSpider):
         for department in location.get("departments"):
             if department["code"] != "09":
                 continue
-            properties = {
-                "ref": supermarket_properties["ref"]
-                + "P",  # No unique identifier for colocated pharmacies, so add "P" to differentiate from supermarkets.
-                "name": supermarket_properties["name"],
-                "brand": supermarket_properties["brand"],
-                "brand_wikidata": supermarket_properties["brand_wikidata"],
-                "phone": department["phoneNumber"].get("raw"),
-                "extras": {"operator": supermarket_properties["extras"]["operator"]},
-            }
+
+            properties = deepcopy(supermarket_properties)
+            properties["ref"] += department["code"]
+            properties["phone"] = department["phoneNumber"].get("raw")
+
             if department.get("locale"):
                 properties["lat"] = department["locale"]["location"]["lat"]
                 properties["lon"] = department["locale"]["location"]["lng"]
@@ -111,14 +108,6 @@ class KrogerUSSpider(SitemapSpider):
                 properties["postcode"] = department["locale"]["address"]["postalCode"]
                 properties["state"] = department["locale"]["address"]["stateProvince"]
                 properties["country"] = department["locale"]["address"]["countryCode"]
-            else:
-                properties["lat"] = supermarket_properties.get("lat")
-                properties["lon"] = supermarket_properties.get("lon")
-                properties["street_address"] = supermarket_properties.get("street_address")
-                properties["city"] = supermarket_properties.get("city")
-                properties["postcode"] = supermarket_properties.get("postcode")
-                properties["state"] = supermarket_properties.get("state")
-                properties["country"] = supermarket_properties.get("country")
 
             properties["opening_hours"] = self.parse_hours(department.get("prettyHours", []))
 
