@@ -1,6 +1,5 @@
 import re
 from urllib.parse import urlparse
-import re
 
 from scrapy.spiders import SitemapSpider
 
@@ -24,7 +23,7 @@ BRANDS = {
     "https://www.kroger.com/": {"brand": "Kroger", "brand_wikidata": "Q153417"},
     "https://www.marianos.com/": {"brand": "Mariano's Fresh Market", "brand_wikidata": "Q55622168"},
     "https://www.metromarket.net/": {"brand": "Metro Market", "brand_wikidata": "Q7371288"},
-	"https://www.pay-less.com/": {"brand": "Pay Less", "brand_wikidata": "Q7156587"},
+    "https://www.pay-less.com/": {"brand": "Pay Less", "brand_wikidata": "Q7156587"},
     "https://www.picknsave.com/": {"brand": "Pick 'n Save", "brand_wikidata": "Q7371288"},
     "https://www.qfc.com/": {"brand": "QFC", "brand_wikidata": "Q7265425"},
     "https://www.ralphs.com/": {"brand": "Ralphs", "brand_wikidata": "Q3929820"},
@@ -46,10 +45,11 @@ class KrogerUSSpider(SitemapSpider):
                 location_ids.append("{}{}".format(*m.groups()))
                 if not brand_domain:
                     brand_domain = urlparse(entry["loc"]).hostname
-        location_groups = [location_ids[i:i+25] for i in range(0, len(location_ids), 25)]
+        location_groups = [location_ids[i : i + 25] for i in range(0, len(location_ids), 25)]
         for location_group in location_groups:
             new_entry = {
-                "loc": f"https://{brand_domain}/atlas/v1/stores/v2/locator?filter.locationIds=" + ",".join(location_group),
+                "loc": f"https://{brand_domain}/atlas/v1/stores/v2/locator?filter.locationIds="
+                + ",".join(location_group),
                 "lastmod": "2000-01-01T00:00:00+00:00",
                 "changefreq": "daily",
                 "priority": "1.0",
@@ -99,7 +99,8 @@ class KrogerUSSpider(SitemapSpider):
             if department["code"] != "09":
                 continue
             properties = {
-                "ref": supermarket_properties["ref"] + "P", # No unique identifier for colocated pharmacies, so add "P" to differentiate from supermarkets.
+                "ref": supermarket_properties["ref"]
+                + "P",  # No unique identifier for colocated pharmacies, so add "P" to differentiate from supermarkets.
                 "name": supermarket_properties["name"],
                 "brand": supermarket_properties["brand"],
                 "brand_wikidata": supermarket_properties["brand_wikidata"],
