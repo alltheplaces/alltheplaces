@@ -40,7 +40,7 @@ class SheetzSpider(scrapy.Spider):
     item_attributes = {"brand": "Sheetz", "brand_wikidata": "Q7492551"}
     allowed_domains = ["orders.sheetz.com"]
     start_urls = ["https://orders.sheetz.com/anybff/api/stores/getOperatingStates"]
-    user_agent = BROWSER_DEFAULT
+    user_agent = BROWSER_DEFAULT 
 
     def make_request(self, state, page=0):
         return scrapy.http.JsonRequest(
