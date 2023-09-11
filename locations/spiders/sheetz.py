@@ -16,7 +16,7 @@ FEATURES_MAPPING = {
     "delivery": Extras.DELIVERY,
     "driveThru": Extras.DRIVE_THROUGH,
     "diesel": Fuel.DIESEL,
-    "e0": Fuel.E0,
+    "e0": Fuel.ETHANOL_FREE,
     "e15": Fuel.E15,
     "e85": Fuel.E85,
     "freeWifi": Extras.WIFI,
