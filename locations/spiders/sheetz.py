@@ -65,7 +65,6 @@ class SheetzSpider(scrapy.Spider):
                 features = store.get("features", {})
                 self.parse_features(item, features)
                 self.parse_24_7(item, features)
-                self.parse_charging_station(item, features)
                 apply_category(Categories.FUEL_STATION, item)
                 yield item
             yield self.make_request(response.meta["state"], 1 + response.meta["page"])
@@ -87,6 +86,8 @@ class SheetzSpider(scrapy.Spider):
             oh.add_days_range(DAYS, "00:00", "23:59")
             item["opening_hours"] = oh.as_opening_hours()
 
+    # TODO: Below method is not active yet.
+    #       At some point we will change it and make it yield a separate item for charging station.
     def parse_charging_station(self, item: Feature, features: dict):
         if features.get("evCharger"):
             apply_category(Categories.CHARGING_STATION, item)
