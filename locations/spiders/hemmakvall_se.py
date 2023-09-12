@@ -1,5 +1,4 @@
 import re
-
 from html import unescape
 
 from scrapy import Selector
@@ -18,7 +17,7 @@ class HemmakvallSESpider(StoreLocatorPlusSelfSpider):
 
     def parse_item(self, item, location):
         item.pop("website", None)
-        hours_string = " ".join(Selector(text=unescape(location["hours"])).xpath('//text()').getall())
+        hours_string = " ".join(Selector(text=unescape(location["hours"])).xpath("//text()").getall())
         hours_string = re.sub(r"\s+", " ", hours_string)
         hours_string = re.sub(r"(?<=\d) ?- ?(?=\d)", "-", hours_string)
         hours_string = re.sub(r"(?<![\d:])(?: | ?- ?)(?=\d)", ": ", hours_string)
