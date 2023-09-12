@@ -59,7 +59,7 @@ class SamsoniteEuSpider(scrapy.Spider):
         data = xmltodict.parse(response.text)
         if data.get("dealers"):
             stores = data.get("dealers", {}).get("dealer")
-            stores = stores if type(stores) == list else [stores]
+            stores = stores if isinstance(stores, list) else [stores]
             for store in stores:
                 if store["fld_Deal_DeCl_ID"] != "9":
                     continue
