@@ -41,9 +41,16 @@ class RSEASafetyAUSpider(Spider):
                 continue
             item = DictParser.parse(location)
             item["ref"] = location["WarehouseCode"]
-            item["street_address"] = ", ".join(filter(None, [location.get("AddressLine1"), location.get("AddressLine2")]))
-            item["website"] = "https://www.rsea.com.au/store-locator/" + location["State"].lower() + "/" + location["Suburb"].lower().replace(" ", "-")
-            hours_string = " ".join(Selector(text=location["OpeningHoursHTML"]).xpath('//text()').getall())
+            item["street_address"] = ", ".join(
+                filter(None, [location.get("AddressLine1"), location.get("AddressLine2")])
+            )
+            item["website"] = (
+                "https://www.rsea.com.au/store-locator/"
+                + location["State"].lower()
+                + "/"
+                + location["Suburb"].lower().replace(" ", "-")
+            )
+            hours_string = " ".join(Selector(text=location["OpeningHoursHTML"]).xpath("//text()").getall())
             item["opening_hours"] = OpeningHours()
             item["opening_hours"].add_ranges_from_string(hours_string)
             yield item
