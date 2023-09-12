@@ -3,7 +3,7 @@ from html import unescape
 from scrapy import Spider
 from scrapy.http import FormRequest
 
-from locations.categories import apply_yes_no, Extras
+from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
@@ -46,7 +46,9 @@ class GoodyearAutocareAUSpider(Spider):
                     continue
                 if "Appointment" in location[f"{day}_open"].title():
                     continue
-                hours_string = f"{hours_string} {day.title()}: " + location[f"{day}_open"] + "-" + location[f"{day}_close"]
+                hours_string = (
+                    f"{hours_string} {day.title()}: " + location[f"{day}_open"] + "-" + location[f"{day}_close"]
+                )
             item["opening_hours"].add_ranges_from_string(hours_string)
             apply_yes_no(Extras.WIFI, item, location["guest_wifi"] == "1", False)
             apply_yes_no(Extras.WHEELCHAIR, item, location["wheelchair_access"] == "1", False)
