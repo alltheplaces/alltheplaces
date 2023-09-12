@@ -17,7 +17,9 @@ class ShopAppsSpider(Spider):
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def start_requests(self):
-        yield JsonRequest(url=f"https://stores.shopapps.site/front-end/get_surrounding_stores.php?shop={self.key}&latitude=0&longitude=0&max_distance=0&limit=10000")
+        yield JsonRequest(
+            url=f"https://stores.shopapps.site/front-end/get_surrounding_stores.php?shop={self.key}&latitude=0&longitude=0&max_distance=0&limit=10000"
+        )
 
     def parse(self, response):
         for location in response.json()["stores"]:

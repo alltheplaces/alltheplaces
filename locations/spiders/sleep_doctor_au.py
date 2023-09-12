@@ -1,5 +1,6 @@
 from locations.storefinders.shopapps import ShopAppsSpider
 
+
 class SleepDoctorAUSpider(ShopAppsSpider):
     name = "sleep_doctor_au"
     item_attributes = {"brand": "Sleep Doctor", "brand_wikidata": "Q122435030"}
