@@ -61,9 +61,11 @@ class StoreLocatorPlusSelfSpider(Spider):
 
     def parse(self, response, **kwargs):
         if len(response.json()["response"]) >= self.max_results:
-            raise RuntimeError("Locations have probably been truncated due to max_results (or more) locations being returned by a single geographic radius search. Use more granular searchable_points_files and a smaller search_radius.")
+            raise RuntimeError(
+                "Locations have probably been truncated due to max_results (or more) locations being returned by a single geographic radius search. Use more granular searchable_points_files and a smaller search_radius."
+            )
         for location in response.json()["response"]:
-            #print(location)
+            # print(location)
             item = DictParser.parse(location)
             item.pop("addr_full", None)
             item["street_address"] = ", ".join(filter(None, [location.get("address"), location.get("address2")]))
