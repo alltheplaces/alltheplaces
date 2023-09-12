@@ -1,7 +1,7 @@
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
-from locations.categories import Extras, Fuel, apply_yes_no
+from locations.categories import Categories, Extras, Fuel, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_FULL, OpeningHours
 
@@ -10,17 +10,15 @@ class MurphyUSAUSSpider(Spider):
     name = "murphy_usa_us"
     item_attributes = {"brand": "Murphy USA", "brand_wikidata": "Q19604459"}
     allowed_domains = ["service.murphydriverewards.com"]
-    start_urls = ["https://service.murphydriverewards.com/api/store/list"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def start_requests(self):
-        for url in self.start_urls:
-            yield JsonRequest(url=url, callback=self.parse_location_list)
+        yield JsonRequest("https://service.murphydriverewards.com/api/store/list", callback=self.parse_location_list)
 
     def parse_location_list(self, response):
         for location in response.json()["data"]:
             store_id = location["id"]
-            yield JsonRequest(url=f"https://service.murphydriverewards.com/api/store/detail/{store_id}")
+            yield JsonRequest(f"https://service.murphydriverewards.com/api/store/detail/{store_id}")
 
     def parse(self, response):
         location = response.json()["data"]
@@ -43,4 +41,5 @@ class MurphyUSAUSSpider(Spider):
         apply_yes_no(Fuel.OCTANE_87, item, "Regular" in fuel_types, False)
         apply_yes_no(Fuel.OCTANE_89, item, "Midgrade" in fuel_types, False)
         apply_yes_no(Fuel.OCTANE_91, item, "Premium" in fuel_types, False)
+        apply_category(Categories.FUEL_STATION, item)
         yield item
