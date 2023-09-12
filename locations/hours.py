@@ -404,6 +404,7 @@ DELIMITERS_EN = {
     "from",
     "thru",
     "through",
+    "until",
 }
 
 DELIMITERS_ES = {
