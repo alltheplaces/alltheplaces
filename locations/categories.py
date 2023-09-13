@@ -216,7 +216,7 @@ class Fuel(Enum):
     GTL_DIESEL = "fuel:GTL_diesel"
     HGV_DIESEL = "fuel:HGV_diesel"
     BIODIESEL = "fuel:biodiesel"
-    UNTAXED_DIESEL = "fuel:untaxed_diesel"
+    UNTAXED_DIESEL = "fuel:taxfree_diesel"
     COLD_WEATHER_DIESEL = "fuel:diesel:class2"
     # Octane levels
     OCTANE_80 = "fuel:octane_80"
