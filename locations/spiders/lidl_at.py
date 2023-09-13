@@ -1,6 +1,6 @@
 import re
 
-from locations.hours import DAYS_HU, OpeningHours, sanitise_day
+from locations.hours import DAYS_AT, OpeningHours, sanitise_day
 from locations.spiders.lidl_gb import LidlGBSpider
 from locations.storefinders.virtualearth import VirtualEarthSpider
 
