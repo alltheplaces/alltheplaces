@@ -28,7 +28,7 @@ FEATURES_MAPPING = {
     "pncAtm": Extras.ATM,
     "showers": Extras.SHOWERS,
     "truckDieselLanes": None,
-    # TODO: availability of truck scales seems important for trucks
+    # TODO: map truck scales as amenity=weighbridge and yield as a separate item.
     "truckScales": None,
     "truckParking": None,
     "truckParkingSpots": None,
