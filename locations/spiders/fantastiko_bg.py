@@ -26,6 +26,7 @@ class FantastikoBGSpider(SitemapSpider, StructuredDataSpider):
             .replace("ч.", "")
             .replace("от ", "")
             .replace(" до ", "-")
+            .replace(".", ":")
         )
 
         yield item
