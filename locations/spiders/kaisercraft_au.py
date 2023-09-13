@@ -10,8 +10,10 @@ from locations.hours import OpeningHours
 class KaisercraftAUSpider(Spider):
     name = "kaisercraft_au"
     item_attributes = {"brand": "Kaisercraft", "brand_wikidata": "Q118342651"}
-    allowed_domains = ["cdn.shopify.com"]
-    start_urls = ["https://cdn.shopify.com/s/files/1/1816/2071/t/543/assets/sca.storelocatordata.json"]
+    allowed_domains = ["www.kaisercraft.com.au"]
+    # Store finder is "Store Locator by Secomapp" (https://doc.storelocator.secomapp.com/)
+    # Also appears to be rebadged as "ProMap Store Locator by AMAI" (https://help.amai.com/en/collections/3274749-promap-store-locator)
+    start_urls = ["https://www.kaisercraft.com.au/cdn/shop/t/548/assets/sca.storelocatordata.json"]
 
     def start_requests(self):
         for url in self.start_urls:

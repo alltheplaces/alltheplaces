@@ -1,4 +1,4 @@
-from scrapy import Request, Selector
+from scrapy import Selector
 
 from locations.hours import OpeningHours
 from locations.storefinders.amasty_store_locator import AmastyStoreLocatorSpider

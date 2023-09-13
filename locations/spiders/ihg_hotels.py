@@ -1,5 +1,6 @@
 from scrapy.spiders import SitemapSpider
 
+from locations.categories import Categories, apply_category
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -9,6 +10,7 @@ class IHGHotelsSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://www.ihg.com/bin/sitemapindex.xml"]
     sitemap_rules = [(r".*/us/en/.*/hoteldetail$", "parse")]
     wanted_types = ["Hotel"]
+    requires_proxy = True
 
     my_brands = {
         "armyhotels": ("Army Hotels", "Q16994722"),
@@ -35,5 +37,7 @@ class IHGHotelsSpider(SitemapSpider, StructuredDataSpider):
 
         if (hotel_type := response.url.split("/")[3]) in self.my_brands:
             item["brand"], item["brand_wikidata"] = self.my_brands.get(hotel_type)
+
+        apply_category(Categories.HOTEL, item)
 
         yield item

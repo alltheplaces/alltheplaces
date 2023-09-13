@@ -1,7 +1,6 @@
-import pprint
-
 from scrapy import Spider
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_FULL, OpeningHours
 from locations.spiders.vapestore_gb import clean_address
@@ -22,7 +21,6 @@ class BEEVGBSpider(Spider):
                 item["opening_hours"] = "24/7"
             else:
                 item["opening_hours"] = OpeningHours()
-                pprint.pp(location["OpeningTimes"]["Times"])
                 for day in DAYS_FULL:
                     rule = location["OpeningTimes"]["Times"].get(day)
                     if not rule:
@@ -34,4 +32,5 @@ class BEEVGBSpider(Spider):
             # TODO: count location["ChargePoints"]?
             # apply_yes_no(Extras.FEE, item, not location["Tariff"]["IsFree"], False)
             # item["extras"]["charge"] = location["Tariff"]["Price"]
+            apply_category(Categories.CHARGING_STATION, item)
             yield item

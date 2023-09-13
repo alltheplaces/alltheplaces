@@ -1,7 +1,7 @@
 FROM ubuntu:22.04
 
 # This is from https://hub.docker.com/r/yahwang/ubuntu-pyenv/dockerfile
-ARG PYTHON_VERSION=3.10
+ARG PYTHON_VERSION=3.11
 ARG BUILD_PYTHON_DEPS=" \
         make \
         build-essential \
@@ -49,11 +49,20 @@ ENV LANG=en_US.UTF-8 \
     PYENV_ROOT="/home/ubuntu/.pyenv" \
     PATH="/home/ubuntu/.pyenv/versions/${PYTHON_VERSION}/bin:/home/ubuntu/.pyenv/bin:/home/ubuntu/.pyenv/shims:$PATH"
 
+# install tippecanoe
+ARG TIPPECANOE_VERSION=2.29.0
+RUN curl -sL https://github.com/felt/tippecanoe/archive/refs/tags/${TIPPECANOE_VERSION}.tar.gz | tar -xz \
+ && cd tippecanoe-${TIPPECANOE_VERSION} \
+ && make -j \
+ && sudo make install \
+ && cd .. \
+ && rm -rf tippecanoe-${TIPPECANOE_VERSION}
+
 # install pyenv & python
 RUN curl https://pyenv.run | bash \
  && pyenv install ${PYTHON_VERSION} \
  && pyenv global ${PYTHON_VERSION} \
- && pip install --upgrade pip pipenv
+ && pip install --upgrade pip pipenv==2023.6.26
 
 COPY Pipfile Pipfile
 COPY Pipfile.lock Pipfile.lock
@@ -63,5 +72,8 @@ RUN playwright install-deps
 RUN playwright install firefox
 
 COPY . .
+
+ARG GIT_COMMIT
+ENV GIT_COMMIT=$GIT_COMMIT
 
 CMD ["/home/ubuntu/ci/run_all_spiders.sh"]

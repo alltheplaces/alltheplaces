@@ -43,7 +43,7 @@ class IowaUniversitySpider(scrapy.Spider):
             properties = {
                 "ref": store["objectID"],
                 "name": store["title"],
-                "addr_full": store["field_address:thoroughfare"],
+                "street_address": store["field_address:thoroughfare"],
                 "city": store["field_address:locality"],
                 "state": store["field_address:administrative_area"],
                 "postcode": store["field_address:postal_code"],

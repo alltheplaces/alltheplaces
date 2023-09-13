@@ -3,6 +3,7 @@ import re
 
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
@@ -75,5 +76,7 @@ class StarbucksEUSpider(scrapy.Spider):
                     "internet_access": wifi,
                 },
             }
+
+            apply_category(Categories.COFFEE_SHOP, properties)
 
             yield Feature(**properties)

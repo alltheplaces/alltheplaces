@@ -5,6 +5,7 @@ from scrapy.http import JsonRequest
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.structured_data_spider import clean_facebook
 
 # Documentation for the Yext API is available at:
 # 1. https://hitchhikers.yext.com/docs/contentdeliveryapis/introduction/overview-policies-and-conventions/
@@ -23,7 +24,7 @@ class YextSpider(Spider):
     search_filter = "{}"
     page_limit = 50
 
-    wanted_type = "location"
+    wanted_types = ["location"]
 
     def request_page(self, next_offset):
         yield JsonRequest(
@@ -39,7 +40,7 @@ class YextSpider(Spider):
 
     def parse(self, response):
         for location in response.json()["response"]["entities"]:
-            if location["meta"].get("entityType") != self.wanted_type:
+            if location["meta"].get("entityType") not in self.wanted_types:
                 continue
             if location.get("closed") or "CLOSED" in location["name"].upper():
                 continue
@@ -59,9 +60,9 @@ class YextSpider(Spider):
             item["twitter"] = location.get("twitterHandle")
             item["extras"]["contact:instagram"] = location.get("instagramHandle")
             if "facebookVanityUrl" in location:
-                item["facebook"] = location["facebookVanityUrl"]
+                item["facebook"] = clean_facebook(location["facebookVanityUrl"])
             else:
-                item["facebook"] = location.get("facebookPageUrl")
+                item["facebook"] = clean_facebook(location.get("facebookPageUrl"))
 
             if "hours" in location:
                 item["opening_hours"] = OpeningHours()

@@ -3,7 +3,6 @@ from scrapy.http import JsonRequest
 
 from locations.categories import Fuel, apply_yes_no
 from locations.dict_parser import DictParser
-from locations.hours import OpeningHours
 
 
 class CaltexSpider(Spider):

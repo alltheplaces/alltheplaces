@@ -1,10 +1,7 @@
 import scrapy
 
+from locations.categories import Categories, Extras, Fuel, apply_category, apply_yes_no
 from locations.items import Feature
-
-BRANDS = {"U76": "76", "P66": "Phillips 66", "CON": "Conoco"}
-
-WIKIBRANDS = {"U76": "Q1658320", "P66": "Q1656230", "CON": "Q214763"}
 
 
 class Phillips66Conoco76Spider(scrapy.Spider):
@@ -17,6 +14,15 @@ class Phillips66Conoco76Spider(scrapy.Spider):
         "&$select=EntityID,Latitude,Longitude,Name,AddressLine,Locality,AdminDistrict,PostalCode,CountryRegion,Phone,"
         "Brand,TFH,e85,Diesel,rd,CarWash,CStore,Snacks,ATM"
     )
+
+    BRANDS = {
+        # TODO: Disabled NSI look up on U76 until matching improves
+        "76": {"brand": "U76", "brand_wikidata": "Q1658320", "nsi_id": "N/A"},
+        "U76": {"brand": "U76", "brand_wikidata": "Q1658320", "nsi_id": "N/A"},
+        "CON": {"brand": "Conoco", "brand_wikidata": "Q109341187"},
+        "COP": None,
+        "P66": {"brand": "Phillips 66", "brand_wikidata": "Q1656230"},
+    }
 
     def start_requests(self):
         yield scrapy.Request(
@@ -37,7 +43,7 @@ class Phillips66Conoco76Spider(scrapy.Spider):
         stations = response.json()["d"]["results"]
 
         for station in stations:
-            yield Feature(
+            item = Feature(
                 lat=station["Latitude"],
                 lon=station["Longitude"],
                 name=station["Name"],
@@ -48,16 +54,16 @@ class Phillips66Conoco76Spider(scrapy.Spider):
                 country=station["CountryRegion"],
                 phone=station["Phone"],
                 ref=station["EntityID"],
-                brand=BRANDS[station["Brand"]],
-                brand_wikidata=WIKIBRANDS[station["Brand"]],
                 opening_hours="24/7" if station["TFH"] else "",
-                extras={
-                    "amenity:fuel": True,
-                    "fuel:e85": station["e85"],
-                    "fuel:diesel": station["Diesel"],
-                    "fuel:biodiesel": station["rd"],
-                    "car_wash": station["CarWash"],
-                    "shop": "convenience" if station["CStore"] else "kiosk" if station["Snacks"] else None,
-                    "atm": station["ATM"],
-                },
             )
+            if brand := self.BRANDS.get(station["Brand"]):
+                item.update(brand)
+
+            apply_category(Categories.FUEL_STATION, item)
+            apply_yes_no(Fuel.E85, item, station["e85"])
+            apply_yes_no(Fuel.DIESEL, item, station["Diesel"])
+            apply_yes_no(Fuel.BIODIESEL, item, station["rd"])
+            apply_yes_no(Extras.ATM, item, station["ATM"])
+            apply_yes_no("shop=yes", item, station["CStore"] or station["Snacks"])
+
+            yield item

@@ -17,5 +17,6 @@ class ShoeZoneGB(SitemapSpider, StructuredDataSpider):
 
     def inspect_item(self, item, response):
         item["street_address"] = clean_address(item["street_address"])
-
+        # lat/lon are both parsed into lat, separate them
+        (item["lat"], item["lon"]) = item["lat"]
         yield item

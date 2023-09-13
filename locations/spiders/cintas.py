@@ -1,80 +1,55 @@
-import json
 import re
 
-import scrapy
+from scrapy import Spider
+from scrapy.http import JsonRequest
 
+from locations.hours import OpeningHours
 from locations.items import Feature
 
 
-class CintasSpider(scrapy.Spider):
-    # download_delay of 0.0 results in rate limiting and 403 errors.
-    download_delay = 0.2
+class CintasSpider(Spider):
     name = "cintas"
     item_attributes = {"brand": "Cintas", "brand_wikidata": "Q1092571"}
     allowed_domains = ["cintas.com"]
-    start_urls = ("https://www.cintas.com/local/usa",)
+    start_urls = ["https://www.cintas.com/location-finder/GetLocationsByGeoCoordinates"]
+
+    def start_requests(self):
+        for url in self.start_urls:
+            # A few search locations are needed to cover the United States and Canada
+            yield JsonRequest(
+                url=url, method="POST", data={"lat": "38.80", "lng": "-116.42", "radiusInMiles": 10000}
+            )  # Nevada
+            yield JsonRequest(
+                url=url, method="POST", data={"lat": "35.52", "lng": "-86.58", "radiusInMiles": 10000}
+            )  # Tennessee
+            yield JsonRequest(
+                url=url, method="POST", data={"lat": "46.88", "lng": "-110.36", "radiusInMiles": 10000}
+            )  # Montana
+            yield JsonRequest(
+                url=url, method="POST", data={"lat": "51.25", "lng": "-85.32", "radiusInMiles": 10000}
+            )  # Ontario
 
     def parse(self, response):
-        urls = response.xpath('//ul[@class="col-3 group locations"]//a/@href').extract()
-        for url in urls:
-            yield scrapy.Request(response.urljoin(url), callback=self.parse_state)
-
-    def parse_state(self, response):
-        facilityurls = response.xpath('//ul[@id="accordion"]//a/@href').extract()
-        for facilityurl in facilityurls:
-            yield scrapy.Request(response.urljoin(facilityurl), callback=self.parse_store)
-
-    def parse_store(self, response):
-        try:
-            data = json.loads(
-                response.xpath(
-                    '//script[@type="application/ld+json" and contains(text(), "addressLocality")]/text()'
-                ).extract_first()
-            )
-            store = (
-                data["address"]["streetAddress"]
-                + ",%20"
-                + data["address"]["addressLocality"]
-                + ",%20"
-                + data["address"]["addressRegion"]
-            )
-
-            storeurl = "https://www.cintas.com/sitefinity/public/services/locationfinder.svc/search/{}/25".format(store)
-            yield scrapy.Request(response.urljoin(storeurl), callback=self.parse_loc)
-        except:
-            pass
-
-    def parse_loc(self, response):
-        try:
-            geocoderdata = response.xpath("//body//text()").extract()
-            geocodertext = geocoderdata[0]
-            geocodertext = geocodertext.replace("[", "")
-            geocode_re = re.search("distance(.*)", geocodertext).group()
-            for item in geocode_re.split('"location":'):
-                geocode_replace = re.sub('"distance":.*?:{', "", item)
-                geocode_replace = geocode_replace.replace("}", "")
-                geocode_replace = geocode_replace.replace("{", "")
-                geocode_replace = geocode_replace.replace("]", "")
-                geocode_replace = geocode_replace.replace("'", "")
-                geocode_replace = geocode_replace.replace('"', "")
-                if item.startswith("dist"):
-                    pass
-                else:
-                    geoc_list = geocode_replace.split(",")
-
-                    properties = {
-                        "ref": geoc_list[5].replace("Id:", ""),
-                        "name": "Cintas",
-                        "addr_full": geoc_list[0].replace("Address_1:", ""),
-                        "city": geoc_list[2].replace("City:", ""),
-                        "state": geoc_list[4].replace("District:", ""),
-                        "postcode": geoc_list[10].replace("Postal:", ""),
-                        "country": "US",
-                        "phone": geoc_list[12].replace("Phone:", ""),
-                        "lat": float(geoc_list[6].replace("Latitude:", "")),
-                        "lon": float(geoc_list[7].replace("Longitude:", "")),
-                    }
-
-                    yield Feature(**properties)
-        except:
-            pass
+        for location in response.xpath("//li[@data-location]"):
+            properties = {
+                "ref": location.xpath(".//@data-item-id").get(),
+                "name": location.xpath('.//h2[@class="locations-results__data-title"]/text()').get().strip(),
+                "lat": location.xpath(".//@data-lat").get(),
+                "lon": location.xpath(".//@data-lng").get(),
+                "addr_full": re.sub(
+                    r"\s+",
+                    " ",
+                    ", ".join(
+                        filter(None, location.xpath('.//p[@class="locations-results__data-address"]/text()').getall())
+                    ),
+                ).strip(),
+            }
+            if phone := location.xpath('.//div[@class="locations-results__data-tel"]/p[2]/a/@href').get():
+                properties["phone"] = phone
+            properties["opening_hours"] = OpeningHours()
+            properties["opening_hours"].add_ranges_from_string(
+                " ".join(
+                    filter(None, location.xpath('.//div[@class="locations-results__data-tel"]/p[1]/text()').getall())
+                )
+            ),
+            yield Feature(**properties)

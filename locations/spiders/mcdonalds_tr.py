@@ -1,80 +1,55 @@
-import json
-import re
+from scrapy import Spider
+from scrapy.http import JsonRequest
 
-import scrapy
-
-from locations.items import Feature
+from locations.categories import Extras, apply_yes_no
+from locations.dict_parser import DictParser
+from locations.hours import DAYS, OpeningHours
 from locations.spiders.mcdonalds import McDonaldsSpider
 
 
-class McDonaldsTRSpider(scrapy.Spider):
+class McDonaldsTRSpider(Spider):
     name = "mcdonalds_tr"
     item_attributes = McDonaldsSpider.item_attributes
     allowed_domains = ["www.mcdonalds.com.tr"]
+    start_urls = ["https://www.mcdonalds.com.tr/restaurants/getstores"]
+    # A significant proportion of requests are either blocked (possibly
+    # by the Turkish government) or the website is very unreliable.
+    # Minimise requests and retry a few extra times.
+    custom_settings = {"ROBOTSTXT_OBEY": False, "RETRY_TIMES": 10}
 
     def start_requests(self):
-        url = "https://www.mcdonalds.com.tr/Content/WebService/ClientSiteWebService.asmx/GetRestaurantsV5"
-        # for state in STATES:
-        formdata = {"cityId": "0", "townId": "0", "Services": ""}
-
-        headers = {
-            "Accept": "application/json, text/javascript, */*; q=0.01",
-            "Accept-Encoding": "gzip, deflate, br",
-            "Accept-Language": "en-US,en;q=0.9",
-            "Content-Type": "application/json",
-            "Origin": "https://www.mcdonalds.com.tr",
-            "Host": "www.mcdonalds.com.tr",
-            "Referer": "https://www.mcdonalds.com.tr/kurumsal/restoranlar",
-            "X-Requested-With": "XMLHttpRequest",
+        data = {
+            "cityId": "0",
+            "subcity": "",
+            "avm": "false",
+            "birthday": "false",
+            "isDeliveryStore": "false",
+            "open724": "false",
+            "breakfast": "false",
+            "mcdcafe": "false",
         }
-
-        yield scrapy.http.Request(
-            url,
-            self.parse,
-            method="POST",
-            body=json.dumps(formdata),
-            headers=headers,
-        )
-
-    def normalize_time(self, time_str):
-        match = re.search(r"([0-9]{1,2}):([0-9]{1,2})", time_str)
-        h, m = match.groups()
-
-        return "%02d:%02d" % (
-            int(h) + 12 if int(h) < 13 else int(h),
-            int(m),
-        )
-
-    def store_hours(self, hour):
-        data = hour[0]
-        if not data["Name"]:
-            return "24/7"
-        value = data["Value"].strip()
-        if value == "-":
-            return None
-
-        start = value.split("-")[0].strip()
-        end = value.split("-")[1].strip()
-        end = self.normalize_time(end)
-        return "Mo-Su " + start + ":" + end
+        for url in self.start_urls:
+            yield JsonRequest(url=url, method="POST", data=data)
 
     def parse(self, response):
-        results = response.json()
-        results = results["d"]
-        for data in results:
-            properties = {
-                "city": data["City"],
-                "ref": data["ID"],
-                "phone": data["Phone"].strip(),
-                "lon": data["Longitude"],
-                "lat": data["Latitude"],
-                "name": data["Name"],
-                "addr_full": data["Address"],
-                "state": data["Town"],
-            }
-
-            opening_hours = self.store_hours(data["WorkingHours"])
-            if opening_hours:
-                properties["opening_hours"] = opening_hours
-
-            yield Feature(**properties)
+        for location in response.json()["data"]:
+            item = DictParser.parse(location)
+            item["addr_full"] = location["STORE_ADDRESS"]
+            item["opening_hours"] = OpeningHours()
+            if location["TWENTYFOUR_HRS"]:
+                item["opening_hours"].add_days_range(DAYS, "00:00", "24:00")
+            else:
+                open_time = (
+                    str(location["STORE_OPEN_AT"]["Hours"]).zfill(2)
+                    + ":"
+                    + str(location["STORE_OPEN_AT"]["Minutes"]).zfill(2)
+                )
+                close_time = (
+                    str(location["STORE_CLOSE_AT"]["Hours"]).zfill(2)
+                    + ":"
+                    + str(location["STORE_CLOSE_AT"]["Minutes"]).zfill(2)
+                )
+                item["opening_hours"].add_days_range(DAYS, open_time, close_time)
+            apply_yes_no(Extras.DRIVE_THROUGH, item, location["MC_DRIVE"], False)
+            apply_yes_no(Extras.DELIVERY, item, location["IS_DELIVERY_STORE"], False)
+            yield item

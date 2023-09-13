@@ -45,7 +45,7 @@ class KorianFrSpider(scrapy.Spider):
             properties = {
                 "ref": store["id"],
                 "name": store["name"],
-                "addr_full": store["address"],
+                "street_address": store["address"],
                 "city": store["city"],
                 "state": store["region"],
                 "postcode": store["zipcode"],

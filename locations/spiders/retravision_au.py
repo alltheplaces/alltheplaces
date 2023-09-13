@@ -14,6 +14,7 @@ class RetravisionAUSpider(SitemapSpider, StructuredDataSpider):
             "parse_sd",
         ),
     ]
+    requires_proxy = "AU"
 
     def post_process_item(self, item, response, ld_data):
         item.pop("facebook")

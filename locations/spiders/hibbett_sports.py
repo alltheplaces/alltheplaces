@@ -12,6 +12,7 @@ class HibbettSportsSpider(scrapy.Spider):
         "https://www.hibbett.com/on/demandware.store/Sites-Hibbett-US-Site/default/Stores-GetNearestStores?latitude=40.7127753&longitude=-74.0059728&countryCode=US&distanceUnit=mi&maxdistance=1000"
     ]
     custom_settings = {"ROBOTSTXT_OBEY": False}
+    requires_proxy = "US"
 
     def parse(self, response):
         for _, data in response.json().get("stores").items():

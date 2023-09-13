@@ -10,8 +10,14 @@ class CarrefourARSpider(scrapy.Spider):
     # TODO: I suspect other Carrefour domains have this very same interface
     # TODO: Figure out why the hash changed. Will this happen again?
     start_urls = [
-        "https://www.carrefour.com.ar/_v/public/graphql/v1?workspace=master&maxAge=short&appsEtag=remove&domain=store&locale=es-AR&operationName=getStoreLocations&variables=%7B%7D&extensions=%7B%22persistedQuery%22%3A%7B%22version%22%3A1%2C%22sha256Hash%22%3A%22162654afe95c8f4ceabfa711ef355ce78a8988bd98ac5affe367f372703e15d6%22%2C%22sender%22%3A%22lyracons.lyr-store-locator%400.x%22%2C%22provider%22%3A%22vtex.store-graphql%402.x%22%7D%2C%22variables%22%3A%22eyJhY2NvdW50IjoiY2FycmVmb3VyYXIifQ%3D%3D%22%7D"
+        "https://www.carrefour.com.ar/_v/public/graphql/v1?workspace=master&maxAge=short&appsEtag=remove&domain=store&locale=es-AR&operationName=getStoreLocations&variables=%7B%7D&extensions=%7B%22persistedQuery%22%3A%7B%22version%22%3A1%2C%22sha256Hash%22%3A%2291524e99508884c32f8fc7d51ee6cf22a44e8f3e4bcf62729e2111d26a91754d%22%2C%22sender%22%3A%22valtech.carrefourar-store-locator%400.x%22%2C%22provider%22%3A%22vtex.store-graphql%402.x%22%7D%2C%22variables%22%3A%22eyJhY2NvdW50IjoiY2FycmVmb3VyYXIifQ%3D%3D%22%7D"
     ]
+
+    brands = {
+        "Hipermercado": {"brand": "Carrefour", "brand_wikidata": "Q217599"},
+        "Market": {"brand": "Carrefour Market", "brand_wikidata": "Q2689639"},
+        "Express": {"brand": "Carrefour Express", "brand_wikidata": "Q2940190"},
+    }
 
     def parse(self, response):
         for data in response.json()["data"]["documents"]:
@@ -25,6 +31,10 @@ class CarrefourARSpider(scrapy.Spider):
             o["city"] = o.get("locality")
             o["state"] = o.get("administrativeArea")
             item = DictParser.parse(o)
+
+            if o.get("labels") not in self.brands.keys():
+                return
+            item.update(self.brands[o.get("labels")])
 
             oh = OpeningHours()
             for day in DAYS_FULL:

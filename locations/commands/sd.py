@@ -1,6 +1,7 @@
 import json
 import os
 import pathlib
+import pprint
 
 from scrapy.commands import BaseRunSpiderCommand
 from scrapy.exceptions import UsageError
@@ -37,7 +38,7 @@ class MySpider(StructuredDataSpider):
 # See what ATP libraries can do with a given web site / web page.
 class SdCommand(BaseRunSpiderCommand):
     requires_project = True
-    default_settings = {"LOG_ENABLED": False}
+    default_settings = {"LOG_LEVEL": "WARNING"}
 
     def syntax(self):
         return "[options] <file or URL to decode>"
@@ -94,5 +95,4 @@ class SdCommand(BaseRunSpiderCommand):
         if stats_dict.get("item_scraped_count", 0) == 0:
             print("failed to decode structured data")
         if opts.stats:
-            for k, v in stats_dict.items():
-                print(k + ": " + str(v))
+            pprint.pprint(stats_dict)

@@ -5,7 +5,7 @@ from locations.storefinders.woosmap import WoosmapSpider
 class TotalEnergiesSpider(WoosmapSpider):
     name = "totalenergies"
     key = "mapstore-prod-woos"
-    custom_settings = {"DEFAULT_REQUEST_HEADERS": {"Origin": "https://totalenergies.com"}}
+    origin = "https://totalenergies.com"
 
     BRANDS = {
         "tot": {"brand": "Total", "brand_wikidata": "Q154037"},
@@ -106,6 +106,9 @@ class TotalEnergiesSpider(WoosmapSpider):
         if brand := self.BRANDS.get(feature["properties"]["user_properties"]["brand"]):
             item.update(brand)
         else:
+            self.crawler.stats.inc_value(
+                f'atp/total_energies/unknown_brand/{feature["properties"]["user_properties"]["brand"]}'
+            )
             item["brand"] = feature["properties"]["user_properties"]["brand"]
 
         yield item

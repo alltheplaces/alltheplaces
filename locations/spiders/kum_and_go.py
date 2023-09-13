@@ -40,7 +40,7 @@ class KumAndGoSpider(scrapy.Spider):
                 ref=store["id"],
                 lon=store["lng"],
                 lat=store["lat"],
-                addr_full=store["address"],
+                street_address=store["address"],
                 city=store["city"],
                 state=store["state"],
                 postcode=store["zip"],

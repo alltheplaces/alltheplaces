@@ -1,14 +1,17 @@
 import math
 import re
 
+from scrapy import Spider
+
 from locations.hours import OpeningHours
 from locations.items import get_lat_lon, set_lat_lon
 
 
-def check_field(item, spider, param, allowed_types, match_regex=None):
+def check_field(item, spider: Spider, param, allowed_types, match_regex=None):
     if val := item.get(param):
-        if not isinstance(val, *allowed_types):
+        if not isinstance(val, allowed_types):
             spider.crawler.stats.inc_value(f"atp/field/{param}/wrong_type")
+            spider.logger.error(f"Invalid type {type(val).__name__} on {param}, expected {allowed_types}")
         elif match_regex and not match_regex.match(val):
             spider.crawler.stats.inc_value(f"atp/field/{param}/invalid")
     else:
@@ -51,6 +54,7 @@ class CheckItemPropertiesPipeline:
         check_field(item, spider, "state", (str,))
         check_field(item, spider, "postcode", (str,))
         check_field(item, spider, "country", (str,), self.country_regex)
+        check_field(item, spider, "name", (str,))
         check_field(item, spider, "brand", (str,))
 
         if coords := get_lat_lon(item):

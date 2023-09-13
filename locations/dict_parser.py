@@ -2,11 +2,11 @@ from locations.items import Feature
 
 
 class DictParser:
-    ref_keys = ["ref", "id", "store-id", "storeNumber", "shop-number", "LocationID", "slug", "storeCode"]
+    ref_keys = ["ref", "id", "store-id", "storeID", "storeNumber", "shop-number", "LocationID", "slug", "storeCode"]
 
     name_keys = ["name", "store-name", "display-name", "title", "businessName"]
 
-    house_number_keys = ["house-number", "house-no", "street-number", "street-no"]
+    house_number_keys = ["house-number", "house-no", "street-number", "street-no", "address-street-no"]
 
     street_address_keys = [
         # EN
@@ -67,6 +67,7 @@ class DictParser:
         "address-post-code",
         "postal",
         "zip-code",
+        "address-postal-code",
         # JP
         "郵便番号",  # "post code"
     ]
@@ -82,6 +83,7 @@ class DictParser:
         "telephone1",
         "contact-number",
         "phone-no",
+        "contact-phone",
     ]
 
     lat_keys = [
@@ -90,6 +92,7 @@ class DictParser:
         "display-lat",
         "yext-display-lat",
         "mapLatitude",
+        "geoLat",
     ]
 
     lon_keys = [
@@ -100,9 +103,10 @@ class DictParser:
         "display-lng",
         "yext-display-lng",
         "mapLongitude",
+        "geoLng",
     ]
 
-    website_keys = ["url", "website", "permalink", "store-url", "storeURL", "websiteURL"]
+    website_keys = ["url", "website", "permalink", "store-url", "storeURL", "website-url", "websiteURL"]
 
     @staticmethod
     def parse(obj) -> Feature:
@@ -120,7 +124,7 @@ class DictParser:
         item["lat"] = DictParser.get_first_key(location, DictParser.lat_keys)
         item["lon"] = DictParser.get_first_key(location, DictParser.lon_keys)
 
-        address = DictParser.get_first_key(obj, ["address", "addr", "storeaddress"])
+        address = DictParser.get_first_key(obj, ["address", "addr", "storeaddress", "physicalAddress"])
 
         if address and isinstance(address, str):
             item["addr_full"] = address

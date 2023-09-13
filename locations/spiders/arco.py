@@ -1,41 +1,48 @@
-import csv
+import html
 import re
 
-import scrapy
+from scrapy import Request
+from scrapy.spiders import CSVFeedSpider
 
-from locations.items import Feature
+from locations.categories import Extras, Fuel, PaymentMethods, apply_yes_no
+from locations.dict_parser import DictParser
+from locations.spiders.tesco_gb import set_located_in
 
 
-class ArcoSpider(scrapy.Spider):
+class ArcoSpider(CSVFeedSpider):
     name = "arco"
-    item_attributes = {"brand": "ARCO", "brand_wikidata": "Q304769"}
-    allowed_domains = ["www.arco.com"]
-    download_delay = 0.2
+    item_attributes = {"brand": "Arco", "brand_wikidata": "Q304769"}
+    AMPM = {"brand": "ampm", "brand_wikidata": "Q306960"}
 
-    start_urls = ["https://www.arco.com/scripts/stationfinder.js"]
+    def start_requests(self):
+        yield Request("https://www.arco.com/scripts/stationfinder.js", self.parse_js)
 
-    def parse(self, response):
-        if response.url == self.start_urls[0]:
-            match = re.search("var csv_url = '(.*)'", response.text)
-            assert match.group(1)
+    def parse_js(self, response, **kwargs):
+        if match := re.search("var csv_url = '(.*)'", response.text):
+            yield Request(response.urljoin(match.group(1)))
 
-            yield scrapy.Request(f"https://www.arco.com{match.group(1)}")
+    def parse_row(self, response, row):
+        if len(row["State"]) == 2 or row["State"] == "California":
+            row["country_code"] = "US"
+            row["street_address"] = html.unescape(row.pop("Address"))
         else:
-            for station in csv.DictReader(response.text.splitlines()):
-                yield Feature(
-                    lat=station["Lat"],
-                    lon=station["Lng"],
-                    name=station["StoreName"],
-                    addr_full=station["Address"],
-                    city=station["City"],
-                    state=station["State"],
-                    postcode=station["Zip"],
-                    country="US" if len(station["State"]) == 2 else "MX",
-                    phone=station["Phone"],
-                    ref=station["StoreNumber"],
-                    extras={
-                        "amenity:fuel": True,
-                        "payment:credit_cards": station["CreditCards"] == "1",
-                        "shop": "convenience" if station["ampm"] == "1" else None,
-                    },
-                )
+            row["country_code"] = "MX"
+            row["Address"] = html.unescape(row["Address"])
+
+        arco = DictParser.parse(row)
+
+        apply_yes_no(PaymentMethods.CREDIT_CARDS, arco, row["CreditCards"] == "1")
+        apply_yes_no(Fuel.DIESEL, arco, row["CreditCards"] == "1")
+        apply_yes_no(Extras.CAR_WASH, arco, row["CarWash"] == "1")
+        # TODO: RenewableDiesel
+
+        yield arco
+
+        if row["ampm"] == "1":
+            ampm = DictParser.parse(row)
+            ampm["ref"] += "_ampm"
+            ampm["name"] = None
+            ampm.update(self.AMPM)
+            set_located_in(self.AMPM, ampm)
+
+            yield ampm

@@ -5,17 +5,13 @@ from scrapy.spiders import SitemapSpider
 from locations.items import Feature
 
 
-class GoodyearEUSpider(SitemapSpider):
-    name = "goodyear_eu"
+class GoodyearSpider(SitemapSpider):
+    name = "goodyear"
     item_attributes = {"brand": "Goodyear", "brand_wikidata": "Q620875"}
     allowed_domains = ["www.goodyear.eu"]
     sitemap_urls = ["https://www.goodyear.eu/robots.txt"]
-    sitemap_rules = [(r"", "parse_store")]
-
-    def sitemap_filter(self, entries):
-        for entry in entries:
-            if "dealers" in entry["loc"]:
-                yield entry
+    sitemap_follow = [r"/(?!ru_ru)[a-z]{2}_[a-z]{2}/consumer.dealers-sitemap.xml"]
+    sitemap_rules = [(r"\/dealers\/\d+\/", "parse_store")]
 
     def parse_store(self, response):
         item = Feature()

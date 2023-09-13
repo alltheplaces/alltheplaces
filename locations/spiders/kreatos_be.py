@@ -1,6 +1,4 @@
-from urllib.parse import urljoin
-
-from scrapy import Selector, Spider
+from scrapy import Spider
 
 from locations.items import Feature
 
@@ -8,25 +6,22 @@ from locations.items import Feature
 class KreatosBESpider(Spider):
     name = "kreatos_be"
     item_attributes = {"brand": "Kreatos", "brand_wikidata": "Q113540702"}
-    start_urls = ["https://www.kreatos.be/store-locator/json"]
+    start_urls = ["https://www.kreatos.be/nl/maak-een-afspraak"]
 
-    def parse(self, response, **kwargs):
-        for location in response.json()["features"]:
-            item = Feature()
-            item["geometry"] = location["geometry"]
-            item["name"] = location["properties"]["name"]
-            item["ref"] = str(location["properties"]["Nid"])
-
-            sel = Selector(text=location["properties"]["description"])
-
-            item["street"] = sel.xpath('//*[@class="thoroughfare"]/text()').get()
-            item["housenumber"] = sel.xpath('//*[@class="premise"]/text()').get()
-            item["city"] = sel.xpath('//span[@class="locality"]/text()').get()
-            item["postcode"] = sel.xpath('//span[@class="postal-code"]/text()').get()
-            item["country"] = sel.xpath('//span[@class="locality"]/text()').get()
-
-            item["website"] = urljoin(
-                response.url, Selector(text=location["properties"]["gsl_props_misc_rendered"]).xpath("//a/@href").get()
-            )
-
-            yield item
+    def parse(self, response):
+        for location in response.xpath('//div[@typeof="Place"]'):
+            properties = {
+                "ref": location.xpath("./@id").get(),
+                "name": " ".join(filter(None, location.xpath('.//div[@class="title"]/a/text()').getall())).strip(),
+                "lat": location.xpath("./@data-lat").get(),
+                "lon": location.xpath("./@data-lng").get(),
+                "addr_full": ", ".join(
+                    filter(
+                        None,
+                        location.xpath('.//div[contains(@class, "field-address")]/div[@class="line"]/text()').getall(),
+                    )
+                ).strip(),
+                "phone": location.xpath('.//a[contains(@href, "tel:")]/@href').get().replace("tel:", ""),
+                "website": "https://www.kreatos.be" + location.xpath('.//div[@class="title"]/a/@href').get(),
+            }
+            yield Feature(**properties)

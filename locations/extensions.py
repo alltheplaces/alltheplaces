@@ -31,4 +31,4 @@ class LogStatsExtension:
 
         if filename:
             with open(filename, "w") as f:
-                f.write(json.dumps(self.crawler.stats.get_stats(), default=myconverter))
+                f.write(json.dumps(self.crawler.stats.get_stats(), default=myconverter, sort_keys=True, indent=1))

@@ -83,7 +83,7 @@ class MarshallsSpider(scrapy.Spider):
             properties = {
                 "name": store["Name"],
                 "ref": store["StoreID"],
-                "addr_full": store["Address"].strip(),
+                "street_address": store["Address"].strip(),
                 "city": store["City"],
                 "state": store["State"],
                 "postcode": store["Zip"],

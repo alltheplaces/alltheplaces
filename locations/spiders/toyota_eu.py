@@ -1,5 +1,6 @@
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
 
@@ -57,4 +58,7 @@ class ToyotaEUSpider(scrapy.Spider):
             item["lat"] = coordinates["lat"]
             item["lon"] = coordinates["lon"]
             item["country"] = store["country"].upper()
+
+            apply_category(Categories.SHOP_CAR, item)
+
             yield item

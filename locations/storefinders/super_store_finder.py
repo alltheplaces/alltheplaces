@@ -1,3 +1,6 @@
+import html
+import re
+
 from scrapy import Request, Selector, Spider
 
 from locations.hours import OpeningHours
@@ -35,6 +38,7 @@ class SuperStoreFinderSpider(Spider):
                 "name": location.xpath("./location/text()").get(),
                 "lat": location.xpath("./latitude/text()").get(),
                 "lon": location.xpath("./longitude/text()").get(),
+                "addr_full": html.unescape(re.sub(r"\s+", " ", location.xpath("./address/text()").get())),
                 "phone": location.xpath("./telephone/text()").get(),
                 "email": location.xpath("./email/text()").get(),
                 "website": location.xpath("./website/text()").get(),

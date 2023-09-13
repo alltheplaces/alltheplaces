@@ -37,7 +37,7 @@ class NationalSpider(scrapy.Spider):
                 "name": loc["name"],
                 "brand": loc["brand"],
                 "phone": loc["phones"][0]["phone_number"],
-                "addr_full": loc["address"]["street_addresses"],
+                "street_address": ", ".join(loc["address"]["street_addresses"]),
                 "city": loc["address"]["city"],
                 "state": loc["address"]["country_subdivision_code"],
                 "postcode": loc["address"]["postal"],

@@ -3,6 +3,7 @@ import json
 
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
 
@@ -46,5 +47,8 @@ class BestWesternSpider(scrapy.spiders.SitemapSpider):
                     )
                 except IndexError:
                     pass
+
+                apply_category(Categories.HOTEL, item)
+
                 yield item
                 return

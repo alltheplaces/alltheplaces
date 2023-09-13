@@ -4,7 +4,7 @@ from locations.storefinders.woosmap import WoosmapSpider
 class AccorSpider(WoosmapSpider):
     name = "accor"
     key = "accor-prod-woos"
-    custom_settings = {"DEFAULT_REQUEST_HEADERS": {"Origin": "https://accor.com/"}}
+    origin = "https://accor.com"
 
     brand_mapping = {
         "SUI": {"brand": "Novotel", "brand_wikidata": "Q420545"},
@@ -49,6 +49,8 @@ class AccorSpider(WoosmapSpider):
     # "ART", "TRI", "MTS", "21C", "SLS", "TOR", "FAE", "DHA", "HYD"
 
     def parse_item(self, item, feature, **kwargs):
+        if "COMING SOON" in item["name"].upper():
+            return
         if match := self.brand_mapping.get(feature["properties"]["types"][0]):
             item.update(match)
         item["website"] = f"https://all.accor.com/hotel/{item['ref']}/index.en.shtml"

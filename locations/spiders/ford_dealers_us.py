@@ -1,6 +1,7 @@
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
+from locations.categories import Categories, apply_category
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -27,3 +28,8 @@ class FordDealersUSSpider(CrawlSpider, StructuredDataSpider):
             callback="parse_sd",
         ),
     ]
+
+    def post_process_item(self, item, response, ld_data, **kwargs):
+        apply_category(Categories.SHOP_CAR, item)
+
+        yield item

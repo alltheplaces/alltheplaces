@@ -1,35 +1,40 @@
-import re
+from html import unescape
 
-from scrapy import Selector, Spider
+from scrapy import Request
 
-from locations.items import Feature
+from locations.storefinders.amasty_store_locator import AmastyStoreLocatorSpider
 
 
-class DialABedZASpider(Spider):
+class DialABedZASpider(AmastyStoreLocatorSpider):
     name = "dial_a_bed_za"
     item_attributes = {"brand": "Dial-a-Bed", "brand_wikidata": "Q116429178"}
-    start_urls = ["https://www.dialabed.co.za/amlocator/index/ajax/"]
+    allowed_domains = ["www.dialabed.co.za"]
 
-    def parse(self, response, **kwargs):
-        for location in response.json()["items"]:
-            item = Feature()
-            item["ref"] = location["id"]
-            item["lat"] = location["lat"]
-            item["lon"] = location["lng"]
+    def start_requests(self):
+        # The request won't work without the headers supplied below.
+        headers = {
+            "X-Requested-With": "XMLHttpRequest",
+        }
+        for domain in self.allowed_domains:
+            yield Request(url=f"https://{domain}/amlocator/index/ajax/", method="POST", headers=headers)
 
-            html = Selector(text=location["popup_html"])
-
-            item["name"] = html.xpath('//div[@class="amlocator-title"]/a/text()').get()
-            item["website"] = html.xpath('//div[@class="amlocator-title"]/a/@href').get()
-
-            for line in html.xpath('//div[@class="amlocator-info-popup"]/text()').getall():
-                line = line.strip()
-                if m := re.match(r"(.*): (.*)", line):
-                    if m.group(1) == "City":
-                        item["city"] = m.group(2)
-                    elif m.group(1) == "Address":
-                        item["street_address"] = m.group(2)
-                    elif m.group(1) == "Phone":
-                        item["phone"] = m.group(2)
-
-            yield item
+    def parse_item(self, item, location, popup_html):
+        item["street_address"] = unescape(
+            " ".join(popup_html.xpath('//div[@class="amlocator-info-popup"]/text()').getall())
+            .split("   Address:", 1)[1]
+            .split("   ", 1)[0]
+            .strip()
+        )
+        item["city"] = unescape(
+            " ".join(popup_html.xpath('//div[@class="amlocator-info-popup"]/text()').getall())
+            .split("City:", 1)[1]
+            .split("   ", 1)[0]
+            .strip()
+        )
+        item["phone"] = unescape(
+            " ".join(popup_html.xpath('//div[@class="amlocator-info-popup"]/text()').getall())
+            .split("   Phone:", 1)[1]
+            .split("   ", 1)[0]
+            .strip()
+        )
+        yield item

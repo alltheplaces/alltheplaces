@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+set -x
+echo "git revision: ${GIT_COMMIT}"
 
 if [ -z "${S3_BUCKET}" ]; then
     (>&2 echo "Please set S3_BUCKET environment variable")
@@ -56,6 +58,23 @@ OUTPUT_LINECOUNT=$(cat "${SPIDER_RUN_DIR}"/output/*.geojson | wc -l | tr -d ' ')
 scrapy insights --atp-nsi-osm "${SPIDER_RUN_DIR}/output" --outfile "${SPIDER_RUN_DIR}/stats/_insights.json"
 (>&2 echo "Done comparing against Name Suggestion Index and OpenStreetMap")
 
+tippecanoe --cluster-distance=25 \
+           --drop-rate=1 \
+           --maximum-zoom=13 \
+           --cluster-maxzoom=g \
+           --layer="alltheplaces" \
+           --read-parallel \
+           --attribution="<a href=\"https://www.alltheplaces.xyz/\">All The Places</a> ${RUN_TIMESTAMP}" \
+           -o "${SPIDER_RUN_DIR}/output.pmtiles" \
+           "${SPIDER_RUN_DIR}"/output/*.geojson
+retval=$?
+if [ ! $retval -eq 0 ]; then
+    (>&2 echo "Couldn't generate pmtiles")
+    exit 1
+fi
+(>&2 echo "Done generating pmtiles")
+
+(>&2 echo "Writing out summary JSON")
 echo "{\"count\": ${SPIDER_COUNT}, \"results\": []}" >> "${SPIDER_RUN_DIR}/stats/_results.json"
 for spider in $(scrapy list)
 do
@@ -149,18 +168,22 @@ if [ ! $retval -eq 0 ]; then
     exit 1
 fi
 
+RUN_END=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+
 (>&2 echo "Creating latest.json")
 
 jq -n --compact-output \
     --arg run_id "${RUN_TIMESTAMP}" \
     --arg run_output_url "${RUN_URL_PREFIX}/output.zip" \
+    --arg run_pmtiles_url "${RUN_URL_PREFIX}/output.pmtiles" \
     --arg run_stats_url "${RUN_URL_PREFIX}/stats/_results.json" \
     --arg run_insights_url "${RUN_URL_PREFIX}/stats/_insights.json" \
     --arg run_start_time "${RUN_START}" \
+    --arg run_end_time "${RUN_END}" \
     --arg run_output_size "${OUTPUT_FILESIZE}" \
     --arg run_spider_count "${SPIDER_COUNT}" \
     --arg run_line_count "${OUTPUT_LINECOUNT}" \
-    '{"run_id": $run_id, "output_url": $run_output_url, "stats_url": $run_stats_url, "insights_url": $run_insights_url, "start_time": $run_start_time, "size_bytes": $run_output_size | tonumber, "spiders": $run_spider_count | tonumber, "total_lines": $run_line_count | tonumber }' \
+    '{"run_id": $run_id, "output_url": $run_output_url, "pmtiles_url": $run_pmtiles_url, "stats_url": $run_stats_url, "insights_url": $run_insights_url, "start_time": $run_start_time, "end_time": $run_end_time, "size_bytes": $run_output_size | tonumber, "spiders": $run_spider_count | tonumber, "total_lines": $run_line_count | tonumber }' \
     > latest.json
 
 retval=$?

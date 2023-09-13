@@ -33,7 +33,7 @@ class PetParadiseSpider(scrapy.Spider):
             properties = {
                 "ref": store_data["interestpointpropertyname"],
                 "name": store_data["interestpointpropertyname"],
-                "addr_full": store_data["interestpointpropertyaddress"],
+                "street_address": store_data["interestpointpropertyaddress"],
                 "city": store_data["interestpointCity"],
                 "state": store_data["interestpointState"],
                 "postcode": store_data["interestpointPostalCode"],
