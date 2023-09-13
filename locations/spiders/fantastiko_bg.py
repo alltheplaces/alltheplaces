@@ -21,7 +21,7 @@ class FantastikoBGSpider(SitemapSpider, StructuredDataSpider):
             '//span[@class="feat-title white shop-number inline_block middle"]/text()'
         ).extract_first()
         item["opening_hours"] = (
-            response.xpath('//span[@itemprop="openingHours"]/text()')
+            response.xpath('//p[@itemprop="openingHours"]/text()')
             .extract_first()
             .replace("ч.", "")
             .replace("от ", "")
