@@ -21,22 +21,24 @@ from locations.spiders.vapestore_gb import clean_address
 #      In addition to method (1), also supply a list of searchable
 #      points files as searchable_points_files = [x, y..] and also
 #      specify a non-zero number for search_radius = x and
-#      max_results = x.
+#      max_results = x. The max_results parameter is hard-coded in
+#      server configuration and cannot be changed. No radius search
+#      should return max_results locations because this is a sign
+#      that some locations are being truncated.
+#
+#      An exception will be raised if max_results (or more)
+#      locations are returned in any given radius search, as this
+#      indicates some locations have been truncated. If this occurs,
+#      more granular searchable points files need to be supplied,
+#      and search_raidus needs to be selected carefully to ensure
+#      that max_results (or more) locations are never returned for
+#      any radius search.
 #
 # If clean ups or additional field extraction is required from the
 # source data, override the parse_item function. Two parameters are
 # passed, item (an ATP "Feature" class) and location (a dict which
 # is returned from the store locator JSON response for a particular
 # location).
-#
-# Important note: this store locator has a hard-coded "max_results"
-# attribute set server-side, that can be configured differently for
-# each installation and cannot be overridden client-side. Check the
-# number of results returned and if it is a round number (e.g. 50)
-# apply caution and double check this is the full count. If results
-# are truncated, you will need to use the geographic radius search
-# method and choose a small enough x for search_radius = x to ensure
-# the "max_results" limit is never reached.
 
 
 class WPStoreLocatorSpider(Spider):
@@ -69,6 +71,10 @@ class WPStoreLocatorSpider(Spider):
                     yield JsonRequest(url=url)
 
     def parse(self, response, **kwargs):
+        if len(response.json()) >= self.max_results:
+            raise RuntimeError(
+                "Locations have probably been truncated due to max_results (or more) locations being returned by a single geographic radius search. Use more granular searchable_points_files and a smaller search_radius."
+            )
         for location in response.json():
             item = DictParser.parse(location)
             item["street_address"] = clean_address([location.get("address"), location.get("address2")])

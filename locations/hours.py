@@ -13,6 +13,8 @@ DAYS_FULL = [
     "Sunday",
 ]
 
+DAYS_AT = {"Mo": "Mo", "Di": "Tu", "Mi": "We", "Do": "Th", "Fr": "Fr", "Sa": "Sa", "So": "Su"}
+
 DAYS_EN = {
     "Monday": "Mo",
     "Mon": "Mo",
@@ -404,6 +406,7 @@ DELIMITERS_EN = {
     "from",
     "thru",
     "through",
+    "until",
 }
 
 DELIMITERS_ES = {

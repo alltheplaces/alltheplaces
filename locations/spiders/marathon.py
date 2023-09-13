@@ -11,9 +11,7 @@ class MarathonSpider(scrapy.spiders.CSVFeedSpider):
         "country": "US",
     }
     start_urls = ["https://www.marathonbrand.com/content/includes/mpc-brand-stations/SiteList.csv"]
-    custom_settings = {
-        "ZYTE_API_TRANSPARENT_MODE": True,
-    }
+    requires_proxy = True
 
     def parse_row(self, response, row):
         if row["Status"] == "Open":

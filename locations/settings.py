@@ -75,6 +75,7 @@ if os.environ.get("ZYTE_API_KEY"):
         "https": "scrapy_zyte_api.ScrapyZyteAPIDownloadHandler",
     }
     DOWNLOADER_MIDDLEWARES = {
+        "locations.middlewares.zyte_api_by_country.ZyteApiByCountryMiddleware": 500,
         "scrapy_zyte_api.ScrapyZyteAPIDownloaderMiddleware": 1000,
     }
     REQUEST_FINGERPRINTER_CLASS = "scrapy_zyte_api.ScrapyZyteAPIRequestFingerprinter"
@@ -110,6 +111,7 @@ ITEM_PIPELINES = {
     "locations.pipelines.count_brands.CountBrandsPipeline": 810,
 }
 
+LOG_FORMATTER = "locations.logformatter.DebugDuplicateLogFormatter"
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See http://doc.scrapy.org/en/latest/topics/autothrottle.html
