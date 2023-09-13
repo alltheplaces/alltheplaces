@@ -106,6 +106,9 @@ class TotalEnergiesSpider(WoosmapSpider):
         if brand := self.BRANDS.get(feature["properties"]["user_properties"]["brand"]):
             item.update(brand)
         else:
+            self.crawler.stats.inc_value(
+                f'atp/total_energies/unknown_brand/{feature["properties"]["user_properties"]["brand"]}'
+            )
             item["brand"] = feature["properties"]["user_properties"]["brand"]
 
         yield item

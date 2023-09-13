@@ -1,3 +1,5 @@
+import random
+
 from scrapy import Spider
 from scrapy.http import JsonRequest
 from scrapy.signals import spider_idle
@@ -62,41 +64,42 @@ class GeoMeSpider(Spider):
 
     def start_location_requests(self):
         self.crawler.signals.disconnect(self.start_location_requests, signal=spider_idle)
-        if len(self.locations_found) > 0:
-            first_search_location = self.locations_found.popitem()
-            first_request = JsonRequest(
-                url=self.url_nearest_to_template.format(
-                    self.key, self.api_version, first_search_location[1][0], first_search_location[1][1]
-                ),
-                callback=self.parse_locations,
-            )
-            self.crawler.engine.crawl(first_request)
+        self.crawler.engine.crawl(self.get_next_location())
 
     def parse_locations(self, response):
         for location in response.json()["locations"]:
-            if location.get("inactive"):
-                continue
-            location["street_address"] = location.pop("address")
-            item = DictParser.parse(location)
-            self.extract_hours(item, location)
-            yield from self.parse_item(item, location) or []
-
             # Remove found location from the list of locations which
             # are still waiting to be found.
             if self.locations_found.get(location["id"]):
                 self.locations_found.pop(location["id"])
 
-        # Get the next location to do a "nearest to" search from.
-        if len(self.locations_found) > 0:
-            next_search_location = self.locations_found.popitem()
-            yield JsonRequest(
-                url=self.url_nearest_to_template.format(
-                    self.key, self.api_version, next_search_location[1][0], next_search_location[1][1]
-                ),
-                callback=self.parse_locations,
-            )
+            if location.get("inactive"):
+                continue
 
-    def extract_hours(self, item, location):
+            location["street_address"] = location.pop("address")
+            item = DictParser.parse(location)
+            self.extract_hours(item, location)
+            yield from self.parse_item(item, location) or []
+
+        # Get the next location to do a "nearest to" search from.
+        yield self.get_next_location()
+
+    def get_next_location(self) -> JsonRequest:
+        if len(self.locations_found) == 0:
+            return
+        next_search_location_id = random.choice(list(self.locations_found))
+        next_search_location_coords = self.locations_found[next_search_location_id]
+        self.locations_found.pop(next_search_location_id)
+        return JsonRequest(
+            url=self.url_nearest_to_template.format(
+                self.key, self.api_version, next_search_location_coords[0], next_search_location_coords[1]
+            ),
+            callback=self.parse_locations,
+            dont_filter=True,
+        )
+
+    @staticmethod
+    def extract_hours(item: Feature, location: dict):
         item["opening_hours"] = OpeningHours()
         if location.get("open_status") == "twenty_four_hour":
             item["opening_hours"].add_days_range(DAYS, "00:00", "23:59")

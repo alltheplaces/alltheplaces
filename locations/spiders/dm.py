@@ -30,7 +30,14 @@ class DmSpider(scrapy.Spider):
             location["address"]["country"] = location["countryCode"]
             location["name"] = location["address"].get("name")
             item = DictParser.parse(location)
-            item["website"] = f'https://www.dm.de/store{location["storeUrlPath"]}'
+            if location["countryCode"] in ["BG", "BA", "IT"]:
+                item[
+                    "website"
+                ] = f'https://www.dm-drogeriemarkt.{location["countryCode"].lower()}/store{location["storeUrlPath"]}'
+            elif location["countryCode"] == "SK":
+                item["website"] = f'https://www.mojadm.sk/store{location["storeUrlPath"]}'
+            else:
+                item["website"] = f'https://www.dm.{location["countryCode"].lower()}/store{location["storeUrlPath"]}'
             item["extras"]["check_date"] = location["updateTimeStamp"]
             item["opening_hours"] = self.parse_hours(location["openingHours"])
 
