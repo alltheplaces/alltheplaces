@@ -238,6 +238,7 @@ class Fuel(Enum):
     E20 = "fuel:e20"
     E30 = "fuel:e30"
     E85 = "fuel:e85"
+    ETHANOL_FREE = "fuel:ethanol_free"
     BIOGAS = "fuel:biogas"
     LPG = "fuel:lpg"
     CNG = "fuel:cng"
