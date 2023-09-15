@@ -7,6 +7,7 @@ import scrapy
 
 from locations.categories import Categories
 from locations.items import Feature
+from locations.searchable_points import open_searchable_points
 
 HEADERS = {"X-Requested-With": "XMLHttpRequest"}
 STORELOCATOR = "https://www.starbucks.com/bff/locations?lat={}&lng={}"
@@ -19,12 +20,12 @@ class StarbucksSpider(scrapy.Spider):
 
     def start_requests(self):
         searchable_point_files = [
-            "./locations/searchable_points/us_centroids_50mile_radius.csv",
-            "./locations/searchable_points/ca_centroids_50mile_radius.csv",
+            "us_centroids_50mile_radius.csv",
+            "ca_centroids_50mile_radius.csv",
         ]
 
         for point_file in searchable_point_files:
-            with open(point_file) as points:
+            with open_searchable_points(point_file) as points:
                 reader = csv.DictReader(points)
                 for point in reader:
                     request = scrapy.Request(

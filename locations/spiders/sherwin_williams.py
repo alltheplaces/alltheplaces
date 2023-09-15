@@ -5,6 +5,7 @@ from urllib.parse import urlencode
 import scrapy
 
 from locations.items import Feature
+from locations.searchable_points import open_searchable_points
 from locations.user_agents import BROWSER_DEFAULT
 
 
@@ -82,7 +83,7 @@ class SherwinWilliamsSpider(scrapy.Spider):
         ]
 
         # paint stores - search by 100 mile radius in US/CA
-        with open("./locations/searchable_points/us_centroids_50mile_radius.csv") as points:
+        with open_searchable_points("us_centroids_50mile_radius.csv") as points:
             next(points)
             for point in points:
                 _, lat, lon = point.strip().split(",")
@@ -93,7 +94,7 @@ class SherwinWilliamsSpider(scrapy.Spider):
                     meta={"store_type": "Sherwin-Williams Paint Store"},
                 )
 
-        with open("./locations/searchable_points/ca_centroids_50mile_radius.csv") as points:
+        with open_searchable_points("ca_centroids_50mile_radius.csv") as points:
             next(points)
             for point in points:
                 _, lat, lon = point.strip().split(",")

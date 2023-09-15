@@ -1,6 +1,7 @@
 import scrapy
 
 from locations.items import Feature
+from locations.searchable_points import open_searchable_points
 
 
 class HopdoddyBurgerBarSpider(scrapy.Spider):
@@ -10,7 +11,7 @@ class HopdoddyBurgerBarSpider(scrapy.Spider):
     def start_requests(self):
         base_url = "https://na6c0i4fb0.execute-api.us-west-2.amazonaws.com/restaurants/near?lat={lat}3&long={lon}"
 
-        with open("./locations/searchable_points/us_centroids_25mile_radius.csv") as points:
+        with open_searchable_points("us_centroids_25mile_radius.csv") as points:
             next(points)  # Ignore the header
             for point in points:
                 _, lat, lon = point.strip().split(",")
