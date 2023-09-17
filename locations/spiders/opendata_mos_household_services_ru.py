@@ -86,8 +86,8 @@ class OpendataMosSpider(scrapy.Spider):
     datasets = {}
     category_mapping = {}
 
-    def filter_function(self, i):
-        pass
+    def filter_function(self, row):
+        return row
 
     def start_requests(self):
         for name, id in self.datasets.items():
@@ -109,13 +109,11 @@ class OpendataMosSpider(scrapy.Spider):
             )
 
     def parse_data(self, response):
-        for row in self.filter_rows(response.json(), self.filter_function):
+        for row in self.filter_rows(response.json()):
             yield self.parse_row(row)
 
-    def filter_rows(self, rows: list, function=None) -> list:
-        if not function:
-            return rows
-        filtered = list(filter(function, rows))
+    def filter_rows(self, rows: list) -> list:
+        filtered = list(filter(self.filter_function, rows))
         self.crawler.stats.inc_value("atp/opendata_mos_ru/filter", len(rows) - len(filtered))
         return filtered
 

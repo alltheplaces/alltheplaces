@@ -22,7 +22,7 @@ class OpendataMosFoodRUSpider(OpendataMosSpider):
     # Exclude some branded locations as they already
     # captured by other spiders with better quality.
     def filter_function(self, row):
-        row.get("Cells", {}).get("OperatingCompany") not in ["KFC", "Вкусно - и точка"]
+        return row.get("Cells", {}).get("OperatingCompany") not in ["KFC", "Вкусно - и точка"]
 
     def parse_extra_fields(self, item: Feature, cells: dict):
         if seats_count := cells.get("SeatsCount"):
