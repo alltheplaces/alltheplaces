@@ -4,6 +4,7 @@ import scrapy
 
 from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.searchable_points import open_searchable_points
 
 DAY_MAPPING = {
     "Monday": "Mo",
@@ -46,7 +47,7 @@ class TMobileUSSpider(scrapy.Spider):
     def start_requests(self):
         url = BASE_URL
 
-        with open("./locations/searchable_points/us_centroids_25mile_radius.csv") as points:
+        with open_searchable_points("us_centroids_25mile_radius.csv") as points:
             next(points)  # Ignore the header
             for point in points:
                 _, lat, lon = point.strip().split(",")

@@ -3,6 +3,7 @@ import re
 import scrapy
 
 from locations.items import Feature
+from locations.searchable_points import open_searchable_points
 
 BRAND_MAPPING = {
     "KFC": "KFC",
@@ -50,7 +51,7 @@ class KBPFoodsSpider(scrapy.Spider):
 
         url = "https://kbp-foods.com/wp-json/facetwp/v1/refresh"
 
-        with open("./locations/searchable_points/us_centroids_100mile_radius.csv") as points:
+        with open_searchable_points("us_centroids_100mile_radius.csv") as points:
             next(points)  # Ignore the header
             for point in points:
                 row = point.split(",")

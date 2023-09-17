@@ -4,6 +4,7 @@ import json
 import scrapy
 
 from locations.items import Feature
+from locations.searchable_points import open_searchable_points
 
 
 class InsomniaCookiesSpider(scrapy.Spider):
@@ -12,7 +13,7 @@ class InsomniaCookiesSpider(scrapy.Spider):
     allowed_domains = ["insomniacookies.com"]
 
     def start_requests(self):
-        with open("./locations/searchable_points/us_centroids_25mile_radius.csv") as points:
+        with open_searchable_points("us_centroids_25mile_radius.csv") as points:
             reader = csv.DictReader(points)
             for line in reader:
                 graphql_query = {

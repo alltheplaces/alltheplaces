@@ -1,8 +1,11 @@
+import logging
+import os
 import re
 
 import scrapy
 
 from locations.items import Feature
+from locations.searchable_points import open_searchable_points
 
 STATES = ["NC", "AL", "GA", "KY", "MD", "MS", "SC", "TN", "VA", "WV"]
 
@@ -16,7 +19,10 @@ class CookoutSpider(scrapy.Spider):
     def start_requests(self):
         base_url = "https://cookout.com/wp-admin/admin-ajax.php?action=store_search&lat={lat}&lng={lng}&max_results=300&search_radius=500"
 
-        with open("./locations/searchable_points/us_centroids_100mile_radius_state.csv") as points:
+        logging.info(os.path.dirname(os.path.realpath(__file__)))
+        logging.info(os.getcwd())
+
+        with open_searchable_points("us_centroids_100mile_radius_state.csv") as points:
             next(points)
             for point in points:
                 _, lat, lon, state = point.strip().split(",")
