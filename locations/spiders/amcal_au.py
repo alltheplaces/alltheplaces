@@ -17,7 +17,9 @@ class AmcalAUSpider(Spider):
             "session_id": "0000000000000000000000000000000000000000",
         }
         headers = {"Origin": "https://amcal.com.au"}
-        yield JsonRequest(url="https://app.medmate.com.au/connect/api/get_locations", data=data, headers=headers, method="POST")
+        yield JsonRequest(
+            url="https://app.medmate.com.au/connect/api/get_locations", data=data, headers=headers, method="POST"
+        )
 
     def parse(self, response):
         for location in response.json():
@@ -25,7 +27,15 @@ class AmcalAUSpider(Spider):
                 continue
             item = DictParser.parse(location)
             item["name"] = location["locationname"]
-            item["website"] = "https://amcal.com.au/store/" + str(location["locationid"]) + "/" + location["state"] + "/" + location["slug"] + "/"
+            item["website"] = (
+                "https://amcal.com.au/store/"
+                + str(location["locationid"])
+                + "/"
+                + location["state"]
+                + "/"
+                + location["slug"]
+                + "/"
+            )
             data = {
                 "businessid": "4",
                 "include_services": True,
@@ -33,7 +43,14 @@ class AmcalAUSpider(Spider):
                 "session_id": "0000000000000000000000000000000000000000",
             }
             headers = {"Origin": "https://amcal.com.au"}
-            yield JsonRequest(url="https://app.medmate.com.au/connect/api/get_pharmacy", data=data, headers=headers, method="POST", meta={"item": item}, callback=self.add_opening_hours)
+            yield JsonRequest(
+                url="https://app.medmate.com.au/connect/api/get_pharmacy",
+                data=data,
+                headers=headers,
+                method="POST",
+                meta={"item": item},
+                callback=self.add_opening_hours,
+            )
 
     def add_opening_hours(self, response):
         item = response.meta["item"]
