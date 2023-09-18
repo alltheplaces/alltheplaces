@@ -23,6 +23,8 @@ class FreshopSpider(Spider):
         for location in response.json()["items"]:
             if location.get("type_id") not in self.location_type_ids or not location.get("has_address"):
                 continue
+            if "COMING SOON" in location.get("hours_md", "").upper():
+                continue
 
             item = DictParser.parse(location)
 

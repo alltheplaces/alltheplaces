@@ -7,6 +7,8 @@ class FestivalFoodsUSSpider(FreshopSpider):
     app_key = "festival_foods_envano"
 
     def parse_item(self, item, location):
-        item["phone"] = item["phone"].replace("Guest Services: ", "").split("<br>", 1)[0].strip()
-        item["website"] = "https://www.festfoods.com" + item["website"]
+        if item.get("phone"):
+            item["phone"] = item["phone"].replace("Guest Services: ", "").split("<br>", 1)[0].strip()
+        if item.get("website"):
+            item["website"] = "https://www.festfoods.com" + item["website"]
         yield item
