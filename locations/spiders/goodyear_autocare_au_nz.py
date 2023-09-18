@@ -8,11 +8,14 @@ from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
 
-class GoodyearAutocareAUSpider(Spider):
-    name = "goodyear_autocare_au"
-    item_attributes = {"brand": "Goodyear Autocare", "brand_wikidata": "Q122429279"}
+class GoodyearAutocareAUNZSpider(Spider):
+    name = "goodyear_autocare_au_nz"
+    item_attributes = {"brand": "Goodyear Autocare", "brand_wikidata": "Q620875"}
     allowed_domains = ["www.goodyearautocare.com.au"]
-    start_urls = ["https://www.goodyearautocare.com.au/slocator/json/search/"]
+    start_urls = [
+        "https://www.goodyearautocare.com.au/slocator/json/search/",
+        "https://www.goodyear.co.nz/slocator/json/search/",
+    ]
 
     @staticmethod
     def request_page(url: str, page_number: int) -> FormRequest:
@@ -22,7 +25,7 @@ class GoodyearAutocareAUSpider(Spider):
             "longitude": "null",
             "page": str(page_number),
         }
-        return FormRequest(url=url, formdata=formdata, meta={"page": page_number}, method="POST")
+        return FormRequest(url=url, formdata=formdata, meta={"page": page_number}, method="POST", dont_filter=True)
 
     def start_requests(self):
         for url in self.start_urls:
@@ -31,6 +34,8 @@ class GoodyearAutocareAUSpider(Spider):
     def parse(self, response):
         for location in response.json()["maps"]["items"]:
             if location["is_active"] != "1":
+                continue
+            if not location["url"].startswith("goodyear-autocare-"):
                 continue
             item = DictParser.parse(location)
             item["ref"] = location["entity_id"]
