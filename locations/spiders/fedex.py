@@ -23,8 +23,8 @@ class FedExSpider(SitemapSpider, StructuredDataSpider):
 
         item["city"] = response.xpath('//span[@class="Address-field Address-city"]/text()').extract_first()
 
-        if 'onsite' in item['name'].lower():
-            apply_yes_no('post_office=post_partner', item, True)
+        if "onsite" in item["name"].lower():
+            apply_yes_no("post_office=post_partner", item, True)
         else:
             apply_category(Categories.POST_OFFICE, item)
 
