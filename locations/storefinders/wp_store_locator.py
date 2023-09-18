@@ -71,7 +71,7 @@ class WPStoreLocatorSpider(Spider):
                     yield JsonRequest(url=url)
 
     def parse(self, response, **kwargs):
-        if len(response.json()) >= self.max_results:
+        if self.max_results != 0 and len(response.json()) >= self.max_results:
             raise RuntimeError(
                 "Locations have probably been truncated due to max_results (or more) locations being returned by a single geographic radius search. Use more granular searchable_points_files and a smaller search_radius."
             )
