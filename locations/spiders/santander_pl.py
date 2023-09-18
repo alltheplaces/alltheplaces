@@ -39,6 +39,9 @@ class SantanderPLSpider(Spider):
                 start_time, end_time = hours.split("-")
                 item["opening_hours"].add_range(DAYS[int(day) - 2], start_time.strip(), end_time.strip())
 
+        if category == Categories.ATM:
+            item["name"] = None
+
         apply_category(category, item)
 
         return item
