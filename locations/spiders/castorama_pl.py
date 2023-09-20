@@ -11,3 +11,8 @@ class CastoramaPLSpider(CrawlSpider, StructuredDataSpider):
     rules = [Rule(LinkExtractor(allow=[r"/sklepy/[-\w]+.html$"]), callback="parse_sd")]
     wanted_types = ["HardwareStore"]
     time_format = "%H:%M:%S Europe/Warsaw"
+    search_for_facebook = False
+    search_for_email = False
+
+    def pre_process_data(self, ld_data, **kwargs):
+        ld_data["image"] = None
