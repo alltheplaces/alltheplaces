@@ -13,10 +13,8 @@ class LewiatanPLSpider(Spider):
     def parse(self, response, **kwargs):
         for location in response.json()["data"]:
             item = DictParser.parse(location)
-            item["name"] = html.unescape(location["name"])
+            item["extras"]["operator"] = html.unescape(item.pop("name"))
             item["street_address"] = item.pop("addr_full")
             item["website"] = response.urljoin(location["url"])
-
-            # TODO opening hours available as field_open_hours_1_value - field_open_hours_4_value
 
             yield item
