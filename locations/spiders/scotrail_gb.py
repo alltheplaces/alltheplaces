@@ -12,6 +12,7 @@ class ScotrailGBSpider(CrawlSpider):
     item_attributes = {"extras": {"operator": "ScotRail", "operator:wikidata": "Q18356161"}}
     start_urls = ["https://www.scotrail.co.uk/plan-your-journey/stations-and-facilities"]
     rules = [Rule(LinkExtractor(allow=r"/plan-your-journey/stations-and-facilities/\w{3}$"), callback="parse")]
+    requires_proxy = True
 
     def parse(self, response, **kwargs):
         item = Feature()
