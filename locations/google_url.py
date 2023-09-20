@@ -93,4 +93,8 @@ def url_to_coords(url: str) -> (float, float):  # noqa: C901
         lat, lon = center.split(",")
         return float(lat), float(lon)
 
+    # Fall back on 2 comma separated floats
+    if match := re.search(r"(-?\d+\.\d+),\s?(-?\d+\.\d+)", url):
+        return float(match.group(1)), float(match.group(2))
+
     return None, None
