@@ -104,6 +104,7 @@ ITEM_PIPELINES = {
     "locations.pipelines.phone_clean_up.PhoneCleanUpPipeline": 360,
     "locations.pipelines.extract_gb_postcode.ExtractGBPostcodePipeline": 400,
     "locations.pipelines.assert_url_scheme.AssertURLSchemePipeline": 500,
+    "locations.pipelines.drop_logo.DropLogoPipeline": 550,
     "locations.pipelines.check_item_properties.CheckItemPropertiesPipeline": 600,
     "locations.pipelines.closed.ClosePipeline": 650,
     "locations.pipelines.apply_nsi_categories.ApplyNSICategoriesPipeline": 700,
