@@ -1,4 +1,10 @@
+import re
+from itertools import chain
+
+from scrapy import Spider
+
 from locations.categories import get_category_tags
+from locations.items import Feature
 from locations.name_suggestion_index import NSI
 
 
@@ -6,14 +12,18 @@ class ApplyNSICategoriesPipeline:
     nsi = NSI()
 
     wikidata_cache = {}
+    strip_names = None
 
-    def process_item(self, item, spider):
+    def process_item(self, item, spider: Spider):
         if item.get("nsi_id"):
             return item
 
         code = item.get("brand_wikidata")
         if not code:
             return item
+
+        if self.strip_names is None:
+            self.strip_names = getattr(spider, "strip_names", set())
 
         if not self.wikidata_cache.get(code):
             # wikidata_cache will usually only hold one thing, but can contain more with more complex spiders
@@ -80,6 +90,8 @@ class ApplyNSICategoriesPipeline:
         extras = item.get("extras", {})
         item["nsi_id"] = match["id"]
 
+        self.clean_name(match, self.strip_names, item)
+
         # Apply NSI tags to item
         for key, value in match["tags"].items():
             if key == "brand:wikidata":
@@ -97,3 +109,27 @@ class ApplyNSICategoriesPipeline:
         item["extras"] = extras
 
         return item
+
+    @staticmethod
+    def clean_name(nsi_entry: dict, strip_names: set[str], item: Feature):
+        if not item.get("name"):
+            # No name, nothing to clean
+            return
+        if "branch" in item["extras"]:
+            # If branch is set, assume the spider has already cleaned this
+            return
+
+        for strip_name in chain(
+            strip_names,
+            filter(
+                None,
+                [
+                    nsi_entry["tags"].get("name"),
+                    nsi_entry["tags"].get("brand"),
+                    nsi_entry["tags"].get("operator"),
+                ],
+            ),
+        ):
+            if strip_name.upper() in item["name"].upper():
+                item["extras"]["branch"] = re.sub(strip_name, "", item.pop("name"), flags=re.IGNORECASE).strip(" -")
+                break
