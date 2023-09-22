@@ -1,4 +1,13 @@
-from locations.categories import Access, Categories, Extras, Fuel, FuelCards, PaymentMethods, apply_category, apply_yes_no
+from locations.categories import (
+    Access,
+    Categories,
+    Extras,
+    Fuel,
+    FuelCards,
+    PaymentMethods,
+    apply_category,
+    apply_yes_no,
+)
 from locations.storefinders.woosmap import WoosmapSpider
 
 
@@ -79,7 +88,7 @@ class TotalEnergiesSpider(WoosmapSpider):
         apply_yes_no(Fuel.ADBLUE, item, "adblue" in feature["properties"]["tags"])
         apply_yes_no(Fuel.LPG, item, "lpg" in feature["properties"]["tags"])
         apply_yes_no(Fuel.KEROSENE, item, "kerosene" in feature["properties"]["tags"])
-        # Other fuels?:
+        # TODO: Other fuels?:
         # gasoil sp95 sp98 super superethanole85 excellium95e10 gasoline92_eg regulargasoline superethanole85
         # sp95performance happyfuel sp95_lb supereffimax dieseleffimax dieselb10 adbluecar excellium_93
 
@@ -98,7 +107,7 @@ class TotalEnergiesSpider(WoosmapSpider):
         apply_yes_no("payment:fleet_fuel_card", item, "ffc" in feature["properties"]["tags"])
         apply_yes_no("payment:eurotrafic", item, "eurotrafic" in feature["properties"]["tags"])
         apply_yes_no("payment:club_total_card", item, "carteclubtotal" in feature["properties"]["tags"])
-        # proficard bonjour mpayment westfalencard prepaidcard travelcard ecocash nimbacard ecash sonayacard
+        # TODO: other cards: proficard bonjour mpayment westfalencard prepaidcard travelcard ecocash nimbacard ecash sonayacard
 
         if "shop" in feature["properties"]["tags"]:
             apply_category(Categories.SHOP_CONVENIENCE, item)
