@@ -1,4 +1,4 @@
-from locations.categories import Categories, Extras, Fuel, PaymentMethods, apply_category, apply_yes_no
+from locations.categories import Access, Categories, Extras, Fuel, FuelCards, PaymentMethods, apply_category, apply_yes_no
 from locations.storefinders.woosmap import WoosmapSpider
 
 
@@ -8,7 +8,7 @@ class TotalEnergiesSpider(WoosmapSpider):
     origin = "https://totalenergies.com"
 
     BRANDS = {
-        "tot": {"brand": "Total", "brand_wikidata": "Q154037"},
+        "tot": {"brand": "TotalEnergies", "brand_wikidata": "Q154037"},
         "cepsa": {"brand": "Cepsa", "brand_wikidata": "Q608819"},
         "aral": {"brand": "Aral", "brand_wikidata": "Q565734"},
         "bp": {"brand": "BP", "brand_wikidata": "Q152057"},
@@ -16,7 +16,7 @@ class TotalEnergiesSpider(WoosmapSpider):
         "totalerg": {"brand": "TotalEnergies", "brand_wikidata": "Q154037"},
         "ela": {"brand": "Elan", "brand_wikidata": "Q57980752"},
         "mol": {"brand": "MOL", "brand_wikidata": "Q549181"},
-        "tac": {"brand": "Total Access", "brand_wikidata": "Q154037"},
+        "tac": {"brand": "TotalEnergies Access", "brand_wikidata": "Q154037"},
         "avi": {"brand": "Avia", "brand_wikidata": "Q300147"},
         "as24": {"brand": "AS 24", "brand_wikidata": "Q2819394"},
         "ess": {"brand": "Esso", "brand_wikidata": "Q867662"},
@@ -24,7 +24,7 @@ class TotalEnergiesSpider(WoosmapSpider):
         "westfalen": {"brand": "Westfalen", "brand_wikidata": "Q1411209"},
         "slovnaft": {"brand": "Slovnaft", "brand_wikidata": "Q1587563"},
         "she": {"brand": "Shell", "brand_wikidata": "Q110716465"},
-        "totex": {"brand": "Total Express"},
+        "totex": {"brand": "TotalEnergies Express", "brand_wikidata": "Q154037"},
         #    159 "eos"
         #    151 "freie"
         #    112 "dyn"
@@ -64,7 +64,7 @@ class TotalEnergiesSpider(WoosmapSpider):
         apply_yes_no(Extras.TOILETS, item, "restroom" in feature["properties"]["tags"])
         apply_yes_no(Extras.WIFI, item, "freewifi" in feature["properties"]["tags"])
         apply_yes_no(Extras.WHEELCHAIR, item, "accessibility" in feature["properties"]["tags"])
-        apply_yes_no("hgv", item, "truckfriendly" in feature["properties"]["tags"])
+        apply_yes_no(Access.HGV, item, "truckfriendly" in feature["properties"]["tags"])
         apply_yes_no(Extras.OIL_CHANGE, item, "oilchange" in feature["properties"]["tags"])
         apply_yes_no("service:vehicle:glass", item, "carglass" in feature["properties"]["tags"])
 
@@ -94,7 +94,7 @@ class TotalEnergiesSpider(WoosmapSpider):
         apply_yes_no(PaymentMethods.CASH, item, "cash" in feature["properties"]["tags"])
         apply_yes_no(PaymentMethods.CREDIT_CARDS, item, "credit_card" in feature["properties"]["tags"])
         apply_yes_no("payment:gr_total_card", item, "grcartefr" in feature["properties"]["tags"])
-        apply_yes_no("payment:total_card", item, "totalcard" in feature["properties"]["tags"])
+        apply_yes_no(FuelCards.TOTAL_CARD, item, "totalcard" in feature["properties"]["tags"])
         apply_yes_no("payment:fleet_fuel_card", item, "ffc" in feature["properties"]["tags"])
         apply_yes_no("payment:eurotrafic", item, "eurotrafic" in feature["properties"]["tags"])
         apply_yes_no("payment:club_total_card", item, "carteclubtotal" in feature["properties"]["tags"])

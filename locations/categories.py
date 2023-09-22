@@ -368,6 +368,7 @@ class FuelCards(Enum):
     SHELL = "payment:shell"
     SLOVNAFT = "payment:slovnaft"  # https://slovnaft.sk/en/
     TIFON = "payment:tifon"  # https://tifon.hr/hr/
+    TOTAL_CARD = "payment:total_card"  # https://totalcard.patotal.com/
     UTA = "payment:uta"
     ROSNEFT = "payment:rosneft"  # https://www.rn-card.ru/
     ROUTEX = "payment:routex"  # https://routex.com/
