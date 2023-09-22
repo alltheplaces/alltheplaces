@@ -1,5 +1,6 @@
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
 
@@ -92,4 +93,6 @@ class IkeaSpider(scrapy.Spider):
             if properties["country"] == "US":
                 properties["state"] = store["address"].get("stateProvinceCode")[2:]
 
-            yield Feature(**properties)
+            item = Feature(**properties)
+            apply_category(Categories.SHOP_FURNITURE, item)
+            yield item
