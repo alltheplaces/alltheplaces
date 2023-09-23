@@ -1,8 +1,7 @@
 import re
-
-from chompjs import parse_js_object
 from html import unescape
 
+from chompjs import parse_js_object
 from scrapy import Selector, Spider
 
 from locations.dict_parser import DictParser
@@ -24,9 +23,15 @@ class LillyBGSpider(Spider):
             item = DictParser.parse(location)
             item["ref"] = location_id
             desc_html = Selector(text=location["description"])
-            item["addr_full"] = re.sub(r"\s+", " ", unescape(desc_html.xpath('//p[1]/text()').get("").replace("Адрес:", "").replace("\\xA0", " "))).strip()
-            item["phone"] = unescape(desc_html.xpath('//p[contains(text(), "Тел:")]/text()').get("").replace("Тел: +", ""))
-            hours_string = " ".join(filter(None, desc_html.xpath('//p/text()').getall()))
+            item["addr_full"] = re.sub(
+                r"\s+",
+                " ",
+                unescape(desc_html.xpath("//p[1]/text()").get("").replace("Адрес:", "").replace("\\xA0", " ")),
+            ).strip()
+            item["phone"] = unescape(
+                desc_html.xpath('//p[contains(text(), "Тел:")]/text()').get("").replace("Тел: +", "")
+            )
+            hours_string = " ".join(filter(None, desc_html.xpath("//p/text()").getall()))
             item["opening_hours"] = OpeningHours()
             item["opening_hours"].add_ranges_from_string(hours_string, DAYS_BG)
             yield item
