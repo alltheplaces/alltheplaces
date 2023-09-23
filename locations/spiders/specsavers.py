@@ -3,7 +3,7 @@ from copy import deepcopy
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
-from locations.categories import apply_category, Categories
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
 
@@ -109,8 +109,8 @@ fragment sectionalNotification on StoreSectionalNotification {
                         "latitude": 0,
                         "longitude": 0,
                         "radiusInKm": 100000,
-                    }
-                }
+                    },
+                },
             }
             yield JsonRequest(url=url, data=data, method="POST")
 
@@ -118,8 +118,16 @@ fragment sectionalNotification on StoreSectionalNotification {
         for location in response.json()["data"]["storesSearch"]["stores"]:
             store = location["store"]
             base_item = DictParser.parse(store)
-            base_item["street_address"] = ", ".join(filter(None, [store["address"].get("line1"), store["address"].get("line2"), store["address"].get("line3")]))
-            if store.get("optical") and store.get("audiology") and store["optical"]["storeNumber"] == store["audiology"]["storeNumber"]:
+            base_item["street_address"] = ", ".join(
+                filter(
+                    None, [store["address"].get("line1"), store["address"].get("line2"), store["address"].get("line3")]
+                )
+            )
+            if (
+                store.get("optical")
+                and store.get("audiology")
+                and store["optical"]["storeNumber"] == store["audiology"]["storeNumber"]
+            ):
                 store["optical"]["storeNumber"] = store["optical"]["storeNumber"] + "_O"
                 store["audiology"]["storeNumber"] = store["audiology"]["storeNumber"] + "_A"
             for store_type in ["optical", "audiology"]:
