@@ -43,7 +43,7 @@ class REWEDESpider(Spider):
                 + item["city"].lower().replace(".", "").replace("/", "-").replace(" ", "-")
                 + "/"
                 + location["id"]
-                + "/rewe-markt-"i
+                + "/rewe-markt-"
                 + location["addressLine1"].lower().replace(".", "").replace("/", "-").replace(" ", "-")
                 + "/"
             )
