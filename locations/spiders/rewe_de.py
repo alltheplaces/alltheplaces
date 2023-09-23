@@ -32,7 +32,7 @@ class REWEDESpider(Spider):
 
     @staticmethod
     def clean_url_text(text: str) -> str:
-        text = text.lower().replace(".", "").replace("/", "-").replace(" ", "-").replace("ö", "oe").replace("ü", "ue")
+        text = text.lower().replace(".", "").replace("/", "-").replace(" ", "-").replace("ö", "oe").replace("ü", "ue").replace("ä", "ae").replace("ß", "ss")
         text = re.sub(r"-+", "-", text)
         return text
 
