@@ -403,6 +403,34 @@ DAYS_RO = {
     "Duminică": "Su",
 }
 
+DAYS_SR = {
+    "Pon": "Mo",
+    "Ponedjeljak": "Mo",
+    "Ponediljak": "Mo",
+    "Понедељак": "Mo",
+    "Понеделник": "Mo",
+    "Uto": "Tu",
+    "Utorak": "Tu",
+    "Уторак": "Tu",
+    "Sri": "We",
+    "Sreda": "We",
+    "Среда": "We",
+    "Cet": "Th",
+    "Čet": "Th",
+    "Četvrtak": "Th",
+    "Cetvrtak": "Th",
+    "Четвртак": "Th",
+    "Pet": "Fr",
+    "Petak": "Fr",
+    "Петак": "Fr",
+    "Sub": "Sa",
+    "Subota": "Sa",
+    "Субота": "Sa",
+    "Ned": "Su",
+    "Nedelja": "Su",
+    "Недеља": "Su",
+}
+
 NAMED_DAY_RANGES_EN = {
     "Daily": ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"],
     "All days": ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"],
