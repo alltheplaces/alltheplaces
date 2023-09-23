@@ -123,6 +123,12 @@ fragment sectionalNotification on StoreSectionalNotification {
                     None, [store["address"].get("line1"), store["address"].get("line2"), store["address"].get("line3")]
                 )
             )
+            if base_item["state"] == "GGY":
+                base_item["country"] = "GG"
+            elif base_item["state"] == "JSY":
+                base_item["country"] = "JE"
+            elif base_item["state"] == "IMN":
+                base_item["country"] = "IM"
             if (
                 store.get("optical")
                 and store.get("audiology")
