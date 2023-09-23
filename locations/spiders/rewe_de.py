@@ -32,17 +32,17 @@ class REWEDESpider(Spider):
         location = response.json()["marketItem"]
         item = DictParser.parse(location)
         item.pop("street_address", None)
-        item["addr_full"] = " ".join(filter(None, [location.get("addressLine1"), location.get("addressLine2")]))
+        item["addr_full"] = ", ".join(filter(None, [location.get("addressLine1"), location.get("addressLine2")]))
         item["city"] = location["rawValues"].get("city")
         item["postcode"] = location["rawValues"].get("postalCode")
         if item.get("city") and location.get("addressLine1"):
             item["website"] = (
                 "https://www.rewe.de/marktseite/"
-                + item["city"].lower().replace(".", "").replace(" ", "-")
+                + item["city"].lower().replace(".", "").replace("/", "-").replace(" ", "-")
                 + "/"
                 + location["id"]
                 + "/"
-                + location["addressLine1"].lower().replace(".", "").replace(" ", "-")
+                + location["addressLine1"].lower().replace(".", "").replace("/", "-").replace(" ", "-")
                 + "/"
             )
         item["phone"] = response.json().get("phone")
