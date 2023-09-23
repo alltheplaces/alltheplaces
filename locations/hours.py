@@ -928,10 +928,13 @@ class OpeningHours:
                     re.IGNORECASE,
                 )
                 for time_range in time_ranges:
+                    time_start_hour = time_range[0]
+                    if time_start_hour == "00":
+                        time_start_hour = "12"
                     if time_range[1]:
-                        time_start = f"{time_range[0]}:{time_range[1]}"
+                        time_start = f"{time_start_hour}:{time_range[1]}"
                     else:
-                        time_start = f"{time_range[0]}:00"
+                        time_start = f"{time_start_hour}:00"
                     if time_range[2]:
                         time_start = f"{time_start}{time_range[2].upper()}"
                     else:
@@ -939,14 +942,17 @@ class OpeningHours:
                         time_start = f"{time_start}AM"
                     time_start_24h = time.strptime(time_start, "%I:%M%p")
                     time_start_24h = time.strftime("%H:%M", time_start_24h)
+                    time_end_hour = time_range[3]
+                    if time_end_hour == "00":
+                        time_end_hour = "12"
                     if time_range[4]:
-                        time_end = f"{time_range[3]}:{time_range[4]}"
+                        time_end = f"{time_end_hour}:{time_range[4]}"
                     else:
-                        time_end = f"{time_range[3]}:00"
+                        time_end = f"{time_end_hour}:00"
                     if time_range[5]:
                         time_end = f"{time_end}{time_range[5].upper()}"
                     else:
-                        # If AM/PM is not specified, it is almost always going to be PM for start times.
+                        # If AM/PM is not specified, it is almost always going to be PM for end times.
                         time_end = f"{time_end}PM"
                     time_end_24h = time.strptime(time_end, "%I:%M%p")
                     time_end_24h = time.strftime("%H:%M", time_end_24h)
