@@ -33,7 +33,7 @@ class BestAndLessAUSpider(Spider):
             item["postcode"] = location["address"].get("postalCode")
             item["phone"] = location["address"].get("phone")
             item["email"] = location["address"].get("email")
-            item["website"] = "https://www.bestandless.com.au" + location["url"]
+            item["website"] = "https://www.bestandless.com.au" + quote(location["url"])
             item["opening_hours"] = OpeningHours()
             for day in location["openingHours"]["weekDayOpeningList"]:
                 if day["closed"]:
