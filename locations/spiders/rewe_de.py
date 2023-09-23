@@ -29,7 +29,13 @@ class REWEDESpider(Spider):
             )
 
     def parse_location(self, response):
-        item = DictParser.parse(response.json()["marketItem"])
+        location = response.json()["marketItem"]
+        item = DictParser.parse(location)
+        item.pop("street_address", None)
+        item["addr_full"] = " ".join(filter(None, [location.get("addressLine1"), location.get("addressLine2")]))
+        item["city"] = location["rawValues"].get("city")
+        item["postcode"] = location["rawValues"].get("postalCode")
+        item["phone"] = response.json().get("phone")
         hours_string = ""
         for day_hours in response.json()["openingTimes"]:
             day_range = day_hours["days"]
