@@ -23,8 +23,6 @@ class AmcalAUSpider(Spider):
 
     def parse(self, response):
         for location in response.json():
-            if location["openstatus"] != "Open":
-                continue
             item = DictParser.parse(location)
             item["name"] = location["locationname"]
             item["website"] = (
