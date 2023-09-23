@@ -12,7 +12,12 @@ class OrlenPaczkaPLSpider(Spider):
 
     def start_requests(self):
         for url in self.start_urls:
-            yield Request(url=url, body='{"a":"f","s":0}', headers={"Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"}, method="POST")
+            yield Request(
+                url=url,
+                body='{"a":"f","s":0}',
+                headers={"Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"},
+                method="POST",
+            )
 
     def parse(self, response):
         for location in response.json()["pts"]:
