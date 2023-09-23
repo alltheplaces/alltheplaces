@@ -1,5 +1,6 @@
 from scrapy import Request, Spider
 
+from locations.categories import apply_category, Categories
 from locations.hours import DAYS_PL, OpeningHours
 from locations.items import Feature
 
@@ -31,4 +32,5 @@ class OrlenPaczkaPLSpider(Spider):
                 "opening_hours": OpeningHours(),
             }
             properties["opening_hours"].add_ranges_from_string(location["o"], days=DAYS_PL)
+            apply_category(Categories.PARCEL_LOCKER, properties)
             yield Feature(**properties)
