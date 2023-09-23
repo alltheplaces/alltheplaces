@@ -30,6 +30,12 @@ class REWEDESpider(Spider):
                 callback=self.parse_location,
             )
 
+    @staticmethod
+    def clean_url_text(text: str) -> str:
+        text = text.lower().replace(".", "").replace("/", "-").replace(" ", "-").replace("ö", "oe").replace("ü", "ue")
+        text = re.sub(r"-+", "-", text)
+        return text
+
     def parse_location(self, response):
         location = response.json()["marketItem"]
         item = DictParser.parse(location)
@@ -40,14 +46,13 @@ class REWEDESpider(Spider):
         if item.get("city") and location.get("addressLine1"):
             item["website"] = (
                 "https://www.rewe.de/marktseite/"
-                + item["city"].lower().replace(".", "").replace("/", "-").replace(" ", "-")
+                + self.clean_url_text(item["city"])
                 + "/"
                 + location["id"]
                 + "/rewe-markt-"
-                + location["addressLine1"].lower().replace(".", "").replace("/", "-").replace(" ", "-")
+                + self.clean_url_text(location["addressLine1"])
                 + "/"
             )
-            item["website"] = re.sub(r"-+", "-", item["website"])
         item["phone"] = response.json().get("phone")
         hours_string = ""
         for day_hours in response.json()["openingTimes"]:
