@@ -36,7 +36,15 @@ class REWEDESpider(Spider):
         item["city"] = location["rawValues"].get("city")
         item["postcode"] = location["rawValues"].get("postalCode")
         if item.get("city") and location.get("addressLine1"):
-            item["website"] = "https://www.rewe.de/marktseite/" + item["city"].lower().replace(".", "").replace(" ", "-") + "/" + location["id"] + "/" + location["addressLine1"].lower().replace(".", "").replace(" ", "-") + "/"
+            item["website"] = (
+                "https://www.rewe.de/marktseite/"
+                + item["city"].lower().replace(".", "").replace(" ", "-")
+                + "/"
+                + location["id"]
+                + "/"
+                + location["addressLine1"].lower().replace(".", "").replace(" ", "-")
+                + "/"
+            )
         item["phone"] = response.json().get("phone")
         hours_string = ""
         for day_hours in response.json()["openingTimes"]:
