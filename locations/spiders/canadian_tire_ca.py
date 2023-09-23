@@ -14,13 +14,8 @@ class CanadianTireSpiderCA(SitemapSpider):
     allowed_domains = ["canadiantire.ca"]
     sitemap_urls = ["https://www.canadiantire.ca/sitemap_Store-en_CA-CAD.xml"]
     sitemap_rules = [("", "parse_store")]
-    custom_settings = {
-        "ROBOTSTXT_OBEY": False,
-        "DEFAULT_REQUEST_HEADERS": {
-            "Host": "www.canadiantire.ca",
-            "User-Agent": BROWSER_DEFAULT,
-        },
-    }
+    user_agent = BROWSER_DEFAULT
+    requires_proxy = True  # Data centre IP ranges appear to be blocked (time out)
 
     def parse_store(self, response):
         headers = {
