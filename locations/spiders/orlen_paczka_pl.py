@@ -1,6 +1,6 @@
 from scrapy import Request, Spider
 
-from locations.categories import apply_category, Categories
+from locations.categories import Categories, apply_category
 from locations.hours import DAYS_PL, OpeningHours
 from locations.items import Feature
 
