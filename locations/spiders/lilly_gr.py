@@ -6,6 +6,7 @@ from scrapy.http import JsonRequest
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_GR, OpeningHours
 
+
 class LillyGRSpider(Spider):
     name = "lilly_gr"
     item_attributes = {"brand": "Lilly", "brand_wikidata": "Q111764460"}
