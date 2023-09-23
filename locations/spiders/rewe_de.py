@@ -11,6 +11,7 @@ class REWEDESpider(Spider):
     item_attributes = {"brand": "REWE", "brand_wikidata": "Q16968817"}
     allowed_domains = ["mobile-api.rewe.de"]
     requires_proxy = True  # Cloudflare bot blocking is in use
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def start_requests(self):
         for lat, lon in point_locations("de_centroids_iseadgg_50km_radius.csv"):
