@@ -1,3 +1,5 @@
+import re
+
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
@@ -41,10 +43,11 @@ class REWEDESpider(Spider):
                 + item["city"].lower().replace(".", "").replace("/", "-").replace(" ", "-")
                 + "/"
                 + location["id"]
-                + "/"
+                + "/rewe-markt-"i
                 + location["addressLine1"].lower().replace(".", "").replace("/", "-").replace(" ", "-")
                 + "/"
             )
+            item["website"] = re.sub(r"-+", "-", item["website"])
         item["phone"] = response.json().get("phone")
         hours_string = ""
         for day_hours in response.json()["openingTimes"]:
