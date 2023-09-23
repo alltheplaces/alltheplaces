@@ -1,9 +1,8 @@
-from unidecode import unidecode
-
 from scrapy import Spider
 from scrapy.http import JsonRequest
+from unidecode import unidecode
 
-from locations.categories import apply_category, Categories
+from locations.categories import Categories, apply_category
 from locations.hours import DAYS, DAYS_PL, OpeningHours
 from locations.items import Feature
 
