@@ -23,80 +23,80 @@ class SpecsaversSpider(Spider):
                 country_code = "GB"
             url = f"https://{domain}/graphql"
             graphql_query = """query storeSearchQuery($query: StoresGeographicSearch!, $limit: Int = 10000, $offset: Int = 0) {
-	storesSearch(query: $query, limit: $limit, offset: $offset) {
-		count
-		offset
-		total
-		stores {
-			distance
-			store {
-				id
-				name
-				shortName
-				address { ...address }
-				coordinates {
-					longitude
-					latitude
-				}
-				accessibility {
-					description
-					accessibility
-					parkingAvailable
-					parkingDescription
-				}
-				url
-				timeZone
-				contactInfo { ...storeContactInfo }
-				optical {
-					id
-					storeNumber
-					contactInfo { ...storeContactInfo }
-					enabledForOnlineBooking
-					onlineAppointmentTypes
-					winkAdditionalFields {
-					winkId
-					winkName
-					winkStoreId
-					}
-				}
-				audiology {
-					id
-					storeNumber
-					contactInfo { ...storeContactInfo }
-					enabledForOnlineBooking
-					onlineAppointmentTypes
-				}
-				sectionalNotification { ...sectionalNotification }
-			}
-		}
-	}
+    storesSearch(query: $query, limit: $limit, offset: $offset) {
+        count
+        offset
+        total
+        stores {
+            distance
+            store {
+                id
+                name
+                shortName
+                address { ...address }
+                coordinates {
+                    longitude
+                    latitude
+                }
+                accessibility {
+                    description
+                    accessibility
+                    parkingAvailable
+                    parkingDescription
+                }
+                url
+                timeZone
+                contactInfo { ...storeContactInfo }
+                optical {
+                    id
+                    storeNumber
+                    contactInfo { ...storeContactInfo }
+                    enabledForOnlineBooking
+                    onlineAppointmentTypes
+                    winkAdditionalFields {
+                    winkId
+                    winkName
+                    winkStoreId
+                    }
+                }
+                audiology {
+                    id
+                    storeNumber
+                    contactInfo { ...storeContactInfo }
+                    enabledForOnlineBooking
+                    onlineAppointmentTypes
+                }
+                sectionalNotification { ...sectionalNotification }
+            }
+        }
+    }
 }
 fragment address on Address {
-	id
-	name
-	line1
-	line2
-	line3
-	postcode
-	city
-	region
-	countryCode
-	country
+    id
+    name
+    line1
+    line2
+    line3
+    postcode
+    city
+    region
+    countryCode
+    country
 }
 fragment storeContactInfo on ContactInfo {
-	email
-	phone
+    email
+    phone
 }
 fragment sectionalNotification on StoreSectionalNotification {
-	title
-	headline
-	important
-	type
-	moreInfoLink
-	phoneNumber
-	includeBookingJourney
-	expiryDate
-	activeInactive
+    title
+    headline
+    important
+    type
+    moreInfoLink
+    phoneNumber
+    includeBookingJourney
+    expiryDate
+    activeInactive
 }"""
             data = {
                 "operationName": "storeSearchQuery",
