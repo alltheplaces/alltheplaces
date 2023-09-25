@@ -1,7 +1,7 @@
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
-from locations.categories import Fuel, apply_yes_no, Categories, apply_category
+from locations.categories import Categories, Fuel, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 
 
