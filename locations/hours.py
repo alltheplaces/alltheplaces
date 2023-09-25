@@ -432,7 +432,7 @@ DAYS_SR = {
 }
 
 NAMED_DAY_RANGES_DK = {
-    "Hverdage": ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"], # Weekdays
+    "Hverdage": ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"],  # Weekdays
 }
 
 NAMED_DAY_RANGES_EN = {
@@ -739,10 +739,18 @@ class OpeningHours:
         replaced_hours_string = hours_string
         if time_24h is True:
             for named_time_name, named_time_time in named_times.items():
-                replaced_hours_string = replaced_hours_string.replace(named_time_name.lower(), named_time_time[1]).replace(named_time_name.title(), named_time_time[1]).replace(named_time_name.upper(), named_time_time[1])
+                replaced_hours_string = (
+                    replaced_hours_string.replace(named_time_name.lower(), named_time_time[1])
+                    .replace(named_time_name.title(), named_time_time[1])
+                    .replace(named_time_name.upper(), named_time_time[1])
+                )
         else:
             for named_time_name, named_time_time in named_times.items():
-                replaced_hours_string = replaced_hours_string.replace(named_time_name.lower(), named_time_time[0]).replace(named_time_name.title(), named_time_time[0]).replace(named_time_name.upper(), named_time_time[0])
+                replaced_hours_string = (
+                    replaced_hours_string.replace(named_time_name.lower(), named_time_time[0])
+                    .replace(named_time_name.title(), named_time_time[0])
+                    .replace(named_time_name.upper(), named_time_time[0])
+                )
         return replaced_hours_string
 
     @staticmethod
@@ -765,7 +773,12 @@ class OpeningHours:
         return time_regex
 
     @staticmethod
-    def hours_extraction_regex(time_24h: bool = True, days: dict = DAYS_EN, named_day_ranges: dict = NAMED_DAY_RANGES_EN, delimiters: list[str] = DELIMITERS_EN) -> str:
+    def hours_extraction_regex(
+        time_24h: bool = True,
+        days: dict = DAYS_EN,
+        named_day_ranges: dict = NAMED_DAY_RANGES_EN,
+        delimiters: list[str] = DELIMITERS_EN,
+    ) -> str:
         """
         Creates a regular expression for capturing opening time
         information from a localised string.
@@ -798,14 +811,22 @@ class OpeningHours:
         days_regex = days_regex + r"|".join(days_regex_parts) + r")"
 
         full_regex = (
-            days_regex + r"(?:\W+|" + OpeningHours.delimiters_regex(delimiters) + r")((?:(?:\s*,?\s*)?" + OpeningHours.time_of_day_regex(time_24h=time_24h) + OpeningHours.delimiters_regex(delimiters) + OpeningHours.time_of_day_regex(time_24h=time_24h) + r")+)"
+            days_regex
+            + r"(?:\W+|"
+            + OpeningHours.delimiters_regex(delimiters)
+            + r")((?:(?:\s*,?\s*)?"
+            + OpeningHours.time_of_day_regex(time_24h=time_24h)
+            + OpeningHours.delimiters_regex(delimiters)
+            + OpeningHours.time_of_day_regex(time_24h=time_24h)
+            + r")+)"
         )
         return full_regex
 
     @staticmethod
-    def days_in_day_range(day_range: list[str], days: dict = DAYS_EN, named_day_ranges: dict = NAMED_DAY_RANGES_EN) -> list[str]:
-        """
-        """
+    def days_in_day_range(
+        day_range: list[str], days: dict = DAYS_EN, named_day_ranges: dict = NAMED_DAY_RANGES_EN
+    ) -> list[str]:
+        """ """
         day_list = []
         if len(day_range) == 1 or days[day_range[0].title()] == days[day_range[1].title()]:
             if day_range[0].title() in named_day_ranges.keys():
@@ -816,13 +837,19 @@ class OpeningHours:
             start_day_index = DAYS.index(days[day_range[0].title()])
             end_day_index = DAYS.index(days[day_range[1].title()])
             if start_day_index > end_day_index:
-                day_list = DAYS[start_day_index:] + DAYS[:end_day_index+1]
+                day_list = DAYS[start_day_index:] + DAYS[: end_day_index + 1]
             else:
-                day_list = DAYS[start_day_index:end_day_index+1]
+                day_list = DAYS[start_day_index : end_day_index + 1]
         return day_list
 
     @staticmethod
-    def extract_hours_from_string(ranges_string: str, days: dict = DAYS_EN, named_day_ranges: dict = NAMED_DAY_RANGES_EN, named_times: dict = NAMED_TIMES_EN, delimiters: list[str] = DELIMITERS_EN) -> list[tuple]:
+    def extract_hours_from_string(
+        ranges_string: str,
+        days: dict = DAYS_EN,
+        named_day_ranges: dict = NAMED_DAY_RANGES_EN,
+        named_times: dict = NAMED_TIMES_EN,
+        delimiters: list[str] = DELIMITERS_EN,
+    ) -> list[tuple]:
         """
         Extracts opening time information from a localised string.
         For every day or day range in the localised string with an
@@ -848,8 +875,12 @@ class OpeningHours:
                   closing time in 24h notation.
         """
         # Create regular expressions for extracting opening time information from a string.
-        hours_extraction_regex_24h = OpeningHours.hours_extraction_regex(time_24h=True, days=days, named_day_ranges=named_day_ranges, delimiters=delimiters)
-        hours_extraction_regex_12h = OpeningHours.hours_extraction_regex(time_24h=False, days=days, named_day_ranges=named_day_ranges, delimiters=delimiters)
+        hours_extraction_regex_24h = OpeningHours.hours_extraction_regex(
+            time_24h=True, days=days, named_day_ranges=named_day_ranges, delimiters=delimiters
+        )
+        hours_extraction_regex_12h = OpeningHours.hours_extraction_regex(
+            time_24h=False, days=days, named_day_ranges=named_day_ranges, delimiters=delimiters
+        )
 
         # Replace named times in source ranges string (e.g. midnight -> 00:00).
         ranges_string_24h = OpeningHours.replace_named_times(ranges_string, named_times, True)
@@ -867,17 +898,35 @@ class OpeningHours:
             for result in results_24h:
                 time_start_index = result.index(next(filter(lambda x: len(x) > 0 and x[0].isdigit(), result)))
                 day_range = list(filter(None, result[:time_start_index]))
-                days_in_range = OpeningHours.days_in_day_range(day_range=day_range, days=days, named_day_ranges=named_day_ranges)
-                time_ranges = re.findall(OpeningHours.time_of_day_regex(time_24h=True) + OpeningHours.delimiters_regex(delimiters) + OpeningHours.time_of_day_regex(time_24h=True), result[time_start_index], re.IGNORECASE)
+                days_in_range = OpeningHours.days_in_day_range(
+                    day_range=day_range, days=days, named_day_ranges=named_day_ranges
+                )
+                time_ranges = re.findall(
+                    OpeningHours.time_of_day_regex(time_24h=True)
+                    + OpeningHours.delimiters_regex(delimiters)
+                    + OpeningHours.time_of_day_regex(time_24h=True),
+                    result[time_start_index],
+                    re.IGNORECASE,
+                )
                 for time_range in time_ranges:
-                    results.append((days_in_range, f"{time_range[0]}:{time_range[1]}", f"{time_range[2]}:{time_range[3]}"))
+                    results.append(
+                        (days_in_range, f"{time_range[0]}:{time_range[1]}", f"{time_range[2]}:{time_range[3]}")
+                    )
         elif len(results_12h) > 0:
             # Parse 12h opening hour information.
             for result in results_12h:
                 time_start_index = result.index(next(filter(lambda x: len(x) > 0 and x[0].isdigit(), result)))
                 day_range = list(filter(None, result[:time_start_index]))
-                days_in_range = OpeningHours.days_in_day_range(day_range=day_range, days=days, named_day_ranges=named_day_ranges)
-                time_ranges = re.findall(OpeningHours.time_of_day_regex(time_24h=False) + OpeningHours.delimiters_regex(delimiters) + OpeningHours.time_of_day_regex(time_24h=False), result[time_start_index], re.IGNORECASE)
+                days_in_range = OpeningHours.days_in_day_range(
+                    day_range=day_range, days=days, named_day_ranges=named_day_ranges
+                )
+                time_ranges = re.findall(
+                    OpeningHours.time_of_day_regex(time_24h=False)
+                    + OpeningHours.delimiters_regex(delimiters)
+                    + OpeningHours.time_of_day_regex(time_24h=False),
+                    result[time_start_index],
+                    re.IGNORECASE,
+                )
                 for time_range in time_ranges:
                     if time_range[1]:
                         time_start = f"{time_range[0]}:{time_range[1]}"
@@ -904,7 +953,14 @@ class OpeningHours:
                     results.append((days_in_range, time_start_24h, time_end_24h))
         return results
 
-    def add_ranges_from_string(self, ranges_string: str, days: dict = DAYS_EN, named_day_ranges: dict = NAMED_DAY_RANGES_EN, named_times: dict = NAMED_TIMES_EN, delimiters: list[str] = DELIMITERS_EN) -> None:
+    def add_ranges_from_string(
+        self,
+        ranges_string: str,
+        days: dict = DAYS_EN,
+        named_day_ranges: dict = NAMED_DAY_RANGES_EN,
+        named_times: dict = NAMED_TIMES_EN,
+        delimiters: list[str] = DELIMITERS_EN,
+    ) -> None:
         """
         Adds opening hour information from a localised string.
         :param ranges_string: localised string containing opening
@@ -922,7 +978,13 @@ class OpeningHours:
                            expression.
         """
         # Extract opening time information from localised string.
-        results = OpeningHours.extract_hours_from_string(ranges_string=ranges_string, days=days, named_day_ranges=named_day_ranges, named_times=named_times, delimiters=delimiters)
+        results = OpeningHours.extract_hours_from_string(
+            ranges_string=ranges_string,
+            days=days,
+            named_day_ranges=named_day_ranges,
+            named_times=named_times,
+            delimiters=delimiters,
+        )
 
         # Add ranges to OpeningHours object.
         for result in results:
