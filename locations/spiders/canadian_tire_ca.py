@@ -2,6 +2,7 @@ import re
 
 from scrapy.spiders import SitemapSpider
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.user_agents import BROWSER_DEFAULT
@@ -55,4 +56,7 @@ class CanadianTireCASpider(SitemapSpider):
                     close_time=day.get("closingTime", {}).get("formattedHour").replace(".", ""),
                     time_format="%I:%M %p",
                 )
+
+        apply_category(Categories.SHOP_DEPARTMENT_STORE, item)
+
         yield item
