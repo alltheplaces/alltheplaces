@@ -34,6 +34,8 @@ class RompetrolSpider(Spider):
             elif "www.rompetrol.ro" in response.url:
                 item["country"] = "RO"
 
+            item["ref"] = "{}-{}".format(item["country"], item["ref"])
+
             apply_yes_no(Fuel.OCTANE_98, item, "27" in location["services"], False)
             apply_yes_no(Fuel.OCTANE_95, item, "28" in location["services"], False)
             apply_yes_no(Fuel.GTL_DIESEL, item, "30" in location["services"], False)
@@ -45,13 +47,10 @@ class RompetrolSpider(Spider):
             apply_yes_no(Extras.WIFI, item, "7" in location["services"], False)
 
             apply_category(Categories.FUEL_STATION, item)
-            if "14" in location["services"]:
-                apply_category(Categories.CHARGING_STATION, item)
-            if "33" in location["services"]:
-                apply_category(Categories.SHOP_LAUNDRY, item)
-            if "20" in location["services"]:
-                apply_category(Categories.COMPRESSED_AIR, item)
-            if "17" in location["services"]:
-                apply_category(Categories.RESTAURANT, item)
+
+            apply_yes_no("fuel:electric", item, "14" in location["services"])
+            apply_yes_no("laundry_service", item, "33" in location["services"])
+            apply_yes_no(Extras.COMPRESSED_AIR, item, "20" in location["services"])
+            apply_yes_no("food", item, "17" in location["services"])
 
             yield item
