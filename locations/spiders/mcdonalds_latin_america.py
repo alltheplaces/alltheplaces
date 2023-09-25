@@ -63,7 +63,6 @@ class McDonaldsLatinAmericaSpider(Spider):
             apply_yes_no(Extras.DELIVERY, item, location["services"]["mcDelivery"], False)
             apply_yes_no(Extras.WIFI, item, location["services"]["wifi"], False)
             apply_yes_no(Extras.WHEELCHAIR, item, location["services"]["wheelchairAccess"], False)
-
             apply_category(Categories.FAST_FOOD, item)
 
             yield item
