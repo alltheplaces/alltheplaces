@@ -3,10 +3,10 @@ import math
 
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.searchable_points import open_searchable_points
-from locations.categories import Categories, apply_category
 
 
 def calculate_offset_point(x, y, d, b):
