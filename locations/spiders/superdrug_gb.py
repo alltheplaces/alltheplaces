@@ -4,7 +4,7 @@ from locations.google_url import extract_google_position
 from locations.spiders.vapestore_gb import clean_address
 from locations.structured_data_spider import StructuredDataSpider
 from locations.user_agents import BROWSER_DEFAULT
-
+from locations.categories import Categories, apply_category
 
 class SuperdrugGBSpider(SitemapSpider, StructuredDataSpider):
     name = "superdrug_gb"
@@ -23,5 +23,6 @@ class SuperdrugGBSpider(SitemapSpider, StructuredDataSpider):
 
         # Supplied url has whitespace padding
         item["website"] = response.url
+        apply_category(Categories.PHARMACY, item)
 
         yield item
