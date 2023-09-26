@@ -766,10 +766,10 @@ class OpeningHours:
         """
         if time_24h is True:
             # Regular expression for extracting 24h times (e.g. 15:45)
-            time_regex = r"(?<!\d)(\d(?!\d)|[01]\d|2[0-4])(?:[:\.]?([0-5]\d))(?:[:\.]?[0-5]\d)?(?!(?:\d|[AP]M))"
+            time_regex = r"(?<!\d)(\d(?!\d)|[01]\d|2[0-4])(?:(?:[:\.]?([0-5]\d))(?:[:\.]?[0-5]\d)?)?(?!(?:\d|:|[AP]M))"
         else:
             # Regular expression for extracting 12h times (e.g. 9:30AM)
-            time_regex = r"(?<!\d)(\d(?!\d)|0\d|1[012])(?:(?:[:\.]?([0-5]\d))(?:[:\.]?[0-5]\d)?)?\s*([AP]M)?(?!\d)"
+            time_regex = r"(?<!\d)(\d(?!\d)|0\d|1[012])(?:(?:[:\.]?([0-5]\d))(?:[:\.]?[0-5]\d)?)?\s*([AP]M)?(?!(?:\d|:|[AP]M))"
         return time_regex
 
     @staticmethod
@@ -909,8 +909,14 @@ class OpeningHours:
                     re.IGNORECASE,
                 )
                 for time_range in time_ranges:
+                    time_start_minute = time_range[1]
+                    if not time_range[1]:
+                        time_start_minute = "00"
+                    time_end_minute = time_range[3]
+                    if not time_range[3]:
+                        time_end_minute = "00"
                     results.append(
-                        (days_in_range, f"{time_range[0]}:{time_range[1]}", f"{time_range[2]}:{time_range[3]}")
+                        (days_in_range, f"{time_range[0]}:{time_start_minute}", f"{time_range[2]}:{time_end_minute}")
                     )
         elif len(results_12h) > 0:
             # Parse 12h opening hour information.
