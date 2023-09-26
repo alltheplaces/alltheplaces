@@ -3,7 +3,7 @@ import re
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
-from locations.categories import Extras, apply_yes_no
+from locations.categories import Extras, apply_yes_no, Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.spiders.mcdonalds import McDonaldsSpider
@@ -45,5 +45,7 @@ class McDonaldsBESpider(Spider):
             apply_yes_no(Extras.DRIVE_THROUGH, item, 2 in service_ids, False)
             apply_yes_no(Extras.DELIVERY, item, 15 in service_ids, False)
             apply_yes_no(Extras.WIFI, item, 1 in service_ids, False)
+
+            apply_category(Categories.FAST_FOOD, item)
 
             yield item
