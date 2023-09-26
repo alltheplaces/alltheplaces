@@ -16,6 +16,7 @@ class TargetAUSpider(CrawlSpider):
     start_urls = ["https://www.target.com.au/store-finder"]
     rules = [Rule(LinkExtractor(restrict_xpaths='//*[@class="store-states"]'), callback="parse_state")]
     user_agent = BROWSER_DEFAULT
+    requires_proxy = True
 
     def parse_state(self, response):
         data = json.loads(response.xpath('//script[@id="store-json-data"]/text()').get())
