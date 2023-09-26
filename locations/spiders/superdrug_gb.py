@@ -1,10 +1,11 @@
 from scrapy.spiders import SitemapSpider
 
+from locations.categories import Categories, apply_category
 from locations.google_url import extract_google_position
 from locations.spiders.vapestore_gb import clean_address
 from locations.structured_data_spider import StructuredDataSpider
 from locations.user_agents import BROWSER_DEFAULT
-from locations.categories import Categories, apply_category
+
 
 class SuperdrugGBSpider(SitemapSpider, StructuredDataSpider):
     name = "superdrug_gb"
