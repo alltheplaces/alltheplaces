@@ -1,8 +1,8 @@
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.linked_data_parser import LinkedDataParser
 from locations.microdata_parser import MicrodataParser
-from locations.categories import Categories, apply_category
 
 
 class FifthThirdBankSpider(scrapy.spiders.SitemapSpider):
