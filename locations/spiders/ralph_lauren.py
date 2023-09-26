@@ -35,7 +35,7 @@ class RalphLaurenSpider(scrapy.Spider):
         # get json which provides most of the data
         data = response.xpath('//div[@class="storeJSON hide"]/@data-storejson').extract_first()
 
-        # opening hourse are not in json, thus need to be scraped seperately
+        # opening hours are not in json, thus need to be scraped separately
         hours = response.xpath('//tr[@class="store-hourrow"]//td//text()').getall()
         opening_hours = []
 
