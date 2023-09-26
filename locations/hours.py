@@ -769,7 +769,9 @@ class OpeningHours:
             time_regex = r"(?<!\d)(\d(?!\d)|[01]\d|2[0-4])(?:(?:[:\.]?([0-5]\d))(?:[:\.]?[0-5]\d)?)?(?!(?:\d|:|[AP]M))"
         else:
             # Regular expression for extracting 12h times (e.g. 9:30AM)
-            time_regex = r"(?<!\d)(\d(?!\d)|0\d|1[012])(?:(?:[:\.]?([0-5]\d))(?:[:\.]?[0-5]\d)?)?\s*([AP]M)?(?!(?:\d|:|[AP]M))"
+            time_regex = (
+                r"(?<!\d)(\d(?!\d)|0\d|1[012])(?:(?:[:\.]?([0-5]\d))(?:[:\.]?[0-5]\d)?)?\s*([AP]M)?(?!(?:\d|:|[AP]M))"
+            )
         return time_regex
 
     @staticmethod
