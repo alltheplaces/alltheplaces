@@ -272,6 +272,7 @@ class Extras(Enum):
     COPYING = "service:copy"
     DELIVERY = "delivery"
     DRIVE_THROUGH = "drive_through"
+    FAST_FOOD = "fast_food"
     FAXING = "service:fax"
     FEE = "fee"
     INDOOR_SEATING = "indoor_seating"
