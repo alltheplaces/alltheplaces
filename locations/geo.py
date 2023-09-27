@@ -49,6 +49,7 @@ def point_locations(areas_csv_file, area_field_filter=None):
     :param area_field_filter: optional list of area names to filter on
 
     """
+
     def get_key(row, keys):
         for key in keys:
             if row.get(key):

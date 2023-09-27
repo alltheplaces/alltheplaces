@@ -33,7 +33,7 @@ class McDonaldsSpider(scrapy.Spider):
             "sv-se",
             "en-sa",
             "uk-ua",
-            'hu-hu'
+            "hu-hu",
         ]:
             country = locale.split("-")[1]
             for city in city_locations(country.upper(), 20000):
@@ -101,7 +101,7 @@ class McDonaldsSpider(scrapy.Spider):
             item["lon"], item["lat"] = store["geometry"]["coordinates"]
 
             # hu-hu has non-standard filterType values
-            filter_type = [p.replace('restaurant.facility.', '').upper() for p in properties["filterType"]]
+            filter_type = [p.replace("restaurant.facility.", "").upper() for p in properties["filterType"]]
 
             apply_yes_no(Extras.DRIVE_THROUGH, item, "DRIVETHRU" in filter_type)
             apply_yes_no(Extras.WIFI, item, "WIFI" in filter_type)
