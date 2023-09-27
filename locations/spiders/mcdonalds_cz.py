@@ -30,7 +30,7 @@ class McDonaldsCZSpider(scrapy.Spider):
     def parse(self, response):
         pois = response.json().get("restaurants")
         for poi in pois:
-            poi['street_address'] = poi.pop('address')
+            poi["street_address"] = poi.pop("address")
             item = DictParser.parse(poi)
             item["postcode"] = str(item["postcode"])
             self.parse_hours(item, poi)
