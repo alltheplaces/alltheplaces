@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.categories import Categories, Extras, apply_category, apply_yes_no
+from locations.categories import Categories, Extras, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.geo import city_locations
 from locations.hours import DAYS_FULL, OpeningHours
@@ -8,7 +8,7 @@ from locations.hours import DAYS_FULL, OpeningHours
 
 class McDonaldsSpider(scrapy.Spider):
     name = "mcdonalds"
-    item_attributes = {"brand": "McDonald’s", "brand_wikidata": "Q38076"}
+    item_attributes = {"brand": "McDonald's", "brand_wikidata": "Q38076", "extras": Categories.FAST_FOOD.value}
     allowed_domains = ["www.mcdonalds.com"]
     download_delay = 0.5
 
@@ -98,7 +98,6 @@ class McDonaldsSpider(scrapy.Spider):
             item["country"] = country.upper()
             item["lon"], item["lat"] = store["geometry"]["coordinates"]
 
-            apply_category(Categories.FAST_FOOD, item)
             apply_yes_no(Extras.DRIVE_THROUGH, item, "DRIVETHRU" in properties["filterType"])
             apply_yes_no(Extras.WIFI, item, "WIFI" in properties["filterType"])
 

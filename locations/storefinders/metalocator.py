@@ -6,7 +6,7 @@ from scrapy.http import JsonRequest
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
-# API documentation avaialble at:
+# API documentation available at:
 # https://admin.metalocator.com/components/com_locator/assets/documents/api/classes/LocatorControllerAPI.html#method_search
 #
 # To use this spider, specify a brand_id (Itemid in API URLs)
