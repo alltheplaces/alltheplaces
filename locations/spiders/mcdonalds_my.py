@@ -2,6 +2,7 @@ import scrapy
 
 from locations.dict_parser import DictParser
 from locations.spiders.mcdonalds import McDonaldsSpider
+from locations.categories import Categories, apply_category
 
 
 class McDonaldsMYSpider(scrapy.Spider):
@@ -28,4 +29,5 @@ class McDonaldsMYSpider(scrapy.Spider):
             item = DictParser.parse(store)
             item["website"] = "https://www.mcdonalds.com.my"
             item["ref"] = index
+            apply_category(Categories.FAST_FOOD, item)
             yield item
