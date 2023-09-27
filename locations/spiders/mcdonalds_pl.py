@@ -1,9 +1,8 @@
 import scrapy
+
 from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
-
-from locations.items import Feature
 from locations.spiders.mcdonalds import McDonaldsSpider
 
 
@@ -12,26 +11,25 @@ class McDonaldsPLSpider(scrapy.Spider):
     item_attributes = McDonaldsSpider.item_attributes
     allowed_domains = ["mcdonalds.pl"]
 
-    start_urls = ['https://mcdonalds.pl/data/places']
+    start_urls = ["https://mcdonalds.pl/data/places"]
 
     def parse_hours(self, item, poi):
         if hours := poi.get("hours"):
             try:
                 oh = OpeningHours()
                 for day, time in hours.items():
-                    if time.get('alwaysOpen') == True:
-                        oh.add_range(DAYS[int(day) - 1], '00:00', '23:59')
+                    if time.get("alwaysOpen") == True:
+                        oh.add_range(DAYS[int(day) - 1], "00:00", "23:59")
                     else:
-                        oh.add_range(DAYS[int(day) - 1], time.get('from'), time.get('to'))
-                item['opening_hours'] = oh.as_opening_hours()
+                        oh.add_range(DAYS[int(day) - 1], time.get("from"), time.get("to"))
+                item["opening_hours"] = oh.as_opening_hours()
             except Exception as e:
-                self.logger.warning(f'Failed to parse opening hours: {hours}')
-                pass
+                self.logger.warning(f"Failed to parse opening hours: {hours}")
 
     def parse(self, response):
         places = response.json().get("places")
         for poi in places:
-            poi['street_address'] = poi.pop('address')
+            poi["street_address"] = poi.pop("address")
             item = DictParser.parse(poi)
             self.parse_hours(item, poi)
             apply_yes_no(Extras.WIFI, item, poi.get("wifi"))
