@@ -30,6 +30,7 @@ class McDonaldsCZSpider(scrapy.Spider):
         for poi in pois:
             poi["street_address"] = poi.pop("address")
             item = DictParser.parse(poi)
+            item["website"] = response.urljoin(poi["slug"])
             item["postcode"] = str(item["postcode"])
             self.parse_hours(item, poi)
             yield item
