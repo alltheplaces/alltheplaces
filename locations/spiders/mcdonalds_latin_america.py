@@ -1,7 +1,7 @@
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
-from locations.categories import Extras, apply_yes_no
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.spiders.mcdonalds import McDonaldsSpider
@@ -63,5 +63,7 @@ class McDonaldsLatinAmericaSpider(Spider):
             apply_yes_no(Extras.DELIVERY, item, location["services"]["mcDelivery"], False)
             apply_yes_no(Extras.WIFI, item, location["services"]["wifi"], False)
             apply_yes_no(Extras.WHEELCHAIR, item, location["services"]["wheelchairAccess"], False)
+
+            apply_category(Categories.FAST_FOOD, item)
 
             yield item
