@@ -1,12 +1,13 @@
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.linked_data_parser import LinkedDataParser
 from locations.microdata_parser import MicrodataParser
 
 
 class FifthThirdBankSpider(scrapy.spiders.SitemapSpider):
     name = "fifththirdbank"
-    item_attributes = {"brand": "Fifth Third Bank", "brand_wikidata": "Q1411810"}
+    item_attributes = {"brand": "Fifth Third Bank", "brand_wikidata": "Q1411810", "extras": Categories.BANK.value}
     allowed_domains = [
         "53.com",
     ]
