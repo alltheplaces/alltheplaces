@@ -33,6 +33,7 @@ class McDonaldsSpider(scrapy.Spider):
             "sv-se",
             "en-sa",
             "uk-ua",
+            "hu-hu",
         ]:
             country = locale.split("-")[1]
             for city in city_locations(country.upper(), 20000):
@@ -57,10 +58,11 @@ class McDonaldsSpider(scrapy.Spider):
             if locale in [
                 "en-ca",
                 "en-gb",
-                "fi-fi",
                 "en-ie",
                 "en-us",
+                "fi-fi",
                 "fr-ch",
+                "hu-hu",
                 "sv-se",
                 "zh-tw",
             ]:
@@ -98,8 +100,12 @@ class McDonaldsSpider(scrapy.Spider):
             item["country"] = country.upper()
             item["lon"], item["lat"] = store["geometry"]["coordinates"]
 
-            apply_yes_no(Extras.DRIVE_THROUGH, item, "DRIVETHRU" in properties["filterType"])
-            apply_yes_no(Extras.WIFI, item, "WIFI" in properties["filterType"])
+            # hu-hu has non-standard filterType values
+            filter_type = [p.replace("restaurant.facility.", "").upper() for p in properties["filterType"]]
+
+            apply_yes_no(Extras.DRIVE_THROUGH, item, "DRIVETHRU" in filter_type)
+            apply_yes_no(Extras.WIFI, item, "WIFI" in filter_type)
+            apply_yes_no(Extras.DELIVERY, item, "MCDELIVERYSERVICE" in filter_type)
 
             if hours := self.store_hours(properties.get("restauranthours")):
                 item["opening_hours"] = hours
