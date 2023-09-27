@@ -22,7 +22,7 @@ class McDonaldsPLSpider(scrapy.Spider):
                         oh.add_range(DAYS[int(day) - 1], "00:00", "23:59")
                     else:
                         oh.add_range(DAYS[int(day) - 1], time.get("from"), time.get("to"))
-                item["opening_hours"] = oh.as_opening_hours()
+                item["opening_hours"] = oh
             except Exception as e:
                 self.logger.warning(f"Failed to parse opening hours: {hours}")
 
