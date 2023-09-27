@@ -2,6 +2,7 @@ import scrapy
 
 from locations.dict_parser import DictParser
 from locations.spiders.mcdonalds import McDonaldsSpider
+from locations.categories import Categories, apply_category
 
 
 class McDonaldsITSpider(scrapy.Spider):
@@ -14,4 +15,5 @@ class McDonaldsITSpider(scrapy.Spider):
             store["street_address"] = store.pop("address")
             item = DictParser.parse(store)
             item["website"] = "https://www.mcdonalds.it/ristorante/" + store["uri"]
+            apply_category(Categories.FAST_FOOD, item)
             yield item
