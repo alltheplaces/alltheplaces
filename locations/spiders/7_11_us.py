@@ -36,9 +36,8 @@ class SevenElevenUSSpider(scrapy.spiders.SitemapSpider):
             if not store:
                 continue
             current_store = DictParser.get_nested_key(store, "currentStore")
-            current_store["location"] = store["localStoreLatLon"]
-            current_store["street_address"] = current_store["address"]
-            del current_store["address"]
+            current_store["location"] = store.get("localStoreLatLon")
+            current_store["street_address"] = current_store.pop("address")
             item = DictParser.parse(current_store)
             item["website"] = item["ref"] = response.url
 
@@ -60,7 +59,7 @@ class SevenElevenUSSpider(scrapy.spiders.SitemapSpider):
                     if tag := FUEL_TYPES_MAPPING.get(fuel_name):
                         apply_yes_no(tag, item, True)
                     else:
-                        self.logger.warning(f"Unknown fuel type: {fuel_name}")
+                        # self.logger.warning(f"Unknown fuel type: {fuel_name}")
                         self.crawler.stats.inc_value(f"atp/7_11/fuel/failed/{fuel_name}")
 
     def parse_features(self, item, store):
@@ -69,5 +68,5 @@ class SevenElevenUSSpider(scrapy.spiders.SitemapSpider):
                 if tag := FEATURES_MAPPING.get(feature):
                     apply_yes_no(tag, item, True)
                 else:
-                    self.logger.warning(f"Unknown feature: {feature}")
+                    # self.logger.warning(f"Unknown feature: {feature}")
                     self.crawler.stats.inc_value(f"atp/7_11/feature/failed/{feature}")
