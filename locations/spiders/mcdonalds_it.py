@@ -1,8 +1,8 @@
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.spiders.mcdonalds import McDonaldsSpider
-from locations.categories import Categories, apply_category
 
 
 class McDonaldsITSpider(scrapy.Spider):
