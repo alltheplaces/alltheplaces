@@ -1,3 +1,5 @@
+from urllib.parse import urljoin
+
 import scrapy
 
 from locations.categories import Extras, apply_yes_no
@@ -31,6 +33,7 @@ class McDonaldsPLSpider(scrapy.Spider):
         for poi in places:
             poi["street_address"] = poi.pop("address")
             item = DictParser.parse(poi)
+            item["website"] = urljoin("https://mcdonalds.pl/restauracje/", poi["slug"])
             self.parse_hours(item, poi)
             apply_yes_no(Extras.WIFI, item, poi.get("wifi"))
             apply_yes_no(Extras.DELIVERY, item, poi.get("mcDelivery"))
