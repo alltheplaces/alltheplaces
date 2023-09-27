@@ -371,6 +371,14 @@ def test_add_ranges_from_string():
     assert o.as_opening_hours() == "24/7"
 
     o = OpeningHours()
+    o.add_ranges_from_string("Monday: 08:00 - Midday, 14:00 - Midnight   tue-sat: Midnight-0800")
+    assert o.as_opening_hours() == "Mo 08:00-12:00,14:00-24:00; Tu-Sa 00:00-08:00"
+
+    o = OpeningHours()
+    o.add_ranges_from_string("Wed 2am-3am, 11am-1pm, 6pm-7pm, Thu midday-3:30pm 4:30pm-5:15pm")
+    assert o.as_opening_hours() == "We 02:00-03:00,11:00-13:00,18:00-19:00; Th 12:00-15:30,16:30-17:15"
+
+    o = OpeningHours()
     o.add_ranges_from_string(
         "Lunes a Domingo: 11:00 a 20:30 / Viernes y Sábado: 11:00 a 21:00",
         days=DAYS_ES,
@@ -393,3 +401,9 @@ def test_add_ranges_from_string():
         "{Sun|056:00AM-08:00PM}{Mon|05:00AM-09:00PM}{Tue|05:00AM-09:00PM}{Wed|05:00AM-09:00PM}{Thu|05:00AM-09:00PM}{Fri|05:00AM-09:00PM}{Sat|c}"
     )
     assert o.as_opening_hours() == "Mo-Fr 05:00-21:00"
+
+    o = OpeningHours()
+    o.add_ranges_from_string("Mo-Tu 06-12,We 14-18:30,Th 09-17,Fr 04-24,Sa-Su 00:00-11:59")
+    assert (
+        o.as_opening_hours() == "Mo-Tu 06:00-12:00; We 14:00-18:30; Th 09:00-17:00; Fr 04:00-24:00; Sa-Su 00:00-11:59"
+    )
