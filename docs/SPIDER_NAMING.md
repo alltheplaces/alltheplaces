@@ -1,8 +1,7 @@
 ## Naming your spider
 
 With so many spider files it is important that we maintain
-a high level of naming consistency.
-At the time of writing there is a
+a high level of naming consistency. At the time of writing there is a
 [single directory](../locations/spiders)
 containing all of our spiders.
 
