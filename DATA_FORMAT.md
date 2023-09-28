@@ -21,8 +21,9 @@ Each GeoJSON feature will have a `properties` object with as many of the followi
 | Name                  | Description                                                                                                                                                                                                                                                                               |
 |-----------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `ref`                 | A unique identifier for this feature inside this spider. The code that generates the output will remove duplicates based on the value of this key.                                                                                                                                        |
-| `@spider`             | The name of the spider that produced this feature. It is [specified in each spider](https://github.com/alltheplaces/alltheplaces/blob/11d9be56515ef0f6419e001b1950f69d28d4f400/locations/spiders/apple.py#L9), so it doesn't necessarily related to the file name of the spider.          |
-| `name`                | The name of the feature. This is usually extracted from the venue's page, so it will probably be different per feature. This is often the location specific part of a chain location's name, like the name of the mall it's in, without the chain name included.                          |
+| `@spider`             | The name of the spider that produced this feature. It is [specified in each spider](https://github.com/alltheplaces/alltheplaces/blob/11d9be56515ef0f6419e001b1950f69d28d4f400/locations/spiders/apple.py#L9), so it isn't necessarily related to the file name of the spider.            |
+| `branch`              | This is often the location specific part of a chain location's name, like the name of the mall or city it is in, without the brand name included.                                                                                                                                         |
+| `name`                | The name of the feature. Ideally the fascia, However this is often a combination of the brand and the branch.                                                                                                                                                                             |
 | **Brand**             | _Information about the brand that operates or owns the venue_                                                                                                                                                                                                                             |
 | `brand`               | The brand or chain name of the feature. This will generally be the same for most features outputted by a scraper. Some scrapers will output for companies that own multiple brands, like Duane Reade and Walgreens for the Walgreens scraper.                                             |
 | `brand:wikidata`      | The [Wikidata](https://www.wikidata.org/wiki/Wikidata:Main_Page) [item ID](https://www.wikidata.org/wiki/Help:Items) for the brand of the feature. This is a machine-readable identifier counterpart for the human-readable `brand` above.                                                |
@@ -50,9 +51,9 @@ Each GeoJSON feature will have a `properties` object with as many of the followi
 
 
 Spiders can also include extra fields that will show up but aren't necessarily documented outside their source code.
-We aim for them to be consistent with [OSM tagging](https://wiki.openstreetmap.org/wiki/Main_Page).
+We aim for them to be consistent with [OpenStreetMap tagging](https://wiki.openstreetmap.org/wiki/Main_Page).
 If enough spiders find interesting things to include in an extra property, it might be included here in the documentation in the future.
 
 ## Categories
 
-Along with the above properties we aim to output [OSM categories](https://wiki.openstreetmap.org/wiki/Map_features).
+Along with the above properties we aim to output [OpenStreetMap categories](https://wiki.openstreetmap.org/wiki/Map_features).
