@@ -1,15 +1,15 @@
 import json
 
 from scrapy.spiders import SitemapSpider
-from locations.categories import Categories, apply_category
 
+from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.structured_data_spider import StructuredDataSpider
 
 PHARMACY_BRANDS = {
-    "CVS Pharmacy" : ("CVS Pharmacy", "Q2078880"),
+    "CVS Pharmacy": ("CVS Pharmacy", "Q2078880"),
     "Longs Drugs": ("Longs Drugs", "Q16931196"),
-    "Navarro": ("Navarro", "Q6982161")
+    "Navarro": ("Navarro", "Q6982161"),
 }
 
 
