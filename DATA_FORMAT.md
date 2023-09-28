@@ -52,3 +52,7 @@ Each GeoJSON feature will have a `properties` object with as many of the followi
 Spiders can also include extra fields that will show up but aren't necessarily documented outside their source code.
 We aim for them to be consistent with [OSM tagging](https://wiki.openstreetmap.org/wiki/Main_Page).
 If enough spiders find interesting things to include in an extra property, it might be included here in the documentation in the future.
+
+## Categories
+
+Along with the above properties we aim to output [OSM categories](https://wiki.openstreetmap.org/wiki/Map_features).
