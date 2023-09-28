@@ -1,14 +1,20 @@
 import json
 
 from scrapy.spiders import SitemapSpider
+from locations.categories import Categories, apply_category
 
 from locations.hours import OpeningHours
 from locations.structured_data_spider import StructuredDataSpider
 
+PHARMACY_BRANDS = {
+    "CVS Pharmacy" : ("CVS Pharmacy", "Q2078880"),
+    "Longs Drugs": ("Longs Drugs", "Q16931196"),
+    "Navarro": ("Navarro", "Q6982161")
+}
+
 
 class CvsUSSpider(SitemapSpider, StructuredDataSpider):
     name = "cvs_us"
-    item_attributes = {"brand": "CVS", "brand_wikidata": "Q2078880"}
     allowed_domains = ["www.cvs.com"]
     sitemap_urls = ["https://www.cvs.com/sitemap/store-details.xml"]
 
@@ -29,7 +35,17 @@ class CvsUSSpider(SitemapSpider, StructuredDataSpider):
         # and clinic; this data is a little too messy for that, so just collect
         # the store's distinguishing attributes as properties on a single feature.
         item["extras"]["departments"] = storeInfo["identifier"]
-        item["extras"]["store_type"] = data["cvsStoreTypeImage"]["altText"]
+        store_type = data["cvsStoreTypeImage"]["altText"]
+        item["extras"]["store_type"] = store_type
+        # A pharmacy category still can be applied as it's present for all locations.
+        apply_category(Categories.PHARMACY, item)
+
+        # There are multiple pharmacy brands owned by CVS
+        if match := PHARMACY_BRANDS.get(store_type):
+            item["brand"], item["brand_wikidata"] = match
+        else:
+            # Default to CVS Pharmacy
+            item["brand"], item["brand_wikidata"] = PHARMACY_BRANDS.get("CVS Pharmacy")
 
         hours = {
             f'opening_hours:{dept["name"]}': self.parse_hours(dept["regHours"])
@@ -46,22 +62,27 @@ class CvsUSSpider(SitemapSpider, StructuredDataSpider):
         yield item
 
     def parse_hours(self, hours):
-        opening_hours = OpeningHours()
-        for row in hours:
-            if row["startTime"] == "Open 24 Hours":
-                row["startTime"] = "12:00 AM"
-            if row["endTime"] == "Open 24 Hours":
-                row["endTime"] = "11:59 PM"
+        try:
+            opening_hours = OpeningHours()
+            for row in hours:
+                if row["startTime"] == "Open 24 Hours":
+                    row["startTime"] = "12:00 AM"
+                if row["endTime"] == "Open 24 Hours":
+                    row["endTime"] = "11:59 PM"
 
-            if {"breakStart", "breakEnd"} <= row.keys():
-                intervals = [
-                    (row["startTime"], row["breakStart"]),
-                    (row["breakEnd"], row["endTime"]),
-                ]
-            else:
-                intervals = [
-                    (row["startTime"], row["endTime"]),
-                ]
-            for open_time, close_time in intervals:
-                opening_hours.add_range(row["weekday"], open_time, close_time, "%I:%M %p")
-        return opening_hours.as_opening_hours()
+                if {"breakStart", "breakEnd"} <= row.keys():
+                    intervals = [
+                        (row["startTime"], row["breakStart"]),
+                        (row["breakEnd"], row["endTime"]),
+                    ]
+                else:
+                    intervals = [
+                        (row["startTime"], row["endTime"]),
+                    ]
+                for open_time, close_time in intervals:
+                    opening_hours.add_range(row["weekday"], open_time, close_time, "%I:%M %p")
+            return opening_hours.as_opening_hours()
+        except:
+            self.logger.warning(f"Failed to parse hours: {hours}")
+            self.crawler.stats.inc_value("atp/cvs_us/hours/failed")
+            return None
