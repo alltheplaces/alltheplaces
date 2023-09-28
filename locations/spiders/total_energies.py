@@ -21,7 +21,7 @@ class TotalEnergiesSpider(WoosmapSpider):
         "cepsa": {"brand": "Cepsa", "brand_wikidata": "Q608819"},
         "aral": {"brand": "Aral", "brand_wikidata": "Q565734"},
         "bp": {"brand": "BP", "brand_wikidata": "Q152057"},
-        #   1454 "unb"
+        #   1454 "unb" - unbranded/independend
         "totalerg": {"brand": "TotalErg", "brand_wikidata": "Q3995933"},
         "ela": {"brand": "Elan", "brand_wikidata": "Q57980752"},
         "mol": {"brand": "MOL", "brand_wikidata": "Q549181"},
@@ -34,17 +34,17 @@ class TotalEnergiesSpider(WoosmapSpider):
         "slovnaft": {"brand": "Slovnaft", "brand_wikidata": "Q1587563"},
         "she": {"brand": "Shell", "brand_wikidata": "Q110716465"},
         "totex": {"brand": "TotalEnergies Express", "brand_wikidata": "Q154037"},
+        "omv": {"brand": "OMV", "brand_wikidata": "Q168238"},
+        "dyn": {"brand": "Dyneff", "brand_wikidata": "Q16630266"},
+        "gul": {"brand": "Gulf", "brand_wikidata": "Q5617505"},
+        "filt": {"brand": "Filoil", "brand_wikidata": None},
         #    159 "eos"
         #    151 "freie"
-        #    112 "dyn"
-        #    106 "gul"
-        #    103 "filt"
         #     32 "totfa"
         #     25 "sup"
         #     20 "wei"
         #     20 "haa"
         #     18 "elf"
-        #     15 "omv"
         #      4 "deal"
         #      3 "diver"
         #      1 "g&v"
@@ -118,6 +118,5 @@ class TotalEnergiesSpider(WoosmapSpider):
             self.crawler.stats.inc_value(
                 f'atp/total_energies/unknown_brand/{feature["properties"]["user_properties"]["brand"]}'
             )
-            item["brand"] = feature["properties"]["user_properties"]["brand"]
 
         yield item
