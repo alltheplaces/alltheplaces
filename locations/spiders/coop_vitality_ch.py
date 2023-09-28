@@ -21,11 +21,10 @@ class CoopVitalityCHSpider(scrapy.Spider):
                 "phone": s.get("phone").replace(" ", ""),
                 "ref": s["galenicare_pharmacy_number"],
                 "website": self.parse_website(s),
+                "branch": s.get("store_name", "").replace("Coop Vitality", "").strip(),
             }
             properties.update(self.parse_addr(s))
-            branch = s.get("store_name", "").replace("Coop Vitality", "").strip()
-            if branch:
-                properties["extras"] = {"branch": branch}
+            properties.update(self.parse_addr(s))
             properties = {k: v for (k, v) in properties.items() if v}
             yield Feature(**properties)
 
