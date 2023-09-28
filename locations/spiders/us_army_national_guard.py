@@ -2,6 +2,7 @@ import scrapy
 from geonamescache import GeonamesCache
 
 from locations.items import Feature
+from locations.categories import apply_category
 
 
 class USArmyNationalGuardSpider(scrapy.Spider):
@@ -29,5 +30,6 @@ class USArmyNationalGuardSpider(scrapy.Spider):
                 "lat": row["latitude"],
                 "lon": row["longitude"],
             }
-
-            yield Feature(**properties)
+            item = Feature(**properties)
+            apply_category({"military": "office"}, item)
+            yield item
