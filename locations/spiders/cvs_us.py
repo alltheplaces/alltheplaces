@@ -51,7 +51,7 @@ class CvsUSSpider(SitemapSpider, StructuredDataSpider):
         for dept in data["cvsStoreDetails"]["hours"]["departments"]:
             dept_name = dept["name"]
             try:
-                hours[f'opening_hours:{dept_name}'] = self.parse_hours(dept["regHours"])
+                hours[f"opening_hours:{dept_name}"] = self.parse_hours(dept["regHours"])
             except Exception as e:
                 self.logger.warning(f"Failed to parse hours for '{dept_name}': {hours}, {e}")
                 self.crawler.stats.inc_value("atp/cvs_us/hours/failed")
@@ -86,4 +86,3 @@ class CvsUSSpider(SitemapSpider, StructuredDataSpider):
             for open_time, close_time in intervals:
                 opening_hours.add_range(row["weekday"], open_time, close_time, "%I:%M %p")
         return opening_hours.as_opening_hours()
-        
