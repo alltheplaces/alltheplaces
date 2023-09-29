@@ -8,11 +8,18 @@ class A1HRSpider(Spider):
     name = "a1_hr"
     item_attributes = {"brand": "A1", "brand_wikidata": "Q688755"}
     allowed_domains = ["www.a1.hr"]
-    start_urls = ["https://www.a1.hr/prodajna-mjesta?p_p_id=pos_WAR_pos&p_p_lifecycle=2&p_p_state=normal&p_p_mode=view&p_p_resource_id=searchPos&p_p_cacheability=cacheLevelPage"]
+    start_urls = [
+        "https://www.a1.hr/prodajna-mjesta?p_p_id=pos_WAR_pos&p_p_lifecycle=2&p_p_state=normal&p_p_mode=view&p_p_resource_id=searchPos&p_p_cacheability=cacheLevelPage"
+    ]
 
     def start_requests(self):
         for url in self.start_urls:
-            yield Request(url=url, body="query=&tipprikaza=lista&types=center&types=partner", headers={"Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"}, method="POST")
+            yield Request(
+                url=url,
+                body="query=&tipprikaza=lista&types=center&types=partner",
+                headers={"Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"},
+                method="POST",
+            )
 
     def parse(self, response):
         for location in response.json()["result"]:
