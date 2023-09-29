@@ -58,7 +58,7 @@ class CircleKSpider(Spider):
                 # default category
                 apply_category(Categories.SHOP_CONVENIENCE, item)
             if "ev_charger" in services or "EU_HIGH_SPEED_CHARGER" in services:
-                apply_category(Categories.CHARGING_STATION, item)            
+                apply_category(Categories.CHARGING_STATION, item)
             yield item
 
         if response.json()["count"] < 10:
