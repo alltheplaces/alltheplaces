@@ -14,7 +14,7 @@ class HSamuelGBSpider(CrawlSpider, StructuredDataSpider):
     rules = [Rule(LinkExtractor(allow="/store/"), callback="parse_sd")]
 
     def post_process_item(self, item, response, ld_data, **kwargs):
-        item["extras"]["branch"] = item.pop("name")
+        item["branch"] = item.pop("name")
 
         data = chompjs.parse_js_object(response.xpath('//script[contains(text(), "storeInformation")]/text()').get())
         item["street_address"] = clean_address([data["line1"], data["line2"]])

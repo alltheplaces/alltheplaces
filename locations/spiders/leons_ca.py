@@ -16,6 +16,6 @@ class LeonsCASpider(Spider):
         for location in response.json()["stores"]:
             location["street_address"] = clean_address([location.pop("address"), location.pop("address2")])
             item = DictParser.parse(location)
-            item["extras"]["branch"] = item.pop("name")
+            item["branch"] = item.pop("name")
 
             yield item

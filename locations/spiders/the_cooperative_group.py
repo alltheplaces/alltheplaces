@@ -1,5 +1,6 @@
 from scrapy.spiders import SitemapSpider
 
+from locations.categories import Categories, apply_category
 from locations.linked_data_parser import LinkedDataParser
 
 
@@ -28,6 +29,7 @@ class TheCooperativeGroupSpider(SitemapSpider):
             return
 
         item["ref"] = item["website"]
+        apply_category(Categories.SHOP_CONVENIENCE, item)
 
         return item
 
@@ -38,5 +40,6 @@ class TheCooperativeGroupSpider(SitemapSpider):
             return
 
         item["ref"] = item["website"]
+        apply_category(Categories.SHOP_FUNERAL_DIRECTORS, item)
 
         return item
