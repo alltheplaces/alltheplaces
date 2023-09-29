@@ -33,7 +33,9 @@ class A1MKSpider(Spider):
             item["city"] = location["city"].get("nameMK")
             item["opening_hours"] = OpeningHours()
             if location.get("workingWeekWorkPeriod") and location["workingWeekWorkPeriod"].strip() != "-":
-                item["opening_hours"].add_days_range(["Mo", "Tu", "We", "Th", "Fr"], *location["workingWeekWorkPeriod"].split(" - "), "%H:%M")
+                item["opening_hours"].add_days_range(
+                    ["Mo", "Tu", "We", "Th", "Fr"], *location["workingWeekWorkPeriod"].split(" - "), "%H:%M"
+                )
             if location.get("saturdayWorkingPeriod") and location["saturdayWorkingPeriod"].strip() != "-":
                 item["opening_hours"].add_range("Sa", *location["saturdayWorkingPeriod"].split(" - "), "%H:%M")
             if location.get("sundayWorkingPeriod") and location["sundayWorkingPeriod"].strip() != "-":
