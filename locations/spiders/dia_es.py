@@ -51,5 +51,5 @@ class DiaESSpider(Spider):
                 properties["opening_hours"].add_range(DAYS[int(day_number) - 1], *day_hours.split(" - ", 1), "%H:%M")
 
         apply_category(Categories.SHOP_SUPERMARKET, properties)
-        
+
         yield Feature(**properties)
