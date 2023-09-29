@@ -25,7 +25,7 @@ class AsdaGBSpider(VirtualEarthSpider):
 
         if feature["asda_store_type"] == "Living":
             item["name"] = item["name"].replace("Living", "").strip()
-        item["extras"]["branch"] = item.pop("name")
+        item["branch"] = item.pop("name")
 
         item["ref"] = feature["imp_id"]
         item["street_address"] = feature["street"]

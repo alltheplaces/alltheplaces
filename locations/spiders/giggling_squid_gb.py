@@ -18,7 +18,7 @@ class GigglingSquidGBSpider(Spider):
             item["ref"] = location["id"]
             item["lat"] = location["coordinates"]["lat"]
             item["lon"] = location["coordinates"]["long"]
-            item["extras"]["branch"] = location["name"]
+            item["branch"] = location["name"]
             item["image"] = urljoin("https://www.gigglingsquid.com/", location["listImage"])
             item["addr_full"] = clean_address(location["address"])
             item["phone"] = location["phone"]

@@ -11,6 +11,7 @@ class Feature(scrapy.Item):
     lon = scrapy.Field()
     geometry = scrapy.Field()
     name = scrapy.Field()
+    branch = scrapy.Field()
     addr_full = scrapy.Field()
     housenumber = scrapy.Field()
     street = scrapy.Field()
