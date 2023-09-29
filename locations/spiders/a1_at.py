@@ -23,7 +23,11 @@ class A1ATSpider(Spider):
                 continue
             item = DictParser.parse(location)
             item["street_address"] = item.pop("addr_full", None)
-            yield JsonRequest(url=f'https://www.a1.net/o/gucci/widgets/apis/shopfinder/bff/microservice-shopfinder/shop/detail/id/{item["ref"]}', meta={"item": item}, callback=self.parse_store)
+            yield JsonRequest(
+                url=f'https://www.a1.net/o/gucci/widgets/apis/shopfinder/bff/microservice-shopfinder/shop/detail/id/{item["ref"]}',
+                meta={"item": item},
+                callback=self.parse_store,
+            )
 
     def parse_store(self, response):
         item = response.meta["item"]
@@ -33,5 +37,7 @@ class A1ATSpider(Spider):
         item["website"] = location.get("url")
         item["opening_hours"] = OpeningHours()
         for day_hours in response.json().get("hoursShops", []):
-            item["opening_hours"].add_range(DAYS_AT[day_hours["days"]], day_hours["tsFrom"], day_hours["tsTo"], "%H%M%S")
+            item["opening_hours"].add_range(
+                DAYS_AT[day_hours["days"]], day_hours["tsFrom"], day_hours["tsTo"], "%H%M%S"
+            )
         yield item
