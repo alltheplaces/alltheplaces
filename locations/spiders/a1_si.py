@@ -1,5 +1,4 @@
 from chompjs import parse_js_object
-
 from scrapy import Spider
 
 from locations.dict_parser import DictParser
@@ -13,7 +12,12 @@ class A1SISpider(Spider):
     start_urls = ["https://www.a1.si/pomoc-in-informacije/prodajna-mesta"]
 
     def parse(self, response):
-        locations_js = response.xpath('//script[contains(text(), "var shopBranchList = ")]/text()').get().split("var shopBranchList = ", 1)[1].split("var savedFilters=[];", 1)[0]
+        locations_js = (
+            response.xpath('//script[contains(text(), "var shopBranchList = ")]/text()')
+            .get()
+            .split("var shopBranchList = ", 1)[1]
+            .split("var savedFilters=[];", 1)[0]
+        )
         locations = parse_js_object(locations_js)
         for location in locations:
             if location["type"] != 0 and location["type"] != 1:
