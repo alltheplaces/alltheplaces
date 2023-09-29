@@ -47,10 +47,15 @@ class CvsUSSpider(SitemapSpider, StructuredDataSpider):
             # Default to CVS Pharmacy
             item["brand"], item["brand_wikidata"] = PHARMACY_BRANDS.get("CVS Pharmacy")
 
-        hours = {
-            f'opening_hours:{dept["name"]}': self.parse_hours(dept["regHours"])
-            for dept in data["cvsStoreDetails"]["hours"]["departments"]
-        }
+        hours = {}
+        for dept in data["cvsStoreDetails"]["hours"]["departments"]:
+            dept_name = dept["name"]
+            try:
+                hours[f'opening_hours:{dept_name}'] = self.parse_hours(dept["regHours"])
+            except Exception as e:
+                self.logger.warning(f"Failed to parse hours for '{dept_name}': {hours}, {e}")
+                self.crawler.stats.inc_value("atp/cvs_us/hours/failed")
+
         item["extras"].update(hours)
 
         # Most stores have retail, with the exception of those located inside
@@ -62,27 +67,23 @@ class CvsUSSpider(SitemapSpider, StructuredDataSpider):
         yield item
 
     def parse_hours(self, hours):
-        try:
-            opening_hours = OpeningHours()
-            for row in hours:
-                if row["startTime"] == "Open 24 Hours":
-                    row["startTime"] = "12:00 AM"
-                if row["endTime"] == "Open 24 Hours":
-                    row["endTime"] = "11:59 PM"
+        opening_hours = OpeningHours()
+        for row in hours:
+            if row["startTime"] == "Open 24 Hours":
+                row["startTime"] = "12:00 AM"
+            if row["endTime"] == "Open 24 Hours":
+                row["endTime"] = "11:59 PM"
 
-                if {"breakStart", "breakEnd"} <= row.keys():
-                    intervals = [
-                        (row["startTime"], row["breakStart"]),
-                        (row["breakEnd"], row["endTime"]),
-                    ]
-                else:
-                    intervals = [
-                        (row["startTime"], row["endTime"]),
-                    ]
-                for open_time, close_time in intervals:
-                    opening_hours.add_range(row["weekday"], open_time, close_time, "%I:%M %p")
-            return opening_hours.as_opening_hours()
-        except:
-            self.logger.warning(f"Failed to parse hours: {hours}")
-            self.crawler.stats.inc_value("atp/cvs_us/hours/failed")
-            return None
+            if {"breakStart", "breakEnd"} <= row.keys():
+                intervals = [
+                    (row["startTime"], row["breakStart"]),
+                    (row["breakEnd"], row["endTime"]),
+                ]
+            else:
+                intervals = [
+                    (row["startTime"], row["endTime"]),
+                ]
+            for open_time, close_time in intervals:
+                opening_hours.add_range(row["weekday"], open_time, close_time, "%I:%M %p")
+        return opening_hours.as_opening_hours()
+        
