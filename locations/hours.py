@@ -405,8 +405,9 @@ DAYS_RO = {
 
 DAYS_SR = {
     "Pon": "Mo",
-    "Ponedjeljak": "Mo",
+    "Ponedeljak": "Mo",
     "Ponediljak": "Mo",
+    "Ponedjeljak": "Mo",
     "Понедељак": "Mo",
     "Понеделник": "Mo",
     "Uto": "Tu",
