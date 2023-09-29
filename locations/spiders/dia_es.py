@@ -3,8 +3,8 @@ from gzip import decompress
 
 from scrapy import Request, Spider
 from scrapy.http import JsonRequest
-from locations.categories import Categories, apply_category
 
+from locations.categories import Categories, apply_category
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 
@@ -49,7 +49,7 @@ class DiaESSpider(Spider):
                     )
             else:
                 properties["opening_hours"].add_range(DAYS[int(day_number) - 1], *day_hours.split(" - ", 1), "%H:%M")
-        
+
         item = Feature(**properties)
         apply_category(Categories.SHOP_SUPERMARKET, item)
         yield item
