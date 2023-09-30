@@ -67,7 +67,7 @@ class CostPlusWorldMarketSpider(scrapy.Spider):
 
         properties = {
             "name": "".join(response.xpath('//span[@class="location-info-header-namee"]/text()').extract()),
-            "addr_full": " ".join(response.xpath('//span[@itemprop="streetAddress"]/text()').extract()),
+            "street_address": " ".join(response.xpath('//span[@itemprop="streetAddress"]/text()').extract()),
             "city": (response.xpath('//span[@itemprop="addressLocality"]/text()').extract_first() or "").strip(","),
             "state": response.xpath('//abbr[@itemprop="addressRegion"]/text()').extract_first(),
             "postcode": (response.xpath('//span[@itemprop="postalCode"]/text()').extract_first() or "").strip(),

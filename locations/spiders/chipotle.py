@@ -86,7 +86,7 @@ class ChipotleSpider(scrapy.Spider):
         properties = {
             "ref": "_".join(re.search(r".+/(.+?)/(.+?)/(.+?)/?(?:\.html|$)", response.url).groups()),
             "name": response.xpath('//*[@itemprop="name"]/text()').extract_first(),
-            "addr_full": response.xpath('//*[@class="c-address-street-1"]/text()').extract_first(),
+            "street_address": response.xpath('//*[@class="c-address-street-1"]/text()').extract_first(),
             "city": response.xpath('//*[@class="c-address-city"]/text()').extract_first(),
             "state": response.xpath('//*[@itemprop="addressRegion"]/text()').extract_first(),
             "postcode": response.xpath('//*[@itemprop="postalCode"]/text()').extract_first(),

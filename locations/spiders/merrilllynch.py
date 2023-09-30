@@ -18,7 +18,7 @@ class MerrillLynchSpider(scrapy.Spider):
             properties = {
                 "ref": location["UniqueId"],
                 "name": location["Company"],
-                "addr_full": location["Address1"].strip(),
+                "street_address": location["Address1"].strip(),
                 "city": location["City"],
                 "state": location["Region"],
                 "country": location["Country"],

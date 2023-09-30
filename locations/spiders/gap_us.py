@@ -1,14 +1,7 @@
 from scrapy.spiders import SitemapSpider
 
-from locations.categories import Categories, Clothes, apply_category, apply_yes_no
-from locations.items import Feature
+from locations.categories import Categories, Clothes, apply_category, apply_clothes
 from locations.structured_data_spider import StructuredDataSpider
-
-
-def apply_clothes(clothes: [str], item: Feature):
-    for c in clothes:
-        apply_yes_no(f"clothes:{c}", item, True)
-    item["extras"]["clothes"] = ";".join(clothes)
 
 
 class GapUSSpider(SitemapSpider, StructuredDataSpider):

@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.hours import OpeningHours
+from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import Feature
 
 
@@ -49,26 +49,13 @@ class ChiquitoSpider(scrapy.Spider):
             }
             oh = OpeningHours()
 
-            for day in [
-                "Monday",
-                "Tuesday",
-                "Wednesday",
-                "Thursday",
-                "Friday",
-                "Saturday",
-                "Sunday",
-            ]:
+            for day in DAYS_FULL:
                 open_time = self.parse_time(store["fields"]["open" + day].split("-")[0])
                 close_time = self.parse_time(store["fields"]["open" + day].split("-")[1])
 
-                oh.add_range(
-                    day[0:2],
-                    open_time,
-                    close_time,
-                    "%I:%M%p",
-                )
+                oh.add_range(day, open_time, close_time, "%I:%M%p")
 
-            properties["opening_hours"] = oh.as_opening_hours()
+            properties["opening_hours"] = oh
 
             yield Feature(**properties)
 
@@ -76,8 +63,9 @@ class ChiquitoSpider(scrapy.Spider):
         time = time.strip()
         if "." in time:
             time = time.replace(".", ":")
-        else:
-            if len(time) == 3:
-                time = "0" + time
+
+        if len(time) == 3:
+            time = "0" + time
+        if ":" not in time:
             time = time[0:2] + ":00" + time[2:]
         return time

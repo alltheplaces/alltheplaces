@@ -23,7 +23,7 @@ class GenghisGrillSpider(scrapy.Spider):
         properties = {
             "ref": ref,
             "name": data["name"].replace("About ", ""),
-            "addr_full": data["address"]["streetAddress"],
+            "street_address": data["address"]["streetAddress"],
             "city": data["address"]["addressLocality"],
             "postcode": data["address"]["postalCode"],
             "state": data["address"]["addressRegion"],
@@ -41,7 +41,10 @@ class GenghisGrillSpider(scrapy.Spider):
 
         hours = response.xpath("//script/text()[contains(., 'Primary Hours')]").extract_first()
 
-        hours_dict = json.loads(re.search(r'"days":(.*]})', hours).group(1))
+        m = re.search(r'"days":(.*]})', hours)
+        if not m:
+            return
+        hours_dict = json.loads(m.group(1))
         for day, times in hours_dict.items():
             if times == "closed":
                 continue

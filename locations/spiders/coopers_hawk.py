@@ -26,7 +26,7 @@ class CoopersHawkSpider(scrapy.Spider):
                 lon=marker["locations"][0]["lng"],
                 ref=marker["locations"][0]["id"].split("-")[0],
                 name=content.css(".location-capsule__heading::text").get().strip(),
-                addr_full=address_lines[0].strip(),
+                street_address=address_lines[0].strip(),
                 city=city_name,
                 state=state,
                 postcode=postcode,

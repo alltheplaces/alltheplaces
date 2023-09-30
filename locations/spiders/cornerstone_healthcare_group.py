@@ -17,7 +17,7 @@ class CornerstoneHealthcareGroupSpider(scrapy.Spider):
         for i, item in enumerate(data):
             properties = {
                 "name": item["title"]["rendered"],
-                "addr_full": item["acf"]["address"],
+                "street_address": item["acf"]["address"],
                 "city": item["acf"]["city"],
                 "state": item["acf"]["state"],
                 "postcode": item["acf"]["zip"],

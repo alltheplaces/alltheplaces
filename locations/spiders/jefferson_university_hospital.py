@@ -12,7 +12,7 @@ class JeffersonUniversityHospitalSpider(scrapy.Spider):
     }
     allowed_domains = ["jeffersonhealth.org", "jeffersonhealth-prod.searchstax.com"]
     user_agent = BROWSER_DEFAULT
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    custom_settings = {"ROBOTSTXT_OBEY": False, "REDIRECT_ENABLED": False}
 
     def start_requests(self):
         url = "https://jeffersonhealth-prod.searchstax.com/solr/jh-prod/search-name-location?rows=10&start=0&fq=content_type:health2021/content-type/location"

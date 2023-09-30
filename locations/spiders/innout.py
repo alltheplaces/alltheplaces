@@ -29,7 +29,7 @@ class InNOutSpider(scrapy.Spider):
 
             properties = {
                 "name": name,
-                "addr_full": addr_full,
+                "street_address": addr_full,
                 "city": city,
                 "state": state,
                 "postcode": zipcode,

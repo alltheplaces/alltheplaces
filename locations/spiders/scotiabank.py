@@ -3,8 +3,10 @@ import math
 
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.searchable_points import open_searchable_points
 
 
 def calculate_offset_point(x, y, d, b):
@@ -30,16 +32,15 @@ def calculate_offset_point(x, y, d, b):
 
 class ScotiabankSpider(scrapy.Spider):
     name = "scotiabank"
-    download_delay = 1.0
     allowed_domains = ["scotiabank.com"]
-    item_attributes = {"brand": "Scotiabank", "brand_wikidata": "Q451476"}
+    item_attributes = {"brand": "Scotiabank", "brand_wikidata": "Q451476", "extras": Categories.BANK.value}
     base_url = "https://mapsms.scotiabank.com/branches?1=1&latitude={lat}&longitude={lon}&recordlimit=20&locationtypes=1&options=&languagespoken=any&language=en&address=&province=&city="
     refs = set()
 
     custom_settings = {"DEFAULT_REQUEST_HEADERS": {"Accept": "application/json"}}
 
     def start_requests(self):
-        with open("./locations/searchable_points/ca_centroids_100mile_radius.csv") as points:
+        with open_searchable_points("ca_centroids_100mile_radius.csv") as points:
             reader = csv.DictReader(points)
             for row in reader:
                 lat, lon = row["latitude"], row["longitude"]

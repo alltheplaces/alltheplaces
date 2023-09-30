@@ -24,7 +24,7 @@ class ErbertandGerbertsSpider(scrapy.Spider):
         properties = {
             "name": response.xpath('//h1[@class="ph__title text-cursive mb0"]/text()').extract_first(),
             "ref": response.xpath('//h1[@class="ph__title text-cursive mb0"]/text()').extract_first(),
-            "addr_full": response.xpath("//address[@class]/text()").extract_first(),
+            "street_address": response.xpath("//address[@class]/text()").extract_first(),
             "city": response.xpath("//address[@class]/text()").extract()[1].split(",")[0],
             "state": response.xpath("//address[@class]/text()").extract()[1].split()[-2],
             "postcode": response.xpath("//address[@class]/text()").extract()[1].split()[-1],

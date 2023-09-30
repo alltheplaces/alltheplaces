@@ -80,6 +80,10 @@ def test_place():
         57.137275,
         -2.098053,
     )
+    assert url_to_coords("https://www.google.com/maps/place/185+S+Frontage+Rd,+Indian+Springs,+NV+89018") == (
+        None,
+        None,
+    )
 
 
 def test_search():

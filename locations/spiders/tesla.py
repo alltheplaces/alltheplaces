@@ -1,21 +1,15 @@
 import re
-import urllib.parse
 
 import scrapy
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
-from locations.items import Feature
 
 
 class TeslaSpider(scrapy.Spider):
     name = "tesla"
     item_attributes = {"brand": "Tesla", "brand_wikidata": "Q478214"}
-
-    download_delay = 0.5
-    custom_settings = {
-        "USER_AGENT": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.86 Safari/537.36",
-    }
+    requires_proxy = True
 
     def start_requests(self):
         yield scrapy.Request(

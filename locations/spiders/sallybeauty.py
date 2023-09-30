@@ -5,6 +5,7 @@ from scrapy.selector import Selector
 
 from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.searchable_points import open_searchable_points
 
 
 class SallyBeautySpider(scrapy.Spider):
@@ -16,8 +17,8 @@ class SallyBeautySpider(scrapy.Spider):
         base_url = "https://www.sallybeauty.com/on/demandware.store/Sites-SA-Site/default/Stores-FindStores?"
 
         point_files = [
-            "./locations/searchable_points/us_centroids_100mile_radius.csv",
-            "./locations/searchable_points/ca_centroids_100mile_radius.csv",
+            "us_centroids_100mile_radius.csv",
+            "ca_centroids_100mile_radius.csv",
         ]
 
         params = {
@@ -26,7 +27,7 @@ class SallyBeautySpider(scrapy.Spider):
         }
 
         for point_file in point_files:
-            with open(point_file) as points:
+            with open_searchable_points(point_file) as points:
                 next(points)
                 for point in points:
                     _, lat, lon = point.strip().split(",")

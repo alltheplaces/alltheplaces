@@ -35,7 +35,7 @@ class QuiznosSpider(scrapy.Spider):
                 "phone": store["phone_number"],
                 "name": store["name"],
                 "opening_hours": hours.as_opening_hours(),
-                "addr_full": store["address_line_1"],
+                "street_address": store["address_line_1"],
                 "extras": {"addr:suite": store["address_line_2"]},
                 "city": store["city"],
                 "state": store["province"],

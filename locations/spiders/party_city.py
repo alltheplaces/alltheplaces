@@ -38,7 +38,7 @@ class PartyCitySpider(scrapy.Spider):
             properties = {
                 "ref": ref,
                 "name": response.xpath('(//span[@class="location-name fc-black bold"])[1]/text()').extract_first(),
-                "addr_full": data.get("address").get("streetAddress").strip(),
+                "street_address": data.get("address").get("streetAddress").strip(),
                 "city": data.get("address").get("addressLocality").strip(),
                 "state": data.get("address").get("addressRegion").strip(),
                 "country": response.xpath(
@@ -77,7 +77,7 @@ class PartyCitySpider(scrapy.Spider):
         properties = {
             "ref": ref,
             "name": name,
-            "addr_full": street_address,
+            "street_address": street_address,
             "city": city,
             "state": state,
             "country": country,

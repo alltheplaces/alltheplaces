@@ -7,7 +7,7 @@ class CarrefourFRSpider(WoosmapSpider):
     item_attributes = {"brand": "Carrefour", "brand_wikidata": "Q217599"}
 
     key = "woos-26fe76aa-ff24-3255-b25b-e1bde7b7a683"
-    custom_settings = {"DEFAULT_REQUEST_HEADERS": {"Origin": "https://www.carrefour.fr"}}
+    origin = "https://www.carrefour.fr"
 
     brands = {
         "CARREFOUR CITY": {"brand": "Carrefour City", "brand_wikidata": "Q2940187"},

@@ -3,6 +3,7 @@ import json
 import scrapy
 
 from locations.items import Feature
+from locations.searchable_points import open_searchable_points
 
 
 class PrimroseSchoolsSpider(scrapy.Spider):
@@ -13,7 +14,7 @@ class PrimroseSchoolsSpider(scrapy.Spider):
     start_urls = ["https://www.primroseschools.com/find-a-school/"]
 
     def parse(self, response):
-        with open("./locations/searchable_points/us_centroids_50mile_radius.csv") as points:
+        with open_searchable_points("us_centroids_50mile_radius.csv") as points:
             next(points)
             for point in points:
                 row = point.replace("\n", "").split(",")

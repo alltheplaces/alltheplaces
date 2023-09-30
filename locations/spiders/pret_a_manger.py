@@ -32,12 +32,10 @@ class PretAMangerSpider(scrapy.Spider):
                     if len(rule) != 2:
                         continue
 
-                    if rule[0] == "0:00AM":
-                        rule[0] = "12:00AM"
-                    if rule[1] == "0:00AM":
-                        rule[1] = "12:00AM"
-                    if rule[0] == "0:01AM":
-                        rule[0] = "12:01AM"
+                    if rule[0].startswith("0:"):
+                        rule[0] = rule[0].replace("0:", "12:", 1)
+                    if rule[1].startswith("0:"):
+                        rule[1] = rule[1].replace("0:", "12:", 1)
 
                     oh.add_range(DAYS[i], rule[0], rule[1], "%I:%M%p")
 

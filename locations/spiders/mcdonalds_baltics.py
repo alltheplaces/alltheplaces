@@ -13,7 +13,6 @@ class McDonaldsBalticsSpider(scrapy.spiders.SitemapSpider):
         "https://mcd.lt/location-sitemap.xml",
         "https://mcdonalds.lv/location-sitemap.xml",
     ]
-    download_delay = 1.0
 
     def parse(self, response):
         item = OpenGraphParser.parse(response)

@@ -8,10 +8,15 @@ from locations.dict_parser import DictParser
 class CaffeNeroSpider(Spider):
     name = "caffe_nero"
     item_attributes = {"brand": "Caffe Nero", "brand_wikidata": "Q675808"}
-    start_urls = ["https://caffenero.com/uk/stores/"]
+    allowed_domains = ["caffenero.com", "greencaffenero.pl"]
+    start_urls = ["https://caffenero.com/us/stores/"]
 
     def parse(self, response, **kwargs):
         for region in response.xpath('//li[@role="menuitem"]/a[not(@class="global")]/@href').getall():
+            # GB stores use a different store locator
+            if ".com/uk" in region:
+                continue
+            region = region.replace("http://", "https://")
             yield Request(url=f"{region}/stores/", callback=self.parse_country)
 
     def parse_country(self, response, **kwargs):

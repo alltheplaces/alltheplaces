@@ -5,6 +5,7 @@ import scrapy
 from locations.categories import Categories
 from locations.geo import MILES_TO_KILOMETERS, vincenty_distance
 from locations.items import Feature
+from locations.searchable_points import open_searchable_points
 
 DAYS_NAME = {
     "MO": "Mo",
@@ -34,7 +35,7 @@ class UspsCollectionBoxesSpider(scrapy.Spider):
     download_delay = 0.1
 
     def start_requests(self):
-        with open("./locations/searchable_points/us_centroids_100mile_radius.csv") as points:
+        with open_searchable_points("us_centroids_100mile_radius.csv") as points:
             next(points)
             for point in points:
                 _, lat, lon = tuple(map(float, point.strip().split(",")))

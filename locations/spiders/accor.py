@@ -1,10 +1,11 @@
+from locations.categories import Categories, apply_category
 from locations.storefinders.woosmap import WoosmapSpider
 
 
 class AccorSpider(WoosmapSpider):
     name = "accor"
     key = "accor-prod-woos"
-    custom_settings = {"DEFAULT_REQUEST_HEADERS": {"Origin": "https://accor.com/"}}
+    origin = "https://accor.com"
 
     brand_mapping = {
         "SUI": {"brand": "Novotel", "brand_wikidata": "Q420545"},
@@ -43,13 +44,40 @@ class AccorSpider(WoosmapSpider):
         "BKF": {"brand": "BreakFree Hotels", "brand_wikidata": "Q110936724"},
         "PEP": {"brand": "Peppers Hotels", "brand_wikidata": "Q110936677"},
         "MOD": {"brand": "Mondrian Hotel", "brand_wikidata": "Q6898825"},
+        "21C": {"brand": "21c Museum Hotels", "brand_wikidata": "Q4631016"},
+        "ANG": {"brand": "Angsana", "brand_wikidata": "Q115489061"},
+        "ART": {"brand": "Art Series", "brand_wikidata": "Q115489062"},
+        "DHA": {"brand": "Dhawa"},
+        "GRE": {"brand": "greet", "brand_wikidata": "Q115489066"},
+        "MTS": {"brand": "Mantis"},
+        "SO": {"brand": "SO/", "brand_wikidata": "Q115489077"},
+        "SOU": {"brand": "Handwritten Collection"},
+        "TRI": {"brand": "TRIBE", "brand_wikidata": "Q113694525"},
+        # Not branded but managed by Accor
+        "SAM": None,
+        # TODO:
+        # Table with brands by Accor: https://group.accor.com/en/sitemap
+        # "ASE": 1,
+        # "CAS": 3,
+        # "DEL": 1,
+        # "FAE": 1,
+        # "GAR": 1,
+        # "HOM": 2,
+        # "HOX": 1,
+        # "HYD": 2,
+        # "MOL": 2,
+        # "SLS": 7,
+        # "TST": 6,
     }
 
-    # Couldn't match:  "SAM", "GRE", "SO", "ASE", "RT", "HTG", "JIH", "JOY", "HII", "STA", "ELA", "ANG", "CAS",
-    # "ART", "TRI", "MTS", "21C", "SLS", "TOR", "FAE", "DHA", "HYD"
-
     def parse_item(self, item, feature, **kwargs):
-        if match := self.brand_mapping.get(feature["properties"]["types"][0]):
+        if "COMING SOON" in item["name"].upper():
+            return
+        brand_id = feature["properties"]["types"][0]
+        if match := self.brand_mapping.get(brand_id):
             item.update(match)
+        else:
+            self.crawler.stats.inc_value(f"atp/accor/unknown_brand/{brand_id}")
         item["website"] = f"https://all.accor.com/hotel/{item['ref']}/index.en.shtml"
+        apply_category(Categories.HOTEL, item)
         yield item

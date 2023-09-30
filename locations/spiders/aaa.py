@@ -2,6 +2,7 @@ from urllib.parse import urlencode
 
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.geo import point_locations
 from locations.items import Feature
 
@@ -13,7 +14,6 @@ class AAASpider(scrapy.Spider):
         "brand_wikidata": "Q463436",
     }
     allowed_domains = ["tdr.aaa.com"]
-    download_delay = 1.0
 
     def start_requests(self):
         point_files = [
@@ -51,4 +51,6 @@ class AAASpider(scrapy.Spider):
                 "lon": location["position"]["longitude"],
                 "phone": location["phones"].get("phone", {}).get("content"),
             }
-            yield Feature(**properties)
+            item = Feature(**properties)
+            apply_category(Categories.SHOP_TRAVEL_AGENCY, item)
+            yield item

@@ -1,7 +1,8 @@
-import json
 import re
 
+import geonamescache
 import scrapy
+from scrapy.http import JsonRequest
 
 from locations.hours import OpeningHours
 from locations.items import Feature
@@ -23,34 +24,11 @@ class FirehouseSubsSpider(scrapy.Spider):
     allowed_domains = ["firehousesubs.com"]
 
     def start_requests(self):
-        with open("./locations/searchable_points/us_centroids_25mile_radius.csv") as points:
-            next(points)  # Ignore the header
-            for point in points:
-                row = point.split(",")
-                lat = row[1]
-                lon = row[2]
-
-                url = f"https://www.firehousesubs.com/FindLocations/GetNearbyLocations/?maxRecords=250&latitude={lat}&longitude={lon}"
-
-                headers = {
-                    "Accept": "application/json, text/javascript, */*; q=0.01",
-                    "Accept-Encoding": "gzip, deflate, br",
-                    "Accept-Language": "en-US,en;q=0.9",
-                    "Host": "www.firehousesubs.com",
-                    "Referer": "https://www.firehousesubs.com/find-a-firehouse/",
-                    "X-Requested-With": "XMLHttpRequest",
-                }
-
-                yield scrapy.http.Request(url, self.parse, method="GET", headers=headers)
+        for state in geonamescache.GeonamesCache().get_us_states().keys() | ["PR"]:
+            yield JsonRequest(url=f"https://www.firehousesubs.com/FindLocations/GetLocationsByState/?state={state}")
 
     def parse(self, response):
-        body = response.text
-        if body is None:
-            return
-
-        result = json.loads(body)
-
-        for store_json_data in result:
+        for store_json_data in response.json():
             addr_full = None
             address = store_json_data.get("address")
             address2 = store_json_data.get("address2")
@@ -67,7 +45,7 @@ class FirehouseSubsSpider(scrapy.Spider):
                 # So use it instead.
                 "ref": store_json_data.get("id"),
                 "name": store_json_data.get("title"),
-                "addr_full": addr_full,
+                "street_address": addr_full,
                 "city": store_json_data.get("city"),
                 "state": store_json_data.get("state"),
                 "postcode": store_json_data.get("zip"),

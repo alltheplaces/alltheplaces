@@ -5,6 +5,8 @@ import math
 
 import geonamescache
 
+from locations.searchable_points import get_searchable_points_path, open_searchable_points
+
 # Radius of the Earth in kilometers
 EARTH_RADIUS = 6378.1
 # Kilometers per mile
@@ -34,10 +36,20 @@ def vincenty_distance(lat, lon, distance_km, bearing_deg):
     return math.degrees(lat2), math.degrees(lon2)
 
 
-# get_locations("eu_centroids_40km_radius_country.csv")
-# get_locations("eu_centroids_40km_radius_country.csv", ["GB", "IE"])
-# get_locations("us_centroids_50mile_radius_state.csv", "NY")
 def point_locations(areas_csv_file, area_field_filter=None):
+    """
+    Get point locations from requested *_centroids_*.csv file.
+
+    Usage examples:
+        point_locations("eu_centroids_40km_radius_country.csv")
+        point_locations("eu_centroids_40km_radius_country.csv", ["GB", "IE"])
+        point_locations("us_centroids_50mile_radius_state.csv", "NY")
+
+    :param areas_csv_file: CSV file with lat/lon points
+    :param area_field_filter: optional list of area names to filter on
+
+    """
+
     def get_key(row, keys):
         for key in keys:
             if row.get(key):
@@ -49,8 +61,8 @@ def point_locations(areas_csv_file, area_field_filter=None):
     if area_field_filter and type(area_field_filter) is not list:
         area_field_filter = [area_field_filter]
     for csv_file in areas_csv_file:
-        with open("./locations/searchable_points/{}".format(csv_file)) as points:
-            for row in csv.DictReader(points):
+        with open_searchable_points("{}".format(csv_file)) as file:
+            for row in csv.DictReader(file):
                 lat, lon = row["latitude"], row["longitude"]
                 if not lat or not lon:
                     raise Exception("missing lat/lon in file")
@@ -90,7 +102,7 @@ def postal_regions(country_code):
     :return: post code regions with possible extras
     """
     if country_code == "GB":
-        with gzip.open("./locations/searchable_points/postcodes/outward_gb.json.gz") as points:
+        with gzip.open(get_searchable_points_path("postcodes/outward_gb.json.gz")) as points:
             for outward_code in json.load(points):
                 yield {
                     "postal_region": outward_code["postcode"],
@@ -110,7 +122,7 @@ def postal_regions(country_code):
         # easily found though links on the root domain. The link must be clearly visible to the human eye.
         # The backlink must be placed before the Customer uses the Database in production.
         #
-        with gzip.open("./locations/searchable_points/postcodes/uszips.csv.gz", mode="rt") as points:
+        with gzip.open(get_searchable_points_path("postcodes/uszips.csv.gz"), mode="rt") as points:
             for row in csv.DictReader(points):
                 yield {
                     "postal_region": row["zip"],
@@ -123,7 +135,7 @@ def postal_regions(country_code):
     elif country_code == "FR":
         # French postal code database from https://datanova.legroupe.laposte.fr
 
-        with gzip.open("./locations/searchable_points/postcodes/frzips.csv.gz", mode="rt") as points:
+        with gzip.open(get_searchable_points_path("postcodes/frzips.csv.gz"), mode="rt") as points:
             for row in csv.DictReader(points):
                 yield {
                     "postal_region": row["Code_postal"],
@@ -197,3 +209,24 @@ def bbox_to_geojson(bounds):
         "coordinates": [[[xmin, ymin], [xmin, ymax], [xmax, ymax], [xmax, ymin], [xmin, ymin]]],
     }
     return polygon
+
+
+def country_coordinates(return_lookup=False):
+    """
+    Return a list of records with ISO 3166-2 alpha-2 country codes and
+    coordinates approximating a centroid of the largest landmass
+    or multiple largest landmasses for countries with multiple
+    landmasses.
+
+    This is useful for supplying coordinates of a country to an API
+    that then expects to reverse geocode a country from the supplied
+    coordinates.
+
+    :return A list of ISO 3166-2 alpha-2 country codes with corresponding latitude and longitude for each country.
+            If return_lookup is True, return a dict of ISO 3166-2 alpha-2 to (lat, lon) instead.
+    """
+    file = json.load(open_searchable_points("country_coordinates.json"))
+    if return_lookup:
+        return {row["isocode"]: (row["lat"], row["lon"]) for row in file}
+    else:
+        return file

@@ -1,53 +1,46 @@
 import scrapy
 
-from locations.hours import OpeningHours
-from locations.items import Feature
-
-DAY_MAPPING = {1: "Mo", 2: "Tu", 3: "We", 4: "Th", 5: "Fr", 6: "Sa", 7: "Su"}
-
-COUNTRY_MAPPING = {"DE": "Germany"}
+from locations.categories import Categories, apply_category
+from locations.dict_parser import DictParser
+from locations.hours import DAYS, OpeningHours
 
 
 class DmSpider(scrapy.Spider):
     name = "dm"
     item_attributes = {"brand": "dm", "brand_wikidata": "Q266572"}
     allowed_domains = ["store-data-service.services.dmtech.com"]
-    start_urls = ["https://store-data-service.services.dmtech.com/stores/bbox/" "85.999%2C-179.999%2C-89.999%2C179.999"]
-    download_delay = 0.2
+    start_urls = ["https://store-data-service.services.dmtech.com/stores/bbox/89.999,-179.999,-89.999,179.999"]
 
-    def parse_hours(self, store_hours):
+    @staticmethod
+    def parse_hours(store_hours: [dict]) -> OpeningHours:
         opening_hours = OpeningHours()
-        if store_hours is None:
-            return
 
         for store_day in store_hours:
-            day = DAY_MAPPING[store_day.get("weekDay")]
-            open_time = store_day["timeRanges"][0]["opening"]
-            close_time = store_day["timeRanges"][0]["closing"]
+            for times in store_day["timeRanges"]:
+                open_time = times["opening"]
+                close_time = times["closing"]
 
-            if open_time is None and close_time is None:
-                continue
-            opening_hours.add_range(day=day, open_time=open_time, close_time=close_time, time_format="%H:%M")
+                opening_hours.add_range(DAYS[store_day["weekDay"] - 1], open_time, close_time)
 
-        return opening_hours.as_opening_hours()
+        return opening_hours
 
-    def parse(self, response):
-        stores = response.json()
-        for store in stores["stores"]:
-            if store["localeCountry"] in COUNTRY_MAPPING:
-                properties = {
-                    "country": COUNTRY_MAPPING[store["localeCountry"]],
-                    "ref": store["storeNumber"],
-                    "phone": store["phone"],
-                    "name": store["address"]["name"],
-                    "street": store["address"]["street"],
-                    "postcode": store["address"]["zip"],
-                    "city": store["address"]["city"],
-                    "lat": store["location"]["lat"],
-                    "lon": store["location"]["lon"],
-                }
-                hours = self.parse_hours(store["openingHours"])
-                if hours:
-                    properties["opening_hours"] = hours
+    def parse(self, response, **kwargs):
+        for location in response.json()["stores"]:
+            location["address"]["street_address"] = location["address"].pop("street")
+            location["address"]["country"] = location["countryCode"]
+            location["name"] = location["address"].get("name")
+            item = DictParser.parse(location)
+            if location["countryCode"] in ["BG", "BA", "IT"]:
+                item[
+                    "website"
+                ] = f'https://www.dm-drogeriemarkt.{location["countryCode"].lower()}/store{location["storeUrlPath"]}'
+            elif location["countryCode"] == "SK":
+                item["website"] = f'https://www.mojadm.sk/store{location["storeUrlPath"]}'
+            else:
+                item["website"] = f'https://www.dm.{location["countryCode"].lower()}/store{location["storeUrlPath"]}'
+            item["extras"]["check_date"] = location["updateTimeStamp"]
+            item["opening_hours"] = self.parse_hours(location["openingHours"])
 
-                yield Feature(**properties)
+            apply_category(Categories.SHOP_CHEMIST, item)
+
+            yield item

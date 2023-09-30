@@ -1,17 +1,8 @@
-from scrapy import Spider
-
-from locations.dict_parser import DictParser
+from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
 
 
-class BreWingzSpider(Spider):
+class BreWingzSpider(WPStoreLocatorSpider):
     name = "bre_wingz"
     item_attributes = {"brand": "BreWingz"}
-    start_urls = ["https://www.brewingz.com/wp-admin/admin-ajax.php?action=store_search&autoload=1"]
-
-    def parse(self, response):
-        for store in response.json():
-            item = DictParser.parse(store)
-
-            item["name"] = store["store"]
-
-            yield item
+    allowed_domains = ["www.brewingz.com"]
+    time_format = "%I:%M %p"

@@ -26,7 +26,7 @@ class CaliberHomeLoansSpider(scrapy.Spider):
                 properties = {
                     "ref": store["BranchID"],
                     "name": store["Name"],
-                    "addr_full": store["Address"],
+                    "street_address": store["Address"],
                     "city": store["City"],
                     "state": store["State"],
                     "postcode": store["ZipCode"],

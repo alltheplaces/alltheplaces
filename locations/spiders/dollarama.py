@@ -4,14 +4,12 @@ import scrapy
 
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
+from locations.searchable_points import open_searchable_points
 
 
 class DollaramaSpider(scrapy.Spider):
     name = "dollarama"
-    item_attributes = {
-        "brand": "Dollarama",
-        "brand_wikidata": "Q3033947",
-    }
+    item_attributes = {"brand": "Dollarama", "brand_wikidata": "Q3033947"}
     allowed_domains = ["dollarama.com"]
 
     def start_requests(self):
@@ -19,7 +17,7 @@ class DollaramaSpider(scrapy.Spider):
 
         params = {"distance": "100", "units": "miles"}
 
-        with open("./locations/searchable_points/ca_centroids_100mile_radius.csv") as points:
+        with open_searchable_points("ca_centroids_100mile_radius.csv") as points:
             next(points)
             for point in points:
                 _, lat, lon = point.strip().split(",")
@@ -51,10 +49,11 @@ class DollaramaSpider(scrapy.Spider):
             properties = {
                 "ref": row["LocationNumber"],
                 "name": row["Name"],
-                "addr_full": row["ExtraData"]["Address"]["AddressNonStruct_Line1"],
+                "street_address": row["ExtraData"]["Address"]["AddressNonStruct_Line1"],
                 "city": row["ExtraData"]["Address"]["Locality"],
                 "state": row["ExtraData"]["Address"]["Region"],
                 "postcode": row["ExtraData"]["Address"]["PostalCode"],
+                "country": row["ExtraData"]["Address"]["CountryCode"],
                 "lat": row["Location"]["coordinates"][1],
                 "lon": row["Location"]["coordinates"][0],
                 "phone": row["ExtraData"]["Phone"],

@@ -28,7 +28,7 @@ class DairyQueenSpider(scrapy.Spider):
 
             properties = {
                 "name": f'{store["address1"]} ({store["conceptType"]})',
-                "addr_full": store.get("address3"),
+                "street_address": store.get("address3"),
                 "phone": store.get("phone"),
                 "city": store.get("city"),
                 "state": store.get("stateProvince"),

@@ -58,7 +58,7 @@ class GiantEagleSpider(scrapy.Spider):
             properties = dict(
                 ref=store["Number"]["Value"],
                 name=store["Name"],
-                addr_full=self.parse_address(store["Address"]),
+                street_address=self.parse_address(store["Address"]),
                 lat=store["Address"]["Coordinates"]["Latitude"],
                 lon=store["Address"]["Coordinates"]["Longitude"],
                 country="US",

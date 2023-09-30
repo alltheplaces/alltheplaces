@@ -31,8 +31,9 @@ ROBOTSTXT_OBEY = True
 FEED_URI = os.environ.get("FEED_URI")
 FEED_FORMAT = os.environ.get("FEED_FORMAT")
 FEED_EXPORTERS = {
-    "geojson": "locations.exporters.GeoJsonExporter",
-    "ndgeojson": "locations.exporters.LineDelimitedGeoJsonExporter",
+    "geojson": "locations.exporters.geojson.GeoJsonExporter",
+    "ndgeojson": "locations.exporters.ld_geojson.LineDelimitedGeoJsonExporter",
+    "osm": "locations.exporters.osm.OSMExporter",
 }
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
@@ -66,9 +67,21 @@ TELNETCONSOLE_ENABLED = False
 
 # Enable or disable downloader middlewares
 # See http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html
-DOWNLOADER_MIDDLEWARES = {
-    "locations.middlewares.cdnstats.CDNStatsMiddleware": 500,
-}
+DOWNLOADER_MIDDLEWARES = {}
+
+if os.environ.get("ZYTE_API_KEY"):
+    DOWNLOAD_HANDLERS = {
+        "http": "scrapy_zyte_api.ScrapyZyteAPIDownloadHandler",
+        "https": "scrapy_zyte_api.ScrapyZyteAPIDownloadHandler",
+    }
+    DOWNLOADER_MIDDLEWARES = {
+        "locations.middlewares.zyte_api_by_country.ZyteApiByCountryMiddleware": 500,
+        "scrapy_zyte_api.ScrapyZyteAPIDownloaderMiddleware": 1000,
+    }
+    REQUEST_FINGERPRINTER_CLASS = "scrapy_zyte_api.ScrapyZyteAPIRequestFingerprinter"
+    TWISTED_REACTOR = "twisted.internet.asyncioreactor.AsyncioSelectorReactor"
+
+DOWNLOADER_MIDDLEWARES["locations.middlewares.cdnstats.CDNStatsMiddleware"] = 500
 
 # Enable or disable extensions
 # See http://scrapy.readthedocs.org/en/latest/topics/extensions.html
@@ -91,12 +104,15 @@ ITEM_PIPELINES = {
     "locations.pipelines.phone_clean_up.PhoneCleanUpPipeline": 360,
     "locations.pipelines.extract_gb_postcode.ExtractGBPostcodePipeline": 400,
     "locations.pipelines.assert_url_scheme.AssertURLSchemePipeline": 500,
+    "locations.pipelines.drop_logo.DropLogoPipeline": 550,
     "locations.pipelines.check_item_properties.CheckItemPropertiesPipeline": 600,
+    "locations.pipelines.closed.ClosePipeline": 650,
     "locations.pipelines.apply_nsi_categories.ApplyNSICategoriesPipeline": 700,
     "locations.pipelines.count_categories.CountCategoriesPipeline": 800,
     "locations.pipelines.count_brands.CountBrandsPipeline": 810,
 }
 
+LOG_FORMATTER = "locations.logformatter.DebugDuplicateLogFormatter"
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See http://doc.scrapy.org/en/latest/topics/autothrottle.html

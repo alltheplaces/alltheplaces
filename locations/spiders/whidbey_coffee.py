@@ -11,7 +11,6 @@ class WhidbeyCoffeeSpider(scrapy.Spider):
     name = "whidbeycoffee"
     item_attributes = {"brand": "Whidbey Coffee"}
     allowed_domains = ["www.whidbeycoffee.com"]
-    download_delay = 1
     start_urls = ("https://www.whidbeycoffee.com/sitemap_pages_1.xml",)
 
     def parse(self, response):

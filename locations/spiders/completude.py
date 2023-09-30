@@ -27,7 +27,7 @@ class CompletudeSpider(scrapy.Spider):
 
             properties = {
                 "ref": ref.strip("/"),
-                "addr_full": address_data[0].strip(),
+                "street_address": address_data[0].strip(),
                 "city": city,
                 "postcode": postal,
                 "phone": response.xpath('//ul[@class="list-contacts"]/li[1]/a/span/text()').extract_first(),

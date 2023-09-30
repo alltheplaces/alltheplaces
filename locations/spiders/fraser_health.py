@@ -25,7 +25,7 @@ class FraserHealthSpider(scrapy.Spider):
         properties = {
             "ref": response.meta["ref"],
             "name": response.xpath('//*[@class="title field-title field-title"]/a/@title').extract_first(),
-            "addr_full": response.xpath('//*[@class="field-address"]/text()').extract_first(),
+            "street_address": response.xpath('//*[@class="field-address"]/text()').extract_first(),
             "city": response.xpath('//*[@class="field-title"]/a/@title').extract_first(),
             "state": state,
             "postcode": response.xpath('//*[@class="postal-code field-postalcode"]/text()').extract_first(),

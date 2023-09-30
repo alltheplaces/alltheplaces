@@ -13,14 +13,29 @@ from locations.items import Feature
 class Categories(Enum):
     BICYCLE_PARKING = {"amenity": "bicycle_parking"}
     BICYCLE_RENTAL = {"amenity": "bicycle_rental"}
+    CAR_RENTAL = {"amenity": "car_rental"}
+    CAR_WASH = {"amenity": "car_wash"}
+    PARKING = {"amenity": "parking"}
 
     BUS_STOP = {"highway": "bus_stop", "public_transport": "platform"}
     BUS_STATION = {"amenity": "bus_station", "public_transport": "station"}
+    TRAIN_STATION = {"railway": "station"}
 
     BOWLING = {"leisure": "bowling_alley"}
     GYM = {"leisure": "fitness_centre"}
+    SAUNA = {"leisure": "sauna"}
 
     HIGHWAY_RESIDENTIAL = {"highway": "residential"}
+
+    CRAFT_CARPENTER = {"craft": "carpenter"}
+    CRAFT_CLOCKMAKER = {"craft": "clockmaker"}
+    CRAFT_ELECTRONICS_REPAIR = {"craft": "electronics_repair"}
+    CRAFT_JEWELLER = {"craft": "jeweller"}
+    CRAFT_KEY_CUTTER = {"craft": "key_cutter"}
+    CRAFT_TAILOR = {"craft": "tailor"}
+    CRAFT_SHOEMAKER = {"craft": "shoemaker"}
+
+    LEISURE_PLAYGROUND = {"leisure": "playground"}
 
     SHOP_ALCOHOL = {"shop": "alcohol"}
     SHOP_BAKERY = {"shop": "bakery"}
@@ -38,6 +53,7 @@ class Categories(Enum):
     SHOP_CLOTHES = {"shop": "clothes"}
     SHOP_CONFECTIONERY = {"shop": "confectionery"}
     SHOP_CONVENIENCE = {"shop": "convenience"}
+    SHOP_COPYSHOP = {"shop": "copyshop"}
     SHOP_COSMETICS = {"shop": "cosmetics"}
     SHOP_DEPARTMENT_STORE = {"shop": "department_store"}
     SHOP_DOITYOURSELF = {"shop": "doityourself"}
@@ -46,11 +62,14 @@ class Categories(Enum):
     SHOP_FLORIST = {"shop": "florist"}
     SHOP_FUNERAL_DIRECTORS = {"shop": "funeral_directors"}
     SHOP_FURNITURE = {"shop": "furniture"}
+    SHOP_FRAME = {"shop": "frame"}
     SHOP_GARDEN_CENTRE = {"shop": "garden_centre"}
     SHOP_GIFT = {"shop": "gift"}
     SHOP_HAIRDRESSER = {"shop": "hairdresser"}
     SHOP_HARDWARE = {"shop": "hardware"}
+    SHOP_HEARING_AIDS = {"shop": "hearing_aids"}
     SHOP_JEWELRY = {"shop": "jewelry"}
+    SHOP_LAUNDRY = {"shop": "laundry"}
     SHOP_MOBILE_PHONE = {"shop": "mobile_phone"}
     SHOP_MONEY_LENDER = {"shop": "money_lender"}
     SHOP_MOTORCYCLE = {"shop": "motorcycle"}
@@ -63,6 +82,8 @@ class Categories(Enum):
     SHOP_PAWNBROKER = {"shop": "pawnbroker"}
     SHOP_PERFUMERY = {"shop": "perfumery"}
     SHOP_PET = {"shop": "pet"}
+    SHOP_PHOTO = {"shop": "photo"}
+    SHOP_SECOND_HAND = {"shop": "second_hand"}
     SHOP_SHOES = {"shop": "shoes"}
     SHOP_SPORTS = {"shop": "sports"}
     SHOP_STATIONERY = {"shop": "stationery"}
@@ -80,13 +101,19 @@ class Categories(Enum):
 
     ATM = {"amenity": "atm"}
     BANK = {"amenity": "bank"}
+    BAR = {"amenity": "bar"}
     BOAT_FUEL_STATION = {"waterway": "fuel"}
     BUREAU_DE_CHANGE = {"amenity": "bureau_de_change"}
     CAFE = {"amenity": "cafe"}
+    CANTEEN = {"amenity": "canteen"}
+    CARAVAN_SITE = {"tourism": "caravan_site"}
     CHARGING_STATION = {"amenity": "charging_station"}
     CHILD_CARE = {"amenity": "childcare"}
+    CINEMA = {"amenity": "cinema"}
+    CLINIC = {"amenity": "clinic", "healthcare": "clinic"}
     CLINIC_URGENT = {"amenity": "clinic", "healthcare": "clinic", "urgent_care": "yes"}
     COFFEE_SHOP = {"amenity": "cafe", "cuisine": "coffee_shop"}
+    COMMUNITY_CENTRE = {"amenity": "community_centre"}
     COMPRESSED_AIR = {"amenity": "compressed_air"}
     DENTIST = {"amenity": "dentist", "healthcare": "dentist"}
     DOCTOR_GP = {"amenity": "doctors", "healthcare": "doctor", "healthcare:speciality": "community"}
@@ -94,12 +121,17 @@ class Categories(Enum):
     FUEL_STATION = {"amenity": "fuel"}
     HOSPITAL = {"amenity": "hospital", "healthcare": "hospital"}
     HOTEL = {"tourism": "hotel"}
+    LIBRARY = {"amenity": "library"}
     MONEY_TRANSFER = {"amenity": "money_transfer"}
+    MUSEUM = {"tourism": "museum"}
     PHARMACY = {"amenity": "pharmacy", "healthcare": "pharmacy"}
+    PARCEL_LOCKER = {"amenity": "parcel_locker"}
     POST_BOX = {"amenity": "post_box"}
+    POST_DEPOT = {"amenity": "post_depot"}
     POST_OFFICE = {"amenity": "post_office"}
     PRODUCT_PICKUP = {"amenity": "product_pickup"}
     PUB = {"amenity": "pub"}
+    TELEPHONE = {"amenity": "telephone"}
     RESTAURANT = {"amenity": "restaurant"}
     VETERINARY = {"amenity": "veterinary"}
 
@@ -144,14 +176,21 @@ def apply_category(category, item):
 
 top_level_tags = [
     "amenity",
+    "club",
+    "craft",
     "emergency",
     "healthcare",
     "highway",
+    "landuse",
     "leisure",
+    "man_made",
     "office",
     "public_transport",
     "shop",
     "tourism",
+    "aeroway",
+    "railway",
+    "waterway",
 ]
 
 
@@ -167,6 +206,8 @@ def get_category_tags(source) -> {}:
     for top_level_tag in top_level_tags:
         if v := tags.get(top_level_tag):
             categories[top_level_tag] = v
+    if len(categories.keys()) > 1 and categories.get("shop") == "yes":
+        categories.pop("shop")
     return categories or None
 
 
@@ -177,7 +218,7 @@ class Fuel(Enum):
     GTL_DIESEL = "fuel:GTL_diesel"
     HGV_DIESEL = "fuel:HGV_diesel"
     BIODIESEL = "fuel:biodiesel"
-    UNTAXED_DIESEL = "fuel:untaxed_diesel"
+    UNTAXED_DIESEL = "fuel:taxfree_diesel"
     COLD_WEATHER_DIESEL = "fuel:diesel:class2"
     # Octane levels
     OCTANE_80 = "fuel:octane_80"
@@ -187,18 +228,25 @@ class Fuel(Enum):
     OCTANE_91 = "fuel:octane_91"
     OCTANE_92 = "fuel:octane_92"
     OCTANE_93 = "fuel:octane_93"
+    OCTANE_94 = "fuel:octane_94"
     OCTANE_95 = "fuel:octane_95"
+    OCTANE_97 = "fuel:octane_97"
     OCTANE_98 = "fuel:octane_98"
     OCTANE_100 = "fuel:octane_100"
     # Formulas
     E5 = "fuel:e5"
     E10 = "fuel:e10"
+    E15 = "fuel:e15"
+    E20 = "fuel:e20"
+    E30 = "fuel:e30"
     E85 = "fuel:e85"
+    ETHANOL_FREE = "fuel:ethanol_free"
     BIOGAS = "fuel:biogas"
     LPG = "fuel:lpg"
     CNG = "fuel:cng"
     LNG = "fuel:lng"
     PROPANE = "fuel:propane"
+    BUTANE = "fuel:butane"
     LH2 = "fuel:LH2"
     # Additives
     ADBLUE = "fuel:adblue"
@@ -209,10 +257,12 @@ class Fuel(Enum):
     AVAUTO_GAS = "fuel:autogas"
     AVJetA1 = "fuel:JetA1"
 
+    HEATING_OIL = "fuel:heating_oil"
     KEROSENE = "fuel:kerosene"
 
 
 class Extras(Enum):
+    AIR_CONDITIONING = "air_conditioning"
     ATM = "atm"
     BABY_CHANGING_TABLE = "changing_table"
     CALLING = "service:phone"
@@ -222,17 +272,24 @@ class Extras(Enum):
     COPYING = "service:copy"
     DELIVERY = "delivery"
     DRIVE_THROUGH = "drive_through"
+    FAST_FOOD = "fast_food"
     FAXING = "service:fax"
     FEE = "fee"
     INDOOR_SEATING = "indoor_seating"
     OIL_CHANGE = "service:vehicle:oil_change"
     OUTDOOR_SEATING = "outdoor_seating"
+    PARKING_PARENT = "capacity:parent"
+    PARKING_WHEELCHAIR = "capacity:disabled"
     PRINTING = "service:print"
+    SELF_CHECKOUT = "self_checkout"
     SCANING = "service:scan"
     SHOWERS = "shower"
+    SMOKING_AREA = "smoking=isolated"
     TAKEAWAY = "takeaway"
     TOILETS = "toilets"
+    TOILETS_WHEELCHAIR = "toilets:wheelchair"
     TRUCK_WASH = "truck_wash"
+    VACUUM_CLEANER = "vacuum_cleaner"
     WHEELCHAIR = "wheelchair"
     WIFI = "internet_access=wlan"
 
@@ -245,6 +302,7 @@ class PaymentMethods(Enum):
     APPLE_PAY = "payment:apple_pay"
     BCA_CARD = "payment:bca_card"
     BLIK = "payment:blik"
+    CARDS = "payment:cards"
     CASH = "payment:cash"
     CHEQUE = "payment:cheque"
     COINS = "payment:coins"
@@ -276,28 +334,50 @@ class PaymentMethods(Enum):
     RAKUTEN_PAY = "payment:rakuten_pay"
     SAMSUNG_PAY = "payment:samsung_pay"
     SATISPAY = "payment:satispay"
+    SBP = "payment:sbp"  # https://www.cbr.ru/eng/psystem/sfp/
     TWINT = "payment:twint"
     UNIONPAY = "payment:unionpay"
     VISA = "payment:visa"
     VISA_CONTACTLESS = "payment:visa_contactless"
     VISA_DEBIT = "payment:visa_debit"
+    VISA_ELECTRON = "payment:visa_electron"
     V_PAY = "payment:v_pay"
     WAON = "payment:waon"
     WECHAT = "payment:wechat"
 
 
 class FuelCards(Enum):
-    ALLSTAR = "Allstar Card"
-    AVIA = "Avia Card"
-    BP = "BP card"
+    ALLSTAR = "payment:allstar"  # https://allstarcard.co.uk/
+    AVIA = "payment:avia_card"  # https://www.aviaitalia.com/en/avia-card/
+    ARIS = "payment:aris"
+    AS24 = "payment:as24"  # https://www.as24.com/en/offers/cards
+    BP = "payment:bp_card"  # https://www.bp.com/en/global/corporate/products-and-services.html
     DEUTSCHLAND = "fuel:discount:deutschland_card"
-    DKV = "fuel:discount:dkv"
-    ESSO_NATIONAL = "fuel:discount:esso_national"
-    EXXONMOBIL_FLEET = "ExxonMobil Fleet Card"
-    LOGPAY = "LogPay Card"
-    MOBIL = "Mobilcard"
-    SHELL = "fuel:discount:shell"
-    UTA = "fuel:discount:uta"
+    DKV = "payment:dkv"
+    E100 = "payment:e100"  # https://e100.eu/en
+    EUROWAG = "payment:eurowag"  # https://www.eurowag.com/
+    ESSO_NATIONAL = "payment:esso_card"
+    EXXONMOBIL_FLEET = "payment:exxonmobil_fleet"
+    INA = "payment:ina"  # https://www.ina.hr/en/customers/ina-card/
+    LOGPAY = "payment:logpay"  # https://www.logpay.de/
+    LUKOIL = "payment:lukoil"  # https://lukoil.ru/Products/business/fuelcards
+    LUKOIL_LOYALTY_PROGRAM = "fuel:discount:lukoil"
+    MOBIL = "payment:mobilcard"  # https://www.mobil.co.nz/en-nz/mobilcard
+    MOLGROUP_CARDS = "payment:molgroup_cards"  # https://www.molgroupcards.com/
+    MORGAN_FUELS = "payment:morgan_fuels"
+    OMV = "payment:omv"  # https://www.omv.com/en/customers/services/fuel-cards
+    PETROL_PLUS_REGION = "payment:petrol_plus_region"  # https://www.petrolplus.ru/
+    SHELL = "payment:shell"
+    SLOVNAFT = "payment:slovnaft"  # https://slovnaft.sk/en/
+    TIFON = "payment:tifon"  # https://tifon.hr/hr/
+    TOTAL_CARD = "payment:total_card"  # https://totalcard.patotal.com/
+    UTA = "payment:uta"
+    ROSNEFT = "payment:rosneft"  # https://www.rn-card.ru/
+    ROUTEX = "payment:routex"  # https://routex.com/
+
+
+class Access(Enum):
+    HGV = "hgv"
 
 
 def apply_yes_no(attribute, item: Feature, state: bool, apply_positive_only: bool = True):
@@ -316,6 +396,8 @@ def apply_yes_no(attribute, item: Feature, state: bool, apply_positive_only: boo
         tag_key = attribute.value
     else:
         raise TypeError("string or Enum required")
+    if not state and "=" in tag_key:
+        return
 
     if "=" in tag_key:
         tag_key, tag_value = tag_key.split("=")
@@ -327,5 +409,13 @@ def apply_yes_no(attribute, item: Feature, state: bool, apply_positive_only: boo
 class Clothes(Enum):
     BABY = "babies"
     CHILDREN = "children"
-    UNDERWEAR = "underwear"
     MATERNITY = "maternity"
+    MEN = "men"
+    UNDERWEAR = "underwear"
+    WOMEN = "women"
+
+
+def apply_clothes(clothes: [str], item: Feature):
+    for c in clothes:
+        apply_yes_no(f"clothes:{c}", item, True)
+    item["extras"]["clothes"] = ";".join(clothes)

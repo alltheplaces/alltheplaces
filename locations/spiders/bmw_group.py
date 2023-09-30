@@ -1,5 +1,6 @@
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
 
@@ -141,7 +142,7 @@ class BMWGroupSpider(scrapy.Spider):
     ]
     brand_mapping = {
         "BMW": {"brand": "BMW", "brand_wikidata": "Q26678"},
-        "BMW_I": {"brand": "BMW Motorrad", "brand_wikidata": "Q796784"},
+        "BMW_I": {"brand": "BMW i", "brand_wikidata": "Q796784"},
         "ROLLS_ROYCE": {"brand": "Rolls-Royce", "brand_wikidata": "Q243278"},
         "BMW_M": {"brand": "BMW M", "brand_wikidata": "Q173339"},
         "MINI": {"brand": "Mini", "brand_wikidata": "Q116232"},
@@ -158,6 +159,7 @@ class BMWGroupSpider(scrapy.Spider):
     def parse(self, response):
         response = response.json().get("data").get("pois")
         for data in response:
+            data["street_address"] = data.pop("street")
             occurrences = self.get_num_of_brands_per_location(response, data.get("key"))
             item = DictParser.parse(data)
             item["ref"] = data.get("key")
@@ -171,6 +173,12 @@ class BMWGroupSpider(scrapy.Spider):
             else:
                 item["brand"] = self.brand_mapping[data.get("category")]["brand"]
                 item["brand_wikidata"] = self.brand_mapping[data.get("category")]["brand_wikidata"]
+
+            if item["brand"] == "BMW Motorrad":
+                apply_category(Categories.SHOP_MOTORCYCLE, item)
+            else:
+                apply_category(Categories.SHOP_CAR, item)
+
             yield item
 
     def get_num_of_brands_per_location(self, data, key):

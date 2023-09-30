@@ -1,5 +1,6 @@
 import scrapy
 
+from locations.categories import Categories, Extras, Fuel, apply_category, apply_yes_no
 from locations.items import Feature
 
 
@@ -7,6 +8,7 @@ class MaverikSpider(scrapy.Spider):
     name = "maverik"
     item_attributes = {"brand": "Maverik", "brand_wikidata": "Q64149010"}
     allowed_domains = ["maverik.com"]
+    requires_proxy = True
 
     def start_requests(self):
         yield scrapy.Request("https://gateway.maverik.com/ac-loc/location/all", callback=self.add_fuels)
@@ -24,34 +26,41 @@ class MaverikSpider(scrapy.Spider):
 
         for location in locations:
             address = location["address"]
-            fuel = next((f for f in fuels if f["storeCode"] == location["code"]), None)
-            metadata = location.get("metadata")
+            fuel = next((f for f in fuels if f["storeCode"] == location["code"]), {})
+            store_fuels = [f["fuelType"] for f in fuel.get("priceMatchDiscounts", [])]
+            metadata = location.get("metadata", [{}])[0]
 
             if not ("longitude" in location and "latitude" in location):
                 continue
 
-            yield Feature(
+            item = Feature(
                 lon=location["longitude"],
                 lat=location["latitude"],
                 ref=location["code"],
-                name=f"Maverick {location['name']}",
-                addr_full=address["address1"],
+                branch=location["name"],
+                street_address=address["address1"],
                 city=address["city"],
                 state=address["stateProvince"],
                 postcode=address["postalCode"],
                 country=address["country"],
                 phone=address["phone"],
                 opening_hours="24/7" if "12:00AM - 12:00AM" == location.get("hoursOfOperation") else None,
-                extras={
-                    "rv": metadata and any(m.get("RV_Lanes") for m in metadata) or None,
-                    "hgv": metadata and any(m.get("Hi_Flow_La") for m in metadata) or None,
-                    "fuel:HGV_diesel": metadata and any(m.get("Hi_Flow_La") for m in metadata),
-                    "fuel:diesel": fuel and any(f["fuelType"] == "Diesel" for f in fuel["priceMatchDiscounts"]) or None,
-                    "amenity:fuel": True,
-                    # 'amenity:toilets': 'Restroom' in details or None,
-                    # 'atm': 'ATM' in details,
-                    # 'car_wash': 'Car Wash' in details,
-                    # 'fuel:diesel': 'Diesel' in details or None,
-                    # 'fuel:e85': 'E-85' in details or None,
-                },
             )
+
+            apply_category(Categories.FUEL_STATION, item)
+
+            # TODO:
+            # "BTO" "Cinnabon" "ETHANOL_FREE" "Freeway/Highway" "Hi_Flow_La" "Pizza" "R_V__Dumps" "Tables_Chairs"
+            # "grab&go"
+            apply_yes_no(Extras.ATM, item, metadata.get("ATM"))
+            apply_yes_no(Extras.COMPRESSED_AIR, item, metadata.get("Air_Machine"))
+            apply_yes_no("hgv", item, metadata.get("Hi_Flow_La"))
+            apply_yes_no(Fuel.HGV_DIESEL, item, metadata.get("Hi_Flow_La"))
+            apply_yes_no("sells:lottery", item, metadata.get("Lottery"))
+            apply_yes_no("rv", item, metadata.get("RV_Lanes"))
+
+            # TODO:
+            # "Car DSL" "DEF" "Ethanol-Free" "Mid-High" "Mid-Low" "Premium" "Truck DSL" "Unleaded"
+            apply_yes_no(Fuel.E15, item, "E15" in store_fuels)
+
+            yield item

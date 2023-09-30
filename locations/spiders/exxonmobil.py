@@ -80,7 +80,7 @@ class ExxonMobilSpider(SitemapSpider):
             yield request
 
     def parse(self, response, **kwargs):
-        for location in response.json():
+        for location in response.json()["Locations"]:
             if location["Brand"] == "Mobilcard":
                 continue  # 170 NZ POIs that seem to third party ones that accept there loyalty cards
 
@@ -93,6 +93,7 @@ class ExxonMobilSpider(SitemapSpider):
             if brand := self.brands.get(location["Brand"]):
                 item.update(brand)
             else:
+                self.crawler.stats.inc_value(f"atp/exxonmobil/unknown_brand/{location['Brand']}")
                 item["brand"] = location["Brand"]
 
             features = [f["Name"] for f in (location["FeaturedItems"] + location["StoreAmenities"])]

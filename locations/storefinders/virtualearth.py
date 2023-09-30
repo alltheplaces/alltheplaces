@@ -34,7 +34,7 @@ class VirtualEarthSpider(Spider):
 
     def parse(self, response, **kwargs):
         for feature in response.json()["d"]["results"]:
-            feature["ref"] = feature["EntityID"]
+            feature["ref"] = feature.get("EntityID")
             feature["address"] = {
                 "street_address": feature.get("AddressLine"),
                 "city": feature.get("Locality"),

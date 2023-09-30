@@ -10,7 +10,6 @@ class SullivansSteakhouseSpider(SitemapSpider):
     item_attributes = {"brand": "Sullivan's Steakhouse"}
     allowed_domains = ["www.sullivanssteakhouse.com"]
     sitemap_urls = ["https://www.sullivanssteakhouse.com/locations-sitemap.xml"]
-    # download_delay = 1
 
     def parse(self, response):
         ld = json.loads(

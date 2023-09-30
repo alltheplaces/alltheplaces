@@ -29,7 +29,7 @@ class LibertyMutualSpider(scrapy.Spider):
             properties = {
                 "name": store_data["name"],
                 "ref": store_data["officeCode"],
-                "addr_full": store_data["address"]["street"],
+                "street_address": store_data["address"]["street"],
                 "city": store_data["address"]["city"],
                 "state": store_data["address"]["state"]["code"],
                 "postcode": store_data["address"]["zip"],

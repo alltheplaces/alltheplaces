@@ -1,40 +1,48 @@
-import scrapy
+from scrapy import Request, Spider
+from scrapy.http import JsonRequest
 
+from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
-from locations.items import Feature
 
 
-class QuickBELUSpider(scrapy.Spider):
+class QuickBELUSpider(Spider):
     name = "quick_be_lu"
-    start_urls = ["https://www.quick.be/fr/Ajax/loadRestaurantsData"]
-
     item_attributes = {"brand": "Quick", "brand_wikidata": "Q286494"}
+    allowed_domains = ["www.quick.be"]
+    start_urls = ["https://www.quick.be/fr/restaurants"]
 
-    def parse(self, response, **kwargs):
-        for store in response.json().get("restaurants").values():
-            oh = OpeningHours()
-            for day in store.get("opening_hours"):
-                if day.get("opening_type") != 1:
+    def start_requests(self):
+        for url in self.start_urls:
+            yield Request(url=url, callback=self.find_json_file)
+
+    def find_json_file(self, response):
+        build_id = (
+            response.xpath('//script[contains(@src, "/_buildManifest.js")]/@src')
+            .get()
+            .replace("/_next/static/", "")
+            .replace("/_buildManifest.js", "")
+        )
+        yield JsonRequest(f"https://www.quick.be/_next/data/{build_id}/fr/restaurants.json")
+
+    def parse(self, response):
+        for location in response.json()["pageProps"]["restaurants"]:
+            item = DictParser.parse(location)
+            item["lat"] = location["latlng"]["lat"]
+            item["lon"] = location["latlng"]["lng"]
+            item["street_address"] = item.pop("addr_full")
+            item["country"] = "BE"
+            if location["country_luxembourg"]:
+                item["country"] = "LU"
+            item["website"] = "https://www.quick.be/fr/restaurant/" + location["slug"]
+            item["opening_hours"] = OpeningHours()
+            for day in location["opening_hours"]:
+                if day["opening_type"] != 1:
                     continue
-                oh.add_range(
-                    day=DAYS[day.get("weekday_from") - 1],
-                    open_time=day.get("from_hour"),
-                    close_time=day.get("to_hour"),
-                    time_format="%H:%M:%S",
+                item["opening_hours"].add_range(
+                    DAYS[day["weekday_from"] - 1], day["from_hour"], day["to_hour"], "%H:%M:%S"
                 )
-            yield Feature(
-                {
-                    "ref": store.get("id"),
-                    "name": store.get("title"),
-                    "street_address": store.get("address"),
-                    "phone": store.get("telephone"),
-                    "email": store.get("hr_email"),
-                    "postcode": store.get("postal_code"),
-                    "country": store.get("country").upper(),
-                    "city": store.get("locality"),
-                    "website": f"https://www.quick.be/fr/restaurant/{store.get('slug')}",
-                    "lat": store.get("location_lat"),
-                    "lon": store.get("location_lng"),
-                    "opening_hours": oh,
-                }
-            )
+
+            if postcode := item.get("postcode"):
+                item["postcode"] = str(postcode)
+
+            yield item

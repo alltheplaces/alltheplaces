@@ -1,5 +1,7 @@
 import scrapy
+from scrapy.http import JsonRequest
 
+from locations.geo import point_locations
 from locations.items import Feature
 
 
@@ -11,16 +13,10 @@ class HoneyBakedHamSpider(scrapy.Spider):
     start_urls = ("https://www.honeybaked.com/stores",)
 
     def parse(self, response):
-        with open("./locations/searchable_points/us_centroids_25mile_radius.csv") as points:
-            next(points)
-            for point in points:
-                row = point.replace("\n", "").split(",")
-                lati = row[1]
-                long = row[2]
-                searchurl = "https://www.honeybaked.com/api/store/v1/?long={lo}&lat={la}&radius=25".format(
-                    la=lati, lo=long
-                )
-                yield scrapy.Request(response.urljoin(searchurl), callback=self.parse_search)
+        for lat, lon in point_locations("us_centroids_100mile_radius.csv"):
+            yield JsonRequest(
+                f"https://www.honeybaked.com/api/store/v1/?long={lon}&lat={lat}&radius=250", callback=self.parse_search
+            )
 
     def parse_search(self, response):
         data = response.json()
@@ -29,12 +25,15 @@ class HoneyBakedHamSpider(scrapy.Spider):
             properties = {
                 "ref": i["storeInformation"]["storeId"],
                 "name": i["storeInformation"]["displayName"],
-                "addr_full": i["storeInformation"]["address1"],
+                "street_address": i["storeInformation"]["address1"],
                 "city": i["storeInformation"]["city"],
                 "state": i["storeInformation"]["state"],
                 "postcode": i["storeInformation"]["zipCode"],
                 "country": i["storeInformation"]["countryCode"],
                 "phone": i["storeInformation"]["phoneNumber"],
+                "website": f'https://www.honeybaked.com/stores/{i["storeInformation"]["storeId"]}',
+                "email": i["storeInformation"]["storeEmail"],
+                "facebook": i["storeInformation"]["facebookUrl"],
                 "lat": float(i["storeInformation"]["location"]["coordinates"][1]),
                 "lon": float(i["storeInformation"]["location"]["coordinates"][0]),
             }

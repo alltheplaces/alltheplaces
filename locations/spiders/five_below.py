@@ -41,7 +41,7 @@ class FiveBelowSpider(scrapy.Spider):
                 store.xpath('//*/span[@class="Hero-locationName"]/text()').get(),
                 store.xpath('//*/span[@class="Hero-locationGeo"]/text()').get(),
             ),
-            "addr_full": postaladdress.xpath('//*[@itemprop="streetAddress"]/@content').get(),
+            "street_address": postaladdress.xpath('//*[@itemprop="streetAddress"]/@content').get(),
             "city": postaladdress.xpath('//*[@itemprop="addressLocality"]/@content').get(),
             "state": postaladdress.xpath('//*[@itemprop="addressRegion"]/text()').get(),
             "postcode": postaladdress.xpath('//*[@itemprop="postalCode"]/text()').get(),

@@ -8,7 +8,6 @@ class FuddruckersSpider(scrapy.Spider):
     item_attributes = {"brand": "Fuddruckers", "brand_wikidata": "Q5507056"}
     start_urls = ["http://www.fuddruckers.com/services/location/get_stores_by_position.php"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
-    download_delay = 1.0
 
     def parse(self, response):
         results = response.json()

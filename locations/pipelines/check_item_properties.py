@@ -1,13 +1,17 @@
 import math
 import re
 
+from scrapy import Spider
+
 from locations.hours import OpeningHours
+from locations.items import get_lat_lon, set_lat_lon
 
 
-def check_field(item, spider, param, allowed_types, match_regex=None):
+def check_field(item, spider: Spider, param, allowed_types, match_regex=None):
     if val := item.get(param):
-        if not isinstance(val, *allowed_types):
+        if not isinstance(val, allowed_types):
             spider.crawler.stats.inc_value(f"atp/field/{param}/wrong_type")
+            spider.logger.error(f"Invalid type {type(val).__name__} on {param}, expected {allowed_types}")
         elif match_regex and not match_regex.match(val):
             spider.crawler.stats.inc_value(f"atp/field/{param}/invalid")
     else:
@@ -50,35 +54,31 @@ class CheckItemPropertiesPipeline:
         check_field(item, spider, "state", (str,))
         check_field(item, spider, "postcode", (str,))
         check_field(item, spider, "country", (str,), self.country_regex)
+        check_field(item, spider, "name", (str,))
         check_field(item, spider, "brand", (str,))
 
-        if not item.get("geometry"):
-            if lat := item.get("lat"):
-                try:
-                    lat = float(lat)
-                    if not (self.min_lat < lat < self.max_lat):
-                        spider.crawler.stats.inc_value("atp/field/lat/invalid")
-                    if math.fabs(lat) < 0.01:
-                        spider.crawler.stats.inc_value("atp/field/lat/invalid")
-                except:
+        if coords := get_lat_lon(item):
+            lat, lon = coords
+
+            if not (self.min_lat < lat < self.max_lat):
+                spider.crawler.stats.inc_value("atp/field/lat/invalid")
+                lat = None
+
+            if not (self.min_lon < lon < self.max_lon):
+                spider.crawler.stats.inc_value("atp/field/lon/invalid")
+                lon = None
+
+            if isinstance(lat, float) and isinstance(lon, float):
+                if math.fabs(lat) < 3 and math.fabs(lon) < 3:
+                    spider.crawler.stats.inc_value("atp/geometry/null_island")
                     lat = None
-                    spider.crawler.stats.inc_value("atp/field/lat/invalid")
-                item["lat"] = lat
-            else:
-                spider.crawler.stats.inc_value("atp/field/lat/missing")
-            if lon := item.get("lon"):
-                try:
-                    lon = float(lon)
-                    if not (self.min_lon < lon < self.max_lon):
-                        spider.crawler.stats.inc_value("atp/field/lon/invalid")
-                    if math.fabs(lon) < 0.01:
-                        spider.crawler.stats.inc_value("atp/field/lon/invalid")
-                except:
                     lon = None
-                    spider.crawler.stats.inc_value("atp/field/lon/invalid")
-                item["lon"] = lon
-            else:
-                spider.crawler.stats.inc_value("atp/field/lon/missing")
+
+            set_lat_lon(item, lat, lon)
+
+        if not (item.get("geometry") or get_lat_lon(item)):
+            spider.crawler.stats.inc_value("atp/field/lat/missing")
+            spider.crawler.stats.inc_value("atp/field/lon/missing")
 
         if twitter := item.get("twitter"):
             if not isinstance(twitter, str):

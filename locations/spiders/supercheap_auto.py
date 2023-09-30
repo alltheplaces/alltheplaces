@@ -1,9 +1,10 @@
 import json
+import re
 
 from scrapy.spiders import SitemapSpider
 
 from locations.dict_parser import DictParser
-from locations.hours import DAYS_EN, OpeningHours
+from locations.hours import OpeningHours
 
 
 class SupercheapAutoSpider(SitemapSpider):
@@ -25,23 +26,12 @@ class SupercheapAutoSpider(SitemapSpider):
         if item["country"] == "NZ":
             item.pop("state")
         item["website"] = response.url
-        hours_raw = response.xpath('//div[contains(@class, "opening-hours")]/dl/*/text()').getall()
-        hours_raw = (
-            " ".join(hours_raw)
-            .upper()
-            .replace("CLOSED", "00:00 AM - 00:00 AM")
-            .replace("-", " ")
-            .replace(" AM", "AM")
-            .replace(" PM", "PM")
-            .split()
+        hours_string = " ".join(
+            filter(None, response.xpath('//div[contains(@class, "opening-hours")]/dl[1]/*/text()').getall())
         )
-        hours_raw = [hours_raw[n : n + 3] for n in range(0, len(hours_raw), 3)]
-        oh = OpeningHours()
-        for day in hours_raw:
-            if day[0].title() not in DAYS_EN:
-                continue
-            if day[1] == "00:00AM" and day[2] == "00:00AM":
-                continue
-            oh.add_range(DAYS_EN[day[0].title()], day[1], day[2], "%I:%M%p")
-        item["opening_hours"] = oh.as_opening_hours()
+        # Remove AM/PM from 24 hour timestamps (not supported by add_ranges_from_string function)
+        if re.search(r"(?<!\d)(?:1[3-9]|2\d):\d{2}(?!\d)", hours_string):
+            hours_string = re.sub(r"(?<=\d)\s*[AP]M", "", hours_string)
+        item["opening_hours"] = OpeningHours()
+        item["opening_hours"].add_ranges_from_string(hours_string)
         yield item

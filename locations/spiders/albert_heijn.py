@@ -1,15 +1,17 @@
-import scrapy
+from scrapy import Spider
 from scrapy.http import JsonRequest
 
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_NL, OpeningHours
+from locations.user_agents import BROWSER_DEFAULT
 
 
-class AlbertHeijnSpider(scrapy.Spider):
+class AlbertHeijnSpider(Spider):
     name = "albert_heijn"
     item_attributes = {"brand": "Albert Heijn", "brand_wikidata": "Q1653985"}
     allowed_domains = ["www.ah.nl", "www.ah.be"]
     start_urls = ["https://www.ah.nl/gql", "https://www.ah.be/gql"]
+    user_agent = BROWSER_DEFAULT
 
     def get_page(self, gql_url, page_number):
         gql_query = """
@@ -113,6 +115,8 @@ fragment storeOpeningHour on StoreOpeningHour {
         headers = {
             "client-name": "alltheplaces",
             "client-version": "1",
+            "Origin": gql_url.replace("/gql", ""),
+            "Referer": gql_url.replace("/gql", "/winkels"),
         }
         yield JsonRequest(url=gql_url, data=query, headers=headers, meta={"page_number": page_number})
 

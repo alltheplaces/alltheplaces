@@ -11,7 +11,6 @@ class PotbellySandwichShopSpider(Spider):
     name = "potbelly_sandwich"
     item_attributes = {"brand": "Potbelly Sandwich Shop", "brand_wikidata": "Q7234777"}
     allowed_domains = ["www.potbelly.com", "api.prod.potbelly.com"]
-    download_delay = 1.0
     start_urls = [
         "https://www.potbelly.com/sitemap_locations.xml",
     ]

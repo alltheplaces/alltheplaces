@@ -33,9 +33,8 @@ def url_to_coords(url: str) -> (float, float):  # noqa: C901
         params = url[38:].split("!")
         maps_keys = {}
         for i in range(0, len(params)):
-            splits = params[i].split("d")
-            if len(splits) == 2:
-                maps_keys[splits[0]] = splits[1]
+            if m := re.match(r"^(\d)d([-.\d]+)$", params[i]):
+                maps_keys[m.group(1)] = m.group(2)
         lat_index = lon_index = None
         if maps_keys.keys() == {"1", "2", "3"}:
             lon_index = "2"
@@ -63,11 +62,13 @@ def url_to_coords(url: str) -> (float, float):  # noqa: C901
                 return float(lat.strip()), float(lon.strip())
 
         for ll in get_query_param(url, "destination"):
-            lat, lon = ll.split(",")
-            return float(lat), float(lon)
+            if m := re.match(r"^(-?[.\d]+),(-?[.\d]+)$", ll):
+                return float(m.group(1)), float(m.group(2))
     elif url.startswith("https://www.google.com/maps/place/"):
-        lat, lon = url.split("/")[5].split(",")
-        return float(lat.strip()), float(lon.strip())
+        slash_splits = url.split("/")
+        if len(slash_splits) > 5:
+            if m := re.match(r"(-?\d+.\d+),\s?(-?\d+.\d+)", slash_splits[5]):
+                return float(m.group(1)), float(m.group(2))
     elif url.startswith("https://www.google.com/maps/search"):
         for query in get_query_param(url, "query"):
             if m := re.match(r"(-?\d+.\d+),(-?\d+.\d+)", query):
@@ -91,5 +92,9 @@ def url_to_coords(url: str) -> (float, float):  # noqa: C901
     for center in get_query_param(url, "center"):
         lat, lon = center.split(",")
         return float(lat), float(lon)
+
+    # Fall back on 2 comma separated floats
+    if match := re.search(r"(-?\d+\.\d+),\s?(-?\d+\.\d+)", url):
+        return float(match.group(1)), float(match.group(2))
 
     return None, None

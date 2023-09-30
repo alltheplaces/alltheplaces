@@ -23,7 +23,7 @@ class JllSpider(scrapy.Spider):
             properties = {
                 "ref": place["id"],
                 "name": place["title"],
-                "addr_full": place["streetAddress"],
+                "street_address": place["streetAddress"],
                 "city": place["city"],
                 "state": place["stateProvince"],
                 "postcode": place["postalCode"],

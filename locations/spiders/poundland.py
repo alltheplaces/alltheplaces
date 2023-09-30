@@ -1,7 +1,9 @@
 import scrapy
 
+from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.spiders.vapestore_gb import clean_address
 
 
 class PoundlandSpider(scrapy.Spider):
@@ -17,7 +19,7 @@ class PoundlandSpider(scrapy.Spider):
         for store in response.json()["locations"]:
             item = DictParser.parse(store)
 
-            item["street_address"] = ", ".join(filter(None, store["address"].get("line")))
+            item["street_address"] = clean_address(store["address"].get("line"))
 
             # "store_id" seems to be a better ref than "id"
             item["ref"] = store.get("store_id")
@@ -30,10 +32,9 @@ class PoundlandSpider(scrapy.Spider):
                 open_time, close_time = rule["hours"].split(" - ")
                 oh.add_range(rule["day"][:2], open_time, close_time)
 
-            item["opening_hours"] = oh.as_opening_hours()
+            item["opening_hours"] = oh
 
-            item["extras"] = {}
-            item["extras"]["atm"] = "yes" if store.get("atm") == "1" else "no"
+            apply_yes_no(Extras.ATM, item, store.get("atm") == "1")
             item["extras"]["icestore"] = "yes" if store.get("icestore") == "1" else "no"
 
             if store["is_pep_co_only"] == "1":

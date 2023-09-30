@@ -1,4 +1,4 @@
-from locations.categories import Categories, Fuel, apply_category, apply_yes_no
+from locations.categories import Categories, Fuel, apply_category, apply_yes_no, get_category_tags
 from locations.items import Feature
 
 
@@ -40,3 +40,19 @@ def test_cuisine_multiple():
     apply_category({"cuisine": "coffee_shop"}, item)
     apply_category({"cuisine": "pizza"}, item)
     assert item["extras"]["cuisine"] == "coffee_shop;pizza"
+
+
+def test_shop_yes_category():
+    item = Feature()
+    apply_category(Categories.FUEL_STATION, item)
+
+    assert get_category_tags(item) == Categories.FUEL_STATION.value
+
+    # Consider shop=yes an attribute, when there are other categories
+    apply_category({"shop": "yes"}, item)
+    assert get_category_tags(item) == Categories.FUEL_STATION.value
+
+    # But top level when there are no other categories
+    item = Feature()
+    apply_category({"shop": "yes"}, item)
+    assert get_category_tags(item) == {"shop": "yes"}

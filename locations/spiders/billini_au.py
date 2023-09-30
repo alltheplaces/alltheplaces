@@ -1,4 +1,3 @@
-from locations.hours import OpeningHours
 from locations.storefinders.stockist import StockistSpider
 
 

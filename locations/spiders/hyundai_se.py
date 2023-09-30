@@ -1,6 +1,7 @@
 import scrapy
 
-from locations.hours import DAYS_EN, OpeningHours
+from locations.categories import Categories, apply_category
+from locations.hours import OpeningHours
 from locations.items import Feature
 
 
@@ -16,12 +17,9 @@ class HyundaiSESpider(scrapy.Spider):
             oh = OpeningHours()
             for hours in store.get("opening_hours"):
                 oh.add_range(
-                    day=DAYS_EN[hours.get("open_day").capitalize()],
-                    open_time=hours.get("open_time"),
-                    close_time=hours.get("close_time"),
-                    time_format="%H:%M",
+                    day=hours.get("open_day"), open_time=hours.get("open_time"), close_time=hours.get("close_time")
                 )
-            yield Feature(
+            item = Feature(
                 {
                     "ref": store.get("id"),
                     "name": store.get("name"),
@@ -35,3 +33,7 @@ class HyundaiSESpider(scrapy.Spider):
                     "opening_hours": oh,
                 }
             )
+
+            apply_category(Categories.SHOP_CAR, item)
+
+            yield item

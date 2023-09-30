@@ -27,7 +27,7 @@ class ChurchsChickenSpider(scrapy.Spider):
         properties = {
             "ref": ref,
             "name": name,
-            "addr_full": addr_full,
+            "street_address": addr_full,
             "city": city,
             "postcode": postcode,
             "state": geo_region[1],

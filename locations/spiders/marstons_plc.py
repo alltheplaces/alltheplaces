@@ -1,7 +1,7 @@
 import scrapy
 
+from locations.categories import Categories, apply_category, apply_yes_no
 from locations.items import Feature
-from locations.spiders.costacoffee_gb import yes_or_no
 
 
 class MarstonsPlcSpider(scrapy.Spider):
@@ -86,16 +86,14 @@ class MarstonsPlcSpider(scrapy.Spider):
                 "website": place["url"],
                 "email": place["email"],
                 "brand": place["pfLabel"],
-                "extras": {
-                    "amenity": "pub",
-                    "payment:marstons_privilege_card": yes_or_no(place["sv"]),
-                },
             }
+            apply_category(Categories.PUB, properties)
+            apply_yes_no("payment:marstons_privilege_card", properties, place["sv"], False)
 
             if img := place.get("img"):
                 properties["image"] = "https://www.marstonspubs.co.uk" + img
 
             if self.store_types[place["phc"]] == 2:
-                properties["extras"]["tourism"] = "hotel"
+                apply_category(Categories.HOTEL, properties)
 
             yield Feature(**properties)

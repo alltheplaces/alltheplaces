@@ -93,8 +93,17 @@ ENV/
 .history
 .DS_Store
 
-*json
-*geojson
+# Data files that may get included by accident from developers
+# using other debugging or data transformation tools in the same
+# working directory as ATP source code.
+*.json
+*.geojson
+*.csv
+*.osm
+!locations/searchable_points/*.json
+!locations/searchable_points/*.geojson
+!locations/searchable_points/*.csv
+
 *zip
 commands.txt
 http_cache.sqlite

@@ -19,7 +19,7 @@ class LidlUSSpider(scrapy.Spider):
             properties = {
                 "name": store["name"],
                 "ref": store["crmStoreID"],
-                "addr_full": store["address"]["street"],
+                "street_address": store["address"]["street"],
                 "city": store["address"]["city"],
                 "state": store["address"]["state"],
                 "postcode": store["address"]["zip"],

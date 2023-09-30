@@ -69,7 +69,7 @@ class OrangetheoryFitnessSpider(scrapy.Spider):
             properties = {
                 "ref": location[0]["studioId"],
                 "name": location[0]["studioName"],
-                "addr_full": location[0]["studioLocation"]["physicalAddress"].strip(),
+                "street_address": location[0]["studioLocation"]["physicalAddress"].strip(),
                 "city": location[0]["studioLocation"]["physicalCity"],
                 "state": location[0]["studioLocation"]["physicalState"],
                 "postcode": location[0]["studioLocation"]["physicalPostalCode"],

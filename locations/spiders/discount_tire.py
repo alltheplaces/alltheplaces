@@ -28,6 +28,7 @@ class DiscountTireSpider(SitemapSpider):
     ]
     download_delay = 5.0
     user_agent = BROWSER_DEFAULT
+    requires_proxy = True
 
     def parse_site(self, response):
         store_code = re.search(r".*/s/(\d*)$", response.url).group(1)
@@ -53,7 +54,7 @@ class DiscountTireSpider(SitemapSpider):
             properties = {
                 "name": data["displayName"],
                 "ref": data["code"],
-                "addr_full": data["address"]["line1"],
+                "street_address": data["address"]["line1"],
                 "city": data["address"]["town"],
                 "state": data["address"]["region"]["isocodeShort"],
                 "postcode": data["address"]["postalCode"],

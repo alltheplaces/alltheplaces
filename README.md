@@ -6,6 +6,8 @@ A project to generate [point of interest (POI)](https://en.wikipedia.org/wiki/Po
 
 ### Development setup
 
+Windows users may need to follow some extra steps, please follow the [scrapy docs](https://docs.scrapy.org/en/latest/intro/install.html#windows) for up to date details.
+
 1. Clone a copy of the project from the [GitHub All The Places](https://github.com/alltheplaces/alltheplaces/) repo (or your own fork if you are considering contributing to the project):
 
    ```

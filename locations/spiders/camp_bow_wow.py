@@ -19,7 +19,7 @@ class CampBowWowSpider(scrapy.Spider):
             properties = {
                 "ref": place["FranchiseLocationID"],
                 "name": place["FranchiseLocationName"],
-                "addr_full": place["Address1"],
+                "street_address": place["Address1"],
                 "city": place["City"],
                 "state": place["State"],
                 "postcode": place["ZipCode"],

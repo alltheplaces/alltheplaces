@@ -7,7 +7,7 @@ from locations.structured_data_spider import StructuredDataSpider
 class BupaGBSpider(SitemapSpider, StructuredDataSpider):
     name = "bupa_gb"
     item_attributes = {"brand": "Bupa", "brand_wikidata": "Q931628", "extras": Categories.DENTIST.value}
-    sitemap_urls = ["https://www.bupa.co.uk/dentalsitemap.xml"]
+    sitemap_urls = ["https://www.bupa.co.uk/robots.txt"]
     sitemap_rules = [(r"/practices/([-\w]+)$", "parse_sd")]
 
     def post_process_item(self, item, response, ld_data, **kwargs):

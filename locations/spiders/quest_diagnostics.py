@@ -1,21 +1,16 @@
-import scrapy
+from scrapy.spiders import SitemapSpider
 
 from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import Feature
 
 
-class QuestDiagnosticsSpider(scrapy.Spider):
+class QuestDiagnosticsSpider(SitemapSpider):
     name = "quest_diagnostics"
     item_attributes = {"brand": "Quest Diagnostics", "brand_wikidata": "Q7271456"}
     allowed_domains = ["www.questdiagnostics.com"]
-    start_urls = ["https://www.questdiagnostics.com/locations-sitemap.xml"]
+    sitemap_urls = ["https://www.questdiagnostics.com/locations-sitemap.xml"]
 
     def parse(self, response):
-        response.selector.remove_namespaces()
-        for url in response.xpath("//url/loc/text()").extract():
-            yield scrapy.Request(url, callback=self.parse_location)
-
-    def parse_location(self, response):
         address_components = response.xpath('//div[@class="address"]/text()').extract()
 
         properties = {
@@ -41,7 +36,7 @@ class QuestDiagnosticsSpider(scrapy.Spider):
             hour = response.xpath(
                 '//div[@class="week-time-content"]/ul/li/p[contains(text(), $day)]/following-sibling::span/text()',
                 day=day,
-            ).extract_first()
+            ).get("")
             for x in hour.split(" , "):
                 try:
                     open_time, close_time = x.split("-")

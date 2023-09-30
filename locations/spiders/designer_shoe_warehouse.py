@@ -7,7 +7,6 @@ from locations.items import Feature
 
 
 class DesignerShoeWarehouseSpider(SitemapSpider):
-    download_delay = 1
     name = "dsw"
     item_attributes = {"brand": "Designer Shoe Warehouse", "brand_wikidata": "Q5206207"}
     allowed_domains = [
@@ -48,7 +47,7 @@ class DesignerShoeWarehouseSpider(SitemapSpider):
                 oh.add_range(day.get("day").title()[:2], str(ot), str(ct), time_format="%H%M")
 
         properties = {
-            "addr_full": response.xpath('//span[@class="c-address-street-1"]/text()').extract_first(),
+            "street_address": response.xpath('//span[@class="c-address-street-1"]/text()').extract_first(),
             "phone": phone,
             "city": response.xpath('//span[@class="c-address-city"]/text()').extract_first(),
             "state": response.xpath('//abbr[@class="c-address-state"]/text()').extract_first(),

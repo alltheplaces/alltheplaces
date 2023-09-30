@@ -1,53 +1,45 @@
+import re
+
+from scrapy import Request
 from scrapy.spiders import SitemapSpider
 
-from locations.hours import DAYS_EN, OpeningHours
+from locations.hours import OpeningHours
 from locations.items import Feature
 
 
 class SchnitzAUSpider(SitemapSpider):
     name = "schnitz_au"
     item_attributes = {"brand": "Schnitz", "brand_wikidata": "Q48792277"}
-    sitemap_urls = ["https://schnitz.com.au/store-sitemap.xml"]
-    sitemap_rules = [(r"\/stores\/(.+)", "parse")]
+    allowed_domains = ["schnitz.com.au", "schnitztechnology.com"]
+    sitemap_urls = ["https://schnitz.com.au/project-sitemap.xml"]
+    sitemap_rules = [(r"\/location\/[\w\-]+", "parse")]
 
     def parse(self, response):
+        hours_page_url = response.xpath(
+            '//iframe[contains(@src, "https://schnitztechnology.com/iframe.php?sid=")]/@src'
+        ).get()
         properties = {
-            "ref": response.url,
-            "name": response.xpath('//div[contains(@class, "hero-module__text-lockup")]/div/h1/text()').get().strip(),
+            "ref": hours_page_url.replace("https://schnitztechnology.com/iframe.php?sid=", ""),
+            "name": response.xpath('//div[@class="et_pb_header_content_wrapper"]/text()').get().strip(),
             "lat": response.xpath("//div/@data-lat").get().strip(),
             "lon": response.xpath("//div/@data-lng").get().strip(),
-            "addr_full": response.xpath('//div[contains(@class, "hero-module__contact")]/div/div[1]/text()')
+            "addr_full": response.xpath(
+                '//div[@class="et_pb_row et_pb_row_0_tb_body"]/div[1]//div[@class="et_pb_text_inner"]/text()'
+            )
             .get()
             .strip(),
-            "phone": response.xpath('//div[contains(@class, "hero-module__contact")]/div/div[2]/text()').get(),
+            "phone": response.xpath(
+                '//div[@class="et_pb_row et_pb_row_0_tb_body"]/div[2]//div[@class="et_pb_text_inner"]/text()'
+            ).get(),
             "website": response.url,
         }
-        if properties["phone"]:
-            properties["phone"] = properties["phone"].strip()
+        item = Feature(**properties)
+        yield Request(url=hours_page_url, meta={"item": item}, callback=self.add_hours)
 
-        oh = OpeningHours()
-        hours_raw = (
-            (
-                " ".join(
-                    response.xpath(
-                        '//ul[contains(@class, "single-store-content__details-oh-list")]/li/span/text()'
-                    ).getall()
-                )
-            )
-            .replace("26th January", "Jan26")
-            .replace("Closed", "0:00 am to 0:00 am")
-            .replace(" to ", " ")
-            .replace(" am", "AM")
-            .replace(" pm", "PM")
-            .split()
-        )
-        hours_raw = [hours_raw[n : n + 3] for n in range(0, len(hours_raw), 3)]
-        for day in hours_raw:
-            if day[0] == "Jan26":
-                continue
-            if day[1] == "0:00AM" and day[2] == "0:00AM":
-                continue
-            oh.add_range(DAYS_EN[day[0]], day[1], day[2], "%I:%M%p")
-        properties["opening_hours"] = oh.as_opening_hours()
-
-        yield Feature(**properties)
+    def add_hours(self, response):
+        hours_string = " ".join(response.xpath("//table/tr/td//text()").getall()).replace("day ", "day: ")
+        hours_string = re.sub(r"([AP]M)\s+(\d+)", r"\1 - \2", hours_string)
+        item = response.meta["item"]
+        item["opening_hours"] = OpeningHours()
+        item["opening_hours"].add_ranges_from_string(hours_string)
+        yield item

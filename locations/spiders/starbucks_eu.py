@@ -3,7 +3,9 @@ import re
 
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
+from locations.searchable_points import open_searchable_points
 
 
 class StarbucksEUSpider(scrapy.Spider):
@@ -14,7 +16,7 @@ class StarbucksEUSpider(scrapy.Spider):
     def start_requests(self):
         base_url = "https://www.starbucks.co.uk/api/v1/store-finder?latLng={lat}%2C{lon}"
 
-        with open("./locations/searchable_points/eu_centroids_20km_radius_country.csv") as points:
+        with open_searchable_points("eu_centroids_20km_radius_country.csv") as points:
             reader = csv.DictReader(points)
             for point in reader:
                 yield scrapy.http.Request(
@@ -75,5 +77,7 @@ class StarbucksEUSpider(scrapy.Spider):
                     "internet_access": wifi,
                 },
             }
+
+            apply_category(Categories.COFFEE_SHOP, properties)
 
             yield Feature(**properties)

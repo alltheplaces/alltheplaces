@@ -1,11 +1,7 @@
-import json
-import random
-
 import scrapy
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
-from locations.items import Feature
 
 
 class ElectrifyAmericaSpider(scrapy.Spider):
@@ -16,6 +12,8 @@ class ElectrifyAmericaSpider(scrapy.Spider):
     def parse(self, response):
         for item in response.json():
             feature = DictParser.parse(item)
+            apply_category(Categories.CHARGING_STATION, feature)
+            feature["street_address"] = feature.pop("addr_full")
 
             extras = dict()
             extras["capacity"] = item.get("evseMax")

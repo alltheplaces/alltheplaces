@@ -10,7 +10,6 @@ class AshleyHomeStoreSpider(CrawlSpider):
     start_urls = ["https://stores.ashleyhomestore.ca/store/"]
     allowed_domains = ["stores.ashleyhomestore.ca"]
     rules = [Rule(LinkExtractor(allow="/store/"), callback="parse_store", follow=True)]
-    download_delay = 1.0
 
     def parse_store(self, response):
         item = LinkedDataParser.parse(response, "FurnitureStore")

@@ -41,7 +41,7 @@ class ChilisSpider(scrapy.Spider):
         data = [json.loads(x) for x in scripts if json.loads(x)["@type"] == "Restaurant"][0]
 
         properties = {
-            "addr_full": html.unescape(data["address"]["streetAddress"]),
+            "street_address": html.unescape(data["address"]["streetAddress"]),
             "phone": data["telephone"],
             "city": data["address"]["addressLocality"],
             "state": data["address"]["addressRegion"],

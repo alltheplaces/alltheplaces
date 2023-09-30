@@ -5,10 +5,10 @@ from locations.dict_parser import DictParser
 from locations.geo import point_locations
 from locations.hours import OpeningHours
 from locations.spiders.circle_k import CircleKSpider
-from locations.spiders.cvs import CVSSpider
-from locations.spiders.riteaid import RiteAidSpider
-from locations.spiders.speedway import SpeedwaySpider
-from locations.spiders.target import TargetSpider
+from locations.spiders.cvs_us import CvsUSSpider
+from locations.spiders.rite_aid_us import RiteAidUSSpider
+from locations.spiders.speedway_us import SpeedwayUSSpider
+from locations.spiders.target_us import TargetUSSpider
 from locations.spiders.walgreens import WalgreensSpider
 
 
@@ -86,23 +86,23 @@ class BMOHarrisSpider(scrapy.Spider):
                 item["extras"]["amenity"] = "atm"
 
                 if item["name"] == "Walgreens":
-                    item["located_in"] = WalgreensSpider.item_attributes["brand"]
-                    item["located_in_wikidata"] = WalgreensSpider.item_attributes["brand_wikidata"]
+                    item["located_in"] = WalgreensSpider.WALGREENS["brand"]
+                    item["located_in_wikidata"] = WalgreensSpider.WALGREENS["brand_wikidata"]
                 elif item["name"] == "CVS":
-                    item["located_in"] = CVSSpider.item_attributes["brand"]
-                    item["located_in_wikidata"] = CVSSpider.item_attributes["brand_wikidata"]
+                    item["located_in"] = CvsUSSpider.item_attributes["brand"]
+                    item["located_in_wikidata"] = CvsUSSpider.item_attributes["brand_wikidata"]
                 elif item["name"] == "Circle K":
                     item["located_in"] = CircleKSpider.item_attributes["brand"]
                     item["located_in_wikidata"] = CircleKSpider.item_attributes["brand_wikidata"]
                 elif item["name"] == "Speedway":
-                    item["located_in"] = SpeedwaySpider.item_attributes["brand"]
-                    item["located_in_wikidata"] = SpeedwaySpider.item_attributes["brand_wikidata"]
+                    item["located_in"] = SpeedwayUSSpider.item_attributes["brand"]
+                    item["located_in_wikidata"] = SpeedwayUSSpider.item_attributes["brand_wikidata"]
                 elif item["name"] == "Rite Aid":
-                    item["located_in"] = RiteAidSpider.item_attributes["brand"]
-                    item["located_in_wikidata"] = RiteAidSpider.item_attributes["brand_wikidata"]
+                    item["located_in"] = RiteAidUSSpider.item_attributes["brand"]
+                    item["located_in_wikidata"] = RiteAidUSSpider.item_attributes["brand_wikidata"]
                 elif item["name"] == "Target":
-                    item["located_in"] = TargetSpider.item_attributes["brand"]
-                    item["located_in_wikidata"] = TargetSpider.item_attributes["brand_wikidata"]
+                    item["located_in"] = TargetUSSpider.item_attributes["brand"]
+                    item["located_in_wikidata"] = TargetUSSpider.item_attributes["brand_wikidata"]
             elif shop["grouptype"] in ["BMOHarrisBranches", "BMOBranches"]:
                 item["extras"]["amenity"] = "bank"
             else:

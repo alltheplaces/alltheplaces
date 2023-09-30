@@ -1,8 +1,10 @@
 import json
 import re
 
-import scrapy
+from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule
 
+from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
 
@@ -17,13 +19,16 @@ DAY_MAPPING = {
 }
 
 
-class CommerzbankDESpider(scrapy.Spider):
+class CommerzbankDESpider(CrawlSpider):
     name = "commerzbank_de"
     item_attributes = {"brand": "Commerzbank", "brand_wikidata": "Q157617"}
     allowed_domains = ["commerzbank.de"]
-    start_urls = ("https://filialsuche.commerzbank.de/de/branch-name",)
+    start_urls = ["https://filialsuche.commerzbank.de/de/branch-name"]
+    rules = [
+        Rule(LinkExtractor(allow=r"^https://filialsuche.commerzbank.de/de/branch-name/.+$"), callback="parse_details")
+    ]
 
-    def parse_hours(self, store_info):
+    def parse_hours(self, store_info) -> OpeningHours:
         opening_hours = OpeningHours()
         for day in DAY_MAPPING:
             try:
@@ -35,14 +40,13 @@ class CommerzbankDESpider(scrapy.Spider):
                 )
             except KeyError:
                 pass
-        return opening_hours.as_opening_hours()
+        return opening_hours
 
     def parse_details(self, response):
-        match = re.search(
-            r'var decodedResults = JSON.parse\(\$\("<div\/>"\).html\("(\[' r'.*?\])"',
+        if match := re.search(
+            r"var decodedResults = JSON\.parse\(\$\(\"<div\/>\"\)\.html\(\"(\[.*?\])\"",
             response.text,
-        )
-        if match:
+        ):
             data = match.group(1)
             data = data.encode().decode("unicode-escape")
             data = json.loads(data)
@@ -51,16 +55,18 @@ class CommerzbankDESpider(scrapy.Spider):
                 properties = {
                     "name": branch["orgTypName"],
                     "ref": branch["id"],
-                    "addr_full": branch["anschriftStrasse"],
+                    "street_address": branch["anschriftStrasse"],
                     "city": branch["anschriftOrt"],
-                    "postcode": branch["postanschriftPostleitzahl"],
+                    "postcode": branch.get("postanschriftPostleitzahl"),
                     "country": "DE",
                     "lat": float(branch["position"][0]),
                     "lon": float(branch["position"][1]),
                     "phone": branch.get("telefon", ""),
+                    "email": branch.get("email"),
+                    "opening_hours": self.parse_hours(branch),
+                    "website": response.url,
                     "extras": {
                         "fax": branch.get("telefax", ""),
-                        "email": branch.get("email", ""),
                         "barriere_type": branch.get("barriereTyp", ""),
                         "cash_register": branch.get("kasse", ""),
                         "vault": branch.get("vault", ""),
@@ -68,15 +74,7 @@ class CommerzbankDESpider(scrapy.Spider):
                         "cashgroup": branch.get("cashgroup", ""),
                     },
                 }
-                hours = self.parse_hours(branch)
 
-                if hours:
-                    properties["opening_hours"] = hours
+                apply_category(Categories.BANK, properties)
 
                 yield Feature(**properties)
-
-    def parse(self, response):
-        branches = response.xpath('//div[@class="mainContent"]//a[@class="SitemapLink"]/@href').getall()
-
-        for branch in branches:
-            yield scrapy.Request(url=branch, callback=self.parse_details)

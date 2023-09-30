@@ -40,7 +40,9 @@ class LesliesPoolmartSpider(scrapy.Spider):
                 properties = {
                     "ref": ref,
                     "name": response.xpath('//h5[@class="store-detail-address"]/span[1]/text()').extract_first(),
-                    "addr_full": response.xpath('//h5[@class="store-detail-address"]/span[2]/text()').extract_first(),
+                    "street_address": response.xpath(
+                        '//h5[@class="store-detail-address"]/span[2]/text()'
+                    ).extract_first(),
                     "city": city,
                     "state": state,
                     "postcode": zipcode,

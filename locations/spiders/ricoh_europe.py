@@ -52,7 +52,7 @@ class RicohEuropeSpider(scrapy.Spider):
                 properties = {
                     "ref": self.REF,
                     "name": store["Name"],
-                    "addr_full": store["Address"]["Street"],
+                    "street_address": store["Address"]["Street"],
                     "city": store["Address"]["City"],
                     "state": store["Address"]["Area"],
                     "postcode": store["Address"]["Zip"],

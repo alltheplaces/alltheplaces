@@ -1,7 +1,7 @@
 import reverse_geocoder
 from geonamescache import GeonamesCache
 
-from locations.pipelines.country_code_clean_up import get_lat_lon
+from locations.items import get_lat_lon
 from locations.spiders.xfinity import US_TERRITORIES
 
 STATES = {
@@ -53,9 +53,9 @@ class StateCodeCleanUpPipeline:
 
         if not state:  # geocode state
             if location := get_lat_lon(item):
-                if results := reverse_geocoder.search([(location[0], location[1])]):
+                if result := reverse_geocoder.get((location[0], location[1]), mode=1, verbose=False):
                     spider.crawler.stats.inc_value("atp/field/state/from_reverse_geocoding")
-                    state = results[0]["admin1"]
+                    state = result["admin1"]
 
         item["state"] = StateCodeCleanUpPipeline.clean_state(state, country)
 

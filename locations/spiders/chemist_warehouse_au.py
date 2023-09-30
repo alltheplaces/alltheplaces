@@ -12,6 +12,7 @@ class ChemistWarehouseAUSpider(scrapy.Spider):
     start_urls = [
         "https://www.chemistwarehouse.com.au/ams/webparts/Google_Map_SL_files/storelocator_data.ashx?searchedPoint=(0,%200)&TrafficSource=1&TrafficSourceState=0"
     ]
+    requires_proxy = True  # Residential IP addresses appear to be required.
 
     def parse(self, response):
         for data in xmltodict.parse(response.text).get("markers").get("marker"):
@@ -33,6 +34,8 @@ class ChemistWarehouseAUSpider(scrapy.Spider):
                     data["@store" + day[:3].lower()].replace(".", ":").replace("00:00AM - 00:00AM", "12:00AM - 12:00AM")
                 )
                 open_time, close_time = rule.split(" - ")
+                if open_time == "0" or close_time == "0":
+                    continue
                 oh.add_range(day, open_time, close_time, time_format="%I:%M%p")
             item["opening_hours"] = oh.as_opening_hours()
 

@@ -36,7 +36,7 @@ class JimNNicksBBQSpider(scrapy.Spider):
             properties = {
                 "ref": ref,
                 "name": response.xpath("//h1/text()").extract_first().strip(),
-                "addr_full": street_address,
+                "street_address": street_address,
                 "city": city,
                 "state": state,
                 "postcode": postal,

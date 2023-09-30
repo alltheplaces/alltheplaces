@@ -5,6 +5,7 @@ import scrapy
 
 from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.searchable_points import open_searchable_points
 
 DAY_MAPPING = {
     "Mon": "Mo",
@@ -27,7 +28,7 @@ class FreseniusKidneyCareSpider(scrapy.Spider):
     def start_requests(self):
         base_url = "https://www.freseniuskidneycare.com/dialysis-centers?lat={lat}&lng={lng}&radius=100&page=1"
 
-        with open("./locations/searchable_points/us_centroids_100mile_radius.csv") as points:
+        with open_searchable_points("us_centroids_100mile_radius.csv") as points:
             next(points)
             for point in points:
                 _, lat, lon = point.strip().split(",")
@@ -66,7 +67,7 @@ class FreseniusKidneyCareSpider(scrapy.Spider):
                     properties = {
                         "name": data["name"],
                         "ref": data["branchCode"],
-                        "addr_full": data["address"]["streetAddress"],
+                        "street_address": data["address"]["streetAddress"],
                         "city": data["address"]["addressLocality"],
                         "state": data["address"]["addressRegion"],
                         "postcode": data["address"]["postalCode"],
@@ -86,7 +87,7 @@ class FreseniusKidneyCareSpider(scrapy.Spider):
                     properties = {
                         "name": json_data["name"],
                         "ref": json_data["branchCode"],
-                        "addr_full": json_data["address"]["streetAddress"],
+                        "street_address": json_data["address"]["streetAddress"],
                         "city": json_data["address"]["addressLocality"],
                         "state": json_data["address"]["addressRegion"],
                         "postcode": json_data["address"]["postalCode"],

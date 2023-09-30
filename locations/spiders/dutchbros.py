@@ -33,7 +33,7 @@ class DutchBrosSpider(scrapy.Spider):
                 name=store["store_nickname"],
                 lat=store["lat"],
                 lon=store["lon"],
-                addr_full=store["stand_address"],
+                street_address=store["stand_address"],
                 city=store["city"],
                 state=store["state"],
                 postcode=store["zip_code"],

@@ -6,6 +6,7 @@ import scrapy
 
 from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.searchable_points import open_searchable_points
 
 DAY_MAPPING = {
     "Sun": "Su",
@@ -32,7 +33,7 @@ class BarnesAndNobleSpider(scrapy.Spider):
 
         params = {"storeFilter": "all", "v": "1", "view": "map"}
 
-        with open("./locations/searchable_points/us_centroids_50mile_radius.csv") as points:
+        with open_searchable_points("us_centroids_50mile_radius.csv") as points:
             next(points)
             for point in points:
                 _, lat, lon = point.strip().split(",")
