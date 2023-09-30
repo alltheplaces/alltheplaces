@@ -18,8 +18,15 @@ class LJHookerAUNZSpider(Spider):
             if location["name"] == "Training":
                 continue
             item = DictParser.parse(location)
-            item["ref"] = location["linkUrl"].replace("https://", "").replace(".ljhooker.com.au", "").replace(".ljhooker.co.nz", "")
-            item["street_address"] = ", ".join(filter(None, [location["address"].get("address1"), location["address"].get("address2")]))
+            item["ref"] = (
+                location["linkUrl"]
+                .replace("https://", "")
+                .replace(".ljhooker.com.au", "")
+                .replace(".ljhooker.co.nz", "")
+            )
+            item["street_address"] = ", ".join(
+                filter(None, [location["address"].get("address1"), location["address"].get("address2")])
+            )
             if ".com.au" in response.url:
                 item["country"] = "AU"
             else:
@@ -32,4 +39,3 @@ class LJHookerAUNZSpider(Spider):
             item["opening_hours"] = OpeningHours()
             item["opening_hours"].add_ranges_from_string(hours_string)
             yield item
-
