@@ -12,6 +12,12 @@ class McGrathAUSpider(SitemapSpider, StructuredDataSpider):
     sitemap_rules = [("/offices/", "parse_sd")]
     wanted_types = ["RealEstateAgent"]
 
+    def pre_process_data(self, ld_data):
+        # Some coordinates are missing a minus in front of the latitude value.
+        if ld_data.get("geo"):
+            if float(ld_data["geo"]["latitude"]) > 0:
+                ld_data["geo"]["latitude"] = str(-1 * float(ld_data["geo"]["latitude"]))
+
     def post_process_item(self, item, response, ld_data):
         item.pop("image", None)
         item.pop("facebook", None)
