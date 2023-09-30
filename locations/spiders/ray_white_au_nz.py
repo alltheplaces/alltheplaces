@@ -42,7 +42,7 @@ class RayWhiteAUNZSpider(Spider):
                 "lat": -23.12,
                 "lon": 132.13,
                 "distance": "100000km",
-            }
+            },
         }
         for url in self.start_urls:
             yield JsonRequest(url=url, data=data, method="POST")
@@ -56,7 +56,7 @@ class RayWhiteAUNZSpider(Spider):
             item["lon"] = location["value"]["address"]["location"]["lon"]
             item["website"] = location["value"]["webSite"]
             for phone_number in location["value"].get("phones", []):
-                if phone_number["typeCode"] == "FIX": # Fixed phone number
+                if phone_number["typeCode"] == "FIX":  # Fixed phone number
                     item["phone"] = phone_number["internationalizedNumber"]
                     break
             if location["value"].get("profile"):
@@ -68,7 +68,7 @@ class RayWhiteAUNZSpider(Spider):
                     elif social_account["type"] == "Twitter":
                         item["twitter"] = clean_twitter(social_account["link"])
                 for photo in location["value"]["profile"].get("photos", []):
-                    if photo["typeCode"] == "OPEXT": # Exterior photo
+                    if photo["typeCode"] == "OPEXT":  # Exterior photo
                         item["image"] = photo["fileName"]
                         break
             yield item
