@@ -1,12 +1,8 @@
-from scrapy.spiders import SitemapSpider
-
-from locations.structured_data_spider import StructuredDataSpider
+from locations.storefinders.yext import YextSpider
 
 
-class CaribouCoffeeUSSpider(SitemapSpider, StructuredDataSpider):
+class CaribouCoffeeUSSpider(YextSpider):
     name = "caribou_coffee_us"
     item_attributes = {"brand": "Caribou Coffee", "brand_wikidata": "Q5039494"}
-    allowed_domains = ["locations.cariboucoffee.com"]
-    sitemap_urls = ["https://locations.cariboucoffee.com/sitemap.xml"]
-    sitemap_rules = [(r"\.com/.+/.+/.+/.+$", "parse_sd")]
-    wanted_types = ["CafeOrCoffeeShop"]
+    api_key = "c328ae6d84635fc2bd9c91497cdeedc0"
+    api_version = "20220511"
