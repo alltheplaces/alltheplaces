@@ -1,5 +1,4 @@
 from chompjs import parse_js_object
-
 from scrapy import Spider
 
 from locations.dict_parser import DictParser
@@ -16,7 +15,13 @@ class HarcourtsSpider(Spider):
     ]
 
     def parse(self, response):
-        locations_js = response.xpath('//script[contains(text(), "var mapItemSearchResultsJSON = ")]/text()').get().split("var mapItemSearchResultsJSON = ", 1)[1].split("}];", 1)[0] + "}]"
+        locations_js = (
+            response.xpath('//script[contains(text(), "var mapItemSearchResultsJSON = ")]/text()')
+            .get()
+            .split("var mapItemSearchResultsJSON = ", 1)[1]
+            .split("}];", 1)[0]
+            + "}]"
+        )
         for location in parse_js_object(locations_js):
             item = DictParser.parse(location)
             if "/nz/" in response.url:
