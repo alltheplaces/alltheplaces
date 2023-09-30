@@ -1,3 +1,4 @@
+from locations.categories import Categories, apply_category
 from locations.storefinders.yext import YextSpider
 
 
@@ -25,4 +26,5 @@ class BuildersFirstSourceUSSpider(YextSpider):
             )
         item.pop("twitter")
         item["extras"].pop("contact:instagram")
+        apply_category(Categories.SHOP_HARDWARE, item)
         yield item
