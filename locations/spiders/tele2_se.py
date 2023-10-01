@@ -16,7 +16,14 @@ class Tele2SESpider(Spider):
             item["street_address"] = item.pop("addr_full", None)
             item.pop("phone", None)
             item["website"] = "https://www.tele2.se/butiker/" + location["slug"]
-            hours_string = "Mo-Fr: " + location.get("weekdayOpenTimes", "") + " Sa: " + location.get("saturdayOpenTimes", "") + " Su: " + location.get("sundayOpenTimes", "")
+            hours_string = (
+                "Mo-Fr: "
+                + location.get("weekdayOpenTimes", "")
+                + " Sa: "
+                + location.get("saturdayOpenTimes", "")
+                + " Su: "
+                + location.get("sundayOpenTimes", "")
+            )
             item["opening_hours"] = OpeningHours()
             item["opening_hours"].add_ranges_from_string(hours_string)
             yield item
