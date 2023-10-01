@@ -25,15 +25,9 @@ class DSKBankBGSpider(scrapy.Spider):
 
             branch_type = data["BranchType"]
             if "Branch" in branch_type:
-                apply_category(
-                    Categories.BANK, 
-                    item
-                )
+                apply_category(Categories.BANK, item)
             else:
-                apply_category(
-                    Categories.ATM, 
-                    item
-                )
+                apply_category(Categories.ATM, item)
 
             text = data["Text"]
             clean_text = re.sub(r"<.*?>", "\n", text)
@@ -64,11 +58,7 @@ class DSKBankBGSpider(scrapy.Spider):
                             hour_to = re.sub(r"\.", ":", hour_to)
                             hour_to += ":00"
                             hour_from += ":00"
-                            item["opening_hours"].add_range(
-                                sanitise_day(day, DAYS_BG), 
-                                hour_from, hour_to, 
-                                "%H:%M:%S"
-                            )
+                            item["opening_hours"].add_range(sanitise_day(day, DAYS_BG), hour_from, hour_to, "%H:%M:%S")
                         except:
                             pass
                     else:
