@@ -14,9 +14,8 @@ class DSKBankBGSpider(scrapy.Spider):
     start_urls = ["https://dskbank.bg/контакти/клонова-мрежа/GetOffices/"]
 
     def parse(self, response):
-        item = Feature()
-        response_json = response.json()
-        for data in response_json:
+        for data in response.json():
+            item = Feature()
             item["ref"] = data["Id"]
             item["name"] = data["Name"]
             item["lat"] = data["Latitude"]
