@@ -38,7 +38,7 @@ class DSKBankBGSpider(scrapy.Spider):
 
             phone = data["Phone"]
             if phone:
-                phone = re.sub(r"\(|\*|\;", "", phone)
+                phone = re.sub(r"\(|\*|\|\);", "", phone)
             item["phone"] = phone
 
             OpenHours = data["OpenHours"]
@@ -50,17 +50,15 @@ class DSKBankBGSpider(scrapy.Spider):
                 OpenHours = OpenHours.split(",")
                 for i in OpenHours:
                     i = i.strip()
-                    i = re.split("\s+", i)
+                    i = re.split(r"\s+", i)
                     if len(i) == 3:
-                        try:
-                            day, hour_from, hour_to = i
+                        day, hour_from, hour_to = i
+                        if(day in DAYS_BG):
                             hour_from = re.sub(r"\.", ":", hour_from)
                             hour_to = re.sub(r"\.", ":", hour_to)
                             hour_to += ":00"
                             hour_from += ":00"
                             item["opening_hours"].add_range(sanitise_day(day, DAYS_BG), hour_from, hour_to, "%H:%M:%S")
-                        except:
-                            pass
                     else:
                         pass
             else:
