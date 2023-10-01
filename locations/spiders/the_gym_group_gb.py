@@ -1,7 +1,6 @@
 import re
 
 from chompjs import parse_js_object
-
 from scrapy import Request, Spider
 
 from locations.hours import DAYS, OpeningHours
@@ -33,7 +32,9 @@ class TheGymGroupGBSpider(Spider):
 
     def add_hours(self, response):
         item = response.meta["item"]
-        hours_string = " ".join(filter(None, response.xpath('//div[@id="gym_times_location_section"]//p/text()').getall()))
+        hours_string = " ".join(
+            filter(None, response.xpath('//div[@id="gym_times_location_section"]//p/text()').getall())
+        )
         item["opening_hours"] = OpeningHours()
         if "24 hours, 7 days a week" in hours_string.lower():
             item["opening_hours"].add_days_range(DAYS, "00:00", "23:59")
