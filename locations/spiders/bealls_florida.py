@@ -1,6 +1,7 @@
-from re import search
 from json import loads
+from re import search
 from urllib.parse import unquote
+
 from scrapy.spiders import SitemapSpider
 
 from locations.hours import OpeningHours
