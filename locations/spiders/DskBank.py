@@ -53,7 +53,7 @@ class DSKBankBGSpider(scrapy.Spider):
                     i = re.split(r"\s+", i)
                     if len(i) == 3:
                         day, hour_from, hour_to = i
-                        if(day in DAYS_BG):
+                        if day in DAYS_BG:
                             hour_from = re.sub(r"\.", ":", hour_from)
                             hour_to = re.sub(r"\.", ":", hour_to)
                             hour_to += ":00"
