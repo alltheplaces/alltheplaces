@@ -1,5 +1,4 @@
 from chompjs import parse_js_object
-
 from scrapy import Request, Spider
 from scrapy.http import JsonRequest
 
@@ -19,7 +18,13 @@ class KiKSpider(Spider):
             yield Request(url=url, callback=self.parse_country_list)
 
     def parse_country_list(self, response):
-        country_list_js = response.xpath('//script[contains(text(), "const translations = {")]/text()').get().split("countries:", 1)[1].split("},", 1)[0] + "}"
+        country_list_js = (
+            response.xpath('//script[contains(text(), "const translations = {")]/text()')
+            .get()
+            .split("countries:", 1)[1]
+            .split("},", 1)[0]
+            + "}"
+        )
         for country_code in parse_js_object(country_list_js).keys():
             # Whilst it is possible to omit the country code to return all
             # locations globally, the resulting data does not provide a
@@ -27,7 +32,11 @@ class KiKSpider(Spider):
             # determine the country of each location. Thus it is easier to
             # filter by country and pass the country code to
             # self.parse_stores to add the country code field.
-            yield JsonRequest(url=f"https://storefinder-microservice.kik.de/storefinder/results.json?lat=&long=&country={country_code}&distance=100000&limit=100000", meta={"country_code": country_code}, callback=self.parse_stores)
+            yield JsonRequest(
+                url=f"https://storefinder-microservice.kik.de/storefinder/results.json?lat=&long=&country={country_code}&distance=100000&limit=100000",
+                meta={"country_code": country_code},
+                callback=self.parse_stores,
+            )
 
     def parse_stores(self, response):
         for location in response.json()["stores"][0]["results"].values():
