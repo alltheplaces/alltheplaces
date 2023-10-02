@@ -1,7 +1,7 @@
 from scrapy import Spider
 from scrapy.http import JsonRequest
-from locations.categories import Categories
 
+from locations.categories import Categories
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 
@@ -16,9 +16,9 @@ class CarrefourTWSpider(Spider):
         "量販": {
             "brand": "Carrefour",
             "brand_wikidata": "Q3117359",
-            'extras': Categories.SHOP_SUPERMARKET.value,
+            "extras": Categories.SHOP_SUPERMARKET.value,
         },  # "Mass sales" (bad translation but as there are fewer of this type, it is probably the hypermarket brand)
-        "超市": {"brand": "Carrefour Market", "brand_wikidata": "Q2689639", 'extras': Categories.SHOP_SUPERMARKET.value}
+        "超市": {"brand": "Carrefour Market", "brand_wikidata": "Q2689639", "extras": Categories.SHOP_SUPERMARKET.value},
     }
 
     def start_requests(self):

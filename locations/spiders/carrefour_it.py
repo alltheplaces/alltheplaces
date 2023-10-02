@@ -1,6 +1,6 @@
 from scrapy import Spider
-from locations.categories import Categories
 
+from locations.categories import Categories
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_IT, OpeningHours
 
@@ -11,8 +11,16 @@ class CarrefourITSpider(Spider):
 
     brands = {
         "iper": {"brand": "Carrefour", "brand_wikidata": "Q217599", "extras": Categories.SHOP_SUPERMARKET.value},
-        "market": {"brand": "Carrefour Market", "brand_wikidata": "Q2689639", "extras": Categories.SHOP_SUPERMARKET.value},
-        "express": {"brand": "Carrefour Express", "brand_wikidata": "Q2940190", "extras": Categories.SHOP_CONVENIENCE.value},
+        "market": {
+            "brand": "Carrefour Market",
+            "brand_wikidata": "Q2689639",
+            "extras": Categories.SHOP_SUPERMARKET.value,
+        },
+        "express": {
+            "brand": "Carrefour Express",
+            "brand_wikidata": "Q2940190",
+            "extras": Categories.SHOP_CONVENIENCE.value,
+        },
     }
 
     def parse(self, response):
