@@ -4,6 +4,7 @@ from scrapy import Selector, Spider
 from locations.categories import Categories
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_RO, OpeningHours
+from locations.spiders.carrefour_fr import CARREFOUR_EXPRESS, CARREFOUR_MARKET, CARREFOUR_SUPERMARKET, CARREFOUR_CONTACT
 
 
 class CarrefourROSpider(Spider):
@@ -12,32 +13,12 @@ class CarrefourROSpider(Spider):
     start_urls = ["https://carrefour.ro/corporate/magazine"]
 
     brands = {
-        "Hipermarket": {"brand": "Carrefour", "brand_wikidata": "Q217599", "extras": Categories.SHOP_SUPERMARKET.value},
-        "Market": {
-            "brand": "Carrefour Market",
-            "brand_wikidata": "Q2689639",
-            "extras": Categories.SHOP_SUPERMARKET.value,
-        },
-        "Express": {
-            "brand": "Carrefour Express",
-            "brand_wikidata": "Q2940190",
-            "extras": Categories.SHOP_CONVENIENCE.value,
-        },
-        "Express portocaliu": {
-            "brand": "Carrefour Express",
-            "brand_wikidata": "Q2940190",
-            "extras": Categories.SHOP_CONVENIENCE.value,
-        },  # Express - "Orange" store (?)
-        "Express Franciza": {
-            "brand": "Carrefour Express",
-            "brand_wikidata": "Q2940190",
-            "extras": Categories.SHOP_CONVENIENCE.value,
-        },  # Express - Franchise store
-        "Contact": {
-            "brand": "Carrefour Contact",
-            "brand_wikidata": "Q2940188",
-            "extras": Categories.SHOP_SUPERMARKET.value,
-        },
+        "Contact": CARREFOUR_CONTACT,
+        "Express": CARREFOUR_EXPRESS,
+        "Express portocaliu": CARREFOUR_EXPRESS,  # Express - "Orange" store (?)
+        "Express Franciza": CARREFOUR_EXPRESS,  # Express - Franchise store
+        "Hipermarket": CARREFOUR_SUPERMARKET,
+        "Market": CARREFOUR_MARKET,
     }
 
     def parse(self, response):

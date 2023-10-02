@@ -9,8 +9,8 @@ class CarrefourBESpider(scrapy.Spider):
     name = "carrefour_be"
     start_urls = ["https://winkels.carrefour.be/api/v3/locations"]
     brands = {
-        "express": ("Carrefour Express", "Q2940190", None),
-        "orange": ("Carrefour Express", "Q2940190", None),
+        "express": ("Carrefour Express", "Q2940190", Categories.SHOP_CONVENIENCE),
+        "orange": ("Carrefour Express", "Q2940190", Categories.SHOP_CONVENIENCE),
         "market": ("Carrefour Market", "Q2689639", Categories.SHOP_SUPERMARKET),
         "hyper": ("Carrefour", "Q217599", Categories.SHOP_SUPERMARKET),
         "drive-2": ("Carrefour", "Q217599", {**Categories.SHOP_SUPERMARKET.value, "drive_through": "yes"}),

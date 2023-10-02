@@ -2,6 +2,7 @@ import scrapy
 
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_FULL, OpeningHours
+from locations.spiders.carrefour_fr import CARREFOUR_EXPRESS, CARREFOUR_MARKET, CARREFOUR_SUPERMARKET
 
 
 class CarrefourARSpider(scrapy.Spider):
@@ -14,9 +15,9 @@ class CarrefourARSpider(scrapy.Spider):
     ]
 
     brands = {
-        "Hipermercado": {"brand": "Carrefour", "brand_wikidata": "Q217599"},
-        "Market": {"brand": "Carrefour Market", "brand_wikidata": "Q2689639"},
-        "Express": {"brand": "Carrefour Express", "brand_wikidata": "Q2940190"},
+        "Hipermercado": CARREFOUR_SUPERMARKET,
+        "Market": CARREFOUR_MARKET,
+        "Express": CARREFOUR_EXPRESS,
     }
 
     def parse(self, response):

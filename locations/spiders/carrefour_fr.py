@@ -1,6 +1,38 @@
 from locations.categories import Categories, apply_category
 from locations.storefinders.woosmap import WoosmapSpider
 
+CARREFOUR_SUPERMARKET = {
+    "brand": "Carrefour",
+    "brand_wikidata": "Q217599",
+    "extras": Categories.SHOP_SUPERMARKET.value,
+}
+
+CARREFOUR_CONVENIENCE = {
+    "brand": "Carrefour",
+    "brand_wikidata": "Q217599",
+    "extras": Categories.SHOP_CONVENIENCE.value,
+}
+
+CARREFOUR_MARKET = {
+    "brand": "Carrefour Market",
+    "brand_wikidata": "Q2689639",
+    "extras": Categories.SHOP_SUPERMARKET.value,
+}
+CARREFOUR_CONTACT = {
+    "brand": "Carrefour Contact",
+    "brand_wikidata": "Q2940188",
+    "extras": Categories.SHOP_SUPERMARKET.value,
+}
+CARREFOUR_EXPRESS = {
+    "brand": "Carrefour Express",
+    "brand_wikidata": "Q2940190",
+    "extras": Categories.SHOP_CONVENIENCE.value,
+}
+CARREFOUR_CITY = {
+    "brand": "Carrefour City",
+    "brand_wikidata": "Q2940187",
+    "extras": Categories.SHOP_SUPERMARKET.value,
+}
 
 class CarrefourFRSpider(WoosmapSpider):
     name = "carrefour_fr"
@@ -10,23 +42,12 @@ class CarrefourFRSpider(WoosmapSpider):
     origin = "https://www.carrefour.fr"
 
     brands = {
-        "CARREFOUR CITY": {"brand": "Carrefour City", "brand_wikidata": "Q2940187"},
-        "CARREFOUR EXPRESS": {"brand": "Carrefour Express", "brand_wikidata": "Q2940190"},
-        "CARREFOUR CONTACT": {
-            "brand": "Carrefour Contact",
-            "brand_wikidata": "Q2940188",
-            "extras": Categories.SHOP_SUPERMARKET.value,
-        },
-        "CARREFOUR MARKET": {
-            "brand": "Carrefour Market",
-            "brand_wikidata": "Q2689639",
-            "extras": Categories.SHOP_SUPERMARKET.value,
-        },
-        "MARKET": {
-            "brand": "Carrefour Market",
-            "brand_wikidata": "Q2689639",
-            "extras": Categories.SHOP_SUPERMARKET.value,
-        },
+        "MARKET": CARREFOUR_MARKET,
+        "CARREFOUR": CARREFOUR_CONVENIENCE,
+        "CARREFOUR CITY": CARREFOUR_CITY,
+        "CARREFOUR CONTACT": CARREFOUR_CONTACT,
+        "CARREFOUR EXPRESS": CARREFOUR_EXPRESS,
+        "CARREFOUR MARKET": CARREFOUR_MARKET,
         "CARREFOUR MONTAGNE": {
             "brand": "Carrefour Montagne",
             "brand_wikidata": "Q2940193",
@@ -36,12 +57,7 @@ class CarrefourFRSpider(WoosmapSpider):
             "brand": "Bon App!",
             "brand_wikidata": "Q90153100",
             "extras": Categories.SHOP_CONVENIENCE.value,
-        },
-        "CARREFOUR": {
-            "brand": "Carrefour",
-            "brand_wikidata": "Q217599",
-            "extras": Categories.SHOP_CONVENIENCE.value,
-        },
+        }
     }
 
     def parse_item(self, item, feature, **kwargs):

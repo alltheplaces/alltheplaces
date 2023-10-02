@@ -8,6 +8,7 @@ from locations.categories import Categories
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_EN, OpeningHours
 from locations.user_agents import BROWSER_DEFAULT
+from locations.spiders.carrefour_fr import CARREFOUR_EXPRESS, CARREFOUR_MARKET, CARREFOUR_SUPERMARKET
 
 
 class CarrefourPLSpider(Spider):
@@ -16,22 +17,10 @@ class CarrefourPLSpider(Spider):
     start_urls = ["https://c4webservice.carrefour.pl:8080/MobileWebService/v3/Bootstrap.svc/App/Bootstrap"]
 
     brands = {
-        "Hipermarket": {"brand": "Carrefour", "brand_wikidata": "Q217599", "extras": Categories.SHOP_SUPERMARKET.value},
-        "Market": {
-            "brand": "Carrefour Market",
-            "brand_wikidata": "Q2689639",
-            "extras": Categories.SHOP_SUPERMARKET.value,
-        },
-        "Express (Zielony)": {
-            "brand": "Carrefour Express",
-            "brand_wikidata": "Q2940190",
-            "extras": Categories.SHOP_CONVENIENCE.value,
-        },
-        "Express (Pomarańczowy)": {
-            "brand": "Carrefour Express",
-            "brand_wikidata": "Q2940190",
-            "extras": Categories.SHOP_CONVENIENCE.value,
-        },
+        "Express (Zielony)": CARREFOUR_EXPRESS,
+        "Express (Pomarańczowy)": CARREFOUR_EXPRESS,
+        "Hipermarket": CARREFOUR_SUPERMARKET,
+        "Market": CARREFOUR_MARKET,
         "Globi": {"brand": "Globi", "extras": Categories.SHOP_CONVENIENCE.value},
     }
     user_agent = BROWSER_DEFAULT

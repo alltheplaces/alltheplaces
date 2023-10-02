@@ -3,6 +3,7 @@ from scrapy import Spider
 from locations.categories import Categories
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_IT, OpeningHours
+from locations.spiders.carrefour_fr import CARREFOUR_EXPRESS, CARREFOUR_MARKET, CARREFOUR_SUPERMARKET
 
 
 class CarrefourITSpider(Spider):
@@ -10,17 +11,9 @@ class CarrefourITSpider(Spider):
     start_urls = ["https://www.carrefour.it/on/demandware.store/Sites-carrefour-IT-Site/it_IT/StoreLocator-GetAll"]
 
     brands = {
-        "iper": {"brand": "Carrefour", "brand_wikidata": "Q217599", "extras": Categories.SHOP_SUPERMARKET.value},
-        "market": {
-            "brand": "Carrefour Market",
-            "brand_wikidata": "Q2689639",
-            "extras": Categories.SHOP_SUPERMARKET.value,
-        },
-        "express": {
-            "brand": "Carrefour Express",
-            "brand_wikidata": "Q2940190",
-            "extras": Categories.SHOP_CONVENIENCE.value,
-        },
+        "iper": CARREFOUR_SUPERMARKET,
+        "market": CARREFOUR_MARKET,
+        "express": CARREFOUR_EXPRESS,
     }
 
     def parse(self, response):
