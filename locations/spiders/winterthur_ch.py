@@ -8,7 +8,7 @@ from locations.items import Feature
 # Open Data of the City of Winterthur, Switzerland
 class WinterthurCHSpider(scrapy.Spider):
     name = "winterthur_ch"
-    allowed_domains = ["stadtplantest.winterthur.ch"]
+    allowed_domains = ["stadtplan.winterthur.ch"]
     dataset_attributes = {
         "attribution": "optional",
         "attribution:name:de": "Stadt Winterthur",
