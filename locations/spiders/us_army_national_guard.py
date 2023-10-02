@@ -28,6 +28,5 @@ class USArmyNationalGuardSpider(scrapy.Spider):
                 "phone": row["phone"],
                 "lat": row["latitude"],
                 "lon": row["longitude"],
-            }
-            
+            }      
             yield Feature(**properties)
