@@ -34,7 +34,7 @@ class McDonaldsSpider(scrapy.Spider):
             "en-sa",
             "uk-ua",
             "hu-hu",
-            "zh-tw"
+            "zh-tw",
         ]:
             country = locale.split("-")[1]
             for city in city_locations(country.upper(), 20000):
