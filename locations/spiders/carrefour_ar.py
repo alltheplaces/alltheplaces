@@ -2,7 +2,7 @@ import scrapy
 
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_FULL, OpeningHours
-from locations.spiders.carrefour_fr import CARREFOUR_EXPRESS, CARREFOUR_MARKET, CARREFOUR_SUPERMARKET
+from locations.spiders.carrefour_fr import CARREFOUR_EXPRESS, CARREFOUR_MARKET, CARREFOUR_SUPERMARKET, parse_brand_and_category_from_mapping
 
 
 class CarrefourARSpider(scrapy.Spider):
@@ -33,9 +33,7 @@ class CarrefourARSpider(scrapy.Spider):
             o["state"] = o.get("administrativeArea")
             item = DictParser.parse(o)
 
-            if match := self.brands.get(o.get("labels")):
-                item.update(match)
-            else:
+            if not parse_brand_and_category_from_mapping(item, o.get("labels"), self.brands):
                 self.crawler.stats.inc_value(f'atp/carrefour_ar/unknown_brand/{o.get("labels")}')
 
             oh = OpeningHours()

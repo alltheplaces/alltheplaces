@@ -3,7 +3,7 @@ from scrapy import Selector, Spider
 
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_RO, OpeningHours
-from locations.spiders.carrefour_fr import CARREFOUR_CONTACT, CARREFOUR_EXPRESS, CARREFOUR_MARKET, CARREFOUR_SUPERMARKET
+from locations.spiders.carrefour_fr import CARREFOUR_CONTACT, CARREFOUR_EXPRESS, CARREFOUR_MARKET, CARREFOUR_SUPERMARKET, parse_brand_and_category_from_mapping
 
 
 class CarrefourROSpider(Spider):
@@ -39,7 +39,9 @@ class CarrefourROSpider(Spider):
             ):
                 # Location is a warehouse or headquarters. Ignore it.
                 continue
-            item.update(self.brands[location["type"]["name"]])
+
+            parse_brand_and_category_from_mapping(item, location["type"]["name"], self.brands)
+
             item["street_address"] = item.pop("addr_full")
             item["city"] = location["city"]["name"]
             item["website"] = (

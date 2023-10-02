@@ -1,37 +1,38 @@
 from locations.categories import Categories, apply_category
+from locations.items import Feature
 from locations.storefinders.woosmap import WoosmapSpider
 
 CARREFOUR_SUPERMARKET = {
     "brand": "Carrefour",
     "brand_wikidata": "Q217599",
-    "extras": Categories.SHOP_SUPERMARKET.value,
+    "extras": Categories.SHOP_SUPERMARKET,
 }
 
 CARREFOUR_CONVENIENCE = {
     "brand": "Carrefour",
     "brand_wikidata": "Q217599",
-    "extras": Categories.SHOP_CONVENIENCE.value,
+    "extras": Categories.SHOP_CONVENIENCE,
 }
 
 CARREFOUR_MARKET = {
     "brand": "Carrefour Market",
     "brand_wikidata": "Q2689639",
-    "extras": Categories.SHOP_SUPERMARKET.value,
+    "extras": Categories.SHOP_SUPERMARKET,
 }
 CARREFOUR_CONTACT = {
     "brand": "Carrefour Contact",
     "brand_wikidata": "Q2940188",
-    "extras": Categories.SHOP_SUPERMARKET.value,
+    "extras": Categories.SHOP_SUPERMARKET,
 }
 CARREFOUR_EXPRESS = {
     "brand": "Carrefour Express",
     "brand_wikidata": "Q2940190",
-    "extras": Categories.SHOP_CONVENIENCE.value,
+    "extras": Categories.SHOP_CONVENIENCE,
 }
 CARREFOUR_CITY = {
     "brand": "Carrefour City",
     "brand_wikidata": "Q2940187",
-    "extras": Categories.SHOP_SUPERMARKET.value,
+    "extras": Categories.SHOP_SUPERMARKET,
 }
 
 
@@ -64,9 +65,7 @@ class CarrefourFRSpider(WoosmapSpider):
     def parse_item(self, item, feature, **kwargs):
         store_types = feature.get("properties").get("types", [])
         if len(store_types) > 0:
-            if brand := self.brands.get(store_types[0]):
-                item.update(brand)
-
+            parse_brand_and_category_from_mapping(item, store_types[0], self.brands)
             item["extras"]["store_type"] = store_types[0]
         # Unfortunately the "types" is often missing
         elif "Parapharmacie" in item["name"]:
@@ -79,3 +78,12 @@ class CarrefourFRSpider(WoosmapSpider):
                     item.update(brand)
 
         yield item
+
+
+def parse_brand_and_category_from_mapping(item: Feature, brand_key: str, brand_mapping: dict):
+    if match := brand_mapping.get(brand_key):
+        item['brand'] = match.get('brand')
+        item['brand_wikidata'] = match.get('brand_wikidata')
+        apply_category(match.get('extras'), item)
+        return True
+    return False

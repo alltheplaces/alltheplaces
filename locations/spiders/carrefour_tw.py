@@ -4,6 +4,7 @@ from scrapy.http import JsonRequest
 from locations.categories import Categories
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
+from locations.spiders.carrefour_fr import parse_brand_and_category_from_mapping
 
 
 class CarrefourTWSpider(Spider):
@@ -16,9 +17,9 @@ class CarrefourTWSpider(Spider):
         "量販": {
             "brand": "Carrefour",
             "brand_wikidata": "Q3117359",
-            "extras": Categories.SHOP_SUPERMARKET.value,
+            "extras": Categories.SHOP_SUPERMARKET,
         },  # "Mass sales" (bad translation but as there are fewer of this type, it is probably the hypermarket brand)
-        "超市": {"brand": "Carrefour Market", "brand_wikidata": "Q2689639", "extras": Categories.SHOP_SUPERMARKET.value},
+        "超市": {"brand": "Carrefour Market", "brand_wikidata": "Q2689639", "extras": Categories.SHOP_SUPERMARKET},
     }
 
     def start_requests(self):
@@ -32,7 +33,7 @@ class CarrefourTWSpider(Spider):
             item = DictParser.parse(location)
             if location["store_type_name"] not in self.brands.keys():
                 continue
-            item.update(self.brands[location["store_type_name"]])
+            parse_brand_and_category_from_mapping(item, location["store_type_name"], self.brands)
             item["phone"] = location["contact_tel"]
             item["opening_hours"] = OpeningHours()
             if location["is24h"]:

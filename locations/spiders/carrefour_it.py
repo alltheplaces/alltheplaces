@@ -2,7 +2,7 @@ from scrapy import Spider
 
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_IT, OpeningHours
-from locations.spiders.carrefour_fr import CARREFOUR_EXPRESS, CARREFOUR_MARKET, CARREFOUR_SUPERMARKET
+from locations.spiders.carrefour_fr import CARREFOUR_EXPRESS, CARREFOUR_MARKET, CARREFOUR_SUPERMARKET, parse_brand_and_category_from_mapping
 
 
 class CarrefourITSpider(Spider):
@@ -25,9 +25,12 @@ class CarrefourITSpider(Spider):
             item["postcode"] = location["CAP"]
             item["website"] = "https://www.carrefour.it" + location["Url"]
             item["opening_hours"] = OpeningHours()
-            if location["Type"] not in self.brands.keys():
+            if not self.brands.get(location["Type"]):
+                self.crawler.stats.inc_value(f'atp/carrefour_it/unknown_brand/{location["Type"]}')
                 continue
-            item.update(self.brands[location["Type"]])
+
+            parse_brand_and_category_from_mapping(item, location["Type"], self.brands)
+
             for day_name, day_hours in location["Orari"].items():
                 if day_hours.upper() == "CHIUSO":  # Closed
                     continue
