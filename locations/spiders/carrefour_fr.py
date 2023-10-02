@@ -34,6 +34,7 @@ CARREFOUR_CITY = {
     "extras": Categories.SHOP_SUPERMARKET.value,
 }
 
+
 class CarrefourFRSpider(WoosmapSpider):
     name = "carrefour_fr"
     item_attributes = {"brand": "Carrefour", "brand_wikidata": "Q217599"}
@@ -57,7 +58,7 @@ class CarrefourFRSpider(WoosmapSpider):
             "brand": "Bon App!",
             "brand_wikidata": "Q90153100",
             "extras": Categories.SHOP_CONVENIENCE.value,
-        }
+        },
     }
 
     def parse_item(self, item, feature, **kwargs):

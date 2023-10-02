@@ -1,10 +1,9 @@
 import chompjs
 from scrapy import Selector, Spider
 
-from locations.categories import Categories
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_RO, OpeningHours
-from locations.spiders.carrefour_fr import CARREFOUR_EXPRESS, CARREFOUR_MARKET, CARREFOUR_SUPERMARKET, CARREFOUR_CONTACT
+from locations.spiders.carrefour_fr import CARREFOUR_CONTACT, CARREFOUR_EXPRESS, CARREFOUR_MARKET, CARREFOUR_SUPERMARKET
 
 
 class CarrefourROSpider(Spider):
