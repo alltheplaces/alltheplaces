@@ -1,7 +1,6 @@
 from html import unescape
 
 from chompjs import parse_js_object
-
 from scrapy import Spider
 
 from locations.dict_parser import DictParser
@@ -20,7 +19,9 @@ class YettelHUSpider(Spider):
             item = DictParser.parse(location)
             item["ref"] = location["code"]
             item["street_address"] = item.pop("addr_full", None)
-            hours_string = " ".join([f"{day_range}: {hours_range}" for day_range, hours_range in location["opening"].items()])
+            hours_string = " ".join(
+                [f"{day_range}: {hours_range}" for day_range, hours_range in location["opening"].items()]
+            )
             item["opening_hours"] = OpeningHours()
             item["opening_hours"].add_ranges_from_string(hours_string, days=DAYS_HU)
             yield item
