@@ -6,11 +6,12 @@ from locations.categories import Categories
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_EN, OpeningHours
 
+
 class MorrisonsSpider(Spider):
     name = "morrisons_gb"
-    item_attributes = {"nsi_id": -1} # Skip NSI matching as it
-                                     # conflates stores and
-                                     # fuel stations.
+    item_attributes = {"nsi_id": -1}  # Skip NSI matching as it
+    # conflates stores and
+    # fuel stations.
     allowed_domains = ["api.morrisons.com"]
     start_urls = ["https://api.morrisons.com/location/v2//stores?apikey=kxBdM2chFwZjNvG2PwnSn3sj6C53dLEY&limit=20000"]
 
@@ -67,12 +68,21 @@ class MorrisonsSpider(Spider):
             item = DictParser.parse(location)
             item["ref"] = location["name"]
             item["name"] = location["storeName"]
-            item["street_address"] = ", ".join(filter(None, [location["address"].get("addressLine1"), location["address"].get("addressLine2")]))
-            item["website"] = "https://my.morrisons.com/storefinder/" + str(location["name"]) + "/" + location["storeName"].lower().translate(str.maketrans('', '', string.punctuation)).replace(" ", "-")
+            item["street_address"] = ", ".join(
+                filter(None, [location["address"].get("addressLine1"), location["address"].get("addressLine2")])
+            )
+            item["website"] = (
+                "https://my.morrisons.com/storefinder/"
+                + str(location["name"])
+                + "/"
+                + location["storeName"].lower().translate(str.maketrans("", "", string.punctuation)).replace(" ", "-")
+            )
 
             item["opening_hours"] = OpeningHours()
             for day_abbrev, day_hours in location["openingTimes"].items():
-                item["opening_hours"].add_range(DAYS_EN[day_abbrev.title()], day_hours["open"], day_hours["close"], "%H:%M:%S")
+                item["opening_hours"].add_range(
+                    DAYS_EN[day_abbrev.title()], day_hours["open"], day_hours["close"], "%H:%M:%S"
+                )
 
             if location["storeFormat"] == "supermarket" and location["category"] == "Supermarket":
                 item.update(self.MORRISONS_SUPERMARKET)
