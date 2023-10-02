@@ -1,7 +1,7 @@
 import chompjs
 from scrapy import Selector, Spider
-from locations.categories import Categories
 
+from locations.categories import Categories
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_RO, OpeningHours
 

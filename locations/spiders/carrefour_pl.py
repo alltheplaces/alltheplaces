@@ -4,7 +4,7 @@ import os
 import scrapy
 from scrapy import Spider
 
-from locations.categories import Categories, apply_category
+from locations.categories import Categories
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_EN, OpeningHours
 from locations.user_agents import BROWSER_DEFAULT
@@ -17,9 +17,21 @@ class CarrefourPLSpider(Spider):
 
     brands = {
         "Hipermarket": {"brand": "Carrefour", "brand_wikidata": "Q217599", "extras": Categories.SHOP_SUPERMARKET.value},
-        "Market": {"brand": "Carrefour Market", "brand_wikidata": "Q2689639", "extras": Categories.SHOP_SUPERMARKET.value},
-        "Express (Zielony)": {"brand": "Carrefour Express", "brand_wikidata": "Q2940190", "extras": Categories.SHOP_CONVENIENCE.value},
-        "Express (Pomarańczowy)": {"brand": "Carrefour Express", "brand_wikidata": "Q2940190", "extras": Categories.SHOP_CONVENIENCE.value},
+        "Market": {
+            "brand": "Carrefour Market",
+            "brand_wikidata": "Q2689639",
+            "extras": Categories.SHOP_SUPERMARKET.value,
+        },
+        "Express (Zielony)": {
+            "brand": "Carrefour Express",
+            "brand_wikidata": "Q2940190",
+            "extras": Categories.SHOP_CONVENIENCE.value,
+        },
+        "Express (Pomarańczowy)": {
+            "brand": "Carrefour Express",
+            "brand_wikidata": "Q2940190",
+            "extras": Categories.SHOP_CONVENIENCE.value,
+        },
         "Globi": {"brand": "Globi", "extras": Categories.SHOP_CONVENIENCE.value},
     }
     user_agent = BROWSER_DEFAULT
@@ -49,7 +61,7 @@ class CarrefourPLSpider(Spider):
                 item.update(brand)
             else:
                 continue  # bad brand
-            
+
             item.pop("street")
             item["ref"] = location["shopId"]
             item["street_address"] = location["street"]
