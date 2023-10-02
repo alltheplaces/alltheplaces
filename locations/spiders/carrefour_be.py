@@ -3,8 +3,13 @@ import scrapy
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_FULL, OpeningHours
-from locations.user_agents import BROWSER_DEFAULT, CHROME_LATEST
-from locations.spiders.carrefour_fr import CARREFOUR_EXPRESS, CARREFOUR_MARKET, CARREFOUR_SUPERMARKET, parse_brand_and_category_from_mapping
+from locations.spiders.carrefour_fr import (
+    CARREFOUR_EXPRESS,
+    CARREFOUR_MARKET,
+    CARREFOUR_SUPERMARKET,
+    parse_brand_and_category_from_mapping,
+)
+from locations.user_agents import CHROME_LATEST
 
 
 class CarrefourBESpider(scrapy.Spider):
@@ -16,7 +21,7 @@ class CarrefourBESpider(scrapy.Spider):
         "market": CARREFOUR_MARKET,
         "hyper": CARREFOUR_SUPERMARKET,
         "drive-2": CARREFOUR_SUPERMARKET,
-        'Maxi': CARREFOUR_SUPERMARKET,
+        "Maxi": CARREFOUR_SUPERMARKET,
     }
     user_agent = CHROME_LATEST
     custom_settings = {"ROBOTSTXT_OBEY": False}
@@ -31,10 +36,10 @@ class CarrefourBESpider(scrapy.Spider):
 
             brand_slug = data.get("brandSlug")
             if not parse_brand_and_category_from_mapping(item, brand_slug, self.brands):
-                self.crawler.stats.inc_value(f'atp/carrefour_be/unknown_brand/{brand_slug}')
+                self.crawler.stats.inc_value(f"atp/carrefour_be/unknown_brand/{brand_slug}")
                 # Default to supermarket if brand match failed
                 apply_category(item, Categories.SHOP_SUPERMARKET)
-                
+
             if brand_slug == "drive-2":
                 apply_yes_no(Extras.DRIVE_THROUGH, item, True)
 

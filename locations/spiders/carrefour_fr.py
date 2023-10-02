@@ -82,8 +82,8 @@ class CarrefourFRSpider(WoosmapSpider):
 
 def parse_brand_and_category_from_mapping(item: Feature, brand_key: str, brand_mapping: dict):
     if match := brand_mapping.get(brand_key):
-        item['brand'] = match.get('brand')
-        item['brand_wikidata'] = match.get('brand_wikidata')
-        apply_category(match.get('extras'), item)
+        item["brand"] = match.get("brand")
+        item["brand_wikidata"] = match.get("brand_wikidata")
+        apply_category(match.get("extras"), item)
         return True
     return False
