@@ -16,11 +16,11 @@ class CarrefourPLSpider(Spider):
     start_urls = ["https://c4webservice.carrefour.pl:8080/MobileWebService/v3/Bootstrap.svc/App/Bootstrap"]
 
     brands = {
-        "Hipermarket": {"brand": "Carrefour", "brand_wikidata": "Q217599"},
-        "Market": {"brand": "Carrefour Market", "brand_wikidata": "Q2689639"},
-        "Express (Zielony)": {"brand": "Carrefour Express", "brand_wikidata": "Q2940190"},
-        "Express (Pomarańczowy)": {"brand": "Carrefour Express", "brand_wikidata": "Q2940190"},
-        "Globi": {"brand": "Globi"},
+        "Hipermarket": {"brand": "Carrefour", "brand_wikidata": "Q217599", "extras": Categories.SHOP_SUPERMARKET.value},
+        "Market": {"brand": "Carrefour Market", "brand_wikidata": "Q2689639", "extras": Categories.SHOP_SUPERMARKET.value},
+        "Express (Zielony)": {"brand": "Carrefour Express", "brand_wikidata": "Q2940190", "extras": Categories.SHOP_CONVENIENCE.value},
+        "Express (Pomarańczowy)": {"brand": "Carrefour Express", "brand_wikidata": "Q2940190", "extras": Categories.SHOP_CONVENIENCE.value},
+        "Globi": {"brand": "Globi", "extras": Categories.SHOP_CONVENIENCE.value},
     }
     user_agent = BROWSER_DEFAULT
 
@@ -49,11 +49,7 @@ class CarrefourPLSpider(Spider):
                 item.update(brand)
             else:
                 continue  # bad brand
-            if item["brand"] == "Globi":
-                apply_category(Categories.SHOP_CONVENIENCE, item)
-            if item["brand"] == "Carrefour":
-                apply_category(Categories.SHOP_SUPERMARKET, item)
-
+            
             item.pop("street")
             item["ref"] = location["shopId"]
             item["street_address"] = location["street"]
