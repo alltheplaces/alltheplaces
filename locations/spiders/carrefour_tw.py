@@ -17,9 +17,9 @@ class CarrefourTWSpider(Spider):
         "量販": {
             "brand": "Carrefour",
             "brand_wikidata": "Q3117359",
-            "extras": Categories.SHOP_SUPERMARKET,
+            "category": Categories.SHOP_SUPERMARKET,
         },  # "Mass sales" (bad translation but as there are fewer of this type, it is probably the hypermarket brand)
-        "超市": {"brand": "Carrefour Market", "brand_wikidata": "Q2689639", "extras": Categories.SHOP_SUPERMARKET},
+        "超市": {"brand": "Carrefour Market", "brand_wikidata": "Q2689639", "category": Categories.SHOP_SUPERMARKET},
     }
 
     def start_requests(self):

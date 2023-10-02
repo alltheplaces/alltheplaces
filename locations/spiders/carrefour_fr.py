@@ -5,34 +5,34 @@ from locations.storefinders.woosmap import WoosmapSpider
 CARREFOUR_SUPERMARKET = {
     "brand": "Carrefour",
     "brand_wikidata": "Q217599",
-    "extras": Categories.SHOP_SUPERMARKET,
+    "category": Categories.SHOP_SUPERMARKET,
 }
 
 CARREFOUR_CONVENIENCE = {
     "brand": "Carrefour",
     "brand_wikidata": "Q217599",
-    "extras": Categories.SHOP_CONVENIENCE,
+    "category": Categories.SHOP_CONVENIENCE,
 }
 
 CARREFOUR_MARKET = {
     "brand": "Carrefour Market",
     "brand_wikidata": "Q2689639",
-    "extras": Categories.SHOP_SUPERMARKET,
+    "category": Categories.SHOP_SUPERMARKET,
 }
 CARREFOUR_CONTACT = {
     "brand": "Carrefour Contact",
     "brand_wikidata": "Q2940188",
-    "extras": Categories.SHOP_SUPERMARKET,
+    "category": Categories.SHOP_SUPERMARKET,
 }
 CARREFOUR_EXPRESS = {
     "brand": "Carrefour Express",
     "brand_wikidata": "Q2940190",
-    "extras": Categories.SHOP_CONVENIENCE,
+    "category": Categories.SHOP_CONVENIENCE,
 }
 CARREFOUR_CITY = {
     "brand": "Carrefour City",
     "brand_wikidata": "Q2940187",
-    "extras": Categories.SHOP_SUPERMARKET,
+    "category": Categories.SHOP_SUPERMARKET,
 }
 
 
@@ -53,12 +53,12 @@ class CarrefourFRSpider(WoosmapSpider):
         "CARREFOUR MONTAGNE": {
             "brand": "Carrefour Montagne",
             "brand_wikidata": "Q2940193",
-            "extras": Categories.SHOP_CONVENIENCE.value,
+            "category": Categories.SHOP_CONVENIENCE,
         },
         "BON APP": {
             "brand": "Bon App!",
             "brand_wikidata": "Q90153100",
-            "extras": Categories.SHOP_CONVENIENCE.value,
+            "category": Categories.SHOP_CONVENIENCE,
         },
     }
 
@@ -84,6 +84,6 @@ def parse_brand_and_category_from_mapping(item: Feature, brand_key: str, brand_m
     if match := brand_mapping.get(brand_key):
         item["brand"] = match.get("brand")
         item["brand_wikidata"] = match.get("brand_wikidata")
-        apply_category(match.get("extras"), item)
+        apply_category(match.get("category"), item)
         return True
     return False
