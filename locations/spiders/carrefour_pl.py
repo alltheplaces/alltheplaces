@@ -26,7 +26,7 @@ class CarrefourPLSpider(Spider):
         "Express (Pomarańczowy)": CARREFOUR_EXPRESS,
         "Hipermarket": CARREFOUR_SUPERMARKET,
         "Market": CARREFOUR_MARKET,
-        "Globi": {"brand": "Globi", "extras": Categories.SHOP_CONVENIENCE.value},
+        "Globi": {"brand": "Globi", "category": Categories.SHOP_CONVENIENCE.value},
     }
     user_agent = BROWSER_DEFAULT
 
@@ -47,11 +47,12 @@ class CarrefourPLSpider(Spider):
     def parse(self, response):
         brand_ids_to_brands = {}
         for brand in response.json()["shopTypes"]:
-            brand_ids_to_brands[str(brand["shopTypeForMobile"])] = self.brands.get(brand["displayName"])
+            brand_ids_to_brands[str(brand["shopTypeForMobile"])] = brand["displayName"]
+
         for location in response.json()["shops"]:
             item = DictParser.parse(location)
 
-            brand_key = str(location["shopTypeForMobile"])
+            brand_key = brand_ids_to_brands.get(str(location["shopTypeForMobile"]))
             if not parse_brand_and_category_from_mapping(item, brand_key, self.brands):
                 continue  # bad brand
 
