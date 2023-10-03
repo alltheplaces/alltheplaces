@@ -18,22 +18,15 @@ class DSKBankBGSpider(scrapy.Spider):
         for data in response.json():
             item = DictParser.parse(data)
 
-            branch_type = data["BranchType"]
-            if "Branch" in branch_type:
+            if "Branch" in data["BranchType"]:
                 apply_category(Categories.BANK, item)
             else:
                 apply_category(Categories.ATM, item)
 
-            if data["Phone"]:
-                item["phone"] = data["Phone"].split(";", 1)[0]
-            else:
-                item["phone"] = None
+            item["phone"] = data.get("Phone", "").split(";", 1)[0]
 
             item["opening_hours"] = OpeningHours()
 
             if data["OpenHours"]:
                 item["opening_hours"].add_ranges_from_string(data["OpenHours"], days=DAYS_BG)
-            else:
-                item["opening_hours"] = None
-
             yield item
