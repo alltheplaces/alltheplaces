@@ -34,7 +34,6 @@ class McDonaldsMTSpider(SitemapSpider):
                 time_format="%H:%M",
             )
 
-        properties["opening_hours"] = OpeningHours()
         properties["opening_hours"] = oh.as_opening_hours()
 
         yield Feature(**properties)
