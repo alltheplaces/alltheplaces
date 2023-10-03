@@ -1,10 +1,11 @@
 import re
 
 import scrapy
+from scrapy import Selector
 
 from locations.categories import Categories, apply_category
-from locations.hours import DAYS_BG, OpeningHours, sanitise_day
-from locations.items import Feature
+from locations.dict_parser import DictParser
+from locations.hours import DAYS_BG, OpeningHours
 
 
 class DSKBankBGSpider(scrapy.Spider):
@@ -15,12 +16,7 @@ class DSKBankBGSpider(scrapy.Spider):
 
     def parse(self, response):
         for data in response.json():
-            item = Feature()
-            item["ref"] = data["Id"]
-            item["name"] = data["Name"]
-            item["lat"] = data["Latitude"]
-            item["lon"] = data["Longitude"]
-            item["email"] = data["Email"]
+            item = DictParser.parse(data)
 
             branch_type = data["BranchType"]
             if "Branch" in branch_type:
@@ -28,38 +24,15 @@ class DSKBankBGSpider(scrapy.Spider):
             else:
                 apply_category(Categories.ATM, item)
 
-            text = data["Text"]
-            clean_text = re.sub(r"<.*?>", "\n", text)
-            clean_text = re.sub("\n+", "\n", clean_text)
-            clean_text = clean_text.strip("\n").split("\n")
+            if data["Phone"]:
+                item["phone"] = data["Phone"].split(";", 1)[0]
+            else:
+                item["phone"] = None
 
-            item["addr_full"] = clean_text[0]
-
-            phone = data["Phone"]
-            if phone:
-                phone = re.sub(r"\(|\*|\|\);", "", phone)
-            item["phone"] = phone
-
-            OpenHours = data["OpenHours"]
             item["opening_hours"] = OpeningHours()
-            if OpenHours:
-                OpenHours = re.sub(r"<.*?>", ",", OpenHours)
-                OpenHours = re.sub(r"\r\n", "", OpenHours)
-                OpenHours = re.sub(r"-", " ", OpenHours)
-                OpenHours = OpenHours.split(",")
-                for i in OpenHours:
-                    i = i.strip()
-                    i = re.split(r"\s+", i)
-                    if len(i) == 3:
-                        day, hour_from, hour_to = i
-                        if day in DAYS_BG:
-                            hour_from = re.sub(r"\.", ":", hour_from)
-                            hour_to = re.sub(r"\.", ":", hour_to)
-                            hour_to += ":00"
-                            hour_from += ":00"
-                            item["opening_hours"].add_range(sanitise_day(day, DAYS_BG), hour_from, hour_to, "%H:%M:%S")
-                    else:
-                        pass
+
+            if data["OpenHours"]:
+                item["opening_hours"].add_ranges_from_string(data["OpenHours"], days=DAYS_BG)
             else:
                 item["opening_hours"] = None
 
