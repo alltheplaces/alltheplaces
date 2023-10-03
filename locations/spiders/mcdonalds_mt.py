@@ -20,8 +20,8 @@ class McDonaldsMTSpider(SitemapSpider):
             "ref": re.search(self.sitemap_rules[0][0], response.url).group(1),
             "name": response.xpath('//h1/text()').get().strip(),
             "addr_full": response.xpath('//div/p/text()').get().strip(),
-            "lat": response.xpath('//div[@class="location-map"]/div[@id="map"]/@data-lat').get(),
-            "lon": response.xpath('//div[@class="location-map"]/div[@id="map"]/@data-lng').get(),
+            "lat": response.xpath("//@data-lat").get(),
+            "lon": response.xpath("//@data-lng").get(),
             "website": response.url,
         }
 
