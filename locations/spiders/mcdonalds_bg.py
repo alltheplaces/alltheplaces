@@ -2,8 +2,9 @@ import json
 
 from scrapy import FormRequest, Spider
 
-from locations.categories import apply_yes_no
+from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
+from locations.hours import DAYS, OpeningHours
 from locations.spiders.mcdonalds import McDonaldsSpider
 
 
@@ -11,7 +12,7 @@ class McDonaldsBGSpider(Spider):
     name = "mcdonalds_bg"
     item_attributes = McDonaldsSpider.item_attributes
     allowed_domains = ["mcdonalds.bg"]
-    start_urls = ["http://mcdonalds.bg/restaurants/"]
+    start_urls = ["https://mcdonalds.bg/restaurants/"]
 
     def parse(self, response):
         name_ids = response.xpath("//strong[@class='restaurant-item__title']/@data-restaurant-id").extract()
@@ -21,26 +22,34 @@ class McDonaldsBGSpider(Spider):
                 url="https://mcdonalds.bg/wp-admin/admin-ajax.php",
                 formdata={"action": "get_restaurant", "restaurant_id": id},
                 callback=self.parse_restaurant,
+                method="POST",
             )
 
     def parse_restaurant(self, response):
-        poi = json.loads(response.text)
-        data = poi.get("data", {}).get("data")
-        item = DictParser.parse(data)
-
-        item["city"] = data.get("city", {}).get("city_name")
-        if phone_numbers := data.get("phone_numbers", []):
+        location = json.loads(response.text)["data"]["data"]
+        item = DictParser.parse(location)
+        item["country"] = "bg"
+        item["city"] = location.get("city", {}).get("city_name")
+        if phone_numbers := location.get("phone_numbers", []):
             item["phone"] = phone_numbers[0]
 
-        for benefit in data.get("benefits", []):
-            if benefit.get("name") == "WiFi":
-                item["extras"]["internet_access"] = "wlan"
+        for benefit in location.get("benefits", []):
+            apply_yes_no(Extras.WIFI, item, benefit.get("name") == "WiFi")
+            apply_yes_no(Extras.DRIVE_THROUGH, item, benefit.get("name") == "McDrive™")
             if benefit.get("name") == "24/7":
                 item["opening_hours"] = "24/7"
-            if benefit.get("name") == "McDrive™":
-                apply_yes_no("drive_through", item, True)
 
-        if data.get("is_delivery_available"):
-            apply_yes_no("delivery", item, True)
+        apply_yes_no("delivery", item, location.get("is_delivery_available"))
+
+        if work_hours := location.get("work_hours", []):
+            for work_hour in work_hours:
+                if work_hour.get("label") == "Ресторант":
+                    oh = OpeningHours()
+                    oh.add_days_range(DAYS, work_hour.get("opens_at"), work_hour.get("closes_at"))
+                    item["opening_hours"] = oh.as_opening_hours()
+                elif work_hour.get("label") == "McDrive™":
+                    oh = OpeningHours()
+                    oh.add_days_range(DAYS, work_hour.get("opens_at"), work_hour.get("closes_at"))
+                    item["extras"]["opening_hours:drive_through"] = oh.as_opening_hours()
 
         yield item
