@@ -64,7 +64,7 @@ class CarrefourFRSpider(WoosmapSpider):
 
     def parse_item(self, item, feature, **kwargs):
         store_types = feature.get("properties").get("types", [])
-        if len(store_types) > 0:
+        if store_types:
             parse_brand_and_category_from_mapping(item, store_types[0], self.brands)
             item["extras"]["store_type"] = store_types[0]
         # Unfortunately the "types" is often missing
@@ -75,7 +75,13 @@ class CarrefourFRSpider(WoosmapSpider):
         else:
             for brand in self.brands.values():
                 if brand["brand"] in item["name"]:
-                    item.update(brand)
+                    item["brand"] = brand.get("brand")
+                    item["brand_wikidata"] = brand.get("brand_wikidata")
+                    apply_category(brand.get("category"), item)
+                    break
+            else:
+                # default to supermarket
+                apply_category(Categories.SHOP_SUPERMARKET, item)
 
         yield item
 
