@@ -1,6 +1,7 @@
 import scrapy
 
 from locations.items import Feature
+from locations.categories import Categories, apply_category
 
 
 class ShellRechargeSpider(scrapy.Spider):
@@ -40,4 +41,10 @@ class ShellRechargeSpider(scrapy.Spider):
                 "postcode": row["zipCode"],
                 "country": row["country"],
             }
+
+            apply_category(Categories.CHARGING_STATION, properties)
+
             yield Feature(**properties)
+
+        
+        
