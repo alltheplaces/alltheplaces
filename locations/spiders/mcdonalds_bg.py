@@ -1,40 +1,46 @@
-import re
+import json
 
-import scrapy
+from scrapy import FormRequest, Spider
 
-from locations.items import Feature
+from locations.categories import apply_yes_no
+from locations.dict_parser import DictParser
 from locations.spiders.mcdonalds import McDonaldsSpider
 
 
-class McDonaldsBGSpider(scrapy.Spider):
+class McDonaldsBGSpider(Spider):
     name = "mcdonalds_bg"
     item_attributes = McDonaldsSpider.item_attributes
     allowed_domains = ["mcdonalds.bg"]
-    start_urls = ("http://mcdonalds.bg/map/",)
+    start_urls = ["http://mcdonalds.bg/restaurants/"]
 
     def parse(self, response):
-        stores = response.css(".restaurant-info")
-        for store in stores:
-            ref = store.xpath(".//@data-post_id").extract_first()
-            city = store.xpath(".//@data-city_title").extract_first()
-            lat = store.xpath(".//@data-latitude").extract_first()
-            lon = store.xpath(".//@data-longitude").extract_first()
-            address = store.xpath(".//p[1]/text()").extract_first()
+        name_ids = response.xpath("//strong[@class='restaurant-item__title']/@data-restaurant-id").extract()
 
-            phone = store.xpath(".//p[2]/text()").extract_first()
-            if phone:
-                match = re.search(r"Тел.(.*)", phone)
-                if match:
-                    phone = match.groups()[0].strip()
+        for id in name_ids:
+            yield FormRequest(
+                url="https://mcdonalds.bg/wp-admin/admin-ajax.php",
+                formdata={"action": "get_restaurant", "restaurant_id": id},
+                callback=self.parse_restaurant,
+            )
 
-            properties = {
-                "ref": ref,
-                "phone": phone if phone else "",
-                "lon": lon,
-                "lat": lat,
-                "city": city,
-                "name": "McDonalds",
-                "addr_full": address,
-            }
+    def parse_restaurant(self, response):
+        poi = json.loads(response.text)
+        data = poi.get("data", {}).get("data")
+        item = DictParser.parse(data)
 
-            yield Feature(**properties)
+        item["city"] = data.get("city", {}).get("city_name")
+        if phone_numbers := data.get("phone_numbers", []):
+            item["phone"] = phone_numbers[0]
+
+        for benefit in data.get("benefits", []):
+            if benefit.get("name") == "WiFi":
+                item["extras"]["internet_access"] = "wlan"
+            if benefit.get("name") == "24/7":
+                item["opening_hours"] = "24/7"
+            if benefit.get("name") == "McDrive™":
+                apply_yes_no("drive_through", item, True)
+
+        if data.get("is_delivery_available"):
+            apply_yes_no("delivery", item, True)
+
+        yield item
