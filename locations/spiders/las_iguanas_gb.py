@@ -16,7 +16,7 @@ class LasIguanasGBSpider(SitemapSpider):
         item = Feature()
         item["ref"] = item["website"] = response.url
         item["addr_full"] = clean_address(response.xpath('//div[@class="address"]/text()').get())
-        item["extras"]["branch"] = response.xpath('//h1[@class="restaurant-title"]/text()').get()
+        item["branch"] = response.xpath('//h1[@class="restaurant-title"]/text()').get()
         extract_google_position(item, response)
         extract_email(item, response)
         extract_phone(item, response)

@@ -35,14 +35,14 @@ class MidcountiesCooperativeGBSpider(Spider):
                     )
 
             if store["tradingGroupId"] == 1:
-                item["extras"]["branch"] = item.pop("name")
+                item["branch"] = item.pop("name")
                 item["name"] = "Your Coop Food"
                 item["brand_wikidata"] = "Q121084548"
                 apply_category(Categories.SHOP_CONVENIENCE, item)
             elif store["tradingGroupId"] == 2:
                 if "Your Co-op Travel" not in item["name"]:
                     continue  # 7 "Carrick Travel" https://carricktravel.com/about.html
-                item["extras"]["branch"] = item.pop("name").replace("Your Co-op Travel ", "")
+                item["branch"] = item.pop("name").replace("Your Co-op Travel ", "")
                 item["name"] = "Your Co-op Travel"
                 item["brand_wikidata"] = "Q7726526"
                 apply_category(Categories.SHOP_TRAVEL_AGENCY, item)

@@ -14,7 +14,7 @@ class YesssGBSpider(Spider):
             item["lat"] = location["latitude"]
             item["lon"] = location["longitude"]
             item["email"] = location["email"]
-            item["extras"]["branch"] = location["name"]
+            item["branch"] = location["name"]
             item["opening_hours"] = item["name"] = None
 
             yield item

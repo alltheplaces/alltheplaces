@@ -42,6 +42,7 @@ class KrogerUSSpider(SitemapSpider):
     sitemap_urls = [f"{brand}storelocator-sitemap.xml" for brand in BRANDS.keys()]
     custom_settings = {"AUTOTHROTTLE_ENABLED": True, "USER_AGENT": BROWSER_DEFAULT}
     url_re = re.compile(r"/(\d{3})/(\d{5})$")
+    requires_proxy = True
 
     departments = {
         "09": Categories.PHARMACY,
@@ -91,7 +92,8 @@ class KrogerUSSpider(SitemapSpider):
                 "country": location["locale"]["address"]["countryCode"],
                 "phone": location["phoneNumber"].get("raw"),
                 "website": response.meta["url_map"][location["locationId"]],
-                "extras": {"operator": location["legalName"], "branch": location["vanityName"]},
+                "branch": location["vanityName"],
+                "extras": {"operator": location["legalName"]},
             }
 
             for url, brand in BRANDS.items():

@@ -4,8 +4,8 @@ from locations.hours import DAYS_BG, OpeningHours, sanitise_day
 from locations.items import Feature
 
 
-class A1Spider(scrapy.Spider):
-    name = "a1"
+class A1BGSpider(scrapy.Spider):
+    name = "a1_bg"
     item_attributes = {"brand": "A1", "brand_wikidata": "Q1941592", "country": "BG"}
     allowed_domains = ["www.a1.bg"]
     start_urls = ["https://www.a1.bg/1/mm/shops/mc/index/ma/index/mo/1?ajaxaction=getShopsWithWorkTime"]
