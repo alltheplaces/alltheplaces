@@ -44,11 +44,10 @@ class McDonaldsBGSpider(Spider):
         if work_hours := location.get("work_hours", []):
             for work_hour in work_hours:
                 oh = OpeningHours()
+                oh.add_days_range(DAYS, work_hour.get("opens_at"), work_hour.get("closes_at"))
                 if work_hour.get("label") == "Ресторант":
-                    oh.add_days_range(DAYS, work_hour.get("opens_at"), work_hour.get("closes_at"))
                     item["opening_hours"] = oh.as_opening_hours()
                 elif work_hour.get("label") == "McDrive™":
-                    oh.add_days_range(DAYS, work_hour.get("opens_at"), work_hour.get("closes_at"))
                     item["extras"]["opening_hours:drive_through"] = oh.as_opening_hours()
 
         yield item
