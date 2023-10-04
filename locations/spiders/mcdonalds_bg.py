@@ -28,7 +28,6 @@ class McDonaldsBGSpider(Spider):
     def parse_restaurant(self, response):
         location = json.loads(response.text)["data"]["data"]
         item = DictParser.parse(location)
-        item["country"] = "bg"
         item["city"] = location.get("city", {}).get("city_name")
         if phone_numbers := location.get("phone_numbers", []):
             item["phone"] = phone_numbers[0]
@@ -39,7 +38,7 @@ class McDonaldsBGSpider(Spider):
             if benefit.get("name") == "24/7":
                 item["opening_hours"] = "24/7"
 
-        apply_yes_no("delivery", item, location.get("is_delivery_available"))
+        apply_yes_no(Extras.DELIVERY, item, location.get("is_delivery_available"))
 
         if work_hours := location.get("work_hours", []):
             for work_hour in work_hours:
