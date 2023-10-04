@@ -23,7 +23,8 @@ class DSKBankBGSpider(scrapy.Spider):
             else:
                 apply_category(Categories.ATM, item)
 
-            item["phone"] = data.get("Phone", "").split(";", 1)[0]
+            if data["Phone"]:
+                item["phone"] = data.get("Phone").split(";", 1)[0]
 
             item["opening_hours"] = OpeningHours()
 
