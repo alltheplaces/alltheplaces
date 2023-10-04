@@ -1,6 +1,7 @@
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
 
@@ -65,4 +66,7 @@ class AramarkUniformServicesUSSpider(Spider):
             elif "Cleanroom Services" in item["name"].title():
                 item["brand"] = "Aramark Cleanroom Services"
                 item["name"] = item["brand"] + " " + item["city"]
+
+            apply_category(Categories.SHOP_CLOTHES, item)
+            apply_category({"rental": "clothes"}, item)
             yield item
