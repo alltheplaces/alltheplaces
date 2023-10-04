@@ -9,8 +9,8 @@ from locations.hours import DAYS_FULL, OpeningHours
 class BulgarianPostsBGSpider(Spider):
     name = "bulgarian_posts_bg"
     item_attributes = {"brand": "Bulgarian Posts", "brand_wikidata": "Q2880826"}
-    allowed_domains = ["new.bgpost.bg"]
-    start_urls = ["https://new.bgpost.bg/api/offices?search_by_city_name_or_address="]
+    allowed_domains = ["bgpost.bg"]
+    start_urls = ["https://bgpost.bg/api/offices?search_by_city_name_or_address="]
 
     def start_requests(self):
         for url in self.start_urls:
@@ -21,7 +21,9 @@ class BulgarianPostsBGSpider(Spider):
             location["street_address"] = location.pop("address", None)
             item = DictParser.parse(location)
             item["name"] = location["office_name"]
-            item["state"] = location["district_bg"]
+            item["city"] = location["city_name"]
+            item["state"] = location["district"]
+            item["phone"] = location["phone"]
             item["opening_hours"] = OpeningHours()
             for day_name in DAYS_FULL:
                 if location[f"working_hours_{day_name.lower()}"]:
