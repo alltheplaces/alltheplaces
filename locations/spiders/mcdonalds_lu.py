@@ -19,18 +19,6 @@ class McDonaldsLUSpider(StructuredDataSpider):
         else:
             return None, None
 
-    def parse_phone(self, phone):
-        match = re.search(r'Tel <span itemprop="telephone" content="(.*)">', phone)
-        if match:
-            return match.groups()[0].strip()
-        else:
-            return None
-
-    def parse_address(self, address):
-        address = address[address.find("<h2>Adresse</h2>") + 16 : address.find("Tel")]
-        match = re.sub("<[^<]+?>", "", address)
-        return " ".join(match.split())
-
     def parse(self, response, **kwargs):
         for ref in response.xpath('//a[starts-with(@id, "snav_1_")]/@id').getall():
             yield Request(
@@ -39,8 +27,9 @@ class McDonaldsLUSpider(StructuredDataSpider):
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["website"] = None
-        item["addr_full"] = self.parse_address(response.text)
-        item["phone"] = self.parse_phone(response.text)
+        item["addr_full"] = " ".join(
+            filter(None, map(str.strip, response.xpath('//div[@class="txt"]/h2/following::text()').getall()))
+        ).split(" Tel ", 1)[0]
         item["lat"], item["lon"] = self.parse_latlon(response.text)
 
         yield item
