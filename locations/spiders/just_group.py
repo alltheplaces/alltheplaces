@@ -70,5 +70,9 @@ class JustGroupSpider(Spider):
                 item["opening_hours"] = OpeningHours()
                 item["opening_hours"].add_ranges_from_string(hours_string)
 
-            apply_category(Categories.SHOP_CLOTHES, item)
+            if item["brand"] == "Smiggle":
+                apply_category(Categories.SHOP_STATIONERY, item)
+            else:
+                apply_category(Categories.SHOP_CLOTHES, item)
+
             yield item
