@@ -1,5 +1,6 @@
 from scrapy.spiders import SitemapSpider
 
+from locations.categories import apply_category
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -12,5 +13,5 @@ class ChildcareNetworkUSSpider(SitemapSpider, StructuredDataSpider):
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["name"] = response.xpath("//h2/text()").get()
-
+        apply_category({"amenity": "kindergarten"}, item)
         yield item
