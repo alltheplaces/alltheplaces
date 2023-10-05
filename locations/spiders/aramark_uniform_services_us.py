@@ -1,7 +1,7 @@
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
-from locations.categories import Categories, apply_category
+from locations.categories import Categories, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 
 
@@ -60,13 +60,17 @@ class AramarkUniformServicesUSSpider(Spider):
             item.update(extra_fields_1)
             extra_fields_2 = {k: v for k, v in DictParser.parse(location["node"]["postLocation"]).items() if v}
             item.update(extra_fields_2)
-            if "Uniform Services" in item["name"].title():
-                item["brand"] = "Aramark Uniform Services"
-                item["name"] = item["brand"] + " " + item["city"]
-            elif "Cleanroom Services" in item["name"].title():
+            if "Cleanroom Services" in item["name"].title():
                 item["brand"] = "Aramark Cleanroom Services"
                 item["name"] = item["brand"] + " " + item["city"]
+                apply_category(Categories.SHOP_LAUNDRY, item)
+                apply_yes_no("laundry_service", item, True)
+                apply_category({"access": "private"}, item)
+            elif "Vestis" in item["name"].title():
+                item["brand"] = "Aramark Uniform Services"
+                item["name"] = item["brand"] + " " + item["city"]
+                apply_category(Categories.SHOP_CLOTHES, item)
+                apply_category({"rental": "clothes"}, item)
+                apply_category({"access": "private"}, item)
 
-            apply_category(Categories.SHOP_CLOTHES, item)
-            apply_category({"rental": "clothes"}, item)
             yield item
