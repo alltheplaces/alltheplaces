@@ -1,7 +1,7 @@
 import re
 
 from locations.storefinders.agile_store_locator import AgileStoreLocatorSpider
-from locations.categories import Categories, Fuel, Extras
+from locations.categories import Fuel, Extras
 
 class PetrolBGSpider(AgileStoreLocatorSpider):
     name = "petrol_bg"
