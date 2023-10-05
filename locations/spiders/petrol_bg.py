@@ -14,7 +14,7 @@ class PetrolBGSpider(AgileStoreLocatorSpider):
             item["ref"] = m.group(1)
             item["name"] = m.group(2)
 
-        categories = location.get("categories", "").split(",")
+        categories = (location["categories"] or "").split(",")
         apply_yes_no(Fuel.DIESEL, item, ("19" in categories or "20" in categories))
         apply_yes_no(Fuel.OCTANE_100, item, "21" in categories)
         apply_yes_no(Fuel.OCTANE_95, item, "22" in categories)
