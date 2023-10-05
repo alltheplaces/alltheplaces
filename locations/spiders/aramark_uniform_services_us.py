@@ -60,17 +60,20 @@ class AramarkUniformServicesUSSpider(Spider):
             item.update(extra_fields_1)
             extra_fields_2 = {k: v for k, v in DictParser.parse(location["node"]["postLocation"]).items() if v}
             item.update(extra_fields_2)
-            if "Cleanroom Services" in item["name"].title():
-                item["brand"] = "Aramark Cleanroom Services"
-                item["name"] = item["brand"] + " " + item["city"]
+
+            def add_tags(item):
                 apply_category(Categories.SHOP_LAUNDRY, item)
                 apply_yes_no("laundry_service", item, True)
-                apply_category({"access": "private"}, item)
-            elif "Vestis" in item["name"].title():
-                item["brand"] = "Aramark Uniform Services"
-                item["name"] = item["brand"] + " " + item["city"]
-                apply_category(Categories.SHOP_CLOTHES, item)
                 apply_category({"rental": "clothes"}, item)
                 apply_category({"access": "private"}, item)
+
+            if "Cleanroom Services" in item["name"].title():
+                item["brand"] = "Vestis Cleanroom Services"
+                item["name"] = item["brand"] + " " + item["city"]
+                add_tags(item)
+            elif "Vestis" in item["name"].title():
+                item["brand"] = "Vestis"
+                item["name"] = item["brand"] + " " + item["city"]
+                add_tags(item)
 
             yield item
