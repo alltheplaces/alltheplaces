@@ -1,6 +1,6 @@
 import re
 
-from locations.categories import Extras, Fuel
+from locations.categories import Extras, Fuel, apply_yes_no
 from locations.storefinders.agile_store_locator import AgileStoreLocatorSpider
 
 
