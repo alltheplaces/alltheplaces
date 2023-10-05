@@ -26,7 +26,7 @@ class CarrefourPLSpider(Spider):
         "Express (Pomarańczowy)": CARREFOUR_EXPRESS,
         "Hipermarket": CARREFOUR_SUPERMARKET,
         "Market": CARREFOUR_MARKET,
-        "Globi": {"brand": "Globi", "category": Categories.SHOP_CONVENIENCE.value},
+        "Globi": {"brand": "Globi", "category": Categories.SHOP_CONVENIENCE},
     }
     user_agent = BROWSER_DEFAULT
 
