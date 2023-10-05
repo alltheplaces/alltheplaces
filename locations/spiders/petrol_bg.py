@@ -1,7 +1,8 @@
 import re
 
+from locations.categories import Extras, Fuel
 from locations.storefinders.agile_store_locator import AgileStoreLocatorSpider
-from locations.categories import Fuel, Extras
+
 
 class PetrolBGSpider(AgileStoreLocatorSpider):
     name = "petrol_bg"
@@ -12,7 +13,7 @@ class PetrolBGSpider(AgileStoreLocatorSpider):
         if m := re.match(r"^(\d+) (.+)$", item["name"]):
             item["ref"] = m.group(1)
             item["name"] = m.group(2)
-        
+
         categories = location["categories"].split(",")
         apply_yes_no(Fuel.DIESEL, item, ("19" in categories || "20" in categories))
         apply_yes_no(Fuel.OCTANE_100, item, "21" in categories)
@@ -25,5 +26,5 @@ class PetrolBGSpider(AgileStoreLocatorSpider):
         apply_yes_no("self_service", item, "28" in categories)
         apply_yes_no(Fuel.ADBLUE, item, "29" in categories)
         apply_yes_no("amenity:chargingstation", item, "31" in categories)
-        
+
         yield item
