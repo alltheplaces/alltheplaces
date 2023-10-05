@@ -19,6 +19,23 @@ def test_item_to_properties():
     assert item_to_properties(item) == {"ref": "a"}
 
 
+def test_none_values():
+    item = Feature()
+    values = ["0", 0, 0.0, float(0)]
+
+    for i, v in enumerate(values):
+        item["extras"][str(i)] = v
+
+    props = item_to_properties(item)
+
+    for i, v in enumerate(values):
+        assert props[str(i)] == v
+
+    item["extras"]["real_none"] = None
+
+    assert "real_none" not in item_to_properties(item)
+
+
 def test_has_geom():
     def has_geom(props: []) -> bool:
         return any(k == "geometry" for k, v in props)
