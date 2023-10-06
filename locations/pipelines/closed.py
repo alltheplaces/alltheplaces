@@ -8,7 +8,7 @@ class ClosePipeline:
 
     def process_item(self, item: Feature, spider: Spider):
         # Skip when we know a feature is closed
-        if item["extras"].get("confidence:feature") == 0.0:
+        if item["extras"].get("end_date"):
             return item
 
         if name := item.get("name"):

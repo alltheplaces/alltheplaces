@@ -16,9 +16,8 @@ class WilkoGBSpider(SitemapSpider, StructuredDataSpider):
             '//span[@class="AlertBanner-text"][contains(text(), "The store will permanently close on ")]/text()'
         ).get():
             closed_date = closed.replace("The store will permanently close on ", "")
-            item["extras"]["confidence:feature"] = 0.0
             item["extras"]["end_date"] = closed_date
         elif item["name"].upper().endswith("CLOSED") or item["name"].upper().endswith("(CLOSED)"):
-            item["extras"]["confidence:feature"] = 0.0
+            item["extras"]["end_date"] = "yes"
 
         yield item

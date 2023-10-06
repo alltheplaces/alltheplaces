@@ -35,8 +35,6 @@ class OSMExporter(XmlItemExporter):
         self.next_id -= 1
         self._beautify_newline()
         for name, value in self._get_serialized_fields(item, default_value=""):
-            if name == "confidence:feature":
-                value = str(value)
             self._export_xml_field(name, value, depth=2)
         self._beautify_indent(depth=1)
         self.xg.endElement(self.item_element)
