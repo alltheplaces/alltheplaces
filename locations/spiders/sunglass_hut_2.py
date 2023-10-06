@@ -1,9 +1,7 @@
 from scrapy import Spider
 
 from locations.dict_parser import DictParser
-from locations.hours import OpeningHours
-
-DAYS_LOWER = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
+from locations.hours import DAYS_FULL, OpeningHours
 
 
 class SunglassHut2Spider(Spider):
@@ -30,16 +28,18 @@ class SunglassHut2Spider(Spider):
         for data in response.json()["contentlets"]:
             item = DictParser.parse(data)
 
-            item["country"] = data["innerCountry"] if data["innerCountry"] else None
+            if data["innerCountry"]:
+                item["country"] = data["innerCountry"]
+            else:
+                item["country"] = response.url.split("https://", 1)[1].split(".", 1)[0].upper()
+                item["country"] = None if (item["country"] == "MENA") else item["country"]
 
             item["lat"] = data["geographicCoordinatesLatitude"]
             item["lon"] = data["geographicCoordinatesLongitude"]
-            item["geometry"] = {"coordinates": [item["lat"], item["lon"]], "type": "Point"}
 
             item["opening_hours"] = OpeningHours()
             item["opening_hours"].add_ranges_from_string(
-                "\n".join([f"{day} {data[day]}" for day in DAYS_LOWER]), delimiters=[" : "]
+                " ".join(["{}: {}".format(day, data[day.lower()]) for day in DAYS_FULL]), delimiters=[" : "]
             )
-            item["opening_hours"] = item["opening_hours"].as_opening_hours()
 
             yield item
