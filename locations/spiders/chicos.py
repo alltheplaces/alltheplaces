@@ -2,6 +2,7 @@ import json
 
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
@@ -38,5 +39,6 @@ class ChicosSpider(scrapy.Spider):
                 "lat": float(data["attributes"]["latitude"]),
                 "lon": float(data["attributes"]["longitude"]),
             }
+            apply_category(Categories.SHOP_CLOTHES, properties)
 
             yield Feature(**properties)
