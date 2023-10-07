@@ -28,4 +28,7 @@ class StokrotkaPLSpider(SitemapSpider, StructuredDataSpider):
             item["brand"] = "Stokrotka"
             item["brand_wikidata"] = "Q9345945"
         del item["image"]  # always the same url returning 404
+        coordsData = response.xpath('//script[contains(text(), "lat:")]/text()').get()
+        item["lat"] = coordsData.split("lat: ", 1)[1].split(",", 1)[0]
+        item["lon"] = coordsData.split("lng: ", 1)[1].split(",", 1)[0]
         yield item
