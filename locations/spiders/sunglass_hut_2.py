@@ -27,12 +27,19 @@ class SunglassHut2Spider(Spider):
     def parse(self, response):
         for data in response.json()["contentlets"]:
             item = DictParser.parse(data)
+            region = response.url.split("https://", 1)[1].split(".", 1)[0].lower()
 
             if data["innerCountry"]:
                 item["country"] = data["innerCountry"]
             else:
-                item["country"] = response.url.split("https://", 1)[1].split(".", 1)[0].upper()
+                item["country"] = region.upper()
                 item["country"] = None if (item["country"] == "MENA") else item["country"]
+
+            item["ref"] = f"{region}-{data['seoUrl']}"
+
+            item["website"] = "https://{}.sunglasshut.com/{}/store-locator/{}".format(
+                region, ("en" if region == "mena" else region), data["seoUrl"]
+            )
 
             item["lat"] = data["geographicCoordinatesLatitude"]
             item["lon"] = data["geographicCoordinatesLongitude"]
