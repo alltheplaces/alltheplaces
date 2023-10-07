@@ -8,14 +8,18 @@ from locations.hours import OpeningHours
 class DelikatesyCentrumPLSpider(Spider):
     name = "delikatesy_centrum_pl"
     item_attributes = {"brand": "Delikatesy Centrum", "brand_wikidata": "Q11693824"}
-    start_urls = ["https://www.delikatesy.pl/_next/data/8y1sYoIBRkA8Q7yTv3U32/sklepy.json"]
+    start_urls = ["https://www.delikatesy.pl"]
     allowed_domains = ["www.delikatesy.pl"]
 
     def start_requests(self):
-        for url in self.start_urls:
-            yield JsonRequest(url=url)
+        yield JsonRequest(url=self.start_urls[0])
 
     def parse(self, response):
+        nextBuildId = response.xpath("//script[contains(@src, '_ssgManifest.js')]/@src").get().split("/")[3]
+        url = f"https://www.delikatesy.pl/_next/data/{nextBuildId}/sklepy.json"
+        yield JsonRequest(url=url, callback=self.parse_api)
+
+    def parse_api(self, response):
         for location in response.json()["pageProps"]["shops"]:
             item = DictParser.parse(location)
             item["ref"] = location["shop_code"]
