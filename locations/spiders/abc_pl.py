@@ -14,4 +14,6 @@ class ABCPLSpider(Spider):
     def parse(self, response, **kwargs):
         for feature in response.json()["shops"]:
             item = DictParser.parse(feature)
+            item["ref"] = feature["idCRM"]
+            item["housenumber"] = feature["number"]
             yield item
