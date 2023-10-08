@@ -11,3 +11,4 @@ class RaceTracUSSpider(SitemapSpider, StructuredDataSpider):
     sitemap_rules = [
         (r"^https:\/\/www\.racetrac\.com\/Locations\/", "parse_sd"),
     ]
+    wanted_types = ["GasStation"]
