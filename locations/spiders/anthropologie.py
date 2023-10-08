@@ -9,3 +9,4 @@ class AnthropologieSpider(SitemapSpider, StructuredDataSpider):
     allowed_domains = ["anthropologie.com"]
     sitemap_urls = ["https://www.anthropologie.com/store_sitemap.xml"]
     sitemap_rules = [("/stores/", "parse_sd")]
+    requires_proxy = True
