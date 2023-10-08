@@ -12,5 +12,5 @@ class FjallravenSpider(Where2GetItSpider):
     api_brand_name = "fjallraven"
     api_key = "FE424754-8D89-11E7-A07A-F839407E493E"
     api_filter = {
-        "brand_store":{"eq":"1"},
+        "brand_store": {"eq": "1"},
     }
