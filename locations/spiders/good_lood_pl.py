@@ -17,6 +17,5 @@ class GoodLoodPLSpider(Spider):
             item["image"] = feature["image"]
             item["opening_hours"] = OpeningHours()
             item["opening_hours"].add_ranges_from_string(feature["openingHours"])
-            item["extras"] = {}
-            item["extras"]["wheelchair"] = "yes" if feature["facilities"]["ramp"] else "no"
+            apply_yes_no(Extras.WHEELCHAIR, item, feature["facilities"]["ramp"])
             yield item
