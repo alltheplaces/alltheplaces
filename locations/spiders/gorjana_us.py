@@ -9,5 +9,5 @@ class GorjanaUSSpider(SitemapSpider, StructuredDataSpider):
     allowed_domains = ["www.gorjana.com"]
     sitemap_urls = ("https://www.gorjana.com/sitemap_pages_1.xml",)
     sitemap_rules = [
-        (r"^https://www.gorjana.com/pages/[^/]+-store-details$", "parse_sd"),
+        (r"^https:\/\/www\.gorjana\.com\/pages\/[^\/]+-store-details$", "parse_sd"),
     ]
