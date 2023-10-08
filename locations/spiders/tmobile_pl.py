@@ -10,6 +10,12 @@ class TMobilePLSpider(Spider):
     start_urls = ["https://www.t-mobile.pl/c/_bffapi/sdr-shops/v1/shops"]
 
     def parse(self, response, **kwargs):
+        streetPrefixMapping = {
+            "Os.": "Osiedle",
+            "Al.": "Aleja",
+            "Pl.": "Plac",
+            "Ul.": None,  # ulica (street) is omitted - OSM convention in Poland
+        }
         for feature in response.json():
             item = DictParser.parse(feature)
             item["lat"] = feature["coordinates"]["y"]
@@ -18,4 +24,6 @@ class TMobilePLSpider(Spider):
                 item["email"] = feature["contact"]["email"]
             item["opening_hours"] = OpeningHours()
             item["opening_hours"].add_ranges_from_string(ranges_string=feature["hours"]["txt"], days=DAYS_PL)
+            streetPrefix = streetPrefixMapping.get(feature["address"]["street_prefix"], None)
+            item["street"] = " ".join(filter(None, [streetPrefix, feature["address"]["street"]]))
             yield item
