@@ -6,7 +6,7 @@ from locations.hours import DAYS_PL, OpeningHours
 
 class TMobilePLSpider(Spider):
     name = "tmobile_pl"
-    item_attributes = {"brand": "T-Mobile International", "brand_wikidata": "Q327634"}
+    item_attributes = {"brand": "T-Mobile", "brand_wikidata": "Q327634"}
     start_urls = ["https://www.t-mobile.pl/c/_bffapi/sdr-shops/v1/shops"]
 
     def parse(self, response, **kwargs):
