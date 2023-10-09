@@ -24,13 +24,13 @@ class BNPParibasBankPLSpider(scrapy.Spider):
             branch["street_address"] = branch.pop("street")
             item = DictParser.parse(branch)
             item["ref"] = branch["branch_id"]
-            item['brand'], item['brand_wikidata'] = BRANDS.get('BNP Paribas Bank Polska')
+            item["brand"], item["brand_wikidata"] = BRANDS.get("BNP Paribas Bank Polska")
 
             oh = OpeningHours()
             for day, times in branch["opening_hours"].items():
                 start_time, end_time = times.split("-")
                 oh.add_range(DAYS[int(day) - 2], start_time, end_time)
-            
+
             item["opening_hours"] = oh
             apply_category(Categories.BANK, item)
             yield item
@@ -44,15 +44,15 @@ class BNPParibasBankPLSpider(scrapy.Spider):
 
             attributes = poi.get("additionalAttributes", [])
 
-            brand_key = 'BNP Paribas Bank Polska'  # Default brand
+            brand_key = "BNP Paribas Bank Polska"  # Default brand
 
-            if 'atm-planet_cash' in attributes:
-                brand_key = 'Planet Cash'
-            elif 'atm-euronet' in attributes:
-                brand_key = 'Euronet'
+            if "atm-planet_cash" in attributes:
+                brand_key = "Planet Cash"
+            elif "atm-euronet" in attributes:
+                brand_key = "Euronet"
 
-            item['brand'], item['brand_wikidata'] = BRANDS.get(brand_key)
-            apply_yes_no(Extras.CASH_IN, item, 'atm_in' in attributes)
-            apply_yes_no(Extras.CASH_OUT, item, 'atm-cash_out' in attributes)
+            item["brand"], item["brand_wikidata"] = BRANDS.get(brand_key)
+            apply_yes_no(Extras.CASH_IN, item, "atm_in" in attributes)
+            apply_yes_no(Extras.CASH_OUT, item, "atm-cash_out" in attributes)
             apply_category(Categories.ATM, item)
             yield item
