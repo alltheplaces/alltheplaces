@@ -4,6 +4,7 @@ from scrapy import Spider
 
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 
 
 class AliorBankPLSpider(Spider):
@@ -24,6 +25,7 @@ class AliorBankPLSpider(Spider):
                 item["lon"] = branch["lg"]
                 item["ref"] = branch["o"]
                 self.parseOpeningHours(item, branch["h"])
+                apply_category(Categories.BANK, item)
                 yield item
 
     # based on _renderOpenHours in JavaScript
