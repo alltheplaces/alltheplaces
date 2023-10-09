@@ -4,7 +4,7 @@ from locations.dict_parser import DictParser
 
 
 class EasypayBGSpider(CSVFeedSpider):
-    name = "easypay" #the name is not set to easypay_bg, because then name would be used to extract "country", and "country" in every item would be set to "BG", which is wrong.
+    name = "easypay"  # the name is not set to easypay_bg, because then name would be used to extract "country", and "country" in every item would be set to "BG", which is wrong.
     item_attributes = {"brand": "EasyPay", "brand_wikidata": "Q110583289"}
     start_urls = ["https://www.easypay.bg/site/en/offices.csv"]
     delimiter = "|"
