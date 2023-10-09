@@ -3,14 +3,13 @@ from urllib.parse import urljoin
 from locations.categories import Categories, apply_category
 from locations.storefinders.woosmap import WoosmapSpider
 
-
 # Types stored at https://api.auchan.com/corp/cms/v4/pl/template/store-types?lang=pl (accessible only from website)
 CATEGORY_MAPPING = {
-    '126': Categories.SHOP_SUPERMARKET,  # Auchan Hiper
-    '129': Categories.SHOP_SUPERMARKET,  # Auchan Super
-    '132': Categories.SHOP_SUPERMARKET,  # Auchan Moje
-    '10968': Categories.SHOP_CONVENIENCE,  # Auchan Easy
-    '58596': Categories.SHOP_CONVENIENCE,  # Auchan Go
+    "126": Categories.SHOP_SUPERMARKET,  # Auchan Hiper
+    "129": Categories.SHOP_SUPERMARKET,  # Auchan Super
+    "132": Categories.SHOP_SUPERMARKET,  # Auchan Moje
+    "10968": Categories.SHOP_CONVENIENCE,  # Auchan Easy
+    "58596": Categories.SHOP_CONVENIENCE,  # Auchan Go
 }
 
 # TODO: services at https://api.auchan.com/corp/cms/v4/pl/template/store-services?lang=pl (accessible only from website)
@@ -25,9 +24,9 @@ class AuchanPLSpider(WoosmapSpider):
     def parse_item(self, item, feature, **kwargs):
         store_types = feature.get("properties", {}).get("types", [])
 
-        item['addr_full'] = item.pop('street_address')
-        if item.get('website'):
-            item['website'] = urljoin(self.origin, item['website'])
+        item["addr_full"] = item.pop("street_address")
+        if item.get("website"):
+            item["website"] = urljoin(self.origin, item["website"])
 
         if len(store_types) > 1:
             self.logger.warning(f"Multiple store types for single location: {store_types}")
@@ -36,6 +35,6 @@ class AuchanPLSpider(WoosmapSpider):
         if category := CATEGORY_MAPPING.get(store_type):
             apply_category(category, item)
         else:
-            self.crawler.stats.inc_value(f'atp/auchan_pl/unknown_category/{store_type}')
+            self.crawler.stats.inc_value(f"atp/auchan_pl/unknown_category/{store_type}")
 
         yield item
