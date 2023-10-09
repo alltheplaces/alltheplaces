@@ -4,13 +4,15 @@ from locations.categories import Categories, apply_category
 from locations.storefinders.woosmap import WoosmapSpider
 
 # Types stored at https://api.auchan.com/corp/cms/v4/pl/template/store-types?lang=pl (accessible only from website)
-CATEGORY_MAPPING = {
-    "126": Categories.SHOP_SUPERMARKET,  # Auchan Hiper
-    "129": Categories.SHOP_SUPERMARKET,  # Auchan Super
-    "132": Categories.SHOP_SUPERMARKET,  # Auchan Moje
-    "10968": Categories.SHOP_CONVENIENCE,  # Auchan Easy
-    "58596": Categories.SHOP_CONVENIENCE,  # Auchan Go
+SUB_BRANDS_MAPPING = {
+    "126": ("Auchan Hiper", "Q758603", Categories.SHOP_SUPERMARKET),
+    "129": ("Auchan Super", "Q758603", Categories.SHOP_SUPERMARKET),
+    "132": ("Auchan Moje", "Q758603", Categories.SHOP_SUPERMARKET),
+    "10968": ("Auchan Easy", "Q758603", Categories.SHOP_CONVENIENCE),
+    "58596": ("Auchan Go", "Q758603", Categories.SHOP_CONVENIENCE),
 }
+
+DEFAULT_BRAND = ("Auchan", "Q758603", Categories.SHOP_SUPERMARKET)
 
 # TODO: services at https://api.auchan.com/corp/cms/v4/pl/template/store-services?lang=pl (accessible only from website)
 
@@ -29,13 +31,19 @@ class AuchanPLSpider(WoosmapSpider):
         store_types = feature.get("properties", {}).get("types", [])
 
         if not store_types:
-            # Default to supermarket if no specific type is given
-            apply_category(Categories.SHOP_SUPERMARKET, item)
+            self.apply_brand(item, DEFAULT_BRAND)
         else:
             store_type = store_types[0]
-            if category := CATEGORY_MAPPING.get(store_type):
-                apply_category(category, item)
-            else:
+            brand = SUB_BRANDS_MAPPING.get(store_type, DEFAULT_BRAND)
+
+            if brand == DEFAULT_BRAND:
                 self.crawler.stats.inc_value(f"atp/auchan_pl/unknown_category/{store_type}")
 
+            self.apply_brand(item, brand)
+
         yield item
+
+    def apply_brand(self, item, brand):
+        item["brand"] = brand[0]
+        item["brand_wikidata"] = brand[1]
+        apply_category(brand[2], item)
