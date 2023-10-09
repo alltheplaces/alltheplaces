@@ -2,9 +2,9 @@ import json
 
 from scrapy import Spider
 
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
-from locations.categories import Categories, Extras, apply_category, apply_yes_no
 
 
 class AliorBankPLSpider(Spider):
