@@ -4,8 +4,8 @@ from urllib.parse import unquote
 
 from scrapy.spiders import SitemapSpider
 
-from locations.hours import OpeningHours
 from locations.dict_parser import DictParser
+from locations.hours import OpeningHours
 from locations.structured_data_spider import StructuredDataSpider
 
 
