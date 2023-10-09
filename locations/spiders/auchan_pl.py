@@ -22,19 +22,20 @@ class AuchanPLSpider(WoosmapSpider):
     origin = "https://www.auchan.pl"
 
     def parse_item(self, item, feature, **kwargs):
-        store_types = feature.get("properties", {}).get("types", [])
-
         item["addr_full"] = item.pop("street_address")
         if item.get("website"):
             item["website"] = urljoin(self.origin, item["website"])
 
-        if len(store_types) > 1:
-            self.logger.warning(f"Multiple store types for single location: {store_types}")
+        store_types = feature.get("properties", {}).get("types", [])
 
-        store_type = store_types[0]
-        if category := CATEGORY_MAPPING.get(store_type):
-            apply_category(category, item)
+        if not store_types:
+            # Default to supermarket if no specific type is given
+            apply_category(Categories.SHOP_SUPERMARKET, item)
         else:
-            self.crawler.stats.inc_value(f"atp/auchan_pl/unknown_category/{store_type}")
+            store_type = store_types[0]
+            if category := CATEGORY_MAPPING.get(store_type):
+                apply_category(category, item)
+            else:
+                self.crawler.stats.inc_value(f"atp/auchan_pl/unknown_category/{store_type}")
 
         yield item
