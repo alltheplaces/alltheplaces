@@ -2,7 +2,7 @@ from scrapy import Spider
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
-from locations.spiders.sunglass_hut import SunglassHutSpider
+from locations.spiders.sunglass_hut_1 import SunglassHutSpider
 from locations.user_agents import BROWSER_DEFAULT
 
 
