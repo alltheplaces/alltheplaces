@@ -24,12 +24,12 @@ class AliorBankPLSpider(Spider):
                 item["lat"] = branch["lt"]
                 item["lon"] = branch["lg"]
                 item["ref"] = branch["o"]
-                self.parseOpeningHours(item, branch["h"])
+                self.parse_opening_hours(item, branch["h"])
                 apply_category(Categories.BANK, item)
                 yield item
 
     # based on _renderOpenHours in JavaScript
-    def parseOpeningHours(self, item, openings):
+    def parse_opening_hours(self, item, openings):
         item["opening_hours"] = OpeningHours()
         if openings[-1]["d"] == "7":
             item["opening_hours"].add_ranges_from_string(f"Mo-Fr {openings[-1]['h']}")
