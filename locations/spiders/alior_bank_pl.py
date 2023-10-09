@@ -2,9 +2,9 @@ import json
 
 from scrapy import Spider
 
-from locations.categories import Categories, Extras, apply_category, apply_yes_no
-from locations.dict_parser import DictParser
+from locations.categories import Categories, apply_category
 from locations.hours import DAYS, OpeningHours
+from locations.items import Feature
 
 
 class AliorBankPLSpider(Spider):
@@ -16,7 +16,7 @@ class AliorBankPLSpider(Spider):
         data = json.loads(response.xpath("//script[@id='branch']/text()").get())
         for city, branches in data.items():
             for branch in branches:
-                item = DictParser.parse(branch)
+                item = Feature()
                 item["postcode"] = branch["pc"]
                 item["city"] = city
                 item["street_address"] = branch["s"]
