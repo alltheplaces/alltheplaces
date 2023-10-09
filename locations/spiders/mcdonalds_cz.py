@@ -1,6 +1,7 @@
 import scrapy
 
-from locations.items import Feature
+from locations.dict_parser import DictParser
+from locations.hours import DAYS, OpeningHours
 from locations.spiders.mcdonalds import McDonaldsSpider
 
 
@@ -8,76 +9,28 @@ class McDonaldsCZSpider(scrapy.Spider):
     name = "mcdonalds_cz"
     item_attributes = McDonaldsSpider.item_attributes
     allowed_domains = ["www.mcdonalds.cz"]
-    start_urls = ("https://www.mcdonalds.cz/wp-content/themes/mcdonaldscz/rests.php",)
+    custom_settings = {"ROBOTSTXT_OBEY": False}
+    start_urls = (
+        "https://restaurace.mcdonalds.cz/api?token=7983978c4175e5a88b9a58e5b5c6d105217fbc625b6c20e9a8eef3b8acc6204f",
+    )
 
-    def store_hours(self, data):
-        day_groups = []
-        this_day_group = {}
-        weekdays = ["Mo", "Th", "We", "Tu", "Fr", "Sa", "Su"]
-        data = data.split(",")
-        index = 0
-        for item in data:
-            if index == 7:
-                break
-            short_day = weekdays[index]
-            hours = item
-            if not this_day_group:
-                this_day_group = {
-                    "from_day": short_day,
-                    "to_day": short_day,
-                    "hours": hours,
-                }
-
-            elif hours == this_day_group["hours"]:
-                this_day_group["to_day"] = short_day
-
-            elif hours != this_day_group["hours"]:
-                day_groups.append(this_day_group)
-                this_day_group = {
-                    "from_day": short_day,
-                    "to_day": short_day,
-                    "hours": hours,
-                }
-            index = index + 1
-
-        day_groups.append(this_day_group)
-
-        if not day_groups:
-            return None
-
-        opening_hours = ""
-        if len(day_groups) == 1 and day_groups[0]["hours"] in (
-            "00:00-23:59",
-            "00:00-00:00",
-        ):
-            opening_hours = "24/7"
-        else:
-            for day_group in day_groups:
-                if day_group["from_day"] == day_group["to_day"]:
-                    opening_hours += "{from_day} {hours}; ".format(**day_group)
-                else:
-                    opening_hours += "{from_day}-{to_day} {hours}; ".format(**day_group)
-            opening_hours = opening_hours[:-2]
-
-        return opening_hours
+    def parse_hours(self, item, poi):
+        if worktime := poi.get("worktime"):
+            oh = OpeningHours()
+            try:
+                for day, times in zip(DAYS, worktime):
+                    open, close = times.split(" - ")
+                    oh.add_range(day, open.strip(), close.strip())
+                item["opening_hours"] = oh
+            except:
+                self.logger.warning(f"Couldn't parse opening hours: {worktime}")
 
     def parse(self, response):
-        results = response.json()
-        for index in results:
-            data = results[index]
-            properties = {
-                "addr_full": data["address"],
-                "city": data["city"],
-                "name": data["restaurant_name"],
-                "postcode": data["zip"],
-                "phone": data["tel"],
-                "ref": data["id"],
-                "lon": data["lng"],
-                "lat": data["lat"],
-            }
-
-            opening_hours = self.store_hours(data["worktime"])
-            if opening_hours:
-                properties["opening_hours"] = opening_hours
-
-            yield Feature(**properties)
+        pois = response.json().get("restaurants")
+        for poi in pois:
+            poi["street_address"] = poi.pop("address")
+            item = DictParser.parse(poi)
+            item["website"] = response.urljoin(poi["slug"])
+            item["postcode"] = str(item["postcode"])
+            self.parse_hours(item, poi)
+            yield item

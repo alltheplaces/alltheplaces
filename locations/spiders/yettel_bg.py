@@ -19,7 +19,6 @@ class YettelBGSpider(Spider):
             item["lon"], item["lat"] = store["geometry"]["coordinates"]
 
             item["ref"] = store["properties"]["title"]
-            item["phone"] = store["properties"]["gsl_props_phone"]
 
             address_block = Selector(text=store["properties"]["gsl_addressfield"])
 

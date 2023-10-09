@@ -16,6 +16,7 @@ class SunocoUSSpider(scrapy.Spider):
         for location in response.json():
             item = DictParser.parse(location)
             item["ref"] = location["Store_ID"]
+            item["postcode"] = str(location["Postalcode"])
             self.parse_hours(item, location)
             apply_category(Categories.FUEL_STATION, item)
             apply_yes_no(Fuel.DIESEL, item, location["HasDiesel"] == "Y")

@@ -14,7 +14,7 @@ class PonderosaBonanzaSteakhouseUSSpider(StoreRocketSpider):
         if location["location_type_name"] == "Ponderosa Steakhouse":
             item.update(self.ponderosa)
         elif location["location_type_name"] == "Bonanza Steakhouse":
-            item["extras"]["branch"] = item.pop("name")
+            item["branch"] = item.pop("name")
             item.update(self.bonanza)
 
         item["opening_hours"] = OpeningHours()

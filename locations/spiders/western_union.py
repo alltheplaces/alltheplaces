@@ -53,7 +53,7 @@ class WesternUnionSpider(Spider):
         # The GraphQL query searches for locations within a 350km
         # radius of supplied coordinates, then returns locations in
         # pages of 15 locations each page.
-        for lat, lon in point_locations("earth_centroids_iseadgg_345km_radius.csv"):
+        for lat, lon in point_locations("earth_centroids_iseadgg_346km_radius.csv"):
             yield from self.request_page(lat, lon, 1)
 
     def parse(self, response):

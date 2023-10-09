@@ -5,6 +5,7 @@ import scrapy
 
 from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.searchable_points import open_searchable_points
 
 DAY_MAPPING = {
     "Mon": "Mo",
@@ -27,7 +28,7 @@ class FreseniusKidneyCareSpider(scrapy.Spider):
     def start_requests(self):
         base_url = "https://www.freseniuskidneycare.com/dialysis-centers?lat={lat}&lng={lng}&radius=100&page=1"
 
-        with open("./locations/searchable_points/us_centroids_100mile_radius.csv") as points:
+        with open_searchable_points("us_centroids_100mile_radius.csv") as points:
             next(points)
             for point in points:
                 _, lat, lon = point.strip().split(",")

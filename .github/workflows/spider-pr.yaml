@@ -13,6 +13,7 @@ jobs:
       AWS_KEY: QUtJQTRLMllUQzIzRzVZRkxENkg=
       AWS_SEC: b1RmNXNxc0VSNlNKdFNhbUdlcjJwZHR6YXQwNXpRRDRPZUtoVkpPSA==
       BUCKET: alltheplaces.openaddresses.io
+      ZYTE_API_KEY: ${{ secrets.ZYTE_API_KEY }}
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
@@ -48,8 +49,8 @@ jobs:
             exit 1
         fi
 
-        if [ $(wc -l <<< "$SPIDERS") -gt 5 ]; then
-            (>&2 echo "refusing to run on more than 5 spiders")
+        if [ $(wc -l <<< "$SPIDERS") -gt 15 ]; then
+            (>&2 echo "refusing to run on more than 15 spiders")
             exit 1
         fi
 

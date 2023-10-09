@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import scrapy
 from scrapy.http import JsonRequest
 
@@ -20,6 +22,7 @@ class ZabkaPLSpider(scrapy.Spider):
         yield JsonRequest(url=self.start_urls[0], headers=headers)
 
     def parse(self, response):
+        today = datetime.now()
         for location in response.json():
             item = DictParser.parse(location)
             item["street_address"] = item.pop("addr_full", "")
@@ -33,4 +36,25 @@ class ZabkaPLSpider(scrapy.Spider):
             item["opening_hours"].add_days_range(
                 ["Mo", "Tu", "We", "Th", "Fr", "Sa"], location["openTime"], location["closeTime"]
             )
+
+            if location["nonTradingDays"]:
+                sunday_open = None
+                sunday_close = None
+                for rule in location["nonTradingDays"]:
+                    d = datetime.strptime(rule["date"], "%Y-%m-%d")
+                    if d.weekday() != 6 or d < today:
+                        continue  # In the past, ignore
+                    if sunday_open is None:
+                        sunday_open = rule["openTime"]
+                        sunday_close = rule["closeTime"]
+                    else:
+                        if sunday_open != rule["openTime"] or sunday_close != rule["closeTime"]:
+                            self.crawler.stats.inc_value("atp/zabka_pl/nonTradingDays/mismatching")
+                            break  # Mismatching future Sundays, skip
+                else:
+                    self.crawler.stats.inc_value("atp/zabka_pl/nonTradingDays/fine")
+                    item["opening_hours"].add_range("Su", sunday_open, sunday_close)
+            else:
+                self.crawler.stats.inc_value("atp/zabka_pl/nonTradingDays/missing")  # Sunday closed? Missing data?
+
             yield item

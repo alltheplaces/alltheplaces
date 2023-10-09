@@ -5,6 +5,7 @@ import scrapy
 
 from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.searchable_points import open_searchable_points
 
 DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 
@@ -25,7 +26,7 @@ class MarshallsSpider(scrapy.Spider):
         url = "https://marketingsl.tjx.com/storelocator/GetSearchResults"
         payload = {"chain": "10", "lang": "en", "maxstores": "100"}
 
-        with open("./locations/searchable_points/us_centroids_100mile_radius.csv") as points:
+        with open_searchable_points("us_centroids_100mile_radius.csv") as points:
             reader = csv.DictReader(points)
             for point in reader:
                 payload.update({"geolat": point["latitude"], "geolong": point["longitude"]})

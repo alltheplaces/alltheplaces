@@ -23,6 +23,7 @@ mapping = (
     ("postcode", "addr:postcode"),
     ("country", "addr:country"),
     ("name", "name"),
+    ("branch", "branch"),
     ("phone", "phone"),
     ("website", "website"),
     ("twitter", "contact:twitter"),

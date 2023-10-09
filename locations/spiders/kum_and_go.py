@@ -4,6 +4,7 @@ import json
 import scrapy
 
 from locations.items import Feature
+from locations.searchable_points import open_searchable_points
 
 
 class KumAndGoSpider(scrapy.Spider):
@@ -13,7 +14,7 @@ class KumAndGoSpider(scrapy.Spider):
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def start_requests(self):
-        with open("./locations/searchable_points/us_centroids_100mile_radius_state.csv") as points:
+        with open_searchable_points("us_centroids_100mile_radius_state.csv") as points:
             reader = csv.DictReader(points)
             for point in reader:
                 if point["state"] in (

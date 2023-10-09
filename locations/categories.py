@@ -19,6 +19,7 @@ class Categories(Enum):
 
     BUS_STOP = {"highway": "bus_stop", "public_transport": "platform"}
     BUS_STATION = {"amenity": "bus_station", "public_transport": "station"}
+    TRAIN_STATION = {"railway": "station"}
 
     BOWLING = {"leisure": "bowling_alley"}
     GYM = {"leisure": "fitness_centre"}
@@ -66,6 +67,7 @@ class Categories(Enum):
     SHOP_GIFT = {"shop": "gift"}
     SHOP_HAIRDRESSER = {"shop": "hairdresser"}
     SHOP_HARDWARE = {"shop": "hardware"}
+    SHOP_HEARING_AIDS = {"shop": "hearing_aids"}
     SHOP_JEWELRY = {"shop": "jewelry"}
     SHOP_LAUNDRY = {"shop": "laundry"}
     SHOP_MOBILE_PHONE = {"shop": "mobile_phone"}
@@ -216,7 +218,7 @@ class Fuel(Enum):
     GTL_DIESEL = "fuel:GTL_diesel"
     HGV_DIESEL = "fuel:HGV_diesel"
     BIODIESEL = "fuel:biodiesel"
-    UNTAXED_DIESEL = "fuel:untaxed_diesel"
+    UNTAXED_DIESEL = "fuel:taxfree_diesel"
     COLD_WEATHER_DIESEL = "fuel:diesel:class2"
     # Octane levels
     OCTANE_80 = "fuel:octane_80"
@@ -238,11 +240,13 @@ class Fuel(Enum):
     E20 = "fuel:e20"
     E30 = "fuel:e30"
     E85 = "fuel:e85"
+    ETHANOL_FREE = "fuel:ethanol_free"
     BIOGAS = "fuel:biogas"
     LPG = "fuel:lpg"
     CNG = "fuel:cng"
     LNG = "fuel:lng"
     PROPANE = "fuel:propane"
+    BUTANE = "fuel:butane"
     LH2 = "fuel:LH2"
     # Additives
     ADBLUE = "fuel:adblue"
@@ -268,6 +272,7 @@ class Extras(Enum):
     COPYING = "service:copy"
     DELIVERY = "delivery"
     DRIVE_THROUGH = "drive_through"
+    FAST_FOOD = "fast_food"
     FAXING = "service:fax"
     FEE = "fee"
     INDOOR_SEATING = "indoor_seating"
@@ -335,6 +340,7 @@ class PaymentMethods(Enum):
     VISA = "payment:visa"
     VISA_CONTACTLESS = "payment:visa_contactless"
     VISA_DEBIT = "payment:visa_debit"
+    VISA_ELECTRON = "payment:visa_electron"
     V_PAY = "payment:v_pay"
     WAON = "payment:waon"
     WECHAT = "payment:wechat"
@@ -344,22 +350,34 @@ class FuelCards(Enum):
     ALLSTAR = "payment:allstar"  # https://allstarcard.co.uk/
     AVIA = "payment:avia_card"  # https://www.aviaitalia.com/en/avia-card/
     ARIS = "payment:aris"
+    AS24 = "payment:as24"  # https://www.as24.com/en/offers/cards
     BP = "payment:bp_card"  # https://www.bp.com/en/global/corporate/products-and-services.html
     DEUTSCHLAND = "fuel:discount:deutschland_card"
     DKV = "payment:dkv"
     E100 = "payment:e100"  # https://e100.eu/en
+    EUROWAG = "payment:eurowag"  # https://www.eurowag.com/
     ESSO_NATIONAL = "payment:esso_card"
     EXXONMOBIL_FLEET = "payment:exxonmobil_fleet"
+    INA = "payment:ina"  # https://www.ina.hr/en/customers/ina-card/
     LOGPAY = "payment:logpay"  # https://www.logpay.de/
     LUKOIL = "payment:lukoil"  # https://lukoil.ru/Products/business/fuelcards
     LUKOIL_LOYALTY_PROGRAM = "fuel:discount:lukoil"
     MOBIL = "payment:mobilcard"  # https://www.mobil.co.nz/en-nz/mobilcard
+    MOLGROUP_CARDS = "payment:molgroup_cards"  # https://www.molgroupcards.com/
+    MORGAN_FUELS = "payment:morgan_fuels"
     OMV = "payment:omv"  # https://www.omv.com/en/customers/services/fuel-cards
     PETROL_PLUS_REGION = "payment:petrol_plus_region"  # https://www.petrolplus.ru/
     SHELL = "payment:shell"
+    SLOVNAFT = "payment:slovnaft"  # https://slovnaft.sk/en/
+    TIFON = "payment:tifon"  # https://tifon.hr/hr/
+    TOTAL_CARD = "payment:total_card"  # https://totalcard.patotal.com/
     UTA = "payment:uta"
     ROSNEFT = "payment:rosneft"  # https://www.rn-card.ru/
     ROUTEX = "payment:routex"  # https://routex.com/
+
+
+class Access(Enum):
+    HGV = "hgv"
 
 
 def apply_yes_no(attribute, item: Feature, state: bool, apply_positive_only: bool = True):
