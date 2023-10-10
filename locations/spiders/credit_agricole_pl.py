@@ -51,7 +51,7 @@ class CreditAgricolePLSpider(SitemapSpider, StructuredDataSpider):
             try:
                 oh = OpeningHours()
                 for hour in hours:
-                    oh.add_ranges_from_string(hour.replace('.', ''))
+                    oh.add_ranges_from_string(hour.replace(".", ""))
                 item["opening_hours"] = oh.as_opening_hours()
             except Exception as e:
                 self.logger.warning(f"Failed to parse hours {hours}: {e}")
