@@ -5,9 +5,9 @@ from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 
 BRAND_MAPPING = {
-    'Bankomat (Euronet)': ('Euronet', 'Q5412010'),
-    'Bankomat (Planet Cash)': ('Planet Cash', 'Q117744569'),
-    'Bankomat bezprowizyjny w placówce CA BP': ('Credit Agricole', 'Q590952')
+    "Bankomat (Euronet)": ("Euronet", "Q5412010"),
+    "Bankomat (Planet Cash)": ("Planet Cash", "Q117744569"),
+    "Bankomat bezprowizyjny w placówce CA BP": ("Credit Agricole", "Q590952"),
 }
 
 
@@ -30,10 +30,14 @@ class CreditAgricolePLSpider(SitemapSpider, StructuredDataSpider):
         item["lat"] = response.xpath('//script[contains(., "branchLat")]').re_first(r"var branchLat = '([\d.]+)';")
         item["lon"] = response.xpath('//script[contains(., "branchLng")]').re_first(r"var branchLng = '([\d.]+)';")
 
-        atm_type = response.xpath("//h1[@class='section-title title--secondary title--contact-map']/small[1]/text()").get(default='').strip()
-    
+        atm_type = (
+            response.xpath("//h1[@class='section-title title--secondary title--contact-map']/small[1]/text()")
+            .get(default="")
+            .strip()
+        )
+
         if match := BRAND_MAPPING.get(atm_type):
-            item['brand'], item['brand_wikidata'] = match
+            item["brand"], item["brand_wikidata"] = match
         else:
             self.crawler.stats.inc_value(f"atp/credit_agricole_pl/unknown_brand/{atm_type}")
 
