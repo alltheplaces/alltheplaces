@@ -98,7 +98,7 @@ class PaczkomatPLSpider(Spider):
         if poi["h"] == "24/7":
             item["opening_hours"] = "24/7"
             return
-        
+
         if hours := poi.get("i"):
             hours = json.loads(hours)
             if isinstance(hours, list):
