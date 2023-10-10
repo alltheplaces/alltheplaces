@@ -1,20 +1,30 @@
 import scrapy
 
-from locations.categories import Categories, apply_category
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_FULL, OpeningHours
+from locations.spiders.carrefour_fr import (
+    CARREFOUR_EXPRESS,
+    CARREFOUR_MARKET,
+    CARREFOUR_SUPERMARKET,
+    parse_brand_and_category_from_mapping,
+)
+from locations.user_agents import CHROME_LATEST
 
 
 class CarrefourBESpider(scrapy.Spider):
     name = "carrefour_be"
     start_urls = ["https://winkels.carrefour.be/api/v3/locations"]
     brands = {
-        "express": ("Carrefour Express", "Q2940190", None),
-        "orange": ("Carrefour Express", "Q2940190", None),
-        "market": ("Carrefour Market", "Q2689639", Categories.SHOP_SUPERMARKET),
-        "hyper": ("Carrefour", "Q217599", Categories.SHOP_SUPERMARKET),
-        "drive-2": ("Carrefour", "Q217599", {**Categories.SHOP_SUPERMARKET.value, "drive_through": "yes"}),
+        "express": CARREFOUR_EXPRESS,
+        "orange": CARREFOUR_EXPRESS,
+        "market": CARREFOUR_MARKET,
+        "hyper": CARREFOUR_SUPERMARKET,
+        "drive-2": CARREFOUR_SUPERMARKET,
+        "Maxi": CARREFOUR_SUPERMARKET,
     }
+    user_agent = CHROME_LATEST
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def parse(self, response):
         for data in response.json():
@@ -25,11 +35,13 @@ class CarrefourBESpider(scrapy.Spider):
             item = DictParser.parse(data)
 
             brand_slug = data.get("brandSlug")
-            brand, brand_wikidata, category = self.brands[brand_slug]
-            item["brand"] = brand
-            item["brand_wikidata"] = brand_wikidata
-            if category is not None:
-                apply_category(category, item)
+            if not parse_brand_and_category_from_mapping(item, brand_slug, self.brands):
+                self.crawler.stats.inc_value(f"atp/carrefour_be/unknown_brand/{brand_slug}")
+                # Default to supermarket if brand match failed
+                apply_category(item, Categories.SHOP_SUPERMARKET)
+
+            if brand_slug == "drive-2":
+                apply_yes_no(Extras.DRIVE_THROUGH, item, True)
 
             oh = OpeningHours()
             for index, bH in enumerate(data.get("businessHours")):

@@ -475,6 +475,16 @@ DELIMITERS_ES = [
     "de",
 ]
 
+DELIMITERS_PL = [
+    "-",
+    "–",
+    "—",
+    "―",
+    "‒",
+    "od",
+    "do",
+]
+
 
 def day_range(start_day, end_day):
     start_ix = DAYS.index(sanitise_day(start_day))
