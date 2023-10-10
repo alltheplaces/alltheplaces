@@ -4,7 +4,7 @@ from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 
 
-class SevenElevenUSSpider(scrapy.Spider):
+class SevenElevenSESpider(scrapy.Spider):
     name = "seven_eleven_se"
     start_urls = ["https://storage.googleapis.com/public-store-data-prod/stores-seven_eleven.json"]
 

@@ -3,9 +3,9 @@ import scrapy
 from locations.dict_parser import DictParser
 
 
-class TwentyFourHourFitnessSpider(scrapy.Spider):
-    name = "24_hour_fitness"
-    item_attributes = {"brand_wikidata": "Q4631849"}
+class TwentyFourHourFitnessUSSpider(scrapy.Spider):
+    name = "twenty_four_hour_fitness_us"
+    item_attributes = {"brand": "24 Hour Fitness", "brand_wikidata": "Q4631849"}
     start_urls = ["https://www.24hourfitness.com/Website/ClubLocation/OpenClubs/"]
 
     def parse(self, response):
