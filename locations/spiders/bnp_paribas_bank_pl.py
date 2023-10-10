@@ -1,4 +1,5 @@
 from urllib.parse import urljoin, urlparse
+
 import scrapy
 from chompjs import chompjs
 
