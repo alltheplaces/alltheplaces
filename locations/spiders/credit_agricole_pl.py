@@ -8,6 +8,7 @@ BRAND_MAPPING = {
     "Bankomat (Euronet)": ("Euronet", "Q5412010"),
     "Bankomat (Planet Cash)": ("Planet Cash", "Q117744569"),
     "Bankomat bezprowizyjny w placówce CA BP": ("Credit Agricole", "Q590952"),
+    "Bankomat bezprowizyjny": ("Credit Agricole", "Q590952"),
 }
 
 
