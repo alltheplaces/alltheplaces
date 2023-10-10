@@ -28,7 +28,7 @@ class OrangePLSpider(SitemapSpider):
     def parse_poi(self, response, website):
         poi = response.json()
         poi["street_address"] = ", ".join(filter(None, [poi.pop("street1"), poi.pop("street2")]))
-        poi["address"] = ", ".join(filter(None, poi["formatted_address"]))
+        poi["addr_full"] = ", ".join(filter(None, poi["formatted_address"]))
         poi["location"] = poi.pop("_geoloc")
         item = DictParser.parse(poi)
         item["country"] = poi["country"]["code"]
