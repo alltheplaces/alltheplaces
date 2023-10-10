@@ -1,5 +1,4 @@
 import pycountry
-
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
@@ -77,9 +76,9 @@ class Where2GetItSpider(Spider):
     api_brand_name = ""
     api_key = ""
     api_filter = {}
-    api_filter_admin_level = 0 # 0 = no filtering,
-                               # 1 = filter by country
-                               # 2 = filter by state/province
+    api_filter_admin_level = 0  # 0 = no filtering,
+    # 1 = filter by country
+    # 2 = filter by state/province
 
     def make_request(self, country_code: str = None, state_code: str = None, province_code: str = None) -> JsonRequest:
         where_clause = {}
@@ -131,9 +130,7 @@ class Where2GetItSpider(Spider):
                 url = self.api_endpoint
             yield JsonRequest(
                 url=url,
-                data={
-                    "request": {"appkey": self.api_key, "formdata": {"objectname": "Account::Country"}}
-                },
+                data={"request": {"appkey": self.api_key, "formdata": {"objectname": "Account::Country"}}},
                 method="POST",
                 callback=self.parse_country_list,
                 dont_filter=True,

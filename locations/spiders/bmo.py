@@ -1,12 +1,12 @@
-from locations.categories import apply_category, apply_yes_no, Categories, Extras
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import Feature
 from locations.spiders.albertsons import AlbertsonsSpider
 from locations.spiders.arco import ArcoSpider
 from locations.spiders.caseys_general_store import CaseysGeneralStoreSpider
 from locations.spiders.chevron import ChevronSpider
-from locations.spiders.costco import CostcoSpider
 from locations.spiders.circle_k import CircleKSpider
+from locations.spiders.costco import CostcoSpider
 from locations.spiders.cvs_us import PHARMACY_BRANDS as CVS_BRANDS
 from locations.spiders.dunkin_us import DunkinUSSpider
 from locations.spiders.food_city_us import FoodCityUSSpider
@@ -51,14 +51,21 @@ class BMOSpider(Where2GetItSpider):
         item["street_address"] = ", ".join(filter(None, [location.get("address1"), location.get("address2")]))
         if location["country"] == "CA":
             item["state"] = location["province"]
-        
+
         item["opening_hours"] = OpeningHours()
         for day_name in DAYS_FULL:
             open_time = location.get("{}open".format(day_name.lower()))
             close_time = location.get("{}close".format(day_name.lower()))
-            if open_time and open_time != "closed" and open_time != "N/A" and close_time and close_time != "closed" and close_time != "N/A":
+            if (
+                open_time
+                and open_time != "closed"
+                and open_time != "N/A"
+                and close_time
+                and close_time != "closed"
+                and close_time != "N/A"
+            ):
                 item["opening_hours"].add_range(day_name, open_time, close_time, "%H%M")
-        
+
         if location["grouptype"] in ["BMOHarrisBranches", "BMOBranches"]:
             apply_category(Categories.BANK, item)
             if location.get("abmcount"):
@@ -170,13 +177,22 @@ class BMOSpider(Where2GetItSpider):
             elif item["name"] == "Schnucks":
                 item["located_in"] = SchnucksUSSpider.item_attributes["brand"]
                 item["located_in_wikidata"] = SchnucksUSSpider.item_attributes["brand_wikidata"]
-            elif item["name"] == "Shell" or item["name"].upper().startswith("SHELL C") or item["name"].upper().startswith("SHELL #"):
+            elif (
+                item["name"] == "Shell"
+                or item["name"].upper().startswith("SHELL C")
+                or item["name"].upper().startswith("SHELL #")
+            ):
                 item["located_in"] = ShellSpider.item_attributes["brand"]
                 item["located_in_wikidata"] = ShellSpider.item_attributes["brand_wikidata"]
             elif item["name"] == "Shoprite" or item["name"] == "Shop Rite":
                 item["located_in"] = ShopriteSpider.item_attributes["brand"]
                 item["located_in_wikidata"] = ShopriteSpider.item_attributes["brand_wikidata"]
-            elif item["name"] == "Smiths Food and Drugs" or item["name"] == "Smiths" or item["name"] == "Smith's" or item["name"] == "Smiths Fuel Center":
+            elif (
+                item["name"] == "Smiths Food and Drugs"
+                or item["name"] == "Smiths"
+                or item["name"] == "Smith's"
+                or item["name"] == "Smiths Fuel Center"
+            ):
                 item["located_in"] = KROGER_BRANDS["https://www.smithsfoodanddrug.com/"]["brand"]
                 item["located_in_wikidata"] = KROGER_BRANDS["https://www.smithsfoodanddrug.com/"]["brand_wikidata"]
             elif item["name"].startswith("Speedway "):
@@ -205,5 +221,5 @@ class BMOSpider(Where2GetItSpider):
                 item["located_in_wikidata"] = WegmansSpider.item_attributes["brand_wikidata"]
         else:
             self.logger.error("Unknown location type: %s", location["grouptype"])
-        
+
         yield item
