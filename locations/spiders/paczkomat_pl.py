@@ -14,7 +14,6 @@ class PaczkomatPLSpider(Spider):
 
     def parse(self, response, **kwargs):
         for poi in response.json()["items"]:
-
             # Skip non-active locations
             if poi["s"] != 1:
                 continue
@@ -32,6 +31,8 @@ class PaczkomatPLSpider(Spider):
             item["lat"] = poi["l"]["a"]
             item["lon"] = poi["l"]["o"]
 
+            item["image"] = f'https://geowidget.easypack24.net/uploads/pl/images/{item["ref"]}.jpg'
+
             item["extras"]["type"] = poi["t"]
 
             # TODO: figure out if below could be mapped
@@ -42,13 +43,7 @@ class PaczkomatPLSpider(Spider):
             # poi["p"]  # payment
 
             self.parse_slug(item)
-
-            item['image'] = f'https://geowidget.easypack24.net/uploads/pl/images/{item["ref"]}.jpg'
-
-            if poi["h"] == "24/7":
-                item["opening_hours"] = "24/7"
-            else:
-                self.parse_hours(item, poi)
+            self.parse_hours(item, poi)
 
             yield item
 
@@ -100,7 +95,11 @@ class PaczkomatPLSpider(Spider):
         item["website"] = f"https://inpost.pl/{slug}"
 
     def parse_hours(self, item, poi):
-        if hours := poi.get('i'):
+        if poi["h"] == "24/7":
+            item["opening_hours"] = "24/7"
+            return
+        
+        if hours := poi.get("i"):
             hours = json.loads(hours)
             if isinstance(hours, list):
                 return
@@ -116,8 +115,8 @@ class PaczkomatPLSpider(Spider):
                     "6": "Sa",
                 }
                 for day, range in hours.items():
-                    range = [f'{h}:00' if ':' not in h else h for h in range]
+                    range = [f"{h}:00" if ":" not in h else h for h in range]
                     oh.add_range(days_mapping.get(day), range[0], range[1])
                 item["opening_hours"] = oh.as_opening_hours()
             except Exception as e:
-                self.logger.warning(f'Failed to parse opening hours {hours}: {e}')
+                self.logger.warning(f"Failed to parse opening hours {hours}: {e}")
