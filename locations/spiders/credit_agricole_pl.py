@@ -26,7 +26,7 @@ class CreditAgricolePLSpider(SitemapSpider, StructuredDataSpider):
     def parse_atm(self, response):
         item = Feature()
         item["street_address"] = response.xpath('//*[@class="street-address"]//text()').get()
-        item["opening_hours"] = "24/7"
+        # TODO: opening hours
         item["ref"] = item["website"] = response.url
         item["lat"] = response.xpath('//script[contains(., "branchLat")]').re_first(r"var branchLat = '([\d.]+)';")
         item["lon"] = response.xpath('//script[contains(., "branchLng")]').re_first(r"var branchLng = '([\d.]+)';")
