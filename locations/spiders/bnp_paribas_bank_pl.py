@@ -1,3 +1,4 @@
+from urllib.parse import urljoin, urlparse
 import scrapy
 from chompjs import chompjs
 
@@ -14,9 +15,16 @@ BRANDS = {
 
 class BNPParibasBankPLSpider(scrapy.Spider):
     name = "bnp_paribas_bank_pl"
-    start_urls = ["https://www.bnpparibas.pl/_js_places/time20230712142358/places.js"]
+    start_urls = ["https://www.bnpparibas.pl/kontakt/oddzialy-z-obsluga-detaliczna-i-biznesowa"]
 
     def parse(self, response, **kwargs):
+        parsed = urlparse(self.start_urls[0])
+        base_url = f"{parsed.scheme}://{parsed.netloc}"
+        pois_path = response.xpath(".//script[@type='text/javascript' and contains(@src, '/_js_places/')]/@src").get()
+        pois_endpoint = urljoin(base_url, pois_path)
+        yield scrapy.Request(pois_endpoint, callback=self.parse_pois)
+
+    def parse_pois(self, response):
         details = chompjs.parse_js_object(response.text)
 
         for poi in details.get("department_retail_business").values():
