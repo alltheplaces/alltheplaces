@@ -1,7 +1,7 @@
 import scrapy
 from scrapy.http import JsonRequest
 
-from locations.categories import apply_category, Categories
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
@@ -30,4 +30,5 @@ class PocztaPolskaPLSpider(scrapy.Spider):
             item["postcode"] = location.get("kod")
             item["phone"] = ";".join(location.get("telefon")[0].split(","))
             apply_category(Categories.POST_OFFICE, item)
+            # TODO: parse hours, services in 'opis' attributes
             yield item
