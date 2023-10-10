@@ -45,6 +45,6 @@ class OrangePLSpider(SitemapSpider):
                 for day, hour in hours.items():
                     for times in hour:
                         oh.add_range(day, times.split("-")[0], times.split("-")[1], time_format="%I:%M%p")
-                item['opening_hours'] = oh.as_opening_hours()
+                item["opening_hours"] = oh.as_opening_hours()
             except Exception as e:
-                self.logger.warning(f'Failed to parse hours {hours}: {e}')
+                self.logger.warning(f"Failed to parse hours {hours}: {e}")
