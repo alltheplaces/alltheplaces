@@ -1,4 +1,4 @@
-from scrapy import Request, Spider
+from scrapy import FormRequest, Spider
 
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
@@ -16,8 +16,9 @@ class QuickChekUSSpider(Spider):
                 "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
                 "X-Requested-With": "XMLHttpRequest",
             }
-            yield Request(
-                url=url, method="POST", body="action=get_sorted_locations&dist=100000&lat=0&lng=0", headers=headers
+            formdata={"action": "get_sorted_locations", "dist": "100000", "lat": "0", "lng": "0"}
+            yield FormRequest(
+                url=url, method="POST", formdata=formdata, headers=headers
             )
 
     def parse(self, response):
