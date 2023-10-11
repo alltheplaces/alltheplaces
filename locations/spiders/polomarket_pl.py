@@ -1,9 +1,9 @@
 import re
 
-from scrapy.spiders import CrawlSpider, Rule
 from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule
 
-from locations.hours import sanitise_day, day_range, DAYS_PL, OpeningHours
+from locations.hours import DAYS_PL, OpeningHours, day_range, sanitise_day
 from locations.items import Feature
 
 
