@@ -5,9 +5,9 @@ import scrapy
 from locations.items import Feature
 
 
-class UnitedDairyFarmersSpider(scrapy.Spider):
+class UnitedDairyFarmersUSSpider(scrapy.Spider):
     download_delay = 0.2
-    name = "united_dairy_farmers"
+    name = "united_dairy_farmers_us"
     item_attributes = {"brand": "United Dairy Farmers", "brand_wikidata": "Q7887677"}
     allowed_domains = ["udfinc.com"]
     start_urls = ("https://www.udfinc.com/wp-sitemap-posts-wpsl_stores-1.xml",)
