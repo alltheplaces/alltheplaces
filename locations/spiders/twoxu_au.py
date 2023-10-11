@@ -4,8 +4,8 @@ from locations.hours import OpeningHours
 from locations.storefinders.stockist import StockistSpider
 
 
-class TwoX2AUSpider(StockistSpider):
-    name = "2xu_au"
+class TwoXUAUSpider(StockistSpider):
+    name = "twoxu_au"
     item_attributes = {"brand": "2XU", "brand_wikidata": "Q16823650"}
     key = "u7719"
 

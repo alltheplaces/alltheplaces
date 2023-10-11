@@ -1,3 +1,4 @@
+import pycountry
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
@@ -52,58 +53,108 @@ from locations.items import Feature
 # As filters are complex to understand, it is best to search spiders
 # using "api_query" to see other examples of filters being used.
 
+# Instead of Where2GetIt being provided as a service, it is also
+# possible for brands to self-host the software at a custom domain
+# name. If this is the case, change the api_endpoint value to be
+# the custom API url ending in "/rest/getlist".
+
 # If there are many store locations to return, it is possible the
 # response will time out. If this is the case, try setting the
-# value of the separate_api_call_per_country parameter to True and
-# an individual request will be sent for each country, hopefully
-# allowing all requests to avoid timing out. If this approach fails,
-# you will need to overwrite the make_request function to use
-# a more granular form of filtering (e.g. by states of a country) to
-# avoid requests timing out.
+# value of the api_filter_admin_level to 1 for querying results
+# country-by-country. If timeouts still occur, set
+# api_filter_admin_level to 2 for querying results not just by
+# country, but also state-by-state or province-by-province. If you
+# still experience timeouts, you will need to overwrite the
+# make_request function to use a more granular form of querying, for
+# example, by city of each location.
 
 
 class Where2GetItSpider(Spider):
     dataset_attributes = {"source": "api", "api": "where2getit.com"}
     custom_settings = {"ROBOTSTXT_OBEY": False}
+    api_endpoint = ""
     api_brand_name = ""
     api_key = ""
     api_filter = {}
-    separate_api_call_per_country = False
+    api_filter_admin_level = 0  # 0 = no filtering,
+    # 1 = filter by country
+    # 2 = filter by state/province
 
-    def make_request(self, country_code: str = None) -> JsonRequest:
+    def make_request(self, country_code: str = None, state_code: str = None, province_code: str = None) -> JsonRequest:
         where_clause = {}
-        if country_code and self.api_filter:
-            where_clause = {"and": {"country": {"eq": country_code}}}
-            where_clause["and"].update(self.api_filter)
-        elif country_code:
-            where_clause = {"country": {"eq": country_code}}
-        elif self.api_filter:
-            where_clause = self.api_filter
+        location_clause = {}
+        if country_code:
+            if state_code:
+                location_clause = {
+                    "and": {
+                        "country": {"eq": country_code},
+                        "state": {"eq": state_code},
+                    }
+                }
+            elif province_code:
+                location_clause = {
+                    "and": {
+                        "country": {"eq": country_code},
+                        "province": {"eq": province_code},
+                    }
+                }
+            else:
+                location_clause = {"country": {"eq": country_code}}
+        if self.api_filter:
+            where_clause = {
+                "and": {
+                    self.api_filter,
+                    location_clause,
+                }
+            }
+        else:
+            where_clause = location_clause
+
+        url = f"https://hosted.where2getit.com/{self.api_brand_name}/rest/getlist"
+        if self.api_endpoint:
+            url = self.api_endpoint
         yield JsonRequest(
-            url=f"https://hosted.where2getit.com/{self.api_brand_name}/rest/getlist",
+            url=url,
             data={
                 "request": {"appkey": self.api_key, "formdata": {"objectname": "Locator::Store", "where": where_clause}}
             },
             method="POST",
             callback=self.parse_locations,
+            dont_filter=True,
         )
 
     def start_requests(self):
-        if self.separate_api_call_per_country:
+        if self.api_filter_admin_level > 0:
+            url = f"https://hosted.where2getit.com/{self.api_brand_name}/rest/getlist"
+            if self.api_endpoint:
+                url = self.api_endpoint
             yield JsonRequest(
-                url=f"https://hosted.where2getit.com/{self.api_brand_name}/rest/getlist",
+                url=url,
                 data={"request": {"appkey": self.api_key, "formdata": {"objectname": "Account::Country"}}},
                 method="POST",
                 callback=self.parse_country_list,
+                dont_filter=True,
             )
         else:
             yield from self.make_request()
 
     def parse_country_list(self, response, **kwargs):
         for country in response.json()["response"]["collection"]:
-            yield from self.make_request(country["name"])
+            country_code = country["name"]
+            if self.api_filter_admin_level > 1:
+                for state in pycountry.subdivisions.get(country_code=country_code):
+                    state_code = state.code[-2:]
+                    if state.type == "Province":
+                        yield from self.make_request(country_code=country_code, province_code=state_code)
+                    else:
+                        yield from self.make_request(country_code=country_code, state_code=state_code)
+            else:
+                yield from self.make_request(country_code=country_code)
 
     def parse_locations(self, response, **kwargs):
+        if response.json().get("code") and response.json()["code"] == 5007:
+            # No results returned for the provided API filter.
+            return
         for location in response.json()["response"]["collection"]:
             item = DictParser.parse(location)
             if not item["ref"]:

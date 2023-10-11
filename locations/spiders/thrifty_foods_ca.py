@@ -5,8 +5,8 @@ import scrapy
 from locations.items import Feature
 
 
-class ThirtyFoodsSpider(scrapy.Spider):
-    name = "thirty_foods"
+class ThriftyFoodsCASpider(scrapy.Spider):
+    name = "thrifty_foods_ca"
     item_attributes = {"brand": "Thirty Foods", "brand_wikidata": "Q7798140"}
     allowed_domains = ["www.thriftyfoods.com"]
     start_urls = (
