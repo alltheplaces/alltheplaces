@@ -46,6 +46,7 @@ class BMOSpider(Where2GetItSpider):
     api_key = "343095D0-C235-11E6-93AB-1BF70C70A832"
     api_filter_admin_level = 2
 
+    # flake8: noqa: C901
     def parse_item(self, item: Feature, location: dict):
         item["ref"] = location["clientkey"]
         item["street_address"] = ", ".join(filter(None, [location.get("address1"), location.get("address2")]))
