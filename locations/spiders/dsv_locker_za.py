@@ -20,6 +20,7 @@ class DSVLockerZASpider(Spider):
             item["lon"] = data.get("gps_longitude")
             item["phone"] = data.get("contact_dsv_tel")
             item["email"] = data.get("contact_dsv_email")
+            item["city"] = data["suburb"]
 
             item["opening_hours"] = OpeningHours()
 
