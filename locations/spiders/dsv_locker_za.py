@@ -14,9 +14,8 @@ class DSVLockerZASpider(Spider):
         for data in response.json()["result"]["features"]:
             data = data["properties"]
             item = DictParser.parse(data)
-
+            item["ref"] = data.get("location_code")
             item["name"] = data.get("location_name")
-            item["street"] = data.get("suburb")
             item["lat"] = data.get("gps_latitude")
             item["lon"] = data.get("gps_longitude")
             item["phone"] = data.get("contact_dsv_tel")
