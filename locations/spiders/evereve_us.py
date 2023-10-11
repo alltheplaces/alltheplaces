@@ -21,7 +21,12 @@ class EVEREVEUSSpider(AmastyStoreLocatorSpider):
     def parse_item(self, item, location, popup_html):
         if "COMING SOON" in item["name"].upper():
             return
-        popup_text = list(filter(None, map(unescape, map(str.strip, popup_html.xpath('//div[@class="amlocator-info-popup"]/text()').getall()))))
+        popup_text = list(
+            filter(
+                None,
+                map(unescape, map(str.strip, popup_html.xpath('//div[@class="amlocator-info-popup"]/text()').getall())),
+            )
+        )
         if len(popup_text) == 3:
             item["addr_full"] = ", ".join([popup_text[0], popup_text[1]])
             item["phone"] = popup_text[2]
