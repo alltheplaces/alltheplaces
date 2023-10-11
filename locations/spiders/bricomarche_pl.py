@@ -13,7 +13,6 @@ class BricomarchePLSpider(scrapy.Spider):
     def parse(self, response):
         for store in response.json()["results"]:
             item = DictParser.parse(store)
-            # item["postcode"] = store["Postcode"]
             if slug := store.get("Slug"):
                 item["website"] = urljoin("https://www.bricomarche.pl/sklep/", slug)
             yield item
