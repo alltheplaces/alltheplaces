@@ -2,6 +2,7 @@ import re
 
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
@@ -57,4 +58,5 @@ class UnitedDairyFarmersUSSpider(scrapy.Spider):
                 "lon": float(data[8].split(":")[1]),
             }
 
+        apply_category(Categories.FUEL_STATION, properties)
         yield Feature(**properties)
