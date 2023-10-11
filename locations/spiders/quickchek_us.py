@@ -16,10 +16,8 @@ class QuickChekUSSpider(Spider):
                 "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
                 "X-Requested-With": "XMLHttpRequest",
             }
-            formdata={"action": "get_sorted_locations", "dist": "100000", "lat": "0", "lng": "0"}
-            yield FormRequest(
-                url=url, method="POST", formdata=formdata, headers=headers
-            )
+            formdata = {"action": "get_sorted_locations", "dist": "100000", "lat": "0", "lng": "0"}
+            yield FormRequest(url=url, method="POST", formdata=formdata, headers=headers)
 
     def parse(self, response):
         for location in response.json():
