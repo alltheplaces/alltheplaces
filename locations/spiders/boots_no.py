@@ -3,12 +3,13 @@ import urllib.parse
 
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
 class BootsNOSpider(scrapy.Spider):
     name = "boots_no"
-    item_attributes = {"brand": "Apotek", "brand_wikidata": "Q4581428"}
+    item_attributes = {"brand": "Boots", "brand_wikidata": "Q6123139"}
     allowed_domains = ["apotek.boots.no", "zpin.it"]
     download_delay = 0.5
     start_urls = [
@@ -33,6 +34,7 @@ class BootsNOSpider(scrapy.Spider):
             "website": response.meta["website"],
         }
 
+        apply_category(Categories.PHARMACY, properties)
         yield Feature(**properties)
 
     def parse_store(self, response):
