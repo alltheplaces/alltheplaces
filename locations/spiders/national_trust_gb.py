@@ -4,8 +4,8 @@ from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
 
-class NationalTrustSpider(Spider):
-    name = "national_trust"
+class NationalTrustGBSpider(Spider):
+    name = "national_trust_gb"
     item_attributes = {"brand": "National Trust", "brand_wikidata": "Q333515"}
     allowed_domains = ["www.nationaltrust.org.uk"]
     start_urls = [
