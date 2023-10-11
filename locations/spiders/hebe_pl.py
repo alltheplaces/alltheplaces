@@ -17,8 +17,8 @@ class HebePLSpider(scrapy.Spider):
             item["lat"] = shop.xpath("./@data-lat").get()
             item["lon"] = shop.xpath("./@data-lng").get()
             item["website"] = response.urljoin(shop.xpath('.//a[@title="Informacje o sklepie"]/@href').get())
-            city_postal = shop.xpath('.//*[@class="store-popup__city"]/text()').get(default='').split(',')
+            city_postal = shop.xpath('.//*[@class="store-popup__city"]/text()').get(default="").split(",")
             if len(city_postal) == 2:
-                item['city'] = city_postal[0].strip()
-                item['postcode'] = city_postal[1].strip()
+                item["city"] = city_postal[0].strip()
+                item["postcode"] = city_postal[1].strip()
             yield item
