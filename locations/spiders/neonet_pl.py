@@ -19,7 +19,6 @@ class NeonetPLSpider(SitemapSpider):
         )[1]
         item = DictParser.parse(data)
         item["ref"] = data.get("@id")
-        oh = OpeningHours()
-        oh.from_linked_data(data)
-        item["opening_hours"] = oh.as_opening_hours()
+        item["opening_hours"] = OpeningHours()
+        item['opening_hours'].from_linked_data(data)
         yield item
