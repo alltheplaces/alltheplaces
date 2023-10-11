@@ -26,7 +26,7 @@ class TimHortonsSpider(Spider):
             item["ref"] = location["number"]
 
             if isinstance(item["email"], list):
-                item["email"] = ",".join(item["email"])
+                item["email"] = ";".join(item["email"])
 
             apply_yes_no(Extras.TAKEAWAY, item, location["hasTakeOut"] or location["hasDriveThru"], False)
             apply_yes_no(Extras.DRIVE_THROUGH, item, location["hasDriveThru"], False)
