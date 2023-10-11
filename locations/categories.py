@@ -267,6 +267,8 @@ class Extras(Enum):
     BABY_CHANGING_TABLE = "changing_table"
     CALLING = "service:phone"
     CAR_WASH = "car_wash"
+    CASH_IN = "cash_in"
+    CASH_OUT = "cash_out"
     COMPRESSED_AIR = "compressed_air"
     COMPUTING = "service:computer"
     COPYING = "service:copy"
