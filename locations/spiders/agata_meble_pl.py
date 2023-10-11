@@ -16,6 +16,5 @@ class AgataMeblePLSpider(scrapy.Spider):
             if poi["Slug"] == "globalny":
                 continue
             item = DictParser.parse(poi)
-            item["postcode"] = poi["Postcode"]
             item["website"] = urljoin("https://www.agatameble.pl/salon/", poi["Slug"])
             yield item
