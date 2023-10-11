@@ -8,7 +8,7 @@ from locations.items import Feature
 
 class BootsNOSpider(scrapy.Spider):
     name = "boots_no"
-    item_attributes = {"brand": "Boots", "brand_wikidata": "Q6123139"}
+    item_attributes = {"brand": "Apotek", "brand_wikidata": "Q4581428"}
     allowed_domains = ["apotek.boots.no", "zpin.it"]
     download_delay = 0.5
     start_urls = [
