@@ -1,3 +1,4 @@
+from urllib.parse import urljoin
 import scrapy
 
 from locations.dict_parser import DictParser
@@ -11,10 +12,9 @@ class AgataMeblePLSpider(scrapy.Spider):
     def parse(self, response):
         for poi in response.json()["results"]:
             # global store is not a poi
-            if poi['Slug'] == 'globalny':
+            if poi["Slug"] == "globalny":
                 continue
             item = DictParser.parse(poi)
             item["postcode"] = poi["Postcode"]
-            website = "https://www.agatameble.pl/salon/" + poi["Slug"]
-            item["website"] = item["ref"] = website
+            item["website"] = urljoin("https://www.agatameble.pl/salon/", poi["Slug"])
             yield item
