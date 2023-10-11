@@ -4,7 +4,7 @@ import json
 from scrapy.spiders import SitemapSpider
 
 from locations.dict_parser import DictParser
-from locations.hours import OpeningHours, sanitise_day
+from locations.hours import OpeningHours
 
 
 class NeonetPLSpider(SitemapSpider):
