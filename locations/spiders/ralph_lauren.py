@@ -14,6 +14,7 @@ class RalphLaurenSpider(scrapy.Spider):
     custom_settings = {"COOKIES_ENABLED": False, "ROBOTSTXT_OBEY": False}
     download_delay = 10
     user_agent = BROWSER_DEFAULT
+    requires_proxy = True
 
     def parse(self, response, **kwargs):
         for country in filter(
