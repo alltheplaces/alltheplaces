@@ -15,7 +15,7 @@ class MtexxBGSpider(Spider):
                 text = location.get()
                 properties = {
                     "name": text.rsplit("-")[0],
-                    "lat": text.rsplit(",", 1)[0].rsplit(" ")[1],
+                    "lat": text.rsplit("-", 1)[1].rsplit(" ")[0],
                     "lon": text.rsplit(" ", 1)[1],
                 }
                 yield Feature(**properties)
