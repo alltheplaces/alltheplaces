@@ -16,7 +16,7 @@ class HiltonSpider(SitemapSpider, StructuredDataSpider):
         "USER_AGENT": CHROME_LATEST,
         "DOWNLOAD_DELAY": 0.2,
     }
-    visited_pages = []
+    visited_pages = set()
 
     HILTON_DOUBLETREE = ["DoubleTree by Hilton", "Q2504643"]
     HILTON_HOTELS = ["Hilton Hotels & Resorts", "Q598884"]
@@ -60,7 +60,7 @@ class HiltonSpider(SitemapSpider, StructuredDataSpider):
                     continue
 
                 yield scrapy.Request(hotel_url, callback=self.parse_sd)
-                self.visited_pages.append(hotel_name)
+                self.visited_pages.add(hotel_name)
 
     def lookup_brand(self, response):
         if "-dt-doubletree-" in response.url:
