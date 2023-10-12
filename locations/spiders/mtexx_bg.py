@@ -16,12 +16,13 @@ class MtexxBGSpider(Spider):
             for location in locations.xpath(".//li/text()"):
                 text = location.get()
                 properties = {
-                    "name": text.rsplit("-")[0],
+                    "name": None,
                     "lat": None,
                     "lon": None,
                 }
-                coords = re.search(r'(\d+\.\d+),\s(\d+\.\d+)|(\d+°\d+\'\d+\.\d+"[NS])\s(\d+°\d+\'\d+\.\d+"[EW])', text)
+                data = re.search(r'^(.+?)(\d+\.\d+),\s(\d+\.\d+)|(\d+°\d+\'\d+\.\d+"[NS])\s(\d+°\d+\'\d+\.\d+"[EW])', text)
                 if coords:
-                    properties["lat"] = coords.group(1)
-                    properties["lon"] = coords.group(2)
+                    properties["name"] = data.group(1)
+                    properties["lat"] = data.group(1)
+                    properties["lon"] = data.group(2)
                 yield Feature(**properties)
