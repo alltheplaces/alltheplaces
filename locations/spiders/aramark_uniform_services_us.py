@@ -5,11 +5,11 @@ from locations.categories import Categories, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 
 
-class AramarkUniformServicesUSSpider(Spider):
-    name = "aramark_uniform_services_us"
+class VestisUniformServicesUSSpider(Spider):
+    name = "vestis_uniform_Services_us"
     item_attributes = {"brand": "Vestis Corporation", "brand_wikidata": "Q122947676"}
-    allowed_domains = ["www.aramarkuniform.com"]
-    start_urls = ["https://www.aramarkuniform.com/graphql"]
+    allowed_domains = ["www.vestis.com"]
+    start_urls = ["https://www.vestis.com/graphql"]
 
     def start_requests(self):
         yield from self.request_graphql_page()
