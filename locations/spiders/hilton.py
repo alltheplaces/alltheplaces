@@ -6,14 +6,14 @@ import scrapy
 from scrapy.spiders import SitemapSpider
 
 from locations.structured_data_spider import StructuredDataSpider
-from locations.user_agents import CHROME_118
+from locations.user_agents import CHROME_LATEST
 
 
 class HiltonSpider(SitemapSpider, StructuredDataSpider):
     name = "hilton"
     sitemap_urls = ["https://www.hilton.com/sitemap.xml"]
     custom_settings = {
-        "USER_AGENT": CHROME_118,
+        "USER_AGENT": CHROME_LATEST,
         "DOWNLOAD_DELAY": 0.2,
     }
     visited_pages = []
