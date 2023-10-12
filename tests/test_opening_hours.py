@@ -350,8 +350,8 @@ def test_add_ranges_from_string():
     o.add_ranges_from_string("Monday-Wednesday: 5pm - 7pm")
     o.add_ranges_from_string("Monday-Wednesday 08:00-14:00")
     o.add_ranges_from_string("Monday to Tuesday: 15:00:01 to 16:35")
-    o.add_ranges_from_string("Thurs 2PM-6:30PM")
-    o.add_ranges_from_string(" Fri    9am  -  11am ")
+    o.add_ranges_from_string("Thurs 2PM-6:30P.M.")
+    o.add_ranges_from_string(" Fri    9 a.m.  -  11am ")
     o.add_ranges_from_string("Weekends: 8:00 AM to 6:00 PM")
     assert (
         o.as_opening_hours()

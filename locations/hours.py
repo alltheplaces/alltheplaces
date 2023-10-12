@@ -777,12 +777,12 @@ class OpeningHours:
         """
         if time_24h is True:
             # Regular expression for extracting 24h times (e.g. 15:45)
-            time_regex = r"(?<!\d)(\d(?!\d)|[01]\d|2[0-4])(?:(?:[:\.]?([0-5]\d))(?:[:\.]?[0-5]\d)?)?(?!(?:\d|:|[AP]M))"
+            time_regex = (
+                r"(?<!\d)(\d(?!\d)|[01]\d|2[0-4])(?:(?:[:\.]?([0-5]\d))(?:[:\.]?[0-5]\d)?)?(?!(?:\d|:|[AP]\.?M\.?))"
+            )
         else:
             # Regular expression for extracting 12h times (e.g. 9:30AM)
-            time_regex = (
-                r"(?<!\d)(\d(?!\d)|0\d|1[012])(?:(?:[:\.]?([0-5]\d))(?:[:\.]?[0-5]\d)?)?\s*([AP]M)?(?!(?:\d|:|[AP]M))"
-            )
+            time_regex = r"(?<!\d)(\d(?!\d)|0\d|1[012])(?:(?:[:\.]?([0-5]\d))(?:[:\.]?[0-5]\d)?)?\s*([AP]\.?M\.?)?(?!(?:\d|:|[AP]\.?M\.?))"
         return time_regex
 
     @staticmethod
@@ -955,7 +955,7 @@ class OpeningHours:
                     else:
                         time_start = f"{time_start_hour}:00"
                     if time_range[2]:
-                        time_start = f"{time_start}{time_range[2].upper()}"
+                        time_start = f"{time_start}{time_range[2].upper()}".replace(".", "")
                     else:
                         # If AM/PM is not specified, it is almost always going to be AM for start times.
                         time_start = f"{time_start}AM"
@@ -969,7 +969,7 @@ class OpeningHours:
                     else:
                         time_end = f"{time_end_hour}:00"
                     if time_range[5]:
-                        time_end = f"{time_end}{time_range[5].upper()}"
+                        time_end = f"{time_end}{time_range[5].upper()}".replace(".", "")
                     else:
                         # If AM/PM is not specified, it is almost always going to be PM for end times.
                         time_end = f"{time_end}PM"
