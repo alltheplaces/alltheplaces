@@ -1,8 +1,9 @@
+import re
+
 from scrapy import Spider
 
 from locations.items import Feature
 
-import re
 
 class MtexxBGSpider(Spider):
     name = "mtexx_bg"
