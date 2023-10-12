@@ -13,7 +13,7 @@ class MtexxBGSpider(Spider):
 
     def parse(self, response):
         for locations in response.xpath("//div[@data-ux='ContentText']"):
-            for location in locations.xpath("//li"):
+            for location in locations.xpath(".//li/text()"):
                 text = location.get()
                 properties = {
                     "name": text.rsplit("-")[0],
