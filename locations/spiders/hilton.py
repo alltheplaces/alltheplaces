@@ -1,5 +1,6 @@
 from pathlib import Path
 from urllib.parse import urlparse
+
 import geonamescache
 import scrapy
 from scrapy.spiders import SitemapSpider
@@ -53,7 +54,7 @@ class HiltonSpider(SitemapSpider, StructuredDataSpider):
             elif x.url.endswith("/hotel-info/"):
                 hotel_url = x.url.replace("/hotel-info/", "/")
                 hotel_name = Path(urlparse(hotel_url).path).name
-                
+
                 if hotel_name in self.visited_pages:
                     # There are localized pages for each hotel, don't scrape same hotel twice.
                     continue
@@ -73,7 +74,7 @@ class HiltonSpider(SitemapSpider, StructuredDataSpider):
         if brand := self.lookup_brand(response):
             if isinstance(brand, str):
                 return
-            
+
             # Last part of url is unique
             item["ref"] = Path(urlparse(response.url).path).name
             # Website provided in structured data does not work, so replace it with working url
