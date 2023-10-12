@@ -15,10 +15,10 @@ class MtexxBGSpider(Spider):
         for locations in response.xpath("//div[@data-ux='ContentText']"):
             for location in locations.xpath("//li"):
                 text = location.get()
-                coords = re.findall(r'(\d+\.\d+,\ \d+\.\d+|\d+°\d+\'\d+\.\d+"[NS]\s\d+°\d+\'\d+\.\d+"[EW])', text)
+                coords = re.search(r'((\d+\.\d+),\s(\d+\.\d+))|((\d+°\d+\'\d+\.\d+"[NS])\s(\d+°\d+\'\d+\.\d+"[EW]))', text)
                 properties = {
                     "name": text.rsplit("-")[0],
-                    "lat": coords[0],
-                    "lon": coords[1],
+                    "lat": coords.group(1),
+                    "lon": coords.group(2),
                 }
                 yield Feature(**properties)
