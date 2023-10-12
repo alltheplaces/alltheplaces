@@ -1,5 +1,6 @@
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.user_agents import BROWSER_DEFAULT
 
@@ -38,5 +39,5 @@ class AudiBeSpider(scrapy.Spider):
             item["phone"] = row.get("TEL")
             item["website"] = row.get("URL")
             item["email"] = row.get("MAIL")
-
+            apply_category(Categories.SHOP_CAR, item)
             yield item
