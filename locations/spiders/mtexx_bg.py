@@ -20,7 +20,9 @@ class MtexxBGSpider(Spider):
                     "lat": None,
                     "lon": None,
                 }
-                data = re.search(r'^(.+?)(\d+\.\d+),\s(\d+\.\d+)|(\d+°\d+\'\d+\.\d+"[NS])\s(\d+°\d+\'\d+\.\d+"[EW])', text)
+                data = re.search(
+                    r'^(.+?)(\d+\.\d+),\s(\d+\.\d+)|(\d+°\d+\'\d+\.\d+"[NS])\s(\d+°\d+\'\d+\.\d+"[EW])', text
+                )
                 if coords:
                     properties["name"] = data.group(1)
                     properties["lat"] = data.group(1)
