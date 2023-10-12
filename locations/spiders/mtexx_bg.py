@@ -21,7 +21,7 @@ class MtexxBGSpider(Spider):
                     "lon": None,
                 }
                 coords = re.search(
-                    r'((\d+\.\d+),\s(\d+\.\d+))|((\d+°\d+\'\d+\.\d+"[NS])\s(\d+°\d+\'\d+\.\d+"[EW]))', text
+                    r'(\d+\.\d+),\s(\d+\.\d+)|(\d+°\d+\'\d+\.\d+"[NS])\s(\d+°\d+\'\d+\.\d+"[EW])', text
                 )
                 if coords:
                     properties["lat"] = coords.group(1)
