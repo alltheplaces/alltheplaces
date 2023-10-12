@@ -1,6 +1,5 @@
 from scrapy.spiders import SitemapSpider
 
-from locations.categories import apply_category
 from locations.structured_data_spider import StructuredDataSpider
 
 
