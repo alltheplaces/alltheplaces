@@ -1,4 +1,4 @@
-from locations.categories import Extras, apply_yes_no
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.storefinders.yext import YextSpider
 
 
@@ -11,4 +11,10 @@ class SevenElevenCASpider(YextSpider):
         item.pop("twitter")
         if "c_delivery" in location:
             apply_yes_no(Extras.DELIVERY, item, location["c_delivery"], False)
+        services = location.get("c_7ElevenServices2", [])
+        apply_yes_no(Extras.ATM, item, "SCOTIABANK_ATM" in services)
+        apply_yes_no(Extras.WIFI, item, "WIFI" in services)
+
+        apply_category(Categories.SHOP_CONVENIENCE, item)
+
         yield item
