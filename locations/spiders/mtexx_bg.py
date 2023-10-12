@@ -10,7 +10,7 @@ class MtexxBGSpider(Spider):
     start_urls = ["https://m-texx.com/локации"]
 
     def parse(self, response):
-        for locations in response.xpath("//div[@data-ux='GridCell']"):
+        for locations in response.xpath("//div[@data-ux='ContentText']"):
             for location in locations.xpath("//li"):
                 text = location.get()
                 properties = {
