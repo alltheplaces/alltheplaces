@@ -6,7 +6,7 @@ from locations.dict_parser import DictParser
 
 
 class VestisUniformServicesUSSpider(Spider):
-    name = "vestis_uniform_Services_us"
+    name = "vestis_uniform_services_us"
     item_attributes = {"brand": "Vestis Corporation", "brand_wikidata": "Q122947676"}
     allowed_domains = ["www.vestis.com"]
     start_urls = ["https://www.vestis.com/graphql"]
