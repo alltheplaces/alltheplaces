@@ -12,9 +12,10 @@ class MtexxBGSpider(Spider):
     def parse(self, response):
         for locations in response.xpath('//div[@"data-ux"="GridCell"]'):
             for location in locations.xpath("//li"):
+                text = location.get()
                 properties = {
-                    "name": location.xpath('.//span[@class="name"]/text()').get().rsplit("-")[0],
-                    "lat": location.xpath(".//@data-lat").get().rsplit(",", 1)[0].rsplit(" ")[1],
-                    "lon": location.xpath(".//@data-lng").get().rsplit(",", 1)[1],
+                    "name": text.rsplit("-")[0],
+                    "lat": text.rsplit(",", 1)[0].rsplit(" ")[1],
+                    "lon": text.rsplit(",", 1)[1],
                 }
                 yield Feature(**properties)
