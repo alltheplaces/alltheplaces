@@ -1,37 +1,18 @@
 import json
 
-import scrapy
+from scrapy.spiders import SitemapSpider
 
 from locations.hours import OpeningHours
 from locations.items import Feature
-from locations.user_agents import BROWSER_DEFAULT
-
-day_mapping = {
-    "Monday": "Mo",
-    "Tuesday": "Tu",
-    "Wednesday": "We",
-    "Thursday": "Th",
-    "Friday": "Fr",
-    "Saturday": "Sa",
-    "Sunday": "Su",
-}
 
 
-class LowesSpider(scrapy.Spider):
-    """ "This spider scrapes Lowes retail store locations"""
-
-    name = "lowes"
+class LowesUSSpider(SitemapSpider):
+    name = "lowes_us"
     item_attributes = {"brand": "Lowe's", "brand_wikidata": "Q1373493"}
     allowed_domains = ["lowes.com"]
-    download_delay = 0.1
-    custom_settings = {"ROBOTSTXT_OBEY": False}
-    user_agent = BROWSER_DEFAULT
-
-    def start_requests(self):
-        yield scrapy.Request(
-            url="https://www.lowes.com/sitemap/store0.xml",
-            callback=self.parse,
-        )
+    sitemap_urls = ["https://www.lowes.com/sitemap/store0.xml"]
+    sitemap_rules = [(r"^https://www.lowes.com/store", "parse_store")]
+    requires_proxy = True
 
     def parse_hours(self, store_hours):
         opening_hours = OpeningHours()
@@ -50,7 +31,7 @@ class LowesSpider(scrapy.Spider):
                 close_time_formatted = "23:59"
 
             opening_hours.add_range(
-                day=day_mapping[day],
+                day=day[:2],
                 open_time=open_time_formatted,
                 close_time=close_time_formatted,
             )
@@ -62,7 +43,7 @@ class LowesSpider(scrapy.Spider):
         if not script_content:
             return
 
-        # effectively strip off leading "window.__PRELOADED_STATE__ = " where
+        # effectively strip off leading "window.__FRAGMENT__FOOTER__PRELOAD__ = " where
         # the rest is a json blob
         script_data = script_content.split(" = ", 1)[-1]
         json_data = json.loads(script_data)
@@ -72,23 +53,17 @@ class LowesSpider(scrapy.Spider):
             "lat": json_data["storeDetails"]["lat"],
             "lon": json_data["storeDetails"]["long"],
             "ref": json_data["storeDetails"]["id"],
-            "addr_full": json_data["storeDetails"]["address"],
+            "street_address": json_data["storeDetails"]["address"],
             "city": json_data["storeDetails"]["city"],
             "state": json_data["storeDetails"]["state"],
             "postcode": json_data["storeDetails"]["zip"],
             "phone": json_data["storeDetails"]["phone"],
             "website": response.request.url,
             "opening_hours": self.parse_hours(store_hours),
-            "extras": {
-                "amenity:toilets": True,
-            },
+            "extras": {},
         }
 
+        if start_date := json_data["storeDetails"].get("openDate"):
+            properties["extras"]["start_date"] = start_date
+
         yield Feature(**properties)
-
-    def parse(self, response):
-        response.selector.remove_namespaces()
-        urls = response.xpath("//url/loc/text()").extract()
-
-        for url in urls:
-            yield scrapy.Request(url, callback=self.parse_store)
