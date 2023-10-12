@@ -51,6 +51,7 @@ class Categories(Enum):
     SHOP_CHARITY = {"shop": "charity"}
     SHOP_CHEMIST = {"shop": "chemist"}
     SHOP_CLOTHES = {"shop": "clothes"}
+    SHOP_COMPUTER = {"shop": "computer"}
     SHOP_CONFECTIONERY = {"shop": "confectionery"}
     SHOP_CONVENIENCE = {"shop": "convenience"}
     SHOP_COPYSHOP = {"shop": "copyshop"}
@@ -59,6 +60,7 @@ class Categories(Enum):
     SHOP_DOITYOURSELF = {"shop": "doityourself"}
     SHOP_DRY_CLEANING = {"shop": "dry_cleaning"}
     SHOP_ELECTRONICS = {"shop": "electronics"}
+    SHOP_FASHION_ACCESSORIES = {"shop": "fashion_accessories"}
     SHOP_FLORIST = {"shop": "florist"}
     SHOP_FUNERAL_DIRECTORS = {"shop": "funeral_directors"}
     SHOP_FURNITURE = {"shop": "furniture"}
