@@ -1,6 +1,6 @@
 from scrapy import Spider
 
-from locations.hours import OpeningHours, DAYS_PL
+from locations.hours import DAYS_PL, OpeningHours
 from locations.items import Feature
 
 
@@ -19,22 +19,21 @@ class EPakaPLSpider(Spider):
                 close_time = opening_day.xpath("close/text()").get()
 
                 opening_hours.add_range(
-                    day=DAYS_PL.get(week_day),
-                    open_time=open_time,
-                    close_time=close_time,
-                    time_format="%H:%M:%S"
+                    day=DAYS_PL.get(week_day), open_time=open_time, close_time=close_time, time_format="%H:%M:%S"
                 )
 
-            yield Feature({
-                "ref": poi.xpath("id/text()").get(),
-                "lat": poi.xpath("lat/text()").get(),
-                "lon": poi.xpath("lng/text()").get(),
-                "city": poi.xpath("city/text()").get(),
-                "phone": poi.xpath("telephone/text()").get().split(",", maxsplit=1)[0],
-                "website": poi.xpath("www/text()").get(),
-                "postcode": poi.xpath("post_code/text()").get(),
-                "street": poi.xpath("street/text()").get().strip(),
-                "housenumber": poi.xpath("number/text()").get(),
-                "email": poi.xpath("email/text()").get(),
-                "opening_hours": opening_hours
-            })
+            yield Feature(
+                {
+                    "ref": poi.xpath("id/text()").get(),
+                    "lat": poi.xpath("lat/text()").get(),
+                    "lon": poi.xpath("lng/text()").get(),
+                    "city": poi.xpath("city/text()").get(),
+                    "phone": poi.xpath("telephone/text()").get().split(",", maxsplit=1)[0],
+                    "website": poi.xpath("www/text()").get(),
+                    "postcode": poi.xpath("post_code/text()").get(),
+                    "street": poi.xpath("street/text()").get().strip(),
+                    "housenumber": poi.xpath("number/text()").get(),
+                    "email": poi.xpath("email/text()").get(),
+                    "opening_hours": opening_hours,
+                }
+            )
