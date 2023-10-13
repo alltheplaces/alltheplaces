@@ -1,10 +1,11 @@
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
-from locations.spiders.central_england_cooperative import COOP_FOOD, COOP_FUNERALCARE, set_operator
+from locations.spiders.central_england_cooperative import COOP_FUNERALCARE, set_operator
 from locations.structured_data_spider import StructuredDataSpider
 
 THE_COOPERATIVE_GROUP = {"brand": "The Co-operative Group", "brand_wikidata": "Q117202"}
+THE_COOPERATIVE_GROUP_FOOD = {"brand": "Co-op Food", "brand_wikidata": "Q3277439"}
 
 
 class TheCooperativeGroupSpider(SitemapSpider, StructuredDataSpider):
@@ -21,7 +22,7 @@ class TheCooperativeGroupSpider(SitemapSpider, StructuredDataSpider):
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         if ld_data["@type"] == "ConvenienceStore":
-            item.update(COOP_FOOD)
+            item.update(THE_COOPERATIVE_GROUP_FOOD)
             apply_category(Categories.SHOP_CONVENIENCE, item)
         else:
             item.update(COOP_FUNERALCARE)
