@@ -24,4 +24,9 @@ class MtexxBGSpider(Spider):
                         "lat": data.group(2),
                         "lon": data.group(3),
                     }
+                    if "N" in properties["lat"]:
+                        deg, minutes, seconds, direction =  re.split('[°\'"]', properties["lat"])
+                        properties["lat"] = (float(deg) + float(minutes)/60 + float(seconds)/(60*60)) * (-1 if direction == 'S' else 1)
+                        deg, minutes, seconds, direction =  re.split('[°\'"]', properties["lon"])
+                        properties["lon"] = (float(deg) + float(minutes)/60 + float(seconds)/(60*60)) * (-1 if direction == 'W' else 1)
                     yield Feature(**properties)
