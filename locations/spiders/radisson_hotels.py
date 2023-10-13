@@ -28,12 +28,11 @@ class RadissonHotelsSpider(scrapy.Spider):
     }
     custom_settings = {
         "DEFAULT_REQUEST_HEADERS": {
-            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+            "Accept": "*/*",
             "User-Agent": BROWSER_DEFAULT,
             "Connection": "keep-alive",
-            "Accept-Language": "en-US,en;q=0.9",
-        },
-        "ROBOTSTXT_OBEY": False,
+            "Accept-Language": "fr-FR",
+        }
     }
 
     def parse(self, response):
