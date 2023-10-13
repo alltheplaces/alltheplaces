@@ -1,5 +1,6 @@
 from scrapy import Spider
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 
@@ -24,6 +25,8 @@ class OKQ8Spider(Spider):
             location["street_address"] = location.pop("address")
             item = DictParser.parse(location)
 
+            # TODO: parse fuel types uisng response.json()["filters"]
+
             item["website"] = f'https://www.okq8.se{location["url"]}'
 
             if location.get("openingHours"):
@@ -33,6 +36,8 @@ class OKQ8Spider(Spider):
                     item["opening_hours"] = OpeningHours()
                     for rule in ["WeekDays", "Saturday", "Sunday"]:
                         self.add_rule(item["opening_hours"], rule, location["openingHours"].get(rule))
+
+            apply_category(Categories.FUEL_STATION, item)
 
             if brand := self.BRANDS.get(location["net"]):
                 item.update(brand)
