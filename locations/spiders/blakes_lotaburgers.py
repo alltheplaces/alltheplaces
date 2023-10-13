@@ -18,7 +18,7 @@ class BlakesLotaburgersSpider(Spider):
             item["name"] = data["business_name"]
             item["lat"] = data["coords"]["lat"]
             item["lon"] = data["coords"]["long"]
-            item["addr_full"] = data["business_address"]
+            item["street_address"] = data["business_address"]
             item["city"] = data["business_city"]
             item["state"] = data["business_state"]
             item["postcode"] = data["business_zipcode"]
