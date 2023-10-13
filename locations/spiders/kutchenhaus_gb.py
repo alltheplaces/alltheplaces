@@ -5,7 +5,7 @@ from locations.items import Feature
 
 class KutchenhausGBSpider(SitemapSpider):
     name = "kutchenhaus_gb"
-    item_attributes = {"brand": "Kutchenhaus", "country": "GB"}
+    item_attributes = {"brand": "Kutchenhaus", "brand_wikidata": "Q123029245"}
     sitemap_urls = ["https://uk.kutchenhaus.com/sitemap.xml"]
     sitemap_follow = ["Store"]
     sitemap_rules = [(r"https:\/\/uk\.kutchenhaus\.com\/store-finder\/[-\w]+$", "parse")]
