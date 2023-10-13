@@ -5,7 +5,6 @@ from typing import List
 import scrapy
 
 from locations.items import Feature
-from locations.structured_data_spider import extract_email, extract_phone
 from locations.user_agents import BROWSER_DEFAULT
 
 
@@ -29,11 +28,12 @@ class RadissonHotelsSpider(scrapy.Spider):
     }
     custom_settings = {
         "DEFAULT_REQUEST_HEADERS": {
-            "Accept": "*/*",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
             "User-Agent": BROWSER_DEFAULT,
             "Connection": "keep-alive",
-            "Accept-Language": "fr-FR",
+            "Accept-Language": "en-US,en;q=0.9",
         },
+        "ROBOTSTXT_OBEY": False,
     }
 
     def parse(self, response):
@@ -55,19 +55,14 @@ class RadissonHotelsSpider(scrapy.Spider):
                 item["brand"], item["brand_wikidata"] = self.brand_mapping.get(brand, [None, None])
             item["website"] = "https://www.radissonhotels.com" + hotel.get("overviewPath")
 
+            if fullAddress := hotel.get("fullAddress"):
+                item["street"] = fullAddress.get("street")
+                item["city"] = fullAddress.get("city")
+                item["country"] = fullAddress.get("countryCode")
+                item["postcode"] = fullAddress.get("postcode")
+
             if coordinates := hotel.get("coordinates", None):
                 item["lat"] = coordinates.get("latitude", None)
                 item["lon"] = coordinates.get("longitude", None)
             item["street_address"] = hotel.get("address", None)
-            try:
-                yield scrapy.Request(url=item["website"], callback=self.parse_hotel, cb_kwargs={"item": item})
-            except Exception:
-                pass
-
-    def parse_hotel(self, response, item):
-        item["city"] = response.xpath('//*[@class="t-city"]/text()').get()
-        item["postcode"] = response.xpath('//*[@class="t-zip"]/text()').get()
-        item["country"] = response.xpath('//*[@class="t-country"]/text()').get()
-        extract_phone(item, response)
-        extract_email(item, response)
-        yield item
+            yield item
