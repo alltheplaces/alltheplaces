@@ -1,4 +1,4 @@
-from cssselect import Selector
+from scrapy import Selector
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
