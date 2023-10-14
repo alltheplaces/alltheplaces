@@ -255,7 +255,6 @@ DAYS_PL = {
     "Pi": "Fr",
     "Pia": "Fr",
     "Piątek": "Fr",
-    "Piątek": "Fr",
     "Sb": "Sa",
     "So": "Sa",
     "Sob": "Sa",
@@ -264,7 +263,7 @@ DAYS_PL = {
     "Ni": "Su",
     "Nie": "Su",
     "Niedz": "Su",
-    "Niedzela": "Su",
+    "Niedziela": "Su",
 }
 DAYS_PT = {
     # "Se": "Mo",
