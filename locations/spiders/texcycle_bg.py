@@ -11,13 +11,13 @@ class TexcycleBGSpider(Spider):
     no_refs = True
 
     def parse(self, response):
-      for row in response.xpath("//div[@class=\"post-content\"]//tbody//tr"):
-        name = row.xpath("./td[2]/text()").get()
-        coords = row.xpath("./td[3]/text()").get().split(",")
-        
-        item = {
-            "name": name,
-            "lat": coords[0],
-            "lon": coords[1],
-        }
-        yield Feature(**item)
+        for row in response.xpath('//div[@class="post-content"]//tbody//tr'):
+            name = row.xpath("./td[2]/text()").get()
+            coords = row.xpath("./td[3]/text()").get().split(",")
+
+            item = {
+                "name": name,
+                "lat": coords[0],
+                "lon": coords[1],
+            }
+            yield Feature(**item)
