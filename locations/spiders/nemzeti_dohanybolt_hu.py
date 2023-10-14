@@ -7,7 +7,7 @@ from locations.dict_parser import DictParser
 class NemzetiDohanyboltHuSpider(scrapy.Spider):
     name = "nemzeti_dohanybolt_hu"
     allowed_domains = ["nemzetidohany.hu"]
-    item_attributes = {"brand": "Nemzeti Dohánybolt", "brand_wikidata": "Q20639040"}
+    item_attributes = {"brand_wikidata": "Q20639040"}
 
     def start_requests(self):
         params = {
