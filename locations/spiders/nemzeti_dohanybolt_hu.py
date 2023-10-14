@@ -19,6 +19,5 @@ class NemzetiDohanyboltHuSpider(scrapy.Spider):
         yield JsonRequest("https://nemzetidohany.hu/publicapi/trafik/search", data=params)
 
     def parse(self, response):
-        pois = response.json().get("data")
-        for poi in pois:
+        for poi in response.json().get("data", []):
             yield DictParser.parse(poi)
