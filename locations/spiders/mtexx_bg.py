@@ -10,6 +10,7 @@ class MtexxBGSpider(Spider):
     item_attributes = {"brand": "M-texx", "brand_wikidata": "Q122947768"}
     allowed_domains = ["www.m-texx.com"]
     start_urls = ["https://m-texx.com/локации"]
+    no_refs = True
 
     def parse(self, response):
         for locations in response.xpath("//div[@data-ux='ContentText']"):
