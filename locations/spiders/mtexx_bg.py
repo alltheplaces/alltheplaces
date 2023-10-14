@@ -17,7 +17,7 @@ class MtexxBGSpider(Spider):
             for location in locations.xpath(".//li/text()"):
                 text = location.get()
                 data = re.search(
-                    r'^(.+?)(\d+\.\d+|\d+°\d+\'\d+\.\d+"[NS])[\s,]?(\d+\.\d+|\d+°\d+\'\d+\.\d+"[EW])', text
+                    r'^(.+?)(\d+\.\d+|\d+°\d+\'\d+\.\d+"[NS])[\s,]+?(\d+\.\d+|\d+°\d+\'\d+\.\d+"[EW])', text
                 )
                 if data:
                     properties = {
