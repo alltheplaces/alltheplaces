@@ -4,7 +4,7 @@ from scrapy.http import JsonRequest
 from locations.dict_parser import DictParser
 
 
-class NemzetiDohanyboltHuSpider(scrapy.Spider):
+class NemzetiDohanyboltHUSpider(scrapy.Spider):
     name = "nemzeti_dohanybolt_hu"
     allowed_domains = ["nemzetidohany.hu"]
     item_attributes = {"brand_wikidata": "Q20639040"}
