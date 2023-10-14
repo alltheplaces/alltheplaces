@@ -18,8 +18,6 @@ class MidcountiesCooperativeGBSpider(Spider):
         for store in response.json()["stores"]:
             item = DictParser.parse(store)
 
-            item["website"] = store.get("branchLink")
-
             item["street_address"] = ", ".join(
                 filter(None, [store.get("addressLine1"), store.get("addressLine2"), store.get("addressLine3")])
             )
