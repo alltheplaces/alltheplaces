@@ -27,6 +27,7 @@ class ItakaPLSpider(Spider):
             for office in offices:
                 details = office["showroom"]["library"]
                 item = DictParser.parse(details)
+                item["street_address"] = item.pop("street", None)
                 item["ref"] = office["showroom"]["id"]
                 if "fotos" in details:
                     item["image"] = ";".join([f"https://www.itaka.pl{url}" for url in details["fotos"]])
