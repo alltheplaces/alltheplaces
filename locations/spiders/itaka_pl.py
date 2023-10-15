@@ -36,7 +36,7 @@ class ItakaPLSpider(Spider):
                 opening_hours = OpeningHours()
                 for hours in details["opening_hours"]:
                     days, hours_range = hours
-                    hours_range = hoursRange.removesuffix("*")
+                    hours_range = hours_range.removesuffix("*")
                     opening_hours.add_ranges_from_string(ranges_string=f"{days} {hours_range}", days=DAYS_PL)
                 item["opening_hours"] = opening_hours
 
