@@ -17,10 +17,13 @@ class ItakaPLSpider(Spider):
             # ignoring "agent-prestizowy" and "agent-zwykly"
             # which are travel agencies cooperating but not branded by Itaka
             offices = []
+
             if "salon-firmowy" in items:
                 offices.extend(items["salon-firmowy"])
+
             if "agent-franchising" in items:
                 offices.extend(items["agent-franchising"])
+
             for office in offices:
                 details = office["showroom"]["library"]
                 item = DictParser.parse(details)
@@ -28,10 +31,12 @@ class ItakaPLSpider(Spider):
                 if "fotos" in details:
                     item["image"] = ";".join([f"https://www.itaka.pl{url}" for url in details["fotos"]])
                 item["website"] = f"https://www.itaka.pl/{details['www']}"
-                openingHours = OpeningHours()
+
+                opening_hours = OpeningHours()
                 for hours in details["opening_hours"]:
-                    days, hoursRange = hours
-                    hoursRange = hoursRange.removesuffix("*")
-                    openingHours.add_ranges_from_string(ranges_string=f"{days} {hoursRange}", days=DAYS_PL)
-                item["opening_hours"] = openingHours
+                    days, hours_range = hours
+                    hours_range = hoursRange.removesuffix("*")
+                    opening_hours.add_ranges_from_string(ranges_string=f"{days} {hours_range}", days=DAYS_PL)
+                item["opening_hours"] = opening_hours
+
                 yield item
