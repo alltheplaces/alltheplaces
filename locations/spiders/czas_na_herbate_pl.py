@@ -39,6 +39,7 @@ class CzasNaHerbatePLSpider(Spider):
                 "lon": marker["coordinates"]["lng"],
                 "ref": marker["post_id"],
             }
+
             if "href=" in marker["media"]["link"]:
                 url = marker["media"]["link"].split('href="')[1].split('"')[0]
                 properties["website"] = url
@@ -55,10 +56,13 @@ class CzasNaHerbatePLSpider(Spider):
         shop["addr_full"] = " ".join(
             [line.strip() for line in infoDiv.xpath("div/div[@class='lokal']/text()").getall()]
         )
+
         if (email := infoDiv.xpath("div/div[@class='lokalemail']/text()").get()) is not None:
             shop["email"] = email.strip()
+
         if (phone := infoDiv.xpath("div/div[@class='lokaltel']/text()").get()) is not None:
             shop["phone"] = phone.strip().removeprefix("tel: ")
+
         openingHours = OpeningHours()
         for hoursLine in infoDiv.xpath("div/div[@class='lokalgodz']/text()").getall():
             parts = hoursLine.removeprefix("godziny otwarcia: ").strip().split("(")
@@ -68,6 +72,7 @@ class CzasNaHerbatePLSpider(Spider):
             days = parts[1].removesuffix(")")
             openingHours.add_ranges_from_string(ranges_string=f"{days} {hours}", days=DAYS_PL)
         shop["opening_hours"] = openingHours
+
         item = Feature(**shop)
         apply_category(Categories.SHOP_TEA, item)
         yield item
