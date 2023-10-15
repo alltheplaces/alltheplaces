@@ -13,6 +13,9 @@ DAYS_FULL = [
     "Sunday",
 ]
 
+# The below DAYS dicts are provided to be used with sanitise_day inorder for us to do best attempts at matching the
+# given day into an English 2 char day to be used inside ATP and then to be exported to OSM formatted opening hours.
+
 DAYS_AT = {"Mo": "Mo", "Di": "Tu", "Mi": "We", "Do": "Th", "Fr": "Fr", "Sa": "Sa", "So": "Su"}
 
 DAYS_EN = {
@@ -263,6 +266,7 @@ DAYS_PL = {
     "Ni": "Su",
     "Nie": "Su",
     "Niedz": "Su",
+    "Niedzela": "Su",
     "Niedziela": "Su",
 }
 DAYS_PT = {
