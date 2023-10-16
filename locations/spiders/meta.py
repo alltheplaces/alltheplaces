@@ -3,7 +3,7 @@ import re
 
 from scrapy import Spider
 
-from locations.categories import apply_category
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.items import Feature
 
@@ -25,8 +25,8 @@ class MetaSpider(Spider):
             item["lon"], item["lat"] = location["coordinates"]
 
             if location["isDataCenter"]:
-                apply_category({"telecom": "data_center"}, item)
+                apply_category(Categories.DATA_CENTRE, item)
             else:
-                apply_category({"office": "it"}, item)
+                apply_category(Categories.OFFICE_IT, item)
 
             yield item

@@ -100,6 +100,7 @@ class Categories(Enum):
     SHOP_WHOLESALE = {"shop": "wholesale"}
 
     OFFICE_FINANCIAL = {"office": "financial"}
+    OFFICE_IT = {"office": "it"}
 
     ATM = {"amenity": "atm"}
     BANK = {"amenity": "bank"}
@@ -136,6 +137,8 @@ class Categories(Enum):
     TELEPHONE = {"amenity": "telephone"}
     RESTAURANT = {"amenity": "restaurant"}
     VETERINARY = {"amenity": "veterinary"}
+
+    DATA_CENTRE = {"telecom": "data_center"}
 
     VENDING_MACHINE_BICYCLE_TUBE = {"amenity": "vending_machine", "vending": "bicycle_tube"}
     VENDING_MACHINE_COFFEE = {"amenity": "vending_machine", "vending": "coffee"}
@@ -193,6 +196,7 @@ top_level_tags = [
     "aeroway",
     "railway",
     "waterway",
+    "telecom",
 ]
 
 
