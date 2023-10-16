@@ -1,4 +1,5 @@
 import scrapy
+from locations.categories import Categories, apply_category
 
 from locations.hours import OpeningHours
 from locations.items import Feature
@@ -44,5 +45,5 @@ class Q8Spider(scrapy.Spider):
 
             if brand := self.BRANDS.get(store["Category"]):
                 item.update(brand)
-
+            apply_category(Categories.FUEL_STATION, item)
             yield item
