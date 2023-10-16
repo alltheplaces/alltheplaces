@@ -5,7 +5,7 @@ from scrapy import Spider
 from scrapy.http import Response
 
 from locations.dict_parser import DictParser
-from locations.hours import DAYS_PL, opening_hours
+from locations.hours import DAYS_PL, OpeningHours
 
 
 class TUISpider(Spider):
@@ -40,7 +40,7 @@ class TUISpider(Spider):
                             item["lon"] = office["position"]["longitude"]
 
                         if "program" in office:
-                            opening_hours = opening_hours()
+                            opening_hours = OpeningHours()
                             for hours in office["program"].split("<br>"):
                                 opening_hours.add_ranges_from_string(ranges_string=hours, days=DAYS_PL)
                             item["opening_hours"] = opening_hours
