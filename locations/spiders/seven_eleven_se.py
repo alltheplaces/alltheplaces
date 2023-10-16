@@ -1,4 +1,5 @@
 import scrapy
+from locations.categories import Categories
 
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
@@ -35,5 +36,6 @@ class SevenElevenSESpider(scrapy.Spider):
                     "lat": coordinates.get("lat"),
                     "lon": coordinates.get("lng"),
                     "opening_hours": oh,
+                    "extras": Categories.SHOP_CONVENIENCE.value
                 }
             )
