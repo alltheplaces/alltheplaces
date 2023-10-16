@@ -34,10 +34,10 @@ class ZahirKebabPLSpider(Spider):
             "//div[@class='entry-content']/div[@class='wp-block-columns']/div[contains(@class, 'wp-block-column')]"
         )
 
-        def text_in_optional_span(h4Index):
-            if infoDiv.xpath(f"h4[{h4Index}]/span").get() is not None:
-                return infoDiv.xpath(f"h4[{h4Index}]/span/text()").get().strip()
-            return infoDiv.xpath(f"h4[{h4Index}]/text()").get().strip()
+        def text_in_optional_span(h4_index):
+            if infoDiv.xpath(f"h4[{h4_index}]/span").get() is not None:
+                return infoDiv.xpath(f"h4[{h4_index}]/span/text()").get().strip()
+            return infoDiv.xpath(f"h4[{h4_index}]/text()").get().strip()
 
         openingHours = OpeningHours()
         for row in infoDiv.xpath("div[contains(@class, 'ninja_table_wrapper')]/table/tbody/tr"):
