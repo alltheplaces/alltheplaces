@@ -31,7 +31,7 @@ class Q8Spider(scrapy.Spider):
                     "ref": store.get("StationId"),
                     "name": store.get("Name"),
                     "country": store.get("Country"),
-                    "street_address": ", ".join(
+                    "addr_full": ", ".join(
                         filter(None, [store.get("Address_line_1"), store.get("Address_line_2")])
                     ),
                     "phone": store.get("Phone"),
