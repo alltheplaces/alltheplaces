@@ -5,7 +5,7 @@ from scrapy import Spider
 from scrapy.http import Response
 
 from locations.dict_parser import DictParser
-from locations.hours import DAYS_PL, OpeningHours
+from locations.hours import DAYS_PL, opening_hours
 
 
 class TUISpider(Spider):
@@ -16,16 +16,21 @@ class TUISpider(Spider):
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for country in response.json()["countries"]:
-            countryName = country["option"]["value"]
-            if countryName not in self.countries:
-                logging.error(f"Unsupported countryName: {countryName}")
+            country_name = country["option"]["value"]
+
+            if country_name not in self.countries:
+                logging.error(f"Unsupported country_name: {country_name}")
                 continue
-            countryCode = self.countries[countryName]
+
+            country_code = self.countries[country_name]
             for region in country["regions"]:
                 for city in region["cities"]:
                     for office in city["offices"]:
                         item = DictParser.parse(office)
-                        item["country"] = countryCode
+
+                        item["street_address"] = item.pop("street", None)
+                        item["country"] = country_code
+
                         if (
                             "position" in office
                             and "latitude" in office["position"]
@@ -33,9 +38,11 @@ class TUISpider(Spider):
                         ):
                             item["lat"] = office["position"]["latitude"]
                             item["lon"] = office["position"]["longitude"]
+
                         if "program" in office:
-                            openingHours = OpeningHours()
+                            opening_hours = opening_hours()
                             for hours in office["program"].split("<br>"):
-                                openingHours.add_ranges_from_string(ranges_string=hours, days=DAYS_PL)
-                            item["opening_hours"] = openingHours
+                                opening_hours.add_ranges_from_string(ranges_string=hours, days=DAYS_PL)
+                            item["opening_hours"] = opening_hours
+
                         yield item
