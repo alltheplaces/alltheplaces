@@ -35,29 +35,29 @@ class PutkaPLSpider(scrapy.Spider):
             yield scrapy.Request(url, callback=self.parse_store, cb_kwargs=properties)
 
     def parse_store(self, response, **kwargs):
-        storeDetails = response.xpath("//div[contains(@class, 'sklep-details')]")
-        streetAddress, postCodeCity, phone = storeDetails.xpath("//table/tr[2]/td/text()").getall()
-        postCode = postCodeCity.split(" ")[0].strip()
-        city = " ".join(postCodeCity.strip().split(" ")[1:])
+        store_details = response.xpath("//div[contains(@class, 'sklep-details')]")
+        street_address, post_code_city, phone = store_details.xpath("//table/tr[2]/td/text()").getall()
+        post_code = post_code_city.split(" ")[0].strip()
+        city = " ".join(post_code_city.strip().split(" ")[1:])
         phone = phone.strip().removeprefix("tel: ")
-        imagePath = storeDetails.xpath("//img[contains(@src, 'upload/sklepy')]/@src").get()
-        openingHours = OpeningHours()
-        openingHoursTexts = storeDetails.xpath("//tr[5]/td/text()").getall()
-        halfOpeningHoursLen = len(openingHoursTexts) // 2
-        for i in range(halfOpeningHoursLen):
-            openingHoursText = (
-                openingHoursTexts[i].strip().replace(".", "")
+        image_path = store_details.xpath("//img[contains(@src, 'upload/sklepy')]/@src").get()
+        opening_hours = OpeningHours()
+        opening_hours_texts = store_details.xpath("//tr[5]/td/text()").getall()
+        half_opening_hours_len = len(opening_hours_texts) // 2
+        for i in range(half_opening_hours_len):
+            opening_hours_text = (
+                opening_hours_texts[i].strip().replace(".", "")
                 + ": "
-                + openingHoursTexts[halfOpeningHoursLen + i].strip()
+                + opening_hours_texts[half_opening_hours_len + i].strip()
             )
-            openingHours.add_ranges_from_string(ranges_string=openingHoursText, days=DAYS_PL)
+            opening_hours.add_ranges_from_string(ranges_string=opening_hours_text, days=DAYS_PL)
         properties = {
-            "street_address": streetAddress.strip(),
+            "street_address": street_address.strip(),
             "city": city,
             "phone": phone,
-            "postcode": postCode,
-            "image": f"{self.host}/{quote(imagePath)}",
-            "opening_hours": openingHours,
+            "postcode": post_code,
+            "image": f"{self.host}/{quote(image_path)}",
+            "opening_hours": opening_hours,
         }
         properties.update(kwargs)
         item = Feature(**properties)

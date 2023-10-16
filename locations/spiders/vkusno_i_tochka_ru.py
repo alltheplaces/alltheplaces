@@ -38,8 +38,8 @@ class VkusnoITochkaRuSpider(scrapy.Spider):
         item = DictParser.parse(restaurant)
         if driver_through := restaurant.get("driveThrough"):
             item["extras"]["drive_through"] = driver_through
-        if openingHours := restaurant.get("openingHours"):
-            item["opening_hours"] = self.parse_hours(openingHours)
+        if opening_hours := restaurant.get("openingHours"):
+            item["opening_hours"] = self.parse_hours(opening_hours)
         return item
 
     def parse_hours(self, hours):

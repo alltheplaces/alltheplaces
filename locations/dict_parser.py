@@ -185,10 +185,10 @@ class DictParser:
         flatcase = key.lower().replace("-", "")
         results.add(flatcase)
 
-        FLATCASEUPPER = flatcase.upper()
+        FLATCASEUPPER = flatcase.upper()  # noqa: N806
         results.add(FLATCASEUPPER)
 
-        camelCase = key[0].lower()
+        camelCase = key[0].lower()  # noqa: N806
         i = 1
         while i < len(key):
             if key[i] == "-":
@@ -200,17 +200,17 @@ class DictParser:
 
         results.add(camelCase)
 
-        PascalCase = camelCase[0].upper() + camelCase[1:]
+        PascalCase = camelCase[0].upper() + camelCase[1:]  # noqa: N806
 
         results.add(PascalCase)
 
         snake_case = key.lower().replace("-", "_")
         results.add(snake_case)
 
-        SCREAMING_SNAKE_CASE = key.upper().replace("-", "_")
+        SCREAMING_SNAKE_CASE = key.upper().replace("-", "_")  # noqa: N806
         results.add(SCREAMING_SNAKE_CASE)
 
-        camel_Snake_Case = key[0].lower()
+        camel_Snake_Case = key[0].lower()  # noqa: N806
         i = 1
         while i < len(key):
             if key[i] == "-":
@@ -223,7 +223,7 @@ class DictParser:
 
         results.add(camel_Snake_Case)
 
-        Pascal_Snake_Case = camel_Snake_Case[0].upper() + camel_Snake_Case[1:]
+        Pascal_Snake_Case = camel_Snake_Case[0].upper() + camel_Snake_Case[1:]  # noqa: N806
 
         results.add(Pascal_Snake_Case)
 

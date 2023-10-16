@@ -13,18 +13,22 @@ class PlayPLSpider(Spider):
         for index, feature in enumerate(response.json()):
             item = DictParser.parse(feature)
             item["ref"] = str(index)  # Might not be stable
-            monFriRange = feature["mon-fri"].split("-")
-            satRange = feature["sat"].split("-")
-            sunRange = feature["sun"].split("-")
+            mon_fri_range = feature["mon-fri"].split("-")
+            sat_range = feature["sat"].split("-")
+            sun_range = feature["sun"].split("-")
             item["opening_hours"] = OpeningHours()
-            if len(monFriRange) == 2:
+            if len(mon_fri_range) == 2:
                 item["opening_hours"].add_days_range(
-                    days=DAYS[:5], open_time=monFriRange[0].strip(), close_time=monFriRange[1].strip()
+                    days=DAYS[:5], open_time=mon_fri_range[0].strip(), close_time=mon_fri_range[1].strip()
                 )
             else:
                 continue
-            if len(satRange) == 2:
-                item["opening_hours"].add_range(day="Sa", open_time=satRange[0].strip(), close_time=satRange[1].strip())
-            if len(sunRange) == 2:
-                item["opening_hours"].add_range(day="Su", open_time=sunRange[0].strip(), close_time=sunRange[1].strip())
+            if len(sat_range) == 2:
+                item["opening_hours"].add_range(
+                    day="Sa", open_time=sat_range[0].strip(), close_time=sat_range[1].strip()
+                )
+            if len(sun_range) == 2:
+                item["opening_hours"].add_range(
+                    day="Su", open_time=sun_range[0].strip(), close_time=sun_range[1].strip()
+                )
             yield item

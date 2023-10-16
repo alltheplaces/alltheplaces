@@ -14,9 +14,9 @@ class MillenniumBankPLSpider(Spider):
     start_urls = ["https://www.bankmillennium.pl/en/about-the-bank/branches-and-atms"]
 
     def parse(self, response, **kwargs):
-        mapConfig = json.loads(response.xpath("//wc-facilities-map/@config").get())
-        yield JsonRequest(url=response.urljoin(mapConfig["branchesUrl"]), callback=self.parse_branches)
-        yield JsonRequest(url=response.urljoin(mapConfig["atmsUrl"]), callback=self.parse_atms)
+        map_config = json.loads(response.xpath("//wc-facilities-map/@config").get())
+        yield JsonRequest(url=response.urljoin(map_config["branchesUrl"]), callback=self.parse_branches)
+        yield JsonRequest(url=response.urljoin(map_config["atmsUrl"]), callback=self.parse_atms)
 
     def parse_branches(self, response, **kwargs):
         for branch in response.json():
@@ -32,12 +32,12 @@ class MillenniumBankPLSpider(Spider):
             yield item
 
     def parse_branch_opening_hours(self, data):
-        openingHours = OpeningHours()
+        opening_hours = OpeningHours()
         for key in data.keys():
             if key.startswith("openHours_"):
                 day = key.removeprefix("openHours_")
-                openingHours.add_ranges_from_string(f"{day} {data[key]}")
-        return openingHours
+                opening_hours.add_ranges_from_string(f"{day} {data[key]}")
+        return opening_hours
 
     def parse_atms(self, response, **kwargs):
         for atm in response.json():

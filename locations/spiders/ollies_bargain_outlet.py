@@ -56,10 +56,10 @@ class OlliesBargainOutletSpider(scrapy.Spider):
             item["website"] = f'https://www.{self.allowed_domains[0]}{data.get("CustomUrl")}'
             item["ref"] = data.get("StoreCode")
 
-            openHours = data.get("OpenHours").split("<br />")
-            openHourFiltered = [row.replace(":", "") for row in openHours if "-" in row]
+            open_hours = data.get("OpenHours").split("<br />")
+            open_hour_filtered = [row.replace(":", "") for row in open_hours if "-" in row]
             oh = OpeningHours()
-            oh.from_linked_data({"openingHours": openHourFiltered}, "%I%p")
+            oh.from_linked_data({"openingHours": open_hour_filtered}, "%I%p")
             item["opening_hours"] = oh.as_opening_hours()
 
             yield item

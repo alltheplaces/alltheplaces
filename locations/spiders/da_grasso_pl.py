@@ -19,12 +19,12 @@ class DaGrassoPLSpider(Spider):
             item["phone"] = ";".join(
                 [feature[key] for key in ["phone", "phone2", "phone3", "mobilePhone"] if feature[key]]
             )
-            openingHours = OpeningHours()
+            opening_hours = OpeningHours()
             for hours in feature["workingHours"]:
-                openingHours.add_days_range(
+                opening_hours.add_days_range(
                     days=day_range(hours["from"], hours["to"] or hours["from"]),
                     open_time=hours["open"],
                     close_time=hours["close"],
                 )
-            item["opening_hours"] = openingHours
+            item["opening_hours"] = opening_hours
             yield item

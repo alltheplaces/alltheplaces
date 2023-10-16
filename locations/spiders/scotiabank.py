@@ -3,7 +3,7 @@ import math
 
 import scrapy
 
-from locations.categories import Categories, apply_category
+from locations.categories import Categories
 from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.searchable_points import open_searchable_points
@@ -19,7 +19,7 @@ def calculate_offset_point(x, y, d, b):
     :param b: bearing in degrees
     :return: new x, y in decimal degrees
     """
-    R = 6378.137  # km
+    R = 6378.137  # km # noqa: N806
     x, y, b = math.radians(x), math.radians(y), math.radians(b)
     new_y = math.asin((math.sin(y) * math.cos(d / R)) + (math.cos(y) * math.sin(d / R) * math.cos(b)))
     new_x = x + math.atan2(

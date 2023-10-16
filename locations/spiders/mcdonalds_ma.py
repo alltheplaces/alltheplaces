@@ -17,10 +17,10 @@ class McDonaldsMASpider(scrapy.Spider):
         city = ""
         matches = re.finditer(r"([\w|\s|\,]{1,}) <br>", data)
 
-        for matchNum, match in enumerate(matches):
-            if matchNum == 0:
+        for match_num, match in enumerate(matches):
+            if match_num == 0:
                 address = match.groups()[0].strip()
-            elif matchNum == 1:
+            elif match_num == 1:
                 city = match.groups()[0].strip()
 
         return address, city

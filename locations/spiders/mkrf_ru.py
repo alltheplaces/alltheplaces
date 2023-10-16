@@ -136,10 +136,10 @@ class MkrfRUSpider(Spider):
                 apply_category(category_tag, item)
 
     def parse_hours(self, item, poi_attributes):
-        if workingSchedule := poi_attributes.get("workingSchedule"):
+        if working_schedule := poi_attributes.get("workingSchedule"):
             try:
                 oh = OpeningHours()
-                for k, v in workingSchedule.items():
+                for k, v in working_schedule.items():
                     oh.add_range(DAYS[int(k)], v.get("from"), v.get("to"), "%H:%M:%S")
                 item["opening_hours"] = oh.as_opening_hours()
             except:
