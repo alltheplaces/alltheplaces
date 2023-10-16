@@ -50,12 +50,12 @@ class DPDDESpider(scrapy.Spider):
                             response,
                             formdata=formdata,
                             headers=headers,
-                            callback=self.shopsResults,
+                            callback=self.shops_results,
                             meta=result,
                         )
                         yield rq
 
-    def shopsResults(self, response):
+    def shops_results(self, response):
         result = response.meta
         body = response.css("body")
         shopList = body.css("div.ShopList")
@@ -127,13 +127,13 @@ class DPDDESpider(scrapy.Spider):
                 response,
                 formdata=formdata,
                 headers=headers,
-                callback=self.openingHoursParse,
+                callback=self.opening_hours_parse,
                 meta=item,
             )
 
             yield rq
 
-    def openingHoursParse(self, response):
+    def opening_hours_parse(self, response):
         body = response.css("body")
         shopDetails = body.css("div.panShopDetails")
         shops = shopDetails.css("div.panBusinessHour")

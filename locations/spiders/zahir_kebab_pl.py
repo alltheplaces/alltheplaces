@@ -34,7 +34,7 @@ class ZahirKebabPLSpider(Spider):
             "//div[@class='entry-content']/div[@class='wp-block-columns']/div[contains(@class, 'wp-block-column')]"
         )
 
-        def textInOptionalSpan(h4Index):
+        def text_in_optional_span(h4Index):
             if infoDiv.xpath(f"h4[{h4Index}]/span").get() is not None:
                 return infoDiv.xpath(f"h4[{h4Index}]/span/text()").get().strip()
             return infoDiv.xpath(f"h4[{h4Index}]/text()").get().strip()
@@ -47,10 +47,10 @@ class ZahirKebabPLSpider(Spider):
             day, openTime, closeTime = cells[:3]
             if day and openTime and closeTime:
                 openingHours.add_ranges_from_string(f"{day} {openTime}-{closeTime}", days=DAYS_PL)
-        postCodeCity = textInOptionalSpan("3")
+        postCodeCity = text_in_optional_span("3")
         properties = {
-            "phone": textInOptionalSpan("1").removeprefix("tel: "),
-            "street_address": textInOptionalSpan("2"),
+            "phone": text_in_optional_span("1").removeprefix("tel: "),
+            "street_address": text_in_optional_span("2"),
             "postcode": postCodeCity.split(" ")[0],
             "city": " ".join(postCodeCity.split(" ")[1:]),
             "opening_hours": openingHours,
