@@ -1,6 +1,6 @@
 import scrapy
-from locations.categories import Categories, apply_category
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
 
@@ -11,15 +11,15 @@ class GoogleOfficesSpider(scrapy.Spider):
         "brand": "Google",
         "brand_wikidata": "Q95",
         # Skip NSI matching as we don't want to assign operator tags to Google offices
-        'nsi_id': 'N/A'}
+        "nsi_id": "N/A",
+    }
     start_urls = ["https://about.google/locations/data/locations.json"]
 
     def parse(self, response):
-        for poi in response.json().get('offices', []):
+        for poi in response.json().get("offices", []):
             item = DictParser.parse(poi)
             # There are global "regions" in raw data e.g. 'europe', 'asia' etc., not states
-            item['state'] = None
-            item['image'] = poi.get('image')
+            item["state"] = None
+            item["image"] = poi.get("image")
             apply_category(Categories.OFFICE_COMPANY, item)
             yield item
-

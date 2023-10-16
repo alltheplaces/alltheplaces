@@ -99,7 +99,7 @@ class Categories(Enum):
     SHOP_WATCHES = {"shop": "watches"}
     SHOP_WHOLESALE = {"shop": "wholesale"}
 
-    OFFICE_COMPANY = {'office': 'company'}
+    OFFICE_COMPANY = {"office": "company"}
     OFFICE_FINANCIAL = {"office": "financial"}
 
     ATM = {"amenity": "atm"}
