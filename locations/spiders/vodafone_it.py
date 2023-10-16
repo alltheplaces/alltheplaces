@@ -25,12 +25,12 @@ class VodafoneItSpider(scrapy.Spider):
             item["lon"] = data.get("profile", {}).get("yextDisplayCoordinate", {}).get("long")
             oh = OpeningHours()
             if data.get("profile", {}).get("hours", {}):
-                for openHour in data.get("profile", {}).get("hours", {}).get("normalHours"):
-                    for i in range(len(openHour.get("intervals"))):
-                        start = str(openHour.get("intervals", {})[i].get("start")).zfill(4)
-                        end = str(openHour.get("intervals", {})[i].get("end")).zfill(4)
+                for open_hour in data.get("profile", {}).get("hours", {}).get("normalHours"):
+                    for i in range(len(open_hour.get("intervals"))):
+                        start = str(open_hour.get("intervals", {})[i].get("start")).zfill(4)
+                        end = str(open_hour.get("intervals", {})[i].get("end")).zfill(4)
                         oh.add_range(
-                            day=openHour.get("day"),
+                            day=open_hour.get("day"),
                             open_time=f"{start[:2]}:{start[2:]}",
                             close_time=f"{end[:2]}:{end[2:]}",
                         )

@@ -68,8 +68,8 @@ class ShopnSaveSpider(scrapy.Spider):
 
     def post_code(self, data):
         str_list = data.split(",")
-        zipCode = str_list[1].strip()
-        return zipCode[-5:]
+        zip_code = str_list[1].strip()
+        return zip_code[-5:]
 
     def phone(self, data):
         return data.replace("— Main", "")

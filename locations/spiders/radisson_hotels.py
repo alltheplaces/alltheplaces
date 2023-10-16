@@ -54,11 +54,11 @@ class RadissonHotelsSpider(scrapy.Spider):
                 item["brand"], item["brand_wikidata"] = self.brand_mapping.get(brand, [None, None])
             item["website"] = "https://www.radissonhotels.com" + hotel.get("overviewPath")
 
-            if fullAddress := hotel.get("fullAddress"):
-                item["street"] = fullAddress.get("street")
-                item["city"] = fullAddress.get("city")
-                item["country"] = fullAddress.get("countryCode")
-                item["postcode"] = fullAddress.get("postcode")
+            if full_address := hotel.get("fullAddress"):
+                item["street"] = full_address.get("street")
+                item["city"] = full_address.get("city")
+                item["country"] = full_address.get("countryCode")
+                item["postcode"] = full_address.get("postcode")
 
             if coordinates := hotel.get("coordinates", None):
                 item["lat"] = coordinates.get("latitude", None)

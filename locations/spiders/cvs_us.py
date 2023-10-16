@@ -26,15 +26,15 @@ class CvsUSSpider(SitemapSpider, StructuredDataSpider):
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         data = json.loads(response.xpath("//@sd-props").get())
-        storeInfo = data["cvsStoreDetails"]["storeInfo"]
-        item["lat"] = storeInfo["latitude"]
-        item["lon"] = storeInfo["longitude"]
-        item["ref"] = storeInfo["storeId"]
+        store_info = data["cvsStoreDetails"]["storeInfo"]
+        item["lat"] = store_info["latitude"]
+        item["lon"] = store_info["longitude"]
+        item["ref"] = store_info["storeId"]
 
         # OSM generally wants to model a separate node for the shop, pharmacy,
         # and clinic; this data is a little too messy for that, so just collect
         # the store's distinguishing attributes as properties on a single feature.
-        item["extras"]["departments"] = storeInfo["identifier"]
+        item["extras"]["departments"] = store_info["identifier"]
         store_type = data["cvsStoreTypeImage"]["altText"]
         item["extras"]["store_type"] = store_type
         # A pharmacy category still can be applied as it's present for all locations.

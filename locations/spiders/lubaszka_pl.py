@@ -11,26 +11,30 @@ class LubaszkaPLSpider(Spider):
     custom_settings = {"ROBOTSTXT_OBEY": False}  # robots.txt causes 404 redirect loop
 
     def parse(self, response, **kwargs):
-        for shopId in response.xpath("//div[contains(@id, 'address_')]/@id").getall():
-            streetAddress = response.xpath(f"//div[@id='{shopId}']/div[@class='row']/div[1]/text()").getall()[0].strip()
-            postCodeCity = response.xpath(f"//div[@id='{shopId}']/div[@class='row']/div[1]/text()").getall()[1].strip()
-            postCode = postCodeCity.split(" ")[0]
-            city = " ".join(postCodeCity.split(" ")[1:])
-            phone = response.xpath(f"//div[@id='{shopId}']/div[@class='row']/div[2]/text()").getall()[1].strip()
-            openingHours = OpeningHours()
-            for openingHoursLine in response.xpath(f"//div[@id='{shopId}']/p[2]/text()").getall()[1:]:
-                openingHours.add_ranges_from_string(openingHoursLine.strip(), days=DAYS_PL)
+        for shop_id in response.xpath("//div[contains(@id, 'address_')]/@id").getall():
+            street_address = (
+                response.xpath(f"//div[@id='{shop_id}']/div[@class='row']/div[1]/text()").getall()[0].strip()
+            )
+            post_code_city = (
+                response.xpath(f"//div[@id='{shop_id}']/div[@class='row']/div[1]/text()").getall()[1].strip()
+            )
+            post_code = post_code_city.split(" ")[0]
+            city = " ".join(post_code_city.split(" ")[1:])
+            phone = response.xpath(f"//div[@id='{shop_id}']/div[@class='row']/div[2]/text()").getall()[1].strip()
+            opening_hours = OpeningHours()
+            for opening_hours_line in response.xpath(f"//div[@id='{shop_id}']/p[2]/text()").getall()[1:]:
+                opening_hours.add_ranges_from_string(opening_hours_line.strip(), days=DAYS_PL)
             properties = {
-                "ref": shopId.removeprefix("address_"),
-                "street_address": streetAddress,
-                "postcode": postCode,
+                "ref": shop_id.removeprefix("address_"),
+                "street_address": street_address,
+                "postcode": post_code,
                 "city": city,
                 "phone": phone,
-                "opening_hours": openingHours,
+                "opening_hours": opening_hours,
             }
-            locationLink = response.xpath(f"//div[@id='{shopId}']/p/a/@href").get()
-            if "/@" in locationLink:
-                coordinates = locationLink.split("/@")[1].split(",")
+            location_link = response.xpath(f"//div[@id='{shop_id}']/p/a/@href").get()
+            if "/@" in location_link:
+                coordinates = location_link.split("/@")[1].split(",")
                 properties["lat"] = coordinates[0]
                 properties["lon"] = coordinates[1]
             feature = Feature(**properties)
