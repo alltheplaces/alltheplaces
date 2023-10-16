@@ -1,11 +1,11 @@
 from scrapy import Spider
-from locations.categories import Categories, Fuel, apply_category, apply_yes_no
 
+from locations.categories import Categories, Fuel, apply_category, apply_yes_no
 from locations.items import Feature
 
 # Ref: https://www.q8.it/geolocalizzatore/js/storelocator/managefilter.js?v":2.0.16
 FUEL_TYPES_MAPPING = {
-    "300004" : Fuel.OCTANE_95,  # COD_BENZINA
+    "300004": Fuel.OCTANE_95,  # COD_BENZINA
     "300016": Fuel.DIESEL,  # COD_DIESEL
     "300391": Fuel.DIESEL,  # COD_HIQ
     "300054": Fuel.LPG,  # COD_GPL
@@ -86,10 +86,9 @@ class Q8ItaliaSpider(Spider):
             yield item
 
     def parse_fuel(self, item, location):
-        for products in location.get('prodotti', []):
-            product_code = products.get('codiceProdotto')
+        for products in location.get("prodotti", []):
+            product_code = products.get("codiceProdotto")
             if tag := FUEL_TYPES_MAPPING.get(product_code):
                 apply_yes_no(tag, item, True)
             else:
-                self.crawler.stats.inc_value(f'atp/q8_italia/unknown_fuel_type/{product_code}')
-
+                self.crawler.stats.inc_value(f"atp/q8_italia/unknown_fuel_type/{product_code}")
