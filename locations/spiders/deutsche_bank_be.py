@@ -1,6 +1,6 @@
 import scrapy
-from locations.categories import Categories
 
+from locations.categories import Categories
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 from locations.spiders.vapestore_gb import clean_address
