@@ -30,9 +30,9 @@ class CzasNaHerbatePLSpider(Spider):
     ]
 
     def parse(self, response, **kwargs):
-        scriptText = response.xpath("//script/text()[contains(., 'cspm_new_pin_object')]").get()
-        for markerJsFragment in scriptText.split("cspm_new_pin_object")[1:]:
-            marker = json.loads(markerJsFragment.split(");")[0].removeprefix("(map_id, "))
+        script_text = response.xpath("//script/text()[contains(., 'cspm_new_pin_object')]").get()
+        for marker_js_fragment in script_text.split("cspm_new_pin_object")[1:]:
+            marker = json.loads(marker_js_fragment.split(");")[0].removeprefix("(map_id, "))
 
             properties = {
                 "lat": marker["coordinates"]["lat"],
@@ -51,27 +51,27 @@ class CzasNaHerbatePLSpider(Spider):
 
     def parse_shop(self, response, **kwargs):
         shop = kwargs
-        infoDiv = response.xpath("//div[contains(@class, 'infosklep')]")
-        shop["image"] = infoDiv.xpath("div/img/@src").get()
+        info_div = response.xpath("//div[contains(@class, 'infosklep')]")
+        shop["image"] = info_div.xpath("div/img/@src").get()
         shop["addr_full"] = " ".join(
-            [line.strip() for line in infoDiv.xpath("div/div[@class='lokal']/text()").getall()]
+            [line.strip() for line in info_div.xpath("div/div[@class='lokal']/text()").getall()]
         )
 
-        if (email := infoDiv.xpath("div/div[@class='lokalemail']/text()").get()) is not None:
+        if (email := info_div.xpath("div/div[@class='lokalemail']/text()").get()) is not None:
             shop["email"] = email.strip()
 
-        if (phone := infoDiv.xpath("div/div[@class='lokaltel']/text()").get()) is not None:
+        if (phone := info_div.xpath("div/div[@class='lokaltel']/text()").get()) is not None:
             shop["phone"] = phone.strip().removeprefix("tel: ")
 
-        openingHours = OpeningHours()
-        for hoursLine in infoDiv.xpath("div/div[@class='lokalgodz']/text()").getall():
-            parts = hoursLine.removeprefix("godziny otwarcia: ").strip().split("(")
+        opening_hours = OpeningHours()
+        for hours_line in info_div.xpath("div/div[@class='lokalgodz']/text()").getall():
+            parts = hours_line.removeprefix("godziny otwarcia: ").strip().split("(")
             if len(parts) < 2:
                 continue
             hours = parts[0].strip()
             days = parts[1].removesuffix(")")
-            openingHours.add_ranges_from_string(ranges_string=f"{days} {hours}", days=DAYS_PL)
-        shop["opening_hours"] = openingHours
+            opening_hours.add_ranges_from_string(ranges_string=f"{days} {hours}", days=DAYS_PL)
+        shop["opening_hours"] = opening_hours
 
         item = Feature(**shop)
         apply_category(Categories.SHOP_TEA, item)
