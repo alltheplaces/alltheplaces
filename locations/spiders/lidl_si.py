@@ -1,6 +1,6 @@
 import re
 
-from locations.hours import DAYS_SI, OpeningHours, sanitise_day
+from locations.hours import DAYS_SI, OpeningHours, day_range, sanitise_day
 from locations.spiders.lidl_gb import LidlGBSpider
 from locations.storefinders.virtualearth import VirtualEarthSpider
 
@@ -21,8 +21,14 @@ class LidlSISpider(VirtualEarthSpider):
             r"(\w+\.?\s?-?\s?\w+\.?):? (\d{2}[:\.]\d{2})\s?-\s?(\d{2}[:\.]\d{2})",
             feature["OpeningTimes"],
         ):
-            days = "-".join([sanitise_day(day, DAYS_SI) for day in days.replace(".", "").replace(" ", "").split("-")])
-            if days is not None:
-                item["opening_hours"].add_range(days, start_time.replace(".", ":"), end_time.replace(".", ":"))
+            if "-" in days:
+                start_day, end_day = days.split("-")
+                days = day_range(sanitise_day(start_day, DAYS_SI), sanitise_day(end_day, DAYS_SI))
+            elif day := sanitise_day(days, DAYS_SI):
+                days = [day]
+            else:
+                days = None
+            if days:
+                item["opening_hours"].add_days_range(days, start_time.replace(".", ":"), end_time.replace(".", ":"))
 
         yield item
