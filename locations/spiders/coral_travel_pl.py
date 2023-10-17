@@ -17,12 +17,12 @@ class CoralTravelPLSpider(Spider):
         content = script.split("var markers = ")[1].split("];")[0].replace("'", '"').strip().removesuffix(",") + "]"
         content = content.replace('["", ,, "autorized"],', "")
         data = json.loads(content)
-        for index, office in enumerate(data):
-            name, lat, lon, officeType = office
+        for office in data:
+            name, lat, lon, office_type = office
             # TODO: more data in infoWindowContent (HTML in JavaScript)
             yield Feature(
                 {
-                    "ref": index,
+                    "ref": None,
                     "lat": lat,
                     "lon": lon,
                 }
