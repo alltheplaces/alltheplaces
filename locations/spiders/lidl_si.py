@@ -22,7 +22,7 @@ class LidlSISpider(VirtualEarthSpider):
             feature["OpeningTimes"],
         ):
             days = "-".join([sanitise_day(day, DAYS_SI) for day in days.replace(".", "").replace(" ", "").split("-")])
-            if days != None:
+            if days is not None:
                 item["opening_hours"].add_range(days, start_time.replace(".", ":"), end_time.replace(".", ":"))
 
         yield item
