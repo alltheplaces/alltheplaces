@@ -18,10 +18,10 @@ class LidlSISpider(VirtualEarthSpider):
 
         item["opening_hours"] = OpeningHours()
         for day, start_time, end_time in re.findall(
-            r"(\w+\s?-?\s?\w+):? (\d{2}[:\.]\d{2})\s?-\s?(\d{2}[:\.]\d{2})",
-            feature["OpeningTimes"].replace(".", ""),
+            r"(\w+\.?\s?-?\s?\w+\.?):? (\d{2}[:\.]\d{2})\s?-\s?(\d{2}[:\.]\d{2})",
+            feature["OpeningTimes"],
         ):
-            if day := sanitise_day(day, DAYS_SI):
-                item["opening_hours"].add_range(day, start_time, end_time)
+            if day := sanitise_day(day.replace(".", "").replace(" ", ""), DAYS_SI):
+                item["opening_hours"].add_range(day, start_time.replace(".", ":"), end_time.replace(".", ":"))
 
         yield item
