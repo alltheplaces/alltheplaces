@@ -163,19 +163,19 @@ DAYS_SE = {
     "Söndag": "Su",
 }
 DAYS_SI = {
-    "po": "Mo",
+    "Po": "Mo",
     "Pon": "Mo",
-    "to": "Tu",
+    "To": "Tu",
     "Tor": "Tu",
-    "sr": "We",
+    "Sr": "We",
     "Sre": "We",
-    "če": "Th",
+    "Če": "Th",
     "Čet": "Th",
-    "pe": "Fr",
+    "Pe": "Fr",
     "Pet": "Fr",
-    "so": "Sa",
+    "So": "Sa",
     "Sob": "Sa",
-    "ne": "Su",
+    "Ne": "Su",
     "Ned": "Su",
 }
 DAYS_IT = {
