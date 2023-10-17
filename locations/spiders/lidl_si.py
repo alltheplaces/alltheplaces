@@ -9,7 +9,7 @@ class LidlSISpider(VirtualEarthSpider):
     name = "lidl_si"
     item_attributes = LidlGBSpider.item_attributes
 
-    dataset_id = "d9ba533940714d34ac6c3714ec2704cc"
+    dataset_id = "541ab265ccaa471896a644d46a803e8f"
     dataset_name = "Filialdaten-SI/Filialdaten-SI"
     key = "As7USYkXX-Ev0Di15XD2jM8zJkdRJ0fVdPC0cT62tfCxqY_S-6wctLO3MH74F-Bt"
 
