@@ -21,7 +21,7 @@ class LidlSISpider(VirtualEarthSpider):
             r"(\w+\.?\s?-?\s?\w+\.?):? (\d{2}[:\.]\d{2})\s?-\s?(\d{2}[:\.]\d{2})",
             feature["OpeningTimes"],
         ):
-            days = "-".join([sanitise_day(day, DAYS_SI) for day in days.replace(".", "").replace(" ", "").split("-")])
-            item["opening_hours"].add_range(days, start_time.replace(".", ":"), end_time.replace(".", ":"))
+            if days := "-".join([sanitise_day(day, DAYS_SI) for day in days.replace(".", "").replace(" ", "").split("-")]):
+                item["opening_hours"].add_range(days, start_time.replace(".", ":"), end_time.replace(".", ":"))
 
         yield item
