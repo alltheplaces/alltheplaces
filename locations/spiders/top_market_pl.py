@@ -15,12 +15,16 @@ class TopMarketPLSpider(Spider):
     def parse(self, response: Response, **kwargs):
         for shop in response.json():
             item = DictParser.parse(shop)
+
             del item["website"]
+
             del item["street"]
             item["street_address"] = shop["street"]
+
             opening_hours = OpeningHours()
             for day, hours in json.loads(shop["open_hours"]).items():
                 if "-" in hours[0]:
                     opening_hours.add_ranges_from_string(f"{day} {hours[0]}")
             item["opening_hours"] = opening_hours
+
             yield item
