@@ -1,6 +1,7 @@
 import scrapy
 
 from locations.linked_data_parser import LinkedDataParser
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class GucciSpider(scrapy.spiders.SitemapSpider):
@@ -8,9 +9,7 @@ class GucciSpider(scrapy.spiders.SitemapSpider):
     item_attributes = {"brand": "Gucci", "brand_wikidata": "Q178516"}
     allowed_domains = ["www.gucci.com"]
     download_delay = 2.0
-    custom_settings = {
-        "USER_AGENT": "Mozilla/5.0 (X11; Linux x86_64; rv:99.0) Gecko/20100101 Firefox/99.0",
-    }
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
     sites = [
         # See https://www.gucci.com/sitemap.xml!
         "https://www.gucci.com/ae/en_gb/",
