@@ -7,7 +7,7 @@ from locations.items import Feature
 
 
 class LowesFoodsSpider(scrapy.Spider):
-    name = "lowes-foods"
+    name = "lowes_foods"
     item_attributes = {"brand": "Lowes Foods", "brand_wikidata": "Q6693991"}
     allowed_domains = ["lowesfoods.com"]
     download_delay = 0.2
