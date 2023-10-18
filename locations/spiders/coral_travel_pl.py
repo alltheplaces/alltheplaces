@@ -15,6 +15,7 @@ class CoralTravelPLSpider(CrawlSpider, StructuredDataSpider):
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["lat"] = response.xpath('//input[@id="map_position_lat"]/@value').get()
         item["lon"] = response.xpath('//input[@id="map_position_lng"]/@value').get()
+
         address_lines = list(
             filter(
                 lambda line: len(line) > 0,
@@ -25,6 +26,7 @@ class CoralTravelPLSpider(CrawlSpider, StructuredDataSpider):
         item["street_address"] = address_lines[-2]
         item["postcode"] = post_code_city.split(" ")[0]
         item["city"] = " ".join(post_code_city.split(" ")[1:])
+
         item["opening_hours"] = OpeningHours()
         for open_hour_div in response.xpath("//div[@class='openContainer']"):
             texts = open_hour_div.xpath("span/text()").getall()
@@ -32,4 +34,5 @@ class CoralTravelPLSpider(CrawlSpider, StructuredDataSpider):
                 continue
             day, open_time, close_time = texts
             item["opening_hours"].add_ranges_from_string(ranges_string=f"{day} {open_time}-{close_time}", days=DAYS_PL)
+
         yield item
