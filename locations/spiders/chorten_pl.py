@@ -1,28 +1,19 @@
-from scrapy import Request, Spider
 from scrapy.http import Response
+from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule
 
 from locations.hours import DAYS_PL, OpeningHours
 from locations.items import Feature
 
 
-class ChortenPLSpider(Spider):
+class ChortenPLSpider(CrawlSpider):
     name = "chorten_pl"
     item_attributes = {"brand": "Chorten", "brand_wikidata": "Q48843988"}
     start_urls = ["https://chorten.com.pl/sklepy/lista/"]
-
-    def parse(self, response: Response, **kwargs):
-        for store_url in response.xpath("//a[@class='s_link']/@href").getall():
-            yield Request(url=store_url, callback=self.parse_store)
-
-        if response.url == self.start_urls[0]:
-            last_page_number = max(
-                map(
-                    lambda x: int(x.removeprefix("https://chorten.com.pl/sklepy/lista/p").removesuffix("?")),
-                    response.xpath("//a[@class='page-link']/@href").getall(),
-                )
-            )
-            for i in range(2, last_page_number + 1):
-                yield Request(url=f"https://chorten.com.pl/sklepy/lista/p{i}?")
+    rules = [
+        Rule(LinkExtractor(allow=[r"/sklepy/lista/p\d+?$"])),
+        Rule(LinkExtractor(allow=[r"/sklepy/[\w%_-]+_\d+$"]), callback="parse_store"),
+    ]
 
     def parse_store(self, response: Response, **kwargs):
         address_lines = list(map(str.strip, response.xpath("//address/text()").getall()))
