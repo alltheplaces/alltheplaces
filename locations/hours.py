@@ -4,7 +4,7 @@ from collections import defaultdict
 
 DAYS = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
 DAYS_3_LETTERS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
-DAYS_3_LETTERS_SUNDAY = DAYS_3_LETTERS[-1:] + DAYS_3_LETTERS[:-1]
+DAYS_3_LETTERS_FROM_SUNDAY = DAYS_3_LETTERS[-1:] + DAYS_3_LETTERS[:-1]
 DAYS_FULL = [
     "Monday",
     "Tuesday",

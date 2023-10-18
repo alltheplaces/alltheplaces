@@ -3,7 +3,7 @@ from datetime import datetime
 
 import scrapy
 
-from locations.hours import DAYS_3_LETTERS_SUNDAY, OpeningHours
+from locations.hours import DAYS_3_LETTERS_FROM_SUNDAY, OpeningHours
 from locations.items import Feature
 
 
@@ -62,8 +62,9 @@ class WhidbeyCoffeeSpider(scrapy.Spider):
             # Day range, e.g. Mon - Fri
             if "-" in day_range:
                 start_day, end_day = re.sub(r"[\s:]", "", day_range).split("-")
-                for day in DAYS_3_LETTERS_SUNDAY[
-                    DAYS_3_LETTERS_SUNDAY.index(start_day[0:3]) : DAYS_3_LETTERS_SUNDAY.index(end_day[0:3]) + 1
+                for day in DAYS_3_LETTERS_FROM_SUNDAY[
+                    DAYS_3_LETTERS_FROM_SUNDAY.index(start_day[0:3]) : DAYS_3_LETTERS_FROM_SUNDAY.index(end_day[0:3])
+                    + 1
                 ]:
                     opening_hours.add_range(
                         day=day[0:2],
