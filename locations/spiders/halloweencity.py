@@ -6,7 +6,7 @@ from locations.items import Feature
 
 
 class HalloweenCitySpider(scrapy.Spider):
-    name = "halloween-city"
+    name = "halloween_city"
     item_attributes = {"brand": "Halloween City"}
     download_delay = 0.2
     allowed_domains = ("stores.halloweencity.com",)
