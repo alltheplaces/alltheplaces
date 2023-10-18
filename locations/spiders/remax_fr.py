@@ -4,6 +4,7 @@ import re
 import scrapy
 
 from locations.items import Feature
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class RemaxFrSpider(scrapy.Spider):
@@ -28,7 +29,7 @@ class RemaxFrSpider(scrapy.Spider):
         headers = {
             "content-type": "application/json",
             "languageid": "2",
-            "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36",
+            "user-agent": BROWSER_DEFAULT,
         }
         yield scrapy.Request(url=url, headers=headers, method="POST", body=payload, callback=self.parse)
 
