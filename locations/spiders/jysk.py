@@ -16,12 +16,14 @@ class JyskSpider(scrapy.Spider):
         main_urls = response.xpath(
             "//div[contains(@class, 'col-xs-12 col-sm-4 col-md-4 panels-flexible-region-inside columns')][1]//li/a/@href"
         ).getall()
-        franchise_urls = response.xpath(
-            "//div[contains(@class, 'col-xs-12 col-sm-4 col-md-4 panels-flexible-region-inside columns')][2]//li/a/@href"
-        ).getall()
+
         # There are Jysk owned stores and Jysk franchise stores.
         # Only Jysk owned stores have standartized store locator, franchise stores have different website format.
         # For this spider we are interested only in Jysk owned stores. Others should be scraped with different spiders.
+        # For reference:
+        # franchise_urls = response.xpath(
+        #     "//div[contains(@class, 'col-xs-12 col-sm-4 col-md-4 panels-flexible-region-inside columns')][2]//li/a/@href"
+        # ).getall()
         for url in main_urls:
             self.logger.info("Found country site: %s", url)
             yield scrapy.Request(urljoin(url, "stores-locator"), callback=self.parse_country_site)
