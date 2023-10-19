@@ -1,74 +1,64 @@
 import json
+from urllib.parse import urljoin, urlparse
 
-from scrapy import Spider
-from scrapy.http import Response
+import scrapy
 
 from locations.dict_parser import DictParser
+from locations.hours import DAYS_FULL, OpeningHours
 from locations.user_agents import BROWSER_DEFAULT
 
 
-# There is also API to get details of one store
-# e.g. https://jysk.pl/services/store/get/P243
-# I haven't used it because Jysk easily bans IP
-# The same issue with sitemap and parsing sites for each store
-class JyskSpider(Spider):
+class JyskSpider(scrapy.Spider):
     name = "jysk"
     item_attributes = {"brand": "JYSK", "brand_wikidata": "Q138913"}
-    user_agent = BROWSER_DEFAULT
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    start_urls = ["https://www.jysk.com/"]
 
-    start_urls = [
-        # "https://jysk.ae/find-store",  # few stores, different website format
-        # "https://jysk.al/public/store",  # few stores, different website format
-        "https://jysk.at/filialen",
-        # "https://jysk.az/az/store.html",  # few stores, different website format
-        "https://jysk.ba/stores-locator",
-        "https://jysk.be/nl/stores-locator",
-        "https://jysk.bg/magazini",
-        "https://jysk.ch/de/filialen",
-        # "https://jysk.com.kw/store-locator",  # few stores, different website format
-        # "https://jysk.com.mt/stores-and-opening-hours/",  # few stores, different website format
-        "https://jysk.com.tr/magazalari-bulun",
-        "https://jysk.co.uk/stores-and-opening-hours",
-        "https://jysk.cz/prodejny",
-        "https://jysk.de/filialen",
-        "https://jysk.dk/butikker-og-abningstider",
-        "https://jysk.es/tiendas",
-        "https://jysk.fi/myymalat",
-        "https://jysk.fr/magasins",
-        # "https://jysk.ge/shop/",  # few stores, different website format
-        "https://jysk.gr/stores-locator",
-        "https://jysk.hr/trgovine",
-        "https://jysk.hu/aruhazak",
-        "https://jysk.ie/stores-and-opening-hours",
-        # "https://jysk.is/thjonusta/opnunartimar/",  # few stores, different website format
-        # "https://jysk-ks.com/public/store",  # few stores, different website format
-        # "https://jysk.md/store.html?lang=ro",  # different website format
-        # "https://jysk.me/prodavnice/",  # few stores, different website format
-        # "https://jysk.mk/public/store",  # few stores, different website format
-        "https://jysk.nl/winkels",
-        "https://jysk.no/butikker",
-        "https://jysk.pl/znajdz-sklep",
-        "https://jysk.pt/lojas",
-        "https://jysk.ro/magazinele-jysk",
-        "https://jysk.rs/prodavnice",
-        "https://jysk.se/butiker",
-        "https://jysk.si/trgovine-odpiralni-casi",
-        "https://jysk.sk/predajne",
-        "https://jysk.ua/stores-locator",
-        # "https://jysk.vn/he-thong-cua-hang",  # different website format
-        # "https://www.jysk.ca/storelocator/",  # different website format
-        # I cannot find store locator for lt/lv/ee (different website format)
-        # "https://www.jysk.lt/",
-        # "https://www.jysk.lv/",
-        # "https://www.jysk.ee/",
-    ]
+    def parse(self, response):
+        main_urls = response.xpath(
+            "//div[contains(@class, 'col-xs-12 col-sm-4 col-md-4 panels-flexible-region-inside columns')][1]//li/a/@href"
+        ).getall()
+        franchise_urls = response.xpath(
+            "//div[contains(@class, 'col-xs-12 col-sm-4 col-md-4 panels-flexible-region-inside columns')][2]//li/a/@href"
+        ).getall()
+        # There are Jysk owned stores and Jysk franchise stores.
+        # Only Jysk owned stores have standartized store locator, franchise stores have different website format.
+        # For this spider we are interested only in Jysk owned stores. Others should be scraped with different spiders.
+        for url in main_urls:
+            self.logger.info("Found country site: %s", url)
+            yield scrapy.Request(urljoin(url, "stores-locator"), callback=self.parse_country_site)
 
-    def parse(self, response: Response, **kwargs):
-        data = json.loads(
-            response.xpath("//div[@data-jysk-react-component='StoresLocatorLayout']/@data-jysk-react-properties").get()
-        )
-        for store in data["storesCoordinates"]:
-            item = DictParser.parse(store)
-            item["website"] = response.urljoin(store["url"])
-            yield item
+    def parse_country_site(self, response):
+        data = response.xpath('//*[@id="stores-locator-ssr"]/div').attrib["data-jysk-react-properties"]
+        locations = json.loads(data)["storesCoordinates"]
+        self.logger.debug("Found %d locations on %s", len(locations), response.url)
+        for location in locations:
+            yield scrapy.Request(
+                "https://{}/services/store/get/{}".format(urlparse(response.url).netloc, str(location["id"])),
+                callback=self.parse_data,
+                cb_kwargs=dict(locator_url=response.url),
+            )
+
+    def parse_data(self, response, locator_url):
+        def convert(i):
+            s = str(i)
+            return s[:-2] + ":" + s[-2:]
+
+        store = response.json()
+        store["name"] = store.pop("shop_name")
+        store["tel"] = store.pop("store_phone")
+        store["house_number"] = store.pop("house")
+        item = DictParser.parse(store)
+        item["image"] = store.get("image")
+        item["website"] = item["ref"] = locator_url + "?storeId=" + store["shop_id"]
+
+        oh = OpeningHours()
+        for info in store["opening"]:
+            day_index = info["day"]
+            if day_index == 0:
+                day_index = 7
+            start = info["starthours"]
+            end = info["endhours"]
+            if start and end:
+                oh.add_range(DAYS_FULL[day_index - 1], convert(start), convert(end))
+        item["opening_hours"] = oh
+        yield item
