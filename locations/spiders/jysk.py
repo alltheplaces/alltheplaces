@@ -5,7 +5,6 @@ import scrapy
 
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_FULL, OpeningHours
-from locations.user_agents import BROWSER_DEFAULT
 
 
 class JyskSpider(scrapy.Spider):
