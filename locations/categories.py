@@ -124,6 +124,7 @@ class Categories(Enum):
     FUEL_STATION = {"amenity": "fuel"}
     HOSPITAL = {"amenity": "hospital", "healthcare": "hospital"}
     HOTEL = {"tourism": "hotel"}
+    KINDERGARTEN = {"amenity": "kindergarten"}
     LIBRARY = {"amenity": "library"}
     MONEY_TRANSFER = {"amenity": "money_transfer"}
     MUSEUM = {"tourism": "museum"}
