@@ -1,14 +1,15 @@
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
+from locations.categories import Categories, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 
 
-class AramarkUniformServicesUSSpider(Spider):
-    name = "aramark_uniform_services_us"
-    item_attributes = {"brand": "Aramark", "brand_wikidata": "Q625708"}
-    allowed_domains = ["www.aramarkuniform.com"]
-    start_urls = ["https://www.aramarkuniform.com/graphql"]
+class VestisUniformServicesUSSpider(Spider):
+    name = "vestis_uniform_services_us"
+    item_attributes = {"brand": "Vestis Corporation", "brand_wikidata": "Q122947676"}
+    allowed_domains = ["www.vestis.com"]
+    start_urls = ["https://www.vestis.com/graphql"]
 
     def start_requests(self):
         yield from self.request_graphql_page()
@@ -59,10 +60,20 @@ class AramarkUniformServicesUSSpider(Spider):
             item.update(extra_fields_1)
             extra_fields_2 = {k: v for k, v in DictParser.parse(location["node"]["postLocation"]).items() if v}
             item.update(extra_fields_2)
-            if "Uniform Services" in item["name"].title():
-                item["brand"] = "Aramark Uniform Services"
+
+            def add_tags(item):
+                apply_category(Categories.SHOP_LAUNDRY, item)
+                apply_yes_no("laundry_service", item, True)
+                apply_category({"rental": "clothes"}, item)
+                apply_category({"access": "private"}, item)
+
+            if "Cleanroom Services" in item["name"].title():
+                item["brand"] = "Vestis Cleanroom Services"
                 item["name"] = item["brand"] + " " + item["city"]
-            elif "Cleanroom Services" in item["name"].title():
-                item["brand"] = "Aramark Cleanroom Services"
+                add_tags(item)
+            elif "Vestis" in item["name"].title():
+                item["brand"] = "Vestis"
                 item["name"] = item["brand"] + " " + item["city"]
+                add_tags(item)
+
             yield item
