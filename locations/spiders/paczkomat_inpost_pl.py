@@ -3,7 +3,7 @@ import re
 from scrapy import Spider
 from unidecode import unidecode
 
-from locations.hours import OpeningHours, DAYS_PL
+from locations.hours import DAYS_PL, OpeningHours
 from locations.items import Feature
 
 
