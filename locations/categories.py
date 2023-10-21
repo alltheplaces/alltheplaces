@@ -32,6 +32,7 @@ class Categories(Enum):
     CRAFT_ELECTRONICS_REPAIR = {"craft": "electronics_repair"}
     CRAFT_JEWELLER = {"craft": "jeweller"}
     CRAFT_KEY_CUTTER = {"craft": "key_cutter"}
+    CRAFT_LOCKSMITH = {"craft": "locksmith"}
     CRAFT_TAILOR = {"craft": "tailor"}
     CRAFT_SHOEMAKER = {"craft": "shoemaker"}
 
@@ -87,6 +88,7 @@ class Categories(Enum):
     SHOP_PHOTO = {"shop": "photo"}
     SHOP_SECOND_HAND = {"shop": "second_hand"}
     SHOP_SHOES = {"shop": "shoes"}
+    SHOP_SHOE_REPAIR = {"shop": "shoe_repair"}
     SHOP_SPORTS = {"shop": "sports"}
     SHOP_STATIONERY = {"shop": "stationery"}
     SHOP_STORAGE_RENTAL = {"shop": "storage_rental"}
