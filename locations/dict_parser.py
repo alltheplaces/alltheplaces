@@ -30,6 +30,8 @@ class DictParser:
         "city-name",
         # JP
         "市区町村",  # "municipality"
+        # PL
+        "miasto",
     ]
 
     region_keys = [
