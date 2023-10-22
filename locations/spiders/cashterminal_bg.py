@@ -15,6 +15,6 @@ class CashterminalBGSpider(Spider):
             properties = {
                 "name": location.get(),
                 "lat": location.xpath("./@data-lat"),
-                "lon": data.xpahth("./@data-long"),
+                "lon": location.xpath("./@data-long"),
             }
             yield Feature(**properties)
