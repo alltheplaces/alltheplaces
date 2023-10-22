@@ -11,7 +11,7 @@ class CashterminalBGSpider(Spider):
     no_refs = True
 
     def parse(self, response):
-        for location in response.xpath("//div[@class='markerList']/a[@data-lat]"):
+        for location in response.xpath("//ul[@class='markerList']/a[@data-lat]"):
             properties = {
                 "name": location.get(),
                 "lat": location.xpath("./@data-lat"),
