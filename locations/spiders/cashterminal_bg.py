@@ -9,9 +9,7 @@ class CashterminalBGSpider(Spider):
     allowed_domains = ["www.cashterminal.eu"]
     start_urls = ["https://www.cashterminal.eu/places"]
     no_refs = True
-    custom_settings = {
-        'ROBOTSTXT_OBEY': False
-    }
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def parse(self, response):
         for location in response.xpath("//ul[@class='markerList']/a[@data-lat]"):
