@@ -15,7 +15,7 @@ class CashterminalBGSpider(Spider):
         for location in response.xpath("//ul[@class='markerList']/a[@data-lat]"):
             properties = {
                 "name": location.get(),
-                "lat": location.xpath("./@data-lat"),
-                "lon": location.xpath("./@data-long"),
+                "lat": location.xpath("./@data-lat").get(),
+                "lon": location.xpath("./@data-long").get(),
             }
             yield Feature(**properties)
