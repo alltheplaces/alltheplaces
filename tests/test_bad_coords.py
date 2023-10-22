@@ -8,6 +8,7 @@ from locations.pipelines.check_item_properties import CheckItemPropertiesPipelin
 def get_objects(lat, lon):
     spider = Spider("test")
     spider.crawler = Crawler(Spider)
+    spider.crawler._apply_settings()
     return (
         [
             Feature(lat=lat, lon=lon),

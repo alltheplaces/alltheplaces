@@ -52,19 +52,19 @@ class PizzaHutAmrestSpider(Spider):
             item = DictParser.parse(location)
             item["country"] = response.meta["country"]
             item["street"] = location["addressStreet"]
-            yesNoAttributes = {
+            yes_no_attributes = {
                 "driveThru": Extras.DRIVE_THROUGH,
                 "garden": Extras.OUTDOOR_SEATING,
                 "delivery": Extras.DELIVERY,
                 "wifi": Extras.WIFI,
                 "takeaway": Extras.TAKEAWAY,
             }
-            for key, extra in yesNoAttributes.items():
+            for key, extra in yes_no_attributes.items():
                 apply_yes_no(attribute=extra, item=item, state=location[key], apply_positive_only=False)
-            openHours = location["openHours"][0]  # always one item
+            open_hours = location["openHours"][0]  # always one item
             item["opening_hours"] = OpeningHours()
             item["opening_hours"].add_days_range(
-                days=DAYS, open_time=openHours["openFrom"], close_time=openHours["openTo"]
+                days=DAYS, open_time=open_hours["openFrom"], close_time=open_hours["openTo"]
             )
             for f in location["filters"]:
                 if f["key"] == "waiter_service":

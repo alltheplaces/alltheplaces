@@ -55,9 +55,9 @@ class LowesFoodsSpider(scrapy.Spider):
             # There is sometimes a space between the time and 'PM'
             close_time = "".join(close_time.split(" "))
 
-            for DAY in DAYS:
+            for day in DAYS:
                 opening_hours.add_range(
-                    day=DAY,
+                    day=day,
                     open_time=open_time,
                     close_time=close_time,
                     time_format="%I:%M%p",

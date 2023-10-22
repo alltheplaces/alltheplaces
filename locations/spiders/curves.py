@@ -28,17 +28,17 @@ class CurvesSpider(scrapy.Spider):
         if response.xpath(
             '//div[@class="field field-name-field-franchise-club-hours field-type-text-long field-label-hidden"]/div/div'
         ).extract_first():
-            storeHoursHTML = str(
+            store_hours_html = str(
                 response.xpath(
                     '//div[@class="field field-name-field-franchise-club-hours field-type-text-long field-label-hidden"]/div/div'
                 ).extract_first()
             )
             p = re.compile(r"<.*?>")
-            storeHours = p.sub(" ", storeHoursHTML)
+            store_hours = p.sub(" ", store_hours_html)
             # storeHours = storeHours.replace('\\n', ' - ')
-            storeHours = storeHours.strip()
+            store_hours = store_hours.strip()
         else:
-            storeHours = response.xpath(
+            store_hours = response.xpath(
                 '//div[@class="field field-name-field-franchise-club-hours field-type-text-long field-label-hidden"]/div/div'
             ).extract_first()
 
@@ -54,7 +54,7 @@ class CurvesSpider(scrapy.Spider):
                 '//div[@class="field field-name-field-franchise-phone field-type-telephone field-label-hidden"]/div/div[@class="field-item even"]/text()'
             ).extract_first(),
             "website": response.request.url,
-            "opening_hours": storeHours,
+            "opening_hours": store_hours,
             # 'lon': float(response.xpath('//head/script[9]').extract_first().split('"coordinates":[')[1].split(']')[0].split(',')[0]),
             # 'lat': float(response.xpath('//head/script[9]').extract_first().split('"coordinates":[')[1].split(']')[0].split(',')[1]),
         }

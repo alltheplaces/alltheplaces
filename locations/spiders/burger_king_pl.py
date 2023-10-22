@@ -11,8 +11,8 @@ class BurgerKingPLSpider(Spider):
     item_attributes = {"brand": "Burger King", "brand_wikidata": "Q177054"}
 
     def parse(self, response, **kwargs):
-        nextBuildId = response.xpath("//script[contains(@src, '_ssgManifest.js')]/@src").get().split("/")[3]
-        url = f"https://burgerking.pl/_next/data/{nextBuildId}/restaurants.json"
+        next_build_id = response.xpath("//script[contains(@src, '_ssgManifest.js')]/@src").get().split("/")[3]
+        url = f"https://burgerking.pl/_next/data/{next_build_id}/restaurants.json"
         yield JsonRequest(url=url, callback=self.parse_api)
 
     def parse_api(self, response, **kwargs):
@@ -23,9 +23,9 @@ class BurgerKingPLSpider(Spider):
             item["image"] = location["imgUrl"]
             item["lat"] = location["geoPosition"]["lat"]
             item["lon"] = location["geoPosition"]["lng"]
-            openingHours = OpeningHours()
+            opening_hours = OpeningHours()
             for day, ranges in location["weeklyWorkingHours"].items():
                 for r in ranges:
-                    openingHours.add_ranges_from_string(f"{day} {r['from']}-{r['to']}")
-            item["opening_hours"] = openingHours
+                    opening_hours.add_ranges_from_string(f"{day} {r['from']}-{r['to']}")
+            item["opening_hours"] = opening_hours
             yield item

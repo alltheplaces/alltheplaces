@@ -15,9 +15,9 @@ class PKOBankPolskiPLSpider(Spider):
 
     def start_requests(self):
         for lat, lon in point_locations("eu_centroids_20km_radius_country.csv", "PL"):
-            startLat = int(float(lat) * 10 - 0.5)
-            startLon = int(float(lon) * 10 - 0.5)
-            bounds = ",".join([str(c) for c in [startLat, startLon, startLat + 1, startLon + 1]])
+            start_lat = int(float(lat) * 10 - 0.5)
+            start_lon = int(float(lon) * 10 - 0.5)
+            bounds = ",".join([str(c) for c in [start_lat, start_lon, start_lat + 1, start_lon + 1]])
             yield JsonRequest(
                 url=f"https://www.pkobp.pl/poi/?type=facility,atm&search=&bounds={bounds}",
             )

@@ -2,7 +2,7 @@ import json
 
 import scrapy
 
-from locations.hours import OpeningHours
+from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 
 
@@ -31,12 +31,10 @@ class RainbowShopsSpider(scrapy.Spider):
         yield scrapy.Request(url=url, callback=self.parse_stores)
 
     def parse_hours(self, hours):
-        HOURS = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"]
         opening_hours = OpeningHours()
-        for h in HOURS:
-            day = h
-            open_time = hours[h]["Ranges"][0]["StartTime"]
-            close_time = hours[h]["Ranges"][0]["EndTime"]
+        for day in DAYS:
+            open_time = hours[day]["Ranges"][0]["StartTime"]
+            close_time = hours[day]["Ranges"][0]["EndTime"]
             if open_time is not None:
                 opening_hours.add_range(
                     day=day,

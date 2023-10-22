@@ -27,8 +27,8 @@ class GeneralLogisticsSystemsSpider(scrapy.Spider):
         ]
 
         for point_file in searchable_point_files:
-            with open_searchable_points(point_file) as openFile:
-                results = csv.DictReader(openFile)
+            with open_searchable_points(point_file) as open_file:
+                results = csv.DictReader(open_file)
                 for result in results:
                     if result["country"] == "DE":
                         longitude = float(result["longitude"])

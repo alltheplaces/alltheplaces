@@ -164,14 +164,14 @@ class OmvSpider(scrapy.Spider):
         try:
             if hours:
                 for day in hours.split("#"):
-                    dayOfWeek, closed, fromTime, toTime = day.split(",")
-                    dayOfWeek = dayOfWeek.split("=")[1]
+                    day_of_week, closed, from_time, to_time = day.split(",")
+                    day_of_week = day_of_week.split("=")[1]
                     closed = closed.split("=")[1]
-                    fromTime = fromTime.split("=")[1]
-                    toTime = toTime.split("=")[1]
+                    from_time = from_time.split("=")[1]
+                    to_time = to_time.split("=")[1]
                     if closed == "TRUE":
                         continue
-                    oh.add_range(DAYS[int(dayOfWeek) - 1], fromTime, toTime)
+                    oh.add_range(DAYS[int(day_of_week) - 1], from_time, to_time)
                 item["opening_hours"] = oh.as_opening_hours()
         except Exception as e:
             self.logger.error(f"Error parsing hours: {hours}, {e}")
