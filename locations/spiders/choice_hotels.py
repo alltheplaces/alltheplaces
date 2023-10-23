@@ -12,7 +12,7 @@ class ChoiceHotelsSpider(SitemapSpider):
     name = "choice_hotels"
     item_attributes = {"brand": "Choice Hotels", "brand_wikidata": "Q1075788"}
     allowed_domains = ["choicehotels.com"]
-    # Original Sitemap with below in it"https://www.choicehotels.com/sitemapindex.xml"
+    # Sitemapindex with below in it is "https://www.choicehotels.com/sitemapindex.xml"
     sitemap_urls = ["https://www.choicehotels.com/brandsearchsitemap.xml.gz"]
     user_agent = BROWSER_DEFAULT
     download_delay = 5  # Requested by https://www.choicehotels.com/robots.txt
