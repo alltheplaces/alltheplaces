@@ -26,7 +26,7 @@ class DealzPLSpider(Spider):
                 "ref": shop["shop_id"],
             }
             shop_div = response.xpath(f'//div[@shops-map-marker-html={shop["shop_id"]}]')
-            if not bool(shop_div):
+            if not shop_div:
                 continue
             address = shop_div.xpath("div/div[contains(@class, 'leaflet-popup__data')]/text()").get()
             address = address.strip()
