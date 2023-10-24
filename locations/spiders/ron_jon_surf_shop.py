@@ -16,5 +16,5 @@ class RonJonSurfShopSpider(Spider):
                 item["addr_full"] = data["address2"]
             else:
                 item["addr_full"] = data["address1"]
-            item["website"] = "www.ronjonsurfshop.com/" + data["url"]
+            item["website"] = "www.ronjonsurfshop.com" + data["url"]
             yield item
