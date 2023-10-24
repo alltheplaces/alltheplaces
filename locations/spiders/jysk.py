@@ -50,7 +50,8 @@ class JyskSpider(scrapy.Spider):
         store["house_number"] = store.pop("house")
         item = DictParser.parse(store)
         item["image"] = store.get("image")
-        item["website"] = item["ref"] = locator_url + "?storeId=" + store["shop_id"]
+        item["website"] = locator_url + "?storeId=" + store["shop_id"]
+        item["ref"] = store["shop_id"]
 
         oh = OpeningHours()
         for info in store["opening"]:
