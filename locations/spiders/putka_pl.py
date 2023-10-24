@@ -2,6 +2,7 @@ from urllib.parse import quote
 
 import scrapy
 from scrapy import FormRequest
+from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.hours import DAYS_PL, OpeningHours
@@ -21,15 +22,19 @@ class PutkaPLSpider(scrapy.Spider):
             formdata=dict(action="wszystkie"),  # Polish for "all" (stores)
         )
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs):
         data = response.json()
-        for ref, coordinates in zip(data["idp"].split(";")[:-1], data["punkty"].split(";")[:-1]):
-            lat, lon = coordinates.split(",")[:2]
+        refs = data["idp"].split(";")
+        points = data["punkty"].split(";")
+        for ref, coordinates in zip(refs[:-1], points[:-1]):
+            lat_lon = coordinates.split(",")[:2]
+            if len(lat_lon) < 2:
+                continue
             url = f"{self.host}/sklepy-firmowe/1/0/{ref}"
             properties = {
                 "ref": ref,
-                "lat": float(lat),
-                "lon": float(lon),
+                "lat": float(lat_lon[0]),
+                "lon": float(lat_lon[1]),
                 "website": url,
             }
             yield scrapy.Request(url, callback=self.parse_store, cb_kwargs=properties)
@@ -56,9 +61,10 @@ class PutkaPLSpider(scrapy.Spider):
             "city": city,
             "phone": phone,
             "postcode": post_code,
-            "image": f"{self.host}/{quote(image_path)}",
             "opening_hours": opening_hours,
         }
+        if image_path:
+            properties["image"] = f"{self.host}/{quote(image_path)}"
         properties.update(kwargs)
         item = Feature(**properties)
         apply_category(Categories.SHOP_BAKERY, item)
