@@ -12,9 +12,12 @@ class RonJonSurfShopSpider(Spider):
     def parse(self, response):
         for data in response.json()["results"]:
             item = DictParser.parse(data)
+
             if not data["address1"]:
                 item["addr_full"] = data["address2"]
             else:
                 item["addr_full"] = data["address1"]
-            item["website"] = "www.ronjonsurfshop.com" + data["url"]
+
+            item["website"] = response.urljoin(data["url"])
+
             yield item
