@@ -31,7 +31,7 @@ class CCCSpider(Spider):
     def parse(self, response, **kwargs):
         shop_data = response.xpath("//div[@id='pos-list-json']/text()").get()
         country = response.url.split("/")[-2].upper()
-        days = self.day_mapping.get(country) or DAYS_EN
+        days = self.days_mapping.get(country) or DAYS_EN
 
         for shop in json.loads(shop_data):
             item = DictParser.parse(shop)
