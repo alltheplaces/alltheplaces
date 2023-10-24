@@ -26,9 +26,9 @@ class MarcsSpider(CrawlSpider):
 
         lmjson = response.xpath('//script[@type="text/javascript"]/text()[contains(.,"initMap()")]').get()
 
-        openHourFiltered = [row for row in data.get("openingHours") if ":" in row]
+        open_hour_filtered = [row for row in data.get("openingHours") if ":" in row]
         oh = OpeningHours()
-        oh.from_linked_data({"openingHours": openHourFiltered})
+        oh.from_linked_data({"openingHours": open_hour_filtered})
 
         properties = {
             "ref": response.url,

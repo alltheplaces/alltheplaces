@@ -14,7 +14,7 @@ class McDonaldsILSpider(scrapy.Spider):
 
     # TODO: Does have hours but the days are not in english and the function does not work. Hence its deletion
 
-    def parse_Ref(self, data):
+    def parse_ref(self, data):
         match = re.search(r"store_id=(.*\d)", data)
         ref = match.groups()[0]
         return ref
@@ -58,7 +58,7 @@ class McDonaldsILSpider(scrapy.Spider):
     def parse(self, response):
         stores = response.xpath('//div[@class="mod_geo_location_store_link"]/span/a/@href').extract()
         for store in stores:
-            ref = self.parse_Ref(store)
+            ref = self.parse_ref(store)
             yield scrapy.Request(
                 "https:" + store, meta={"ref": ref}, callback=self.parse_store, cb_kwargs={"store_id": ref}
             )

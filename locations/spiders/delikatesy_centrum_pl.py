@@ -15,8 +15,8 @@ class DelikatesyCentrumPLSpider(Spider):
         yield JsonRequest(url=self.start_urls[0])
 
     def parse(self, response):
-        nextBuildId = response.xpath("//script[contains(@src, '_ssgManifest.js')]/@src").get().split("/")[3]
-        url = f"https://www.delikatesy.pl/_next/data/{nextBuildId}/sklepy.json"
+        next_build_id = response.xpath("//script[contains(@src, '_ssgManifest.js')]/@src").get().split("/")[3]
+        url = f"https://www.delikatesy.pl/_next/data/{next_build_id}/sklepy.json"
         yield JsonRequest(url=url, callback=self.parse_api)
 
     def parse_api(self, response):

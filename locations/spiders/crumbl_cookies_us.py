@@ -13,8 +13,8 @@ class CrumblCookiesUSSpider(Spider):
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def parse(self, response):
-        nextBuildId = response.xpath("//script[contains(@src, '_ssgManifest.js')]/@src").get().split("/")[3]
-        url = f"https://crumblcookies.com/_next/data/{nextBuildId}/en-US/stores.json"
+        next_build_id = response.xpath("//script[contains(@src, '_ssgManifest.js')]/@src").get().split("/")[3]
+        url = f"https://crumblcookies.com/_next/data/{next_build_id}/en-US/stores.json"
         yield JsonRequest(url=url, callback=self.parse_api)
 
     def parse_api(self, response, **kwargs):

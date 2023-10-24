@@ -44,8 +44,10 @@ class CarrefourBESpider(scrapy.Spider):
                 apply_yes_no(Extras.DRIVE_THROUGH, item, True)
 
             oh = OpeningHours()
-            for index, bH in enumerate(data.get("businessHours")):
-                oh.add_range(DAYS_FULL[index - 1], bH.get("openTimeFormat"), bH.get("closeTimeFormat"))
+            for index, business_hours in enumerate(data.get("businessHours")):
+                oh.add_range(
+                    DAYS_FULL[index - 1], business_hours.get("openTimeFormat"), business_hours.get("closeTimeFormat")
+                )
 
             item["opening_hours"] = oh.as_opening_hours()
             item["website"] = "https://winkels.carrefour.be/nl/s/carrefour/{slug}/{id}".format(
