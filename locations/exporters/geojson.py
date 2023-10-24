@@ -49,14 +49,15 @@ def item_to_properties(item):
     # Add in the extra bits
     if extras := item.get("extras"):
         for key, value in extras.items():
-            if value:
+            if value is not None and value != "":
                 # Only export populated values
                 props[key] = value
 
     # Bring in the optional stuff
     for map_from, map_to in mapping:
         if item_value := item.get(map_from):
-            props[map_to] = item_value
+            if item_value is not None and item_value != "":
+                props[map_to] = item_value
 
     return props
 
