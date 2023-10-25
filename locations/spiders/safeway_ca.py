@@ -42,6 +42,11 @@ class SafewayCaSpider(scrapy.Spider):
         opening_hours = OpeningHours()
         for day, span in zip(*[iter(vals)] * 2):
             day = day[:2]
-            open_time, close_time = span.split(" to ")
+            span_split = span.split(" to ")
+            if len(span_split) == 2:
+                open_time = span_split[0]
+                close_time = span_split[1]
+            else:
+                continue
             opening_hours.add_range(day, open_time, close_time, "%I:%M %p")
         return opening_hours.as_opening_hours()
