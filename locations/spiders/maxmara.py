@@ -1,7 +1,7 @@
 import scrapy
 from geonamescache import GeonamesCache
-from locations.categories import Categories, apply_category
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_EN, OpeningHours
 from locations.user_agents import BROWSER_DEFAULT
@@ -43,6 +43,6 @@ class MaxmaraSpider(scrapy.Spider):
                 item["opening_hours"] = oh
 
                 apply_category(Categories.SHOP_CLOTHES, item)
-                apply_category({'clothes': 'women'}, item)
-                
+                apply_category({"clothes": "women"}, item)
+
                 yield item
