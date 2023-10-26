@@ -1,11 +1,19 @@
 import scrapy
-from locations.categories import Categories, Extras, Fuel, apply_category, apply_yes_no
 
+from locations.categories import Categories, Extras, Fuel, apply_category, apply_yes_no
 from locations.items import Feature
 from locations.user_agents import BROWSER_DEFAULT
 
-AMENITIES_MAPPING = {"10": Extras.CAR_WASH, "12": Fuel.DIESEL, "13": Fuel.CNG, "14": Fuel.LNG, "15": Fuel.ADBLUE, "16": Fuel.E85}
+AMENITIES_MAPPING = {
+    "10": Extras.CAR_WASH,
+    "12": Fuel.DIESEL,
+    "13": Fuel.CNG,
+    "14": Fuel.LNG,
+    "15": Fuel.ADBLUE,
+    "16": Fuel.E85,
+}
 # Sells Gas = 11, but it's not clear what octane number to use.
+
 
 class KwikTripSpider(scrapy.Spider):
     name = "kwiktrip"
@@ -39,5 +47,5 @@ class KwikTripSpider(scrapy.Spider):
                     apply_yes_no(AMENITIES_MAPPING.get(amenity), item, True)
 
             apply_category(Categories.FUEL_STATION, item)
-            
+
             yield item
