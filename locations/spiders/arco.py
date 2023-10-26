@@ -7,8 +7,7 @@ from scrapy.spiders import CSVFeedSpider
 from locations.categories import Categories, Extras, Fuel, PaymentMethods, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.spiders.tesco_gb import set_located_in
-
-
+ 
 class ArcoSpider(CSVFeedSpider):
     name = "arco"
     item_attributes = {"brand": "Arco", "brand_wikidata": "Q304769"}
