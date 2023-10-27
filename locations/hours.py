@@ -297,12 +297,15 @@ DAYS_RU = {
     "Вторник": "Tu",
     "Ср": "We",
     "Среда": "We",
+    "Среду": "We",
     "Чт": "Th",
     "Четверг": "Th",
     "Пт": "Fr",
     "Пятница": "Fr",
+    "Пятницу": "Fr",
     "Сб": "Sa",
     "Суббота": "Sa",
+    "Субботу": "Sa",
     "Вс": "Su",
     "Воскресенье": "Su",
 }
@@ -455,8 +458,12 @@ NAMED_TIMES_EN = {
 
 NAMED_DAY_RANGES_RU = {
     "Ежедневно": ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"],  # Daily
-    "По будням": ["Mo", "Tu", "We", "Th", "Fr"],  # Weekdays
-    "По выходным": ["Sa", "Su"],  # Weekends
+    "По Будням": ["Mo", "Tu", "We", "Th", "Fr"],  # Weekdays
+    "По Выходным": ["Sa", "Su"],  # Weekends
+}
+
+NAMED_TIMES_RU = {
+    "Круглосуточно": ["00:00", "23:59"],  # 24/7
 }
 
 DELIMITERS_EN = [
@@ -489,6 +496,8 @@ DELIMITERS_PL = [
     "od",
     "do",
 ]
+
+DELIMITERS_RU = DELIMITERS_EN + ["с", "по", "до", "в", "во"]
 
 
 def day_range(start_day, end_day):
