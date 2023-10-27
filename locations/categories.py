@@ -80,6 +80,7 @@ class Categories(Enum):
     SHOP_NEWSAGENT = {"shop": "newsagent"}
     SHOP_OPTICIAN = {"shop": "optician"}
     SHOP_OUTDOOR = {"shop": "outdoor"}
+    SHOP_OUTPOST = {"shop": "outpost"}
     SHOP_PAINT = {"shop": "paint"}
     SHOP_PASTRY = {"shop": "pastry"}
     SHOP_PAWNBROKER = {"shop": "pawnbroker"}
@@ -287,6 +288,7 @@ class Extras(Enum):
     INDOOR_SEATING = "indoor_seating"
     OIL_CHANGE = "service:vehicle:oil_change"
     OUTDOOR_SEATING = "outdoor_seating"
+    PARCEL_PICKUP = "parcel_pickup"
     PARKING_PARENT = "capacity:parent"
     PARKING_WHEELCHAIR = "capacity:disabled"
     PRINTING = "service:print"
