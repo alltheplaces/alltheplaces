@@ -1,6 +1,6 @@
 import scrapy
-from locations.categories import Categories, Extras, apply_category, apply_yes_no
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_RU, DELIMITERS_RU, NAMED_DAY_RANGES_RU, NAMED_TIMES_RU, OpeningHours
 
@@ -24,9 +24,7 @@ class WildberriesSpider(scrapy.Spider):
             item["lat"] = poi["coordinates"][0]
             item["lon"] = poi["coordinates"][1]
             self.parse_hours(item, poi)
-
             apply_category(Categories.SHOP_OUTPOST, item)
-
             yield item
 
     def parse_hours(self, item, poi):

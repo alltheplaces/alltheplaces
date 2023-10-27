@@ -1,7 +1,20 @@
 import json
 import time
 
-from locations.hours import DAYS, DAYS_BG, DAYS_DE, DAYS_ES, DAYS_RU, DELIMITERS_ES, DELIMITERS_RU, NAMED_DAY_RANGES_RU, NAMED_TIMES_RU, OpeningHours, day_range, sanitise_day
+from locations.hours import (
+    DAYS,
+    DAYS_BG,
+    DAYS_DE,
+    DAYS_ES,
+    DAYS_RU,
+    DELIMITERS_ES,
+    DELIMITERS_RU,
+    NAMED_DAY_RANGES_RU,
+    NAMED_TIMES_RU,
+    OpeningHours,
+    day_range,
+    sanitise_day,
+)
 
 
 def test_day_range():
@@ -409,5 +422,11 @@ def test_add_ranges_from_string():
     )
 
     o = OpeningHours()
-    o.add_ranges_from_string('[по будням: 10:00 - 21:00], [в субботу: 10:00 - 20:00], [в воскресенье: 10:00 - 21:00]', DAYS_RU, NAMED_DAY_RANGES_RU, NAMED_TIMES_RU, DELIMITERS_RU)
+    o.add_ranges_from_string(
+        "[по будням: 10:00 - 21:00], [в субботу: 10:00 - 20:00], [в воскресенье: 10:00 - 21:00]",
+        DAYS_RU,
+        NAMED_DAY_RANGES_RU,
+        NAMED_TIMES_RU,
+        DELIMITERS_RU,
+    )
     assert o.as_opening_hours() == "Mo-Fr 10:00-21:00; Sa 10:00-20:00; Su 10:00-21:00"

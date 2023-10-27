@@ -463,7 +463,7 @@ NAMED_DAY_RANGES_RU = {
 }
 
 NAMED_TIMES_RU = {
-    "Круглосуточно": ['00:00', '23:59'],  # 24/7
+    "Круглосуточно": ["00:00", "23:59"],  # 24/7
 }
 
 DELIMITERS_EN = [
@@ -497,7 +497,7 @@ DELIMITERS_PL = [
     "do",
 ]
 
-DELIMITERS_RU = DELIMITERS_EN + ["с", "по", "до", 'в', 'во']
+DELIMITERS_RU = DELIMITERS_EN + ["с", "по", "до", "в", "во"]
 
 
 def day_range(start_day, end_day):
