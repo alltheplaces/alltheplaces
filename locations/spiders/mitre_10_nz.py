@@ -12,6 +12,7 @@ class Mitre10NZSpider(Spider):
     start_urls = [
         "https://ccapi.mitre10.co.nz/mitre10webservices/v2/mitre10/geolocation/store-locator?fields=FULL&page=0&pageSize=1000&storeCode=28&lang=en&curr=NZD"
     ]
+    requires_proxy = "NZ"
 
     def start_requests(self):
         for url in self.start_urls:
