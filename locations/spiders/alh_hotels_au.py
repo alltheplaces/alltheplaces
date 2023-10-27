@@ -8,14 +8,15 @@ class ALHHotelsAUAUSpider(StoreLocatorWidgetsSpider):
     key = "41fdc8f98fc2738172250baa676b369d"
 
     def parse_item(self, item, location):
-        if "hotel" in item["name"].lower() or "inn" in item["name"].lower():
+        item_name = item["name"].lower()
+        if "hotel" in item_name or "inn" in item_name:
             apply_category(Categories.HOTEL, item)
-        elif "tavern" in item["name"].lower():
+        elif "tavern" in item_name:
             apply_category(Categories.RESTAURANT, item)
-        elif "pub" in item["name"].lower() or "grill" in item["name"].lower():
+        elif "pub" in item_name or "grill" in item_name:
             apply_category(Categories.PUB, item)
-        elif "bar" in item["name"].lower():
+        elif "bar" in item_name:
             apply_category(Categories.BAR, item)
-        elif "cafe" in item["name"].lower():
+        elif "cafe" in item_name:
             apply_category(Categories.CAFE, item)
         yield item
