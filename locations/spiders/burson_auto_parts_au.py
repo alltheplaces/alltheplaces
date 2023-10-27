@@ -26,7 +26,9 @@ class BursonAutoPartsAU(Spider):
             item["postcode"] = location["location"]["postal_code"]
             item["phone"] = location["location"]["extra_fields"]["phone"]
             item["email"] = location["location"]["extra_fields"]["email"]
-            hours_string = " ".join(Selector(text=location["location"]["extra_fields"]["hours"]).xpath("//text()").getall())
+            hours_string = " ".join(
+                Selector(text=location["location"]["extra_fields"]["hours"]).xpath("//text()").getall()
+            )
             item["opening_hours"] = OpeningHours()
             item["opening_hours"].add_ranges_from_string(hours_string)
             yield item
