@@ -19,7 +19,13 @@ class ReissGBSpider(StructuredDataSpider):
 
     def parse(self, response):
         for location in response.json()["Stores"]:
-            yield Request(url="https://www.reiss.com/storelocator/{}/{}".format(location["NA"].lower().replace(" ", ""), location["BR"]), meta={"id": location["BR"]}, callback=self.parse_sd)
+            yield Request(
+                url="https://www.reiss.com/storelocator/{}/{}".format(
+                    location["NA"].lower().replace(" ", ""), location["BR"]
+                ),
+                meta={"id": location["BR"]},
+                callback=self.parse_sd,
+            )
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         if m := re.search(r"\"&daddr=\"\s*\+\s*(-?\d+\.\d+)\s*\+\s*\",\"\s*\+\s*(-?\d+\.\d+);", response.text):
