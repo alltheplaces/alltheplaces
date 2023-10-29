@@ -10,10 +10,12 @@ from locations.hours import OpeningHours
 class AristocrazyESSpider(Spider):
     name = "aristocrazy_es"
     item_attributes = {"brand": "Aristocrazy", "brand_wikidata": "Q117802848"}
-    start_urls = ["https://www.aristocrazy.com/es/en/Localizador-De-Tiendas?showMap=true&horizontalView=true&isForm=true"]
+    start_urls = [
+        "https://www.aristocrazy.com/es/en/Localizador-De-Tiendas?showMap=true&horizontalView=true&isForm=true"
+    ]
 
     def parse(self, response):
-        for location in response.xpath('//input/@data-store-info').getall():
+        for location in response.xpath("//input/@data-store-info").getall():
             location = parse_js_object(unescape(location))
             item = DictParser.parse(location)
             item["street_address"] = ", ".join(filter(None, [location["address1"], location["address2"]]))
