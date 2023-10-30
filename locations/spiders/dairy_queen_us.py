@@ -25,7 +25,6 @@ class DairyQueenUSSpider(Spider):
 
     def parse(self, response):
         for location in response.json()["contentlets"]:
-            print(location)
             item = DictParser.parse(location)
             item["lat"], item["lon"] = location.get("latlong", ",").split(",", 2)
             item["name"] = re.sub(r"^\d+ : ", "", item["name"])
