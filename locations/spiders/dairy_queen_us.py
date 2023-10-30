@@ -11,7 +11,7 @@ class DairyQueenUSSpider(Spider):
     item_attributes = {"brand": "Dairy Queen", "brand_wikidata": "Q1141226"}
     allowed_domains = ["prod-dairyqueen.dotcmscloud.com"]
     start_urls = ["https://prod-dairyqueen.dotcmscloud.com/api/es/search"]
-    custom_settings = {"ROBOTSTXT_OBEY": False} # Missing robots.txt
+    custom_settings = {"ROBOTSTXT_OBEY": False}  # Missing robots.txt
 
     def start_requests(self):
         yield JsonRequest(
@@ -20,18 +20,7 @@ class DairyQueenUSSpider(Spider):
             headers={
                 "Referer": "https://www.dairyqueen.com/",
             },
-            data={
-                "size": 10000,
-                "query": {
-                    "bool": {
-                        "must": [{
-                            "term": {
-                                "contenttype": "locationDetail"
-                            }
-                        }]
-                    }
-                }
-            },
+            data={"size": 10000, "query": {"bool": {"must": [{"term": {"contenttype": "locationDetail"}}]}}},
         )
 
     def parse(self, response):
