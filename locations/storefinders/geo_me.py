@@ -117,7 +117,9 @@ class GeoMeSpider(Spider):
             for day in day_range(DAYS_EN[day_from], DAYS_EN[day_to]):
                 for hours in spec["hours"]:
                     start_time = hours[0].replace("1900-01-01 ", "")
-                    end_time = re.sub(r"^00:00$", "23:59", hours[1].replace("00:00:00", "23:59:59").replace("1900-01-01 ", ""))
+                    end_time = re.sub(
+                        r"^00:00$", "23:59", hours[1].replace("00:00:00", "23:59:59").replace("1900-01-01 ", "")
+                    )
                     hours_string = f"{hours_string} {day}: {start_time} - {end_time}"
         item["opening_hours"].add_ranges_from_string(hours_string)
 
