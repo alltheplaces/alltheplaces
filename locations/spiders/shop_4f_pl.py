@@ -15,7 +15,9 @@ class Shop4fPL(Spider):
         for shop in response.json()["data"]["stationaryShops"]:
             if shop["active"] != "1":
                 continue
+
             item = DictParser.parse(shop)
             item["street_address"] = shop["address"]
             del item["addr_full"]
+
             yield item
