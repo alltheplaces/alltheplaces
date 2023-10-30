@@ -27,8 +27,11 @@ class BulgarianPostsBGSpider(Spider):
             item["opening_hours"] = OpeningHours()
             for day_name in DAYS_FULL:
                 if location[f"working_hours_{day_name.lower()}"]:
-                    item["opening_hours"].add_range(
-                        day_name, *location[f"working_hours_{day_name.lower()}"].split("-", 1), "%H:%M"
-                    )
+                    try:
+                        item["opening_hours"].add_range(
+                            day_name, *location[f"working_hours_{day_name.lower()}"].split("-", 1), "%H:%M"
+                        )
+                    except ValueError:
+                        continue
             apply_category(Categories.POST_OFFICE, item)
             yield item
