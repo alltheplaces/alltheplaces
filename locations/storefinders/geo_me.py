@@ -1,4 +1,5 @@
 import random
+import re
 
 from scrapy import Spider
 from scrapy.http import JsonRequest
@@ -107,6 +108,7 @@ class GeoMeSpider(Spider):
         open_hours = location.get("opening_hours")
         if not open_hours:
             return
+        hours_string = ""
         for spec in open_hours:
             days = spec["days"]
             day_from = day_to = days[0]
@@ -114,7 +116,12 @@ class GeoMeSpider(Spider):
                 day_to = days[1]
             for day in day_range(DAYS_EN[day_from], DAYS_EN[day_to]):
                 for hours in spec["hours"]:
-                    item["opening_hours"].add_range(day, hours[0], hours[1])
+                    start_time = hours[0].replace("1900-01-01 ", "")
+                    end_time = re.sub(
+                        r"^00:00$", "23:59", hours[1].replace("00:00:00", "23:59:59").replace("1900-01-01 ", "")
+                    )
+                    hours_string = f"{hours_string} {day}: {start_time} - {end_time}"
+        item["opening_hours"].add_ranges_from_string(hours_string)
 
     def parse_item(self, item: Feature, location: dict, **kwargs):
         yield item
