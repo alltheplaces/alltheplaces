@@ -9,4 +9,4 @@ class JDWetherspoonSpider(SitemapSpider, StructuredDataSpider):
     allowed_domains = ["www.jdwetherspoon.com"]
     sitemap_urls = ["https://www.jdwetherspoon.com/sitemap.xml"]
     sitemap_rules = [(r"https:\/\/www\.jdwetherspoon\.com\/pubs\/all-pubs(?:\/[\w\-]+){3}", "parse_sd")]
-    custom_settings = {"REDIRECT_ENABLED": False} # Numerous location pages don't exist.
+    custom_settings = {"REDIRECT_ENABLED": False}  # Numerous location pages don't exist.
