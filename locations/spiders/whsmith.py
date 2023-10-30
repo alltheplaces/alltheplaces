@@ -52,7 +52,7 @@ class WHSmithSpider(Spider):
             for day in DAYS_FULL:
                 if not store.get(f"c_openingTimes{day}") or "closed" in store[f"c_openingTimes{day}"].lower():
                     continue
-                start_time, end_time = store[f"c_openingTimes{day}"].split("-")
+                start_time, end_time = map(str.strip, store[f"c_openingTimes{day}"].split("-"))
                 if ":" not in start_time:
                     if start_time == "24hr":
                         start_time = "00:00"
