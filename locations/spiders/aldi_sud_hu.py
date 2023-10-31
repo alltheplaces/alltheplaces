@@ -27,5 +27,5 @@ class AldiSudHUSpider(Spider):
                 if not rule.get("closed", False):
                     oh.add_range(day, rule["openFormatted"], rule["closeFormatted"])
             item["opening_hours"] = oh.as_opening_hours()
-
+            item["name"] = "ALDI"
             yield item
