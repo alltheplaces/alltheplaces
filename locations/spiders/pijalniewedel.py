@@ -17,7 +17,7 @@ class PijalnieWedel(Spider):
 
     def parse(self, response: Response, **kwargs):
         place_data = response.xpath(
-            '//script[contains(text(), "var placeData") and not(contains(text(), "DOMContentLoaded"))]/text()'
+            '//script[contains(text(), "var placeData")]/text()'
         ).re_first(r"var placeData = (.*);")
 
         place_data = chompjs.parse_js_object(place_data)
