@@ -38,8 +38,10 @@ class PijalnieWedel(Spider):
                 "lat": place["lat"],
                 "lon": place["lng"],
                 "phone": location_div.xpath("div/div/a[starts-with(@href,'tel:')]").attrib["href"].removeprefix("tel:"),
-                "email": location_div.xpath("div/div/a[starts-with(@href,'mailto:')]").attrib["href"].removeprefix("mailto:"),
-                "opening_hours": opening_hours
+                "email": location_div.xpath("div/div/a[starts-with(@href,'mailto:')]")
+                .attrib["href"]
+                .removeprefix("mailto:"),
+                "opening_hours": opening_hours,
             }
 
             yield Feature(**properties)
