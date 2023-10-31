@@ -12,7 +12,6 @@ from locations.items import Feature
 class EmpikSpider(Spider):
     name = "empik_pl"
     item_attributes = {"brand": "Empik", "brand_wikidata": "Q3045978"}
-    start_urls = ["https://www.empik.com/ajax/delivery-point/empik?query="]
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def start_requests(self) -> Iterable[Request]:
