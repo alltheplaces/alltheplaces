@@ -1,11 +1,9 @@
-import json
 from typing import Iterable
 
 from scrapy import Request, Spider
 from scrapy.http import Response
 
 from locations.dict_parser import DictParser
-from locations.items import Feature
 
 
 class AllegroOneBoxSpider(Spider):
@@ -21,10 +19,10 @@ class AllegroOneBoxSpider(Spider):
         )
 
     def parse(self, response: Response, **kwargs):
-        data = json.loads(response.text)
+        data = response.json()
 
         for box in data["points"]:
             properties = DictParser.parse(box)
             del properties["name"]
             properties["website"] = f"https://allegro.pl/kampania/one/znajdz-nas?pointId={box['id']}"
-            yield Feature(**properties)
+            yield properties
