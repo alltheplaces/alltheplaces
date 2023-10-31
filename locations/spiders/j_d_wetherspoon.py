@@ -10,3 +10,8 @@ class JDWetherspoonSpider(CrawlSpider, StructuredDataSpider):
     allowed_domains = ["www.jdwetherspoon.com"]
     start_urls = ["https://www.jdwetherspoon.com/pubs/all-pubs"]
     rules = [Rule(LinkExtractor(allow="/pubs/all-pubs/"), callback="parse_sd")]
+
+    def post_process_item(self, item, response, ld_data, **kwargs):
+        if item.get("postcode") and item.get("postcode") in item.get("street_address"):
+            item["addr_full"] = item.pop("street_address")
+        yield item
