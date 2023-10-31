@@ -1,7 +1,7 @@
 import json
 from typing import Iterable
 
-from scrapy import Spider, Request
+from scrapy import Request, Spider
 from scrapy.http import Response
 
 from locations.dict_parser import DictParser
@@ -19,12 +19,8 @@ class EmpikSpider(Spider):
         yield Request(
             method="POST",
             url="https://www.empik.com/ajax/delivery-point/empik?query=",
-            headers={
-                "X-CSRF-TOKEN": "42adc778-4158-4646-8ca9-e97ce140da75"
-            },
-            cookies={
-                "CSRF": "42adc778-4158-4646-8ca9-e97ce140da75"
-            }
+            headers={"X-CSRF-TOKEN": "42adc778-4158-4646-8ca9-e97ce140da75"},
+            cookies={"CSRF": "42adc778-4158-4646-8ca9-e97ce140da75"},
         )
 
     def parse(self, response: Response, **kwargs):
