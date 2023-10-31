@@ -18,7 +18,7 @@ class MerGBSpider(Spider):
         )
 
     def parse(self, response, **kwargs):
-        for location in response.json()["data"][1]:
+        for location in response.json()["data"]:
             if location["deleted"]:
                 continue
 

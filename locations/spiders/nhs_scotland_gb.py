@@ -58,10 +58,9 @@ class NhsScotlandGBSpider(scrapy.Spider):
 
     def parse(self, response, service):
         for link in response.xpath('//h2[@class="nhsuk-heading-m"]/a/@href').extract():
-            url = "https://www.nhsinform.scot" + link
-            yield scrapy.Request(url, callback=self.parse_service, cb_kwargs=dict(service=service))
+            yield scrapy.Request(link, callback=self.parse_service, cb_kwargs=dict(service=service))
         for link in response.xpath('//a[@class="pagination__link "]/@href').extract():
-            yield scrapy.Request(response.urljoin(link), cb_kwargs=dict(service=service))
+            yield scrapy.Request(link, cb_kwargs=dict(service=service))
 
     def parse_service(self, response, service):
         item = Feature()
