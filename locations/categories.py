@@ -104,6 +104,7 @@ class Categories(Enum):
     SHOP_WHOLESALE = {"shop": "wholesale"}
 
     OFFICE_FINANCIAL = {"office": "financial"}
+    OFFICE_ENGINEER = {"office": "engineer"}
 
     ATM = {"amenity": "atm"}
     BANK = {"amenity": "bank"}
