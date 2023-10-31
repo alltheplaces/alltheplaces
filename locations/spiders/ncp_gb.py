@@ -3,13 +3,18 @@ import re
 
 from scrapy.spiders import SitemapSpider
 
-from locations.categories import Categories, Extras, apply_category, apply_yes_no
+from locations.categories import Categories, Extras, PaymentMethods, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.spiders.central_england_cooperative import set_operator
 from locations.spiders.vapestore_gb import clean_address
 from locations.user_agents import BROWSER_DEFAULT
 
+PAYMENT = {
+    "Debit Card": PaymentMethods.DEBIT_CARDS,
+    "Credit Card": PaymentMethods.CREDIT_CARDS,
+    "Cash": PaymentMethods.CASH,
+}
 OPERATORS = {
     "NCP": {"brand": "National Car Parks", "brand_wikidata": "Q6971273"},
     "APH": {"brand": "Airport Parking & Hotels", "brand_wikidata": None},
@@ -71,3 +76,13 @@ class NCPGB(SitemapSpider):
                 oh.add_ranges_from_string(d)
 
         item["opening_hours"] = oh
+
+    def payment_method(self, item, data):
+        if not data:
+            return
+
+        for payment in data.split("_"):
+            if method := PAYMENT.get(payment):
+                apply_yes_no(method, item, True)
+            else:
+                self.crawler.stats.inc_value(f"ncp/failed_payment_method/{payment}")
