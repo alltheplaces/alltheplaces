@@ -1,7 +1,7 @@
 import json
 from typing import Iterable
 
-from scrapy import Spider, Request
+from scrapy import Request, Spider
 from scrapy.http import Response
 
 from locations.dict_parser import DictParser
@@ -17,7 +17,7 @@ class AllegroOneBoxSpider(Spider):
         yield Request(
             method="GET",
             url="https://edge.allegro.pl/general-deliveries?nwLat=56.04770689192265&nwLon=2.5567803015399404&seLat=48.224919937057095&seLon=38.32826467653994&brandKeys=ALLEGRO_APM&clusterThreshold=900000000",
-            headers={"Accept": "application/vnd.allegro.public.v3+json"}
+            headers={"Accept": "application/vnd.allegro.public.v3+json"},
         )
 
     def parse(self, response: Response, **kwargs):
