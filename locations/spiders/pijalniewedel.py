@@ -26,7 +26,7 @@ class PijalnieWedel(Spider):
             location_div = response.xpath(f"//div[@data-id='{place['slug']}']")
 
             image_div = location_div.xpath("div[@class='o-location__img ratio']")
-            image_url = 'https://wedelpijalnie.pl' + image_div.attrib['style'].split("'")[1]
+            image_url = "https://wedelpijalnie.pl" + image_div.attrib["style"].split("'")[1]
 
             opening_hours = OpeningHours()
             opening_hours_rows = location_div.xpath(".//div[@class='o-openings__hours-list']/p//text()").getall()
@@ -45,7 +45,7 @@ class PijalnieWedel(Spider):
                 .attrib["href"]
                 .removeprefix("mailto:"),
                 "opening_hours": opening_hours,
-                "image": image_url
+                "image": image_url,
             }
 
             yield Feature(**properties)
