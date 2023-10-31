@@ -5,6 +5,7 @@ from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
+from locations.hours import OpeningHours
 from locations.spiders.central_england_cooperative import set_operator
 from locations.spiders.vapestore_gb import clean_address
 from locations.user_agents import BROWSER_DEFAULT
@@ -40,6 +41,8 @@ class NCPGB(SitemapSpider):
 
                 apply_category(Categories.PARKING, item)
 
+                self.parse_hours(poi.get("openHours"), item)
+
                 apply_yes_no("surveillance", item, poi["cctv"] == "Y")
                 apply_yes_no(Extras.TOILETS, item, poi["customerToilets"] == "Customer Toilets")
                 apply_yes_no("supervised", item, poi["mannedSite"] == "Staffed Site")
@@ -52,3 +55,19 @@ class NCPGB(SitemapSpider):
                         item["extras"]["capacity:disabled"] = num_dis
 
                 yield item
+
+    def parse_hours(self, data, item):
+        if data == "0":
+            return
+
+        oh = OpeningHours()
+        for d in data.split("; "):
+            if "24" in d:
+                days = d.split(" ")[0]
+                oh.add_ranges_from_string(f"{days} 00:00-00:00")
+            elif "closed" in d.lower():
+                continue
+            else:
+                oh.add_ranges_from_string(d)
+
+        item["opening_hours"] = oh
