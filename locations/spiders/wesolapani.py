@@ -4,10 +4,11 @@ import chompjs
 from scrapy import Spider
 from scrapy.http import Response
 
-from locations.hours import OpeningHours, DAYS_RU
+from locations.hours import DAYS_RU, OpeningHours
 
-
-ADDRESS_PATTERN = re.compile(r"^(?:.*[Uu][Ll] ?\. ?)?(?P<street>(?:(?![0-9]{2}-[0-9]{3}).)*(?![0-9]{2}-[0-9]{3})[0-9]+[a-zA-Z]?)(?:(?![0-9]{2}-[0-9]{3}).)*(?P<postalcode>[0-9]{2}-[0-9]{3})?")
+ADDRESS_PATTERN = re.compile(
+    r"^(?:.*[Uu][Ll] ?\. ?)?(?P<street>(?:(?![0-9]{2}-[0-9]{3}).)*(?![0-9]{2}-[0-9]{3})[0-9]+[a-zA-Z]?)(?:(?![0-9]{2}-[0-9]{3}).)*(?P<postalcode>[0-9]{2}-[0-9]{3})?"
+)
 
 
 class WesolaPaniSpider(Spider):
@@ -16,7 +17,9 @@ class WesolaPaniSpider(Spider):
     start_urls = ["https://wesolapani.com/shops"]
 
     def parse(self, response: Response, **kwargs):
-        storage_js = response.xpath('//script[contains(text(), "var storage") and not(contains(text(), "DOMContentLoaded"))]/text()').re_first(r"var storage = (.*);")
+        storage_js = response.xpath(
+            '//script[contains(text(), "var storage") and not(contains(text(), "DOMContentLoaded"))]/text()'
+        ).re_first(r"var storage = (.*);")
         storage = chompjs.parse_js_object(storage_js)
 
         for shop in storage["shops"]:
@@ -33,5 +36,5 @@ class WesolaPaniSpider(Spider):
                 "phone": shop["phone1"],
                 "street_address": address["street"].strip(" ,"),
                 "postcode": address["postalcode"],
-                "opening_hours": opening_hours
+                "opening_hours": opening_hours,
             }
