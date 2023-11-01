@@ -6,7 +6,7 @@ from locations.items import Feature
 from locations.spiders.vapestore_gb import clean_address
 
 
-class FleetFeetUS(Spider):
+class FleetFeetUSSpider(Spider):
     name = "fleet_feet_us"
     item_attributes = {"brand": "Fleet Feet", "brand_wikidata": "Q117062761"}
     start_urls = ["https://www.fleetfeet.com/locations"]
