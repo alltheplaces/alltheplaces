@@ -1,6 +1,6 @@
+import json
 import re
 
-import chompjs
 from scrapy import Spider
 from scrapy.http import Response
 
@@ -20,7 +20,7 @@ class WesolaPaniSpider(Spider):
         storage_js = response.xpath(
             '//script[contains(text(), "var storage") and not(contains(text(), "DOMContentLoaded"))]/text()'
         ).re_first(r"var storage = (.*);")
-        storage = chompjs.parse_js_object(storage_js)
+        storage = json.loads(storage_js)
 
         for shop in storage["shops"]:
             opening_hours = OpeningHours()
