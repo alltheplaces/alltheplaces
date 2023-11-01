@@ -13,7 +13,7 @@ ADDRESS_PATTERN = re.compile(
 
 
 class WesolaPaniSpider(Spider):
-    name = "wesolapani"
+    name = "wesola_pani"
     item_attributes = {"brand": "Wesoła Pani", "brand_wikidata": "Q123240454"}
     start_urls = ["https://wesolapani.com/shops"]
 
