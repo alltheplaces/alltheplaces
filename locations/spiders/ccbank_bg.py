@@ -1,8 +1,8 @@
 from scrapy import Spider
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_BG, OpeningHours
-from locations.categories import Categories, apply_category
 
 
 class ccbankBGSpider(Spider):
@@ -17,7 +17,7 @@ class ccbankBGSpider(Spider):
 
             item["opening_hours"] = OpeningHours()
             if data["workhours"]:
-                item["opening_hours"].add_ranges_from_string(data["workhours"].replace(" - ",","), days=DAYS_BG)
+                item["opening_hours"].add_ranges_from_string(data["workhours"].replace(" - ", ","), days=DAYS_BG)
             if data["type"] == "3":
                 apply_category(Categories.ATM, item)
             else:
