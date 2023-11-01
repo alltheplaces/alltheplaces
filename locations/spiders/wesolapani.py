@@ -13,7 +13,7 @@ ADDRESS_PATTERN = re.compile(
 
 class WesolaPaniSpider(Spider):
     name = "wesolapani"
-    item_attribute = {"brand": "Wesoła Pani", "brand_wikidata": "Q123240454"}
+    item_attributes = {"brand": "Wesoła Pani", "brand_wikidata": "Q123240454"}
     start_urls = ["https://wesolapani.com/shops"]
 
     def parse(self, response: Response, **kwargs):
