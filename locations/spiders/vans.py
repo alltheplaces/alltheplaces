@@ -8,4 +8,4 @@ class VansSpider(SitemapSpider, StructuredDataSpider):
     item_attributes = {"brand": "Vans", "brand_wikidata": "Q1135366"}
     allowed_domains = ["vans.com"]
     sitemap_urls = ["https://www.vans.com/sitemaps/store-locations.xml"]
-    sitemap_rules = [(r"/stores/\w+/[-%\w]+/\w+\d{3}$", "parse_sd")]
+    sitemap_rules = [(r"/stores/.+/.+/\w+\d+$", "parse_sd")]
