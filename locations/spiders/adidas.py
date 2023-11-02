@@ -2,8 +2,8 @@ import json
 
 from scrapy import Spider
 from scrapy.http import Response
-from locations.categories import apply_yes_no
 
+from locations.categories import apply_yes_no
 from locations.dict_parser import DictParser
 
 
@@ -31,5 +31,5 @@ class AdidasSpider(Spider):
                 .replace("/", "")
             )
             item["website"] = f"https://www.adidas.co.uk/storefront/{item['ref']}-{slug}"
-            apply_yes_no('factory_outlet', item, shop.get('factory_outlet') == "1")
+            apply_yes_no("factory_outlet", item, shop.get("factory_outlet") == "1")
             yield item
