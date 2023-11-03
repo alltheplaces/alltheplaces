@@ -277,6 +277,7 @@ class Extras(Enum):
     FAST_FOOD = "fast_food"
     FAXING = "service:fax"
     FEE = "fee"
+    HALAL = "diet:halal"
     INDOOR_SEATING = "indoor_seating"
     OIL_CHANGE = "service:vehicle:oil_change"
     OUTDOOR_SEATING = "outdoor_seating"
