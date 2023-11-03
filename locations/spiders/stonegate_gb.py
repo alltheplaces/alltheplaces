@@ -19,10 +19,10 @@ class StonegateGBSpider(CrawlSpider, StructuredDataSpider):
     ]
 
     brands = {
-        "www.feverbars.co.uk": {"brand": "Fever"},
-        "www.walkaboutbars.co.uk": {"brand": "Walkabout", "brand_wikidata": "Q7962149"},
-        "www.beatone.co.uk": {"brand": "Be At One", "brand_wikidata": "Q110016786"},
-        "www.popworldparty.co.uk": {"brand": "Popworld"},
+        "www.feverbars.co.uk": {"brand": "Fever", "cat": Categories.NIGHTCLUB},
+        "www.walkaboutbars.co.uk": {"brand": "Walkabout", "brand_wikidata": "Q7962149", "cat": Categories.PUB},
+        "www.beatone.co.uk": {"brand": "Be At One", "brand_wikidata": "Q110016786", "cat": Categories.BAR},
+        "www.popworldparty.co.uk": {"brand": "Popworld", "cat": Categories.NIGHTCLUB},
         "www.slugandlettuce.co.uk": {"brand": "Slug & Lettuce", "brand_wikidata": "Q7542224"},
         "www.crafted-social.co.uk": {"brand": "Crafted Social"},
         "www.greatukpubs.co.uk": {"brand": "Great UK Pubs"},
@@ -32,8 +32,12 @@ class StonegateGBSpider(CrawlSpider, StructuredDataSpider):
     def post_process_item(self, item, response, ld_data, **kwargs):
         set_operator(self.STONEGATE, item)
 
-        if brand := self.brands.get(urlparse(response.url).netloc):
-            item.update(brand)
+        brand = self.brands.get(urlparse(response.url).netloc, {})
+
+        item["brand"] = brand.get("brand")
+        item["brand_wikidata"] = brand.get("brand_wikidata")
+        if cat := brand.get("cat"):
+            apply_category(cat, item)
         else:
             apply_category(Categories.PUB, item)
 
