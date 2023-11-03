@@ -1,3 +1,4 @@
+import html
 from urllib.parse import urlparse
 
 from scrapy.linkextractors import LinkExtractor
@@ -6,6 +7,14 @@ from scrapy.spiders import CrawlSpider, Rule
 from locations.categories import Categories, apply_category
 from locations.spiders.morrisons_gb import set_operator
 from locations.structured_data_spider import StructuredDataSpider
+
+
+def html_decode_dict(obj: dict):
+    for k, v in obj.items():
+        if isinstance(v, str):
+            obj[k] = html.unescape(v)
+        elif isinstance(v, dict):
+            html_decode_dict(v)
 
 
 class StonegateGBSpider(CrawlSpider, StructuredDataSpider):
@@ -28,6 +37,9 @@ class StonegateGBSpider(CrawlSpider, StructuredDataSpider):
         "www.greatukpubs.co.uk": {"brand": "Great UK Pubs"},
         "www.craftunionpubs.com": {"brand": "Craft Union"},
     }
+
+    def pre_process_data(self, ld_data, **kwargs):
+        html_decode_dict(ld_data)
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         set_operator(self.STONEGATE, item)
