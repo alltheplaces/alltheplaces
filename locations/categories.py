@@ -132,6 +132,7 @@ class Categories(Enum):
     LIBRARY = {"amenity": "library"}
     MONEY_TRANSFER = {"amenity": "money_transfer"}
     MUSEUM = {"tourism": "museum"}
+    NIGHTCLUB = {"amenity": "nightclub"}
     PHARMACY = {"amenity": "pharmacy", "healthcare": "pharmacy"}
     PARCEL_LOCKER = {"amenity": "parcel_locker"}
     POST_BOX = {"amenity": "post_box"}
