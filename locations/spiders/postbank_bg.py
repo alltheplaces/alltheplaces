@@ -1,10 +1,11 @@
-import scrapy
 import re
+
+import scrapy
 from scrapy.http import FormRequest
 
-from locations.hours import DAYS_BG, OpeningHours, sanitise_day, day_range
+from locations.categories import Categories, apply_category, apply_yes_no
+from locations.hours import DAYS_BG, OpeningHours, day_range, sanitise_day
 from locations.items import Feature
-from locations.categories import apply_category, apply_yes_no, Categories
 
 
 class PosstbankBGSpider(scrapy.Spider):
@@ -13,10 +14,16 @@ class PosstbankBGSpider(scrapy.Spider):
     allowed_domains = ["www.postbank.bg"]
     start_urls = ["https://www.postbank.bg/bg-BG/api/locations/locations"]
     no_refs = True
+
     def start_requests(self):
-        return [ FormRequest("https://www.postbank.bg/bg-BG/api/locations/locations",
-                     formdata={"contextItemPath": "/sitecore/content/postbank/home"},
-                     callback=self.parse) ]
+        return [
+            FormRequest(
+                "https://www.postbank.bg/bg-BG/api/locations/locations",
+                formdata={"contextItemPath": "/sitecore/content/postbank/home"},
+                callback=self.parse,
+            )
+        ]
+
     def parse(self, response):
         for city in response.json():
             for location in city["branches"]:
@@ -32,7 +39,7 @@ class PosstbankBGSpider(scrapy.Spider):
                 item["phone"] = location["phone"]
 
                 item["opening_hours"] = OpeningHours()
-                
+
                 if location["worktime"] is not None:
                     # ; needs to be replaced for a single item only..
                     for worktime in location["worktime"].replace(" : ", " ").replace(";", ":").split("<br/>"):
@@ -42,7 +49,7 @@ class PosstbankBGSpider(scrapy.Spider):
                         if match:
                             days = [sanitise_day(day, DAYS_BG) for day in match.group(1).replace(" ", "").split("-")]
                             hours = [match.group(2), match.group(3)]
-                            if len(days)==2:
+                            if len(days) == 2:
                                 item["opening_hours"].add_days_range(day_range(days[0], days[1]), hours[0], hours[1])
                             else:
                                 item["opening_hours"].add_range(days[0], hours[0], hours[1])
