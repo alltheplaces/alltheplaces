@@ -45,7 +45,7 @@ class PosstbankBGSpider(scrapy.Spider):
                     for worktime in location["worktime"].replace(" : ", " ").replace(";", ":").split("<br/>"):
                         if worktime == "":
                             continue
-                        match = re.match("([а-я]+\s?\-?\s?[а-я]+)+[\s:]+(\d{2}:\d{2})-(\d{2}:\d{2})", worktime.lower())
+                        match = re.match(r"([а-я]+\s?\-?\s?[а-я]+)+[\s:]+(\d{2}:\d{2})-(\d{2}:\d{2})", worktime.lower())
                         if match:
                             days = [sanitise_day(day, DAYS_BG) for day in match.group(1).replace(" ", "").split("-")]
                             hours = [match.group(2), match.group(3)]
