@@ -1,4 +1,5 @@
 import json
+import re
 
 from scrapy.spiders import SitemapSpider
 
@@ -20,14 +21,19 @@ class FantastikoBGSpider(SitemapSpider, StructuredDataSpider):
         item["ref"] = response.xpath(
             '//span[@class="feat-title white shop-number inline_block middle"]/text()'
         ).extract_first()
-        item["opening_hours"] = (
-            response.xpath('//p[@itemprop="openingHours"]/text()')
+        opening_hours = (response.xpath('//p[@itemprop="openingHours"]/text()')
             .extract_first()
             .replace("ч.", "")
             .replace("от ", "")
             .replace(" до ", "-")
             .replace(".", ":")
             .strip()
+            .split("-")
         )
-
+        open_time = ":".join([time_item.zfill(2) for time_item in opening_hours[0].split(":")])
+        close_time = ":".join([time_item.zfill(2) for time_item in opening_hours[1].split(":")])
+        item["opening_hours"] = f"{open_time}-{close_time}"
+        
+        item["facebook"] = None
+        item["phone"] = None
         yield item
