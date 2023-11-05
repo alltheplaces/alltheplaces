@@ -30,7 +30,7 @@ class BulgarianPostsBGSpider(Spider):
 
             has_break = False
             if location["note"] is not None:
-                if break_times := re.match("(\d+:\d+)-(\d+:\d+) - затворено", location["note"]):
+                if break_times := re.match(r"(\d+:\d+)-(\d+:\d+) - затворено", location["note"]):
                     break_start = break_times.group(1)
                     break_end = break_times.group(2)
                     has_break = True
