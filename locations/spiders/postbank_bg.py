@@ -8,7 +8,7 @@ from locations.hours import DAYS_BG, OpeningHours, day_range, sanitise_day
 from locations.items import Feature
 
 
-class PosstbankBGSpider(scrapy.Spider):
+class PostbankBGSpider(scrapy.Spider):
     name = "postbank_bg"
     item_attributes = {"brand": "Postbank", "brand_wikidata": "Q7234083", "country": "BG"}
     allowed_domains = ["www.postbank.bg"]
