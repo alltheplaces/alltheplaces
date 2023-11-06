@@ -12,7 +12,11 @@ class DairyQueenUSSpider(Spider):
     start_urls = ["https://prod-dairyqueen.dotcmscloud.com/api/es/search"]
     custom_settings = {"ROBOTSTXT_OBEY": False}  # Missing robots.txt
     brands = {
-        "Food and Treat": {"brand": "DQ Grill & Chill", "brand_wikidata": "Q1141226", "extras": {"cuisine": "ice_cream;burger"}},
+        "Food and Treat": {
+            "brand": "DQ Grill & Chill",
+            "brand_wikidata": "Q1141226",
+            "extras": {"cuisine": "ice_cream;burger"},
+        },
         "Treat Only": {"brand": "Dairy Queen", "brand_wikidata": "Q1141226", "extras": {"cuisine": "ice_cream"}},
     }
 
