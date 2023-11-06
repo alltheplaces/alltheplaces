@@ -8,10 +8,13 @@ from locations.dict_parser import DictParser
 
 class DairyQueenUSSpider(Spider):
     name = "dairy_queen_us"
-    item_attributes = {"brand": "Dairy Queen", "brand_wikidata": "Q1141226"}
     allowed_domains = ["prod-dairyqueen.dotcmscloud.com"]
     start_urls = ["https://prod-dairyqueen.dotcmscloud.com/api/es/search"]
     custom_settings = {"ROBOTSTXT_OBEY": False}  # Missing robots.txt
+    brands = {
+        "Food and Treat": {"brand": "DQ Grill & Chill", "brand_wikidata": "Q1141226", "extras": {"cuisine": "ice_cream;burger"}},
+        "Treat Only": {"brand": "Dairy Queen", "brand_wikidata": "Q1141226", "extras": {"cuisine": "ice_cream"}},
+    }
 
     def start_requests(self):
         yield JsonRequest(
@@ -27,6 +30,7 @@ class DairyQueenUSSpider(Spider):
         for location in response.json()["contentlets"]:
             item = DictParser.parse(location)
             item["lat"], item["lon"] = location.get("latlong", ",").split(",", 2)
+            item.update(self.brands[location["conceptType"]])
             item["name"] = re.sub(r"^\d+ : ", "", item["name"])
             item["street_address"] = location.get("address3")
             item["website"] = "https://www.dairyqueen.com" + location.get("urlTitle")
