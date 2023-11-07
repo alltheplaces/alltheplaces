@@ -11,9 +11,12 @@ def _get_possible_links(response):
 
 def extract_google_position(item, response):
     for link in _get_possible_links(response):
-        coords = url_to_coords(link)
-        if coords != (None, None):
-            item["lat"], item["lon"] = coords
+        try:
+            coords = url_to_coords(link)
+            if coords != (None, None):
+                item["lat"], item["lon"] = coords
+                return
+        except ValueError:
             return
 
 
