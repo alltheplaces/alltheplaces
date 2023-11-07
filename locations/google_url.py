@@ -19,6 +19,7 @@ def extract_google_position(item, response):
         except ValueError:
             return
 
+
 def url_to_coords(url: str) -> (float, float):  # noqa: C901
     def get_query_param(link, query_param):
         parsed_link = urlsplit(link)
