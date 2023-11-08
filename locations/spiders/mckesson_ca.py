@@ -41,7 +41,11 @@ class McKessonCASpider(Spider):
                 if day_hours["isClose"] or day_hours["isNotAvailable"]:
                     continue
                 if day_hours["displayLanguage"]["Name"] == "en":
-                    item["opening_hours"].add_range(DAYS_EN[day_hours["day"]], day_hours["startTime"], day_hours["endTime"], "%H:%M:%S")
+                    item["opening_hours"].add_range(
+                        DAYS_EN[day_hours["day"]], day_hours["startTime"], day_hours["endTime"], "%H:%M:%S"
+                    )
                 elif day_hours["displayLanguage"]["Name"] == "fr":
-                    item["opening_hours"].add_range(DAYS_FR[day_hours["day"]], day_hours["startTime"], day_hours["endTime"], "%H:%M:%S")
+                    item["opening_hours"].add_range(
+                        DAYS_FR[day_hours["day"]], day_hours["startTime"], day_hours["endTime"], "%H:%M:%S"
+                    )
             yield item
