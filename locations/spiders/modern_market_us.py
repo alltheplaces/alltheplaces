@@ -21,7 +21,9 @@ class ModernMarketUSSpider(Spider):
             if "COMING SOON" in location["name"].upper():
                 continue
             item = DictParser.parse(location)
-            item["street_address"] = ", ".join(filter(None, [location.get("streetaddress"), location.get("streetaddress2")]))
+            item["street_address"] = ", ".join(
+                filter(None, [location.get("streetaddress"), location.get("streetaddress2")])
+            )
             apply_yes_no(Extras.DELIVERY, item, location.get("candeliver"), False)
             apply_yes_no(Extras.DRIVE_THROUGH, item, location.get("supportsdrivethru"), False)
             item["opening_hours"] = OpeningHours()
@@ -29,6 +31,10 @@ class ModernMarketUSSpider(Spider):
                 if calendar["type"] == "business":
                     if len(calendar["ranges"]) >= 7:
                         for i in range(0, 6, 1):
-                            item["opening_hours"].add_range(calendar["ranges"][i]["weekday"], calendar["ranges"][i]["start"].split(" ", 1)[1], calendar["ranges"][i]["end"].split(" ", 1)[1])
+                            item["opening_hours"].add_range(
+                                calendar["ranges"][i]["weekday"],
+                                calendar["ranges"][i]["start"].split(" ", 1)[1],
+                                calendar["ranges"][i]["end"].split(" ", 1)[1],
+                            )
                     break
             yield item
