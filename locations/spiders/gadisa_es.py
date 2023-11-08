@@ -44,5 +44,7 @@ class GadisaESSpider(Spider):
             }
             properties.update(self.brands[location["sec"]])
             if location.get("horario"):
-                properties["opening_hours"].add_ranges_from_string(ranges_string=location["horario"], days=DAYS_ES, delimiters=DELIMITERS_ES)
+                properties["opening_hours"].add_ranges_from_string(
+                    ranges_string=location["horario"], days=DAYS_ES, delimiters=DELIMITERS_ES
+                )
             yield Feature(**properties)
