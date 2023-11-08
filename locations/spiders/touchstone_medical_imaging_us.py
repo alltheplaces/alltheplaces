@@ -1,6 +1,5 @@
-from locations.storefinders.storepoint import StorepointSpider
-
 from locations.hours import DAYS_FULL, OpeningHours
+from locations.storefinders.storepoint import StorepointSpider
 
 
 class TouchstoneMedicalImagingUSSpider(StorepointSpider):
