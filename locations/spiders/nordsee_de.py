@@ -10,7 +10,6 @@ class NordseeDESpider(Spider):
     item_attributes = {"brand": "Nordsee", "brand_wikidata": "Q74866"}
     allowed_domains = ["www.nordsee.com"]
     start_urls = ["https://www.nordsee.com/en/?type=2001"]
-    custom_settings = {"ROBOTSTXT_OBEY": False}  # Missing robots.txt
 
     def start_requests(self):
         for url in self.start_urls:
