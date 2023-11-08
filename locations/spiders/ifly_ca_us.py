@@ -5,8 +5,8 @@ from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
 
-class iFLYUSSpider(Spider):
-    name = "ifly_us"
+class iFLYCAUSSpider(Spider):
+    name = "ifly_ca_us"
     item_attributes = {"brand": "iFLY", "brand_wikidata": "Q64767105"}
     allowed_domains = ["dataanywhereprod.azure-api.net"]
     start_urls = ["https://dataanywhereprod.azure-api.net/SL/V2/api/stores/"]
@@ -37,6 +37,7 @@ class iFLYUSSpider(Spider):
             item["city"] = location["ExtraData"]["Address"].get("Locality")
             item["state"] = location["ExtraData"]["Address"].get("Region")
             item["postcode"] = location["ExtraData"]["Address"].get("PostalCode")
+            item["country"] = location["ExtraData"]["Address"].get("CountryCode")
             item["phone"] = location["ExtraData"].get("Phone")
             item["opening_hours"] = OpeningHours()
             for day_abbrev, hours_ranges in location["ExtraData"]["HoursOfOpStruct"].items():
