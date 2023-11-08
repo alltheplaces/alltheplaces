@@ -10,7 +10,7 @@ class NordseeDESpider(Spider):
     item_attributes = {"brand": "Nordsee", "brand_wikidata": "Q74866"}
     allowed_domains = ["www.nordsee.com"]
     start_urls = ["https://www.nordsee.com/en/?type=2001"]
-    custom_settings = {"ROBOTSTXT_OBEY": False} # Missing robots.txt
+    custom_settings = {"ROBOTSTXT_OBEY": False}  # Missing robots.txt
 
     def start_requests(self):
         for url in self.start_urls:
@@ -25,5 +25,8 @@ class NordseeDESpider(Spider):
             for day_abbrev, hours_range in location.get("opening").items():
                 if isinstance(hours_range, str):
                     item["opening_hours"].add_range(day_abbrev.title(), *hours_range.split(" - ", 1), "%H:%M")
-            item["website"] = "https://www.nordsee.com" + Selector(text=location["listItem"]).xpath('//a[@class="storeListItem__link"]/@href').get()
+            item["website"] = (
+                "https://www.nordsee.com"
+                + Selector(text=location["listItem"]).xpath('//a[@class="storeListItem__link"]/@href').get()
+            )
             yield item
