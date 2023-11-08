@@ -25,7 +25,15 @@ class iFLYUSSpider(Spider):
             item = DictParser.parse(location)
             item["ref"] = location["ExtraData"]["ReferenceCode"]
             item["geometry"] = location["Location"]
-            item["street_address"] = ", ".join(filter(None, [location["ExtraData"]["Address"].get("AddressNonStruct_Line1"), location["ExtraData"]["Address"].get("AddressNonStruct_Line2")]))
+            item["street_address"] = ", ".join(
+                filter(
+                    None,
+                    [
+                        location["ExtraData"]["Address"].get("AddressNonStruct_Line1"),
+                        location["ExtraData"]["Address"].get("AddressNonStruct_Line2"),
+                    ],
+                )
+            )
             item["city"] = location["ExtraData"]["Address"].get("Locality")
             item["state"] = location["ExtraData"]["Address"].get("Region")
             item["postcode"] = location["ExtraData"]["Address"].get("PostalCode")
@@ -35,5 +43,7 @@ class iFLYUSSpider(Spider):
                 if day_abbrev == "SpecialHours" or not hours_ranges.get("Ranges"):
                     continue
                 for hours_range in hours_ranges["Ranges"]:
-                    item["opening_hours"].add_range(day_abbrev.title(), hours_range["StartTime"], hours_range["EndTime"], "%I:%M%p")
+                    item["opening_hours"].add_range(
+                        day_abbrev.title(), hours_range["StartTime"], hours_range["EndTime"], "%I:%M%p"
+                    )
             yield item
