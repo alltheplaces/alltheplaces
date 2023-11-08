@@ -13,16 +13,18 @@ class ProMedicaUSSpider(XMLFeedSpider):
 
     def parse_node(self, response, node):
         properties = {
-            "ref": node.xpath('.//@web').get(),
-            "name": node.xpath('.//@name').get(),
-            "lat": node.xpath('.//@lat').get(),
-            "lon": node.xpath('.//@lng').get(),
-            "street_address": ", ".join(filter(None, [node.xpath('.//@address').get(), node.xpath('.//@address2').get()])),
-            "city": node.xpath('.//@city').get(),
-            "state": node.xpath('.//@state').get(),
-            "postcode": node.xpath('.//@postal').get(),
-            "phone": node.xpath('.//@phone').get(),
-            "website": node.xpath('.//@web').get(),
-            "image": "https://promedicaseniorcare.org" + node.xpath('.//@image').get(),
+            "ref": node.xpath(".//@web").get(),
+            "name": node.xpath(".//@name").get(),
+            "lat": node.xpath(".//@lat").get(),
+            "lon": node.xpath(".//@lng").get(),
+            "street_address": ", ".join(
+                filter(None, [node.xpath(".//@address").get(), node.xpath(".//@address2").get()])
+            ),
+            "city": node.xpath(".//@city").get(),
+            "state": node.xpath(".//@state").get(),
+            "postcode": node.xpath(".//@postal").get(),
+            "phone": node.xpath(".//@phone").get(),
+            "website": node.xpath(".//@web").get(),
+            "image": "https://promedicaseniorcare.org" + node.xpath(".//@image").get(),
         }
         yield Feature(**properties)
