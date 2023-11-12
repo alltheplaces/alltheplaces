@@ -32,7 +32,7 @@ class DodoPizzaSpider(Spider):
                 yield from self.parse_poi(poi, response.meta["country"])
 
     def parse_poi(self, poi, country):
-        # Type 1 is a restaurant, State 1 is resaurant is open
+        # Type 1 is a restaurant, State 1 is restaurant is open
         if poi.get("Type") == 1 and poi.get("State") == 1:
             item = DictParser.parse(poi)
             item["name"] = poi.get("Alias")
