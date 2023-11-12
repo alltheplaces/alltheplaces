@@ -18,7 +18,7 @@ class JyskSpider(scrapy.Spider):
         ).getall()
 
         # There are Jysk owned stores and Jysk franchise stores.
-        # Only Jysk owned stores have standartized store locator, franchise stores have different website format.
+        # Only Jysk owned stores have standardized store locator, franchise stores have different website format.
         # For this spider we are interested only in Jysk owned stores. Others should be scraped with different spiders.
         # For reference:
         # franchise_urls = response.xpath(
