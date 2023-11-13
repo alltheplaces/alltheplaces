@@ -37,7 +37,6 @@ class LondonDrugsCASpider(scrapy.Spider):
                         close_time = day_hours["hours"][1]
                         hours_text = f"{hours_text} {day_range}: {open_time} - {close_time}"
                     hours_text = hours_text.replace("& Holidays", "")
-                    print(hours_text)
                     item["opening_hours"] = OpeningHours()
                     item["opening_hours"].add_ranges_from_string(hours_text)
                     break
