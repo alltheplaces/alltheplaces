@@ -3,7 +3,7 @@ from urllib.parse import urljoin
 import scrapy
 
 from locations.dict_parser import DictParser
-
+from locations.categories import Extras, apply_yes_no
 
 class VkusnoITochkaRuSpider(scrapy.Spider):
     """
@@ -19,9 +19,10 @@ class VkusnoITochkaRuSpider(scrapy.Spider):
     single_restaurant_url = "https://vkusnoitochka.ru/api/restaurant/"
     restaurants_map_url = "https://vkusnoitochka.ru/restaurants/map/"
     start_urls = [all_restaurants_url]
+    requires_proxy = True
 
     def parse(self, response, **kwargs):
-        for restaurant in response.json()["restaurants"]:
+        for _, restaurant in response.json()["restaurants"].items():
             url = urljoin(self.single_restaurant_url, str(restaurant["id"]))
             yield scrapy.Request(
                 url,
@@ -36,10 +37,12 @@ class VkusnoITochkaRuSpider(scrapy.Spider):
         restaurant["housenumber"] = restaurant.get("house")
         restaurant["website"] = urljoin(self.restaurants_map_url, str(restaurant["id"]))
         item = DictParser.parse(restaurant)
-        if driver_through := restaurant.get("driveThrough"):
-            item["extras"]["drive_through"] = driver_through
-        if opening_hours := restaurant.get("openingHours"):
-            item["opening_hours"] = self.parse_hours(opening_hours)
+        features = [f['xmlId'] for f in restaurant['features']]
+        apply_yes_no(Extras.DRIVE_THROUGH, item, 'mcauto' in features, True)
+        if 'around-the-clock' in features:
+            item['opening_hours'] = '24/7'
+        elif opening_hours := restaurant.get("openingHours"):
+            item["opening_hours"] = self.parse_hours(opening_hours)  
         return item
 
     def parse_hours(self, hours):
@@ -55,6 +58,7 @@ class VkusnoITochkaRuSpider(scrapy.Spider):
         Type 1 is for lobby hours which is what we want.
         Weekday 1 is for all days of the week.
         """
+        # TODO: api was changed and this does not work anymore - figure out hours
         hours = [x for x in hours if x["weekday"] == 1 and x["type"] == 1]
         if not hours:
             return None
