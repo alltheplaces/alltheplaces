@@ -9,6 +9,14 @@ class NickScaliFurnitureSpider(AmastyStoreLocatorSpider):
     item_attributes = {"brand": "Nick Scali Furniture", "brand_wikidata": "Q17053453"}
     allowed_domains = ["www.nickscali.com.au", "www.nickscali.co.nz"]
 
+    def start_requests(self):
+        for domain in self.allowed_domains:
+            headers = {
+                "X-Requested-With": "XMLHttpRequest",
+                "Origin": f"https://{domain}",
+            }
+            yield Request(url=f"https://{domain}/amlocator/index/ajax/", method="POST", headers=headers)
+
     def parse_item(self, item, location, popup_html):
         item["addr_full"] = " ".join(
             (" ".join(popup_html.xpath('//div[contains(@class, "amlocator-info-popup")]/text()').getall())).split()
