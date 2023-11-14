@@ -2,8 +2,9 @@ from urllib.parse import urljoin
 
 import scrapy
 
-from locations.dict_parser import DictParser
 from locations.categories import Extras, apply_yes_no
+from locations.dict_parser import DictParser
+
 
 class VkusnoITochkaRuSpider(scrapy.Spider):
     """
@@ -37,12 +38,12 @@ class VkusnoITochkaRuSpider(scrapy.Spider):
         restaurant["housenumber"] = restaurant.get("house")
         restaurant["website"] = urljoin(self.restaurants_map_url, str(restaurant["id"]))
         item = DictParser.parse(restaurant)
-        features = [f['xmlId'] for f in restaurant['features']]
-        apply_yes_no(Extras.DRIVE_THROUGH, item, 'mcauto' in features, True)
-        if 'around-the-clock' in features:
-            item['opening_hours'] = '24/7'
+        features = [f["xmlId"] for f in restaurant["features"]]
+        apply_yes_no(Extras.DRIVE_THROUGH, item, "mcauto" in features, True)
+        if "around-the-clock" in features:
+            item["opening_hours"] = "24/7"
         elif opening_hours := restaurant.get("openingHours"):
-            item["opening_hours"] = self.parse_hours(opening_hours)  
+            item["opening_hours"] = self.parse_hours(opening_hours)
         return item
 
     def parse_hours(self, hours):
