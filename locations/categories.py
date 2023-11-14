@@ -272,6 +272,7 @@ class Fuel(Enum):
     """
     Fuel categories per https://wiki.openstreetmap.org/wiki/Key:fuel
     """
+
     # Diesel
     DIESEL = "fuel:diesel"
     GTL_DIESEL = "fuel:GTL_diesel"
@@ -362,6 +363,7 @@ class PaymentMethods(Enum):
     """
     Payment method categories per https://wiki.openstreetmap.org/wiki/Key:payment:*
     """
+
     ALIPAY = "payment:alipay"
     AMERICAN_EXPRESS = "payment:american_express"
     AMERICAN_EXPRESS_CONTACTLESS = "payment:american_express_contactless"
@@ -417,6 +419,7 @@ class FuelCards(Enum):
     """
     Fuel card categories per https://wiki.openstreetmap.org/wiki/Key:payment:*#Fuel_cards
     """
+
     ALLSTAR = "payment:allstar"  # https://allstarcard.co.uk/
     AVIA = "payment:avia_card"  # https://www.aviaitalia.com/en/avia-card/
     ARIS = "payment:aris"
@@ -450,6 +453,7 @@ class Access(Enum):
     """
     Access categories per https://wiki.openstreetmap.org/wiki/Key:access
     """
+
     HGV = "hgv"
 
 
@@ -483,6 +487,7 @@ class Clothes(Enum):
     """
     Clothing categories per https://wiki.openstreetmap.org/wiki/Key:clothes
     """
+
     BABY = "babies"
     CHILDREN = "children"
     MATERNITY = "maternity"
@@ -511,6 +516,7 @@ class HealthcareSpecialities(Enum):
     """
     Healthcare speciality categories per https://wiki.openstreetmap.org/wiki/Key:healthcare:speciality
     """
+
     ABORTION = "abortion"
     ACUPUNCTURE = "acupuncture"
     ALLERGOLOGY = "allergoloy"

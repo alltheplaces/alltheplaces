@@ -74,7 +74,12 @@ def test_clothes():
     assert item["extras"] == {"clothes": "men;women", "clothes:men": "yes", "clothes:women": "yes"}
 
     apply_clothes([Clothes.CHILDREN], item)
-    assert item["extras"] == {"clothes": "children;men;women", "clothes:children": "yes", "clothes:men": "yes", "clothes:women": "yes"}
+    assert item["extras"] == {
+        "clothes": "children;men;women",
+        "clothes:children": "yes",
+        "clothes:men": "yes",
+        "clothes:women": "yes",
+    }
 
     item = Feature()
     apply_clothes([Clothes.WOMEN], item)
@@ -96,9 +101,7 @@ def test_healthcare_specialities():
     )
     assert item["extras"] == {"healthcare:speciality": "general;orthodontics;surgery"}
 
-    apply_healthcare_specialities(
-        [HealthcareSpecialities.DERMATOLOGY, HealthcareSpecialities.NEUROLOGY], item
-    )
+    apply_healthcare_specialities([HealthcareSpecialities.DERMATOLOGY, HealthcareSpecialities.NEUROLOGY], item)
     assert item["extras"] == {"healthcare:speciality": "dermatology;general;neurology;orthodontics;surgery"}
 
     item = Feature()
