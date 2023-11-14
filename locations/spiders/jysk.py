@@ -10,11 +10,11 @@ from locations.hours import DAYS_FULL, OpeningHours
 class JyskSpider(scrapy.Spider):
     name = "jysk"
     item_attributes = {"brand": "JYSK", "brand_wikidata": "Q138913"}
-    start_urls = ["https://www.jysk.com/"]
+    start_urls = ["https://www.jysk.com/jysk-stores"]
 
     def parse(self, response):
         main_urls = response.xpath(
-            "//div[contains(@class, 'col-xs-12 col-sm-4 col-md-4 panels-flexible-region-inside columns')][1]//li/a/@href"
+            "//div[@class='paragraph paragraph--type--text paragraph--view-mode--default']/div/ul/li/a/@href"
         ).getall()
 
         # There are Jysk owned stores and Jysk franchise stores.
