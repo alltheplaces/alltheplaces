@@ -1,4 +1,14 @@
-from locations.categories import Categories, Clothes, Fuel, HealthcareSpecialities, apply_category, apply_yes_no, get_category_tags, apply_clothes, apply_healthcare_specialities
+from locations.categories import (
+    Categories,
+    Clothes,
+    Fuel,
+    HealthcareSpecialities,
+    apply_category,
+    apply_clothes,
+    apply_healthcare_specialities,
+    apply_yes_no,
+    get_category_tags,
+)
 from locations.items import Feature
 
 
@@ -57,6 +67,7 @@ def test_shop_yes_category():
     apply_category({"shop": "yes"}, item)
     assert get_category_tags(item) == {"shop": "yes"}
 
+
 def test_clothes():
     item = Feature()
     apply_clothes([Clothes.MEN.value, Clothes.WOMEN.value], item)
@@ -72,12 +83,22 @@ def test_clothes():
     apply_clothes([Clothes.WOMEN.value], item)
     assert get_category_tags(item) == {"clothes": "women"}
 
+
 def test_healthcare_specialities():
     item = Feature()
-    apply_healthcare_specialities([HealthcareSpecialities.GENERAL.value, HealthcareSpecialities.SURGERY.value, HealthcareSpecialities.ORTHODONTICS.value], item)
+    apply_healthcare_specialities(
+        [
+            HealthcareSpecialities.GENERAL.value,
+            HealthcareSpecialities.SURGERY.value,
+            HealthcareSpecialities.ORTHODONTICS.value,
+        ],
+        item,
+    )
     assert get_category_tags(item) == {"healthcare:speciality": "general;orthodontics;surgery"}
 
-    apply_healthcare_specialities([HealthcareSpecialities.DERMATOLOGY.value, HealthcareSpecialities.NEUROLOGY.value], item)
+    apply_healthcare_specialities(
+        [HealthcareSpecialities.DERMATOLOGY.value, HealthcareSpecialities.NEUROLOGY.value], item
+    )
     assert get_category_tags(item) == {"healthcare:speciality": "dermatology;general;neurology;orthodontics;surgery"}
 
     item = Feature()

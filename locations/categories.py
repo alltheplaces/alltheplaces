@@ -463,6 +463,7 @@ def apply_clothes(clothes: [Clothes], item: Feature):
         apply_yes_no(f"clothes:{c.value}", item, True)
         apply_category({"clothes": c.value}, item)
 
+
 class HealthcareSpecialities(Enum):
     ABORTION = "abortion"
     ACUPUNCTURE = "acupuncture"
@@ -558,6 +559,7 @@ class HealthcareSpecialities(Enum):
     VASCULAR_SURGERY = "vascular_surgery"
     VENEREOLOGY = "venereology"
     WOUND_TREATMENT = "wound_treatment"
+
 
 def apply_healthcare_specialities(specialities: [HealthcareSpecialities], item: Feature):
     for s in specialities:

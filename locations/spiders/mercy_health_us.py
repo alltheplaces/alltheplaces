@@ -1,8 +1,13 @@
 from scrapy.spiders import SitemapSpider
 
-from locations.categories import Categories, HealthcareSpecialities, apply_category, apply_healthcare_specialities, apply_yes_no
+from locations.categories import (
+    Categories,
+    HealthcareSpecialities,
+    apply_category,
+    apply_healthcare_specialities,
+    apply_yes_no,
+)
 from locations.structured_data_spider import StructuredDataSpider
-
 
 HEALTHCARE_CATEGORIES = {
     "/anticoagulation-clinics/": [Categories.CLINIC],
@@ -29,7 +34,11 @@ HEALTHCARE_CATEGORIES = {
     "/maternity-care-birthing-centers/": [Categories.BIRTHING_CENTRE],
     "/medical-centers-clinics/": [Categories.CLINIC],
     "/nephrology-kidney-care/": [Categories.CLINIC, HealthcareSpecialities.NEPHROLOGY],
-    "/neurology-neurosurgery-neuroscience/": [Categories.CLINIC, HealthcareSpecialities.NEUROLOGY, HealthcareSpecialities.NEUROSURGERY],
+    "/neurology-neurosurgery-neuroscience/": [
+        Categories.CLINIC,
+        HealthcareSpecialities.NEUROLOGY,
+        HealthcareSpecialities.NEUROSURGERY,
+    ],
     "/occupational-health/": [Categories.CLINIC, HealthcareSpecialities.OCCUPATIONAL],
     "/orthopedics-sports-medicine-spine/": [Categories.CLINIC, HealthcareSpecialities.ORTHOPAEDICS],
     "/other-locations/": [Categories.CLINIC],
@@ -58,7 +67,12 @@ class MercyHealthUSSpider(SitemapSpider, StructuredDataSpider):
     item_attributes = {"brand": "Mercy Health", "brand_wikidata": "Q5053169"}
     allowed_domains = ["www.mercy.com"]
     sitemap_urls = ["https://www.mercy.com/sitemap.xml"]
-    sitemap_rules = [(r"^https:\/\/www\.mercy\.com\/locations\/(?:emergency-room|fitness-healthplex|hospitals|medical-centers-clinics|primary-care-family-medicine|senior-living|specialty-locations|urgent-care)\/[\w\-]+\/[\w\-]+$", "parse")]
+    sitemap_rules = [
+        (
+            r"^https:\/\/www\.mercy\.com\/locations\/(?:emergency-room|fitness-healthplex|hospitals|medical-centers-clinics|primary-care-family-medicine|senior-living|specialty-locations|urgent-care)\/[\w\-]+\/[\w\-]+$",
+            "parse",
+        )
+    ]
     wanted_types = ["EmergencyService", "ExerciseGym", "Hospital", "MedicalClinic", "Residence"]
 
     def post_process_item(self, item, response, ld_data):
