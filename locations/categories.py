@@ -71,13 +71,17 @@ class Categories(Enum):
     SHOP_HAIRDRESSER = {"shop": "hairdresser"}
     SHOP_HARDWARE = {"shop": "hardware"}
     SHOP_HEARING_AIDS = {"shop": "hearing_aids"}
+    SHOP_HERBALIST = {"shop": "herbalist"}
     SHOP_JEWELRY = {"shop": "jewelry"}
     SHOP_LAUNDRY = {"shop": "laundry"}
+    SHOP_MASSAGE = {"shop": "massage"}
+    SHOP_MEDICAL_SUPPLY = {"shop": "medical_supply"}
     SHOP_MOBILE_PHONE = {"shop": "mobile_phone"}
     SHOP_MONEY_LENDER = {"shop": "money_lender"}
     SHOP_MOTORCYCLE = {"shop": "motorcycle"}
     SHOP_MOTORCYCLE_REPAIR = {"shop": "motorcycle_repair"}
     SHOP_NEWSAGENT = {"shop": "newsagent"}
+    SHOP_NUTRITION_SUPPLEMENTS = {"shop": "nutrition_supplements"}
     SHOP_OPTICIAN = {"shop": "optician"}
     SHOP_OUTDOOR = {"shop": "outdoor"}
     SHOP_OUTPOST = {"shop": "outpost"}
@@ -106,9 +110,15 @@ class Categories(Enum):
     OFFICE_FINANCIAL = {"office": "financial"}
     OFFICE_ENGINEER = {"office": "engineer"}
 
+    ALTERNATIVE_MEDICINE = {"healthcare": "alternative"}
+    AMBULANCE_STATION = {"emergency": "ambulance_station"}
     ATM = {"amenity": "atm"}
+    AUDIOLOGIST = {"healthcare": "audiologist"}
     BANK = {"amenity": "bank"}
     BAR = {"amenity": "bar"}
+    BIRTHING_CENTRE = {"healthcare": "birthing_centre"}
+    BLOOD_BANK = {"healthcare": "blood_bank"}
+    BLOOD_DONATION = {"healthcare": "blood_donation"}
     BOAT_FUEL_STATION = {"waterway": "fuel"}
     BUREAU_DE_CHANGE = {"amenity": "bureau_de_change"}
     CAFE = {"amenity": "cafe"}
@@ -123,25 +133,40 @@ class Categories(Enum):
     COMMUNITY_CENTRE = {"amenity": "community_centre"}
     COMPRESSED_AIR = {"amenity": "compressed_air"}
     DENTIST = {"amenity": "dentist", "healthcare": "dentist"}
+    DEFIBRILLATOR = {"emergency": "defibrillator"}
+    DIALYSIS = {"healthcare": "dialysis"}
     DOCTOR_GP = {"amenity": "doctors", "healthcare": "doctor", "healthcare:speciality": "community"}
+    EMERGENCY_WARD = {"emergency": "emergency_ward_entrance"}
     FAST_FOOD = {"amenity": "fast_food"}
     FUEL_STATION = {"amenity": "fuel"}
     HOSPITAL = {"amenity": "hospital", "healthcare": "hospital"}
+    HOSPICE = {"healthcare": "hospice"}
     HOTEL = {"tourism": "hotel"}
     KINDERGARTEN = {"amenity": "kindergarten"}
     LIBRARY = {"amenity": "library"}
+    MEDICAL_LABORATORY = {"healthcare": "laboratory"}
     MONEY_TRANSFER = {"amenity": "money_transfer"}
     MUSEUM = {"tourism": "museum"}
     NIGHTCLUB = {"amenity": "nightclub"}
+    NURSING_HOME = {"amenity": "social_facility", "social_facility": "nursing_home", "social_facility:for": "senior"}
+    NUTRITIONIST = {"healthcare": "nutrition_counselling"}
+    OPTOMETRIST = {"healthcare": "optometrist"}
     PHARMACY = {"amenity": "pharmacy", "healthcare": "pharmacy"}
     PARCEL_LOCKER = {"amenity": "parcel_locker"}
+    PHYSIOTHERAPIST = {"healthcare": "physiotherapist"}
+    PODIATRIST = {"healthcare": "podiatrist"}
     POST_BOX = {"amenity": "post_box"}
     POST_DEPOT = {"amenity": "post_depot"}
     POST_OFFICE = {"amenity": "post_office"}
     PRODUCT_PICKUP = {"amenity": "product_pickup"}
+    PSYCHOTHERAPIST = {"healthcare": "psychotherapist"}
     PUB = {"amenity": "pub"}
+    REHABILITATION = {"healthcare": "rehabilitation"}
+    SAMPLE_COLLECTION = {"healthcare": "sample_collection"}
+    SPEECH_THERAPIST = {"healthcare": "speech_therapist"}
     TELEPHONE = {"amenity": "telephone"}
     RESTAURANT = {"amenity": "restaurant"}
+    VACCINATION_CENTRE = {"healthcare": "vaccination_centre"}
     VETERINARY = {"amenity": "veterinary"}
 
     VENDING_MACHINE_BICYCLE_TUBE = {"amenity": "vending_machine", "vending": "bicycle_tube"}
@@ -185,10 +210,12 @@ def apply_category(category, item):
 
 top_level_tags = [
     "amenity",
+    "clothes",
     "club",
     "craft",
     "emergency",
     "healthcare",
+    "healthcare:speciality",
     "highway",
     "landuse",
     "leisure",
@@ -196,6 +223,8 @@ top_level_tags = [
     "office",
     "public_transport",
     "shop",
+    "social_facility",
+    "social_facility:for",
     "tourism",
     "aeroway",
     "railway",
@@ -429,7 +458,107 @@ class Clothes(Enum):
     WOMEN = "women"
 
 
-def apply_clothes(clothes: [str], item: Feature):
+def apply_clothes(clothes: [Clothes], item: Feature):
     for c in clothes:
-        apply_yes_no(f"clothes:{c}", item, True)
-    item["extras"]["clothes"] = ";".join(clothes)
+        apply_yes_no(f"clothes:{c.value}", item, True)
+        apply_category({"clothes": c.value}, item)
+
+class HealthcareSpecialities(Enum):
+    ABORTION = "abortion"
+    ACUPUNCTURE = "acupuncture"
+    ALLERGOLOGY = "allergoloy"
+    ANAESTHETICS = "anaesthetics"
+    ANTRHOPOSOPHICAL = "anthroposophical"
+    APPLIED_KINESIOLOGY = "applied_kinesiology"
+    AROMATHERAPY = "aromatherapy"
+    AYUREVDA = "ayurveda"
+    BARIATRIC_SURGERY = "bariatric_surgery"
+    BIOLOGY = "biology"
+    BIOCHEMISTRY = "biochemistry"
+    BLOOD_CHECK = "blood_check"
+    CARDIOLOGY = "cardiology"
+    CARDIOTHORACIC_SURGERY = "cardiothoracic_surgery"
+    CHILD_PSYCHIATRY = "child_psychiatry"
+    CHIROPRATIC = "chiropractic"
+    CLINICAL_PATHOLOGY = "clinical_pathology"
+    COMMUNITY = "community"
+    DERMATOLOGY = "dermatology"
+    DERMATOVENEREOLOGY = "dermatovenereology"
+    DIAGNOSTIC_RADIOLOGY = "diagnostic_radiology"
+    EMERGENCY = "emergency"
+    ENDOCRINOLOGY = "endocrinology"
+    ENDODONTICS = "endodontics"
+    FERTILITY = "fertility"
+    GASTROENTEROLOGY = "gastroenterology"
+    GENERAL = "general"
+    GERIATRICS = "geriatrics"
+    GYNAECOLOGY = "gynaecology"
+    HAEMATOLOGY = "haematology"
+    HEPATOLOGY = "hepatology"
+    HERBALISM = "herbalism"
+    HOMEOPATHY = "homeopathy"
+    HYDROTHERAPY = "hydrotherapy"
+    HYPNOSIS = "hypnosis"
+    IMPLANTOLOGY = "implantology"
+    INFECTIOUS_DISEASES = "infectious_diseases"
+    INTENSIVE = "intensive"
+    INTERNAL = "internal"
+    MAXILLOFACIAL = "dental_oral_maxillo_facial_surgery"
+    NATUROPATHY = "naturopathy"
+    NEONATOLOGY = "neonatology"
+    NEPHROLOGY = "nephrology"
+    NEUROLOGY = "neurology"
+    NEUROPSYCHIATRY = "neuropsychiatry"
+    NEUROSURGERY = "neurosurgery"
+    NUCLEAR = "nuclear"
+    OBSTRETIC_ULTRASONOGRAPHY = "obstetric_ultrasonography"
+    OCCUPATIONAL = "occupational"
+    ONCOLOGY = "oncology"
+    OPHTHALMOLOGY = "ophthalmology"
+    ORTHODONTICS = "orthodontics"
+    ORTHOPAEDICS = "orthopaedics"
+    OSTEOPATHY = "osteopathy"
+    OTOLARYNGOLOGY = "otolaryngology"
+    PAEDIATRIC_DENTISTRY = "paediatric_dentistry"
+    PAEDIATRIC_SURGERY = "paediatric_surgery"
+    PAEDIATRICS = "paediatrics"
+    PAIN_MEDICINE = "pain_control"
+    PALLIATIVE = "palliative"
+    PATHOLOGY = "pathology"
+    PERIODONTICS = "periodontics"
+    PHYSIATRY = "physiatry"
+    PLASTIC_SURGERY = "plastic_surgery"
+    PODIATRY = "podiatry"
+    PROCTOLOGY = "proctology"
+    PSYCHIATRY = "psychiatry"
+    PSYCHOTHERAPHY_BEHAVIOR = "behavior"
+    PSYCHOTHERAPHY_BODY = "body"
+    PSYCHOTHERAPHY_DEPTH = "depth"
+    PSYCHOTHERAPHY_HUMANISTIC = "humanistic"
+    PSYCHOTHERAPHY_SYSTEMIC = "systemic"
+    PULMONOLOGY = "pulmonology"
+    RADIOLOGY = "radiology"
+    RADIOTHERAPY = "radiotherapy"
+    REFLEXOLOGY = "reflexology"
+    REHABILITATION = "rehabilitation"
+    REIKI = "reiki"
+    RHEUMATOLOGY = "rheumatology"
+    SHIATSU = "shiatsu"
+    SLEEP_MEDICINE = "sleep"
+    STOMATOLOGY = "stomatology"
+    SURGERY = "surgery"
+    TRADITIONAL_CHINESE_MEDICINE = "traditional_chinese_medicine"
+    TRANSPLANT = "transplant"
+    TRAUMA = "trauma"
+    TROPICAL = "tropical"
+    TUINA = "tuina"
+    UNANI = "unani"
+    UROLOGY = "urology"
+    VACCINATION = "vaccination"
+    VASCULAR_SURGERY = "vascular_surgery"
+    VENEREOLOGY = "venereology"
+    WOUND_TREATMENT = "wound_treatment"
+
+def apply_healthcare_specialities(specialities: [HealthcareSpecialities], item: Feature):
+    for s in specialities:
+        apply_category({"healthcare:speciality": s.value}, item)
