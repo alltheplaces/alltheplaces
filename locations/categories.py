@@ -185,7 +185,19 @@ class Categories(Enum):
     TRADE_SWIMMING_POOL_SUPPLIES = {"trade": "swimming_pool_supplies"}
 
 
-def apply_category(category, item):
+def apply_category(category, item: Feature):
+    """
+    Apply categories to a Feature, where categories can be supplied
+    as a single Enum, or dictionary of key-value strings. If a
+    value for the category key is already defined, the new value for
+    the category key is appended rather than overwritten. When
+    appending the new value, the list of values is sorted and each
+    value is separated with a semi-colon.
+    :param category: Either an Enum member representing a single
+                     category to add, or a dictionary of key-value
+                     strings representing multiple categories to add.
+    :param item: Feature to which categories should be added to.
+    """
     if isinstance(category, Enum):
         tags = category.value
     elif isinstance(category, dict):
@@ -210,12 +222,10 @@ def apply_category(category, item):
 
 top_level_tags = [
     "amenity",
-    "clothes",
     "club",
     "craft",
     "emergency",
     "healthcare",
-    "healthcare:speciality",
     "highway",
     "landuse",
     "leisure",
@@ -223,8 +233,6 @@ top_level_tags = [
     "office",
     "public_transport",
     "shop",
-    "social_facility",
-    "social_facility:for",
     "tourism",
     "aeroway",
     "railway",
@@ -233,6 +241,17 @@ top_level_tags = [
 
 
 def get_category_tags(source) -> {}:
+    """
+    Retreive OpenStreetMap top level tags from a Feature, Enum or
+    dict. All top level tags can exist on their own and do not
+    require the presence of other tags. If the Feature, Enum or dict
+    supplied contains other tags, these are ignored.
+    :param source: Either a Feature, Enum or dictionary which
+                   contains categories (such as "amenity": "pub").
+    :return: dictionary of OpenStreetMap top level tags, if any
+             exist within the supplied source object. Other tags
+             which are not top-level are ignored.
+    """
     if isinstance(source, Feature):
         tags = source.get("extras", {})
     elif isinstance(source, Enum):
@@ -249,8 +268,10 @@ def get_category_tags(source) -> {}:
     return categories or None
 
 
-# See: https://wiki.openstreetmap.org/wiki/Key:fuel#Examples
 class Fuel(Enum):
+    """
+    Fuel categories per https://wiki.openstreetmap.org/wiki/Key:fuel
+    """
     # Diesel
     DIESEL = "fuel:diesel"
     GTL_DIESEL = "fuel:GTL_diesel"
@@ -338,6 +359,9 @@ class Extras(Enum):
 
 
 class PaymentMethods(Enum):
+    """
+    Payment method categories per https://wiki.openstreetmap.org/wiki/Key:payment:*
+    """
     ALIPAY = "payment:alipay"
     AMERICAN_EXPRESS = "payment:american_express"
     AMERICAN_EXPRESS_CONTACTLESS = "payment:american_express_contactless"
@@ -390,6 +414,9 @@ class PaymentMethods(Enum):
 
 
 class FuelCards(Enum):
+    """
+    Fuel card categories per https://wiki.openstreetmap.org/wiki/Key:payment:*#Fuel_cards
+    """
     ALLSTAR = "payment:allstar"  # https://allstarcard.co.uk/
     AVIA = "payment:avia_card"  # https://www.aviaitalia.com/en/avia-card/
     ARIS = "payment:aris"
@@ -420,6 +447,9 @@ class FuelCards(Enum):
 
 
 class Access(Enum):
+    """
+    Access categories per https://wiki.openstreetmap.org/wiki/Key:access
+    """
     HGV = "hgv"
 
 
@@ -450,6 +480,9 @@ def apply_yes_no(attribute, item: Feature, state: bool, apply_positive_only: boo
 
 
 class Clothes(Enum):
+    """
+    Clothing categories per https://wiki.openstreetmap.org/wiki/Key:clothes
+    """
     BABY = "babies"
     CHILDREN = "children"
     MATERNITY = "maternity"
@@ -459,12 +492,25 @@ class Clothes(Enum):
 
 
 def apply_clothes(clothes: [Clothes], item: Feature):
+    """
+    Apply clothing categories to a Feature. If the Feature
+    already has clothing categories defined, this function will
+    append to the list of clothing categories rather than
+    overwriting existing clothing categories. When appending,
+    the list of clothing categories is sorted and then each value
+    is separated with a semi-colon.
+    :param clothes: array of Clothes Enum members
+    :param item: Feature which should have clothing categories applied.
+    """
     for c in clothes:
         apply_yes_no(f"clothes:{c.value}", item, True)
         apply_category({"clothes": c.value}, item)
 
 
 class HealthcareSpecialities(Enum):
+    """
+    Healthcare speciality categories per https://wiki.openstreetmap.org/wiki/Key:healthcare:speciality
+    """
     ABORTION = "abortion"
     ACUPUNCTURE = "acupuncture"
     ALLERGOLOGY = "allergoloy"
@@ -562,5 +608,15 @@ class HealthcareSpecialities(Enum):
 
 
 def apply_healthcare_specialities(specialities: [HealthcareSpecialities], item: Feature):
+    """
+    Apply healthcare specialities to a Feature. If the Feature
+    already has healthcare specialities defined, this function will
+    append to the list of healthcare specialities rather than
+    overwriting existing healthcare specialities. When appending,
+    the list of healthcare specialities is sorted and then each
+    value is separated with a semi-colon.
+    :param clothes: array of HealthcareSpecialities Enum members
+    :param item: Feature which should have healthcare specialities applied.
+    """
     for s in specialities:
         apply_category({"healthcare:speciality": s.value}, item)
