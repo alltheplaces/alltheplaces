@@ -103,8 +103,9 @@ class Categories(Enum):
     SHOP_WATCHES = {"shop": "watches"}
     SHOP_WHOLESALE = {"shop": "wholesale"}
 
-    OFFICE_FINANCIAL = {"office": "financial"}
+    OFFICE_COMPANY = {"office": "company"}
     OFFICE_ENGINEER = {"office": "engineer"}
+    OFFICE_FINANCIAL = {"office": "financial"}
     OFFICE_IT = {"office": "it"}
 
     ATM = {"amenity": "atm"}
