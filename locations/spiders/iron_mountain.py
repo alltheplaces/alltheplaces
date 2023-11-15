@@ -1,6 +1,6 @@
 import scrapy
-from locations.categories import Categories, apply_category
 
+from locations.categories import Categories, apply_category
 from locations.open_graph_parser import OpenGraphParser
 
 
