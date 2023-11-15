@@ -22,6 +22,7 @@ class TacoTimeNorthwestUSSpider(scrapy.Spider):
         for store in stores:
             item = DictParser.parse(store)
             item["image"] = store["image"]
-            item["website"] = store["order"]
+            item["extras"]["website:menu"] = store["order"]
+            item["website"] = "https://tacotimenw.com/find-us/{}/".format(store["order"].split("/")[-1])
             item["name"] = item["name"].replace("&#8211;", "–")
             yield item
