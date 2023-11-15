@@ -11,6 +11,6 @@ class IronMountainSpider(scrapy.spiders.SitemapSpider):
 
     def parse(self, response):
         item = OpenGraphParser.parse(response)
-        apply_category(Categories.OFFICE_FINANCIAL, item)
+        apply_category(Categories.OFFICE_COMPANY, item)
         if item["lat"]:
             yield item
