@@ -58,7 +58,6 @@ class VkusnoITochkaRuSpider(scrapy.Spider):
         Type 1 is for lobby hours which is what we want.
         Weekday 1 is for all days of the week.
         """
-
         hours = [x for x in hours if x["weekday"] == 1 and x["type"] == 1]
         if not hours:
             return None
