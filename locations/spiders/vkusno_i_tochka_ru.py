@@ -40,9 +40,8 @@ class VkusnoITochkaRuSpider(scrapy.Spider):
         item = DictParser.parse(restaurant)
         features = [f["xmlId"] for f in restaurant["features"]]
         apply_yes_no(Extras.DRIVE_THROUGH, item, "mcauto" in features, True)
-        if "around-the-clock" in features:
-            item["opening_hours"] = "24/7"
-        elif opening_hours := restaurant.get("openingHours"):
+        # TODO: data was changed and opening hours doesn't work anymore
+        if opening_hours := restaurant.get("openingHours"):
             item["opening_hours"] = self.parse_hours(opening_hours)
         return item
 
@@ -59,7 +58,7 @@ class VkusnoITochkaRuSpider(scrapy.Spider):
         Type 1 is for lobby hours which is what we want.
         Weekday 1 is for all days of the week.
         """
-        # TODO: api was changed and this does not work anymore - figure out hours
+
         hours = [x for x in hours if x["weekday"] == 1 and x["type"] == 1]
         if not hours:
             return None
