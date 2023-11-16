@@ -2,13 +2,29 @@ import scrapy
 from scrapy import Request
 from scrapy.http import JsonRequest
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
 class FirstCashSpider(scrapy.Spider):
     name = "first_cash"
-    item_attributes = {"brand": "First Cash", "brand_wikidata": "Q5048636"}
-    allowed_domains = ["find.cashamerica.us"]
+
+    BRANDS = {
+        "Cash America": {
+            "brand": "Cash America",
+            "brand_wikidata": "Q5048636",
+            "name": "Cash America Pawn",
+        },
+        "First Cash": {
+            "brand": "First Cash Pawn",
+            "name": "First Cash Pawn",
+        },
+        "Valu + Pawn": {
+            "brand": "Valu + Pawn",
+            "name": "Valu + Pawn",
+        },
+        "Money Man Pawn Shop": {"brand": "Money Man Pawn Shop", "name": "Money Man Pawn Shop"},
+    }
 
     def make_request(self, page: int = 1) -> Request:
         return JsonRequest(
@@ -27,7 +43,6 @@ class FirstCashSpider(scrapy.Spider):
         for place in data:
             properties = {
                 "ref": place["storeNumber"],
-                "name": place["shortName"],
                 "street_address": place["address"]["address1"],
                 "city": place["address"]["city"],
                 "state": place["address"]["state"],
@@ -36,8 +51,16 @@ class FirstCashSpider(scrapy.Spider):
                 "lat": place["latitude"],
                 "lon": place["longitude"],
                 "phone": place["phone"],
-                "brand": place["brand"].split(" #")[0],
             }
+
+            for name, brand in self.BRANDS.items():
+                if name in place["brand"]:
+                    properties.update(brand)
+                    break
+            else:
+                properties["name"] = place["brand"].split("#", 1)[0].strip()
+
+            apply_category(Categories.SHOP_PAWNBROKER, properties)
 
             yield Feature(**properties)
 
