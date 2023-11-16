@@ -1,8 +1,8 @@
 import scrapy
-from locations.dict_parser import DictParser
 
+from locations.dict_parser import DictParser
 from locations.geo import point_locations
-from locations.hours import DAYS, OpeningHours
+from locations.hours import OpeningHours
 
 
 class TjxSpider(scrapy.Spider):
@@ -18,8 +18,8 @@ class TjxSpider(scrapy.Spider):
         "91": {"brand": "Winners", "brand_wikidata": "Q845257", "country": "Canada"},
         "93": {"brand": "Marshalls", "brand_wikidata": "Q15903261", "country": "Canada"},
         # There are separate spiders for below brands that provide better data
-        "28": {"brand": "Homegoods", "brand_wikidata": "Q5887941", 'country': "USA"},
-        "50": {"brand": "Sierra", "brand_wikidata": "Q7511598", 'country': "USA"},
+        "28": {"brand": "Homegoods", "brand_wikidata": "Q5887941", "country": "USA"},
+        "50": {"brand": "Sierra", "brand_wikidata": "Q7511598", "country": "USA"},
     }
 
     countries = {"Canada": "ca_centroids_100mile_radius.csv", "USA": "us_centroids_50mile_radius.csv"}
@@ -32,7 +32,7 @@ class TjxSpider(scrapy.Spider):
                 yield scrapy.http.FormRequest(
                     url="https://marketingsl.tjx.com/storelocator/GetSearchResults",
                     formdata={
-                        "chain": ','.join(chains),
+                        "chain": ",".join(chains),
                         "lang": "en",
                         "geolat": lat,
                         "geolong": lon,
@@ -47,7 +47,7 @@ class TjxSpider(scrapy.Spider):
                 hours = hours.replace("Black Friday", "Fri")
                 opening_hours = OpeningHours()
                 opening_hours.add_ranges_from_string(hours)
-                item['opening_hours'] = opening_hours.as_opening_hours()
+                item["opening_hours"] = opening_hours.as_opening_hours()
             except Exception as e:
                 self.logger.warning(f"Couldn't parse hours for {item['ref']}: {hours}, {e}")
 
@@ -58,8 +58,8 @@ class TjxSpider(scrapy.Spider):
                 self.logger.error(f"Unknown chain: {store['Chain']}")
                 continue
             item = DictParser.parse(store)
-            item['ref'] = f'{store["Chain"]}{store["StoreID"]}'
-            item['brand'] = self.chains.get(store["Chain"], {}).get("brand")
-            item['brand_wikidata'] = self.chains.get(store["Chain"], {}).get("brand_wikidata")
+            item["ref"] = f'{store["Chain"]}{store["StoreID"]}'
+            item["brand"] = self.chains.get(store["Chain"], {}).get("brand")
+            item["brand_wikidata"] = self.chains.get(store["Chain"], {}).get("brand_wikidata")
             self.parse_hours(item, store)
             yield item
