@@ -1,7 +1,7 @@
 import scrapy
+from scrapy import Request
 from scrapy.http import JsonRequest
 
-from locations.geo import point_locations
 from locations.items import Feature
 
 
@@ -10,11 +10,16 @@ class FirstCashSpider(scrapy.Spider):
     item_attributes = {"brand": "First Cash", "brand_wikidata": "Q5048636"}
     allowed_domains = ["find.cashamerica.us"]
 
-    def start_requests(self):
-        base_url = "http://find.cashamerica.us/api/stores?p=1&s=100&lat={lat}&lng={lng}&d=2019-10-14T17:43:05.914Z&key=D21BFED01A40402BADC9B931165432CD"
+    def make_request(self, page: int = 1) -> Request:
+        return JsonRequest(
+            url="http://find.cashamerica.us/api/stores?p={page}&s=100&lat={lat}&lng={lng}&d=2019-10-14T17:43:05.914Z&key=D21BFED01A40402BADC9B931165432CD".format(
+                page=page, lat=38.8, lng=-107.1
+            ),
+            meta={"page": page},
+        )
 
-        for lat, lon in point_locations("us_centroids_100mile_radius.csv"):
-            yield JsonRequest(url=base_url.format(lat=lat, lng=lon))
+    def start_requests(self):
+        yield self.make_request()
 
     def parse(self, response):
         data = response.json()
@@ -35,3 +40,6 @@ class FirstCashSpider(scrapy.Spider):
             }
 
             yield Feature(**properties)
+
+        if len(data) == 100:
+            yield self.make_request(response.meta["page"] + 1)
