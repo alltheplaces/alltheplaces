@@ -102,6 +102,7 @@ class Categories(Enum):
     SHOP_VARIETY_STORE = {"shop": "variety_store"}
     SHOP_WATCHES = {"shop": "watches"}
     SHOP_WHOLESALE = {"shop": "wholesale"}
+    SHOP_WINDOW_BLIND = {"shop": "window_blind"}
 
     OFFICE_COMPANY = {"office": "company"}
     OFFICE_ENGINEER = {"office": "engineer"}
