@@ -47,7 +47,6 @@ class FirstCashSpider(scrapy.Spider):
                 "city": place["address"]["city"],
                 "state": place["address"]["state"],
                 "postcode": place["address"]["zipCode"],
-                "country": "US",
                 "lat": place["latitude"],
                 "lon": place["longitude"],
                 "phone": place["phone"],
