@@ -14,6 +14,9 @@ class BlindsToGoSpider(CrawlSpider, StructuredDataSpider):
     skip_auto_cc_spider_name = False
 
     def post_process_item(self, item, response, ld_data, **kwargs):
+        if image := item.get("image"):
+            item["image"] = image.strip()
+
         item["extras"]["website:en"] = response.url
         item["extras"]["website:fr"] = response.xpath('//link[@rel="alternate"][@hreflang="fr-CA"]/@href').get()
 
