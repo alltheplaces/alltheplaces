@@ -70,9 +70,9 @@ fragment StoreLocatorHoursFragment on StoreLocation {
     }
 }
 """,
-            "operationName": "getStoreLocatorList",
-            "variables": {},
-        }
+                "operationName": "getStoreLocatorList",
+                "variables": {},
+            }
         yield JsonRequest(url=url, data=data)
 
     def parse(self, response):
@@ -81,11 +81,17 @@ fragment StoreLocatorHoursFragment on StoreLocation {
             item["postcode"] = data.get("location", {}).get("postalCode")
             item["state"] = data.get("location", {}).get("state")
             item["city"] = data.get("location", {}).get("city")
-            item["street_address"] = ", ".join(filter(None, [data.get("location", {}).get("address1"), data.get("location", {}).get("address2")]))
+            item["street_address"] = ", ".join(
+                filter(None, [data.get("location", {}).get("address1"), data.get("location", {}).get("address2")])
+            )
             if item["postcode"] and item["state"]:
-                item["website"] = f'https://www.davidsbridal.com/stores/{item["city"].lower()}-{item["state"].lower()}-{item["postcode"].lower().replace(" ", "").replace("-", "")}-{item["ref"]}'
+                item[
+                    "website"
+                ] = f'https://www.davidsbridal.com/stores/{item["city"].lower()}-{item["state"].lower()}-{item["postcode"].lower().replace(" ", "").replace("-", "")}-{item["ref"]}'
             item["opening_hours"] = OpeningHours()
             if data.get("hours", {}):
                 for day in data.get("hours", {}).get("regular"):
-                    item["opening_hours"].add_range(day=day.get("day"), open_time=day.get("open")[:5], close_time=day.get("close")[:5])
+                    item["opening_hours"].add_range(
+                        day=day.get("day"), open_time=day.get("open")[:5], close_time=day.get("close")[:5]
+                    )
             yield item
