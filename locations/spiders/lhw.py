@@ -27,12 +27,16 @@ class LHWSpider(scrapy.Spider):
         json_data = json.loads(response.xpath("//pre/text()").get())
         pois = json_data["d"]["Hotels"]
         for poi in pois:
-            poi[""]
             item = DictParser.parse(poi)
+            item.pop("street_address")
+            item["addr_full"] = (
+                poi.get("Address1")
+                if not poi.get("Address2")
+                else ", ".join([poi.get("Address1"), poi.get("Address2")])
+            )
             item["ref"] = poi["BookingNumber"]
             item["image"] = poi["Image"]
-            if poi.get("Address2"):
-                self.logger.warning(f"{poi.get('Address1')}, {poi.get('Address2')}")
+            item["website"] = poi["Link"]
             apply_category(Categories.HOTEL, item)
             self.parse_features(item, poi)
             yield item
