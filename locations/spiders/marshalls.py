@@ -3,8 +3,8 @@ import datetime
 
 import scrapy
 
+from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
-from locations.items import Feature
 from locations.searchable_points import open_searchable_points
 
 DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
@@ -15,11 +15,11 @@ class MarshallsSpider(scrapy.Spider):
     allowed_domains = ["tjx.com"]
 
     chains = {
-        "08": "TJ Maxx",
-        "10": "Marshalls",
-        "28": "Homegoods",
-        "29": "Homesense",
-        "50": "Sierra",
+        "08": ["TJ Maxx", "Q10860683"],
+        "10": ["Marshalls", "Q15903261"],
+        "28": ["Homegoods", "Q5887941"],
+        "29": ["Homesense", "Q16844433"],
+        "50": ["Sierra" "Q7511598"],
     }
 
     def start_requests(self):
@@ -81,22 +81,10 @@ class MarshallsSpider(scrapy.Spider):
         data = response.json()
 
         for store in data["Stores"]:
-            properties = {
-                "name": store["Name"],
-                "ref": store["StoreID"],
-                "street_address": store["Address"].strip(),
-                "city": store["City"],
-                "state": store["State"],
-                "postcode": store["Zip"],
-                "country": store["Country"],
-                "phone": store["Phone"],
-                "lat": float(store["Latitude"]),
-                "lon": float(store["Longitude"]),
-                "brand": self.chains[store["Chain"]],
-            }
-
+            item = DictParser.parse(store)
+            item["brand"], item["brand_wikidata"] = self.chains.get(store["Chain"])
             hours = self.parse_hours(store["Hours"])
             if hours:
-                properties["opening_hours"] = hours
+                item["opening_hours"] = hours
 
-            yield Feature(**properties)
+            yield item
