@@ -100,6 +100,7 @@ class SfCommand(BaseRunSpiderCommand):
             nsi_matches = [nsi_match for nsi_match in nsi.iter_nsi(DetectorSpider.parameters["brand_wikidata"])]
             if len(nsi_matches) == 1:
                 spider_key = re.sub(r"[^a-zA-Z0-9_]", "", nsi_matches[0]["tags"]["name"].replace(" ", "_")).lower()
+                spider_class_name = re.sub(r"[^a-zA-Z0-9]", "", nsi_matches[0]["tags"]["name"].replace(" ", ""))
                 if nsi_matches[0].get("locationSet") and nsi_matches[0]["locationSet"].get("include"):
                     if (
                         len(nsi_matches[0]["locationSet"]["include"]) == 1
@@ -109,9 +110,8 @@ class SfCommand(BaseRunSpiderCommand):
                             if not pycountry.countries.get(alpha_2=country_code.upper()):
                                 continue
                             spider_key = f"{spider_key}_{country_code.lower()}"
-                spider_class_name = (
-                    re.sub(r"[^a-zA-Z0-9]", "", nsi_matches[0]["tags"]["name"].replace(" ", "")) + "Spider"
-                )
+                            spider_class_name = f"{spider_class_name}{country_code.upper()}"
+                spider_class_name = f"{spider_class_name}Spider"
                 brand = nsi_matches[0]["tags"].get("brand", nsi_matches[0]["tags"].get("name"))
                 DetectorSpider.parameters["spider_key"] = spider_key
                 DetectorSpider.parameters["spider_class_name"] = spider_class_name
