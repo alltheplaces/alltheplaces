@@ -302,6 +302,7 @@ class Extras(Enum):
     SCANING = "service:scan"
     SHOWERS = "shower"
     SMOKING_AREA = "smoking=isolated"
+    SWIMMING_POOL = "swimming_pool"
     TAKEAWAY = "takeaway"
     TOILETS = "toilets"
     TOILETS_WHEELCHAIR = "toilets:wheelchair"
