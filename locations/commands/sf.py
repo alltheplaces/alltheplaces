@@ -1,8 +1,8 @@
 import inspect
-import pycountry
 import re
 import sys
 
+import pycountry
 from scrapy import Spider
 from scrapy.commands import BaseRunSpiderCommand
 from scrapy.exceptions import UsageError
@@ -101,12 +101,17 @@ class SfCommand(BaseRunSpiderCommand):
             if len(nsi_matches) == 1:
                 spider_key = re.sub(r"[^a-zA-Z0-9_]", "", nsi_matches[0]["tags"]["name"].replace(" ", "_")).lower()
                 if nsi_matches[0].get("locationSet") and nsi_matches[0]["locationSet"].get("include"):
-                    if len(nsi_matches[0]["locationSet"]["include"]) == 1 or len(nsi_matches[0]["locationSet"]["include"]) == 2:
+                    if (
+                        len(nsi_matches[0]["locationSet"]["include"]) == 1
+                        or len(nsi_matches[0]["locationSet"]["include"]) == 2
+                    ):
                         for country_code in nsi_matches[0]["locationSet"]["include"]:
                             if not pycountry.countries.get(alpha_2=country_code.upper()):
                                 continue
                             spider_key = f"{spider_key}_{country_code.lower()}"
-                spider_class_name = re.sub(r"[^a-zA-Z0-9]", "", nsi_matches[0]["tags"]["name"].replace(" ", "")) + "Spider"
+                spider_class_name = (
+                    re.sub(r"[^a-zA-Z0-9]", "", nsi_matches[0]["tags"]["name"].replace(" ", "")) + "Spider"
+                )
                 brand = nsi_matches[0]["tags"].get("brand", nsi_matches[0]["tags"].get("name"))
                 DetectorSpider.parameters["spider_key"] = spider_key
                 DetectorSpider.parameters["spider_class_name"] = spider_class_name

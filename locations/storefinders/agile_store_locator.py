@@ -98,8 +98,7 @@ class AgileStoreLocatorSpider(Spider):
         ):
             if "brand" in spider.item_attributes.keys():
                 item_attributes_code = '\titem_attributes = {{"brand": "{}", "brand_wikidata": "{}"}}\n'.format(
-                    spider.item_attributes["brand"],
-                    spider.item_attributes["brand_wikidata"]
+                    spider.item_attributes["brand"], spider.item_attributes["brand_wikidata"]
                 )
             else:
                 item_attributes_code = '\titem_attributes = {{"brand_wikidata": "{}"}}\n'.format(
