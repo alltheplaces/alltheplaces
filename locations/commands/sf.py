@@ -21,16 +21,28 @@ class DetectorSpider(Spider):
     }
 
     def parse(self, response):
-        for storefinder in [cls for _, cls in inspect.getmembers(sys.modules["locations.storefinders"], inspect.isclass) if issubclass(cls, Spider)]:
+        for storefinder in [
+            cls
+            for _, cls in inspect.getmembers(sys.modules["locations.storefinders"], inspect.isclass)
+            if issubclass(cls, Spider)
+        ]:
             if not callable(getattr(storefinder, "storefinder_exists", None)):
                 continue
             if not storefinder.storefinder_exists(response):
                 continue
-            new_spider = type(self.parameters["spider_class_name"], (storefinder,), {"__module__": "locations.spiders"}, response=response, wikidata=self.parameters["wikidata"], spider_key=self.parameters["spider_key"])
+            new_spider = type(
+                self.parameters["spider_class_name"],
+                (storefinder,),
+                {"__module__": "locations.spiders"},
+                response=response,
+                wikidata=self.parameters["wikidata"],
+                spider_key=self.parameters["spider_key"],
+            )
             if not callable(getattr(storefinder, "generate_spider_code")):
                 break
             print(storefinder.generate_spider_code(new_spider))
             break
+
 
 # Detect presence of a store finder at a given URL, and return a pre-filled Spider.
 class SfCommand(BaseRunSpiderCommand):
@@ -66,7 +78,9 @@ class SfCommand(BaseRunSpiderCommand):
             raise UsageError("Please specify single URL that is desired to be scanned for a store finder.")
 
         if not args[0].startswith("http"):
-            raise UsageError("A http or https URL scheme is required when specifying the single URL that is desired to be scanned for a store finder.")
+            raise UsageError(
+                "A http or https URL scheme is required when specifying the single URL that is desired to be scanned for a store finder."
+            )
 
         if opts.wikidata:
             DetectorSpider.parameters["wikidata"] = opts.wikidata

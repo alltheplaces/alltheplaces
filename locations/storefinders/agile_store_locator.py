@@ -1,5 +1,5 @@
-from urllib.parse import urlparse
 import json
+from urllib.parse import urlparse
 
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
@@ -86,15 +86,32 @@ class AgileStoreLocatorSpider(Spider):
 
         spider_key_code = ""
         if hasattr(spider, "name") and isinstance(spider.name, str):
-            spider_key_code = "\tname = \"{}\"\n".format(spider.name)
+            spider_key_code = '\tname = "{}"\n'.format(spider.name)
 
         item_attributes_code = ""
-        if hasattr(spider, "item_attributes") and isinstance(spider.item_attributes, dict) and "brand_wikidata" in spider.item_attributes.keys():
-            item_attributes_code = "\titem_attributes = {{\"brand_wikidata\": \"{}\"}}\n".format(spider.item_attributes["brand_wikidata"])
+        if (
+            hasattr(spider, "item_attributes")
+            and isinstance(spider.item_attributes, dict)
+            and "brand_wikidata" in spider.item_attributes.keys()
+        ):
+            item_attributes_code = '\titem_attributes = {{"brand_wikidata": "{}"}}\n'.format(
+                spider.item_attributes["brand_wikidata"]
+            )
 
         allowed_domains_code = ""
-        if hasattr(spider, "allowed_domains") and len(spider.allowed_domains) == 1 and isinstance(spider.allowed_domains[0], str):
-            allowed_domains_code = "\tallowed_domains = [\"{}\"]\n".format(spider.allowed_domains[0])
+        if (
+            hasattr(spider, "allowed_domains")
+            and len(spider.allowed_domains) == 1
+            and isinstance(spider.allowed_domains[0], str)
+        ):
+            allowed_domains_code = '\tallowed_domains = ["{}"]\n'.format(spider.allowed_domains[0])
 
-        spider_code = "{}\n\nclass {}({}):\n{}{}{}".format(imports_list, spider.__name__, superclasses_list, spider_key_code, item_attributes_code, allowed_domains_code)
+        spider_code = "{}\n\nclass {}({}):\n{}{}{}".format(
+            imports_list,
+            spider.__name__,
+            superclasses_list,
+            spider_key_code,
+            item_attributes_code,
+            allowed_domains_code,
+        )
         return spider_code
