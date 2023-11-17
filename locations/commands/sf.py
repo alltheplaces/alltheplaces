@@ -1,10 +1,13 @@
 import inspect
+import pycountry
+import re
 import sys
 
 from scrapy import Spider
 from scrapy.commands import BaseRunSpiderCommand
 from scrapy.exceptions import UsageError
 
+from locations.name_suggestion_index import NSI
 from locations.storefinders import *
 from locations.user_agents import BROWSER_DEFAULT
 
@@ -15,7 +18,8 @@ class DetectorSpider(Spider):
     custom_settings = {"ROBOTSTXT_OBEY": False}
     user_agent = BROWSER_DEFAULT
     parameters = {
-        "wikidata": None,
+        "brand": None,
+        "brand_wikidata": None,
         "spider_key": None,
         "spider_class_name": "NewBrandZZSpider",
     }
@@ -35,7 +39,8 @@ class DetectorSpider(Spider):
                 (storefinder,),
                 {"__module__": "locations.spiders"},
                 response=response,
-                wikidata=self.parameters["wikidata"],
+                brand_wikidata=self.parameters["brand_wikidata"],
+                brand=self.parameters["brand"],
                 spider_key=self.parameters["spider_key"],
             )
             if not callable(getattr(storefinder, "generate_spider_code")):
@@ -59,7 +64,7 @@ class SfCommand(BaseRunSpiderCommand):
         super().add_options(parser)
         parser.add_argument(
             "--wikidata",
-            dest="wikidata",
+            dest="brand_wikidata",
             help="attempt to pre-fill brand name and NSI category based on supplied wikidata Q-code",
         )
         parser.add_argument(
@@ -82,8 +87,30 @@ class SfCommand(BaseRunSpiderCommand):
                 "A http or https URL scheme is required when specifying the single URL that is desired to be scanned for a store finder."
             )
 
-        if opts.wikidata:
-            DetectorSpider.parameters["wikidata"] = opts.wikidata
+        nsi = NSI()
+
+        if opts.brand_wikidata:
+            DetectorSpider.parameters["brand_wikidata"] = opts.brand_wikidata
+        else:
+            wikidata_code = nsi.get_wikidata_code_from_url(args[0])
+            if wikidata_code:
+                DetectorSpider.parameters["brand_wikidata"] = wikidata_code
+
+        if DetectorSpider.parameters["brand_wikidata"]:
+            nsi_matches = [nsi_match for nsi_match in nsi.iter_nsi(DetectorSpider.parameters["brand_wikidata"])]
+            if len(nsi_matches) == 1:
+                spider_key = re.sub(r"[^a-zA-Z0-9_]", "", nsi_matches[0]["tags"]["name"].replace(" ", "_")).lower()
+                if nsi_matches[0].get("locationSet") and nsi_matches[0]["locationSet"].get("include"):
+                    if len(nsi_matches[0]["locationSet"]["include"]) == 1 or len(nsi_matches[0]["locationSet"]["include"]) == 2:
+                        for country_code in nsi_matches[0]["locationSet"]["include"]:
+                            if not pycountry.countries.get(alpha_2=country_code.upper()):
+                                continue
+                            spider_key = f"{spider_key}_{country_code.lower()}"
+                spider_class_name = re.sub(r"[^a-zA-Z0-9]", "", nsi_matches[0]["tags"]["name"].replace(" ", "")) + "Spider"
+                brand = nsi_matches[0]["tags"].get("brand", nsi_matches[0]["tags"].get("name"))
+                DetectorSpider.parameters["spider_key"] = spider_key
+                DetectorSpider.parameters["spider_class_name"] = spider_class_name
+                DetectorSpider.parameters["brand"] = brand
 
         if opts.spider_key:
             DetectorSpider.parameters["spider_key"] = opts.spider_key

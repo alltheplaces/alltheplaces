@@ -69,9 +69,11 @@ class AgileStoreLocatorSpider(Spider):
     def __init_subclass__(cls, **kwargs):
         if "response" in kwargs.keys() and kwargs["response"] and isinstance(kwargs["response"], Response):
             cls.allowed_domains = [urlparse(kwargs["response"].url).netloc]
-        if "wikidata" in kwargs.keys() and kwargs["wikidata"]:
+        if "brand_wikidata" in kwargs.keys() and kwargs["brand_wikidata"]:
             cls.item_attributes = {}
-            cls.item_attributes["brand_wikidata"] = kwargs["wikidata"]
+            cls.item_attributes["brand_wikidata"] = kwargs["brand_wikidata"]
+            if "brand" in kwargs.keys() and kwargs["brand"]:
+                cls.item_attributes["brand"] = kwargs["brand"]
         if "spider_key" in kwargs.keys() and kwargs["spider_key"]:
             cls.name = kwargs["spider_key"]
 
@@ -94,9 +96,15 @@ class AgileStoreLocatorSpider(Spider):
             and isinstance(spider.item_attributes, dict)
             and "brand_wikidata" in spider.item_attributes.keys()
         ):
-            item_attributes_code = '\titem_attributes = {{"brand_wikidata": "{}"}}\n'.format(
-                spider.item_attributes["brand_wikidata"]
-            )
+            if "brand" in spider.item_attributes.keys():
+                item_attributes_code = '\titem_attributes = {{"brand": "{}", "brand_wikidata": "{}"}}\n'.format(
+                    spider.item_attributes["brand"],
+                    spider.item_attributes["brand_wikidata"]
+                )
+            else:
+                item_attributes_code = '\titem_attributes = {{"brand_wikidata": "{}"}}\n'.format(
+                    spider.item_attributes["brand_wikidata"]
+                )
 
         allowed_domains_code = ""
         if (
