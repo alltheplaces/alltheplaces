@@ -2,7 +2,6 @@ import re
 
 from scrapy import Request
 from scrapy.http import JsonRequest
-from scrapy.spiders import SitemapSpider
 
 from locations.spiders.johnlewis import JohnLewisSpider
 from locations.structured_data_spider import StructuredDataSpider
