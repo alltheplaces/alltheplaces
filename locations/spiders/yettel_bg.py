@@ -1,5 +1,8 @@
-from scrapy import Selector, Spider
+from scrapy import Spider
 
+import io
+from openpyxl import load_workbook
+from locations.hours import OpeningHours, day_range
 from locations.items import Feature
 
 
@@ -10,20 +13,43 @@ class YettelBGSpider(Spider):
         "brand_wikidata": "Q14915070",
         "country": "BG",
     }
-    start_urls = ["https://www.yettel.bg/store-locator/json"]
+    start_urls = ["https://www.yettel.bg/dA/1d9e589cca"]
+    no_refs = True
+    custom_settings = {
+        "ROBOTSTXT_OBEY": False
+    }
 
     def parse(self, response):
-        for store in response.json()["features"]:
-            item = Feature()
+        if 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' in response.headers.get('Content-Type').decode('utf-8'):
+            excel_file = response.body
 
-            item["lon"], item["lat"] = store["geometry"]["coordinates"]
+            excel_data = io.BytesIO(excel_file)
+            workbook = load_workbook(excel_data, read_only=True)
 
-            item["ref"] = store["properties"]["title"]
+            sheet = workbook.active
 
-            address_block = Selector(text=store["properties"]["gsl_addressfield"])
+            data = []
+            for row in sheet.iter_rows(values_only=True):
+                data.append(row)
 
-            item["street_address"] = address_block.xpath('//div[@class="thoroughfare"]/text()').get()
-            item["postcode"] = address_block.xpath('//span[@class="postal-code"]/text()').get()
-            item["city"] = address_block.xpath('//span[@class="locality"]/text()').get()
+            headers = data[0] 
+            json_data = []
+            for row in data[1:]:
+                json_data.append({headers[i]: cell for i, cell in enumerate(row)})
 
-            yield item
+            for store in json_data:
+                item = Feature()
+
+                item["lat"] = store["latitude"]
+                item["lon"] = store["longitude"]
+
+                item["street_address"] = store["address_loc"]
+                item["city"] = store["city_loc"]
+
+                item["opening_hours"] = OpeningHours()
+                item["opening_hours"].add_days_range(day_range("Mo", "Fr"), *store["working_time_weekdays"].replace(" ", "").split("-"))
+                if store["is_closed_on_saturday"]=="No":
+                    item["opening_hours"].add_range("Sa", *store["working_time_saturday"].replace(" ", "").split("-"))
+                if store["is_closed_on_sunday"]=="No":
+                    item["opening_hours"].add_range("Su", *store["working_time_sunday"].replace(" ", "").split("-"))
+                yield item
