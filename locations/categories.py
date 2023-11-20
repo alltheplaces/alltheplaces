@@ -102,9 +102,12 @@ class Categories(Enum):
     SHOP_VARIETY_STORE = {"shop": "variety_store"}
     SHOP_WATCHES = {"shop": "watches"}
     SHOP_WHOLESALE = {"shop": "wholesale"}
+    SHOP_WINDOW_BLIND = {"shop": "window_blind"}
 
-    OFFICE_FINANCIAL = {"office": "financial"}
+    OFFICE_COMPANY = {"office": "company"}
     OFFICE_ENGINEER = {"office": "engineer"}
+    OFFICE_FINANCIAL = {"office": "financial"}
+    OFFICE_IT = {"office": "it"}
 
     ATM = {"amenity": "atm"}
     BANK = {"amenity": "bank"}
@@ -294,11 +297,13 @@ class Extras(Enum):
     PARCEL_PICKUP = "parcel_pickup"
     PARKING_PARENT = "capacity:parent"
     PARKING_WHEELCHAIR = "capacity:disabled"
+    PETS_ALLOWED = "pets_allowed"
     PRINTING = "service:print"
     SELF_CHECKOUT = "self_checkout"
     SCANING = "service:scan"
     SHOWERS = "shower"
     SMOKING_AREA = "smoking=isolated"
+    SWIMMING_POOL = "swimming_pool"
     TAKEAWAY = "takeaway"
     TOILETS = "toilets"
     TOILETS_WHEELCHAIR = "toilets:wheelchair"

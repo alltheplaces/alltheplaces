@@ -1,6 +1,7 @@
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
@@ -31,4 +32,5 @@ class DelikatesyCentrumPLSpider(Spider):
                 if not day_hours["hours"] or day_hours["hours"] == "czynne":
                     continue
                 item["opening_hours"].add_range(day_hours["day"].title(), *day_hours["hours"].split("-", 1), "%H:%M")
+            apply_category(Categories.SHOP_SUPERMARKET, item)
             yield item
