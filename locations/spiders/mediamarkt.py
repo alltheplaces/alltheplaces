@@ -12,8 +12,6 @@ class MediaMarktSpider(StructuredDataSpider):
     name = "media_markt"
     item_attributes = {"brand": "MediaMarkt", "brand_wikidata": "Q2381223"}
     start_urls = ["https://www.mediamarkt.de/de/store/store-finder"]
-    user_agent = BROWSER_DEFAULT
-    rules = [Rule(LinkExtractor(allow=r"https://www.mediamarkt.de/de/store/"), callback="parse_sd")]
 
     def _parse(self, response):
         script = response.xpath('//script[contains(text(), "__PRELOADED_STATE__")]/text()').extract_first()
