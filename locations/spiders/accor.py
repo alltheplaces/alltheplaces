@@ -11,8 +11,7 @@ class AccorSpider(WoosmapSpider):
         "SUI": {"brand": "Novotel", "brand_wikidata": "Q420545"},
         "NOV": {"brand": "Novotel", "brand_wikidata": "Q420545"},
         "NOL": {"brand": "Novotel", "brand_wikidata": "Q420545"},
-        "IBI": {"brand": "Ibis Hotels", "brand_wikidata": "Q920166"},
-        "IBS": {"brand": "Ibis Hotels", "brand_wikidata": "Q920166"},
+        "IBS": {"brand": "Ibis Styles", "brand_wikidata": "Q3147425"},
         "PUL": {"brand": "Pullman Hotels and Resorts", "brand_wikidata": "Q3410757"},
         "IBH": {"brand": "Ibis Hotels", "brand_wikidata": "Q920166"},
         "IBB": {"brand": "Ibis Budget", "brand_wikidata": "Q1458135"},
@@ -78,6 +77,7 @@ class AccorSpider(WoosmapSpider):
             item.update(match)
         else:
             self.crawler.stats.inc_value(f"atp/accor/unknown_brand/{brand_id}")
+        item["addr_full"] = item.pop("street_address")
         item["website"] = f"https://all.accor.com/hotel/{item['ref']}/index.en.shtml"
         apply_category(Categories.HOTEL, item)
         yield item

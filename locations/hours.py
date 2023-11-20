@@ -3,6 +3,8 @@ import time
 from collections import defaultdict
 
 DAYS = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
+DAYS_3_LETTERS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+DAYS_3_LETTERS_FROM_SUNDAY = DAYS_3_LETTERS[-1:] + DAYS_3_LETTERS[:-1]
 DAYS_FULL = [
     "Monday",
     "Tuesday",
@@ -83,7 +85,9 @@ DAYS_BG = {
     "Съ": "Sa",
     "Сб": "Sa",
     "Неделя": "Su",
+    "Нед": "Su",
     "нед": "Su",
+    "Нед": "Su",
     "Не": "Su",
     "Нд": "Su",
 }
@@ -163,19 +167,19 @@ DAYS_SE = {
     "Söndag": "Su",
 }
 DAYS_SI = {
-    "po": "Mo",
+    "Po": "Mo",
     "Pon": "Mo",
-    "to": "Tu",
+    "To": "Tu",
     "Tor": "Tu",
-    "sr": "We",
+    "Sr": "We",
     "Sre": "We",
-    "če": "Th",
+    "Če": "Th",
     "Čet": "Th",
-    "pe": "Fr",
+    "Pe": "Fr",
     "Pet": "Fr",
-    "so": "Sa",
+    "So": "Sa",
     "Sob": "Sa",
-    "ne": "Su",
+    "Ne": "Su",
     "Ned": "Su",
 }
 DAYS_IT = {
@@ -295,12 +299,15 @@ DAYS_RU = {
     "Вторник": "Tu",
     "Ср": "We",
     "Среда": "We",
+    "Среду": "We",
     "Чт": "Th",
     "Четверг": "Th",
     "Пт": "Fr",
     "Пятница": "Fr",
+    "Пятницу": "Fr",
     "Сб": "Sa",
     "Суббота": "Sa",
+    "Субботу": "Sa",
     "Вс": "Su",
     "Воскресенье": "Su",
 }
@@ -453,8 +460,12 @@ NAMED_TIMES_EN = {
 
 NAMED_DAY_RANGES_RU = {
     "Ежедневно": ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"],  # Daily
-    "По будням": ["Mo", "Tu", "We", "Th", "Fr"],  # Weekdays
-    "По выходным": ["Sa", "Su"],  # Weekends
+    "По Будням": ["Mo", "Tu", "We", "Th", "Fr"],  # Weekdays
+    "По Выходным": ["Sa", "Su"],  # Weekends
+}
+
+NAMED_TIMES_RU = {
+    "Круглосуточно": ["00:00", "23:59"],  # 24/7
 }
 
 DELIMITERS_EN = [
@@ -487,6 +498,8 @@ DELIMITERS_PL = [
     "od",
     "do",
 ]
+
+DELIMITERS_RU = DELIMITERS_EN + ["с", "по", "до", "в", "во"]
 
 
 def day_range(start_day, end_day):

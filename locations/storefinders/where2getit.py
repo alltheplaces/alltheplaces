@@ -101,12 +101,7 @@ class Where2GetItSpider(Spider):
             else:
                 location_clause = {"country": {"eq": country_code}}
         if self.api_filter:
-            where_clause = {
-                "and": {
-                    self.api_filter,
-                    location_clause,
-                }
-            }
+            where_clause = {"and": self.api_filter | location_clause}
         else:
             where_clause = location_clause
 

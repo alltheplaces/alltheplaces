@@ -1,48 +1,48 @@
-import scrapy
+from scrapy import Spider
+from scrapy.http import JsonRequest
 
 from locations.dict_parser import DictParser
-from locations.hours import DAYS_FULL, OpeningHours
+from locations.hours import OpeningHours
 
 
-class Mitre10NZSpider(scrapy.Spider):
+class Mitre10NZSpider(Spider):
     name = "mitre_10_nz"
     item_attributes = {"brand": "Mitre 10", "brand_wikidata": "Q6882394"}
     allowed_domains = ["www.mitre10.co.nz"]
-    start_urls = ["https://www.mitre10.co.nz/store-locator?branchId=X1&page=0&type=data"]
+    start_urls = [
+        "https://ccapi.mitre10.co.nz/mitre10webservices/v2/mitre10/geolocation/store-locator?fields=FULL&page=0&pageSize=1000&storeCode=28&lang=en&curr=NZD"
+    ]
+    requires_proxy = "NZ"
+
+    def start_requests(self):
+        for url in self.start_urls:
+            yield JsonRequest(url=url)
 
     def parse(self, response):
-        current_page = response.meta.get("page", 0)
-        total_stores = response.json()["total"]
-        stores = response.json()["data"]
-        for store in stores:
-            item = DictParser.parse(store)
-            item["ref"] = store["storeCode"]
-            item["name"] = store["displayName"]
-            item.pop("website")
-            if len(store["storeLandingUrl"]) > 0:
-                if store["storeLandingUrl"][0] == "/":
-                    item["website"] = "https://www.mitre10.co.nz/store" + store["storeLandingUrl"]
-                else:
-                    item["website"] = store["storeLandingUrl"]
-            oh = OpeningHours()
-            for day in DAYS_FULL:
-                if day in store["openings"]:
-                    hours_raw = "".join(store["openings"][day].split())
-                elif day.upper() in store["openings"]:
-                    hours_raw = "".join(store["openings"][day.upper()].split())
-                else:
-                    continue
-                if hours_raw == "Closed":
-                    continue
-                open_time = hours_raw.split("-")[0]
-                close_time = hours_raw.split("-")[1]
-                oh.add_range(day, open_time, close_time, "%I:%M%p")
-            item["opening_hours"] = oh.as_opening_hours()
-            yield item
-        if current_page * 10 < total_stores - 10:
-            next_page = current_page + 1
-            yield scrapy.Request(
-                url=f"https://www.mitre10.co.nz/store-locator?branchId=X1&page={next_page}&type=data",
-                callback=self.parse,
-                meta={"page": next_page},
+        for location in response.json()["stores"]:
+            item = DictParser.parse(location)
+            item["ref"] = location["name"]
+            item["name"] = location["displayName"]
+            item["city"] = location["address"].get(
+                "suburb", location["address"].get("town", location["address"].get("city"))
             )
+            item["addr_full"] = location["address"]["formattedAddress"]
+            item["phone"] = location["address"].get("phone")
+            item["email"] = location["address"].get("email")
+            item["website"] = "https://www.mitre10.co.nz/store-locator?storeCode=" + location["name"]
+            if location.get("openingHours"):
+                item["opening_hours"] = OpeningHours()
+                for day_hours in location["openingHours"]["weekDayOpeningList"]:
+                    if day_hours["closed"]:
+                        continue
+                    if "openingTime" not in day_hours.keys():
+                        continue
+                    if "closingTime" not in day_hours.keys():
+                        continue
+                    item["opening_hours"].add_range(
+                        day_hours["weekDay"],
+                        day_hours["openingTime"]["formattedHour"].upper(),
+                        day_hours["closingTime"]["formattedHour"].upper(),
+                        "%I:%M %p",
+                    )
+            yield item

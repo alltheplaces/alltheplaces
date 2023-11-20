@@ -32,6 +32,7 @@ class Categories(Enum):
     CRAFT_ELECTRONICS_REPAIR = {"craft": "electronics_repair"}
     CRAFT_JEWELLER = {"craft": "jeweller"}
     CRAFT_KEY_CUTTER = {"craft": "key_cutter"}
+    CRAFT_LOCKSMITH = {"craft": "locksmith"}
     CRAFT_TAILOR = {"craft": "tailor"}
     CRAFT_SHOEMAKER = {"craft": "shoemaker"}
 
@@ -79,6 +80,7 @@ class Categories(Enum):
     SHOP_NEWSAGENT = {"shop": "newsagent"}
     SHOP_OPTICIAN = {"shop": "optician"}
     SHOP_OUTDOOR = {"shop": "outdoor"}
+    SHOP_OUTPOST = {"shop": "outpost"}
     SHOP_PAINT = {"shop": "paint"}
     SHOP_PASTRY = {"shop": "pastry"}
     SHOP_PAWNBROKER = {"shop": "pawnbroker"}
@@ -87,10 +89,12 @@ class Categories(Enum):
     SHOP_PHOTO = {"shop": "photo"}
     SHOP_SECOND_HAND = {"shop": "second_hand"}
     SHOP_SHOES = {"shop": "shoes"}
+    SHOP_SHOE_REPAIR = {"shop": "shoe_repair"}
     SHOP_SPORTS = {"shop": "sports"}
     SHOP_STATIONERY = {"shop": "stationery"}
     SHOP_STORAGE_RENTAL = {"shop": "storage_rental"}
     SHOP_SUPERMARKET = {"shop": "supermarket"}
+    SHOP_TEA = {"shop": "tea"}
     SHOP_TELECOMMUNICATION = {"shop": "telecommunication"}
     SHOP_TOYS = {"shop": "toys"}
     SHOP_TRADE = {"shop": "trade"}
@@ -98,9 +102,12 @@ class Categories(Enum):
     SHOP_VARIETY_STORE = {"shop": "variety_store"}
     SHOP_WATCHES = {"shop": "watches"}
     SHOP_WHOLESALE = {"shop": "wholesale"}
+    SHOP_WINDOW_BLIND = {"shop": "window_blind"}
 
     OFFICE_COMPANY = {"office": "company"}
+    OFFICE_ENGINEER = {"office": "engineer"}
     OFFICE_FINANCIAL = {"office": "financial"}
+    OFFICE_IT = {"office": "it"}
 
     ATM = {"amenity": "atm"}
     BANK = {"amenity": "bank"}
@@ -124,9 +131,11 @@ class Categories(Enum):
     FUEL_STATION = {"amenity": "fuel"}
     HOSPITAL = {"amenity": "hospital", "healthcare": "hospital"}
     HOTEL = {"tourism": "hotel"}
+    KINDERGARTEN = {"amenity": "kindergarten"}
     LIBRARY = {"amenity": "library"}
     MONEY_TRANSFER = {"amenity": "money_transfer"}
     MUSEUM = {"tourism": "museum"}
+    NIGHTCLUB = {"amenity": "nightclub"}
     PHARMACY = {"amenity": "pharmacy", "healthcare": "pharmacy"}
     PARCEL_LOCKER = {"amenity": "parcel_locker"}
     POST_BOX = {"amenity": "post_box"}
@@ -235,6 +244,7 @@ class Fuel(Enum):
     OCTANE_95 = "fuel:octane_95"
     OCTANE_97 = "fuel:octane_97"
     OCTANE_98 = "fuel:octane_98"
+    OCTANE_99 = "fuel:octane_99"
     OCTANE_100 = "fuel:octane_100"
     # Formulas
     E5 = "fuel:e5"
@@ -280,16 +290,20 @@ class Extras(Enum):
     FAST_FOOD = "fast_food"
     FAXING = "service:fax"
     FEE = "fee"
+    HALAL = "diet:halal"
     INDOOR_SEATING = "indoor_seating"
     OIL_CHANGE = "service:vehicle:oil_change"
     OUTDOOR_SEATING = "outdoor_seating"
+    PARCEL_PICKUP = "parcel_pickup"
     PARKING_PARENT = "capacity:parent"
     PARKING_WHEELCHAIR = "capacity:disabled"
+    PETS_ALLOWED = "pets_allowed"
     PRINTING = "service:print"
     SELF_CHECKOUT = "self_checkout"
     SCANING = "service:scan"
     SHOWERS = "shower"
     SMOKING_AREA = "smoking=isolated"
+    SWIMMING_POOL = "swimming_pool"
     TAKEAWAY = "takeaway"
     TOILETS = "toilets"
     TOILETS_WHEELCHAIR = "toilets:wheelchair"

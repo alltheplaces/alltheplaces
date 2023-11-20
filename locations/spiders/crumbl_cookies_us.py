@@ -4,6 +4,7 @@ from scrapy import Spider
 from scrapy.http import JsonRequest
 
 from locations.dict_parser import DictParser
+from locations.hours import OpeningHours
 
 
 class CrumblCookiesUSSpider(Spider):
@@ -13,14 +14,14 @@ class CrumblCookiesUSSpider(Spider):
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def parse(self, response):
-        nextBuildId = response.xpath("//script[contains(@src, '_ssgManifest.js')]/@src").get().split("/")[3]
-        url = f"https://crumblcookies.com/_next/data/{nextBuildId}/en-US/stores.json"
+        next_build_id = response.xpath("//script[contains(@src, '_ssgManifest.js')]/@src").get().split("/")[3]
+        url = f"https://crumblcookies.com/_next/data/{next_build_id}/en-US/stores.json"
         yield JsonRequest(url=url, callback=self.parse_api)
 
     def parse_api(self, response, **kwargs):
         for location in response.json()["pageProps"]["stores"]:
-            location["street_address"] = location.pop("street")
             item = DictParser.parse(location)
             item["website"] = urljoin("https://crumblcookies.com/", location["slug"])
-            item["extras"]["contact:yelp"] = location["yelpPage"]
+            item["opening_hours"] = OpeningHours()
+            item["opening_hours"].add_ranges_from_string(location["storeHours"]["description"])
             yield item

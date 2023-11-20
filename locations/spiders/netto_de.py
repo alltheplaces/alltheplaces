@@ -49,15 +49,7 @@ class NettoDESpider(scrapy.Spider):
         )
 
     def parse_opening_hours(self, hours):
-        DAYS = [
-            "Mo.",
-            "Di.",
-            "Mi.",
-            "Do.",
-            "Fr.",
-            "Sa.",
-            "So.",
-        ]
+        days_with_dot = list(DAY_MAPPING.keys())
 
         opening_hours = OpeningHours()
         for block in hours.split("<br />"):
@@ -71,7 +63,7 @@ class NettoDESpider(scrapy.Spider):
                     start_day, end_day = days.split("-")
                 else:
                     start_day, end_day = days, days
-                for day in DAYS[DAYS.index(start_day) : DAYS.index(end_day) + 1]:
+                for day in days_with_dot[days_with_dot.index(start_day) : days_with_dot.index(end_day) + 1]:
                     open_time, close_time = hrs.split("-")
                     close_time = close_time.replace("Uhr", "").strip()
                     open_time = open_time.strip()

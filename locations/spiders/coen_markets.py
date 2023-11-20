@@ -7,7 +7,7 @@ from locations.items import Feature
 
 class CoenMarketsSpider(scrapy.Spider):
     name = "coen_markets"
-    item_attributes = {"name": "Coen", "brand": "Coen Markets"}
+    item_attributes = {"name": "Coen", "brand": "Coen Markets Inc", "brand_wikidata": "Q123235821"}
     start_urls = ["https://coen1923.com/locations/search"]
 
     def parse(self, response):

@@ -10,8 +10,6 @@ class GoogleOfficesSpider(scrapy.Spider):
     item_attributes = {
         "brand": "Google",
         "brand_wikidata": "Q95",
-        # Skip NSI matching as we don't want to assign operator tags to Google offices
-        "nsi_id": "N/A",
     }
     start_urls = ["https://about.google/locations/data/locations.json"]
 

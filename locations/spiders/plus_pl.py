@@ -13,16 +13,20 @@ class PlusPLSpider(Spider):
         for feature in response.json()["apss"]["aps"]:
             item = DictParser.parse(feature)
             item["lat"], item["lon"] = feature["coords"].split(", ")
-            weekRange = feature["businessHoursWeek"].split("-")
-            satRange = feature["businessHoursWeekend"].split("-")
-            sunRange = feature["businessHoursWeekendSunday"].split("-")
+            week_range = feature["businessHoursWeek"].split("-")
+            sat_range = feature["businessHoursWeekend"].split("-")
+            sun_range = feature["businessHoursWeekendSunday"].split("-")
             item["opening_hours"] = OpeningHours()
-            if len(weekRange) == 2:
+            if len(week_range) == 2:
                 item["opening_hours"].add_days_range(
-                    days=DAYS[:5], open_time=weekRange[0].strip(), close_time=weekRange[1].strip()
+                    days=DAYS[:5], open_time=week_range[0].strip(), close_time=week_range[1].strip()
                 )
-            if len(satRange) == 2:
-                item["opening_hours"].add_range(day="Sa", open_time=satRange[0].strip(), close_time=satRange[1].strip())
-            if len(sunRange) == 2:
-                item["opening_hours"].add_range(day="Su", open_time=sunRange[0].strip(), close_time=sunRange[1].strip())
+            if len(sat_range) == 2:
+                item["opening_hours"].add_range(
+                    day="Sa", open_time=sat_range[0].strip(), close_time=sat_range[1].strip()
+                )
+            if len(sun_range) == 2:
+                item["opening_hours"].add_range(
+                    day="Su", open_time=sun_range[0].strip(), close_time=sun_range[1].strip()
+                )
             yield item
