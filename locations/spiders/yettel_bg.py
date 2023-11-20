@@ -1,7 +1,8 @@
+import io
+
+from openpyxl import load_workbook
 from scrapy import Spider
 
-import io
-from openpyxl import load_workbook
 from locations.hours import OpeningHours, day_range
 from locations.items import Feature
 
@@ -15,12 +16,12 @@ class YettelBGSpider(Spider):
     }
     start_urls = ["https://www.yettel.bg/dA/1d9e589cca"]
     no_refs = True
-    custom_settings = {
-        "ROBOTSTXT_OBEY": False
-    }
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def parse(self, response):
-        if 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' in response.headers.get('Content-Type').decode('utf-8'):
+        if "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" in response.headers.get(
+            "Content-Type"
+        ).decode("utf-8"):
             excel_file = response.body
 
             excel_data = io.BytesIO(excel_file)
@@ -32,7 +33,7 @@ class YettelBGSpider(Spider):
             for row in sheet.iter_rows(values_only=True):
                 data.append(row)
 
-            headers = data[0] 
+            headers = data[0]
             json_data = []
             for row in data[1:]:
                 json_data.append({headers[i]: cell for i, cell in enumerate(row)})
@@ -47,9 +48,11 @@ class YettelBGSpider(Spider):
                 item["city"] = store["city_loc"]
 
                 item["opening_hours"] = OpeningHours()
-                item["opening_hours"].add_days_range(day_range("Mo", "Fr"), *store["working_time_weekdays"].replace(" ", "").split("-"))
-                if store["is_closed_on_saturday"]=="No":
+                item["opening_hours"].add_days_range(
+                    day_range("Mo", "Fr"), *store["working_time_weekdays"].replace(" ", "").split("-")
+                )
+                if store["is_closed_on_saturday"] == "No":
                     item["opening_hours"].add_range("Sa", *store["working_time_saturday"].replace(" ", "").split("-"))
-                if store["is_closed_on_sunday"]=="No":
+                if store["is_closed_on_sunday"] == "No":
                     item["opening_hours"].add_range("Su", *store["working_time_sunday"].replace(" ", "").split("-"))
                 yield item
