@@ -8,7 +8,7 @@ from locations.hours import DAYS_RU, OpeningHours
 # https://online.vtb.ru/msa/api-gw/attm/attm-dictionary/atm/nearby/filtered/?longitude=36.6153309807117&latitude=54.66560792903764&radius=100
 
 
-class VtbRuSpider(scrapy.Spider):
+class VtbRUSpider(scrapy.Spider):
     name = "vtb_ru"
     allowed_domains = ["vtb.ru"]
     start_urls = ["https://headless-cms3.vtb.ru/projects/atm/models/default/items/departments"]
