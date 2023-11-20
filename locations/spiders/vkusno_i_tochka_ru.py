@@ -6,7 +6,7 @@ from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
 
 
-class VkusnoITochkaRuSpider(scrapy.Spider):
+class VkusnoITochkaRUSpider(scrapy.Spider):
     """
     A spider for russian fast-food chain "Vkusno i tochka". It has 863 locations as of 2023-01-09.
     Main Url: https://vkusnoitochka.ru/
@@ -40,7 +40,6 @@ class VkusnoITochkaRuSpider(scrapy.Spider):
         item = DictParser.parse(restaurant)
         features = [f["xmlId"] for f in restaurant["features"]]
         apply_yes_no(Extras.DRIVE_THROUGH, item, "mcauto" in features, True)
-        # TODO: data was changed and opening hours doesn't work anymore
         if opening_hours := restaurant.get("openingHours"):
             item["opening_hours"] = self.parse_hours(opening_hours)
         return item
