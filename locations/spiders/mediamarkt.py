@@ -1,11 +1,8 @@
 import json
 
 from scrapy.http import Request
-from scrapy.linkextractors import LinkExtractor
-from scrapy.spiders import Rule
 
 from locations.structured_data_spider import StructuredDataSpider
-from locations.user_agents import BROWSER_DEFAULT
 
 
 class MediaMarktSpider(StructuredDataSpider):
