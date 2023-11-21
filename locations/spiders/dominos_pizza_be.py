@@ -3,6 +3,7 @@ import re
 from scrapy.spiders import SitemapSpider
 
 from locations.items import Feature
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class DominosPizzaBESpider(SitemapSpider):
@@ -12,8 +13,8 @@ class DominosPizzaBESpider(SitemapSpider):
     sitemap_urls = ["https://www.dominos.be/sitemap.aspx"]
     url_regex = r"https:\/\/www\.dominos\.be/nl/winkel\/([\w]+)-([\w]+)-([\d]+)$"
     sitemap_rules = [(url_regex, "parse_store")]
-
     start_urls = ("https://www.dominos.be/winkels",)
+    user_agent = BROWSER_DEFAULT
 
     def parse_store(self, response):
         match = re.match(self.url_regex, response.url)
