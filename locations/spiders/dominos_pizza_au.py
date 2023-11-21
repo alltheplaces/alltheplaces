@@ -13,7 +13,6 @@ class DominosPizzaAUSpider(scrapy.Spider):
     allowed_domains = ["dominos.com.au"]
     user_agent = BROWSER_DEFAULT
 
-
     start_urls = ("https://www.dominos.com.au/stores",)
 
     def parse(self, response):
