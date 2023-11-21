@@ -86,14 +86,18 @@ class SignetJewelersSpider(scrapy.Spider):
     def start_requests(self):
         north_america_brands = ["jared", "kay", "zales", "pagoda", "peoplesjewellers"]
 
-        uk_urls = [
-            "https://www.hsamuel.co.uk/scripts/dist/store-locator/functionality/store-details.min.js?sprint-17_20190911.3",
-            "https://www.ernestjones.co.uk/scripts/store-locator/storeLocationDetails.js",
-        ]
+        yield scrapy.Request(
+            url="https://www.hsamuel.co.uk/store-finder/view-stores/GB%20Region", callback=self.parse_cities
+        )
 
-        for url in uk_urls:
-            yield scrapy.Request(url=url, callback=self.parse_uk)
-
+        # uk_urls = [
+        #     "https://www.hsamuel.co.uk/scripts/dist/store-locator/functionality/store-details.min.js?sprint-17_20190911.3",
+        #     "https://www.ernestjones.co.uk/scripts/store-locator/storeLocationDetails.js",
+        # ]
+        #
+        # for url in uk_urls:
+        #     yield scrapy.Request(url=url, callback=self.parse_uk)
+        #
         template = "https://www.{brand}.com/store-finder/view-stores/{region}"
 
         for brand in north_america_brands:
@@ -113,24 +117,10 @@ class SignetJewelersSpider(scrapy.Spider):
 
     def parse(self, response):
         script = " ".join(response.xpath('//*[@id="js-store-details"]/div/script/text()').extract())
-        data = None
 
-        if re.search(r"storeInformation\s=\s((?s).*)", script) is not None:
-            data = re.search(r"storeInformation\s=\s((?s).*)", script).groups()
-
-        properties = {}
-
-        if data is not None:
-            if len(data) > 0:
-                data = data[0]
-            data = data.replace(";", "")
-            data = eval(data)
-
-            if data["region"] in SignetJewelersSpider.ca_prov:
-                country = "CA"
-            else:
-                country = "US"
-
+        if re.search(r"(?s)storeInformation\s=\s(.*);", script) is not None:
+            data = re.search(r"(?s)storeInformation\s=\s(.*);", script).group(1)
+            data = json.loads(data.replace("y:", "y").replace("},", "}"))
             properties = {
                 "ref": data["name"],
                 "name": data["displayName"],
@@ -138,7 +128,7 @@ class SignetJewelersSpider(scrapy.Spider):
                 "city": data["town"],
                 "state": data["region"],
                 "postcode": data["postalCode"],
-                "country": country,
+                # "country": country,
                 "lat": data["latitude"],
                 "lon": data["longitude"],
                 "phone": data["phone"],
@@ -146,7 +136,7 @@ class SignetJewelersSpider(scrapy.Spider):
                 "brand": re.search(r"www.(\w+)", response.url)[1],
             }
 
-        yield Feature(**properties)
+            yield Feature(**properties)
 
     def parse_uk(self, response):
         data = re.search(r"Signet.allStoreDetails=((?s).*)", response.text)[1]
