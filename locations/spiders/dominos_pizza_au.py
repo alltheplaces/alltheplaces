@@ -4,12 +4,14 @@ import scrapy
 
 from locations.items import Feature
 from locations.spiders.vapestore_gb import clean_address
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class DominosPizzaAUSpider(scrapy.Spider):
     name = "dominos_pizza_au"
     item_attributes = {"brand": "Domino's", "brand_wikidata": "Q839466"}
     allowed_domains = ["dominos.com.au"]
+    user_agent = BROWSER_DEFAULT
 
     start_urls = ("https://www.dominos.com.au/stores",)
 
