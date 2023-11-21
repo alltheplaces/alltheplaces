@@ -10,7 +10,7 @@ class MediaMarktSpider(StructuredDataSpider):
     item_attributes = {"brand": "MediaMarkt", "brand_wikidata": "Q2381223"}
     start_urls = ["https://www.mediamarkt.de/de/store/store-finder"]
 
-    def _parse(self, response):
+    def parse(self, response):
         script = response.xpath('//script[contains(text(), "__PRELOADED_STATE__")]/text()').extract_first()
         script = script[script.index("{") : script.rindex("}") + 1]
         state = json.loads(script)["apolloState"]["ROOT_QUERY"]['localStorePage({"uid":"store-finder"})']["content"]
