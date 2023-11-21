@@ -86,18 +86,14 @@ class SignetJewelersSpider(scrapy.Spider):
     def start_requests(self):
         north_america_brands = ["jared", "kay", "zales", "pagoda", "peoplesjewellers"]
 
-        yield scrapy.Request(
-            url="https://www.hsamuel.co.uk/store-finder/view-stores/GB%20Region", callback=self.parse_cities
-        )
+        uk_urls = [
+            "https://www.hsamuel.co.uk/store-finder/view-stores/GB%20Region",
+            "https://www.ernestjones.co.uk/store-finder/view-stores/GB%20Region",
+        ]
 
-        # uk_urls = [
-        #     "https://www.hsamuel.co.uk/scripts/dist/store-locator/functionality/store-details.min.js?sprint-17_20190911.3",
-        #     "https://www.ernestjones.co.uk/scripts/store-locator/storeLocationDetails.js",
-        # ]
-        #
-        # for url in uk_urls:
-        #     yield scrapy.Request(url=url, callback=self.parse_uk)
-        #
+        for url in uk_urls:
+            yield scrapy.Request(url=url, callback=self.parse_cities)
+
         template = "https://www.{brand}.com/store-finder/view-stores/{region}"
 
         for brand in north_america_brands:
