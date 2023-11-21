@@ -84,7 +84,7 @@ class SignetJewelersSpider(scrapy.Spider):
     ]
 
     def start_requests(self):
-        north_america_brands = ["jared", "kay", "zales", "pagoda", "peoplesjewellers"]
+        north_america_brands = ["jared", "zales", "peoplesjewellers"]
 
         uk_urls = [
             "https://www.hsamuel.co.uk/store-finder/view-stores/GB%20Region",
@@ -94,6 +94,7 @@ class SignetJewelersSpider(scrapy.Spider):
         for url in uk_urls:
             yield scrapy.Request(url=url, callback=self.parse_cities)
 
+        # Kay and Pagoda no longer use this store finder form, migrated to separate spiders
         template = "https://www.{brand}.com/store-finder/view-stores/{region}"
 
         for brand in north_america_brands:
@@ -104,6 +105,7 @@ class SignetJewelersSpider(scrapy.Spider):
             else:
                 for state in SignetJewelersSpider.states:
                     url = template.format(brand=brand, region=state)
+                    self.logger.info(url)
                     yield scrapy.Request(url, callback=self.parse_cities)
 
     def parse_cities(self, response):
@@ -129,26 +131,6 @@ class SignetJewelersSpider(scrapy.Spider):
                 "lon": data["longitude"],
                 "phone": data["phone"],
                 "website": response.url,
-                "brand": re.search(r"www.(\w+)", response.url)[1],
-            }
-
-            yield Feature(**properties)
-
-    def parse_uk(self, response):
-        data = re.search(r"Signet.allStoreDetails=((?s).*)", response.text)[1]
-        data = data.replace(";", "")
-        data = json.loads(data)
-
-        for store in data:
-            properties = {
-                "ref": store["number"],
-                "name": store["name"],
-                "addr_full": store["addressLine1"],
-                "city": store["town"],
-                "postcode": store["postcode"],
-                "country": "GB",
-                "lat": store["latitude"],
-                "lon": store["longitude"],
                 "brand": re.search(r"www.(\w+)", response.url)[1],
             }
 
