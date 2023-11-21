@@ -1,5 +1,6 @@
 import scrapy
 
+from locations.categories import Categories, apply_category, apply_yes_no
 from locations.items import Feature
 
 
@@ -34,5 +35,23 @@ class NissanSpider(scrapy.Spider):
         item["phone"] = data.get("contact", {}).get("phone")
         item["email"] = data.get("contact", {}).get("email")
         item["website"] = data.get("contact", {}).get("website")
+
+        services = [s["name"] for s in data.get("dealerServices")]
+
+        sales_list = [
+            "Business Center",
+            "Testrit",
+            "Elektrische voertuigen",
+            "Lichte bedrijfsvoertuigen",
+            "Personenwagens",
+        ]
+
+        if any(s in services for s in sales_list):
+            apply_category(Categories.SHOP_CAR, item)
+            if "Erkend koetswerkhersteller" in services:
+                apply_yes_no("service:vehicle:car_repair", item, True)
+        else:
+            if "Erkend koetswerkhersteller" in services:
+                apply_category(Categories.SHOP_CAR_REPAIR, item)
 
         yield item
