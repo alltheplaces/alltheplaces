@@ -1,8 +1,8 @@
 from scrapy import Request, Spider
 
-from locations.categories import apply_yes_no, Extras
+from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
-from locations.hours import OpeningHours, DAYS_EN
+from locations.hours import DAYS_EN, OpeningHours
 
 
 class CaffeNeroSpider(Spider):
@@ -12,8 +12,11 @@ class CaffeNeroSpider(Spider):
 
     def parse(self, response, **kwargs):
         for region in response.xpath("//link[@rel='alternate'][starts-with(@hreflang, 'en-')]/@hreflang").getall():
-            country_code = region.split('-')[1].lower()
-            yield Request(url=f"https://caffenerowebsite.blob.core.windows.net/production/data/stores/stores-{country_code}.json", callback=self.parse_country)
+            country_code = region.split("-")[1].lower()
+            yield Request(
+                url=f"https://caffenerowebsite.blob.core.windows.net/production/data/stores/stores-{country_code}.json",
+                callback=self.parse_country,
+            )
 
     def parse_country(self, response):
         geojson = response.json()
