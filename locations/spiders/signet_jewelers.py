@@ -3,16 +3,25 @@ import re
 
 import scrapy
 
+from locations.hours import OpeningHours
 from locations.items import Feature
+
+BRANDS = {
+    "banter": {"brand": "Banter by Piercing Pagoda", "brand_wikidata": "Q108410448"},
+    "ernestjones": {"brand": "Ernest Jones", "brand_wikidata": "Q5393358"},
+    "hsamuel": {"brand": "H.Samuel", "brand_wikidata": "Q5628558"},
+    "jared": {"brand": "Jared", "brand_wikidata": "Q62029282"},
+    "peoplesjewellers": {"brand": "Peoples Jewellers", "brand_wikidata": "Q64995558"},
+    "zales": {"brand": "Zales", "brand_wikidata": "Q8065305"},
+}
 
 
 class SignetJewelersSpider(scrapy.Spider):
     name = "signet_jewelers"
     allowed_domains = [
         "www.jared.com",
-        "www.kay.com",
         "www.zales.com",
-        "www.pagoda.com",
+        "www.banter.com",
         "www.peoplesjewellers.com",
         "www.ernestjones.co.uk",
         "www.hsamuel.co.uk",
@@ -84,7 +93,8 @@ class SignetJewelersSpider(scrapy.Spider):
     ]
 
     def start_requests(self):
-        north_america_brands = ["jared", "zales", "peoplesjewellers"]
+        # Pagoda has changed site to banter.com
+        north_america_brands = ["banter", "jared", "peoplesjewellers", "zales"]
 
         uk_urls = [
             "https://www.hsamuel.co.uk/store-finder/view-stores/GB%20Region",
@@ -94,7 +104,7 @@ class SignetJewelersSpider(scrapy.Spider):
         for url in uk_urls:
             yield scrapy.Request(url=url, callback=self.parse_cities)
 
-        # Kay and Pagoda no longer use this store finder form, migrated to separate spiders
+        # Kay no longer use this store finder form, migrated to separate spider
         template = "https://www.{brand}.com/store-finder/view-stores/{region}"
 
         for brand in north_america_brands:
@@ -105,7 +115,6 @@ class SignetJewelersSpider(scrapy.Spider):
             else:
                 for state in SignetJewelersSpider.states:
                     url = template.format(brand=brand, region=state)
-                    self.logger.info(url)
                     yield scrapy.Request(url, callback=self.parse_cities)
 
     def parse_cities(self, response):
@@ -119,19 +128,31 @@ class SignetJewelersSpider(scrapy.Spider):
         if re.search(r"(?s)storeInformation\s=\s(.*);", script) is not None:
             data = re.search(r"(?s)storeInformation\s=\s(.*);", script).group(1)
             data = json.loads(data.replace("y:", "y").replace("},", "}"))
+            brand = re.search(r"www.(\w+)", response.url)[1]
             properties = {
                 "ref": data["name"],
                 "name": data["displayName"],
-                "addr_full": data["line1"],
+                "street_address": data["line1"],
                 "city": data["town"],
                 "state": data["region"],
                 "postcode": data["postalCode"],
-                # "country": country,
                 "lat": data["latitude"],
                 "lon": data["longitude"],
                 "phone": data["phone"],
                 "website": response.url,
-                "brand": re.search(r"www.(\w+)", response.url)[1],
+                "brand": BRANDS[brand]["brand"],
+                "brand_wikidata": BRANDS[brand]["brand_wikidata"],
             }
 
+            self.opening_hours(data.get("openings"), properties)
+
             yield Feature(**properties)
+
+    def opening_hours(self, data, item):
+        if not data:
+            return
+
+        oh = OpeningHours()
+        for key, value in data.items():
+            oh.add_ranges_from_string("{day} {hours}".format(day=key, hours=value))
+        item["opening_hours"] = oh
