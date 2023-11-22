@@ -8,7 +8,7 @@ class TaxAssistGBSpider(CrawlSpider, StructuredDataSpider):
     name = "tax_assist_gb"
     item_attributes = {"brand": "TaxAssist Accountants", "brand_wikidata": "Q122459380"}
     start_urls = ["https://www.taxassist.co.uk/locations"]
-    rules = [Rule(LinkExtractor("/accountants/"), "parse_sd")]
+    rules = [Rule(LinkExtractor("/accountants/", restrict_xpaths='//div[contains(., "Local Offices")]'), "parse_sd")]
     wanted_types = ["AccountingService"]
 
     def pre_process_data(self, ld_data, **kwargs):
