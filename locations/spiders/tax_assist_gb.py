@@ -6,6 +6,7 @@ from locations.structured_data_spider import StructuredDataSpider
 
 class TaxAssistGBSpider(CrawlSpider, StructuredDataSpider):
     name = "tax_assist_gb"
+    item_attributes = {"brand": "TaxAssist Accountants", "brand_wikidata": "Q122459380"}
     start_urls = ["https://www.taxassist.co.uk/locations"]
     rules = [Rule(LinkExtractor("/accountants/"), "parse_sd")]
     wanted_types = ["AccountingService"]
