@@ -167,7 +167,6 @@ class BurgerKingSpider(scrapy.Spider):
 
     def parse(self, response, country_code):
         for row in response.json()[0]["data"]["restaurants"]["nodes"]:
-            self.crawler.stats.inc_value("atp/burger_king/scraped_for/" + country_code)
             row.update(row.pop("physicalAddress"))
             item = DictParser.parse(row)
             item["name"] = "Burger King"
