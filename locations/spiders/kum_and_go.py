@@ -1,5 +1,3 @@
-import json
-
 import scrapy
 
 from locations.categories import Categories, Fuel, apply_category, apply_yes_no
@@ -27,6 +25,7 @@ class KumAndGoSpider(scrapy.Spider):
     name = "kum_and_go"
     item_attributes = {"brand": "Kum & Go", "brand_wikidata": "Q6443340"}
     allowed_domains = ["kumandgo.com"]
+    skip_auto_cc_spider_name = True
 
     def start_requests(self):
         states = [
@@ -46,8 +45,7 @@ class KumAndGoSpider(scrapy.Spider):
             yield scrapy.Request(f"https://app.kumandgo.com/api/stores/nearest?q={state}")
 
     def parse(self, response):
-        result = json.loads(response.text)
-        for store in result.get("data"):
+        for store in response.json().get("data"):
             item = DictParser.parse(store)
             fuels = store["features"].get("fuelProducts")
             if fuels:
@@ -64,6 +62,7 @@ class KumAndGoSpider(scrapy.Spider):
             for hours in store["storeHours"].get("hours"):
                 if hours.get("displayText") is not None:
                     oh.add_ranges_from_string(hours.get("day") + " " + hours.get("displayText"))
-            item["opening_hours"] = oh.as_opening_hours()
+            item["opening_hours"] = oh
+            item["website"] = "https://www.kumandgo.com/store-locator?details={}".format(item["ref"])
 
             yield item
