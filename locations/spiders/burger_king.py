@@ -140,7 +140,6 @@ class BurgerKingSpider(scrapy.Spider):
         us_endpoint = "https://use1-prod-bk.rbictg.com/graphql"
 
         # Europe
-        eu_capitals = self.get_eu_capitals()
         for country_code, city_name in self.get_eu_capitals():
             # Currently we have data for AT, CH, CZ, DE, ES, GB, NL, PL, PT, RO in eu_endpoint (2023-11-22)
             if country_code in ["AT", "CH", "CZ", "DE", "ES", "GB", "NL", "PL", "PT", "RO"]:
