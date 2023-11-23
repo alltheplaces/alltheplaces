@@ -45,6 +45,3 @@ class ShellRechargeSpider(scrapy.Spider):
             apply_category(Categories.CHARGING_STATION, properties)
 
             yield Feature(**properties)
-
-        
-        
