@@ -2,12 +2,17 @@ import json
 
 import scrapy
 
+from locations.categories import Categories
 from locations.items import Feature
 
 
 class ChicosOffTheRackSpider(scrapy.Spider):
     name = "chicosofftherack"
-    item_attributes = {"brand": "Chico's Off The Rack", "brand_wikidata": "Q5096393"}
+    item_attributes = {
+        "brand": "Chico's Off The Rack",
+        "brand_wikidata": "Q5096393",
+        "extras": Categories.SHOP_CLOTHES.value,
+    }
     allowed_domains = ["stores.chicosofftherack.com"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
