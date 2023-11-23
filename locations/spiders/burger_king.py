@@ -204,6 +204,7 @@ class BurgerKingSpider(scrapy.Spider):
             "__typename": "OperatingHours"
             }
         """
+        # TODO: parse driveThruHours
         if hours := row.get("diningRoomHours"):
             try:
                 oh = OpeningHours()
