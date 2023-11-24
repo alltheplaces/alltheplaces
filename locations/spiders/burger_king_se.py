@@ -1,4 +1,5 @@
 from urllib.parse import urljoin
+
 import scrapy
 
 from locations.hours import DAYS_EN, OpeningHours
