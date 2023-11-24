@@ -147,6 +147,8 @@ class Categories(Enum):
     RESTAURANT = {"amenity": "restaurant"}
     VETERINARY = {"amenity": "veterinary"}
 
+    DATA_CENTRE = {"telecom": "data_center"}
+
     VENDING_MACHINE_BICYCLE_TUBE = {"amenity": "vending_machine", "vending": "bicycle_tube"}
     VENDING_MACHINE_COFFEE = {"amenity": "vending_machine", "vending": "coffee"}
 
@@ -203,6 +205,7 @@ top_level_tags = [
     "aeroway",
     "railway",
     "waterway",
+    "telecom",
 ]
 
 
