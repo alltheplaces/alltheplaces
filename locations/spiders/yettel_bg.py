@@ -14,11 +14,16 @@ class YettelBGSpider(Spider):
         "brand_wikidata": "Q14915070",
         "country": "BG",
     }
-    start_urls = ["https://www.yettel.bg/dA/1d9e589cca"]
+    start_urls = ["https://www.yettel.bg/faq/digital-customer-service/store-locator"]
     no_refs = True
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def parse(self, response):
+        yield response.follow(
+            url=response.xpath('//input[@id="hdnExcelFile"]/@value').get(), callback=self.parse_spreadsheet
+        )
+
+    def parse_spreadsheet(self, response):
         if "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" in response.headers.get(
             "Content-Type"
         ).decode("utf-8"):
