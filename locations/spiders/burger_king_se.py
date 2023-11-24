@@ -14,6 +14,7 @@ class BurgerKingSESpider(scrapy.Spider):
         "https://bk-se-ordering-api.azurewebsites.net/api/v2/restaurants?latitude=59.330311012767446&longitude=18.068330468145753&radius=99900000&top=100000"
     ]
     restaurants_url = "https://bk-se-ordering-api.azurewebsites.net/api/v2/restaurants/"
+    website_template = "https://burgerking.se/restauranger/{slug}"
 
     def parse(self, response):
         for store in response.json().get("data"):
@@ -38,7 +39,7 @@ class BurgerKingSESpider(scrapy.Spider):
                 "street_address": store.get("storeAddress"),
                 "lat": coords.get("latitude"),
                 "lon": coords.get("longitude"),
-                "website": f"https://burgerking.se/restauranger/{store.get('slug')}",
+                "website": self.website_template.format(slug=store.get("slug")),
                 "opening_hours": oh.as_opening_hours(),
                 "extras": {
                     "drive_through": "yes" if store.get("hasDriveThru") is True else "no",
