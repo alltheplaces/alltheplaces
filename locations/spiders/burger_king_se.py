@@ -1,3 +1,4 @@
+from urllib.parse import urljoin
 import scrapy
 
 from locations.hours import DAYS_EN, OpeningHours
@@ -11,11 +12,12 @@ class BurgerKingSESpider(scrapy.Spider):
     start_urls = [
         "https://bk-se-ordering-api.azurewebsites.net/api/v2/restaurants?latitude=59.330311012767446&longitude=18.068330468145753&radius=99900000&top=100000"
     ]
+    restaurants_url = "https://bk-se-ordering-api.azurewebsites.net/api/v2/restaurants/"
 
     def parse(self, response):
         for store in response.json().get("data"):
             yield scrapy.Request(
-                f"https://bk-se-ordering-api.azurewebsites.net/api/v2/restaurants/{store.get('slug')}",
+                url=urljoin(self.restaurants_url, store.get("slug")),
                 callback=self.parse_store,
             )
 
