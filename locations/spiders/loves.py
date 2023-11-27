@@ -1,10 +1,10 @@
 import json
 
 import scrapy
-
-from locations.items import Feature
-from locations.categories import Categories,apply_category
 from scrapy.exceptions import CloseSpider
+
+from locations.categories import Categories, apply_category
+from locations.items import Feature
 
 HEADERS = {"Content-Type": "application/json"}
 
@@ -38,7 +38,7 @@ class LovesSpider(scrapy.Spider):
 
     def parse(self, response):
         stores = response.json()
-        if len(stores )== 0:
+        if len(stores) == 0:
             raise CloseSpider()
         else:
             for store in stores:
@@ -55,15 +55,15 @@ class LovesSpider(scrapy.Spider):
                     lon=float(store["Longitude"]),
                 )
 
-                if store['IsLoveStore']==True:
-                        apply_category({"highway":"service"}, item)
-                elif store['IsCountryStore']==True:
-                        apply_category(Categories.FUEL_STATION, item)                               
-                elif store['IsSpeedCo']==True:
-                        apply_category({"shop":"truck_repair"}, item)
+                if store["IsLoveStore"] == True:
+                    apply_category({"highway": "service"}, item)
+                elif store["IsCountryStore"] == True:
+                    apply_category(Categories.FUEL_STATION, item)
+                elif store["IsSpeedCo"] == True:
+                    apply_category({"shop": "truck_repair"}, item)
 
                 yield item
-        
-        self.page +=1
+
+        self.page += 1
         next_page = f"https://www.loves.com/api/sitecore/StoreSearch/SearchStoresWithDetail?pageNumber={self.page}&top=50&lat=39.09574818760951&lng=-96.9935195"
         yield response.follow(next_page, callback=self.parse)
