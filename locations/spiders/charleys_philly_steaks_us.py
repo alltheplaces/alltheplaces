@@ -14,12 +14,7 @@ class CharleysPhillySteaksUSSpider(Spider):
     start_urls = ["https://www.charleys.com/wp-admin/admin-ajax.php"]
 
     def start_requests(self):
-        formdata = {
-            "action": "get_blended_nearby_locations",
-            "lat": "40.7127753",
-            "lon": "-74.0059728",
-            "distance": ""
-        }
+        formdata = {"action": "get_blended_nearby_locations", "lat": "40.7127753", "lon": "-74.0059728", "distance": ""}
         for url in self.start_urls:
             yield FormRequest(url=url, method="POST", formdata=formdata, callback=self.parse_list)
 

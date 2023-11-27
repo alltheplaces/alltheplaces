@@ -33,15 +33,27 @@ class GeneralPantsCoSpider(Spider):
                 continue
             item = DictParser.parse(location)
             item["ref"] = location["code"]
-            item["street_address"] = ", ".join(filter(None, [location["address"]["line1"], location["address"]["line2"]]))
+            item["street_address"] = ", ".join(
+                filter(None, [location["address"]["line1"], location["address"]["line2"]])
+            )
             item["addr_full"] = location["address"]["formattedAddress"]
             item["phone"] = location["address"].get("phone")
             item["email"] = location["address"].get("email")
-            item["website"] = "https://www.generalpants.com/" + location["address"]["country"]["isocode"].lower() + "/store/" + location["nameClean"]
+            item["website"] = (
+                "https://www.generalpants.com/"
+                + location["address"]["country"]["isocode"].lower()
+                + "/store/"
+                + location["nameClean"]
+            )
             if location.get("openingHours"):
                 item["opening_hours"] = OpeningHours()
                 for day_hours in location["openingHours"]["weekDayOpeningList"]:
                     if day_hours["closed"]:
                         continue
-                    item["opening_hours"].add_range(day_hours["weekDay"], day_hours["openingTime"]["formattedHour"].upper(), day_hours["closingTime"]["formattedHour"].upper(), "%I:%M %p")
+                    item["opening_hours"].add_range(
+                        day_hours["weekDay"],
+                        day_hours["openingTime"]["formattedHour"].upper(),
+                        day_hours["closingTime"]["formattedHour"].upper(),
+                        "%I:%M %p",
+                    )
             yield item

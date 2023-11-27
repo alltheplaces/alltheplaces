@@ -2,7 +2,7 @@ from scrapy import Spider
 from scrapy.http import Response
 
 
-class AutomaticSpiderGenerator():
+class AutomaticSpiderGenerator:
     @staticmethod
     def generate_spider_code(spider: Spider) -> str:
         """
@@ -29,7 +29,9 @@ class AutomaticSpiderGenerator():
         return spider_code
 
     @staticmethod
-    def generate_spider_attributes_code(spider: Spider, sort_order: [] = ["name", "item_attributes", "allowed_domains", "start_urls"]) -> str:
+    def generate_spider_attributes_code(
+        spider: Spider, sort_order: [] = ["name", "item_attributes", "allowed_domains", "start_urls"]
+    ) -> str:
         """
         Generate source code representation of class attributes
         for a spider.
@@ -45,24 +47,26 @@ class AutomaticSpiderGenerator():
                  of class attributes.
         """
         spider_attributes_code = ""
-        spider_attributes = {k:v for k,v in vars(spider).items() if not k.startswith("_") and v is not None}
+        spider_attributes = {k: v for k, v in vars(spider).items() if not k.startswith("_") and v is not None}
         spider_attributes_sorted = {k: spider_attributes[k] for k in sort_order if k in spider_attributes}
-        spider_attributes_sorted.update({k: spider_attributes[k] for k in dict(sorted(spider_attributes.items())) if k not in sort_order})
+        spider_attributes_sorted.update(
+            {k: spider_attributes[k] for k in dict(sorted(spider_attributes.items())) if k not in sort_order}
+        )
         for k, v in spider_attributes_sorted.items():
             if isinstance(v, dict):
-                spider_attributes_code = '{}\n\t{} = {{'.format(spider_attributes_code, k)
+                spider_attributes_code = "{}\n\t{} = {{".format(spider_attributes_code, k)
                 for k2, v2 in v.items():
                     if isinstance(v2, str):
                         spider_attributes_code = '{}\n\t\t{} = "{}",'.format(spider_attributes_code, k2, v2)
-                spider_attributes_code = '{}\n\t}}'.format(spider_attributes_code)
+                spider_attributes_code = "{}\n\t}}".format(spider_attributes_code)
             elif isinstance(v, str):
                 spider_attributes_code = '{}\n\t{} = "{}"'.format(spider_attributes_code, k, v)
-            elif hasattr(v, '__len__'): # Array
-                spider_attributes_code = '{}\n\t{} = ['.format(spider_attributes_code, k)
+            elif hasattr(v, "__len__"):  # Array
+                spider_attributes_code = "{}\n\t{} = [".format(spider_attributes_code, k)
                 for v2 in v:
                     if isinstance(v2, str):
                         spider_attributes_code = '{}\n\t\t"{}",'.format(spider_attributes_code, v2)
-                spider_attributes_code = '{}\n\t]'.format(spider_attributes_code)
+                spider_attributes_code = "{}\n\t]".format(spider_attributes_code)
         return spider_attributes_code
 
     @staticmethod

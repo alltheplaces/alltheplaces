@@ -9,6 +9,7 @@ from locations.items import Feature
 from locations.spiders.vapestore_gb import clean_address
 from locations.user_agents import BROWSER_DEFAULT
 
+
 class LittleCaesarsUSSpider(Spider):
     name = "little_caesars_us"
     item_attributes = {
@@ -28,16 +29,25 @@ class LittleCaesarsUSSpider(Spider):
                 "address": {
                     "city": "",
                     "state": "",
-                    "street" : "",
+                    "street": "",
                     "zip": str(record["postal_region"]),
                 }
             }
-            yield JsonRequest(url="https://api.cloud.littlecaesars.com/bff/api/GetClosestStores", data=data, headers=headers, method="POST", callback=self.parse_location_list)
+            yield JsonRequest(
+                url="https://api.cloud.littlecaesars.com/bff/api/GetClosestStores",
+                data=data,
+                headers=headers,
+                method="POST",
+                callback=self.parse_location_list,
+            )
 
     def parse_location_list(self, response):
         for location in response.json()["stores"]:
             store_id = str(location["locationNumber"])
-            yield JsonRequest(url="https://api.cloud.littlecaesars.com/bff/api/v2/store/location/{store_id}", callback=self.parse_store)
+            yield JsonRequest(
+                url="https://api.cloud.littlecaesars.com/bff/api/v2/store/location/{store_id}",
+                callback=self.parse_store,
+            )
 
     def parse_store(self, response):
         location = response.json()["storeInfo"]

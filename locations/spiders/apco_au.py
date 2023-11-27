@@ -11,11 +11,11 @@ class APCOAUSpider(Spider):
 
     def parse(self, response):
         for location_html in response.xpath('//div[contains(@class, "location") and @data-index]'):
-            if "Support Office" in location_html.xpath('.//h2/text()').get().title():
+            if "Support Office" in location_html.xpath(".//h2/text()").get().title():
                 continue
             properties = {
-                "ref": location_html.xpath('.//@data-index').get(),
-                "name": location_html.xpath('.//h2/text()').get(),
+                "ref": location_html.xpath(".//@data-index").get(),
+                "name": location_html.xpath(".//h2/text()").get(),
                 "street_address": location_html.xpath('.//span[contains(@class, "address")]/text()').get(),
                 "city": location_html.xpath('.//span[contains(@class, "suburb")]/text()').get(),
                 "postcode": location_html.xpath('.//span[contains(@class, "postcode")]/text()').get(),

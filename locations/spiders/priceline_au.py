@@ -4,13 +4,12 @@ from scrapy.selector import Selector
 from locations.dict_parser import DictParser
 from locations.user_agents import BROWSER_DEFAULT
 
+
 class PricelineAUSpider(scrapy.Spider):
     name = "priceline_au"
     allowed_domains = [""]
     item_attributes = {"brand": "Priceline", "brand_wikidata": "Q7242652"}
-    start_urls = (
-        "https://www.priceline.com.au/ustorelocator/location/map/?ajax=1&page=1",
-    )
+    start_urls = ("https://www.priceline.com.au/ustorelocator/location/map/?ajax=1&page=1",)
     user_agent = BROWSER_DEFAULT
 
     def parse(self, response):

@@ -114,7 +114,9 @@ class SfCommand(BaseRunSpiderCommand):
                         DetectorSpider.parameters["operator_wikidata"] = wikidata_code
 
         if DetectorSpider.parameters["brand_wikidata"] or DetectorSpider.parameters["operator_wikidata"]:
-            wikidata_code = DetectorSpider.parameters["brand_wikidata"] or DetectorSpider.parameters["operator_wikidata"]
+            wikidata_code = (
+                DetectorSpider.parameters["brand_wikidata"] or DetectorSpider.parameters["operator_wikidata"]
+            )
             nsi_matches = [nsi_match for nsi_match in nsi.iter_nsi(wikidata_code)]
             if len(nsi_matches) == 1:
                 spider_key = re.sub(r"[^a-zA-Z0-9_]", "", nsi_matches[0]["tags"]["name"].replace(" ", "_")).lower()

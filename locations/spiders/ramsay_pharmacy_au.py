@@ -28,7 +28,9 @@ class RamsayPharmacyAUSpider(Spider):
             "WeekDayId": None,
         }
         for url in self.start_urls:
-            yield JsonRequest(url=url, method="POST", data=data, headers={"Origin": "https://www.ramsaypharmacy.com.au"})
+            yield JsonRequest(
+                url=url, method="POST", data=data, headers={"Origin": "https://www.ramsaypharmacy.com.au"}
+            )
 
     def parse(self, response):
         print(response.text())
