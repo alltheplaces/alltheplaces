@@ -25,7 +25,7 @@ class EGAmericaUSSpider(Spider):
         16: {"brand": "Fastrac", "brand_wikidata": "Q117324848"},
         17: {"brand": "Certified Oil", "brand_wikidata": "Q100148356"},
         18: {"brand": "Kwik Shop", "brand_wikidata": "Q6450417"},
-        19: {"brand": "Loaf N' Jug", "brand_wikidata": "Q6663398"},
+        19: {"brand": "Loaf 'N Jug", "brand_wikidata": "Q6663398"},
         20: {"brand": "Sprint", "brand_wikidata": "Q123012447"},
     }
 
