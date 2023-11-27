@@ -3,6 +3,7 @@ import re
 
 import scrapy
 
+from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.items import Feature
 
@@ -129,30 +130,22 @@ class SignetJewelersSpider(scrapy.Spider):
             data = re.search(r"(?s)storeInformation\s=\s(.*);", script).group(1)
             data = json.loads(data.replace("y:", "y").replace("},", "}"))
             brand = re.search(r"www.(\w+)", response.url)[1]
-            properties = {
-                "ref": data["name"],
-                "name": data["displayName"],
-                "street_address": data["line1"],
-                "city": data["town"],
-                "state": data["region"],
-                "postcode": data["postalCode"],
-                "lat": data["latitude"],
-                "lon": data["longitude"],
-                "phone": data["phone"],
-                "website": response.url,
-                "brand": BRANDS[brand]["brand"],
-                "brand_wikidata": BRANDS[brand]["brand_wikidata"],
-            }
+            item = DictParser.parse(data)
+            item["ref"] = data.get("name")
+            item["name"] = data.get("displayName")
+            item["website"] = response.url
+            item["brand"] = BRANDS[brand]["brand"]
+            item["brand_wikidata"] = BRANDS[brand]["brand_wikidata"]
 
-            self.opening_hours(data.get("openings"), properties)
+            self.opening_hours(data.get("openings"), item)
 
-            yield Feature(**properties)
+            yield item
 
-    def opening_hours(self, data, item):
-        if not data:
+    def opening_hours(self, hours, item):
+        if not hours:
             return
 
         oh = OpeningHours()
-        for key, value in data.items():
+        for key, value in hours.items():
             oh.add_ranges_from_string("{day} {hours}".format(day=key, hours=value))
         item["opening_hours"] = oh
