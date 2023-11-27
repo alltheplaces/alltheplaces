@@ -44,7 +44,7 @@ class HandelsbankenSESpider(scrapy.Spider):
                 "lon": store.get("location").get("lng"),
                 "opening_hours": oh,
             }
-            if location_type == "ATM":
+            if location_type in ["ATM", "CRS"]:
                 apply_category(Categories.ATM, properties)
             elif location_type == "Branch":
                 apply_category(Categories.BANK, properties)
