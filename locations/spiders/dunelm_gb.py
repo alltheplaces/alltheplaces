@@ -7,7 +7,11 @@ from locations.hours import OpeningHours
 
 class DunelmGB(Spider):
     name = "dunelm_gb"
-    item_attributes = {"brand": "Dunelm", "brand_wikidata": "Q5315020"}
+    item_attributes = {
+        "brand": "Dunelm",
+        "brand_wikidata": "Q5315020",
+        "extras": {"shop": "houseware"},
+    }
 
     def start_requests(self):
         yield JsonRequest(

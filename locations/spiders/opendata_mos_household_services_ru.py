@@ -63,12 +63,12 @@ CATEGORY_MAPPING = {
 class OpendataMosSpider(scrapy.Spider):
     """
     A spider for Open Data Portal of Moscow Government.
-        Documentation: https://data-new.mos.ru/developers
-        More datasets: https://data-new.mos.ru/
+        Documentation: https://data.mos.ru/developers
+        More datasets: https://data.mos.ru/
     Each dataset from this portal may have different data format.
     """
 
-    allowed_domains = ["apidata-new.mos.ru"]
+    allowed_domains = ["apidata.mos.ru"]
     api_key = "8caab471-cc9f-46c8-aeea-fa3f5e1c765c"
     download_delay = 0.25
     requires_proxy = True
@@ -76,7 +76,7 @@ class OpendataMosSpider(scrapy.Spider):
         "attribution": "required",
         "attribution:name:ru": "ПОРТАЛ ОТКРЫТЫХ ДАННЫХ Правительства Москвы",
         "attribution:name:en": "OPEN DATA PORTAL of Moscow Government",
-        "attribution:website": "https://data-new.mos.ru/",
+        "attribution:website": "https://data.mos.ru/",
         "contact:email": "opendata@mos.ru",
         "license": "Creative Commons Attribution 3.0 Unported",
         "license:website": "https://creativecommons.org/licenses/by/3.0/",
@@ -92,7 +92,7 @@ class OpendataMosSpider(scrapy.Spider):
     def start_requests(self):
         for name, id in self.datasets.items():
             yield Request(
-                url=f"https://apidata-new.mos.ru/v1/datasets/{id}/count?api_key={self.api_key}",
+                url=f"https://apidata.mos.ru/v1/datasets/{id}/count?api_key={self.api_key}",
                 meta={"id": id, "name": name},
             )
 
@@ -104,7 +104,7 @@ class OpendataMosSpider(scrapy.Spider):
         for offset in range(0, count, 500):
             # a max number of rows to fetch is top=500
             yield JsonRequest(
-                url=f"https://apidata-new.mos.ru/v1/datasets/{id}/rows?$top=500&$skip={offset}&api_key={self.api_key}",
+                url=f"https://apidata.mos.ru/v1/datasets/{id}/rows?$top=500&$skip={offset}&api_key={self.api_key}",
                 callback=self.parse_data,
             )
 

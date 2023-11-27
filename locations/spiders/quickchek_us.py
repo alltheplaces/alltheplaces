@@ -1,5 +1,6 @@
 from scrapy import FormRequest, Spider
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 
@@ -27,4 +28,5 @@ class QuickChekUSSpider(Spider):
                 item["opening_hours"].add_days_range(DAYS, "00:00", "23:59")
             else:
                 item["opening_hours"].add_ranges_from_string("Mo-Su: {}".format(location["hours"]))
+            apply_category(Categories.SHOP_CONVENIENCE, item)
             yield item

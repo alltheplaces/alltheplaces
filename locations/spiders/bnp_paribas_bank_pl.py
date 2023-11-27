@@ -30,6 +30,8 @@ class BNPParibasBankPLSpider(scrapy.Spider):
 
         for poi in details.get("department_retail_business").values():
             branch = poi.get("basicParameters")
+            if not branch.get("branch_id"):
+                continue  # Currently 2 don't have ids
             branch["street_address"] = branch.pop("street")
             item = DictParser.parse(branch)
             item["ref"] = branch["branch_id"]
