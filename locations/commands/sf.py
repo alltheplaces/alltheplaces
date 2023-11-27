@@ -7,6 +7,7 @@ from scrapy import Spider
 from scrapy.commands import BaseRunSpiderCommand
 from scrapy.exceptions import UsageError
 
+from locations.automatic_spider_generator import AutomaticSpiderGenerator
 from locations.name_suggestion_index import NSI
 from locations.storefinders import *
 from locations.user_agents import BROWSER_DEFAULT
@@ -30,10 +31,8 @@ class DetectorSpider(Spider):
         for storefinder in [
             cls
             for _, cls in inspect.getmembers(sys.modules["locations.storefinders"], inspect.isclass)
-            if issubclass(cls, Spider)
+            if [base for base in cls.__bases__ if base.__name__ == AutomaticSpiderGenerator.__name__]
         ]:
-            if not callable(getattr(storefinder, "storefinder_exists", None)):
-                continue
             if not storefinder.storefinder_exists(response):
                 continue
             new_spider = type(

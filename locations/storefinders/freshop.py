@@ -1,6 +1,9 @@
-from scrapy import Spider
-from scrapy.http import JsonRequest
+import re
 
+from scrapy import Spider
+from scrapy.http import JsonRequest, Response
+
+from locations.automatic_spider_generator import AutomaticSpiderGenerator
 from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
@@ -11,7 +14,7 @@ from locations.hours import OpeningHours
 # make corrections to automatically extracted location data.
 
 
-class FreshopSpider(Spider):
+class FreshopSpider(Spider, AutomaticSpiderGenerator):
     dataset_attributes = {"source": "api", "api": "freshop.com"}
     app_key = ""
     location_type_ids = ["1567647"]
@@ -46,3 +49,19 @@ class FreshopSpider(Spider):
 
     def parse_item(self, item, location, **kwargs):
         yield item
+
+    @staticmethod
+    def storefinder_exists(response: Response) -> bool:
+        if len(response.xpath('//script[contains(@src, "https://asset.freshop.com/freshop.js")]')) > 0:
+            return True
+        return False
+
+    @staticmethod
+    def extract_spider_attributes(response: Response) -> dict:
+        app_key = ""
+        app_key_url = response.xpath('//script[contains(@src, "https://asset.freshop.com/freshop.js")]/@src').get()
+        if app_key_match := re.search(r"(?<![\w\-])app_key=([\w\-]+)", app_key_url):
+            app_key = app_key_match.group(1)
+        return {
+            "app_key": app_key,
+        }
