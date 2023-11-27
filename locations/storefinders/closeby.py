@@ -34,7 +34,10 @@ class ClosebySpider(Spider, AutomaticSpiderGenerator):
         if api_key and "/" in api_key:
             api_key = api_key.split("/")[-1]
         if not api_key:
-            if api_key_match := re.search(r"closeby\.mapKey=([0-9a-f]{32})(?![0-9a-f])", response.xpath('//script[contains(@src, "https://embed.closeby.co/v1.js")]').get()):
+            if api_key_match := re.search(
+                r"closeby\.mapKey=([0-9a-f]{32})(?![0-9a-f])",
+                response.xpath('//script[contains(@src, "https://embed.closeby.co/v1.js")]').get(),
+            ):
                 api_key = api_key_match.group(1)
         if api_key:
             return {
