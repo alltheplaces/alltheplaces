@@ -1,5 +1,6 @@
 from scrapy import Spider
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
 
@@ -19,4 +20,5 @@ class GridserveGBSpider(Spider):
 
             # TODO: connector data location["connectors"]
 
+            apply_category(Categories.CHARGING_STATION, item)
             yield item

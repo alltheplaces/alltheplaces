@@ -2,6 +2,7 @@ import re
 
 from scrapy import Spider
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
 
@@ -26,5 +27,5 @@ class IonitySpider(Spider):
 
             if m := re.search(r"Number of CCS Chargers: (\d+)", location["description"]):
                 item["extras"]["socket:CCS"] = m.group(1)
-
+            apply_category(Categories.CHARGING_STATION, item)
             yield item
