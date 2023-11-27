@@ -50,6 +50,10 @@ class SweetIQSpider(Spider):
                 for time_range in time_ranges:
                     item["opening_hours"].add_range(day_name, time_range[0], time_range[1])
 
+            item["extras"] = {}
+            if future_opening_date := location["properties"]["futureOpeningDate"]:
+                item["extras"]["start_date"] = future_opening_date
+
             payment_methods = {
                 "AMEX": PaymentMethods.AMERICAN_EXPRESS,
                 "AMERICAN EXPRESS": PaymentMethods.AMERICAN_EXPRESS,

@@ -1,5 +1,6 @@
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
@@ -41,4 +42,6 @@ class TommyHilfigerSpider(scrapy.Spider):
             if store.get("telephone1"):
                 properties["phone"] = store["telephone1"].strip()
 
-            yield Feature(**properties)
+            item = Feature(**properties)
+            apply_category(Categories.SHOP_CLOTHES, item)
+            yield item

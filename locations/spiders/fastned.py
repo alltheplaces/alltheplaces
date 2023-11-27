@@ -1,5 +1,6 @@
 from scrapy import Spider
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
 
@@ -11,6 +12,9 @@ class FastnedSpider(Spider):
     def parse(self, response, **kwargs):
         for location in response.json():
             item = DictParser.parse(location)
+
+            apply_category(Categories.CHARGING_STATION, item)
+            item["extras"]["operator"] = "Fastned"
 
             # TODO: connector data available in location["connectors"]
             yield item

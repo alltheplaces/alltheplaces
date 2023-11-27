@@ -1,4 +1,6 @@
-import scrapy
+import re
+
+from scrapy import Request, Spider
 
 from locations.categories import Categories, apply_category
 from locations.google_url import extract_google_position
@@ -35,7 +37,7 @@ def ignore(item):
     return False
 
 
-class NhsScotlandGBSpider(scrapy.Spider):
+class NHSScotlandGBSpider(Spider):
     name = "nhs_scotland_gb"
     item_attributes = {"brand": "NHS Scotland", "brand_wikidata": "Q16933548"}
     services = {
@@ -46,10 +48,11 @@ class NhsScotlandGBSpider(scrapy.Spider):
         "opticians": Categories.SHOP_OPTICIAN,
         "pharmacies": Categories.PHARMACY,
     }
+    download_delay = 0.2
 
     def start_requests(self):
         for service in self.services.keys():
-            yield scrapy.Request(
+            yield Request(
                 "https://www.nhsinform.scot/scotlands-service-directory/{}?page=1&sortby=_distance&sortdir=Asc".format(
                     service
                 ),
@@ -57,11 +60,11 @@ class NhsScotlandGBSpider(scrapy.Spider):
             )
 
     def parse(self, response, service):
-        for link in response.xpath('//h2[@class="nhsuk-heading-m"]/a/@href').extract():
-            url = "https://www.nhsinform.scot" + link
-            yield scrapy.Request(url, callback=self.parse_service, cb_kwargs=dict(service=service))
-        for link in response.xpath('//a[@class="pagination__link "]/@href').extract():
-            yield scrapy.Request(response.urljoin(link), cb_kwargs=dict(service=service))
+        for link in response.xpath('//h2[@class="nhsuk-heading-m"]/a/@href').getall():
+            yield Request(link, callback=self.parse_service, cb_kwargs=dict(service=service))
+        for link in response.xpath('//a[contains(@class, "pagination__link")]/@href').getall():
+            link = re.sub(r"\?page=\d+&page=", "?page=", link)
+            yield Request(link, callback=self.parse, cb_kwargs=dict(service=service))
 
     def parse_service(self, response, service):
         item = Feature()

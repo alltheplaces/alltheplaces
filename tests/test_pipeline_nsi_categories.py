@@ -12,6 +12,7 @@ def get_objects():
 
     spider = Spider()
     spider.crawler = Crawler(GreggsGBSpider)
+    spider.crawler._apply_settings()
     return Feature(), ApplyNSICategoriesPipeline(), spider
 
 

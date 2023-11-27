@@ -11,7 +11,9 @@ def get_objects():
         pass
 
     spider = Spider()
-    spider.crawler = Crawler(GreggsGBSpider)
+    crawler = Crawler(GreggsGBSpider)
+    spider.crawler = crawler
+    crawler._apply_settings()
     return Feature(), CountCategoriesPipeline(), spider
 
 

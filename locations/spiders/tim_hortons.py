@@ -4,6 +4,7 @@ from scrapy.http import JsonRequest
 from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.spiders.vapestore_gb import clean_address
 
 
 class TimHortonsSpider(Spider):
@@ -12,24 +13,94 @@ class TimHortonsSpider(Spider):
     allowed_domains = ["czqk28jt.apicdn.sanity.io"]
 
     def start_requests(self):
-        graphql_query = "query GetRestaurants($filter:RestaurantFilter,$limit:Int){allRestaurants(where:$filter,limit:$limit){...RestaurantFragment}} fragment RestaurantFragment on Restaurant{environment diningRoomHours{...HoursFragment} email hasBreakfast hasBurgersForBreakfast hasCurbside hasDineIn hasCatering hasDelivery hasDriveThru hasTableService hasMobileOrdering hasParking hasPlayground hasTakeOut hasWifi hasLoyalty latitude longitude  name number phoneNumber physicalAddress{address1 address2 city country postalCode stateProvince} status} fragment HoursFragment on HoursOfOperation{friClose friOpen monClose monOpen satClose satOpen sunClose sunOpen thrClose thrOpen tueClose tueOpen wedClose wedOpen}"
-        data = {
-            "query": graphql_query,
-            "variables": {"filter": {"status": "Open", "environment": "prod"}, "limit": 10000},
-        }
-        yield JsonRequest(url="https://czqk28jt.apicdn.sanity.io/v1/graphql/prod_th_us/default", data=data)
+        yield JsonRequest(
+            url="https://czqk28jt.apicdn.sanity.io/v1/graphql/prod_th_us/default",
+            data={
+                "query": """
+                 query AllRestaurants($filter: RestaurantFilter, $limit: Int) {
+                    allRestaurants(where: $filter, limit: $limit) {
+                        check_date: _updatedAt
+                        hasDelivery
+                        hasDineIn
+                        hasTakeOut
+                        hasDriveThru
+                        hasCurbside
+                        hasCatering
+                        hasTableService
+                        hasBreakfast
+                        ref: number
+                        phoneNumber
+                        address: physicalAddress {
+                            address1
+                            address2
+                            city
+                            postalCode
+                            state: stateProvinceShort
+                            country
+                        }
+                        restaurantImage {
+                            asset {
+                                url
+                            }
+                        }
+                        vatNumber
+                        latitude
+                        longitude
+                        driveThruLaneType
+                        hasPlayground
+                        hasParking
+                        hasWifi
+                        hasMobileOrdering
+                        isHalal
+                        operator: franchiseGroupName
+                        operator_id: franchiseGroupId
+                        email
+                        isDarkKitchen
+                        diningRoomHours {
+                            monOpen
+                            monClose
+                            tueOpen
+                            tueClose
+                            wedOpen
+                            wedClose
+                            thrOpen
+                            thrClose
+                            friOpen
+                            friClose
+                            satOpen
+                            satClose
+                            sunOpen
+                            sunClose
+                        }
+                    }
+                }""",
+                "variables": {"filter": {"status": "Open", "environment": "prod"}, "limit": 10000},
+            },
+        )
 
     def parse(self, response):
         locations = response.json()["data"]["allRestaurants"]
         for location in locations:
-            item = DictParser.parse(location)
-            item["ref"] = location["number"]
+            if location["isDarkKitchen"]:
+                continue  # No OSM tagging yet
 
-            apply_yes_no(Extras.TAKEAWAY, item, location["hasTakeOut"] or location["hasDriveThru"], False)
+            item = DictParser.parse(location)
+            item["street_address"] = clean_address([location["address"]["address1"], location["address"]["address2"]])
+            item["image"] = (location["restaurantImage"] or {}).get("asset", {}).get("url")
+            item["extras"]["check_date"] = location["check_date"]
+            if location["operator_id"] is not None:
+                item["extras"]["operator"] = location["operator"]
+                item["extras"]["operator:ref"] = str(location["operator_id"])
+
+            if isinstance(item["email"], list):
+                item["email"] = ";".join(item["email"])
+
+            apply_yes_no(Extras.TAKEAWAY, item, location["hasTakeOut"])
             apply_yes_no(Extras.DRIVE_THROUGH, item, location["hasDriveThru"], False)
             apply_yes_no(Extras.INDOOR_SEATING, item, location["hasDineIn"], False)
             apply_yes_no(Extras.DELIVERY, item, location["hasDelivery"], False)
             apply_yes_no(Extras.WIFI, item, location["hasWifi"], False)
+            apply_yes_no(Extras.HALAL, item, location["isHalal"])
 
             item["opening_hours"] = OpeningHours()
             for day in ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]:

@@ -17,7 +17,7 @@ class OrlenSpider(scrapy.Spider):
         "BLISKA": {"brand": "Bliska", "brand_wikidata": "Q4016378"},
         "CPN": {"brand": "CPN"},
         "Petrochemia": {"brand": "Petrochemia"},
-        "Benzina": {"brand": "ORLEN Benzina", "brand_wikidata": "Q11130894"},
+        "Benzina": {"brand": "Benzina", "brand_wikidata": "Q11130894"},
         "Ventus": {"brand": "Ventus"},
         "Star": {"brand": "star", "brand_wikidata": "Q109930371"},
     }

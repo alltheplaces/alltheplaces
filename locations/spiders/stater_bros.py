@@ -4,7 +4,7 @@ from locations.items import Feature
 
 
 class StaterBrosSpider(scrapy.Spider):
-    name = "stater-bros"
+    name = "stater_bros"
     item_attributes = {"brand": "Stater Bros"}
     allowed_domains = ["www.staterbros.com"]
 
