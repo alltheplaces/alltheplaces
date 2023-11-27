@@ -38,12 +38,12 @@ class KayJewelersSpider(scrapy.Spider):
                 self.opening_hours(poi["ExtraData"].get("HoursOfOpStruct"), item)
                 yield item
 
-    def opening_hours(self, data, item):
-        if not data:
+    def opening_hours(self, hours, item):
+        if not hours:
             return
 
         oh = OpeningHours()
-        for day, info in data.items():
+        for day, info in hours.items():
             if day in DAYS:
                 if times := info["Ranges"]:
                     for time in times:
