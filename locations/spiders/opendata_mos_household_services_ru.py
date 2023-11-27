@@ -122,7 +122,7 @@ class OpendataMosSpider(scrapy.Spider):
         item = DictParser.parse(cells)
         item["lat"] = cells.get("Latitude_WGS84")
         item["lon"] = cells.get("Longitude_WGS84")
-        item["extras"]["operator"] = cells.get("OperatingCompany")
+        item["operator"] = cells.get("OperatingCompany")
         self.parse_phones(item, cells)
         self.parse_hours(item, cells)
         self.parse_extra_fields(item, cells)

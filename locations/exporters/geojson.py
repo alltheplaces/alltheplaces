@@ -33,6 +33,8 @@ mapping = (
     ("image", "image"),
     ("brand", "brand"),
     ("brand_wikidata", "brand:wikidata"),
+    ("operator", "operator"),
+    ("operator_wikidata", "operator:wikidata"),
     ("located_in", "located_in"),
     ("located_in_wikidata", "located_in:wikidata"),
     ("nsi_id", "nsi_id"),

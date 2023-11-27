@@ -11,7 +11,7 @@ class ApplyNSICategoriesPipeline:
         if item.get("nsi_id"):
             return item
 
-        code = item.get("brand_wikidata")
+        code = item.get("brand_wikidata", item.get("operator_wikidata"))
         if not code:
             return item
 
@@ -22,8 +22,11 @@ class ApplyNSICategoriesPipeline:
 
         matches = self.wikidata_cache.get(code)
 
-        if len(matches) == 0:
+        if len(matches) == 0 and item.get("brand_wikidata"):
             spider.crawler.stats.inc_value("atp/nsi/brand_missing")
+            return item
+        elif len(matches) == 0 and item.get("operator_wikidata"):
+            spider.crawler.stats.inc_value("atp/nsi/operator_missing")
             return item
 
         if len(matches) == 1:
@@ -84,6 +87,8 @@ class ApplyNSICategoriesPipeline:
         for key, value in match["tags"].items():
             if key == "brand:wikidata":
                 key = "brand_wikidata"
+            if key == "operator:wikidata":
+                key = "operator_wikidata"
 
             # Fields defined in Feature are added directly otherwise add them to extras
             # Never override anything set by the spider

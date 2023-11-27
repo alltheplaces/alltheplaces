@@ -4,6 +4,7 @@ from urllib.parse import urlparse
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
+from locations.automatic_spider_generator import AutomaticSpiderGenerator
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_EN, OpeningHours
 from locations.items import Feature
@@ -24,7 +25,7 @@ from locations.items import Feature
 # location).
 
 
-class AgileStoreLocatorSpider(Spider):
+class AgileStoreLocatorSpider(Spider, AutomaticSpiderGenerator):
     def start_requests(self):
         if len(self.start_urls) == 0 and hasattr(self, "allowed_domains"):
             for domain in self.allowed_domains:
@@ -66,59 +67,8 @@ class AgileStoreLocatorSpider(Spider):
             return True
         return False
 
-    def __init_subclass__(cls, **kwargs):
-        if "response" in kwargs.keys() and kwargs["response"] and isinstance(kwargs["response"], Response):
-            cls.allowed_domains = [urlparse(kwargs["response"].url).netloc]
-        if "brand_wikidata" in kwargs.keys() and kwargs["brand_wikidata"]:
-            cls.item_attributes = {}
-            cls.item_attributes["brand_wikidata"] = kwargs["brand_wikidata"]
-            if "brand" in kwargs.keys() and kwargs["brand"]:
-                cls.item_attributes["brand"] = kwargs["brand"]
-        if "spider_key" in kwargs.keys() and kwargs["spider_key"]:
-            cls.name = kwargs["spider_key"]
-
     @staticmethod
-    def generate_spider_code(spider: Spider) -> str:
-        imports_list = ""
-        superclasses = []
-        for spider_base in spider.__bases__:
-            imports_list = "{}from {} import {}\n".format(imports_list, spider_base.__module__, spider_base.__name__)
-            superclasses.append(spider_base.__name__)
-        superclasses_list = ", ".join(superclasses)
-
-        spider_key_code = ""
-        if hasattr(spider, "name") and isinstance(spider.name, str):
-            spider_key_code = '\tname = "{}"\n'.format(spider.name)
-
-        item_attributes_code = ""
-        if (
-            hasattr(spider, "item_attributes")
-            and isinstance(spider.item_attributes, dict)
-            and "brand_wikidata" in spider.item_attributes.keys()
-        ):
-            if "brand" in spider.item_attributes.keys():
-                item_attributes_code = '\titem_attributes = {{"brand": "{}", "brand_wikidata": "{}"}}\n'.format(
-                    spider.item_attributes["brand"], spider.item_attributes["brand_wikidata"]
-                )
-            else:
-                item_attributes_code = '\titem_attributes = {{"brand_wikidata": "{}"}}\n'.format(
-                    spider.item_attributes["brand_wikidata"]
-                )
-
-        allowed_domains_code = ""
-        if (
-            hasattr(spider, "allowed_domains")
-            and len(spider.allowed_domains) == 1
-            and isinstance(spider.allowed_domains[0], str)
-        ):
-            allowed_domains_code = '\tallowed_domains = ["{}"]\n'.format(spider.allowed_domains[0])
-
-        spider_code = "{}\n\nclass {}({}):\n{}{}{}".format(
-            imports_list,
-            spider.__name__,
-            superclasses_list,
-            spider_key_code,
-            item_attributes_code,
-            allowed_domains_code,
-        )
-        return spider_code
+    def extract_spider_attributes(response: Response) -> dict:
+        return {
+            "allowed_domains": [urlparse(response.url).netloc],
+        }

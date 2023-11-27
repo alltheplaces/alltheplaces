@@ -40,15 +40,15 @@ class NSI(metaclass=Singleton):
     def get_wikidata_code_from_url(self, url: str):
         """
         Attempt to return a single wikidata code corresponding to
-        the brand of the supplied URL.
+        the brand or operator of the supplied URL.
         :param url: URL to find the corresponding wikidata code for
         :return: wikidata code, or None if no match found
         """
         self._ensure_loaded()
-        for wikidata_code, brand_parameters in self.wikidata_json.items():
-            for official_website in brand_parameters.get("officialWebsites", []):
+        supplied_url_domain = urlparse(url).netloc
+        for wikidata_code, org_parameters in self.wikidata_json.items():
+            for official_website in org_parameters.get("officialWebsites", []):
                 official_website_domain = urlparse(official_website).netloc
-                supplied_url_domain = urlparse(url).netloc
                 if official_website_domain == supplied_url_domain:
                     return wikidata_code
         return None

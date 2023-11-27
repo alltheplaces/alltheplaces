@@ -110,6 +110,7 @@ ITEM_PIPELINES = {
     "locations.pipelines.apply_nsi_categories.ApplyNSICategoriesPipeline": 700,
     "locations.pipelines.count_categories.CountCategoriesPipeline": 800,
     "locations.pipelines.count_brands.CountBrandsPipeline": 810,
+    "locations.pipelines.count_operators.CountOperatorsPipeline": 820,
 }
 
 LOG_FORMATTER = "locations.logformatter.DebugDuplicateLogFormatter"

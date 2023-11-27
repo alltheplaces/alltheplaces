@@ -8,6 +8,7 @@ from locations.items import Feature
 # Open Data of the City of Winterthur, Switzerland
 class WinterthurCHSpider(scrapy.Spider):
     name = "winterthur_ch"
+    item_attributes = {"operator": "Stadtgrün Winterthur", "operator_wikidata": "Q56825906"}
     allowed_domains = ["stadtplan.winterthur.ch"]
     dataset_attributes = {
         "attribution": "optional",
@@ -45,11 +46,6 @@ class WinterthurCHSpider(scrapy.Spider):
                 "street": props.get("streetName"),
                 "housenumber": props.get("houseNo"),
                 "city": "Winterthur",
-                "country": "CH",
-                "extras": {
-                    "operator": "Stadtgrün Winterthur",
-                    "operator:wikidata": "Q56825906",
-                },
             }
             apply_category(Categories.LEISURE_PLAYGROUND, item)
             if name_words := props.get("name", "").split():

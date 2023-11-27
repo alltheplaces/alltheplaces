@@ -8,6 +8,7 @@ from locations.structured_data_spider import clean_facebook, clean_twitter
 
 class FollettSpider(Spider):
     name = "follett"
+    item_attributes = {"operator": "Follett Corporation", "operator_wikidata": "Q5464641"}
     allowed_domains = ["svc.bkstr.com"]
     start_urls = ["https://svc.bkstr.com/store/byName?storeType=FMS&langId=-1&schoolName=*"]
 
@@ -70,9 +71,5 @@ class FollettSpider(Spider):
                     hours_string = f"{hours_string} {day_name}: {day_hours}"
                 properties["opening_hours"] = OpeningHours()
                 properties["opening_hours"].add_ranges_from_string(hours_string)
-
-        properties["extras"] = {}
-        properties["extras"]["operator"] = "Follett Corporation"
-        properties["extras"]["operator:wikidata"] = "Q5464641"
 
         yield Feature(**properties)
