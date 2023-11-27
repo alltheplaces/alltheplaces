@@ -3,6 +3,8 @@ import json
 import scrapy
 
 from locations.items import Feature
+from locations.categories import Categories,apply_category
+from scrapy.exceptions import CloseSpider
 
 HEADERS = {"Content-Type": "application/json"}
 
@@ -12,6 +14,8 @@ class LovesSpider(scrapy.Spider):
     item_attributes = {"brand": "Love's", "brand_wikidata": "Q1872496"}
     allowed_domains = ["www.loves.com"]
     download_delay = 0.2
+    handle_httpstatus_list = [404]
+    page = 0
 
     def start_requests(self):
         payload = json.dumps(
@@ -26,7 +30,7 @@ class LovesSpider(scrapy.Spider):
             }
         )
         yield scrapy.Request(
-            "https://www.loves.com/api/sitecore/StoreSearch/SearchStores",
+            f"https://www.loves.com/api/sitecore/StoreSearch/SearchStoresWithDetail?pageNumber={0}&top=50&lat=39.09574818760951&lng=-96.9935195",
             method="POST",
             body=payload,
             headers=HEADERS,
@@ -34,15 +38,32 @@ class LovesSpider(scrapy.Spider):
 
     def parse(self, response):
         stores = response.json()
-        for store in stores[0]["Points"]:
-            yield Feature(
-                name=store["Name"],
-                ref=store["SiteId"],
-                street_address=store["Address1"],
-                city=store["City"],
-                state=store["State"],
-                postcode=store["Zip"],
-                phone=store["PhoneNumber"],
-                lat=float(store["Latitude"]),
-                lon=float(store["Longitude"]),
-            )
+        if len(stores )== 0:
+            raise CloseSpider()
+        else:
+            for store in stores:
+                item = Feature(
+                    name=store["SiteName"],
+                    ref=store["SiteId"],
+                    street_address=store["Address"],
+                    city=store["City"],
+                    state=store["State"],
+                    postcode=store["Zip"],
+                    phone=store["MainPhone"],
+                    email=store["MainEmail"],
+                    lat=float(store["Latitude"]),
+                    lon=float(store["Longitude"]),
+                )
+
+                if store['IsLoveStore']==True:
+                        apply_category({"highway":"service"}, item)
+                elif store['IsCountryStore']==True:
+                        apply_category(Categories.FUEL_STATION, item)                               
+                elif store['IsSpeedCo']==True:
+                        apply_category({"shop":"truck_repair"}, item)
+
+                yield item
+        
+        self.page +=1
+        next_page = f"https://www.loves.com/api/sitecore/StoreSearch/SearchStoresWithDetail?pageNumber={self.page}&top=50&lat=39.09574818760951&lng=-96.9935195"
+        yield response.follow(next_page, callback=self.parse)
