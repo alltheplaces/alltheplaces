@@ -59,7 +59,7 @@ class LovesSpider(scrapy.Spider):
                     apply_category({"highway": "service"}, item)
                 elif store["IsCountryStore"] is True:
                     apply_category(Categories.FUEL_STATION, item)
-                elif store["IsSpeedCo"] == True:
+                elif store["IsSpeedCo"] is True:
                     apply_category({"shop": "truck_repair"}, item)
 
                 yield item
