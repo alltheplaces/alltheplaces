@@ -45,13 +45,8 @@ jobs:
 
         RUN_DIR="${GITHUB_WORKSPACE}/output"
         EXIT_CODE=0
-        for file_changed in $SPIDERS
+        for file_changed in ${SPIDERS[@]}
         do
-            if [[ $file_changed != locations/spiders/* ]]; then
-                echo "${file_changed} is not a spider. Skipping."
-                continue
-            fi
-
             spider="${file_changed}"
             (>&2 echo "${spider} running ...")
             SPIDER_NAME=$(basename $spider)
