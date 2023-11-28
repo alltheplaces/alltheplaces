@@ -55,7 +55,7 @@ class LovesSpider(scrapy.Spider):
                     lon=float(store["Longitude"]),
                 )
 
-                if store["IsLoveStore"] == True:
+                if store["IsLoveStore"] is True:
                     apply_category({"highway": "service"}, item)
                 elif store["IsCountryStore"] == True:
                     apply_category(Categories.FUEL_STATION, item)
