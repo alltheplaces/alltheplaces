@@ -38,7 +38,7 @@ class LovesSpider(scrapy.Spider):
 
     def parse(self, response):
         stores = response.json()
-        if len(stores) == 0:
+        if not stores:
             raise CloseSpider()
         else:
             for store in stores:
