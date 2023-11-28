@@ -14,7 +14,6 @@ class LovesSpider(scrapy.Spider):
     item_attributes = {"brand": "Love's", "brand_wikidata": "Q1872496"}
     allowed_domains = ["www.loves.com"]
     download_delay = 0.2
-    handle_httpstatus_list = [404]
     page = 0
 
     def start_requests(self):
@@ -40,29 +39,28 @@ class LovesSpider(scrapy.Spider):
         stores = response.json()
         if not stores:
             raise CloseSpider()
-        else:
-            for store in stores:
-                item = Feature(
-                    name=store["SiteName"],
-                    ref=store["SiteId"],
-                    street_address=store["Address"],
-                    city=store["City"],
-                    state=store["State"],
-                    postcode=store["Zip"],
-                    phone=store["MainPhone"],
-                    email=store["MainEmail"],
-                    lat=float(store["Latitude"]),
-                    lon=float(store["Longitude"]),
-                )
+        for store in stores:
+            item = Feature(
+                name=store["SiteName"],
+                ref=store["SiteId"],
+                street_address=store["Address"],
+                city=store["City"],
+                state=store["State"],
+                postcode=store["Zip"],
+                phone=store["MainPhone"],
+                email=store["MainEmail"],
+                lat=float(store["Latitude"]),
+                lon=float(store["Longitude"]),
+            )
 
-                if store["IsLoveStore"] is True:
-                    apply_category({"highway": "service"}, item)
-                elif store["IsCountryStore"] is True:
-                    apply_category(Categories.FUEL_STATION, item)
-                elif store["IsSpeedCo"] is True:
-                    apply_category({"shop": "truck_repair"}, item)
+            if store["IsLoveStore"] is True:
+                apply_category({"highway": "service"}, item)
+            elif store["IsCountryStore"] is True:
+                apply_category(Categories.FUEL_STATION, item)
+            elif store["IsSpeedCo"] is True:
+                apply_category({"shop": "truck_repair"}, item)
 
-                yield item
+            yield item
 
         self.page += 1
         next_page = f"https://www.loves.com/api/sitecore/StoreSearch/SearchStoresWithDetail?pageNumber={self.page}&top=50&lat=39.09574818760951&lng=-96.9935195"
