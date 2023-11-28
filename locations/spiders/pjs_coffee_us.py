@@ -6,7 +6,7 @@ from locations.structured_data_spider import StructuredDataSpider
 
 class PjsCoffeeUSSpider(CrawlSpider, StructuredDataSpider):
     name = "pjs_coffee_us"
-    item_attributes = {"brand_wikidata": "Q120513813"}
+    item_attributes = {"brand_wikidata": "Q7119454"}
     start_urls = ["https://locations.pjscoffee.com/"]
     rules = [
         Rule(LinkExtractor(r"/\w\w/(?:\w+/)?$")),

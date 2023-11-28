@@ -1,8 +1,8 @@
 from chompjs import chompjs
 from scrapy import Selector, Spider
 
+from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
-from locations.items import Feature
 
 
 class BursonAutoPartsAU(Spider):
@@ -13,30 +13,22 @@ class BursonAutoPartsAU(Spider):
 
     def parse(self, response):
         raw_js = (
-            response.xpath('//script[contains(text(), "var markers = ")]/text()')
+            response.xpath('//script[contains(text(), "var map1 = ")]/text()')
             .get()
-            .split("var markers = ", 1)[1]
-            .split("var icon = ", 1)[0]
+            .split('"places":', 1)[1]
+            .split('"marker_cluster":', 1)[0]
             .strip()[:-1]
         )
         for location in chompjs.parse_js_object(raw_js):
-            location_html = Selector(text=location[1])
-            properties = {
-                "ref": location[0],
-                "name": location_html.xpath("//h3/text()").get(),
-                "lat": location[3],
-                "lon": location[4],
-                "addr_full": " ".join(
-                    location_html.xpath('//strong[text()="Address"]/following::text()')
-                    .get(default="")[2:]
-                    .replace("\xa0", " ")
-                    .split()
-                ),
-                "phone": location_html.xpath('//strong[text()="Phone"]/following::text()').get(default="")[2:],
-                "email": location_html.xpath('//strong[text()="Email"]/following::text()').get(default="")[2:],
-                "opening_hours": OpeningHours(),
-            }
-            properties["opening_hours"].add_ranges_from_string(
-                location_html.xpath('//strong[text()="Hours"]/following::text()').get()[2:]
+            item = DictParser.parse(location)
+            item["city"] = location["location"]["city"]
+            item["state"] = location["location"]["state"]
+            item["postcode"] = location["location"]["postal_code"]
+            item["phone"] = location["location"]["extra_fields"]["phone"]
+            item["email"] = location["location"]["extra_fields"]["email"]
+            hours_string = " ".join(
+                Selector(text=location["location"]["extra_fields"]["hours"]).xpath("//text()").getall()
             )
-            yield Feature(**properties)
+            item["opening_hours"] = OpeningHours()
+            item["opening_hours"].add_ranges_from_string(hours_string)
+            yield item

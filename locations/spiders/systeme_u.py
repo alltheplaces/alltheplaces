@@ -2,6 +2,7 @@ import re
 
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
 
@@ -13,6 +14,13 @@ class SystemeUSpider(scrapy.Spider):
     start_urls = [
         "https://www.magasins-u.com/sitemap.xml",
     ]
+    requires_proxy = "FR"  # Proxy or other captcha drama?
+    brands = {
+        "uexpress": {"brand": "U Express", "brand_wikidata": "Q2529029"},
+        "superu": {"brand": "Super U", "brand_wikidata": "Q2529029"},
+        "marcheu": {"brand": "Marché U", "brand_wikidata": "Q2529029"},
+        "hyperu": {"brand": "Hyper U", "brand_wikidata": "Q2529029"},
+    }
 
     def parse_hours(self, hours):
         opening_hours = OpeningHours()
@@ -36,7 +44,7 @@ class SystemeUSpider(scrapy.Spider):
 
     def parse_stores(self, response):
         properties = {
-            "ref": re.search(r".+/(.+?)/?(?:\.html|$)", response.url).group(1),
+            "ref": response.url,
             "name": response.xpath('//*[@id="libelle-magasin"]/text()').extract_first(),
             "addr_full": response.xpath('normalize-space(//*[@itemprop="streetAddress"]/text())').extract_first(),
             "city": response.xpath('//*[@itemprop="addressLocality"]/text()').extract_first(),
@@ -47,6 +55,14 @@ class SystemeUSpider(scrapy.Spider):
             "phone": response.xpath('//*[@itemprop="telephone"]/text()').extract_first(),
             "website": response.url,
         }
+
+        if m := re.search(r"/(magasin|station)/(uexpress|superu|marcheu|hyperu)-\w+", response.url):
+            if m.group(1) == "magasin":
+                apply_category(Categories.SHOP_SUPERMARKET, properties)
+            else:
+                apply_category(Categories.FUEL_STATION, properties)
+
+            properties.update(self.brands[m.group(2)])
 
         try:
             h = self.parse_hours(response.xpath('//*[@itemprop="openingHours"]/@content').extract())
@@ -66,7 +82,7 @@ class SystemeUSpider(scrapy.Spider):
         for url in urls:
             try:
                 type = re.search(r"com\/(.*?)\/", url).group(1)
-                if type == "magasin":
+                if type in ["magasin", "station"]:
                     yield scrapy.Request(url, callback=self.parse_stores)
             except:
                 pass

@@ -1,4 +1,3 @@
-from locations.hours import OpeningHours
 from locations.storefinders.storerocket import StoreRocketSpider
 
 
@@ -9,10 +8,4 @@ class RibCribUSSpider(StoreRocketSpider):
 
     def parse_item(self, item, location):
         item["website"] = "https://ribcrib.com/locations/?location=" + location.get("slug")
-        hours_string = ""
-        for day, hours in location.get("hours", {}).items():
-            day = day.title()
-            hours_string = f"{hours_string} {day}: {hours}"
-        item["opening_hours"] = OpeningHours()
-        item["opening_hours"].add_ranges_from_string(hours_string)
         yield item

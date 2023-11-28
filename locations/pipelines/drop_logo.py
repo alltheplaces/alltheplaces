@@ -9,5 +9,6 @@ class DropLogoPipeline:
             if isinstance(image, str):
                 if "logo" in image:
                     item["image"] = None
+                    spider.crawler.stats.inc_value("atp/field/image/dropped")
 
         return item

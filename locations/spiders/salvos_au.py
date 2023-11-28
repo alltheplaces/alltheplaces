@@ -1,5 +1,6 @@
 from scrapy import Spider
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
@@ -22,4 +23,5 @@ class SalvosAUSpider(Spider):
                 if day_hours == "Close":
                     continue
                 item["opening_hours"].add_range(day_name, day_hours["Opening"], day_hours["Closing"], "%H:%M:%S")
+            apply_category(Categories.SHOP_CHARITY, item)
             yield item

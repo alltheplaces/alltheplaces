@@ -15,7 +15,7 @@ class BuceesUSSpider(WPStoreLocatorSpider):
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def parse_item(self, item: Feature, location: dict, **kwargs):
-        item["extras"]["branch"] = html.unescape(item.pop("name"))
+        item["branch"] = html.unescape(item.pop("name"))
 
         apply_category(Categories.FUEL_STATION, item)
         apply_yes_no(Fuel.DIESEL, item, True)

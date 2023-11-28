@@ -5,7 +5,7 @@ from locations.spiders.lidl_gb import LidlGBSpider
 from locations.storefinders.virtualearth import VirtualEarthSpider
 
 
-class LidlHUSpider(VirtualEarthSpider):
+class LidlATSpider(VirtualEarthSpider):
     name = "lidl_at"
     item_attributes = LidlGBSpider.item_attributes
 

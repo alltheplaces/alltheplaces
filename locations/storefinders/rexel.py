@@ -38,9 +38,9 @@ class RexelSpider(Spider):
             item["opening_hours"] = self.decode_hours(feature)
             # We could also fall back to cartIcon here...
             if feature["storeImages"]:
-                storeImages = filter(lambda x: (x["format"] == "store" and x["url"]), feature["storeImages"])
-                if storeImages:
-                    item["image"] = next(storeImages)["url"]
+                store_images = filter(lambda x: (x["format"] == "store" and x["url"]), feature["storeImages"])
+                if store_images:
+                    item["image"] = next(store_images)["url"]
             yield from self.parse_item(item, feature) or []
 
     def parse_item(self, item, feature, **kwargs):

@@ -3,6 +3,7 @@ import math
 
 import scrapy
 
+from locations.categories import Categories
 from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.searchable_points import open_searchable_points
@@ -18,7 +19,7 @@ def calculate_offset_point(x, y, d, b):
     :param b: bearing in degrees
     :return: new x, y in decimal degrees
     """
-    R = 6378.137  # km
+    R = 6378.137  # km # noqa: N806
     x, y, b = math.radians(x), math.radians(y), math.radians(b)
     new_y = math.asin((math.sin(y) * math.cos(d / R)) + (math.cos(y) * math.sin(d / R) * math.cos(b)))
     new_x = x + math.atan2(
@@ -32,7 +33,7 @@ def calculate_offset_point(x, y, d, b):
 class ScotiabankSpider(scrapy.Spider):
     name = "scotiabank"
     allowed_domains = ["scotiabank.com"]
-    item_attributes = {"brand": "Scotiabank", "brand_wikidata": "Q451476"}
+    item_attributes = {"brand": "Scotiabank", "brand_wikidata": "Q451476", "extras": Categories.BANK.value}
     base_url = "https://mapsms.scotiabank.com/branches?1=1&latitude={lat}&longitude={lon}&recordlimit=20&locationtypes=1&options=&languagespoken=any&language=en&address=&province=&city="
     refs = set()
 

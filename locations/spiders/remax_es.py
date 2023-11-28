@@ -18,7 +18,7 @@ class RemaxEsSpider(Spider):
             yield JsonRequest(url=url, headers={"X-Requested-With": "XMLHttpRequest"})
 
     def parse(self, response):
-        for location in response.json().values():
+        for location in response.json():
             item = DictParser.parse(location)
             item["ref"] = location["id_oficina_anaconda"]
             item["name"] = location["headline"]

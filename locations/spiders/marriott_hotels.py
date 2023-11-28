@@ -1,5 +1,6 @@
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
 
@@ -77,4 +78,5 @@ class MarriottHotelsSpider(scrapy.Spider):
         item["ref"] = hotel["marsha_code"]
         item["image"] = hotel.get("exterior_photo")
         item["brand"], item["brand_wikidata"] = brand
+        apply_category(Categories.HOTEL, item)
         return item

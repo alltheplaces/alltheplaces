@@ -3,6 +3,7 @@ import re
 
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
@@ -53,5 +54,15 @@ class BayshoreHealthcareSpider(scrapy.Spider):
                 "phone": store["local_telephone"],
                 "website": "https://www.bayshore.ca" + store["url"],
             }
+
+            if "pharmacy" in properties.get("name", "").lower():
+                apply_category(Categories.PHARMACY, properties)
+            elif "clinic" in properties.get("name", "").lower():
+                apply_category(Categories.CLINIC, properties)
+            elif (
+                "home care" in properties.get("name", "").lower() or "home health" in properties.get("name", "").lower()
+            ):
+                # All the others are Home Health Offices - Office to sign up or buy in home health services
+                apply_category({"office": "healthcare"}, properties)
 
             yield Feature(**properties)
