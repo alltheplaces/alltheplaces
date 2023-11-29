@@ -1,6 +1,7 @@
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
+from locations.categories import Categories, apply_category
 from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import Feature
 from locations.structured_data_spider import clean_facebook, clean_twitter
@@ -74,5 +75,8 @@ class FollettSpider(Spider):
         properties["extras"] = {}
         properties["extras"]["operator"] = "Follett Corporation"
         properties["extras"]["operator:wikidata"] = "Q5464641"
+
+        apply_category(Categories.SHOP_BOOKS, properties)
+        properties["extras"]["books"] = "academic"
 
         yield Feature(**properties)
