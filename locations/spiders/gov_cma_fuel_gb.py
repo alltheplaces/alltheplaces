@@ -1,6 +1,6 @@
 from scrapy import Request, Spider
 
-from locations.categories import Categories, Fuel, apply_category, apply_yes_no
+from locations.categories import Categories, apply_category, apply_yes_no
 from locations.items import Feature
 from locations.settings import ITEM_PIPELINES
 from locations.user_agents import BROWSER_DEFAULT
@@ -46,10 +46,10 @@ class GovCmaFuelGBSpider(Spider):
     }
 
     fuel_map = {
-        "B7": Fuel.DIESEL,
-        "E10": Fuel.E10,
-        "E5": Fuel.E5,
-        # "SDV": "fuel:ethanol", #TODO: ?
+        "B7": "diesel",
+        "E10": "e10",
+        "E5": "e5",
+        # "SDV": "ethanol", # TODO: ?
     }
 
     def parse(self, response, **kwargs):
@@ -78,11 +78,9 @@ class GovCmaFuelGBSpider(Spider):
                     # BP, sgnretail, Tesco!
                     price *= 100
 
-                # TODO: Better tag?
-                item["extras"][fuel] = str(round(price, 1))
-
-                if tag := self.fuel_map.get(fuel):
-                    apply_yes_no(tag, item, True)
+                tag = self.fuel_map.get(fuel, fuel)
+                item["extras"]["charge:{}".format(tag)] = "{} GBP/1 litre".format(round(price / 100, 2))
+                apply_yes_no("fuel:{}".format(tag), item, True)
 
             apply_category(Categories.FUEL_STATION, item)
 
