@@ -112,6 +112,7 @@ class Categories(Enum):
     ATM = {"amenity": "atm"}
     BANK = {"amenity": "bank"}
     BAR = {"amenity": "bar"}
+    BENCH = {"amenity": "bench"}
     BOAT_FUEL_STATION = {"waterway": "fuel"}
     BUREAU_DE_CHANGE = {"amenity": "bureau_de_change"}
     CAFE = {"amenity": "cafe"}
