@@ -6,7 +6,7 @@ from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 from locations.user_agents import BROWSER_DEFAULT
 
-DEFAULT_BRAND_NAME = 'Магнит'
+DEFAULT_BRAND_NAME = "Магнит"
 
 CATEGORY_MAPPING = {
     "1": (Categories.SHOP_CONVENIENCE, "Магнит у дома", DEFAULT_BRAND_NAME),
@@ -22,9 +22,9 @@ class MagnitRUSpider(Spider):
     name = "magnit_ru"
     item_attributes = {
         "brand_wikidata": "Q940518",
-        # TODO: delete this when ApplyNSICategoriesPipeline is fixed, 
+        # TODO: delete this when ApplyNSICategoriesPipeline is fixed,
         #       currently it does the wrong match
-        "nsi_id": "N/A"
+        "nsi_id": "N/A",
     }
 
     def start_requests(self):
@@ -33,7 +33,7 @@ class MagnitRUSpider(Spider):
             headers={
                 "User-Agent": BROWSER_DEFAULT,
                 "x-client-name": "magnit",
-                # x-device-id might change
+                # TODO: see if x-device-id is volatile
                 "x-device-id": "wo8qwwozw7",
                 "x-device-platform": "web",
                 "x-device-tag": "disabled",
@@ -50,7 +50,7 @@ class MagnitRUSpider(Spider):
                 category, name, brand = tags
                 apply_category(category, item)
                 item["name"] = name
-                item['brand'] = brand
+                item["brand"] = brand
             else:
                 self.logger.error(f"Unknown type: {poi['type']}")
                 continue
