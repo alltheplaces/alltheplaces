@@ -31,9 +31,11 @@ class TheKegSteakhouseSpider(Spider):
         html_content = await playwright_page.content()
         await playwright_page.close()
         locations = Selector(text=html_content)
-        for location_url in locations.xpath('//div[contains(@class, "LocationCard")]/a[contains(@class, "image-link")]/@href').getall():
+        for location_url in locations.xpath(
+            '//div[contains(@class, "LocationCard")]/a[contains(@class, "image-link")]/@href'
+        ).getall():
             yield Request(
-                url = "https://thekeg.com" + location_url,
+                url="https://thekeg.com" + location_url,
                 callback=self.parse,
             )
 
@@ -42,14 +44,35 @@ class TheKegSteakhouseSpider(Spider):
             "ref": response.url.split("/")[-1],
             "website": response.url,
             "name": response.xpath('//section[@id="LocationDetail"]//h2/text()').get(),
-            "addr_full": re.sub(r"\s+", " ", " ".join(filter(None, response.xpath('//section[@id="LocationDetail"]//p[contains(@class, "address")]//text()').getall()))).strip(),
-            "phone": response.xpath('//section[@id="LocationDetail"]//p[contains(@class, "phone")]/a/@href').get("").replace("tel:", ""),
+            "addr_full": re.sub(
+                r"\s+",
+                " ",
+                " ".join(
+                    filter(
+                        None,
+                        response.xpath(
+                            '//section[@id="LocationDetail"]//p[contains(@class, "address")]//text()'
+                        ).getall(),
+                    )
+                ),
+            ).strip(),
+            "phone": response.xpath('//section[@id="LocationDetail"]//p[contains(@class, "phone")]/a/@href')
+            .get("")
+            .replace("tel:", ""),
         }
-        hours_text = re.sub(r"\s+", " ", " ".join(filter(None, response.xpath('//div[contains(@class, "hours")]//table//text()').getall()))).strip()
+        hours_text = re.sub(
+            r"\s+",
+            " ",
+            " ".join(filter(None, response.xpath('//div[contains(@class, "hours")]//table//text()').getall())),
+        ).strip()
         properties["opening_hours"] = OpeningHours()
         properties["opening_hours"].add_ranges_from_string(hours_text)
         extract_google_position(properties, response)
-        extra_features = map(str.upper, map(str.strip, filter(None, response.xpath('//div[contains(@class, "attributes")]/ul/li/p/text()').getall())))
+        extra_features = map(
+            str.upper,
+            map(
+                str.strip, filter(None, response.xpath('//div[contains(@class, "attributes")]/ul/li/p/text()').getall())
+            ),
+        )
         apply_yes_no(Extras.WIFI, properties, "FREE WI-FI" in extra_features, False)
         yield Feature(**properties)
-

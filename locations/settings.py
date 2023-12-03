@@ -152,7 +152,8 @@ DEFAULT_PLAYWRIGHT_SETTINGS = {
 DEFAULT_PLAYWRIGHT_SETTINGS_WITH_EXT_JS = {
     "PLAYWRIGHT_BROWSER_TYPE": "firefox",
     "PLAYWRIGHT_DEFAULT_NAVIGATION_TIMEOUT": 30 * 1000,
-    "PLAYWRIGHT_ABORT_REQUEST": lambda request: not request.resource_type == "document" and not request.resource_type == "script",
+    "PLAYWRIGHT_ABORT_REQUEST": lambda request: not request.resource_type == "document"
+    and not request.resource_type == "script",
     "TWISTED_REACTOR": "twisted.internet.asyncioreactor.AsyncioSelectorReactor",
     "DOWNLOAD_HANDLERS": {
         "http": "scrapy_playwright.handler.ScrapyPlaywrightDownloadHandler",
