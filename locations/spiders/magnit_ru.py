@@ -6,19 +6,26 @@ from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 from locations.user_agents import BROWSER_DEFAULT
 
+DEFAULT_BRAND_NAME = 'Магнит'
+
 CATEGORY_MAPPING = {
-    "1": (Categories.SHOP_CONVENIENCE, "Магнит у дома"),
-    "2": (Categories.SHOP_SUPERMARKET, "Магнит Семейный"),
-    "3": (Categories.SHOP_CHEMIST, "Магнит Косметик"),
-    "4": (Categories.PHARMACY, "Магнит Аптека"),
-    "5": (Categories.SHOP_SUPERMARKET, "Магнит Опт"),
-    "6": (Categories.SHOP_SUPERMARKET, "Магнит Экстра"),
+    "1": (Categories.SHOP_CONVENIENCE, "Магнит у дома", DEFAULT_BRAND_NAME),
+    "2": (Categories.SHOP_SUPERMARKET, "Магнит Семейный", DEFAULT_BRAND_NAME),
+    "3": (Categories.SHOP_CHEMIST, "Магнит Косметик", "Магнит Косметик"),
+    "4": (Categories.PHARMACY, "Магнит Аптека", DEFAULT_BRAND_NAME),
+    "5": (Categories.SHOP_SUPERMARKET, "Магнит Опт", DEFAULT_BRAND_NAME),
+    "6": (Categories.SHOP_SUPERMARKET, "Магнит Экстра", DEFAULT_BRAND_NAME),
 }
 
 
 class MagnitRUSpider(Spider):
     name = "magnit_ru"
-    item_attributes = {"brand_wikidata": "Q940518"}
+    item_attributes = {
+        "brand_wikidata": "Q940518",
+        # TODO: delete this when ApplyNSICategoriesPipeline is fixed, 
+        #       currently it does the wrong match
+        "nsi_id": "N/A"
+    }
 
     def start_requests(self):
         yield JsonRequest(
@@ -40,10 +47,10 @@ class MagnitRUSpider(Spider):
             item = DictParser.parse(poi)
             self.parse_hours(item, poi)
             if tags := CATEGORY_MAPPING.get(poi["type"]):
-                self.logger.info(f"setting category {tags} for {poi['type']}")
-                category, name = tags
+                category, name, brand = tags
                 apply_category(category, item)
                 item["name"] = name
+                item['brand'] = brand
             else:
                 self.logger.error(f"Unknown type: {poi['type']}")
                 continue
