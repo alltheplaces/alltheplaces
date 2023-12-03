@@ -1,13 +1,14 @@
-import scrapy
+from scrapy import Spider
 
 from locations.items import Feature
 
 
-class AmcTheatresSpider(scrapy.Spider):
-    name = "amctheatres"
-    item_attributes = {"brand": "AMC Theaters", "brand_wikidata": "Q294721", "country": "US"}
-    allowed_domains = ["amctheatres.com"]
-    start_urls = ("https://www.amctheatres.com/sitemaps/sitemap-theatres.xml",)
+class AMCTheatresUSSpider(Spider):
+    name = "amc_theatres_us"
+    item_attributes = {"brand": "AMC Theaters", "brand_wikidata": "Q294721"}
+    allowed_domains = ["www.amctheatres.com"]
+    start_urls = ["https://www.amctheatres.com/sitemaps/sitemap-theatres.xml"]
+    requires_proxy = "US"
 
     def parse(self, response):
         response.selector.remove_namespaces()
