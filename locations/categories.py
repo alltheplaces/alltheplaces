@@ -69,6 +69,7 @@ class Categories(Enum):
     SHOP_GARDEN_CENTRE = {"shop": "garden_centre"}
     SHOP_GIFT = {"shop": "gift"}
     SHOP_HAIRDRESSER = {"shop": "hairdresser"}
+    SHOP_HAIRDRESSER_SUPPLY = {"shop": "hairdresser_supply"}
     SHOP_HARDWARE = {"shop": "hardware"}
     SHOP_HEARING_AIDS = {"shop": "hearing_aids"}
     SHOP_JEWELRY = {"shop": "jewelry"}
