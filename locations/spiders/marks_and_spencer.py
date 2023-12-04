@@ -41,8 +41,8 @@ class MarksAndSpencerSpider(scrapy.Spider):
             }
 
             if store["storeType"] == "mands":
-                properties["extras"]["operator"] = "Marks and Spencer"
-                properties["extras"]["operator:wikidata"] = "Q714491"
+                properties["operator"] = "Marks and Spencer"
+                properties["operator:wikidata"] = "Q714491"
 
             name = store["name"].lower()
             if name.endswith("foodhall"):

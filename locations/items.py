@@ -30,6 +30,8 @@ class Feature(scrapy.Item):
     ref = scrapy.Field()
     brand = scrapy.Field()
     brand_wikidata = scrapy.Field()
+    operator = scrapy.Field()
+    operator_wikidata = scrapy.Field()
     located_in = scrapy.Field()
     located_in_wikidata = scrapy.Field()
     nsi_id = scrapy.Field()

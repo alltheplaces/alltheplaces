@@ -55,10 +55,8 @@ class WinterthurCHSpider(scrapy.Spider):
                 "housenumber": props.get("houseNo"),
                 "city": "Winterthur",
                 "country": "CH",
-                "extras": {
-                    "operator": "Stadtgrün Winterthur",
-                    "operator:wikidata": "Q56825906",
-                },
+                "operator": "Stadtgrün Winterthur",
+                "operator:wikidata": "Q56825906",
             }
             apply_category(Categories.LEISURE_PLAYGROUND, item)
             if name_words := props.get("name", "").split():
@@ -81,14 +79,14 @@ class WinterthurCHSpider(scrapy.Spider):
                     "lon": lon,
                     "city": "Winterthur",
                     "country": "CH",
+                    "operator": "Stadtgrün Winterthur",
+                    "operator:wikidata": "Q56825906",
                     "extras": {
                         "backrest": self.parse_bench_backrest(btype),
                         "colour": self.parse_bench_colour(btype),
                         "inscription": self.parse_bench_inscription(f),
                         "material": self.parse_bench_material(btype),
                         "material:wikidata": self.parse_bench_material_wikidata(btype),
-                        "operator": "Stadtgrün Winterthur",
-                        "operator:wikidata": "Q56825906",
                     },
                     "ref": f["Banknummer"],
                 }

@@ -100,3 +100,19 @@ def test_cc_filter():
     filtered = pipeline.filter_cc(matches, "GB")
     assert len(filtered) == 1
     assert filtered[0]["id"] == "test_global"
+
+
+def test_nsi_brand_matching():
+    item, pipeline, spider = get_objects()
+    item["brand_wikidata"] = "Q4683851"
+    pipeline.process_item(item, spider)
+
+    assert item["nsi_id"]
+
+
+def test_nsi_operator_matching():
+    item, pipeline, spider = get_objects()
+    item["operator_wikidata"] = "Q4829193"
+    pipeline.process_item(item, spider)
+
+    assert item["nsi_id"]

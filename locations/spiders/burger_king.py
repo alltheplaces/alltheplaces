@@ -172,7 +172,7 @@ class BurgerKingSpider(scrapy.Spider):
             item["country"] = country_code
             item["addr_full"] = None
             item["website"] = self.store_locator_templates.get(country_code, "").format(row["_id"]) or None
-            item["extras"]["operator"] = row.get("franchiseGroupName")
+            item["operator"] = row.get("franchiseGroupName")
             apply_yes_no(Extras.WIFI, item, row.get("hasWifi"), True)
             apply_yes_no(Extras.DRIVE_THROUGH, item, row.get("hasDriveThru"), True)
             apply_yes_no(Extras.DELIVERY, item, row.get("hasDelivery"), True)
