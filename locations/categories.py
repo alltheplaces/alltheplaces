@@ -69,6 +69,7 @@ class Categories(Enum):
     SHOP_GARDEN_CENTRE = {"shop": "garden_centre"}
     SHOP_GIFT = {"shop": "gift"}
     SHOP_HAIRDRESSER = {"shop": "hairdresser"}
+    SHOP_HAIRDRESSER_SUPPLY = {"shop": "hairdresser_supply"}
     SHOP_HARDWARE = {"shop": "hardware"}
     SHOP_HEARING_AIDS = {"shop": "hearing_aids"}
     SHOP_JEWELRY = {"shop": "jewelry"}
@@ -112,6 +113,7 @@ class Categories(Enum):
     ATM = {"amenity": "atm"}
     BANK = {"amenity": "bank"}
     BAR = {"amenity": "bar"}
+    BENCH = {"amenity": "bench"}
     BOAT_FUEL_STATION = {"waterway": "fuel"}
     BUREAU_DE_CHANGE = {"amenity": "bureau_de_change"}
     CAFE = {"amenity": "cafe"}
@@ -134,6 +136,7 @@ class Categories(Enum):
     KINDERGARTEN = {"amenity": "kindergarten"}
     LIBRARY = {"amenity": "library"}
     MONEY_TRANSFER = {"amenity": "money_transfer"}
+    MOTEL = {"tourism": "motel"}
     MUSEUM = {"tourism": "museum"}
     NIGHTCLUB = {"amenity": "nightclub"}
     PHARMACY = {"amenity": "pharmacy", "healthcare": "pharmacy"}

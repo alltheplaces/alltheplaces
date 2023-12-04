@@ -12,5 +12,5 @@ class EasypaySpider(CSVFeedSpider):
 
     def parse_row(self, response, row):
         item = DictParser.parse(row)
-        item["extras"]["operator"] = row["operator"]
+        item["operator"] = row["operator"]
         yield item

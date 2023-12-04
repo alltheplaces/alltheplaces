@@ -7,6 +7,7 @@ from locations.items import Feature
 
 class NSWRuralFireServiceAUSpider(Spider):
     name = "nsw_rural_fire_service_au"
+    item_attributes = {"brand": "New South Wales Rural Fire Service", "brand_wikidata": "Q7011777"}
     allowed_domains = ["portal.spatial.nsw.gov.au"]
     start_urls = [
         "https://portal.spatial.nsw.gov.au/server/rest/services/NSW_FOI_Emergency_Service_Facilities/FeatureServer/2/query?f=geojson"
@@ -35,6 +36,4 @@ class NSWRuralFireServiceAUSpider(Spider):
             else:
                 apply_category({"office": "government"}, properties)
                 apply_category({"government": "fire_service"}, properties)
-            properties["extras"]["operator"] = "New South Wales Rural Fire Service"
-            properties["extras"]["operator:wikidata"] = "Q7011777"
             yield Feature(**properties)

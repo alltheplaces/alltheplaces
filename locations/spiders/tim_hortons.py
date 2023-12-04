@@ -89,7 +89,7 @@ class TimHortonsSpider(Spider):
             item["image"] = (location["restaurantImage"] or {}).get("asset", {}).get("url")
             item["extras"]["check_date"] = location["check_date"]
             if location["operator_id"] is not None:
-                item["extras"]["operator"] = location["operator"]
+                item["operator"] = location["operator"]
                 item["extras"]["operator:ref"] = str(location["operator_id"])
 
             if isinstance(item["email"], list):

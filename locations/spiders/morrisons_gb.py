@@ -6,11 +6,7 @@ from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.items import Feature
-
-
-def set_operator(brand: {}, item: Feature):
-    item["extras"]["operator"] = brand.get("brand")
-    item["extras"]["operator:wikidata"] = brand.get("brand_wikidata")
+from locations.spiders.central_england_cooperative import set_operator
 
 
 class MorrisonsGBSpider(Spider):
