@@ -9,9 +9,9 @@ from locations.items import Feature
 from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS_WITH_EXT_JS
 
 
-class TheKegSteakhouseSpider(Spider):
-    name = "the_keg_steakhouse"
-    item_attributes = {"brand": "The Keg Steakhouse", "brand_wikidata": "Q7744066"}
+class TheKegCAUSSpider(Spider):
+    name = "the_keg_ca_us"
+    item_attributes = {"brand": "The Keg", "brand_wikidata": "Q7744066"}
     allowed_domains = ["thekeg.com"]
     start_urls = ["https://thekeg.com/en/locations"]
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS_WITH_EXT_JS

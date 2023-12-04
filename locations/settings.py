@@ -149,17 +149,9 @@ DEFAULT_PLAYWRIGHT_SETTINGS = {
     "DOWNLOADER_MIDDLEWARES": {"locations.middlewares.playwright_middleware.PlaywrightMiddleware": 543},
 }
 
-DEFAULT_PLAYWRIGHT_SETTINGS_WITH_EXT_JS = {
-    "PLAYWRIGHT_BROWSER_TYPE": "firefox",
-    "PLAYWRIGHT_DEFAULT_NAVIGATION_TIMEOUT": 30 * 1000,
+DEFAULT_PLAYWRIGHT_SETTINGS_WITH_EXT_JS = DEFAULT_PLAYWRIGHT_SETTINGS | {
     "PLAYWRIGHT_ABORT_REQUEST": lambda request: not request.resource_type == "document"
     and not request.resource_type == "script",
-    "TWISTED_REACTOR": "twisted.internet.asyncioreactor.AsyncioSelectorReactor",
-    "DOWNLOAD_HANDLERS": {
-        "http": "scrapy_playwright.handler.ScrapyPlaywrightDownloadHandler",
-        "https": "scrapy_playwright.handler.ScrapyPlaywrightDownloadHandler",
-    },
-    "DOWNLOADER_MIDDLEWARES": {"locations.middlewares.playwright_middleware.PlaywrightMiddleware": 543},
 }
 
 REQUESTS_CACHE_ENABLED = True
