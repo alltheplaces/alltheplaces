@@ -150,6 +150,11 @@ DEFAULT_PLAYWRIGHT_SETTINGS = {
     "DOWNLOADER_MIDDLEWARES": {"locations.middlewares.playwright_middleware.PlaywrightMiddleware": 543},
 }
 
+DEFAULT_PLAYWRIGHT_SETTINGS_WITH_EXT_JS = DEFAULT_PLAYWRIGHT_SETTINGS | {
+    "PLAYWRIGHT_ABORT_REQUEST": lambda request: not request.resource_type == "document"
+    and not request.resource_type == "script",
+}
+
 REQUESTS_CACHE_ENABLED = True
 REQUESTS_CACHE_BACKEND_SETTINGS = {
     "expire_after": 60 * 60 * 24 * 3,
