@@ -136,6 +136,7 @@ class Categories(Enum):
     KINDERGARTEN = {"amenity": "kindergarten"}
     LIBRARY = {"amenity": "library"}
     MONEY_TRANSFER = {"amenity": "money_transfer"}
+    MOTEL = {"tourism": "motel"}
     MUSEUM = {"tourism": "museum"}
     NIGHTCLUB = {"amenity": "nightclub"}
     PHARMACY = {"amenity": "pharmacy", "healthcare": "pharmacy"}
