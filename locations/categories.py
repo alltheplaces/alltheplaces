@@ -100,6 +100,7 @@ class Categories(Enum):
     SHOP_TOYS = {"shop": "toys"}
     SHOP_TRADE = {"shop": "trade"}
     SHOP_TRAVEL_AGENCY = {"shop": "travel_agency"}
+    SHOP_TYRES = {"shop": "tyres"}
     SHOP_VARIETY_STORE = {"shop": "variety_store"}
     SHOP_WATCHES = {"shop": "watches"}
     SHOP_WHOLESALE = {"shop": "wholesale"}
