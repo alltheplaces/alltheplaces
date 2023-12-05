@@ -63,6 +63,7 @@ class RicohEuropeSpider(scrapy.Spider):
                     "phone": store["Phone"],
                 }
                 apply_category(Categories.OFFICE_COMPANY, properties)
+                apply_category({"company": "consulting"}, properties)
                 yield Feature(**properties)
             else:
                 pass
