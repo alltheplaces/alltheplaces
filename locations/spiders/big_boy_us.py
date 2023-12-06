@@ -7,7 +7,7 @@ from locations.items import Feature
 
 class BigBoyUSSpider(SitemapSpider):
     name = "big_boy_us"
-    item_attributes = {"brand": "Big Boy"}
+    item_attributes = {"brand": "Big Boy", "brand_wikidata": "Q4386779"}
     allowed_domains = ["www.bigboy.com"]
     sitemap_urls = ["https://www.bigboy.com/dynamic-location-sitemap.xml"]
     sitemap_rules = [(r"/location/big-boy", "parse")]
