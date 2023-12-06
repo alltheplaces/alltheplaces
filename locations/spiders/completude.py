@@ -2,6 +2,7 @@ import re
 
 import scrapy
 
+from locations.categories import apply_category
 from locations.items import Feature
 
 
@@ -31,13 +32,15 @@ class CompletudeSpider(scrapy.Spider):
                 "city": city,
                 "postcode": postal,
                 "phone": response.xpath('//ul[@class="list-contacts"]/li[1]/a/span/text()').extract_first(),
-                "name": response.xpath('//select[@name="agency"]/option[2]/text()').extract_first(),
+                "name": response.xpath('//select[@name="agency"]/option[2]/text()').extract_first()
+                or f"Completude Office in {city}",
                 "country": "FR",
                 "lat": float(response.xpath('//div[@class="google-map map-default"]/@data-lat').extract_first()),
                 "lon": float(response.xpath('//div[@class="google-map map-default"]/@data-lng').extract_first()),
                 "website": response.url,
             }
 
+            apply_category({"office": "tutoring"}, properties)
             yield Feature(**properties)
         except:
             pass
