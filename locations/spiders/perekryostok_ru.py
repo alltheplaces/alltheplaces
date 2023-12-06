@@ -14,6 +14,7 @@ class PerekryostokRUSpider(scrapy.Spider):
     item_attributes = {"brand": "Перекрёсток", "brand_wikidata": "Q1684639"}
     start_urls = ["https://www.perekrestok.ru/"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
+    requires_proxy = "RU"
     api_token = ""
 
     def parse(self, response):
