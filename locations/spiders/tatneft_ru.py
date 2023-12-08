@@ -5,24 +5,26 @@ from locations.dict_parser import DictParser
 
 # https://api.gs.tatneft.ru/api/v2/azs/fuel_types/
 FUEL_TYPES_MAPPING = {
-    5: Fuel.OCTANE_95,
     2: Fuel.OCTANE_92,
     3: Fuel.OCTANE_92,
-    10: Fuel.DIESEL,
-    9: Fuel.DIESEL,
-    13: Fuel.LPG,
+    5: Fuel.OCTANE_95,
     7: Fuel.OCTANE_98,
-    20: Fuel.DIESEL,
+    9: Fuel.DIESEL,
+    10: Fuel.DIESEL,
+    13: Fuel.LPG,
     19: Fuel.CNG,
+    20: Fuel.DIESEL,
 }
 # https://api.gs.tatneft.ru/api/v2/azs/features/
 FEATURES_MAPPING = {
-    15: Extras.TOILETS,
-    3: Extras.FAST_FOOD,
     2: Extras.COMPRESSED_AIR,
-    18: Extras.VACUUM_CLEANER,
-    9: Extras.WIFI,
+    3: Extras.FAST_FOOD,
     7: Extras.ATM,
+    9: Extras.WIFI,
+    10: Extras.CAR_WASH,
+    15: Extras.TOILETS,
+    18: Extras.VACUUM_CLEANER,
+    # TODO: find tags for features like Tyre service (16) & Car Service (4)
 }
 
 
