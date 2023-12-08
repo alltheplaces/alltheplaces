@@ -27,4 +27,6 @@ class MTBankUSSpider(SitemapSpider, StructuredDataSpider):
                 return
             item["branch"] = item.pop("name").removeprefix("M&T Bank in ")
 
+        item["country"] = "US"
+
         yield item
