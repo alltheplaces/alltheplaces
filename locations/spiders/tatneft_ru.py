@@ -33,7 +33,7 @@ class TatneftRUSpider(scrapy.Spider):
     item_attributes = {"brand": "Татнефть", "brand_wikidata": "Q1616858"}
     allowed_domains = ["api.gs.tatneft.ru"]
     start_urls = ["https://api.gs.tatneft.ru/api/v2/azs/"]
-    requires_proxy = True
+    requires_proxy = "RU"
 
     def parse(self, response):
         for poi in response.json()["data"]:
