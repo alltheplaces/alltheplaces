@@ -30,6 +30,8 @@ class DictParser:
         "city-name",
         # JP
         "市区町村",  # "municipality"
+        # PL
+        "miasto",
     ]
 
     region_keys = [
@@ -180,50 +182,58 @@ class DictParser:
         title = key.title()
         results.add(title)
 
+        # example: flatcase
         flatcase = key.lower().replace("-", "")
         results.add(flatcase)
 
-        FLATCASEUPPER = flatcase.upper()
-        results.add(FLATCASEUPPER)
+        # example: FLATCASEUPPER
+        flatcase_upper = flatcase.upper()
+        results.add(flatcase_upper)
 
-        camelCase = key[0].lower()
+        # example: camelCase
+        camel_case = key[0].lower()
         i = 1
         while i < len(key):
             if key[i] == "-":
                 i += 1
-                camelCase += key[i].upper()
+                camel_case += key[i].upper()
             else:
-                camelCase += key[i]
+                camel_case += key[i]
             i += 1
 
-        results.add(camelCase)
+        results.add(camel_case)
 
-        PascalCase = camelCase[0].upper() + camelCase[1:]
+        # example: PascalCase
+        pascal_case = camel_case[0].upper() + camel_case[1:]
 
-        results.add(PascalCase)
+        results.add(pascal_case)
 
+        # example: snake_case
         snake_case = key.lower().replace("-", "_")
         results.add(snake_case)
 
-        SCREAMING_SNAKE_CASE = key.upper().replace("-", "_")
-        results.add(SCREAMING_SNAKE_CASE)
+        # example: SCREAMING_SNAKE_CASE
+        screaming_snake_case = key.upper().replace("-", "_")
+        results.add(screaming_snake_case)
 
-        camel_Snake_Case = key[0].lower()
+        # example: camel_Snake_Case
+        camel_snake_case = key[0].lower()
         i = 1
         while i < len(key):
             if key[i] == "-":
                 i += 1
-                camel_Snake_Case += "_"
-                camel_Snake_Case += key[i].upper()
+                camel_snake_case += "_"
+                camel_snake_case += key[i].upper()
             else:
-                camel_Snake_Case += key[i]
+                camel_snake_case += key[i]
             i += 1
 
-        results.add(camel_Snake_Case)
+        results.add(camel_snake_case)
 
-        Pascal_Snake_Case = camel_Snake_Case[0].upper() + camel_Snake_Case[1:]
+        # example: Pascal_Snake_Case
+        pascal_snake_case = camel_snake_case[0].upper() + camel_snake_case[1:]
 
-        results.add(Pascal_Snake_Case)
+        results.add(pascal_snake_case)
 
         return results
 

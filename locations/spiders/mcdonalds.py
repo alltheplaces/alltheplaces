@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.categories import Categories, Extras, apply_category, apply_yes_no
+from locations.categories import Categories, Extras, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.geo import city_locations
 from locations.hours import DAYS_FULL, OpeningHours
@@ -8,7 +8,7 @@ from locations.hours import DAYS_FULL, OpeningHours
 
 class McDonaldsSpider(scrapy.Spider):
     name = "mcdonalds"
-    item_attributes = {"brand": "McDonald’s", "brand_wikidata": "Q38076"}
+    item_attributes = {"brand": "McDonald's", "brand_wikidata": "Q38076", "extras": Categories.FAST_FOOD.value}
     allowed_domains = ["www.mcdonalds.com"]
     download_delay = 0.5
 
@@ -33,6 +33,8 @@ class McDonaldsSpider(scrapy.Spider):
             "sv-se",
             "en-sa",
             "uk-ua",
+            "hu-hu",
+            "zh-tw",
         ]:
             country = locale.split("-")[1]
             for city in city_locations(country.upper(), 20000):
@@ -57,10 +59,11 @@ class McDonaldsSpider(scrapy.Spider):
             if locale in [
                 "en-ca",
                 "en-gb",
-                "fi-fi",
                 "en-ie",
                 "en-us",
+                "fi-fi",
                 "fr-ch",
+                "hu-hu",
                 "sv-se",
                 "zh-tw",
             ]:
@@ -98,9 +101,12 @@ class McDonaldsSpider(scrapy.Spider):
             item["country"] = country.upper()
             item["lon"], item["lat"] = store["geometry"]["coordinates"]
 
-            apply_category(Categories.FAST_FOOD, item)
-            apply_yes_no(Extras.DRIVE_THROUGH, item, "DRIVETHRU" in properties["filterType"])
-            apply_yes_no(Extras.WIFI, item, "WIFI" in properties["filterType"])
+            # hu-hu has non-standard filterType values
+            filter_type = [p.replace("restaurant.facility.", "").upper() for p in properties["filterType"]]
+
+            apply_yes_no(Extras.DRIVE_THROUGH, item, "DRIVETHRU" in filter_type)
+            apply_yes_no(Extras.WIFI, item, "WIFI" in filter_type)
+            apply_yes_no(Extras.DELIVERY, item, "MCDELIVERYSERVICE" in filter_type)
 
             if hours := self.store_hours(properties.get("restauranthours")):
                 item["opening_hours"] = hours

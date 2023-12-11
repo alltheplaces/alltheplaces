@@ -17,8 +17,8 @@ class CooplandsDoncasterSpider(scrapy.Spider):
 
     def __init__(self):
         self.item_attributes["opening_hours"] = OpeningHours()
-        for DAY in DAYS[0:6]:
-            self.item_attributes["opening_hours"].add_range(day=DAY, open_time="08:00", close_time="17:00")
+        for day in DAYS[0:6]:
+            self.item_attributes["opening_hours"].add_range(day=day, open_time="08:00", close_time="17:00")
 
     def parse(self, response):
         stores = response.xpath("//div[@class='box box-store']")

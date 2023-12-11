@@ -24,7 +24,7 @@ The rest of this page discusses some different kinds of JSON API by example.
 
 In nearly all cases you should find that our [DictParser](../locations/dict_parser.py)
 class can help keep your code tight. There are only so many ways that you
-can name a field `latitide`. The `DictParser` code tries those different ways for
+can name a field `latitude`. The `DictParser` code tries those different ways for
 this and other fields. Of course, it will not get everything right for every API.
 This is where you may have to write a little code yourself, but a lot
 less than otherwise.

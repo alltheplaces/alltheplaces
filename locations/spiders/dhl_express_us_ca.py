@@ -2,6 +2,7 @@ import re
 
 from scrapy.spiders import SitemapSpider
 
+from locations.categories import Categories, apply_category
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -20,5 +21,5 @@ class DhlExpressUsSpider(SitemapSpider, StructuredDataSpider):
 
     def post_process_item(self, item, response, ld_data):
         item["country"] = re.findall(r"\.ca|\.us", response.url)[0][1:].upper()
-
+        apply_category(Categories.POST_OFFICE, item)
         yield item

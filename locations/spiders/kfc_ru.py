@@ -12,7 +12,7 @@ class KfcRUSpider(scrapy.Spider):
     item_attributes = {"brand": "KFC", "brand_wikidata": "Q524757"}
 
     def start_requests(self):
-        yield JsonRequest("https://api.kfc.digital/api/store/v2/store.get_restaurants?showClosed=false")
+        yield JsonRequest("https://api.prod.digital.uni.rest/api/store/v2/store.get_restaurants?showClosed=false")
 
     def parse(self, response):
         for poi in response.json().get("searchResults"):

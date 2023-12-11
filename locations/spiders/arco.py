@@ -4,7 +4,7 @@ import re
 from scrapy import Request
 from scrapy.spiders import CSVFeedSpider
 
-from locations.categories import Extras, Fuel, PaymentMethods, apply_yes_no
+from locations.categories import Categories, Extras, Fuel, PaymentMethods, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.spiders.tesco_gb import set_located_in
 
@@ -35,6 +35,8 @@ class ArcoSpider(CSVFeedSpider):
         apply_yes_no(Fuel.DIESEL, arco, row["CreditCards"] == "1")
         apply_yes_no(Extras.CAR_WASH, arco, row["CarWash"] == "1")
         # TODO: RenewableDiesel
+
+        apply_category(Categories.FUEL_STATION, arco)
 
         yield arco
 

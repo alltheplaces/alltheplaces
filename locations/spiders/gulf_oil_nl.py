@@ -1,5 +1,6 @@
 import scrapy
 
+from locations.categories import Categories
 from locations.hours import OpeningHours, sanitise_day
 from locations.items import Feature
 
@@ -46,5 +47,6 @@ class GulfOilNLSpider(scrapy.Spider):
                 "lat": float(store_info.get("y-cords")),
                 "lon": float(store_info.get("x-cords")),
                 "opening_hours": oh,
+                "extras": Categories.FUEL_STATION.value,
             }
         )

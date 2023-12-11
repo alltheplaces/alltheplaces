@@ -2,7 +2,20 @@ import json
 
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
+
+AMENITIES = {
+    "": Categories.HOSPITAL,
+    "DiagnosticLab": {"healthcare": "laboratory"},
+    "EmergencyService": {"emergency": "emergency_ward_entrance"},
+    "ExerciseGym": {"leisure": "fitness_centre"},
+    "Hospital": Categories.HOSPITAL,
+    "MedicalClinic": {"amenity": "clinic"},
+    "Pharmacy": {"amenity": "pharmacy"},
+    "ProfessionalService": Categories.HOSPITAL,
+    "Residence": {"social_facility": "nursing_home"},
+}
 
 
 class MercyHealthSpider(scrapy.Spider):
@@ -41,4 +54,7 @@ class MercyHealthSpider(scrapy.Spider):
                 "website": store_data["Location"]["Link"],
             }
 
-            yield Feature(**properties)
+            item = Feature(**properties)
+            facility_type = store_data.get("Location", {}).get("FacilityType", {}).get("SchemaPlaceType", "")
+            apply_category(AMENITIES[facility_type], item)
+            yield item

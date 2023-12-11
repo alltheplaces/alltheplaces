@@ -11,10 +11,10 @@ class SupercheapAutoSpider(SitemapSpider):
     name = "supercheap_auto"
     item_attributes = {"brand": "Supercheap Auto", "brand_wikidata": "Q7643119"}
     sitemap_urls = [
-        "https://www.supercheapauto.com.au/sitemap-store_sitemap.xml",
+        "https://www.supercheapauto.com.au/sitemap-stores.xml",
         "https://www.supercheapauto.co.nz/sitemap-stores.xml",
     ]
-    sitemap_rules = [(r"\/stores\/details\?s?id=", "parse_store")]
+    sitemap_rules = [(r"\/stores\/details\/sca-[\w\-]+$", "parse_store")]
 
     def parse_store(self, response):
         data_raw = response.xpath('//div[@id="store-locator-details-map"]/@data-store-object').get()
