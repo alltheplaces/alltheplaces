@@ -40,4 +40,3 @@ class McDonaldsPHSpider(scrapy.Spider):
             apply_category(Categories.FAST_FOOD, item)
 
             yield item
-
