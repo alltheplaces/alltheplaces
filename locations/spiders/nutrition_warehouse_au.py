@@ -1,5 +1,5 @@
 from locations.storefinders.stockinstore import StockInStoreSpider
-
+from locations.categories import Categories, apply_category
 
 class NutritionWarehouseAUSpider(StockInStoreSpider):
     name = "nutrition_warehouse_au"
@@ -8,3 +8,7 @@ class NutritionWarehouseAUSpider(StockInStoreSpider):
     api_widget_id = "105"
     api_widget_type = "storelocator"
     api_origin = "https://www.nutritionwarehouse.com.au"
+
+    def parse_item(self, item, location):
+        apply_category({'shop':'nutrition_supplements'}, item)
+        yield item
