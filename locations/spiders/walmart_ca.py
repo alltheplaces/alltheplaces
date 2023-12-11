@@ -14,7 +14,7 @@ class WalmartCaSpider(scrapy.Spider):
     custom_settings = {
         "USER_AGENT": BROWSER_DEFAULT,
         "CONCURRENT_REQUESTS": 1,
-        "DOWNLOAD_DELAY": 5,
+        "DOWNLOAD_DELAY": 10,
         "ROBOTSTXT_OBEY": False,
     }
 
@@ -41,6 +41,7 @@ class WalmartCaSpider(scrapy.Spider):
 
             item["opening_hours"] = self.parse_hours(poi.get("regularHours"))
 
+            # TODO: parse more categories under 'servicesMap' key
             apply_category(Categories.SHOP_DEPARTMENT_STORE, item)
 
             yield item
