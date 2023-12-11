@@ -110,6 +110,7 @@ ITEM_PIPELINES = {
     "locations.pipelines.apply_nsi_categories.ApplyNSICategoriesPipeline": 700,
     "locations.pipelines.count_categories.CountCategoriesPipeline": 800,
     "locations.pipelines.count_brands.CountBrandsPipeline": 810,
+    "locations.pipelines.count_operators.CountOperatorsPipeline": 820,
 }
 
 LOG_FORMATTER = "locations.logformatter.DebugDuplicateLogFormatter"
@@ -147,6 +148,11 @@ DEFAULT_PLAYWRIGHT_SETTINGS = {
         "https": "scrapy_playwright.handler.ScrapyPlaywrightDownloadHandler",
     },
     "DOWNLOADER_MIDDLEWARES": {"locations.middlewares.playwright_middleware.PlaywrightMiddleware": 543},
+}
+
+DEFAULT_PLAYWRIGHT_SETTINGS_WITH_EXT_JS = DEFAULT_PLAYWRIGHT_SETTINGS | {
+    "PLAYWRIGHT_ABORT_REQUEST": lambda request: not request.resource_type == "document"
+    and not request.resource_type == "script",
 }
 
 REQUESTS_CACHE_ENABLED = True

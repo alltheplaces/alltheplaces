@@ -7,9 +7,7 @@ from locations.items import Feature
 
 class CarharttWipSpider(Spider):
     name = "carhartt_wip"
-    item_attributes = {
-        "brand": "Carhartt WIP",
-    }
+    item_attributes = {"brand": "Carhartt Work in Progress", "brand_wikidata": "Q123015694"}
     graphql_url = "https://carharrt-storefinder-api.herokuapp.com/graphql"
 
     def start_requests(self):

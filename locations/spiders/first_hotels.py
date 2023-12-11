@@ -21,5 +21,9 @@ class FirstHotelsSpider(StructuredDataSpider):
         item["name"] = item["name"].strip()
         item["lat"] = coords.split(",")[0]
         item["lon"] = coords.split(",")[1]
+
+        for alt in response.xpath('//link[@rel="alternate"][@hreflang]'):
+            item["extras"]["website:{}".format(alt.xpath("@hreflang").get())] = alt.xpath("@href").get()
+
         apply_category(Categories.HOTEL, item)
         yield item

@@ -1,6 +1,10 @@
+from urllib.parse import urljoin
+
 import scrapy
 
-from locations.items import Feature
+from locations.categories import Extras, apply_yes_no
+from locations.dict_parser import DictParser
+from locations.hours import DAYS, OpeningHours
 from locations.spiders.mcdonalds import McDonaldsSpider
 
 
@@ -9,83 +13,29 @@ class McDonaldsPLSpider(scrapy.Spider):
     item_attributes = McDonaldsSpider.item_attributes
     allowed_domains = ["mcdonalds.pl"]
 
-    start_urls = ("https://mcdonalds.pl/restauracje/getMarkers",)
+    start_urls = ["https://mcdonalds.pl/data/places"]
 
-    def store_hours(self, data):
-        day_groups = []
-        this_day_group = {}
-        weekdays = {
-            "1": "Mo",
-            "2": "Th",
-            "3": "We",
-            "4": "Tu",
-            "5": "Fr",
-            "6": "Sa",
-            "7": "Su",
-        }
-
-        for index in data:
-            hours = ""
-
-            short_day = weekdays[index]
-            hours = "{}-{}".format(data[index]["from"], data[index]["to"])
-            if not this_day_group:
-                this_day_group = {
-                    "from_day": short_day,
-                    "to_day": short_day,
-                    "hours": hours,
-                }
-
-            elif hours == this_day_group["hours"]:
-                this_day_group["to_day"] = short_day
-
-            elif hours != this_day_group["hours"]:
-                day_groups.append(this_day_group)
-                this_day_group = {
-                    "from_day": short_day,
-                    "to_day": short_day,
-                    "hours": hours,
-                }
-
-        day_groups.append(this_day_group)
-
-        if not day_groups:
-            return None
-
-        opening_hours = ""
-        if len(day_groups) == 1 and day_groups[0]["hours"] in (
-            "00:00-23:59",
-            "00:00-00:00",
-        ):
-            opening_hours = "24/7"
-        else:
-            for day_group in day_groups:
-                if day_group["from_day"] == day_group["to_day"]:
-                    opening_hours += "{from_day} {hours}; ".format(**day_group)
-                else:
-                    opening_hours += "{from_day}-{to_day} {hours}; ".format(**day_group)
-            opening_hours = opening_hours[:-2]
-
-        return opening_hours
+    def parse_hours(self, item, poi):
+        if hours := poi.get("hours"):
+            try:
+                oh = OpeningHours()
+                for day, time in hours.items():
+                    if time.get("alwaysOpen") is True:
+                        oh.add_range(DAYS[int(day) - 1], "00:00", "23:59")
+                    else:
+                        oh.add_range(DAYS[int(day) - 1], time.get("from"), time.get("to"))
+                item["opening_hours"] = oh
+            except:
+                self.logger.warning(f"Failed to parse opening hours: {hours}")
 
     def parse(self, response):
-        results = response.json()
-
-        for item in results:
-            properties = {
-                "addr_full": item["address"],
-                "city": item["city"],
-                "name": "McDonald's",
-                "postcode": item["postCode"],
-                "phone": item["phone"],
-                "ref": item["id"],
-                "lon": item["lng"],
-                "lat": item["lat"],
-                "state": item["province"],
-            }
-
-            opening_hours = self.store_hours(item["hours"])
-            if opening_hours:
-                properties["opening_hours"] = opening_hours
-
-            yield Feature(**properties)
+        places = response.json().get("places")
+        for poi in places:
+            poi["street_address"] = poi.pop("address")
+            item = DictParser.parse(poi)
+            item["website"] = urljoin("https://mcdonalds.pl/restauracje/", poi["slug"])
+            self.parse_hours(item, poi)
+            apply_yes_no(Extras.WIFI, item, poi.get("wifi"))
+            apply_yes_no(Extras.DELIVERY, item, poi.get("mcDelivery"))
+            apply_yes_no(Extras.DRIVE_THROUGH, item, poi.get("mcDrive"))
+            yield item

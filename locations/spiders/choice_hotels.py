@@ -12,7 +12,8 @@ class ChoiceHotelsSpider(SitemapSpider):
     name = "choice_hotels"
     item_attributes = {"brand": "Choice Hotels", "brand_wikidata": "Q1075788"}
     allowed_domains = ["choicehotels.com"]
-    sitemap_urls = ["https://www.choicehotels.com/propertysitemap.xml"]
+    # Sitemapindex with below in it is "https://www.choicehotels.com/sitemapindex.xml"
+    sitemap_urls = ["https://www.choicehotels.com/brandsearchsitemap.xml.gz"]
     user_agent = BROWSER_DEFAULT
     download_delay = 5  # Requested by https://www.choicehotels.com/robots.txt
     requires_proxy = True
@@ -33,24 +34,25 @@ class ChoiceHotelsSpider(SitemapSpider):
     }
 
     def parse(self, response):
-        data = json.loads(re.search(r"window.PRELOADED_STATE = (.*)?;", response.text).group(1))["page"]
-        location = DictParser.get_nested_key(data, "property")
+        data = json.loads(re.search(r"window.PRELOADED_STATE = (.*)?;", response.text).group(1))
+        hotels = DictParser.get_nested_key(data, "hotels")
 
-        item = DictParser.parse(location)
+        for location in hotels:
+            item = DictParser.parse(location)
 
-        item["brand"] = location["brandName"]
-        item["state"] = location["address"].get("subdivision")
-        item["website"] = response.url
+            item["brand"] = location["brandName"]
+            item["state"] = location["address"].get("subdivision")
+            item["website"] = response.url
 
-        if brand_info := self.brand_mapping.get(location["brandCode"]):
-            item["brand_wikidata"] = brand_info[1]
-            if len(brand_info) == 3:
-                apply_category(brand_info[2], item)
-        else:
-            self.crawler.stats.inc_value(
-                f'atp/choice_hotels/unmapped_category/{location["brandCode"]}/{location["brandName"]}'
-            )
-            self.crawler.stats.inc_value(f"atp/choice_hotels/unmapped_category/{response.url}")
-            self.logger.warning("Missing brand mapping for %s, %s", location["brandCode"], location["brandName"])
+            if brand_info := self.brand_mapping.get(location["brandCode"]):
+                item["brand_wikidata"] = brand_info[1]
+                if len(brand_info) == 3:
+                    apply_category(brand_info[2], item)
+            else:
+                self.crawler.stats.inc_value(
+                    f'atp/choice_hotels/unmapped_category/{location["brandCode"]}/{location["brandName"]}'
+                )
+                self.crawler.stats.inc_value(f"atp/choice_hotels/unmapped_category/{response.url}")
+                self.logger.warning("Missing brand mapping for %s, %s", location["brandCode"], location["brandName"])
 
-        yield item
+            yield item

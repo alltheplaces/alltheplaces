@@ -1,7 +1,7 @@
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
-from locations.categories import Fuel, apply_yes_no
+from locations.categories import Categories, Fuel, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 
 
@@ -95,5 +95,7 @@ class CaltexSpider(Spider):
                 )
                 apply_yes_no(Fuel.ADBLUE, item, "Bulk AdBlue" in location["fuelsName"], False)
                 apply_yes_no(Fuel.KEROSENE, item, "Kerosene" in location["fuelsName"], False)
+
+                apply_category(Categories.FUEL_STATION, item)
 
             yield item

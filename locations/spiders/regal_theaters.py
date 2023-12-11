@@ -8,7 +8,7 @@ from locations.items import Feature
 
 class RegalTheatersSpider(scrapy.Spider):
     name = "regal_theaters"
-    item_attributes = {"brand": "Regal Theaters"}
+    item_attributes = {"brand": "Regal Theaters", "brand_wikidata": "Q835638"}
     allowed_domains = ["www.regmovies.com"]
     start_urls = ["https://www.regmovies.com/theatres/regal-riviera/0690"]
     requires_proxy = "US"

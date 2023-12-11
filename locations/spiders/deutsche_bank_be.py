@@ -1,5 +1,6 @@
 import scrapy
 
+from locations.categories import Categories
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 from locations.spiders.vapestore_gb import clean_address
@@ -32,5 +33,7 @@ class DeutscheBankBESpider(scrapy.Spider):
                     "website": website.get("fr"),
                     "lat": store.get("lat"),
                     "lon": store.get("long"),
+                    "opening_hours": oh.as_opening_hours(),
+                    "extras": Categories.BANK.value,
                 }
             )

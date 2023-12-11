@@ -24,6 +24,10 @@ class MercySpider(scrapy.Spider):
         ("Behavioral Health", {"healthcare": "counselling"}),
         ("Childbirth", {"healthcare": "midwife"}),
         ("Vaccinations", {"healthcare": "vaccination_centre"}),
+        ("Urgent Care or Convenient Care", Categories.CLINIC_URGENT),
+        ("Surgery", {"amenity": "hospital", "healthcare": "hospital", "healthcare:speciality": "surgery"}),
+        ("Mission and Ministry", {"amenity": "social_centre"}),
+        ("Cancer Treatment Center", {"amenity": "centre", "healthcare:specialty": "cancer_treatment_centre"}),
     ]
 
     def parse(self, response):

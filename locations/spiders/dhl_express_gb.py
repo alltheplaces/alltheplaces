@@ -1,5 +1,6 @@
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 
@@ -31,5 +32,6 @@ class DhlExpressGbSpider(scrapy.Spider):
                     day=DAYS[day.get("Day") - 1], open_time=day.get("OpenTime"), close_time=day.get("CloseTime")
                 )
             item["opening_hours"] = oh.as_opening_hours()
+            apply_category(Categories.POST_OFFICE, item)
 
             yield item

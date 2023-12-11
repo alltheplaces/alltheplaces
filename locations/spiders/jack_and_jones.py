@@ -5,7 +5,7 @@ import scrapy
 from locations.items import Feature
 
 
-class jackAndJonesSpider(scrapy.Spider):
+class JackAndJonesSpider(scrapy.Spider):
     name = "jack_and_jones"
     item_attributes = {"brand": "Jack & Jones", "brand_wikidata": "Q6077665"}
     start_urls = [

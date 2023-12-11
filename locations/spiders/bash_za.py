@@ -3,6 +3,7 @@ import re
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
+from locations.categories import Categories
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 
@@ -10,13 +11,17 @@ BASH_BRANDS = {
     "ASJ": {"brand": "American Swiss", "brand_wikidata": "Q116430764"},
     "AMERICAN SWISS": {"brand": "American Swiss", "brand_wikidata": "Q116430764"},
     "ARCHIVE": {"brand": "Archive", "brand_wikidata": "Q116431114"},
-    "CHARLES & KEITH": {"brand": "Charles & Keith", "brand_wikidata": "Q3878818"},
-    "COLETTE": {"brand": "Colette", "brand_wikidata": "Q737606"},
+    "CHARLES & KEITH": {
+        "brand": "Charles & Keith",
+        "brand_wikidata": "Q3878818",
+        "extras": Categories.SHOP_CLOTHES.value,
+    },
+    "COLETTE": {"brand": "Colette", "brand_wikidata": "Q737606", "extras": Categories.SHOP_CLOTHES.value},
     "EXACT": {"brand": "Exact", "brand_wikidata": "Q116379381"},
     "EX": {"brand": "Exact", "brand_wikidata": "Q116379381"},
-    "DONNA": {"brand": "Donna", "brand_wikidata": "Q117407190"},
-    "DS": {"brand": "Duesouth", "brand_wikidata": "Q117406776"},
-    "DUESOUTH": {"brand": "Duesouth", "brand_wikidata": "Q117406776"},
+    "DONNA": {"brand": "Donna", "brand_wikidata": "Q117407190", "extras": Categories.SHOP_VARIETY_STORE.value},
+    "DS": {"brand": "Duesouth", "brand_wikidata": "Q117406776", "extras": Categories.SHOP_VARIETY_STORE.value},
+    "DUESOUTH": {"brand": "Duesouth", "brand_wikidata": "Q117406776", "extras": Categories.SHOP_VARIETY_STORE.value},
     "FABIANI": {"brand": "Fabiani", "brand_wikidata": "Q116379050"},
     "FB": {"brand": "Fabiani", "brand_wikidata": "Q116379050"},
     "FIX": {"brand": "The FIX", "brand_wikidata": "Q116379523"},
@@ -24,22 +29,30 @@ BASH_BRANDS = {
     "FOS": {"brand": "Foschini", "brand_wikidata": "Q116391780"},
     "G-STAR RAW": {"brand": "G-Star RAW", "brand_wikidata": "Q1484081"},
     "G-STAR": {"brand": "G-Star RAW", "brand_wikidata": "Q1484081"},
-    "HI": {"brand": "hi", "brand_wikidata": "Q116431177"},
+    "HI": {"brand": "hi", "brand_wikidata": "Q116431177", "extras": Categories.SHOP_CLOTHES.value},
     "@HOME LIVINGSPACE": {"brand": "@Home Livingspace", "brand_wikidata": "Q117406343"},
     "@HOME": {"brand": "@Home", "brand_wikidata": "Q116429887"},
-    "LUELLA": {"brand": "Luella", "brand_wikidata": "Q117406783"},
+    "LUELLA": {"brand": "Luella", "brand_wikidata": "Q117406783", "extras": Categories.SHOP_VARIETY_STORE.value},
     "JET": {"brand": "Jet", "brand_wikidata": "Q61995123"},
     "MARKHAM": {"brand": "Markham", "brand_wikidata": "Q116378583"},
-    "MAT & MAY": {"brand": "Mat & May", "brand_wikidata": "Q117406655"},
-    "MATRIX": {"brand": "Matrix Warehouse Computers", "brand_wikidata": "Q117407296"},
+    "MAT & MAY": {
+        "brand": "Mat & May",
+        "brand_wikidata": "Q117406655",
+        "extras": Categories.SHOP_FASHION_ACCESSORIES.value,
+    },
+    "MATRIX": {
+        "brand": "Matrix Warehouse Computers",
+        "brand_wikidata": "Q117407296",
+        "extras": Categories.SHOP_COMPUTER.value,
+    },
     "MK": {"brand": "Markham", "brand_wikidata": "Q116378583"},
     "NEXT": {"brand": "Next", "brand_wikidata": "Q246655"},
     "RELAY JEANS": {"brand": "Relay Jeans", "brand_wikidata": "Q116378360"},
     "RFO": {"brand": "Renegade Fashion Outlet", "brand_wikidata": "Q116457467"},
-    "SB": {"brand": "SODA Bloc", "brand_wikidata": "Q117406709"},
+    "SB": {"brand": "SODA Bloc", "brand_wikidata": "Q117406709", "extras": Categories.SHOP_CLOTHES.value},
     "SF": {"brand": "The Sneaker Factory", "brand_wikidata": "Q116290301"},
     "SNEAKER FACTORY": {"brand": "The Sneaker Factory", "brand_wikidata": "Q116290301"},
-    "SODA BLOC": {"brand": "SODA Bloc", "brand_wikidata": "Q117406709"},
+    "SODA BLOC": {"brand": "SODA Bloc", "brand_wikidata": "Q117406709", "extras": Categories.SHOP_CLOTHES.value},
     "SPORTSCENE": {"brand": "Sportscene", "brand_wikidata": "Q116378841"},
     "SS": {"brand": "Sportscene", "brand_wikidata": "Q116378841"},
     "STERNS": {"brand": "Sterns", "brand_wikidata": "Q116430300"},
@@ -47,7 +60,7 @@ BASH_BRANDS = {
     "TOTALSPORTS": {"brand": "Totalsports", "brand_wikidata": "Q116379123"},
     "TS": {"brand": "Totalsports", "brand_wikidata": "Q116379123"},
     "THE FIX": {"brand": "The FIX", "brand_wikidata": "Q116379523"},
-    "THE SCENE": {"brand": "The Scene", "brand_wikidata": "Q117406601"},
+    "THE SCENE": {"brand": "The Scene", "brand_wikidata": "Q117406601", "extras": Categories.SHOP_CLOTHES.value},
 }
 
 
