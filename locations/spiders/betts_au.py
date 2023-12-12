@@ -1,5 +1,6 @@
-from locations.storefinders.metalocator import MetaLocatorSpider
 from locations.categories import Categories, apply_category
+from locations.storefinders.metalocator import MetaLocatorSpider
+
 
 class BettsAU(MetaLocatorSpider):
     name = "betts_au"
