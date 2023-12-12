@@ -1,5 +1,6 @@
-from locations.storefinders.stockinstore import StockInStoreSpider
 from locations.categories import Categories, apply_category
+from locations.storefinders.stockinstore import StockInStoreSpider
+
 
 class TobysSportsPHSpider(StockInStoreSpider):
     name = "tobys_sports_ph"
