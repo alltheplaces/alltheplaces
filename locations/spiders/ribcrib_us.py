@@ -1,5 +1,6 @@
-from locations.storefinders.storerocket import StoreRocketSpider
 from locations.categories import Categories, apply_category
+from locations.storefinders.storerocket import StoreRocketSpider
+
 
 class RibCribUSSpider(StoreRocketSpider):
     name = "ribcrib_us"
