@@ -1,7 +1,8 @@
 import scrapy
 
-from locations.items import Feature
 from locations.categories import Categories, apply_category
+from locations.items import Feature
+
 
 class PeugeotNLSpider(scrapy.Spider):
     name = "peugeot_nl"
