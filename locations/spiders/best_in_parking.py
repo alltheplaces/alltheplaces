@@ -31,7 +31,7 @@ class BestInParkingSpider(scrapy.Spider):
             apply_category(Categories.PARKING, item)
             # TODO: map driveway_height attribute
             # TODO: figure out how to fetch opening_hours
-            
-            # There is also a status endpoint for each POI, 
+
+            # There is also a status endpoint for each POI,
             # e.g. https://www.bestinparking.com/en/api/garages/live/2675
             yield item
