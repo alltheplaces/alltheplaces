@@ -14,7 +14,7 @@ class WalmartCaSpider(scrapy.Spider):
     custom_settings = {
         "USER_AGENT": BROWSER_DEFAULT,
         "CONCURRENT_REQUESTS": 1,
-        "DOWNLOAD_DELAY": 10,
+        "DOWNLOAD_DELAY": 15,
         "ROBOTSTXT_OBEY": False,
     }
 
