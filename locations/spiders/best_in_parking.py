@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.categories import apply_yes_no
+from locations.categories import Categories, apply_category, apply_yes_no
 from locations.items import Feature
 
 
@@ -22,10 +22,13 @@ class BestInParkingSpider(scrapy.Spider):
             item["image"] = poi.get("image", {}).get("media_image")
             item["extras"]["capacity"] = poi["parking_car_spaces"]
             apply_yes_no("fee", item, poi.get("cheapest_short_parking_tariff_price"))
-            # TODO: map driveway_height attribute
-            # TODO: figure out how to fetch opening_hours
+
             geo = poi.get("geolocation", "").split(", ")
             if geo:
                 item["lat"] = geo[0]
                 item["lon"] = geo[1]
+            
+            apply_category(Categories.PARKING, item)
+            # TODO: map driveway_height attribute
+            # TODO: figure out how to fetch opening_hours
             yield item
