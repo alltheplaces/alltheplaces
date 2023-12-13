@@ -14,8 +14,10 @@ class McDonaldsCYSpider(scrapy.Spider):
     start_urls = ["https://www.mcdonalds.com.cy/locate"]
 
     def parse(self, response):
-        raw_data = response.xpath('//script[contains(text(), "function distance(lat1, lng1, lat2, lng2)")]/text()').get()
-        data = re.findall(r'var McDonald_s_\w+\s*=\s*(.*)', raw_data)
+        raw_data = response.xpath(
+            '//script[contains(text(), "function distance(lat1, lng1, lat2, lng2)")]/text()'
+        ).get()
+        data = re.findall(r"var McDonald_s_\w+\s*=\s*(.*)", raw_data)
         for i in data:
             location = chompjs.parse_js_object(i)
             item = DictParser.parse(location)
@@ -30,5 +32,3 @@ class McDonaldsCYSpider(scrapy.Spider):
             apply_category(Categories.FAST_FOOD, item)
 
             yield item
-
-
