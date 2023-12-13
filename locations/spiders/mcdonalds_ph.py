@@ -1,7 +1,7 @@
-import re
+import json
 
-import chompjs
 import scrapy
+from scrapy.http import XmlResponse
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
@@ -14,12 +14,8 @@ class McDonaldsPHSpider(scrapy.Spider):
     item_attributes = McDonaldsSpider.item_attributes
     start_urls = ["https://www.mcdonalds.com.ph/store-locator"]
 
-    def parse(self, response, **kwargs):
-        raw_data = response.xpath("//store-locator").get()
-        locations = chompjs.parse_js_object(
-            "".join(re.findall(r'<store-locator :stores="(.*?)></store-locator>', raw_data))[:-1].replace("&quot;", '"')
-        )
-        for location in locations:
+    def parse(self, response: XmlResponse, **kwargs):
+        for location in json.loads(response.xpath("//store-locator").attrib[":stores"]):
             item = DictParser.parse(location)
             item["city"] = location["city_name"]
             item["state"] = location["province_name"]
