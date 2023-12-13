@@ -8,7 +8,7 @@ from locations.items import Feature
 
 class CatherinesSpider(scrapy.Spider):
     name = "catherines"
-    item_attributes = {"brand": "Catherine's"}
+    item_attributes = {"brand": "Catherine's", "brand_wikidata": "Q64026208"}
     allowed_domains = ["stores.catherines.com"]
     download_delay = 0.5
     start_urls = ("https://stores.catherines.com/",)

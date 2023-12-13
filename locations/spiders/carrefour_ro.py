@@ -3,6 +3,13 @@ from scrapy import Selector, Spider
 
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_RO, OpeningHours
+from locations.spiders.carrefour_fr import (
+    CARREFOUR_CONTACT,
+    CARREFOUR_EXPRESS,
+    CARREFOUR_MARKET,
+    CARREFOUR_SUPERMARKET,
+    parse_brand_and_category_from_mapping,
+)
 
 
 class CarrefourROSpider(Spider):
@@ -11,15 +18,12 @@ class CarrefourROSpider(Spider):
     start_urls = ["https://carrefour.ro/corporate/magazine"]
 
     brands = {
-        "Hipermarket": {"brand": "Carrefour", "brand_wikidata": "Q217599"},
-        "Market": {"brand": "Carrefour Market", "brand_wikidata": "Q2689639"},
-        "Express": {"brand": "Carrefour Express", "brand_wikidata": "Q2940190"},
-        "Express portocaliu": {
-            "brand": "Carrefour Express",
-            "brand_wikidata": "Q2940190",
-        },  # Express - "Orange" store (?)
-        "Express Franciza": {"brand": "Carrefour Express", "brand_wikidata": "Q2940190"},  # Express - Franchise store
-        "Contact": {"brand": "Carrefour Contact", "brand_wikidata": "Q2940188"},
+        "Contact": CARREFOUR_CONTACT,
+        "Express": CARREFOUR_EXPRESS,
+        "Express portocaliu": CARREFOUR_EXPRESS,  # Express - "Orange" store (?)
+        "Express Franciza": CARREFOUR_EXPRESS,  # Express - Franchise store
+        "Hipermarket": CARREFOUR_SUPERMARKET,
+        "Market": CARREFOUR_MARKET,
     }
 
     def parse(self, response):
@@ -41,7 +45,9 @@ class CarrefourROSpider(Spider):
             ):
                 # Location is a warehouse or headquarters. Ignore it.
                 continue
-            item.update(self.brands[location["type"]["name"]])
+
+            parse_brand_and_category_from_mapping(item, location["type"]["name"], self.brands)
+
             item["street_address"] = item.pop("addr_full")
             item["city"] = location["city"]["name"]
             item["website"] = (

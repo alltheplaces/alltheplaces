@@ -7,7 +7,7 @@ from locations.items import Feature
 
 
 class VitaminShoppeSpider(scrapy.Spider):
-    name = "vitamin-shoppe"
+    name = "vitamin_shoppe"
     item_attributes = {"brand": "The Vitamin Shoppe", "brand_wikidata": "Q7772938"}
     download_delay = 0.2
     allowed_domains = ("locations.vitaminshoppe.com",)

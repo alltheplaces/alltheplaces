@@ -2,6 +2,7 @@ import re
 
 from scrapy.spiders import SitemapSpider
 
+from locations.categories import Categories, apply_category
 from locations.linked_data_parser import LinkedDataParser
 
 BRANDS = {
@@ -56,12 +57,17 @@ class WyndhamSpider(SitemapSpider):
             item["ref"] = response.url.replace("https://www.wyndhamhotels.com/", "").replace("/overview", "")
 
         brand_id = re.match(self.sitemap_rules[0][0], response.url).group(1)
-        brand = BRANDS[brand_id]
 
-        if brand:
+        if brand := BRANDS.get(brand_id):
             item["brand"] = brand[0]
             item["brand_wikidata"] = brand[1]
         else:
             item["brand"] = brand_id
+            self.crawler.stats.inc_value(f"atp/wyndham/unknown_brand/{brand_id}")
+
+        if brand_id == "super-8":
+            apply_category(Categories.MOTEL, item)
+        else:
+            apply_category(Categories.HOTEL, item)
 
         return item

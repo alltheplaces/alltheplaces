@@ -18,7 +18,7 @@ class SofologyGBSpider(Spider):
             )
             item = DictParser.parse(location)
 
-            item["extras"]["branch"] = location["outlet"]
+            item["branch"] = location["outlet"]
             item["image"] = location["imageOutside"]
             item["website"] = urljoin(
                 "https://www.sofology.co.uk/stores/", location["outlet"].lower().replace(" ", "-")

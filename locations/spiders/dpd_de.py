@@ -18,8 +18,8 @@ class DPDDESpider(scrapy.Spider):
         ]
 
         for point_file in searchable_point_files:
-            with open_searchable_points(point_file) as openFile:
-                results = csv.DictReader(openFile)
+            with open_searchable_points(point_file) as open_file:
+                results = csv.DictReader(open_file)
                 for result in results:
                     if result["country"] == "DE":
                         headers = {"Content-Type": "application/x-www-form-urlencoded"}
@@ -50,30 +50,30 @@ class DPDDESpider(scrapy.Spider):
                             response,
                             formdata=formdata,
                             headers=headers,
-                            callback=self.shopsResults,
+                            callback=self.shops_results,
                             meta=result,
                         )
                         yield rq
 
-    def shopsResults(self, response):
+    def shops_results(self, response):
         result = response.meta
         body = response.css("body")
-        shopList = body.css("div.ShopList")
-        shop = shopList.css("a")
-        lengthOfShops = len(shop) - 1
-        for nr in range(lengthOfShops):
+        shop_list = body.css("div.ShopList")
+        shop = shop_list.css("a")
+        length_of_shops = len(shop) - 1
+        for nr in range(length_of_shops):
             item = Feature()
             name = shop.css(
                 "span#ContentPlaceHolder1_modShopFinder_repShopList_labShopName_" + str(nr) + "::text"
             ).extract()[0]
-            streetElement = shop.css(
+            street_element = shop.css(
                 "span#ContentPlaceHolder1_modShopFinder_repShopList_labShopStreet_" + str(nr) + "::text"
             ).extract()[0]
-            streets = streetElement.split("\xa0")
+            streets = street_element.split("\xa0")
             street = streets[0]
             housenumber = streets[1]
 
-            postalAndCity = (
+            postal_and_city = (
                 shop.css("span#ContentPlaceHolder1_modShopFinder_repShopList_labShopCity_" + str(nr) + "::text")
                 .extract()[0]
                 .split()
@@ -84,8 +84,8 @@ class DPDDESpider(scrapy.Spider):
             lng = shop.css(
                 "input#ContentPlaceHolder1_modShopFinder_repShopList_longitude_" + str(nr) + "::attr(value)"
             ).extract()[0]
-            plz = postalAndCity[0]
-            city = postalAndCity[1]
+            plz = postal_and_city[0]
+            city = postal_and_city[1]
             item["lat"] = lat
             item["lon"] = lng
             item["name"] = name
@@ -127,24 +127,24 @@ class DPDDESpider(scrapy.Spider):
                 response,
                 formdata=formdata,
                 headers=headers,
-                callback=self.openingHoursParse,
+                callback=self.opening_hours_parse,
                 meta=item,
             )
 
             yield rq
 
-    def openingHoursParse(self, response):
+    def opening_hours_parse(self, response):
         body = response.css("body")
-        shopDetails = body.css("div.panShopDetails")
-        shops = shopDetails.css("div.panBusinessHour")
+        shop_details = body.css("div.panShopDetails")
+        shops = shop_details.css("div.panBusinessHour")
         item = response.meta
-        openingShop = dict()
+        opening_shop = dict()
         if len(shops) > 0:
             for nr in range(7):
                 day = shops.css(
                     "span#ContentPlaceHolder1_modShopFinder_repBusinessHours_labBusinessDay_" + str(nr) + "::text"
                 ).extract()[0]
-                openningHours = (
+                opening_hours = (
                     shops.css(
                         "span#ContentPlaceHolder1_modShopFinder_repBusinessHours_labBusinessHour_" + str(nr) + "::text"
                     )
@@ -152,12 +152,12 @@ class DPDDESpider(scrapy.Spider):
                     .split(" ")
                 )
 
-                for element in openningHours:
+                for element in opening_hours:
                     if element == "-":
-                        del openningHours[1]
+                        del opening_hours[1]
 
-                openingShop[day] = openningHours
+                opening_shop[day] = opening_hours
 
-            item["opening_hours"] = openingShop
+            item["opening_hours"] = opening_shop
 
         yield item

@@ -1,5 +1,6 @@
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.linked_data_parser import LinkedDataParser
 from locations.microdata_parser import MicrodataParser
 
@@ -23,4 +24,6 @@ class NorthwestBankSpider(scrapy.spiders.SitemapSpider):
             city.root.set("itemprop", "addressLocality")
         MicrodataParser.convert_to_json_ld(response.selector)
         item = LinkedDataParser.parse(response, "BankOrCreditUnion")
+        if item:
+            apply_category(Categories.BANK, item)
         yield item

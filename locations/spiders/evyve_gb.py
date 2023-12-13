@@ -2,6 +2,7 @@ import json
 
 from scrapy import Spider
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
 
@@ -27,4 +28,5 @@ class EvyveGBSpider(Spider):
             )
             item.pop("city")
             item["extras"]["access"] = location["access_type"].lower()
+            apply_category(Categories.CHARGING_STATION, item)
             yield item
