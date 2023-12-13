@@ -6,7 +6,7 @@ from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
 
 class BarBurritoCASpider(WPStoreLocatorSpider):
     name = "bar_burrito_ca"
-    item_attributes = {"brand": "BarBurrito", "brand_wikidata": "Q123765650"}
+    item_attributes = {"brand": "BarBurrito", "brand_wikidata": "Q104844862"}
     allowed_domains = ["www.barburrito.ca"]
 
     def parse_item(self, item: Feature, location: dict, **kwargs):
