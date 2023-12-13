@@ -22,7 +22,7 @@ class BestInParkingSpider(scrapy.Spider):
             item["image"] = poi.get("image", {}).get("media_image")
             item["extras"]["capacity"] = poi["parking_car_spaces"]
             apply_yes_no("fee", item, poi.get("cheapest_short_parking_tariff_price"))
-            # TODO: driveway_height
+            # TODO: map driveway_height attribute
             # TODO: figure out how to fetch opening_hours
             geo = poi.get("geolocation", "").split(", ")
             if geo:
