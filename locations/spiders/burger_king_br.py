@@ -50,7 +50,7 @@ class BurgerKingBRSpider(scrapy.Spider):
                 day = key[:-5]
                 if "24h" in value:
                     oh.add_range(day, "00:00", "23:59")
-                elif "N/A" not in value and "Não abre" not in value:
+                elif "N/A" not in value and "não abre" not in value.lower():
                     open, close = self.split_hours(value)
                     oh.add_range(day, open, close)
                 else:
@@ -62,7 +62,7 @@ class BurgerKingBRSpider(scrapy.Spider):
             value = poi["specialHours"]
             if "24h" in value:
                 oh.add_days_range(DAYS, "00:00", "23:59")
-            if "N/A" not in value and "Não abre" not in value:
+            if "N/A" not in value and "não abre" not in value.lower():
                 open, close = self.split_hours(value)
                 oh.add_days_range(DAYS, open, close)
 
