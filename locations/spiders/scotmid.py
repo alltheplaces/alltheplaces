@@ -33,6 +33,7 @@ class ScotmidSpider(Spider):
             elif type == "lakes-and-dales":
                 item["brand"] = "Lakes & Dales Co-operative"
                 item["brand_wikidata"] = "Q110620660"
+                apply_category(Categories.SHOP_CONVENIENCE, item)
             elif type == "funeral-branches":
                 apply_category(Categories.SHOP_FUNERAL_DIRECTORS, item)
 
