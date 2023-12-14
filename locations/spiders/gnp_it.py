@@ -26,7 +26,7 @@ class GnpITSpider(Spider):
             item["ref"] = location["id"]
             item["lat"] = location["coordinate"]["latitude"]
             item["lon"] = location["coordinate"]["longitude"]
-            item["extras"]["branch"] = location["name"]
+            item["branch"] = location["name"]
             item["street_address"] = location["address"]
             item["postcode"] = location["cap"]
             item["city"] = location["city"]

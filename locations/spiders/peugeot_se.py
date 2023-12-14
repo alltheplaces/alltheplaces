@@ -1,5 +1,6 @@
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
@@ -16,7 +17,7 @@ class PeugeotSESpider(scrapy.Spider):
             address_details = store.get("address")
             coordinates = store.get("geolocation")
             contact_details = store.get("generalContact")
-            yield Feature(
+            item = Feature(
                 {
                     "ref": store.get("rrdi"),
                     "name": store.get("dealerName"),
@@ -31,3 +32,16 @@ class PeugeotSESpider(scrapy.Spider):
                     "lon": float(coordinates.get("longitude")),
                 }
             )
+
+            service_names = []
+            for service in store.get("services", []):
+                service_names.append(service.get("name"))
+
+            if "New Vehicles" in service_names:
+                apply_category(Categories.SHOP_CAR, item)
+            elif "Aftersales" in service_names:
+                apply_category(Categories.SHOP_CAR_REPAIR, item)
+            elif "Parts" in service_names:
+                apply_category(Categories.SHOP_CAR_PARTS, item)
+
+            yield item

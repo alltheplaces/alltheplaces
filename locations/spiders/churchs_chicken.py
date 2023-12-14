@@ -2,6 +2,7 @@ import re
 
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
@@ -37,6 +38,8 @@ class ChurchsChickenSpider(scrapy.Spider):
             "phone": phone,
             "website": response.url,
         }
+
+        apply_category(Categories.FAST_FOOD, properties)
 
         yield Feature(**properties)
 

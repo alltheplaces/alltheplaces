@@ -3,6 +3,7 @@ import logging
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
 
@@ -29,5 +30,5 @@ class EcarsSpider(Spider):
 
             item = DictParser.parse(location)
             item["addr_full"] = location["dn"]
-
+            apply_category(Categories.CHARGING_STATION, item)
             yield item

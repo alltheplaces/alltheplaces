@@ -37,7 +37,7 @@ class SleepOutfittersUSSpider(Spider):
             item = DictParser.parse(location)
             item["street_address"] = clean_address([item.pop("addr_full", None), location["address2"]])
             item["image"] = location.get("storefront", {}).get("meta", {}).get("download_url")
-            item["extras"]["branch"] = item.pop("name", "").replace("Sleep Outfitters", "").strip(", !")
+            item["branch"] = item.pop("name", "").replace("Sleep Outfitters", "").strip(", !")
 
             yield item
 

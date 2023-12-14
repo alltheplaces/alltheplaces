@@ -37,7 +37,7 @@ class MuellerSpider(scrapy.Spider):
             "brand_wikidata": "Q1958759",
             "lat": store["latitude"],
             "lon": store["longitude"],
-            "extras": {"branch": store["storeName"]},
+            "branch": store["storeName"],
             "name": "Müller",
             "street_address": store["street"],
             "city": store["city"],

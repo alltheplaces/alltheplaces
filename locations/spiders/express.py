@@ -2,6 +2,7 @@ import re
 
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
 
@@ -61,6 +62,8 @@ class ExpressSpider(scrapy.Spider):
             opening_hours = self.parse_hours(hours)
             if opening_hours:
                 properties["opening_hours"] = opening_hours
+
+        apply_category(Categories.SHOP_CLOTHES, properties)
         yield Feature(**properties)
 
     def parse_city_stores(self, response):

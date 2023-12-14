@@ -11,6 +11,7 @@ class BrookdaleUSSpider(Spider):
     start_urls = [
         "https://www.brookdale.com/bin/brookdale/search/global?fq=(contentCategory%3Alocations)&bq=(contentType%3Acommunity^0.025)&pt=43.0389025%2C-87.9064736&d=100000&rows=10000"
     ]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def start_requests(self):
         for url in self.start_urls:
