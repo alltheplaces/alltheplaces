@@ -9,5 +9,5 @@ class RibCribUSSpider(StoreRocketSpider):
 
     def parse_item(self, item, location):
         item["website"] = "https://ribcrib.com/locations/?location=" + location.get("slug")
-        apply_category(Categories.FAST_FOOD, item)
+        apply_category(Categories.RESTAURANT, item)
         yield item
