@@ -50,5 +50,5 @@ class NSWAmbulanceAUSpider(Spider):
             ]:
                 properties["state"] = "ACT"
                 properties["operator"] = "Australian Capital Territory Ambulance Service"
-                properties["operator:wikidata"] = "Q4823922"
+                properties["operator_wikidata"] = "Q4823922"
             yield Feature(**properties)

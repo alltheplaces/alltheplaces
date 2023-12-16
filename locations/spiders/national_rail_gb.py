@@ -59,7 +59,7 @@ class NationalRailGBSpider(Spider):
             item["lon"] = location["longitude"]
             item["postcode"] = location["postcode"]
             item["website"] = "https://www.nationalrail.co.uk/stations/{}/".format(location["crsCode"].lower())
-            item["operator"], item["operator:wikidata"] = self.operators.get(
+            item["operator"], item["operator_wikidata"] = self.operators.get(
                 location["operator"], (location["operator"], None)
             )
 

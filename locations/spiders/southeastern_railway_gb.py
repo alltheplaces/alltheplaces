@@ -9,7 +9,7 @@ from locations.structured_data_spider import StructuredDataSpider
 
 class SoutheasternRailwayGBSpider(SitemapSpider, StructuredDataSpider):
     name = "southeastern_railway_gb"
-    item_attributes = {"operator": "Southeastern", "operator:wikidata": "Q1696490"}
+    item_attributes = {"operator": "Southeastern", "operator_wikidata": "Q1696490"}
     sitemap_urls = ["https://www.southeasternrailway.co.uk/robots.txt"]
     sitemap_rules = [("/station-information/stations/", "parse")]
     search_for_facebook = False

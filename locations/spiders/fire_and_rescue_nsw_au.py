@@ -7,7 +7,7 @@ from locations.items import Feature
 
 class FireAndRescueNSWAUSpider(SitemapSpider):
     name = "fire_and_rescue_nsw_au"
-    item_attributes = {"operator": "Fire and Rescue New South Wales", "operator:wikidata": "Q5451532"}
+    item_attributes = {"operator": "Fire and Rescue New South Wales", "operator_wikidata": "Q5451532"}
     allowed_domains = ["www.fire.nsw.gov.au"]
     sitemap_urls = ["https://www.fire.nsw.gov.au/feeds/sitemap.xml"]
     sitemap_rules = [(r"^https:\/\/www\.fire\.nsw\.gov\.au\/page\.php\?id=9210&station=\d+", "parse")]
