@@ -1,3 +1,5 @@
+from urllib.parse import urlparse
+
 import requests
 
 
@@ -35,7 +37,23 @@ class NSI(metaclass=Singleton):
             self.nsi_json = self._request_file("nsi.min.json")["nsi"]
             self.loaded = True
 
-    def lookup_wikidata(self, wikidata_code):
+    def get_wikidata_code_from_url(self, url: str):
+        """
+        Attempt to return a single Wikidata code corresponding to
+        the brand or operator of the supplied URL.
+        :param_url: URL to find the corresponding Wikidata code for
+        :return: Wikidata code, or None if no match found
+        """
+        self._ensure_loaded()
+        supplied_url_domain = urlparse(url).netloc
+        for wikidata_code, org_parameters in self.wikidata_json.items():
+            for official_website in org_parameters.get("officialWebsites", []):
+                official_website_domain = urlparse(official_website).netloc
+                if official_website_domain == supplied_url_domain:
+                    return wikidata_code
+        return None
+
+    def lookup_wikidata(self, wikidata_code: str):
         """
         Lookup wikidata code in the NSI.
         :param wikidata_code: wikidata code to lookup in the NSI

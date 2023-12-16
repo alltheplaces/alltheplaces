@@ -1,8 +1,9 @@
+from urllib.parse import urlparse
 import random
 import re
 
 from scrapy import Spider
-from scrapy.http import JsonRequest
+from scrapy.http import JsonRequest, Response
 from scrapy.signals import spider_idle
 
 from locations.dict_parser import DictParser
@@ -125,3 +126,18 @@ class GeoMeSpider(Spider):
 
     def parse_item(self, item: Feature, location: dict, **kwargs):
         yield item
+
+    @staticmethod
+    def storefinder_exists(response: Response) -> bool:
+        if len(response.xpath('//iframe[contains(@src, ".geoapp.me")]')) > 0:
+            return True
+        return False
+
+    @staticmethod
+    def extract_spider_attributes(response: Response) -> dict:
+        geoappme_url = response.xpath('//iframe[contains(@src, ".geoapp.me")]/@src').get()
+        if geoappme_url:
+            key = urlparse(url).netloc.split(".", 1)[0]
+            return {"key": key}
+        else:
+            return {}
