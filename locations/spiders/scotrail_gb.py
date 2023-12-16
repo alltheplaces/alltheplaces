@@ -9,7 +9,7 @@ from locations.items import Feature
 
 class ScotrailGBSpider(CrawlSpider):
     name = "scotrail_gb"
-    item_attributes = {"operator": "ScotRail", "operator:wikidata": "Q18356161"}
+    item_attributes = {"operator": "ScotRail", "operator_wikidata": "Q18356161"}
     start_urls = ["https://www.scotrail.co.uk/plan-your-journey/stations-and-facilities"]
     rules = [Rule(LinkExtractor(allow=r"/plan-your-journey/stations-and-facilities/\w{3}$"), callback="parse")]
     requires_proxy = True
