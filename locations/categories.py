@@ -72,6 +72,7 @@ class Categories(Enum):
     SHOP_HAIRDRESSER_SUPPLY = {"shop": "hairdresser_supply"}
     SHOP_HARDWARE = {"shop": "hardware"}
     SHOP_HEARING_AIDS = {"shop": "hearing_aids"}
+    SHOP_HOUSEHOLD_LINEN = {"shop": "household_linen"}
     SHOP_JEWELRY = {"shop": "jewelry"}
     SHOP_LAUNDRY = {"shop": "laundry"}
     SHOP_MOBILE_PHONE = {"shop": "mobile_phone"}
@@ -100,6 +101,7 @@ class Categories(Enum):
     SHOP_TOYS = {"shop": "toys"}
     SHOP_TRADE = {"shop": "trade"}
     SHOP_TRAVEL_AGENCY = {"shop": "travel_agency"}
+    SHOP_TYRES = {"shop": "tyres"}
     SHOP_VARIETY_STORE = {"shop": "variety_store"}
     SHOP_WATCHES = {"shop": "watches"}
     SHOP_WHOLESALE = {"shop": "wholesale"}
@@ -136,6 +138,7 @@ class Categories(Enum):
     KINDERGARTEN = {"amenity": "kindergarten"}
     LIBRARY = {"amenity": "library"}
     MONEY_TRANSFER = {"amenity": "money_transfer"}
+    MOTEL = {"tourism": "motel"}
     MUSEUM = {"tourism": "museum"}
     NIGHTCLUB = {"amenity": "nightclub"}
     PHARMACY = {"amenity": "pharmacy", "healthcare": "pharmacy"}
