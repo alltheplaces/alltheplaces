@@ -57,7 +57,14 @@ class SfCommand(BaseRunSpiderCommand):
         process = CrawlerProcess(settings)
         crawler = process.create_crawler(StorefinderDetectorSpider)
         crawler.signals.connect(self.print_spider_code, signal=signals.item_scraped)
-        process.crawl(crawler, url=args[0], brand_wikidata = opts.brand_wikidata, operator_wikidata = opts.operator_wikidata, spider_key = opts.spider_key, spider_class_name = opts.spider_class_name)
+        process.crawl(
+            crawler,
+            url=args[0],
+            brand_wikidata=opts.brand_wikidata,
+            operator_wikidata=opts.operator_wikidata,
+            spider_key=opts.spider_key,
+            spider_class_name=opts.spider_class_name,
+        )
         process.start()
 
     def print_spider_code(self, item):

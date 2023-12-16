@@ -1,6 +1,6 @@
-from urllib.parse import urlparse
 import random
 import re
+from urllib.parse import urlparse
 
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response

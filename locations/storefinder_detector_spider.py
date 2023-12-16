@@ -3,7 +3,6 @@ import re
 import sys
 
 import pycountry
-
 from scrapy import Spider
 
 from locations.automatic_spider_generator import AutomaticSpiderGenerator
@@ -27,7 +26,16 @@ class StorefinderDetectorSpider(Spider):
         "spider_class_name": "NewBrandZZSpider",
     }
 
-    def __init__(self, url: str = None, brand_wikidata: str = None, operator_wikidata: str = None, spider_key: str = None, spider_class_name: str = None, *args, **kwargs):
+    def __init__(
+        self,
+        url: str = None,
+        brand_wikidata: str = None,
+        operator_wikidata: str = None,
+        spider_key: str = None,
+        spider_class_name: str = None,
+        *args,
+        **kwargs,
+    ):
         self.start_urls = [url]
         self.brand_wikidata = brand_wikidata
         self.operator_wikidata = operator_wikidata
@@ -62,12 +70,12 @@ class StorefinderDetectorSpider(Spider):
           1. start_urls[0]
           2. parameters["brand_wikidata"]
           3. parameters["operator_wikidata"]
-        
+
         If any of the above are specified for this spider, and this
         method is called, this method will attempt to populate all
         other parameters automatically from Name Suggestion Index
         data.
-        
+
         See automatically_extract_brand_or_operator_from_start_url(self)
         for details on how parameters are extracted from just a single
         supplied start_urls[0].

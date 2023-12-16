@@ -79,6 +79,7 @@ def add_social_media(item: Feature, service: str, account: str):
     else:
         item["extras"][f"contact:{service}"] = account
 
+
 class GeneratedSpider(scrapy.Item):
     search_url = scrapy.Field()
     spider = scrapy.Field()
