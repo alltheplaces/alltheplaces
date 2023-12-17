@@ -59,7 +59,9 @@ class KiboSpider(Spider, AutomaticSpiderGenerator):
 
     @staticmethod
     def extract_spider_attributes(response: Response) -> dict:
-        start_url = "https://" + urlparse(response.url).netloc + "/api/commerce/storefront/locationUsageTypes/SP/locations"
+        start_url = (
+            "https://" + urlparse(response.url).netloc + "/api/commerce/storefront/locationUsageTypes/SP/locations"
+        )
         return {
             "start_urls": [start_url],
         }

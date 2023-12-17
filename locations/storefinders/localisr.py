@@ -98,12 +98,16 @@ class LocalisrSpider(Spider, AutomaticSpiderGenerator):
     @staticmethod
     def extract_spider_attributes(response: Response) -> dict:
         api_key = ""
-        localisr_widget_url = response.xpath('//script[contains(@src, "app.localisr.io/js/storelocator/widget.js")]/@src').get()
+        localisr_widget_url = response.xpath(
+            '//script[contains(@src, "app.localisr.io/js/storelocator/widget.js")]/@src'
+        ).get()
         if localisr_widget_url:
             if extracted_key := re.search(r"key=(\w+)&", localisr_widget_url):
                 api_key = extracted_key.group(1)
         if not api_key:
-            localisr_iframe_url = response.xpath('//iframe[contains(@src, "app.localisr.io/public/store-locator")]/@src').get()
+            localisr_iframe_url = response.xpath(
+                '//iframe[contains(@src, "app.localisr.io/public/store-locator")]/@src'
+            ).get()
             if localisr_iframe_url:
                 if extracted_key := re.search(r"requestToken=(\w+)", localisr_iframe_url):
                     api_key = extracted_key.group(1)

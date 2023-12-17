@@ -52,7 +52,9 @@ class LimesharpStoreLocatorSpider(Spider, AutomaticSpiderGenerator):
 
     @staticmethod
     def storefinder_exists(response: Response) -> bool:
-        if response.xpath('//body[contains(@class, "stockists-index-index")]') and response.xpath('//script[@type="text/x-magento-init"]'):
+        if response.xpath('//body[contains(@class, "stockists-index-index")]') and response.xpath(
+            '//script[@type="text/x-magento-init"]'
+        ):
             return True
         return False
 
@@ -60,5 +62,5 @@ class LimesharpStoreLocatorSpider(Spider, AutomaticSpiderGenerator):
     def extract_spider_attributes(response: Response) -> dict:
         allowed_domains = urlparse(response.url).netloc
         return {
-                "allowed_domains": [allowed_domains],
+            "allowed_domains": [allowed_domains],
         }
