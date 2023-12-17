@@ -22,7 +22,7 @@ class StorefinderDetectorSpider(Spider):
         "brand_wikidata": None,
         "operator": None,
         "operator_wikidata": None,
-        "spider_key": None,
+        "spider_key": "new_brand_zz",
         "spider_class_name": "NewBrandZZSpider",
     }
 
