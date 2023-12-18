@@ -44,5 +44,5 @@ class PetParadiseSpider(scrapy.Spider):
                 "website": store_data["interestpointMoreInfoLink"],
             }
 
-            apply_category({"shop": "pet_grooming"}, properties)
+            apply_category(Categories.ANIMAL_BOARDING, properties)
             yield Feature(**properties)
