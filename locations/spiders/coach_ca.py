@@ -19,7 +19,7 @@ class CoachCASpider(CrawlSpider, StructuredDataSpider):
     wanted_types = ["Store", "OutletStore"]
 
     def post_process_item(self, item, response, ld_data, **kwargs):
-        item["extras"]["website:fr"] = response.xpath('//a[text()="Français"]/@href').get()
+        item["extras"]["website:fr"] = response.urljoin(response.xpath('//a[text()="Français"]/@href').get())
         item["extras"]["website:en"] = response.url
 
         if item["name"].startswith("COACH Outlet"):
