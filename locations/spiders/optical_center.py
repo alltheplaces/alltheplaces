@@ -27,6 +27,7 @@ class OpticalCenterSpider(CrawlSpider, StructuredDataSpider):
         item["ref"] = response.url.split("/")[-1]
         item["street_address"] = html.unescape(item["street_address"])
         item["city"] = html.unescape(item["city"])
+        item["name"] = html.unescape(item["name"])
 
         # x-default is a lie, it's always FR, the whole thing is a lie, it's about domains not languages
         for link in response.xpath('//link[@rel="alternate"][@hreflang][@href]'):
