@@ -604,6 +604,8 @@ class OpeningHours:
     def from_linked_data(self, linked_data, time_format: str = "%H:%M"):
         if linked_data.get("openingHoursSpecification"):
             for rule in linked_data["openingHoursSpecification"]:
+                if not isinstance(rule, dict):
+                    continue
                 if not rule.get("dayOfWeek") or not rule.get("opens") or not rule.get("closes"):
                     continue
 
