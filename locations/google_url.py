@@ -1,15 +1,20 @@
 import re
 from urllib.parse import parse_qs, urlsplit
 
+from scrapy import Selector
+from scrapy.http import Response
 
-def _get_possible_links(response):
-    yield from response.xpath('//img[contains(@src, "maps/api/staticmap")]/@src').getall()
-    yield from response.xpath('//iframe[contains(@src, "maps/embed")]/@src').getall()
-    yield from response.xpath("//a[contains(@href, 'google')][contains(@href, 'maps')]/@href").getall()
-    yield from response.xpath("//a[contains(@href, 'maps.apple.com')]/@href").getall()
+from locations.items import Feature
 
 
-def extract_google_position(item, response):
+def _get_possible_links(response: Response | Selector):
+    yield from response.xpath('.//img[contains(@src, "maps/api/staticmap")]/@src').getall()
+    yield from response.xpath('.//iframe[contains(@src, "maps/embed")]/@src').getall()
+    yield from response.xpath(".//a[contains(@href, 'google')][contains(@href, 'maps')]/@href").getall()
+    yield from response.xpath(".//a[contains(@href, 'maps.apple.com')]/@href").getall()
+
+
+def extract_google_position(item: Feature, response: Response | Selector):
     for link in _get_possible_links(response):
         try:
             coords = url_to_coords(link)
