@@ -7,7 +7,7 @@ from locations.hours import OpeningHours
 from locations.user_agents import BROWSER_DEFAULT
 
 
-# On the data of writing (2023-12-20) the website blocks the spider with a captcha
+# On the date of writing (2023-12-20) the website blocks the spider with a captcha
 # after ~150 requests with current settings, so we are not getting all POIs.
 class WalmartCaSpider(scrapy.Spider):
     name = "walmart_ca"
