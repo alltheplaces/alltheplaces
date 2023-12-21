@@ -160,12 +160,19 @@ DAYS_HU = {
 
 DAYS_SE = {
     "Måndag": "Mo",
+    "Mån": "Mo",
     "Tisdag": "Tu",
+    "Tis": "Tu",
     "Onsdag": "We",
+    "Ons": "We",
     "Torsdag": "Th",
+    "Tors": "Th",
     "Fredag": "Fr",
+    "Fre": "Fr",
     "Lördag": "Sa",
+    "Lör": "Sa",
     "Söndag": "Su",
+    "Sön": "Su",
 }
 DAYS_SI = {
     "Po": "Mo",
