@@ -20,7 +20,7 @@ class MetaLocatorSpider(Spider, AutomaticSpiderGenerator):
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def start_requests(self):
-        yield JsonRequest(url=f"https://code.metalocator.com/webapi/api/search/?Itemid={self.brand_id}")
+        yield JsonRequest(url=f"https://code.metalocator.com/webapi/api/search/?Itemid={self.brand_id}&limit=100000")
 
     def parse(self, response, **kwargs):
         for location in response.json():
