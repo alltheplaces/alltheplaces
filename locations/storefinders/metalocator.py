@@ -1,5 +1,4 @@
 import re
-
 from urllib.parse import quote_plus
 
 from scrapy import Spider
@@ -21,9 +20,7 @@ class MetaLocatorSpider(Spider, AutomaticSpiderGenerator):
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def start_requests(self):
-        yield JsonRequest(
-            url=f"https://code.metalocator.com/webapi/api/search/?Itemid={self.brand_id}"
-        )
+        yield JsonRequest(url=f"https://code.metalocator.com/webapi/api/search/?Itemid={self.brand_id}")
 
     def parse(self, response, **kwargs):
         for location in response.json():
@@ -40,7 +37,11 @@ class MetaLocatorSpider(Spider, AutomaticSpiderGenerator):
 
     @staticmethod
     def storefinder_exists(response: Response) -> bool | Request:
-        return Request(url=response.request.url, meta={"playwright": True, "next_detection_method": MetaLocatorSpider.storefinder_exists_playwright}, dont_filter=True)
+        return Request(
+            url=response.request.url,
+            meta={"playwright": True, "next_detection_method": MetaLocatorSpider.storefinder_exists_playwright},
+            dont_filter=True,
+        )
 
     @staticmethod
     def storefinder_exists_playwright(response: Response) -> bool | Request:
@@ -50,11 +51,17 @@ class MetaLocatorSpider(Spider, AutomaticSpiderGenerator):
 
     @staticmethod
     def extract_spider_attributes(response: Response) -> dict | Request:
-        return Request(url=response.request.url, meta={"playwright": True, "next_extraction_method": MetaLocatorSpider.extract_spider_attributes_playwright}, dont_filter=True)
+        return Request(
+            url=response.request.url,
+            meta={"playwright": True, "next_extraction_method": MetaLocatorSpider.extract_spider_attributes_playwright},
+            dont_filter=True,
+        )
 
     @staticmethod
     def extract_spider_attributes_playwright(response: Response) -> dict | Request:
-        for iframe_src in response.xpath('//iframe[contains(@src, "code.metalocator.com") and (contains(@src, "Itemid") or contains(@src, "itemid"))]/@src').getall():
+        for iframe_src in response.xpath(
+            '//iframe[contains(@src, "code.metalocator.com") and (contains(@src, "Itemid") or contains(@src, "itemid"))]/@src'
+        ).getall():
             if itemid := re.search(r"(?<=Itemid=)(\d+)", iframe_src, flags=re.IGNORECASE):
                 return {"brand_id": itemid.group(1)}
         return {}

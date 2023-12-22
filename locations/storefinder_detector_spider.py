@@ -123,8 +123,17 @@ class StorefinderDetectorSpider(Spider):
                 self.parameters["operator"] = operator
 
     def parse(self, response: Response):
-        all_storefinders = [storefinder for storefinder in [cls for _, cls in inspect.getmembers(sys.modules["locations.storefinders"], inspect.isclass) if [base for base in cls.__bases__ if base.__name__ == AutomaticSpiderGenerator.__name__]]]
-        detection_results = [(storefinder, storefinder.storefinder_exists(response)) for storefinder in all_storefinders]
+        all_storefinders = [
+            storefinder
+            for storefinder in [
+                cls
+                for _, cls in inspect.getmembers(sys.modules["locations.storefinders"], inspect.isclass)
+                if [base for base in cls.__bases__ if base.__name__ == AutomaticSpiderGenerator.__name__]
+            ]
+        ]
+        detection_results = [
+            (storefinder, storefinder.storefinder_exists(response)) for storefinder in all_storefinders
+        ]
         detected_storefinders = [storefinder[0] for storefinder in detection_results if storefinder[1] is True]
         for detected_storefinder in detected_storefinders:
             response.meta["storefinder"] = detected_storefinder
