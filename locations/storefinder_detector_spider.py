@@ -4,6 +4,7 @@ import sys
 
 import pycountry
 from scrapy import Spider
+from scrapy.http import Request, Response
 
 from locations.automatic_spider_generator import AutomaticSpiderGenerator
 from locations.items import GeneratedSpider
@@ -15,7 +16,14 @@ from locations.user_agents import BROWSER_DEFAULT
 class StorefinderDetectorSpider(Spider):
     name = "storefinder_detector"
     start_urls = []
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    custom_settings = {
+        "ROBOTSTXT_OBEY": False,
+        "DOWNLOAD_HANDLERS": {
+            "http": "scrapy_playwright.handler.ScrapyPlaywrightDownloadHandler",
+            "https": "scrapy_playwright.handler.ScrapyPlaywrightDownloadHandler",
+        },
+        "TWISTED_REACTOR": "twisted.internet.asyncioreactor.AsyncioSelectorReactor",
+    }
     user_agent = BROWSER_DEFAULT
     parameters = {
         "brand": None,
@@ -41,9 +49,9 @@ class StorefinderDetectorSpider(Spider):
         self.operator_wikidata = operator_wikidata
         self.spider_key = spider_key
         self.spider_class_name = spider_class_name
-        self.automatically_extract_parameters()
+        self.automatically_set_parameters()
 
-    def automatically_extract_brand_or_operator_from_start_url(self):
+    def automatically_set_brand_or_operator_from_start_url(self):
         """
         Automatically extract parameters["brand_wikidata"] or
         parameters["operator_wikidata"] from a supplied
@@ -63,7 +71,7 @@ class StorefinderDetectorSpider(Spider):
                     elif "operator:wikidata" in nsi_matches[0]["tags"].keys():
                         self.parameters["operator_wikidata"] = wikidata_code
 
-    def automatically_extract_parameters(self):
+    def automatically_set_parameters(self):
         """
         Automatically extract parameters from at least one or more
         of the following:
@@ -76,12 +84,12 @@ class StorefinderDetectorSpider(Spider):
         other parameters automatically from Name Suggestion Index
         data.
 
-        See automatically_extract_brand_or_operator_from_start_url(self)
+        See automatically_set_brand_or_operator_from_start_url(self)
         for details on how parameters are extracted from just a single
         supplied start_urls[0].
         """
         if not self.parameters["brand_wikidata"] and not self.parameters["operator_wikidata"]:
-            self.automatically_extract_brand_or_operator_from_start_url()
+            self.automatically_set_brand_or_operator_from_start_url()
 
         nsi = NSI()
         if self.parameters["brand_wikidata"] or self.parameters["operator_wikidata"]:
@@ -114,30 +122,58 @@ class StorefinderDetectorSpider(Spider):
                 operator = nsi_matches[0]["tags"].get("operator", nsi_matches[0]["tags"].get("name"))
                 self.parameters["operator"] = operator
 
-    def parse(self, response):
-        for storefinder in [
-            cls
-            for _, cls in inspect.getmembers(sys.modules["locations.storefinders"], inspect.isclass)
-            if [base for base in cls.__bases__ if base.__name__ == AutomaticSpiderGenerator.__name__]
-        ]:
-            if not storefinder.storefinder_exists(response):
-                continue
-            new_spider = type(
-                self.parameters["spider_class_name"],
-                (storefinder,),
-                {"__module__": "locations.spiders"},
-                response=response,
-                brand_wikidata=self.parameters["brand_wikidata"],
-                brand=self.parameters["brand"],
-                operator_wikidata=self.parameters["operator_wikidata"],
-                operator=self.parameters["operator"],
-                spider_key=self.parameters["spider_key"],
-                extracted_attributes=storefinder.extract_spider_attributes(response),
-            )
-            if not callable(getattr(storefinder, "generate_spider_code")):
-                break
-            generated_spider = GeneratedSpider()
-            generated_spider["search_url"] = response.url
-            generated_spider["spider"] = new_spider
-            yield generated_spider
-            break
+    def parse(self, response: Response):
+        all_storefinders = [storefinder for storefinder in [cls for _, cls in inspect.getmembers(sys.modules["locations.storefinders"], inspect.isclass) if [base for base in cls.__bases__ if base.__name__ == AutomaticSpiderGenerator.__name__]]]
+        detection_results = [(storefinder, storefinder.storefinder_exists(response)) for storefinder in all_storefinders]
+        detected_storefinders = [storefinder[0] for storefinder in detection_results if storefinder[1] is True]
+        for detected_storefinder in detected_storefinders:
+            response.meta["storefinder"] = detected_storefinder
+            response.meta["first_response"] = response
+            response.meta["first_response"].meta["storefinder"] = detected_storefinder
+            yield from self.parse_detection(response)
+        additional_requests = [result for result in detection_results if isinstance(result[1], Request)]
+        for additional_request in additional_requests:
+            additional_request[1].meta["storefinder"] = additional_request[0]
+            additional_request[1].meta["first_response"] = response
+            additional_request[1].meta["first_response"].meta["storefinder"] = additional_request[0]
+            additional_request[1].callback = self.parse_detection
+            yield additional_request[1]
+
+    def parse_detection(self, response: Response):
+        storefinder = response.meta["storefinder"]
+        next_detection_method = response.meta.get("next_detection_method", storefinder.storefinder_exists)
+        storefinder_exists = next_detection_method(response)
+        if isinstance(storefinder_exists, Request):
+            storefinder_exists.meta["storefinder"] = storefinder
+            storefinder_exists.meta["first_response"] = response.meta.get("first_response")
+            storefinder_exists.callback = self.parse_detection
+            yield storefinder_exists
+            return
+        if storefinder_exists is True:
+            yield from self.parse_extraction(response.meta["first_response"])
+
+    def parse_extraction(self, response: Response):
+        storefinder = response.meta["storefinder"]
+        next_extraction_method = response.meta.get("next_extraction_method", storefinder.extract_spider_attributes)
+        spider_attributes = next_extraction_method(response)
+        if isinstance(spider_attributes, Request):
+            spider_attributes.meta["storefinder"] = storefinder
+            spider_attributes.callback = self.parse_extraction
+            yield spider_attributes
+            return
+        new_spider = type(
+            self.parameters["spider_class_name"],
+            (storefinder,),
+            {"__module__": "locations.spiders"},
+            response=response,
+            brand_wikidata=self.parameters["brand_wikidata"],
+            brand=self.parameters["brand"],
+            operator_wikidata=self.parameters["operator_wikidata"],
+            operator=self.parameters["operator"],
+            spider_key=self.parameters["spider_key"],
+            extracted_attributes=spider_attributes,
+        )
+        generated_spider = GeneratedSpider()
+        generated_spider["search_url"] = response.url
+        generated_spider["spider"] = new_spider
+        yield generated_spider

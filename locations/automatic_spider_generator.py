@@ -1,5 +1,5 @@
 from scrapy import Spider
-from scrapy.http import Response
+from scrapy.http import Request, Response
 
 
 class AutomaticSpiderGenerator:
@@ -70,31 +70,65 @@ class AutomaticSpiderGenerator:
         return spider_attributes_code
 
     @staticmethod
-    def storefinder_exists(response: Response) -> bool:
+    def storefinder_exists(response: Response) -> bool | Request:
         """
         Method which store finder classes should overwrite to return
         True if the response object is detected to have a particular
-        store finder present.
+        store finder present. A store finder class may alternatively
+        return a Scrapy Request object if additional requests need
+        to be made to ascertain whether a store finder is in use.
         :param response: Scrapy response object for a given URL
                          which is being checked for the presence of
                          a store finder.
         :return: True if the store finder is detected, False
-                 otherwise.
+                 if a store finder is not detected, or a Scrapy
+                 Request object if additional requests need to be
+                 made to ascertain whether a store finder is in use.
+                 Any Scrapy Request object returned must set
+                 meta["next_detection_method"] callback method that
+                 matches the return types for this
+                 storefinder_exists method. A chain of requests
+                 may occur, evenutally resulting in a boolean
+                 return value.
         """
         return False
 
     @staticmethod
-    def extract_spider_attributes(response: Response) -> dict:
+    def extract_spider_attributes(response: Response) -> dict | Request:
         """
         Method which store finder classes should overwrite to return
         a dictionary of attributes that can be extracted from the
-        supplied response object.
+        supplied response object. A store finder class may
+        alternatively return a Scrapy Request object if additional
+        requests need to be made to extract attributes. This may
+        occur for example if the response contains an iframe, or some
+        or all attributes need to be extracted from externally linked
+        pages or JSON objects.
         :param response: Scrapy response object for a given URL
                          which is being checked for the presence of
                          a store finder.
-        :return: dictionary of attributes which have been able to be
-                 extracted from the provided response object. An
-                 example is {"api_key": "12345"}.
+        :return: A dictionary of attributes extracted from the
+                 response, or a Scrapy Request object if additional
+                 requests need to be made to extract a full set of
+                 attributes.
+                 Any Scrapy Request object returned must
+                 set meta["next_extraction_method"] to a method
+                 which returns the same types as this
+                 extract_spider_attributes method.
+                 The callback method for the Scrapy Request object
+                 will be ignored.
+                 If some attributes are extracted from the response
+                 object, and further attributes are to be extracted
+                 from a returned Scrapy Request object, the Scrapy
+                 Request object must populate
+                 meta["extracted_attributes"] with the partial set
+                 of extracted attributes. The method specified by
+                 meta["next_extraction_method"] can then append to
+                 the set of extracted attributes and return either
+                 the full set of attributes, or another Scrapy
+                 Request object (causing this chain of requests to
+                 continue until a dictionary of attributes is
+                 returned in full).
         """
         return {}
 
