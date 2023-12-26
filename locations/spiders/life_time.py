@@ -6,12 +6,13 @@ from scrapy.http import Request
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
+
 class LifeTimeSpider(Spider):
     name = "life_time"
     item_attributes = {"brand": "Life Time", "brand_wikidata": "Q6545004"}
     allowed_domains = ["www.lifetime.life", "my.lifetime.life"]
     start_urls = ["https://www.lifetime.life/bin/lt/nearestClubServlet.locator.json?limit=10000&distance=15000"]
-    custom_settings = {"ROBOTSTXT_OBEY": False} # robots.txt is a HTML error page
+    custom_settings = {"ROBOTSTXT_OBEY": False}  # robots.txt is a HTML error page
 
     def parse(self, response):
         for location in response.json():
@@ -30,7 +31,13 @@ class LifeTimeSpider(Spider):
 
     def add_hours(self, response):
         item = response.meta["item"]
-        hours_text = re.sub(r"\s+", " ", " ".join(response.xpath('(//table[contains(@summary, "open hours summary")])[1]//td/text()').getall()).strip())
+        hours_text = re.sub(
+            r"\s+",
+            " ",
+            " ".join(
+                response.xpath('(//table[contains(@summary, "open hours summary")])[1]//td/text()').getall()
+            ).strip(),
+        )
         item["opening_hours"] = OpeningHours()
         item["opening_hours"].add_ranges_from_string(hours_text)
         yield item
