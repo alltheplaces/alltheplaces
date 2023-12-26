@@ -105,7 +105,7 @@ jobs:
                 exit 1
             fi
 
-            LOGFILE_URL="https://data.alltheplaces.xyz/ci/${GITHUB_RUN_ID}/${SPIDER_NAME}/log.txt"
+            LOGFILE_URL="https://alltheplaces-data.openaddresses.io/ci/${GITHUB_RUN_ID}/${SPIDER_NAME}/log.txt"
             echo "${spider} log: ${LOGFILE_URL}"
 
             if [ -f "$OUTFILE" ]; then
@@ -130,13 +130,13 @@ jobs:
                     exit 1
                 fi
 
-                OUTFILE_URL="https://data.alltheplaces.xyz/ci/${GITHUB_RUN_ID}/${SPIDER_NAME}/output.geojson"
+                OUTFILE_URL="https://alltheplaces-data.openaddresses.io/ci/${GITHUB_RUN_ID}/${SPIDER_NAME}/output.geojson"
 
                 if grep -q 'Stored geojson feed' $LOGFILE; then
-                    echo "${spider} has ${FEATURE_COUNT} features: https://data.alltheplaces.xyz/map.html?show=${OUTFILE_URL}"
+                    echo "${spider} has ${FEATURE_COUNT} features: https://alltheplaces-data.openaddresses.io/map.html?show=${OUTFILE_URL}"
                 fi
 
-                PR_COMMENT_BODY="${PR_COMMENT_BODY}|[\`$spider\`](https://github.com/${GITHUB_REPOSITORY}/blob/${GITHUB_SHA}/${spider})|[${FEATURE_COUNT} items](${OUTFILE_URL}) ([Map](https://data.alltheplaces.xyz/map.html?show=${OUTFILE_URL}))|Resulted in a \`${FAILURE_REASON}\` ([Log](${LOGFILE_URL}))|\\n"
+                PR_COMMENT_BODY="${PR_COMMENT_BODY}|[\`$spider\`](https://github.com/${GITHUB_REPOSITORY}/blob/${GITHUB_SHA}/${spider})|[${FEATURE_COUNT} items](${OUTFILE_URL}) ([Map](https://alltheplaces-data.openaddresses.io/map.html?show=${OUTFILE_URL}))|Resulted in a \`${FAILURE_REASON}\` ([Log](${LOGFILE_URL}))|\\n"
             else
                 echo "${spider} has no output"
                 FAILURE_REASON="no output"
