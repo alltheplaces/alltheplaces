@@ -19,7 +19,11 @@ class DunhamsSportsUSSpider(Spider):
             item = DictParser.parse(location)
             if location.get("ID"):
                 item["website"] = "https://www.dunhamssports.com/store-details?storeID={}".format(location.get("ID"))
-            hours_text = re.sub(r"\s+", " ", " ".join(filter(None, Selector(text=location.get("storeHours", "")).xpath('//td/text()').getall())))
+            hours_text = re.sub(
+                r"\s+",
+                " ",
+                " ".join(filter(None, Selector(text=location.get("storeHours", "")).xpath("//td/text()").getall())),
+            )
             item["opening_hours"] = OpeningHours()
             item["opening_hours"].add_ranges_from_string(hours_text)
             yield item
