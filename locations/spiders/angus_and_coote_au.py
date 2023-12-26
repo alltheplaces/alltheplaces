@@ -1,6 +1,6 @@
-from chompjs import parse_js_object
 import re
 
+from chompjs import parse_js_object
 from scrapy import Spider
 
 from locations.dict_parser import DictParser
@@ -22,7 +22,22 @@ class AngusAndCooteAUSpider(Spider):
             item["website"] = "https://www.anguscoote.com.au/stores/" + location.get("url")
             if location.get("rawdata"):
                 raw_data = parse_js_object(location.get("rawdata"))
-                item["street_address"] = re.sub(r"\s+", " ", ", ".join(filter(None, [raw_data.get("Address line 1"), raw_data.get("Address line 2"), raw_data.get("Address line 3"), raw_data.get("Address line 4"), raw_data.get("Address line 5")])).strip())
+                item["street_address"] = re.sub(
+                    r"\s+",
+                    " ",
+                    ", ".join(
+                        filter(
+                            None,
+                            [
+                                raw_data.get("Address line 1"),
+                                raw_data.get("Address line 2"),
+                                raw_data.get("Address line 3"),
+                                raw_data.get("Address line 4"),
+                                raw_data.get("Address line 5"),
+                            ],
+                        )
+                    ).strip(),
+                )
                 item["city"] = raw_data.get("Locality")
                 item["postcode"] = raw_data.get("Postcode")
                 item["opening_hours"] = OpeningHours()
