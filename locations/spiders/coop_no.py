@@ -24,8 +24,8 @@ class CoopNOSpider(Spider):
 
     def parse(self, response):
         for location in response.json().get("stores"):
-                url = "https://www.coop.no/api/content" + location["url"]
-                yield JsonRequest(url=url, callback=self.parse_store)
+            url = "https://www.coop.no/api/content" + location["url"]
+            yield JsonRequest(url=url, callback=self.parse_store)
 
     def parse_store(self, response):
         location = response.json()
