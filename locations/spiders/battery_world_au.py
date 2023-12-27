@@ -22,7 +22,7 @@ class BatteryWorldAUSpider(Spider):
             item["street_address"] = ", ".join(filter(None, [location.get("address1"), location.get("address2")]))
             item["website"] = "https://www.batteryworld.com.au/stores/" + location.get("urlcomponent")
             hours_html = Selector(text=location.get("openingHours"))
-            hours_string = " ".join(hours_html.xpath('.//text()').getall())
+            hours_string = " ".join(hours_html.xpath(".//text()").getall())
             item["opening_hours"] = OpeningHours()
             item["opening_hours"].add_ranges_from_string(hours_string)
             yield item
