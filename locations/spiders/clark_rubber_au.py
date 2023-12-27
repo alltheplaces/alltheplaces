@@ -20,7 +20,7 @@ class ClarkRubberAUSpider(Spider):
                 "phone": location["properties"].get("phone"),
             }
             hours_html = Selector(text=location["properties"].get("hours"))
-            hours_text = " ".join(hours_html.xpath('//text()').getall())
+            hours_text = " ".join(hours_html.xpath("//text()").getall())
             properties["opening_hours"] = OpeningHours()
             properties["opening_hours"].add_ranges_from_string(hours_text)
             yield Feature(**properties)
