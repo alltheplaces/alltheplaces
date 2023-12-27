@@ -6,6 +6,7 @@ from scrapy.http import Request
 
 from locations.hours import DAYS_NL, OpeningHours
 from locations.items import Feature
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.user_agents import BROWSER_DEFAULT
 
 
@@ -15,6 +16,8 @@ class AlbertHeijnSpider(Spider):
     allowed_domains = ["www.ah.nl", "www.ah.be"]
     start_urls = ["https://www.ah.nl/winkels", "https://www.ah.be/winkels"]
     user_agent = BROWSER_DEFAULT
+    is_playwright_spider = True
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
 
     def parse(self, response):
         request_url = urlparse(response.request.url)
@@ -43,7 +46,7 @@ class AlbertHeijnSpider(Spider):
 
                 item = Feature()
                 item["ref"] = store_id
-                item["name"] = "AH"
+                item["name"] = store.get("name", "").strip()
                 item["city"] = store.get("address", {}).get("city")
                 item["country"] = store.get("address", {}).get("countryCode")
                 item["housenumber"] = store.get("address", {}).get("houseNumber")
@@ -52,6 +55,7 @@ class AlbertHeijnSpider(Spider):
                 item["lat"] = store.get("geoLocation", {}).get("latitude")
                 item["lon"] = store.get("geoLocation", {}).get("longitude")
                 item["phone"] = store.get("phone")
+                item["website"] = "https://www.ah.nl/winkel/" + item["ref"]
                 self.parse_hours(item, store)
 
                 yield item
