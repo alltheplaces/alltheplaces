@@ -14,6 +14,8 @@ DAYS_FULL = [
     "Saturday",
     "Sunday",
 ]
+DAYS_WEEKDAY = ["Mo", "Tu", "We", "Th", "Fr"]
+DAYS_WEEKEND = ["Sa", "Su"]
 
 # The below DAYS dicts are provided to be used with sanitise_day inorder for us to do best attempts at matching the
 # given day into an English 2 char day to be used inside ATP and then to be exported to OSM formatted opening hours.
