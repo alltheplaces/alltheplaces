@@ -8,11 +8,14 @@ from locations.hours import DAYS_FULL, OpeningHours
 from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.user_agents import BROWSER_DEFAULT
 
+
 class WilliamsSonomaUSCASpider(Spider):
     name = "williams_sonoma_us_ca"
     item_attributes = {"brand": "Williams Sonoma", "brand_wikidata": "Q96415240"}
     allowed_domains = ["www.williams-sonoma.com"]
-    start_urls = ["https://www.williams-sonoma.com/api/phygital/v1/storesbylocation.json?brands=WS&lat=40.71304703&lng=-74.00723267&radius=100000&includeOutlets=true"]
+    start_urls = [
+        "https://www.williams-sonoma.com/api/phygital/v1/storesbylocation.json?brands=WS&lat=40.71304703&lng=-74.00723267&radius=100000&includeOutlets=true"
+    ]
     user_agent = BROWSER_DEFAULT
     is_playwright_spider = True
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
@@ -26,10 +29,12 @@ class WilliamsSonomaUSCASpider(Spider):
         # obtained as Playwright's Response object is not exposed. Instead, a
         # HTML wrapper is put around the raw JSON response, and thus we need
         # to extract from this HTML wrapper.
-        for location in loads(response.xpath('//pre/text()').get()):
+        for location in loads(response.xpath("//pre/text()").get()):
             item = DictParser.parse(location)
             item["street_address"] = location["address"].get("addrLine1")
-            item["website"] = "https://www.williams-sonoma.com/stores/{}-{}".format(location["address"].get("countryCode").lower(), location["storeIdentifier"])
+            item["website"] = "https://www.williams-sonoma.com/stores/{}-{}".format(
+                location["address"].get("countryCode").lower(), location["storeIdentifier"]
+            )
             item["opening_hours"] = OpeningHours()
             for day_name, day_hours in location.get("storeHoursMap", {}).items():
                 if day_name.title() not in DAYS_FULL:
