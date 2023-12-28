@@ -38,26 +38,44 @@ class LouMalnatisPizzeriaUSSpider(Spider):
 
     def parse(self, response):
         markers = {}
-        markers_js = Selector(text=response.json()["locatorNewJSHolder"]["jContentReturn"]).xpath('//script/text()').get()
+        markers_js = (
+            Selector(text=response.json()["locatorNewJSHolder"]["jContentReturn"]).xpath("//script/text()").get()
+        )
         for marker_js in markers_js.split("var newMarker = new Array();")[1:]:
             marker_html = Selector(text=marker_js.split('newMarker["html"] = "', 1)[1].split('";', 1)[0])
             marker_ref = marker_html.xpath('.//div[contains(@class, "sideBar_MapOrder")]/a/@href').get().split("/")[-1]
-            marker_lat = marker_js.split('newMarker["lat"] = ', 1)[1].split(';', 1)[0]
-            marker_lon = marker_js.split('newMarker["lng"] = ', 1)[1].split(';', 1)[0]
+            marker_lat = marker_js.split('newMarker["lat"] = ', 1)[1].split(";", 1)[0]
+            marker_lon = marker_js.split('newMarker["lng"] = ', 1)[1].split(";", 1)[0]
             markers[marker_ref] = (marker_lat, marker_lon)
 
         locations = Selector(text=response.json()["locatorMapList"]["jContentReturn"])
         for location in locations.xpath('//div[contains(@class, "sideBar_MapListAddress")]'):
             properties = {
                 "ref": location.xpath('.//div[contains(@class, "sideBar_MapOrder")]/a/@href').get().split("/")[-1],
-                "name": unescape(location.xpath('.//div[contains(@class, "sideBar_MapAddressElementClickable desktop-only")]/text()').get()).replace(" - Now Open!", ""),
-                "addr_full": ", ".join(filter(None, location.xpath('(.//div[@class="sideBar_MapAddressElement"]/text())[position() < 3]').getall())),
-                "phone": location.xpath('.//div[@class="sideBar_MapAddressElement"]/a[contains(@href, "tel:")]/@href').get().replace("tel:", ""),
+                "name": unescape(
+                    location.xpath(
+                        './/div[contains(@class, "sideBar_MapAddressElementClickable desktop-only")]/text()'
+                    ).get()
+                ).replace(" - Now Open!", ""),
+                "addr_full": ", ".join(
+                    filter(
+                        None,
+                        location.xpath('(.//div[@class="sideBar_MapAddressElement"]/text())[position() < 3]').getall(),
+                    )
+                ),
+                "phone": location.xpath('.//div[@class="sideBar_MapAddressElement"]/a[contains(@href, "tel:")]/@href')
+                .get()
+                .replace("tel:", ""),
                 "website": location.xpath('.//div[contains(@class, "sideBar_MapMoreDetails")]/a/@href').get(),
             }
             if properties["ref"] in markers.keys():
                 properties["lat"], properties["lon"] = markers[properties["ref"]]
-            hours_string = " ".join(filter(None, location.xpath('(.//div[@class="sideBar_MapAddressElement"]/text())[position() >= 4]').getall()))
+            hours_string = " ".join(
+                filter(
+                    None,
+                    location.xpath('(.//div[@class="sideBar_MapAddressElement"]/text())[position() >= 4]').getall(),
+                )
+            )
             properties["opening_hours"] = OpeningHours()
             properties["opening_hours"].add_ranges_from_string(hours_string)
             yield Feature(**properties)
