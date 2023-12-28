@@ -9,7 +9,9 @@ class TheBrassTapUSSpider(Spider):
     name = "the_brass_tap_us"
     item_attributes = {"brand": "The Brass Tap", "brand_wikidata": "Q64358002"}
     allowed_domains = ["www.brasstapbeerbar.com"]
-    start_urls = ["https://www.brasstapbeerbar.com/pinsNearestBrassTap.ashx?lat1=27.950&lon1=-82.45&range=100000&food=%25&lunch=%25&brunch=%25&music=%25"]
+    start_urls = [
+        "https://www.brasstapbeerbar.com/pinsNearestBrassTap.ashx?lat1=27.950&lon1=-82.45&range=100000&food=%25&lunch=%25&brunch=%25&music=%25"
+    ]
 
     def start_requests(self):
         for url in self.start_urls:
