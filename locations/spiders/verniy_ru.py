@@ -1,16 +1,15 @@
 import scrapy
 from chompjs import chompjs
-from locations.categories import Categories, apply_category
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
-from locations.hours import OpeningHours
-from locations.hours import DAYS_WEEKDAY, DAYS_WEEKEND
+from locations.hours import DAYS_WEEKDAY, DAYS_WEEKEND, OpeningHours
 
 
 class VernyiRUSpider(scrapy.Spider):
     name = "vernyi_ru"
     start_urls = ["https://www.verno-info.ru/shops"]
-    item_attributes = {'brand_wikidata': 'Q110037370'}
+    item_attributes = {"brand_wikidata": "Q110037370"}
 
     def parse(self, response):
         data = response.xpath('//script[@type="text/javascript" and contains(text(), "var shops =")]').get()
@@ -35,9 +34,8 @@ class VernyiRUSpider(scrapy.Spider):
                     if time.lower() == "круглосуточно":
                         oh.add_days_range(days, "00:00", "23:59")
                         continue
-                    open, close = time.replace(' ', '').replace('—', '-').replace('.',':').split("-")
+                    open, close = time.replace(" ", "").replace("—", "-").replace(".", ":").split("-")
                     oh.add_days_range(days, open, close)
-                item['opening_hours'] = oh.as_opening_hours()
+                item["opening_hours"] = oh.as_opening_hours()
             except Exception as e:
-                self.logger.warning(f"Couldn't parse opening hours: {time_weekdays} {time_weekends}, {e}")    
-
+                self.logger.warning(f"Couldn't parse opening hours: {time_weekdays} {time_weekends}, {e}")
