@@ -92,7 +92,7 @@ class WPStoreLocatorSpider(Spider, AutomaticSpiderGenerator):
         hours_raw = DictParser.get_first_key(location, DictParser.hours_keys)
         if not hours_raw:
             return
-        hours_text = " ".join(filter(None, Selector(text=hours_raw).xpath('//text()').getall()))
+        hours_text = " ".join(filter(None, Selector(text=hours_raw).xpath("//text()").getall()))
         oh = OpeningHours()
         oh.add_ranges_from_string(hours_text)
         return oh
