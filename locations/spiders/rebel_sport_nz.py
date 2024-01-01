@@ -15,15 +15,19 @@ class RebelSportNZSpider(Spider):
 
     def parse(self, response):
         locations = []
-        store_lists = response.xpath('//@data-store').getall()
+        store_lists = response.xpath("//@data-store").getall()
         for store_list_str in store_lists:
             store_list = json.loads(store_list_str)
             locations = locations + store_list
         for location in locations:
             item = DictParser.parse(location)
             item.pop("addr_full", None)
-            item["street_address"] = re.sub(r"\s+", " ", " ".join(Selector(text="<div>" + location["address"] + "</div>").xpath('//div/text()').getall())).strip()
-            item["phone"] = Selector(text=location["telephone"]).xpath('//@href').get().replace("tel:", "")
+            item["street_address"] = re.sub(
+                r"\s+",
+                " ",
+                " ".join(Selector(text="<div>" + location["address"] + "</div>").xpath("//div/text()").getall()),
+            ).strip()
+            item["phone"] = Selector(text=location["telephone"]).xpath("//@href").get().replace("tel:", "")
             item["opening_hours"] = OpeningHours()
             item["opening_hours"].add_ranges_from_string(location["hours"])
             yield item
