@@ -24,14 +24,23 @@ class AmartFurnitureAUSpider(Spider):
     def parse(self, response):
         for location in response.xpath('//div[contains(@class, "card-body")]'):
             properties = {
-                "ref": location.xpath('.//@data-store-id').get(),
+                "ref": location.xpath(".//@data-store-id").get(),
                 "name": location.xpath('.//h5[@class="store-name"]/text()').get(),
-                "addr_full": re.sub(r"\s+", " ", " ".join(filter(None, location.xpath('.//p[@class="address"]//text()').getall()))).strip(),
+                "addr_full": re.sub(
+                    r"\s+", " ", " ".join(filter(None, location.xpath('.//p[@class="address"]//text()').getall()))
+                ).strip(),
                 "phone": location.xpath('.//a[@class="phone"]/@href').get("").replace("tel:", ""),
                 "email": location.xpath('.//a[@class="email"]/@href').get("").replace("mailto:", ""),
-                "website": "https://www.amartfurniture.com.au" + location.xpath('.//h5[@class="store-name"]/ancestor::*[self::a][1]/@href').get(),
+                "website": "https://www.amartfurniture.com.au"
+                + location.xpath('.//h5[@class="store-name"]/ancestor::*[self::a][1]/@href').get(),
             }
-            properties["lat"], properties["lon"] = location.xpath('.//button[contains(@onclick, "https://maps.google.com/?daddr=")]/@onclick').get().split("?daddr=", 1)[1].split("'", 1)[0].split(",", 1)
+            properties["lat"], properties["lon"] = (
+                location.xpath('.//button[contains(@onclick, "https://maps.google.com/?daddr=")]/@onclick')
+                .get()
+                .split("?daddr=", 1)[1]
+                .split("'", 1)[0]
+                .split(",", 1)
+            )
             hours_string = " ".join(filter(None, location.xpath('.//div[@class="store-hours"]//text()').getall()))
             properties["opening_hours"] = OpeningHours()
             properties["opening_hours"].add_ranges_from_string(hours_string)
