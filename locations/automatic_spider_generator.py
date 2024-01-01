@@ -57,7 +57,7 @@ class AutomaticSpiderGenerator:
                 spider_attributes_code = "{}\n\t{} = {{".format(spider_attributes_code, k)
                 for k2, v2 in v.items():
                     if isinstance(v2, str):
-                        spider_attributes_code = '{}\n\t\t{} = "{}",'.format(spider_attributes_code, k2, v2)
+                        spider_attributes_code = '{}\n\t\t"{}": "{}",'.format(spider_attributes_code, k2, v2)
                 spider_attributes_code = "{}\n\t}}".format(spider_attributes_code)
             elif isinstance(v, str):
                 spider_attributes_code = '{}\n\t{} = "{}"'.format(spider_attributes_code, k, v)

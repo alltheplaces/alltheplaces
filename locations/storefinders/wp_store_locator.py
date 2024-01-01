@@ -1,6 +1,9 @@
-from scrapy import Selector, Spider
-from scrapy.http import JsonRequest
+from urllib.parse import urlparse
 
+from scrapy import Selector, Spider
+from scrapy.http import JsonRequest, Request, Response
+
+from locations.automatic_spider_generator import AutomaticSpiderGenerator
 from locations.dict_parser import DictParser
 from locations.geo import point_locations
 from locations.hours import DAYS_EN, OpeningHours, sanitise_day
@@ -41,7 +44,7 @@ from locations.spiders.vapestore_gb import clean_address
 # location).
 
 
-class WPStoreLocatorSpider(Spider):
+class WPStoreLocatorSpider(Spider, AutomaticSpiderGenerator):
     days = DAYS_EN
     time_format = "%H:%M"
     searchable_points_files = []
@@ -86,18 +89,24 @@ class WPStoreLocatorSpider(Spider):
         yield item
 
     def parse_opening_hours(self, location: dict, **kwargs) -> OpeningHours:
-        if not location.get("hours"):
+        hours_raw = DictParser.get_first_key(location, DictParser.hours_keys)
+        if not hours_raw:
             return
-        sel = Selector(text=location["hours"])
+        hours_text = " ".join(filter(None, Selector(text=hours_raw).xpath('//text()').getall()))
         oh = OpeningHours()
-        for rule in sel.xpath("//tr"):
-            day = sanitise_day(rule.xpath("./td/text()").get(), days=self.days)
-            times = rule.xpath("./td/time/text()").get()
-            if not day or not times:
-                continue
-            if times.lower() in ["closed"]:
-                continue
-            start_time, end_time = times.split("-")
-            oh.add_range(day, start_time.strip(), end_time.strip(), time_format=self.time_format)
-
+        oh.add_ranges_from_string(hours_text)
         return oh
+
+    def storefinder_exists(response: Response) -> bool | Request:
+        if response.xpath('//link[@id="wpsl-styles-css"]/@id').get():
+            return True
+        if response.xpath('//script[@id="wpsl-js-js"]/@id').get():
+            return True
+        if response.xpath('//script[@id="wpsl-js-js-extra"]/@id').get():
+            return True
+        return False
+
+    def extract_spider_attributes(response: Response) -> dict | Request:
+        return {
+            "allowed_domains": [urlparse(response.url).netloc],
+        }

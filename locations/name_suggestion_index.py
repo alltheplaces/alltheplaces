@@ -51,6 +51,8 @@ class NSI(metaclass=Singleton):
                 official_website_domain = urlparse(official_website).netloc
                 if official_website_domain == supplied_url_domain:
                     return wikidata_code
+                elif official_website_domain.lstrip("www.") == supplied_url_domain.lstrip("www."):
+                    return wikidata_code
         return None
 
     def lookup_wikidata(self, wikidata_code: str):
