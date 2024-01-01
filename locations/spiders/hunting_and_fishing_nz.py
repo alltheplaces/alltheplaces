@@ -1,10 +1,11 @@
-from chompjs import parse_js_object
 import json
 
+from chompjs import parse_js_object
 from scrapy import Spider
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+
 
 class HuntingAndFishingNZSpider(Spider):
     name = "hunting_and_fishing_nz"
@@ -13,7 +14,14 @@ class HuntingAndFishingNZSpider(Spider):
     start_urls = ["https://www.huntingandfishing.co.nz/store-locator"]
 
     def parse(self, response):
-        stores_js = "[{" + response.xpath('//script[contains(text(), \'"sources": [{\')]/text()').get().split('"sources": [{', 1)[1].split('}]', 1)[0] + "}]"
+        stores_js = (
+            "[{"
+            + response.xpath("//script[contains(text(), '\"sources\": [{')]/text()")
+            .get()
+            .split('"sources": [{', 1)[1]
+            .split("}]", 1)[0]
+            + "}]"
+        )
         locations = parse_js_object(stores_js)
         for location in locations:
             item = DictParser.parse(location)
