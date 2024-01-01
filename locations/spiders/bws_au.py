@@ -17,7 +17,16 @@ class BWSAUSpider(Spider):
             item["ref"] = location["profile"]["meta"]["id"]
             item["lat"] = location["profile"]["yextDisplayCoordinate"]["lat"]
             item["lon"] = location["profile"]["yextDisplayCoordinate"]["long"]
-            item["street_address"] = ", ".join(filter(None, [location["profile"]["address"]["line1"], location["profile"]["address"]["line2"], location["profile"]["address"]["line3"]]))
+            item["street_address"] = ", ".join(
+                filter(
+                    None,
+                    [
+                        location["profile"]["address"]["line1"],
+                        location["profile"]["address"]["line2"],
+                        location["profile"]["address"]["line3"],
+                    ],
+                )
+            )
             item["website"] = "https://store.bws.com.au/" + location["url"]
             if location["profile"].get("mainPhone"):
                 item["phone"] = location["profile"]["mainPhone"]["number"]
@@ -25,5 +34,7 @@ class BWSAUSpider(Spider):
                 item["opening_hours"] = OpeningHours()
                 for day_hours in location["profile"]["hours"]["normalHours"]:
                     for interval in day_hours["intervals"]:
-                        item["opening_hours"].add_range(day_hours["day"].title(), str(interval["start"]), str(interval["end"]), "%H%M")
+                        item["opening_hours"].add_range(
+                            day_hours["day"].title(), str(interval["start"]), str(interval["end"]), "%H%M"
+                        )
             yield item
