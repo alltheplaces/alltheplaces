@@ -1,9 +1,10 @@
 import scrapy
 
-from locations.dict_parser import DictParser
 from locations.categories import Categories, apply_category
+from locations.dict_parser import DictParser
 
-# Sats (Gym chain in the nordics) is active in SE, NO, DK, FI. 
+
+# Sats (Gym chain in the nordics) is active in SE, NO, DK, FI.
 # This spider is scraping the gym centers in all countries.
 class StcSESpider(scrapy.Spider):
     name = "stc_se"
