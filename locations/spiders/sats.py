@@ -1,9 +1,10 @@
 import scrapy
 
-from locations.dict_parser import DictParser
 from locations.categories import Categories, apply_category
+from locations.dict_parser import DictParser
 
-# Sats (Gym chain in the nordics) is active in SE, NO, DK, FI. 
+
+# Sats (Gym chain in the nordics) is active in SE, NO, DK, FI.
 # This spider is scraping the gym centers in all countries.
 class SatsSpider(scrapy.Spider):
     name = "sats"
@@ -18,5 +19,5 @@ class SatsSpider(scrapy.Spider):
             listName = club.get("listName").lower()
             if listName.startswith("hk "):
                 apply_category(Categories.OFFICE_COMPANY, item)
-            
+
             yield item
