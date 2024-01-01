@@ -151,6 +151,7 @@ class Categories(Enum):
     TELEPHONE = {"amenity": "telephone"}
     RESTAURANT = {"amenity": "restaurant"}
     VETERINARY = {"amenity": "veterinary"}
+    ANIMAL_BOARDING = {"amenity": "animal_boarding"}
 
     DATA_CENTRE = {"telecom": "data_center"}
 

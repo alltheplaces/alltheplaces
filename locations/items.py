@@ -2,6 +2,7 @@
 #
 # See documentation in:
 # http://doc.scrapy.org/en/latest/topics/items.html
+from datetime import datetime
 
 import scrapy
 
@@ -79,6 +80,8 @@ def add_social_media(item: Feature, service: str, account: str):
     else:
         item["extras"][f"contact:{service}"] = account
 
+def set_closed(item: Feature, end_date: datetime = None):
+    item["extras"]["end_date"] = end_date.strftime("%Y-%m-%d") if end_date else "yes"
 
 class GeneratedSpider(scrapy.Item):
     search_url = scrapy.Field()
