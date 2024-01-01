@@ -1,6 +1,6 @@
-from html import unescape
 import json
 import re
+from html import unescape
 
 from scrapy.spiders import SitemapSpider
 
@@ -22,7 +22,7 @@ class SuperRetailGroupSpider(SitemapSpider, StructuredDataSpider):
         "https://www.supercheapauto.com.au/sitemap-stores.xml",
         "https://www.supercheapauto.co.nz/sitemap-stores.xml",
     ]
-    sitemap_rules = [(r"\/stores\/details\?sid=(?:bcf|rebel|sca)-[\w\-]+$","parse_sd")]
+    sitemap_rules = [(r"\/stores\/details\?sid=(?:bcf|rebel|sca)-[\w\-]+$", "parse_sd")]
     time_format = "%I:%M %p"
 
     def post_process_item(self, item, response, ld_data):
