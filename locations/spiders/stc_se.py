@@ -3,6 +3,7 @@ import scrapy
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
+
 class StcSESpider(scrapy.Spider):
     name = "stc_se"
     item_attributes = {"brand": "STC", "brand_wikidata": "Q124061743"}
