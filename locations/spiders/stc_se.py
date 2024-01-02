@@ -14,5 +14,6 @@ class StcSESpider(scrapy.Spider):
             item = DictParser.parse(club)
             item["branch"] = item.pop("name")
             item["city"] = item["city"].title()
+            item["street_address"] = item.pop("street")
 
             yield item
