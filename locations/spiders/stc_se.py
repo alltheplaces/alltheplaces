@@ -15,7 +15,7 @@ class StcSESpider(scrapy.Spider):
         for club in response.json():
             item = DictParser.parse(club)
             item["branch"] = item["name"]
-            item["name"] = "STC"
+            item["branch"] = item.pop("name")
             item["city"] = item["city"].title()
 
             yield item
