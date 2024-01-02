@@ -1,7 +1,11 @@
+import pprint
+from urllib.parse import urljoin
+
 import scrapy
 
-from locations.categories import Categories, apply_category
+from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
+from locations.hours import OpeningHours
 
 
 class StcSESpider(scrapy.Spider):
@@ -15,5 +19,16 @@ class StcSESpider(scrapy.Spider):
             item["branch"] = item.pop("name")
             item["city"] = item["city"].title()
             item["street_address"] = item.pop("street")
+            item["website"] = urljoin("https://www.stc.se/gym/", club["slug"])
+            apply_yes_no(Extras.WIFI, item, "wifi" in club["includes"])
+
+            item["opening_hours"] = OpeningHours()
+            for rule in club["openingHours"]["default"]["data"]:
+                pprint.pp(rule)
+                if rule["hours"]["unmanned"] == "Dygnet runt":
+                    start_time, end_time = "00:00", "23:59"
+                else:
+                    start_time, end_time = rule["hours"]["unmanned"].replace(" ", "").replace(".", ":").split("-")
+                item["opening_hours"].add_range(rule["day"], start_time, end_time)
 
             yield item
