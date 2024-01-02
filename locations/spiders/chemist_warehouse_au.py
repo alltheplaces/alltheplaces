@@ -17,26 +17,35 @@ class ChemistWarehouseAUSpider(XMLFeedSpider):
 
     def parse_node(self, response, node):
         properties = {
-            "ref": node.xpath('@id').get(),
-            "name": node.xpath('@storename').get(),
-            "lat": node.xpath('@lat').get(),
-            "lon": node.xpath('@lon').get(),
-            "street_address": node.xpath('@storeaddress').get(),
-            "city": node.xpath('@storesuburb').get(),
-            "state": node.xpath('@storestate').get(),
-            "postcode": node.xpath('@storepostcode').get(),
-            "phone": node.xpath('@storephone').get(),
-            "email": node.xpath('@storeemail').get(),
+            "ref": node.xpath("@id").get(),
+            "name": node.xpath("@storename").get(),
+            "lat": node.xpath("@lat").get(),
+            "lon": node.xpath("@lon").get(),
+            "street_address": node.xpath("@storeaddress").get(),
+            "city": node.xpath("@storesuburb").get(),
+            "state": node.xpath("@storestate").get(),
+            "postcode": node.xpath("@storepostcode").get(),
+            "phone": node.xpath("@storephone").get(),
+            "email": node.xpath("@storeemail").get(),
         }
-        hours_string = " ".join([
-            "Mon: ", node.xpath('@storemon').get(),
-            "Tue: ", node.xpath('@storetue').get(),
-            "Wed: ", node.xpath('@storewed').get(),
-            "Thu: ", node.xpath('@storethu').get(),
-            "Fri: ", node.xpath('@storefri').get(),
-            "Sat: ", node.xpath('@storesat').get(),
-            "Sun: ", node.xpath('@storesun').get(),
-        ])
+        hours_string = " ".join(
+            [
+                "Mon: ",
+                node.xpath("@storemon").get(),
+                "Tue: ",
+                node.xpath("@storetue").get(),
+                "Wed: ",
+                node.xpath("@storewed").get(),
+                "Thu: ",
+                node.xpath("@storethu").get(),
+                "Fri: ",
+                node.xpath("@storefri").get(),
+                "Sat: ",
+                node.xpath("@storesat").get(),
+                "Sun: ",
+                node.xpath("@storesun").get(),
+            ]
+        )
         properties["opening_hours"] = OpeningHours()
         properties["opening_hours"].add_ranges_from_string(hours_string)
         yield Feature(**properties)
