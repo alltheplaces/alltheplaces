@@ -11,6 +11,7 @@ class KFCAUSpider(scrapy.Spider):
     item_attributes = {"brand": "KFC", "brand_wikidata": "Q524757"}
     start_urls = ["https://orderserv-kfc-apac-olo-api.yum.com/dev/v1/stores/"]
     tenant_id = "afd3813afa364270bfd33f0a8d77252d"
+    requires_proxy = True  # Requires AU proxy, possibly residential IPs only.
 
     def start_requests(self):
         for url in self.start_urls:
