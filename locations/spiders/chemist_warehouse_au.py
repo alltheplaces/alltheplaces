@@ -18,18 +18,23 @@ class ChemistWarehouseAUSpider(XMLFeedSpider):
 
     def parse_node(self, response, node):
         properties = {
-            "ref": node.xpath('cw:Id/text()').get(),
-            "name": node.xpath('cw:Name/text()').get(),
-            "lat": node.xpath('cw:GeoPoint/cw:Latitude/text()').get(),
-            "lon": node.xpath('cw:GeoPoint/cw:Longitude/text()').get(),
-            "street_address": node.xpath('cw:Address/text()').get(),
-            "city": node.xpath('cw:Suburb/text()').get(),
-            "state": node.xpath('cw:State/text()').get(),
-            "postcode": node.xpath('cw:Postcode/text()').get(),
-            "phone": node.xpath('cw:Phone/text()').get(),
-            "email": node.xpath('cw:Email/text()').get(),
+            "ref": node.xpath("cw:Id/text()").get(),
+            "name": node.xpath("cw:Name/text()").get(),
+            "lat": node.xpath("cw:GeoPoint/cw:Latitude/text()").get(),
+            "lon": node.xpath("cw:GeoPoint/cw:Longitude/text()").get(),
+            "street_address": node.xpath("cw:Address/text()").get(),
+            "city": node.xpath("cw:Suburb/text()").get(),
+            "state": node.xpath("cw:State/text()").get(),
+            "postcode": node.xpath("cw:Postcode/text()").get(),
+            "phone": node.xpath("cw:Phone/text()").get(),
+            "email": node.xpath("cw:Email/text()").get(),
         }
         properties["opening_hours"] = OpeningHours()
-        for day_hours in node.xpath('cw:OpenHours/cw:OpenHour'):
-            properties["opening_hours"].add_range(day_hours.xpath('cw:WeekDay/text()').get(), day_hours.xpath('cw:OpenTime/text()').get(), day_hours.xpath('cw:CloseTime/text()').get(), "%I:%M %p")
+        for day_hours in node.xpath("cw:OpenHours/cw:OpenHour"):
+            properties["opening_hours"].add_range(
+                day_hours.xpath("cw:WeekDay/text()").get(),
+                day_hours.xpath("cw:OpenTime/text()").get(),
+                day_hours.xpath("cw:CloseTime/text()").get(),
+                "%I:%M %p",
+            )
         yield Feature(**properties)
