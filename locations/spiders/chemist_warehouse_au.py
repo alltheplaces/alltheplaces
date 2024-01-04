@@ -9,43 +9,27 @@ class ChemistWarehouseAUSpider(XMLFeedSpider):
     item_attributes = {"brand": "Chemist Warehouse", "brand_wikidata": "Q48782120"}
     allowed_domains = ["www.chemistwarehouse.com.au"]
     start_urls = [
-        "https://www.chemistwarehouse.com.au/ams/webparts/Google_Map_SL_files/storelocator_data.ashx?searchedPoint=(0,%200)&TrafficSource=1&TrafficSourceState=0"
+        "https://www.chemistwarehouse.com.au/webapi/store/store-locator?BusinessGroupId=2&SortByDistance=true&SearchByState=0&Coordinate=(-37.8152065,%20144.963937)&ShowNearbyOnly=false"
     ]
     requires_proxy = True  # Residential IP addresses appear to be required.
     iterator = "xml"
-    itertag = "marker"
+    namespaces = [("cw", "http://schemas.datacontract.org/2004/07/AmSolutions.ChemistWarehouse.Models.Store")]
+    itertag = "cw:StoreLocationModel"
 
     def parse_node(self, response, node):
         properties = {
-            "ref": node.xpath("@id").get(),
-            "name": node.xpath("@storename").get(),
-            "lat": node.xpath("@lat").get(),
-            "lon": node.xpath("@lon").get(),
-            "street_address": node.xpath("@storeaddress").get(),
-            "city": node.xpath("@storesuburb").get(),
-            "state": node.xpath("@storestate").get(),
-            "postcode": node.xpath("@storepostcode").get(),
-            "phone": node.xpath("@storephone").get(),
-            "email": node.xpath("@storeemail").get(),
+            "ref": node.xpath('cw:Id/text()').get(),
+            "name": node.xpath('cw:Name/text()').get(),
+            "lat": node.xpath('cw:GeoPoint/cw:Latitude/text()').get(),
+            "lon": node.xpath('cw:GeoPoint/cw:Longitude/text()').get(),
+            "street_address": node.xpath('cw:Address/text()').get(),
+            "city": node.xpath('cw:Suburb/text()').get(),
+            "state": node.xpath('cw:State/text()').get(),
+            "postcode": node.xpath('cw:Postcode/text()').get(),
+            "phone": node.xpath('cw:Phone/text()').get(),
+            "email": node.xpath('cw:Email/text()').get(),
         }
-        hours_string = " ".join(
-            [
-                "Mon: ",
-                node.xpath("@storemon").get(),
-                "Tue: ",
-                node.xpath("@storetue").get(),
-                "Wed: ",
-                node.xpath("@storewed").get(),
-                "Thu: ",
-                node.xpath("@storethu").get(),
-                "Fri: ",
-                node.xpath("@storefri").get(),
-                "Sat: ",
-                node.xpath("@storesat").get(),
-                "Sun: ",
-                node.xpath("@storesun").get(),
-            ]
-        )
         properties["opening_hours"] = OpeningHours()
-        properties["opening_hours"].add_ranges_from_string(hours_string)
+        for day_hours in node.xpath('cw:OpenHours/cw:OpenHour'):
+            properties["opening_hours"].add_range(day_hours.xpath('cw:WeekDay/text()').get(), day_hours.xpath('cw:OpenTime/text()').get(), day_hours.xpath('cw:CloseTime/text()').get(), "%I:%M %p")
         yield Feature(**properties)
