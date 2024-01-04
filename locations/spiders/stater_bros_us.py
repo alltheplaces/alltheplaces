@@ -1,5 +1,4 @@
 from phpserialize import unserialize
-
 from scrapy import Selector, Spider
 
 from locations.dict_parser import DictParser
@@ -19,7 +18,9 @@ class StaterBrosUSSpider(Spider):
             item["ref"] = store_id
             item["website"] = "https://www.staterbros.com/stores/" + store_id
             item["opening_hours"] = OpeningHours()
-            hours_string = " ".join(filter(None, map(str.strip, Selector(text=location["store_hours"]).xpath('//text()').getall())))
+            hours_string = " ".join(
+                filter(None, map(str.strip, Selector(text=location["store_hours"]).xpath("//text()").getall()))
+            )
             item["opening_hours"].add_ranges_from_string(hours_string)
             yield item
 
@@ -41,7 +42,9 @@ class StaterBrosUSSpider(Spider):
             # Reference: https://www.php.net/manual/en/function.unserialize.php
             php_serialized_string = location["map"].encode("utf-8")
             unserialized_object = unserialize(php_serialized_string)
-            unserialized_dict = {k.decode(): v.decode() if isinstance(v, bytes) else v for k, v in unserialized_object.items()}
+            unserialized_dict = {
+                k.decode(): v.decode() if isinstance(v, bytes) else v for k, v in unserialized_object.items()
+            }
             location.update(unserialized_dict)
             location.pop("map")
         return locations
