@@ -27,16 +27,57 @@ class TravelCentersOfAmericaUSSpider(SitemapSpider, StructuredDataSpider):
         item.pop("facebook", None)
         item.pop("twitter", None)
         fuel_types = []
-        if ld_data.get("hasOfferCatalog") and ld_data["hasOfferCatalog"].get("name") == "Fuel" and ld_data["hasOfferCatalog"].get("itemListElement"):
+        if (
+            ld_data.get("hasOfferCatalog")
+            and ld_data["hasOfferCatalog"].get("name") == "Fuel"
+            and ld_data["hasOfferCatalog"].get("itemListElement")
+        ):
             for fuel_type in ld_data["hasOfferCatalog"]["itemListElement"]:
                 fuel_types.append(fuel_type["name"])
         apply_category(Categories.FUEL_STATION, item)
         apply_yes_no(Fuel.OCTANE_87, item, "Unleaded" in fuel_types, False)
         apply_yes_no(Fuel.OCTANE_89, item, "Unleaded Plus" in fuel_types, False)
         apply_yes_no(Fuel.OCTANE_93, item, "Unleaded Premium" in fuel_types, False)
-        apply_yes_no(Fuel.BIODIESEL, item, "BIO DIESEL 2% ULS" in fuel_types or "BIO DIESEL 5% ULS" in fuel_types or "BIO DIESEL 10% ULS" in fuel_types or "BIO DIESEL 11% ULS" in fuel_types or "BIO DIESEL 20% ULS" in fuel_types or "TEX LED ULSD #2 - 20% BIO" in fuel_types or "20%BIO DSL - CA CARB ULSD#2" in fuel_types, False)
-        apply_yes_no(Fuel.DIESEL, item, "Auto Diesel" in fuel_types or "Diesel" in fuel_types or "Diesel 1" in fuel_types or "Diesel 1 Reefer" in fuel_types or "Reefer" in fuel_types or "Offroad Diesel" in fuel_types or "TEX LED ULSD #2" in fuel_types, False)
-        apply_yes_no(Fuel.COLD_WEATHER_DIESEL, item, "DIESEL #2 SELF ULS" in fuel_types or "TEX LED ULSD #2 - 20% BIO" in fuel_types or "20%BIO DSL - CA CARB ULSD#2" in fuel_types, False)
+        apply_yes_no(
+            Fuel.BIODIESEL,
+            item,
+            "BIO DIESEL 2% ULS" in fuel_types
+            or "BIO DIESEL 5% ULS" in fuel_types
+            or "BIO DIESEL 10% ULS" in fuel_types
+            or "BIO DIESEL 11% ULS" in fuel_types
+            or "BIO DIESEL 20% ULS" in fuel_types
+            or "TEX LED ULSD #2 - 20% BIO" in fuel_types
+            or "20%BIO DSL - CA CARB ULSD#2" in fuel_types,
+            False,
+        )
+        apply_yes_no(
+            Fuel.DIESEL,
+            item,
+            "Auto Diesel" in fuel_types
+            or "Diesel" in fuel_types
+            or "Diesel 1" in fuel_types
+            or "Diesel 1 Reefer" in fuel_types
+            or "Reefer" in fuel_types
+            or "Offroad Diesel" in fuel_types
+            or "TEX LED ULSD #2" in fuel_types,
+            False,
+        )
+        apply_yes_no(
+            Fuel.COLD_WEATHER_DIESEL,
+            item,
+            "DIESEL #2 SELF ULS" in fuel_types
+            or "TEX LED ULSD #2 - 20% BIO" in fuel_types
+            or "20%BIO DSL - CA CARB ULSD#2" in fuel_types,
+            False,
+        )
         apply_yes_no(Fuel.ADBLUE, item, "DEF" in fuel_types, False)
-        apply_yes_no(Fuel.LNG, item, "SHELL LNG 3" in fuel_types or "Shell LNG 3" in fuel_types or "SHELL LNG 7" in fuel_types or "Shell LNG 7" in fuel_types, False)
+        apply_yes_no(
+            Fuel.LNG,
+            item,
+            "SHELL LNG 3" in fuel_types
+            or "Shell LNG 3" in fuel_types
+            or "SHELL LNG 7" in fuel_types
+            or "Shell LNG 7" in fuel_types,
+            False,
+        )
         yield item
