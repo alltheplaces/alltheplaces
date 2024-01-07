@@ -40,7 +40,6 @@ class BobEvansUSSpider(SitemapSpider):
         for row in hours:
             start = datetime.fromisoformat(row["startDate"])
             end = datetime.fromisoformat(row["endDate"])
-            assert start.weekday() == end.weekday()
             day = DAYS[start.weekday()]
             start_time = start.strftime("%H:%M")
             end_time = end.strftime("%H:%M")
