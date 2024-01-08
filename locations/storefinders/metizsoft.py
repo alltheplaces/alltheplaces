@@ -1,6 +1,6 @@
-from chompjs import parse_js_object
 from urllib.parse import parse_qs, urlparse
 
+from chompjs import parse_js_object
 from scrapy import Spider
 from scrapy.http import FormRequest, Request, Response
 

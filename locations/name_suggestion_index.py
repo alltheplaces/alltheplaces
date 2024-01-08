@@ -1,7 +1,7 @@
-import tldextract
 from urllib.parse import urlparse
 
 import requests
+import tldextract
 
 
 class Singleton(type):
