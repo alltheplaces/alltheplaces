@@ -279,6 +279,8 @@ class Fuel(Enum):
     AVAUTO_GAS = "fuel:autogas"
     AVJetA1 = "fuel:JetA1"
 
+    ALKYLATE = "fuel:alkylate"  # https://de.wikipedia.org/wiki/Alkylatbenzin
+
     HEATING_OIL = "fuel:heating_oil"
     KEROSENE = "fuel:kerosene"
 
