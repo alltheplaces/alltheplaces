@@ -81,7 +81,7 @@ class MomentFeedSpider(Spider, AutomaticSpiderGenerator):
             elif len(appjs_uris) > 1:
                 first_appjs_uri = appjs_uris.pop()
                 return response.follow(
-                    url=first_appsjs_uri,
+                    url=first_appjs_uri,
                     meta={
                         "next_extraction_method": MomentFeedSpider.extract_spider_attributes_appjs,
                         "extra_appjs_uris": appjs_uris,
@@ -99,7 +99,7 @@ class MomentFeedSpider(Spider, AutomaticSpiderGenerator):
         elif response.meta.get("extra_appjs_uris"):
             appjs_uris = response.meta["extra_appjs_uris"]
             next_appjs_uri = appjs_uris.pop()
-            if len(next_appjs_uris) == 0:
+            if len(appjs_uris) == 0:
                 return response.follow(
                     url=next_appjs_uri,
                     meta={
@@ -107,7 +107,7 @@ class MomentFeedSpider(Spider, AutomaticSpiderGenerator):
                     },
                     dont_filter=True,
                 )
-            elif len(next_appjs_uris) > 0:
+            elif len(appjs_uris) > 0:
                 return response.follow(
                     url=next_appjs_uri,
                     meta={

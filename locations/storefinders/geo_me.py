@@ -137,7 +137,7 @@ class GeoMeSpider(Spider):
     def extract_spider_attributes(response: Response) -> dict:
         geoappme_url = response.xpath('//iframe[contains(@src, ".geoapp.me")]/@src').get()
         if geoappme_url:
-            key = urlparse(url).netloc.split(".", 1)[0]
+            key = urlparse(geoappme_url).netloc.split(".", 1)[0]
             return {"key": key}
         else:
             return {}
