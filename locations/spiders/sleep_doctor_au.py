@@ -1,5 +1,4 @@
 from chompjs import parse_js_object
-
 from scrapy import Selector, Spider
 
 from locations.dict_parser import DictParser
