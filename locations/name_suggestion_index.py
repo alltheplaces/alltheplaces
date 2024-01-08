@@ -1,3 +1,4 @@
+import tldextract
 from urllib.parse import urlparse
 
 import requests
@@ -46,12 +47,24 @@ class NSI(metaclass=Singleton):
         """
         self._ensure_loaded()
         supplied_url_domain = urlparse(url).netloc
+        # First attempt to find an extact FQDN match
         for wikidata_code, org_parameters in self.wikidata_json.items():
             for official_website in org_parameters.get("officialWebsites", []):
                 official_website_domain = urlparse(official_website).netloc
                 if official_website_domain == supplied_url_domain:
                     return wikidata_code
-                elif official_website_domain.lstrip("www.") == supplied_url_domain.lstrip("www."):
+        # Next attempt to find an exact match excluding any "www." prefix
+        for wikidata_code, org_parameters in self.wikidata_json.items():
+            for official_website in org_parameters.get("officialWebsites", []):
+                official_website_domain = urlparse(official_website).netloc
+                if official_website_domain.lstrip("www.") == supplied_url_domain.lstrip("www."):
+                    return wikidata_code
+        # Last attempt to find a fuzzy match for registered domain (exlcuding subdomains)
+        for wikidata_code, org_parameters in self.wikidata_json.items():
+            for official_website in org_parameters.get("officialWebsites", []):
+                official_website_reg = tldextract.extract(official_website).registered_domain
+                supplied_url_reg = tldextract.extract(supplied_url_domain).registered_domain
+                if official_website_reg == supplied_url_reg:
                     return wikidata_code
         return None
 
