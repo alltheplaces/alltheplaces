@@ -42,12 +42,12 @@ class MetizsoftSpider(Spider, AutomaticSpiderGenerator):
 
     @staticmethod
     def storefinder_exists(response: Response) -> bool | Request:
-        js_blob = response.xpath('//script[contains(text(), "function asyncLoad() {")]/text()').get()
-        js_blob = "[" + js_blob.split("var urls = [", 1)[1].split("];", 1)[0] + "]"
-        urls = parse_js_object(js_blob)
-        for url in urls:
-            if urlparse(url).netloc == "storelocator.metizapps.com":
-                return True
+        if js_blob := response.xpath('//script[contains(text(), "function asyncLoad() {")]/text()').get():
+            js_blob = "[" + js_blob.split("var urls = [", 1)[1].split("];", 1)[0] + "]"
+            urls = parse_js_object(js_blob)
+            for url in urls:
+                if urlparse(url).netloc == "storelocator.metizapps.com":
+                    return True
         return False
 
     @staticmethod
