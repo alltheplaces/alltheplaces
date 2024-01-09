@@ -39,6 +39,7 @@ jobs:
         export AWS_ACCESS_KEY_ID=$(echo -n "${AWS_KEY}" | base64 --decode)
         export AWS_SECRET_ACCESS_KEY=$(echo -n "${AWS_SEC}" | base64 --decode)
         export AWS_REGION="us-east-1"
+        set -x
 
         pr_file_changes=$(curl -sL --header 'authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' "https://api.github.com/repos/alltheplaces/alltheplaces/pulls/${{ github.event.number }}/files")
         (>&2 echo "PR response: ${pr_file_changes}")
