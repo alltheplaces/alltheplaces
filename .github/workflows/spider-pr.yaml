@@ -48,7 +48,10 @@ jobs:
             (>&2 echo "checking file changes failed. response was ${pr_file_changes}")
             exit 1
         fi
-
+        if [ $(wc -l <<< "$SPIDERS") -eq 0 ]; then
+            (>&2 echo "No spiders changed")
+            exit 0
+        fi
         if [ $(wc -l <<< "$SPIDERS") -gt 15 ]; then
             (>&2 echo "refusing to run on more than 15 spiders")
             exit 1
