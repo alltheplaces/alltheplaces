@@ -43,14 +43,20 @@ jobs:
 
         pr_file_changes=$(curl -sL --header 'authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' "https://api.github.com/repos/alltheplaces/alltheplaces/pulls/${{ github.event.number }}/files")
         (>&2 echo "PR response: ${pr_file_changes}")
-        SPIDERS=$(echo "${pr_file_changes}" | jq -r '.[] | select(.status != "removed") | .filename' | grep "^locations/spiders/")
+        echo "${pr_file_changes}" | jq
+        if [ ! $? -eq 0 ]; then
+            (>&2 echo "error running jq on echo")
+            exit 1
+        fi
+        
+        SPIDERS=$(echo "${pr_file_changes}" | jq -r '.[] | select(.status != "removed") | select(.filename | startswith("locations/spiders/")) | .filename')
         retval=$?
         if [ ! $retval -eq 0 ]; then
             (>&2 echo "checking file changes failed. response was ${pr_file_changes}")
             exit 1
         fi
 
-        spider_count=$(echo "${pr_file_changes}" | jq -r '[.[] | select(.status != "removed") | select(.filename | startswith("locations/spiders/"))] | length')
+        spider_count=$(echo -n "${pr_file_changes}" | jq -r '[.[] | select(.status != "removed") | select(.filename | startswith("locations/spiders/"))] | length')
         if [ $spider_count -gt 15 ]; then
             (>&2 echo "refusing to run on more than 15 spiders")
             exit 1
