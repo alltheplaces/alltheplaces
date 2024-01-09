@@ -3,7 +3,7 @@ from urllib.parse import urljoin
 
 import scrapy
 
-from locations.categories import Extras, apply_yes_no
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
@@ -30,5 +30,5 @@ class StcSESpider(scrapy.Spider):
                 else:
                     start_time, end_time = rule["hours"]["unmanned"].replace(" ", "").replace(".", ":").split("-")
                 item["opening_hours"].add_range(rule["day"], start_time, end_time)
-
+            apply_category(Categories.GYM, item)
             yield item
