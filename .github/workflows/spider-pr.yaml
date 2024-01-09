@@ -48,7 +48,7 @@ jobs:
             (>&2 echo "error running jq on echo")
             exit 1
         fi
-        
+
         SPIDERS=$(echo "${pr_file_changes}" | jq -r '.[] | select(.status != "removed") | select(.filename | startswith("locations/spiders/")) | .filename')
         retval=$?
         if [ ! $retval -eq 0 ]; then
