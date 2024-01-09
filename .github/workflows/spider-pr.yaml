@@ -49,7 +49,7 @@ jobs:
             exit 1
         fi
 
-        spider_count=$(echo $pr_file_changes | jq -r '.[] | select(.status != "removed") | .filename' | grep "^locations/spiders/" | wc -l)
+        spider_count=$(echo $pr_file_changes | jq -r '.[] | select(.status != "removed") | .filename' | grep "^locations/spiders/" | wc -l | tr -s " ")
         if [ $spider_count -gt 15 ]; then
             (>&2 echo "refusing to run on more than 15 spiders")
             exit 1
