@@ -42,7 +42,7 @@ class PhotoMeGBSpider(Spider):
 
             yield from self.parse_item(item, location, location["properties"]) or []
 
-        if response.json()["properties"]["exceededTransferLimit"]:
+        if response.json().get("properties", {}).get("exceededTransferLimit"):
             yield self.get_request(response.meta["offset"] + response.meta["size"], response.meta["size"])
 
     def parse_item(self, item: Feature, location: dict, properties: dict) -> Iterable[Feature]:
