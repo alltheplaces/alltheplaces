@@ -39,15 +39,9 @@ jobs:
         export AWS_ACCESS_KEY_ID=$(echo -n "${AWS_KEY}" | base64 --decode)
         export AWS_SECRET_ACCESS_KEY=$(echo -n "${AWS_SEC}" | base64 --decode)
         export AWS_REGION="us-east-1"
-        set -x
 
         pr_file_changes=$(curl -sL --header 'authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' "https://api.github.com/repos/alltheplaces/alltheplaces/pulls/${{ github.event.number }}/files")
         (>&2 echo "PR response: ${pr_file_changes}")
-        echo "${pr_file_changes}" | jq
-        if [ ! $? -eq 0 ]; then
-            (>&2 echo "error running jq on echo")
-            exit 1
-        fi
 
         SPIDERS=$(echo "${pr_file_changes}" | jq -r '.[] | select(.status != "removed") | select(.filename | startswith("locations/spiders/")) | .filename')
         retval=$?
