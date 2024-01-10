@@ -8,7 +8,7 @@ class CaesarsSpider(scrapy.Spider):
     item_attributes = {
         "brand": "Caesars Entertainment",
         "brand_wikidata": "Q18636524",
-        "extras": {"leisure": "resort", "amenity": "casino"},
+        "extras": {"amenity": "casino"}
     }
     start_urls = ["https://www.caesars.com/api/v1/properties"]
 
