@@ -5,7 +5,11 @@ from locations.items import Feature
 
 class CaesarsSpider(scrapy.Spider):
     name = "caesars"
-    item_attributes = {"brand": "Caesars Entertainment", "brand_wikidata": "Q18636524"}
+    item_attributes = {
+        "brand": "Caesars Entertainment",
+        "brand_wikidata": "Q18636524",
+        "extras": {"leisure": "resort", "amenity": "casino"},
+    }
     start_urls = ["https://www.caesars.com/api/v1/properties"]
 
     def parse(self, response):
