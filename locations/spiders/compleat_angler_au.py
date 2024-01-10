@@ -1,6 +1,7 @@
 from scrapy import Selector, Spider
 from scrapy.http import JsonRequest
 
+from locations.categories import apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
@@ -37,4 +38,5 @@ class CompleatAnglerAUSpider(Spider):
             hours_string = " ".join(Selector(text=location.get("misc3")).xpath("//text()").getall())
             item["opening_hours"] = OpeningHours()
             item["opening_hours"].add_ranges_from_string(hours_string)
+            apply_category({"shop": "fishing"}, item)
             yield item
