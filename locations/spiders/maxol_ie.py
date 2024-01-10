@@ -1,3 +1,4 @@
+import html
 import re
 
 from scrapy.spiders import SitemapSpider
@@ -13,6 +14,9 @@ class MaxolIESpider(SitemapSpider, StructuredDataSpider):
     sitemap_rules = [(r"\.ie\/[-\w]+\/[-.\w]+\/[-\/\w]+$", "parse_sd")]
 
     def post_process_item(self, item, response, ld_data, **kwargs):
+        item["name"] = html.unescape(item["name"])
+        item["street_address"] = html.unescape(item["street_address"])
+
         if m := re.search(r"\"latitude\":(-?\d+\.\d+),\"longitude\":(-?\d+\.\d+)", response.text):
             item["lat"], item["lon"] = m.groups()
 
