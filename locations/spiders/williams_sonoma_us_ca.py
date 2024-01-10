@@ -3,7 +3,7 @@ from json import loads
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
-from locations.categories import apply_category, Categories
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_FULL, OpeningHours
 from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
@@ -15,7 +15,7 @@ class WilliamsSonomaUSCASpider(Spider):
     allowed_domains = ["www.williams-sonoma.com"]
     start_urls = [
         "https://www.williams-sonoma.com/search/stores.json?brands=WS,PB&lat=40.71304703&lng=-74.00723267&radius=100000&includeOutlets=false",
-        "https://www.williams-sonoma.ca/search/stores.json?brands=WS,PB&lat=40.71304703&lng=-74.00723267&radius=100000&includeOutlets=false"
+        "https://www.williams-sonoma.ca/search/stores.json?brands=WS,PB&lat=40.71304703&lng=-74.00723267&radius=100000&includeOutlets=false",
     ]
     brands = {
         "WS": {"brand": "Williams-Sonoma", "brand_wikidata": "Q2581220"},
@@ -41,7 +41,12 @@ class WilliamsSonomaUSCASpider(Spider):
             item.update(self.brands[location["BRAND"]])
             item["street_address"] = location["ADDRESS_LINE_1"]
             item["phone"] = location["PHONE_NUMBER_FORMATTED"]
-            slug = "{}-{}-{}-{}".format(location["COUNTRY_CODE"].lower(), location["STATE_PROVINCE"].lower(), location["CITY"].lower().replace(" ", "-"), location["STORE_NAME"].lower().replace(" ", "-"))
+            slug = "{}-{}-{}-{}".format(
+                location["COUNTRY_CODE"].lower(),
+                location["STATE_PROVINCE"].lower(),
+                location["CITY"].lower().replace(" ", "-"),
+                location["STORE_NAME"].lower().replace(" ", "-"),
+            )
             if location["BRAND"] == "WS":
                 apply_category(Categories.SHOP_HOUSEWARE, item)
                 item["website"] = f"https://www.williams-sonoma.com/stores/{slug}/"
