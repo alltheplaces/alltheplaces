@@ -58,5 +58,5 @@ class WilliamsSonomaUSCASpider(Spider):
                 day_hours = location.get("{}_HOURS_FORMATTED".format(day_name.upper()))
                 if not day_hours:
                     continue
-                item["opening_hours"].add_range(day_name, *day_hours.split(" - ", 2), "%I:%M %p")
+                item["opening_hours"].add_range(day_name, *day_hours.split(" - ", 1), "%I:%M %p")
             yield item
