@@ -73,6 +73,7 @@ class Categories(Enum):
     SHOP_HARDWARE = {"shop": "hardware"}
     SHOP_HEARING_AIDS = {"shop": "hearing_aids"}
     SHOP_HOUSEHOLD_LINEN = {"shop": "household_linen"}
+    SHOP_HOUSEWARE = {"shop": "houseware"}
     SHOP_JEWELRY = {"shop": "jewelry"}
     SHOP_LAUNDRY = {"shop": "laundry"}
     SHOP_MOBILE_PHONE = {"shop": "mobile_phone"}
