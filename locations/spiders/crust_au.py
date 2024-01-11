@@ -22,16 +22,34 @@ class CrustAUSpider(Spider):
             item.pop("addr_full", None)
             item["street_address"] = ", ".join(filter(None, [location["address"], location["address2"]]))
             item["postcode"] = str(item.get("postcode", ""))
-            yield Request(url="https://www.crust.com.au/stores/{}/store_online?&context=locator".format(location["id"]), meta={"item": item}, callback=self.add_store_details)
+            yield Request(
+                url="https://www.crust.com.au/stores/{}/store_online?&context=locator".format(location["id"]),
+                meta={"item": item},
+                callback=self.add_store_details,
+            )
 
     def add_store_details(self, response):
         item = response.meta["item"]
         item["website"] = "https://www.crust.com.au" + response.xpath('//div[@class="store_container"]/a/@href').get()
-        item["addr_full"] = " ".join(filter(None, map(str.strip, response.xpath('//div[@class="store_container"]/p[1]/text()').getall())))
+        item["addr_full"] = " ".join(
+            filter(None, map(str.strip, response.xpath('//div[@class="store_container"]/p[1]/text()').getall()))
+        )
         item["phone"] = response.xpath('//a[contains(@href, "tel:")]/@href').get("").replace("tel:", "")
         item["email"] = response.xpath('//a[contains(@href, "mailto:")]/@href').get("").replace("mailto:", "")
-        days_list = list(map(lambda x: x.split(",", 1)[0], filter(None, map(str.strip, response.xpath('//div[@class="opening-hours"]/table/tbody/tr/td[1]/text()').getall()))))
-        hours_list = list(map(str.strip, response.xpath('//div[@class="opening-hours"]/table/tbody/tr/td[3]/text()').getall()))
+        days_list = list(
+            map(
+                lambda x: x.split(",", 1)[0],
+                filter(
+                    None,
+                    map(
+                        str.strip, response.xpath('//div[@class="opening-hours"]/table/tbody/tr/td[1]/text()').getall()
+                    ),
+                ),
+            )
+        )
+        hours_list = list(
+            map(str.strip, response.xpath('//div[@class="opening-hours"]/table/tbody/tr/td[3]/text()').getall())
+        )
         day_hours_array = list(zip(days_list, hours_list))
         hours_string = ""
         for day_hours in day_hours_array:
@@ -39,5 +57,3 @@ class CrustAUSpider(Spider):
         item["opening_hours"] = OpeningHours()
         item["opening_hours"].add_ranges_from_string(hours_string)
         yield item
-
-        
