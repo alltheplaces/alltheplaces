@@ -1,3 +1,4 @@
+from locations.categories import Categories, apply_category
 from locations.storefinders.storepoint import StorepointSpider
 
 
@@ -10,4 +11,5 @@ class VerveCoffeeRoastersSpider(StorepointSpider):
         if location["name"] != "Verve Coffee Roasters":
             # Retailer of coffee beans - ignore.
             return
+        apply_category(Categories.COFFEE_SHOP, item)
         yield item
