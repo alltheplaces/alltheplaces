@@ -74,7 +74,7 @@ class DictParser:
         "郵便番号",  # "post code"
     ]
 
-    email_keys = ["email", "contact-email", "email-address", "email1"]
+    email_keys = ["email", "contact-email", "email-address", "email1", "store-email"]
 
     phone_keys = [
         "phone-number",
@@ -86,6 +86,7 @@ class DictParser:
         "contact-number",
         "phone-no",
         "contact-phone",
+        "store-phone",
     ]
 
     lat_keys = [
