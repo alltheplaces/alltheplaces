@@ -1,8 +1,8 @@
 import re
 
+from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.storefinders.stockist import StockistSpider
-from locations.categories import Categories, apply_category
 
 
 class JoMercerAUSpider(StockistSpider):
