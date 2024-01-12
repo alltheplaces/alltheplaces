@@ -9,7 +9,7 @@ class CoralTravelPLSpider(CrawlSpider):
     name = "coral_travel_pl"
     item_attributes = {"brand": "Coral Travel", "brand_wikidata": "Q58011479"}
     start_urls = ["https://www.coraltravel.pl/travel-offices"]
-    rules = [Rule(LinkExtractor("/travel-offices/.+/.+$"), callback="parse")]
+    rules = [Rule(LinkExtractor(r'/travel-offices/.+/.+$'), callback="parse")]
     wanted_types = ["TravelAgency"]
 
     def parse(self, response, **kwargs):
