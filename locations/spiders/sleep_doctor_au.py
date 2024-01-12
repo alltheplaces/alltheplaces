@@ -6,7 +6,13 @@ from locations.dict_parser import DictParser
 
 class SleepDoctorAUSpider(Spider):
     name = "sleep_doctor_au"
-    item_attributes = {"brand": "Sleep Doctor", "brand_wikidata": "Q122435030"}
+    item_attributes = {
+        "brand": "Sleep Doctor",
+        "brand_wikidata": "Q122435030",
+        "extras": {
+            "shop": "bed",
+        },
+    }
     allowed_domains = ["sleepdoctor.com.au"]
     start_urls = ["https://sleepdoctor.com.au/apps/store-locator/"]
 
