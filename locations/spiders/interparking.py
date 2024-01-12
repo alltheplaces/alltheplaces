@@ -8,7 +8,7 @@ from locations.items import Feature
 class InterparkingSpider(Spider):
     name = "interparking"
     item_attributes = {"brand": "Interparking", "brand_wikidata": "Q1895863"}
-    countries = ['be', 'fr', 'fr', 'it', 'nl', 'pl', 'ro', 'es' ]
+    countries = ['be', 'fr', 'fr', 'it', 'nl', 'pl', 'ro', 'es']
 
     def start_requests(self):
         for country in self.countries:
