@@ -37,6 +37,7 @@ class Categories(Enum):
     CRAFT_SHOEMAKER = {"craft": "shoemaker"}
 
     LEISURE_PLAYGROUND = {"leisure": "playground"}
+    LEISURE_RESORT = {"leisure": "resort"}
 
     SHOP_ALCOHOL = {"shop": "alcohol"}
     SHOP_BAKERY = {"shop": "bakery"}
@@ -69,9 +70,12 @@ class Categories(Enum):
     SHOP_GARDEN_CENTRE = {"shop": "garden_centre"}
     SHOP_GIFT = {"shop": "gift"}
     SHOP_HAIRDRESSER = {"shop": "hairdresser"}
+    SHOP_HAIRDRESSER_SUPPLY = {"shop": "hairdresser_supply"}
     SHOP_HARDWARE = {"shop": "hardware"}
     SHOP_HEARING_AIDS = {"shop": "hearing_aids"}
     SHOP_HERBALIST = {"shop": "herbalist"}
+    SHOP_HOUSEHOLD_LINEN = {"shop": "household_linen"}
+    SHOP_HOUSEWARE = {"shop": "houseware"}
     SHOP_JEWELRY = {"shop": "jewelry"}
     SHOP_LAUNDRY = {"shop": "laundry"}
     SHOP_MASSAGE = {"shop": "massage"}
@@ -103,12 +107,16 @@ class Categories(Enum):
     SHOP_TOYS = {"shop": "toys"}
     SHOP_TRADE = {"shop": "trade"}
     SHOP_TRAVEL_AGENCY = {"shop": "travel_agency"}
+    SHOP_TYRES = {"shop": "tyres"}
     SHOP_VARIETY_STORE = {"shop": "variety_store"}
     SHOP_WATCHES = {"shop": "watches"}
     SHOP_WHOLESALE = {"shop": "wholesale"}
+    SHOP_WINDOW_BLIND = {"shop": "window_blind"}
 
-    OFFICE_FINANCIAL = {"office": "financial"}
+    OFFICE_COMPANY = {"office": "company"}
     OFFICE_ENGINEER = {"office": "engineer"}
+    OFFICE_FINANCIAL = {"office": "financial"}
+    OFFICE_IT = {"office": "it"}
 
     ALTERNATIVE_MEDICINE = {"healthcare": "alternative"}
     AMBULANCE_STATION = {"emergency": "ambulance_station"}
@@ -116,6 +124,7 @@ class Categories(Enum):
     AUDIOLOGIST = {"healthcare": "audiologist"}
     BANK = {"amenity": "bank"}
     BAR = {"amenity": "bar"}
+    BENCH = {"amenity": "bench"}
     BIRTHING_CENTRE = {"healthcare": "birthing_centre"}
     BLOOD_BANK = {"healthcare": "blood_bank"}
     BLOOD_DONATION = {"healthcare": "blood_donation"}
@@ -146,6 +155,7 @@ class Categories(Enum):
     LIBRARY = {"amenity": "library"}
     MEDICAL_LABORATORY = {"healthcare": "laboratory"}
     MONEY_TRANSFER = {"amenity": "money_transfer"}
+    MOTEL = {"tourism": "motel"}
     MUSEUM = {"tourism": "museum"}
     NIGHTCLUB = {"amenity": "nightclub"}
     NURSING_HOME = {"amenity": "social_facility", "social_facility": "nursing_home", "social_facility:for": "senior"}
@@ -168,6 +178,9 @@ class Categories(Enum):
     RESTAURANT = {"amenity": "restaurant"}
     VACCINATION_CENTRE = {"healthcare": "vaccination_centre"}
     VETERINARY = {"amenity": "veterinary"}
+    ANIMAL_BOARDING = {"amenity": "animal_boarding"}
+
+    DATA_CENTRE = {"telecom": "data_center"}
 
     VENDING_MACHINE_BICYCLE_TUBE = {"amenity": "vending_machine", "vending": "bicycle_tube"}
     VENDING_MACHINE_COFFEE = {"amenity": "vending_machine", "vending": "coffee"}
@@ -237,6 +250,7 @@ top_level_tags = [
     "aeroway",
     "railway",
     "waterway",
+    "telecom",
 ]
 
 
@@ -318,6 +332,8 @@ class Fuel(Enum):
     AVAUTO_GAS = "fuel:autogas"
     AVJetA1 = "fuel:JetA1"
 
+    ALKYLATE = "fuel:alkylate"  # https://de.wikipedia.org/wiki/Alkylatbenzin
+
     HEATING_OIL = "fuel:heating_oil"
     KEROSENE = "fuel:kerosene"
 
@@ -345,11 +361,13 @@ class Extras(Enum):
     PARCEL_PICKUP = "parcel_pickup"
     PARKING_PARENT = "capacity:parent"
     PARKING_WHEELCHAIR = "capacity:disabled"
+    PETS_ALLOWED = "pets_allowed"
     PRINTING = "service:print"
     SELF_CHECKOUT = "self_checkout"
     SCANING = "service:scan"
     SHOWERS = "shower"
     SMOKING_AREA = "smoking=isolated"
+    SWIMMING_POOL = "swimming_pool"
     TAKEAWAY = "takeaway"
     TOILETS = "toilets"
     TOILETS_WHEELCHAIR = "toilets:wheelchair"

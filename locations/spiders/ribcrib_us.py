@@ -1,3 +1,4 @@
+from locations.categories import Categories, apply_category
 from locations.storefinders.storerocket import StoreRocketSpider
 
 
@@ -8,4 +9,5 @@ class RibCribUSSpider(StoreRocketSpider):
 
     def parse_item(self, item, location):
         item["website"] = "https://ribcrib.com/locations/?location=" + location.get("slug")
+        apply_category(Categories.RESTAURANT, item)
         yield item

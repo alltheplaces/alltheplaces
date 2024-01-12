@@ -14,6 +14,8 @@ DAYS_FULL = [
     "Saturday",
     "Sunday",
 ]
+DAYS_WEEKDAY = ["Mo", "Tu", "We", "Th", "Fr"]
+DAYS_WEEKEND = ["Sa", "Su"]
 
 # The below DAYS dicts are provided to be used with sanitise_day inorder for us to do best attempts at matching the
 # given day into an English 2 char day to be used inside ATP and then to be exported to OSM formatted opening hours.
@@ -34,6 +36,7 @@ DAYS_EN = {
     "We": "We",
     "Thursday": "Th",
     "Thu": "Th",
+    "Thr": "Th",
     "Thur": "Th",
     "Thrs": "Th",
     "Thurs": "Th",
@@ -159,12 +162,19 @@ DAYS_HU = {
 
 DAYS_SE = {
     "Måndag": "Mo",
+    "Mån": "Mo",
     "Tisdag": "Tu",
+    "Tis": "Tu",
     "Onsdag": "We",
+    "Ons": "We",
     "Torsdag": "Th",
+    "Tors": "Th",
     "Fredag": "Fr",
+    "Fre": "Fr",
     "Lördag": "Sa",
+    "Lör": "Sa",
     "Söndag": "Su",
+    "Sön": "Su",
 }
 DAYS_SI = {
     "Po": "Mo",
@@ -603,6 +613,8 @@ class OpeningHours:
     def from_linked_data(self, linked_data, time_format: str = "%H:%M"):
         if linked_data.get("openingHoursSpecification"):
             for rule in linked_data["openingHoursSpecification"]:
+                if not isinstance(rule, dict):
+                    continue
                 if not rule.get("dayOfWeek") or not rule.get("opens") or not rule.get("closes"):
                     continue
 

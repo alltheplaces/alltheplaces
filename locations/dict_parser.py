@@ -2,7 +2,7 @@ from locations.items import Feature
 
 
 class DictParser:
-    ref_keys = ["ref", "id", "store-id", "storeID", "storeNumber", "shop-number", "LocationID", "slug", "storeCode"]
+    ref_keys = ["ref", "id", "store-id", "store-number", "shop-number", "location-id", "slug", "store-code"]
 
     name_keys = ["name", "store-name", "display-name", "title", "businessName"]
 
@@ -74,7 +74,7 @@ class DictParser:
         "郵便番号",  # "post code"
     ]
 
-    email_keys = ["email", "contact-email", "email-address", "email1"]
+    email_keys = ["email", "contact-email", "email-address", "email1", "store-email"]
 
     phone_keys = [
         "phone-number",
@@ -86,6 +86,7 @@ class DictParser:
         "contact-number",
         "phone-no",
         "contact-phone",
+        "store-phone",
     ]
 
     lat_keys = [
@@ -126,7 +127,7 @@ class DictParser:
         item["lat"] = DictParser.get_first_key(location, DictParser.lat_keys)
         item["lon"] = DictParser.get_first_key(location, DictParser.lon_keys)
 
-        address = DictParser.get_first_key(obj, ["address", "addr", "storeaddress", "physicalAddress"])
+        address = DictParser.get_first_key(obj, ["address", "addr", "storeaddress", "physicalAddress", "full-address"])
 
         if address and isinstance(address, str):
             item["addr_full"] = address

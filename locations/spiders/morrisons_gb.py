@@ -1,16 +1,11 @@
-import string
+import re
 
 from scrapy import Spider
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
-from locations.items import Feature
-
-
-def set_operator(brand: {}, item: Feature):
-    item["extras"]["operator"] = brand.get("brand")
-    item["extras"]["operator:wikidata"] = brand.get("brand_wikidata")
+from locations.spiders.central_england_cooperative import set_operator
 
 
 class MorrisonsGBSpider(Spider):
@@ -25,6 +20,22 @@ class MorrisonsGBSpider(Spider):
     MORRISONS_DAILY = {"brand": "Morrisons Daily", "brand_wikidata": "Q99752411"}
     MORRISONS_SELECT = {"brand": "Morrisons Select", "brand_wikidata": "Q105221633"}
 
+    def create_slug(self, name: str) -> str:
+        a = "àáäâãåăæąçćčđďèéěėëêęğǵḧìíïîįłḿǹńňñòóöôœøṕŕřßşśšșťțùúüûǘůűūųẃẍÿýźžż·/_,:;"
+        b = "aaaaaaaaacccddeeeeeeegghiiiiilmnnnnooooooprrsssssttuuuuuuuuuwxyyzzz------"
+
+        slug = re.sub(r"\s+", "-", name.lower())
+
+        for old, new in zip(a, b):
+            slug = slug.replace(old, new)
+
+        slug = slug.replace("&", "-and-")
+        slug = re.sub(r"[^\w\-]+", "", slug)
+        slug = re.sub(r"\-\-+", "-", slug)
+        slug = slug.strip("-")
+
+        return slug
+
     def parse(self, response):
         for location in response.json()["stores"]:
             location["id"] = str(location.pop("name"))
@@ -33,8 +44,7 @@ class MorrisonsGBSpider(Spider):
                 filter(None, [location["address"].get("addressLine1"), location["address"].get("addressLine2")])
             )
             item["website"] = "https://my.morrisons.com/storefinder/{}/{}".format(
-                item["ref"],
-                location["storeName"].lower().translate(str.maketrans("", "", string.punctuation)).replace(" ", "-"),
+                item["ref"], self.create_slug(location["storeName"])
             )
 
             item["opening_hours"] = OpeningHours()

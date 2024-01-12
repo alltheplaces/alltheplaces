@@ -93,7 +93,7 @@ class KrogerUSSpider(SitemapSpider):
                 "phone": location["phoneNumber"].get("raw"),
                 "website": response.meta["url_map"][location["locationId"]],
                 "branch": location["vanityName"],
-                "extras": {"operator": location["legalName"]},
+                "operator": location["legalName"],
             }
 
             for url, brand in BRANDS.items():

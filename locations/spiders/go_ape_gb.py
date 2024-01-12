@@ -2,6 +2,7 @@ import re
 
 from scrapy.spiders import SitemapSpider
 
+from locations.categories import apply_category
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -14,5 +15,5 @@ class GoApeGB(SitemapSpider, StructuredDataSpider):
 
     def inspect_item(self, item, response):
         item["ref"] = re.match(self.sitemap_rules[0][0], response.url).group(1)
-
+        apply_category({"leisure": "sports_centre", "aerialway": "zip_line"}, item)
         yield item
