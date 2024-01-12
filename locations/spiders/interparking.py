@@ -5,15 +5,17 @@ from scrapy import FormRequest, Selector, Spider
 from locations.items import Feature
 
 
-class InterparkingBESpider(Spider):
-    name = "interparking_be"
+class InterparkingSpider(Spider):
+    name = "interparking"
     item_attributes = {"brand": "Interparking", "brand_wikidata": "Q1895863"}
+    countries = ['be', 'fr', 'fr', 'it', 'nl', 'pl', 'ro', 'es']
 
     def start_requests(self):
-        yield FormRequest(
-            url="https://www.interparking.be/en/find-parking/search-results/?keyword=",
-            formdata={"urlHash": "{}", "requestType": "FilterParkings"},
-        )
+        for country in self.countries:
+            yield FormRequest(
+                url=f"https://www.interparking.{country}/en/find-parking/search-results/?keyword=",
+                formdata={"urlHash": "{}", "requestType": "FilterParkings"},
+            )
 
     def parse(self, response, **kwargs):
         for location in response.json()["MapItems"]:
