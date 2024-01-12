@@ -2,7 +2,6 @@ from locations.categories import Categories, Extras, apply_category, apply_yes_n
 from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import Feature
 from locations.spiders.albertsons import AlbertsonsSpider
-from locations.spiders.arco import ArcoSpider
 from locations.spiders.caseys_general_store import CaseysGeneralStoreSpider
 from locations.spiders.chevron import ChevronSpider
 from locations.spiders.circle_k import CircleKSpider
@@ -15,6 +14,7 @@ from locations.spiders.giantfoodstores import GiantFoodStoresSpider
 from locations.spiders.godfathers_pizza import GodfathersPizzaSpider
 from locations.spiders.h_e_b_us import HEBUSSpider
 from locations.spiders.kroger_us import BRANDS as KROGER_BRANDS
+from locations.spiders.marathon_petroleum_us import MarathonPetroleumUSSpider
 from locations.spiders.marcs import MarcsSpider
 from locations.spiders.market_basket import MarketBasketSpider
 from locations.spiders.mcdonalds import McDonaldsSpider
@@ -77,8 +77,8 @@ class BMOSpider(Where2GetItSpider):
                 item["located_in"] = SevenElevenUSSpider.item_attributes["brand"]
                 item["located_in_wikidata"] = SevenElevenUSSpider.item_attributes["brand_wikidata"]
             elif item["name"] == "Arco":
-                item["located_in"] = ArcoSpider.item_attributes["brand"]
-                item["located_in_wikidata"] = ArcoSpider.item_attributes["brand_wikidata"]
+                item["located_in"] = MarathonPetroleumUSSpider.brands["ARCO"]["brand"]
+                item["located_in_wikidata"] = MarathonPetroleumUSSpider.brands["ARCO"]["brand_wikidata"]
             elif item["name"] == "Casey's":
                 item["located_in"] = CaseysGeneralStoreSpider.item_attributes["brand"]
                 item["located_in_wikidata"] = CaseysGeneralStoreSpider.item_attributes["brand_wikidata"]
