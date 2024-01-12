@@ -2,9 +2,9 @@ from locations.items import Feature
 
 
 class DictParser:
-    ref_keys = ["ref", "id", "store-id", "store-number", "shop-number", "location-id", "slug", "store-code"]
+    ref_keys = ["ref", "id", "store-id", "store-number", "shop-number", "location-id", "slug", "store-code", "item-id"]
 
-    name_keys = ["name", "store-name", "display-name", "title", "businessName"]
+    name_keys = ["name", "store-name", "display-name", "title", "business-name", "item-name"]
 
     house_number_keys = ["house-number", "house-no", "street-number", "street-no", "address-street-no"]
 
