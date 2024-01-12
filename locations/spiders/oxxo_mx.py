@@ -8,8 +8,8 @@ from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 
 
-class OXXOSpider(Spider):
-    name = "oxxo"
+class OxxoMXSpider(Spider):
+    name = "oxxo_mx"
     item_attributes = {"brand": "Oxxo", "brand_wikidata": "Q1342538"}
     allowed_domains = ["www.oxxo.com"]
     start_urls = ["https://www.oxxo.com/tiendas"]
