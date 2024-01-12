@@ -73,15 +73,19 @@ class Categories(Enum):
     SHOP_HAIRDRESSER_SUPPLY = {"shop": "hairdresser_supply"}
     SHOP_HARDWARE = {"shop": "hardware"}
     SHOP_HEARING_AIDS = {"shop": "hearing_aids"}
+    SHOP_HERBALIST = {"shop": "herbalist"}
     SHOP_HOUSEHOLD_LINEN = {"shop": "household_linen"}
     SHOP_HOUSEWARE = {"shop": "houseware"}
     SHOP_JEWELRY = {"shop": "jewelry"}
     SHOP_LAUNDRY = {"shop": "laundry"}
+    SHOP_MASSAGE = {"shop": "massage"}
+    SHOP_MEDICAL_SUPPLY = {"shop": "medical_supply"}
     SHOP_MOBILE_PHONE = {"shop": "mobile_phone"}
     SHOP_MONEY_LENDER = {"shop": "money_lender"}
     SHOP_MOTORCYCLE = {"shop": "motorcycle"}
     SHOP_MOTORCYCLE_REPAIR = {"shop": "motorcycle_repair"}
     SHOP_NEWSAGENT = {"shop": "newsagent"}
+    SHOP_NUTRITION_SUPPLEMENTS = {"shop": "nutrition_supplements"}
     SHOP_OPTICIAN = {"shop": "optician"}
     SHOP_OUTDOOR = {"shop": "outdoor"}
     SHOP_OUTPOST = {"shop": "outpost"}
@@ -114,10 +118,16 @@ class Categories(Enum):
     OFFICE_FINANCIAL = {"office": "financial"}
     OFFICE_IT = {"office": "it"}
 
+    ALTERNATIVE_MEDICINE = {"healthcare": "alternative"}
+    AMBULANCE_STATION = {"emergency": "ambulance_station"}
     ATM = {"amenity": "atm"}
+    AUDIOLOGIST = {"healthcare": "audiologist"}
     BANK = {"amenity": "bank"}
     BAR = {"amenity": "bar"}
     BENCH = {"amenity": "bench"}
+    BIRTHING_CENTRE = {"healthcare": "birthing_centre"}
+    BLOOD_BANK = {"healthcare": "blood_bank"}
+    BLOOD_DONATION = {"healthcare": "blood_donation"}
     BOAT_FUEL_STATION = {"waterway": "fuel"}
     BUREAU_DE_CHANGE = {"amenity": "bureau_de_change"}
     CAFE = {"amenity": "cafe"}
@@ -132,26 +142,41 @@ class Categories(Enum):
     COMMUNITY_CENTRE = {"amenity": "community_centre"}
     COMPRESSED_AIR = {"amenity": "compressed_air"}
     DENTIST = {"amenity": "dentist", "healthcare": "dentist"}
+    DEFIBRILLATOR = {"emergency": "defibrillator"}
+    DIALYSIS = {"healthcare": "dialysis"}
     DOCTOR_GP = {"amenity": "doctors", "healthcare": "doctor", "healthcare:speciality": "community"}
+    EMERGENCY_WARD = {"emergency": "emergency_ward_entrance"}
     FAST_FOOD = {"amenity": "fast_food"}
     FUEL_STATION = {"amenity": "fuel"}
     HOSPITAL = {"amenity": "hospital", "healthcare": "hospital"}
+    HOSPICE = {"healthcare": "hospice"}
     HOTEL = {"tourism": "hotel"}
     KINDERGARTEN = {"amenity": "kindergarten"}
     LIBRARY = {"amenity": "library"}
+    MEDICAL_LABORATORY = {"healthcare": "laboratory"}
     MONEY_TRANSFER = {"amenity": "money_transfer"}
     MOTEL = {"tourism": "motel"}
     MUSEUM = {"tourism": "museum"}
     NIGHTCLUB = {"amenity": "nightclub"}
+    NURSING_HOME = {"amenity": "social_facility", "social_facility": "nursing_home", "social_facility:for": "senior"}
+    NUTRITIONIST = {"healthcare": "nutrition_counselling"}
+    OPTOMETRIST = {"healthcare": "optometrist"}
     PHARMACY = {"amenity": "pharmacy", "healthcare": "pharmacy"}
     PARCEL_LOCKER = {"amenity": "parcel_locker"}
+    PHYSIOTHERAPIST = {"healthcare": "physiotherapist"}
+    PODIATRIST = {"healthcare": "podiatrist"}
     POST_BOX = {"amenity": "post_box"}
     POST_DEPOT = {"amenity": "post_depot"}
     POST_OFFICE = {"amenity": "post_office"}
     PRODUCT_PICKUP = {"amenity": "product_pickup"}
+    PSYCHOTHERAPIST = {"healthcare": "psychotherapist"}
     PUB = {"amenity": "pub"}
+    REHABILITATION = {"healthcare": "rehabilitation"}
+    SAMPLE_COLLECTION = {"healthcare": "sample_collection"}
+    SPEECH_THERAPIST = {"healthcare": "speech_therapist"}
     TELEPHONE = {"amenity": "telephone"}
     RESTAURANT = {"amenity": "restaurant"}
+    VACCINATION_CENTRE = {"healthcare": "vaccination_centre"}
     VETERINARY = {"amenity": "veterinary"}
     ANIMAL_BOARDING = {"amenity": "animal_boarding"}
 
@@ -173,7 +198,19 @@ class Categories(Enum):
     TRADE_SWIMMING_POOL_SUPPLIES = {"trade": "swimming_pool_supplies"}
 
 
-def apply_category(category, item):
+def apply_category(category, item: Feature):
+    """
+    Apply categories to a Feature, where categories can be supplied
+    as a single Enum, or dictionary of key-value strings. If a
+    value for the category key is already defined, the new value for
+    the category key is appended rather than overwritten. When
+    appending the new value, the list of values is sorted and each
+    value is separated with a semi-colon.
+    :param category: Either an Enum member representing a single
+                     category to add, or a dictionary of key-value
+                     strings representing multiple categories to add.
+    :param item: Feature to which categories should be added to.
+    """
     if isinstance(category, Enum):
         tags = category.value
     elif isinstance(category, dict):
@@ -218,6 +255,17 @@ top_level_tags = [
 
 
 def get_category_tags(source) -> {}:
+    """
+    Retreive OpenStreetMap top level tags from a Feature, Enum or
+    dict. All top level tags can exist on their own and do not
+    require the presence of other tags. If the Feature, Enum or dict
+    supplied contains other tags, these are ignored.
+    :param source: Either a Feature, Enum or dictionary which
+                   contains categories (such as "amenity": "pub").
+    :return: dictionary of OpenStreetMap top level tags, if any
+             exist within the supplied source object. Other tags
+             which are not top-level are ignored.
+    """
     if isinstance(source, Feature):
         tags = source.get("extras", {})
     elif isinstance(source, Enum):
@@ -234,8 +282,11 @@ def get_category_tags(source) -> {}:
     return categories or None
 
 
-# See: https://wiki.openstreetmap.org/wiki/Key:fuel#Examples
 class Fuel(Enum):
+    """
+    Fuel categories per https://wiki.openstreetmap.org/wiki/Key:fuel
+    """
+
     # Diesel
     DIESEL = "fuel:diesel"
     GTL_DIESEL = "fuel:GTL_diesel"
@@ -327,6 +378,10 @@ class Extras(Enum):
 
 
 class PaymentMethods(Enum):
+    """
+    Payment method categories per https://wiki.openstreetmap.org/wiki/Key:payment:*
+    """
+
     ALIPAY = "payment:alipay"
     AMERICAN_EXPRESS = "payment:american_express"
     AMERICAN_EXPRESS_CONTACTLESS = "payment:american_express_contactless"
@@ -379,6 +434,10 @@ class PaymentMethods(Enum):
 
 
 class FuelCards(Enum):
+    """
+    Fuel card categories per https://wiki.openstreetmap.org/wiki/Key:payment:*#Fuel_cards
+    """
+
     ALLSTAR = "payment:allstar"  # https://allstarcard.co.uk/
     AVIA = "payment:avia_card"  # https://www.aviaitalia.com/en/avia-card/
     ARIS = "payment:aris"
@@ -409,6 +468,10 @@ class FuelCards(Enum):
 
 
 class Access(Enum):
+    """
+    Access categories per https://wiki.openstreetmap.org/wiki/Key:access
+    """
+
     HGV = "hgv"
 
 
@@ -439,6 +502,10 @@ def apply_yes_no(attribute, item: Feature, state: bool, apply_positive_only: boo
 
 
 class Clothes(Enum):
+    """
+    Clothing categories per https://wiki.openstreetmap.org/wiki/Key:clothes
+    """
+
     BABY = "babies"
     CHILDREN = "children"
     MATERNITY = "maternity"
@@ -447,7 +514,133 @@ class Clothes(Enum):
     WOMEN = "women"
 
 
-def apply_clothes(clothes: [str], item: Feature):
+def apply_clothes(clothes: [Clothes], item: Feature):
+    """
+    Apply clothing categories to a Feature. If the Feature
+    already has clothing categories defined, this function will
+    append to the list of clothing categories rather than
+    overwriting existing clothing categories. When appending,
+    the list of clothing categories is sorted and then each value
+    is separated with a semi-colon.
+    :param clothes: array of Clothes Enum members
+    :param item: Feature which should have clothing categories applied.
+    """
     for c in clothes:
-        apply_yes_no(f"clothes:{c}", item, True)
-    item["extras"]["clothes"] = ";".join(clothes)
+        apply_yes_no(f"clothes:{c.value}", item, True)
+        apply_category({"clothes": c.value}, item)
+
+
+class HealthcareSpecialities(Enum):
+    """
+    Healthcare speciality categories per https://wiki.openstreetmap.org/wiki/Key:healthcare:speciality
+    """
+
+    ABORTION = "abortion"
+    ACUPUNCTURE = "acupuncture"
+    ALLERGOLOGY = "allergoloy"
+    ANAESTHETICS = "anaesthetics"
+    ANTRHOPOSOPHICAL = "anthroposophical"
+    APPLIED_KINESIOLOGY = "applied_kinesiology"
+    AROMATHERAPY = "aromatherapy"
+    AYUREVDA = "ayurveda"
+    BARIATRIC_SURGERY = "bariatric_surgery"
+    BIOLOGY = "biology"
+    BIOCHEMISTRY = "biochemistry"
+    BLOOD_CHECK = "blood_check"
+    CARDIOLOGY = "cardiology"
+    CARDIOTHORACIC_SURGERY = "cardiothoracic_surgery"
+    CHILD_PSYCHIATRY = "child_psychiatry"
+    CHIROPRATIC = "chiropractic"
+    CLINICAL_PATHOLOGY = "clinical_pathology"
+    COMMUNITY = "community"
+    DERMATOLOGY = "dermatology"
+    DERMATOVENEREOLOGY = "dermatovenereology"
+    DIAGNOSTIC_RADIOLOGY = "diagnostic_radiology"
+    EMERGENCY = "emergency"
+    ENDOCRINOLOGY = "endocrinology"
+    ENDODONTICS = "endodontics"
+    FERTILITY = "fertility"
+    GASTROENTEROLOGY = "gastroenterology"
+    GENERAL = "general"
+    GERIATRICS = "geriatrics"
+    GYNAECOLOGY = "gynaecology"
+    HAEMATOLOGY = "haematology"
+    HEPATOLOGY = "hepatology"
+    HERBALISM = "herbalism"
+    HOMEOPATHY = "homeopathy"
+    HYDROTHERAPY = "hydrotherapy"
+    HYPNOSIS = "hypnosis"
+    IMPLANTOLOGY = "implantology"
+    INFECTIOUS_DISEASES = "infectious_diseases"
+    INTENSIVE = "intensive"
+    INTERNAL = "internal"
+    MAXILLOFACIAL = "dental_oral_maxillo_facial_surgery"
+    NATUROPATHY = "naturopathy"
+    NEONATOLOGY = "neonatology"
+    NEPHROLOGY = "nephrology"
+    NEUROLOGY = "neurology"
+    NEUROPSYCHIATRY = "neuropsychiatry"
+    NEUROSURGERY = "neurosurgery"
+    NUCLEAR = "nuclear"
+    OBSTRETIC_ULTRASONOGRAPHY = "obstetric_ultrasonography"
+    OCCUPATIONAL = "occupational"
+    ONCOLOGY = "oncology"
+    OPHTHALMOLOGY = "ophthalmology"
+    ORTHODONTICS = "orthodontics"
+    ORTHOPAEDICS = "orthopaedics"
+    OSTEOPATHY = "osteopathy"
+    OTOLARYNGOLOGY = "otolaryngology"
+    PAEDIATRIC_DENTISTRY = "paediatric_dentistry"
+    PAEDIATRIC_SURGERY = "paediatric_surgery"
+    PAEDIATRICS = "paediatrics"
+    PAIN_MEDICINE = "pain_control"
+    PALLIATIVE = "palliative"
+    PATHOLOGY = "pathology"
+    PERIODONTICS = "periodontics"
+    PHYSIATRY = "physiatry"
+    PLASTIC_SURGERY = "plastic_surgery"
+    PODIATRY = "podiatry"
+    PROCTOLOGY = "proctology"
+    PSYCHIATRY = "psychiatry"
+    PSYCHOTHERAPHY_BEHAVIOR = "behavior"
+    PSYCHOTHERAPHY_BODY = "body"
+    PSYCHOTHERAPHY_DEPTH = "depth"
+    PSYCHOTHERAPHY_HUMANISTIC = "humanistic"
+    PSYCHOTHERAPHY_SYSTEMIC = "systemic"
+    PULMONOLOGY = "pulmonology"
+    RADIOLOGY = "radiology"
+    RADIOTHERAPY = "radiotherapy"
+    REFLEXOLOGY = "reflexology"
+    REHABILITATION = "rehabilitation"
+    REIKI = "reiki"
+    RHEUMATOLOGY = "rheumatology"
+    SHIATSU = "shiatsu"
+    SLEEP_MEDICINE = "sleep"
+    STOMATOLOGY = "stomatology"
+    SURGERY = "surgery"
+    TRADITIONAL_CHINESE_MEDICINE = "traditional_chinese_medicine"
+    TRANSPLANT = "transplant"
+    TRAUMA = "trauma"
+    TROPICAL = "tropical"
+    TUINA = "tuina"
+    UNANI = "unani"
+    UROLOGY = "urology"
+    VACCINATION = "vaccination"
+    VASCULAR_SURGERY = "vascular_surgery"
+    VENEREOLOGY = "venereology"
+    WOUND_TREATMENT = "wound_treatment"
+
+
+def apply_healthcare_specialities(specialities: [HealthcareSpecialities], item: Feature):
+    """
+    Apply healthcare specialities to a Feature. If the Feature
+    already has healthcare specialities defined, this function will
+    append to the list of healthcare specialities rather than
+    overwriting existing healthcare specialities. When appending,
+    the list of healthcare specialities is sorted and then each
+    value is separated with a semi-colon.
+    :param clothes: array of HealthcareSpecialities Enum members
+    :param item: Feature which should have healthcare specialities applied.
+    """
+    for s in specialities:
+        apply_category({"healthcare:speciality": s.value}, item)
