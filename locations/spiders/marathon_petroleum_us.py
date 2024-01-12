@@ -1,7 +1,7 @@
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
-from locations.categories import apply_category, apply_yes_no, Categories, Fuel
+from locations.categories import Categories, Fuel, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 
 
@@ -12,7 +12,9 @@ class MarathonPetroleumUSSpider(Spider):
         "MARATHON": {"brand": "Marathon", "brand_wikidata": "Q458363"},
     }
     allowed_domains = ["devmarathon.dialogs8.com"]
-    start_urls = ["https://devmarathon.dialogs8.com/ajax_stations_search.html?reason=get-station-info&reason=get-station-info"]
+    start_urls = [
+        "https://devmarathon.dialogs8.com/ajax_stations_search.html?reason=get-station-info&reason=get-station-info"
+    ]
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def start_requests(self):
@@ -26,7 +28,9 @@ class MarathonPetroleumUSSpider(Spider):
             if location["site_brand"] in self.brands.keys():
                 item.update(self.brands[location["site_brand"]])
             apply_category(Categories.FUEL_STATION, item)
-            fuel_types_raw = list(map(str.upper, map(str.strip, [fuel["description"] for fuel in location.get("price_data", [])])))
+            fuel_types_raw = list(
+                map(str.upper, map(str.strip, [fuel["description"] for fuel in location.get("price_data", [])]))
+            )
             fuel_types_matched = []
             for fuel_type in fuel_types_raw:
                 match fuel_type:
