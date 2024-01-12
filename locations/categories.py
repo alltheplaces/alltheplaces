@@ -297,6 +297,7 @@ class Fuel(Enum):
     # Octane levels
     OCTANE_80 = "fuel:octane_80"
     OCTANE_87 = "fuel:octane_87"
+    OCTANE_88 = "fuel:octane_88"
     OCTANE_89 = "fuel:octane_89"
     OCTANE_90 = "fuel:octane_90"
     OCTANE_91 = "fuel:octane_91"
@@ -304,6 +305,7 @@ class Fuel(Enum):
     OCTANE_93 = "fuel:octane_93"
     OCTANE_94 = "fuel:octane_94"
     OCTANE_95 = "fuel:octane_95"
+    OCTANE_96 = "fuel:octane_96"
     OCTANE_97 = "fuel:octane_97"
     OCTANE_98 = "fuel:octane_98"
     OCTANE_99 = "fuel:octane_99"
@@ -316,6 +318,7 @@ class Fuel(Enum):
     E30 = "fuel:e30"
     E85 = "fuel:e85"
     ETHANOL_FREE = "fuel:ethanol_free"
+    METHANOL = "fuel:methanol"
     BIOGAS = "fuel:biogas"
     LPG = "fuel:lpg"
     CNG = "fuel:cng"
