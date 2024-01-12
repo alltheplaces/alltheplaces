@@ -20,9 +20,9 @@ class FiveGuysSpider(SitemapSpider, StructuredDataSpider):
         "https://restaurants.fiveguys.ca/sitemap.xml",
         "https://restaurants.fiveguys.ch/sitemap.xml",
         "https://restaurants.fiveguys.cn/sitemap.xml",
-        #"https://restaurants.fiveguys.de/sitemap.xml",
-        #"https://restaurantes.fiveguys.es/sitemap.xml",
-        #"https://restaurants.fiveguys.fr/sitemap.xml",
+        # "https://restaurants.fiveguys.de/sitemap.xml",
+        # "https://restaurantes.fiveguys.es/sitemap.xml",
+        # "https://restaurants.fiveguys.fr/sitemap.xml",
         "https://restaurants.fiveguys.com.hk/sitemap.xml",
         "https://restaurants.fiveguys.ie/sitemap.xml",
         "https://restaurants.fiveguys.co.kr/sitemap.xml",
@@ -35,7 +35,7 @@ class FiveGuysSpider(SitemapSpider, StructuredDataSpider):
         "https://restaurants.fiveguys.qa/sitemap.xml",
         "https://restaurants.fiveguys.sa/sitemap.xml",
         "https://restaurants.fiveguys.sg/sitemap.xml",
-        #"https://restaurants.fiveguys.co.uk/sitemap.xml",
+        # "https://restaurants.fiveguys.co.uk/sitemap.xml",
     ]
     sitemap_rules = [
         (r"^https://restaurants\.fiveguys\.com\/[^/]+$", "parse_sd"),
@@ -47,9 +47,9 @@ class FiveGuysSpider(SitemapSpider, StructuredDataSpider):
         (r"^https://restaurants\.fiveguys\.ca\/[^/]+$", "parse_sd"),
         (r"^https://restaurants\.fiveguys\.ch\/en_ch\/[^/]+$", "parse_sd"),
         (r"^https://restaurants\.fiveguys\.cn\/en\/[^/]+$", "parse_sd"),
-        #(r"^https://restaurants\.fiveguys\.de\/[^/]+\/[^/]+$", "parse_sd"),
-        #(r"^https://restaurants\.fiveguys\.es\/[^/]+\/[^/]+$", "parse_sd"),
-        #(r"^https://restaurants\.fiveguys\.fr\/[^/]+\/[^/]+$", "parse_sd"),
+        # (r"^https://restaurants\.fiveguys\.de\/[^/]+\/[^/]+$", "parse_sd"),
+        # (r"^https://restaurants\.fiveguys\.es\/[^/]+\/[^/]+$", "parse_sd"),
+        # (r"^https://restaurants\.fiveguys\.fr\/[^/]+\/[^/]+$", "parse_sd"),
         ("^https://restaurants\.fiveguys\.com\.hk\/en_hk\/(?!search$)[^/]+$", "parse_sd"),
         (r"^https://restaurants\.fiveguys\.ie\/[^/]+$", "parse_sd"),
         (r"^https://restaurants\.fiveguys\.co\.kr\/en\/(?!search$)[^/]+$", "parse_sd"),
@@ -62,6 +62,6 @@ class FiveGuysSpider(SitemapSpider, StructuredDataSpider):
         (r"^https://restaurants\.fiveguys\.qa\/en_qa\/[^/]+$", "parse_sd"),
         (r"^https://restaurants\.fiveguys\.sa\/en_sa\/[^/]+$", "parse_sd"),
         (r"^https://restaurants\.fiveguys\.sg\/[^/]+$", "parse_sd"),
-        #(r"^https://restaurants\.fiveguys\.co\.uk\/.+$", "parse_sd"),
+        # (r"^https://restaurants\.fiveguys\.co\.uk\/.+$", "parse_sd"),
     ]
     download_delay = 0.5
