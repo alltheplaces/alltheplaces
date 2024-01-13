@@ -1,7 +1,7 @@
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
-from locations.categories import apply_category, Categories
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
 
@@ -9,7 +9,9 @@ class RepsolPESpider(Spider):
     name = "repsol_pe"
     item_attributes = {"brand": "Repsol", "brand_wikidata": "Q174747"}
     allowed_domains = ["www.repsol.pe"]
-    start_urls = ["https://www.repsol.pe/content/dam/aplicaciones/repsol-paises/pe/es/estaciones-de-servicio/data/data.json"]
+    start_urls = [
+        "https://www.repsol.pe/content/dam/aplicaciones/repsol-paises/pe/es/estaciones-de-servicio/data/data.json"
+    ]
 
     def start_requests(self):
         for url in self.start_urls:
