@@ -1,9 +1,9 @@
-from chompjs import parse_js_object
 from html import unescape
 
+from chompjs import parse_js_object
 from scrapy import Spider
 
-from locations.categories import apply_category, apply_yes_no, Categories, Fuel
+from locations.categories import Categories, Fuel, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
@@ -30,10 +30,19 @@ class RepsolPTSpider(Spider):
             fuel_types = [fuel_type["text"] for fuel_type in location.get("products", [])]
             if len(fuel_types) > 0:
                 apply_yes_no(Fuel.OCTANE_91, item, "Gasóleo" in fuel_types, False)
-                apply_yes_no(Fuel.OCTANE_95, item, "Gasolina Efitec 95" in fuel_types or "Gasolina S/Chumbo 95" in fuel_types or "Ef 95 Premium" in fuel_types, False)
+                apply_yes_no(
+                    Fuel.OCTANE_95,
+                    item,
+                    "Gasolina Efitec 95" in fuel_types
+                    or "Gasolina S/Chumbo 95" in fuel_types
+                    or "Ef 95 Premium" in fuel_types,
+                    False,
+                )
                 apply_yes_no(Fuel.OCTANE_98, item, "Gasolina Efitec 98" in fuel_types, False)
-                apply_yes_no(Fuel.DIESEL, item, "Repsol Diesel E+ 10" in fuel_types or "AGRODIESEL e+10" in fuel_types, False)
+                apply_yes_no(
+                    Fuel.DIESEL, item, "Repsol Diesel E+ 10" in fuel_types or "AGRODIESEL e+10" in fuel_types, False
+                )
                 apply_yes_no(Fuel.BIODIESEL, item, "Diesel 100% Renovável" in fuel_types, False)
-                apply_yes_no(Fuel.LPG , item, "Autogás" in fuel_types, False)
+                apply_yes_no(Fuel.LPG, item, "Autogás" in fuel_types, False)
                 apply_yes_no(Fuel.ADBLUE, item, "Adblue Granel" in fuel_types, False)
             yield item
