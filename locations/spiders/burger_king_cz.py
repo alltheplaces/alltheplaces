@@ -1,7 +1,6 @@
-from unidecode import unidecode
-
 from scrapy import Spider
 from scrapy.http import JsonRequest
+from unidecode import unidecode
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
@@ -17,7 +16,9 @@ class BurgerKingCZSpider(Spider):
     def parse(self, response):
         next_build_manifest = response.xpath('//script[contains(@src, "/_buildManifest.js")]/@src').get()
         next_build_id = next_build_manifest.replace("/_next/static/", "").replace("/_buildManifest.js", "")
-        yield JsonRequest(url=f"https://burgerking.cz/_next/data/{next_build_id}/restaurants.json", callback=self.parse_locations)
+        yield JsonRequest(
+            url=f"https://burgerking.cz/_next/data/{next_build_id}/restaurants.json", callback=self.parse_locations
+        )
 
     def parse_locations(self, response):
         for ref, location in response.json()["pageProps"]["initialState"]["restaurant"]["restaurants"].items():
@@ -25,7 +26,9 @@ class BurgerKingCZSpider(Spider):
                 continue
             item = DictParser.parse(location)
             item["housenumber"] = location["address"]["number"]
-            item["website"] = "https://burgerking.cz/restaurants/" + unidecode(location["name"]).lower().replace(" ", "-")
+            item["website"] = "https://burgerking.cz/restaurants/" + unidecode(location["name"]).lower().replace(
+                " ", "-"
+            )
             item["opening_hours"] = OpeningHours()
             hours_string = ""
             for day_name, day_hours in location["weeklyWorkingHours"].items():
