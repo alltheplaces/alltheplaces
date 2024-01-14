@@ -1,4 +1,3 @@
-from categories import Extras, apply_yes_no
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
