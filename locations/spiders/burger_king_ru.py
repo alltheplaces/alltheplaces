@@ -1,5 +1,4 @@
-from scrapy import Spider
-from scrapy.http import JsonRequest
+from scrapy import Request, Spider
 
 from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
@@ -17,7 +16,7 @@ class BurgerKingRUSpider(Spider):
 
     def start_requests(self):
         for url in self.start_urls:
-            yield JsonRequest(url=url)
+            yield Request(url=url)
 
     def parse(self, response):
         for location in response.json()["response"]["list"]:
