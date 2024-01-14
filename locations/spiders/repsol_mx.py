@@ -20,6 +20,8 @@ class RepsolMXSpider(Spider):
     def parse(self, response):
         for location in response.json():
             item = DictParser.parse(location)
+            # The latitude and longitude values in the JSON are flipped
+            item["lat"], item["lon"] = item["lon"], item["lat"]
             item["ref"] = location["subTitle"].split(" - ", 1)[0]
             item["street_address"] = item.pop("addr_full", None)
             item["postcode"] = location["cp"]
