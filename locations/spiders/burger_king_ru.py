@@ -1,7 +1,7 @@
+from categories import Extras, apply_yes_no
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
-from categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 from locations.user_agents import BROWSER_DEFAULT
