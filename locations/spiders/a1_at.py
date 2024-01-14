@@ -10,6 +10,7 @@ class A1ATSpider(Spider):
     item_attributes = {"brand": "A1", "brand_wikidata": "Q688755"}
     allowed_domains = ["www.a1.net"]
     start_urls = ["https://www.a1.net/o/gucci/widgets/apis/shopfinder/bff/microservice-shopfinder/shop/basicData"]
+    requires_proxy = "AT"
 
     def start_requests(self):
         for url in self.start_urls:
