@@ -87,7 +87,6 @@ if __name__ == "__main__":
                     run_data["total_lines"] = sum(s["features"] for s in stats["results"])
             except json.decoder.JSONDecodeError:
                 print(f"Couldn't decode {stats_json}, skipping")
-                pass
 
         insights_suffix = f"runs/{run_id}/stats/_insights.json"
         if object_exists(client, bucket_name, insights_suffix):

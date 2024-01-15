@@ -1,7 +1,7 @@
 from scrapy.http import JsonRequest
 from scrapy.spiders import Spider
 
-from locations.categories import Categories, apply_category
+from locations.categories import apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 

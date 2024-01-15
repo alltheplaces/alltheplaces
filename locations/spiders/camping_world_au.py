@@ -1,13 +1,18 @@
 from scrapy import Selector, Spider
 from scrapy.http import JsonRequest
 
+from locations.categories import Categories
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
 
 class CampingWorldAUSpider(Spider):
     name = "camping_world_au"
-    item_attributes = {"brand": "Camping World", "brand_wikidata": "Q124062618"}
+    item_attributes = {
+        "brand": "Camping World",
+        "brand_wikidata": "Q124062618",
+        "extras": Categories.SHOP_OUTDOOR.value,
+    }
     allowed_domains = ["www.campingworld.com.au"]
     start_urls = [
         "https://www.campingworld.com.au/index.php?hcs=locatoraid&hcrand=3018&hca=search:search//product/_PRODUCT_/lat//lng//limit/1000"
