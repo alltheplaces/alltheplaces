@@ -4,6 +4,7 @@ from scrapy import Spider
 from scrapy.http import Response
 
 from locations.dict_parser import DictParser
+from locations.items import set_closed
 from locations.spiders.vapestore_gb import clean_address
 
 
@@ -26,5 +27,8 @@ class BeefeaterGBSpider(Spider):
             )
             item["website"] = response.urljoin(location["path"])
             item["phone"] = location["contactInfo"]
+
+            if "closed-sites" in item["website"]:
+                set_closed(item)
 
             yield item
