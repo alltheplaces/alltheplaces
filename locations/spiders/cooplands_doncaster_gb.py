@@ -1,5 +1,6 @@
 import scrapy
 
+from locations.categories import Categories
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 from locations.spiders.vapestore_gb import clean_address
@@ -8,10 +9,7 @@ from locations.spiders.vapestore_gb import clean_address
 class CooplandsDoncasterGBSpider(scrapy.Spider):
     name = "cooplands_doncaster_gb"
     allowed_domains = ["cooplands.co.uk"]
-    item_attributes = {
-        "brand": "Cooplands",
-        "brand_wikidata": "Q5167971",
-    }
+    item_attributes = {"brand": "Cooplands", "brand_wikidata": "Q96622197", "extras": Categories.SHOP_BAKERY.value}
     start_urls = ["https://cooplands.co.uk/shop-locations"]
 
     def __init__(self):
