@@ -23,5 +23,5 @@ class RetravisionAUSpider(SitemapSpider, StructuredDataSpider):
 
     def post_process_item(self, item, response, ld_data):
         item.pop("facebook")
-        item.pop("image")
+        item.pop("image", "")
         yield item
