@@ -5,13 +5,12 @@ from locations.items import Feature
 from locations.spiders.vapestore_gb import clean_address
 
 
-class CooplandsDoncasterSpider(scrapy.Spider):
-    name = "cooplands_doncaster"
+class CooplandsDoncasterGBSpider(scrapy.Spider):
+    name = "cooplands_doncaster_gb"
     allowed_domains = ["cooplands.co.uk"]
     item_attributes = {
         "brand": "Cooplands",
-        "brand_wikidata": "Q96622197",
-        "country": "GB",
+        "brand_wikidata": "Q5167971",
     }
     start_urls = ["https://cooplands.co.uk/shop-locations"]
 
