@@ -1,5 +1,4 @@
 from chompjs import parse_js_object
-
 from scrapy import Spider
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
@@ -20,17 +19,42 @@ class BiggbyCoffeeUSSpider(Spider):
             if location["acf"]["store_coming_soon"]:
                 continue
             item = DictParser.parse(location["acf"])
-            item["street_address"] = ", ".join(filter(None, map(str.strip, [location["acf"]["address_one"], location["acf"]["address_two"]])))
+            item["street_address"] = ", ".join(
+                filter(None, map(str.strip, [location["acf"]["address_one"], location["acf"]["address_two"]]))
+            )
             if location["acf"].get("location_map"):
                 item["addr_full"] = location["acf"]["location_map"]["address"]
                 item["lat"] = location["acf"]["location_map"]["lat"]
                 item["lon"] = location["acf"]["location_map"]["lng"]
             if location["acf"].get("monday_thru_thurs_open_hour"):
                 item["opening_hours"] = OpeningHours()
-                hours_string = "Mo-Th: " + location["acf"].get("monday_thru_thurs_open_hour", "") + " - " + location["acf"].get("mon_thru_thurs_close_hour", "")
-                hours_string = hours_string + " Fr: " + location["acf"].get("friday_open_hour", "") + " - " + location["acf"].get("friday_close_hour", "")
-                hours_string = hours_string + " Sa: " + location["acf"].get("sat_open_hour", "") + " - " + location["acf"].get("sat_close_hour", "")
-                hours_string = hours_string + " Su: " + location["acf"].get("sun_open_hour", "") + " - " + location["acf"].get("sun_close_hour", "")
+                hours_string = (
+                    "Mo-Th: "
+                    + location["acf"].get("monday_thru_thurs_open_hour", "")
+                    + " - "
+                    + location["acf"].get("mon_thru_thurs_close_hour", "")
+                )
+                hours_string = (
+                    hours_string
+                    + " Fr: "
+                    + location["acf"].get("friday_open_hour", "")
+                    + " - "
+                    + location["acf"].get("friday_close_hour", "")
+                )
+                hours_string = (
+                    hours_string
+                    + " Sa: "
+                    + location["acf"].get("sat_open_hour", "")
+                    + " - "
+                    + location["acf"].get("sat_close_hour", "")
+                )
+                hours_string = (
+                    hours_string
+                    + " Su: "
+                    + location["acf"].get("sun_open_hour", "")
+                    + " - "
+                    + location["acf"].get("sun_close_hour", "")
+                )
                 item["opening_hours"].add_ranges_from_string(hours_string)
             apply_category(Categories.CAFE, item)
             apply_yes_no(Extras.WIFI, item, location["acf"]["wifi"], False)
