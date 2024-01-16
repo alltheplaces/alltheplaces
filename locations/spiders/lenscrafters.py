@@ -2,13 +2,14 @@ import re
 
 import scrapy
 
+from locations.categories import Categories
 from locations.hours import OpeningHours
 from locations.items import Feature
 
 
 class LensCraftersSpider(scrapy.Spider):
     name = "lenscrafters"
-    item_attributes = {"brand": "Lenscrafters", "brand_wikidata": "Q6523209"}
+    item_attributes = {"brand": "Lenscrafters", "brand_wikidata": "Q6523209", "extras": Categories.SHOP_OPTICIAN.value}
     allowed_domains = ["local.lenscrafters.com"]
     start_urls = ["https://local.lenscrafters.com/"]
 
