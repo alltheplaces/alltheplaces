@@ -12,7 +12,7 @@ from locations.hours import OpeningHours
 
 class WesternUnionSpider(Spider):
     name = "western_union"
-    item_attributes = {"brand": "Western Union", "brand_wikidata": "Q861042", "extras": Categories.MONEY_TRANSFER.value}
+    item_attributes = {"brand": "Western Union", "brand_wikidata": "Q861042", "extras": {"money_transfer": "western_union"}}
     allowed_domains = ["www.westernunion.com"]
     # start_urls[0] is a GraphQL endpoint.
     start_urls = ["https://www.westernunion.com/router/"]
