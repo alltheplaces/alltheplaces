@@ -470,6 +470,7 @@ NAMED_TIMES_EN = {
 
 NAMED_DAY_RANGES_RU = {
     "Ежедневно": ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"],  # Daily
+    "Eжедн": ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"],  # Daily
     "По Будням": ["Mo", "Tu", "We", "Th", "Fr"],  # Weekdays
     "По Выходным": ["Sa", "Su"],  # Weekends
 }
