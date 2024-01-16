@@ -1,3 +1,4 @@
+from locations.categories import Categories, apply_category
 from locations.hours import DAYS_FULL, OpeningHours
 from locations.storefinders.storelocatorwidgets import StoreLocatorWidgetsSpider
 
@@ -26,4 +27,5 @@ class AmericasKidsUSSpider(StoreLocatorWidgetsSpider):
                 hours_string = f"{hours_string} {day_name}: {time_range}"
         item["opening_hours"] = OpeningHours()
         item["opening_hours"].add_ranges_from_string(hours_string)
+        apply_category(Categories.SHOP_CLOTHES, item)
         yield item
