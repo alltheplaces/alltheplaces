@@ -3,6 +3,7 @@ import re
 import chompjs
 import scrapy
 
+from locations.categories import Categories
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours, day_range
 from locations.spiders.vapestore_gb import clean_address
@@ -10,7 +11,11 @@ from locations.spiders.vapestore_gb import clean_address
 
 class TheFreshGrocerSpider(scrapy.Spider):
     name = "the_fresh_grocer_us"
-    item_attributes = {"brand": "The Fresh Grocer", "brand_wikidata": "Q18389721"}
+    item_attributes = {
+        "brand": "The Fresh Grocer",
+        "brand_wikidata": "Q18389721",
+        "extras": Categories.SHOP_SUPERMARKET.value,
+    }
     start_urls = ["https://www.thefreshgrocer.com/"]
     requires_proxy = True
 
