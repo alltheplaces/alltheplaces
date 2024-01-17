@@ -52,7 +52,7 @@ class VkusvillRUSpider(Spider):
                     # Opening soon
                     continue
                 item = DictParser.parse(poi)
-                # remove darkstore word from address
+                # Remove darkstore word from address
                 item["street_address"] = item.pop("addr_full", "").replace("Даркстор", "").strip()
                 item["phone"] = poi.get("PHONE", [None])[0]
                 icon = shop_point.get("options", {}).get("iconImageHref", "")
