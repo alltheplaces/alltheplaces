@@ -36,6 +36,8 @@ class Categories(Enum):
     CRAFT_TAILOR = {"craft": "tailor"}
     CRAFT_SHOEMAKER = {"craft": "shoemaker"}
 
+    DARK_STORE_GROCERY = {"dark_store": "grocery"}
+
     LEISURE_PLAYGROUND = {"leisure": "playground"}
     LEISURE_RESORT = {"leisure": "resort"}
 
@@ -184,6 +186,7 @@ class Categories(Enum):
 
     VENDING_MACHINE_BICYCLE_TUBE = {"amenity": "vending_machine", "vending": "bicycle_tube"}
     VENDING_MACHINE_COFFEE = {"amenity": "vending_machine", "vending": "coffee"}
+    VENDING_MACHINE_FOOD = {"amenity": "vending_machine", "vending": "food"}
 
     TRADE_AGRICULTURAL_SUPPLIES = {"trade": "agricultural_supplies"}
     TRADE_BATHROOM = {"trade": "bathroom"}
@@ -237,6 +240,7 @@ top_level_tags = [
     "amenity",
     "club",
     "craft",
+    "dark_store",
     "emergency",
     "healthcare",
     "highway",
