@@ -1,12 +1,17 @@
 from scrapy import Selector, Spider
 
+from locations.categories import Categories
 from locations.hours import OpeningHours
 from locations.items import Feature
 
 
 class ClarkRubberAUSpider(Spider):
     name = "clark_rubber_au"
-    item_attributes = {"brand": "Clark Rubber", "brand_wikidata": "Q124003720"}
+    item_attributes = {
+        "brand": "Clark Rubber",
+        "brand_wikidata": "Q124003720",
+        "extras": Categories.SHOP_HOUSEWARE.value,
+    }
     allowed_domains = ["www.clarkrubber.com.au"]
     start_urls = ["https://www.clarkrubber.com.au/files/maps/locations.json"]
 
