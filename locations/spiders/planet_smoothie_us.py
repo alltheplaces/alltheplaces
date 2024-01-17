@@ -18,6 +18,7 @@ class PlanetSmoothieUSSpider(Spider):
         for location_raw in re.findall(r"Locator\.stores\[\d+\] = ({.+})", response.text):
             location = json.loads(location_raw)
             item = DictParser.parse(location)
+            item["branch"] = item.pop("name")
             item.pop("addr_full")
             item["street_address"] = clean_address([location["Address"]])
             item["website"] = "https://www.planetsmoothie.com/stores/{}/{}".format(
