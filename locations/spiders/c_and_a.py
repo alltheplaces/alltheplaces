@@ -1,8 +1,7 @@
 import json
+import re
 
 import scrapy
-
-import re
 
 from locations.items import Feature
 
@@ -32,7 +31,7 @@ class CAndASpider(scrapy.Spider):
         "https://www.c-and-a.com/stores/rs-rs/index.html",
     )
 
-    postcode_pattern = r'^(\d+[- ]?(?:\d+|[A-Z]{2})) (.*)$'
+    postcode_pattern = r"^(\d+[- ]?(?:\d+|[A-Z]{2})) (.*)$"
 
     def parse(self, response):
         pages = response.xpath(
