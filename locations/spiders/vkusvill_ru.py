@@ -33,7 +33,7 @@ class VkusvillRUSpider(Spider):
         for subdomain in subdomains:
             # The first subdomain is empty, but it's actually for Moscow
             if subdomain == "":
-                url = f"https://vkusvill.ru/shops"
+                url = "https://vkusvill.ru/shops"
             else:
                 url = f"https://{subdomain}.vkusvill.ru/shops"
             yield Request(
