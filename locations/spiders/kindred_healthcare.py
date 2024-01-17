@@ -9,9 +9,9 @@ from locations.items import Feature
 class KindredHealthcareSpider(scrapy.Spider):
     name = "kindred_healthcare"
     item_attributes = {"brand": "Kindred Healthcare", "brand_wikidata": "Q921363"}
-    allowed_domains = ["www.kindredhealthcare.com"]
+    allowed_domains = ["www.kindredhospitals.com"]
     start_urls = [
-        "https://www.kindredhealthcare.com/sitemap/sitemap.xml",
+        "https://www.kindredhospitals.com/sitemap/sitemap.xml",
     ]
     download_delay = 0.3
 
@@ -36,7 +36,7 @@ class KindredHealthcareSpider(scrapy.Spider):
             properties = {
                 "name": data["name"],
                 "ref": ref,
-                "addr_full": data["address"]["streetAddress"],
+                "street_address": data["address"]["streetAddress"],
                 "city": data["address"]["addressLocality"],
                 "state": data["address"]["addressRegion"],
                 "postcode": data["address"]["postalCode"],

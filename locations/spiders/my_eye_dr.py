@@ -7,7 +7,7 @@ from locations.items import Feature
 
 class MyEyeDrSpider(scrapy.Spider):
     name = "my_eye_dr"
-    item_attributes = {"brand": "MyEyeDr."}
+    item_attributes = {"brand": "MyEyeDr.", "brand_wikidata": "Q117864710"}
     allowed_domains = ["myeyedr.com"]
     start_urls = [
         "https://locations.myeyedr.com/index.html",
@@ -32,7 +32,9 @@ class MyEyeDrSpider(scrapy.Spider):
         properties = {
             "ref": ref,
             "name": "".join(response.xpath('//h1[@class="Hero-title"]//text()').extract()),
-            "addr_full": response.xpath('normalize-space(//span[@class="c-address-street-1"]//text())').extract_first(),
+            "street_address": response.xpath(
+                'normalize-space(//span[@class="c-address-street-1"]//text())'
+            ).extract_first(),
             "city": response.xpath('normalize-space(//span[@class="c-address-city"]//text())').extract_first(),
             "state": response.xpath('normalize-space(//abbr[@class="c-address-state"]//text())').extract_first(),
             "postcode": response.xpath(

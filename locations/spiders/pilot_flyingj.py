@@ -28,7 +28,7 @@ class PilotFlyingJSpider(scrapy.Spider):
             "lon": item.xpath('//*[@itemprop="longitude"]/@content').get(),
             "name": store["name"],
             "website": response.url,
-            "addr_full": store["address"]["line1"],
+            "street_address": store["address"]["line1"],
             "city": store["address"]["city"],
             "state": store["address"]["region"],
             "postcode": store["address"]["postalCode"],
@@ -36,10 +36,10 @@ class PilotFlyingJSpider(scrapy.Spider):
             "phone": store.get("mainPhone", {}).get("number"),
             "extras": {
                 "fax": store.get("fax", {}).get("number"),
-                "amenity:fuel": True,
-                "fuel:diesel": True,
-                "fuel:HGV_diesel": True,
-                "hgv": True,
+                "amenity": "fuel",
+                "fuel:diesel": "yes",
+                "fuel:HGV_diesel": "yes",
+                "hgv": "yes",
             },
         }
         properties.update(self.brand_info(store["name"]))

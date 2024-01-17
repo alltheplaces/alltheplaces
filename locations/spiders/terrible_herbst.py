@@ -1,5 +1,6 @@
 import scrapy
 
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.items import Feature
 
 
@@ -13,28 +14,28 @@ class TerribleHerbstSpider(scrapy.Spider):
 
     def parse(self, response):
         response.selector.remove_namespaces()
-
         for place in response.xpath("//Placemark"):
-            self.logger.info(place.get())
-            city_state = place.xpath('.//Data[@name="CITY/STATE"]/value/text()').get().split(",")
+            item = Feature()
 
+            city_state = place.xpath('.//Data[@name="CITY/STATE"]/value/text()').get().split(",")
             city = city_state[0]
             state = city_state[1] if len(city_state) > 1 else None
 
             features = (place.xpath('.//Data[@name="FEATURES"]/value/text()').get() or "").lower()
 
-            yield Feature(
-                ref=place.xpath("name/text()").get(),
-                name=place.xpath("name/text()").get(),
-                addr_full=place.xpath('.//Data[@name="STREET ADDRESS"]/value/text()').get(),
-                postcode=place.xpath('.//Data[@name="ZIP CODE"]/value/text()').get(),
-                city=city.strip(),
-                state=state and state.strip(),
-                country="US",
-                phone=place.xpath('.//Data[@name="TELEPHONE #"]/value/text()').get(),
-                extras={
-                    "amenity:fuel": True,
-                    "amenity:chargingstation": "ev charging" in features,
-                    "car_wash": "car wash" in features,
-                },
-            )
+            item["ref"] = place.xpath("name/text()").get()
+            item["name"] = place.xpath("name/text()").get()
+            # Addresses are inconsistent, sometimes it's street address, sometimes full
+            item["addr_full"] = place.xpath('.//Data[@name="STREET ADDRESS"]/value/text()').get()
+            item["postcode"] = place.xpath('.//Data[@name="ZIP CODE"]/value/text()').get()
+            item["city"] = city.strip()
+            item["state"] = state and state.strip()
+            item["country"] = "US"
+            item["phone"] = place.xpath('.//Data[@name="TELEPHONE #"]/value/text()').get()
+            apply_category(Categories.FUEL_STATION, item)
+            apply_yes_no(Extras.CAR_WASH, item, "car wash" in features)
+            # TODO: map EV charging on fuel stations properly
+            if "ev charging" in features:
+                pass
+
+            yield item

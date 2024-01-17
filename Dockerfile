@@ -49,6 +49,15 @@ ENV LANG=en_US.UTF-8 \
     PYENV_ROOT="/home/ubuntu/.pyenv" \
     PATH="/home/ubuntu/.pyenv/versions/${PYTHON_VERSION}/bin:/home/ubuntu/.pyenv/bin:/home/ubuntu/.pyenv/shims:$PATH"
 
+# install tippecanoe
+ARG TIPPECANOE_VERSION=2.29.0
+RUN curl -sL https://github.com/felt/tippecanoe/archive/refs/tags/${TIPPECANOE_VERSION}.tar.gz | tar -xz \
+ && cd tippecanoe-${TIPPECANOE_VERSION} \
+ && make -j \
+ && sudo make install \
+ && cd .. \
+ && rm -rf tippecanoe-${TIPPECANOE_VERSION}
+
 # install pyenv & python
 RUN curl https://pyenv.run | bash \
  && pyenv install ${PYTHON_VERSION} \

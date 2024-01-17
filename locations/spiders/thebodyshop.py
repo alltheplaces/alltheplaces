@@ -48,5 +48,7 @@ class TheBodyShopSpider(scrapy.spiders.SitemapSpider):
         item["ref"] = store["address"]["id"]
         item["name"] = store["displayName"]
         item["website"] = html_url
+        if isinstance(item["state"], dict):  # inconsistently string or dict
+            item["state"] = item["state"]["name"]
         item["country"] = store["address"]["country"]["isocode"]
         return item

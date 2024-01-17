@@ -2,13 +2,14 @@ import re
 
 import scrapy
 
+from locations.categories import Categories
 from locations.hours import OpeningHours
 from locations.items import Feature
 
 
 class LensCraftersSpider(scrapy.Spider):
     name = "lenscrafters"
-    item_attributes = {"brand": "Lenscrafters", "brand_wikidata": "Q6523209"}
+    item_attributes = {"brand": "Lenscrafters", "brand_wikidata": "Q6523209", "extras": Categories.SHOP_OPTICIAN.value}
     allowed_domains = ["local.lenscrafters.com"]
     start_urls = ["https://local.lenscrafters.com/"]
 
@@ -37,7 +38,7 @@ class LensCraftersSpider(scrapy.Spider):
         if len(urls) == 0:
             properties = {
                 "name": response.xpath('//h1[@id="location-name"]/text()').extract_first(),
-                "addr_full": response.xpath('//span[@class="c-address-street-1"]/text()').extract_first(),
+                "street_address": response.xpath('//span[@class="c-address-street-1"]/text()').extract_first(),
                 "city": response.xpath('//span[@class="c-address-city"]/text()').extract_first(),
                 "state": response.xpath('//abbr[@class="c-address-state"]/text()').extract_first(),
                 "postcode": response.xpath('//span[@class="c-address-postal-code"]/text()').extract_first(),

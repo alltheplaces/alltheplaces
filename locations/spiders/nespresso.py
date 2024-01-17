@@ -24,9 +24,8 @@ class NespressoSpider(scrapy.Spider):
             properties = {
                 "ref": store["point_of_interest"]["point_of_interest_id"]["id"],
                 "name": store["point_of_interest"]["address"]["name"]["company_name_type"]["name"]["name"],
-                "addr_full": store["point_of_interest"]["address"]["address_line"],
+                "street_address": store["point_of_interest"]["address"]["address_line"],
                 "city": store["point_of_interest"]["address"]["city"]["name"],
-                "state": "",
                 "postcode": store["point_of_interest"]["address"]["postal_code"],
                 "country": response.meta["country"],
                 "lat": store["position"]["latitude"],

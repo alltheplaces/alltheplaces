@@ -7,8 +7,8 @@ At the time of writing there is a
 containing all of our spiders.
 
 The file and the spider within it should share the same name.
-The name should reflect the brand or company name that the
-spider is for. Lower case characters must be used.
+The name should reflect the brand or company name (operator) that
+the spider is for. Lower case characters must be used.
 If your Python file is `great_name.py` then your spider
 should look something like:
 
@@ -21,11 +21,11 @@ class GreatNameSpider(scrapy.Spider):
 
 The camel case approach illustrated for the class name
 is further recommended. If you know the company / brand
-that you are spidering only has outlets in one country then it
+that you are spidering only has locations in one country then it
 is helpful to suffix your name with the
 [ISO alpha-2 code](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2)
-for that country. For example,  if `great_name` only had outlets in
-South Africa, then name the spider file `great_name_za.py`.
+for that country. For example,  if `great_name` only had locations
+in South Africa, then name the spider file `great_name_za.py`.
 Internally, it should look something like:
 
 ```python
@@ -36,9 +36,8 @@ class GreatNameZASpider(scrapy.Spider):
 ```
 
 If a brand / company is present in multiple territories, and
-the spider is able
-to access all of these using a common approach / API, then do not
-qualify the spider name with a country code.
+the spider is able to access all of these using a common approach /
+API, then do not qualify the spider name with a country code.
 An example of this would be the
 [Decathlon spider](../locations/spiders/decathlon.py).
 

@@ -1,6 +1,6 @@
 from urllib.parse import unquote_plus
 
-from scrapy import Request, Spider
+from scrapy import Request
 
 from locations.hours import OpeningHours
 from locations.items import Feature

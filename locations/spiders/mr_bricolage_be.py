@@ -71,6 +71,7 @@ class MrBircolageBeSpider(scrapy.Spider):
 
         addr_full = ", ".join([street_address, postcode_city])
         properties["addr_full"] = addr_full
+        properties["street_address"] = street_address
         return properties
 
     def parse_hours(self, store):

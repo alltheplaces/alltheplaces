@@ -8,6 +8,7 @@ class VakifKatilimTRSpider(scrapy.Spider):
     name = "vakif_katilim_tr"
     item_attributes = {"brand": "Vakıf Katılım", "brand_wikidata": "Q31188912"}
     start_urls = ["https://www.vakifkatilim.com.tr/tr/diger/subeler-ve-atmler"]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def parse(self, response):
         lang_id = response.xpath('//script[contains(text(), "langId:")]//text()').re_first(r"langId:\s*'([^']+)'")

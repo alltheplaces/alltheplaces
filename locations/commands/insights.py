@@ -1,11 +1,13 @@
 import json
 import os
+import pprint
 import re
 from collections import Counter
 from zipfile import ZipFile
 
 import ijson
 import requests
+import scrapy.statscollectors
 from scrapy.commands import ScrapyCommand
 from scrapy.exceptions import UsageError
 
@@ -13,11 +15,28 @@ from locations.country_utils import CountryUtils
 from locations.name_suggestion_index import NSI
 
 
+def iter_json(stream, file_name):
+    try:
+        if file_name.endswith("ndgeojson"):
+            # New line delimited GeoJSON is to be read a line at a time.
+            while True:
+                if line := stream.readline():
+                    yield json.loads(line)
+                    continue
+                return
+        # Assume the file is GeoJSON format, further assume many features and stream read the features.
+        yield from ijson.items(stream, "features.item", use_float=True)
+    except Exception as e:
+        # Fail hard (for this file) on the first JSON error we come across.
+        print("Failed to decode: " + file_name)
+        print(e)
+
+
 def iter_features(files_and_dirs, ignore_spiders):
     """
     Iterate through a set of GeoJSON files and directories. Each item in the iteration is a
-    single feature. Zero length files are skipped. Only files ending .json or .geojson are
-    processed.
+    single feature. Zero length files are skipped. Only files ending .json, .geojson or .ndgeojson
+    are processed.
     :param files_and_dirs: a list of files and directories
     :param ignore_spiders: file names matching any of the strings in this list will be ignored
     :return: a GeoJSON feature iterator
@@ -32,13 +51,6 @@ def iter_features(files_and_dirs, ignore_spiders):
             return False
         else:
             return True
-
-    def iter_json(x, s):
-        try:
-            yield from ijson.items(x, "features.item", use_float=True)
-        except Exception as e:
-            print("Failed to decode: " + s)
-            print(e)
 
     file_list = []
     for file_or_dir in files_and_dirs:
@@ -87,6 +99,12 @@ class InsightsCommand(ScrapyCommand):
             help="Do not process data for spider matching this file name fragment",
         )
         parser.add_argument(
+            "--value-types",
+            dest="value_types",
+            action="store_true",
+            help="Check property values are strings",
+        )
+        parser.add_argument(
             "--country-codes",
             dest="country_codes",
             action="store_true",
@@ -121,6 +139,9 @@ class InsightsCommand(ScrapyCommand):
     def run(self, args, opts):
         if len(args) < 1:
             raise UsageError()
+        if opts.value_types:
+            self.check_value_types(args, opts)
+            return
         if opts.country_codes:
             self.check_country_codes(args, opts)
             return
@@ -138,6 +159,16 @@ class InsightsCommand(ScrapyCommand):
         if len(counter.most_common()) > 0:
             print(msg)
             print(counter)
+
+    def check_value_types(self, args, opts):
+        stats = scrapy.statscollectors.StatsCollector(self)
+        for feature in iter_features(args, opts.filter_spiders):
+            spider_name = feature["properties"].get("@spider")
+            for k, v in feature["properties"].items():
+                if not isinstance(v, str):
+                    stats.inc_value(f"{spider_name}/{k}/{type(v).__name__}")
+
+            pprint.pp(stats._stats)
 
     def check_country_codes(self, args, opts):
         country_utils = CountryUtils()
@@ -224,6 +255,10 @@ class InsightsCommand(ScrapyCommand):
             wikidata_dict[wikidata_code] = record
             return record
 
+        def get_brand_name(item_tags: dict):
+            # Prefer English brand name for insights application (https://www.alltheplaces.xyz/wikidata.html).
+            return item_tags.get("brand:en") or item_tags.get("brand")
+
         # A dict keyed by wikidata code.
         wikidata_dict = {}
 
@@ -251,7 +286,7 @@ class InsightsCommand(ScrapyCommand):
         # Build a lookup table from NSI id's to associated brand name if any.
         nsi_id_to_brand = {}
         for item in nsi.iter_nsi():
-            if brand := item.get("tags", {}).get("brand"):
+            if brand := get_brand_name(item.get("tags", {})):
                 nsi_id_to_brand[item["id"]] = brand
 
         # TODO: Could go through ATP spiders themselves looking for Q-codes. Add an atp_count=-1
@@ -264,18 +299,16 @@ class InsightsCommand(ScrapyCommand):
             brand_wikidata = properties.get("brand:wikidata")
             if not brand_wikidata:
                 continue
-            brand = properties.get("brand")
+            brand = get_brand_name(properties)
             r = lookup_code(brand_wikidata)
 
-            if properties.get("nsi_id"):
+            if nsi_id := properties.get("nsi_id"):
                 # If we have found the brand in NSI then show the NSI brand name in the
                 # output JSON to help highlight where a spider brand name differs from
                 # the NSI brand name.
-                r["nsi_brand"] = nsi_id_to_brand.get(properties.get("nsi_id"))
+                r["nsi_brand"] = nsi_id_to_brand.get(nsi_id)
 
-            count = r.get("atp_count")
-            if not count:
-                count = 0
+            count = r.get("atp_count") or 0
             r["atp_count"] = count + 1
             if brand:
                 r["atp_brand"] = brand
@@ -288,9 +321,7 @@ class InsightsCommand(ScrapyCommand):
 
             spider = properties.get("@spider")
             r["atp_supplier_count"].add(spider)
-            spider_count = split.get(spider)
-            if not spider_count:
-                spider_count = 0
+            spider_count = split.get(spider) or 0
             split[spider] = spider_count + 1
 
         for record in wikidata_dict.values():

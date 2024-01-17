@@ -3,6 +3,7 @@ import csv
 import scrapy
 
 from locations.items import Feature
+from locations.searchable_points import open_searchable_points
 from locations.spiders.vapestore_gb import clean_address
 
 
@@ -18,7 +19,7 @@ class BlueRhinoSpider(scrapy.Spider):
     custom_settings = {"DEFAULT_REQUEST_HEADERS": {"Accept": "application/json"}}
 
     def start_requests(self):
-        with open("locations/searchable_points/us_centroids_100mile_radius.csv") as points:
+        with open_searchable_points("us_centroids_100mile_radius.csv") as points:
             for point in csv.DictReader(points):
                 yield scrapy.Request(
                     f'https://bluerhino.com/api/propane/GetRetailersNearPoint?latitude={point["latitude"]}&longitude={point["longitude"]}&radius=1000&name=&type=&top=5000&cache=false'

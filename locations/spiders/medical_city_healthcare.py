@@ -3,6 +3,7 @@ import re
 
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
@@ -14,6 +15,20 @@ class MedicalCityHealthcareSpider(scrapy.Spider):
         "https://medicalcityhealthcare.com/locations/",
     ]
 
+    categories = [
+        ("Hospital", Categories.HOSPITAL),
+        ("ER", Categories.HOSPITAL),
+        ("Pharmacy", Categories.PHARMACY),
+        ("Behavioral_Health", {"healthcare": "psychotherapist", "healthcare:speciality": "behavior"}),
+        (
+            "Imaging_Center",
+            {"amenity": "hospital", "healthcare": "hospital", "healthcare:speciality": "diagnostic_radiology"},
+        ),
+        ("Surgery_Center", {"amenity": "hospital", "healthcare": "hospital", "healthcare:speciality": "surgery"}),
+        ("Rehabilitation_Center", {"healthcare": "rehabilitation"}),
+        ("Urgent_Care", Categories.CLINIC_URGENT),
+    ]
+
     def parse(self, response):
         script = response.xpath('//script[contains(text(), "hostLocations")]').extract_first()
         data = re.search(r"var hostLocations = (.*]);", script).group(1)
@@ -23,7 +38,7 @@ class MedicalCityHealthcareSpider(scrapy.Spider):
             properties = {
                 "ref": location["id"],
                 "name": location["title"],
-                "addr_full": location["address1"],
+                "street_address": location["address1"],
                 "city": location["city"],
                 "state": location["state"],
                 "postcode": location["zip"],
@@ -32,5 +47,14 @@ class MedicalCityHealthcareSpider(scrapy.Spider):
                 "phone": location["phone"],
                 "website": response.url,
             }
+
+            types = location.get("type")[1:-1].split(",")
+            for label, cat in self.categories:
+                if label in types:
+                    apply_category(cat, properties)
+                    break
+            else:
+                for cat in types:
+                    self.crawler.stats.inc_value(f"atp/medical_city_healthcare/unmatched_category/{cat}")
 
             yield Feature(**properties)

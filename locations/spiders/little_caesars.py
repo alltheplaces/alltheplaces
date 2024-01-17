@@ -5,6 +5,7 @@ import scrapy
 from locations.geo import postal_regions
 from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.spiders.vapestore_gb import clean_address
 from locations.user_agents import BROWSER_DEFAULT
 
 DAY_MAPPING = {
@@ -70,20 +71,12 @@ class LittleCaesarsSpider(scrapy.Spider):
         if not address:
             return
 
-        addr_full = None
-        street = store.get("street")
-        street2 = store.get("street2")
-        if street:
-            addr_full = street
-        if street2:
-            addr_full += f", {street2}"
-
         properties = {
             # 'siteId' appears to be the publicly facing store number.  I would prefer to use it, but
             # it comes back as null for some stores.  'id' also appears in the data, reliably.
             # So use it instead.
             "ref": store.get("locationNumber"),
-            "addr_full": addr_full,
+            "street_address": clean_address([address.get("street"), address.get("street2")]),
             "city": address.get("city"),
             "state": address.get("state"),
             "postcode": address.get("zip"),

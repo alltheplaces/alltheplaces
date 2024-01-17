@@ -1,16 +1,79 @@
-import scrapy
+from scrapy import Spider
+from scrapy.http import JsonRequest
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
 
-class DavidsBridalSpider(scrapy.Spider):
+class DavidsBridalSpider(Spider):
     name = "davids_bridal"
     item_attributes = {"brand": "Davids Bridal", "brand_wikidata": "Q5230388"}
     allowed_domains = ["www.davidsbridal.com"]
-    start_urls = [
-        "https://www.davidsbridal.com/graphql?query={storeLocationList{active+name+phone+storeId+timezone+location{postalCode+state+city+country+countryCode+latitude+longitude+address1+address2+building+__typename}hours{regular{close+day+open+__typename}override{date+end+name+start+timeType+__typename}__typename}__typename}}"
-    ]
+    start_urls = ["https://www.davidsbridal.com/api/graphql"]
+
+    def start_requests(self):
+        for url in self.start_urls:
+            data = {
+                "query": """
+query getStoreLocatorList {
+    storeLocationList(active: true) {
+        ...StoreLocatorFragment
+        ...StoreLocatorMessagingFragment
+        ...StoreLocatorHoursFragment
+    }
+}
+
+fragment StoreLocatorFragment on StoreLocation {
+    active
+    name
+    phone
+    storeId
+    appointmentsEligible
+    storeType
+    timezone
+    location {
+        postalCode
+        state
+        city
+        country
+        countryCode
+        latitude
+        longitude
+        address1
+        address2
+        building
+    }
+}
+
+fragment StoreLocatorMessagingFragment on StoreLocation {
+    messaging {
+        lines {
+            text
+        }
+    }
+}
+
+fragment StoreLocatorHoursFragment on StoreLocation {
+    hours {
+        regular {
+            close
+            day
+            open
+        }
+        override {
+            date
+            end
+            name
+            start
+            timeType
+        }
+    }
+}
+""",
+                "operationName": "getStoreLocatorList",
+                "variables": {},
+            }
+        yield JsonRequest(url=url, data=data)
 
     def parse(self, response):
         for data in response.json().get("data", {}).get("storeLocationList"):
@@ -18,16 +81,17 @@ class DavidsBridalSpider(scrapy.Spider):
             item["postcode"] = data.get("location", {}).get("postalCode")
             item["state"] = data.get("location", {}).get("state")
             item["city"] = data.get("location", {}).get("city")
-            item["street_address"] = data.get("location", {}).get("address1")
-            item["website"] = (
-                f'https://www.davidsbridal.com/stores/{item["city"].lower()}-{item["state"].lower()}-{item["postcode"].replace("-", "")}-{item["ref"]}'
-                if item["state"]
-                else None
+            item["street_address"] = ", ".join(
+                filter(None, [data.get("location", {}).get("address1"), data.get("location", {}).get("address2")])
             )
-            oh = OpeningHours()
+            if item["postcode"] and item["state"]:
+                item[
+                    "website"
+                ] = f'https://www.davidsbridal.com/stores/{item["city"].lower()}-{item["state"].lower()}-{item["postcode"].lower().replace(" ", "").replace("-", "")}-{item["ref"]}'
+            item["opening_hours"] = OpeningHours()
             if data.get("hours", {}):
                 for day in data.get("hours", {}).get("regular"):
-                    oh.add_range(day=day.get("day"), open_time=day.get("open")[:5], close_time=day.get("close")[:5])
-
-            item["opening_hours"] = oh.as_opening_hours()
+                    item["opening_hours"].add_range(
+                        day=day.get("day"), open_time=day.get("open")[:5], close_time=day.get("close")[:5]
+                    )
             yield item

@@ -3,6 +3,7 @@ import json
 import scrapy
 
 from locations.items import Feature
+from locations.user_agents import BROWSER_DEFAULT
 
 DAYS = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"]
 
@@ -17,7 +18,7 @@ class IowaUniversitySpider(scrapy.Spider):
     body = '{"requests":[{"indexName":"uihc_locations","params":"query=&highlightPreTag=__ais-highlight__&highlightPostTag=__%2Fais-highlight__&page=%PAGE%&maxValuesPerFacet=100&facets=%5B%22services%22%2C%22field_patient_population%22%5D&tagFilters="}]}'
     headers = {
         "Content-Type": "application/json",
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:81.0) Gecko/20100101 Firefox/81.0",
+        "User-Agent": BROWSER_DEFAULT,
         "Origin": "https://uihc.org",
         "Referer": "https://uihc.org/locations",
         "Accept": "*/*",

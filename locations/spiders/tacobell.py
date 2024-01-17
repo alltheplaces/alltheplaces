@@ -1,12 +1,13 @@
-import scrapy
+from scrapy.spiders import SitemapSpider
 
 from locations.linked_data_parser import LinkedDataParser
 from locations.microdata_parser import MicrodataParser
 
 
-class TacobellSpider(scrapy.spiders.SitemapSpider):
+class TacoBellSpider(SitemapSpider):
     name = "tacobell"
     item_attributes = {"brand": "Taco Bell", "brand_wikidata": "Q752941"}
+    TACOBELL_CANTINA = {"name": "Taco Bell Cantina", "brand_wikidata": "Q111972226"}
     sitemap_urls = [
         "https://locations.tacobell.com/sitemap.xml",
         "https://locations.tacobell.ca/sitemap.xml",
@@ -42,6 +43,19 @@ class TacobellSpider(scrapy.spiders.SitemapSpider):
     def parse(self, response):
         MicrodataParser.convert_to_json_ld(response)
         if item := LinkedDataParser.parse(response, "FastFoodRestaurant"):
+            if " in " in item["name"]:
+                item["name"], item["branch"] = item["name"].split(" in ", 1)
+
             if "locations.tacobell.ca" in item["website"]:
+                item["extras"]["website:en"] = response.url
+                item["extras"]["website:fr"] = response.urljoin(
+                    response.xpath('//a[@data-ya-track="language_fr_CA"]/@href').get()
+                )
                 item["country"] = "CA"
+            elif "locations.tacobell.com" in item["website"]:
+                if "Cantina" in item["name"]:
+                    item.update(self.TACOBELL_CANTINA)
+            elif "locations.tacobell.co.uk" in item["website"]:
+                item["name"] = "Taco Bell"
+
             yield item

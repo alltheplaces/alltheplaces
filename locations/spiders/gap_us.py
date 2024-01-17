@@ -1,14 +1,7 @@
 from scrapy.spiders import SitemapSpider
 
-from locations.categories import Categories, Clothes, apply_category, apply_yes_no
-from locations.items import Feature
+from locations.categories import Categories, Clothes, apply_category, apply_clothes
 from locations.structured_data_spider import StructuredDataSpider
-
-
-def apply_clothes(clothes: [str], item: Feature):
-    for c in clothes:
-        apply_yes_no(f"clothes:{c}", item, True)
-    item["extras"]["clothes"] = ";".join(clothes)
 
 
 class GapUSSpider(SitemapSpider, StructuredDataSpider):
@@ -21,26 +14,19 @@ class GapUSSpider(SitemapSpider, StructuredDataSpider):
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["name"] = response.xpath('normalize-space(//div[@class="location-name"]/text())').get()
-
         types = response.xpath('normalize-space(//div[@class="store-carries"]/text())').get()
-
         if types == "Gap Factory Store":
             item["brand"] = "Gap Factory Store"
         else:
             item["brand"] = "Gap"
-            clothes = []
+            apply_category(Categories.SHOP_CLOTHES, item)
             if "GapBody" in types:
-                clothes.append(Clothes.UNDERWEAR.value)
+                apply_clothes([Clothes.UNDERWEAR], item)
             if "GapMaternity" in types:
-                clothes.append(Clothes.MATERNITY.value)
+                apply_clothes([Clothes.MATERNITY], item)
             if "babyGap" in types:
-                clothes.append(Clothes.BABY.value)
+                apply_clothes([Clothes.BABY], item)
             if "GapKids" in types:
-                clothes.append(Clothes.CHILDREN.value)
-            apply_clothes(clothes, item)
-
+                apply_clothes([Clothes.CHILDREN], item)
         item["image"] = None
-
-        apply_category(Categories.SHOP_CLOTHES, item)
-
         yield item

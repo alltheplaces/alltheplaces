@@ -2,6 +2,7 @@
 #
 # See documentation in:
 # http://doc.scrapy.org/en/latest/topics/items.html
+from datetime import datetime
 
 import scrapy
 
@@ -11,6 +12,7 @@ class Feature(scrapy.Item):
     lon = scrapy.Field()
     geometry = scrapy.Field()
     name = scrapy.Field()
+    branch = scrapy.Field()
     addr_full = scrapy.Field()
     housenumber = scrapy.Field()
     street = scrapy.Field()
@@ -29,6 +31,8 @@ class Feature(scrapy.Item):
     ref = scrapy.Field()
     brand = scrapy.Field()
     brand_wikidata = scrapy.Field()
+    operator = scrapy.Field()
+    operator_wikidata = scrapy.Field()
     located_in = scrapy.Field()
     located_in_wikidata = scrapy.Field()
     nsi_id = scrapy.Field()
@@ -58,8 +62,8 @@ def get_lat_lon(item: Feature) -> (float, float):
 
 
 def set_lat_lon(item: Feature, lat: float, lon: float):
-    item["lat"] = None
-    item["lon"] = None
+    item.pop("lat", None)
+    item.pop("lon", None)
     if lat and lon:
         item["geometry"] = {
             "type": "Point",
@@ -67,3 +71,15 @@ def set_lat_lon(item: Feature, lat: float, lon: float):
         }
     else:
         item["geometry"] = None
+
+
+def add_social_media(item: Feature, service: str, account: str):
+    service = service.lower()
+    if service in item.fields:
+        item[service] = account
+    else:
+        item["extras"][f"contact:{service}"] = account
+
+
+def set_closed(item: Feature, end_date: datetime = None):
+    item["extras"]["end_date"] = end_date.strftime("%Y-%m-%d") if end_date else "yes"

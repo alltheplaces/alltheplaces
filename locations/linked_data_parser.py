@@ -24,11 +24,11 @@ class LinkedDataParser:
 
             if isinstance(ld_obj, dict):
                 if "@graph" in ld_obj:
-                    yield from ld_obj["@graph"]
+                    yield from filter(None, ld_obj["@graph"])
                 else:
                     yield ld_obj
             elif isinstance(ld_obj, list):
-                yield from ld_obj
+                yield from filter(None, ld_obj)
             else:
                 raise TypeError(ld_obj)
 
@@ -66,6 +66,8 @@ class LinkedDataParser:
                 item["lon"] = LinkedDataParser.clean_float(LinkedDataParser.get_clean(geo, "longitude"))
 
         item["name"] = LinkedDataParser.get_clean(ld, "name")
+        if isinstance(item["name"], list):
+            item["name"] = item["name"][0]
 
         if addr := LinkedDataParser.get_clean(ld, "address"):
             if isinstance(addr, list):
@@ -134,6 +136,13 @@ class LinkedDataParser:
         if item["ref"] == "":
             item["ref"] = None
 
+        types = ld.get("@type", [])
+        if not isinstance(types, list):
+            types = [types]
+        types = [LinkedDataParser.clean_type(t) for t in types]
+        for t in types:
+            LinkedDataParser.parse_enhanced(t, ld, item)
+
         return item
 
     @staticmethod
@@ -193,3 +202,16 @@ class LinkedDataParser:
                 pass
         # Pass the bad data forward and let the validation pipeline complain
         return value
+
+    @staticmethod
+    def parse_enhanced(t: str, ld: dict, item: Feature):
+        if t == "hotel":
+            LinkedDataParser.parse_enhanced_hotel(ld, item)
+
+    @staticmethod
+    def parse_enhanced_hotel(ld: dict, item: Feature):
+        if stars := LinkedDataParser.get_clean(ld, "starRating"):
+            if isinstance(stars, str):
+                item["extras"]["stars"] = stars
+            elif isinstance(stars, dict):
+                item["extras"]["stars"] = stars.get("ratingValue")

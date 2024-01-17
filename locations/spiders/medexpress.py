@@ -31,7 +31,7 @@ class MedExpressSpider(scrapy.Spider):
             }
 
             if "Coming soon" not in store["address"]:
-                properties["addr_full"] = store["address"]
+                properties["street_address"] = store["address"]
 
             if "displayWebsiteUrl" in store:
                 properties["website"] = store["displayWebsiteUrl"]

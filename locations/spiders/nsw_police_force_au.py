@@ -9,6 +9,7 @@ from locations.items import Feature
 
 class NSWPoliceForceAUSpider(CrawlSpider):
     name = "nsw_police_force_au"
+    item_attributes = {"operator": "New South Wales Police Force", "operator_wikidata": "Q7011763"}
     allowed_domains = ["www.police.nsw.gov.au", "portal.spatial.nsw.gov.au"]
     start_urls = ["https://www.police.nsw.gov.au/about_us/regions_commands_districts"]
     rules = [
@@ -26,7 +27,6 @@ class NSWPoliceForceAUSpider(CrawlSpider):
             follow=False,
         ),
     ]
-    no_refs = True
     location_geometry = {}
 
     def start_requests(self):
@@ -43,6 +43,7 @@ class NSWPoliceForceAUSpider(CrawlSpider):
 
     def parse(self, response):
         properties = {
+            "ref": response.url,
             "name": response.xpath('//h3[@class="p-hero__heading"]/text()').get(),
             "state": "NSW",
             "website": response.url,
@@ -67,6 +68,4 @@ class NSWPoliceForceAUSpider(CrawlSpider):
             else:
                 properties["addr_full"] = ", ".join(filter(None, [properties.get("addr_full"), contact_line.strip()]))
         apply_category({"amenity": "police"}, properties)
-        properties["extras"]["operator"] = "New South Wales Police Force"
-        properties["extras"]["operator:wikidata"] = "Q7011763"
         yield Feature(**properties)

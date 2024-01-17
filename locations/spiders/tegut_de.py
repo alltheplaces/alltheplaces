@@ -1,7 +1,9 @@
 import json
+import re
 
 import scrapy
 
+from locations import hours
 from locations.items import Feature
 
 DAY_MAPPING = {
@@ -15,6 +17,24 @@ DAY_MAPPING = {
     "Samstag": "Sa",
     "Sonntag": "Su",
 }
+
+
+def parse_opening_hours(opening_hours):
+    p = re.compile(r"^([A-Za-z-,]+)\s+(\d{1,2}:\d{2})\s*-\s*(\d{1,2}:\d{2})$")
+    oh = hours.OpeningHours()
+    for part in opening_hours:
+        m = p.match(part)
+        if m:
+            (days, open_time, close_time) = m.groups()
+            days_split = [d.split("-") for d in days.split(",")]
+            for d in days_split:
+                if len(d) > 1:
+                    oh.add_days_range(hours.day_range(d[0], d[1]), open_time, close_time)
+                else:
+                    oh.add_range(d[0], open_time, close_time)
+        else:
+            raise Exception(f"No regex match for opening hours: {part}")
+    return oh.as_opening_hours()
 
 
 class TegutDeSpider(scrapy.Spider):
@@ -42,7 +62,7 @@ class TegutDeSpider(scrapy.Spider):
                 "lat": store["geo"]["latitude"],
                 "lon": store["geo"]["longitude"],
                 "phone": store["telephone"],
-                "opening_hours": store["openingHours"],
+                "opening_hours": parse_opening_hours(store["openingHours"]),
                 "website": store["url"],
             }
 

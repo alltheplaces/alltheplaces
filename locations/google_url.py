@@ -1,19 +1,27 @@
 import re
 from urllib.parse import parse_qs, urlsplit
 
+from scrapy import Selector
+from scrapy.http import Response
 
-def _get_possible_links(response):
-    yield from response.xpath('//img[contains(@src, "maps/api/staticmap")]/@src').getall()
-    yield from response.xpath('//iframe[contains(@src, "maps/embed")]/@src').getall()
-    yield from response.xpath("//a[contains(@href, 'google')][contains(@href, 'maps')]/@href").getall()
-    yield from response.xpath("//a[contains(@href, 'maps.apple.com')]/@href").getall()
+from locations.items import Feature
 
 
-def extract_google_position(item, response):
+def _get_possible_links(response: Response | Selector):
+    yield from response.xpath('.//img[contains(@src, "maps/api/staticmap")]/@src').getall()
+    yield from response.xpath('.//iframe[contains(@src, "maps/embed")]/@src').getall()
+    yield from response.xpath(".//a[contains(@href, 'google')][contains(@href, 'maps')]/@href").getall()
+    yield from response.xpath(".//a[contains(@href, 'maps.apple.com')]/@href").getall()
+
+
+def extract_google_position(item: Feature, response: Response | Selector):
     for link in _get_possible_links(response):
-        coords = url_to_coords(link)
-        if coords != (None, None):
-            item["lat"], item["lon"] = coords
+        try:
+            coords = url_to_coords(link)
+            if coords != (None, None):
+                item["lat"], item["lon"] = coords
+                return
+        except ValueError:
             return
 
 
@@ -92,5 +100,9 @@ def url_to_coords(url: str) -> (float, float):  # noqa: C901
     for center in get_query_param(url, "center"):
         lat, lon = center.split(",")
         return float(lat), float(lon)
+
+    # Fall back on 2 comma separated floats
+    if match := re.search(r"(-?\d+\.\d+),\s?(-?\d+\.\d+)", url):
+        return float(match.group(1)), float(match.group(2))
 
     return None, None

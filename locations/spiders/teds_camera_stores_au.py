@@ -6,7 +6,13 @@ from locations.storefinders.amasty_store_locator import AmastyStoreLocatorSpider
 
 class TedsCameraStoresAUSpider(AmastyStoreLocatorSpider):
     name = "teds_camera_stores_au"
-    item_attributes = {"brand": "Ted's Camera Stores", "brand_wikidata": "Q117958394"}
+    item_attributes = {
+        "brand": "Ted's Camera Stores",
+        "brand_wikidata": "Q117958394",
+        "extras": {
+            "shop": "camera",
+        },
+    }
     allowed_domains = ["www.teds.com.au"]
 
     def start_requests(self):

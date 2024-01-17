@@ -1,12 +1,10 @@
-from locations.categories import Categories
 from locations.storefinders.woosmap import WoosmapSpider
 
 
 class RSGGroupSpider(WoosmapSpider):
     name = "rsg_group"
     key = "woos-3cb8caa3-ad4d-3e7b-b7d6-221a7b72398d&stores_by_page=300"
-    custom_settings = {"DEFAULT_REQUEST_HEADERS": {"Origin": "https://www.mcfit.com"}}
-    item_attributes = {"extras": Categories.GYM.value}
+    origin = "https://www.mcfit.com"
 
     JOHN_REED = {"brand": "JOHN REED Fitness", "brand_wikidata": "Q106434148"}
     MC_FIT = {"brand": "McFit", "brand_wikidata": "Q871302"}
@@ -25,6 +23,8 @@ class RSGGroupSpider(WoosmapSpider):
             return
         if item["ref"] == "5814289014024709637":
             return  # Head Office
+        if "COMING SOON" in item["name"].upper():
+            return
 
         brand_id = feature["properties"]["types"][0]
         if brand_id in ["GG", "franchise"]:

@@ -41,7 +41,10 @@ def property_value(element: lxml.html.HtmlElement):
         # the element at the time the attribute is set, or the empty string if
         # there is no such attribute or if parsing it results in an error.
         value = element.attrib.get("src", "")
-        value = urljoin(element.base_url, value)
+        try:
+            value = urljoin(element.base_url, value)
+        except ValueError:
+            value = None
         return value
     # If the element is an a, area, or link element
     elif element.tag in ["a", "area", "link"]:
@@ -50,7 +53,10 @@ def property_value(element: lxml.html.HtmlElement):
         # of the element at the time the attribute is set, or the empty string
         # if there is no such attribute or if parsing it results in an error.
         value = element.attrib.get("href", "")
-        value = urljoin(element.base_url, value)
+        try:
+            value = urljoin(element.base_url, value)
+        except ValueError:
+            value = None
         return value
     # If the element is an object element
     elif element.tag == "object":
@@ -59,7 +65,10 @@ def property_value(element: lxml.html.HtmlElement):
         # of the element at the time the attribute is set, or the empty string
         # if there is no such attribute or if parsing it results in an error.
         value = element.attrib.get("data", "")
-        value = urljoin(element.base_url, value)
+        try:
+            value = urljoin(element.base_url, value)
+        except ValueError:
+            value = None
         return value
     # If the element is a data element
     # If the element is a meter element
@@ -167,8 +176,11 @@ def get_object(item: lxml.html.HtmlElement, memory=None):
     # 5. If the item has a global identifier, add an entry to result called
     # "id" whose value is the global identifier of item.
     if itemid := item.attrib.get("itemid"):
-        value = urljoin(item.base_url, itemid)
-        result["id"] = value
+        try:
+            value = urljoin(item.base_url, itemid)
+            result["id"] = value
+        except ValueError:
+            pass
 
     # 6. Let properties be an empty object.
     properties = {}

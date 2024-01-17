@@ -8,7 +8,7 @@ from locations.items import Feature
 
 class JuicelandSpider(scrapy.Spider):
     name = "juiceland"
-    item_attributes = {"brand": "JuiceLand"}
+    item_attributes = {"brand": "JuiceLand", "brand_wikidata": "Q123022671"}
     allowed_domains = ["juiceland.com"]
     start_urls = [
         "https://www.juiceland.com/all-locations/",
@@ -33,7 +33,9 @@ class JuicelandSpider(scrapy.Spider):
         properties = {
             "ref": response.url,
             "name": response.xpath('normalize-space(//*[@itemprop="name"]//text())').extract_first(),
-            "addr_full": response.xpath('normalize-space(//span[@itemprop="StreetAddress"]//text())').extract_first(),
+            "street_address": response.xpath(
+                'normalize-space(//span[@itemprop="StreetAddress"]//text())'
+            ).extract_first(),
             "city": response.xpath('normalize-space(//span[@itemprop="addressLocality"]//text())').extract_first(),
             "state": response.xpath('normalize-space(//span[@itemprop="addressRegion"]//text())').extract_first(),
             "postcode": response.xpath('normalize-space(//span[@itemprop="postalCode"]//text())').extract_first(),

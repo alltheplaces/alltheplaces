@@ -1,13 +1,14 @@
 import scrapy
 
 from locations.items import Feature
+from locations.user_agents import BROWSER_DEFAULT
 
 HEADERS = {
     "authority": "prd.location.enterprise.com",
     "sec-ch-ua": '"Not A;Brand";v="99", "Chromium";v="90", "Google Chrome";v="90"',
     "accept": "application/json, text/plain, */*",
     "sec-ch-ua-mobile": "?0",
-    "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Safari/537.36",
+    "user-agent": BROWSER_DEFAULT,
     "sec-fetch-site": "cross-site",
     "sec-fetch-mode": "cors",
     "sec-fetch-dest": "empty",
@@ -37,7 +38,7 @@ class NationalSpider(scrapy.Spider):
                 "name": loc["name"],
                 "brand": loc["brand"],
                 "phone": loc["phones"][0]["phone_number"],
-                "addr_full": loc["address"]["street_addresses"],
+                "street_address": ", ".join(loc["address"]["street_addresses"]),
                 "city": loc["address"]["city"],
                 "state": loc["address"]["country_subdivision_code"],
                 "postcode": loc["address"]["postal"],

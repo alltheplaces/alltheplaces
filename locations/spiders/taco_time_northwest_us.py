@@ -3,12 +3,11 @@ import json
 import scrapy
 
 from locations.dict_parser import DictParser
-from locations.items import Feature
 
 
 class TacoTimeNorthwestUSSpider(scrapy.Spider):
     name = "taco_time_northwest_us"
-    item_attributes = {"brand": "Taco Time Northwest", "brand_wikidata": "Q7673970"}
+    item_attributes = {"brand_wikidata": "Q7673970"}
     allowed_domains = ["tacotimenw.com"]
     start_urls = ["https://tacotimenw.com/find-us/"]
 
@@ -23,6 +22,7 @@ class TacoTimeNorthwestUSSpider(scrapy.Spider):
         for store in stores:
             item = DictParser.parse(store)
             item["image"] = store["image"]
-            item["website"] = store["order"]
+            item["extras"]["website:menu"] = store["order"]
+            item["website"] = "https://tacotimenw.com/find-us/{}/".format(store["order"].split("/")[-1])
             item["name"] = item["name"].replace("&#8211;", "–")
             yield item

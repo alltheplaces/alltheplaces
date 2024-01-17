@@ -1,15 +1,13 @@
 import scrapy
 import xmltodict
 
-from locations.dict_parser import DictParser
+from locations.items import Feature, add_social_media
 
 
 class SamsoniteEuSpider(scrapy.Spider):
     name = "samsonite_eu"
-    item_attributes = {
-        "brand": "Samsonite",
-        "brand_wikidata": "Q1203426",
-    }
+    CHIC_ACCENT = {"brand": "Chic Accent"}
+    SAMSONITE = {"brand": "Samsonite", "brand_wikidata": "Q1203426"}
     allowed_domains = ["samsonite.com"]
 
     def start_requests(self):
@@ -51,6 +49,7 @@ class SamsoniteEuSpider(scrapy.Spider):
             "SE",
             "PT",
             "RO",
+            "GB",
         ]
         template = "https://storelocator.samsonite.eu/data-exchange/getDealerLocatorMapV2_Radius.aspx?s=sams&country={}&search=dealer&lat=48.85799300000001&lng=2.381153&radius=100000"
         for country in country_eu:
@@ -60,15 +59,33 @@ class SamsoniteEuSpider(scrapy.Spider):
         data = xmltodict.parse(response.text)
         if data.get("dealers"):
             stores = data.get("dealers", {}).get("dealer")
-            stores = stores if type(stores) == list else [stores]
+            stores = stores if isinstance(stores, list) else [stores]
             for store in stores:
-                item = DictParser.parse(store)
+                if store["fld_Deal_DeCl_ID"] != "9":
+                    continue
+                item = Feature()
+                item["lat"] = store["Latitude"]
+                item["lon"] = store["Longitude"]
                 item["ref"] = store.get("fld_Deal_Id")
                 item["street_address"] = store.get("fld_Deal_Address1")
                 item["city"] = store.get("fld_Deal_City1")
                 item["postcode"] = store.get("fld_Deal_Zip")
                 item["country"] = store.get("fld_Coun_Name")
-                item["phone"] = store.get("fld_Deal_Phone")
-                item["email"] = store.get("fld_Deal_Email")
+                item["email"] = store.get("fld_Deal_Email") or ""
+                item["website"] = store["fld_Deal_DetailPageUrl"]
+
+                if "chicaccent.com" in item["email"]:
+                    item.update(self.CHIC_ACCENT)
+                else:
+                    item.update(self.SAMSONITE)
+
+                if phone := store.get("fld_Deal_Phone"):
+                    phone = store["fld_Deal_Prefix"] + phone.lower()
+
+                    if "whatsapp" in phone:
+                        phone, whats_app = phone.split("whatsapp")
+                        add_social_media(item, "WhatsApp", whats_app.strip(" :"))
+
+                    item["phone"] = phone
 
                 yield item

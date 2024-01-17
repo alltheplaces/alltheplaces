@@ -1,90 +1,53 @@
-import json
-import re
+from scrapy import Spider
+from scrapy.http import JsonRequest
 
-import scrapy
+from locations.dict_parser import DictParser
+from locations.hours import OpeningHours
 
-from locations.items import Feature
 
-
-class TiffanySpider(scrapy.Spider):
+class TiffanySpider(Spider):
     name = "tiffany"
     item_attributes = {"brand": "Tiffany", "brand_wikidata": "Q1066858"}
     allowed_domains = ["www.tiffany.com"]
-    download_delay = 0.5
-    start_urls = ("https://www.tiffany.com/jewelry-stores/store-list/",)
+    start_urls = ["https://www.tiffany.com/content/tiffany-n-co/_jcr_content/servlets/storeslist.1.json"]
 
-    def parse_day(self, day):
-        if re.search("-", day):
-            days = day.split("-")
-            osm_days = []
-            if len(days) == 2:
-                for day in days:
-                    osm_day = day.strip()[:2]
-                    osm_days.append(osm_day)
-            return "-".join(osm_days)
-        return day.strip()[:2]
-
-    def parse_times(self, times):
-        if times.strip() == "CLOSED":
-            return "Closed"
-        hours_to = [x.strip() for x in times.split("-")]
-        cleaned_times = []
-        for hour in hours_to:
-            if re.search("PM$", hour):
-                hour = re.sub("PM", "", hour).strip()
-                hour_min = hour.split(":")
-                if int(hour_min[0]) < 12:
-                    hour_min[0] = str(12 + int(hour_min[0]))
-                cleaned_times.append(":".join(hour_min))
-
-            if re.search("AM$", hour):
-                hour = re.sub("AM", "", hour).strip()
-                hour_min = hour.split(":")
-                if len(hour_min[0]) < 2:
-                    hour_min[0] = hour_min[0].zfill(2)
-                else:
-                    hour_min[0] = str(int(hour_min[0]))
-
-                cleaned_times.append(":".join(hour_min))
-        return "-".join(cleaned_times)
-
-    def parse_hours(self, lis):
-        hours = []
-        for li in lis:
-            if re.search(r"([0-9]{1,2}):([0-9]{1,2})([APM]{2})|CLOSED", li):
-                day = li.split(":")[0]
-                times = li.replace(day + ":", "")
-                if times and day:
-                    parsed_time = self.parse_times(times)
-                    parsed_day = self.parse_day(day)
-                    hours.append(parsed_day + " " + parsed_time)
-
-        return "; ".join(hours)
+    def start_requests(self):
+        for url in self.start_urls:
+            yield JsonRequest(url=url)
 
     def parse(self, response):
-        for href in response.xpath('//@href[contains(., "/jewelry-stores/")]').extract():
-            yield scrapy.Request(response.urljoin(href))
-
-        for ldjson in response.xpath('//script[@type="application/ld+json"]/text()').extract():
-            data = json.loads(ldjson)
-            if data["@type"] != "Store":
+        for location in response.json()["resultDto"]:
+            item = DictParser.parse(location["store"])
+            if "TEMPORARILY CLOSED" in item["name"].upper():
                 continue
-
-            properties = {
-                "name": data["name"],
-                "phone": data["telephone"],
-                "addr_full": data["address"]["streetAddress"],
-                "city": data["address"]["addressLocality"],
-                "state": data["address"]["addressRegion"],
-                "postcode": data["address"]["postalCode"],
-                "country": data["address"]["addressCountry"],
-                "ref": data["name"].replace(" ", "_"),
-                "website": response.url,
-                "lat": response.xpath("//tiffany-maps/@markeratlat").extract_first(),
-                "lon": response.xpath("//tiffany-maps/@markeratlng").extract_first(),
-            }
-
-            hours = self.parse_hours(response.xpath('//div[@id="divExtendedInfo"]/text()').extract())
-            if hours:
-                properties["opening_hours"] = hours
-            yield Feature(**properties)
+            item["lat"] = location["store"]["geoCodeLattitude"]
+            item["lon"] = location["store"]["geoCodeLongitude"]
+            item["street_address"] = ", ".join(
+                filter(
+                    None,
+                    [
+                        location["store"].get("address1"),
+                        location["store"].get("address2"),
+                        location["store"].get("address3"),
+                    ],
+                )
+            )
+            item["phone"] = location["store"]["phone"].split("/", 1)[0].strip()
+            item["website"] = (
+                "https://www.tiffany.com/jewelry-stores/" + location["storeSeoAttributes"][0]["canonicalUrlkeyword"]
+            )
+            if location["store"]["storePhoto"] != "/shared/images/stores/store_location.jpg":
+                item["image"] = "https://www.tiffany.com" + location["store"]["storePhoto"]
+            opening_soon = False
+            for store_hours in location["storeHours"]:
+                if store_hours.get("storeHourTypeId", 0) == 1:
+                    if "OPENING SOON" in store_hours["storeHours"].upper():
+                        opening_soon = True
+                        break
+                    item["opening_hours"] = OpeningHours()
+                    item["opening_hours"].add_ranges_from_string(
+                        store_hours["storeHours"].replace("<br>", "").replace(".", "")
+                    )
+            if opening_soon:
+                continue
+            yield item

@@ -2,6 +2,7 @@ import datetime
 
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
 
@@ -77,7 +78,7 @@ class RogersCommunicationsSpider(scrapy.Spider):
             properties = {
                 "ref": store["properties"]["Record_ID"],
                 "name": name,
-                "addr_full": addr,
+                "street_address": addr,
                 "city": store["properties"]["City"],
                 "state": store["properties"]["StateOrProvince"],
                 "postcode": store["properties"]["ZIPOrPostalCode"],
@@ -105,4 +106,5 @@ class RogersCommunicationsSpider(scrapy.Spider):
             except:
                 pass
 
+            apply_category(Categories.SHOP_TELECOMMUNICATION, properties)
             yield Feature(**properties)

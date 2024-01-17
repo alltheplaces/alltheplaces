@@ -3,7 +3,6 @@ from scrapy.spiders import CrawlSpider, Request, Rule
 
 from locations.linked_data_parser import LinkedDataParser
 from locations.microdata_parser import MicrodataParser
-from locations.user_agents import BROWSER_DEFAULT
 
 
 class FatFaceSpider(CrawlSpider):

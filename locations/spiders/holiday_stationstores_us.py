@@ -3,6 +3,7 @@ import re
 from scrapy import Request, Spider
 from scrapy.http import JsonRequest
 
+from locations.categories import Categories, Extras, Fuel, apply_category, apply_yes_no
 from locations.items import Feature
 
 
@@ -49,20 +50,19 @@ class HolidayStationstoresUSSpider(Spider):
             "state": state.strip(),
             "website": response.url,
             "opening_hours": "24/7" if open_24_hours else self.opening_hours(response),
-            "extras": {
-                "amenity:fuel": True,
-                "fuel:diesel": "diesel" in services or None,
-                "atm": "atm" in services or None,
-                "fuel:e85": "e85" in services or None,
-                "hgv": "truck" in services or None,
-                "fuel:propane": "propane" in services or None,
-                "car_wash": "car wash" in services or None,
-                "fuel:cng": "cng" in services or None,
-            },
         }
+        apply_category(Categories.FUEL_STATION, properties)
+        apply_yes_no(Fuel.DIESEL, properties, "diesel" in services)
+        apply_yes_no(Extras.ATM, properties, "atm" in services)
+        apply_yes_no(Fuel.E85, properties, "e85" in services)
+        apply_yes_no("hgv", properties, "truck" in services)
+        apply_yes_no(Fuel.PROPANE, properties, "propane" in services)
+        apply_yes_no(Extras.CAR_WASH, properties, "car wash" in services)
+        apply_yes_no(Fuel.CNG, properties, "cng" in services)
 
         yield Feature(**properties)
 
+    # TODO: clean up opening hours
     def opening_hours(self, response):
         hour_part_elems = response.xpath('//div[@class="row"][@style="font-size: 12px;"]')
         day_groups = []

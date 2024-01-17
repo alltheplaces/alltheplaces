@@ -20,20 +20,20 @@ class PAWineSpiritsSpider(scrapy.Spider):
 
     def parse(self, response):
         for row in response.css(".tabContentRow"):
-            columnAddress = row.css(".columnAddress")
-            addressPhoneFax = [s.strip() for s in columnAddress.xpath('*[@class="normalText"]//text()').extract()]
-            if "Fax:" in addressPhoneFax:
-                i = addressPhoneFax.index("Fax:")
-                fax = addressPhoneFax[i + 1]
-                addressPhoneFax[i:] = []
+            column_address = row.css(".columnAddress")
+            address_phone_fax = [s.strip() for s in column_address.xpath('*[@class="normalText"]//text()').extract()]
+            if "Fax:" in address_phone_fax:
+                i = address_phone_fax.index("Fax:")
+                fax = address_phone_fax[i + 1]
+                address_phone_fax[i:] = []
             else:
                 fax = None
-            i = addressPhoneFax.index("Phone:")
-            phone = addressPhoneFax[i + 1]
-            addressPhoneFax[i:] = []
-            address = "\n".join(addressPhoneFax).strip().replace("\xa0", " ")
+            i = address_phone_fax.index("Phone:")
+            phone = address_phone_fax[i + 1]
+            address_phone_fax[i:] = []
+            address = "\n".join(address_phone_fax).strip().replace("\xa0", " ")
 
-            ref = columnAddress.xpath('*[@class="boldMaroonText"]/text()').get().strip()
+            ref = column_address.xpath('*[@class="boldMaroonText"]/text()').get().strip()
 
             type_text = [s.strip() for s in row.xpath('*[@class="columnTypeOfStore"]//text()').extract()]
             type_of_store = [s for s in type_text if s]

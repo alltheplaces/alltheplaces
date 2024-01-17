@@ -2,6 +2,7 @@ import re
 
 import scrapy
 
+from locations.categories import Categories
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 
@@ -17,7 +18,11 @@ STORE_STATES = [
 
 class InglesSpider(scrapy.Spider):
     name = "ingles"
-    item_attributes = {"brand": "Ingles", "brand_wikidata": "Q6032595"}
+    item_attributes = {
+        "brand": "Ingles",
+        "brand_wikidata": "Q6032595",
+        "extras": Categories.SHOP_SUPERMARKET.value,
+    }
     allowed_domains = ["www.ingles-markets.com"]
 
     def start_requests(self):

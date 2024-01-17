@@ -1,10 +1,7 @@
-import json
-
 import scrapy
 from scrapy.http import JsonRequest
 
-from locations.dict_parser import DictParser
-from locations.hours import DAYS_EN, DAYS_FULL, OpeningHours
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
@@ -52,7 +49,7 @@ class DiSpider(scrapy.Spider):
             address_details = store.get("address").get("fields")
             coordinates = store.get("coordinates")
             contact_details = store.get("card")
-            yield Feature(
+            item = Feature(
                 ref=store_details.get("id"),
                 name=store_details.get("title"),
                 website=store_details.get("URL").get("canonical"),
@@ -77,3 +74,5 @@ class DiSpider(scrapy.Spider):
                 email=contact_details.get("email"),
                 phone=contact_details.get("phone"),
             )
+            apply_category(Categories.SHOP_COSMETICS, item)
+            yield item

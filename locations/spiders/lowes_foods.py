@@ -7,7 +7,7 @@ from locations.items import Feature
 
 
 class LowesFoodsSpider(scrapy.Spider):
-    name = "lowes-foods"
+    name = "lowes_foods"
     item_attributes = {"brand": "Lowes Foods", "brand_wikidata": "Q6693991"}
     allowed_domains = ["lowesfoods.com"]
     download_delay = 0.2
@@ -32,7 +32,7 @@ class LowesFoodsSpider(scrapy.Spider):
             name=response.xpath("//div[@class='store-details__heading']/h1/text()").extract_first().strip(),
             lat=re.search(r".*lat: (-?\d+\.\d+),.*", map_data).group(1),
             lon=re.search(r".*lng: (-?\d+\.\d+).*", map_data).group(1),
-            addr_full=response.xpath("//div[@class='store-details__store-info']/ul/li[2]/text()")
+            street_address=response.xpath("//div[@class='store-details__store-info']/ul/li[2]/text()")
             .extract_first()
             .strip(),
             city=city_state_zip.split(",")[0],
@@ -55,9 +55,9 @@ class LowesFoodsSpider(scrapy.Spider):
             # There is sometimes a space between the time and 'PM'
             close_time = "".join(close_time.split(" "))
 
-            for DAY in DAYS:
+            for day in DAYS:
                 opening_hours.add_range(
-                    day=DAY,
+                    day=day,
                     open_time=open_time,
                     close_time=close_time,
                     time_format="%I:%M%p",

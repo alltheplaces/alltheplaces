@@ -9,14 +9,14 @@ from locations.geo import (
 
 
 def test_point_locations():
-    POINTS_FILE = "eu_centroids_120km_radius_country.csv"
+    points_file = "eu_centroids_120km_radius_country.csv"
     expected_eu_points = 959
-    eu_points = list(point_locations(POINTS_FILE))
+    eu_points = list(point_locations(points_file))
     assert len(eu_points) == expected_eu_points
-    eu_point_twice = list(point_locations([POINTS_FILE, POINTS_FILE]))
+    eu_point_twice = list(point_locations([points_file, points_file]))
     assert len(eu_point_twice) == 2 * len(eu_points)
-    assert 0 == len(list(point_locations(POINTS_FILE, "US")))
-    assert 41 == len(list(point_locations(POINTS_FILE, ["US", "DE"])))
+    assert 0 == len(list(point_locations(points_file, "US")))
+    assert 41 == len(list(point_locations(points_file, ["US", "DE"])))
 
 
 def test_city_locations():

@@ -1,8 +1,8 @@
 import scrapy
 
+from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
-from locations.spiders.costacoffee_gb import yes_or_no
 
 
 class GuzmanyGomezSpider(scrapy.Spider):
@@ -25,8 +25,6 @@ class GuzmanyGomezSpider(scrapy.Spider):
             item["opening_hours"] = oh.as_opening_hours()
 
             item["website"] = data["orderLink"]
-            item["extras"] = {
-                "wheelchair": yes_or_no(any("Wheelchair accessible" == t["tag"] for t in data["tags"])),
-                "sells:alcohol": yes_or_no(any("Liquor" == t["tag"] for t in data["tags"])),
-            }
+            apply_yes_no(Extras.WHEELCHAIR, item, any("Wheelchair accessible" == t["tag"] for t in data["tags"]), False)
+            apply_yes_no("sells:alcohol", item, any("Liquor" == t["tag"] for t in data["tags"]), False)
             yield item

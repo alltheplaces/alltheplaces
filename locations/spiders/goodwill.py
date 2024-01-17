@@ -6,6 +6,7 @@ import scrapy
 
 from locations.categories import Categories
 from locations.items import Feature
+from locations.searchable_points import open_searchable_points
 
 CATEGORY_MAPPING = {
     "1": "Donation Site",
@@ -33,7 +34,7 @@ class GoodwillSpider(scrapy.Spider):
     download_delay = 0.2
 
     def start_requests(self):
-        with open("./locations/searchable_points/us_centroids_25mile_radius.csv") as points:
+        with open_searchable_points("us_centroids_25mile_radius.csv") as points:
             reader = csv.DictReader(points)
             for point in reader:
                 # Unable to find a way to specify a search radius
@@ -60,9 +61,9 @@ class GoodwillSpider(scrapy.Spider):
                 "lat": store.get("LocationLatitude1"),
                 "lon": store.get("LocationLongitude1"),
                 "website": f'https://www.goodwill.org/locator/location/?store={b64_wrap(store["LocationId"])}&lat={b64_wrap(store["LocationLatitude1"])}&lng={b64_wrap(store["LocationLongitude1"])}',
+                "operator": store.get("Name_Parent"),
                 "extras": {
                     "store_categories": store.get("calcd_ServicesOffered"),
-                    "operator": store.get("Name_Parent"),
                     "operator:website": store.get("LocationParentWebsite"),
                     "operator:phone": store.get("Phone_Parent"),
                     "operator:facebook": store.get("LocationParentURLFacebook"),

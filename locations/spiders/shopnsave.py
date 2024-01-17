@@ -50,7 +50,7 @@ class ShopnSaveSpider(scrapy.Spider):
                 "addr_full": store.xpath('td[@class="store-result-address"]/text()')[1].extract(),
                 "city": self.city(store.xpath('td[@class="store-result-address"]/text()')[2].extract()),
                 "state": self.state(store.xpath('td[@class="store-result-address"]/text()')[2].extract()),
-                "postcode": self.postCode(store.xpath('td[@class="store-result-address"]/text()')[2].extract()),
+                "postcode": self.post_code(store.xpath('td[@class="store-result-address"]/text()')[2].extract()),
                 "phone": self.phone(store.xpath('td[@class="store-result-phone"]/strong/text()')[0].extract()),
             }
 
@@ -66,10 +66,10 @@ class ShopnSaveSpider(scrapy.Spider):
         state = state[:2]
         return state
 
-    def postCode(self, data):
+    def post_code(self, data):
         str_list = data.split(",")
-        zipCode = str_list[1].strip()
-        return zipCode[-5:]
+        zip_code = str_list[1].strip()
+        return zip_code[-5:]
 
     def phone(self, data):
         return data.replace("— Main", "")

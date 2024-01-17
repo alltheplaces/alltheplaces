@@ -8,14 +8,15 @@ from locations.structured_data_spider import StructuredDataSpider
 class HomeBargainsGB(CrawlSpider, StructuredDataSpider):
     name = "home_bargains_gb"
     item_attributes = {"brand": "Home Bargains", "brand_wikidata": "Q5888229"}
-    allowed_domains = ["homebargains.co.uk"]
-    start_urls = ["https://storelocator.homebargains.co.uk/all-stores"]
+    allowed_domains = ["storelocator.home.bargains"]
+    start_urls = ["https://storelocator.home.bargains/all-stores"]
     rules = [Rule(LinkExtractor(allow="/store/"), callback="parse_sd", follow=False)]
     wanted_types = ["LocalBusiness"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
     download_delay = 0.5
 
     def inspect_item(self, item, response):
+        item["ref"] = response.url.split("/store/", 1)[1].split("/", 1)[0]
         full_address = response.xpath('//*[@itemprop="address"]/text()').extract()[:-1]
         item["addr_full"] = ",".join(full_address).strip()
         item["postcode"] = full_address[-1].strip()

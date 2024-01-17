@@ -1,10 +1,11 @@
-import scrapy
+from scrapy import Spider
+from scrapy.http import JsonRequest
 
 from locations.dict_parser import DictParser
-from locations.hours import DAYS_NO, OpeningHours, sanitise_day
+from locations.hours import DAYS, OpeningHours
 
 
-class CoopNOSpider(scrapy.Spider):
+class CoopNOSpider(Spider):
     name = "coop_no"
     BRANDS = {
         "01": {"brand": "Coop Prix", "brand_wikidata": "Q5167705"},
@@ -17,24 +18,31 @@ class CoopNOSpider(scrapy.Spider):
         "43": {"brand": "Obs BYGG", "brand_wikidata": "Q5167707"},
         "45": {"brand": "Coop Elektro", "brand_wikidata": "Q111534601"},
     }
-    start_urls = [
-        "https://coop.no/StoreService/StoresByBoundingBox?locationLat=0&locationLon=0&latNw=90&lonNw=-180&latSe=-90&lonSe=180"
-    ]
+    allowed_domains = ["www.coop.no"]
+    start_urls = ["https://www.coop.no/api/content/butikker?skip=0&count=10000"]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
-    def parse(self, response, **kwargs):
-        for location in response.json():
-            location["street_address"] = location.pop("Address")
-            item = DictParser.parse(location)
+    def parse(self, response):
+        for location in response.json().get("stores"):
+            url = "https://www.coop.no/api/content" + location["url"]
+            yield JsonRequest(url=url, callback=self.parse_store)
 
-            item["opening_hours"] = OpeningHours()
-            for rule in location["OpeningHours"]:
-                if rule["Closed"]:
-                    continue
-                if day := sanitise_day(rule["Day"], DAYS_NO):
-                    start_time, end_time = rule["OpenString"].split("-")
-                    item["opening_hours"].add_range(day, start_time[:5], end_time[:5])
-
-            if brand := self.BRANDS.get(location["ChainId"]):
-                item.update(brand)
-
-            yield item
+    def parse_store(self, response):
+        location = response.json()
+        item = DictParser.parse(location)
+        if brand := self.BRANDS.get(location.get("chainId", "")):
+            item.update(brand)
+        else:
+            if location.get("chainId"):
+                self.logger.error("Unknown brand ID: {}".format(location.get("chainId", "")))
+        item["ref"] = location.get("metaInfo").get("canonicalUrl").split("-")[-1]
+        item["street_address"] = item.pop("street", None)
+        item["website"] = location.get("metaInfo").get("canonicalUrl")
+        item["opening_hours"] = OpeningHours()
+        for day_hours in location.get("openingHours", [])[:-1]:
+            if day_hours.get("closed"):
+                continue
+            item["opening_hours"].add_range(DAYS[day_hours["dayOfWeek"] - 1], day_hours["from1"], day_hours["to1"])
+            if day_hours.get("from2") and day_hours.get("to2"):
+                item["opening_hours"].add_range(DAYS[day_hours["dayOfWeek"] - 1], day_hours["from2"], day_hours["to2"])
+        yield item

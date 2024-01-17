@@ -7,6 +7,7 @@ import scrapy
 
 from locations.categories import Categories
 from locations.items import Feature
+from locations.searchable_points import open_searchable_points
 
 HEADERS = {"X-Requested-With": "XMLHttpRequest"}
 STORELOCATOR = "https://www.starbucks.com/bff/locations?lat={}&lng={}"
@@ -19,12 +20,12 @@ class StarbucksSpider(scrapy.Spider):
 
     def start_requests(self):
         searchable_point_files = [
-            "./locations/searchable_points/us_centroids_50mile_radius.csv",
-            "./locations/searchable_points/ca_centroids_50mile_radius.csv",
+            "us_centroids_50mile_radius.csv",
+            "ca_centroids_50mile_radius.csv",
         ]
 
         for point_file in searchable_point_files:
-            with open(point_file) as points:
+            with open_searchable_points(point_file) as points:
                 reader = csv.DictReader(points)
                 for point in reader:
                     request = scrapy.Request(
@@ -37,12 +38,12 @@ class StarbucksSpider(scrapy.Spider):
                     yield request
 
     def parse(self, response):
-        responseJson = json.loads(response.body)
-        stores = responseJson["stores"]
+        response_json = json.loads(response.body)
+        stores = response_json["stores"]
 
         for store in stores:
-            storeLat = store["coordinates"]["latitude"]
-            storeLon = store["coordinates"]["longitude"]
+            store_lat = store["coordinates"]["latitude"]
+            store_lon = store["coordinates"]["longitude"]
             properties = {
                 "name": store["name"],
                 "street_address": ", ".join(
@@ -61,8 +62,8 @@ class StarbucksSpider(scrapy.Spider):
                 "postcode": store["address"]["postalCode"],
                 "phone": store["phoneNumber"],
                 "ref": store["id"],
-                "lon": storeLon,
-                "lat": storeLat,
+                "lon": store_lon,
+                "lat": store_lat,
                 "brand": store["brandName"],
                 "website": f'https://www.starbucks.com/store-locator/store/{store["id"]}/{store["slug"]}',
                 "extras": {"number": store["storeNumber"], "ownership_type": store["ownershipTypeCode"]},
@@ -74,29 +75,29 @@ class StarbucksSpider(scrapy.Spider):
         # Center is lng, lat
         center = [float(pairs[1].split("=")[1]), float(pairs[0].split("=")[1])]
 
-        paging = responseJson["paging"]
+        paging = response_json["paging"]
         if paging["returned"] > 0 and paging["limit"] == paging["returned"]:
             if response.meta["distance"] > 0.15:
-                nextDistance = response.meta["distance"] / 2
+                next_distance = response.meta["distance"] / 2
                 # Create four new coordinate pairs
-                nextCoordinates = [
-                    [center[0] - nextDistance, center[1] + nextDistance],
-                    [center[0] + nextDistance, center[1] + nextDistance],
-                    [center[0] - nextDistance, center[1] - nextDistance],
-                    [center[0] + nextDistance, center[1] - nextDistance],
+                next_coordinates = [
+                    [center[0] - next_distance, center[1] + next_distance],
+                    [center[0] + next_distance, center[1] + next_distance],
+                    [center[0] - next_distance, center[1] - next_distance],
+                    [center[0] + next_distance, center[1] - next_distance],
                 ]
-                urls = [STORELOCATOR.format(c[1], c[0]) for c in nextCoordinates]
+                urls = [STORELOCATOR.format(c[1], c[0]) for c in next_coordinates]
                 for url in urls:
                     request = scrapy.Request(url=url, headers=HEADERS, callback=self.parse)
-                    request.meta["distance"] = nextDistance
+                    request.meta["distance"] = next_distance
                     yield request
 
             elif response.meta["distance"] > 0.10:
                 # Only used to track how often this happens
                 self.logger.debug("Using secondary search of far away stores")
-                nextDistance = response.meta["distance"] / 2
+                next_distance = response.meta["distance"] / 2
 
-                nextCoordinates = []
+                next_coordinates = []
                 current_center = center
                 additional_stores = 5
                 store_distances = defaultdict(list)
@@ -123,14 +124,14 @@ class StarbucksSpider(scrapy.Spider):
                     ]
 
                     # Append it to the next search list
-                    nextCoordinates.append(
+                    next_coordinates.append(
                         [stores[max_store]["coordinates"]["longitude"], stores[max_store]["coordinates"]["latitude"]]
                     )
 
-                urls = [STORELOCATOR.format(c[1], c[0]) for c in nextCoordinates]
+                urls = [STORELOCATOR.format(c[1], c[0]) for c in next_coordinates]
                 for url in urls:
                     self.logger.debug(f"Adding {url} to list")
 
                     request = scrapy.Request(url=url, headers=HEADERS, callback=self.parse)
-                    request.meta["distance"] = nextDistance
+                    request.meta["distance"] = next_distance
                     yield request
