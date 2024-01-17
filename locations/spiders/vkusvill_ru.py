@@ -17,7 +17,13 @@ class VkusvillRUSpider(Spider):
         "DOWNLOAD_DELAY": 15,
         "ROBOTSTXT_OBEY": False,
     }
-    item_attributes = {"brand_wikidata": "Q57271676"}
+    item_attributes = {
+        "brand": "ВкусВилл",
+        "brand_wikidata": "Q57271676",
+        # TODO: delete this when ApplyNSICategoriesPipeline is fixed,
+        #       currently it assigns the category even if it's already set
+        "nsi_id": "N/A",
+    }
 
     def parse(self, response):
         subdomains = response.xpath(
