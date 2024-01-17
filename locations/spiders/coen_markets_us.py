@@ -6,7 +6,7 @@ from locations.items import Feature
 
 class CoenMarketsUSSpider(Spider):
     name = "coen_markets_us"
-    item_attributes = {"name": "Coen", "brand": "Coen Markets Inc", "brand_wikidata": "Q123235821"}
+    item_attributes = {"name": "Coen", "brand": "Coen Markets Inc", "brand_wikidata": "Q122856721"}
     allowed_domains = ["www.coenmarkets.com"]
     start_urls = ["https://www.coenmarkets.com/locations/?location_city=10000&zip_radius=10000"]
 
