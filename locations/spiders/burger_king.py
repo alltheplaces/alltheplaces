@@ -1,7 +1,7 @@
 import geonamescache
 import scrapy
 
-from locations.categories import Extras, apply_yes_no
+from locations.categories import Categories, Extras, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.geo import city_locations, point_locations
 from locations.hours import DAYS_EN, OpeningHours
@@ -9,7 +9,7 @@ from locations.hours import DAYS_EN, OpeningHours
 
 class BurgerKingSpider(scrapy.Spider):
     name = "burgerking"
-    item_attributes = {"brand": "Burger King", "brand_wikidata": "Q177054"}
+    item_attributes = {"brand": "Burger King", "brand_wikidata": "Q177054", "extras": Categories.FAST_FOOD.value}
     download_delay = 2.0
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
