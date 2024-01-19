@@ -7,11 +7,8 @@ class LoxamFrSpider(SitemapSpider, StructuredDataSpider):
     name = "loxam_fr"
     item_attributes = {"brand": "Loxam", "brand_wikidata": "Q3264407"}
     allowed_domains = ["agence.loxam.fr"]
-    sitemap_urls = [
-        "https://agence.loxam.fr/locationsitemap1.xml",
-        "https://agence.loxam.fr/locationsitemap2.xml",
-        "https://agence.loxam.fr/locationsitemap3.xml",
-    ]
+    sitemap_urls = ["https://agence.loxam.fr/robots.txt"]
+    sitemap_follow = ["locationsitemap"]
     sitemap_rules = [("", "parse_sd")]
     requires_proxy = True
 
