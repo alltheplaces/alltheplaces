@@ -1,3 +1,5 @@
+from html import unescape
+
 from scrapy.spiders import SitemapSpider
 
 from locations.structured_data_spider import StructuredDataSpider
@@ -14,7 +16,7 @@ class LoxamFrSpider(SitemapSpider, StructuredDataSpider):
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item.pop("image", None)
-        item["name"] = html.unescape(item["name"])
-        item["street_address"] = html.unescape(item["street_address"])
-        item["city"] = html.unescape(item["city"])
+        item["name"] = unescape(item["name"])
+        item["street_address"] = unescape(item["street_address"])
+        item["city"] = unescape(item["city"])
         yield item
