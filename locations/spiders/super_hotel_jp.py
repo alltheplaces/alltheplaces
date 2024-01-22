@@ -3,12 +3,16 @@ from typing import Any, Iterable
 from scrapy import Request, Spider
 from scrapy.http import JsonRequest, Response
 
+from locations.categories import Categories
 from locations.items import Feature
 
 
 class SuperHotelJPSpider(Spider):
     name = "super_hotel_jp"
-    item_attributes = {"brand_wikidata": "Q11313858"}
+    item_attributes = {
+        "brand_wikidata": "Q11313858",
+        "extras": Categories.HOTEL.value,
+    }
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def make_request(self, offset: int, count: int = 100) -> JsonRequest:
