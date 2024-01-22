@@ -1,5 +1,4 @@
 import json
-import pprint
 import re
 from typing import Any
 
@@ -18,7 +17,6 @@ class SizzlerUSSpider(Spider):
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in json.loads(re.search(r"var locations_meta = (\[.+\]);", response.text).group(1)):
             item = Feature()
-            pprint.pp(location)
             item["ref"] = location["location"]["branch_id"]
             item["website"] = location["single_page"]
             item["phone"] = location["location"]["store_phone_number"]
