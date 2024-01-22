@@ -5,6 +5,7 @@ from typing import Any
 from scrapy import Spider
 from scrapy.http import Response
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.spiders.vapestore_gb import clean_address
 
@@ -24,5 +25,5 @@ class PlanetSmoothieUSSpider(Spider):
             item["website"] = "https://www.planetsmoothie.com/stores/{}/{}".format(
                 location["cleanCity"], location["StoreId"]
             )
-
+            apply_category(Categories.FAST_FOOD, item)
             yield item
