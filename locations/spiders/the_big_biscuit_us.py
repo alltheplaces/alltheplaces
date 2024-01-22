@@ -7,7 +7,11 @@ from locations.hours import DAYS, OpeningHours
 
 class TheBigBiscuitUSSpider(Spider):
     name = "the_big_biscuit_us"
-    item_attributes = {"brand": "The Big Biscuit", "brand_wikidata": "Q124125449"}
+    item_attributes = {
+        "brand": "The Big Biscuit",
+        "brand_wikidata": "Q124125449",
+        "extras": {"amenity": "restaurant", "cuisine": "american"},
+    }
     allowed_domains = ["www.bigbiscuit.com"]
     start_urls = ["https://bigbiscuit.com/locations/"]
 
