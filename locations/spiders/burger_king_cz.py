@@ -4,12 +4,12 @@ from unidecode import unidecode
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
-from locations.spiders.burger_king import BurgerKingSpider
+from locations.spiders.burger_king import BURGER_KING_SHARED_ATTRIBUTES
 
 
 class BurgerKingCZSpider(Spider):
     name = "burger_king_cz"
-    item_attributes = BurgerKingSpider.item_attributes
+    item_attributes = BURGER_KING_SHARED_ATTRIBUTES
     allowed_domains = ["burgerking.cz"]
     start_urls = ["https://burgerking.cz/restaurants"]
 
