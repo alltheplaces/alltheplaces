@@ -30,6 +30,10 @@ class MegafonRuSpider(scrapy.Spider):
             self.crawler.stats.inc_value(f"atp/megafon_ru/types/{poi.get('type')}")
             self.parse_hours(item, poi)
             apply_category(Categories.SHOP_MOBILE_PHONE, item)
+            if "yota" in poi.get("type", ""):
+                # Some Yota stores are present too
+                item["brand_wikidata"] = "Q965740"
+                item["brand"] = "Yota"
             yield item
 
     def parse_hours(self, item, poi):
