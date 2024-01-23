@@ -5,11 +5,12 @@ from scrapy import Spider
 from locations.categories import Categories, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_DK, OpeningHours, day_range, sanitise_day
+from locations.spiders.seven_eleven_au import SEVEN_ELEVEN_SHARED_ATTRIBUTES
 
 
 class SevenElevenDKSpider(Spider):
     name = "seven_eleven_dk"
-    item_attributes = {"brand": "7-Eleven", "brand_wikidata": "Q259340"}
+    item_attributes = SEVEN_ELEVEN_SHARED_ATTRIBUTES
     start_urls = ["https://www.7-eleven.dk/wp-content/themes/7-eleven/get_stores.php"]
 
     def parse(self, response, **kwargs):
