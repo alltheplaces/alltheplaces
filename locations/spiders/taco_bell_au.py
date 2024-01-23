@@ -6,13 +6,14 @@ from scrapy.spiders import CrawlSpider, Rule
 
 from locations.google_url import extract_google_position
 from locations.items import Feature
+from locations.spiders.taco_bell import TACO_BELL_SHARED_ATTRIBUTES
 from locations.spiders.vapestore_gb import clean_address
 from locations.structured_data_spider import extract_phone
 
 
 class TacoBellAUSpider(CrawlSpider):
     name = "taco_bell_au"
-    item_attributes = {"brand": "Taco Bell", "brand_wikidata": "Q752941"}
+    item_attributes = TACO_BELL_SHARED_ATTRIBUTES
     start_urls = ["https://tacobell.com.au/order-now-locations/"]
     rules = [Rule(LinkExtractor(restrict_xpaths=['//a[text()="Order Now"]']), callback="parse")]
 

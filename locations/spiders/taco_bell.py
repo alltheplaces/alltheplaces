@@ -3,17 +3,18 @@ from scrapy.spiders import SitemapSpider
 from locations.linked_data_parser import LinkedDataParser
 from locations.microdata_parser import MicrodataParser
 
+TACO_BELL_SHARED_ATTRIBUTES = {"brand": "Taco Bell", "brand_wikidata": "Q752941"}
+
 
 class TacoBellSpider(SitemapSpider):
-    name = "tacobell"
-    item_attributes = {"brand": "Taco Bell", "brand_wikidata": "Q752941"}
+    name = "taco_bell"
+    item_attributes = TACO_BELL_SHARED_ATTRIBUTES
     TACOBELL_CANTINA = {"name": "Taco Bell Cantina", "brand_wikidata": "Q111972226"}
     sitemap_urls = [
         "https://locations.tacobell.com/sitemap.xml",
         "https://locations.tacobell.ca/sitemap.xml",
         "https://locations.tacobell.co.uk/sitemap.xml",
         # TODO: Different scheme to above, perhaps another spider?
-        # "https://tacobell.es/restaurantes-sitemap.xml",
         # "https://tacobell.nl/location-sitemap.xml",
     ]
 
