@@ -21,7 +21,7 @@ class Subwaykrpider(scrapy.Spider):
 
     def parse(self, response: Response, **kwargs):
         links = self.link_extractor.extract_links(response)
-        if len(links) == 1:
+        if len(links) == 0:
             return
         else:
             next_page = response.meta["page"] + 1
