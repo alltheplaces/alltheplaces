@@ -3,11 +3,12 @@ import scrapy
 from locations.categories import Categories, apply_category
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
+from locations.spiders.dhl_express_de import DHL_EXPRESS_SHARED_ATTRIBUTES
 
 
 class DhlExpressGbSpider(scrapy.Spider):
     name = "dhl_express_gb"
-    item_attributes = {"brand": "DHL", "brand_wikidata": "Q489815"}
+    item_attributes = DHL_EXPRESS_SHARED_ATTRIBUTES
     allowed_domains = ["dhlparcel.co.uk"]
 
     def start_requests(self):
