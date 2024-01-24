@@ -4,12 +4,12 @@ from scrapy.http import JsonRequest
 from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
-from locations.spiders.burger_king import BurgerKingSpider
+from locations.spiders.burger_king import BURGER_KING_SHARED_ATTRIBUTES
 
 
 class BurgerKingFRSpider(scrapy.Spider):
     name = "burger_king_fr"
-    item_attributes = BurgerKingSpider.item_attributes
+    item_attributes = BURGER_KING_SHARED_ATTRIBUTES
     start_urls = ["https://webapi.burgerking.fr/blossom/api/v12/public/store-locator/all"]
 
     def parse(self, response):
