@@ -80,6 +80,7 @@ class Categories(Enum):
     SHOP_HOUSEWARE = {"shop": "houseware"}
     SHOP_JEWELRY = {"shop": "jewelry"}
     SHOP_LAUNDRY = {"shop": "laundry"}
+    SHOP_MALL = {"shop": "mall"}
     SHOP_MASSAGE = {"shop": "massage"}
     SHOP_MEDICAL_SUPPLY = {"shop": "medical_supply"}
     SHOP_MOBILE_PHONE = {"shop": "mobile_phone"}
