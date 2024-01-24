@@ -11,7 +11,7 @@ from locations.spiders.seven_eleven_au import SEVEN_ELEVEN_SHARED_ATTRIBUTES
 class SevenElevenDKSpider(Spider):
     name = "seven_eleven_dk"
     item_attributes = SEVEN_ELEVEN_SHARED_ATTRIBUTES
-    start_urls = ["https://www.7-eleven.dk/wp-content/themes/7-eleven/get_stores.php"]
+    start_urls = ["https://7eleven-prod.azurewebsites.net/api/stores/all"]
 
     def parse(self, response, **kwargs):
         for location in response.json():
@@ -35,7 +35,7 @@ class SevenElevenDKSpider(Spider):
 
             if location["type"] == "shell":
                 apply_category(Categories.FUEL_STATION, item)
-                apply_yes_no("car_wash", item, location["carwash"] == "on")
+                apply_yes_no("car_wash", item, location["hasCarwash"])
             else:
                 apply_category(Categories.SHOP_CONVENIENCE, item)
 
