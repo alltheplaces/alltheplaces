@@ -7,8 +7,8 @@ from scrapy.spiders import SitemapSpider
 from locations.items import Feature
 
 
-class TangerUSSpider(SitemapSpider):
-    name = "tanger_us"
+class TangerSpider(SitemapSpider):
+    name = "tanger"
     item_attributes = {"brand": "Tanger Outlets", "brand_wikidata": "Q7682888"}
     sitemap_urls = ["https://www.tanger.com/robots.txt"]
     sitemap_rules = [(r"/location$", "parse")]
