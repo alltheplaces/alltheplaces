@@ -4,12 +4,13 @@ from scrapy.http import JsonRequest
 from locations.categories import apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_EN, OpeningHours
+from locations.spiders.kfc import KFC_SHARED_ATTRIBUTES
 
 
 class KfcRUSpider(scrapy.Spider):
     name = "kfc_ru"
     allowed_domains = ["kfc.digital"]
-    item_attributes = {"brand": "KFC", "brand_wikidata": "Q524757"}
+    item_attributes = KFC_SHARED_ATTRIBUTES
 
     def start_requests(self):
         yield JsonRequest("https://api.prod.digital.uni.rest/api/store/v2/store.get_restaurants?showClosed=false")
