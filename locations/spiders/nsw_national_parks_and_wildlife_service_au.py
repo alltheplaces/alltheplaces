@@ -6,10 +6,19 @@ from locations.structured_data_spider import StructuredDataSpider
 
 class NSWNationalParksAndWildlifeServiceAUSpider(SitemapSpider, StructuredDataSpider):
     name = "nsw_national_parks_and_wildlife_service_au"
-    item_attributes = {"state": "New South Wales", "operator": "NSW National Parks and Wildlife Service", "operator_wikidata": "Q108872274"}
+    item_attributes = {
+        "state": "New South Wales",
+        "operator": "NSW National Parks and Wildlife Service",
+        "operator_wikidata": "Q108872274",
+    }
     allowed_domains = ["www.nationalparks.nsw.gov.au"]
     sitemap_urls = ["https://www.nationalparks.nsw.gov.au/sitemap.xml"]
-    sitemap_rules = [(r"^https:\/\/www\.nationalparks\.nsw\.gov\.au\/camping-and-accommodation\/(?:accommodation|campgrounds)\/[\w\-]+$", "parse_sd")]
+    sitemap_rules = [
+        (
+            r"^https:\/\/www\.nationalparks\.nsw\.gov\.au\/camping-and-accommodation\/(?:accommodation|campgrounds)\/[\w\-]+$",
+            "parse_sd",
+        )
+    ]
     wanted_types = ["Accommodation", "Campground"]
 
     def post_process_item(self, item, response, ld_data):
@@ -21,15 +30,29 @@ class NSWNationalParksAndWildlifeServiceAUSpider(SitemapSpider, StructuredDataSp
             apply_category({"reservation": "required"}, item)
             for campground_detail in response.xpath('//table[contains(@class, "itemDetails")]/tr'):
                 if campground_detail.xpath('./th[contains(text(), "Number of campsites")]'):
-                    capacity = campground_detail.xpath('./td/text()').get()
+                    capacity = campground_detail.xpath("./td/text()").get()
                     apply_category({"capacity:pitches": capacity}, item)
                 elif campground_detail.xpath('./th[contains(text(), "Camping type")]'):
-                    camping_types = campground_detail.xpath('./td/text()').get().lower()
-                    apply_yes_no("tents", item, "tent" in camping_types or "camping beside my vehicle" in camping_types, False)
-                    apply_yes_no("caravans", item, "camper trailer site" in camping_types or "caravan site" in camping_types, False)
-                    apply_yes_no("motor_vehicle", item, "camping beside my vehicle" in camping_types or "camper trailer site" in camping_types or "caravan site" in camping_types, False)
+                    camping_types = campground_detail.xpath("./td/text()").get().lower()
+                    apply_yes_no(
+                        "tents", item, "tent" in camping_types or "camping beside my vehicle" in camping_types, False
+                    )
+                    apply_yes_no(
+                        "caravans",
+                        item,
+                        "camper trailer site" in camping_types or "caravan site" in camping_types,
+                        False,
+                    )
+                    apply_yes_no(
+                        "motor_vehicle",
+                        item,
+                        "camping beside my vehicle" in camping_types
+                        or "camper trailer site" in camping_types
+                        or "caravan site" in camping_types,
+                        False,
+                    )
                 elif campground_detail.xpath('./th[contains(text(), "Facilities")]'):
-                    facilities = campground_detail.xpath('./td/text()').get().lower()
+                    facilities = campground_detail.xpath("./td/text()").get().lower()
                     apply_yes_no("bbq", item, "barbecue facilities" in facilities, False)
                     apply_yes_no("picnic_table", item, "picnic tables" in facilities, False)
                     apply_yes_no("toilets", item, "toilets" in facilities, False)
