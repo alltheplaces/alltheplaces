@@ -5,12 +5,17 @@ import zlib
 
 import scrapy
 
+from locations.categories import Categories
 from locations.items import Feature
 
 
 class TacototeSpider(scrapy.Spider):
     name = "tacotote"
-    item_attributes = {"brand": "El Taco Tote"}
+    item_attributes = {
+        "brand": "El Taco Tote",
+        "brand_wikidata": "Q16992316",
+        "extras": Categories.RESTAURANT.value,
+    }
     allowed_domains = ["tacotote.com"]
     start_urls = ("https://tacotote.com/wp-sitemap-posts-page-1.xml",)
 
