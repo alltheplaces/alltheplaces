@@ -1,12 +1,12 @@
 import scrapy
 
 from locations.dict_parser import DictParser
-from locations.spiders.burger_king import BurgerKingSpider
+from locations.spiders.burger_king import BURGER_KING_SHARED_ATTRIBUTES
 
 
 class BurgerKingTRSpider(scrapy.Spider):
     name = "burger_king_tr"
-    item_attributes = BurgerKingSpider.item_attributes
+    item_attributes = BURGER_KING_SHARED_ATTRIBUTES
     start_urls = ["https://www.burgerking.com.tr/Restaurants/GetRestaurants/"]
 
     def parse(self, response):

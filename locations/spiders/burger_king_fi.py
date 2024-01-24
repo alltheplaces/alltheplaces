@@ -2,7 +2,7 @@ import scrapy
 
 from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
-from locations.spiders.burger_king import BurgerKingSpider
+from locations.spiders.burger_king import BURGER_KING_SHARED_ATTRIBUTES
 
 FEATURES_MAPPING = {
     "bk_delivery": Extras.DELIVERY,
@@ -14,7 +14,7 @@ FEATURES_MAPPING = {
 class BurgerKingFISpider(scrapy.Spider):
     name = "burger_king_fi"
     allowed_domains = ["burgerking.fi"]
-    item_attributes = BurgerKingSpider.item_attributes
+    item_attributes = BURGER_KING_SHARED_ATTRIBUTES
     start_urls = ["https://burgerking.fi/wp-json/v2/restaurants"]
 
     def parse(self, response):

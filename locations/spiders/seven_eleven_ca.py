@@ -1,10 +1,11 @@
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
+from locations.spiders.seven_eleven_au import SEVEN_ELEVEN_SHARED_ATTRIBUTES
 from locations.storefinders.yext import YextSpider
 
 
 class SevenElevenCASpider(YextSpider):
     name = "seven_eleven_ca"
-    item_attributes = {"brand": "7-Eleven", "brand_wikidata": "Q259340"}
+    item_attributes = SEVEN_ELEVEN_SHARED_ATTRIBUTES
     api_key = "4c8292a53c2dae5082ba012bdf783295"
 
     def parse_item(self, item, location):

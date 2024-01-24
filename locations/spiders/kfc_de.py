@@ -3,7 +3,7 @@ from scrapy import Spider
 from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
-from locations.spiders.kfc import KFCSpider
+from locations.spiders.kfc import KFC_SHARED_ATTRIBUTES
 from locations.user_agents import BROWSER_DEFAULT
 
 SERVICES_MAPPING = {
@@ -17,7 +17,7 @@ SERVICES_MAPPING = {
 
 class KFCDESpider(Spider):
     name = "kfc_de"
-    item_attributes = KFCSpider.item_attributes
+    item_attributes = KFC_SHARED_ATTRIBUTES
     start_urls = ["https://api.kfc.de/find-a-kfc/allrestaurant"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
     user_agent = BROWSER_DEFAULT

@@ -4,7 +4,7 @@ from scrapy.http import JsonRequest
 from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
-from locations.spiders.burger_king import BurgerKingSpider
+from locations.spiders.burger_king import BURGER_KING_SHARED_ATTRIBUTES
 
 SERVICES_MAPPING = {
     "Drive Thru": Extras.DRIVE_THROUGH,
@@ -14,7 +14,7 @@ SERVICES_MAPPING = {
 
 class BurgerKingBRSpider(scrapy.Spider):
     name = "burger_king_br"
-    item_attributes = BurgerKingSpider.item_attributes
+    item_attributes = BURGER_KING_SHARED_ATTRIBUTES
     allowed_domains = ["www.burgerking.com.br"]
     requires_proxy = True
 

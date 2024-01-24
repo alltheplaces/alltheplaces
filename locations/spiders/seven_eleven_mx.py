@@ -5,11 +5,12 @@ from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
+from locations.spiders.seven_eleven_au import SEVEN_ELEVEN_SHARED_ATTRIBUTES
 
 
 class SevenElevenMXSpider(Spider):
     name = "seven_eleven_mx"
-    item_attributes = {"brand": "7-Eleven", "brand_wikidata": "Q259340"}
+    item_attributes = SEVEN_ELEVEN_SHARED_ATTRIBUTES
     start_urls = ["https://app.7-eleven.com.mx:8443/web/services/tiendas"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
