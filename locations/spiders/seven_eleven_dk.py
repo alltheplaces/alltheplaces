@@ -1,10 +1,8 @@
-import re
 
 from scrapy import Spider
 
 from locations.categories import Categories, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
-from locations.hours import DAYS_DK, OpeningHours, day_range, sanitise_day
 from locations.spiders.seven_eleven_au import SEVEN_ELEVEN_SHARED_ATTRIBUTES
 
 
