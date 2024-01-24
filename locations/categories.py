@@ -120,6 +120,8 @@ class Categories(Enum):
     OFFICE_FINANCIAL = {"office": "financial"}
     OFFICE_IT = {"office": "it"}
 
+    TOURISM_CAMP_SITE = {"tourism": "camp_site"}
+
     ALTERNATIVE_MEDICINE = {"healthcare": "alternative"}
     AMBULANCE_STATION = {"emergency": "ambulance_station"}
     ATM = {"amenity": "atm"}
