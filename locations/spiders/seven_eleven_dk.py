@@ -19,19 +19,7 @@ class SevenElevenDKSpider(Spider):
 
             item = DictParser.parse(location)
 
-            item["ref"] = item["website"] = location["smiley"]
-
-            item["opening_hours"] = OpeningHours()
-            for rule in location["open"].replace("24.00", "23.59").split(";"):
-                if match := re.match(r"(\w+)(?:\-(\w+))?: (\d\d\.\d\d)\-(\d\d\.\d\d)", rule):
-                    start_day, end_day, start_time, end_time = match.groups()
-                    start_day = sanitise_day(start_day, DAYS_DK)
-                    end_day = sanitise_day(end_day, DAYS_DK)
-                    if start_day:
-                        if not end_day:
-                            end_day = start_day
-                        for day in day_range(start_day, end_day):
-                            item["opening_hours"].add_range(day, start_time, end_time, time_format="%H.%M")
+            item["ref"] = location["storeNumber"]
 
             if location["type"] == "shell":
                 apply_category(Categories.FUEL_STATION, item)
