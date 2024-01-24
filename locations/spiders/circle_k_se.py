@@ -7,7 +7,7 @@ from locations.structured_data_spider import StructuredDataSpider
 
 class CircleKSESpider(SitemapSpider, StructuredDataSpider):
     name = "circle_k_se"
-    item_attributes = {"brand": "Circle K", "brand_wikidata": "Q3268010", "extras": Categories.FUEL_STATION.value}
+    item_attributes = {"brand": "Circle K", "brand_wikidata": "Q3268010"}
     sitemap_urls = ["https://www.circlek.se/stations/sitemap.xml"]
     sitemap_rules = [("/station/circle-k-", "parse")]
 
