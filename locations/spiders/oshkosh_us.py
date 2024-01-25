@@ -2,6 +2,7 @@ from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
 from locations.structured_data_spider import StructuredDataSpider
+from locations.user_agents import BROWSER_DEFAULT
 
 
 # Sitemap is currently out of date
@@ -16,3 +17,4 @@ class OshkoshUSSpider(CrawlSpider, StructuredDataSpider):
     ]
     wanted_types = ["LocalBusiness"]
     search_for_twitter = False
+    user_agent = BROWSER_DEFAULT
