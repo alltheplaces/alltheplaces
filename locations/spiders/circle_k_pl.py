@@ -11,16 +11,16 @@ from locations.items import Feature
 
 FUELS_MAP = {
     "EU_ADBLUE": Fuel.ADBLUE,
-    "EU_BENZIN_95": None,
+    "EU_BENZIN_95": Fuel.OCTANE_95,
     "EU_DIESEL": Fuel.DIESEL,
     "EU_LPG": Fuel.LPG,
-    "EU_MILESPLUS_95": None,
-    "EU_MILESPLUS_98": None,
+    "EU_MILESPLUS_95": Fuel.OCTANE_95,
+    "EU_MILESPLUS_98": Fuel.OCTANE_98,
     "EU_MILESPLUS_DIESEL": Fuel.DIESEL,
-    "EU_MILES_95": None,
-    "EU_MILES_98": None,
+    "EU_MILES_95": Fuel.OCTANE_95,
+    "EU_MILES_98": Fuel.OCTANE_98,
     "EU_MILES_DIESEL": Fuel.DIESEL,
-    "EU_SUPRAGAZ": None,
+    "EU_SUPRAGAZ": Fuel.LPG,
 }
 
 
