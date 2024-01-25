@@ -1,12 +1,13 @@
 import scrapy
 from scrapy.http import JsonRequest
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.spiders.vapestore_gb import clean_address
 
 
-class BaptistHealthArkansasSpider(scrapy.Spider):
-    name = "bha"
+class BaptistHealthArkansasUSSpider(scrapy.Spider):
+    name = "bha_us"
     item_attributes = {
         "brand": "Baptist Health Foundation",
         "brand_wikidata": "Q50379824",
@@ -31,18 +32,24 @@ class BaptistHealthArkansasSpider(scrapy.Spider):
         for i in response.json()["results"]:
             first_value = list(i.values())[0]
             for j in first_value:
-                properties = {
-                    "name": j["post_title"],
-                    "ref": j["permalink"],
-                    "website": j["permalink"],
-                    "image": j["image"],
-                    "street_address": clean_address([j["address_1"], j["address_2"]]),
-                    "city": j["city"],
-                    "state": j["state"],
-                    "postcode": j["zip_code"],
-                    "country": "US",
-                    "phone": j["phone_number"],
-                    "lat": float(j["_geoloc"]["lat"]),
-                    "lon": float(j["_geoloc"]["lng"]),
-                }
-                yield Feature(**properties)
+                item = Feature()
+                item["name"] = j["post_title"]
+                item["ref"] = j["permalink"]
+                item["website"] = j["permalink"]
+                item["image"] = j["image"]
+                item["street_address"] = clean_address([j["address_1"], j["address_2"]])
+                item["city"] = j["city"]
+                item["state"] = j["state"]
+                item["postcode"] = j["zip_code"]
+                item["country"] = "US"
+                item["phone"] = j["phone_number"]
+                item["lat"] = float(j["_geoloc"]["lat"])
+                item["lon"] = float(j["_geoloc"]["lng"])
+                if facility_type := j.get("facility_type"):
+                    if "Hospitals" in facility_type:
+                        apply_category(Categories.HOSPITAL, item)
+                    elif "Urgent Care" in facility_type:
+                        apply_category(Categories.CLINIC_URGENT, item)
+                    else:
+                        apply_category(Categories.CLINIC, item)
+                yield item
