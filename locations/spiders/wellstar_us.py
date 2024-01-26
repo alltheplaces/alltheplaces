@@ -2,8 +2,9 @@ import json
 
 import scrapy
 
+from locations.categories import Categories, apply_category
+from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
-from locations.items import Feature
 
 DAYS_NAME = {
     "Monday": "Mo",
@@ -16,9 +17,25 @@ DAYS_NAME = {
     "Sunday": "Su",
 }
 
+CATEGORY_MAP = {
+    "Community Hospice": Categories.HOSPICE,
+    "Diabetes Center": Categories.CLINIC,
+    "Emergency Department": Categories.EMERGENCY_WARD,
+    "Health Park": Categories.HOSPITAL,
+    "Hospital": Categories.HOSPITAL,
+    "Imaging Center": Categories.CLINIC,
+    "Lab Services": Categories.MEDICAL_LABORATORY,
+    "Medical Practice": Categories.DOCTOR_GP,
+    "Pharmacy": Categories.PHARMACY,
+    "Rehabilitation Center": Categories.REHABILITATION,
+    "Senior Living": Categories.NURSING_HOME,
+    "Urgent Care": Categories.CLINIC_URGENT,
+    "Infusion Center": Categories.CLINIC,
+}
 
-class WellStarSpider(scrapy.Spider):
-    name = "wellstar"
+
+class WellStarUSSpider(scrapy.Spider):
+    name = "wellstar_us"
     item_attributes = {"brand": "WellStar Health System", "brand_wikidata": "Q7981073"}
     allowed_domains = ["www.wellstar.org"]
     start_urls = ("https://www.wellstar.org/locations",)
@@ -113,20 +130,20 @@ class WellStarSpider(scrapy.Spider):
         hdata = hdata["matchingItems"]
 
         for row in hdata:
-            address_attributes = self.get_address_attributes(row.get("Address"))
-            properties = {
-                "ref": row.get("LocationID"),
-                "name": row.get("Name"),
-                "addr_full": " ".join([row.get("Address").split(",")[0], row.get("Address2", "") or ""]).strip(),
-                "city": address_attributes.get("city"),
-                "state": address_attributes.get("state"),
-                "postcode": address_attributes.get("postcode"),
-                "lat": row.get("Latitude"),
-                "lon": row.get("Longitude"),
-                "phone": row.get("LocationContactPhone"),
-            }
-
+            address_data = row.pop("Address")
+            address_attributes = self.get_address_attributes(address_data)
+            item = DictParser.parse(row)
+            item["ref"] = row.get("LocationID")
+            item["phone"] = row.get("LocationContactPhone")
+            item["addr_full"] = " ".join([address_data.split(",")[0], row.get("Address2", "") or ""]).strip()
+            item["city"] = address_attributes.get("city")
+            item["state"] = address_attributes.get("state")
+            item["postcode"] = address_attributes.get("postcode")
+            item["website"] = "https://www.wellstar.org" + row["PageURL"]
             hours = self.parse_hours(row.get("Hours"))
-            properties["opening_hours"] = hours
+            item["opening_hours"] = hours
 
-            yield Feature(**properties)
+            if cat := CATEGORY_MAP.get(row["LocationTypes"][0]):
+                apply_category(cat, item)
+
+            yield item
