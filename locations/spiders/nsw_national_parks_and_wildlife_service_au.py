@@ -1,6 +1,6 @@
 from scrapy.spiders import SitemapSpider
 
-from locations.categories import Categories, apply_category, apply_yes_no
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -35,16 +35,16 @@ class NSWNationalParksAndWildlifeServiceAUSpider(SitemapSpider, StructuredDataSp
                 elif campground_detail.xpath('./th[contains(text(), "Camping type")]'):
                     camping_types = campground_detail.xpath("./td/text()").get().lower()
                     apply_yes_no(
-                        "tents", item, "tent" in camping_types or "camping beside my vehicle" in camping_types, False
+                        Extras.TENT_SITES, item, "tent" in camping_types or "camping beside my vehicle" in camping_types, False
                     )
                     apply_yes_no(
-                        "caravans",
+                        Extras.CARAVAN_SITES,
                         item,
                         "camper trailer site" in camping_types or "caravan site" in camping_types,
                         False,
                     )
                     apply_yes_no(
-                        "motor_vehicle",
+                        Extras.MOTOR_VEHICLES,
                         item,
                         "camping beside my vehicle" in camping_types
                         or "camper trailer site" in camping_types
@@ -53,11 +53,11 @@ class NSWNationalParksAndWildlifeServiceAUSpider(SitemapSpider, StructuredDataSp
                     )
                 elif campground_detail.xpath('./th[contains(text(), "Facilities")]'):
                     facilities = campground_detail.xpath("./td/text()").get().lower()
-                    apply_yes_no("bbq", item, "barbecue facilities" in facilities, False)
-                    apply_yes_no("picnic_table", item, "picnic tables" in facilities, False)
-                    apply_yes_no("toilets", item, "toilets" in facilities, False)
-                    apply_yes_no("drinking_water", item, "drinking water" in facilities, False)
-                    apply_yes_no("shower", item, "showers" in facilities, False)
+                    apply_yes_no(Extras.BARBEQUES, item, "barbecue facilities" in facilities, False)
+                    apply_yes_no(Extras.PICNIC_TABLES, item, "picnic tables" in facilities, False)
+                    apply_yes_no(Extras.TOILETS, item, "toilets" in facilities, False)
+                    apply_yes_no(Extras.DRINKING_WATER, item, "drinking water" in facilities, False)
+                    apply_yes_no(Extras.SHOWERS, item, "showers" in facilities, False)
         else:
             # Other types of accommodation are extremely varied and
             # are difficult to tag accurately:
