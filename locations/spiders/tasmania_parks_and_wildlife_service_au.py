@@ -2,17 +2,23 @@ from copy import deepcopy
 
 from scrapy import Request, Spider
 
-from locations.categories import apply_category, apply_yes_no, Categories, Extras
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.items import Feature
 from locations.settings import ITEM_PIPELINES
 
 
 class TasmaniaParksAndWildlifeServiceAUSpider(Spider):
     name = "tasmania_parks_and_wildlife_service_au"
-    item_attributes = {"state": "Tasmania", "operator": "Tasmania Parks and Wildlife Service", "operator_wikidata": "Q7687416"}
+    item_attributes = {
+        "state": "Tasmania",
+        "operator": "Tasmania Parks and Wildlife Service",
+        "operator_wikidata": "Q7687416",
+    }
     allowed_domains = ["parks.tas.gov.au"]
     start_urls = ["https://parks.tas.gov.au/where-to-stay/map-of-stays"]
-    custom_settings = {"ITEM_PIPELINES": ITEM_PIPELINES | {"locations.pipelines.apply_nsi_categories.ApplyNSICategoriesPipeline": None}}
+    custom_settings = {
+        "ITEM_PIPELINES": ITEM_PIPELINES | {"locations.pipelines.apply_nsi_categories.ApplyNSICategoriesPipeline": None}
+    }
 
     def parse(self, response):
         js_blob = response.xpath('//div[@class="pws--map-container"]//script/text()').get()
@@ -30,10 +36,18 @@ class TasmaniaParksAndWildlifeServiceAUSpider(Spider):
             else:
                 continue
             properties = {
-                "name": line.split("<b>", 1)[1].split("</b>", 1)[0].replace(" walker camping", "").replace(" camping", "").replace(" accommodation", ""),
+                "name": line.split("<b>", 1)[1]
+                .split("</b>", 1)[0]
+                .replace(" walker camping", "")
+                .replace(" camping", "")
+                .replace(" accommodation", ""),
                 "website": "https://parks.tas.gov.au" + line.split("<a href='", 1)[1].split("'", 1)[0],
             }
-            yield Request(url=properties["website"], meta={"properties": properties, "coordinates": coordinates}, callback=self.parse_location)
+            yield Request(
+                url=properties["website"],
+                meta={"properties": properties, "coordinates": coordinates},
+                callback=self.parse_location,
+            )
 
     def parse_location(self, response):
         for site_number, coordinate in enumerate(response.meta["coordinates"]):
@@ -58,10 +72,28 @@ class TasmaniaParksAndWildlifeServiceAUSpider(Spider):
                 # varied, without an easy and reliable way to
                 # tag these features with specific tourism tags.
                 apply_category({"tourism": "yes"}, properties)
-            apply_yes_no(Extras.TENT_SITES, properties, response.xpath('//img[contains(@data-src, "/icons/camping.png")]'), False)
-            apply_yes_no(Extras.CARAVAN_SITES, properties, response.xpath('//img[contains(@data-src, "/icons/Caravan-site.png")]'), False)
-            apply_yes_no(Extras.BARBEQUES, properties, response.xpath('//img[contains(@data-src, "/icons/BBQ.png")]'), False)
-            apply_yes_no(Extras.PICNIC_TABLES, properties, response.xpath('//img[contains(@data-src, "/icons/Picnic-area.png")]'), False)
-            apply_yes_no(Extras.TOILETS, properties, response.xpath('//img[contains(@data-src, "/icons/toilets.png")]'), False)
-            apply_yes_no(Extras.SHOWERS, properties, response.xpath('//img[contains(@data-src, "/icons/shower.png")]'), False)
+            apply_yes_no(
+                Extras.TENT_SITES, properties, response.xpath('//img[contains(@data-src, "/icons/camping.png")]'), False
+            )
+            apply_yes_no(
+                Extras.CARAVAN_SITES,
+                properties,
+                response.xpath('//img[contains(@data-src, "/icons/Caravan-site.png")]'),
+                False,
+            )
+            apply_yes_no(
+                Extras.BARBEQUES, properties, response.xpath('//img[contains(@data-src, "/icons/BBQ.png")]'), False
+            )
+            apply_yes_no(
+                Extras.PICNIC_TABLES,
+                properties,
+                response.xpath('//img[contains(@data-src, "/icons/Picnic-area.png")]'),
+                False,
+            )
+            apply_yes_no(
+                Extras.TOILETS, properties, response.xpath('//img[contains(@data-src, "/icons/toilets.png")]'), False
+            )
+            apply_yes_no(
+                Extras.SHOWERS, properties, response.xpath('//img[contains(@data-src, "/icons/shower.png")]'), False
+            )
             yield Feature(**properties)

@@ -35,7 +35,10 @@ class NSWNationalParksAndWildlifeServiceAUSpider(SitemapSpider, StructuredDataSp
                 elif campground_detail.xpath('./th[contains(text(), "Camping type")]'):
                     camping_types = campground_detail.xpath("./td/text()").get().lower()
                     apply_yes_no(
-                        Extras.TENT_SITES, item, "tent" in camping_types or "camping beside my vehicle" in camping_types, False
+                        Extras.TENT_SITES,
+                        item,
+                        "tent" in camping_types or "camping beside my vehicle" in camping_types,
+                        False,
                     )
                     apply_yes_no(
                         Extras.CARAVAN_SITES,
