@@ -13,19 +13,18 @@ class AldiSudCHSpider(scrapy.Spider):
 
     def parse(self, response):
         for store in response.json()["stores"]:
-            item = DictParser.parse(store)
             if store["storeType"] == "N":
                 continue
-            if item["country"] != "CH":
+            if store["countryCode"] != "CH":
                 continue
 
-            item["website"] = store.get("url")
+            item = DictParser.parse(store)
+            item.pop("name")
 
-            oh = OpeningHours()
+            item["opening_hours"] = OpeningHours()
             for rule in store["openUntilSorted"]["openingHours"]:
                 day = sanitise_day(rule["day"], DAYS_CH)
                 if not rule.get("closed", False):
-                    oh.add_range(day, rule["openFormatted"], rule["closeFormatted"])
-            item["opening_hours"] = oh.as_opening_hours()
+                    item["opening_hours"].add_range(day, rule["openFormatted"], rule["closeFormatted"])
 
             yield item
