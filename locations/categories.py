@@ -122,6 +122,8 @@ class Categories(Enum):
     OFFICE_IT = {"office": "it"}
 
     TOURISM_CAMP_SITE = {"tourism": "camp_site"}
+    TOURISM_CHALET = {"tourism": "chalet"}
+    TOURISM_WILDERNESS_HUT = {"tourism": "wilderness_hut"}
 
     ALTERNATIVE_MEDICINE = {"healthcare": "alternative"}
     AMBULANCE_STATION = {"emergency": "ambulance_station"}
@@ -352,8 +354,10 @@ class Extras(Enum):
     AIR_CONDITIONING = "air_conditioning"
     ATM = "atm"
     BABY_CHANGING_TABLE = "changing_table"
+    BARBEQUES = "bbq"
     CALLING = "service:phone"
     CAR_WASH = "car_wash"
+    CARAVAN_SITES = "caravans"
     CASH_IN = "cash_in"
     CASH_OUT = "cash_out"
     COMPRESSED_AIR = "compressed_air"
@@ -372,6 +376,7 @@ class Extras(Enum):
     PARKING_PARENT = "capacity:parent"
     PARKING_WHEELCHAIR = "capacity:disabled"
     PETS_ALLOWED = "pets_allowed"
+    PICNIC_TABLES = "picnic_table"
     PRINTING = "service:print"
     SELF_CHECKOUT = "self_checkout"
     SCANING = "service:scan"
@@ -379,6 +384,7 @@ class Extras(Enum):
     SMOKING_AREA = "smoking=isolated"
     SWIMMING_POOL = "swimming_pool"
     TAKEAWAY = "takeaway"
+    TENT_SITES = "tents"
     TOILETS = "toilets"
     TOILETS_WHEELCHAIR = "toilets:wheelchair"
     TRUCK_WASH = "truck_wash"
