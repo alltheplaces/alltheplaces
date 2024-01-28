@@ -2,7 +2,8 @@ from scrapy.commands import ScrapyCommand
 from scrapy.exceptions import UsageError
 
 from locations.name_suggestion_index import NSI
-
+from locations.exporters.geojson import find_spider_class
+from locations.commands.duplicate_wikidata import DuplicateWikidataCommand
 
 class NameSuggestionIndexCommand(ScrapyCommand):
     """
@@ -17,10 +18,10 @@ class NameSuggestionIndexCommand(ScrapyCommand):
     nsi = NSI()
 
     def syntax(self):
-        return "[options] <name | code>"
+        return "[options] <name | code | detect-missing>"
 
     def short_desc(self):
-        return "Lookup wikidata code or (fuzzy match) brand name in the name suggestion index"
+        return "Lookup wikidata code, (fuzzy match) brand name in the name suggestion index, or detecting missing by category"
 
     def add_options(self, parser):
         ScrapyCommand.add_options(self, parser)
@@ -36,6 +37,12 @@ class NameSuggestionIndexCommand(ScrapyCommand):
             action="store_true",
             help="Query NSI for wikidata code",
         )
+        parser.add_argument(
+            "--detect-missing",
+            dest="detect_missing",
+            action="store_true",
+            help="Query NSI for missing by NSI category. ie brands/shop/supermarket",
+        )
 
     def run(self, args, opts):
         if not len(args) == 1:
@@ -44,6 +51,8 @@ class NameSuggestionIndexCommand(ScrapyCommand):
             self.lookup_name(args)
         if opts.lookup_code:
             self.lookup_code(args)
+        if opts.detect_missing:
+            self.detect_missing(args)
 
     def lookup_name(self, args):
         for code, _ in self.nsi.iter_wikidata(args[0]):
@@ -59,6 +68,30 @@ class NameSuggestionIndexCommand(ScrapyCommand):
                     )
                 )
                 print("       -> " + str(item))
+
+    def detect_missing(self, args):
+        codes = {}
+        for spider_name in self.crawler_process.spider_loader.list():
+            props = DuplicateWikidataCommand.spider_properties(spider_name)
+            for code in props["wikidata_codes"]:
+                code_spiders = codes.get(code, set())
+                code_spiders.add(props["filename"])
+                codes[code] = code_spiders
+
+        # Fetch the category from NSI's github, and try to match to wikidata.
+        # TODO: This assumes you are going for only one category, by wikidata ID.
+        #       Is it worth having this just check all of the wikidata entries and printing out what is missing globally?
+        response = self.nsi._request_file(f"data/{args[0]}.json")
+        print(f"Fetched {len(response['items'])} {response['properties']['path']} from NSI")
+
+        missing = []
+        for item in response["items"]:
+            if "brand:wikidata" in item["tags"]:
+                if not item["tags"]["brand:wikidata"] in codes.keys():
+                    missing.append(item)
+        print(f"Missing by wikidata: {len(missing)}")
+        for brand in missing:
+            self.show(brand['tags']['brand:wikidata'], {"label": brand['displayName']})
 
     @staticmethod
     def show(code, data):

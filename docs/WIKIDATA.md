@@ -92,6 +92,22 @@ $ pipenv run scrapy nsi --code Q9361374
 Note the OSM POI category attributes for a hotel (`'tourism': 'hotel'`) are part
 of the tag set that the NSI is "suggesting" in this case.
 
+### Finding scrapers to build by category
+
+To looking for missing or existing scrapers by a given category, review https://nsi.guide/?t=brands and supply the category
+to the nsi --detect-missing command.
+
+```
+$ pipenv run scrapy nsi --detect-missing brands/shop/supermarket
+Fetched 915 brands/shop/supermarket from NSI
+Missing by wikidata: 619
+"3hreeSixty", "Q7797310"
+       -> https://www.wikidata.org/wiki/Q7797310
+       -> https://www.wikidata.org/wiki/Special:EntityData/Q7797310.json
+```
+
+Check carefully if this is simply a scraper missing a wikidata entry, or if it is truely missing a scraper.
+
 ### Automatic POI categorisation
 
 The [ATP item pipeline](../locations/pipelines/apply_nsi_categories.py)
