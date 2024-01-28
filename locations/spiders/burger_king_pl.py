@@ -3,12 +3,13 @@ from scrapy.http import JsonRequest
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.spiders.burger_king import BURGER_KING_SHARED_ATTRIBUTES
 
 
 class BurgerKingPLSpider(Spider):
     name = "burger_king_pl"
     start_urls = ["https://burgerking.pl/restaurants"]
-    item_attributes = {"brand": "Burger King", "brand_wikidata": "Q177054"}
+    item_attributes = BURGER_KING_SHARED_ATTRIBUTES
 
     def parse(self, response, **kwargs):
         next_build_id = response.xpath("//script[contains(@src, '_ssgManifest.js')]/@src").get().split("/")[3]

@@ -36,7 +36,7 @@ class OneStopGBSpider(Spider):
             location["location"]["contact"]["phone"] = location["location"]["contact"]["phoneNumbers"]["main"]
 
             item = DictParser.parse(location["location"])
-            item["website"] = f'https://www.onestop.co.uk/store?store={item["ref"]}'
+            item["website"] = f'https://www.onestop.co.uk/store/?store={item["ref"]}'
 
             if isinstance(location["location"]["openingHours"], dict):
                 item["opening_hours"] = OpeningHours()

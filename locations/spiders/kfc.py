@@ -3,10 +3,12 @@ import scrapy
 from locations.linked_data_parser import LinkedDataParser
 from locations.microdata_parser import MicrodataParser
 
+KFC_SHARED_ATTRIBUTES = {"brand": "KFC", "brand_wikidata": "Q524757"}
+
 
 class KFCSpider(scrapy.spiders.SitemapSpider):
     name = "kfc"
-    item_attributes = {"brand": "KFC", "brand_wikidata": "Q524757"}
+    item_attributes = KFC_SHARED_ATTRIBUTES
     sitemap_urls = [
         "https://www.kfc.co.uk/sitemap.xml",
         "https://locations.kfc.com/sitemap.xml",
