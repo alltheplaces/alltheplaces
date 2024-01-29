@@ -51,7 +51,7 @@ Each GeoJSON feature will have a `properties` object with as many of the followi
 | `located_in`          | The name of the feature that this feature is located in.
 | `located_in:wikidata` | The [Wikidata](https://www.wikidata.org/wiki/Wikidata:Main_Page) [item ID](https://www.wikidata.org/wiki/Help:Items) for the brand or chain of the feature that this feature is located in. This is a machine-readable identifier counterpart for the human-readable `located_in` above.
 | `nsi_id`              | The [Name Suggestion Index](https://nsi.guide/) (NSI) ID for the feature. NSI IDs aren't stable, so you may require [old NSI data](https://github.com/osmlab/name-suggestion-index/tree/main/dist) if you are working with old ATP data.
-| `end_date`              | `end_date=yes` is applied when given location is closed and not operating
+| `end_date`              | `end_date=yes` is applied when given location is closed at unknown date and can be assumed to not operate right now, `end_date` may also have values in year-month-day format, including future dates for planned closures.
 
 ### Extras
 
