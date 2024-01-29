@@ -19,7 +19,7 @@ class PapaJohnsSpider(SitemapSpider, StructuredDataSpider):
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         if name := item.get("name", "").lower():
-            if name.startswith("Coming Soon - "):
+            if name.startswith("coming soon - "):
                 return
             else:
                 item["branch"] = item.pop("name").removeprefix("Papa Johns Pizza ")
