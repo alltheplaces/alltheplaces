@@ -10,13 +10,12 @@ from locations.hours import OpeningHours
 
 class RubyTuesdayUsSpider(Spider):
     name = "ruby_tuesday_us"
-    item_attributes = {"brand": "Ruby Tuesday", "brand_wikidata": "Q7376400", "nsi_id": "rubytuesday-2fabb0"}
+    item_attributes = {"brand": "Ruby Tuesday", "brand_wikidata": "Q7376400"}
     start_urls = ["https://www.rubytuesday.com/locations/"]
 
     def parse(self, response: Response):
-        scripts = response.css('[type="text/javascript"]::text').getall()
-        locations = parse_js_object([s for s in scripts if s.startswith("var locations_meta")][0])
-        for location in locations:
+        js_blob = response.xpath('//script[contains(text(), "var locations_meta =")]/text()').get()
+        for location in parse_js_object(js_blob):
             location = location["location"]
             item = DictParser.parse(location["map_pin"])
             item["city"] = item["city"].title()
