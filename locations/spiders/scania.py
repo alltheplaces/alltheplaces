@@ -128,9 +128,11 @@ class ScaniaSpider(scrapy.Spider):
                     "email": address_details.get("electronicMailAddress"),
                     "postcode": postal_address.get("postalCode"),
                     "city": postal_address.get("city").get("value"),
-                    "state": postal_address.get("countryRegion").get("value")
-                    if postal_address.get("countryRegion")
-                    else None,
+                    "state": (
+                        postal_address.get("countryRegion").get("value")
+                        if postal_address.get("countryRegion")
+                        else None
+                    ),
                     "lat": lat,
                     "lon": lon,
                     "opening_hours": oh,
