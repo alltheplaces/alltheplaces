@@ -46,7 +46,7 @@ Each GeoJSON feature will have a `properties` object with as many of the followi
 | `contact:twitter`     | The twitter account for the venue. We try to make this specific to the venue and not generic for the brand that is operating the venue.
 | `contact:facebook`    | The facebook account for the venue. We try to make this specific to the venue and not generic for the brand that is operating the venue.
 | **Other**             | _Other information about the venue_
-| `opening_hours`       | The opening hours for the venue. When we can, the format for this field follows [OpenStreetMap's `opening_hours` format](https://wiki.openstreetmap.org/wiki/Key:opening_hours#Examples).
+| `opening_hours`       | The opening hours for the venue. When we can, the format for this field follows [OpenStreetMap's `opening_hours` format](https://wiki.openstreetmap.org/wiki/Key:opening_hours#Examples). Note that in some cases only some days of week are parsed.
 | `image`               | A URL of an image for the venue. We try to make this specific to the venue and not generic for the brand that is operating the venue.
 | `located_in`          | The name of the feature that this feature is located in.
 | `located_in:wikidata` | The [Wikidata](https://www.wikidata.org/wiki/Wikidata:Main_Page) [item ID](https://www.wikidata.org/wiki/Help:Items) for the brand or chain of the feature that this feature is located in. This is a machine-readable identifier counterpart for the human-readable `located_in` above.
