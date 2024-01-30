@@ -21,7 +21,7 @@ class AnthropologieSpider(SitemapSpider, StructuredDataSpider):
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["branch"] = item.pop("name").removeprefix(" - Anthropologie Store")
 
-        if item["branch"].startswith("Closed - ") or item["name"].endswith(" - Closed"):
+        if item["branch"].startswith("Closed - ") or item["branch"].endswith(" - Closed"):
             set_closed(item)
 
         yield item
