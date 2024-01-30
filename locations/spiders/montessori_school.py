@@ -7,7 +7,7 @@ from locations.items import Feature
 
 class MontessoriSchoolSpider(scrapy.Spider):
     name = "montessori_school"
-    item_attributes = {"brand": "Montessori School", "brand_wikidata": "Q114840336"}
+    item_attributes = {"brand": "Montessori School", "brand_wikidata": "Q56280103", "extras": {"amenity": "school"}}
     allowed_domains = ["www.montessori.com"]
     start_urls = ("https://www.montessori.com/montessori-schools/find-a-school/",)
 
