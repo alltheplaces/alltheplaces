@@ -14,7 +14,7 @@ class StudenacHrSpider(CrawlSpider):
     allowed_domains = ["studenac.hr"]
     # store finder contains about 90 extra stores compared to the sitemap
     start_urls = ["https://www.studenac.hr/popis-trgovina"]
-    rules = [Rule(LinkExtractor(allow=r"trgovine/\d{3,4}/t"), callback="parse", follow=False)]
+    rules = [Rule(LinkExtractor(allow=r"trgovine/\d{1,5}/t"), callback="parse", follow=False)]
 
     def parse(self, response: Response):
         # email address on store websites is generic
