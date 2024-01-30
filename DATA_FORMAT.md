@@ -62,3 +62,11 @@ If enough spiders find interesting things to include in an extra property, it mi
 ## Categories
 
 Along with the above properties we aim to output [OpenStreetMap categories](https://wiki.openstreetmap.org/wiki/Map_features) as properties on the GeoJSON Feature.
+
+## Data quality
+
+Note that the All the Places project collects data from original sources. Most mistakes or inaccuracies present in the original sources will be reproduced by the datasets published by All the Places.
+
+In addition, parts of the data may be missing or not parsed, especially in cases where the original source is hard to parse or crawling failed for some reason. Data may also be outdated - either due to being outdated in original source, an update happening since data was last crawled, or due to a failing spider.
+
+Data quality is not consistent and will vary significantly between spiders. Note that global, less specific spiders are especially likely to have inaccurate data.
