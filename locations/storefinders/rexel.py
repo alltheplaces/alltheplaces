@@ -32,9 +32,9 @@ class RexelSpider(Spider):
             item = DictParser.parse(feature)
             item["phone"] = feature["address"]["phone"]
             # e.g. https://www.denmans.co.uk/den/Bradley-Stoke-Bristol/store/1AR
-            item[
-                "website"
-            ] = f'https://{self.base_url}/{feature["address"]["town"].replace(" ", "-")}/store/{feature["ref"]}'
+            item["website"] = (
+                f'https://{self.base_url}/{feature["address"]["town"].replace(" ", "-")}/store/{feature["ref"]}'
+            )
             item["opening_hours"] = self.decode_hours(feature)
             # We could also fall back to cartIcon here...
             if feature["storeImages"]:

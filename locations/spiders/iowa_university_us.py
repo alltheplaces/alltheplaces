@@ -2,14 +2,15 @@ import json
 
 import scrapy
 
-from locations.items import Feature
+from locations.categories import Categories, apply_category
+from locations.dict_parser import DictParser
 from locations.user_agents import BROWSER_DEFAULT
 
 DAYS = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"]
 
 
-class IowaUniversitySpider(scrapy.Spider):
-    name = "iowa_university"
+class IowaUniversityUSSpider(scrapy.Spider):
+    name = "iowa_university_us"
     item_attributes = {
         "brand": "University of Iowa Hospitals and Clinics",
         "brand_wikidata": "Q7895561",
@@ -41,21 +42,23 @@ class IowaUniversitySpider(scrapy.Spider):
         stores = json.loads(response.body)["results"][0]
 
         for store in stores["hits"]:
-            properties = {
-                "ref": store["objectID"],
-                "name": store["title"],
-                "street_address": store["field_address:thoroughfare"],
-                "city": store["field_address:locality"],
-                "state": store["field_address:administrative_area"],
-                "postcode": store["field_address:postal_code"],
-                "country": "US",
-                "lat": store["field_geolocation:lat"],
-                "lon": store["field_geolocation:lon"],
-                "phone": store.get("field_location_phone"),
-                "website": store["url"],
-            }
-
-            yield Feature(**properties)
+            item = DictParser.parse(store)
+            item["ref"] = store["objectID"]
+            item["street_address"] = store["field_address:thoroughfare"]
+            item["city"] = store["field_address:locality"]
+            item["state"] = store["field_address:administrative_area"]
+            item["postcode"] = store["field_address:postal_code"]
+            item["lat"] = store["field_geolocation:lat"]
+            item["lon"] = store["field_geolocation:lon"]
+            item["phone"] = store.get("field_location_phone")
+            if services := store.get("services"):
+                if "Same-Day Care" in services:
+                    apply_category(Categories.CLINIC, item)
+                else:
+                    apply_category(Categories.HOSPITAL, item)
+            else:
+                apply_category(Categories.CLINIC, item)
+            yield item
 
         if stores["page"] < stores["nbPages"]:
             yield self._prepare_request(int(stores["page"]) + 1)

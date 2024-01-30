@@ -14,4 +14,6 @@ class SamsClubMXSpider(Spider):
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for locations in response.json()["stateStores"].values():
             for location in locations:
-                yield DictParser.parse(location)
+                item = DictParser.parse(location)
+                item["website"] = "https://www.sams.com.mx/clubes/{}".format(item["ref"])
+                yield item

@@ -2,6 +2,7 @@ import json
 
 import scrapy
 
+from locations.categories import Categories
 from locations.hours import DAYS_EN, OpeningHours
 from locations.items import Feature
 
@@ -10,7 +11,7 @@ class DockxBESpider(scrapy.Spider):
     name = "dockx_be"
     start_urls = ["https://www.dockx.be/en/locations"]
 
-    item_attributes = {"brand": "Dockx"}
+    item_attributes = {"brand": "Dockx", "extras": Categories.CAR_RENTAL.value}
 
     def parse(self, response, **kwargs):
         raw = (

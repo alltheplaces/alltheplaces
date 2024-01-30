@@ -1,5 +1,3 @@
-import re
-
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
@@ -28,8 +26,8 @@ class MyDentistGBSpider(CrawlSpider, StructuredDataSpider):
     wanted_types = ["LocalBusiness"]
 
     def inspect_item(self, item, response):
-        item["lat"] = re.search(r"\"_readModeLat\":(-?[\d.]+),", response.text).group(1)
-        item["lon"] = re.search(r"\"_readModeLon\":(-?[\d.]+),", response.text).group(1)
+        item["lat"] = response.xpath('//input[@name="Latitude"]/@value').get()
+        item["lon"] = response.xpath('//input[@name="Longitude"]/@value').get()
 
         # City can come back as eg ["Penistone", "Sheffield"] - put the locality on the end of street address
         if "city" in item and isinstance(item["city"], list):

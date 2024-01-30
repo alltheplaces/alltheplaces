@@ -15,8 +15,6 @@ class LidlATSpider(VirtualEarthSpider):
     days = DAYS_AT
 
     def parse_item(self, item, feature, **kwargs):
-        item["name"] = feature["ShownStoreName"]
-
         item["opening_hours"] = OpeningHours()
         for day, start_time, end_time in re.findall(
             r"(\w+) (\d{2}:\d{2})-(\d{2}:\d{2})",
