@@ -55,7 +55,7 @@ class BenchmarkHospitalitySpider(scrapy.Spider):
 
         item["ref"] = re.search(r".com/+(?:meeting/+)?(.+?)//?", response.url + "/").group(1)
         item["addr_full"] = address.strip() if "Reservations" not in address else None
-        item["phone"] = (phone.strip(),)
+        item["phone"] = phone.strip()
         item["website"] = response.url
 
         if "Resort" in item["name"]:
