@@ -2,14 +2,13 @@ from chompjs import parse_js_object
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
-from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
 
 class EspressoHouseSpider(SitemapSpider):
     name = "espresso_house"
-    item_attributes = {"brand": "Espresso House", "brand_wikidata": "Q10489162", "nsi_id": "espressohouse-99eace"}
+    item_attributes = {"brand": "Espresso House", "brand_wikidata": "Q10489162"}
     allowed_domains = ["espressohouse.com"]
 
     sitemap_urls = ["https://espressohouse.com/sitemap.xml"]
@@ -35,5 +34,4 @@ class EspressoHouseSpider(SitemapSpider):
             item["opening_hours"] = opening_hours
         except:
             pass
-        apply_category(Categories.COFFEE_SHOP, item)
         yield item
