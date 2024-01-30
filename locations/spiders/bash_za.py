@@ -6,6 +6,7 @@ from scrapy.http import JsonRequest
 from locations.categories import Categories
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
+from locations.items import set_closed
 
 BASH_BRANDS = {
     "ASJ": {"brand": "American Swiss", "brand_wikidata": "Q116430764"},
@@ -72,6 +73,7 @@ class BashZASpider(Spider):
     ]
 
     def start_requests(self):
+        self.brand_name_regex = re.compile(r"^(" + "|".join(BASH_BRANDS) + r") ", re.IGNORECASE)
         for url in self.start_urls:
             yield JsonRequest(url=url)
 
@@ -108,9 +110,10 @@ class BashZASpider(Spider):
                     DAYS[hours_range["dayOfWeek"]], hours_range["openingTime"], hours_range["closingTime"], "%H:%M:%S"
                 )
 
-            brands_regex_group = r"|".join(BASH_BRANDS)
-            brand_name_regex = r"^(" + brands_regex_group + r") "
-            if m := re.match(brand_name_regex, item["name"], flags=re.IGNORECASE):
+            if " (CLOSED) " in item["name"]:
+                set_closed(item)
+
+            if m := self.brand_name_regex.match(item["name"]):
                 item.update(BASH_BRANDS[m.group(1).upper()])
 
             yield item
