@@ -109,6 +109,7 @@ class Categories(Enum):
     SHOP_TELECOMMUNICATION = {"shop": "telecommunication"}
     SHOP_TOYS = {"shop": "toys"}
     SHOP_TRADE = {"shop": "trade"}
+    SHOP_TRUCK_REPAIR = {"shop": "truck_repair"}
     SHOP_TRAVEL_AGENCY = {"shop": "travel_agency"}
     SHOP_TYRES = {"shop": "tyres"}
     SHOP_VARIETY_STORE = {"shop": "variety_store"}
