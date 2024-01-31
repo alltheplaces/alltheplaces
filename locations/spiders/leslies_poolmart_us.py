@@ -16,11 +16,10 @@ class LesliesPoolmartUSSpider(SitemapSpider):
     sitemap_rules = [("/location/", "parse")]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        print(response.text)
         item = Feature()
-        item["ref"] = response.xpath("////a[@data-store-id]/@data-store-id").get()
-        item["lat"] = response.xpath("//@data-store-latitude").get()
-        item["lon"] = response.xpath("//@data-store-longitude").get()
+        item["ref"] = response.xpath("//a[@data-store-id]/@data-store-id").get()
+        item["lat"] = response.xpath("//a[@data-store-latitude]/@data-store-latitude").get()
+        item["lon"] = response.xpath("//a[@data-store-longitude]/@data-store-longitude").get()
         item["branch"] = response.xpath("//h1/text()").get()
         item["website"] = response.url
         extract_phone(item, response)
