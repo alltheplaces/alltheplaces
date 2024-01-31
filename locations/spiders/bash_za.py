@@ -18,6 +18,8 @@ BASH_BRANDS = {
         "extras": Categories.SHOP_CLOTHES.value,
     },
     "COLETTE": {"brand": "Colette", "brand_wikidata": "Q737606", "extras": Categories.SHOP_CLOTHES.value},
+    "CORICRAFT": {"brand": "Coricraft", "brand_wikidata": "Q116428628"},
+    "DIAL A BED": {"brand": "Dial-a-Bed", "brand_wikidata": "Q116429178"},
     "EXACT": {"brand": "Exact", "brand_wikidata": "Q116379381"},
     "EX": {"brand": "Exact", "brand_wikidata": "Q116379381"},
     "DONNA": {"brand": "Donna", "brand_wikidata": "Q117407190", "extras": Categories.SHOP_VARIETY_STORE.value},
@@ -61,7 +63,9 @@ BASH_BRANDS = {
     "TOTALSPORTS": {"brand": "Totalsports", "brand_wikidata": "Q116379123"},
     "TS": {"brand": "Totalsports", "brand_wikidata": "Q116379123"},
     "THE FIX": {"brand": "The FIX", "brand_wikidata": "Q116379523"},
+    "THE BED STORE": {"brand": "The Bed Store", "brand_wikidata": "Q116429563"},
     "THE SCENE": {"brand": "The Scene", "brand_wikidata": "Q117406601", "extras": Categories.SHOP_CLOTHES.value},
+    "VOLPES": {"brand": "Volpes", "brand_wikidata": "Q116431266"},
 }
 
 
