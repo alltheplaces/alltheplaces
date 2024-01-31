@@ -16,6 +16,7 @@ class LesliesPoolmartUSSpider(SitemapSpider):
     sitemap_rules = [("/location/", "parse")]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
+        print(response.text)
         item = Feature()
         item["ref"] = response.xpath("////a[@data-store-id]/@data-store-id").get()
         item["lat"] = response.xpath("//@data-store-latitude").get()
