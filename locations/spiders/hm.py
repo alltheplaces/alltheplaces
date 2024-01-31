@@ -8,6 +8,7 @@ class HMSpider(scrapy.Spider):
     name = "hm"
     item_attributes = {"brand": "H&M", "brand_wikidata": "Q188326"}
     start_urls = ["http://www.hm.com/entrance.ahtml"]
+    requires_proxy = True
 
     def parse(self, response):
         for country_code in response.xpath("//@data-location").getall():
