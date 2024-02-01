@@ -2,6 +2,7 @@ import json
 
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
@@ -38,4 +39,21 @@ class MedstarSpider(scrapy.Spider):
             "lon": float(response.xpath('//div[@class="field-distance fieldlocation "]/span/@data-lon').extract()[0]),
         }
 
+        name_lower = properties.get("name").lower()
+        if "hospital" in name_lower:
+            apply_category(Categories.HOSPITAL, properties)
+        elif "pharmacy" in name_lower:
+            apply_category(Categories.PHARMACY, properties)
+        elif self.list_check(["medical center", "hospital center"], name_lower):
+            apply_category({"healthcare": "centre"}, properties)
+        elif self.list_check(["urgent care", "women's health"], name_lower):
+            apply_category(Categories.CLINIC, properties)
+
         yield Feature(**properties)
+
+    def list_check(self, substr_list, string):
+        for substr in substr_list:
+            if substr in string:
+                return True
+        else:
+            return False
