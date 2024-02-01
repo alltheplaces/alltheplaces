@@ -40,10 +40,13 @@ class LittleFreeLibrarySpider(Spider):
             "state": location.get("State_Province_Region__c"),
             "postcode": location.get("Postal_Zip_Code__c"),
             "country": location.get("Country__c"),
-            "operator": location.get("Primary_Steward_s_Name__c"),
-            "phone": location.get("Primary_Steward_s_Phone__c"),
-            "email": location.get("Primary_Steward_s_Email__c"),
             "image": location.get("primary_image"),
+            # These fields could potentially be considered
+            # personal/private information and don't add much value
+            # to ATP. It's easier to ignore these fields.
+            # "operator": location.get("Primary_Steward_s_Name__c"),
+            # "phone": location.get("Primary_Steward_s_Phone__c"),
+            # "email": location.get("Primary_Steward_s_Email__c"),
         }
         if location.get("Library_Name__c"):
             properties["name"] = location.get("Library_Name__c")
