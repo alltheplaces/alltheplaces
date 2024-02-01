@@ -112,6 +112,7 @@ class Categories(Enum):
     SHOP_TRAVEL_AGENCY = {"shop": "travel_agency"}
     SHOP_TYRES = {"shop": "tyres"}
     SHOP_VARIETY_STORE = {"shop": "variety_store"}
+    SHOP_VIDEO_GAMES = {"shop": "video_games"}
     SHOP_WATCHES = {"shop": "watches"}
     SHOP_WHOLESALE = {"shop": "wholesale"}
     SHOP_WINDOW_BLIND = {"shop": "window_blind"}
