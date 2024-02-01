@@ -149,7 +149,9 @@ def postal_regions(country_code: str, min_population: int = 0, decimation_radius
         raise Exception("country code not supported: " + country_code)
 
 
-def make_subdivisions(bounds: tuple[float, float, float, float], num_tiles: int = 4) -> list[tuple[float, float, float, float]]:
+def make_subdivisions(
+    bounds: tuple[float, float, float, float], num_tiles: int = 4
+) -> list[tuple[float, float, float, float]]:
     """
     Divide the given bounds into num_tiles*num_tiles equal subdivisions.
 

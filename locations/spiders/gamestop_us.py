@@ -9,14 +9,20 @@ from locations.geo import postal_regions
 from locations.hours import OpeningHours
 from locations.user_agents import BROWSER_DEFAULT
 
-GAMESTOP_SHARED_ATTRIBUTES = {"brand": "GameStop", "brand_wikidata": "Q202210", "extras": Categories.SHOP_VIDEO_GAMES.value}
+GAMESTOP_SHARED_ATTRIBUTES = {
+    "brand": "GameStop",
+    "brand_wikidata": "Q202210",
+    "extras": Categories.SHOP_VIDEO_GAMES.value,
+}
 
 
 class GamestopUSSpider(Spider):
     name = "gamestop_us"
     item_attributes = GAMESTOP_SHARED_ATTRIBUTES
     allowed_domains = ["www.gamestop.com"]
-    start_urls = ["https://www.gamestop.com/on/demandware.store/Sites-gamestop-us-Site/default/Stores-FindStores?hasCondition=false&hasVariantsAvailableForLookup=false&hasVariantsAvailableForPickup=false&source=plp&showMap=false&products=undefined:1"]
+    start_urls = [
+        "https://www.gamestop.com/on/demandware.store/Sites-gamestop-us-Site/default/Stores-FindStores?hasCondition=false&hasVariantsAvailableForLookup=false&hasVariantsAvailableForPickup=false&source=plp&showMap=false&products=undefined:1"
+    ]
     user_agent = BROWSER_DEFAULT
     custom_settings = {"ROBOTSTXT_OBEY": False}
     download_delay = 0.2
@@ -74,7 +80,7 @@ class GamestopUSSpider(Spider):
                     url=url,
                     method="POST",
                     headers=headers,
-                    formdata={"postalCode": str(postcode), "radius": "100", "csrf_token": "0"}
+                    formdata={"postalCode": str(postcode), "radius": "100", "csrf_token": "0"},
                 )
 
     def parse(self, response):

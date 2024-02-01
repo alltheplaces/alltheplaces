@@ -1,8 +1,7 @@
 from scrapy import Selector
 
-from locations.hours import OpeningHours, DAYS_DE
+from locations.hours import DAYS_DE, OpeningHours
 from locations.items import Feature
-
 from locations.spiders.gamestop_ca import GamestopCASpider
 
 
@@ -16,7 +15,9 @@ class GamestopDESpider(GamestopCASpider):
         if not location.get("Hours"):
             yield item
             return
-        hours_string = " ".join(filter(None, map(str.strip, Selector(text=location["Hours"]).xpath('//td/text()').getall())))
+        hours_string = " ".join(
+            filter(None, map(str.strip, Selector(text=location["Hours"]).xpath("//td/text()").getall()))
+        )
         item["opening_hours"] = OpeningHours()
         item["opening_hours"].add_ranges_from_string(hours_string, days=DAYS_DE)
         yield item
