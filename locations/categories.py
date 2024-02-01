@@ -376,6 +376,7 @@ class Extras(Enum):
     FEE = "fee"
     HALAL = "diet:halal"
     INDOOR_SEATING = "indoor_seating"
+    KOSHER = "diet:kosher"
     MOTOR_VEHICLES = "motor_vehicle"
     OIL_CHANGE = "service:vehicle:oil_change"
     OUTDOOR_SEATING = "outdoor_seating"
