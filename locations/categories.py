@@ -109,6 +109,7 @@ class Categories(Enum):
     SHOP_TELECOMMUNICATION = {"shop": "telecommunication"}
     SHOP_TOYS = {"shop": "toys"}
     SHOP_TRADE = {"shop": "trade"}
+    SHOP_TRUCK_REPAIR = {"shop": "truck_repair"}
     SHOP_TRAVEL_AGENCY = {"shop": "travel_agency"}
     SHOP_TYRES = {"shop": "tyres"}
     SHOP_VARIETY_STORE = {"shop": "variety_store"}
@@ -122,6 +123,8 @@ class Categories(Enum):
     OFFICE_IT = {"office": "it"}
 
     TOURISM_CAMP_SITE = {"tourism": "camp_site"}
+    TOURISM_CHALET = {"tourism": "chalet"}
+    TOURISM_WILDERNESS_HUT = {"tourism": "wilderness_hut"}
 
     ALTERNATIVE_MEDICINE = {"healthcare": "alternative"}
     AMBULANCE_STATION = {"emergency": "ambulance_station"}
@@ -353,26 +356,31 @@ class Extras(Enum):
     AIR_CONDITIONING = "air_conditioning"
     ATM = "atm"
     BABY_CHANGING_TABLE = "changing_table"
+    BARBEQUES = "bbq"
     CALLING = "service:phone"
     CAR_WASH = "car_wash"
+    CARAVAN_SITES = "caravans"
     CASH_IN = "cash_in"
     CASH_OUT = "cash_out"
     COMPRESSED_AIR = "compressed_air"
     COMPUTING = "service:computer"
     COPYING = "service:copy"
     DELIVERY = "delivery"
+    DRINKING_WATER = "drinking_water"
     DRIVE_THROUGH = "drive_through"
     FAST_FOOD = "fast_food"
     FAXING = "service:fax"
     FEE = "fee"
     HALAL = "diet:halal"
     INDOOR_SEATING = "indoor_seating"
+    MOTOR_VEHICLES = "motor_vehicle"
     OIL_CHANGE = "service:vehicle:oil_change"
     OUTDOOR_SEATING = "outdoor_seating"
     PARCEL_PICKUP = "parcel_pickup"
     PARKING_PARENT = "capacity:parent"
     PARKING_WHEELCHAIR = "capacity:disabled"
     PETS_ALLOWED = "pets_allowed"
+    PICNIC_TABLES = "picnic_table"
     PRINTING = "service:print"
     SELF_CHECKOUT = "self_checkout"
     SCANING = "service:scan"
@@ -380,6 +388,7 @@ class Extras(Enum):
     SMOKING_AREA = "smoking=isolated"
     SWIMMING_POOL = "swimming_pool"
     TAKEAWAY = "takeaway"
+    TENT_SITES = "tents"
     TOILETS = "toilets"
     TOILETS_WHEELCHAIR = "toilets:wheelchair"
     TRUCK_WASH = "truck_wash"
