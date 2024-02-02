@@ -130,27 +130,25 @@ def postal_regions(country_code: str, min_population: int = 0, consolidate_citie
         # The backlink must be placed before the Customer uses the Database in production.
         #
         with gzip.open(get_searchable_points_path("postcodes/uszips.csv.gz"), mode="rt") as points:
-            postcode_dict = lambda x: {
-                "postal_region": x["zip"],
-                "city": x["city"],
-                "state": x["state_id"],
-                "latitude": x["lat"],
-                "longitude": x["lng"],
-            }
-            above_minimum_population = lambda x: not (
-                x["population"].isnumeric() and int(x["population"]) < min_population
-            )
-            postcode_data = filter(above_minimum_population, csv.DictReader(points))
+            def create_postcode_output_dict(postcode: dict) -> dict:
+                return {
+                    "postal_region": postcode["zip"],
+                    "city": postcode["city"],
+                    "state": postcode["state_id"],
+                    "latitude": postcode["lat"],
+                    "longitude": postcode["lng"],
+                }
+            postcode_data = filter(lambda x: not(x["population"].isnumeric() and int(x["population"]) < min_population), csv.DictReader(points))
             if consolidate_cities:
                 postcode_data = sorted(postcode_data, key=lambda x: (x["state_name"], x["county_name"], x["city"]))
                 for city, postcodes_in_city in groupby(
                     postcode_data, lambda x: (x["state_name"], x["county_name"], x["city"])
                 ):
                     largest_postcode = max(list(postcodes_in_city), key=lambda x: x["population"])
-                    yield postcode_dict(largest_postcode)
+                    yield create_postcode_output_dict(largest_postcode)
             else:
                 for postcode in postcode_data:
-                    yield postcode_dict(postcode)
+                    yield create_postcode_output_dict(postcode)
 
     elif country_code == "FR":
         # French postal code database from https://datanova.legroupe.laposte.fr
