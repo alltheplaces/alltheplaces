@@ -44,6 +44,8 @@ class PetstockAUSpider(Spider):
                     day_name = DAYS_FULL[DAYS_FULL.index(list(location["open_hours"][str(int(index) + 2)])[0]) - 2]
                 elif day_name == "Tomorrow":
                     day_name = DAYS_FULL[DAYS_FULL.index(list(location["open_hours"][str(int(index) + 1)])[0]) - 1]
+                if day_name not in DAYS_FULL:
+                    continue
                 item["opening_hours"].add_range(
                     day_name, hours[list(hours)[0]]["open"], hours[list(hours)[0]]["close"], "%H%M"
                 )

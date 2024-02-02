@@ -1,46 +1,34 @@
-import json
 import re
 
 from scrapy.spiders import SitemapSpider
 
-from locations.hours import OpeningHours
-from locations.items import Feature
+from locations.spiders.sainsburys import SainsburysSpider
+from locations.spiders.tesco_gb import set_located_in
+from locations.structured_data_spider import StructuredDataSpider
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class ArgosSpider(SitemapSpider):
+class ArgosSpider(SitemapSpider, StructuredDataSpider):
     name = "argos"
     item_attributes = {"brand": "Argos", "brand_wikidata": "Q4789707"}
-    allowed_domains = ["www.argos.co.uk"]
-    download_delay = 0.5
     sitemap_urls = ["https://www.argos.co.uk/stores_sitemap.xml"]
     sitemap_rules = [(r"https://www.argos.co.uk/stores/([\d]+)-([\w-]+)", "parse")]
     user_agent = BROWSER_DEFAULT
 
-    def parse(self, response):
-        data = re.findall(r"window.INITIAL_STATE =[^<]+", response.text)
-        json_data = json.loads(data[0].replace("window.INITIAL_STATE =", ""))
-        properties = {
-            "street_address": json_data["store"]["store"]["address"],
-            "phone": json_data["store"]["store"]["tel"],
-            "city": json_data["store"]["store"]["town"],
-            "name": json_data["store"]["store"]["name"],
-            "postcode": json_data["store"]["store"]["postcode"],
-            "ref": json_data["store"]["store"]["id"],
-            "website": response.url,
-            "lat": float(json_data["store"]["store"]["lat"]),
-            "lon": float(json_data["store"]["store"]["lng"]),
-            "extras": {
-                "store_type": json_data["store"]["store"]["type"],
-            },
-        }
+    def post_process_item(self, item, response, ld_data, **kwargs):
+        if item["name"].startswith("Closed - "):
+            return
 
-        oh = OpeningHours()
-        for item in json_data["store"]["store"]["storeTimes"]:
-            open_time, close_time = item["time"].split(" - ")
-            if open_time and not open_time.isspace() and close_time and not close_time.isspace():
-                oh.add_range(item["date"][:2], open_time, close_time)
+        if m := re.search(r"((?:in|inside|) Sainsbury'?s?)", item["name"], flags=re.IGNORECASE):
+            item["name"] = item["name"].replace(m.group(1), "").strip()
+            set_located_in(SainsburysSpider.SAINSBURYS, item)
+        if item["name"].endswith(" Local"):
+            item["name"] = item["name"].removesuffix(" Local")
+            set_located_in(SainsburysSpider.SAINSBURYS_LOCAL, item)
 
-        properties["opening_hours"] = oh.as_opening_hours()
+        if m := re.search(r'"type":(\d),"lat":(-?\d+\.\d+),"lng":(-?\d+\.\d+),', response.text):
+            store_type, item["lat"], item["lon"] = m.groups()
+            if store_type == "1" or "Collection Point" in item["name"] or "CP" in item["name"]:
+                return
 
-        yield Feature(**properties)
+        yield item

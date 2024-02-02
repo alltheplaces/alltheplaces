@@ -4,8 +4,8 @@ from locations.dict_parser import DictParser
 
 
 class BlazePizzaSpider(scrapy.Spider):
-    name = "blazepizza"
-    item_attributes = {"brand": "Blaze Pizza"}
+    name = "blaze_pizza"
+    item_attributes = {"brand": "Blaze Pizza", "brand_wikidata": "Q23016666"}
     allowed_domains = ["nomnom-prod-api.blazepizza.com"]
     start_urls = ["https://nomnom-prod-api.blazepizza.com/extras/restaurant/summary/state"]
 

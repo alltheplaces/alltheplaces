@@ -1,12 +1,17 @@
 from scrapy.spiders import SitemapSpider
 
+from locations.categories import Categories
 from locations.google_url import extract_google_position
 from locations.items import Feature
 
 
 class TheBarreCodeUSSpider(SitemapSpider):
     name = "the_barre_code_us"
-    item_attributes = {"brand": "The Barre Code", "brand_wikidata": "Q118870170"}
+    item_attributes = {
+        "brand": "The Barre Code",
+        "brand_wikidata": "Q118870170",
+        "extras": Categories.GYM.value,
+    }
     allowed_domains = ["thebarrecode.com"]
     sitemap_urls = ["https://thebarrecode.com/all-sitemap.xml"]
     sitemap_rules = [(r"thebarrecode.com\/(?!base-site)[\w\-]+\/contact-us\/?$", "parse")]

@@ -7,7 +7,7 @@ from locations.items import Feature
 
 class XlPartsSpider(scrapy.Spider):
     name = "xl_parts"
-    item_attributes = {"brand": "XL Parts", "country": "US"}
+    item_attributes = {"brand": "XL Parts", "brand_wikidata": "Q123188576", "country": "US"}
     allowed_domains = ["www.xlparts.com"]
 
     def start_requests(self):

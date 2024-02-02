@@ -45,6 +45,7 @@ class CheckItemPropertiesPipeline:
 
     def process_item(self, item, spider):  # noqa: C901
         check_field(item, spider, "brand_wikidata", allowed_types=(str,), match_regex=self.wikidata_regex)
+        check_field(item, spider, "operator_wikidata", allowed_types=(str,), match_regex=self.wikidata_regex)
         check_field(item, spider, "website", (str,), self.url_regex)
         check_field(item, spider, "image", (str,), self.url_regex)
         check_field(item, spider, "email", (str,), self.email_regex)
@@ -56,6 +57,7 @@ class CheckItemPropertiesPipeline:
         check_field(item, spider, "country", (str,), self.country_regex)
         check_field(item, spider, "name", (str,))
         check_field(item, spider, "brand", (str,))
+        check_field(item, spider, "operator", (str,))
 
         if coords := get_lat_lon(item):
             lat, lon = coords

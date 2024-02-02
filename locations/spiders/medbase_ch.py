@@ -48,7 +48,7 @@ class MedbaseCHSpider(scrapy.Spider):
     def parse_branch(self, tr, feature):
         branch = tr.css(".title").xpath("text()").get()
         branch = branch.removeprefix("Medbase")
-        feature["extras"]["branch"] = " ".join(branch.split())
+        feature["branch"] = " ".join(branch.split())
 
     def parse_email(self, tr, feature):
         if m := re.search(r"mailto:([a-zA-Z0-9\-]+@medbase\.ch)", tr.get()):
