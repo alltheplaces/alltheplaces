@@ -8,7 +8,6 @@ from locations.dict_parser import DictParser
 class PizzaHutTRSpider(scrapy.Spider):
     name = "pizza_hut_tr"
     item_attributes = {"brand": "Pizza Hut", "brand_wikidata": "Q191615"}
-
     def start_requests(self):
         yield JsonRequest(
             url="https://api.pizzahut.com.tr/api/web/Restaurants/GetRestaurants?getAll=true",
