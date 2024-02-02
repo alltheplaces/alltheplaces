@@ -19,6 +19,11 @@ class RealCanadianSuperstoreCASpider(scrapy.Spider):
             if not location["visible"]:
                 continue
 
+            if location["storeId"] == "4450":
+                # "Mobile Store"
+                # https://www.realcanadiansuperstore.ca/store-locator/details/4450
+                continue
+
             yield JsonRequest(
                 "https://www.realcanadiansuperstore.ca/api/pickup-locations/{}".format(location["storeId"]),
                 headers={"Site-Banner": "superstore"},
