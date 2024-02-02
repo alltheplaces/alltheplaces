@@ -5,8 +5,8 @@ from locations.google_url import extract_google_position
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class CircleKIESpider(SitemapSpider, StructuredDataSpider):
-    name = "circle_k_ie"
+class CircleKIrelandSpider(SitemapSpider, StructuredDataSpider):
+    name = "circle_k_ireland"
     item_attributes = {"brand": "Circle K", "brand_wikidata": "Q3268010"}
     sitemap_urls = ["https://www.circlek.ie/stations/sitemap.xml"]
     sitemap_rules = [("/station/circle-k-", "parse")]
