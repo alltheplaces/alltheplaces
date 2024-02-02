@@ -23,9 +23,11 @@ class HallmarkSpider(scrapy.Spider):
             properties = {
                 "name": location["location_name"],
                 "ref": location["fid"] + "_" + location["lid"],
-                "street": location["address_1"] + " " + location["address_2"]
-                if location["address_2"]
-                else location["address_1"],
+                "street": (
+                    location["address_1"] + " " + location["address_2"]
+                    if location["address_2"]
+                    else location["address_1"]
+                ),
                 "city": location["city"],
                 "postcode": location["post_code"],
                 "state": location["region"],

@@ -22,9 +22,9 @@ and at reasonable expense.
 ### What to spider?
 
 Make no mistake, we cannot write a spider for every website in the world. This
-is not our intention. However, for the major brands and companies, and especially
-the ones that a lot of people wish to find and visit then it can make
-a lot of sense.
+is not our intention. However, for the major brands, companies, and
+operators, and especially the ones that a lot of people wish to find
+and visit then it can make a lot of sense.
 
 If we are writing tens of lines of code to generate thousands of good quality
 POIs for a site then we are winning. This is possible for companies like
@@ -32,10 +32,13 @@ McDonald's, Starbucks, Exxon, Mobil, BP, Shell and many more.
 
 Sometimes we can relax the few sites rule when considering the importance
 to the company / brand in terms of number of visitors to their locations.
-For example, COSTCO and IKEA would fall into this bucket.
+For example, COSTCO and IKEA would fall into this bucket. Important
+public services such as hospitals, police stations, fire stations
+and public toilets are worth spending the time to develop a spider
+for due to their importance to the public.
 
-A not unreasonable rule of thumb would be that if a site is important enough
-to have merited an entry in the
+A not unreasonable rule of thumb would be that if a brand or
+operator  is important enough to have merited an entry in the
 [name suggestion index (NSI)](https://nsi.guide/?t=brands)
 then it probably also merits a spider. Of course some
 brands merit an NSI entry but do not have one yet! Read their pages,

@@ -5,10 +5,10 @@ from locations.linked_data_parser import LinkedDataParser
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class TUISpider(SitemapSpider):
+class TUIGBSpider(SitemapSpider):
     name = "tui_gb"
     item_attributes = {
-        "brand": "Q7795876",
+        "brand": "TUI",
         "brand_wikidata": "Q7795876",
         "country": "GB",
     }

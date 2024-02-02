@@ -117,6 +117,8 @@ class StadtZuerichCHSpider(scrapy.Spider):
             "postcode": tags.pop("addr:postcode", None),
             "ref": tags.pop("ref"),
             "street": tags.pop("addr:street", None),
+            "operator": tags.pop("operator", None),
+            "operator_wikidata": tags.pop("operator:wikidata", None),
         }
         item["extras"] = {k: v for (k, v) in tags.items() if v}
         item = {k: v for (k, v) in item.items() if v}

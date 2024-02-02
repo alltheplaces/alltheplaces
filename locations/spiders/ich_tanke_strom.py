@@ -70,6 +70,8 @@ class IchTankeStromSpider(scrapy.Spider):
             properties = {
                 "brand": tags.pop("brand", None),
                 "brand_wikidata": tags.pop("brand:wikidata", None),
+                "operator": tags.pop("operator", None),
+                "operator_wikidata": tags.pop("operator:wikidata", None),
                 "extras": tags,
                 "lat": lat,
                 "lon": lon,

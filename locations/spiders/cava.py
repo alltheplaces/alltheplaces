@@ -21,12 +21,12 @@ class CavaSpider(scrapy.Spider):
             yield from self.parse_location(location_selector)
 
     def parse_location(self, location):
-        nonBreakingSpace = "\xa0"
+        non_breaking_space = "\xa0"
         city = location.xpath(".//h3/text()").extract_first()
         street_address = (
-            location.xpath('.//div[@class="street-address"]/text()').extract_first().replace(nonBreakingSpace, " ")
+            location.xpath('.//div[@class="street-address"]/text()').extract_first().replace(non_breaking_space, " ")
             + ", "
-            + location.xpath('.//span[@class="locality"]/text()').extract_first().replace(nonBreakingSpace, " ")
+            + location.xpath('.//span[@class="locality"]/text()').extract_first().replace(non_breaking_space, " ")
         )
         state = location.xpath('.//span[@class="region"]/text()').extract_first()
         postcode = location.xpath('.//span[@class="postal-code"]/text()').extract_first()

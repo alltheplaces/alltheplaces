@@ -2,6 +2,7 @@ import re
 
 import scrapy
 
+from locations.categories import Categories, apply_category, apply_yes_no
 from locations.hours import DAYS_EN, DAYS_FR, DAYS_NL, DAYS_SE, OpeningHours, sanitise_day
 from locations.items import Feature
 
@@ -38,7 +39,7 @@ class CitroenSpider(scrapy.Spider):
                             except:
                                 pass
 
-            yield Feature(
+            item = Feature(
                 {
                     "ref": store.get("rrdi"),
                     "name": store.get("dealerName"),
@@ -54,3 +55,18 @@ class CitroenSpider(scrapy.Spider):
                     "opening_hours": oh,
                 }
             )
+
+            services = str(store.get("services"))
+            car_dealer = re.findall("'type': 'sales'", services)
+            car_repair = re.findall("'type': 'service'", services)
+            if len(car_dealer) > 0 and len(car_repair) > 0:
+                apply_category(Categories.SHOP_CAR, item)
+                apply_yes_no("service:vehicle:car_repair", item, True)
+            elif car_dealer:
+                apply_category(Categories.SHOP_CAR, item)
+            elif car_repair:
+                apply_category(Categories.SHOP_CAR_REPAIR, item)
+            else:
+                apply_category(Categories.SHOP_CAR, item)
+
+            yield item

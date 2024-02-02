@@ -1,5 +1,6 @@
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
@@ -61,7 +62,8 @@ class RicohEuropeSpider(scrapy.Spider):
                     "lon": store["Longitude"],
                     "phone": store["Phone"],
                 }
-
+                apply_category(Categories.OFFICE_COMPANY, properties)
+                apply_category({"company": "consulting"}, properties)
                 yield Feature(**properties)
             else:
                 pass

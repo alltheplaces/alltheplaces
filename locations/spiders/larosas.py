@@ -30,12 +30,12 @@ class LarosasSpider(scrapy.Spider):
     def store_hours(self, store_hours):
         opening_hours = ""
         hours = []
-        monThurs = store_hours.xpath("@diningMonThurs").extract_first()
+        mon_thurs = store_hours.xpath("@diningMonThurs").extract_first()
         fri = store_hours.xpath("@diningFri").extract_first()
         sat = store_hours.xpath("@diningSat").extract_first()
         sun = store_hours.xpath("@diningSun").extract_first()
 
-        hours.append(monThurs)
+        hours.append(mon_thurs)
         hours.append(fri)
         hours.append(sat)
         hours.append(sun)

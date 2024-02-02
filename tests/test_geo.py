@@ -9,14 +9,14 @@ from locations.geo import (
 
 
 def test_point_locations():
-    POINTS_FILE = "eu_centroids_120km_radius_country.csv"
+    points_file = "eu_centroids_120km_radius_country.csv"
     expected_eu_points = 959
-    eu_points = list(point_locations(POINTS_FILE))
+    eu_points = list(point_locations(points_file))
     assert len(eu_points) == expected_eu_points
-    eu_point_twice = list(point_locations([POINTS_FILE, POINTS_FILE]))
+    eu_point_twice = list(point_locations([points_file, points_file]))
     assert len(eu_point_twice) == 2 * len(eu_points)
-    assert 0 == len(list(point_locations(POINTS_FILE, "US")))
-    assert 41 == len(list(point_locations(POINTS_FILE, ["US", "DE"])))
+    assert 0 == len(list(point_locations(points_file, "US")))
+    assert 41 == len(list(point_locations(points_file, ["US", "DE"])))
 
 
 def test_city_locations():
@@ -32,6 +32,12 @@ def test_postal_regions():
     assert 2000 < uk_codes < 3000
     us_codes = len(list(postal_regions("US")))
     assert 33000 < us_codes < 34000
+    us_codes = len(list(postal_regions("US", min_population=20000)))
+    assert 6000 < us_codes < 6500
+    us_codes = len(list(postal_regions("US", consolidate_cities=True)))
+    assert 28000 < us_codes < 29000
+    us_codes = len(list(postal_regions("US", min_population=20000, consolidate_cities=True)))
+    assert 3000 < us_codes < 3500
 
 
 def test_make_subdivisions():

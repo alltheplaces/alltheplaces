@@ -1,5 +1,6 @@
 from scrapy.spiders import SitemapSpider
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
@@ -27,4 +28,6 @@ class InteriorHealthCASpider(SitemapSpider):
             properties["phone"] = properties["phone"].replace("tel:", "").strip()
         else:
             properties.pop("phone", None)
+
+        apply_category(Categories.HOSPITAL, properties)
         yield Feature(**properties)
