@@ -179,6 +179,7 @@ class Categories(Enum):
     PRODUCT_PICKUP = {"amenity": "product_pickup"}
     PSYCHOTHERAPIST = {"healthcare": "psychotherapist"}
     PUB = {"amenity": "pub"}
+    PUBLIC_BOOKCASE = {"amenity": "public_bookcase"}
     REHABILITATION = {"healthcare": "rehabilitation"}
     SAMPLE_COLLECTION = {"healthcare": "sample_collection"}
     SPEECH_THERAPIST = {"healthcare": "speech_therapist"}
