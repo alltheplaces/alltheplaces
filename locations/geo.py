@@ -2,6 +2,7 @@ import csv
 import gzip
 import json
 import math
+from itertools import groupby
 
 import geonamescache
 
@@ -88,7 +89,7 @@ def city_locations(country_code: str, min_population: int = 0):
             yield city
 
 
-def postal_regions(country_code: str, min_population: int = 0, decimation_radius: int = 100):
+def postal_regions(country_code: str, min_population: int = 0, consolidate_cities: bool = False):
     """
     Sometimes useful to iterate postal regions in a country as they are usually
      allocated by population density. The granularity varies by country. In the US
@@ -99,7 +100,12 @@ def postal_regions(country_code: str, min_population: int = 0, decimation_radius
      where the backing dataset supports it.
 
     :param country_code: ISO 2-alpha country code to query
-    :param min_population: minimum population to be included in result list, default zero
+    :param min_population: if source data permits, only return
+           postcodes above a minimum population size, default is 0
+    :param consolidate_cities: if source data permits, consolidate
+           multiple postcodes in the same city together and where
+           possible the largest postcode by population is returned,
+           defaults to False
     :return: post code regions with possible extras
     """
     if country_code == "GB":
@@ -124,16 +130,23 @@ def postal_regions(country_code: str, min_population: int = 0, decimation_radius
         # The backlink must be placed before the Customer uses the Database in production.
         #
         with gzip.open(get_searchable_points_path("postcodes/uszips.csv.gz"), mode="rt") as points:
-            for row in csv.DictReader(points):
-                if row["population"].isnumeric() and int(row["population"]) < min_population:
-                    continue
-                yield {
-                    "postal_region": row["zip"],
-                    "city": row["city"],
-                    "state": row["state_id"],
-                    "latitude": row["lat"],
-                    "longitude": row["lng"],
-                }
+            postcode_dict = lambda x: {
+                "postal_region": x["zip"],
+                "city": x["city"],
+                "state": x["state_id"],
+                "latitude": x["lat"],
+                "longitude": x["lng"],
+            }
+            above_minimum_population = lambda x: not(x["population"].isnumeric() and int(x["population"]) < min_population)
+            postcode_data = filter(above_minimum_population, csv.DictReader(points))
+            if consolidate_cities:
+                postcode_data = sorted(postcode_data, key=lambda x: (x["state_name"], x["county_name"], x["city"]))
+                for city, postcodes_in_city in groupby(postcode_data, lambda x: (x["state_name"], x["county_name"], x["city"])):
+                    largest_postcode = max(list(postcodes_in_city), key=lambda x: x["population"])
+                    yield postcode_dict(largest_postcode)
+            else:
+                for postcode in postcode_data:
+                    yield postcode_dict(postcode)
 
     elif country_code == "FR":
         # French postal code database from https://datanova.legroupe.laposte.fr

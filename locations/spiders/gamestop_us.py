@@ -55,12 +55,10 @@ class GamestopUSSpider(Spider):
             #
             # One year later, the following search results were
             # observed for different population filter values:
-            # 1. Population > 20000: 2843 locations returned
-            #    from 6234 requests to the API.
-            # 2. Population > 30000: 2837 locations returned
-            #    from 3692 requests to the API.
-            # 3. Population > 50000: 2653 locations returned
-            #    from 1017 requests to the API.
+            # 1. Population > 30000: 2843 locations returned
+            #    from 2013 requests to the API.
+            # 2. Population > 50000: 2824 locations returned
+            #    from 629 requests to the API.
             #
             # This spider picks option (2) as a balance between
             # minimising API requests and obtaining as many
@@ -71,16 +69,21 @@ class GamestopUSSpider(Spider):
             # to the end of January 2024. Reference:
             # https://gsclosing.blogspot.com/
             #
-            # The error margin therefore appears to be ~50 stores
-            # (<2%) which this spider may miss due to reduction
+            # The error margin therefore appears to be ~70 stores
+            # (<2.5%) which this spider may miss due to reduction
             # in postcodes which are searched for stores.
-            for postal_region in postal_regions("US", min_population=30000):
+            #
+            # Note the search radius can be increased above 200
+            # however this will result in API failures because
+            # there is a limit of a 3MB response and 1 million
+            # characters returned.
+            for postal_region in postal_regions("US", min_population=50000, consolidate_cities=True):
                 postcode = postal_region["postal_region"]
                 yield FormRequest(
                     url=url,
                     method="POST",
                     headers=headers,
-                    formdata={"postalCode": str(postcode), "radius": "100", "csrf_token": "0"},
+                    formdata={"postalCode": str(postcode), "radius": "200", "csrf_token": "0"},
                 )
 
     def parse(self, response):
