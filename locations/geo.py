@@ -137,11 +137,15 @@ def postal_regions(country_code: str, min_population: int = 0, consolidate_citie
                 "latitude": x["lat"],
                 "longitude": x["lng"],
             }
-            above_minimum_population = lambda x: not(x["population"].isnumeric() and int(x["population"]) < min_population)
+            above_minimum_population = lambda x: not (
+                x["population"].isnumeric() and int(x["population"]) < min_population
+            )
             postcode_data = filter(above_minimum_population, csv.DictReader(points))
             if consolidate_cities:
                 postcode_data = sorted(postcode_data, key=lambda x: (x["state_name"], x["county_name"], x["city"]))
-                for city, postcodes_in_city in groupby(postcode_data, lambda x: (x["state_name"], x["county_name"], x["city"])):
+                for city, postcodes_in_city in groupby(
+                    postcode_data, lambda x: (x["state_name"], x["county_name"], x["city"])
+                ):
                     largest_postcode = max(list(postcodes_in_city), key=lambda x: x["population"])
                     yield postcode_dict(largest_postcode)
             else:
