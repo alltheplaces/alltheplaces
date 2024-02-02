@@ -2,6 +2,7 @@ import json
 
 from scrapy.spiders import SitemapSpider
 
+from locations.categories import Categories, apply_category
 from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import Feature
 
@@ -43,4 +44,6 @@ class CrackerBarrelSpider(SitemapSpider):
             "phone": data["Phone"]["value"],
             "opening_hours": hours.as_opening_hours(),
         }
+        apply_category(Categories.RESTAURANT, properties)
+        apply_category({"cuisine": "american"}, properties)
         yield Feature(**properties)

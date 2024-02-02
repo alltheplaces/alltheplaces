@@ -7,7 +7,11 @@ class ManTruckAndBusSpider(scrapy.Spider):
     name = "man_truck_and_bus"
     start_urls = ["https://settlement.man.eu/settlement/public/mui/world.js?"]
 
-    item_attributes = {"brand": "MAN Truck & Bus", "brand_wikidata": "Q708667"}
+    item_attributes = {
+        "brand": "MAN Truck & Bus",
+        "brand_wikidata": "Q708667",
+        "extras": {"shop": "truck"},
+    }
 
     def parse(self, response, **kwargs):
         for store in response.json():

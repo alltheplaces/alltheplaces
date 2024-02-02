@@ -1,5 +1,6 @@
 from scrapy.spiders import SitemapSpider
 
+from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
 
@@ -35,4 +36,7 @@ class GiantFoodStoresSpider(SitemapSpider):
             "postcode": main.css("[itemprop=postalCode]::text").get(),
             "opening_hours": hours.as_opening_hours(),
         }
+
+        apply_category(Categories.SHOP_SUPERMARKET, properties)
+
         return Feature(**properties)

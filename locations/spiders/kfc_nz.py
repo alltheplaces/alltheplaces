@@ -7,11 +7,12 @@ from scrapy.spiders import XMLFeedSpider
 from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
+from locations.spiders.kfc import KFC_SHARED_ATTRIBUTES
 
 
 class KFCNZSpider(XMLFeedSpider):
     name = "kfc_nz"
-    item_attributes = {"brand": "KFC", "brand_wikidata": "Q524757"}
+    item_attributes = KFC_SHARED_ATTRIBUTES
     allowed_domains = ["kfc.co.nz"]
     start_urls = ["https://kfc.co.nz/sitemap.xml"]
     itertag = "loc"

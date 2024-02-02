@@ -5,7 +5,7 @@ import scrapy
 from locations.hours import DAYS
 from locations.linked_data_parser import LinkedDataParser
 
-daysRe = rf"(?:{'|'.join(DAYS)})"
+days_regex = rf"(?:{'|'.join(DAYS)})"
 
 
 class BatteriesPlusSpider(scrapy.spiders.SitemapSpider):
@@ -23,7 +23,7 @@ class BatteriesPlusSpider(scrapy.spiders.SitemapSpider):
         if 301 in response.request.meta.get("redirect_reasons", []):
             return
         ld = LinkedDataParser.find_linked_data(response, "ElectronicsStore")
-        ld["openingHours"] = re.findall(rf"({daysRe}[^A-Z]*) ", ld["openingHours"])
+        ld["openingHours"] = re.findall(rf"({days_regex}[^A-Z]*) ", ld["openingHours"])
         item = LinkedDataParser.parse_ld(ld)
         item["ref"] = response.url.rsplit("-", 1)[-1]
         yield item

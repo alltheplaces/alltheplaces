@@ -63,8 +63,8 @@ dig deeper, perhaps  going directly to the
 ### Name Suggestion Index (NSI)
 
 The NSI is essentially a well curated subset of
-Wikidata brand and company QIDs. The main goal of the project is to aid
-[OpenStreetMap](https://www.openstreetmap.org/)
+Wikidata brand and operator (company) QIDs. The main goal of the
+project is to aid [OpenStreetMap](https://www.openstreetmap.org/)
 editing of POIs by allowing easy import of common data. This
 is well described in a
 [video of a presentation](https://2019.stateofthemap.us/program/sat/mapping-brands-with-the-name-suggestion-index.html)

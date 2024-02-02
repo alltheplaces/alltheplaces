@@ -60,7 +60,7 @@ class ValoraSpider(scrapy.Spider):
             properties.update(self.parse_branch(store, brand, columns))
             properties.update(self.parse_address(store, countries, columns))
             properties = {k: v for k, v in properties.items() if v}
-            for k in ("branch", "shop"):
+            for k in ["shop"]:
                 if k in properties:
                     properties.setdefault("extras", {})[k] = properties[k]
                     del properties[k]

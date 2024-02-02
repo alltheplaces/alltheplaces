@@ -1,11 +1,13 @@
 import scrapy
 
+from locations.categories import Categories
 from locations.dict_parser import DictParser
 
 
 class FastracCafeUSSpider(scrapy.Spider):
     name = "fastrac_cafe_us"
-    item_attributes = {"brand": "Fastrac Cafe", "brand_wikidata": "Q117324848"}
+    item_attributes = {"brand": "Fastrac Cafe", "brand_wikidata": "Q117324848", "extras": Categories.FUEL_STATION.value}
+
     # A pageNumber higher than available gives us all the POIs
     start_urls = ["https://fastraccafe.com/api/stores-locator/store-locator-search/results?bannerId=16&pageNumber=100"]
 

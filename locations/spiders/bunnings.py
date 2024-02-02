@@ -1,45 +1,41 @@
-import secrets
-import string
+import json
 
-import scrapy
+from scrapy import Request, Spider
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
 
-class BunningsSpider(scrapy.Spider):
+class BunningsSpider(Spider):
     name = "bunnings"
     allowed_domains = ["bunnings.com.au"]
     start_urls = [
         "https://api.prod.bunnings.com.au/v1/stores?latitude=-23.12&longitude=132.13&currentPage=0&fields=FULL&pageSize=10000&radius=9000000",
     ]
     item_attributes = {"brand": "Bunnings", "brand_wikidata": "Q4997829"}
-    custom_settings = {
-        "COOKIES_ENABLED": True,
-    }
+    custom_settings = {"ROBOTSTXT_OBEY": False}
     client_id = "mHPVWnzuBkrW7rmt56XGwKkb5Gp9BJMk"  # Fixed value of APIGEE_CLIENT_ID variable from store locator page.
-    auth_token = ""
+    requires_proxy = True  # Requires AU or NZ proxy, possibly residential IP addresses only.
 
     def start_requests(self):
-        nonce = "".join(secrets.choice(string.ascii_letters + string.digits) for i in range(18))
-        yield scrapy.Request(
-            f"https://authorisation.api.bunnings.com.au/connect/authorize?response_type=token&scope=chk:exec cm:access ecom:access chk:pub &client_id=budp_guest_user_au&redirect_uri=https://www.bunnings.com.au/static/guest.html&nonce={nonce}&acr_values=",
-            self.parse_guest_login_page,
-        )
+        yield Request(url="https://www.bunnings.com.au/", callback=self.parse_cookies)
 
-    def parse_guest_login_page(self, response):
-        self.auth_token = response.request.url.split("#access_token=", 1)[1].split("&token_type=", 1)[0]
-        for url in self.start_urls:
-            yield scrapy.Request(
-                url,
-                self.parse,
-                headers={
-                    "Authorization": "Bearer " + self.auth_token,
-                    "clientId": self.client_id,
-                    "country": "AU",
-                    "locale": "en_AU",
-                },
-            )
+    def parse_cookies(self, response):
+        cookies = response.headers.getlist("Set-Cookie")
+        for cookie in cookies:
+            if "guest-token-storage" not in str(cookie):
+                continue
+            token_dict = json.loads("{" + str(cookie).split("={", 1)[1].split("}", 1)[0] + "}")
+            auth_token = token_dict["token"]
+            headers = {
+                "Authorization": "Bearer " + auth_token,
+                "clientId": self.client_id,
+                "country": "AU",
+                "locale": "en_AU",
+            }
+            for url in self.start_urls:
+                yield Request(url=url, headers=headers, callback=self.parse)
+            return
 
     def parse(self, response):
         if response.json()["statusDetails"]["state"] != "SUCCESS":

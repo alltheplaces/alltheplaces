@@ -4,7 +4,6 @@ from scrapy import Spider
 from scrapy.downloadermiddlewares.retry import get_retry_request
 from scrapy.http import JsonRequest
 
-from locations.categories import Categories
 from locations.dict_parser import DictParser
 from locations.geo import point_locations
 from locations.hours import OpeningHours
@@ -12,7 +11,11 @@ from locations.hours import OpeningHours
 
 class WesternUnionSpider(Spider):
     name = "western_union"
-    item_attributes = {"brand": "Western Union", "brand_wikidata": "Q861042", "extras": Categories.MONEY_TRANSFER.value}
+    item_attributes = {
+        "brand": "Western Union",
+        "brand_wikidata": "Q861042",
+        "extras": {"money_transfer": "western_union"},
+    }
     allowed_domains = ["www.westernunion.com"]
     # start_urls[0] is a GraphQL endpoint.
     start_urls = ["https://www.westernunion.com/router/"]
