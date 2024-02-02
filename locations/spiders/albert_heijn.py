@@ -36,7 +36,6 @@ class AlbertHeijnSpider(Spider):
                       id
                       storeType
                       phone
-                      branch: name
                       address {
                         city
                         countryCode
@@ -70,7 +69,6 @@ class AlbertHeijnSpider(Spider):
     def parse_api(self, response: Response, **kwargs: Any) -> Any:
         for location in json.loads(response.xpath("/html/body/pre/text()").get())["data"]["storesSearch"]["result"]:
             item = DictParser.parse(location)
-            item["branch"] = location["branch"].removeprefix("AH{} ".format(item["ref"]))
             self.parse_hours(item, location)
             item.update(self.brand_map.get(location["storeType"]))
 
