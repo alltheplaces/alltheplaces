@@ -1,9 +1,9 @@
 import scrapy
+from geonamescache import GeonamesCache
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
-from geonamescache import GeonamesCache
 
 class HMSpider(scrapy.Spider):
     name = "hm"
