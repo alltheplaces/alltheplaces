@@ -70,7 +70,7 @@ class AlbertHeijnSpider(Spider):
     def parse_api(self, response: Response, **kwargs: Any) -> Any:
         for location in json.loads(response.xpath("/html/body/pre/text()").get())["data"]["storesSearch"]["result"]:
             item = DictParser.parse(location)
-            item["branch"] = location["branch"]
+            _, item["branch"] = location["branch"].split(" ", maxsplit=1)
             self.parse_hours(item, location)
             item.update(self.brand_map.get(location["storeType"]))
 
