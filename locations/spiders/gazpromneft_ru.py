@@ -6,7 +6,7 @@ from locations.dict_parser import DictParser
 
 BRANDS_MAPPING = {
     31: ("Газпромнефть", "Q1461799"),
-    50000005: ("ОПТИ 24", "Q109356512"),
+    50000005: ("ОПТИ", "Q109356512"),
 }
 
 FUEL_MAPPING = {
