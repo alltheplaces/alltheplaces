@@ -352,6 +352,8 @@ class Fuel(Enum):
     HEATING_OIL = "fuel:heating_oil"
     KEROSENE = "fuel:kerosene"
 
+    ELECTRIC = "fuel:electric"  # Electric vehicle charger
+
 
 class Extras(Enum):
     AIR_CONDITIONING = "air_conditioning"
