@@ -398,7 +398,6 @@ class Extras(Enum):
     VACUUM_CLEANER = "vacuum_cleaner"
     WHEELCHAIR = "wheelchair"
     WIFI = "internet_access=wlan"
-    WATER_POINT = "water_point"
 
 
 class PaymentMethods(Enum):

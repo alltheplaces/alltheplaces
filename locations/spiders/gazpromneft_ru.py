@@ -59,7 +59,7 @@ SERVICES_MAPPING = {
     "toilet": Extras.TOILETS,
     "track-parking": Access.HGV,
     "vacuum": Extras.VACUUM_CLEANER,
-    "water": Extras.WATER_POINT,
+    "water": Extras.DRINKING_WATER,
 }
 
 
