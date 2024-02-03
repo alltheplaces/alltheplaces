@@ -347,6 +347,8 @@ class Fuel(Enum):
     HEATING_OIL = "fuel:heating_oil"
     KEROSENE = "fuel:kerosene"
 
+    ELECTRIC = "fuel:electric"  # Electric vehicle charger
+
 
 class Extras(Enum):
     AIR_CONDITIONING = "air_conditioning"
@@ -385,6 +387,7 @@ class Extras(Enum):
     VACUUM_CLEANER = "vacuum_cleaner"
     WHEELCHAIR = "wheelchair"
     WIFI = "internet_access=wlan"
+    WATER_POINT = "water_point"
 
 
 class PaymentMethods(Enum):
