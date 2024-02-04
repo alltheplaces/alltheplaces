@@ -1,7 +1,10 @@
-from scrapy.spiders import SitemapSpider
-from locations.structured_data_spider import StructuredDataSpider
-from locations.hours import OpeningHours, DAYS_DE
 import json
+
+from scrapy.spiders import SitemapSpider
+
+from locations.hours import DAYS_DE, OpeningHours
+from locations.structured_data_spider import StructuredDataSpider
+
 
 class HornbachDESpider(SitemapSpider, StructuredDataSpider):
     name = "hornbach_de"
@@ -14,7 +17,7 @@ class HornbachDESpider(SitemapSpider, StructuredDataSpider):
         item["city"] = response.xpath('//div[@itemprop="addressLocality"]/text()').get()
         item["lat"] = response.xpath('//meta[@itemprop="latitude"]/@content').get()
         item["lon"] = response.xpath('//meta[@itemprop="longitude"]/@content').get()
-        open_times_data = response.xpath('//cms-market-info-box/@open-times').get()
+        open_times_data = response.xpath("//cms-market-info-box/@open-times").get()
         opening_hours = OpeningHours()
         for rule in json.loads(open_times_data)["openTimes"]:
             opening_hours.add_ranges_from_string(":".join([rule["day"].replace(".", ""), rule["time"]]), days=DAYS_DE)
