@@ -3,6 +3,7 @@ from urllib.parse import urljoin
 
 from scrapy import Selector, Spider
 
+from locations.categories import apply_category
 from locations.dict_parser import DictParser
 from locations.items import Feature
 from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
@@ -30,5 +31,5 @@ class YHAGBSpider(Spider):
             item["name"] = sel.xpath('normalize-space(//h3[@class="search-teaser__title"]/text())').get()
             item["addr_full"] = clean_address(sel.xpath('//p[@class="location"]/text()').get())
             item["website"] = urljoin(response.url, sel.xpath("//a/@href").get())
-
+            apply_category({"tourism": "hostel"}, item)
             yield item

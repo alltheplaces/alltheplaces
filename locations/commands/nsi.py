@@ -46,18 +46,18 @@ class NameSuggestionIndexCommand(ScrapyCommand):
             self.lookup_code(args)
 
     def lookup_name(self, args):
-        result = list(self.nsi.iter_wikidata(args[0]))
-        if len(result) == 1:
-            # Only one match, so go and lookup full NSI details by Q-code
-            self.lookup_code(result[0])
-        else:
-            for k, v in result:
-                NameSuggestionIndexCommand.show(k, v)
+        for code, _ in self.nsi.iter_wikidata(args[0]):
+            self.lookup_code([code])
 
     def lookup_code(self, args):
         if v := self.nsi.lookup_wikidata(args[0]):
             NameSuggestionIndexCommand.show(args[0], v)
             for item in self.nsi.iter_nsi(args[0]):
+                print(
+                    '       -> item_attributes = {{"brand": "{}", "brand_wikidata": "{}"}}'.format(
+                        item["tags"].get("brand") or item["tags"].get("operator"), args[0]
+                    )
+                )
                 print("       -> " + str(item))
 
     @staticmethod
@@ -69,4 +69,3 @@ class NameSuggestionIndexCommand(ScrapyCommand):
             print("       -> {}".format(s))
         if s := data.get("identities"):
             print("       -> {}".format(s.get("website", "N/A")))
-        print('       -> item_attributes = {{"brand": "{0}", "brand_wikidata": "{1}"}}'.format(data["label"], code))

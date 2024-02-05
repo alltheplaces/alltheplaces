@@ -2,6 +2,7 @@ import json
 
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
 
@@ -40,16 +41,21 @@ class MarksAndSpencerSpider(scrapy.Spider):
             }
 
             if store["storeType"] == "mands":
-                properties["extras"]["operator"] = "Marks and Spencer"
-                properties["extras"]["operator:wikidata"] = "Q714491"
+                properties["operator"] = "Marks and Spencer"
+                properties["operator_wikidata"] = "Q714491"
 
             name = store["name"].lower()
             if name.endswith("foodhall"):
                 properties["brand"] = "M&S Foodhall"
+                apply_category(Categories.SHOP_SUPERMARKET, properties)
             elif name.endswith("simply food"):
                 properties["brand"] = "M&S Simply Food"
+                apply_category(Categories.SHOP_CONVENIENCE, properties)
             elif name.endswith("outlet"):
                 properties["brand"] = "M&S Outlet"
+                apply_category(Categories.SHOP_DEPARTMENT_STORE, properties)
+            else:
+                apply_category(Categories.SHOP_DEPARTMENT_STORE, properties)
 
             yield Feature(**properties)
 

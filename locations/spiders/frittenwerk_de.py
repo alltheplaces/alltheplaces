@@ -19,6 +19,6 @@ class FrittenwerkDESpider(CrawlSpider, StructuredDataSpider):
         if lon := re.search(r'"longitude": "(-?\d+\.\d+)"', response.text):
             item["lon"] = lon.group(1)
 
-        item["extras"]["branch"] = item.pop("name").replace("Frittenwerk ", "")
+        item["branch"] = item.pop("name").replace("Frittenwerk", "").strip()
 
         yield item

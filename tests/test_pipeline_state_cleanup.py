@@ -8,6 +8,7 @@ from locations.spiders.greggs_gb import GreggsGBSpider
 def get_objects():
     spider = GreggsGBSpider()
     spider.crawler = Crawler(GreggsGBSpider)
+    spider.crawler._apply_settings()
     return Feature(), StateCodeCleanUpPipeline(), spider
 
 

@@ -4,11 +4,12 @@ import re
 import scrapy
 
 from locations.items import Feature
+from locations.spiders.nandos import NANDOS_SHARED_ATTRIBUTES
 
 
 class NandosZMSpider(scrapy.Spider):
     name = "nandos_zm"
-    item_attributes = {"brand": "Nando's", "brand_wikidata": "Q3472954"}
+    item_attributes = NANDOS_SHARED_ATTRIBUTES
     allowed_domains = ["www.nandos.co.zm"]
     start_urls = [
         "https://www.nandos.co.zm/eat/restaurants-all",

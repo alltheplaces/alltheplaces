@@ -46,9 +46,9 @@ class VallartaSpider(scrapy.Spider):
             open_time = hours.split(" - ")[0]
             close_time = hours.split(" - ")[1]
 
-            for DAY in DAYS:
+            for day in DAYS:
                 opening_hours.add_range(
-                    day=DAY,
+                    day=day,
                     open_time=open_time,
                     close_time=close_time,
                     time_format="%I:%M%p",

@@ -1,3 +1,4 @@
+from locations.categories import Categories, apply_category
 from locations.storefinders.stockinstore import StockInStoreSpider
 
 
@@ -8,3 +9,5 @@ class TobysSportsPHSpider(StockInStoreSpider):
     api_widget_id = "90"
     api_widget_type = "cnc"
     api_origin = "https://www.tobys.com"
+
+    apply_category(Categories.SHOP_SPORTS, item_attributes)

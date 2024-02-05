@@ -1,7 +1,8 @@
 import scrapy
 
+from locations.categories import Categories, apply_category
+from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
-from locations.items import Feature
 
 
 class TangoSpider(scrapy.Spider):
@@ -11,22 +12,19 @@ class TangoSpider(scrapy.Spider):
 
     def parse(self, response):
         for data in response.json().get("Stations").get("Station"):
+            item = DictParser.parse(data)
+            item["ref"] = data.get("StationId")
+            # Coordinates are incorrectly named in data
+            item["lat"] = data.get("XCoordinate")
+            item["lon"] = data.get("YCoordinate")
+            item["street_address"] = data.get("Address_line_1")
+            item["website"] = f"https://www.tango.nl{data.get('NodeURL')}" if data.get("NodeURL") else None
+            item["addr_full"] = " ".join([data.get("Address_line_1"), data.get("Address_line_2")])
             oh = OpeningHours()
             for day, hours in data.get("OpeningHours").items():
                 start, end = hours.split("-")
                 oh.add_range(day=day, open_time=start, close_time=end)
-            yield Feature(
-                {
-                    "ref": data.get("StationId"),
-                    "name": data.get("Name"),
-                    "country": data.get("Country"),
-                    "email": data.get("Email"),
-                    "phone": data.get("Phone"),
-                    "lat": data.get("XCoordinate"),
-                    "lon": data.get("YCoordinate"),
-                    "street_address": data.get("Address_line_1"),
-                    "addr_full": " ".join([data.get("Address_line_1"), data.get("Address_line_2")]),
-                    "website": f"https://www.tango.nl{data.get('NodeURL')}" if data.get("NodeURL") else None,
-                    "opening_hours": oh,
-                }
-            )
+            item["opening_hours"] = oh.as_opening_hours()
+            apply_category(Categories.FUEL_STATION, item)
+            # TODO: capture services and fuel types
+            yield item
