@@ -12,7 +12,6 @@ class IsmashGBSpider(Spider):
     start_urls = ["https://api.ismash.com/app/stores"]
 
     def parse(self, response, **kwargs):
-        print(response.json())
         for location in response.json():
             if location["isStore"] != 1:
                 continue
