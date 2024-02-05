@@ -37,9 +37,7 @@ class AuchanPTSpider(CrawlSpider, StructuredDataSpider):
             item["nsi_id"] = "N/A"
             apply_category(Categories.FUEL_STATION, item)
         if services := response.xpath('//*[contains(@class,"services-item")]//span/text()').getall():
-            print(services)
             services = [service.lower() for service in services]
-            print("this is:", services)
             apply_yes_no(Extras.WIFI, item, "wifi grátis" in services)
             apply_yes_no("amenity:parking", item, "parque grátis" in services)
         yield item
