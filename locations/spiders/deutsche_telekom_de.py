@@ -3,6 +3,7 @@ from typing import Any, Iterable
 from scrapy import Request, Spider
 from scrapy.http import JsonRequest, Response
 
+from locations.categories import Categories
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.items import set_closed
@@ -10,7 +11,11 @@ from locations.items import set_closed
 
 class DeutscheTelekomDESpider(Spider):
     name = "deutsche_telekom_de"
-    item_attributes = {"brand": "Deutsche Telekom", "brand_wikidata": "Q9396"}
+    item_attributes = {
+        "brand": "Deutsche Telekom",
+        "brand_wikidata": "Q9396",
+        "extras": Categories.SHOP_MOBILE_PHONE.value,
+    }
 
     def make_request(self, page: int) -> JsonRequest:
         return JsonRequest(url="https://shopseite.telekom.de/api/shops?_page={}".format(page))
