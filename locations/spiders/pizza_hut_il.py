@@ -2,18 +2,8 @@ from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
 from locations.categories import Categories, apply_category
-from locations.hours import OpeningHours
+from locations.hours import DAYS_IL, OpeningHours
 from locations.items import Feature
-
-DAYS_IL = {
-    "יום שני": "Mo",
-    "יום שלישי": "Tu",
-    "יום רביעי": "We",
-    "יום חמישי": "Th",
-    "יום שישי": "Fr",
-    "יום שבת": "Sa",
-    "יום ראשון": "Su",
-}
 
 
 class PizzaHutILSpider(CrawlSpider):
