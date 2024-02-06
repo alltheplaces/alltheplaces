@@ -1,8 +1,10 @@
 from chompjs import parse_js_object
-from locations.dict_parser import DictParser
-from locations.hours import OpeningHours, DAYS_DE
 from scrapy import Spider
 from scrapy.http import Response
+
+from locations.dict_parser import DictParser
+from locations.hours import DAYS_DE, OpeningHours
+
 
 class SteineckeDESpider(Spider):
     name = "steinecke_de"
