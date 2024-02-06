@@ -1,13 +1,12 @@
-import re
 import json
-
-from scrapy import Spider
-from scrapy.http import Response, Request
+import re
 
 from chompjs import parse_js_object
+from scrapy import Spider
+from scrapy.http import Request, Response
 
 from locations.dict_parser import DictParser
-from locations.hours import OpeningHours, DAYS_DE
+from locations.hours import DAYS_DE, OpeningHours
 
 
 class JungeDESpider(Spider):
@@ -16,14 +15,16 @@ class JungeDESpider(Spider):
     start_urls = ["https://shop.jb.de/geschaeftefinder"]
 
     def details_request_body(self, branch_id):
-        return json.dumps(dict(
-            branchId=branch_id,
-            responseType='addon',
-        ))
+        return json.dumps(
+            dict(
+                branchId=branch_id,
+                responseType="addon",
+            )
+        )
 
     def parse(self, response: Response):
-        branches = response.xpath('//store-finder-core').attrib[":branches"]
-        branches = re.sub(r"\"branch(.+?)\"", "\"\g<1>\"", branches, flags=re.DOTALL)
+        branches = response.xpath("//store-finder-core").attrib[":branches"]
+        branches = re.sub(r"\"branch(.+?)\"", '"\g<1>"', branches, flags=re.DOTALL)
         for branch in parse_js_object(branches):
             branch["Address"]["streetAddress"] = branch["Address"].pop("street")
             internal_id = branch["Id"]
@@ -33,11 +34,11 @@ class JungeDESpider(Spider):
                 "https://shop.jb.de/api/branch/details",
                 method="POST",
                 body=self.details_request_body(internal_id),
-                headers={'Content-Type': 'application/json'},
+                headers={"Content-Type": "application/json"},
                 meta=dict(item=DictParser.parse(branch)),
-                callback=self.parse_detail
+                callback=self.parse_detail,
             )
-    
+
     def parse_detail(self, response: Response):
         opening_hours = OpeningHours()
         for rule in response.json()["branchOpeningHours"]:
