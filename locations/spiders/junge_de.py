@@ -24,7 +24,7 @@ class JungeDESpider(Spider):
 
     def parse(self, response: Response):
         branches = response.xpath("//store-finder-core").attrib[":branches"]
-        branches = re.sub(r"\"branch(.+?)\"", '"\g<1>"', branches, flags=re.DOTALL)
+        branches = re.sub(r"\"branch(.+?)\"", r'"\g<1>"', branches, flags=re.DOTALL)
         for branch in parse_js_object(branches):
             branch["Address"]["streetAddress"] = branch["Address"].pop("street")
             internal_id = branch["Id"]
