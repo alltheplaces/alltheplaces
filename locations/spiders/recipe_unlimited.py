@@ -7,8 +7,16 @@ class RecipeUnlimitedSpider(YextSpider):
     wanted_types = ["restaurant"]
 
     brands = {
-        "Añejo Restaurant": {"brand": "Añejo Restaurant", "brand_wikidata": "Q118744458"},
-        "Blanco Cantina": {"brand": "Blanco Cantina", "brand_wikidata": "Q118744486"},
+        "Añejo Restaurant": {
+            "brand": "Añejo Restaurant",
+            "brand_wikidata": "Q118744458",
+            "extras": {"amenity": "restaurant", "cuisine": "mexican"},
+        },
+        "Blanco Cantina": {
+            "brand": "Blanco Cantina",
+            "brand_wikidata": "Q118744486",
+            "extras": {"amenity": "restaurant", "cuisine": "mexican"},
+        },
         "Bier Markt": {"brand": "Bier Markt", "brand_wikidata": "Q118744348", "extras": {"amenity": "biergarten"}},
         "East Side Mario's": {"brand": "East Side Mario's", "brand_wikidata": "Q5329375"},
         "Elephant & Castle": {
@@ -24,7 +32,7 @@ class RecipeUnlimitedSpider(YextSpider):
         "Fresh Kitchen + Juice Bar": {
             "brand": "Fresh Kitchen + Juice Bar",
             "brand_wikidata": "Q118744242",
-            "extras": {"amentiy": "restaurant", "diet:vegetarian": "only"},
+            "extras": {"amenity": "restaurant", "diet:vegetarian": "only"},
         },
         "Harvey's": {"brand": "Harvey's", "brand_wikidata": "Q1466184"},
         "Kelseys Original Roadhouse": {"brand": "Kelseys Original Roadhouse", "brand_wikidata": "Q6386459"},
@@ -33,7 +41,7 @@ class RecipeUnlimitedSpider(YextSpider):
             "brand_wikidata": "Q118744373",
             "extras": {"amenity": "restaurant", "cuisine": "american"},
         },
-        "Montana's": {"brand": "Montana's", "brand_wikidata": "Q17022490"},
+        "Montana": {"brand": "Montana's", "brand_wikidata": "Q17022490"},
         "New York Fries": {"brand": "New York Fries", "brand_wikidata": "Q7013558"},
         "Original Joe's": {"brand": "Original Joe's", "brand_wikidata": "Q118744382"},
         "Pickle Barrel": {

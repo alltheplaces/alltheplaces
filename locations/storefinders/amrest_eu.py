@@ -34,7 +34,7 @@ class AmrestEUSpider(Spider):
         match self.item_attributes["brand"]:
             case "KFC":
                 return f"{root_url}{self.restaurants_url}details/{restaurant['id']}"
-            case "Pizza Hut" | "Burger King":
+            case "Pizza Hut" | "Burger King" | "La Tagliatella":
                 for channel_key, channel in self.CHANNELS.items():
                     if restaurant.get(channel_key):
                         return f"{root_url}{self.restaurants_url}{restaurant['id']}/{channel}"

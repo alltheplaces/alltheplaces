@@ -119,7 +119,17 @@ class DictParser:
         item["name"] = DictParser.get_first_key(obj, DictParser.name_keys)
 
         location = DictParser.get_first_key(
-            obj, ["location", "geo-location", "geo", "geo-point", "geocoded-coordinate", "coordinates", "geo-position"]
+            obj,
+            [
+                "location",
+                "geo-location",
+                "geo",
+                "geo-point",
+                "geocoded-coordinate",
+                "coordinates",
+                "geo-position",
+                "position",
+            ],
         )
         # If not a good location object then use the parent
         if not location or not isinstance(location, dict):

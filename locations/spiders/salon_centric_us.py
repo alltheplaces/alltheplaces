@@ -6,7 +6,11 @@ from locations.structured_data_spider import StructuredDataSpider
 
 class SalonCentricUSSpider(SitemapSpider, StructuredDataSpider):
     name = "salon_centric_us"
-    item_attributes = {"brand": "SalonCentric", "brand_wikidata": "Q124339481"}
+    item_attributes = {
+        "brand": "SalonCentric",
+        "brand_wikidata": "Q124339481",
+        "extras": {"shop": "hairdresser_supply"},
+    }
     sitemap_urls = ["https://stores.saloncentric.com/sitemap.xml"]
     sitemap_rules = [(r"com/\w\w/[^/]+/(\d+)$", "parse")]
     wanted_types = ["HealthAndBeautyBusiness"]

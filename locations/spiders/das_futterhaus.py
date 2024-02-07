@@ -5,13 +5,12 @@ from scrapy import Spider
 from scrapy.http import Response
 
 import locations.hours as hours
-from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
 
 class DasFutterhausSpider(Spider):
     name = "das_futterhaus"
-    item_attributes = {"brand": "Das Futterhaus", "brand_wikidata": "Q1167914", "nsi_id": "dasfutterhaus-f5d6d7"}
+    item_attributes = {"brand": "Das Futterhaus", "brand_wikidata": "Q1167914"}
 
     # As of Jan 2024, there are 2 localized versions of the website.
     # Both of them contain the same data (from both countries).
@@ -47,5 +46,4 @@ class DasFutterhausSpider(Spider):
             except:
                 pass
 
-            apply_category(Categories.SHOP_PET, item)
             yield item

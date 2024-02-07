@@ -109,9 +109,11 @@ class Categories(Enum):
     SHOP_TELECOMMUNICATION = {"shop": "telecommunication"}
     SHOP_TOYS = {"shop": "toys"}
     SHOP_TRADE = {"shop": "trade"}
+    SHOP_TRUCK_REPAIR = {"shop": "truck_repair"}
     SHOP_TRAVEL_AGENCY = {"shop": "travel_agency"}
     SHOP_TYRES = {"shop": "tyres"}
     SHOP_VARIETY_STORE = {"shop": "variety_store"}
+    SHOP_VIDEO_GAMES = {"shop": "video_games"}
     SHOP_WATCHES = {"shop": "watches"}
     SHOP_WHOLESALE = {"shop": "wholesale"}
     SHOP_WINDOW_BLIND = {"shop": "window_blind"}
@@ -178,6 +180,7 @@ class Categories(Enum):
     PRODUCT_PICKUP = {"amenity": "product_pickup"}
     PSYCHOTHERAPIST = {"healthcare": "psychotherapist"}
     PUB = {"amenity": "pub"}
+    PUBLIC_BOOKCASE = {"amenity": "public_bookcase"}
     REHABILITATION = {"healthcare": "rehabilitation"}
     SAMPLE_COLLECTION = {"healthcare": "sample_collection"}
     SPEECH_THERAPIST = {"healthcare": "speech_therapist"}
@@ -348,6 +351,8 @@ class Fuel(Enum):
 
     HEATING_OIL = "fuel:heating_oil"
     KEROSENE = "fuel:kerosene"
+
+    ELECTRIC = "fuel:electric"  # Electric vehicle charger
 
 
 class Extras(Enum):

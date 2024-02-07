@@ -2,6 +2,7 @@ import re
 
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
@@ -36,6 +37,11 @@ class BenchmarkHospitalitySpider(scrapy.Spider):
             return
         properties = response.meta["properties"]
 
+        item = Feature()
+        item["lat"] = properties["lat"]
+        item["lon"] = properties["lon"]
+        item["name"] = properties["name"]
+
         p = response.xpath('//p[@class="brand-cap"]/following-sibling::p/text()').extract_first()
 
         if p:
@@ -47,13 +53,16 @@ class BenchmarkHospitalitySpider(scrapy.Spider):
             address = p[0]
             phone = ""
 
-        properties.update(
-            {
-                "ref": re.search(r".com/+(?:meeting/+)?(.+?)//?", response.url + "/").group(1),
-                "addr_full": address.strip() if "Reservations" not in address else None,
-                "phone": phone.strip(),
-                "website": response.url,
-            }
-        )
+        item["ref"] = re.search(r".com/+(?:meeting/+)?(.+?)//?", response.url + "/").group(1)
+        item["addr_full"] = address.strip() if "Reservations" not in address else None
+        item["phone"] = phone.strip()
+        item["website"] = response.url
 
-        yield Feature(**properties)
+        if "Resort" in item["name"]:
+            apply_category(Categories.LEISURE_RESORT, item)
+        elif "Center" in item["name"]:
+            apply_category({"amenity": "conference_centre"}, item)
+        else:
+            apply_category(Categories.HOTEL, item)
+
+        yield item
