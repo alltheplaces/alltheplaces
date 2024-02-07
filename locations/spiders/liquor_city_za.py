@@ -7,7 +7,6 @@ class LiquorCitySpider(scrapy.Spider):
     item_attributes = {
         "brand": "Liquor City",
         "brand_wikidata": "Q116620538",
-
     }
     start_urls = [
         'https://shop.liquorcity.co.za/api/marketplace/marketplace_get_city_storefronts_v3?domain_name=shop.liquorcity.co.za&post_to_get=1&marketplace_reference_id=01c838877c7b7c7d9f15b8f40d3d2980&marketplace_user_id=742314&latitude=-30.559482&longitude=22.937506&search_text=&filters=undefined&skip=0&limit=5000&self_pickup=1&source=0&dual_user_key=0&language=en']
