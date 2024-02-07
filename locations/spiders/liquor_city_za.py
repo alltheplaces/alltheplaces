@@ -15,7 +15,7 @@ class LiquorCitySpider(scrapy.Spider):
         for location in response.json()['data']:
 
             properties = {
-                "store_id": location["storefront_user_id"],
+                "ref": location["storefront_user_id"],
                 "addr_full": location["address"],
                 "phone": location["phone"],
                 "email": location["email"],
