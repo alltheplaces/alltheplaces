@@ -9,7 +9,3 @@ class ChildcareNetworkUSSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://schools.childcarenetwork.com/robots.txt"]
     sitemap_rules = [(r"\.com/\w\w/[-\w]+/[-\w]+$", "parse_sd")]
     wanted_types = ["ChildCare"]
-
-    def post_process_item(self, item, response, ld_data, **kwargs):
-        item["name"] = response.xpath("//h2/text()").get()
-        yield item
