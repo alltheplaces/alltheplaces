@@ -15,4 +15,5 @@ class ChuckECheeseSpider(SitemapSpider, StructuredDataSpider):
         item.pop("image", None)
         item.pop("facebook", None)
         item.pop("twitter", None)
+        item.pop("name", None)
         yield item
