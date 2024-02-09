@@ -1,5 +1,6 @@
 import json
 
+import chompjs
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
@@ -19,10 +20,11 @@ class HomeDepotSpider(CrawlSpider, StructuredDataSpider):
     requires_proxy = "US"
 
     def post_process_item(self, item, response, ld_data, **kwargs):
+        item["branch"] = item.pop("name")
         # There's a JSON blob in the HTML that has a "nearby stores" query that includes lat/lon for this store
-        data = json.loads(
-            response.xpath('//script[contains(text(), "__APOLLO_STATE__")]/text()').extract_first().strip()[24:-1]
-        )["ROOT_QUERY"]
+        data = chompjs.parse_js_object(response.xpath('//script[contains(text(), "__APOLLO_STATE__")]/text()').get())[
+            "ROOT_QUERY"
+        ]
 
         # The key with store info in it seems to change based on store ID, so look for the one we care about
         # It starts with "storeSearch".
@@ -46,6 +48,6 @@ class HomeDepotSpider(CrawlSpider, StructuredDataSpider):
             if day == "__typename":
                 continue
 
-            item["opening_hours"].add_range(day[:2].title(), info["open"], info["close"])
+            item["opening_hours"].add_range(day, info["open"], info["close"])
 
         yield item
