@@ -26,7 +26,9 @@ class BurgerKingBRSpider(scrapy.Spider):
         )
 
     def parse(self, response):
-        for poi in response.json()["entries"]:
+        for key, poi in response.json()["entries"].items():
+            if key == "cacheForever":
+                continue
             item = DictParser.parse(poi)
             item["state"] = poi["administrativeArea"]
             item["website"] = "https://www.burgerking.com.br"
