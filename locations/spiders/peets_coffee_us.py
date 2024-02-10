@@ -23,10 +23,12 @@ class PeetsCoffeeUSSpider(StockistSpider):
                         close = str(closeHour) + ":" + closeMinute
                     hours = open + "-" + close
                 item["opening_hours"].add_ranges_from_string(day + " " + hours)
+
             if field["name"] == "Order Online" and item.get("website") is None:
                 item["website"] = field["value"]
             if field["name"] == "Type" and field["value"] == "Licensed Partner":
                 item["located_in"] = item.pop("name")
+
         for feature in location["filters"]:
             if feature["name"] == "Contactless Payments":
                 item["extras"]["payment:contactless"] = "yes"
@@ -39,4 +41,5 @@ class PeetsCoffeeUSSpider(StockistSpider):
                 item["extras"]["internet_access:fee"] = "no"
             if feature["name"] == "Delivery":
                 item["extras"]["delivery"] = "yes"
+
         yield item
