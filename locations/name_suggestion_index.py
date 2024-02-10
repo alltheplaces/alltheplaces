@@ -1,4 +1,7 @@
+from urllib.parse import urlparse
+
 import requests
+import tldextract
 
 
 class Singleton(type):
@@ -35,7 +38,37 @@ class NSI(metaclass=Singleton):
             self.nsi_json = self._request_file("dist/nsi.min.json")["nsi"]
             self.loaded = True
 
-    def lookup_wikidata(self, wikidata_code):
+    def get_wikidata_code_from_url(self, url: str):
+        """
+        Attempt to return a single Wikidata code corresponding to
+        the brand or operator of the supplied URL.
+        :param_url: URL to find the corresponding Wikidata code for
+        :return: Wikidata code, or None if no match found
+        """
+        self._ensure_loaded()
+        supplied_url_domain = urlparse(url).netloc
+        # First attempt to find an extact FQDN match
+        for wikidata_code, org_parameters in self.wikidata_json.items():
+            for official_website in org_parameters.get("officialWebsites", []):
+                official_website_domain = urlparse(official_website).netloc
+                if official_website_domain == supplied_url_domain:
+                    return wikidata_code
+        # Next attempt to find an exact match excluding any "www." prefix
+        for wikidata_code, org_parameters in self.wikidata_json.items():
+            for official_website in org_parameters.get("officialWebsites", []):
+                official_website_domain = urlparse(official_website).netloc
+                if official_website_domain.lstrip("www.") == supplied_url_domain.lstrip("www."):
+                    return wikidata_code
+        # Last attempt to find a fuzzy match for registered domain (exlcuding subdomains)
+        for wikidata_code, org_parameters in self.wikidata_json.items():
+            for official_website in org_parameters.get("officialWebsites", []):
+                official_website_reg = tldextract.extract(official_website).registered_domain
+                supplied_url_reg = tldextract.extract(supplied_url_domain).registered_domain
+                if official_website_reg == supplied_url_reg:
+                    return wikidata_code
+        return None
+
+    def lookup_wikidata(self, wikidata_code: str):
         """
         Lookup wikidata code in the NSI.
         :param wikidata_code: wikidata code to lookup in the NSI

@@ -1,6 +1,9 @@
-from scrapy import Selector, Spider
-from scrapy.http import JsonRequest
+import re
 
+from scrapy import Selector, Spider
+from scrapy.http import JsonRequest, Response
+
+from locations.automatic_spider_generator import AutomaticSpiderGenerator
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.items import Feature
@@ -24,7 +27,7 @@ from locations.items import Feature
 # If you need to clean up data returned, override the parse_item function.
 
 
-class LocalisrSpider(Spider):
+class LocalisrSpider(Spider, AutomaticSpiderGenerator):
     dataset_attributes = {"source": "api", "api": "localisr.io"}
     api_key = ""
     api_version = "2.1.0"  # Use the latest observed API version
@@ -83,3 +86,36 @@ class LocalisrSpider(Spider):
 
     def parse_item(self, item: Feature, location: dict, **kwargs):
         yield item
+
+    @staticmethod
+    def storefinder_exists(response: Response) -> bool:
+        if response.xpath('//script[contains(@src, "app.localisr.io/js/storelocator/widget.js")]'):
+            return True
+        if response.xpath('//iframe[contains(@src, "app.localisr.io/public/store-locator")]'):
+            return True
+        return False
+
+    @staticmethod
+    def extract_spider_attributes(response: Response) -> dict:
+        api_key = ""
+        localisr_widget_url = response.xpath(
+            '//script[contains(@src, "app.localisr.io/js/storelocator/widget.js")]/@src'
+        ).get()
+        if localisr_widget_url:
+            if extracted_key := re.search(r"key=(\w+)&", localisr_widget_url):
+                api_key = extracted_key.group(1)
+        if not api_key:
+            localisr_iframe_url = response.xpath(
+                '//iframe[contains(@src, "app.localisr.io/public/store-locator")]/@src'
+            ).get()
+            if localisr_iframe_url:
+                if extracted_key := re.search(r"requestToken=(\w+)", localisr_iframe_url):
+                    api_key = extracted_key.group(1)
+        # TODO: request localisr_url and extract from it:
+        # search_coordinates = []
+        # if coords := re.findall(r"searchLocationsNear\(\"search\",null,(-?\d+.\d+),(-?\d+.\d+),\d+\)", response.text):
+        #     for coord in coords:
+        #         search_coordinates.append((coord[0], coord[1]))
+        return {
+            "api_key": api_key,
+        }

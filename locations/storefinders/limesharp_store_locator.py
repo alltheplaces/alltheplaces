@@ -1,6 +1,9 @@
-from scrapy import Spider
-from scrapy.http import JsonRequest
+from urllib.parse import urlparse
 
+from scrapy import Spider
+from scrapy.http import JsonRequest, Response
+
+from locations.automatic_spider_generator import AutomaticSpiderGenerator
 from locations.dict_parser import DictParser
 from locations.items import Feature
 
@@ -21,7 +24,7 @@ from locations.items import Feature
 # location).
 
 
-class LimesharpStoreLocatorSpider(Spider):
+class LimesharpStoreLocatorSpider(Spider, AutomaticSpiderGenerator):
     def start_requests(self):
         if len(self.start_urls) == 0 and hasattr(self, "allowed_domains"):
             for domain in self.allowed_domains:
@@ -46,3 +49,18 @@ class LimesharpStoreLocatorSpider(Spider):
 
     def parse_item(self, item: Feature, location: dict, **kwargs):
         yield item
+
+    @staticmethod
+    def storefinder_exists(response: Response) -> bool:
+        if response.xpath('//body[contains(@class, "stockists-index-index")]') and response.xpath(
+            '//script[@type="text/x-magento-init"]'
+        ):
+            return True
+        return False
+
+    @staticmethod
+    def extract_spider_attributes(response: Response) -> dict:
+        allowed_domains = urlparse(response.url).netloc
+        return {
+            "allowed_domains": [allowed_domains],
+        }

@@ -1,30 +1,26 @@
+import re
 from urllib.parse import quote_plus
 
 from scrapy import Spider
-from scrapy.http import JsonRequest
+from scrapy.http import JsonRequest, Request, Response
 
+from locations.automatic_spider_generator import AutomaticSpiderGenerator
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
 # API documentation available at:
 # https://admin.metalocator.com/components/com_locator/assets/documents/api/classes/LocatorControllerAPI.html#method_search
 #
-# To use this spider, specify a brand_id (Itemid in API URLs)
-# as well as one or more country names in the country_list array.
+# To use this spider, specify a brand_id (Itemid in API URLs).
 
 
-class MetaLocatorSpider(Spider):
+class MetaLocatorSpider(Spider, AutomaticSpiderGenerator):
     dataset_attributes = {"source": "api", "api": "metalocator.com"}
     brand_id = None
-    country_list = []
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def start_requests(self):
-        for country in self.country_list:
-            country_urlsafe = quote_plus(country)
-            yield JsonRequest(
-                url=f"https://code.metalocator.com/webapi/api/search/?Itemid={self.brand_id}&country={country_urlsafe}&limit=1000000"
-            )
+        yield JsonRequest(url=f"https://code.metalocator.com/webapi/api/search/?Itemid={self.brand_id}&limit=100000")
 
     def parse(self, response, **kwargs):
         for location in response.json():
@@ -38,3 +34,34 @@ class MetaLocatorSpider(Spider):
 
     def parse_item(self, item, location, **kwargs):
         yield item
+
+    @staticmethod
+    def storefinder_exists(response: Response) -> bool | Request:
+        return Request(
+            url=response.request.url,
+            meta={"playwright": True, "next_detection_method": MetaLocatorSpider.storefinder_exists_playwright},
+            dont_filter=True,
+        )
+
+    @staticmethod
+    def storefinder_exists_playwright(response: Response) -> bool | Request:
+        if response.xpath('//iframe[contains(@src, "code.metalocator.com")]'):
+            return True
+        return False
+
+    @staticmethod
+    def extract_spider_attributes(response: Response) -> dict | Request:
+        return Request(
+            url=response.request.url,
+            meta={"playwright": True, "next_extraction_method": MetaLocatorSpider.extract_spider_attributes_playwright},
+            dont_filter=True,
+        )
+
+    @staticmethod
+    def extract_spider_attributes_playwright(response: Response) -> dict | Request:
+        for iframe_src in response.xpath(
+            '//iframe[contains(@src, "code.metalocator.com") and (contains(@src, "Itemid") or contains(@src, "itemid"))]/@src'
+        ).getall():
+            if itemid := re.search(r"(?<=Itemid=)(\d+)", iframe_src, flags=re.IGNORECASE):
+                return {"brand_id": itemid.group(1)}
+        return {}

@@ -1,6 +1,9 @@
-from scrapy import Spider
-from scrapy.http import JsonRequest
+from urllib.parse import urlparse
 
+from scrapy import Spider
+from scrapy.http import JsonRequest, Response
+
+from locations.automatic_spider_generator import AutomaticSpiderGenerator
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_FULL, OpeningHours
 
@@ -11,7 +14,7 @@ from locations.hours import DAYS_FULL, OpeningHours
 # /commerce/storefront/locationUsageTypes/DL/locations
 
 
-class KiboSpider(Spider):
+class KiboSpider(Spider, AutomaticSpiderGenerator):
     page_size = 1000
 
     def start_requests(self):
@@ -47,3 +50,18 @@ class KiboSpider(Spider):
 
     def parse_item(self, item, location, **kwargs):
         yield item
+
+    @staticmethod
+    def storefinder_exists(response: Response) -> bool:
+        if response.xpath('//script[@id="data-mz-preload-apicontext"]'):
+            return True
+        return False
+
+    @staticmethod
+    def extract_spider_attributes(response: Response) -> dict:
+        start_url = (
+            "https://" + urlparse(response.url).netloc + "/api/commerce/storefront/locationUsageTypes/SP/locations"
+        )
+        return {
+            "start_urls": [start_url],
+        }
