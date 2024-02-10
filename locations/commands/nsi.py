@@ -1,4 +1,3 @@
-
 from scrapy.commands import ScrapyCommand
 from scrapy.exceptions import UsageError
 
@@ -137,7 +136,6 @@ class NameSuggestionIndexCommand(ScrapyCommand):
             print("Official Url(s): {}".format(website))
             print("- [] I have run the below and if anything in generated, added it.")
             print(" ".join(["pipenv run scrapy sf", "--brand-wikidata={}".format(code), website]))
-
 
             print("```")
             # Now, we crawl!
