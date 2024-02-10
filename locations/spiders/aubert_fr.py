@@ -1,13 +1,12 @@
-import json
-import re
 
 import scrapy
-
-from locations.hours import OpeningHours
-from locations.items import Feature
 from scrapy.spiders import SitemapSpider
+
 from locations.structured_data_spider import StructuredDataSpider
+
 q
+
+
 class AubertFRSpider(SitemapSpider, StructuredDataSpider):
     name = "aubert_fr"
     item_attributes = {"brand": "Aubert", "brand_wikidata": "Q62964657"}

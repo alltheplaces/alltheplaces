@@ -1,9 +1,9 @@
 from scrapy.commands import ScrapyCommand
 from scrapy.exceptions import UsageError
 
-from locations.name_suggestion_index import NSI
-from locations.exporters.geojson import find_spider_class
 from locations.commands.duplicate_wikidata import DuplicateWikidataCommand
+from locations.name_suggestion_index import NSI
+
 
 class NameSuggestionIndexCommand(ScrapyCommand):
     """
@@ -91,7 +91,7 @@ class NameSuggestionIndexCommand(ScrapyCommand):
                     missing.append(item)
         print(f"Missing by wikidata: {len(missing)}")
         for brand in missing:
-            self.show(brand['tags']['brand:wikidata'], {"label": brand['displayName']})
+            self.show(brand["tags"]["brand:wikidata"], {"label": brand["displayName"]})
 
     @staticmethod
     def show(code, data):
