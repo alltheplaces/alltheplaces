@@ -134,10 +134,10 @@ class NameSuggestionIndexCommand(ScrapyCommand):
         print("### Store finder url(s)\n")
         for website in website_urls:
             print("Official Url(s): {}".format(website))
-            print("- [] I have run the below and if anything in generated, added it.")
-            print("- [] I have manually checked for a storefinder")
-            print("- [] This is not a manufacturer listing outlets operating under their own brands / this will not create duplicates")
-            print(" ".join(["pipenv run scrapy sf", "--brand-wikidata={}".format(code), website]))
+            print("- [ ] I have run the below and if anything in generated, added it.")
+            print("- [ ] I have manually checked for a storefinder")
+            print("- [ ] This is not a manufacturer listing outlets operating under their own brands / this will not create duplicates")
+            print("`{}`".format(" ".join(["pipenv run scrapy sf", "--brand-wikidata={}".format(code), website])))
 
             print("```")
             # Now, we crawl!
