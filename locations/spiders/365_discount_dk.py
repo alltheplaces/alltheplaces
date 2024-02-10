@@ -13,8 +13,8 @@ class ThreeSixFiveDiscountDKSpider(Spider):
 
     def start_requests(self) -> Iterable[Request]:
         yield FormRequest(
-            "https://365discount.coop.dk/umbraco/surface/Chains/GetAllStores",
-            formdata={"pageId": "1754", "chainsToShowStoresFrom": "Coop 365", "hideClosedStores": "false"},
+            "https://365discount.coop.dk/umbraco/api/Chains/GetAllStores",
+            formdata={"pageId": "4976", "chainsToShowStoresFrom": "Coop 365", "hideClosedStores": "false"},
         )
 
     def parse(self, response: Response, **kwargs: Any) -> Any:

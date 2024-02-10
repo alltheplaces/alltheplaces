@@ -119,6 +119,7 @@ class Categories(Enum):
     SHOP_WINDOW_BLIND = {"shop": "window_blind"}
 
     OFFICE_COMPANY = {"office": "company"}
+    OFFICE_COURIER = {"office": "courier"}
     OFFICE_ENGINEER = {"office": "engineer"}
     OFFICE_FINANCIAL = {"office": "financial"}
     OFFICE_IT = {"office": "it"}
@@ -352,6 +353,8 @@ class Fuel(Enum):
     HEATING_OIL = "fuel:heating_oil"
     KEROSENE = "fuel:kerosene"
 
+    ELECTRIC = "fuel:electric"  # Electric vehicle charger
+
 
 class Extras(Enum):
     AIR_CONDITIONING = "air_conditioning"
@@ -374,6 +377,7 @@ class Extras(Enum):
     FEE = "fee"
     HALAL = "diet:halal"
     INDOOR_SEATING = "indoor_seating"
+    KOSHER = "diet:kosher"
     MOTOR_VEHICLES = "motor_vehicle"
     OIL_CHANGE = "service:vehicle:oil_change"
     OUTDOOR_SEATING = "outdoor_seating"

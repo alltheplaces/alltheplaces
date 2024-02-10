@@ -74,7 +74,9 @@ class CitiSpider(scrapy.Spider):
                 apply_category(Categories.ATM, properties)
             elif feature["properties"]["type"] == "branch":
                 apply_category(Categories.BANK, properties)
+            elif feature["properties"]["type"] == "citifinancial":
+                apply_category(Categories.BANK, properties)
             elif feature["properties"]["type"] == "private bank":
-                pass
+                apply_category(Categories.BANK, properties)
 
             yield Feature(**properties)
