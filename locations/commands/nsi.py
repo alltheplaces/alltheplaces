@@ -91,7 +91,8 @@ class NameSuggestionIndexCommand(ScrapyCommand):
                     missing.append(item)
         print(f"Missing by wikidata: {len(missing)}")
         for brand in missing:
-            self.issue_template(brand["tags"]["brand:wikidata"], brand | {"label": brand["displayName"]})
+            wikidata = self.nsi.lookup_wikidata(brand["tags"]["brand:wikidata"])
+            self.issue_template(brand["tags"]["brand:wikidata"], brand | {"label": brand["displayName"]} | wikidata)
 
     @staticmethod
     def show(code, data):
@@ -116,6 +117,9 @@ class NameSuggestionIndexCommand(ScrapyCommand):
         print("https://www.wikidata.org/wiki/Special:EntityData/{}.json\n".format(code))
         print("### Store finder url(s)\n")
         if s := data.get("identities"):
-            print("Website: {}".format(s.get("website", "N/A")))
+            print("Primary website: {}".format(s.get("website", "N/A")))
+        if s := data.get("officialWebsites"):
+            for website in set(s):
+                print("Official Url(s): {}".format(website))
         print("")
         print("----")
