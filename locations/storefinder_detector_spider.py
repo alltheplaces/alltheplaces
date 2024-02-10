@@ -49,6 +49,9 @@ class StorefinderDetectorSpider(Spider):
         self.operator_wikidata = operator_wikidata
         self.spider_key = spider_key
         self.spider_class_name = spider_class_name
+        # TODO: For running stand alone, this makes sense.
+        # For invoking from other areas - where we may already have a lot of this information, this work in the constructor doubles efforts
+        # Consider shifting up to the caller
         self.automatically_set_parameters()
 
     def automatically_set_brand_or_operator_from_start_url(self):
@@ -159,7 +162,7 @@ class StorefinderDetectorSpider(Spider):
             yield storefinder_exists
             return
         if storefinder_exists is True:
-            yield from self.parse_extraction(response.meta["first_response"])
+            yield from self.parse_extraction(response.meta["first_response"]) # TODO: Check if first_response is right, or if it should be last_response. When running multiple times for multiple stores, I was seeing the current url with the first generated spider 
 
     def parse_extraction(self, response: Response):
         storefinder = response.meta["storefinder"]

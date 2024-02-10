@@ -4,6 +4,8 @@ from scrapy.exceptions import UsageError
 from locations.commands.duplicate_wikidata import DuplicateWikidataCommand
 from locations.name_suggestion_index import NSI
 
+import subprocess
+import os
 
 class NameSuggestionIndexCommand(ScrapyCommand):
     """
@@ -92,7 +94,21 @@ class NameSuggestionIndexCommand(ScrapyCommand):
         print(f"Missing by wikidata: {len(missing)}")
         for brand in missing:
             wikidata = self.nsi.lookup_wikidata(brand["tags"]["brand:wikidata"])
-            self.issue_template(brand["tags"]["brand:wikidata"], brand | {"label": brand["displayName"]} | wikidata)
+            if wikidata is None:
+                # Sometimes, we don't get a wikidata match. For now, skip
+                continue
+
+            # Determine various websites
+            website_urls = []
+            if s := wikidata.get("identities"):
+                if s.get("website"):
+                    website_urls.append(s.get("website"))
+            if s := wikidata.get("officialWebsites"):
+                for website in set(s):
+                    website_urls.append(website)
+            website_urls = set(website_urls)
+
+            self.issue_template(brand["tags"]["brand:wikidata"], brand | {"label": brand["displayName"]} | wikidata, website_urls)
 
     @staticmethod
     def show(code, data):
@@ -105,7 +121,7 @@ class NameSuggestionIndexCommand(ScrapyCommand):
             print("       -> {}".format(s.get("website", "N/A")))
 
     @staticmethod
-    def issue_template(code, data):
+    def issue_template(code, data, website_urls):
         print("### Brand name\n")
         print(data["label"])
         print("")
@@ -116,10 +132,22 @@ class NameSuggestionIndexCommand(ScrapyCommand):
         print("https://www.wikidata.org/wiki/{}".format(code))
         print("https://www.wikidata.org/wiki/Special:EntityData/{}.json\n".format(code))
         print("### Store finder url(s)\n")
-        if s := data.get("identities"):
-            print("Primary website: {}".format(s.get("website", "N/A")))
-        if s := data.get("officialWebsites"):
-            for website in set(s):
-                print("Official Url(s): {}".format(website))
+        for website in website_urls:
+            print("Official Url(s): {}".format(website))
+            print("Run the below and if anything in generated, add.")
+            print(' '.join(['pipenv run scrapy sf', '--brand-wikidata={}'.format(code), website]))
+
+            print("```")
+            # Now, we crawl!
+            # TODO: The subprocess gets ModuleNotFoundError: No module named 'locations', despite the current working dir and shell=True being passed.
+            # What's missing? Why doesn't the pipenv execution know where we are?
+
+            # Why a subprocess?
+            # There are issues with reactor trying to do this all inline; global state; the on the fly class definitions...
+            # so just call the storefinder command as a subprocess.
+            # result = subprocess.run(['pipenv run scrapy sf', '--brand-wikidata={}'.format(code), website], shell=True, cwd=os.getcwd())
+            # print(result.stdout)
+            print("```")
+
         print("")
         print("----")
