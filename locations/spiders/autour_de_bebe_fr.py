@@ -1,12 +1,17 @@
 import scrapy
 from scrapy.spiders import SitemapSpider
+
 from locations.categories import Categories
 from locations.structured_data_spider import StructuredDataSpider
 
 
 class AutourDeBebeFRSpider(SitemapSpider, StructuredDataSpider):
     name = "autour_de_bebe_fr"
-    item_attributes = {"brand": "Autour de Bébé", "brand_wikidata": "Q117842411", "extras": Categories.SHOP_BABY_GOODS.value}
+    item_attributes = {
+        "brand": "Autour de Bébé",
+        "brand_wikidata": "Q117842411",
+        "extras": Categories.SHOP_BABY_GOODS.value,
+    }
     download_delay = 0.5
     allowed_domains = [
         "magasins.autourdebebe.com",
