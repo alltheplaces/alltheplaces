@@ -1,4 +1,3 @@
-import scrapy
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories
@@ -7,7 +6,11 @@ from locations.structured_data_spider import StructuredDataSpider
 
 class AkachanJPSpider(SitemapSpider, StructuredDataSpider):
     name = "akachan_jp"
-    item_attributes = {"brand": "Akachan Honpo", "brand_wikidata": "Q11257015", "extras": Categories.SHOP_BABY_GOODS.value}
+    item_attributes = {
+        "brand": "Akachan Honpo",
+        "brand_wikidata": "Q11257015",
+        "extras": Categories.SHOP_BABY_GOODS.value,
+    }
     download_delay = 0.5
     allowed_domains = [
         "stores.akachan.jp",
