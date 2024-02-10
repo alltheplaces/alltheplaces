@@ -1,4 +1,3 @@
-
 from scrapy.commands import ScrapyCommand
 from scrapy.exceptions import UsageError
 
@@ -139,7 +138,6 @@ class NameSuggestionIndexCommand(ScrapyCommand):
             print("- [] I have manually checked for a storefinder")
             print("- [] This is not a manufacturer listing outlets operating under their own brands / this will not create duplicates")
             print(" ".join(["pipenv run scrapy sf", "--brand-wikidata={}".format(code), website]))
-
 
             print("```")
             # Now, we crawl!
