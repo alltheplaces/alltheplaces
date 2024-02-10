@@ -11,7 +11,6 @@ class AkachanJPSpider(SitemapSpider, StructuredDataSpider):
         "brand_wikidata": "Q11257015",
         "extras": Categories.SHOP_BABY_GOODS.value,
     }
-    download_delay = 0.5
     allowed_domains = [
         "stores.akachan.jp",
     ]
