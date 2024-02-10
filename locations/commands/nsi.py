@@ -1,11 +1,10 @@
+
 from scrapy.commands import ScrapyCommand
 from scrapy.exceptions import UsageError
 
 from locations.commands.duplicate_wikidata import DuplicateWikidataCommand
 from locations.name_suggestion_index import NSI
 
-import subprocess
-import os
 
 class NameSuggestionIndexCommand(ScrapyCommand):
     """
@@ -108,7 +107,9 @@ class NameSuggestionIndexCommand(ScrapyCommand):
                     website_urls.append(website)
             website_urls = set(website_urls)
 
-            self.issue_template(brand["tags"]["brand:wikidata"], brand | {"label": brand["displayName"]} | wikidata, website_urls)
+            self.issue_template(
+                brand["tags"]["brand:wikidata"], brand | {"label": brand["displayName"]} | wikidata, website_urls
+            )
 
     @staticmethod
     def show(code, data):
@@ -135,7 +136,8 @@ class NameSuggestionIndexCommand(ScrapyCommand):
         for website in website_urls:
             print("Official Url(s): {}".format(website))
             print("- [] I have run the below and if anything in generated, added it.")
-            print(' '.join(['pipenv run scrapy sf', '--brand-wikidata={}'.format(code), website]))
+            print(" ".join(["pipenv run scrapy sf", "--brand-wikidata={}".format(code), website]))
+
 
             print("```")
             # Now, we crawl!
