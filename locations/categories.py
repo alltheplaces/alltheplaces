@@ -42,6 +42,7 @@ class Categories(Enum):
     LEISURE_RESORT = {"leisure": "resort"}
 
     SHOP_ALCOHOL = {"shop": "alcohol"}
+    SHOP_BABY_GOODS = {"shop": "baby_goods"}
     SHOP_BAKERY = {"shop": "bakery"}
     SHOP_BEAUTY = {"shop": "beauty"}
     SHOP_BEVERAGES = {"shop": "beverages"}

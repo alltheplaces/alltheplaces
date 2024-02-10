@@ -1,12 +1,12 @@
 import scrapy
 from scrapy.spiders import SitemapSpider
-
+from locations.categories import Categories
 from locations.structured_data_spider import StructuredDataSpider
 
 
 class AubertFRSpider(SitemapSpider, StructuredDataSpider):
     name = "aubert_fr"
-    item_attributes = {"brand": "Aubert", "brand_wikidata": "Q62964657"}
+    item_attributes = {"brand": "Aubert", "brand_wikidata": "Q62964657", "extras": Categories.SHOP_BABY_GOODS.value}
     download_delay = 0.5
     allowed_domains = [
         "magasins.aubert.com",
