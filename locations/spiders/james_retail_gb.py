@@ -25,7 +25,7 @@ class JamesRetailGBSpider(Spider):
                 "ref": unescape(location[-2][-1]).replace('\\"', "").replace("\xa0", " ").strip(),
                 "name": unescape(location[-1][0][0]).replace('\\"', "").replace("\xa0", " ").strip(),
                 "lat": location[-2][4][0],
-                "lon": location[-2][4][0],
+                "lon": location[-2][4][1],
             }
             if "SUPERNEWS" in properties["name"].upper():
                 properties.update(self.brands["SUPERNEWS"])
