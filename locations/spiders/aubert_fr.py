@@ -1,10 +1,9 @@
-import json
-import re
 
 import scrapy
-
 from scrapy.spiders import SitemapSpider
+
 from locations.structured_data_spider import StructuredDataSpider
+
 
 class AubertFRSpider(SitemapSpider, StructuredDataSpider):
     name = "aubert_fr"
