@@ -22,6 +22,10 @@ class DennerCHSpider(SitemapSpider, StructuredDataSpider):
         item["ref"] = re.search("/([^/]+)/$", item["website"]).group(1)
         item["phone"] = self.parse_phone(response)
         item.setdefault("extras", {}).update(self.parse_opening_date(response))
+        item["extras"]["website:de"] = response.xpath('//link[@rel="alternate"][@hreflang="de"]/@href').get()
+        item["extras"]["website:fr"] = response.xpath('//link[@rel="alternate"][@hreflang="fr"]/@href').get()
+        item["extras"]["website:it"] = response.xpath('//link[@rel="alternate"][@hreflang="it"]/@href').get()
+
         yield item
 
     @staticmethod

@@ -21,9 +21,9 @@ class OTRAUSpider(Spider):
                 clean_location[key.replace("site_", "")] = value
             location = clean_location
 
-            location[
-                "url"
-            ] = f'https://www.otr.com.au/locations/{location["suburb_url"]}-{location["streetaddress_url"]}/{location["name_url"]}/'
+            location["url"] = (
+                f'https://www.otr.com.au/locations/{location["suburb_url"]}-{location["streetaddress_url"]}/{location["name_url"]}/'
+            )
 
             item = DictParser.parse(location)
 
