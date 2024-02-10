@@ -8,7 +8,6 @@ from locations.structured_data_spider import StructuredDataSpider
 class NatalysFRSpider(SitemapSpider, StructuredDataSpider):
     name = "natalys_fr"
     item_attributes = {"brand": "Natalys", "brand_wikidata": "Q3336439", "extras": Categories.SHOP_BABY_GOODS.value}
-    download_delay = 0.5
     allowed_domains = [
         "boutiques.natalys.com",
     ]
