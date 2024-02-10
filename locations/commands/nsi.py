@@ -134,7 +134,7 @@ class NameSuggestionIndexCommand(ScrapyCommand):
         print("### Store finder url(s)\n")
         for website in website_urls:
             print("Official Url(s): {}".format(website))
-            print("Run the below and if anything in generated, add.")
+            print("- [] I have run the below and if anything in generated, added it.")
             print(' '.join(['pipenv run scrapy sf', '--brand-wikidata={}'.format(code), website]))
 
             print("```")
