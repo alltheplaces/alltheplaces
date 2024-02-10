@@ -12,7 +12,6 @@ class AutourDeBebeFRSpider(SitemapSpider, StructuredDataSpider):
         "brand_wikidata": "Q117842411",
         "extras": Categories.SHOP_BABY_GOODS.value,
     }
-    download_delay = 0.5
     allowed_domains = [
         "magasins.autourdebebe.com",
     ]
