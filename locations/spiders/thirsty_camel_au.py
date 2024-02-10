@@ -3,12 +3,16 @@ from scrapy.http import JsonRequest
 
 from locations.categories import Categories
 from locations.dict_parser import DictParser
-from locations.hours import DAYS_FULL, OpeningHours
+from locations.hours import OpeningHours
 
 
 class ThirstyCamelAUSpider(Spider):
     name = "thirsty_camel_au"
-    item_attributes = {"brand": "Thirsty Camel", "brand_wikidata": "Q113503937", "extras": Categories.SHOP_ALCOHOL.value}
+    item_attributes = {
+        "brand": "Thirsty Camel",
+        "brand_wikidata": "Q113503937",
+        "extras": Categories.SHOP_ALCOHOL.value,
+    }
     allowed_domains = ["api.beta.thirstycamel.com.au"]
     start_urls = ["https://api.beta.thirstycamel.com.au/stores/all"]
 
