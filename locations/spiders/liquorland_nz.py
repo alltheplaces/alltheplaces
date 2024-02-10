@@ -23,9 +23,15 @@ class LiquorlandNZSpider(Spider):
             item = DictParser.parse(location["properties"])
             item["ref"] = location["properties"]["url"].split("?StoreId=", 1)[1]
             item["geometry"] = location["geometry"]
-            item["addr_full"] = re.sub(r"\s?,(?=[^\s])", ", ", re.sub(r"\s+", " ", location["properties"]["address"].replace("<br>", ",")).strip())
+            item["addr_full"] = re.sub(
+                r"\s?,(?=[^\s])",
+                ", ",
+                re.sub(r"\s+", " ", location["properties"]["address"].replace("<br>", ",")).strip(),
+            )
             item["website"] = "https://www.liquorland.co.nz" + location["properties"]["url"]
-            hours_string = " ".join(filter(None, map(str.strip, Selector(text=location["properties"]["hours"]).xpath('//text()').getall())))
+            hours_string = " ".join(
+                filter(None, map(str.strip, Selector(text=location["properties"]["hours"]).xpath("//text()").getall()))
+            )
             item["opening_hours"] = OpeningHours()
             item["opening_hours"].add_ranges_from_string(hours_string)
             yield item
