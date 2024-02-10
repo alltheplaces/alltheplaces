@@ -91,7 +91,7 @@ class NameSuggestionIndexCommand(ScrapyCommand):
                     missing.append(item)
         print(f"Missing by wikidata: {len(missing)}")
         for brand in missing:
-            self.show(brand["tags"]["brand:wikidata"], {"label": brand["displayName"]})
+            self.issue_template(brand["tags"]["brand:wikidata"], brand | {"label": brand["displayName"]})
 
     @staticmethod
     def show(code, data):
@@ -102,3 +102,20 @@ class NameSuggestionIndexCommand(ScrapyCommand):
             print("       -> {}".format(s))
         if s := data.get("identities"):
             print("       -> {}".format(s.get("website", "N/A")))
+
+    @staticmethod
+    def issue_template(code, data):
+        print("### Brand name\n")
+        print(data["label"])
+        print("")
+        if s := data.get("description"):
+            print("{}\n".format(s))
+        print("### Wikidata ID\n")
+        print(code)
+        print("https://www.wikidata.org/wiki/{}".format(code))
+        print("https://www.wikidata.org/wiki/Special:EntityData/{}.json\n".format(code))
+        print("### Store finder url(s)\n")
+        if s := data.get("identities"):
+            print("Website: {}".format(s.get("website", "N/A")))
+        print("")
+        print("----")
