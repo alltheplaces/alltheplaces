@@ -58,6 +58,6 @@ class SunbeltRentalsUsCaSpider(scrapy.Spider):
 
             hours = self.parse_hours(store["operatingHours"])
             if hours:
-                properties["opening_hours"] = hours
+                item["opening_hours"] = hours
 
-            yield Feature(**properties)
+            yield item
