@@ -17,6 +17,7 @@ class GapUSSpider(SitemapSpider, StructuredDataSpider):
         types = response.xpath('normalize-space(//div[@class="store-carries"]/text())').get()
         if types == "Gap Factory Store":
             item["brand"] = "Gap Factory Store"
+            apply_category(Categories.SHOP_CLOTHES, item)
         else:
             item["brand"] = "Gap"
             apply_category(Categories.SHOP_CLOTHES, item)
