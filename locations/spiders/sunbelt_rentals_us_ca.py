@@ -5,7 +5,6 @@ import scrapy
 from locations.categories import Categories
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
-from locations.items import Feature
 
 
 class SunbeltRentalsUsCaSpider(scrapy.Spider):
