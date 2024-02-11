@@ -162,7 +162,9 @@ class StorefinderDetectorSpider(Spider):
             yield storefinder_exists
             return
         if storefinder_exists is True:
-            yield from self.parse_extraction(response.meta["first_response"]) # TODO: Check if first_response is right, or if it should be last_response. When running multiple times for multiple stores, I was seeing the current url with the first generated spider 
+            yield from self.parse_extraction(
+                response.meta["first_response"]
+            )  # TODO: Check if first_response is right, or if it should be last_response. When running multiple times for multiple stores, I was seeing the current url with the first generated spider
 
     def parse_extraction(self, response: Response):
         storefinder = response.meta["storefinder"]
