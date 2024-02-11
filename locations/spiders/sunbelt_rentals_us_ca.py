@@ -53,7 +53,7 @@ class SunbeltRentalsUsCaSpider(scrapy.Spider):
 
     def parse(self, response):
         for store in response.json()["data"]["pcList"]:
-            item = DictParser.parse(location)
+            item = DictParser.parse(store)
             item["street_address"] = item.pop("street", None)
 
             hours = self.parse_hours(store["operatingHours"])
