@@ -54,7 +54,7 @@ class SunbeltRentalsUsCaSpider(scrapy.Spider):
         for store in response.json()["data"]["pcList"]:
             item = DictParser.parse(store)
             item["street_address"] = item.pop("street", None)
-            item["ref"] = item["pc"]
+            item["ref"] = store["pc"]
 
             hours = self.parse_hours(store["operatingHours"])
             if hours:
