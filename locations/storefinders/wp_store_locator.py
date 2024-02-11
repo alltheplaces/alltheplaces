@@ -6,7 +6,7 @@ from scrapy.http import JsonRequest, Request, Response
 from locations.automatic_spider_generator import AutomaticSpiderGenerator
 from locations.dict_parser import DictParser
 from locations.geo import point_locations
-from locations.hours import DAYS_EN, OpeningHours
+from locations.hours import DAYS_EN, OpeningHours, sanitise_day
 from locations.items import Feature
 from locations.spiders.vapestore_gb import clean_address
 
