@@ -9,6 +9,7 @@ from scrapy.http import Request, Response
 from locations.automatic_spider_generator import AutomaticSpiderGenerator
 from locations.items import GeneratedSpider
 from locations.name_suggestion_index import NSI
+from locations.storefinders import *
 from locations.user_agents import BROWSER_DEFAULT
 
 
@@ -161,9 +162,7 @@ class StorefinderDetectorSpider(Spider):
             yield storefinder_exists
             return
         if storefinder_exists is True:
-            yield from self.parse_extraction(
-                response.meta["first_response"]
-            )  # TODO: Check if first_response is right, or if it should be last_response. When running multiple times for multiple stores, I was seeing the current url with the first generated spider
+            yield from self.parse_extraction(response.meta["first_response"]) # TODO: Check if first_response is right, or if it should be last_response. When running multiple times for multiple stores, I was seeing the current url with the first generated spider 
 
     def parse_extraction(self, response: Response):
         storefinder = response.meta["storefinder"]

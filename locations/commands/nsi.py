@@ -4,6 +4,8 @@ from scrapy.exceptions import UsageError
 from locations.commands.duplicate_wikidata import DuplicateWikidataCommand
 from locations.name_suggestion_index import NSI
 
+import subprocess
+import os
 
 class NameSuggestionIndexCommand(ScrapyCommand):
     """
@@ -106,9 +108,7 @@ class NameSuggestionIndexCommand(ScrapyCommand):
                     website_urls.append(website)
             website_urls = set(website_urls)
 
-            self.issue_template(
-                brand["tags"]["brand:wikidata"], brand | {"label": brand["displayName"]} | wikidata, website_urls
-            )
+            self.issue_template(brand["tags"]["brand:wikidata"], brand | {"label": brand["displayName"]} | wikidata, website_urls)
 
     @staticmethod
     def show(code, data):
