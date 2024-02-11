@@ -19,5 +19,4 @@ class MitraNLSpider(CrawlSpider, StructuredDataSpider):
     def parse(self, response):
         links = self.link_extractor.extract_links(response)
         for link in links:
-            print(link.url)
             yield scrapy.Request(link.url, callback=self.parse_sd)
