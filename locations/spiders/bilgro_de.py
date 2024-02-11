@@ -9,5 +9,5 @@ class BilgroDESpider(WPStoreLocatorSpider):
         "www.bilgro.de",
     ]
     start_urls = [
-        "https://www.bilgro.de/wp-admin/admin-ajax.php?action=store_search&lat=50.969454&lng=13.122099&max_results=1000&search_radius=5000&autoload=1"
+        "https://www.bilgro.de/wp-admin/admin-ajax.php?action=store_search&lat=50.969454&lng=13.122099&max_results=1000&search_radius=10000&autoload=1"
     ]
