@@ -7,7 +7,13 @@ from locations.hours import OpeningHours
 
 class RSEASafetyAUSpider(Spider):
     name = "rsea_safety_au"
-    item_attributes = {"brand": "RSEA Safety", "brand_wikidata": "Q122418895"}
+    item_attributes = {
+        "brand": "RSEA Safety",
+        "brand_wikidata": "Q122418895",
+        "extras": {
+            "shop": "safety_equipment",
+        },
+    }
     allowed_domains = ["www.rsea.com.au"]
     start_urls = ["https://www.rsea.com.au/service/storeLocator/findNearestStore"]
     custom_settings = {"COOKIES_ENABLED": True}

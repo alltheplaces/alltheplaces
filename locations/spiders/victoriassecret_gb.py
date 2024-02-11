@@ -26,10 +26,10 @@ class VictoriasSecretGBSpider(scrapy.Spider):
                         store.xpath('./button[@class="vs-store-btn"]/descendant-or-self::text()').getall(),
                     ),
                 )
-            )
+            ).replace(", find us in the Next store", "")
             item["phone"] = (
                 store.xpath('./div[@class="vs-store-details"]/div[@class="vs-store-address"]/strong/text()')
-                .get()
+                .get("")
                 .strip()
             )
             item["addr_full"] = (

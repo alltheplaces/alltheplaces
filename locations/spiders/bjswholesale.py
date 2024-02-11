@@ -4,6 +4,7 @@ from datetime import datetime
 
 import scrapy
 
+from locations.categories import Categories
 from locations.hours import OpeningHours
 from locations.items import Feature
 
@@ -12,7 +13,11 @@ DAY_MAPPING = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
 
 class BJsWholesaleSpider(scrapy.Spider):
     name = "bjswholesale"
-    item_attributes = {"brand": "BJ's Wholesale", "brand_wikidata": "Q4835754"}
+    item_attributes = {
+        "brand": "BJ's Wholesale",
+        "brand_wikidata": "Q4835754",
+        "extras": Categories.SHOP_WHOLESALE.value,
+    }
     allowed_domains = ["bjs.com"]
     start_urls = [
         "https://api.bjs.com/digital/live/apis/v1.0/clublocatorpage/statetowns/10201",

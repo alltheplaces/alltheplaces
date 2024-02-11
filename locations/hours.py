@@ -3,6 +3,8 @@ import time
 from collections import defaultdict
 
 DAYS = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
+DAYS_3_LETTERS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+DAYS_3_LETTERS_FROM_SUNDAY = DAYS_3_LETTERS[-1:] + DAYS_3_LETTERS[:-1]
 DAYS_FULL = [
     "Monday",
     "Tuesday",
@@ -12,6 +14,11 @@ DAYS_FULL = [
     "Saturday",
     "Sunday",
 ]
+DAYS_WEEKDAY = ["Mo", "Tu", "We", "Th", "Fr"]
+DAYS_WEEKEND = ["Sa", "Su"]
+
+# The below DAYS dicts are provided to be used with sanitise_day inorder for us to do best attempts at matching the
+# given day into an English 2 char day to be used inside ATP and then to be exported to OSM formatted opening hours.
 
 DAYS_AT = {"Mo": "Mo", "Di": "Tu", "Mi": "We", "Do": "Th", "Fr": "Fr", "Sa": "Sa", "So": "Su"}
 
@@ -29,6 +36,7 @@ DAYS_EN = {
     "We": "We",
     "Thursday": "Th",
     "Thu": "Th",
+    "Thr": "Th",
     "Thur": "Th",
     "Thrs": "Th",
     "Thurs": "Th",
@@ -80,7 +88,9 @@ DAYS_BG = {
     "Съ": "Sa",
     "Сб": "Sa",
     "Неделя": "Su",
+    "Нед": "Su",
     "нед": "Su",
+    "Нед": "Su",
     "Не": "Su",
     "Нд": "Su",
 }
@@ -150,29 +160,46 @@ DAYS_HU = {
     "Vas": "Su",
 }
 
+DAYS_IL = {
+    "יום שני": "Mo",
+    "יום שלישי": "Tu",
+    "יום רביעי": "We",
+    "יום חמישי": "Th",
+    "יום שישי": "Fr",
+    "יום שבת": "Sa",
+    "יום ראשון": "Su",
+}
+
 DAYS_SE = {
     "Måndag": "Mo",
+    "Mån": "Mo",
     "Tisdag": "Tu",
+    "Tis": "Tu",
     "Onsdag": "We",
+    "Ons": "We",
     "Torsdag": "Th",
+    "Tors": "Th",
     "Fredag": "Fr",
+    "Fre": "Fr",
     "Lördag": "Sa",
+    "Lör": "Sa",
     "Söndag": "Su",
+    "Sön": "Su",
 }
 DAYS_SI = {
-    "po": "Mo",
+    "Po": "Mo",
     "Pon": "Mo",
-    "to": "Tu",
+    "To": "Tu",
     "Tor": "Tu",
-    "sr": "We",
+    "Sr": "We",
     "Sre": "We",
-    "če": "Th",
+    "Če": "Th",
     "Čet": "Th",
-    "pe": "Fr",
+    "Pe": "Fr",
     "Pet": "Fr",
-    "so": "Sa",
+    "So": "Sa",
     "Sob": "Sa",
-    "ne": "Su",
+    "Ne": "Su",
     "Ned": "Su",
 }
 DAYS_IT = {
@@ -255,7 +282,6 @@ DAYS_PL = {
     "Pi": "Fr",
     "Pia": "Fr",
     "Piątek": "Fr",
-    "Piątek": "Fr",
     "Sb": "Sa",
     "So": "Sa",
     "Sob": "Sa",
@@ -265,6 +291,7 @@ DAYS_PL = {
     "Nie": "Su",
     "Niedz": "Su",
     "Niedzela": "Su",
+    "Niedziela": "Su",
 }
 DAYS_PT = {
     # "Se": "Mo",
@@ -292,12 +319,15 @@ DAYS_RU = {
     "Вторник": "Tu",
     "Ср": "We",
     "Среда": "We",
+    "Среду": "We",
     "Чт": "Th",
     "Четверг": "Th",
     "Пт": "Fr",
     "Пятница": "Fr",
+    "Пятницу": "Fr",
     "Сб": "Sa",
     "Суббота": "Sa",
+    "Субботу": "Sa",
     "Вс": "Su",
     "Воскресенье": "Su",
 }
@@ -450,8 +480,13 @@ NAMED_TIMES_EN = {
 
 NAMED_DAY_RANGES_RU = {
     "Ежедневно": ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"],  # Daily
-    "По будням": ["Mo", "Tu", "We", "Th", "Fr"],  # Weekdays
-    "По выходным": ["Sa", "Su"],  # Weekends
+    "Eжедн": ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"],  # Daily
+    "По Будням": ["Mo", "Tu", "We", "Th", "Fr"],  # Weekdays
+    "По Выходным": ["Sa", "Su"],  # Weekends
+}
+
+NAMED_TIMES_RU = {
+    "Круглосуточно": ["00:00", "23:59"],  # 24/7
 }
 
 DELIMITERS_EN = [
@@ -474,6 +509,18 @@ DELIMITERS_ES = [
     "y",
     "de",
 ]
+
+DELIMITERS_PL = [
+    "-",
+    "–",
+    "—",
+    "―",
+    "‒",
+    "od",
+    "do",
+]
+
+DELIMITERS_RU = DELIMITERS_EN + ["с", "по", "до", "в", "во"]
 
 
 def day_range(start_day, end_day):
@@ -577,6 +624,8 @@ class OpeningHours:
     def from_linked_data(self, linked_data, time_format: str = "%H:%M"):
         if linked_data.get("openingHoursSpecification"):
             for rule in linked_data["openingHoursSpecification"]:
+                if not isinstance(rule, dict):
+                    continue
                 if not rule.get("dayOfWeek") or not rule.get("opens") or not rule.get("closes"):
                     continue
 
@@ -767,12 +816,12 @@ class OpeningHours:
         """
         if time_24h is True:
             # Regular expression for extracting 24h times (e.g. 15:45)
-            time_regex = r"(?<!\d)(\d(?!\d)|[01]\d|2[0-4])(?:(?:[:\.]?([0-5]\d))(?:[:\.]?[0-5]\d)?)?(?!(?:\d|:|[AP]M))"
+            time_regex = (
+                r"(?<!\d)(\d(?!\d)|[01]\d|2[0-4])(?:(?:[:\.]?([0-5]\d))(?:[:\.]?[0-5]\d)?)?(?!(?:\d|:|[AP]\.?M\.?))"
+            )
         else:
             # Regular expression for extracting 12h times (e.g. 9:30AM)
-            time_regex = (
-                r"(?<!\d)(\d(?!\d)|0\d|1[012])(?:(?:[:\.]?([0-5]\d))(?:[:\.]?[0-5]\d)?)?\s*([AP]M)?(?!(?:\d|:|[AP]M))"
-            )
+            time_regex = r"(?<!\d)(\d(?!\d)|0\d|1[012])(?:(?:[:\.]?([0-5]\d))(?:[:\.]?[0-5]\d)?)?\s*([AP]\.?M\.?)?(?!(?:\d|:|[AP]\.?M\.?))"
         return time_regex
 
     @staticmethod
@@ -945,7 +994,7 @@ class OpeningHours:
                     else:
                         time_start = f"{time_start_hour}:00"
                     if time_range[2]:
-                        time_start = f"{time_start}{time_range[2].upper()}"
+                        time_start = f"{time_start}{time_range[2].upper()}".replace(".", "")
                     else:
                         # If AM/PM is not specified, it is almost always going to be AM for start times.
                         time_start = f"{time_start}AM"
@@ -959,7 +1008,7 @@ class OpeningHours:
                     else:
                         time_end = f"{time_end_hour}:00"
                     if time_range[5]:
-                        time_end = f"{time_end}{time_range[5].upper()}"
+                        time_end = f"{time_end}{time_range[5].upper()}".replace(".", "")
                     else:
                         # If AM/PM is not specified, it is almost always going to be PM for end times.
                         time_end = f"{time_end}PM"

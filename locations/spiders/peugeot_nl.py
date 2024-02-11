@@ -1,5 +1,6 @@
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
@@ -16,7 +17,7 @@ class PeugeotNLSpider(scrapy.Spider):
             address_details = store.get("address")
             coordinates = store.get("geolocation")
             contact_details = store.get("generalContact")
-            yield Feature(
+            item = Feature(
                 {
                     "ref": store.get("rrdi"),
                     "name": store.get("dealerName"),
@@ -31,3 +32,6 @@ class PeugeotNLSpider(scrapy.Spider):
                     "lon": float(coordinates.get("longitude")),
                 }
             )
+
+            apply_category(Categories.SHOP_CAR, item)
+            yield item

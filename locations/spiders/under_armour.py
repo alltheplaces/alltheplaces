@@ -2,6 +2,7 @@ import re
 
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.linked_data_parser import LinkedDataParser
 
 
@@ -23,4 +24,5 @@ class UnderArmourSpider(scrapy.spiders.SitemapSpider):
             text = re.sub(r" +//.*", "", text, flags=re.M)
             script.root.text = text
         item = LinkedDataParser.parse(response, "SportingGoodsStore")
+        apply_category(Categories.SHOP_CLOTHES, item)
         yield item

@@ -21,6 +21,7 @@ class MarionnaudSpider(Spider):
     ]
     user_agent = BROWSER_DEFAULT
     custom_settings = {"DEFAULT_REQUEST_HEADERS": {"Accept": "application/json"}}
+    requires_proxy = True
 
     def parse(self, response, **kwargs):
         for location in response.json()["stores"]:

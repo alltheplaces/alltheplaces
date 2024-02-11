@@ -4,7 +4,7 @@ from locations.linked_data_parser import LinkedDataParser
 
 
 class PlanetFitnessSpider(SitemapSpider):
-    name = "planet-fitness"
+    name = "planet_fitness"
     item_attributes = {"brand": "Planet Fitness", "brand_wikidata": "Q7201095"}
     download_delay = 4
     sitemap_urls = [

@@ -2,13 +2,18 @@ import re
 
 from scrapy import Spider
 
+from locations.categories import Categories
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 
 
 class BeaconAndBridgeMarketUSSpider(Spider):
     name = "beacon_and_bridge_market_us"
-    item_attributes = {"brand": "Beacon & Bridge Market", "brand_wikidata": "Q122209684"}
+    item_attributes = {
+        "brand": "Beacon & Bridge Market",
+        "brand_wikidata": "Q122209684",
+        "extras": Categories.FUEL_STATION.value,
+    }
     start_urls = ["https://beaconandbridge.com/locations/"]
 
     def parse(self, response):

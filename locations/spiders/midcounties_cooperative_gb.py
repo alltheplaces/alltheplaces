@@ -9,7 +9,8 @@ class MidcountiesCooperativeGBSpider(Spider):
     name = "midcounties_cooperative_gb"
     item_attributes = {
         "brand": "Your Co-op",
-        "extras": {"operator": "Midcounties Co-operative", "operator:wikidata": "Q6841138"},
+        "operator": "Midcounties Co-operative",
+        "operator_wikidata": "Q6841138",
     }
     start_urls = ["https://www.midcounties.coop/static/js/stores.json"]
     no_refs = True
@@ -17,8 +18,6 @@ class MidcountiesCooperativeGBSpider(Spider):
     def parse(self, response):
         for store in response.json()["stores"]:
             item = DictParser.parse(store)
-
-            item["website"] = store.get("branchLink")
 
             item["street_address"] = ", ".join(
                 filter(None, [store.get("addressLine1"), store.get("addressLine2"), store.get("addressLine3")])

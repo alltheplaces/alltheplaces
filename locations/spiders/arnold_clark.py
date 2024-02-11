@@ -1,5 +1,6 @@
 from scrapy.spiders import SitemapSpider
 
+from locations.categories import Categories, apply_category
 from locations.linked_data_parser import LinkedDataParser
 
 
@@ -18,4 +19,6 @@ class ArnoldClarkSpider(SitemapSpider):
     ]
 
     def parse_item(self, response):
-        return LinkedDataParser.parse(response, "AutoDealer")
+        item = LinkedDataParser.parse(response, "AutoDealer")
+        apply_category(Categories.SHOP_CAR, item)
+        return item

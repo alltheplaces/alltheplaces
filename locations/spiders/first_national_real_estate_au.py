@@ -1,34 +1,46 @@
-from chompjs import parse_js_object
-from scrapy import Spider
+from typing import Any, Iterable
 
-from locations.dict_parser import DictParser
+from scrapy import Request, Spider
+from scrapy.http import JsonRequest, Response
+
+from locations.items import Feature
+from locations.spiders.vapestore_gb import clean_address
 
 
 class FirstNationalRealEstateAUSpider(Spider):
     name = "first_national_real_estate_au"
     item_attributes = {"brand": "First National Real Estate", "brand_wikidata": "Q122888198"}
     allowed_domains = ["www.firstnational.com.au"]
-    start_urls = ["https://www.firstnational.com.au/offices"]
 
-    def parse(self, response):
-        locations_js = (
-            response.xpath('//script[contains(text(), "var offices = ")]/text()')
-            .get()
-            .split("var offices = ", 1)[1]
-            .split("}];", 1)[0]
-            + "}]"
+    def make_request(self, page: int) -> JsonRequest:
+        return JsonRequest(
+            "https://www.firstnational.com.au/pages/real-estate/offices?widgetKey=200204&context=offices&pattern=offices&pg={}".format(
+                page
+            )
         )
-        for location in parse_js_object(locations_js):
-            item = DictParser.parse(location)
-            item["ref"] = location["code"]
-            item["addr_full"] = ", ".join(
-                filter(None, map(str.strip, response.xpath('//div[@id="' + location["code"] + '"]/p/text()').getall()))
+
+    def start_requests(self) -> Iterable[Request]:
+        yield self.make_request(1)
+
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        for location in response.json()["offices"]:
+            item = Feature()
+            item["ref"] = location["id"]
+            item["name"] = location["office_name"]
+            item["lat"] = location["latitude"]
+            item["lon"] = location["longitude"]
+            item["website"] = response.urljoin(location["office_link"])
+            item["phone"] = location["office_phone"]
+            item["email"] = location["office_email"]
+            item["street_address"] = clean_address(
+                [location["office_address_line_1"], location["office_address_line_2"]]
             )
-            item["postcode"] = response.xpath('//div[@id="' + location["code"] + '"]/@data-postcode').get()
-            item["phone"] = (
-                response.xpath('//div[@id="' + location["code"] + '"]/p/a[contains(@href, "tel:")]/@href')
-                .get("")
-                .replace("tel:", "")
-            )
-            item["website"] = "https://www.firstnational.com.au/contact?office_id=" + str(location["id"])
+            item["city"] = location["office_suburb"]
+            item["postcode"] = location["office_post_code"]
+            item["state"] = location["office_state"]
+
             yield item
+
+        next_page = response.json()["pagination"]["offices"]["next_page"]
+        if next_page != 0:
+            yield self.make_request(next_page)

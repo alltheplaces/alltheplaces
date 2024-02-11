@@ -1,6 +1,7 @@
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
@@ -28,4 +29,5 @@ class PurebabyAUSpider(Spider):
                 hours_range = day_hours["hours"]
                 hours_string = f"{hours_string} {day_name}: {hours_range}"
             item["opening_hours"].add_ranges_from_string(hours_string)
+            apply_category(Categories.SHOP_CLOTHES, item)
             yield item

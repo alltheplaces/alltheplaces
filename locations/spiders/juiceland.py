@@ -8,7 +8,7 @@ from locations.items import Feature
 
 class JuicelandSpider(scrapy.Spider):
     name = "juiceland"
-    item_attributes = {"brand": "JuiceLand"}
+    item_attributes = {"brand": "JuiceLand", "brand_wikidata": "Q123022671"}
     allowed_domains = ["juiceland.com"]
     start_urls = [
         "https://www.juiceland.com/all-locations/",

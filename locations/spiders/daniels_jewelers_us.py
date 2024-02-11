@@ -1,21 +1,17 @@
-from urllib.parse import urljoin
-
-from scrapy import Spider
-
-from locations.dict_parser import DictParser
+from locations.hours import OpeningHours
+from locations.storefinders.stockist import StockistSpider
 
 
-class DanielsJewelersUSSpider(Spider):
+class DanielsJewelersUSSpider(StockistSpider):
     name = "daniels_jewelers_us"
     item_attributes = {"brand": "Daniel's Jewelers", "brand_wikidata": "Q120763875"}
-    start_urls = ["https://admin.danielsjewelers.com/storelocator/index/stores/?type=all"]
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    key = "u15600"
 
-    def parse(self, response, **kwargs):
-        for location in response.json()["storesjson"]:
-            item = DictParser.parse(location)
-            item["ref"] = location["storelocator_id"]
-            item["website"] = urljoin("https://www.danielsjewelers.com/stores/", location["rewrite_request_path"])
-            item["image"] = urljoin("https://admin.danielsjewelers.com/media/", location["path"])
-
-            yield item
+    def parse_item(self, item, location):
+        for custom_field in location.get("custom_fields"):
+            if custom_field["id"] == 6307:
+                item["ref"] = custom_field["value"]
+            elif custom_field["id"] == 5350:
+                item["opening_hours"] = OpeningHours()
+                item["opening_hours"].add_ranges_from_string(custom_field["value"])
+        yield item
