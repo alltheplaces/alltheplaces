@@ -8,4 +8,3 @@ class GoodfeetSpider(SitemapSpider, StructuredDataSpider):
     item_attributes = {"brand": "The Good Feet Store"}
     sitemap_urls = ["https://www.goodfeet.com/sitemap.xml"]
     sitemap_rules = [(r"/locations/(.*)$", "parse_sd")]
-
