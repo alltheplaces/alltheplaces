@@ -1,8 +1,8 @@
 from scrapy.spiders import SitemapSpider
 
-from locations.structured_data_spider import StructuredDataSpider
-from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.google_url import extract_google_position
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
+from locations.structured_data_spider import StructuredDataSpider
 
 
 class EBGamesNZSpider(SitemapSpider, StructuredDataSpider):
