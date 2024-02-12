@@ -8,5 +8,5 @@ class MartinsUSSpider(FreshopSpider):
     item_attributes = {
         "brand": "Martin's Super Markets",
         "brand_wikidata": "Q7573912",
-        "extras": Categories.SHOP_SUPERMARKET.values,
+        "extras": Categories.SHOP_SUPERMARKET.value,
     }
