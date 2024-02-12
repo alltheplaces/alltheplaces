@@ -6,8 +6,7 @@ from scrapy.http import JsonRequest
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.geo import city_locations
-
-from locations.hours import OpeningHours, DAYS_WEEKDAY, DAYS_WEEKEND
+from locations.hours import DAYS_WEEKDAY, DAYS_WEEKEND, OpeningHours
 
 
 class PizzaHutKRSpider(scrapy.Spider):
@@ -16,7 +15,7 @@ class PizzaHutKRSpider(scrapy.Spider):
 
     def start_requests(self):
         for city in city_locations("KR", 15000):
-            if len(city["alternatenames"]) > 10:    # API requires city name in korean language
+            if len(city["alternatenames"]) > 10:  # API requires city name in korean language
                 city_names = city["alternatenames"][-5:]
             else:
                 city_names = city["alternatenames"][-1]
