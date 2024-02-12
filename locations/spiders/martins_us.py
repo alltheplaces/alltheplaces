@@ -1,5 +1,5 @@
-from locations.storefinders.freshop import FreshopSpider
 from locations.categories import Categories
+from locations.storefinders.freshop import FreshopSpider
 
 
 class MartinsUSSpider(FreshopSpider):
