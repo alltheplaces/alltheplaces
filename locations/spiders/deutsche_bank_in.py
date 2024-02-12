@@ -2,7 +2,7 @@ import re
 
 import scrapy
 
-from locations.categories import apply_category, Categories, apply_yes_no
+from locations.categories import Categories, apply_category, apply_yes_no
 from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.spiders.deutsche_bank_be import DeutscheBankBESpider
@@ -17,12 +17,12 @@ class DeutscheBankINSpider(scrapy.Spider):
     def parse(self, response, **kwargs):
         locations_parent_node = response.xpath('//section[@class="acc__entry"]//section[@id]')
         for available_locations in [
-            locations_parent_node.xpath('./p'),
-            locations_parent_node.xpath('./div'),
+            locations_parent_node.xpath("./p"),
+            locations_parent_node.xpath("./div"),
             locations_parent_node.xpath('.//ul[@class="ul-dash"]/li'),
         ]:
             for location in available_locations:
-                location_info = location.xpath('./text()').getall()
+                location_info = location.xpath("./text()").getall()
                 if "cash dispenser" in location.get().lower():  # ATM
                     if match := re.search(r"ID[*\s:]+(\w+)", location.get()):
                         item = Feature()
