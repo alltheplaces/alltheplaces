@@ -1,8 +1,6 @@
 from scrapy.spiders import SitemapSpider
 
-from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.structured_data_spider import StructuredDataSpider
-from locations.user_agents import BROWSER_DEFAULT
 
 
 class GoodfeetSpider(SitemapSpider, StructuredDataSpider):
