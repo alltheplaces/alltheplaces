@@ -25,7 +25,7 @@ class OKQ8Spider(Spider):
             location["street_address"] = location.pop("address")
             item = DictParser.parse(location)
 
-            # TODO: parse fuel types uisng response.json()["filters"]
+            # TODO: parse fuel types using response.json()["filters"]
 
             item["website"] = f'https://www.okq8.se{location["url"]}'
 

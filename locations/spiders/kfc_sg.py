@@ -4,11 +4,12 @@ from scrapy.selector import Selector
 
 from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.spiders.kfc import KFC_SHARED_ATTRIBUTES
 
 
 class KFCSGSpider(scrapy.Spider):
     name = "kfc_sg"
-    item_attributes = {"brand": "KFC", "brand_wikidata": "Q524757"}
+    item_attributes = KFC_SHARED_ATTRIBUTES
     allowed_domains = ["www.kfc.com.sg"]
     start_urls = ["https://www.kfc.com.sg/Location/Search"]
 

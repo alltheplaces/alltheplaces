@@ -4,14 +4,14 @@ from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_FULL, OpeningHours
 from locations.spiders.asda_gb import AsdaGBSpider
-from locations.spiders.kfc import KFCSpider
+from locations.spiders.kfc import KFC_SHARED_ATTRIBUTES
 from locations.spiders.vets4pets_gb import set_located_in
 from locations.user_agents import BROWSER_DEFAULT
 
 
 class KFCGB(Spider):
     name = "kfc_gb"
-    item_attributes = KFCSpider.item_attributes
+    item_attributes = KFC_SHARED_ATTRIBUTES
     start_urls = ["https://www.kfc.co.uk/cms/api/data/restaurants_all"]
     user_agent = BROWSER_DEFAULT
 

@@ -9,7 +9,8 @@ class MidcountiesCooperativeGBSpider(Spider):
     name = "midcounties_cooperative_gb"
     item_attributes = {
         "brand": "Your Co-op",
-        "extras": {"operator": "Midcounties Co-operative", "operator:wikidata": "Q6841138"},
+        "operator": "Midcounties Co-operative",
+        "operator_wikidata": "Q6841138",
     }
     start_urls = ["https://www.midcounties.coop/static/js/stores.json"]
     no_refs = True

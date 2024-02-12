@@ -57,12 +57,11 @@ class BayshoreHealthcareSpider(scrapy.Spider):
 
             if "pharmacy" in properties.get("name", "").lower():
                 apply_category(Categories.PHARMACY, properties)
-            elif "clinic" in properties.get("name", "").lower():
-                apply_category(Categories.CLINIC, properties)
             elif (
                 "home care" in properties.get("name", "").lower() or "home health" in properties.get("name", "").lower()
             ):
-                # All the others are Home Health Offices - Office to sign up or buy in home health services
                 apply_category({"office": "healthcare"}, properties)
+            else:
+                apply_category(Categories.CLINIC, properties)
 
             yield Feature(**properties)

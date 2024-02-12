@@ -1,13 +1,18 @@
 from scrapy.http import JsonRequest
 from scrapy.spiders import Spider
 
+from locations.categories import apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
 
 class DunelmGB(Spider):
     name = "dunelm_gb"
-    item_attributes = {"brand": "Dunelm", "brand_wikidata": "Q5315020"}
+    item_attributes = {
+        "brand": "Dunelm",
+        "brand_wikidata": "Q5315020",
+        "extras": {"shop": "houseware"},
+    }
 
     def start_requests(self):
         yield JsonRequest(
@@ -25,9 +30,7 @@ class DunelmGB(Spider):
     def parse(self, response, **kwargs):
         for store in response.json()["results"][0]["hits"]:
             store["location"] = store["_geoloc"]
-
             item = DictParser.parse(store)
-
             item["ref"] = store["sapStoreId"]
             item["website"] = "https://www.dunelm.com/stores/" + store["uri"]
 
@@ -36,7 +39,6 @@ class DunelmGB(Spider):
                 oh.add_range(rule["day"], rule["open"], rule["close"])
 
             item["opening_hours"] = oh.as_opening_hours()
-
             item["extras"] = {"storeType": store.get("storeType")}
-
+            apply_category({"shop": "interior_decoration"}, item)
             yield item

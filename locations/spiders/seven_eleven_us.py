@@ -4,6 +4,7 @@ import scrapy
 
 from locations.categories import Categories, Extras, Fuel, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
+from locations.spiders.seven_eleven_au import SEVEN_ELEVEN_SHARED_ATTRIBUTES
 
 FUEL_TYPES_MAPPING = {
     "DEF": Fuel.ADBLUE,
@@ -24,7 +25,7 @@ FEATURES_MAPPING = {
 
 class SevenElevenUSSpider(scrapy.spiders.SitemapSpider):
     name = "seven_eleven_us"
-    item_attributes = {"brand": "7-Eleven", "brand_wikidata": "Q259340"}
+    item_attributes = SEVEN_ELEVEN_SHARED_ATTRIBUTES
     allowed_domains = ["7-eleven.com"]
     sitemap_urls = ["https://www.7-eleven.com/sitemap.xml"]
     sitemap_rules = [("/locations/", "parse")]

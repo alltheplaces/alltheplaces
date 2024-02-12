@@ -3,6 +3,7 @@ import re
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
+from locations.categories import Categories, apply_category
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -30,4 +31,5 @@ class GolubCorporationUSSpider(CrawlSpider, StructuredDataSpider):
         item["name"] = re.sub(r",[A-Z]{2}\s*$", "", re.sub(r"\(Store #\d+\)", "", item["name"]))
         item.pop("facebook", None)
         item.pop("twitter", None)
+        apply_category(Categories.SHOP_SUPERMARKET, item)
         yield item

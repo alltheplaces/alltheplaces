@@ -6,6 +6,7 @@ class TropicalSmoothieCafeUSSpider(YextSpider):
     name = "tropical_smoothie_cafe_us"
     item_attributes = {"brand": "Tropical Smoothie Cafe", "brand_wikidata": "Q7845817"}
     api_key = "e00ed8254f827f6c73044941473bb9e9"
+    wanted_types = ["restaurant"]
 
     def parse_item(self, item, location):
         item["email"] = location.get("c_cafeEmail")

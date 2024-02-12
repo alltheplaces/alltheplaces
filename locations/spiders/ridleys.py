@@ -1,11 +1,16 @@
 import scrapy
 
+from locations.categories import Categories
 from locations.items import Feature
 
 
 class Ridleys(scrapy.Spider):
     name = "ridleys"
-    item_attributes = {"brand": "Ridley's Family Markets"}
+    item_attributes = {
+        "brand": "Ridley's Family Markets",
+        "brand_wikidata": "Q7332999",
+        "extras": Categories.SHOP_SUPERMARKET.value,
+    }
     start_urls = ["https://shopridleys.com/_ajax_map.php"]
 
     def parse(self, response):

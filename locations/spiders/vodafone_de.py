@@ -5,13 +5,12 @@ import scrapy
 from locations.hours import OpeningHours
 from locations.items import Feature
 
+VODAFONE_SHARED_ATTRIBUTES = {"brand": "Vodafone", "brand_wikidata": "Q122141"}
+
 
 class VodafoneDeSpider(scrapy.Spider):
     name = "vodafone_de"
-    item_attributes = {
-        "brand": "Vodafone",
-        "brand_wikidata": "Q122141",
-    }
+    item_attributes = VODAFONE_SHARED_ATTRIBUTES
     allowed_domains = ["vodafone.de"]
     start_urls = ["https://shops.vodafone.de"]
 

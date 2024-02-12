@@ -74,7 +74,8 @@ class EdekaDESpider(scrapy.Spider):
                 item.update(self.MARKT_BACKEREI)
             elif "ellimarkt" in name:
                 item.update(self.ELLI)
-
+            else:
+                item.update(self.EDEKA)
             yield item
 
         if next := response.json()["_links"].get("next"):

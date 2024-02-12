@@ -24,9 +24,12 @@ Each GeoJSON feature will have a `properties` object with as many of the followi
 | `@spider`             | The name of the spider that produced this feature. It is [specified in each spider](https://github.com/alltheplaces/alltheplaces/blob/11d9be56515ef0f6419e001b1950f69d28d4f400/locations/spiders/apple.py#L9), so it isn't necessarily related to the file name of the spider.
 | `branch`              | This is often the location specific part of a chain location's name, like the name of the mall or city it is in, without the brand name included.
 | `name`                | The name of the feature. Ideally the fascia, However this is often a combination of the brand and the branch.
-| **Brand**             | _Information about the brand that operates or owns the venue_
+| **Brand**             | _Information about the brand for the venue_
 | `brand`               | The brand or chain name of the feature. This will generally be the same for most features outputted by a scraper. Some scrapers will output for companies that own multiple brands, like Duane Reade and Walgreens for the Walgreens scraper.
 | `brand:wikidata`      | The [Wikidata](https://www.wikidata.org/wiki/Wikidata:Main_Page) [item ID](https://www.wikidata.org/wiki/Help:Items) for the brand of the feature. This is a machine-readable identifier counterpart for the human-readable `brand` above.
+| **Operator**          | _Information about the operator of the venue_
+| `operator`            | The name of the operator of the feature. See the [OpenStreetMap Wiki](https://wiki.openstreetmap.org/wiki/Key:operator) for more details about the difference between `brand` and `operator`.
+| `operator:wikidata`   | The [Wikidata](https://www.wikidata.org/wiki/Wikidata:Main_Page) [item ID](https://www.wikidata.org/wiki/Help:Items) for the operator of the feature. This is a machine-readable identifier counterpart for the human-readable `operator` above.
 | **Address**           | _Information about the address of the venue_
 | `addr:full`           | The full address for the venue in one line of text. Usually this follows the format of street, city, province, postcode address. This field might exist instead of the other address-related fields, especially if the spider can't reliably extract the individual parts of the address.
 | `addr:housenumber`    | The house number part of the address.
@@ -48,6 +51,7 @@ Each GeoJSON feature will have a `properties` object with as many of the followi
 | `located_in`          | The name of the feature that this feature is located in.
 | `located_in:wikidata` | The [Wikidata](https://www.wikidata.org/wiki/Wikidata:Main_Page) [item ID](https://www.wikidata.org/wiki/Help:Items) for the brand or chain of the feature that this feature is located in. This is a machine-readable identifier counterpart for the human-readable `located_in` above.
 | `nsi_id`              | The [Name Suggestion Index](https://nsi.guide/) (NSI) ID for the feature. NSI IDs aren't stable, so you may require [old NSI data](https://github.com/osmlab/name-suggestion-index/tree/main/dist) if you are working with old ATP data.
+| `end_date`            | `end_date=yes` is applied when given location is closed at unknown date and can be assumed to not operate right now, `end_date` may also have values in year-month-day format, including future dates for planned closures.
 
 ### Extras
 
@@ -58,3 +62,11 @@ If enough spiders find interesting things to include in an extra property, it mi
 ## Categories
 
 Along with the above properties we aim to output [OpenStreetMap categories](https://wiki.openstreetmap.org/wiki/Map_features) as properties on the GeoJSON Feature.
+
+## Data quality
+
+Note that the All the Places project collects data from original sources. Most mistakes or inaccuracies present in the original sources will be reproduced by the datasets published by All the Places.
+
+In addition, parts of the data may be missing or not parsed, especially in cases where the original source is hard to parse or crawling failed for some reason. Data may also be outdated - either due to being outdated in original source, an update happening since data was last crawled, or due to a failing spider.
+
+Data quality is not consistent and will vary significantly between spiders. Note that global, less specific spiders are especially likely to have inaccurate data.

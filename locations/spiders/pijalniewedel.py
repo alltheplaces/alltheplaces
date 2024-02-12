@@ -4,6 +4,7 @@ import chompjs
 from scrapy import Spider
 from scrapy.http import Response
 
+from locations.categories import Categories
 from locations.hours import DAYS_PL, OpeningHours
 from locations.items import Feature
 
@@ -12,7 +13,11 @@ ADDRESS_PATTERN = re.compile(r"(?P<street>.*)<br>(?P<postal>[0-9]{2}\s?-\s?[0-9]
 
 class PijalnieWedel(Spider):
     name = "pijalniewedel_pl"
-    item_attributes = {"brand": "Pijalnia Czekolady E.Wedel", "brand_wikidata": "Q123251317"}
+    item_attributes = {
+        "brand": "Pijalnia Czekolady E.Wedel",
+        "brand_wikidata": "Q123251317",
+        "extras": Categories.CAFE.value,
+    }
     start_urls = ["https://wedelpijalnie.pl/lokale"]
 
     def parse(self, response: Response, **kwargs):
