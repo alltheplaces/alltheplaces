@@ -1,6 +1,5 @@
 import re
 
-from scrapy import Request
 
 from locations.categories import Categories
 from locations.items import Feature
