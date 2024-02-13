@@ -17,6 +17,7 @@ class MedicalCityHealthcareSpider(scrapy.Spider):
 
     categories = [
         ("Hospital", Categories.HOSPITAL),
+        ("Childrens_Hospital", Categories.HOSPITAL),
         ("ER", Categories.HOSPITAL),
         ("Pharmacy", Categories.PHARMACY),
         ("Behavioral_Health", {"healthcare": "psychotherapist", "healthcare:speciality": "behavior"}),
@@ -27,6 +28,12 @@ class MedicalCityHealthcareSpider(scrapy.Spider):
         ("Surgery_Center", {"amenity": "hospital", "healthcare": "hospital", "healthcare:speciality": "surgery"}),
         ("Rehabilitation_Center", {"healthcare": "rehabilitation"}),
         ("Urgent_Care", Categories.CLINIC_URGENT),
+        ("Cancer_Center", {"healthcare": "centre", "healthcare:speciality": "oncology"}),
+        ("Health_Center", {"healthcare": "centre"}),
+        ("Diagnostic_Center", {"healthcare": "centre"}),
+        ("Womens_Center", {"healthcare": "centre"}),
+        ("Medical_Group", {"healthcare": "centre"}),
+        ("Other", {"healthcare": "centre"}),
     ]
 
     def parse(self, response):
