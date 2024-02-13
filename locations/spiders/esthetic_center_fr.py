@@ -1,5 +1,5 @@
-from locations.storefinders.agile_store_locator import AgileStoreLocatorSpider
 from locations.categories import Categories
+from locations.storefinders.agile_store_locator import AgileStoreLocatorSpider
 
 
 class EstheticCenterFRSpider(AgileStoreLocatorSpider):
