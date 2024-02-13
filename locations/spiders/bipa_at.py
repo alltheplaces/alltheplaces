@@ -6,7 +6,6 @@ from locations.hours import OpeningHours
 
 
 class BipaATSpider(Spider):
-    # todo: wikidata, opening hours
     name = "bipa_at"
     item_attributes = {"brand": "Bipa", "brand_wikidata": "Q864933"}
     start_urls = ["https://www.bipa.at/stores"]
