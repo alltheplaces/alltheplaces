@@ -1,9 +1,8 @@
 from scrapy import Spider
 
+from locations.categories import Categories
 from locations.hours import DAYS_EN, OpeningHours
 from locations.items import Feature
-from locations.dict_parser import DictParser
-from locations.categories import Categories, apply_category
 
 
 class NinetyNineBikesAUSpider(Spider):
