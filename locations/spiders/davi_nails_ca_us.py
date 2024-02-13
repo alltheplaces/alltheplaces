@@ -17,10 +17,10 @@ class DaViNailsCAUSSpider(WPStoreLocatorSpider):
         "davinails.com",
     ]
     searchable_points_files = ["us_centroids_25mile_radius_state.csv"]
-    search_radius = 50
+    search_radius = 25
     max_results = 100
 
     def parse_item(self, item: Feature, location: dict, **kwargs):
         item["city"] = item["city"].strip(",")
-        item["name"] = re.sub(" inside WM \#\d+", "", item["name"])
+        item["name"] = re.sub(" inside WM #\d+", "", item["name"])
         yield item
