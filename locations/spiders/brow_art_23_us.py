@@ -1,5 +1,6 @@
 from locations.categories import Categories
 from locations.storefinders.agile_store_locator import AgileStoreLocatorSpider
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 
 
 class BrowArt23USSpider(AgileStoreLocatorSpider):
@@ -8,6 +9,4 @@ class BrowArt23USSpider(AgileStoreLocatorSpider):
     allowed_domains = [
         "browart23.com",
     ]
-    # We see TCP connection timed out: 110: Connection timed out when fetching robots.txt
-    # Attempt to skip fetching it
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    requires_proxy = True
