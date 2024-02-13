@@ -21,5 +21,5 @@ class DaViNailsCAUSSpider(WPStoreLocatorSpider):
 
     def parse_item(self, item: Feature, location: dict, **kwargs):
         item["city"] = item["city"].strip(",")
-        item["name"] = re.sub(" inside WM #\d+", "", item["name"])
+        item["name"] = re.sub(r" inside WM #\d+", "", item["name"])
         yield item
