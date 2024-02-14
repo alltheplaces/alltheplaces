@@ -5,10 +5,10 @@ class CheckersRallysUS(YextSpider):
     name = "checkers_rallys_us"
     api_key = "3a0695216a74763b09659ee6021687a0"
     wanted_types = ["restaurant"]
-    # Data centre netblocks appear to be blocked.
-    requires_proxy = True
 
     def parse_item(self, item, location):
+        if not location.get("brands"):
+            location["brands"] = [location["name"]]
         if "Checkers" in location["brands"]:
             item["brand"] = "Checkers"
             item["brand_wikidata"] = "Q63919315"
