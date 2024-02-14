@@ -17,9 +17,6 @@ class CombiDESpider(CrawlSpider):
 
     address_pattern = r"\W*?^(\w.+\w)\W*,\W*(\d{5})\W*(\w.+\w)\W*?$"
 
-    def coord_pattern(self, coord):
-        return f"var {coord} = Number\('(.+?)'\)"
-
     def parse(self, response: Response):
         address = response.xpath("//address/text()").get().strip()
         street_address, postcode, city = re.findall(self.address_pattern, address)[0]
@@ -33,8 +30,8 @@ class CombiDESpider(CrawlSpider):
             ref=response.url.split("/")[-1],
             website=response.url,
             street_address=street_address,
-            lat=re.findall(self.coord_pattern("lat"), response.text, re.DOTALL)[0],
-            lon=re.findall(self.coord_pattern("lon"), response.text, re.DOTALL)[0],
+            lat=re.findall(r"var lat = Number\('(.+?)'\)", response.text, re.DOTALL)[0],
+            lon=re.findall(r"var lon = Number\('(.+?)'\)", response.text, re.DOTALL)[0],
             postcode=postcode,
             city=city,
             addr_full=address,
