@@ -8,15 +8,13 @@ from locations.items import Feature
 class BipaHRSpider(Spider):
     name = "bipa_hr"
     item_attributes = {"brand": "Bipa", "brand_wikidata": "Q864933"}
-    custom_settings = {
-        "DEFAULT_REQUEST_HEADERS": {
-            "ModuleId": "841",
-            "TabId": "195",
-        }
+    headers = {
+        "ModuleId": "841",
+        "TabId": "195",
     }
 
     def start_requests(self):
-        yield JsonRequest("https://www.bipa.hr/api/2sxc/app/auto/query/SvePoslovnice/Poslovnice")
+        yield JsonRequest("https://www.bipa.hr/api/2sxc/app/auto/query/SvePoslovnice/Poslovnice", headers=self.headers)
 
     def parse(self, response: Response):
         for store in response.json()["Poslovnice"]:
