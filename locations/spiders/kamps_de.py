@@ -12,6 +12,7 @@ class KampsDESpider(SitemapSpider):
     sitemap_rules = [
         (r"/standort/", "parse"),
     ]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def parse(self, response):
         properties = {

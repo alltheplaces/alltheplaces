@@ -25,24 +25,20 @@ class GovCmaFuelGBSpider(Spider):
     user_agent = BROWSER_DEFAULT  # TESCO!
 
     brand_map = {
-        "ASDA": {"brand": "Asda", "brand_wikidata": "Q297410"},
-        "Applegreen": {"brand": "Applegreen", "brand_wikidata": "Q7178908"},
-        "BP": {"brand": "BP", "brand_wikidata": "Q152057"},
-        "Coop": None,
-        "ESSO": {"brand": "Esso", "brand_wikidata": "Q867662"},
-        "Essar": {"brand": "Essar", "brand_wikidata": "Q5399372"},
-        "Esso": {"brand": "Esso", "brand_wikidata": "Q867662"},
-        "JET": {"brand": "JET", "brand_wikidata": "Q568940"},
-        "JET ": {"brand": "JET", "brand_wikidata": "Q568940"},
-        "Jet": {"brand": "JET", "brand_wikidata": "Q568940"},
-        "Morrisons": {"brand": "Morrisons", "brand_wikidata": "Q922344"},
-        "Murco": {"brand": "Murco", "brand_wikidata": "Q16998281"},
-        "SHELL": {"brand": "Shell", "brand_wikidata": "Q110716465"},
-        "Sainsbury's": {"brand": "Sainsbury's", "brand_wikidata": "Q152096"},
-        "Shell": {"brand": "Shell", "brand_wikidata": "Q110716465"},
-        "TESCO": {"brand": "Tesco", "brand_wikidata": "Q487494"},
-        "TEXACO": {"brand": "Texaco", "brand_wikidata": "Q775060"},
-        "Texaco": {"brand": "Texaco", "brand_wikidata": "Q775060"},
+        "asda": {"brand": "Asda", "brand_wikidata": "Q297410"},
+        "applegreen": {"brand": "Applegreen", "brand_wikidata": "Q7178908"},
+        "bp": {"brand": "BP", "brand_wikidata": "Q152057"},
+        "coop": None,
+        "essar": {"brand": "Essar", "brand_wikidata": "Q5399372"},
+        "esso": {"brand": "Esso", "brand_wikidata": "Q867662"},
+        "jet ": {"brand": "JET", "brand_wikidata": "Q568940"},
+        "jet": {"brand": "JET", "brand_wikidata": "Q568940"},
+        "morrisons": {"brand": "Morrisons", "brand_wikidata": "Q922344"},
+        "murco": {"brand": "Murco", "brand_wikidata": "Q16998281"},
+        "sainsbury's": {"brand": "Sainsbury's", "brand_wikidata": "Q152096"},
+        "shell": {"brand": "Shell", "brand_wikidata": "Q110716465"},
+        "tesco": {"brand": "Tesco", "brand_wikidata": "Q487494"},
+        "texaco": {"brand": "Texaco", "brand_wikidata": "Q775060"},
     }
 
     fuel_map = {
@@ -65,8 +61,9 @@ class GovCmaFuelGBSpider(Spider):
             item["lat"] = location["location"]["latitude"]
             item["lon"] = location["location"]["longitude"]
 
-            if brand := self.brand_map.get(location["brand"]):
+            if brand := self.brand_map.get(location["brand"].lower()):
                 item.update(brand)
+                item["name"] = item.get("brand")
             else:
                 self.crawler.stats.inc_value("atp/gov_cma_fuel_gb/upmapped_brand/{}".format(location["brand"]))
 
