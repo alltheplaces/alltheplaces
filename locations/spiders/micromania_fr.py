@@ -1,5 +1,5 @@
-from html import unescape
 import json
+from html import unescape
 
 from scrapy import Request, Selector
 from scrapy.http import JsonRequest
@@ -13,7 +13,9 @@ class MicromaniaFRSpider(StructuredDataSpider):
     name = "micromania_fr"
     item_attributes = {"brand": "Micromania", "brand_wikidata": "Q3312221", "extras": Categories.SHOP_VIDEO_GAMES.value}
     allowed_domains = ["www.micromania.fr"]
-    start_urls = ["https://www.micromania.fr/on/demandware.store/Sites-Micromania-Site/default/Stores-FindStoresLocator?radius=3000&postalCode=*"]
+    start_urls = [
+        "https://www.micromania.fr/on/demandware.store/Sites-Micromania-Site/default/Stores-FindStoresLocator?radius=3000&postalCode=*"
+    ]
 
     def start_requests(self):
         for url in self.start_urls:
@@ -28,7 +30,17 @@ class MicromaniaFRSpider(StructuredDataSpider):
 
     def post_process_item(self, item, response, ld_data):
         item["ref"] = response.url.split("?storeid=", 1)[1]
-        item["street_address"] = ", ".join(filter(None, map(str.strip, response.xpath('//p[@itemprop="address"]//text()/parent::*[@itemprop="streetAddress" or @itemprop="address"]/text()').getall())))
+        item["street_address"] = ", ".join(
+            filter(
+                None,
+                map(
+                    str.strip,
+                    response.xpath(
+                        '//p[@itemprop="address"]//text()/parent::*[@itemprop="streetAddress" or @itemprop="address"]/text()'
+                    ).getall(),
+                ),
+            )
+        )
         item.pop("facebook", None)
         item.pop("twitter", None)
 
@@ -38,6 +50,8 @@ class MicromaniaFRSpider(StructuredDataSpider):
         for day_hours in hours_json.values():
             if day_hours["ouverture"] == day_hours["fermeture"]:
                 continue
-            item["opening_hours"].add_range(DAYS_FR[day_hours["name"]], day_hours["ouverture"], day_hours["fermeture"], "%H:%M:%S")
+            item["opening_hours"].add_range(
+                DAYS_FR[day_hours["name"]], day_hours["ouverture"], day_hours["fermeture"], "%H:%M:%S"
+            )
 
         yield item
