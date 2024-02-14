@@ -7,7 +7,7 @@ from locations.spiders.vapestore_gb import clean_address
 
 class UbitricitySpider(Spider):
     name = "ubitricity"
-    item_attributes = {"brand": "Ubitricity", "brand_wikidata": "Q113699692"}
+    item_attributes = {"brand": "Ubitricity", "brand_wikidata": "Q113699692", "extras": {"amenity": "charging_station"}}
 
     def start_requests(self):
         yield JsonRequest(
