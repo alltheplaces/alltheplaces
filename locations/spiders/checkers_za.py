@@ -1,7 +1,6 @@
 from scrapy import Request, Selector
 
 from locations.categories import Categories, apply_category
-from locations.hours import OpeningHours
 from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.structured_data_spider import StructuredDataSpider
 
@@ -16,7 +15,12 @@ class CheckersZASpider(StructuredDataSpider):
 
     def start_requests(self):
         for sitemap_url in self.start_urls:
-            yield Request(url=sitemap_url, meta={"playwright": True, "playwright_include_page": True}, callback=self.parse_sitemap, errback=self.errback_close_page)
+            yield Request(
+                url=sitemap_url,
+                meta={"playwright": True, "playwright_include_page": True},
+                callback=self.parse_sitemap,
+                errback=self.errback_close_page,
+            )
 
     async def errback_close_page(self, failure):
         playwright_page = failure.request.meta["playwright_page"]
@@ -26,7 +30,7 @@ class CheckersZASpider(StructuredDataSpider):
         playwright_page = response.meta["playwright_page"]
         sitemap = await playwright_page.content()
         await playwright_page.close()
-        sitemap_locations = Selector(text=sitemap).xpath('//loc/text()').getall()
+        sitemap_locations = Selector(text=sitemap).xpath("//loc/text()").getall()
         for sitemap_location in sitemap_locations:
             yield Request(url=sitemap_location.replace("http://", "https://").split("?", 1)[0], callback=self.parse_sd)
 
