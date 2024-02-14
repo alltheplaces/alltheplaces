@@ -30,6 +30,10 @@ class DirckIIINLSpider(Spider):
             item["opening_hours"] = OpeningHours()
             hours_dict = json.loads(location["storetime"])
             for record in hours_dict:
-                item["opening_hours"].add_range(record["days"], "{}:{}".format(record["open_hour"], record["open_minute"]), "{}:{}".format(record["close_hour"], record["close_minute"]))
+                item["opening_hours"].add_range(
+                    record["days"],
+                    "{}:{}".format(record["open_hour"], record["open_minute"]),
+                    "{}:{}".format(record["close_hour"], record["close_minute"]),
+                )
 
             yield item
