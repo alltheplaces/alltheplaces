@@ -152,6 +152,8 @@ class StructuredDataSpider(Spider):
         "AutoPartsStore",
         "GasStation",
         "LiquorStore",
+        "BikeStore",
+        "Optician",
     ]
     search_for_email = True
     search_for_phone = True
