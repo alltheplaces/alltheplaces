@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.categories import Extras, Fuel, apply_yes_no
+from locations.categories import Categories, Extras, Fuel, apply_category, apply_yes_no
 from locations.items import Feature
 from locations.spiders.vapestore_gb import clean_address
 
@@ -60,6 +60,7 @@ class CenexSpider(scrapy.Spider):
                 opening_hours="24/7" if "24-Hour Fueling" in amenities else None,
             )
 
+            apply_category(Categories.FUEL_STATION, item)
             apply_yes_no(Extras.ATM, item, "ATM" in amenities)
             apply_yes_no(Extras.COMPRESSED_AIR, item, "Air" in amenities)
             apply_yes_no(Fuel.BIODIESEL, item, "Biodiesel" in amenities)

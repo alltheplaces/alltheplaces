@@ -14,9 +14,9 @@ class RemaxGbSpider(scrapy.Spider):
     def start_requests(self):
         template = "https://remax.uk/api/locations?name={}"
         for i in range(97, 123):
-            yield scrapy.Request(url=template.format(chr(i)), callback=self.parse_placeId)
+            yield scrapy.Request(url=template.format(chr(i)), callback=self.parse_place_id)
 
-    def parse_placeId(self, response):
+    def parse_place_id(self, response):
         template = "https://remax.uk/api/locationsbyplaceid?placeid={}"
         for id in response.json().get("predictions"):
             yield scrapy.Request(url=template.format(id.get("place_id")), callback=self.parse)

@@ -1,3 +1,5 @@
+import re
+
 from scrapy.spiders import SitemapSpider
 
 from locations.structured_data_spider import StructuredDataSpider
@@ -11,5 +13,11 @@ class BaskinRobbinsUSSpider(SitemapSpider, StructuredDataSpider):
     wanted_types = ["IceCreamShop"]
 
     def post_process_item(self, item, response, ld_data, **kwargs):
-        if not item.get("name") == "Baskin-Robbins - Closed™":
-            yield item
+        if item.get("name") == "Baskin-Robbins - Closed™":
+            return
+
+        item["ref"] = item["website"] = response.url
+        if m := re.search(r'"geocodedCoordinate":{"latitude":(-?\d+\.\d+),"longitude":(-?\d+\.\d+)}', response.text):
+            item["lat"], item["lon"] = m.groups()
+
+        yield item

@@ -19,10 +19,10 @@ class BrewdogSpider(scrapy.Spider):
         for bar in bars:
             item = DictParser.parse(bar["fields"])
             item["ref"] = bar["sys"]["id"]
-            openingHours = bar["fields"].get("openingHours")
+            opening_hours = bar["fields"].get("openingHours")
             oh = OpeningHours()
-            if openingHours:
-                for key, value in openingHours.items():
+            if opening_hours:
+                for key, value in opening_hours.items():
                     if key == "exceptions" or value.get("is_open") is False:
                         continue
                     oh.add_range(

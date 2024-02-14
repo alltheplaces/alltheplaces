@@ -2,14 +2,18 @@ import chompjs
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
-from locations.categories import Extras, apply_yes_no
+from locations.categories import Categories, Extras, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
 
 class RiesbeckFoodMarketsUSSpider(CrawlSpider):
     name = "riesbeck_food_markets_us"
-    item_attributes = {"brand": "Riesbeck's", "brand_wikidata": "Q28226114"}
+    item_attributes = {
+        "brand": "Riesbeck's",
+        "brand_wikidata": "Q28226114",
+        "extras": Categories.SHOP_SUPERMARKET.value,
+    }
     allowed_domains = ["www.riesbeckfoods.com"]
     start_urls = ["https://www.riesbeckfoods.com/stores"]
     rules = [

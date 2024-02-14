@@ -49,8 +49,8 @@ class CoopFoodGBSpider(scrapy.Spider):
                 "lon": float(store["position"]["x"]),
                 "lat": float(store["position"]["y"]),
                 "phone": store["phone"],
+                "operator": store["society"],
                 "extras": {
-                    "operator": store["society"],
                     "location_type": store["location_type"],
                 },
             }

@@ -1,6 +1,7 @@
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
@@ -32,4 +33,5 @@ class DollarCurtainsAndBlindsAUSpider(Spider):
             item["website"] = location["link"]
             item["opening_hours"] = OpeningHours()
             item["opening_hours"].add_ranges_from_string(location["open_hours"])
+            apply_category(Categories.SHOP_HOUSEWARE, item)
             yield item

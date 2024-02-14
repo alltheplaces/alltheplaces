@@ -10,7 +10,7 @@ class FarmersHomeFurnitureSpider(scrapy.Spider):
     name = "farmershomefurniture"
     item_attributes = {
         "brand": "Farmers Home Furniture",
-        "brand_wikidata": "Q114870935",
+        "brand_wikidata": "Q121586393",
         "country": "US",
     }
     allowed_domains = ["www.farmershomefurniture.com"]

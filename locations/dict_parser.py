@@ -2,9 +2,9 @@ from locations.items import Feature
 
 
 class DictParser:
-    ref_keys = ["ref", "id", "store-id", "storeID", "storeNumber", "shop-number", "LocationID", "slug", "storeCode"]
+    ref_keys = ["ref", "id", "store-id", "store-number", "shop-number", "location-id", "slug", "store-code", "item-id"]
 
-    name_keys = ["name", "store-name", "display-name", "title", "businessName"]
+    name_keys = ["name", "store-name", "display-name", "title", "business-name", "item-name"]
 
     house_number_keys = ["house-number", "house-no", "street-number", "street-no", "address-street-no"]
 
@@ -30,6 +30,8 @@ class DictParser:
         "city-name",
         # JP
         "市区町村",  # "municipality"
+        # PL
+        "miasto",
     ]
 
     region_keys = [
@@ -72,7 +74,7 @@ class DictParser:
         "郵便番号",  # "post code"
     ]
 
-    email_keys = ["email", "contact-email", "email-address", "email1"]
+    email_keys = ["email", "contact-email", "email-address", "email1", "store-email"]
 
     phone_keys = [
         "phone-number",
@@ -84,6 +86,7 @@ class DictParser:
         "contact-number",
         "phone-no",
         "contact-phone",
+        "store-phone",
     ]
 
     lat_keys = [
@@ -116,7 +119,7 @@ class DictParser:
         item["name"] = DictParser.get_first_key(obj, DictParser.name_keys)
 
         location = DictParser.get_first_key(
-            obj, ["location", "geo-location", "geo", "geo-point", "geocodedCoordinate", "coordinates"]
+            obj, ["location", "geo-location", "geo", "geo-point", "geocoded-coordinate", "coordinates", "geo-position"]
         )
         # If not a good location object then use the parent
         if not location or not isinstance(location, dict):
@@ -124,7 +127,7 @@ class DictParser:
         item["lat"] = DictParser.get_first_key(location, DictParser.lat_keys)
         item["lon"] = DictParser.get_first_key(location, DictParser.lon_keys)
 
-        address = DictParser.get_first_key(obj, ["address", "addr", "storeaddress", "physicalAddress"])
+        address = DictParser.get_first_key(obj, ["address", "addr", "storeaddress", "physicalAddress", "full-address"])
 
         if address and isinstance(address, str):
             item["addr_full"] = address
@@ -180,50 +183,58 @@ class DictParser:
         title = key.title()
         results.add(title)
 
+        # example: flatcase
         flatcase = key.lower().replace("-", "")
         results.add(flatcase)
 
-        FLATCASEUPPER = flatcase.upper()
-        results.add(FLATCASEUPPER)
+        # example: FLATCASEUPPER
+        flatcase_upper = flatcase.upper()
+        results.add(flatcase_upper)
 
-        camelCase = key[0].lower()
+        # example: camelCase
+        camel_case = key[0].lower()
         i = 1
         while i < len(key):
             if key[i] == "-":
                 i += 1
-                camelCase += key[i].upper()
+                camel_case += key[i].upper()
             else:
-                camelCase += key[i]
+                camel_case += key[i]
             i += 1
 
-        results.add(camelCase)
+        results.add(camel_case)
 
-        PascalCase = camelCase[0].upper() + camelCase[1:]
+        # example: PascalCase
+        pascal_case = camel_case[0].upper() + camel_case[1:]
 
-        results.add(PascalCase)
+        results.add(pascal_case)
 
+        # example: snake_case
         snake_case = key.lower().replace("-", "_")
         results.add(snake_case)
 
-        SCREAMING_SNAKE_CASE = key.upper().replace("-", "_")
-        results.add(SCREAMING_SNAKE_CASE)
+        # example: SCREAMING_SNAKE_CASE
+        screaming_snake_case = key.upper().replace("-", "_")
+        results.add(screaming_snake_case)
 
-        camel_Snake_Case = key[0].lower()
+        # example: camel_Snake_Case
+        camel_snake_case = key[0].lower()
         i = 1
         while i < len(key):
             if key[i] == "-":
                 i += 1
-                camel_Snake_Case += "_"
-                camel_Snake_Case += key[i].upper()
+                camel_snake_case += "_"
+                camel_snake_case += key[i].upper()
             else:
-                camel_Snake_Case += key[i]
+                camel_snake_case += key[i]
             i += 1
 
-        results.add(camel_Snake_Case)
+        results.add(camel_snake_case)
 
-        Pascal_Snake_Case = camel_Snake_Case[0].upper() + camel_Snake_Case[1:]
+        # example: Pascal_Snake_Case
+        pascal_snake_case = camel_snake_case[0].upper() + camel_snake_case[1:]
 
-        results.add(Pascal_Snake_Case)
+        results.add(pascal_snake_case)
 
         return results
 

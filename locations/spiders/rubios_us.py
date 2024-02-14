@@ -9,8 +9,8 @@ class RubiosUSSpider(Spider):
     name = "rubios_us"
     item_attributes = {"brand": "Rubio's", "brand_wikidata": "Q7376154"}
     allowed_domains = ["rubiosbackend.azurewebsites.net"]
-    start_urls = ["https://rubiosbackend.azurewebsites.net/punchh_api/api2/dashboard/locations"]
-    custom_settings = {"ROBOTSTXT_OBEY": False}  # No robots.txt. Unparseable HTML error page returned.
+    start_urls = ["https://rubiosbackend.azurewebsites.net/api/v1/punchh_api/api2/dashboard/locations"]
+    custom_settings = {"ROBOTSTXT_OBEY": False}  # No robots.txt. Unparsable HTML error page returned.
 
     def start_requests(self):
         for url in self.start_urls:

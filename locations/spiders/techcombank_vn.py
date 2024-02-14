@@ -1,6 +1,7 @@
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.user_agents import BROWSER_DEFAULT
 
@@ -22,5 +23,5 @@ class TechcombankVNSpider(Spider):
             item["lat"] = location["lat"]
             item["lon"] = location["long"]
             item["phone"] = location.get("phone")
-
+            apply_category(Categories.BANK, item)
             yield item
