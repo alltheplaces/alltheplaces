@@ -16,10 +16,12 @@ class AvisBYSpider(scrapy.Spider):
     def parse(self, response, **kwargs):
         for location in response.xpath('//*[@id="start-map-tab"]//li[@data-id]'):
             item = Feature()
-            item["ref"] = location.xpath('./@data-id').get()
+            item["ref"] = location.xpath("./@data-id").get()
             location_details = location.xpath('.//*[@class="details-block"]')
-            address = location_details.xpath('.//span[@lang="en-US"]/text()').get() or location_details.xpath(
-                './text()').get()
+            address = (
+                location_details.xpath('.//span[@lang="en-US"]/text()').get()
+                or location_details.xpath("./text()").get()
+            )
             item["street_address"], item["phone"] = address.split("+") if "+" in address else (address, None)
             item["street_address"] = clean_address(item["street_address"]).replace("Adress:", "")
             if "available on request" in item["street_address"]:
