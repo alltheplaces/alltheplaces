@@ -33,8 +33,8 @@ class AviaRSSpider(Spider):
             item["website"] = "https://radunavia.rs/"
             for lat_lon in lat_lon_data:
                 if item["name"] in lat_lon:
-                    item["lon"] = lat_lon[1]
-                    item["lat"] = lat_lon[2]
+                    item["lat"] = lat_lon[1]
+                    item["lon"] = lat_lon[2]
             apply_category(Categories.FUEL_STATION, item)
 
             yield item
