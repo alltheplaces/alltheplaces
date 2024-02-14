@@ -17,7 +17,7 @@ class AviaRSSpider(Spider):
 
     def parse(self, response, **kwargs):
         data = ast.literal_eval(
-            response.xpath('//script[contains(text(), "var markers")]').re_first("infoWindowContent=(\[.*\]);")
+            response.xpath('//script[contains(text(), "var markers")]').re_first(r"infoWindowContent=(\[.*\]);")
         )
         lat_lon_data = ast.literal_eval(
             response.xpath('//script[contains(text(), "var markers")]').re_first(
