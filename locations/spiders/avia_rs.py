@@ -21,7 +21,7 @@ class AviaRSSpider(Spider):
         )
         lat_lon_data = ast.literal_eval(
             response.xpath('//script[contains(text(), "var markers")]').re_first(
-                "var markers=(\[.*\]);var infoWindowContent"
+                r"var markers=(\[.*\]);var infoWindowContent"
             )
         )
         for station in data:
@@ -33,7 +33,6 @@ class AviaRSSpider(Spider):
             item["website"] = "https://radunavia.rs/"
             for lat_lon in lat_lon_data:
                 if item["name"] in lat_lon:
-                    print(lat_lon)
                     item["lon"] = lat_lon[1]
                     item["lat"] = lat_lon[2]
             apply_category(Categories.FUEL_STATION, item)
