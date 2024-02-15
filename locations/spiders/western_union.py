@@ -14,7 +14,7 @@ class WesternUnionSpider(Spider):
     item_attributes = {
         "brand": "Western Union",
         "brand_wikidata": "Q861042",
-        "extras": {"money_transfer": "western_union"},
+        "extras": {"amenity": "money_transfer"},
     }
     allowed_domains = ["www.westernunion.com"]
     # start_urls[0] is a GraphQL endpoint.
