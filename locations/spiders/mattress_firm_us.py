@@ -13,6 +13,7 @@ class MattressFirmUSSpider(Where2GetItSpider):
     def parse_item(self, item, location, **kwargs):
         # Apply basic information common to each brand
         apply_category(Categories.SHOP_BED, item)
+
         if location["mattress_firm_clearance_center"] == "yes":
             item["brand"] = "Mattress Firm Clearance"
             item["brand_wikidata"] = "Q6791878"
