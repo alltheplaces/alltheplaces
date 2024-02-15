@@ -114,6 +114,9 @@ class TotalEnergiesSpider(WoosmapSpider):
 
         if brand := self.BRANDS.get(feature["properties"]["user_properties"]["brand"]):
             item.update(brand)
+            #Agip gas stations (Germany) have flipped coordinates in the source data.
+            if brand["brand"] == "Agip":
+                item["geometry"]["coordinates"].reverse()
         else:
             self.crawler.stats.inc_value(
                 f'atp/total_energies/unknown_brand/{feature["properties"]["user_properties"]["brand"]}'
