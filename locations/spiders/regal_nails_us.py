@@ -13,3 +13,4 @@ class RegalNailsUSSpider(WPStoreLocatorSpider):
     start_urls = [
         "https://regalnails.com/wp-admin/admin-ajax.php?action=store_search&lat=30.4514677&lng=-91.18714659999999&max_results=1000&search_radius=1000&filter=10",
     ]
+    time_format = "%I:%M %p"
