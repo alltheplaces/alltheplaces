@@ -100,7 +100,6 @@ DEPARTMENT_TYPE_MAP = {
 
 class KaiserPermanenteUSSpider(SitemapSpider, StructuredDataSpider):
     name = "kaiser_permanente_us"
-    item_attributes = {"brand": "Kaiser Permanente", "brand_wikidata": "Q1721601"}
     allowed_domains = ["healthy.kaiserpermanente.org"]
     sitemap_urls = ["https://healthy.kaiserpermanente.org/robots.txt"]
     sitemap_follow = ["/facilities/"]
@@ -118,6 +117,10 @@ class KaiserPermanenteUSSpider(SitemapSpider, StructuredDataSpider):
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["lat"] = response.xpath("//@data-lat").get()
         item["lon"] = response.xpath("//@data-lng").get()
+
+        # "Affiliated" locations are not KP-branded
+        if response.xpath("//@data-affiliated").get() != "true":
+            apply_category({"brand": "Kaiser Permanente", "brand_wikidata": "Q1721601"}, item)
 
         cat = response.xpath("//@data-type").get()
         if cat in CATEGORY_MAP:
