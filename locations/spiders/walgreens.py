@@ -1,12 +1,12 @@
 from scrapy.spiders import SitemapSpider
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.structured_data_spider import StructuredDataSpider
 
 
 class WalgreensSpider(SitemapSpider, StructuredDataSpider):
     name = "walgreens"
-    WALGREENS = {"brand": "Walgreens", "brand_wikidata": "Q1591889", "extras": Categories.PHARMACY.value}
+    WALGREENS = {"brand": "Walgreens", "brand_wikidata": "Q1591889"}
     DUANE_READE = {"brand": "Duane Reade", "brand_wikidata": "Q5310380"}
     sitemap_urls = ["https://www.walgreens.com/sitemap-storedetails.xml"]
     sitemap_rules = [("", "parse_sd")]
@@ -25,4 +25,5 @@ class WalgreensSpider(SitemapSpider, StructuredDataSpider):
             item.update(self.DUANE_READE)
         # TODO: a few more brands here
 
+        apply_category(Categories.PHARMACY, item)
         yield item
