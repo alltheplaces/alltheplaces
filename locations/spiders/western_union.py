@@ -4,8 +4,7 @@ from scrapy import Spider
 from scrapy.downloadermiddlewares.retry import get_retry_request
 from scrapy.http import JsonRequest
 
-from locations.categories import Categories, apply_category
-from locations.categories import Extras, apply_yes_no
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.geo import point_locations
 from locations.hours import OpeningHours
