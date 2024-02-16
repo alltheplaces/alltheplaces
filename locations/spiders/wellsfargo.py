@@ -48,8 +48,9 @@ class WellsFargoSpider(scrapy.Spider):
             elif category == "ATM":
                 apply_category(Categories.ATM, item)
             else:
-                self.logger.warning(f"Unknown category: {category}")
-                self.crawler.stats.inc_value(f"atp/wellsfargo/unknown_category/{category}")
+                apply_category(Categories.BANK, item)
+        else:
+            apply_category(Categories.BANK, item)
 
     def parse_coords(self, item, response):
         if geo_link := response.xpath('//img[contains(@alt, "Bank location centered on map")]/@src').get():
