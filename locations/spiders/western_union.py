@@ -4,6 +4,8 @@ from scrapy import Spider
 from scrapy.downloadermiddlewares.retry import get_retry_request
 from scrapy.http import JsonRequest
 
+from locations.categories import Categories, apply_category
+from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.geo import point_locations
 from locations.hours import OpeningHours
@@ -79,6 +81,9 @@ class WesternUnionSpider(Spider):
             item["opening_hours"] = OpeningHours()
             hours_string = " ".join([f"{day}: {hours}" for (day, hours) in location["detail.hours"].items()])
             item["opening_hours"].add_ranges_from_string(hours_string)
+
+            apply_yes_no(Extras.ATM, item, location["atmLocation"] == "Y")
+            apply_category(Categories.BANK, item)
             yield item
 
         # On the first response per radius search of a coordinate,
