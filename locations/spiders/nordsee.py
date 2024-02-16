@@ -5,8 +5,8 @@ from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
 
-class NordseeDESpider(Spider):
-    name = "nordsee_de"
+class NordseeSpider(Spider):
+    name = "nordsee"
     item_attributes = {"brand": "Nordsee", "brand_wikidata": "Q74866"}
     allowed_domains = ["www.nordsee.com"]
     start_urls = ["https://www.nordsee.com/en/?type=2001"]
