@@ -9,5 +9,5 @@ class HallmarkSpider(RioSeoSpider):
         "https://maps.hallmark.com/api/getAsyncLocations?template=search&level=search&search=66952&radius=10000&limit=3000"
     ]
 
-    def post_process_feature(feature, location):
+    def post_process_feature(self, feature, location):
         feature["country"] = location["country"]
