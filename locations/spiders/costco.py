@@ -18,3 +18,4 @@ class CostcoSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://www.costco.com/sitemap_lw_index.xml"]
     sitemap_follow = ["lw_l"]
     sitemap_rules = [("/warehouse-locations/", "parse_sd")]
+    requires_proxy = True
