@@ -17,5 +17,5 @@ class CostcoSpider(SitemapSpider, StructuredDataSpider):
     custom_settings = {"ROBOTSTXT_OBEY": False}
     sitemap_urls = ["https://www.costco.com/sitemap_lw_index.xml"]
     sitemap_follow = ["lw_l"]
-    sitemap_rules = [("/warehouse-locations/", "parse_sd")]
+    sitemap_rules = [(r"/warehouse-locations/[^.]+-(\d+)\.html$", "parse_sd")]
     requires_proxy = True
