@@ -5,8 +5,8 @@ from locations.structured_data_spider import StructuredDataSpider
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class CostcoSpider(SitemapSpider, StructuredDataSpider):
-    name = "costco"
+class CostcoUSSpider(SitemapSpider, StructuredDataSpider):
+    name = "costco_us"
     item_attributes = {
         "brand": "Costco",
         "brand_wikidata": "Q715583",
