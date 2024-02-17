@@ -19,3 +19,4 @@ class CostcoSpider(SitemapSpider, StructuredDataSpider):
     sitemap_follow = ["lw_l"]
     sitemap_rules = [(r"/warehouse-locations/[^.]+-(\d+)\.html$", "parse_sd")]
     requires_proxy = True
+    search_for_facebook = False
