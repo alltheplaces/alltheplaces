@@ -1,5 +1,4 @@
 from chompjs import parse_js_object
-
 from scrapy import Selector, Spider
 
 from locations.categories import Categories
@@ -9,7 +8,11 @@ from locations.items import Feature
 
 class TheGoodFeetStoreSpider(Spider):
     name = "the_good_feet_store"
-    item_attributes = {"brand": "The Good Feet Store", "brand_wikidata": "Q122031157", "extras": Categories.SHOP_SHOES.value}
+    item_attributes = {
+        "brand": "The Good Feet Store",
+        "brand_wikidata": "Q122031157",
+        "extras": Categories.SHOP_SHOES.value,
+    }
     allowed_domains = ["www.goodfeet.com"]
     start_urls = ["https://www.goodfeet.com/locations"]
 
@@ -19,17 +22,17 @@ class TheGoodFeetStoreSpider(Spider):
         locations = parse_js_object(js_blob)
         for location in locations:
             location_html = Selector(text=location[1])
-            all_text = " ".join(location_html.xpath('//text()').getall())
+            all_text = " ".join(location_html.xpath("//text()").getall())
             if "COMING SOON" in all_text.upper():
                 continue
             properties = {
-                "ref": location_html.xpath('//h4/a/@href').get(),
-                "name": location_html.xpath('//h4/a/text()').get(),
+                "ref": location_html.xpath("//h4/a/@href").get(),
+                "name": location_html.xpath("//h4/a/text()").get(),
                 "lat": location[-2],
                 "lon": location[-1],
                 "addr_full": location[0],
                 "phone": location_html.xpath('//a[contains(@href, "tel:")]/@href').get(),
-                "website": location_html.xpath('//h4/a/@href').get(),
+                "website": location_html.xpath("//h4/a/@href").get(),
             }
             properties["opening_hours"] = OpeningHours()
             properties["opening_hours"].add_ranges_from_string(all_text)
