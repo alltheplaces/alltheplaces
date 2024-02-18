@@ -9,6 +9,11 @@ from locations.items import Feature
 
 
 class NewspowerAUSpider(SitemapSpider):
+    # Whilst WP Store Locator is used for this brand, it is set to
+    # return at most the 5 closest points to a provided search
+    # coordinate. There is an impractical number of search requests
+    # thus required to use the WP Store Locator store finder API.
+    # A Sitemap spider is used instead.
     name = "newspower_au"
     item_attributes = {"brand": "Newspower", "brand_wikidata": "Q120670137"}
     allowed_domains = ["newspower.com.au"]
