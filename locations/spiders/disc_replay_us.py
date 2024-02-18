@@ -1,5 +1,5 @@
-from scrapy.spiders import CrawlSpider, Rule
 from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule
 
 from locations.categories import Categories
 from locations.google_url import extract_google_position
@@ -9,16 +9,30 @@ from locations.items import Feature
 
 class DiscReplayUSSpider(CrawlSpider):
     name = "disc_replay_us"
-    item_attributes = {"brand": "Disc Replay", "brand_wikidata": "Q108202431", "extras": Categories.SHOP_VIDEO_GAMES.value}
+    item_attributes = {
+        "brand": "Disc Replay",
+        "brand_wikidata": "Q108202431",
+        "extras": Categories.SHOP_VIDEO_GAMES.value,
+    }
     allowed_domains = ["www.discreplay.com"]
     start_urls = ["https://www.discreplay.com/locations"]
-    rules = [Rule(LinkExtractor(allow=r"^https:\/\/www\.discreplay\.com\/[^/]+$", restrict_xpaths='//div[contains(@class, "single-location")]'), callback="parse")]
+    rules = [
+        Rule(
+            LinkExtractor(
+                allow=r"^https:\/\/www\.discreplay\.com\/[^/]+$",
+                restrict_xpaths='//div[contains(@class, "single-location")]',
+            ),
+            callback="parse",
+        )
+    ]
 
     def parse(self, response):
         properties = {
             "ref": response.url.split("/")[-1],
             "name": response.xpath('//span[@class="loc-loc"]/text()').get().strip(),
-            "addr_full": ", ".join(filter(None, map(str.strip, response.xpath('//span[@class="loc-add"]//text()').getall()))),
+            "addr_full": ", ".join(
+                filter(None, map(str.strip, response.xpath('//span[@class="loc-add"]//text()').getall()))
+            ),
             "phone": response.xpath('//span[@class="loc-ph"]/text()').get().strip(),
             "website": response.url,
         }
