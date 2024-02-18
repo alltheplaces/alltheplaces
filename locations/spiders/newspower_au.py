@@ -21,7 +21,7 @@ class NewspowerAUSpider(SitemapSpider):
         "https://newspower.com.au/wpsl_stores-sitemap1.xml",
         "https://newspower.com.au/wpsl_stores-sitemap2.xml",
     ]
-    sitemap_rules = [("/stores/", "parse")]
+    sitemap_rules = [(r"^https:\/\/newspower\.com\.au\/stores/[^/]+\/$", "parse")]
 
     def parse(self, response):
         map_marker_js_blob = response.xpath('//script[contains(text(), "var wpslMap_0 = ")]/text()').get()
