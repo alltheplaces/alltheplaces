@@ -5,6 +5,7 @@ class DictParser:
     ref_keys = [
         "ref",
         "id",
+        "identifier",
         "store-id",
         "store-number",
         "shop-number",
