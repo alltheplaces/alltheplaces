@@ -1,5 +1,4 @@
 from chompjs import parse_js_object
-
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories
@@ -8,7 +7,11 @@ from locations.dict_parser import DictParser
 
 class CarpetOneFloorAndHomeUSSpider(SitemapSpider):
     name = "carpet_one_floor_and_home_us"
-    item_attributes = {"brand": "Carpet One Floor & Home", "brand_wikidata": "Q121335910", "extras": Categories.SHOP_FLOORING.value}
+    item_attributes = {
+        "brand": "Carpet One Floor & Home",
+        "brand_wikidata": "Q121335910",
+        "extras": Categories.SHOP_FLOORING.value,
+    }
     allowed_domains = ["www.carpetone.com"]
     sitemap_urls = ["https://www.carpetone.com/locations-sitemap.xml"]
     sitemap_rules = [(r"^https:\/\/www\.carpetone\.com\/locations\/[^/]+/[^/]+$", "parse")]
@@ -19,7 +22,9 @@ class CarpetOneFloorAndHomeUSSpider(SitemapSpider):
         js_blob = "[{" + js_blob.split("var locationlist=[{", 1)[1].split("}];", 1)[0] + "}]"
         for location in parse_js_object(js_blob):
             item = DictParser.parse(location)
-            item["street_address"] = ", ".join(filter(None, [location["address"].get("line1"), location["address"].get("line2")]))
+            item["street_address"] = ", ".join(
+                filter(None, [location["address"].get("line1"), location["address"].get("line2")])
+            )
             item["phone"] = location["address"].get("phone")
             item["website"] = location.get("microSiteUrl")
 
