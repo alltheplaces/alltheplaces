@@ -18,7 +18,7 @@ class SaniDumpNLSpider(CrawlSpider, StructuredDataSpider):
     rules = [
         Rule(
             LinkExtractor(
-                allow="^https:\/\/www\.sanidump\.nl\/winkels\/[^/]+\/?$", restrict_xpaths='//a[@class="map-pin"]'
+                allow=r"^https:\/\/www\.sanidump\.nl\/winkels\/[^/]+\/?$", restrict_xpaths='//a[@class="map-pin"]'
             ),
             callback="parse_sd",
         )
