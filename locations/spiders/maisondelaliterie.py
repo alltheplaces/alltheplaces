@@ -1,8 +1,9 @@
+from typing import Any
+
+from scrapy import Spider
+from scrapy.http import Response
+
 from locations.dict_parser import DictParser
-from scrapy import Request, Spider
-from scrapy.http import JsonRequest, Response
-from typing import Any, Iterable
-from locations.hours import OpeningHours, DAYS_FR
 
 
 class MaisonDeLaLiterieSpider(Spider):
