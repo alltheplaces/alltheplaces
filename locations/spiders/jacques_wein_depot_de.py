@@ -63,8 +63,8 @@ class JacquesWeinDepotDESpider(Spider):
     def parse_location(self, response):
         location = response.json()
         item = DictParser.parse(location)
-        item["lat"] = location["coordinates"][1]
-        item["lon"] = location["coordinates"][0]
+        item["lat"] = location["location"]["coordinates"][1]
+        item["lon"] = location["location"]["coordinates"][0]
         item["phone"] = location["address"].get("phone")
         item["email"] = location["address"].get("email")
         item["website"] = "https://www.jacques.de/weindepot/{}/{}".format(
