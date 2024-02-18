@@ -10,7 +10,9 @@ class BuildersSpider(Spider):
     name = "builders"
     item_attributes = {"brand": "Builders", "brand_wikidata": "Q116819137", "extras": Categories.SHOP_HARDWARE.value}
     allowed_domains = ["www.builders.co.za"]
-    start_urls = ["https://www.builders.co.za/web/v2/builders/channel/web/zone/B14/stores?query=&latitude=-26.1328705&longitude=27.9114834&radius=10000000&fields=FULL"]
+    start_urls = [
+        "https://www.builders.co.za/web/v2/builders/channel/web/zone/B14/stores?query=&latitude=-26.1328705&longitude=27.9114834&radius=10000000&fields=FULL"
+    ]
 
     def start_requests(self):
         formdata = {
@@ -20,7 +22,12 @@ class BuildersSpider(Spider):
             "client_secret": "Gh6tuc6L",
             "grant_type": "client_credentials",
         }
-        yield FormRequest(url="https://www.builders.co.za/authorizationserver/oauth/token", method="POST", formdata=formdata, callback=self.parse_auth_token)
+        yield FormRequest(
+            url="https://www.builders.co.za/authorizationserver/oauth/token",
+            method="POST",
+            formdata=formdata,
+            callback=self.parse_auth_token,
+        )
 
     def parse_auth_token(self, response):
         auth_token = response.json()["access_token"]
@@ -42,7 +49,9 @@ class BuildersSpider(Spider):
                 item["name"] = location["displayName"].replace("Builders Express ", "")
             elif "BUILDERS SUPERSTORE " in location["displayName"].upper():
                 item["brand"] = "Builders SuperStore"
-                item["name"] = location["displayName"].replace("Builders SuperStore ", "").replace("Builders Superstore", "")
+                item["name"] = (
+                    location["displayName"].replace("Builders SuperStore ", "").replace("Builders Superstore", "")
+                )
             elif "BUILDERS TRADE DEPOT " in location["displayName"].upper():
                 item["brand"] = "Builders Trade Depot"
                 item["name"] = location["displayName"].replace("Builders Trade Depot ", "")
@@ -60,6 +69,11 @@ class BuildersSpider(Spider):
             for day_hours in location["openingHours"]["weekDayOpeningList"]:
                 if day_hours["closed"]:
                     continue
-                item["opening_hours"].add_range(day_hours["weekDay"], day_hours["openingTime"]["formattedHour"], day_hours["closingTime"]["formattedHour"], "%I:%M %p")
+                item["opening_hours"].add_range(
+                    day_hours["weekDay"],
+                    day_hours["openingTime"]["formattedHour"],
+                    day_hours["closingTime"]["formattedHour"],
+                    "%I:%M %p",
+                )
 
             yield item
