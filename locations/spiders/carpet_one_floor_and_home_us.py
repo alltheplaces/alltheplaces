@@ -15,6 +15,10 @@ class CarpetOneFloorAndHomeUSSpider(SitemapSpider):
     allowed_domains = ["www.carpetone.com"]
     sitemap_urls = ["https://www.carpetone.com/locations-sitemap.xml"]
     sitemap_rules = [(r"^https:\/\/www\.carpetone\.com\/locations\/[^/]+/[^/]+$", "parse")]
+    # Attempt crawling with a high delay to try and avoid receiving
+    # truncated binary responses (non-HTTP). Possible rate limiting
+    # mechanism to frustrate bots?
+    download_delay = 10
 
     @staticmethod
     def parse_store(response):
