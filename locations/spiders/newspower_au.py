@@ -22,6 +22,10 @@ class NewspowerAUSpider(SitemapSpider):
         "https://newspower.com.au/wpsl_stores-sitemap2.xml",
     ]
     sitemap_rules = [(r"^https:\/\/newspower\.com\.au\/stores/[^/]+\/$", "parse")]
+    # Server will redirect wpsl_stores-sitemap2.xml to
+    # https://newspower.com.au/store-locator/ if it doesn't like
+    # the country/netblock requesting the page.
+    requires_proxy = True
 
     def parse(self, response):
         map_marker_js_blob = response.xpath('//script[contains(text(), "var wpslMap_0 = ")]/text()').get()
