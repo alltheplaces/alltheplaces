@@ -10,12 +10,13 @@ class DictParser:
         "store-number",
         "shop-number",
         "location-id",
+        "location-number",
         "slug",
         "store-code",
         "item-id",
     ]
 
-    name_keys = ["name", "store-name", "display-name", "title", "business-name", "item-name"]
+    name_keys = ["name", "store-name", "display-name", "title", "business-name", "item-name", "location-name"]
 
     house_number_keys = ["house-number", "house-no", "street-number", "street-no", "address-street-no"]
 
