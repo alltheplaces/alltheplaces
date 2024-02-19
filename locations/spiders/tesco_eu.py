@@ -7,15 +7,13 @@ from scrapy import Request
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
+from locations.spiders.tesco_gb import TescoGBSpider
 from locations.user_agents import BROWSER_DEFAULT
 
 
 class TescoSpider(scrapy.Spider):
     name = "tesco_eu"
     user_agent = BROWSER_DEFAULT
-    TESCO = ("Tesco", "Q487494", Categories.SHOP_SUPERMARKET.value)
-    TESCO_EXTRA = ("Tesco Extra", "Q25172225", Categories.SHOP_SUPERMARKET.value)
-    TESCO_EXPRESS = ("Tesco Express", "Q98456772", Categories.SHOP_CONVENIENCE.value)
     COUNTRY_WEBSITE_MAP = {
         "cz": "https://itesco.cz/prodejny/obchody-tesco/",
         "hu": "https://tesco.hu/aruhazak/aruhaz/",
@@ -47,14 +45,12 @@ class TescoSpider(scrapy.Spider):
             # typeid is not consistent across countries, also sometimes not reliable to determine a brand
             store_names = [name.title() for name in [store.get("name", ""), store.get("webname", "")]]
             if any("Extra" in name for name in store_names):
-                self.apply_brand(item, self.TESCO_EXTRA)
+                apply_category(Categories.SHOP_SUPERMARKET, item)
+                item.update(TescoGBSpider.TESCO_EXTRA)
             elif any("Expres" in name for name in store_names):
-                self.apply_brand(item, self.TESCO_EXPRESS)
+                apply_category(Categories.SHOP_CONVENIENCE, item)
+                item.update(TescoGBSpider.TESCO_EXPRESS)
             else:
-                self.apply_brand(item, self.TESCO)
+                apply_category(Categories.SHOP_SUPERMARKET, item)
+                item.update(TescoGBSpider.TESCO)
             yield item
-
-    def apply_brand(self, item, brand):
-        item["brand"] = brand[0]
-        item["brand_wikidata"] = brand[1]
-        apply_category(brand[2], item)
