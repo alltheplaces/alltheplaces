@@ -23,10 +23,10 @@ class OsservaprezziCarburantiITSpider(Spider):
         "Q8": {"brand": "Q8", "brand_wikidata": "Q1634762"},
         "Tamoil": {"brand": "Tamoil", "brand_wikidata": "Q706793"},
         "AgipEni": {"brand": "Eni", "brand_wikidata": "Q565594"},
-        "Giap": {"brand": "Giap", "brand_wikidata": None, "nsi_id": "giap-e8f712"},
-        "Energas": {"brand": "Energas", "brand_wikidata": None, "nsi_id": "energas-e8f712"},
-        "Keropetrol": {"brand": "Keropetrol", "brand_wikidata": None, "nsi_id": "keropetrol-e8f712"},
-        "San Marco Petroli": {"brand": "San Marco Petroli", "brand_wikidata": None, "nsi_id": "sanmarcopetroli-e8f712"},
+        "Giap": {"brand": "Giap", "brand_wikidata": None},
+        "Energas": {"brand": "Energas", "brand_wikidata": None},
+        "Keropetrol": {"brand": "Keropetrol", "brand_wikidata": None},
+        "San Marco Petroli": {"brand": "San Marco Petroli", "brand_wikidata": None},
     }
 
     def start_requests(self):
