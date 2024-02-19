@@ -6,8 +6,8 @@ from locations.dict_parser import DictParser
 from locations.geo import point_locations
 
 
-class OsservaprezziCarburantiITSpider(Spider):
-    name = "osservaprezzi_carburanti_it"
+class GovOsservaprezziCarburantiITSpider(Spider):
+    name = "gov_osservaprezzi_carburanti_it"
 
     FUELS = {
         "Gasolio": Fuel.DIESEL,
