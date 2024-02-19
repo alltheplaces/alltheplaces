@@ -32,16 +32,12 @@ class OsservaprezziCarburantiITSpider(Spider):
 
     def start_requests(self):
         for lat, lon in point_locations("italy_grid_10km.csv"):
-            payload = json.dumps(
-                {
-                    "points": [{"lat": lat, "lng": lon}],
-                    "radius": 10,
-                }
-            )
             yield JsonRequest(
                 "https://carburanti.mise.gov.it/ospzApi/search/zone",
-                method="POST",
-                body=payload,
+                data={
+                    "points": [{"lat": lat, "lng": lon}],
+                    "radius": 10,
+                },
             )
 
     def parse(self, response: Response):
