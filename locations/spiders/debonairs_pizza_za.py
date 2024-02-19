@@ -1,7 +1,6 @@
-from unidecode import unidecode
-
 from scrapy import Spider
 from scrapy.http import JsonRequest
+from unidecode import unidecode
 
 from locations.categories import Categories
 from locations.dict_parser import DictParser
@@ -25,16 +24,28 @@ class DebonairsPizzaZASpider(Spider):
                 for store in city.get("Stores", []):
                     store_id_list.append(store["Id"])
         for start_pos in range(0, len(store_id_list), 20):
-            batch = store_id_list[start_pos:start_pos+20]
-            yield JsonRequest(url="https://app.debonairspizza.co.za/management/api/stores?ids={}".format(",".join(map(str, batch))), callback=self.parse_locations)
+            batch = store_id_list[start_pos : start_pos + 20]
+            yield JsonRequest(
+                url="https://app.debonairspizza.co.za/management/api/stores?ids={}".format(",".join(map(str, batch))),
+                callback=self.parse_locations,
+            )
 
     def parse_locations(self, response):
         for location in response.json():
             item = DictParser.parse(location)
-            item["street_address"] = ", ".join(filter(None, [location.get("AddressLine1"), location.get("AddressLine2")]))
+            item["street_address"] = ", ".join(
+                filter(None, [location.get("AddressLine1"), location.get("AddressLine2")])
+            )
             item.pop("state", None)
-            item["website"] = "https://app.debonairspizza.co.za/restaurant/{}/{}".format(item["ref"], unidecode(item["name"].lower()).replace(" ", "-"))
+            item["website"] = "https://app.debonairspizza.co.za/restaurant/{}/{}".format(
+                item["ref"], unidecode(item["name"].lower()).replace(" ", "-")
+            )
             item["opening_hours"] = OpeningHours()
             for day_hours in location.get("TradingHours", []):
-                item["opening_hours"].add_range(DAYS_3_LETTERS_FROM_SUNDAY[day_hours["Day"]], day_hours["OpenTime"], day_hours["CloseTime"], "%H:%M:%S")
+                item["opening_hours"].add_range(
+                    DAYS_3_LETTERS_FROM_SUNDAY[day_hours["Day"]],
+                    day_hours["OpenTime"],
+                    day_hours["CloseTime"],
+                    "%H:%M:%S",
+                )
             yield item
