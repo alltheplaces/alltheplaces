@@ -11,12 +11,12 @@ class CzechPostCZSpider(Spider):
     start_urls = ["https://www.postaonline.cz/en/vyhledat-pobocku"]
 
     types = {
-        "Balíkovna": {"post_office:parcel_pickup": "yes"},
+        "Balíkovna": {"amenity": "post_office", "post_office": "post_partner", "parcel_pickup": "yes"},
         "Depot": Categories.POST_DEPOT,
         "Post office": Categories.POST_OFFICE,
-        "Postal agency": None,  # 6 "vydejniMisto"
-        "Service point": None,  # 43 "vydejniMisto"
-        "Technical outlet": None,  # 252 "technickaProvozovna"
+        "Postal agency": {"amenity": "post_office", "post_office": "post_partner"},  # 6 "vydejniMisto"
+        "Service point": {"amenity": "post_office", "post_office": "post_partner"},  # 43 "vydejniMisto"
+        "Technical outlet": {"amenity": "post_office", "post_office": "post_partner"},  # 252 "technickaProvozovna"
         "post.type.external.partner-box": Categories.PARCEL_LOCKER,  # "balikovna_box"
     }
 
