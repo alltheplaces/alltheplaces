@@ -10,10 +10,19 @@ class GovOsservaprezziCarburantiITSpider(Spider):
     name = "gov_osservaprezzi_carburanti_it"
 
     FUELS = {
-        "Gasolio": Fuel.DIESEL,
         "GPL": Fuel.LPG,
         "Metano": Fuel.CNG,
-        # "Blue Diesel": Fuel.ADBLUE, ?
+        "Gasolio": Fuel.DIESEL,
+        "Gasolio Ecoplus": Fuel.BIODIESEL,
+        "Gasolio Artico": Fuel.COLD_WEATHER_DIESEL,
+        "Gasolio artico": Fuel.COLD_WEATHER_DIESEL,
+        "Gasolio Artico Igloo": Fuel.COLD_WEATHER_DIESEL,
+        "Gasolio Alpino": Fuel.COLD_WEATHER_DIESEL,
+        "V-Power Diesel": Fuel.GTL_DIESEL,
+        "Hi-Q Diesel": Fuel.GTL_DIESEL,
+        "Diesel Shell V Power": Fuel.GTL_DIESEL,
+        # no official tag
+        "Benzina": "fuel:petrol",
     }
 
     BRANDS = {
@@ -52,11 +61,14 @@ class GovOsservaprezziCarburantiITSpider(Spider):
 
             apply_category(Categories.FUEL_STATION, item)
 
-            for fuel_name, fuel in self.FUELS.items():
-                apply_yes_no(fuel, item, any(f["name"] == fuel_name for f in result["fuels"]))
+            for fuel in result["fuels"]:
+                if fuel["name"] not in self.FUELS:
+                    self.crawler.stats.inc_value(f"atp/gov_osservaprezzi_carburanti_it/unmapped_fuel/{fuel['name']}")
+                apply_yes_no(self.FUELS.get(fuel["name"]), item, fuel["name"] in self.FUELS)
 
             if (brand := result["brand"]) in self.BRANDS:
                 item.update(self.BRANDS[brand])
             else:
                 item["brand"] = brand
+                self.crawler.stats.inc_value(f"atp/gov_osservaprezzi_carburanti_it/unmapped_brand/{brand}")
             yield item
