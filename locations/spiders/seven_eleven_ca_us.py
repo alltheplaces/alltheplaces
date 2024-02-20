@@ -63,7 +63,6 @@ class SevenElevenCAUSSpider(scrapy.Spider):
                 apply_category(Categories.SHOP_CONVENIENCE, item)
 
             self.parse_features(item, store)
-
             yield item
 
         if len(response.json()["results"]) == self.page_size:
