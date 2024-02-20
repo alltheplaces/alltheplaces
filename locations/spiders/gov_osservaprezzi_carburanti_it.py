@@ -32,8 +32,7 @@ class GovOsservaprezziCarburantiITSpider(Spider):
         "Beyfin": {"brand": "Beyfin", "brand_wikidata": "Q3639256"},
         "Costantin": {"brand": "Costantin", "brand_wikidata": "Q48800790"},
         "Lukoil": {"brand": "Lukoil", "brand_wikidata": "Q329347"},
-
-        #"brand" used by non-branded stations
+        # "brand" used by non-branded stations
         "PompeBianche": {},
     }
 
@@ -56,7 +55,7 @@ class GovOsservaprezziCarburantiITSpider(Spider):
             for fuel_name, fuel in self.FUELS.items():
                 apply_yes_no(fuel, item, any(f["name"] == fuel_name for f in result["fuels"]))
 
-            if (brand := result["brand"])  in self.BRANDS:
+            if (brand := result["brand"]) in self.BRANDS:
                 item.update(self.BRANDS[brand])
             else:
                 item["brand"] = brand
