@@ -74,8 +74,8 @@ class BMOSpider(Where2GetItSpider):
         elif location["grouptype"] in ["BMOHarrisATM", "BMOATM"]:
             apply_category(Categories.ATM, item)
             if item["name"] == "Alon 7-Eleven":
-                item["located_in"] = SevenElevenUSSpider.item_attributes["brand"]
-                item["located_in_wikidata"] = SevenElevenUSSpider.item_attributes["brand_wikidata"]
+                item["located_in"] = SevenElevenCAUSSpider.item_attributes["brand"]
+                item["located_in_wikidata"] = SevenElevenCAUSSpider.item_attributes["brand_wikidata"]
             elif item["name"] == "Arco":
                 item["located_in"] = MarathonPetroleumUSSpider.brands["ARCO"]["brand"]
                 item["located_in_wikidata"] = MarathonPetroleumUSSpider.brands["ARCO"]["brand_wikidata"]
