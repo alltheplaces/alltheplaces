@@ -26,6 +26,7 @@ from locations.spiders.rite_aid_us import RiteAidUSSpider
 from locations.spiders.royal_farms import RoyalFarmsSpider
 from locations.spiders.safeway import SafewaySpider
 from locations.spiders.schnucks_us import SchnucksUSSpider
+from locations.spiders.seven_eleven_ca_us import SevenElevenCAUSSpider
 from locations.spiders.shell import ShellSpider
 from locations.spiders.shoprite import ShopriteSpider
 from locations.spiders.speedway_us import SpeedwayUSSpider
