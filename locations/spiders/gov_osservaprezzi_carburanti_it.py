@@ -22,10 +22,19 @@ class GovOsservaprezziCarburantiITSpider(Spider):
         "Q8": {"brand": "Q8", "brand_wikidata": "Q1634762"},
         "Tamoil": {"brand": "Tamoil", "brand_wikidata": "Q706793"},
         "AgipEni": {"brand": "Eni", "brand_wikidata": "Q565594"},
-        "Giap": {"brand": "Giap", "brand_wikidata": None},
-        "Energas": {"brand": "Energas", "brand_wikidata": None},
-        "Keropetrol": {"brand": "Keropetrol", "brand_wikidata": None},
-        "San Marco Petroli": {"brand": "San Marco Petroli", "brand_wikidata": None},
+        "Shell": {"brand": "Shell", "brand_wikidata": "Q110716465"},
+        "Europam": {"brand": "Europam", "brand_wikidata": "Q115268198"},
+        "Giap": {"brand": "Giap", "brand_wikidata": "Q107609037"},
+        "Energas": {"brand": "Energas", "brand_wikidata": "Q124623439"},
+        "KEROPETROL": {"brand": "Keropetrol", "brand_wikidata": "Q124336939"},
+        "SanMarcoPetroli": {"brand": "San Marco Petroli", "brand_wikidata": "Q124623464"},
+        "Retitalia": {"brand": "Retitalia", "brand_wikidata": "Q119135752"},
+        "Beyfin": {"brand": "Beyfin", "brand_wikidata": "Q3639256"},
+        "Costantin": {"brand": "Costantin", "brand_wikidata": "Q48800790"},
+        "Lukoil": {"brand": "Lukoil", "brand_wikidata": "Q329347"},
+
+        #"brand" used by non-branded stations
+        "PompeBianche": {},
     }
 
     def start_requests(self):
@@ -47,10 +56,7 @@ class GovOsservaprezziCarburantiITSpider(Spider):
             for fuel_name, fuel in self.FUELS.items():
                 apply_yes_no(fuel, item, any(f["name"] == fuel_name for f in result["fuels"]))
 
-            if (brand := result["brand"]) == "PompeBianche":
-                # non-branded station
-                yield item
-            if brand in self.BRANDS:
+            if (brand := result["brand"])  in self.BRANDS:
                 item.update(self.BRANDS[brand])
             else:
                 item["brand"] = brand
