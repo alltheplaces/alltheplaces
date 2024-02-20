@@ -1,8 +1,10 @@
+from locations.categories import Categories
 from locations.storefinders.yext import YextSpider
 
 
 class CheckersRallysUS(YextSpider):
     name = "checkers_rallys_us"
+    item_attributes = {"extras": Categories.FAST_FOOD.value}
     api_key = "3a0695216a74763b09659ee6021687a0"
     wanted_types = ["restaurant"]
 
