@@ -9,6 +9,12 @@ from locations.geo import point_locations
 class GovOsservaprezziCarburantiITSpider(Spider):
     name = "gov_osservaprezzi_carburanti_it"
 
+    custom_settings = {
+        "HTTPCACHE_ENABLED": True,
+        "HTTPCACHE_EXPIRATION_SECS": 1800,
+        "DOWNLOAD_DELAY": 0.1,
+    }
+
     FUELS = {
         "GPL": Fuel.LPG,
         "Metano": Fuel.CNG,
