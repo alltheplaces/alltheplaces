@@ -69,8 +69,8 @@ https://smashburger.com/locations/us/co/denver/7305-e-35th-avenue/
 ................. and many more!
 ```
 
-That has got us a fair way forward quite quickly. One of the next steps
-forward could be to analyze one of the store URLs for SEO content
+That is a good start! One of the next steps
+could be to analyze one of the store URLs for SEO content
 using our [structured data tooling](./STRUCTURED_DATA.md), or give it to a
 [schema validation tool](https://validator.schema.org/) which in this case
 [yields a good result](https://validator.schema.org/#url=https%3A%2F%2Fsmashburger.com%2Flocations%2Fus%2Fco%2Flafayette%2F2755-dagny-way%2F).
