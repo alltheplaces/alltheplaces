@@ -1,5 +1,5 @@
-from html import unescape
 import re
+from html import unescape
 
 from scrapy import Selector
 
@@ -14,7 +14,11 @@ from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
 
 class WienerFeinbackerHebererDESpider(WPStoreLocatorSpider):
     name = "wiener_feinbacker_heberer_de"
-    item_attributes = {"brand": "Wiener Feinbäcker Heberer", "brand_wikidata": "Q15854357", "extras": Categories.SHOP_BAKERY.value}
+    item_attributes = {
+        "brand": "Wiener Feinbäcker Heberer",
+        "brand_wikidata": "Q15854357",
+        "extras": Categories.SHOP_BAKERY.value,
+    }
     allowed_domains = ["heberer.de"]
 
     def parse_item(self, item, location):
@@ -39,7 +43,9 @@ class WienerFeinbackerHebererDESpider(WPStoreLocatorSpider):
             else:
                 item["name"] = old_name
 
-        hours_string = " ".join(filter(None, map(str.strip, Selector(text=location["description"]).xpath('//text()').getall())))
+        hours_string = " ".join(
+            filter(None, map(str.strip, Selector(text=location["description"]).xpath("//text()").getall()))
+        )
         item["opening_hours"] = OpeningHours()
         item["opening_hours"].add_ranges_from_string(hours_string, days=DAYS_DE)
 
