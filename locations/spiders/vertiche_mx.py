@@ -1,8 +1,7 @@
 from geonamescache import GeonamesCache
-from unidecode import unidecode
-
 from scrapy import Request
 from scrapy.http import JsonRequest
+from unidecode import unidecode
 
 from locations.categories import Categories
 from locations.hours import DAYS_ES
@@ -38,7 +37,9 @@ class VerticheMXSpider(WPStoreLocatorSpider):
         for city_key in response.xpath('//div[@class="wpsl-input"]//option/text()').getall():
             if not city_key or city_key == "-":
                 continue
-            city_name = unidecode(city_key).split(",", 1)[0].replace("Cd. ", "Ciudad ").replace("Cd ", "Ciudad ").strip()
+            city_name = (
+                unidecode(city_key).split(",", 1)[0].replace("Cd. ", "Ciudad ").replace("Cd ", "Ciudad ").strip()
+            )
             manual_replacements = {
                 "Cabos San Lucas": "Cabo San Lucas",
                 "Valle de Chalco": "Xico",
@@ -51,12 +52,16 @@ class VerticheMXSpider(WPStoreLocatorSpider):
             matched_cities = gc.search_cities(city_name, contains_search=False)
             mexican_cities = list(filter(lambda x: x["countrycode"] == "MX", matched_cities))
             if len(mexican_cities) == 0:
-                self.logger.warning(f"Coordinates could not be looked up in geonamescache for Mexican city: {city_name}. Locations in this city will not be returned.")
+                self.logger.warning(
+                    f"Coordinates could not be looked up in geonamescache for Mexican city: {city_name}. Locations in this city will not be returned."
+                )
                 continue
             for mexican_city in mexican_cities:
                 lat = mexican_city["latitude"]
                 lon = mexican_city["longitude"]
-                yield JsonRequest(url=f"https://{self.allowed_domains[0]}/wp-admin/admin-ajax.php?action=store_search&lat={lat}&lng={lon}&max_results={self.max_results}&search_radius={self.search_radius}")
+                yield JsonRequest(
+                    url=f"https://{self.allowed_domains[0]}/wp-admin/admin-ajax.php?action=store_search&lat={lat}&lng={lon}&max_results={self.max_results}&search_radius={self.search_radius}"
+                )
 
     def parse_item(self, item, location):
         item.pop("address", None)
