@@ -70,7 +70,7 @@ class OrlenSpider(scrapy.Spider):
                 + self.build_url_params(
                     languageCode="EN",
                     gasStationId=location["Id"],
-                    gasStationTemplate="DlaKierowcowTemplates",  # "for drivers tewmplate"
+                    gasStationTemplate="DlaKierowcowTemplates",  # "for drivers template"
                 ),
                 callback=self.parse_location,
             )
