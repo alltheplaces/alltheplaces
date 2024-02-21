@@ -14,7 +14,7 @@ class BipaHRSpider(Spider):
 
     def start_requests(self):
         yield JsonRequest(
-            "https://www.bipa.hr/api/2sxc/app/auto/query/SvePoslovnice/Poslovnice", 
+            "https://www.bipa.hr/api/2sxc/app/auto/query/SvePoslovnice/Poslovnice",
             headers={
                 "ModuleId": "841",
                 "TabId": "195",
