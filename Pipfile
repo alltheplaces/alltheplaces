@@ -14,7 +14,6 @@ flake8 = "*"
 pep8-naming = "*"
 isort = "*"
 pre-commit = "*"
-exceptiongroup = "*"
 
 [packages]
 scrapy = "*"
@@ -41,3 +40,4 @@ scrapy-zyte-api = "*"
 cryptography = "*"
 twisted = "22.10.0"
 phpserialize = "*"
+exceptiongroup = "*"

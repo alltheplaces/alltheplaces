@@ -25,7 +25,7 @@ Windows users may need to follow some extra steps, please follow the [scrapy doc
 
    ```
    $ cd alltheplaces
-   $ pipenv install
+   $ pipenv install --dev
    ```
 
 1. Test for successful project installation:
