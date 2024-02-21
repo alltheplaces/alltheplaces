@@ -45,6 +45,7 @@ DEPARTMENT_TYPE_MAP = {
     "Eye Care Services": HealthcareSpecialities.OPHTHALMOLOGY,
     "Family Practice": HealthcareSpecialities.GENERAL,
     "Farmer's Market": None,
+    "Flu Injection Clinic": None,
     "Food and Nutrition": None,
     "Gastroenterology": HealthcareSpecialities.GASTROENTEROLOGY,
     "Gastroenterology/Hepatology": HealthcareSpecialities.HEPATOLOGY,
@@ -60,10 +61,11 @@ DEPARTMENT_TYPE_MAP = {
     "Hospice Home Care": HealthcareSpecialities.PALLIATIVE,
     "Infectious Disease": HealthcareSpecialities.INFECTIOUS_DISEASES,
     "Injection Clinics": None,
+    "Insurance": None,
     "Internal Medicine": HealthcareSpecialities.INTERNAL,
     "Laboratory": None,
     "Language services": None,
-    "Language services": None,
+    "Long-term Care": None,
     "Medical correspondence": None,
     "Member services": None,
     "Neurology": HealthcareSpecialities.NEUROLOGY,
@@ -117,6 +119,7 @@ class KaiserPermanenteUSSpider(SitemapSpider, StructuredDataSpider):
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["lat"] = response.xpath("//@data-lat").get()
         item["lon"] = response.xpath("//@data-lng").get()
+        item["image"] = ld_data.get("photo")
 
         # "Affiliated" locations are not KP-branded
         if response.xpath("//@data-affiliated").get() != "true":

@@ -115,7 +115,7 @@ class LinkedDataParser:
         try:
             oh = OpeningHours()
             oh.from_linked_data(ld, time_format=time_format)
-            item["opening_hours"] = oh
+            item["opening_hours"] = oh.as_opening_hours()
         except:
             pass
 
