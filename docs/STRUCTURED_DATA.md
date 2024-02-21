@@ -76,7 +76,7 @@ pipenv run scrapy sd -O smashburger.geojson --wikidata Q17061332 https://smashbu
 
 The single POI has been written as output to the `smashburger.geojson` file shown below:
 
-```json
+```
 {"type":"FeatureCollection","features":[{"type": "Feature", "id": "d9bWFhLsLRtombN0CN2nyIJozyY=", "properties": {"ref": "1001", "@spid
 er": "my_spider", "nsi_id": "smashburger-d2abf0", "amenity": "fast_food", "cuisine": "burger", "takeaway": "yes", "addr:street_address
 ": "2755 Dagny Way,", "addr:city": "Lafayette", "addr:state": "CO", "addr:postcode": "80026", "name": "Your Neighborhood Smashburger",
