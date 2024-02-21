@@ -1,6 +1,6 @@
-from chompjs import parse_js_object
 from html import unescape
 
+from chompjs import parse_js_object
 from scrapy import Spider
 
 from locations.categories import Categories
@@ -15,7 +15,7 @@ class HITDESpider(Spider):
     start_urls = ["https://www.hit.de/maerkte?ajax=1"]
 
     def parse(self, response):
-        js_blob = unescape(response.xpath('//div/@data-stores').get())
+        js_blob = unescape(response.xpath("//div/@data-stores").get())
         for location in parse_js_object(js_blob):
             item = DictParser.parse(location)
             item["ref"] = location["url"].split("/")[-1]
@@ -24,6 +24,8 @@ class HITDESpider(Spider):
             item["opening_hours"] = OpeningHours()
             for day_hours in location.get("openings", []):
                 for day_of_week in day_hours["daysOfWeek"]:
-                    item["opening_hours"].add_range(DAYS_DE[day_of_week], day_hours["openedFrom"], day_hours["openedTo"])
+                    item["opening_hours"].add_range(
+                        DAYS_DE[day_of_week], day_hours["openedFrom"], day_hours["openedTo"]
+                    )
 
             yield item
