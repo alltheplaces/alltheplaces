@@ -7,19 +7,25 @@ from locations.items import Feature
 
 class BipaHRSpider(Spider):
     name = "bipa_hr"
-    item_attributes = {"brand": "Bipa", "brand_wikidata": "Q864933"}
-    headers = {
-        "ModuleId": "841",
-        "TabId": "195",
+    item_attributes = {
+        "brand": "Bipa",
+        "brand_wikidata": "Q864933",
     }
 
     def start_requests(self):
-        yield JsonRequest("https://www.bipa.hr/api/2sxc/app/auto/query/SvePoslovnice/Poslovnice", headers=self.headers)
+        yield JsonRequest(
+            "https://www.bipa.hr/api/2sxc/app/auto/query/SvePoslovnice/Poslovnice", 
+            headers={
+                "ModuleId": "841",
+                "TabId": "195",
+            },
+        )
 
     def parse(self, response: Response):
         for store in response.json()["Poslovnice"]:
             opening_hours = OpeningHours()
             opening_hours.add_ranges_from_string(store["RadnoVrijeme"], days=DAYS_SR)
+
             yield Feature(
                 ref=store["Id"],
                 city=store["Grad"],
