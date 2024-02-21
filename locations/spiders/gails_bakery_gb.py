@@ -1,5 +1,4 @@
 from chompjs import parse_js_object
-
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories
@@ -19,11 +18,15 @@ class GAILsBakeryGBSpider(SitemapSpider):
         js_blob = "{" + js_blob.split("var wpslMap_0 = {", 1)[1].split("};", 1)[0] + "}"
         location = parse_js_object(js_blob)["locations"][0]
         item = DictParser.parse(location)
-        item["name"] = " ".join(filter(None, map(str.strip, response.xpath('//h1[@class="slideshow-title"]/text()').getall())))
+        item["name"] = " ".join(
+            filter(None, map(str.strip, response.xpath('//h1[@class="slideshow-title"]/text()').getall()))
+        )
         item["street_address"] = item.pop("addr_full", None)
         item["website"] = response.url
 
-        hours_string = " ".join(filter(None, map(str.strip, response.xpath('//ul[@class="opening-hours"]//text()').getall())))
+        hours_string = " ".join(
+            filter(None, map(str.strip, response.xpath('//ul[@class="opening-hours"]//text()').getall()))
+        )
         item["opening_hours"] = OpeningHours()
         item["opening_hours"].add_ranges_from_string(hours_string)
 
