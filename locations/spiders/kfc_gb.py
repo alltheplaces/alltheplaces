@@ -9,11 +9,12 @@ from locations.spiders.vets4pets_gb import set_located_in
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class KFCGB(Spider):
+class KFCGBSpider(Spider):
     name = "kfc_gb"
     item_attributes = KFC_SHARED_ATTRIBUTES
     start_urls = ["https://www.kfc.co.uk/cms/api/data/restaurants_all"]
     user_agent = BROWSER_DEFAULT
+    requires_proxy = True
 
     def parse(self, response, **kwargs):
         for location in response.json():
