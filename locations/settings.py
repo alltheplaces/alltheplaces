@@ -69,6 +69,13 @@ TELNETCONSOLE_ENABLED = False
 # See http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html
 DOWNLOADER_MIDDLEWARES = {}
 
+# Anti Bot Detection middleware must execute prior to
+# scrapy.spidermiddlewares.httperror.HttpErrorMiddleware
+# Refer to SPIDER_MIDDLEWARES_BASE at:
+# https://doc.scrapy.org/en/latest/topics/settings.html#std-setting-SPIDER_MIDDLEWARES_BASE
+DOWNLOADER_MIDDLEWARES["locations.middlewares.anti_bot_detection.AntiBotDetectionMiddleware"] = 40
+DOWNLOADER_MIDDLEWARES["locations.middlewares.anti_bot_stop_crawl.AntiBotStopCrawlMiddleware"] = 45
+
 if os.environ.get("ZYTE_API_KEY"):
     DOWNLOAD_HANDLERS = {
         "http": "scrapy_zyte_api.ScrapyZyteAPIDownloadHandler",
