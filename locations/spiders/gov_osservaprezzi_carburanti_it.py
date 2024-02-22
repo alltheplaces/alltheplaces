@@ -1,3 +1,7 @@
+import re
+from collections import defaultdict
+from enum import Enum
+
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
@@ -8,6 +12,7 @@ from locations.geo import point_locations
 
 class GovOsservaprezziCarburantiITSpider(Spider):
     name = "gov_osservaprezzi_carburanti_it"
+    dataset_attributes = {"source": "api", "api": "carburanti.mise.gov.it"}
 
     custom_settings = {
         "HTTPCACHE_ENABLED": True,
@@ -27,6 +32,7 @@ class GovOsservaprezziCarburantiITSpider(Spider):
         "V-Power Diesel": Fuel.GTL_DIESEL,
         "Hi-Q Diesel": Fuel.GTL_DIESEL,
         "Diesel Shell V Power": Fuel.GTL_DIESEL,
+        "Blue Diesel": Fuel.ADBLUE,
         # no official tag
         "Benzina": "fuel:petrol",
     }
@@ -51,6 +57,11 @@ class GovOsservaprezziCarburantiITSpider(Spider):
         "PompeBianche": {},
     }
 
+    def get_price_tag(self, fuel_tag):
+        if isinstance(fuel_tag, Enum):
+            fuel_tag = fuel_tag.value
+        return re.sub(r"^fuel:", "charge:", fuel_tag)
+
     def start_requests(self):
         for lat, lon in point_locations("italy_grid_10km.csv"):
             yield JsonRequest(
@@ -67,10 +78,42 @@ class GovOsservaprezziCarburantiITSpider(Spider):
 
             apply_category(Categories.FUEL_STATION, item)
 
+            fuel_prices = defaultdict(dict)
+            has_self_service = False
+            has_full_service = False
+
+            # parse all types of fuel and group prices by fuel type
             for fuel in result["fuels"]:
                 if fuel["name"] not in self.FUELS:
                     self.crawler.stats.inc_value(f"atp/gov_osservaprezzi_carburanti_it/unmapped_fuel/{fuel['name']}")
-                apply_yes_no(self.FUELS.get(fuel["name"]), item, fuel["name"] in self.FUELS)
+                    continue
+                osm_fuel_tag = self.FUELS.get(fuel["name"])
+                osm_price_tag = self.get_price_tag(osm_fuel_tag)
+
+                apply_yes_no(osm_fuel_tag, item, True)
+
+                if fuel["isSelf"]:
+                    has_self_service = True
+                    fuel_prices[osm_price_tag]["self_service"] = "{} EUR/1 litre".format(round(fuel["price"], 2))
+                else:
+                    has_full_service = True
+                    fuel_prices[osm_price_tag]["full_service"] = "{} EUR/1 litre".format(round(fuel["price"], 2))
+
+            apply_yes_no("self_service", item, has_self_service, apply_positive_only=False)
+            apply_yes_no("full_service", item, has_full_service, apply_positive_only=False)
+
+            # parse fuel prices
+            for charged_fuel, prices in fuel_prices.items():
+                is_one_price = ("self_service" in prices) != ("full_service" in prices)
+                is_identical_price = prices.get("self_service") == prices.get("full_service")
+                if is_one_price or is_identical_price:
+                    # price is the same regardless of self/full service
+                    item["extras"][charged_fuel] = prices[next(iter(prices))]
+                else:
+                    # TODO: add conditional prices for self and full service
+                    # item["extras"][charged_fuel] = prices["self_service"]
+                    # item["extras"][charged_fuel] = prices["full_service"]
+                    self.crawler.stats.inc_value(f"atp/gov_osservaprezzi_carburanti_it/unmapped_price/{charged_fuel}")
 
             if (brand := result["brand"]) in self.BRANDS:
                 item.update(self.BRANDS[brand])
