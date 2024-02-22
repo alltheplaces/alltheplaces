@@ -2,7 +2,8 @@ from scrapy import Request, Spider
 from scrapy.exceptions import IgnoreRequest
 from scrapy.http import Response
 
-from locations.middlewares.anti_bot_detection import AntiBotDetectionMiddleware, AntiBotMethods
+from locations.middlewares.anti_bot_detection import AntiBotMethods
+
 
 class AntiBotStopCrawlMiddleware:
     def __init__(self, crawler):
@@ -14,7 +15,9 @@ class AntiBotStopCrawlMiddleware:
 
     def process_response(self, request: Request, response: Response, spider: Spider):
         if anti_bot_methods := getattr(spider, "anti_bot_methods", None):
-            nonbypassable_anti_bot_methods = [anti_bot_method for anti_bot_method in anti_bot_methods if not anti_bot_method.value["zyte_bypassable"]]
+            nonbypassable_anti_bot_methods = [
+                anti_bot_method for anti_bot_method in anti_bot_methods if not anti_bot_method.value["zyte_bypassable"]
+            ]
             if len(nonbypassable_anti_bot_methods) > 0 or not getattr(spider, "requires_proxy", None):
                 self.close_spider(anti_bot_methods, spider)
         return response

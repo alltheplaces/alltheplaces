@@ -80,5 +80,7 @@ class AntiBotDetectionMiddleware:
             setattr(spider, "anti_bot_methods", [])
         if anti_bot_method not in spider.anti_bot_methods:
             anti_bot_name = anti_bot_method.value["name"]
-            spider.logger.info(f"{anti_bot_name} anti-bot protection has been detected when executing spider {spider.name}.")
+            spider.logger.info(
+                f"{anti_bot_name} anti-bot protection has been detected when executing spider {spider.name}."
+            )
             spider.anti_bot_methods.append(anti_bot_method)
