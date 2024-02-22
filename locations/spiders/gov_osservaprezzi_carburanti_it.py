@@ -88,25 +88,26 @@ class GovOsservaprezziCarburantiITSpider(Spider):
                     self.crawler.stats.inc_value(f"atp/gov_osservaprezzi_carburanti_it/unmapped_fuel/{fuel['name']}")
                     continue
                 osm_fuel_tag = self.FUELS.get(fuel["name"])
-                osm_price_tag = self.get_price_tag(osm_fuel_tag)
+                osm_fuel_price_tag = self.get_price_tag(osm_fuel_tag)
 
                 apply_yes_no(osm_fuel_tag, item, True)
 
                 if fuel["isSelf"]:
                     has_self_service = True
-                    fuel_prices[osm_price_tag]["self_service"] = "{} EUR/1 litre".format(round(fuel["price"], 2))
+                    fuel_prices[osm_fuel_price_tag]["self_service"] = "{} EUR/1 litre".format(round(fuel["price"], 2))
                 else:
                     has_full_service = True
-                    fuel_prices[osm_price_tag]["full_service"] = "{} EUR/1 litre".format(round(fuel["price"], 2))
+                    fuel_prices[osm_fuel_price_tag]["full_service"] = "{} EUR/1 litre".format(round(fuel["price"], 2))
 
+            # see https://wiki.openstreetmap.org/wiki/Tag:amenity%3Dfuel#How_to_map
             apply_yes_no("self_service", item, has_self_service, apply_positive_only=False)
             apply_yes_no("full_service", item, has_full_service, apply_positive_only=False)
 
             # parse fuel prices
             for charged_fuel, prices in fuel_prices.items():
-                is_one_price = ("self_service" in prices) != ("full_service" in prices)
-                is_identical_price = prices.get("self_service") == prices.get("full_service")
-                if is_one_price or is_identical_price:
+                has_one_price: bool = ("self_service" in prices) != ("full_service" in prices)
+                has_identical_prices: bool = prices.get("self_service") == prices.get("full_service")
+                if has_one_price or has_identical_prices:
                     # price is the same regardless of self/full service
                     item["extras"][charged_fuel] = prices[next(iter(prices))]
                 else:
