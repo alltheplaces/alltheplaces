@@ -18,7 +18,13 @@ class CoxHealthSpider(scrapy.Spider):
         ("Surgery", {"amenity": "hospital", "healthcare": "hospital", "healthcare:speciality": "surgery"}),
         ("Pharmacy", Categories.PHARMACY),
         ("Dialysis", {"healthcare": "dialysis"}),
-        ("Fitness Center", {"liesure": "fitness_centre"}),
+        ("Fitness Center", Categories.GYM),
+        ("Center", {"healthcare": "centre"}),
+        ("Gift", Categories.SHOP_GIFT),
+        ("Hotel", Categories.HOTEL),
+        ("Rehab", Categories.REHABILITATION),
+        ("Diabetes", {"healthcare": "centre", "healthcare:speciality": "endocrinology"}),
+        ("Emergency", {"amenity": "hospital", "healthcare": "hospital", "healthcare:speciality": "emergency"}),
     ]
 
     def parse(self, response):
