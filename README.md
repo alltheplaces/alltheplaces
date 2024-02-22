@@ -72,7 +72,7 @@ These instructions were tested with macOS 14.3.1 on 2024-02-21.
    ```
    $ brew install python@3
    ```
-   
+
 1. Install `pyenv` and ensure the correct version of Python is available. The following is a summary of the steps, please refer to the [pyenv documentation](https://github.com/pyenv/pyenv#installation) for the most up-to-date instructions.
 
    ```
