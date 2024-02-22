@@ -1,3 +1,5 @@
+from urllib.parse import urljoin
+
 from scrapy import Spider
 
 from locations.categories import Extras, apply_yes_no
@@ -25,8 +27,8 @@ class KFCGBSpider(Spider):
             location["id"] = location.pop("storeid")
 
             item = DictParser.parse(location)
-
-            item["website"] = "https://www.kfc.co.uk" + location["link"]
+            if slug := location.get("link"):
+                item["website"] = urljoin("https://www.kfc.co.uk/", slug)
 
             for h in location["hours"]:
                 if h["type"] == "Standard":
