@@ -160,7 +160,9 @@ class DictParser:
         item["lat"] = DictParser.get_first_key(location, DictParser.lat_keys)
         item["lon"] = DictParser.get_first_key(location, DictParser.lon_keys)
 
-        address = DictParser.get_first_key(obj, ["address", "addr", "store-address", "physical-address", "full-address"])
+        address = DictParser.get_first_key(
+            obj, ["address", "addr", "store-address", "physical-address", "full-address"]
+        )
 
         if address and isinstance(address, str):
             item["addr_full"] = address
