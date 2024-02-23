@@ -40,6 +40,7 @@ class DictParser:
         "locality",
         "suburb",
         "city-name",
+        "store-city",
         # JP
         "市区町村",  # "municipality"
         # PL
@@ -56,6 +57,7 @@ class DictParser:
         "state-code",
         "county",
         "state-name",
+        "store-state",
         # JP
         "都道府県",  # "prefecture"
     ]
@@ -65,6 +67,7 @@ class DictParser:
         "address-country",
         "country",
         "country-name",
+        "store-country",
     ]
 
     isocode_keys = [
@@ -82,6 +85,12 @@ class DictParser:
         "postal",
         "zip-code",
         "address-postal-code",
+        "store-postcode",
+        "store-post-code",
+        "store-postal-code",
+        "store-zip",
+        "store-zip-code",
+        "store-zipcode",
         # JP
         "郵便番号",  # "post code"
     ]
@@ -104,10 +113,11 @@ class DictParser:
     lat_keys = [
         "latitude",
         "lat",
+        "store-latitude",
         "display-lat",
         "yext-display-lat",
-        "mapLatitude",
-        "geoLat",
+        "map-latitude",
+        "geo-lat",
     ]
 
     lon_keys = [
@@ -115,10 +125,11 @@ class DictParser:
         "lon",
         "long",
         "lng",
+        "store-longitude",
         "display-lng",
         "yext-display-lng",
-        "mapLongitude",
-        "geoLng",
+        "map-longitude",
+        "geo-lng",
     ]
 
     website_keys = ["url", "website", "permalink", "store-url", "storeURL", "website-url", "websiteURL"]
@@ -149,7 +160,7 @@ class DictParser:
         item["lat"] = DictParser.get_first_key(location, DictParser.lat_keys)
         item["lon"] = DictParser.get_first_key(location, DictParser.lon_keys)
 
-        address = DictParser.get_first_key(obj, ["address", "addr", "storeaddress", "physicalAddress", "full-address"])
+        address = DictParser.get_first_key(obj, ["address", "addr", "store-address", "physical-address", "full-address"])
 
         if address and isinstance(address, str):
             item["addr_full"] = address
