@@ -14,11 +14,13 @@ class MinimaxAUSpider(Spider):
     def parse(self, response):
         for location in response.xpath('//div[@class="storeLocations desktop"]//div[@class="storeWrapper"]'):
             properties = {
-                "ref": location.xpath('./@rel').get(),
+                "ref": location.xpath("./@rel").get(),
                 "name": location.xpath('.//span[@class="storeName"]/text()').get("").strip(),
-                "lat": location.xpath('.//@data-lat').get(),
-                "lon": location.xpath('.//@data-lng').get(),
-                "addr_full": ", ".join(filter(None, map(str.strip, location.xpath('.//span[@class="detail"][1]/text()').getall()))),
+                "lat": location.xpath(".//@data-lat").get(),
+                "lon": location.xpath(".//@data-lng").get(),
+                "addr_full": ", ".join(
+                    filter(None, map(str.strip, location.xpath('.//span[@class="detail"][1]/text()').getall()))
+                ),
                 "phone": location.xpath('.//a[contains(@href, "tel:")]/@href').get("").replace("tel:", ""),
             }
             day_names = list(filter(None, map(str.strip, location.xpath('.//span[@class="day"]//text()').getall())))
@@ -27,4 +29,3 @@ class MinimaxAUSpider(Spider):
             properties["opening_hours"] = OpeningHours()
             properties["opening_hours"].add_ranges_from_string(hours_string)
             yield Feature(**properties)
-
