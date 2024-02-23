@@ -18,7 +18,6 @@ class SalvosAUSpider(Spider):
             if location.get("isPermanentlyClosed") or location.get("isOpeningSoon"):
                 continue
             item = DictParser.parse(location)
-            item["ref"] = location["StoreID"]
             item["addr_full"] = re.sub(r"\s+", " ", location["FullAddress"].replace("<br>", ", ")).strip()
             item["housenumber"] = location["Number"]
             item["street"] = " ".join(filter(None, [location["StreetName"], location["StreetType"]]))
