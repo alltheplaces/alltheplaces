@@ -2,18 +2,27 @@ from locations.items import Feature
 
 
 class DictParser:
+    # Variations can't handle capitalised acronyms such as "ID" so
+    # the common variants of case including such acronyms need to
+    # all be listed below.
     ref_keys = [
         "ref",
         "id",
         "identifier",
         "store-id",
+        "StoreID",
+        "storeID",
         "store-number",
         "shop-number",
         "location-id",
+        "LocationID",
+        "locationID",
         "location-number",
         "slug",
         "store-code",
         "item-id",
+        "ItemID",
+        "itemID",
     ]
 
     name_keys = ["name", "store-name", "display-name", "title", "business-name", "item-name", "location-name"]
