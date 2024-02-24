@@ -110,6 +110,8 @@ class StorefinderDetectorSpider(Spider):
                     or len(nsi_matches[0]["locationSet"]["include"]) == 2
                 ):
                     for country_code in nsi_matches[0]["locationSet"]["include"]:
+                        if not type(country_code) == str:
+                            continue
                         if not pycountry.countries.get(alpha_2=country_code.upper()):
                             continue
                         spider_key = f"{spider_key}_{country_code.lower()}"
