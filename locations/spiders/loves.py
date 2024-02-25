@@ -59,6 +59,8 @@ class LovesSpider(scrapy.Spider):
                 apply_category(Categories.FUEL_STATION, item)
             elif store["IsSpeedCo"] is True:
                 apply_category({"shop": "truck_repair"}, item)
+            elif store["IsHotel"] is True:
+                apply_category(Categories.HOTEL, item)
 
             yield item
 

@@ -195,8 +195,8 @@ class ExxonMobilSpider(SitemapSpider):
             apply_yes_no(Fuel.PROPANE, item, "Propane" in features)
             apply_yes_no(Fuel.LPG, item, "LPG" in features)
             apply_yes_no(Fuel.KEROSENE, item, "Kerosene" in features)
-            apply_yes_no("fuel:electric", item, "Electric Charger" in features, True)
-            apply_yes_no("fuel:electric", item, "Electric Vehicle Charging" in features, True)
+            apply_yes_no(Fuel.ELECTRIC, item, "Electric Charger" in features, True)
+            apply_yes_no(Fuel.ELECTRIC, item, "Electric Vehicle Charging" in features, True)
 
             # if "Convenience Store" in features:
             #    apply_category(Categories.SHOP_CONVENIENCE, item)

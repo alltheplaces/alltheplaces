@@ -1,11 +1,12 @@
 from scrapy.spiders import XMLFeedSpider
 
+from locations.categories import Categories
 from locations.items import Feature
 
 
 class GeorgeWebbUSSpider(XMLFeedSpider):
     name = "george_webb_us"
-    item_attributes = {"brand": "George Webb", "brand_wikidata": "Q5546110"}
+    item_attributes = {"brand": "George Webb", "brand_wikidata": "Q5546110", "extras": Categories.FAST_FOOD.value}
     allowed_domains = ["georgewebb.com"]
     start_urls = ["https://georgewebb.com/hwstorelocation/storeload"]
     iterator = "xml"

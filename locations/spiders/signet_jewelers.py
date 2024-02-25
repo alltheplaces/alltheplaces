@@ -5,7 +5,6 @@ import scrapy
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
-from locations.items import Feature
 
 BRANDS = {
     "banter": {"brand": "Banter by Piercing Pagoda", "brand_wikidata": "Q108410448"},

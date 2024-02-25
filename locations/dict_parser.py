@@ -2,9 +2,21 @@ from locations.items import Feature
 
 
 class DictParser:
-    ref_keys = ["ref", "id", "store-id", "storeID", "storeNumber", "shop-number", "LocationID", "slug", "storeCode"]
+    ref_keys = [
+        "ref",
+        "id",
+        "identifier",
+        "store-id",
+        "store-number",
+        "shop-number",
+        "location-id",
+        "location-number",
+        "slug",
+        "store-code",
+        "item-id",
+    ]
 
-    name_keys = ["name", "store-name", "display-name", "title", "businessName"]
+    name_keys = ["name", "store-name", "display-name", "title", "business-name", "item-name", "location-name"]
 
     house_number_keys = ["house-number", "house-no", "street-number", "street-no", "address-street-no"]
 
@@ -28,6 +40,7 @@ class DictParser:
         "locality",
         "suburb",
         "city-name",
+        "store-city",
         # JP
         "市区町村",  # "municipality"
         # PL
@@ -44,6 +57,7 @@ class DictParser:
         "state-code",
         "county",
         "state-name",
+        "store-state",
         # JP
         "都道府県",  # "prefecture"
     ]
@@ -53,6 +67,7 @@ class DictParser:
         "address-country",
         "country",
         "country-name",
+        "store-country",
     ]
 
     isocode_keys = [
@@ -70,11 +85,17 @@ class DictParser:
         "postal",
         "zip-code",
         "address-postal-code",
+        "store-postcode",
+        "store-post-code",
+        "store-postal-code",
+        "store-zip",
+        "store-zip-code",
+        "store-zipcode",
         # JP
         "郵便番号",  # "post code"
     ]
 
-    email_keys = ["email", "contact-email", "email-address", "email1"]
+    email_keys = ["email", "contact-email", "email-address", "email1", "store-email"]
 
     phone_keys = [
         "phone-number",
@@ -86,15 +107,17 @@ class DictParser:
         "contact-number",
         "phone-no",
         "contact-phone",
+        "store-phone",
     ]
 
     lat_keys = [
         "latitude",
         "lat",
+        "store-latitude",
         "display-lat",
         "yext-display-lat",
-        "mapLatitude",
-        "geoLat",
+        "map-latitude",
+        "geo-lat",
     ]
 
     lon_keys = [
@@ -102,10 +125,11 @@ class DictParser:
         "lon",
         "long",
         "lng",
+        "store-longitude",
         "display-lng",
         "yext-display-lng",
-        "mapLongitude",
-        "geoLng",
+        "map-longitude",
+        "geo-lng",
     ]
 
     website_keys = ["url", "website", "permalink", "store-url", "storeURL", "website-url", "websiteURL"]
@@ -120,7 +144,17 @@ class DictParser:
         item["name"] = DictParser.get_first_key(obj, DictParser.name_keys)
 
         location = DictParser.get_first_key(
-            obj, ["location", "geo-location", "geo", "geo-point", "geocodedCoordinate", "coordinates"]
+            obj,
+            [
+                "location",
+                "geo-location",
+                "geo",
+                "geo-point",
+                "geocoded-coordinate",
+                "coordinates",
+                "geo-position",
+                "position",
+            ],
         )
         # If not a good location object then use the parent
         if not location or not isinstance(location, dict):
@@ -128,7 +162,9 @@ class DictParser:
         item["lat"] = DictParser.get_first_key(location, DictParser.lat_keys)
         item["lon"] = DictParser.get_first_key(location, DictParser.lon_keys)
 
-        address = DictParser.get_first_key(obj, ["address", "addr", "storeaddress", "physicalAddress"])
+        address = DictParser.get_first_key(
+            obj, ["address", "addr", "store-address", "physical-address", "full-address"]
+        )
 
         if address and isinstance(address, str):
             item["addr_full"] = address

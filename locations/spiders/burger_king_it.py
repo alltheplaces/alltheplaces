@@ -2,14 +2,13 @@ import scrapy
 
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_IT, OpeningHours
+from locations.spiders.burger_king import BURGER_KING_SHARED_ATTRIBUTES
 
 
 class BurgerKingItSpider(scrapy.Spider):
     name = "burger_king_it"
-    item_attributes = {"brand": "Burger King", "brand_wikidata": "Q177054"}
-    start_urls = [
-        "https://burgerking.it/api/data/it/ristoranti.json",
-    ]
+    item_attributes = BURGER_KING_SHARED_ATTRIBUTES
+    start_urls = ["https://burgerking.it/api/data/it/ristoranti.json"]
 
     def parse(self, response):
         for store in response.json():

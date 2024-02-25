@@ -5,13 +5,14 @@ from scrapy.spiders import SitemapSpider
 
 from locations.google_url import extract_google_position
 from locations.items import Feature
+from locations.spiders.taco_bell import TACO_BELL_SHARED_ATTRIBUTES
 from locations.spiders.vapestore_gb import clean_address
 from locations.structured_data_spider import extract_phone
 
 
 class TacoBellESSpider(SitemapSpider):
     name = "taco_bell_es"
-    item_attributes = {"brand": "Taco Bell", "brand_wikidata": "Q752941"}
+    item_attributes = TACO_BELL_SHARED_ATTRIBUTES
     sitemap_urls = ["https://tacobell.es/restaurantes-sitemap.xml"]
     sitemap_rules = [("/restaurantes/", "parse")]
 

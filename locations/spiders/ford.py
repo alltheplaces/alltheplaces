@@ -184,7 +184,8 @@ class FordSpider(scrapy.Spider):
                 apply_category(Categories.SHOP_CAR_REPAIR, item)
             elif data["HasPartsDepartment"]:
                 apply_category(Categories.SHOP_CAR_PARTS, item)
-
+            else:
+                apply_category(Categories.SHOP_CAR, item)
             yield item
 
         if len(results) == 250:

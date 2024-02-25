@@ -3,6 +3,7 @@ import json
 from chompjs import parse_js_object
 from scrapy import Spider
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
@@ -36,4 +37,5 @@ class HuntingAndFishingNZSpider(Spider):
                 if not hours_range.get("from") or not hours_range.get("to"):
                     continue
                 item["opening_hours"].add_range(day.title(), hours_range["from"], hours_range["to"])
+            apply_category(Categories.SHOP_OUTDOOR, item)
             yield item

@@ -1,10 +1,16 @@
 import scrapy
 
+from locations.categories import Categories
 from locations.items import Feature
 
 
 class CampBowWowSpider(scrapy.Spider):
     name = "camp_bow_wow"
+    item_attributes = {
+        "brand": "Camp Bow Wow",
+        "brand_wikidata": "Q121322343",
+        "extras": Categories.ANIMAL_BOARDING.value,
+    }
     allowed_domains = ["campbowwow.com"]
 
     def start_requests(self):

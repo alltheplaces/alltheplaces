@@ -1,6 +1,7 @@
 import scrapy
 from scrapy import Selector
 
+from locations.categories import Categories
 from locations.items import Feature
 
 countries = (
@@ -70,7 +71,7 @@ countries = (
 class AlstomSpider(scrapy.Spider):
     # download_delay = 0.3
     name = "alstom"
-    item_attributes = {"brand": "Alstom", "brand_wikidata": "Q309084"}
+    item_attributes = {"brand": "Alstom", "brand_wikidata": "Q309084", "extras": Categories.OFFICE_COMPANY.value}
     allowed_domains = ["alstom.com"]
     start_urls = ("https://www.alstom.com/alstom-page/maps/json/1826",)
 

@@ -2,12 +2,13 @@ import re
 
 import scrapy
 
+from locations.categories import Categories
 from locations.items import Feature
 
 
 class CrownBurgersSpider(scrapy.Spider):
     name = "crown_burgers"
-    item_attributes = {"brand": "Crown Burgers", "brand_wikidata": "Q5189316"}
+    item_attributes = {"brand": "Crown Burgers", "brand_wikidata": "Q5189316", "extras": Categories.RESTAURANT.value}
     allowed_domains = ["crown-burgers.com"]
     start_urls = ("http://www.crown-burgers.com/locations.php",)
     custom_settings = {"ROBOTSTXT_OBEY": False}
