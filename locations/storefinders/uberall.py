@@ -76,6 +76,4 @@ class UberallSpider(Spider, AutomaticSpiderGenerator):
 
     def extract_spider_attributes(response: Response) -> dict | Request:
         if response.xpath('//div[@id="store-finder-widget"]/@data-key').get():
-            return {
-                "key": response.xpath('//div[@id="store-finder-widget"]/@data-key').get()
-            }
+            return {"key": response.xpath('//div[@id="store-finder-widget"]/@data-key').get()}
