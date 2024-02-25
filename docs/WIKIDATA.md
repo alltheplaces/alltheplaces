@@ -92,6 +92,13 @@ $ pipenv run scrapy nsi --code Q9361374
 Note the OSM POI category attributes for a hotel (`'tourism': 'hotel'`) are part
 of the tag set that the NSI is "suggesting" in this case.
 
+You may also notice that the bottom line has an `'id'` &ndash; an internal NSI 
+identifier of the brand. This ID is not stable, so you shouldn't hardcode it into spiders. Instead, our pipeline will retrieve it directly 
+from NSI each time the spider launches, 
+based on the Wikidata QID specified in the spider. 
+If the brand/operator doesn't have a Wikidata QID in NSI, you can either raise an issue in the [NSI repository](https://github.com/osmlab/name-suggestion-index/),
+ or [contribute the missing QID to NSI](https://github.com/osmlab/name-suggestion-index/wiki/Adding-Wikidata-Tags) yourself.
+
 ### Automatic POI categorisation
 
 The [ATP item pipeline](../locations/pipelines/apply_nsi_categories.py)
