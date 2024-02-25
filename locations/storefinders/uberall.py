@@ -54,6 +54,9 @@ class UberallSpider(Spider, AutomaticSpiderGenerator):
         yield item
 
     def storefinder_exists(response: Response) -> bool | Request:
+        if response.xpath('//div[@id="store-finder-widget"]/@data-key').get():
+            return True
+
         # Example: https://www.yves-rocher.it/trova-il-tuo-negozio#!
         # <script src="https://uberall.com/assets/storeFinderWidget-v2.js"></script>
         if response.xpath('//script[contains(@src, "https://uberall.com/assets/storeFinderWidget-v2.js")]').get():
@@ -72,6 +75,7 @@ class UberallSpider(Spider, AutomaticSpiderGenerator):
         return False
 
     def extract_spider_attributes(response: Response) -> dict | Request:
-        return {
-            "allowed_domains": [urlparse(response.url).netloc],
-        }
+        if response.xpath('//div[@id="store-finder-widget"]/@data-key').get():
+            return {
+                "key": response.xpath('//div[@id="store-finder-widget"]/@data-key').get()
+            }
