@@ -32,7 +32,7 @@ class StoremapperSpider(Spider, AutomaticSpiderGenerator):
         if len(response.xpath('//script[contains(text(), "https://www.storemapper.co/js/widget-3.min.js")]')) > 0:
             return True
 
-        if len(response.xpath('//script[contains(src(), "https://www.storemapper.co/js/widget-3.min.js")]')) > 0:
+        if len(response.xpath('//script[contains(@src, "https://www.storemapper.co/js/widget-3.min.js")]')) > 0:
             return True
 
         if len(response.xpath('//div[id="storemapper")]')) > 0:
