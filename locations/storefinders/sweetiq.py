@@ -1,13 +1,15 @@
 import chompjs
+from urllib.parse import urlparse
 from scrapy import Request, Spider
-from scrapy.http import JsonRequest
+from scrapy.http import JsonRequest, Response
 
+from locations.automatic_spider_generator import AutomaticSpiderGenerator
 from locations.categories import PaymentMethods, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
 
-class SweetIQSpider(Spider):
+class SweetIQSpider(Spider, AutomaticSpiderGenerator):
     dataset_attributes = {"source": "api", "api": "sweetiq.com"}
     request_batch_size = 10
 
@@ -73,3 +75,19 @@ class SweetIQSpider(Spider):
 
     def parse_item(self, item, location, **kwargs):
         yield item
+
+
+    def storefinder_exists(response: Response) -> bool | Request:
+        # Example: https://locations.thepaperstore.com/
+        if response.xpath('//script[contains(text(), "__SLS_REDUX_STATE__")]').get():
+            return True
+
+        if response.xpath('//script[contains(@src, "sls-cdn.sweetiq.com"]').get():
+            return True
+
+        return False
+
+    def extract_spider_attributes(response: Response) -> dict | Request:
+        return {
+            "allowed_domains": [urlparse(response.url).netloc],
+        }
