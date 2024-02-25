@@ -2,7 +2,6 @@ import csv
 
 import scrapy
 
-from locations.categories import Categories
 from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.searchable_points import open_searchable_points
