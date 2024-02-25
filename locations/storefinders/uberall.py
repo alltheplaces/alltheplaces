@@ -51,6 +51,9 @@ class UberallSpider(Spider, AutomaticSpiderGenerator):
 
             yield from self.parse_item(item, feature)
 
+    def parse_item(self, item, feature, **kwargs):
+        yield item
+
     def storefinder_exists(response: Response) -> bool | Request:
         # Example: https://www.yves-rocher.it/trova-il-tuo-negozio#!
         # <script src="https://uberall.com/assets/storeFinderWidget-v2.js"></script>
