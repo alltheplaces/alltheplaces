@@ -10,7 +10,7 @@ Windows users may need to follow some extra steps, please follow the [scrapy doc
 
 #### Codespaces
 
-To explore the project, or run a scraoer experimentally, use the Github Codespaces tooling to start up a premade docker container.
+To explore the project, or run a scraper experimentally, use the Github Codespaces tooling to start up a premade docker container.
 
 #### Docker
 
