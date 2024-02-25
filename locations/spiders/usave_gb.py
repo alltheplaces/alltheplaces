@@ -10,3 +10,4 @@ class USaveGBSpider(WPStoreLocatorSpider):
     allowed_domains = [
         "www.usave.org.uk",
     ]
+    time_format = "%I:%M %p"
