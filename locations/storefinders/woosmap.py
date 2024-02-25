@@ -1,6 +1,7 @@
+from urllib.parse import urlparse
+
 from scrapy import Spider
 from scrapy.http import JsonRequest, Request, Response
-from urllib.parse import urlparse
 
 from locations.automatic_spider_generator import AutomaticSpiderGenerator
 from locations.dict_parser import DictParser
@@ -82,9 +83,6 @@ class WoosmapSpider(Spider, AutomaticSpiderGenerator):
         # Example: https://www.decathlon.fr/store-locator
         if response.xpath('//script[contains(text(), "woosmapApiKey")]').get():
             return True
-
-
-
 
         return False
 
