@@ -82,7 +82,7 @@ class SweetIQSpider(Spider, AutomaticSpiderGenerator):
         if response.xpath('//script[contains(text(), "__SLS_REDUX_STATE__")]').get():
             return True
 
-        if response.xpath('//script[contains(@src, "sls-cdn.sweetiq.com"]').get():
+        if response.xpath('//script[contains(@src, "sls-cdn.sweetiq.com")]').get():
             return True
 
         return False
