@@ -8,6 +8,14 @@ A project to generate [point of interest (POI)](https://en.wikipedia.org/wiki/Po
 
 Windows users may need to follow some extra steps, please follow the [scrapy docs](https://docs.scrapy.org/en/latest/intro/install.html#windows) for up to date details.
 
+#### Codespaces
+
+To explore the project, or run a scraoer experimentally, use the Github Codespaces tooling to start up a premade docker container.
+
+#### Docker
+
+Clone and run the associated docker file to configure a full environment, optimised towards production use.
+
 #### Ubuntu
 
 These instructions were tested with Ubuntu 22.04.1 LTS on 2024-02-21.
