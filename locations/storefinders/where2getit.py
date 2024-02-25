@@ -1,7 +1,9 @@
 import pycountry
 from scrapy import Spider
-from scrapy.http import JsonRequest
+from scrapy.http import JsonRequest, Response, Request
+from urllib.parse import urlparse
 
+from locations.automatic_spider_generator import AutomaticSpiderGenerator
 from locations.dict_parser import DictParser
 from locations.items import Feature
 
@@ -69,7 +71,7 @@ from locations.items import Feature
 # example, by city of each location.
 
 
-class Where2GetItSpider(Spider):
+class Where2GetItSpider(Spider, AutomaticSpiderGenerator):
     dataset_attributes = {"source": "api", "api": "where2getit.com"}
     custom_settings = {"ROBOTSTXT_OBEY": False}
     api_endpoint = ""
@@ -161,3 +163,26 @@ class Where2GetItSpider(Spider):
 
     def parse_item(self, item: Feature, location: dict, **kwargs):
         yield item
+
+    def storefinder_exists(response: Response) -> bool | Request:
+        # Example: https://www.att.com/stores/
+        # <script>
+        #     let locationsCount;
+        #     var W2GI = {
+        #         config: {
+        #             appkey: '...',
+        if response.xpath('//script[contains(text(), "W2GI")]').get():
+            return True
+
+        # https://locations.vans.com/index.html
+        # <script type="text/javascript" src="/w2gi/javascript/ace/2.1/W2GI_core.js"></script>
+        if response.xpath('//script[contains(@src, "W2GI")]').get():
+            return True
+
+        return False
+
+    def extract_spider_attributes(response: Response) -> dict | Request:
+        return {
+            "allowed_domains": [urlparse(response.url).netloc],
+            "api_key": 'Inspect //script[contains(text(), "W2GI")]/text() manually',  # response.xpath('//script[contains(text(), "W2GI")]/text()').get() # TODO: Extract appkey: (api key from script)
+        }
