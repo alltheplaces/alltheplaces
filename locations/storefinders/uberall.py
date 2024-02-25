@@ -1,5 +1,4 @@
 import logging
-
 from urllib.parse import urlparse
 
 from scrapy import Spider
@@ -65,7 +64,9 @@ class UberallSpider(Spider, AutomaticSpiderGenerator):
         # TODO: Needs playwright to detect this properly in most cases
         # Loads into the DOM:
         # <script type="module" src="https://locator.uberall.com/locator-assets/store-finder-widget-bundle-v2-modern.js?b=My4xODQuMjU="></script>
-        if response.xpath('//script[contains(@src, "https://locator.uberall.com/locator-assets/store-finder-widget-bundle-v2-modern.js")]').get():
+        if response.xpath(
+            '//script[contains(@src, "https://locator.uberall.com/locator-assets/store-finder-widget-bundle-v2-modern.js")]'
+        ).get():
             return True
 
         return False
