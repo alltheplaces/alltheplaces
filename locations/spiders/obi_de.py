@@ -6,7 +6,7 @@ from locations.structured_data_spider import StructuredDataSpider
 
 class ObiDESpider(CrawlSpider, StructuredDataSpider):
     name = "obi_de"
-    item_attributes = {"brand": "Obi", "brand_wikidata": "Q300518"}
+    item_attributes = {"brand": "OBI", "brand_wikidata": "Q300518"}
     allowed_domains = ["www.obi.de"]
     start_urls = ["https://www.obi.de/markt/index.html"]
     rules = [Rule(LinkExtractor(allow="https://www.obi.de/markt/.*"), callback="parse_sd")]
