@@ -1,8 +1,8 @@
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
-from locations.dict_parser import DictParser
 from locations.automatic_spider_generator import AutomaticSpiderGenerator
+from locations.dict_parser import DictParser
 
 
 class StoremapperSpider(Spider, AutomaticSpiderGenerator):
