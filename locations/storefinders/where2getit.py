@@ -179,10 +179,15 @@ class Where2GetItSpider(Spider, AutomaticSpiderGenerator):
         if response.xpath('//script[contains(@src, "W2GI")]').get():
             return True
 
+        # https://www.dollartree.com/store-locator
+        # https://www.familydollar.com/store-locator
+        if response.xpath('//script[contains(text(), "ccstoreui")]').get():
+            return True
+
         return False
 
     def extract_spider_attributes(response: Response) -> dict | Request:
         return {
             "allowed_domains": [urlparse(response.url).netloc],
-            "api_key": 'Inspect //script[contains(text(), "W2GI")]/text() manually',  # response.xpath('//script[contains(text(), "W2GI")]/text()').get() # TODO: Extract appkey: (api key from script)
+            "api_key": "Inspect browser console to determine",
         }
