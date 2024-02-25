@@ -10,3 +10,4 @@ class OhioCATUSSpider(WPStoreLocatorSpider):
     allowed_domains = [
         "ohiocat.com",
     ]
+    time_format = "%I:%M %p"
