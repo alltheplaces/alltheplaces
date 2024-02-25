@@ -1,5 +1,6 @@
-import chompjs
 from urllib.parse import urlparse
+
+import chompjs
 from scrapy import Request, Spider
 from scrapy.http import JsonRequest, Response
 
