@@ -9,7 +9,6 @@ from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.structured_data_spider import clean_facebook
 
-
 # Documentation for the Yext API is available at:
 # 1. https://hitchhikers.yext.com/docs/contentdeliveryapis/introduction/overview-policies-and-conventions/
 # 2. https://hitchhikers.yext.com/docs/contentdeliveryapis/legacy/entities
