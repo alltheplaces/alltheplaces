@@ -81,4 +81,3 @@ class UberallSpider(Spider, AutomaticSpiderGenerator):
             attribs["key"] = response.xpath('//div[@id="store-finder-widget"]/@data-key').get()
 
         return attribs
-
