@@ -1,3 +1,5 @@
+from urllib.parse import urljoin
+
 from scrapy import Spider
 
 from locations.categories import Extras, apply_yes_no
@@ -9,11 +11,12 @@ from locations.spiders.vets4pets_gb import set_located_in
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class KFCGB(Spider):
+class KFCGBSpider(Spider):
     name = "kfc_gb"
     item_attributes = KFC_SHARED_ATTRIBUTES
     start_urls = ["https://www.kfc.co.uk/cms/api/data/restaurants_all"]
     user_agent = BROWSER_DEFAULT
+    requires_proxy = True
 
     def parse(self, response, **kwargs):
         for location in response.json():
@@ -24,8 +27,8 @@ class KFCGB(Spider):
             location["id"] = location.pop("storeid")
 
             item = DictParser.parse(location)
-
-            item["website"] = "https://www.kfc.co.uk" + location["link"]
+            if slug := location.get("link"):
+                item["website"] = urljoin("https://www.kfc.co.uk/", slug)
 
             for h in location["hours"]:
                 if h["type"] == "Standard":
