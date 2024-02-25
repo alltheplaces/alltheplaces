@@ -24,6 +24,7 @@ class StorefinderDetectorSpider(Spider):
         },
         "TWISTED_REACTOR": "twisted.internet.asyncioreactor.AsyncioSelectorReactor",
     }
+    is_playwright_spider = True
     user_agent = BROWSER_DEFAULT
     parameters = {
         "brand": None,
@@ -53,6 +54,13 @@ class StorefinderDetectorSpider(Spider):
         # For invoking from other areas - where we may already have a lot of this information, this work in the constructor doubles efforts
         # Consider shifting up to the caller
         self.automatically_set_parameters()
+
+    def start_requests(self):
+        for url in self.start_urls:
+            yield Request(
+                url=url,
+                meta={"playwright": True, "playwright_include_page": True},
+            )
 
     def automatically_set_brand_or_operator_from_start_url(self):
         """
