@@ -172,7 +172,7 @@ class Where2GetItSpider(Spider, AutomaticSpiderGenerator):
         #     var W2GI = {
         #         config: {
         #             appkey: '...',
-        if response.xpath('//script[contains(text(), "W2GI")]').get():
+        if response.xpath('//script[contains(text(), "var W2GI = {")]').get():
             return True
 
         # https://locations.vans.com/index.html
