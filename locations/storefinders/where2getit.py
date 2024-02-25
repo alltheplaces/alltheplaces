@@ -181,6 +181,7 @@ class Where2GetItSpider(Spider, AutomaticSpiderGenerator):
 
         # https://www.dollartree.com/store-locator
         # https://www.familydollar.com/store-locator
+        # "Oracle Commerce Cloud"
         if response.xpath('//script[contains(text(), "ccstoreui")]').get():
             return True
 
