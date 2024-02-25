@@ -1,11 +1,14 @@
 import datetime
+from urllib.parse import urlparse
 
-from scrapy import Spider
-from scrapy.http import JsonRequest
+from scrapy import Selector, Spider
+from scrapy.http import JsonRequest, Request, Response
 
+from locations.automatic_spider_generator import AutomaticSpiderGenerator
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.structured_data_spider import clean_facebook
+
 
 # Documentation for the Yext API is available at:
 # 1. https://hitchhikers.yext.com/docs/contentdeliveryapis/introduction/overview-policies-and-conventions/
@@ -18,7 +21,7 @@ from locations.structured_data_spider import clean_facebook
 # to extract additional location data and to make corrections to automatically extracted location data.
 
 
-class YextSpider(Spider):
+class YextSpider(Spider, AutomaticSpiderGenerator):
     api_key = ""
     api_version = ""
     search_filter = "{}"
@@ -84,3 +87,14 @@ class YextSpider(Spider):
 
     def parse_item(self, item, location, **kwargs):
         yield item
+
+    def storefinder_exists(response: Response) -> bool | Request:
+        # "https://cdn.yextapis.com/v2/accounts/me/entities?api_key=
+        if response.xpath('//script[contains(text(), "window.Yext")]').get():
+            return True
+        return False
+
+    def extract_spider_attributes(response: Response) -> dict | Request:
+        return {
+            "allowed_domains": [urlparse(response.url).netloc],
+        }
