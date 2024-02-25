@@ -60,7 +60,7 @@ class AmastyStoreLocatorSpider(Spider, AutomaticSpiderGenerator):
     def storefinder_exists(response: Response) -> bool | Request:
         # Example: https://www.aussiedisposals.com.au/store-locator/
         # Example: https://www.lcbo.com/en/stores/
-        if response.xpath('//script[contains(@text, "/amlocator/index/ajax/")]/@text').get():
+        if response.xpath('//script[contains(text(), "/amlocator/index/ajax/")]/text()').get():
             return True
 
         return False
