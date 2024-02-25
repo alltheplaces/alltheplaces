@@ -174,6 +174,11 @@ class Where2GetItSpider(Spider, AutomaticSpiderGenerator):
         if response.xpath('//script[contains(text(), "W2GI")]').get():
             return True
 
+        # https://locations.vans.com/index.html
+        # <script type="text/javascript" src="/w2gi/javascript/ace/2.1/W2GI_core.js"></script>
+        if response.xpath('//script[contains(@src, "W2GI")]').get():
+            return True
+
         return False
 
     def extract_spider_attributes(response: Response) -> dict | Request:
