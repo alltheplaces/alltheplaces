@@ -76,7 +76,6 @@ class SweetIQSpider(Spider, AutomaticSpiderGenerator):
     def parse_item(self, item, location, **kwargs):
         yield item
 
-
     def storefinder_exists(response: Response) -> bool | Request:
         # Example: https://locations.thepaperstore.com/
         if response.xpath('//script[contains(text(), "__SLS_REDUX_STATE__")]').get():
