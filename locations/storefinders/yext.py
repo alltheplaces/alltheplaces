@@ -92,9 +92,16 @@ class YextSpider(Spider, AutomaticSpiderGenerator):
         # "https://cdn.yextapis.com/v2/accounts/me/entities?api_key=
         if response.xpath('//script[contains(text(), "window.Yext")]').get():
             return True
+
         # https://locations.cariboucoffee.com/
         if response.xpath('//script[contains(text(), "locator-google")]').get():
             return True
+
+        # https://www.fnb-online.com/atm-branch-locator
+        # As per https://hitchhikers.yext.com/guides/add-searchbar-guide/01-intializethelibrary/
+        if response.xpath('//script[contains(@src, "answers-search-bar")]').get():
+            return True
+
         return False
 
     def extract_spider_attributes(response: Response) -> dict | Request:
