@@ -9,18 +9,16 @@ class ThomasPhilippsSpider(Spider):
     name = "thomas_philipps"
     item_attributes = {"brand": "Thomas Philipps", "brand_wikidata": "Q1424735"}
 
-    payload = {
-        "coordinateX": 52.52000659999999,
-        "coordinateY": 13.404954,
-        "listId": "5f1b4bf48edf4a7abc7856616fe5097c",
-        "displayMode": "list",
-        "count": 10000,
-    }
-
     def start_requests(self):
         yield JsonRequest(
             "https://www.thomas-philipps.de/od/maps/getLocations",
-            data=self.payload,
+            data={
+                "coordinateX": 52.52000659999999,
+                "coordinateY": 13.404954,
+                "listId": "5f1b4bf48edf4a7abc7856616fe5097c",
+                "displayMode": "list",
+                "count": 10000,
+            },
         )
 
     def parse(self, response: Response):
