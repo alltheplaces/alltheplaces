@@ -18,7 +18,6 @@ class GeneralLogisticsSystemsSpider(scrapy.Spider):
         "brand": "General Logistics Systems",
         "brand_wikidata": "Q46495823",
         "country": "DE",
-        "extras": Categories.POST_OFFICE.value,
     }
 
     def start_requests(self):
