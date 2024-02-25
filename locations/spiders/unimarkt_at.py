@@ -1,5 +1,6 @@
 from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
 
+
 class UnimarktATSpider(WPStoreLocatorSpider):
     name = "unimarkt_at"
     item_attributes = {
