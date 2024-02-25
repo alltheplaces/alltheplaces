@@ -1,12 +1,15 @@
-from scrapy import Spider
-from scrapy.http import JsonRequest
+from urllib.parse import urlparse
 
+from scrapy import Spider
+from scrapy.http import JsonRequest, Request, Response
+
+from locations.automatic_spider_generator import AutomaticSpiderGenerator
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.items import Feature
 
 
-class StoreRocketSpider(Spider):
+class StoreRocketSpider(Spider, AutomaticSpiderGenerator):
     dataset_attributes = {"source": "api", "api": "storerocket.io"}
 
     storerocket_id = ""
@@ -41,3 +44,25 @@ class StoreRocketSpider(Spider):
 
     def parse_item(self, item: Feature, location: dict, **kwargs):
         yield item
+
+    def storefinder_exists(response: Response) -> bool | Request:
+        # Example: # https://barre3.com/studio-locations
+        # Only after DOM load
+        # <script id="store-rocket-script" src="https://cdn.storerocket.io/widget.js"></script>
+
+        # Example: https://soapynoble.com/
+        # <script type="text/javascript" async="" src="https://cdn.storerocket.io/js/widget-mb.js"></script>
+        if response.xpath('//script[contains(@src, "https://cdn.storerocket.io/widget")]').get():
+            return True
+
+        # Example: https://soapynoble.com/
+        # Example: https://ribcrib.com/locations/
+        if response.xpath('//div[@id="storerocket-widget"]').get():
+            return True
+
+        return False
+
+    def extract_spider_attributes(response: Response) -> dict | Request:
+        return {
+            "allowed_domains": [urlparse(response.url).netloc],
+        }
