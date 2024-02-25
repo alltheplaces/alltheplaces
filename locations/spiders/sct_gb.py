@@ -1,8 +1,8 @@
 from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
 
 
-class SCTSpider(WPStoreLocatorSpider):
-    name = "sct"
+class SCTGBSpider(WPStoreLocatorSpider):
+    name = "sct_gb"
     item_attributes = {
         "brand_wikidata": "Q107463316",
         "brand": "Spitalfields Crypt Trust",
