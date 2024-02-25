@@ -46,7 +46,7 @@ class StoreRocketSpider(Spider, AutomaticSpiderGenerator):
         yield item
 
     def storefinder_exists(response: Response) -> bool | Request:
-        # Example: # https://barre3.com/studio-locations
+        # Example: https://barre3.com/studio-locations
         # Only after DOM load
         # <script id="store-rocket-script" src="https://cdn.storerocket.io/widget.js"></script>
 
@@ -63,6 +63,11 @@ class StoreRocketSpider(Spider, AutomaticSpiderGenerator):
         return False
 
     def extract_spider_attributes(response: Response) -> dict | Request:
-        return {
-            "allowed_domains": [urlparse(response.url).netloc],
-        }
+        attribs = {}
+
+        if response.xpath('//div[@id="storerocket-widget"]/@data-storerocket-id').get():
+            attribs["storerocket_id"] = response.xpath('//div[@id="storerocket-widget"]/@data-storerocket-id').get()
+
+        # TODO: https://barre3.com/studio-locations and similar inject JavaScript into a Playwright page for this URL to extract the key from object Window.StoreRocket.configs.projectId which in this case is jN49m3n4Gy
+
+        return attribs
