@@ -202,6 +202,7 @@ def test_get_variations():
 
     assert any("Postcode" in DictParser.get_variations(key) for key in DictParser.postcode_keys)
 
+
 def test_get_first_key():
     ref_keys = [
         "storeid",
