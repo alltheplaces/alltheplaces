@@ -1,7 +1,8 @@
+from urllib.parse import urlparse
+
 import pycountry
 from scrapy import Spider
-from scrapy.http import JsonRequest, Response, Request
-from urllib.parse import urlparse
+from scrapy.http import JsonRequest, Request, Response
 
 from locations.automatic_spider_generator import AutomaticSpiderGenerator
 from locations.dict_parser import DictParser
