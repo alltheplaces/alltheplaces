@@ -1,5 +1,4 @@
 import logging
-
 from urllib.parse import urlparse
 
 from scrapy import Spider
@@ -55,6 +54,9 @@ class UberallSpider(Spider, AutomaticSpiderGenerator):
         yield item
 
     def storefinder_exists(response: Response) -> bool | Request:
+        if response.xpath('//div[@id="store-finder-widget"]/@data-key').get():
+            return True
+
         # Example: https://www.yves-rocher.it/trova-il-tuo-negozio#!
         # <script src="https://uberall.com/assets/storeFinderWidget-v2.js"></script>
         if response.xpath('//script[contains(@src, "https://uberall.com/assets/storeFinderWidget-v2.js")]').get():
@@ -65,12 +67,17 @@ class UberallSpider(Spider, AutomaticSpiderGenerator):
         # TODO: Needs playwright to detect this properly in most cases
         # Loads into the DOM:
         # <script type="module" src="https://locator.uberall.com/locator-assets/store-finder-widget-bundle-v2-modern.js?b=My4xODQuMjU="></script>
-        if response.xpath('//script[contains(@src, "https://locator.uberall.com/locator-assets/store-finder-widget-bundle-v2-modern.js")]').get():
+        if response.xpath(
+            '//script[contains(@src, "https://locator.uberall.com/locator-assets/store-finder-widget-bundle-v2-modern.js")]'
+        ).get():
             return True
 
         return False
 
     def extract_spider_attributes(response: Response) -> dict | Request:
-        return {
-            "allowed_domains": [urlparse(response.url).netloc],
-        }
+        attribs = {}
+
+        if response.xpath('//div[@id="store-finder-widget"]/@data-key').get():
+            attribs["key"] = response.xpath('//div[@id="store-finder-widget"]/@data-key').get()
+
+        return attribs

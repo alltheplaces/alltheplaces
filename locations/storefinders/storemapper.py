@@ -26,7 +26,7 @@ class StoremapperSpider(Spider, AutomaticSpiderGenerator):
     @staticmethod
     def storefinder_exists(response: Response) -> bool:
         # Example: https://francescas.com/store-locator
-        if len(response.xpath("//script[@data-storemapper-id]/@data-storemapper-id")) > 0:
+        if len(response.xpath("//script/@data-storemapper-id")) > 0:
             return True
 
         if len(response.xpath('//script[contains(text(), "https://www.storemapper.co/js/widget-3.min.js")]')) > 0:
@@ -43,5 +43,5 @@ class StoremapperSpider(Spider, AutomaticSpiderGenerator):
     @staticmethod
     def extract_spider_attributes(response: Response) -> dict:
         return {
-            "key": response.xpath("//script[@data-storemapper-id]/@data-storemapper-id").get(),
+            "key": response.xpath("//script/@data-storemapper-id").get(),
         }
