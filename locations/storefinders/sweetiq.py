@@ -89,7 +89,6 @@ class SweetIQSpider(Spider, AutomaticSpiderGenerator):
 
     def extract_spider_attributes(response: Response) -> dict | Request:
         attribs = {
-            "allowed_domains": [urlparse(response.url).netloc],
         }
 
         if response.xpath('//script[contains(text(), "__SLS_REDUX_STATE__")]').get():
