@@ -17,7 +17,11 @@ class SigmaITSpider(AgileStoreLocatorSpider):
     def parse_hours(self, response):
         item = response.meta["item"]
         item["website"] = response.url  # Capture any redirected URL
-        hours_string = " ".join(filter(None, map(str.strip, response.xpath('//span[contains(@class, "bkg_orari")]/span/span//text()').getall())))
+        hours_string = " ".join(
+            filter(
+                None, map(str.strip, response.xpath('//span[contains(@class, "bkg_orari")]/span/span//text()').getall())
+            )
+        )
         if hours_string:
             item["opening_hours"] = OpeningHours()
             item["opening_hours"].add_ranges_from_string(hours_string, days=DAYS_IT)
