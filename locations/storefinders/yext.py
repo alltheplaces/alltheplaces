@@ -92,6 +92,9 @@ class YextSpider(Spider, AutomaticSpiderGenerator):
         # "https://cdn.yextapis.com/v2/accounts/me/entities?api_key=
         if response.xpath('//script[contains(text(), "window.Yext")]').get():
             return True
+        # https://locations.cariboucoffee.com/
+        if response.xpath('//script[contains(text(), "locator-google")]').get():
+            return True
         return False
 
     def extract_spider_attributes(response: Response) -> dict | Request:
