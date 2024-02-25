@@ -1,10 +1,11 @@
 from scrapy import Spider
-from scrapy.http import JsonRequest
+from scrapy.http import JsonRequest, Response
 
+from locations.automatic_spider_generator import AutomaticSpiderGenerator
 from locations.dict_parser import DictParser
 
 
-class StoremapperSpider(Spider):
+class StoremapperSpider(Spider, AutomaticSpiderGenerator):
     dataset_attributes = {"source": "api", "api": "storemapper.com"}
 
     key = ""
@@ -21,3 +22,26 @@ class StoremapperSpider(Spider):
 
     def parse_item(self, item, location, **kwargs):
         yield item
+
+    @staticmethod
+    def storefinder_exists(response: Response) -> bool:
+        # Example: https://francescas.com/store-locator
+        if len(response.xpath("//script/@data-storemapper-id")) > 0:
+            return True
+
+        if len(response.xpath('//script[contains(text(), "https://www.storemapper.co/js/widget-3.min.js")]')) > 0:
+            return True
+
+        if len(response.xpath('//script[contains(@src, "https://www.storemapper.co/js/widget-3.min.js")]')) > 0:
+            return True
+
+        if len(response.xpath('//div[id="storemapper"]')) > 0:
+            return True
+
+        return False
+
+    @staticmethod
+    def extract_spider_attributes(response: Response) -> dict:
+        return {
+            "key": response.xpath("//script/@data-storemapper-id").get(),
+        }
