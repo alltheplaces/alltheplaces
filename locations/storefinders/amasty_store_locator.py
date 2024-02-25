@@ -1,5 +1,7 @@
 from scrapy import Request, Selector, Spider
+from scrapy.http import Response
 
+from locations.automatic_spider_generator import AutomaticSpiderGenerator
 from locations.dict_parser import DictParser
 
 # This store finder is provided as an extension either for Magento
@@ -23,7 +25,7 @@ from locations.dict_parser import DictParser
 # popup_html.xpath(...) queries.
 
 
-class AmastyStoreLocatorSpider(Spider):
+class AmastyStoreLocatorSpider(Spider, AutomaticSpiderGenerator):
     def start_requests(self):
         if len(self.start_urls) == 0:
             for domain in self.allowed_domains:
@@ -52,3 +54,14 @@ class AmastyStoreLocatorSpider(Spider):
 
     def parse_item(self, item, location, popup_html):
         yield item
+
+    def storefinder_exists(response: Response) -> bool | Request:
+        # Example: https://www.aussiedisposals.com.au/store-locator/
+        # TODO: Consider amlocator-stores-wrapper?
+        if response.xpath('//script[contains(@text, "/amlocator/index/ajax/")]').get():
+            return True
+
+        return False
+
+    def extract_spider_attributes(response: Response) -> dict | Request:
+        return {}
