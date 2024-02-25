@@ -43,5 +43,5 @@ class StoremapperSpider(Spider, AutomaticSpiderGenerator):
     @staticmethod
     def extract_spider_attributes(response: Response) -> dict:
         return {
-            "key": response.xpath("//script[@data-storemapper-id]/@data-storemapper-id").get(),
+            "key": response.xpath("//script/@data-storemapper-id").get(),
         }
