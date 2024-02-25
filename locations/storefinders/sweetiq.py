@@ -88,8 +88,7 @@ class SweetIQSpider(Spider, AutomaticSpiderGenerator):
         return False
 
     def extract_spider_attributes(response: Response) -> dict | Request:
-        attribs = {
-        }
+        attribs = {}
 
         if response.xpath('//script[contains(text(), "__SLS_REDUX_STATE__")]').get():
             attribs["start_urls"] = [response.url]
