@@ -15,7 +15,12 @@ class TheBarreCodeUSSpider(CrawlSpider):
     }
     allowed_domains = ["thebarrecode.com"]
     start_urls = ["https://thebarrecode.com/locations/"]
-    rules = [Rule(LinkExtractor(restrict_xpaths='//ul[@id="maplocationsectionbottom"]//a[contains(text(), "Visit Site")]'), callback="parse")]
+    rules = [
+        Rule(
+            LinkExtractor(restrict_xpaths='//ul[@id="maplocationsectionbottom"]//a[contains(text(), "Visit Site")]'),
+            callback="parse",
+        )
+    ]
 
     def parse(self, response):
         properties = {
