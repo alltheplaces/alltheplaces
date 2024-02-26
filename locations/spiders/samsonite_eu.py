@@ -1,6 +1,7 @@
 import scrapy
 import xmltodict
 
+from locations.categories import apply_category
 from locations.items import Feature, add_social_media
 
 
@@ -87,5 +88,5 @@ class SamsoniteEuSpider(scrapy.Spider):
                         add_social_media(item, "WhatsApp", whats_app.strip(" :"))
 
                     item["phone"] = phone
-
+                apply_category({"shop": "bag"}, item)
                 yield item

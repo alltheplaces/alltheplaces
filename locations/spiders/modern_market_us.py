@@ -1,7 +1,7 @@
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
-from locations.categories import Extras, apply_yes_no
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
@@ -37,4 +37,5 @@ class ModernMarketUSSpider(Spider):
                                 calendar["ranges"][i]["end"].split(" ", 1)[1],
                             )
                     break
+            apply_category(Categories.RESTAURANT, item)
             yield item

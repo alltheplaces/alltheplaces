@@ -9,7 +9,6 @@ from scrapy.http import Request, Response
 from locations.automatic_spider_generator import AutomaticSpiderGenerator
 from locations.items import GeneratedSpider
 from locations.name_suggestion_index import NSI
-from locations.storefinders import *
 from locations.user_agents import BROWSER_DEFAULT
 
 

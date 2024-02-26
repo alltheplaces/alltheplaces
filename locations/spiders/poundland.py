@@ -12,7 +12,7 @@ class PoundlandSpider(WoosmapSpider):
     def parse_item(self, item: Feature, feature: dict, **kwargs):
         item["branch"] = item.pop("name")
 
-        if "Pep Shop" in feature["properties"]["tags"]:
+        if "Pep Shop" in feature["properties"]["tags"] or item["branch"].startswith("Pep & Co "):
             pep = item.deepcopy()
 
             pep["ref"] = pep["ref"] + "_pep"
@@ -24,6 +24,9 @@ class PoundlandSpider(WoosmapSpider):
             pep["located_in_wikidata"] = self.item_attributes["brand_wikidata"]
 
             yield pep
+
+        if item["branch"].startswith("Pep & Co "):
+            return
 
         apply_yes_no(Extras.ATM, item, "ATM" in feature["properties"]["tags"])
         item["extras"]["icestore"] = "yes" if "Ice Store" in feature["properties"]["tags"] else "no"

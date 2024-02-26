@@ -5,12 +5,13 @@ from scrapy.http import Response
 
 from locations.google_url import extract_google_position
 from locations.items import Feature
+from locations.spiders.taco_bell import TACO_BELL_SHARED_ATTRIBUTES
 from locations.spiders.vapestore_gb import clean_address
 
 
 class TacoBellINSpider(Spider):
     name = "taco_bell_in"
-    item_attributes = {"brand": "Taco Bell", "brand_wikidata": "Q752941"}
+    item_attributes = TACO_BELL_SHARED_ATTRIBUTES
     start_urls = ["https://www.tacobell.co.in/find-us"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:

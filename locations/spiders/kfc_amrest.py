@@ -1,9 +1,10 @@
+from locations.spiders.kfc import KFC_SHARED_ATTRIBUTES
 from locations.storefinders.amrest_eu import AmrestEUSpider
 
 
 class KfcAmrestSpider(AmrestEUSpider):
     name = "kfc_amrest"
-    item_attributes = {"brand": "KFC", "brand_wikidata": "Q524757"}
+    item_attributes = KFC_SHARED_ATTRIBUTES
     base_urls = [
         "https://api.amrest.eu/amdv/ordering-api/KFC_PL/",  # https://kfc.pl/en/restaurants
         "https://api.amrest.eu/amdv/ordering-api/KFC_HU/",  # https://kfc.hu/en/restaurants

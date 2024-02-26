@@ -37,7 +37,7 @@ class RompetrolSpider(Spider):
 
             apply_category(Categories.FUEL_STATION, item)
 
-            apply_yes_no("fuel:electric", item, "34" in location["services"])
+            apply_yes_no(Fuel.ELECTRIC, item, "34" in location["services"])
             apply_yes_no("laundry_service", item, "33" in location["services"])
             apply_yes_no(Extras.COMPRESSED_AIR, item, "20" in location["services"])
             apply_yes_no("food", item, "17" in location["services"])

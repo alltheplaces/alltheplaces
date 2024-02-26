@@ -9,6 +9,11 @@ from locations.items import Feature
 
 
 class NewspowerAUSpider(SitemapSpider):
+    # Whilst WP Store Locator is used for this brand, it is set to
+    # return at most the 5 closest points to a provided search
+    # coordinate. There is an impractical number of search requests
+    # thus required to use the WP Store Locator store finder API.
+    # A Sitemap spider is used instead.
     name = "newspower_au"
     item_attributes = {"brand": "Newspower", "brand_wikidata": "Q120670137"}
     allowed_domains = ["newspower.com.au"]
@@ -16,7 +21,11 @@ class NewspowerAUSpider(SitemapSpider):
         "https://newspower.com.au/wpsl_stores-sitemap1.xml",
         "https://newspower.com.au/wpsl_stores-sitemap2.xml",
     ]
-    sitemap_rules = [("/stores/", "parse")]
+    sitemap_rules = [(r"^https:\/\/newspower\.com\.au\/stores/[^/]+\/$", "parse")]
+    # Server will redirect wpsl_stores-sitemap2.xml to
+    # https://newspower.com.au/store-locator/ if it doesn't like
+    # the country/netblock requesting the page.
+    requires_proxy = True
 
     def parse(self, response):
         map_marker_js_blob = response.xpath('//script[contains(text(), "var wpslMap_0 = ")]/text()').get()

@@ -28,7 +28,7 @@ class AccorSpider(WoosmapSpider):
         "MEI": {"brand": "Mercure", "brand_wikidata": "Q1709809"},
         "MEL": {"brand": "Mercure", "brand_wikidata": "Q1709809"},
         "SEB": {"brand": "The Sebel", "brand_wikidata": "Q110888248"},
-        "HOF": {"brand": "Hotel F1 ", "brand_wikidata": "Q1630895"},
+        "HOF": {"brand": "hotelF1", "brand_wikidata": "Q1630895"},
         "MGA": {"brand": "MGallery", "brand_wikidata": "Q25419207"},
         "MGS": {"brand": "MGallery", "brand_wikidata": "Q25419207"},
         "SOF": {"brand": "Sofitel", "brand_wikidata": "Q749431"},

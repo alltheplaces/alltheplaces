@@ -5,11 +5,12 @@ from scrapy.spiders import Spider
 
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
+from locations.spiders.taco_bell import TACO_BELL_SHARED_ATTRIBUTES
 
 
 class TacoBellFISpider(Spider):
     name = "taco_bell_fi"
-    item_attributes = {"brand": "Taco Bell", "brand_wikidata": "Q752941"}
+    item_attributes = TACO_BELL_SHARED_ATTRIBUTES
     start_urls = ["https://www.tacobell.fi/page-data/ravintolat/page-data.json"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:

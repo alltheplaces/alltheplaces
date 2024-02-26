@@ -96,6 +96,6 @@ class CaltexSpider(Spider):
                 apply_yes_no(Fuel.ADBLUE, item, "Bulk AdBlue" in location["fuelsName"], False)
                 apply_yes_no(Fuel.KEROSENE, item, "Kerosene" in location["fuelsName"], False)
 
-                apply_category(Categories.FUEL_STATION, item)
+            apply_category(Categories.FUEL_STATION, item)
 
             yield item

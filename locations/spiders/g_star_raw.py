@@ -44,9 +44,9 @@ class GStarRawSpider(scrapy.Spider):
                         day=day.lower(),
                         open_time=data.get(day.lower()).split(" - ")[0],
                         close_time=data.get(day.lower()).split(" - ")[0],
-                        time_format="%I:%M %p"
-                        if "PM" in data.get(day.lower()) or "AM" in data.get(day.lower())
-                        else "%H:%M",
+                        time_format=(
+                            "%I:%M %p" if "PM" in data.get(day.lower()) or "AM" in data.get(day.lower()) else "%H:%M"
+                        ),
                     )
 
                 item["opening_hours"] = oh.as_opening_hours()
