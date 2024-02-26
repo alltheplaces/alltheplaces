@@ -1,6 +1,6 @@
-from typing import Any, Iterable
+from typing import Any
 
-from scrapy import Request, Spider
+from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.items import Feature
@@ -11,18 +11,24 @@ class FirstNationalRealEstateAUSpider(Spider):
     name = "first_national_real_estate_au"
     item_attributes = {"brand": "First National Real Estate", "brand_wikidata": "Q122888198"}
     allowed_domains = ["www.firstnational.com.au"]
+    start_urls = ["https://www.firstnational.com.au/pages/real-estate/offices"]
+    api_url_template = ""
 
     def make_request(self, page: int) -> JsonRequest:
-        return JsonRequest(
-            "https://www.firstnational.com.au/pages/real-estate/offices?widgetKey=200204&context=offices&pattern=offices&pg={}".format(
-                page
-            )
-        )
+        next_page_url = self.api_url_template.format(page)
+        return JsonRequest(url=next_page_url, callback=self.parse_results_page)
 
-    def start_requests(self) -> Iterable[Request]:
+    def parse(self, response):
+        api_url_path = (
+            response.xpath('//button[@hx-get and contains(@hx-target, "#load-offices-")]/@hx-get')
+            .get()
+            .replace("&pg=2", "&pg={}")
+            .replace("&returnAs=markup", "")
+        )
+        self.api_url_template = f"https://{self.allowed_domains[0]}{api_url_path}"
         yield self.make_request(1)
 
-    def parse(self, response: Response, **kwargs: Any) -> Any:
+    def parse_results_page(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json()["offices"]:
             item = Feature()
             item["ref"] = location["id"]

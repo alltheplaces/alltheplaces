@@ -15,7 +15,7 @@ class ApplyNSICategoriesPipeline:
         if not code:
             return item
 
-        if not self.wikidata_cache.get(code):
+        if code not in self.wikidata_cache:
             # wikidata_cache will usually only hold one thing, but can contain more with more complex spiders
             # The key thing is that we don't have to call nsi.iter_nsi on every process_item
             self.wikidata_cache[code] = list(self.nsi.iter_nsi(code))
