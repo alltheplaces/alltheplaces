@@ -11,3 +11,6 @@ class BuffaloExchangeUSSpider(WPStoreLocatorSpider):
         "buffaloexchange.com",
     ]
     time_format = "%I:%M %p"
+    start_urls = [
+        "https://buffaloexchange.com/wp-admin/admin-ajax.php?action=store_search&lat=38.19447&lng=-95.74276&max_results=1000&search_radius=1000"
+    ]
