@@ -1,4 +1,5 @@
 from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
+from urllib.parse import parse_qs, urlencode, urljoin, urlparse
 
 
 class BuffaloExchangeUSSpider(WPStoreLocatorSpider):
@@ -14,3 +15,8 @@ class BuffaloExchangeUSSpider(WPStoreLocatorSpider):
     searchable_points_files = ["us_centroids_iseadgg_458km_radius.csv"]
     search_radius = 1000
     max_results = 100
+
+    def parse_item(self, item, location):
+        item["website"] = urljoin("https://buffaloexchange.com", item["website"])
+
+        yield item
