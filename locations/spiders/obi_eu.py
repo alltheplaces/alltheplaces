@@ -3,10 +3,12 @@ from scrapy.spiders import CrawlSpider, Rule
 
 from locations.structured_data_spider import StructuredDataSpider
 
+OBI_SHARED_ATTRIBUTES = {"brand": "OBI", "brand_wikidata": "Q300518"}
+
 
 class ObiEUSpider(CrawlSpider, StructuredDataSpider):
     name = "obi_eu"
-    item_attributes = {"brand": "OBI", "brand_wikidata": "Q300518"}
+    item_attributes = OBI_SHARED_ATTRIBUTES
     start_urls = [
         "https://www.obi.at/markt/index.html",
         "https://www.obi.ch/markt/index.html",
