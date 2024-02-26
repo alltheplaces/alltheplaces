@@ -1,5 +1,6 @@
+from urllib.parse import urljoin
+
 from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
-from urllib.parse import parse_qs, urlencode, urljoin, urlparse
 
 
 class BuffaloExchangeUSSpider(WPStoreLocatorSpider):
