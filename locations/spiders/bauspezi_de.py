@@ -1,6 +1,7 @@
-from locations.categories import Categories, apply_category
-from locations.dict_parser import DictParser
 from scrapy import Spider
+
+from locations.dict_parser import DictParser
+
 
 class BauSpeziDESpider(Spider):
     name = "bauspezi_de"
