@@ -8,7 +8,7 @@ from locations.items import Feature
 
 class TierSpider(Spider):
     name = "tier"
-    item_attributes = {"name": "Tier", "brand": "Tier", "brand_wikidata": "Q63386916"}
+    item_attributes = {"name": "Tier", "operator": "Tier", "operator_wikidata": "Q63386916"}
 
     def start_requests(self) -> Iterable[Request]:
         yield JsonRequest(
