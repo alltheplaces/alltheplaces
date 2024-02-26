@@ -7,7 +7,7 @@ from locations.spiders.subway import SubwaySpider
 from locations.spiders.vapestore_gb import clean_address
 
 
-class SubwayTHpider(scrapy.Spider):
+class SubwayTHSpider(scrapy.Spider):
     name = "subway_th"
     item_attributes = SubwaySpider.item_attributes
     start_urls = ["https://www.subway.co.th/en/layouts/page_restaurant_locator.html"]
