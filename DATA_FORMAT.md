@@ -16,7 +16,9 @@ Although it's not supported at the time of this writing, we hope to include a ge
 
 ## Properties
 
-Each GeoJSON feature will have a `properties` object with as many of the following properties as possible, however only `@spider` is guaranteed:
+Each GeoJSON feature will have a `properties` object with as many of the following properties as possible, however only `@spider` is guaranteed.
+
+Note that data in general replicates what is provided by shop operator. As result inaccurate claims may be repeated if they were present at data source.
 
 | Name                  | Description |
 |-----------------------|---|
@@ -36,7 +38,7 @@ Each GeoJSON feature will have a `properties` object with as many of the followi
 | `addr:street`         | The street name.
 | `addr:street_address` | The street address, including street name and house number and/or name.
 | `addr:city`           | The city part of the address.
-| `addr:state`          | The state or province part of the address.
+| `addr:state`          | The state or province part of the address. Note that it may be in English or other language other than typicaly used address form in given location, it may be also not needed to specify an actual address.
 | `addr:postcode`       | The postcode part of the address.
 | `addr:country`        | The country part of the address.
 | **Contact**           | _Contact information for the venue_
