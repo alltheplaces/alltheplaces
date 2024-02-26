@@ -253,6 +253,7 @@ else
     curl --request GET \
          --silent \
          --url 'https://api.bunny.net/purge?url=https%3A%2F%2Fdata.alltheplaces.xyz%2Fruns%2Flatest.json&async=false' \
+         --header "AccessKey: ${BUNNY_API_KEY}" \
          --header 'accept: application/json'
 
     retval=$?
@@ -266,6 +267,7 @@ else
     curl --request GET \
          --silent \
          --url 'https://api.bunny.net/purge?url=https%3A%2F%2Fdata.alltheplaces.xyz%2Fruns%2Fhistory.json&async=false' \
+         --header "AccessKey: ${BUNNY_API_KEY}" \
          --header 'accept: application/json'
 
     retval=$?
