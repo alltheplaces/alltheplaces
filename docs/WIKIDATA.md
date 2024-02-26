@@ -94,7 +94,7 @@ of the tag set that the NSI is "suggesting" in this case.
 
 You may also notice that the bottom line has an `'id'` &ndash; an internal NSI
 identifier of the brand. This ID is not stable, so you shouldn't hardcode it into spiders.
-Instead, our pipeline will retrieve it directly from NSI each time the spider launches,
+Instead, our pipeline will retrieve it directly from NSI each time a spider launches,
 based on the Wikidata QID specified in the spider. If the brand/operator doesn't have a
 Wikidata QID in NSI, you can either [raise an issue in the
 NSI repository](https://github.com/osmlab/name-suggestion-index/issues), or
