@@ -1,6 +1,6 @@
-from typing import Any, Iterable
+from typing import Any
 
-from scrapy import Request, Spider
+from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.items import Feature
@@ -19,7 +19,12 @@ class FirstNationalRealEstateAUSpider(Spider):
         return JsonRequest(url=next_page_url, callback=self.parse_results_page)
 
     def parse(self, response):
-        api_url_path = response.xpath('//button[@hx-get and contains(@hx-target, "#load-offices-")]/@hx-get').get().replace("&pg=2", "&pg={}").replace("&returnAs=markup", "")
+        api_url_path = (
+            response.xpath('//button[@hx-get and contains(@hx-target, "#load-offices-")]/@hx-get')
+            .get()
+            .replace("&pg=2", "&pg={}")
+            .replace("&returnAs=markup", "")
+        )
         self.api_url_template = f"https://{self.allowed_domains[0]}{api_url_path}"
         yield self.make_request(1)
 
