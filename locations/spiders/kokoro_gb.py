@@ -3,7 +3,7 @@ from typing import Any
 from scrapy import Spider
 from scrapy.http import Response
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.google_url import extract_google_position
 from locations.items import Feature
 from locations.structured_data_spider import extract_phone
@@ -11,7 +11,7 @@ from locations.structured_data_spider import extract_phone
 
 class KokoroGBSpider(Spider):
     name = "kokoro_gb"
-    item_attributes = {"brand": "Kokoro", "brand_wikidata": "Q117050264", "extras": Categories.RESTAURANT.value}
+    item_attributes = {"brand": "Kokoro", "brand_wikidata": "Q117050264"}
     start_urls = ["https://kokorouk.com/branches/"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
@@ -23,5 +23,7 @@ class KokoroGBSpider(Spider):
             )
             extract_phone(item, location)
             extract_google_position(item, location)
+
+            apply_category(Categories.FAST_FOOD, item)
 
             yield item
