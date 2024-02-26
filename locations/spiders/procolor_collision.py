@@ -1,8 +1,8 @@
 from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
 
 
-class ProColorCollisionUSSpider(WPStoreLocatorSpider):
-    name = "procolor_collision_us"
+class ProColorCollisionSpider(WPStoreLocatorSpider):
+    name = "procolor_collision"
     item_attributes = {
         "brand_wikidata": "Q120648778",
         "brand": "ProColor Collision",
