@@ -46,6 +46,6 @@ class KrakowPublicTransportVendingMachines(Spider):
                 item["extras"]["payment:cards"] = "yes"
             else:
                 self.crawler.stats.inc_value("atp/kkm_vending_krk_pl/unmapped_type/{}".format(location["TypeId"]))
-                 continue
+                continue
 
-             yield item
+            yield item
