@@ -9,7 +9,7 @@ from locations.items import Feature
 
 
 class TestSpider(Spider):
-    name = "test"
+    name = "kkm_vending_krk_pl"
     item_attributes = {"brand": "KKM", "brand_wikidata": "Q57515549"}
     start_urls = ["https://kkm.krakow.pl/pl/punkty-sprzedazy-biletow/"]
 
