@@ -1,7 +1,6 @@
 import csv
-from pathlib import Path
 import re
-from urllib.parse import urlsplit, parse_qs
+from urllib.parse import parse_qs, urlsplit
 
 import chompjs
 import scrapy
