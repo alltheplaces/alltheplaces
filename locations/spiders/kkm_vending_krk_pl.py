@@ -38,12 +38,14 @@ class KrakowPublicTransportVendingMachines(Spider):
                 item["extras"]["ticket"] = "public_transport"
                 item["name"] = "Punkt Obsługi Pasażerów KMK"
                 item["nsi_id"] = "N/A"
-                yield item
-            if location["TypeId"] in TICKET_MACHINE_WITH_INFO_KIOSK_VALUES + TICKET_MACHINE_VALUES:
+            elif location["TypeId"] in TICKET_MACHINE_WITH_INFO_KIOSK_VALUES + TICKET_MACHINE_VALUES:
                 item["extras"]["payment:cash"] = "yes"
                 item["extras"]["payment:cards"] = "yes"
-                yield item
-            if location["TypeId"] in TICKET_MACHINE_VALUES_WITH_NO_CACH_SUPPORT:
+            elif location["TypeId"] in TICKET_MACHINE_VALUES_WITH_NO_CACH_SUPPORT:
                 item["extras"]["payment:cash"] = "no"
                 item["extras"]["payment:cards"] = "yes"
-                yield item
+            else:
+                self.crawler.stats.inc_value("atp/kkm_vending_krk_pl/unmapped_type/{}".format(location["TypeId"]))
+                 continue
+
+             yield item
