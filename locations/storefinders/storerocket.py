@@ -1,4 +1,3 @@
-from urllib.parse import urlparse
 
 from scrapy import Spider
 from scrapy.http import JsonRequest, Request, Response
