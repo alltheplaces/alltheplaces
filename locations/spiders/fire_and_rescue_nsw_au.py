@@ -10,7 +10,7 @@ class FireAndRescueNSWAUSpider(SitemapSpider):
     item_attributes = {
         "operator": "Fire and Rescue New South Wales",
         "operator_wikidata": "Q5451532",
-        "extras": Categories.FIRE_STATION,
+        "extras": Categories.FIRE_STATION.value,
     }
     allowed_domains = ["www.fire.nsw.gov.au"]
     sitemap_urls = ["https://www.fire.nsw.gov.au/feeds/sitemap.xml"]
