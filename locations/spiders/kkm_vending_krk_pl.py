@@ -38,13 +38,13 @@ class TestSpider(Spider):
                 entry.add_ranges_from_string(location["OpeningHours"])
                 item["extras"]["opening_hours"] = entry.as_opening_hours()
 
-            TICKET_OFFICE_VALUES = ['2']
-            TICKET_MACHINE_WITH_INFO_KIOSK_VALUES = ['13']
-            TICKET_MACHINE_VALUES = ['1', '9']
-            TICKET_MACHINE_VALUES_WITH_NO_CACH_SUPPORT = ['41']
+            TICKET_OFFICE_VALUES = ["2"]
+            TICKET_MACHINE_WITH_INFO_KIOSK_VALUES = ["13"]
+            TICKET_MACHINE_VALUES = ["1", "9"]
+            TICKET_MACHINE_VALUES_WITH_NO_CACH_SUPPORT = ["41"]
             if location["TypeId"] in TICKET_OFFICE_VALUES:
                 apply_category(Categories.SHOP_TICKET, item)
-                item["extras"]["ticket"] = 'public_transport'
+                item["extras"]["ticket"] = "public_transport"
                 item["name"] = "Punkt Obsługi Pasażerów KMK"
                 # TODO: stop matching on NSI here - these are offices
                 yield item
