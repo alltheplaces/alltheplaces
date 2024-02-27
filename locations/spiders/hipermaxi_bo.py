@@ -1,4 +1,5 @@
 from locations.storefinders.agile_store_locator import AgileStoreLocatorSpider
+from locations.categories import Categories, apply_category
 
 
 class HipermaxiBOSpider(AgileStoreLocatorSpider):
@@ -10,3 +11,12 @@ class HipermaxiBOSpider(AgileStoreLocatorSpider):
     allowed_domains = [
         "hipermaxi.com",
     ]
+
+    def parse_item(self, item, location):
+        if location["slug"].startswith("farmacia-"):
+            apply_category(Categories.PHARMACY, item)
+        if location["slug"].startswith("drugstore-"):
+            apply_category(Categories.SHOP_CHEMIST, item)
+        if location["slug"].startswith("hipermaxi-"):
+            apply_category(Categories.SHOP_SUPERMARKET, item)
+        yield item
