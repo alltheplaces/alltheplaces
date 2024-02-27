@@ -7,6 +7,7 @@ from locations.hours import (
     DAYS_DE,
     DAYS_ES,
     DAYS_RU,
+    DAYS_PL,
     DELIMITERS_ES,
     DELIMITERS_RU,
     NAMED_DAY_RANGES_RU,
@@ -430,3 +431,10 @@ def test_add_ranges_from_string():
         DELIMITERS_RU,
     )
     assert o.as_opening_hours() == "Mo-Fr 10:00-21:00; Sa 10:00-20:00; Su 10:00-21:00"
+
+    o = OpeningHours()
+    o.add_ranges_from_string(
+        "pon.-sob. 10:00-18:00",
+        DAYS_PL,
+    )
+    assert o.as_opening_hours() == "Mo-Sa 10:00-18:00"
