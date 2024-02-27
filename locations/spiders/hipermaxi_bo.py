@@ -1,5 +1,5 @@
-from locations.storefinders.agile_store_locator import AgileStoreLocatorSpider
 from locations.categories import Categories, apply_category
+from locations.storefinders.agile_store_locator import AgileStoreLocatorSpider
 
 
 class HipermaxiBOSpider(AgileStoreLocatorSpider):
