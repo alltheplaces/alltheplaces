@@ -438,3 +438,17 @@ def test_add_ranges_from_string():
         DAYS_PL,
     )
     assert o.as_opening_hours() == "Mo-Sa 10:00-18:00"
+
+    o = OpeningHours()
+    o.add_ranges_from_string(
+        "pn - pt 11:00 - 19:00",
+        DAYS_PL,
+    )
+    assert o.as_opening_hours() == "Mo-Fr 11:00-19:00"
+
+    o = OpeningHours()
+    o.add_ranges_from_string(
+        "pon-pt 08:00-19:00<br>sob 09:00-15:00",
+        DAYS_PL,
+    )
+    assert o.as_opening_hours() == "Mo-Fr 08:00-19:00; Sa 09:00-15:00"
