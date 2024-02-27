@@ -24,9 +24,6 @@ class TestSpider(Spider):
             if location["OpeningHours"] == "Całą dobę":
                 item["extras"]["opening_hours"] = "24/7"
             else:
-                # TODO: figure out how to run tests
-                # TODO: maybe add it to docs
-                # TODO: rg "run tests" find nothing (for now)
                 # TODO: add cases to test_opening_hours
                 # TODO: fix failures there
                 # TODO: first test case below
