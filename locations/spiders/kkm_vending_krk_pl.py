@@ -47,4 +47,3 @@ class KrakowPublicTransportVendingMachines(Spider):
                 item["extras"]["payment:cash"] = "no"
                 item["extras"]["payment:cards"] = "yes"
                 yield item
-            yield item
