@@ -47,7 +47,7 @@ class KrakowPublicTransportVendingMachines(Spider):
                 apply_category(Categories.SHOP_TICKET, item)
                 item["extras"]["ticket"] = "public_transport"
                 item["name"] = "Punkt Obsługi Pasażerów KMK"
-                item['nsi_id'] = 'terminate_nsi_matching' # is it supposed to end in end data?
+                item["nsi_id"] = "terminate_nsi_matching" # is it supposed to end in end data?
                 yield item
             if location["TypeId"] in TICKET_MACHINE_WITH_INFO_KIOSK_VALUES + TICKET_MACHINE_VALUES:
                 item["extras"]["payment:cash"] = "yes"
