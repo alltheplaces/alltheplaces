@@ -24,11 +24,10 @@ class KrakowPublicTransportVendingMachines(Spider):
             item["lon"] = location["Longitude"]
             item["extras"]["location_description"] = location["Location"]
             if location["OpeningHours"] == "Całą dobę":
-                item["extras"]["opening_hours"] = "24/7"
+                item["opening_hours"] = "24/7"
             else:
-                entry = OpeningHours()
-                entry.add_ranges_from_string(location["OpeningHours"], DAYS_PL)
-                item["extras"]["opening_hours"] = entry.as_opening_hours()
+                item["opening_hours"] = OpeningHours()
+                item["opening_hours"].add_ranges_from_string(location["OpeningHours"], DAYS_PL)
 
             TICKET_OFFICE_VALUES = ["2"]
             TICKET_MACHINE_WITH_INFO_KIOSK_VALUES = ["13"]
