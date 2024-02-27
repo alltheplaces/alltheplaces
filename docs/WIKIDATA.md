@@ -63,7 +63,7 @@ You may also notice that the bottom line has an `'id'` &ndash; an internal NSI i
 
 The [ATP item pipeline](../locations/pipelines/apply_nsi_categories.py) will attempt to enhance POIs it sees automatically with OSM category data from the NSI. It only does this if there is a non-ambiguous match of QID, country location (if appropriate) and category suggestion.
 
-In the great majority cases the automation gets the correct answer. In the cases where it fails for some reason then the automation can be disabled for the spider, and the correct categories applied in the spider code itself.
+In the great majority cases the automation gets the correct answer. In the cases where it fails for some reason then the automation can be disabled for the spider, and the correct categories applied in the spider code itself. See [ApplyNSICategoriesPipeline docs](PIPELINES.md).
 
 ### A virtuous circle?
 
