@@ -6,7 +6,7 @@ from scrapy import Spider
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
-from locations.hours import OpeningHours
+from locations.hours import OpeningHours, DAYS_PL
 from locations.items import Feature
 
 
@@ -25,18 +25,8 @@ class KrakowPublicTransportVendingMachines(Spider):
             if location["OpeningHours"] == "Całą dobę":
                 item["extras"]["opening_hours"] = "24/7"
             else:
-                # TODO: add cases to test_opening_hours
-                # TODO: fix failures there
-                # TODO: first test case below
-                # pon.-sob. 10:00-18:00
-                print(location["OpeningHours"])
-                print(location["OpeningHours"])
-                print(location["OpeningHours"])
-                print(location["OpeningHours"])
-                print(location["OpeningHours"])
-                print(location["OpeningHours"])
                 entry = OpeningHours()
-                entry.add_ranges_from_string(location["OpeningHours"])
+                entry.add_ranges_from_string(location["OpeningHours"], DAYS_PL)
                 item["extras"]["opening_hours"] = entry.as_opening_hours()
 
             TICKET_OFFICE_VALUES = ["2"]
