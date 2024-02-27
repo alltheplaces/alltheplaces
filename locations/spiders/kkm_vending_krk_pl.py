@@ -22,6 +22,7 @@ class KrakowPublicTransportVendingMachines(Spider):
             item["ref"] = location["Id"]
             item["lat"] = location["Latitude"]
             item["lon"] = location["Longitude"]
+            item["extras"]["location_description"] = location["Location"]
             if location["OpeningHours"] == "Całą dobę":
                 item["extras"]["opening_hours"] = "24/7"
             else:
