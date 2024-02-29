@@ -1,4 +1,5 @@
 import logging
+
 from scrapy import Selector, Spider
 from scrapy.http import JsonRequest
 
