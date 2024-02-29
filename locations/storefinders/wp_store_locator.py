@@ -1,3 +1,4 @@
+import logging
 from scrapy import Selector, Spider
 from scrapy.http import JsonRequest
 
@@ -85,7 +86,7 @@ class WPStoreLocatorSpider(Spider):
                 item["opening_hours"] = self.parse_opening_hours(location, self.days)
             else:
                 # Otherwise, iterate over the possibilities until we get a first match
-                logging.warn(
+                logging.warning(
                     "Attempting to detect opening hours - specify self.days = DAYS_EN or the appropriate language code to suppress this warning"
                 )
                 for days in self.possible_days:
