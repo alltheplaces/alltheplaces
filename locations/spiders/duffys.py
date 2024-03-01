@@ -7,7 +7,7 @@ from locations.items import Feature
 
 class Duffys(scrapy.Spider):
     name = "duffys"
-    item_attributes = {"brand": "Duffys"}
+    item_attributes = {"brand": "Duffys", "extras": {"amenity": "restaurant", "cuisine": "american"}}
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def start_requests(self):

@@ -1,11 +1,12 @@
 from scrapy.spiders import SitemapSpider
 
+from locations.spiders.kfc import KFC_SHARED_ATTRIBUTES
 from locations.structured_data_spider import StructuredDataSpider
 
 
 class KfcPHSpider(SitemapSpider, StructuredDataSpider):
     name = "kfc_ph"
-    item_attributes = {"brand": "KFC", "brand_wikidata": "Q524757"}
+    item_attributes = KFC_SHARED_ATTRIBUTES
     allowed_domains = ["stores.kfc.com.ph"]
     sitemap_urls = ["https://stores.kfc.com.ph/sitemap.xml"]
     sitemap_rules = [(r"-fast-food-restaurant-.+-\d+\/Map$", "parse_sd")]

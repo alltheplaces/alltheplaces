@@ -3,11 +3,12 @@ import re
 from scrapy.spiders import SitemapSpider
 
 from locations.items import Feature
+from locations.spiders.nandos import NANDOS_SHARED_ATTRIBUTES
 
 
 class NandosMYSpider(SitemapSpider):
     name = "nandos_my"
-    item_attributes = {"brand": "Nando's", "brand_wikidata": "Q3472954"}
+    item_attributes = NANDOS_SHARED_ATTRIBUTES
     allowed_domains = ["nandos.com.my"]
     sitemap_urls = ["https://nandos.com.my/wp-sitemap.xml"]
     sitemap_follow = ["restaurants"]

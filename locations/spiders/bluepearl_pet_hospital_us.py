@@ -12,6 +12,7 @@ class BluePearlPetHospitalUSSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://bluepearlvet.com/hospital-sitemap.xml"]
     sitemap_rules = [(r"\/hospital\/[\w\-]+\/$", "parse_sd")]
     wanted_types = ["LocalBusiness"]
+    requires_proxy = True  # Cloudflare bot protection used
 
     def post_process_item(self, item, response, ld_data):
         name_html = Selector(text=ld_data["name"])

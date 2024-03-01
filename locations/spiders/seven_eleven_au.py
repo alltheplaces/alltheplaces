@@ -4,10 +4,12 @@ from locations.categories import Categories, Fuel, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 
+SEVEN_ELEVEN_SHARED_ATTRIBUTES = {"brand": "7-Eleven", "brand_wikidata": "Q259340"}
+
 
 class SevenElevenAUSpider(scrapy.Spider):
     name = "seven_eleven_au"
-    item_attributes = {"brand": "7-Eleven", "brand_wikidata": "Q259340"}
+    item_attributes = SEVEN_ELEVEN_SHARED_ATTRIBUTES
     start_urls = ["https://www.7eleven.com.au/storelocator-retail/mulesoft/stores"]
 
     def parse(self, response, **kwargs):

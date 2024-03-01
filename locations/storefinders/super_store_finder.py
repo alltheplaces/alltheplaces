@@ -1,8 +1,11 @@
 import html
 import re
+from urllib.parse import urlparse
 
 from scrapy import Request, Selector, Spider
+from scrapy.http import Response
 
+from locations.automatic_spider_generator import AutomaticSpiderGenerator
 from locations.hours import OpeningHours
 from locations.items import Feature
 
@@ -22,7 +25,7 @@ from locations.items import Feature
 # location).
 
 
-class SuperStoreFinderSpider(Spider):
+class SuperStoreFinderSpider(Spider, AutomaticSpiderGenerator):
     def start_requests(self):
         if len(self.start_urls) > 0:
             for url in self.start_urls:
@@ -61,3 +64,15 @@ class SuperStoreFinderSpider(Spider):
 
     def parse_item(self, item: Feature, location: Selector, **kwargs):
         yield item
+
+    def storefinder_exists(response: Response) -> bool | Request:
+        # Example: https://soulpattinson.com.au/
+        if response.xpath('//script[contains(@src, "/wp-content/plugins/superstorefinder-wp")]').get():
+            return True
+
+        return False
+
+    def extract_spider_attributes(response: Response) -> dict | Request:
+        return {
+            "allowed_domains": [urlparse(response.url).netloc],
+        }

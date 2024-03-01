@@ -13,6 +13,7 @@ class DeutschePostDESpider(Spider):
     allowed_domains = ["www.deutschepost.de"]
     item_attributes = {"brand": "Deutsche Post", "brand_wikidata": "Q15805513"}
     user_agent = BROWSER_DEFAULT
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     cats = {
         "PAKETBOX": None,

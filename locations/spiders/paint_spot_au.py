@@ -6,7 +6,13 @@ from locations.storefinders.amasty_store_locator import AmastyStoreLocatorSpider
 
 class PaintSpotAUSpider(AmastyStoreLocatorSpider):
     name = "paint_spot_au"
-    item_attributes = {"brand": "Paint Spot", "brand_wikidata": "Q117852598"}
+    item_attributes = {
+        "brand": "Paint Spot",
+        "brand_wikidata": "Q117852598",
+        "extras": {
+            "shop": "paint",
+        },
+    }
     allowed_domains = ["paintspot.com.au"]
 
     def parse_item(self, item, location, popup_html):

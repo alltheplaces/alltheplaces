@@ -8,6 +8,7 @@ from locations.items import Feature
 
 class NorthernCaliforniaBreweriesSpider(scrapy.Spider):
     name = "northern_california_breweries"
+    item_attributes = {"brand": "", "brand_wikidata": "", "extras": {"craft": "brewery"}}
     allowed_domains = ["projects.sfchronicle.com"]
     start_urls = ("http://projects.sfchronicle.com/2017/brewery-map/",)
 

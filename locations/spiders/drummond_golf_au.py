@@ -5,7 +5,13 @@ from locations.items import Feature
 
 class DrummondGolfAUSpider(XMLFeedSpider):
     name = "drummond_golf_au"
-    item_attributes = {"brand": "Drummond Golf", "brand_wikidata": "Q124065894"}
+    item_attributes = {
+        "brand": "Drummond Golf",
+        "brand_wikidata": "Q124065894",
+        "extras": {
+            "shop": "golf",
+        },
+    }
     allowed_domains = ["www.drummondgolf.com.au"]
     start_urls = [
         "https://www.drummondgolf.com.au/storelocator/index/search/?lat=-33.870&lng=151.210&radius=20000&page_limit=10000"

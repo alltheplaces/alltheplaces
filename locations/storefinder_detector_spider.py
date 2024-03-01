@@ -1,6 +1,7 @@
 import inspect
 import re
 import sys
+from typing import Any, Iterable
 
 import pycountry
 from scrapy import Spider
@@ -9,7 +10,36 @@ from scrapy.http import Request, Response
 from locations.automatic_spider_generator import AutomaticSpiderGenerator
 from locations.items import GeneratedSpider
 from locations.name_suggestion_index import NSI
-from locations.storefinders import *
+from locations.storefinders.agile_store_locator import AgileStoreLocatorSpider
+from locations.storefinders.amasty_store_locator import AmastyStoreLocatorSpider
+from locations.storefinders.amrest_eu import AmrestEUSpider
+from locations.storefinders.closeby import ClosebySpider
+from locations.storefinders.freshop import FreshopSpider
+from locations.storefinders.geo_me import GeoMeSpider
+from locations.storefinders.kibo import KiboSpider
+from locations.storefinders.limesharp_store_locator import LimesharpStoreLocatorSpider
+from locations.storefinders.localisr import LocalisrSpider
+from locations.storefinders.metalocator import MetaLocatorSpider
+from locations.storefinders.metizsoft import MetizsoftSpider
+from locations.storefinders.momentfeed import MomentFeedSpider
+from locations.storefinders.rexel import RexelSpider
+from locations.storefinders.shopapps import ShopAppsSpider
+from locations.storefinders.stockinstore import StockInStoreSpider
+from locations.storefinders.stockist import StockistSpider
+from locations.storefinders.store_locator_plus_cloud import StoreLocatorPlusCloudSpider
+from locations.storefinders.store_locator_plus_self import StoreLocatorPlusSelfSpider
+from locations.storefinders.storelocatorwidgets import StoreLocatorWidgetsSpider
+from locations.storefinders.storemapper import StoremapperSpider
+from locations.storefinders.storepoint import StorepointSpider
+from locations.storefinders.storerocket import StoreRocketSpider
+from locations.storefinders.super_store_finder import SuperStoreFinderSpider
+from locations.storefinders.sweetiq import SweetIQSpider
+from locations.storefinders.uberall import UberallSpider
+from locations.storefinders.virtualearth import VirtualEarthSpider
+from locations.storefinders.where2getit import Where2GetItSpider
+from locations.storefinders.woosmap import WoosmapSpider
+from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
+from locations.storefinders.yext import YextSpider
 from locations.user_agents import BROWSER_DEFAULT
 
 
@@ -122,17 +152,54 @@ class StorefinderDetectorSpider(Spider):
                 operator = nsi_matches[0]["tags"].get("operator", nsi_matches[0]["tags"].get("name"))
                 self.parameters["operator"] = operator
 
-    def parse(self, response: Response):
+    @staticmethod
+    def get_all_storefinders() -> list[type[AutomaticSpiderGenerator]]:
         all_storefinders = [
-            storefinder
-            for storefinder in [
-                cls
-                for _, cls in inspect.getmembers(sys.modules["locations.storefinders"], inspect.isclass)
-                if [base for base in cls.__bases__ if base.__name__ == AutomaticSpiderGenerator.__name__]
-            ]
+            AgileStoreLocatorSpider,
+            AmastyStoreLocatorSpider,
+            AmrestEUSpider,
+            ClosebySpider,
+            FreshopSpider,
+            GeoMeSpider,
+            KiboSpider,
+            LimesharpStoreLocatorSpider,
+            LocalisrSpider,
+            MetaLocatorSpider,
+            MetizsoftSpider,
+            MomentFeedSpider,
+            RexelSpider,
+            ShopAppsSpider,
+            StockInStoreSpider,
+            StockistSpider,
+            StoreLocatorPlusCloudSpider,
+            StoreLocatorPlusSelfSpider,
+            StoreLocatorWidgetsSpider,
+            StoremapperSpider,
+            StorepointSpider,
+            StoreRocketSpider,
+            SuperStoreFinderSpider,
+            SweetIQSpider,
+            UberallSpider,
+            VirtualEarthSpider,
+            Where2GetItSpider,
+            WoosmapSpider,
+            WPStoreLocatorSpider,
+            YextSpider,
         ]
+        return all_storefinders
+
+    def start_requests(self) -> Iterable[Request]:
+        all_storefinders = self.get_all_storefinders()
+        for url in self.start_urls:
+            for storefinder in all_storefinders:
+                if not issubclass(storefinder, AutomaticSpiderGenerator):
+                    continue
+                yield from storefinder.request_storefinder_page(url)
+
+    def parse(self, response: Response) -> Any:
+        all_storefinders = self.get_all_storefinders()
         detection_results = [
-            (storefinder, storefinder.storefinder_exists(response)) for storefinder in all_storefinders
+            (storefinder, storefinder.storefinder_exists(response)) for storefinder in all_storefinders if issubclass(storefinder, AutomaticSpiderGenerator)
         ]
         detected_storefinders = [storefinder[0] for storefinder in detection_results if storefinder[1] is True]
         for detected_storefinder in detected_storefinders:
@@ -148,7 +215,7 @@ class StorefinderDetectorSpider(Spider):
             additional_request[1].callback = self.parse_detection
             yield additional_request[1]
 
-    def parse_detection(self, response: Response):
+    def parse_detection(self, response: Response) -> Any:
         storefinder = response.meta["storefinder"]
         next_detection_method = response.meta.get("next_detection_method", storefinder.storefinder_exists)
         storefinder_exists = next_detection_method(response)
@@ -161,7 +228,7 @@ class StorefinderDetectorSpider(Spider):
         if storefinder_exists is True:
             yield from self.parse_extraction(response.meta["first_response"])
 
-    def parse_extraction(self, response: Response):
+    def parse_extraction(self, response: Response) -> Any:
         storefinder = response.meta["storefinder"]
         next_extraction_method = response.meta.get("next_extraction_method", storefinder.extract_spider_attributes)
         spider_attributes = next_extraction_method(response)

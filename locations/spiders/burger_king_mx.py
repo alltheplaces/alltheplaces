@@ -4,12 +4,12 @@ import chompjs
 from scrapy import Selector, Spider
 
 from locations.items import Feature
-from locations.spiders.burger_king import BurgerKingSpider
+from locations.spiders.burger_king import BURGER_KING_SHARED_ATTRIBUTES
 
 
 class BurgerKingMXSpider(Spider):
     name = "burger_king_mx"
-    item_attributes = BurgerKingSpider.item_attributes
+    item_attributes = BURGER_KING_SHARED_ATTRIBUTES
     start_urls = ["https://www.burgerking.com.mx/es/restaurantes/index-s.html"]
     no_refs = True
 

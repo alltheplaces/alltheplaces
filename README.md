@@ -1,6 +1,6 @@
 # All the Places
 
-A project to generate [point of interest (POI)](https://en.wikipedia.org/wiki/Point_of_interest) data sourced [primarily from major websites](docs/WHY_SPIDER.md) with 'store location' pages. The project uses [`scrapy`](https://scrapy.org/), a popular Python-based web scraping framework, to write individual site [spiders](https://doc.scrapy.org/en/latest/topics/spiders.html) to retrieve POI data, publishing the results in a [standard format](DATA_FORMAT.md). There are various `scrapy` tutorials, [this series on YouTube](https://www.youtube.com/watch?v=s4jtkzHhLzY) is reasonable.
+A project to generate [point of interest (POI)](https://en.wikipedia.org/wiki/Point_of_interest) data sourced [from websites](docs/WHY_SPIDER.md) with 'store location' pages. The project uses [`scrapy`](https://scrapy.org/), a popular Python-based web scraping framework, to execute individual site [spiders](https://doc.scrapy.org/en/latest/topics/spiders.html) that retrieve POI data, publishing the results in a [standard format](DATA_FORMAT.md). There are various `scrapy` tutorials on the Internet and [this series on YouTube](https://www.youtube.com/watch?v=s4jtkzHhLzY) is reasonable.
 
 ## Getting started
 
@@ -8,24 +8,100 @@ A project to generate [point of interest (POI)](https://en.wikipedia.org/wiki/Po
 
 Windows users may need to follow some extra steps, please follow the [scrapy docs](https://docs.scrapy.org/en/latest/intro/install.html#windows) for up to date details.
 
-1. Clone a copy of the project from the [GitHub All The Places](https://github.com/alltheplaces/alltheplaces/) repo (or your own fork if you are considering contributing to the project):
+#### Ubuntu
+
+These instructions were tested with Ubuntu 22.04.1 LTS on 2024-02-21.
+
+1. Install Python 3 and `pip`:
+
+   ```
+   $ sudo apt-get update
+   $ sudo apt-get install -y python3 python3-pip python-is-python3
+   ```
+
+1. Install `pyenv` and ensure the correct version of Python is available. The following is a summary of the steps, please refer to the [pyenv documentation](https://github.com/pyenv/pyenv#installation) for the most up-to-date instructions.
+
+   ```
+   $ sudo apt-get install -y build-essential libssl-dev zlib1g-dev \
+         libbz2-dev libreadline-dev libsqlite3-dev curl git \
+         libncursesw5-dev xz-utils tk-dev libxml2-dev libxmlsec1-dev \
+         libffi-dev liblzma-dev
+   $ curl https://pyenv.run | bash
+   $ echo 'export PATH="$HOME/.pyenv/bin:$PATH"' >> ~/.bashrc
+   $ echo 'eval "$(pyenv init --path)"' >> ~/.bashrc
+   $ echo 'eval "$(pyenv init -)"' >> ~/.bashrc
+   $ exec "$SHELL"
+   $ pyenv install 3.11
+   ```
+
+1. Install `pipenv` and check that it runs:
+
+   ```
+   $ pip install --user pipenv
+   $ pipenv --version
+   pipenv, version 2023.12.1
+   ```
+
+1. Clone a copy of the project from the [All the Places](https://github.com/alltheplaces/alltheplaces/) repo (or your own fork if you are considering contributing to the project):
 
    ```
    $ git clone git@github.com:alltheplaces/alltheplaces.git
-   ```
-
-1. If you haven't done so already, [install `pipenv`](https://github.com/pypa/pipenv#installation) and check that it runs:
-
-   ```
-   $ pipenv --version
-   pipenv, version 2022.8.30
    ```
 
 1. Use `pipenv` to install the project dependencies:
 
    ```
    $ cd alltheplaces
-   $ pipenv install
+   $ pipenv sync
+   ```
+
+1. Test for successful project installation:
+
+   ```
+   $ pipenv run scrapy
+   ```
+
+   If the above runs without complaint, then you have a functional installation and are ready to run and write spiders.
+
+#### macOS
+
+These instructions were tested with macOS 14.3.1 on 2024-02-21.
+
+1. Install Python 3 and `pip`:
+
+   ```
+   $ brew install python@3
+   ```
+
+1. Install `pyenv` and ensure the correct version of Python is available. The following is a summary of the steps, please refer to the [pyenv documentation](https://github.com/pyenv/pyenv#installation) for the most up-to-date instructions.
+
+   ```
+   $ brew install pyenv
+   $ echo 'eval "$(pyenv init --path)"' >> ~/.zshrc
+   $ echo 'eval "$(pyenv init -)"' >> ~/.zshrc
+   $ exec "$SHELL"
+   $ pyenv install 3.11
+   ```
+
+1. Install `pipenv` and check that it runs:
+
+   ```
+   $ brew install pipenv
+   $ pipenv --version
+   pipenv, version 2023.12.1
+   ```
+
+1. Clone a copy of the project from the [All the Places](https://github.com/alltheplaces/alltheplaces/) repo (or your own fork if you are considering contributing to the project):
+
+   ```
+   $ git clone git@github.com:alltheplaces/alltheplaces.git
+   ```
+
+1. Use `pipenv` to install the project dependencies:
+
+   ```
+   $ cd alltheplaces
+   $ pipenv sync
    ```
 
 1. Test for successful project installation:
