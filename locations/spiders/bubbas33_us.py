@@ -5,7 +5,7 @@ from scrapy.spiders import SitemapSpider
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
-from locations.spiders.vapestore_gb import clean_address
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class Bubbas33USSpider(SitemapSpider):
@@ -17,7 +17,7 @@ class Bubbas33USSpider(SitemapSpider):
     def parse(self, response, **kwargs):
         location = json.loads(re.search(r"window.__location__ = (\{.+\});", response.text).group(1))
 
-        location["street_address"] = clean_address([location.pop("address1"), location.pop("address2")])
+        location["street_address"] = merge_address_lines([location.pop("address1"), location.pop("address2")])
         item = DictParser.parse(location)
         item["website"] = item["ref"] = response.url
 

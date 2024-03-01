@@ -3,7 +3,7 @@ from scrapy.spiders import CrawlSpider, Rule
 
 from locations.google_url import extract_google_position
 from locations.items import Feature
-from locations.spiders.vapestore_gb import clean_address
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class RolldAUSpider(CrawlSpider):
@@ -18,11 +18,11 @@ class RolldAUSpider(CrawlSpider):
         item["ref"] = item["website"] = response.url.split("?")[0]
 
         item["name"] = response.xpath('//h1[@class="entry-title"]/text()').get()
-        item["street_address"] = clean_address(
-            response.xpath('//div[@class="wpsl-location-address"]/span/text()').get()
-        )
+        item["street_address"] = response.xpath('//div[@class="wpsl-location-address"]/span/text()').get()
         item["postcode"] = response.xpath('normalize-space(//span[@class="zip-code"]/text())').get()
-        item["addr_full"] = clean_address(response.xpath('//div[@class="wpsl-location-address"]/span/text()').getall())
+        item["addr_full"] = merge_address_lines(
+            response.xpath('//div[@class="wpsl-location-address"]/span/text()').getall()
+        )
         item["phone"] = response.xpath('//div[@class="phone-number"]/text()').get()
 
         if "closed" in item["name"].lower():

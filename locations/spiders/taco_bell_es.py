@@ -5,8 +5,8 @@ from scrapy.spiders import SitemapSpider
 
 from locations.google_url import extract_google_position
 from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 from locations.spiders.taco_bell import TACO_BELL_SHARED_ATTRIBUTES
-from locations.spiders.vapestore_gb import clean_address
 from locations.structured_data_spider import extract_phone
 
 
@@ -19,8 +19,8 @@ class TacoBellESSpider(SitemapSpider):
     def parse(self, response: Response, **kwargs: Any) -> Any:
         item = Feature()
         item["ref"] = item["website"] = response.url
-        item["name"] = clean_address(response.xpath('//div[@class="dir"]/h1/text()').getall())
-        item["addr_full"] = clean_address(response.xpath('//div[@class="dir"]/text()').getall())
+        item["name"] = merge_address_lines(response.xpath('//div[@class="dir"]/h1/text()').getall())
+        item["addr_full"] = merge_address_lines(response.xpath('//div[@class="dir"]/text()').getall())
         extract_google_position(item, response)
         extract_phone(item, response)
 

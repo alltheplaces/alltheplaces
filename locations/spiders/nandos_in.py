@@ -2,7 +2,6 @@ from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
 from locations.spiders.nandos import NANDOS_SHARED_ATTRIBUTES
-from locations.spiders.vapestore_gb import clean_address
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -14,6 +13,6 @@ class NandosINSpider(CrawlSpider, StructuredDataSpider):
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["website"] = response.url
-        item["addr_full"] = clean_address(item.pop("street_address"))
+        item["addr_full"] = item.pop("street_address")
 
         yield item

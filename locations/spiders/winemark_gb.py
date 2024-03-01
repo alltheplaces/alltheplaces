@@ -3,7 +3,7 @@ import html
 from scrapy import FormRequest, Spider
 
 from locations.dict_parser import DictParser
-from locations.spiders.vapestore_gb import clean_address
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class WinemarkGBSpider(Spider):
@@ -19,7 +19,7 @@ class WinemarkGBSpider(Spider):
     def parse(self, response, **kwargs):
         for location in response.json()["response"]:
             location["street_address"] = html.unescape(
-                clean_address([location.pop("address"), location.pop("address2")])
+                merge_address_lines([location.pop("address"), location.pop("address2")])
             )
             item = DictParser.parse(location)
             item["extras"]["branch"] = item.pop("name")

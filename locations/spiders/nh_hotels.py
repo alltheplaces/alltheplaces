@@ -2,7 +2,6 @@ from scrapy.spiders import Request, SitemapSpider
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
-from locations.spiders.vapestore_gb import clean_address
 from locations.user_agents import BROWSER_DEFAULT
 
 SUB_BRANDS = ["NH Collection", "nhow", "Tivoli", "Anantara", "Avani", "Elewana", "Oaks", "NH"]
@@ -27,7 +26,7 @@ class NHHotelGroupSpider(SitemapSpider):
         item["name"] = data["name"]
         item["city"] = data["city"]
         item["country"] = data["country"]
-        item["street_address"] = clean_address(data["address"]["street"])
+        item["street_address"] = data["address"]["street"]
         item["postcode"] = data["address"]["postalCode"]
         item["lat"] = data["address"]["latitud"]
         item["lon"] = data["address"]["longitud"]

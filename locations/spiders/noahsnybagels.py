@@ -4,7 +4,7 @@ import scrapy
 
 from locations.hours import OpeningHours
 from locations.items import Feature
-from locations.spiders.vapestore_gb import clean_address
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class NoahsNYBagelsSpider(scrapy.Spider):
@@ -44,7 +44,7 @@ class NoahsNYBagelsSpider(scrapy.Spider):
         address2 = response.xpath('//span[@class="c-address-street-2"]/text()').extract_first() or ""
 
         properties = {
-            "street_address": clean_address([address1, address2]),
+            "street_address": merge_address_lines([address1, address2]),
             "phone": response.xpath('//span[@itemprop="telephone"]/text()').extract_first(),
             "city": response.xpath('//span[@class="c-address-city"]/text()').extract_first(),
             "state": response.xpath('//span[@itemprop="addressRegion"]/text()').extract_first(),

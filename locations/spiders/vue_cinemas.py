@@ -2,7 +2,7 @@ from scrapy.spiders import SitemapSpider
 
 from locations.google_url import extract_google_position
 from locations.items import Feature
-from locations.spiders.vapestore_gb import clean_address
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class VueCinemasSpider(SitemapSpider):
@@ -25,7 +25,7 @@ class VueCinemasSpider(SitemapSpider):
                 './/div[contains(@data-page-url, "/getting-here")]/following-sibling::div//div[@class="container container--scroll"]/div/p/text()'
             ).getall()
 
-        item["addr_full"] = clean_address(address_parts)
+        item["addr_full"] = merge_address_lines(address_parts)
 
         extract_google_position(item, cinema)
 

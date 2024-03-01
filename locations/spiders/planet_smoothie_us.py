@@ -7,7 +7,6 @@ from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
-from locations.spiders.vapestore_gb import clean_address
 
 
 class PlanetSmoothieUSSpider(Spider):
@@ -20,8 +19,7 @@ class PlanetSmoothieUSSpider(Spider):
             location = json.loads(location_raw)
             item = DictParser.parse(location)
             item["branch"] = item.pop("name")
-            item.pop("addr_full")
-            item["street_address"] = clean_address([location["Address"]])
+            item["street_address"] = item.pop("addr_full")
             item["website"] = "https://www.planetsmoothie.com/stores/{}/{}".format(
                 location["cleanCity"], location["StoreId"]
             )

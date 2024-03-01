@@ -11,7 +11,7 @@ from scrapy.utils.sitemap import Sitemap
 from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
-from locations.spiders.vapestore_gb import clean_address
+from locations.pipelines.address_clean_up import merge_address_lines
 from locations.user_agents import BROWSER_DEFAULT
 
 BRANDS = {
@@ -85,7 +85,7 @@ class KrogerUSSpider(SitemapSpider):
                 "name": location["facilityName"],
                 "lat": location["locale"]["location"]["lat"],
                 "lon": location["locale"]["location"]["lng"],
-                "street_address": clean_address(location["locale"]["address"]["addressLines"]),
+                "street_address": merge_address_lines(location["locale"]["address"]["addressLines"]),
                 "city": location["locale"]["address"]["cityTown"],
                 "postcode": location["locale"]["address"]["postalCode"],
                 "state": location["locale"]["address"]["stateProvince"],
@@ -126,7 +126,7 @@ class KrogerUSSpider(SitemapSpider):
             if department.get("locale"):
                 properties["lat"] = department["locale"]["location"]["lat"]
                 properties["lon"] = department["locale"]["location"]["lng"]
-                properties["street_address"] = clean_address(department["locale"]["address"]["addressLines"])
+                properties["street_address"] = merge_address_lines(department["locale"]["address"]["addressLines"])
                 properties["city"] = department["locale"]["address"]["cityTown"]
                 properties["postcode"] = department["locale"]["address"]["postalCode"]
                 properties["state"] = department["locale"]["address"]["stateProvince"]

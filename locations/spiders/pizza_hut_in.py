@@ -6,7 +6,7 @@ from scrapy.spiders import CrawlSpider, Rule
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
-from locations.spiders.vapestore_gb import clean_address
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class PizzaHutINSpider(CrawlSpider):
@@ -21,7 +21,7 @@ class PizzaHutINSpider(CrawlSpider):
             item["ref"] = item["website"] = location.xpath('.//a[contains(@href, "/Home")]/@href').get()
             item["lat"] = location.xpath('input[@class="outlet-latitude"]/@value').get()
             item["lon"] = location.xpath('input[@class="outlet-longitude"]/@value').get()
-            item["addr_full"] = clean_address(
+            item["addr_full"] = merge_address_lines(
                 location.xpath('.//li[@class="outlet-address"]/div[@class="info-text"]/span/text()').getall()
             )
             item["phone"] = location.xpath('.//li[@class="outlet-phone"]/div[@class="info-text"]/a/text()').get()

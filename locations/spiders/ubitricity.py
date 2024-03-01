@@ -2,7 +2,7 @@ from scrapy import Spider
 from scrapy.http import JsonRequest
 
 from locations.dict_parser import DictParser
-from locations.spiders.vapestore_gb import clean_address
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class UbitricitySpider(Spider):
@@ -18,7 +18,7 @@ class UbitricitySpider(Spider):
     def parse(self, response, **kwargs):
         for location in response.json():
             location["location"] = location["address"].pop("location")
-            location["address"]["street_address"] = clean_address(
+            location["address"]["street_address"] = merge_address_lines(
                 [location["address"].pop("street"), location["address"].pop("street2")]
             )
             location["ref"] = location["ssoId"]

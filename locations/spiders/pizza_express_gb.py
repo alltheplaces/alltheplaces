@@ -1,7 +1,7 @@
 import scrapy
 
 from locations.dict_parser import DictParser
-from locations.spiders.vapestore_gb import clean_address
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class PizzaExpressGBSpider(scrapy.Spider):
@@ -16,7 +16,7 @@ class PizzaExpressGBSpider(scrapy.Spider):
             item["ref"] = i["restaurantId"]
             item["addr_full"] = i["fullAddress"]
             item["postcode"] = i["Postcode"]
-            item["street_address"] = clean_address(
+            item["street_address"] = merge_address_lines(
                 [
                     i["Address1"],
                     i["Address2"],

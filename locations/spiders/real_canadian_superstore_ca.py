@@ -5,7 +5,7 @@ from scrapy.http import JsonRequest, Response
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
-from locations.spiders.vapestore_gb import clean_address
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class RealCanadianSuperstoreCASpider(scrapy.Spider):
@@ -34,7 +34,7 @@ class RealCanadianSuperstoreCASpider(scrapy.Spider):
         location = response.json()
         item = DictParser.parse(location)
         item["branch"] = item.pop("name")
-        item["street_address"] = clean_address([location["address"]["line1"], location["address"]["line2"]])
+        item["street_address"] = merge_address_lines([location["address"]["line1"], location["address"]["line2"]])
         item["addr_full"] = location["address"]["formattedAddress"]
         item["website"] = "https://www.realcanadiansuperstore.ca/store-locator/details/{}".format(item["ref"])
 

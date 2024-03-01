@@ -4,7 +4,7 @@ from scrapy import Spider
 
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_FULL, OpeningHours
-from locations.spiders.vapestore_gb import clean_address
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class Apotek1NOSpider(Spider):
@@ -29,7 +29,7 @@ class Apotek1NOSpider(Spider):
 
             item = DictParser.parse(location)
             item["name"] = location["Description"][0]["displayStoreName"]
-            item["street_address"] = clean_address(location["addressLine"])
+            item["street_address"] = merge_address_lines(location["addressLine"])
             item["state"] = location["stateOrProvinceName"]
             item["ref"] = location["storeName"]
             item["extras"]["fax"] = location["fax1"]

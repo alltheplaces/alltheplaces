@@ -7,7 +7,7 @@ from locations.categories import Categories, Extras, apply_category, apply_yes_n
 from locations.dict_parser import DictParser
 from locations.geo import city_locations
 from locations.hours import DAYS, OpeningHours
-from locations.spiders.vapestore_gb import clean_address
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class StarbucksARCLSpider(Spider):
@@ -29,7 +29,7 @@ class StarbucksARCLSpider(Spider):
         for location in response.json():
             store = location.get("store")
             item = DictParser.parse(store)
-            item["street_address"] = clean_address(
+            item["street_address"] = merge_address_lines(
                 [store["address"].get("streetAddressLine1"), store["address"].get("streetAddressLine2")]
             )
             item["state"] = store["address"].get("countrySubdivisionCode")

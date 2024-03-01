@@ -2,7 +2,7 @@ import scrapy
 
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
-from locations.spiders.vapestore_gb import clean_address
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class AutoNationSpider(scrapy.Spider):
@@ -46,7 +46,7 @@ class AutoNationSpider(scrapy.Spider):
             properties = {
                 "ref": store["StoreId"],
                 "name": store["Name"],
-                "street_address": clean_address([store["AddressLine1"], store["AddressLine2"]]),
+                "street_address": merge_address_lines([store["AddressLine1"], store["AddressLine2"]]),
                 "city": store["City"],
                 "state": store["StateCode"],
                 "postcode": store["PostalCode"],

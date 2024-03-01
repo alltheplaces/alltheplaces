@@ -2,7 +2,7 @@ from scrapy import Spider
 from scrapy.http import JsonRequest
 
 from locations.items import Feature
-from locations.spiders.vapestore_gb import clean_address
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class ChiquinhoSorvetesBRSpider(Spider):
@@ -33,7 +33,7 @@ class ChiquinhoSorvetesBRSpider(Spider):
             item = Feature()
             item["ref"] = location["codigo"]
             item["name"] = location["nome"]
-            item["street_address"] = clean_address([location.get("complemento"), location["endereco"]])
+            item["street_address"] = merge_address_lines([location.get("complemento"), location["endereco"]])
             item["postcode"] = location["cep"]
             item["phone"] = location["telefone"]
 

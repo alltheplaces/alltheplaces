@@ -5,7 +5,7 @@ import scrapy
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
-from locations.spiders.vapestore_gb import clean_address
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class QualityDairyUSSpider(scrapy.Spider):
@@ -23,7 +23,7 @@ class QualityDairyUSSpider(scrapy.Spider):
             )
 
     def parse_location(self, response, location, **kwargs):
-        location["street_address"] = clean_address([location.pop("address"), location.pop("address2")])
+        location["street_address"] = merge_address_lines([location.pop("address"), location.pop("address2")])
         item = DictParser.parse(location)
 
         item["opening_hours"] = OpeningHours()

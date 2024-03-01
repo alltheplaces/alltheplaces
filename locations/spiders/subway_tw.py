@@ -2,7 +2,6 @@ from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
 from locations.items import Feature
-from locations.spiders.vapestore_gb import clean_address
 
 
 class SubwayTWSpider(CrawlSpider):
@@ -17,9 +16,7 @@ class SubwayTWSpider(CrawlSpider):
         for store in response.xpath("//*[contains(@class, 'store-table')]/tbody/tr"):
             item = Feature()
             item["name"] = store.xpath('./*[@data-title="Location"]/text()').get().strip()
-            item["addr_full"] = clean_address(
-                store.xpath('./*[@data-title="Address"]/a/text()').get().replace("\n", "")
-            )
+            item["addr_full"] = store.xpath('./*[@data-title="Address"]/a/text()').get().replace("\n", "")
             item["phone"] = store.xpath('.//a[contains(@href, "tel")]/@href').get()
             item["ref"] = store.xpath('./*[@data-title="NO"]/text()').get().strip()
             item["website"] = response.url

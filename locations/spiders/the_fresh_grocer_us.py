@@ -6,7 +6,7 @@ import scrapy
 from locations.categories import Categories
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours, day_range
-from locations.spiders.vapestore_gb import clean_address
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class TheFreshGrocerSpider(scrapy.Spider):
@@ -23,7 +23,7 @@ class TheFreshGrocerSpider(scrapy.Spider):
         for location in chompjs.parse_js_object(
             response.xpath('//script[contains(text(), "__PRELOADED_STATE__")]/text()').get()
         )["stores"]["availablePlanningStores"]["items"]:
-            location["street_address"] = clean_address(
+            location["street_address"] = merge_address_lines(
                 [location["addressLine1"], location["addressLine2"], location["addressLine3"]]
             )
             location["state"] = location["countyProvinceState"]

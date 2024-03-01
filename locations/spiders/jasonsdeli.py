@@ -4,7 +4,7 @@ import scrapy
 
 from locations.hours import OpeningHours
 from locations.items import Feature
-from locations.spiders.vapestore_gb import clean_address
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class JasonsDeliSpider(scrapy.Spider):
@@ -29,7 +29,7 @@ class JasonsDeliSpider(scrapy.Spider):
         ref = re.search(r".+/(.+)", response.url).group(1)
 
         properties = {
-            "addr_full": clean_address(response.xpath('//div[@class="address"]/text()').getall()),
+            "addr_full": merge_address_lines(response.xpath('//div[@class="address"]/text()').getall()),
             "city": response.xpath('//div[@class="address"]/text()').extract()[-1].split(",")[0],
             "state": response.xpath('//div[@class="address"]/text()').extract()[-1].split(", ")[1].split(" ")[-2],
             "postcode": response.xpath('//div[@class="address"]/text()').extract()[-1].split(", ")[1].split(" ")[-1],

@@ -3,8 +3,8 @@ import csv
 import scrapy
 
 from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 from locations.searchable_points import open_searchable_points
-from locations.spiders.vapestore_gb import clean_address
 
 
 class BlueRhinoSpider(scrapy.Spider):
@@ -32,7 +32,7 @@ class BlueRhinoSpider(scrapy.Spider):
                 "lon": row["Longitude"],
                 "ref": row["RetailKey"],
                 "name": row["RetailName"],
-                "street_address": clean_address([row["Address1"], row["Address2"], row["Address3"]]),
+                "street_address": merge_address_lines([row["Address1"], row["Address2"], row["Address3"]]),
                 "city": row["City"],
                 "state": row["State"],
                 "postcode": row["Zip"],

@@ -2,7 +2,7 @@ from scrapy import Spider
 
 from locations.categories import Categories, Extras, PaymentMethods, apply_category, apply_yes_no
 from locations.items import Feature
-from locations.spiders.vapestore_gb import clean_address
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class CircleKVNSpider(Spider):
@@ -14,7 +14,7 @@ class CircleKVNSpider(Spider):
         for store in response.xpath('//*[@class="item"]'):
             item = Feature()
             item["ref"] = store.xpath(".//@data-index").get()
-            item["addr_full"] = clean_address(store.xpath("./p/text()").getall())
+            item["addr_full"] = merge_address_lines(store.xpath("./p/text()").getall())
             item["lat"] = store.xpath(".//@data-lat").get()
             item["lon"] = store.xpath(".//@data-lng").get()
             item["name"] = "Circle K"

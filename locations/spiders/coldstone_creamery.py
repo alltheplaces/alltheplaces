@@ -3,7 +3,6 @@ import json
 import scrapy
 
 from locations.items import Feature
-from locations.spiders.vapestore_gb import clean_address
 
 
 class ColdstoneCreamerySpider(scrapy.Spider):
@@ -18,9 +17,8 @@ class ColdstoneCreamerySpider(scrapy.Spider):
             first_bracket = location_js.find("{")
             last_bracket = location_js.rfind("}")
             store_obj = json.loads(location_js[first_bracket : last_bracket + 1])
-
             props = {
-                "street_address": clean_address(store_obj["Address"]),
+                "street_address": store_obj["Address"],
                 "city": store_obj["City"],
                 "state": store_obj["State"],
                 "postcode": store_obj["Zip"],

@@ -4,7 +4,7 @@ from scrapy.http import JsonRequest
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
-from locations.spiders.vapestore_gb import clean_address
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class AustraliaPostAUSpider(scrapy.Spider):
@@ -30,7 +30,7 @@ class AustraliaPostAUSpider(scrapy.Spider):
         for store in response.json()["points"]:
             item = DictParser.parse(store)
             item["ref"] = store["location_code"]
-            item["street_address"] = clean_address(
+            item["street_address"] = merge_address_lines(
                 [store.get("address_line_1"), store.get("address_line_2"), store.get("address_line_3")]
             )
             item["opening_hours"] = OpeningHours()

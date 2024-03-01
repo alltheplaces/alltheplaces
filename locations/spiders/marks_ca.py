@@ -9,7 +9,7 @@ from scrapy.utils.sitemap import Sitemap
 from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
-from locations.spiders.vapestore_gb import clean_address
+from locations.pipelines.address_clean_up import merge_address_lines
 from locations.user_agents import BROWSER_DEFAULT
 
 
@@ -41,7 +41,7 @@ class MarksCASpider(Spider):
         item["email"] = location["address"]["email"]
         item["phone"] = location["address"]["phone"]
         item["postcode"] = location["address"]["postalCode"]
-        item["street_address"] = clean_address([location["address"]["line1"], location["address"]["line2"]])
+        item["street_address"] = merge_address_lines([location["address"]["line1"], location["address"]["line2"]])
 
         item["opening_hours"] = OpeningHours()
         for rule in location["openingHours"]["weekDayOpeningList"]:

@@ -8,7 +8,7 @@ from scrapy.spiders import Spider
 from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
-from locations.spiders.vapestore_gb import clean_address
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class PopeyesUSFRSpider(Spider):
@@ -78,7 +78,9 @@ class PopeyesUSFRSpider(Spider):
             item["extras"]["check_date"] = location["check_date"]
             item["operator"] = location["operator"]
             item["addr_full"] = location["addr_full"]
-            item["street_address"] = clean_address([location["address"]["address1"], location["address"]["address2"]])
+            item["street_address"] = merge_address_lines(
+                [location["address"]["address1"], location["address"]["address2"]]
+            )
             apply_yes_no(Extras.DELIVERY, item, location["hasDelivery"])
             apply_yes_no(Extras.INDOOR_SEATING, item, location["hasDineIn"])
             apply_yes_no(Extras.TAKEAWAY, item, location["hasTakeOut"])

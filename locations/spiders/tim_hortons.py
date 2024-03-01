@@ -4,7 +4,7 @@ from scrapy.http import JsonRequest
 from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
-from locations.spiders.vapestore_gb import clean_address
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class TimHortonsSpider(Spider):
@@ -85,7 +85,9 @@ class TimHortonsSpider(Spider):
                 continue  # No OSM tagging yet
 
             item = DictParser.parse(location)
-            item["street_address"] = clean_address([location["address"]["address1"], location["address"]["address2"]])
+            item["street_address"] = merge_address_lines(
+                [location["address"]["address1"], location["address"]["address2"]]
+            )
             item["image"] = (location["restaurantImage"] or {}).get("asset", {}).get("url")
             item["extras"]["check_date"] = location["check_date"]
             if location["operator_id"] is not None:

@@ -3,7 +3,6 @@ from scrapy.http import JsonRequest
 
 from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
-from locations.spiders.vapestore_gb import clean_address
 
 
 class ChurchOfEnglandGBSpider(Spider):
@@ -22,7 +21,6 @@ class ChurchOfEnglandGBSpider(Spider):
             if not church["is_church"]:
                 continue
             item = DictParser.parse(church)
-            item["addr_full"] = clean_address(item.get("addr_full"))
             item["image"] = church["photo_image"]
             item["website"] = "https://www.achurchnearyou.com" + church["acny_url"]
             apply_yes_no(Extras.TOILETS, item, "toilets" in church["tags"])

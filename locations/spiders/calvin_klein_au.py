@@ -4,8 +4,8 @@ from scrapy import Spider
 
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 from locations.spiders.calvin_klein import CalvinKleinSpider
-from locations.spiders.vapestore_gb import clean_address
 
 
 class CalvinKleinAUSpider(Spider):
@@ -20,7 +20,7 @@ class CalvinKleinAUSpider(Spider):
             item["lat"] = location["l"]
             item["lon"] = location["g"]
             item["name"] = location["n"]
-            item["addr_full"] = clean_address(location.get("a"))
+            item["addr_full"] = merge_address_lines(location.get("a"))
             item["street_address"] = location["a"][0]
             item["city"] = location["a"][1]
             item["state"] = location["a"][2]

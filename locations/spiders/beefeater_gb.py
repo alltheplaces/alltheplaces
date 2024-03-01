@@ -5,7 +5,7 @@ from scrapy.http import Response
 
 from locations.dict_parser import DictParser
 from locations.items import set_closed
-from locations.spiders.vapestore_gb import clean_address
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class BeefeaterGBSpider(Spider):
@@ -16,7 +16,7 @@ class BeefeaterGBSpider(Spider):
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json():
             item = DictParser.parse(location)
-            item["addr_full"] = clean_address(
+            item["addr_full"] = merge_address_lines(
                 [
                     location["address1"],
                     location["address2"],

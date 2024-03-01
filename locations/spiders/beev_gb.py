@@ -3,7 +3,7 @@ from scrapy import Spider
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_FULL, OpeningHours
-from locations.spiders.vapestore_gb import clean_address
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class BEEVGBSpider(Spider):
@@ -14,7 +14,7 @@ class BEEVGBSpider(Spider):
     def parse(self, response, **kwargs):
         for location in response.json():
             item = DictParser.parse(location)
-            item["street_address"] = clean_address(
+            item["street_address"] = merge_address_lines(
                 [location["Address"]["Line1"], location["Address"]["Line2"], location["Address"]["Line3"]]
             )
             if location["OpeningTimes"]["Is24Hours"]:
