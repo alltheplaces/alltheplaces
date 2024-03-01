@@ -4,10 +4,10 @@ from locations.categories import Categories, apply_category
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class SparkasseSpider(SitemapSpider, StructuredDataSpider):
-    name = "sparkasse"
+class SparkasseDESpider(SitemapSpider, StructuredDataSpider):
+    name = "sparkasse_de"
     item_attributes = {"brand": "Sparkasse", "brand_wikidata": "Q13601825"}
-    sitemap_urls = ["https://www.sparkasse.de/sitemap.google-sitemap-filialfinder.xml"]
+    sitemap_urls = ["https://www.sparkasse.de/sitemap/sitemap-filialfinder.xml"]
 
     def pre_process_data(self, ld_data, **kwargs):
         if lon := ld_data["geo"].get("longitude "):
