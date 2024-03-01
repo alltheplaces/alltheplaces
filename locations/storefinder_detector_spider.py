@@ -1,6 +1,4 @@
-import inspect
 import re
-import sys
 from typing import Any, Iterable
 
 import pycountry
@@ -199,7 +197,9 @@ class StorefinderDetectorSpider(Spider):
     def parse(self, response: Response) -> Any:
         all_storefinders = self.get_all_storefinders()
         detection_results = [
-            (storefinder, storefinder.storefinder_exists(response)) for storefinder in all_storefinders if issubclass(storefinder, AutomaticSpiderGenerator)
+            (storefinder, storefinder.storefinder_exists(response))
+            for storefinder in all_storefinders
+            if issubclass(storefinder, AutomaticSpiderGenerator)
         ]
         detected_storefinders = [storefinder[0] for storefinder in detection_results if storefinder[1] is True]
         for detected_storefinder in detected_storefinders:

@@ -1,5 +1,5 @@
-from urllib.parse import urlparse
 import re
+from urllib.parse import urlparse
 
 from scrapy import Request, Selector, Spider
 from scrapy.http import Response
