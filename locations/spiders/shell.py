@@ -1,4 +1,5 @@
 from locations.categories import Categories, Fuel, apply_category, apply_yes_no
+from locations.items import Feature
 from locations.storefinders.geo_me import GeoMeSpider
 
 
@@ -13,7 +14,21 @@ class ShellSpider(GeoMeSpider):
         fuels = location["fuels"]
         apply_category(Categories.FUEL_STATION, item)
         if "shop" in amenities:
-            apply_category(Categories.SHOP_CONVENIENCE, item)
+            shop_item = Feature()
+            shop_item["ref"] = item.get("ref") + "-attached-shop"
+            shop_item["lat"] = item.get("lat")
+            shop_item["lon"] = item.get("lon")
+            shop_item["addr_full"] = item.get("addr_full")
+            shop_item["phone"] = item.get("phone")
+            shop_item["street"] = item.get("street")
+            shop_item["housenumber"] = item.get("housenumber")
+            shop_item["street_address"] = item.get("street_address")
+            shop_item["city"] = item.get("city")
+            shop_item["state"] = item.get("state")
+            shop_item["postcode"] = item.get("postcode")
+            shop_item["country"] = item.get("country")
+            apply_category(Categories.SHOP_CONVENIENCE, shop_item)
+            yield shop_item
         apply_yes_no("amenity:chargingstation", item, "electric_charging_other" in fuels or "shell_recharge" in fuels)
         apply_yes_no("toilets", item, "toilet" in amenities)
         apply_yes_no("atm", item, "atm" in amenities)
