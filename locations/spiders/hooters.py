@@ -5,7 +5,7 @@ from scrapy.http import JsonRequest, Response
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
-from locations.spiders.vapestore_gb import clean_address
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class HootersSpider(scrapy.Spider):
@@ -27,7 +27,7 @@ class HootersSpider(scrapy.Spider):
         item["branch"] = item.pop("name")
         item["website"] = response.urljoin(location["detailsUrl"])
         item["street_address"] = location["address"]["line-1"]
-        item["addr_full"] = clean_address([location["address"]["line-1"], location["address"]["line-2"]])
+        item["addr_full"] = merge_address_lines([location["address"]["line-1"], location["address"]["line-2"]])
 
         item["opening_hours"] = OpeningHours()
         for day, times in (location["hours"] or {}).items():
