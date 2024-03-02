@@ -24,5 +24,5 @@ class NothingBundtCakesUSCASpider(CrawlSpider, StructuredDataSpider):
 
     def post_process_item(self, item, response, ld_data):
         # Example: 'Weslaco TX Bakery & Cake Shop | Wedding & Birthday Celebration Cakes',
-        item["name"] = item["name"].replace(" | Wedding & Birthday Celebration Cakes", "").replace("  ", " ")
+        item["name"] = item["name"].replace(" | Wedding & Birthday Celebration Cakes", "")
         yield item
