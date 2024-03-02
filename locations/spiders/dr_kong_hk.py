@@ -1,5 +1,6 @@
-from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
 from locations.hours import DAYS_EN
+from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
+
 
 class DrKongHKSpider(WPStoreLocatorSpider):
     days = DAYS_EN
