@@ -24,7 +24,6 @@ class AuchanHUSpider(SitemapSpider):
         item["addr_full"], item["phone"] = (
             address_info.split("Központi szám:") if "Központi szám:" in address_info else (address_info, None)
         )
-        item["addr_full"] = item["addr_full"]
         apply_category(Categories.SHOP_SUPERMARKET, item)
         yield item
 
