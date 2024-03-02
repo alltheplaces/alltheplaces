@@ -21,3 +21,8 @@ class NothingBundtCakesUSCASpider(CrawlSpider, StructuredDataSpider):
         ),
     ]
     wanted_types = ["Bakery"]
+
+    def post_process_item(self, item, response, ld_data):
+        # Example: 'Weslaco TX Bakery & Cake Shop | Wedding & Birthday Celebration Cakes',
+        item["name"] = item["name"].replace('| Wedding & Birthday Celebration Cakes', '')
+        yield item
