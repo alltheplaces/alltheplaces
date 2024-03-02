@@ -6,7 +6,7 @@ from locations.structured_data_spider import StructuredDataSpider
 
 class vanHarenBENLSpider(SitemapSpider, StructuredDataSpider):
     name = "vanharen_be_nl"
-    item_attributes = {"brand_wikidata": "Q62390668", "brand": "vanHaren", "extras": Categories.SHOP_SHOES}
+    item_attributes = {"brand_wikidata": "Q62390668", "brand": "vanHaren", "extras": Categories.SHOP_SHOES.value}
     sitemap_urls = ["https://stores.vanharen.nl/sitemap.xml"]
     sitemap_rules = [
         (r"-\d+$", "parse_sd"),
