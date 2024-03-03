@@ -162,6 +162,8 @@ class GovBio123DE(SitemapSpider, StructuredDataSpider):
 
             item["opening_hours"] = self.determine_hours(response)
 
+            item["email"] = item["email"].replace(" [at] ", "@")
+
             self.determine_tags(response, item)
 
             yield item
