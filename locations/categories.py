@@ -223,6 +223,7 @@ class Categories(Enum):
     DOCTOR_GP = {"amenity": "doctors", "healthcare": "doctor", "healthcare:speciality": "community"}
     EMERGENCY_WARD = {"emergency": "emergency_ward_entrance"}
     FAST_FOOD = {"amenity": "fast_food"}
+    FIRE_STATION = {"amenity": "fire_station"}
     FUEL_STATION = {"amenity": "fuel"}
     HOSPITAL = {"amenity": "hospital", "healthcare": "hospital"}
     HOSPICE = {"healthcare": "hospice"}

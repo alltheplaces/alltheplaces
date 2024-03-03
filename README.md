@@ -150,6 +150,7 @@ Many of the sites provide their data in a [standard format](docs/STRUCTURED_DATA
 * [Sitemaps make finding POI pages easier](docs/SITEMAP.md)
 * [Data from many POI pages can be extracted without writing code](docs/STRUCTURED_DATA.md)
 * [What is expected in a pull request?](docs/PULL_REQUEST.md)
+* [What we do behind the scenes](docs/PIPELINES.md)
 
 ### The weekly run
 

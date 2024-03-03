@@ -15,6 +15,7 @@ class AldiSudDESpider(scrapy.Spider):
     def parse(self, response):
         for store in response.json()["stores"]:
             item = DictParser.parse(store)
+            item["name"] = None
             if store["storeType"] == "N":
                 continue  # AldiNordDESpider
             if item["country"] != "DE":
