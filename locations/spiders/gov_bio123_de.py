@@ -158,8 +158,7 @@ class GovBio123DE(SitemapSpider, StructuredDataSpider):
             for category in categories:
                 apply_category(category, item)
 
-            if item["website"] == "Website":
-                item["website"] = None
+            item["website"] = response.xpath("//div[contains(@class, 'field-name-field-vendor-website')]/a/@href").get()
 
             item["opening_hours"] = self.determine_hours(response)
 
