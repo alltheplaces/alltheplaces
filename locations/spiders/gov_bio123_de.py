@@ -158,11 +158,12 @@ class GovBio123DE(SitemapSpider, StructuredDataSpider):
             for category in categories:
                 apply_category(category, item)
 
-            item["website"] = response.xpath("//div[contains(@class, 'field-name-field-vendor-website')]/a/@href").get()
+            item["website"] = response.xpath("//div[contains(@class, 'field-name-field-vendor-website')]/div/a/@href").get()
 
             item["opening_hours"] = self.determine_hours(response)
 
-            item["email"] = item["email"].replace(" [at] ", "@")
+            if item["email"]:
+                item["email"] = item["email"].replace(" [at] ", "@")
 
             self.determine_tags(response, item)
 
