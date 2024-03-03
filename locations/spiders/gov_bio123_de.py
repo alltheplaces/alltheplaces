@@ -8,8 +8,6 @@ from locations.categories import Categories, apply_category, apply_yes_no
 from locations.hours import DAYS_DE, OpeningHours
 from locations.structured_data_spider import StructuredDataSpider
 
-logger = logging.getLogger(__name__)
-
 
 class GovBio123DE(SitemapSpider, StructuredDataSpider):
     name = "gov_bio123_de"
@@ -108,7 +106,7 @@ class GovBio123DE(SitemapSpider, StructuredDataSpider):
                 case "/anbieter/kategorie/weingut":
                     mapped_categories.append({"extras": {"craft": "winery"}})
                 case _:
-                    logger.warning("Unmapped category %s", category)
+                    self.logger.warning("Unmapped category %s", category)
 
         return mapped_categories
 
@@ -134,7 +132,7 @@ class GovBio123DE(SitemapSpider, StructuredDataSpider):
             # ['alkoholische Getränke', 'allergikerfreundlich', 'fair trade', 'Laktoseintoleranz', 'Urlaub', 'vegan', 'Zölliakie']
             # ['100% Bio', 'Bioland', 'Bistro', 'Demeter', 'EU-Bio', 'Eier', 'Erzeuger', 'Feinkost', 'Fruchtaufstriche', 'Gemüse', 'Gewürze', 'Großverbraucher', 'Haarpflege', 'Handel', 'Hanf', 'Hersteller', 'Heumilch', 'Honig', 'Kaffee', 'Kartoffeln', 'Konserven', 'Kosmetik', 'Kräuter', 'Körperpflege', 'Laktoseintoleranz', 'Müsli', 'Naturkost', 'Naturland', 'Nüsse', 'Obst', 'Olivenöl', 'Onlineshop', 'Rohkost', 'Saaten', 'Saucen & Dips', 'Schokolade', 'Spülen', 'Säfte', 'Tee', 'Trockenfrüchte', 'Trockensortiment', 'Waschen', 'Wasser', 'Wein', 'alkoholische Getränke', 'biokreis', 'fair trade', 'glutenfrei', 'regional', 'vegan', 'vegetarisch', 'Öle & Fette']
             # ['Mittagstisch', 'Urlaub']
-            logger.debug("Discovered tags %s", tags)
+            self.logger.debug("Discovered tags %s", tags)
 
     def determine_hours(self, response: Response):
         # Example: https://www.bio123.de/anbieter/volkach/weltladen-volkach Has hours, not in structured data.
@@ -143,7 +141,7 @@ class GovBio123DE(SitemapSpider, StructuredDataSpider):
             '//div[contains(@class, "field-name-field-vendor-shophours")]/div[@class="field-items"]/div[contains(@class, "field-item")]/text()'
         ).getall()
         if len(hours) > 0:
-            logger.debug("Determining opening hours from %s", hours)
+            self.logger.debug("Determining opening hours from %s", hours)
             oh = OpeningHours()
             for opening_interval in hours:
                 oh.add_ranges_from_string(opening_interval.replace(" Uhr", ""), days=DAYS_DE)
@@ -153,7 +151,7 @@ class GovBio123DE(SitemapSpider, StructuredDataSpider):
         # For now, if we cannot work out a category we do not want to scrape.
         categories = self.determine_categories(response)
         if len(categories) == 0:
-            logger.debug("Unable to determine categories of %s, dropping", response.url)
+            self.logger.debug("Unable to determine categories of %s, dropping", response.url)
             yield None
         else:
             for category in categories:
