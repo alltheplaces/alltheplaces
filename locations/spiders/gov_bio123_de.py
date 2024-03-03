@@ -58,10 +58,54 @@ class GovBio123DE(SitemapSpider, StructuredDataSpider):
                     mapped_categories.append(
                         Categories.SHOP_CONVENIENCE.value
                     )  # Brief search of OSM shows this is the most common tagging.
-                    break
+
+                case "anbieter/kategorie/baby-kind":
+                    mapped_categories.append(Categories.SHOP_BABY_GOODS.value)
+
                 case " /anbieter/kategorie/imbiss":
                     mapped_categories.append(Categories.FAST_FOOD.value)  # "Snack" Food Kiosk? Take away? Street food?
+
+                case "/anbieter/kategorie/spielzeug":
+                    mapped_categories.append(Categories.SHOP_TOYS.value)  # Wooden toy maker?
+
+                case "/anbieter/kategorie/metzger":
+                    mapped_categories.append(Categories.SHOP_BUTCHER.value)
+
+                case "/anbieter/kategorie/erzeuger-biobauernhof":
+                    mapped_categories.append({"extras": {"man_made": "works", "product": "food"}})  # shop=farm, maybe?
+
+                case "/anbieter/kategorie/lieferservice":
+                    # Delivery service?
                     break
+
+                case "/anbieter/kategorie/handwerk":
+                    mapped_categories.append(Categories.SHOP_CRAFT.value)
+
+                case "/anbieter/kategorie/markt":
+                    mapped_categories.append({"extras": {"amenity": "marketplace"}})
+
+                case "/anbieter/kategorie/grosshandler":
+                    mapped_categories.append(Categories.SHOP_WHOLESALE.value)
+
+                case "/anbieter/kategorie/heim-garten":
+                    mapped_categories.append(Categories.SHOP_DOITYOURSELF.value)  # Garden centre?
+
+                case "/anbieter/kategorie/friseur":
+                    mapped_categories.append(
+                        Categories.SHOP_HAIRDRESSER
+                    )  # Barber. Is this generally masculine, or unisex?
+
+                case "/anbieter/kategorie/mobel":
+                    mapped_categories.append(Categories.SHOP_FURNITURE)
+
+                case "/anbieter/kategorie/energie-technik":
+                    mapped_categories.append(Categories.SHOP_ELECTRONICS)
+
+                case "/anbieter/kategorie/tierbedarf":
+                    mapped_categories.append(Categories.SHOP_PET)
+
+                case "/anbieter/kategorie/weingut":
+                    mapped_categories.append({"extras": {"craft": "winery"}})
                 case _:
                     logger.warning("Unmapped category %s", category)
 
