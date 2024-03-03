@@ -1,4 +1,5 @@
 import logging
+import re
 
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
@@ -158,12 +159,22 @@ class GovBio123DE(SitemapSpider, StructuredDataSpider):
             for category in categories:
                 apply_category(category, item)
 
-            item["website"] = response.xpath("//div[contains(@class, 'field-name-field-vendor-website')]/div/a/@href").get()
+            item["website"] = response.xpath(
+                "//div[contains(@class, 'field-name-field-vendor-website')]/div/div/a/@href"
+            ).get()
 
             item["opening_hours"] = self.determine_hours(response)
 
             if item["email"]:
                 item["email"] = item["email"].replace(" [at] ", "@")
+
+            map_javascript = response.xpath("//script[contains(text(), 'bio123_anbieter_map')]/text()").get()
+            if map_javascript:
+                matches = re.search(
+                    r'"bio123_anbieter_map":{"markers":\[{"lat":"([\d\.]+)","lon":"([\d\.]+)"', map_javascript
+                )
+                item["lat"] = matches.group(1)
+                item["lon"] = matches.group(2)
 
             self.determine_tags(response, item)
 
