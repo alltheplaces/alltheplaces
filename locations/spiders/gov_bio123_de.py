@@ -1,10 +1,10 @@
 import logging
 
-from scrapy.spiders import SitemapSpider
 from scrapy.http import Response
+from scrapy.spiders import SitemapSpider
 
-from locations.hours import OpeningHours, DAYS_DE
 from locations.categories import Categories, apply_category, apply_yes_no
+from locations.hours import DAYS_DE, OpeningHours
 from locations.structured_data_spider import StructuredDataSpider
 
 logger = logging.getLogger(__name__)
