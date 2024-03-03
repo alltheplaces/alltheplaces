@@ -4,7 +4,7 @@ from scrapy.spiders import SitemapSpider
 from scrapy.http import Response
 
 from locations.hours import OpeningHours, DAYS_DE
-from locations.categories import Categories, apply_category
+from locations.categories import Categories, apply_category, apply_yes_no
 from locations.structured_data_spider import StructuredDataSpider
 
 logger = logging.getLogger(__name__)
@@ -116,14 +116,22 @@ class GovBio123DE(SitemapSpider, StructuredDataSpider):
             '//div[@class="bio123-base-anbieter-category"]/div[contains(@class, "field-name-field-vendor-vendor-tags")]/div[@class="field-items"]/div/span/text()'
         ).getall()
         if len(tags) > 0:
+            # TODO: Should this be the responsibility of apply_yes_no?
+            if not "extras" in item.keys():
+                item["extras"] = {}
+
             if "vegan" in tags:
-                apply_category({"extras": {"vegan": "yes"}}, item)
+                apply_yes_no("vegan", item, True)
+
+            if "vegetarisch" in tags:
+                apply_yes_no("vegetarian", item, True)
 
             if "fair trade" in tags:
-                apply_category({"extras": {"fair_trade": "yes"}}, item)
+                apply_yes_no("fair_trade", item, True)
 
-            # TODO: More spefici categories may be revealed by the tags
+            # TODO: More specific categories may be revealed by the tags
             # ['alkoholische Getränke', 'allergikerfreundlich', 'fair trade', 'Laktoseintoleranz', 'Urlaub', 'vegan', 'Zölliakie']
+            # ['100% Bio', 'Bioland', 'Bistro', 'Demeter', 'EU-Bio', 'Eier', 'Erzeuger', 'Feinkost', 'Fruchtaufstriche', 'Gemüse', 'Gewürze', 'Großverbraucher', 'Haarpflege', 'Handel', 'Hanf', 'Hersteller', 'Heumilch', 'Honig', 'Kaffee', 'Kartoffeln', 'Konserven', 'Kosmetik', 'Kräuter', 'Körperpflege', 'Laktoseintoleranz', 'Müsli', 'Naturkost', 'Naturland', 'Nüsse', 'Obst', 'Olivenöl', 'Onlineshop', 'Rohkost', 'Saaten', 'Saucen & Dips', 'Schokolade', 'Spülen', 'Säfte', 'Tee', 'Trockenfrüchte', 'Trockensortiment', 'Waschen', 'Wasser', 'Wein', 'alkoholische Getränke', 'biokreis', 'fair trade', 'glutenfrei', 'regional', 'vegan', 'vegetarisch', 'Öle & Fette']
             # ['Mittagstisch', 'Urlaub']
             logger.debug("Discovered tags %s", tags)
 
