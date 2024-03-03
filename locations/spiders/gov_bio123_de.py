@@ -136,7 +136,6 @@ class GovBio123DE(SitemapSpider, StructuredDataSpider):
 
     def determine_hours(self, response: Response):
         # Example: https://www.bio123.de/anbieter/volkach/weltladen-volkach Has hours, not in structured data.
-        # print(response.xpath('//div[contains(@class, "field-name-field-vendor-shophours")]/div[@class="field-items"]/div[contains(@class, "field-item")]').get())
         hours = response.xpath(
             '//div[contains(@class, "field-name-field-vendor-shophours")]/div[@class="field-items"]/div[contains(@class, "field-item")]/text()'
         ).getall()
