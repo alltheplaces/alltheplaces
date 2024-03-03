@@ -56,7 +56,12 @@ class AgileStoreLocatorSpider(Spider):
                         start_time = hours_range.split(" - ", 1)[0]
                         end_time = hours_range.split(" - ", 1)[1]
                     if "AM" in start_time or "PM" in start_time or "AM" in end_time or "PM" in end_time:
-                        item["opening_hours"].add_range(DAYS_EN[day_name.title()], start_time, end_time, "%I:%M %p")
+                        item["opening_hours"].add_range(
+                            DAYS_EN[day_name.title()],
+                            start_time.replace(" AM", "AM").replace(" PM", "PM"),
+                            end_time.replace(" AM", "AM").replace(" PM", "PM"),
+                            "%I:%M%p",
+                        )
                     else:
                         item["opening_hours"].add_range(DAYS_EN[day_name.title()], start_time, end_time)
         return item
