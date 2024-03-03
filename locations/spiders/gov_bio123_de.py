@@ -115,7 +115,7 @@ class GovBio123DE(SitemapSpider, StructuredDataSpider):
         ).getall()
         if len(tags) > 0:
             # TODO: Should this be the responsibility of apply_yes_no?
-            if not "extras" in item.keys():
+            if "extras" not in item:
                 item["extras"] = {}
 
             if "vegan" in tags:
