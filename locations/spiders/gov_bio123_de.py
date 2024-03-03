@@ -165,7 +165,7 @@ class GovBio123DE(SitemapSpider, StructuredDataSpider):
 
             item["opening_hours"] = self.determine_hours(response)
 
-            if item["email"]:
+            if not item["email"] is None:
                 item["email"] = item["email"].replace(" [at] ", "@")
 
             map_javascript = response.xpath("//script[contains(text(), 'bio123_anbieter_map')]/text()").get()
