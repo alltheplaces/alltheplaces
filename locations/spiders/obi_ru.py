@@ -2,13 +2,13 @@ import scrapy
 
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_RU, NAMED_DAY_RANGES_RU, NAMED_TIMES_RU, OpeningHours
-from locations.spiders.obi_de import ObiDESpider
+from locations.spiders.obi_eu import OBI_SHARED_ATTRIBUTES
 
 
 class ObiRUSpider(scrapy.Spider):
     name = "obi_ru"
     allowed_domains = ["obi.ru"]
-    item_attributes = ObiDESpider.item_attributes
+    item_attributes = OBI_SHARED_ATTRIBUTES
     start_urls = ["https://obi.ru/graphql?hash=2872797852"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
     requires_proxy = "RU"
