@@ -94,6 +94,7 @@ class WPStoreLocatorSpider(Spider):
                     item["opening_hours"] = self.parse_opening_hours(location, days)
                     if item["opening_hours"] is not None:
                         self.days = days
+                        break
 
             yield from self.parse_item(item, location) or []
 
