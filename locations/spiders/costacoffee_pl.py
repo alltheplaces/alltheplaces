@@ -42,4 +42,3 @@ class CostaCoffeePLSpider(scrapy.Spider):
             apply_category(Categories.CAFE, properties)
 
             yield Feature(**properties)
-
