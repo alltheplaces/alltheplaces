@@ -9,7 +9,6 @@ from locations.categories import (
     apply_yes_no,
 )
 from locations.hours import DAYS, OpeningHours
-from locations.items import Feature
 from locations.storefinders.geo_me import GeoMeSpider
 
 
@@ -22,14 +21,17 @@ class ShellSpider(GeoMeSpider):
         # Definitions extracted from https://shellgsllocator.geoapp.me/config/published/retail/prod/en_US.json?format=json
         amenities = location["amenities"]
         fuels = location["fuels"]
-        apply_category(Categories.FUEL_STATION, item)
 
         # As we know the name of the shop attached we create its own POI
         if "selectshop" in amenities:
-            select_shop_item = self.copy_address_coord_info(item)
+            select_shop_item = item.deepcopy()
             item["name"] = "Shell Select"
+            item["brand"] = "Shell Select"
+            item["brand_wikidata"] = "Q110716465"
             apply_category(Categories.SHOP_CONVENIENCE, select_shop_item)
             yield select_shop_item
+
+        apply_category(Categories.FUEL_STATION, item)
 
         # As we do not know the name of shop/restaurant attached, we apply to main item
         if "shop" in amenities:
@@ -85,19 +87,3 @@ class ShellSpider(GeoMeSpider):
         apply_yes_no(FuelCards.ESSO_NATIONAL, item, "fleet_card_esso" in amenities)
         apply_yes_no(FuelCards.UTA, item, "fleet_card_uta" in amenities)
         yield item
-
-    def copy_address_coord_info(self, item):
-        new_item = Feature()
-        new_item["ref"] = item.get("ref") + "-attached-shop"
-        new_item["lat"] = item.get("lat")
-        new_item["lon"] = item.get("lon")
-        new_item["addr_full"] = item.get("addr_full")
-        new_item["phone"] = item.get("phone")
-        new_item["street"] = item.get("street")
-        new_item["housenumber"] = item.get("housenumber")
-        new_item["street_address"] = item.get("street_address")
-        new_item["city"] = item.get("city")
-        new_item["state"] = item.get("state")
-        new_item["postcode"] = item.get("postcode")
-        new_item["country"] = item.get("country")
-        return new_item
