@@ -25,10 +25,10 @@ class ShellSpider(GeoMeSpider):
         # As we know the name of the shop attached we create its own POI
         if "selectshop" in amenities:
             select_shop_item = item.deepcopy()
-            item["ref"] = item.get("ref") + "-attached-shop"
-            item["name"] = "Shell Select"
-            item["brand"] = "Shell Select"
-            item["brand_wikidata"] = "Q110716465"
+            select_shop_item["ref"] = item.get("ref") + "-attached-shop"
+            select_shop_item["name"] = "Shell Select"
+            select_shop_item["brand"] = "Shell Select"
+            select_shop_item["brand_wikidata"] = "Q110716465"
             apply_category(Categories.SHOP_CONVENIENCE, select_shop_item)
             yield select_shop_item
 
