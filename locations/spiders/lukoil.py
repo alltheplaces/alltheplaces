@@ -21,7 +21,7 @@ FUEL_TYPES_MAPPING = {
     Fuel.HEATING_OIL: ["heating-oil"],
 }
 
-LUKOIL_BRAND = {"brand": "Лукойл", "brand_wikidata": "Q329347"}
+LUKOIL_BRAND = {"brand_wikidata": "Q329347"}
 
 COMPANY_BRANDS = {
     # Companies under Lukoil brand
@@ -72,6 +72,8 @@ SERVICES = {
     "Wi-Fi": Extras.WIFI,
     "air tower": Extras.COMPRESSED_AIR,
     "handicap accessible restroom": Extras.TOILETS_WHEELCHAIR,
+    "Oil Change": Extras.OIL_CHANGE,
+    "Vacuum": Extras.VACUUM_CLEANER,
     # Values below are not mapped as they should exist as separate POIs,
     # or already mapped in other attributes, or not possible to map at all.
     "ASE": None,
@@ -95,7 +97,6 @@ SERVICES = {
     "Lukoil Rapida Credit Card (pay balance)": None,
     "Mobile phone recharge": None,
     "None": None,
-    "Oil Change": None,
     "Paid parking": None,
     "Parking": None,
     "Playground": None,
@@ -103,7 +104,6 @@ SERVICES = {
     'Refill "Platon"': None,
     "State Inspection": None,
     "Truck Stop": None,
-    "Vacuum": None,
     "border crossing payments acceptance": None,
     "marketing promotions": None,
     "road tax vignette (sales)": None,
@@ -153,8 +153,7 @@ class LukoilSpider(scrapy.Spider):
         if company_name := poi.get("Company", {}).get("Name", ""):
             for brand, brand_tags in COMPANY_BRANDS.items():
                 if brand.lower() in company_name.lower():
-                    item["brand"] = brand_tags["brand"]
-                    item["brand_wikidata"] = brand_tags["brand_wikidata"]
+                    item.update(brand_tags)
                     break
             else:
                 self.logger.warning(f"Unknown brand: {company_name}")

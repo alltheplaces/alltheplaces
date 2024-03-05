@@ -14,6 +14,8 @@ DAYS_FULL = [
     "Saturday",
     "Sunday",
 ]
+DAYS_WEEKDAY = ["Mo", "Tu", "We", "Th", "Fr"]
+DAYS_WEEKEND = ["Sa", "Su"]
 
 # The below DAYS dicts are provided to be used with sanitise_day inorder for us to do best attempts at matching the
 # given day into an English 2 char day to be used inside ATP and then to be exported to OSM formatted opening hours.
@@ -158,14 +160,31 @@ DAYS_HU = {
     "Vas": "Su",
 }
 
+DAYS_IL = {
+    "יום שני": "Mo",
+    "יום שלישי": "Tu",
+    "יום רביעי": "We",
+    "יום חמישי": "Th",
+    "יום שישי": "Fr",
+    "יום שבת": "Sa",
+    "יום ראשון": "Su",
+}
+
 DAYS_SE = {
     "Måndag": "Mo",
+    "Mån": "Mo",
     "Tisdag": "Tu",
+    "Tis": "Tu",
     "Onsdag": "We",
+    "Ons": "We",
     "Torsdag": "Th",
+    "Tors": "Th",
     "Fredag": "Fr",
+    "Fre": "Fr",
     "Lördag": "Sa",
+    "Lör": "Sa",
     "Söndag": "Su",
+    "Sön": "Su",
 }
 DAYS_SI = {
     "Po": "Mo",
@@ -247,29 +266,37 @@ DAYS_PL = {
     "Pn": "Mo",
     "Po": "Mo",
     "Pon": "Mo",
+    "Pn.": "Mo",
+    "Pon.": "Mo",
     "Poniedziałek": "Mo",
     "Wt": "Tu",
     "Wto": "Tu",
+    "Wto.": "Tu",
     "Wtorek": "Tu",
     "Śr": "We",
     "Sr": "We",
     "Sro": "We",
     "Śro": "We",
+    "Śro.": "We",
     "Środa": "We",
     "Cz": "Th",
     "Czw": "Th",
+    "Czw.": "Th",
     "Czwartek": "Th",
     "Pt": "Fr",
+    "Pt.": "Fr",
     "Pi": "Fr",
     "Pia": "Fr",
     "Piątek": "Fr",
     "Sb": "Sa",
     "So": "Sa",
     "Sob": "Sa",
+    "Sob.": "Sa",
     "Sobota": "Sa",
     "Nd": "Su",
     "Ni": "Su",
     "Nie": "Su",
+    "Ndz": "Su",
     "Niedz": "Su",
     "Niedzela": "Su",
     "Niedziela": "Su",
@@ -443,6 +470,41 @@ DAYS_SR = {
     "Недеља": "Su",
 }
 
+# See https://github.com/alltheplaces/alltheplaces/issues/7360
+# A list orded by Languages most frequently used for web content as of January 2024, by share of websites.
+# See WPStoreLocator for example usage.
+DAYS_BY_FREQUENCY = [
+    DAYS_EN,
+    DAYS_ES,
+    DAYS_DE,
+    DAYS_RU,
+    # Japanese missing
+    DAYS_FR,
+    DAYS_PT,
+    DAYS_IT,
+    # Turkish missing
+    DAYS_DK,
+    DAYS_PL,
+    # Persian
+    DAYS_CZ,
+    # And everything else
+    DAYS_AT,
+    DAYS_BG,
+    DAYS_CH,
+    DAYS_FI,
+    DAYS_GR,
+    DAYS_HU,
+    DAYS_IL,
+    DAYS_NL,
+    DAYS_NO,
+    DAYS_RO,
+    DAYS_RS,
+    DAYS_SE,
+    DAYS_SI,
+    DAYS_SK,
+    DAYS_SR,
+]
+
 NAMED_DAY_RANGES_DK = {
     "Hverdage": ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"],  # Weekdays
 }
@@ -461,6 +523,7 @@ NAMED_TIMES_EN = {
 
 NAMED_DAY_RANGES_RU = {
     "Ежедневно": ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"],  # Daily
+    "Eжедн": ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"],  # Daily
     "По Будням": ["Mo", "Tu", "We", "Th", "Fr"],  # Weekdays
     "По Выходным": ["Sa", "Su"],  # Weekends
 }
@@ -604,6 +667,8 @@ class OpeningHours:
     def from_linked_data(self, linked_data, time_format: str = "%H:%M"):
         if linked_data.get("openingHoursSpecification"):
             for rule in linked_data["openingHoursSpecification"]:
+                if not isinstance(rule, dict):
+                    continue
                 if not rule.get("dayOfWeek") or not rule.get("opens") or not rule.get("closes"):
                     continue
 

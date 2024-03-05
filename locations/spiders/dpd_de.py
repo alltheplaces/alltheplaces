@@ -3,6 +3,8 @@ import csv
 import scrapy
 from scrapy import FormRequest
 
+from locations.categories import apply_category
+from locations.hours import DAYS_DE, OpeningHours, sanitise_day
 from locations.items import Feature
 from locations.searchable_points import open_searchable_points
 
@@ -22,8 +24,6 @@ class DPDDESpider(scrapy.Spider):
                 results = csv.DictReader(open_file)
                 for result in results:
                     if result["country"] == "DE":
-                        headers = {"Content-Type": "application/x-www-form-urlencoded"}
-
                         formdata = {
                             "ctl00$hidMarkerHouse": "https://my.dpd.de/themes/Icons/summer2020/house.svg",
                             "ctl00$hidMarkerShop": "https://my.dpd.de/themes/Icons/summer2020/parcelshop.svg",
@@ -49,7 +49,6 @@ class DPDDESpider(scrapy.Spider):
                         rq = FormRequest.from_response(
                             response,
                             formdata=formdata,
-                            headers=headers,
                             callback=self.shops_results,
                             meta=result,
                         )
@@ -94,8 +93,7 @@ class DPDDESpider(scrapy.Spider):
             item["postcode"] = plz
             item["ref"] = lat + lng
             item["housenumber"] = housenumber
-
-            headers = {"Content-Type": "application/x-www-form-urlencoded"}
+            apply_category({"amenity": "post_office", "post_office": "post_partner"}, item)
 
             formdata = {
                 "ctl00$ctl16": "ctl00$ContentPlaceHolder1$modShopFinder$ctl01|ctl00$ContentPlaceHolder1$modShopFinder$repShopList$ctl0"
@@ -126,9 +124,8 @@ class DPDDESpider(scrapy.Spider):
             rq = FormRequest.from_response(
                 response,
                 formdata=formdata,
-                headers=headers,
                 callback=self.opening_hours_parse,
-                meta=item,
+                meta={"item": item},
             )
 
             yield rq
@@ -137,8 +134,8 @@ class DPDDESpider(scrapy.Spider):
         body = response.css("body")
         shop_details = body.css("div.panShopDetails")
         shops = shop_details.css("div.panBusinessHour")
-        item = response.meta
-        opening_shop = dict()
+        item = response.meta["item"]
+        item["opening_hours"] = OpeningHours()
         if len(shops) > 0:
             for nr in range(7):
                 day = shops.css(
@@ -151,13 +148,8 @@ class DPDDESpider(scrapy.Spider):
                     .extract()[0]
                     .split(" ")
                 )
-
-                for element in opening_hours:
-                    if element == "-":
-                        del opening_hours[1]
-
-                opening_shop[day] = opening_hours
-
-            item["opening_hours"] = opening_shop
+                if "Geschlossen" in opening_hours:
+                    continue
+                item["opening_hours"].add_range(sanitise_day(day, DAYS_DE), opening_hours[0], opening_hours[-1])
 
         yield item

@@ -7,7 +7,7 @@ from locations.structured_data_spider import StructuredDataSpider
 
 class GreatWesternRailwayGBSpider(StructuredDataSpider):
     name = "great_western_railway_gb"
-    item_attributes = {"operator": "Great Western Railway", "operator:wikidata": "Q1419438"}
+    item_attributes = {"operator": "Great Western Railway", "operator_wikidata": "Q1419438"}
     start_urls = ["https://www.gwr.com/api/stations"]
     wanted_types = ["TrainStation"]
     search_for_twitter = False

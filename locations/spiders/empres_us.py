@@ -1,4 +1,4 @@
-from scrapy import Request, Spider
+from scrapy import Spider
 from scrapy.http import FormRequest
 
 from locations.dict_parser import DictParser
@@ -7,7 +7,11 @@ from locations.user_agents import BROWSER_DEFAULT
 
 class EmpResUSSpider(Spider):
     name = "empres_us"
-    item_attributes = {"brand": "EmpRes", "brand_wikidata": "Q123370276"}
+    item_attributes = {
+        "brand": "EmpRes",
+        "brand_wikidata": "Q123370276",
+        "extras": {"amenity": "clinic", "healthcare": "rehabilitation"},
+    }
     allowed_domains = ["www.empres.com"]
     start_urls = ["https://www.empres.com/wp-admin/admin-ajax.php"]
     user_agent = BROWSER_DEFAULT

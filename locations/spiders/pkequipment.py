@@ -8,7 +8,7 @@ from locations.items import Feature
 
 class PKEquipmentSpider(scrapy.Spider):
     name = "pkequipment"
-    item_attributes = {"brand": "P&K Equipment"}
+    item_attributes = {"brand": "P&K Equipment", "extras": {"shop": "tractor"}}
     allowed_domains = ["pkequipment.com"]
     download_delay = 0.1
     start_urls = ("https://www.pkequipment.com/about-us/locations/",)

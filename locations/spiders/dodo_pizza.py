@@ -1,5 +1,3 @@
-# a spider for dodo_pizza_ru.
-
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
@@ -12,7 +10,6 @@ class DodoPizzaSpider(Spider):
     name = "dodo_pizza"
     item_attributes = {"brand": "Dodo Pizza", "brand_wikidata": "Q61949318"}
     allowed_domains = ["publicapi.dodois.io"]
-    no_refs = True
     custom_settings = {"ROBOTSTXT_OBEY": False}
     # TODO: update list of countries in 2024
     countries = ["RU", "BY", "GB", "VN", "DE", "KZ", "CN", "KG", "LT", "NG", "PL", "RO", "SI", "TJ", "UZ", "EE", "US"]
@@ -35,6 +32,7 @@ class DodoPizzaSpider(Spider):
         # Type 1 is a restaurant, State 1 is restaurant is open
         if poi.get("Type") == 1 and poi.get("State") == 1:
             item = DictParser.parse(poi)
+            item["ref"] = poi.get("UUId")
             item["name"] = poi.get("Alias")
             item["country"] = country
             item["street_address"] = poi.get("Address")

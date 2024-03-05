@@ -1,60 +1,83 @@
 import json
-from urllib.parse import urlparse
+from typing import Any
+from urllib.parse import urljoin
 
 from scrapy import Spider
-from scrapy.http import Request
+from scrapy.http import JsonRequest, Response
 
+from locations.dict_parser import DictParser
 from locations.hours import DAYS_NL, OpeningHours
-from locations.items import Feature
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.user_agents import BROWSER_DEFAULT
 
 
 class AlbertHeijnSpider(Spider):
     name = "albert_heijn"
-    item_attributes = {"brand": "Albert Heijn", "brand_wikidata": "Q1653985"}
     allowed_domains = ["www.ah.nl", "www.ah.be"]
     start_urls = ["https://www.ah.nl/winkels", "https://www.ah.be/winkels"]
     user_agent = BROWSER_DEFAULT
+    is_playwright_spider = True
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
 
-    def parse(self, response):
-        request_url = urlparse(response.request.url)
-        scripts = response.xpath('//script[contains(text(), "__APOLLO_STATE__")]/text()').extract_first()
-        scripts = scripts.split("\n")
-        for script in scripts:
-            if "__APOLLO_STATE__" in script:
-                json_string = script[script.index("=") + 1 :]
-                store_ids = json.loads(json_string)["ROOT_QUERY"]['storesSearch({"limit":5000,"start":0})']["result"]
-                for item in store_ids:
-                    stores_colon_id = item.get("__ref")
-                    store_id = stores_colon_id[stores_colon_id.index(":") + 1 :]
-                    yield Request(
-                        f"https://{request_url.hostname}/winkel/{store_id}",
-                        callback=self.parse_store,
-                        cb_kwargs={"store_id": store_id},
-                    )
+    brand_map = {
+        "REGULAR": {"brand": "Albert Heijn", "brand_wikidata": "Q1653985"},
+        "TOGO": {"brand": "Albert Heijn to go", "brand_wikidata": "Q77971185"},
+        "XL": {"brand": "Albert Heijn XL", "brand_wikidata": "Q78163765"},
+    }
 
-    def parse_store(self, response, store_id):
-        scripts = response.xpath('//script[contains(text(), "__APOLLO_STATE__")]/text()').extract_first()
-        scripts = scripts.split("\n")
-        for script in scripts:
-            if "__APOLLO_STATE__" in script:
-                json_string = script[script.index("=") + 1 :]
-                store = json.loads(json_string)[f"Stores:{store_id}"]
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        # Collect cookies
+        yield JsonRequest(
+            response.urljoin("/gql"),
+            data={
+                "query": """query storesMapResults {
+                  storesSearch(start: 0, limit: 5000) {
+                    result {
+                      id
+                      storeType
+                      phone
+                      address {
+                        city
+                        countryCode
+                        houseNumber
+                        houseNumberExtra
+                        postalCode
+                        street
+                      }
+                      openingDays {
+                        date
+                        dayName
+                        openingHour {
+                          openFrom
+                          openUntil
+                        }
+                        type
+                      }
+                      geoLocation {
+                        latitude
+                        longitude
+                      }
+                      storeType
+                    }
+                  }
+                }
+                """
+            },
+            callback=self.parse_api,
+        )
 
-                item = Feature()
-                item["ref"] = store_id
-                item["name"] = "AH"
-                item["city"] = store.get("address", {}).get("city")
-                item["country"] = store.get("address", {}).get("countryCode")
-                item["housenumber"] = store.get("address", {}).get("houseNumber")
-                item["postcode"] = store.get("address", {}).get("postalCode")
-                item["street"] = store.get("address", {}).get("street")
-                item["lat"] = store.get("geoLocation", {}).get("latitude")
-                item["lon"] = store.get("geoLocation", {}).get("longitude")
-                item["phone"] = store.get("phone")
-                self.parse_hours(item, store)
+    def parse_api(self, response: Response, **kwargs: Any) -> Any:
+        for location in json.loads(response.xpath("/html/body/pre/text()").get())["data"]["storesSearch"]["result"]:
+            item = DictParser.parse(location)
+            self.parse_hours(item, location)
+            item.update(self.brand_map.get(location["storeType"]))
 
-                yield item
+            slug = "/winkel/{}".format(item["ref"])
+            item["website"] = response.urljoin(slug)
+            item["extras"]["website:be"] = urljoin("https://www.ah.be/", slug)
+            item["extras"]["website:nl"] = urljoin("https://www.ah.nl/", slug)
+
+            yield item
 
     def parse_hours(self, item, store):
         if days_hours := store.get("openingDays"):

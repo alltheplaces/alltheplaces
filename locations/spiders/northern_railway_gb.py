@@ -8,7 +8,7 @@ from locations.items import Feature
 
 class NorthernRailwayGBSpider(Spider):
     name = "northern_railway_gb"
-    item_attributes = {"operator": "Northern", "operator:wikidata": "Q85789775"}
+    item_attributes = {"operator": "Northern", "operator_wikidata": "Q85789775"}
     start_urls = ["https://www.northernrailway.co.uk/api/northern_station_list_auto_complete"]
 
     def parse(self, response, **kwargs):

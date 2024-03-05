@@ -2,6 +2,7 @@ import json
 
 import scrapy
 
+from locations.categories import Categories
 from locations.items import Feature
 
 
@@ -11,11 +12,11 @@ class HardRockSpider(scrapy.Spider):
     start_urls = ["https://www.hardrock.com/files/5880/widget935343.js?callback=widget935343DataCallback"]
 
     cats = {
-        "Cafe": {"brand_wikidata": "Q918151"},
-        "Hotel": {"brand_wikidata": "Q109275902"},
-        # "Hotel & Casino" 11
-        # "Live" 5
-        # "Casino" 3
+        "Cafe": {"brand": "Hard Rock Cafe", "brand_wikidata": "Q918151"},
+        "Hotel": {"brand": "Hard Rock Hotel", "brand_wikidata": "Q109275902"},
+        "Live": {"brand": "Hard Rock Live", "brand_wikidata": "Q5655372", "extras": {"amenity": "music_venue"}},
+        "Hotel & Casino": {"brand": "Hard Rock Hotel & Casino", "brand_wikidata": "", "extras": Categories.HOTEL.value},
+        "Casino": {"brand": "Hard Rock Casino", "brand_wikidata": "", "extras": {"amenity": "casino"}},
     }
 
     def parse(self, response):

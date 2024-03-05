@@ -1,5 +1,6 @@
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
@@ -9,6 +10,22 @@ class CoxHealthSpider(scrapy.Spider):
     item_attributes = {"brand": "CoxHealth", "brand_wikidata": "Q5179867"}
     allowed_domains = ["coxhealth.com"]
     start_urls = ("https://www.coxhealth.com/our-hospitals-and-clinics/our-locations/",)
+
+    categories = [
+        ("Hospital", Categories.HOSPITAL),
+        ("Urgent Care", Categories.CLINIC_URGENT),
+        ("Clinic", Categories.CLINIC),
+        ("Surgery", {"amenity": "hospital", "healthcare": "hospital", "healthcare:speciality": "surgery"}),
+        ("Pharmacy", Categories.PHARMACY),
+        ("Dialysis", {"healthcare": "dialysis"}),
+        ("Fitness Center", Categories.GYM),
+        ("Center", {"healthcare": "centre"}),
+        ("Gift", Categories.SHOP_GIFT),
+        ("Hotel", Categories.HOTEL),
+        ("Rehab", Categories.REHABILITATION),
+        ("Diabetes", {"healthcare": "centre", "healthcare:speciality": "endocrinology"}),
+        ("Emergency", {"amenity": "hospital", "healthcare": "hospital", "healthcare:speciality": "emergency"}),
+    ]
 
     def parse(self, response):
         urls = response.xpath('//div[@class="card-action"]//a/@href').extract()
@@ -59,5 +76,10 @@ class CoxHealthSpider(scrapy.Spider):
             "lat": float(xy[5].strip(",")),
             "lon": float(xy[3].strip(",")),
         }
+
+        for label, cat in self.categories:
+            if label in properties.get("name"):
+                apply_category(cat, properties)
+                break
 
         yield Feature(**properties)

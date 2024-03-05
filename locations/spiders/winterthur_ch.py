@@ -56,7 +56,7 @@ class WinterthurCHSpider(scrapy.Spider):
                 "city": "Winterthur",
                 "country": "CH",
                 "operator": "Stadtgrün Winterthur",
-                "operator:wikidata": "Q56825906",
+                "operator_wikidata": "Q56825906",
             }
             apply_category(Categories.LEISURE_PLAYGROUND, item)
             if name_words := props.get("name", "").split():
@@ -80,7 +80,7 @@ class WinterthurCHSpider(scrapy.Spider):
                     "city": "Winterthur",
                     "country": "CH",
                     "operator": "Stadtgrün Winterthur",
-                    "operator:wikidata": "Q56825906",
+                    "operator_wikidata": "Q56825906",
                     "extras": {
                         "backrest": self.parse_bench_backrest(btype),
                         "colour": self.parse_bench_colour(btype),
