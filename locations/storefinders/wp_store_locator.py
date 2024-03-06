@@ -46,7 +46,7 @@ from locations.spiders.vapestore_gb import clean_address
 
 
 class WPStoreLocatorSpider(Spider, AutomaticSpiderGenerator):
-    days = DAYS_EN
+    days = None
     time_format = "%H:%M"
     searchable_points_files = []
     search_radius = 0
