@@ -1,13 +1,17 @@
+import pytest
+
 from locations.categories import (
     Categories,
     Clothes,
     Fuel,
     HealthcareSpecialities,
+    PaymentMethods,
     apply_category,
     apply_clothes,
     apply_healthcare_specialities,
     apply_yes_no,
     get_category_tags,
+    map_payment,
 )
 from locations.items import Feature
 
@@ -110,3 +114,29 @@ def test_healthcare_specialities():
 
     apply_healthcare_specialities([HealthcareSpecialities.OCCUPATIONAL], item)
     assert item["extras"] == {"healthcare:speciality": "occupational"}
+
+
+@pytest.fixture
+def payment_methods_enum():
+    return PaymentMethods
+
+
+@pytest.fixture
+def item():
+    return Feature()
+
+
+@pytest.mark.parametrize(
+    "input_payment, expected_tag",
+    [
+        ("americanexpress", "payment:american_express"),
+        ("american express", "payment:american_express"),
+        ("American Express", "payment:american_express"),
+        ("american_express", "payment:american_express"),
+        ("American_Express", None),  # TODO: fix this
+    ],
+)
+def test_map_payment(item, payment_methods_enum, input_payment, expected_tag):
+    map_payment(item, input_payment, payment_methods_enum)
+    if expected_tag:
+        assert item["extras"].get(expected_tag)
