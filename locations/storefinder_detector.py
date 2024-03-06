@@ -1,9 +1,11 @@
-from copy import deepcopy
-import jq
 import re
+from copy import deepcopy
 from typing import Any, Iterable
-from playwright.async_api import Frame, Request as PlaywrightRequest
+
+import jq
 import pycountry
+from playwright.async_api import Frame
+from playwright.async_api import Request as PlaywrightRequest
 from scrapy import Selector, Spider
 from scrapy.http import Request, Response
 
@@ -13,32 +15,10 @@ from locations.name_suggestion_index import NSI
 from locations.storefinders.agile_store_locator import AgileStoreLocatorSpider
 from locations.storefinders.amasty_store_locator import AmastyStoreLocatorSpider
 from locations.storefinders.amrest_eu import AmrestEUSpider
-from locations.storefinders.closeby import ClosebySpider
-from locations.storefinders.freshop import FreshopSpider
-from locations.storefinders.geo_me import GeoMeSpider
-from locations.storefinders.kibo import KiboSpider
-from locations.storefinders.limesharp_store_locator import LimesharpStoreLocatorSpider
-from locations.storefinders.localisr import LocalisrSpider
-from locations.storefinders.metalocator import MetaLocatorSpider
-from locations.storefinders.metizsoft import MetizsoftSpider
-from locations.storefinders.momentfeed import MomentFeedSpider
-from locations.storefinders.rexel import RexelSpider
-from locations.storefinders.shopapps import ShopAppsSpider
-from locations.storefinders.stockinstore import StockInStoreSpider
-from locations.storefinders.stockist import StockistSpider
-from locations.storefinders.store_locator_plus_cloud import StoreLocatorPlusCloudSpider
-from locations.storefinders.store_locator_plus_self import StoreLocatorPlusSelfSpider
-from locations.storefinders.storelocatorwidgets import StoreLocatorWidgetsSpider
-from locations.storefinders.storemapper import StoremapperSpider
 from locations.storefinders.storepoint import StorepointSpider
 from locations.storefinders.storerocket import StoreRocketSpider
-from locations.storefinders.super_store_finder import SuperStoreFinderSpider
 from locations.storefinders.sweetiq import SweetIQSpider
-from locations.storefinders.uberall import UberallSpider
-from locations.storefinders.virtualearth import VirtualEarthSpider
 from locations.storefinders.where2getit import Where2GetItSpider
-from locations.storefinders.woosmap import WoosmapSpider
-from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
 from locations.storefinders.yext import YextSpider
 from locations.user_agents import BROWSER_DEFAULT
 
@@ -76,7 +56,7 @@ class StorefinderDetectorSpider(Spider):
             # For debugging purposes, disable headless mode so that
             # any problems preventing a complete page load are
             # easily determined.
-            #"headless": False
+            # "headless": False
             #
             # If https://github.com/microsoft/playwright/issues/7297
             # is ever implemented, uBlock Origin would be useful to
@@ -193,32 +173,32 @@ class StorefinderDetectorSpider(Spider):
             AgileStoreLocatorSpider,
             AmastyStoreLocatorSpider,
             AmrestEUSpider,
-            #ClosebySpider,
-            #FreshopSpider,
-            #GeoMeSpider,
-            #KiboSpider,
-            #LimesharpStoreLocatorSpider,
-            #LocalisrSpider,
-            #MetaLocatorSpider,
-            #MetizsoftSpider,
-            #MomentFeedSpider,
-            #RexelSpider,
-            #ShopAppsSpider,
-            #StockInStoreSpider,
-            #StockistSpider,
-            #StoreLocatorPlusCloudSpider,
-            #StoreLocatorPlusSelfSpider,
-            #StoreLocatorWidgetsSpider,
-            #StoremapperSpider,
+            # ClosebySpider,
+            # FreshopSpider,
+            # GeoMeSpider,
+            # KiboSpider,
+            # LimesharpStoreLocatorSpider,
+            # LocalisrSpider,
+            # MetaLocatorSpider,
+            # MetizsoftSpider,
+            # MomentFeedSpider,
+            # RexelSpider,
+            # ShopAppsSpider,
+            # StockInStoreSpider,
+            # StockistSpider,
+            # StoreLocatorPlusCloudSpider,
+            # StoreLocatorPlusSelfSpider,
+            # StoreLocatorWidgetsSpider,
+            # StoremapperSpider,
             StorepointSpider,
             StoreRocketSpider,
-            #SuperStoreFinderSpider,
+            # SuperStoreFinderSpider,
             SweetIQSpider,
-            #UberallSpider,
-            #VirtualEarthSpider,
+            # UberallSpider,
+            # VirtualEarthSpider,
             Where2GetItSpider,
-            #WoosmapSpider,
-            #WPStoreLocatorSpider,
+            # WoosmapSpider,
+            # WPStoreLocatorSpider,
             YextSpider,
         ]
         return all_storefinders
@@ -272,7 +252,7 @@ class StorefinderDetectorSpider(Spider):
         return retyped_parameters
 
     @staticmethod
-    def execute_jq(query: str, input_data: dict|str) -> dict|bool:
+    def execute_jq(query: str, input_data: dict | str) -> dict | bool:
         result = jq.compile(query).input_value(input_data).first()
         if not isinstance(result, dict) and not isinstance(result, bool):
             # The query should only return a dictionary of extracted
@@ -325,7 +305,10 @@ class StorefinderDetectorSpider(Spider):
                 if post_data_jq := detection_rule.data:
                     if "content-type" not in request.headers.keys():
                         continue
-                    if request.headers["content-type"].split(";", 1)[0] not in ["application/json", "application/x-www-form-urlencoded"]:
+                    if request.headers["content-type"].split(";", 1)[0] not in [
+                        "application/json",
+                        "application/x-www-form-urlencoded",
+                    ]:
                         continue
                     if post_data_result := self.execute_jq(post_data_jq, request.post_data_json):
                         if isinstance(post_data_result, dict):
@@ -370,7 +353,7 @@ class StorefinderDetectorSpider(Spider):
                         if param_name.startswith("__"):
                             remaining_xpaths.pop(param_name)
                             continue
-                        if len(results) == 1 and not param_name.endswith("__list"): 
+                        if len(results) == 1 and not param_name.endswith("__list"):
                             extracted_parameters.update({param_name: results[0]})
                             remaining_xpaths.pop(param_name)
                         elif len(results) > 1 and not param_name.endswith("__list"):
@@ -406,10 +389,10 @@ class StorefinderDetectorSpider(Spider):
         # we want to observe are potentially hidden in obfuscated
         # JavaScript blobs that could take a while to execute.
         await page.wait_for_timeout(1000)
-        await page.mouse.move(0,0)
-        await page.mouse.move(100,100)
+        await page.mouse.move(0, 0)
+        await page.mouse.move(100, 100)
         await page.wait_for_timeout(1000)
-        await page.mouse.wheel(100,100)
+        await page.mouse.wheel(100, 100)
         await page.wait_for_timeout(3000)
         await self.handle_storefinder_page_response(response)
         await page.close()

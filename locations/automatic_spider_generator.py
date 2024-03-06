@@ -1,11 +1,10 @@
-from playwright.async_api import Request as PlaywrightRequest
 from typing import Iterable
 
 from scrapy import Spider
 from scrapy.http import Request, Response
 
 
-class DetectionRule():
+class DetectionRule:
     url: str = None
     headers: str = None
 

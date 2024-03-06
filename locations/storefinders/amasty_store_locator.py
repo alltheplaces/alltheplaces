@@ -26,12 +26,10 @@ from locations.dict_parser import DictParser
 
 class AmastyStoreLocatorSpider(Spider, AutomaticSpiderGenerator):
     detection_rules = [
-        DetectionRequestRule(
-            url=r"^https?:\/\/(?P<allowed_domains__list>[A-Za-z0-9\-.]+)\/amlocator\/index\/ajax\/?"
-        ),
+        DetectionRequestRule(url=r"^https?:\/\/(?P<allowed_domains__list>[A-Za-z0-9\-.]+)\/amlocator\/index\/ajax\/?"),
         DetectionRequestRule(
             url=r"^(?P<start_urls__list>https?:\/\/[A-Za-z0-9\-.]+(?:\/[^\/]+)+\/amlocator\/index\/ajax\/?)$"
-        )
+        ),
     ]
 
     def start_requests(self):

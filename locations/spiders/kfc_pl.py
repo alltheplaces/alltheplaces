@@ -1,8 +1,8 @@
 from unidecode import unidecode
 
-from locations.categories import Categories
 from locations.spiders.kfc import KFC_SHARED_ATTRIBUTES
 from locations.storefinders.amrest_eu import AmrestEUSpider
+
 
 class KFCPLSpider(AmrestEUSpider):
     name = "kfc_pl"
@@ -13,5 +13,10 @@ class KFCPLSpider(AmrestEUSpider):
     api_auth_source = "WEB_KFC"
 
     def parse_item(self, item, location):
-        item["website"] = "https://kfc.pl/en/restaurants/" + unidecode(item["name"]).lower().replace(" - ", "-").replace(" ", "-") + "-" + item["ref"]
+        item["website"] = (
+            "https://kfc.pl/en/restaurants/"
+            + unidecode(item["name"]).lower().replace(" - ", "-").replace(" ", "-")
+            + "-"
+            + item["ref"]
+        )
         yield item

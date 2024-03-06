@@ -11,9 +11,7 @@ class StorepointSpider(Spider, AutomaticSpiderGenerator):
     key = ""
     custom_settings = {"ROBOTSTXT_OBEY": False}
     detection_rules = [
-        DetectionRequestRule(
-            url=r"^https?:\/\/api\.storepoint\.co\/v1\/(?P<key>[0-9a-f]{14})\/locations[?\/$]"
-        )
+        DetectionRequestRule(url=r"^https?:\/\/api\.storepoint\.co\/v1\/(?P<key>[0-9a-f]{14})\/locations[?\/$]")
     ]
 
     def start_requests(self):

@@ -1,6 +1,5 @@
-
 from scrapy import Spider
-from scrapy.http import JsonRequest, Request, Response
+from scrapy.http import JsonRequest
 
 from locations.automatic_spider_generator import AutomaticSpiderGenerator, DetectionRequestRule, DetectionResponseRule
 from locations.dict_parser import DictParser
@@ -16,9 +15,7 @@ class StoreRocketSpider(Spider, AutomaticSpiderGenerator):
         DetectionRequestRule(
             url=r"^https?:\/\/storerocket\.io\/api\/user\/(?P<storerocket_id>[0-9A-Za-z]+)\/locations[?$]"
         ),
-        DetectionResponseRule(
-            js_objects={"storerocket_id": "window.StoreRocket.configs.projectId"}
-        )
+        DetectionResponseRule(js_objects={"storerocket_id": "window.StoreRocket.configs.projectId"}),
     ]
 
     def start_requests(self):

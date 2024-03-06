@@ -31,7 +31,7 @@ class YextSpider(Spider, AutomaticSpiderGenerator):
         ),
         DetectionRequestRule(
             url=r"^https?:\/\/[A-Za-z0-9\-.]+\.yextapis\.com\/v2\/accounts\/me\/.+&v=(?P<api_version>[0-9]{8})[&$]"
-        )
+        ),
     ]
 
     def request_page(self, next_offset):

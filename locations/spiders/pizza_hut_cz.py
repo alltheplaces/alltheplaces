@@ -14,5 +14,10 @@ class PizzaHutCZSpider(AmrestEUSpider):
     api_channel = "TAKEAWAY"
 
     def parse_item(self, item, location):
-        item["website"] = "https://pizzahut.cz/en/restaurants/" + item["ref"] + "-" + unidecode(item["name"]).lower().replace(" ", "-")
+        item["website"] = (
+            "https://pizzahut.cz/en/restaurants/"
+            + item["ref"]
+            + "-"
+            + unidecode(item["name"]).lower().replace(" ", "-")
+        )
         yield item

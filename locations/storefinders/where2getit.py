@@ -85,15 +85,13 @@ class Where2GetItSpider(Spider, AutomaticSpiderGenerator):
     detection_rules = [
         DetectionRequestRule(
             url=r"^https?:\/\/hosted\.where2getit\.com\/(?P<api_brand_name>[^\/]+)\/rest\/getlist[?\/$]",
-            data='.request | if .formdata.objectname == "W2GILocator" then {"api_key": .appkey} else null end'
+            data='.request | if .formdata.objectname == "W2GILocator" then {"api_key": .appkey} else null end',
         ),
         DetectionRequestRule(
             url=r"^(?P<api_endpoint>https?:\/\/[A-Za-z0-9\-.]+(?:\/[^\/]+)*\/rest\/getlist)[?\/$]",
-            data='.request | if .formdata.objectname == "W2GILocator" then {"api_key": .appkey} else null end'
+            data='.request | if .formdata.objectname == "W2GILocator" then {"api_key": .appkey} else null end',
         ),
-        DetectionResponseRule(
-            js_objects={"api_key": "window.W2GI.config.appkey"}
-        )
+        DetectionResponseRule(js_objects={"api_key": "window.W2GI.config.appkey"}),
     ]
 
     def make_request(self, country_code: str = None, state_code: str = None, province_code: str = None) -> JsonRequest:

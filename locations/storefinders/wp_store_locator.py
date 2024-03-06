@@ -1,5 +1,5 @@
-from urllib.parse import urlparse
 import logging
+from urllib.parse import urlparse
 
 from scrapy import Selector, Spider
 from scrapy.http import JsonRequest, Request, Response

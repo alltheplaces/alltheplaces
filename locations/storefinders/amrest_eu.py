@@ -2,7 +2,7 @@ from scrapy import Spider
 from scrapy.http import JsonRequest
 
 from locations.automatic_spider_generator import AutomaticSpiderGenerator, DetectionRequestRule
-from locations.categories import Categories, Extras, apply_category, apply_yes_no
+from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.items import Feature
@@ -18,21 +18,21 @@ class AmrestEUSpider(Spider, AutomaticSpiderGenerator):
         DetectionRequestRule(
             url=r"^https?:\/\/api\.amrest\.eu\/amdv\/ordering-api\/(?P<api_brand_country_key>[^\/]+)\/rest\/v1\/auth\/get-token$",
             headers='{"api_brand_key": .brand, "api_source": .source}',
-            data='{"api_auth_source": .source}'
+            data='{"api_auth_source": .source}',
         ),
         DetectionRequestRule(
             url=r"^https?:\/\/api\.amrest\.eu\/amdv\/ordering-api\/(?P<api_brand_country_key>[^\/]+)\/rest\/v1\/auth\/get-token$",
             headers='{"api_brand_key": .brand}',
-            data='{"api_auth_source": .source}'
+            data='{"api_auth_source": .source}',
         ),
         DetectionRequestRule(
             url=r"^https?:\/\/api\.amrest\.eu\/amdv\/ordering-api\/(?P<api_brand_country_key>[^\/]+)\/rest\/v1\/auth\/get-token$",
             headers='{"api_source": .source}',
-            data='{"api_auth_source": .source}'
+            data='{"api_auth_source": .source}',
         ),
         DetectionRequestRule(
             url=r"^https?:\/\/api\.amrest\.eu\/amdv\/ordering-api\/(?P<api_brand_country_key>[^\/]+)\/rest\/v1\/auth\/get-token$",
-            data='{"api_auth_source": .source}'
+            data='{"api_auth_source": .source}',
         ),
         DetectionRequestRule(
             url=r"^https?:\/\/api\.amrest\.eu\/amdv\/ordering-api\/(?P<api_brand_country_key>[^\/]+)\/rest\/v[23]\/restaurants\/$",
@@ -63,7 +63,7 @@ class AmrestEUSpider(Spider, AutomaticSpiderGenerator):
         ),
         DetectionRequestRule(
             url=r"^https?:\/\/api\.amrest\.eu\/amdv\/ordering-api\/(?P<api_brand_country_key>[^\/]+)\/rest\/v2\/restaurants\/(?:\d+\/(?P<api_channel>[A-Z_]+)|details\/\d+)$",
-        )
+        ),
     ]
 
     def start_requests(self):
@@ -77,7 +77,12 @@ class AmrestEUSpider(Spider, AutomaticSpiderGenerator):
             "deviceUuidSource": "FINGERPRINT",
             "source": f"{self.api_auth_source}",
         }
-        yield JsonRequest(url=f"https://api.amrest.eu/amdv/ordering-api/{self.api_brand_country_key}/rest/v1/auth/get-token", headers=headers, data=data, callback=self.parse_auth_token)
+        yield JsonRequest(
+            url=f"https://api.amrest.eu/amdv/ordering-api/{self.api_brand_country_key}/rest/v1/auth/get-token",
+            headers=headers,
+            data=data,
+            callback=self.parse_auth_token,
+        )
 
     def parse_auth_token(self, response):
         auth_token = response.json()["token"]
@@ -87,7 +92,11 @@ class AmrestEUSpider(Spider, AutomaticSpiderGenerator):
         }
         if self.api_source:
             headers.update({"Source": self.api_source})
-        yield JsonRequest(url=f"https://api.amrest.eu/amdv/ordering-api/{self.api_brand_country_key}/rest/v3/restaurants/", headers=headers, callback=self.parse_restaurants_list)
+        yield JsonRequest(
+            url=f"https://api.amrest.eu/amdv/ordering-api/{self.api_brand_country_key}/rest/v3/restaurants/",
+            headers=headers,
+            callback=self.parse_restaurants_list,
+        )
 
     def parse_restaurants_list(self, response):
         headers = {
@@ -99,9 +108,18 @@ class AmrestEUSpider(Spider, AutomaticSpiderGenerator):
         for restaurant in response.json()["restaurants"]:
             restaurant_id = restaurant["id"]
             if self.api_channel:
-                yield JsonRequest(url=f"https://api.amrest.eu/amdv/ordering-api/{self.api_brand_country_key}/rest/v2/restaurants/{restaurant_id}/{self.api_channel}", headers=headers, callback=self.parse_restaurant_details)
+                yield JsonRequest(
+                    url=f"https://api.amrest.eu/amdv/ordering-api/{self.api_brand_country_key}/rest/v2/restaurants/{restaurant_id}/{self.api_channel}",
+                    headers=headers,
+                    callback=self.parse_restaurant_details,
+                )
             else:
-                yield JsonRequest(url=f"https://api.amrest.eu/amdv/ordering-api/{self.api_brand_country_key}/rest/v2/restaurants/details/{restaurant_id}", headers=headers, callback=self.parse_restaurant_details)
+                yield JsonRequest(
+                    url=f"https://api.amrest.eu/amdv/ordering-api/{self.api_brand_country_key}/rest/v2/restaurants/details/{restaurant_id}",
+                    headers=headers,
+                    callback=self.parse_restaurant_details,
+                )
+
     def parse_restaurant_details(self, response):
         location = response.json()["details"]
         item = DictParser.parse(location)
