@@ -6,6 +6,7 @@ from scrapy.http import Response
 
 from locations.categories import Access, Categories, Extras, Fuel, FuelCards, apply_category, apply_yes_no
 from locations.items import Feature
+from locations.spiders.avia_de import AVIA_SHARED_ATTRIBUTES
 from locations.spiders.vapestore_gb import clean_address
 from locations.structured_data_spider import extract_phone
 
@@ -36,7 +37,7 @@ FUELS_AND_SERVICES_MAPPING = {
 
 class AviaPLSpider(Spider):
     name = "avia_pl"
-    item_attributes = {"brand": "Avia", "brand_wikidata": "Q300147"}
+    item_attributes = AVIA_SHARED_ATTRIBUTES
     start_urls = ["https://aviastacjapaliw.pl/mapa-2/"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
