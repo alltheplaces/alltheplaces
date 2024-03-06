@@ -2,7 +2,7 @@
 from scrapy import Spider
 from scrapy.http import JsonRequest, Request, Response
 
-from locations.automatic_spider_generator import AutomaticSpiderGenerator
+from locations.automatic_spider_generator import AutomaticSpiderGenerator, DetectionRequestRule, DetectionResponseRule
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.items import Feature
@@ -10,9 +10,16 @@ from locations.items import Feature
 
 class StoreRocketSpider(Spider, AutomaticSpiderGenerator):
     dataset_attributes = {"source": "api", "api": "storerocket.io"}
-
     storerocket_id = ""
     base_url = None
+    detection_rules = [
+        DetectionRequestRule(
+            url=r"^https?:\/\/storerocket\.io\/api\/user\/(?P<storerocket_id>[0-9A-Za-z]+)\/locations[?$]"
+        ),
+        DetectionResponseRule(
+            js_objects={"storerocket_id": "window.StoreRocket.configs.projectId"}
+        )
+    ]
 
     def start_requests(self):
         yield JsonRequest(url=f"https://storerocket.io/api/user/{self.storerocket_id}/locations")
@@ -43,30 +50,3 @@ class StoreRocketSpider(Spider, AutomaticSpiderGenerator):
 
     def parse_item(self, item: Feature, location: dict, **kwargs):
         yield item
-
-    def storefinder_exists(response: Response) -> bool | Request:
-        # Example: https://barre3.com/studio-locations
-        # Only after DOM load
-        # <script id="store-rocket-script" src="https://cdn.storerocket.io/widget.js"></script>
-
-        # Example: https://soapynoble.com/
-        # <script type="text/javascript" async="" src="https://cdn.storerocket.io/js/widget-mb.js"></script>
-        if response.xpath('//script[contains(@src, "https://cdn.storerocket.io/widget")]').get():
-            return True
-
-        # Example: https://soapynoble.com/
-        # Example: https://ribcrib.com/locations/
-        if response.xpath('//div[@id="storerocket-widget"]').get():
-            return True
-
-        return False
-
-    def extract_spider_attributes(response: Response) -> dict | Request:
-        attribs = {}
-
-        if response.xpath('//div[@id="storerocket-widget"]/@data-storerocket-id').get():
-            attribs["storerocket_id"] = response.xpath('//div[@id="storerocket-widget"]/@data-storerocket-id').get()
-
-        # TODO: https://barre3.com/studio-locations and similar inject JavaScript into a Playwright page for this URL to extract the key from object Window.StoreRocket.configs.projectId which in this case is jN49m3n4Gy
-
-        return attribs

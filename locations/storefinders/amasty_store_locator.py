@@ -1,5 +1,6 @@
 from scrapy import Request, Selector, Spider
 
+from locations.automatic_spider_generator import AutomaticSpiderGenerator, DetectionRequestRule
 from locations.dict_parser import DictParser
 
 # This store finder is provided as an extension either for Magento
@@ -23,7 +24,16 @@ from locations.dict_parser import DictParser
 # popup_html.xpath(...) queries.
 
 
-class AmastyStoreLocatorSpider(Spider):
+class AmastyStoreLocatorSpider(Spider, AutomaticSpiderGenerator):
+    detection_rules = [
+        DetectionRequestRule(
+            url=r"^https?:\/\/(?P<allowed_domains__list>[A-Za-z0-9\-.]+)\/amlocator\/index\/ajax\/?"
+        ),
+        DetectionRequestRule(
+            url=r"^(?P<start_urls__list>https?:\/\/[A-Za-z0-9\-.]+(?:\/[^\/]+)+\/amlocator\/index\/ajax\/?)$"
+        )
+    ]
+
     def start_requests(self):
         if len(self.start_urls) == 0:
             for domain in self.allowed_domains:

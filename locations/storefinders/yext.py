@@ -3,6 +3,7 @@ import datetime
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
+from locations.automatic_spider_generator import AutomaticSpiderGenerator, DetectionRequestRule
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.structured_data_spider import clean_facebook
@@ -18,13 +19,20 @@ from locations.structured_data_spider import clean_facebook
 # to extract additional location data and to make corrections to automatically extracted location data.
 
 
-class YextSpider(Spider):
+class YextSpider(Spider, AutomaticSpiderGenerator):
     api_key = ""
     api_version = ""
     search_filter = "{}"
     page_limit = 50
-
     wanted_types = ["location"]
+    detection_rules = [
+        DetectionRequestRule(
+            url=r"^https?:\/\/[A-Za-z0-9\-.]+\.yextapis\.com\/v2\/accounts\/me\/.+&api_key=(?P<api_key>[0-9a-f]{32})[&$]"
+        ),
+        DetectionRequestRule(
+            url=r"^https?:\/\/[A-Za-z0-9\-.]+\.yextapis\.com\/v2\/accounts\/me\/.+&v=(?P<api_version>[0-9]{8})[&$]"
+        )
+    ]
 
     def request_page(self, next_offset):
         yield JsonRequest(

@@ -4,7 +4,7 @@ from urllib.parse import urlparse
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
-from locations.automatic_spider_generator import AutomaticSpiderGenerator
+from locations.automatic_spider_generator import AutomaticSpiderGenerator, DetectionRequestRule
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_EN, OpeningHours
 from locations.items import Feature
@@ -26,6 +26,12 @@ from locations.items import Feature
 
 
 class AgileStoreLocatorSpider(Spider, AutomaticSpiderGenerator):
+    detection_rules = [
+        DetectionRequestRule(
+            url=r"^https?:\/\/(?P<allowed_domains__list>[A-Za-z0-9\-.]+)\/wp-admin\/admin-ajax\.php\?.*?(?<=[?&])action=asl_load_stores[&$]"
+        ),
+    ]
+
     def start_requests(self):
         if len(self.start_urls) == 0 and hasattr(self, "allowed_domains"):
             for domain in self.allowed_domains:
@@ -61,15 +67,3 @@ class AgileStoreLocatorSpider(Spider, AutomaticSpiderGenerator):
 
     def parse_item(self, item: Feature, location: dict, **kwargs):
         yield item
-
-    @staticmethod
-    def storefinder_exists(response: Response) -> bool:
-        if len(response.xpath('//*[contains(@id, "agile-store-locator-")]')) > 0:
-            return True
-        return False
-
-    @staticmethod
-    def extract_spider_attributes(response: Response) -> dict:
-        return {
-            "allowed_domains": [urlparse(response.url).netloc],
-        }

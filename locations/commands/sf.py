@@ -4,13 +4,13 @@ from scrapy.crawler import CrawlerProcess
 from scrapy.exceptions import UsageError
 from scrapy.utils.project import get_project_settings
 
-from locations.storefinder_detector_spider import StorefinderDetectorSpider
+from locations.storefinder_detector import StorefinderDetectorSpider
 
 
 # Detect presence of a store finder at a given URL, and return a pre-filled Spider.
 class SfCommand(BaseRunSpiderCommand):
     requires_project = True
-    default_settings = {"LOG_LEVEL": "WARNING"}
+    default_settings = {"LOG_LEVEL": "ERROR"}
 
     def syntax(self):
         return "[options] <URL to scan for store finder>"

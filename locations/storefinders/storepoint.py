@@ -1,7 +1,7 @@
 from scrapy import Spider
-from scrapy.http import JsonRequest, Response
+from scrapy.http import JsonRequest
 
-from locations.automatic_spider_generator import AutomaticSpiderGenerator
+from locations.automatic_spider_generator import AutomaticSpiderGenerator, DetectionRequestRule
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_FULL, OpeningHours
 
@@ -10,6 +10,11 @@ class StorepointSpider(Spider, AutomaticSpiderGenerator):
     dataset_attributes = {"source": "api", "api": "storepoint.co"}
     key = ""
     custom_settings = {"ROBOTSTXT_OBEY": False}
+    detection_rules = [
+        DetectionRequestRule(
+            url=r"^https?:\/\/api\.storepoint\.co\/v1\/(?P<key>[0-9a-f]{14})\/locations[?\/$]"
+        )
+    ]
 
     def start_requests(self):
         yield JsonRequest(url=f"https://api.storepoint.co/v1/{self.key}/locations")
@@ -35,15 +40,3 @@ class StorepointSpider(Spider, AutomaticSpiderGenerator):
 
     def parse_item(self, item, location: {}, **kwargs):
         yield item
-
-    @staticmethod
-    def storefinder_exists(response: Response) -> bool:
-        if len(response.xpath('//div[@id="storepoint-container"]/@data-map-id')) > 0:
-            return True
-        return False
-
-    @staticmethod
-    def extract_spider_attributes(response: Response) -> dict:
-        return {
-            "key": response.xpath('//div[@id="storepoint-container"]/@data-map-id').get(),
-        }
