@@ -112,6 +112,35 @@ These instructions were tested with macOS 14.3.1 on 2024-02-21.
 
    If the above runs without complaint, then you have a functional installation and are ready to run and write spiders.
 
+#### Codespaces
+
+You can use GitHub Codespaces to run the project. This is a cloud-based development environment that is created from the project's repository and includes a pre-configured environment with all the tools you need to develop the project. To use Codespaces, click the button below:
+
+   [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/alltheplaces/alltheplaces)
+
+#### Docker
+
+You can use Docker to run the project. This is a container-based development environment that is created from the project's repository and includes a pre-configured environment with all the tools you need to develop the project.
+
+1. Clone a copy of the project from the [All the Places](https://github.com/alltheplaces/alltheplaces/) repo (or your own fork if you are considering contributing to the project):
+
+   ```
+   $ git clone git@github.com:alltheplaces/alltheplaces.git
+   ```
+
+1. Build the Docker image:
+
+   ```
+   $ cd alltheplaces
+   $ docker build -t alltheplaces .
+   ```
+
+1. Run the Docker container:
+
+   ```
+   $ docker run -it alltheplaces
+   ```
+
 ### Contributing code
 
 Many of the sites provide their data in a [standard format](docs/STRUCTURED_DATA.md). Others export their data [via simple APIs](docs/API_SPIDER.md). We have a number of guides to help you develop spiders:
@@ -121,6 +150,7 @@ Many of the sites provide their data in a [standard format](docs/STRUCTURED_DATA
 * [Sitemaps make finding POI pages easier](docs/SITEMAP.md)
 * [Data from many POI pages can be extracted without writing code](docs/STRUCTURED_DATA.md)
 * [What is expected in a pull request?](docs/PULL_REQUEST.md)
+* [What we do behind the scenes](docs/PIPELINES.md)
 
 ### The weekly run
 

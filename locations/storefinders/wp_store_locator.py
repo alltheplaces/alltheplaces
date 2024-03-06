@@ -1,4 +1,5 @@
 from urllib.parse import urlparse
+import logging
 
 from scrapy import Selector, Spider
 from scrapy.http import JsonRequest, Request, Response
@@ -6,7 +7,7 @@ from scrapy.http import JsonRequest, Request, Response
 from locations.automatic_spider_generator import AutomaticSpiderGenerator
 from locations.dict_parser import DictParser
 from locations.geo import point_locations
-from locations.hours import DAYS_EN, OpeningHours
+from locations.hours import DAYS_BY_FREQUENCY, OpeningHours, sanitise_day
 from locations.items import Feature
 from locations.spiders.vapestore_gb import clean_address
 
@@ -50,6 +51,7 @@ class WPStoreLocatorSpider(Spider, AutomaticSpiderGenerator):
     searchable_points_files = []
     search_radius = 0
     max_results = 0
+    possible_days = DAYS_BY_FREQUENCY
 
     def start_requests(self):
         if len(self.start_urls) == 0 and hasattr(self, "allowed_domains"):
@@ -82,19 +84,39 @@ class WPStoreLocatorSpider(Spider, AutomaticSpiderGenerator):
             item = DictParser.parse(location)
             item["street_address"] = clean_address([location.get("address"), location.get("address2")])
             item["name"] = location["store"]
-            item["opening_hours"] = self.parse_opening_hours(location)
+            # If we have preconfigured the exact days to use, start there
+            if self.days is not None:
+                item["opening_hours"] = self.parse_opening_hours(location, self.days)
+            else:
+                # Otherwise, iterate over the possibilities until we get a first match
+                logging.warning(
+                    "Attempting to detect opening hours - specify self.days = DAYS_EN or the appropriate language code to suppress this warning"
+                )
+                for days in self.possible_days:
+                    item["opening_hours"] = self.parse_opening_hours(location, days)
+                    if item["opening_hours"] is not None:
+                        self.days = days
+                        break
+
             yield from self.parse_item(item, location) or []
 
     def parse_item(self, item: Feature, location: dict, **kwargs):
         yield item
 
-    def parse_opening_hours(self, location: dict, **kwargs) -> OpeningHours:
-        hours_raw = DictParser.get_first_key(location, DictParser.hours_keys)
-        if not hours_raw:
+    def parse_opening_hours(self, location: dict, days: dict, **kwargs) -> OpeningHours:
+        if not location.get("hours"):
             return
         hours_text = " ".join(filter(None, Selector(text=hours_raw).xpath("//text()").getall()))
         oh = OpeningHours()
-        oh.add_ranges_from_string(hours_text)
+        for rule in sel.xpath("//tr"):
+            day = sanitise_day(rule.xpath("./td/text()").get(), days)
+            times = rule.xpath("./td/time/text()").get()
+            if not day or not times:
+                continue
+            if times.lower() in ["closed"]:
+                continue
+            start_time, end_time = times.split("-")
+            oh.add_range(day, start_time.strip(), end_time.strip(), time_format=self.time_format)
         return oh
 
     def storefinder_exists(response: Response) -> bool | Request:
