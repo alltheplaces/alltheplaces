@@ -15,6 +15,7 @@ class BeaconAndBridgeMarketUSSpider(Spider):
         "extras": Categories.FUEL_STATION.value,
     }
     start_urls = ["https://beaconandbridge.com/locations/"]
+    requires_proxy = True
 
     def parse(self, response):
         address_list = response.xpath('//div[@id="section_2"]//div[contains(@class, "yes_heads")]')
