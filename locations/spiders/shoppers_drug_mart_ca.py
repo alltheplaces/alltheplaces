@@ -5,6 +5,7 @@ from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
+from locations.hours import DAYS_EN, DAYS_FR, OpeningHours, sanitise_day
 
 BRANDS = {
     "Beauty Boutique by Shoppers": None,
@@ -40,6 +41,18 @@ class ShoppersDrugMartCASpider(Spider):
                 "/en/store-locator/store/{}".format(location["StoreID"])
             )
             item["extras"]["website:fr"] = response.urljoin("/fr/store-locator/store/{}".format(location["StoreID"]))
+
+            item["opening_hours"] = OpeningHours()
+            for day, times in zip(location["WeekDays"], location["StoreHours"]):
+                if times == "CLOSED":
+                    continue
+                elif times == "24 Hours":
+                    times = "12:00 AM - 12:00 AM"
+                times = times.replace("Midnight", "12:00 AM")
+
+                item["opening_hours"].add_range(
+                    sanitise_day(day, DAYS_FR | DAYS_EN), *times.split(" - "), time_format="%I:%M %p"
+                )
 
             if props := BRANDS.get(location["StoreType"]["DisplayName"]):
                 item.update(props[0])
