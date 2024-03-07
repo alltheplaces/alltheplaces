@@ -1,5 +1,3 @@
-import pytest
-
 from locations.categories import (
     Categories,
     Clothes,
@@ -116,27 +114,23 @@ def test_healthcare_specialities():
     assert item["extras"] == {"healthcare:speciality": "occupational"}
 
 
-@pytest.fixture
-def payment_methods_enum():
-    return PaymentMethods
+def test_map_payment():
+    item = Feature()
+    map_payment(item, "americanexpress", PaymentMethods)
+    assert item["extras"].get("payment:american_express")
 
+    item = Feature()
+    map_payment(item, "american express", PaymentMethods)
+    assert item["extras"].get("payment:american_express")
 
-@pytest.fixture
-def item():
-    return Feature()
+    item = Feature()
+    map_payment(item, "American Express", PaymentMethods)
+    assert item["extras"].get("payment:american_express")
 
+    item = Feature()
+    map_payment(item, "american_express", PaymentMethods)
+    assert item["extras"].get("payment:american_express")
 
-@pytest.mark.parametrize(
-    "input_payment, expected_tag",
-    [
-        ("americanexpress", "payment:american_express"),
-        ("american express", "payment:american_express"),
-        ("American Express", "payment:american_express"),
-        ("american_express", "payment:american_express"),
-        ("American_Express", None),  # TODO: fix this
-    ],
-)
-def test_map_payment(item, payment_methods_enum, input_payment, expected_tag):
-    map_payment(item, input_payment, payment_methods_enum)
-    if expected_tag:
-        assert item["extras"].get(expected_tag)
+    item = Feature()
+    map_payment(item, "American_Express", PaymentMethods)
+    assert not item["extras"].get("payment:american_express")
