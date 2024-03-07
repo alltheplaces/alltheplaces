@@ -10,3 +10,4 @@ class BlackberrysINSpider(CrawlSpider, StructuredDataSpider):
     start_urls = ["https://stores.blackberrys.com/"]
     rules = [Rule(LinkExtractor(r"page=\d+$")), Rule(LinkExtractor("/Home"), callback="parse_sd")]
     wanted_types = ["Store"]
+    requires_proxy = True
