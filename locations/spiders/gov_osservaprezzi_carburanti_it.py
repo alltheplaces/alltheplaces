@@ -15,8 +15,6 @@ class GovOsservaprezziCarburantiITSpider(Spider):
     dataset_attributes = {"source": "api", "api": "carburanti.mise.gov.it"}
 
     custom_settings = {
-        "HTTPCACHE_ENABLED": True,
-        "HTTPCACHE_EXPIRATION_SECS": 1800,
         "DOWNLOAD_DELAY": 0.1,
     }
 
