@@ -1,9 +1,7 @@
-import re
-
 from scrapy import Spider
-from scrapy.http import JsonRequest, Response
+from scrapy.http import JsonRequest
 
-from locations.automatic_spider_generator import AutomaticSpiderGenerator
+from locations.automatic_spider_generator import AutomaticSpiderGenerator, DetectionRequestRule
 from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
@@ -16,13 +14,18 @@ from locations.hours import OpeningHours
 
 class FreshopSpider(Spider, AutomaticSpiderGenerator):
     dataset_attributes = {"source": "api", "api": "freshop.com"}
-    app_key = ""
-    location_type_ids = ["1567647"]
+    app_key: str = ""
+    location_type_ids: list[str] = ["1567647"]
+    detection_rules = [
+        DetectionRequestRule(
+            url=r"^https?:\/\/api\.freshop\.com\/1\/stores\?.*?(?<=[?&])app_key=(?P<app_key>\w+)[&$]"
+        )
+    ]
 
     def start_requests(self):
         yield JsonRequest(url=f"https://api.freshop.com/1/stores?app_key={self.app_key}")
 
-    def parse(self, response, **kwargs):
+    def parse(self, response):
         for location in response.json()["items"]:
             if location.get("type_id") not in self.location_type_ids or not location.get("has_address"):
                 continue
@@ -47,21 +50,5 @@ class FreshopSpider(Spider, AutomaticSpiderGenerator):
 
             yield from self.parse_item(item, location) or []
 
-    def parse_item(self, item, location, **kwargs):
+    def parse_item(self, item, location):
         yield item
-
-    @staticmethod
-    def storefinder_exists(response: Response) -> bool:
-        if len(response.xpath('//script[contains(@src, "https://asset.freshop.com/freshop.js")]')) > 0:
-            return True
-        return False
-
-    @staticmethod
-    def extract_spider_attributes(response: Response) -> dict:
-        app_key = ""
-        app_key_url = response.xpath('//script[contains(@src, "https://asset.freshop.com/freshop.js")]/@src').get()
-        if app_key_match := re.search(r"(?<![\w\-])app_key=([\w\-]+)", app_key_url):
-            app_key = app_key_match.group(1)
-        return {
-            "app_key": app_key,
-        }
