@@ -58,7 +58,7 @@ class WPStoreLocatorSpider(Spider, AutomaticSpiderGenerator):
         ),
         DetectionResponseRule(
             js_objects={
-                "allowed_domains": r'(window.wpslSettings.ajaxurl.match(/^https?:\/\/[^\/]+?\/wp-admin\/admin-ajax\.php/)) ? [new URL(window.wpslSettings.ajaxurl).hostname] : null'
+                "allowed_domains": r"(window.wpslSettings.ajaxurl.match(/^https?:\/\/[^\/]+?\/wp-admin\/admin-ajax\.php/)) ? [new URL(window.wpslSettings.ajaxurl).hostname] : null"
             }
         ),
         DetectionResponseRule(
