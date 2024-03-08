@@ -2,7 +2,7 @@ import random
 import re
 
 from scrapy import Spider
-from scrapy.http import JsonRequest, Response
+from scrapy.http import JsonRequest
 from scrapy.signals import spider_idle
 
 from locations.automatic_spider_generator import AutomaticSpiderGenerator, DetectionRequestRule
@@ -41,14 +41,12 @@ from locations.items import Feature
 class GeoMeSpider(Spider, AutomaticSpiderGenerator):
     api_key: str = ""
     api_version: str = "2"
-    url_within_bounds_template: str = "https://{}.geoapp.me/api/v{}/locations/within_bounds?sw[]={}&sw[]={}&ne[]={}&ne[]={}"
+    url_within_bounds_template: str = (
+        "https://{}.geoapp.me/api/v{}/locations/within_bounds?sw[]={}&sw[]={}&ne[]={}&ne[]={}"
+    )
     url_nearest_to_template: str = "https://{}.geoapp.me/api/v{}/locations/nearest_to?lat={}&lng={}&limit=50"
     _locations_found: dict = {}
-    detection_rules = [
-        DetectionRequestRule(
-            url=r"^https?:\/\/(?P<api_key>\w+)\.geoapp\.me\/api\/v\d+\/locations\/"
-        )
-    ]
+    detection_rules = [DetectionRequestRule(url=r"^https?:\/\/(?P<api_key>\w+)\.geoapp\.me\/api\/v\d+\/locations\/")]
 
     def start_requests(self):
         self.crawler.signals.connect(self.start_location_requests, signal=spider_idle)

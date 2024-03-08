@@ -1,5 +1,5 @@
-from scrapy import Selector, Spider
-from scrapy.http import JsonRequest, Request, Response
+from scrapy import Spider
+from scrapy.http import JsonRequest
 
 from locations.automatic_spider_generator import AutomaticSpiderGenerator, DetectionRequestRule, DetectionResponseRule
 from locations.dict_parser import DictParser
@@ -57,11 +57,15 @@ class WPStoreLocatorSpider(Spider, AutomaticSpiderGenerator):
             url=r"^(?P<start_urls__list>https?:\/\/[A-Za-z0-9\-.]+(?:\/[^\/]+)+\/wp-admin\/admin-ajax\.php\?.*?(?<=[?&])action=store_search[&$].*$)"
         ),
         DetectionResponseRule(
-            js_objects={"allowed_domains": '(window.wpslSettings.ajaxurl.match(/^https?:\/\/[^\/]+?\/wp-admin\/admin-ajax\.php/)) ? [new URL(window.wpslSettings.ajaxurl).hostname] : null'}
+            js_objects={
+                "allowed_domains": "(window.wpslSettings.ajaxurl.match(/^https?:\/\/[^\/]+?\/wp-admin\/admin-ajax\.php/)) ? [new URL(window.wpslSettings.ajaxurl).hostname] : null"
+            }
         ),
         DetectionResponseRule(
-            js_objects={"start_urls": '(window.wpslSettings.ajaxurl.match(/^https?:\/\/[^\/]+?\/.+?\/wp-admin\/admin-ajax\.php/)) ? [new URL(window.wpslSettings.ajaxurl).origin + new URL(window.wpslSettings.ajaxurl).pathname + "?action=store_search&autoload=1"] : null'}
-        )
+            js_objects={
+                "start_urls": '(window.wpslSettings.ajaxurl.match(/^https?:\/\/[^\/]+?\/.+?\/wp-admin\/admin-ajax\.php/)) ? [new URL(window.wpslSettings.ajaxurl).origin + new URL(window.wpslSettings.ajaxurl).pathname + "?action=store_search&autoload=1"] : null'
+            }
+        ),
     ]
 
     def start_requests(self):

@@ -20,26 +20,30 @@ from locations.storefinders.freshop import FreshopSpider
 from locations.storefinders.geo_me import GeoMeSpider
 from locations.storefinders.kibo import KiboSpider
 from locations.storefinders.limesharp_store_locator import LimesharpStoreLocatorSpider
-#from locations.storefinders.localisr import LocalisrSpider
-#from locations.storefinders.metalocator import MetaLocatorSpider
-#from locations.storefinders.metizsoft import MetizsoftSpider
-#from locations.storefinders.momentfeed import MomentFeedSpider
-#from locations.storefinders.rexel import RexelSpider
-#from locations.storefinders.shopapps import ShopAppsSpider
-#from locations.storefinders.stockinstore import StockInStoreSpider
-#from locations.storefinders.stockist import StockistSpider
-#from locations.storefinders.store_locator_plus_cloud import StoreLocatorPlusCloudSpider
-#from locations.storefinders.store_locator_plus_self import StoreLocatorPlusSelfSpider
-#from locations.storefinders.storelocatorwidgets import StoreLocatorWidgetsSpider
-#from locations.storefinders.storemapper import StoremapperSpider
+
+# from locations.storefinders.localisr import LocalisrSpider
+# from locations.storefinders.metalocator import MetaLocatorSpider
+# from locations.storefinders.metizsoft import MetizsoftSpider
+# from locations.storefinders.momentfeed import MomentFeedSpider
+# from locations.storefinders.rexel import RexelSpider
+# from locations.storefinders.shopapps import ShopAppsSpider
+# from locations.storefinders.stockinstore import StockInStoreSpider
+# from locations.storefinders.stockist import StockistSpider
+# from locations.storefinders.store_locator_plus_cloud import StoreLocatorPlusCloudSpider
+# from locations.storefinders.store_locator_plus_self import StoreLocatorPlusSelfSpider
+# from locations.storefinders.storelocatorwidgets import StoreLocatorWidgetsSpider
+# from locations.storefinders.storemapper import StoremapperSpider
 from locations.storefinders.storepoint import StorepointSpider
 from locations.storefinders.storerocket import StoreRocketSpider
-#from locations.storefinders.super_store_finder import SuperStoreFinderSpider
+
+# from locations.storefinders.super_store_finder import SuperStoreFinderSpider
 from locations.storefinders.sweetiq import SweetIQSpider
-#from locations.storefinders.uberall import UberallSpider
-#from locations.storefinders.virtualearth import VirtualEarthSpider
+
+# from locations.storefinders.uberall import UberallSpider
+# from locations.storefinders.virtualearth import VirtualEarthSpider
 from locations.storefinders.where2getit import Where2GetItSpider
-#from locations.storefinders.woosmap import WoosmapSpider
+
+# from locations.storefinders.woosmap import WoosmapSpider
 from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
 from locations.storefinders.yext import YextSpider
 from locations.user_agents import BROWSER_DEFAULT
@@ -78,7 +82,7 @@ class StorefinderDetectorSpider(Spider):
             # For debugging purposes, disable headless mode so that
             # any problems preventing a complete page load are
             # easily determined.
-            #"headless": False
+            # "headless": False
             #
             # If https://github.com/microsoft/playwright/issues/7297
             # is ever implemented, uBlock Origin would be useful to
