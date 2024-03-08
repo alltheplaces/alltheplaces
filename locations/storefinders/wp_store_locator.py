@@ -58,12 +58,12 @@ class WPStoreLocatorSpider(Spider, AutomaticSpiderGenerator):
         ),
         DetectionResponseRule(
             js_objects={
-                "allowed_domains": "(window.wpslSettings.ajaxurl.match(/^https?:\/\/[^\/]+?\/wp-admin\/admin-ajax\.php/)) ? [new URL(window.wpslSettings.ajaxurl).hostname] : null"
+                "allowed_domains": r'(window.wpslSettings.ajaxurl.match(/^https?:\/\/[^\/]+?\/wp-admin\/admin-ajax\.php/)) ? [new URL(window.wpslSettings.ajaxurl).hostname] : null'
             }
         ),
         DetectionResponseRule(
             js_objects={
-                "start_urls": '(window.wpslSettings.ajaxurl.match(/^https?:\/\/[^\/]+?\/.+?\/wp-admin\/admin-ajax\.php/)) ? [new URL(window.wpslSettings.ajaxurl).origin + new URL(window.wpslSettings.ajaxurl).pathname + "?action=store_search&autoload=1"] : null'
+                "start_urls": r'(window.wpslSettings.ajaxurl.match(/^https?:\/\/[^\/]+?\/.+?\/wp-admin\/admin-ajax\.php/)) ? [new URL(window.wpslSettings.ajaxurl).origin + new URL(window.wpslSettings.ajaxurl).pathname + "?action=store_search&autoload=1"] : null'
             }
         ),
     ]
@@ -123,5 +123,5 @@ class WPStoreLocatorSpider(Spider, AutomaticSpiderGenerator):
         if not hours_raw:
             return None
         oh = OpeningHours()
-        oh.add_ranges_from_string(hours_text, days=days)
+        oh.add_ranges_from_string(hours_raw, days=days)
         return oh
