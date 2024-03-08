@@ -19,8 +19,8 @@ from locations.storefinders.closeby import ClosebySpider
 from locations.storefinders.freshop import FreshopSpider
 from locations.storefinders.geo_me import GeoMeSpider
 from locations.storefinders.kibo import KiboSpider
-from locations.storefinders.limesharp_store_locator import LimesharpStoreLocatorSpider
 
+# from locations.storefinders.limesharp_store_locator import LimesharpStoreLocatorSpider
 # from locations.storefinders.localisr import LocalisrSpider
 # from locations.storefinders.metalocator import MetaLocatorSpider
 # from locations.storefinders.metizsoft import MetizsoftSpider
@@ -203,7 +203,7 @@ class StorefinderDetectorSpider(Spider):
             FreshopSpider,
             GeoMeSpider,
             KiboSpider,
-            LimesharpStoreLocatorSpider,
+            # LimesharpStoreLocatorSpider,
             # LocalisrSpider,
             # MetaLocatorSpider,
             # MetizsoftSpider,
