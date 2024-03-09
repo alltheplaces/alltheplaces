@@ -1,4 +1,5 @@
 from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
+from locations.hours import DAYS_EN
 
 
 class GoGamesToysUSSpider(WPStoreLocatorSpider):
@@ -17,3 +18,12 @@ class GoGamesToysUSSpider(WPStoreLocatorSpider):
     searchable_points_files = [
         "us_centroids_100mile_radius.csv",
     ]
+    days = DAYS_EN
+
+    def parse_item(self, item, location):
+        if item['name'] == 'Attic Salt':
+            item['brand'] = "Attic Salt"
+            item['brand_wikidata'] = 'Q108409773'
+
+
+        yield item
