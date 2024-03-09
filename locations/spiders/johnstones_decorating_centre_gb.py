@@ -1,8 +1,10 @@
 from typing import Any
+
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
-from locations.items import Feature
+
 from locations.hours import OpeningHours
+from locations.items import Feature
 
 # from locations.structured_data_spider import StructuredDataSpider
 
