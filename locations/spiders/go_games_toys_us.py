@@ -1,5 +1,5 @@
-from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
 from locations.hours import DAYS_EN
+from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
 
 
 class GoGamesToysUSSpider(WPStoreLocatorSpider):
@@ -21,9 +21,8 @@ class GoGamesToysUSSpider(WPStoreLocatorSpider):
     days = DAYS_EN
 
     def parse_item(self, item, location):
-        if item['name'] == 'Attic Salt':
-            item['brand'] = "Attic Salt"
-            item['brand_wikidata'] = 'Q108409773'
-
+        if item["name"] == "Attic Salt":
+            item["brand"] = "Attic Salt"
+            item["brand_wikidata"] = "Q108409773"
 
         yield item
