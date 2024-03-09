@@ -3,7 +3,7 @@ from scrapy import Spider
 from scrapy.http import JsonRequest, Response, Request
 from urllib.parse import urlparse
 
-from locations.automatic_spider_generator import AutomaticSpiderGenerator
+from locations.automatic_spider_generator import AutomaticSpiderGenerator, DetectionRequestRule, DetectionResponseRule
 from locations.dict_parser import DictParser
 from locations.items import Feature
 
@@ -74,13 +74,26 @@ from locations.items import Feature
 class Where2GetItSpider(Spider, AutomaticSpiderGenerator):
     dataset_attributes = {"source": "api", "api": "where2getit.com"}
     custom_settings = {"ROBOTSTXT_OBEY": False}
-    api_endpoint = ""
-    api_brand_name = ""
-    api_key = ""
-    api_filter = {}
-    api_filter_admin_level = 0  # 0 = no filtering,
-    # 1 = filter by country
-    # 2 = filter by state/province
+    api_endpoint: str = ""
+    api_brand_name: str = ""
+    api_key: str = ""
+    api_filter: dict = {}
+    # api_filter_admin_level:
+    #   0 = no filtering
+    #   1 = filter by country
+    #   2 = filter by state/province
+    api_filter_admin_level: int = 0
+    detection_rules = [
+        DetectionRequestRule(
+            url=r"^https?:\/\/hosted\.where2getit\.com\/(?P<api_brand_name>[^\/]+)\/rest\/getlist[?\/$]",
+            data='.request | if .formdata.objectname == "W2GILocator" then {"api_key": .appkey} else null end',
+        ),
+        DetectionRequestRule(
+            url=r"^(?P<api_endpoint>https?:\/\/[A-Za-z0-9\-.]+(?:\/[^\/]+)*\/rest\/getlist)[?\/$]",
+            data='.request | if .formdata.objectname == "W2GILocator" then {"api_key": .appkey} else null end',
+        ),
+        DetectionResponseRule(js_objects={"api_key": "window.W2GI.config.appkey"}),
+    ]
 
     def make_request(self, country_code: str = None, state_code: str = None, province_code: str = None) -> JsonRequest:
         where_clause = {}

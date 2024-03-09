@@ -4,7 +4,87 @@ from scrapy import Spider
 from scrapy.http import Request, Response
 
 
+class DetectionRule:
+    url: str = None
+    headers: str = None
+
+    def __init__(
+        self,
+        url: str = None,
+        headers: str = None,
+        *args,
+        **kwargs,
+    ):
+        self.url = url
+        self.headers = headers
+
+    def __repr__(self):
+        parameters = []
+        if self.url:
+            parameters.append('url="{}"'.format(self.url))
+        if self.headers:
+            parameters.append("headers='{}'".format(self.headers))
+        return "DetectionRule({})".format(", ".join(parameters))
+
+
+class DetectionRequestRule(DetectionRule):
+    data: str = None
+
+    def __init__(
+        self,
+        url: str = None,
+        headers: str = None,
+        data: str = None,
+        *args,
+        **kwargs,
+    ):
+        super().__init__(url, headers, *args, **kwargs)
+        self.data = data
+
+    def __repr__(self):
+        parameters = []
+        if self.url:
+            parameters.append('url="{}"'.format(self.url))
+        if self.headers:
+            parameters.append("headers='{}'".format(self.headers))
+        if self.data:
+            parameters.append("data='{}'".format(self.data))
+        return "DetectionRequestRule({})".format(", ".join(parameters))
+
+
+class DetectionResponseRule(DetectionRule):
+    js_objects: dict = {}
+    xpaths: dict = {}
+
+    def __init__(
+        self,
+        url: str = None,
+        headers: str = None,
+        js_objects: dict = {},
+        xpaths: dict = {},
+        *args,
+        **kwargs,
+    ):
+        super().__init__(url, headers, *args, **kwargs)
+        self.js_objects = js_objects
+        self.xpaths = xpaths
+
+    def __repr__(self):
+        parameters = []
+        if self.url:
+            parameters.append('url="{}"'.format(self.url))
+        if self.headers:
+            parameters.append("headers='{}'".format(self.headers))
+        if self.js_objects:
+            parameters.append("js_objects={}".format(self.js_objects.__repr__()))
+        if self.xpaths:
+            parameters.append("xpaths={}".format(self.xpaths.__repr__()))
+        return "DetectionResponseRule({})".format(", ".join(parameters))
+
+
 class AutomaticSpiderGenerator:
+    detection_rules: list[DetectionRule] = []
+
     @staticmethod
     def generate_spider_code(spider: Spider) -> str:
         """
@@ -76,13 +156,13 @@ class AutomaticSpiderGenerator:
         """
         Method which store finder classes may choose to overwrite if
         the initial request to the store finder page should be more
-        complex such as requiring use of Playwright.
+        complex than simply loading the page in a Playwright browser.
         :param url: URL (as a string) of the store finder page which
                     should be the starting point for detecting the
                     presence of a store finder.
-        :return: Scrapy Request object.
+        :return: Scrapy Request object(s) or None.
         """
-        yield Request(url=url)
+        yield None
 
     @staticmethod
     def storefinder_exists(response: Response) -> bool | Request:

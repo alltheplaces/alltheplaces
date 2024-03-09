@@ -11,3 +11,8 @@ class BelhavenPubsGBSpider(SitemapSpider, StructuredDataSpider):
     }
     sitemap_urls = ["https://www.belhaven.co.uk/sitemap.xml"]
     sitemap_rules = [(r"https:\/\/www\.belhaven\.co\.uk\/pubs\/([-\w]+)\/([-\w]+)$", "parse_sd")]
+
+    def post_process_item(self, item, response, ld_data, **kwargs):
+        item["facebook"] = None
+
+        yield item

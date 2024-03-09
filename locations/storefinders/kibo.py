@@ -1,11 +1,10 @@
-from urllib.parse import urlparse
-
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
-from locations.automatic_spider_generator import AutomaticSpiderGenerator
+from locations.automatic_spider_generator import AutomaticSpiderGenerator, DetectionRequestRule
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_FULL, OpeningHours
+from locations.items import Feature
 
 # Documentation for the Kibo Commerce Storefront Location API is available at
 # https://apidocs.kibocommerce.com/?spec=location_storefront#get-/commerce/storefront/locationUsageTypes/DL/locations
@@ -15,12 +14,17 @@ from locations.hours import DAYS_FULL, OpeningHours
 
 
 class KiboSpider(Spider, AutomaticSpiderGenerator):
-    page_size = 1000
+    page_size: int = 1000
+    detection_rules = [
+        DetectionRequestRule(
+            url=r"^(?P<start_urls__list>https?:\/\/[A-Za-z0-9\-.]+\/api\/commerce\/storefront\/locationUsageTypes\/SP\/locations)[?\/$]"
+        )
+    ]
 
     def start_requests(self):
         yield JsonRequest(url=f"{self.start_urls[0]}?pageSize={self.page_size}")
 
-    def parse(self, response, **kwargs):
+    def parse(self, response: Response):
         for location in response.json()["items"]:
             item = DictParser.parse(location)
 
@@ -55,20 +59,5 @@ class KiboSpider(Spider, AutomaticSpiderGenerator):
                 next_start_index = response.json()["startIndex"] + self.page_size
                 yield JsonRequest(url=f"{self.start_urls[0]}?pageSize={self.page_size}&startIndex={next_start_index}")
 
-    def parse_item(self, item, location, **kwargs):
+    def parse_item(self, item: Feature, location: dict):
         yield item
-
-    @staticmethod
-    def storefinder_exists(response: Response) -> bool:
-        if response.xpath('//script[@id="data-mz-preload-apicontext"]'):
-            return True
-        return False
-
-    @staticmethod
-    def extract_spider_attributes(response: Response) -> dict:
-        start_url = (
-            "https://" + urlparse(response.url).netloc + "/api/commerce/storefront/locationUsageTypes/SP/locations"
-        )
-        return {
-            "start_urls": [start_url],
-        }
