@@ -20,7 +20,7 @@ class LeeannChinUSSpider(CrawlSpider, StructuredDataSpider):
     time_format = "%I:%M %p"
 
     def post_process_item(self, item, response, ld_data, **kwargs):
-        if 'openingHours' in ld_data:
-            item["opening_hours"].add_ranges_from_string(ld_data['openingHours'], days=DAYS_EN)
+        if "openingHours" in ld_data:
+            item["opening_hours"].add_ranges_from_string(ld_data["openingHours"], days=DAYS_EN)
 
         return super().post_process_item(item, response, ld_data, **kwargs)
