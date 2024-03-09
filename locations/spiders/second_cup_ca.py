@@ -1,8 +1,6 @@
-from scrapy.linkextractors import LinkExtractor
-from scrapy.spiders import SitemapSpider, Rule
+from scrapy.spiders import SitemapSpider
 
 from locations.hours import DAYS_FR
-from locations.categories import Categories
 from locations.structured_data_spider import StructuredDataSpider
 
 
