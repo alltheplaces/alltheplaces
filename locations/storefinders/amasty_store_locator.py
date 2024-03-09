@@ -1,5 +1,7 @@
 from urllib.parse import urlparse
 
+from scrapy import Spider, Request
+from scrapy.http import Response
 from locations.automatic_spider_generator import AutomaticSpiderGenerator, DetectionRequestRule
 from locations.dict_parser import DictParser
 
