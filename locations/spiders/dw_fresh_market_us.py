@@ -8,3 +8,8 @@ class DWFreshMarketUSSpider(FreshopSpider):
         "brand": "D&W Fresh Market",
     }
     app_key = "dw_fresh_market"
+
+    def parse_item(self, item, location):
+        if "Pharmacy Phone:" in item["phone"]:
+            item["phone"] = item["phone"].replace("Pharmacy Phone: ", "").split("\n")[0]
+        yield item
