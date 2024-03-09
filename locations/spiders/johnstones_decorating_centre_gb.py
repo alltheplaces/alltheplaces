@@ -7,7 +7,6 @@ from locations.hours import OpeningHours
 from locations.items import Feature
 
 
-
 class JohnstonesDecoratingGBCentreSpider(SitemapSpider):
     name = "johnstones_decorating_centre_gb"
     item_attributes = {"brand": "Johnstone's Decorating Centre", "brand_wikidata": "Q121742106"}
