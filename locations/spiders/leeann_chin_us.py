@@ -2,7 +2,6 @@ from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
 from locations.hours import DAYS_EN
-from locations.categories import Categories
 from locations.structured_data_spider import StructuredDataSpider
 
 
