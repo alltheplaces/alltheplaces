@@ -14,8 +14,6 @@ class SecondCupCASpider(SitemapSpider, StructuredDataSpider):
     sitemap_rules = [
         (r"^https://secondcup\.com/location/.*/$", "parse_sd"),
     ]
-    # wanted_types = ["Restaurant"]
-    # time_format = "%I:%M %p"
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         if "openingHours" in ld_data:
