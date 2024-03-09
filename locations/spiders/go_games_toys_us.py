@@ -16,7 +16,7 @@ class GoGamesToysUSSpider(WPStoreLocatorSpider):
     # https://goretailgroup.com/wp-admin/admin-ajax.php?action=store_search&lat=29.42519&lng=-98.49459&max_results=100&search_radius=500
     # Max is 500 miles
     searchable_points_files = [
-        "us_centroids_100mile_radius.csv",
+        "us_centroids_iseadgg_458km_radius.csv",
     ]
     days = DAYS_EN
 
