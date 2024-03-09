@@ -143,6 +143,7 @@ class NameSuggestionIndexCommand(ScrapyCommand):
                 "- [ ] This is not a manufacturer listing outlets operating under their own brands / this will not create duplicates"
             )
             print("`{}`".format(" ".join(["pipenv run scrapy sf", "--brand-wikidata={}".format(code), website])))
+            print("`{}`".format(" ".join(["pipenv run scrapy sitemap", "--pages", website])))
             print("```")
             # Now, we crawl!
             # TODO: The subprocess gets ModuleNotFoundError: No module named 'locations', despite the current working dir and shell=True being passed.
