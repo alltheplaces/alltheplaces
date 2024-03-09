@@ -1,7 +1,7 @@
+import re
 from urllib.parse import urlparse
 
 import scrapy
-import re
 from scrapy.commands import BaseRunSpiderCommand
 from scrapy.exceptions import UsageError
 from scrapy.spiders.sitemap import iterloc
