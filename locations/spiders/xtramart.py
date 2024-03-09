@@ -2,8 +2,8 @@ from locations.hours import DAYS_EN
 from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
 
 
-class XtraMartSpider(WPStoreLocatorSpider):
-    name = "xtramart"
+class XtraMartUSSpider(WPStoreLocatorSpider):
+    name = "xtramart_us"
     item_attributes = {
         "brand_wikidata": "Q119586946",
         "brand": "XtraMart",
