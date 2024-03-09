@@ -9,6 +9,7 @@ class CostaCoffeePLSpider(scrapy.Spider):
     item_attributes = {"brand": "Costa Coffee", "brand_wikidata": "Q608845"}
     allowed_domains = ["api.costacoffee.pl"]
     start_urls = ["https://api.costacoffee.pl/api/storelocator/list"]
+    no_refs = True
 
     def parse(self, response):
         data = response.json()
@@ -37,16 +38,6 @@ class CostaCoffeePLSpider(scrapy.Spider):
                     "delivery": "yes" if store["deliveryAvailable"] else "no",
                 },
             }
-
-            # No ref in upstream data, so we just want something as unique as possible
-            properties["ref"] = "|".join(
-                (
-                    properties["lat"],
-                    properties["lon"],
-                    properties["name"],
-                    properties["addr_full"],
-                )
-            )
 
             apply_category(Categories.CAFE, properties)
 
