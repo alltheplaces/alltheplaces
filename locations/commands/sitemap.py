@@ -19,7 +19,6 @@ class MySitemapSpider(scrapy.spiders.SitemapSpider):
     # Generated from the codebase, see https://github.com/alltheplaces/alltheplaces/issues/7723
     common_sitemap_patterns = [
         r"(.+)/marktseite$",
-        r"(/\w\w/[-\w]+/[-\w]+)\.html",
         r"-\d+$",
         r"-\d+\.html",
         r"-fast-food-restaurant-.+-\d+\/Map$",
@@ -208,7 +207,6 @@ class MySitemapSpider(scrapy.spiders.SitemapSpider):
         r"[0-9]+$",
         r"[0-9]+.html",
         r"\.com/\w\w/[-.\w]+/[-.\w]+$",
-        r"\.com/\w\w/[-\w]+/[-\w]+$",
         r"\.com/\w\w/[^/]+/[^/]+$",
         r"\.com/\w\w/[^/]+/clothing-store-(\d+)\.html",
         r"\.com\/([-\w]{3,})$",
@@ -239,7 +237,7 @@ class MySitemapSpider(scrapy.spiders.SitemapSpider):
         r"https://burgerurge\.com\.au\/location\/[\w\-]+\/$",
         r"https://filialen\.(.*)",
         r"https://local\.(.*)/[^/]+/[^/]+/[^/]+$",
-        r"https://local\.(?:fuel\.|pharmacy\.)?safeway\.com/safeway/\w\w/[-\w]+/[-\w]+\.html",
+        r"\w\w/[-\w]+/[-\w]+\.html",
         r"https://locations(.*).com/[-\w]+/[-\w]+/[-\w]+",
         r"https://locations(.*)/.*/.*/.*",
         r"https://locations(.*)/.+/.+/.+",
