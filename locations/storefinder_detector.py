@@ -164,8 +164,13 @@ class StorefinderDetectorSpider(Spider):
             nsi_matches = [nsi_match for nsi_match in nsi.iter_nsi(wikidata_code)]
             if len(nsi_matches) != 1:
                 return
-            spider_key = re.sub(r"[^a-zA-Z0-9_]", "", nsi_matches[0]["tags"]["name"].replace(" ", "_")).lower()
-            spider_class_name = re.sub(r"[^a-zA-Z0-9]", "", nsi_matches[0]["tags"]["name"].replace(" ", ""))
+            if "name" in nsi_matches[0]["tags"].keys():
+                spider_key = re.sub(r"[^a-zA-Z0-9_]", "", nsi_matches[0]["tags"]["name"].replace(" ", "_")).lower()
+                spider_class_name = re.sub(r"[^a-zA-Z0-9]", "", nsi_matches[0]["tags"]["name"].replace(" ", ""))
+            elif "displayName" in nsi_matches[0]:
+                spider_key = re.sub(r"[^a-zA-Z0-9_]", "", nsi_matches[0]["displayName"].replace(" ", "_")).lower()
+                spider_class_name = re.sub(r"[^a-zA-Z0-9]", "", nsi_matches[0]["displayName"].replace(" ", ""))
+
 
             # Add country name to spider name if spider exists in a single country
             if nsi_matches[0].get("locationSet") and nsi_matches[0]["locationSet"].get("include"):
