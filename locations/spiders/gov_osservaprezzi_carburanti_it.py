@@ -15,8 +15,6 @@ class GovOsservaprezziCarburantiITSpider(Spider):
     dataset_attributes = {"source": "api", "api": "carburanti.mise.gov.it"}
 
     custom_settings = {
-        "HTTPCACHE_ENABLED": True,
-        "HTTPCACHE_EXPIRATION_SECS": 1800,
         "DOWNLOAD_DELAY": 0.1,
     }
 
@@ -53,8 +51,6 @@ class GovOsservaprezziCarburantiITSpider(Spider):
         "Beyfin": {"brand": "Beyfin", "brand_wikidata": "Q3639256"},
         "Costantin": {"brand": "Costantin", "brand_wikidata": "Q48800790"},
         "Lukoil": {"brand": "Lukoil", "brand_wikidata": "Q329347"},
-        # "brand" used by non-branded stations
-        "PompeBianche": {},
     }
 
     def get_price_tag(self, fuel_tag):
@@ -117,8 +113,11 @@ class GovOsservaprezziCarburantiITSpider(Spider):
                     self.crawler.stats.inc_value(f"atp/gov_osservaprezzi_carburanti_it/unmapped_price/{charged_fuel}")
 
             if (brand := result["brand"]) in self.BRANDS:
+                item["name"] = None  # Use NSI name
                 item.update(self.BRANDS[brand])
+            elif result["brand"] == "PompeBianche":  # "brand" used by non-branded stations
+                pass
             else:
-                item["brand"] = brand
+                item["brand"] = item["name"] = brand  # Use the brand as the name as well
                 self.crawler.stats.inc_value(f"atp/gov_osservaprezzi_carburanti_it/unmapped_brand/{brand}")
             yield item
