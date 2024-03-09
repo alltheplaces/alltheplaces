@@ -7,8 +7,8 @@ from locations.hours import OpeningHours
 from locations.items import Feature
 
 
-class JohnstonesDecoratingGBCentreSpider(SitemapSpider):
-    name = "johnstones_decorating_centre_gb"
+class JohnstonesDecoratingCentreSpider(SitemapSpider):
+    name = "johnstones_decorating_centre"
     item_attributes = {"brand": "Johnstone's Decorating Centre", "brand_wikidata": "Q121742106"}
     sitemap_urls = ["https://www.johnstonesdc.com/sitemap.xml"]
 
