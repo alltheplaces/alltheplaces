@@ -20,7 +20,7 @@
 	// "forwardPorts": [],
 
 	// Uncomment the next line to run commands after the container is created.
-	"postCreateCommand": "cd /workspaces/alltheplaces && pipenv run scrapy"
+	"postCreateCommand": "cd /workspaces/alltheplaces && git config core.hooksPath contrib/hooks && pipenv run scrapy"
 
 	// Configure tool-specific properties.
 	// "customizations": {},
