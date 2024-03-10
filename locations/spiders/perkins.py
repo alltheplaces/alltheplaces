@@ -1,10 +1,7 @@
-import json
-
-import scrapy
 
 from scrapy.spiders import SitemapSpider
+
 from locations.structured_data_spider import StructuredDataSpider
-from locations.hours import DAYS_3_LETTERS
 
 
 class PerkinsSpider(SitemapSpider, StructuredDataSpider):
@@ -17,7 +14,7 @@ class PerkinsSpider(SitemapSpider, StructuredDataSpider):
         (r"/locations/.*$", "parse_sd")
     ]
     time_format = "%I:%M"
-    
+
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["ref"] = response.url
         return super().post_process_item(item, response, ld_data, **kwargs)
