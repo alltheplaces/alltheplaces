@@ -8,8 +8,8 @@ from locations.items import Feature
 class KpmgSpider(SitemapSpider):
     name = "kpmg"
     item_attributes = {"brand": "KPMG", "brand_wikidata": "Q493751"}
-    allowed_domains = ["home.kpmg"]
-    sitemap_urls = ["https://home.kpmg/sitemap-index.xml"]
+    allowed_domains = ["kpmg.com", ""]
+    sitemap_urls = ["https://kpmg.com/sitemap-index.xml"]
     sitemap_rules = [("/offices/", "parse")]
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
