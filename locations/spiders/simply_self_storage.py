@@ -1,10 +1,5 @@
-import re
-
 import scrapy
 
-from locations.hours import OpeningHours
-from locations.linked_data_parser import LinkedDataParser
-from locations.microdata_parser import MicrodataParser
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -18,4 +13,3 @@ class SimplySelfStorageSpider(scrapy.spiders.SitemapSpider, StructuredDataSpider
         (r"https://www.publicstorage.com/self-storage-.*\.html", "parse_sd"),
     ]
     wanted_types = ["SelfStorage"]
-
