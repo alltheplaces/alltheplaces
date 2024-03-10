@@ -317,7 +317,7 @@ DAYS_PT = {
     "Sa": "Sa",
     "Sá": "Sa",
     "Do": "Su",
-    "Domingo": "Su"
+    "Domingo": "Su",
 }
 DAYS_SK = {
     "Po": "Mo",

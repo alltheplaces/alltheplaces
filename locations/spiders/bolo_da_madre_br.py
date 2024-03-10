@@ -1,7 +1,7 @@
-from scrapy import Spider, Request
+from scrapy import Request, Spider
 
-from locations.items import Feature
 from locations.hours import DAYS_PT, DELIMITERS_PT, OpeningHours
+from locations.items import Feature
 
 
 class BoloDaMadreBRSpider(Spider):
