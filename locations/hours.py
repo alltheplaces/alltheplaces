@@ -302,7 +302,7 @@ DAYS_PL = {
     "Niedziela": "Su",
 }
 DAYS_PT = {
-    # Feriado Holidays
+    # "Feriado": "PH",
     # "Se": "Mo",
     "Segunda": "Mo",
     "Te": "Tu",
@@ -558,6 +558,14 @@ DELIMITERS_ES = [
     "-",
     "a",
     "y",
+    "de",
+]
+
+DELIMITERS_PT = [
+    "-",
+    "a",
+    "das",
+    "às",
     "de",
 ]
 
