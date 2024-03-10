@@ -1,8 +1,8 @@
 import scrapy
 
+from locations.geo import point_locations
 from locations.hours import OpeningHours
 from locations.items import Feature
-from locations.searchable_points import open_searchable_points
 from locations.user_agents import BROWSER_DEFAULT
 
 
@@ -20,11 +20,9 @@ class TractorSupplySpider(scrapy.Spider):
     def start_requests(self):
         base_url = "https://www.tractorsupply.com/wcs/resources/store/10151/zipcode/fetchstoredetails?responseFormat=json&latitude={lat}&longitude={lng}"
 
-        with open_searchable_points("us_centroids_25mile_radius.csv") as points:
-            for point in points:
-                _, lat, lon = point.strip().split(",")
-                url = base_url.format(lat=lat, lng=lon)
-                yield scrapy.Request(url=url, callback=self.parse)
+        for lat, lon in point_locations("us_centroids_25mile_radius.csv"):
+            url = base_url.format(lat=lat, lng=lon)
+            yield scrapy.Request(url=url, callback=self.parse)
 
     def parse_hours(self, hours):
         day_hour = hours.split("|")
