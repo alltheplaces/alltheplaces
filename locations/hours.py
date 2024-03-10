@@ -302,14 +302,22 @@ DAYS_PL = {
     "Niedziela": "Su",
 }
 DAYS_PT = {
+    # Feriado Holidays
     # "Se": "Mo",
+    "Segunda": "Mo",
     "Te": "Tu",
+    "Terça": "Tu",
     # "Qu": "We",
+    "Quarta": "We",
     # "Qu": "Th",
+    "Quinta": "Th",
     # "Se": "Fr",
+    "Sexta": "Fr",
+    "Sábado": "Sa",
     "Sa": "Sa",
     "Sá": "Sa",
     "Do": "Su",
+    "Domingo": "Su"
 }
 DAYS_SK = {
     "Po": "Mo",
