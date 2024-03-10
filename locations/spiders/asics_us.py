@@ -1,5 +1,3 @@
-import scrapy
-
 from locations.storefinders.locally import LocallySpider
 
 
