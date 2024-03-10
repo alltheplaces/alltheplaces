@@ -2,20 +2,26 @@ import json
 import re
 
 from scrapy import Request, Spider
+from scrapy.http import Response
 
+from locations.automatic_spider_generator import AutomaticSpiderGenerator, DetectionRequestRule, DetectionResponseRule
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_FULL, OpeningHours
+from locations.items import Feature
 
 
-class StoreLocatorWidgetsSpider(Spider):
+class StoreLocatorWidgetsSpider(Spider, AutomaticSpiderGenerator):
     dataset_attributes = {"source": "api", "api": "storelocatorwidgets.com"}
-
-    key = ""
+    key: str = ""
+    detection_rules = [
+        DetectionRequestRule(url=r"^https?:\/\/cdn\.storelocatorwidgets\.com\/json\/(?P<key>[0-9a-f]{32})(?:\?|$)"),
+        DetectionResponseRule(xpaths={"key": r'//script[contains(@src, "//cdn.storelocatorwidgets.com/widget/widget.js")]/@data-uid'})
+    ]
 
     def start_requests(self):
         yield Request(url=f"https://cdn.storelocatorwidgets.com/json/{self.key}")
 
-    def parse_hours_for_day_12h(self, oh, day, hours_for_day):
+    def parse_hours_for_day_12h(self, oh: OpeningHours, day: str, hours_for_day: str):
         hours_for_day = (
             hours_for_day.replace("midnight", "12AM").replace("midday", "12PM").replace("24 hours", "12AM - 11:59PM")
         )
@@ -36,7 +42,7 @@ class StoreLocatorWidgetsSpider(Spider):
             end_time = f"{end_hour}:{end_min} {end_am_pm}"
             oh.add_range(day, start_time, end_time, time_format="%I:%M %p")
 
-    def parse_hours_for_day_24h(self, oh, day, hours_for_day):
+    def parse_hours_for_day_24h(self, oh: OpeningHours, day: str, hours_for_day: str):
         hours_for_day = (
             hours_for_day.replace("midnight", "00:00").replace("midday", "12:00").replace("24 hours", "00:00 - 23:59")
         )
@@ -56,7 +62,7 @@ class StoreLocatorWidgetsSpider(Spider):
             end_time = f"{end_hour}:{end_min}"
             oh.add_range(day, start_time, end_time, time_format="%H:%M")
 
-    def parse_hours(self, location):
+    def parse_hours(self, location: dict) -> OpeningHours:
         oh = OpeningHours()
         for day in DAYS_FULL:
             if hours_for_day := location["data"].get("hours_" + day):
@@ -66,7 +72,7 @@ class StoreLocatorWidgetsSpider(Spider):
                     self.parse_hours_for_day_24h(oh, day, hours_for_day)
         return oh.as_opening_hours()
 
-    def parse(self, response, **kwargs):
+    def parse(self, response: Response):
         data_clean = response.text[4 : len(response.text) - 1]
         locations = json.loads(data_clean)["stores"]
         for location in locations:
@@ -86,5 +92,5 @@ class StoreLocatorWidgetsSpider(Spider):
             item["opening_hours"] = self.parse_hours(location)
             yield from self.parse_item(item, location)
 
-    def parse_item(self, item, location: {}, **kwargs):
+    def parse_item(self, item: Feature, location: dict):
         yield item

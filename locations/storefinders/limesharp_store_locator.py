@@ -1,9 +1,7 @@
-from urllib.parse import urlparse
-
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
-from locations.automatic_spider_generator import AutomaticSpiderGenerator
+from locations.automatic_spider_generator import AutomaticSpiderGenerator, DetectionRequestRule, DetectionResponseRule
 from locations.dict_parser import DictParser
 from locations.items import Feature
 
@@ -25,6 +23,14 @@ from locations.items import Feature
 
 
 class LimesharpStoreLocatorSpider(Spider, AutomaticSpiderGenerator):
+    detection_rules = [
+        DetectionRequestRule(
+            # Path appears to be fixed per:
+            # https://github.com/search?q=repo:motou/magento2-store-locator-stockists-extension+getStores&type=code
+            url=r"^https?:\/\/(?P<allowed_domains__list>[A-Za-z0-9\-.]+)\/stockists\/ajax\/stores(?:\?|\/|$)"
+        ),
+    ]
+
     def start_requests(self):
         if len(self.start_urls) == 0 and hasattr(self, "allowed_domains"):
             for domain in self.allowed_domains:
@@ -33,7 +39,7 @@ class LimesharpStoreLocatorSpider(Spider, AutomaticSpiderGenerator):
             for url in self.start_urls:
                 yield JsonRequest(url=url)
 
-    def parse(self, response, **kwargs):
+    def parse(self, response):
         for location in response.json():
             if (
                 not location["name"]
@@ -47,20 +53,5 @@ class LimesharpStoreLocatorSpider(Spider, AutomaticSpiderGenerator):
             item["street_address"] = location["address"]
             yield from self.parse_item(item, location) or []
 
-    def parse_item(self, item: Feature, location: dict, **kwargs):
+    def parse_item(self, item: Feature, location: dict):
         yield item
-
-    @staticmethod
-    def storefinder_exists(response: Response) -> bool:
-        if response.xpath('//body[contains(@class, "stockists-index-index")]') and response.xpath(
-            '//script[@type="text/x-magento-init"]'
-        ):
-            return True
-        return False
-
-    @staticmethod
-    def extract_spider_attributes(response: Response) -> dict:
-        allowed_domains = urlparse(response.url).netloc
-        return {
-            "allowed_domains": [allowed_domains],
-        }

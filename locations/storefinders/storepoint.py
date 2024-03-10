@@ -8,10 +8,10 @@ from locations.hours import DAYS_FULL, OpeningHours
 
 class StorepointSpider(Spider, AutomaticSpiderGenerator):
     dataset_attributes = {"source": "api", "api": "storepoint.co"}
-    key = ""
+    key: str = ""
     custom_settings = {"ROBOTSTXT_OBEY": False}
     detection_rules = [
-        DetectionRequestRule(url=r"^https?:\/\/api\.storepoint\.co\/v1\/(?P<key>[0-9a-f]{14})\/locations[?\/$]")
+        DetectionRequestRule(url=r"^https?:\/\/api\.storepoint\.co\/v1\/(?P<key>[0-9a-f]{14})\/locations(?:\?|\/|$)")
     ]
 
     def start_requests(self):

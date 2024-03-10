@@ -27,7 +27,7 @@ from locations.items import Feature
 class AgileStoreLocatorSpider(Spider, AutomaticSpiderGenerator):
     detection_rules = [
         DetectionRequestRule(
-            url=r"^https?:\/\/(?P<allowed_domains__list>[A-Za-z0-9\-.]+)\/wp-admin\/admin-ajax\.php\?.*?(?<=[?&])action=asl_load_stores[&$]"
+            url=r"^https?:\/\/(?P<allowed_domains__list>[A-Za-z0-9\-.]+)\/wp-admin\/admin-ajax\.php\?.*?(?<=[?&])action=asl_load_stores(?:&|$)"
         ),
     ]
 

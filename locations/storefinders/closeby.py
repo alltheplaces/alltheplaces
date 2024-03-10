@@ -9,8 +9,8 @@ class ClosebySpider(Spider, AutomaticSpiderGenerator):
     dataset_attributes = {"source": "api", "api": "closeby.co"}
     api_key: str = ""
     detection_rules = [
-        DetectionRequestRule(url=r"^https?:\/\/www\.closeby\.co\/embed\/(?P<api_key>[0-9a-f]{32})[?\/$]"),
-        DetectionResponseRule(js_objects={"api_key": "window.__closeby__.mapKey"}),
+        DetectionRequestRule(url=r"^https?:\/\/www\.closeby\.co\/embed\/(?P<api_key>[0-9a-f]{32})(?:\?|\/|$)"),
+        DetectionResponseRule(js_objects={"api_key": r"window.__closeby__.mapKey"}),
     ]
 
     def start_requests(self):

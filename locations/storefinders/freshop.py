@@ -17,7 +17,7 @@ class FreshopSpider(Spider, AutomaticSpiderGenerator):
     app_key: str = ""
     location_type_ids: list[str] = ["1567647"]
     detection_rules = [
-        DetectionRequestRule(url=r"^https?:\/\/api\.freshop\.com\/1\/stores\?.*?(?<=[?&])app_key=(?P<app_key>\w+)[&$]")
+        DetectionRequestRule(url=r"^https?:\/\/api\.freshop\.com\/1\/stores\?.*?(?<=[?&])app_key=(?P<app_key>\w+)(?:&|$)")
     ]
 
     def start_requests(self):
