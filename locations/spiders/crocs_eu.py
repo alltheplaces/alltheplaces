@@ -1,9 +1,9 @@
 import scrapy
 
-from locations.dict_parser import DictParser
+from locations.storefinders.locally import LocallySpider
 
 
-class CrocsEUSpider(scrapy.Spider):
+class CrocsEUSpider(LocallySpider):
     name = "crocs_eu"
     item_attributes = {"brand": "Crocs", "brand_wikidata": "Q926699"}
     custom_settings = {"ROBOTSTXT_OBEY": False}
@@ -13,10 +13,5 @@ class CrocsEUSpider(scrapy.Spider):
     ]
     skip_auto_cc_spider_name = True
 
-    def parse(self, response):
-        results = response.json()["markers"]
-        for data in results:
-            item = DictParser.parse(data)
-            item["street_address"] = item.pop("addr_full")
-
-            yield item
+    def post_process_item(self, item, store):
+        item["street_address"] = item.pop("addr_full")
