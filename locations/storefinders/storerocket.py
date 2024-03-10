@@ -8,9 +8,8 @@ from locations.items import Feature, SocialMedia, set_social_media
 
 class StoreRocketSpider(Spider):
     dataset_attributes = {"source": "api", "api": "storerocket.io"}
-
-    storerocket_id = ""
-    base_url = None
+    storerocket_id: str = ""
+    base_url: str | None = None
 
     def start_requests(self):
         yield JsonRequest(url=f"https://storerocket.io/api/user/{self.storerocket_id}/locations")
