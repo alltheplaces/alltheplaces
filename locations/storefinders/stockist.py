@@ -35,7 +35,7 @@ class StockistSpider(Spider, AutomaticSpiderGenerator):
     detection_rules = [
         DetectionRequestRule(url=r"^https?:\/\/stockist\.co\/api\/v1\/(?P<key>u\d+)\/locations\/all(?:\?|$)"),
         DetectionRequestRule(url=r"^https?:\/\/stockist\.co\/api\/v1\/(?P<key>u\d+)\/widget\.js(?:\?|$)"),
-        DetectionResponseRule(js_objects={"key": r"window.Stockist.__widget.__config.tag"})
+        DetectionResponseRule(js_objects={"key": r"window.Stockist.__widget.__config.tag"}),
     ]
 
     def start_requests(self):

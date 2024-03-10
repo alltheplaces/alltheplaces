@@ -1,6 +1,5 @@
-from html import unescape
 import re
-from urllib.parse import urlparse
+from html import unescape
 
 from scrapy import Request, Selector, Spider
 from scrapy.http import Response
@@ -27,10 +26,22 @@ from locations.items import Feature
 
 class SuperStoreFinderSpider(Spider, AutomaticSpiderGenerator):
     detection_rules = [
-        DetectionRequestRule(url=r"^https?:\/\/(?P<allowed_domains__list>[A-Za-z0-9\-.]+)\/wp-content\/plugins\/superstorefinder-wp\/ssf-wp-xml\.php(?:\?|$)"),
-        DetectionRequestRule(url=r"^(?P<start_urls__list>https?:\/\/[A-Za-z0-9\-.]+(?:\/[^\/]+)+\/wp-content\/plugins\/superstorefinder-wp\/ssf-wp-xml\.php(?:\?.*$|$))"),
-        DetectionResponseRule(js_objects={"allowed_domains": r"(window.ssf_wp_base.match(/^https?:\/\/[^\/]+?\/wp-content\/plugins\/superstorefinder-wp/)) ? [new URL(window.ssf_wp_base).hostname] : null"}),
-        DetectionResponseRule(js_objects={"start_urls": r'(window.ssf_wp_base.match(/^https?:\/\/[^\/]+?\/.+?\/wp-content\/plugins\/superstorefinder-wp/)) ? [new URL(window.ssf_wp_base).origin + new URL(window.ssf_wp_base).pathname + "/ssf-wp-xml.php"] : null'})
+        DetectionRequestRule(
+            url=r"^https?:\/\/(?P<allowed_domains__list>[A-Za-z0-9\-.]+)\/wp-content\/plugins\/superstorefinder-wp\/ssf-wp-xml\.php(?:\?|$)"
+        ),
+        DetectionRequestRule(
+            url=r"^(?P<start_urls__list>https?:\/\/[A-Za-z0-9\-.]+(?:\/[^\/]+)+\/wp-content\/plugins\/superstorefinder-wp\/ssf-wp-xml\.php(?:\?.*$|$))"
+        ),
+        DetectionResponseRule(
+            js_objects={
+                "allowed_domains": r"(window.ssf_wp_base.match(/^https?:\/\/[^\/]+?\/wp-content\/plugins\/superstorefinder-wp/)) ? [new URL(window.ssf_wp_base).hostname] : null"
+            }
+        ),
+        DetectionResponseRule(
+            js_objects={
+                "start_urls": r'(window.ssf_wp_base.match(/^https?:\/\/[^\/]+?\/.+?\/wp-content\/plugins\/superstorefinder-wp/)) ? [new URL(window.ssf_wp_base).origin + new URL(window.ssf_wp_base).pathname + "/ssf-wp-xml.php"] : null'
+            }
+        ),
     ]
 
     def start_requests(self):

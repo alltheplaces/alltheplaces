@@ -45,18 +45,20 @@ class LocalisrSpider(Spider, AutomaticSpiderGenerator):
         ),
         DetectionRequestRule(
             url=r"^https?:\/\/app\.localisr\.io\/api\/auth\/v2\/validate(?:\?|\/|$)",
-            data=r'{"api_key": .key, "api_version": .version}'
+            data=r'{"api_key": .key, "api_version": .version}',
         ),
         DetectionRequestRule(
             url=r"^https?:\/\/app\.localisr\.io\/js\/localisr\/widget\.js\?key=(?P<api_key>[A-Z0-9]+)&version=(?P<api_version>[\d.]+)$"
         ),
         DetectionResponseRule(
-            xpaths={"api_key": r'substring-after(//iframe[contains(@src, "https://app.localisr.io/public/store-locator?requestToken=")]/@src, "requestToken=")'}
+            xpaths={
+                "api_key": r'substring-after(//iframe[contains(@src, "https://app.localisr.io/public/store-locator?requestToken=")]/@src, "requestToken=")'
+            }
         ),
         DetectionResponseRule(
             xpaths={
                 "api_key": r'substring-after(substring-before(//script[contains(@src, "https://app.localisr.io/js/localisr/widget.js")]/@src, "&version="), "?key=")',
-                "api_version": r'substring-after(//script[contains(@src, "https://app.localisr.io/js/localisr/widget.js")]/@src, "&version=")'
+                "api_version": r'substring-after(//script[contains(@src, "https://app.localisr.io/js/localisr/widget.js")]/@src, "&version=")',
             }
         ),
     ]

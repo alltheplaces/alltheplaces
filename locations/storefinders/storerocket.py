@@ -10,7 +10,7 @@ from locations.items import Feature
 class StoreRocketSpider(Spider, AutomaticSpiderGenerator):
     dataset_attributes = {"source": "api", "api": "storerocket.io"}
     storerocket_id: str = ""
-    base_url: str|None = None
+    base_url: str | None = None
     detection_rules = [
         DetectionRequestRule(
             url=r"^https?:\/\/storerocket\.io\/api\/user\/(?P<storerocket_id>[0-9A-Za-z]+)\/locations(?:\?|\/|$)"

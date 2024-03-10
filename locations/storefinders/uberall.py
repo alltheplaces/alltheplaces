@@ -1,5 +1,5 @@
 from scrapy import Spider
-from scrapy.http import JsonRequest, Request, Response
+from scrapy.http import JsonRequest, Response
 
 from locations.automatic_spider_generator import AutomaticSpiderGenerator, DetectionRequestRule, DetectionResponseRule
 from locations.dict_parser import DictParser
@@ -13,7 +13,7 @@ class UberallSpider(Spider, AutomaticSpiderGenerator):
     business_id_filter: int = None
     detection_rules = [
         DetectionRequestRule(url=r"^https?:\/\/locator\.uberall\.com\/api\/storefinders\/(?P<key>\w+)\/"),
-        DetectionResponseRule(xpaths={"key": r'//div[@id="store-finder-widget"]/@data-key'})
+        DetectionResponseRule(xpaths={"key": r'//div[@id="store-finder-widget"]/@data-key'}),
     ]
 
     def start_requests(self):

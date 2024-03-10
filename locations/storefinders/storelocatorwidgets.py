@@ -15,7 +15,9 @@ class StoreLocatorWidgetsSpider(Spider, AutomaticSpiderGenerator):
     key: str = ""
     detection_rules = [
         DetectionRequestRule(url=r"^https?:\/\/cdn\.storelocatorwidgets\.com\/json\/(?P<key>[0-9a-f]{32})(?:\?|$)"),
-        DetectionResponseRule(xpaths={"key": r'//script[contains(@src, "//cdn.storelocatorwidgets.com/widget/widget.js")]/@data-uid'})
+        DetectionResponseRule(
+            xpaths={"key": r'//script[contains(@src, "//cdn.storelocatorwidgets.com/widget/widget.js")]/@data-uid'}
+        ),
     ]
 
     def start_requests(self):

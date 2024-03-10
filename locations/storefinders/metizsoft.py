@@ -16,12 +16,11 @@ class MetizsoftSpider(Spider, AutomaticSpiderGenerator):
     shopify_url: str = ""
     detection_rules = [
         DetectionRequestRule(
-            url=r"^https?:\/\/storelocator\.metizapps\.com\/stores\/storeDataGet$",
-            data=r'{"shopify_url": .shopData}'
+            url=r"^https?:\/\/storelocator\.metizapps\.com\/stores\/storeDataGet$", data=r'{"shopify_url": .shopData}'
         ),
         DetectionRequestRule(
             url=r"^https?:\/\/storelocator\.metizapps\.com\/assets\/js\/app\.js\?shop=(?P<shopify_url>[A-Za-z0-9\-.]+)$"
-        )
+        ),
     ]
 
     def start_requests(self):

@@ -1,6 +1,7 @@
 import re
 from copy import deepcopy
 from typing import Any, Iterable
+from urllib.parse import parse_qsl
 
 import jq
 import pycountry
@@ -8,7 +9,6 @@ from playwright.async_api import Frame
 from playwright.async_api import Request as PlaywrightRequest
 from scrapy import Selector, Spider
 from scrapy.http import Request, Response
-from urllib.parse import parse_qsl
 
 from locations.automatic_spider_generator import AutomaticSpiderGenerator, DetectionRequestRule, DetectionResponseRule
 from locations.items import GeneratedSpider
@@ -316,7 +316,9 @@ class StorefinderDetectorSpider(Spider):
     async def handle_storefinder_page_request(self, request: PlaywrightRequest) -> None:
         all_storefinders = self.get_all_storefinders()
         for storefinder in all_storefinders:
-            for detection_rule in filter(lambda x: isinstance(x, DetectionRequestRule) and x, storefinder.detection_rules):
+            for detection_rule in filter(
+                lambda x: isinstance(x, DetectionRequestRule) and x, storefinder.detection_rules
+            ):
                 extracted_parameters = {}
 
                 # Perform a regular expression match against the request URL.
@@ -371,7 +373,9 @@ class StorefinderDetectorSpider(Spider):
     async def handle_storefinder_page_response(self, response: Response) -> None:
         all_storefinders = self.get_all_storefinders()
         for storefinder in all_storefinders:
-            for detection_rule in filter(lambda x: isinstance(x, DetectionResponseRule) and x, storefinder.detection_rules):
+            for detection_rule in filter(
+                lambda x: isinstance(x, DetectionResponseRule) and x, storefinder.detection_rules
+            ):
                 extracted_parameters = {}
 
                 # Perform a regular expression match against the URL of the

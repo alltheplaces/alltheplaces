@@ -25,13 +25,17 @@ class StoremapperSpider(Spider, AutomaticSpiderGenerator):
     company_id: str = ""
     custom_settings = {"ROBOTSTXT_OBEY": False}
     detection_rules = [
-        DetectionRequestRule(url=r"^https:\/\/storemapper-herokuapp-com\.global\.ssl\.fastly\.net\/api\/users\/(?P<company_id>\d+(?:-\w+)?)\/stores\.js(?:\?|$)"),
-        DetectionResponseRule(js_objects={"company_id": r'window.Storemapper.companyId'}),
-        DetectionResponseRule(xpaths={"company_id": r'//script/@data-storemapper-id'})
+        DetectionRequestRule(
+            url=r"^https:\/\/storemapper-herokuapp-com\.global\.ssl\.fastly\.net\/api\/users\/(?P<company_id>\d+(?:-\w+)?)\/stores\.js(?:\?|$)"
+        ),
+        DetectionResponseRule(js_objects={"company_id": r"window.Storemapper.companyId"}),
+        DetectionResponseRule(xpaths={"company_id": r"//script/@data-storemapper-id"}),
     ]
 
     def start_requests(self):
-        yield JsonRequest(url=f"https://storemapper-herokuapp-com.global.ssl.fastly.net/api/users/{self.company_id}/stores.js")
+        yield JsonRequest(
+            url=f"https://storemapper-herokuapp-com.global.ssl.fastly.net/api/users/{self.company_id}/stores.js"
+        )
 
     def parse(self, response: Response):
         for location in response.json()["stores"]:
