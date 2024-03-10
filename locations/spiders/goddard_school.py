@@ -13,7 +13,6 @@ class GoddardSchoolSpider(scrapy.Spider):
         "ROBOTSTXT_OBEY": False,
     }
 
-
     def parse(self, response):
         for data in response.json().get("items"):
             item = DictParser.parse(data.get("address1"))
