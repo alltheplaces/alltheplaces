@@ -3,16 +3,7 @@ import scrapy
 from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.searchable_points import open_searchable_points
-
-DAYS_NAME = {
-    "Monday": "Mo",
-    "Tuesday": "Tu",
-    "Wednesday": "We",
-    "Thursday": "Th",
-    "Friday": "Fr",
-    "Saturday": "Sa",
-    "Sunday": "Su",
-}
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class TractorSupplySpider(scrapy.Spider):
@@ -20,8 +11,8 @@ class TractorSupplySpider(scrapy.Spider):
     item_attributes = {"brand": "Tractor Supply", "brand_wikidata": "Q15109925"}
     allowed_domains = ["tractorsupply.com"]
     download_delay = 1.5
+    user_agent = BROWSER_DEFAULT
     custom_settings = {
-        "USER_AGENT": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.128 Safari/537.36",
         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
         "ROBOTSTXT_OBEY": False,
     }
@@ -42,9 +33,9 @@ class TractorSupplySpider(scrapy.Spider):
 
         for dh in day_hour:
             try:
-                day = DAYS_NAME[dh.split("=")[0]]
-                hr = dh.split("=")[1]
-                open_time, close_time = hr.split("-")
+                dh_left, dh_right = dh.split("=")
+                day = dh_left[:2]
+                open_time, close_time = dh_right.split("-")
                 opening_hours.add_range(
                     day=day,
                     open_time=open_time,
