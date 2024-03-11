@@ -31,7 +31,7 @@ class T_Market_BGSpider(SitemapSpider):
         ).getall()
         self.log(oh_days)
         # Others lack days entirely, so it's Mo-Su
-        if len(oh_days) == 1 and oh_days[0] == None:
+        if len(oh_days) == 1 and oh_days[0] is None:
             oh_days[0] = "Понеделник - Неделя"
         oh_days = [re.sub(r"[^а-я-]", "", days.lower()) for days in oh_days]
 
