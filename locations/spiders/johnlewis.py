@@ -21,6 +21,7 @@ class JohnLewisSpider(CrawlSpider):
     ]
     custom_settings = {"REDIRECT_ENABLED": False}
     user_agent = BROWSER_DEFAULT
+    requires_proxy = True
 
     def parse_stores(self, response):
         item = Feature()

@@ -13,6 +13,7 @@ class PlanetFitnessSpider(SitemapSpider):
     sitemap_rules = [
         (r"https://www.planetfitness.com/gyms/", "parse"),
     ]
+    requires_proxy = True
 
     def parse(self, response):
         item = LinkedDataParser.parse(response, "ExerciseGym")
