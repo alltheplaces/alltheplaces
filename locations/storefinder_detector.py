@@ -1,10 +1,9 @@
-import re
 from copy import deepcopy
+import re
 from typing import Any, Iterable
 from urllib.parse import parse_qsl
 
 import jq
-import pycountry
 from playwright.async_api import Frame
 from playwright.async_api import Request as PlaywrightRequest
 from scrapy import Selector, Spider
@@ -166,24 +165,11 @@ class StorefinderDetectorSpider(Spider):
             nsi_matches = [nsi_match for nsi_match in nsi.iter_nsi(wikidata_code)]
             if len(nsi_matches) != 1:
                 return
-            spider_key = re.sub(r"[^a-zA-Z0-9_]", "", nsi_matches[0]["tags"]["name"].replace(" ", "_")).lower()
-            spider_class_name = re.sub(r"[^a-zA-Z0-9]", "", nsi_matches[0]["tags"]["name"].replace(" ", ""))
 
-            # Add country name to spider name if spider exists in a single country
-            if nsi_matches[0].get("locationSet") and nsi_matches[0]["locationSet"].get("include"):
-                if (
-                    len(nsi_matches[0]["locationSet"]["include"]) == 1
-                    or len(nsi_matches[0]["locationSet"]["include"]) == 2
-                ):
-                    for country_code in nsi_matches[0]["locationSet"]["include"]:
-                        if not pycountry.countries.get(alpha_2=country_code.upper()):
-                            continue
-                        spider_key = f"{spider_key}_{country_code.lower()}"
-                        spider_class_name = f"{spider_class_name}{country_code.upper()}"
+            if found_keys := NSI.generate_keys_from_nsi_attributes(nsi_matches[0]):
+                self.parameters["spider_key"] = found_keys[0]
+                self.parameters["spider_class_name"] = found_keys[1]
 
-            spider_class_name = f"{spider_class_name}Spider"
-            self.parameters["spider_key"] = spider_key
-            self.parameters["spider_class_name"] = spider_class_name
             if self.parameters["brand_wikidata"]:
                 brand = nsi_matches[0]["tags"].get("brand", nsi_matches[0]["tags"].get("name"))
                 self.parameters["brand"] = brand
