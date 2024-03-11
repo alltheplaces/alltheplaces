@@ -18,7 +18,7 @@ from locations.hours import DAYS, OpeningHours
 class WoosmapSpider(Spider, AutomaticSpiderGenerator):
     dataset_attributes = {"source": "api", "api": "woosmap.com"}
     key = ""
-    origin = ""   
+    origin = ""
 
     # if response.xpath('//script[contains(text(), "woosmapApiKey")]').get():
     detection_rules = [
@@ -30,19 +30,14 @@ class WoosmapSpider(Spider, AutomaticSpiderGenerator):
         #      url="https://webapp.woosmap.com/webapp.js"
         # ),
         # Example: https://www.decathlon.fr/store-locator
-        DetectionRequestRule(
-             url=r"https:\/\/api\.woosmap\.com\/stores\?key=([\w-]+)"
-        ),
-        DetectionRequestRule(
-             url=r"https:\/\/api\.woosmap\.com\/stores\/search\?key=([\w-]+)"
-        ),
+        DetectionRequestRule(url=r"https:\/\/api\.woosmap\.com\/stores\?key=([\w-]+)"),
+        DetectionRequestRule(url=r"https:\/\/api\.woosmap\.com\/stores\/search\?key=([\w-]+)"),
         # DetectionRequestRule(
         #      url=r"https:\/\/api\.woosmap\.com\/config\?key=([\w-]+)"
         # ),
         # DetectionResponseRule(js_objects={"key": "window.woosmap.public_key"}),
         # detect from https://www.carrefour.fr/ or https://www.carrefour.fr/magasin/liste#stores-directories-A
         DetectionResponseRule(js_objects={"key": '.["woosmapApiKey"]'}),
-         
         # DetectionResponseRule(
         #     xpaths={
         #         "": '//script[contains(@src, "https://webapp.woosmap.com/webapp.js")]'

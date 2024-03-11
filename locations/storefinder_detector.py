@@ -44,7 +44,6 @@ from locations.storefinders.uberall import UberallSpider
 
 # from locations.storefinders.virtualearth import VirtualEarthSpider
 from locations.storefinders.where2getit import Where2GetItSpider
-
 from locations.storefinders.woosmap import WoosmapSpider
 from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
 from locations.storefinders.yext import YextSpider
