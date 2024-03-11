@@ -51,6 +51,12 @@ class DetectionRequestRule(DetectionRule):
             parameters.append("data='{}'".format(self.data))
         return "DetectionRequestRule({})".format(", ".join(parameters))
 
+    def __bool__(self):
+        if self.url or self.headers or self.data:
+            return True
+        else:
+            return False
+
 
 class DetectionResponseRule(DetectionRule):
     js_objects: dict = {}
@@ -80,6 +86,12 @@ class DetectionResponseRule(DetectionRule):
         if self.xpaths:
             parameters.append("xpaths={}".format(self.xpaths.__repr__()))
         return "DetectionResponseRule({})".format(", ".join(parameters))
+
+    def __bool__(self):
+        if self.url or self.headers or self.js_objects or self.xpaths:
+            return True
+        else:
+            return False
 
 
 class AutomaticSpiderGenerator:

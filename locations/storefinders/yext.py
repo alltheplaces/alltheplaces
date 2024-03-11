@@ -1,14 +1,13 @@
 import datetime
 from urllib.parse import urlparse
 
-from scrapy import Selector, Spider
+from scrapy import Spider
 from scrapy.http import JsonRequest, Request, Response
 
 from locations.automatic_spider_generator import AutomaticSpiderGenerator, DetectionRequestRule
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.structured_data_spider import clean_facebook
-
 
 # Documentation for the Yext API is available at:
 # 1. https://hitchhikers.yext.com/docs/contentdeliveryapis/introduction/overview-policies-and-conventions/
@@ -22,17 +21,17 @@ from locations.structured_data_spider import clean_facebook
 
 
 class YextSpider(Spider, AutomaticSpiderGenerator):
-    api_key = ""
-    api_version = ""
-    search_filter = "{}"
-    page_limit = 50
-    wanted_types = ["location"]
+    api_key: str = ""
+    api_version: str = ""
+    search_filter: str = "{}"
+    page_limit: int = 50
+    wanted_types: list[str] = ["location"]
     detection_rules = [
         DetectionRequestRule(
-            url=r"^https?:\/\/[A-Za-z0-9\-.]+\.yextapis\.com\/v2\/accounts\/me\/.+&api_key=(?P<api_key>[0-9a-f]{32})[&$]"
+            url=r"^https?:\/\/[A-Za-z0-9\-.]+\.yextapis\.com\/v2\/accounts\/me\/.+&api_key=(?P<api_key>[0-9a-f]{32})(?:&|$)"
         ),
         DetectionRequestRule(
-            url=r"^https?:\/\/[A-Za-z0-9\-.]+\.yextapis\.com\/v2\/accounts\/me\/.+&v=(?P<api_version>[0-9]{8})[&$]"
+            url=r"^https?:\/\/[A-Za-z0-9\-.]+\.yextapis\.com\/v2\/accounts\/me\/.+&v=(?P<api_version>[0-9]{8})(?:&|$)"
         ),
     ]
 

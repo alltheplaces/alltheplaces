@@ -17,49 +17,49 @@ class AmrestEUSpider(Spider, AutomaticSpiderGenerator):
     detection_rules = [
         DetectionRequestRule(
             url=r"^https?:\/\/api\.amrest\.eu\/amdv\/ordering-api\/(?P<api_brand_country_key>[^\/]+)\/rest\/v1\/auth\/get-token$",
-            headers='{"api_brand_key": .brand, "api_source": .source}',
-            data='{"api_auth_source": .source}',
+            headers=r'{"api_brand_key": .brand, "api_source": .source}',
+            data=r'{"api_auth_source": .source}',
         ),
         DetectionRequestRule(
             url=r"^https?:\/\/api\.amrest\.eu\/amdv\/ordering-api\/(?P<api_brand_country_key>[^\/]+)\/rest\/v1\/auth\/get-token$",
-            headers='{"api_brand_key": .brand}',
-            data='{"api_auth_source": .source}',
+            headers=r'{"api_brand_key": .brand}',
+            data=r'{"api_auth_source": .source}',
         ),
         DetectionRequestRule(
             url=r"^https?:\/\/api\.amrest\.eu\/amdv\/ordering-api\/(?P<api_brand_country_key>[^\/]+)\/rest\/v1\/auth\/get-token$",
-            headers='{"api_source": .source}',
-            data='{"api_auth_source": .source}',
+            headers=r'{"api_source": .source}',
+            data=r'{"api_auth_source": .source}',
         ),
         DetectionRequestRule(
             url=r"^https?:\/\/api\.amrest\.eu\/amdv\/ordering-api\/(?P<api_brand_country_key>[^\/]+)\/rest\/v1\/auth\/get-token$",
-            data='{"api_auth_source": .source}',
+            data=r'{"api_auth_source": .source}',
         ),
         DetectionRequestRule(
             url=r"^https?:\/\/api\.amrest\.eu\/amdv\/ordering-api\/(?P<api_brand_country_key>[^\/]+)\/rest\/v[23]\/restaurants\/$",
-            headers='{"api_brand_key": .brand, "api_source": .source}',
+            headers=r'{"api_brand_key": .brand, "api_source": .source}',
         ),
         DetectionRequestRule(
             url=r"^https?:\/\/api\.amrest\.eu\/amdv\/ordering-api\/(?P<api_brand_country_key>[^\/]+)\/rest\/v[23]\/restaurants\/$",
-            headers='{"api_brand_key": .brand}',
+            headers=r'{"api_brand_key": .brand}',
         ),
         DetectionRequestRule(
             url=r"^https?:\/\/api\.amrest\.eu\/amdv\/ordering-api\/(?P<api_brand_country_key>[^\/]+)\/rest\/v[23]\/restaurants\/$",
-            headers='{"api_source": .source}',
+            headers=r'{"api_source": .source}',
         ),
         DetectionRequestRule(
             url=r"^https?:\/\/api\.amrest\.eu\/amdv\/ordering-api\/(?P<api_brand_country_key>[^\/]+)\/rest\/v[23]\/restaurants\/$",
         ),
         DetectionRequestRule(
             url=r"^https?:\/\/api\.amrest\.eu\/amdv\/ordering-api\/(?P<api_brand_country_key>[^\/]+)\/rest\/v2\/restaurants\/(?:\d+\/(?P<api_channel>[A-Z_]+)|details\/\d+)$",
-            headers='{"api_brand_key": .brand, "api_source": .source}',
+            headers=r'{"api_brand_key": .brand, "api_source": .source}',
         ),
         DetectionRequestRule(
             url=r"^https?:\/\/api\.amrest\.eu\/amdv\/ordering-api\/(?P<api_brand_country_key>[^\/]+)\/rest\/v2\/restaurants\/(?:\d+\/(?P<api_channel>[A-Z_]+)|details\/\d+)$",
-            headers='{"api_brand_key": .brand}',
+            headers=r'{"api_brand_key": .brand}',
         ),
         DetectionRequestRule(
             url=r"^https?:\/\/api\.amrest\.eu\/amdv\/ordering-api\/(?P<api_brand_country_key>[^\/]+)\/rest\/v2\/restaurants\/(?:\d+\/(?P<api_channel>[A-Z_]+)|details\/\d+)$",
-            headers='{"api_source": .source}',
+            headers=r'{"api_source": .source}',
         ),
         DetectionRequestRule(
             url=r"^https?:\/\/api\.amrest\.eu\/amdv\/ordering-api\/(?P<api_brand_country_key>[^\/]+)\/rest\/v2\/restaurants\/(?:\d+\/(?P<api_channel>[A-Z_]+)|details\/\d+)$",

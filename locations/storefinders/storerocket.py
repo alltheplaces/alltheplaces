@@ -9,11 +9,11 @@ from locations.items import Feature
 
 class StoreRocketSpider(Spider, AutomaticSpiderGenerator):
     dataset_attributes = {"source": "api", "api": "storerocket.io"}
-    storerocket_id = ""
-    base_url = None
+    storerocket_id: str = ""
+    base_url: str | None = None
     detection_rules = [
         DetectionRequestRule(
-            url=r"^https?:\/\/storerocket\.io\/api\/user\/(?P<storerocket_id>[0-9A-Za-z]+)\/locations[?$]"
+            url=r"^https?:\/\/storerocket\.io\/api\/user\/(?P<storerocket_id>[0-9A-Za-z]+)\/locations(?:\?|\/|$)"
         ),
         DetectionResponseRule(js_objects={"storerocket_id": "window.StoreRocket.configs.projectId"}),
     ]

@@ -43,18 +43,18 @@ from locations.spiders.vapestore_gb import clean_address
 
 
 class WPStoreLocatorSpider(Spider, AutomaticSpiderGenerator):
-    days = None
-    time_format = "%H:%M"
-    searchable_points_files = []
-    search_radius = 0
-    max_results = 0
-    possible_days = DAYS_BY_FREQUENCY
+    days: dict = None
+    time_format: str = "%H:%M"
+    searchable_points_files: list[str] = []
+    search_radius: int = 0
+    max_results: int = 0
+    possible_days: list[dict] = DAYS_BY_FREQUENCY
     detection_rules = [
         DetectionRequestRule(
-            url=r"^https?:\/\/(?P<allowed_domains__list>[A-Za-z0-9\-.]+)\/wp-admin\/admin-ajax\.php\?.*?(?<=[?&])action=store_search[&$]"
+            url=r"^https?:\/\/(?P<allowed_domains__list>[A-Za-z0-9\-.]+)\/wp-admin\/admin-ajax\.php\?.*?(?<=[?&])action=store_search(?:&|$)"
         ),
         DetectionRequestRule(
-            url=r"^(?P<start_urls__list>https?:\/\/[A-Za-z0-9\-.]+(?:\/[^\/]+)+\/wp-admin\/admin-ajax\.php\?.*?(?<=[?&])action=store_search[&$].*$)"
+            url=r"^(?P<start_urls__list>https?:\/\/[A-Za-z0-9\-.]+(?:\/[^\/]+)+\/wp-admin\/admin-ajax\.php\?.*?(?<=[?&])action=store_search(?:&.*$|$))"
         ),
         DetectionResponseRule(
             js_objects={

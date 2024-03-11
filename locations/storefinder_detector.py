@@ -1,6 +1,7 @@
 import re
 from copy import deepcopy
 from typing import Any, Iterable
+from urllib.parse import parse_qsl
 
 import jq
 import pycountry
@@ -19,31 +20,31 @@ from locations.storefinders.closeby import ClosebySpider
 from locations.storefinders.freshop import FreshopSpider
 from locations.storefinders.geo_me import GeoMeSpider
 from locations.storefinders.kibo import KiboSpider
+from locations.storefinders.limesharp_store_locator import LimesharpStoreLocatorSpider
+from locations.storefinders.localisr import LocalisrSpider
 
-# from locations.storefinders.limesharp_store_locator import LimesharpStoreLocatorSpider
-# from locations.storefinders.localisr import LocalisrSpider
 # from locations.storefinders.metalocator import MetaLocatorSpider
-# from locations.storefinders.metizsoft import MetizsoftSpider
-# from locations.storefinders.momentfeed import MomentFeedSpider
+from locations.storefinders.metizsoft import MetizsoftSpider
+from locations.storefinders.momentfeed import MomentFeedSpider
+
 # from locations.storefinders.rexel import RexelSpider
 # from locations.storefinders.shopapps import ShopAppsSpider
 # from locations.storefinders.stockinstore import StockInStoreSpider
-# from locations.storefinders.stockist import StockistSpider
+from locations.storefinders.stockist import StockistSpider
+
 # from locations.storefinders.store_locator_plus_cloud import StoreLocatorPlusCloudSpider
 # from locations.storefinders.store_locator_plus_self import StoreLocatorPlusSelfSpider
-# from locations.storefinders.storelocatorwidgets import StoreLocatorWidgetsSpider
-# from locations.storefinders.storemapper import StoremapperSpider
+from locations.storefinders.storelocatorwidgets import StoreLocatorWidgetsSpider
+from locations.storefinders.storemapper import StoremapperSpider
 from locations.storefinders.storepoint import StorepointSpider
 from locations.storefinders.storerocket import StoreRocketSpider
-
-# from locations.storefinders.super_store_finder import SuperStoreFinderSpider
+from locations.storefinders.super_store_finder import SuperStoreFinderSpider
 from locations.storefinders.sweetiq import SweetIQSpider
+from locations.storefinders.uberall import UberallSpider
 
-# from locations.storefinders.uberall import UberallSpider
 # from locations.storefinders.virtualearth import VirtualEarthSpider
 from locations.storefinders.where2getit import Where2GetItSpider
-
-# from locations.storefinders.woosmap import WoosmapSpider
+from locations.storefinders.woosmap import WoosmapSpider
 from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
 from locations.storefinders.yext import YextSpider
 from locations.user_agents import BROWSER_DEFAULT
@@ -171,7 +172,6 @@ class StorefinderDetectorSpider(Spider):
                 spider_key = re.sub(r"[^a-zA-Z0-9_]", "", nsi_matches[0]["displayName"].replace(" ", "_")).lower()
                 spider_class_name = re.sub(r"[^a-zA-Z0-9]", "", nsi_matches[0]["displayName"].replace(" ", ""))
 
-
             # Add country name to spider name if spider exists in a single country
             if nsi_matches[0].get("locationSet") and nsi_matches[0]["locationSet"].get("include"):
                 if (
@@ -208,27 +208,27 @@ class StorefinderDetectorSpider(Spider):
             FreshopSpider,
             GeoMeSpider,
             KiboSpider,
-            # LimesharpStoreLocatorSpider,
-            # LocalisrSpider,
+            LimesharpStoreLocatorSpider,
+            LocalisrSpider,
             # MetaLocatorSpider,
-            # MetizsoftSpider,
-            # MomentFeedSpider,
+            MetizsoftSpider,
+            MomentFeedSpider,
             # RexelSpider,
             # ShopAppsSpider,
             # StockInStoreSpider,
-            # StockistSpider,
+            StockistSpider,
             # StoreLocatorPlusCloudSpider,
             # StoreLocatorPlusSelfSpider,
-            # StoreLocatorWidgetsSpider,
-            # StoremapperSpider,
+            StoreLocatorWidgetsSpider,
+            StoremapperSpider,
             StorepointSpider,
             StoreRocketSpider,
-            # SuperStoreFinderSpider,
+            SuperStoreFinderSpider,
             SweetIQSpider,
-            # UberallSpider,
+            UberallSpider,
             # VirtualEarthSpider,
             Where2GetItSpider,
-            # WoosmapSpider,
+            WoosmapSpider,
             WPStoreLocatorSpider,
             YextSpider,
         ]
@@ -319,20 +319,36 @@ class StorefinderDetectorSpider(Spider):
     async def handle_storefinder_page_request(self, request: PlaywrightRequest) -> None:
         all_storefinders = self.get_all_storefinders()
         for storefinder in all_storefinders:
-            for detection_rule in filter(lambda x: isinstance(x, DetectionRequestRule), storefinder.detection_rules):
+            for detection_rule in filter(
+                lambda x: isinstance(x, DetectionRequestRule) and x, storefinder.detection_rules
+            ):
                 extracted_parameters = {}
+
+                # Perform a regular expression match against the request URL.
                 if url_regex := detection_rule.url:
                     if m := re.search(url_regex, request.url):
                         retyped_parameters = StorefinderDetectorSpider.retype_parameters_dict(m.groupdict())
                         extracted_parameters.update(retyped_parameters)
                     else:
                         continue
+
+                # Conduct a JQ query against the HTTP headers sent with the
+                # request. HTTP headers are first converted into a JSON
+                # dictionary allowing JQ to be used for querying.
                 if headers_jq := detection_rule.headers:
                     if headers_result := self.execute_jq(headers_jq, request.headers):
                         if isinstance(headers_result, dict):
                             extracted_parameters.update(headers_result)
                     else:
                         continue
+
+                # Conduct a JQ query against the URL-encoded or JSON-encoded
+                # POST data sent with the request. If URL-encoding is used,
+                # the POST data is first converted into a JSON dictionary
+                # allowing JQ to be used for querying. If the request is sent
+                # with multi-part encoding, this data is ignored as support
+                # for converting multi-part encoding to a JSON dictionary
+                # is not implemented.
                 if post_data_jq := detection_rule.data:
                     if "content-type" not in request.headers.keys():
                         continue
@@ -341,59 +357,85 @@ class StorefinderDetectorSpider(Spider):
                         "application/x-www-form-urlencoded",
                     ]:
                         continue
-                    if post_data_result := self.execute_jq(post_data_jq, request.post_data_json):
+
+                    # Workaround for playwright-python bug https://github.com/microsoft/playwright-python/issues/2348
+                    post_data_json = {}
+                    if request.headers["content-type"].startswith("application/x-www-form-urlencoded"):
+                        post_data_json = dict(parse_qsl(request.post_data))
+                    else:
+                        post_data_json = request.post_data_json()
+
+                    if post_data_result := self.execute_jq(post_data_jq, post_data_json):
                         if isinstance(post_data_result, dict):
                             extracted_parameters.update(post_data_result)
                     else:
                         continue
+
                 self.add_parameters(storefinder, extracted_parameters)
 
     async def handle_storefinder_page_response(self, response: Response) -> None:
         all_storefinders = self.get_all_storefinders()
         for storefinder in all_storefinders:
-            for detection_rule in filter(lambda x: isinstance(x, DetectionResponseRule), storefinder.detection_rules):
+            for detection_rule in filter(
+                lambda x: isinstance(x, DetectionResponseRule) and x, storefinder.detection_rules
+            ):
                 extracted_parameters = {}
+
+                # Perform a regular expression match against the URL of the
+                # main frame. Note that the URLs of iframes are ignored.
                 if url_regex := detection_rule.url:
                     if m := re.search(url_regex, response.url):
                         retyped_parameters = StorefinderDetectorSpider.retype_parameters_dict(m.groupdict())
                         extracted_parameters.update(retyped_parameters)
                     else:
                         continue
+
+                # Conduct a JQ query against the HTTP headers returned for the
+                # main frame. HTTP headers are first converted into a JSON
+                # dictionary allowing JQ to be used for querying. Note that
+                # headers of iframes are ignored.
                 if headers_jq := detection_rule.headers:
                     if headers_result := self.execute_jq(headers_jq, response.headers):
                         if isinstance(headers_result, dict):
                             extracted_parameters.update(headers_result)
                     else:
                         continue
+
+                # Execute JavaScript code in the main frame and then all
+                # nested iframes in order of their appearance in the DOM for
+                # the provided JQ query to return a non-null response. The
+                # search stops as soon as the first JQ query succeeds.
                 remaining_js_objects = deepcopy(detection_rule.js_objects)
                 for param_name, js_code in detection_rule.js_objects.items():
                     page = response.meta["playwright_page"]
                     result = await self.extract_javascript_object(js_code, page.main_frame)
                     if result is None:
                         break
-                    extracted_parameters.update({param_name: result})
+                    if not param_name.startswith("__"):
+                        extracted_parameters.update({param_name: result})
                     remaining_js_objects.pop(param_name)
                 if len(remaining_js_objects.keys()) != 0:
                     continue
+
+                # Search the main frame and then all nested iframes in order
+                # of their appearance in the DOM for an XPath query provided.
+                # The search stops as soon as the first XPath query succeeds.
                 remaining_xpaths = deepcopy(detection_rule.xpaths)
                 for param_name, xpath in detection_rule.xpaths.items():
                     page = response.meta["playwright_page"]
-                    page_content = await page.content()
-                    if results := Selector(text=page_content).xpath(xpath).getall():
-                        if param_name.startswith("__"):
-                            remaining_xpaths.pop(param_name)
-                            continue
-                        if len(results) == 1 and not param_name.endswith("__list"):
-                            extracted_parameters.update({param_name: results[0]})
-                            remaining_xpaths.pop(param_name)
-                        elif len(results) > 1 and not param_name.endswith("__list"):
-                            continue
-                        extracted_parameters.update({param_name: results})
-                        remaining_xpaths.pop(param_name)
-                    else:
-                        continue
+                    result = await self.extract_xpath_object(xpath, page.main_frame)
+                    if result is None:
+                        break
+                    if len(result) > 1 and not param_name.endswith("__list"):
+                        break
+                    elif len(result) == 1 and not param_name.endswith("__list"):
+                        result = result[0]
+                    if not param_name.startswith("__"):
+                        extracted_parameters.update({param_name: result})
+                    remaining_xpaths.pop(param_name)
                 if len(remaining_xpaths.keys()) != 0:
                     continue
+
                 self.add_parameters(storefinder, extracted_parameters)
 
     async def extract_javascript_object(self, js_code: str, frame: Frame) -> Any:
@@ -404,6 +446,33 @@ class StorefinderDetectorSpider(Spider):
                 if not child_frame.url.startswith("https://") and not child_frame.url.startswith("http://"):
                     continue
                 result = await self.extract_javascript_object(js_code, child_frame)
+                if result is not None:
+                    return result
+            return None
+
+    async def extract_xpath_object(self, xpath: str, frame: Frame) -> Any:
+        frame_content = None
+        try:
+            frame_content = await frame.content()
+        except:
+            # frame.child_frames has been observed to contain duplicate
+            # iframes, causing an error:
+            #   playwright._impl._api_types.Error: Execution context was
+            #   destroyed, most likely because of a navigation
+            # The second of the duplicate frames does allow content to be
+            # returned, so the error appears to be OK to ignore on the first
+            # of the duplicate frames.
+            # Unsure why this error occurs and frames appear duplicated.
+            return None
+        if not frame_content:
+            return None
+        if result := list(filter(None, Selector(text=frame_content).xpath(xpath).getall())):
+            return result
+        else:
+            for child_frame in frame.child_frames:
+                if not child_frame.url.startswith("https://") and not child_frame.url.startswith("http://"):
+                    continue
+                result = await self.extract_xpath_object(xpath, child_frame)
                 if result is not None:
                     return result
             return None

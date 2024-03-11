@@ -1,8 +1,9 @@
-from scrapy import Spider
-from scrapy.http import JsonRequest, Request, Response
 from urllib.parse import urlparse
 
-from locations.automatic_spider_generator import AutomaticSpiderGenerator
+from scrapy import Spider
+from scrapy.http import JsonRequest, Request, Response
+
+from locations.automatic_spider_generator import AutomaticSpiderGenerator, DetectionRequestRule, DetectionResponseRule
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 
@@ -18,7 +19,20 @@ class WoosmapSpider(Spider, AutomaticSpiderGenerator):
     dataset_attributes = {"source": "api", "api": "woosmap.com"}
     key = ""
     origin = ""
-    is_playwright_spider = True # Required for auto detection to discover JS
+    is_playwright_spider = True  # Required for auto detection to discover JS
+
+    detection_rules = [
+        # Example: https://www.auchan.pl/pl/znajdz-sklep
+        DetectionRequestRule(url=r"https:\/\/webapp-conf\.woosmap\.com\/(?P<key>[\w-]+)\/webapp-conf\.json"),
+        # Example: https://www.decathlon.fr/store-locator
+        DetectionRequestRule(url=r"https:\/\/api\.woosmap\.com\/stores\?key=(?P<key>[\w-]+)"),
+        DetectionRequestRule(url=r"https:\/\/api\.woosmap\.com\/stores\/search\?key=(?P<key>[\w-]+)"),
+        DetectionRequestRule(url=r"https:\/\/api\.woosmap\.com\/project\/config\?key=(?P<key>[\w-]+)"),
+        DetectionResponseRule(js_objects={"key": "window.woosmap.public_key"}),
+        # detect from https://www.carrefour.fr/magasin/liste
+        # DetectionResponseRule(js_objects={"key": '.. | .woosmapApiKey'}),
+        DetectionResponseRule(js_objects={"key": "window.__INITIAL_STATE__.links.woosmapApiKey"}),
+    ]
 
     def start_requests(self):
         yield JsonRequest(
@@ -83,9 +97,6 @@ class WoosmapSpider(Spider, AutomaticSpiderGenerator):
         # Example: https://www.decathlon.fr/store-locator
         if response.xpath('//script[contains(text(), "woosmapApiKey")]').get():
             return True
-
-
-
 
         return False
 

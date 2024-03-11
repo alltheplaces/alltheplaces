@@ -1,11 +1,10 @@
-import html
 import re
-from urllib.parse import urlparse
+from html import unescape
 
 from scrapy import Request, Selector, Spider
 from scrapy.http import Response
 
-from locations.automatic_spider_generator import AutomaticSpiderGenerator
+from locations.automatic_spider_generator import AutomaticSpiderGenerator, DetectionRequestRule, DetectionResponseRule
 from locations.hours import OpeningHours
 from locations.items import Feature
 
@@ -26,6 +25,25 @@ from locations.items import Feature
 
 
 class SuperStoreFinderSpider(Spider, AutomaticSpiderGenerator):
+    detection_rules = [
+        DetectionRequestRule(
+            url=r"^https?:\/\/(?P<allowed_domains__list>[A-Za-z0-9\-.]+)\/wp-content\/plugins\/superstorefinder-wp\/ssf-wp-xml\.php(?:\?|$)"
+        ),
+        DetectionRequestRule(
+            url=r"^(?P<start_urls__list>https?:\/\/[A-Za-z0-9\-.]+(?:\/[^\/]+)+\/wp-content\/plugins\/superstorefinder-wp\/ssf-wp-xml\.php(?:\?.*$|$))"
+        ),
+        DetectionResponseRule(
+            js_objects={
+                "allowed_domains": r"(window.ssf_wp_base.match(/^https?:\/\/[^\/]+?\/wp-content\/plugins\/superstorefinder-wp/)) ? [new URL(window.ssf_wp_base).hostname] : null"
+            }
+        ),
+        DetectionResponseRule(
+            js_objects={
+                "start_urls": r'(window.ssf_wp_base.match(/^https?:\/\/[^\/]+?\/.+?\/wp-content\/plugins\/superstorefinder-wp/)) ? [new URL(window.ssf_wp_base).origin + new URL(window.ssf_wp_base).pathname + "/ssf-wp-xml.php"] : null'
+            }
+        ),
+    ]
+
     def start_requests(self):
         if len(self.start_urls) > 0:
             for url in self.start_urls:
@@ -34,14 +52,14 @@ class SuperStoreFinderSpider(Spider, AutomaticSpiderGenerator):
             for allowed_domain in self.allowed_domains:
                 yield Request(url=f"https://{allowed_domain}/wp-content/plugins/superstorefinder-wp/ssf-wp-xml.php")
 
-    def parse(self, response, **kwargs):
+    def parse(self, response: Response):
         for location in response.xpath("//store/item"):
             properties = {
                 "ref": location.xpath("./storeId/text()").get(),
                 "name": location.xpath("./location/text()").get(),
                 "lat": location.xpath("./latitude/text()").get(),
                 "lon": location.xpath("./longitude/text()").get(),
-                "addr_full": html.unescape(re.sub(r"\s+", " ", location.xpath("./address/text()").get())),
+                "addr_full": unescape(re.sub(r"\s+", " ", location.xpath("./address/text()").get())),
                 "phone": location.xpath("./telephone/text()").get(),
                 "email": location.xpath("./email/text()").get(),
                 "website": location.xpath("./website/text()").get(),
@@ -62,17 +80,5 @@ class SuperStoreFinderSpider(Spider, AutomaticSpiderGenerator):
 
             yield from self.parse_item(Feature(**properties), location) or []
 
-    def parse_item(self, item: Feature, location: Selector, **kwargs):
+    def parse_item(self, item: Feature, location: Selector):
         yield item
-
-    def storefinder_exists(response: Response) -> bool | Request:
-        # Example: https://soulpattinson.com.au/
-        if response.xpath('//script[contains(@src, "/wp-content/plugins/superstorefinder-wp")]').get():
-            return True
-
-        return False
-
-    def extract_spider_attributes(response: Response) -> dict | Request:
-        return {
-            "allowed_domains": [urlparse(response.url).netloc],
-        }
