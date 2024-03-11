@@ -9,6 +9,9 @@ class GoddardSchoolSpider(scrapy.Spider):
     item_attributes = {"brand": "Goddard School", "brand_wikidata": "Q5576260"}
     allowed_domains = ["goddardschool.com"]
     start_urls = ["https://www.goddardschool.com/apps/gsi/api/v1/schools"]
+    custom_settings = {
+        "ROBOTSTXT_OBEY": False,
+    }
 
     def parse(self, response):
         for data in response.json().get("items"):

@@ -1,13 +1,17 @@
 from scrapy.spiders import SitemapSpider
 
-from locations.categories import apply_category
+from locations.categories import Categories
 from locations.google_url import extract_google_position
 from locations.items import Feature
 
 
 class FireAndRescueNSWAUSpider(SitemapSpider):
     name = "fire_and_rescue_nsw_au"
-    item_attributes = {"operator": "Fire and Rescue New South Wales", "operator_wikidata": "Q5451532"}
+    item_attributes = {
+        "operator": "Fire and Rescue New South Wales",
+        "operator_wikidata": "Q5451532",
+        "extras": Categories.FIRE_STATION.value,
+    }
     allowed_domains = ["www.fire.nsw.gov.au"]
     sitemap_urls = ["https://www.fire.nsw.gov.au/feeds/sitemap.xml"]
     sitemap_rules = [(r"^https:\/\/www\.fire\.nsw\.gov\.au\/page\.php\?id=9210&station=\d+", "parse")]
@@ -34,5 +38,4 @@ class FireAndRescueNSWAUSpider(SitemapSpider):
             ).get(),
         }
         extract_google_position(properties, response)
-        apply_category({"amenity": "fire_station"}, properties)
         yield Feature(**properties)
