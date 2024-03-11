@@ -1,5 +1,3 @@
-import os
-import subprocess
 
 from scrapy.commands import ScrapyCommand
 from scrapy.exceptions import UsageError
