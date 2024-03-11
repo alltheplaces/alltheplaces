@@ -345,7 +345,7 @@ class StorefinderDetectorSpider(Spider):
                     if request.headers["content-type"].startswith("application/x-www-form-urlencoded"):
                         post_data_json = dict(parse_qsl(request.post_data))
                     else:
-                        post_data_json = request.post_data_json()
+                        post_data_json = request.post_data_json
 
                     if post_data_result := self.execute_jq(post_data_jq, post_data_json):
                         if isinstance(post_data_result, dict):
