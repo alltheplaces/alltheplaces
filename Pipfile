@@ -48,3 +48,4 @@ twisted = {extras = ["http2"], version = "*"}
 tzdata = "*"
 unidecode = "*"
 xmltodict = "*"
+tldextract = "*"
