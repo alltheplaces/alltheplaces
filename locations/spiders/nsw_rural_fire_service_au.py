@@ -1,7 +1,7 @@
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
-from locations.categories import apply_category
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
@@ -32,7 +32,7 @@ class NSWRuralFireServiceAUSpider(Spider):
                 or " FIRE CONTROL CENTRE" in properties["name"]
                 or "ACT RFS " in properties["name"]
             ):
-                apply_category({"amenity": "fire_station"}, properties)
+                apply_category(Categories.FIRE_STATION, properties)
             else:
                 apply_category({"office": "government"}, properties)
                 apply_category({"government": "fire_service"}, properties)

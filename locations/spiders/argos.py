@@ -14,6 +14,7 @@ class ArgosSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://www.argos.co.uk/stores_sitemap.xml"]
     sitemap_rules = [(r"https://www.argos.co.uk/stores/([\d]+)-([\w-]+)", "parse")]
     user_agent = BROWSER_DEFAULT
+    requires_proxy = True
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         if item["name"].startswith("Closed - "):
