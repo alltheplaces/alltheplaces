@@ -88,10 +88,11 @@ ENV/
 # Rope project settings
 .ropeproject
 
-# IDE files
+# Editor/IDE files
 .idea
 .history
 .DS_Store
+*.swp
 
 # Data files that may get included by accident from developers
 # using other debugging or data transformation tools in the same

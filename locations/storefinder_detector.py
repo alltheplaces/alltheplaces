@@ -22,17 +22,17 @@ from locations.storefinders.kibo import KiboSpider
 from locations.storefinders.limesharp_store_locator import LimesharpStoreLocatorSpider
 from locations.storefinders.localisr import LocalisrSpider
 
-# from locations.storefinders.metalocator import MetaLocatorSpider
+# from locations.storefinders.locally import LocallySpider
+from locations.storefinders.metalocator import MetaLocatorSpider
 from locations.storefinders.metizsoft import MetizsoftSpider
 from locations.storefinders.momentfeed import MomentFeedSpider
 
 # from locations.storefinders.rexel import RexelSpider
-# from locations.storefinders.shopapps import ShopAppsSpider
-# from locations.storefinders.stockinstore import StockInStoreSpider
+from locations.storefinders.shopapps import ShopAppsSpider
+from locations.storefinders.stockinstore import StockInStoreSpider
 from locations.storefinders.stockist import StockistSpider
-
-# from locations.storefinders.store_locator_plus_cloud import StoreLocatorPlusCloudSpider
-# from locations.storefinders.store_locator_plus_self import StoreLocatorPlusSelfSpider
+from locations.storefinders.store_locator_plus_cloud import StoreLocatorPlusCloudSpider
+from locations.storefinders.store_locator_plus_self import StoreLocatorPlusSelfSpider
 from locations.storefinders.storelocatorwidgets import StoreLocatorWidgetsSpider
 from locations.storefinders.storemapper import StoremapperSpider
 from locations.storefinders.storepoint import StorepointSpider
@@ -40,11 +40,9 @@ from locations.storefinders.storerocket import StoreRocketSpider
 from locations.storefinders.super_store_finder import SuperStoreFinderSpider
 from locations.storefinders.sweetiq import SweetIQSpider
 from locations.storefinders.uberall import UberallSpider
-
-# from locations.storefinders.virtualearth import VirtualEarthSpider
+from locations.storefinders.virtualearth import VirtualEarthSpider
 from locations.storefinders.where2getit import Where2GetItSpider
-
-# from locations.storefinders.woosmap import WoosmapSpider
+from locations.storefinders.woosmap import WoosmapSpider
 from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
 from locations.storefinders.yext import YextSpider
 from locations.user_agents import BROWSER_DEFAULT
@@ -193,15 +191,16 @@ class StorefinderDetectorSpider(Spider):
             KiboSpider,
             LimesharpStoreLocatorSpider,
             LocalisrSpider,
-            # MetaLocatorSpider,
+            # LocallySpider
+            MetaLocatorSpider,
             MetizsoftSpider,
             MomentFeedSpider,
             # RexelSpider,
-            # ShopAppsSpider,
-            # StockInStoreSpider,
+            ShopAppsSpider,
+            StockInStoreSpider,
             StockistSpider,
-            # StoreLocatorPlusCloudSpider,
-            # StoreLocatorPlusSelfSpider,
+            StoreLocatorPlusCloudSpider,
+            StoreLocatorPlusSelfSpider,
             StoreLocatorWidgetsSpider,
             StoremapperSpider,
             StorepointSpider,
@@ -209,9 +208,9 @@ class StorefinderDetectorSpider(Spider):
             SuperStoreFinderSpider,
             SweetIQSpider,
             UberallSpider,
-            # VirtualEarthSpider,
+            VirtualEarthSpider,
             Where2GetItSpider,
-            # WoosmapSpider,
+            WoosmapSpider,
             WPStoreLocatorSpider,
             YextSpider,
         ]

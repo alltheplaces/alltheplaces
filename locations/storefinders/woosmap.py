@@ -1,8 +1,10 @@
 from scrapy import Spider
-from scrapy.http import JsonRequest
+from scrapy.http import JsonRequest, Response
 
+from locations.automatic_spider_generator import AutomaticSpiderGenerator, DetectionRequestRule, DetectionResponseRule
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
+from locations.items import Feature
 
 # Documentation available at https://developers.woosmap.com/products/search-api/get-started/
 #
@@ -12,10 +14,22 @@ from locations.hours import DAYS, OpeningHours
 # 'https://www.brandname.example'.
 
 
-class WoosmapSpider(Spider):
+class WoosmapSpider(Spider, AutomaticSpiderGenerator):
     dataset_attributes = {"source": "api", "api": "woosmap.com"}
-    key = ""
-    origin = ""
+    key: str = ""
+    origin: str = ""
+    detection_rules = [
+        DetectionRequestRule(
+            url=r"^https?:\/\/api\.woosmap\.com\/.*?(?<=[?&])key=(?P<key>woos-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})(?:&|$)",
+            headers='{"origin": .origin}'
+        ),
+        DetectionResponseRule(
+            js_objects = {
+                "key": r"window.woosmap.public_key",
+                "origin": r'window.location.protocol + "//" + window.location.hostname'
+            }
+        )
+    ]
 
     def start_requests(self):
         yield JsonRequest(
@@ -24,7 +38,7 @@ class WoosmapSpider(Spider):
             meta={"referrer_policy": "no-referrer"},
         )
 
-    def parse(self, response, **kwargs):
+    def parse(self, response: Response):
         if features := response.json()["features"]:
             for feature in features:
                 item = DictParser.parse(feature["properties"])
@@ -56,5 +70,5 @@ class WoosmapSpider(Spider):
                     meta={"referrer_policy": "no-referrer"},
                 )
 
-    def parse_item(self, item, feature, **kwargs):
+    def parse_item(self, item: Feature, feature: dict):
         yield item
