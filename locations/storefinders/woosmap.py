@@ -24,13 +24,10 @@ class WoosmapSpider(Spider, AutomaticSpiderGenerator):
     detection_rules = [
         # Example: https://www.auchan.pl/pl/znajdz-sklep
         DetectionRequestRule(url=r"https:\/\/webapp-conf\.woosmap\.com\/(?P<key>[\w-]+)\/webapp-conf\.json"),
-
         # Example: https://www.decathlon.fr/store-locator
         DetectionRequestRule(url=r"https:\/\/api\.woosmap\.com\/stores\?key=(?P<key>[\w-]+)"),
         DetectionRequestRule(url=r"https:\/\/api\.woosmap\.com\/stores\/search\?key=(?P<key>[\w-]+)"),
-        DetectionRequestRule(
-             url=r"https:\/\/api\.woosmap\.com\/project\/config\?key=(?P<key>[\w-]+)"
-        ),
+        DetectionRequestRule(url=r"https:\/\/api\.woosmap\.com\/project\/config\?key=(?P<key>[\w-]+)"),
         DetectionResponseRule(js_objects={"key": "window.woosmap.public_key"}),
         # detect from https://www.carrefour.fr/magasin/liste
         # DetectionResponseRule(js_objects={"key": '.. | .woosmapApiKey'}),
