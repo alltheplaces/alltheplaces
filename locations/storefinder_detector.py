@@ -45,7 +45,7 @@ from locations.storefinders.uberall import UberallSpider
 # from locations.storefinders.virtualearth import VirtualEarthSpider
 from locations.storefinders.where2getit import Where2GetItSpider
 
-# from locations.storefinders.woosmap import WoosmapSpider
+from locations.storefinders.woosmap import WoosmapSpider
 from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
 from locations.storefinders.yext import YextSpider
 from locations.user_agents import BROWSER_DEFAULT
@@ -225,7 +225,7 @@ class StorefinderDetectorSpider(Spider):
             UberallSpider,
             # VirtualEarthSpider,
             Where2GetItSpider,
-            # WoosmapSpider,
+            WoosmapSpider,
             WPStoreLocatorSpider,
             YextSpider,
         ]
