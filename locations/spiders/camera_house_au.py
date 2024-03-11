@@ -6,7 +6,13 @@ from locations.items import Feature
 
 class CameraHouseAUSpider(Spider):
     name = "camera_house_au"
-    item_attributes = {"brand": "Camera House", "brand_wikidata": "Q124062505"}
+    item_attributes = {
+        "brand": "Camera House",
+        "brand_wikidata": "Q124062505",
+        "extras": {
+            "shop": "camera",
+        },
+    }
     allowed_domains = ["www.camerahouse.com.au"]
     start_urls = ["https://www.camerahouse.com.au/stores/index/dataAjax"]
 

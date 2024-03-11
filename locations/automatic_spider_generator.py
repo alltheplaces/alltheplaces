@@ -1,17 +1,111 @@
+from typing import Iterable
+
 from scrapy import Spider
 from scrapy.http import Request, Response
 
 
+class DetectionRule:
+    url: str = None
+    headers: str = None
+
+    def __init__(
+        self,
+        url: str = None,
+        headers: str = None,
+        *args,
+        **kwargs,
+    ):
+        self.url = url
+        self.headers = headers
+
+    def __repr__(self):
+        parameters = []
+        if self.url:
+            parameters.append('url="{}"'.format(self.url))
+        if self.headers:
+            parameters.append("headers='{}'".format(self.headers))
+        return "DetectionRule({})".format(", ".join(parameters))
+
+
+class DetectionRequestRule(DetectionRule):
+    data: str = None
+
+    def __init__(
+        self,
+        url: str = None,
+        headers: str = None,
+        data: str = None,
+        *args,
+        **kwargs,
+    ):
+        super().__init__(url, headers, *args, **kwargs)
+        self.data = data
+
+    def __repr__(self):
+        parameters = []
+        if self.url:
+            parameters.append('url="{}"'.format(self.url))
+        if self.headers:
+            parameters.append("headers='{}'".format(self.headers))
+        if self.data:
+            parameters.append("data='{}'".format(self.data))
+        return "DetectionRequestRule({})".format(", ".join(parameters))
+
+    def __bool__(self):
+        if self.url or self.headers or self.data:
+            return True
+        else:
+            return False
+
+
+class DetectionResponseRule(DetectionRule):
+    js_objects: dict = {}
+    xpaths: dict = {}
+
+    def __init__(
+        self,
+        url: str = None,
+        headers: str = None,
+        js_objects: dict = {},
+        xpaths: dict = {},
+        *args,
+        **kwargs,
+    ):
+        super().__init__(url, headers, *args, **kwargs)
+        self.js_objects = js_objects
+        self.xpaths = xpaths
+
+    def __repr__(self):
+        parameters = []
+        if self.url:
+            parameters.append('url="{}"'.format(self.url))
+        if self.headers:
+            parameters.append("headers='{}'".format(self.headers))
+        if self.js_objects:
+            parameters.append("js_objects={}".format(self.js_objects.__repr__()))
+        if self.xpaths:
+            parameters.append("xpaths={}".format(self.xpaths.__repr__()))
+        return "DetectionResponseRule({})".format(", ".join(parameters))
+
+    def __bool__(self):
+        if self.url or self.headers or self.js_objects or self.xpaths:
+            return True
+        else:
+            return False
+
+
 class AutomaticSpiderGenerator:
+    detection_rules: list[DetectionRule] = []
+
     @staticmethod
     def generate_spider_code(spider: Spider) -> str:
         """
         Generate source code representation of a spider class, where
         the generated source code is intended to be executable
         without further changes being required.
-        :param spider: spider class which should have a source code
+        :param spider: Spider class which should have a source code
                        representation generated for.
-        :return: generated source code (multi-line) of spider.
+        :return: Generated source code (multi-line) of spider.
         """
         imports_list = ""
         superclasses = []
@@ -35,15 +129,15 @@ class AutomaticSpiderGenerator:
         """
         Generate source code representation of class attributes
         for a spider.
-        :param spider: spider class for which a source code
+        :param spider: Spider class for which a source code
                        representation of attributes should be
                        generated.
-        :param sort_order: array of attribute key names which should
+        :param sort_order: Array of attribute key names which should
                            be printed into the textual representation
                            in the order specified. Other attributes
                            will be printed after this list in
                            alphabetical order.
-        :return: generated source code representation (multi-line)
+        :return: Generated source code representation (multi-line)
                  of class attributes.
         """
         spider_attributes_code = ""
@@ -68,6 +162,19 @@ class AutomaticSpiderGenerator:
                         spider_attributes_code = '{}\n\t\t"{}",'.format(spider_attributes_code, v2)
                 spider_attributes_code = "{}\n\t]".format(spider_attributes_code)
         return spider_attributes_code
+
+    @staticmethod
+    def request_storefinder_page(url: str) -> Iterable[Request]:
+        """
+        Method which store finder classes may choose to overwrite if
+        the initial request to the store finder page should be more
+        complex than simply loading the page in a Playwright browser.
+        :param url: URL (as a string) of the store finder page which
+                    should be the starting point for detecting the
+                    presence of a store finder.
+        :return: Scrapy Request object(s) or None.
+        """
+        yield None
 
     @staticmethod
     def storefinder_exists(response: Response) -> bool | Request:

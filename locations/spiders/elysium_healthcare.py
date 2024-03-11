@@ -7,8 +7,8 @@ from locations.categories import apply_category
 from locations.items import Feature
 
 category_mapping = {
-    "neurological": {"healthcare": "yes", "healthcare:specialty": "physiatry"},
-    "mental health and wellbeing": {"amenity": "social_facility", "social_facility:for": "mental_health"},
+    "neurological": {"healthcare": "centre", "healthcare:speciality": "neurology"},
+    "mental health and wellbeing": {"healthcare": "centre", "healthcare:speciality": "psychiatry"},
     "learning disabilities & autism": {"amenity": "social_facility", "social_facility:for": "disabled"},
     "children & education": {"amenity": "social_facility", "social_facility:for": "disabled"},
 }
@@ -101,9 +101,10 @@ class ElysiumHealthcareSpider(scrapy.Spider):
                 "website": response.url,
             }
 
-            divisions = response.xpath('//div[contains(@class, "button-division-location")]')
-            for division in divisions:
-                specialty = division.xpath(".//a/text()").get().lower()
-                apply_category(category_mapping[specialty], properties)
-
+            if divisions := response.xpath('//div[contains(@class, "button-division-location")]'):
+                for division in divisions:
+                    specialty = division.xpath(".//a/text()").get().lower()
+                    apply_category(category_mapping[specialty], properties)
+            else:
+                apply_category({"healthcare": "centre"}, properties)
             yield Feature(**properties)

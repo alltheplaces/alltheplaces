@@ -5,10 +5,12 @@ import scrapy
 from locations.dict_parser import DictParser
 from locations.linked_data_parser import LinkedDataParser
 
+NANDOS_SHARED_ATTRIBUTES = {"brand": "Nando's", "brand_wikidata": "Q3472954"}
+
 
 class NandosSpider(scrapy.spiders.SitemapSpider):
     name = "nandos"
-    item_attributes = {"brand": "Nando's", "brand_wikidata": "Q3472954"}
+    item_attributes = NANDOS_SHARED_ATTRIBUTES
     sitemap_urls = [
         "https://www.nandos.co.uk/sitemap.xml",  # This is GB and IE
         "https://www.nandosperiperi.com/sitemap.xml",

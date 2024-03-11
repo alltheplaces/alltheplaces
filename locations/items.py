@@ -86,5 +86,5 @@ def set_closed(item: Feature, end_date: datetime = None):
 
 
 class GeneratedSpider(scrapy.Item):
-    search_url = scrapy.Field()
+    storefinder_url = scrapy.Field()
     spider = scrapy.Field()

@@ -4,12 +4,12 @@ import scrapy
 
 from locations.hours import DAYS_EN, OpeningHours
 from locations.items import Feature
-from locations.spiders.burger_king import BurgerKingSpider
+from locations.spiders.burger_king import BURGER_KING_SHARED_ATTRIBUTES
 
 
 class BurgerKingSESpider(scrapy.Spider):
     name = "burger_king_se"
-    item_attributes = BurgerKingSpider.item_attributes
+    item_attributes = BURGER_KING_SHARED_ATTRIBUTES
     start_urls = [
         "https://bk-se-ordering-api.azurewebsites.net/api/v2/restaurants?latitude=59.330311012767446&longitude=18.068330468145753&radius=99900000&top=100000"
     ]

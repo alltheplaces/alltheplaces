@@ -4,11 +4,12 @@ from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.geo import point_locations
 from locations.hours import OpeningHours
+from locations.spiders.dhl_express_de import DHL_EXPRESS_SHARED_ATTRIBUTES
 
 
 class DhlExpressEsSpider(scrapy.Spider):
     name = "dhl_express_es"
-    item_attributes = {"brand": "DHL", "brand_wikidata": "Q489815"}
+    item_attributes = DHL_EXPRESS_SHARED_ATTRIBUTES
     allowed_domains = ["wsbexpress.dhl.com"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
 

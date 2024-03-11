@@ -27,7 +27,18 @@ class MercySpider(scrapy.Spider):
         ("Urgent Care or Convenient Care", Categories.CLINIC_URGENT),
         ("Surgery", {"amenity": "hospital", "healthcare": "hospital", "healthcare:speciality": "surgery"}),
         ("Mission and Ministry", {"amenity": "social_centre"}),
-        ("Cancer Treatment Center", {"amenity": "centre", "healthcare:specialty": "cancer_treatment_centre"}),
+        ("Cancer Treatment Center", {"healthcare": "centre", "healthcare:speciality": "cancer_treatment_centre"}),
+        ("Hearing and Vision", {"healthcare": "centre", "healthcare:speciality": "optometrist;audiologist"}),
+        ("Infusion", Categories.CLINIC),
+        ("Mercy Kids", Categories.HOSPITAL),
+        ("Women's Health", {"healthcare": "centre"}),
+        ("Community and Corporate Health", {"amenity": "social_centre"}),
+        ("Education", {"healthcare": "centre"}),
+        ("Gastroenterology Center", {"healthcare": "centre", "healthcare:speciality": "gastroenterology"}),
+        ("Home Health and Hospice", Categories.HOSPICE),
+        ("Multispecialty Care", {"healthcare": "centre"}),
+        ("Retail", Categories.SHOP_GIFT),
+        ("Skilled Nursing", {"healthcare": "nurse"}),
     ]
 
     def parse(self, response):
@@ -60,7 +71,7 @@ class MercySpider(scrapy.Spider):
             item["opening_hours"] = oh
 
             if not data.get("marketSiteOfServiceType"):
-                self.crawler.stats.inc_value("atp/mercy/no_categories")
+                apply_category({"healthcare": "centre"}, item)
             else:
                 for label, cat in self.categories:
                     if label in data["marketSiteOfServiceType"]:
