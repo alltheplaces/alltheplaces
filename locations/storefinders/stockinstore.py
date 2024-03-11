@@ -37,16 +37,16 @@ class StockInStoreSpider(Spider, AutomaticSpiderGenerator):
         DetectionRequestRule(
             url=r"^https?:\/\/stockinstore\.net\/stores\/(?:getAllStores|getAllStoresLimited|getStoresForWidget|getStoresStock)$",
             headers='{"api_origin": .origin}',
-            data='{"api_site_id": .site, "api_widget_id": .widget, "api_widget_type": .widgetType}'
+            data='{"api_site_id": .site, "api_widget_id": .widget, "api_widget_type": .widgetType}',
         ),
         DetectionResponseRule(
-            js_objects = {
+            js_objects={
                 "api_site_id": r"window._stockinstore[0].site",
                 "api_widget_id": r"window._stockinstore[0].widgets",
                 "api_widget_type": r"window.stockInStore.tags.sis_module",
-                "api_origin": r'window.location.protocol + "//" + window.location.hostname'
+                "api_origin": r'window.location.protocol + "//" + window.location.hostname',
             }
-        )
+        ),
     ]
 
     def start_requests(self):

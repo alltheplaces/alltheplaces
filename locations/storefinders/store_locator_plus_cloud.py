@@ -22,7 +22,9 @@ class StoreLocatorPlusCloudSpider(Spider, AutomaticSpiderGenerator):
     slp_dataset: str = None
     slp_key: str = None
     detection_rules = [
-        DetectionRequestRule(url=r"^https?:\/\/dashboard\.storelocatorplus\.com\/(?P<slp_dataset>[^\/]+)\/wp-json\/myslp\/v2\/locations-map\?.*?(?<=[?&])api_key=(?P<slp_key>myslp\.[0-9a-f]+)(?:&|$)")
+        DetectionRequestRule(
+            url=r"^https?:\/\/dashboard\.storelocatorplus\.com\/(?P<slp_dataset>[^\/]+)\/wp-json\/myslp\/v2\/locations-map\?.*?(?<=[?&])api_key=(?P<slp_key>myslp\.[0-9a-f]+)(?:&|$)"
+        )
     ]
 
     def start_requests(self):

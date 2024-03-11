@@ -17,7 +17,9 @@ class MetaLocatorSpider(Spider, AutomaticSpiderGenerator):
     brand_id: str = None
     custom_settings = {"ROBOTSTXT_OBEY": False}
     detection_rules = [
-        DetectionRequestRule(url=r"^https?:\/\/(?:admin|code)\.metalocator\.com\/index\.php\?.*?(?<=[?&])Itemid=(?P<brand_id>\d+)(?:&|$)"),
+        DetectionRequestRule(
+            url=r"^https?:\/\/(?:admin|code)\.metalocator\.com\/index\.php\?.*?(?<=[?&])Itemid=(?P<brand_id>\d+)(?:&|$)"
+        ),
         DetectionResponseRule(js_objects={"brand_id": r"window.ml___Itemid.toString()"}),
         DetectionResponseRule(js_objects={"brand_id": r"window.ml_search_geography.itemid.toString()"}),
     ]

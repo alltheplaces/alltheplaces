@@ -18,7 +18,9 @@ class ShopAppsSpider(Spider, AutomaticSpiderGenerator):
     key: str = ""
     custom_settings = {"ROBOTSTXT_OBEY": False}
     detection_rules = [
-        DetectionRequestRule(url=r"^https?:\/\/stores\.shopapps\.site\/front-end\/get_surrounding_stores\.php\?.*?(?<=[?&])shop=(?P<key>[A-Za-z0-9\-.]+)(?:&|$)")
+        DetectionRequestRule(
+            url=r"^https?:\/\/stores\.shopapps\.site\/front-end\/get_surrounding_stores\.php\?.*?(?<=[?&])shop=(?P<key>[A-Za-z0-9\-.]+)(?:&|$)"
+        )
     ]
 
     def start_requests(self):

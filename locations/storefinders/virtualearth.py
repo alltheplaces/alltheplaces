@@ -20,7 +20,7 @@ class VirtualEarthSpider(Spider, AutomaticSpiderGenerator):
         ),
         DetectionRequestRule(
             url=r"^https?:\/\/spatial\.virtualearth\.net\/REST\/v1\/data\/(?P<dataset_id>[0-9a-f]{32})\/(?P<dataset_name>[^?]+)\?.*?(?<=[?&])\$select=(?P<dataset_select>[^&]+)&.*?(?<=&)\$filter=(?P<dataset_filter>[^&]+)&.*?(?<=&)key=(?P<api_key>[^&]+)(?:&|$)"
-        )
+        ),
     ]
 
     def start_requests(self):

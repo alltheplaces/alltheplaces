@@ -158,14 +158,14 @@ class AutomaticSpiderGenerator:
             elif isinstance(v, str):
                 spider_attributes_code = '{}\n    {} = "{}"'.format(spider_attributes_code, k, v)
             elif isinstance(v, int) or isinstance(v, float):
-                spider_attributes_code = '{}\n    {} = {}'.format(spider_attributes_code, k, v)
+                spider_attributes_code = "{}\n    {} = {}".format(spider_attributes_code, k, v)
             elif hasattr(v, "__len__"):  # Array
                 spider_attributes_code = "{}\n    {} = [".format(spider_attributes_code, k)
                 for v2 in v:
                     if isinstance(v2, str):
                         spider_attributes_code = '{}\n        "{}",'.format(spider_attributes_code, v2)
                     elif isinstance(v, int) or isinstance(v, float):
-                        spider_attributes_code = '{}\n        {},'.format(spider_attributes_code, v2)
+                        spider_attributes_code = "{}\n        {},".format(spider_attributes_code, v2)
                 spider_attributes_code = "{}\n    ]".format(spider_attributes_code)
         return spider_attributes_code
 

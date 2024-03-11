@@ -21,14 +21,14 @@ class WoosmapSpider(Spider, AutomaticSpiderGenerator):
     detection_rules = [
         DetectionRequestRule(
             url=r"^https?:\/\/api\.woosmap\.com\/.*?(?<=[?&])key=(?P<key>woos-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})(?:&|$)",
-            headers='{"origin": .origin}'
+            headers='{"origin": .origin}',
         ),
         DetectionResponseRule(
-            js_objects = {
+            js_objects={
                 "key": r"window.woosmap.public_key",
-                "origin": r'window.location.protocol + "//" + window.location.hostname'
+                "origin": r'window.location.protocol + "//" + window.location.hostname',
             }
-        )
+        ),
     ]
 
     def start_requests(self):
