@@ -32,7 +32,11 @@ def test_iter_nsi():
 def test_generate_keys_from_nsi_attributes():
     nsi = NSI()
     matches = list(nsi.iter_nsi("Q38076"))
-    keys_to_find = [("mcdonalds", "McDonaldsSpider"), ("mcdonalds_fr", "McDonaldsFRSpider"), ("mai_dang_lao_mcdonalds_hk_mo", "MaiDangLaoMcDonaldsHKMOSpider")]
+    keys_to_find = [
+        ("mcdonalds", "McDonaldsSpider"),
+        ("mcdonalds_fr", "McDonaldsFRSpider"),
+        ("mai_dang_lao_mcdonalds_hk_mo", "MaiDangLaoMcDonaldsHKMOSpider"),
+    ]
     for match in matches:
         key, class_name = NSI.generate_keys_from_nsi_attributes(match)
         assert key and class_name
@@ -46,5 +50,3 @@ def test_generate_keys_from_nsi_attributes():
     key, class_name = NSI.generate_keys_from_nsi_attributes(matches[0])
     assert key == "go_games_and_toys_us"
     assert class_name == "GoGamesAndToysUSSpider"
-
-

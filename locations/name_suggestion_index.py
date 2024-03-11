@@ -1,11 +1,11 @@
-import pycountry
 import re
 from typing import Iterable
-from unidecode import unidecode
 from urllib.parse import urlparse
 
+import pycountry
 import requests
 import tldextract
+from unidecode import unidecode
 
 
 class Singleton(type):
@@ -42,7 +42,7 @@ class NSI(metaclass=Singleton):
             self.nsi_json = self._request_file("nsi.min.json")["nsi"]
             self.loaded = True
 
-    def get_wikidata_code_from_url(self, url: str = None) -> str|None:
+    def get_wikidata_code_from_url(self, url: str = None) -> str | None:
         """
         Attempt to return a single Wikidata code corresponding to
         the brand or operator of the supplied URL.
@@ -115,13 +115,13 @@ class NSI(metaclass=Singleton):
                     yield item
 
     @staticmethod
-    def generate_keys_from_nsi_attributes(nsi_attributes: dict) -> tuple[str, str]|None:
+    def generate_keys_from_nsi_attributes(nsi_attributes: dict) -> tuple[str, str] | None:
         """
         From supplied NSI attributes of a brand or operator, generate a tuple
         containing:
           1. Key suitable for use as a spider key and filename.
           2. Class name suitable for use as the name of a spider class.
-        
+
         If the brand or operator exists in one
         or two countries, add ISO 3166-1 alpha-2 codes for the one or two
         countries as suffixes to the generated key.
@@ -135,11 +135,31 @@ class NSI(metaclass=Singleton):
         # Try using the NSI "name" field and if that doesn't work, try the
         # NSI "displayName" field instead.
         if nsi_attributes.get("tags") and nsi_attributes["tags"].get("name"):
-            key = re.sub(r"_+", "_", re.sub(r"[^\w ]", "", unidecode(nsi_attributes["tags"]["name"]).replace("&", "and").lower()).strip().replace(" ", "_"))
-            class_name = re.sub(r"[^\w]", "", unidecode(nsi_attributes["tags"]["name"]).replace("&", "And")).strip().replace(" ", "")
+            key = re.sub(
+                r"_+",
+                "_",
+                re.sub(r"[^\w ]", "", unidecode(nsi_attributes["tags"]["name"]).replace("&", "and").lower())
+                .strip()
+                .replace(" ", "_"),
+            )
+            class_name = (
+                re.sub(r"[^\w]", "", unidecode(nsi_attributes["tags"]["name"]).replace("&", "And"))
+                .strip()
+                .replace(" ", "")
+            )
         if not key and nsi_attributes.get("displayName"):
-            key = re.sub(r"_+", "_", re.sub(r"[^\w ]", "", unidecode(nsi_attributes["displayName"]).replace("&", "and").lower()).strip().replace(" ", "_"))
-            class_name = re.sub(r"[^\w]", "", unidecode(nsi_attributes["displayName"]).replace("&", "And")).strip().replace(" ", "")
+            key = re.sub(
+                r"_+",
+                "_",
+                re.sub(r"[^\w ]", "", unidecode(nsi_attributes["displayName"]).replace("&", "and").lower())
+                .strip()
+                .replace(" ", "_"),
+            )
+            class_name = (
+                re.sub(r"[^\w]", "", unidecode(nsi_attributes["displayName"]).replace("&", "And"))
+                .strip()
+                .replace(" ", "")
+            )
         if not key or not class_name:
             return None
 
@@ -147,10 +167,7 @@ class NSI(metaclass=Singleton):
         # countries. If the brand/operator is in three or more countries, do
         # not add a country suffix(es) as the key/class name will be too long.
         if nsi_attributes.get("locationSet") and nsi_attributes["locationSet"].get("include"):
-            if (
-                len(nsi_attributes["locationSet"]["include"]) == 1
-                or len(nsi_attributes["locationSet"]["include"]) == 2
-            ):
+            if len(nsi_attributes["locationSet"]["include"]) == 1 or len(nsi_attributes["locationSet"]["include"]) == 2:
                 for country_code in nsi_attributes["locationSet"]["include"]:
                     if not pycountry.countries.get(alpha_2=country_code.upper()):
                         continue
