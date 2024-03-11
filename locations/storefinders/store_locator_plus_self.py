@@ -46,7 +46,7 @@ class StoreLocatorPlusSelfSpider(Spider, AutomaticSpiderGenerator):
     max_results: int = 0
     detection_rules = [
         DetectionRequestRule(
-            url="^https?:\/\/[A-Za-z0-9\-.]+\/wp-admin\/admin-ajax\.php(?:\?|$)",
+            url=r"^https?:\/\/[A-Za-z0-9\-.]+\/wp-admin\/admin-ajax\.php(?:\?|$)",
             data=r'if .action == "csl_ajax_onload" then {"search_radius": (.["options[initial_radius]"] | tonumber)} else null end',
         ),
         DetectionRequestRule(
