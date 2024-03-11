@@ -40,6 +40,7 @@ class TetaCZSpider(Spider):
         item = kwargs["item"]
 
         item["website"] = response.urljoin(response.xpath('//a[@id="hpDetail"]/@href').get())
+        item["addr_full"] = response.xpath('//h3[@class="sx-store-detail-small-info"]/text()').get().strip()
 
         item["opening_hours"] = OpeningHours()
         opening_time_days = response.xpath("//table[@class='sx-store-detail-small-opening']/tr/td[2]/text()")
