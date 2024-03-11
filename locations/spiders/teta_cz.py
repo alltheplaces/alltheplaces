@@ -39,6 +39,8 @@ class TetaCZSpider(Spider):
     def parse_location(self, response, **kwargs):
         item = kwargs["item"]
 
+        item["website"] = response.urljoin(response.xpath('//a[@id="hpDetail"]/@href').get())
+
         item["opening_hours"] = OpeningHours()
         opening_time_days = response.xpath("//table[@class='sx-store-detail-small-opening']/tr/td[2]/text()")
         if len(opening_time_days) != 7:
