@@ -9,4 +9,3 @@ class LaVieClaireFRSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://magasins.lavieclaire.com/sitemap.xml"]
     sitemap_rules = [(r"https://magasins.lavieclaire.com/lavieclaire/fr/store/.*/\d+$", "parse_sd")]
     wanted_types = ["LocalBusiness"]
-
