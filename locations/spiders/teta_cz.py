@@ -1,6 +1,8 @@
+import json
+from typing import Iterable
+
 import scrapy
-from scrapy import Spider
-from scrapy.http import JsonRequest
+from scrapy import FormRequest, Request, Spider
 
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
@@ -9,16 +11,16 @@ from locations.hours import DAYS, OpeningHours
 class TetaCZSpider(Spider):
     name = "teta_cz"
     item_attributes = {"brand": "Teta", "brand_wikidata": "Q20860823"}
-    start_urls = ["https://www.tetadrogerie.cz/prodejny"]
-    custom_settings = {
-        "ROBOTSTXT_OBEY": False,
-    }
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
-    def parse(self, response, **kwargs):
-        yield JsonRequest(
+    def start_requests(self) -> Iterable[Request]:
+        yield FormRequest(
             url="https://www.tetadrogerie.cz/CMSPages/Sprinx/MapData.ashx",
-            headers={"Content-Type": "application/x-www-form-urlencoded"},
-            body=r"search=%7B%22Extra%22%3A%5B%5D%2C%22Services%22%3A%5B%5D%2C%22CosmeticsBrands%22%3A%5B%5D%2C%22Location%22%3A%7B%22Lat%22%3A0%2C%22Lng%22%3A0%7D%7D",
+            formdata={
+                "search": json.dumps(
+                    {"Extra": [], "Services": [], "CosmeticsBrands": [], "Location": {"Lat": 0, "Lng": 0}}
+                )
+            },
             callback=self.parse_locations,
         )
 
