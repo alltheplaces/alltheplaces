@@ -20,7 +20,6 @@ class WoosmapSpider(Spider, AutomaticSpiderGenerator):
     key = ""
     origin = ""
 
-    # if response.xpath('//script[contains(text(), "woosmapApiKey")]').get():
     detection_rules = [
         # Example: https://www.auchan.pl/pl/znajdz-sklep
         DetectionRequestRule(url=r"https:\/\/webapp-conf\.woosmap\.com\/(?P<key>[\w-]+)\/webapp-conf\.json"),
