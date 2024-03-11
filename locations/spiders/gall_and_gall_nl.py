@@ -22,6 +22,7 @@ class GallAndGallSpider(Spider):
         for location in response.json()["stores"]:
             item = DictParser.parse(location)
             item["website"] = "https://www.gall.nl/" + item["website"]
+            item["housenumber"] = location["houseNr"] + location["houseNrAdditional"]
 
             item["opening_hours"] = OpeningHours()
 
