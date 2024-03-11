@@ -11,6 +11,7 @@ class HollisterSpider(scrapy.Spider):
     start_urls = ["https://www.hollisterco.com/api/ecomm/h-us/storelocator/search?country="]
     user_agent = BROWSER_DEFAULT
     custom_settings = {"ROBOTSTXT_OBEY": False}
+    requires_proxy = True
 
     def parse(self, response):
         data = response.json()
