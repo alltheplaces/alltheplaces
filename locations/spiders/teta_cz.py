@@ -1,5 +1,5 @@
-from scrapy import Spider
 import scrapy
+from scrapy import Spider
 from scrapy.http import JsonRequest
 
 from locations.dict_parser import DictParser
@@ -19,7 +19,7 @@ class TetaCZSpider(Spider):
             url="https://www.tetadrogerie.cz/CMSPages/Sprinx/MapData.ashx",
             headers={"Content-Type": "application/x-www-form-urlencoded"},
             body=r"search=%7B%22Extra%22%3A%5B%5D%2C%22Services%22%3A%5B%5D%2C%22CosmeticsBrands%22%3A%5B%5D%2C%22Location%22%3A%7B%22Lat%22%3A0%2C%22Lng%22%3A0%7D%7D",
-            callback=self.parse_locations
+            callback=self.parse_locations,
         )
 
     def parse_locations(self, response, **kwargs):
@@ -29,7 +29,7 @@ class TetaCZSpider(Spider):
             yield scrapy.Request(
                 "https://www.tetadrogerie.cz/CMSPages/Sprinx/ShopDetail.aspx?id=%d" % location["Id"],
                 callback=self.parse_location,
-                cb_kwargs={"item": item}
+                cb_kwargs={"item": item},
             )
 
     def parse_location(self, response, **kwargs):
