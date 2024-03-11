@@ -1,5 +1,6 @@
 from enum import Enum
 
+from locations.dict_parser import DictParser
 from locations.items import Feature
 
 
@@ -223,6 +224,7 @@ class Categories(Enum):
     DOCTOR_GP = {"amenity": "doctors", "healthcare": "doctor", "healthcare:speciality": "community"}
     EMERGENCY_WARD = {"emergency": "emergency_ward_entrance"}
     FAST_FOOD = {"amenity": "fast_food"}
+    FIRE_STATION = {"amenity": "fire_station"}
     FUEL_STATION = {"amenity": "fuel"}
     HOSPITAL = {"amenity": "hospital", "healthcare": "hospital"}
     HOSPICE = {"healthcare": "hospice"}
@@ -735,3 +737,22 @@ def apply_healthcare_specialities(specialities: [HealthcareSpecialities], item: 
     """
     for s in specialities:
         apply_category({"healthcare:speciality": s.value}, item)
+
+
+# TODO: something similar for fuel types
+def map_payment(item: Feature, payment_method: str, enum: PaymentMethods | FuelCards):
+    """Apply appropriate payment method tag to an item if given string is found in an enum."""
+    if not payment_method:
+        return
+    map = {}
+    for payment in enum:
+        variations = DictParser.get_variations(payment.name.replace("_", "-"))
+        variations.add(payment.name.replace("_", " ").lower())
+        variations.add(payment.name.replace("_", " ").title())
+        variations.add(payment.name.replace("_", " ").upper())
+        for variation in variations:
+            map[variation] = payment.name
+
+    if payment := map.get(payment_method):
+        apply_yes_no(enum[payment], item, True)
+        return True
