@@ -74,8 +74,3 @@ class WoosmapSpider(Spider, AutomaticSpiderGenerator):
 
     def parse_item(self, item, feature, **kwargs):
         yield item
-
-    def extract_spider_attributes(response: Response) -> dict | Request:
-        return {
-            "allowed_domains": [urlparse(response.url).netloc],
-        }
