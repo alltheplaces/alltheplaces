@@ -1,40 +1,29 @@
-import json
 import re
 from typing import Any
 
-from scrapy import Spider
 from scrapy.http import Response
+from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
+from locations.user_agents import BROWSER_DEFAULT
 
 
-class BankOfIrelandSpider(Spider):
+class BankOfIrelandSpider(CrawlSpider):
     name = "bank_of_ireland"
     item_attributes = {"brand": "Bank of Ireland", "brand_wikidata": "Q806689"}
-    start_urls = ["https://www.bankofireland.com/branch-locator/"]
+    start_urls = ["https://www.bankofireland.com/branch-listing/"]
+    rules = [Rule(LinkExtractor(allow=r"/branch-locator/[0-9a-z]+"), callback="parse")]
+    custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT}
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        data = json.loads(re.search(r"window.DATA_INIT = ({.+});", response.text).group(1))
-        for location in data["branches"].values():
-            item = Feature()
-            item["lat"] = location["position"]["lat"]
-            item["lon"] = location["position"]["lng"]
-            item["ref"] = item["website"] = "https://www.bankofireland.com/branch-locator/{}/".format(location["slug"])
-            item["branch"] = location["name"]
-            item["addr_full"] = location["address"]
+        item = Feature()
+        item["name"] = "Bank of Ireland"
+        item["ref"] = item["website"] = response.url
+        item["addr_full"], item["phone"] = re.search(
+            r"Address:(.*)BOI Direct:\s*(.*)?\.", response.xpath(r'//*[@id = "meta-description"]/@content').get()
+        ).groups()
+        apply_category(Categories.BANK, item)
 
-            apply_category(Categories.BANK, item)
-
-            yield item
-        for location in data["atms"].values():
-            item = Feature()
-            item["lat"] = location["position"]["lat"]
-            item["lon"] = location["position"]["lng"]
-            item["ref"] = location["id"]
-            item["branch"] = location["name"]
-            item["addr_full"] = location["address"]
-
-            apply_category(Categories.ATM, item)
-
-            yield item
+        yield item

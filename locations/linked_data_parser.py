@@ -4,7 +4,7 @@ import chompjs
 import json5
 
 from locations.hours import OpeningHours
-from locations.items import Feature
+from locations.items import Feature, add_social_media
 
 
 class LinkedDataParser:
@@ -143,6 +143,8 @@ class LinkedDataParser:
         for t in types:
             LinkedDataParser.parse_enhanced(t, ld, item)
 
+        LinkedDataParser.parse_same_as(ld, item)
+
         return item
 
     @staticmethod
@@ -215,3 +217,14 @@ class LinkedDataParser:
                 item["extras"]["stars"] = stars
             elif isinstance(stars, dict):
                 item["extras"]["stars"] = stars.get("ratingValue")
+
+    @staticmethod
+    def parse_same_as(ld: dict, item: Feature):
+        if same_as := LinkedDataParser.get_clean(ld, "sameAs"):
+            if isinstance(same_as, str):
+                same_as = [same_as]
+            for link in same_as:
+                if "facebook.com" in link:
+                    add_social_media(item, "facebook", link)
+                elif "tripadvisor.com" in link:
+                    add_social_media(item, "tripadvisor", link)

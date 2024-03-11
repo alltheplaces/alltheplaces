@@ -266,42 +266,58 @@ DAYS_PL = {
     "Pn": "Mo",
     "Po": "Mo",
     "Pon": "Mo",
+    "Pn.": "Mo",
+    "Pon.": "Mo",
     "Poniedziałek": "Mo",
     "Wt": "Tu",
     "Wto": "Tu",
+    "Wto.": "Tu",
     "Wtorek": "Tu",
     "Śr": "We",
     "Sr": "We",
     "Sro": "We",
     "Śro": "We",
+    "Śro.": "We",
     "Środa": "We",
     "Cz": "Th",
     "Czw": "Th",
+    "Czw.": "Th",
     "Czwartek": "Th",
     "Pt": "Fr",
+    "Pt.": "Fr",
     "Pi": "Fr",
     "Pia": "Fr",
     "Piątek": "Fr",
     "Sb": "Sa",
     "So": "Sa",
     "Sob": "Sa",
+    "Sob.": "Sa",
     "Sobota": "Sa",
     "Nd": "Su",
     "Ni": "Su",
     "Nie": "Su",
+    "Ndz": "Su",
     "Niedz": "Su",
     "Niedzela": "Su",
     "Niedziela": "Su",
 }
 DAYS_PT = {
+    # "Feriado": "PH",
     # "Se": "Mo",
+    "Segunda": "Mo",
     "Te": "Tu",
+    "Terça": "Tu",
     # "Qu": "We",
+    "Quarta": "We",
     # "Qu": "Th",
+    "Quinta": "Th",
     # "Se": "Fr",
+    "Sexta": "Fr",
+    "Sábado": "Sa",
     "Sa": "Sa",
     "Sá": "Sa",
     "Do": "Su",
+    "Domingo": "Su",
 }
 DAYS_SK = {
     "Po": "Mo",
@@ -462,6 +478,41 @@ DAYS_SR = {
     "Недеља": "Su",
 }
 
+# See https://github.com/alltheplaces/alltheplaces/issues/7360
+# A list orded by Languages most frequently used for web content as of January 2024, by share of websites.
+# See WPStoreLocator for example usage.
+DAYS_BY_FREQUENCY = [
+    DAYS_EN,
+    DAYS_ES,
+    DAYS_DE,
+    DAYS_RU,
+    # Japanese missing
+    DAYS_FR,
+    DAYS_PT,
+    DAYS_IT,
+    # Turkish missing
+    DAYS_DK,
+    DAYS_PL,
+    # Persian
+    DAYS_CZ,
+    # And everything else
+    DAYS_AT,
+    DAYS_BG,
+    DAYS_CH,
+    DAYS_FI,
+    DAYS_GR,
+    DAYS_HU,
+    DAYS_IL,
+    DAYS_NL,
+    DAYS_NO,
+    DAYS_RO,
+    DAYS_RS,
+    DAYS_SE,
+    DAYS_SI,
+    DAYS_SK,
+    DAYS_SR,
+]
+
 NAMED_DAY_RANGES_DK = {
     "Hverdage": ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"],  # Weekdays
 }
@@ -507,6 +558,14 @@ DELIMITERS_ES = [
     "-",
     "a",
     "y",
+    "de",
+]
+
+DELIMITERS_PT = [
+    "-",
+    "a",
+    "das",
+    "às",
     "de",
 ]
 
