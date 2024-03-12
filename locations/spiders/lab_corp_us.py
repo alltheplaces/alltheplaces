@@ -6,15 +6,13 @@ from scrapy.spiders import SitemapSpider
 from locations.linked_data_parser import LinkedDataParser
 from locations.spiders.tesco_gb import set_located_in
 from locations.spiders.walgreens import WalgreensSpider
-from locations.structured_data_spider import StructuredDataSpider
 
 
-class LabCorpUSSpider(SitemapSpider, StructuredDataSpider):
+class LabCorpUSSpider(SitemapSpider):
     name = "lab_corp_us"
     item_attributes = {"brand": "LabCorp", "brand_wikidata": "Q6466630"}
     sitemap_urls = ["https://locations.labcorp.com/robots.txt"]
     sitemap_rules = [(r"/\w\w/[^/]+/(\d+)/", "parse")]
-    wanted_types = ["MedicalBusiness"]
 
     def parse(self, response: Response, **kwargs):
         # Remove comments from JSON
