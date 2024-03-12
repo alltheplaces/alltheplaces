@@ -1,8 +1,8 @@
 import re
-from urllib.parse import urljoin
 
 import chompjs
 from scrapy import Request, Spider
+
 from locations.items import Feature
 
 
@@ -15,7 +15,7 @@ class mtexxBGSpider(Spider):
 
     def parse(self, response, **kwargs):
         url = re.search(r"(static/chunks/app/\(website\)/locations/page-\w+\.js)", response.text)
-        yield Request("https://m-texx.com/_next/"+url.group(1), callback=self.parse_locations)
+        yield Request("https://m-texx.com/_next/" + url.group(1), callback=self.parse_locations)
 
     def parse_locations(self, response, **kwargs):
         locations = chompjs.parse_js_objects(re.search(r"exports=\[({city:.+}])}", response.text).group(1))
