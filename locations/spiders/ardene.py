@@ -4,11 +4,13 @@ import scrapy
 from scrapy import FormRequest
 
 from locations.dict_parser import DictParser
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class ArdeneSpider(scrapy.Spider):
     name = "ardene"
     item_attributes = {"brand": "Ardene", "brand_wikidata": "Q2860764"}
+    user_agent = BROWSER_DEFAULT
 
     def start_requests(self):
         yield FormRequest(

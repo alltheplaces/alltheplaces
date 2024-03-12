@@ -12,6 +12,7 @@ class CheckersZASpider(StructuredDataSpider):
     # AWS WAF bot protection appears to be used but can be bypassed with Playwright.
     is_playwright_spider = True
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"CONCURRENT_REQUESTS": 1, "ROBOTSTXT_OBEY": False}
+    requires_proxy = True
 
     def start_requests(self):
         for sitemap_url in self.start_urls:
@@ -45,7 +46,7 @@ class CheckersZASpider(StructuredDataSpider):
                 if day_hours["dayOfWeek"] in newohspec.keys():
                     break
                 newohspec[day_hours["dayOfWeek"]] = day_hours
-            ld_data["openingHoursSpecification"] = newohspec.values()
+            ld_data["openingHoursSpecification"] = list(newohspec.values())
 
     def post_process_item(self, item, response, ld_data):
         if "Checkers Hyper " in item["name"]:

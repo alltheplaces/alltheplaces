@@ -42,7 +42,7 @@ Each GeoJSON feature will have a `properties` object with as many of the followi
 | **Contact**           | _Contact information for the venue_
 | `phone`               | The telephone number for the venue. Note that this is usually pulled from a website assuming local visitors, so it probably doesn't include the country code.
 | `website`             | The website for the venue. We try to make this a URL specific to the venue and not a generic URL for the brand that is operating the venue.
-| `contact:email`       | The email address for the venue. We try to make this an email specific to the venue and not a generic email for the brand that is operating the venue.
+| `email`               | The email address for the venue. We try to make this an email specific to the venue and not a generic email for the brand that is operating the venue.
 | `contact:twitter`     | The twitter account for the venue. We try to make this specific to the venue and not generic for the brand that is operating the venue.
 | `contact:facebook`    | The facebook account for the venue. We try to make this specific to the venue and not generic for the brand that is operating the venue.
 | **Other**             | _Other information about the venue_
