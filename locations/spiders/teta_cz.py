@@ -27,8 +27,7 @@ class TetaCZSpider(Spider):
     def parse_locations(self, response, **kwargs):
         for location in response.json():
             item = DictParser.parse(location)
-            if item["name"] == "Teta drogerie a lékárny ČR s.r.o.":
-                item["name"] = "Teta"
+            item["operator"] = item.pop("name")
 
             yield scrapy.Request(
                 "https://www.tetadrogerie.cz/CMSPages/Sprinx/ShopDetail.aspx?id=%d" % location["Id"],
