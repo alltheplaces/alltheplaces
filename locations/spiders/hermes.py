@@ -1,6 +1,7 @@
 import scrapy
 
 from locations.dict_parser import DictParser
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class HermesSpider(scrapy.Spider):
@@ -11,6 +12,7 @@ class HermesSpider(scrapy.Spider):
     }
     allowed_domains = ["hermes.com"]
     start_urls = ["https://bck.hermes.com/stores?lang=en"]
+    custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT}
 
     def parse(self, response):
         for store in response.json().get("shops"):
