@@ -1,5 +1,5 @@
-from locations.storefinders.where2getit import Where2GetItSpider
 from locations.categories import Categories
+from locations.storefinders.where2getit import Where2GetItSpider
 
 
 class CinnaholicUSSpider(Where2GetItSpider):
