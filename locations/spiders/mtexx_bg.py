@@ -6,7 +6,7 @@ from scrapy import Request, Spider
 from locations.items import Feature
 
 
-class mtexxBGSpider(Spider):
+class MtexxBGSpider(Spider):
     name = "mtexx_bg"
     item_attributes = {"brand": "M-texx", "brand_wikidata": "Q122947768"}
     allowed_domains = ["m-texx.com"]
