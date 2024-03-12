@@ -15,7 +15,7 @@ class LidlGBSpider(VirtualEarthSpider):
 
     dataset_id = "588775718a4b4312842f6dffb4428cff"
     dataset_name = "Filialdaten-UK/Filialdaten-UK"
-    key = "Argt0lKZTug_IDWKC5e8MWmasZYNJPRs0btLw62Vnwd7VLxhOxFLW2GfwAhMK5Xg"
+    api_key = "Argt0lKZTug_IDWKC5e8MWmasZYNJPRs0btLw62Vnwd7VLxhOxFLW2GfwAhMK5Xg"
 
     def parse_item(self, item, feature, **kwargs):
         if match := re.match(r"(\w{1,2}\d{1,2}\w?) (\d|O)(\w{2})", feature["Locality"].upper()):
