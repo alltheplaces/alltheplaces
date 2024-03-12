@@ -13,4 +13,3 @@ class ShoppersFoodUSSpider(SitemapSpider, StructuredDataSpider):
             "parse_sd",
         )
     ]
-
