@@ -72,32 +72,3 @@ class WoosmapSpider(Spider, AutomaticSpiderGenerator):
 
     def parse_item(self, item: Feature, feature: dict):
         yield item
-
-    def storefinder_exists(response: Response) -> bool | Request:
-        # Example: https://www.auchan.pl/pl/znajdz-sklep
-        # This is delivered via Vue.js and is dynamically loading https://webapp.woosmap.com/webapp.js similar to https://codesandbox.io/s/dzgjh
-        # if response.xpath('//script[contains(text(), "loadStoreLocator")]').get():
-        #     return True
-
-        # TODO: Execute javascript to detect the component?
-        # Unclear how to detect from https://www.carrefour.fr/ or https://www.carrefour.fr/magasin/liste#stores-directories-A
-
-        # playwright_page = response.meta["playwright_page"]
-        # sitemap = await playwright_page.locator('xpath=//script[contains(@src, "https://webapp.woosmap.com/webapp.js")').all()
-        # print(sitemap)
-        # if response.xpath('//script[contains(@src, "https://webapp.woosmap.com/webapp.js")]').get():
-        #     return True
-
-        if response.xpath('//script[contains(@src, "https://webapp.woosmap.com/webapp.js")]').get():
-            return True
-
-        # Example: https://www.decathlon.fr/store-locator
-        if response.xpath('//script[contains(text(), "woosmapApiKey")]').get():
-            return True
-
-        return False
-
-    def extract_spider_attributes(response: Response) -> dict | Request:
-        return {
-            "allowed_domains": [urlparse(response.url).netloc],
-        }
