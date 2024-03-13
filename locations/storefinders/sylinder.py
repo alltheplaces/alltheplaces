@@ -12,7 +12,6 @@ from locations.dict_parser import DictParser
 # TODO: Optionally collect opening hours with further API calls
 
 
-
 class SylinderSpider(Spider):
     dataset_attributes = {"source": "api", "api": "api.ngadata.no"}
     app_key = ""
