@@ -40,7 +40,7 @@ class SylinderSpider(Spider):
 
             item["facebook"] = location["storeDetails"]["organization"]["facebookUrl"]
             if self.base_url is not None:
-                item["website"] = self.base_url + location["organization"]["slug"]
+                item["website"] = self.base_url + location["storeDetails"]["slug"]
 
             # TODO: Full opening hours available under https://api.ngdata.no/sylinder/stores/v1/extended-info/7080000008896?
             # if location.get("openingHours"):
