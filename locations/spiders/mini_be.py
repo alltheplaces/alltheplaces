@@ -15,7 +15,7 @@ class MiniBESpider(scrapy.Spider):
     user_agent = BROWSER_DEFAULT
     custom_settings = {"ROBOTSTXT_OBEY": False}
     start_urls = [
-        "https://www.mini.be/c2b-localsearch/services/api/v4/clients/BMWSTAGE2_DLO/BE/pois?brand=MINI&cached=off&category=MI&country=BE&language=nl&lat=0&lng=0&maxResults=700&showAll=true&unit=km"
+        "https://c2b-services.bmw.com/c2b-localsearch/services/api/v4/clients/BMWSTAGE2_DLO/-/pois?category=MI&maxResults=2000&showAll=true&country=BE"
     ]
 
     def parse(self, response):
