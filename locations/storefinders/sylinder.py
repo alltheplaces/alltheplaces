@@ -8,14 +8,17 @@ from locations.dict_parser import DictParser
 # the "app_key" attribute of this class. You may need to define a
 # parse_item function to extract additional location data and to
 # make corrections to automatically extracted location data.
-# Ensure you pass in a referrer
+# Ensure you pass in a referrer or domain
 
 
 class SylinderSpider(Spider):
     dataset_attributes = {"source": "api", "api": "api.ngadata.no"}
     app_key = ""
+    base_url = None
 
     def start_requests(self):
+        if self.base_url is None:
+            self.logger.warning("Specify self.base_url to detect websites")
         yield JsonRequest(url=f"https://api.ngdata.no/sylinder/stores/v1/basic-info?chainId={self.app_key}")
 
     def parse(self, response, **kwargs):
@@ -35,6 +38,8 @@ class SylinderSpider(Spider):
             item["email"] = location["storeDetails"]["organization"]["email"]
 
             item["facebook"] = location["storeDetails"]["organization"]["facebookUrl"]
+            if self.base_url is not None:
+                item["website"] = self.base_url + location["slug"]
 
             # TODO: Full opening hours available under https://api.ngdata.no/sylinder/stores/v1/extended-info/7080000008896?
             # if location.get("openingHours"):
