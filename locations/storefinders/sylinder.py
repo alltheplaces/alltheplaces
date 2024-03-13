@@ -8,7 +8,9 @@ from locations.dict_parser import DictParser
 # the "app_key" attribute of this class. You may need to define a
 # parse_item function to extract additional location data and to
 # make corrections to automatically extracted location data.
-# Ensure you pass in a referrer or domain
+# Ensure you specify the base_url; typically the storefinder url, so you can generate website deep links.
+# TODO: Optionally collect opening hours with further API calls
+
 
 
 class SylinderSpider(Spider):
