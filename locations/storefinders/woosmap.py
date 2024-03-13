@@ -1,11 +1,10 @@
-from urllib.parse import urlparse
-
 from scrapy import Spider
-from scrapy.http import JsonRequest, Request, Response
+from scrapy.http import JsonRequest, Response
 
 from locations.automatic_spider_generator import AutomaticSpiderGenerator, DetectionRequestRule, DetectionResponseRule
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
+from locations.items import Feature
 
 # Documentation available at https://developers.woosmap.com/products/search-api/get-started/
 #
@@ -17,21 +16,19 @@ from locations.hours import DAYS, OpeningHours
 
 class WoosmapSpider(Spider, AutomaticSpiderGenerator):
     dataset_attributes = {"source": "api", "api": "woosmap.com"}
-    key = ""
-    origin = ""
-    is_playwright_spider = True  # Required for auto detection to discover JS
-
+    key: str = ""
+    origin: str = ""
     detection_rules = [
-        # Example: https://www.auchan.pl/pl/znajdz-sklep
-        DetectionRequestRule(url=r"https:\/\/webapp-conf\.woosmap\.com\/(?P<key>[\w-]+)\/webapp-conf\.json"),
-        # Example: https://www.decathlon.fr/store-locator
-        DetectionRequestRule(url=r"https:\/\/api\.woosmap\.com\/stores\?key=(?P<key>[\w-]+)"),
-        DetectionRequestRule(url=r"https:\/\/api\.woosmap\.com\/stores\/search\?key=(?P<key>[\w-]+)"),
-        DetectionRequestRule(url=r"https:\/\/api\.woosmap\.com\/project\/config\?key=(?P<key>[\w-]+)"),
-        DetectionResponseRule(js_objects={"key": "window.woosmap.public_key"}),
-        # detect from https://www.carrefour.fr/magasin/liste
-        # DetectionResponseRule(js_objects={"key": '.. | .woosmapApiKey'}),
-        DetectionResponseRule(js_objects={"key": "window.__INITIAL_STATE__.links.woosmapApiKey"}),
+        DetectionRequestRule(
+            url=r"^https?:\/\/api\.woosmap\.com\/.*?(?<=[?&])key=(?P<key>woos-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})(?:&|$)",
+            headers='{"origin": .origin}',
+        ),
+        DetectionResponseRule(
+            js_objects={
+                "key": r"window.woosmap.public_key",
+                "origin": r'window.location.protocol + "//" + window.location.hostname',
+            }
+        ),
     ]
 
     def start_requests(self):
@@ -41,7 +38,7 @@ class WoosmapSpider(Spider, AutomaticSpiderGenerator):
             meta={"referrer_policy": "no-referrer"},
         )
 
-    def parse(self, response, **kwargs):
+    def parse(self, response: Response):
         if features := response.json()["features"]:
             for feature in features:
                 item = DictParser.parse(feature["properties"])
@@ -73,7 +70,7 @@ class WoosmapSpider(Spider, AutomaticSpiderGenerator):
                     meta={"referrer_policy": "no-referrer"},
                 )
 
-    def parse_item(self, item, feature, **kwargs):
+    def parse_item(self, item: Feature, feature: dict):
         yield item
 
     def storefinder_exists(response: Response) -> bool | Request:

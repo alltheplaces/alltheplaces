@@ -4,7 +4,6 @@ from typing import Any, Iterable
 from urllib.parse import parse_qsl
 
 import jq
-import pycountry
 from playwright.async_api import Frame
 from playwright.async_api import Request as PlaywrightRequest
 from scrapy import Selector, Spider
@@ -23,17 +22,17 @@ from locations.storefinders.kibo import KiboSpider
 from locations.storefinders.limesharp_store_locator import LimesharpStoreLocatorSpider
 from locations.storefinders.localisr import LocalisrSpider
 
-# from locations.storefinders.metalocator import MetaLocatorSpider
+# from locations.storefinders.locally import LocallySpider
+from locations.storefinders.metalocator import MetaLocatorSpider
 from locations.storefinders.metizsoft import MetizsoftSpider
 from locations.storefinders.momentfeed import MomentFeedSpider
 
 # from locations.storefinders.rexel import RexelSpider
-# from locations.storefinders.shopapps import ShopAppsSpider
-# from locations.storefinders.stockinstore import StockInStoreSpider
+from locations.storefinders.shopapps import ShopAppsSpider
+from locations.storefinders.stockinstore import StockInStoreSpider
 from locations.storefinders.stockist import StockistSpider
-
-# from locations.storefinders.store_locator_plus_cloud import StoreLocatorPlusCloudSpider
-# from locations.storefinders.store_locator_plus_self import StoreLocatorPlusSelfSpider
+from locations.storefinders.store_locator_plus_cloud import StoreLocatorPlusCloudSpider
+from locations.storefinders.store_locator_plus_self import StoreLocatorPlusSelfSpider
 from locations.storefinders.storelocatorwidgets import StoreLocatorWidgetsSpider
 from locations.storefinders.storemapper import StoremapperSpider
 from locations.storefinders.storepoint import StorepointSpider
@@ -41,8 +40,7 @@ from locations.storefinders.storerocket import StoreRocketSpider
 from locations.storefinders.super_store_finder import SuperStoreFinderSpider
 from locations.storefinders.sweetiq import SweetIQSpider
 from locations.storefinders.uberall import UberallSpider
-
-# from locations.storefinders.virtualearth import VirtualEarthSpider
+from locations.storefinders.virtualearth import VirtualEarthSpider
 from locations.storefinders.where2getit import Where2GetItSpider
 from locations.storefinders.woosmap import WoosmapSpider
 from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
@@ -165,28 +163,11 @@ class StorefinderDetectorSpider(Spider):
             nsi_matches = [nsi_match for nsi_match in nsi.iter_nsi(wikidata_code)]
             if len(nsi_matches) != 1:
                 return
-            if "name" in nsi_matches[0]["tags"].keys():
-                spider_key = re.sub(r"[^a-zA-Z0-9_]", "", nsi_matches[0]["tags"]["name"].replace(" ", "_")).lower()
-                spider_class_name = re.sub(r"[^a-zA-Z0-9]", "", nsi_matches[0]["tags"]["name"].replace(" ", ""))
-            elif "displayName" in nsi_matches[0]:
-                spider_key = re.sub(r"[^a-zA-Z0-9_]", "", nsi_matches[0]["displayName"].replace(" ", "_")).lower()
-                spider_class_name = re.sub(r"[^a-zA-Z0-9]", "", nsi_matches[0]["displayName"].replace(" ", ""))
 
-            # Add country name to spider name if spider exists in a single country
-            if nsi_matches[0].get("locationSet") and nsi_matches[0]["locationSet"].get("include"):
-                if (
-                    len(nsi_matches[0]["locationSet"]["include"]) == 1
-                    or len(nsi_matches[0]["locationSet"]["include"]) == 2
-                ):
-                    for country_code in nsi_matches[0]["locationSet"]["include"]:
-                        if not pycountry.countries.get(alpha_2=country_code.upper()):
-                            continue
-                        spider_key = f"{spider_key}_{country_code.lower()}"
-                        spider_class_name = f"{spider_class_name}{country_code.upper()}"
+            if found_keys := NSI.generate_keys_from_nsi_attributes(nsi_matches[0]):
+                self.parameters["spider_key"] = found_keys[0]
+                self.parameters["spider_class_name"] = found_keys[1]
 
-            spider_class_name = f"{spider_class_name}Spider"
-            self.parameters["spider_key"] = spider_key
-            self.parameters["spider_class_name"] = spider_class_name
             if self.parameters["brand_wikidata"]:
                 brand = nsi_matches[0]["tags"].get("brand", nsi_matches[0]["tags"].get("name"))
                 self.parameters["brand"] = brand
@@ -210,15 +191,16 @@ class StorefinderDetectorSpider(Spider):
             KiboSpider,
             LimesharpStoreLocatorSpider,
             LocalisrSpider,
-            # MetaLocatorSpider,
+            # LocallySpider
+            MetaLocatorSpider,
             MetizsoftSpider,
             MomentFeedSpider,
             # RexelSpider,
-            # ShopAppsSpider,
-            # StockInStoreSpider,
+            ShopAppsSpider,
+            StockInStoreSpider,
             StockistSpider,
-            # StoreLocatorPlusCloudSpider,
-            # StoreLocatorPlusSelfSpider,
+            StoreLocatorPlusCloudSpider,
+            StoreLocatorPlusSelfSpider,
             StoreLocatorWidgetsSpider,
             StoremapperSpider,
             StorepointSpider,
@@ -226,7 +208,7 @@ class StorefinderDetectorSpider(Spider):
             SuperStoreFinderSpider,
             SweetIQSpider,
             UberallSpider,
-            # VirtualEarthSpider,
+            VirtualEarthSpider,
             Where2GetItSpider,
             WoosmapSpider,
             WPStoreLocatorSpider,
@@ -363,7 +345,7 @@ class StorefinderDetectorSpider(Spider):
                     if request.headers["content-type"].startswith("application/x-www-form-urlencoded"):
                         post_data_json = dict(parse_qsl(request.post_data))
                     else:
-                        post_data_json = request.post_data_json()
+                        post_data_json = request.post_data_json
 
                     if post_data_result := self.execute_jq(post_data_jq, post_data_json):
                         if isinstance(post_data_result, dict):

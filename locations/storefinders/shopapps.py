@@ -1,7 +1,9 @@
 from scrapy import Spider
-from scrapy.http import JsonRequest
+from scrapy.http import JsonRequest, Response
 
+from locations.automatic_spider_generator import AutomaticSpiderGenerator, DetectionRequestRule
 from locations.dict_parser import DictParser
+from locations.items import Feature
 
 # This is an undocumented application forming part of the ShopApps
 # suite of Shopify apps mentioned at https://shopapps.in/
@@ -11,17 +13,22 @@ from locations.dict_parser import DictParser
 # data needing to be cleaned, override the parse_item function.
 
 
-class ShopAppsSpider(Spider):
+class ShopAppsSpider(Spider, AutomaticSpiderGenerator):
     dataset_attributes = {"source": "api", "api": "shopapps.site"}
-    key = ""
+    key: str = ""
     custom_settings = {"ROBOTSTXT_OBEY": False}
+    detection_rules = [
+        DetectionRequestRule(
+            url=r"^https?:\/\/stores\.shopapps\.site\/front-end\/get_surrounding_stores\.php\?.*?(?<=[?&])shop=(?P<key>[A-Za-z0-9\-.]+)(?:&|$)"
+        )
+    ]
 
     def start_requests(self):
         yield JsonRequest(
             url=f"https://stores.shopapps.site/front-end/get_surrounding_stores.php?shop={self.key}&latitude=0&longitude=0&max_distance=0&limit=10000"
         )
 
-    def parse(self, response):
+    def parse(self, response: Response):
         for location in response.json()["stores"]:
             item = DictParser.parse(location)
             item.pop("addr_full", None)
@@ -30,5 +37,5 @@ class ShopAppsSpider(Spider):
             item["state"] = location.get("prov_state")
             yield from self.parse_item(item, location) or []
 
-    def parse_item(self, item, location, **kwargs):
+    def parse_item(self, item: Feature, location: dict):
         yield item
