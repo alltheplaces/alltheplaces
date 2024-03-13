@@ -354,7 +354,7 @@ class MySitemapSpider(scrapy.spiders.SitemapSpider):
 
                 if len(self.matched_patterns) > 0:
                     print("Possible patterns")
-                    for pattern, value in sorted(self.matched_patterns.items(), key=lambda x:x[1], reverse=True):
+                    for pattern, value in sorted(self.matched_patterns.items(), key=lambda x: x[1], reverse=True):
                         print("{}: {}".format(pattern, value))
 
 
