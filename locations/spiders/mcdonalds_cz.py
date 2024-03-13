@@ -28,6 +28,7 @@ class McDonaldsCZSpider(scrapy.Spider):
     def parse(self, response):
         pois = response.json().get("restaurants")
         for poi in pois:
+            poi.pop("name")
             poi["street_address"] = poi.pop("address")
             item = DictParser.parse(poi)
             item["website"] = response.urljoin(poi["slug"])
