@@ -9,7 +9,7 @@ class DickBlickSpider(SitemapSpider, StructuredDataSpider):
     name = "dick_blick"
     item_attributes = {"brand": "Dick Blick", "brand_wikidata": "Q5272692"}
     allowed_domains = ["www.dickblick.com"]
-    sitemap_urls = ["https://www.dickblick.com/sitemap.aspx"]
+    sitemap_urls = ["https://www.dickblick.com/robots.txt"]
     sitemap_rules = [(r"/stores/[-\w]+/[-\w]+/$", "parse_sd")]
     wanted_types = ["HobbyShop"]
     user_agent = BROWSER_DEFAULT
