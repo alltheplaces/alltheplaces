@@ -34,7 +34,10 @@ class BILLASpider(Spider):
         for location in response.json():
             if not location.get("open") and not location.get("openingTimes"):
                 continue
+            if "billa.cz" in response.url and "phone" in location:
+                location["phone"] = "+420" + location["phone"][1:]
             item = DictParser.parse(location)
+            item.pop("name")
             item["brand_wikidata"] = wikidata
             item["lon"] = location["coordinate"]["x"]
             item["lat"] = location["coordinate"]["y"]
