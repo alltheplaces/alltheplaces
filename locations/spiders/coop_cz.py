@@ -2,6 +2,7 @@ import re
 
 from scrapy import Request, Spider
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
@@ -20,13 +21,12 @@ class CoopCZSpider(Spider):
     def parse_cooperative(self, response):
         for location in response.xpath("//div[contains(@class, 'obsah')]/table/tbody/tr"):
             relative_url = location.xpath("./td[1]/a/@href").get()
-
             store = {}
             store["ref"] = relative_url.removeprefix("/")
             store["website"] = response.urljoin(relative_url)
-
             store["city"] = location.xpath("./td[2]/text()").get()
             store["postcode"] = location.xpath("./td[4]/text()").get()
+            apply_category(Categories.SHOP_SUPERMARKET, store)
             yield Request(url=store["website"], callback=self.parse_location, cb_kwargs={"store": store})
 
     def parse_location(self, response, store):
