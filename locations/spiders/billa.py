@@ -7,7 +7,7 @@ from locations.hours import DAYS_BG, DAYS_CZ, DAYS_EN, DAYS_SK, OpeningHours, sa
 
 class BILLASpider(Spider):
     name = "billa"
-    item_attributes = {"brand": "BILLA", "brand_wikidata": "Q537781"}
+    item_attributes = {"brand": "Billa", "brand_wikidata": "Q537781"}
     allowed_domains = ["www.billa.at", "www.billa.bg", "www.billa.sk", "www.billa.cz"]
     start_urls = [
         "https://www.billa.at/api/stores",
