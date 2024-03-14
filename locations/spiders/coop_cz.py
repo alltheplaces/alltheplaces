@@ -20,21 +20,21 @@ class CoopCZSpider(Spider):
     def parse_cooperative(self, response):
         for location in response.xpath("//div[contains(@class, 'obsah')]/table/tbody/tr"):
             relative_url = location.xpath("./td[1]/a/@href").get()
-            
+
             store = {}
             store["ref"] = relative_url.removeprefix("/")
             store["website"] = response.urljoin(relative_url)
 
             store["city"] = location.xpath("./td[2]/text()").get()
             store["postcode"] = location.xpath("./td[4]/text()").get()
-            yield Request(url=store["website"],  callback=self.parse_location, cb_kwargs={"store": store})
-    
+            yield Request(url=store["website"], callback=self.parse_location, cb_kwargs={"store": store})
+
     def parse_location(self, response, store):
         lat_lon_regex = re.compile(r"new google\.maps\.LatLng\(\"(-?\d+\.\d+)\", \"(-?\d+\.\d+)\"\)")
         if match := re.search(lat_lon_regex, response.text):
             store["lat"] = float(match.group(1))
             store["lon"] = float(match.group(2))
-        
+
         contacts = response.xpath("//*[contains(@class, 'kontakt')]")
         if phone := contacts.xpath("//*[contains(@class, 'telefon')]//text()").get():
             store["phone"] = phone
@@ -43,5 +43,5 @@ class CoopCZSpider(Spider):
         # override website if location explicitly provides its own
         if website := contacts.xpath("//*[contains(@class, 'link')]//a/@href").get():
             store["website"] = website
-        
+
         yield Feature(**store)
