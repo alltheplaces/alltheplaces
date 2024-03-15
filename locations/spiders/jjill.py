@@ -62,7 +62,7 @@ class JJillSpider(scrapy.Spider):
 
     @staticmethod
     def sanitise_time(time: str) -> str:
-        if not "am" in time and not "pm" in time:
+        if "am" not in time and "pm" not in time:
             time = time.replace("a", "am").replace("p", "pm")
         time = time.replace(" ", "")
         if ":" not in time:
