@@ -19,7 +19,7 @@ class TescoSpider(scrapy.Spider):
         "hu": "https://tesco.hu/aruhazak/aruhaz/",
         "sk": "https://tesco.sk/obchody/detail-obchodu/",
     }
-    BRANDING_WORDS = ["tesco", "expres", "extra"]  # lowercase
+    BRANDING_WORDS = ["tesco", "expres", "extra", "expressz"]  # lowercase
 
     def start_requests(self):
         for country, website in self.COUNTRY_WEBSITE_MAP.items():
