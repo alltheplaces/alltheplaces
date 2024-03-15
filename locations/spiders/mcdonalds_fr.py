@@ -10,9 +10,9 @@ class McDonaldsFRSpider(WoosmapSpider):
     origin = "https://www.mcdonalds.fr"
 
     def parse_item(self, item, feature, **kwargs):
-        item[
-            "website"
-        ] = f'https://www.mcdonalds.fr/restaurants{feature["properties"]["contact"]["website"]}/{feature["properties"]["store_id"]}'
+        item["website"] = (
+            f'https://www.mcdonalds.fr/restaurants{feature["properties"]["contact"]["website"]}/{feature["properties"]["store_id"]}'
+        )
         item["postcode"] = feature["properties"]["user_properties"]["displayPostCode"]
         item["extras"]["check_date"] = feature["properties"]["last_updated"]
         item["branch"] = item.pop("name").title()
