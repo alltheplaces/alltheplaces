@@ -38,4 +38,7 @@ class KrystalUSSpider(SitemapSpider, StructuredDataSpider):
                 if ":" not in close_time:
                     close_time = close_time.replace("AM", ":00AM").replace("PM", ":00PM")
                 item["opening_hours"].add_range(day[0], open_time, close_time, "%I:%M%p")
+
+        if m := re.search(r"\w\w\.lat=(-?\d+\.\d+);\w\w\.lng=(-?\d+\.\d+)", response.text):
+            item["lat"], item["lon"] = m.groups()
         yield item
