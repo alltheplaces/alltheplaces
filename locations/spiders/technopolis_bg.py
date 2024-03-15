@@ -9,12 +9,12 @@ class TechnopolisBGSpider(scrapy.Spider):
     name = "technopolis_bg"
     item_attributes = {"brand": "Technopolis", "brand_wikidata": "Q28056752", "country": "BG"}
     allowed_domains = ["www.technopolis.bg"]
-    start_urls = ["https://api.technopolis.bg/videoluxcommercewebservices/v2/technopolis-bg/mapbox/customerpreferedstore"]
+    start_urls = [
+        "https://api.technopolis.bg/videoluxcommercewebservices/v2/technopolis-bg/mapbox/customerpreferedstore"
+    ]
     custom_settings = {
-        "ROBOTSTXT_OBEY": False, # No robots.txt
-        "DEFAULT_REQUEST_HEADERS": {
-            'Accept': 'application/json, text/plain, */*'
-        }
+        "ROBOTSTXT_OBEY": False,  # No robots.txt
+        "DEFAULT_REQUEST_HEADERS": {"Accept": "application/json, text/plain, */*"},
     }
 
     def parse(self, response):
