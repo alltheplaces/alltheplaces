@@ -12,4 +12,5 @@ class LaTagliatellaESSpider(AmrestEUSpider):
     def parse_item(self, item, feature, **kwargs):
         # storeLocatorUrl format vary for other Amrest brands
         item["website"] = feature.get("storeLocatorUrl")
+        item["branch"] = item.pop("name")
         yield item

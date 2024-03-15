@@ -73,8 +73,6 @@ class AmrestEUSpider(Spider):
 
         item = DictParser.parse(feature)
 
-        item["branch"] = item.pop("name").removeprefix("KFC ")
-
         item["postcode"] = feature["addressPostalCode"]
         item["housenumber"] = feature.get("addressStreetNo")
         item["street"] = feature["addressStreet"]
