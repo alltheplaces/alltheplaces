@@ -31,6 +31,7 @@ class TescoSpider(scrapy.Spider):
         for store in response.json()["stores"]:
             store["street-address"] = store.pop("address", "")
             item = DictParser.parse(store)
+            item.pop("name")
             item["ref"] = store["goldid"]
             item["lat"] = store.get("gpslat")
             item["lon"] = store.get("gpslng")
