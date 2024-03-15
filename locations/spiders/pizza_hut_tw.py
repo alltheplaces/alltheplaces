@@ -16,6 +16,6 @@ class PizzaHutTWSpider(Spider):
             item["state"] = store.xpath("./m_c/text()").get()
             item["city"] = store.xpath("./m_a/text()").get()
             item["addr_full"] = store.xpath("./addr/text()").get()
-            item["geometry"] = store.xpath("./latlng/text()").get()
+            item["lat"], item["lon"] = store.xpath("./latlng/text()").get().split(",", 1)
             item["phone"] = store.xpath("./ctel/text()").get()
             yield item
