@@ -6,8 +6,8 @@ from scrapy.http import Response
 
 from locations.categories import Access, Categories, Extras, Fuel, FuelCards, apply_category, apply_yes_no
 from locations.items import Feature
-from locations.spiders.avia_de import AVIA_SHARED_ATTRIBUTES
 from locations.pipelines.address_clean_up import merge_address_lines
+from locations.spiders.avia_de import AVIA_SHARED_ATTRIBUTES
 from locations.structured_data_spider import extract_phone
 
 FUELS_AND_SERVICES_MAPPING = {

@@ -4,8 +4,8 @@ from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
 from locations.items import Feature
-from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.pipelines.address_clean_up import merge_address_lines
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.user_agents import BROWSER_DEFAULT
 
 
