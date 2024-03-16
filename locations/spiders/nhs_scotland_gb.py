@@ -6,7 +6,7 @@ from locations.categories import Categories, apply_category
 from locations.google_url import extract_google_position
 from locations.hours import OpeningHours
 from locations.items import Feature
-from locations.spiders.vapestore_gb import clean_address
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 # TODO: if ever the project was to gain the concept of a secondary observation then it
@@ -71,7 +71,7 @@ class NHSScotlandGBSpider(Spider):
         extract_google_position(item, response)
         apply_category(self.services.get(service), item)
         item["name"] = (response.xpath('//input[@id="ServiceName"]/@value').get() or "").strip()
-        item["addr_full"] = clean_address(response.xpath("//address/text()").getall())
+        item["addr_full"] = merge_address_lines(response.xpath("//address/text()").getall())
         item["website"] = item["ref"] = response.url
         if external_url := response.xpath('//a[@class="external"]/@href').get():
             item["website"] = external_url
