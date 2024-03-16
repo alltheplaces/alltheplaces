@@ -21,8 +21,7 @@ from locations.storefinders.geo_me import GeoMeSpider
 from locations.storefinders.kibo import KiboSpider
 from locations.storefinders.limesharp_store_locator import LimesharpStoreLocatorSpider
 from locations.storefinders.localisr import LocalisrSpider
-
-# from locations.storefinders.locally import LocallySpider
+from locations.storefinders.locally import LocallySpider
 from locations.storefinders.metalocator import MetaLocatorSpider
 from locations.storefinders.metizsoft import MetizsoftSpider
 from locations.storefinders.momentfeed import MomentFeedSpider
@@ -191,7 +190,7 @@ class StorefinderDetectorSpider(Spider):
             KiboSpider,
             LimesharpStoreLocatorSpider,
             LocalisrSpider,
-            # LocallySpider
+            LocallySpider,
             MetaLocatorSpider,
             MetizsoftSpider,
             MomentFeedSpider,
