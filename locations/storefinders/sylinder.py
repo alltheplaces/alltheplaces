@@ -10,7 +10,6 @@ from locations.hours import OpeningHours
 # parse_item function to extract additional location data and to
 # make corrections to automatically extracted location data.
 # Ensure you specify the base_url; typically the storefinder url, so you can generate website deep links.
-# TODO: Optionally collect opening hours with further API calls
 
 
 class SylinderSpider(Spider):
