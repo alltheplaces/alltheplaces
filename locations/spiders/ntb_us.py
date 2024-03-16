@@ -5,7 +5,7 @@ from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.dict_parser import DictParser
-from locations.spiders.vapestore_gb import clean_address
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class NationalTireAndBatteryUSSpider(Spider):
@@ -61,7 +61,7 @@ class NationalTireAndBatteryUSSpider(Spider):
         resp = response.json()["data"]["componentStoreDetailsCollection"]
         for location in resp["items"]:
             item = DictParser.parse(location)
-            item["street_address"] = clean_address([location["addressLineOne"], location["addressLineTwo"]])
+            item["street_address"] = merge_address_lines([location["addressLineOne"], location["addressLineTwo"]])
 
             yield item
 
