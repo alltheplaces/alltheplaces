@@ -25,5 +25,7 @@ class KFCATSpider(Spider):
             for day_hours in location.get("opening_hours", []):
                 if day_hours["closed"]:
                     continue
-                item["opening_hours"].add_range(day_hours["day_dayname"]["label"], day_hours["start"], day_hours["stop"])
+                item["opening_hours"].add_range(
+                    day_hours["day_dayname"]["label"], day_hours["start"], day_hours["stop"]
+                )
             yield item
