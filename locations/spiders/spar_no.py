@@ -1,5 +1,6 @@
 from locations.storefinders.sylinder import SylinderSpider
 
+
 class SparNoSpider(SylinderSpider):
     name = "spar_no"
     item_attributes = {"brand": "Spar", "brand_wikidata": "Q610492"}
