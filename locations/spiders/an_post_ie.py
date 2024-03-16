@@ -7,8 +7,8 @@ from scrapy.http import JsonRequest
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.pipelines.address_clean_up import merge_address_lines
 from locations.spiders.central_england_cooperative import set_operator
-from locations.spiders.vapestore_gb import clean_address
 
 
 class AnPostIESpider(Spider):
@@ -31,7 +31,7 @@ class AnPostIESpider(Spider):
         for location in response.json()["d"]:
             item = DictParser.parse(location)
             item["street_address"] = None
-            item["addr_full"] = clean_address(
+            item["addr_full"] = merge_address_lines(
                 [
                     location["Address1"],
                     location["Address2"],

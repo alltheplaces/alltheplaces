@@ -3,7 +3,6 @@ from urllib.parse import urljoin
 from scrapy.spiders import Spider
 
 from locations.items import Feature
-from locations.spiders.vapestore_gb import clean_address
 
 
 class GigglingSquidGBSpider(Spider):
@@ -20,7 +19,7 @@ class GigglingSquidGBSpider(Spider):
             item["lon"] = location["coordinates"]["long"]
             item["branch"] = location["name"]
             item["image"] = urljoin("https://www.gigglingsquid.com/", location["listImage"])
-            item["addr_full"] = clean_address(location["address"])
+            item["addr_full"] = location["address"]
             item["phone"] = location["phone"]
             item["website"] = urljoin("https://www.gigglingsquid.com/restaurant/", location["slug"])
 

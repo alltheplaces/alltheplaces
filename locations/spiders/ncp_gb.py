@@ -6,8 +6,8 @@ from scrapy.spiders import SitemapSpider
 from locations.categories import Categories, Extras, PaymentMethods, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.pipelines.address_clean_up import merge_address_lines
 from locations.spiders.central_england_cooperative import set_operator
-from locations.spiders.vapestore_gb import clean_address
 from locations.user_agents import BROWSER_DEFAULT
 
 PAYMENT = {
@@ -33,7 +33,9 @@ class NCPGB(SitemapSpider):
             data = json.loads(poi_match.group(1))
             for poi in data:
                 item = DictParser.parse(poi)
-                item["street_address"] = clean_address([poi["addressLine1"], poi["addressLine2"], poi["addressLine3"]])
+                item["street_address"] = merge_address_lines(
+                    [poi["addressLine1"], poi["addressLine2"], poi["addressLine3"]]
+                )
                 item["website"] = response.urljoin(poi["clickUrl"])
                 item["ref"] = poi.get("carParkHeadingID")
                 item["name"] = poi.get("carParkTitle")
