@@ -6,7 +6,7 @@ from scrapy.http import JsonRequest
 
 from locations.hours import OpeningHours
 from locations.items import Feature
-from locations.spiders.vapestore_gb import clean_address
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class DepartmentVeteransAffairsSpider(scrapy.Spider):
@@ -73,7 +73,9 @@ class DepartmentVeteransAffairsSpider(scrapy.Spider):
                 "name": place_info["name"],
                 "lat": place_info["lat"],
                 "lon": place_info["long"],
-                "street_address": clean_address([addr.get("address1"), addr.get("address2"), addr.get("address3")]),
+                "street_address": merge_address_lines(
+                    [addr.get("address1"), addr.get("address2"), addr.get("address3")]
+                ),
                 "city": addr.get("city"),
                 "state": addr.get("state"),
                 "country": "US",

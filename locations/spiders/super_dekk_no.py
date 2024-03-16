@@ -4,7 +4,7 @@ import chompjs
 from scrapy import Selector, Spider
 
 from locations.items import Feature
-from locations.spiders.vapestore_gb import clean_address
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class SuperDekkNOSpider(Spider):
@@ -24,6 +24,6 @@ class SuperDekkNOSpider(Spider):
             sel = Selector(text=popup_html)
 
             item["ref"] = item["website"] = response.urljoin(sel.xpath("//a/@href").get())
-            item["addr_full"] = clean_address(sel.xpath("/html/body/text()").getall())
+            item["addr_full"] = merge_address_lines(sel.xpath("/html/body/text()").getall())
 
             yield item

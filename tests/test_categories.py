@@ -3,11 +3,13 @@ from locations.categories import (
     Clothes,
     Fuel,
     HealthcareSpecialities,
+    PaymentMethods,
     apply_category,
     apply_clothes,
     apply_healthcare_specialities,
     apply_yes_no,
     get_category_tags,
+    map_payment,
 )
 from locations.items import Feature
 
@@ -110,3 +112,25 @@ def test_healthcare_specialities():
 
     apply_healthcare_specialities([HealthcareSpecialities.OCCUPATIONAL], item)
     assert item["extras"] == {"healthcare:speciality": "occupational"}
+
+
+def test_map_payment():
+    item = Feature()
+    map_payment(item, "americanexpress", PaymentMethods)
+    assert item["extras"].get("payment:american_express")
+
+    item = Feature()
+    map_payment(item, "american express", PaymentMethods)
+    assert item["extras"].get("payment:american_express")
+
+    item = Feature()
+    map_payment(item, "American Express", PaymentMethods)
+    assert item["extras"].get("payment:american_express")
+
+    item = Feature()
+    map_payment(item, "american_express", PaymentMethods)
+    assert item["extras"].get("payment:american_express")
+
+    item = Feature()
+    map_payment(item, "American_Express", PaymentMethods)
+    assert not item["extras"].get("payment:american_express")

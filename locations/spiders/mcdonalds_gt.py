@@ -1,7 +1,11 @@
-import re
+import json
+from typing import Any
 
 import scrapy
+from scrapy.http import Response
 
+from locations.categories import Extras, apply_yes_no
+from locations.hours import DAYS_ES, OpeningHours, sanitise_day
 from locations.items import Feature
 from locations.spiders.mcdonalds import McDonaldsSpider
 
@@ -9,55 +13,28 @@ from locations.spiders.mcdonalds import McDonaldsSpider
 class McDonaldsGTSpider(scrapy.Spider):
     name = "mcdonalds_gt"
     item_attributes = McDonaldsSpider.item_attributes
-    allowed_domains = ["mcdonalds.com.gt"]
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    acustom_settings = {"ROBOTSTXT_OBEY": False}
+    start_urls = ["https://mcdonalds.com.gt/restaurantes"]
 
-    def start_requests(self):
-        url = "https://mcdonalds.com.gt/wp-admin/admin-ajax.php"
-        headers = {
-            "Accept-Language": "en-US,en;q=0.9",
-            "Origin": "https://mcdonalds.com.gt",
-            "Accept-Encoding": "gzip, deflate, br",
-            "Accept": "*/*",
-            "Referer": "https://mcdonalds.com.gt/ubicaciones-mc/",
-            "Content-Type": "application/x-www-form-urlencoded",
-            "X-Requested-With": "XMLHttpRequest",
-        }
-        form_data = {"action": "obtener_marcadores"}
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        data = json.loads(response.xpath("//@data-page").get())
+        for location in data["props"]["restaurants"]:
+            item = Feature()
+            item["ref"] = location["id"]
+            item["branch"] = location["name"]
+            item["addr_full"] = location["address"]
+            item["email"] = location["email"]
+            item["lat"] = location["latitude"]
+            item["lon"] = location["longitude"]
+            apply_yes_no(Extras.DELIVERY, item, "Delivery" in location["categorias"])
 
-        yield scrapy.http.FormRequest(
-            url=url,
-            method="POST",
-            formdata=form_data,
-            headers=headers,
-            callback=self.parse,
-        )
+            for oh_rules in (
+                location["horarios"].values() if isinstance(location["horarios"], dict) else location["horarios"]
+            ):
+                if oh_rules["name"] == "Restaurante":
+                    item["opening_hours"] = OpeningHours()
+                    for rule in oh_rules["horarios"]:
+                        if day := sanitise_day(rule["description"], DAYS_ES):
+                            item["opening_hours"].add_range(day, rule["start_time"], rule["end_time"])
 
-    def parse_latlon(self, data):
-        match = re.search(r"(.*)(,<div)", data)
-        data = match.groups()[0]
-        lat = data.split(",")[0].strip()
-        lon = data.split(",")[1].strip()
-        return lat, lon
-
-    def parse_address(self, data):
-        match = re.search(r"(McDonald&#039;s )(.*)", data)
-        return match.groups()[1]
-
-    def parse(self, response):
-        stores = response.text.split("|")
-        index = 0
-        for item in stores:
-            lat, lon = self.parse_latlon(item)
-            address = self.parse_address(item)
-            properties = {
-                "ref": index,
-                "name": "Mcdonald's",
-                "addr_full": address,
-                "lat": lat,
-                "lon": lon,
-            }
-
-            index = index + 1
-
-            yield Feature(**properties)
+            yield item

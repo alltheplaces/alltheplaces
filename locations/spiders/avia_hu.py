@@ -7,11 +7,12 @@ from scrapy.http import Response
 
 from locations.categories import Categories, Extras, Fuel, apply_category, apply_yes_no
 from locations.items import Feature
+from locations.spiders.avia_de import AVIA_SHARED_ATTRIBUTES
 
 
 class AviaHUSpider(Spider):
     name = "avia_hu"
-    item_attributes = {"brand": "Avia", "brand_wikidata": "Q300147"}
+    item_attributes = AVIA_SHARED_ATTRIBUTES
     start_urls = ["https://www.avia.hu/kapcsolat/toltoallomasok/"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:

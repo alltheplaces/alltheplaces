@@ -2,7 +2,6 @@ from scrapy import FormRequest, Spider
 
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
-from locations.spiders.vapestore_gb import clean_address
 
 COUNTRY_MAP = {101: "Botswana", 155: "Lesotho", 182: "Namibia", 73: "South Africa", 219: "Swaziland"}
 
@@ -33,7 +32,7 @@ class LewisStoresSpider(Spider):
                     location[k] = None
 
             location["country"] = COUNTRY_MAP.get(location["CountryId"])
-            location["street_address"] = clean_address(
+            location["street_address"] = (
                 location.pop("Address").replace(location["City"], "").replace(location["country"], "")
             )
             location["phone"] = "; ".join(filter(None, [location.pop("Phone"), location["Phone2"], location["Phone3"]]))
