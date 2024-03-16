@@ -5,9 +5,14 @@ from locations.categories import Categories
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
+
 class DuluxDecoratorCentreGBSpider(Spider):
     name = "dulux_decorator_centre_gb"
-    item_attributes = {"brand": "Dulux Decorator Centre", "brand_wikidata": "Q115593557", "extras": Categories.SHOP_PAINT.value}
+    item_attributes = {
+        "brand": "Dulux Decorator Centre",
+        "brand_wikidata": "Q115593557",
+        "extras": Categories.SHOP_PAINT.value,
+    }
     allowed_domains = ["www.duluxdecoratorcentre.co.uk"]
     start_urls = ["https://www.duluxdecoratorcentre.co.uk/store/getstores"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
@@ -20,7 +25,9 @@ class DuluxDecoratorCentreGBSpider(Spider):
         for location in response.json()["Points"]:
             item = DictParser.parse(location)
             store_details = Selector(text=location["FormattedAddress"])
-            item["street_address"] = store_details.xpath('//div[contains(@class, "store-street-address")]/text()').get("").strip()
+            item["street_address"] = (
+                store_details.xpath('//div[contains(@class, "store-street-address")]/text()').get("").strip()
+            )
             item["city"] = store_details.xpath('//div[contains(@class, "store-town")]/text()').get("").strip()
             item["state"] = store_details.xpath('//div[contains(@class, "store-country")]/text()').get("").strip()
             item["postcode"] = store_details.xpath('//div[@class="store-info"]/text()').get("").strip()
