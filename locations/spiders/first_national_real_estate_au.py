@@ -4,7 +4,7 @@ from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.items import Feature
-from locations.spiders.vapestore_gb import clean_address
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class FirstNationalRealEstateAUSpider(Spider):
@@ -38,7 +38,7 @@ class FirstNationalRealEstateAUSpider(Spider):
             item["website"] = response.urljoin(location["office_link"])
             item["phone"] = location["office_phone"]
             item["email"] = location["office_email"]
-            item["street_address"] = clean_address(
+            item["street_address"] = merge_address_lines(
                 [location["office_address_line_1"], location["office_address_line_2"]]
             )
             item["city"] = location["office_suburb"]
