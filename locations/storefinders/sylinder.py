@@ -3,6 +3,7 @@ from scrapy.http import JsonRequest
 
 # from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
+from locations.hours import OpeningHours
 
 # To use this store finder, specify the brand/application key using
 # the "app_key" attribute of this class. You may need to define a
@@ -20,7 +21,7 @@ class SylinderSpider(Spider):
     def start_requests(self):
         if self.base_url is None:
             self.logger.warning("Specify self.base_url to detect websites")
-        yield JsonRequest(url=f"https://api.ngdata.no/sylinder/stores/v1/basic-info?chainId={self.app_key}")
+        yield JsonRequest(url=f"https://api.ngdata.no/sylinder/stores/v1/extended-info?chainId={self.app_key}")
 
     def parse(self, response, **kwargs):
         for location in response.json():
@@ -42,11 +43,20 @@ class SylinderSpider(Spider):
             if self.base_url is not None:
                 item["website"] = self.base_url + location["storeDetails"]["slug"]
 
-            # TODO: Full opening hours available under https://api.ngdata.no/sylinder/stores/v1/extended-info/7080000008896?
-            # if location.get("openingHours"):
-            #     item["opening_hours"] = OpeningHours()
-            #     item["opening_hours"].parse
-            #     (location["openingHours"])
+            if location.get("openingHours"):
+                item["opening_hours"] = OpeningHours()
+
+                # For now, not collecting special opening hours
+                # print(location["openingHours"]["upcomingSpecialOpeningHours"])
+
+                for day in location["openingHours"]["upcomingOpeningHours"]:
+                    if day["closed"]:
+                        continue
+
+                    if day["isSpecial"]:
+                        continue
+
+                    item["opening_hours"].add_range(day["abbreviatedDayOfWeek"], day["opens"], day["closes"])
 
             yield from self.parse_item(item, location) or []
 
