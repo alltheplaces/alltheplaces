@@ -2,7 +2,7 @@ from scrapy import Spider
 from scrapy.http import JsonRequest
 
 from locations.dict_parser import DictParser
-
+from locations.geo import point_locations
 
 # To use this spider, either specify the start_urls or
 # pass in a coordinates file.
