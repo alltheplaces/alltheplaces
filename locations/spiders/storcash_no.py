@@ -1,7 +1,7 @@
 from scrapy.http import JsonRequest
 
-from locations.storefinders.sylinder import SylinderSpider
 from locations.categories import Categories
+from locations.storefinders.sylinder import SylinderSpider
 
 
 class StorcashNoSpider(SylinderSpider):
