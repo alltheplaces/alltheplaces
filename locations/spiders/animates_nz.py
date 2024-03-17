@@ -1,5 +1,3 @@
-import json
-
 from locations.categories import Categories
 from locations.storefinders.aheadworks import AheadworksSpider
 
