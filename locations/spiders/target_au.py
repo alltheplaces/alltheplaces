@@ -5,7 +5,7 @@ from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
 from locations.items import Feature
-from locations.spiders.vapestore_gb import clean_address
+from locations.pipelines.address_clean_up import merge_address_lines
 from locations.user_agents import BROWSER_DEFAULT
 
 
@@ -28,7 +28,7 @@ class TargetAUSpider(CrawlSpider):
                 "name": row["name"],
                 "lat": row["lat"],
                 "lon": row["lng"],
-                "street_address": clean_address(body.xpath('//*[@itemprop="streetAddress"]//text()').getall()),
+                "street_address": merge_address_lines(body.xpath('//*[@itemprop="streetAddress"]//text()').getall()),
                 "city": body.xpath('//*[@itemprop="addressLocality"]/text()').get(),
                 "state": body.xpath('//*[@itemprop="addressRegion"]/text()').get(),
                 "postcode": body.xpath('//*[@itemprop="postalCode"]/text()').get(),

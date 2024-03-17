@@ -13,6 +13,7 @@ class KFCHRSpider(AmrestEUSpider):
     api_auth_source = "WEB_KFC"
 
     def parse_item(self, item, location):
+        item["branch"] = item.pop("name").removeprefix("KFC ")
         item["website"] = (
             "https://kfc.hr/en/restaurants/"
             + unidecode(item["name"]).lower().replace(" - ", "-").replace(" ", "-")

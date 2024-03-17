@@ -3,7 +3,7 @@ from scrapy.http import JsonRequest
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
-from locations.spiders.vapestore_gb import clean_address
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class BaptistHealthArkansasUSSpider(scrapy.Spider):
@@ -37,7 +37,7 @@ class BaptistHealthArkansasUSSpider(scrapy.Spider):
                 item["ref"] = j["permalink"]
                 item["website"] = j["permalink"]
                 item["image"] = j["image"]
-                item["street_address"] = clean_address([j["address_1"], j["address_2"]])
+                item["street_address"] = merge_address_lines([j["address_1"], j["address_2"]])
                 item["city"] = j["city"]
                 item["state"] = j["state"]
                 item["postcode"] = j["zip_code"]

@@ -9,10 +9,16 @@ class TechnopolisBGSpider(scrapy.Spider):
     name = "technopolis_bg"
     item_attributes = {"brand": "Technopolis", "brand_wikidata": "Q28056752", "country": "BG"}
     allowed_domains = ["www.technopolis.bg"]
-    start_urls = ["https://www.technopolis.bg/bg/mapbox/preferedstores.json"]
+    start_urls = [
+        "https://api.technopolis.bg/videoluxcommercewebservices/v2/technopolis-bg/mapbox/customerpreferedstore"
+    ]
+    custom_settings = {
+        "ROBOTSTXT_OBEY": False,  # No robots.txt
+        "DEFAULT_REQUEST_HEADERS": {"Accept": "application/json, text/plain, */*"},
+    }
 
     def parse(self, response):
-        for location in response.json()["features"]:
+        for location in response.json()["storesMap"]["features"]:
             item = Feature()
             item["ref"] = location["id"]
             item["name"] = location["properties"]["name"]
@@ -21,7 +27,7 @@ class TechnopolisBGSpider(scrapy.Spider):
             item["city"] = location["properties"]["city"]
             item["lat"] = location["geometry"]["coordinates"][1]
             item["lon"] = location["geometry"]["coordinates"][0]
-            item["image"] = f"https://www.technopolis.bg/{location['image']}"
+            item["image"] = f"https://api.technopolis.bg{location['image']}"
 
             item["opening_hours"] = OpeningHours()
 

@@ -4,7 +4,7 @@ from scrapy import Spider
 from scrapy.http import JsonRequest
 
 from locations.dict_parser import DictParser
-from locations.spiders.vapestore_gb import clean_address
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class SleepOutfittersUSSpider(Spider):
@@ -35,7 +35,7 @@ class SleepOutfittersUSSpider(Spider):
     def parse(self, response, **kwargs):
         for location in response.json()["items"]:
             item = DictParser.parse(location)
-            item["street_address"] = clean_address([item.pop("addr_full", None), location["address2"]])
+            item["street_address"] = merge_address_lines([item.pop("addr_full", None), location["address2"]])
             item["image"] = location.get("storefront", {}).get("meta", {}).get("download_url")
             item["branch"] = item.pop("name", "").replace("Sleep Outfitters", "").strip(", !")
 

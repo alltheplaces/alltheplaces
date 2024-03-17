@@ -5,7 +5,7 @@ from scrapy.spiders import SitemapSpider
 
 from locations.hours import OpeningHours
 from locations.items import Feature
-from locations.spiders.vapestore_gb import clean_address
+from locations.pipelines.address_clean_up import merge_address_lines
 from locations.structured_data_spider import extract_phone
 
 
@@ -24,8 +24,8 @@ class LesliesPoolmartUSSpider(SitemapSpider):
         item["website"] = response.url
         extract_phone(item, response)
 
-        item["addr_full"] = clean_address(
-            ", ".join(response.xpath('//h5[contains(@class, "store-detail-address")]/span/text()').getall())
+        item["addr_full"] = merge_address_lines(
+            response.xpath('//h5[contains(@class, "store-detail-address")]/span/text()').getall()
         )
 
         item["opening_hours"] = OpeningHours()

@@ -1,3 +1,4 @@
+from locations.categories import Categories
 from locations.storefinders.agile_store_locator import AgileStoreLocatorSpider
 
 
@@ -6,7 +7,4 @@ class ShopMetroPHSpider(AgileStoreLocatorSpider):
     allowed_domains = [
         "shopmetro.ph",
     ]
-    item_attributes = {
-        "brand_wikidata": "Q23808789",
-        "brand": "ShopMetro",
-    }
+    item_attributes = {"brand_wikidata": "Q23808789", "brand": "ShopMetro", "extras": Categories.SHOP_SUPERMARKET.value}

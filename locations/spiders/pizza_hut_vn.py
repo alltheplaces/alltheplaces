@@ -4,7 +4,7 @@ from scrapy.http import JsonRequest
 from locations.categories import Categories, apply_category
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
-from locations.spiders.vapestore_gb import clean_address
+from locations.pipelines.address_clean_up import clean_address
 
 
 class PizzaHutVNSpider(scrapy.Spider):
@@ -27,7 +27,7 @@ class PizzaHutVNSpider(scrapy.Spider):
             item["lat"], item["lon"] = store.get("location", "").split(",")
             item["name"] = store.get("name_vi")
             item["extras"]["name:en"] = store.get("name_en")
-            item["addr_full"] = clean_address(store.get("add_vn"))
+            item["addr_full"] = store.get("add_vn")
             item["extras"]["addr:full:en"] = clean_address(store.get("add_en"))
             item["website"] = "https://pizzahut.vn/"
             if store.get("Open_Time") and store.get("Close_Time"):
