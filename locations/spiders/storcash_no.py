@@ -1,4 +1,5 @@
 from locations.storefinders.sylinder import SylinderSpider
+from scrapy.http import JsonRequest
 
 
 class StorcashNoSpider(SylinderSpider):
@@ -21,7 +22,7 @@ class StorcashNoSpider(SylinderSpider):
 
     def parse(self, response, **kwargs):
         for location in response.json():
-            if not location["chainId"] in self.app_keys:
+            if not location["storeDetails"]["chainId"] in self.app_keys:
                 continue
 
-            yield from parse_location(location) or []
+            yield from self.parse_location(location) or []

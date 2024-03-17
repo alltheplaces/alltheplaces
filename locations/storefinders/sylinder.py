@@ -24,7 +24,7 @@ class SylinderSpider(Spider):
 
     def parse(self, response, **kwargs):
         for location in response.json():
-            yield from parse_location(location) or []
+            yield from self.parse_location(location) or []
 
     def parse_location(self, location):
         item = DictParser.parse(location["storeDetails"])
