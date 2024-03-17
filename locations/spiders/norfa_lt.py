@@ -23,7 +23,7 @@ class NorfaLT(Spider):
             item["phone"] = location.xpath(
                 "div/div[@class='c-shop-deatiled']/p/a[contains(@href, 'tel:')].text()"
             ).get()
-            item["name"] = location.xpath("div/div[@class='c-shop-deatiled']/p/a[contains(@href, 'tel:')].text()").get()
+            item["name"] = location.xpath("div/div[@class='c-shop-deatiled']/p/a[contains(@href, 'tel:')]/text()").get()
 
             # TODO: Is it worth mapping any of
             # <table class="c-services-table">
