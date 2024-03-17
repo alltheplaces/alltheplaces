@@ -1,5 +1,5 @@
-from locations.hours import OpeningHours
 from locations.categories import Categories
+from locations.hours import OpeningHours
 from locations.storefinders.easylocator import EasyLocatorSpider
 
 
