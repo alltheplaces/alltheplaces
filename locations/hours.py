@@ -171,22 +171,22 @@ DAYS_IL = {
 }
 
 DAYS_LT = {
-  "pirmadienis": "Mo",
-  "antradienis": "Tu",
-  "trečiadienis": "We",
-  "ketvirtadienis": "Th",
-  "penktadienis": "Fr",
-  "šeštadienis": "Sa",
-  "sekmadienis": "Su",
-  "I": "Mo",
-  "II": "Tu",
-  "III": "We",
-  "IV": "Th",
-  "V": "Fr",
-  "VI": "Sa",
-  "VII": "Su",
-  "Vi": "Sa",
-  "Vii": "Su",
+    "pirmadienis": "Mo",
+    "antradienis": "Tu",
+    "trečiadienis": "We",
+    "ketvirtadienis": "Th",
+    "penktadienis": "Fr",
+    "šeštadienis": "Sa",
+    "sekmadienis": "Su",
+    "I": "Mo",
+    "II": "Tu",
+    "III": "We",
+    "IV": "Th",
+    "V": "Fr",
+    "VI": "Sa",
+    "VII": "Su",
+    "Vi": "Sa",
+    "Vii": "Su",
 }
 
 DAYS_SE = {

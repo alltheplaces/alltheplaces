@@ -1,7 +1,8 @@
 from scrapy import Spider
 
-from locations.items import Feature
 from locations.hours import DAYS_LT, OpeningHours
+from locations.items import Feature
+
 
 class NorfaLT(Spider):
     name = "norfa_lt"
@@ -19,16 +20,18 @@ class NorfaLT(Spider):
             hours_str = location.xpath("*[@class='c-shop__hours']/text()").get().replace(".", ":")
             item["opening_hours"].add_ranges_from_string(hours_str, days=DAYS_LT)
 
-            item["phone"] = location.xpath("div/div[@class='c-shop-deatiled']/p/a[contains(@href, 'tel:')].text()").get()
+            item["phone"] = location.xpath(
+                "div/div[@class='c-shop-deatiled']/p/a[contains(@href, 'tel:')].text()"
+            ).get()
             item["name"] = location.xpath("div/div[@class='c-shop-deatiled']/p/a[contains(@href, 'tel:')].text()").get()
 
             # TODO: Is it worth mapping any of
-            # <table class="c-services-table">                                             
+            # <table class="c-services-table">
             # <td><i class="icon-fresh-food"></i></td>
             # <td>Karštų gaminių skyrius</td>
             # <td><i class="icon-fish"></i></td>
             # <td>Šviežios žuvies skyrius</td>
             # h<td><i class="icon-conditery"></i></td>
             # <td>Norfos kepyklėlė</td>
-                                                            
+
             yield item
