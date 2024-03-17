@@ -3,9 +3,10 @@ from scrapy.http import JsonRequest
 
 from locations.dict_parser import DictParser
 
+
 # To use this spider, either specify the start_urls or
 # pass in a coordinates file.
-# 
+#
 # Example: https://easylocator.net/ajax/search_by_lat_lon_geojson/gigiscupcakesusa/-37.86/144.9717/0/10/null/null
 class EasyLocatorSpider(Spider):
     dataset_attributes = {"source": "api", "api": "easylocator.net"}
@@ -28,8 +29,8 @@ class EasyLocatorSpider(Spider):
 
     def parse(self, response):
         for location in response.json()["physical"]:
-            item = DictParser.parse(location['properties'])
-            item['postcode'] = location['properties']['zip_postal_code']
+            item = DictParser.parse(location["properties"])
+            item["postcode"] = location["properties"]["zip_postal_code"]
             yield from self.parse_item(item, location) or []
 
     def parse_item(self, item, location):
