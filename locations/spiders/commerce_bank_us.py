@@ -1,4 +1,4 @@
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.storefinders.rio_seo_spider import RioSeoSpider
 
 
@@ -13,8 +13,8 @@ class CommerceBankUSSpider(RioSeoSpider):
     def post_process_feature(self, feature, location):
         # TODO: Is name reliable?
         if feature["name"] == "Commerce Bank ATM":
-            feature["extras"] = Categories.ATM.value
+            apply_category(Categories.ATM, feature)
         else:
-            feature["extras"] = Categories.BANK.value
+            apply_category(Categories.BANK, feature)
 
         yield feature
