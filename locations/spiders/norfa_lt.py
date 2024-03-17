@@ -21,9 +21,8 @@ class NorfaLT(Spider):
             item["opening_hours"].add_ranges_from_string(hours_str, days=DAYS_LT)
 
             item["phone"] = location.xpath(
-                "div/div[@class='c-shop-deatiled']/p/a[contains(@href, 'tel:')].text()"
+                "div/div[@class='c-shop-deatiled']/p/a[contains(@href, 'tel:')]/text()"
             ).get()
-            item["name"] = location.xpath("div/div[@class='c-shop-deatiled']/p/a[contains(@href, 'tel:')]/text()").get()
 
             # TODO: Is it worth mapping any of
             # <table class="c-services-table">
