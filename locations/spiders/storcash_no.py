@@ -6,14 +6,14 @@ class StorcashNoSpider(SylinderSpider):
     item_attributes = {"brand": "Storcash"}
     base_url = "https://storcash.no/#"  # Note: Doesn't use the same storefinder
     app_keys = [
-        "5000", # Bergen Storcash Storcash (NO)
-        "5020", # Sola Storcash
-        "5030", # Haugaland Storcash
-        "5040", # Kjørbekk Storcash
-        "5060", # Tiller Storcash
-        "5070", # Sørlandet Storcash
-        "5080", # Buskerud Storcash
-        "5090", # Bodø Storcash
+        "5000",  # Bergen Storcash Storcash (NO)
+        "5020",  # Sola Storcash
+        "5030",  # Haugaland Storcash
+        "5040",  # Kjørbekk Storcash
+        "5060",  # Tiller Storcash
+        "5070",  # Sørlandet Storcash
+        "5080",  # Buskerud Storcash
+        "5090",  # Bodø Storcash
     ]
 
     def start_requests(self):
@@ -25,5 +25,3 @@ class StorcashNoSpider(SylinderSpider):
                 continue
 
             yield from parse_location(location) or []
-
-
