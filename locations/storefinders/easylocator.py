@@ -1,6 +1,7 @@
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
+from locations.automatic_spider_generator import AutomaticSpiderGenerator, DetectionRequestRule
 from locations.dict_parser import DictParser
 from locations.geo import point_locations
 
@@ -9,7 +10,14 @@ from locations.geo import point_locations
 # pass in a coordinates file.
 #
 # Example: https://easylocator.net/ajax/search_by_lat_lon_geojson/gigiscupcakesusa/-37.86/144.9717/0/10/null/null
-class EasyLocatorSpider(Spider):
+class EasyLocatorSpider(Spider, AutomaticSpiderGenerator):
+    detection_rules = [
+        DetectionRequestRule(
+            # Path appears to be fixed per:
+            # Example: https://gigiscupcakesusa.com/pages/stores-in-store-pickup
+            url=r"^https?:\/\/easylocator.net\/ajax\/search_by_lat_lon_geojson\/(?P<api_key>[\w]+)"
+        ),
+    ]
     dataset_attributes = {"source": "api", "api": "easylocator.net"}
     allowed_domains = ["easylocator.net"]
     searchable_points_files = []
