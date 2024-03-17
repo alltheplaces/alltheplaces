@@ -1,9 +1,9 @@
+import chompjs
 from scrapy import Spider
 
 from locations.hours import DAYS_LT, OpeningHours
 from locations.items import Feature
 
-import chompjs
 
 class NorfaLT(Spider):
     name = "norfa_lt"
@@ -11,9 +11,13 @@ class NorfaLT(Spider):
     item_attributes = {"brand": "Norfa", "brand_wikidata": "Q1998983"}
 
     def parse(self, response):
-        js = response.xpath("//script[contains(text(), '_markers_data_main ')]").get().replace(" var _markers_data_main = ", "")
+        js = (
+            response.xpath("//script[contains(text(), '_markers_data_main ')]")
+            .get()
+            .replace(" var _markers_data_main = ", "")
+        )
         data = chompjs.parse_js_object(js)
-        
+
         for location in response.xpath("//div[contains(@class, 'c-shop shop-')]"):
             item = Feature()
             item["ref"] = location.xpath("@class").get().split("c-shop shop-")[1]
