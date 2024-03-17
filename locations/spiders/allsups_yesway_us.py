@@ -3,7 +3,7 @@ import scrapy
 from locations.categories import Extras, Fuel, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_FULL, OpeningHours
-from locations.spiders.vapestore_gb import clean_address
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class AllsupsYeswayUSSpider(scrapy.Spider):
@@ -23,7 +23,9 @@ class AllsupsYeswayUSSpider(scrapy.Spider):
             item = DictParser.parse(store["acf"])
             item["ref"] = store["acf"]["internal_store_code"]
             item["phone"] = store["acf"]["primary_phone"]
-            item["street_address"] = clean_address([store["acf"]["address_line_1"], store["acf"]["address_line_2"]])
+            item["street_address"] = merge_address_lines(
+                [store["acf"]["address_line_1"], store["acf"]["address_line_2"]]
+            )
 
             if brand := self.BRANDS.get(store["acf"]["business_name"]):
                 item.update(brand)

@@ -4,7 +4,7 @@ from scrapy import Spider
 from scrapy.http import Response
 
 from locations.items import Feature
-from locations.spiders.vapestore_gb import clean_address
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class BadcockUSSpider(Spider):
@@ -21,7 +21,7 @@ class BadcockUSSpider(Spider):
             item["lat"] = location.xpath(".//@data-latitude").get()
             item["lon"] = location.xpath(".//@data-longitude").get()
             item["street_address"] = location.xpath('.//div[@class="short-description"]/p[1]/text()').get()
-            item["addr_full"] = clean_address(
+            item["addr_full"] = merge_address_lines(
                 location.xpath('.//div[@class="short-description"]/p[position()<3]/text()').getall()
             )
 

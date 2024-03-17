@@ -5,7 +5,7 @@ from scrapy.http import Response
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
-from locations.spiders.vapestore_gb import clean_address
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class BenchmarxGBSpider(Spider):
@@ -20,7 +20,7 @@ class BenchmarxGBSpider(Spider):
 
             item = DictParser.parse(location)
             item["branch"] = item.pop("name")
-            item["street_address"] = clean_address(
+            item["street_address"] = merge_address_lines(
                 [location["line1"], location["line2"], location["line3"], location["line4"]]
             )
             item["website"] = "https://www.benchmarxkitchens.co.uk/branches/{}".format(location["slug"])

@@ -3,7 +3,7 @@ from scrapy.http import JsonRequest
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
-from locations.spiders.vapestore_gb import clean_address
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class SparNorthernIrelandGBSpider(Spider):
@@ -22,7 +22,7 @@ class SparNorthernIrelandGBSpider(Spider):
 
     def parse(self, response, **kwargs):
         for location in response.json()["storeList"]:
-            location["street_address"] = clean_address(
+            location["street_address"] = merge_address_lines(
                 [location["Address1"], location["Address2"], location["Address3"]]
             )
             item = DictParser.parse(location)

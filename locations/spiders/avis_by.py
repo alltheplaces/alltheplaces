@@ -5,7 +5,6 @@ import scrapy
 from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.spiders.avis import AvisSpider
-from locations.spiders.vapestore_gb import clean_address
 
 
 class AvisBYSpider(scrapy.Spider):
@@ -23,7 +22,7 @@ class AvisBYSpider(scrapy.Spider):
                 or location_details.xpath("./text()").get()
             )
             item["street_address"], item["phone"] = address.split("+") if "+" in address else (address, None)
-            item["street_address"] = clean_address(item["street_address"]).replace("Adress:", "")
+            item["street_address"] = item["street_address"].replace("Adress:", "")
             if "available on request" in item["street_address"]:
                 continue
             if not item["phone"]:
