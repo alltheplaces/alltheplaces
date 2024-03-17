@@ -4,7 +4,7 @@ import scrapy
 
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
-from locations.spiders.vapestore_gb import clean_address
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class AfcUrgentCareSpider(scrapy.Spider):
@@ -27,7 +27,7 @@ class AfcUrgentCareSpider(scrapy.Spider):
             "lat": obj["lat"],
             "lon": obj["lon"],
             "phone": obj["phonemap_e164"].get("phone"),
-            "street_address": clean_address([obj["street"], obj["street2"]]),
+            "street_address": merge_address_lines([obj["street"], obj["street2"]]),
             "name": obj["location_name"],
             "city": obj["city"],
             "state": obj["state"],

@@ -7,7 +7,7 @@ from locations.dict_parser import DictParser
 from locations.geo import point_locations
 from locations.hours import DAYS_BY_FREQUENCY, OpeningHours, sanitise_day
 from locations.items import Feature
-from locations.spiders.vapestore_gb import clean_address
+from locations.pipelines.address_clean_up import merge_address_lines
 
 # Source code for the WP Store Locator API call used by this spider:
 # https://github.com/wp-plugins/wp-store-locator/blob/master/frontend/wpsl-ajax-functions.php
@@ -80,7 +80,7 @@ class WPStoreLocatorSpider(Spider):
             )
         for location in response.json():
             item = DictParser.parse(location)
-            item["street_address"] = clean_address([location.get("address"), location.get("address2")])
+            item["street_address"] = merge_address_lines([location.get("address"), location.get("address2")])
             item["name"] = location["store"]
             # If we have preconfigured the exact days to use, start there
             if self.days is not None:

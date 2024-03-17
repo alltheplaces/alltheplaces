@@ -4,7 +4,7 @@ from scrapy import Request, Spider
 
 from locations.hours import DAYS_FR, OpeningHours
 from locations.items import Feature
-from locations.spiders.vapestore_gb import clean_address
+from locations.pipelines.address_clean_up import clean_address
 
 
 class CoraSpider(Spider):
@@ -26,7 +26,7 @@ class CoraSpider(Spider):
         item["street_address"] = clean_address(street_address)
         item["postcode"] = postcode_city.strip().split(" ", maxsplit=1)[0]
         item["city"] = postcode_city.strip().split(" ", maxsplit=1)[1]
-        item["housenumber"] = clean_address(street_address).split(", ")[1]
+        item["housenumber"] = item["street_address"].split(", ")[1]
         item["phone"] = tel.replace("Tél :", "").strip()
         item["opening_hours"] = self.parse_opening_hours(store_info)
         item["website"] = response.url

@@ -2,7 +2,6 @@ from scrapy import Spider
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.items import Feature
-from locations.spiders.vapestore_gb import clean_address
 
 
 class CentraIESpider(Spider):
@@ -16,7 +15,7 @@ class CentraIESpider(Spider):
             item = Feature()
             item["ref"] = location.xpath('./div[@class="shop-info"]/a/@href').re_first(r"_(\d+)$")
             item["name"] = location.xpath('.//h4[@class="shop-title"]/text()').get()
-            item["addr_full"] = clean_address(location.xpath('.//p[@class="shop-address"]/text()').get())
+            item["addr_full"] = location.xpath('.//p[@class="shop-address"]/text()').get()
             item["phone"] = location.xpath('.//li[@class="call"]/a/@href').get().replace("tel:", "")
             item["lat"], item["lon"] = (
                 location.xpath('.//li[@class="directions"]/a/@onclick')

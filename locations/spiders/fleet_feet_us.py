@@ -3,7 +3,7 @@ import re
 from scrapy import Spider
 
 from locations.items import Feature
-from locations.spiders.vapestore_gb import clean_address
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class FleetFeetUSSpider(Spider):
@@ -21,11 +21,11 @@ class FleetFeetUSSpider(Spider):
 
             if addr := location.xpath('./p[@class="address"]/text()').getall():
                 if m := re.search(r"([. \w]+), (\w\w) (\d+)", addr[1].strip()):
-                    item["street_address"] = clean_address(addr[0])
+                    item["street_address"] = addr[0]
                     item["city"] = m.group(1)
                     item["state"] = m.group(2)
                     item["postcode"] = m.group(3)
                 else:
-                    item["street_address"] = clean_address([addr[0], addr[1]])
+                    item["street_address"] = merge_address_lines([addr[0], addr[1]])
 
             yield item

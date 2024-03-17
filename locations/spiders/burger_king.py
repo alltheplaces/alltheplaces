@@ -161,13 +161,15 @@ class BurgerKingSpider(scrapy.Spider):
             yield self.make_request(lat, lon, "US", 128000, 20000, us_endpoint)
 
     store_locator_templates = {
+        "AT": "https://www.burgerking.at/store-locator/store/{}",
         "CA": "https://www.burgerking.ca/store-locator/store/{}",
+        "CH": "https://www.burger-king.ch/store-locator/store/{}",
         "DE": "https://www.burgerking.de/store-locator/store/{}",
         "GB": "https://www.burgerking.co.uk/store-locator/store/{}",
         "NZ": "https://www.burgerking.co.nz/store-locator/store/{}",
         "NL": "https://www.burgerking.nl/store-locator/store/{}",
+        "PL": "https://burgerking.pl/store-locator/store/{}",
         "US": "https://www.bk.com/store-locator/store/{}",
-        # TODO: more countries
     }
 
     def parse(self, response, country_code):
