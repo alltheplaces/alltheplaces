@@ -5,10 +5,10 @@ from locations.dict_parser import DictParser
 from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import Feature
 
-
 # To use this spider, specify one or more start_urls which have a domain of
 # www.locally.com or brandname.locally.com and path of /stores/conversion_data
 # Include all arguments in the URL.
+
 
 class LocallySpider(Spider, AutomaticSpiderGenerator):
     custom_settings = {"ROBOTSTXT_OBEY": False}
