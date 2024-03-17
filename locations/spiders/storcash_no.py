@@ -1,10 +1,12 @@
-from locations.storefinders.sylinder import SylinderSpider
 from scrapy.http import JsonRequest
+
+from locations.storefinders.sylinder import SylinderSpider
+from locations.categories import Categories
 
 
 class StorcashNoSpider(SylinderSpider):
     name = "storcash_no"
-    item_attributes = {"brand": "Storcash"}
+    item_attributes = {"brand": "Storcash", "extras": Categories.SHOP_WHOLESALE.value}
     base_url = "https://storcash.no/#"  # Note: Doesn't use the same storefinder
     app_keys = [
         "5000",  # Bergen Storcash Storcash (NO)
