@@ -36,8 +36,10 @@ class LighthouseSpider(Spider):
     # Example:
     #         <div class="extra-features-container">
     #             <ul>
-    #                     <li class="carwash" title="Car Wash"></li>
-    #                     <li class="ekosmile" title="Ekosmile"></li>
+    #                   <li class="carwash" title="Car Wash"></li>
+    #                   <li class="ekosmile" title="Ekosmile"></li>
+    #                   <li class="supermarket" title="Supermarket"></li>
+    #                   <li class="minimarket" title="Mini Market"></li>
     #             </ul>
     def map_extras(self, item, extra_feature, location):
         if extra_feature.xpath("@class").get() == "carwash":
