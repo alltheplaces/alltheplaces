@@ -17,4 +17,4 @@ class CommerceBankUSSpider(RioSeoSpider):
         else:
             apply_category(Categories.BANK, feature)
 
-        yield feature
+        return feature
