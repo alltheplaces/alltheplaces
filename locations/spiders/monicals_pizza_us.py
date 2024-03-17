@@ -1,7 +1,6 @@
 from scrapy.spiders import SitemapSpider
 
 from locations.items import Feature
-from locations.spiders.vapestore_gb import clean_address
 
 
 # Only half the Microdata :(
@@ -19,7 +18,7 @@ class MonicalsPizzaUSSpider(SitemapSpider):
         item["lon"] = response.xpath('//*[@id="location-lng"]/@value').get()
         item["name"] = response.xpath('//div[@class="title-wrap"]/h2/text()').get()
         item["phone"] = response.xpath('//div[@class="phone"]/text()').get()
-        item["street_address"] = clean_address(response.xpath('//li[@itemprop="streetAddress"]/text()').get())
+        item["street_address"] = response.xpath('//li[@itemprop="streetAddress"]/text()').get()
         item["city"] = response.xpath('//span[@itemprop="addressLocality"]/text()').get()
         item["state"] = response.xpath('//span[@itemprop="addressRegion"]/text()').get()
         item["postcode"] = response.xpath('//span[@itemprop="postalCode"]/text()').get()

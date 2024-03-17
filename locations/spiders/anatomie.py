@@ -1,7 +1,7 @@
 import scrapy
 
 from locations.items import Feature
-from locations.spiders.vapestore_gb import clean_address
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class AnatomieSpider(scrapy.Spider):
@@ -17,7 +17,7 @@ class AnatomieSpider(scrapy.Spider):
         json_data = response.json()
         for item in json_data["stores"]:
             properties = {
-                "street_address": clean_address([item["address"], item["address2"]]),
+                "street_address": merge_address_lines([item["address"], item["address2"]]),
                 "name": item["name"],
                 "city": item["city"],
                 "state": item["prov_state"],

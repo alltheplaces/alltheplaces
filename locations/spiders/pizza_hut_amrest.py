@@ -4,6 +4,7 @@ from locations.storefinders.amrest_eu import AmrestEUSpider
 YES_NO_ATTRIBUTES = {
     "garden": Extras.OUTDOOR_SEATING,
     "wifi": Extras.WIFI,
+    "driveThru": Extras.DRIVE_THROUGH,
 }
 
 
@@ -19,10 +20,15 @@ class PizzaHutAmrestSpider(AmrestEUSpider):
     auth_data = AmrestEUSpider.auth_data | {"source": "WEB_PH"}
 
     def parse_item(self, item, feature, **kwargs):
+        item["branch"] = item.pop("name").removeprefix("Pizza Hut ")
         for f in feature["filters"]:
             if tags := YES_NO_ATTRIBUTES.get(f["key"]):
                 apply_yes_no(tags, item, f.get("available"))
 
             if f["key"] == "waiter_service":
-                apply_category(Categories.RESTAURANT if f.get("available") else Categories.FAST_FOOD, item)
+                if f.get("available"):
+                    apply_category(Categories.RESTAURANT, item)
+                else:
+                    item["name"] = "Pizza Hut Express"
+                    apply_category(Categories.FAST_FOOD, item)
         yield item

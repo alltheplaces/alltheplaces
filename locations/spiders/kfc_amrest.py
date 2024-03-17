@@ -14,3 +14,7 @@ class KfcAmrestSpider(AmrestEUSpider):
     ]
     base_headers = AmrestEUSpider.base_headers | {"brand": "KFC"}
     auth_data = AmrestEUSpider.auth_data | {"source": "WEB_KFC"}
+
+    def parse_item(self, item, feature, **kwargs):
+        item["branch"] = item.pop("name").removeprefix("KFC ")
+        yield item

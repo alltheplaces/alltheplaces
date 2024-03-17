@@ -2,7 +2,6 @@ from scrapy import Spider
 
 from locations.items import Feature
 from locations.pipelines.extract_gb_postcode import extract_gb_postcode
-from locations.spiders.vapestore_gb import clean_address
 
 
 class TimHortonsGBSpider(Spider):
@@ -26,5 +25,5 @@ class TimHortonsGBSpider(Spider):
                 if not city.lower() in dirty_address.lower():
                     dirty_address += "," + city
                 dirty_address += "," + postcode
-                item["addr_full"] = clean_address(dirty_address)
+                item["addr_full"] = dirty_address
             yield item

@@ -3,8 +3,8 @@ import xmltodict
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
+from locations.pipelines.address_clean_up import merge_address_lines
 from locations.spiders.carrefour_fr import CARREFOUR_EXPRESS, CARREFOUR_MARKET, CARREFOUR_SUPERMARKET
-from locations.spiders.vapestore_gb import clean_address
 
 CARREFOUR_BIO = {
     "brand": "Carrefour BIO",
@@ -34,7 +34,7 @@ class CarrefourESSpider(scrapy.Spider):
     def parse(self, response, **kwargs):
         for store_data in xmltodict.parse(response.text)["markers"]["marker"]:
             store = {key.removeprefix("@"): value for key, value in store_data.items()}
-            store["street-address"] = clean_address([store.pop("address", ""), store.pop("address2", "")])
+            store["street-address"] = merge_address_lines([store.pop("address", ""), store.pop("address2", "")])
             item = DictParser.parse(store)
             item["website"] = response.urljoin(store["web"]) if store.get("web") else response.url
             location_category = store.get("category", "").lower()
