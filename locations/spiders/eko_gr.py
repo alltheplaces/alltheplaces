@@ -1,5 +1,6 @@
-from locations.storefinders.lighthouse import LighthouseSpider
 from locations.categories import Categories
+from locations.storefinders.lighthouse import LighthouseSpider
+
 
 class EkoGRSpider(LighthouseSpider):
     name = "eko_gr"
