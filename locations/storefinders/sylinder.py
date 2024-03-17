@@ -24,40 +24,43 @@ class SylinderSpider(Spider):
 
     def parse(self, response, **kwargs):
         for location in response.json():
-            item = DictParser.parse(location["storeDetails"])
-            item["ref"] = location["gln"]
+            yield from parse_location(location) or []
 
-            # Example:
-            # {'gln': '7080001064310', 'storeDetails': {'storeId': '1020', 'storeName': 'MENY Ski', 'slug': 'meny-ski', 'position': {'lat': 59.713270584310074, 'lng': 10.835573416901537}, 'shopServices': [{'typeCode': 'BHG', 'name': 'Gavekort'}, {'typeCode': 'BAX_NT', 'name': 'Tipping'}, {'typeCode': 'P_PB_U', 'name': 'Posten pakkeboks ute'}, {'typeCode': 'KIB', 'name': 'Kontanttjenester i Butikk'}], 'chainId': '1300', 'organization': {'address': 'Eikeliv 1', 'addressType': 'Delivery', 'postalCode': '1400', 'city': 'SKI', 'phone': '64 878090', 'fax': '64 863312', 'facebookUrl': None, 'email': 'butikksjef.ski@meny.no'}, 'municipality': 'NORDRE FOLLO', 'county': 'AKERSHUS', 'lastChanged': '2024-01-24T14:03:23.0000000+01:00', 'metadata': {'messageReceived': '2024-01-24T14:03:25.8000000+01:00', 'source': 'NGG IntStore'}}, 'openingHours': {'isOpenSunday': False, 'metadata': {'messageReceived': '2024-02-26T15:36:07.9070000+01:00', 'source': 'SAP Retail OSB'}}}
-            # item["city"] = location["storeDetails"]["municipality"]
-            item["state"] = location["storeDetails"]["county"]
-            item["street_address"] = location["storeDetails"]["organization"]["address"]
-            item["city"] = location["storeDetails"]["organization"]["city"]
-            item["postcode"] = location["storeDetails"]["organization"]["postalCode"]
+    def parse_location(self, location):
+        item = DictParser.parse(location["storeDetails"])
+        item["ref"] = location["gln"]
 
-            item["phone"] = location["storeDetails"]["organization"]["phone"]
-            item["email"] = location["storeDetails"]["organization"]["email"]
+        # Example:
+        # {'gln': '7080001064310', 'storeDetails': {'storeId': '1020', 'storeName': 'MENY Ski', 'slug': 'meny-ski', 'position': {'lat': 59.713270584310074, 'lng': 10.835573416901537}, 'shopServices': [{'typeCode': 'BHG', 'name': 'Gavekort'}, {'typeCode': 'BAX_NT', 'name': 'Tipping'}, {'typeCode': 'P_PB_U', 'name': 'Posten pakkeboks ute'}, {'typeCode': 'KIB', 'name': 'Kontanttjenester i Butikk'}], 'chainId': '1300', 'organization': {'address': 'Eikeliv 1', 'addressType': 'Delivery', 'postalCode': '1400', 'city': 'SKI', 'phone': '64 878090', 'fax': '64 863312', 'facebookUrl': None, 'email': 'butikksjef.ski@meny.no'}, 'municipality': 'NORDRE FOLLO', 'county': 'AKERSHUS', 'lastChanged': '2024-01-24T14:03:23.0000000+01:00', 'metadata': {'messageReceived': '2024-01-24T14:03:25.8000000+01:00', 'source': 'NGG IntStore'}}, 'openingHours': {'isOpenSunday': False, 'metadata': {'messageReceived': '2024-02-26T15:36:07.9070000+01:00', 'source': 'SAP Retail OSB'}}}
+        # item["city"] = location["storeDetails"]["municipality"]
+        item["state"] = location["storeDetails"]["county"]
+        item["street_address"] = location["storeDetails"]["organization"]["address"]
+        item["city"] = location["storeDetails"]["organization"]["city"]
+        item["postcode"] = location["storeDetails"]["organization"]["postalCode"]
 
-            item["facebook"] = location["storeDetails"]["organization"]["facebookUrl"]
-            if self.base_url is not None:
-                item["website"] = self.base_url + location["storeDetails"]["slug"]
+        item["phone"] = location["storeDetails"]["organization"]["phone"]
+        item["email"] = location["storeDetails"]["organization"]["email"]
 
-            if location.get("openingHours"):
-                item["opening_hours"] = OpeningHours()
+        item["facebook"] = location["storeDetails"]["organization"]["facebookUrl"]
+        if self.base_url is not None:
+            item["website"] = self.base_url + location["storeDetails"]["slug"]
 
-                # For now, not collecting special opening hours
-                # print(location["openingHours"]["upcomingSpecialOpeningHours"])
+        if location.get("openingHours"):
+            item["opening_hours"] = OpeningHours()
 
-                for day in location["openingHours"]["upcomingOpeningHours"]:
-                    if day["closed"]:
-                        continue
+            # For now, not collecting special opening hours
+            # print(location["openingHours"]["upcomingSpecialOpeningHours"])
 
-                    if day["isSpecial"]:
-                        continue
+            for day in location["openingHours"]["upcomingOpeningHours"]:
+                if day["closed"]:
+                    continue
 
-                    item["opening_hours"].add_range(day["abbreviatedDayOfWeek"], day["opens"], day["closes"])
+                if day["isSpecial"]:
+                    continue
 
-            yield from self.parse_item(item, location) or []
+                item["opening_hours"].add_range(day["abbreviatedDayOfWeek"], day["opens"], day["closes"])
+
+        yield from self.parse_item(item, location) or []
 
     def parse_item(self, item, location, **kwargs):
         yield item
