@@ -1,4 +1,4 @@
-from locations.categories import Categories, apply_category, apply_yes_no, Extras
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.storefinders.rio_seo_spider import RioSeoSpider
 
 
