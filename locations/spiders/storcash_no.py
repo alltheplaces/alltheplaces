@@ -20,7 +20,7 @@ class StorcashNoSpider(SylinderSpider):
     ]
 
     def start_requests(self):
-        yield JsonRequest(url=f"https://api.ngdata.no/sylinder/stores/v1/extended-info")
+        yield JsonRequest(url="https://api.ngdata.no/sylinder/stores/v1/extended-info")
 
     def parse(self, response, **kwargs):
         for location in response.json():
