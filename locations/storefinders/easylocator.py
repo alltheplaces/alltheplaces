@@ -1,32 +1,25 @@
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
+from locations.automatic_spider_generator import AutomaticSpiderGenerator, DetectionRequestRule
 from locations.dict_parser import DictParser
-from locations.geo import point_locations
 
 
-# To use this spider, either specify the start_urls or
-# pass in a coordinates file.
+# To use this spider, specify api_brand_name as the brand name key existing
+# in calls to the Easy Locator API at https://easylocator.net/ajax/...
 #
-# Example: https://easylocator.net/ajax/search_by_lat_lon_geojson/gigiscupcakesusa/-37.86/144.9717/0/10/null/null
-class EasyLocatorSpider(Spider):
+# Example source URL: https://easylocator.net/ajax/search_by_lat_lon_geojson/gigiscupcakesusa/-37.86/144.9717/0/10/null/null
+# Example api_brand_name from source URL: gigiscupcakesusa
+
+class EasyLocatorSpider(Spider, AutomaticSpiderGenerator):
     dataset_attributes = {"source": "api", "api": "easylocator.net"}
-    allowed_domains = ["easylocator.net"]
-    searchable_points_files = []
-    search_radius = 0
-    max_results = 1000
+    api_brand_name: str = None
+    detection_rules = [
+        DetectionRequestRule(url=r"^https?:\/\/easylocator\.net\/ajax\/search_by_lat_lon_geojson\/(?P<api_brand_name>[^\/]+)\/")
+    ]
 
     def start_requests(self):
-        if len(self.start_urls) != 0:
-            for url in self.start_urls:
-                if len(self.searchable_points_files) > 0 and self.search_radius != 0 and self.max_results != 0:
-                    for searchable_points_file in self.searchable_points_files:
-                        for lat, lon in point_locations(searchable_points_file):
-                            yield JsonRequest(
-                                url=f"{url}/{self.api_key}/{lat}/{lon}/{self.search_radius}/{self.max_results}/null/null"
-                            )
-                else:
-                    yield JsonRequest(url=url)
+        yield JsonRequest(url=f"https://easylocator.net/ajax/search_by_lat_lon_geojson/{self.api_brand_name}/0/0/0/null/null/null")
 
     def parse(self, response):
         for location in response.json()["physical"]:

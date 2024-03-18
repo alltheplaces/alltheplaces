@@ -16,6 +16,7 @@ from locations.storefinders.agile_store_locator import AgileStoreLocatorSpider
 from locations.storefinders.amasty_store_locator import AmastyStoreLocatorSpider
 from locations.storefinders.amrest_eu import AmrestEUSpider
 from locations.storefinders.closeby import ClosebySpider
+from locations.storefinders.easylocator import EasyLocatorSpider
 from locations.storefinders.freshop import FreshopSpider
 from locations.storefinders.geo_me import GeoMeSpider
 from locations.storefinders.kibo import KiboSpider
@@ -186,6 +187,7 @@ class StorefinderDetectorSpider(Spider):
             AmastyStoreLocatorSpider,
             AmrestEUSpider,
             ClosebySpider,
+            EasyLocatorSpider,
             FreshopSpider,
             GeoMeSpider,
             KiboSpider,
