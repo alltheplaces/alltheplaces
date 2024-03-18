@@ -11,10 +11,10 @@ from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
 
-
 # To use this spider, specify one or more start_urls which have a path of:
 # /api/getAsyncLocations. Include arguments such as
 # ?template=search&level=search...etc
+
 
 class RioSeoSpider(Spider, AutomaticSpiderGenerator):
     dataset_attributes = {"source": "api", "api": "rio_seo"}
