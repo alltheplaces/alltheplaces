@@ -25,6 +25,7 @@ from locations.storefinders.locally import LocallySpider
 from locations.storefinders.metalocator import MetaLocatorSpider
 from locations.storefinders.metizsoft import MetizsoftSpider
 from locations.storefinders.momentfeed import MomentFeedSpider
+from locations.storefinders.rio_seo import RioSeoSpider
 
 # from locations.storefinders.rexel import RexelSpider
 from locations.storefinders.shopapps import ShopAppsSpider
@@ -195,6 +196,7 @@ class StorefinderDetectorSpider(Spider):
             MetizsoftSpider,
             MomentFeedSpider,
             # RexelSpider,
+            RioSeoSpider,
             ShopAppsSpider,
             StockInStoreSpider,
             StockistSpider,

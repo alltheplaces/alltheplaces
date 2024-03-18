@@ -2,16 +2,29 @@ import json
 from typing import Iterable
 
 from scrapy import Spider
+from scrapy.http import JsonRequest
 from scrapy.selector import Selector
 
+from locations.automatic_spider_generator import AutomaticSpiderGenerator, DetectionRequestRule
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
 
 
-class RioSeoSpider(Spider):
+# To use this spider, specify one or more start_urls which have a path of:
+# /api/getAsyncLocations. Include arguments such as
+# ?template=search&level=search...etc
+
+class RioSeoSpider(Spider, AutomaticSpiderGenerator):
     dataset_attributes = {"source": "api", "api": "rio_seo"}
+    detection_rules = [
+        DetectionRequestRule(url=r"^(?P<start_urls__list>https?:\/\/[A-Za-z0-9\-.]+\/api\/getAsyncLocations\?.+)$")
+    ]
+
+    def start_requests(self):
+        for url in self.start_urls:
+            yield JsonRequest(url=url)
 
     def parse(self, response, **kwargs):
         map_list = response.json()["maplist"]
