@@ -28,7 +28,7 @@ class LocallySpider(Spider, AutomaticSpiderGenerator):
                 close = f"{day[:3].lower()}_time_close"
                 if not location.get(open) or len(str(location.get(open))) < 3:
                     continue
-                oh.add_range(
+                item["opening_hours"].add_range(
                     day=day,
                     open_time=f"{str(location.get(open))[:-2]}:{str(location.get(open))[-2:]}",
                     close_time=f"{str(location.get(close))[:-2]}:{str(location.get(close))[-2:]}",
