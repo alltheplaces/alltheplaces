@@ -8,6 +8,7 @@ from scrapy.http import Response
 from locations.items import Feature
 from locations.linked_data_parser import LinkedDataParser
 from locations.microdata_parser import MicrodataParser
+from locations.automatic_spider_generator import AutomaticSpiderGenerator, DetectionResponseRule
 
 
 def extract_email(item, sel: Selector):
@@ -127,7 +128,7 @@ def get_url(response) -> str:
     return response.url
 
 
-class StructuredDataSpider(Spider):
+class StructuredDataSpider(Spider, AutomaticSpiderGenerator):
     dataset_attributes = {"source": "structured_data"}
 
     wanted_types = [
@@ -157,6 +158,11 @@ class StructuredDataSpider(Spider):
         "InsuranceAgency",
         "ElectronicsStore",
     ]
+    detection_rules = []
+    for wanted_type in wanted_types:
+        # TODO: We can't set an array type, or seemingly call replacements
+        detection_rules.append(DetectionResponseRule(xpaths={"wanted_types": f'//*[@itemtype="http://schema.org/{wanted_type}"]/@itemtype'}))
+
     search_for_email = True
     search_for_phone = True
     search_for_twitter = True
@@ -167,6 +173,7 @@ class StructuredDataSpider(Spider):
     time_format = "%H:%M"
 
     def __init__(self):
+
         for i, wanted in enumerate(self.wanted_types):
             if isinstance(wanted, list):
                 self.wanted_types[i] = [LinkedDataParser.clean_type(t) for t in wanted]

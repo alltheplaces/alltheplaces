@@ -36,6 +36,7 @@ from locations.storefinders.storelocatorwidgets import StoreLocatorWidgetsSpider
 from locations.storefinders.storemapper import StoremapperSpider
 from locations.storefinders.storepoint import StorepointSpider
 from locations.storefinders.storerocket import StoreRocketSpider
+from locations.structured_data_spider import StructuredDataSpider
 from locations.storefinders.super_store_finder import SuperStoreFinderSpider
 from locations.storefinders.sweetiq import SweetIQSpider
 from locations.storefinders.uberall import UberallSpider
@@ -204,6 +205,7 @@ class StorefinderDetectorSpider(Spider):
             StoremapperSpider,
             StorepointSpider,
             StoreRocketSpider,
+            StructuredDataSpider,
             SuperStoreFinderSpider,
             SweetIQSpider,
             UberallSpider,
