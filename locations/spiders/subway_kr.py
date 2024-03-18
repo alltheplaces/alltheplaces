@@ -5,8 +5,8 @@ from scrapy.http import Response
 from scrapy.linkextractors import LinkExtractor
 
 from locations.dict_parser import DictParser
+from locations.pipelines.address_clean_up import merge_address_lines
 from locations.spiders.subway import SubwaySpider
-from locations.spiders.vapestore_gb import clean_address
 
 
 class Subwaykrpider(scrapy.Spider):
@@ -37,7 +37,7 @@ class Subwaykrpider(scrapy.Spider):
         data.update(data.pop("franchiseDetail"))
         item = DictParser.parse(data)
         item["name"] = data.get("storNm")
-        item["addr_full"] = clean_address(",".join([data.get("storAddr1"), data.get("storAddr2")]))
+        item["addr_full"] = merge_address_lines([data.get("storAddr1"), data.get("storAddr2")])
         item["phone"] = data.get("storTel")
         item["ref"] = item["website"] = response.url
         yield item

@@ -4,7 +4,7 @@ from scrapy.spiders import SitemapSpider
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.items import Feature
-from locations.spiders.vapestore_gb import clean_address
+from locations.pipelines.address_clean_up import clean_address
 
 
 class AuchanHUSpider(SitemapSpider):
@@ -24,7 +24,6 @@ class AuchanHUSpider(SitemapSpider):
         item["addr_full"], item["phone"] = (
             address_info.split("Központi szám:") if "Központi szám:" in address_info else (address_info, None)
         )
-        item["addr_full"] = clean_address(item["addr_full"])
         apply_category(Categories.SHOP_SUPERMARKET, item)
         yield item
 

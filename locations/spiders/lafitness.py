@@ -7,7 +7,6 @@ from scrapy.http import JsonRequest
 
 from locations.hours import OpeningHours, day_range, sanitise_day
 from locations.items import Feature
-from locations.spiders.vapestore_gb import clean_address
 
 
 class LAFitnessSpider(scrapy.Spider):
@@ -87,7 +86,7 @@ class LAFitnessSpider(scrapy.Spider):
                 "lat": float(location["Latitude"]),
                 "lon": float(location["Longitude"]),
                 "image": f'https://lafitness.com/Pages/Images/ClubExterior/{location["ClubID"]}.jpg',
-                "addr_full": clean_address(location["Address"].replace("<br />", ",")),
+                "addr_full": location["Address"].replace("<br />", ","),
                 "city": location["City"],
                 "state": location["State"],
             }
