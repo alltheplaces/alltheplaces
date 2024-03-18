@@ -4,22 +4,26 @@ from scrapy.http import JsonRequest
 from locations.automatic_spider_generator import AutomaticSpiderGenerator, DetectionRequestRule
 from locations.dict_parser import DictParser
 
-
 # To use this spider, specify api_brand_name as the brand name key existing
 # in calls to the Easy Locator API at https://easylocator.net/ajax/...
 #
 # Example source URL: https://easylocator.net/ajax/search_by_lat_lon_geojson/gigiscupcakesusa/-37.86/144.9717/0/10/null/null
 # Example api_brand_name from source URL: gigiscupcakesusa
 
+
 class EasyLocatorSpider(Spider, AutomaticSpiderGenerator):
     dataset_attributes = {"source": "api", "api": "easylocator.net"}
     api_brand_name: str = None
     detection_rules = [
-        DetectionRequestRule(url=r"^https?:\/\/easylocator\.net\/ajax\/search_by_lat_lon_geojson\/(?P<api_brand_name>[^\/]+)\/")
+        DetectionRequestRule(
+            url=r"^https?:\/\/easylocator\.net\/ajax\/search_by_lat_lon_geojson\/(?P<api_brand_name>[^\/]+)\/"
+        )
     ]
 
     def start_requests(self):
-        yield JsonRequest(url=f"https://easylocator.net/ajax/search_by_lat_lon_geojson/{self.api_brand_name}/0/0/0/null/null/null")
+        yield JsonRequest(
+            url=f"https://easylocator.net/ajax/search_by_lat_lon_geojson/{self.api_brand_name}/0/0/0/null/null/null"
+        )
 
     def parse(self, response):
         for location in response.json()["physical"]:
