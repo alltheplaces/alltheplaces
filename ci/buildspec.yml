@@ -20,7 +20,7 @@ phases:
       - |
         PR_COMMENT_BODY="I ran the spiders in this pull request and got these results:\\n\\n|Spider|Results|Log|\\n|---|---|---|\\n"
 
-        pr_file_changes=$(curl -sL --header 'authorization: Bearer ${GITHUB_TOKEN}' "https://api.github.com/repos/alltheplaces/alltheplaces/pulls/${PR_NUMBER}/files")
+        pr_file_changes=$(curl -sL --header "authorization: Bearer ${GITHUB_TOKEN}" "https://api.github.com/repos/alltheplaces/alltheplaces/pulls/${PR_NUMBER}/files")
         (>&2 echo "PR response: ${pr_file_changes}")
 
         SPIDERS=$(echo "${pr_file_changes}" | jq -r '.[] | select(.status != "removed") | select(.filename | startswith("locations/spiders/")) | .filename')
