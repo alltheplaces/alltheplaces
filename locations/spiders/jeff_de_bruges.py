@@ -42,6 +42,8 @@ class JeffDeBrugesSpider(Spider):
             properties = {
                 "ref": location["common"].get("code"),
                 "name": location["common"].get("title"),
+                "lat": location["coordinates"].get("latitude"),
+                "lon": location["coordinates"].get("longitude"),
                 "street_address": location["address"]["fields"].get("street"),
                 "city": location["address"]["fields"].get("locality"),
                 "postcode": location["address"]["fields"].get("zipCode"),
