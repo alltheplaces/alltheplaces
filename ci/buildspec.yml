@@ -18,6 +18,7 @@ phases:
     commands:
       - pipenv run scrapy check
       - |
+        env
         PR_COMMENT_BODY="I ran the spiders in this pull request and got these results:\\n\\n|Spider|Results|Log|\\n|---|---|---|\\n"
 
         # Check if the build is triggered by a pull request
