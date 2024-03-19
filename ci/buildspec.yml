@@ -21,7 +21,7 @@ phases:
         PR_COMMENT_BODY="I ran the spiders in this pull request and got these results:\\n\\n|Spider|Results|Log|\\n|---|---|---|\\n"
 
         # Check if the build is triggered by a pull request
-        if [[ "${CODEBUILD_WEBHOOK_EVENT}" =~ ^(PULL_REQUEST_CREATED|PULL_REQUEST_UPDATED)$ ]]; then
+        if [[ "${CODEBUILD_WEBHOOK_EVENT}" =~ ^(PUSH|PULL_REQUEST_CREATED|PULL_REQUEST_UPDATED)$ ]]; then
           # Extract the pull request number from the CODEBUILD_SOURCE_VERSION variable
           # CODEBUILD_SOURCE_VERSION format: "pr/pull-request-number"
           pull_request_number=$(echo "${CODEBUILD_SOURCE_VERSION}" | cut -d '/' -f 2)
