@@ -5,10 +5,7 @@ env:
     BUCKET: alltheplaces.openaddresses.io
     AWS_REGION: us-east-1
   secrets-manager:
-    AWS_ACCESS_KEY_ID: alltheplaces/AWS_KEY
-    AWS_SECRET_ACCESS_KEY: alltheplaces/AWS_SEC
     ZYTE_API_KEY: alltheplaces/ZYTE_API_KEY
-    GITHUB_TOKEN: alltheplaces/GITHUB_TOKEN
 
 phases:
   install:
