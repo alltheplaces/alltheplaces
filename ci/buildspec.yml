@@ -5,6 +5,7 @@ env:
     BUCKET: alltheplaces.openaddresses.io
   secrets-manager:
     ZYTE_API_KEY: "alltheplaces:ZYTE_API_KEY"
+    GITHUB_TOKEN: "alltheplaces:GITHUB_TOKEN"
 
 phases:
   install:
@@ -19,7 +20,7 @@ phases:
       - |
         PR_COMMENT_BODY="I ran the spiders in this pull request and got these results:\\n\\n|Spider|Results|Log|\\n|---|---|---|\\n"
 
-        pr_file_changes=$(curl -sL --header 'authorization: Bearer ${TOKEN}' "https://api.github.com/repos/alltheplaces/alltheplaces/pulls/${PR_NUMBER}/files")
+        pr_file_changes=$(curl -sL --header 'authorization: Bearer ${GITHUB_TOKEN}' "https://api.github.com/repos/alltheplaces/alltheplaces/pulls/${PR_NUMBER}/files")
         (>&2 echo "PR response: ${pr_file_changes}")
 
         SPIDERS=$(echo "${pr_file_changes}" | jq -r '.[] | select(.status != "removed") | select(.filename | startswith("locations/spiders/")) | .filename')
@@ -138,14 +139,14 @@ phases:
             echo $EXIT_CODE
         fi
 
-        if [ -z "${TOKEN}" ]; then
+        if [ -z "${GITHUB_TOKEN}" ]; then
             echo "No GITHUB_TOKEN set"
         else
             if [ "${PR_NUMBER}" != "false" ]; then
                 curl \
                     -s \
                     -XPOST \
-                    -H "Authorization: token ${TOKEN}" \
+                    -H "Authorization: token ${GITHUB_TOKEN}" \
                     -d "{\"body\":\"${PR_COMMENT_BODY}\"}" \
                     "https://api.github.com/repos/${OWNER}/${REPO}/issues/${PR_NUMBER}/comments"
                 echo "Added a comment to pull https://github.com/${OWNER}/${REPO}/pull/${PR_NUMBER}"
