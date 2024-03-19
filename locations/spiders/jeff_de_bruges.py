@@ -8,7 +8,11 @@ from locations.items import Feature
 
 class JeffDeBrugesSpider(Spider):
     name = "jeff_de_bruges"
-    item_attributes = {"brand": "Jeff de Bruges", "brand_wikidata": "Q3176626", "extras": Categories.SHOP_CHOCOLATE.value}
+    item_attributes = {
+        "brand": "Jeff de Bruges",
+        "brand_wikidata": "Q3176626",
+        "extras": Categories.SHOP_CHOCOLATE.value,
+    }
     allowed_domains = ["www.jeff-de-bruges.com"]
     start_urls = ["https://www.jeff-de-bruges.com/ajax.V1.php/fr_FR/Rbs/Storelocator/Store/"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
@@ -22,17 +26,14 @@ class JeffDeBrugesSpider(Spider):
                 "currentStoreId": 0,
                 "distanceUnit": "kilometers",
                 "distance": "50000kilometers",
-                "coordinates": {
-                    "latitude": 0,
-                    "longitude": 0
-                },
-                "commercialSign": 0
+                "coordinates": {"latitude": 0, "longitude": 0},
+                "commercialSign": 0,
             },
             "dataSets": "coordinates,address,card,allow,hours",
             "URLFormats": "canonical,contextual",
             "visualFormats": "original,95x95,190x190,290x188,384x249,580x376,768x498,1160x752,1536x996",
             "pagination": "0,5000",
-            "referer": "https://www.jeff-de-bruges.com/trouver-une-boutique"
+            "referer": "https://www.jeff-de-bruges.com/trouver-une-boutique",
         }
         yield JsonRequest(url=self.start_urls[0], data=data, headers={"X-HTTP-Method-Override": "GET"}, method="POST")
 
