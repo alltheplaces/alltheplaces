@@ -15,8 +15,6 @@ phases:
     runtime-versions:
       python: 3.11
     commands:
-      - apt-get update
-      - apt-get install -y jq
       - pip install pipenv
       - pipenv --bare install --deploy
   build:
