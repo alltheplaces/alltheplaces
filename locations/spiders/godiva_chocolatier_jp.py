@@ -8,7 +8,11 @@ from locations.hours import OpeningHours
 
 class GodivaChocolatierJPSpider(Spider):
     name = "godiva_chocolatier_jp"
-    item_attributes = {"brand": "Godiva Chocolatier", "brand_wikidata": "Q931084", "extras": Categories.SHOP_CHOCOLATE.value}
+    item_attributes = {
+        "brand": "Godiva Chocolatier",
+        "brand_wikidata": "Q931084",
+        "extras": Categories.SHOP_CHOCOLATE.value,
+    }
     allowed_domains = ["shop.godiva.co.jp"]
     start_urls = ["https://shop.godiva.co.jp/api/delivery/stores/search/"]
 
@@ -24,7 +28,7 @@ class GodivaChocolatierJPSpider(Spider):
             "referer": "",
             "_browser_url": "https://shop.godiva.co.jp/stores",
             "current_url": "https://shop.godiva.co.jp/stores",
-            "limit": "10000"
+            "limit": "10000",
         }
         yield JsonRequest(url=self.start_urls[0], data=data, method="POST")
 
@@ -41,7 +45,9 @@ class GodivaChocolatierJPSpider(Spider):
             hours_string = ""
             for day_hours in location.get("weekday_opens", []):
                 for time_period in day_hours["data"]["time"]:
-                    hours_string = "{} {}: {} - {}".format(hours_string, day_hours["data"]["name_en"], time_period["start"], time_period["end"])
+                    hours_string = "{} {}: {} - {}".format(
+                        hours_string, day_hours["data"]["name_en"], time_period["start"], time_period["end"]
+                    )
             item["opening_hours"].add_ranges_from_string(hours_string)
 
             yield item
