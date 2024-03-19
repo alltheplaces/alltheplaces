@@ -1,11 +1,10 @@
-import logging
-
-from scrapy import Selector, Spider
+from scrapy import Spider
 from scrapy.http import JsonRequest
 
+from locations.automatic_spider_generator import AutomaticSpiderGenerator, DetectionRequestRule, DetectionResponseRule
 from locations.dict_parser import DictParser
 from locations.geo import point_locations
-from locations.hours import DAYS_BY_FREQUENCY, OpeningHours, sanitise_day
+from locations.hours import DAYS_BY_FREQUENCY, OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
 
@@ -43,13 +42,31 @@ from locations.pipelines.address_clean_up import merge_address_lines
 # location).
 
 
-class WPStoreLocatorSpider(Spider):
-    days = None
-    time_format = "%H:%M"
-    searchable_points_files = []
-    search_radius = 0
-    max_results = 0
-    possible_days = DAYS_BY_FREQUENCY
+class WPStoreLocatorSpider(Spider, AutomaticSpiderGenerator):
+    days: dict = None
+    time_format: str = "%H:%M"
+    searchable_points_files: list[str] = []
+    search_radius: int = 0
+    max_results: int = 0
+    possible_days: list[dict] = DAYS_BY_FREQUENCY
+    detection_rules = [
+        DetectionRequestRule(
+            url=r"^https?:\/\/(?P<allowed_domains__list>[A-Za-z0-9\-.]+)\/wp-admin\/admin-ajax\.php\?.*?(?<=[?&])action=store_search(?:&|$)"
+        ),
+        DetectionRequestRule(
+            url=r"^(?P<start_urls__list>https?:\/\/[A-Za-z0-9\-.]+(?:\/[^\/]+)+\/wp-admin\/admin-ajax\.php\?.*?(?<=[?&])action=store_search(?:&.*$|$))"
+        ),
+        DetectionResponseRule(
+            js_objects={
+                "allowed_domains": r"(window.wpslSettings.ajaxurl.match(/^https?:\/\/[^\/]+?\/wp-admin\/admin-ajax\.php/)) ? [new URL(window.wpslSettings.ajaxurl).hostname] : null"
+            }
+        ),
+        DetectionResponseRule(
+            js_objects={
+                "start_urls": r'(window.wpslSettings.ajaxurl.match(/^https?:\/\/[^\/]+?\/.+?\/wp-admin\/admin-ajax\.php/)) ? [new URL(window.wpslSettings.ajaxurl).origin + new URL(window.wpslSettings.ajaxurl).pathname + "?action=store_search&autoload=1"] : null'
+            }
+        ),
+    ]
 
     def start_requests(self):
         if len(self.start_urls) == 0 and hasattr(self, "allowed_domains"):
@@ -73,7 +90,7 @@ class WPStoreLocatorSpider(Spider):
                 else:
                     yield JsonRequest(url=url)
 
-    def parse(self, response, **kwargs):
+    def parse(self, response):
         if self.max_results != 0 and len(response.json()) >= self.max_results:
             raise RuntimeError(
                 "Locations have probably been truncated due to max_results (or more) locations being returned by a single geographic radius search. Use more granular searchable_points_files and a smaller search_radius."
@@ -87,8 +104,8 @@ class WPStoreLocatorSpider(Spider):
                 item["opening_hours"] = self.parse_opening_hours(location, self.days)
             else:
                 # Otherwise, iterate over the possibilities until we get a first match
-                logging.warning(
-                    "Attempting to detect opening hours - specify self.days = DAYS_EN or the appropriate language code to suppress this warning"
+                self.logger.warning(
+                    "Attempting to automatically detect the language of opening hours data. Specify spider parameter days = DAYS_EN or the appropriate language code to suppress this warning."
                 )
                 for days in self.possible_days:
                     item["opening_hours"] = self.parse_opening_hours(location, days)
@@ -98,22 +115,13 @@ class WPStoreLocatorSpider(Spider):
 
             yield from self.parse_item(item, location) or []
 
-    def parse_item(self, item: Feature, location: dict, **kwargs):
+    def parse_item(self, item: Feature, location: dict):
         yield item
 
-    def parse_opening_hours(self, location: dict, days: dict, **kwargs) -> OpeningHours:
-        if not location.get("hours"):
-            return
-        sel = Selector(text=location["hours"])
+    def parse_opening_hours(self, location: dict, days: dict) -> OpeningHours | None:
+        hours_raw = DictParser.get_first_key(location, DictParser.hours_keys)
+        if not hours_raw:
+            return None
         oh = OpeningHours()
-        for rule in sel.xpath("//tr"):
-            day = sanitise_day(rule.xpath("./td/text()").get(), days)
-            times = rule.xpath("./td/time/text()").get()
-            if not day or not times:
-                continue
-            if times.lower() in ["closed"]:
-                continue
-            start_time, end_time = times.split("-")
-            oh.add_range(day, start_time.strip(), end_time.strip(), time_format=self.time_format)
-
+        oh.add_ranges_from_string(hours_raw, days=days)
         return oh

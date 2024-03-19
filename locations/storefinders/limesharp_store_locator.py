@@ -1,6 +1,7 @@
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
+from locations.automatic_spider_generator import AutomaticSpiderGenerator, DetectionRequestRule
 from locations.dict_parser import DictParser
 from locations.items import Feature
 
@@ -21,7 +22,15 @@ from locations.items import Feature
 # location).
 
 
-class LimesharpStoreLocatorSpider(Spider):
+class LimesharpStoreLocatorSpider(Spider, AutomaticSpiderGenerator):
+    detection_rules = [
+        DetectionRequestRule(
+            # Path appears to be fixed per:
+            # https://github.com/search?q=repo:motou/magento2-store-locator-stockists-extension+getStores&type=code
+            url=r"^https?:\/\/(?P<allowed_domains__list>[A-Za-z0-9\-.]+)\/stockists\/ajax\/stores(?:\?|\/|$)"
+        ),
+    ]
+
     def start_requests(self):
         if len(self.start_urls) == 0 and hasattr(self, "allowed_domains"):
             for domain in self.allowed_domains:
@@ -30,7 +39,7 @@ class LimesharpStoreLocatorSpider(Spider):
             for url in self.start_urls:
                 yield JsonRequest(url=url)
 
-    def parse(self, response, **kwargs):
+    def parse(self, response):
         for location in response.json():
             if (
                 not location["name"]
@@ -44,5 +53,5 @@ class LimesharpStoreLocatorSpider(Spider):
             item["street_address"] = location["address"]
             yield from self.parse_item(item, location) or []
 
-    def parse_item(self, item: Feature, location: dict, **kwargs):
+    def parse_item(self, item: Feature, location: dict):
         yield item

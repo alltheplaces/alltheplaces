@@ -1,16 +1,22 @@
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
+from locations.automatic_spider_generator import AutomaticSpiderGenerator, DetectionRequestRule, DetectionResponseRule
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.items import Feature
 
 
-class StoreRocketSpider(Spider):
+class StoreRocketSpider(Spider, AutomaticSpiderGenerator):
     dataset_attributes = {"source": "api", "api": "storerocket.io"}
-
-    storerocket_id = ""
-    base_url = None
+    storerocket_id: str = ""
+    base_url: str | None = None
+    detection_rules = [
+        DetectionRequestRule(
+            url=r"^https?:\/\/storerocket\.io\/api\/user\/(?P<storerocket_id>[0-9A-Za-z]+)\/locations(?:\?|\/|$)"
+        ),
+        DetectionResponseRule(js_objects={"storerocket_id": "window.StoreRocket.configs.projectId"}),
+    ]
 
     def start_requests(self):
         yield JsonRequest(url=f"https://storerocket.io/api/user/{self.storerocket_id}/locations")

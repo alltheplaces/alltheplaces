@@ -1,12 +1,21 @@
 from scrapy import Selector, Spider
-from scrapy.http import JsonRequest
+from scrapy.http import JsonRequest, Response
 
+from locations.automatic_spider_generator import AutomaticSpiderGenerator, DetectionRequestRule, DetectionResponseRule
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.items import Feature
 
-# The official home page of this Localisr store finder is:
-# https://matterdesign.com.au/localisr-a-geolocation-powered-store-finder-for-bigcommerce/
+# The archived official home page of this Localisr store finder is:
+# https://web.archive.org/web/20231021142419/https://matterdesign.com.au/localisr-a-geolocation-powered-store-finder-for-bigcommerce/
+#
+# It appears this store finder may be deprecated and is in the process of
+# being replaced as some brands previously making API calls to
+# app.localisr.io are now making different API calls to
+# <brand_key>.matter.design. The brand store locator pages still pull in
+# Javascript from app.localisr.io and the app.localisr.io API calls still
+# work, so for these brands, LocalisrSpider still appears to work, but
+# probably should be replaced.
 #
 # Documentation does not appear to be publicly available, however
 # the obersved behaviour is that coordinates are supplied for
@@ -24,12 +33,35 @@ from locations.items import Feature
 # If you need to clean up data returned, override the parse_item function.
 
 
-class LocalisrSpider(Spider):
+class LocalisrSpider(Spider, AutomaticSpiderGenerator):
     dataset_attributes = {"source": "api", "api": "localisr.io"}
-    api_key = ""
-    api_version = "2.1.0"  # Use the latest observed API version
-    search_coordinates = []
-    search_radius = 400
+    api_key: str = ""
+    api_version: str = "2.1.0"  # Use the latest observed API version by default
+    search_coordinates: list[tuple[float, float]] = []
+    search_radius: int = 400
+    detection_rules = [
+        DetectionRequestRule(
+            url=r"^https?:\/\/app\.localisr\.io\/public\/store-locator\?requestToken=(?P<api_key>[A-Z0-9]+)(?:&|\/|$)"
+        ),
+        DetectionRequestRule(
+            url=r"^https?:\/\/app\.localisr\.io\/api\/auth\/v2\/validate(?:\?|\/|$)",
+            data=r'{"api_key": .key, "api_version": .version}',
+        ),
+        DetectionRequestRule(
+            url=r"^https?:\/\/app\.localisr\.io\/js\/localisr\/widget\.js\?key=(?P<api_key>[A-Z0-9]+)&version=(?P<api_version>[\d.]+)$"
+        ),
+        DetectionResponseRule(
+            xpaths={
+                "api_key": r'substring-after(//iframe[contains(@src, "https://app.localisr.io/public/store-locator?requestToken=")]/@src, "requestToken=")'
+            }
+        ),
+        DetectionResponseRule(
+            xpaths={
+                "api_key": r'substring-after(substring-before(//script[contains(@src, "https://app.localisr.io/js/localisr/widget.js")]/@src, "&version="), "?key=")',
+                "api_version": r'substring-after(//script[contains(@src, "https://app.localisr.io/js/localisr/widget.js")]/@src, "&version=")',
+            }
+        ),
+    ]
 
     def start_requests(self):
         data = {
@@ -43,7 +75,7 @@ class LocalisrSpider(Spider):
             callback=self.parse_session_token,
         )
 
-    def parse_session_token(self, response):
+    def parse_session_token(self, response: Response):
         request_token = response.json()["data"]["request_token"]
         user_token = (
             Selector(text=response.json()["data"]["builder"]).xpath('//input[@id="slmUniqueUserToken"]/@value').get()
@@ -56,7 +88,7 @@ class LocalisrSpider(Spider):
             }
             yield JsonRequest(url=url, headers=headers, method="GET", callback=self.parse)
 
-    def parse(self, response):
+    def parse(self, response: Response):
         for location in response.json()["data"]:
             item = DictParser.parse(location)
             item["ref"] = location["store_identifier"]
@@ -81,5 +113,5 @@ class LocalisrSpider(Spider):
                 item["opening_hours"].add_range(day_name, day_hours[0].upper(), day_hours[1].upper(), "%I:%M %p")
             yield from self.parse_item(item, location) or []
 
-    def parse_item(self, item: Feature, location: dict, **kwargs):
+    def parse_item(self, item: Feature, location: dict):
         yield item

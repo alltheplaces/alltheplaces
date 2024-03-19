@@ -15,7 +15,7 @@ from locations.storefinders.geo_me import GeoMeSpider
 class ShellSpider(GeoMeSpider):
     name = "shell"
     item_attributes = {"brand": "Shell", "brand_wikidata": "Q110716465"}
-    key = "shellgsllocator"
+    api_key = "shellgsllocator"
 
     def parse_item(self, item, location):
         # Definitions extracted from https://shellgsllocator.geoapp.me/config/published/retail/prod/en_US.json?format=json

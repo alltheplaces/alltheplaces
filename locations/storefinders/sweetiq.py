@@ -2,14 +2,21 @@ import chompjs
 from scrapy import Request, Spider
 from scrapy.http import JsonRequest
 
+from locations.automatic_spider_generator import AutomaticSpiderGenerator, DetectionResponseRule
 from locations.categories import PaymentMethods, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
 
-class SweetIQSpider(Spider):
+class SweetIQSpider(Spider, AutomaticSpiderGenerator):
     dataset_attributes = {"source": "api", "api": "sweetiq.com"}
     request_batch_size = 10
+    detection_rules = [
+        DetectionResponseRule(
+            url=r"^(?P<start_urls__list>https?:\/\/.+)",
+            xpaths={"__": r'//script[contains(text(), "__SLS_REDUX_STATE__")]/text()'},
+        )
+    ]
 
     def start_requests(self):
         for url in self.start_urls:

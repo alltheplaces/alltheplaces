@@ -12,7 +12,7 @@ class LidlBGSpider(VirtualEarthSpider):
 
     dataset_id = "04982a582660451a8e08b705855a1008"
     dataset_name = "Filialdaten-BG/Filialdaten-BG"
-    key = "AkK9Xgxa6n1ly8c3xz1ntR6ojGGT3h-hys5yW7P9xHpJS2FycVLoYxLo_eeFR69o"
+    api_key = "AkK9Xgxa6n1ly8c3xz1ntR6ojGGT3h-hys5yW7P9xHpJS2FycVLoYxLo_eeFR69o"
 
     def parse_item(self, item, feature, **kwargs):
         item["name"] = feature["ShownStoreName"]

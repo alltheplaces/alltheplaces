@@ -1,6 +1,7 @@
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
+from locations.automatic_spider_generator import AutomaticSpiderGenerator, DetectionRequestRule
 from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
@@ -11,15 +12,20 @@ from locations.hours import OpeningHours
 # make corrections to automatically extracted location data.
 
 
-class FreshopSpider(Spider):
+class FreshopSpider(Spider, AutomaticSpiderGenerator):
     dataset_attributes = {"source": "api", "api": "freshop.com"}
-    app_key = ""
-    location_type_ids = ["1567647"]
+    app_key: str = ""
+    location_type_ids: list[str] = ["1567647"]
+    detection_rules = [
+        DetectionRequestRule(
+            url=r"^https?:\/\/api\.freshop\.com\/1\/stores\?.*?(?<=[?&])app_key=(?P<app_key>\w+)(?:&|$)"
+        )
+    ]
 
     def start_requests(self):
         yield JsonRequest(url=f"https://api.freshop.com/1/stores?app_key={self.app_key}")
 
-    def parse(self, response, **kwargs):
+    def parse(self, response):
         for location in response.json()["items"]:
             if location.get("type_id") not in self.location_type_ids or not location.get("has_address"):
                 continue
@@ -44,5 +50,5 @@ class FreshopSpider(Spider):
 
             yield from self.parse_item(item, location) or []
 
-    def parse_item(self, item, location, **kwargs):
+    def parse_item(self, item, location):
         yield item

@@ -8,4 +8,4 @@ class LidlHRSpider(VirtualEarthSpider):
 
     dataset_id = "d82c19ca83104facab354f376bf4312b"
     dataset_name = "Filialdaten-HR/Filialdaten-HR"
-    key = "AoX_2ZTHnC3kIskrKATT7ZcheF4L7vHMCaHTqcTpjmaOm3kIGwASRnEqLpeH7_-S"
+    api_key = "AoX_2ZTHnC3kIskrKATT7ZcheF4L7vHMCaHTqcTpjmaOm3kIGwASRnEqLpeH7_-S"

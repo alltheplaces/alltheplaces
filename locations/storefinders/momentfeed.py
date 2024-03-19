@@ -1,25 +1,33 @@
 import urllib.parse
 
 from scrapy import Spider
-from scrapy.http import JsonRequest
+from scrapy.http import JsonRequest, Response
 
+from locations.automatic_spider_generator import AutomaticSpiderGenerator, DetectionRequestRule
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
+from locations.items import Feature
 
 
-class MomentFeedSpider(Spider):
+class MomentFeedSpider(Spider, AutomaticSpiderGenerator):
     dataset_attributes = {"source": "api", "api": "momentfeed.com"}
-
-    id = ""
-
-    page_size = 100
+    api_key: str = ""
+    page_size: int = 100
+    detection_rules = [
+        DetectionRequestRule(
+            url=r"^https?:\/\/api\.momentfeed\.com\/v1\/analytics\/api\/llp\/meta\.json\?.*?(?<=[?&])auth_token=(?P<api_key>[A-Z]+)(?:&|$)"
+        ),
+        DetectionRequestRule(
+            url=r"^https?:\/\/uberall\.com\/api\/mf-lp-adapter\/llp\.json\?.*?(?<=[?&])auth_token=(?P<api_key>[A-Z]+)(?:&|$)"
+        ),
+    ]
 
     def start_requests(self):
         yield JsonRequest(
-            url=f"https://api.momentfeed.com/v1/analytics/api/llp.json?auth_token={self.id}&pageSize={self.page_size}&page=1"
+            url=f"https://api.momentfeed.com/v1/analytics/api/llp.json?auth_token={self.api_key}&pageSize={self.page_size}&page=1"
         )
 
-    def parse(self, response, **kwargs):
+    def parse(self, response: Response):
         if "message" in response.json():
             return
 
@@ -54,8 +62,8 @@ class MomentFeedSpider(Spider):
         if len(response.json()) == self.page_size:
             page = int(urllib.parse.parse_qs(urllib.parse.urlparse(response.url).query)["page"][0])
             yield JsonRequest(
-                url=f"https://api.momentfeed.com/v1/analytics/api/llp.json?auth_token={self.id}&pageSize={self.page_size}&page={page+1}"
+                url=f"https://api.momentfeed.com/v1/analytics/api/llp.json?auth_token={self.api_key}&pageSize={self.page_size}&page={page+1}"
             )
 
-    def parse_item(self, item, feature, store_info, **kwargs):
+    def parse_item(self, item: Feature, feature: dict, store_info: dict):
         yield item
