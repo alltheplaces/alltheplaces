@@ -566,6 +566,7 @@ class Access(Enum):
     """
 
     HGV = "hgv"
+    MOTOR_CAR = "motorcar"
 
 
 def apply_yes_no(attribute, item: Feature, state: bool, apply_positive_only: bool = True):
