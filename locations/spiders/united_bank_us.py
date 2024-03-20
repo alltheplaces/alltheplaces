@@ -1,5 +1,5 @@
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
-from locations.storefinders.rio_seo_spider import RioSeoSpider
+from locations.storefinders.rio_seo import RioSeoSpider
 
 
 class UnitedBankUSSpider(RioSeoSpider):
@@ -11,7 +11,9 @@ class UnitedBankUSSpider(RioSeoSpider):
     ]
 
     def post_process_feature(self, feature, location):
-        if location["location_type_cs"] == "Branch & ATM":
+        if location["location_type_cs"] == "Branch":
+            apply_category(Categories.BANK, feature)
+        elif location["location_type_cs"] == "Branch & ATM":
             apply_category(Categories.BANK, feature)
             apply_yes_no(Extras.ATM, feature, True)
         elif location["location_type_cs"] == "ATM":
@@ -19,3 +21,5 @@ class UnitedBankUSSpider(RioSeoSpider):
         else:
             self.logger.info("Cannot determine category, inferring location is bank")
             apply_category(Categories.BANK, feature)
+
+        yield feature
