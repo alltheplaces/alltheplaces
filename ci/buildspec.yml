@@ -118,7 +118,7 @@ phases:
                 if [ $FEATURE_COUNT == "0" ]; then
                     echo "${spider} has no output"
                     FAILURE_REASON="no output"
-                    PR_COMMENT_BODY="${PR_COMMENT_BODY}|[\`$spider\`](https://github.com/${OWNER}/${REPO}/blob/${GITHUB_SHA}/${spider})| (No Output) |Resulted in a \`${FAILURE_REASON}\` ([Log](${LOGFILE_URL}))|\\n"
+                    PR_COMMENT_BODY="${PR_COMMENT_BODY}|[\`$spider\`](https://github.com/alltheplaces/alltheplaces/blob/${GITHUB_SHA}/${spider})| (No Output) |Resulted in a \`${FAILURE_REASON}\` ([Log](${LOGFILE_URL}))|\\n"
                     EXIT_CODE=1
                     continue
                 fi
@@ -136,11 +136,11 @@ phases:
                     echo "${spider} has ${FEATURE_COUNT} features: https://alltheplaces-data.openaddresses.io/map.html?show=${OUTFILE_URL}"
                 fi
 
-                PR_COMMENT_BODY="${PR_COMMENT_BODY}|[\`$spider\`](https://github.com/${OWNER}/${REPO}/blob/${GITHUB_SHA}/${spider})|[${FEATURE_COUNT} items](${OUTFILE_URL}) ([Map](https://alltheplaces-data.openaddresses.io/map.html?show=${OUTFILE_URL}))|Resulted in a \`${FAILURE_REASON}\` ([Log](${LOGFILE_URL}))|\\n"
+                PR_COMMENT_BODY="${PR_COMMENT_BODY}|[\`$spider\`](https://github.com/alltheplaces/alltheplaces/blob/${GITHUB_SHA}/${spider})|[${FEATURE_COUNT} items](${OUTFILE_URL}) ([Map](https://alltheplaces-data.openaddresses.io/map.html?show=${OUTFILE_URL}))|Resulted in a \`${FAILURE_REASON}\` ([Log](${LOGFILE_URL}))|\\n"
             else
                 echo "${spider} has no output"
                 FAILURE_REASON="no output"
-                PR_COMMENT_BODY="${PR_COMMENT_BODY}|[\`$spider\`](https://github.com/${OWNER}/${REPO}/blob/${GITHUB_SHA}/${spider})| (No Output) |Resulted in a \`${FAILURE_REASON}\` ([Log](${LOGFILE_URL}))|\\n"
+                PR_COMMENT_BODY="${PR_COMMENT_BODY}|[\`$spider\`](https://github.com/alltheplaces/alltheplaces/blob/${GITHUB_SHA}/${spider})| (No Output) |Resulted in a \`${FAILURE_REASON}\` ([Log](${LOGFILE_URL}))|\\n"
                 EXIT_CODE=1
             fi
 
@@ -161,8 +161,8 @@ phases:
                     -XPOST \
                     -H "Authorization: token ${GITHUB_TOKEN}" \
                     -d "{\"body\":\"${PR_COMMENT_BODY}\"}" \
-                    "https://api.github.com/repos/${OWNER}/${REPO}/issues/${pull_request_number}/comments"
-                echo "Added a comment to pull https://github.com/${OWNER}/${REPO}/pull/${pull_request_number}"
+                    "https://api.github.com/repos/alltheplaces/alltheplaces/issues/${pull_request_number}/comments"
+                echo "Added a comment to pull https://github.com/alltheplaces/alltheplaces/pull/${pull_request_number}"
             else
                 echo "Not posting to GitHub because no pull event number set"
             fi
