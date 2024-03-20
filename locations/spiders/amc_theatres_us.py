@@ -22,8 +22,8 @@ class AMCTheatresUSSpider(Spider):
                 "city": theater_elem.xpath('.//Attribute[@name="city"]/text()').extract_first(),
                 "state": theater_elem.xpath('.//Attribute[@name="state"]/text()').extract_first(),
                 "postcode": theater_elem.xpath('.//Attribute[@name="postalCode"]/text()').extract_first(),
-                "lat": float(theater_elem.xpath('.//Attribute[@name="latitude"]/text()').extract_first()),
-                "lon": float(theater_elem.xpath('.//Attribute[@name="longitude"]/text()').extract_first()),
+                "lat": theater_elem.xpath('.//Attribute[@name="latitude"]/text()').extract_first(),
+                "lon": theater_elem.xpath('.//Attribute[@name="longitude"]/text()').extract_first(),
             }
 
             yield Feature(**properties)
