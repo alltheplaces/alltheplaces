@@ -8,7 +8,7 @@ class AMCTheatresUSSpider(Spider):
     item_attributes = {"brand": "AMC Theaters", "brand_wikidata": "Q294721"}
     allowed_domains = ["www.amctheatres.com"]
     start_urls = ["https://www.amctheatres.com/sitemaps/sitemap-theatres.xml"]
-    requires_proxy = "US"
+    # requires_proxy = "US"
 
     def parse(self, response):
         response.selector.remove_namespaces()
