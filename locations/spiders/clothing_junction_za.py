@@ -7,6 +7,6 @@ class ClothingJunctionZASpider(StoreLocatorWidgetsSpider):
     item_attributes = {
         "brand": "Clothing Junction",
         "brand_wikidata": "Q116474981",
-        "extras": Categories.SHOP_CLOTHES.value
+        "extras": Categories.SHOP_CLOTHES.value,
     }
     key = "N9yE0tiPbX9Z6diGz7MwPNqBWhMWA2uV"
