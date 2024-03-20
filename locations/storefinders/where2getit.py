@@ -1,6 +1,8 @@
+from urllib.parse import urlparse
+
 import pycountry
 from scrapy import Spider
-from scrapy.http import JsonRequest
+from scrapy.http import JsonRequest, Request, Response
 
 from locations.automatic_spider_generator import AutomaticSpiderGenerator, DetectionRequestRule, DetectionResponseRule
 from locations.dict_parser import DictParser
@@ -175,3 +177,32 @@ class Where2GetItSpider(Spider, AutomaticSpiderGenerator):
 
     def parse_item(self, item: Feature, location: dict, **kwargs):
         yield item
+
+    def storefinder_exists(response: Response) -> bool | Request:
+        # Example: https://www.att.com/stores/
+        # <script>
+        #     let locationsCount;
+        #     var W2GI = {
+        #         config: {
+        #             appkey: '...',
+        if response.xpath('//script[contains(text(), "W2GI")]').get():
+            return True
+
+        # https://locations.vans.com/index.html
+        # <script type="text/javascript" src="/w2gi/javascript/ace/2.1/W2GI_core.js"></script>
+        if response.xpath('//script[contains(@src, "W2GI")]').get():
+            return True
+
+        # https://www.dollartree.com/store-locator
+        # https://www.familydollar.com/store-locator
+        # "Oracle Commerce Cloud"
+        if response.xpath('//script[contains(text(), "ccstoreui")]').get():
+            return True
+
+        return False
+
+    def extract_spider_attributes(response: Response) -> dict | Request:
+        return {
+            "allowed_domains": [urlparse(response.url).netloc],
+            "api_key": "Inspect browser console to determine",
+        }

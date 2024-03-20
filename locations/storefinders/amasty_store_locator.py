@@ -1,4 +1,7 @@
-from scrapy import Request, Selector, Spider
+from urllib.parse import urlparse
+
+from scrapy import Request, Spider
+from scrapy.http import Response
 
 from locations.automatic_spider_generator import AutomaticSpiderGenerator, DetectionRequestRule
 from locations.dict_parser import DictParser
@@ -60,3 +63,16 @@ class AmastyStoreLocatorSpider(Spider, AutomaticSpiderGenerator):
 
     def parse_item(self, item, location, popup_html):
         yield item
+
+    def storefinder_exists(response: Response) -> bool | Request:
+        # Example: https://www.aussiedisposals.com.au/store-locator/
+        # Example: https://www.lcbo.com/en/stores/
+        if response.xpath('//script[contains(text(), "/amlocator/index/ajax/")]/text()').get():
+            return True
+
+        return False
+
+    def extract_spider_attributes(response: Response) -> dict | Request:
+        return {
+            "allowed_domains": [urlparse(response.url).netloc],
+        }

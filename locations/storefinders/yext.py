@@ -1,7 +1,8 @@
 import datetime
+from urllib.parse import urlparse
 
 from scrapy import Spider
-from scrapy.http import JsonRequest
+from scrapy.http import JsonRequest, Request, Response
 
 from locations.automatic_spider_generator import AutomaticSpiderGenerator, DetectionRequestRule
 from locations.dict_parser import DictParser
@@ -92,3 +93,24 @@ class YextSpider(Spider, AutomaticSpiderGenerator):
 
     def parse_item(self, item, location, **kwargs):
         yield item
+
+    def storefinder_exists(response: Response) -> bool | Request:
+        # "https://cdn.yextapis.com/v2/accounts/me/entities?api_key=
+        if response.xpath('//script[contains(text(), "window.Yext")]').get():
+            return True
+
+        # https://locations.cariboucoffee.com/
+        if response.xpath('//script[contains(text(), "locator-google")]').get():
+            return True
+
+        # https://www.fnb-online.com/atm-branch-locator
+        # As per https://hitchhikers.yext.com/guides/add-searchbar-guide/01-intializethelibrary/
+        if response.xpath('//script[contains(@src, "answers-search-bar")]').get():
+            return True
+
+        return False
+
+    def extract_spider_attributes(response: Response) -> dict | Request:
+        return {
+            "allowed_domains": [urlparse(response.url).netloc],
+        }
