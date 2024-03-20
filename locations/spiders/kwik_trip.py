@@ -1,51 +1,81 @@
+from typing import Any
+
 import scrapy
+from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, Extras, Fuel, apply_category, apply_yes_no
-from locations.items import Feature
-from locations.user_agents import BROWSER_DEFAULT
+from locations.dict_parser import DictParser
+from locations.hours import OpeningHours
+from locations.pipelines.address_clean_up import merge_address_lines
 
-AMENITIES_MAPPING = {
-    "10": Extras.CAR_WASH,
-    "12": Fuel.DIESEL,
-    "13": Fuel.CNG,
-    "14": Fuel.LNG,
-    "15": Fuel.ADBLUE,
-    "16": Fuel.E85,
+BRANDS = {
+    "KWIK SPIRITS": {"name": "Kwik Spirits"},
+    "KWIK STAR": {"name": "Kwik Star", "brand": "Kwik Star", "brand_wikidata": "Q123269534"},
+    "KWIK TRIP": {"name": "Kwik Trip"},
+    "STOP N GO": {"name": "Stop N Go"},
+    "TOBACCO OUTLET PLUS": {"name": "Tobacco Outlet Plus"},
+    "TOBACCO OUTLET PLUS GROCERY": {"name": "Tobacco Outlet Plus Grocery"},
 }
-# Sells Gas = 11, but it's not clear what octane number to use.
 
 
 class KwikTripSpider(scrapy.Spider):
     name = "kwiktrip"
     item_attributes = {"brand": "Kwik Trip", "brand_wikidata": "Q6450420"}
     allowed_domains = ["www.kwiktrip.com"]
-    download_delay = 0
-    user_agent = BROWSER_DEFAULT
     start_urls = ["https://www.kwiktrip.com/Maps-Downloads/Store-List"]
     requires_proxy = True
 
-    def parse(self, response):
-        rows = response.xpath("(//tr)[position()>1]")  # Skip header of table
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        for location in response.xpath("(//tr)[position()>1]"):
+            yield JsonRequest(
+                url="https://www.kwiktrip.com/locproxy.php?location={}".format(
+                    location.xpath('.//td[@class="column-1"]/text()').get()
+                ),
+                callback=self.parse_location,
+            )
 
-        for row in rows:
-            properties = {
-                "ref": row.xpath('.//td[@class="column-1"]/text()').extract_first(),
-                "name": row.xpath('.//td[@class="column-2"]/text()').extract_first(),
-                "street_address": row.xpath('.//td[@class="column-3"]/text()').extract_first(),
-                "city": row.xpath('.//td[@class="column-4"]/text()').extract_first(),
-                "state": row.xpath('.//td[@class="column-5"]/text()').extract_first(),
-                "postcode": row.xpath('.//td[@class="column-6"]/text()').extract_first(),
-                "lat": row.xpath('.//td[@class="column-8"]/text()').extract_first(),
-                "lon": row.xpath('.//td[@class="column-9"]/text()').extract_first(),
-                "phone": row.xpath('.//td[@class="column-7"]/text()').extract_first(),
-                "website": response.url,
-            }
-            item = Feature(**properties)
+    def parse_location(self, response: Response, **kwargs: Any) -> Any:
+        location = response.json()
+        item = DictParser.parse(location)
+        item["street_address"] = merge_address_lines([location["address"]["address1"], location["address"]["address2"]])
 
-            for amenity in AMENITIES_MAPPING:
-                if row.xpath(f'.//td[@class="column-{amenity}"]/text()').extract_first() == "Yes":
-                    apply_yes_no(AMENITIES_MAPPING.get(amenity), item, True)
+        item["lat"] = location["address"]["latitude"]
+        item["lon"] = location["address"]["longitude"]
+        item["website"] = "https://www.kwiktrip.com/locator/store?id={}".format(item["ref"])
 
+        if location["open24Hours"]:
+            item["opening_hours"] = "24/7"
+        else:
+            item["opening_hours"] = OpeningHours()
+            for rule in location["hours"]:
+                item["opening_hours"].add_range(rule["dayOfWeek"], rule["openTime"], rule["closeTime"], "%H:%M:%S")
+
+        properties = [p["displayName"] if p["hasProperty"] else None for p in location["properties"]]
+
+        apply_yes_no(Extras.ATM, item, "ATM" in properties)
+        apply_yes_no(Extras.CAR_WASH, item, "Car Wash" in properties)
+        apply_yes_no(Extras.SHOWERS, item, "Showers" in properties)
+        # "Fleet Cards Accepted"
+
+        apply_yes_no(Fuel.BIODIESEL, item, "Bio Diesel" in properties)
+        apply_yes_no(Fuel.CNG, item, "CNG" in properties)
+        apply_yes_no(Fuel.DIESEL, item, "Diesel" in properties)
+        apply_yes_no(Fuel.E85, item, "E-85" in properties)
+        apply_yes_no(Fuel.E88, item, "E-88" in properties)
+        # "Diesel Exhaust Fluid", "Gas"
+
+        # TODO: fuel prices
+
+        store_format, _ = item["name"].split(" #", 1)
+        if store_format in BRANDS:
+            item.update(BRANDS[store_format])
+
+        if location.get("fuel"):
             apply_category(Categories.FUEL_STATION, item)
+        else:
+            if item["name"] == "Tobacco Outlet Plus":
+                apply_category(Categories.SHOP_TOBACCO, item)
+            else:
+                apply_category(Categories.SHOP_CONVENIENCE, item)
 
-            yield item
+        yield item

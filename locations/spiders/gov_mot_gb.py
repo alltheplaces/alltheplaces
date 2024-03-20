@@ -35,8 +35,8 @@ class GovMOTGBSpider(CSVFeedSpider):
 
     def parse_row(self, response, row):
         item = Feature()
-        item["ref"] = row["Site ID"]
-        item["name"] = row["Trading Name"]
+        item["ref"] = row["Site_Number"]
+        item["name"] = row["Trading_Name"]
         item["street_address"] = merge_address_lines([row["Address1"], row["Address2"], row["Address3"]])
         item["city"] = row["Town"]
         item["postcode"] = row["Postcode"]
