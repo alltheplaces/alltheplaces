@@ -1,4 +1,4 @@
-from locations.storefinders.rio_seo_spider import RioSeoSpider
+from locations.storefinders.rio_seo import RioSeoSpider
 
 
 class HallmarkSpider(RioSeoSpider):
@@ -8,6 +8,3 @@ class HallmarkSpider(RioSeoSpider):
     start_urls = [
         "https://maps.hallmark.com/api/getAsyncLocations?template=search&level=search&search=66952&radius=10000&limit=3000"
     ]
-
-    def post_process_feature(self, feature, location):
-        feature["country"] = location["country"]
