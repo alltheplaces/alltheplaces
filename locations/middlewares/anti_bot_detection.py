@@ -12,11 +12,28 @@ from scrapy.http import HtmlResponse, Response
 # need to be frequently updated depending on the effectiveness of
 # Zyte API's ability to rapidly bypass new/revised anti-bot methods.
 class AntiBotMethods(Enum):
+    # Azure Web Applicatigon Firewall bot protection documentation:
+    # https://learn.microsoft.com/en-us/azure/web-application-firewall/ag/bot-protection-overview
     AZURE_WAF = {"name": "Azure WAF", "zyte_bypassable": True}
+
+    # Cloudflare bot protection documentation:
+    # https://developers.cloudflare.com/bots/
     CLOUDFLARE = {"name": "Cloudflare", "zyte_bypassable": True}
+
+    # DataDome bot protection product brochure:
+    # https://datadome.co/products/bot-protection/
     DATADOME = {"name": "DataDome", "zyte_bypassable": True}
+
+    # HUMAN Bot Defender bot protection product brochure:
+    # https://www.humansecurity.com/products/human-bot-defender
     HUMAN = {"name": "HUMAN", "zyte_bypassable": True}
+
+    # Imperva bot protection product brochure:
+    # https://www.imperva.com/products/bot-detection-mitigation/
     IMPERVA = {"name": "Imperva", "zyte_bypassable": True}
+
+    # Qrator bot protection documentation:
+    # https://docs.qrator.net/en/technologies/tracking-cookie.html
     QRATOR = {"name": "Qrator", "zyte_bypassable": True}
 
 
