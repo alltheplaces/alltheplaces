@@ -8,10 +8,22 @@ from locations.dict_parser import DictParser
 from locations.pipelines.address_clean_up import merge_address_lines
 
 
-class CostcoGBSpider(Spider):
-    name = "costco_gb"
+class CostcoGlobalSpider(Spider):
+    name = "costco_global"
     item_attributes = {"brand": "Costco", "brand_wikidata": "Q715583"}
-    start_urls = ["https://www.costco.co.uk/store-finder/search?q=United%20Kingdom"]
+    start_urls = [
+        "https://www.costco.co.uk/store-finder/search?q=",
+        "https://www.costco.com.au/store-finder/search?q=",
+        "https://www.costco.com.tw/store-finder/search?q=",
+        "https://www.costco.fr/store-finder/search?q=",
+        "https://www.costco.is/store-finder/search?q=",
+        "https://www.costco.co.jp/store-finder/search?q=",
+        "https://www.costco.com.mx/store-finder/search?q=",
+        "https://www.costco.co.nz/store-finder/search?q=",
+        "https://www.costco.co.kr/store-finder/search?q=",
+        "https://www.costco.es/store-finder/search?q=",
+        "https://www.costco.se/store-finder/search?q=",
+    ]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json()["data"]:
@@ -23,7 +35,7 @@ class CostcoGBSpider(Spider):
             item["ref"] = location["warehouseCode"]
 
             services = {}
-            for service in location["availableServices"]:
+            for service in location.get("availableServices", []):
                 services[service["code"]] = service
 
             for code, cat in [
@@ -39,7 +51,7 @@ class CostcoGBSpider(Spider):
                 apply_category(cat, i)
                 yield i
 
-            apply_yes_no(Extras.WHEELCHAIR, item, "Wheelchair Available" in location["features"])
+            apply_yes_no(Extras.WHEELCHAIR, item, "Wheelchair Available" in location.get("features", []))
 
             apply_category(Categories.SHOP_WHOLESALE, item)
 
