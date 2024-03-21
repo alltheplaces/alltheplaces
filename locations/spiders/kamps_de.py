@@ -30,7 +30,7 @@ class KampsDESpider(SitemapSpider):
             range_str = row.xpath("./td/text()")[-1].extract()
             if range_str == "24 Stunden":
                 oh.add_days_range(DAYS, "00:00", "23:59")
-            if "Vorübergehend geschlossen" in range_str:
+            if "geschlossen" in range_str:
                 return
             times = range_str.replace("–", "-")
             if "-" in times:
