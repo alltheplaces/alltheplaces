@@ -46,7 +46,7 @@ Each GeoJSON feature will have a `properties` object with as many of the followi
 | `contact:twitter`     | The twitter account for the venue. We try to make this specific to the venue and not generic for the brand that is operating the venue.
 | `contact:facebook`    | The facebook account for the venue. We try to make this specific to the venue and not generic for the brand that is operating the venue.
 | **Other**             | _Other information about the venue_
-| `opening_hours`       | The opening hours for the venue. When we can, the format for this field follows [OpenStreetMap's `opening_hours` format](https://wiki.openstreetmap.org/wiki/Key:opening_hours#Examples). Note that:<br>- day is omitted from the opening hours string when object is closed on that day (normal in this format)<br>- in some cases only some days of week are parsed, that day is omitted from the opening hours string and [it is impossible to distinguish this cases](https://github.com/alltheplaces/alltheplaces/issues/6943)<br>- opening hours provided by source and recorded in ATP may be special for given week due to presence of public holidays exist within the week. Given day can be omitted from opening hours field also for this reason, some days may also have unusually short or unusually long opening hours. Data captured from previous weeks can be checked to find the most common (regular) opening hours for a location.<br>- opening hour strings do not match OSM syntax [when time ranges extend across midnight](https://github.com/alltheplaces/alltheplaces/discussions/4959)
+| `opening_hours`       | The opening hours for the venue. See further discussion [below](#opening-hours) for more details.
 | `image`               | A URL of an image for the venue. We try to make this specific to the venue and not generic for the brand that is operating the venue.
 | `located_in`          | The name of the feature that this feature is located in.
 | `located_in:wikidata` | The [Wikidata](https://www.wikidata.org/wiki/Wikidata:Main_Page) [item ID](https://www.wikidata.org/wiki/Help:Items) for the brand or chain of the feature that this feature is located in. This is a machine-readable identifier counterpart for the human-readable `located_in` above.
@@ -58,6 +58,15 @@ Each GeoJSON feature will have a `properties` object with as many of the followi
 Spiders can also include extra fields that will show up but aren't necessarily documented outside their source code.
 We aim for them to be consistent with [OpenStreetMap tagging](https://wiki.openstreetmap.org/wiki/Main_Page).
 If enough spiders find interesting things to include in an extra property, it might be included here in the documentation in the future.
+
+## Opening Hours
+
+When we can, the format for opening hours follows [OpenStreetMap's `opening_hours` format](https://wiki.openstreetmap.org/wiki/Key:opening_hours#Examples), with the following known caveats:
+
+* Day is omitted from the opening hours string when object is closed on that day
+* In some cases only some days of week are parsed, that day is omitted from the opening hours string and [it is impossible to distinguish this cases](https://github.com/alltheplaces/alltheplaces/issues/6943)
+* Opening hours provided by a source and recorded in All the Places may be special for the week due to presence of public holidays within the week at the time of parsing. As a result, the day may be omitted from opening hours output. Also for this reason, some days may have unusually short or unusually long opening hours. Data captured from previous All the Places builds can be checked to find the most common (regular) opening hours for a location.
+* Opening hours format does not match OSM syntax exactly [when time ranges extend across midnight](https://github.com/alltheplaces/alltheplaces/discussions/4959).
 
 ## Categories
 
