@@ -48,7 +48,7 @@ class MapsMarkerProSpider(Spider):
 
             for popup in response.json()["data"]:
                 if popup["id"] == location["properties"]["id"]:
-                    html_fragment = HtmlResponse(url="#", body=popup["popup"], encoding="utf-8")
+                    html_fragment = HtmlResponse(url="#"+popup["id"], body=popup["popup"], encoding="utf-8")
                     item = self.parse_popup_html(item, location, html_fragment)
 
             yield from self.parse_item(item, location)
@@ -58,7 +58,6 @@ class MapsMarkerProSpider(Spider):
         for hours in html_fragment.xpath("//div[contains(@class, 'real-opening-hours')]/ul/li/text()").getall():
             item["opening_hours"].add_ranges_from_string(hours, days=self.days)
 
-        item["website"] = html_fragment.xpath("//a/@href").get()
         return item
 
     def parse_item(self, item: Feature, location: dict, **kwargs):
