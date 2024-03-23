@@ -33,8 +33,10 @@ phases:
           # if the cache does not exist, install dependencies and save the cache to S3
           echo "Cache not found. Installing dependencies."
           pip install -qq --upgrade pip pipenv
-          echo "Pipenv is installed at $(which pipenv)"
           pipenv sync --system
+          echo "Pipenv is installed at $(which pipenv)"
+          echo "Python is installed at $(which python)"
+          echo "Scrapy is installed at $(which scrapy)"
 
           echo "Caching pipenv environment to $REMOTE_CACHE_LOCATION"
           tar -czf "${PIPENV_HASH}.tar.gz" "${PYTHON_INSTALL_LOCATION}"
