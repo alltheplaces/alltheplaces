@@ -1,9 +1,8 @@
-from scrapy.spiders import SitemapSpider
-
-import chompjs
 import re
 
-from locations.dict_parser import DictParser
+import chompjs
+from scrapy.spiders import SitemapSpider
+
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -22,7 +21,6 @@ class PerkinsSpider(SitemapSpider, StructuredDataSpider):
     stores_pattern = re.compile(r"data:(\[.+\]),fe")
     coordinates_map = {}
 
-
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["ref"] = response.url
         if js := response.xpath('//script[contains(text(), "__NUXT__")]/text()').get():
@@ -37,10 +35,9 @@ class PerkinsSpider(SitemapSpider, StructuredDataSpider):
                 stores = chompjs.parse_js_object("[" + m.group(1) + "]")
                 for store in stores:
                     # Find the one entry with a 2 character variable instead of a URL
-                    if len(store['path']) == 2:
-                        latitude_variable = store['content']['latitude']
-                        longitude_variable = store['content']['longitude']
-
+                    if len(store["path"]) == 2:
+                        latitude_variable = store["content"]["latitude"]
+                        longitude_variable = store["content"]["longitude"]
 
             # See also: ToolstationSpider.
             # stores is actually a JS function, so we have to parse the parameters and values
@@ -51,10 +48,9 @@ class PerkinsSpider(SitemapSpider, StructuredDataSpider):
                 args[params[i]] = values[i]
 
             if latitude_variable is not None and longitude_variable is not None:
-                item['lat'] = args[latitude_variable]
-                item['lon'] = args[longitude_variable]
+                item["lat"] = args[latitude_variable]
+                item["lon"] = args[longitude_variable]
 
             yield item
 
-    
         return super().post_process_item(item, response, ld_data, **kwargs)
