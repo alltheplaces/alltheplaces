@@ -34,6 +34,10 @@ phases:
           pip install --upgrade pip pipenv
           pipenv install --deploy
 
+          # install playwright dependencies too
+          pipenv run playwright install-deps
+          pipenv run playwright install firefox
+
           echo "Caching pipenv environment to $REMOTE_CACHE_LOCATION"
           tar -czf ${PIPENV_HASH}.tar.gz .venv
           aws s3 --only-show-errors cp ${PIPENV_HASH}.tar.gz $REMOTE_CACHE_LOCATION
