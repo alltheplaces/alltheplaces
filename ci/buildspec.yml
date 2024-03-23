@@ -11,9 +11,33 @@ phases:
   install:
     runtime-versions:
       python: 3.11
+  pre_build:
+    on-failure: ABORT
     commands:
-      - pip install pipenv
-      - pipenv --bare install --deploy
+      - |
+        # calculate a hash of the pipenv lockfile
+        # this is used to cache the pipenv environment
+        # if the lockfile changes, the cache will be invalidated
+        PIPENV_HASH=$(sha256sum Pipfile.lock | cut -d ' ' -f 1)
+
+        # output where pip is installing stuff to help with debugging
+        echo "Pip install location: $(python -m site --user-base)/lib/python3.11/site-packages"
+
+        # check if the cache exists on S3
+        REMOTE_CACHE_LOCATION="s3://${BUCKET}/pipenv-cache/${PIPENV_HASH}.tar.gz"
+        if aws s3 --only-show-errors cp $REMOTE_CACHE_LOCATION .; then
+          # if the cache exists, extract it
+          tar -xzf ${PIPENV_HASH}.tar.gz
+        else
+          # if the cache does not exist, install dependencies and save the cache to S3
+          echo "Cache not found. Installing dependencies."
+          pip install --upgrade pip pipenv
+          pipenv install --deploy
+
+          echo "Caching pipenv environment to $REMOTE_CACHE_LOCATION"
+          tar -czf ${PIPENV_HASH}.tar.gz .venv
+          aws s3 --only-show-errors cp ${PIPENV_HASH}.tar.gz $REMOTE_CACHE_LOCATION
+        fi
   build:
     commands:
       - pipenv run scrapy check
