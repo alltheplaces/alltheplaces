@@ -12,7 +12,6 @@ phases:
     runtime-versions:
       python: 3.11
   pre_build:
-    on-failure: ABORT
     commands:
       - |
         # calculate a hash of the pipenv lockfile
@@ -34,7 +33,7 @@ phases:
           # if the cache does not exist, install dependencies and save the cache to S3
           echo "Cache not found. Installing dependencies."
           pip install --user --upgrade pip pipenv
-          pipenv install --deploy
+          pipenv sync --deploy
 
           # install playwright dependencies too
           pipenv run playwright install-deps
