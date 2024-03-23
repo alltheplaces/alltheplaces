@@ -48,7 +48,7 @@ class MapsMarkerProSpider(Spider):
 
             for popup in response.json()["data"]:
                 if popup["id"] == location["properties"]["id"]:
-                    html_fragment = HtmlResponse(url="#"+popup["id"], body=popup["popup"], encoding="utf-8")
+                    html_fragment = HtmlResponse(url="#" + popup["id"], body=popup["popup"], encoding="utf-8")
                     item = self.parse_popup_html(item, location, html_fragment)
 
             yield from self.parse_item(item, location)
