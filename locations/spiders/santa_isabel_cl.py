@@ -40,7 +40,7 @@ class SantaIsabelCLSpider(Spider):
 
             hours_string = (
                 re.sub(
-                    "\s+", " ", location.get("schedule").replace("<br />", " ").replace("<b>", " ").replace("</b>", " ")
+                    r"\s+", " ", location.get("schedule").replace("<br />", " ").replace("<b>", " ").replace("</b>", " ")
                 )
                 .replace("Domingos y Festivos", "Domingos")
                 .strip()
