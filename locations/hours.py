@@ -450,10 +450,12 @@ DAYS_ES = {
     "Vi": "Fr",
     "Sabado": "Sa",
     "Sábado": "Sa",
+    "Sábados": "Sa",
     "Sab": "Sa",
     "Sáb": "Sa",
     "Sa": "Sa",
     "Domingo": "Su",
+    "Domingos": "Su",
     "Dom": "Su",
     "Do": "Su",
 }
