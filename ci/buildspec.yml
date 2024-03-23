@@ -20,7 +20,7 @@ phases:
         PIPENV_HASH=$(sha256sum Pipfile.lock | cut -d ' ' -f 1)
 
         # output where pip is installing stuff to help with debugging
-        PYTHON_INSTALL_LOCATION=$(python -m site --user-site)
+        PYTHON_INSTALL_LOCATION="/tmp/opt/python/site-packages"
         echo "Pip install location: ${PYTHON_INSTALL_LOCATION}"
 
         # check if the cache exists on S3
@@ -37,6 +37,7 @@ phases:
           echo "Pipenv is installed at $(which pipenv)"
           echo "Python is installed at $(which python)"
           echo "Scrapy is installed at $(which scrapy)"
+          echo "Playwright is installed at $(which playwright)"
 
           echo "Caching pipenv environment to $REMOTE_CACHE_LOCATION"
           tar -czf "${PIPENV_HASH}.tar.gz" "${PYTHON_INSTALL_LOCATION}"
