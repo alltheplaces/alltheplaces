@@ -21,17 +21,19 @@ phases:
         PIPENV_HASH=$(sha256sum Pipfile.lock | cut -d ' ' -f 1)
 
         # output where pip is installing stuff to help with debugging
-        echo "Pip install location: $(python -m site --user-base)/lib/python3.11/site-packages"
+        PYTHON_INSTALL_LOCATION=$(python -m site --user-site)
+        echo "Pip install location: ${PYTHON_INSTALL_LOCATION}"
 
         # check if the cache exists on S3
         REMOTE_CACHE_LOCATION="s3://${BUCKET}/pipenv-cache/${PIPENV_HASH}.tar.gz"
         if aws s3 --only-show-errors cp $REMOTE_CACHE_LOCATION .; then
-          # if the cache exists, extract it
-          tar -xzf ${PIPENV_HASH}.tar.gz
+          # if the cache exists, extract it to the install location
+          echo "Cache found. Extracting ${REMOTE_CACHE_LOCATION} to ${PYTHON_INSTALL_LOCATION}"
+          tar -xzf ${PIPENV_HASH}.tar.gz -C ${PYTHON_INSTALL_LOCATION}
         else
           # if the cache does not exist, install dependencies and save the cache to S3
           echo "Cache not found. Installing dependencies."
-          pip install --upgrade pip pipenv
+          pip install --user --upgrade pip pipenv
           pipenv install --deploy
 
           # install playwright dependencies too
