@@ -31,7 +31,7 @@ class PerkinsSpider(SitemapSpider, StructuredDataSpider):
             # The only one without strings and values will be the current store,
             # which will have variables.
             # We use these to determine what the specific page has compiled, later
-            if m := re.search("locations:\[(.*)\]", js):
+            if m := re.search(r"locations:\[(.*)\]", js):
                 stores = chompjs.parse_js_object("[" + m.group(1) + "]")
                 for store in stores:
                     # Find the one entry with a 2 character variable instead of a URL
