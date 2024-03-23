@@ -33,6 +33,7 @@ phases:
           # if the cache does not exist, install dependencies and save the cache to S3
           echo "Cache not found. Installing dependencies."
           pip install --upgrade pip pipenv
+          echo "Pipenv is installed at $(which pipenv)"
           pipenv sync --system
 
           echo "Caching pipenv environment to $REMOTE_CACHE_LOCATION"
