@@ -32,12 +32,12 @@ phases:
         else
           # if the cache does not exist, install dependencies and save the cache to S3
           echo "Cache not found. Installing dependencies."
-          pip install --upgrade pip pipenv
+          pip install -qq --upgrade pip pipenv
           echo "Pipenv is installed at $(which pipenv)"
           pipenv sync --system
 
           echo "Caching pipenv environment to $REMOTE_CACHE_LOCATION"
-          tar -czf ${PIPENV_HASH}.tar.gz .venv
+          tar -czf "${PIPENV_HASH}.tar.gz" "${PYTHON_INSTALL_LOCATION}"
           aws s3 --only-show-errors cp ${PIPENV_HASH}.tar.gz $REMOTE_CACHE_LOCATION
         fi
   build:
