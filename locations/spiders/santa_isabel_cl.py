@@ -44,8 +44,8 @@ class SantaIsabelCLSpider(Spider):
                     " ",
                     location.get("schedule").replace("<br />", " ").replace("<b>", " ").replace("</b>", " "),
                 )
-                .replace("Domingos y Festivos", "Domingos")
                 .replace("Sábados, Domingos y Festivos", "Sábados a Domingos")
+                .replace("Domingos y Festivos", "Domingos")
                 .strip()
             )
             properties["opening_hours"] = OpeningHours()
