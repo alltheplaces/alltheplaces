@@ -35,8 +35,8 @@ class SantaIsabelCLSpider(Spider):
 
             coordinates = re.findall(r"-?\d+\.\d*", location.get("geolocation"))
             if len(coordinates) == 2:
-                properties["lat"] = coordinates[1]
-                properties["lon"] = coordinates[0]
+                properties["lat"] = coordinates[0]
+                properties["lon"] = coordinates[1]
 
             hours_string = (
                 re.sub(
