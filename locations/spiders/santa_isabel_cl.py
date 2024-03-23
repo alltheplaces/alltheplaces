@@ -1,8 +1,8 @@
 import re
-from unidecode import unidecode
 
 from scrapy import Spider
 from scrapy.http import JsonRequest
+from unidecode import unidecode
 
 from locations.categories import Categories
 from locations.hours import DAYS_ES, DELIMITERS_ES, OpeningHours
@@ -11,7 +11,11 @@ from locations.items import Feature
 
 class SantaIsabelCLSpider(Spider):
     name = "santa_isabel_cl"
-    item_attributes = {"brand": "Santa Isabel", "brand_wikidata": "Q7419620", "extras": Categories.SHOP_SUPERMARKET.value}
+    item_attributes = {
+        "brand": "Santa Isabel",
+        "brand_wikidata": "Q7419620",
+        "extras": Categories.SHOP_SUPERMARKET.value,
+    }
     allowed_domains = ["assets.santaisabel.cl"]
     start_urls = ["https://assets.santaisabel.cl/json/cms/page-1506.json"]
 
@@ -34,9 +38,14 @@ class SantaIsabelCLSpider(Spider):
                 properties["lat"] = coordinates[1]
                 properties["lon"] = coordinates[0]
 
-            hours_string = re.sub("\s+", " ", location.get("schedule").replace("<br />", " ").replace("<b>", " ").replace("</b>", " ")).replace("Domingos y Festivos", "Domingos").strip()
+            hours_string = (
+                re.sub(
+                    "\s+", " ", location.get("schedule").replace("<br />", " ").replace("<b>", " ").replace("</b>", " ")
+                )
+                .replace("Domingos y Festivos", "Domingos")
+                .strip()
+            )
             properties["opening_hours"] = OpeningHours()
             properties["opening_hours"].add_ranges_from_string(hours_string, days=DAYS_ES, delimiters=DELIMITERS_ES)
 
             yield Feature(**properties)
-
