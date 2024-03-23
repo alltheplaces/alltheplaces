@@ -1,14 +1,10 @@
 import scrapy
-
-
 from scrapy import Spider
+from scrapy.http import HtmlResponse
 
 from locations.dict_parser import DictParser
-from locations.geo import point_locations
-from locations.hours import DAYS_BY_FREQUENCY, OpeningHours, sanitise_day
+from locations.hours import OpeningHours
 from locations.items import Feature
-from locations.pipelines.address_clean_up import merge_address_lines
-from scrapy.http import HtmlResponse
 
 # Similar to many other wordpress based spiders, supply an allowed domain or start_urls
 # Explicity specify days

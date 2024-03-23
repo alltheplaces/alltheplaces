@@ -1,5 +1,5 @@
-from locations.storefinders.maps_marker_pro import MapsMarkerProSpider
 from locations.hours import DAYS_HU
+from locations.storefinders.maps_marker_pro import MapsMarkerProSpider
 
 
 class RealHU(MapsMarkerProSpider):
