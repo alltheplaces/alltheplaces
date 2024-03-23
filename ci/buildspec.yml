@@ -3,6 +3,7 @@ version: 0.2
 env:
   variables:
     BUCKET: alltheplaces.openaddresses.io
+    CODEBUILD_CACHE_BUCKET: codebuild-cache.openaddresses.io
   secrets-manager:
     ZYTE_API_KEY: "alltheplaces:ZYTE_API_KEY"
     GITHUB_TOKEN: "alltheplaces:GITHUB_TOKEN"
@@ -24,7 +25,7 @@ phases:
         echo "Pip install location: ${PYTHON_INSTALL_LOCATION}"
 
         # check if the cache exists on S3
-        REMOTE_CACHE_LOCATION="s3://${BUCKET}/pipenv-cache/${PIPENV_HASH}.tar.gz"
+        REMOTE_CACHE_LOCATION="s3://${CODEBUILD_CACHE_BUCKET}/atp-pipenv-cache/${PIPENV_HASH}.tar.gz"
         if aws s3 --only-show-errors cp $REMOTE_CACHE_LOCATION .; then
           # if the cache exists, extract it to the install location
           echo "Cache found. Extracting ${REMOTE_CACHE_LOCATION} to ${PYTHON_INSTALL_LOCATION}"
