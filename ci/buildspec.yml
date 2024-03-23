@@ -46,7 +46,7 @@ phases:
         fi
   build:
     commands:
-      - pipenv run scrapy check
+      - scrapy check
       - |
         env
         PR_COMMENT_BODY="I ran the spiders in this pull request and got these results:\\n\\n|Spider|Results|Log|\\n|---|---|---|\\n"
@@ -86,8 +86,8 @@ phases:
 
         if grep PLAYWRIGHT -q -m 1 $SPIDERS; then
             echo "Playwright detected. Installing requirements."
-            pipenv run playwright install-deps
-            pipenv run playwright install firefox
+            playwright install-deps
+            playwright install firefox
         fi
 
         RUN_DIR="/tmp/output"
@@ -109,7 +109,7 @@ phases:
             LOGFILE="${SPIDER_RUN_DIR}/log.txt"
             OUTFILE="${SPIDER_RUN_DIR}/output.geojson"
 
-            pipenv run scrapy runspider \
+            scrapy runspider \
                 -o "file://${OUTFILE}:geojson" \
                 --loglevel=INFO \
                 --logfile="${LOGFILE}" \
