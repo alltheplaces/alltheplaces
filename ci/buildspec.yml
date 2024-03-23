@@ -29,6 +29,7 @@ phases:
         if aws s3 --only-show-errors cp $REMOTE_CACHE_LOCATION .; then
           # if the cache exists, extract it to the install location
           echo "Cache found. Extracting ${REMOTE_CACHE_LOCATION} to ${PYTHON_INSTALL_LOCATION}"
+          mkdir -p ${PYTHON_INSTALL_LOCATION}
           tar -xzf ${PIPENV_HASH}.tar.gz -C ${PYTHON_INSTALL_LOCATION}
         else
           # if the cache does not exist, install dependencies and save the cache to S3
