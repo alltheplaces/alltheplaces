@@ -6,6 +6,7 @@ from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.items import Feature
 
+# Spider for https://www.mapsmarker.com/
 # Similar to many other wordpress based spiders, supply an allowed domain or start_urls
 # Explicity specify days
 # TODO: Auto detection of an ajaxy request with mmp_* to a wordpress endpoint
