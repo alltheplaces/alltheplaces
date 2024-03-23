@@ -19,7 +19,7 @@ class MapsMarkerProSpider(Spider):
         payload = "action=mmp_map_markers&type=map"
         if len(self.start_urls) == 0 and hasattr(self, "allowed_domains"):
             for domain in self.allowed_domains:
-                url = "https://{domain}/wp-admin/admin-ajax.php"
+                url = f"https://{domain}/wp-admin/admin-ajax.php"
                 yield scrapy.Request(url=url, headers=self.headers, method="POST", body=payload, callback=self.parse)
         elif len(self.start_urls) != 0:
             for url in self.start_urls:
