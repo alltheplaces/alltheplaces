@@ -45,7 +45,7 @@ class MapsMarkerProSpider(Spider):
     def parse_popups(self, response, features, **kwargs):
         for location in features:
             item = DictParser.parse(location["properties"])
-            item["lat"], item["lon"] = location["geometry"]["coordinates"]
+            item["geometry"] = location["geometry"]
 
             for popup in response.json()["data"]:
                 if popup["id"] == location["properties"]["id"]:
