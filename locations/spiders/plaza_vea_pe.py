@@ -15,8 +15,8 @@ class PlazaVeaPESpider(Spider):
             item = DictParser.parse(location)
             item["ref"] = location["TIE_CODIGO"]
             item["name"] = location["TIE_NOMBRE"]
-            item["lat"] = location["TIE_GMAP_LONGITUD"]
-            item["lon"] = location["TIE_GMAP_LATITUD"]
+            item["lon"] = location["TIE_GMAP_LONGITUD"]
+            item["lat"] = location["TIE_GMAP_LATITUD"]
             item["phone"] = location["TIE_TELEFONO"]
             item["street_address"] = location["TIE_DIRECCION"]
             item["opening_hours"] = OpeningHours()
