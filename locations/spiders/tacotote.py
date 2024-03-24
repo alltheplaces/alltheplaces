@@ -1,6 +1,4 @@
-import re
 import scrapy
-
 from scrapy.spiders.sitemap import SitemapSpider
 
 from locations.categories import Categories

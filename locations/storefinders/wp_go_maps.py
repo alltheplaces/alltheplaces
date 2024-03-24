@@ -2,7 +2,7 @@ import base64
 import json
 import zlib
 
-from scrapy import Spider, Request
+from scrapy import Request, Spider
 
 from locations.dict_parser import DictParser
 
@@ -21,12 +21,12 @@ class WpGoMapsSpider(Spider):
 
     def start_requests(self):
         urls = self.start_urls
-        if (len(self.start_urls) == 0):
+        if len(self.start_urls) == 0:
             urls.append(self.features_url_for(self.map_id))
-        
+
         for url in urls:
             yield Request(url=url, callback=self.parse)
-          
+
     def parse(self, response, **kwargs):
         yield from self.parse_stores(response)
 
