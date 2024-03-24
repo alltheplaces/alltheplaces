@@ -53,7 +53,7 @@ class WpGoMapsSpider(Spider):
         if "<img" in marker["address"]:
             marker.pop("address")
         return marker
-    
+
     def post_process_item(self, item, location):
         return item
 
