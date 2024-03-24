@@ -19,28 +19,24 @@ phases:
         # this is used to cache the pipenv environment
         # if the lockfile changes, the cache will be invalidated
         PIPENV_HASH=$(sha256sum Pipfile.lock | cut -d ' ' -f 1)
+        PLATFORM=$(uname -m)
 
         # output where pip is installing stuff to help with debugging
         PYTHON_INSTALL_LOCATION="/tmp/opt/python/site-packages"
         echo "Pip install location: ${PYTHON_INSTALL_LOCATION}"
 
         # check if the cache exists on S3
-        REMOTE_CACHE_LOCATION="s3://${CODEBUILD_CACHE_BUCKET}/atp-pipenv-cache/${PIPENV_HASH}.tar.gz"
+        REMOTE_CACHE_LOCATION="s3://${CODEBUILD_CACHE_BUCKET}/atp-pipenv-cache/${PIPENV_HASH}-${PLATFORM}.tar.gz"
         if aws s3 --only-show-errors cp $REMOTE_CACHE_LOCATION .; then
           # if the cache exists, extract it to the install location
           echo "Cache found. Extracting ${REMOTE_CACHE_LOCATION} to ${PYTHON_INSTALL_LOCATION}"
           mkdir -p ${PYTHON_INSTALL_LOCATION}
           tar -xzf ${PIPENV_HASH}.tar.gz -C /
-          ls -la ${PYTHON_INSTALL_LOCATION}/**/*
         else
           # if the cache does not exist, install dependencies and save the cache to S3
           echo "Cache not found. Installing dependencies."
           pip install -qq --upgrade pip pipenv
           pipenv sync --system
-          echo "Pipenv is installed at $(which pipenv)"
-          echo "Python is installed at $(which python)"
-          echo "Scrapy is installed at $(which scrapy)"
-          echo "Playwright is installed at $(which playwright)"
 
           echo "Caching pipenv environment to $REMOTE_CACHE_LOCATION"
           tar -czf "${PIPENV_HASH}.tar.gz" "${PYTHON_INSTALL_LOCATION}"
