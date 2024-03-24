@@ -1,4 +1,3 @@
-
 from scrapy.spiders import SitemapSpider
 
 from locations.structured_data_spider import StructuredDataSpider
