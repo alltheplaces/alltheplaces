@@ -15,19 +15,3 @@ class ReiSpider(SitemapSpider, StructuredDataSpider):
     user_agent = BROWSER_DEFAULT
     download_delay = 2.5
     wanted_types = ["Store"]
-
-    def inspect_item(self, item, response):
-        hours = json.loads(response.xpath('//script[@id="store-schema"]/text()').extract_first())["openingHours"]
-        for i, h in enumerate(hours):
-            hours[i] = (
-                h.replace("Mon", "Mo")
-                .replace("Tue", "Tu")
-                .replace("Wed", "We")
-                .replace("Thu", "Th")
-                .replace("Fri", "Fr")
-                .replace("Sat", "Sa")
-                .replace("Sun", "Su")
-                .replace(" - ", "-")
-            )
-        item["opening_hours"] = "; ".join(hours)
-        yield item
