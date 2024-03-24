@@ -53,7 +53,12 @@ class WpGoMapsSpider(Spider):
         if "<img" in marker["address"]:
             marker.pop("address")
         return marker
+    
+    def post_process_item(self, item, location):
+        return item
 
     def parse_stores(self, response):
         for marker in response.json()["markers"]:
-            yield DictParser.parse(self.pre_process_marker(marker))
+            location = self.pre_process_marker(marker)
+            item = DictParser.parse(location)
+            yield self.post_process_item(item, location)
