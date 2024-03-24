@@ -25,20 +25,18 @@ class RevolutionLaundry(Spider):
         for company in self.companies:
             yield JsonRequest(
                 url="https://stores.revolution-laundry.com/Ajax/searchByCoordinates",
-                body=json.dumps(
-                    {
-                        "company": {"companyId": company["id"]},
-                        "location": {
-                            "geoCoordinates": {
-                                "latitude": company["latitude"],
-                                "longitude": company["longitude"],
-                                "geoCircle": 10000000,
-                            }
-                        },
-                        "machineFamily": {"familyId": 6},
-                        "pagination": {"pageNumber": 1, "pageSize": 99999},
-                    }
-                ),
+                data={
+                    "company": {"companyId": company["id"]},
+                    "location": {
+                        "geoCoordinates": {
+                            "latitude": company["latitude"],
+                            "longitude": company["longitude"],
+                            "geoCircle": 10000000,
+                        }
+                    },
+                    "machineFamily": {"familyId": 6},
+                    "pagination": {"pageNumber": 1, "pageSize": 99999},
+                },
                 method="POST",
                 callback=self.parse,
             )
