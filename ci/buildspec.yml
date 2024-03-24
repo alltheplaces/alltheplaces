@@ -108,6 +108,7 @@ phases:
             LOGFILE="${SPIDER_RUN_DIR}/log.txt"
             OUTFILE="${SPIDER_RUN_DIR}/output.geojson"
 
+            timeout -k 5s 65s \
             scrapy runspider \
                 -o "file://${OUTFILE}:geojson" \
                 --loglevel=INFO \
@@ -118,7 +119,11 @@ phases:
                 $spider
 
             FAILURE_REASON="success"
-            if grep -q "Spider closed (closespider_errorcount)" $LOGFILE; then
+            if [ $? -eq 124 ]; then
+                (>&2 echo "${spider} hit shell timeout")
+                EXIT_CODE=1
+                FAILURE_REASON="timeout"
+            elif grep -q "Spider closed (closespider_errorcount)" $LOGFILE; then
                 (>&2 echo "${spider} exited with errors")
                 EXIT_CODE=1
                 FAILURE_REASON="exception"
