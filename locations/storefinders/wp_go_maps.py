@@ -1,8 +1,8 @@
-import json
 import base64
+import json
 import zlib
 
-from scrapy import Spider
+from scrapy import Spider, Request
 
 from locations.dict_parser import DictParser
 
@@ -10,10 +10,6 @@ from locations.dict_parser import DictParser
 # A base spider for WP Go Maps (https://wordpress.org/plugins/wp-google-maps/ and https://www.wpgmaps.com/)
 #
 # Supply `allowed_domains` or explicit `start_urls`
-#
-# https://www.wpgmaps.com/wp-json/wpgmza/v1/marker-listing/base64eJyrVirIKHDOSSwuVrJSCg9w941yjInxTSzKTi3yySwuycxLj4lxSizOTAbxlHSUiksSi0qUrAx0lHJS89JLMpSsDIHs3MSC+MwUINu0FgB6phsI
-#  eJyrVirIKHDOSSwuVrJSCg9w941yjInxTSzKTi3yySwuycxLj4lxSizOTAbxlHSUiksSi0qUrAx0lHJS89JLMpSsDIHs3MSC+MwUINu0FgB6phsI Gzip decompresses to:
-# {"phpClass":"WPGMZA\\MarkerListing\\BasicList","start":0,"length":10,"map_id":15}
 #
 class WpGoMapsSpider(Spider):
     map_id = None
@@ -23,14 +19,24 @@ class WpGoMapsSpider(Spider):
     start_urls = []
     allowed_domains = []
 
-    # def start_requests(self):
-    #     data = {
-    #         "map_id": self.map_id,
-    #         "length": self.length,
-    #         "start": self.start
-    #     }
-    #     yield Request(url=self.start_urls[0], data=data, method="POST")
+    def start_requests(self):
+        urls = self.start_urls
+        if (len(self.start_urls) == 0):
+            urls.append(self.features_url_for(self.map_id))
+        
+        for url in urls:
+            yield Request(url=url, callback=self.parse)
+          
+    def parse(self, response, **kwargs):
+        yield from self.parse_stores(response)
 
+    def features_url_for(self, map_id):
+        param = {"filter": json.dumps({"map_id": map_id})}
+        return f"https://{self.allowed_domains[0]}/wp-json/wpgmza/v1/features/{self.encode_params(param)}"
+
+    # https://www.wpgmaps.com/wp-json/wpgmza/v1/marker-listing/base64eJyrVirIKHDOSSwuVrJSCg9w941yjInxTSzKTi3yySwuycxLj4lxSizOTAbxlHSUiksSi0qUrAx0lHJS89JLMpSsDIHs3MSC+MwUINu0FgB6phsI
+    #  eJyrVirIKHDOSSwuVrJSCg9w941yjInxTSzKTi3yySwuycxLj4lxSizOTAbxlHSUiksSi0qUrAx0lHJS89JLMpSsDIHs3MSC+MwUINu0FgB6phsI Gzip decompresses to:
+    # {"phpClass":"WPGMZA\\MarkerListing\\BasicList","start":0,"length":10,"map_id":15}
     def encode_params(self, params):
         data = zlib.compress(json.dumps(params).encode())
         path = base64.b64encode(data).rstrip(b"=").decode()

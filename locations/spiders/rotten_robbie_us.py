@@ -8,6 +8,3 @@ class RottenRobbieUSSpider(WpGoMapsSpider):
     start_urls = [
         "https://www.rottenrobbie.com/wp-json/wpgmza/v1/features/base64eJyrVkrLzClJLVKyUqqOUcpNLIjPTIlRsopRMoxRqlWqBQCnUQoG"
     ]
-
-    def parse(self, response, **kwargs):
-        yield from self.parse_stores(response)
