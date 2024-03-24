@@ -9,4 +9,4 @@ class RegalTheatersSpider(SitemapSpider, StructuredDataSpider):
     item_attributes = {"brand": "Regal Theaters", "brand_wikidata": "Q835638"}
     sitemap_urls = ["https://www.regmovies.com/sitemap.xml"]
     sitemap_rules = [("/theatres/", "parse_sd")]
-    user_agent = BROWSER_DEFAULT
+    requires_proxy = True
