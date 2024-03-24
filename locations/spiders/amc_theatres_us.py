@@ -13,7 +13,7 @@ class AMCTheatresUSSpider(Spider):
     def parse(self, response):
         response.selector.remove_namespaces()
 
-        for theater_elem in response.xpath("//ur l"):
+        for theater_elem in response.xpath("//url"):
             properties = {
                 "website": theater_elem.xpath(".//loc/text()").extract_first(),
                 "name": theater_elem.xpath('.//Attribute[@name="title"]/text()').extract_first(),
