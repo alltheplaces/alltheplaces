@@ -1,4 +1,6 @@
 import json
+import base64
+import zlib
 
 from scrapy import Spider
 
@@ -30,7 +32,9 @@ class WpGoMapsSpider(Spider):
     #     yield Request(url=self.start_urls[0], data=data, method="POST")
 
     def encode_params(self, params):
-        return "base64" + json.dumps(params).encode("zlib")
+        data = zlib.compress(json.dumps(params).encode())
+        path = base64.b64encode(data).rstrip(b"=").decode()
+        return f"base64{path}"
 
     def pre_process_marker(self, marker):
         if "<img" in marker["title"]:

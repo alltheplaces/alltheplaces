@@ -28,7 +28,5 @@ class TacototeSpider(WpGoMapsSpider):
     def parse_city(self, response):
         mapid = response.xpath("//@mapid").extract_first()
         param = {"filter": json.dumps({"map_id": mapid})}
-        data = zlib.compress(json.dumps(param).encode())
-        path = base64.b64encode(data).rstrip(b"=").decode()
-        url = f"https://tacotote.com/wp-json/wpgmza/v1/features/base64{path}"
+        url = "https://tacotote.com/wp-json/wpgmza/v1/features/" + self.encode_params(param)
         yield scrapy.Request(url, callback=self.parse_stores)
