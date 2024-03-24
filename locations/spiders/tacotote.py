@@ -6,10 +6,10 @@ import zlib
 import scrapy
 
 from locations.categories import Categories
-from locations.items import Feature
+from locations.storefinders.wp_go_maps import WpGoMapsSpider
 
 
-class TacototeSpider(scrapy.Spider):
+class TacototeSpider(WpGoMapsSpider):
     name = "tacotote"
     item_attributes = {
         "brand": "El Taco Tote",
@@ -32,18 +32,3 @@ class TacototeSpider(scrapy.Spider):
         path = base64.b64encode(data).rstrip(b"=").decode()
         url = f"https://tacotote.com/wp-json/wpgmza/v1/features/base64{path}"
         yield scrapy.Request(url, callback=self.parse_stores)
-
-    def parse_stores(self, response):
-        for marker in response.json()["markers"]:
-            properties = {
-                "lat": marker["lat"],
-                "lon": marker["lng"],
-                "ref": marker["id"],
-            }
-            if not "<img" in marker["title"]:
-                properties["name"] = marker["title"]
-
-            if not "<img" in marker["address"]:
-                properties["street_address"] = marker["address"]
-
-            yield Feature(**properties)
