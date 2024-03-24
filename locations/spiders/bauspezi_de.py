@@ -8,4 +8,3 @@ class BauSpeziDESpider(WpGoMapsSpider):
         "brand": "BauSpezi",
     }
     allowed_domains = ["bauspezi.de"]
-
