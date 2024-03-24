@@ -1,8 +1,9 @@
+import chompjs
 from scrapy import Spider
 from scrapy.http import HtmlResponse
-import chompjs
-from locations.items import Feature
+
 from locations.hours import OpeningHours
+from locations.items import Feature
 
 
 class MegoLV(Spider):
