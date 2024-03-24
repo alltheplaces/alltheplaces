@@ -39,7 +39,11 @@ class TacototeSpider(scrapy.Spider):
                 "lat": marker["lat"],
                 "lon": marker["lng"],
                 "ref": marker["id"],
-                "name": marker["title"],
-                "addr_full": marker["address"],
             }
+            if not "<img" in marker["title"]:
+                properties["name"] = marker["title"]
+
+            if not "<img" in marker["address"]:
+                properties["street_address"] = marker["address"]
+
             yield Feature(**properties)
