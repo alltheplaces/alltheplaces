@@ -12,6 +12,7 @@ from locations.dict_parser import DictParser
 # Supply `allowed_domains` or explicit `start_urls`.
 # Optionally, filter to a specific map_id
 
+
 #
 class WpGoMapsSpider(Spider):
     map_id = None
