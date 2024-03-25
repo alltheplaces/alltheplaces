@@ -11,7 +11,6 @@ from locations.dict_parser import DictParser
 # Supply `allowed_domains` or explicit `start_urls`.
 # Optionally, filter to a specific map_id
 
-
 #
 class WpGoMapsSpider(Spider):
     map_id = None
@@ -24,7 +23,6 @@ class WpGoMapsSpider(Spider):
     def start_requests(self):
         urls = self.start_urls
         if len(self.start_urls) == 0:
-
             if self.map_id is not None:
                 urls.append(self.features_url_for(self.map_id))
             else:
