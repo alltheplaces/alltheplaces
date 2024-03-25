@@ -319,6 +319,7 @@ DAYS_PL = {
     "Niedz": "Su",
     "Niedzela": "Su",
     "Niedziela": "Su",
+    "Niedziele": "Su",
 }
 DAYS_PT = {
     # "Feriado": "PH",

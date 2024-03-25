@@ -9,7 +9,10 @@ from locations.dict_parser import DictParser
 
 # A base spider for WP Go Maps (https://wordpress.org/plugins/wp-google-maps/ and https://www.wpgmaps.com/)
 #
-# Supply `allowed_domains` or explicit `start_urls`
+
+# Supply `allowed_domains` or explicit `start_urls`.
+# Optionally, filter to a specific map_id
+
 #
 class WpGoMapsSpider(Spider):
     map_id = None
@@ -22,7 +25,13 @@ class WpGoMapsSpider(Spider):
     def start_requests(self):
         urls = self.start_urls
         if len(self.start_urls) == 0:
-            urls.append(self.features_url_for(self.map_id))
+
+
+            if self.map_id is not None:
+                urls.append(self.features_url_for(self.map_id))
+            else:
+                urls.append(f"https://{self.allowed_domains[0]}/wp-json/wpgmza/v1/features/")
+
 
         for url in urls:
             yield Request(url=url, callback=self.parse)
@@ -50,6 +59,12 @@ class WpGoMapsSpider(Spider):
             marker.pop("address")
         return marker
 
+
+    def post_process_item(self, item, location):
+        return item
+
     def parse_stores(self, response):
         for marker in response.json()["markers"]:
-            yield DictParser.parse(self.pre_process_marker(marker))
+            location = self.pre_process_marker(marker)
+            item = DictParser.parse(location)
+            yield self.post_process_item(item, location)
