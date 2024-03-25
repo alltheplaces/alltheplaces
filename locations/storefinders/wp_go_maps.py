@@ -6,12 +6,12 @@ from scrapy import Request, Spider
 
 from locations.dict_parser import DictParser
 
-
 # A base spider for WP Go Maps (https://wordpress.org/plugins/wp-google-maps/ and https://www.wpgmaps.com/)
 #
 
 # Supply `allowed_domains` or explicit `start_urls`.
 # Optionally, filter to a specific map_id
+
 
 #
 class WpGoMapsSpider(Spider):
@@ -26,12 +26,10 @@ class WpGoMapsSpider(Spider):
         urls = self.start_urls
         if len(self.start_urls) == 0:
 
-
             if self.map_id is not None:
                 urls.append(self.features_url_for(self.map_id))
             else:
                 urls.append(f"https://{self.allowed_domains[0]}/wp-json/wpgmza/v1/features/")
-
 
         for url in urls:
             yield Request(url=url, callback=self.parse)
@@ -58,7 +56,6 @@ class WpGoMapsSpider(Spider):
         if "<img" in marker["address"]:
             marker.pop("address")
         return marker
-
 
     def post_process_item(self, item, location):
         return item
