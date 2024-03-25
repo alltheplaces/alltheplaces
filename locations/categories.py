@@ -398,6 +398,7 @@ class Fuel(Enum):
     E20 = "fuel:e20"
     E30 = "fuel:e30"
     E85 = "fuel:e85"
+    E88 = "fuel:e88"
     ETHANOL_FREE = "fuel:ethanol_free"
     METHANOL = "fuel:methanol"
     BIOGAS = "fuel:biogas"
@@ -566,6 +567,7 @@ class Access(Enum):
     """
 
     HGV = "hgv"
+    MOTOR_CAR = "motorcar"
 
 
 def apply_yes_no(attribute, item: Feature, state: bool, apply_positive_only: bool = True):

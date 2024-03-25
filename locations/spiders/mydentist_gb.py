@@ -41,4 +41,7 @@ class MyDentistGBSpider(CrawlSpider, StructuredDataSpider):
             item.update(self.MYDENTIST)
             item["name"] = "{my}dentist"
 
+        if isinstance(item.get("email"), list):
+            item["email"] = ", ".join(item["email"])
+
         yield item

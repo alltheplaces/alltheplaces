@@ -1,16 +1,14 @@
 import scrapy
 from scrapy.http import JsonRequest
 
-from locations.categories import apply_yes_no
+from locations.categories import Categories, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_EN, OpeningHours
 from locations.spiders.kfc import KFC_SHARED_ATTRIBUTES
 
 
-class KfcRUSpider(scrapy.Spider):
-    name = "kfc_ru"
-    allowed_domains = ["kfc.digital"]
-    item_attributes = KFC_SHARED_ATTRIBUTES
+class RosticsRUSpider(scrapy.Spider):
+    name = "rostics_ru"
 
     def start_requests(self):
         yield JsonRequest("https://api.prod.digital.uni.rest/api/store/v2/store.get_restaurants?showClosed=false")
@@ -18,10 +16,6 @@ class KfcRUSpider(scrapy.Spider):
     def parse(self, response):
         for poi in response.json().get("searchResults"):
             store = poi.get("storePublic")
-            if store.get("brand") != "kfc":
-                # TODO: add Rostics (https://xn--h1aekhgce.xn--p1ai/) to NSI/Wikidata,
-                #       it will slowly replace KFC in RU
-                continue
             item = DictParser.parse(store)
             item["ref"] = store.get("storeId")
             item["name"] = store.get("title", {}).get("ru")
@@ -39,6 +33,12 @@ class KfcRUSpider(scrapy.Spider):
             self.parse_hours(item, store)
             apply_yes_no("drive_through", item, "driveIn" in store.get("features", []))
             apply_yes_no("internet_access=wlan", item, "wifi" in store.get("features", []))
+            match store.get("brand"):
+                case "kfc":
+                    item.update(KFC_SHARED_ATTRIBUTES)
+                case _:
+                    item.update({"brand": "Rostic's", "brand_wikidata": "Q3442874"})
+            apply_category(Categories.FAST_FOOD, item)
             yield item
 
     def parse_hours(self, item, store):

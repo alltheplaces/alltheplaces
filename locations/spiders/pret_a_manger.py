@@ -43,7 +43,7 @@ class PretAMangerSpider(scrapy.Spider):
 
             item["extras"] = {}
 
-            item["extras"]["delivery"] = "yes" if store["features"]["delivery"] else "no"
+            item["extras"]["delivery"] = "yes" if store["features"].get("delivery") else "no"
             item["extras"]["storeType"] = store["features"].get("storeType")
             item["extras"]["wheelchair"] = "yes" if store["features"]["wheelchairAccess"] else "no"
             item["extras"]["internet_access"] = "wlan" if store["features"]["wifi"] else "no"

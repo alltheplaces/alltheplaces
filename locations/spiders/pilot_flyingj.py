@@ -49,6 +49,6 @@ class PilotFlyingJSpider(scrapy.Spider):
         if "Pilot" in name:
             return {"brand": "Pilot", "brand_wikidata": "Q7194412"}
         elif "Flying J" in name:
-            return {"brand": "Flying J", "brand_wikidata": "Q16974822"}
+            return {"brand": "Flying J", "brand_wikidata": "Q64130592"}
         else:
             return {"brand": name}
