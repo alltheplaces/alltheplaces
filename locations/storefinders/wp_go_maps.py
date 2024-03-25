@@ -6,11 +6,11 @@ from scrapy import Request, Spider
 
 from locations.dict_parser import DictParser
 
-
 # A base spider for WP Go Maps (https://wordpress.org/plugins/wp-google-maps/ and https://www.wpgmaps.com/)
 #
 # Supply `allowed_domains` or explicit `start_urls`.
 # Optionally, filter to a specific map_id
+
 
 #
 class WpGoMapsSpider(Spider):
