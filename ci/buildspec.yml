@@ -3,6 +3,7 @@ version: 0.2
 env:
   variables:
     BUCKET: alltheplaces.openaddresses.io
+    CODEBUILD_CACHE_BUCKET: codebuild-cache.openaddresses.io
   secrets-manager:
     ZYTE_API_KEY: "alltheplaces:ZYTE_API_KEY"
     GITHUB_TOKEN: "alltheplaces:GITHUB_TOKEN"
@@ -11,12 +12,40 @@ phases:
   install:
     runtime-versions:
       python: 3.11
+  pre_build:
     commands:
-      - pip install pipenv
-      - pipenv --bare install --deploy
+      - |
+        # calculate a hash of the pipenv lockfile
+        # this is used to cache the pipenv environment
+        # if the lockfile changes, the cache will be invalidated
+        PIPENV_HASH=$(sha256sum Pipfile.lock | cut -d ' ' -f 1)
+        PLATFORM=$(uname -m)
+        CACHE_FILE_NAME="${PIPENV_HASH}-${PLATFORM}.tar.gz"
+
+        # output where pip is installing stuff to help with debugging
+        PYTHON_INSTALL_LOCATION="/tmp/opt/python/site-packages"
+        echo "Pip install location: ${PYTHON_INSTALL_LOCATION}"
+
+        # check if the cache exists on S3
+        REMOTE_CACHE_LOCATION="s3://${CODEBUILD_CACHE_BUCKET}/atp-pipenv-cache/${CACHE_FILE_NAME}"
+        if aws s3 --only-show-errors cp $REMOTE_CACHE_LOCATION .; then
+          # if the cache exists, extract it to the install location
+          echo "Cache found. Extracting ${REMOTE_CACHE_LOCATION} to ${PYTHON_INSTALL_LOCATION}"
+          mkdir -p ${PYTHON_INSTALL_LOCATION}
+          tar -xzf "${CACHE_FILE_NAME}" -C /
+        else
+          # if the cache does not exist, install dependencies and save the cache to S3
+          echo "Cache not found. Installing dependencies."
+          pip install -qq --upgrade pip pipenv
+          pipenv sync --system
+
+          echo "Caching pipenv environment to $REMOTE_CACHE_LOCATION"
+          tar -czf "${CACHE_FILE_NAME}" "${PYTHON_INSTALL_LOCATION}"
+          aws s3 --only-show-errors cp ${PIPENV_HASH}.tar.gz $REMOTE_CACHE_LOCATION
+        fi
   build:
     commands:
-      - pipenv run scrapy check
+      - scrapy check
       - |
         env
         PR_COMMENT_BODY="I ran the spiders in this pull request and got these results:\\n\\n|Spider|Results|Log|\\n|---|---|---|\\n"
@@ -56,8 +85,8 @@ phases:
 
         if grep PLAYWRIGHT -q -m 1 $SPIDERS; then
             echo "Playwright detected. Installing requirements."
-            pipenv run playwright install-deps
-            pipenv run playwright install firefox
+            playwright install-deps
+            playwright install firefox
         fi
 
         RUN_DIR="/tmp/output"
@@ -79,7 +108,8 @@ phases:
             LOGFILE="${SPIDER_RUN_DIR}/log.txt"
             OUTFILE="${SPIDER_RUN_DIR}/output.geojson"
 
-            pipenv run scrapy runspider \
+            timeout -k 5s 75s \
+            scrapy runspider \
                 -o "file://${OUTFILE}:geojson" \
                 --loglevel=INFO \
                 --logfile="${LOGFILE}" \
@@ -89,7 +119,11 @@ phases:
                 $spider
 
             FAILURE_REASON="success"
-            if grep -q "Spider closed (closespider_errorcount)" $LOGFILE; then
+            if [ $? -eq 124 ]; then
+                (>&2 echo "${spider} hit shell timeout")
+                EXIT_CODE=1
+                FAILURE_REASON="timeout"
+            elif grep -q "Spider closed (closespider_errorcount)" $LOGFILE; then
                 (>&2 echo "${spider} exited with errors")
                 EXIT_CODE=1
                 FAILURE_REASON="exception"
