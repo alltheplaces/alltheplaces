@@ -116,3 +116,22 @@ def test_nsi_operator_matching():
     pipeline.process_item(item, spider)
 
     assert item["nsi_id"]
+
+
+def test_filter_cc_considers_already_applied_category():
+    item, pipeline, _ = get_objects()
+    apply_category(Categories.CAR_RENTAL, item)
+    matches = [
+        {
+            "locationSet": {"include": ["001"]},
+            "tags": {
+                "amenity": "car_rental",
+            },
+        },
+        {"locationSet": {"include": ["ca", "us"]}, "tags": {"shop": "rental"}},
+    ]
+
+    filtered = pipeline.filter_cc(matches, "US", get_category_tags(item))
+
+    assert len(filtered) == 1
+    assert filtered[0]["tags"]["amenity"] == "car_rental"
