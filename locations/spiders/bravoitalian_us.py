@@ -23,7 +23,7 @@ class BravoItalianUSSpider(Spider):
             item["geometry"] = location["geometry"]
             item["opening_hours"] = OpeningHours()
             for hours in location["properties"]["more_hours"]:
-                if hours["is_closed"] == False:
+                if hours["is_closed"] is False:
                     item["opening_hours"].add_range(hours["open_day"], hours["open_time"], hours["close_time"])
 
             yield item
