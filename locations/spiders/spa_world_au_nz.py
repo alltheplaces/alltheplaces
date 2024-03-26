@@ -15,3 +15,7 @@ class SpawWorldAUNZSpider(SitemapSpider, StructuredDataSpider):
         "https://www.spaworld.co.nz/sitemap/sitemap-index.xml",
     ]
     sitemap_rules = [("find-a-showroom/(.*)", "parse_sd")]
+
+    def post_process_item(self, item, response, ld_data):
+        item["postcode"] = str(item["postcode"])
+        yield item

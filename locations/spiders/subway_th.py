@@ -3,8 +3,8 @@ import re
 import scrapy
 
 from locations.items import Feature
+from locations.pipelines.address_clean_up import clean_address
 from locations.spiders.subway import SubwaySpider
-from locations.spiders.vapestore_gb import clean_address
 
 
 class SubwayTHSpider(scrapy.Spider):

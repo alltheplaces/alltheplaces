@@ -170,6 +170,25 @@ DAYS_IL = {
     "יום ראשון": "Su",
 }
 
+DAYS_LT = {
+    "pirmadienis": "Mo",
+    "antradienis": "Tu",
+    "trečiadienis": "We",
+    "ketvirtadienis": "Th",
+    "penktadienis": "Fr",
+    "šeštadienis": "Sa",
+    "sekmadienis": "Su",
+    "I": "Mo",
+    "II": "Tu",
+    "III": "We",
+    "IV": "Th",
+    "V": "Fr",
+    "VI": "Sa",
+    "VII": "Su",
+    "Vi": "Sa",
+    "Vii": "Su",
+}
+
 DAYS_SE = {
     "Måndag": "Mo",
     "Mån": "Mo",
@@ -300,6 +319,7 @@ DAYS_PL = {
     "Niedz": "Su",
     "Niedzela": "Su",
     "Niedziela": "Su",
+    "Niedziele": "Su",
 }
 DAYS_PT = {
     # "Feriado": "PH",
@@ -431,10 +451,12 @@ DAYS_ES = {
     "Vi": "Fr",
     "Sabado": "Sa",
     "Sábado": "Sa",
+    "Sábados": "Sa",
     "Sab": "Sa",
     "Sáb": "Sa",
     "Sa": "Sa",
     "Domingo": "Su",
+    "Domingos": "Su",
     "Dom": "Su",
     "Do": "Su",
 }
