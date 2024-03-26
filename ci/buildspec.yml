@@ -108,7 +108,7 @@ phases:
             LOGFILE="${SPIDER_RUN_DIR}/log.txt"
             OUTFILE="${SPIDER_RUN_DIR}/output.geojson"
 
-            timeout -k 5s 65s \
+            timeout -k 5s 75s \
             scrapy runspider \
                 -o "file://${OUTFILE}:geojson" \
                 --loglevel=INFO \
