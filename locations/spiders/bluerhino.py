@@ -1,10 +1,7 @@
-import csv
-
 import scrapy
 
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
-from locations.searchable_points import open_searchable_points
 
 
 class BlueRhinoSpider(scrapy.Spider):
@@ -15,15 +12,10 @@ class BlueRhinoSpider(scrapy.Spider):
         "country": "US",
     }
     allowed_domains = ["bluerhino.com"]
-
+    start_urls = [
+        "https://bluerhino.com/api/propane/GetRetailersNearPoint?latitude=0&longitude=0&radius=10000&name=&type=&top=500000&cache=false"
+    ]
     custom_settings = {"DEFAULT_REQUEST_HEADERS": {"Accept": "application/json"}}
-
-    def start_requests(self):
-        with open_searchable_points("us_centroids_100mile_radius.csv") as points:
-            for point in csv.DictReader(points):
-                yield scrapy.Request(
-                    f'https://bluerhino.com/api/propane/GetRetailersNearPoint?latitude={point["latitude"]}&longitude={point["longitude"]}&radius=1000&name=&type=&top=5000&cache=false'
-                )
 
     def parse(self, response):
         for row in response.json():
@@ -31,12 +23,13 @@ class BlueRhinoSpider(scrapy.Spider):
                 "lat": row["Latitude"],
                 "lon": row["Longitude"],
                 "ref": row["RetailKey"],
-                "name": row["RetailName"],
+                "located_in": row["RetailName"],
                 "street_address": merge_address_lines([row["Address1"], row["Address2"], row["Address3"]]),
                 "city": row["City"],
                 "state": row["State"],
                 "postcode": row["Zip"],
+                "country": row["Country"],
                 "phone": row["Phone"],
-                "extras": {"fax": row["Fax"]},
+                "extras": {"fax": row["Fax"], "check_date": row["LastDeliveryDate"].split("T", 1)[0]},
             }
             yield Feature(**properties)
