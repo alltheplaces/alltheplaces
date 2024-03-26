@@ -1,15 +1,10 @@
-from scrapy import Spider
-
-from locations.dict_parser import DictParser
+from locations.storefinders.wp_go_maps import WpGoMapsSpider
 
 
-class BauSpeziDESpider(Spider):
+class BauSpeziDESpider(WpGoMapsSpider):
     name = "bauspezi_de"
     item_attributes = {
         "brand_wikidata": "Q85324366",
         "brand": "BauSpezi",
     }
-    start_urls = ["https://bauspezi.de/wp-json/wpgmza/v1/features"]
-
-    def parse(self, response, **kwargs):
-        yield from map(DictParser.parse, response.json()["markers"])
+    allowed_domains = ["bauspezi.de"]
