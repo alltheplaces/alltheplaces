@@ -130,8 +130,12 @@ def test_filter_cc_considers_already_applied_category():
         },
         {"locationSet": {"include": ["ca", "us"]}, "tags": {"shop": "rental"}},
     ]
-
-    filtered = pipeline.filter_cc(matches, "US", get_category_tags(item))
-
+    filtered = pipeline.filter_cc(matches, "us", get_category_tags(item))
     assert len(filtered) == 1
     assert filtered[0]["tags"]["amenity"] == "car_rental"
+
+    # For the same matches country specific match should be returned when no category is applied
+    _, pipeline, _ = get_objects()
+    filtered = pipeline.filter_cc(matches, "us")
+    assert len(filtered) == 1
+    assert filtered[0]["tags"]["shop"] == "rental"
