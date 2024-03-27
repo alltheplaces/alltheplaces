@@ -34,7 +34,7 @@ class ApplyNSICategoriesPipeline:
             return self.apply_tags(matches[0], item)
 
         if cc := item.get("country"):
-            matches = self.filter_cc(matches, cc.lower())
+            matches = self.filter_cc(matches, cc.lower(), get_category_tags(item))
 
             if len(matches) == 1:
                 spider.crawler.stats.inc_value("atp/nsi/cc_match")
@@ -50,7 +50,7 @@ class ApplyNSICategoriesPipeline:
         spider.crawler.stats.inc_value("atp/nsi/match_failed")
         return item
 
-    def filter_cc(self, matches, cc) -> []:
+    def filter_cc(self, matches, cc, categories: dict = None) -> list:
         includes = []
         globals_matches = []
 
@@ -68,9 +68,14 @@ class ApplyNSICategoriesPipeline:
             if "001" in include:  # 001 being global in NSI
                 globals_matches.append(match)
 
+        if categories:
+            # Find better match if category is supplied
+            includes = self.filter_categories(includes, categories)
+            globals_matches = self.filter_categories(globals_matches, categories)
+
         return includes or globals_matches
 
-    def filter_categories(self, matches, tags) -> []:
+    def filter_categories(self, matches, tags: dict) -> list:
         results = []
 
         for match in matches:
