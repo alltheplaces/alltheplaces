@@ -47,7 +47,6 @@ phases:
     commands:
       - scrapy check
       - |
-        env
         PR_COMMENT_BODY="I ran the spiders in this pull request and got these results:\\n\\n|Spider|Results|Log|\\n|---|---|---|\\n"
 
         # Check if the build is triggered by a pull request
@@ -108,7 +107,7 @@ phases:
             LOGFILE="${SPIDER_RUN_DIR}/log.txt"
             OUTFILE="${SPIDER_RUN_DIR}/output.geojson"
 
-            timeout -k 5s 65s \
+            timeout -k 5s 75s \
             scrapy runspider \
                 -o "file://${OUTFILE}:geojson" \
                 --loglevel=INFO \
@@ -119,7 +118,7 @@ phases:
                 $spider
 
             FAILURE_REASON="success"
-            if [ $? -eq 124 ]; then
+            if [ ! $? -eq 0 ]; then
                 (>&2 echo "${spider} hit shell timeout")
                 EXIT_CODE=1
                 FAILURE_REASON="timeout"

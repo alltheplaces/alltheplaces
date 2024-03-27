@@ -19,7 +19,6 @@ class DennerCHSpider(SitemapSpider, StructuredDataSpider):
         item["name"] = "Denner"
         item["lat"], item["lon"] = self.parse_lat_lon(response)
         item["country"] = "LI" if 9485 <= int(item.get("postcode", 0)) <= 9499 else "CH"
-        item["ref"] = re.search("/([^/]+)/$", item["website"]).group(1)
         item["phone"] = self.parse_phone(response)
         item.setdefault("extras", {}).update(self.parse_opening_date(response))
         item["extras"]["website:de"] = response.xpath('//link[@rel="alternate"][@hreflang="de"]/@href').get()
