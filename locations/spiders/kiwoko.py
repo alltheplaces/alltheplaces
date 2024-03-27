@@ -16,6 +16,6 @@ class KiwokoSpider(Spider):
         for location in response.json()["stores"]:
             item = DictParser.parse(location)
             item["website"] = response.urljoin(f'/{location["ID"]}.html')
-            item["street_address"] = merge_address_lines([location["address1"], location["address2"]])
+            item["street_address"] = merge_address_lines([location.get("address1"), location.get("address2")])
 
             yield item
