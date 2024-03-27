@@ -1,4 +1,5 @@
 import scrapy
+from scrapy import Selector
 from scrapy.http import JsonRequest, Response
 
 from locations.dict_parser import DictParser
@@ -35,7 +36,7 @@ class SevenElevenPhSpider(scrapy.Spider):
         if not hours:
             return
         try:
-            days = scrapy.Selector(text=hours).xpath("//tr")
+            days = Selector(text=hours).xpath("//tr")
             oh = OpeningHours()
             for day in days:
                 day_name = day.xpath("td[1]/text()").get()
