@@ -1,13 +1,18 @@
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.storefinders.sylinder import SylinderSpider
 
 
 class SparNoSpider(SylinderSpider):
     name = "spar_no"
-    item_attributes = {
-        "brand": "Spar",
-        "brand_wikidata": "Q610492",
-        "extras": Categories.SHOP_SUPERMARKET.value,
-    }
     app_key = "1210"
     base_url = "https://spar.no/Finn-butikk/"
+
+    def parse_item(self, item, location, **kwargs):
+        if "EUROSPAR" in location["storeDetails"].get("storeName", "").upper():
+            item["brand"] = "Eurospar"
+            item["brand_wikidata"] = "Q12309283"
+        else:
+            item["brand"] = "Spar"
+            item["brand_wikidata"] = "Q610492"
+        apply_category(Categories.SHOP_SUPERMARKET, item)
+        yield item
