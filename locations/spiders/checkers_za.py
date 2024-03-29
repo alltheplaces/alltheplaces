@@ -8,6 +8,7 @@ from locations.structured_data_spider import StructuredDataSpider
 # Shoprite. Refer to shoprite_za for an almost identical spider
 # addressing the Shoprite brand.
 
+
 class CheckersZASpider(StructuredDataSpider):
     name = "checkers_za"
     start_urls = ["https://www.checkers.co.za/sitemap/medias/Store-checkersZA-0.xml"]

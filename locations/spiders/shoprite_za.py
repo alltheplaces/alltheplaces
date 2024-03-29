@@ -8,6 +8,7 @@ from locations.structured_data_spider import StructuredDataSpider
 # Checkers. Refer to checkers_za for an almost identical spider
 # addressing the Checkers brand.
 
+
 class ShopriteZASpider(StructuredDataSpider):
     name = "shoprite_za"
     item_attributes = {"brand": "Shoprite", "brand_wikidata": "Q1857639", "extras": Categories.SHOP_SUPERMARKET.value}
@@ -37,7 +38,12 @@ class ShopriteZASpider(StructuredDataSpider):
         await playwright_page.close()
         sitemap_locations = Selector(text=sitemap).xpath("//loc/text()").getall()
         for sitemap_location in sitemap_locations:
-            yield Request(url=sitemap_location.replace("shopriteza.prod.shopritelabs.co.za", "www.shoprite.co.za").replace("http://", "https://").split("?", 1)[0], callback=self.parse_sd)
+            yield Request(
+                url=sitemap_location.replace("shopriteza.prod.shopritelabs.co.za", "www.shoprite.co.za")
+                .replace("http://", "https://")
+                .split("?", 1)[0],
+                callback=self.parse_sd,
+            )
 
     def pre_process_data(self, ld_data):
         # One openingHourSpecification mixes hours for a
