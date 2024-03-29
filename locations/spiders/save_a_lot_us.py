@@ -23,12 +23,16 @@ class SaveALotUSSpider(Spider):
             circle_west = vincenty_distance(lat, lon, 50, 270)
             box_sw = (circle_south[0], circle_west[1])
             box_ne = (circle_north[0], circle_east[1])
-            yield JsonRequest(url=f"https://savealot.com/wp-json/locator/v1/search/{lat}/{lon}/{box_sw[0]}/{box_sw[1]}/{box_ne[0]}/{box_ne[1]}/")
+            yield JsonRequest(
+                url=f"https://savealot.com/wp-json/locator/v1/search/{lat}/{lon}/{box_sw[0]}/{box_sw[1]}/{box_ne[0]}/{box_ne[1]}/"
+            )
 
     def parse(self, response):
         locations = response.json()
         if len(locations) == 50:
-            raise RuntimeError("Locations have probably been truncated due to 50 (or more) locations being returned by a single geographic radius search. Use a more granular searchable points file.")
+            raise RuntimeError(
+                "Locations have probably been truncated due to 50 (or more) locations being returned by a single geographic radius search. Use a more granular searchable points file."
+            )
         for location in locations:
             item = DictParser.parse(location)
             item["ref"] = location["store"]
