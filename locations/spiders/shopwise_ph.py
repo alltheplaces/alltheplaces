@@ -23,8 +23,13 @@ class ShopwisePHSpider(Spider):
             if not location.get("enabled"):
                 continue
             item = DictParser.parse(location)
-            item["phone"] = re.sub(r"<[^>]+>", "", location["phone"].split(" loc", 1)[0].split(";", 1)[0].split("/", 1)[0])
-            ph_regions = {region["id"]: re.sub(r"^Region [\w\-]+ \(([^\)]+)\)$", r"\1", region["name"]).title() for region in response.json()["perRegions"]}
+            item["phone"] = re.sub(
+                r"<[^>]+>", "", location["phone"].split(" loc", 1)[0].split(";", 1)[0].split("/", 1)[0]
+            )
+            ph_regions = {
+                region["id"]: re.sub(r"^Region [\w\-]+ \(([^\)]+)\)$", r"\1", region["name"]).title()
+                for region in response.json()["perRegions"]
+            }
             item["state"] = ph_regions[location["region_id"]]
             hours_string = "Mo-Su: " + re.sub(r"<[^>]+>", "", location.get("store_hours", ""))
             item["opening_hours"] = OpeningHours()
