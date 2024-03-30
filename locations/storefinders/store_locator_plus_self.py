@@ -60,7 +60,7 @@ class StoreLocatorPlusSelfSpider(Spider):
                     yield FormRequest(url=url, formdata=formdata, method="POST")
 
     def parse(self, response, **kwargs):
-        if len(response.json()["response"]) >= self.max_results:
+        if len(response.json()["response"]) >= self.max_results and self.max_results > 0:
             raise RuntimeError(
                 "Locations have probably been truncated due to max_results (or more) locations being returned by a single geographic radius search. Use more granular searchable_points_files and a smaller search_radius."
             )
