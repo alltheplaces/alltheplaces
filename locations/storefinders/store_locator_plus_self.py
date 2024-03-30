@@ -69,6 +69,8 @@ class StoreLocatorPlusSelfSpider(Spider):
             item = DictParser.parse(location)
             item.pop("addr_full", None)
             item["street_address"] = ", ".join(filter(None, [location.get("address"), location.get("address2")]))
+            if item["website"] and item["website"].startswith("/") and hasattr(self, "allowed_domains"):
+                item["website"] = f"https://{self.allowed_domains[0]}{item['website']}"
             yield from self.parse_item(item, location) or []
 
     def parse_item(self, item, location, **kwargs):
