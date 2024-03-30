@@ -1,4 +1,5 @@
 from scrapy.http import FormRequest
+
 from locations.storefinders.store_locator_plus_self import StoreLocatorPlusSelfSpider
 
 
@@ -14,11 +15,5 @@ class SeafoodCitySpider(StoreLocatorPlusSelfSpider):
         url = f"https://www.seafoodcity.com/wp-admin/admin-ajax.php"
         lat = 37.09024
         lon = -95.712891
-        formdata = {
-            "action": "csl_ajax_onload",
-            "lat": str(lat),
-            "lng": str(lon),
-            "radius": "",
-            "nonce": "18e8e79bfe"
-        }
+        formdata = {"action": "csl_ajax_onload", "lat": str(lat), "lng": str(lon), "radius": "", "nonce": "18e8e79bfe"}
         yield FormRequest(url=url, formdata=formdata, method="POST")
