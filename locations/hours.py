@@ -640,6 +640,7 @@ class OpeningHours:
 
         if day not in DAYS:
             raise ValueError(f"day must be one of {DAYS}, not {day!r}")
+
         if not open_time or not close_time:
             return
         if isinstance(open_time, str):
