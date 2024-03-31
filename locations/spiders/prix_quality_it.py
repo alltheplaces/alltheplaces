@@ -13,23 +13,22 @@ class PrixQualityITSpider(scrapy.Spider):
     ]
     time_format = "%H:%M"
     item_attributes = {"brand": "Prix Quality", "brand_wikidata": "Q61994819"}
-    
 
     def parse(self, response):
         for record in response.json():
-            store = record['acf']
+            store = record["acf"]
             item = DictParser.parse(store)
-            item['ref'] = store['shop_code']
-            item['name'] = store['shop_name']
+            item["ref"] = store["shop_code"]
+            item["name"] = store["shop_name"]
             # 'latlng': {'address': "VIA MARCONI, 157/1 VO' EUGANEO", 'lat': '45.3273025', 'lng': '11.6391062', 'zoom': 14, 'street_number': '157', 'street_name': 'Via G. Marconi', 'street_short_name': 'Via G. Marconi', 'city': "Vo'", 'state': 'Veneto', 'state_short': 'Veneto', 'post_code': '35030', 'country': 'Italy', 'country_short': 'IT', 'place_id': 'EipWaWEgRy4gTWFyY29uaSwgMTU3LzEsIDM1MDMwIFZvJyBQRCwgSXRhbHkiHRobChYKFAoSCcXwLrvAIX9HEY7Fr5NIUwpkEgEx'},
-            address = store['latlng']
-            item['state'] = address['state']
-            item['country'] = address['country_short']
-            item['lat'] = address['lat']
-            item['lon'] = address['lng']
-            item['housenumber'] = address['street_number']
-            item['street'] = address['street_name']
-            item['postcode'] =  address['post_code']
+            address = store["latlng"]
+            item["state"] = address["state"]
+            item["country"] = address["country_short"]
+            item["lat"] = address["lat"]
+            item["lon"] = address["lng"]
+            item["housenumber"] = address["street_number"]
+            item["street"] = address["street_name"]
+            item["postcode"] = address["post_code"]
 
             # 'shop_services': ['0', '0', 'invoice', 'pos', 'air', 'access', 'parking']
 
