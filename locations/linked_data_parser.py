@@ -1,9 +1,9 @@
 import json
+import logging
+import traceback
 
 import chompjs
 import json5
-import logging
-import traceback
 
 from locations.hours import OpeningHours
 from locations.items import Feature, add_social_media
@@ -123,11 +123,9 @@ class LinkedDataParser:
         except ValueError as e:
             # Explicitly handle a ValueError, which is likely time_format related
             logger.warn(f"Unable to parse opening hours - check time_format? Error was: {str(e)}")
-            pass
         except Exception as e:
             logger.warn(f"Unhandled error, unable to parse opening hours. Error was: {type(e)} {str(e)}")
             logger.debug(traceback.print_exc())
-            pass
 
         if image := ld.get("image"):
             if isinstance(image, list):

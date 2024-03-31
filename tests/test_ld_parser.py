@@ -141,6 +141,7 @@ def test_ld_lowercase_attributes():
     assert i["lat"] == 40.6862
     assert i["lon"] == -99.08411
 
+
 def test_ld_opening_hours_specification_as_dict():
     i = LinkedDataParser.parse_ld(
         json.loads(
@@ -280,7 +281,7 @@ def test_ld_opening_hours_specification_as_list():
             }
             """
         ),
-        time_format="%H:%M:%S"
+        time_format="%H:%M:%S",
     )
 
     assert i["opening_hours"].as_opening_hours() == "Mo-Su 09:00-17:00"
