@@ -23,7 +23,7 @@ class NSLCCASpider(Spider):
             for day in location["openingHours"]:
                 item["opening_hours"].add_range(day["dayOfWeek"], day["opens"], day["closes"])
 
-            item["website"] = "https://www.mynslc.com/en/Stores/Store_#{location['id']}"
+            item["website"] = f"https://www.mynslc.com/en/Stores/Store_#{location['id']}"
 
             # TODO: At a later point, tagging for cannabis or primarily cannabis should be explored.
             # for feature in location['features']:
