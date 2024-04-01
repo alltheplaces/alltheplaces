@@ -1,3 +1,4 @@
+import logging
 import re
 import time
 from collections import defaultdict
@@ -603,6 +604,8 @@ DELIMITERS_PL = [
 
 DELIMITERS_RU = DELIMITERS_EN + ["с", "по", "до", "в", "во"]
 
+logger = logging.getLogger(__name__)
+
 
 def day_range(start_day, end_day):
     start_ix = DAYS.index(sanitise_day(start_day))
@@ -760,20 +763,19 @@ class OpeningHours:
         Deprecated, please use LinkedDataParser.parse_opening_hours
         """
         # TODO: move to LinkedDataParser
-        if linked_data.get("openingHoursSpecification"):
-            if isinstance(linked_data.get("openingHoursSpecification"), list):
+        if spec := linked_data.get("openingHoursSpecification"):
+            if isinstance(spec, list):
                 for rule in linked_data["openingHoursSpecification"]:
                     if not isinstance(rule, dict):
                         continue
                     self._parse_opening_hours_specification(rule, time_format)
-            elif isinstance(linked_data.get("openingHoursSpecification"), dict):
-                self._parse_opening_hours_specification(linked_data.get("openingHoursSpecification"), time_format)
+            elif isinstance(spec, dict):
+                self._parse_opening_hours_specification(spec, time_format)
             else:
-                self.logger.info("Unknown openingHoursSpecification structure, ignoring")
-                self.logger.debug(linked_data.get("openingHoursSpecification"))
+                logger.info("Unknown openingHoursSpecification structure, ignoring")
+                logger.debug(linked_data.get("openingHoursSpecification"))
 
-        elif linked_data.get("openingHours"):
-            rules = linked_data["openingHours"]
+        elif rules := linked_data.get("openingHours"):
             if not isinstance(rules, list):
                 rules = re.findall(
                     r"((\w{2,3}|\w{2,3}\s?\-\s?\w{2,3}|(\w{2,3},)+\w{2,3})\s(\d\d:\d\d)\s?\-\s?(\d\d:\d\d))",
