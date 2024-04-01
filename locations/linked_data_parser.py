@@ -122,9 +122,9 @@ class LinkedDataParser:
             item["opening_hours"] = oh
         except ValueError as e:
             # Explicitly handle a ValueError, which is likely time_format related
-            logger.warn(f"Unable to parse opening hours - check time_format? Error was: {str(e)}")
+            logger.warning(f"Unable to parse opening hours - check time_format? Error was: {str(e)}")
         except Exception as e:
-            logger.warn(f"Unhandled error, unable to parse opening hours. Error was: {type(e)} {str(e)}")
+            logger.warning(f"Unhandled error, unable to parse opening hours. Error was: {type(e)} {str(e)}")
             logger.debug(traceback.print_exc())
 
         if image := ld.get("image"):
