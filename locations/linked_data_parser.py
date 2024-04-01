@@ -172,6 +172,12 @@ class LinkedDataParser:
             return item
 
     @staticmethod
+    def parse_opening_hours(linked_data, time_format: str = "%H:%M") -> OpeningHours:
+        oh = OpeningHours()
+        oh.from_linked_data(linked_data, time_format)
+        return oh
+
+    @staticmethod
     def get_clean(obj, key):
         if value := obj.get(key):
             if isinstance(value, str):

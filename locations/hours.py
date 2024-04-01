@@ -711,7 +711,7 @@ class OpeningHours:
     #  "opens":  "09:00:00"
     # }
     # See https://schema.org/OpeningHoursSpecification for further examples.
-    def parse_opening_hours_specification(self, rule: dict, time_format: dict):
+    def _parse_opening_hours_specification(self, rule: dict, time_format: str):
         if not rule.get("dayOfWeek") or not rule.get("opens") or not rule.get("closes"):
             return
 
@@ -730,7 +730,7 @@ class OpeningHours:
     # Parse an individual https://schema.org/openingHours property value such as
     # "Mo,Tu,We,Th 09:00-12:00"
     # "Mo-Fr 10:00-19:00"
-    def parse_opening_hours(self, rule: str, time_format: str):
+    def _parse_opening_hours(self, rule: str, time_format: str):
         days, time_ranges = rule.split(" ", 1)
 
         if "-" not in time_ranges:
@@ -756,14 +756,18 @@ class OpeningHours:
                         self.add_range(d, start_time, end_time, time_format)
 
     def from_linked_data(self, linked_data, time_format: str = "%H:%M"):
+        """
+        Deprecated, please use LinkedDataParser.parse_opening_hours
+        """
+        # TODO: move to LinkedDataParser
         if linked_data.get("openingHoursSpecification"):
             if isinstance(linked_data.get("openingHoursSpecification"), list):
                 for rule in linked_data["openingHoursSpecification"]:
                     if not isinstance(rule, dict):
                         continue
-                    self.parse_opening_hours_specification(rule, time_format)
+                    self._parse_opening_hours_specification(rule, time_format)
             elif isinstance(linked_data.get("openingHoursSpecification"), dict):
-                self.parse_opening_hours_specification(linked_data.get("openingHoursSpecification"), time_format)
+                self._parse_opening_hours_specification(linked_data.get("openingHoursSpecification"), time_format)
             else:
                 self.logger.info("Unknown openingHoursSpecification structure, ignoring")
                 self.logger.debug(linked_data.get("openingHoursSpecification"))
@@ -781,7 +785,7 @@ class OpeningHours:
                 if not rule:
                     continue
 
-                self.parse_opening_hours(rule, time_format)
+                self._parse_opening_hours(rule, time_format)
 
     @staticmethod
     def delimiters_regex(delimiters: list[str] = DELIMITERS_EN) -> str:
