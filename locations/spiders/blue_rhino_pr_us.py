@@ -17,7 +17,9 @@ class BlueRhinoPRUSSpider(Spider):
     def start_requests(self):
         # The server times out at a 500km search radius, so use 200km instead.
         for lat, lon in point_locations("pr_us_centroids_iseadgg_175km_radius.csv"):
-            yield JsonRequest(url=f"https://bluerhino.com/api/propane/GetRetailersNearPoint?latitude={lat}&longitude={lon}&radius=200&name=&type=&top=100000&cache=false")
+            yield JsonRequest(
+                url=f"https://bluerhino.com/api/propane/GetRetailersNearPoint?latitude={lat}&longitude={lon}&radius=200&name=&type=&top=100000&cache=false"
+            )
 
     def parse(self, response):
         for row in response.json():
@@ -32,9 +34,7 @@ class BlueRhinoPRUSSpider(Spider):
                 "postcode": row["Zip"],
                 "country": row["Country"],
                 "phone": row["Phone"],
-                "extras": {
-                    "check_date": row["LastDeliveryDate"].split("T", 1)[0]
-                },
+                "extras": {"check_date": row["LastDeliveryDate"].split("T", 1)[0]},
             }
             if properties["state"] == "PR":
                 properties["country"] = properties.pop("state")
