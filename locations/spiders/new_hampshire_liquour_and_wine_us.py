@@ -6,8 +6,8 @@ from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
 
-class NewHampshireLiquorAndWineSpider(Spider):
-    name = "new_hampshire_liquor_and_wine_ca"
+class NewHampshireLiquorAndWineUSSpider(Spider):
+    name = "new_hampshire_liquor_and_wine_us"
     item_attributes = {"brand": "New Hampshire Liquor & Wine Outlets", "brand_wikidata": "Q98400557"}
     start_urls = ["https://www.liquorandwineoutlets.com/api/checkout/carts_storelist"]
 
