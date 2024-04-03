@@ -1,15 +1,11 @@
 import json
-import re
 
 from scrapy import Spider
 from scrapy.http import Response
 
 from locations.hours import DAYS_RU, OpeningHours
 from locations.items import Feature
-
-ADDRESS_PATTERN = re.compile(
-    r"^(?:.*[Uu][Ll] ?\. ?)?(?P<street>(?:(?![0-9]{2}-[0-9]{3}).)*(?![0-9]{2}-[0-9]{3})[0-9]+[a-zA-Z]?)(?:(?![0-9]{2}-[0-9]{3}).)*(?P<postalcode>[0-9]{2}-[0-9]{3})?"
-)
+from locations.pipelines.address_clean_up import clean_address
 
 
 class WesolaPaniSpider(Spider):
@@ -27,17 +23,13 @@ class WesolaPaniSpider(Spider):
             opening_hours = OpeningHours()
             opening_hours.add_ranges_from_string(ranges_string=shop["shedule"], days=DAYS_RU)
 
-            address = ADDRESS_PATTERN.search(shop["address"])
-            address = address.groupdict()
-
             yield Feature(
                 {
                     "ref": shop["id"],
                     "lat": shop["posx"],
                     "lon": shop["posy"],
                     "phone": shop["phone1"],
-                    "street_address": address["street"].strip(" ,"),
-                    "postcode": address["postalcode"],
+                    "addr_full": clean_address(shop["address"]),
                     "opening_hours": opening_hours,
                 }
             )
