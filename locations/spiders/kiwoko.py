@@ -1,7 +1,7 @@
 from scrapy import Spider
 
 from locations.dict_parser import DictParser
-from locations.spiders.vapestore_gb import clean_address
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class KiwokoSpider(Spider):
@@ -16,6 +16,6 @@ class KiwokoSpider(Spider):
         for location in response.json()["stores"]:
             item = DictParser.parse(location)
             item["website"] = response.urljoin(f'/{location["ID"]}.html')
-            item["street_address"] = clean_address([location["address1"], location["address2"]])
+            item["street_address"] = merge_address_lines([location.get("address1"), location.get("address2")])
 
             yield item

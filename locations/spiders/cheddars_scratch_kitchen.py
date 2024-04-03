@@ -1,8 +1,8 @@
 import scrapy
 
 from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 from locations.searchable_points import open_searchable_points
-from locations.spiders.vapestore_gb import clean_address
 
 
 class CheddarsScratchKitchenSpider(scrapy.Spider):
@@ -43,7 +43,7 @@ class CheddarsScratchKitchenSpider(scrapy.Spider):
                 properties = {
                     "ref": place["restaurantNumber"],
                     "name": place["restaurantName"],
-                    "street_address": clean_address([place["AddressOne"], place["AddressTwo"]]),
+                    "street_address": merge_address_lines([place["AddressOne"], place["AddressTwo"]]),
                     "city": place["city"],
                     "state": place["state"],
                     "postcode": place["zip"],

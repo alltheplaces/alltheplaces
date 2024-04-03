@@ -47,6 +47,9 @@ DOWNLOAD_DELAY = 1
 # CONCURRENT_REQUESTS_PER_DOMAIN = 16
 # CONCURRENT_REQUESTS_PER_IP = 16
 
+# Set a timeout for requests
+DOWNLOAD_TIMEOUT = 15
+
 # Disable cookies (enabled by default)
 # COOKIES_ENABLED = False
 
@@ -101,6 +104,7 @@ ITEM_PIPELINES = {
     "locations.pipelines.apply_spider_name.ApplySpiderNamePipeline": 350,
     "locations.pipelines.country_code_clean_up.CountryCodeCleanUpPipeline": 355,
     "locations.pipelines.state_clean_up.StateCodeCleanUpPipeline": 356,
+    "locations.pipelines.address_clean_up.AddressCleanUpPipeline": 357,
     "locations.pipelines.phone_clean_up.PhoneCleanUpPipeline": 360,
     "locations.pipelines.extract_gb_postcode.ExtractGBPostcodePipeline": 400,
     "locations.pipelines.assert_url_scheme.AssertURLSchemePipeline": 500,

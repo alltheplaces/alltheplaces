@@ -19,6 +19,7 @@ class TescoSpider(scrapy.Spider):
         "hu": "https://tesco.hu/aruhazak/aruhaz/",
         "sk": "https://tesco.sk/obchody/detail-obchodu/",
     }
+    BRANDING_WORDS = ["tesco", "expres", "extra", "expressz"]  # lowercase
 
     def start_requests(self):
         for country, website in self.COUNTRY_WEBSITE_MAP.items():
@@ -31,6 +32,8 @@ class TescoSpider(scrapy.Spider):
         for store in response.json()["stores"]:
             store["street-address"] = store.pop("address", "")
             item = DictParser.parse(store)
+            if name := item.pop("name"):
+                item["branch"] = " ".join([word for word in name.split(" ") if word.lower() not in self.BRANDING_WORDS])
             item["ref"] = store["goldid"]
             item["lat"] = store.get("gpslat")
             item["lon"] = store.get("gpslng")

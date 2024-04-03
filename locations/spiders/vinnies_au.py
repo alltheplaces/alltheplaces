@@ -1,15 +1,17 @@
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
+from locations.categories import Categories
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
 
 class VinniesAUSpider(Spider):
     name = "vinnies_au"
-    item_attributes = {"brand": "Vinnies", "brand_wikidata": "Q117547405"}
+    item_attributes = {"brand": "Vinnies", "brand_wikidata": "Q117547405", "extras": Categories.SHOP_CHARITY.value}
     allowed_domains = ["cms.vinnies.org.au"]
     start_urls = ["https://cms.vinnies.org.au/api/shops/get"]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def start_requests(self):
         for url in self.start_urls:

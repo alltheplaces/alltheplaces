@@ -1,11 +1,12 @@
-from scrapy.spiders import SitemapSpider
+from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule
 
 from locations.categories import Categories
 from locations.google_url import extract_google_position
 from locations.items import Feature
 
 
-class TheBarreCodeUSSpider(SitemapSpider):
+class TheBarreCodeUSSpider(CrawlSpider):
     name = "the_barre_code_us"
     item_attributes = {
         "brand": "The Barre Code",
@@ -13,8 +14,13 @@ class TheBarreCodeUSSpider(SitemapSpider):
         "extras": Categories.GYM.value,
     }
     allowed_domains = ["thebarrecode.com"]
-    sitemap_urls = ["https://thebarrecode.com/all-sitemap.xml"]
-    sitemap_rules = [(r"thebarrecode.com\/(?!base-site)[\w\-]+\/contact-us\/?$", "parse")]
+    start_urls = ["https://thebarrecode.com/locations/"]
+    rules = [
+        Rule(
+            LinkExtractor(restrict_xpaths='//ul[@id="maplocationsectionbottom"]//a[contains(text(), "Visit Site")]'),
+            callback="parse",
+        )
+    ]
 
     def parse(self, response):
         properties = {

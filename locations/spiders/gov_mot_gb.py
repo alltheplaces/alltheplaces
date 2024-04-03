@@ -5,9 +5,9 @@ from scrapy.spiders import CSVFeedSpider
 
 from locations.categories import Categories, apply_category, apply_yes_no
 from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 from locations.spiders.arnold_clark import ArnoldClarkSpider
 from locations.spiders.kwik_fit_gb import KwikFitGBSpider
-from locations.spiders.vapestore_gb import clean_address
 
 
 class GovMOTGBSpider(CSVFeedSpider):
@@ -35,9 +35,9 @@ class GovMOTGBSpider(CSVFeedSpider):
 
     def parse_row(self, response, row):
         item = Feature()
-        item["ref"] = row["Site ID"]
-        item["name"] = row["Trading Name"]
-        item["street_address"] = clean_address([row["Address1"], row["Address2"], row["Address3"]])
+        item["ref"] = row["Site_Number"]
+        item["name"] = row["Trading_Name"]
+        item["street_address"] = merge_address_lines([row["Address1"], row["Address2"], row["Address3"]])
         item["city"] = row["Town"]
         item["postcode"] = row["Postcode"]
         item["phone"] = row["Phone"]

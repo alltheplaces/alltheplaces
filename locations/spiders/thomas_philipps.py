@@ -1,7 +1,5 @@
-import json
-
-from scrapy import Request, Spider
-from scrapy.http import Response
+from scrapy import Spider
+from scrapy.http import JsonRequest, Response
 
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
@@ -10,22 +8,17 @@ from locations.hours import DAYS, OpeningHours
 class ThomasPhilippsSpider(Spider):
     name = "thomas_philipps"
     item_attributes = {"brand": "Thomas Philipps", "brand_wikidata": "Q1424735"}
-    headers = {"Content-type": "application/json"}
-
-    payload = {
-        "coordinateX": 52.52000659999999,
-        "coordinateY": 13.404954,
-        "listId": "5f1b4bf48edf4a7abc7856616fe5097c",
-        "displayMode": "list",
-        "count": 10000,
-    }
 
     def start_requests(self):
-        yield Request(
+        yield JsonRequest(
             "https://www.thomas-philipps.de/od/maps/getLocations",
-            method="POST",
-            headers=self.headers,
-            body=json.dumps(self.payload),
+            data={
+                "coordinateX": 52.52000659999999,
+                "coordinateY": 13.404954,
+                "listId": "5f1b4bf48edf4a7abc7856616fe5097c",
+                "displayMode": "list",
+                "count": 10000,
+            },
         )
 
     def parse(self, response: Response):

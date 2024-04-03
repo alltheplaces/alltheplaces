@@ -246,3 +246,35 @@ if [ ! $retval -eq 0 ]; then
     (>&2 echo "Couldn't copy history.json to S3")
     exit 1
 fi
+
+if [ -z "${BUNNY_API_KEY}" ]; then
+    (>&2 echo "Skipping CDN cache purge because BUNNY_API_KEY environment variable not set")
+else
+    curl --request GET \
+         --silent \
+         --url 'https://api.bunny.net/purge?url=https%3A%2F%2Fdata.alltheplaces.xyz%2Fruns%2Flatest.json&async=false' \
+         --header "AccessKey: ${BUNNY_API_KEY}" \
+         --header 'accept: application/json'
+
+    retval=$?
+    if [ ! $retval -eq 0 ]; then
+        (>&2 echo "Failed to purge latest.json from CDN")
+        exit 1
+    fi
+
+    (>&2 echo "Purged latest.json from CDN")
+
+    curl --request GET \
+         --silent \
+         --url 'https://api.bunny.net/purge?url=https%3A%2F%2Fdata.alltheplaces.xyz%2Fruns%2Fhistory.json&async=false' \
+         --header "AccessKey: ${BUNNY_API_KEY}" \
+         --header 'accept: application/json'
+
+    retval=$?
+    if [ ! $retval -eq 0 ]; then
+        (>&2 echo "Failed to purge history.json from CDN")
+        exit 1
+    fi
+
+    (>&2 echo "Purged history.json from CDN")
+fi

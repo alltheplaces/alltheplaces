@@ -13,9 +13,13 @@ from locations.hours import DAYS_FULL, OpeningHours
 
 class KiboSpider(Spider):
     page_size = 1000
+    api_filter = None
 
     def start_requests(self):
-        yield JsonRequest(url=f"{self.start_urls[0]}?pageSize={self.page_size}")
+        if self.api_filter:
+            yield JsonRequest(url=f"{self.start_urls[0]}?pageSize={self.page_size}&filter={self.api_filter}")
+        else:
+            yield JsonRequest(url=f"{self.start_urls[0]}?pageSize={self.page_size}")
 
     def parse(self, response, **kwargs):
         for location in response.json()["items"]:
@@ -30,12 +34,19 @@ class KiboSpider(Spider):
             if not item["phone"] and "phoneNumber" in location["shippingOriginContact"]:
                 item["phone"] = location["shippingOriginContact"]["phoneNumber"]
 
-            oh = OpeningHours()
+            item["opening_hours"] = OpeningHours()
+            hours_string = ""
             for day in DAYS_FULL:
                 hours_for_day = location["regularHours"][day.lower()]
-                if not hours_for_day["isClosed"]:
-                    oh.add_range(day, hours_for_day["openTime"], hours_for_day["closeTime"])
-            item["opening_hours"] = oh.as_opening_hours()
+                if hours_for_day["isClosed"]:
+                    continue
+                if hours_for_day.get("openTime") and hours_for_day.get("closeTime"):
+                    open_time = hours_for_day["openTime"]
+                    close_time = hours_for_day["closeTime"]
+                    hours_string = f"{hours_string} {day}: {open_time} - {close_time}"
+                elif hours_label := hours_for_day.get("label"):
+                    hours_string = f"{hours_string} {day}: {hours_label}"
+            item["opening_hours"].add_ranges_from_string(hours_string)
 
             yield from self.parse_item(item, location) or []
 
