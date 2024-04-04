@@ -50,7 +50,13 @@ class ApplyNSICategoriesPipeline:
         spider.crawler.stats.inc_value("atp/nsi/match_failed")
         return item
 
-    def filter_cc(self, matches, cc, categories: dict = None) -> list:
+    def filter_cc(self, matches: list[dict], cc: str, categories: dict = None) -> list[dict]:
+        """Filter matches by country code, attempt to find a better match if category is supplied.
+        :param matches: list of matches from NSI
+        :param cc: country code in lower case
+        :param categories: category tags
+        :return: filtered list of matches
+        """
         includes = []
         globals_matches = []
 
@@ -75,7 +81,12 @@ class ApplyNSICategoriesPipeline:
 
         return includes or globals_matches
 
-    def filter_categories(self, matches, tags: dict) -> list:
+    def filter_categories(self, matches: list[dict], tags: dict) -> list[dict]:
+        """Filter matches by category tags.
+        :param matches: list of matches from NSI
+        :param tags: category tags
+        :return: filtered list of matches
+        """
         results = []
 
         for match in matches:
