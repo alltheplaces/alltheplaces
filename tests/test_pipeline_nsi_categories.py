@@ -69,6 +69,42 @@ def test_categories_filter():
     assert len(filtered) == 1
     assert filtered[0]["id"] == "test_bus_stop"
 
+    matches = [
+        {
+            "id": "test_bakery",
+            "locationSet": {"include": ["001"]},
+            "tags": {
+                "shop": "bakery",
+            },
+        },
+        {
+            "id": "test_cafe_with_bakery",
+            "locationSet": {"include": ["001"]},
+            "tags": {
+                "shop": "bakery",
+                "amenity": "cafe",
+            },
+        },
+    ]
+
+    item, _, _ = get_objects()
+    apply_category(Categories.CAFE, item)
+    apply_category(Categories.SHOP_BAKERY, item)
+    filtered = pipeline.filter_categories(matches, get_category_tags(item))
+    assert len(filtered) == 1
+    assert filtered[0]["id"] == "test_cafe_with_bakery"
+
+    item, _, _ = get_objects()
+    apply_category(Categories.SHOP_BAKERY, item)
+    filtered = pipeline.filter_categories(matches, get_category_tags(item))
+    assert len(filtered) == 1
+    assert filtered[0]["id"] == "test_bakery"
+
+    item, _, _ = get_objects()
+    apply_category(Categories.CAFE, item)
+    filtered = pipeline.filter_categories(matches, get_category_tags(item))
+    assert len(filtered) == 0
+
 
 def test_cc_filter():
     _, pipeline, _ = get_objects()
