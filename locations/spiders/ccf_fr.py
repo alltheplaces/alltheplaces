@@ -20,6 +20,6 @@ class CcfFRSpider(SitemapSpider, StructuredDataSpider):
             data.get("props", {}).get("pageProps", {}).get("poiData", {}).get("customPoiData").get("services", [])
         )
         for service in services:
-            apply_yes_no(Extras.ATM, item, service.get("code") == "atm" and service.get("value") == True)
+            apply_yes_no(Extras.ATM, item, service.get("code") == "atm" and service.get("value") is True)
         apply_category(Categories.BANK, item)
         yield item
