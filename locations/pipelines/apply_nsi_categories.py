@@ -75,14 +75,14 @@ class ApplyNSICategoriesPipeline:
                 globals_matches.append(match)
 
         if categories:
-            # Find better match if category is supplied
             includes = self.filter_categories(includes, categories)
             globals_matches = self.filter_categories(globals_matches, categories)
 
         return includes or globals_matches
 
-    def filter_categories(self, matches: list[dict], tags: dict) -> list[dict]:
-        """Filter matches by category tags.
+    def filter_categories(self, matches: list[dict], categories: dict) -> list[dict]:
+        """Filter matches by category tags. If two category tags are supplied,
+        both tags have to present on the NSI item for a match to occur.
         :param matches: list of matches from NSI
         :param tags: category tags
         :return: filtered list of matches
@@ -90,7 +90,7 @@ class ApplyNSICategoriesPipeline:
         results = []
 
         for match in matches:
-            if get_category_tags(match["tags"]) == tags:
+            if get_category_tags(match["tags"]) == categories:
                 results.append(match)
 
         return results
