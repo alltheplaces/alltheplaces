@@ -11,15 +11,13 @@ from locations.hours import OpeningHours
 class RedRoosterAUSpider(Spider):
     name = "red_rooster_au"
     item_attributes = {"brand": "Red Rooster", "brand_wikidata": "Q376466"}
-    allowed_domains = ["redrooster.com.au"]
-    start_urls = ["https://api.redrooster.com.au/olo/store/getall"]
     # robots.txt returns a HTTP 403 error which confuses Scrapy
     custom_settings = {"ROBOTSTXT_OBEY": False}
+    api_url = "https://api.redrooster.com.au/olo/store/getall"
     api_key = "WDnfnaRMYSUJXkDp3SLh5VwUXe9jjXV7EBjYQNW0"
 
     def start_requests(self):
-        for url in self.start_urls:
-            yield JsonRequest(url=url, headers={"x-api-key": self.api_key})
+        yield JsonRequest(url=self.api_url, headers={"x-api-key": self.api_key})
 
     def parse(self, response):
         for location in response.json()["store"]:
@@ -34,7 +32,6 @@ class RedRoosterAUSpider(Spider):
             item["name"] = location["attributes"]["storeName"]
             item["phone"] = location["attributes"].get("storePhone")
             item["email"] = location["attributes"].get("storeEmail")
-            item["ref"] = item["email"].split("@", 1)[0][-4:]
 
             if "urlPath" in location["relationships"].keys():
                 item["website"] = (

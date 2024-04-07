@@ -79,7 +79,7 @@ class StoreLocatorPlusSelfSpider(Spider, AutomaticSpiderGenerator):
                     yield FormRequest(url=url, formdata=formdata, method="POST")
 
     def parse(self, response: Response):
-        if len(response.json()["response"]) >= self.max_results:
+        if len(response.json()["response"]) >= self.max_results and self.max_results > 0:
             raise RuntimeError(
                 "Locations have probably been truncated due to max_results (or more) locations being returned by a single geographic radius search. Use more granular searchable_points_files and a smaller search_radius."
             )
@@ -87,6 +87,8 @@ class StoreLocatorPlusSelfSpider(Spider, AutomaticSpiderGenerator):
             item = DictParser.parse(location)
             item.pop("addr_full", None)
             item["street_address"] = ", ".join(filter(None, [location.get("address"), location.get("address2")]))
+            if item["website"] and item["website"].startswith("/") and hasattr(self, "allowed_domains"):
+                item["website"] = f"https://{self.allowed_domains[0]}{item['website']}"
             yield from self.parse_item(item, location) or []
 
     def parse_item(self, item: Feature, location: dict):

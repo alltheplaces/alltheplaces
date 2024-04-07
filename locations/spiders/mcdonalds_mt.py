@@ -1,40 +1,41 @@
-import re
+import html
+from typing import Any
 
-from scrapy.spiders import SitemapSpider
+from scrapy import FormRequest, Spider
+from scrapy.http import Response
 
-from locations.hours import OpeningHours
-from locations.items import Feature
+from locations.categories import Extras, apply_yes_no
+from locations.dict_parser import DictParser
 from locations.spiders.mcdonalds import McDonaldsSpider
 
 
-class McDonaldsMTSpider(SitemapSpider):
+class McDonaldsMTSpider(Spider):
     name = "mcdonalds_mt"
     item_attributes = McDonaldsSpider.item_attributes
-    allowed_domains = ["mcdonalds.com.mt"]
-    sitemap_urls = ["https://mcdonalds.com.mt/location-sitemap.xml"]
-    sitemap_rules = [(r"\/location\/([\w\-]+)\/", "parse")]
+    start_urls = ["https://mcdonalds.com.mt/locate/"]
+    requires_proxy = True
 
-    def parse(self, response):
-        properties = {
-            "ref": re.search(self.sitemap_rules[0][0], response.url).group(1),
-            "name": response.xpath("//h1/text()").get().strip(),
-            "addr_full": response.xpath("//div/p/text()").get().strip(),
-            "lat": response.xpath("//@data-lat").get(),
-            "lon": response.xpath("//@data-lng").get(),
-            "website": response.url,
-        }
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        yield FormRequest(
+            url="https://mcdonalds.com.mt/wp-admin/admin-ajax.php",
+            formdata={
+                "action": "get_locations",
+                "token": response.xpath('//script[@id="locate-js-extra"]/text()').re_first('"ajax_nonce":"(.+?)",'),
+            },
+            callback=self.parse_api,
+        )
 
-        oh = OpeningHours()
-        for day in response.xpath(
-            '//div[@class="elementor-tab-content elementor-clearfix"]/table[@class="location-hours-table"]//tr'
-        )[0:6]:
-            oh.add_range(
-                day=day.xpath("./td[1]/text()").get(),
-                open_time=day.xpath("./td[2]/text()").get().split(" - ")[0],
-                close_time=day.xpath("./td[2]/text()").get().split(" - ")[1],
-                time_format="%H:%M",
-            )
-
-        properties["opening_hours"] = oh.as_opening_hours()
-
-        yield Feature(**properties)
+    def parse_api(self, response: Response, **kwargs: Any) -> Any:
+        for location in response.json()["data"]:
+            location.update(location.pop("latlng"))
+            location.pop("street_number", "")  # street address data not consistent,
+            location.pop("street_name", "")  # addr_full gets populated with proper address
+            item = DictParser.parse(location)
+            item["branch"] = html.unescape(item.pop("name"))
+            if services := location.get("terms"):
+                apply_yes_no(Extras.DELIVERY, item, "mcdelivery" in services)
+                apply_yes_no(Extras.OUTDOOR_SEATING, item, "outdoor-seating" in services)
+                apply_yes_no(Extras.DRIVE_THROUGH, item, "drive-thru" in services)
+                apply_yes_no(Extras.SELF_CHECKOUT, item, "self-ordering-kiosk" in services)
+                apply_yes_no(Extras.WHEELCHAIR, item, "wheel-chair-accessibility" in services)
+            yield item

@@ -1821,6 +1821,7 @@
                 "sha256:e2af80566f43c85f5797365077fb64a393861a3730bd110971ab7a0c94e873e7"
             ],
             "index": "pypi",
+            "markers": "python_version >= '3.8'",
             "version": "==24.3.0"
         },
         "boto3": {
