@@ -22,7 +22,17 @@ class RoddaPaintUSSpider(Spider):
             item = DictParser.parse(location)
             item["name"] = item["name"].replace("Rodda Paint – ", "")
             item["street_address"] = merge_address_lines([location.get("address"), location.get("address2")])
-            hours_string = " ".join([location.get("hours1"), location.get("hours2"), location.get("hours3"), location.get("hours4"), location.get("hours5"), location.get("hours6"), location.get("hours7")])
+            hours_string = " ".join(
+                [
+                    location.get("hours1"),
+                    location.get("hours2"),
+                    location.get("hours3"),
+                    location.get("hours4"),
+                    location.get("hours5"),
+                    location.get("hours6"),
+                    location.get("hours7"),
+                ]
+            )
             item["opening_hours"] = OpeningHours()
             item["opening_hours"].add_ranges_from_string(hours_string)
             yield item
