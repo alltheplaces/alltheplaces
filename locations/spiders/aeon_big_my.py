@@ -7,11 +7,14 @@ from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
 
+
 class AEONBiGMYSpider(CrawlSpider):
     name = "aeon_big_my"
     item_attributes = {"brand": "AEON BiG", "brand_wikidata": "Q8077280", "extras": Categories.SHOP_SUPERMARKET.value}
     allowed_domains = ["aeonbig.com.my"]
-    start_urls = ["https://aeonbig.com.my/wp-content/themes/twentyseventeen/ajax/portfolio-ajax-load-more-store.php?limit=1000&id=&p=1"]
+    start_urls = [
+        "https://aeonbig.com.my/wp-content/themes/twentyseventeen/ajax/portfolio-ajax-load-more-store.php?limit=1000&id=&p=1"
+    ]
     rules = [Rule(LinkExtractor(allow=r"^https:\/\/aeonbig\.com\.my\/store\/\?[\w\-]+$"), callback="parse")]
 
     def parse(self, response):
