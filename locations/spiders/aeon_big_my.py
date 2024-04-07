@@ -20,7 +20,9 @@ class AEONBiGMYSpider(CrawlSpider):
     def parse(self, response):
         properties = {
             "ref": response.url,
-            "name": response.xpath('//h4[contains(@class, "heading-primarys")]/text()').get("").replace("AEON BiG ", ""),
+            "name": response.xpath('//h4[contains(@class, "heading-primarys")]/text()')
+            .get("")
+            .replace("AEON BiG ", ""),
             "addr_full": merge_address_lines(response.xpath('//div[@class="store_info"]/ul[1]/li[1]/text()').getall()),
             "phone": response.xpath('//div[@class="store_info"]/ul[1]/li[2]/text()').get("").strip(),
             "website": response.url,
