@@ -19,15 +19,15 @@ class KekeSpider(SitemapSpider, StructuredDataSpider):
         if response.xpath('//div[@class="sqs-block-content"]/p[1]/text()').get() == "COMING SOON!":
             return
         data = json.loads(response.xpath("//@data-block-json").get()).get("location", {})
-        address = response.xpath(
-            '//a[contains(@href, "maps/place/") or contains(@href, "/g.page/") or contains(@href, "/maps?q")]/text()'
-        ).extract()
         item["name"] = response.xpath('//div[@class="sqs-block-content"]//h1/text()').get()
-        item["housenumber"] = (re.findall(r"^\d+", address[0].strip())[:1] or (None,))[0]
-        item["street_address"] = address[0].strip()
-        item["city"] = address[-1].split(",")[0]
-        item["state"] = address[-1].split(",")[1].split()[0]
-        item["postcode"] = address[-1].split(",")[1].split()[1]
+        if address := response.xpath(
+            '//a[contains(@href, "maps/place/") or contains(@href, "/g.page/") or contains(@href, "/maps?q")]/text()'
+        ).extract():
+            item["housenumber"] = (re.findall(r"^\d+", address[0].strip())[:1] or (None,))[0]
+            item["street_address"] = address[0].strip()
+            item["city"] = address[-1].split(",")[0]
+            item["state"] = address[-1].split(",")[1].split()[0]
+            item["postcode"] = address[-1].split(",")[1].split()[1]
         item["country"] = data.get("addressCountry")
         item["email"] = response.xpath('//a[contains(@href, "mailto")]/text()').get()
         item["phone"] = response.xpath('//a[contains(@href, "tel")]/text()').get()
