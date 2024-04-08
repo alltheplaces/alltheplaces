@@ -96,6 +96,7 @@ phases:
 
         if grep PLAYWRIGHT -q -m 1 $SPIDERS; then
             echo "Playwright detected. Installing requirements."
+            ldd --version
             playwright install-deps
             playwright install firefox
         fi
