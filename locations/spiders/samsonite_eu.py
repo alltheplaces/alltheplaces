@@ -1,8 +1,8 @@
 import scrapy
 import xmltodict
 
-from locations.categories import apply_category
-from locations.items import Feature, add_social_media
+from locations.categories import Categories, apply_category
+from locations.items import Feature, SocialMedia, set_social_media
 
 
 class SamsoniteEuSpider(scrapy.Spider):
@@ -10,6 +10,7 @@ class SamsoniteEuSpider(scrapy.Spider):
     CHIC_ACCENT = {"brand": "Chic Accent"}
     SAMSONITE = {"brand": "Samsonite", "brand_wikidata": "Q1203426"}
     allowed_domains = ["samsonite.com"]
+    custom_settings = {"DOWNLOAD_TIMEOUT": 30}
 
     def start_requests(self):
         country_eu = [
@@ -85,8 +86,8 @@ class SamsoniteEuSpider(scrapy.Spider):
 
                     if "whatsapp" in phone:
                         phone, whats_app = phone.split("whatsapp")
-                        add_social_media(item, "WhatsApp", whats_app.strip(" :"))
+                        set_social_media(item, SocialMedia.WHATSAPP, whats_app.strip(" :"))
 
                     item["phone"] = phone
-                apply_category({"shop": "bag"}, item)
+                apply_category(Categories.SHOP_BAG, item)
                 yield item

@@ -4,7 +4,7 @@ from scrapy import Request, Spider
 
 from locations.categories import Categories, apply_category
 from locations.google_url import extract_google_position
-from locations.hours import OpeningHours
+from locations.hours import DAYS_EN, OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
 
@@ -82,6 +82,8 @@ class NHSScotlandGBSpider(Spider):
             response.xpath('//div[@class="panel-times"]/dl/dd/text()').getall(),
         ):
             day = day.strip()
+            if day not in DAYS_EN:
+                continue
             times = times.strip()
             if times == "Closed":
                 continue

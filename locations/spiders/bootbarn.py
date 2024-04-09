@@ -18,13 +18,16 @@ class BootbarnSpider(scrapy.Spider):
         opening_hours = OpeningHours()
         for i in range(0, len(hours), 2):
             day = hours[i]
-            open_time, close_time = hours[i + 1].split(" - ")
-            opening_hours.add_range(
-                day=day[:2],
-                open_time=open_time,
-                close_time=close_time,
-                time_format="%I%p" if ":" not in open_time else "%I:%M%p",
-            )
+            if "CLOSED" in hours[i + 1]:
+                continue
+            else:
+                open_time, close_time = hours[i + 1].split(" - ")
+                opening_hours.add_range(
+                    day=day[:2],
+                    open_time=open_time,
+                    close_time=close_time,
+                    time_format="%I%p" if ":" not in open_time else "%I:%M%p",
+                )
 
         return opening_hours
 

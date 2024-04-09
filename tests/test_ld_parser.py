@@ -142,6 +142,120 @@ def test_ld_lowercase_attributes():
     assert i["lon"] == -99.08411
 
 
+def test_ld_opening_hours_specification_as_dict():
+    i = LinkedDataParser.parse_ld(
+        {
+            "@context": "https://schema.org",
+            "@type": "GroceryStore",
+            "name": "New Seasons Market",
+            "image": "https://www.newseasonsmarket.com/getattachment/1fcd06e5-9cc4-4f64-b887-4b2e169db283/williams_1080x1000_v3.jpg?lang=en-US&ext=.jpg",
+            "@id": "https://www.newseasonsmarket.com/find-a-store/williams",
+            "url": "https://www.newseasonsmarket.com/find-a-store/williams",
+            "telephone": "(503) 528-2888",
+            "priceRange": "$$",
+            "address": {
+                "@type": "PostalAddress",
+                "streetAddress": "3445 N Williams Ave",
+                "addressLocality": "Portland",
+                "addressRegion": "OR",
+                "postalCode": "97227",
+                "addressCountry": "US",
+            },
+            "geo": {"@type": "GeoCoordinates", "latitude": 45.5481269199285600, "longitude": -122.6673199714278200},
+            "openingHoursSpecification": {
+                "@type": "OpeningHoursSpecification",
+                "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+                "opens": "07:00",
+                "closes": "22:00",
+            },
+            "department": {
+                "@type": "Restaurant",
+                "name": "Hot Bar",
+                "image": "",
+                "telephone": "(503) 528-2888",
+                "openingHoursSpecification": {
+                    "@type": "OpeningHoursSpecification",
+                    "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+                    "opens": "07:00",
+                    "closes": "22:00",
+                },
+            },
+        }
+    )
+
+    assert i["opening_hours"].as_opening_hours() == "Mo-Su 07:00-22:00"
+
+
+def test_ld_opening_hours_specification_as_list():
+    i = LinkedDataParser.parse_ld(
+        ld={
+            "@context": ["https://schema.org", {"@language": "en-ca"}],
+            "@type": "Library",
+            "address": {
+                "@id": "_:school_edu_library_1",
+                "@type": "PostalAddress",
+                "addressCountry": "Canada",
+                "addressLocality": "Sudbury",
+                "addressRegion": "ON",
+                "contactType": "Mailing address",
+                "postalCode": "P3E 2C6",
+                "streetAddress": "School of Education - Music Resource Centre Laurentian University",
+            },
+            "email": "mailto:dscott@laurentian.ca",
+            "location": {"@id": "_:school_edu_library_1"},
+            "name": "Music Resource Centre",
+            "parentOrganization": "https://laurentian.concat.ca/eg/opac/library/LUSYS",
+            "openingHoursSpecification": [
+                {
+                    "@type": "OpeningHoursSpecification",
+                    "closes": "17:00:00",
+                    "dayOfWeek": "https://schema.org/Sunday",
+                    "opens": "09:00:00",
+                },
+                {
+                    "@type": "OpeningHoursSpecification",
+                    "closes": "17:00:00",
+                    "dayOfWeek": "https://schema.org/Saturday",
+                    "opens": "09:00:00",
+                },
+                {
+                    "@type": "OpeningHoursSpecification",
+                    "closes": "17:00:00",
+                    "dayOfWeek": "https://schema.org/Thursday",
+                    "opens": "09:00:00",
+                },
+                {
+                    "@type": "OpeningHoursSpecification",
+                    "closes": "17:00:00",
+                    "dayOfWeek": "https://schema.org/Tuesday",
+                    "opens": "09:00:00",
+                },
+                {
+                    "@type": "OpeningHoursSpecification",
+                    "closes": "17:00:00",
+                    "dayOfWeek": "https://schema.org/Friday",
+                    "opens": "09:00:00",
+                },
+                {
+                    "@type": "OpeningHoursSpecification",
+                    "closes": "17:00:00",
+                    "dayOfWeek": "https://schema.org/Monday",
+                    "opens": "09:00:00",
+                },
+                {
+                    "@type": "OpeningHoursSpecification",
+                    "closes": "17:00:00",
+                    "dayOfWeek": "https://schema.org/Wednesday",
+                    "opens": "09:00:00",
+                },
+            ],
+        },
+        time_format="%H:%M:%S",
+    )
+
+    assert i["opening_hours"].as_opening_hours() == "Mo-Su 09:00-17:00"
+
+
 def test_ld_lat_lon():
     i = LinkedDataParser.parse_ld(
         json.loads(

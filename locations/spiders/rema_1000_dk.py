@@ -35,5 +35,5 @@ class REMA1000DKSpider(Spider):
                 )
             item["opening_hours"] = OpeningHours()
             item["opening_hours"].add_ranges_from_string(hours_string, days=DAYS_NO)
-
+            item["postcode"] = str(item["postcode"])
             yield item

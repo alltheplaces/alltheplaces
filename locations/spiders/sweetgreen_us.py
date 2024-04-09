@@ -20,8 +20,8 @@ class SweetgreenUSSpider(Spider):
         point_files = "us_centroids_100mile_radius.csv"
         for url in self.start_urls:
             for lat, lon in point_locations(point_files):
-                nw_coords = vincenty_distance(float(lat), float(lon), 115, 315)
-                se_coords = vincenty_distance(float(lat), float(lon), 115, 135)
+                nw_coords = vincenty_distance(lat, lon, 115, 315)
+                se_coords = vincenty_distance(lat, lon, 115, 135)
                 request = {
                     "operationName": "LocationsSearchByArea",
                     "query": graphql_query,
