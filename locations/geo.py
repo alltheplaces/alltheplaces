@@ -68,11 +68,19 @@ def point_locations(areas_csv_file: str, area_field_filter: list[str] = None) ->
                 try:
                     lat, lon = float(row["latitude"]), float(row["longitude"])
                 except ValueError:
-                    raise Exception("Invalid latitude/longitude in searchable points file {} where latitude = {} and longitude = {}.".format(csv_file, row["latitude"], row["longitude"]))
+                    raise Exception(
+                        "Invalid latitude/longitude in searchable points file {} where latitude = {} and longitude = {}.".format(
+                            csv_file, row["latitude"], row["longitude"]
+                        )
+                    )
                 area = get_key(row, ["country", "territory", "state"])
                 if area_field_filter:
                     if not area:
-                        raise Exception("Searchable points file {} does support support area field filters (columns named 'country', 'territory' and 'state').".format(csv_file))
+                        raise Exception(
+                            "Searchable points file {} does support support area field filters (columns named 'country', 'territory' and 'state').".format(
+                                csv_file
+                            )
+                        )
                     if area not in area_field_filter:
                         continue
                 yield lat, lon
