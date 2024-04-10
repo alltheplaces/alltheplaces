@@ -34,7 +34,7 @@ class DictParser:
         "title",
         "business-name",
         "item-name",
-        "location-name"
+        "location-name",
     ]
 
     house_number_keys = [
@@ -43,7 +43,7 @@ class DictParser:
         "house-no",
         "street-number",
         "street-no",
-        "address-street-no"
+        "address-street-no",
     ]
 
     full_address_keys = [
@@ -141,7 +141,7 @@ class DictParser:
         "contact-email",
         "email-address",
         "email1",
-        "store-email"
+        "store-email",
     ]
 
     phone_keys = [
@@ -197,7 +197,7 @@ class DictParser:
         "store-url",
         "storeURL",
         "website-url",
-        "websiteURL"
+        "websiteURL",
     ]
 
     @staticmethod

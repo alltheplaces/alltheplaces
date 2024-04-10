@@ -1,6 +1,6 @@
-from chompjs import parse_js_object
 from hashlib import sha1
 
+from chompjs import parse_js_object
 from scrapy import Spider
 
 from locations.categories import Categories
