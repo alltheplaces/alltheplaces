@@ -6,6 +6,7 @@ class DictParser:
     # the common variants of case including such acronyms need to
     # all be listed below.
     ref_keys = [
+        # EN
         "ref",
         "id",
         "identifier",
@@ -25,9 +26,36 @@ class DictParser:
         "itemID",
     ]
 
-    name_keys = ["name", "store-name", "display-name", "title", "business-name", "item-name", "location-name"]
+    name_keys = [
+        # EN
+        "name",
+        "store-name",
+        "display-name",
+        "title",
+        "business-name",
+        "item-name",
+        "location-name"
+    ]
 
-    house_number_keys = ["house-number", "house-no", "street-number", "street-no", "address-street-no"]
+    house_number_keys = [
+        # EN
+        "house-number",
+        "house-no",
+        "street-number",
+        "street-no",
+        "address-street-no"
+    ]
+
+    full_address_keys = [
+        # EN
+        "address",
+        "addr",
+        "store-address",
+        "physical-address",
+        "full-address",
+        # ES
+        "direccion",  # "address"
+    ]
 
     street_address_keys = [
         # EN
@@ -54,6 +82,8 @@ class DictParser:
         "市区町村",  # "municipality"
         # PL
         "miasto",
+        # ES
+        "ciudad",  # "city"
     ]
 
     region_keys = [
@@ -72,6 +102,7 @@ class DictParser:
     ]
 
     country_keys = [
+        # EN
         "country-code",
         "address-country",
         "country",
@@ -104,9 +135,17 @@ class DictParser:
         "郵便番号",  # "post code"
     ]
 
-    email_keys = ["email", "contact-email", "email-address", "email1", "store-email"]
+    email_keys = [
+        # EN
+        "email",
+        "contact-email",
+        "email-address",
+        "email1",
+        "store-email"
+    ]
 
     phone_keys = [
+        # EN
         "phone-number",
         "phone",
         "telephone",
@@ -118,9 +157,12 @@ class DictParser:
         "contact-phone",
         "store-phone",
         "primary-phone",
+        # ES
+        "telefono",  # "phone"
     ]
 
     lat_keys = [
+        # EN
         "latitude",
         "lat",
         "store-latitude",
@@ -128,9 +170,12 @@ class DictParser:
         "yext-display-lat",
         "map-latitude",
         "geo-lat",
+        # ES
+        "coordenaday",  # "Coordinate Y"
     ]
 
     lon_keys = [
+        # EN
         "longitude",
         "lon",
         "long",
@@ -140,9 +185,20 @@ class DictParser:
         "yext-display-lng",
         "map-longitude",
         "geo-lng",
+        # ES
+        "coordenadax",  # "Coordinate X"
     ]
 
-    website_keys = ["url", "website", "permalink", "store-url", "storeURL", "website-url", "websiteURL"]
+    website_keys = [
+        # EN
+        "url",
+        "website",
+        "permalink",
+        "store-url",
+        "storeURL",
+        "website-url",
+        "websiteURL"
+    ]
 
     @staticmethod
     def parse(obj) -> Feature:
@@ -170,9 +226,7 @@ class DictParser:
         item["lat"] = DictParser.get_first_key(location, DictParser.lat_keys)
         item["lon"] = DictParser.get_first_key(location, DictParser.lon_keys)
 
-        address = DictParser.get_first_key(
-            obj, ["address", "addr", "store-address", "physical-address", "full-address"]
-        )
+        address = DictParser.get_first_key(obj, DictParser.full_address_keys)
 
         if address and isinstance(address, str):
             item["addr_full"] = address
