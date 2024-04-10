@@ -77,7 +77,7 @@ def point_locations(areas_csv_file: str, area_field_filter: list[str] = None) ->
                 if area_field_filter:
                     if not area:
                         raise Exception(
-                            "Searchable points file {} does support support area field filters (columns named 'country', 'territory' and 'state').".format(
+                            "Searchable points file {} does not support area field filters (columns named 'country', 'territory' and 'state').".format(
                                 csv_file
                             )
                         )
