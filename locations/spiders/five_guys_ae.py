@@ -8,6 +8,8 @@ from locations.categories import PaymentMethods, apply_yes_no
 from locations.spiders.five_guys_us import FiveGuysUSSpider
 from locations.structured_data_spider import StructuredDataSpider
 
+# Five Guys Structured Data
+
 
 class FiveGuysAESpider(SitemapSpider, StructuredDataSpider):
     name = "five_guys_ae"
