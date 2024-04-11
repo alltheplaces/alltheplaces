@@ -2,6 +2,7 @@ import scrapy
 
 from locations.hours import DAYS_EN, DAYS_FULL, OpeningHours
 from locations.items import Feature
+from locations.user_agents import BROWSER_DEFAULT
 
 TIME_FORMAT = "%I:%M %p"
 
@@ -12,7 +13,7 @@ class LidsSpider(scrapy.Spider):
     allowed_domains = ["lids.com"]
     custom_settings = {
         "COOKIES_ENABLED": True,
-        "USER_AGENT": " Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36",
+        "USER_AGENT": BROWSER_DEFAULT,
     }
 
     def start_requests(self):

@@ -1,104 +1,199 @@
-<!doctype html>
-<html>
-    <head>
-        <meta name="viewport" content="width=device-width,initial-scale=1" />
-        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"
-            integrity="sha512-mD70nAW2ThLsWH0zif8JPbfraZ8hbCtjQ+5RU1m4+ztZq6/MymyZeB55pWsi4YAX+73yvcaJyk61mzfYMvtm9w=="
-            crossorigin=""/>
-        <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"
-            integrity="sha512-Dqm3h1Y4qiHUjbhxTuBGQsza0Tfppn53SHlu/uj1f+RT+xfShfe7r6czRf5r2NmllO2aKx+tYJgoxboOkn1Scg=="
-            crossorigin=""></script>
-        <script src="https://unpkg.com/supercluster@8.0.1/dist/supercluster.min.js"
-            integrity="sha512-+1mea1aNoNdQM3zbLOIuIHHoQQrvnnl+eUK22wPO1aorVm0xWvQrqo3oLXBj1JdvhCRueUSKL0luG0+8n5J4Eg=="
-            crossorigin=""></script>
-        <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css"
-            integrity="sha512-mQ77VzAakzdpWdgfL/lM1ksNy89uFgibRQANsNneSTMD/bj0Y/8+94XMwYhnbzx8eki2hrbPpDm0vD0CiT2lcg=="
-            crossorigin=""/>
-        <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css"
-            integrity="sha512-6ZCLMiYwTeli2rVh3XAPxy3YoR5fVxGdH/pz+KMCzRY2M65Emgkw00Yqmhh8qLGeYQ3LbVZGdmOX9KUjSKr0TA=="
-            crossorigin=""/>
-    </head>
-<body style="margin: 0px;">
-    <div id="map" style="position: absolute; width: 100%; height: 100%;"></div>
-    <script>
-        var map = L.map("map");
-        var layer = new L.tileLayer("https://stamen-tiles-{s}.a.ssl.fastly.net/toner/{z}/{x}/{y}.png", {
-            attribution: 'Map tiles by <a href="https://stamen.com/">Stamen Design</a>, under <a href="https://creativecommons.org/licenses/by/3.0/">CC BY 3.0</a>. Data by <a href="https://www.openstreetmap.org/">OpenStreetMap</a>, under <a href="https://www.openstreetmap.org/copyright">ODbL</a>.',
-        });
-        map.setView([35.9908385, -78.9005222], 3);
-        map.addLayer(layer);
-
-        addEventListener("DOMContentLoaded", () => {
-            const url = new URL(location);
-            if (url.searchParams.has("show")) {
-                const show = url.searchParams.get("show");
-                console.log("Fetching GeoJSON at " + show);
-                fetch(show)
-                    .then(response => response.json())
-                    .then(data => addDataToMap(data, map));
-            } else {
-                console.log("No GeoJSON file specified.");
-            }
-        });
-
-        function popupHandler(layer) {
-            const popup = document.createElement("pre");
-            popup.textContent = JSON.stringify(layer.feature.properties, null, 2);
-            return popup;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maplibre JS Clustering</title>
+    <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@3.5.2/dist/maplibre-gl.css" />
+    <script src="https://unpkg.com/maplibre-gl@3.5.2/dist/maplibre-gl.js"></script>
+    <style>
+        body {
+            padding: 0;
+            margin: 0;
+        }
+        html, body, #map {
+            height: 100%;
+            width: 100vw;
         }
 
-        function addDataToMap(data, map) {
-            if (data.features.length > 500) {
-                const index = new Supercluster({
-                    radius: 60,
-                    extent: 256,
-                    maxZoom: 17,
-                }).load(data.features);
+        /* Make the maplibre popup table header have a right alignment */
+        .maplibregl-popup-content table th {
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
 
-                const markers = L.geoJson(null, {
-                    pointToLayer: createClusterIcon,
-                }).addTo(map);
+<div id="map"></div>
 
-                markers.on("click", (e) => {
-                    if (e.layer.feature.properties.cluster_id) {
-                        map.flyTo(e.latlng, index.getClusterExpansionZoom(e.layer.feature.properties.cluster_id));
-                    } else {
-                        L.popup({ content: popupHandler }, e.layer).setLatLng(e.layer.getLatLng()).openOn(map);
-                    }
-                });
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Get the URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const geoJsonUrl = urlParams.get('show');
+        console.log('Fetching GeoJSON at ' + geoJsonUrl);
 
-                const update = () => {
-                    const bounds = map.getBounds();
-                    markers.clearLayers();
-                    markers.addData(
-                        index.getClusters(
-                            [bounds.getWest(), bounds.getSouth(), bounds.getEast(), bounds.getNorth()],
-                            map.getZoom()
-                        )
-                    );
-                };
-                update();
-                map.on("moveend", update);
-            } else {
-                const dataLayer = L.geoJson(data, {
-                    attribution: 'Data by <a href="https://www.alltheplaces.xyz/">All The Places</a>.',
-                }).bindPopup(popupHandler);
-                dataLayer.addTo(map);
-            }
+        if (!geoJsonUrl) {
+            console.error('No GeoJSON URL specified in the "show" parameter.');
+            return;
         }
 
-        function createClusterIcon(feature, latlng) {
-            if (!feature.properties.cluster) return L.marker(latlng);
-            const count = feature.properties.point_count;
-            const size = count < 100 ? "small" : count < 1000 ? "medium" : "large";
-            const icon = L.divIcon({
-                html: `<div><span>${feature.properties.point_count_abbreviated}</span></div>`,
-                className: `marker-cluster marker-cluster-${size}`,
-                iconSize: L.point(40, 40),
+        // Initialize the map
+        const map = new maplibregl.Map({
+            container: 'map',
+            style: 'https://api.protomaps.com/styles/v2/dark.json?key=a19ca255a685ed70',
+            center: [0, 0],
+            zoom: 2
+        });
+
+        // Add the GeoJSON source
+        map.on('load', function () {
+            map.addSource('points', {
+                type: 'geojson',
+                data: geoJsonUrl,
+                cluster: true,
+                clusterMaxZoom: 14,
+                clusterRadius: 50
             });
-            return L.marker(latlng, { icon });
-        }
 
-    </script>
+            // Add a layer for clustered points
+            map.addLayer({
+                id: 'clusters',
+                type: 'circle',
+                source: 'points',
+                filter: ['has', 'point_count'],
+                paint: {
+                    'circle-color': [
+                        'step',
+                        ['get', 'point_count'],
+                        '#51bbd6',
+                        100,
+                        '#f1f075',
+                        750,
+                        '#f28cb1'
+                    ],
+                    'circle-radius': [
+                        'step',
+                        ['get', 'point_count'],
+                        20,
+                        100,
+                        30,
+                        750,
+                        40
+                    ]
+                }
+            });
+
+            // Add a layer for individual points
+            map.addLayer({
+                id: 'cluster-count',
+                type: 'symbol',
+                source: 'points',
+                filter: ['has', 'point_count'],
+                layout: {
+                    'text-field': '{point_count_abbreviated}',
+                    'text-font': ['Noto Sans Medium'],
+                    'text-size': 12
+                }
+            });
+
+            // Add a layer for unclustered points
+            map.addLayer({
+                id: 'unclustered-point',
+                type: 'circle',
+                source: 'points',
+                filter: ['!', ['has', 'point_count']],
+                paint: {
+                    'circle-color': '#11b4da',
+                    'circle-radius': 6,
+                    'circle-stroke-width': 1,
+                    'circle-stroke-color': '#fff'
+                }
+            });
+
+            // Show a popup when hovering over an unclustered point
+            const popup = new maplibregl.Popup({
+                closeOnClick: false,
+                maxWidth: '400px'
+            });
+            let stickyPopup = false;
+
+            map.on('mouseenter', 'unclustered-point', function (e) {
+                map.getCanvas().style.cursor = 'pointer';
+                const feature = e.features[0];
+                const coordinates = feature.geometry.coordinates.slice();
+                let description = "<table>";
+                // Sort the properties by key
+                const sortedProperties = {};
+                Object.keys(feature.properties).sort().forEach(function (key) {
+                    sortedProperties[key] = feature.properties[key];
+                });
+                for (let [key, value] of Object.entries(sortedProperties)) {
+                    // If the value is a URL, make it a link
+                    if (/^http[s]?:\/\//.test(value)) {
+                        value = `<a referrerpolicy="no-referrer" target="_blank" href="${value}">${value}</a>`;
+                    }
+
+                    // If the key is "brand:wikidata", make it a link to Wikidata
+                    if (key === "brand:wikidata") {
+                        value = `<a referrerpolicy="no-referrer" target="_blank" href="https://www.wikidata.org/wiki/${value}">${value}</a>`;
+                    }
+
+                    description += `<tr><th>${key}</th><td>${value}</td></tr>`;
+                }
+                description += "</table>";
+
+                // Ensure that if the map is zoomed out such that multiple
+                // copies of the feature are visible, the popup appears
+                // over the copy being pointed to
+                while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+                    coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+                }
+
+                popup
+                    .setLngLat(coordinates)
+                    .setHTML(description)
+                    .addTo(map);
+            });
+
+            // Click on the point to keep the popup open
+            map.on('click', 'unclustered-point', function (e) {
+                map.getCanvas().style.cursor = 'pointer';
+                stickyPopup = true;
+            });
+
+            // Unset the sticky popup when the popup is closed
+            popup.on('close', function () {
+                stickyPopup = false;
+            });
+
+            // Hide the popup when the mouse leaves the point
+            map.on('mouseleave', 'unclustered-point', function () {
+                map.getCanvas().style.cursor = '';
+                if (!stickyPopup) popup.remove();
+            });
+
+            // Click on a clustered point to zoom to that cluster
+            map.on('click', 'clusters', function (e) {
+                const features = map.queryRenderedFeatures(e.point, {
+                    layers: ['clusters']
+                });
+                const clusterId = features[0].properties.cluster_id;
+                map.getSource('points').getClusterExpansionZoom(
+                    clusterId,
+                    function (err, zoom) {
+                        if (err) return;
+                        map.easeTo({
+                            center: features[0].geometry.coordinates,
+                            zoom: zoom
+                        });
+                    }
+                );
+            });
+
+        });
+    });
+</script>
+
 </body>
 </html>

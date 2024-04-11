@@ -1,5 +1,6 @@
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
 
@@ -30,9 +31,7 @@ class Q8Spider(scrapy.Spider):
                     "ref": store.get("StationId"),
                     "name": store.get("Name"),
                     "country": store.get("Country"),
-                    "street_address": ", ".join(
-                        filter(None, [store.get("Address_line_1"), store.get("Address_line_2")])
-                    ),
+                    "addr_full": ", ".join(filter(None, [store.get("Address_line_1"), store.get("Address_line_2")])),
                     "phone": store.get("Phone"),
                     "email": store.get("Email"),
                     "website": f"https://www.q8.be/{website}" if website else None,
@@ -44,5 +43,5 @@ class Q8Spider(scrapy.Spider):
 
             if brand := self.BRANDS.get(store["Category"]):
                 item.update(brand)
-
+            apply_category(Categories.FUEL_STATION, item)
             yield item

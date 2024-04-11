@@ -12,7 +12,7 @@ class ZEnergyNZSpider(scrapy.Spider):
     start_urls = ["https://www.z.co.nz/find-a-station/"]
 
     def parse(self, response, **kwargs):
-        for location in json.loads(response.xpath("//div/@data-props").get())["stations"]:
+        for location in json.loads(response.xpath('//div[@data-component="locator"]/@data-props').get())["stations"]:
             item = DictParser.parse(location)
             item["ref"] = location["externalID"]
             item["website"] = f'https://www.z.co.nz{location["link"]}'

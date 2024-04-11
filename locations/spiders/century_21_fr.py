@@ -1,24 +1,36 @@
-import scrapy
+import json
+from json import JSONDecodeError
 
-from locations.dict_parser import DictParser
-from locations.geo import postal_regions
+from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule
+
+from locations.items import Feature
 from locations.spiders.century_21 import Century21Spider
 
 
-class Century21FrSpider(scrapy.Spider):
+class Century21FRSpider(CrawlSpider):
     name = "century_21_fr"
     item_attributes = Century21Spider.item_attributes
-    allowed_domains = ["century21.fr"]
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    start_urls = ["https://www.century21.fr/trouver_agence/"]
+    rules = [Rule(LinkExtractor("trouver_agence/d-"), callback="parse")]
 
-    def start_requests(self):
-        for record in postal_regions("FR"):
-            template_url = "https://www.century21.fr/autocomplete/localite/?q={}"
-            yield scrapy.Request(template_url.format(record["postal_region"]))
-
-    def parse(self, response):
-        for data in response.json():
-            item = DictParser.parse(data)
-            item["postcode"] = data.get("cp")
-
-            yield item
+    def parse(self, response, **kwargs):
+        try:
+            data = response.xpath("//@data-agencies").get()
+            locations = json.loads(data)
+        except JSONDecodeError:
+            self.logger.error("Invalid json found on {}".format(response.url))
+            return
+        for location in locations:
+            yield Feature(
+                ref=location["ref_agence"],
+                lat=location["lat"],
+                lon=location["lng"],
+                name=location["nom"],
+                street_address=location["address"],
+                postcode=location["code_postal"],
+                city=location["ville"],
+                country="FR",
+                phone=location["tel"],
+                website=response.urljoin(location["absolute_url"]),
+            )

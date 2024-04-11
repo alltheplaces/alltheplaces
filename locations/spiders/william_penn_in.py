@@ -3,6 +3,7 @@ import re
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
 
@@ -22,4 +23,5 @@ class WilliamPennINSpider(Spider):
             item = DictParser.parse(location)
             item["addr_full"] = re.sub(r"\s+", " ", item.get("addr_full", ""))
             item["postcode"] = location["pincode"]
+            apply_category(Categories.SHOP_STATIONERY, item)
             yield item

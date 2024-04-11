@@ -2,6 +2,7 @@ from urllib.parse import urlencode
 
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.geo import point_locations
 from locations.items import Feature
 
@@ -25,7 +26,7 @@ class AAASpider(scrapy.Spider):
                 "radius": "5000",
                 "format": "json",
                 "ident": "AAACOM",
-                "destination": ",".join([lat, lon]),
+                "destination": f"{lat},{lon}",
             }
             yield scrapy.http.Request("https://tdr.aaa.com/tdrl/search.jsp?" + urlencode(params))
 
@@ -50,4 +51,6 @@ class AAASpider(scrapy.Spider):
                 "lon": location["position"]["longitude"],
                 "phone": location["phones"].get("phone", {}).get("content"),
             }
-            yield Feature(**properties)
+            item = Feature(**properties)
+            apply_category(Categories.SHOP_TRAVEL_AGENCY, item)
+            yield item

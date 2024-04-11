@@ -1,11 +1,25 @@
-from locations.storefinders.freshop import FreshopSpider
+import json
+import re
+
+from scrapy.spiders import SitemapSpider
+
+from locations.dict_parser import DictParser
 
 
-class PigglyWigglyUSSpider(FreshopSpider):
+class PigglyWigglyUSSpider(SitemapSpider):
     name = "piggly_wiggly_us"
     item_attributes = {"brand": "Piggly Wiggly", "brand_wikidata": "Q3388303"}
-    app_key = "piggly_wiggly_nc"
+    sitemap_urls = ["https://www.pigglywiggly.com/wp-sitemap-posts-page-1.xml"]
+    sitemap_rules = [(r"/store-locations/.+/", "parse")]
 
-    def parse_item(self, item, location):
-        item["phone"] = item["phone"].split("|", 1)[0].split("\n", 1)[0].strip()
-        yield item
+    def parse(self, response, **kwargs):
+        locations = json.loads(re.search(r"locations = (\[?{.+}\]?);", response.text).group(1))
+        if isinstance(locations, dict):
+            locations = locations.values()
+
+        for location in locations:
+            item = DictParser.parse(location)
+            item["ref"] = location["storeNumber"]
+            item["website"] = item.pop("email")
+            item["name"] = None
+            yield item

@@ -1,46 +1,59 @@
-from scrapy import Spider
+import re
+
+from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule
 
 from locations.hours import OpeningHours
 from locations.items import Feature
-from locations.spiders.vapestore_gb import clean_address
 
 
-class TigerWheelAndTyreZASpider(Spider):
+class TigerWheelAndTyreZASpider(CrawlSpider):
     name = "tiger_wheel_and_tyre_za"
     item_attributes = {"brand": "Tiger Wheel & Tyre", "brand_wikidata": "Q120762656"}
-    start_urls = [
-        "https://api.locationbank.net/storelocator/StoreLocatorAPI?clientId=229c9ffb-f729-4455-b0a2-ac61974c7074"
+    start_urls = ["https://twtinfo.goreview.co.za/store-locator"]
+    rules = [
+        Rule(
+            LinkExtractor(allow=r"^https:\/\/twt\d+\.goreview\.co\.za\/store-information\?store-locator=twtinfo$"),
+            callback="parse",
+        )
     ]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
-    def parse(self, response, **kwargs):
-        for location in response.json()["locations"]:
-            item = Feature()
-            item["ref"] = location["id"]
-            item["lat"] = location["latitude"]
-            item["lon"] = location["longitude"]
-            item["name"] = location["locationName"]
-            item["street_address"] = clean_address(
-                [
-                    location.get("addressLine1"),
-                    location.get("addressLine2"),
-                    location.get("addressLine3"),
-                    location.get("addressLine4"),
-                    location.get("addressLine5"),
-                ]
+    def parse(self, response):
+        properties = {
+            "ref": response.url,
+            "name": response.xpath('//div[contains(@class, "content-wrapper")]/div[1]/h2/text()').get(),
+            "addr_full": re.sub(
+                r"\s+",
+                " ",
+                ", ".join(
+                    filter(
+                        None,
+                        map(
+                            str.strip,
+                            response.xpath(
+                                '//div[contains(@class, "content-wrapper")]/div[2]/div[1]//p/text()'
+                            ).getall(),
+                        ),
+                    )
+                ),
+            ),
+            "phone": response.xpath(
+                '//div[contains(@class, "content-wrapper")]/div[2]/div[3]//a[contains(@href, "tel:")]/@href'
             )
-            item["extras"]["addr:town"] = location["subLocality"]
-            item["city"] = location["locality"]
-            item["state"] = location["administrativeArea"]
-            item["country"] = location["country"]
-            item["postcode"] = location["postalCode"]
-            item["website"] = f'https://www.twt.co.za/store-details/?locationid={location["id"]}'
-            item["phone"] = location["primaryPhone"]
-            item["email"] = location["email"]
-
-            item["opening_hours"] = OpeningHours()
-            for rule in location["regularHours"]:
-                if not rule["isOpen"]:
-                    continue
-                item["opening_hours"].add_range(rule["openDay"], rule["openTime"], rule["closeTime"])
-
-            yield item
+            .get()
+            .replace("tel:", ""),
+            "facebook": response.xpath(
+                '//div[contains(@class, "content-wrapper")]/div[2]/div[5]//a[contains(@href, "facebook.com")]/@href'
+            ).get(),
+            "website": response.url,
+        }
+        if maps_links_js := response.xpath('//script[contains(text(), "#apple_maps_directions")]/text()').get():
+            if "&sll=" in maps_links_js:
+                properties["lat"], properties["lon"] = maps_links_js.split("&sll=", 1)[1].split("&", 1)[0].split(",", 2)
+        hours_string = " ".join(
+            response.xpath('//div[contains(@class, "content-wrapper")]/div[2]/div[4]/p//text()').getall()
+        )
+        properties["opening_hours"] = OpeningHours()
+        properties["opening_hours"].add_ranges_from_string(hours_string)
+        yield Feature(**properties)

@@ -18,7 +18,7 @@ class ApplyNSICategoriesPipeline:
         if item.get("nsi_id"):
             return item
 
-        code = item.get("brand_wikidata")
+        code = item.get("brand_wikidata", item.get("operator_wikidata"))
         if not code:
             return item
 
@@ -32,8 +32,11 @@ class ApplyNSICategoriesPipeline:
 
         matches = self.wikidata_cache.get(code)
 
-        if len(matches) == 0:
+        if len(matches) == 0 and item.get("brand_wikidata"):
             spider.crawler.stats.inc_value("atp/nsi/brand_missing")
+            return item
+        elif len(matches) == 0 and item.get("operator_wikidata"):
+            spider.crawler.stats.inc_value("atp/nsi/operator_missing")
             return item
 
         if len(matches) == 1:
@@ -41,7 +44,7 @@ class ApplyNSICategoriesPipeline:
             return self.apply_tags(matches[0], item)
 
         if cc := item.get("country"):
-            matches = self.filter_cc(matches, cc.lower())
+            matches = self.filter_cc(matches, cc.lower(), get_category_tags(item))
 
             if len(matches) == 1:
                 spider.crawler.stats.inc_value("atp/nsi/cc_match")
@@ -57,7 +60,13 @@ class ApplyNSICategoriesPipeline:
         spider.crawler.stats.inc_value("atp/nsi/match_failed")
         return item
 
-    def filter_cc(self, matches, cc) -> []:
+    def filter_cc(self, matches: list[dict], cc: str, categories: dict = None) -> list[dict]:
+        """Filter matches by country code, attempt to find a better match if category is supplied.
+        :param matches: list of matches from NSI
+        :param cc: country code in lower case
+        :param categories: category tags
+        :return: filtered list of matches
+        """
         includes = []
         globals_matches = []
 
@@ -75,13 +84,23 @@ class ApplyNSICategoriesPipeline:
             if "001" in include:  # 001 being global in NSI
                 globals_matches.append(match)
 
+        if categories:
+            includes = self.filter_categories(includes, categories)
+            globals_matches = self.filter_categories(globals_matches, categories)
+
         return includes or globals_matches
 
-    def filter_categories(self, matches, tags) -> []:
+    def filter_categories(self, matches: list[dict], categories: dict) -> list[dict]:
+        """Filter matches by category tags. If two category tags are supplied,
+        both tags have to present on the NSI item for a match to occur.
+        :param matches: list of matches from NSI
+        :param tags: category tags
+        :return: filtered list of matches
+        """
         results = []
 
         for match in matches:
-            if get_category_tags(match["tags"]) == tags:
+            if get_category_tags(match["tags"]) == categories:
                 results.append(match)
 
         return results
@@ -96,6 +115,8 @@ class ApplyNSICategoriesPipeline:
         for key, value in match["tags"].items():
             if key == "brand:wikidata":
                 key = "brand_wikidata"
+            elif key == "operator:wikidata":
+                key = "operator_wikidata"
 
             # Fields defined in Feature are added directly otherwise add them to extras
             # Never override anything set by the spider

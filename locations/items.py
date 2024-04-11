@@ -2,6 +2,8 @@
 #
 # See documentation in:
 # http://doc.scrapy.org/en/latest/topics/items.html
+from datetime import datetime
+from enum import Enum
 
 import scrapy
 
@@ -11,6 +13,7 @@ class Feature(scrapy.Item):
     lon = scrapy.Field()
     geometry = scrapy.Field()
     name = scrapy.Field()
+    branch = scrapy.Field()
     addr_full = scrapy.Field()
     housenumber = scrapy.Field()
     street = scrapy.Field()
@@ -29,6 +32,8 @@ class Feature(scrapy.Item):
     ref = scrapy.Field()
     brand = scrapy.Field()
     brand_wikidata = scrapy.Field()
+    operator = scrapy.Field()
+    operator_wikidata = scrapy.Field()
     located_in = scrapy.Field()
     located_in_wikidata = scrapy.Field()
     nsi_id = scrapy.Field()
@@ -69,9 +74,56 @@ def set_lat_lon(item: Feature, lat: float, lon: float):
         item["geometry"] = None
 
 
-def add_social_media(item: Feature, service: str, account: str):
-    service = service.lower()
-    if service in item.fields:
-        item[service] = account
+class SocialMedia(Enum):
+    FACEBOOK = "facebook"
+    TRIPADVISOR = "tripadvisor"
+    INSTAGRAM = "instagram"
+    TRIP_ADVISOR = "tripadvisor"
+    VK = "vk"
+    TWITTER = "twitter"
+    YOUTUBE = "youtube"
+    LINKEDIN = "linkedin"
+    TELEGRAM = "telegram"
+    WHATSAPP = "whatsapp"
+    VIBER = "viber"
+    YELP = "yelp"
+    PINTEREST = "pinterest"
+    TIKTOK = "tiktok"
+    MASTODON = "mastodon"
+
+
+def get_social_media(item: Feature, service: str | Enum) -> str:
+    if isinstance(service, Enum):
+        service_str = service.value
+    elif isinstance(service, str):
+        service_str = service.lower()
     else:
-        item["extras"][f"contact:{service}"] = account
+        raise TypeError("string or Enum required")
+
+    if service_str in item.fields:
+        return item.get(service_str)
+    else:
+        return item["extras"].get("contact:{}".format(service_str))
+
+
+def add_social_media(item: Feature, service: str, account: str):
+    """Deprecated, use set_social_media"""
+    set_social_media(item, service, account)
+
+
+def set_social_media(item: Feature, service: str | Enum, account: str):
+    if isinstance(service, Enum):
+        service_str = service.value
+    elif isinstance(service, str):
+        service_str = service.lower()
+    else:
+        raise TypeError("string or Enum required")
+
+    if service_str in item.fields:
+        item[service_str] = account
+    else:
+        item["extras"]["contact:{}".format(service_str)] = account
+
+
+def set_closed(item: Feature, end_date: datetime = None):
+    item["extras"]["end_date"] = end_date.strftime("%Y-%m-%d") if end_date else "yes"

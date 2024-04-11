@@ -1,4 +1,16 @@
-from locations.categories import Categories, Extras, Fuel, PaymentMethods, apply_category, apply_yes_no
+import reverse_geocoder
+
+from locations.categories import (
+    Access,
+    Categories,
+    Extras,
+    Fuel,
+    FuelCards,
+    PaymentMethods,
+    apply_category,
+    apply_yes_no,
+)
+from locations.items import get_lat_lon, set_lat_lon
 from locations.storefinders.woosmap import WoosmapSpider
 
 
@@ -8,12 +20,12 @@ class TotalEnergiesSpider(WoosmapSpider):
     origin = "https://totalenergies.com"
 
     BRANDS = {
-        "tot": {"brand": "Total", "brand_wikidata": "Q154037"},
+        "tot": {"brand": "TotalEnergies", "brand_wikidata": "Q154037"},
         "cepsa": {"brand": "Cepsa", "brand_wikidata": "Q608819"},
         "aral": {"brand": "Aral", "brand_wikidata": "Q565734"},
         "bp": {"brand": "BP", "brand_wikidata": "Q152057"},
-        #   1454 "unb"
-        "totalerg": {"brand": "TotalEnergies", "brand_wikidata": "Q154037"},
+        #   1454 "unb" - unbranded/independend
+        "totalerg": {"brand": "TotalErg", "brand_wikidata": "Q3995933"},
         "ela": {"brand": "Elan", "brand_wikidata": "Q57980752"},
         "mol": {"brand": "MOL", "brand_wikidata": "Q549181"},
         "tac": {"brand": "Total Access", "brand_wikidata": "Q154037"},
@@ -24,18 +36,18 @@ class TotalEnergiesSpider(WoosmapSpider):
         "westfalen": {"brand": "Westfalen", "brand_wikidata": "Q1411209"},
         "slovnaft": {"brand": "Slovnaft", "brand_wikidata": "Q1587563"},
         "she": {"brand": "Shell", "brand_wikidata": "Q110716465"},
-        "totex": {"brand": "Total Express"},
+        "totex": {"brand": "TotalEnergies Express", "brand_wikidata": "Q154037"},
+        "omv": {"brand": "OMV", "brand_wikidata": "Q168238"},
+        "dyn": {"brand": "Dyneff", "brand_wikidata": "Q16630266"},
+        "gul": {"brand": "Gulf", "brand_wikidata": "Q5617505"},
+        "filt": {"brand": "Filoil", "brand_wikidata": None},
         #    159 "eos"
         #    151 "freie"
-        #    112 "dyn"
-        #    106 "gul"
-        #    103 "filt"
         #     32 "totfa"
         #     25 "sup"
         #     20 "wei"
         #     20 "haa"
         #     18 "elf"
-        #     15 "omv"
         #      4 "deal"
         #      3 "diver"
         #      1 "g&v"
@@ -64,7 +76,7 @@ class TotalEnergiesSpider(WoosmapSpider):
         apply_yes_no(Extras.TOILETS, item, "restroom" in feature["properties"]["tags"])
         apply_yes_no(Extras.WIFI, item, "freewifi" in feature["properties"]["tags"])
         apply_yes_no(Extras.WHEELCHAIR, item, "accessibility" in feature["properties"]["tags"])
-        apply_yes_no("hgv", item, "truckfriendly" in feature["properties"]["tags"])
+        apply_yes_no(Access.HGV, item, "truckfriendly" in feature["properties"]["tags"])
         apply_yes_no(Extras.OIL_CHANGE, item, "oilchange" in feature["properties"]["tags"])
         apply_yes_no("service:vehicle:glass", item, "carglass" in feature["properties"]["tags"])
 
@@ -79,7 +91,7 @@ class TotalEnergiesSpider(WoosmapSpider):
         apply_yes_no(Fuel.ADBLUE, item, "adblue" in feature["properties"]["tags"])
         apply_yes_no(Fuel.LPG, item, "lpg" in feature["properties"]["tags"])
         apply_yes_no(Fuel.KEROSENE, item, "kerosene" in feature["properties"]["tags"])
-        # Other fuels?:
+        # TODO: Other fuels?:
         # gasoil sp95 sp98 super superethanole85 excellium95e10 gasoline92_eg regulargasoline superethanole85
         # sp95performance happyfuel sp95_lb supereffimax dieseleffimax dieselb10 adbluecar excellium_93
 
@@ -94,11 +106,11 @@ class TotalEnergiesSpider(WoosmapSpider):
         apply_yes_no(PaymentMethods.CASH, item, "cash" in feature["properties"]["tags"])
         apply_yes_no(PaymentMethods.CREDIT_CARDS, item, "credit_card" in feature["properties"]["tags"])
         apply_yes_no("payment:gr_total_card", item, "grcartefr" in feature["properties"]["tags"])
-        apply_yes_no("payment:total_card", item, "totalcard" in feature["properties"]["tags"])
+        apply_yes_no(FuelCards.TOTAL_CARD, item, "totalcard" in feature["properties"]["tags"])
         apply_yes_no("payment:fleet_fuel_card", item, "ffc" in feature["properties"]["tags"])
         apply_yes_no("payment:eurotrafic", item, "eurotrafic" in feature["properties"]["tags"])
         apply_yes_no("payment:club_total_card", item, "carteclubtotal" in feature["properties"]["tags"])
-        # proficard bonjour mpayment westfalencard prepaidcard travelcard ecocash nimbacard ecash sonayacard
+        # TODO: other cards: proficard bonjour mpayment westfalencard prepaidcard travelcard ecocash nimbacard ecash sonayacard
 
         if "shop" in feature["properties"]["tags"]:
             apply_category(Categories.SHOP_CONVENIENCE, item)
@@ -109,6 +121,16 @@ class TotalEnergiesSpider(WoosmapSpider):
             self.crawler.stats.inc_value(
                 f'atp/total_energies/unknown_brand/{feature["properties"]["user_properties"]["brand"]}'
             )
-            item["brand"] = feature["properties"]["user_properties"]["brand"]
+
+        # Some locations have flipped coordinates - all gas stations of certain brands (Agip) and
+        # some, but not all stations of other brands (Cepsa).
+
+        lat, lon = get_lat_lon(item)
+        coords_country = reverse_geocoder.get((lat, lon), mode=1, verbose=False)["cc"]
+        flipped_coords_country = reverse_geocoder.get((lon, lat), mode=1, verbose=False)["cc"]
+        expected_country = item["country"]
+
+        if expected_country == flipped_coords_country and expected_country != coords_country:
+            set_lat_lon(item, lon, lat)
 
         yield item

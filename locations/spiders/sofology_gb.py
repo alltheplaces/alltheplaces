@@ -3,7 +3,7 @@ from urllib.parse import urljoin
 from scrapy.spiders import Spider
 
 from locations.dict_parser import DictParser
-from locations.spiders.vapestore_gb import clean_address
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class SofologyGBSpider(Spider):
@@ -13,12 +13,12 @@ class SofologyGBSpider(Spider):
 
     def parse(self, response, **kwargs):
         for location in response.json():
-            location["street_address"] = clean_address(
+            location["street_address"] = merge_address_lines(
                 [location.pop("addressOne"), location.pop("addressTwo"), location.pop("addressThree")]
             )
             item = DictParser.parse(location)
 
-            item["extras"]["branch"] = location["outlet"]
+            item["branch"] = location["outlet"]
             item["image"] = location["imageOutside"]
             item["website"] = urljoin(
                 "https://www.sofology.co.uk/stores/", location["outlet"].lower().replace(" ", "-")

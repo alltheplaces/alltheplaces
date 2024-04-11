@@ -4,6 +4,7 @@ import re
 from chompjs import chompjs
 from scrapy import Selector, Spider
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
@@ -68,4 +69,10 @@ class JustGroupSpider(Spider):
             if hours_string:
                 item["opening_hours"] = OpeningHours()
                 item["opening_hours"].add_ranges_from_string(hours_string)
+
+            if item["brand"] == "Smiggle":
+                apply_category(Categories.SHOP_STATIONERY, item)
+            else:
+                apply_category(Categories.SHOP_CLOTHES, item)
+
             yield item

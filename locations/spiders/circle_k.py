@@ -54,6 +54,9 @@ class CircleKSpider(Spider):
                 or "EU_TRUCKDIESEL_NETWORK" in services
             ):
                 apply_category(Categories.FUEL_STATION, item)
+            else:
+                # default category
+                apply_category(Categories.SHOP_CONVENIENCE, item)
             if "ev_charger" in services or "EU_HIGH_SPEED_CHARGER" in services:
                 apply_category(Categories.CHARGING_STATION, item)
             yield item

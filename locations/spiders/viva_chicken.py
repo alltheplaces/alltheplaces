@@ -8,7 +8,10 @@ from locations.items import Feature
 
 class VivaChickenSpider(scrapy.Spider):
     name = "viva_chicken"
-    item_attributes = {"brand": "Viva Chicken"}
+    item_attributes = {
+        "brand": "Viva Chicken",
+        "extras": {"amenity": "restaurant", "cuisine": "chicken"},
+    }
     allowed_domains = ["www.vivachicken.com"]
     start_urls = ["https://www.vivachicken.com/locations"]
 

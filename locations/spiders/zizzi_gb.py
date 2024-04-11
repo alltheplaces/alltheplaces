@@ -14,4 +14,11 @@ class ZizziGBSpider(scrapy.Spider):
             item["addr_full"] = ", ".join(store["address"].split("\r\n"))
             item["image"] = store["featured_image"]
             item["website"] = store["link"]
+
+            if store["region"] == "Ireland":
+                item.pop("state")
+                item["country"] = "IE"
+            else:
+                item["country"] = "GB"
+
             yield item

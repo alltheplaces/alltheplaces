@@ -33,18 +33,18 @@ class ZyteApiByCountryMiddleware:
     def from_crawler(cls, crawler: Crawler):
         return cls(crawler)
 
+    def _load_config(self, spider: Spider):
+        if requires_proxy := getattr(spider, "requires_proxy", False):
+            if cc := get_proxy_location(requires_proxy, spider.name):
+                self.zyte_api_automap = {"geolocation": cc.upper()}  # Use the country code set in spider
+            else:
+                self.zyte_api_automap = True  # Let zyte work out the best place
+        else:
+            self.zyte_api_automap = False  # Proxy disabled
+
     def process_request(self, request: Request, spider: Spider):
         # Calculate zyte_api_automap on the first request
         if self.zyte_api_automap is None:
-            if requires_proxy := getattr(spider, "requires_proxy", False):
-                if cc := get_proxy_location(requires_proxy, spider.name):
-                    # Use the country code set in spider
-                    self.zyte_api_automap = {"geolocation": cc.upper()}
-                else:
-                    # Let zyte work out the best place
-                    self.zyte_api_automap = True
-            else:
-                # Proxy disabled
-                self.zyte_api_automap = False
+            self._load_config(spider)
 
         request.meta["zyte_api_automap"] = self.zyte_api_automap

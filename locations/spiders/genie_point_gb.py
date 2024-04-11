@@ -1,6 +1,6 @@
 from scrapy import Spider
 
-from locations.categories import Extras, apply_yes_no
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 
 
@@ -14,5 +14,5 @@ class GeniePointGBSpider(Spider):
             item = DictParser.parse(location)
 
             apply_yes_no(Extras.FEE, item, location["IsFreeCharge"], False)
-
+            apply_category(Categories.CHARGING_STATION, item)
             yield item

@@ -28,7 +28,7 @@ class LiviqueCHSpider(SitemapSpider, StructuredDataSpider):
         item["brand"] = item["name"] = brand
         item["brand_wikidata"] = brand_wikidata
         item["country"] = "CH"
-        item["extras"] = {"branch": branch}
+        item["branch"] = branch
         item["image"] = self.cleanup_image(item["image"])
         item["lat"], item["lon"] = self.parse_lat_lon(response)
         item["opening_hours"] = self.parse_hours(response)

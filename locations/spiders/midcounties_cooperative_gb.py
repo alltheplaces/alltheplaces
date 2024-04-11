@@ -9,7 +9,8 @@ class MidcountiesCooperativeGBSpider(Spider):
     name = "midcounties_cooperative_gb"
     item_attributes = {
         "brand": "Your Co-op",
-        "extras": {"operator": "Midcounties Co-operative", "operator:wikidata": "Q6841138"},
+        "operator": "Midcounties Co-operative",
+        "operator_wikidata": "Q6841138",
     }
     start_urls = ["https://www.midcounties.coop/static/js/stores.json"]
     no_refs = True
@@ -17,8 +18,6 @@ class MidcountiesCooperativeGBSpider(Spider):
     def parse(self, response):
         for store in response.json()["stores"]:
             item = DictParser.parse(store)
-
-            item["website"] = store.get("branchLink")
 
             item["street_address"] = ", ".join(
                 filter(None, [store.get("addressLine1"), store.get("addressLine2"), store.get("addressLine3")])
@@ -35,14 +34,14 @@ class MidcountiesCooperativeGBSpider(Spider):
                     )
 
             if store["tradingGroupId"] == 1:
-                item["extras"]["branch"] = item.pop("name")
+                item["branch"] = item.pop("name")
                 item["name"] = "Your Coop Food"
                 item["brand_wikidata"] = "Q121084548"
                 apply_category(Categories.SHOP_CONVENIENCE, item)
             elif store["tradingGroupId"] == 2:
                 if "Your Co-op Travel" not in item["name"]:
                     continue  # 7 "Carrick Travel" https://carricktravel.com/about.html
-                item["extras"]["branch"] = item.pop("name").replace("Your Co-op Travel ", "")
+                item["branch"] = item.pop("name").replace("Your Co-op Travel ", "")
                 item["name"] = "Your Co-op Travel"
                 item["brand_wikidata"] = "Q7726526"
                 apply_category(Categories.SHOP_TRAVEL_AGENCY, item)

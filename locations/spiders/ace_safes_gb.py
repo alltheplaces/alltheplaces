@@ -1,3 +1,4 @@
+from locations.categories import apply_category
 from locations.storefinders.storelocatorwidgets import StoreLocatorWidgetsSpider
 
 
@@ -8,4 +9,5 @@ class AceSafesGBSpider(StoreLocatorWidgetsSpider):
 
     def parse_item(self, item, location):
         item["city"] = item.pop("addr_full")
+        apply_category({"shop": "safe"}, item)
         yield item

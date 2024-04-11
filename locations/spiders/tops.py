@@ -33,9 +33,9 @@ class TopsSpider(scrapy.Spider):
         city = data.split(",")[0].strip()
         data = data.split(",")[1].strip()
         state = data.split(" ")[0]
-        postalCode = data.split(" ")[1]
+        postal_code = data.split(" ")[1]
 
-        return address, city, state, postalCode
+        return address, city, state, postal_code
 
     def parse_phone(self, data):
         filtered_data = []
@@ -134,14 +134,14 @@ class TopsSpider(scrapy.Spider):
 
     def parse_store(self, response):
         data = response.xpath('//p[@class="Address"]//text()').extract()
-        address, city, state, postalCode = self.parse_address(data)
+        address, city, state, postal_code = self.parse_address(data)
         data = response.xpath('//p[@class="PhoneNumber"]//text()').extract()
         phone = self.parse_phone(data)
         properties = {
             "addr_full": address,
             "city": city,
             "state": state,
-            "postcode": postalCode,
+            "postcode": postal_code,
             "phone": phone,
             "ref": response.meta["ref"],
             "lon": response.meta["lon"],

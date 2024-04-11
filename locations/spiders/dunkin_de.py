@@ -1,9 +1,10 @@
+from locations.spiders.dunkin_at import DUNKIN_SHARED_ATTRIBUTES
 from locations.storefinders.storerocket import StoreRocketSpider
 
 
 class DunkinDESpider(StoreRocketSpider):
     name = "dunkin_de"
-    item_attributes = {"brand": "Dunkin'", "brand_wikidata": "Q847743"}
+    item_attributes = DUNKIN_SHARED_ATTRIBUTES
     storerocket_id = "DG4gZ3yp05"
 
     def parse_item(self, item, location):

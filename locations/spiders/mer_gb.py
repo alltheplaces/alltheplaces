@@ -1,6 +1,7 @@
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
 
@@ -18,11 +19,11 @@ class MerGBSpider(Spider):
         )
 
     def parse(self, response, **kwargs):
-        for location in response.json()["data"][1]:
+        for location in response.json()["data"]:
             if location["deleted"]:
                 continue
 
             item = DictParser.parse(location)
             item["addr_full"] = location["dn"]
-
+            apply_category(Categories.CHARGING_STATION, item)
             yield item

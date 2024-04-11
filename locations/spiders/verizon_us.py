@@ -60,9 +60,9 @@ class VerizonUSSpider(scrapy.Spider):
             "website": response.url,
             "lat": store_data["geo"].get("latitude"),
             "lon": store_data["geo"].get("longitude"),
+            "operator": (store_data.get("posStoreDetail") or {}).get("businessName"),
             "extras": {
                 # Sometimes 'postStoreDetail' exists with "None" value, usual get w/ default syntax isn't reliable
-                "operator": (store_data.get("posStoreDetail") or {}).get("businessName"),
                 "retail_id": store_data.get("retailId"),
                 "store_type": (store_data.get("posStoreDetail") or {}).get("storeType"),
                 "store_type_note": ";".join(store_data.get("typeOfStore")),

@@ -24,8 +24,8 @@ class FreshMarketSpider(scrapy.Spider):
         match = re.search(r'\],"allStores":(\[.+\]),"data":', json_data)
         if not match:
             return
-        allStores = json.loads(match.group(1))
-        for store in allStores:
+        all_stores = json.loads(match.group(1))
+        for store in all_stores:
             properties = {
                 "name": store["storeName"],
                 "ref": store["storeNumber"],

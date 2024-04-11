@@ -13,7 +13,7 @@ class AccessStorageGBSpider(Spider):
             location["Information"].update(location["Location"])
             location["Information"]["street_address"] = location["Information"].pop("Address")
             item = DictParser.parse(location["Information"])
-            item["extras"]["branch"] = item.pop("name", None)
+            item["branch"] = item.pop("name", None)
 
             item["website"] = location["Information"]["Link"]
             item["image"] = location["Information"]["Image"]

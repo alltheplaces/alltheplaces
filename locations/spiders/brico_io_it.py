@@ -4,7 +4,7 @@ from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 
 
-class Brico_ioITSpider(Spider):
+class BricoIOITSpider(Spider):
     name = "brico_io_it"
     item_attributes = {"brand": "Brico io", "brand_wikidata": "Q15965705"}
     allowed_domains = ["www.bricoio.it"]

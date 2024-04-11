@@ -1,31 +1,30 @@
-import scrapy
+from scrapy import Spider
 
 from locations.items import Feature
 from locations.spiders.mcdonalds import McDonaldsSpider
 
 
-class McDonaldsZASpider(scrapy.Spider):
+class McDonaldsZASpider(Spider):
     name = "mcdonalds_za"
     item_attributes = McDonaldsSpider.item_attributes
-    allowed_domains = ["www.mcdonalds.co", "www.mcdonalds.co.za"]
-    start_urls = ("https://www.mcdonalds.co.za/restaurants",)
+    start_urls = ["https://www.mcdonalds.co.za/templates/_layout/ajax_calls/get_all_locations.php?lat=0&long=0"]
 
-    def parse(self, response):
-        stores = response.css(".row")
-        ref = 1
-        for store in stores:
-            name = store.xpath('.//div[@class="a"]/p/strong/text()').extract_first()
-            if not name:
+    def parse(self, response, **kwargs):
+        for location in response.xpath('//div[@class="store_listing_con"]'):
+            item = Feature()
+            item["website"] = item["ref"] = location.xpath(".//a/@href").get()
+
+            if item["website"] == "https://www.mcdonalds.co.za/location/mcdonalds-head-office":
                 continue
-            address = store.xpath('.//div[@class="b"]/p[2]/text()').extract_first().strip()
-            phone = store.xpath('.//div[@class="c"]/p[2]/text()').extract_first().strip()
 
-            properties = {
-                "ref": ref,
-                "addr_full": address,
-                "phone": phone,
-                "name": name,
-            }
+            item["name"] = location.xpath(".//h5/text()").get()
+            item["addr_full"] = location.xpath(".//p/text()").get()
+            item["phone"] = (
+                location.xpath('.//span[contains(., "Contact Number:")]/text()')
+                .get()
+                .replace("Contact Number:", "")
+                .strip()
+            )
+            item["email"] = location.xpath('.//span[contains(., "Email:")]/text()').get().replace("Email:", "").strip()
 
-            yield Feature(**properties)
-            ref = ref + 1
+            yield item

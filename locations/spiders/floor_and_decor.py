@@ -7,7 +7,7 @@ from locations.items import Feature
 
 class FloorAndDecorSpider(scrapy.Spider):
     name = "floor_and_decor"
-    item_attributes = {"brand": "Floor and Decor"}
+    item_attributes = {"brand": "Floor and Decor", "brand_wikidata": "Q56280964"}
     allowed_domains = ["www.flooranddecor.com"]
     start_urls = [
         "https://www.flooranddecor.com/view-all-stores",

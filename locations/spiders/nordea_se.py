@@ -2,6 +2,7 @@ import re
 
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.hours import DAYS_SE, OpeningHours, sanitise_day
 from locations.items import Feature
 
@@ -35,5 +36,6 @@ class NordeaSeSpider(scrapy.Spider):
             item["lat"] = bank.get("lat")
             item["lon"] = bank.get("lng")
             item["opening_hours"] = oh.as_opening_hours()
+            apply_category(Categories.BANK, item)
 
             yield item

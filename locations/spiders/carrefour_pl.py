@@ -4,9 +4,15 @@ import os
 import scrapy
 from scrapy import Spider
 
-from locations.categories import Categories, apply_category
+from locations.categories import Categories
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_EN, OpeningHours
+from locations.spiders.carrefour_fr import (
+    CARREFOUR_EXPRESS,
+    CARREFOUR_MARKET,
+    CARREFOUR_SUPERMARKET,
+    parse_brand_and_category_from_mapping,
+)
 from locations.user_agents import BROWSER_DEFAULT
 
 
@@ -16,11 +22,11 @@ class CarrefourPLSpider(Spider):
     start_urls = ["https://c4webservice.carrefour.pl:8080/MobileWebService/v3/Bootstrap.svc/App/Bootstrap"]
 
     brands = {
-        "Hipermarket": {"brand": "Carrefour", "brand_wikidata": "Q217599"},
-        "Market": {"brand": "Carrefour Market", "brand_wikidata": "Q2689639"},
-        "Express (Zielony)": {"brand": "Carrefour Express", "brand_wikidata": "Q2940190"},
-        "Express (Pomarańczowy)": {"brand": "Carrefour Express", "brand_wikidata": "Q2940190"},
-        "Globi": {"brand": "Globi"},
+        "Express (Zielony)": CARREFOUR_EXPRESS,
+        "Express (Pomarańczowy)": CARREFOUR_EXPRESS,
+        "Hipermarket": CARREFOUR_SUPERMARKET,
+        "Market": CARREFOUR_MARKET,
+        "Globi": {"brand": "Globi", "category": Categories.SHOP_CONVENIENCE},
     }
     user_agent = BROWSER_DEFAULT
 
@@ -41,18 +47,14 @@ class CarrefourPLSpider(Spider):
     def parse(self, response):
         brand_ids_to_brands = {}
         for brand in response.json()["shopTypes"]:
-            brand_ids_to_brands[str(brand["shopTypeForMobile"])] = self.brands.get(brand["displayName"])
+            brand_ids_to_brands[str(brand["shopTypeForMobile"])] = brand["displayName"]
+
         for location in response.json()["shops"]:
             item = DictParser.parse(location)
-            brand = brand_ids_to_brands[str(location["shopTypeForMobile"])]
-            if brand:
-                item.update(brand)
-            else:
+
+            brand_key = brand_ids_to_brands.get(str(location["shopTypeForMobile"]))
+            if not parse_brand_and_category_from_mapping(item, brand_key, self.brands):
                 continue  # bad brand
-            if item["brand"] == "Globi":
-                apply_category(Categories.SHOP_CONVENIENCE, item)
-            if item["brand"] == "Carrefour":
-                apply_category(Categories.SHOP_SUPERMARKET, item)
 
             item.pop("street")
             item["ref"] = location["shopId"]

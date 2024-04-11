@@ -2,13 +2,26 @@ import json
 
 from scrapy.spiders import SitemapSpider
 
+from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
+from locations.spiders.schnucks_us import SchnucksUSSpider
+from locations.spiders.target_us import TargetUSSpider
+from locations.spiders.tesco_gb import set_located_in
 from locations.structured_data_spider import StructuredDataSpider
+
+CVS = {"name": "CVS Pharmacy", "brand": "CVS Pharmacy", "brand_wikidata": "Q2078880"}
+
+PHARMACY_BRANDS = {
+    "CVS Pharmacy": CVS,
+    "CVS HealthHub": CVS,
+    "CVS Pharmacy y más": CVS | {"name": "CVS Pharmacy y más"},
+    "Longs Drugs": {"brand": "Longs Drugs", "brand_wikidata": "Q16931196"},
+    "Navarro": {"name": "Navarro", "brand": "Navarro", "brand_wikidata": "Q6982161"},
+}
 
 
 class CvsUSSpider(SitemapSpider, StructuredDataSpider):
     name = "cvs_us"
-    item_attributes = {"brand": "CVS", "brand_wikidata": "Q2078880"}
     allowed_domains = ["www.cvs.com"]
     sitemap_urls = ["https://www.cvs.com/sitemap/store-details.xml"]
 
@@ -19,22 +32,51 @@ class CvsUSSpider(SitemapSpider, StructuredDataSpider):
         yield from super().parse(response)
 
     def post_process_item(self, item, response, ld_data, **kwargs):
-        data = json.loads(response.xpath("//@sd-props").get())
-        storeInfo = data["cvsStoreDetails"]["storeInfo"]
-        item["lat"] = storeInfo["latitude"]
-        item["lon"] = storeInfo["longitude"]
-        item["ref"] = storeInfo["storeId"]
+        props = response.xpath("//@sd-props").get()
+        if not props:
+            return  # Some urls get redirected to the city page
+        data = json.loads(props)
+        store_info = data["cvsStoreDetails"]["storeInfo"]
+        item["lat"] = store_info["latitude"]
+        item["lon"] = store_info["longitude"]
+        item["ref"] = store_info["storeId"]
+
+        item["name"] = None
+        item["image"] = None
+        item["street_address"] = item.get("street_address", "").removeprefix("at ")
 
         # OSM generally wants to model a separate node for the shop, pharmacy,
         # and clinic; this data is a little too messy for that, so just collect
         # the store's distinguishing attributes as properties on a single feature.
-        item["extras"]["departments"] = storeInfo["identifier"]
-        item["extras"]["store_type"] = data["cvsStoreTypeImage"]["altText"]
+        item["extras"]["departments"] = ";".join(sorted(store_info["identifier"]))
+        store_type = data["cvsStoreTypeImage"]["altText"]
+        # A pharmacy category still can be applied as it's present for all locations.
+        apply_category(Categories.PHARMACY, item)
 
-        hours = {
-            f'opening_hours:{dept["name"]}': self.parse_hours(dept["regHours"])
-            for dept in data["cvsStoreDetails"]["hours"]["departments"]
-        }
+        # There are multiple pharmacy brands owned by CVS
+        if brand := PHARMACY_BRANDS.get(store_type):
+            item.update(brand)
+        elif store_type == "CVS Pharmacy at Target":
+            item.update(CVS)
+            set_located_in(TargetUSSpider.item_attributes, item)
+        elif store_type == "Schnucks":
+            item.update(CVS)
+            set_located_in(SchnucksUSSpider.item_attributes, item)
+        else:
+            self.crawler.stats.inc_value("atp/cvs_us/unmapped_store_type/{}".format(store_type))
+            item["extras"]["store_type"] = store_type
+            # Default to CVS Pharmacy
+            item.update(CVS)
+
+        hours = {}
+        for dept in data["cvsStoreDetails"]["hours"]["departments"]:
+            dept_name = dept["name"]
+            try:
+                hours[f"opening_hours:{dept_name}"] = self.parse_hours(dept["regHours"])
+            except Exception as e:
+                self.logger.warning(f"Failed to parse hours for '{dept_name}': {hours}, {e}")
+                self.crawler.stats.inc_value("atp/cvs_us/hours/failed")
+
         item["extras"].update(hours)
 
         # Most stores have retail, with the exception of those located inside

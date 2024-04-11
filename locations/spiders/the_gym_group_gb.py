@@ -1,63 +1,43 @@
-import json
+import re
 
-from scrapy.spiders import SitemapSpider
+from chompjs import parse_js_object
+from scrapy import Request, Spider
 
-from locations.dict_parser import DictParser
-from locations.hours import OpeningHours
+from locations.hours import DAYS, OpeningHours
+from locations.items import Feature
 
 
-class TheGymGroupGBSpider(SitemapSpider):
+class TheGymGroupGBSpider(Spider):
     name = "the_gym_group_gb"
     item_attributes = {
         "brand": "The Gym Group",
         "brand_wikidata": "Q48815022",
         "country": "GB",
     }
-    sitemap_urls = ["https://www.thegymgroup.com/sitemap.xml"]
-    sitemap_rules = [
-        (
-            r"https:\/\/www\.thegymgroup\.com\/find-a-gym\/[-\w]+-gyms\/[-\w]+\/$",
-            "parse",
+    allowed_domains = ["www.thegymgroup.com"]
+    start_urls = ["https://www.thegymgroup.com/find-a-gym/"]
+
+    def parse(self, response):
+        locations_js = response.xpath('//script[@id="__NEXT_DATA__"]/text()').get()
+        for location in parse_js_object(locations_js)["props"]["pageProps"]["gymMapData"]:
+            properties = {
+                "ref": location["gym"]["branchId"],
+                "name": location["gym"]["gymName"],
+                "lat": location["position"]["lat"],
+                "lon": location["position"]["lng"],
+                "addr_full": re.sub(r"\s+", " ", location["gym"]["gymAddress"]),
+                "website": "https://www.thegymgroup.com" + location["gym"]["gymPageURL"],
+            }
+            yield Request(url=properties["website"], meta={"item": Feature(**properties)}, callback=self.add_hours)
+
+    def add_hours(self, response):
+        item = response.meta["item"]
+        hours_string = " ".join(
+            filter(None, response.xpath('//div[@id="gym_times_location_section"]//p/text()').getall())
         )
-    ]
-
-    def parse(self, response, **kwargs):
-        data = json.loads(response.xpath('//script[@id="__NEXT_DATA__"]/text()').get())
-
-        if data is None:
-            return
-
-        store = data["props"].get("pageProps")
-
-        if store is None:
-            return
-
-        item = DictParser.parse(store)
-
-        item["ref"] = store.get("branchId")
-
-        item["name"] = store.get("gymName")
-
-        if addr := store.get("address"):
-            item["street_address"] = ", ".join(
-                filter(
-                    None,
-                    [addr.get("address1"), addr.get("address2"), addr.get("address3")],
-                )
-            )
-
-        item["website"] = response.url
-
-        oh = OpeningHours()
-        if rules := store.get("openingHours"):
-            for day, rule in rules.items():
-                oh.add_range(
-                    day[0:2],
-                    rule["OpeningTime"],
-                    rule["ClosingTime"],
-                    time_format="%H:%M:%S",
-                )
-
-        item["opening_hours"] = oh.as_opening_hours()
-
-        return item
+        item["opening_hours"] = OpeningHours()
+        if "24 hours, 7 days a week" in hours_string.lower():
+            item["opening_hours"].add_days_range(DAYS, "00:00", "23:59")
+        else:
+            item["opening_hours"].add_ranges_from_string(hours_string)
+        yield item

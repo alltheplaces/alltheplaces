@@ -2,11 +2,60 @@ from locations.items import Feature
 
 
 class DictParser:
-    ref_keys = ["ref", "id", "store-id", "storeID", "storeNumber", "shop-number", "LocationID", "slug", "storeCode"]
+    # Variations can't handle capitalised acronyms such as "ID" so
+    # the common variants of case including such acronyms need to
+    # all be listed below.
+    ref_keys = [
+        # EN
+        "ref",
+        "id",
+        "identifier",
+        "store-id",
+        "StoreID",
+        "storeID",
+        "store-number",
+        "shop-number",
+        "location-id",
+        "LocationID",
+        "locationID",
+        "location-number",
+        "slug",
+        "store-code",
+        "item-id",
+        "ItemID",
+        "itemID",
+    ]
 
-    name_keys = ["name", "store-name", "display-name", "title", "businessName"]
+    name_keys = [
+        # EN
+        "name",
+        "store-name",
+        "display-name",
+        "title",
+        "business-name",
+        "item-name",
+        "location-name",
+    ]
 
-    house_number_keys = ["house-number", "house-no", "street-number", "street-no", "address-street-no"]
+    house_number_keys = [
+        # EN
+        "house-number",
+        "house-no",
+        "street-number",
+        "street-no",
+        "address-street-no",
+    ]
+
+    full_address_keys = [
+        # EN
+        "address",
+        "addr",
+        "store-address",
+        "physical-address",
+        "full-address",
+        # ES
+        "direccion",  # "address"
+    ]
 
     street_address_keys = [
         # EN
@@ -28,8 +77,13 @@ class DictParser:
         "locality",
         "suburb",
         "city-name",
+        "store-city",
         # JP
         "市区町村",  # "municipality"
+        # PL
+        "miasto",
+        # ES
+        "ciudad",  # "city"
     ]
 
     region_keys = [
@@ -42,15 +96,18 @@ class DictParser:
         "state-code",
         "county",
         "state-name",
+        "store-state",
         # JP
         "都道府県",  # "prefecture"
     ]
 
     country_keys = [
+        # EN
         "country-code",
         "address-country",
         "country",
         "country-name",
+        "store-country",
     ]
 
     isocode_keys = [
@@ -68,13 +125,27 @@ class DictParser:
         "postal",
         "zip-code",
         "address-postal-code",
+        "store-postcode",
+        "store-post-code",
+        "store-postal-code",
+        "store-zip",
+        "store-zip-code",
+        "store-zipcode",
         # JP
         "郵便番号",  # "post code"
     ]
 
-    email_keys = ["email", "contact-email", "email-address", "email1"]
+    email_keys = [
+        # EN
+        "email",
+        "contact-email",
+        "email-address",
+        "email1",
+        "store-email",
+    ]
 
     phone_keys = [
+        # EN
         "phone-number",
         "phone",
         "telephone",
@@ -84,29 +155,50 @@ class DictParser:
         "contact-number",
         "phone-no",
         "contact-phone",
+        "store-phone",
+        "primary-phone",
+        # ES
+        "telefono",  # "phone"
     ]
 
     lat_keys = [
+        # EN
         "latitude",
         "lat",
+        "store-latitude",
         "display-lat",
         "yext-display-lat",
-        "mapLatitude",
-        "geoLat",
+        "map-latitude",
+        "geo-lat",
+        # ES
+        "coordenaday",  # "Coordinate Y"
     ]
 
     lon_keys = [
+        # EN
         "longitude",
         "lon",
         "long",
         "lng",
+        "store-longitude",
         "display-lng",
         "yext-display-lng",
-        "mapLongitude",
-        "geoLng",
+        "map-longitude",
+        "geo-lng",
+        # ES
+        "coordenadax",  # "Coordinate X"
     ]
 
-    website_keys = ["url", "website", "permalink", "store-url", "storeURL", "website-url", "websiteURL"]
+    website_keys = [
+        # EN
+        "url",
+        "website",
+        "permalink",
+        "store-url",
+        "storeURL",
+        "website-url",
+        "websiteURL",
+    ]
 
     @staticmethod
     def parse(obj) -> Feature:
@@ -116,7 +208,17 @@ class DictParser:
         item["name"] = DictParser.get_first_key(obj, DictParser.name_keys)
 
         location = DictParser.get_first_key(
-            obj, ["location", "geo-location", "geo", "geo-point", "geocodedCoordinate", "coordinates"]
+            obj,
+            [
+                "location",
+                "geo-location",
+                "geo",
+                "geo-point",
+                "geocoded-coordinate",
+                "coordinates",
+                "geo-position",
+                "position",
+            ],
         )
         # If not a good location object then use the parent
         if not location or not isinstance(location, dict):
@@ -124,7 +226,7 @@ class DictParser:
         item["lat"] = DictParser.get_first_key(location, DictParser.lat_keys)
         item["lon"] = DictParser.get_first_key(location, DictParser.lon_keys)
 
-        address = DictParser.get_first_key(obj, ["address", "addr", "storeaddress", "physicalAddress"])
+        address = DictParser.get_first_key(obj, DictParser.full_address_keys)
 
         if address and isinstance(address, str):
             item["addr_full"] = address
@@ -180,50 +282,58 @@ class DictParser:
         title = key.title()
         results.add(title)
 
+        # example: flatcase
         flatcase = key.lower().replace("-", "")
         results.add(flatcase)
 
-        FLATCASEUPPER = flatcase.upper()
-        results.add(FLATCASEUPPER)
+        # example: FLATCASEUPPER
+        flatcase_upper = flatcase.upper()
+        results.add(flatcase_upper)
 
-        camelCase = key[0].lower()
+        # example: camelCase
+        camel_case = key[0].lower()
         i = 1
         while i < len(key):
             if key[i] == "-":
                 i += 1
-                camelCase += key[i].upper()
+                camel_case += key[i].upper()
             else:
-                camelCase += key[i]
+                camel_case += key[i]
             i += 1
 
-        results.add(camelCase)
+        results.add(camel_case)
 
-        PascalCase = camelCase[0].upper() + camelCase[1:]
+        # example: PascalCase
+        pascal_case = camel_case[0].upper() + camel_case[1:]
 
-        results.add(PascalCase)
+        results.add(pascal_case)
 
+        # example: snake_case
         snake_case = key.lower().replace("-", "_")
         results.add(snake_case)
 
-        SCREAMING_SNAKE_CASE = key.upper().replace("-", "_")
-        results.add(SCREAMING_SNAKE_CASE)
+        # example: SCREAMING_SNAKE_CASE
+        screaming_snake_case = key.upper().replace("-", "_")
+        results.add(screaming_snake_case)
 
-        camel_Snake_Case = key[0].lower()
+        # example: camel_Snake_Case
+        camel_snake_case = key[0].lower()
         i = 1
         while i < len(key):
             if key[i] == "-":
                 i += 1
-                camel_Snake_Case += "_"
-                camel_Snake_Case += key[i].upper()
+                camel_snake_case += "_"
+                camel_snake_case += key[i].upper()
             else:
-                camel_Snake_Case += key[i]
+                camel_snake_case += key[i]
             i += 1
 
-        results.add(camel_Snake_Case)
+        results.add(camel_snake_case)
 
-        Pascal_Snake_Case = camel_Snake_Case[0].upper() + camel_Snake_Case[1:]
+        # example: Pascal_Snake_Case
+        pascal_snake_case = camel_snake_case[0].upper() + camel_snake_case[1:]
 
-        results.add(Pascal_Snake_Case)
+        results.add(pascal_snake_case)
 
         return results
 

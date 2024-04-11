@@ -34,8 +34,8 @@ class EspritSpider(scrapy.Spider):
             item = DictParser.parse(store)
             item["lat"] = store.get("geo_latitude")
             item["lon"] = store.get("geo_longitude")
-            item[
-                "website"
-            ] = f'https://www.esprit.com/storefinder?storeid={store["store_id"]}&location={store["geo_latitude"]},{store["geo_longitude"]}'
+            item["website"] = (
+                f'https://www.esprit.com/storefinder?storeid={store["store_id"]}&location={store["geo_latitude"]},{store["geo_longitude"]}'
+            )
             item["opening_hours"] = oh
             yield item

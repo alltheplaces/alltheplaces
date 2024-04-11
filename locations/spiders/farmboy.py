@@ -59,7 +59,7 @@ class FarmBoySpider(scrapy.Spider):
                     "ref": store.xpath("div/h3/text()").extract_first(),
                     "name": store.xpath("div/h3/text()").extract_first(),
                     "addr_full": store.xpath("div/div/p/text()").extract_first(),
-                    "postcode": self.postCode(store.xpath("div/div/p/text()[last()]").extract_first()),
+                    "postcode": self.post_code(store.xpath("div/div/p/text()[last()]").extract_first()),
                     "state": self.state(store.xpath("div/div/p/text()[last() - 1]").extract_first()),
                     "phone": self.phone(store.xpath('div/div/div[@id="cinfo"]/p/text()').extract_first()),
                     "opening_hours": self.parse_hours(store.xpath('div/div/div[@id="sinfo"]/table[1]/tbody/tr')),
@@ -82,7 +82,7 @@ class FarmBoySpider(scrapy.Spider):
         else:
             return data
 
-    def postCode(self, data):
+    def post_code(self, data):
         if data is None:
             return ""
         return data.strip().replace("\xa0", "")

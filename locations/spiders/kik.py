@@ -1,56 +1,49 @@
-import json
+from chompjs import parse_js_object
+from scrapy import Request, Spider
+from scrapy.http import JsonRequest
 
-import scrapy
-
-from locations.geo import point_locations
+from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
-from locations.items import Feature
 
 
-class KikSpider(scrapy.Spider):
+class KiKSpider(Spider):
     name = "kik"
-    item_attributes = {"brand": "Kik", "brand_wikidata": "Q883965"}
-    allowed_domains = ["kik.de"]
+    item_attributes = {"brand": "KiK", "brand_wikidata": "Q883965"}
+    allowed_domains = ["www.kik.de", "storefinder-microservice.kik.de"]
+    start_urls = ["https://www.kik.de/storefinderAssets/"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
-    start_urls = ["https://www.kik.de/storefinderAssets"]
 
-    def find_between(self, text, first, last):
-        start = text.index(first) + len(first)
-        end = text.index(last, start)
-        return text[start:end]
+    def start_requests(self):
+        for url in self.start_urls:
+            yield Request(url=url, callback=self.parse_country_list)
 
-    def parse(self, response):
-        point_files = "eu_centroids_120km_radius_country.csv"
-        countries = self.find_between(response.text, "countries: ", "list").replace("},", "}").replace("'", '"')
-        for country in json.loads(countries):
-            for lat, lon in point_locations(point_files, country.upper()):
-                yield scrapy.Request(
-                    f"https://storefinder-microservice.kik.de/storefinder/results.json?lat={lat}&long={lon}&country={country}&distance=130",
-                    callback=self.parse_store,
-                    cb_kwargs={"country": country},
-                )
+    def parse_country_list(self, response):
+        country_list_js = (
+            response.xpath('//script[contains(text(), "const translations = {")]/text()')
+            .get()
+            .split("countries:", 1)[1]
+            .split("},", 1)[0]
+            + "}"
+        )
+        for country_code in parse_js_object(country_list_js).keys():
+            # Whilst it is possible to omit the country code to return all
+            # locations globally, the resulting data does not provide a
+            # country field or other means besides reverse geocoding to
+            # determine the country of each location. Thus it is easier to
+            # filter by country and pass the country code to
+            # self.parse_stores to add the country code field.
+            yield JsonRequest(
+                url=f"https://storefinder-microservice.kik.de/storefinder/results.json?lat=&long=&country={country_code}&distance=100000&limit=100000",
+                meta={"country_code": country_code},
+                callback=self.parse_stores,
+            )
 
-    def parse_store(self, response, country):
-        data = response.json().get("stores")[0].get("results")
-        for _, store in data.items():
-            oh = OpeningHours()
-            if store.get("opening_times"):
-                openHours = [
-                    f'{row.split(":", 1)[0][:2]} {row.split(":", 1)[1]}'
-                    for row in store.get("opening_times").split("*")
-                    if row.split(":", 1)[1] != "  - "
-                ]
-                oh.from_linked_data({"openingHours": openHours})
-
-            properties = {
-                "ref": store.get("filiale"),
-                "street_address": store.get("address"),
-                "city": store.get("city"),
-                "postcode": store.get("zip"),
-                "country": country.upper(),
-                "lat": float(store.get("latitude")),
-                "lon": float(store.get("longitude")),
-                "opening_hours": oh.as_opening_hours(),
-            }
-
-            yield Feature(**properties)
+    def parse_stores(self, response):
+        for location in response.json()["stores"][0]["results"].values():
+            item = DictParser.parse(location)
+            item["ref"] = location["filiale"]
+            item["street_address"] = item.pop("addr_full", None)
+            item["country"] = response.meta["country_code"].upper()
+            item["opening_hours"] = OpeningHours()
+            item["opening_hours"].add_ranges_from_string(location["opening_times"], delimiters=["-", "*"])
+            yield item

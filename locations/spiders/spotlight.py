@@ -6,7 +6,7 @@ from locations.items import Feature
 
 class SpotlightSpider(SitemapSpider):
     name = "spotlight"
-    item_attributes = {"brand": "Spotlight", "brand_wikidata": "Q117035636"}
+    item_attributes = {"brand": "Spotlight", "brand_wikidata": "Q105960982"}
     allowed_domains = ["www.spotlightstores.com"]
     sitemap_urls = [
         "https://www.spotlightstores.com/sitemap/store/store-sitemap.xml",

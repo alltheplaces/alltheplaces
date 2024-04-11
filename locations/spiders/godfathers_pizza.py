@@ -28,7 +28,7 @@ class GodfathersPizzaSpider(scrapy.Spider):
                 "lat": store["latitude"],
                 "lon": store["longitude"],
                 "phone": store["phoneNumber"],
-                "extras": {"operator": store["franchiseNm"]},
+                "operator": store["franchiseNm"],
             }
 
             yield Feature(**properties)

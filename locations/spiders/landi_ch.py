@@ -166,4 +166,4 @@ class LandiCHSpider(SitemapSpider):
             if cat := self.categories.get(word):
                 apply_category(cat, item)
                 return
-        self.logger.warn("no category for %s", item["website"])
+        apply_category(Categories.SHOP_DOITYOURSELF, item)

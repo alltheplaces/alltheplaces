@@ -1,6 +1,7 @@
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
+from locations.categories import Categories, apply_category
 from locations.hours import DAYS_FR, OpeningHours
 from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
@@ -42,5 +43,6 @@ class CiceSpider(CrawlSpider, StructuredDataSpider):
                     close_time=day.xpath(f"./td[{i}]/text()").get().strip().replace("h", ":").split("-")[1],
                 )
         item["opening_hours"] = oh.as_opening_hours()
+        apply_category(Categories.BANK, item)
 
         yield item

@@ -12,6 +12,7 @@ def get_objects(spider_name):
     spider = Spider()
     spider.name = spider_name
     spider.crawler = Crawler(GreggsGBSpider)
+    spider.crawler._apply_settings()
     return Feature(), CountryCodeCleanUpPipeline(), spider
 
 

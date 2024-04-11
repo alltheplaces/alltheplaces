@@ -1,6 +1,7 @@
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
+from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
 
@@ -45,4 +46,6 @@ class TommyHilfigerAUNZSpider(Spider):
                 )
                 properties["opening_hours"] = OpeningHours()
                 properties["opening_hours"].add_ranges_from_string(hours_string)
-            yield Feature(**properties)
+            item = Feature(**properties)
+            apply_category(Categories.SHOP_CLOTHES, item)
+            yield item

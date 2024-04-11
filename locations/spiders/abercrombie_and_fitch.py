@@ -12,28 +12,29 @@ class AbercrombieAndFitchSpider(scrapy.Spider):
         "ROBOTSTXT_OBEY": False,
     }
     user_agent = BROWSER_DEFAULT
+    requires_proxy = True
 
     start_urls = [
-        "https://www.abercrombie.com/api/ecomm/a-uk/storelocator/search?country=AE",
-        "https://www.abercrombie.com/api/ecomm/a-uk/storelocator/search?country=BE",
-        "https://www.abercrombie.com/api/ecomm/a-uk/storelocator/search?country=CA",
-        "https://www.abercrombie.com/api/ecomm/a-uk/storelocator/search?country=CN",
-        "https://www.abercrombie.com/api/ecomm/a-uk/storelocator/search?country=DE",
-        "https://www.abercrombie.com/api/ecomm/a-uk/storelocator/search?country=ES",
-        "https://www.abercrombie.com/api/ecomm/a-uk/storelocator/search?country=FR",
-        "https://www.abercrombie.com/api/ecomm/a-uk/storelocator/search?country=GB",
-        "https://www.abercrombie.com/api/ecomm/a-uk/storelocator/search?country=HK",
-        "https://www.abercrombie.com/api/ecomm/a-uk/storelocator/search?country=IT",
-        "https://www.abercrombie.com/api/ecomm/a-uk/storelocator/search?country=JP",
-        "https://www.abercrombie.com/api/ecomm/a-uk/storelocator/search?country=KW",
-        "https://www.abercrombie.com/api/ecomm/a-uk/storelocator/search?country=MX",
-        "https://www.abercrombie.com/api/ecomm/a-uk/storelocator/search?country=QA",
-        "https://www.abercrombie.com/api/ecomm/a-uk/storelocator/search?country=SA",
-        "https://www.abercrombie.com/api/ecomm/a-uk/storelocator/search?country=US",
+        "https://www.abercrombie.com/api/ecomm/a-wd/storelocator/search?country=AE",
+        "https://www.abercrombie.com/api/ecomm/a-wd/storelocator/search?country=BE",
+        "https://www.abercrombie.com/api/ecomm/a-wd/storelocator/search?country=CA",
+        "https://www.abercrombie.com/api/ecomm/a-wd/storelocator/search?country=CN",
+        "https://www.abercrombie.com/api/ecomm/a-wd/storelocator/search?country=DE",
+        "https://www.abercrombie.com/api/ecomm/a-wd/storelocator/search?country=ES",
+        "https://www.abercrombie.com/api/ecomm/a-wd/storelocator/search?country=FR",
+        "https://www.abercrombie.com/api/ecomm/a-wd/storelocator/search?country=GB",
+        "https://www.abercrombie.com/api/ecomm/a-wd/storelocator/search?country=HK",
+        "https://www.abercrombie.com/api/ecomm/a-wd/storelocator/search?country=IT",
+        "https://www.abercrombie.com/api/ecomm/a-wd/storelocator/search?country=JP",
+        "https://www.abercrombie.com/api/ecomm/a-wd/storelocator/search?country=KW",
+        "https://www.abercrombie.com/api/ecomm/a-wd/storelocator/search?country=MX",
+        "https://www.abercrombie.com/api/ecomm/a-wd/storelocator/search?country=QA",
+        "https://www.abercrombie.com/api/ecomm/a-wd/storelocator/search?country=SA",
+        "https://www.abercrombie.com/api/ecomm/a-wd/storelocator/search?country=US",
     ]
     # Old regions:
-    # "https://www.abercrombie.com/api/ecomm/a-uk/storelocator/search?country=EU",
-    # "https://www.abercrombie.com/api/ecomm/a-uk/storelocator/search?country=AM",
+    # "https://www.abercrombie.com/api/ecomm/a-wd/storelocator/search?country=EU",
+    # "https://www.abercrombie.com/api/ecomm/a-wd/storelocator/search?country=AM",
 
     def parse(self, response):
         data = response.json()

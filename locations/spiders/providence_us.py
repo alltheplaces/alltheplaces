@@ -2,6 +2,7 @@ import re
 
 from scrapy import Request
 
+from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.structured_data_spider import StructuredDataSpider
 
@@ -52,4 +53,8 @@ class ProvidenceUSSpider(StructuredDataSpider):
             .replace("p.m", "PM")
         )
         item["opening_hours"].add_ranges_from_string(hours_string)
+        if "hospital" in item["name"].lower() or "medical center" in item["name"].lower():
+            apply_category(Categories.HOSPITAL, item)
+        else:
+            apply_category(Categories.CLINIC, item)
         yield item

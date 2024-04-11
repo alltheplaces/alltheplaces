@@ -1,6 +1,7 @@
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
 
@@ -21,4 +22,5 @@ class KristOilUSSpider(Spider):
             item["name"] = location["title"]
             item["addr_full"] = location.pop("street_address", location.get("address"))
             item["phone"] = location["phone"]
+            apply_category(Categories.FUEL_STATION, item)
             yield item

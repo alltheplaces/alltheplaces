@@ -1,13 +1,18 @@
 import reverse_geocoder
 from scrapy import Request, Spider
 
+from locations.categories import Categories
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
 
 class HouseAUSpider(Spider):
     name = "house_au"
-    item_attributes = {"brand": "House", "brand_wikidata": "Q117921987"}
+    item_attributes = {
+        "brand": "House",
+        "brand_wikidata": "Q117921987",
+        "extras": Categories.SHOP_HOUSEWARE.value,
+    }
     allowed_domains = ["www.house.com.au"]
     start_urls = ["https://www.house.com.au/api/get-stores"]
 
@@ -30,7 +35,7 @@ class HouseAUSpider(Spider):
             item["website"] = "https://www.house.com.au/stores/" + location["slug"]
             item["opening_hours"] = OpeningHours()
             for day_name, hours in location["storeHours"].items():
-                if hours["open"] == "-" or hours["close"] == "-":
+                if hours["open"] == "-" or hours["close"] == "-" or hours["close"] == "17:3016:00":
                     continue
                 item["opening_hours"].add_range(
                     day_name.title(),

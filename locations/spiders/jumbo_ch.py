@@ -34,7 +34,7 @@ class JumboCHSpider(SitemapSpider):
         ref = re.search(r"/([0-9]+)_POS$", response.url).group(1)
         item.update(
             {
-                "extras": {"branch": branch},
+                "branch": branch,
                 "image": "https://www.jumbo.ch/img/vst/pos833Wx555H/%s_POS.jpg" % ref,
                 "name": "Jumbo",
                 "opening_hours": self.parse_hours(response),
@@ -57,4 +57,4 @@ class JumboCHSpider(SitemapSpider):
             if m := re.match(r"^(\d{2}:\d{2})\s*-\s*(\d{2}:\d{2})$", hour):
                 open_time, close_time = m.groups()
                 oh.add_range(DAYS_DE.get(day), open_time, close_time)
-        return oh.as_opening_hours()
+        return oh

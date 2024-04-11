@@ -107,6 +107,5 @@ class GulfPRUSSpider(Spider):
         apply_yes_no(Fuel.E85, properties, response.meta["ethanol"], False)
         apply_yes_no(Extras.TOILETS, properties, response.meta["toilets"], False)
         apply_yes_no(Extras.ATM, properties, response.meta["atm"], False)
-        if response.meta["convenience_store"]:
-            apply_category(Categories.SHOP_CONVENIENCE, properties)
+        apply_category(Categories.FUEL_STATION, properties)
         yield Feature(**properties)

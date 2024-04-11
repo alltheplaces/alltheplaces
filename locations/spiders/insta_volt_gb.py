@@ -2,7 +2,7 @@ import re
 
 from scrapy import FormRequest, Spider
 
-from locations.categories import Extras, apply_yes_no
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 
 
@@ -30,5 +30,7 @@ class InstaVoltGBSpider(Spider):
 
             apply_yes_no(Extras.TOILETS, item, "facilities^toilet" in location.get("amenities", []))
             apply_yes_no(Extras.WIFI, item, "facilities^free_wifi" in location.get("amenities", []))
+
+            apply_category(Categories.CHARGING_STATION, item)
 
             yield item

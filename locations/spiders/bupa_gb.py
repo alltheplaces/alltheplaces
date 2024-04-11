@@ -1,6 +1,7 @@
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories
+from locations.items import set_closed
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -13,4 +14,8 @@ class BupaGBSpider(SitemapSpider, StructuredDataSpider):
     def post_process_item(self, item, response, ld_data, **kwargs):
         if "Total Dental Care" in item["name"]:
             item["brand"] = "Total Dental Care"
+
+        if item["name"].lower().endswith(" - closed"):
+            set_closed(item)
+
         yield item

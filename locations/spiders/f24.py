@@ -1,5 +1,6 @@
 from scrapy import Spider
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 
@@ -34,6 +35,8 @@ class F24Spider(Spider):
 
             if brand := self.BRANDS.get(location["net"]):
                 item.update(brand)
+
+            apply_category(Categories.FUEL_STATION, item)
 
             yield item
 

@@ -7,7 +7,7 @@ from locations.items import Feature
 
 
 class SpiritHalloweenSpider(scrapy.Spider):
-    name = "spirit-halloween"
+    name = "spirit_halloween"
     item_attributes = {"brand": "Spirit Halloween", "brand_wikidata": "Q25212133"}
     download_delay = 0.2
     allowed_domains = ("stores.spirithalloween.com",)

@@ -10,6 +10,8 @@ on:
     - 'locations/storefinders/*.py'
     - 'locations/*.py'
     - 'tests/*.py'
+    - 'Pipfile'
+    - 'Pipfile.lock'
 
 
 jobs:

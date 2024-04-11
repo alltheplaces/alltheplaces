@@ -2,7 +2,6 @@ import csv
 
 import scrapy
 
-from locations.categories import Categories
 from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.searchable_points import open_searchable_points
@@ -18,7 +17,6 @@ class GeneralLogisticsSystemsSpider(scrapy.Spider):
         "brand": "General Logistics Systems",
         "brand_wikidata": "Q46495823",
         "country": "DE",
-        "extras": Categories.POST_OFFICE.value,
     }
 
     def start_requests(self):
@@ -27,8 +25,8 @@ class GeneralLogisticsSystemsSpider(scrapy.Spider):
         ]
 
         for point_file in searchable_point_files:
-            with open_searchable_points(point_file) as openFile:
-                results = csv.DictReader(openFile)
+            with open_searchable_points(point_file) as open_file:
+                results = csv.DictReader(open_file)
                 for result in results:
                     if result["country"] == "DE":
                         longitude = float(result["longitude"])

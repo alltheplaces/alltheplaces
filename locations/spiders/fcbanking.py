@@ -4,6 +4,7 @@ import urllib.parse
 
 from scrapy.spiders import SitemapSpider
 
+from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.linked_data_parser import LinkedDataParser
 
@@ -35,4 +36,5 @@ class FcBankingSpider(SitemapSpider):
         oh = OpeningHours()
         oh.from_linked_data({"openingHours": hours_fixed}, "%I:%M %p")
         item["opening_hours"] = oh.as_opening_hours()
+        apply_category(Categories.BANK, item)
         yield item

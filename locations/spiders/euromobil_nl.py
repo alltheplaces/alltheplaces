@@ -10,7 +10,7 @@ class EuroMobilNLSpider(scrapy.Spider):
     name = "euromobil_nl"
     start_urls = ["https://euromobil.nl/contact/"]
 
-    item_attributes = {"brand": "Euromobil"}
+    item_attributes = {"brand": "Euromobil", "brand_wikidata": "Q1375118"}
 
     def parse(self, response, **kwargs):
         pattern = r"var\s+partners\s*=\s*(\[.*?\]);\s*var"

@@ -3,6 +3,7 @@ import urllib.parse
 
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
@@ -33,6 +34,7 @@ class BootsNOSpider(scrapy.Spider):
             "website": response.meta["website"],
         }
 
+        apply_category(Categories.PHARMACY, properties)
         yield Feature(**properties)
 
     def parse_store(self, response):

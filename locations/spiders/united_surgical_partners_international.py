@@ -1,5 +1,6 @@
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
@@ -34,4 +35,5 @@ class UnitedSurgicalPartnersInternationalSpider(scrapy.Spider):
                 "lat": item[8],
                 "lon": item[9],
             }
+            apply_category(Categories.DOCTOR_GP, properties)
             yield Feature(**properties)

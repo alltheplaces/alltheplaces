@@ -6,7 +6,7 @@ from locations.items import Feature
 
 
 class BjRestaurantsSpider(scrapy.Spider):
-    name = "bj-restaurant"
+    name = "bj_restaurant"
     item_attributes = {
         "brand": "BJ's Restaurant & Brewery",
         "brand_wikidata": "Q4835755",

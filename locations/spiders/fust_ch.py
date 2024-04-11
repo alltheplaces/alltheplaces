@@ -30,7 +30,7 @@ class FustCHSpider(SitemapSpider):
         lat, lon = self.parse_lat_lon(s)
         properties = {
             "city": branch.split()[0],
-            "extras": {"branch": branch},
+            "branch": branch,
             "email": email,
             "image": self.parse_image(response),
             "lat": lat,

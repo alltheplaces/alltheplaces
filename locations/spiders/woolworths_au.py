@@ -11,6 +11,7 @@ class WoolworthsAUSpider(scrapy.Spider):
         "https://www.woolworths.com.au/apis/ui/StoreLocator/Stores?Max=10000&Division=SUPERMARKETS,PETROL,CALTEXWOW,AMPOLMETRO,AMPOL&Facility=&postcode=*"
     ]
     custom_settings = {"ROBOTSTXT_OBEY": False}
+    requires_proxy = "AU"
 
     def parse(self, response):
         data = response.json()

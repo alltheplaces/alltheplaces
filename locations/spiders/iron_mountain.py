@@ -1,5 +1,6 @@
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.open_graph_parser import OpenGraphParser
 
 
@@ -10,5 +11,6 @@ class IronMountainSpider(scrapy.spiders.SitemapSpider):
 
     def parse(self, response):
         item = OpenGraphParser.parse(response)
+        apply_category(Categories.OFFICE_COMPANY, item)
         if item["lat"]:
             yield item

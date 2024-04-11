@@ -1,5 +1,6 @@
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
 
@@ -28,4 +29,5 @@ class AvedaSpider(scrapy.Spider):
             item["phone"] = value.get("PHONE1")
             item["website"] = value.get("WEBURL")
 
+            apply_category(Categories.SHOP_COSMETICS, item)
             yield item

@@ -1,5 +1,6 @@
 from scrapy.spiders import SitemapSpider
 
+from locations.categories import Categories, apply_category
 from locations.linked_data_parser import LinkedDataParser
 from locations.microdata_parser import MicrodataParser
 
@@ -42,4 +43,5 @@ class EastOfEnglandCoopSpider(SitemapSpider):
         if item.get("lon") is None:
             item["lon"] = response.xpath('//div[@class="store-map"]/@data-long').get()
 
+        apply_category(Categories.SHOP_SUPERMARKET, item)
         return item

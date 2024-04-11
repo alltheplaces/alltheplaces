@@ -89,9 +89,9 @@ class CapitalOneUSSpider(scrapy.Spider):
     def parse(self, response, **kwargs):
         for location in response.json()["data"]["geoSearch"]:
             item = DictParser.parse(location)
-            item[
-                "website"
-            ] = f'https://locations.capitalone.com/{location["seoType"]}/{item["state"]}/{location["slug"]}'
+            item["website"] = (
+                f'https://locations.capitalone.com/{location["seoType"]}/{item["state"]}/{location["slug"]}'
+            )
             item["street_address"] = ", ".join(
                 filter(
                     None,

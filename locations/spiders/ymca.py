@@ -2,7 +2,7 @@ import re
 
 import scrapy
 
-from locations.hours import OpeningHours
+from locations.hours import DAYS_3_LETTERS, OpeningHours
 from locations.items import Feature
 
 
@@ -52,8 +52,6 @@ class YMCASpider(scrapy.Spider):
     def parse_hours(self, hours):
         opening_hours = OpeningHours()
 
-        DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
-
         days = hours[0::2]
         times = hours[1::2]
 
@@ -66,7 +64,9 @@ class YMCASpider(scrapy.Spider):
             # Day range, e.g. Mon - Fri
             if "-" in day_range:
                 start_day, end_day = re.sub(r"[\s:]", "", day_range).split("-")
-                for day in DAYS[DAYS.index(start_day[0:3]) : DAYS.index(end_day[0:3]) + 1]:
+                for day in DAYS_3_LETTERS[
+                    DAYS_3_LETTERS.index(start_day[0:3]) : DAYS_3_LETTERS.index(end_day[0:3]) + 1
+                ]:
                     opening_hours.add_range(
                         day=day[0:2],
                         open_time=open_time,

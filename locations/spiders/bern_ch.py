@@ -97,11 +97,11 @@ class BernCHSpider(scrapy.Spider):
         item, props = self.parse_feature(f), f["properties"]
         if operator := props.get("punktname"):
             operator_wikidata, extras = self.operators.get(operator, (None, {}))
+            item["operator"] = operator
+            item["operator_wikidata"] = operator_wikidata
             item["extras"].update(
                 {
-                    "operator": operator,
                     "operator:phone": props.get("telefon"),
-                    "operator:wikidata": operator_wikidata,
                 }
             )
             item["extras"].update(extras)
@@ -129,9 +129,9 @@ class BernCHSpider(scrapy.Spider):
 
     def parse_bicycle_tube_vending_machine(self, f):
         item, props = self.parse_feature(f), f["properties"]
+        item["operator"] = props.get("punktname")
         item["extras"].update(
             {
-                "operator": props.get("punktname"),
                 "operator:email": props.get("email"),
                 "operator:phone": props.get("telefon"),
                 "operator:website": props.get("url"),

@@ -63,7 +63,7 @@ class VisaSpider(Spider):
 
                 item = DictParser.parse(location)
 
-                item["extras"]["operator"] = location.get("ownerBusName")
+                item["operator"] = location.get("ownerBusName")
                 item["located_in"] = location.get("placeName")
 
                 apply_category(Categories.ATM, item)

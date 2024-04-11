@@ -4,11 +4,10 @@ from scrapy.spiders import SitemapSpider
 
 from locations.hours import OpeningHours
 from locations.items import Feature
-from locations.structured_data_spider import StructuredDataSpider
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class HelzbergDiamondsSpider(SitemapSpider, StructuredDataSpider):
+class HelzbergDiamondsSpider(SitemapSpider):
     name = "helzberg_diamonds"
     item_attributes = {"brand": "Helzberg Diamonds", "brand_wikidata": "Q16995161"}
     allowed_domains = ["helzberg.com"]
@@ -18,7 +17,7 @@ class HelzbergDiamondsSpider(SitemapSpider, StructuredDataSpider):
 
     def parse(self, response):
         item = Feature()
-        address = response.xpath('//p[@class="address"]/text()').extract()
+        address = response.xpath('//p[contains(@class,"address")]/text()').extract()
         item["ref"] = re.findall("[0-9]+", response.url)[0]
         item["name"] = response.xpath('//h1[@class="store-title"]/text()').get()
         item["phone"] = response.xpath('//a[@class="storelocator-phone"]/text()').get()

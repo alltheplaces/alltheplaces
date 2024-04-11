@@ -2,7 +2,7 @@
     ignore = E203, E266, E501, E722, W503, F403, F401
     max-line-length = 120
     max-complexity = 18
-    select = B,C,E,F,W,T4,B9,T20
+    select = B,C,E,F,W,T4,B9,T20,N801,N802,N803,N806,N816
     per-file-ignores =
         ci/restore_history.py: T20
         locations/commands/*: T20

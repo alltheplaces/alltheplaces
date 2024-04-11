@@ -12,32 +12,27 @@ class BestAndLessAUSpider(Spider):
     item_attributes = {"brand": "Best & Less", "brand_wikidata": "Q4896542"}
     allowed_domains = ["www.bestandless.com.au"]
     start_urls = [
-        "https://www.bestandless.com.au/stores/ACT",
-        "https://www.bestandless.com.au/stores/NSW",
-        "https://www.bestandless.com.au/stores/NT",
-        "https://www.bestandless.com.au/stores/QLD",
-        "https://www.bestandless.com.au/stores/SA",
-        "https://www.bestandless.com.au/stores/TAS",
-        "https://www.bestandless.com.au/stores/VIC",
-        "https://www.bestandless.com.au/stores/WA",
+        f"https://prodapi.bestandless.com.au/occ/v2/bnlsite/stores/location/{state}?fields=FULL"
+        for state in ["ACT", "NSW", "NT", "QLD", "SA", "TAS", "VIC", "WA"]
     ]
 
     def start_requests(self):
         for url in self.start_urls:
-            yield JsonRequest(url=url, method="POST")
+            yield JsonRequest(url=url)
 
     def parse(self, response):
         for location in response.json()["stores"]:
             item = DictParser.parse(location)
-            item.pop("housenumber")
-            item.pop("street")
+            item["ref"] = location["address"]["id"]
+            item["addr_full"] = location["address"].get("formattedAddress")
             item["street_address"] = ", ".join(
-                filter(None, [location["address"]["line1"], location["address"]["line2"]])
+                filter(None, [location["address"].get("line1"), location["address"].get("line2")])
             )
-            item["addr_full"] = location["address"]["formattedAddress"]
-            item["state"] = location["address"]["state"]
-            item["phone"] = location["address"]["phone"]
-            item["email"] = location["address"]["email"]
+            item["city"] = location["address"].get("town")
+            item["state"] = location["address"].get("state")
+            item["postcode"] = location["address"].get("postalCode")
+            item["phone"] = location["address"].get("phone")
+            item["email"] = location["address"].get("email")
             item["website"] = "https://www.bestandless.com.au" + quote(location["url"])
             item["opening_hours"] = OpeningHours()
             for day in location["openingHours"]["weekDayOpeningList"]:

@@ -1,24 +1,22 @@
-import scrapy
+import re
 
-from locations.linked_data_parser import LinkedDataParser
-from locations.microdata_parser import MicrodataParser
+from scrapy.spiders import SitemapSpider
+
+from locations.structured_data_spider import StructuredDataSpider
 
 
-class GreatclipsSpider(scrapy.spiders.SitemapSpider):
+class GreatClipsSpider(SitemapSpider, StructuredDataSpider):
     name = "greatclips"
     item_attributes = {"brand": "Great Clips", "brand_wikidata": "Q5598967"}
     allowed_domains = ["greatclips.com"]
-    sitemap_urls = [
-        "https://salons.greatclips.com/robots.txt",
-    ]
+    sitemap_urls = ["https://salons.greatclips.com/robots.txt"]
+    sitemap_rules = [(r"/(?:us|ca)/\w\w/[^/]+/[^/]+$", "parse")]
+    wanted_types = ["HealthAndBeautyBusiness"]
 
-    def sitemap_filter(self, entries):
-        for entry in entries:
-            if entry["loc"].endswith("/salon-services"):
-                entry["loc"] = entry["loc"].removesuffix("/salon-services")
-                yield entry
+    def post_process_item(self, item, response, ld_data, **kwargs):
+        if m := re.search(r"\"latitude\":(-?\d+\.\d+),\"longitude\":(-?\d+\.\d+)", response.text):
+            item["lat"], item["lon"] = m.groups()
 
-    def parse(self, response):
-        MicrodataParser.convert_to_json_ld(response)
-        item = LinkedDataParser.parse(response, "HealthAndBeautyBusiness")
+        item["branch"] = response.xpath("//h1/text()").get()
+
         yield item

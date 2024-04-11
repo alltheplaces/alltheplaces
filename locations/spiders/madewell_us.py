@@ -10,7 +10,7 @@ class MadewellUSSpider(SitemapSpider, StructuredDataSpider):
     sitemap_rules = [(r"^https://stores\.madewell\.com/\w\w/\w\w/[-.\w]+/[-.'\w]+$", "parse")]
 
     def post_process_item(self, item, response, ld_data, **kwargs):
-        item["extras"]["branch"] = item.pop("name")
+        item["branch"] = item.pop("name")
         item["phone"] = response.xpath('//div[@id="phone-main"]/a/@href').get()
 
         yield item

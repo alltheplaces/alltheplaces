@@ -1,5 +1,6 @@
 import scrapy
 
+from locations.categories import Categories
 from locations.hours import DAYS_NL, OpeningHours
 from locations.items import Feature
 
@@ -8,7 +9,7 @@ class KpnNLSpider(scrapy.Spider):
     name = "kpn_nl"
     start_urls = ["https://www.kpn.com/w3/rest/storelocator/stores"]
 
-    item_attributes = {"brand": "KPN", "brand_wikidata": "Q338633"}
+    item_attributes = {"brand": "KPN", "brand_wikidata": "Q338633", "extras": Categories.SHOP_MOBILE_PHONE.value}
     custom_settings = {
         "DEFAULT_REQUEST_HEADERS": {"referer": "https://www.kpn.com/w3/vind-een-winkel/"},
         "ROBOTSTXT_OBEY": False,

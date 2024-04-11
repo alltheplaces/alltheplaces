@@ -19,14 +19,14 @@ class TeremokRUSpider(scrapy.Spider):
             city_id = city.xpath("@data-id").get()
             city_name = city.xpath("text()").get()
             yield JsonRequest(
-                urljoin(self.start_urls[0], f"/api/place/list/?city_id={city_id}"),
+                urljoin(self.start_urls[0], f"/api/main/place/list/?city_id={city_id}"),
                 callback=self.parse_city,
                 meta={"city_name": city_name},
             )
 
     def parse_city(self, response):
         city_name = response.meta["city_name"]
-        for poi in response.json()["result"]["items"]:
+        for poi in response.json():
             yield self.parse_poi(poi, city_name)
 
     def parse_poi(self, poi, city_name):

@@ -2,12 +2,13 @@ import json
 
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
 class WSPSpider(scrapy.Spider):
     name = "wsp"
-    item_attributes = {"brand": "wsp", "brand_wikidata": "Q30284893"}
+    item_attributes = {"brand": "WSP", "brand_wikidata": "Q1333162"}
     allowed_domains = ["www.wsp.com"]
     start_urls = ("https://www.wsp.com/",)
 
@@ -40,5 +41,7 @@ class WSPSpider(scrapy.Spider):
                 }
             except IndexError:
                 continue
+
+            apply_category(Categories.OFFICE_ENGINEER, properties)
 
             yield Feature(**properties)

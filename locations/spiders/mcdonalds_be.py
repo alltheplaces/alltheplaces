@@ -28,7 +28,11 @@ class McDonaldsBESpider(Spider):
             item["city"] = location.get("city_en")
             item["lat"] = float(location["lat_times_a_million"]) / 1000000.0
             item["lon"] = float(location["lng_times_a_million"]) / 1000000.0
-            item["website"] = "https://www.mcdonalds.be/en/restaurants/" + location["slug"]
+            item["website"] = item["extras"]["website:nl"] = "https://www.mcdonalds.be/{}/restaurants/{}".format(
+                "nl", location["slug"]
+            )
+            item["extras"]["website:en"] = "https://www.mcdonalds.be/{}/restaurants/{}".format("en", location["slug"])
+            item["extras"]["website:fr"] = "https://www.mcdonalds.be/{}/restaurants/{}".format("fr", location["slug"])
 
             item["opening_hours"] = OpeningHours()
             for day_hours in location["opening_hours"]:

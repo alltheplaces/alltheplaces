@@ -1,45 +1,29 @@
-import json
+from scrapy import Spider
 
-import scrapy
-
-from locations.hours import DAYS, OpeningHours
-from locations.items import Feature
+from locations.dict_parser import DictParser
+from locations.hours import OpeningHours
 
 
-class Tele2SESpider(scrapy.Spider):
+class Tele2SESpider(Spider):
     name = "tele2_se"
-    start_urls = ["https://www.tele2.se/butiker"]
-
     item_attributes = {"brand": "Tele2", "brand_wikidata": "Q309865"}
+    allowed_domains = [""]
+    start_urls = ["https://api-web.tele2.se/content/store/collection"]
 
-    def parse(self, response, **kwargs):
-        stores_json = json.loads(
-            response.xpath("//script[contains(text(), '__INITIAL_DATA__')]/text()")
-            .get()
-            .lstrip("window.__INITIAL_DATA__ = ")
-        )
-        for store in stores_json.get("state").get("entities").get("store").get("values").values():
-            opening_hours = OpeningHours()
-            website = store.get("slug")
-            for day_index in range(7):
-                if day_index <= 4:
-                    open, close = store.get("weekdayOpenTimes").split("-")
-                elif day_index == 5:
-                    open, close = store.get("saturdayOpenTimes").split("-")
-                else:
-                    open, close = store.get("sundayOpenTimes").split("-")
-                opening_hours.add_range(day=DAYS[day_index], open_time=open, close_time=close, time_format="%H")
-            yield Feature(
-                {
-                    "ref": store.get("sys").get("id"),
-                    "name": store.get("name"),
-                    "street_address": store.get("address"),
-                    "phone": store.get("phoneNumber"),
-                    "postcode": store.get("zipCode"),
-                    "city": store.get("city"),
-                    "website": f"https://www.tele2.se/butiker/{website}" if website else None,
-                    "lat": store.get("latitude"),
-                    "lon": store.get("longitude"),
-                    "opening_hours": opening_hours,
-                }
+    def parse(self, response):
+        for location in response.json()["items"]:
+            item = DictParser.parse(location)
+            item["street_address"] = item.pop("addr_full", None)
+            item.pop("phone", None)
+            item["website"] = "https://www.tele2.se/butiker/" + location["slug"]
+            hours_string = (
+                "Mo-Fr: "
+                + location.get("weekdayOpenTimes", "")
+                + " Sa: "
+                + location.get("saturdayOpenTimes", "")
+                + " Su: "
+                + location.get("sundayOpenTimes", "")
             )
+            item["opening_hours"] = OpeningHours()
+            item["opening_hours"].add_ranges_from_string(hours_string)
+            yield item

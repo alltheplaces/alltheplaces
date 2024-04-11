@@ -1,7 +1,7 @@
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
-from locations.categories import Extras, Fuel, apply_yes_no
+from locations.categories import Categories, Extras, Fuel, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
@@ -42,6 +42,7 @@ class PetrolSpider(Spider):
                 elif cat["characteristic"]["key"] == "191":
                     apply_yes_no(Extras.WIFI, item, True)
 
+            apply_category(Categories.FUEL_STATION, item)
             yield item
 
         if len(response.json()) == 100:

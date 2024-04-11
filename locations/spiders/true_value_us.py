@@ -7,7 +7,9 @@ class TrueValueUSSpider(Where2GetItSpider):
     api_brand_name = "truevalue"
     api_key = "EDF319D8-F561-11E7-9BF7-BFAAF3F4F7A7"
     api_filter = {
-        "truevaluebranded": {"eq": "Branded"},
-        "excluded": {"distinctfrom": "1"},
-        "active": {"eq": "1"},
+        "and": {
+            "truevaluebranded": {"eq": "Branded"},
+            "excluded": {"distinctfrom": "1"},
+            "active": {"eq": "1"},
+        }
     }

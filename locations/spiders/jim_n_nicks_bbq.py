@@ -8,7 +8,7 @@ from locations.items import Feature
 class JimNNicksBBQSpider(scrapy.Spider):
     name = "jim_n_nicks"
     allowed_domains = ["www.jimnnicks.com"]
-    item_attributes = {"brand": "Jim 'N Nick's"}
+    item_attributes = {"brand": "Jim 'N Nick's", "brand_wikidata": "Q122955601"}
     start_urls = ("https://www.jimnnicks.com/locations/",)
 
     def parse(self, response):

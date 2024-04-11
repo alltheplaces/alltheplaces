@@ -1,3 +1,4 @@
+from locations.categories import Categories, apply_category
 from locations.storefinders.freshop import FreshopSpider
 
 
@@ -11,4 +12,5 @@ class FestivalFoodsUSSpider(FreshopSpider):
             item["phone"] = item["phone"].replace("Guest Services: ", "").split("<br>", 1)[0].strip()
         if item.get("website"):
             item["website"] = "https://www.festfoods.com" + item["website"]
+        apply_category(Categories.SHOP_SUPERMARKET, item)
         yield item

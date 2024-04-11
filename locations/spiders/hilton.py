@@ -1,13 +1,22 @@
+from pathlib import Path
+from urllib.parse import urlparse
+
 import geonamescache
 import scrapy
+from scrapy.spiders import SitemapSpider
 
 from locations.structured_data_spider import StructuredDataSpider
+from locations.user_agents import CHROME_LATEST
 
 
-class HiltonSpider(scrapy.spiders.SitemapSpider, StructuredDataSpider):
+class HiltonSpider(SitemapSpider, StructuredDataSpider):
     name = "hilton"
     sitemap_urls = ["https://www.hilton.com/sitemap.xml"]
-    download_delay = 0.2
+    custom_settings = {
+        "USER_AGENT": CHROME_LATEST,
+        "DOWNLOAD_DELAY": 0.2,
+    }
+    visited_pages = set()
 
     HILTON_DOUBLETREE = ["DoubleTree by Hilton", "Q2504643"]
     HILTON_HOTELS = ["Hilton Hotels & Resorts", "Q598884"]
@@ -17,6 +26,8 @@ class HiltonSpider(scrapy.spiders.SitemapSpider, StructuredDataSpider):
         "di": HILTON_DOUBLETREE,
         "dt": HILTON_DOUBLETREE,
         "es": ["Embassy Suites", "Q5369524"],
+        "gi": ["Hilton Garden Inn", "Q1162859"],
+        "he": HILTON_HOTELS,
         "hf": HILTON_HOTELS,
         "hh": HILTON_HOTELS,
         "hi": HILTON_HOTELS,
@@ -25,8 +36,10 @@ class HiltonSpider(scrapy.spiders.SitemapSpider, StructuredDataSpider):
         "ht": ["Home2 Suites by Hilton", "Q5887912"],
         "hw": ["Homewood Suites by Hilton", "Q5890701"],
         "hx": ["Hampton by Hilton", "Q5646230"],
-        "gi": ["Hilton Garden Inn", "Q1162859"],
         "ol": ["LXR Hotels & Resorts", "Q64605184"],
+        "on": HILTON_HOTELS,
+        "pe": HILTON_HOTELS,
+        "po": ["Tempo by Hilton", "Q112144357"],
         "pr": "Hilton Hotels & Resorts",
         "py": ["Canopy by Hilton", "Q30632909"],
         "qq": "Curio Collection",
@@ -37,13 +50,22 @@ class HiltonSpider(scrapy.spiders.SitemapSpider, StructuredDataSpider):
         "wa": ["Waldorf Astoria", "Q3239392"],
     }
     gc = geonamescache.GeonamesCache()
+    requires_proxy = True
 
     def _parse_sitemap(self, response):
         for x in super()._parse_sitemap(response):
             if x.url.endswith(".xml"):
                 yield x
             elif x.url.endswith("/hotel-info/"):
-                yield scrapy.Request(x.url.replace("/hotel-info/", "/"), callback=self.parse_sd)
+                hotel_url = x.url.replace("/hotel-info/", "/")
+                hotel_name = Path(urlparse(hotel_url).path).name
+
+                if hotel_name in self.visited_pages:
+                    # There are localized pages for each hotel, don't scrape same hotel twice.
+                    continue
+
+                yield scrapy.Request(hotel_url, callback=self.parse_sd)
+                self.visited_pages.add(hotel_name)
 
     def lookup_brand(self, response):
         if "-dt-doubletree-" in response.url:
@@ -57,7 +79,12 @@ class HiltonSpider(scrapy.spiders.SitemapSpider, StructuredDataSpider):
         if brand := self.lookup_brand(response):
             if isinstance(brand, str):
                 return
-            item["ref"] = response.url
+
+            # Last part of url is unique
+            item["ref"] = Path(urlparse(response.url).path).name
+            # Website provided in structured data does not work, so replace it with working url
+            item["website"] = response.url
+
             item["brand"], item["brand_wikidata"] = brand
             # In many cases the street address is set by Hilton to be the full address
             # of the property. A certain amount of fixup can be attempted.

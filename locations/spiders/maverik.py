@@ -37,7 +37,7 @@ class MaverikSpider(scrapy.Spider):
                 lon=location["longitude"],
                 lat=location["latitude"],
                 ref=location["code"],
-                extras={"branch": location["name"]},
+                branch=location["name"],
                 street_address=address["address1"],
                 city=address["city"],
                 state=address["stateProvince"],
@@ -49,6 +49,7 @@ class MaverikSpider(scrapy.Spider):
 
             apply_category(Categories.FUEL_STATION, item)
 
+            # TODO:
             # "BTO" "Cinnabon" "ETHANOL_FREE" "Freeway/Highway" "Hi_Flow_La" "Pizza" "R_V__Dumps" "Tables_Chairs"
             # "grab&go"
             apply_yes_no(Extras.ATM, item, metadata.get("ATM"))
@@ -58,6 +59,7 @@ class MaverikSpider(scrapy.Spider):
             apply_yes_no("sells:lottery", item, metadata.get("Lottery"))
             apply_yes_no("rv", item, metadata.get("RV_Lanes"))
 
+            # TODO:
             # "Car DSL" "DEF" "Ethanol-Free" "Mid-High" "Mid-Low" "Premium" "Truck DSL" "Unleaded"
             apply_yes_no(Fuel.E15, item, "E15" in store_fuels)
 
