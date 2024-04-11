@@ -27,3 +27,14 @@ def test_iter_nsi():
     i = matches[0]
     assert i["displayName"] == "Greggs"
     assert i["tags"]["amenity"] == "fast_food"
+
+
+def test_get_by_id():
+    nsi = NSI()
+
+    # Invalid items should not return an NSI entry
+    assert nsi.get_item("N/A") is None
+    assert nsi.get_item(-1) is None
+
+    valid_id = nsi.nsi_json["brands/amenity/fuel"]["items"][0]["id"]
+    assert nsi.get_item(valid_id)["id"] == valid_id

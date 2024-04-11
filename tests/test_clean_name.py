@@ -15,4 +15,4 @@ def test_split():
     ]:
         item = Feature(name=name)
         ApplyNSICategoriesPipeline.clean_name({"tags": {"name": nsi_name}}, strip_names, item)
-        assert item["extras"]["branch"] == expected_branch
+        assert item["branch"] == expected_branch

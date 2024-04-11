@@ -76,6 +76,13 @@ class NSI(metaclass=Singleton):
                 elif wikidata_code == item["tags"].get("operator:wikidata"):
                     yield item
 
+    def get_item(self, nsi_id: str) -> dict | None:
+        self._ensure_loaded()
+        for tree in self.nsi_json.values():
+            for item in tree["items"]:
+                if item["id"] == nsi_id:
+                    return item
+
     @staticmethod
     def normalise(s):
         """

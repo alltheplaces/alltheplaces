@@ -136,7 +136,7 @@ class ApplyNSICategoriesPipeline:
         if not item.get("name"):
             # No name, nothing to clean
             return
-        if "branch" in item["extras"]:
+        if "branch" in item:
             # If branch is set, assume the spider has already cleaned this
             return
 
@@ -152,5 +152,5 @@ class ApplyNSICategoriesPipeline:
             ),
         ):
             if strip_name.upper() in item["name"].upper():
-                item["extras"]["branch"] = re.sub(strip_name, "", item.pop("name"), flags=re.IGNORECASE).strip(" -")
+                item["branch"] = re.sub(strip_name, "", item.pop("name"), flags=re.IGNORECASE).strip(" -")
                 break
