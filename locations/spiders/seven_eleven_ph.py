@@ -2,6 +2,7 @@ import scrapy
 from scrapy import Selector
 from scrapy.http import JsonRequest, Response
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.geo import city_locations
 from locations.hours import DAYS_EN, OpeningHours
@@ -29,6 +30,7 @@ class SevenElevenPhSpider(scrapy.Spider):
             if "[PERMANENT CLOSED]" in item["addr_full"]:
                 item["extras"]["end_date"] = "yes"
             self.clean_address(item)
+            apply_category(Categories.SHOP_CONVENIENCE, item)
             yield item
 
     def parse_hours(self, item, poi):
