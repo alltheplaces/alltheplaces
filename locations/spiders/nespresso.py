@@ -9,7 +9,7 @@ class NespressoSpider(scrapy.Spider):
     item_attributes = {"brand": "Nespresso", "brand_wikidata": "Q301301"}
 
     def start_requests(self):
-        countries = ["AT", "CA", "CH", "DE", "DK", "FR", "GB", "IT", "NL", "US", "ZA"]
+        countries = ["AT", "CA", "CH", "DE", "DK", "FR", "GB", "HU", "IT", "NL", "US", "ZA"]
 
         base_url = "https://www.nespresso.com/storelocator/app/find_poi-v4.php?country={country}&lang=EN"
 
