@@ -9,9 +9,9 @@ def test_split():
         ("Decathlon Košice", "Decathlon", set(), "Košice"),
         ("Domino's Pizza London - Collier Row", "Domino's", {"Domino's Pizza"}, "London - Collier Row"),
         ("Frankie & Benny's Tamworth", "Frankie & Benny's", set(), "Tamworth"),
-        ("GAME Northampton", "Game", set(), "Northampton"),
+        ("Game Northampton", "Game", set(), "Northampton"),
         ("O2 Shop Barking", "O2", {"O2 Shop"}, "Barking"),
-        ("wilko Acton", "Wilko", set(), "Acton"),
+        ("Wilko Acton", "Wilko", set(), "Acton"),
     ]:
         item = Feature(name=name)
         NameCleanUpPipeline.clean_name({"tags": {"name": nsi_name}}, strip_names, item)
