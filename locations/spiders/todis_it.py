@@ -19,13 +19,15 @@ class TodisITSpider(Spider):
     def parse_store_list(self, response):
         for location in response.json():
             store_id = location["id"]
-            yield JsonRequest(url=f"https://www.todis.it/wp-json/todis-stores/v1/store?id={store_id}", callback=self.parse_store)
+            yield JsonRequest(
+                url=f"https://www.todis.it/wp-json/todis-stores/v1/store?id={store_id}", callback=self.parse_store
+            )
 
     def parse_store(self, response):
         location = response.json()
         if location["store"]["active"] != "1":
             return
-    
+
         item = DictParser.parse(location["store"])
         item["name"] = location["store"]["store"]
         item["street_address"] = item.pop("addr_full", None)
