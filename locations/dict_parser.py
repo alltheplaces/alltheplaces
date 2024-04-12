@@ -84,6 +84,8 @@ class DictParser:
         "miasto",
         # ES
         "ciudad",  # "city"
+        # IT
+        "comune",  # "comune"
     ]
 
     region_keys = [
@@ -99,6 +101,8 @@ class DictParser:
         "store-state",
         # JP
         "都道府県",  # "prefecture"
+        # IT
+        "regione",  # "region"
     ]
 
     country_keys = [
