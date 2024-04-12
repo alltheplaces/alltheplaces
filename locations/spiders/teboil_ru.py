@@ -15,9 +15,9 @@ FUEL_MAPING = {
 }
 
 
-class TeboilRuSpider(Spider):
+class TeboilRUSpider(Spider):
     name = "teboil_ru"
-    item_attributes = {"brand_wikidata": "Q7692079"}
+    item_attributes = {"brand": "Teboil", "brand_wikidata": "Q7692079"}
     allowed_domains = ["azs.teboil.ru"]
 
     def start_requests(self) -> Iterable[Request]:
@@ -34,6 +34,7 @@ class TeboilRuSpider(Spider):
             item["addr_full"] = poi["adr"]
             item["lat"], item["lon"] = poi["coordinates"]
             apply_category(Categories.FUEL_STATION, item)
+            self.parse_fuel(item, poi)
             yield item
 
     def parse_fuel(self, item, poi):
