@@ -26,5 +26,5 @@ class SuperCCASpider(SitemapSpider):
         json_ld_data = parse_js_object(js_blob.split('var storeJsonLd = "', 1)[1].split('";', 1)[0])
         item = LinkedDataParser.parse_ld(json_ld_data)
         item["ref"] = json_ld_data["id"].split("/find-a-grocery/", 1)[1]
-        item["name"] = item["name"].removeprefix("Super C - ")
+        item["branch"] = item["name"].removeprefix("Super C - ")
         yield item
