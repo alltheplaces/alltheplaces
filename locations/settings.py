@@ -111,6 +111,7 @@ ITEM_PIPELINES = {
     "locations.pipelines.drop_logo.DropLogoPipeline": 550,
     "locations.pipelines.closed.ClosePipeline": 650,
     "locations.pipelines.apply_nsi_categories.ApplyNSICategoriesPipeline": 700,
+    "locations.pipelines.name_clean_up.NameCleanUpPipeline": 725,
     "locations.pipelines.check_item_properties.CheckItemPropertiesPipeline": 750,
     "locations.pipelines.count_categories.CountCategoriesPipeline": 800,
     "locations.pipelines.count_brands.CountBrandsPipeline": 810,

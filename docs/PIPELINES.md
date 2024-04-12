@@ -64,6 +64,12 @@ See [NSI Matching](NSI_MATCHING.md) for more details.
 
 This can be disabled by setting `nsi_id='N/A'` in the Spider.
 
+## `NameCleanUpPipeline`
+
+Once a `Feature` has been matched to NSI, we attempt to split the `name` from the `Spider` into `name` and `branch`.
+
+This is disabled automatically when a `Spider` assigns a `branch` manually, or if we didn't match NSI.
+
 ## `CheckItemPropertiesPipeline`
 
 Count missing and invalid properties provided by the spider.
