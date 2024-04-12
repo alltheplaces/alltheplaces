@@ -1,5 +1,4 @@
 from chompjs import parse_js_object
-
 from scrapy import Request, Spider
 
 from locations.categories import Categories
@@ -14,7 +13,14 @@ class TopazPLSpider(Spider):
     start_urls = ["https://topaz24.pl/sklepy-topaz"]
 
     def parse(self, response):
-        js_blob = "[" + response.xpath('//script[contains(text(), "var locations = [")]/text()').get().split("var locations = [", 1)[1].split("];", 1)[0] + "]"
+        js_blob = (
+            "["
+            + response.xpath('//script[contains(text(), "var locations = [")]/text()')
+            .get()
+            .split("var locations = [", 1)[1]
+            .split("];", 1)[0]
+            + "]"
+        )
         js_blob = js_blob.replace('\\"', "").replace("\\/", "/")
         for location in parse_js_object(js_blob, unicode_escape=True):
             properties = {
@@ -30,8 +36,12 @@ class TopazPLSpider(Spider):
 
     def parse_store(self, response):
         properties = response.meta["properties"]
-        properties["phone"] = list(filter(None, map(str.strip, response.xpath('//div[@id="shop"]/div[1]/div[4]/div[1]//text()').getall())))[-1]
-        hours_string = " ".join(filter(None, map(str.strip, response.xpath('//div[@id="shop"]/div[1]/div[4]/div[2]//text()').getall())))
+        properties["phone"] = list(
+            filter(None, map(str.strip, response.xpath('//div[@id="shop"]/div[1]/div[4]/div[1]//text()').getall()))
+        )[-1]
+        hours_string = " ".join(
+            filter(None, map(str.strip, response.xpath('//div[@id="shop"]/div[1]/div[4]/div[2]//text()').getall()))
+        )
         properties["opening_hours"] = OpeningHours()
         properties["opening_hours"].add_ranges_from_string(hours_string, days=DAYS_PL)
         yield Feature(**properties)
