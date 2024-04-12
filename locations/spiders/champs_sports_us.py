@@ -9,3 +9,4 @@ class ChampsSportsUSSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://stores.champssports.com/sitemap.xml"]
     sitemap_rules = [(r".html$", "parse_sd")]
     wanted_types = ["ShoeStore"]
+    drop_attributes = {"name"}
