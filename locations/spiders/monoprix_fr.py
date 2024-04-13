@@ -1,6 +1,5 @@
-from locations.storefinders.woosmap import WoosmapSpider
-
 from locations.categories import Categories
+from locations.storefinders.woosmap import WoosmapSpider
 
 
 class MonoprixFRSpider(WoosmapSpider):
