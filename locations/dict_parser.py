@@ -35,6 +35,7 @@ class DictParser:
         "business-name",
         "item-name",
         "location-name",
+        "loc-name",
     ]
 
     house_number_keys = [
