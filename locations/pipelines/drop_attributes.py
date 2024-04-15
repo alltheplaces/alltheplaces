@@ -10,8 +10,8 @@ class DropAttributesPipeline:
 
         for attribute in getattr(spider, "drop_attributes"):
             if attribute in item.fields:
-                del item[attribute]
+                item.pop(attribute, None)
             else:
-                del item["extras"][attribute]
+                item["extras"].pop(attribute, None)
 
         return item

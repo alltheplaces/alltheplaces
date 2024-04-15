@@ -6,7 +6,7 @@ See [`fedex.py`](../locations/spiders/fedex.py) for an example.
 
 ### `DropAttributesPipeline`
 
-When a spider has `drop_attributes`, we remove those attributes from `Item`s, this happens early, so it may be re added by other pipelines later on.
+When a spider has `drop_attributes`, we remove those attributes from `Feature`s, this happens early, so it may be re added by other pipelines later on.
 
 ### `ApplySpiderLevelAttributesPipeline`
 
