@@ -14,6 +14,8 @@ class SuzukiFRSpider(SitemapSpider):
 
     def parse(self, response, **kwargs):
         item = Feature()
+        item["lat"] = response.xpath(r'//div[@id = "store-locator-map"]/@data-store-lat').get()
+        item["lon"] = response.xpath(r'//div[@id = "store-locator-map"]/@data-store-lng').get()
         item["name"] = response.xpath(r"//title/text()").get().replace("|", "-")
         item["street_address"] = clean_address(response.xpath(r'//*[@class = "uppercase"]/text()').get().strip())
         item["addr_full"] = (
