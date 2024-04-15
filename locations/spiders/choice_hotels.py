@@ -16,7 +16,6 @@ class ChoiceHotelsSpider(SitemapSpider):
     sitemap_urls = ["https://www.choicehotels.com/brandsearchsitemap.xml.gz"]
     user_agent = CHROME_LATEST
     download_delay = 5  # Requested by https://www.choicehotels.com/robots.txt
-    requires_proxy = True
 
     brand_mapping = {
         "AC": ("Ascend Hotel Collection", "Q113152464"),
