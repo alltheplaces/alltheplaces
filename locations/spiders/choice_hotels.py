@@ -5,7 +5,7 @@ from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
-from locations.user_agents import BROWSER_DEFAULT
+from locations.user_agents import CHROME_LATEST
 
 
 class ChoiceHotelsSpider(SitemapSpider):
@@ -14,7 +14,7 @@ class ChoiceHotelsSpider(SitemapSpider):
     allowed_domains = ["choicehotels.com"]
     # Sitemapindex with below in it is "https://www.choicehotels.com/sitemapindex.xml"
     sitemap_urls = ["https://www.choicehotels.com/brandsearchsitemap.xml.gz"]
-    user_agent = BROWSER_DEFAULT
+    user_agent = CHROME_LATEST
     download_delay = 5  # Requested by https://www.choicehotels.com/robots.txt
     requires_proxy = True
 
