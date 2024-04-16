@@ -1,11 +1,9 @@
-from scrapy.spiders import SitemapSpider
+from locations.categories import Categories
+from locations.storefinders.yext import YextSpider
 
-from locations.structured_data_spider import StructuredDataSpider
 
-
-class ArcaplanetITSpider(SitemapSpider, StructuredDataSpider):
+class ArcaplanetITSpider(YextSpider):
     name = "arcaplanet_it"
-    item_attributes = {"brand": "Arcaplanet", "brand_wikidata": "Q105530937"}
-    sitemap_urls = ["https://negozi.arcaplanet.it/sitemap.xml"]
-    sitemap_rules = [(r"it/[^/]+/\w\w/.+$", "parse")]
-    wanted_types = ["PetStore"]
+    item_attributes = {"brand": "Arcaplanet", "brand_wikidata": "Q105530937", "extras": Categories.SHOP_PET.value}
+    api_key = "e0faf99fdcbc6c43da0eaf74c90c23d1"
+    api_version = "20220511"
