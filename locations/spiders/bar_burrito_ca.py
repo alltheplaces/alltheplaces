@@ -1,4 +1,5 @@
 from html import unescape
+
 from phpserialize import unserialize
 
 from locations.categories import Categories
@@ -25,13 +26,13 @@ class BarBurritoCASpider(WPStoreLocatorSpider):
         unserialized_dict = {
             k.decode(): v.decode() if isinstance(v, bytes) else v for k, v in unserialized_object.items()
         }
-        unserialized_dict = {
-            k: list(map(bytes.decode, v.values())) for k, v in unserialized_dict.items()
-        }
+        unserialized_dict = {k: list(map(bytes.decode, v.values())) for k, v in unserialized_dict.items()}
         hours_string = ""
         for day_name, hour_ranges in unserialized_dict.items():
             for hour_range in hour_ranges:
-                hours_string = "{} {}: {} - {}".format(hours_string, day_name, hour_range.split(",", 1)[0], hour_range.split(",", 1)[1])
+                hours_string = "{} {}: {} - {}".format(
+                    hours_string, day_name, hour_range.split(",", 1)[0], hour_range.split(",", 1)[1]
+                )
         oh = OpeningHours()
         oh.add_ranges_from_string(hours_string)
         return oh
