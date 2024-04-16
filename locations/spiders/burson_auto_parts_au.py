@@ -10,6 +10,7 @@ class BursonAutoPartsAU(Spider):
     item_attributes = {"brand": "Burson Auto Parts", "brand_wikidata": "Q117075930"}
     allowed_domains = ["www.burson.com.au"]
     start_urls = ["https://www.burson.com.au/find-a-store"]
+    custom_settings = {"DOWNLOAD_TIMEOUT": 60}  # Possible anti-bot delay in use
 
     def parse(self, response):
         raw_js = (
