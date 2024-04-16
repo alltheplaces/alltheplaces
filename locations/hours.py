@@ -724,9 +724,9 @@ class OpeningHours:
 
         for day in days:
             self.add_range(
-                day=day,
-                open_time=rule["opens"],
-                close_time=rule["closes"],
+                day=day.strip(),
+                open_time=rule["opens"].strip(),
+                close_time=rule["closes"].strip(),
                 time_format=time_format,
             )
 
