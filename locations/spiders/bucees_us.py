@@ -31,7 +31,7 @@ class BuceesUSSpider(WPStoreLocatorSpider):
 
         yield item
 
-    def parse_opening_hours(self, location: dict, **kwargs) -> OpeningHours:
+    def parse_opening_hours(self, location: dict, days: dict, **kwargs) -> OpeningHours:
         sel = Selector(text=location["hours"])
         oh = OpeningHours()
         for rule in sel.xpath("//tr"):
