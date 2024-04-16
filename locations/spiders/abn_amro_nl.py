@@ -17,7 +17,7 @@ class AbnAmroNLSpider(scrapy.Spider):
             store = stores.get("serviceLocation")
             oh = OpeningHours()
             for services in store.get("services"):
-                for day, hours in services.get("officeHours").items():
+                for day, hours in services.get("officeHours", {}).items():
                     if "-" not in hours[0]:
                         continue
                     starting, closing = hours[0].split("-")
