@@ -12,8 +12,7 @@ class AlamoSpider(scrapy.Spider):
     def parse(self, response):
         for loc in response.json():
             properties = {
-                "name": loc["name"],
-                "brand": loc["brand"],
+                "branch": loc["name"],
                 "phone": "; ".join([p["phone_number"] for p in loc["phones"]]),
                 "street_address": ", ".join(loc["address"]["street_addresses"]),
                 "city": loc["address"].get("city"),
