@@ -36,7 +36,7 @@ class MarriottHotelsSpider(scrapy.Spider):
         "BA": ["Marriott Beach Apartments", "Q3918608"],
         "BG": ["Bulgari Hotels", "Q91602871"],
         "BR": ["Renaissance Hotels", "Q2143252"],
-        "CY": ["Courtyard by Marriott", "Q1053170"],
+        "CY": ["Courtyard", "Q1053170"],
         "DE": ["Delta Hotels", "Q5254663"],
         "DS": ["Design Hotels", "Q5264274"],
         "EB": ["Edition Hotels", "Q91218404"],
