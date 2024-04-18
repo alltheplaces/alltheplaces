@@ -5,7 +5,7 @@ from locations.spiders.pandora import PandoraSpider
 
 class ClairesSpider(SitemapSpider):
     name = "claires"
-    item_attributes = {"brand": "Claire's", "brand_wikidata": "Q2974996"}
+    item_attributes = {"brand_wikidata": "Q2974996"}
     allowed_domains = ["claires.com"]
     sitemap_urls = ["https://stores.claires.com/sitemap.xml"]
     sitemap_rules = [
@@ -17,4 +17,10 @@ class ClairesSpider(SitemapSpider):
     download_delay = 0.2
 
     def parse_store(self, response):
-        yield PandoraSpider.parse_item(response, self.sitemap_rules[0][0])
+        item = PandoraSpider.parse_item(response, self.sitemap_rules[0][0])
+        item["branch"] = (
+            item.pop("name")
+            .removeprefix("Shop Ear Piercings & Jewellery at ")
+            .removeprefix("Shop Ear Piercings & Jewelry at ")
+        )
+        yield item
