@@ -21,7 +21,7 @@ class TheFoodWarehouseGBSpider(Spider):
             if "CLOSED" in item["name"].upper() or "COMING SOON" in item["name"].upper():
                 continue
             item["ref"] = store["storeNo"]
-            item["website"] = "https://www.thefoodwarehouse.com/" + store["url"]
+            item["website"] = "https://www.thefoodwarehouse.com" + store["url"]
             item["phone"] = store.get("store-number")
             item["addr_full"] = (
                 item["addr_full"].replace("<br>", "").replace("<br />", "").replace("<p>", "").replace("</p>", "")
