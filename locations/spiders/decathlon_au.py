@@ -3,8 +3,8 @@ from scrapy.http import JsonRequest
 
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
-from locations.spiders.decathlon_fr import DecathlonFRSpider
 from locations.pipelines.address_clean_up import clean_address
+from locations.spiders.decathlon_fr import DecathlonFRSpider
 
 
 class DecathlonAUSpider(Spider):
