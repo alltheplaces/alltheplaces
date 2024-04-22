@@ -15,7 +15,7 @@ class TheFoodWarehouseGBSpider(Spider):
     }
     allowed_domains = ["www.thefoodwarehouse.com"]
     start_urls = ["https://www.thefoodwarehouse.com/assets/foodwarehouse/ajax/"]
-    no_refs = True # https://github.com/alltheplaces/alltheplaces/issues/8237
+    no_refs = True  # https://github.com/alltheplaces/alltheplaces/issues/8237
 
     def parse(self, response):
         for store in response.json():
