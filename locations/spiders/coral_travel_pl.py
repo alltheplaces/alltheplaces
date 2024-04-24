@@ -16,9 +16,9 @@ class CoralTravelPLSpider(CrawlSpider):
         item = Feature()
         item["website"] = response.url
         item["ref"] = response.url.split("/")[-1]
-        item["lat"], item["lon"] = (
-            response.xpath('//a[contains(@href, "destination=")]/@href').get().split("destination=")[-1].split(",")
-        )
+
+        if destination_text := response.xpath('//a[contains(@href, "destination=")]/@href').get():
+            item["lat"], item["lon"] = destination_text.split("destination=")[-1].split(",")
 
         address_lines = list(
             filter(
