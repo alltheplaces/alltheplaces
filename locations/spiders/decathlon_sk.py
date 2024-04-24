@@ -1,6 +1,5 @@
-from chompjs import parse_js_object
-from json import loads
 
+from chompjs import parse_js_object
 from scrapy import Spider
 
 from locations.dict_parser import DictParser
@@ -17,7 +16,9 @@ class DecathlonSKSpider(Spider):
     def parse(self, response):
         js_blob = response.xpath('//script[contains(text(), ",stores=[{")]/text()').get()
 
-        js_blob_markers = js_blob.split(",store_marker=", 1)[1].split(",store_name=", 1)[0].replace('\\"', "'").replace("\\/", "/")
+        js_blob_markers = (
+            js_blob.split(",store_marker=", 1)[1].split(",store_name=", 1)[0].replace('\\"', "'").replace("\\/", "/")
+        )
         markers = parse_js_object(js_blob_markers, unicode_escape=True)
         markers = {marker["store_number"]: marker for marker in markers}
 
