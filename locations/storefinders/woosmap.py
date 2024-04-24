@@ -51,7 +51,7 @@ class WoosmapSpider(Spider):
         if pagination := response.json()["pagination"]:
             if pagination["page"] < pagination["pageCount"]:
                 yield JsonRequest(
-                    url=f'https://api.woosmap.com/stores?key={self.key}&stores_by_page=300&page={pagination["page"]+1}',
+                    url=f'https://api.woosmap.com/stores?key={self.key}&stores_by_page=300&page={pagination["page"] + 1}',
                     headers={"Origin": self.origin},
                     meta={"referrer_policy": "no-referrer"},
                 )

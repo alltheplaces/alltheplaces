@@ -43,7 +43,7 @@ class FoodLionUSSpider(scrapy.Spider):
         for store in json.loads(response.json()["result"]):
             store["street_address"] = store.pop("address")
             item = DictParser.parse(store)
-            item["website"] = f'https://www.foodlion.com{ store["href"]}'
+            item["website"] = f'https://www.foodlion.com{store["href"]}'
 
             item["opening_hours"] = self.parse_hours(store["hours"])
 
