@@ -2,7 +2,7 @@ from scrapy import Spider
 from scrapy.http import JsonRequest
 
 from locations.dict_parser import DictParser
-from locations.spiders.vapestore_gb import clean_address
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class TopsSpider(Spider):
@@ -21,7 +21,9 @@ class TopsSpider(Spider):
         for location in response.json():
             location["location"] = {"lat": location["GPSLat"], "lon": location["GPSLong"]}
             location["street_address"] = location["PhysicalAddress"]
-            location["address"] = clean_address([location["PhysicalAddress"], location["Suburb"], location["Town"]])
+            location["address"] = merge_address_lines(
+                [location["PhysicalAddress"], location["Suburb"], location["Town"]]
+            )
             location["Url"] = f'https://www.topsatspar.co.za/{location["Url"]}'
 
             yield DictParser.parse(location)

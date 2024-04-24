@@ -41,5 +41,5 @@ class GoldsmithsGBSpider(Spider):
         pages = response.json()["pagination"]["numberOfPages"]
         if current_page < pages:
             yield JsonRequest(
-                url=f"https://www.goldsmiths.co.uk/store-finder?q=&latitude=0&longitude=0&page={current_page+1}"
+                url=f"https://www.goldsmiths.co.uk/store-finder?q=&latitude=0&longitude=0&page={current_page + 1}"
             )

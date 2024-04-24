@@ -1,11 +1,12 @@
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
+from locations.categories import Categories
 from locations.structured_data_spider import StructuredDataSpider
 
 
 class MyDentistGBSpider(CrawlSpider, StructuredDataSpider):
-    MYDENTIST = {"brand": "My Dentist", "brand_wikidata": "Q65118035"}
+    MYDENTIST = {"brand": "My Dentist", "brand_wikidata": "Q65118035", "extras": Categories.DENTIST.value}
 
     name = "mydentist_gb"
     allowed_domains = ["mydentist.co.uk"]
@@ -39,5 +40,8 @@ class MyDentistGBSpider(CrawlSpider, StructuredDataSpider):
         ):
             item.update(self.MYDENTIST)
             item["name"] = "{my}dentist"
+
+        if isinstance(item.get("email"), list):
+            item["email"] = ", ".join(item["email"])
 
         yield item

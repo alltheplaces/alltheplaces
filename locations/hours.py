@@ -1,3 +1,4 @@
+import logging
 import re
 import time
 from collections import defaultdict
@@ -170,6 +171,25 @@ DAYS_IL = {
     "יום ראשון": "Su",
 }
 
+DAYS_LT = {
+    "pirmadienis": "Mo",
+    "antradienis": "Tu",
+    "trečiadienis": "We",
+    "ketvirtadienis": "Th",
+    "penktadienis": "Fr",
+    "šeštadienis": "Sa",
+    "sekmadienis": "Su",
+    "I": "Mo",
+    "II": "Tu",
+    "III": "We",
+    "IV": "Th",
+    "V": "Fr",
+    "VI": "Sa",
+    "VII": "Su",
+    "Vi": "Sa",
+    "Vii": "Su",
+}
+
 DAYS_SE = {
     "Måndag": "Mo",
     "Mån": "Mo",
@@ -266,42 +286,59 @@ DAYS_PL = {
     "Pn": "Mo",
     "Po": "Mo",
     "Pon": "Mo",
+    "Pn.": "Mo",
+    "Pon.": "Mo",
     "Poniedziałek": "Mo",
     "Wt": "Tu",
     "Wto": "Tu",
+    "Wto.": "Tu",
     "Wtorek": "Tu",
     "Śr": "We",
     "Sr": "We",
     "Sro": "We",
     "Śro": "We",
+    "Śro.": "We",
     "Środa": "We",
     "Cz": "Th",
     "Czw": "Th",
+    "Czw.": "Th",
     "Czwartek": "Th",
     "Pt": "Fr",
+    "Pt.": "Fr",
     "Pi": "Fr",
     "Pia": "Fr",
     "Piątek": "Fr",
     "Sb": "Sa",
     "So": "Sa",
     "Sob": "Sa",
+    "Sob.": "Sa",
     "Sobota": "Sa",
     "Nd": "Su",
     "Ni": "Su",
     "Nie": "Su",
+    "Ndz": "Su",
     "Niedz": "Su",
     "Niedzela": "Su",
     "Niedziela": "Su",
+    "Niedziele": "Su",
 }
 DAYS_PT = {
+    # "Feriado": "PH",
     # "Se": "Mo",
+    "Segunda": "Mo",
     "Te": "Tu",
+    "Terça": "Tu",
     # "Qu": "We",
+    "Quarta": "We",
     # "Qu": "Th",
+    "Quinta": "Th",
     # "Se": "Fr",
+    "Sexta": "Fr",
+    "Sábado": "Sa",
     "Sa": "Sa",
     "Sá": "Sa",
     "Do": "Su",
+    "Domingo": "Su",
 }
 DAYS_SK = {
     "Po": "Mo",
@@ -415,10 +452,12 @@ DAYS_ES = {
     "Vi": "Fr",
     "Sabado": "Sa",
     "Sábado": "Sa",
+    "Sábados": "Sa",
     "Sab": "Sa",
     "Sáb": "Sa",
     "Sa": "Sa",
     "Domingo": "Su",
+    "Domingos": "Su",
     "Dom": "Su",
     "Do": "Su",
 }
@@ -461,6 +500,41 @@ DAYS_SR = {
     "Nedelja": "Su",
     "Недеља": "Su",
 }
+
+# See https://github.com/alltheplaces/alltheplaces/issues/7360
+# A list orded by Languages most frequently used for web content as of January 2024, by share of websites.
+# See WPStoreLocator for example usage.
+DAYS_BY_FREQUENCY = [
+    DAYS_EN,
+    DAYS_ES,
+    DAYS_DE,
+    DAYS_RU,
+    # Japanese missing
+    DAYS_FR,
+    DAYS_PT,
+    DAYS_IT,
+    # Turkish missing
+    DAYS_DK,
+    DAYS_PL,
+    # Persian
+    DAYS_CZ,
+    # And everything else
+    DAYS_AT,
+    DAYS_BG,
+    DAYS_CH,
+    DAYS_FI,
+    DAYS_GR,
+    DAYS_HU,
+    DAYS_IL,
+    DAYS_NL,
+    DAYS_NO,
+    DAYS_RO,
+    DAYS_RS,
+    DAYS_SE,
+    DAYS_SI,
+    DAYS_SK,
+    DAYS_SR,
+]
 
 NAMED_DAY_RANGES_DK = {
     "Hverdage": ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"],  # Weekdays
@@ -510,6 +584,14 @@ DELIMITERS_ES = [
     "de",
 ]
 
+DELIMITERS_PT = [
+    "-",
+    "a",
+    "das",
+    "às",
+    "de",
+]
+
 DELIMITERS_PL = [
     "-",
     "–",
@@ -521,6 +603,8 @@ DELIMITERS_PL = [
 ]
 
 DELIMITERS_RU = DELIMITERS_EN + ["с", "по", "до", "в", "во"]
+
+logger = logging.getLogger(__name__)
 
 
 def day_range(start_day, end_day):
@@ -621,27 +705,77 @@ class OpeningHours:
 
         return opening_hours
 
+    # Parses an openingHoursSpecification dict
+    # IE:
+    # {
+    #  "@type": "OpeningHoursSpecification",
+    #  "closes":  "17:00:00",
+    #  "dayOfWeek": "https://schema.org/Sunday",
+    #  "opens":  "09:00:00"
+    # }
+    # See https://schema.org/OpeningHoursSpecification for further examples.
+    def _parse_opening_hours_specification(self, rule: dict, time_format: str):
+        if not rule.get("dayOfWeek") or not rule.get("opens") or not rule.get("closes"):
+            return
+
+        days = rule["dayOfWeek"]
+        if not isinstance(days, list):
+            days = [days]
+
+        for day in days:
+            self.add_range(
+                day=day.strip(),
+                open_time=rule["opens"].strip(),
+                close_time=rule["closes"].strip(),
+                time_format=time_format,
+            )
+
+    # Parse an individual https://schema.org/openingHours property value such as
+    # "Mo,Tu,We,Th 09:00-12:00"
+    # "Mo-Fr 10:00-19:00"
+    def _parse_opening_hours(self, rule: str, time_format: str):
+        days, time_ranges = rule.split(" ", 1)
+
+        if "-" not in time_ranges:
+            return
+
+        for time_range in time_ranges.split(","):
+            start_time, end_time = time_range.split("-")
+
+            start_time = start_time.strip()
+            end_time = end_time.strip()
+
+            if "-" in days:
+                start_day, end_day = days.split("-")
+
+                start_day = sanitise_day(start_day)
+                end_day = sanitise_day(end_day)
+
+                for day in day_range(start_day, end_day):
+                    self.add_range(day, start_time, end_time, time_format)
+            else:
+                for day in days.split(","):
+                    if d := sanitise_day(day):
+                        self.add_range(d, start_time, end_time, time_format)
+
     def from_linked_data(self, linked_data, time_format: str = "%H:%M"):
-        if linked_data.get("openingHoursSpecification"):
-            for rule in linked_data["openingHoursSpecification"]:
-                if not isinstance(rule, dict):
-                    continue
-                if not rule.get("dayOfWeek") or not rule.get("opens") or not rule.get("closes"):
-                    continue
+        """
+        Deprecated, please use LinkedDataParser.parse_opening_hours
+        """
+        # TODO: move to LinkedDataParser
+        if spec := linked_data.get("openingHoursSpecification"):
+            if isinstance(spec, list):
+                for rule in linked_data["openingHoursSpecification"]:
+                    if not isinstance(rule, dict):
+                        continue
+                    self._parse_opening_hours_specification(rule, time_format)
+            elif isinstance(spec, dict):
+                self._parse_opening_hours_specification(spec, time_format)
+            else:
+                logger.info("Unknown openingHoursSpecification structure, ignoring")
+                logger.debug(linked_data.get("openingHoursSpecification"))
 
-                days = rule["dayOfWeek"]
-                if not isinstance(days, list):
-                    days = [days]
-
-                for day in days:
-                    self.add_range(
-                        day=day,
-                        open_time=rule["opens"],
-                        close_time=rule["closes"],
-                        time_format=time_format,
-                    )
-        elif linked_data.get("openingHours"):
-            rules = linked_data["openingHours"]
+        elif rules := linked_data.get("openingHours"):
             if not isinstance(rules, list):
                 rules = re.findall(
                     r"((\w{2,3}|\w{2,3}\s?\-\s?\w{2,3}|(\w{2,3},)+\w{2,3})\s(\d\d:\d\d)\s?\-\s?(\d\d:\d\d))",
@@ -652,29 +786,8 @@ class OpeningHours:
             for rule in rules:
                 if not rule:
                     continue
-                days, time_ranges = rule.split(" ", 1)
 
-                if "-" not in time_ranges:
-                    continue
-
-                for time_range in time_ranges.split(","):
-                    start_time, end_time = time_range.split("-")
-
-                    start_time = start_time.strip()
-                    end_time = end_time.strip()
-
-                    if "-" in days:
-                        start_day, end_day = days.split("-")
-
-                        start_day = sanitise_day(start_day)
-                        end_day = sanitise_day(end_day)
-
-                        for day in day_range(start_day, end_day):
-                            self.add_range(day, start_time, end_time, time_format)
-                    else:
-                        for day in days.split(","):
-                            if d := sanitise_day(day):
-                                self.add_range(d, start_time, end_time, time_format)
+                self._parse_opening_hours(rule, time_format)
 
     @staticmethod
     def delimiters_regex(delimiters: list[str] = DELIMITERS_EN) -> str:

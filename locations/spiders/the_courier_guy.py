@@ -6,6 +6,7 @@ from locations.dict_parser import DictParser
 
 class TheCourierGuySpider(scrapy.Spider):
     name = "the_courier_guy"
+    PUDO = {"brand": "pudo", "brand_wikidata": "Q116753323"}
     item_attributes = {"brand": "The Courier Guy", "brand_wikidata": "Q116753262"}
     allowed_domains = ["wp-admin.thecourierguy.co.za", "ksttcgzafunctionsv2-candidate.azurewebsites.net"]
 
@@ -51,4 +52,5 @@ class TheCourierGuySpider(scrapy.Spider):
             item = DictParser.parse(locker)
             item["postcode"] = locker.get("place", {}).get("postalCode")
             apply_category(Categories.PARCEL_LOCKER, item)
+            item.update(self.PUDO)
             yield item

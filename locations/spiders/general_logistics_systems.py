@@ -2,7 +2,6 @@ import csv
 
 import scrapy
 
-from locations.categories import Categories
 from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.searchable_points import open_searchable_points
@@ -18,7 +17,6 @@ class GeneralLogisticsSystemsSpider(scrapy.Spider):
         "brand": "General Logistics Systems",
         "brand_wikidata": "Q46495823",
         "country": "DE",
-        "extras": Categories.POST_OFFICE.value,
     }
 
     def start_requests(self):

@@ -3,7 +3,6 @@ from scrapy import Spider
 from locations.categories import Categories
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
-from locations.spiders.vapestore_gb import clean_address
 
 
 class TheFoodWarehouseGBSpider(Spider):
@@ -22,9 +21,9 @@ class TheFoodWarehouseGBSpider(Spider):
             if "CLOSED" in item["name"].upper() or "COMING SOON" in item["name"].upper():
                 continue
             item["ref"] = store["storeNo"]
-            item["website"] = "https://www.thefoodwarehouse.com/" + store["url"]
+            item["website"] = "https://www.thefoodwarehouse.com" + store["url"]
             item["phone"] = store.get("store-number")
-            item["addr_full"] = clean_address(
+            item["addr_full"] = (
                 item["addr_full"].replace("<br>", "").replace("<br />", "").replace("<p>", "").replace("</p>", "")
             )
             item["opening_hours"] = OpeningHours()

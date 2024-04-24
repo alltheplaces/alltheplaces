@@ -69,7 +69,7 @@ class TegutDeSpider(scrapy.Spider):
             yield Feature(**properties)
 
     def parse(self, response):
-        stores = response.xpath('//h3[@class="h4 store-title float-left mr-1"]//a/@href').getall()
+        stores = response.xpath('//h2[@class="h3 font-weight-bold store_title"]//a/@href').getall()
         for store in stores:
             yield scrapy.Request(f"https://www.tegut.com{store}", callback=self.parse_data)
 

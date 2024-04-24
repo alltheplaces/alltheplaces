@@ -2,12 +2,13 @@ import geonamescache
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
 
 class EnterpriseSpider(Spider):
     name = "enterprise"
-    item_attributes = {"brand": "Enterprise Rent-A-Car", "brand_wikidata": "Q17085454"}
+    item_attributes = {"brand": "Enterprise", "brand_wikidata": "Q17085454"}
     allowed_domains = ["prd.location.enterprise.com", "int1.location.enterprise.com"]
 
     def start_requests(self):
@@ -32,4 +33,5 @@ class EnterpriseSpider(Spider):
             item["name"] = location["locationNameTranslation"]
             item["street_address"] = ", ".join(filter(None, location["addressLines"]))
             item["phone"] = location["formattedPhone"]
+            apply_category(Categories.CAR_RENTAL, item)
             yield item

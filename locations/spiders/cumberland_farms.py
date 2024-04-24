@@ -31,5 +31,5 @@ class CumberlandFarmsUSSpider(Spider):
 
         if results["pageNumber"] < results["totalPages"]:
             yield JsonRequest(
-                f'https://www.cumberlandfarms.com/api/stores-locator/store-locator-search/results?bannerId=1&pageNumber={response.json()["value"]["listResults"]["pageNumber"]+1}'
+                f'https://www.cumberlandfarms.com/api/stores-locator/store-locator-search/results?bannerId=1&pageNumber={response.json()["value"]["listResults"]["pageNumber"] + 1}'
             )

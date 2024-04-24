@@ -28,7 +28,7 @@ mapping = (
     ("website", "website"),
     ("twitter", "contact:twitter"),
     ("facebook", "contact:facebook"),
-    ("email", "contact:email"),
+    ("email", "email"),
     ("opening_hours", "opening_hours"),
     ("image", "image"),
     ("brand", "brand"),

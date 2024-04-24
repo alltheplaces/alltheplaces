@@ -1,12 +1,13 @@
 import scrapy
 
+from locations.categories import Categories
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_WEEKDAY, OpeningHours
 
 
 class SparZASpider(scrapy.Spider):
     name = "spar_za"
-    item_attributes = {"brand": "SPAR", "brand_wikidata": "Q610492"}
+    item_attributes = {"brand": "SPAR", "brand_wikidata": "Q610492", "extras": Categories.SHOP_SUPERMARKET.value}
     start_urls = []
 
     def start_requests(self):

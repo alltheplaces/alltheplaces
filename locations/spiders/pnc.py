@@ -7,7 +7,7 @@ from locations.geo import point_locations
 
 class PNCSpider(scrapy.Spider):
     name = "pnc"
-    item_attributes = {"brand": "PNC", "brand_wikidata": "Q38928", "country": "US"}
+    item_attributes = {"brand": "PNC Bank", "brand_wikidata": "Q38928", "country": "US"}
     allowed_domains = ["www.pnc.com"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
 

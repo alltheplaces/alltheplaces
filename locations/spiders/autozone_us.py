@@ -17,8 +17,7 @@ class AutoZoneUSSpider(SitemapSpider, StructuredDataSpider):
     user_agent = BROWSER_DEFAULT
 
     def post_process_item(self, item, response, ld_data):
-        item["ref"] = item["name"].split(" #", 1)[1]
-        item["name"] = item["name"].split(" #", 1)[0]
+        item["ref"] = response.url
         item.pop("facebook", None)
         item.pop("twitter", None)
         item.pop("image", None)

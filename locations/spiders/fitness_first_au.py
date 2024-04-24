@@ -1,7 +1,7 @@
 import scrapy
 
 from locations.dict_parser import DictParser
-from locations.spiders.vapestore_gb import clean_address
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class FitnessFirstAUSpider(scrapy.Spider):
@@ -13,7 +13,7 @@ class FitnessFirstAUSpider(scrapy.Spider):
         for gym in response.json()["clubs"]:
             gym.update(gym.pop("address"))
             item = DictParser.parse(gym)
-            item["street_address"] = clean_address([gym.get("street1"), gym.get("street2")])
+            item["street_address"] = merge_address_lines([gym.get("street1"), gym.get("street2")])
             item["website"] = f'https://www.fitnessfirst.com.au{gym["slug"]}'
             if gym["is24Hours"]:
                 item["opening_hours"] = "24/7"

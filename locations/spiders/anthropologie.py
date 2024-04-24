@@ -1,27 +1,22 @@
-from scrapy.spiders import SitemapSpider
+import scrapy
 
-from locations.items import set_closed
-from locations.structured_data_spider import StructuredDataSpider
+from locations.dict_parser import DictParser
+from locations.user_agents import BROWSER_DEFAULT
 
 
-class AnthropologieSpider(SitemapSpider, StructuredDataSpider):
+class AnthropologieSpider(scrapy.Spider):
     name = "anthropologie"
     item_attributes = {"brand": "Anthropologie", "brand_wikidata": "Q4773903"}
-    allowed_domains = ["anthropologie.com"]
-    sitemap_urls = ["https://www.anthropologie.com/store_sitemap.xml"]
-    sitemap_rules = [("/stores/", "parse_sd")]
-    requires_proxy = True
+    start_urls = [
+        "https://www.anthropologie.com/api/misl/v1/stores/search?brandId=54%7C04",
+    ]
+    custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT}
 
-    def pre_process_data(self, ld_data, **kwargs):
-        ld_data["geo"]["latitude"], ld_data["geo"]["longitude"] = (
-            ld_data["geo"]["longitude"],
-            ld_data["geo"]["latitude"],
-        )
-
-    def post_process_item(self, item, response, ld_data, **kwargs):
-        item["branch"] = item.pop("name").removeprefix(" - Anthropologie Store")
-
-        if item["branch"].startswith("Closed - ") or item["branch"].endswith(" - Closed"):
-            set_closed(item)
-
-        yield item
+    def parse(self, response, **kwargs):
+        for store in response.json()["results"]:
+            item = DictParser.parse(store)
+            item["name"] = store.get("addresses").get("marketing").get("name") + "- Anthropologie Store"
+            item["lon"], item["lat"] = store.get("loc")[0], store.get("loc")[1]
+            if address2 := store.get("addressLineTwo"):
+                item["addr_full"] = ",".join([item["street_address"], address2])
+            yield item

@@ -3,7 +3,7 @@ from scrapy.http import JsonRequest
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours, day_range, sanitise_day
-from locations.spiders.vapestore_gb import clean_address
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class AndPizzaSpider(Spider):
@@ -40,7 +40,7 @@ class AndPizzaSpider(Spider):
         for location in response.json()["data"]:
             location.update(location.pop("location"))
             item = DictParser.parse(location)
-            item["street_address"] = clean_address([location["address1"], location["address2"]])
+            item["street_address"] = merge_address_lines([location["address1"], location["address2"]])
 
             item["opening_hours"] = self.parse_hours(location["service_schedule"]["general"])
 

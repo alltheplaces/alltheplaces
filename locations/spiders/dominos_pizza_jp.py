@@ -9,7 +9,6 @@ from locations.user_agents import BROWSER_DEFAULT
 class DominosPizzaJPSpider(scrapy.Spider):
     name = "dominos_pizza_jp"
     item_attributes = {
-        "brand": "Domino's",
         "brand_wikidata": "Q839466",
         "country": "JP",
     }
