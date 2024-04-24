@@ -38,7 +38,10 @@ class MallMaverickSpider(Spider):
             item["website"] = location["url"]
 
             for social_media in location["social_links"]:
-                if service := SOCIAL_MEDIA_MAP.get(social_media["social_type"].lower()):
+                # Handle the case where the value in social_type is set to null
+                social_media_lower = (social_media.get("social_type") or "").lower()
+
+                if service := SOCIAL_MEDIA_MAP.get(social_media_lower):
                     add_social_media(item, service, social_media["url"])
 
             apply_category(Categories.SHOP_MALL, item)
