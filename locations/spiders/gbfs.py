@@ -1,7 +1,6 @@
 from scrapy.http import JsonRequest
 from scrapy.spiders import CSVFeedSpider
 
-from locations.categories import apply_yes_no
 from locations.dict_parser import DictParser
 
 # General Bikeshare Feed Specification
@@ -59,7 +58,7 @@ class GBFSSpider(CSVFeedSpider):
             # but until then, we can do a white lie and call it public transit
             item["extras"]["public_transport"] = "stop_position"
 
-            if station.get('is_virtual_station'):
-                item['extras']['physically_present'] = 'no'
+            if station.get("is_virtual_station"):
+                item["extras"]["physically_present"] = "no"
 
             yield item
