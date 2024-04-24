@@ -23,11 +23,15 @@ class ZambreroAUSpider(Spider):
 
     def parse_location(self, response):
         properties = {
-            "ref": response.xpath('//@data-location-id').get(),
-            "name": re.sub(r"\s+", " ", response.xpath('//div[@data-location-id]/h4/text()').get()).strip(),
-            "lat": response.xpath('//@data-lat').get(),
-            "lon": response.xpath('///@data-lng').get(),
-            "addr_full": re.sub("\s+", " ", " ".join(response.xpath('//div[@data-location-id]//span[contains(@class, "address")]/text()').getall())).strip(),
+            "ref": response.xpath("//@data-location-id").get(),
+            "name": re.sub(r"\s+", " ", response.xpath("//div[@data-location-id]/h4/text()").get()).strip(),
+            "lat": response.xpath("//@data-lat").get(),
+            "lon": response.xpath("///@data-lng").get(),
+            "addr_full": re.sub(
+                "\s+",
+                " ",
+                " ".join(response.xpath('//div[@data-location-id]//span[contains(@class, "address")]/text()').getall()),
+            ).strip(),
             "phone": response.xpath('//a[contains(@class, "phone")]/@href').get().replace("tel:", ""),
             "email": response.xpath('//a[contains(@href, "mailto:")]/@href').get().replace("mailto:", ""),
             "website": response.url,
@@ -38,7 +42,9 @@ class ZambreroAUSpider(Spider):
         if properties["phone"] == "0":
             properties.pop("phone")
 
-        hours_text = re.sub(r"\s+", " ", " ".join(response.xpath('//div[contains(@class, "hours-item")]/span/text()').getall()))
+        hours_text = re.sub(
+            r"\s+", " ", " ".join(response.xpath('//div[contains(@class, "hours-item")]/span/text()').getall())
+        )
         properties["opening_hours"].add_ranges_from_string(hours_text)
 
         # Some store names and URLs contain "Opening Soon" but numerous of
