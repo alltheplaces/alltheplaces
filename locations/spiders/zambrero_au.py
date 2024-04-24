@@ -28,7 +28,7 @@ class ZambreroAUSpider(Spider):
             "lat": response.xpath("//@data-lat").get(),
             "lon": response.xpath("///@data-lng").get(),
             "addr_full": re.sub(
-                "\s+",
+                r"\s+",
                 " ",
                 " ".join(response.xpath('//div[@data-location-id]//span[contains(@class, "address")]/text()').getall()),
             ).strip(),
