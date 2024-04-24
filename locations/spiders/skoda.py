@@ -5,7 +5,7 @@ from locations.items import Feature
 
 class SkodaSpider(scrapy.Spider):
     name = "skoda"
-    item_attributes = {"brand": "Skoda", "brand_wikidata": "Q29637"}
+    item_attributes = {"brand": "Škoda", "brand_wikidata": "Q29637"}
 
     available_countries = {
         260: "CZ",

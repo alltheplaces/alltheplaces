@@ -11,6 +11,7 @@ class TccUSSpider(SitemapSpider, StructuredDataSpider):
         "operator": "The Cellular Connection",
         "operator_wikidata": "Q121336519",
     }
+    drop_attributes = {"image"}
     sitemap_urls = ["https://locations.tccrocks.com/sitemap.xml"]
     sitemap_rules = [(r"https://locations.tccrocks.com/\w\w/.+/.+\.html", "parse_sd")]
     wanted_types = ["MobilePhoneStore"]

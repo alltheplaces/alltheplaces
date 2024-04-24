@@ -1,3 +1,4 @@
+import logging
 import re
 import time
 from collections import defaultdict
@@ -603,6 +604,8 @@ DELIMITERS_PL = [
 
 DELIMITERS_RU = DELIMITERS_EN + ["с", "по", "до", "в", "во"]
 
+logger = logging.getLogger(__name__)
+
 
 def day_range(start_day, end_day):
     start_ix = DAYS.index(sanitise_day(start_day))
@@ -702,27 +705,77 @@ class OpeningHours:
 
         return opening_hours
 
+    # Parses an openingHoursSpecification dict
+    # IE:
+    # {
+    #  "@type": "OpeningHoursSpecification",
+    #  "closes":  "17:00:00",
+    #  "dayOfWeek": "https://schema.org/Sunday",
+    #  "opens":  "09:00:00"
+    # }
+    # See https://schema.org/OpeningHoursSpecification for further examples.
+    def _parse_opening_hours_specification(self, rule: dict, time_format: str):
+        if not rule.get("dayOfWeek") or not rule.get("opens") or not rule.get("closes"):
+            return
+
+        days = rule["dayOfWeek"]
+        if not isinstance(days, list):
+            days = [days]
+
+        for day in days:
+            self.add_range(
+                day=day.strip(),
+                open_time=rule["opens"].strip(),
+                close_time=rule["closes"].strip(),
+                time_format=time_format,
+            )
+
+    # Parse an individual https://schema.org/openingHours property value such as
+    # "Mo,Tu,We,Th 09:00-12:00"
+    # "Mo-Fr 10:00-19:00"
+    def _parse_opening_hours(self, rule: str, time_format: str):
+        days, time_ranges = rule.split(" ", 1)
+
+        if "-" not in time_ranges:
+            return
+
+        for time_range in time_ranges.split(","):
+            start_time, end_time = time_range.split("-")
+
+            start_time = start_time.strip()
+            end_time = end_time.strip()
+
+            if "-" in days:
+                start_day, end_day = days.split("-")
+
+                start_day = sanitise_day(start_day)
+                end_day = sanitise_day(end_day)
+
+                for day in day_range(start_day, end_day):
+                    self.add_range(day, start_time, end_time, time_format)
+            else:
+                for day in days.split(","):
+                    if d := sanitise_day(day):
+                        self.add_range(d, start_time, end_time, time_format)
+
     def from_linked_data(self, linked_data, time_format: str = "%H:%M"):
-        if linked_data.get("openingHoursSpecification"):
-            for rule in linked_data["openingHoursSpecification"]:
-                if not isinstance(rule, dict):
-                    continue
-                if not rule.get("dayOfWeek") or not rule.get("opens") or not rule.get("closes"):
-                    continue
+        """
+        Deprecated, please use LinkedDataParser.parse_opening_hours
+        """
+        # TODO: move to LinkedDataParser
+        if spec := linked_data.get("openingHoursSpecification"):
+            if isinstance(spec, list):
+                for rule in linked_data["openingHoursSpecification"]:
+                    if not isinstance(rule, dict):
+                        continue
+                    self._parse_opening_hours_specification(rule, time_format)
+            elif isinstance(spec, dict):
+                self._parse_opening_hours_specification(spec, time_format)
+            else:
+                logger.info("Unknown openingHoursSpecification structure, ignoring")
+                logger.debug(linked_data.get("openingHoursSpecification"))
 
-                days = rule["dayOfWeek"]
-                if not isinstance(days, list):
-                    days = [days]
-
-                for day in days:
-                    self.add_range(
-                        day=day,
-                        open_time=rule["opens"],
-                        close_time=rule["closes"],
-                        time_format=time_format,
-                    )
-        elif linked_data.get("openingHours"):
-            rules = linked_data["openingHours"]
+        elif rules := linked_data.get("openingHours"):
             if not isinstance(rules, list):
                 rules = re.findall(
                     r"((\w{2,3}|\w{2,3}\s?\-\s?\w{2,3}|(\w{2,3},)+\w{2,3})\s(\d\d:\d\d)\s?\-\s?(\d\d:\d\d))",
@@ -733,29 +786,8 @@ class OpeningHours:
             for rule in rules:
                 if not rule:
                     continue
-                days, time_ranges = rule.split(" ", 1)
 
-                if "-" not in time_ranges:
-                    continue
-
-                for time_range in time_ranges.split(","):
-                    start_time, end_time = time_range.split("-")
-
-                    start_time = start_time.strip()
-                    end_time = end_time.strip()
-
-                    if "-" in days:
-                        start_day, end_day = days.split("-")
-
-                        start_day = sanitise_day(start_day)
-                        end_day = sanitise_day(end_day)
-
-                        for day in day_range(start_day, end_day):
-                            self.add_range(day, start_time, end_time, time_format)
-                    else:
-                        for day in days.split(","):
-                            if d := sanitise_day(day):
-                                self.add_range(d, start_time, end_time, time_format)
+                self._parse_opening_hours(rule, time_format)
 
     @staticmethod
     def delimiters_regex(delimiters: list[str] = DELIMITERS_EN) -> str:

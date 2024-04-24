@@ -8,14 +8,14 @@ from locations.structured_data_spider import StructuredDataSpider
 BRAND_MAPPING = {
     "Bankomat (Euronet)": ("Euronet", "Q5412010"),
     "Bankomat (Planet Cash)": ("Planet Cash", "Q117744569"),
-    "Bankomat bezprowizyjny w placówce CA BP": ("Credit Agricole", "Q590952"),
-    "Bankomat bezprowizyjny": ("Credit Agricole", "Q590952"),
+    "Bankomat bezprowizyjny w placówce CA BP": ("Crédit Agricole", "Q590952"),
+    "Bankomat bezprowizyjny": ("Crédit Agricole", "Q590952"),
 }
 
 
 class CreditAgricolePLSpider(SitemapSpider, StructuredDataSpider):
     name = "credit_agricole_pl"
-    item_attributes = {"brand": "Credit Agricole", "brand_wikidata": "Q590952"}
+    item_attributes = {"brand": "Crédit Agricole", "brand_wikidata": "Q590952"}
     sitemap_urls = ["https://www.credit-agricole.pl/sitemap.xml"]
     wanted_types = ["FinancialService"]
     sitemap_rules = [(r"/oddzial/[\d]+", "parse_sd"), (r"/bankomat/[\d]+", "parse_atm")]

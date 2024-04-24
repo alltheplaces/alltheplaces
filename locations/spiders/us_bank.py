@@ -11,7 +11,7 @@ class UsBankSpider(SitemapSpider):
     name = "us_bank"
     download_delay = 0.5
     concurrent_requests = 3
-    item_attributes = {"brand": "US Bank", "brand_wikidata": "Q739084"}
+    item_attributes = {"brand": "U.S. Bank", "brand_wikidata": "Q739084"}
     allowed_domains = ["usbank.com"]
     sitemap_urls = [
         "https://www.usbank.com/locations/sitemap.xml",

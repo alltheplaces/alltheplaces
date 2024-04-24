@@ -7,7 +7,7 @@ from locations.items import Feature
 
 class BPPulseGBSpider(Spider):
     name = "bp_pulse_gb"
-    item_attributes = {"brand": "bp pulse", "brand_wikidata": "Q39057719"}
+    item_attributes = {"brand_wikidata": "Q39057719"}
 
     @staticmethod
     def make_request(page: int) -> JsonRequest:

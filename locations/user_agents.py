@@ -5,6 +5,7 @@ FIREFOX_124 = "Mozilla/5.0 (X11; Linux x86_64; rv:124.0) Gecko/20100101 Firefox/
 FIREFOX_LATEST = FIREFOX_124
 
 CHROME_120 = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-CHROME_LATEST = CHROME_120
+CHROME_123 = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36"
+CHROME_LATEST = CHROME_123
 
 BROWSER_DEFAULT = FIREFOX_ESR_LATEST

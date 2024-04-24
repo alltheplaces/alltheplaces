@@ -17,6 +17,8 @@ class JohnstonesDecoratingCentreSpider(SitemapSpider):
     sitemap_rules = [(r"/(united-kingdom-region|republic-of-ireland-region)-[-\w]+\d+$", "parse")]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
+        if "https://www.johnstonesdc.com/stores" in response.url:
+            return
         store_locator = response.xpath("//section[contains(@class, 'store-locator')]")
         address = store_locator.xpath(".//div[contains(@class, 'card-address')]/div/div/div/text()").getall()
         hours = store_locator.xpath(

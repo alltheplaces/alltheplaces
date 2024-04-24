@@ -41,8 +41,8 @@ class BcpizzaSpider(CrawlSpider):
         days = response.xpath('//table[contains(@class, "op-table")]//tr')
         oh = OpeningHours()
         for i, day in enumerate(days):
-            dd = day.xpath(f"//tr[{i+1}]//th/text()").get()
-            hh = day.xpath(f"//tr[{i+1}]//span/text()").get()
+            dd = day.xpath(f"//tr[{i + 1}]//th/text()").get()
+            hh = day.xpath(f"//tr[{i + 1}]//span/text()").get()
             if hh == "Closed":
                 continue
             open_time, close_time = hh.split(" – ")

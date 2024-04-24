@@ -41,7 +41,7 @@ phases:
 
           echo "Caching pipenv environment to $REMOTE_CACHE_LOCATION"
           tar -czf "${CACHE_FILE_NAME}" "${PYTHON_INSTALL_LOCATION}"
-          aws s3 --only-show-errors cp ${PIPENV_HASH}.tar.gz $REMOTE_CACHE_LOCATION
+          aws s3 --only-show-errors cp "${CACHE_FILE_NAME}" "${REMOTE_CACHE_LOCATION}"
         fi
   build:
     commands:
@@ -106,8 +106,9 @@ phases:
 
             LOGFILE="${SPIDER_RUN_DIR}/log.txt"
             OUTFILE="${SPIDER_RUN_DIR}/output.geojson"
+            FAILURE_REASON="success"
 
-            timeout -k 5s 75s \
+            timeout -k 5s 90s \
             scrapy runspider \
                 -o "file://${OUTFILE}:geojson" \
                 --loglevel=INFO \
@@ -117,7 +118,6 @@ phases:
                 -s LOGSTATS_FILE=${SPIDER_RUN_DIR}/stats.json \
                 $spider
 
-            FAILURE_REASON="success"
             if [ ! $? -eq 0 ]; then
                 (>&2 echo "${spider} hit shell timeout")
                 EXIT_CODE=1

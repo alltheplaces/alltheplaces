@@ -12,10 +12,10 @@ class TacoCabanaUSSpider(Spider):
 
     def parse(self, response):
         js_blob = response.xpath('//script[contains(text(), "var locations_meta = [")]/text()').get()
-        js_blob = "[" + js_blob.split("var locations_meta = [", 1)[1].split("}]", 1)[0] + "}]"
         for location in parse_js_object(js_blob):
             item = DictParser.parse(location["map_pin"])
+            item["name"] = item["street"] = None
+            item["website"] = location["order_now_link"]
             item["ref"] = location["store_id_number"]
-            item["addr_full"] = location["map_pin"]["address"]
             item["phone"] = location["store_phone_number"]
             yield item

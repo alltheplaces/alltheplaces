@@ -6,6 +6,7 @@ from locations.structured_data_spider import StructuredDataSpider
 class AldiSudUSSpider(SitemapSpider, StructuredDataSpider):
     name = "aldi_sud_us"
     item_attributes = {"brand": "ALDI", "brand_wikidata": "Q41171672", "country": "US"}
+    drop_attributes = {"image"}
     allowed_domains = ["stores.aldi.us"]
     sitemap_urls = ["https://stores.aldi.us/robots.txt"]
     sitemap_rules = [
