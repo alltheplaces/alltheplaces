@@ -4,8 +4,9 @@ from scrapy import Request, Spider
 
 from locations.categories import Categories, apply_category
 from locations.google_url import extract_google_position
+from locations.hours import DAYS_EN, OpeningHours
 from locations.items import Feature
-from locations.spiders.vapestore_gb import clean_address
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 # TODO: if ever the project was to gain the concept of a secondary observation then it
@@ -39,7 +40,6 @@ def ignore(item):
 
 class NHSScotlandGBSpider(Spider):
     name = "nhs_scotland_gb"
-    item_attributes = {"brand": "NHS Scotland", "brand_wikidata": "Q16933548"}
     services = {
         "dental-services": Categories.DENTIST,
         "aes-and-minor-injuries-units": Categories.CLINIC_URGENT,
@@ -70,12 +70,26 @@ class NHSScotlandGBSpider(Spider):
         item = Feature()
         extract_google_position(item, response)
         apply_category(self.services.get(service), item)
-        item["name"] = response.xpath('//input[@id="ServiceName"]/@value').get().strip()
+        item["name"] = (response.xpath('//input[@id="ServiceName"]/@value').get() or "").strip()
+        item["addr_full"] = merge_address_lines(response.xpath("//address/text()").getall())
         item["website"] = item["ref"] = response.url
-        item["postcode"] = response.xpath('//input[@id="ServicePostcode"]/@value').get().strip()
-        # TODO opening_hours = response.xpath('//div[@class="panel-times"]//dd').getall()
-        item["addr_full"] = clean_address(response.xpath("//address/text()").getall())
         if external_url := response.xpath('//a[@class="external"]/@href').get():
             item["website"] = external_url
+
+        item["opening_hours"] = OpeningHours()
+        for day, times in zip(
+            response.xpath('//div[@class="panel-times"]/dl/dt/text()').getall(),
+            response.xpath('//div[@class="panel-times"]/dl/dd/text()').getall(),
+        ):
+            day = day.strip()
+            if day not in DAYS_EN:
+                continue
+            times = times.strip()
+            if times == "Closed":
+                continue
+            if times == "24 hours":
+                times = "00:00 - 24:00"
+            item["opening_hours"].add_range(day, *times.split(" - "))
+
         if not ignore(item):
             yield item

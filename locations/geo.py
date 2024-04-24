@@ -2,6 +2,8 @@ import csv
 import gzip
 import json
 import math
+from itertools import groupby
+from typing import Iterable
 
 import geonamescache
 
@@ -13,7 +15,7 @@ EARTH_RADIUS = 6378.1
 MILES_TO_KILOMETERS = 1.60934
 
 
-def vincenty_distance(lat, lon, distance_km, bearing_deg):
+def vincenty_distance(lat: float, lon: float, distance_km: float, bearing_deg: float) -> tuple[float, float]:
     """
     Returns a (lat, lon) tuple starting at lat, lon and traveling distance_km kilometers
     along a path bearing_deg degrees.
@@ -36,7 +38,7 @@ def vincenty_distance(lat, lon, distance_km, bearing_deg):
     return math.degrees(lat2), math.degrees(lon2)
 
 
-def point_locations(areas_csv_file, area_field_filter=None):
+def point_locations(areas_csv_file: str, area_field_filter: list[str] = None) -> Iterable[tuple[float, float]]:
     """
     Get point locations from requested *_centroids_*.csv file.
 
@@ -63,19 +65,28 @@ def point_locations(areas_csv_file, area_field_filter=None):
     for csv_file in areas_csv_file:
         with open_searchable_points("{}".format(csv_file)) as file:
             for row in csv.DictReader(file):
-                lat, lon = row["latitude"], row["longitude"]
-                if not lat or not lon:
-                    raise Exception("missing lat/lon in file")
+                try:
+                    lat, lon = float(row["latitude"]), float(row["longitude"])
+                except ValueError:
+                    raise Exception(
+                        "Invalid latitude/longitude in searchable points file {} where latitude = {} and longitude = {}.".format(
+                            csv_file, row["latitude"], row["longitude"]
+                        )
+                    )
                 area = get_key(row, ["country", "territory", "state"])
                 if area_field_filter:
                     if not area:
-                        raise Exception("trying to perform area filter on file with no area support")
+                        raise Exception(
+                            "Searchable points file {} does not support area field filters (columns named 'country', 'territory' and 'state').".format(
+                                csv_file
+                            )
+                        )
                     if area not in area_field_filter:
                         continue
                 yield lat, lon
 
 
-def city_locations(country_code, min_population=0):
+def city_locations(country_code: str, min_population: int = 0) -> Iterable[dict]:
     """
     Sometimes useful to iterate cities in a country. This method is backed by the GeoNames database.
 
@@ -88,7 +99,7 @@ def city_locations(country_code, min_population=0):
             yield city
 
 
-def postal_regions(country_code):
+def postal_regions(country_code: str, min_population: int = 0, consolidate_cities: bool = False) -> Iterable[dict]:
     """
     Sometimes useful to iterate postal regions in a country as they are usually
      allocated by population density. The granularity varies by country. In the US
@@ -99,6 +110,12 @@ def postal_regions(country_code):
      where the backing dataset supports it.
 
     :param country_code: ISO 2-alpha country code to query
+    :param min_population: if source data permits, only return
+           postcodes above a minimum population size, default is 0
+    :param consolidate_cities: if source data permits, consolidate
+           multiple postcodes in the same city together and where
+           possible the largest postcode by population is returned,
+           defaults to False
     :return: post code regions with possible extras
     """
     if country_code == "GB":
@@ -123,14 +140,30 @@ def postal_regions(country_code):
         # The backlink must be placed before the Customer uses the Database in production.
         #
         with gzip.open(get_searchable_points_path("postcodes/uszips.csv.gz"), mode="rt") as points:
-            for row in csv.DictReader(points):
-                yield {
-                    "postal_region": row["zip"],
-                    "city": row["city"],
-                    "state": row["state_id"],
-                    "latitude": row["lat"],
-                    "longitude": row["lng"],
+
+            def create_postcode_output_dict(postcode: dict) -> dict:
+                return {
+                    "postal_region": postcode["zip"],
+                    "city": postcode["city"],
+                    "state": postcode["state_id"],
+                    "latitude": postcode["lat"],
+                    "longitude": postcode["lng"],
                 }
+
+            postcode_data = filter(
+                lambda x: not (x["population"].isnumeric() and int(x["population"]) < min_population),
+                csv.DictReader(points),
+            )
+            if consolidate_cities:
+                postcode_data = sorted(postcode_data, key=lambda x: (x["state_name"], x["county_name"], x["city"]))
+                for city, postcodes_in_city in groupby(
+                    postcode_data, lambda x: (x["state_name"], x["county_name"], x["city"])
+                ):
+                    largest_postcode = max(list(postcodes_in_city), key=lambda x: x["population"])
+                    yield create_postcode_output_dict(largest_postcode)
+            else:
+                for postcode in postcode_data:
+                    yield create_postcode_output_dict(postcode)
 
     elif country_code == "FR":
         # French postal code database from https://datanova.legroupe.laposte.fr
@@ -146,7 +179,9 @@ def postal_regions(country_code):
         raise Exception("country code not supported: " + country_code)
 
 
-def make_subdivisions(bounds, num_tiles=4):
+def make_subdivisions(
+    bounds: tuple[float, float, float, float], num_tiles: int = 4
+) -> list[tuple[float, float, float, float]]:
     """
     Divide the given bounds into num_tiles*num_tiles equal subdivisions.
 
@@ -178,7 +213,7 @@ def make_subdivisions(bounds, num_tiles=4):
     return tiles
 
 
-def bbox_contains(bounds, point):
+def bbox_contains(bounds: tuple[float, float, float, float], point: tuple[float, float]) -> bool:
     """
     Returns true if the lat/lon point is contained in the given lat/lon bounding box.
 
@@ -195,7 +230,7 @@ def bbox_contains(bounds, point):
     return False
 
 
-def bbox_to_geojson(bounds):
+def bbox_to_geojson(bounds: tuple[float, float]) -> dict:
     """
     Convert a bounding box tuple into a Polygon GeoJSON geometry dict. Useful for debugging.
 
@@ -211,7 +246,7 @@ def bbox_to_geojson(bounds):
     return polygon
 
 
-def country_coordinates(return_lookup=False):
+def country_coordinates(return_lookup: bool = False) -> dict:
     """
     Return a list of records with ISO 3166-2 alpha-2 country codes and
     coordinates approximating a centroid of the largest landmass

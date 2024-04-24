@@ -1,13 +1,12 @@
-import re
-
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
+from locations.categories import Categories
 from locations.structured_data_spider import StructuredDataSpider
 
 
 class MyDentistGBSpider(CrawlSpider, StructuredDataSpider):
-    MYDENTIST = {"brand": "My Dentist", "brand_wikidata": "Q65118035"}
+    MYDENTIST = {"brand": "My Dentist", "brand_wikidata": "Q65118035", "extras": Categories.DENTIST.value}
 
     name = "mydentist_gb"
     allowed_domains = ["mydentist.co.uk"]
@@ -28,8 +27,8 @@ class MyDentistGBSpider(CrawlSpider, StructuredDataSpider):
     wanted_types = ["LocalBusiness"]
 
     def inspect_item(self, item, response):
-        item["lat"] = re.search(r"\"_readModeLat\":(-?[\d.]+),", response.text).group(1)
-        item["lon"] = re.search(r"\"_readModeLon\":(-?[\d.]+),", response.text).group(1)
+        item["lat"] = response.xpath('//input[@name="Latitude"]/@value').get()
+        item["lon"] = response.xpath('//input[@name="Longitude"]/@value').get()
 
         # City can come back as eg ["Penistone", "Sheffield"] - put the locality on the end of street address
         if "city" in item and isinstance(item["city"], list):
@@ -41,5 +40,8 @@ class MyDentistGBSpider(CrawlSpider, StructuredDataSpider):
         ):
             item.update(self.MYDENTIST)
             item["name"] = "{my}dentist"
+
+        if isinstance(item.get("email"), list):
+            item["email"] = ", ".join(item["email"])
 
         yield item

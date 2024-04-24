@@ -12,6 +12,7 @@ class DairyQueenUSSpider(Spider):
     allowed_domains = ["prod-dairyqueen.dotcmscloud.com"]
     start_urls = ["https://prod-dairyqueen.dotcmscloud.com/api/es/search"]
     custom_settings = {"ROBOTSTXT_OBEY": False}  # Missing robots.txt
+    item_attributes = {"nsi_id": "N/A"}
     brands = {
         "Food and Treat": {
             "brand": "DQ Grill & Chill",
@@ -40,7 +41,8 @@ class DairyQueenUSSpider(Spider):
                 item["brand_wikidata"] = self.brands[location["conceptType"]]["brand_wikidata"]
                 for tag_key, tag_value in self.brands[location["conceptType"]]["extras"].items():
                     apply_category({tag_key: tag_value}, item)
-            item["name"] = re.sub(r"^\d+ : ", "", item["name"])
+            item["branch"] = re.sub(r"^\d+ : ", "", item["name"])
+            item["name"] = item["brand"]
             item["street_address"] = location.get("address3")
             item["website"] = "https://www.dairyqueen.com" + location.get("urlTitle")
             yield item

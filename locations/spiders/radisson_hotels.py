@@ -4,6 +4,7 @@ from typing import List
 
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.user_agents import BROWSER_DEFAULT
 
@@ -64,4 +65,5 @@ class RadissonHotelsSpider(scrapy.Spider):
                 item["lat"] = coordinates.get("latitude", None)
                 item["lon"] = coordinates.get("longitude", None)
             item["street_address"] = hotel.get("address", None)
+            apply_category(Categories.HOTEL, item)
             yield item

@@ -14,8 +14,8 @@ class GroszekPLSpider(Spider):
             item = DictParser.parse(feature)
             item["ref"] = feature["idCRM"]
             item["housenumber"] = feature["number"]
-            if feature["format"] == "Supermarket":
-                apply_category(Categories.SHOP_SUPERMARKET, item)
             if feature["format"] in ["Market", "Minimarket"]:
                 apply_category(Categories.SHOP_CONVENIENCE, item)
+            else:
+                apply_category(Categories.SHOP_SUPERMARKET, item)
             yield item

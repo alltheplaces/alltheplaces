@@ -1,5 +1,6 @@
 import re
 
+from locations.categories import Categories, apply_category
 from locations.storefinders.storelocatorwidgets import StoreLocatorWidgetsSpider
 
 
@@ -12,4 +13,5 @@ class BlackRoosterPeriPeriGBSpider(StoreLocatorWidgetsSpider):
         item["name"] = item["name"].strip()
         item["addr_full"] = re.sub(r"\s+", " ", item["addr_full"])
         item.pop("website")
+        apply_category(Categories.FAST_FOOD, item)
         yield item

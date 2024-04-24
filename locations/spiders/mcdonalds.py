@@ -8,9 +8,12 @@ from locations.hours import DAYS_FULL, OpeningHours
 
 class McDonaldsSpider(scrapy.Spider):
     name = "mcdonalds"
-    item_attributes = {"brand": "McDonald's", "brand_wikidata": "Q38076", "extras": Categories.FAST_FOOD.value}
+    item_attributes = {
+        "brand": "McDonald's",
+        "brand_wikidata": "Q38076",
+        "extras": Categories.FAST_FOOD.value,
+    }
     allowed_domains = ["www.mcdonalds.com"]
-    download_delay = 0.5
 
     def start_requests(self):
         template = "https://www.mcdonalds.com/googleappsv2/geolocation?latitude={}&longitude={}&radius=50&maxResults=250&country={}&language={}&showClosed="

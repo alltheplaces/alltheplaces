@@ -3,13 +3,14 @@ import re
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
+from locations.categories import Categories
 from locations.hours import OpeningHours
 from locations.items import Feature
 
 
 class HyVeeUSSpider(CrawlSpider):
     name = "hy_vee_us"
-    item_attributes = {"brand": "Hy-Vee", "brand_wikidata": "Q1639719"}
+    item_attributes = {"brand": "Hy-Vee", "brand_wikidata": "Q1639719", "extras": Categories.SHOP_SUPERMARKET.value}
     allowed_domains = ["www.hy-vee.com"]
     start_urls = ["https://www.hy-vee.com/aisles-online/stores"]
     rules = [Rule(LinkExtractor(allow=r"^https:\/\/www\.hy-vee\.com\/stores\/detail\.aspx\?sc=\d+$"), callback="parse")]

@@ -1,5 +1,6 @@
 from scrapy.spiders import SitemapSpider
 
+from locations.categories import Categories, apply_category, apply_yes_no
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -22,4 +23,6 @@ class BridgestoneSelectSpider(SitemapSpider, StructuredDataSpider):
         item.pop("facebook", None)
         if "generic-" in item.get("image", ""):
             item.pop("image", None)
+        apply_category(Categories.SHOP_TYRES, item)
+        apply_yes_no("repair", item, True)
         yield item

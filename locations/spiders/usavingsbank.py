@@ -1,5 +1,6 @@
 from scrapy.spiders import SitemapSpider
 
+from locations.categories import Categories
 from locations.google_url import extract_google_position
 from locations.hours import OpeningHours
 from locations.items import Feature
@@ -7,7 +8,7 @@ from locations.items import Feature
 
 class UnionSavingsBankSpider(SitemapSpider):
     name = "usavingsbank"
-    item_attributes = {"brand": "Union Savings Bank", "brand_wikidata": "Q69206498"}
+    item_attributes = {"brand": "Union Savings Bank", "brand_wikidata": "Q69206498", "extras": Categories.BANK.value}
     allowed_domains = ["usavingsbank.com"]
     sitemap_urls = ["https://usavingsbank.com/branches-sitemap.xml"]
 

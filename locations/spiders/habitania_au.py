@@ -1,3 +1,4 @@
+from locations.categories import Categories, apply_category
 from locations.storefinders.metizsoft import MetizsoftSpider
 
 
@@ -8,4 +9,5 @@ class HabitaniaAUSpider(MetizsoftSpider):
 
     def parse_item(self, item, location):
         item.pop("website")
+        apply_category(Categories.SHOP_HOUSEWARE, item)
         yield item

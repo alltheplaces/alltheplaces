@@ -3,13 +3,14 @@ from datetime import datetime
 
 import scrapy
 
+from locations.categories import Categories
 from locations.hours import DAYS_3_LETTERS_FROM_SUNDAY, OpeningHours
 from locations.items import Feature
 
 
 class WhidbeyCoffeeSpider(scrapy.Spider):
     name = "whidbeycoffee"
-    item_attributes = {"brand": "Whidbey Coffee"}
+    item_attributes = {"brand": "Whidbey Coffee", "extras": Categories.COFFEE_SHOP.value}
     allowed_domains = ["www.whidbeycoffee.com"]
     start_urls = ("https://www.whidbeycoffee.com/sitemap_pages_1.xml",)
 

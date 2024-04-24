@@ -5,7 +5,7 @@ from locations.items import Feature
 
 class AureconGroupSpider(scrapy.Spider):
     name = "aurecongroup"
-    item_attributes = {"brand": "Aurecon", "brand_wikidata": "Q2871849"}
+    item_attributes = {"brand": "Aurecon", "brand_wikidata": "Q2871849", "extras": {"office": "construction_company"}}
     allowed_domains = ["www.aurecon.com"]
     download_delay = 0.1
     start_urls = ("https://www.aurecongroup.com/locations",)

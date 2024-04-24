@@ -5,7 +5,7 @@ from locations.items import Feature
 
 class TherapieClinicSpider(scrapy.Spider):
     name = "therapie_clinic"
-    item_attributes = {"brand": "Thérapie Clinic"}
+    item_attributes = {"brand": "Thérapie Clinic", "brand_wikidata": "Q123034602"}
     allowed_domains = ["www.therapieclinic.com"]
     start_urls = ["https://www.therapieclinic.com/our-clinics/"]
 

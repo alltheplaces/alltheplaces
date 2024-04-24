@@ -32,6 +32,12 @@ def test_postal_regions():
     assert 2000 < uk_codes < 3000
     us_codes = len(list(postal_regions("US")))
     assert 33000 < us_codes < 34000
+    us_codes = len(list(postal_regions("US", min_population=20000)))
+    assert 6000 < us_codes < 6500
+    us_codes = len(list(postal_regions("US", consolidate_cities=True)))
+    assert 28000 < us_codes < 29000
+    us_codes = len(list(postal_regions("US", min_population=20000, consolidate_cities=True)))
+    assert 3000 < us_codes < 3500
 
 
 def test_make_subdivisions():

@@ -2,7 +2,7 @@ import json
 
 import scrapy
 
-from locations.categories import Categories, apply_category
+from locations.categories import Categories, apply_category, apply_yes_no
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 
@@ -44,8 +44,10 @@ class HandelsbankenSESpider(scrapy.Spider):
                 "lon": store.get("location").get("lng"),
                 "opening_hours": oh,
             }
-            if location_type == "ATM":
+            if location_type in ["ATM", "CRS"]:
                 apply_category(Categories.ATM, properties)
+                if location_type == "CRS":
+                    apply_yes_no("cash_out", properties, True)
             elif location_type == "Branch":
                 apply_category(Categories.BANK, properties)
             yield Feature(**properties)

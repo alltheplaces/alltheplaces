@@ -8,7 +8,7 @@ from locations.structured_data_spider import StructuredDataSpider
 
 class CreditAgricoleSpider(SitemapSpider, StructuredDataSpider):
     name = "credit_agricole"
-    item_attributes = {"brand": "Credit Agricole", "brand_wikidata": "Q590952", "extras": Categories.BANK.value}
+    item_attributes = {"brand": "Crédit Agricole", "brand_wikidata": "Q590952", "extras": Categories.BANK.value}
     allowed_domains = ["credit-agricole.fr"]
     sitemap_urls = ["https://www.credit-agricole.fr/robots.txt"]
     sitemap_rules = [(r"/particulier/agence/[-\w]+/([-\w]+)\.html$", "parse_sd")]

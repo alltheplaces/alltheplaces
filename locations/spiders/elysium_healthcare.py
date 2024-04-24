@@ -3,7 +3,15 @@ import re
 
 import scrapy
 
+from locations.categories import apply_category
 from locations.items import Feature
+
+category_mapping = {
+    "neurological": {"healthcare": "centre", "healthcare:speciality": "neurology"},
+    "mental health and wellbeing": {"healthcare": "centre", "healthcare:speciality": "psychiatry"},
+    "learning disabilities & autism": {"amenity": "social_facility", "social_facility:for": "disabled"},
+    "children & education": {"amenity": "social_facility", "social_facility:for": "disabled"},
+}
 
 
 class ElysiumHealthcareSpider(scrapy.Spider):
@@ -78,10 +86,14 @@ class ElysiumHealthcareSpider(scrapy.Spider):
             if telephone:
                 telephone.replace("Email us", "")
 
+            if addr_full:
+                address_full = addr_full.replace("\xa0", " ").strip()
+            else:
+                address_full = None
             properties = {
                 "ref": ref,
                 "name": name,
-                "addr_full": addr_full.replace("\xa0", " ").strip(),
+                "addr_full": address_full,
                 "country": "GB",
                 "lat": lat,
                 "lon": lon,
@@ -89,4 +101,10 @@ class ElysiumHealthcareSpider(scrapy.Spider):
                 "website": response.url,
             }
 
+            if divisions := response.xpath('//div[contains(@class, "button-division-location")]'):
+                for division in divisions:
+                    specialty = division.xpath(".//a/text()").get().lower()
+                    apply_category(category_mapping[specialty], properties)
+            else:
+                apply_category({"healthcare": "centre"}, properties)
             yield Feature(**properties)

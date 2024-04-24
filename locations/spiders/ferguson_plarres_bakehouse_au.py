@@ -9,7 +9,7 @@ from locations.hours import OpeningHours
 
 class FergusonPlarresBakehouseAUSpider(Spider):
     name = "ferguson_plarres_bakehouse_au"
-    item_attributes = {"brand": "Ferguson Plarre's Bakehouse", "brand_wikidata": "Q117196143"}
+    item_attributes = {"brand": "Ferguson Plarre's Bakehouse", "brand_wikidata": "Q5444249"}
     allowed_domains = ["www.fergusonplarre.com.au"]
     start_urls = ["https://www.fergusonplarre.com.au/rest/e/get/locations"]
 

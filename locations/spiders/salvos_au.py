@@ -1,5 +1,8 @@
+import re
+
 from scrapy import Spider
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
@@ -12,7 +15,10 @@ class SalvosAUSpider(Spider):
 
     def parse(self, response):
         for location in response.json().values():
+            if location.get("isPermanentlyClosed") or location.get("isOpeningSoon"):
+                continue
             item = DictParser.parse(location)
+            item["addr_full"] = re.sub(r"\s+", " ", location["FullAddress"].replace("<br>", ", ")).strip()
             item["housenumber"] = location["Number"]
             item["street"] = " ".join(filter(None, [location["StreetName"], location["StreetType"]]))
             item["city"] = location["SuburbName"]
@@ -22,4 +28,5 @@ class SalvosAUSpider(Spider):
                 if day_hours == "Close":
                     continue
                 item["opening_hours"].add_range(day_name, day_hours["Opening"], day_hours["Closing"], "%H:%M:%S")
+            apply_category(Categories.SHOP_CHARITY, item)
             yield item

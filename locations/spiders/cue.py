@@ -3,13 +3,14 @@ import json
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
+from locations.categories import Categories
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
 
 class CueSpider(Spider):
     name = "cue"
-    item_attributes = {"brand": "Cue", "brand_wikidata": "Q5192554"}
+    item_attributes = {"brand": "Cue", "brand_wikidata": "Q5192554", "extras": Categories.SHOP_CLOTHES.value}
     allowed_domains = ["www.cue.com"]
     start_urls = [
         "https://www.cue.com/Geolocation/GetStoresByState",
@@ -41,6 +42,7 @@ class CueSpider(Spider):
             if not location["Active"]:
                 continue
             item = DictParser.parse(location)
+            item["ref"] = location["StoreID"]
             item["opening_hours"] = OpeningHours()
             item["opening_hours"].add_ranges_from_string(str(location["StoreHours"]))
 

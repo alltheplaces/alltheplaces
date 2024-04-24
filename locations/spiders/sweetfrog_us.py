@@ -1,5 +1,5 @@
 from chompjs import parse_js_object
-from scrapy import Request, Spider
+from scrapy import Request
 
 from locations.structured_data_spider import StructuredDataSpider
 

@@ -67,7 +67,6 @@ class MkrfRUSpider(Spider):
     name = "mkrf_ru"
     allowed_domains = ["opendata.mkrf.ru"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
-    no_refs = True
     dataset_attributes = {
         "attribution": "required",
         "attribution:name:en": "Ministry of Culture of the Russian Federation",
@@ -86,6 +85,7 @@ class MkrfRUSpider(Spider):
             yield Request(
                 url=f"https://opendata.mkrf.ru/v2/{dataset}/$?l=1000",
                 headers={"x-api-key": self.api_key, "Content-Type": "application/json"},
+                meta={"dataset": dataset},
             )
 
     def parse(self, response):
@@ -93,19 +93,21 @@ class MkrfRUSpider(Spider):
             if len(pois):
                 self.logger.info(f"Found {len(pois)} POIs for {response.url}")
                 for poi in pois:
-                    yield from self.parse_poi(poi)
+                    yield from self.parse_poi(poi, response.meta["dataset"])
 
                 if next_page := response.json().get("nextPage"):
                     yield Request(
                         url=next_page,
                         callback=self.parse,
                         headers={"x-api-key": self.api_key, "Content-Type": "application/json"},
+                        meta={"dataset": response.meta["dataset"]},
                     )
 
-    def parse_poi(self, poi):
+    def parse_poi(self, poi, dataset):
         poi_attributes = poi.get("data", {}).get("general")
         if poi_attributes:
             item = DictParser.parse(poi_attributes)
+            item["ref"] = str(poi_attributes.get("id", "")) + "-" + dataset
             item["street"] = None
 
             # 'locale' is inconsistent, sometimes it's is city, sometimes it's region - skip it

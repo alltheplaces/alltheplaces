@@ -1,3 +1,4 @@
+from locations.categories import Categories, apply_category
 from locations.storefinders.stockinstore import StockInStoreSpider
 
 
@@ -12,4 +13,5 @@ class RolerAUSpider(StockInStoreSpider):
     def parse_item(self, item, location):
         if "INDUSTRIE" in item["name"].upper():
             return
+        apply_category(Categories.SHOP_CLOTHES, item)
         yield item

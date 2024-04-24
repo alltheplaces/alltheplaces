@@ -29,9 +29,11 @@ class FarmerBoys(scrapy.Spider):
                 "phone": location["phone"],
                 "website": "https://www.farmerboys.com/locations/location-detail.php?loc="
                 + location["location_url"].strip(),
-                "image": "https://www.farmerboys.com/images/locations/" + location["location_pic"].strip()
-                if location["location_pic"]
-                else None,
+                "image": (
+                    "https://www.farmerboys.com/images/locations/" + location["location_pic"].strip()
+                    if location["location_pic"]
+                    else None
+                ),
                 "lat": float(location["lat"]) if location["lat"] else None,
                 "lon": float(location["lng"]) if location["lng"] else None,
             }

@@ -3,7 +3,7 @@ import html
 from scrapy import Spider
 
 from locations.dict_parser import DictParser
-from locations.spiders.vapestore_gb import clean_address
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class WardsRestaurantUSSpider(Spider):
@@ -13,6 +13,6 @@ class WardsRestaurantUSSpider(Spider):
 
     def parse(self, response, **kwargs):
         for location in response.json():
-            location["street_address"] = clean_address([location.pop("address"), location.pop("address2")])
+            location["street_address"] = merge_address_lines([location.pop("address"), location.pop("address2")])
             location["name"] = html.unescape(location["name"])
             yield DictParser.parse(location)

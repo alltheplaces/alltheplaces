@@ -6,7 +6,6 @@ import scrapy
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours, day_range, sanitise_day
-from locations.spiders.vapestore_gb import clean_address
 
 
 class ToolstationSpider(scrapy.spiders.SitemapSpider):
@@ -27,7 +26,7 @@ class ToolstationSpider(scrapy.spiders.SitemapSpider):
             store = json.loads(re.search(self.gm_pattern, js).group(1))[0]
             item = DictParser.parse(store)
             item["website"] = response.url
-            item["addr_full"] = clean_address(store["address_text"].split("<br /><br />")[0])
+            item["addr_full"] = store["address_text"].split("<br /><br />")[0]
             yield item
         elif js := response.xpath('//script[contains(text(), "__NUXT__")]/text()').get():
             # stores is actually a JS function, so we have to parse the parameters and values

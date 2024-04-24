@@ -88,17 +88,17 @@ class NormaDeSpider(scrapy.Spider):
             if match:
                 street = match.group(1)
 
-            match = re.search(r"(\d{5}) (.*?)<\/p>", address)
+            match = re.search(r"(\d{5})\s*(.*?)\s*$", address, re.MULTILINE)
             if match:
                 zip = match.group(1)
                 city = match.group(2)
 
             position = store.xpath('.//div[@class="col-xs-12 col-sm-6 col-md-2 col-lg-2 actions"]' "//a/@href").get()
             if position:
-                match = re.search(r"lng=(.*?)&lat=(.*?)&", position)
+                match = re.search(r"@(-?\d+\.\d+),(-?\d+\.\d+)", position)
                 if match:
-                    lat = match.group(2)
-                    lon = match.group(1)
+                    lat = match.group(1)
+                    lon = match.group(2)
 
             properties = {
                 "ref": f"{lat}_{lon}",

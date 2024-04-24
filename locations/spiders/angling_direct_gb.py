@@ -28,6 +28,8 @@ class AnglingDirectGBSpider(Spider):
             ).lower().replace(" ", "-")
             item["opening_hours"] = OpeningHours()
             for day_name, day_hours in location["opening_hours"].items():
+                if "CLOSED" in day_hours.upper():
+                    continue
                 item["opening_hours"].add_range(
                     day_name.title(), day_hours.split(" - ", 1)[0], day_hours.split(" - ", 1)[1]
                 )

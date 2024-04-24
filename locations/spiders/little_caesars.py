@@ -5,7 +5,7 @@ import scrapy
 from locations.geo import postal_regions
 from locations.hours import OpeningHours
 from locations.items import Feature
-from locations.spiders.vapestore_gb import clean_address
+from locations.pipelines.address_clean_up import merge_address_lines
 from locations.user_agents import BROWSER_DEFAULT
 
 DAY_MAPPING = {
@@ -76,7 +76,7 @@ class LittleCaesarsSpider(scrapy.Spider):
             # it comes back as null for some stores.  'id' also appears in the data, reliably.
             # So use it instead.
             "ref": store.get("locationNumber"),
-            "street_address": clean_address([address.get("street"), address.get("street2")]),
+            "street_address": merge_address_lines([address.get("street"), address.get("street2")]),
             "city": address.get("city"),
             "state": address.get("state"),
             "postcode": address.get("zip"),

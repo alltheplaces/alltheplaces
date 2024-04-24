@@ -1,99 +1,30 @@
-import scrapy
+from typing import Any
 
+import scrapy
+from scrapy.http import JsonRequest, Response
+
+from locations.categories import Categories
 from locations.hours import OpeningHours, sanitise_day
 from locations.items import Feature
 
 
 class ScaniaSpider(scrapy.Spider):
     name = "scania"
-    available_countries = [
-        "IT",
-        "PY",
-        "JP",
-        "MY",
-        "PF",
-        "ZM",
-        "AE",
-        "GR",
-        "TW",
-        "ID",
-        "LT",
-        "BN",
-        "PE",
-        "CZ",
-        "RE",
-        "SK",
-        "RS",
-        "IE",
-        "GP",
-        "AT",
-        "US",
-        "DE",
-        "CH",
-        "NA",
-        "PH",
-        "MX",
-        "ES",
-        "SG",
-        "FR",
-        "TR",
-        "MQ",
-        "GF",
-        "RO",
-        "SI",
-        "KZ",
-        "IR",
-        "UY",
-        "GH",
-        "BE",
-        "NL",
-        "AU",
-        "BR",
-        "PT",
-        "PL",
-        "VN",
-        "CA",
-        "GB",
-        "BG",
-        "UA",
-        "HU",
-        "IN",
-        "NO",
-        "FI",
-        "PK",
-        "DK",
-        "MA",
-        "ZA",
-        "KR",
-        "IS",
-        "ME",
-        "HR",
-        "TH",
-        "LU",
-        "EE",
-        "BA",
-        "OM",
-        "EG",
-        "NZ",
-        "CN",
-        "DZ",
-        "BW",
-        "ZW",
-        "SE",
-        "CO",
-        "CL",
-        "LV",
-        "AR",
-        "HK",
-    ]
-    item_attributes = {"brand": "Scania", "brand_wikidata": "Q219960"}
+    item_attributes = {"brand": "Scania", "brand_wikidata": "Q219960", "extras": Categories.SHOP_TRUCK_REPAIR.value}
+    start_urls = ["https://www.scania.com/content/scanianoe/platform/SalesRegionJson.json"]
 
-    def start_requests(self):
-        for country in self.available_countries:
-            url = f"https://www.scania.com/api/sis.json?type=DealerV2&country={country}"
-            yield scrapy.Request(url=url, callback=self.parse_stores)
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        for country, websites in response.json()["websites"].items():
+            yield JsonRequest(
+                "https://www.scania.com/api/sis.json?type=DealerV2&country={}&currentPage={}".format(
+                    websites[0]["countryCode"].upper(), websites[0]["siteUrl"].replace(".html", "/find-dealers")
+                ),
+                callback=self.parse_stores,
+            )
 
-    def parse_stores(self, response):
+    def parse_stores(self, response: Response):
+        if not response.body:
+            return  # 0 locations, eg cuba
         for store in response.json().get("dealers"):
             oh = OpeningHours()
             if store.get("openingHours"):
@@ -128,9 +59,11 @@ class ScaniaSpider(scrapy.Spider):
                     "email": address_details.get("electronicMailAddress"),
                     "postcode": postal_address.get("postalCode"),
                     "city": postal_address.get("city").get("value"),
-                    "state": postal_address.get("countryRegion").get("value")
-                    if postal_address.get("countryRegion")
-                    else None,
+                    "state": (
+                        postal_address.get("countryRegion").get("value")
+                        if postal_address.get("countryRegion")
+                        else None
+                    ),
                     "lat": lat,
                     "lon": lon,
                     "opening_hours": oh,

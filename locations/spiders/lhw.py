@@ -8,7 +8,7 @@ from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 
 FEATURES_MAPPING = {
     "Swimming Pool(s)": Extras.SWIMMING_POOL,
-    "Pet Friendly - Conditions Apply": Extras.PETS_ALLOWED
+    "Pet Friendly - Conditions Apply": Extras.PETS_ALLOWED,
     # TODO: other features
 }
 

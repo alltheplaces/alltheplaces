@@ -1,43 +1,34 @@
-import scrapy
+from scrapy import Spider
+from scrapy.http import JsonRequest
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
-from locations.user_agents import BROWSER_DEFAULT
 
 
-class AudiBeSpider(scrapy.Spider):
+class AudiBESpider(Spider):
     name = "audi_be"
-    item_attributes = {
-        "brand": "Audi",
-        "brand_wikidata": "Q23317",
-    }
-    allowed_domains = ["audi.be"]
-    custom_settings = {
-        "ROBOTSTXT_OBEY": False,
-        "DEFAULT_REQUEST_HEADERS": {
-            "Content-Type": "application/json;charset=UTF-8",
-            "User-Agent": BROWSER_DEFAULT,
-        },
-    }
+    item_attributes = {"brand": "Audi", "brand_wikidata": "Q23317"}
+    allowed_domains = ["dealerlocator-api.dieteren.be"]
+    start_urls = ["https://dealerlocator-api.dieteren.be/api/workLocations?templateId=16&language=fr"]
 
     def start_requests(self):
-        url = "https://dealerlocator.dieteren.be/api/locator.asmx/SearchEntities"
-        payload = '{"request":{"TemplateID":11,"Sale":"N","AfterSale":"N","ETron":false,"AudiSport":false,"Aap":false,"Gte":false,"Language":"fr"}}'
-        yield scrapy.Request(url=url, body=payload, method="POST", callback=self.parse)
+        for url in self.start_urls:
+            yield JsonRequest(url=url)
 
     def parse(self, response):
-        for row in response.json()["d"]["Dealers"]:
-            item = Feature()
-            item["ref"] = row.get("UTE")
-            item["name"] = row.get("NAME")
-            item["street_address"] = row.get("ADDRESS")
-            item["city"] = row.get("CITY")
-            item["postcode"] = row.get("ZIP")
-            item["lat"] = float(row.get("GPSLAT").replace(",", "."))
-            item["lon"] = float(row.get("GPSLONG").replace(",", "."))
-            item["country"] = row.get("country")
-            item["phone"] = row.get("TEL")
-            item["website"] = row.get("URL")
-            item["email"] = row.get("MAIL")
-            apply_category(Categories.SHOP_CAR, item)
-            yield item
+        for location in response.json()["Dealers"]:
+            properties = {
+                "ref": location.get("WorkLocationId"),
+                "name": location.get("NAME"),
+                "street_address": location.get("ADDRESS"),
+                "city": location.get("CITY"),
+                "postcode": location.get("ZIP"),
+                "lat": float(location.get("GPSLAT")),
+                "lon": float(location.get("GPSLONG")),
+                "phone": location.get("TEL"),
+                "website": location.get("URL"),
+            }
+            if properties["website"] and properties["website"].startswith("www."):
+                properties["website"] = "https://" + properties["website"]
+            apply_category(Categories.SHOP_CAR, properties)
+            yield Feature(**properties)

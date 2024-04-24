@@ -3,9 +3,13 @@ from scrapy.spiders import SitemapSpider
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class GenghisGrillUSSpier(SitemapSpider, StructuredDataSpider):
+class GenghisGrillUSSpider(SitemapSpider, StructuredDataSpider):
     name = "genghis_grill_us"
-    item_attributes = {"brand": "Genghis Grill", "brand_wikidata": "Q29470710"}
+    item_attributes = {
+        "brand": "Genghis Grill",
+        "brand_wikidata": "Q29470710",
+        "extras": {"amenity": "restaurant", "cuisine": "mongolian_grill"},
+    }
     sitemap_urls = ["https://locations.genghisgrill.com/robots.txt"]
     sitemap_rules = [(r".html$", "parse_sd")]
 

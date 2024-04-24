@@ -10,9 +10,15 @@ class BurgerKingRUSpider(scrapy.Spider):
     name = "burger_king_ru"
     item_attributes = {"brand": "Бургер Кинг", "brand_wikidata": "Q177054"}
     allowed_domains = ["burgerkingrus.ru"]
+    custom_settings = {
+        "ROBOTSTXT_OBEY": False,
+    }
 
     def start_requests(self):
-        yield JsonRequest("https://orderapp.burgerkingrus.ru/api/v1/restaurants/search")
+        yield JsonRequest(
+            "https://orderapp.burgerkingrus.ru/api/v1/restaurants/search",
+            headers={"Origin": "https://burgerkingrus.ru", "Referer": "https://burgerkingrus.ru/"},
+        )
 
     def parse(self, response):
         for poi in response.json().get("response"):

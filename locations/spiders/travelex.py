@@ -1,7 +1,6 @@
 import scrapy
 
 from locations.dict_parser import DictParser
-from locations.spiders.vapestore_gb import clean_address
 
 
 class TravelexSpider(scrapy.Spider):
@@ -56,7 +55,7 @@ class TravelexSpider(scrapy.Spider):
             stores = category.get("stores")
             for row in stores:
                 item = DictParser.parse(row)
-                item["addr_full"] = clean_address(row.get("formattedAddress"))
+                item["addr_full"] = row.get("formattedAddress")
                 item["extras"] = {
                     "directions": row.get("directions"),
                     "notes": row.get("notes"),

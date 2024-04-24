@@ -14,7 +14,8 @@ class FastnedSpider(Spider):
             item = DictParser.parse(location)
 
             apply_category(Categories.CHARGING_STATION, item)
-            item["extras"]["operator"] = "Fastned"
+            item["operator"] = self.item_attributes["brand"]
+            item["operator_wikidata"] = self.item_attributes["brand_wikidata"]
 
             # TODO: connector data available in location["connectors"]
             yield item

@@ -1,5 +1,6 @@
 import scrapy
 
+from locations.categories import apply_category
 from locations.items import Feature
 
 
@@ -36,4 +37,5 @@ class VoyageCareSpider(scrapy.Spider):
                 "lon": float(store["properties"]["address1_longitude"]),
                 "website": response.url,
             }
+            apply_category({"amenity": "social_facility", "social_facility:for": "disabled"}, properties)
             yield Feature(**properties)

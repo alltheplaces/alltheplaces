@@ -14,4 +14,6 @@ class CrossroadsIGAUSSpider(StoreLocatorWidgetsSpider):
                 apply_category(Categories.SHOP_SUPERMARKET, item)
             if "Fuel" in location["filters"]:
                 apply_category(Categories.FUEL_STATION, item)
+        else:
+            apply_category(Categories.SHOP_DOITYOURSELF, item)
         yield item

@@ -1,4 +1,5 @@
 import json
+import re
 
 import scrapy
 
@@ -30,6 +31,8 @@ class CAndASpider(scrapy.Spider):
         "https://www.c-and-a.com/stores/rs-rs/index.html",
     )
 
+    postcode_pattern = r"^(\d+[- ]?(?:\d+|[A-Z]{2})) (.*)$"
+
     def parse(self, response):
         pages = response.xpath(
             '//div[@class="overviewCities"]/div/div/a[contains(concat(" ", normalize-space(@class), " "), " allcities ")]/@href'
@@ -55,6 +58,11 @@ class CAndASpider(scrapy.Spider):
                 for i in store.xpath('./div[@class="addressBox"]/p[@class="openingHours hideopeninghours"]')
             ]
 
+            try:
+                postcode, city = re.findall(self.postcode_pattern, address[1])[0]
+            except:
+                postcode, city = None, address[1]
+
             properties = {
                 "ref": store.xpath("./@id").get(),
                 "website": response.urljoin(
@@ -67,7 +75,8 @@ class CAndASpider(scrapy.Spider):
                 "country": country,
                 "opening_hours": "; ".join(hours),
                 "street_address": address[0],
-                "city": address[1],
+                "postcode": postcode,
+                "city": city,
                 "addr_full": ", ".join(address),
                 "extras": {
                     "wheelchair": "yes" if "wheelchairflag" in flags else "no",

@@ -3,6 +3,7 @@ import re
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
+from locations.categories import Categories, apply_category
 from locations.linked_data_parser import LinkedDataParser
 
 
@@ -31,5 +32,5 @@ class AwayResortsSpider(CrawlSpider):
 
             item["addr_full"] = item["street_address"].replace("\r\n", ", ")
             item["street_address"] = None
-
+            apply_category(Categories.LEISURE_RESORT, item)
             return item

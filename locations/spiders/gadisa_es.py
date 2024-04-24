@@ -1,7 +1,7 @@
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
-from locations.dict_parser import DictParser
+from locations.categories import Categories
 from locations.hours import DAYS_ES, DELIMITERS_ES, OpeningHours
 from locations.items import Feature
 
@@ -15,10 +15,10 @@ class GadisaESSpider(Spider):
         "https://www.gadisa.es/api/centro/sec::gadis",
     ]
     brands = {
-        "CASACLAUDIO": {"brand": "Casa Claudio", "brand_wikidata": "Q123370107"},
-        "CASHIFA": {"brand": "Cash IFA", "brand_wikidata": "Q123369964"},
-        "CLAUDIO": {"brand": "Claudio", "brand_wikidata": "Q123369953"},
-        "GADIS": {"brand": "Gadis", "brand_wikidata": "Q114398305"},
+        "CASACLAUDIO": {"brand": "Casa Claudio", "brand_wikidata": "Q123370107", "extras": {"shop": "deli"}},
+        "CASHIFA": {"brand": "Cash IFA", "brand_wikidata": "Q123369964", "extras": Categories.SHOP_WHOLESALE.value},
+        "CLAUDIO": {"brand": "Claudio", "brand_wikidata": "Q123369953", "extras": Categories.SHOP_SUPERMARKET.value},
+        "GADIS": {"brand": "Gadis", "brand_wikidata": "Q114398305", "extras": Categories.SHOP_SUPERMARKET.value},
     }
 
     def start_requests(self):

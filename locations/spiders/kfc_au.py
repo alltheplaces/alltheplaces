@@ -4,13 +4,15 @@ from scrapy.http import JsonRequest
 from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.spiders.kfc import KFC_SHARED_ATTRIBUTES
 
 
 class KFCAUSpider(scrapy.Spider):
     name = "kfc_au"
-    item_attributes = {"brand": "KFC", "brand_wikidata": "Q524757"}
+    item_attributes = KFC_SHARED_ATTRIBUTES
     start_urls = ["https://orderserv-kfc-apac-olo-api.yum.com/dev/v1/stores/"]
     tenant_id = "afd3813afa364270bfd33f0a8d77252d"
+    requires_proxy = True  # Requires AU proxy, possibly residential IPs only.
 
     def start_requests(self):
         for url in self.start_urls:

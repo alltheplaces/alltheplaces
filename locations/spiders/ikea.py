@@ -80,9 +80,9 @@ class IkeaSpider(scrapy.Spider):
                 "city": store["address"].get("city"),
                 "postcode": store["address"].get("zipCode"),
                 "country": response.request.url[21:23].upper(),
-                "website": store["storePageUrl"]
-                if "storePageUrl" in store
-                else f"https://www.ikea.com/{country_path}/stores/",
+                "website": (
+                    store["storePageUrl"] if "storePageUrl" in store else f"https://www.ikea.com/{country_path}/stores/"
+                ),
                 "ref": store["id"],
                 "opening_hours": opening_hours.as_opening_hours(),
                 "extras": {

@@ -1,3 +1,4 @@
+from locations.categories import Categories, apply_category
 from locations.storefinders.agile_store_locator import AgileStoreLocatorSpider
 
 
@@ -9,4 +10,5 @@ class DirtCheapUSSpider(AgileStoreLocatorSpider):
     def parse_item(self, item, location):
         item["website"] = "https://ilovedirtcheap.com/locations/store-details/" + location["slug"]
         item["image"] = location.get("storephoto")
+        apply_category(Categories.SHOP_VARIETY_STORE, item)
         yield item

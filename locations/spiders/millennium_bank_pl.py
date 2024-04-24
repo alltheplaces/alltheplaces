@@ -10,7 +10,7 @@ from locations.hours import OpeningHours
 
 class MillenniumBankPLSpider(Spider):
     name = "millennium_bank_pl"
-    item_attributes = {"brand": "Bank Millennium", "brand_wikidata": "Q4855947"}
+    item_attributes = {"brand": "Millennium Bank", "brand_wikidata": "Q4855947"}
     start_urls = ["https://www.bankmillennium.pl/en/about-the-bank/branches-and-atms"]
 
     def parse(self, response, **kwargs):

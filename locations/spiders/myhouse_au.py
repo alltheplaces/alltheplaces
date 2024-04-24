@@ -6,7 +6,11 @@ from locations.hours import OpeningHours
 
 class MyHouseAUSpider(Spider):
     name = "myhouse_au"
-    item_attributes = {"brand": "MyHouse", "brand_wikidata": "Q28854270"}
+    item_attributes = {
+        "brand": "MyHouse",
+        "brand_wikidata": "Q28854270",
+        "extras": {"shop": "houseware"},
+    }
     allowed_domains = ["myhouse.com.au"]
     start_urls = ["https://myhouse.com.au/api/get-stores"]
 

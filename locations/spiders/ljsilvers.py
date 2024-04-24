@@ -1,39 +1,33 @@
+from chompjs import chompjs
 from scrapy.spiders import SitemapSpider
 
+from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
-from locations.items import Feature
 
 
 class LjsilversSpider(SitemapSpider):
     name = "ljsilvers"
     item_attributes = {"brand": "Long John Silver's", "brand_wikidata": "Q1535221"}
-    allowed_domains = ["ljsilvers.com"]
 
-    sitemap_urls = ["https://locations.ljsilvers.com/robots.txt"]
-    sitemap_rules = [(r"^https://locations.ljsilvers.com/.*/.*/.*$", "parse")]
+    sitemap_urls = ["https://www.ljsilvers.com/sitemap.xml"]
+    sitemap_rules = [(r"https://www.ljsilvers.com/locations/\w+\/", "parse")]
 
-    def parse(self, response):
-        main = response.xpath("//main")
-        address = main.css("[itemprop=address]")
+    def parse(self, response, **kwargs):
+        if data := chompjs.parse_js_object(
+            response.xpath('//script[contains(text(), "window.__NUXT__")]/text()').re_first(r"location:({.*})}\]")
+        ):
+            item = DictParser.parse(data)
+            item["ref"] = item["website"] = response.url
+            item["name"] = "Long John Silver's"
+            item["opening_hours"] = OpeningHours()
+            for row in response.xpath(r'//*[@class="hours"]/div'):
+                day = row.xpath(".//p[1]/text()").get()
+                if time := row.xpath(".//p[2]/text()").get():
+                    open_time, close_time = time.split("-")
+                    item["opening_hours"].add_range(
+                        day=day, open_time=open_time.strip(), close_time=close_time.strip(), time_format="%I:%M %p"
+                    )
+                else:
+                    continue
 
-        opening_hours = OpeningHours()
-        for row in response.xpath('//*[@itemprop="openingHours"]/@content').extract():
-            day, interval = row.split(" ", 1)
-            if interval == "Closed":
-                continue
-            open_time, close_time = interval.split("-")
-            opening_hours.add_range(day, open_time, close_time)
-
-        properties = {
-            "ref": main.attrib["itemid"],
-            "website": response.url,
-            "name": response.css("span#location-name ::text").get(),
-            "lat": response.css("[itemprop=latitude]").attrib["content"],
-            "lon": response.css("[itemprop=longitude]").attrib["content"],
-            "street_address": address.css("[itemprop=streetAddress]").attrib["content"],
-            "city": address.css(".Address-city ::text").get(),
-            "state": address.css("[itemprop=addressRegion] ::text").get(),
-            "phone": response.css("[itemprop=telephone]::text").get(),
-            "opening_hours": opening_hours.as_opening_hours(),
-        }
-        yield Feature(**properties)
+            yield item

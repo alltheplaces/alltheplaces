@@ -7,7 +7,7 @@ from locations.items import Feature
 
 class CurvesSpider(scrapy.Spider):
     name = "curves"
-    item_attributes = {"brand": "Curves"}
+    item_attributes = {"brand": "Curves", "brand_wikidata": "Q1515831"}
     allowed_domains = ["curves.com"]
     start_urls = ("https://www.curves.com/sitemap.xml",)
 

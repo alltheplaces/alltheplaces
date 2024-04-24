@@ -32,5 +32,6 @@ class RSGGroupSpider(WoosmapSpider):
 
         if brand := self.BRANDS.get(brand_id):
             item.update(brand)
-
+        else:
+            item.update(self.MC_FIT)
         yield item

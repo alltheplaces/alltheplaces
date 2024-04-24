@@ -38,14 +38,12 @@ class HugoBossSpider(Spider):
                     else:
                         item["opening_hours"].add_range(DAYS[int(day_number) - 1], day_hours[0], day_hours[1])
 
-            clothes = []
             if "womenswear" in location.get("c_categories", []):
-                clothes.append(Clothes.WOMEN.value)
+                apply_clothes([Clothes.WOMEN], item)
             if "menswear" in location.get("c_categories", []):
-                clothes.append(Clothes.MEN.value)
+                apply_clothes([Clothes.MEN], item)
             if "kidswear" in location.get("c_categories", []):
-                clothes.append(Clothes.CHILDREN.value)
-            apply_clothes(clothes, item)
+                apply_clothes([Clothes.CHILDREN], item)
 
             yield item
 

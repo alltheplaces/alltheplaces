@@ -41,8 +41,8 @@ class DinoPLSpider(Spider):
             item = DictParser.parse(location["properties"])
             item["geometry"] = location["geometry"]
             item["opening_hours"] = OpeningHours()
-            item["opening_hours"].add_days_range(
-                ["Mo", "Tu", "We", "Th", "Fr", "Sa"], *location["properties"]["weekHours"].split("-", 1)
-            )
-            item["opening_hours"].add_range("Su", *location["properties"]["sundayHours"].split("-", 1))
+            if week_hours := location["properties"].get("weekHours"):
+                item["opening_hours"].add_days_range(["Mo", "Tu", "We", "Th", "Fr", "Sa"], *week_hours.split("-", 1))
+            if sun_hours := location["properties"].get("sundayHours"):
+                item["opening_hours"].add_range("Su", *sun_hours.split("-", 1))
             yield item

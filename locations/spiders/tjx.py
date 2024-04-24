@@ -18,7 +18,7 @@ class TjxSpider(scrapy.Spider):
         "91": {"brand": "Winners", "brand_wikidata": "Q845257", "country": "Canada"},
         "93": {"brand": "Marshalls", "brand_wikidata": "Q15903261", "country": "Canada"},
         # There are separate spiders for below brands that provide better data
-        "28": {"brand": "Homegoods", "brand_wikidata": "Q5887941", "country": "USA"},
+        "28": {"brand": "HomeGoods", "brand_wikidata": "Q5887941", "country": "USA"},
         "50": {"brand": "Sierra", "brand_wikidata": "Q7511598", "country": "USA"},
     }
 
@@ -34,8 +34,8 @@ class TjxSpider(scrapy.Spider):
                     formdata={
                         "chain": ",".join(chains),
                         "lang": "en",
-                        "geolat": lat,
-                        "geolong": lon,
+                        "geolat": str(lat),
+                        "geolong": str(lon),
                     },
                     headers={"Accept": "application/json"},
                 )

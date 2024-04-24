@@ -2,6 +2,7 @@ import re
 
 import scrapy
 
+from locations.categories import Categories
 from locations.google_url import extract_google_position
 from locations.hours import DAYS
 from locations.items import Feature
@@ -9,7 +10,11 @@ from locations.items import Feature
 
 class McmenaminsSpider(scrapy.Spider):
     name = "mcmenamins_us"
-    item_attributes = {"brand": "McMenamins", "brand_wikidata": "Q6802345"}
+    item_attributes = {
+        "brand": "McMenamins",
+        "brand_wikidata": "Q6802345",
+        "extras": Categories.PUB.value,
+    }
     allowed_domains = ["mcmenamins.com"]
     start_urls = ("https://www.mcmenamins.com/eat-drink",)
 

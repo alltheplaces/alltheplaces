@@ -81,6 +81,8 @@ class TimpsonGBSpider(CrawlSpider):
                     "Photo Gifts" in services or "Photo Processing" in services or "Instant Photo Printing" in services
                 ):
                     apply_category(Categories.SHOP_PHOTO, item)
+                else:
+                    apply_category(Categories.SHOP_SHOE_REPAIR, item)
 
                 # TODO: too painful to port at present
                 # for brand in [Brand.MORRISONS, Brand.SAINSBURYS, Brand.TESCO, Brand.ASDA, Brand.WAITROSE]:

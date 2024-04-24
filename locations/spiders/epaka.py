@@ -1,12 +1,13 @@
 from scrapy import Spider
 
+from locations.categories import Categories
 from locations.hours import DAYS_PL, OpeningHours
 from locations.items import Feature
 
 
 class EPakaPLSpider(Spider):
     name = "epaka_pl"
-    item_attributes = {"brand": "Epaka.pl", "brand_wikidata": "Q123028724"}
+    item_attributes = {"brand": "Epaka.pl", "brand_wikidata": "Q123028724", "extras": Categories.POST_OFFICE.value}
     start_urls = ["https://www.epaka.pl/api/getPoints.xml"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
 

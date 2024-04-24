@@ -2,7 +2,7 @@ import scrapy
 from geonamescache import GeonamesCache
 
 from locations.hours import DAYS, OpeningHours
-from locations.items import Feature
+from locations.items import Feature, set_closed
 
 US_TERRITORIES = {
     "AS": {"code": "AS", "name": "American Samoa"},
@@ -36,9 +36,10 @@ class XfinitySpider(scrapy.Spider):
 
     def parse(self, response):
         for store in response.json()["locations"]:
+            if store["locationName"].startswith("Comcast Service Center"):
+                continue
             properties = {
                 "ref": store["id"],
-                "name": store["locationName"],
                 "opening_hours": self.store_hours(store["hours"]),
                 "lat": store["yextDisplayLat"],
                 "lon": store["yextDisplayLng"],
@@ -49,5 +50,11 @@ class XfinitySpider(scrapy.Spider):
                 "country": response.json()["geo"]["country"],
                 "website": store["websiteUrl"].split("?")[0],
             }
+            item = Feature(**properties)
 
-            yield Feature(**properties)
+            if store["locationName"].lower().endswith(" - closed"):
+                set_closed(item)
+
+            # TODO: hours
+
+            yield item

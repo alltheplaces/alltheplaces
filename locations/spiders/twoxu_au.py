@@ -1,12 +1,13 @@
 import re
 
+from locations.categories import Categories
 from locations.hours import OpeningHours
 from locations.storefinders.stockist import StockistSpider
 
 
 class TwoXUAUSpider(StockistSpider):
     name = "twoxu_au"
-    item_attributes = {"brand": "2XU", "brand_wikidata": "Q16823650"}
+    item_attributes = {"brand": "2XU", "brand_wikidata": "Q16823650", "extras": Categories.SHOP_CLOTHES.value}
     key = "u7719"
 
     def parse_item(self, item, location):

@@ -12,16 +12,15 @@ class LidlATSpider(VirtualEarthSpider):
     dataset_id = "d9ba533940714d34ac6c3714ec2704cc"
     dataset_name = "Filialdaten-AT/Filialdaten-AT"
     key = "Ailqih9-jVv2lUGvfCkWmEFxPjFBNcEdqZ3lK_6jMMDDtfTYu60SwIaxs32Wtik2"
+    days = DAYS_AT
 
     def parse_item(self, item, feature, **kwargs):
-        item["name"] = feature["ShownStoreName"]
-
         item["opening_hours"] = OpeningHours()
         for day, start_time, end_time in re.findall(
             r"(\w+) (\d{2}:\d{2})-(\d{2}:\d{2})",
             feature["OpeningTimes"],
         ):
-            if day := sanitise_day(day, DAYS_AT):
+            if day := sanitise_day(day, self.days):
                 item["opening_hours"].add_range(day, start_time, end_time)
 
         yield item

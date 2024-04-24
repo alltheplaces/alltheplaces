@@ -3,12 +3,12 @@ import re
 import scrapy
 
 from locations.items import Feature
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class DominosPizzaJPSpider(scrapy.Spider):
     name = "dominos_pizza_jp"
     item_attributes = {
-        "brand": "Domino's",
         "brand_wikidata": "Q839466",
         "country": "JP",
     }
@@ -17,6 +17,7 @@ class DominosPizzaJPSpider(scrapy.Spider):
         "https://www.dominos.jp/sitemap.aspx",
     ]
     download_delay = 0.3
+    user_agent = BROWSER_DEFAULT
 
     def parse(self, response):
         response.selector.remove_namespaces()

@@ -2,7 +2,6 @@ from locations.categories import Categories, Extras, apply_category, apply_yes_n
 from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import Feature
 from locations.spiders.albertsons import AlbertsonsSpider
-from locations.spiders.arco import ArcoSpider
 from locations.spiders.caseys_general_store import CaseysGeneralStoreSpider
 from locations.spiders.chevron import ChevronSpider
 from locations.spiders.circle_k import CircleKSpider
@@ -15,6 +14,7 @@ from locations.spiders.giantfoodstores import GiantFoodStoresSpider
 from locations.spiders.godfathers_pizza import GodfathersPizzaSpider
 from locations.spiders.h_e_b_us import HEBUSSpider
 from locations.spiders.kroger_us import BRANDS as KROGER_BRANDS
+from locations.spiders.marathon_petroleum_us import MarathonPetroleumUSSpider
 from locations.spiders.marcs import MarcsSpider
 from locations.spiders.market_basket import MarketBasketSpider
 from locations.spiders.mcdonalds import McDonaldsSpider
@@ -26,7 +26,7 @@ from locations.spiders.rite_aid_us import RiteAidUSSpider
 from locations.spiders.royal_farms import RoyalFarmsSpider
 from locations.spiders.safeway import SafewaySpider
 from locations.spiders.schnucks_us import SchnucksUSSpider
-from locations.spiders.seven_eleven_us import SevenElevenUSSpider
+from locations.spiders.seven_eleven_ca_us import SevenElevenCAUSSpider
 from locations.spiders.shell import ShellSpider
 from locations.spiders.shoprite import ShopriteSpider
 from locations.spiders.speedway_us import SpeedwayUSSpider
@@ -74,11 +74,11 @@ class BMOSpider(Where2GetItSpider):
         elif location["grouptype"] in ["BMOHarrisATM", "BMOATM"]:
             apply_category(Categories.ATM, item)
             if item["name"] == "Alon 7-Eleven":
-                item["located_in"] = SevenElevenUSSpider.item_attributes["brand"]
-                item["located_in_wikidata"] = SevenElevenUSSpider.item_attributes["brand_wikidata"]
+                item["located_in"] = SevenElevenCAUSSpider.item_attributes["brand"]
+                item["located_in_wikidata"] = SevenElevenCAUSSpider.item_attributes["brand_wikidata"]
             elif item["name"] == "Arco":
-                item["located_in"] = ArcoSpider.item_attributes["brand"]
-                item["located_in_wikidata"] = ArcoSpider.item_attributes["brand_wikidata"]
+                item["located_in"] = MarathonPetroleumUSSpider.brands["ARCO"]["brand"]
+                item["located_in_wikidata"] = MarathonPetroleumUSSpider.brands["ARCO"]["brand_wikidata"]
             elif item["name"] == "Casey's":
                 item["located_in"] = CaseysGeneralStoreSpider.item_attributes["brand"]
                 item["located_in_wikidata"] = CaseysGeneralStoreSpider.item_attributes["brand_wikidata"]
@@ -95,8 +95,8 @@ class BMOSpider(Where2GetItSpider):
                 item["located_in"] = CostcoSpider.item_attributes["brand"]
                 item["located_in_wikidata"] = CostcoSpider.item_attributes["brand_wikidata"]
             elif item["name"] == "CVS":
-                item["located_in"] = CVS_BRANDS["CVS Pharmacy"][0]
-                item["located_in_wikidata"] = CVS_BRANDS["CVS Pharmacy"][1]
+                item["located_in"] = CVS_BRANDS["CVS Pharmacy"]["brand"]
+                item["located_in_wikidata"] = CVS_BRANDS["CVS Pharmacy"]["brand_wikidata"]
             elif item["name"] == "Dillons":
                 item["located_in"] = KROGER_BRANDS["https://www.dillons.com/"]["brand"]
                 item["located_in_wikidata"] = KROGER_BRANDS["https://www.dillons.com/"]["brand_wikidata"]
@@ -140,8 +140,8 @@ class BMOSpider(Where2GetItSpider):
                 item["located_in"] = KROGER_BRANDS["https://www.kroger.com/"]["brand"]
                 item["located_in_wikidata"] = KROGER_BRANDS["https://www.kroger.com/"]["brand_wikidata"]
             elif item["name"] == "Longs Drugs":
-                item["located_in"] = CVS_BRANDS["Longs Drugs"][0]
-                item["located_in_wikidata"] = CVS_BRANDS["Longs Drugs"][1]
+                item["located_in"] = CVS_BRANDS["Longs Drugs"]["brand"]
+                item["located_in_wikidata"] = CVS_BRANDS["Longs Drugs"]["brand_wikidata"]
             elif item["name"] == "Marcs":
                 item["located_in"] = MarcsSpider.item_attributes["brand"]
                 item["located_in_wikidata"] = MarcsSpider.item_attributes["brand_wikidata"]

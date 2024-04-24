@@ -6,8 +6,8 @@ from locations.structured_data_spider import StructuredDataSpider
 
 
 def set_operator(brand: dict, item: Feature):
-    item["extras"]["operator"] = brand["brand"]
-    item["extras"]["operator:wikidata"] = brand["brand_wikidata"]
+    item["operator"] = brand["brand"]
+    item["operator_wikidata"] = brand["brand_wikidata"]
 
 
 COOP_FOOD = {"brand": "The Co-operative Food", "brand_wikidata": "Q107617274"}

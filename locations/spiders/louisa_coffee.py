@@ -5,7 +5,7 @@ from locations.items import Feature
 
 class LouisaCoffeeSpider(scrapy.Spider):
     name = "louisa_coffee"
-    item_attributes = {"brand": "Louisa Coffee", "brand_wikidata": "Q67933328"}
+    item_attributes = {"brand": "Louisa Coffee", "brand_wikidata": "Q96390921"}
     allowed_domains = ["www.louisacoffee.com.tw"]
     start_urls = ("http://www.louisacoffee.com.tw/visit_result",)
 

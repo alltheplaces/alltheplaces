@@ -71,7 +71,7 @@ class VestisUniformServicesUSSpider(Spider):
                 item["brand"] = "Vestis Cleanroom Services"
                 item["name"] = item["brand"] + " " + item["city"]
                 add_tags(item)
-            elif "Vestis" in item["name"].title():
+            else:
                 item["brand"] = "Vestis"
                 item["name"] = item["brand"] + " " + item["city"]
                 add_tags(item)
