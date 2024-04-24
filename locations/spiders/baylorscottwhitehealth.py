@@ -22,7 +22,7 @@ class BaylorScottWhiteHealthSpider(scrapy.Spider):
         page_size = 100
 
         while page_number * page_size < total_count:
-            yield scrapy.Request(self.base_url + f"?perPage={page_size}&pageNumber={page_number+1}")
+            yield scrapy.Request(self.base_url + f"?perPage={page_size}&pageNumber={page_number + 1}")
             page_number += 1
 
     def parse(self, response):
