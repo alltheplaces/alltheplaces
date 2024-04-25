@@ -69,6 +69,42 @@ def test_categories_filter():
     assert len(filtered) == 1
     assert filtered[0]["id"] == "test_bus_stop"
 
+    matches = [
+        {
+            "id": "test_bakery",
+            "locationSet": {"include": ["001"]},
+            "tags": {
+                "shop": "bakery",
+            },
+        },
+        {
+            "id": "test_cafe_with_bakery",
+            "locationSet": {"include": ["001"]},
+            "tags": {
+                "shop": "bakery",
+                "amenity": "cafe",
+            },
+        },
+    ]
+
+    item, _, _ = get_objects()
+    apply_category(Categories.CAFE, item)
+    apply_category(Categories.SHOP_BAKERY, item)
+    filtered = pipeline.filter_categories(matches, get_category_tags(item))
+    assert len(filtered) == 1
+    assert filtered[0]["id"] == "test_cafe_with_bakery"
+
+    item, _, _ = get_objects()
+    apply_category(Categories.SHOP_BAKERY, item)
+    filtered = pipeline.filter_categories(matches, get_category_tags(item))
+    assert len(filtered) == 1
+    assert filtered[0]["id"] == "test_bakery"
+
+    item, _, _ = get_objects()
+    apply_category(Categories.CAFE, item)
+    filtered = pipeline.filter_categories(matches, get_category_tags(item))
+    assert len(filtered) == 0
+
 
 def test_cc_filter():
     _, pipeline, _ = get_objects()
@@ -116,3 +152,26 @@ def test_nsi_operator_matching():
     pipeline.process_item(item, spider)
 
     assert item["nsi_id"]
+
+
+def test_filter_cc_considers_already_applied_category():
+    item, pipeline, _ = get_objects()
+    apply_category(Categories.CAR_RENTAL, item)
+    matches = [
+        {
+            "locationSet": {"include": ["001"]},
+            "tags": {
+                "amenity": "car_rental",
+            },
+        },
+        {"locationSet": {"include": ["ca", "us"]}, "tags": {"shop": "rental"}},
+    ]
+    filtered = pipeline.filter_cc(matches, "us", get_category_tags(item))
+    assert len(filtered) == 1
+    assert filtered[0]["tags"]["amenity"] == "car_rental"
+
+    # For the same matches country specific match should be returned when no category is applied
+    _, pipeline, _ = get_objects()
+    filtered = pipeline.filter_cc(matches, "us")
+    assert len(filtered) == 1
+    assert filtered[0]["tags"]["shop"] == "rental"

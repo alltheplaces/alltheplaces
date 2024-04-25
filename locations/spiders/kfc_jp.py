@@ -5,12 +5,11 @@ from scrapy import Request, Spider
 from locations.categories import Extras, PaymentMethods, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
-from locations.spiders.kfc import KFC_SHARED_ATTRIBUTES
 
 
 class KFCJPSpider(Spider):
     name = "kfc_jp"
-    item_attributes = KFC_SHARED_ATTRIBUTES
+    item_attributes = {"brand_wikidata": "Q524757"}
     allowed_domains = ["search.kfc.co.jp"]
     start_urls = ["https://search.kfc.co.jp/api/point?b=31,129,46,146"]
 

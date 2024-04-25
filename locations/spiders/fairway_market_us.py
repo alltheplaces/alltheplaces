@@ -24,6 +24,7 @@ class FairwayMarketUSSpider(scrapy.Spider):
     start_urls = [
         "https://www.fairwaymarket.com/api/models/stores?posts_per_page=40",
     ]
+    requires_proxy = True  # Cloudflare geoblocking in use
 
     def parse_hours(self, hours):
         opening_hours = OpeningHours()

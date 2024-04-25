@@ -6,7 +6,7 @@ from locations.hours import DAYS_FULL, OpeningHours
 
 class PennyDESpider(scrapy.Spider):
     name = "penny_de"
-    item_attributes = {"brand": "Penny", "brand_wikidata": "Q284688"}
+    item_attributes = {"brand_wikidata": "Q284688"}
     allowed_domains = ["penny.de"]
     start_urls = ("https://www.penny.de/.rest/market",)
 
@@ -23,7 +23,7 @@ class PennyDESpider(scrapy.Spider):
     def parse(self, response, **kwargs):
         for location in response.json():
             item = DictParser.parse(location)
-            item["name"] = location["marketName"]
+            item["branch"] = location["marketName"].removeprefix("Penny ")
             item["street_address"] = location["streetWithHouseNumber"]
             item["website"] = response.urljoin(
                 "/".join(["/markt", location["citySlug"], location["wwIdent"], location["slug"]])
