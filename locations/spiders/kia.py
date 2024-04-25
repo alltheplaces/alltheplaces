@@ -3,13 +3,15 @@ import scrapy
 from locations.items import Feature
 
 
-class KiaATFRDESpider(scrapy.Spider):
-    name = "kia_at_fr_de"
+class KiaSpider(scrapy.Spider):
+    name = "kia"
     item_attributes = {"brand": "Kia", "brand_wikidata": "Q35349"}
     start_urls = [
         "https://www.kia.com/api/bin/dealer?locale=at-de&program=dealerLocatorSearch",
         "https://www.kia.com/api/bin/dealer?locale=fr-fr&program=dealerLocatorSearch",
         "https://www.kia.com/api/bin/dealer?locale=de-de&program=dealerLocatorSearch",
+        "https://www.kia.com/api/bin/dealer?locale=es-es&program=dealerLocatorSearch",
+        "https://www.kia.com/api/bin/dealer?locale=nl-nl&program=dealerLocatorSearch",
     ]
 
     def parse(self, response, **kwargs):
