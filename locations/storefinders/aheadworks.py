@@ -45,7 +45,7 @@ class AheadworksSpider(Spider, AutomaticSpiderGenerator):
             for day, hours in loads(location["hoursofoperation"])["hoursofoperation"].items():
                 item["opening_hours"].add_range(day, hours[0], hours[1])
 
-            yield from parse_item(item, location) or []
+            yield from self.parse_item(item, location) or []
 
     def parse_item(self, item: Feature, feature: dict):
         yield item
