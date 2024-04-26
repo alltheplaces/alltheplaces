@@ -12,8 +12,8 @@ from scrapy.http import Request, Response
 from locations.automatic_spider_generator import AutomaticSpiderGenerator, DetectionRequestRule, DetectionResponseRule
 from locations.items import GeneratedSpider
 from locations.name_suggestion_index import NSI
-from locations.storefinders.aheadworks import AheadworksSpider
 from locations.storefinders.agile_store_locator import AgileStoreLocatorSpider
+from locations.storefinders.aheadworks import AheadworksSpider
 from locations.storefinders.amasty_store_locator import AmastyStoreLocatorSpider
 from locations.storefinders.amrest_eu import AmrestEUSpider
 from locations.storefinders.closeby import ClosebySpider

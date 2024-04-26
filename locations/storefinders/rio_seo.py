@@ -19,7 +19,9 @@ from locations.pipelines.address_clean_up import merge_address_lines
 class RioSeoSpider(Spider, AutomaticSpiderGenerator):
     dataset_attributes = {"source": "api", "api": "rio_seo"}
     detection_rules = [
-        DetectionRequestRule(url=r"^(?P<start_urls__list>https?:\/\/(?P<allowed_domains__list>[A-Za-z0-9\-.]+)\/api\/getAsyncLocations\?.+)$")
+        DetectionRequestRule(
+            url=r"^(?P<start_urls__list>https?:\/\/(?P<allowed_domains__list>[A-Za-z0-9\-.]+)\/api\/getAsyncLocations\?.+)$"
+        )
     ]
 
     def start_requests(self):
