@@ -1,6 +1,6 @@
+import re
 from hashlib import sha1
 from html import unescape
-import re
 from typing import Iterable
 
 from scrapy import Selector, Spider
@@ -10,7 +10,6 @@ from locations.automatic_spider_generator import AutomaticSpiderGenerator, Detec
 from locations.categories import Extras, apply_yes_no
 from locations.hours import DAYS_BY_FREQUENCY, OpeningHours
 from locations.items import Feature
-
 
 # Lighthouse e-commerce platform store finder, with official URL of
 # https://www.lighthouse.gr/
@@ -57,14 +56,39 @@ class LighthouseSpider(Spider, AutomaticSpiderGenerator):
             item["ref"] = location.xpath("@id").get()
             item["lat"] = location.xpath("@data-latitude").get()
             item["lon"] = location.xpath("@data-longitude").get()
-            item["name"] = location.xpath('.//*[contains(@class, "name") and not(contains(@class, "name-"))]/text()').get("").strip()
-            item["addr_full"] = re.sub(r"\s+", " ", ", ".join(filter(None, map(str.strip, location.xpath('(.//*[contains(@class, "address-one")])[1]//text()').getall()))))
+            item["name"] = (
+                location.xpath('.//*[contains(@class, "name") and not(contains(@class, "name-"))]/text()')
+                .get("")
+                .strip()
+            )
+            item["addr_full"] = re.sub(
+                r"\s+",
+                " ",
+                ", ".join(
+                    filter(
+                        None,
+                        map(str.strip, location.xpath('(.//*[contains(@class, "address-one")])[1]//text()').getall()),
+                    )
+                ),
+            )
             item["phone"] = location.xpath('.//a[contains(@href, "tel:")]/@href').get("").replace("tel:", "")
             if not item["phone"]:
-                item["phone"] = location.xpath('(.//*[contains(@class, "phone") and not(contains(@class, "icon-open-hours"))])[1]/text()').get("").split(",")[0].strip()
+                item["phone"] = (
+                    location.xpath(
+                        '(.//*[contains(@class, "phone") and not(contains(@class, "icon-open-hours"))])[1]/text()'
+                    )
+                    .get("")
+                    .split(",")[0]
+                    .strip()
+                )
             item["email"] = location.xpath('.//a[contains(@href, "mailto:")]/@href').get("").replace("mailto:", "")
             if not item["email"]:
-                item["email"] = location.xpath('.//*[contains(@class, "email") and not(@data-cfemail)]/text()').get("").split(",")[0].strip()
+                item["email"] = (
+                    location.xpath('.//*[contains(@class, "email") and not(@data-cfemail)]/text()')
+                    .get("")
+                    .split(",")[0]
+                    .strip()
+                )
 
             # If no unique identifier is available, generate one from
             # coordinates instead.
@@ -87,7 +111,9 @@ class LighthouseSpider(Spider, AutomaticSpiderGenerator):
         apply_yes_no(Extras.COMPRESSED_AIR, item, "aircompresor" in extra_features, True)
 
     def parse_opening_hours(self, item: Feature, location: Selector) -> None:
-        if hours_string := " ".join(filter(None, map(str.strip, location.xpath('.//*[contains(@class, "icon-open-hours")]//text()').getall()))):
+        if hours_string := " ".join(
+            filter(None, map(str.strip, location.xpath('.//*[contains(@class, "icon-open-hours")]//text()').getall()))
+        ):
             hours_string = re.sub(r"\s+", " ", unescape(hours_string))
             print(hours_string)
             item["opening_hours"] = OpeningHours()
@@ -96,8 +122,8 @@ class LighthouseSpider(Spider, AutomaticSpiderGenerator):
             else:
                 # Otherwise, iterate over the possibilities until we get a first match
                 self.logger.warning(
-                        "Attempting to automatically detect the language of opening hours data. Specify spider parameter days = DAYS_EN or the appropriate language code to suppress this warning."
-                    )
+                    "Attempting to automatically detect the language of opening hours data. Specify spider parameter days = DAYS_EN or the appropriate language code to suppress this warning."
+                )
                 for days_candidate in DAYS_BY_FREQUENCY:
                     item["opening_hours"].add_ranges_from_string(hours_string, days=days_candidate)
                     if item["opening_hours"].as_opening_hours():
