@@ -1,12 +1,12 @@
 import base64
 import json
-from typing import Iterable
 import zlib
+from typing import Iterable
 
 from scrapy import Request, Spider
 from scrapy.http import Response
 
-from locations.automatic_spider_generator import AutomaticSpiderGenerator, DetectionResponseRule, DetectionRequestRule
+from locations.automatic_spider_generator import AutomaticSpiderGenerator, DetectionRequestRule, DetectionResponseRule
 from locations.dict_parser import DictParser
 from locations.items import Feature
 
@@ -46,7 +46,9 @@ class WPGoMapsSpider(Spider, AutomaticSpiderGenerator):
             js_objects={"allowed_domains": r'(typeof window.WPGMZA == "object") ? [window.location.hostname] : null'}
         ),
         DetectionResponseRule(
-            js_objects={"allowed_domains": r'(typeof window.wpgmza_google_api_status == "object") ? [window.location.hostname] : null'}
+            js_objects={
+                "allowed_domains": r'(typeof window.wpgmza_google_api_status == "object") ? [window.location.hostname] : null'
+            }
         ),
     ]
 

@@ -28,15 +28,13 @@ class SylinderSpider(Spider, AutomaticSpiderGenerator):
         DetectionRequestRule(
             url=r"^https?:\/\/platform-rest-prod\.ngdata\.no\/api\/episearch\/(?P<app_key>\d+)\/querysuggestions\?"
         ),
-        DetectionRequestRule(
-            url=r"^https?:\/\/platform-rest-prod\.ngdata\.no\/api\/handoveroptions\/(?P<app_key>\d+)"
-        ),
+        DetectionRequestRule(url=r"^https?:\/\/platform-rest-prod\.ngdata\.no\/api\/handoveroptions\/(?P<app_key>\d+)"),
         DetectionRequestRule(
             url=r"^https?:\/\/api\.ngdata\.no\/sylinder\/stores\/v1\/basic-info\?chainId=(?P<app_key>\d+)"
         ),
         DetectionRequestRule(
             url=r"^https?:\/\/api\.ngdata\.no\/sylinder\/stores\/v1\/extended-info\?chainId=(?P<app_key>\d+)"
-        )
+        ),
     ]
 
     def start_requests(self) -> Iterable[JsonRequest]:
