@@ -51,7 +51,6 @@ class LighthouseSpider(Spider, AutomaticSpiderGenerator):
 
     def parse(self, response: Response):
         for location in response.xpath('//article[@data-control="box"]'):
-            print(location)
             item = Feature()
             item["ref"] = location.xpath("@id").get()
             item["lat"] = location.xpath("@data-latitude").get()
@@ -115,7 +114,6 @@ class LighthouseSpider(Spider, AutomaticSpiderGenerator):
             filter(None, map(str.strip, location.xpath('.//*[contains(@class, "icon-open-hours")]//text()').getall()))
         ):
             hours_string = re.sub(r"\s+", " ", unescape(hours_string))
-            print(hours_string)
             item["opening_hours"] = OpeningHours()
             if self.days:
                 item["opening_hours"].add_ranges_from_string(hours_string, days=self.days)
