@@ -48,6 +48,7 @@ from locations.storefinders.uberall import UberallSpider
 from locations.storefinders.virtualearth import VirtualEarthSpider
 from locations.storefinders.where2getit import Where2GetItSpider
 from locations.storefinders.woosmap import WoosmapSpider
+from locations.storefinders.wp_go_maps import WPGoMapsSpider
 from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
 from locations.storefinders.yext import YextSpider
 from locations.user_agents import BROWSER_DEFAULT
@@ -222,6 +223,7 @@ class StorefinderDetectorSpider(Spider):
             VirtualEarthSpider,
             Where2GetItSpider,
             WoosmapSpider,
+            WPGoMapsSpider,
             WPStoreLocatorSpider,
             YextSpider,
         ]
@@ -396,8 +398,9 @@ class StorefinderDetectorSpider(Spider):
 
                 # Execute JavaScript code in the main frame and then all
                 # nested iframes in order of their appearance in the DOM for
-                # the provided JQ query to return a non-null response. The
-                # search stops as soon as the first JQ query succeeds.
+                # the provided JS code. The search stops as soon as the first
+                # non-null response is received. Exceptions will cause a null
+                # response.
                 remaining_js_objects = deepcopy(detection_rule.js_objects)
                 for param_name, js_code in detection_rule.js_objects.items():
                     page = response.meta["playwright_page"]

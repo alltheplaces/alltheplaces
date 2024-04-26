@@ -1,27 +1,56 @@
 import base64
 import json
+from typing import Iterable
 import zlib
 
 from scrapy import Request, Spider
+from scrapy.http import Response
 
+from locations.automatic_spider_generator import AutomaticSpiderGenerator, DetectionResponseRule, DetectionRequestRule
 from locations.dict_parser import DictParser
+from locations.items import Feature
 
-# A base spider for WP Go Maps (https://wordpress.org/plugins/wp-google-maps/ and https://www.wpgmaps.com/)
+# A base spider for WP Go Maps (https://wordpress.org/plugins/wp-google-maps/
+# and https://www.wpgmaps.com/).
 #
-# Supply `allowed_domains` or explicit `start_urls`.
-# Optionally, filter to a specific map_id
-
-
+# Supply `allowed_domains` as the domain containing the store finder page.
+# In some rare circumstances where the WordPress API endpoint is in a custom
+# path, specify an explicit `start_urls` to the path of
+# `/wp-json/wpgmza/v1/features/`.
 #
-class WpGoMapsSpider(Spider):
-    map_id = None
-    length = 10000
-    start = 0
+# This store finder allows multiple feature layers to be returned from the
+# same API endpoint. Most store locator implementations will only have a
+# single feature layer with identifier of "1". Only in circumstances where
+# a different feature layer needs to be used should a value for the `map_id`
+# attribute of this class be supplied. All valid `map_id` values can be found
+# by typing `window.WPGMZA.maps.map(i => {return i.id})` into a Firefox
+# JavaScript console on the store finder page to observe any identifiers
+# returned other than the default of "1".
+#
+# If clean-up to extracted data is required, or additional data fields need to
+# be extracted, override the `post_process_item` method.
 
-    start_urls = []
-    allowed_domains = []
 
-    def start_requests(self):
+class WPGoMapsSpider(Spider, AutomaticSpiderGenerator):
+    map_id: int = None
+    length: int = 10000
+    start: int = 0
+    detection_rules = [
+        DetectionRequestRule(
+            url=r"^https?:\/\/(?P<allowed_domains__list>[A-Za-z0-9\-.]+)\/wp-json\/wpgmza\/v1\/features\/"
+        ),
+        DetectionRequestRule(
+            url=r"^(?P<start_urls__list>https?:\/\/(?P<allowed_domains__list>[A-Za-z0-9\-.]+)(?:\/[^\/]+)+\/wp-json\/wpgmza\/v1\/features\/)"
+        ),
+        DetectionResponseRule(
+            js_objects={"allowed_domains": r'(typeof window.WPGMZA == "object") ? [window.location.hostname] : null'}
+        ),
+        DetectionResponseRule(
+            js_objects={"allowed_domains": r'(typeof window.wpgmza_google_api_status == "object") ? [window.location.hostname] : null'}
+        ),
+    ]
+
+    def start_requests(self) -> Iterable[Request]:
         urls = self.start_urls
         if len(self.start_urls) == 0:
             if self.map_id is not None:
@@ -32,10 +61,10 @@ class WpGoMapsSpider(Spider):
         for url in urls:
             yield Request(url=url, callback=self.parse)
 
-    def parse(self, response, **kwargs):
+    def parse(self, response: Response) -> Iterable[Feature]:
         yield from self.parse_stores(response)
 
-    def features_url_for(self, map_id):
+    def features_url_for(self, map_id: int) -> str:
         param = {"filter": json.dumps({"map_id": map_id})}
         return f"https://{self.allowed_domains[0]}/wp-json/wpgmza/v1/features/{self.encode_params(param)}"
 
@@ -47,7 +76,7 @@ class WpGoMapsSpider(Spider):
         path = base64.b64encode(data).rstrip(b"=").decode()
         return f"base64{path}"
 
-    def pre_process_marker(self, marker):
+    def pre_process_marker(self, marker: dict) -> dict:
         if "<img" in marker["title"]:
             marker.pop("title")
 
@@ -55,10 +84,10 @@ class WpGoMapsSpider(Spider):
             marker.pop("address")
         return marker
 
-    def post_process_item(self, item, location):
+    def post_process_item(self, item: Feature, location: dict) -> Feature:
         return item
 
-    def parse_stores(self, response):
+    def parse_stores(self, response: Response) -> Iterable[Feature]:
         for marker in response.json()["markers"]:
             location = self.pre_process_marker(marker)
             item = DictParser.parse(location)
