@@ -34,7 +34,7 @@ from locations.items import Feature
 
 
 class MapsMarkerProSpider(Spider, AutomaticSpiderGenerator):
-    days = None
+    days: dict = None
     detection_rules = [
         DetectionRequestRule(
             url=r"^https?:\/\/(?P<allowed_domains__list>[A-Za-z0-9\-.]+)\/wp-admin\/admin-ajax\.php$",
