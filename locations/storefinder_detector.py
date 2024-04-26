@@ -21,6 +21,7 @@ from locations.storefinders.easylocator import EasyLocatorSpider
 from locations.storefinders.freshop import FreshopSpider
 from locations.storefinders.geo_me import GeoMeSpider
 from locations.storefinders.kibo import KiboSpider
+from locations.storefinders.lighthouse import LighthouseSpider
 from locations.storefinders.limesharp_store_locator import LimesharpStoreLocatorSpider
 from locations.storefinders.localisr import LocalisrSpider
 from locations.storefinders.locally import LocallySpider
@@ -193,6 +194,7 @@ class StorefinderDetectorSpider(Spider):
             FreshopSpider,
             GeoMeSpider,
             KiboSpider,
+            LighthouseSpider,
             LimesharpStoreLocatorSpider,
             LocalisrSpider,
             LocallySpider,
