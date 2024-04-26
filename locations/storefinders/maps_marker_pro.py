@@ -43,7 +43,7 @@ class MapsMarkerProSpider(Spider, AutomaticSpiderGenerator):
         DetectionRequestRule(
             url=r"^(?P<start_urls__list>https?:\/\/(?P<allowed_domains__list>[A-Za-z0-9\-.]+)(?:\/[^\/]+)+\/wp-admin\/admin-ajax\.php)$",
             js_objects={"__": 'if (typeof window.MapsMarkerPro == "function") {true} else {null}'},
-        )
+        ),
     ]
 
     def start_requests(self):
@@ -93,7 +93,15 @@ class MapsMarkerProSpider(Spider, AutomaticSpiderGenerator):
             yield from self.parse_item(item, feature, popup)
 
     def parse_opening_hours(self, item: Feature, feature: dict, popup: dict, hours_selector: Selector) -> None:
-        if hours_string := " ".join(filter(None, map(str.strip, hours_selector.xpath("//div[contains(@class, 'real-opening-hours')]/ul/li/text()").getall()))):
+        if hours_string := " ".join(
+            filter(
+                None,
+                map(
+                    str.strip,
+                    hours_selector.xpath("//div[contains(@class, 'real-opening-hours')]/ul/li/text()").getall(),
+                ),
+            )
+        ):
             item["opening_hours"] = OpeningHours()
             if self.days:
                 item["opening_hours"].add_ranges_from_string(hours_string, days=self.days)
