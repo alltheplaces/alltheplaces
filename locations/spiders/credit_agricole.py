@@ -24,7 +24,10 @@ class CreditAgricoleSpider(SitemapSpider, StructuredDataSpider):
             item["lat"] = coords["latitude"]
             item["lon"] = coords["longitude"]
 
-        if 'guichets automatiques' in response.xpath('//span[@class="npc-sl-strct-srv-card--text "]/text()').get(default='').lower():
+        if (
+            "guichets automatiques"
+            in response.xpath('//span[@class="npc-sl-strct-srv-card--text "]/text()').get(default="").lower()
+        ):
             apply_yes_no(Extras.ATM, item, True)
 
         yield item
