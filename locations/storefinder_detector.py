@@ -43,6 +43,7 @@ from locations.storefinders.storepoint import StorepointSpider
 from locations.storefinders.storerocket import StoreRocketSpider
 from locations.storefinders.super_store_finder import SuperStoreFinderSpider
 from locations.storefinders.sweetiq import SweetIQSpider
+from locations.storefinders.sylinder import SylinderSpider
 from locations.storefinders.uberall import UberallSpider
 from locations.storefinders.virtualearth import VirtualEarthSpider
 from locations.storefinders.where2getit import Where2GetItSpider
@@ -216,6 +217,7 @@ class StorefinderDetectorSpider(Spider):
             StoreRocketSpider,
             SuperStoreFinderSpider,
             SweetIQSpider,
+            SylinderSpider,
             UberallSpider,
             VirtualEarthSpider,
             Where2GetItSpider,
