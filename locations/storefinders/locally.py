@@ -14,7 +14,7 @@ class LocallySpider(Spider, AutomaticSpiderGenerator):
     custom_settings = {"ROBOTSTXT_OBEY": False}
     detection_rules = [
         DetectionRequestRule(
-            url=r"^(?P<start_urls__list>https?:\/\/[A-Za-z0-9\-.]+\.locally\.com\/stores\/conversion_data\?.+)$"
+            url=r"^(?P<start_urls__list>https?:\/\/(?P<allowed_domains__list>[A-Za-z0-9\-.]+\.locally\.com)\/stores\/conversion_data\?.+)$"
         )
     ]
 

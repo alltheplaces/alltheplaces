@@ -18,7 +18,7 @@ class KiboSpider(Spider, AutomaticSpiderGenerator):
     api_filter: str = None
     detection_rules = [
         DetectionRequestRule(
-            url=r"^(?P<start_urls__list>https?:\/\/[A-Za-z0-9\-.]+\/api\/commerce\/storefront\/locationUsageTypes\/SP\/locations)(?:\?|\/|$)"
+            url=r"^(?P<start_urls__list>https?:\/\/(?P<allowed_domains__list>[A-Za-z0-9\-.]+)\/api\/commerce\/storefront\/locationUsageTypes\/SP\/locations)(?:\?|\/|$)"
         )
     ]
 
