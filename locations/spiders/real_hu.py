@@ -3,8 +3,8 @@ from locations.hours import DAYS_HU
 from locations.storefinders.maps_marker_pro import MapsMarkerProSpider
 
 
-class RealHU(MapsMarkerProSpider):
+class RealHUSpider(MapsMarkerProSpider):
     name = "real_hu"
+    item_attributes = {"brand": "Real", "brand_wikidata": "Q100741414", "extras": Categories.SHOP_CONVENIENCE.value}
     allowed_domains = ["real.hu"]
     days = DAYS_HU
-    item_attributes = {"brand": "Real", "brand_wikidata": "Q100741414", "extras": Categories.SHOP_CONVENIENCE.value}

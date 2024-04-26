@@ -25,6 +25,7 @@ from locations.storefinders.lighthouse import LighthouseSpider
 from locations.storefinders.limesharp_store_locator import LimesharpStoreLocatorSpider
 from locations.storefinders.localisr import LocalisrSpider
 from locations.storefinders.locally import LocallySpider
+from locations.storefinders.maps_marker_pro import MapsMarkerProSpider
 from locations.storefinders.metalocator import MetaLocatorSpider
 from locations.storefinders.metizsoft import MetizsoftSpider
 from locations.storefinders.momentfeed import MomentFeedSpider
@@ -198,6 +199,7 @@ class StorefinderDetectorSpider(Spider):
             LimesharpStoreLocatorSpider,
             LocalisrSpider,
             LocallySpider,
+            MapsMarkerProSpider,
             MetaLocatorSpider,
             MetizsoftSpider,
             MomentFeedSpider,
