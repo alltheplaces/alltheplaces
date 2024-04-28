@@ -279,6 +279,7 @@ class Categories(Enum):
 
     SURVEILLANCE_CAMERA = {"man_made": "camera", "surveillance:type": "camera"}
 
+
 def apply_category(category, item: Feature):
     """
     Apply categories to a Feature, where categories can be supplied
