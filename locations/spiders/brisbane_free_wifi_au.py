@@ -21,6 +21,7 @@ class BrisbaneFreeWiFiAUSpider(XMLFeedSpider):
             "lat": node.xpath(".//Point/coordinates/text()").get().split(",", 3)[1],
             "lon": node.xpath(".//Point/coordinates/text()").get().split(",", 3)[0],
             "city": node.xpath('.//ExtendedData/Data[@name="suburb"]/value/text()').get(),
+            "state": "Queensland",
             "extras": {
                 "internet_access": "wlan",
                 "internet_access:fee": "no",
