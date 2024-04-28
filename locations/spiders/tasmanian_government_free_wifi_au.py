@@ -3,7 +3,7 @@ from hashlib import sha1
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
-from locations.categories import apply_category, Categories
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
@@ -35,7 +35,7 @@ class TasmanianGovernmentFreeWiFiAUSpider(Spider):
                         "internet_access:operator": "Telstra",
                         "internet_access:operator:wikidata": "Q721162",
                         "internet_access:ssid": "TasGov_Free",
-                    }
+                    },
                 }
                 apply_category(Categories.ANTENNA, properties)
                 yield Feature(**properties)
