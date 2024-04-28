@@ -3,7 +3,7 @@ from hashlib import sha1
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
-from locations.categories import apply_category, Categories
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
@@ -35,7 +35,11 @@ class ACTGovernmentRoadSafetyCamerasAUSpider(Spider):
             # Unfortunately camera/location codes are not unique, so we need
             # to generate our own unique references that include the location
             # description and lat/lon fields.
-            properties["ref"] = sha1("{} {} {} {}".format(properties["name"], properties["addr_full"], properties["lat"], properties["lon"]).encode("UTF-8")).hexdigest()
+            properties["ref"] = sha1(
+                "{} {} {} {}".format(
+                    properties["name"], properties["addr_full"], properties["lat"], properties["lon"]
+                ).encode("UTF-8")
+            ).hexdigest()
 
             if location["camera_type"] == "FIXED ONLY SPEED CAMERA":
                 apply_category(Categories.ENFORCEMENT_MAXIMUM_SPEED, properties)
