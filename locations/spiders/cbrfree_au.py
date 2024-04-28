@@ -1,8 +1,7 @@
 from chompjs import parse_js_object
-
 from scrapy import Spider
 
-from locations.categories import apply_category, Categories
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
@@ -10,7 +9,9 @@ class CBRfreeAU(Spider):
     name = "cbrfree_au"
     item_attributes = {"operator": "Government of the Australian Capital Territory", "operator_wikidata": "Q27220504"}
     allowed_domains = ["www.google.com"]
-    start_urls = ["https://www.google.com/maps/d/embed?mid=1KiDsTVMHb_DsRtT2J_mI364o9d6iPeW0&ll=-35.31163605596965%2C149.1047475&z=10"]
+    start_urls = [
+        "https://www.google.com/maps/d/embed?mid=1KiDsTVMHb_DsRtT2J_mI364o9d6iPeW0&ll=-35.31163605596965%2C149.1047475&z=10"
+    ]
 
     def parse(self, response):
         js_blob = response.xpath('//script[contains(text(), "var _pageData = ")]/text()').get()
@@ -32,7 +33,7 @@ class CBRfreeAU(Spider):
                     "internet_access:operator": "iiNet",
                     "internet_access:operator:wikidata": "Q16252604",
                     "internet_access:ssid": "CBRfree WiFi",
-                }
+                },
             }
             apply_category(Categories.ANTENNA, properties)
             yield Feature(**properties)
