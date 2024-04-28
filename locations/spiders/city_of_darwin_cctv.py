@@ -28,7 +28,7 @@ class CityOfDarwinCCTVAUSpider(Spider):
                 "state": "Northern Territory",
                 "extras": {
                     "surveillance": "public",
-                }
+                },
             }
 
             if location["properties"].get("Camera_Type") != "Fixed":
