@@ -28,6 +28,7 @@ class CityOfDarwinFreeWiFiAUSpider(Spider):
                 continue
             properties = {
                 "geometry": loads(to_geojson(Polygon(shape(location["geometry"])).centroid)),
+                "state": "Northern Territory",
                 "extras": {
                     "internet_access": "wlan",
                     "internet_access:fee": "no",
