@@ -27,7 +27,7 @@ class BrisbaneFreeWiFiAUSpider(XMLFeedSpider):
                 "internet_access:operator": "Telstra",
                 "internet_access:operator:wikidata": "Q721162",
                 "internet_access:ssid": "Brisbane Free Wi-Fi",
-            }
+            },
         }
         apply_category(Categories.ANTENNA, properties)
         yield Feature(**properties)
