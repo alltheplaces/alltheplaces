@@ -28,6 +28,10 @@ class Categories(Enum):
 
     HIGHWAY_RESIDENTIAL = {"highway": "residential"}
 
+    ENFORCEMENT_AVERAGE_SPEED = {"enforcement": "average_speed"}
+    ENFORCEMENT_MAXIMUM_SPEED = {"enforcement": "maxspeed"}
+    ENFORCEMENT_TRAFFIC_SIGNALS = {"enforcement": "traffic_signals"}
+
     CRAFT_CARPENTER = {"craft": "carpenter"}
     CRAFT_CLOCKMAKER = {"craft": "clockmaker"}
     CRAFT_ELECTRONICS_REPAIR = {"craft": "electronics_repair"}
