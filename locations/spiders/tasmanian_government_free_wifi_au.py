@@ -12,6 +12,7 @@ class TasmanianGovernmentFreeWiFiAUSpider(Spider):
     item_attributes = {"operator": "Government of Tasmania", "operator_wikidata": "Q3112571"}
     allowed_domains = ["freewifi.tas.gov.au"]
     start_urls = ["https://freewifi.tas.gov.au/api/application.json"]
+    no_refs = True
 
     def start_requests(self):
         for url in self.start_urls:
@@ -23,7 +24,6 @@ class TasmanianGovernmentFreeWiFiAUSpider(Spider):
                 if hotspot["disabled"]:
                     continue
                 properties = {
-                    "ref": sha1("{},{}".format(hotspot["latitude"], hotspot["longitude"]).encode("UTF-8")).hexdigest(),
                     "name": hotspot["label"],
                     "lat": hotspot["latitude"],
                     "lon": hotspot["longitude"],
