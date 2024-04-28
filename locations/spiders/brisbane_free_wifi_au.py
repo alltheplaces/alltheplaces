@@ -1,4 +1,3 @@
-
 from scrapy.spiders import XMLFeedSpider
 
 from locations.categories import Categories, apply_category
