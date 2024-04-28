@@ -5,8 +5,8 @@ from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
-class RoadSafetyCamerasVictoriaAUSpider(Spider):
-    name = "road_safety_cameras_victoria_au"
+class VictorianGovernmentRoadSafetyCamerasAUSpider(Spider):
+    name = "victorian_government_road_safety_cameras_au"
     item_attributes = {"operator": "Department of Justice and Community Safety", "operator_wikidata": "Q5260361"}
     allowed_domains = ["services-ap1.arcgis.com"]
     start_urls = [
