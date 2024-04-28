@@ -21,7 +21,6 @@ class CBRfreeAU(Spider):
         outdoor_hotspots = parse_js_object(js_blob)[1][6][2][4][0][6]
         all_hotspots = indoor_hotspots + outdoor_mesh_hotspots + outdoor_hotspots
         for hotspot in all_hotspots:
-            print(hotspot)
             properties = {
                 "ref": hotspot[5][0][0].replace('\\"', ""),
                 "lat": hotspot[4][0][1][0],
