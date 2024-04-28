@@ -279,6 +279,7 @@ class Categories(Enum):
 
     ANTENNA = {"man_made": "antenna"}
 
+
 def apply_category(category, item: Feature):
     """
     Apply categories to a Feature, where categories can be supplied
