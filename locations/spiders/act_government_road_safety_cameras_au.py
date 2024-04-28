@@ -1,5 +1,3 @@
-from hashlib import sha1
-
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
@@ -12,6 +10,7 @@ class ACTGovernmentRoadSafetyCamerasAUSpider(Spider):
     item_attributes = {"operator": "Government of the Australian Capital Territory", "operator_wikidata": "Q27220504"}
     allowed_domains = ["www.data.act.gov.au"]
     start_urls = ["https://www.data.act.gov.au/resource/426s-vdu4.json?$limit=50000"]
+    no_refs = True
 
     def start_requests(self):
         for url in self.start_urls:
@@ -31,15 +30,6 @@ class ACTGovernmentRoadSafetyCamerasAUSpider(Spider):
                 "lat": location["latitude"],
                 "lon": location["longitude"],
             }
-
-            # Unfortunately camera/location codes are not unique, so we need
-            # to generate our own unique references that include the location
-            # description and lat/lon fields.
-            properties["ref"] = sha1(
-                "{} {} {} {}".format(
-                    properties["name"], properties["addr_full"], properties["lat"], properties["lon"]
-                ).encode("UTF-8")
-            ).hexdigest()
 
             if location["camera_type"] == "FIXED ONLY SPEED CAMERA":
                 apply_category(Categories.ENFORCEMENT_MAXIMUM_SPEED, properties)
