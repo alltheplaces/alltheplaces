@@ -1,9 +1,9 @@
 from json import loads
-from shapely import to_geojson
-from shapely.geometry import shape, Polygon
 
 from scrapy import Spider
 from scrapy.http import JsonRequest
+from shapely import to_geojson
+from shapely.geometry import Polygon, shape
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
