@@ -1,6 +1,7 @@
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
+from locations.categories import apply_category, Categories
 from locations.items import Feature
 
 
@@ -33,4 +34,5 @@ class VicFreeWiFiAUSpider(Spider):
                     "internet_access:ssid": "VicFreeWiFi",
                 },
             }
+            apply_category(Categories.ANTENNA, properties)
             yield Feature(**properties)
