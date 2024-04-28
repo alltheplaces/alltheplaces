@@ -277,6 +277,8 @@ class Categories(Enum):
     TRADE_PLUMBING = {"trade": "plumbing"}
     TRADE_SWIMMING_POOL_SUPPLIES = {"trade": "swimming_pool_supplies"}
 
+    SURVEILLANCE_CAMERA = {"man_made": "surveillance", "surveillance:type": "camera"}
+
 
 def apply_category(category, item: Feature):
     """
