@@ -13,10 +13,10 @@ class BrisbaneFreeWiFiAUSpider(XMLFeedSpider):
     start_urls = ["https://www.brisbane.qld.gov.au/maps/layers/kml/16"]
     iterator = "xml"
     itertag = "Placemark"
+    no_refs = True
 
     def parse_node(self, response, node):
         properties = {
-            "ref": sha1(node.xpath(".//Point/coordinates/text()").get().encode("UTF-8")).hexdigest(),
             "name": node.xpath(".//name/text()").get(),
             "lat": node.xpath(".//Point/coordinates/text()").get().split(",", 3)[1],
             "lon": node.xpath(".//Point/coordinates/text()").get().split(",", 3)[0],
