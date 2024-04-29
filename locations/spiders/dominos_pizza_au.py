@@ -19,8 +19,12 @@ class DominosPizzaAUSpider(SitemapSpider):
     def parse(self, response):
         properties = {
             "ref": response.url.split("-")[-1],
-            "name": unescape(" ".join(filter(None, map(str.strip, response.xpath('//div[@class="storetitle"]/text()').getall())))),
-            "addr_full": merge_address_lines(filter(None, map(str.strip, response.xpath('//a[@id="open-map-address"]/text()').getall()))),
+            "name": unescape(
+                " ".join(filter(None, map(str.strip, response.xpath('//div[@class="storetitle"]/text()').getall())))
+            ),
+            "addr_full": merge_address_lines(
+                filter(None, map(str.strip, response.xpath('//a[@id="open-map-address"]/text()').getall()))
+            ),
             "state": response.url.split("/store/", 1)[1].split("-")[0].upper(),
             "lat": float(response.xpath('//input[@id="store-lat"]/@value').get()),
             "lon": float(response.xpath('//input[@id="store-lon"]/@value').get()),
@@ -29,7 +33,12 @@ class DominosPizzaAUSpider(SitemapSpider):
             "opening_hours": OpeningHours(),
         }
 
-        hours_text = " ".join(filter(None, map(str.strip, response.xpath('//span[@class="trading-day" or @class="trading-hour"]/text()').getall())))
+        hours_text = " ".join(
+            filter(
+                None,
+                map(str.strip, response.xpath('//span[@class="trading-day" or @class="trading-hour"]/text()').getall()),
+            )
+        )
         properties["opening_hours"].add_ranges_from_string(hours_text)
 
         yield Feature(**properties)
