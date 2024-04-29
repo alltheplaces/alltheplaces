@@ -19,6 +19,8 @@ from locations.structured_data_spider import clean_facebook
 
 
 class YextSpider(Spider):
+    dataset_attributes = {"source": "api", "api": "yext"}
+
     api_key = ""
     api_version = ""
     search_filter = "{}"
