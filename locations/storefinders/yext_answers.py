@@ -1,0 +1,74 @@
+import json
+from typing import Any, Iterable
+from urllib.parse import urlencode
+
+from scrapy import Request
+from scrapy.http import JsonRequest, Response
+from scrapy.spiders import Spider
+
+from locations.dict_parser import DictParser
+from locations.hours import OpeningHours
+from locations.items import Feature
+
+
+class YextAnswersSpider(Spider):
+    dataset_attributes = {"source": "api", "api": "yext"}
+
+    endpoint: str = "https://liveapi.yext.com/v2/accounts/me/answers/vertical/query"
+    api_key: str = ""
+    api_version: str = "20220511"
+    page_limit: int = 50
+
+    def make_request(self, offset: int) -> JsonRequest:
+        return JsonRequest(
+            url="{}?{}".format(
+                self.endpoint,
+                urlencode(
+                    {
+                        "experienceKey": "tgi-fridays-search",
+                        "api_key": self.api_key,
+                        "v": self.api_version,
+                        "version": "PRODUCTION",
+                        "locale": "en",
+                        "verticalKey": "locations",
+                        "filters": json.dumps(
+                            {"builtin.location": {"$near": {"lat": 0, "lng": 0, "radius": 50000000}}}
+                        ),
+                        "limit": str(self.page_limit),
+                        "offset": str(offset),
+                        "source": "STANDARD",
+                    }
+                ),
+            ),
+            meta={"offset": offset},
+        )
+
+    def start_requests(self) -> Iterable[Request]:
+        yield self.make_request(0)
+
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        for location in response.json()["response"]["results"]:
+            item = DictParser.parse(location["data"])
+            item["branch"] = location["data"]["geomodifier"]
+            item["extras"]["ref:google"] = location["data"].get("googlePlaceId")
+            item["facebook"] = location["data"].get("facebookPageUrl")
+
+            item["opening_hours"] = self.parse_opening_hours(location)
+
+            yield from self.parse_item(location, item) or []
+
+        if len(response.json()["response"]["results"]) == self.page_limit:
+            yield self.make_request(response.meta["offset"] + self.page_limit)
+
+    def parse_opening_hours(self, location, **kwargs: Any) -> OpeningHours | None:
+        oh = OpeningHours()
+        for day, rule in location["data"]["hours"].items():
+            if rule.get("isClosed") is True:
+                continue
+            for time in rule["openIntervals"]:
+                oh.add_range(day, time["start"], time["end"])
+
+        return oh
+
+    def parse_item(self, location: dict, item: Feature) -> Iterable[Feature]:
+        yield item
