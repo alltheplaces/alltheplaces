@@ -50,14 +50,14 @@ class FortyWinksAUSpider(Spider):
                     if len(missing_day_names) == 1:
                         day_name = missing_day_names[0]
                     else:
-                        self.logger.error("Multiple missing day names in provided opening hours. Extracted opening hours data will be partially incomplete.")
+                        self.logger.error(
+                            "Multiple missing day names in provided opening hours. Extracted opening hours data will be partially incomplete."
+                        )
                         continue
                 for hours_range in hours_ranges:
                     if not hours_range["Start"] or not hours_range["Finish"]:
                         continue
                     open_time = datetime.fromisoformat(hours_range["Start"]).astimezone(time_zone).strftime("%H:%M")
-                    close_time = (
-                        datetime.fromisoformat(hours_range["Finish"]).astimezone(time_zone).strftime("%H:%M")
-                    )
+                    close_time = datetime.fromisoformat(hours_range["Finish"]).astimezone(time_zone).strftime("%H:%M")
                     item["opening_hours"].add_range(day_name, open_time, close_time)
             yield item
