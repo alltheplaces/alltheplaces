@@ -6,7 +6,7 @@ from scrapy import Spider
 from scrapy.http import JsonRequest
 
 from locations.dict_parser import DictParser
-from locations.hours import OpeningHours
+from locations.hours import DAYS_FULL, OpeningHours
 
 STATE_TIMEZONES = {
     "Australian Capital Territory": "Australia/Sydney",
@@ -39,15 +39,25 @@ class FortyWinksAUSpider(Spider):
                 item["website"] = "https://www.fortywinks.com.au/store-finder" + item["website"]
             time_zone = ZoneInfo(STATE_TIMEZONES[item["state"]])
             item["opening_hours"] = OpeningHours()
+            hours_dict = {}
             for hours_raw in location["openingHours"]:
                 hours_json = json.loads(hours_raw)
-                for day_name, hours_ranges in hours_json.items():
-                    for hours_range in hours_ranges:
-                        if not hours_range["Start"] or not hours_range["Finish"]:
-                            continue
-                        open_time = datetime.fromisoformat(hours_range["Start"]).astimezone(time_zone).strftime("%H:%M")
-                        close_time = (
-                            datetime.fromisoformat(hours_range["Finish"]).astimezone(time_zone).strftime("%H:%M")
+                hours_dict.update(hours_json)
+            for day_name, hours_ranges in hours_dict.items():
+                if not day_name:
+                    specified_day_names = list(filter(None, hours_dict.keys()))
+                    missing_day_names = list(set(DAYS_FULL) - set(specified_day_names))
+                    if len(missing_day_names) == 1:
+                        day_name = missing_day_names[0]
+                    else:
+                        self.logger.error(
+                            "Multiple missing day names in provided opening hours. Extracted opening hours data will be partially incomplete."
                         )
-                        item["opening_hours"].add_range(day_name, open_time, close_time)
+                        continue
+                for hours_range in hours_ranges:
+                    if not hours_range["Start"] or not hours_range["Finish"]:
+                        continue
+                    open_time = datetime.fromisoformat(hours_range["Start"]).astimezone(time_zone).strftime("%H:%M")
+                    close_time = datetime.fromisoformat(hours_range["Finish"]).astimezone(time_zone).strftime("%H:%M")
+                    item["opening_hours"].add_range(day_name, open_time, close_time)
             yield item
