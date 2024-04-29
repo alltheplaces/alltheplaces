@@ -16,8 +16,10 @@ class YextAnswersSpider(Spider):
 
     endpoint: str = "https://liveapi.yext.com/v2/accounts/me/answers/vertical/query"
     api_key: str = ""
+    experience_key: str = ""
     api_version: str = "20220511"
     page_limit: int = 50
+    locale: str = "en"
 
     def make_request(self, offset: int) -> JsonRequest:
         return JsonRequest(
@@ -25,11 +27,11 @@ class YextAnswersSpider(Spider):
                 self.endpoint,
                 urlencode(
                     {
-                        "experienceKey": "tgi-fridays-search",
+                        "experienceKey": self.experience_key,
                         "api_key": self.api_key,
                         "v": self.api_version,
                         "version": "PRODUCTION",
-                        "locale": "en",
+                        "locale": self.locale,
                         "verticalKey": "locations",
                         "filters": json.dumps(
                             {"builtin.location": {"$near": {"lat": 0, "lng": 0, "radius": 50000000}}}
@@ -49,7 +51,7 @@ class YextAnswersSpider(Spider):
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json()["response"]["results"]:
             item = DictParser.parse(location["data"])
-            item["branch"] = location["data"]["geomodifier"]
+            item["branch"] = location["data"].get("geomodifier")
             item["extras"]["ref:google"] = location["data"].get("googlePlaceId")
             item["facebook"] = location["data"].get("facebookPageUrl")
 
@@ -62,7 +64,12 @@ class YextAnswersSpider(Spider):
 
     def parse_opening_hours(self, location, **kwargs: Any) -> OpeningHours | None:
         oh = OpeningHours()
+        hours = location["data"].get("hours")
+        if not hours:
+            return None
         for day, rule in location["data"]["hours"].items():
+            if day == "holidayHours":
+                continue
             if rule.get("isClosed") is True:
                 continue
             for time in rule["openIntervals"]:
