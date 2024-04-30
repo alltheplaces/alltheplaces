@@ -3,7 +3,7 @@ from scrapy import Request, Spider
 from locations.dict_parser import DictParser
 from locations.google_url import url_to_coords
 from locations.hours import OpeningHours
-from locations.items import set_social_media, SocialMedia
+from locations.items import SocialMedia, set_social_media
 from locations.pipelines.address_clean_up import clean_address
 from locations.spiders.tgi_fridays_us import TGIFridaysUSSpider
 from locations.structured_data_spider import clean_facebook
