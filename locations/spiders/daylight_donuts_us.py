@@ -13,3 +13,4 @@ class DaylightDonutsUSSpider(WPStoreLocatorSpider):
         "daylightdonuts.com",
     ]
     time_format = "%I:%M %p"
+    requires_proxy = True  # Imperva anti-bot protection in use

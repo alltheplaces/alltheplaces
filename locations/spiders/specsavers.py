@@ -141,8 +141,9 @@ fragment sectionalNotification on StoreSectionalNotification {
                     continue
                 item = deepcopy(base_item)
                 item["ref"] = store[store_type]["storeNumber"]
-                item["phone"] = store[store_type]["contactInfo"].get("phone")
-                item["email"] = store[store_type]["contactInfo"].get("email")
+                if store[store_type].get("contactInfo"):
+                    item["phone"] = store[store_type]["contactInfo"].get("phone")
+                    item["email"] = store[store_type]["contactInfo"].get("email")
                 if store_type == "optical":
                     apply_category(Categories.SHOP_OPTICIAN, item)
                     item["extras"]["healthcare"] = "optometrist"

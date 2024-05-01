@@ -136,8 +136,9 @@ class Where2GetItSpider(Spider):
     def parse_country_list(self, response, **kwargs):
         for country in response.json()["response"]["collection"]:
             country_code = country["name"]
-            if self.api_filter_admin_level > 1:
-                for state in pycountry.subdivisions.get(country_code=country_code):
+            subdivisions = pycountry.subdivisions.get(country_code=country_code)
+            if self.api_filter_admin_level > 1 and subdivisions:
+                for state in subdivisions:
                     state_code = state.code[-2:]
                     if state.type == "Province":
                         yield from self.make_request(country_code=country_code, province_code=state_code)

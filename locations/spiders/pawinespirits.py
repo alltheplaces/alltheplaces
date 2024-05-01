@@ -40,7 +40,7 @@ class PAWineSpiritsSpider(scrapy.Spider):
 
             hours_txt = row.xpath('*[@class="columnHoursOfOprn"]/div/*/text()').extract()
             opening_hours = [
-                f"{hours_txt[i]} {hours_txt[i+1]}"
+                f"{hours_txt[i]} {hours_txt[i + 1]}"
                 for i in range(0, len(hours_txt) // 2, 2)
                 if hours_txt[i + 1] != "Closed"
             ]

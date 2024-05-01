@@ -28,6 +28,10 @@ class Categories(Enum):
 
     HIGHWAY_RESIDENTIAL = {"highway": "residential"}
 
+    ENFORCEMENT_AVERAGE_SPEED = {"enforcement": "average_speed"}
+    ENFORCEMENT_MAXIMUM_SPEED = {"enforcement": "maxspeed"}
+    ENFORCEMENT_TRAFFIC_SIGNALS = {"enforcement": "traffic_signals"}
+
     CRAFT_CARPENTER = {"craft": "carpenter"}
     CRAFT_CLOCKMAKER = {"craft": "clockmaker"}
     CRAFT_ELECTRONICS_REPAIR = {"craft": "electronics_repair"}
@@ -276,6 +280,10 @@ class Categories(Enum):
     TRADE_LANDSCAPING_SUPPLIES = {"trade": "landscaping_supplies"}
     TRADE_PLUMBING = {"trade": "plumbing"}
     TRADE_SWIMMING_POOL_SUPPLIES = {"trade": "swimming_pool_supplies"}
+
+    ANTENNA = {"man_made": "antenna"}
+
+    SURVEILLANCE_CAMERA = {"man_made": "surveillance", "surveillance:type": "camera"}
 
 
 def apply_category(category, item: Feature):

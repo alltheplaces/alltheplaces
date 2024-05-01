@@ -31,8 +31,15 @@ class SparPLSpider(Spider):
             days = ["poniedzialek", "wtorek", "sroda", "czwartek", "piatek", "sobota", "niedziela"]
             for day in days:
                 item["opening_hours"].add_ranges_from_string(f"{day} {shop[day]}")
-            if "EUROSPAR" in shop["format"]:
+            if shop["format"] == "EUROSPAR":
                 item.update(self.EUROSPAR)
-            else:
+            elif shop["format"] == "SPAR EXPRESS":
+                item["name"] = "Spar Express"
+                apply_category(Categories.SHOP_CONVENIENCE, item)
+            elif shop["format"] == "SPAR mini":
+                item["name"] = "Spar Mini"
+                apply_category(Categories.SHOP_CONVENIENCE, item)
+            elif shop["format"] == "SPAR":
+                item["name"] = "Spar"
                 apply_category(Categories.SHOP_CONVENIENCE, item)
             yield item

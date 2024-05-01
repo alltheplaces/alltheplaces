@@ -6,7 +6,7 @@ from locations.structured_data_spider import StructuredDataSpider
 
 class vhlDESpider(SitemapSpider, StructuredDataSpider):
     name = "vhl_de"
-    item_attributes = {"brand": "Vereinigte Lohnsteuerhilfe e.V.", "brand_wikidata": "Q15852617"}
+    item_attributes = {"brand": "Vereinigte Lohnsteuerhilfe", "brand_wikidata": "Q15852617"}
     sitemap_urls = [
         "https://www.vlh.de/sitemap.bst.xml",
     ]
