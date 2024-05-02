@@ -1,5 +1,3 @@
-from urllib.parse import urljoin
-
 from scrapy import Spider
 
 from locations.dict_parser import DictParser
@@ -15,7 +13,7 @@ class UnitedRentalsSpider(Spider):
             item = DictParser.parse(location)
 
             # The URL in the response is relative
-            item["website"] = urljoin(response.url, location["url"])
+            item["website"] = response.urljoin(location["url"])
 
             # The public "branch ID" is found at the end of the URL
             item["ref"] = item["branch"] = location["url"].split("/")[-1].upper()
