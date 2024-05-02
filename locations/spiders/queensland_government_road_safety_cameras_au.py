@@ -1,7 +1,7 @@
 from chompjs import parse_js_object
 from scrapy import Spider
 
-from locations.categories import apply_category, Categories
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
@@ -9,7 +9,9 @@ class QueenslandGovernmentRoadSafetyCamerasAUSpider(Spider):
     name = "queensland_government_road_safety_cameras_au"
     item_attributes = {"operator": "Queensland Government", "operator_wikidata": "Q3112627"}
     allowed_domains = ["www.google.com"]
-    start_urls = ["https://www.google.com/maps/d/viewer?mid=1KO5byT1dvAbg-wBx8IeAEA7KC2Y&msa=0&ll=-22.677961683728526%2C149.631106&z=6"]
+    start_urls = [
+        "https://www.google.com/maps/d/viewer?mid=1KO5byT1dvAbg-wBx8IeAEA7KC2Y&msa=0&ll=-22.677961683728526%2C149.631106&z=6"
+    ]
     no_refs = True
 
     def parse(self, response):
