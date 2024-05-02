@@ -1,12 +1,13 @@
 from scrapy.spiders import SitemapSpider
 
+from locations.categories import Categories
 from locations.google_url import extract_google_position
 from locations.structured_data_spider import StructuredDataSpider
 
 
 class AnicuraSpider(SitemapSpider, StructuredDataSpider):
     name = "anicura"
-    item_attributes = {"brand": "AniCura", "brand_wikidata": "Q21100245"}
+    item_attributes = {"brand": "AniCura", "brand_wikidata": "Q21100245", "extras": Categories.VETERINARY.value}
     sitemap_urls = [
         "https://www.anicura.at/robots.txt",
         "https://www.anicura.be/robots.txt",
