@@ -13,7 +13,6 @@ from locations.user_agents import CHROME_LATEST
 
 class MetroCashAndCarrySpider(SitemapSpider):
     name = "metro_cash_and_carry"
-    start_urls = []
     user_agent = CHROME_LATEST
     sitemap_rules = [
         # A better way to get all shop URLs was not found.
