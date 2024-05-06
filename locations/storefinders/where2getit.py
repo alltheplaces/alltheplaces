@@ -156,7 +156,9 @@ class Where2GetItSpider(Spider):
             item = DictParser.parse(location)
             if not item["ref"]:
                 item["ref"] = location["clientkey"]
-            item["street_address"] = clean_address([location.get("address1"), location.get("address2"), location.get("address3")])
+            item["street_address"] = clean_address(
+                [location.get("address1"), location.get("address2"), location.get("address3")]
+            )
             yield from self.parse_item(item, location)
 
     def parse_item(self, item: Feature, location: dict, **kwargs):
