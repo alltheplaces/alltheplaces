@@ -4,6 +4,7 @@ from scrapy.http import JsonRequest
 
 from locations.dict_parser import DictParser
 from locations.items import Feature
+from locations.pipelines.address_clean_up import clean_address
 
 # To use this storefinder, supply an api_brand_name value as would
 # be found in the following URL template:
@@ -155,8 +156,8 @@ class Where2GetItSpider(Spider):
             item = DictParser.parse(location)
             if not item["ref"]:
                 item["ref"] = location["clientkey"]
-            item["street_address"] = ", ".join(
-                filter(None, [location.get("address1"), location.get("address2"), location.get("address3")])
+            item["street_address"] = clean_address(
+                [location.get("address1"), location.get("address2"), location.get("address3")]
             )
             yield from self.parse_item(item, location)
 
