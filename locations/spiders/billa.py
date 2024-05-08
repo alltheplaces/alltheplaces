@@ -38,8 +38,8 @@ class BILLASpider(Spider):
             item = DictParser.parse(location)
             item.pop("name")
             item["brand_wikidata"] = wikidata
-            item["lon"] = location["coordinate"]["x"]
-            item["lat"] = location["coordinate"]["y"]
+            item["lon"] = location["position"]["lng"]
+            item["lat"] = location["position"]["lat"]
             item["opening_hours"] = OpeningHours()
             for day_hours in location["openingTimes"]:
                 if len(day_hours.get("times", [])) != 2:
