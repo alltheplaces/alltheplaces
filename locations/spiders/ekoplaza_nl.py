@@ -38,20 +38,11 @@ class EkoplazaNLSpider(scrapy.Spider):
                 "name": store.get("Name"),
                 "housenumber": store.get("streetNumber"),
                 "street": store.get("Street"),
-                "street_address": " ".join([store.get("HouseNumber"), store.get("Street")]),
                 "country": store.get("CountryCode"),
                 "phone": store.get("PhoneNumber"),
                 "email": store.get("Email"),
                 "postcode": store.get("PostalCode"),
                 "city": store.get("City"),
-                "addr_full": " ".join(
-                    [
-                        store.get("HouseNumber"),
-                        store.get("Street"),
-                        store.get("PostalCode"),
-                        store.get("City"),
-                    ]
-                ),
                 "lat": coordinates.get("Latitude"),
                 "lon": coordinates.get("Longitude"),
                 "opening_hours": oh,
