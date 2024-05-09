@@ -3,6 +3,7 @@ from scrapy.http import JsonRequest
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.pipelines.address_clean_up import clean_address
 
 
 class GoldsmithsGBSpider(Spider):
@@ -13,9 +14,7 @@ class GoldsmithsGBSpider(Spider):
     def parse(self, response, **kwargs):
         for location in response.json()["results"]:
             location["ref"] = location.pop("name")
-            location["address"]["street_address"] = ", ".join(
-                filter(None, [location["address"].get("line1"), location["address"].get("line2")])
-            )
+            location["address"]["street_address"] = clean_address([location["address"].get("line1"), location["address"].get("line2")])
             location["address"]["country"] = location["address"]["country"]["isocode"]
             location["phone"] = location["address"]["phone"]
             location["email"] = location["address"]["email"]
