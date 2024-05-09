@@ -28,7 +28,9 @@ class ZambreroAUSpider(Spider):
             "name": re.sub(r"\s+", " ", response.xpath("//div[@data-location-id]/h4/text()").get()).strip(),
             "lat": response.xpath("//@data-lat").get(),
             "lon": response.xpath("///@data-lng").get(),
-            "addr_full": clean_address(" ".join(response.xpath('//div[@data-location-id]//span[contains(@class, "address")]/text()').getall())),
+            "addr_full": clean_address(
+                " ".join(response.xpath('//div[@data-location-id]//span[contains(@class, "address")]/text()').getall())
+            ),
             "phone": response.xpath('//a[contains(@class, "phone")]/@href').get().replace("tel:", ""),
             "email": response.xpath('//a[contains(@href, "mailto:")]/@href').get().replace("mailto:", ""),
             "website": response.url,
