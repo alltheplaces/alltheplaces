@@ -82,7 +82,9 @@ fragment StoreLocatorHoursFragment on StoreLocation {
             item["postcode"] = data.get("location", {}).get("postalCode")
             item["state"] = data.get("location", {}).get("state")
             item["city"] = data.get("location", {}).get("city")
-            item["street_address"] = clean_address([data.get("location", {}).get("address1"), data.get("location", {}).get("address2")])
+            item["street_address"] = clean_address(
+                [data.get("location", {}).get("address1"), data.get("location", {}).get("address2")]
+            )
             if item["postcode"] and item["state"]:
                 item["website"] = (
                     f'https://www.davidsbridal.com/stores/{item["city"].lower()}-{item["state"].lower()}-{item["postcode"].lower().replace(" ", "").replace("-", "")}-{item["ref"]}'

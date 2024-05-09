@@ -16,7 +16,9 @@ class DaveAndBustersSpider(Spider):
             if "COMING SOON" in location["name"].upper():
                 continue
 
-            location["address"]["street_address"] = clean_address([location["address"].pop("line1"), location["address"].pop("line2")])
+            location["address"]["street_address"] = clean_address(
+                [location["address"].pop("line1"), location["address"].pop("line2")]
+            )
             location["website"] = location.pop("websiteUrl")
 
             yield DictParser.parse(location)
