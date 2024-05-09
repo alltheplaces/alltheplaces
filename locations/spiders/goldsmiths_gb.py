@@ -14,7 +14,9 @@ class GoldsmithsGBSpider(Spider):
     def parse(self, response, **kwargs):
         for location in response.json()["results"]:
             location["ref"] = location.pop("name")
-            location["address"]["street_address"] = clean_address([location["address"].get("line1"), location["address"].get("line2")])
+            location["address"]["street_address"] = clean_address(
+                [location["address"].get("line1"), location["address"].get("line2")]
+            )
             location["address"]["country"] = location["address"]["country"]["isocode"]
             location["phone"] = location["address"]["phone"]
             location["email"] = location["address"]["email"]
