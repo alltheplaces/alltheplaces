@@ -25,7 +25,9 @@ class LJHookerAUNZSpider(Spider):
                 .replace(".ljhooker.com.au", "")
                 .replace(".ljhooker.co.nz", "")
             )
-            item["street_address"] = clean_address([location["address"].get("address1"), location["address"].get("address2")])
+            item["street_address"] = clean_address(
+                [location["address"].get("address1"), location["address"].get("address2")]
+            )
             if ".com.au" in response.url:
                 item["country"] = "AU"
             else:
