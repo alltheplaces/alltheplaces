@@ -1,4 +1,3 @@
-import re
 
 from scrapy import Spider
 

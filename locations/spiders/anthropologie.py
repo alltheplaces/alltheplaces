@@ -1,8 +1,8 @@
 import scrapy
 
 from locations.dict_parser import DictParser
-from locations.user_agents import BROWSER_DEFAULT
 from locations.pipelines.address_clean_up import clean_address
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class AnthropologieSpider(scrapy.Spider):

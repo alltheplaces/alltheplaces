@@ -22,7 +22,9 @@ class AveraUSSpider(Spider):
         for location in response.json():
             item = DictParser.parse(location)
             item["ref"] = location["LocationId"]
-            item["street_address"] = clean_address([location["Address"].get("AddressLine1"), location["Address"].get("AddressLine2")])
+            item["street_address"] = clean_address(
+                [location["Address"].get("AddressLine1"), location["Address"].get("AddressLine2")]
+            )
             if "Main" in location["PhoneNumbers"]:
                 item["phone"] = location["PhoneNumbers"]["Main"].get("WholeNumber")
             item["opening_hours"] = OpeningHours()
