@@ -11,7 +11,11 @@ from locations.user_agents import BROWSER_DEFAULT
 
 class CanadianTireCASpider(SitemapSpider):
     name = "canadian_tire_ca"
-    item_attributes = {"brand": "Canadian Tire", "brand_wikidata": "Q1032400", "extras": Categories.SHOP_DEPARTMENT_STORE.value}
+    item_attributes = {
+        "brand": "Canadian Tire",
+        "brand_wikidata": "Q1032400",
+        "extras": Categories.SHOP_DEPARTMENT_STORE.value,
+    }
     allowed_domains = ["canadiantire.ca"]
     sitemap_urls = ["https://www.canadiantire.ca/sitemap_Store-en_CA-CAD.xml"]
     sitemap_rules = [("", "parse_store_details")]
