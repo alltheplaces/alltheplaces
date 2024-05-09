@@ -1,6 +1,7 @@
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import Feature
+from locations.pipelines.address_clean_up import clean_address
 from locations.spiders.albertsons import AlbertsonsSpider
 from locations.spiders.caseys_general_store import CaseysGeneralStoreSpider
 from locations.spiders.chevron import ChevronSpider
@@ -49,7 +50,7 @@ class BMOSpider(Where2GetItSpider):
     # flake8: noqa: C901
     def parse_item(self, item: Feature, location: dict):
         item["ref"] = location["clientkey"]
-        item["street_address"] = ", ".join(filter(None, [location.get("address1"), location.get("address2")]))
+        item["street_address"] = clean_address([location.get("address1"), location.get("address2")])
         if location["country"] == "CA":
             item["state"] = location["province"]
 

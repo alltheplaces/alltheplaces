@@ -4,6 +4,7 @@ from scrapy import Request
 
 from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.pipelines.address_clean_up import clean_address
 from locations.storefinders.amasty_store_locator import AmastyStoreLocatorSpider
 
 
@@ -34,9 +35,7 @@ class BedBathNTableSpider(AmastyStoreLocatorSpider):
             item["ref"] = ref
             item["name"] = location.xpath('.//a[@class="amlocator-link"]/@title').get()
             item["website"] = location.xpath('.//a[@class="amlocator-link"]/@href').get()
-            item["street_address"] = ", ".join(
-                filter(None, location.xpath('.//div[@class="store-address"]//text()').getall())
-            ).strip()
+            item["street_address"] = clean_address(location.xpath('.//div[@class="store-address"]//text()').getall())
             item["addr_full"] = unquote_plus(
                 location.xpath('.//a[@class="get-direction"]/@href').get().split("//", 2)[2]
             )
