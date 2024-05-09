@@ -54,7 +54,7 @@ class BMOSpider(Where2GetItSpider):
         if location["country"] == "CA":
             item["state"] = location["province"]
 
-        item["opening_hours"] = OpeningHours()
+        hours_text = ""
         for day_name in DAYS_FULL:
             open_time = location.get("{}open".format(day_name.lower()))
             close_time = location.get("{}close".format(day_name.lower()))
@@ -66,7 +66,9 @@ class BMOSpider(Where2GetItSpider):
                 and close_time != "closed"
                 and close_time != "N/A"
             ):
-                item["opening_hours"].add_range(day_name, open_time, close_time, "%H%M")
+                hours_text = "{} {}: {} - {}".format(hours_text, day_name, open_time, close_time)
+        item["opening_hours"] = OpeningHours()
+        item["opening_hours"].add_ranges_from_string(hours_text)
 
         if location["grouptype"] in ["BMOHarrisBranches", "BMOBranches"]:
             apply_category(Categories.BANK, item)
