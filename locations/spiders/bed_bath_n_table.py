@@ -34,6 +34,8 @@ class BedBathNTableSpider(AmastyStoreLocatorSpider):
             item = Feature()
             item["ref"] = ref
             item["name"] = location.xpath('.//a[@class="amlocator-link"]/@title').get()
+            if "TEMPORARILY CLOSED" in item["name"].upper():
+                continue
             item["website"] = location.xpath('.//a[@class="amlocator-link"]/@href').get()
             item["street_address"] = clean_address(location.xpath('.//div[@class="store-address"]//text()').getall())
             item["addr_full"] = unquote_plus(
