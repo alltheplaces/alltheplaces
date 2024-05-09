@@ -26,10 +26,7 @@ class PhoneHouseNLSpider(scrapy.Spider):
                 {
                     "ref": store.get("id"),
                     "housenumber": address.get("HouseNumber"),
-                    "street_address": " ".join([address.get("HouseNumber"), address.get("Street")]),
-                    "addr_full": " ".join(
-                        [address.get("HouseNumber"), address.get("Street"), address.get("City"), address.get("ZipCode")]
-                    ),
+                    "street": address.get("Street"),
                     "postcode": address.get("ZipCode"),
                     "city": address.get("City"),
                     "lat": store.get("latitude"),

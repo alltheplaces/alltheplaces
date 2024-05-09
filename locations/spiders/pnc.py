@@ -3,6 +3,7 @@ import scrapy
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.geo import point_locations
+from locations.pipelines.address_clean_up import clean_address
 
 
 class PNCSpider(scrapy.Spider):
@@ -21,15 +22,7 @@ class PNCSpider(scrapy.Spider):
         for branch in response.json()["locations"]:
             branch["ref"] = branch.pop("locationId")
             branch["name"] = branch.pop("locationName")
-            branch["street_address"] = ", ".join(
-                filter(
-                    None,
-                    [
-                        branch["address"].pop("address1"),
-                        branch["address"].pop("address2"),
-                    ],
-                )
-            )
+            branch["street_address"] = clean_address([branch["address"].pop("address1"), branch["address"].pop("address2")]),
             branch["location"] = {
                 "latitude": branch["address"].pop("latitude"),
                 "longitude": branch["address"].pop("longitude"),
