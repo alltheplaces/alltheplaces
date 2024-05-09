@@ -26,7 +26,9 @@ class CellarbrationsAUSpider(Spider):
             item["ref"] = location["retailerStoreId"]
             item["name"] = item["name"].strip()
             item["city"] = item["city"].strip()
-            item["street_address"] = clean_address([location.get("addressLine1"), location.get("addressLine2"), location.get("addressLine3")])
+            item["street_address"] = clean_address(
+                [location.get("addressLine1"), location.get("addressLine2"), location.get("addressLine3")]
+            )
             item["state"] = location.get("countyProvinceState")
             if location.get("openingHours"):
                 item["opening_hours"] = OpeningHours()

@@ -25,7 +25,9 @@ class Coffee1GB(scrapy.Spider):
         item = DictParser.parse(location)
 
         if "<br />" in location["branch_address"]:
-            item["addr_full"] = clean_address([i.strip(" ,") for i in location["branch_address"].split("<br />\r\n") if i])
+            item["addr_full"] = clean_address(
+                [i.strip(" ,") for i in location["branch_address"].split("<br />\r\n") if i]
+            )
         else:
             item["addr_full"] = location["branch_address"]
 

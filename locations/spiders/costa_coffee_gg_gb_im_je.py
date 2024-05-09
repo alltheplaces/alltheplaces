@@ -120,7 +120,9 @@ class CostaCoffeeGGGBIMJESpider(Spider):
                 apply_category(Categories.COFFEE_SHOP, item)
             item["lat"] = location["location"]["geo"]["latitude"]
             item["lon"] = location["location"]["geo"]["longitude"]
-            item["street_address"] = clean_address([location["location"]["address"]["address1"], location["location"]["address"]["address2"]])
+            item["street_address"] = clean_address(
+                [location["location"]["address"]["address1"], location["location"]["address"]["address2"]]
+            )
             item["city"] = location["location"]["address"]["city"]
             item["postcode"] = location["location"]["address"]["postCode"]
             if item["postcode"]:
