@@ -3,6 +3,7 @@ from scrapy.http import JsonRequest
 
 from locations.dict_parser import DictParser
 from locations.geo import city_locations
+from locations.pipelines.address_clean_up import clean_address
 from locations.spiders.starbucks import HEADERS, STORELOCATOR, StarbucksSpider
 
 
@@ -20,15 +21,12 @@ class StarbucksPESpider(scrapy.Spider):
     def parse(self, response, **kwargs):
         for store in response.json()["stores"]:
             item = DictParser.parse(store)
-            item["street_address"] = ", ".join(
-                filter(
-                    None,
-                    [
-                        store["address"].get("streetAddressLine1"),
-                        store["address"].get("streetAddressLine2"),
-                        store["address"].get("streetAddressLine3"),
-                    ],
-                )
+            item["street_address"] = clean_address(
+                [
+                    store["address"].get("streetAddressLine1"),
+                    store["address"].get("streetAddressLine2"),
+                    store["address"].get("streetAddressLine3"),
+                ]
             )
             item["state"] = store["address"].get("countrySubdivisionCode")
             item["website"] = f'https://www.starbucks.com/store-locator/store/{store["id"]}/{store["slug"]}'

@@ -4,6 +4,7 @@ from scrapy import Selector, Spider
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.pipelines.address_clean_up import clean_address
 
 
 class SunLoanUSSpider(Spider):
@@ -22,7 +23,7 @@ class SunLoanUSSpider(Spider):
             item["ref"] = str(location["id"])
             item["name"] = html.unescape(location["store"])
             item.pop("addr_full")
-            item["street_address"] = ", ".join(filter(None, [location["address"], location["address2"]]))
+            item["street_address"] = clean_address([location["address"], location["address2"]])
 
             hours_html = Selector(text=location["hours"])
             hours_string = " ".join(hours_html.xpath("//text()").getall())

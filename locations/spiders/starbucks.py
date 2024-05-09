@@ -7,6 +7,7 @@ import scrapy
 
 from locations.categories import Categories
 from locations.items import Feature
+from locations.pipelines.address_clean_up import clean_address
 from locations.searchable_points import open_searchable_points
 
 HEADERS = {"X-Requested-With": "XMLHttpRequest"}
@@ -46,15 +47,12 @@ class StarbucksSpider(scrapy.Spider):
             store_lon = store["coordinates"]["longitude"]
             properties = {
                 "name": store["name"],
-                "street_address": ", ".join(
-                    filter(
-                        None,
-                        [
-                            store["address"]["streetAddressLine1"],
-                            store["address"]["streetAddressLine2"],
-                            store["address"]["streetAddressLine3"],
-                        ],
-                    )
+                "street_address": clean_address(
+                    [
+                        store["address"]["streetAddressLine1"],
+                        store["address"]["streetAddressLine2"],
+                        store["address"]["streetAddressLine3"],
+                    ]
                 ),
                 "city": store["address"]["city"],
                 "state": store["address"]["countrySubdivisionCode"],
