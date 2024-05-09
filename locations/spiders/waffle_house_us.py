@@ -3,6 +3,7 @@ import json
 from scrapy import Spider
 
 from locations.dict_parser import DictParser
+from locations.pipelines.address_clean_up import clean_address
 
 
 class WaffleHouseUSSpider(Spider):
@@ -19,7 +20,7 @@ class WaffleHouseUSSpider(Spider):
         for location in locations:
             item = DictParser.parse(location)
             item["ref"] = location["storeCode"]
-            item["street_address"] = ", ".join(filter(None, location["addressLines"]))
+            item["street_address"] = clean_address(location["addressLines"])
             if len(location["phoneNumbers"]) > 0:
                 item["phone"] = location["phoneNumbers"][0]
             item["website"] = item["website"].replace("///", "/")
