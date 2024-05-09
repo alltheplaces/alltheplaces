@@ -1,5 +1,6 @@
 import re
 
+from locations.pipelines.address_clean_up import clean_address
 from locations.storefinders.amasty_store_locator import AmastyStoreLocatorSpider
 
 
@@ -18,5 +19,5 @@ class MunchsSupplyUSSpider(AmastyStoreLocatorSpider):
                 item["phone"] = m.group(1)
             else:
                 address_parts.append(contact_raw_part)
-        item["addr_full"] = " ".join((" ".join(address_parts)).split())
+        item["addr_full"] = clean_address(address_parts)
         yield item

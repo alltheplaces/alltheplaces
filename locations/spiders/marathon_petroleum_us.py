@@ -3,6 +3,7 @@ from scrapy.http import JsonRequest
 
 from locations.categories import Categories, Fuel, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
+from locations.pipelines.address_clean_up import clean_address
 
 
 class MarathonPetroleumUSSpider(Spider):
@@ -24,7 +25,7 @@ class MarathonPetroleumUSSpider(Spider):
     def parse(self, response):
         for location in response.json():
             item = DictParser.parse(location)
-            item["street_address"] = ", ".join(filter(None, [location.get("addr1"), location.get("addr2")]))
+            item["street_address"] = clean_address([location.get("addr1"), location.get("addr2")])
             if location["site_brand"] in self.brands.keys():
                 item.update(self.brands[location["site_brand"]])
             apply_category(Categories.FUEL_STATION, item)
