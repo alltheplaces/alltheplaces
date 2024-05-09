@@ -3,6 +3,7 @@ from scrapy import Spider
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.user_agents import BROWSER_DEFAULT
+from locations.pipelines.address_clean_up import clean_address
 
 
 class VersaceSpider(Spider):
@@ -16,7 +17,7 @@ class VersaceSpider(Spider):
     def parse(self, response):
         for location in response.json()["stores"]:
             item = DictParser.parse(location)
-            item["street_address"] = ", ".join(filter(None, [location.get("address1"), location.get("address2")]))
+            item["street_address"] = clean_address([location.get("address1"), location.get("address2")])
             item["opening_hours"] = OpeningHours()
             item["opening_hours"].add_ranges_from_string(location.get("storeHours"))
             yield item
