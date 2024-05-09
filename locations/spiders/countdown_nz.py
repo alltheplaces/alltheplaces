@@ -26,7 +26,7 @@ class CountdownNZSpider(Spider):
 
     def parse(self, response):
         # Playwright page responses for JSON data get wrapped in HTML.
-        json_blob = loads(response.xpath('//pre/text()').get())
+        json_blob = loads(response.xpath("//pre/text()").get())
         for location in json_blob["siteDetail"]:
             item = DictParser.parse(location["site"])
             if location["site"].get("email") == "null":
