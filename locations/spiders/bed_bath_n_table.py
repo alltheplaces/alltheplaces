@@ -51,6 +51,8 @@ class BedBathNTableSpider(AmastyStoreLocatorSpider):
         yield from super().start_requests()
 
     def parse_item(self, item, location, popup_html):
+        if "TEMPORARILY CLOSED" in popup_html.xpath('//a[@class="amlocator-link"]/@title').get("").upper():
+            return
         item["ref"] = str(item["ref"])
         for allowed_domain in self.allowed_domains:
             if allowed_domain in item["website"]:
