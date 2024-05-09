@@ -12,6 +12,7 @@ class FreshThymeSpider(scrapy.Spider):
     item_attributes = {"brand": "Fresh Thyme", "brand_wikidata": "Q64132791"}
     allowed_domains = ["www.freshthyme.com"]
     start_urls = ["https://discover.freshthyme.com/api/v2/stores"]
+    require_proxy = "US"  # Cloudflare geoblocking in use
 
     def parse(self, response):
         data = json.loads(response.text)["items"]
