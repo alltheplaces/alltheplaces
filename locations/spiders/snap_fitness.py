@@ -3,6 +3,7 @@ from scrapy.http import JsonRequest
 
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
+from locations.pipelines.address_clean_up import clean_address
 from locations.structured_data_spider import clean_facebook, clean_instagram
 
 
@@ -42,14 +43,11 @@ class SnapFitnessSpider(Spider):
             item["name"] = location["name"]
             item["lat"] = location["customProperties"]["latitude"]
             item["lon"] = location["customProperties"]["longitude"]
-            item["street_address"] = ", ".join(
-                filter(
-                    None,
-                    [
-                        location["customProperties"]["contactDetails"].get("address"),
-                        location["customProperties"]["contactDetails"].get("address2"),
-                    ],
-                )
+            item["street_address"] = clean_address(
+                [
+                    location["customProperties"]["contactDetails"].get("address"),
+                    location["customProperties"]["contactDetails"].get("address2"),
+                ]
             )
             item["website"] = response.url.replace("/api/location-finder-edge", location["urlPath"])
             if not item.get("extras"):
