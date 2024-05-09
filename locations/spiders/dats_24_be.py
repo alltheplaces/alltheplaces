@@ -13,7 +13,13 @@ class DATS24BESpider(Spider):
 
     def start_requests(self):
         query = '{"latitude":0,"longitude":0,"searchRadius":1000000000,"filterCriteria":{"serviceDeliveryPointType":["FUEL"],"serviceDeliveryPointAvailability":[],"chargingConnectorType":[],"chargingConnectorPowerType":[],"chargingLocationOperatorName":["ALL"],"fuelProductType":[]}}'
-        yield Request(url=self.start_urls[0], method="POST", body=query, headers={"Content-Type": "text/plain;charset=UTF-8"}, callback=self.parse_locations_list)
+        yield Request(
+            url=self.start_urls[0],
+            method="POST",
+            body=query,
+            headers={"Content-Type": "text/plain;charset=UTF-8"},
+            callback=self.parse_locations_list,
+        )
 
     def parse_locations_list(self, response):
         for location in response.json()["serviceDeliveryPoints"]:
@@ -23,7 +29,14 @@ class DATS24BESpider(Spider):
             item["lat"] = location["latitude"]
             item["lon"] = location["longitude"]
             query = '{"deliveryPointId":' + str(location["fuelStation"]["id"]) + ',"deliveryPointType":"FUEL"}'
-            yield Request(url="https://dats24.be/api/service_point_details", method="POST", body=query, headers={"Content-Type": "text/plain;charset=UTF-8"}, meta={"item": item}, callback=self.parse_location_details)
+            yield Request(
+                url="https://dats24.be/api/service_point_details",
+                method="POST",
+                body=query,
+                headers={"Content-Type": "text/plain;charset=UTF-8"},
+                meta={"item": item},
+                callback=self.parse_location_details,
+            )
 
     def parse_location_details(self, response):
         item = response.meta["item"]
