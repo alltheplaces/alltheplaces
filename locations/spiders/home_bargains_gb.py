@@ -2,8 +2,8 @@ from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
 from locations.hours import OpeningHours
-from locations.structured_data_spider import StructuredDataSpider
 from locations.pipelines.address_clean_up import clean_address
+from locations.structured_data_spider import StructuredDataSpider
 
 
 class HomeBargainsGB(CrawlSpider, StructuredDataSpider):

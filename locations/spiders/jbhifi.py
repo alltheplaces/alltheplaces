@@ -23,7 +23,9 @@ class JbHifiSpider(scrapy.Spider):
         opening_hours = OpeningHours()
         for day in store_hours:
             if "NULL" not in day["OpeningTime"] and "NULL" not in day["ClosingTime"]:
-                opening_hours.add_range(DAYS_3_LETTERS_FROM_SUNDAY[day["DayOfWeek"]], day["OpeningTime"], day["ClosingTime"])
+                opening_hours.add_range(
+                    DAYS_3_LETTERS_FROM_SUNDAY[day["DayOfWeek"]], day["OpeningTime"], day["ClosingTime"]
+                )
 
         return opening_hours.as_opening_hours()
 
