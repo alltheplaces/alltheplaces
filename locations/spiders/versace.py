@@ -4,9 +4,9 @@ from scrapy import Spider
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.pipelines.address_clean_up import clean_address
 from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.user_agents import BROWSER_DEFAULT
-from locations.pipelines.address_clean_up import clean_address
 
 
 class VersaceSpider(Spider):
@@ -22,7 +22,7 @@ class VersaceSpider(Spider):
 
     def parse(self, response):
         # Playwright page responses for JSON data get wrapped in HTML.
-        json_blob = loads(response.xpath('//pre/text()').get())
+        json_blob = loads(response.xpath("//pre/text()").get())
         for location in json_blob["stores"]:
             item = DictParser.parse(location)
             item["street_address"] = clean_address([location.get("address1"), location.get("address2")])

@@ -58,7 +58,9 @@ class VisaSpider(Spider):
         if data := response.json().get("responseData"):
             for atm in data.get("foundATMLocations") or []:
                 location = atm["location"]
-                location["address"]["street_address"] = clean_address([location["address"].pop("street"), location["address"].pop("street2")])
+                location["address"]["street_address"] = clean_address(
+                    [location["address"].pop("street"), location["address"].pop("street2")]
+                )
                 item = DictParser.parse(location)
 
                 item["operator"] = location.get("ownerBusName")
