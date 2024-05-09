@@ -4,6 +4,7 @@ from scrapy.http import JsonRequest
 from locations.categories import Categories
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.pipelines.address_clean_up import clean_address
 
 
 class JamaicaBlueAUSpider(Spider):
@@ -20,7 +21,7 @@ class JamaicaBlueAUSpider(Spider):
         for location in response.json():
             item = DictParser.parse(location)
             item["street_address"] = location["address"]
-            item["addr_full"] = ", ".join(filter(None, [location.get("address"), location.get("address2")]))
+            item["addr_full"] = clean_address([location.get("address"), location.get("address2")])
             item["website"] = location["web"]
             if location.get("opening_hours"):
                 item["opening_hours"] = OpeningHours()

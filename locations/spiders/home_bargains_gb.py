@@ -3,6 +3,7 @@ from scrapy.spiders import CrawlSpider, Rule
 
 from locations.hours import OpeningHours
 from locations.structured_data_spider import StructuredDataSpider
+from locations.pipelines.address_clean_up import clean_address
 
 
 class HomeBargainsGB(CrawlSpider, StructuredDataSpider):
@@ -17,9 +18,9 @@ class HomeBargainsGB(CrawlSpider, StructuredDataSpider):
 
     def inspect_item(self, item, response):
         item["ref"] = response.url.split("/store/", 1)[1].split("/", 1)[0]
-        full_address = response.xpath('//*[@itemprop="address"]/text()').extract()[:-1]
-        item["addr_full"] = ",".join(full_address).strip()
-        item["postcode"] = full_address[-1].strip()
+        full_address_parts = response.xpath('//*[@itemprop="address"]/text()').extract()[:-1]
+        item["addr_full"] = clean_address(full_address_parts)
+        item["postcode"] = full_address_parts[-1].strip()
         item["opening_hours"] = self.parse_hours(response.xpath('//*[@itemprop="openingHours"]/@datetime').extract())
         item["lat"] = response.xpath('//*[@itemprop="latitude"]/text()').extract_first()
         item["lon"] = response.xpath('//*[@itemprop="longitude"]/text()').extract_first()
