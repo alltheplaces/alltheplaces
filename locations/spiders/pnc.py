@@ -22,7 +22,9 @@ class PNCSpider(scrapy.Spider):
         for branch in response.json()["locations"]:
             branch["ref"] = branch.pop("locationId")
             branch["name"] = branch.pop("locationName")
-            branch["street_address"] = clean_address([branch["address"].pop("address1"), branch["address"].pop("address2")]),
+            branch["street_address"] = (
+                clean_address([branch["address"].pop("address1"), branch["address"].pop("address2")]),
+            )
             branch["location"] = {
                 "latitude": branch["address"].pop("latitude"),
                 "longitude": branch["address"].pop("longitude"),
