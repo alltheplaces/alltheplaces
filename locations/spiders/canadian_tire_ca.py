@@ -35,7 +35,9 @@ class CanadianTireCASpider(SitemapSpider):
 
     def parse_store_details(self, response):
         item = DictParser.parse(response.json())
-        item["street_address"] = clean_address([response.json().get("address", {}).get("line1"), response.json().get("address", {}).get("line2")])
+        item["street_address"] = clean_address(
+            [response.json().get("address", {}).get("line1"), response.json().get("address", {}).get("line2")]
+        )
         item["city"] = response.json().get("address", {}).get("town")
         item["state"] = response.json().get("address", {}).get("region", {}).get("name")
         item["country"] = response.json().get("address", {}).get("country", {}).get("isocode")

@@ -40,7 +40,9 @@ class BootsNOSpider(scrapy.Spider):
 
     def parse_store(self, response):
         ref = re.search(r".+/(.+?)/?(?:\.html|$)", response.url).group(1)
-        address = clean_address(response.xpath('//div[contains(text(),"Besøksadresse")]/following-sibling::text()').getall())
+        address = clean_address(
+            response.xpath('//div[contains(text(),"Besøksadresse")]/following-sibling::text()').getall()
+        )
         name = urllib.parse.unquote_plus(re.search(r".+/(.+?)/(.+?)/?(?:\.html|$)", response.url).group(1))
         phone = response.xpath('//a[contains(@href,"tel")]/text()').extract_first()
 
