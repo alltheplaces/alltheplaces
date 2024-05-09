@@ -4,6 +4,7 @@ import re
 import scrapy
 
 from locations.items import Feature
+from locations.pipelines.address_clean_up import clean_address
 
 
 class CAndASpider(scrapy.Spider):
@@ -77,7 +78,7 @@ class CAndASpider(scrapy.Spider):
                 "street_address": address[0],
                 "postcode": postcode,
                 "city": city,
-                "addr_full": ", ".join(address),
+                "addr_full": clean_address(address),
                 "extras": {
                     "wheelchair": "yes" if "wheelchairflag" in flags else "no",
                     # "email": contact[1].replace("Tel: ", ""),

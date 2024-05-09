@@ -5,6 +5,7 @@ import scrapy
 
 from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.pipelines.address_clean_up import clean_address
 
 
 class BucadiBeppoSpider(scrapy.Spider):
@@ -23,7 +24,7 @@ class BucadiBeppoSpider(scrapy.Spider):
         else:
             name = self.xpath_join(response.xpath('//*[@id="location-name" and @itemprop="name"]//text()').extract())
             address = response.xpath('//*[@itemprop="address"]')[0]
-            street = self.xpath_join(address.xpath('.//*[@itemprop="streetAddress"]//text()').extract())
+            street = clean_address(address.xpath('.//*[@itemprop="streetAddress"]//text()').getall())
             city = address.xpath('.//*[@itemprop="addressLocality"]/text()').extract_first()
             state = address.xpath('.//*[@itemprop="addressRegion"]/text()').extract_first()
             postalcode = address.xpath('.//*[@itemprop="postalCode"]/text()').extract_first()

@@ -5,6 +5,7 @@ from scrapy.spiders import SitemapSpider
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.pipelines.address_clean_up import clean_address
 from locations.user_agents import BROWSER_DEFAULT
 
 
@@ -34,11 +35,7 @@ class CanadianTireCASpider(SitemapSpider):
 
     def parse_store_details(self, response):
         item = DictParser.parse(response.json())
-        item["street_address"] = ", ".join(
-            filter(
-                None, [response.json().get("address", {}).get("line1"), response.json().get("address", {}).get("line2")]
-            )
-        )
+        item["street_address"] = clean_address([response.json().get("address", {}).get("line1"), response.json().get("address", {}).get("line2")])
         item["city"] = response.json().get("address", {}).get("town")
         item["state"] = response.json().get("address", {}).get("region", {}).get("name")
         item["country"] = response.json().get("address", {}).get("country", {}).get("isocode")
