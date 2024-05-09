@@ -3,6 +3,7 @@ from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories
 from locations.dict_parser import DictParser
+from locations.pipelines.address_clean_up import clean_address
 
 
 class CarpetOneFloorAndHomeUSSpider(SitemapSpider):
@@ -26,9 +27,7 @@ class CarpetOneFloorAndHomeUSSpider(SitemapSpider):
         js_blob = "[{" + js_blob.split("var locationlist=[{", 1)[1].split("}];", 1)[0] + "}]"
         for location in parse_js_object(js_blob):
             item = DictParser.parse(location)
-            item["street_address"] = ", ".join(
-                filter(None, [location["address"].get("line1"), location["address"].get("line2")])
-            )
+            item["street_address"] = clean_address([location["address"].get("line1"), location["address"].get("line2")])
             item["phone"] = location["address"].get("phone")
             item["website"] = location.get("microSiteUrl")
 
