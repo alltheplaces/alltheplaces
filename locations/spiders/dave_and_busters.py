@@ -1,6 +1,7 @@
 from scrapy import Spider
 
 from locations.dict_parser import DictParser
+from locations.pipelines.address_clean_up import clean_address
 
 
 class DaveAndBustersSpider(Spider):
@@ -15,9 +16,7 @@ class DaveAndBustersSpider(Spider):
             if "COMING SOON" in location["name"].upper():
                 continue
 
-            location["address"]["street_address"] = ", ".join(
-                filter(None, [location["address"].pop("line1"), location["address"].pop("line2")])
-            )
+            location["address"]["street_address"] = clean_address([location["address"].pop("line1"), location["address"].pop("line2")])
             location["website"] = location.pop("websiteUrl")
 
             yield DictParser.parse(location)

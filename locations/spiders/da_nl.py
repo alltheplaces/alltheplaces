@@ -23,7 +23,6 @@ class DaNLSpider(scrapy.Spider):
             item["lat"] = store["store_latitude"]
             item["lon"] = store["store_longitude"]
             item["phone"] = store["store_phone"]
-            item["addr_full"] = ", ".join([store["address"], store["city"], store["zipcode"]])
             item["opening_hours"] = oh
             item["street_address"] = store["address"]
             yield item
