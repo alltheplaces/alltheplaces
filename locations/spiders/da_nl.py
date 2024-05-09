@@ -44,13 +44,7 @@ class DaNLSpider(Spider):
         curbside_enabled
     }
 }"""
-        data = {
-            "operationName": "GetRetailStores",
-            "variables": {
-                "storeId": 3
-            },
-            "query": graphql_query
-        }
+        data = {"operationName": "GetRetailStores", "variables": {"storeId": 3}, "query": graphql_query}
         yield JsonRequest(url=self.start_urls[0], method="POST", data=data)
 
     def parse(self, response):
@@ -65,9 +59,15 @@ class DaNLSpider(Spider):
                 if not day_hours["status"]:  # Closed on this day
                     continue
                 if day_hours["lunch_start"] and day_hours["lunch_stop"]:
-                    item["opening_hours"].add_range(DAYS[day_hours["day_of_week"] - 1], day_hours["open"], day_hours["lunch_start"])
-                    item["opening_hours"].add_range(DAYS[day_hours["day_of_week"] - 1], day_hours["lunch_stop"], day_hours["close"])
+                    item["opening_hours"].add_range(
+                        DAYS[day_hours["day_of_week"] - 1], day_hours["open"], day_hours["lunch_start"]
+                    )
+                    item["opening_hours"].add_range(
+                        DAYS[day_hours["day_of_week"] - 1], day_hours["lunch_stop"], day_hours["close"]
+                    )
                 else:
-                    item["opening_hours"].add_range(DAYS[day_hours["day_of_week"] - 1], day_hours["open"], day_hours["close"])
+                    item["opening_hours"].add_range(
+                        DAYS[day_hours["day_of_week"] - 1], day_hours["open"], day_hours["close"]
+                    )
 
             yield item
