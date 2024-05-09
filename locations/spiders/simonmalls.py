@@ -18,7 +18,9 @@ class SimonMallsSpider(scrapy.Spider):
         for location in response.json():
             location["ref"] = location["mallId"]
             location["name"] = location["mallName"]
-            location["address"]["street_address"] = clean_address([location["address"].pop("street1"), location["address"].pop("street2")])
+            location["address"]["street_address"] = clean_address(
+                [location["address"].pop("street1"), location["address"].pop("street2")]
+            )
             location["phone"] = location["phones"].get("information")
 
             item = DictParser.parse(location)

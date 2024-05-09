@@ -15,7 +15,9 @@ class SevenElevenAUSpider(scrapy.Spider):
 
     def parse(self, response, **kwargs):
         for location in response.json()["stores"]:
-            location["address"]["street_address"] = clean_address([location["address"].pop("address1"), location["address"].pop("address2")])
+            location["address"]["street_address"] = clean_address(
+                [location["address"].pop("address1"), location["address"].pop("address2")]
+            )
             location["address"]["country_code"] = location["region"]["countryId"]
             item = DictParser.parse(location)
 

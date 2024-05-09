@@ -119,7 +119,9 @@ fragment sectionalNotification on StoreSectionalNotification {
         for location in response.json()["data"]["storesSearch"]["stores"]:
             store = location["store"]
             base_item = DictParser.parse(store)
-            base_item["street_address"] = clean_address([store["address"].get("line1"), store["address"].get("line2"), store["address"].get("line3")])
+            base_item["street_address"] = clean_address(
+                [store["address"].get("line1"), store["address"].get("line2"), store["address"].get("line3")]
+            )
             if base_item["state"] == "GGY":
                 base_item["country"] = "GG"
             elif base_item["state"] == "JSY":

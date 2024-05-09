@@ -24,7 +24,9 @@ class SparGBSpider(scrapy.Spider):
         for store in stores:
             item = DictParser.parse(store)
             item["website"] = "https://www.spar.co.uk" + store["StoreUrl"]
-            item["street_address"] = clean_address([store.get("Address1"), store.get("Address2"), store.get("Address3")])
+            item["street_address"] = clean_address(
+                [store.get("Address1"), store.get("Address2"), store.get("Address3")]
+            )
 
             services = [s["Name"] for s in store["Services"]]
 
