@@ -2,6 +2,7 @@ from scrapy.spiders import XMLFeedSpider
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
+from locations.pipelines.address_clean_up import clean_address
 
 
 class ProMedicaUSSpider(XMLFeedSpider):
@@ -18,9 +19,7 @@ class ProMedicaUSSpider(XMLFeedSpider):
         item["name"] = node.xpath(".//@name").get()
         item["lat"] = node.xpath(".//@lat").get()
         item["lon"] = node.xpath(".//@lng").get()
-        item["street_address"] = ", ".join(
-            filter(None, [node.xpath(".//@address").get(), node.xpath(".//@address2").get()])
-        )
+        item["street_address"] = clean_address([node.xpath(".//@address").get(), node.xpath(".//@address2").get()])
         item["city"] = node.xpath(".//@city").get()
         item["state"] = node.xpath(".//@state").get()
         item["postcode"] = node.xpath(".//@postal").get()

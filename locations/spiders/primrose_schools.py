@@ -3,6 +3,7 @@ import json
 import scrapy
 
 from locations.items import Feature
+from locations.pipelines.address_clean_up import clean_address
 from locations.searchable_points import open_searchable_points
 
 
@@ -35,7 +36,7 @@ class PrimroseSchoolsSpider(scrapy.Spider):
             if i["address_1"]:
                 properties = {
                     "name": i["name"],
-                    "street_address": ", ".join(filter(None, [i["address_1"], i["address_2"]])),
+                    "street_address": clean_address([i["address_1"], i["address_2"]]),
                     "city": i["city"],
                     "state": i["state"],
                     "postcode": i["zip_code"],

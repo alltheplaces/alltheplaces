@@ -5,6 +5,7 @@ from scrapy.spiders import SitemapSpider
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import Feature
+from locations.pipelines.address_clean_up import clean_address
 
 
 class PrimarkGBSpider(SitemapSpider):
@@ -23,7 +24,7 @@ class PrimarkGBSpider(SitemapSpider):
         item["lat"] = store["displayCoordinate"]["latitude"]
         item["lon"] = store["displayCoordinate"]["longitude"]
         item["name"] = " ".join([store["name"], store["geomodifier"]])
-        item["street_address"] = ", ".join(filter(None, [store["address"]["line1"], store["address"]["line2"]]))
+        item["street_address"] = clean_address([store["address"]["line1"], store["address"]["line2"]])
         item["city"] = store["address"]["city"]
         item["postcode"] = store["address"]["postalCode"]
         item["country"] = store["address"]["countryCode"]

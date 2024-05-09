@@ -4,6 +4,7 @@ from scrapy.spiders import SitemapSpider
 
 from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.pipelines.address_clean_up import clean_address
 
 
 class PrimarkSpider(SitemapSpider):
@@ -30,15 +31,12 @@ class PrimarkSpider(SitemapSpider):
 
         properties = {
             "name": js["name"],
-            "street_address": ", ".join(
-                filter(
-                    None,
-                    [
-                        js["address"]["line1"],
-                        js["address"]["line2"],
-                        js["address"]["line3"],
-                    ],
-                )
+            "street_address": clean_address(
+                [
+                    js["address"]["line1"],
+                    js["address"]["line2"],
+                    js["address"]["line3"],
+                ]
             ),
             "ref": js["meta"]["id"],
             "website": response.url,

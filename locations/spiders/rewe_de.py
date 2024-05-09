@@ -6,6 +6,7 @@ from scrapy.http import JsonRequest
 from locations.dict_parser import DictParser
 from locations.geo import point_locations
 from locations.hours import OpeningHours
+from locations.pipelines.address_clean_up import clean_address
 
 
 class REWEDESpider(Spider):
@@ -49,7 +50,7 @@ class REWEDESpider(Spider):
         location = response.json()["marketItem"]
         item = DictParser.parse(location)
         item.pop("street_address", None)
-        item["addr_full"] = ", ".join(filter(None, [location.get("addressLine1"), location.get("addressLine2")]))
+        item["addr_full"] = clean_address([location.get("addressLine1"), location.get("addressLine2")])
         item["city"] = location["rawValues"].get("city")
         item["postcode"] = location["rawValues"].get("postalCode")
         if item.get("city") and location.get("addressLine1"):
