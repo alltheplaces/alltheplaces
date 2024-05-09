@@ -1,6 +1,7 @@
 from scrapy import Spider
 
 from locations.dict_parser import DictParser
+from locations.pipelines.address_clean_up import clean_address
 
 
 class LovisaSpider(Spider):
@@ -13,6 +14,6 @@ class LovisaSpider(Spider):
         for location in response.json()["stores"]:
             item = DictParser.parse(location)
             item["ref"] = str(location["branch"])
-            item["street_address"] = ", ".join(filter(None, [location.get("address1"), location.get("address2")]))
+            item["street_address"] = clean_address([location.get("address1"), location.get("address2")])
             item.pop("website")  # websites are generally just malls, not individual stores within
             yield item
