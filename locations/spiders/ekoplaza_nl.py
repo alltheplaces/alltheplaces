@@ -17,6 +17,8 @@ class EkoplazaNLSpider(scrapy.Spider):
             coordinates = store.get("Location")
             oh = OpeningHours()
             for ohs in store.get("OpeningTimes").get("Weekdays"):
+                if not ohs.get("OpeningTime") or not ohs.get("ClosingTime"):
+                    continue
                 day, opens, closes = (
                     sanitise_day(ohs.get("Day")),
                     ohs.get("OpeningTime").lstrip("PT"),
