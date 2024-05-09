@@ -19,7 +19,9 @@ class MidcountiesCooperativeGBSpider(Spider):
     def parse(self, response):
         for store in response.json()["stores"]:
             item = DictParser.parse(store)
-            item["street_address"] = clean_address([store.get("addressLine1"), store.get("addressLine2"), store.get("addressLine3")])
+            item["street_address"] = clean_address(
+                [store.get("addressLine1"), store.get("addressLine2"), store.get("addressLine3")]
+            )
 
             item["opening_hours"] = OpeningHours()
             for day in DAYS_FULL:

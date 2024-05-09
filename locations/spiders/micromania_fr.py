@@ -31,7 +31,13 @@ class MicromaniaFRSpider(StructuredDataSpider):
 
     def post_process_item(self, item, response, ld_data):
         item["ref"] = response.url.split("?storeid=", 1)[1]
-        item["street_address"] = clean_address(response.xpath('//p[@itemprop="address"]//text()/parent::*[@itemprop="streetAddress" or @itemprop="address"]/text()').getall()),
+        item["street_address"] = (
+            clean_address(
+                response.xpath(
+                    '//p[@itemprop="address"]//text()/parent::*[@itemprop="streetAddress" or @itemprop="address"]/text()'
+                ).getall()
+            ),
+        )
         item.pop("facebook", None)
         item.pop("twitter", None)
 

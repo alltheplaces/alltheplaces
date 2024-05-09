@@ -41,7 +41,9 @@ class MorrisonsGBSpider(Spider):
         for location in response.json()["stores"]:
             location["id"] = str(location.pop("name"))
             item = DictParser.parse(location)
-            item["street_address"] = clean_address([location["address"].get("addressLine1"), location["address"].get("addressLine2")])
+            item["street_address"] = clean_address(
+                [location["address"].get("addressLine1"), location["address"].get("addressLine2")]
+            )
             item["website"] = "https://my.morrisons.com/storefinder/{}/{}".format(
                 item["ref"], self.create_slug(location["storeName"])
             )
