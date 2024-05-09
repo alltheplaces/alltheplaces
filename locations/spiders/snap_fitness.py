@@ -38,7 +38,7 @@ class SnapFitnessSpider(Spider):
 
     def parse(self, response):
         for location in response.json()["items"]:
-            item = DictParser.parse(location["customProperties"]["contactDetails"])
+            item = DictParser.parse(location.get("customProperties", {}).get("contactDetails", {}))
             item["ref"] = location["id"]
             item["name"] = location["name"]
             item["lat"] = location["customProperties"]["latitude"]
