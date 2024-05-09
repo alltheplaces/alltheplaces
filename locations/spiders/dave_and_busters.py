@@ -1,5 +1,4 @@
 from chompjs import parse_js_object
-
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
