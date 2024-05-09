@@ -4,6 +4,7 @@ import scrapy
 from scrapy import FormRequest
 
 from locations.dict_parser import DictParser
+from locations.pipelines.address_clean_up import clean_address
 from locations.user_agents import BROWSER_DEFAULT
 
 
@@ -31,7 +32,7 @@ class ArdeneSpider(scrapy.Spider):
             if "LIQUIDATION" in store["name"]:
                 continue
 
-            store["street_address"] = ", ".join(filter(None, [store.get("address1"), store.get("address2")]))
+            store["street_address"] = clean_address([store.get("address1"), store.get("address2")])
             if store["postalCode"] == "0":
                 store["postalCode"] = None
 

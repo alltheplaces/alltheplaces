@@ -1,3 +1,6 @@
+from html import unescape
+import re
+
 from scrapy import Spider
 
 from locations.items import Feature
@@ -11,7 +14,7 @@ def clean_address(address: list[str] | str) -> str:
     if isinstance(address, list):
         address = merge_address_lines(address)
 
-    address_list = address.replace("\n", ",").replace("\r", ",").replace("\t", ",").replace("\f", ",").split(",")
+    address_list = re.sub(r"\s+", " ", unescape(address)).replace("\n", ",").replace("\r", ",").replace("\t", ",").replace("\f", ",").split(",")
 
     return_addr = []
 
