@@ -1,4 +1,3 @@
-
 from scrapy import Spider
 
 from locations.hours import OpeningHours
