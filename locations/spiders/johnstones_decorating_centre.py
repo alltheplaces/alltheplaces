@@ -5,6 +5,7 @@ from scrapy.spiders import SitemapSpider
 
 from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.pipelines.address_clean_up import clean_address
 
 
 class JohnstonesDecoratingCentreSpider(SitemapSpider):
@@ -39,7 +40,7 @@ class JohnstonesDecoratingCentreSpider(SitemapSpider):
             "ref": response.url,
             "website": response.url,
             "opening_hours": oh,
-            "addr_full": ", ".join([address[1].strip(), address[2]]),
+            "addr_full": clean_address([address[1], address[2]]),
             "phone": contact[0],
             "email": contact[1],
             "name": address[0],
