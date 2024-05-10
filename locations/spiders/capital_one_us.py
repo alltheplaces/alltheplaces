@@ -5,6 +5,7 @@ from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.geo import point_locations
 from locations.hours import OpeningHours
+from locations.pipelines.address_clean_up import clean_address
 
 
 class CapitalOneUSSpider(scrapy.Spider):
@@ -92,16 +93,13 @@ class CapitalOneUSSpider(scrapy.Spider):
             item["website"] = (
                 f'https://locations.capitalone.com/{location["seoType"]}/{item["state"]}/{location["slug"]}'
             )
-            item["street_address"] = ", ".join(
-                filter(
-                    None,
-                    [
-                        location["address"]["addressLine1"],
-                        location["address"]["addressLine2"],
-                        location["address"]["addressLine3"],
-                        location["address"]["addressLine4"],
-                    ],
-                )
+            item["street_address"] = clean_address(
+                [
+                    location["address"]["addressLine1"],
+                    location["address"]["addressLine2"],
+                    location["address"]["addressLine3"],
+                    location["address"]["addressLine4"],
+                ]
             )
             item["image"] = location["photo"]
 

@@ -2,15 +2,20 @@ import re
 
 from scrapy.spiders import SitemapSpider
 
-from locations.categories import Categories, apply_category
+from locations.categories import Categories
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.pipelines.address_clean_up import clean_address
 from locations.user_agents import BROWSER_DEFAULT
 
 
 class CanadianTireCASpider(SitemapSpider):
     name = "canadian_tire_ca"
-    item_attributes = {"brand": "Canadian Tire", "brand_wikidata": "Q1032400"}
+    item_attributes = {
+        "brand": "Canadian Tire",
+        "brand_wikidata": "Q1032400",
+        "extras": Categories.SHOP_DEPARTMENT_STORE.value,
+    }
     allowed_domains = ["canadiantire.ca"]
     sitemap_urls = ["https://www.canadiantire.ca/sitemap_Store-en_CA-CAD.xml"]
     sitemap_rules = [("", "parse_store_details")]
@@ -33,21 +38,22 @@ class CanadianTireCASpider(SitemapSpider):
                 yield entry
 
     def parse_store_details(self, response):
-        item = DictParser.parse(response.json())
-        item["street_address"] = ", ".join(
-            filter(
-                None, [response.json().get("address", {}).get("line1"), response.json().get("address", {}).get("line2")]
-            )
+        location = response.json()
+        if not location.get("id"):
+            return  # Some locations are null responses (just some fields all set to None)
+        item = DictParser.parse(location)
+        item["street_address"] = clean_address(
+            [location.get("address", {}).get("line1"), location.get("address", {}).get("line2")]
         )
-        item["city"] = response.json().get("address", {}).get("town")
-        item["state"] = response.json().get("address", {}).get("region", {}).get("name")
-        item["country"] = response.json().get("address", {}).get("country", {}).get("isocode")
-        item["phone"] = response.json().get("address", {}).get("phone")
-        item["email"] = response.json().get("address", {}).get("email")
-        item["website"] = "https://www.canadiantire.ca" + response.json().get("url")
+        item["city"] = location.get("address", {}).get("town")
+        item["state"] = location.get("address", {}).get("region", {}).get("name")
+        item["country"] = location.get("address", {}).get("country", {}).get("isocode")
+        item["phone"] = location.get("address", {}).get("phone")
+        item["email"] = location.get("address", {}).get("email")
+        item["website"] = "https://www.canadiantire.ca" + location.get("url")
         item["opening_hours"] = OpeningHours()
-        if response.json().get("storeServices"):
-            for day in response.json().get("storeServices", {})[0].get("weekDayOpeningList"):
+        if location.get("storeServices"):
+            for day in location.get("storeServices", {})[0].get("weekDayOpeningList"):
                 if day.get("closed"):
                     continue
                 item["opening_hours"].add_range(
@@ -56,7 +62,5 @@ class CanadianTireCASpider(SitemapSpider):
                     close_time=day.get("closingTime", {}).get("formattedHour").replace(".", ""),
                     time_format="%I:%M %p",
                 )
-
-        apply_category(Categories.SHOP_DEPARTMENT_STORE, item)
 
         yield item

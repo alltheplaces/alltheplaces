@@ -2,6 +2,7 @@ from scrapy import Spider
 
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
+from locations.pipelines.address_clean_up import clean_address
 
 
 class BricoIOITSpider(Spider):
@@ -18,9 +19,7 @@ class BricoIOITSpider(Spider):
             item = DictParser.parse(location)
             item["ref"] = location["code"]
             item["name"] = location["alias"]
-            item["street_address"] = " ".join(
-                filter(None, [location["address"]["street1"], location["address"]["street2"]])
-            )
+            item["street_address"] = clean_address([location["address"]["street1"], location["address"]["street2"]])
             item["country"] = location["address"]["idCountry"]
             for contact_method in location["contacts"]:
                 if contact_method["type"] == 1:
