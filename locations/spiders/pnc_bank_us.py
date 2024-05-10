@@ -20,26 +20,36 @@ class PNCBankUSSpider(Spider):
 
     def parse_app_key(self, response):
         app_key = response.text.split('xAppKey=o?"', 1)[1].split('"', 1)[0]
-        yield JsonRequest(url="https://apps.pnc.com/dsa-api/v1/auth/getToken", method="POST", headers={"X-App-Key": app_key}, callback=self.parse_jwt)
+        yield JsonRequest(
+            url="https://apps.pnc.com/dsa-api/v1/auth/getToken",
+            method="POST",
+            headers={"X-App-Key": app_key},
+            callback=self.parse_jwt,
+        )
 
     def parse_jwt(self, response):
         jwt = response.headers["pnc_api_key"].decode("utf-8")
-        headers = {
-            "Authorization": f"Bearer {jwt}",
-            "X-App-Key": response.request.headers["X-App-Key"].decode("utf-8")
-        }
-        yield JsonRequest(url="https://apps.pnc.com/locator-api/locator/api/v1/locator/browse", headers=headers, callback=self.parse_cities_list)
+        headers = {"Authorization": f"Bearer {jwt}", "X-App-Key": response.request.headers["X-App-Key"].decode("utf-8")}
+        yield JsonRequest(
+            url="https://apps.pnc.com/locator-api/locator/api/v1/locator/browse",
+            headers=headers,
+            callback=self.parse_cities_list,
+        )
 
     def parse_cities_list(self, response):
         headers = {
             "Authorization": response.request.headers["Authorization"].decode("utf-8"),
-            "X-App-Key": response.request.headers["X-App-Key"].decode("utf-8")
+            "X-App-Key": response.request.headers["X-App-Key"].decode("utf-8"),
         }
         for state_code, cities_list in response.json().items():
             for city_locations_list in cities_list["locations"]:
                 for location in city_locations_list["locationDetails"]:
                     location_external_id = location["externalId"]
-                    yield JsonRequest(url=f"https://apps.pnc.com/locator-api/locator/api/v2/location/details/{location_external_id}", headers=headers, callback=self.parse_location)
+                    yield JsonRequest(
+                        url=f"https://apps.pnc.com/locator-api/locator/api/v2/location/details/{location_external_id}",
+                        headers=headers,
+                        callback=self.parse_location,
+                    )
 
     def parse_location(self, response):
         location = response.json()
@@ -47,8 +57,12 @@ class PNCBankUSSpider(Spider):
         item["ref"] = location.get("externalId")
         item["lat"] = location["address"].get("latitude")
         item["lon"] = location["address"].get("longitude")
-        item["street_address"] = clean_address([location["address"].get("address1"), location["address"].get("address2")])
-        item["website"] = "https://apps.pnc.com/locator/result-details/{}/{}".format(item["ref"], re.sub(r"[\s\-]+", "-", item["name"].lower()))
+        item["street_address"] = clean_address(
+            [location["address"].get("address1"), location["address"].get("address2")]
+        )
+        item["website"] = "https://apps.pnc.com/locator/result-details/{}/{}".format(
+            item["ref"], re.sub(r"[\s\-]+", "-", item["name"].lower())
+        )
 
         for contact_info in location["contactInfo"]:
             if contact_info["contactType"] == "External Phone":
@@ -77,6 +91,8 @@ class PNCBankUSSpider(Spider):
                             for hours_range in day_hours:
                                 if not hours_range["open"] or not hours_range["close"]:
                                     continue
-                                item["opening_hours"].add_range(day_name.title(), hours_range["open"], hours_range["close"], "%I:%M %p")
+                                item["opening_hours"].add_range(
+                                    day_name.title(), hours_range["open"], hours_range["close"], "%I:%M %p"
+                                )
 
         yield item
