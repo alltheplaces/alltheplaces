@@ -1,4 +1,3 @@
-
 from chompjs import parse_js_object
 from scrapy.spiders import SitemapSpider
 
