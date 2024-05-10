@@ -14,10 +14,7 @@ class BurgerKingITSpider(scrapy.Spider):
     name = "burger_king_it"
     item_attributes = BURGER_KING_SHARED_ATTRIBUTES
     start_urls = ["https://burgerking.it/trova-un-ristorante"]
-    custom_settings = {
-        "METAREFRESH_ENABLED": False,
-        "ROBOTSTXT_OBEY": False
-        }
+    custom_settings = {"METAREFRESH_ENABLED": False, "ROBOTSTXT_OBEY": False}
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         blob = response.xpath('//script[contains(text(), "dati_pagina")]/text()').re_first(r"JSON.parse\('(.+)'\);")
