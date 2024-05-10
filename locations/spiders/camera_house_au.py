@@ -2,6 +2,7 @@ from scrapy import Spider
 
 from locations.hours import DAYS_3_LETTERS_FROM_SUNDAY, OpeningHours
 from locations.items import Feature
+from locations.pipelines.address_clean_up import clean_address
 
 
 class CameraHouseAUSpider(Spider):
@@ -24,7 +25,7 @@ class CameraHouseAUSpider(Spider):
                 "lat": location["l"],
                 "lon": location["g"],
                 "addr_full": location["a"],
-                "street_address": ", ".join(filter(None, [location["fa"].get("st"), location["fa"].get("st2")])),
+                "street_address": clean_address([location["fa"].get("st"), location["fa"].get("st2")]),
                 "city": location["fa"]["su"],
                 "state": location["fa"]["rc"],
                 "postcode": location["fa"]["po"],

@@ -2,6 +2,7 @@ from scrapy import Spider
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.pipelines.address_clean_up import clean_address
 
 
 class DanMurphysAUSpider(Spider):
@@ -17,15 +18,12 @@ class DanMurphysAUSpider(Spider):
             item["ref"] = location["profile"]["meta"]["id"]
             item["lat"] = location["profile"]["yextDisplayCoordinate"]["lat"]
             item["lon"] = location["profile"]["yextDisplayCoordinate"]["long"]
-            item["street_address"] = ", ".join(
-                filter(
-                    None,
-                    [
-                        location["profile"]["address"]["line1"],
-                        location["profile"]["address"]["line2"],
-                        location["profile"]["address"]["line3"],
-                    ],
-                )
+            item["street_address"] = clean_address(
+                [
+                    location["profile"]["address"]["line1"],
+                    location["profile"]["address"]["line2"],
+                    location["profile"]["address"]["line3"],
+                ]
             )
             item["website"] = "https://store.danmurphys.com.au/" + location["url"]
             if location["profile"].get("mainPhone"):

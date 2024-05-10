@@ -2,6 +2,7 @@ from scrapy import Spider
 from scrapy.http import JsonRequest
 
 from locations.dict_parser import DictParser
+from locations.pipelines.address_clean_up import clean_address
 
 
 class MarineMaxUSSpider(Spider):
@@ -24,7 +25,7 @@ class MarineMaxUSSpider(Spider):
             item["ref"] = location["IDS_Site_ID"]
             item["lat"] = location["_geoloc"]["lat"]
             item["lon"] = location["_geoloc"]["lng"]
-            item["street_address"] = ", ".join(filter(None, [location["Address1"], location["Address2"]]))
+            item["street_address"] = clean_address([location["Address1"], location["Address2"]])
             item["state"] = location["State"]
             item["email"] = location["OwnerEmailAddress"]
             item["website"] = location["LocationPageURL"]

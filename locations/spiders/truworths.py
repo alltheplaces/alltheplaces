@@ -2,6 +2,7 @@ from scrapy import Spider
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
+from locations.pipelines.address_clean_up import clean_address
 
 
 class TruworthsSpider(Spider):
@@ -20,8 +21,8 @@ class TruworthsSpider(Spider):
             clean_location = {}
             for key, value in location["attributes"].items():
                 clean_location[key.replace("store.", "")] = value[0]
-            clean_location["street_address"] = ", ".join(
-                filter(None, [clean_location.pop("address1", ""), clean_location.pop("address2", "")])
+            clean_location["street_address"] = clean_address(
+                [clean_location.pop("address1", ""), clean_location.pop("address2", "")]
             )
             clean_location["lat"], clean_location["lon"] = clean_location.pop("geocode", ",").split(",")
 

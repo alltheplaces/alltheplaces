@@ -4,6 +4,7 @@ import re
 import scrapy
 
 from locations.items import Feature
+from locations.pipelines.address_clean_up import clean_address
 
 
 class DeloitteSpider(scrapy.Spider):
@@ -53,7 +54,7 @@ class DeloitteSpider(scrapy.Spider):
                 # too much variation to figure out address parsing
                 city, state, postcode = None, None, None
                 address_parts.append(country)
-            address = " ".join(address_parts)
+            address = clean_address(address_parts)
 
             name = office.xpath(".//h3/a/text()").extract_first() or ""
             if not name:

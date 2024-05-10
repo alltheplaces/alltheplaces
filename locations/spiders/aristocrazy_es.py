@@ -5,6 +5,7 @@ from scrapy import Spider
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.pipelines.address_clean_up import clean_address
 
 
 class AristocrazyESSpider(Spider):
@@ -18,7 +19,7 @@ class AristocrazyESSpider(Spider):
         for location in response.xpath("//input/@data-store-info").getall():
             location = parse_js_object(unescape(location))
             item = DictParser.parse(location)
-            item["street_address"] = ", ".join(filter(None, [location["address1"], location["address2"]]))
+            item["street_address"] = clean_address([location["address1"], location["address2"]])
             hours_string = location["storeHours"].replace("Sundays and Holidays from", "Sunday")
             item["opening_hours"] = OpeningHours()
             item["opening_hours"].add_ranges_from_string(hours_string)

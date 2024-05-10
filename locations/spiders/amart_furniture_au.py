@@ -1,9 +1,8 @@
-import re
-
 from scrapy import Spider
 
 from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.pipelines.address_clean_up import clean_address
 
 
 class AmartFurnitureAUSpider(Spider):
@@ -26,9 +25,7 @@ class AmartFurnitureAUSpider(Spider):
             properties = {
                 "ref": location.xpath(".//@data-store-id").get(),
                 "name": location.xpath('.//h5[@class="store-name"]/text()').get(),
-                "addr_full": re.sub(
-                    r"\s+", " ", " ".join(filter(None, location.xpath('.//p[@class="address"]//text()').getall()))
-                ).strip(),
+                "addr_full": clean_address(location.xpath('.//p[@class="address"]//text()').getall()),
                 "phone": location.xpath('.//a[@class="phone"]/@href').get("").replace("tel:", ""),
                 "email": location.xpath('.//a[@class="email"]/@href').get("").replace("mailto:", ""),
                 "website": "https://www.amartfurniture.com.au"
