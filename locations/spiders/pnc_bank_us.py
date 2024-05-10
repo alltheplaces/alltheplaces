@@ -9,8 +9,8 @@ from locations.hours import DAYS, DAYS_FULL, OpeningHours
 from locations.pipelines.address_clean_up import clean_address
 
 
-class PNCUSSpider(Spider):
-    name = "pnc_us"
+class PNCBankUSSpider(Spider):
+    name = "pnc_bank_us"
     item_attributes = {"brand": "PNC Bank", "brand_wikidata": "Q38928"}
     start_urls = ["https://apps.pnc.com/locator/bundle/bundle.js"]
     allowed_domains = ["apps.pnc.com"]
