@@ -516,6 +516,7 @@ class PaymentMethods(Enum):
     MASTER_CARD_DEBIT = "payment:mastercard_debit"
     MERPAY = "payment:merpay"
     MIPAY = "payment:mipay"
+    MIR = "payment:mir"
     NANACO = "payment:nanaco"
     NOTES = "payment:notes"
     PAYPAY = "payment:paypay"
