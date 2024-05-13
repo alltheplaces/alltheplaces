@@ -14,6 +14,8 @@ _multiple_spaces = re.compile(r" +")
 
 
 def clean_address(address: list[str] | str) -> str:
+    if not address:
+        return ""
     if isinstance(address, list):
         address = merge_address_lines(address)
     address_list = (
