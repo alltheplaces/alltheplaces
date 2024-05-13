@@ -17,7 +17,7 @@ class SmeshnieCenyRUSpider(SitemapSpider):
 
     def parse(self, response):
         item = Feature()
-        item["ref"] = response.url
+        item["ref"] = item["website"] = response.url
         item["addr_full"] = response.xpath('//table[@class="table"]/tbody/tr[th/text()="Адрес"]/td/text()').get()
         script_text = response.xpath('//script[contains(., "ymaps.ready(init)")]/text()').get()
         if match := re.search(r"new ymaps.Placemark\(\[([\d.]+),\s*([\d.]+)\]", script_text):
