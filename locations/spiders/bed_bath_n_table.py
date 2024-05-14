@@ -4,6 +4,7 @@ from scrapy import Request
 
 from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.pipelines.address_clean_up import clean_address
 from locations.storefinders.amasty_store_locator import AmastyStoreLocatorSpider
 
 
@@ -33,10 +34,10 @@ class BedBathNTableSpider(AmastyStoreLocatorSpider):
             item = Feature()
             item["ref"] = ref
             item["name"] = location.xpath('.//a[@class="amlocator-link"]/@title').get()
+            if "TEMPORARILY CLOSED" in item["name"].upper():
+                continue
             item["website"] = location.xpath('.//a[@class="amlocator-link"]/@href').get()
-            item["street_address"] = ", ".join(
-                filter(None, location.xpath('.//div[@class="store-address"]//text()').getall())
-            ).strip()
+            item["street_address"] = clean_address(location.xpath('.//div[@class="store-address"]//text()').getall())
             item["addr_full"] = unquote_plus(
                 location.xpath('.//a[@class="get-direction"]/@href').get().split("//", 2)[2]
             )
@@ -50,6 +51,8 @@ class BedBathNTableSpider(AmastyStoreLocatorSpider):
         yield from super().start_requests()
 
     def parse_item(self, item, location, popup_html):
+        if "TEMPORARILY CLOSED" in popup_html.xpath('//a[@class="amlocator-link"]/@title').get("").upper():
+            return
         item["ref"] = str(item["ref"])
         for allowed_domain in self.allowed_domains:
             if allowed_domain in item["website"]:

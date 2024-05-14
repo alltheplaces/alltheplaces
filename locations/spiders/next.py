@@ -5,6 +5,7 @@ from scrapy import FormRequest, Request, Spider
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.pipelines.address_clean_up import clean_address
 
 
 class NextSpider(Spider):
@@ -60,17 +61,14 @@ class NextSpider(Spider):
         ):
             location = json.loads(data)
 
-            location["street_address"] = ", ".join(
-                filter(
-                    None,
-                    [
-                        # Fields aren't descriptive of contents
-                        location.pop("AddressLine"),
-                        location.pop("centre"),
-                        location.pop("street"),
-                        location.pop("town"),
-                    ],
-                )
+            location["street_address"] = clean_address(
+                [
+                    # Fields aren't descriptive of contents
+                    location.pop("AddressLine"),
+                    location.pop("centre"),
+                    location.pop("street"),
+                    location.pop("town"),
+                ]
             )
 
             item = DictParser.parse(location)

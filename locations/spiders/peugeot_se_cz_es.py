@@ -4,10 +4,12 @@ from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
-class PeugeotSESpider(scrapy.Spider):
-    name = "peugeot_se"
+class PeugeotSECZESSpider(scrapy.Spider):
+    name = "peugeot_se_cz_es"
     start_urls = [
-        "https://www.peugeot.se/apps/atomic/DealersServlet?distance=30000&latitude=59.33257&longitude=18.06682&maxResults=4000&orderResults=false&path=L2NvbnRlbnQvcGV1Z2VvdC93b3JsZHdpZGUvc3dlZGVuL3Nl&searchType=latlong"
+        "https://www.peugeot.se/apps/atomic/DealersServlet?distance=30000&latitude=59.33257&longitude=18.06682&maxResults=4000&orderResults=false&path=L2NvbnRlbnQvcGV1Z2VvdC93b3JsZHdpZGUvc3dlZGVuL3Nl&searchType=latlong",
+        "https://www.peugeot.cz/apps/atomic/DealersServlet?distance=300&latitude=50.07914&longitude=14.43299&maxResults=40000&orderResults=false&path=L2NvbnRlbnQvcGV1Z2VvdC93b3JsZHdpZGUvY3plY2hfcmVwdWJsaWMvY3o%3D&searchType=latlong",
+        "https://www.peugeot.es/apps/atomic/DealersServlet?distance=300&latitude=40.41955&longitude=-3.69197&maxResults=40&orderResults=false&path=L2NvbnRlbnQvcGV1Z2VvdC93b3JsZHdpZGUvc3BhaW4vZXM%3D&searchType=latlong",
     ]
 
     item_attributes = {"brand": "Peugeot", "brand_wikidata": "Q6742"}
@@ -19,7 +21,7 @@ class PeugeotSESpider(scrapy.Spider):
             contact_details = store.get("generalContact")
             item = Feature(
                 {
-                    "ref": store.get("rrdi"),
+                    "ref": store.get("siteGeo"),
                     "name": store.get("dealerName"),
                     "street_address": address_details.get("addresssLine1"),
                     "phone": contact_details.get("phone1"),
@@ -43,5 +45,4 @@ class PeugeotSESpider(scrapy.Spider):
                 apply_category(Categories.SHOP_CAR_REPAIR, item)
             elif "Parts" in service_names:
                 apply_category(Categories.SHOP_CAR_PARTS, item)
-
             yield item

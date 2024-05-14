@@ -3,6 +3,7 @@ import scrapy
 from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.pipelines.address_clean_up import clean_address
 
 
 class GuzmanyGomezSpider(scrapy.Spider):
@@ -12,7 +13,7 @@ class GuzmanyGomezSpider(scrapy.Spider):
 
     def parse(self, response):
         for data in response.json():
-            data["street_address"] = ", ".join(filter(None, [data["address1"], data["address2"]]))
+            data["street_address"] = clean_address([data["address1"], data["address2"]])
             item = DictParser.parse(data)
             oh = OpeningHours()
             for day in data["tradingHours"]:

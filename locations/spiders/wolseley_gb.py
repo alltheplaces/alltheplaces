@@ -4,6 +4,7 @@ from scrapy.spiders import SitemapSpider
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.pipelines.address_clean_up import clean_address
 
 
 class WolseleyGBSpider(SitemapSpider):
@@ -23,15 +24,12 @@ class WolseleyGBSpider(SitemapSpider):
     def parse(self, response, **kwargs):
         store = response.json()["storeLocation"]
         store["website"] = f'https://www.wolseley.co.uk/branch/{store["seoName"]}/'
-        store["address"]["street_address"] = ", ".join(
-            filter(
-                None,
-                [
-                    store["address"].pop("address1"),
-                    store["address"].pop("address2"),
-                    store["address"].pop("address3"),
-                ],
-            )
+        store["address"]["street_address"] = clean_address(
+            [
+                store["address"].pop("address1"),
+                store["address"].pop("address2"),
+                store["address"].pop("address3"),
+            ]
         )
         item = DictParser.parse(store)
 

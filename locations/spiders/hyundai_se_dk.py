@@ -5,9 +5,12 @@ from locations.hours import OpeningHours
 from locations.items import Feature
 
 
-class HyundaiSESpider(scrapy.Spider):
-    name = "hyundai_se"
-    start_urls = ["https://www.hyundai.se/api/elastic-locations/contextual?category=retail"]
+class HyundaiSEDKSpider(scrapy.Spider):
+    name = "hyundai_se_dk"
+    start_urls = [
+        "https://www.hyundai.se/api/elastic-locations/contextual?category=retail",
+        "https://www.hyundai.dk/api/elastic-locations/contextual?category=retail",
+    ]
 
     item_attributes = {"brand": "Hyundai", "brand_wikidata": "Q55931"}
 

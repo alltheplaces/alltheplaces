@@ -5,6 +5,7 @@ from scrapy.spiders import SitemapSpider
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.pipelines.address_clean_up import clean_address
 
 
 class WalmartUSSpider(SitemapSpider):
@@ -57,14 +58,11 @@ class WalmartUSSpider(SitemapSpider):
         item["opening_hours"] = self.store_hours(store)
 
         if addr := store.get("address"):
-            item["street_address"] = ", ".join(
-                filter(
-                    None,
-                    [
-                        addr.get("addressLineOne"),
-                        addr.get("addressLineTwo"),
-                    ],
-                )
+            item["street_address"] = clean_address(
+                [
+                    addr.get("addressLineOne"),
+                    addr.get("addressLineTwo"),
+                ]
             )
         item["website"] = response.url
 

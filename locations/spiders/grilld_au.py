@@ -14,7 +14,8 @@ class GrilldAUSpider(Spider):
     def parse(self, response):
         for location in response.json():
             item = DictParser.parse(location)
-            item["website"] = "https://grilld.com.au/restaurants/" + location["slug"]
+            if location.get("slug"):
+                item["website"] = "https://grilld.com.au/restaurants/" + location["slug"]
 
             hours_string = ""
             for day_hours in location.get("hours", []):
