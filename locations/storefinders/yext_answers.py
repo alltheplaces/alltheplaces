@@ -62,7 +62,7 @@ class YextAnswersSpider(Spider):
         if len(response.json()["response"]["results"]) == self.page_limit:
             yield self.make_request(response.meta["offset"] + self.page_limit)
 
-    def parse_opening_hours(self, location, **kwargs: Any) -> OpeningHours | None:
+    def parse_opening_hours(self, location: dict, **kwargs: Any) -> OpeningHours | None:
         oh = OpeningHours()
         hours = location["data"].get("hours")
         if not hours:
