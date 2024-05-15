@@ -3,7 +3,7 @@ from typing import Any, Iterable
 from scrapy import Request, Spider
 from scrapy.http import JsonRequest, Response
 
-from locations.categories import apply_yes_no, PaymentMethods
+from locations.categories import PaymentMethods, apply_yes_no
 from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
