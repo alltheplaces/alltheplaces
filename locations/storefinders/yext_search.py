@@ -56,13 +56,13 @@ class YextSearchSpider(Spider):
             if location["profile"].get("googlePlaceId"):
                 item["extras"]["ref:google"] = location["profile"].get("googlePlaceId")
 
-            if location["profile"].get("paymentOptions"):
-                payment_methods = [v for v in location["profile"].get("paymentOptions")]
+            if payment_methods := location["profile"].get("paymentOptions"):
                 apply_yes_no(PaymentMethods.CASH, item, "Cash" in payment_methods, False)
                 apply_yes_no(PaymentMethods.CHEQUE, item, "Check" in payment_methods, False)
                 apply_yes_no(PaymentMethods.MASTER_CARD, item, "MasterCard" in payment_methods, False)
                 apply_yes_no(PaymentMethods.VISA, item, "Visa" in payment_methods, False)
                 apply_yes_no(PaymentMethods.AMERICAN_EXPRESS, item, "American Express" in payment_methods, False)
+                apply_yes_no(PaymentMethods.DISCOVER_CARD, item, "Discover" in payment_methods, False)
 
             item["opening_hours"] = self.parse_opening_hours(location)
 
