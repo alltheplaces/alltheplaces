@@ -57,6 +57,14 @@ class YextAnswersSpider(Spider):
             item["extras"]["ref:google"] = location["data"].get("googlePlaceId")
             item["facebook"] = location["data"].get("facebookPageUrl")
 
+            if (
+                not isinstance(item["lat"], float)
+                or not isinstance(item["lon"], float)
+                and location["data"].get("yextDisplayCoordinate")
+            ):
+                item["lat"] = location["data"]["yextDisplayCoordinate"].get("latitude")
+                item["lon"] = location["data"]["yextDisplayCoordinate"].get("longitude")
+
             item["opening_hours"] = self.parse_opening_hours(location)
 
             yield from self.parse_item(location, item) or []
@@ -64,12 +72,14 @@ class YextAnswersSpider(Spider):
         if len(response.json()["response"]["results"]) == self.page_limit:
             yield self.make_request(response.meta["offset"] + self.page_limit)
 
-    def parse_opening_hours(self, location, **kwargs: Any) -> OpeningHours | None:
+    def parse_opening_hours(self, location: dict, **kwargs: Any) -> OpeningHours | None:
         oh = OpeningHours()
         hours = location["data"].get("hours")
         if not hours:
             return None
-        for day, rule in location["data"]["hours"].items():
+        for day, rule in hours.items():
+            if not isinstance(rule, dict):
+                continue
             if day == "holidayHours":
                 continue
             if rule.get("isClosed") is True:
