@@ -6,7 +6,7 @@ from locations.dict_parser import DictParser
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class HermesSpider(scrapy.Spider):
+class HotPotBuffetTHSpider(scrapy.Spider):
     name = "hot_pot_buffet_th"
     item_attributes = {
         "brand": "HOT POT Buffet",
