@@ -9,8 +9,9 @@ from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 
 
-class NissanEuropeSpider(scrapy.Spider):
-    name = "nissan_europe"
+# Although API url appears to be covering EU only, but actually scrapes multiple non EU countries as well.
+class NissanSpider(scrapy.Spider):
+    name = "nissan"
     item_attributes = {"brand": "Nissan", "brand_wikidata": "Q20165", "extras": Categories.SHOP_CAR.value}
 
     def __init__(self):
