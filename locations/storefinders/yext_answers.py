@@ -20,6 +20,8 @@ class YextAnswersSpider(Spider):
     api_version: str = "20220511"
     page_limit: int = 50
     locale: str = "en"
+    environment: str = "PRODUCTION"  # "STAGING" also used
+    feature_type: str = "locations"  # "restaurants" also used
 
     def make_request(self, offset: int) -> JsonRequest:
         return JsonRequest(
@@ -30,9 +32,9 @@ class YextAnswersSpider(Spider):
                         "experienceKey": self.experience_key,
                         "api_key": self.api_key,
                         "v": self.api_version,
-                        "version": "PRODUCTION",
+                        "version": self.environment,
                         "locale": self.locale,
-                        "verticalKey": "locations",
+                        "verticalKey": self.feature_type,
                         "filters": json.dumps(
                             {"builtin.location": {"$near": {"lat": 0, "lng": 0, "radius": 50000000}}}
                         ),
