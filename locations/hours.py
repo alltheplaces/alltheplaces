@@ -715,7 +715,11 @@ class OpeningHours:
     # }
     # See https://schema.org/OpeningHoursSpecification for further examples.
     def _parse_opening_hours_specification(self, rule: dict, time_format: str):
-        if not rule.get("dayOfWeek") or not rule.get("opens") or not rule.get("closes"):
+        if (
+            not type(rule.get("dayOfWeek")) in [list, str]
+            or not type(rule.get("opens")) == str
+            or not type(rule.get("closes")) == str
+        ):
             return
 
         days = rule["dayOfWeek"]
