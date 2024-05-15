@@ -55,7 +55,11 @@ class YextAnswersSpider(Spider):
             item["extras"]["ref:google"] = location["data"].get("googlePlaceId")
             item["facebook"] = location["data"].get("facebookPageUrl")
 
-            if not isinstance(item["lat"], float) or not isinstance(item["lon"], float) and location["data"].get("yextDisplayCoordinate"):
+            if (
+                not isinstance(item["lat"], float)
+                or not isinstance(item["lon"], float)
+                and location["data"].get("yextDisplayCoordinate")
+            ):
                 item["lat"] = location["data"]["yextDisplayCoordinate"].get("latitude")
                 item["lon"] = location["data"]["yextDisplayCoordinate"].get("longitude")
 
