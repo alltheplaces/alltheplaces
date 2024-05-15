@@ -14,8 +14,6 @@ class ThreeGBSpider(SitemapSpider, StructuredDataSpider):
         )
     ]
     wanted_types = ["MobilePhoneStore"]
-    download_delay = 0
-    search_for_image = False
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["name"] = item["image"] = None
