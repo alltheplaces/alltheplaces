@@ -35,6 +35,8 @@ class ScotmidSpider(Spider):
                 item["brand_wikidata"] = "Q110620660"
                 apply_category(Categories.SHOP_CONVENIENCE, item)
             elif type == "funeral-branches":
+                item["brand"] = "Scotmid Funerals"
+                item["brand_wikidata"] = "Q125940846"
                 apply_category(Categories.SHOP_FUNERAL_DIRECTORS, item)
 
             item["name"] = store.get("title")
