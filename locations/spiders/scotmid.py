@@ -49,7 +49,7 @@ class ScotmidSpider(Spider):
 
             if "slug" in store:
                 item["website"] = "https://scotmid.coop/store/" + store["slug"] + "/"
-            
+
             oh = OpeningHours()
             for day in [
                 "mon",
