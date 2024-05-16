@@ -47,6 +47,9 @@ class ScotmidSpider(Spider):
 
             item["phone"] = store.get("telephone_number")
 
+            if "slug" in store:
+                item["website"] = "https://scotmid.coop/store/" + store["slug"] + "/"
+            
             oh = OpeningHours()
             for day in [
                 "mon",
