@@ -11,6 +11,7 @@ class LeenBakkerNLSpider(Spider):
     name = "leen_bakker_nl"
     item_attributes = {"brand": "Leen Bakker", "brand_wikidata": "Q3333662"}
     start_urls = ["https://www.leenbakker.nl/api/nl-NL/stores"]
+    requires_proxy = True
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json():
