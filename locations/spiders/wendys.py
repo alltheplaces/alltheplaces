@@ -17,14 +17,18 @@ class WendysSpider(SitemapSpider, StructuredDataSpider):
         item["website"] = ld_data.get("url")
 
         # Opening hours for the drive-through seem to get included with regular hours, so clean that up
-        item["opening_hours"] = self.clean_hours(response.xpath('//div[@class="c-location-hours-details-wrapper js-location-hours"]')[0])
-        item["extras"]["opening_hours:drive_through"] = self.clean_hours(response.xpath('//div[@class="c-location-hours-details-wrapper js-location-hours"]')[1])
+        item["opening_hours"] = self.clean_hours(
+            response.xpath('//div[@class="c-location-hours-details-wrapper js-location-hours"]')[0]
+        )
+        item["extras"]["opening_hours:drive_through"] = self.clean_hours(
+            response.xpath('//div[@class="c-location-hours-details-wrapper js-location-hours"]')[1]
+        )
 
         yield item
 
     @staticmethod
     def clean_hours(hours_div):
-        days = hours_div.xpath('.//@data-days').extract_first()
+        days = hours_div.xpath(".//@data-days").extract_first()
         days = json.loads(days)
 
         oh = OpeningHours()
