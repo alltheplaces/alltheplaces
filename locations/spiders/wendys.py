@@ -17,24 +17,24 @@ class WendysSpider(SitemapSpider, StructuredDataSpider):
         item["website"] = ld_data.get("url")
 
         # Opening hours for the drive-through seem to get included with regular hours, so clean that up
-        item["opening_hours"] = self.clean_hours(response.xpath('//div[@class="c-location-hours-details-wrapper js-location-hours"]').first())
-        item["opening_hours:drive_through"] = self.clean_hours(response.xpath('//div[@class="c-location-hours-details-wrapper js-location-hours"]').last())
+        item["opening_hours"] = self.clean_hours(response.xpath('//div[@class="c-location-hours-details-wrapper js-location-hours"]')[0])
+        item["extras"]["opening_hours:drive_through"] = self.clean_hours(response.xpath('//div[@class="c-location-hours-details-wrapper js-location-hours"]')[1])
 
-        return item
+        yield item
 
     @staticmethod
     def clean_hours(hours_div):
-        days = hours_div.xpath('.//@data-days').extract()
+        days = hours_div.xpath('.//@data-days').extract_first()
         days = json.loads(days)
 
         oh = OpeningHours()
 
         for day in days:
-            day = day["day"]
             for interval in day["intervals"]:
-                open_time = interval["start"]
-                close_time = interval["end"]
+                # These interval ranges are 24 hour times represented as integers, so they need to be converted to strings
+                open_time = str(interval["start"]).zfill(4)
+                close_time = str(interval["end"]).zfill(4)
 
-                oh.add_range(day=day.titlecase()[:2], open_time=open_time, close_time=close_time)
+                oh.add_range(day=day["day"].title()[:2], open_time=open_time, close_time=close_time, time_format="%H%M")
 
         return oh.as_opening_hours()
