@@ -23,14 +23,16 @@ class WendysSpider(SitemapSpider, StructuredDataSpider):
         if len(opening_hours_divs) > 1:
             item["extras"]["opening_hours:drive_through"] = self.clean_hours(opening_hours_divs[1])
 
-        if breakfast_hours_divs := response.xpath('//div[@class="LocationInfo-breakfastInfo js-breakfastInfo"]/span[@class="c-location-hours-today js-location-hours"]'):
+        if breakfast_hours_divs := response.xpath(
+            '//div[@class="LocationInfo-breakfastInfo js-breakfastInfo"]/span[@class="c-location-hours-today js-location-hours"]'
+        ):
             item["extras"]["breakfast"] = self.clean_hours(breakfast_hours_divs[0])
 
         yield item
 
     @staticmethod
     def clean_hours(hours_div):
-        days = hours_div.xpath('.//@data-days').extract_first()
+        days = hours_div.xpath(".//@data-days").extract_first()
         days = json.loads(days)
 
         oh = OpeningHours()
