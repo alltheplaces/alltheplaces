@@ -18,6 +18,7 @@ class ToyotaAUSpider(Spider):
         "https://www.toyota.com.au/main/api/v1/toyotaforms/info/dealersbystate/VIC?dealerOptIn=false",
         "https://www.toyota.com.au/main/api/v1/toyotaforms/info/dealersbystate/WA?dealerOptIn=false",
     ]
+    requires_proxy = "AU"
 
     def parse(self, response):
         for location in response.json()["results"]:
