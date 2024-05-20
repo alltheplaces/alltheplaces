@@ -23,8 +23,8 @@ class TalbotsUSSpider(Spider):
             item["street_address"] = clean_address([store_details.get("address1"), store_details.get("address2")])
             item["website"] = "https://www.talbots.com/stores/{}/{}/{}/{}.html".format(
                 store_details["stateCode"].lower(),
-                re.sub("\s+", "-", re.sub("[^\w ]+", "", store_details["city"].lower())).strip(),
-                re.sub("\s+", "-", re.sub("[^\w ]+", "", store_details["address2"].lower())).strip(),
+                re.sub(r"\s+", "-", re.sub(r"[^\w ]+", "", store_details["city"].lower())).strip(),
+                re.sub(r"\s+", "-", re.sub(r"[^\w ]+", "", store_details["address2"].lower())).strip(),
                 store_id,
             )
             hours_text = store_details.get("storeHours", "").replace("<br>", " ")
