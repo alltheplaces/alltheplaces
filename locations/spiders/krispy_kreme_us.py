@@ -10,7 +10,9 @@ class KrispyKremeUSSpider(Spider):
     name = "krispy_kreme_us"
     item_attributes = {"brand": "Krispy Kreme", "brand_wikidata": "Q1192805", "extras": Categories.FAST_FOOD.value}
     allowed_domains = ["api.krispykreme.com"]
-    start_urls = ["https://api.krispykreme.com/shops/?latitude=41.1199&longitude=-74.1242&count=10000&shopFeatureFlags=0&includeGroceryStores=false&includeShops=true"]
+    start_urls = [
+        "https://api.krispykreme.com/shops/?latitude=41.1199&longitude=-74.1242&count=10000&shopFeatureFlags=0&includeGroceryStores=false&includeShops=true"
+    ]
 
     def parse(self, response):
         for location in response.json():
@@ -23,11 +25,18 @@ class KrispyKremeUSSpider(Spider):
             item["website"] = location.get("pagesUrl")
             item["facebook"] = location.get("facebookPageUrl")
 
-            hours_text = " ".join(["{}: {}".format(day_hours["key"], day_hours["value"]) for day_hours in location["hoursDineIn"]])
+            hours_text = " ".join(
+                ["{}: {}".format(day_hours["key"], day_hours["value"]) for day_hours in location["hoursDineIn"]]
+            )
             item["opening_hours"] = OpeningHours()
             item["opening_hours"].add_ranges_from_string(hours_text)
 
             apply_yes_no(Extras.DELIVERY, item, location.get("canDeliver"), False)
-            apply_yes_no(Extras.DRIVE_THROUGH, item, location.get("hoursDriveThru")[0]["key"] != "Not Available at this Location", False)
+            apply_yes_no(
+                Extras.DRIVE_THROUGH,
+                item,
+                location.get("hoursDriveThru")[0]["key"] != "Not Available at this Location",
+                False,
+            )
 
             yield item
