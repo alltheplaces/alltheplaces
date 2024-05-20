@@ -20,6 +20,8 @@ class YextAnswersSpider(Spider):
     api_version: str = "20220511"
     page_limit: int = 50
     locale: str = "en"
+    environment: str = "PRODUCTION"  # "STAGING" also used
+    feature_type: str = "locations"  # "restaurants" also used
 
     def make_request(self, offset: int) -> JsonRequest:
         return JsonRequest(
@@ -30,9 +32,9 @@ class YextAnswersSpider(Spider):
                         "experienceKey": self.experience_key,
                         "api_key": self.api_key,
                         "v": self.api_version,
-                        "version": "PRODUCTION",
+                        "version": self.environment,
                         "locale": self.locale,
-                        "verticalKey": "locations",
+                        "verticalKey": self.feature_type,
                         "filters": json.dumps(
                             {"builtin.location": {"$near": {"lat": 0, "lng": 0, "radius": 50000000}}}
                         ),
@@ -55,6 +57,14 @@ class YextAnswersSpider(Spider):
             item["extras"]["ref:google"] = location["data"].get("googlePlaceId")
             item["facebook"] = location["data"].get("facebookPageUrl")
 
+            if (
+                not isinstance(item["lat"], float)
+                or not isinstance(item["lon"], float)
+                and location["data"].get("yextDisplayCoordinate")
+            ):
+                item["lat"] = location["data"]["yextDisplayCoordinate"].get("latitude")
+                item["lon"] = location["data"]["yextDisplayCoordinate"].get("longitude")
+
             item["opening_hours"] = self.parse_opening_hours(location)
 
             yield from self.parse_item(location, item) or []
@@ -62,12 +72,14 @@ class YextAnswersSpider(Spider):
         if len(response.json()["response"]["results"]) == self.page_limit:
             yield self.make_request(response.meta["offset"] + self.page_limit)
 
-    def parse_opening_hours(self, location, **kwargs: Any) -> OpeningHours | None:
+    def parse_opening_hours(self, location: dict, **kwargs: Any) -> OpeningHours | None:
         oh = OpeningHours()
         hours = location["data"].get("hours")
         if not hours:
             return None
-        for day, rule in location["data"]["hours"].items():
+        for day, rule in hours.items():
+            if not isinstance(rule, dict):
+                continue
             if day == "holidayHours":
                 continue
             if rule.get("isClosed") is True:
