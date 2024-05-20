@@ -2,7 +2,6 @@ from scrapy import Spider
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
-from locations.hours import OpeningHours
 
 
 class ToyotaAUSpider(Spider):
