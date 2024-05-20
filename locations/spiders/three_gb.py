@@ -18,5 +18,6 @@ class ThreeGBSpider(SitemapSpider, StructuredDataSpider):
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["name"] = item["image"] = None
         item["branch"] = response.xpath('//span[@id="location-name"]/text()').get(default="").removeprefix("Three ")
-
+        item.pop("facebook", None)  # Brand specific not location specific.
+        item.pop("twitter", None)  # Brand specific not location specific.
         yield item
