@@ -4,14 +4,16 @@ from scrapy import Request, Spider
 
 from locations.categories import Categories
 from locations.dict_parser import DictParser
-from locations.hours import OpeningHours, DAYS_FULL
+from locations.hours import DAYS_FULL, OpeningHours
 
 
 class GreatWallMotorAUNZSpider(Spider):
     name = "great_wall_motor_au_nz"
     item_attributes = {"brand": "Great Wall Motor", "brand_wikidata": "Q1117001", "extras": Categories.SHOP_CAR.value}
     allowed_domains = ["api.storyblok.com", "a.storyblok.com"]
-    start_urls = ["https://api.storyblok.com/v2/cdn/stories/dealer-locator?cv=1715928712&language=au&resolve_relations=SelectModelLine.options%2CSelectEnquiryType.options&token=grBrbRuRX6NJLbQcyDGpcgtt&version=published"]
+    start_urls = [
+        "https://api.storyblok.com/v2/cdn/stories/dealer-locator?cv=1715928712&language=au&resolve_relations=SelectModelLine.options%2CSelectEnquiryType.options&token=grBrbRuRX6NJLbQcyDGpcgtt&version=published"
+    ]
 
     def parse(self, response):
         locations_csv_url = response.json()["story"]["content"]["body"][0]["stores"]["filename"]
