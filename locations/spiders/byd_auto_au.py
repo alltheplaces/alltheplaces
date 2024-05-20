@@ -1,5 +1,4 @@
 from chompjs import parse_js_object
-
 from scrapy import Selector, Spider
 
 from locations.categories import Categories, apply_category
@@ -14,7 +13,13 @@ class BYDAutoAUSpider(Spider):
     start_urls = ["https://bydautomotive.com.au/find-us"]
 
     def parse(self, response):
-        js_blob = response.xpath('//script[contains(text(), "var designLocationsArr = ")]/text()').get().split("var designLocationsArr = ", 1)[1].split("}];", 1)[0] + "}]"
+        js_blob = (
+            response.xpath('//script[contains(text(), "var designLocationsArr = ")]/text()')
+            .get()
+            .split("var designLocationsArr = ", 1)[1]
+            .split("}];", 1)[0]
+            + "}]"
+        )
         locations = parse_js_object(js_blob)
         for location in locations:
             if location["mapBadgeStyle"] != "badge-success":
@@ -29,7 +34,9 @@ class BYDAutoAUSpider(Spider):
             item["postcode"] = str(item["postcode"])
             item.pop("phone", None)  # Always a common phone number for the brand, not an individual location.
 
-            hours_text = " ".join(filter(None, map(str.strip, Selector(text=location["openHours"]).xpath('//text()').getall())))
+            hours_text = " ".join(
+                filter(None, map(str.strip, Selector(text=location["openHours"]).xpath("//text()").getall()))
+            )
             item["opening_hours"] = OpeningHours()
             item["opening_hours"].add_ranges_from_string(hours_text)
 
