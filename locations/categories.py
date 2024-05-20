@@ -195,8 +195,10 @@ class Categories(Enum):
     OFFICE_FINANCIAL = {"office": "financial"}
     OFFICE_IT = {"office": "it"}
 
+    TOURISM_APARTMENT = {"tourism": "apartment"}
     TOURISM_CAMP_SITE = {"tourism": "camp_site"}
     TOURISM_CHALET = {"tourism": "chalet"}
+    TOURISM_HOSTEL = {"tourism": "hostel"}
     TOURISM_WILDERNESS_HUT = {"tourism": "wilderness_hut"}
 
     ALTERNATIVE_MEDICINE = {"healthcare": "alternative"}
