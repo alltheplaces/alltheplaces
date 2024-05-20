@@ -11,7 +11,6 @@ class BYDAutoAUSpider(Spider):
     item_attributes = {"brand": "BYD Auto", "brand_wikidata": "Q27423"}
     allowed_domains = ["bydautomotive.com.au"]
     start_urls = ["https://bydautomotive.com.au/find-us"]
-    requires_proxy = "AU"
 
     def parse(self, response):
         js_blob = (
