@@ -117,7 +117,7 @@ class OpendataMosSpider(scrapy.Spider):
         self.crawler.stats.inc_value("atp/opendata_mos_ru/filter", len(rows) - len(filtered))
         return filtered
 
-    def parse_row(self, row):
+    def parse_row(self, row: dict) -> Feature:
         cells = row.get("Cells", {})
         item = DictParser.parse(cells)
         item["lat"] = cells.get("Latitude_WGS84")
@@ -133,7 +133,7 @@ class OpendataMosSpider(scrapy.Spider):
             apply_category(tags, item)
             return item
         else:
-            self.crawler.stats.inc_value(f"atp/opendata_mos_ru/category/failed/{category}")
+            self.crawler.stats.inc_value(f"atp/{self.name}/category/failed/{category}")
             return None
 
     def parse_phones(self, item: Feature, cells: dict):
