@@ -1,5 +1,5 @@
-from html import unescape
 import re
+from html import unescape
 
 from scrapy import Selector
 
@@ -15,9 +15,7 @@ class KiaPHSpider(KiaAUSpider):
         item["phone"] = item["phone"].split("/", 1)[0].strip()
         if feature.get("openHours"):
             hours_text = unescape(
-                re.sub(
-                    r"\s+", " ", " ".join(Selector(text=feature["openHours"]).xpath("//text()").getall()).strip()
-                )
+                re.sub(r"\s+", " ", " ".join(Selector(text=feature["openHours"]).xpath("//text()").getall()).strip())
             )
             if re.match(r"^\d", hours_text):
                 hours_text = f"Monday - Friday: {hours_text}"
