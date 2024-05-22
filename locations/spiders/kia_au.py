@@ -1,6 +1,8 @@
+from html import unescape
+import re
 from typing import Iterable
 
-from scrapy import Spider
+from scrapy import Selector, Spider
 
 from locations.categories import Categories
 from locations.dict_parser import DictParser
@@ -25,8 +27,9 @@ class KiaAUSpider(Spider):
             item["name"] = location["dealerNm"]
             if item["website"] and item["website"].startswith("www."):
                 item["website"] = "https://" + item["website"]
+            hours_text = unescape(re.sub(r"\s+", " ", " ".join(Selector(text=location.get("openHours")).xpath('//text()').getall()).strip()))
             item["opening_hours"] = OpeningHours()
-            item["opening_hours"].add_ranges_from_string(location.get("openHours", "").replace("<br>", " "))
+            item["opening_hours"].add_ranges_from_string(hours_text)
             yield from self.post_process_feature(item, location) or []
 
     def post_process_feature(self, item: Feature, feature: dict) -> Iterable[Feature]:
