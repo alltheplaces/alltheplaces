@@ -1,5 +1,5 @@
-from html import unescape
 import re
+from html import unescape
 from typing import Iterable
 
 from scrapy import Selector, Spider
@@ -27,7 +27,11 @@ class KiaAUSpider(Spider):
             item["name"] = location["dealerNm"]
             if item["website"] and item["website"].startswith("www."):
                 item["website"] = "https://" + item["website"]
-            hours_text = unescape(re.sub(r"\s+", " ", " ".join(Selector(text=location.get("openHours")).xpath('//text()').getall()).strip()))
+            hours_text = unescape(
+                re.sub(
+                    r"\s+", " ", " ".join(Selector(text=location.get("openHours")).xpath("//text()").getall()).strip()
+                )
+            )
             item["opening_hours"] = OpeningHours()
             item["opening_hours"].add_ranges_from_string(hours_text)
             yield from self.post_process_feature(item, location) or []
