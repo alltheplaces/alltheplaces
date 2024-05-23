@@ -3,13 +3,18 @@ from typing import Any, Iterable
 from scrapy import Request, Spider
 from scrapy.http import JsonRequest, Response
 
+from locations.categories import Categories
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class RisparmioCasaITSpider(Spider):
     name = "risparmio_casa_it"
-    item_attributes = {"brand": "Risparmio Casa", "brand_wikidata": "Q125936928"}
+    item_attributes = {
+        "brand": "Risparmio Casa",
+        "brand_wikidata": "Q125936928",
+        "extras": Categories.SHOP_HOUSEWARE.value,
+    }
 
     def make_request(self, page: int) -> JsonRequest:
         return JsonRequest(
