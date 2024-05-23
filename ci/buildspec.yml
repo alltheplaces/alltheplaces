@@ -61,6 +61,12 @@ phases:
           exit 1
         fi
 
+        # If the most recent commit on the PR is from the pre-commit bot, skip running the spiders
+        if git log -1 --pretty=format:%an | grep -q "pre-commit"; then
+          echo "Skipping spider run for pre-commit changes."
+          exit 0
+        fi
+
         pr_file_changes=$(curl -sL --header "authorization: Bearer ${GITHUB_TOKEN}" "https://api.github.com/repos/alltheplaces/alltheplaces/pulls/${pull_request_number}/files")
         (>&2 echo "PR response: ${pr_file_changes}")
 
