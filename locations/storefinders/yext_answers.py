@@ -57,6 +57,12 @@ class YextAnswersSpider(Spider):
             item["extras"]["ref:google"] = location["data"].get("googlePlaceId")
             item["facebook"] = location["data"].get("facebookPageUrl")
 
+            if website_url_dict := location["data"].get("websiteUrl"):
+                if website_url_dict.get("preferDisplayUrl"):
+                    item["website"] = website_url_dict.get("displayUrl")
+                else:
+                    item["website"] = website_url_dict.get("url")
+
             if (
                 not isinstance(item["lat"], float)
                 or not isinstance(item["lon"], float)
