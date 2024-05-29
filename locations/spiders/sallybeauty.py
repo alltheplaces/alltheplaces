@@ -5,6 +5,7 @@ from scrapy.selector import Selector
 
 from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.pipelines.address_clean_up import clean_address
 from locations.searchable_points import open_searchable_points
 
 
@@ -64,7 +65,7 @@ class SallyBeautySpider(scrapy.Spider):
             properties = {
                 "ref": row["ID"],
                 "name": row["name"],
-                "addr_full": " ".join([row["address1"], row.get("address2", "") or ""]).strip(),
+                "addr_full": clean_address([row.get("address1"), row.get("address2")]),
                 "city": row["city"],
                 "postcode": row["postalCode"],
                 "lat": row["latitude"],

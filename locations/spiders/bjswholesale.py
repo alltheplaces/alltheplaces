@@ -7,6 +7,7 @@ import scrapy
 from locations.categories import Categories
 from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.pipelines.address_clean_up import clean_address
 
 DAY_MAPPING = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
 
@@ -64,7 +65,7 @@ class BJsWholesaleSpider(scrapy.Spider):
         properties = {
             "name": data["Description"][0]["displayStoreName"],
             "ref": data["storeName"],
-            "street_address": " ".join(data["addressLine"]).strip(),
+            "street_address": clean_address(data["addressLine"]),
             "city": data["city"].strip(),
             "state": data["stateOrProvinceName"].strip(),
             "postcode": data["postalCode"].strip(),
