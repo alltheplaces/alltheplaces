@@ -5,6 +5,7 @@ from scrapy.http import FormRequest
 from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.pipelines.address_clean_up import clean_address
 
 
 class TotalWineAndMoreUSSpider(Spider):
@@ -34,7 +35,7 @@ class TotalWineAndMoreUSSpider(Spider):
         for location in response.json()[0]["response"]["data"]["reactComponent"]["props"]["data"]["stores"]:
             item = DictParser.parse(location)
             item["ref"] = location["storeNumber"]
-            item["street_address"] = ", ".join(filter(None, [location.get("address1"), location.get("address2")]))
+            item["street_address"] = clean_address([location.get("address1"), location.get("address2")])
             item["website"] = "https://www.totalwine.com/store-info/" + item["ref"]
 
             for social_account in location.get("socialMedia", []):

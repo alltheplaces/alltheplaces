@@ -2,6 +2,7 @@ import scrapy
 
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
+from locations.pipelines.address_clean_up import clean_address
 
 
 class EspritSpider(scrapy.Spider):
@@ -30,7 +31,7 @@ class EspritSpider(scrapy.Spider):
                     close_time=f"{closing.get('h')}:{closing.get('m')}",
                     time_format="%H:%M",
                 )
-            store["street_address"] = ", ".join(filter(None, [store["address_additional"], store.pop("address")]))
+            store["street_address"] = clean_address([store["address_additional"], store.pop("address")])
             item = DictParser.parse(store)
             item["lat"] = store.get("geo_latitude")
             item["lon"] = store.get("geo_longitude")

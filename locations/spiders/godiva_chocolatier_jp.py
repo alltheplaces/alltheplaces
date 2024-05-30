@@ -4,6 +4,7 @@ from scrapy.http import JsonRequest
 from locations.categories import Categories
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.pipelines.address_clean_up import clean_address
 
 
 class GodivaChocolatierJPSpider(Spider):
@@ -36,7 +37,7 @@ class GodivaChocolatierJPSpider(Spider):
         for location in response.json()["data"]["items"]:
             item = DictParser.parse(location)
             item["lat"], item["lon"] = location.get("location").split(",", 1)
-            item["addr_full"] = ", ".join(filter(None, [location.get("addressExtra"), location.get("address")]))
+            item["addr_full"] = clean_address([location.get("addressExtra"), location.get("address")])
 
             if location.get("image"):
                 item["image"] = location["image"][0].get("1024")

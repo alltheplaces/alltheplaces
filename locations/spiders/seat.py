@@ -21,6 +21,7 @@ class SeatSpider(scrapy.Spider):
         "mx": "concesionarias",
         "ch": "de/haendlersuche",
         "se": "hitta-aterforsaljare",
+        "pl": "mapa-dealerow-i-serwisow",
     }
 
     def start_requests(self):

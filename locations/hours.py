@@ -52,6 +52,7 @@ DAYS_EN = {
     "Sun": "Su",
     "Su": "Su",
 }
+
 DAYS_DE = {
     "Montag": "Mo",
     "Mo": "Mo",
@@ -68,6 +69,7 @@ DAYS_DE = {
     "Sonntag": "Su",
     "So": "Su",
 }
+
 DAYS_BG = {
     "Понеделник": "Mo",
     "Пн": "Mo",
@@ -95,6 +97,7 @@ DAYS_BG = {
     "Не": "Su",
     "Нд": "Su",
 }
+
 DAYS_CH = {
     "Mo": "Mo",
     "Di": "Tu",
@@ -104,6 +107,76 @@ DAYS_CH = {
     "Sa": "Sa",
     "So": "Su",
 }
+
+DAYS_CN = {
+    # Standard Modern Chinese
+    "月曜日": "Mo",
+    "Yuèyàorì": "Mo",
+    "星期一": "Mo",
+    "Xīngqīyī": "Mo",
+    "週一": "Mo",
+    "Zhōuyī": "Mo",
+    "禮拜一": "Mo",
+    "Lǐbàiyī": "Mo",
+    "周一": "Mo",
+    "火曜日": "Tu",
+    "Huǒyàorì": "Tu",
+    "星期二": "Tu",
+    "Xīngqī'èr": "Tu",
+    "週二": "Tu",
+    "Zhōu'èr": "Tu",
+    "禮拜二": "Tu",
+    "Lǐbài'èr": "Tu",
+    "水曜日": "We",
+    "Shuǐyàorì": "We",
+    "星期三": "We",
+    "Xīngqīsān": "We",
+    "週三": "We",
+    "Zhōusān": "We",
+    "禮拜三": "We",
+    "Lǐbàisān": "We",
+    "木曜日": "Th",
+    "Mùyàorì": "Th",
+    "星期三": "We",
+    "星期四": "Th",
+    "Xīngqīsì": "Th",
+    "週四": "Th",
+    "Zhōusì": "Th",
+    "禮拜四": "Th",
+    "Lǐbàisì": "Th",
+    "金曜日": "Fr",
+    "Jīnyàorì": "Fr",
+    "星期五": "Fr",
+    "Xīngqīwǔ": "Fr",
+    "週五": "Fr",
+    "Zhōuwǔ": "Fr",
+    "禮拜五": "Fr",
+    "Lǐbàiwǔ": "Fr",
+    "土曜日": "Sa",
+    "Tǔyàorì": "Sa",
+    "星期六": "Sa",
+    "Xīngqīliù": "Sa",
+    "週六": "Sa",
+    "Zhōuliù": "Sa",
+    "禮拜六": "Sa",
+    "Lǐbàiliù": "Sa",
+    "日曜日": "Su",
+    "Rìyàorì": "Su",
+    "星期日": "Su",
+    "Xīngqīrì": "Su",
+    "星期天": "Su",
+    "Xīngqītiān": "Su",
+    "週日": "Su",
+    "Zhōurì": "Su",
+    "週天": "Su",
+    "Zhōutiān": "Su",
+    "禮拜天": "Su",
+    "Lǐbàitiān": "Su",
+    "禮拜日": "Su",
+    "Lǐbàirì": "Su",
+    "周日": "Su",
+}
+
 DAYS_CZ = {
     "Pondělí": "Mo",
     "Po": "Mo",
@@ -120,6 +193,7 @@ DAYS_CZ = {
     "Neděle": "Su",
     "Ne": "Su",
 }
+
 DAYS_GR = {
     "Δε": "Mo",
     "Δευτέρα": "Mo",
@@ -715,7 +789,11 @@ class OpeningHours:
     # }
     # See https://schema.org/OpeningHoursSpecification for further examples.
     def _parse_opening_hours_specification(self, rule: dict, time_format: str):
-        if not rule.get("dayOfWeek") or not rule.get("opens") or not rule.get("closes"):
+        if (
+            not type(rule.get("dayOfWeek")) in [list, str]
+            or not type(rule.get("opens")) == str
+            or not type(rule.get("closes")) == str
+        ):
             return
 
         days = rule["dayOfWeek"]

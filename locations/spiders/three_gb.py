@@ -1,11 +1,23 @@
-from locations.storefinders.yext import YextSpider
+from scrapy.spiders import SitemapSpider
+
+from locations.structured_data_spider import StructuredDataSpider
 
 
-class ThreeGB(YextSpider):
+class ThreeGBSpider(SitemapSpider, StructuredDataSpider):
     name = "three_gb"
     item_attributes = {"brand": "Three", "brand_wikidata": "Q407009"}
-    api_key = "46281e259fc6522cc15ea1a0011c21a9"
+    sitemap_urls = ["https://locator.three.co.uk/robots.txt"]
+    sitemap_rules = [
+        (
+            r"^https:\/\/locator\.three\.co\.uk\/(london|london-&-ni|midlands|north|south)\/([-a-z]+)\/([-0-9a-z']+)$",
+            "parse_sd",
+        )
+    ]
+    wanted_types = ["MobilePhoneStore"]
 
-    def parse_item(self, item, location):
-        item["name"] = location["c_pageH1"]
+    def post_process_item(self, item, response, ld_data, **kwargs):
+        item["name"] = item["image"] = None
+        item["branch"] = response.xpath('//span[@id="location-name"]/text()').get(default="").removeprefix("Three ")
+        item.pop("facebook", None)  # Brand specific not location specific.
+        item.pop("twitter", None)  # Brand specific not location specific.
         yield item

@@ -3,6 +3,7 @@ from scrapy.http import JsonRequest
 
 from locations.categories import Categories, Extras, PaymentMethods, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
+from locations.pipelines.address_clean_up import clean_address
 
 
 class SparGBSpider(scrapy.Spider):
@@ -23,8 +24,8 @@ class SparGBSpider(scrapy.Spider):
         for store in stores:
             item = DictParser.parse(store)
             item["website"] = "https://www.spar.co.uk" + store["StoreUrl"]
-            item["street_address"] = ", ".join(
-                filter(None, [store.get("Address1"), store.get("Address2"), store.get("Address3")])
+            item["street_address"] = clean_address(
+                [store.get("Address1"), store.get("Address2"), store.get("Address3")]
             )
 
             services = [s["Name"] for s in store["Services"]]
