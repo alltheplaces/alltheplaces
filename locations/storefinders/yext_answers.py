@@ -6,14 +6,14 @@ from scrapy import Request
 from scrapy.http import JsonRequest, Response
 from scrapy.spiders import Spider
 
+from locations.automatic_spider_generator import AutomaticSpiderGenerator, DetectionRequestRule
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.items import Feature
 
 
-class YextAnswersSpider(Spider):
+class YextAnswersSpider(Spider, AutomaticSpiderGenerator):
     dataset_attributes = {"source": "api", "api": "yext"}
-
     endpoint: str = "https://liveapi.yext.com/v2/accounts/me/answers/vertical/query"
     api_key: str = ""
     experience_key: str = ""
@@ -22,6 +22,26 @@ class YextAnswersSpider(Spider):
     locale: str = "en"
     environment: str = "PRODUCTION"  # "STAGING" also used
     feature_type: str = "locations"  # "restaurants" also used
+    detection_rules = [
+        DetectionRequestRule(
+            url=r"^https?:\/\/[A-Za-z0-9\-.]+\.yext(?:apis)?\.com\/v2\/accounts\/me\/search\/vertical\/query\?.*?(?<=[?&])api_key=(?P<api_key>[0-9a-f]{32})(?:&|$)"
+        ),
+        DetectionRequestRule(
+            url=r"^https?:\/\/[A-Za-z0-9\-.]+\.yext(?:apis)?\.com\/v2\/accounts\/me\/search\/vertical\/query\?.*?(?<=[?&])experienceKey=(?P<experience_key>\w+)(?:&|$)"
+        ),
+        DetectionRequestRule(
+            url=r"^https?:\/\/[A-Za-z0-9\-.]+\.yext(?:apis)?\.com\/v2\/accounts\/me\/search\/vertical\/query\?.*?(?<=[?&])v=(?P<api_version>\d{8})(?:&|$)"
+        ),
+        DetectionRequestRule(
+            url=r"^https?:\/\/[A-Za-z0-9\-.]+\.yext(?:apis)?\.com\/v2\/accounts\/me\/search\/vertical\/query\?.*?(?<=[?&])locale=(?P<locale>\w+)(?:&|$)"
+        ),
+        DetectionRequestRule(
+            url=r"^https?:\/\/[A-Za-z0-9\-.]+\.yext(?:apis)?\.com\/v2\/accounts\/me\/search\/vertical\/query\?.*?(?<=[?&])version=(?P<environment>\w+)(?:&|$)"
+        ),
+        DetectionRequestRule(
+            url=r"^https?:\/\/[A-Za-z0-9\-.]+\.yext(?:apis)?\.com\/v2\/accounts\/me\/search\/vertical\/query\?.*?(?<=[?&])verticalKey=(?P<feature_type>\w+)(?:&|$)"
+        ),
+    ]
 
     def make_request(self, offset: int) -> JsonRequest:
         return JsonRequest(

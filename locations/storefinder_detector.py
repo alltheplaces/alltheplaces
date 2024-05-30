@@ -51,6 +51,9 @@ from locations.storefinders.woosmap import WoosmapSpider
 from locations.storefinders.wp_go_maps import WPGoMapsSpider
 from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
 from locations.storefinders.yext import YextSpider
+from locations.storefinders.yext_answers import YextAnswersSpider
+
+# from locations.storefinders.yext_search import YextSearchSpider
 from locations.user_agents import BROWSER_DEFAULT
 
 
@@ -226,6 +229,8 @@ class StorefinderDetectorSpider(Spider):
             WPGoMapsSpider,
             WPStoreLocatorSpider,
             YextSpider,
+            YextAnswersSpider,
+            # YextSearchSpider,
         ]
         return all_storefinders
 

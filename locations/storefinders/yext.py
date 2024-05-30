@@ -28,10 +28,13 @@ class YextSpider(Spider, AutomaticSpiderGenerator):
     wanted_types: list[str] = ["location"]
     detection_rules = [
         DetectionRequestRule(
-            url=r"^https?:\/\/[A-Za-z0-9\-.]+\.yextapis\.com\/v2\/accounts\/me\/.+&api_key=(?P<api_key>[0-9a-f]{32})(?:&|$)"
+            url=r"^https?:\/\/[A-Za-z0-9\-.]+\.yext(?:apis)?\.com\/v2\/accounts\/me\/entities(?:\/geosearch)?\?.*?(?<=[?&])api_key=(?P<api_key>[0-9a-f]{32})(?:&|$)"
         ),
         DetectionRequestRule(
-            url=r"^https?:\/\/[A-Za-z0-9\-.]+\.yextapis\.com\/v2\/accounts\/me\/.+&v=(?P<api_version>[0-9]{8})(?:&|$)"
+            url=r"^https?:\/\/[A-Za-z0-9\-.]+\.yext(?:apis)?\.com\/v2\/accounts\/me\/entities(?:\/geosearch)?\?.*?(?<=[?&])v=(?P<api_version>\d{8})(?:&|$)"
+        ),
+        DetectionRequestRule(
+            url=r"^https?:\/\/[A-Za-z0-9\-.]+\.yext(?:apis)?\.com\/v2\/accounts\/me\/entities(?:\/geosearch)?\?.*?(?<=[?&])filter=(?P<search_filter>[^&]+)(?:&|$)"
         ),
     ]
 
