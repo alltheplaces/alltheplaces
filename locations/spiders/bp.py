@@ -14,7 +14,7 @@ from locations.storefinders.geo_me import GeoMeSpider
 
 class BPSpider(GeoMeSpider):
     name = "bp"
-    key = "bpretaillocator"
+    api_key = "bpretaillocator"
     brands = {
         "BP": ("BP", "Q152057"),
         "AM": ("Amoco", "Q465952"),

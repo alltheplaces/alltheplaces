@@ -1,12 +1,17 @@
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
+from locations.automatic_spider_generator import AutomaticSpiderGenerator, DetectionRequestRule, DetectionResponseRule
 from locations.dict_parser import DictParser
 
 
-class ClosebySpider(Spider):
+class ClosebySpider(Spider, AutomaticSpiderGenerator):
     dataset_attributes = {"source": "api", "api": "closeby.co"}
-    api_key = ""
+    api_key: str = ""
+    detection_rules = [
+        DetectionRequestRule(url=r"^https?:\/\/www\.closeby\.co\/embed\/(?P<api_key>[0-9a-f]{32})(?:\?|\/|$)"),
+        DetectionResponseRule(js_objects={"api_key": r"window.__closeby__.mapKey"}),
+    ]
 
     def start_requests(self):
         yield JsonRequest(url=f"https://www.closeby.co/embed/{self.api_key}/locations")
