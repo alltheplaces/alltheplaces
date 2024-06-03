@@ -26,8 +26,21 @@ class KwikKopyAUSpider(CrawlSpider, StructuredDataSpider):
         item.pop("image", None)  # data:image/png;base64 should be ignored.
         item.pop("facebook", None)  # Brand Facebook page, not location specific.
 
-        hours_string = " ".join(filter(None, map(str.strip, response.xpath('//div[contains(@class, "store-information")]/div[4]/span/text()').getall())))
-        hours_string = hours_string.replace(" (other times by appointment)", "").replace(", with after hours pick up on request", "").replace("(until 5:30pm by appointment only)", "").replace("Fridays", "Friday")
+        hours_string = " ".join(
+            filter(
+                None,
+                map(
+                    str.strip,
+                    response.xpath('//div[contains(@class, "store-information")]/div[4]/span/text()').getall(),
+                ),
+            )
+        )
+        hours_string = (
+            hours_string.replace(" (other times by appointment)", "")
+            .replace(", with after hours pick up on request", "")
+            .replace("(until 5:30pm by appointment only)", "")
+            .replace("Fridays", "Friday")
+        )
         if "Monday" in hours_string and not hours_string.startswith("Monday"):
             # If "Monday" is included after offset 0 in the string, the string
             # needs to be reordered so the day range is first and hours range
