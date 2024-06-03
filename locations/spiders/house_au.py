@@ -12,7 +12,11 @@ class HouseAUSpider(Spider):
     allowed_domains = ["www.house.com.au"]
     start_urls = ["https://www.house.com.au/api/get-stores"]
     brands = {
-        "House Bed & Bath": {"brand": "House Bed & Bath", "brand_wikidata": "", "extras": Categories.SHOP_HOUSEHOLD_LINEN.value},
+        "House Bed & Bath": {
+            "brand": "House Bed & Bath",
+            "brand_wikidata": "",
+            "extras": Categories.SHOP_HOUSEHOLD_LINEN.value,
+        },
         "House": {"brand": "House", "brand_wikidata": "Q117921987", "extras": Categories.SHOP_HOUSEWARE.value},
     }
 
