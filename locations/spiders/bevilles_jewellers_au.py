@@ -7,5 +7,6 @@ class BevillesJewellersAUSpider(StoremapperSpider):
     key = "6228"
 
     def parse_item(self, item, location):
-        item["name"] = item["name"].replace("Bevilles Jewellers | ", "")
+        item["name"] = item["name"].replace(" | ", " ")
+        item["branch"] = item["name"].replace("Bevilles Jewellers ", "")
         yield item
