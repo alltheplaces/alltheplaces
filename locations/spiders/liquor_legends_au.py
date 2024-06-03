@@ -10,7 +10,11 @@ from locations.items import Feature
 
 class LiquorLegendsAUSpider(Spider):
     name = "liquor_legends_au"
-    item_attributes = {"brand": "Liquor Legends", "brand_wikidata": "Q126175687", "extras": Categories.SHOP_ALCOHOL.value}
+    item_attributes = {
+        "brand": "Liquor Legends",
+        "brand_wikidata": "Q126175687",
+        "extras": Categories.SHOP_ALCOHOL.value,
+    }
     allowed_domains = ["rewardsapi.liquorlegends.com.au"]
     start_urls = ["https://rewardsapi.liquorlegends.com.au/api/v1/venue/geo-json"]
 
