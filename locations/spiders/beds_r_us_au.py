@@ -1,5 +1,4 @@
 from chompjs import parse_js_object
-
 from scrapy import Selector, Spider
 
 from locations.categories import Categories
@@ -27,7 +26,12 @@ class BedsRUsAUSpider(Spider):
             item["addr_full"] = clean_address(additional_fields.xpath('//div[@class="address"]//text()').getall())
             item["phone"] = additional_fields.xpath('//a[contains(@href, "tel:")]/@href').get("").replace("tel:", "")
 
-            hours_string = " ".join(filter(None, map(str.strip, additional_fields.xpath('//div[@class="section_oh_short_desc"]//text()').getall())))
+            hours_string = " ".join(
+                filter(
+                    None,
+                    map(str.strip, additional_fields.xpath('//div[@class="section_oh_short_desc"]//text()').getall()),
+                )
+            )
             item["opening_hours"] = OpeningHours()
             item["opening_hours"].add_ranges_from_string(hours_string)
 
