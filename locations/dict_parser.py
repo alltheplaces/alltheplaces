@@ -204,6 +204,7 @@ class DictParser:
         "storeURL",
         "website-url",
         "websiteURL",
+        "location-url",
     ]
 
     @staticmethod
