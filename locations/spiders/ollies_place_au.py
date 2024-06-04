@@ -6,6 +6,3 @@ class OlliesPlaceAUSpider(StockistSpider):
     name = "ollies_place_au"
     item_attributes = {"brand": "Ollies Place", "brand_wikidata": "Q126165914", "extras": Categories.SHOP_BABY_GOODS.value}
     key = "u20939"
-
-    def parse_item(self, item, location):
-        yield item
