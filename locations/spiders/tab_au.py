@@ -1,3 +1,5 @@
+import re
+
 from scrapy import Spider
 
 from locations.categories import Categories
@@ -25,4 +27,7 @@ class TABAUSpider(Spider):
                 item["street_address"] = item["street_address"].strip()
             if item["postcode"]:
                 item["postcode"] = str(item["postcode"])
+            if item["phone"]:
+                if re.match(r"^\d+\.\d+$", item["phone"]):
+                    item.pop("phone", None)  # Invalid phone number.
             yield item
