@@ -1,3 +1,5 @@
+from typing import Iterable
+
 from locations.categories import (
     Access,
     Categories,
@@ -8,7 +10,7 @@ from locations.categories import (
     apply_category,
     apply_yes_no,
 )
-from locations.hours import DAYS, OpeningHours
+from locations.items import Feature
 from locations.storefinders.geo_me import GeoMeSpider
 
 
@@ -16,31 +18,30 @@ class BPSpider(GeoMeSpider):
     name = "bp"
     key = "bpretaillocator"
     brands = {
-        "BP": ("BP", "Q152057"),
-        "AM": ("Amoco", "Q465952"),
-        "ARAL Tankstelle": ("Aral", "Q565734"),
+        "bp": {"brand": "BP", "brand_wikidata": "Q152057"},
+        "aral": {"brand": "Aral", "brand_wikidata": "Q565734"},
+        "amoco": {"brand": "Amoco", "brand_wikidata": "Q465952"},
+        "aral_pulse": {"brand": "Aral pulse", "operator": "Aral", "operator_wikidata": "Q565734"},
     }
 
     def parse_item(self, item, location):
-        item["brand"], item["brand_wikidata"] = self.brands.get(location["site_brand"], self.brands["BP"])
+        if brand := self.brands.get(location["site_brand"]):
+            item.update(brand)
+        else:
+            item.update(self.brands["BP"])
+            self.crawler.stats.inc_value("{}/unmapped_brand/{}".format(self.name, location["site_brand"]))
+
         products = location["products"]
         facilities = location["facilities"]
 
-        if "bp_connect_store" in facilities:
-            bp_connect_item = item.deepcopy()
-            bp_connect_item["ref"] = item.get("ref") + "-attachecd-bp-connect-shop"
-            bp_connect_item["name"] = "BP Connect"
-            bp_connect_item["brand"] = "BP Connect"
-            bp_connect_item["brand_wikidata"] = "Q152057"
-            if "shop_open_24_hours" in facilities:
-                item["opening_hours"] = OpeningHours()
-                item["opening_hours"].add_days_range(DAYS, "00:00", "23:59")
-            apply_category(Categories.SHOP_CONVENIENCE, bp_connect_item)
-            yield bp_connect_item
+        yield from self.parse_stores(item, location) or []
 
-        apply_category(Categories.FUEL_STATION, item)
-        if "shop" in facilities:
-            apply_yes_no("shop", item, True)
+        if location["site_brand"] == "aral_pulse":
+            item["located_in"] = item.pop("name")
+            apply_category(Categories.CHARGING_STATION, item)
+        else:
+            apply_category(Categories.FUEL_STATION, item)
+
         if "restaurant" in facilities:
             apply_yes_no("food", item, True)
 
@@ -80,3 +81,26 @@ class BPSpider(GeoMeSpider):
         apply_yes_no(FuelCards.DKV, item, "dkv" in facilities)
         apply_yes_no(FuelCards.UTA, item, "uta" in facilities)
         yield item
+
+    store_brands = {
+        "bp_connect_store": {"name": "BP Connect", "brand": "BP Connect", "brand_wikidata": "Q152057"},
+        "aral_store": {"name": "Aral", "brand": "Aral", "brand_wikidata": "Q565734"},
+        "rewe_to_go": {"name": "REWE To Go", "brand": "REWE To Go", "brand_wikidata": "Q85224313"},
+        "wild_bean_cafe": {"name": "Wild Bean Cafe", "brand": "Wild Bean Cafe", "brand_wikidata": "Q61804826"},
+    }
+
+    def parse_stores(self, item: Feature, location: dict) -> Iterable[Feature]:
+        for store_key in self.store_brands.keys():
+            if store_key not in location["facilities"]:
+                continue
+            store = item.deepcopy()
+            store["ref"] = "{}-{}".format(item.get("ref"), store_key)
+            store.update(self.store_brands[store_key])
+
+            store["opening_hours"] = "24/7" if "shop_open_24_hours" in location["facilities"] else None
+
+            if store_key == "wild_bean_cafe":
+                apply_category(Categories.CAFE, store)
+            else:
+                apply_category(Categories.SHOP_CONVENIENCE, store)
+            yield store
