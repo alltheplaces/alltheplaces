@@ -12,6 +12,8 @@ class LoblawsSpider(scrapy.Spider):
     def parse(self, response):
         results = response.json()
         for i in results:
+            if i["visible"] is False:
+                continue
             if i["locationType"] == "STORE":
                 if i["storeBannerId"] == "dominion":
                     brand = "Dominion Stores"
@@ -20,17 +22,17 @@ class LoblawsSpider(scrapy.Spider):
                     brand = "Extra Foods"
                     wikidata = "Q5422144"
                 elif i["storeBannerId"] == "zehrs":
-                    brand = "Zehrs Markets"
+                    brand = "Zehrs"
                     wikidata = "Q8068546"
                 elif i["storeBannerId"] == "fortinos":
                     brand = "Fortinos"
                     wikidata = "Q5472662"
                 elif i["storeBannerId"] == "rass":
-                    brand = "Real Canadian Superstores"
+                    brand = "Real Canadian Superstore"
                     wikidata = "Q7300856"
                 elif i["storeBannerId"] == "loblaw":
-                    brand = "Loblaw"
-                    wikidata = "Q909856"
+                    brand = "Loblaws"
+                    wikidata = "Q3257626"
                 elif i["storeBannerId"] == "wholesaleclub":
                     brand = "Wholesale Club"
                     wikidata = "Q7997568"
