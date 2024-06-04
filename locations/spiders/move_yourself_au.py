@@ -38,8 +38,8 @@ class MoveYourselfAUSpider(Spider):
                     item["located_in"] = AmpolAUSpider.item_attributes["brand"]
                     item["located_in_wikidata"] = AmpolAUSpider.item_attributes["brand_wikidata"]
                 case "bp":
-                    item["located_in"] = BPSpider.brands["BP"][0]
-                    item["located_in_wikidata"] = BPSpider.brands["BP"][1]
+                    item["located_in"] = BPSpider.brands["bp"]["brand"]
+                    item["located_in_wikidata"] = BPSpider.brands["bp"]["brand_wikidata"]
                 case "coles":
                     item["located_in"] = ColesAUSpider.BRANDS[1]["brand"]
                     item["located_in_wikidata"] = ColesAUSpider.BRANDS[1]["brand_wikidata"]
