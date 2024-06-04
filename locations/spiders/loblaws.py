@@ -67,6 +67,7 @@ class LoblawsSpider(scrapy.Spider):
                     "state": i["address"]["region"],
                     "postcode": i["address"]["postalCode"],
                     "country": i["address"]["country"],
+                    "website": "https://www.loblaws.ca/store-locator/details/{}".format(i["storeId"]),
                 }
 
                 yield Feature(**properties)
