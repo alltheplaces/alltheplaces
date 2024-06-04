@@ -1,7 +1,7 @@
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
-from locations.categories import apply_yes_no, Categories, Extras
+from locations.categories import Categories, Extras, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.pipelines.address_clean_up import clean_address
@@ -9,7 +9,11 @@ from locations.pipelines.address_clean_up import clean_address
 
 class DorevitchPathologyAUSpider(Spider):
     name = "dorevitch_pathology_au"
-    item_attributes = {"brand": "Dorevitch Pathology", "brand_wikidata": "Q126165490", "extras": Categories.SAMPLE_COLLECTION.value}
+    item_attributes = {
+        "brand": "Dorevitch Pathology",
+        "brand_wikidata": "Q126165490",
+        "extras": Categories.SAMPLE_COLLECTION.value,
+    }
     allowed_domains = ["www.healius.com.au"]
     start_urls = ["https://www.healius.com.au/structr/rest/Location/fetchLocationFromFindUsAPI"]
     company_code = "dorevitch"
@@ -63,4 +67,3 @@ class DorevitchPathologyAUSpider(Spider):
         oh = OpeningHours()
         oh.add_ranges_from_string(hours_string)
         return oh
-        
