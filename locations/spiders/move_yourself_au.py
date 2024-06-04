@@ -16,7 +16,11 @@ from locations.spiders.united_petroleum_au import UnitedPetroleumAUSpider
 
 class MoveYourselfAUSpider(Spider):
     name = "move_yourself_au"
-    item_attributes = {"brand": "Move Yourself", "brand_wikidata": "Q126164464", "extras": Categories.SHOP_PLANT_HIRE.value}
+    item_attributes = {
+        "brand": "Move Yourself",
+        "brand_wikidata": "Q126164464",
+        "extras": Categories.SHOP_PLANT_HIRE.value,
+    }
     allowed_domains = ["www.moveyourself.com.au"]
     start_urls = ["https://www.moveyourself.com.au/index.php"]
 
@@ -88,7 +92,15 @@ class MoveYourselfAUSpider(Spider):
                     elif item["name"].startswith("S24 "):
                         item["located_in"] = "S24"
                     else:
-                        self.logger.warning("Unknown brand detected for the feature this Move Yourself is located within. Full location name is: {}".format(location["deponame"]))
+                        self.logger.warning(
+                            "Unknown brand detected for the feature this Move Yourself is located within. Full location name is: {}".format(
+                                location["deponame"]
+                            )
+                        )
                 case _:
-                    self.logger.warning("Unknown brand detected for the feature this Move Yourself is located within: {}".format(location["depotype"]))
+                    self.logger.warning(
+                        "Unknown brand detected for the feature this Move Yourself is located within: {}".format(
+                            location["depotype"]
+                        )
+                    )
             yield item
