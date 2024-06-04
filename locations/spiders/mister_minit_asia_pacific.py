@@ -1,9 +1,7 @@
 from chompjs import parse_js_object
-
 from scrapy import Spider
 
 from locations.categories import Categories
-from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
 
@@ -38,6 +36,10 @@ class MisterMinitAsiaPacificSpider(Spider):
             elif location["address2"].endswith("Malaysia"):
                 properties["country"] = "MY"
             else:
-                self.logger.warning("Feature located in country that is not currently known to this spider. Address including country: {}".format(location["address2"]))
+                self.logger.warning(
+                    "Feature located in country that is not currently known to this spider. Address including country: {}".format(
+                        location["address2"]
+                    )
+                )
 
             yield Feature(**properties)
