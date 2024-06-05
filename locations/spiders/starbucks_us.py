@@ -2,7 +2,7 @@ import csv
 from collections import defaultdict
 from math import sqrt
 
-import scrapy
+from scrapy import Request, Spider
 
 from locations.categories import Categories
 from locations.hours import DAYS_EN, OpeningHours
@@ -14,8 +14,8 @@ HEADERS = {"X-Requested-With": "XMLHttpRequest"}
 STORELOCATOR = "https://www.starbucks.com/bff/locations?lat={}&lng={}"
 
 
-class StarbucksSpider(scrapy.Spider):
-    name = "starbucks"
+class StarbucksUSSpider(Spider):
+    name = "starbucks_us"
     item_attributes = {"brand": "Starbucks", "brand_wikidata": "Q37158", "extras": Categories.COFFEE_SHOP.value}
     allowed_domains = ["www.starbucks.com"]
 
@@ -29,7 +29,7 @@ class StarbucksSpider(scrapy.Spider):
             with open_searchable_points(point_file) as points:
                 reader = csv.DictReader(points)
                 for point in reader:
-                    request = scrapy.Request(
+                    request = Request(
                         url=STORELOCATOR.format(point["latitude"], point["longitude"]),
                         headers=HEADERS,
                         callback=self.parse,
@@ -87,7 +87,7 @@ class StarbucksSpider(scrapy.Spider):
                 ]
                 urls = [STORELOCATOR.format(c[1], c[0]) for c in next_coordinates]
                 for url in urls:
-                    request = scrapy.Request(url=url, headers=HEADERS, callback=self.parse)
+                    request = Request(url=url, headers=HEADERS, callback=self.parse)
                     request.meta["distance"] = next_distance
                     yield request
 
@@ -136,7 +136,7 @@ class StarbucksSpider(scrapy.Spider):
                 for url in urls:
                     self.logger.debug(f"Adding {url} to list")
 
-                    request = scrapy.Request(url=url, headers=HEADERS, callback=self.parse)
+                    request = Request(url=url, headers=HEADERS, callback=self.parse)
                     request.meta["distance"] = next_distance
                     yield request
 
