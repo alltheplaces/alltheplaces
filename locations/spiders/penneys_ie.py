@@ -103,7 +103,7 @@ fragment storesInPageFields on StoresInPage {
     def parse_locations_of_city(self, response):
         locations = response.json()["data"]["content"]["props"]["geosearchByCity"]["stores"]
         for location in locations:
-            if "COMING SOON" in location["branch"].upper():
+            if "COMING SOON" in location["branch"].upper() or "OPENING SOON" in location["branch"].upper():
                 continue
 
             item = DictParser.parse(location)
