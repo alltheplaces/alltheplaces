@@ -8,8 +8,8 @@ from locations.pipelines.address_clean_up import clean_address
 class ProMedicaUSSpider(XMLFeedSpider):
     name = "promedica_us"
     item_attributes = {"brand": "ProMedica", "brand_wikidata": "Q7246673"}
-    allowed_domains = ["promedicaseniorcare.org"]
-    start_urls = ["https://promedicaseniorcare.org/alllocations?formattedAddress=&boundsNorthEast=&boundsSouthWest="]
+    allowed_domains = ["www.promedicaseniorcare.org"]
+    start_urls = ["https://www.promedicaseniorcare.org/alllocations?formattedAddress=&boundsNorthEast=&boundsSouthWest="]
     iterator = "xml"
     itertag = "marker"
 
