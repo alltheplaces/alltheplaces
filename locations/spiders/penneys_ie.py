@@ -1,8 +1,8 @@
 import re
-from unidecode import unidecode
 
 from scrapy import Spider
 from scrapy.http import JsonRequest
+from unidecode import unidecode
 
 from locations.categories import Categories, Extras, PaymentMethods, apply_yes_no
 from locations.dict_parser import DictParser
@@ -19,7 +19,12 @@ class PenneysIESpider(Spider):
     custom_settings = {"ROBOTSTXT_OBEY": False}  # No robots.txt, ignore to avoid errors.
 
     def start_requests(self):
-        yield JsonRequest(url="{}?operationName=StoreLocatorPageQuery&variables=%7B%22slug%22%3A%22search%22%2C%22locale%22%3A%22{}%22%2C%22latitude%22%3Anull%2C%22longitude%22%3Anull%2C%22radius%22%3A50%7D&extensions=%7B%22persistedQuery%22%3A%7B%22version%22%3A1%2C%22sha256Hash%22%3A%22bd880c21a82a27e8b192c9416b63916e0a6c5cb66bff446f8bb0a959e8d3157c%22%7D%7D".format(self.start_urls[0], self.locale), callback=self.parse_cities_list)
+        yield JsonRequest(
+            url="{}?operationName=StoreLocatorPageQuery&variables=%7B%22slug%22%3A%22search%22%2C%22locale%22%3A%22{}%22%2C%22latitude%22%3Anull%2C%22longitude%22%3Anull%2C%22radius%22%3A50%7D&extensions=%7B%22persistedQuery%22%3A%7B%22version%22%3A1%2C%22sha256Hash%22%3A%22bd880c21a82a27e8b192c9416b63916e0a6c5cb66bff446f8bb0a959e8d3157c%22%7D%7D".format(
+                self.start_urls[0], self.locale
+            ),
+            callback=self.parse_cities_list,
+        )
 
     def parse_cities_list(self, response):
         for city in response.json()["data"]["content"]["props"]["cities"]:
@@ -111,7 +116,15 @@ fragment storesInPageFields on StoresInPage {
             item["name"] = "{} {}".format(location["brand"], location["branch"])
             item["street_address"] = clean_address([location["address"]["line1"], location["address"]["line2"]])
 
-            slug = re.sub(r"-+", "-", re.sub(r"[^\w\- ]", "", unidecode(item["city"]).lower()).replace(" ", "-")) + "/" + re.sub(r"-+", "-", re.sub(r"[^\w\- ]", "", unidecode(location["address"]["line1"]).lower()).replace(" ", "-"))
+            slug = (
+                re.sub(r"-+", "-", re.sub(r"[^\w\- ]", "", unidecode(item["city"]).lower()).replace(" ", "-"))
+                + "/"
+                + re.sub(
+                    r"-+",
+                    "-",
+                    re.sub(r"[^\w\- ]", "", unidecode(location["address"]["line1"]).lower()).replace(" ", "-"),
+                )
+            )
             item["website"] = "https://www.primark.com/{}/stores/{}".format(self.locale, slug)
 
             if location.get("hours"):
@@ -131,7 +144,9 @@ fragment storesInPageFields on StoresInPage {
                 apply_yes_no(PaymentMethods.CASH, item, "CASH" in location.get("paymentOptions"), False)
                 apply_yes_no(PaymentMethods.MASTER_CARD, item, "MASTERCARD" in location.get("paymentOptions"), False)
                 apply_yes_no(PaymentMethods.VISA, item, "VISA" in location.get("paymentOptions"), False)
-                apply_yes_no(PaymentMethods.AMERICAN_EXPRESS, item, "AMERICANEXPRESS" in location.get("paymentOptions"), False)
+                apply_yes_no(
+                    PaymentMethods.AMERICAN_EXPRESS, item, "AMERICANEXPRESS" in location.get("paymentOptions"), False
+                )
                 apply_yes_no(PaymentMethods.MAESTRO, item, "MAESTRO" in location.get("paymentOptions"), False)
                 apply_yes_no(PaymentMethods.APPLE_PAY, item, "APPLEPAY" in location.get("paymentOptions"), False)
                 apply_yes_no(PaymentMethods.GOOGLE_PAY, item, "ANDROIDPAY" in location.get("paymentOptions"), False)
