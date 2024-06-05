@@ -2,33 +2,31 @@ import csv
 from collections import defaultdict
 from math import sqrt
 
-import scrapy
+from scrapy import Request, Spider
 
 from locations.categories import Categories
 from locations.hours import DAYS_EN, OpeningHours
 from locations.items import Feature
+from locations.pipelines.address_clean_up import clean_address
 from locations.searchable_points import open_searchable_points
 
 HEADERS = {"X-Requested-With": "XMLHttpRequest"}
 STORELOCATOR = "https://www.starbucks.com/bff/locations?lat={}&lng={}"
 
 
-class StarbucksSpider(scrapy.Spider):
-    name = "starbucks"
+class StarbucksUSSpider(Spider):
+    name = "starbucks_us"
     item_attributes = {"brand": "Starbucks", "brand_wikidata": "Q37158", "extras": Categories.COFFEE_SHOP.value}
     allowed_domains = ["www.starbucks.com"]
+    searchable_point_files = ["us_centroids_50mile_radius.csv"]
+    country_filter = ["US"]
 
     def start_requests(self):
-        searchable_point_files = [
-            "us_centroids_50mile_radius.csv",
-            "ca_centroids_50mile_radius.csv",
-        ]
-
-        for point_file in searchable_point_files:
+        for point_file in self.searchable_point_files:
             with open_searchable_points(point_file) as points:
                 reader = csv.DictReader(points)
                 for point in reader:
-                    request = scrapy.Request(
+                    request = Request(
                         url=STORELOCATOR.format(point["latitude"], point["longitude"]),
                         headers=HEADERS,
                         callback=self.parse,
@@ -42,20 +40,25 @@ class StarbucksSpider(scrapy.Spider):
 
         for poi in stores:
             store = poi["store"]
+
+            if store["address"]["countryCode"] not in self.country_filter:
+                # Coordinate searches return cross-border results. A country
+                # filter ensures that multiple Starbucks spiders for nearby
+                # countries don't return the same location.
+                continue
+
             store_lat = store.get("coordinates", {}).get("latitude")
             store_lon = store.get("coordinates", {}).get("longitude")
+
             properties = {
                 "name": store["name"],
                 "branch": store["name"],
-                "street_address": ", ".join(
-                    filter(
-                        None,
-                        [
-                            store["address"]["streetAddressLine1"],
-                            store["address"]["streetAddressLine2"],
-                            store["address"]["streetAddressLine3"],
-                        ],
-                    )
+                "street_address": clean_address(
+                    [
+                        store["address"]["streetAddressLine1"],
+                        store["address"]["streetAddressLine2"],
+                        store["address"]["streetAddressLine3"],
+                    ],
                 ),
                 "city": store["address"]["city"],
                 "state": store["address"]["countrySubdivisionCode"],
@@ -89,7 +92,7 @@ class StarbucksSpider(scrapy.Spider):
                 ]
                 urls = [STORELOCATOR.format(c[1], c[0]) for c in next_coordinates]
                 for url in urls:
-                    request = scrapy.Request(url=url, headers=HEADERS, callback=self.parse)
+                    request = Request(url=url, headers=HEADERS, callback=self.parse)
                     request.meta["distance"] = next_distance
                     yield request
 
@@ -138,7 +141,7 @@ class StarbucksSpider(scrapy.Spider):
                 for url in urls:
                     self.logger.debug(f"Adding {url} to list")
 
-                    request = scrapy.Request(url=url, headers=HEADERS, callback=self.parse)
+                    request = Request(url=url, headers=HEADERS, callback=self.parse)
                     request.meta["distance"] = next_distance
                     yield request
 
