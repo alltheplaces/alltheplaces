@@ -1,6 +1,5 @@
 from scrapy.spiders import SitemapSpider
 
-from locations.spiders.vapestore_gb import clean_address
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -16,7 +15,6 @@ class ShoeZoneGB(SitemapSpider, StructuredDataSpider):
     wanted_types = ["ShoeStore"]
 
     def inspect_item(self, item, response):
-        item["street_address"] = clean_address(item["street_address"])
         # lat/lon are both parsed into lat, separate them
         (item["lat"], item["lon"]) = item["lat"]
         yield item

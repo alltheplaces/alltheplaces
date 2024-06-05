@@ -34,8 +34,8 @@ class TjxSpider(scrapy.Spider):
                     formdata={
                         "chain": ",".join(chains),
                         "lang": "en",
-                        "geolat": lat,
-                        "geolong": lon,
+                        "geolat": str(lat),
+                        "geolong": str(lon),
                     },
                     headers={"Accept": "application/json"},
                 )

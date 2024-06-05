@@ -1,20 +1,15 @@
-from scrapy.spiders import SitemapSpider
+from typing import Iterable
 
-from locations.spiders.pandora import PandoraSpider
+from locations.items import Feature
+from locations.storefinders.rio_seo import RioSeoSpider
 
 
-class ClairesSpider(SitemapSpider):
+class ClairesSpider(RioSeoSpider):
     name = "claires"
-    item_attributes = {"brand": "Claire's", "brand_wikidata": "Q2974996"}
-    allowed_domains = ["claires.com"]
-    sitemap_urls = ["https://stores.claires.com/sitemap.xml"]
-    sitemap_rules = [
-        (
-            r"https:\/\/stores\.claires\.com\/.+\/([-\w]+\/\d+)\.html$",
-            "parse_store",
-        )
-    ]
-    download_delay = 0.2
+    item_attributes = {"brand_wikidata": "Q2974996"}
+    end_point = "https://maps.stores.claires.com/api/"
 
-    def parse_store(self, response):
-        yield PandoraSpider.parse_item(response, self.sitemap_rules[0][0])
+    def post_process_feature(self, feature: Feature, location: dict) -> Iterable[Feature]:
+        feature["branch"] = feature.pop("name")
+
+        yield feature

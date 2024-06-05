@@ -6,7 +6,6 @@ from scrapy.http import JsonRequest
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours, day_range
-from locations.spiders.vapestore_gb import clean_address
 
 
 class FoodLionUSSpider(scrapy.Spider):
@@ -42,9 +41,9 @@ class FoodLionUSSpider(scrapy.Spider):
 
     def parse(self, response, **kwargs):
         for store in json.loads(response.json()["result"]):
-            store["street_address"] = clean_address(store.pop("address"))
+            store["street_address"] = store.pop("address")
             item = DictParser.parse(store)
-            item["website"] = f'https://www.foodlion.com{ store["href"]}'
+            item["website"] = f'https://www.foodlion.com{store["href"]}'
 
             item["opening_hours"] = self.parse_hours(store["hours"])
 

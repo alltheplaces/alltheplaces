@@ -11,8 +11,8 @@ from scrapy.utils.sitemap import Sitemap
 from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
-from locations.spiders.vapestore_gb import clean_address
-from locations.user_agents import BROWSER_DEFAULT
+from locations.pipelines.address_clean_up import merge_address_lines
+from locations.user_agents import FIREFOX_LATEST
 
 BRANDS = {
     "https://www.bakersplus.com/": {"brand": "Baker's", "brand_wikidata": "Q4849080"},
@@ -40,9 +40,10 @@ BRANDS = {
 class KrogerUSSpider(SitemapSpider):
     name = "kroger_us"
     sitemap_urls = [f"{brand}storelocator-sitemap.xml" for brand in BRANDS.keys()]
-    custom_settings = {"AUTOTHROTTLE_ENABLED": True, "USER_AGENT": BROWSER_DEFAULT}
+    custom_settings = {"AUTOTHROTTLE_ENABLED": True}
     url_re = re.compile(r"/(\d{3})/(\d{5})$")
     requires_proxy = True
+    user_agent = FIREFOX_LATEST
 
     departments = {
         "09": Categories.PHARMACY,
@@ -85,7 +86,7 @@ class KrogerUSSpider(SitemapSpider):
                 "name": location["facilityName"],
                 "lat": location["locale"]["location"]["lat"],
                 "lon": location["locale"]["location"]["lng"],
-                "street_address": clean_address(location["locale"]["address"]["addressLines"]),
+                "street_address": merge_address_lines(location["locale"]["address"]["addressLines"]),
                 "city": location["locale"]["address"]["cityTown"],
                 "postcode": location["locale"]["address"]["postalCode"],
                 "state": location["locale"]["address"]["stateProvince"],
@@ -126,7 +127,7 @@ class KrogerUSSpider(SitemapSpider):
             if department.get("locale"):
                 properties["lat"] = department["locale"]["location"]["lat"]
                 properties["lon"] = department["locale"]["location"]["lng"]
-                properties["street_address"] = clean_address(department["locale"]["address"]["addressLines"])
+                properties["street_address"] = merge_address_lines(department["locale"]["address"]["addressLines"])
                 properties["city"] = department["locale"]["address"]["cityTown"]
                 properties["postcode"] = department["locale"]["address"]["postalCode"]
                 properties["state"] = department["locale"]["address"]["stateProvince"]

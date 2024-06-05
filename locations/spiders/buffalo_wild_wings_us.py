@@ -5,6 +5,7 @@ from scrapy.http import JsonRequest
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.pipelines.address_clean_up import clean_address
 
 
 class BuffaloWildWingsUSSpider(Spider):
@@ -28,15 +29,12 @@ class BuffaloWildWingsUSSpider(Spider):
             item["ref"] = location["metadata"]["restaurantNumber"]
             item["lat"] = location["details"]["latitude"]
             item["lon"] = location["details"]["longitude"]
-            item["street_address"] = ", ".join(
-                filter(
-                    None,
-                    [
-                        location["contactDetails"]["address"]["line1"],
-                        location["contactDetails"]["address"]["line2"],
-                        location["contactDetails"]["address"]["line3"],
-                    ],
-                )
+            item["street_address"] = clean_address(
+                [
+                    location["contactDetails"]["address"]["line1"],
+                    location["contactDetails"]["address"]["line2"],
+                    location["contactDetails"]["address"]["line3"],
+                ]
             )
             item["city"] = location["contactDetails"]["address"]["city"]
             item["state"] = location["contactDetails"]["address"]["stateProvinceCode"]

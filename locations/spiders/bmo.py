@@ -1,9 +1,10 @@
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import Feature
+from locations.pipelines.address_clean_up import clean_address
 from locations.spiders.albertsons import AlbertsonsSpider
 from locations.spiders.caseys_general_store import CaseysGeneralStoreSpider
-from locations.spiders.chevron import ChevronSpider
+from locations.spiders.chevron_us import ChevronUSSpider
 from locations.spiders.circle_k import CircleKSpider
 from locations.spiders.costco import CostcoSpider
 from locations.spiders.cvs_us import PHARMACY_BRANDS as CVS_BRANDS
@@ -26,7 +27,7 @@ from locations.spiders.rite_aid_us import RiteAidUSSpider
 from locations.spiders.royal_farms import RoyalFarmsSpider
 from locations.spiders.safeway import SafewaySpider
 from locations.spiders.schnucks_us import SchnucksUSSpider
-from locations.spiders.seven_eleven_us import SevenElevenUSSpider
+from locations.spiders.seven_eleven_ca_us import SevenElevenCAUSSpider
 from locations.spiders.shell import ShellSpider
 from locations.spiders.shoprite import ShopriteSpider
 from locations.spiders.speedway_us import SpeedwayUSSpider
@@ -49,11 +50,11 @@ class BMOSpider(Where2GetItSpider):
     # flake8: noqa: C901
     def parse_item(self, item: Feature, location: dict):
         item["ref"] = location["clientkey"]
-        item["street_address"] = ", ".join(filter(None, [location.get("address1"), location.get("address2")]))
+        item["street_address"] = clean_address([location.get("address1"), location.get("address2")])
         if location["country"] == "CA":
             item["state"] = location["province"]
 
-        item["opening_hours"] = OpeningHours()
+        hours_text = ""
         for day_name in DAYS_FULL:
             open_time = location.get("{}open".format(day_name.lower()))
             close_time = location.get("{}close".format(day_name.lower()))
@@ -65,7 +66,9 @@ class BMOSpider(Where2GetItSpider):
                 and close_time != "closed"
                 and close_time != "N/A"
             ):
-                item["opening_hours"].add_range(day_name, open_time, close_time, "%H%M")
+                hours_text = "{} {}: {} - {}".format(hours_text, day_name, open_time, close_time)
+        item["opening_hours"] = OpeningHours()
+        item["opening_hours"].add_ranges_from_string(hours_text)
 
         if location["grouptype"] in ["BMOHarrisBranches", "BMOBranches"]:
             apply_category(Categories.BANK, item)
@@ -74,8 +77,8 @@ class BMOSpider(Where2GetItSpider):
         elif location["grouptype"] in ["BMOHarrisATM", "BMOATM"]:
             apply_category(Categories.ATM, item)
             if item["name"] == "Alon 7-Eleven":
-                item["located_in"] = SevenElevenUSSpider.item_attributes["brand"]
-                item["located_in_wikidata"] = SevenElevenUSSpider.item_attributes["brand_wikidata"]
+                item["located_in"] = SevenElevenCAUSSpider.item_attributes["brand"]
+                item["located_in_wikidata"] = SevenElevenCAUSSpider.item_attributes["brand_wikidata"]
             elif item["name"] == "Arco":
                 item["located_in"] = MarathonPetroleumUSSpider.brands["ARCO"]["brand"]
                 item["located_in_wikidata"] = MarathonPetroleumUSSpider.brands["ARCO"]["brand_wikidata"]
@@ -83,8 +86,8 @@ class BMOSpider(Where2GetItSpider):
                 item["located_in"] = CaseysGeneralStoreSpider.item_attributes["brand"]
                 item["located_in_wikidata"] = CaseysGeneralStoreSpider.item_attributes["brand_wikidata"]
             elif item["name"] == "Chevron":
-                item["located_in"] = ChevronSpider.item_attributes["brand"]
-                item["located_in_wikidata"] = ChevronSpider.item_attributes["brand_wikidata"]
+                item["located_in"] = ChevronUSSpider.CHEVRON["brand"]
+                item["located_in_wikidata"] = ChevronUSSpider.CHEVRON["brand_wikidata"]
             elif item["name"] == "Circle K" or item["name"] == "Irving - Circle K":
                 item["located_in"] = CircleKSpider.item_attributes["brand"]
                 item["located_in_wikidata"] = CircleKSpider.item_attributes["brand_wikidata"]
@@ -95,8 +98,8 @@ class BMOSpider(Where2GetItSpider):
                 item["located_in"] = CostcoSpider.item_attributes["brand"]
                 item["located_in_wikidata"] = CostcoSpider.item_attributes["brand_wikidata"]
             elif item["name"] == "CVS":
-                item["located_in"] = CVS_BRANDS["CVS Pharmacy"][0]
-                item["located_in_wikidata"] = CVS_BRANDS["CVS Pharmacy"][1]
+                item["located_in"] = CVS_BRANDS["CVS Pharmacy"]["brand"]
+                item["located_in_wikidata"] = CVS_BRANDS["CVS Pharmacy"]["brand_wikidata"]
             elif item["name"] == "Dillons":
                 item["located_in"] = KROGER_BRANDS["https://www.dillons.com/"]["brand"]
                 item["located_in_wikidata"] = KROGER_BRANDS["https://www.dillons.com/"]["brand_wikidata"]
@@ -140,8 +143,8 @@ class BMOSpider(Where2GetItSpider):
                 item["located_in"] = KROGER_BRANDS["https://www.kroger.com/"]["brand"]
                 item["located_in_wikidata"] = KROGER_BRANDS["https://www.kroger.com/"]["brand_wikidata"]
             elif item["name"] == "Longs Drugs":
-                item["located_in"] = CVS_BRANDS["Longs Drugs"][0]
-                item["located_in_wikidata"] = CVS_BRANDS["Longs Drugs"][1]
+                item["located_in"] = CVS_BRANDS["Longs Drugs"]["brand"]
+                item["located_in_wikidata"] = CVS_BRANDS["Longs Drugs"]["brand_wikidata"]
             elif item["name"] == "Marcs":
                 item["located_in"] = MarcsSpider.item_attributes["brand"]
                 item["located_in_wikidata"] = MarcsSpider.item_attributes["brand_wikidata"]

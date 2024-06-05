@@ -1,7 +1,11 @@
+from typing import Iterable
+
+from requests_cache import Response
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
 from locations.categories import Categories
+from locations.linked_data_parser import LinkedDataParser
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -45,3 +49,27 @@ class HSBCSpider(CrawlSpider, StructuredDataSpider):
         # "https://www.hsbc.com.vn/en-vn/contact/branch-finder/",
     ]
     rules = [Rule(LinkExtractor(allow="/branch-list/"), callback="parse_sd")]
+
+    # TODO: Remove this method when the types will be added to structured data
+    def iter_linked_data(self, response: Response) -> Iterable[dict]:
+        for ld_obj in LinkedDataParser.iter_linked_data(response, self.json_parser):
+            if not ld_obj.get("@type"):
+                # Structured data for bank branches on all pages does not have a type currently,
+                # so we're overriding iter_linked_data to parse POIs.
+                # When the type will be added, this method should still pick POIs up.
+                yield ld_obj
+                break
+
+            types = ld_obj["@type"]
+
+            if not isinstance(types, list):
+                types = [types]
+
+            types = [LinkedDataParser.clean_type(t) for t in types]
+
+            for wanted_types in self.wanted_types:
+                if isinstance(wanted_types, list):
+                    if all(wanted in types for wanted in wanted_types):
+                        yield ld_obj
+                elif wanted_types in types:
+                    yield ld_obj

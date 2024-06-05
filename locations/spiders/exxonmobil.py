@@ -4,6 +4,7 @@ from scrapy.spiders import SitemapSpider
 from locations.categories import Categories, Extras, Fuel, FuelCards, PaymentMethods, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
+from locations.pipelines.address_clean_up import clean_address
 
 # We can get the first 250 from the API, but can't find a way to get the next 250 :(
 # So instead get the ids from the sitemap and call the individual api endpoint
@@ -86,7 +87,7 @@ class ExxonMobilSpider(SitemapSpider):
 
             item = DictParser.parse(location)
             item["ref"] = location["LocationID"]
-            item["street_address"] = ", ".join(filter(None, [location["AddressLine1"], location["AddressLine2"]]))
+            item["street_address"] = clean_address([location["AddressLine1"], location["AddressLine2"]])
             item["website"] = response.meta["webpage"]
             item["opening_hours"] = self.store_hours(location["HoursOfOperation24"])
 

@@ -1,11 +1,9 @@
-import re
-from html import unescape
-
 from chompjs import parse_js_object
 from scrapy.spiders import SitemapSpider
 
 from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.pipelines.address_clean_up import clean_address
 
 
 class NewspowerAUSpider(SitemapSpider):
@@ -34,16 +32,8 @@ class NewspowerAUSpider(SitemapSpider):
         properties = {
             "ref": map_marker_dict["id"],
             "name": response.xpath('//div[@class="wpsl-locations-details"]/span/strong/text()').get().strip(),
-            "addr_full": unescape(
-                re.sub(
-                    r"\s+",
-                    " ",
-                    ", ".join(filter(None, response.xpath('//div[@class="wpsl-location-address"]//text()').getall())),
-                )
-            )
-            .replace(" ,", ",")
-            .strip(),
-            "street_address": ", ".join(filter(None, [map_marker_dict["address"], map_marker_dict["address2"]])),
+            "addr_full": clean_address(response.xpath('//div[@class="wpsl-location-address"]//text()').getall()),
+            "street_address": clean_address([map_marker_dict["address"], map_marker_dict["address2"]]),
             "city": map_marker_dict["city"],
             "state": map_marker_dict["state"],
             "postcode": map_marker_dict["zip"],

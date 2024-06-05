@@ -13,7 +13,6 @@ class NandosSpider(scrapy.spiders.SitemapSpider):
     item_attributes = NANDOS_SHARED_ATTRIBUTES
     sitemap_urls = [
         "https://www.nandos.co.uk/sitemap.xml",  # This is GB and IE
-        "https://www.nandosperiperi.com/sitemap.xml",
         "https://www.nandos.com.au/sitemap.xml",
         "https://www.nandos.co.nz/sitemap.xml",
         "https://www.nandos.ca/sitemap.xml",
@@ -21,7 +20,6 @@ class NandosSpider(scrapy.spiders.SitemapSpider):
     # Different Nando's estates have slightly different approaches.
     sitemap_rules = [
         (".co.uk/restaurants/", "parse_ldjson"),
-        ("periperi.com/find/", "parse_ldjson"),
         (".com.au/restaurants/", "parse_json2"),
         (".co.nz/restaurants/", "parse_json2"),
         ("nandos.ca/find/", "parse_json1"),

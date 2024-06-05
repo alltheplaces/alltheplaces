@@ -5,6 +5,7 @@ from scrapy.http import JsonRequest
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.pipelines.address_clean_up import clean_address
 
 
 class BestAndLessAUSpider(Spider):
@@ -25,9 +26,7 @@ class BestAndLessAUSpider(Spider):
             item = DictParser.parse(location)
             item["ref"] = location["address"]["id"]
             item["addr_full"] = location["address"].get("formattedAddress")
-            item["street_address"] = ", ".join(
-                filter(None, [location["address"].get("line1"), location["address"].get("line2")])
-            )
+            item["street_address"] = clean_address([location["address"].get("line1"), location["address"].get("line2")])
             item["city"] = location["address"].get("town")
             item["state"] = location["address"].get("state")
             item["postcode"] = location["address"].get("postalCode")

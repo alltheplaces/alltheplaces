@@ -22,6 +22,7 @@ class SafewaySpider(SitemapSpider, StructuredDataSpider):
     wanted_types = ["GroceryStore", "GasStation", "Pharmacy"]
 
     def post_process_item(self, item, response, ld_data, **kwargs):
+        item["image"] = None
         if ld_data["@type"] == "GroceryStore":
             apply_category(Categories.SHOP_SUPERMARKET, item)
         elif ld_data["@type"] == "GasStation":

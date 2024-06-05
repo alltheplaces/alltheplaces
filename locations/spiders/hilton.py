@@ -26,6 +26,8 @@ class HiltonSpider(SitemapSpider, StructuredDataSpider):
         "di": HILTON_DOUBLETREE,
         "dt": HILTON_DOUBLETREE,
         "es": ["Embassy Suites", "Q5369524"],
+        "gi": ["Hilton Garden Inn", "Q1162859"],
+        "he": HILTON_HOTELS,
         "hf": HILTON_HOTELS,
         "hh": HILTON_HOTELS,
         "hi": HILTON_HOTELS,
@@ -34,8 +36,10 @@ class HiltonSpider(SitemapSpider, StructuredDataSpider):
         "ht": ["Home2 Suites by Hilton", "Q5887912"],
         "hw": ["Homewood Suites by Hilton", "Q5890701"],
         "hx": ["Hampton by Hilton", "Q5646230"],
-        "gi": ["Hilton Garden Inn", "Q1162859"],
         "ol": ["LXR Hotels & Resorts", "Q64605184"],
+        "on": HILTON_HOTELS,
+        "pe": HILTON_HOTELS,
+        "po": ["Tempo by Hilton", "Q112144357"],
         "pr": "Hilton Hotels & Resorts",
         "py": ["Canopy by Hilton", "Q30632909"],
         "qq": "Curio Collection",
@@ -46,6 +50,7 @@ class HiltonSpider(SitemapSpider, StructuredDataSpider):
         "wa": ["Waldorf Astoria", "Q3239392"],
     }
     gc = geonamescache.GeonamesCache()
+    requires_proxy = True
 
     def _parse_sitemap(self, response):
         for x in super()._parse_sitemap(response):

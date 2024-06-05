@@ -1,71 +1,65 @@
 import json
-import re
 
-import scrapy
+from scrapy.spiders import SitemapSpider
 
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
+from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
-from locations.items import Feature
 
 
-class UsBankSpider(scrapy.Spider):
+class UsBankSpider(SitemapSpider):
     name = "us_bank"
     download_delay = 0.5
     concurrent_requests = 3
-    item_attributes = {"brand": "US Bank", "brand_wikidata": "Q739084"}
+    item_attributes = {"brand": "U.S. Bank", "brand_wikidata": "Q739084"}
     allowed_domains = ["usbank.com"]
-    start_urls = [
-        "https://locations.usbank.com/index.html",
+    sitemap_urls = [
+        "https://www.usbank.com/locations/sitemap.xml",
     ]
-
-    def parse(self, response):
-        state_urls = response.xpath('//*[@class="stateListItemLi"]/a/@href').extract()
-
-        for state_url in state_urls:
-            yield scrapy.Request(url=response.urljoin(state_url), callback=self.parse_cities)
-
-    def parse_cities(self, response):
-        city_urls = response.xpath('//*[@class="cityListItemLi"]/a/@href').extract()
-
-        for city_url in city_urls:
-            yield scrapy.Request(url=response.urljoin(city_url), callback=self.parse_stores)
-
-    def parse_stores(self, response):
-        store_urls = response.xpath('//*[@class="btn btn-branch-default btn-top"]/@href').extract()
-
-        for store_url in store_urls:
-            yield scrapy.Request(url=response.urljoin(store_url), callback=self.parse_store_info)
+    sitemap_rules = [("/locations/([a-z-]*)/([.a-z-]*)/([.0-9a-z-]*)/", "parse_store_info")]
 
     def opening_hours(self, hours):
         opening_hours = OpeningHours()
 
         for hour in hours:
-            day = re.search(r".org\/(.{2})", hour["dayOfWeek"]).group(1)
-            start = re.search(r"^(.*):", hour["opens"]).group(1)
-            end = re.search(r"^(.*):", hour["closes"]).group(1)
+            day = hour["dayOfTheWeek"]
+            start = hour.get("openingTime")
+            end = hour.get("closingTime")
 
-            opening_hours.add_range(day=day, open_time=start, close_time=end)
+            opening_hours.add_range(day=day, open_time=start, close_time=end, time_format="%H:%M:%S")
 
         return opening_hours.as_opening_hours()
 
     def parse_store_info(self, response):
-        data = json.loads(response.xpath('//script[@type="application/ld+json"]/text()').extract_first())
+        data = json.loads(response.xpath('//script[@type="application/json"]/text()').extract_first())
 
-        properties = {
-            "ref": data[0]["branchCode"],
-            "name": data[0]["name"],
-            "addr_full": data[0]["address"]["streetAddress"],
-            "city": data[0]["address"]["addressLocality"],
-            "state": data[0]["address"]["addressRegion"],
-            "postcode": data[0]["address"]["postalCode"],
-            "country": data[0]["address"]["addressCountry"],
-            "lat": data[0]["geo"]["latitude"],
-            "lon": data[0]["geo"]["longitude"],
-            "website": response.url,
-        }
+        branch_data = data["props"]["pageProps"]["branchData"]
+        item = DictParser.parse(branch_data)
+        apply_category(Categories.BANK, item)
+        item["website"] = response.url
+        del item["name"]
 
-        hours = self.opening_hours(data[0]["openingHoursSpecification"])
+        branch_detail = branch_data["branchDetail"]
+        item["branch"] = branch_detail.get("nickName")
+        item["phone"] = branch_detail.get("phoneNumber")
+        item["opening_hours"] = self.opening_hours(branch_detail.get("branchHours", []))
+        item["ref"] = branch_detail.get("branchNumber")
+        item["located_in"] = branch_detail.get("inStoreNm")
+        item["extras"]["fax"] = branch_detail.get("faxNumber")
 
-        if hours:
-            properties["opening_hours"] = hours
+        imagesData = data["props"]["pageProps"].get("branchImagesData")
+        if imagesData is not None:
+            images = imagesData.get("entities", [])
+            if len(images) > 0:
+                links = images[0].get("links", [])
+                if len(links) > 0:
+                    item["image"] = links[0].get("href")
+                    if item["image"].endswith(".json"):
+                        item["image"] = item["image"][:-5]
 
-        yield Feature(**properties)
+        apply_yes_no(
+            Extras.ATM, item, branch_detail.get("numberOfWalkUpATMs", 0) + branch_detail.get("numberOfDriveUpATMs", 0)
+        )
+        apply_yes_no(Extras.DRIVE_THROUGH, item, branch_detail.get("numberOfDriveUpATMs", 0))
+
+        yield item

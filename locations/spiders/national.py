@@ -1,6 +1,7 @@
 import scrapy
 
 from locations.items import Feature
+from locations.pipelines.address_clean_up import clean_address
 from locations.user_agents import BROWSER_DEFAULT
 
 HEADERS = {
@@ -38,7 +39,7 @@ class NationalSpider(scrapy.Spider):
                 "name": loc["name"],
                 "brand": loc["brand"],
                 "phone": loc["phones"][0]["phone_number"],
-                "street_address": ", ".join(loc["address"]["street_addresses"]),
+                "street_address": clean_address(loc["address"]["street_addresses"]),
                 "city": loc["address"]["city"],
                 "state": loc["address"]["country_subdivision_code"],
                 "postcode": loc["address"]["postal"],

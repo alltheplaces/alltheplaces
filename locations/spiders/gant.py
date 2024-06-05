@@ -13,6 +13,7 @@ from locations.hours import (
     OpeningHours,
 )
 from locations.items import Feature
+from locations.pipelines.address_clean_up import clean_address
 
 
 class GantSpider(scrapy.Spider):
@@ -58,7 +59,7 @@ class GantSpider(scrapy.Spider):
             item["country"] = store.get("countryCode", None)
             item["postcode"] = store.get("postalCode", None)
             item["email"] = store.get("email", None)
-            item["street_address"] = " ".join([store.get("address1", None) or "", store.get("address2", None) or ""])
+            item["street_address"] = clean_address([store.get("address1"), store.get("address2")])
             oh = OpeningHours()
             for opening_hour in store["storeHours"]:
                 oh.add_ranges_from_string(

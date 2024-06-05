@@ -5,8 +5,8 @@ from scrapy.http import Response
 
 from locations.google_url import extract_google_position
 from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 from locations.spiders.taco_bell import TACO_BELL_SHARED_ATTRIBUTES
-from locations.spiders.vapestore_gb import clean_address
 
 
 class TacoBellINSpider(Spider):
@@ -19,7 +19,7 @@ class TacoBellINSpider(Spider):
             item = Feature()
             item["image"] = location.xpath('.//img[@class="find-Us-Branch-Img"]/@src').get()
             item["branch"] = location.xpath('normalize-space(.//div[@class="findus-heading"]/text())').get()
-            item["addr_full"] = clean_address(location.xpath('.//p[@class="findus_addr"]/text()').getall())
+            item["addr_full"] = merge_address_lines(location.xpath('.//p[@class="findus_addr"]/text()').getall())
             item["phone"] = location.xpath('.//a[@class="mobile-no"]/@rel').get()
             extract_google_position(item, location)
             item["ref"] = item["website"] = location.xpath('.//a[@class="restro-detail"]/@href').get()

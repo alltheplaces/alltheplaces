@@ -2,6 +2,7 @@ import scrapy
 
 from locations.hours import DAYS_FR, OpeningHours
 from locations.items import Feature
+from locations.pipelines.address_clean_up import clean_address
 
 
 class MrBircolageBeSpider(scrapy.Spider):
@@ -69,7 +70,7 @@ class MrBircolageBeSpider(scrapy.Spider):
                 )[0]
             )
 
-        addr_full = ", ".join([street_address, postcode_city])
+        addr_full = clean_address([street_address, postcode_city])
         properties["addr_full"] = addr_full
         properties["street_address"] = street_address
         return properties

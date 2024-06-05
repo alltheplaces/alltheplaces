@@ -3,6 +3,7 @@ from scrapy import Request, Spider
 from scrapy.http import JsonRequest
 
 from locations.dict_parser import DictParser
+from locations.pipelines.address_clean_up import clean_address
 
 
 class SolaSalonStudiosSpider(Spider):
@@ -26,6 +27,6 @@ class SolaSalonStudiosSpider(Spider):
         location_js = response.xpath('//script[@id="__NEXT_DATA__"]/text()').get()
         location = parse_js_object(location_js)["props"]["pageProps"]["locationSEODetails"]["data"]
         item = response.meta["item"]
-        item["street_address"] = ", ".join(filter(None, [location["address_1"], location["address_2"]]))
+        item["street_address"] = clean_address([location["address_1"], location["address_2"]])
         item["country"] = location["country"]
         yield item

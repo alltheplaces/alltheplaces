@@ -1,3 +1,5 @@
+from urllib.parse import urljoin
+
 from scrapy import Spider
 from scrapy.http import JsonRequest
 from unidecode import unidecode
@@ -12,6 +14,7 @@ class BurgerKingCZSpider(Spider):
     item_attributes = BURGER_KING_SHARED_ATTRIBUTES
     allowed_domains = ["burgerking.cz"]
     start_urls = ["https://burgerking.cz/restaurants"]
+    prefixes = ["Burger King", "BurgerKing", "BK"]
 
     def parse(self, response):
         next_build_manifest = response.xpath('//script[contains(@src, "/_buildManifest.js")]/@src').get()
@@ -25,10 +28,15 @@ class BurgerKingCZSpider(Spider):
             if not location["active"] or location["tempDisabled"]:
                 continue
             item = DictParser.parse(location)
+            item["branch"] = item.pop("name")
+            for prefix in self.prefixes:
+                item["branch"] = item["branch"].removeprefix(prefix)
+            item["branch"] = item["branch"].strip()
             item["housenumber"] = location["address"]["number"]
-            item["website"] = "https://burgerking.cz/restaurants/" + unidecode(location["name"]).lower().replace(
-                " ", "-"
-            )
+            slug = unidecode(location["name"]).lower().replace(" ", "-")
+            item["website"] = item["extras"]["website:cs"] = urljoin("https://burgerking.cz/restaurants/", slug)
+            item["extras"]["website:en"] = urljoin("https://burgerking.cz/en/restaurants/", slug)
+
             item["opening_hours"] = OpeningHours()
             hours_string = ""
             for day_name, day_hours in location["weeklyWorkingHours"].items():

@@ -201,3 +201,39 @@ def test_get_variations():
         assert variation in variations
 
     assert any("Postcode" in DictParser.get_variations(key) for key in DictParser.postcode_keys)
+
+
+def test_get_first_key():
+    ref_keys = [
+        "storeid",
+        "storeID",
+        "StoreID",
+        "storeId",
+        "StoreId",
+        "id",
+        "Id",
+        "ID",
+        "locationid",
+        "locationID",
+        "LocationID",
+        "locationId",
+        "LocationID",
+        "store_id",
+        "store_ID",
+        "Store_ID",
+        "store_Id",
+        "Store_Id",
+        "store-id",
+        "store-ID",
+        "Store-ID",
+        "store-Id",
+        "Store-Id",
+    ]
+    for ref_key in ref_keys:
+        location_dict = {
+            "sTOREID": "0000",
+            ref_key: "1234",
+            "identifier": "9999",
+        }
+        assert DictParser.get_first_key(location_dict, ref_keys) == "1234"
+        assert DictParser.get_first_key(location_dict, ["lOCATION_ID"]) is None

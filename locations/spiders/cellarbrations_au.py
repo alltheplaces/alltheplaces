@@ -3,6 +3,7 @@ from scrapy.http import JsonRequest
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.pipelines.address_clean_up import clean_address
 
 
 class CellarbrationsAUSpider(Spider):
@@ -25,9 +26,9 @@ class CellarbrationsAUSpider(Spider):
             item["ref"] = location["retailerStoreId"]
             item["name"] = item["name"].strip()
             item["city"] = item["city"].strip()
-            item["street_address"] = ", ".join(
-                filter(None, [location.get("addressLine1"), location.get("addressLine2"), location.get("addressLine3")])
-            ).strip()
+            item["street_address"] = clean_address(
+                [location.get("addressLine1"), location.get("addressLine2"), location.get("addressLine3")]
+            )
             item["state"] = location.get("countyProvinceState")
             if location.get("openingHours"):
                 item["opening_hours"] = OpeningHours()

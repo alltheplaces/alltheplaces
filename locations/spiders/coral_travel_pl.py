@@ -2,24 +2,28 @@ from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
 from locations.hours import DAYS_PL, OpeningHours
-from locations.structured_data_spider import StructuredDataSpider
+from locations.items import Feature
 
 
-class CoralTravelPLSpider(CrawlSpider, StructuredDataSpider):
+class CoralTravelPLSpider(CrawlSpider):
     name = "coral_travel_pl"
     item_attributes = {"brand": "Coral Travel", "brand_wikidata": "Q58011479"}
-    start_urls = ["https://www.coraltravel.pl/biura-podrozy"]
-    rules = [Rule(LinkExtractor("/biura-podrozy/.+/.+/.+$"), callback="parse_sd")]
+    start_urls = ["https://www.coraltravel.pl/travel-offices"]
+    rules = [Rule(LinkExtractor(r"/travel-offices/.+/.+$"), callback="parse")]
     wanted_types = ["TravelAgency"]
 
-    def post_process_item(self, item, response, ld_data, **kwargs):
-        item["lat"] = response.xpath('//input[@id="map_position_lat"]/@value').get()
-        item["lon"] = response.xpath('//input[@id="map_position_lng"]/@value').get()
+    def parse(self, response, **kwargs):
+        item = Feature()
+        item["website"] = response.url
+        item["ref"] = response.url.split("/")[-1]
+
+        if destination_text := response.xpath('//a[contains(@href, "destination=")]/@href').get():
+            item["lat"], item["lon"] = destination_text.split("destination=")[-1].split(",")
 
         address_lines = list(
             filter(
                 lambda line: len(line) > 0,
-                map(str.strip, response.xpath("//div[@class='saleAdress']/text()").getall()),
+                map(str.strip, response.xpath('//p[a[contains(@href, "destination=")]]/text()').get().split("\n")),
             )
         )
         post_code_city = address_lines[-1]
@@ -28,11 +32,10 @@ class CoralTravelPLSpider(CrawlSpider, StructuredDataSpider):
         item["city"] = " ".join(post_code_city.split(" ")[1:])
 
         item["opening_hours"] = OpeningHours()
-        for open_hour_div in response.xpath("//div[@class='openContainer']"):
-            texts = open_hour_div.xpath("span/text()").getall()
-            if len(texts) != 3:
-                continue
-            day, open_time, close_time = texts
-            item["opening_hours"].add_ranges_from_string(ranges_string=f"{day} {open_time}-{close_time}", days=DAYS_PL)
+        open_hour_lines = response.xpath('//div[h3[text()="Godziny otwarcia"]]/ul/li/text()').getall()
+        for index in range(0, len(open_hour_lines), 2):
+            days = open_hour_lines[index]
+            hours = open_hour_lines[index + 1]
+            item["opening_hours"].add_ranges_from_string(ranges_string=f"{days} {hours}", days=DAYS_PL)
 
         yield item

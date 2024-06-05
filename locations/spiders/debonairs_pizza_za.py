@@ -5,6 +5,7 @@ from unidecode import unidecode
 from locations.categories import Categories
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_3_LETTERS_FROM_SUNDAY, OpeningHours
+from locations.pipelines.address_clean_up import clean_address
 
 
 class DebonairsPizzaZASpider(Spider):
@@ -33,9 +34,7 @@ class DebonairsPizzaZASpider(Spider):
     def parse_locations(self, response):
         for location in response.json():
             item = DictParser.parse(location)
-            item["street_address"] = ", ".join(
-                filter(None, [location.get("AddressLine1"), location.get("AddressLine2")])
-            )
+            item["street_address"] = clean_address([location.get("AddressLine1"), location.get("AddressLine2")])
             item.pop("state", None)
             item["website"] = "https://app.debonairspizza.co.za/restaurant/{}/{}".format(
                 item["ref"], unidecode(item["name"].lower()).replace(" ", "-")
