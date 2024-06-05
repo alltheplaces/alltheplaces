@@ -9,7 +9,9 @@ class ProMedicaUSSpider(XMLFeedSpider):
     name = "promedica_us"
     item_attributes = {"brand": "ProMedica", "brand_wikidata": "Q7246673"}
     allowed_domains = ["www.promedicaseniorcare.org"]
-    start_urls = ["https://www.promedicaseniorcare.org/alllocations?formattedAddress=&boundsNorthEast=&boundsSouthWest="]
+    start_urls = [
+        "https://www.promedicaseniorcare.org/alllocations?formattedAddress=&boundsNorthEast=&boundsSouthWest="
+    ]
     iterator = "xml"
     itertag = "marker"
 
