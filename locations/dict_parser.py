@@ -225,6 +225,7 @@ class DictParser:
                 "coordinates",
                 "geo-position",
                 "position",
+                "display-coordinate",
             ],
         )
         # If not a good location object then use the parent
