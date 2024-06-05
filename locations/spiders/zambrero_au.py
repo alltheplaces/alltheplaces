@@ -6,6 +6,7 @@ from scrapy.http import Request
 from locations.categories import Categories
 from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.pipelines.address_clean_up import clean_address
 
 
 class ZambreroAUSpider(Spider):
@@ -27,11 +28,9 @@ class ZambreroAUSpider(Spider):
             "name": re.sub(r"\s+", " ", response.xpath("//div[@data-location-id]/h4/text()").get()).strip(),
             "lat": response.xpath("//@data-lat").get(),
             "lon": response.xpath("///@data-lng").get(),
-            "addr_full": re.sub(
-                r"\s+",
-                " ",
-                " ".join(response.xpath('//div[@data-location-id]//span[contains(@class, "address")]/text()').getall()),
-            ).strip(),
+            "addr_full": clean_address(
+                " ".join(response.xpath('//div[@data-location-id]//span[contains(@class, "address")]/text()').getall())
+            ),
             "phone": response.xpath('//a[contains(@class, "phone")]/@href').get().replace("tel:", ""),
             "email": response.xpath('//a[contains(@href, "mailto:")]/@href').get().replace("mailto:", ""),
             "website": response.url,

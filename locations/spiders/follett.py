@@ -4,6 +4,7 @@ from scrapy.http import JsonRequest
 from locations.categories import Categories, apply_category
 from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import Feature
+from locations.pipelines.address_clean_up import clean_address
 from locations.structured_data_spider import clean_facebook, clean_twitter
 
 
@@ -47,7 +48,7 @@ class FollettSpider(Spider):
 
         for location_data in location["locationInfo"]:
             if location_data["languageId"] == "-1":  # English
-                properties["street_address"] = ", ".join(filter(None, location_data["address"]["addressLine"]))
+                properties["street_address"] = clean_address(location_data["address"]["addressLine"])
                 properties["city"] = location_data["address"].get("city")
                 properties["state"] = location_data["address"].get("stateOrProvinceName")
                 properties["country"] = location_data["address"].get("country")

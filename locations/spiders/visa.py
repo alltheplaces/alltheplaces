@@ -6,6 +6,7 @@ from scrapy.http import JsonRequest
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
+from locations.pipelines.address_clean_up import clean_address
 
 
 class VisaSpider(Spider):
@@ -57,10 +58,9 @@ class VisaSpider(Spider):
         if data := response.json().get("responseData"):
             for atm in data.get("foundATMLocations") or []:
                 location = atm["location"]
-                location["address"]["street_address"] = ", ".join(
-                    filter(None, [location["address"].pop("street"), location["address"].pop("street2")])
+                location["address"]["street_address"] = clean_address(
+                    [location["address"].pop("street"), location["address"].pop("street2")]
                 )
-
                 item = DictParser.parse(location)
 
                 item["operator"] = location.get("ownerBusName")

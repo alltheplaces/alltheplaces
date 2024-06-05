@@ -5,6 +5,7 @@ from locations.categories import Categories, Extras, Fuel, PaymentMethods, apply
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
+from locations.pipelines.address_clean_up import clean_address
 
 
 class SainsburysSpider(scrapy.Spider):
@@ -25,7 +26,7 @@ class SainsburysSpider(scrapy.Spider):
             store.update(store.pop("contact"))
             store["id"] = store["code"]
 
-            store["street_address"] = ", ".join(filter(None, [store["address1"], store["address2"]]))
+            store["street_address"] = clean_address([store["address1"], store["address2"]])
 
             if store.get("other_name"):
                 store["name"] = store["other_name"]

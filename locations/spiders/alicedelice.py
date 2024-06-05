@@ -1,6 +1,7 @@
 import scrapy
 
 from locations.items import Feature
+from locations.pipelines.address_clean_up import clean_address
 
 
 class AliceDeliceSpider(scrapy.Spider):
@@ -22,7 +23,7 @@ class AliceDeliceSpider(scrapy.Spider):
         street_address_parts = response.xpath(
             "//h1/following-sibling::*/span[@class='city']/preceding-sibling::*/text()"
         ).getall()
-        street_address = "".join(street_address_parts) if street_address_parts is not None else None
+        street_address = clean_address(street_address_parts)
 
         city_raw = response.xpath("//h1/following-sibling::*/span[@class='city']/span[3]/text()").get()
         city = city_raw.strip() if city_raw is not None else None

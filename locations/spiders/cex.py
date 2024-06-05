@@ -2,6 +2,7 @@ import scrapy
 
 from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.pipelines.address_clean_up import clean_address
 
 
 class CeXSpider(scrapy.Spider):
@@ -27,12 +28,7 @@ class CeXSpider(scrapy.Spider):
         item["lat"] = store["latitude"]
         item["lon"] = store["longitude"]
         item["name"] = store["storeName"]
-        item["street_address"] = ", ".join(
-            filter(
-                None,
-                [store["addressLine1"].strip(", "), store["addressLine2"].strip(", ")],
-            )
-        )
+        item["street_address"] = clean_address([store["addressLine1"], store["addressLine2"]])
         item["city"] = store["city"]
         item["state"] = store["county"]
         item["postcode"] = store["postcode"]

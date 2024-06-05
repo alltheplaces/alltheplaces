@@ -3,6 +3,7 @@ from scrapy.http import JsonRequest
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.pipelines.address_clean_up import clean_address
 
 
 class iFLYCAUSSpider(Spider):
@@ -25,14 +26,11 @@ class iFLYCAUSSpider(Spider):
             item = DictParser.parse(location)
             item["ref"] = location["ExtraData"]["ReferenceCode"]
             item["geometry"] = location["Location"]
-            item["street_address"] = ", ".join(
-                filter(
-                    None,
-                    [
-                        location["ExtraData"]["Address"].get("AddressNonStruct_Line1"),
-                        location["ExtraData"]["Address"].get("AddressNonStruct_Line2"),
-                    ],
-                )
+            item["street_address"] = clean_address(
+                [
+                    location["ExtraData"]["Address"].get("AddressNonStruct_Line1"),
+                    location["ExtraData"]["Address"].get("AddressNonStruct_Line2"),
+                ]
             )
             item["city"] = location["ExtraData"]["Address"].get("Locality")
             item["state"] = location["ExtraData"]["Address"].get("Region")

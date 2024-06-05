@@ -28,7 +28,7 @@ class ShellSpider(GeoMeSpider):
             select_shop_item["ref"] = item.get("ref") + "-attached-shop"
             select_shop_item["name"] = "Shell Select"
             select_shop_item["brand"] = "Shell Select"
-            select_shop_item["brand_wikidata"] = "Q110716465"
+            select_shop_item["brand_wikidata"] = "Q124359752"
             apply_category(Categories.SHOP_CONVENIENCE, select_shop_item)
             yield select_shop_item
 

@@ -4,6 +4,7 @@ import scrapy
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.pipelines.address_clean_up import clean_address
 
 
 class BathAndBodyWorksUSSpider(scrapy.Spider):
@@ -17,7 +18,7 @@ class BathAndBodyWorksUSSpider(scrapy.Spider):
 
     def parse(self, response, **kwargs):
         for ref, store in response.json()["stores"].items():
-            store["street_address"] = ", ".join(filter(None, [store.pop("address1"), store.pop("address2")]))
+            store["street_address"] = clean_address([store.pop("address1"), store.pop("address2")])
             item = DictParser.parse(store)
             item["ref"] = ref
 
