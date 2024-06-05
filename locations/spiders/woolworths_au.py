@@ -1,6 +1,7 @@
 import scrapy
 
 from locations.dict_parser import DictParser
+from locations.pipelines.address_clean_up import clean_address
 
 
 class WoolworthsAUSpider(scrapy.Spider):
@@ -20,7 +21,7 @@ class WoolworthsAUSpider(scrapy.Spider):
             if not i["IsOpen"]:
                 continue
 
-            i["street_address"] = ", ".join(filter(None, [i["AddressLine1"], i["AddressLine2"]]))
+            i["street_address"] = clean_address([i["AddressLine1"], i["AddressLine2"]])
             i["ref"] = i.pop("StoreNo")
             i["city"] = i.pop("Suburb")
 

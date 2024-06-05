@@ -2,6 +2,7 @@ import scrapy
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours, day_range, sanitise_day
+from locations.pipelines.address_clean_up import clean_address
 
 
 class SimonMallsSpider(scrapy.Spider):
@@ -17,8 +18,8 @@ class SimonMallsSpider(scrapy.Spider):
         for location in response.json():
             location["ref"] = location["mallId"]
             location["name"] = location["mallName"]
-            location["address"]["street_address"] = ", ".join(
-                filter(None, [location["address"].pop("street1"), location["address"].pop("street2")])
+            location["address"]["street_address"] = clean_address(
+                [location["address"].pop("street1"), location["address"].pop("street2")]
             )
             location["phone"] = location["phones"].get("information")
 

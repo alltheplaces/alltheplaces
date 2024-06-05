@@ -17,9 +17,13 @@ class DairyQueenUSSpider(Spider):
         "Food and Treat": {
             "brand": "DQ Grill & Chill",
             "brand_wikidata": "Q1141226",
-            "extras": {"cuisine": "ice_cream;burger"},
+            "extras": {"amenity": "fast_food", "cuisine": "ice_cream;burger"},
         },
-        "Treat Only": {"brand": "Dairy Queen", "brand_wikidata": "Q1141226", "extras": {"cuisine": "ice_cream"}},
+        "Treat Only": {
+            "brand": "Dairy Queen",
+            "brand_wikidata": "Q1141226",
+            "extras": {"amenity": "fast_food", "cuisine": "ice_cream"},
+        },
     }
 
     def start_requests(self):

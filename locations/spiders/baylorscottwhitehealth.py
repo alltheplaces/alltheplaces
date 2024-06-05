@@ -2,6 +2,7 @@ import scrapy
 
 from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.pipelines.address_clean_up import clean_address
 
 
 class BaylorScottWhiteHealthSpider(scrapy.Spider):
@@ -32,7 +33,7 @@ class BaylorScottWhiteHealthSpider(scrapy.Spider):
             properties = {
                 "ref": row["locationID"],
                 "name": row["locationName"],
-                "street_address": " ".join([row["locationStreet1"], row.get("locationStreet2", "")]).strip(),
+                "street_address": clean_address([row["locationStreet1"], row.get("locationStreet2", "")]),
                 "city": row["locationCity"],
                 "postcode": row["locationZip"],
                 "state": row["locationState"],

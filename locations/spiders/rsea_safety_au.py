@@ -3,6 +3,7 @@ from scrapy.http import FormRequest
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.pipelines.address_clean_up import clean_address
 
 
 class RSEASafetyAUSpider(Spider):
@@ -47,9 +48,7 @@ class RSEASafetyAUSpider(Spider):
                 continue
             item = DictParser.parse(location)
             item["ref"] = location["WarehouseCode"]
-            item["street_address"] = ", ".join(
-                filter(None, [location.get("AddressLine1"), location.get("AddressLine2")])
-            )
+            item["street_address"] = clean_address([location.get("AddressLine1"), location.get("AddressLine2")])
             item["website"] = (
                 "https://www.rsea.com.au/store-locator/"
                 + location["State"].lower()

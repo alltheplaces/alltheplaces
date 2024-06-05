@@ -5,6 +5,7 @@ from scrapy.http import JsonRequest
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.pipelines.address_clean_up import clean_address
 
 
 class KiplingUSSpider(Spider):
@@ -28,7 +29,7 @@ class KiplingUSSpider(Spider):
                 continue
             item = DictParser.parse(location)
             item["ref"] = location["storeID"]
-            item["street_address"] = ", ".join(filter(None, [location.get("address1"), location.get("address2")]))
+            item["street_address"] = clean_address([location.get("address1"), location.get("address2")])
             hours_string = re.sub(r"\s+", " ", location.get("storeHours")).strip()
             item["opening_hours"] = OpeningHours()
             item["opening_hours"].add_ranges_from_string(hours_string)

@@ -7,6 +7,7 @@ from locations.categories import Categories
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 from locations.items import set_closed
+from locations.pipelines.address_clean_up import clean_address
 
 BASH_BRANDS = {
     "ASJ": {"brand": "American Swiss", "brand_wikidata": "Q116430764"},
@@ -97,9 +98,7 @@ class BashZASpider(Spider):
             item["lat"] = location["address"]["location"]["latitude"]
             item["lon"] = location["address"]["location"]["longitude"]
             item.pop("street")
-            item["street_address"] = " ".join(
-                filter(None, [location["address"]["street"], location["address"]["complement"]])
-            ).strip()
+            item["street_address"] = clean_address([location["address"]["street"], location["address"]["complement"]])
             item["website"] = (
                 "https://bash.com/store/"
                 + item["name"].lower().replace(" ", "-")

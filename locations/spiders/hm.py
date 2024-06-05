@@ -3,6 +3,7 @@ from geonamescache import GeonamesCache
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.pipelines.address_clean_up import clean_address
 
 
 class HMSpider(scrapy.Spider):
@@ -28,7 +29,7 @@ class HMSpider(scrapy.Spider):
     def parse_country(self, response):
         for store in response.json()["stores"]:
             store.update(store.pop("address"))
-            store["street_address"] = ", ".join(filter(None, [store.get("streetName1"), store.get("streetName2")]))
+            store["street_address"] = clean_address([store.get("streetName1"), store.get("streetName2")])
 
             item = DictParser.parse(store)
 

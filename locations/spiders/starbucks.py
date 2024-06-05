@@ -1,11 +1,11 @@
 import csv
-import json
 from collections import defaultdict
 from math import sqrt
 
 import scrapy
 
 from locations.categories import Categories
+from locations.hours import DAYS_EN, OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
 from locations.searchable_points import open_searchable_points
@@ -39,20 +39,21 @@ class StarbucksSpider(scrapy.Spider):
                     yield request
 
     def parse(self, response):
-        response_json = json.loads(response.body)
-        stores = response_json["stores"]
+        stores = response.json()
 
-        for store in stores:
-            store_lat = store["coordinates"]["latitude"]
-            store_lon = store["coordinates"]["longitude"]
+        for poi in stores:
+            store = poi["store"]
+            store_lat = store.get("coordinates", {}).get("latitude")
+            store_lon = store.get("coordinates", {}).get("longitude")
             properties = {
                 "name": store["name"],
+                "branch": store["name"],
                 "street_address": clean_address(
                     [
                         store["address"]["streetAddressLine1"],
                         store["address"]["streetAddressLine2"],
                         store["address"]["streetAddressLine3"],
-                    ]
+                    ],
                 ),
                 "city": store["address"]["city"],
                 "state": store["address"]["countrySubdivisionCode"],
@@ -62,19 +63,19 @@ class StarbucksSpider(scrapy.Spider):
                 "ref": store["id"],
                 "lon": store_lon,
                 "lat": store_lat,
-                "brand": store["brandName"],
                 "website": f'https://www.starbucks.com/store-locator/store/{store["id"]}/{store["slug"]}',
                 "extras": {"number": store["storeNumber"], "ownership_type": store["ownershipTypeCode"]},
             }
-            yield Feature(**properties)
+            item = Feature(**properties)
+            self.parse_hours(item, store)
+            yield item
 
         # Get lat and lng from URL
         pairs = response.url.split("?")[-1].split("&")
         # Center is lng, lat
         center = [float(pairs[1].split("=")[1]), float(pairs[0].split("=")[1])]
 
-        paging = response_json["paging"]
-        if paging["returned"] > 0 and paging["limit"] == paging["returned"]:
+        if stores:
             if response.meta["distance"] > 0.15:
                 next_distance = response.meta["distance"] / 2
                 # Create four new coordinate pairs
@@ -104,14 +105,19 @@ class StarbucksSpider(scrapy.Spider):
                 for ii in range(additional_stores):
                     # Find distance between current center and all stores
                     for jj, store in enumerate(stores):
-                        store_lat = store["coordinates"]["latitude"]
-                        store_lon = store["coordinates"]["longitude"]
+                        store_lat = store.get("coordinates", {}).get("latitude")
+                        store_lon = store.get("coordinates", {}).get("longitude")
+                        if store_lat is None or store_lon is None:
+                            continue
                         store_distances[jj].append(
                             sqrt((current_center[1] - store_lat) ** 2 + (current_center[0] - store_lon) ** 2)
                         )
 
                     # Find total distance from each store to each center point
                     total_distances = {key: sum(val) for key, val in store_distances.items()}
+
+                    if not total_distances:
+                        continue
 
                     # Find store furthest away
                     max_store = max(total_distances, key=total_distances.get)
@@ -133,3 +139,27 @@ class StarbucksSpider(scrapy.Spider):
                     request = scrapy.Request(url=url, headers=HEADERS, callback=self.parse)
                     request.meta["distance"] = next_distance
                     yield request
+
+    def parse_hours(self, item: Feature, poi: dict):
+        if schedule := poi.get("schedule"):
+            try:
+                oh = OpeningHours()
+                for day in schedule:
+                    if not day.get("open"):
+                        continue
+                    day_name = day.get("dayOfWeek", "")
+                    hours_formatted = day.get("hoursFormatted", "")
+                    if hours_formatted == "Open 24 hours":
+                        oh.add_range(day=DAYS_EN.get(day_name.title()), open_time="00:00", close_time="23:59")
+                    else:
+                        hours = hours_formatted.split(" to ")
+                        oh.add_range(
+                            day=DAYS_EN.get(day_name.title()),
+                            open_time=hours[0],
+                            close_time=hours[1],
+                            time_format="%I:%M %p",
+                        )
+                item["opening_hours"] = oh.as_opening_hours()
+            except Exception as e:
+                self.logger.warning(f"Failed to parse hours for {schedule}: {e}")
+                self.crawler.stats.inc_value(f"atp/{self.name}/hours/failed")

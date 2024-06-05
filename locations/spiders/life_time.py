@@ -5,6 +5,7 @@ from scrapy.http import Request
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.pipelines.address_clean_up import clean_address
 
 
 class LifeTimeSpider(Spider):
@@ -22,7 +23,7 @@ class LifeTimeSpider(Spider):
             item = DictParser.parse(location)
             item["ref"] = location["clubId"]
             item["website"] = location.get("clubPagePath")
-            item["street_address"] = ", ".join(filter(None, [location.get("street1"), location.get("street2")]))
+            item["street_address"] = clean_address([location.get("street1"), location.get("street2")])
             if location.get("clubPagePaths") and location["clubPagePaths"].get("clubHours"):
                 hours_url = location["clubPagePaths"]["clubHours"]
                 yield Request(url=hours_url, callback=self.add_hours, meta={"item": item})
