@@ -12,8 +12,6 @@ class QuestDiagnosticsSpider(SitemapSpider):
     sitemap_urls = ["https://www.questdiagnostics.com/locations-sitemap.xml"]
 
     def parse(self, response):
-        address_components = response.xpath('//div[@class="address"]/text()').extract()
-
         properties = {
             "ref": response.url,
             "lat": response.xpath('//div[@class="latitude"]/text()').get(),
