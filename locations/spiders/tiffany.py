@@ -4,7 +4,7 @@ from scrapy.http import JsonRequest
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.pipelines.address_clean_up import clean_address
-from locations.user_agents import FIREFOX_LATEST  # ATP and older user agents are blocked.
+from locations.user_agents import FIREFOX_LATEST
 
 
 class TiffanySpider(Spider):
@@ -12,7 +12,8 @@ class TiffanySpider(Spider):
     item_attributes = {"brand": "Tiffany", "brand_wikidata": "Q1066858"}
     allowed_domains = ["www.tiffany.com"]
     start_urls = ["https://www.tiffany.com/content/tiffany-n-co/_jcr_content/servlets/storeslist.1.json"]
-    user_agent = FIREFOX_LATEST
+    user_agent = FIREFOX_LATEST  # ATP and older user agents are blocked.
+    requires_proxy = True  # Data centre netblocks appear to be blocked.
 
     def start_requests(self):
         for url in self.start_urls:
