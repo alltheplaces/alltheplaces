@@ -9,7 +9,11 @@ from locations.hours import OpeningHours
 
 class PrimroseSchoolUSSpider(Spider):
     name = "primrose_school_us"
-    item_attributes = {"brand": "Primrose School", "brand_wikidata": "Q7243677", "extras": Categories.KINDERGARTEN.value}
+    item_attributes = {
+        "brand": "Primrose School",
+        "brand_wikidata": "Q7243677",
+        "extras": Categories.KINDERGARTEN.value,
+    }
     allowed_domains = ["www.primroseschools.com"]
     start_urls = ["https://www.primroseschools.com/find-a-school"]
 
