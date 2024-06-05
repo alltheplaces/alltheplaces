@@ -21,6 +21,7 @@ ARG BUILD_PYTHON_DEPS=" \
 ARG BUILD_OPT_DEPS=" \
         sudo \
         locales \
+        ssh \
         git \
         ca-certificates \
         curl \
