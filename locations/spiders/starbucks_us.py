@@ -18,14 +18,11 @@ class StarbucksUSSpider(Spider):
     name = "starbucks_us"
     item_attributes = {"brand": "Starbucks", "brand_wikidata": "Q37158", "extras": Categories.COFFEE_SHOP.value}
     allowed_domains = ["www.starbucks.com"]
+    searchable_point_files = ["us_centroids_50mile_radius.csv"]
+    country_filter = ["US"]
 
     def start_requests(self):
-        searchable_point_files = [
-            "us_centroids_50mile_radius.csv",
-            "ca_centroids_50mile_radius.csv",
-        ]
-
-        for point_file in searchable_point_files:
+        for point_file in self.searchable_point_files:
             with open_searchable_points(point_file) as points:
                 reader = csv.DictReader(points)
                 for point in reader:
@@ -43,8 +40,16 @@ class StarbucksUSSpider(Spider):
 
         for poi in stores:
             store = poi["store"]
+
+            if store["address"]["countryCode"] not in self.country_filter:
+                # Coordinate searches return cross-border results. A country
+                # filter ensures that multiple Starbucks spiders for nearby
+                # countries don't return the same location.
+                continue
+
             store_lat = store.get("coordinates", {}).get("latitude")
             store_lon = store.get("coordinates", {}).get("longitude")
+
             properties = {
                 "name": store["name"],
                 "branch": store["name"],

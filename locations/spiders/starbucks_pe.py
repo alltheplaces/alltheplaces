@@ -7,6 +7,7 @@ from locations.spiders.starbucks_us import HEADERS, STORELOCATOR, StarbucksUSSpi
 class StarbucksPESpider(StarbucksUSSpider):
     name = "starbucks_pe"
     item_attributes = StarbucksUSSpider.item_attributes
+    country_filter = ["PE"]
 
     def start_requests(self):
         for city in city_locations("PE", 15000):
