@@ -26,7 +26,7 @@ class PressShopBESpider(Spider):
             item["state"] = location["region"]
             item["lat"] = location["latitude"]
             item["lon"] = location["longitude"]
-            item["phone"] = location["phone"]
+            item["phone"] = location["phone"].replace("/", "")
             item["ref"] = location["id"]
             # url is a lie
 
