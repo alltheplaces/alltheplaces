@@ -10,7 +10,11 @@ from locations.pipelines.address_clean_up import merge_address_lines
 
 class BerlinDonerKebapPLSpider(Spider):
     name = "berlin_doner_kebap_pl"
-    item_attributes = {"brand": "Berlin Döner Kebap", "brand_wikidata": "Q126195313"}
+    item_attributes = {
+        "brand": "Berlin Döner Kebap",
+        "brand_wikidata": "Q126195313",
+        "extras": {"amenity": "fast_food", "cuisine": "kebab"},
+    }
     start_urls = ["https://www.berlindonerkebap.com/restauracje/wszystkie/"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
