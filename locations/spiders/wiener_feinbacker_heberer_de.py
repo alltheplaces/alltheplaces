@@ -5,8 +5,8 @@ from scrapy import Selector
 
 from locations.categories import Categories
 from locations.hours import DAYS_DE, OpeningHours
+from locations.spiders.galeria_de import GaleriaDESpider
 from locations.spiders.hit_de import HITDESpider
-from locations.spiders.karstadt_de import KarstadtDESpider
 from locations.spiders.kaufland import KauflandSpider
 from locations.spiders.rewe_de import REWEDESpider
 from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
@@ -35,8 +35,8 @@ class WienerFeinbackerHebererDESpider(WPStoreLocatorSpider):
                 item["located_in"] = HITDESpider.item_attributes["brand"]
                 item["located_in_wikidata"] = HITDESpider.item_attributes["brand_wikidata"]
             elif re.search(r"\WKarstadt\W", located_in_tag, flags=re.IGNORECASE):
-                item["located_in"] = KarstadtDESpider.item_attributes["brand"]
-                item["located_in_wikidata"] = KarstadtDESpider.item_attributes["brand_wikidata"]
+                item["located_in"] = GaleriaDESpider.item_attributes["brand"]
+                item["located_in_wikidata"] = GaleriaDESpider.item_attributes["brand_wikidata"]
             elif re.search(r"\WKaufland\W", located_in_tag, flags=re.IGNORECASE):
                 item["located_in"] = KauflandSpider.item_attributes["brand"]
                 item["located_in_wikidata"] = KauflandSpider.item_attributes["brand_wikidata"]
