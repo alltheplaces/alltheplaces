@@ -3,6 +3,7 @@ from scrapy.http import JsonRequest
 
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
+from locations.pipelines.address_clean_up import clean_address
 
 # Documentation available at https://developers.woosmap.com/products/search-api/get-started/
 #
@@ -10,7 +11,6 @@ from locations.hours import DAYS, OpeningHours
 # with 'woos-' followed by a UUID. Also supply a value for 'origin'
 # which is the HTTP 'Origin' header value, typically similar to
 # 'https://www.brandname.example'.
-from locations.pipelines.address_clean_up import clean_address
 
 
 class WoosmapSpider(Spider):
