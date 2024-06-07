@@ -16,6 +16,7 @@ class DollarGeneralSpider(SitemapSpider):
     allowed_domains = ["dollargeneral.com"]
     sitemap_urls = ["https://www.dollargeneral.com/sitemap-main.xml"]
     sitemap_rules = [(r"https:\/\/www\.dollargeneral\.com\/store-directory\/\w{2}\/.*\/\d+$", "parse")]
+    requires_proxy = True
 
     def parse(self, response):
         properties = {
