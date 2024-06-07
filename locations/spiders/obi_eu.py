@@ -10,14 +10,7 @@ class ObiEUSpider(CrawlSpider, StructuredDataSpider):
     name = "obi_eu"
     item_attributes = OBI_SHARED_ATTRIBUTES
     start_urls = [
-        "https://www.obi.at/markt/index.html",
-        "https://www.obi.ch/markt/index.html",
-        "https://www.obi.cz/prodejna/index.html",
-        "https://www.obi.de/markt/index.html",
-        "https://www.obi.hu/aruhaz/index.html",
-        "https://www.obi-italia.it/negozio/index.html",
         "https://www.obi.pl/stores",
-        "https://www.obi.sk/predajna/index.html",
     ]
     rules = [
         # Try to avoid complex regex to improve maintainability
