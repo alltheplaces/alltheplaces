@@ -10,6 +10,7 @@ from locations.hours import DAYS, OpeningHours
 # with 'woos-' followed by a UUID. Also supply a value for 'origin'
 # which is the HTTP 'Origin' header value, typically similar to
 # 'https://www.brandname.example'.
+from locations.pipelines.address_clean_up import clean_address
 
 
 class WoosmapSpider(Spider):
@@ -29,7 +30,7 @@ class WoosmapSpider(Spider):
             for feature in features:
                 item = DictParser.parse(feature["properties"])
 
-                item["street_address"] = ", ".join(filter(None, feature["properties"]["address"]["lines"]))
+                item["street_address"] = clean_address(feature["properties"]["address"]["lines"])
                 item["geometry"] = feature["geometry"]
 
                 item["opening_hours"] = OpeningHours()
