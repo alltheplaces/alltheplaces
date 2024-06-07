@@ -20,12 +20,16 @@ class ChevroletSpider(scrapy.Spider):
             "clientapplicationid": "quantum",
             "locale": "en-US",
         }
-        point_files = "us_centroids_100mile_radius_state.csv"
-        for lat, lon in point_locations(point_files):
-            yield scrapy.Request(
-                url=f"https://www.chevrolet.com/bypass/pcf/quantum-dealer-locator/v1/getDealers?desiredCount=1000&distance=1200&makeCodes=001&latitude={lat}&longitude={lon}&searchType=latLongSearch",
-                headers=headers,
-            )
+        point_files = [
+            "us_centroids_100mile_radius_state.csv",
+            "ca_centroids_100mile_radius_territory.csv",
+        ]
+        for point_file in point_files:
+            for lat, lon in point_locations(point_file):
+                yield scrapy.Request(
+                    url=f"https://www.chevrolet.com/bypass/pcf/quantum-dealer-locator/v1/getDealers?desiredCount=1000&distance=500&makeCodes=001&latitude={lat}&longitude={lon}&searchType=latLongSearch",
+                    headers=headers,
+                )
 
     def parse(self, response):
         for data in response.json().get("payload", {}).get("dealers"):
