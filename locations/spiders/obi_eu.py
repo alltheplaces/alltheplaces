@@ -16,7 +16,7 @@ class ObiEUSpider(CrawlSpider, StructuredDataSpider):
         "https://www.obi.de/markt/index.html",
         "https://www.obi.hu/aruhaz/index.html",
         "https://www.obi-italia.it/negozio/index.html",
-        "https://www.obi.pl/stores/index.html",
+        "https://www.obi.pl/stores",
         "https://www.obi.sk/predajna/index.html",
     ]
     rules = [
