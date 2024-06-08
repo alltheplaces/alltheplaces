@@ -4,6 +4,7 @@ from scrapy.spiders import SitemapSpider
 
 from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.user_agents import FIREFOX_LATEST
 
 
 class LowesUSSpider(SitemapSpider):
@@ -12,6 +13,7 @@ class LowesUSSpider(SitemapSpider):
     allowed_domains = ["lowes.com"]
     sitemap_urls = ["https://www.lowes.com/sitemap/store0.xml"]
     sitemap_rules = [(r"^https://www.lowes.com/store", "parse_store")]
+    user_agent = FIREFOX_LATEST
     requires_proxy = True
 
     def parse_hours(self, store_hours):
