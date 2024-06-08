@@ -3,11 +3,10 @@ import scrapy
 from locations.items import Feature
 
 
-class LouisaCoffeeSpider(scrapy.Spider):
-    name = "louisa_coffee"
+class LouisaCoffeeTWSpider(scrapy.Spider):
+    name = "louisa_coffee_tw"
     item_attributes = {"brand": "Louisa Coffee", "brand_wikidata": "Q96390921"}
-    allowed_domains = ["www.louisacoffee.com.tw"]
-    start_urls = ("http://www.louisacoffee.com.tw/visit_result",)
+    start_urls = ["https://www.louisacoffee.co/visit_result?data[county]="]
 
     def parse(self, response):
         location_hrefs = response.xpath('//a[contains(@class, "marker")]')
@@ -18,8 +17,11 @@ class LouisaCoffeeSpider(scrapy.Spider):
                 "ref": location_href.xpath(
                     "@rel-store-name"
                 ).extract_first(),  # using the name in lieu of an ID of any kind
-                "lon": float(location_href.xpath("@rel-store-lng").extract_first()),
-                "lat": float(location_href.xpath("@rel-store-lat").extract_first()),
+                "lon": location_href.xpath("@rel-store-lng").extract_first(),
+                "lat": location_href.xpath("@rel-store-lat").extract_first(),
+                "phone": location_href.xpath('.//ancestor::*[@class="row"]//*[contains(text(),"電話")]/text()')
+                .extract_first()
+                .replace("電話/", ""),
             }
 
             yield Feature(**properties)
