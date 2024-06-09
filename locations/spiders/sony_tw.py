@@ -7,7 +7,10 @@ from locations.items import Feature
 class AmpolAUSpider(Spider):
     name = "sony_tw"
     item_attributes = {"brand": "Sony", "brand_wikidata": "Q41187"}
-    start_urls = ["https://store.sony.com.tw/channelStore/index?area=all&productId=&type=direct&isType=Y"]
+    start_urls = [
+        "https://store.sony.com.tw/channelStore/index?area=all&productId=&type=direct&isType=Y",
+        "https://store.sony.com.tw/channelStore/index?area=all&productId=&type=special&isType=Y&max=100",
+    ]
 
     # def start_requests(self):
     #     yield Request(
