@@ -1,7 +1,6 @@
-import pprint
 
 from locations.categories import Extras, PaymentMethods, apply_yes_no
-from locations.hours import DAYS, DAYS_3_LETTERS, OpeningHours
+from locations.hours import OpeningHours
 from locations.storefinders.where2getit import Where2GetItSpider
 
 
