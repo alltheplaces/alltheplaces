@@ -4,7 +4,7 @@ from locations.hours import DAYS_CN, OpeningHours, day_range
 from locations.items import Feature
 
 
-class AmpolAUSpider(Spider):
+class SonyTWSpider(Spider):
     name = "sony_tw"
     item_attributes = {"brand": "Sony", "brand_wikidata": "Q41187"}
     start_urls = [
@@ -12,16 +12,9 @@ class AmpolAUSpider(Spider):
         "https://store.sony.com.tw/channelStore/index?area=all&productId=&type=special&isType=Y&max=100",
     ]
 
-    # def start_requests(self):
-    #     yield Request(
-    #         url="https://store.sony.com.tw/channelStore/index?area=all&productId=&type=direct&isType=Y",
-    #     )
-
     def parse(self, response):
-        stores = response.xpath('//figure[@class="cell store__list"]')  # .getall()
+        stores = response.xpath('//figure[@class="cell store__list"]')
         for store in stores:
-            # print()
-            # print(store)
             item = {}
 
             # Ref
