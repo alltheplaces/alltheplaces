@@ -3,13 +3,14 @@ from typing import Any
 from scrapy import Spider
 from scrapy.http import Response
 
+from locations.categories import Categories
 from locations.dict_parser import DictParser
 from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class VuoriSpider(Spider):
     name = "vuori"
-    item_attributes = {"brand": "Vuori", "brand_wikidata": "Q121878733"}
+    item_attributes = {"brand": "Vuori", "brand_wikidata": "Q121878733", "extras": Categories.SHOP_CLOTHES.value}
     start_urls = ["https://vuoriclothing.com/api/store-locations"]
     no_refs = True
 
