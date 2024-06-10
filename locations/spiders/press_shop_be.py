@@ -5,12 +5,13 @@ from typing import Any
 from scrapy import Spider
 from scrapy.http import Response
 
+from locations.categories import Categories
 from locations.items import Feature
 
 
 class PressShopBESpider(Spider):
     name = "press_shop_be"
-    item_attributes = {"brand": "Press Shop", "brand_wikidata": "Q126196511"}
+    item_attributes = {"brand": "Press Shop", "brand_wikidata": "Q126196511", "extras": Categories.SHOP_NEWSAGENT.value}
     start_urls = ["https://press-shop.be/nl/onze-winkels/press-shop"]
     establishments_pattern = re.compile(r'"establishments":\s*(\[.+\]),\s*"moreinfo_block3"', re.DOTALL)
 
