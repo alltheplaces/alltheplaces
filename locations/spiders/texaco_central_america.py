@@ -6,13 +6,13 @@ from typing import Any
 from scrapy import Spider
 from scrapy.http import Response
 
-from locations.categories import Fuel, apply_yes_no
+from locations.categories import Categories, Fuel, apply_yes_no
 from locations.items import Feature
 
 
 class TexacoCentralAmericaSpider(Spider):
     name = "texaco_central_america"
-    item_attributes = {"brand": "Texaco", "brand_wikidata": "Q775060"}
+    item_attributes = {"brand": "Texaco", "brand_wikidata": "Q775060", "extras": Categories.FUEL_STATION.value}
     start_urls = [
         "https://www.texacocontechron.com/estaciones-de-servicio/",
         "https://www.texacocontechron.com/gt/estaciones-de-servicio/",
