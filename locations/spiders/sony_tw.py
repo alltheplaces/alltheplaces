@@ -1,4 +1,7 @@
-from scrapy import Spider
+from urllib.parse import urlparse
+
+import chompjs
+from scrapy import Request, Spider
 
 from locations.hours import DAYS_CN, OpeningHours, day_range
 from locations.items import Feature
@@ -19,6 +22,7 @@ class SonyTWSpider(Spider):
 
             # Ref
             item["ref"] = store.xpath("./a/@href").get()
+            item["website"] = f"https://{urlparse(response.request.url).netloc}{item['ref']}"
 
             # Name
             item["name"] = store.xpath('./a/div/p[@class="h5"]/strong/text()').get()
@@ -35,7 +39,7 @@ class SonyTWSpider(Spider):
             item["phone"] = info_values[1].split("(")[0]
             self.parse_opening_hours(item, info_values[2][:-1])
 
-            yield Feature(**item)
+            yield Request(url=item["website"], callback=self.parse_lat_lon, cb_kwargs={"item": item})
 
     def parse_opening_hours(self, item, hours):
         try:
@@ -60,3 +64,12 @@ class SonyTWSpider(Spider):
                 item["opening_hours"].add_days_range(days, open_time, close_time)
         except Exception:
             self.crawler.stats.inc_value("failed_hours_parse")
+
+    def parse_lat_lon(self, response, item):
+        script = response.xpath('//script[contains(text(), "var uluru")]/text()').get()
+        var_uluru = script[script.find("{", script.find("var uluru")) : script.find("}", script.find("var uluru")) + 1]
+        var_uluru_json = chompjs.parse_js_object(var_uluru)
+        item["lat"] = var_uluru_json["lat"]
+        item["lon"] = var_uluru_json["lng"]
+
+        yield Feature(**item)
