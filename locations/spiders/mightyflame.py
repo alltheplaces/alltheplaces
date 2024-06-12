@@ -11,9 +11,7 @@ from locations.searchable_points import open_searchable_points
 
 class MightyFlameSpider(scrapy.Spider):
     name = "mightyflame"
-    item_attributes = {
-        "brand": "Mighty Flame",
-    }
+    item_attributes = {"brand": "Mighty Flame", "extras": {"shop": "fuel", "fuel": "propane"}}
     allowed_domains = ["secure.gotwww.com"]
 
     def start_requests(self):
