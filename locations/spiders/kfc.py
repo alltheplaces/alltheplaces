@@ -1,5 +1,6 @@
 from scrapy.spiders import SitemapSpider
 
+from locations.categories import Extras, apply_yes_no
 from locations.items import set_closed
 from locations.structured_data_spider import StructuredDataSpider
 
@@ -15,8 +16,16 @@ class KFCSpider(SitemapSpider, StructuredDataSpider):
     wanted_types = ["FoodEstablishment"]
 
     def post_process_item(self, item, response, ld_data, **kwargs):
-        item["name"] = None
+        item["name"] = item["image"] = None
         if all(rule.endswith(" Closed") for rule in ld_data.get("openingHours", [])):
             set_closed(item)
+
+        services = response.xpath('//*[contains(@class, "CoreServices-label")]/text()').getall()
+
+        # apply_yes_no(, item, "Catering" in services)
+        apply_yes_no(Extras.DELIVERY, item, "Delivery" in services)
+        apply_yes_no(Extras.DRIVE_THROUGH, item, "Drive Thru" in services)
+        # apply_yes_no(, item, "Gift Cards" in services)
+        apply_yes_no(Extras.WIFI, item, "WiFi" in services)
 
         yield item
