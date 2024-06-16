@@ -1,35 +1,22 @@
-import scrapy
+from scrapy.spiders import SitemapSpider
 
-from locations.linked_data_parser import LinkedDataParser
-from locations.microdata_parser import MicrodataParser
+from locations.items import set_closed
+from locations.structured_data_spider import StructuredDataSpider
 
 KFC_SHARED_ATTRIBUTES = {"brand": "KFC", "brand_wikidata": "Q524757"}
 
 
-class KFCSpider(scrapy.spiders.SitemapSpider):
+class KFCSpider(SitemapSpider, StructuredDataSpider):
     name = "kfc"
     item_attributes = KFC_SHARED_ATTRIBUTES
-    sitemap_urls = [
-        "https://www.kfc.co.uk/sitemap.xml",
-        "https://locations.kfc.com/sitemap.xml",
-    ]
+    sitemap_urls = ["https://locations.kfc.com/sitemap.xml"]
+    sitemap_rules = [(r"com/\w\w/[^/]+/[^/]+$", "parse")]
     download_delay = 0.5
+    wanted_types = ["FoodEstablishment"]
 
-    def _parse_sitemap(self, response):
-        def follow_link(url):
-            if "kfc.co.uk" in url:
-                return "/kfc-near-me/" in url
-            for s in ["/delivery", "/chickensandwich"]:
-                if url.endswith(s):
-                    return False
-            return True
+    def post_process_item(self, item, response, ld_data, **kwargs):
+        item["name"] = None
+        if all(rule.endswith(" Closed") for rule in ld_data.get("openingHours", [])):
+            set_closed(item)
 
-        for x in super()._parse_sitemap(response):
-            if follow_link(x.url):
-                yield x
-
-    def parse(self, response):
-        MicrodataParser.convert_to_json_ld(response)
-        for store_type in ["FoodEstablishment", "Restaurant"]:
-            if item := LinkedDataParser.parse(response, store_type):
-                yield item
+        yield item
