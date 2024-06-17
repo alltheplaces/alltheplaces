@@ -709,6 +709,9 @@ class OpeningHours:
         self.day_hours = defaultdict(set)
         self.days_closed = set()
 
+    def __bool__(self):
+        return bool(self.day_hours or self.days_closed)
+
     def add_days_range(self, days: [str], open_time, close_time, time_format="%H:%M"):
         for day in days:
             self.add_range(day, open_time, close_time, time_format=time_format)
