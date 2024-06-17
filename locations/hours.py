@@ -830,9 +830,6 @@ class OpeningHours:
     def _parse_opening_hours(self, rule: str, time_format: str):
         days, time_ranges = rule.split(" ", 1)
 
-        # if "-" not in time_ranges:
-        # return
-
         for time_range in time_ranges.split(","):
             if time_ranges.lower() in ["closed", "off"]:
                 start_time = end_time = "closed"
