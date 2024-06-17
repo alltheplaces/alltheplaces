@@ -1,4 +1,4 @@
-from locations.spiders.kfc import KFC_SHARED_ATTRIBUTES
+from locations.spiders.kfc_us import KFC_SHARED_ATTRIBUTES
 from locations.storefinders.amrest_eu import AmrestEUSpider
 
 
