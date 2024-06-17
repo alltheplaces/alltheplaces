@@ -1,12 +1,13 @@
 import scrapy
 from scrapy.http import JsonRequest
 
+from locations.categories import Categories
 from locations.dict_parser import DictParser
 
 
 class GapTWSpider(scrapy.Spider):
     name = "gap_tw"
-    item_attributes = {"brand": "Gap", "brand_wikidata": "Q420822"}
+    item_attributes = {"brand": "Gap", "brand_wikidata": "Q420822", "extras": Categories.SHOP_CLOTHES.value}
 
     def start_requests(self):
         url = "https://api.gap.tw/store/queryStoreLocation"
