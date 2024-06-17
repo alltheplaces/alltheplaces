@@ -333,6 +333,44 @@ def test_ld_parse_opening_hours_array_with_commas():
     assert o.as_opening_hours() == "Mo-Su 00:00-01:00,04:00-24:00"
 
 
+def test_ld_parse_opening_hours_closed():
+    o = OpeningHours()
+    o.from_linked_data(
+        json.loads(
+            """
+            {
+                "@context": "https://schema.org",
+                "openingHours": [
+                    "Mo Closed",
+                    "Tu Closed",
+                    "We Closed",
+                    "Th Closed",
+                    "Fr Closed",
+                    "Sa Closed",
+                    "Su Closed"
+                ]
+            }
+            """
+        )
+    )
+    assert o.as_opening_hours() == "Mo-Su closed"
+
+
+def test_ld_parse_opening_hours_closed_range():
+    o = OpeningHours()
+    o.from_linked_data(
+        json.loads(
+            """
+            {
+                "@context": "https://schema.org",
+                "openingHours": ["Mo-Su Closed"]
+            }
+            """
+        )
+    )
+    assert o.as_opening_hours() == "Mo-Su closed"
+
+
 def test_ld_parse_time_format():
     o = OpeningHours()
     o.from_linked_data(
