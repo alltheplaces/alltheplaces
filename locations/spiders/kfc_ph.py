@@ -1,6 +1,6 @@
 from scrapy.spiders import SitemapSpider
 
-from locations.spiders.kfc import KFC_SHARED_ATTRIBUTES
+from locations.spiders.kfc_us import KFC_SHARED_ATTRIBUTES
 from locations.structured_data_spider import StructuredDataSpider
 
 

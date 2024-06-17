@@ -5,7 +5,7 @@ from scrapy.http import JsonRequest, Response
 
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
-from locations.spiders.kfc import KFC_SHARED_ATTRIBUTES
+from locations.spiders.kfc_us import KFC_SHARED_ATTRIBUTES
 
 
 class KfcTHSpider(Spider):

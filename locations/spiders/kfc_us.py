@@ -7,8 +7,8 @@ from locations.structured_data_spider import StructuredDataSpider
 KFC_SHARED_ATTRIBUTES = {"brand": "KFC", "brand_wikidata": "Q524757"}
 
 
-class KFCSpider(SitemapSpider, StructuredDataSpider):
-    name = "kfc"
+class KFCUSSpider(SitemapSpider, StructuredDataSpider):
+    name = "kfc_us"
     item_attributes = KFC_SHARED_ATTRIBUTES
     sitemap_urls = ["https://locations.kfc.com/sitemap.xml"]
     sitemap_rules = [(r"com/\w\w/[^/]+/[^/]+$", "parse")]
