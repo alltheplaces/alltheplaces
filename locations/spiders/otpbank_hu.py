@@ -10,6 +10,7 @@ from locations.items import Feature
 class OtpBankHUSpider(Spider):
     name = "otpbank_hu"
     item_attributes = {"brand_wikidata": "Q912778"}
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def start_requests(self) -> Iterable[Request]:
         yield JsonRequest(
