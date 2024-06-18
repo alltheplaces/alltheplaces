@@ -707,6 +707,10 @@ def sanitise_day(day: str, days: {} = DAYS_EN) -> str:
 class OpeningHours:
     def __init__(self):
         self.day_hours = defaultdict(set)
+        self.days_closed = set()
+
+    def __bool__(self):
+        return bool(self.day_hours or self.days_closed)
 
     def add_days_range(self, days: [str], open_time, close_time, time_format="%H:%M"):
         for day in days:
@@ -720,6 +724,14 @@ class OpeningHours:
 
         if not open_time or not close_time:
             return
+        if (
+            isinstance(open_time, str)
+            and isinstance(close_time, str)
+            and open_time.lower() == "closed"
+            and close_time.lower() == "closed"
+        ):
+            self.day_hours.pop(day, None)
+            self.days_closed.add(day)
         if isinstance(open_time, str):
             if open_time.lower() == "closed":
                 return
@@ -733,6 +745,7 @@ class OpeningHours:
         if not isinstance(close_time, time.struct_time):
             close_time = time.strptime(close_time, time_format)
 
+        self.days_closed.discard(day)
         self.day_hours[day].add((open_time, close_time))
 
     def as_opening_hours(self) -> str:
@@ -740,14 +753,17 @@ class OpeningHours:
         this_day_group = None
 
         for day in DAYS:
-            hours = ",".join(
-                "%s-%s"
-                % (
-                    time.strftime("%H:%M", h[0]),
-                    time.strftime("%H:%M", h[1]).replace("23:59", "24:00"),
+            if day in self.days_closed:
+                hours = "closed"
+            else:
+                hours = ",".join(
+                    "%s-%s"
+                    % (
+                        time.strftime("%H:%M", h[0]),
+                        time.strftime("%H:%M", h[1]).replace("23:59", "24:00"),
+                    )
+                    for h in sorted(self.day_hours[day])
                 )
-                for h in sorted(self.day_hours[day])
-            )
 
             if not this_day_group:
                 this_day_group = {"from_day": day, "to_day": day, "hours": hours}
@@ -814,11 +830,11 @@ class OpeningHours:
     def _parse_opening_hours(self, rule: str, time_format: str):
         days, time_ranges = rule.split(" ", 1)
 
-        if "-" not in time_ranges:
-            return
-
         for time_range in time_ranges.split(","):
-            start_time, end_time = time_range.split("-")
+            if time_ranges.lower() in ["closed", "off"]:
+                start_time = end_time = "closed"
+            else:
+                start_time, end_time = time_range.split("-")
 
             start_time = start_time.strip()
             end_time = end_time.strip()
