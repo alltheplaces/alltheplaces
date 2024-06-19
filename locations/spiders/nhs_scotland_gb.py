@@ -49,6 +49,7 @@ class NHSScotlandGBSpider(Spider):
         "pharmacies": Categories.PHARMACY,
     }
     download_delay = 0.2
+    requires_proxy = True
 
     def start_requests(self):
         for service in self.services.keys():
