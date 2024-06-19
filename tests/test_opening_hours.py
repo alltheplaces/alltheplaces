@@ -333,6 +333,14 @@ def test_ld_parse_opening_hours_array_with_commas():
     assert o.as_opening_hours() == "Mo-Su 00:00-01:00,04:00-24:00"
 
 
+def test_opening_hours_closed():
+    oh = OpeningHours()
+    oh.set_closed("Su")
+    assert oh.as_opening_hours() == "Su closed"
+    oh.set_closed(DAYS)
+    assert oh.as_opening_hours() == "Mo-Su closed"
+
+
 def test_ld_parse_opening_hours_closed():
     o = OpeningHours()
     o.from_linked_data(
