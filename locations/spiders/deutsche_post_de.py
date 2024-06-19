@@ -11,7 +11,7 @@ from locations.user_agents import BROWSER_DEFAULT
 class DeutschePostDESpider(Spider):
     name = "deutsche_post_de"
     allowed_domains = ["www.deutschepost.de"]
-    item_attributes = {"brand": "Deutsche Post", "brand_wikidata": "Q15805513"}
+    item_attributes = {"brand": "Deutsche Post", "brand_wikidata": "Q157645"}
     user_agent = BROWSER_DEFAULT
     custom_settings = {"ROBOTSTXT_OBEY": False}
 

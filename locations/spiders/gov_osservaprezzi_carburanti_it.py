@@ -37,7 +37,7 @@ class GovOsservaprezziCarburantiITSpider(Spider):
     }
 
     BRANDS = {
-        "Api-Ip": {"brand": "IP", "brand_wikidata": "Q646807"},
+        "Api-Ip": {"brand": "IP", "brand_wikidata": "Q3788748"},
         "Esso": {"brand": "Esso", "brand_wikidata": "Q867662"},
         "Q8": Q8ItaliaSpider.item_attributes,
         "Tamoil": {"brand": "Tamoil", "brand_wikidata": "Q706793"},
