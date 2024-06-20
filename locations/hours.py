@@ -872,8 +872,16 @@ class OpeningHours:
         elif rules := linked_data.get("openingHours"):
             if not isinstance(rules, list):
                 rules = re.findall(
-                    r"((\w{2,3}|\w{2,3}\s?\-\s?\w{2,3}|(\w{2,3},)+\w{2,3})\s(\d\d:\d\d)\s?\-\s?(\d\d:\d\d))",
+                    r"""((
+                        \w{2,3}                 # Day
+                        |\w{2,3}\s?\-\s?\w{2,3} # Day - Day
+                        |(\w{2,3},)+\w{2,3}     # Day,Day
+                    )\s(
+                        (\d\d:\d\d)\s?\-\s?(\d\d:\d\d) # time - range
+                        |(?i:closed) # ignoring case
+                    ))""",
                     rules,
+                    re.X,
                 )
                 rules = [r[0] for r in rules]
 
