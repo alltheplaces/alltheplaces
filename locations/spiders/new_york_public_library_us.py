@@ -1,17 +1,7 @@
 import scrapy
 
 from locations.dict_parser import DictParser
-from locations.hours import OpeningHours
-
-DAY_MAPPING = {
-    "Mon": "Mo",
-    "Tue": "Tu",
-    "Wed": "We",
-    "Thu": "Th",
-    "Fri": "Fr",
-    "Sat": "Sa",
-    "Sun": "Su",
-}
+from locations.hours import DAYS_EN, OpeningHours
 
 
 class NewYorkPublicLibraryUSSpider(scrapy.Spider):
@@ -27,7 +17,7 @@ class NewYorkPublicLibraryUSSpider(scrapy.Spider):
         regular_hours = location_hours["regular"]
 
         for week_day in regular_hours:
-            day = DAY_MAPPING[week_day["day"].strip(".")]
+            day = DAYS_EN[week_day["day"].strip(".")]
             open_time = week_day["open"]
             close_time = week_day["close"]
 
