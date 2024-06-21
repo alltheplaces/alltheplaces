@@ -1,36 +1,37 @@
-from scrapy import Spider
+from typing import Iterable
 
-from locations.categories import Categories, apply_category
-from locations.dict_parser import DictParser
-from locations.hours import DAYS_FULL, OpeningHours
-from locations.spiders.vapestore_gb import clean_address
+from scrapy import Request, Spider
+from scrapy.http import JsonRequest
+
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
+from locations.items import Feature
 
 
 class BEEVGBSpider(Spider):
     name = "beev_gb"
     item_attributes = {"brand": "Be.EV", "brand_wikidata": "Q118263083"}
-    start_urls = ["https://be-ev.co.uk/api/chargepoints/GetSiteMarkersNoFilter"]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
+
+    def start_requests(self) -> Iterable[Request]:
+        yield JsonRequest(
+            url="https://be-ev.co.uk/api/sites/GetMarkersWithFilters?ConnectorType=type2:0,ccs:0,chademo:0&ChargerType=f:0,r:0&Availability=a:0,o:0,u:0,cs:0&PaymentOptions=cless:0&AccessibilityFeatures=wpb:0,ac:0,sfk:0,sfc:0,fg:0&MultiChargerLocations=one:0,two:0,three:0,fourplus:0&SpecialistGroups=taxi:0&DifferentOperators=diffops:0&OffPeakPricing=opp:0&source=fuuse",
+        )
 
     def parse(self, response, **kwargs):
         for location in response.json():
-            item = DictParser.parse(location)
-            item["street_address"] = clean_address(
-                [location["Address"]["Line1"], location["Address"]["Line2"], location["Address"]["Line3"]]
-            )
-            if location["OpeningTimes"]["Is24Hours"]:
-                item["opening_hours"] = "24/7"
-            else:
-                item["opening_hours"] = OpeningHours()
-                for day in DAYS_FULL:
-                    rule = location["OpeningTimes"]["Times"].get(day)
-                    if not rule:
-                        continue
-                    if rule["starthours"] != "-1" and rule["endhours"] != "-1":
-                        item["opening_hours"].add_range(
-                            day, rule["starthours"].zfill(4), rule["endhours"].zfill(4), time_format="%H%M"
-                        )
-            # TODO: count location["ChargePoints"]?
-            # apply_yes_no(Extras.FEE, item, not location["Tariff"]["IsFree"], False)
-            # item["extras"]["charge"] = location["Tariff"]["Price"]
+            if location["Status"] == 4:
+                continue  # Upcoming
+
+            item = Feature()
+            item["ref"] = location["SiteId"]
+            item["lat"] = location["Coordinates"]["Lat"]
+            item["lon"] = location["Coordinates"]["Long"]
+            item["name"] = location["Name"]
+            item["postcode"] = location["FormattedAddress"]["PostCode"]
+
+            apply_yes_no(Extras.FEE, item, location["Tariff"]["Amount"] == "0.00", False)
+            item["extras"]["charge"] = "{} {}/kWh".format(location["Tariff"]["Amount"], location["Tariff"]["Currency"])
+
             apply_category(Categories.CHARGING_STATION, item)
+
             yield item

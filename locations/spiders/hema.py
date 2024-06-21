@@ -21,6 +21,7 @@ class HemaSpider(Spider):
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
+        country = response.url.split("/Stores-Load", 1)[0].split("_")[-1]
         for location in response.xpath('//li[contains(@class, "store")]'):
             item = Feature()
             item["ref"] = location.xpath('.//input[@name="stores"]/@value').get()
@@ -30,6 +31,7 @@ class HemaSpider(Spider):
             ).getall()
             item["phone"] = response.xpath('.//a[@class="store-info-phone"]/text()').get()
             extract_google_position(item, location)
+            item["country"] = country
 
             item["opening_hours"] = OpeningHours()
             for rule in location.xpath(

@@ -6,7 +6,6 @@ from locations.categories import Categories, apply_category, apply_yes_no
 from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.spiders.deutsche_bank_be import DeutscheBankBESpider
-from locations.spiders.vapestore_gb import clean_address
 
 
 class DeutscheBankINSpider(scrapy.Spider):
@@ -27,7 +26,7 @@ class DeutscheBankINSpider(scrapy.Spider):
                     if match := re.search(r"ID[*\s:]+(\w+)", location.get()):
                         item = Feature()
                         item["ref"] = match.group(1)
-                        item["addr_full"] = clean_address(location_info[0].replace("Address", "").replace(":", ""))
+                        item["addr_full"] = location_info[0].replace("Address", "").replace(":", "")
                         item["website"] = response.url
                         apply_category(Categories.ATM, item)
                         if "cheque deposit" in location.get().lower():
@@ -39,7 +38,7 @@ class DeutscheBankINSpider(scrapy.Spider):
                     if "phone" in location_info[0].lower():  # no address or incorrect data
                         continue
                     item = Feature()
-                    item["addr_full"] = clean_address(location_info[0])
+                    item["addr_full"] = location_info[0]
                     for info in location_info[1:]:
                         if "phone" in info.lower():
                             item["phone"] = info
@@ -51,7 +50,7 @@ class DeutscheBankINSpider(scrapy.Spider):
                         else:
                             pass  # same IFSC code for many branches, hence not collected
                     if not item.get("phone"):
-                        item["addr_full"] = clean_address(location_info)  # only address is present
+                        item["addr_full"] = location_info  # only address is present
                     item["ref"] = item["addr_full"]
                     item["website"] = response.url
                     apply_category(Categories.BANK, item)

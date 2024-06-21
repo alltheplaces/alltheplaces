@@ -5,6 +5,7 @@ from scrapy import Request, Spider
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.pipelines.address_clean_up import clean_address
 
 
 class FlightCentreAUSpider(Spider):
@@ -60,15 +61,12 @@ class FlightCentreAUSpider(Spider):
                 continue
             item = DictParser.parse(location["_source"])
             item["ref"] = location["_id"].split(":", 1)[0]
-            item["street_address"] = ", ".join(
-                filter(
-                    None,
-                    [
-                        location["_source"].get("address1"),
-                        location["_source"].get("address2"),
-                        location["_source"].get("address3"),
-                    ],
-                )
+            item["street_address"] = clean_address(
+                [
+                    location["_source"].get("address1"),
+                    location["_source"].get("address2"),
+                    location["_source"].get("address3"),
+                ]
             )
             item["phone"] = location["_source"].get("toll_free_number__tel")
             if location["_source"].get("slug"):

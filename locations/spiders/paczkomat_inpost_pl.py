@@ -9,7 +9,7 @@ from locations.items import Feature
 
 class PaczkomatInpostPLSpider(Spider):
     name = "paczkomat_inpost_pl"
-    item_attributes = {"brand": "Paczkomat", "brand_wikidata": "Q110970254"}
+    item_attributes = {"brand": "Paczkomat InPost", "brand_wikidata": "Q110970254"}
     allowed_domains = ["inpost.pl"]
     start_urls = ["https://inpost.pl/sites/default/files/points.json"]
 

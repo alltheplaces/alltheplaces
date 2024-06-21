@@ -5,6 +5,7 @@ import scrapy
 
 from locations.hours import OpeningHours, day_range, sanitise_day
 from locations.items import Feature
+from locations.pipelines.address_clean_up import clean_address
 
 
 class TijuanaFlatsSpider(scrapy.Spider):
@@ -25,7 +26,7 @@ class TijuanaFlatsSpider(scrapy.Spider):
                 "name": name,
                 "lat": row["acf"]["physical_location"]["lat"],
                 "lon": row["acf"]["physical_location"]["lng"],
-                "street_address": ", ".join(filter(None, [row["acf"]["address_1"], row["acf"]["address_2"]])),
+                "street_address": clean_address([row["acf"]["address_1"], row["acf"]["address_2"]]),
                 "city": row["acf"]["city"],
                 "state": row["acf"]["state"],
                 "postcode": row["acf"]["zip"],

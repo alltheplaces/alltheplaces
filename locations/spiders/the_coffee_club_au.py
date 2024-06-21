@@ -3,6 +3,7 @@ from scrapy.http import JsonRequest
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.pipelines.address_clean_up import clean_address
 
 
 class TheCoffeeClubAUSpider(Spider):
@@ -23,7 +24,7 @@ class TheCoffeeClubAUSpider(Spider):
                 continue
             item = DictParser.parse(location)
             item["ref"] = location["storeNumber"]
-            item["street_address"] = ", ".join(filter(None, [location["addressLine1"], location["addressLine2"]]))
+            item["street_address"] = clean_address([location["addressLine1"], location["addressLine2"]])
             item["website"] = "https://coffeeclub.com.au/pages/store-details?country=Australia&name=" + location[
                 "displayName"
             ].lower().replace(" ", "-")

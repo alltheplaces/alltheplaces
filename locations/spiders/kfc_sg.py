@@ -4,7 +4,7 @@ from scrapy.selector import Selector
 
 from locations.hours import OpeningHours
 from locations.items import Feature
-from locations.spiders.kfc import KFC_SHARED_ATTRIBUTES
+from locations.spiders.kfc_us import KFC_SHARED_ATTRIBUTES
 
 
 class KFCSGSpider(scrapy.Spider):

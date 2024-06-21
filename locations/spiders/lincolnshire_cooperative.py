@@ -27,8 +27,8 @@ class LincolnshireCooperativeSpider(SitemapSpider):
         ("coffee", Categories.COFFEE_SHOP),
         ("filling station", Categories.FUEL_STATION),
         ("travel", Categories.SHOP_TRAVEL_AGENCY),
-        ("chiropody", {"healthcare": "podiatry"}),
-        ("podiatry", {"healthcare": "podiatry"}),
+        ("chiropody", Categories.SHOP_ORTHOPEDICS),
+        ("podiatry", Categories.SHOP_ORTHOPEDICS),
     ]
 
     def parse_item(self, response):

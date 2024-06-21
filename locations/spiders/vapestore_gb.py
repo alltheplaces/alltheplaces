@@ -4,41 +4,9 @@ from scrapy.spiders import SitemapSpider
 
 from locations.google_url import extract_google_position
 from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
-
-
-def extract_email_link(item, response):
-    for link in response.xpath("//a/@href").getall():
-        if link.startswith("mailto:"):
-            item["email"] = link.replace("mailto:", "").strip()
-            return
-
-
-def extract_phone_link(item, response):
-    for link in response.xpath("//a/@href").getall():
-        if link.startswith("tel:"):
-            item["phone"] = link.replace("tel:", "").strip()
-            return
-
-
-def clean_address(addr):
-    if isinstance(addr, str):
-        addr = addr.replace("\n", ",").replace("\r", ",").replace("\t", ",").replace("\f", ",")
-        addr = addr.split(",")
-
-    if not isinstance(addr, list):
-        return
-
-    return_addr = []
-
-    for line in addr:
-        if line:
-            line = line.replace("(null)", "").replace("\xa0", " ")
-            line = line.strip("\n\r\t\f ,")
-            if line != "":
-                return_addr.append(line)
-
-    return ", ".join(return_addr)
+from locations.structured_data_spider import extract_email
 
 
 class VapeStoreGBSpider(SitemapSpider):
@@ -61,9 +29,9 @@ class VapeStoreGBSpider(SitemapSpider):
         item["website"] = response.url
 
         item["name"] = response.xpath('//div[@class="flt_left"]/strong/text()').get()
-        item["addr_full"] = clean_address(response.xpath('//div[@class="flt_left"]/text()').getall())
+        item["addr_full"] = merge_address_lines(response.xpath('//div[@class="flt_left"]/text()').getall())
 
-        extract_email_link(item, response)
+        extract_email(item, response)
         extract_google_position(item, response)
 
         return item

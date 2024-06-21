@@ -12,7 +12,7 @@ class DmSpider(scrapy.Spider):
     start_urls = ["https://store-data-service.services.dmtech.com/stores/bbox/89.999,-179.999,-89.999,179.999"]
 
     @staticmethod
-    def parse_hours(store_hours: [dict]) -> OpeningHours:
+    def parse_hours(store_hours: list[dict]) -> OpeningHours:
         opening_hours = OpeningHours()
 
         for store_day in store_hours:
@@ -28,7 +28,6 @@ class DmSpider(scrapy.Spider):
         for location in response.json()["stores"]:
             location["address"]["street_address"] = location["address"].pop("street")
             location["address"]["country"] = location["countryCode"]
-            location["name"] = location["address"].get("name")
             item = DictParser.parse(location)
             if location["countryCode"] in ["BG", "BA", "IT"]:
                 item["website"] = (

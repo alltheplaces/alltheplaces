@@ -1,13 +1,13 @@
 import scrapy
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_DE, OpeningHours, sanitise_day
 
 
 class AldiSudDESpider(scrapy.Spider):
     name = "aldi_sud_de"
-    item_attributes = {"brand": "ALDI Süd", "brand_wikidata": "Q41171672", "extras": Categories.SHOP_SUPERMARKET.value}
+    item_attributes = {"name": "ALDI Süd", "brand": "ALDI Süd", "brand_wikidata": "Q41171672"}
     start_urls = [
         "https://www.aldi-sued.de/de/de/.get-stores-in-radius.json?latitude=44.721772724757756&longitude=18.98679905523246&radius=2500000"
     ]
@@ -29,5 +29,7 @@ class AldiSudDESpider(scrapy.Spider):
                 if not rule.get("closed", False):
                     oh.add_range(day, rule["openFormatted"], rule["closeFormatted"])
             item["opening_hours"] = oh.as_opening_hours()
+
+            apply_category(Categories.SHOP_SUPERMARKET, item)
 
             yield item

@@ -7,8 +7,8 @@ from locations.categories import apply_category
 from locations.items import Feature
 
 category_mapping = {
-    "neurological": {"healthcare": "centre", "healthcare:specialty": "neurology"},
-    "mental health and wellbeing": {"healthcare": "centre", "healthcare:specialty": "psychiatry"},
+    "neurological": {"healthcare": "centre", "healthcare:speciality": "neurology"},
+    "mental health and wellbeing": {"healthcare": "centre", "healthcare:speciality": "psychiatry"},
     "learning disabilities & autism": {"amenity": "social_facility", "social_facility:for": "disabled"},
     "children & education": {"amenity": "social_facility", "social_facility:for": "disabled"},
 }

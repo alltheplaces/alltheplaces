@@ -37,25 +37,38 @@ class AgileStoreLocatorSpider(Spider):
             item = DictParser.parse(location)
             item["name"] = item["name"].strip()
             item["street_address"] = item.pop("street")
-            if location.get("open_hours"):
-                item["opening_hours"] = OpeningHours()
-                hours_json = json.loads(location["open_hours"])
-                for day_name, hours_ranges in hours_json.items():
-                    for hours_range in hours_ranges:
-                        hours_range = hours_range.upper()
-                        if not hours_range or hours_range == "0":
-                            continue
-                        if hours_range == "1":
-                            start_time = "12:00 AM"
-                            end_time = "11:59 PM"
-                        else:
-                            start_time = hours_range.split(" - ", 1)[0]
-                            end_time = hours_range.split(" - ", 1)[1]
-                        if "AM" in start_time or "PM" in start_time or "AM" in end_time or "PM" in end_time:
-                            item["opening_hours"].add_range(DAYS_EN[day_name.title()], start_time, end_time, "%I:%M %p")
-                        else:
-                            item["opening_hours"].add_range(DAYS_EN[day_name.title()], start_time, end_time)
+            item = self.parse_opening_hours(item, location)
             yield from self.parse_item(item, location) or []
+
+    def parse_opening_hours(self, item: Feature, location: dict, **kwargs):
+        if location.get("open_hours"):
+            item["opening_hours"] = OpeningHours()
+            hours_json = json.loads(location["open_hours"])
+
+            if hours_json == []:
+                return item
+
+            for day_name, hours_ranges in hours_json.items():
+                for hours_range in hours_ranges:
+                    hours_range = hours_range.upper()
+                    if not hours_range or hours_range == "0":
+                        continue
+                    if hours_range == "1":
+                        start_time = "12:00 AM"
+                        end_time = "11:59 PM"
+                    else:
+                        start_time = hours_range.split(" - ", 1)[0]
+                        end_time = hours_range.split(" - ", 1)[1]
+                    if "AM" in start_time or "PM" in start_time or "AM" in end_time or "PM" in end_time:
+                        item["opening_hours"].add_range(
+                            DAYS_EN[day_name.title()],
+                            start_time.replace(" AM", "AM").replace(" PM", "PM"),
+                            end_time.replace(" AM", "AM").replace(" PM", "PM"),
+                            "%I:%M%p",
+                        )
+                    else:
+                        item["opening_hours"].add_range(DAYS_EN[day_name.title()], start_time, end_time)
+        return item
 
     def parse_item(self, item: Feature, location: dict, **kwargs):
         yield item

@@ -1,27 +1,57 @@
-from typing import Any
+from typing import Any, Iterable
 
-from scrapy.http import Response
-from scrapy.spiders import SitemapSpider
+from scrapy import Request
+from scrapy.http import JsonRequest, Response
+from scrapy.spiders import Spider
 
-from locations.google_url import extract_google_position
+from locations.categories import Extras, apply_yes_no
 from locations.items import Feature
 from locations.spiders.taco_bell import TACO_BELL_SHARED_ATTRIBUTES
-from locations.spiders.vapestore_gb import clean_address
-from locations.structured_data_spider import extract_phone
 
 
-class TacoBellESSpider(SitemapSpider):
+class TacoBellESSpider(Spider):
     name = "taco_bell_es"
     item_attributes = TACO_BELL_SHARED_ATTRIBUTES
-    sitemap_urls = ["https://tacobell.es/restaurantes-sitemap.xml"]
-    sitemap_rules = [("/restaurantes/", "parse")]
+
+    def make_request(self, offset: int) -> JsonRequest:
+        return JsonRequest(
+            url="https://loyalty-customer-api.pro.tacobell.es/public/store/list?paginationMaxItems=100&paginationOffset={}&showOrder=distance&model.idStoreStatusStore=1".format(
+                offset
+            ),
+            headers={
+                "X-Auth-Token": "s1ktt2qz7tiis5sut4yer4gv7mx4qm6h3u4erplzs7avaopwv5wotdpzj9f6cg85gqydxk07md86f2n1ykvgxjizcpnx6hloa3pxkphdilsab5fwnn0o950y5xx4igio"
+            },
+            meta={"offset": offset},
+        )
+
+    def start_requests(self) -> Iterable[Request]:
+        yield self.make_request(0)
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        item = Feature()
-        item["ref"] = item["website"] = response.url
-        item["name"] = clean_address(response.xpath('//div[@class="dir"]/h1/text()').getall())
-        item["addr_full"] = clean_address(response.xpath('//div[@class="dir"]/text()').getall())
-        extract_google_position(item, response)
-        extract_phone(item, response)
+        for location in response.json()["data"]["list"]:
+            item = Feature()
+            item["ref"] = location["idStore"]
+            item["branch"] = location["descriptionStore"].removeprefix("Taco Bell").strip()
+            item["street_address"] = location["addressStore"]
+            item["city"] = location["cityStore"]
+            item["state"] = location["nameProvince"]
+            item["postcode"] = location["postCodeStore"]
+            item["lat"] = location["latitudeStore"]
+            item["lon"] = location["longitudeStore"]
 
-        yield item
+            apply_yes_no(Extras.DRIVE_THROUGH, item, location["drivethruStore"])
+
+            item["website"] = item["extras"]["website:es"] = "https://tacobell.es/es/restaurantes/{}/{}".format(
+                location["idProvinceStore"], location["idStore"]
+            )
+            item["extras"]["website:ca"] = "https://tacobell.es/ca/restaurants/{}/{}".format(
+                location["idProvinceStore"], location["idStore"]
+            )
+            item["extras"]["website:en"] = "https://tacobell.es/en/restaurants/{}/{}".format(
+                location["idProvinceStore"], location["idStore"]
+            )
+
+            yield item
+
+        if len(response.json()["data"]["list"]) == 100:
+            yield self.make_request(response.meta["offset"] + 100)

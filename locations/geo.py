@@ -3,6 +3,7 @@ import gzip
 import json
 import math
 from itertools import groupby
+from typing import Iterable
 
 import geonamescache
 
@@ -14,7 +15,7 @@ EARTH_RADIUS = 6378.1
 MILES_TO_KILOMETERS = 1.60934
 
 
-def vincenty_distance(lat: float, lon: float, distance_km: float, bearing_deg: float) -> float:
+def vincenty_distance(lat: float, lon: float, distance_km: float, bearing_deg: float) -> tuple[float, float]:
     """
     Returns a (lat, lon) tuple starting at lat, lon and traveling distance_km kilometers
     along a path bearing_deg degrees.
@@ -37,7 +38,7 @@ def vincenty_distance(lat: float, lon: float, distance_km: float, bearing_deg: f
     return math.degrees(lat2), math.degrees(lon2)
 
 
-def point_locations(areas_csv_file: str, area_field_filter: list[str] = None):
+def point_locations(areas_csv_file: str, area_field_filter: list[str] = None) -> Iterable[tuple[float, float]]:
     """
     Get point locations from requested *_centroids_*.csv file.
 
@@ -64,19 +65,28 @@ def point_locations(areas_csv_file: str, area_field_filter: list[str] = None):
     for csv_file in areas_csv_file:
         with open_searchable_points("{}".format(csv_file)) as file:
             for row in csv.DictReader(file):
-                lat, lon = row["latitude"], row["longitude"]
-                if not lat or not lon:
-                    raise Exception("missing lat/lon in file")
+                try:
+                    lat, lon = float(row["latitude"]), float(row["longitude"])
+                except ValueError:
+                    raise Exception(
+                        "Invalid latitude/longitude in searchable points file {} where latitude = {} and longitude = {}.".format(
+                            csv_file, row["latitude"], row["longitude"]
+                        )
+                    )
                 area = get_key(row, ["country", "territory", "state"])
                 if area_field_filter:
                     if not area:
-                        raise Exception("trying to perform area filter on file with no area support")
+                        raise Exception(
+                            "Searchable points file {} does not support area field filters (columns named 'country', 'territory' and 'state').".format(
+                                csv_file
+                            )
+                        )
                     if area not in area_field_filter:
                         continue
                 yield lat, lon
 
 
-def city_locations(country_code: str, min_population: int = 0):
+def city_locations(country_code: str, min_population: int = 0) -> Iterable[dict]:
     """
     Sometimes useful to iterate cities in a country. This method is backed by the GeoNames database.
 
@@ -89,7 +99,7 @@ def city_locations(country_code: str, min_population: int = 0):
             yield city
 
 
-def postal_regions(country_code: str, min_population: int = 0, consolidate_cities: bool = False):
+def postal_regions(country_code: str, min_population: int = 0, consolidate_cities: bool = False) -> Iterable[dict]:
     """
     Sometimes useful to iterate postal regions in a country as they are usually
      allocated by population density. The granularity varies by country. In the US

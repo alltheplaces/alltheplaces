@@ -42,7 +42,7 @@ class UspsSpider(scrapy.Spider):
                 "street_address": store["address1"],
                 "city": store["city"],
                 "state": store["state"],
-                "postcode": store["zip5"],
+                "postcode": store["zip5"] + "-" + store["zip4"],
                 "country": "US",
                 "lat": store["latitude"],
                 "lon": store["longitude"],
