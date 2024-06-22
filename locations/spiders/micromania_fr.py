@@ -36,7 +36,7 @@ class MicromaniaFRSpider(StructuredDataSpider):
                 response.xpath(
                     '//p[@itemprop="address"]//text()/parent::*[@itemprop="streetAddress" or @itemprop="address"]/text()'
                 ).getall()
-            ),
+            )
         )
         item.pop("facebook", None)
         item.pop("twitter", None)
