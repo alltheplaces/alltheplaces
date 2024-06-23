@@ -15,10 +15,12 @@ class BurgerKingCZSpider(Spider):
     name = "burger_king_cz"
     item_attributes = BURGER_KING_SHARED_ATTRIBUTES
     allowed_domains = ["burgerking.cz"]
+    db = "prod_bk_cz"
+    base = "https://burgerking.cz/store-locator/store/"
 
     def start_requests(self) -> Iterable[Request]:
         yield JsonRequest(
-            url="https://czqk28jt.api.sanity.io/v2023-08-01/graphql/prod_bk_cz/gen3",
+            url="https://czqk28jt.api.sanity.io/v2023-08-01/graphql/{}/gen3".format(self.db),
             data={
                 "query": """
                 query AllRestaurant {
@@ -88,7 +90,7 @@ class BurgerKingCZSpider(Spider):
                 [location["address"]["address1"], location["address"]["address2"]]
             )
             item["operator"] = location["operator"]
-            item["website"] = urljoin("https://burgerking.cz/store-locator/store/", location["ref"])
+            item["website"] = urljoin(self.base, location["ref"])
             apply_yes_no(Extras.DELIVERY, item, location["hasDelivery"] is True)
             apply_yes_no(Extras.INDOOR_SEATING, item, location["hasDineIn"] is True)
             apply_yes_no(Extras.TAKEAWAY, item, location["hasTakeOut"] is True)
