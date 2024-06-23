@@ -716,6 +716,15 @@ class OpeningHours:
         for day in days:
             self.add_range(day, open_time, close_time, time_format=time_format)
 
+    def set_closed(self, days: str | list[str]):
+        for day in [days] if isinstance(days, str) else days:
+            day = sanitise_day(day)
+
+            if day not in DAYS:
+                raise ValueError(f"day must be one of {DAYS}, not {day!r}")
+            self.day_hours.pop(day, None)
+            self.days_closed.add(day)
+
     def add_range(self, day, open_time, close_time, time_format="%H:%M"):
         day = sanitise_day(day)
 
@@ -732,6 +741,7 @@ class OpeningHours:
         ):
             self.day_hours.pop(day, None)
             self.days_closed.add(day)
+            return
         if isinstance(open_time, str):
             if open_time.lower() == "closed":
                 return

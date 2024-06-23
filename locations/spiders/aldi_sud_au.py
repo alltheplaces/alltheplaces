@@ -21,7 +21,7 @@ class AldiSudAUSpider(SitemapSpider, StructuredDataSpider):
         if data := response.xpath("//@data-days").get():
             for rule in json.loads(data):
                 if rule["isClosed"]:
-                    continue
+                    item["opening_hours"].set_closed(rule["day"])
                 for time in rule["intervals"]:
                     item["opening_hours"].add_range(
                         rule["day"], str(time["start"]).zfill(4), str(time["end"]).zfill(4), "%H%M"
