@@ -39,6 +39,7 @@ class AmtrakSpider(Spider):
             if details := self.shelter_types.get(location["properties"]["StaType"]):
                 item["extras"].update(details)
 
-            item["extras"]["alt_name"] = ";".join(location["properties"]["StationAliases"].split(","))
+            if aliases := location["properties"]["StationAliases"]:
+                item["extras"]["alt_name"] = ";".join(aliases.split(","))
 
             yield item
