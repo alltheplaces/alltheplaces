@@ -100,6 +100,7 @@ ENV/
 *.geojson
 *.csv
 *.osm
+*.ndgeojson
 !locations/searchable_points/*.json
 !locations/searchable_points/*.geojson
 !locations/searchable_points/*.csv
