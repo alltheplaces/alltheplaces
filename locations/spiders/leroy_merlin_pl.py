@@ -21,8 +21,8 @@ class LeroyMerlinPLSpider(Spider):
             item["phone"] = poi["informationPointPhone"]
             item["website"] = urljoin("https://www.leroymerlin.pl", poi.get("wwwUrl"))
             # TODO: figure out opening hours
-            if item['lat'] < 48.99 or item['lat'] > 54.87 or item['lon'] < 14.07 or item['lon'] > 24.13:
+            if item["lat"] < 48.99 or item["lat"] > 54.87 or item["lon"] < 14.07 or item["lon"] > 24.13:
                 # clearly outside Poland, some locations were claimed to be in the Middle East
-                del item['lat']
-                del item['lon']
+                del item["lat"]
+                del item["lon"]
             yield item
