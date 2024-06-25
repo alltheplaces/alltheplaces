@@ -7,36 +7,19 @@ from locations.items import Feature
 class CostaCoffeePLSpider(scrapy.Spider):
     name = "costacoffee_pl"
     item_attributes = {"brand": "Costa Coffee", "brand_wikidata": "Q608845"}
-    allowed_domains = ["api.costacoffee.pl"]
-    start_urls = ["https://api.costacoffee.pl/api/storelocator/list"]
+    allowed_domains = ["costacoffee.pl"]
+    start_urls = ["https://www.costacoffee.pl/api/cf/?content_type=storeLocatorStore&limit=1000"]
     no_refs = True
 
     def parse(self, response):
-        data = response.json()
+        data = response.json()['items']
         for store in data:
             properties = {
-                "name": store["name"],
-                "street_address": store["address"],
-                "city": store["city"],
-                "postcode": store["postCode"],
+                "name": store['fields']["cmsLabel"],
+                "addr_full": store['fields']["storeAddress"],
                 "country": "PL",
-                "addr_full": ", ".join(
-                    filter(
-                        None,
-                        (
-                            store["address"],
-                            store["city"],
-                            store["postCode"],
-                            "Poland",
-                        ),
-                    ),
-                ),
-                "lat": store["gpsY"],
-                "lon": store["gpsX"],
-                "extras": {
-                    "store_type": store["type"],
-                    "delivery": "yes" if store["deliveryAvailable"] else "no",
-                },
+                "lat": store['fields']['location']["lat"],
+                "lon": store['fields']['location']["lon"],
             }
 
             apply_category(Categories.CAFE, properties)
