@@ -12,14 +12,14 @@ class CostaCoffeePLSpider(scrapy.Spider):
     no_refs = True
 
     def parse(self, response):
-        data = response.json()['items']
+        data = response.json()["items"]
         for store in data:
             properties = {
-                "name": store['fields']["cmsLabel"],
-                "addr_full": store['fields']["storeAddress"],
+                "name": store["fields"]["cmsLabel"],
+                "addr_full": store["fields"]["storeAddress"],
                 "country": "PL",
-                "lat": store['fields']['location']["lat"],
-                "lon": store['fields']['location']["lon"],
+                "lat": store["fields"]["location"]["lat"],
+                "lon": store["fields"]["location"]["lon"],
             }
 
             apply_category(Categories.CAFE, properties)
