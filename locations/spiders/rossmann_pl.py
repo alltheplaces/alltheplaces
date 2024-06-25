@@ -11,4 +11,8 @@ class RossmannPLSpider(SitemapSpider, StructuredDataSpider):
 
     def post_process_item(self, item, response, ld_data):
         item["name"] = ld_data["description"]
+
+        # Country ends up in the city field for some reason
+        item["country"] = item.pop("city")
+
         yield item
