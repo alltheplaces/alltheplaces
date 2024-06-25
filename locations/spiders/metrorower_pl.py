@@ -8,7 +8,12 @@ from locations.items import Feature
 
 class MetrorowerPLSpider(Spider):
     name = "metrorower_pl"
-    item_attributes = {"brand": "Metrorower", "brand_wikidata": "Q123507620", "network": "Metrorower", "network_metrorower": "Q123507620"}
+    item_attributes = {
+        "brand": "Metrorower",
+        "brand_wikidata": "Q123507620",
+        "network": "Metrorower",
+        "network_metrorower": "Q123507620",
+    }
     start_urls = ["https://api-gateway.nextbike.pl/api/maps/service/zz/locations"]
 
     def parse(self, response):
