@@ -11,8 +11,10 @@ class MetrorowerPLSpider(Spider):
     item_attributes = {
         "brand": "Metrorower",
         "brand_wikidata": "Q123507620",
-        "network": "Metrorower",
-        "network_metrorower": "Q123507620",
+        "extras": {
+            "network": "Metrorower",
+            "network:wikidata": "Q123507620"
+        }
     }
     start_urls = ["https://api-gateway.nextbike.pl/api/maps/service/zz/locations"]
 
