@@ -12,7 +12,7 @@ class MetrorowerPLSpider(Spider):
     start_urls = ["https://api-gateway.nextbike.pl/api/maps/service/zz/locations"]
 
     def parse(self, response):
-        places = list(chain.from_iterable([x["places"] for x in cities.json()[0]["cities"]]))
+        places = list(chain.from_iterable([x["places"] for x in response.json()[0]["cities"]]))
         stations = [z for z in places if z["number"] != 0]  # filter out bikes outside the stations
         for station in stations:
             item = Feature()
