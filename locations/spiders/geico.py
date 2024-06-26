@@ -4,6 +4,7 @@ import re
 import scrapy
 
 from locations.items import Feature
+from locations.pipelines.address_clean_up import clean_address
 
 MAP_URL = "https://www.geico.com/public/php/geo_map.php?"
 
@@ -12,7 +13,7 @@ class GeicoSpider(scrapy.Spider):
     name = "geico"
     item_attributes = {"brand": "GEICO", "brand_wikidata": "Q1498689"}
     allowed_domains = ["www.geico.com"]
-    start_urls = ("https://www.geico.com/sitemap.xml",)
+    start_urls = ["https://www.geico.com/sitemap.xml"]
     download_delay = 1.5
 
     def parse(self, response):
@@ -42,10 +43,10 @@ class GeicoSpider(scrapy.Spider):
                 "phone": data.get("telephone"),
                 "website": data.get("url") or response.url,
             }
-            address = " ".join(
+            address = clean_address(
                 [
                     data["address"]["streetAddress"],
-                    data["address"]["addressLocality"] + ",",
+                    data["address"]["addressLocality"],
                     data["address"]["addressRegion"],
                     data["address"]["postalCode"],
                 ]

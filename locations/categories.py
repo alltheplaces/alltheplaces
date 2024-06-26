@@ -195,8 +195,10 @@ class Categories(Enum):
     OFFICE_FINANCIAL = {"office": "financial"}
     OFFICE_IT = {"office": "it"}
 
+    TOURISM_APARTMENT = {"tourism": "apartment"}
     TOURISM_CAMP_SITE = {"tourism": "camp_site"}
     TOURISM_CHALET = {"tourism": "chalet"}
+    TOURISM_HOSTEL = {"tourism": "hostel"}
     TOURISM_WILDERNESS_HUT = {"tourism": "wilderness_hut"}
 
     ALTERNATIVE_MEDICINE = {"healthcare": "alternative"}
@@ -516,6 +518,7 @@ class PaymentMethods(Enum):
     MASTER_CARD_DEBIT = "payment:mastercard_debit"
     MERPAY = "payment:merpay"
     MIPAY = "payment:mipay"
+    MIR = "payment:mir"
     NANACO = "payment:nanaco"
     NOTES = "payment:notes"
     PAYPAY = "payment:paypay"

@@ -3,6 +3,7 @@ from scrapy.spiders import SitemapSpider
 from locations.categories import Categories, apply_category
 from locations.linked_data_parser import LinkedDataParser
 from locations.microdata_parser import MicrodataParser
+from locations.pipelines.address_clean_up import clean_address
 
 
 class EastOfEnglandCoopSpider(SitemapSpider):
@@ -34,7 +35,7 @@ class EastOfEnglandCoopSpider(SitemapSpider):
 
         if isinstance(item.get("street_address"), list):
             item["street_address"].reverse()
-            item["street_address"] = ", ".join(item["street_address"])
+            item["street_address"] = clean_address(item["street_address"])
 
         item["ref"] = item["website"]
 

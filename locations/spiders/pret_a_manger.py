@@ -8,8 +8,15 @@ DAYS = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"]
 
 class PretAMangerSpider(scrapy.Spider):
     name = "pret_a_manger"
-    veggie_pret = {"brand": "Veggie Pret", "brand_wikidata": "Q108118332"}
-    item_attributes = {"brand": "Pret A Manger", "brand_wikidata": "Q2109109"}
+    brands = {
+        "Pret A Manger": {"brand": "Pret A Manger", "brand_wikidata": "Q2109109"},
+        "Veggie Pret": {
+            "brand": "Veggie Pret",
+            "brand_wikidata": "Q108118332",
+            "extras": {"amenity": "fast_food", "diet:vegetarian": "only"},
+        },
+    }
+
     start_urls = ["https://api1.pret.com/v1/shops"]
 
     def parse(self, response):
@@ -49,7 +56,8 @@ class PretAMangerSpider(scrapy.Spider):
             item["extras"]["internet_access"] = "wlan" if store["features"]["wifi"] else "no"
 
             if store["features"].get("storeType") == "veggie-pret":
-                item["brand"] = self.veggie_pret["brand"]
-                item["brand_wikidata"] = self.veggie_pret["brand_wikidata"]
+                item.update(self.brands["Veggie Pret"])
+            else:
+                item.update(self.brands["Pret A Manger"])
 
             yield item

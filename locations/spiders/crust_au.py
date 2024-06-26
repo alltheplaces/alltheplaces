@@ -3,6 +3,7 @@ from scrapy.http import JsonRequest, Request
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.pipelines.address_clean_up import clean_address
 
 
 class CrustAUSpider(Spider):
@@ -20,7 +21,7 @@ class CrustAUSpider(Spider):
             item = DictParser.parse(location)
             item["lat"], item["lon"] = location["location"].split(",", 1)
             item.pop("addr_full", None)
-            item["street_address"] = ", ".join(filter(None, [location["address"], location["address2"]]))
+            item["street_address"] = clean_address([location["address"], location["address2"]])
             item["postcode"] = str(item.get("postcode", ""))
             yield Request(
                 url="https://www.crust.com.au/stores/{}/store_online?&context=locator".format(location["id"]),

@@ -31,7 +31,6 @@ class KpnNLSpider(scrapy.Spider):
                     "name": store.get("formulenaam"),
                     "street": store.get("straat"),
                     "housenumber": store.get("huisnummer"),
-                    "street_address": ", ".join([store.get("huisnummer"), store.get("straat")]),
                     "phone": store.get("phone"),
                     "email": store.get("email"),
                     "postcode": store.get("postcode"),

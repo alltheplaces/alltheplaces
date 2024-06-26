@@ -4,6 +4,7 @@ from scrapy import Request, Spider
 from locations.categories import Categories
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.pipelines.address_clean_up import clean_address
 
 
 class HouseAUSpider(Spider):
@@ -31,7 +32,7 @@ class HouseAUSpider(Spider):
                 if result["cc"] == "AU":
                     item["geometry"] = location["location"]
 
-            item["street_address"] = ", ".join(filter(None, [location["address1"], location["address2"]]))
+            item["street_address"] = clean_address([location["address1"], location["address2"]])
             item["website"] = "https://www.house.com.au/stores/" + location["slug"]
             item["opening_hours"] = OpeningHours()
             for day_name, hours in location["storeHours"].items():
