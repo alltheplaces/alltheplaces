@@ -20,9 +20,9 @@ class DinoPLSpider(Spider):
         )
 
     def parse_decryption_params(self, response):
-        if m := re.search(r'\.from\("([0-9a-f]{64})","hex"\)', response.text):
+        if m := re.search(r"""\.from\([\n ]*['"]([0-9a-f]{64})['"],[\n ]*['"]hex['"][\n ]*\)""", response.text):
             key = m.group(1)
-        if m := re.search(r'\.from\("([0-9a-f]{32})","hex"\)', response.text):
+        if m := re.search(r"""\.from\([\n ]*['"]([0-9a-f]{32})['"],[\n ]*['"]hex['"][\n ]*\)""", response.text):
             iv = m.group(1)
         yield Request(
             url="https://api-dino.appchance.shop/api/v1/dino_content/geofile/",
