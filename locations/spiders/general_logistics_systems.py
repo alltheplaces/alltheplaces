@@ -45,8 +45,8 @@ class GeneralLogisticsSystemsSpider(scrapy.Spider):
             item = DictParser.parse(poi)
             address = poi["address"]
             coordinates = address["coordinates"]
-            item["lat"] = coordinates["longitude"]
-            item["lon"] = coordinates["latitude"]
+            item["lat"] = coordinates["latitude"]
+            item["lon"] = coordinates["longitude"]
             item["name"] = address["name"]
             opening_hours = OpeningHours()
             for day, time_ranges in poi["openingHours"].items():
