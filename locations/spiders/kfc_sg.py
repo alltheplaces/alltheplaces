@@ -1,8 +1,6 @@
 import scrapy
-from scrapy.http import JsonRequest
 
 from locations.hours import OpeningHours
-from locations.items import Feature
 from locations.spiders.kfc_us import KFC_SHARED_ATTRIBUTES
 from locations.dict_parser import DictParser
 
