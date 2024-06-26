@@ -2,12 +2,12 @@ import csv
 
 import scrapy
 
+from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
-from locations.items import Feature
 from locations.searchable_points import open_searchable_points
 
 HEADERS = {"X-Requested-With": "XMLHttpRequest"}
-STORELOCATOR = "https://api.gls-pakete.de/parcelshops?version=4&coordinates={:0.5},{:0.5}&distance=40"
+STORELOCATOR = "https://api.gls-pakete.de/parcelshops?latitude={:0.5}&longitude={:0.5}&distance=40"
 
 
 class GeneralLogisticsSystemsSpider(scrapy.Spider):
@@ -39,30 +39,19 @@ class GeneralLogisticsSystemsSpider(scrapy.Spider):
                         yield request
 
     def parse(self, response):
-        first_results = response.json()
-        results = first_results["shops"]
+        pois = response.json().get("shops")
 
-        for result in results:
-            item = Feature()
-            address = result["address"]
-            phone = result["phone"]
+        for poi in pois:
+            item = DictParser.parse(poi)
+            address = poi["address"]
             coordinates = address["coordinates"]
-            longitude = coordinates["longitude"]
-            latitude = coordinates["latitude"]
-            name = address["name"]
+            item["lat"] = coordinates["latitude"]
+            item["lon"] = coordinates["longitude"]
+            item["name"] = address["name"]
             opening_hours = OpeningHours()
-            for day, time_ranges in result["openingHours"].items():
+            for day, time_ranges in poi["openingHours"].items():
                 for time_range in time_ranges:
                     opening_hours.add_range(day, time_range["from"], time_range["to"])
 
-            item["ref"] = result["id"]
-            item["name"] = name
-            item["lat"] = latitude
-            item["lon"] = longitude
-            item["street"] = address["street"]
-            item["housenumber"] = address["houseNumber"]
-            item["city"] = address["city"]
-            item["postcode"] = address["postalCode"]
-            item["phone"] = phone["number"]
             item["opening_hours"] = opening_hours.as_opening_hours()
             yield item
