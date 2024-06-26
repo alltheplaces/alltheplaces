@@ -14,6 +14,7 @@ class OfficeDepotSpider(SitemapSpider, StructuredDataSpider):
     allowed_domains = ["officedepot.com"]
     sitemap_urls = ["https://www.officedepot.com/storelocator_0.xml"]
     json_parser = "json5"
+    requires_proxy = "US"
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["website"] = response.url
