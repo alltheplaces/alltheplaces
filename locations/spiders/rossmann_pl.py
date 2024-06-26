@@ -14,16 +14,14 @@ class RossmannPLSpider(Spider):
     def parse(self, response):
         data = response.json()["data"]
 
-        regex = r"(\S+\.?) ([\S ]+) (\d+ ?[a-zA-Z]?)"
-        pattern = re.compile(regex)
+        pattern = re.compile(r"(\S+\.?) ([\S ]+) (\d+ ?[a-zA-Z]?)")
 
         for shop in data:
-
             hours = self.parse_hours(shop.get("openHours"))
 
-            matcher = re.match(regex, shop["address"]["street"].replace("\r\n", ""))
-            street = matcher.group(2) if matcher != None else ""
-            housenumber = matcher.group(3) if matcher != None else ""
+            matcher = pattern.match(shop["address"]["street"].replace("\r\n", ""))
+            street = matcher.group(2) if matcher is not None else ""
+            housenumber = matcher.group(3) if matcher is not None else ""
 
             properties = {
                 "ref": shop["shopNumber"],
