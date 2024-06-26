@@ -1,7 +1,7 @@
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
-from locations.categories import Categories, apply_category
+from locations.categories import apply_category
 from locations.items import Feature
 
 
@@ -30,17 +30,15 @@ class ACTGovernmentRoadSafetyCamerasAUSpider(Spider):
                 "lat": location["latitude"],
                 "lon": location["longitude"],
             }
-
             if location["camera_type"] == "FIXED ONLY SPEED CAMERA":
-                apply_category(Categories.ENFORCEMENT_MAXIMUM_SPEED, properties)
+                apply_category({"highway": "speed_camera", "enforcement": "maxspeed"}, properties)
             elif location["camera_type"] == "RED LIGHT AND SPEED CAMERA":
-                apply_category(Categories.ENFORCEMENT_MAXIMUM_SPEED, properties)
-                apply_category(Categories.ENFORCEMENT_TRAFFIC_SIGNALS, properties)
+                apply_category({"highway": "speed_camera", "enforcement": "maxspeed"}, properties)
+                apply_category({"highway": "traffic_signals", "enforcement": "traffic_signals"}, properties)
             elif location["camera_type"] == "POINT TO POINT CAMERA":
-                apply_category(Categories.ENFORCEMENT_AVERAGE_SPEED, properties)
+                apply_category({"highway": "speed_camera", "enforcement": "average_speed"}, properties)
             elif location["camera_type"] == "MOBILE SPEED CAMERA":
-                apply_category(Categories.ENFORCEMENT_MAXIMUM_SPEED, properties)
-                apply_category({"permanent": "no"}, properties)
+                apply_category({"highway": "speed_camera", "enforcement": "maxspeed", "permanent": "no"}, properties)
             else:
                 self.logger.warning("Unknown traffic camera type: {}".format(location["camera_type"]))
 

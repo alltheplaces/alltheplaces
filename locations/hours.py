@@ -707,10 +707,23 @@ def sanitise_day(day: str, days: {} = DAYS_EN) -> str:
 class OpeningHours:
     def __init__(self):
         self.day_hours = defaultdict(set)
+        self.days_closed = set()
+
+    def __bool__(self):
+        return bool(self.day_hours or self.days_closed)
 
     def add_days_range(self, days: [str], open_time, close_time, time_format="%H:%M"):
         for day in days:
             self.add_range(day, open_time, close_time, time_format=time_format)
+
+    def set_closed(self, days: str | list[str]):
+        for day in [days] if isinstance(days, str) else days:
+            day = sanitise_day(day)
+
+            if day not in DAYS:
+                raise ValueError(f"day must be one of {DAYS}, not {day!r}")
+            self.day_hours.pop(day, None)
+            self.days_closed.add(day)
 
     def add_range(self, day, open_time, close_time, time_format="%H:%M"):
         day = sanitise_day(day)
@@ -719,6 +732,15 @@ class OpeningHours:
             raise ValueError(f"day must be one of {DAYS}, not {day!r}")
 
         if not open_time or not close_time:
+            return
+        if (
+            isinstance(open_time, str)
+            and isinstance(close_time, str)
+            and open_time.lower() == "closed"
+            and close_time.lower() == "closed"
+        ):
+            self.day_hours.pop(day, None)
+            self.days_closed.add(day)
             return
         if isinstance(open_time, str):
             if open_time.lower() == "closed":
@@ -733,6 +755,7 @@ class OpeningHours:
         if not isinstance(close_time, time.struct_time):
             close_time = time.strptime(close_time, time_format)
 
+        self.days_closed.discard(day)
         self.day_hours[day].add((open_time, close_time))
 
     def as_opening_hours(self) -> str:
@@ -740,14 +763,17 @@ class OpeningHours:
         this_day_group = None
 
         for day in DAYS:
-            hours = ",".join(
-                "%s-%s"
-                % (
-                    time.strftime("%H:%M", h[0]),
-                    time.strftime("%H:%M", h[1]).replace("23:59", "24:00"),
+            if day in self.days_closed:
+                hours = "closed"
+            else:
+                hours = ",".join(
+                    "%s-%s"
+                    % (
+                        time.strftime("%H:%M", h[0]),
+                        time.strftime("%H:%M", h[1]).replace("23:59", "24:00"),
+                    )
+                    for h in sorted(self.day_hours[day])
                 )
-                for h in sorted(self.day_hours[day])
-            )
 
             if not this_day_group:
                 this_day_group = {"from_day": day, "to_day": day, "hours": hours}
@@ -814,11 +840,11 @@ class OpeningHours:
     def _parse_opening_hours(self, rule: str, time_format: str):
         days, time_ranges = rule.split(" ", 1)
 
-        if "-" not in time_ranges:
-            return
-
         for time_range in time_ranges.split(","):
-            start_time, end_time = time_range.split("-")
+            if time_ranges.lower() in ["closed", "off"]:
+                start_time = end_time = "closed"
+            else:
+                start_time, end_time = time_range.split("-")
 
             start_time = start_time.strip()
             end_time = end_time.strip()
@@ -856,8 +882,16 @@ class OpeningHours:
         elif rules := linked_data.get("openingHours"):
             if not isinstance(rules, list):
                 rules = re.findall(
-                    r"((\w{2,3}|\w{2,3}\s?\-\s?\w{2,3}|(\w{2,3},)+\w{2,3})\s(\d\d:\d\d)\s?\-\s?(\d\d:\d\d))",
+                    r"""((
+                        \w{2,3}                 # Day
+                        |\w{2,3}\s?\-\s?\w{2,3} # Day - Day
+                        |(\w{2,3},)+\w{2,3}     # Day,Day
+                    )\s(
+                        (\d\d:\d\d)\s?\-\s?(\d\d:\d\d) # time - range
+                        |(?i:closed) # ignoring case
+                    ))""",
                     rules,
+                    re.X,
                 )
                 rules = [r[0] for r in rules]
 

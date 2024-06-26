@@ -89,8 +89,8 @@ class BMOSpider(Where2GetItSpider):
                 item["located_in"] = ChevronUSSpider.CHEVRON["brand"]
                 item["located_in_wikidata"] = ChevronUSSpider.CHEVRON["brand_wikidata"]
             elif item["name"] == "Circle K" or item["name"] == "Irving - Circle K":
-                item["located_in"] = CircleKSpider.item_attributes["brand"]
-                item["located_in_wikidata"] = CircleKSpider.item_attributes["brand_wikidata"]
+                item["located_in"] = CircleKSpider.CIRCLE_K["brand"]
+                item["located_in_wikidata"] = CircleKSpider.CIRCLE_K["brand_wikidata"]
             elif item["name"] == "City Market":
                 item["located_in"] = KROGER_BRANDS["https://www.citymarket.com/"]["brand"]
                 item["located_in_wikidata"] = KROGER_BRANDS["https://www.citymarket.com/"]["brand_wikidata"]

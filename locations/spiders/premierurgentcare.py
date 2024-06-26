@@ -5,7 +5,7 @@ from locations.structured_data_spider import StructuredDataSpider
 
 class PremierurgentcareSpider(SitemapSpider, StructuredDataSpider):
     name = "premierurgentcare"
-    item_attributes = {"brand": "Premier Urgent Care"}
+    item_attributes = {"brand": "Premier Urgent Care", "extras": {"amenity": "clinic", "emergency": "yes"}}
     allowed_domains = ["www.premier.care"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
     sitemap_urls = ["https://www.premier.care/sitemap.xml"]

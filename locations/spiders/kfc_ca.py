@@ -7,7 +7,7 @@ from scrapy.spiders import Spider
 from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
-from locations.spiders.kfc import KFC_SHARED_ATTRIBUTES
+from locations.spiders.kfc_us import KFC_SHARED_ATTRIBUTES
 
 
 class KFCCASpider(Spider):

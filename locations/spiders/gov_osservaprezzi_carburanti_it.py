@@ -8,6 +8,7 @@ from scrapy.http import JsonRequest, Response
 from locations.categories import Categories, Fuel, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.geo import point_locations
+from locations.spiders.q8_italia import Q8ItaliaSpider
 
 
 class GovOsservaprezziCarburantiITSpider(Spider):
@@ -36,9 +37,9 @@ class GovOsservaprezziCarburantiITSpider(Spider):
     }
 
     BRANDS = {
-        "Api-Ip": {"brand": "IP", "brand_wikidata": "Q646807"},
+        "Api-Ip": {"brand": "IP", "brand_wikidata": "Q3788748"},
         "Esso": {"brand": "Esso", "brand_wikidata": "Q867662"},
-        "Q8": {"brand": "Q8", "brand_wikidata": "Q1634762"},
+        "Q8": Q8ItaliaSpider.item_attributes,
         "Tamoil": {"brand": "Tamoil", "brand_wikidata": "Q706793"},
         "AgipEni": {"brand": "Eni", "brand_wikidata": "Q565594"},
         "Shell": {"brand": "Shell", "brand_wikidata": "Q110716465"},

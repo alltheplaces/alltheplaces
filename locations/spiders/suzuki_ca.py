@@ -2,6 +2,7 @@ import ast
 
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
@@ -27,4 +28,5 @@ class SuzukiCASpider(scrapy.Spider):
                     item["opening_hours"].add_range(
                         day=day, open_time=open_time.strip(), close_time=close_time.strip(), time_format="%I:%M %p"
                     )
+            apply_category(Categories.SHOP_CAR, item)
             yield item

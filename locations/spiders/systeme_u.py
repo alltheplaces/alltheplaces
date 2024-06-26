@@ -50,8 +50,8 @@ class SystemeUSpider(scrapy.Spider):
             "city": response.xpath('//*[@itemprop="addressLocality"]/text()').extract_first(),
             "postcode": response.xpath('//*[@itemprop="postalCode"]/text()').extract_first(),
             "country": "FR",
-            "lat": response.xpath('//*[@id="map-magasin"]/@data-lat').extract_first(),
-            "lon": response.xpath('//*[@id="map-magasin"]/@data-lng').extract_first(),
+            "lat": response.xpath("//@data-store-latitude").extract_first(),
+            "lon": response.xpath("//@data-store-longitude").extract_first(),
             "phone": response.xpath('//*[@itemprop="telephone"]/text()').extract_first(),
             "website": response.url,
         }
