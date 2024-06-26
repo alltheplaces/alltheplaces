@@ -8,7 +8,7 @@ from locations.items import Feature
 
 class ChortenPLSpider(CrawlSpider):
     name = "chorten_pl"
-    item_attributes = {}
+    item_attributes = {"shop": "yes"}
     start_urls = ["https://chorten.com.pl/sklepy/lista/"]
     rules = [
         Rule(LinkExtractor(allow=[r"/sklepy/lista/p\d+?$"])),
