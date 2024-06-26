@@ -1,8 +1,8 @@
 import scrapy
-
+from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.spiders.kfc_us import KFC_SHARED_ATTRIBUTES
-from locations.dict_parser import DictParser
+
 
 class KFCSGSpider(scrapy.Spider):
     name = "kfc_sg"
