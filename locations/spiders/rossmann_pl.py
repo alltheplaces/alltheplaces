@@ -1,5 +1,6 @@
-from scrapy import Spider
 import re
+
+from scrapy import Spider
 
 from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import Feature
