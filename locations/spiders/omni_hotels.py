@@ -7,7 +7,6 @@ from locations.pipelines.address_clean_up import clean_address
 
 
 class OmniHotelsSpider(SitemapSpider):
-    download_delay = 0.2
     name = "omni_hotels"
     item_attributes = {"brand": "Omni Hotels", "brand_wikidata": "Q7090329", "extras": Categories.HOTEL.value}
     sitemap_urls = ["https://www.omnihotels.com/sitemap.xml"]
