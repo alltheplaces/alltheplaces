@@ -12,7 +12,7 @@ class BoxNowSpider(Spider):
         "https://boxlockersloadfiles.blob.core.windows.net/lockerslargenavigate/all.json",
         "https://boxlockersloadfilescr.blob.core.windows.net/lockerslargenavigate/all.json",
     ]
-    requires_proxy = "BG"
+    # requires_proxy = "BG"
 
     def start_requests(self):
         for url in self.start_urls:
