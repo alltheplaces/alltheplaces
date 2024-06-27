@@ -8,6 +8,10 @@ from locations.items import Feature
 
 
 class AllThePlacesSpider(Spider):
+    """
+    This class can help parse ATP style geojson files (from https://www.alltheplaces.xyz/spiders.html, or other sources)
+    to allow for the data to be processed through different exporters or pipelines.
+    """
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for feature in response.json().get("features", []):
