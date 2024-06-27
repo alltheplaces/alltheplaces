@@ -11,7 +11,8 @@ from locations.hours import OpeningHours
 class DinoPLSpider(Spider):
     name = "dino_pl"
     item_attributes = {"brand": "Dino", "brand_wikidata": "Q11694239"}
-    allowed_domains = ["marketdino.pl", "api-dino.appchance.shop"]
+    allowed_domains = ["marketdino.pl"]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def start_requests(self):
         yield Request(
@@ -25,7 +26,7 @@ class DinoPLSpider(Spider):
         if m := re.search(r"""\.from\([\n ]*['"]([0-9a-f]{32})['"],[\n ]*['"]hex['"][\n ]*\)""", response.text):
             iv = m.group(1)
         yield Request(
-            url="https://api-dino.appchance.shop/api/v1/dino_content/geofile/",
+            url="https://api.marketdino.pl/api/v1/dino_content/geofile/",
             meta={"key": key, "iv": iv},
             callback=self.parse_encrypted_geojson,
         )
