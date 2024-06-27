@@ -33,6 +33,7 @@ class AaronsSpider(SitemapSpider, StructuredDataSpider):
                     "/sony",
                     "/televisions",
                     "/washer-dryer",
+                    "/woodhaven",
                 ]
             ):
                 continue
