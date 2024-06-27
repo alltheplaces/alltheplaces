@@ -1,3 +1,5 @@
+import re
+
 from scrapy import Spider
 
 from locations.hours import DAYS_FULL, OpeningHours
@@ -11,13 +13,21 @@ class RossmannPLSpider(Spider):
 
     def parse(self, response):
         data = response.json()["data"]
-        for shop in data:
 
+        pattern = re.compile(r"(\S+\.?) ([\S ]+) (\d+ ?[a-zA-Z]?)")
+
+        for shop in data:
             hours = self.parse_hours(shop.get("openHours"))
+
+            matcher = pattern.match(shop["address"]["street"].replace("\r\n", ""))
+            street = matcher.group(2) if matcher is not None else ""
+            housenumber = matcher.group(3) if matcher is not None else ""
 
             properties = {
                 "ref": shop["shopNumber"],
-                "street_address": shop["address"]["street"],
+                "street_address": shop["address"]["street"].replace("\r\n", ""),
+                "street": street,
+                "housenumber": housenumber,
                 "city": shop["address"]["city"],
                 "postcode": shop["address"]["postCode"],
                 "country": "PL",
