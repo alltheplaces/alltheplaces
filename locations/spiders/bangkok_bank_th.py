@@ -5,13 +5,21 @@ from scrapy.http import JsonRequest
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
+from locations.user_agents import CHROME_LATEST
 
 
 class BangkokBankSpider(scrapy.Spider):
     name = "bangkok_bank"
     allowed_domains = ["www.bangkokbank.com"]
     item_attributes = {"brand_wikidata": "Q806483"}
-    custom_settings = {"DEFAULT_REQUEST_HEADERS": {"Ocp-Apim-Subscription-Key": "7d1b09abe2ea413cbf95b2d99782ed37"}}
+    user_agent = CHROME_LATEST
+    custom_settings = {
+        "DEFAULT_REQUEST_HEADERS": {
+            "Ocp-Apim-Subscription-Key": "7d1b09abe2ea413cbf95b2d99782ed37",
+            "X-Requested-With": "XMLHttpRequest",
+        },
+        "ROBOTSTXT_OBEY": False,
+    }
     base_url = "https://www.bangkokbank.com/api/locationsearchservice/"
 
     def start_requests(self):
