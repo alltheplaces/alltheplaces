@@ -14,6 +14,7 @@ class OxxoMXSpider(Spider):
     item_attributes = {"brand": "Oxxo", "brand_wikidata": "Q1342538"}
     allowed_domains = ["www.oxxo.com"]
     start_urls = ["https://www.oxxo.com/tiendas"]
+    requires_proxy = "MX"
 
     def parse(self, response):
         js_blob = response.xpath('//store-locator/@*[name()=":raw_stores"]').get()
