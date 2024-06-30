@@ -8,6 +8,7 @@ class HemkopSESpider(scrapy.Spider):
     name = "hemkop_se"
     item_attributes = {"brand": "Hemköp", "brand_wikidata": "Q10521746"}
     start_urls = ["https://www.hemkop.se/axfood/rest/search/store?q=*&sort=display-name-asc"]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def parse(self, response):
         for store in response.json()["results"]:
