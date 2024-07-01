@@ -20,6 +20,8 @@ class BurgerKingRUSpider(Spider):
 
     def parse(self, response):
         for location in response.json()["response"]["list"]:
+            if location["status"] != 1:
+                continue
             item = DictParser.parse(location)
             item["street_address"] = location.pop("addr_full", None)
             item["opening_hours"] = OpeningHours()
