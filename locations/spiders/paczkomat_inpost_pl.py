@@ -16,7 +16,7 @@ class PaczkomatInpostPLSpider(Spider):
     def parse(self, response, **kwargs):
         for poi in response.json()["items"]:
             # Skip non-active locations and places which are not parcel lockers
-            if poi["s"] != 1 and poi["t"] != 1:
+            if poi["s"] != 1 and poi["t"] != 1 or poi["n"].startswith("POP-"):
                 continue
 
             item = Feature()
