@@ -1,22 +1,8 @@
-import scrapy
-
-from locations.dict_parser import DictParser
+from locations.storefinders.yext_answers import YextAnswersSpider
 
 
-class KateSpadeSpider(scrapy.Spider):
+class KateSpadeSpider(YextAnswersSpider):
     name = "kate_spade"
     item_attributes = {"brand": "Kate Spade New York", "brand_wikidata": "Q6375797"}
-    allowed_domains = ["eu.katespade.com"]
-    start_urls = [
-        "https://eu.katespade.com/on/demandware.store/Sites-ksEuRoe-Site/en_FR/Stores-GetNearestStores?latitude=39.629490&longitude=-100.059825&distanceUnit=Meilen&maxdistance=300000"
-    ]
-
-    def parse(self, response):
-        for ref, store in response.json()["stores"].items():
-            item = DictParser.parse(store)
-            item["lat"] = store.get("latitude").replace(",", ".")
-            item["lon"] = store.get("longitude").replace(",", ".")
-            item["ref"] = ref
-            item["website"] = f'https://{self.allowed_domains[0]}{store.get("storeURL")}'
-
-            yield item
+    api_key = "b7318cda413fa6f985c0770ffb411bbd"
+    experience_key = "kate-spade-uk"
