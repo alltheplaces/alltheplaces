@@ -6,7 +6,7 @@ from locations.dict_parser import DictParser
 
 class ABCPLSpider(Spider):
     name = "abc_pl"
-    item_attributes = {"brand": "abc", "brand_wikidata": "Q11683985"}
+    item_attributes = {"shop": "convenience"}
 
     def start_requests(self):
         yield JsonRequest(url="https://sklepyabc.pl/wp-content/themes/abc/api/js/gps.json")
