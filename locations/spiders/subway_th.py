@@ -75,6 +75,10 @@ class SubwayWorldwideSpider(Spider):
         current, total = pages.split("/")
 
         for poi in data.get("ResultData", []):
+            if poi.get("Address", {}).get("CountryCode", "").upper() != response.meta["country_code"]:
+                # API can give POIs for nearby countries, filter them out for less confusion
+                # TODO: revisit this at some point?
+                continue
             item = DictParser.parse(poi)
             item["ref"] = poi["LocationId"]["StoreNumber"]
             yield item
@@ -91,3 +95,6 @@ class SubwayWorldwideSpider(Spider):
 
 class SubwayTHSpider(SubwayWorldwideSpider):
     name = "subway_th"
+
+
+# TODO: spiders for other countries
