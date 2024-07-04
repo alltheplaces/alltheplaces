@@ -23,6 +23,10 @@ class LeroyMerlinPLSpider(Spider):
             # TODO: figure out opening hours
             if item["lat"] < 48.99 or item["lat"] > 54.87 or item["lon"] < 14.07 or item["lon"] > 24.13:
                 # clearly outside Poland, some locations were claimed to be in the Middle East
-                del item["lat"]
-                del item["lon"]
+                if item["lon"] > 48.99 and item["lon"] < 54.87 and item["lat"] > 14.07 and item["lat"] < 24.13:
+                    # swapped lat, lon - swap them back
+                    item["lat"], item["lon"] = item["lon"], item["lat"]
+                else:
+                    del item["lat"]
+                    del item["lon"]
             yield item
