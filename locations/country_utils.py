@@ -88,7 +88,7 @@ def get_locale(country_code: str) -> str | None:
     """
     Get language locale for a given country code.
     :param country_code: ISO alpha-2 country code
-    :return: language locale in format of en-us or None if not found
+    :return: language locale in format of en-US or None if not found
     """
     try:
         locale = Locale.parse("und-" + country_code, sep="-")
