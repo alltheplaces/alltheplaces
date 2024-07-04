@@ -24,8 +24,6 @@ class ChetyreLapyRUSpider(scrapy.Spider):
 
     def parse_pois(self, response):
         for poi in list(response.json()["pageProps"]["fallback"].values())[0]["items"]:
-            if not poi["active"]:
-                continue
             item = Feature()
             item["ref"] = poi["id"]
             item["addr_full"] = poi["address"]
