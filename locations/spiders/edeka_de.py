@@ -41,7 +41,7 @@ class EdekaDESpider(scrapy.Spider):
 
             item = DictParser.parse(store)
 
-            item["opening_hours"] = self.parse_hours(item)
+            item["opening_hours"] = self.parse_hours(store)
 
             name = item["name"].lower().replace(" ", "").replace("und", "&").replace("-", "")
             if "nah&gut" in name:
