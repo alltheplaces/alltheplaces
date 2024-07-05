@@ -1,8 +1,8 @@
-from scrapy.spiders import Spider
-
-from typing import Any
-from scrapy.http import Response
 import json
+from typing import Any
+
+from scrapy.http import Response
+from scrapy.spiders import Spider
 
 from locations.dict_parser import DictParser
 
@@ -22,6 +22,5 @@ class KonaGrillSpider(Spider):
             item = DictParser.parse(location)
             item["street_address"] = item.pop("addr_full")
             item["website"] = location["order_online_url"]
-            
-            yield item
 
+            yield item
