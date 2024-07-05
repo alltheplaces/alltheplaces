@@ -76,6 +76,8 @@ class EdekaDESpider(scrapy.Spider):
                 item.update(self.ELLI)
             else:
                 item.update(self.EDEKA)
+            if item["website"] == "https://www.edeka.de/eh/minden-hannover/edeka-junghans-poppauer-str.-2/index.jspp":
+                item["website"] = "https://www.edeka.de/eh/minden-hannover/edeka-junghans-poppauer-str.-2/index.jsp"
             yield item
 
         if next := response.json()["_links"].get("next"):
