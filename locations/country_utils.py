@@ -93,5 +93,5 @@ def get_locale(country_code: str) -> str | None:
     try:
         locale = Locale.parse("und-" + country_code, sep="-")
         return "-".join(filter(None, [locale.language, locale.territory]))
-    except (ValueError, UnknownLocaleError) as e:
+    except (ValueError, UnknownLocaleError):
         return None
