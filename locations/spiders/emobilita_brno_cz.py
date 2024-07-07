@@ -40,4 +40,3 @@ class EmobilitaBrnoCzSpider(scrapy.Spider):
                 item["extras"]["capacity"] = max(mennekes, ccs2)
 
             yield item
-
