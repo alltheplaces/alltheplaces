@@ -40,9 +40,9 @@ class EmobilitaBrnoCzSpider(scrapy.Spider):
                 item["ref"] = station["stationCode"]
                 item["extras"]["ref:EU:EVSE"] = ";".join(evse)
                 if mennekes:
-                    item["extras"]["socket:type2"] = mennekes
+                    item["extras"]["socket:type2"] = str(mennekes)
                 if ccs2:
-                    item["extras"]["socket:type2_combo"] = ccs2
-                item["extras"]["capacity"] = max(mennekes, ccs2)
+                    item["extras"]["socket:type2_combo"] = str(ccs2)
+                item["extras"]["capacity"] = str(max(mennekes, ccs2))
 
-            yield item
+                yield item
