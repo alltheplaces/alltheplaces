@@ -1,4 +1,7 @@
+from typing import Any
+
 import scrapy
+from scrapy.http import JsonRequest, Response
 
 from locations.items import Feature
 
@@ -8,13 +11,16 @@ class EmobilitaBrnoCzSpider(scrapy.Spider):
     item_attributes = {"operator": "Teplárny Brno", "operator_wikidata": "Q54980987"}
 
     def start_requests(self):
-        url = "https://uuapp.plus4u.net/uu-chargeup-portalg01/cde72fa6c93d4cad87dcfd67ed8fc975/chargingPlace/listWithinPolygon"
-        payload = '{"criteria":{"connectors":[],"onlyAvailable":false,"dataSources":[],"powerFrom":0},"northEast":{"lat":50,"lng":17},"southWest":{"lat":49,"lng":18}}'
-        headers = {"Content-Type": "application/json; charset=utf-8"}
+        yield JsonRequest(
+            url="https://uuapp.plus4u.net/uu-chargeup-portalg01/cde72fa6c93d4cad87dcfd67ed8fc975/chargingPlace/listWithinPolygon",
+            data={
+                "criteria": {"connectors": [], "onlyAvailable": False, "dataSources": [], "powerFrom": 0},
+                "northEast": {"lat": 90, "lng": 180},
+                "southWest": {"lat": -90, "lng": -180},
+            },
+        )
 
-        yield scrapy.http.Request(url, self.parse, method="POST", headers=headers, body=payload)
-
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         result = response.json()
 
         for stations in result["chargingPlaces"]["itemList"]:
