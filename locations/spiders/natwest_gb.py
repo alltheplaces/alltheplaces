@@ -47,9 +47,9 @@ class NatWestGBSpider(Spider):
             item["facebook"] = "https://www.facebook.com/{}".format(location["facebookVanityUrl"])
             item["extras"]["ref:facebook"] = location.get("" "facebookPageUrl", "").split("/")[-1]
             item["extras"]["ref:google"] = location["googlePlaceId"]
+
             if "phone" in item and item["phone"].startswith("+443"):
                 # not a phone number specific to given branch
-                item["extras"]["callcenter_phone"] = item["phone"]
                 item["phone"] = None
 
             item["opening_hours"] = OpeningHours()
