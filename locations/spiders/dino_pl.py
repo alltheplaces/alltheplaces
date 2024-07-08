@@ -46,4 +46,10 @@ class DinoPLSpider(Spider):
                 item["opening_hours"].add_days_range(["Mo", "Tu", "We", "Th", "Fr", "Sa"], *week_hours.split("-", 1))
             if sun_hours := location["properties"].get("sundayHours"):
                 item["opening_hours"].add_range("Su", *sun_hours.split("-", 1))
+            if "name" in item:
+                item["extras"]["web_listing_name"] = item["name"]
+            if "brand" in item:
+                item["name"] = item["brand"]
+            else:
+                item["name"] = "Dino"
             yield item
