@@ -36,7 +36,7 @@ class CheckItemPropertiesPipeline:
         r"^Q[0-9]+$",
     )
     opening_hours_regex = re.compile(
-        r"^(?:(?:Mo|Tu|We|Th|Fr|Sa|Su)(?:-(?:Mo|Tu|We|Th|Fr|Sa|Su))? (?:,?[0-9]{2}:[0-9]{2}-[0-9]{2}:[0-9]{2})+(?:; )?)+$"
+        r"^(?:(?:Mo|Tu|We|Th|Fr|Sa|Su)(?:-(?:Mo|Tu|We|Th|Fr|Sa|Su))? (?:,?[0-9]{2}:[0-9]{2}-[0-9]{2}:[0-9]{2}|closed|off)+(?:; )?)+$"
     )
     min_lat = -90.0
     max_lat = 90.0
