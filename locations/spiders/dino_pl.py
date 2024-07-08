@@ -40,16 +40,11 @@ class DinoPLSpider(Spider):
             if location["properties"]["status"] != "MARKET OTWARTY":  # "MARKET OPEN"
                 continue
             item = DictParser.parse(location["properties"])
+            item["branch"] = item.pop("name", None)
             item["geometry"] = location["geometry"]
             item["opening_hours"] = OpeningHours()
             if week_hours := location["properties"].get("weekHours"):
                 item["opening_hours"].add_days_range(["Mo", "Tu", "We", "Th", "Fr", "Sa"], *week_hours.split("-", 1))
             if sun_hours := location["properties"].get("sundayHours"):
                 item["opening_hours"].add_range("Su", *sun_hours.split("-", 1))
-            if "name" in item:
-                item["extras"]["web_listing_name"] = item["name"]
-            if "brand" in item:
-                item["name"] = item["brand"]
-            else:
-                item["name"] = "Dino"
             yield item
