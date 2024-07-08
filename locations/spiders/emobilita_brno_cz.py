@@ -3,6 +3,7 @@ from typing import Any
 import scrapy
 from scrapy.http import JsonRequest, Response
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
@@ -44,5 +45,7 @@ class EmobilitaBrnoCzSpider(scrapy.Spider):
                 if ccs2:
                     item["extras"]["socket:type2_combo"] = str(ccs2)
                 item["extras"]["capacity"] = str(max(mennekes, ccs2))
+
+                apply_category(Categories.CHARGING_STATION, item)
 
                 yield item
