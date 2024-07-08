@@ -92,12 +92,13 @@ class CheckItemPropertiesPipeline:
         else:
             spider.crawler.stats.inc_value("atp/field/twitter/missing")
 
-        if opening_hours := item.get("opening_hours"):
+        opening_hours = item.get("opening_hours")
+        if opening_hours is not None:
             if isinstance(opening_hours, OpeningHours):
                 if opening_hours:
                     item["opening_hours"] = opening_hours.as_opening_hours()
                 else:
-                    item["opening_hours"] = None
+                    del item["opening_hours"]
                     spider.crawler.stats.inc_value("atp/field/opening_hours/missing")
             elif not isinstance(opening_hours, str):
                 spider.crawler.stats.inc_value("atp/field/opening_hours/wrong_type")
