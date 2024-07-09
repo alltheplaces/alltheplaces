@@ -45,3 +45,4 @@ shapely = "*"
 tzdata = "*"
 unidecode = "*"
 xmltodict = "*"
+twisted = {extras = ["http2"], version = "*"}
