@@ -48,6 +48,7 @@ class EmobilitaBrnoCzSpider(scrapy.Spider):
             connectors[connector["key"]].append(
                 str(connector["maxPower"]["energy"]) + " " + connector["maxPower"]["unit"]
             )
+
             if connector["caption"].startswith("Mennekes 3x"):
                 item["extras"]["socket:type2:voltage"] = "400"
 
@@ -56,12 +57,15 @@ class EmobilitaBrnoCzSpider(scrapy.Spider):
         item["lat"] = station["location"]["coordinates"][1]
         item["ref"] = station["stationCode"]
         item["extras"]["ref:EU:EVSE"] = ";".join(evse)
-        if len(connectors["Mennekes"]):
+
+        if connectors["Mennekes"]:
             item["extras"]["socket:type2"] = str(len(connectors["Mennekes"]))
             item["extras"]["socket:type2:output"] = ";".join(set(connectors["Mennekes"]))
-        if len(connectors["CCS2"]):
+
+        if connectors["CCS2"]:
             item["extras"]["socket:type2_combo"] = str(len(connectors["CCS2"]))
             item["extras"]["socket:type2_combo:output"] = ";".join(set(connectors["CCS2"]))
+
         item["extras"]["capacity"] = str(max(len(connectors["Mennekes"]), len(connectors["CCS2"])))
 
         apply_category(Categories.CHARGING_STATION, item)
