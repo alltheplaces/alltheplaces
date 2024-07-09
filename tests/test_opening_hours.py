@@ -528,3 +528,17 @@ def test_add_ranges_from_string():
         DAYS_PL,
     )
     assert o.as_opening_hours() == "Mo-Fr 08:00-19:00; Sa 09:00-15:00"
+
+
+def test_oh_as_bool():
+    # https://github.com/alltheplaces/alltheplaces/pull/8779#issue-2395034394
+    o = OpeningHours()
+    assert not o
+
+    o = OpeningHours()
+    o.add_range("Mo", "09:00", "17:00")
+    assert o
+
+    o = OpeningHours()
+    o.set_closed("Mo")
+    assert o
