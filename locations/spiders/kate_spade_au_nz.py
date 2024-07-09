@@ -8,3 +8,4 @@ class KateSpadeAUNZSpider(StockInStoreSpider):
     api_widget_id = "83"
     api_widget_type = "sis"
     api_origin = "https://katespade.com.au"
+    custom_settings = {"ROBOTSTXT_OBEY": False}

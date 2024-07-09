@@ -14,7 +14,7 @@ from locations.spiders.burger_king import BURGER_KING_SHARED_ATTRIBUTES
 class BurgerKingCZSpider(Spider):
     name = "burger_king_cz"
     item_attributes = BURGER_KING_SHARED_ATTRIBUTES
-    allowed_domains = ["burgerking.cz"]
+    allowed_domains = ["czqk28jt.api.sanity.io"]
     db = "prod_bk_cz"
     base = "https://burgerking.cz/store-locator/store/"
 
