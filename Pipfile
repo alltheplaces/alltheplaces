@@ -19,6 +19,7 @@ pylint = "*"
 pytest = "*"
 
 [packages]
+babel = "*"
 boto3 = "*"
 brotli = "*"
 chompjs = "*"
@@ -44,4 +45,3 @@ shapely = "*"
 tzdata = "*"
 unidecode = "*"
 xmltodict = "*"
-babel = "*"
