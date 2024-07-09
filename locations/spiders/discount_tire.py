@@ -36,7 +36,7 @@ class DiscountTireSpider(StructuredDataSpider):
     def parse_sitemap(self, response):
         data = json.loads(response.text)
         html_content = data["data"]["cms"]["page"]["htmlContent"]
-        urls = re.findall('href=\\"(\/store\/[a-z]{2}\/[\w-]+\/s\/\d+)\\"', html_content)
+        urls = re.findall(r'href=\"(\/store\/[a-z]{2}\/[\w-]+\/s\/\d+)\"', html_content)
         for url in urls:
             new_url = "https://www.discounttire.com" + url[6:]
             headers = {"Referer": "https://www.discounttire.com/", "Operation": "CmsPage"}
