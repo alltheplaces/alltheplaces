@@ -10,7 +10,9 @@ from locations.geo import city_locations
 
 
 class A101TRSpider(scrapy.Spider):
-    # TODO: the spider is giving an incomplete output, 5k locations instead of 13k, due to a hard limit of 20 locations per request
+    # TODO: due to a hard limit of 20 locations per request
+    #       the spider is giving an incomplete output,
+    #       5k locations instead of 13k.
     name = "a101_tr"
     item_attributes = {"brand": "A101", "brand_wikidata": "Q6034496"}
 
