@@ -3,10 +3,10 @@ import glob
 import multiprocessing
 import os.path
 
-import pyogrio.errors
 import geopandas
 import pandas
 import pyarrow
+import pyogrio.errors
 
 
 def read_file(filename):
@@ -16,17 +16,17 @@ def read_file(filename):
 
     # Sometimes a single spider's scrape fails and the output file ends up
     # as an invalid GeoJSON feature collection.
-    with open(filename, 'r') as f:
+    with open(filename, "r") as f:
         contents = f.read()
         # If the file ends with a comma and a newline, we need to remove the last comma and add the closing brackets
-        if contents[-2:] == ',\n':
-            with open(filename, 'a') as f:
+        if contents[-2:] == ",\n":
+            with open(filename, "a") as f:
                 f.seek(f.tell() - 2)
-                f.write('\n]}')
+                f.write("\n]}")
         # If the file doesn't end with the closing brackets, we need to add them
-        elif contents[-3:] != ']}\n':
-            with open(filename, 'a') as f:
-                f.write(']}\n')
+        elif contents[-3:] != "]}\n":
+            with open(filename, "a") as f:
+                f.write("]}\n")
 
     try:
         df = geopandas.read_file(filename)
@@ -37,7 +37,7 @@ def read_file(filename):
     # Convert all non-geometry columns to object type to avoid issues with mixed types in the concatenated output
     # parquet file
     for col in df.columns:
-        if col != 'geometry' and df[col].dtype != 'object':
+        if col != "geometry" and df[col].dtype != "object":
             df[col] = df[col].astype(str)
 
     try:
@@ -49,11 +49,11 @@ def read_file(filename):
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Process GeoJSON files into a GeoParquet file.')
-    parser.add_argument('files', type=str, nargs='+',
-                        help='a path to a GeoJSON file')
-    parser.add_argument('-o', '--output', type=argparse.FileType('wb'), nargs='?',
-                        help='a path to the output GeoParquet file')
+    parser = argparse.ArgumentParser(description="Process GeoJSON files into a GeoParquet file.")
+    parser.add_argument("files", type=str, nargs="+", help="a path to a GeoJSON file")
+    parser.add_argument(
+        "-o", "--output", type=argparse.FileType("wb"), nargs="?", help="a path to the output GeoParquet file"
+    )
 
     args = parser.parse_args()
 
@@ -77,5 +77,5 @@ def main():
     master_df.to_parquet(args.output)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
