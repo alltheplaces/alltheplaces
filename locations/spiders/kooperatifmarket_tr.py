@@ -1,5 +1,6 @@
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
@@ -17,4 +18,5 @@ class KooperatifmarketTrSpider(scrapy.Spider):
             item["lat"] = float(poi["marketEnlem"])
             item["lon"] = float(poi["marketBoylam"])
             item["addr_full"] = poi["marketAdres"]
+            apply_category(Categories.SHOP_SUPERMARKET, item)
             yield item
