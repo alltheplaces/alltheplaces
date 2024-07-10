@@ -164,7 +164,7 @@ class GeoJsonExporter(JsonItemExporter):
             ("type", "Feature"),
             ("id", compute_hash(item)),
             ("properties", item_to_properties(item)),
-            ("geometry", item_to_geometry(item))
+            ("geometry", item_to_geometry(item)),
         ]
 
         return feature
