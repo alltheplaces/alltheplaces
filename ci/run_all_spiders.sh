@@ -34,7 +34,7 @@ mkdir -p "${SPIDER_RUN_DIR}"
 (>&2 echo "Write out a file with scrapy commands to parallelize")
 for spider in $(scrapy list -s REQUESTS_CACHE_ENABLED=False)
 do
-    echo "timeout -k 15s 8h scrapy crawl --output ${SPIDER_RUN_DIR}/output/${spider}.geojson:geojson --logfile ${SPIDER_RUN_DIR}/logs/${spider}.txt --loglevel ERROR --set TELNETCONSOLE_ENABLED=0 --set CLOSESPIDER_TIMEOUT=${SPIDER_TIMEOUT} --set LOGSTATS_FILE=${SPIDER_RUN_DIR}/stats/${spider}.json ${spider}" >> ${SPIDER_RUN_DIR}/commands.txt
+    echo "timeout -k 15s 8h scrapy crawl --output ${SPIDER_RUN_DIR}/output/${spider}.geojson:geojson --output ${SPIDER_RUN_DIR}/output/${spider}.parquet:parquet --logfile ${SPIDER_RUN_DIR}/logs/${spider}.txt --loglevel ERROR --set TELNETCONSOLE_ENABLED=0 --set CLOSESPIDER_TIMEOUT=${SPIDER_TIMEOUT} --set LOGSTATS_FILE=${SPIDER_RUN_DIR}/stats/${spider}.json ${spider}" >> ${SPIDER_RUN_DIR}/commands.txt
 done
 
 mkdir -p "${SPIDER_RUN_DIR}/logs"
@@ -74,20 +74,20 @@ if [ ! $retval -eq 0 ]; then
 fi
 (>&2 echo "Done generating pmtiles")
 
-python ci/convert_to_parquet.py \
+python ci/concatenate_parquet.py \
     --output "${SPIDER_RUN_DIR}/output.parquet" \
-    "${SPIDER_RUN_DIR}"/output/*.geojson
+    "${SPIDER_RUN_DIR}"/output/*.parquet
 retval=$?
 if [ ! $retval -eq 0 ]; then
     (>&2 echo "Couldn't convert to parquet")
     exit 1
 fi
 
-# convert_to_parquet.py leaves behind the parquet files for each spider, and I don't
+# concatenate_parquet.py leaves behind the parquet files for each spider, and I don't
 # want to include those in the output zip, so delete them here.
 rm "${SPIDER_RUN_DIR}"/output/*.parquet
 
-(>&2 echo "Done converting to parquet")
+(>&2 echo "Done concatenating parquet files")
 
 (>&2 echo "Writing out summary JSON")
 echo "{\"count\": ${SPIDER_COUNT}, \"results\": []}" >> "${SPIDER_RUN_DIR}/stats/_results.json"
