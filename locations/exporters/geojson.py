@@ -145,9 +145,11 @@ class GeoJsonExporter(JsonItemExporter):
 
     def export_item(self, item):
         spider_name = item.get("extras", {}).get("@spider")
+
         if self.first_item:
             self.spider_name = spider_name
             self.write_geojson_header()
+
         if spider_name != self.spider_name:
             # It really should not happen that a single exporter instance
             # handles output from different spiders. If it does happen,
