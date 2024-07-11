@@ -18,7 +18,7 @@ class PetValuSpider(scrapy.Spider):
             store.update(store.pop("businessAddress"))
             item = DictParser.parse(store)
             item["ref"] = store["clientLocationId"]
-            item["lat"], item["lon"] = store["coordinates"]
+            item["lon"], item["lat"] = store["coordinates"]
             item["phone"] = store["primaryPhone"]
             item["website"] = "https://store.petvalu.ca/store/" + store["link"]
             yield item
