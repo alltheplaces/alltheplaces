@@ -12,7 +12,6 @@ class CheckersZASpider(StructuredDataSpider):
     # AWS WAF bot protection appears to be used but can be bypassed with Playwright.
     is_playwright_spider = True
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"CONCURRENT_REQUESTS": 1, "ROBOTSTXT_OBEY": False}
-    requires_proxy = True
 
     def start_requests(self):
         for sitemap_url in self.start_urls:
@@ -60,9 +59,12 @@ class CheckersZASpider(StructuredDataSpider):
         else:
             self.logger.warning("Unknown brand from store name: {}".format(item["name"]))
             return
+
         apply_category(Categories.SHOP_SUPERMARKET, item)
+
         item["ref"] = response.url.split("/")[-1]
         item["website"] = response.xpath('//link[@rel="canonical"]/@href').get()
         item.pop("facebook", None)
         item.pop("twitter", None)
+
         yield item
