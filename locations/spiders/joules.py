@@ -12,4 +12,3 @@ class JoulesSpider(SitemapSpider, StructuredDataSpider):
 
     def pre_process_data(self, ld_data, **kwargs):
         ld_data["url"] = None
-
