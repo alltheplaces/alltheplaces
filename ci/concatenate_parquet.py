@@ -41,11 +41,9 @@ def main():
         parquet_filenames.extend(glob.glob(pattern))
 
     if not parquet_filenames:
-        print("No input files found.")
         exit(1)
 
     if args.output is None:
-        print("No output file specified.")
         exit(1)
 
     # Unify the schema of all Parquet files and gather the geoparquet metadata
