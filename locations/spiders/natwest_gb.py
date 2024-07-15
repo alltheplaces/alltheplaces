@@ -48,7 +48,7 @@ class NatWestGBSpider(Spider):
             item["extras"]["ref:facebook"] = location.get("" "facebookPageUrl", "").split("/")[-1]
             item["extras"]["ref:google"] = location["googlePlaceId"]
 
-            if "phone" in item and item["phone"].startswith("+443"):
+            if "phone" in item and item["phone"].replace(" ", "").startswith("+443"):
                 # not a phone number specific to given branch
                 item["phone"] = None
 
