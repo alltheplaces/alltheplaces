@@ -29,6 +29,7 @@ class EmpikSpider(Spider):
             properties["email"] = properties["email"].strip()
             properties["phone"] = shop["phone"] or shop["cellPhone"]
             properties["website"] = "https://www.empik.com" + shop["storePage"]
+            properties["branch"] = properties.pop("name", None)
             properties["opening_hours"] = OpeningHours()
 
             hours = {
