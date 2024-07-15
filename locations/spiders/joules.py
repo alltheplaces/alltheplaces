@@ -1,7 +1,8 @@
 from scrapy.spiders import SitemapSpider
 
 from locations.structured_data_spider import StructuredDataSpider
-
+from locations.google_url import extract_google_position
+import re
 
 class JoulesSpider(SitemapSpider, StructuredDataSpider):
     name = "joules"
@@ -12,4 +13,12 @@ class JoulesSpider(SitemapSpider, StructuredDataSpider):
 
     def pre_process_data(self, ld_data, **kwargs):
         ld_data["url"] = None
+    
+    def post_process_item(self, item, response, ld_data, **kwargs):
+        coordinates = re.findall(r'(-?\d+\.\d+)',  re.search(r'var directionsUrl = (.+);', response.text).group(1))
+        item["lat"] = coordinates[0]
+        item["lon"] = coordinates[1]
+
+        yield item
+
 
