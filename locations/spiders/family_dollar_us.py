@@ -47,4 +47,5 @@ class FamilyDollarUSSpider(Where2GetItSpider):
             hours_string = hours_string + f" {day}: {open_time} - {close_time}"
         item["opening_hours"] = OpeningHours()
         item["opening_hours"].add_ranges_from_string(hours_string)
+        item["extras"]["ref:branch"] = item.pop("name", "").removeprefix("FAMILY DOLLAR #")
         yield item
