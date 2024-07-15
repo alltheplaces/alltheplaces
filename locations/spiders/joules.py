@@ -1,7 +1,6 @@
 from scrapy.spiders import SitemapSpider
 
 from locations.structured_data_spider import StructuredDataSpider
-from locations.google_url import extract_google_position
 import re
 
 class JoulesSpider(SitemapSpider, StructuredDataSpider):
