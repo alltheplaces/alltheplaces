@@ -79,7 +79,7 @@ def check_file(file_path: str) -> List[str]:
                 if isinstance(item, ast.Assign):
                     for target in item.targets:
                         if isinstance(target, ast.Name) and target.id == "name":
-                            spider_name = item.value.s
+                            spider_name = item.value.value
                             break
                     if spider_name:
                         break
