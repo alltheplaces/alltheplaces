@@ -15,7 +15,7 @@ class AmericanGolfGBSpider(Spider):
         "https://www.americangolf.co.uk/on/demandware.store/Sites-AmericanGolf-GB-Site/en_GB/Stores-GetAllStores"
     ]
 
-    def parse(self, response: Response, **kwargs: Any) -> Any:
+    def parse(self, response):
         for location in response.json()["stores"]:
             item = Feature()
             item["ref"] = location["ID"]
