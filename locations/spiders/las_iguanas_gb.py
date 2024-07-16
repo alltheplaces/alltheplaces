@@ -2,13 +2,14 @@ from typing import Any
 from urllib.parse import urljoin
 
 from scrapy.http import Response
+from scrapy.spiders import Spider
 
 from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
 
 
-class LasIguanasGBSpider(SitemapSpider):
+class LasIguanasGBSpider(Spider):
     name = "las_iguanas_gb"
     item_attributes = {"brand": "Las Iguanas", "brand_wikidata": "Q19875012"}
     start_urls = ["https://api.bigtablegroup.com/cdg/allRestaurants/iguanas"]
