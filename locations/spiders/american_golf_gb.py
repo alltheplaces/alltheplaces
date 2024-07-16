@@ -30,11 +30,11 @@ class AmericanGolfGBSpider(Spider):
             item["phone"] = location["phone"]
             item["email"] = location["email"]
 
-            item["opening_hours"] = OpeningHours()
-            for day in map(str.lower, DAYS_FULL):
-                item["opening_hours"].add_range(
-                    day,
-                    location["storeHours"][format(day)].strip(),
-                )
+   #         item["opening_hours"] = OpeningHours()
+   #         for day in map(str.lower, DAYS_FULL):
+   #             item["opening_hours"].add_range(
+   #                 day,
+   #                 location["storeHours"][format(day)].strip(),
+   #             )
 
             yield item
