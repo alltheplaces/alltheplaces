@@ -28,12 +28,13 @@ class BananaTreeGBSpider(Spider):
             item["phone"] = location["phoneNumber"]
             item["email"] = location["email"]
 
-            item["opening_hours"] = OpeningHours()
-            for day in map(str.lower, DAYS_FULL):
-                item["opening_hours"].add_range(
-                    day,
-                    location["hours"]["{}Open".format(day)].strip(),
-                    location["hours"]["{}Close".format(day)].strip(),
-                )
+            if location["hours]:
+                item["opening_hours"] = OpeningHours()
+                for day in map(str.lower, DAYS_FULL):
+                    item["opening_hours"].add_range(
+                        day,
+                        location["hours"]["{}Open".format(day)].strip(),
+                        location["hours"]["{}Close".format(day)].strip(),
+                    )
 
             yield item
