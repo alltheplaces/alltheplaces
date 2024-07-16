@@ -12,6 +12,7 @@ class KasikornBankTHSpider(Spider):
     name = "kasikorn_bank_th"
     item_attributes = {"brand_wikidata": "Q276557"}
     start_urls = ["https://www.kasikornbank.com/th/branch/Pages/result.aspx?qs=branch&qw=&qn=n"]
+    requires_proxy = "TH"
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in json.loads(
@@ -24,12 +25,12 @@ class KasikornBankTHSpider(Spider):
             item["lon"] = location["lon"]
             item["addr_full"] = location["adr"]
             item["phone"] = "; ".join(location["tel"].split(","))
-            item["website"] = item["extras"]["website:th"] = (
-                "https://www.kasikornbank.com/th/branch/Pages/detail.aspx?qs=branch&cz={}".format(location["cls"])
-            )
-            item["extras"]["website:th"] = (
-                "https://www.kasikornbank.com/en/branch/Pages/detail.aspx?qs=branch&cz={}".format(location["cls"])
-            )
+            item["website"] = item["extras"][
+                "website:th"
+            ] = "https://www.kasikornbank.com/th/branch/Pages/detail.aspx?qs=branch&cz={}".format(location["cls"])
+            item["extras"][
+                "website:th"
+            ] = "https://www.kasikornbank.com/en/branch/Pages/detail.aspx?qs=branch&cz={}".format(location["cls"])
             apply_category(Categories.BANK, item)
             yield item
 
@@ -40,11 +41,11 @@ class KasikornBankTHSpider(Spider):
             item["lat"] = location["lat"]
             item["lon"] = location["lon"]
             item["addr_full"] = location["adr"]
-            item["website"] = item["extras"]["website:th"] = (
-                "https://www.kasikornbank.com/th/branch/Pages/detail.aspx?qs=atm&cz={}".format(location["ky"])
-            )
-            item["extras"]["website:th"] = (
-                "https://www.kasikornbank.com/en/branch/Pages/detail.aspx?qs=atm&cz={}".format(location["ky"])
-            )
+            item["website"] = item["extras"][
+                "website:th"
+            ] = "https://www.kasikornbank.com/th/branch/Pages/detail.aspx?qs=atm&cz={}".format(location["ky"])
+            item["extras"][
+                "website:th"
+            ] = "https://www.kasikornbank.com/en/branch/Pages/detail.aspx?qs=atm&cz={}".format(location["ky"])
             apply_category(Categories.ATM, item)
             yield item
