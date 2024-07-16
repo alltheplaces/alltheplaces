@@ -17,7 +17,7 @@ class AmericanGolfGBSpider(Spider):
     ]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        for location in response.json():
+        for location in response.json()["stores"]:
             item = Feature()
             item["ref"] = location["ID"]
             item["lat"] = location["latitude"]
