@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Iterable
 from urllib.parse import urljoin
 
 from scrapy.http import Response
@@ -24,16 +24,20 @@ class FrankieAndBennysGBSpider(Spider):
             item["street_address"] = merge_address_lines([location["addressLine1"], location["addressLine2"]])
             item["city"] = location["addressCity"]
             item["postcode"] = location["postcode"]
-            item["website"] = urljoin("https://www.frankieandbennys.com/restaurants/", location["slug"])
             item["phone"] = location["phoneNumber"]
             item["email"] = location["email"]
 
-            item["opening_hours"] = OpeningHours()
-            for day in map(str.lower, DAYS_FULL):
-                item["opening_hours"].add_range(
-                    day,
-                    location["hours"]["{}Open".format(day)].strip(),
-                    location["hours"]["{}Close".format(day)].strip(),
-                )
+            if location.get("hours"):
+                item["opening_hours"] = OpeningHours()
+                for day in map(str.lower, DAYS_FULL):
+                    item["opening_hours"].add_range(
+                        day,
+                        location["hours"]["{}Open".format(day)].strip(),
+                        location["hours"]["{}Close".format(day)].strip(),
+                    )
 
-            yield item
+            yield from self.parse_item(item, location) or []
+
+    def parse_item(self, item: Feature, location: dict, **kwargs) -> Iterable[Feature]:
+        item["website"] = urljoin("https://www.frankieandbennys.com/restaurants/", location["slug"])
+        yield item
